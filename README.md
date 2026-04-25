@@ -2,100 +2,132 @@
 
 [![CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml) [![CodeQL](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml) [![Security](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml) [![License](https://img.shields.io/badge/license-UNLICENSED-lightgrey)](./LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/) [![pnpm](https://img.shields.io/badge/pnpm-monorepo-orange)](https://pnpm.io/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
 
+> **Current status: active prototype / demo platform under development.**  
+> No material action is designed to execute without human approval. Demo connectors use mock data unless configured otherwise.
+
 **Governed decision infrastructure — connecting what is observable to what is executable, with full attribution.**
 
 [Architecture](./docs/architecture/architecture.md) · [Platform Primitives](./docs/architecture/platform-primitives.md) · [Trust Center](./docs/trust/trust-center.md) · [Security](./SECURITY.md) · [Investor Docs](./docs/investor/platform-thesis.md)
 
 ---
 
-## Canonical Entry Points
+## What A11oy Is
 
-New to the codebase? Start here.
+**A11oy** is the governed agentic layer that sits between enterprise data and enterprise decisions. It does not just observe — it senses, structures, correlates, explains, recommends, approves, executes, verifies, and preserves cryptographic proof. In real time. Across all seven SZL verticals.
 
-| Document | Purpose |
-|---|---|
-| **[docs/INDEX.md](./docs/INDEX.md)** | Master index of all documentation, audit reports, and doctrine |
-| **[docs/audit/2026-04/README.md](./docs/audit/2026-04/README.md)** | April 2026 operational audit — executive summary and findings |
-| **[docs/doctrine/szl-doctrine.md](./docs/doctrine/szl-doctrine.md)** | The SZL point of view: four pillars, voice rules, anti-patterns |
-| **[packages/config/](./packages/config/)** | Single source of truth: platform registry, claims, feature flags, env contract |
-| **[docs/APP_STATUS.md](./docs/APP_STATUS.md)** | Authoritative artifact readiness register (GA / Beta / Partial / Archived) |
-| **[docs/operations/known-gaps.md](./docs/operations/known-gaps.md)** | Honest inventory of technical debt and remediation paths |
-| **[docs/platform-facts.md](./docs/platform-facts.md)** | Authoritative platform statistics — generated from `packages/platform-metrics-registry` |
-
-> **Platform facts are auto-generated.** Run `pnpm metrics:generate` to regenerate [`docs/platform-facts.md`](./docs/platform-facts.md) and the registry from the current filesystem state. Run `pnpm metrics:validate` to verify no drift. Never edit `docs/platform-facts.md` directly.
+Every step in the A11oy pipeline has a traceable owner, a policy constraint, and an immutable record.
 
 ---
 
-## Trust
+## Why It Exists
 
-An AI-assisted operations platform carries a distinct trust burden. The platform addresses it structurally, not through policy documents alone.
-
-| Concern | Structural Response |
-|---------|---------------------|
-| AI without oversight | Covenant Policy enforces approval gates — AI cannot execute consequential actions without human confirmation |
-| Opaque AI outputs | All recommendations include source citations, confidence scores, and retrieval provenance |
-| Audit accountability | Every action generates an immutable audit event with actor attribution via Proof Chain |
-| Access control | 11-role RBAC with org-scoped tenant isolation. Deny-by-default global auth enforcer |
-| Multi-tenancy | All queries scoped by org identifier. Cross-org access returns 404 to prevent information leakage |
-| Decision traceability | Outcome Graph tracks the full chain: signal to recommendation to decision to outcome |
-
-[Trust Center](docs/trust/trust-center.md) · [Security Policy](SECURITY.md) · [Proof and Policy Model](docs/architecture/proof-and-policy-model.md)
-
----
-
-## What We Build
-
-Enterprise operations have an accountability gap. Dashboards show what happened. Alerts surface what is wrong. Neither tells operators what to do next, who is responsible, or whether a recommended action is safe to execute.
+Enterprise operations have an accountability gap. Dashboards show what happened. Alerts surface what is wrong. Neither tells operators what to do next, who authorized it, or whether a recommended action is safe to execute.
 
 AI tools compound the problem: they add recommendation volume without governance. Operators accumulate more data, more noise, and more untracked decisions.
 
-SZL Holdings builds the governed decision layer that sits between signal detection and action execution:
+A11oy is the layer that closes the gap.
+
+---
+
+## Core Thesis
+
+The problem is not insight — it is accountability. Enterprises do not lack data or dashboards. They lack a system that can answer:
+
+- What should we do next, and why?
+- Who approved this, and under what policy?
+- What happened as a result?
+- Can we prove it?
+
+A11oy makes every one of those questions answerable in under 30 seconds.
+
+---
+
+## Architecture
+
+A11oy is a seven-layer in-memory fabric:
 
 ```
-Signal -> Context -> Recommendation -> Simulation -> Policy -> Approval -> Execution -> Proof -> Outcome
+Signal Mesh        →  senses raw events from every connected vertical
+State Engine       →  maintains current business state across all contexts
+Causal Core        →  correlates signals and surfaces root causes
+Action Rail        →  routes AI recommendations to human approval gates
+Covenant Layer     →  enforces policy constraints before any action executes
+Proof Ledger       →  cryptographic append-only record of every decision
+Coverage Graph     →  maps observability across all connected systems
+```
+
+---
+
+## Execution Pipeline
+
+```
+Signal → Context → Recommendation → Simulation → Policy → Approval → Execution → Proof → Outcome
 ```
 
 Every step is instrumented. Every decision is attributed. Every AI recommendation carries source citations and confidence scores. Every consequential action requires human confirmation.
 
 ---
 
-## Product Portfolio
+## Product Surfaces
 
-### Platform Core
+A11oy exposes 19 named surfaces — each a distinct governance view into the fabric:
 
-**KORA** is the flagship command surface where operators observe signals, review AI recommendations, run simulations, and make governed decisions. It runs the PRAXIS framework (People, Revenue, Infrastructure, Security, Market) across all connected domains.
+| Surface | Route | What It Shows |
+|---------|-------|---------------|
+| **Hero** | `/a11oy/` | Fabric entry point — live signal overview across all verticals |
+| **Now Board** | `/a11oy/now` | Real-time prioritized signal stream with causal attribution |
+| **Command Surface** | `/a11oy/command` | Unified operator view — all verticals, all pending decisions |
+| **Signal Mesh** | `/a11oy/signals` | Correlated signal graph — 32 business signals × 7 verticals |
+| **Action Rail** | `/a11oy/actions` | Human-approval queue — no action executes without confirmation |
+| **Proof Ledger** | `/a11oy/proof` | Cryptographic audit trail — 5 proof packets, immutable chain |
+| **Covenant Governance** | `/a11oy/governance` | Policy engine — 5 covenant policies with approval thresholds |
+| **Operator Control Plane** | `/a11oy/agents` | Agent orchestration — observable execution with full trace |
+| **Workcells** | `/a11oy/workcells` | Sandboxed execution units with scope and policy constraints |
+| **Workcell Replay** | `/a11oy/replay` | Step-by-step execution playback with diff and proof verification |
+| **MirrorEval** | `/a11oy/evals` | AI reasoning evaluation — recommendations vs historical outcomes |
+| **Connector Firewall** | `/a11oy/connectors` | Governed integration layer — policy-gated data access |
+| **Twin Foundry** | `/a11oy/twins` | Digital twin simulation — sensitivity analysis, confidence intervals |
+| **Model Router** | `/a11oy/model-router` | Multi-provider AI routing (Anthropic/OpenAI/Gemini) with policy |
+| **Skills Library** | `/a11oy/skills` | Composable agent capability registry — versioned, scoped, governed |
+| **Trust Center** | `/a11oy/trust` | Platform governance posture — structural controls, not policy docs |
+| **Sovereign** | `/a11oy/sovereign` | Data sovereignty — jurisdiction control and residency enforcement |
+| **Boardroom Mode** | `/a11oy/boardroom` | Executive decision briefing — attribution, proof chain, board-ready |
+| **Investor Demo** | `/a11oy/investor-demo` | Guided walkthrough — signal ingestion to proof ledger verification |
 
-**FORGE** is the execution fabric: signal normalization, workflow orchestration, approval controls, human-in-the-loop gates, and immutable audit trail. It is the shared infrastructure layer that makes AI-assisted operations durable and accountable.
+---
 
-**APEX** is the unified mobile command app (iOS and Android) that surfaces all domain workspaces with biometric authentication and offline-capable sync.
+## Human-Gated Autonomy
 
-### Domain Packs
+A11oy does not autonomously execute consequential actions. The Action Rail routes every AI recommendation to a human approval gate. The Covenant Layer enforces this structurally — it is not a UI option that can be toggled off.
 
-Domain packs extend the same governance infrastructure into domain-specific intelligence. Each pack is a structured application built on KORA, FORGE, and the six platform primitives.
+Approval gates are configurable per policy:
+- **Auto-approve**: permitted only for low-risk, high-confidence, policy-approved classes of action
+- **Human-confirm**: default for any action with material business consequence
+- **Multi-party**: requires quorum approval for high-stakes decisions
 
-<!-- BEGIN: portfolio-table (generated by scripts/generate-readme-product-table.js) -->
+Every approval — including auto-approvals — generates an immutable Proof Ledger entry with actor attribution.
 
-| Product | Domain | Status |
-|---------|--------|--------|
-| **TENAX** | Cyber resilience command — exposure mapping, recovery readiness, incident command, control drift detection | Active |
-| **Counsel** | Legal matter command — agentic matter management, obligation tracking, exposure quantification, court filing integration | Active |
-| **PARAGON** | Security and defense intelligence — SOC command, advanced security modules, SOAR playbooks, threat intelligence | Domain backend active; web UI consolidated into Aegis |
-| **SEXTANT** | Maritime fleet intelligence — AIS tracking, S&P workflow, demurrage, freight, voyage P&L | Active |
-| **DOMAINE** | Real estate intelligence — distress pipeline, ownership graph, deal workflow, AI analysis | Active |
-| **Carlota Jo** | Premium advisory operations — UHNW client portal, service catalog, engagement management | Active |
-| **LUMINA** | AI executive briefing — narrative intelligence reports synthesized from live platform signals | Active |
-| **Counsel (legacy PRISM Counsel)** | Legal matter command — agentic matter management, court filings, recovery operations | Superseded by Counsel (Active); legacy domain API routes retained |
-| **IMPERIUM** | Cloud sovereignty — multi-cloud governance, policy enforcement, cloud estate visibility | Archived (Task #920) |
+---
 
-<!-- END: portfolio-table -->
+## Operators
 
-### FORGE Command Portal
+The Operator Control Plane gives platform operators full visibility into agent execution:
+- Active agents with execution status and current task
+- Full execution trace — every step, every tool call, every output
+- Intervention controls — pause, override, or terminate any agent at any point
+- Attribution — every agent action is linked to the operator who authorized it
 
-The FORGE Command Portal is the cross-domain real-time dashboard aggregating signals from all domain packs into a unified executive view with eight-domain SSE feeds and executive briefing.
+Agents cannot operate outside their defined Workcell scope.
 
-### A11oy — Live Enterprise Execution Fabric
+---
 
-**A11oy** is the governed agentic layer that sits between enterprise data and enterprise decisions. It senses, structures, correlates, explains, recommends, approves, executes, verifies, and preserves cryptographic proof — in real time, across all seven SZL verticals.
+## Workcells
+
+Workcells are sandboxed execution environments for agent tasks. Each Workcell has:
+- **Scope**: what data and systems the agent can access
+- **Policy**: what actions the agent can take, and under what approval constraints
+- **Trace**: full execution log, replayable at any point
+- **Proof**: cryptographic proof of every action taken within the cell
 
 ## A11oy Doctrine
 
@@ -128,137 +160,142 @@ Quick agent reference and copy-ready prompts: [`skills/a11oy-code/`](./skills/a1
 - **Phase 2 (planned):** Workcell engine, live AI reasoning, full proof-carrying execution
 - **Docs:** `AGENTS.md` · `CONTEXT.md` · `llms.txt`
 
-### Walkthrough Video
-
-A 60-second governed-autonomy walkthrough is rendered from `artifacts/szl-demo-video`:
-
-| Format | File | Use |
-|--------|------|-----|
-| 1920×1080 H.264 (16:9) | [`artifacts/szl-demo-video/deliverables/linkedin-4-17.mp4`](artifacts/szl-demo-video/deliverables/linkedin-4-17.mp4) | Web / desktop / LinkedIn |
-| 1080×1080 H.264 (1:1) | [`artifacts/szl-demo-video/deliverables/linkedin-4-17-square.mp4`](artifacts/szl-demo-video/deliverables/linkedin-4-17-square.mp4) | Mobile feed |
-
-Re-render with `pnpm --filter @workspace/szl-demo-video render`. Source manifest and scene definitions live in [`artifacts/szl-demo-video/src/`](artifacts/szl-demo-video/src/).
-
-### Screens
-
-![SZL Holdings Dashboard](docs/assets/screenshots/current/szl-holdings-dashboard.jpg)
-
-![KORA — PRAXIS Command](docs/assets/screenshots/current/kora-praxis-command.jpg)
-
-![SEXTANT — Fleet Command](docs/assets/screenshots/current/sextant-fleet-command.jpg)
-
-![DOMAINE — Deal Pipeline](docs/assets/screenshots/current/domaine-deal-pipeline.jpg)
-
-![Carlota Jo — Client Portal](docs/assets/screenshots/current/carlota-jo-client-portal.jpg)
-
-![FORGE Command Portal — Executive View](docs/assets/screenshots/current/forge-command-portal-executive.jpg)
-
-![TENAX — SOC Command](docs/assets/screenshots/current/tenax-soc-command.jpg)
-
-> **Note on these images:** The images above (`assets/readme/products/`) are pre-v2 design generation assets and are candidates for replacement. For verified, post-redesign screenshots captured live on 2026-04-21, see `docs/assets/screenshots/current/` (7 current screenshots) and `audit/screenshot-catalog.md` for full metadata. Authenticated dashboard surfaces require `DATABASE_URL` to be provisioned — see `audit/deployment-proof.md`.
+Workcell Replay lets operators or auditors step through any completed execution and verify every decision.
 
 ---
 
-## Architecture
+## MirrorEval
 
-The six platform primitives define what is structurally different from dashboards, copilots, and workflow tools:
+MirrorEval is A11oy's AI reasoning evaluation harness. It compares AI recommendations against historical outcomes to surface:
+- Accuracy drift over time
+- Confidence calibration (do 80%-confidence recommendations win 80% of the time?)
+- Recommendation bias by vertical or signal type
+- Coverage gaps — signals the fabric is not yet surfacing
 
-| Primitive | Function |
-|-----------|----------|
-| **Outcome Graph** | Tracks the full lifecycle: recommendation to decision to outcome. Closed-loop learning — the platform knows which recommendations led to which results. |
-| **Proof Chain** | Immutable, verifiable audit trail for every significant action. Compliance teams can reconstruct any decision chain. AI outputs carry provenance. |
-| **Covenant Policy** | Defines what agents and users can do, with what approval requirements. Human-in-the-loop is enforced at the policy layer — AI cannot bypass it. |
-| **Decision Simulation** | Probabilistic simulation before action — confidence intervals and sensitivity analysis. Operators see not just what should be done but what could happen. |
-| **Workflow Engine** | Durable multi-step process orchestration with agent coordination. Complex decisions are tracked, governed, and recoverable. |
-| **Event Fabric** | Cross-domain signal backbone — normalizes, routes, and correlates events. A sanctions hit in SEXTANT can surface a legal risk flag in Counsel automatically. |
-
-**Platform hierarchy:**
-
-```
-+-----------------------------------------------------------------------+
-|  SZL HOLDINGS                                                         |
-|  Governed decision infrastructure layer                              |
-+-----------------------------------------------------------------------+
-|  KORA                  — Flagship command surface (PRAXIS framework)  |
-|  FORGE                 — Execution fabric (workflows, approvals, audit)|
-|  APEX                  — Unified mobile command (iOS + Android)       |
-+-----------------------------------------------------------------------+
-|  DOMAIN PACKS                                                         |
-|                                                                       |
-|  TENAX    Counsel   PARAGON  SEXTANT    DOMAINE                      |
-|  Carlota Jo         LUMINA                                           |
-+-----------------------------------------------------------------------+
-|  GOVERNANCE INFRASTRUCTURE                                            |
-|                                                                       |
-|  Outcome Graph  .  Proof Chain  .  Covenant Policy                   |
-|  Decision Simulation  .  Workflow Engine  .  Event Fabric            |
-+-----------------------------------------------------------------------+
-|  DATA LAYER                                                           |
-|                                                                       |
-|  PostgreSQL 16 (Drizzle ORM)  .  External feeds: AIS, STIX/TAXII    |
-+-----------------------------------------------------------------------+
-```
-
-See [docs/architecture/platform-primitives.md](docs/architecture/platform-primitives.md) for the full specification of each primitive and [docs/architecture/architecture.md](docs/architecture/architecture.md) for the service topology.
+MirrorEval is not a benchmark. It is a closed-loop learning system that continuously improves the fabric.
 
 ---
 
-## Repository Map
+## Covenant Layer
 
-This is a pnpm monorepo. Key locations:
+The Covenant Layer is the policy enforcement plane. Covenant Policies define:
+- What agents and users can do
+- What approval requirements apply
+- What escalation paths exist if policies cannot be satisfied
+- What the proof record must contain
 
-| Path | Contents |
-|------|----------|
-| `artifacts/` | All deployable web and mobile applications |
-| `lib/` | Shared libraries: database client, auth, AI, event bus, UI components |
-| `apps/` | Background applications: embedding API, ingestion orchestrator, runtime API |
-| `services/` | Platform services: FORGE fabric, KORA metrics, Substrate MCP gateway |
-| `workers/` | Background workers: embedding, ranking, reranking, vector, Python substrate |
-| `packages/` | Domain packages: design system, substrate, agent core, evidence ledger, policy guard |
-| `scripts/` | Seed scripts, QA scripts, deployment utilities |
-| `docs/` | Architecture, trust, investor, and operational documentation |
-| `ops/` | Infrastructure configuration, environment matrix, runbooks |
-| `.github/workflows/` | CI, CodeQL, security, deploy, and README QA pipelines |
-| `assets/readme/` | All README-facing visual assets (products, architecture, brand) |
-
-Artifact inventory:
-
-| Artifact | Kind | Preview | Status | README |
-|----------|------|---------|--------|--------|
-| SZL Holdings Dashboard | web | `/` | **Active** — primary public web app | [README](artifacts/szl-holdings/README.md) |
-| API Server | web | `/api/` | **Active** — backend API, powers all surfaces | [README](artifacts/api-server/README.md) |
-| FORGE Command Portal | web | `/command/` | **Active** — ops command surface (merged KORA + IMPERIUM) | [README](artifacts/command/README.md) |
-| TENAX — Cyber Resilience Command | web | `/sentra/` | **Active** — domain pack: cyber posture, recovery readiness, incident command | [README](artifacts/sentra/README.md) |
-| Counsel — Legal Matter Command | web | `/counsel/` | **Active** — domain pack: legal matter management, obligation tracking, exposure quantification | [README](artifacts/counsel/README.md) |
-| DOMAINE — Real Estate Intelligence | web | `/terra/` | **Active** — domain pack | [README](artifacts/terra/README.md) |
-| SEXTANT Maritime Intelligence | web | `/vessels/` | **Active** — domain pack | [README](artifacts/vessels/README.md) |
-| Carlota Jo Consulting | web | `/carlota-jo/` | **Active** — domain pack | [README](artifacts/carlota-jo/README.md) |
-| LUMINA — AI Executive Briefing | web | `/pulse/` | **Active** — executive intelligence briefing | [README](artifacts/pulse/README.md) |
-| SZL Holdings — Investor Pitch Deck (PARAGON) | web | `/aegis/` | **Active** — investor slides and ATLAS runtime | [README](artifacts/aegis/README.md) |
-| SZL Holdings — Governed Autonomy Demo | video | `/szl-demo-video/` | **Active** — demo video artifact | [README](artifacts/szl-demo-video/README.md) |
-| SZL Holdings — Mobile Command | mobile | `/szl-holdings-mobile/` | **Deferred** — after APEX ships | [README](artifacts/szl-holdings-mobile/README.md) |
-| PRAXIS — Unified Agentic AI Layer | design | `/nexus/` | **Internal** — UI prototyping only | — |
-
-**Archived artifacts** (source on disk, no registered workflow, not part of the build):
-
-| Artifact | Disposition | Notes |
-|----------|-------------|-------|
-| `artifacts/imperium/` | Archived (Task #920) | Cloud sovereignty UI; source retained on disk |
-| `artifacts/cortex-mobile/` | Archived | Superseded by `artifacts/szl-holdings-mobile` |
-| `artifacts/prism-counsel/` | Archived | Superseded by `artifacts/counsel`; legacy API routes retained |
-
-**Removed artifacts** (directory deleted, no remaining code on disk):
-
-| Artifact | Disposition | Notes |
-|----------|-------------|-------|
-| `prism-counsel/` | Removed (Task #634) | `/prism-counsel/*` API routes still live on the API server |
-| `stephen-site/` | Removed (Task #634) | Content moved to `/founder` route in SZL Holdings |
-
-If a future product decision brings any archived surface back, treat it as a fresh build — do not restore from old `dist/` output.
+Policies are structural. They cannot be bypassed by users, agents, or API calls. Any attempted policy violation is logged and surfaced as a Trust Center alert.
 
 ---
 
-## Build, Run, and Contribute
+## Connector Firewall
+
+The Connector Firewall governs all integration data access. No connector can read or write data without:
+1. An active policy permitting the operation
+2. A scoped credential with minimum necessary permissions
+3. An audit log entry for every access
+
+Demo connectors use mock data. Live connectors require explicit configuration and policy assignment.
+
+---
+
+## Proof Ledger
+
+The Proof Ledger is the cryptographic audit trail. Every governed action — whether executed, rejected, or escalated — generates an append-only Proof Ledger entry containing:
+- Actor (human or agent)
+- Signal or trigger
+- Recommendation and confidence
+- Policy applied
+- Approval chain
+- Execution result
+- Outcome (tracked over time via the Outcome Graph)
+
+Proof packets are verifiable — compliance teams can reconstruct any decision chain from the ledger alone.
+
+---
+
+## Twin Foundry
+
+The Twin Foundry creates digital twins of business systems for decision simulation. Before any consequential action executes, operators can:
+- Run a probabilistic simulation on the current twin
+- See confidence intervals and sensitivity analysis
+- Understand what could happen, not just what should be done
+
+Simulation results are attached to the Proof Ledger entry so post-decision review includes the pre-decision model.
+
+---
+
+## Boardroom Mode
+
+Boardroom Mode translates A11oy's operational fabric into executive-grade decision briefings. It surfaces:
+- The most consequential pending decisions requiring board or C-suite attention
+- Attribution for who recommended each action and under what policy
+- Proof chain links to the full decision context
+- Outcome summaries for previously approved decisions
+
+Boardroom Mode is not a summary — it is a governed decision surface with the same proof chain guarantees as the full operator view.
+
+---
+
+## Demo Screenshots
+
+The screenshots below are verified, unmodified captures from the active demo platform. No mockups or AI-generated imagery.
+
+### A11oy — Governed Agentic Execution Fabric
+
+![A11oy — Live Enterprise Execution Fabric](docs/assets/screenshots/current/a11oy-hero-2026-04--desktop-1440.png)
+
+*A11oy hero — seven-layer governed agentic fabric with live in-memory seed data. Captured 2026-04-25.*
+
+![A11oy — Boardroom Mode](docs/assets/screenshots/current/a11oy-boardroom-mode-2026-04--desktop-1440.png)
+
+*Boardroom Mode — executive-ready governed decision briefing with attribution and proof chain links. Captured 2026-04-25.*
+
+![A11oy — Command Surface](docs/assets/screenshots/current/a11oy-command-surface-2026-04--desktop-1440.png)
+
+*Command Surface — unified operator view across all verticals, with human-approval queue. Captured 2026-04-25.*
+
+![A11oy — Proof Ledger](docs/assets/screenshots/current/a11oy-proof-ledger-2026-04--desktop-1440.png)
+
+*Proof Ledger — cryptographic append-only audit trail. 5 proof packets demonstrating signal-to-outcome traceability. Captured 2026-04-25.*
+
+### Platform Surfaces and Domain Packs
+
+![SZL Holdings Dashboard](docs/assets/screenshots/current/szl-holdings-dashboard-2026-04-21.jpg)
+
+![KORA — PRAXIS Command](docs/assets/screenshots/current/kora-praxis-command-2026-04-21.jpg)
+
+![FORGE Command Portal — Executive View](docs/assets/screenshots/current/forge-command-portal-executive-2026-04-21.jpg)
+
+![TENAX — SOC Command](docs/assets/screenshots/current/tenax-soc-command-2026-04-21.jpg)
+
+![SEXTANT — Fleet Command](docs/assets/screenshots/current/sextant-fleet-command-2026-04-21.jpg)
+
+![DOMAINE — Deal Pipeline](docs/assets/screenshots/current/domaine-deal-pipeline-2026-04-21.jpg)
+
+![Carlota Jo — Client Portal](docs/assets/screenshots/current/carlota-jo-client-portal-2026-04-21.jpg)
+
+> A11oy screenshots (`.png`) captured 2026-04-25 from the live Vite dev server. Platform surface screenshots (`.jpg`) captured 2026-04-21. All images are unmodified captures — no mockups or AI-generated imagery. See `docs/assets/screenshots/current/screenshot-manifest.md` for the full manifest (81 A11oy captures across 19 routes and 5 viewports).
+
+---
+
+## Tech Stack
+
+| Layer | Stack |
+|-------|-------|
+| **Language** | TypeScript 5.x (full stack, strict mode) |
+| **Frontend** | React 19, Vite, Tailwind CSS 4, Framer Motion, Recharts |
+| **Mobile** | Expo SDK 53 / React Native, NativeWind |
+| **Backend** | Express 5, Node.js 22 |
+| **Database** | PostgreSQL 16, Drizzle ORM |
+| **AI** | Multi-provider (Anthropic, OpenAI, Gemini), evidence-backed retrieval |
+| **Auth** | OIDC/PKCE, 11-role RBAC, SCIM 2.0, deny-by-default enforcement |
+| **Infra** | pnpm monorepo, Turbo, Azure (App Service, PostgreSQL Flexible, Key Vault) |
+| **CI/CD** | GitHub Actions — lint, typecheck, test, build, CodeQL, dependency review, secret scan |
+
+---
+
+## Running Locally
 
 **Requirements:** Node.js 22+, pnpm 10+
 
@@ -266,86 +303,142 @@ If a future product decision brings any archived surface back, treat it as a fre
 git clone https://github.com/szl-holdings/szl-holdings-platform.git
 cd szl-holdings-platform
 pnpm install
-pnpm dev
+pnpm seed          # seed the local database with demo data
+pnpm dev           # start all artifact workflows
 ```
+
+A11oy (`/a11oy/`) uses in-memory seed data and does not require DATABASE_URL to be provisioned in Phase 1. All other domain pack surfaces require a configured PostgreSQL instance.
 
 **Common tasks:**
 
 ```bash
-pnpm typecheck          # TypeScript type checking across all packages
-pnpm test               # Unit and component tests
-pnpm test:integration   # Integration tests
-pnpm readme:check       # Validate README images and badge workflows
-pnpm qa:routes          # Smoke-test all routes
-pnpm audit:all          # Run full audit suite (mocks, routes, deps, copy, design)
-pnpm seed               # Seed the local database with demo data
+pnpm typecheck              # TypeScript type checking across all packages
+pnpm test                   # unit and component tests
+pnpm test:integration       # integration tests
+pnpm screenshots:proof      # capture investor-grade screenshots (requires all workflows running)
+pnpm validate:markdown-assets  # validate all image and link references in README files
+pnpm qa:routes              # smoke-test all routes
+pnpm audit:all              # run full audit suite
 ```
-
-See [docs/operations/deployment-guide.md](docs/operations/deployment-guide.md) for staging and production deployment.
-
-**Contributing:** See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch workflow, code style, commit format, and PR process. All contributions require a passing CI run and a passing `pnpm readme:check` before merge.
-
-**Environments:**
-
-| Environment | Purpose | Trigger |
-|-------------|---------|---------|
-| Development | Active development and internal preview | Always on (Replit workspace) |
-| Staging | Integration validation before production | Push to `main` via `deploy-staging.yml` |
-| Production | Customer-facing deployment | Published release via `deploy-production.yml` |
 
 ---
 
-## Governance, Security, and Contact
+## Environment Variables
 
-**Access control:** 11-role RBAC with deny-by-default enforcement. All routes require authentication. All queries are org-scoped.
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `DATABASE_URL` | Yes (for domain packs) | PostgreSQL connection string |
+| `ANTHROPIC_API_KEY` | Optional | AI recommendations (falls back to mock) |
+| `OPENAI_API_KEY` | Optional | AI recommendations (falls back to mock) |
+| `GEMINI_API_KEY` | Optional | AI recommendations (falls back to mock) |
+| `SESSION_SECRET` | Yes | Express session signing |
+| `PORT` | Auto-assigned | Artifact dev server port (set by Replit) |
 
-**AI governance:** Advisory agents only. Covenant Policy enforces approval gates at the workflow layer. AI cannot bypass human confirmation requirements.
+See [docs/operations/deployment-guide.md](docs/operations/deployment-guide.md) for the full environment variable matrix and staging/production configuration.
 
-**Audit trail:** Every consequential action writes an immutable Proof Chain event with actor attribution, timestamp, source, and decision context.
+---
+
+## Security Posture
+
+**Access control:** 11-role RBAC with deny-by-default enforcement. All routes require authentication. All queries are org-scoped. Cross-org access returns 404 to prevent information leakage.
+
+**AI governance:** Advisory agents only. Covenant Policy enforces approval gates at the fabric layer. AI cannot bypass human confirmation requirements.
+
+**Audit trail:** Every consequential action writes an immutable Proof Ledger entry with actor attribution, timestamp, source, and decision context.
+
+**Multi-tenancy:** All queries include org_id scoping — cross-tenant access is architecturally prevented, not only policy-controlled.
 
 **Vulnerability disclosure:** See [SECURITY.md](SECURITY.md). Responsible disclosure only.
 
-**Known gaps and tech debt:** Documented honestly in [docs/operations/known-gaps.md](docs/operations/known-gaps.md).
-
-### Documentation Index
-
-All documentation has been consolidated into `docs/`. See [docs/INDEX.md](docs/INDEX.md) for the complete index.
-
-| Document | Purpose |
-|----------|---------|
-| [docs/architecture/architecture.md](docs/architecture/architecture.md) | System architecture: topology, stack, design principles (v4.0, canonical) |
-| [docs/architecture/platform-primitives.md](docs/architecture/platform-primitives.md) | The six core abstractions |
-| [docs/architecture/data-model.md](docs/architecture/data-model.md) | Entity-relationship overview of the core database schema |
-| [docs/architecture/api-spec.md](docs/architecture/api-spec.md) | API surface: route inventory, auth model, rate limiting |
-| [docs/security/access-control-matrix.md](docs/security/access-control-matrix.md) | Role-permission matrix mapped to implementation |
-| [docs/security/security-checklist.md](docs/security/security-checklist.md) | Security controls checklist |
-| [docs/operations/deployment-guide.md](docs/operations/deployment-guide.md) | Deployment procedures |
-| [docs/operations/operations-runbook.md](docs/operations/operations-runbook.md) | Operational procedures and incident response |
-| [docs/operations/known-gaps.md](docs/operations/known-gaps.md) | Honest assessment of tech debt and planned improvements |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines |
-| [docs/readme-standards.md](docs/readme-standards.md) | README asset and badge standards |
-
-**Canonical ops documentation** (authoritative sources — these win over root-level equivalents):
-
-| Document | Purpose |
-|----------|---------|
-| [ops/infra/target-production-architecture.md](ops/infra/target-production-architecture.md) | Production architecture and deployment topology |
-| [ops/infra/environment-matrix.md](ops/infra/environment-matrix.md) | Environment separation (dev / staging / prod) |
-| [ops/infra/recovery-and-backup-model.md](ops/infra/recovery-and-backup-model.md) | Backup and disaster recovery |
-| [ops/mobile/flagship-release-readiness.md](ops/mobile/flagship-release-readiness.md) | APEX mobile release status and readiness criteria |
-| [ops/mobile/eas-and-store-secrets-matrix.md](ops/mobile/eas-and-store-secrets-matrix.md) | EAS build profiles and App Store secrets |
-| [ops/mobile/testflight-play-internal-runbook.md](ops/mobile/testflight-play-internal-runbook.md) | TestFlight / Play Internal Testing distribution runbook |
-| [ops/frontier/final-frontier-report.md](ops/frontier/final-frontier-report.md) | Final platform readiness report |
-| [ops/frontier/launch-readiness-scorecard.md](ops/frontier/launch-readiness-scorecard.md) | Go/no-go launch scorecard |
-| [ops/frontier/disposition-matrix.md](ops/frontier/disposition-matrix.md) | App disposition decisions (archive / defer / active) |
-| [ops/cleanup/canonical-source-map.md](ops/cleanup/canonical-source-map.md) | Single reference for canonical document locations |
+> No SOC 2, HIPAA, FedRAMP, or ISO certifications are claimed. Compliance readiness is a planned roadmap item. See [docs/operations/known-gaps.md](docs/operations/known-gaps.md) for honest technical debt assessment.
 
 ---
 
+## Roadmap
+
+| Item | Status |
+|------|--------|
+| A11oy Phase 1 — Foundation (full type system, fabric primitives, demo seed, read API) | ✅ Complete |
+| A11oy Phase 2 — Workcell engine with live AI reasoning | 🔜 Planned |
+| A11oy Phase 3 — Full proof-carrying execution with live connectors | 🔜 Planned |
+| APEX mobile (unified iOS + Android command) | 🔜 Deferred after APEX ships |
+| SOC 2 Type 1 audit readiness | 🔜 Roadmap |
+| HIPAA controls implementation | 🔜 Roadmap |
+| Production customer onboarding | 🔜 Roadmap |
+
+---
+
+## Current Status
+
+**Active prototype / demo platform under development.**
+
+- A11oy Phase 1: fully implemented. All 19 routes functional with in-memory seed data.
+- Domain pack surfaces: implemented and active with seeded demo data.
+- AI recommendations: backed by multi-provider routing; demo data used in absence of live connectors.
+- Authentication: full OIDC/PKCE with 11-role RBAC implemented.
+- No production customers. No revenue. No official partnerships.
+- All screenshots are from the active demo platform — no mockups or AI-generated imagery.
+
+---
+
+## Canonical Entry Points
+
+| Document | Purpose |
+|---|---|
+| **[docs/INDEX.md](./docs/INDEX.md)** | Master index of all documentation, audit reports, and doctrine |
+| **[docs/doctrine/szl-doctrine.md](./docs/doctrine/szl-doctrine.md)** | The SZL point of view: four pillars, voice rules, anti-patterns |
+| **[packages/config/](./packages/config/)** | Single source of truth: platform registry, claims, feature flags, env contract |
+| **[docs/APP_STATUS.md](./docs/APP_STATUS.md)** | Authoritative artifact readiness register |
+| **[docs/operations/known-gaps.md](./docs/operations/known-gaps.md)** | Honest inventory of technical debt and remediation paths |
+| **[docs/platform-facts.md](./docs/platform-facts.md)** | Authoritative platform statistics |
+| **[audit/AUDIT_START_STATE.md](./audit/AUDIT_START_STATE.md)** | Repo state at start of screenshot/README pass |
+
+---
+
+## Repository Map
+
+| Path | Contents |
+|------|----------|
+| `artifacts/` | All deployable web and mobile applications |
+| `artifacts/a11oy/` | A11oy — Live Enterprise Execution Fabric |
+| `lib/` | Shared libraries: database client, auth, AI, event bus, UI components |
+| `apps/` | Background applications: embedding API, ingestion orchestrator, runtime API |
+| `services/` | Platform services: FORGE fabric, KORA metrics, Substrate MCP gateway |
+| `workers/` | Background workers: embedding, ranking, reranking, vector, Python substrate |
+| `packages/` | Domain packages: design system, substrate, agent core, evidence ledger, policy guard |
+| `scripts/` | Seed scripts, QA scripts, screenshot capture, deployment utilities |
+| `docs/` | Architecture, trust, investor, and operational documentation |
+| `docs/assets/screenshots/current/` | Verified current screenshots — only source for README images |
+| `audit/` | Audit reports, QA reports, asset reports |
+| `ops/` | Infrastructure configuration, environment matrix, runbooks |
+| `.github/workflows/` | CI, CodeQL, security, deploy, and README QA pipelines |
+
+**Artifact inventory:**
+
+| Artifact | Kind | Preview | Status |
+|----------|------|---------|--------|
+| SZL Holdings Dashboard | web | `/` | Active |
+| A11oy — Live Enterprise Execution Fabric | web | `/a11oy/` | Active — Phase 1 complete |
+| API Server | web | `/api/` | Active — backend API |
+| FORGE Command Portal | web | `/command/` | Active — cross-domain command surface |
+| TENAX — Cyber Resilience Command | web | `/sentra/` | Active — domain pack |
+| Counsel — Legal Matter Command | web | `/counsel/` | Active — domain pack |
+| DOMAINE — Real Estate Intelligence | web | `/terra/` | Active — domain pack |
+| SEXTANT Maritime Intelligence | web | `/vessels/` | Active — domain pack |
+| Carlota Jo Consulting | web | `/carlota-jo/` | Active — domain pack |
+| LUMINA — AI Executive Briefing | web | `/pulse/` | Active — cross-domain briefing |
+| PARAGON (Investor Pitch Deck) | web | `/aegis/` | Active — investor slides and ATLAS runtime |
+| SZL Holdings — Governed Autonomy Demo | video | `/szl-demo-video/` | Active — 60-second demo video |
+| SZL Holdings — Mobile Command (APEX) | mobile | `/szl-holdings-mobile/` | Deferred — after APEX ships |
+
+---
+
+## Contact
+
 **Stephen Lutar** — Founder and CEO, SZL Holdings
 
-**Email:** inquiries@szlholdings.com
-**Website:** [szlholdings.com](https://szlholdings.com)
+**Email:** inquiries@szlholdings.com  
+**Website:** [szlholdings.com](https://szlholdings.com)  
 **LinkedIn:** [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)
 
 Open to design partner conversations, enterprise evaluation, and investment introductions.

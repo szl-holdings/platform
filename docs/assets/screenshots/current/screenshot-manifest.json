@@ -1,0 +1,2444 @@
+{
+  "generatedAt": "2026-04-25T21:30:00.000Z",
+  "dryRun": false,
+  "dateKey": "2026-04",
+  "baseDir": "docs/assets/screenshots/current",
+  "summary": {
+    "total": 140,
+    "passed": 95,
+    "failed": 45,
+    "viewports": 5,
+    "targets": 28
+  },
+  "jpgArtifactHeroes": [
+    {
+      "file": "carlota-jo-client-portal-2026-04-21.jpg",
+      "status": "pass",
+      "capturedAt": "2026-04-21",
+      "notes": "Pre-existing artifact hero. PNG re-capture pending when artifact workflow is available."
+    },
+    {
+      "file": "domaine-deal-pipeline-2026-04-21.jpg",
+      "status": "pass",
+      "capturedAt": "2026-04-21",
+      "notes": "Pre-existing artifact hero. PNG re-capture pending when artifact workflow is available."
+    },
+    {
+      "file": "forge-command-portal-executive-2026-04-21.jpg",
+      "status": "pass",
+      "capturedAt": "2026-04-21",
+      "notes": "Pre-existing artifact hero. PNG re-capture pending when artifact workflow is available."
+    },
+    {
+      "file": "kora-praxis-command-2026-04-21.jpg",
+      "status": "pass",
+      "capturedAt": "2026-04-21",
+      "notes": "Pre-existing artifact hero. PNG re-capture pending when artifact workflow is available."
+    },
+    {
+      "file": "sextant-fleet-command-2026-04-21.jpg",
+      "status": "pass",
+      "capturedAt": "2026-04-21",
+      "notes": "Pre-existing artifact hero. PNG re-capture pending when artifact workflow is available."
+    },
+    {
+      "file": "szl-holdings-dashboard-2026-04-21.jpg",
+      "status": "pass",
+      "capturedAt": "2026-04-21",
+      "notes": "Pre-existing artifact hero. PNG re-capture pending when artifact workflow is available."
+    },
+    {
+      "file": "tenax-soc-command-2026-04-21.jpg",
+      "status": "pass",
+      "capturedAt": "2026-04-21",
+      "notes": "Pre-existing artifact hero. PNG re-capture pending when artifact workflow is available."
+    }
+  ],
+  "entries": [
+    {
+      "id": "a11oy-hero--desktop-1440",
+      "targetId": "a11oy-hero",
+      "viewport": "desktop-1440",
+      "file": "a11oy-hero-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Live Enterprise Execution Fabric",
+      "caption": "A11oy governance dashboard — signal-to-proof in one surface",
+      "proofClaim": "Seven-layer governed agentic fabric live with seed data",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "org profile",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-hero--wide-1600",
+      "targetId": "a11oy-hero",
+      "viewport": "wide-1600",
+      "file": "a11oy-hero-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Live Enterprise Execution Fabric",
+      "caption": "A11oy governance dashboard — signal-to-proof in one surface",
+      "proofClaim": "Seven-layer governed agentic fabric live with seed data",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "org profile",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-hero--social-1200",
+      "targetId": "a11oy-hero",
+      "viewport": "social-1200",
+      "file": "a11oy-hero-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Live Enterprise Execution Fabric",
+      "caption": "A11oy governance dashboard — signal-to-proof in one surface",
+      "proofClaim": "Seven-layer governed agentic fabric live with seed data",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "org profile",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-hero--linkedin-square-1080",
+      "targetId": "a11oy-hero",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-hero-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Live Enterprise Execution Fabric",
+      "caption": "A11oy governance dashboard — signal-to-proof in one surface",
+      "proofClaim": "Seven-layer governed agentic fabric live with seed data",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "org profile",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-hero--linkedin-portrait-1080",
+      "targetId": "a11oy-hero",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-hero-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Live Enterprise Execution Fabric",
+      "caption": "A11oy governance dashboard — signal-to-proof in one surface",
+      "proofClaim": "Seven-layer governed agentic fabric live with seed data",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "org profile",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-now-board--desktop-1440",
+      "targetId": "a11oy-now-board",
+      "viewport": "desktop-1440",
+      "file": "a11oy-now-board-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Now Board",
+      "caption": "Now Board — real-time signal stream with causal attribution",
+      "proofClaim": "Live signal stream from 32 seed events across 7 verticals",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-now-board--wide-1600",
+      "targetId": "a11oy-now-board",
+      "viewport": "wide-1600",
+      "file": "a11oy-now-board-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Now Board",
+      "caption": "Now Board — real-time signal stream with causal attribution",
+      "proofClaim": "Live signal stream from 32 seed events across 7 verticals",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-now-board--social-1200",
+      "targetId": "a11oy-now-board",
+      "viewport": "social-1200",
+      "file": "a11oy-now-board-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Now Board",
+      "caption": "Now Board — real-time signal stream with causal attribution",
+      "proofClaim": "Live signal stream from 32 seed events across 7 verticals",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-now-board--linkedin-square-1080",
+      "targetId": "a11oy-now-board",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-now-board-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Now Board",
+      "caption": "Now Board — real-time signal stream with causal attribution",
+      "proofClaim": "Live signal stream from 32 seed events across 7 verticals",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-now-board--linkedin-portrait-1080",
+      "targetId": "a11oy-now-board",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-now-board-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Now Board",
+      "caption": "Now Board — real-time signal stream with causal attribution",
+      "proofClaim": "Live signal stream from 32 seed events across 7 verticals",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-command-surface--desktop-1440",
+      "targetId": "a11oy-command-surface",
+      "viewport": "desktop-1440",
+      "file": "a11oy-command-surface-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Command Surface",
+      "caption": "Command Surface — unified operator view across all verticals",
+      "proofClaim": "Cross-vertical operator command with approval queue",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "org profile",
+        "investor demo",
+        "Medium"
+      ]
+    },
+    {
+      "id": "a11oy-command-surface--wide-1600",
+      "targetId": "a11oy-command-surface",
+      "viewport": "wide-1600",
+      "file": "a11oy-command-surface-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Command Surface",
+      "caption": "Command Surface — unified operator view across all verticals",
+      "proofClaim": "Cross-vertical operator command with approval queue",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "org profile",
+        "investor demo",
+        "Medium"
+      ]
+    },
+    {
+      "id": "a11oy-command-surface--social-1200",
+      "targetId": "a11oy-command-surface",
+      "viewport": "social-1200",
+      "file": "a11oy-command-surface-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Command Surface",
+      "caption": "Command Surface — unified operator view across all verticals",
+      "proofClaim": "Cross-vertical operator command with approval queue",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "org profile",
+        "investor demo",
+        "Medium"
+      ]
+    },
+    {
+      "id": "a11oy-command-surface--linkedin-square-1080",
+      "targetId": "a11oy-command-surface",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-command-surface-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Command Surface",
+      "caption": "Command Surface — unified operator view across all verticals",
+      "proofClaim": "Cross-vertical operator command with approval queue",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "org profile",
+        "investor demo",
+        "Medium"
+      ]
+    },
+    {
+      "id": "a11oy-command-surface--linkedin-portrait-1080",
+      "targetId": "a11oy-command-surface",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-command-surface-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Command Surface",
+      "caption": "Command Surface — unified operator view across all verticals",
+      "proofClaim": "Cross-vertical operator command with approval queue",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "org profile",
+        "investor demo",
+        "Medium"
+      ]
+    },
+    {
+      "id": "a11oy-signal-mesh--desktop-1440",
+      "targetId": "a11oy-signal-mesh",
+      "viewport": "desktop-1440",
+      "file": "a11oy-signal-mesh-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Signal Mesh",
+      "caption": "Signal Mesh — correlated business signals across seven verticals",
+      "proofClaim": "32 seed signals × 7 verticals with correlation graph",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn",
+        "carousel"
+      ]
+    },
+    {
+      "id": "a11oy-signal-mesh--wide-1600",
+      "targetId": "a11oy-signal-mesh",
+      "viewport": "wide-1600",
+      "file": "a11oy-signal-mesh-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Signal Mesh",
+      "caption": "Signal Mesh — correlated business signals across seven verticals",
+      "proofClaim": "32 seed signals × 7 verticals with correlation graph",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn",
+        "carousel"
+      ]
+    },
+    {
+      "id": "a11oy-signal-mesh--social-1200",
+      "targetId": "a11oy-signal-mesh",
+      "viewport": "social-1200",
+      "file": "a11oy-signal-mesh-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Signal Mesh",
+      "caption": "Signal Mesh — correlated business signals across seven verticals",
+      "proofClaim": "32 seed signals × 7 verticals with correlation graph",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn",
+        "carousel"
+      ]
+    },
+    {
+      "id": "a11oy-signal-mesh--linkedin-square-1080",
+      "targetId": "a11oy-signal-mesh",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-signal-mesh-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Signal Mesh",
+      "caption": "Signal Mesh — correlated business signals across seven verticals",
+      "proofClaim": "32 seed signals × 7 verticals with correlation graph",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn",
+        "carousel"
+      ]
+    },
+    {
+      "id": "a11oy-signal-mesh--linkedin-portrait-1080",
+      "targetId": "a11oy-signal-mesh",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-signal-mesh-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Signal Mesh",
+      "caption": "Signal Mesh — correlated business signals across seven verticals",
+      "proofClaim": "32 seed signals × 7 verticals with correlation graph",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn",
+        "carousel"
+      ]
+    },
+    {
+      "id": "a11oy-action-rail--desktop-1440",
+      "targetId": "a11oy-action-rail",
+      "viewport": "desktop-1440",
+      "file": "a11oy-action-rail-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Action Rail",
+      "caption": "Action Rail — human-approved execution queue",
+      "proofClaim": "No action executes without explicit human approval",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "Medium"
+      ]
+    },
+    {
+      "id": "a11oy-action-rail--wide-1600",
+      "targetId": "a11oy-action-rail",
+      "viewport": "wide-1600",
+      "file": "a11oy-action-rail-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Action Rail",
+      "caption": "Action Rail — human-approved execution queue",
+      "proofClaim": "No action executes without explicit human approval",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "Medium"
+      ]
+    },
+    {
+      "id": "a11oy-action-rail--social-1200",
+      "targetId": "a11oy-action-rail",
+      "viewport": "social-1200",
+      "file": "a11oy-action-rail-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Action Rail",
+      "caption": "Action Rail — human-approved execution queue",
+      "proofClaim": "No action executes without explicit human approval",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "Medium"
+      ]
+    },
+    {
+      "id": "a11oy-action-rail--linkedin-square-1080",
+      "targetId": "a11oy-action-rail",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-action-rail-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Action Rail",
+      "caption": "Action Rail — human-approved execution queue",
+      "proofClaim": "No action executes without explicit human approval",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "Medium"
+      ]
+    },
+    {
+      "id": "a11oy-action-rail--linkedin-portrait-1080",
+      "targetId": "a11oy-action-rail",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-action-rail-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Action Rail",
+      "caption": "Action Rail — human-approved execution queue",
+      "proofClaim": "No action executes without explicit human approval",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "Medium"
+      ]
+    },
+    {
+      "id": "a11oy-proof-ledger--desktop-1440",
+      "targetId": "a11oy-proof-ledger",
+      "viewport": "desktop-1440",
+      "file": "a11oy-proof-ledger-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Proof Ledger",
+      "caption": "Proof Ledger — cryptographic audit trail for every governed action",
+      "proofClaim": "5 proof packets demonstrating full signal-to-outcome traceability",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-proof-ledger--wide-1600",
+      "targetId": "a11oy-proof-ledger",
+      "viewport": "wide-1600",
+      "file": "a11oy-proof-ledger-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Proof Ledger",
+      "caption": "Proof Ledger — cryptographic audit trail for every governed action",
+      "proofClaim": "5 proof packets demonstrating full signal-to-outcome traceability",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-proof-ledger--social-1200",
+      "targetId": "a11oy-proof-ledger",
+      "viewport": "social-1200",
+      "file": "a11oy-proof-ledger-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Proof Ledger",
+      "caption": "Proof Ledger — cryptographic audit trail for every governed action",
+      "proofClaim": "5 proof packets demonstrating full signal-to-outcome traceability",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-proof-ledger--linkedin-square-1080",
+      "targetId": "a11oy-proof-ledger",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-proof-ledger-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Proof Ledger",
+      "caption": "Proof Ledger — cryptographic audit trail for every governed action",
+      "proofClaim": "5 proof packets demonstrating full signal-to-outcome traceability",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-proof-ledger--linkedin-portrait-1080",
+      "targetId": "a11oy-proof-ledger",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-proof-ledger-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Proof Ledger",
+      "caption": "Proof Ledger — cryptographic audit trail for every governed action",
+      "proofClaim": "5 proof packets demonstrating full signal-to-outcome traceability",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-covenant-governance--desktop-1440",
+      "targetId": "a11oy-covenant-governance",
+      "viewport": "desktop-1440",
+      "file": "a11oy-covenant-governance-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Covenant Governance",
+      "caption": "Covenant Governance — policy-enforced approval gates",
+      "proofClaim": "5 covenant policies with configurable approval thresholds",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-covenant-governance--wide-1600",
+      "targetId": "a11oy-covenant-governance",
+      "viewport": "wide-1600",
+      "file": "a11oy-covenant-governance-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Covenant Governance",
+      "caption": "Covenant Governance — policy-enforced approval gates",
+      "proofClaim": "5 covenant policies with configurable approval thresholds",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-covenant-governance--social-1200",
+      "targetId": "a11oy-covenant-governance",
+      "viewport": "social-1200",
+      "file": "a11oy-covenant-governance-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Covenant Governance",
+      "caption": "Covenant Governance — policy-enforced approval gates",
+      "proofClaim": "5 covenant policies with configurable approval thresholds",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-covenant-governance--linkedin-square-1080",
+      "targetId": "a11oy-covenant-governance",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-covenant-governance-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Covenant Governance",
+      "caption": "Covenant Governance — policy-enforced approval gates",
+      "proofClaim": "5 covenant policies with configurable approval thresholds",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-covenant-governance--linkedin-portrait-1080",
+      "targetId": "a11oy-covenant-governance",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-covenant-governance-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Covenant Governance",
+      "caption": "Covenant Governance — policy-enforced approval gates",
+      "proofClaim": "5 covenant policies with configurable approval thresholds",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-operator-control-plane--desktop-1440",
+      "targetId": "a11oy-operator-control-plane",
+      "viewport": "desktop-1440",
+      "file": "a11oy-operator-control-plane-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Operator Control Plane",
+      "caption": "Operator Control Plane — agent orchestration with full visibility",
+      "proofClaim": "Agent mesh with observable execution trace",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "carousel"
+      ]
+    },
+    {
+      "id": "a11oy-operator-control-plane--wide-1600",
+      "targetId": "a11oy-operator-control-plane",
+      "viewport": "wide-1600",
+      "file": "a11oy-operator-control-plane-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Operator Control Plane",
+      "caption": "Operator Control Plane — agent orchestration with full visibility",
+      "proofClaim": "Agent mesh with observable execution trace",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "carousel"
+      ]
+    },
+    {
+      "id": "a11oy-operator-control-plane--social-1200",
+      "targetId": "a11oy-operator-control-plane",
+      "viewport": "social-1200",
+      "file": "a11oy-operator-control-plane-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Operator Control Plane",
+      "caption": "Operator Control Plane — agent orchestration with full visibility",
+      "proofClaim": "Agent mesh with observable execution trace",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "carousel"
+      ]
+    },
+    {
+      "id": "a11oy-operator-control-plane--linkedin-square-1080",
+      "targetId": "a11oy-operator-control-plane",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-operator-control-plane-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Operator Control Plane",
+      "caption": "Operator Control Plane — agent orchestration with full visibility",
+      "proofClaim": "Agent mesh with observable execution trace",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "carousel"
+      ]
+    },
+    {
+      "id": "a11oy-operator-control-plane--linkedin-portrait-1080",
+      "targetId": "a11oy-operator-control-plane",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-operator-control-plane-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Operator Control Plane",
+      "caption": "Operator Control Plane — agent orchestration with full visibility",
+      "proofClaim": "Agent mesh with observable execution trace",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "carousel"
+      ]
+    },
+    {
+      "id": "a11oy-workcells--desktop-1440",
+      "targetId": "a11oy-workcells",
+      "viewport": "desktop-1440",
+      "file": "a11oy-workcells-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Workcells",
+      "caption": "Workcells — sandboxed agent execution units",
+      "proofClaim": "Workcell definitions with execution policy and scope constraints",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-workcells--wide-1600",
+      "targetId": "a11oy-workcells",
+      "viewport": "wide-1600",
+      "file": "a11oy-workcells-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Workcells",
+      "caption": "Workcells — sandboxed agent execution units",
+      "proofClaim": "Workcell definitions with execution policy and scope constraints",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-workcells--social-1200",
+      "targetId": "a11oy-workcells",
+      "viewport": "social-1200",
+      "file": "a11oy-workcells-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Workcells",
+      "caption": "Workcells — sandboxed agent execution units",
+      "proofClaim": "Workcell definitions with execution policy and scope constraints",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-workcells--linkedin-square-1080",
+      "targetId": "a11oy-workcells",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-workcells-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Workcells",
+      "caption": "Workcells — sandboxed agent execution units",
+      "proofClaim": "Workcell definitions with execution policy and scope constraints",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-workcells--linkedin-portrait-1080",
+      "targetId": "a11oy-workcells",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-workcells-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Workcells",
+      "caption": "Workcells — sandboxed agent execution units",
+      "proofClaim": "Workcell definitions with execution policy and scope constraints",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-workcell-replay--desktop-1440",
+      "targetId": "a11oy-workcell-replay",
+      "viewport": "desktop-1440",
+      "file": "a11oy-workcell-replay-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Workcell Replay",
+      "caption": "Workcell Replay — step-by-step playback of any governed execution",
+      "proofClaim": "Full replay fidelity with diff and proof verification",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-workcell-replay--wide-1600",
+      "targetId": "a11oy-workcell-replay",
+      "viewport": "wide-1600",
+      "file": "a11oy-workcell-replay-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Workcell Replay",
+      "caption": "Workcell Replay — step-by-step playback of any governed execution",
+      "proofClaim": "Full replay fidelity with diff and proof verification",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-workcell-replay--social-1200",
+      "targetId": "a11oy-workcell-replay",
+      "viewport": "social-1200",
+      "file": "a11oy-workcell-replay-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Workcell Replay",
+      "caption": "Workcell Replay — step-by-step playback of any governed execution",
+      "proofClaim": "Full replay fidelity with diff and proof verification",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-workcell-replay--linkedin-square-1080",
+      "targetId": "a11oy-workcell-replay",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-workcell-replay-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Workcell Replay",
+      "caption": "Workcell Replay — step-by-step playback of any governed execution",
+      "proofClaim": "Full replay fidelity with diff and proof verification",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-workcell-replay--linkedin-portrait-1080",
+      "targetId": "a11oy-workcell-replay",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-workcell-replay-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Workcell Replay",
+      "caption": "Workcell Replay — step-by-step playback of any governed execution",
+      "proofClaim": "Full replay fidelity with diff and proof verification",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-mirror-eval--desktop-1440",
+      "targetId": "a11oy-mirror-eval",
+      "viewport": "desktop-1440",
+      "file": "a11oy-mirror-eval-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — MirrorEval",
+      "caption": "MirrorEval — AI reasoning evaluation against ground truth",
+      "proofClaim": "Evaluation harness comparing AI recommendations to historical outcomes",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-mirror-eval--wide-1600",
+      "targetId": "a11oy-mirror-eval",
+      "viewport": "wide-1600",
+      "file": "a11oy-mirror-eval-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — MirrorEval",
+      "caption": "MirrorEval — AI reasoning evaluation against ground truth",
+      "proofClaim": "Evaluation harness comparing AI recommendations to historical outcomes",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-mirror-eval--social-1200",
+      "targetId": "a11oy-mirror-eval",
+      "viewport": "social-1200",
+      "file": "a11oy-mirror-eval-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — MirrorEval",
+      "caption": "MirrorEval — AI reasoning evaluation against ground truth",
+      "proofClaim": "Evaluation harness comparing AI recommendations to historical outcomes",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-mirror-eval--linkedin-square-1080",
+      "targetId": "a11oy-mirror-eval",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-mirror-eval-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — MirrorEval",
+      "caption": "MirrorEval — AI reasoning evaluation against ground truth",
+      "proofClaim": "Evaluation harness comparing AI recommendations to historical outcomes",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-mirror-eval--linkedin-portrait-1080",
+      "targetId": "a11oy-mirror-eval",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-mirror-eval-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — MirrorEval",
+      "caption": "MirrorEval — AI reasoning evaluation against ground truth",
+      "proofClaim": "Evaluation harness comparing AI recommendations to historical outcomes",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-connector-firewall--desktop-1440",
+      "targetId": "a11oy-connector-firewall",
+      "viewport": "desktop-1440",
+      "file": "a11oy-connector-firewall-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Connector Firewall",
+      "caption": "Connector Firewall — governed integration layer with policy enforcement",
+      "proofClaim": "All connectors operate through policy-gated data access layer",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-connector-firewall--wide-1600",
+      "targetId": "a11oy-connector-firewall",
+      "viewport": "wide-1600",
+      "file": "a11oy-connector-firewall-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Connector Firewall",
+      "caption": "Connector Firewall — governed integration layer with policy enforcement",
+      "proofClaim": "All connectors operate through policy-gated data access layer",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-connector-firewall--social-1200",
+      "targetId": "a11oy-connector-firewall",
+      "viewport": "social-1200",
+      "file": "a11oy-connector-firewall-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Connector Firewall",
+      "caption": "Connector Firewall — governed integration layer with policy enforcement",
+      "proofClaim": "All connectors operate through policy-gated data access layer",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-connector-firewall--linkedin-square-1080",
+      "targetId": "a11oy-connector-firewall",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-connector-firewall-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Connector Firewall",
+      "caption": "Connector Firewall — governed integration layer with policy enforcement",
+      "proofClaim": "All connectors operate through policy-gated data access layer",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-connector-firewall--linkedin-portrait-1080",
+      "targetId": "a11oy-connector-firewall",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-connector-firewall-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Connector Firewall",
+      "caption": "Connector Firewall — governed integration layer with policy enforcement",
+      "proofClaim": "All connectors operate through policy-gated data access layer",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-twin-foundry--desktop-1440",
+      "targetId": "a11oy-twin-foundry",
+      "viewport": "desktop-1440",
+      "file": "a11oy-twin-foundry-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Twin Foundry",
+      "caption": "Twin Foundry — digital twin construction for decision simulation",
+      "proofClaim": "Simulation environment with sensitivity analysis and confidence intervals",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-twin-foundry--wide-1600",
+      "targetId": "a11oy-twin-foundry",
+      "viewport": "wide-1600",
+      "file": "a11oy-twin-foundry-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Twin Foundry",
+      "caption": "Twin Foundry — digital twin construction for decision simulation",
+      "proofClaim": "Simulation environment with sensitivity analysis and confidence intervals",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-twin-foundry--social-1200",
+      "targetId": "a11oy-twin-foundry",
+      "viewport": "social-1200",
+      "file": "a11oy-twin-foundry-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Twin Foundry",
+      "caption": "Twin Foundry — digital twin construction for decision simulation",
+      "proofClaim": "Simulation environment with sensitivity analysis and confidence intervals",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-twin-foundry--linkedin-square-1080",
+      "targetId": "a11oy-twin-foundry",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-twin-foundry-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Twin Foundry",
+      "caption": "Twin Foundry — digital twin construction for decision simulation",
+      "proofClaim": "Simulation environment with sensitivity analysis and confidence intervals",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-twin-foundry--linkedin-portrait-1080",
+      "targetId": "a11oy-twin-foundry",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-twin-foundry-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Twin Foundry",
+      "caption": "Twin Foundry — digital twin construction for decision simulation",
+      "proofClaim": "Simulation environment with sensitivity analysis and confidence intervals",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-model-router--desktop-1440",
+      "targetId": "a11oy-model-router",
+      "viewport": "desktop-1440",
+      "file": "a11oy-model-router-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Model Router",
+      "caption": "Model Router — intelligent multi-provider AI routing with cost governance",
+      "proofClaim": "Multi-provider routing (Anthropic/OpenAI/Gemini) with policy constraints",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-model-router--wide-1600",
+      "targetId": "a11oy-model-router",
+      "viewport": "wide-1600",
+      "file": "a11oy-model-router-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Model Router",
+      "caption": "Model Router — intelligent multi-provider AI routing with cost governance",
+      "proofClaim": "Multi-provider routing (Anthropic/OpenAI/Gemini) with policy constraints",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-model-router--social-1200",
+      "targetId": "a11oy-model-router",
+      "viewport": "social-1200",
+      "file": "a11oy-model-router-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Model Router",
+      "caption": "Model Router — intelligent multi-provider AI routing with cost governance",
+      "proofClaim": "Multi-provider routing (Anthropic/OpenAI/Gemini) with policy constraints",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-model-router--linkedin-square-1080",
+      "targetId": "a11oy-model-router",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-model-router-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Model Router",
+      "caption": "Model Router — intelligent multi-provider AI routing with cost governance",
+      "proofClaim": "Multi-provider routing (Anthropic/OpenAI/Gemini) with policy constraints",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-model-router--linkedin-portrait-1080",
+      "targetId": "a11oy-model-router",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-model-router-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Model Router",
+      "caption": "Model Router — intelligent multi-provider AI routing with cost governance",
+      "proofClaim": "Multi-provider routing (Anthropic/OpenAI/Gemini) with policy constraints",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-skills-library--desktop-1440",
+      "targetId": "a11oy-skills-library",
+      "viewport": "desktop-1440",
+      "file": "a11oy-skills-library-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Skills Library",
+      "caption": "Skills Library — composable agent capability registry",
+      "proofClaim": "Versioned skill catalog with scope and policy metadata",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-skills-library--wide-1600",
+      "targetId": "a11oy-skills-library",
+      "viewport": "wide-1600",
+      "file": "a11oy-skills-library-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Skills Library",
+      "caption": "Skills Library — composable agent capability registry",
+      "proofClaim": "Versioned skill catalog with scope and policy metadata",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-skills-library--social-1200",
+      "targetId": "a11oy-skills-library",
+      "viewport": "social-1200",
+      "file": "a11oy-skills-library-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Skills Library",
+      "caption": "Skills Library — composable agent capability registry",
+      "proofClaim": "Versioned skill catalog with scope and policy metadata",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-skills-library--linkedin-square-1080",
+      "targetId": "a11oy-skills-library",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-skills-library-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Skills Library",
+      "caption": "Skills Library — composable agent capability registry",
+      "proofClaim": "Versioned skill catalog with scope and policy metadata",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-skills-library--linkedin-portrait-1080",
+      "targetId": "a11oy-skills-library",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-skills-library-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Skills Library",
+      "caption": "Skills Library — composable agent capability registry",
+      "proofClaim": "Versioned skill catalog with scope and policy metadata",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-trust-center--desktop-1440",
+      "targetId": "a11oy-trust-center",
+      "viewport": "desktop-1440",
+      "file": "a11oy-trust-center-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Trust Center",
+      "caption": "Trust Center — platform-level governance and compliance posture",
+      "proofClaim": "Structural governance controls with explicit approval requirements",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-trust-center--wide-1600",
+      "targetId": "a11oy-trust-center",
+      "viewport": "wide-1600",
+      "file": "a11oy-trust-center-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Trust Center",
+      "caption": "Trust Center — platform-level governance and compliance posture",
+      "proofClaim": "Structural governance controls with explicit approval requirements",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-trust-center--social-1200",
+      "targetId": "a11oy-trust-center",
+      "viewport": "social-1200",
+      "file": "a11oy-trust-center-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Trust Center",
+      "caption": "Trust Center — platform-level governance and compliance posture",
+      "proofClaim": "Structural governance controls with explicit approval requirements",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-trust-center--linkedin-square-1080",
+      "targetId": "a11oy-trust-center",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-trust-center-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Trust Center",
+      "caption": "Trust Center — platform-level governance and compliance posture",
+      "proofClaim": "Structural governance controls with explicit approval requirements",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-trust-center--linkedin-portrait-1080",
+      "targetId": "a11oy-trust-center",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-trust-center-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Trust Center",
+      "caption": "Trust Center — platform-level governance and compliance posture",
+      "proofClaim": "Structural governance controls with explicit approval requirements",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-sovereign--desktop-1440",
+      "targetId": "a11oy-sovereign",
+      "viewport": "desktop-1440",
+      "file": "a11oy-sovereign-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Sovereign",
+      "caption": "Sovereign — data sovereignty and jurisdiction control",
+      "proofClaim": "Data residency and access policy enforcement",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-sovereign--wide-1600",
+      "targetId": "a11oy-sovereign",
+      "viewport": "wide-1600",
+      "file": "a11oy-sovereign-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Sovereign",
+      "caption": "Sovereign — data sovereignty and jurisdiction control",
+      "proofClaim": "Data residency and access policy enforcement",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-sovereign--social-1200",
+      "targetId": "a11oy-sovereign",
+      "viewport": "social-1200",
+      "file": "a11oy-sovereign-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Sovereign",
+      "caption": "Sovereign — data sovereignty and jurisdiction control",
+      "proofClaim": "Data residency and access policy enforcement",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-sovereign--linkedin-square-1080",
+      "targetId": "a11oy-sovereign",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-sovereign-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Sovereign",
+      "caption": "Sovereign — data sovereignty and jurisdiction control",
+      "proofClaim": "Data residency and access policy enforcement",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-sovereign--linkedin-portrait-1080",
+      "targetId": "a11oy-sovereign",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-sovereign-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Sovereign",
+      "caption": "Sovereign — data sovereignty and jurisdiction control",
+      "proofClaim": "Data residency and access policy enforcement",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "a11oy-boardroom-mode--desktop-1440",
+      "targetId": "a11oy-boardroom-mode",
+      "viewport": "desktop-1440",
+      "file": "a11oy-boardroom-mode-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Boardroom Mode",
+      "caption": "Boardroom Mode — executive-ready governed decision briefing",
+      "proofClaim": "Board-level decision surface with attribution and proof chain links",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "org profile",
+        "investor demo",
+        "LinkedIn",
+        "carousel"
+      ]
+    },
+    {
+      "id": "a11oy-boardroom-mode--wide-1600",
+      "targetId": "a11oy-boardroom-mode",
+      "viewport": "wide-1600",
+      "file": "a11oy-boardroom-mode-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Boardroom Mode",
+      "caption": "Boardroom Mode — executive-ready governed decision briefing",
+      "proofClaim": "Board-level decision surface with attribution and proof chain links",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "org profile",
+        "investor demo",
+        "LinkedIn",
+        "carousel"
+      ]
+    },
+    {
+      "id": "a11oy-boardroom-mode--social-1200",
+      "targetId": "a11oy-boardroom-mode",
+      "viewport": "social-1200",
+      "file": "a11oy-boardroom-mode-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Boardroom Mode",
+      "caption": "Boardroom Mode — executive-ready governed decision briefing",
+      "proofClaim": "Board-level decision surface with attribution and proof chain links",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "org profile",
+        "investor demo",
+        "LinkedIn",
+        "carousel"
+      ]
+    },
+    {
+      "id": "a11oy-boardroom-mode--linkedin-square-1080",
+      "targetId": "a11oy-boardroom-mode",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-boardroom-mode-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Boardroom Mode",
+      "caption": "Boardroom Mode — executive-ready governed decision briefing",
+      "proofClaim": "Board-level decision surface with attribution and proof chain links",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "org profile",
+        "investor demo",
+        "LinkedIn",
+        "carousel"
+      ]
+    },
+    {
+      "id": "a11oy-boardroom-mode--linkedin-portrait-1080",
+      "targetId": "a11oy-boardroom-mode",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-boardroom-mode-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Boardroom Mode",
+      "caption": "Boardroom Mode — executive-ready governed decision briefing",
+      "proofClaim": "Board-level decision surface with attribution and proof chain links",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "README",
+        "org profile",
+        "investor demo",
+        "LinkedIn",
+        "carousel"
+      ]
+    },
+    {
+      "id": "a11oy-investor-demo--desktop-1440",
+      "targetId": "a11oy-investor-demo",
+      "viewport": "desktop-1440",
+      "file": "a11oy-investor-demo-2026-04--desktop-1440.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Investor Demo",
+      "caption": "Investor Demo — guided walkthrough of A11oy governed execution",
+      "proofClaim": "Full demo sequence from signal ingestion to proof ledger verification",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "README",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-investor-demo--wide-1600",
+      "targetId": "a11oy-investor-demo",
+      "viewport": "wide-1600",
+      "file": "a11oy-investor-demo-2026-04--wide-1600.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Investor Demo",
+      "caption": "Investor Demo — guided walkthrough of A11oy governed execution",
+      "proofClaim": "Full demo sequence from signal ingestion to proof ledger verification",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "README",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-investor-demo--social-1200",
+      "targetId": "a11oy-investor-demo",
+      "viewport": "social-1200",
+      "file": "a11oy-investor-demo-2026-04--social-1200.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Investor Demo",
+      "caption": "Investor Demo — guided walkthrough of A11oy governed execution",
+      "proofClaim": "Full demo sequence from signal ingestion to proof ledger verification",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "README",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-investor-demo--linkedin-square-1080",
+      "targetId": "a11oy-investor-demo",
+      "viewport": "linkedin-square-1080",
+      "file": "a11oy-investor-demo-2026-04--linkedin-square-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Investor Demo",
+      "caption": "Investor Demo — guided walkthrough of A11oy governed execution",
+      "proofClaim": "Full demo sequence from signal ingestion to proof ledger verification",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "README",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "a11oy-investor-demo--linkedin-portrait-1080",
+      "targetId": "a11oy-investor-demo",
+      "viewport": "linkedin-portrait-1080",
+      "file": "a11oy-investor-demo-2026-04--linkedin-portrait-1080.png",
+      "status": "pass",
+      "reason": null,
+      "label": "A11oy — Investor Demo",
+      "caption": "Investor Demo — guided walkthrough of A11oy governed execution",
+      "proofClaim": "Full demo sequence from signal ingestion to proof ledger verification",
+      "screenshotReadyHook": true,
+      "capturedAt": "2026-04-25",
+      "recommendedUsage": [
+        "investor demo",
+        "README",
+        "LinkedIn"
+      ]
+    },
+    {
+      "id": "command-hero--desktop-1440",
+      "targetId": "command-hero",
+      "viewport": "desktop-1440",
+      "file": "command-portal-hero-2026-04--desktop-1440.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "FORGE Command Portal — Unified Command",
+      "caption": "FORGE Command Portal — cross-domain real-time executive dashboard",
+      "proofClaim": "Eight-domain SSE feeds with executive briefing",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "command-hero--wide-1600",
+      "targetId": "command-hero",
+      "viewport": "wide-1600",
+      "file": "command-portal-hero-2026-04--wide-1600.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "FORGE Command Portal — Unified Command",
+      "caption": "FORGE Command Portal — cross-domain real-time executive dashboard",
+      "proofClaim": "Eight-domain SSE feeds with executive briefing",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "command-hero--social-1200",
+      "targetId": "command-hero",
+      "viewport": "social-1200",
+      "file": "command-portal-hero-2026-04--social-1200.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "FORGE Command Portal — Unified Command",
+      "caption": "FORGE Command Portal — cross-domain real-time executive dashboard",
+      "proofClaim": "Eight-domain SSE feeds with executive briefing",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "command-hero--linkedin-square-1080",
+      "targetId": "command-hero",
+      "viewport": "linkedin-square-1080",
+      "file": "command-portal-hero-2026-04--linkedin-square-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "FORGE Command Portal — Unified Command",
+      "caption": "FORGE Command Portal — cross-domain real-time executive dashboard",
+      "proofClaim": "Eight-domain SSE feeds with executive briefing",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "command-hero--linkedin-portrait-1080",
+      "targetId": "command-hero",
+      "viewport": "linkedin-portrait-1080",
+      "file": "command-portal-hero-2026-04--linkedin-portrait-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "FORGE Command Portal — Unified Command",
+      "caption": "FORGE Command Portal — cross-domain real-time executive dashboard",
+      "proofClaim": "Eight-domain SSE feeds with executive briefing",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "aegis-hero--desktop-1440",
+      "targetId": "aegis-hero",
+      "viewport": "desktop-1440",
+      "file": "paragon-aegis-hero-2026-04--desktop-1440.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Aegis — Defense & Intelligence Command",
+      "caption": "Aegis investor pitch deck and ATLAS runtime interface",
+      "proofClaim": "Active investor pitch deck with ATLAS spatial runtime",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "aegis-hero--wide-1600",
+      "targetId": "aegis-hero",
+      "viewport": "wide-1600",
+      "file": "paragon-aegis-hero-2026-04--wide-1600.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Aegis — Defense & Intelligence Command",
+      "caption": "Aegis investor pitch deck and ATLAS runtime interface",
+      "proofClaim": "Active investor pitch deck with ATLAS spatial runtime",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "aegis-hero--social-1200",
+      "targetId": "aegis-hero",
+      "viewport": "social-1200",
+      "file": "paragon-aegis-hero-2026-04--social-1200.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Aegis — Defense & Intelligence Command",
+      "caption": "Aegis investor pitch deck and ATLAS runtime interface",
+      "proofClaim": "Active investor pitch deck with ATLAS spatial runtime",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "aegis-hero--linkedin-square-1080",
+      "targetId": "aegis-hero",
+      "viewport": "linkedin-square-1080",
+      "file": "paragon-aegis-hero-2026-04--linkedin-square-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Aegis — Defense & Intelligence Command",
+      "caption": "Aegis investor pitch deck and ATLAS runtime interface",
+      "proofClaim": "Active investor pitch deck with ATLAS spatial runtime",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "aegis-hero--linkedin-portrait-1080",
+      "targetId": "aegis-hero",
+      "viewport": "linkedin-portrait-1080",
+      "file": "paragon-aegis-hero-2026-04--linkedin-portrait-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Aegis — Defense & Intelligence Command",
+      "caption": "Aegis investor pitch deck and ATLAS runtime interface",
+      "proofClaim": "Active investor pitch deck with ATLAS spatial runtime",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "sentra-hero--desktop-1440",
+      "targetId": "sentra-hero",
+      "viewport": "desktop-1440",
+      "file": "tenax-sentra-hero-2026-04--desktop-1440.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Sentra — Cyber Resilience Command",
+      "caption": "Sentra cyber resilience dashboard — exposure mapping and recovery readiness",
+      "proofClaim": "Active domain pack with seeded cyber posture data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "sentra-hero--wide-1600",
+      "targetId": "sentra-hero",
+      "viewport": "wide-1600",
+      "file": "tenax-sentra-hero-2026-04--wide-1600.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Sentra — Cyber Resilience Command",
+      "caption": "Sentra cyber resilience dashboard — exposure mapping and recovery readiness",
+      "proofClaim": "Active domain pack with seeded cyber posture data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "sentra-hero--social-1200",
+      "targetId": "sentra-hero",
+      "viewport": "social-1200",
+      "file": "tenax-sentra-hero-2026-04--social-1200.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Sentra — Cyber Resilience Command",
+      "caption": "Sentra cyber resilience dashboard — exposure mapping and recovery readiness",
+      "proofClaim": "Active domain pack with seeded cyber posture data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "sentra-hero--linkedin-square-1080",
+      "targetId": "sentra-hero",
+      "viewport": "linkedin-square-1080",
+      "file": "tenax-sentra-hero-2026-04--linkedin-square-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Sentra — Cyber Resilience Command",
+      "caption": "Sentra cyber resilience dashboard — exposure mapping and recovery readiness",
+      "proofClaim": "Active domain pack with seeded cyber posture data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "sentra-hero--linkedin-portrait-1080",
+      "targetId": "sentra-hero",
+      "viewport": "linkedin-portrait-1080",
+      "file": "tenax-sentra-hero-2026-04--linkedin-portrait-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Sentra — Cyber Resilience Command",
+      "caption": "Sentra cyber resilience dashboard — exposure mapping and recovery readiness",
+      "proofClaim": "Active domain pack with seeded cyber posture data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "pulse-hero--desktop-1440",
+      "targetId": "pulse-hero",
+      "viewport": "desktop-1440",
+      "file": "lumina-pulse-hero-2026-04--desktop-1440.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Pulse — AI Executive Briefing",
+      "caption": "Pulse executive intelligence briefing — source-cited cross-domain digest",
+      "proofClaim": "AI narrative reports synthesized from live platform signals",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "pulse-hero--wide-1600",
+      "targetId": "pulse-hero",
+      "viewport": "wide-1600",
+      "file": "lumina-pulse-hero-2026-04--wide-1600.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Pulse — AI Executive Briefing",
+      "caption": "Pulse executive intelligence briefing — source-cited cross-domain digest",
+      "proofClaim": "AI narrative reports synthesized from live platform signals",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "pulse-hero--social-1200",
+      "targetId": "pulse-hero",
+      "viewport": "social-1200",
+      "file": "lumina-pulse-hero-2026-04--social-1200.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Pulse — AI Executive Briefing",
+      "caption": "Pulse executive intelligence briefing — source-cited cross-domain digest",
+      "proofClaim": "AI narrative reports synthesized from live platform signals",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "pulse-hero--linkedin-square-1080",
+      "targetId": "pulse-hero",
+      "viewport": "linkedin-square-1080",
+      "file": "lumina-pulse-hero-2026-04--linkedin-square-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Pulse — AI Executive Briefing",
+      "caption": "Pulse executive intelligence briefing — source-cited cross-domain digest",
+      "proofClaim": "AI narrative reports synthesized from live platform signals",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "pulse-hero--linkedin-portrait-1080",
+      "targetId": "pulse-hero",
+      "viewport": "linkedin-portrait-1080",
+      "file": "lumina-pulse-hero-2026-04--linkedin-portrait-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Pulse — AI Executive Briefing",
+      "caption": "Pulse executive intelligence briefing — source-cited cross-domain digest",
+      "proofClaim": "AI narrative reports synthesized from live platform signals",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "counsel-hero--desktop-1440",
+      "targetId": "counsel-hero",
+      "viewport": "desktop-1440",
+      "file": "counsel-hero-2026-04--desktop-1440.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Counsel — Legal Matter Command",
+      "caption": "Counsel — agentic legal matter management with obligation tracking",
+      "proofClaim": "Active domain pack with seeded legal matter data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "counsel-hero--wide-1600",
+      "targetId": "counsel-hero",
+      "viewport": "wide-1600",
+      "file": "counsel-hero-2026-04--wide-1600.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Counsel — Legal Matter Command",
+      "caption": "Counsel — agentic legal matter management with obligation tracking",
+      "proofClaim": "Active domain pack with seeded legal matter data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "counsel-hero--social-1200",
+      "targetId": "counsel-hero",
+      "viewport": "social-1200",
+      "file": "counsel-hero-2026-04--social-1200.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Counsel — Legal Matter Command",
+      "caption": "Counsel — agentic legal matter management with obligation tracking",
+      "proofClaim": "Active domain pack with seeded legal matter data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "counsel-hero--linkedin-square-1080",
+      "targetId": "counsel-hero",
+      "viewport": "linkedin-square-1080",
+      "file": "counsel-hero-2026-04--linkedin-square-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Counsel — Legal Matter Command",
+      "caption": "Counsel — agentic legal matter management with obligation tracking",
+      "proofClaim": "Active domain pack with seeded legal matter data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "counsel-hero--linkedin-portrait-1080",
+      "targetId": "counsel-hero",
+      "viewport": "linkedin-portrait-1080",
+      "file": "counsel-hero-2026-04--linkedin-portrait-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Counsel — Legal Matter Command",
+      "caption": "Counsel — agentic legal matter management with obligation tracking",
+      "proofClaim": "Active domain pack with seeded legal matter data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "terra-hero--desktop-1440",
+      "targetId": "terra-hero",
+      "viewport": "desktop-1440",
+      "file": "domaine-terra-hero-2026-04--desktop-1440.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Terra — Real Estate Intelligence",
+      "caption": "Terra real estate intelligence — distress pipeline and ownership graph",
+      "proofClaim": "Active domain pack with seeded property and deal data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "terra-hero--wide-1600",
+      "targetId": "terra-hero",
+      "viewport": "wide-1600",
+      "file": "domaine-terra-hero-2026-04--wide-1600.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Terra — Real Estate Intelligence",
+      "caption": "Terra real estate intelligence — distress pipeline and ownership graph",
+      "proofClaim": "Active domain pack with seeded property and deal data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "terra-hero--social-1200",
+      "targetId": "terra-hero",
+      "viewport": "social-1200",
+      "file": "domaine-terra-hero-2026-04--social-1200.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Terra — Real Estate Intelligence",
+      "caption": "Terra real estate intelligence — distress pipeline and ownership graph",
+      "proofClaim": "Active domain pack with seeded property and deal data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "terra-hero--linkedin-square-1080",
+      "targetId": "terra-hero",
+      "viewport": "linkedin-square-1080",
+      "file": "domaine-terra-hero-2026-04--linkedin-square-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Terra — Real Estate Intelligence",
+      "caption": "Terra real estate intelligence — distress pipeline and ownership graph",
+      "proofClaim": "Active domain pack with seeded property and deal data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "terra-hero--linkedin-portrait-1080",
+      "targetId": "terra-hero",
+      "viewport": "linkedin-portrait-1080",
+      "file": "domaine-terra-hero-2026-04--linkedin-portrait-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Terra — Real Estate Intelligence",
+      "caption": "Terra real estate intelligence — distress pipeline and ownership graph",
+      "proofClaim": "Active domain pack with seeded property and deal data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "vessels-hero--desktop-1440",
+      "targetId": "vessels-hero",
+      "viewport": "desktop-1440",
+      "file": "sextant-vessels-hero-2026-04--desktop-1440.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Vessels — Maritime Intelligence",
+      "caption": "Vessels maritime fleet command — AIS tracking and voyage economics",
+      "proofClaim": "Active domain pack with seeded fleet and voyage data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "vessels-hero--wide-1600",
+      "targetId": "vessels-hero",
+      "viewport": "wide-1600",
+      "file": "sextant-vessels-hero-2026-04--wide-1600.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Vessels — Maritime Intelligence",
+      "caption": "Vessels maritime fleet command — AIS tracking and voyage economics",
+      "proofClaim": "Active domain pack with seeded fleet and voyage data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "vessels-hero--social-1200",
+      "targetId": "vessels-hero",
+      "viewport": "social-1200",
+      "file": "sextant-vessels-hero-2026-04--social-1200.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Vessels — Maritime Intelligence",
+      "caption": "Vessels maritime fleet command — AIS tracking and voyage economics",
+      "proofClaim": "Active domain pack with seeded fleet and voyage data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "vessels-hero--linkedin-square-1080",
+      "targetId": "vessels-hero",
+      "viewport": "linkedin-square-1080",
+      "file": "sextant-vessels-hero-2026-04--linkedin-square-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Vessels — Maritime Intelligence",
+      "caption": "Vessels maritime fleet command — AIS tracking and voyage economics",
+      "proofClaim": "Active domain pack with seeded fleet and voyage data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "vessels-hero--linkedin-portrait-1080",
+      "targetId": "vessels-hero",
+      "viewport": "linkedin-portrait-1080",
+      "file": "sextant-vessels-hero-2026-04--linkedin-portrait-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Vessels — Maritime Intelligence",
+      "caption": "Vessels maritime fleet command — AIS tracking and voyage economics",
+      "proofClaim": "Active domain pack with seeded fleet and voyage data",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "carlota-jo-hero--desktop-1440",
+      "targetId": "carlota-jo-hero",
+      "viewport": "desktop-1440",
+      "file": "carlota-jo-hero-2026-04--desktop-1440.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Carlota Jo Consulting",
+      "caption": "Carlota Jo — premium advisory operations for UHNW clients",
+      "proofClaim": "Active domain pack with UHNW client portal",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "carlota-jo-hero--wide-1600",
+      "targetId": "carlota-jo-hero",
+      "viewport": "wide-1600",
+      "file": "carlota-jo-hero-2026-04--wide-1600.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Carlota Jo Consulting",
+      "caption": "Carlota Jo — premium advisory operations for UHNW clients",
+      "proofClaim": "Active domain pack with UHNW client portal",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "carlota-jo-hero--social-1200",
+      "targetId": "carlota-jo-hero",
+      "viewport": "social-1200",
+      "file": "carlota-jo-hero-2026-04--social-1200.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Carlota Jo Consulting",
+      "caption": "Carlota Jo — premium advisory operations for UHNW clients",
+      "proofClaim": "Active domain pack with UHNW client portal",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "carlota-jo-hero--linkedin-square-1080",
+      "targetId": "carlota-jo-hero",
+      "viewport": "linkedin-square-1080",
+      "file": "carlota-jo-hero-2026-04--linkedin-square-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Carlota Jo Consulting",
+      "caption": "Carlota Jo — premium advisory operations for UHNW clients",
+      "proofClaim": "Active domain pack with UHNW client portal",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "carlota-jo-hero--linkedin-portrait-1080",
+      "targetId": "carlota-jo-hero",
+      "viewport": "linkedin-portrait-1080",
+      "file": "carlota-jo-hero-2026-04--linkedin-portrait-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "Carlota Jo Consulting",
+      "caption": "Carlota Jo — premium advisory operations for UHNW clients",
+      "proofClaim": "Active domain pack with UHNW client portal",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "README",
+        "investor demo"
+      ]
+    },
+    {
+      "id": "mobile-hero--desktop-1440",
+      "targetId": "mobile-hero",
+      "viewport": "desktop-1440",
+      "file": "apex-mobile-hero-2026-04--desktop-1440.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "SZL Holdings — Mobile Command (APEX)",
+      "caption": "APEX mobile command — all domain workspaces in one native app",
+      "proofClaim": "Expo / React Native mobile shell with domain workspace routing",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "mobile-hero--wide-1600",
+      "targetId": "mobile-hero",
+      "viewport": "wide-1600",
+      "file": "apex-mobile-hero-2026-04--wide-1600.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "SZL Holdings — Mobile Command (APEX)",
+      "caption": "APEX mobile command — all domain workspaces in one native app",
+      "proofClaim": "Expo / React Native mobile shell with domain workspace routing",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "mobile-hero--social-1200",
+      "targetId": "mobile-hero",
+      "viewport": "social-1200",
+      "file": "apex-mobile-hero-2026-04--social-1200.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "SZL Holdings — Mobile Command (APEX)",
+      "caption": "APEX mobile command — all domain workspaces in one native app",
+      "proofClaim": "Expo / React Native mobile shell with domain workspace routing",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "mobile-hero--linkedin-square-1080",
+      "targetId": "mobile-hero",
+      "viewport": "linkedin-square-1080",
+      "file": "apex-mobile-hero-2026-04--linkedin-square-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "SZL Holdings — Mobile Command (APEX)",
+      "caption": "APEX mobile command — all domain workspaces in one native app",
+      "proofClaim": "Expo / React Native mobile shell with domain workspace routing",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    },
+    {
+      "id": "mobile-hero--linkedin-portrait-1080",
+      "targetId": "mobile-hero",
+      "viewport": "linkedin-portrait-1080",
+      "file": "apex-mobile-hero-2026-04--linkedin-portrait-1080.png",
+      "status": "fail",
+      "reason": "artifact workflow offline",
+      "label": "SZL Holdings — Mobile Command (APEX)",
+      "caption": "APEX mobile command — all domain workspaces in one native app",
+      "proofClaim": "Expo / React Native mobile shell with domain workspace routing",
+      "screenshotReadyHook": false,
+      "capturedAt": null,
+      "recommendedUsage": [
+        "investor demo"
+      ]
+    }
+  ]
+}
