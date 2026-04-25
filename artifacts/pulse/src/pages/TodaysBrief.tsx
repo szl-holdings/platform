@@ -17,6 +17,7 @@ import { useLocation } from 'wouter';
 import AgentBadge from '../components/AgentBadge';
 import ConfidenceChip from '../components/ConfidenceChip';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { HeliosFrontierBriefing } from '../components/HeliosFrontierBriefing';
 import MeshCard from '../components/MeshCard';
 import { BriefSkeleton } from '../components/SkeletonRow';
 import { exportBriefingPdf, isDemoMode, useGenerateBriefing, useTodaysBrief } from '../lib/api';
@@ -934,6 +935,8 @@ export default function TodaysBrief() {
             </ErrorBoundary>
           ))}
         </div>
+
+        <HeliosFrontierBriefing />
 
         {/* Brief footer */}
         <div

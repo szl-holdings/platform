@@ -7,6 +7,7 @@ import { GitBranch, Map, TrendingUp, Zap } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { AmbientSignalRanker } from '../components/ambient-signal-ranker';
+import { HeliosProposalsInbox } from '../components/helios-proposals-inbox';
 import { AtlasKpiSection } from '../components/atlas-kpi-section';
 import { CommandActions } from '../components/command-actions';
 import { CommandBar } from '../components/command-bar';
@@ -277,6 +278,8 @@ export function Dashboard() {
           </div>
           <SignalChainsPanel />
         </div>
+
+        <HeliosProposalsInbox />
       </main>
     </div>
   );

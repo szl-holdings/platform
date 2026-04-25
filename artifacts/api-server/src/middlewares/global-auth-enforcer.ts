@@ -139,6 +139,18 @@ const PUBLIC_EXACT_PATHS = new Set([
   // Explorer. The mutating /api/graph/* endpoints are NOT covered here and
   // continue to enforce auth + tenant scope via routes/groups/graph.ts.
   "/api/graph/stream",
+  // Helios — Frontier Intelligence & Evolution Engine read-only GET endpoints.
+  // Exact-path entries ensure mutating routes (PATCH /proposals/:id/status,
+  // PATCH /scanners/:id/toggle, POST /scanners/:id/run, POST /mcp) remain
+  // protected by session auth and are NOT reachable anonymously.
+  "/api/helios/stats",
+  "/api/helios/signals",
+  "/api/helios/mythos",
+  "/api/helios/proposals",
+  "/api/helios/benchmarks",
+  "/api/helios/scanners",
+  "/api/helios/memos",
+  "/api/helios/frontier-briefing",
 ]);
 
 const PUBLIC_PREFIXES = [
@@ -309,6 +321,13 @@ const PUBLIC_PREFIXES = [
   // surface; the route handler scopes results per-matter via matterId.
   // Mutating write routes remain covered by CSRF double-submit protection.
   "/api/counsel-knowledge/",
+  // Helios sub-resource read-only paths — covers /mythos/search and
+  // /mythos/nodes/:id (graph exploration) and /memos/:id (individual memo
+  // detail). Mutating routes (PATCH /proposals/:id/status,
+  // PATCH /scanners/:id/toggle, POST /scanners/:id/run, POST /mcp)
+  // are NOT covered here and enforce auth via session/token.
+  "/api/helios/mythos/",
+  "/api/helios/memos/",
 ];
 
 /**

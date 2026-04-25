@@ -134,6 +134,12 @@ router.use(lazyMatch("/lyte", () => import("./lyte-market"), "lyte-market"));
 // mode without a session). Gracefully returns 503 when not configured.
 router.use(lazyMatch("/n8n", () => import("./n8n"), "n8n"));
 
+// Helios — Frontier Intelligence & Evolution Engine. Public demo surface.
+// Owns /helios/* endpoints: signals, mythos, proposals, benchmarks, scanners,
+// memos, stats, mcp (Mythos query for portfolio agents), and frontier-briefing.
+// Mounted BEFORE guardianPolicyCheck so unauthenticated views can hydrate.
+router.use("/helios", lazyMount(() => import("./helios/index"), "helios"));
+
 // Global Guardian policy check — derives category from request path.
 router.use(guardianPolicyCheck());
 

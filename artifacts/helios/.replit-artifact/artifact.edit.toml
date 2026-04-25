@@ -1,0 +1,33 @@
+kind = "web"
+  previewPath = "/helios/"
+  title = "HELIOS — Frontier Intelligence Engine"
+  version = "1.0.0"
+  id = "artifacts/helios"
+  router = "path"
+
+  [[integratedSkills]]
+  name = "react-vite"
+  version = "1.0.0"
+
+  [[services]]
+  name = "web"
+  paths = [ "/helios/" ]
+  localPort = 9090
+  autoStart = true
+
+  [services.development]
+  run = "bash -c 'cd /home/runner/workspace/artifacts/helios && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
+
+  [services.production]
+  build = [ "pnpm", "--filter", "@workspace/helios", "run", "build" ]
+  publicDir = "artifacts/helios/dist/public"
+  serve = "static"
+
+  [[services.production.rewrites]]
+  from = "/*"
+  to = "/index.html"
+
+  [services.env]
+  VITE_PORT = "5205"
+  BASE_PATH = "/helios/"
+  
