@@ -267,6 +267,11 @@ const PUBLIC_PREFIXES = [
   // Phase 2 will add session-gated write paths; the prefix bypass is intentional
   // for now so the A11oy demo renders without a session.
   "/api/a11oy/",
+  // n8n Automation Bridge — MCP-compatible proxy to a connected n8n instance.
+  // Public so the Command Automations surface renders in demo mode without a
+  // session. When N8N_INSTANCE_URL/N8N_API_KEY are not set, the proxy returns
+  // 503 { configured: false } rather than forwarding any request.
+  "/api/n8n/",
   // Competitive Intel monitor — backs the Command Competitive Atlas page with
   // RSS-derived "Intel Update" alerts about tracked champions (CrowdStrike,
   // Clio, CoStar, Windward, Palantir, ThoughtSpot). The Atlas page is internal-

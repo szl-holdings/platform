@@ -88,6 +88,81 @@ pnpm seed:demo
 | Decision Receipts | `/command/decisions` | Immutable governed decision archive |
 | Outcome Loop | `/command/outcomes` | Outcome graph view |
 | Infrastructure | `/command/infrastructure` | Cloud sovereignty surfaces |
+| **Automations** | `/command/operations/automations` | n8n workflow bridge — 400+ integrations |
+
+## n8n Automation Bridge
+
+Command is connected to n8n's 400+ integrations via an MCP-compatible proxy bridge. The
+**Automations** surface at `/command/operations/automations` lets operators browse available
+n8n workflows, trigger them with custom parameters, and view run history — all without leaving
+Command.
+
+### Connecting n8n
+
+1. **Stand up or access an n8n instance.** You can self-host n8n at [n8n.io](https://n8n.io) or
+   use n8n Cloud. The instance just needs to be network-accessible from the API server.
+
+2. **Get an API key.** In n8n, go to **Settings → API → Create an API key**.
+
+3. **Set environment secrets.** In the Replit Secrets panel (or your deployment environment), add:
+
+   | Secret | Example value |
+   |--------|---------------|
+   | `N8N_INSTANCE_URL` | `https://your-n8n.yourdomain.com` |
+   | `N8N_API_KEY` | `n8n_api_XXXX…` |
+
+4. **Restart the API server.** The bridge reads the config at startup; a restart is required after
+   adding or changing secrets.
+
+5. Navigate to **Operations → Automations** in Command. You should see your workflows listed.
+
+### How to find workflow IDs
+
+Open any workflow in the n8n editor. The ID appears in the browser URL:
+`/workflow/<id>`. The Automations surface also displays each workflow's ID in the list view.
+
+### Triggering automations from context
+
+On the **Alerts** page (`/command/operations/alerts`), expanding any alert reveals an
+**Automate** button alongside the normal acknowledge/snooze/resolve actions. Clicking it
+navigates directly to the Automations surface so you can select and run an appropriate n8n
+workflow (e.g. "post to #ops-alerts in Slack", "create Jira ticket", "page on-call via PagerDuty").
+
+### Adding new in-context trigger sites
+
+To add an "Automate" button to any other Command page:
+
+```tsx
+import { useLocation } from 'wouter';
+import { Workflow } from 'lucide-react';
+
+// Inside your component:
+const [, navigate] = useLocation();
+
+<button onClick={() => navigate('/operations/automations')}>
+  <Workflow size={12} /> Automate
+</button>
+```
+
+### API endpoints
+
+The bridge exposes the following endpoints on the API server under `/api/n8n/`:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/n8n/health` | Connection status — `{ configured, reachable }` |
+| `GET` | `/api/n8n/workflows` | List all workflows |
+| `GET` | `/api/n8n/workflows/:id` | Get a single workflow's details |
+| `POST` | `/api/n8n/workflows/:id/execute` | Trigger a workflow with `{ data: { ... } }` payload |
+| `GET` | `/api/n8n/executions` | List recent executions (optional `?workflowId=` filter) |
+| `GET` | `/api/n8n/executions/:id` | Get a single execution's status |
+
+When `N8N_INSTANCE_URL` / `N8N_API_KEY` are not set, all endpoints return:
+```json
+{ "configured": false, "message": "n8n is not connected. Set N8N_INSTANCE_URL and N8N_API_KEY…" }
+```
+The Command frontend detects this 503 response and shows a clear setup prompt rather than an
+error state.
 
 See [`PRODUCT_SURFACE_MAP.md`](../../PRODUCT_SURFACE_MAP.md) for the full module-to-primitive mapping.
 

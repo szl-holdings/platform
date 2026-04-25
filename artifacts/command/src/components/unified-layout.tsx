@@ -191,6 +191,10 @@ const OPERATIONS_NAV: NavGroup[] = [
     ],
   },
   {
+    section: 'Automations',
+    items: [{ href: '/operations/automations', label: 'n8n Automation Bridge', icon: Workflow }],
+  },
+  {
     section: 'Counsel — Execution',
     items: [
       { href: '/operations/alloy/policy-compiler', label: 'Policy Compiler', icon: Code },

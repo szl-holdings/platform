@@ -122,6 +122,11 @@ router.use(a11oyFabricRouter);
 // Public read endpoint; mounted before tenantScope group.
 router.use(lazyMatch("/lyte", () => import("./lyte-market"), "lyte-market"));
 
+// n8n Automation Bridge — proxy to a connected n8n instance (public surface,
+// mounted BEFORE guardianPolicyCheck so the Automations page works in demo
+// mode without a session). Gracefully returns 503 when not configured.
+router.use(lazyMatch("/n8n", () => import("./n8n"), "n8n"));
+
 // Global Guardian policy check — derives category from request path.
 router.use(guardianPolicyCheck());
 
@@ -250,5 +255,6 @@ router.use(lazyMatch("/mobile-biometric", () => import("./mobile-biometric"), "m
 // Owns /evolution/* endpoints: candidates, evaluation, calibration, scoring,
 // drift, promotion, rollback, audit, and diagnostics.
 router.use(lazyMatch("/evolution", () => import("./evolution"), "evolution"));
+
 
 export default router;

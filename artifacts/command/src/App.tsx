@@ -230,6 +230,8 @@ const SelfModelConsole = lazy(() => import('./pages/cognitive/self-model'));
 const WorldModelExplorer = lazy(() => import('./pages/cognitive/world-model'));
 const ReplayLab = lazy(() => import('./pages/replay-lab'));
 const EvalLab = lazy(() => import('./pages/eval-lab'));
+const AutomationsPage = lazy(() => import('./pages/automations'));
+const AlertsPage = lazy(() => import('./pages/alerts'));
 const PERRuntimeOverview = lazy(() => import('./pages/evolution/runtime-overview'));
 const PEREvaluationConsole = lazy(() => import('./pages/evolution/evaluation-console'));
 const PERGovernanceConsole = lazy(() => import('./pages/evolution/governance-console'));
@@ -428,6 +430,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/operations/cognitive-runtime', label: 'Cognitive Runtime', group: 'Operations' },
   { href: '/operations/ai-ops', label: 'AI Quality Dashboard', group: 'Operations' },
   { href: '/operations/fabric', label: 'Global Fabric', group: 'Operations' },
+  { href: '/operations/automations', label: 'Automations — n8n Bridge', group: 'Operations' },
   { href: '/operations/alloy/canvas', label: 'Counsel Workflow Canvas', group: 'Counsel' },
   { href: '/operations/alloy/actions', label: 'Counsel Action Console', group: 'Counsel' },
   { href: '/operations/alloy/templates', label: 'Counsel Templates', group: 'Counsel' },
@@ -726,6 +729,8 @@ function AppShell() {
               />
               <Route path="/operations/cognitive-runtime" component={() => <CognitiveRuntime />} />
               <Route path="/operations/ai-ops" component={() => <AIQualityDashboard />} />
+              <Route path="/operations/automations" component={() => <AutomationsPage />} />
+              <Route path="/alerts" component={() => <AlertsPage />} />
               <Route path="/operations/fabric" component={() => <GlobalFabricPage />} />
               <Route path="/operations/alloy/canvas" component={() => <AlloyWorkflowCanvas />} />
               <Route path="/operations/alloy/actions" component={() => <AlloyActionConsole />} />

@@ -12,9 +12,11 @@ import {
   Filter,
   History,
   Settings,
+  Workflow,
   XCircle,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useLocation } from 'wouter';
 import { OpsLayout } from '../components/ops-layout';
 
 type AlertStatus = 'active' | 'acknowledged' | 'snoozed' | 'resolved';
@@ -249,6 +251,7 @@ const STATUS_ICONS: Record<AlertStatus, React.ElementType> = {
 };
 
 export default function AlertsPage() {
+  const [, navigate] = useLocation();
   const queryClient = useQueryClient();
   const { data: apiData } = useStandardQuery<ApiAlertsResponse>({
     queryKey: ['command-alerts'],
@@ -761,6 +764,21 @@ export default function AlertsPage() {
                             <CheckCircle2 className="w-3 h-3" /> Resolve
                           </button>
                         )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate('/operations/automations');
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+                          style={{
+                            backgroundColor: 'rgba(139,122,200,0.1)',
+                            border: '1px solid rgba(139,122,200,0.25)',
+                            color: '#8b7ac8',
+                          }}
+                          title="Open Automations to trigger an n8n workflow for this alert"
+                        >
+                          <Workflow className="w-3 h-3" /> Automate
+                        </button>
                         <button
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ml-auto"
                           style={{
