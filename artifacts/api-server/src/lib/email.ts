@@ -1437,6 +1437,33 @@ export function buildSupportTicketStatusUpdateEmail(params: {
   `);
 }
 
+export function buildSupportTicketReplyEmail(params: {
+  submitterName: string;
+  ticketRef: string;
+  subject: string;
+  replyBody: string;
+  agentName: string;
+  ticketUrl?: string;
+}): string {
+  const ticketUrl =
+    params.ticketUrl ??
+    `${process.env.APP_URL || 'https://szlholdings.com'}/support/tickets/${params.ticketRef}`;
+  return szlBrand(`
+    <h2>A reply has been added to your support ticket</h2>
+    <p>Hi ${params.submitterName}, our support team has responded to your request.</p>
+    <div class="highlight">
+      <p class="label">Reference</p>
+      <p style="font-weight:600;">${params.ticketRef}</p>
+      <p class="label" style="margin-top:8px;">Subject</p>
+      <p>${params.subject}</p>
+      <p class="label" style="margin-top:8px;">Reply from ${params.agentName}</p>
+      <p>${params.replyBody.replace(/\n/g, '<br />')}</p>
+    </div>
+    <a class="cta" href="${ticketUrl}">View Your Ticket</a>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">You're receiving this because you submitted a support request. If you have further questions, reply to this email or visit your ticket above.</p>
+  `);
+}
+
 const TYPE_COLORS: Record<string, string> = {
   info: '#6366f1',
   success: '#10b981',

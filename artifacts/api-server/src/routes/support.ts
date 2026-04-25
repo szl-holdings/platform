@@ -12,6 +12,7 @@ import { sendBadRequest, sendError, sendForbidden, sendNotFound } from '../lib/a
 import {
   buildSupportTicketAdminNotificationEmail,
   buildSupportTicketConfirmationEmail,
+  buildSupportTicketReplyEmail,
   buildSupportTicketStatusUpdateEmail,
   sendEmail,
 } from '../lib/email';
@@ -434,6 +435,34 @@ router.post(
         .update(supportTicketsTable)
         .set({ updatedAt: new Date() })
         .where(eq(supportTicketsTable.id, ticketId));
+
+      if (isPrivileged && !comment.isInternal) {
+        const replyHtml = buildSupportTicketReplyEmail({
+          submitterName: ticket.submitterName,
+          ticketRef: ticket.ticketRef,
+          subject: ticket.subject,
+          replyBody: body,
+          agentName: comment.authorName,
+        });
+        sendEmail({
+          to: ticket.submitterEmail,
+          subject: `[${ticket.ticketRef}] New reply on your support ticket`,
+          html: replyHtml,
+          text: `Hi ${ticket.submitterName},\n\nA support agent has replied to your ticket.\n\nReference: ${ticket.ticketRef}\nSubject: ${ticket.subject}\n\n${comment.authorName} wrote:\n${body}\n\nPlease log in to view and respond to your ticket.`,
+        }).then((result) => {
+          if (!result.success) {
+            logger.warn(
+              { ticketRef: ticket.ticketRef, err: result.error },
+              'Failed to send support ticket reply notification email',
+            );
+          }
+        }).catch((err) => {
+          logger.warn(
+            { ticketRef: ticket.ticketRef, err },
+            'Failed to send support ticket reply notification email',
+          );
+        });
+      }
 
       res.status(201).json({ comment });
     } catch (err) {
