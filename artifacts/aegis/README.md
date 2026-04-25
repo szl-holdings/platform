@@ -84,7 +84,7 @@ pnpm --filter @szl-holdings/api-server dev
 
 ## Notes
 
-This artifact previously hosted the Aegis defense intelligence app at this path. It now hosts the investor pitch deck and ATLAS demo. The defense intelligence surface (`artifacts/firestorm/`) is archived — see the root [`README.md`](../../README.md) for the archived surfaces register.
+This artifact previously hosted the Aegis defense intelligence app at this path. It now hosts the investor pitch deck and ATLAS demo. The defense intelligence surface is archived — see the root [`README.md`](../../README.md) for the archived surfaces register.
 
 ---
 

@@ -281,7 +281,6 @@ function scanFile(filePath: string): Violation[] {
 // ---------------------------------------------------------------------------
 // The following artifact directories exist in the repo but have no source
 // files (no src/ subdirectory) — they are empty scaffolds or archived builds:
-//   artifacts/firestorm        — archived; dist-only, no src
 //   artifacts/imperium         — archived; dist-only, no src
 //   artifacts/lyte-command-center — archived; dist-only, no src
 // They are intentionally not excluded from the walk (they contribute zero
