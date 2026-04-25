@@ -1147,6 +1147,10 @@ export class OntologyEngine {
     });
   }
 
+  getCacheStats(): { size: number; maxSize: number } {
+    return { size: this.entityCache.size, maxSize: this.MAX_CACHE_SIZE };
+  }
+
   async getGraphStats(): Promise<{
     totalEntities: number;
     totalRelationships: number;
