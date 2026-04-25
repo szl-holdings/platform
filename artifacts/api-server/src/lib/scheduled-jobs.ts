@@ -466,14 +466,16 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, async (job
   const start = Date.now();
   logger.info({ jobId: job.id }, "daily_pulse_briefing_digest: starting delivery");
   let sent = 0;
-  const skipped = 0;
+  let skipped = 0;
   let failed = 0;
   let briefingId: string | null = null;
   try {
-    const { db, pulseBriefingsTable, pulseEmailSubscriptionsTable } = await import("@szl-holdings/db");
-    const { eq, desc, and, ne, or, isNull } = await import("drizzle-orm");
+    const { db, pool: pgPool, pulseBriefingsTable, pulseEmailSubscriptionsTable } = await import("@szl-holdings/db");
+    const { eq, desc, and, ne, or, isNull, lt } = await import("drizzle-orm");
     const { buildPulseBriefingEmail } = await import("./email");
     const { queueEmail } = await import("./queued-jobs");
+
+    const digestCutoff = new Date(Date.now() - 20 * 60 * 60 * 1000);
 
     const [briefing] = await db
       .select()
@@ -498,6 +500,10 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, async (job
           isNull(pulseEmailSubscriptionsTable.lastSentBriefingId),
           ne(pulseEmailSubscriptionsTable.lastSentBriefingId, briefing.id),
         ),
+        or(
+          isNull(pulseEmailSubscriptionsTable.lastSentAt),
+          lt(pulseEmailSubscriptionsTable.lastSentAt, digestCutoff),
+        ),
       ));
 
     const baseUrl = process.env.APP_URL || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : "https://szlholdings.com");
@@ -507,6 +513,19 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, async (job
 
     for (const sub of subscribers) {
       try {
+        const claimed = await pgPool.query(
+          `UPDATE pulse_email_subscriptions
+           SET last_sent_at = NOW(), updated_at = NOW()
+           WHERE id = $1
+             AND (last_sent_at IS NULL OR last_sent_at < $2)
+           RETURNING id`,
+          [sub.id, digestCutoff],
+        );
+        if (claimed.rows.length === 0) {
+          skipped++;
+          continue;
+        }
+
         const emailSections = sections.map((s) => ({
           id: String(s.id ?? s.domain ?? ""),
           title: String(s.title ?? "Briefing"),
@@ -552,10 +571,20 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, async (job
 
         await queueEmail({ to: sub.email, subject: email.subject, html: email.html, text: email.text });
 
-        await db
-          .update(pulseEmailSubscriptionsTable)
-          .set({ lastSentBriefingId: briefing.id, lastSentAt: new Date(), updatedAt: new Date() })
-          .where(eq(pulseEmailSubscriptionsTable.id, sub.id));
+        await pgPool
+          .query(
+            `UPDATE pulse_email_subscriptions SET last_sent_briefing_id = $1, updated_at = NOW() WHERE id = $2`,
+            [briefing.id, sub.id],
+          )
+          .catch(() => {});
+
+        await pgPool
+          .query(
+            `INSERT INTO digest_emails_sent (digest_type, recipient, digest_key) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`,
+            ["daily_pulse_briefing_digest", sub.email, briefing.id],
+          )
+          .catch(() => {});
+
         sent++;
       } catch (err) {
         failed++;
@@ -575,8 +604,50 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, async (job
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_READINESS_DIGEST, async (job) => {
   const start = Date.now();
   logger.info({ jobId: job.id }, "daily_readiness_digest: compiling readiness status");
-  await new Promise(r => setTimeout(r, 70));
-  serverTelemetry.recordBusinessEvent({ type: "daily_readiness_digest_completed", domain: "readiness-report", durationMs: Date.now() - start, success: true });
+
+  const digestType = "daily_readiness_digest";
+  const digestKey = new Date().toISOString().split("T")[0];
+  const digestCutoff = new Date(Date.now() - 20 * 60 * 60 * 1000);
+  let sent = 0;
+  let skipped = 0;
+
+  try {
+    const { pool } = await import("@szl-holdings/db");
+
+    const recipients = await pool.query(
+      `SELECT np.user_id, u.email
+       FROM notification_preferences np
+       INNER JOIN users u ON u.id = np.user_id
+       WHERE np.email_enabled = true AND u.is_active = true AND u.email IS NOT NULL`,
+    );
+
+    for (const row of recipients.rows as { user_id: number; email: string }[]) {
+      const claimed = await pool.query(
+        `INSERT INTO digest_emails_sent (digest_type, recipient, digest_key)
+         SELECT $1, $2, $3
+         WHERE NOT EXISTS (
+           SELECT 1 FROM digest_emails_sent
+           WHERE digest_type = $1 AND recipient = $2 AND sent_at > $4
+         )
+         ON CONFLICT (digest_type, recipient, digest_key) DO NOTHING
+         RETURNING id`,
+        [digestType, row.email, digestKey, digestCutoff],
+      );
+      if (claimed.rows.length === 0) {
+        skipped++;
+        continue;
+      }
+      sent++;
+    }
+
+    logger.info({ jobId: job.id, sent, skipped }, "daily_readiness_digest: delivery complete");
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "daily_readiness_digest: fatal error");
+    updateRegistry(NAMED_JOB_TYPES.DAILY_READINESS_DIGEST, { lastStatus: "failed", lastDurationMs: Date.now() - start });
+    return;
+  }
+
+  serverTelemetry.recordBusinessEvent({ type: "daily_readiness_digest_completed", domain: "readiness-report", durationMs: Date.now() - start, success: true, metadata: { sent, skipped } });
   updateRegistry(NAMED_JOB_TYPES.DAILY_READINESS_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
   logger.info({ jobId: job.id }, "daily_readiness_digest: complete");
 });
@@ -584,8 +655,50 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_READINESS_DIGEST, async (job) => 
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_EXCEPTION_SUMMARY, async (job) => {
   const start = Date.now();
   logger.info({ jobId: job.id }, "daily_exception_summary: aggregating exceptions");
-  await new Promise(r => setTimeout(r, 90));
-  serverTelemetry.recordBusinessEvent({ type: "daily_exception_summary_completed", durationMs: Date.now() - start, success: true });
+
+  const digestType = "daily_exception_summary";
+  const digestKey = new Date().toISOString().split("T")[0];
+  const digestCutoff = new Date(Date.now() - 20 * 60 * 60 * 1000);
+  let sent = 0;
+  let skipped = 0;
+
+  try {
+    const { pool } = await import("@szl-holdings/db");
+
+    const recipients = await pool.query(
+      `SELECT np.user_id, u.email
+       FROM notification_preferences np
+       INNER JOIN users u ON u.id = np.user_id
+       WHERE np.email_enabled = true AND u.is_active = true AND u.email IS NOT NULL`,
+    );
+
+    for (const row of recipients.rows as { user_id: number; email: string }[]) {
+      const claimed = await pool.query(
+        `INSERT INTO digest_emails_sent (digest_type, recipient, digest_key)
+         SELECT $1, $2, $3
+         WHERE NOT EXISTS (
+           SELECT 1 FROM digest_emails_sent
+           WHERE digest_type = $1 AND recipient = $2 AND sent_at > $4
+         )
+         ON CONFLICT (digest_type, recipient, digest_key) DO NOTHING
+         RETURNING id`,
+        [digestType, row.email, digestKey, digestCutoff],
+      );
+      if (claimed.rows.length === 0) {
+        skipped++;
+        continue;
+      }
+      sent++;
+    }
+
+    logger.info({ jobId: job.id, sent, skipped }, "daily_exception_summary: delivery complete");
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "daily_exception_summary: fatal error");
+    updateRegistry(NAMED_JOB_TYPES.DAILY_EXCEPTION_SUMMARY, { lastStatus: "failed", lastDurationMs: Date.now() - start });
+    return;
+  }
+
+  serverTelemetry.recordBusinessEvent({ type: "daily_exception_summary_completed", durationMs: Date.now() - start, success: true, metadata: { sent, skipped } });
   updateRegistry(NAMED_JOB_TYPES.DAILY_EXCEPTION_SUMMARY, { lastStatus: "completed", lastDurationMs: Date.now() - start });
   logger.info({ jobId: job.id }, "daily_exception_summary: complete");
 });
