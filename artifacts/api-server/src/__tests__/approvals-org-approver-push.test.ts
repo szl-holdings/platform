@@ -262,4 +262,46 @@ describe('sendPushToOrgApprovers', () => {
 
     expect(resolveUserIds).toHaveBeenCalledWith(1, ['aegis-mobile']);
   });
+
+  it('includes the legacy unified-app appId "cortex" in the default app-id family', async () => {
+    // Regression guard: szl-holdings-mobile/app/_layout.tsx currently
+    // registers push tokens with appId='cortex'. If that legacy id is
+    // ever dropped from CORTEX_MOBILE_APP_IDS, real production devices
+    // silently stop receiving approval pushes. This test fails loudly
+    // if that happens.
+    const mod = await import('../lib/expo-push.js');
+    expect(mod.CORTEX_MOBILE_APP_IDS).toContain('cortex');
+    expect(mod.CORTEX_MOBILE_APP_IDS).toContain('cortex-mobile');
+  });
+
+  it('queries push-tokens with the legacy "cortex" appId so unified-app devices are reachable', async () => {
+    const resolveUserIds = vi
+      .fn<OrgApproverInternals['resolveUserIds']>()
+      .mockResolvedValue([777]);
+    const sendToUser = vi
+      .fn<OrgApproverInternals['sendToUser']>()
+      .mockResolvedValue({ sent: true });
+    const isAllowed = vi
+      .fn<OrgApproverInternals['isAllowed']>()
+      .mockResolvedValue(true);
+    const mod = await loadHelperWith({
+      resolveUserIds,
+      sendToUser,
+      isAllowed,
+    });
+
+    const result = await mod.sendPushToOrgApprovers(
+      42,
+      { title: 'High-Priority Approval Pending', body: 'x' },
+      { severity: 'high' },
+    );
+
+    // Default appIds passed to the resolver must include 'cortex' so
+    // tokens registered by the current unified mobile app are matched.
+    const calledWithAppIds = resolveUserIds.mock.calls[0]![1];
+    expect(calledWithAppIds).toContain('cortex');
+    expect(result.targeted).toBe(1);
+    expect(result.sent).toBe(1);
+    expect(sendToUser).toHaveBeenCalledTimes(1);
+  });
 });

@@ -372,6 +372,12 @@ const APPROVER_ROLE_NAMES: readonly string[] = [
  * registered a token from.
  */
 export const CORTEX_MOBILE_APP_IDS: readonly string[] = [
+  // Legacy unified-app appId currently registered by szl-holdings-mobile
+  // (see artifacts/szl-holdings-mobile/app/_layout.tsx onTokenAcquired).
+  // MUST stay in this list until/unless that registration is migrated to
+  // 'cortex-mobile' — otherwise approver fan-out will silently miss real
+  // production devices.
+  'cortex',
   'cortex-mobile',
   'cortex-advisory',
   'aegis-mobile',
