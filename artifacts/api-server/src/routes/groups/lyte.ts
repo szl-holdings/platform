@@ -15,6 +15,7 @@ const _writeLimiter = perUserWriteSlidingLimiter;
 //   - /lyte/billing/*             Billing surface (lyte-billing.ts)
 //   - /lyte/observability/*       Observability surface (lyte-observability.ts)
 //   - /lyte/cognitive/*           Cognitive surface (lyte-cognitive.ts)
+//   - /lyte/backbone/*            Alloy backbone reference integration (lyte-backbone.ts)
 export function register(router: IRouter): void {
   router.use('/lyte', tenantScope({ required: true }));
 
@@ -35,4 +36,9 @@ export function register(router: IRouter): void {
 
   router.use('/lyte/cognitive', _readLimiter);
   router.use(lazyMatch('/lyte', () => import('../lyte-cognitive'), 'lyte-cognitive'));
+
+  // Alloy backbone reference integration (Moonshot Phase 2).
+  // Wires Lyte through the multi-agent coordinator end-to-end.
+  router.use('/lyte/backbone', _writeLimiter);
+  router.use(lazyMatch('/lyte', () => import('../lyte-backbone'), 'lyte-backbone'));
 }

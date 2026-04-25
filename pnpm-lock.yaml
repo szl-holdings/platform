@@ -668,6 +668,9 @@ importers:
       '@workspace/agents-tools':
         specifier: workspace:*
         version: link:../../packages/agents-tools
+      '@workspace/alloy':
+        specifier: workspace:*
+        version: link:../../packages/alloy
       '@workspace/alloy-embed-worker':
         specifier: workspace:*
         version: link:../../workers/alloy-embed-worker
@@ -689,6 +692,9 @@ importers:
       '@workspace/eval-forge':
         specifier: workspace:*
         version: link:../../packages/eval-forge
+      '@workspace/eval-os':
+        specifier: workspace:*
+        version: link:../../packages/eval-os
       '@workspace/executive-briefing':
         specifier: workspace:*
         version: link:../../packages/executive-briefing
@@ -722,6 +728,9 @@ importers:
       '@workspace/tool-mesh':
         specifier: workspace:*
         version: link:../../packages/tool-mesh
+      '@workspace/tool-registry':
+        specifier: workspace:*
+        version: link:../../packages/tool-registry
       '@workspace/trace-graph':
         specifier: workspace:*
         version: link:../../packages/trace-graph
@@ -3550,6 +3559,31 @@ importers:
         specifier: 'catalog:'
         version: 25.3.5
 
+  packages/alloy:
+    dependencies:
+      '@szl-holdings/policy-guard':
+        specifier: workspace:*
+        version: link:../policy-guard
+      '@szl-holdings/shared-contracts':
+        specifier: workspace:*
+        version: link:../shared-contracts
+      '@workspace/eval-os':
+        specifier: workspace:*
+        version: link:../eval-os
+      '@workspace/planner':
+        specifier: workspace:*
+        version: link:../planner
+      '@workspace/run-ledger':
+        specifier: workspace:*
+        version: link:../run-ledger
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
   packages/approvals-inbox:
     dependencies:
       '@szl-holdings/contracts':
@@ -3944,6 +3978,16 @@ importers:
       vitest:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/eval-os:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   packages/evidence-graph:
     dependencies:
@@ -4520,6 +4564,16 @@ importers:
       vitest:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/tool-registry:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   packages/trace-graph:
     dependencies:
