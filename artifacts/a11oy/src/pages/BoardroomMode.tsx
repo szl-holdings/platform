@@ -1,182 +1,217 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout';
-import { DemoBadge, VerdictBadge } from '../components/ui';
-import { SEED_SIGNALS, SEED_WORKCELLS, SEED_OUTCOMES, SEED_PROOF_PACKETS } from '@workspace/a11oy-fabric';
+import { PageHeader, Card, SectionTitle, KpiCard, DemoBadge } from '../components/ui';
 
-const VERTICAL_COLORS: Record<string, string> = {
-  'lyte-revenue': '#3b82f6', 'vessels-maritime': '#06b6d4', 'terra-real-estate': '#10b981',
-  'aegis-defense': '#ef4444', 'prism-counsel': '#8b5cf6', 'carlota-jo': '#f59e0b', 'alloy-core': '#6366f1',
+const API = '/api/a11oy';
+
+interface BoardSection {
+  title: string;
+  bullets: string[];
+  metric?: string;
+  metricLabel?: string;
+}
+
+interface BoardPacket {
+  id: string; tenantId: string; tenantName: string; domain: string;
+  generatedAt: string; period: string; approvedBy: string;
+  executiveSummary: string; sections: BoardSection[];
+  kpis: Array<{ label: string; value: string; trend: string; delta: string }>;
+  approvalStatement: string; nextReviewDate: string;
+  modelUsed: string; evalDisposition: string; evalComposite: number;
+  proofRef: string;
+}
+
+interface BoardroomData {
+  packets: BoardPacket[];
+  summary: { totalPackets: number; tenantsServed: number; avgEvalComposite: number };
+  capabilities: string[];
+  generationLatencyMs: number;
+}
+
+const TREND_STYLE: Record<string, { color: string; symbol: string }> = {
+  up: { color: '#10b981', symbol: '▲' },
+  down: { color: '#ef4444', symbol: '▼' },
+  stable: { color: '#9bacc4', symbol: '→' },
+  mixed: { color: '#f59e0b', symbol: '⟷' },
 };
-const VERTICAL_LABELS: Record<string, string> = {
-  'lyte-revenue': 'Lyte Revenue', 'vessels-maritime': 'Vessels', 'terra-real-estate': 'Terra',
-  'aegis-defense': 'Aegis', 'prism-counsel': 'Counsel', 'carlota-jo': 'Carlota Jo', 'alloy-core': 'Core',
+
+const DISP_STYLE: Record<string, string> = {
+  pass: '#10b981', pass_with_warning: '#f59e0b', needs_more_evidence: '#f59e0b',
+  requires_human_review: '#ef4444', blocked: '#ef4444',
 };
-
-const STAGE_LABELS = ['SENSE', 'STRUCTURE', 'CORRELATE', 'EXPLAIN', 'RECOMMEND', 'APPROVE', 'EXECUTE', 'VERIFY', 'PROVE'];
-
-const activeSignals = SEED_SIGNALS.filter(s => s.status === 'active' || s.status === 'escalated');
-const criticalSignals = SEED_SIGNALS.filter(s => s.severity === 'critical');
-const pendingApprovals = SEED_WORKCELLS.filter(w => w.requiresApproval && w.status === 'running');
-const outcomesAtRisk = SEED_OUTCOMES.filter(o => o.status === 'blocked' || o.status === 'missed');
-const failedWC = SEED_WORKCELLS.filter(w => w.status === 'error');
-const mirrorWarnCount = SEED_WORKCELLS.filter(w => w.mirrorEvalResult.verdict === 'warn' || w.mirrorEvalResult.verdict === 'fail').length;
-
-const KPIs = [
-  { label: 'ACTIVE SIGNALS',       value: String(activeSignals.length),   sub: `${criticalSignals.length} critical`,   color: '#ef4444' },
-  { label: 'PENDING APPROVALS',    value: String(pendingApprovals.length), sub: 'human gate required',                  color: '#8b5cf6' },
-  { label: 'OUTCOMES AT RISK',      value: String(outcomesAtRisk.length),  sub: 'blocked or missed',                    color: '#f59e0b' },
-  { label: 'PROOF COVERAGE',        value: '91%',                          sub: `${SEED_PROOF_PACKETS.length} packets`,  color: '#10b981' },
-  { label: 'FAILED WORKCELLS',      value: String(failedWC.length),        sub: 'need attention',                       color: failedWC.length > 0 ? '#ef4444' : '#10b981' },
-  { label: 'MIRROREVAL FLAGS',      value: String(mirrorWarnCount),        sub: 'evaluation warnings',                  color: mirrorWarnCount > 0 ? '#f59e0b' : '#10b981' },
-  { label: 'VERIFIED ACTIONS',      value: '47',                           sub: 'last 24h',                             color: '#10b981' },
-  { label: 'FABRIC HEALTH',         value: '99.2%',                        sub: 'all 7 layers live',                    color: '#3b82f6' },
-];
 
 export function BoardroomMode() {
-  const [time, setTime] = useState(new Date());
-  const [ticker, setTicker] = useState(0);
+  const [data, setData] = useState<BoardroomData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<BoardPacket | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [genResult, setGenResult] = useState<BoardPacket | null>(null);
 
   useEffect(() => {
-    const iv = setInterval(() => {
-      setTime(new Date());
-      setTicker(t => t + 1);
-    }, 3000);
-    return () => clearInterval(iv);
+    fetch(`${API}/boardroom/sovereign`)
+      .then(r => r.json())
+      .then(d => { if (d.ok) { setData(d.data); setSelected(d.data.packets[0] ?? null); } })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  const rotatingSignal = activeSignals[ticker % activeSignals.length];
+  function generatePacket() {
+    setGenerating(true);
+    setGenResult(null);
+    fetch(`${API}/boardroom/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tenantId: 'DEMO_GEN', period: 'Q2 2026' }),
+    })
+      .then(r => r.json())
+      .then(d => { if (d.ok) { setGenResult(d.data.packet); setSelected(d.data.packet); } })
+      .catch(() => {})
+      .finally(() => setGenerating(false));
+  }
 
   return (
-    <Layout fullscreen>
-      <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#050810', color: '#f0f4fc' }}>
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 sm:px-10 py-4 border-b flex-wrap gap-3" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-          <div className="flex items-center gap-4">
-            <div className="w-9 h-9 rounded flex items-center justify-center font-mono font-bold text-sm" style={{ backgroundColor: '#3b82f6', color: 'white' }}>A</div>
-            <div>
-              <div className="text-lg font-display font-semibold tracking-tight">A11oy</div>
-              <div className="text-xs font-mono" style={{ color: '#4d607a' }}>LIVE ENTERPRISE EXECUTION FABRIC</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-6">
-            <div className="text-xs font-mono" style={{ color: '#4d607a' }}>
-              {time.toLocaleTimeString('en-US', { timeZone: 'UTC', hour12: false })} UTC
-            </div>
-            <div className="flex items-center gap-2 text-sm font-mono">
-              <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: '#10b981' }} />
-              <span style={{ color: '#10b981' }}>Fabric operational</span>
-            </div>
-            <DemoBadge />
-          </div>
-        </div>
+    <Layout>
+      <PageHeader
+        label="BOARDROOM MODE"
+        title="Board Packet Generation"
+        subtitle="Synthesize every running signal, Workcell, proof packet, and twin state into a single board-ready executive briefing — with MirrorEval 2.0 scoring and full proof chain."
+        status="DEMO"
+      />
 
-        <div className="flex-1 px-6 sm:px-10 py-6 overflow-auto">
-          {/* KPI Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-8">
-            {KPIs.map(kpi => (
-              <div key={kpi.label} className="flex flex-col gap-1 p-3 rounded-lg" style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <div className="font-mono tracking-wider" style={{ color: '#4d607a', fontSize: '9px' }}>{kpi.label}</div>
-                <div className="text-2xl font-display font-bold" style={{ color: kpi.color }}>{kpi.value}</div>
-                <div className="text-xs" style={{ color: '#9bacc4' }}>{kpi.sub}</div>
-              </div>
-            ))}
+      {loading ? (
+        <div className="text-xs animate-pulse mb-8" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Loading boardroom data…</div>
+      ) : data ? (
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <KpiCard label="BOARD PACKETS" value={String(data.summary.totalPackets)} sub="Generated" accent="#ec4899" />
+            <KpiCard label="TENANTS SERVED" value={String(data.summary.tenantsServed)} sub="Demo enterprises" accent="#8b5cf6" />
+            <KpiCard label="AVG EVAL SCORE" value={`${Math.round(data.summary.avgEvalComposite * 100)}%`} sub="MirrorEval 2.0" accent="#10b981" />
+            <KpiCard label="GEN LATENCY" value={`${data.generationLatencyMs}ms`} sub="Estimated" accent="#b08d52" />
           </div>
 
-          {/* 3-panel middle */}
-          <div className="grid lg:grid-cols-3 gap-4 mb-6">
-            {/* Vertical Status */}
-            <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <div className="text-xs font-mono tracking-widest mb-4" style={{ color: '#4d607a' }}>VERTICAL STATUS</div>
-              <div className="grid grid-cols-2 gap-2">
-                {Object.entries(VERTICAL_LABELS).map(([id, label]) => {
-                  const sigs = SEED_SIGNALS.filter(s => s.vertical === id);
-                  const critical = sigs.filter(s => s.severity === 'critical').length;
-                  const high = sigs.filter(s => s.severity === 'high').length;
-                  const color = VERTICAL_COLORS[id] ?? '#9bacc4';
-                  const statusLabel = critical > 0 ? 'ACTIVE' : high > 0 ? 'MONITORING' : 'NOMINAL';
-                  const statusColor = critical > 0 ? '#ef4444' : high > 0 ? '#f59e0b' : '#10b981';
-                  return (
-                    <div key={id} className="p-2 rounded" style={{ backgroundColor: `${color}08`, border: `1px solid ${color}20` }}>
-                      <div className="text-xs font-mono mb-0.5" style={{ color }}>{label}</div>
-                      <div className="text-xs font-bold mb-0.5" style={{ color: statusColor }}>{statusLabel}</div>
-                      <div className="text-xs" style={{ color: '#9bacc4' }}>{sigs.length} sigs</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Execution Pipeline */}
-            <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <div className="text-xs font-mono tracking-widest mb-4" style={{ color: '#4d607a' }}>EXECUTION PIPELINE</div>
-              <div className="flex flex-col gap-1.5">
-                {STAGE_LABELS.map((stage, i) => (
-                  <div key={stage} className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: i < 5 ? '#3b82f6' : i === 5 ? '#8b5cf6' : '#10b981' }} />
-                    <span className="text-xs font-mono" style={{ color: i < 5 ? '#3b82f6' : i === 5 ? '#8b5cf6' : '#10b981' }}>{stage}</span>
-                    {i === 5 && <span className="text-xs" style={{ color: '#8b5cf6' }}>← human gate</span>}
-                  </div>
-                ))}
-              </div>
-              <div className="mt-3 text-xs" style={{ color: '#4d607a' }}>
-                APPROVE stage is non-bypassable. Zero silent executions.
-              </div>
-            </div>
-
-            {/* Proof Ledger */}
-            <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(176,141,82,0.06)', border: '1px solid rgba(176,141,82,0.15)' }}>
-              <div className="text-xs font-mono tracking-widest mb-4" style={{ color: '#b08d52' }}>PROOF LEDGER</div>
-              <div className="space-y-3">
-                {SEED_PROOF_PACKETS.slice(0, 5).map(p => (
-                  <div key={p.id} className="text-xs">
-                    <div className="font-mono" style={{ color: '#b08d52' }}>{p.hash.slice(0, 22)}…</div>
-                    <div style={{ color: '#9bacc4' }}>{p.kind} · {p.vertical}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Live Signal Ticker */}
-          <div className="p-4 rounded-lg mb-6" style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <div className="text-xs font-mono tracking-widest mb-3" style={{ color: '#4d607a' }}>LIVE SIGNAL TICKER</div>
-            {rotatingSignal && (
-              <div className="flex items-center gap-4">
-                <span className="w-2 h-2 rounded-full animate-pulse flex-shrink-0" style={{ backgroundColor: rotatingSignal.severity === 'critical' ? '#ef4444' : rotatingSignal.severity === 'high' ? '#f59e0b' : '#10b981' }} />
-                <div>
-                  <span className="text-xs font-mono mr-2" style={{ color: VERTICAL_COLORS[rotatingSignal.vertical] ?? '#9bacc4' }}>
-                    {VERTICAL_LABELS[rotatingSignal.vertical]}
-                  </span>
-                  <span className="text-xs" style={{ color: '#f0f4fc' }}>{rotatingSignal.title}</span>
-                </div>
-                <div className="ml-auto text-xs font-mono" style={{ color: '#4d607a' }}>
-                  {activeSignals.indexOf(rotatingSignal) + 1} / {activeSignals.length}
-                </div>
-              </div>
+          <div className="flex items-center gap-3 mb-6">
+            <button
+              onClick={generatePacket}
+              disabled={generating}
+              className="text-xs px-4 py-2 rounded font-medium"
+              style={{ backgroundColor: 'rgba(236,72,153,0.15)', color: '#ec4899', border: '1px solid rgba(236,72,153,0.3)', opacity: generating ? 0.6 : 1 }}
+            >
+              {generating ? 'Generating board packet…' : '+ Generate New Board Packet'}
+            </button>
+            {genResult && (
+              <span className="text-xs" style={{ color: '#10b981' }}>✓ Generated for {genResult.tenantName}</span>
             )}
           </div>
 
-          {/* MirrorEval Summary */}
-          <div className="grid lg:grid-cols-4 gap-3">
-            {SEED_WORKCELLS.slice(0, 4).map(wc => (
-              <div key={wc.id} className="p-3 rounded-lg" style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div className="text-xs font-medium mb-1 truncate" style={{ color: '#f0f4fc' }}>{wc.name}</div>
-                <VerdictBadge verdict={wc.mirrorEvalResult.verdict} />
-                <div className="text-xs mt-1 font-mono" style={{ color: '#9bacc4' }}>
-                  Score: {Math.round(wc.mirrorEvalResult.score * 100)}%
+          <div className="grid lg:grid-cols-3 gap-4">
+            <div>
+              <SectionTitle>Board Packets ({data.packets.length})</SectionTitle>
+              <div className="flex flex-col gap-2 max-h-[600px] overflow-y-auto pr-1">
+                {data.packets.map(p => (
+                  <Card key={p.id} className={`cursor-pointer hover:opacity-80 ${selected?.id === p.id ? 'ring-1 ring-pink-500/30' : ''}`} onClick={() => setSelected(p)}>
+                    <div className="font-medium text-sm mb-0.5" style={{ color: 'var(--color-a11oy-text)' }}>{p.tenantName}</div>
+                    <div className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.domain} · {p.period}</div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span style={{ color: DISP_STYLE[p.evalDisposition] ?? '#9bacc4' }}>{Math.round(p.evalComposite * 100)}% eval</span>
+                      <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.approvedBy}</span>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              <div className="mt-4">
+                <SectionTitle>Capabilities</SectionTitle>
+                <div className="space-y-1">
+                  {data.capabilities.map(c => (
+                    <div key={c} className="flex items-start gap-2 text-xs">
+                      <span style={{ color: '#10b981', flexShrink: 0 }}>✓</span>
+                      <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{c}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* Footer */}
-        <div className="px-10 py-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
-          <div className="flex items-center justify-between text-xs font-mono" style={{ color: '#4d607a' }}>
-            <span>A11oy — Live Enterprise Execution Fabric (pronounced "Alloy")</span>
-            <DemoBadge />
+            <div className="lg:col-span-2">
+              {selected ? (
+                <>
+                  <SectionTitle>Board Packet — {selected.tenantName}</SectionTitle>
+                  <div className="flex flex-col gap-4">
+                    <Card>
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <div className="font-semibold text-sm" style={{ color: 'var(--color-a11oy-text)' }}>{selected.tenantName}</div>
+                          <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{selected.domain} · {selected.period}</div>
+                        </div>
+                        <div className="text-right text-xs">
+                          <div style={{ color: DISP_STYLE[selected.evalDisposition] ?? '#9bacc4' }}>
+                            Eval: {Math.round(selected.evalComposite * 100)}%
+                          </div>
+                          <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>{selected.approvedBy}</div>
+                        </div>
+                      </div>
+                      <p className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-sub)' }}>{selected.executiveSummary}</p>
+                      <div className="text-xs p-2 rounded" style={{ backgroundColor: 'rgba(176,141,82,0.08)', color: '#b08d52', border: '1px solid rgba(176,141,82,0.2)' }}>
+                        {selected.approvalStatement}
+                      </div>
+                    </Card>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {selected.kpis.map(kpi => {
+                        const ts = TREND_STYLE[kpi.trend] ?? TREND_STYLE.stable;
+                        return (
+                          <Card key={kpi.label}>
+                            <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{kpi.label}</div>
+                            <div className="font-semibold mt-0.5" style={{ color: 'var(--color-a11oy-text)' }}>{kpi.value}</div>
+                            <div className="text-xs" style={{ color: ts.color }}>{ts.symbol} {kpi.delta}</div>
+                          </Card>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                      {selected.sections.map((sec, i) => (
+                        <Card key={i}>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-sm font-medium" style={{ color: 'var(--color-a11oy-text)' }}>{sec.title}</div>
+                            {sec.metric && (
+                              <div className="text-right">
+                                <div className="text-lg font-bold font-mono" style={{ color: 'var(--color-a11oy-gold)' }}>{sec.metric}</div>
+                                {sec.metricLabel && <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{sec.metricLabel}</div>}
+                              </div>
+                            )}
+                          </div>
+                          <ul className="space-y-1">
+                            {sec.bullets.map((b, bi) => (
+                              <li key={bi} className="flex items-start gap-2 text-xs">
+                                <span style={{ color: 'var(--color-a11oy-gold)', flexShrink: 0 }}>·</span>
+                                <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{b}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </Card>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center gap-4 text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                      <span>◇ {selected.proofRef}</span>
+                      <span>model: {selected.modelUsed}</span>
+                      <span>next review: {new Date(selected.nextReviewDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Select a board packet to view.</div>
+              )}
+            </div>
           </div>
-        </div>
+        </>
+      ) : (
+        <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Boardroom data unavailable.</div>
+      )}
+
+      <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(236,72,153,0.06)', border: '1px solid rgba(236,72,153,0.2)', color: 'var(--color-a11oy-text-ghost)' }}>
+        <DemoBadge /> Board packets are seeded and deterministic. Generation uses real prompt synthesis in production — demo mode uses scripted output.
       </div>
     </Layout>
   );

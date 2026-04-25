@@ -1,101 +1,140 @@
+import { useState, useEffect } from 'react';
+import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, DemoBadge } from '../components/ui';
 
-const REPLAY_SESSIONS = [
-  {
-    id: 'replay-wc-defense-001',
-    workcell: 'TG-Ember Response Cell',
-    domain: 'Defense',
-    completedAt: '2026-04-24T18:55:00Z',
-    duration: '4m 12s',
-    proofRef: 'pce-b8c3f9e2',
-    steps: [
-      { step: 1, label: 'Signal ingested', actor: 'Signal Mesh', ts: '18:50:43', outcome: 'success', detail: 'TG-Ember activity spike detected — 12 TTPs matched' },
-      { step: 2, label: 'Severity classified', actor: 'Guardian (auto)', ts: '18:50:44', outcome: 'success', detail: 'Threat tier elevated: YELLOW → ORANGE' },
-      { step: 3, label: 'Policy gate evaluated', actor: 'Covenant Layer', ts: '18:50:44', outcome: 'success', detail: 'pol-security-007 matched — auto_escalate enforcement' },
-      { step: 4, label: 'CISO notified', actor: 'Guardian (auto)', ts: '18:50:45', outcome: 'success', detail: 'Notification dispatched — CISO acknowledged 18:52:01' },
-      { step: 5, label: 'Perimeter hardened', actor: 'security-ops:automated', ts: '18:52:01', outcome: 'success', detail: 'WAF rules updated, access tokens rotated' },
-      { step: 6, label: 'Proof ledger entry created', actor: 'Proof Ledger', ts: '18:55:00', outcome: 'success', detail: 'Hash: sha256:b8c3f9e2a4d1e7f3b6c2a9e4d1f7b3c6' },
-    ],
-  },
-];
+const API = '/api/a11oy';
+const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 
-const SESSION = REPLAY_SESSIONS[0];
+interface ReplaySummary {
+  id: string; workcellId: string; workcellName: string; tenant: string; domain: string;
+  outcome: string; completedAt: string; durationMs: number; evalDisposition: string | null;
+  evalComposite: number | null; proofRef: string | null; failureClass: string | null;
+  approvalTier: string;
+}
 
-const OUTCOME_COLORS: Record<string, string> = { success: '#10b981', failed: '#ef4444', pending: '#f59e0b' };
+interface ReplaysData {
+  replays: ReplaySummary[];
+  total: number; successful: number; failed: number;
+}
+
+const OUTCOME_COLORS: Record<string, string> = { success: '#10b981', blocked: '#ef4444', failed: '#f59e0b' };
+const DISP_COLORS: Record<string, string> = { pass: '#10b981', pass_with_warning: '#f59e0b', needs_more_evidence: '#f59e0b', requires_human_review: '#f59e0b', blocked: '#ef4444' };
+
+function fmt(ms: number) {
+  const s = Math.floor(ms / 1000);
+  return s > 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`;
+}
 
 export function WorkcellReplay() {
+  const [data, setData] = useState<ReplaysData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [filterOutcome, setFilterOutcome] = useState('all');
+  const [filterDomain, setFilterDomain] = useState('all');
+
+  useEffect(() => {
+    fetch(`${API}/replay`)
+      .then(r => r.json())
+      .then(d => { if (d.ok) setData(d.data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const domains = data ? [...new Set(data.replays.map(r => r.domain))] : [];
+  const filtered = data?.replays.filter(r =>
+    (filterOutcome === 'all' || r.outcome === filterOutcome) &&
+    (filterDomain === 'all' || r.domain === filterDomain)
+  ) ?? [];
+
   return (
     <Layout>
       <PageHeader
         label="WORKCELL REPLAY"
-        title="Execution Timeline Replay"
-        subtitle="Step-by-step replay of completed workcell executions. Every step is linked to its proof ledger entry for full accountability."
+        title="Flight Recorder & Execution Audit"
+        subtitle="Every completed Workcell is replayable — step by step, with timeline, eval scores, approval records, tool calls, and proof chain."
         status="DEMO"
       />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <KpiCard label="REPLAYS AVAILABLE" value="1" sub="Demo replay loaded" accent="#3b82f6" />
-        <KpiCard label="TOTAL STEPS" value={String(SESSION.steps.length)} sub={SESSION.workcell} accent="#b08d52" />
-        <KpiCard label="DURATION" value={SESSION.duration} sub="End-to-end" accent="#10b981" />
-        <KpiCard label="PROOF REF" value={SESSION.proofRef.split('-').slice(0, 2).join('-')} sub="Ledger entry" accent="#f59e0b" />
-      </div>
-
-      <div className="mb-4">
-        <Card>
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="text-xs mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{SESSION.domain}</div>
-              <div className="font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{SESSION.workcell}</div>
-              <div className="text-xs mt-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                Completed: {new Date(SESSION.completedAt).toLocaleString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' })}
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{SESSION.proofRef}</div>
-              <div className="text-xs mt-0.5" style={{ color: '#10b981' }}>verified</div>
-            </div>
+      {loading ? (
+        <div className="text-xs animate-pulse mb-8" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Loading replay index…</div>
+      ) : data ? (
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <KpiCard label="TOTAL REPLAYS" value={String(data.total)} sub="All workcells" accent="#3b82f6" />
+            <KpiCard label="SUCCESSFUL" value={String(data.successful)} sub="Completed" accent="#10b981" />
+            <KpiCard label="FAILED / BLOCKED" value={String(data.failed)} sub="Need review" accent="#ef4444" />
+            <KpiCard label="FAILURE CLASSES" value="12" sub="Classification model" accent="#f59e0b" />
           </div>
-        </Card>
-      </div>
 
-      <SectionTitle>Execution Timeline</SectionTitle>
-      <div className="relative">
-        <div
-          className="absolute left-6 top-0 bottom-0 w-px"
-          style={{ backgroundColor: 'var(--color-a11oy-border)' }}
-        />
-        <div className="flex flex-col gap-4 pl-16">
-          {SESSION.steps.map(step => (
-            <div key={step.step} className="relative">
-              <div
-                className="absolute -left-10 top-3 w-5 h-5 rounded-full flex items-center justify-center text-xs font-mono"
-                style={{
-                  backgroundColor: OUTCOME_COLORS[step.outcome] + '20',
-                  color: OUTCOME_COLORS[step.outcome],
-                  border: `1px solid ${OUTCOME_COLORS[step.outcome]}40`,
-                }}
-              >
-                {step.step}
-              </div>
-              <Card>
-                <div className="flex items-start justify-between gap-3 mb-1">
-                  <div className="font-medium text-sm" style={{ color: 'var(--color-a11oy-text)' }}>{step.label}</div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-xs font-mono" style={{ color: OUTCOME_COLORS[step.outcome] }}>{step.outcome}</span>
-                    <span className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{step.ts}</span>
+          <div className="flex items-center gap-2 mb-4 flex-wrap">
+            <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Outcome:</span>
+            {['all', 'success', 'failed', 'blocked'].map(o => (
+              <button key={o} onClick={() => setFilterOutcome(o)} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: filterOutcome === o ? 'rgba(59,130,246,0.2)' : 'var(--color-a11oy-muted)', color: filterOutcome === o ? '#3b82f6' : 'var(--color-a11oy-text-ghost)', border: `1px solid ${filterOutcome === o ? 'rgba(59,130,246,0.4)' : 'var(--color-a11oy-border)'}` }}>
+                {o}
+              </button>
+            ))}
+            <span className="text-xs ml-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Domain:</span>
+            {['all', ...domains].map(d => (
+              <button key={d} onClick={() => setFilterDomain(d)} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: filterDomain === d ? 'rgba(139,92,246,0.2)' : 'var(--color-a11oy-muted)', color: filterDomain === d ? '#8b5cf6' : 'var(--color-a11oy-text-ghost)', border: `1px solid ${filterDomain === d ? 'rgba(139,92,246,0.4)' : 'var(--color-a11oy-border)'}` }}>
+                {d}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-col gap-3">
+            {filtered.map(r => (
+              <Link key={r.id} href={`${BASE}/replay/${r.id}`}>
+                <Card className="cursor-pointer hover:opacity-80 transition-opacity">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-medium" style={{ color: OUTCOME_COLORS[r.outcome] ?? '#9bacc4' }}>
+                          {r.outcome === 'success' ? '✓' : r.outcome === 'blocked' ? '⊗' : '⚠'} {r.outcome.toUpperCase()}
+                        </span>
+                        <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{r.domain} · {r.tenant}</span>
+                      </div>
+                      <div className="font-medium text-sm truncate mb-1" style={{ color: 'var(--color-a11oy-text)' }}>{r.workcellName}</div>
+                      <div className="flex items-center gap-4 text-xs">
+                        <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{new Date(r.completedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                        <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>⏱ {fmt(r.durationMs)}</span>
+                        {r.approvalTier && <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>⚖ {r.approvalTier}</span>}
+                        {r.proofRef && <span style={{ color: '#b08d52' }}>◇ {r.proofRef.split('-').slice(0, 2).join('-')}</span>}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                      {r.evalDisposition && (
+                        <span className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ color: DISP_COLORS[r.evalDisposition] ?? '#9bacc4', backgroundColor: `${DISP_COLORS[r.evalDisposition] ?? '#9bacc4'}18` }}>
+                          {r.evalDisposition.replace(/_/g, ' ')}
+                        </span>
+                      )}
+                      {r.evalComposite !== null && (
+                        <span className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                          eval {Math.round(r.evalComposite * 100)}%
+                        </span>
+                      )}
+                      {r.failureClass && (
+                        <span className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444' }}>
+                          {r.failureClass.replace(/_/g, ' ')}
+                        </span>
+                      )}
+                      <span className="text-xs" style={{ color: '#3b82f6' }}>View replay →</span>
+                    </div>
                   </div>
-                </div>
-                <div className="text-xs mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Actor: {step.actor}</div>
-                <div className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>{step.detail}</div>
-              </Card>
-            </div>
-          ))}
-        </div>
-      </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+
+          {filtered.length === 0 && (
+            <div className="text-xs text-center py-8" style={{ color: 'var(--color-a11oy-text-ghost)' }}>No replays match the selected filters.</div>
+          )}
+        </>
+      ) : (
+        <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Replay index unavailable.</div>
+      )}
 
       <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
-        <DemoBadge /> Replay data is illustrative. Production replays are reconstructed from the immutable Proof Ledger.
+        <DemoBadge /> Replay data is reconstructed from the immutable Proof Ledger in production. Demo replays are seeded.
       </div>
     </Layout>
   );

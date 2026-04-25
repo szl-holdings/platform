@@ -1,236 +1,339 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import { DemoBadge, ApprovalGate } from '../components/ui';
 
+const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+
+const STAGE_CTAS: Record<number, { label: string; path: string; color: string }> = {
+  2: { label: 'Enter Command Surface →', path: '/command', color: '#8b5cf6' },
+  4: { label: 'View Workcell Replay →', path: '/replay', color: '#3b82f6' },
+  10: { label: 'Generate Board Packet →', path: '/boardroom', color: '#ec4899' },
+};
+
 const STAGES = [
   {
-    id: 'sense', stage: 1, label: 'SENSE', title: 'Signal Ingestion',
-    narrative: "A11oy's Signal Mesh ingests business signals across 7 enterprise verticals simultaneously. MV Cascade reports a 38-hour port delay. The mesh normalizes, deduplicates, and routes the signal in 12ms.",
-    visual: { primary: 'Signal received', secondary: 'MV Cascade · Port Houston · +38h delay', badge: 'sig-maritime-001', color: '#3b82f6' },
+    step: 1,
+    title: 'The Problem: Enterprise Execution is Broken',
+    category: 'MARKET',
+    body: 'Enterprises are drowning in operational complexity. 60% of strategic decisions are delayed by poor signal synthesis. Human capacity is the bottleneck — but unconstrained AI is the risk. A11oy solves both.',
+    metrics: [
+      { label: 'Avg Decision Delay', value: '4.2 days', sub: 'Due to poor signal synthesis' },
+      { label: 'Data Silos', value: '47', sub: 'Average per $1B+ enterprise' },
+      { label: 'Unharvested Value', value: '$3.8M/yr', sub: 'Per 1000-person enterprise' },
+    ],
+    highlight: 'The gap between signal and action costs enterprises millions annually. A11oy closes it.',
+    type: 'problem',
   },
   {
-    id: 'structure', stage: 2, label: 'STRUCTURE', title: 'Data Normalization',
-    narrative: 'The State Engine structures the raw signal into the canonical Enterprise State schema — vessel identity, cargo manifest, financial exposure, and causal context — creating an authoritative current state.',
-    visual: { primary: 'State structured', secondary: '2,400 TEU · $14,200/day exposure · Berth 7', badge: 'state-cascade-v12', color: '#6366f1' },
+    step: 2,
+    title: 'The Solution: Governed Execution Fabric',
+    category: 'PRODUCT',
+    body: 'A11oy is not an AI assistant — it is a governed execution fabric. Signals, agents, connectors, policies, and people operate as one controlled system. Every action is evaluated, approved, and proven.',
+    metrics: [
+      { label: 'Decision Cycle', value: '< 90 min', sub: 'From signal to approved action' },
+      { label: 'Proof Coverage', value: '100%', sub: 'Every action has a proof packet' },
+      { label: 'Human Override', value: 'Structural', sub: 'Not optional — guaranteed' },
+    ],
+    highlight: 'Governed autonomy — AI executes within defined boundaries, humans control every boundary.',
+    type: 'solution',
   },
   {
-    id: 'correlate', stage: 3, label: 'CORRELATE', title: 'Causal Analysis',
-    narrative: 'The Causal Core correlates the Cascade delay with 4 prior signals: port congestion data, weather model, charter party terms, and Q2 logistics commitments. Confidence: 94%.',
-    visual: { primary: '4 causal links found', secondary: 'Congestion → Weather → Charter → Q2 commitments', badge: 'causal-4-links', color: '#8b5cf6' },
+    step: 3,
+    title: 'Signal Mesh — Multi-Domain Ingestion',
+    category: 'ARCHITECTURE',
+    body: 'A11oy synthesizes structured and unstructured signals across maritime, legal, revenue, defense, real estate, and procurement domains simultaneously. The Signal Mesh scores, deduplicates, and routes each signal.',
+    metrics: [
+      { label: 'Domains', value: '8', sub: 'Simultaneously active' },
+      { label: 'Signal Score', value: 'Real-time', sub: 'Urgency × probability × impact' },
+      { label: 'Latency', value: '< 200ms', sub: 'From ingest to Workcell trigger' },
+    ],
+    highlight: 'No single-domain limitation. A revenue signal and a maritime delay become a unified action brief.',
+    type: 'technical',
   },
   {
-    id: 'explain', stage: 4, label: 'EXPLAIN', title: 'Reasoning Chain',
-    narrative: 'A11oy generates a structured explanation: the delay is causal, not incidental. The 38h delay will trigger demurrage at T+24h. The originating cause is port scheduling, not vessel failure.',
-    visual: { primary: 'Root cause identified', secondary: 'Port scheduling → demurrage threshold T+24h', badge: 'explain-v1', color: '#b08d52' },
+    step: 4,
+    title: 'Workcell Runtime — Structured Execution',
+    category: 'ARCHITECTURE',
+    body: 'Workcells are A11oy\'s unit of governed execution. Each Workcell is a structured task: signal → steps → tools → eval → approval → proof. No unstructured agent loops. Every Workcell is replayable.',
+    metrics: [
+      { label: 'Avg Steps', value: '4–12', sub: 'Per Workcell execution' },
+      { label: 'Tool Calls', value: 'Allowlisted', sub: 'Connector Firewall enforced' },
+      { label: 'Replay', value: 'Full audit trail', sub: 'Step-by-step, always' },
+    ],
+    highlight: 'Every Workcell creates an immutable proof packet — SHA-256 hash chain, no post-hoc revision.',
+    type: 'technical',
   },
   {
-    id: 'recommend', stage: 5, label: 'RECOMMEND', title: 'Action Recommendation',
-    narrative: 'The Action Rail recommends authorizing a 48-hour port standby. MirrorEval tests this against the counterfactual: rebooking an alternative berth. Standby wins on cost and optionality (91% vs 78% confidence).',
-    visual: { primary: 'Action recommended', secondary: 'PORT_STANDBY · $14,200/day · 91% confidence', badge: 'act-001', color: '#f59e0b' },
+    step: 5,
+    title: 'MirrorEval 2.0 — 14-Dimension Scoring',
+    category: 'GOVERNANCE',
+    body: 'Before any action proceeds, MirrorEval scores it across 14 dimensions: groundedness, evidence coverage, action safety, hallucination risk, policy compliance, tool risk, and 8 more. Five dispositions — pass to blocked.',
+    metrics: [
+      { label: 'Dimensions', value: '14', sub: 'Per evaluation' },
+      { label: 'Dispositions', value: '5', sub: 'Pass → Blocked' },
+      { label: 'Gating', value: 'Enforced', sub: 'Blocked = no execution' },
+    ],
+    highlight: 'Hallucination risk scored on every action. Proof completeness is a hard gate.',
+    type: 'governance',
   },
   {
-    id: 'approve', stage: 6, label: 'APPROVE', title: 'Human Approval Gate',
-    narrative: 'The Covenant Layer enforces policy pol-maritime-002: no port standby authorization without VP Operations approval. The action is queued — nothing executes until a human approves.',
-    visual: { primary: 'Gate enforced', secondary: 'Awaiting VP Operations · pol-maritime-002', badge: 'gate-blocked', color: '#8b5cf6' },
-    isGated: true,
+    step: 6,
+    title: 'Connector Firewall — Default Deny',
+    category: 'SECURITY',
+    body: 'Every connector is untrusted until registered, schema-validated, and consent-gated. Tool calls are restricted to explicit allowlists. Prompt injection scanned on every input and output. Default deny — no exceptions.',
+    metrics: [
+      { label: 'Policy', value: 'Default deny', sub: 'No implicit trust' },
+      { label: 'Scans', value: 'Every call', sub: 'Injection + schema + consent' },
+      { label: 'Trust Score', value: '0–100', sub: 'Per connector, enforced' },
+    ],
+    highlight: 'Injection attempts are blocked at ingestion — not after execution.',
+    type: 'security',
   },
   {
-    id: 'execute', stage: 7, label: 'EXECUTE', title: 'Governed Execution',
-    narrative: 'VP Operations approves. A11oy executes: port standby is authorized, logistics team is notified, charter party clause 14.3 is flagged, and the execution receipt is generated.',
-    visual: { primary: 'Execution complete', secondary: 'Standby authorized · Notifications sent · Receipt: exe-2026-001', badge: 'exe-complete', color: '#10b981' },
+    step: 7,
+    title: 'Twin Foundry — Live Business Twins',
+    category: 'INTELLIGENCE',
+    body: 'Every enterprise asset — deal, vessel, legal matter, vendor contract, incident — has a live digital twin. Twins are continuously synced, drift-scored, and simulation-ready. No action without twin state check.',
+    metrics: [
+      { label: 'Twin Types', value: '30+', sub: 'Vessel, deal, matter, vendor…' },
+      { label: 'Drift Score', value: 'Continuous', sub: '0=stable · 100=critical' },
+      { label: 'Simulation', value: 'No-action vs. approved', sub: 'Before any execution' },
+    ],
+    highlight: 'Simulate no-action vs. approved-action for every twin before committing resources.',
+    type: 'intelligence',
   },
   {
-    id: 'verify', stage: 8, label: 'VERIFY', title: 'Outcome Verification',
-    narrative: 'A11oy verifies the execution outcome against the expected state: standby confirmed by port authority, financial commitment recorded, demurrage clock reset. Verification: passed.',
-    visual: { primary: 'Outcome verified', secondary: 'Port confirmed · Demurrage clock reset · State updated', badge: 'verify-pass', color: '#10b981' },
+    step: 8,
+    title: 'Human-Gated Autonomy — Structural Guarantee',
+    category: 'GOVERNANCE',
+    body: 'A11oy enforces approval tiers by action type, cost, risk, and domain. No action above tier threshold executes without human sign-off. This is not a UI feature — it is an architectural guarantee in the Covenant Layer.',
+    metrics: [
+      { label: 'Approval Tiers', value: '4', sub: 'Autonomous → Board required' },
+      { label: 'Override', value: 'Always', sub: 'Human can always stop' },
+      { label: 'Covenant Layer', value: 'Enforced', sub: 'Not bypassable' },
+    ],
+    highlight: null,
+    type: 'governance',
+    showApproval: true,
   },
   {
-    id: 'prove', stage: 9, label: 'PROVE', title: 'Proof-Carrying Execution',
-    narrative: 'The Proof Ledger records the complete chain: signal → causal links → policy evaluation → approval → execution → verification → outcome. SHA-256 hash: immutable, board-ready.',
-    visual: { primary: 'Proof recorded', secondary: 'sha256:c9f2e5b8a1d3e6f9b2c5a8d3e1f6b9c2', badge: 'pce-c9f2e5b8', color: '#b08d52' },
+    step: 9,
+    title: 'Proof Ledger — Immutable Audit Chain',
+    category: 'COMPLIANCE',
+    body: 'Every executed Workcell produces a Proof Packet — SHA-256 hash chain, all reasoning steps, tool calls, approvals, eval scores, and model outputs. Ledger is append-only. No post-hoc revision is possible.',
+    metrics: [
+      { label: 'Hash chain', value: 'SHA-256', sub: 'Per Workcell' },
+      { label: 'Coverage', value: '100%', sub: 'Every executed action' },
+      { label: 'Replay', value: 'Full fidelity', sub: 'Step · eval · approval' },
+    ],
+    highlight: 'Built for SOC 2 Type II, HIPAA, GDPR, and FedRAMP readiness on the roadmap.',
+    type: 'compliance',
+  },
+  {
+    step: 10,
+    title: 'Boardroom Mode — AI-Synthesized Governance',
+    category: 'EXECUTIVE',
+    body: 'At any moment, A11oy can synthesize the entire enterprise state into a board-ready packet — executive summary, domain KPIs, risk flags, recommended actions, approval chain, and proof references. Delivered in seconds.',
+    metrics: [
+      { label: 'Generation', value: '< 3 sec', sub: 'Full board packet' },
+      { label: 'Eval scored', value: 'Yes', sub: 'MirrorEval 2.0 on every packet' },
+      { label: 'Proof chain', value: 'Included', sub: 'Every claim has a reference' },
+    ],
+    highlight: 'Not a dashboard — a fully synthesized, model-generated, eval-scored board packet.',
+    type: 'executive',
+  },
+  {
+    step: 11,
+    title: 'Go-to-Market — Land & Expand',
+    category: 'BUSINESS',
+    body: 'A11oy sells to enterprise operational leaders — COOs, General Counsels, CFOs, and CTOs. Land with a single domain (e.g., maritime or legal), prove ROI in 90 days, expand to 3–5 domains. ACVs range from $200K to $2M.',
+    metrics: [
+      { label: 'ACV Range', value: '$200K–$2M', sub: 'Depending on domains' },
+      { label: 'TAM', value: '$14B', sub: 'Enterprise governance & AI ops' },
+      { label: 'Land + Expand', value: '90-day', sub: 'Proof-of-value window' },
+    ],
+    highlight: 'The Proof Ledger is the sales proof — every ROI claim is hash-chained.',
+    type: 'business',
+  },
+  {
+    step: 12,
+    title: 'The Ask — Seed Round',
+    category: 'INVESTMENT',
+    body: 'We are raising a $4M seed round to fund 18 months of product development, 3 pilot enterprise customers, and a team of 6. The capital funds: SOC 2 certification, production deployment layer, and enterprise connector library expansion.',
+    metrics: [
+      { label: 'Raising', value: '$4M', sub: 'Seed round' },
+      { label: 'Runway', value: '18 months', sub: 'To Series A' },
+      { label: 'Use of Funds', value: 'Product + GTM', sub: '60% product, 40% GTM' },
+    ],
+    highlight: 'A11oy is not a chatbot — it is the governed execution operating system for the enterprise.',
+    type: 'investment',
   },
 ];
 
-const ADVANCE_MS = 4500;
+const CAT_COLORS: Record<string, string> = {
+  MARKET: '#ef4444', PRODUCT: '#8b5cf6', ARCHITECTURE: '#3b82f6',
+  GOVERNANCE: '#10b981', SECURITY: '#f59e0b', INTELLIGENCE: '#06b6d4',
+  COMPLIANCE: '#b08d52', EXECUTIVE: '#ec4899', BUSINESS: '#6366f1',
+  INVESTMENT: '#10b981',
+};
+const TYPE_BG: Record<string, string> = {
+  problem: 'rgba(239,68,68,0.04)', solution: 'rgba(139,92,246,0.04)',
+  technical: 'rgba(59,130,246,0.04)', governance: 'rgba(16,185,129,0.04)',
+  security: 'rgba(245,158,11,0.04)', intelligence: 'rgba(6,182,212,0.04)',
+  compliance: 'rgba(176,141,82,0.04)', executive: 'rgba(236,72,153,0.04)',
+  business: 'rgba(99,102,241,0.04)', investment: 'rgba(16,185,129,0.08)',
+};
 
 export function InvestorDemo() {
-  const [activeStage, setActiveStage] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const stage = STAGES[activeStage];
-
-  const goTo = (idx: number) => {
-    setActiveStage(idx);
-  };
-  const goNext = () => {
-    setActiveStage(i => {
-      if (i < STAGES.length - 1) return i + 1;
-      return 0;
-    });
-  };
+  const [stage, setStage] = useState(0);
+  const [autoPlay, setAutoPlay] = useState(false);
+  const [approvalGranted, setApprovalGranted] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const current = STAGES[stage];
 
   useEffect(() => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    if (!isPlaying) return;
-    if (stage.isGated) {
-      setIsPlaying(false);
-      return;
+    if (autoPlay) {
+      intervalRef.current = setInterval(() => {
+        setStage(s => {
+          if (s >= STAGES.length - 1) { setAutoPlay(false); return s; }
+          return s + 1;
+        });
+      }, 7000);
     }
-    timerRef.current = setTimeout(() => {
-      setActiveStage(i => {
-        if (i < STAGES.length - 1) return i + 1;
-        return 0;
-      });
-    }, ADVANCE_MS);
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [activeStage, isPlaying, stage.isGated]);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [autoPlay]);
+
+  if (!current) return null;
 
   return (
     <Layout>
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <span className="text-xs font-mono" style={{ color: 'var(--color-a11oy-gold)' }}>INVESTOR DEMO</span>
-          <DemoBadge />
-          <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ backgroundColor: isPlaying ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)', color: isPlaying ? '#10b981' : '#f59e0b' }}>
-            {stage.isGated ? '⏸ PAUSED — awaiting approval gate' : isPlaying ? '▶ Auto-advancing' : '⏸ Paused'}
-          </span>
-        </div>
-        <h1 className="text-2xl font-display font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>
-          Narrated Walkthrough — SENSE → PROVE
-        </h1>
-        <p className="mt-1 text-sm" style={{ color: 'var(--color-a11oy-text-sub)' }}>
-          Follow one real decision through all 9 stages of A11oy's execution pipeline — from signal ingestion to cryptographic proof.
-        </p>
-      </div>
-
-      <div className="flex gap-1 mb-8 overflow-x-auto pb-2">
-        {STAGES.map((s, i) => (
-          <button
-            key={s.id}
-            onClick={() => { setIsPlaying(false); goTo(i); }}
-            className="flex flex-col items-center gap-1 px-2 py-1.5 rounded transition-all flex-shrink-0"
-            style={{
-              backgroundColor: activeStage === i ? `${s.visual.color}18` : 'transparent',
-              border: `1px solid ${activeStage === i ? s.visual.color + '40' : 'var(--color-a11oy-border)'}`,
-              cursor: 'pointer',
-              color: activeStage === i ? s.visual.color : 'var(--color-a11oy-text-ghost)',
-              minWidth: '80px',
-            }}
-          >
-            <span className="text-xs font-mono">{s.stage}</span>
-            <span className="text-xs font-mono font-bold">{s.label}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-6 mb-6">
-        <div
-          className="rounded-lg border p-6"
-          style={{ backgroundColor: 'var(--color-a11oy-card)', borderColor: 'var(--color-a11oy-border)' }}
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div
-              className="w-8 h-8 rounded flex items-center justify-center font-mono text-sm font-bold"
-              style={{ backgroundColor: `${stage.visual.color}20`, color: stage.visual.color }}
+      <div className="min-h-screen" style={{ color: 'var(--color-a11oy-text)' }}>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <div className="text-xs font-mono tracking-widest mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+              A11OY — GOVERNED EXECUTION FABRIC
+            </div>
+            <div className="text-2xl font-bold" style={{ color: 'var(--color-a11oy-text)' }}>Investor Demo</div>
+            <div className="text-xs mt-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>12-step product narrative · Seed round · April 2026</div>
+          </div>
+          <div className="flex items-center gap-2">
+            <DemoBadge />
+            <button
+              onClick={() => setAutoPlay(a => !a)}
+              className="text-xs px-3 py-1.5 rounded font-medium"
+              style={{ backgroundColor: autoPlay ? 'rgba(16,185,129,0.15)' : 'rgba(59,130,246,0.12)', color: autoPlay ? '#10b981' : '#3b82f6', border: `1px solid ${autoPlay ? 'rgba(16,185,129,0.3)' : 'rgba(59,130,246,0.25)'}` }}
             >
-              {stage.stage}
-            </div>
-            <div>
-              <div className="text-xs font-mono" style={{ color: stage.visual.color }}>{stage.label}</div>
-              <div className="font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{stage.title}</div>
-            </div>
-          </div>
-
-          <p className="text-sm leading-relaxed mb-6" style={{ color: 'var(--color-a11oy-text-sub)' }}>
-            {stage.narrative}
-          </p>
-
-          <div className="flex flex-wrap gap-3">
-            {activeStage > 0 && (
-              <button
-                onClick={() => { setIsPlaying(false); setActiveStage(i => Math.max(0, i - 1)); }}
-                className="px-3 py-1.5 rounded text-xs font-medium border"
-                style={{ borderColor: 'var(--color-a11oy-border)', color: 'var(--color-a11oy-text-sub)', backgroundColor: 'transparent', cursor: 'pointer' }}
-              >
-                ← Previous
-              </button>
-            )}
-            {!isPlaying && !stage.isGated && (
-              <button
-                onClick={() => setIsPlaying(true)}
-                className="px-3 py-1.5 rounded text-xs font-medium border"
-                style={{ borderColor: 'rgba(16,185,129,0.4)', color: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)', cursor: 'pointer' }}
-              >
-                ▶ Resume
-              </button>
-            )}
-            {isPlaying && (
-              <button
-                onClick={() => setIsPlaying(false)}
-                className="px-3 py-1.5 rounded text-xs font-medium border"
-                style={{ borderColor: 'var(--color-a11oy-border)', color: 'var(--color-a11oy-text-ghost)', backgroundColor: 'transparent', cursor: 'pointer' }}
-              >
-                ⏸ Pause
-              </button>
-            )}
-            {activeStage < STAGES.length - 1 && (
-              <button
-                onClick={() => { setIsPlaying(false); goNext(); }}
-                className="px-3 py-1.5 rounded text-xs font-medium"
-                style={{ backgroundColor: stage.visual.color, color: 'white', border: 'none', cursor: 'pointer' }}
-              >
-                {stage.isGated ? 'Approve & Continue →' : 'Next Stage →'}
-              </button>
-            )}
-            {activeStage === STAGES.length - 1 && (
-              <button
-                onClick={() => { setActiveStage(0); setIsPlaying(true); }}
-                className="px-3 py-1.5 rounded text-xs font-medium"
-                style={{ backgroundColor: '#b08d52', color: 'white', border: 'none', cursor: 'pointer' }}
-              >
-                ↺ Restart Demo
-              </button>
-            )}
+              {autoPlay ? '⏸ Pause' : '▶ Auto-play'}
+            </button>
           </div>
         </div>
 
-        <div
-          className="rounded-lg border p-6 flex flex-col"
-          style={{ backgroundColor: `${stage.visual.color}06`, borderColor: `${stage.visual.color}25` }}
-        >
-          <div className="text-xs font-mono mb-4" style={{ color: stage.visual.color }}>STAGE {stage.stage} OUTPUT</div>
-          <div className="flex-1">
-            <div className="text-xl font-display font-semibold mb-2" style={{ color: 'var(--color-a11oy-text)' }}>
-              {stage.visual.primary}
-            </div>
-            <div className="text-sm mb-4" style={{ color: 'var(--color-a11oy-text-sub)' }}>
-              {stage.visual.secondary}
-            </div>
-            <div className="font-mono text-xs px-3 py-2 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)', color: 'var(--color-a11oy-text-ghost)', border: '1px solid var(--color-a11oy-border)' }}>
-              {stage.visual.badge}
-            </div>
+        {/* Stage nav */}
+        <div className="flex gap-1 mb-6 flex-wrap">
+          {STAGES.map((s, i) => (
+            <button
+              key={i}
+              onClick={() => setStage(i)}
+              className="text-xs px-2 py-1 rounded font-mono"
+              style={{ backgroundColor: stage === i ? `${CAT_COLORS[s.category] ?? '#3b82f6'}22` : 'var(--color-a11oy-muted)', color: stage === i ? (CAT_COLORS[s.category] ?? '#3b82f6') : 'var(--color-a11oy-text-ghost)', border: `1px solid ${stage === i ? (CAT_COLORS[s.category] ?? '#3b82f6') + '40' : 'var(--color-a11oy-border)'}` }}
+            >
+              {s.step}
+            </button>
+          ))}
+        </div>
+
+        {/* Main slide */}
+        <div className="rounded-xl border p-8 mb-6" style={{ backgroundColor: TYPE_BG[current.type] ?? 'rgba(59,130,246,0.04)', borderColor: `${CAT_COLORS[current.category] ?? '#3b82f6'}30`, minHeight: 420 }}>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ color: CAT_COLORS[current.category] ?? '#9bacc4', backgroundColor: `${CAT_COLORS[current.category] ?? '#9bacc4'}18` }}>
+              {current.category}
+            </span>
+            <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>STEP {current.step} / {STAGES.length}</span>
           </div>
-          {stage.isGated && (
-            <div className="mt-4">
-              <ApprovalGate label="No material action executes without human approval — demo paused at this gate" />
+
+          <h1 className="text-2xl font-bold mb-4" style={{ color: 'var(--color-a11oy-text)', lineHeight: 1.2 }}>{current.title}</h1>
+          <p className="text-base mb-6" style={{ color: 'var(--color-a11oy-text-sub)', lineHeight: 1.6 }}>{current.body}</p>
+
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            {current.metrics.map(m => (
+              <div key={m.label} className="p-4 rounded-lg border text-center" style={{ borderColor: `${CAT_COLORS[current.category] ?? '#3b82f6'}25`, backgroundColor: `${CAT_COLORS[current.category] ?? '#3b82f6'}08` }}>
+                <div className="text-2xl font-bold font-mono mb-1" style={{ color: CAT_COLORS[current.category] ?? '#3b82f6' }}>{m.value}</div>
+                <div className="text-xs font-medium mb-0.5" style={{ color: 'var(--color-a11oy-text-sub)' }}>{m.label}</div>
+                <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{m.sub}</div>
+              </div>
+            ))}
+          </div>
+
+          {current.highlight && (
+            <div className="p-4 rounded-lg" style={{ backgroundColor: `${CAT_COLORS[current.category] ?? '#3b82f6'}12`, border: `1px solid ${CAT_COLORS[current.category] ?? '#3b82f6'}25` }}>
+              <p className="text-sm font-medium" style={{ color: CAT_COLORS[current.category] ?? '#3b82f6' }}>{current.highlight}</p>
             </div>
           )}
-        </div>
-      </div>
 
-      <div className="flex gap-1">
-        {STAGES.map((s, i) => (
-          <div
-            key={s.id}
-            className="h-1 flex-1 rounded-full transition-all"
-            style={{ backgroundColor: i <= activeStage ? s.visual.color : 'var(--color-a11oy-border)' }}
-          />
-        ))}
-      </div>
-      <div className="mt-2 text-xs text-center" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-        Stage {activeStage + 1} of {STAGES.length}{isPlaying && !stage.isGated ? ` — advancing in ${ADVANCE_MS / 1000}s` : ''}
+          {current.showApproval && (
+            <div className="mt-4">
+              <ApprovalGate
+                label="DEMO: Tier-3 Action — Approve fund reallocation of $340K"
+                onApprove={() => setApprovalGranted(true)}
+                onReject={() => setApprovalGranted(false)}
+              />
+              {approvalGranted && (
+                <div className="mt-2 text-xs px-3 py-2 rounded" style={{ backgroundColor: 'rgba(16,185,129,0.08)', color: '#10b981', border: '1px solid rgba(16,185,129,0.2)' }}>
+                  ✓ Approved — Workcell proceeds. Proof packet generated. Ledger updated.
+                </div>
+              )}
+            </div>
+          )}
+
+          {STAGE_CTAS[current.step] && (() => {
+            const cta = STAGE_CTAS[current.step];
+            return (
+              <div className="mt-5 flex">
+                <Link
+                  href={`${BASE}${cta.path}`}
+                  className="inline-block text-sm font-medium px-5 py-2.5 rounded border"
+                  style={{
+                    color: cta.color,
+                    borderColor: `${cta.color}40`,
+                    backgroundColor: `${cta.color}10`,
+                    textDecoration: 'none',
+                    transition: 'opacity 0.2s',
+                  }}
+                >
+                  {cta.label}
+                </Link>
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* Navigation */}
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => setStage(s => Math.max(0, s - 1))}
+            disabled={stage === 0}
+            className="text-xs px-4 py-2 rounded font-medium"
+            style={{ backgroundColor: 'var(--color-a11oy-muted)', color: stage === 0 ? 'var(--color-a11oy-text-ghost)' : 'var(--color-a11oy-text-sub)', border: '1px solid var(--color-a11oy-border)', opacity: stage === 0 ? 0.4 : 1 }}
+          >
+            ← Previous
+          </button>
+
+          <div className="flex gap-1">
+            {STAGES.map((_, i) => (
+              <div key={i} className="h-1.5 rounded-full" style={{ width: i === stage ? 24 : 8, backgroundColor: i === stage ? (CAT_COLORS[current.category] ?? '#3b82f6') : 'var(--color-a11oy-border)', transition: 'all 0.3s' }} />
+            ))}
+          </div>
+
+          <button
+            onClick={() => setStage(s => Math.min(STAGES.length - 1, s + 1))}
+            disabled={stage === STAGES.length - 1}
+            className="text-xs px-4 py-2 rounded font-medium"
+            style={{ backgroundColor: 'rgba(59,130,246,0.12)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.25)', opacity: stage === STAGES.length - 1 ? 0.4 : 1 }}
+          >
+            Next →
+          </button>
+        </div>
       </div>
     </Layout>
   );

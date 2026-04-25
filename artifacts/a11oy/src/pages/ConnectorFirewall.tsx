@@ -1,89 +1,252 @@
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, DemoBadge, StatusPill } from '../components/ui';
 
-const CONNECTORS = [
-  { id: 'conn-001', name: 'Port Authority API', domain: 'Maritime', category: 'compatible integration target', status: 'demo', icon: '⚓', latency: 'N/A', uptime: 'N/A', note: 'Compatible integration target — real credentials required' },
-  { id: 'conn-002', name: 'Matter Management (iManage)', domain: 'Legal', category: 'compatible integration target', status: 'demo', icon: '⚖', latency: 'N/A', uptime: 'N/A', note: 'Compatible integration target — API key required' },
-  { id: 'conn-003', name: 'CRM Pipeline (Salesforce)', domain: 'Revenue', category: 'compatible integration target', status: 'demo', icon: '◈', latency: 'N/A', uptime: 'N/A', note: 'Compatible integration target — OAuth required' },
-  { id: 'conn-004', name: 'Vessel Tracking (AIS)', domain: 'Maritime', category: 'future connector target', status: 'roadmap', icon: '🚢', latency: 'N/A', uptime: 'N/A', note: 'Future connector target — planned Phase 3' },
-  { id: 'conn-005', name: 'CAD/GIS Feed', domain: 'Defense', category: 'future connector target', status: 'roadmap', icon: '◎', latency: 'N/A', uptime: 'N/A', note: 'Future connector target — SCIF-compliant implementation' },
-  { id: 'conn-006', name: 'Proof Ledger (internal)', domain: 'Alloy Core', category: 'built', status: 'live', icon: '◇', latency: '8ms', uptime: '99.97%', note: 'Built — operational in demo mode' },
-  { id: 'conn-007', name: 'Signal Mesh (internal)', domain: 'Alloy Core', category: 'built', status: 'live', icon: '⬡', latency: '12ms', uptime: '99.92%', note: 'Built — operational in demo mode' },
-  { id: 'conn-008', name: 'Policy Engine (internal)', domain: 'Alloy Core', category: 'built', status: 'live', icon: '⚖', latency: '5ms', uptime: '100%', note: 'Built — operational in demo mode' },
-];
+const API = '/api/a11oy';
 
-const STATUS_LABELS: Record<string, 'LIVE' | 'DEMO' | 'ROADMAP'> = {
-  live: 'LIVE', demo: 'DEMO', roadmap: 'ROADMAP',
+interface Connector {
+  id: string; name: string; vendor: string; domain: string; category: string;
+  riskScore: number; riskLevel: string; status: string; approvalRequired: boolean;
+  dataClasses: string[]; allowedTools: string[]; blockedTools: string[];
+  lastCall: string | null; callsToday: number; firewallEvents: number;
+  outputSanitized: boolean; promptInjectionScans: number; promptInjectionBlocked: number;
+  trustScore: number; consentGranted: boolean; schemaValidated: boolean;
+  tenant: string | null; note: string;
+}
+
+interface FirewallData {
+  connectors: Connector[];
+  summary: { total: number; approved: number; blocked: number; pendingReview: number; totalFirewallEvents: number; injectionAttemptsBlocked: number };
+  firewallPolicy: { defaultDeny: boolean; requiresSchemaValidation: boolean; requiresConsentGate: boolean; promptInjectionPatterns: string[] };
+}
+
+const RISK_COLORS: Record<string, string> = {
+  low: '#10b981', medium: '#f59e0b', high: '#ef4444', critical: '#ef4444',
+};
+const STATUS_MAP: Record<string, 'LIVE' | 'DEMO' | 'ROADMAP'> = {
+  approved: 'LIVE', pending_review: 'DEMO', blocked: 'ROADMAP',
 };
 
-const CATEGORY_COLORS: Record<string, string> = {
-  'built': '#10b981',
-  'compatible integration target': '#3b82f6',
-  'future connector target': '#9bacc4',
-};
+function RiskBadge({ level }: { level: string }) {
+  return (
+    <span className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ color: RISK_COLORS[level] ?? '#9bacc4', backgroundColor: `${RISK_COLORS[level] ?? '#9bacc4'}18`, border: `1px solid ${RISK_COLORS[level] ?? '#9bacc4'}40` }}>
+      {level.toUpperCase()}
+    </span>
+  );
+}
 
 export function ConnectorFirewall() {
+  const [data, setData] = useState<FirewallData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<Connector | null>(null);
+  const [testResult, setTestResult] = useState<Record<string, unknown> | null>(null);
+  const [testLoading, setTestLoading] = useState(false);
+  const [filterRisk, setFilterRisk] = useState('all');
+
+  useEffect(() => {
+    fetch(`${API}/connectors/sovereign`)
+      .then(r => r.json())
+      .then(d => { if (d.ok) setData(d.data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  function testConnector(connector: Connector) {
+    setTestLoading(true);
+    setTestResult(null);
+    setSelected(connector);
+    fetch(`${API}/connectors/${connector.id}/test`, { method: 'POST' })
+      .then(r => r.json())
+      .then(d => setTestResult(d))
+      .catch(() => {})
+      .finally(() => setTestLoading(false));
+  }
+
+  const filtered = data?.connectors.filter(c => filterRisk === 'all' || c.riskLevel === filterRisk) ?? [];
+
   return (
     <Layout>
       <PageHeader
         label="CONNECTOR FIREWALL"
-        title="Integration Registry"
-        subtitle="All connectors are classified as Built, Compatible Integration Target, or Future Connector Target. No fake partner claims. No unofficial integrations."
+        title="Integration Registry & Firewall"
+        subtitle="Every connector is untrusted until registered, schema-validated, and consent-gated. Default deny — no tool call proceeds without an approved allowlist entry."
         status="DEMO"
       />
 
-      <div className="p-4 rounded-lg mb-8 border" style={{ backgroundColor: 'rgba(59,130,246,0.05)', borderColor: 'rgba(59,130,246,0.2)' }}>
-        <div className="text-xs font-mono mb-1" style={{ color: '#3b82f6' }}>CLASSIFICATION POLICY</div>
-        <div className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>
-          A11oy does not claim official partnerships. Connectors are labeled: <span style={{ color: '#10b981' }}>Built</span> (operational today), <span style={{ color: '#3b82f6' }}>Compatible Integration Target</span> (API-compatible, requires credentials), or <span style={{ color: '#9bacc4' }}>Future Connector Target</span> (planned, not built).
-        </div>
-      </div>
+      {loading ? (
+        <div className="text-xs animate-pulse mb-8" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Loading connector registry…</div>
+      ) : data ? (
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+            <KpiCard label="CONNECTORS" value={String(data.summary.total)} sub="Registered" accent="#3b82f6" />
+            <KpiCard label="APPROVED" value={String(data.summary.approved)} sub="Active" accent="#10b981" />
+            <KpiCard label="PENDING REVIEW" value={String(data.summary.pendingReview)} sub="No tools approved" accent="#f59e0b" />
+            <KpiCard label="BLOCKED" value={String(data.summary.blocked)} sub="Zero access" accent="#ef4444" />
+            <KpiCard label="FIREWALL EVENTS" value={String(data.summary.totalFirewallEvents)} sub="Intercepted" accent="#b08d52" />
+            <KpiCard label="INJECTION BLOCKED" value={String(data.summary.injectionAttemptsBlocked)} sub="Prompt injection" accent="#ef4444" />
+          </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <KpiCard label="BUILT" value="3" sub="Operational in demo" accent="#10b981" />
-        <KpiCard label="COMPATIBLE TARGETS" value="3" sub="Require credentials" accent="#3b82f6" />
-        <KpiCard label="FUTURE TARGETS" value="2" sub="Planned roadmap" accent="#9bacc4" />
-        <KpiCard label="ACTIVE (DEMO)" value="3" sub="Internal fabric connectors" accent="#f59e0b" />
-      </div>
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Risk filter:</span>
+            {['all', 'low', 'medium', 'high', 'critical'].map(r => (
+              <button key={r} onClick={() => setFilterRisk(r)} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: filterRisk === r ? 'rgba(59,130,246,0.2)' : 'var(--color-a11oy-muted)', color: filterRisk === r ? '#3b82f6' : 'var(--color-a11oy-text-ghost)', border: `1px solid ${filterRisk === r ? 'rgba(59,130,246,0.4)' : 'var(--color-a11oy-border)'}` }}>
+                {r}
+              </button>
+            ))}
+          </div>
 
-      <div className="flex flex-col gap-3">
-        {CONNECTORS.map(c => (
-          <Card key={c.id}>
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-8 h-8 rounded flex items-center justify-center text-sm flex-shrink-0"
-                  style={{ backgroundColor: 'var(--color-a11oy-muted)', color: CATEGORY_COLORS[c.category] ?? '#9bacc4' }}
-                >
-                  {c.icon}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                    <span className="text-sm font-medium" style={{ color: 'var(--color-a11oy-text)' }}>{c.name}</span>
-                    <StatusPill status={STATUS_LABELS[c.status] ?? 'DEMO'} />
-                    <DemoBadge />
-                  </div>
-                  <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{c.domain}</div>
-                </div>
-              </div>
-              <div className="text-right flex-shrink-0">
-                <div className="text-xs font-mono" style={{ color: CATEGORY_COLORS[c.category] ?? '#9bacc4' }}>
-                  {c.category}
-                </div>
-                {c.latency !== 'N/A' && (
-                  <div className="text-xs mt-0.5" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                    {c.latency} · {c.uptime}
-                  </div>
-                )}
+          <div className="grid lg:grid-cols-2 gap-4 mb-8">
+            <div>
+              <SectionTitle>Connector Registry ({filtered.length})</SectionTitle>
+              <div className="flex flex-col gap-2 max-h-[600px] overflow-y-auto pr-1">
+                {filtered.map(c => (
+                  <Card key={c.id} className={`cursor-pointer hover:opacity-80 ${selected?.id === c.id ? 'ring-1 ring-blue-500/30' : ''}`} onClick={() => setSelected(c)}>
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div>
+                        <div className="text-sm font-medium" style={{ color: 'var(--color-a11oy-text)' }}>{c.name}</div>
+                        <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{c.vendor} · {c.domain}</div>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <RiskBadge level={c.riskLevel} />
+                        <StatusPill status={STATUS_MAP[c.status] ?? 'DEMO'} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2 text-xs">
+                      <div>
+                        <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>trust</div>
+                        <div style={{ color: c.trustScore >= 80 ? '#10b981' : c.trustScore >= 60 ? '#f59e0b' : '#ef4444' }}>{c.trustScore}</div>
+                      </div>
+                      <div>
+                        <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>calls</div>
+                        <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{c.callsToday}</div>
+                      </div>
+                      <div>
+                        <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>blocked</div>
+                        <div style={{ color: c.promptInjectionBlocked > 0 ? '#ef4444' : 'var(--color-a11oy-text-sub)' }}>{c.promptInjectionBlocked}</div>
+                      </div>
+                      <div>
+                        <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>sanitized</div>
+                        <div style={{ color: c.outputSanitized ? '#10b981' : '#ef4444' }}>{c.outputSanitized ? 'yes' : 'no'}</div>
+                      </div>
+                    </div>
+                    {c.promptInjectionBlocked > 0 && (
+                      <div className="mt-2 text-xs px-2 py-1 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444' }}>
+                        ⚠ {c.promptInjectionBlocked} injection attempt{c.promptInjectionBlocked > 1 ? 's' : ''} blocked
+                      </div>
+                    )}
+                  </Card>
+                ))}
               </div>
             </div>
-            <div className="mt-2 text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{c.note}</div>
-          </Card>
-        ))}
-      </div>
 
-      <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
-        <DemoBadge /> Connector registry reflects demo classification only. Live data requires real credentials per connector.
+            <div>
+              {selected ? (
+                <>
+                  <SectionTitle>Connector Detail — {selected.name}</SectionTitle>
+                  <Card>
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <div className="font-semibold text-sm" style={{ color: 'var(--color-a11oy-text)' }}>{selected.name}</div>
+                        <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{selected.vendor} · {selected.category}</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <RiskBadge level={selected.riskLevel} />
+                        <button
+                          onClick={() => testConnector(selected)}
+                          disabled={testLoading || selected.status === 'blocked'}
+                          className="text-xs px-2 py-1 rounded"
+                          style={{ backgroundColor: 'rgba(59,130,246,0.12)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.25)', opacity: selected.status === 'blocked' ? 0.4 : 1 }}
+                        >
+                          {testLoading ? 'Testing…' : 'Test Connection'}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 mb-4 text-xs">
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Trust Score</div><div className="font-mono" style={{ color: selected.trustScore >= 80 ? '#10b981' : '#f59e0b' }}>{selected.trustScore} / 100</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Risk Score</div><div className="font-mono" style={{ color: RISK_COLORS[selected.riskLevel] }}>{selected.riskScore} / 100</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Approval Required</div><div style={{ color: selected.approvalRequired ? '#f59e0b' : '#10b981' }}>{selected.approvalRequired ? 'Yes' : 'No'}</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Schema Validated</div><div style={{ color: selected.schemaValidated ? '#10b981' : '#ef4444' }}>{selected.schemaValidated ? 'Yes' : 'No'}</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Consent Granted</div><div style={{ color: selected.consentGranted ? '#10b981' : '#ef4444' }}>{selected.consentGranted ? 'Yes' : 'No'}</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Output Sanitized</div><div style={{ color: selected.outputSanitized ? '#10b981' : '#ef4444' }}>{selected.outputSanitized ? 'Yes' : 'No'}</div></div>
+                    </div>
+
+                    <div className="mb-3">
+                      <div className="text-xs font-medium mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Allowed Tools</div>
+                      <div className="flex flex-wrap gap-1">
+                        {selected.allowedTools.length > 0 ? selected.allowedTools.map(t => (
+                          <span key={t} className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(16,185,129,0.08)', color: '#10b981' }}>{t}</span>
+                        )) : <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>None approved</span>}
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="text-xs font-medium mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Blocked Tools</div>
+                      <div className="flex flex-wrap gap-1">
+                        {selected.blockedTools.map(t => (
+                          <span key={t} className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444' }}>{t}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="text-xs font-medium mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Data Classes</div>
+                      <div className="flex flex-wrap gap-1">
+                        {selected.dataClasses.map(d => (
+                          <span key={d} className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: 'var(--color-a11oy-text-ghost)' }}>{d}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="text-xs p-2 rounded" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: 'var(--color-a11oy-text-sub)' }}>{selected.note}</div>
+
+                    {testResult && (
+                      <div className="mt-3 p-2 rounded text-xs" style={{ backgroundColor: (testResult as Record<string, unknown>).ok ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', color: (testResult as Record<string, unknown>).ok ? '#10b981' : '#ef4444', border: `1px solid ${(testResult as Record<string, unknown>).ok ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}` }}>
+                        {(testResult as Record<string, unknown>).ok
+                          ? `✓ Connection test passed (demo mode) — latency: ${(testResult.data as Record<string, unknown>)?.latencyMs}ms`
+                          : `✗ ${((testResult.error as Record<string, unknown>)?.message as string) ?? 'Blocked'}`
+                        }
+                      </div>
+                    )}
+                  </Card>
+                </>
+              ) : (
+                <>
+                  <SectionTitle>Firewall Policy</SectionTitle>
+                  <Card>
+                    <div className="text-xs font-semibold mb-3" style={{ color: '#ef4444' }}>DEFAULT DENY — All connectors untrusted until registered</div>
+                    <div className="space-y-2 mb-4">
+                      {[
+                        { label: 'Schema validation required', value: 'enforced' },
+                        { label: 'Consent gate required', value: 'enforced' },
+                        { label: 'Prompt injection scanner', value: 'active' },
+                        { label: 'Output sanitizer', value: 'active' },
+                        { label: 'Tool allowlist enforcement', value: 'enforced' },
+                      ].map(p => (
+                        <div key={p.label} className="flex items-center justify-between text-xs">
+                          <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{p.label}</span>
+                          <span style={{ color: '#10b981' }}>{p.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-xs font-medium mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Injection Patterns Scanned</div>
+                    <div className="space-y-1">
+                      {data.firewallPolicy.promptInjectionPatterns.map(p => (
+                        <div key={p} className="text-xs flex items-center gap-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                          <span style={{ color: '#f59e0b' }}>⚠</span> {p}
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                  <div className="mt-3 text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Select a connector to view details and run a test.</div>
+                </>
+              )}
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Connector registry unavailable.</div>
+      )}
+
+      <div className="p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
+        <DemoBadge /> Demo mode — no real connector calls. All trust scores and firewall events are seeded. Destructive tools are always blocked.
       </div>
     </Layout>
   );

@@ -1,7 +1,25 @@
 # SZL Holdings Platform
 
 ## Overview
-SZL Holdings offers FORGE, a governed operational intelligence platform for regulated enterprises. The platform includes **A11oy**, a Live Enterprise Execution Fabric that senses business signals, explains their causes, recommends governed actions, executes them in Workcells, and records cryptographic proof of every step. A11oy is a fully-rendered web artifact with 19 product surfaces ensuring human-in-the-loop governance, immutable record-keeping, and attributable outcomes for AI recommendations. The platform is a pnpm monorepo supporting web and mobile applications, an API, and a design system. Its core purpose is Governed Workflow Orchestration (FORGE + Command + KORA) and Maritime Intelligence (SEXTANT), with specialized extensions like PARAGON, DOMAINE, Counsel, and Carlota Jo. The business vision is to provide a comprehensive solution for decision intelligence and operational oversight in highly regulated environments, with strong market potential in sectors requiring stringent compliance and auditable AI applications.
+SZL Holdings offers FORGE, a governed operational intelligence platform for regulated enterprises. The platform includes **A11oy Phase 3 — Sovereign Execution Lab** — the governed execution fabric where enterprise signals, agents, tools, people, policies, and proof operate as one controlled system. A11oy is a fully-rendered web artifact at `artifacts/a11oy` (path `/a11oy/`) with 19 product surfaces: Hero, NowBoard, CommandSurface, SignalMesh, ActionRail, ProofLedger, Governance, Agents, Workcells, MirrorEval, ConnectorFirewall, TwinFoundry, TrustCenter, ModelRouter, SkillsLibrary, WorkcellReplay, Sovereign, BoardroomMode, and InvestorDemo.
+
+**Phase 3 additions (Sovereign Execution Lab):**
+- Model Router (5 provider profiles, routing policy, health monitoring)
+- MirrorEval 2.0 (14-dimension eval suite, 5 dispositions, regression suite)
+- Workcell Replay (flight recorder index → detail with step timeline)
+- Connector Firewall (default-deny registry, trust scores, prompt injection blocking)
+- Twin Foundry (30+ business twins, drift scoring, no-action vs. approved-action simulation)
+- Skill Library (15 named skills, demo execution, tool allowlist policy)
+- Boardroom Mode (board packet generation, KPIs, exec summary, proof references)
+- Trust Center (governance controls accordion, security claims, what-is-built vs. roadmap)
+- Investor Demo (12-step guided product narrative with live approval gate demo)
+- Sovereign landing (telemetry rollup, regenerate, sovereign self-test)
+
+**Phase 3 backend:** `artifacts/api-server/src/routes/a11oy-sovereign-api.ts` — 18 endpoints mounted at `/api/a11oy` covering all Phase 3 surfaces with rich seed data (6 tenants, 5 model profiles, 40+ evals, 15 replays, 12 connectors, 30+ twins, 15 skills, 5 board packets, 50+ telemetry spans).
+
+**Phase 3 docs:** `docs/A11OY_PHASE3_ARCHITECTURE.md`, `docs/HUMAN_GATED_AUTONOMY.md`, `docs/CONNECTOR_FIREWALL.md`, `docs/MIRROREVAL.md`, `docs/INVESTOR_DEMO_SCRIPT.md`, `docs/A11OY_PHASE3_SECURITY_POSTURE.md`.
+
+The platform is a pnpm monorepo supporting web and mobile applications, an API, and a design system. Its core purpose is Governed Workflow Orchestration (FORGE + Command + KORA) and Maritime Intelligence (SEXTANT), with specialized extensions like PARAGON, DOMAINE, Counsel, and Carlota Jo built upon its governed foundation. The business vision is to provide a comprehensive solution for decision intelligence and operational oversight in highly regulated environments, with strong market potential in sectors requiring stringent compliance and auditable AI applications.
 
 ## User Preferences
 I prefer detailed explanations.

@@ -34,16 +34,48 @@ export function DemoBadge() {
   );
 }
 
-export function ApprovalGate({ label = 'Requires human approval' }: { label?: string }) {
+export function ApprovalGate({
+  label = 'Requires human approval',
+  onApprove,
+  onReject,
+}: {
+  label?: string;
+  onApprove?: () => void;
+  onReject?: () => void;
+}) {
   return (
     <div
-      className="flex items-center gap-2 px-3 py-2 rounded text-xs font-medium"
-      style={{ backgroundColor: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.25)', color: '#a78bfa' }}
+      className="px-3 py-2 rounded text-xs"
+      style={{ backgroundColor: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.25)' }}
     >
-      <svg width="12" height="12" fill="none" viewBox="0 0 16 16">
-        <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 6.5a1 1 0 011 1v2a1 1 0 01-2 0v-2a1 1 0 011-1zm0-2.5a1 1 0 100-2 1 1 0 000 2z" fill="currentColor"/>
-      </svg>
-      {label}
+      <div className="flex items-center gap-2 font-medium" style={{ color: '#a78bfa' }}>
+        <svg width="12" height="12" fill="none" viewBox="0 0 16 16">
+          <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 6.5a1 1 0 011 1v2a1 1 0 01-2 0v-2a1 1 0 011-1zm0-2.5a1 1 0 100-2 1 1 0 000 2z" fill="currentColor"/>
+        </svg>
+        {label}
+      </div>
+      {(onApprove || onReject) && (
+        <div className="flex items-center gap-2 mt-2">
+          {onApprove && (
+            <button
+              onClick={onApprove}
+              className="px-3 py-1 rounded text-xs font-medium"
+              style={{ backgroundColor: 'rgba(16,185,129,0.15)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', cursor: 'pointer' }}
+            >
+              ✓ Approve
+            </button>
+          )}
+          {onReject && (
+            <button
+              onClick={onReject}
+              className="px-3 py-1 rounded text-xs font-medium"
+              style={{ backgroundColor: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.25)', cursor: 'pointer' }}
+            >
+              ✕ Reject
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

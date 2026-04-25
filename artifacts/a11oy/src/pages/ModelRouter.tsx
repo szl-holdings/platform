@@ -1,100 +1,178 @@
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, KpiCard, DemoBadge } from '../components/ui';
+import { PageHeader, Card, SectionTitle, KpiCard, DemoBadge, StatusPill } from '../components/ui';
 
-const MODELS = [
-  { id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI (compatible)', role: 'Primary reasoning', cost: '$5/M tokens', latency: '820ms avg', routed: 1204, domains: ['Revenue', 'Maritime'], status: 'active' },
-  { id: 'claude-3-5-sonnet', name: 'Claude 3.5 Sonnet', provider: 'Anthropic (compatible)', role: 'Long-context analysis', cost: '$3/M tokens', latency: '640ms avg', routed: 876, domains: ['Legal', 'Defense'], status: 'active' },
-  { id: 'claude-3-haiku', name: 'Claude 3 Haiku', provider: 'Anthropic (compatible)', role: 'Fast classification', cost: '$0.25/M tokens', latency: '180ms avg', routed: 3210, domains: ['Signal Mesh', 'Routing'], status: 'active' },
-  { id: 'llama-3-70b', name: 'Llama 3 70B', provider: 'Sovereign / on-prem (future)', role: 'Air-gapped inference', cost: 'Self-hosted', latency: '2,400ms avg', routed: 0, domains: ['Defense (planned)'], status: 'roadmap' },
-];
+const API = '/api/a11oy';
 
-const ROUTING_RULES = [
-  { condition: 'Input tokens > 100k', route: 'claude-3-5-sonnet', reason: 'Superior long-context handling' },
-  { condition: 'Classification task (intent, severity)', route: 'claude-3-haiku', reason: 'Fast, cost-efficient' },
-  { condition: 'Counterfactual or MirrorEval', route: 'gpt-4o', reason: 'Strong comparative reasoning' },
-  { condition: 'Legal domain, discovery', route: 'claude-3-5-sonnet', reason: 'Document fidelity' },
-  { condition: 'Defense domain (air-gapped)', route: 'llama-3-70b', reason: 'Sovereign inference (roadmap)' },
-];
+interface ModelProfile {
+  id: string; name: string; provider: string; providerLabel: string; role: string;
+  routingModes: string[]; costPer1kTokens: number; avgLatencyMs: number;
+  maxContextTokens: number; callsTotal: number; callsToday: number;
+  tokensUsedToday: number; costToday: number; failureRate: number;
+  fallbackEvents: number; status: string; demoMode: boolean; healthScore: number;
+  domains: string[];
+}
 
-const STATUS_COLORS: Record<string, string> = { active: '#10b981', roadmap: '#9bacc4' };
+interface RoutingRule { mode: string; model: string; reason: string; }
+interface HealthEntry { id: string; name: string; provider: string; status: string; healthScore: number; latencyMs: number; failureRate: number; demoMode: boolean; }
+
+interface ModelsData { models: ModelProfile[]; routingPolicy: RoutingRule[]; }
+interface HealthData { providers: HealthEntry[]; activeProvider: string; fallbackChain: string[]; lastHealthCheck: string; }
+
+const STATUS_MAP: Record<string, 'LIVE' | 'DEMO' | 'ROADMAP'> = {
+  active: 'LIVE', roadmap: 'ROADMAP',
+};
+
+const PROVIDER_COLORS: Record<string, string> = {
+  openai: '#10b981', deepseek: '#3b82f6', nvidia: '#f59e0b', mock: '#8b5cf6', local: '#9bacc4',
+};
+
+const MODE_LABELS: Record<string, string> = {
+  fast_triage: 'Fast Triage',
+  deep_reasoning: 'Deep Reasoning',
+  long_context: 'Long Context',
+  code_analysis: 'Code Analysis',
+  document_analysis: 'Document Analysis',
+  eval_judge: 'Eval Judge',
+  board_packet: 'Board Packet',
+  proof_reconstruction: 'Proof Reconstruction',
+};
 
 export function ModelRouter() {
+  const [models, setModels] = useState<ModelsData | null>(null);
+  const [health, setHealth] = useState<HealthData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch(`${API}/models`).then(r => r.json()),
+      fetch(`${API}/models/health`).then(r => r.json()),
+    ])
+      .then(([m, h]) => {
+        if (m.ok) setModels(m.data);
+        if (h.ok) setHealth(h.data);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const activeModels = models?.models.filter(m => m.status === 'active') ?? [];
+  const totalCallsToday = models?.models.reduce((s, m) => s + m.callsToday, 0) ?? 0;
+  const avgLatency = activeModels.length ? Math.round(activeModels.reduce((s, m) => s + m.avgLatencyMs, 0) / activeModels.length) : 0;
+
   return (
     <Layout>
       <PageHeader
         label="MODEL ROUTER"
         title="Inference Routing Layer"
-        subtitle="A11oy routes inference tasks to the optimal model based on task type, domain, token budget, and latency requirements. No single-model dependency."
+        subtitle="Provider-agnostic model routing — task type, domain, token budget, and latency requirements determine which model handles each inference. No single-model dependency."
         status="DEMO"
       />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <KpiCard label="MODELS REGISTERED" value="4" sub="3 active, 1 roadmap" accent="#3b82f6" />
-        <KpiCard label="INFERENCES TODAY" value="5,290" sub="Demo estimate" accent="#10b981" />
-        <KpiCard label="AVG LATENCY" value="510ms" sub="Weighted avg" accent="#b08d52" />
-        <KpiCard label="COST TODAY" value="$0" sub="Demo mode — no real calls" accent="#f59e0b" />
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-6">
-        <div>
-          <SectionTitle>Registered Models</SectionTitle>
-          <div className="flex flex-col gap-3">
-            {MODELS.map(m => (
-              <Card key={m.id}>
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <div className="font-medium text-sm" style={{ color: 'var(--color-a11oy-text)' }}>{m.name}</div>
-                    <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{m.provider}</div>
-                  </div>
-                  <span
-                    className="text-xs font-mono px-1.5 py-0.5 rounded"
-                    style={{ backgroundColor: `${STATUS_COLORS[m.status]}18`, color: STATUS_COLORS[m.status] }}
-                  >
-                    {m.status}
-                  </span>
-                </div>
-                <div className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-sub)' }}>{m.role}</div>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div>
-                    <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>cost</div>
-                    <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{m.cost}</div>
-                  </div>
-                  <div>
-                    <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>latency</div>
-                    <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{m.latency}</div>
-                  </div>
-                  <div>
-                    <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>routed</div>
-                    <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{m.routed.toLocaleString()}</div>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {m.domains.map(d => (
-                    <span key={d} className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: 'var(--color-a11oy-text-ghost)' }}>{d}</span>
-                  ))}
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <SectionTitle>Routing Rules</SectionTitle>
-          <div className="flex flex-col gap-2">
-            {ROUTING_RULES.map((r, i) => (
-              <Card key={i}>
-                <div className="text-xs font-mono mb-1" style={{ color: 'var(--color-a11oy-gold)' }}>IF: {r.condition}</div>
-                <div className="text-xs mb-0.5" style={{ color: 'var(--color-a11oy-text-sub)' }}>→ Route to: <span style={{ color: '#3b82f6' }}>{r.route}</span></div>
-                <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Reason: {r.reason}</div>
-              </Card>
-            ))}
+      {loading ? (
+        <div className="text-xs animate-pulse mb-8" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Loading model router…</div>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+            <KpiCard label="MODELS REGISTERED" value={String(models?.models.length ?? 0)} sub={`${activeModels.length} active, ${(models?.models.length ?? 0) - activeModels.length} roadmap`} accent="#3b82f6" />
+            <KpiCard label="INFERENCES TODAY" value={totalCallsToday.toLocaleString()} sub="Demo estimate" accent="#10b981" />
+            <KpiCard label="AVG LATENCY" value={`${avgLatency}ms`} sub="Active models" accent="#b08d52" />
+            <KpiCard label="COST TODAY" value="$0" sub="Demo mode — no real calls" accent="#f59e0b" />
           </div>
 
-          <div className="mt-4 p-3 rounded-lg text-xs" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
-            <DemoBadge /> All inference routing is illustrative. No real model API calls are made in demo mode. Recommendations are scripted demo content.
+          <div className="grid lg:grid-cols-2 gap-6 mb-8">
+            <div>
+              <SectionTitle>Model Profiles</SectionTitle>
+              <div className="flex flex-col gap-3">
+                {models?.models.map(m => (
+                  <Card key={m.id}>
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <div className="font-medium text-sm" style={{ color: 'var(--color-a11oy-text)' }}>{m.name}</div>
+                        <div className="text-xs" style={{ color: PROVIDER_COLORS[m.provider] ?? '#9bacc4' }}>{m.providerLabel}</div>
+                      </div>
+                      <StatusPill status={STATUS_MAP[m.status] ?? 'DEMO'} />
+                    </div>
+                    <p className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-sub)' }}>{m.role}</p>
+                    <div className="grid grid-cols-4 gap-2 text-xs mb-2">
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>latency</div><div style={{ color: 'var(--color-a11oy-text-sub)' }}>{m.avgLatencyMs}ms</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>today</div><div style={{ color: 'var(--color-a11oy-text-sub)' }}>{m.callsToday}</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>fail rate</div><div style={{ color: m.failureRate > 0.02 ? '#f59e0b' : '#10b981' }}>{(m.failureRate * 100).toFixed(1)}%</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>health</div><div style={{ color: m.healthScore >= 95 ? '#10b981' : m.healthScore >= 80 ? '#f59e0b' : '#9bacc4' }}>{m.healthScore}</div></div>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {m.routingModes.map(mode => (
+                        <span key={mode} className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: 'var(--color-a11oy-text-ghost)' }}>
+                          {MODE_LABELS[mode] ?? mode}
+                        </span>
+                      ))}
+                    </div>
+                    {m.fallbackEvents > 0 && (
+                      <div className="mt-1.5 text-xs" style={{ color: '#f59e0b' }}>⚠ {m.fallbackEvents} fallback event{m.fallbackEvents > 1 ? 's' : ''}</div>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <SectionTitle>Routing Policy</SectionTitle>
+              <div className="flex flex-col gap-2 mb-6">
+                {models?.routingPolicy.map(rule => (
+                  <Card key={rule.mode}>
+                    <div className="text-xs font-mono mb-0.5" style={{ color: 'var(--color-a11oy-gold)' }}>
+                      MODE: {MODE_LABELS[rule.mode] ?? rule.mode}
+                    </div>
+                    <div className="text-xs mb-0.5" style={{ color: 'var(--color-a11oy-text-sub)' }}>
+                      → <span style={{ color: '#3b82f6' }}>{rule.model}</span>
+                    </div>
+                    <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{rule.reason}</div>
+                  </Card>
+                ))}
+              </div>
+
+              {health && (
+                <>
+                  <SectionTitle>Provider Health</SectionTitle>
+                  <Card>
+                    <div className="text-xs mb-3 flex items-center gap-2">
+                      <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Active provider:</span>
+                      <span className="font-mono" style={{ color: PROVIDER_COLORS[health.activeProvider] ?? '#9bacc4' }}>{health.activeProvider}</span>
+                      <span className="text-xs px-1 rounded" style={{ backgroundColor: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}>demo mode</span>
+                    </div>
+                    <div className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                      Fallback chain: {health.fallbackChain.map((p, i) => (
+                        <span key={p}>
+                          <span style={{ color: PROVIDER_COLORS[p] ?? '#9bacc4' }}>{p}</span>
+                          {i < health.fallbackChain.length - 1 && <span style={{ color: 'var(--color-a11oy-text-ghost)' }}> → </span>}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="space-y-2 mt-3">
+                      {health.providers.map(p => (
+                        <div key={p.id} className="flex items-center justify-between text-xs">
+                          <span style={{ color: PROVIDER_COLORS[p.provider] ?? '#9bacc4' }}>{p.name}</span>
+                          <div className="flex items-center gap-2">
+                            <span style={{ color: p.healthScore >= 90 ? '#10b981' : p.healthScore >= 70 ? '#f59e0b' : '#9bacc4' }}>{p.healthScore > 0 ? `${p.healthScore}%` : 'unavailable'}</span>
+                            <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.latencyMs}ms</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-3 text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                      Last check: {new Date(health.lastHealthCheck).toLocaleTimeString('en-US')}
+                    </div>
+                  </Card>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      </div>
+
+          <div className="p-3 rounded-lg text-xs" style={{ backgroundColor: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
+            <DemoBadge /> Demo mode — all inference routing is illustrative. Provider keys are read from environment variables; missing keys fall back to mock provider. No real model API calls.
+          </div>
+        </>
+      )}
     </Layout>
   );
 }

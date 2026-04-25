@@ -1,112 +1,189 @@
+import { useState, useEffect } from 'react';
+import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, DemoBadge, StatusPill } from '../components/ui';
 
-const SOVEREIGN_MODES = [
-  {
-    id: 'cloud-managed', name: 'Cloud Managed', status: 'LIVE' as const,
-    description: 'A11oy hosted infrastructure. Model calls via API. Proof Ledger on managed store.',
-    pros: ['Fastest deployment', 'Automatic updates', 'No infra overhead'],
-    cons: ['Data leaves premises', 'API key dependency', 'Shared tenancy'],
-    current: true,
-  },
-  {
-    id: 'vpc-isolated', name: 'VPC Isolated', status: 'ROADMAP' as const,
-    description: 'A11oy deployed in customer VPC. Data stays within cloud boundary. Model calls internal.',
-    pros: ['Data sovereignty within cloud', 'Private endpoints', 'Network isolation'],
-    cons: ['Infra management required', 'Higher cost', 'Deployment complexity'],
-    current: false,
-  },
-  {
-    id: 'on-prem', name: 'On-Premises / Air-Gapped', status: 'ROADMAP' as const,
-    description: 'Full on-premises deployment. No external network calls. Local model inference (Llama 3 or equivalent).',
-    pros: ['True data sovereignty', 'No external deps', 'Defense/gov certified posture'],
-    cons: ['Highest complexity', 'GPU infra required', 'Manual update cycle'],
-    current: false,
-  },
+const API = '/api/a11oy';
+const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+function b(path: string) { return `${BASE}${path}`; }
+
+interface SovereignSummary {
+  tenants: number;
+  models: { registered: number; active: number };
+  evals: { total: number; passed: number; blocked: number };
+  replays: { total: number; successful: number; failed: number };
+  connectors: { total: number; approved: number; blocked: number };
+  twins: { total: number; highRisk: number };
+  skills: { total: number; live: number };
+  boardPackets: number;
+  telemetry: { spans: number; blockedSpans: number };
+  lastRegenerated: string;
+  selfTestStatus: string;
+  demoMode: boolean;
+}
+
+interface SelfTestResult {
+  passed: number; warned: number; failed: number; total: number;
+  overallStatus: string;
+  tests: Array<{ name: string; status: string; detail: string }>;
+}
+
+const NAV_LINKS = [
+  { href: '/model-router', label: 'Model Router', icon: '⬡', description: 'Provider status, routing policy, latency, cost' },
+  { href: '/evals', label: 'MirrorEval 2.0', icon: '◎', description: '14-dimension eval dashboard, regression suite' },
+  { href: '/replay', label: 'Workcell Replay', icon: '▶', description: 'Flight recorder, timeline, failure classification' },
+  { href: '/connectors', label: 'Connector Firewall', icon: '⊕', description: 'Registry, trust scores, injection blocking' },
+  { href: '/twins', label: 'Twin Foundry', icon: '◈', description: 'Business twins, drift map, simulation' },
+  { href: '/skills', label: 'Skill Library', icon: '∿', description: '15 named skills, run-demo, policy links' },
+  { href: '/boardroom', label: 'Boardroom Mode', icon: '◇', description: 'Board packets, executive snapshot' },
+  { href: '/trust', label: 'Trust Center', icon: '⚖', description: 'Security posture, human-gated autonomy' },
+  { href: '/investor-demo', label: 'Investor Demo', icon: '▸', description: '12-step guided product story' },
 ];
 
-const DATA_CLASSIFICATION = [
-  { label: 'Signal data', classification: 'Stays within workcell boundary', sovereign: true },
-  { label: 'Proof Ledger entries', classification: 'Immutable, tenant-isolated store', sovereign: true },
-  { label: 'Model inference payloads', classification: 'Transmitted to model API (cloud mode)', sovereign: false },
-  { label: 'Approval records', classification: 'Stays within workcell boundary', sovereign: true },
-  { label: 'Policy configurations', classification: 'Stays within workcell boundary', sovereign: true },
-];
+const ST_COLOR: Record<string, string> = { passed: '#10b981', warning: '#f59e0b', failed: '#ef4444' };
+const ST_ICON: Record<string, string> = { passed: '✓', warning: '⚠', failed: '✗' };
 
 export function Sovereign() {
+  const [summary, setSummary] = useState<SovereignSummary | null>(null);
+  const [selfTest, setSelfTest] = useState<SelfTestResult | null>(null);
+  const [selfTestLoading, setSelfTestLoading] = useState(false);
+  const [regenLoading, setRegenLoading] = useState(false);
+  const [regenDone, setRegenDone] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API}/sovereign/summary`)
+      .then(r => r.json())
+      .then(d => { if (d.ok) setSummary(d.data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  function runSelfTest() {
+    setSelfTestLoading(true);
+    setSelfTest(null);
+    fetch(`${API}/selftest/run`, { method: 'POST' })
+      .then(r => r.json())
+      .then(d => { if (d.ok) setSelfTest(d.data); })
+      .catch(() => {})
+      .finally(() => setSelfTestLoading(false));
+  }
+
+  function regenerate() {
+    setRegenLoading(true);
+    fetch(`${API}/demo/regenerate`, { method: 'POST' })
+      .then(r => r.json())
+      .then(d => { if (d.ok) { setRegenDone(true); setTimeout(() => setRegenDone(false), 4000); } })
+      .catch(() => {})
+      .finally(() => setRegenLoading(false));
+  }
+
   return (
     <Layout>
       <PageHeader
-        label="SOVEREIGN"
-        title="On-Premises & Air-Gapped Posture"
-        subtitle="A11oy's sovereignty roadmap — from cloud-managed to fully air-gapped deployment. Defense and government clients require full on-premises posture."
+        label="SOVEREIGN EXECUTION LAB"
+        title="Governed Execution Fabric"
+        subtitle="A11oy is the governed execution fabric where enterprise signals, agents, tools, people, policies, and proof operate as one controlled system."
         status="DEMO"
       />
 
-      <div className="p-4 rounded-lg mb-8 border" style={{ backgroundColor: 'rgba(139,92,246,0.06)', borderColor: 'rgba(139,92,246,0.25)' }}>
-        <div className="text-sm font-semibold mb-1" style={{ color: '#8b5cf6' }}>Current Deployment Mode</div>
-        <div className="text-sm" style={{ color: 'var(--color-a11oy-text-sub)' }}>
-          This prototype runs in cloud-managed mode with demo data. VPC-isolated and on-premises deployment modes are on the roadmap — explicitly labeled, not claimed as current capability.
+      <div className="flex items-center gap-3 mb-6 flex-wrap">
+        <button
+          onClick={regenerate} disabled={regenLoading}
+          className="text-xs px-3 py-1.5 rounded font-medium"
+          style={{ backgroundColor: 'rgba(139,92,246,0.15)', color: '#8b5cf6', border: '1px solid rgba(139,92,246,0.3)', opacity: regenLoading ? 0.6 : 1 }}
+        >
+          {regenLoading ? 'Regenerating…' : regenDone ? '✓ Regenerated' : 'Regenerate Demo Enterprise'}
+        </button>
+        <button
+          onClick={runSelfTest} disabled={selfTestLoading}
+          className="text-xs px-3 py-1.5 rounded font-medium"
+          style={{ backgroundColor: 'rgba(59,130,246,0.12)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.25)', opacity: selfTestLoading ? 0.6 : 1 }}
+        >
+          {selfTestLoading ? 'Running tests…' : 'Run Sovereign Self-Test'}
+        </button>
+        {summary && (
+          <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+            Regenerated: {new Date(summary.lastRegenerated).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+          </span>
+        )}
+      </div>
+
+      {selfTest && (
+        <div className="mb-8 p-4 rounded-lg border" style={{ backgroundColor: 'rgba(16,185,129,0.04)', borderColor: 'rgba(16,185,129,0.2)' }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-sm font-semibold" style={{ color: ST_COLOR[selfTest.overallStatus] ?? '#10b981' }}>
+              Sovereign Self-Test — {selfTest.overallStatus.toUpperCase()} · {selfTest.passed}/{selfTest.total}
+            </div>
+            <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{selfTest.warned} warned · {selfTest.failed} failed</div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-1 max-h-52 overflow-y-auto">
+            {selfTest.tests.map((t, i) => (
+              <div key={i} className="flex items-start gap-2 text-xs">
+                <span style={{ color: ST_COLOR[t.status] ?? '#9bacc4', flexShrink: 0 }}>{ST_ICON[t.status] ?? '?'}</span>
+                <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{t.name}</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <KpiCard label="CLOUD MANAGED" value="LIVE" sub="Current demo posture" accent="#10b981" />
-        <KpiCard label="VPC ISOLATED" value="ROADMAP" sub="Phase 3" accent="#9bacc4" />
-        <KpiCard label="AIR-GAPPED" value="ROADMAP" sub="Phase 4" accent="#9bacc4" />
-      </div>
+      {loading ? (
+        <div className="text-xs mb-8 animate-pulse" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Loading telemetry rollup…</div>
+      ) : summary ? (
+        <>
+          <SectionTitle>Telemetry Rollup — Phase 3</SectionTitle>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
+            <KpiCard label="DEMO TENANTS" value={String(summary.tenants)} sub="Synthetic enterprise" accent="#8b5cf6" />
+            <KpiCard label="MODELS ACTIVE" value={String(summary.models.active)} sub={`${summary.models.registered} registered`} accent="#3b82f6" />
+            <KpiCard label="EVAL RESULTS" value={String(summary.evals.total)} sub={`${summary.evals.passed} pass · ${summary.evals.blocked} blocked`} accent="#10b981" />
+            <KpiCard label="REPLAYS" value={String(summary.replays.total)} sub={`${summary.replays.successful} success · ${summary.replays.failed} failed`} accent="#f59e0b" />
+            <KpiCard label="CONNECTORS" value={String(summary.connectors.total)} sub={`${summary.connectors.blocked} blocked`} accent="#ef4444" />
+            <KpiCard label="BUSINESS TWINS" value={String(summary.twins.total)} sub={`${summary.twins.highRisk} high risk`} accent="#b08d52" />
+            <KpiCard label="SKILLS" value={String(summary.skills.total)} sub={`${summary.skills.live} live`} accent="#6366f1" />
+            <KpiCard label="BOARD PACKETS" value={String(summary.boardPackets)} sub="5 tenants" accent="#ec4899" />
+            <KpiCard label="TRACE SPANS" value={String(summary.telemetry.spans)} sub={`${summary.telemetry.blockedSpans} blocked`} accent="#9bacc4" />
+            <KpiCard label="SELF-TEST" value={summary.selfTestStatus.toUpperCase()} sub="All gates" accent="#10b981" />
+          </div>
+        </>
+      ) : null}
 
-      <div className="grid lg:grid-cols-3 gap-4 mb-8">
-        {SOVEREIGN_MODES.map(mode => (
-          <Card key={mode.id} className={mode.current ? 'ring-1 ring-blue-500/30' : ''}>
-            <div className="flex items-start justify-between mb-3">
-              <div className="font-semibold text-sm" style={{ color: 'var(--color-a11oy-text)' }}>{mode.name}</div>
-              <StatusPill status={mode.status} />
-            </div>
-            <p className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-sub)' }}>{mode.description}</p>
-            <div className="space-y-1">
-              {mode.pros.map(p => (
-                <div key={p} className="flex items-center gap-2 text-xs">
-                  <span style={{ color: '#10b981' }}>+</span>
-                  <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{p}</span>
+      <SectionTitle>Sovereign Sub-Surfaces</SectionTitle>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
+        {NAV_LINKS.map(link => (
+          <Link key={link.href} href={b(link.href)}>
+            <Card className="cursor-pointer hover:opacity-80 transition-opacity">
+              <div className="flex items-center gap-3">
+                <span className="text-xl" style={{ color: 'var(--color-a11oy-gold)' }}>{link.icon}</span>
+                <div>
+                  <div className="text-sm font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{link.label}</div>
+                  <div className="text-xs mt-0.5" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{link.description}</div>
                 </div>
-              ))}
-              {mode.cons.map(c => (
-                <div key={c} className="flex items-center gap-2 text-xs">
-                  <span style={{ color: '#f59e0b' }}>−</span>
-                  <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{c}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
+              </div>
+            </Card>
+          </Link>
         ))}
       </div>
 
-      <SectionTitle>Data Classification</SectionTitle>
-      <div className="flex flex-col gap-2 mb-6">
-        {DATA_CLASSIFICATION.map(d => (
-          <Card key={d.label}>
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <div className="text-sm font-medium" style={{ color: 'var(--color-a11oy-text)' }}>{d.label}</div>
-                <div className="text-xs mt-0.5" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{d.classification}</div>
-              </div>
-              <span
-                className="text-xs font-mono px-2 py-0.5 rounded flex-shrink-0"
-                style={{
-                  backgroundColor: d.sovereign ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
-                  color: d.sovereign ? '#10b981' : '#f59e0b',
-                }}
-              >
-                {d.sovereign ? 'stays local' : 'leaves boundary'}
-              </span>
+      <SectionTitle>Deployment Posture</SectionTitle>
+      <div className="grid md:grid-cols-3 gap-4 mb-6">
+        {[
+          { label: 'Cloud Managed', status: 'LIVE' as const, desc: 'Current demo posture. A11oy hosted. Demo data only.' },
+          { label: 'VPC Isolated', status: 'ROADMAP' as const, desc: 'Customer VPC deployment — data stays within cloud boundary.' },
+          { label: 'Air-Gapped', status: 'ROADMAP' as const, desc: 'Full on-premises. Local model inference. Defense/gov posture.' },
+        ].map(m => (
+          <Card key={m.label}>
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-sm font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{m.label}</div>
+              <StatusPill status={m.status} />
             </div>
+            <p className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>{m.desc}</p>
           </Card>
         ))}
       </div>
 
       <div className="p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
-        <DemoBadge /> Sovereign deployment modes are roadmap items. Current prototype is cloud-managed with demo data.
+        <DemoBadge /> Phase 3 — Sovereign Execution Lab. All data is seeded and deterministic. No real connector calls, LLM API calls, or destructive actions are made.
       </div>
     </Layout>
   );

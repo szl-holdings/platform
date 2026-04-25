@@ -27,6 +27,7 @@ import * as crossPlatform from "./groups/cross-platform";
 import decisionsRuntimeRouter from "./decisions-runtime";
 import a11oyFabricRouter from "./a11oy-fabric-api";
 import a11oyRuntimeRouter from "./a11oy-runtime-api.js";
+import a11oySovereignRouter from "./a11oy-sovereign-api.js";
 
 const router: IRouter = Router();
 
@@ -116,6 +117,11 @@ router.use(lazyMatch("/crisis-arena", () => import("./crisis-arena"), "crisis-ar
 // Exact paths are whitelisted in global-auth-enforcer.ts.
 router.use(lazyMatch("/lyte", () => import("./lyte-surfaces"), "lyte-surfaces"));
 router.use(lazyMatch("/lyte", () => import("./lyte-intel"), "lyte-intel"));
+
+// A11oy Sovereign API (Phase 3) — Sovereign Execution Lab endpoints.
+// model-router, MirrorEval 2.0, replay, connector firewall, twin foundry, skills, boardroom, trust center.
+// Note: routes/index.ts is mounted at /api in app.ts, so this resolves to /api/a11oy/*.
+router.use('/a11oy', a11oySovereignRouter);
 
 // A11oy Runtime API (Phase 2) — mutating endpoints, operators, MirrorEval, PCE gate, Workcells, Skills.
 // Mounted BEFORE the Phase 1 fabric router so runtime routes take precedence when paths overlap.
