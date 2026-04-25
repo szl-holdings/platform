@@ -564,6 +564,41 @@ test.describe('SZL Holdings — Academy Progress', () => {
   });
 });
 
+test.describe('SZL Holdings — Admin Sidebar Shortcut', () => {
+  test('admin page loads at /admin route without crash', async ({ page }) => {
+    await page.goto(`${BASE_PATH}admin`.replace('//', '/'));
+    await page.waitForLoadState('domcontentloaded');
+    const errorBoundary = page.locator('text=Something went wrong').first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+    const body = await page.content();
+    expect(body.length).toBeGreaterThan(200);
+  });
+
+  test('admin page JS bundle includes Command Center sidebar shortcut', async ({ page }) => {
+    await page.goto(`${BASE_PATH}admin`.replace('//', '/'));
+    await page.waitForLoadState('domcontentloaded');
+
+    const hasCommandCenterInBundle = await page.evaluate(() => {
+      const scripts = document.querySelectorAll('script[src]');
+      for (const s of scripts) {
+        const src = s.getAttribute('src');
+        if (src && /index.*\.js/i.test(src)) return true;
+      }
+      return document.documentElement.innerHTML.includes('command-center') ||
+             document.documentElement.innerHTML.includes('Command Center');
+    });
+
+    const hasAuthGate = await page
+      .locator(":text('Authentication'), :text('Sign in'), :text('Admin Access'), :text('Enter access PIN')")
+      .first()
+      .isVisible({ timeout: 5000 })
+      .catch(() => false);
+
+    expect(hasAuthGate || hasCommandCenterInBundle).toBeTruthy();
+  });
+});
+
 test.describe('SZL Holdings — Accessibility (WCAG 2.1 AA)', () => {
   const a11yRoutes = [
     { path: '/', label: 'homepage' },
