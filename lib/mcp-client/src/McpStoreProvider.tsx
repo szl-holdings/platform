@@ -22,6 +22,7 @@ const McpStoreContext = createContext<McpStoreContextValue | null>(null);
 
 const STORAGE_KEY = 'szl_mcp_servers';
 const NATIVE_SERVER_ID = 'alloy-native';
+const HF_MCP_SERVER_ID = 'huggingface-mcp';
 
 function getBaseUrl(): string {
   if (typeof window !== 'undefined') {
@@ -68,9 +69,19 @@ export function McpStoreProvider({
     isConnected: true,
   };
 
+  const hfMcpServer: McpServerConfig = {
+    id: HF_MCP_SERVER_ID,
+    name: 'HuggingFace MCP',
+    url: `${baseUrl}/api/hf-mcp`,
+    transport: 'http',
+    description: 'HuggingFace model hub — search models, datasets, papers, and spaces via MCP protocol',
+    isNative: true,
+    isConnected: true,
+  };
+
   const [servers, setServers] = useState<McpServerConfig[]>(() => {
     const saved = loadServers().filter((s) => !s.isNative);
-    return [nativeServer, ...saved];
+    return [nativeServer, hfMcpServer, ...saved];
   });
 
   const [connections, setConnections] = useState<Record<string, McpConnectionState>>({
@@ -78,6 +89,12 @@ export function McpStoreProvider({
       status: 'connected',
       serverUrl: mcpBaseUrl,
       serverName: 'Counsel MCP Server',
+      lastPing: new Date(),
+    },
+    [HF_MCP_SERVER_ID]: {
+      status: 'connected',
+      serverUrl: `${baseUrl}/api/hf-mcp`,
+      serverName: 'HuggingFace MCP',
       lastPing: new Date(),
     },
   });
@@ -127,7 +144,7 @@ export function McpStoreProvider({
   }, []);
 
   const removeServer = useCallback((id: string) => {
-    if (id === NATIVE_SERVER_ID) return;
+    if (id === NATIVE_SERVER_ID || id === HF_MCP_SERVER_ID) return;
     setServers((prev) => {
       const next = prev.filter((s) => s.id !== id);
       saveServers(next.filter((s) => !s.isNative));

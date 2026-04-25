@@ -210,6 +210,8 @@ router.use(
 );
 router.use(lazyMatch("/mcp-gateway", () => import("./mcp-gateway"), "mcp-gateway"));
 
+router.use(lazyMatch("/hf-mcp", () => import("./hf-mcp-proxy"), "hf-mcp-proxy"));
+
 core.register(router);
 vessels.register(router);
 security.register(router);

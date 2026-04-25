@@ -151,6 +151,7 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/helios/scanners",
   "/api/helios/memos",
   "/api/helios/frontier-briefing",
+  "/api/hf-mcp/health",
 ]);
 
 const PUBLIC_PREFIXES = [

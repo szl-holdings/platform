@@ -87,6 +87,8 @@ export const DOMAIN_TOOLS: Record<McpDomain, string[]> = {
     'alloy_research',
     'get_market_overview',
     'get_property_analysis',
+    'hf_search_models',
+    'hf_search_datasets',
   ],
   'carlota-jo': [
     'alloy_create_artifact',
@@ -104,7 +106,14 @@ export const DOMAIN_TOOLS: Record<McpDomain, string[]> = {
     'get_platform_status',
   ],
   stephen: ['alloy_research', 'alloy_create_artifact', 'get_platform_info'],
-  global: [],
+  global: [
+    'hf_search_models',
+    'hf_search_datasets',
+    'hf_search_papers',
+    'hf_search_spaces',
+    'hf_get_model_info',
+    'hf_get_dataset_info',
+  ],
 };
 
 export const BUILT_IN_MCP_TOOLS: McpTool[] = [
@@ -282,6 +291,89 @@ export const BUILT_IN_MCP_TOOLS: McpTool[] = [
       required: ['region'],
     },
     domain: ['terra'],
+    approvalClass: 'auto',
+  },
+  {
+    name: 'hf_search_models',
+    description: 'Search HuggingFace model hub for ML models by query, task, or library',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query' },
+        task: { type: 'string', description: 'Filter by ML task' },
+        limit: { type: 'string', description: 'Max results (default 5)' },
+      },
+      required: ['query'],
+    },
+    domain: ['global'],
+    approvalClass: 'auto',
+  },
+  {
+    name: 'hf_search_datasets',
+    description: 'Search HuggingFace datasets hub for training and evaluation datasets',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query' },
+        limit: { type: 'string', description: 'Max results (default 5)' },
+      },
+      required: ['query'],
+    },
+    domain: ['global'],
+    approvalClass: 'auto',
+  },
+  {
+    name: 'hf_search_papers',
+    description: 'Search HuggingFace Daily Papers for recent ML/AI research',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query' },
+        limit: { type: 'string', description: 'Max results (default 5)' },
+      },
+      required: ['query'],
+    },
+    domain: ['global'],
+    approvalClass: 'auto',
+  },
+  {
+    name: 'hf_search_spaces',
+    description: 'Search HuggingFace Spaces for interactive ML demos and apps',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query' },
+        limit: { type: 'string', description: 'Max results (default 5)' },
+      },
+      required: ['query'],
+    },
+    domain: ['global'],
+    approvalClass: 'auto',
+  },
+  {
+    name: 'hf_get_model_info',
+    description: 'Get detailed info about a specific HuggingFace model',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        model_id: { type: 'string', description: 'Full model ID (e.g. meta-llama/Llama-3.1-8B-Instruct)' },
+      },
+      required: ['model_id'],
+    },
+    domain: ['global'],
+    approvalClass: 'auto',
+  },
+  {
+    name: 'hf_get_dataset_info',
+    description: 'Get detailed info about a specific HuggingFace dataset',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dataset_id: { type: 'string', description: 'Full dataset ID' },
+      },
+      required: ['dataset_id'],
+    },
+    domain: ['global'],
     approvalClass: 'auto',
   },
 ];

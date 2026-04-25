@@ -463,6 +463,88 @@ const PLATFORM_TOOLS: McpTool[] = [
   },
 ];
 
+const HF_MCP_TOOLS: McpTool[] = [
+  {
+    name: 'hf_search_models',
+    description:
+      'Search HuggingFace model hub for ML models by query, task, or library — returns model cards, download counts, and metadata',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query (e.g. "code generation", "text-to-image")' },
+        author: { type: 'string', description: 'Filter by author/organization (e.g. "meta-llama", "mistralai")' },
+        task: { type: 'string', description: 'Filter by task (e.g. "text-generation", "image-classification")' },
+        limit: { type: 'number', description: 'Max results to return (default 5)' },
+      },
+      required: ['query'],
+    },
+  },
+  {
+    name: 'hf_search_datasets',
+    description:
+      'Search HuggingFace datasets hub — find training/evaluation datasets by topic, task, or size',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query (e.g. "medical QA", "code instructions")' },
+        author: { type: 'string', description: 'Filter by author/organization' },
+        limit: { type: 'number', description: 'Max results (default 5)' },
+      },
+      required: ['query'],
+    },
+  },
+  {
+    name: 'hf_search_papers',
+    description:
+      'Search HuggingFace Daily Papers — find recent ML/AI research papers by topic or keyword',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Paper search query (e.g. "reasoning", "diffusion models")' },
+        limit: { type: 'number', description: 'Max results (default 5)' },
+      },
+      required: ['query'],
+    },
+  },
+  {
+    name: 'hf_search_spaces',
+    description:
+      'Search HuggingFace Spaces — find interactive ML demos, apps, and Gradio/Streamlit deployments',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query (e.g. "image segmentation demo")' },
+        limit: { type: 'number', description: 'Max results (default 5)' },
+      },
+      required: ['query'],
+    },
+  },
+  {
+    name: 'hf_get_model_info',
+    description:
+      'Get detailed information about a specific HuggingFace model — model card, config, files, tags, and download stats',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        model_id: { type: 'string', description: 'Full model ID (e.g. "meta-llama/Llama-3.1-8B-Instruct")' },
+      },
+      required: ['model_id'],
+    },
+  },
+  {
+    name: 'hf_get_dataset_info',
+    description:
+      'Get detailed information about a specific HuggingFace dataset — card, features, splits, and statistics',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dataset_id: { type: 'string', description: 'Full dataset ID (e.g. "HuggingFaceFW/fineweb")' },
+      },
+      required: ['dataset_id'],
+    },
+  },
+];
+
 const DATA_TOOLS: McpTool[] = [
   {
     name: 'query_holdings_ecosystem',
@@ -495,7 +577,7 @@ const DATA_TOOLS: McpTool[] = [
   },
 ];
 
-const ALL_TOOLS: McpTool[] = [...DOMAIN_TOOLS, ...PLATFORM_TOOLS, ...DATA_TOOLS];
+const ALL_TOOLS: McpTool[] = [...DOMAIN_TOOLS, ...PLATFORM_TOOLS, ...DATA_TOOLS, ...HF_MCP_TOOLS];
 
 const MCP_RESOURCES: McpResource[] = [
   {
@@ -522,6 +604,13 @@ const MCP_RESOURCES: McpResource[] = [
     uri: 'alloy://workflows/templates',
     name: 'Workflow Templates',
     description: 'Available workflow definitions and their configuration schemas',
+    mimeType: 'application/json',
+  },
+  {
+    uri: 'huggingface://mcp/catalog',
+    name: 'HuggingFace MCP Tool Catalog',
+    description:
+      'Live tool catalog from the HuggingFace remote MCP server — model search, dataset search, paper search, spaces',
     mimeType: 'application/json',
   },
 ];
@@ -1106,6 +1195,18 @@ async function executeTool(
       const snapshot = await connectorHub.getSnapshot();
       return { tool: toolName, snapshot };
     }
+    case 'hf_search_models':
+    case 'hf_search_datasets':
+    case 'hf_search_papers':
+    case 'hf_search_spaces':
+    case 'hf_get_model_info':
+    case 'hf_get_dataset_info': {
+      const { callHfTool } = await import('./hf-mcp-proxy');
+      const hfToolName = toolName.replace(/^hf_/, '');
+      const result = await callHfTool(hfToolName, toolArgs);
+      return { tool: toolName, source: 'huggingface-mcp', result };
+    }
+
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }
@@ -1286,6 +1387,29 @@ async function readResource(uri: string, _token?: string): Promise<unknown> {
         .orderBy(alloyWorkflowsTable.name)
         .limit(100);
       return { uri, workflows, count: workflows.length, mimeType: 'application/json' };
+    }
+    case 'huggingface://mcp/catalog': {
+      try {
+        const { discoverHfMcpTools } = await import('./hf-mcp-proxy');
+        const tools = await discoverHfMcpTools();
+        return {
+          uri,
+          server: 'huggingface-mcp',
+          endpoint: 'https://huggingface.co/mcp',
+          tools,
+          count: tools.length,
+          mimeType: 'application/json',
+        };
+      } catch {
+        return {
+          uri,
+          server: 'huggingface-mcp',
+          tools: HF_MCP_TOOLS,
+          count: HF_MCP_TOOLS.length,
+          note: 'Returned static tool definitions — live discovery failed',
+          mimeType: 'application/json',
+        };
+      }
     }
     default:
       throw new Error(`Unknown resource URI: ${uri}`);
