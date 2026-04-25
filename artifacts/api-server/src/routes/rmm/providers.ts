@@ -14,6 +14,7 @@ import { logger } from '../../lib/logger';
 import {
   listQuerySchema,
   rmmProviderCreateSchema,
+  rmmProviderUpdateSchema,
   validateBody,
   validateQuery,
 } from '../../lib/validation';
@@ -105,16 +106,7 @@ router.patch(
   '/rmm/providers/:id',
   authWrite,
   roleAdmin,
-  validateBody(
-    bodyShape({
-      config: z.unknown().optional(),
-      mode: z.unknown().optional(),
-      name: z.unknown().optional(),
-      notes: z.unknown().optional(),
-      status: z.unknown().optional(),
-      syncIntervalMinutes: z.unknown().optional(),
-    }),
-  ),
+  validateBody(rmmProviderUpdateSchema),
   async (req, res) => {
     try {
       const id = parseInt(String(req.params.id), 10);

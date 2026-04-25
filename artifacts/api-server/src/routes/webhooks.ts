@@ -9,7 +9,7 @@ import {
   sendSuccess,
 } from '../lib/api-response';
 import { logger } from '../lib/logger';
-import { validateExternalUrl, validateExternalUrlSync } from '../lib/ssrf-guard';
+import { ssrfSafeFetch, validateExternalUrlSync } from '../lib/ssrf-guard';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
 
@@ -163,23 +163,6 @@ async function attemptWebhookDelivery(
   endpoint: WebhookEndpoint,
   retryAttempt = 1,
 ): Promise<void> {
-  // Re-validate URL with async DNS resolution before each delivery attempt.
-  // Catches hostnames that resolve to internal/private addresses (DNS rebinding)
-  // that sync validation at registration time cannot detect.
-  const urlCheck = await validateExternalUrl(endpoint.url);
-  if (!urlCheck.valid) {
-    delivery.status = 'failed';
-    delivery.error = `SSRF guard blocked delivery: ${urlCheck.reason}`;
-    delivery.deliveredAt = Date.now();
-    delivery.attempt = retryAttempt;
-    endpoint.failureCount++;
-    logger.error(
-      { endpointId: endpoint.id, url: endpoint.url, reason: urlCheck.reason },
-      'Webhook delivery blocked by SSRF guard (DNS-aware check)',
-    );
-    return;
-  }
-
   const bodyStr = JSON.stringify(delivery.payload);
   const signature = signPayload(bodyStr, endpoint.secret);
 
@@ -190,7 +173,10 @@ async function attemptWebhookDelivery(
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10_000);
 
-    const res = await fetch(endpoint.url, {
+    // ssrfSafeFetch resolves DNS once, verifies the resolved IP is not private,
+    // then connects directly to that pinned IP (with original hostname in Host/SNI).
+    // This eliminates the TOCTOU gap that would allow DNS rebinding attacks.
+    const res = await ssrfSafeFetch(endpoint.url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

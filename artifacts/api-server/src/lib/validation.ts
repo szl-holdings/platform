@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { Request, Response, NextFunction } from "express";
 import { sendBadRequest } from "./api-response";
+import { validateExternalUrlSync } from "./ssrf-guard";
 
 export const commonSchemas = {
   id: z.coerce.number().int().positive(),
@@ -820,12 +821,39 @@ export const rmmPlaybookUpdateSchema = z.object({
   confidenceThreshold: z.number().min(0).max(100).optional(),
 });
 
+const rmmBaseUrlSchema = z
+  .string()
+  .url("baseUrl must be a valid URL")
+  .refine(
+    (url) => validateExternalUrlSync(url).valid,
+    (url) => {
+      const result = validateExternalUrlSync(url);
+      return {
+        message: result.valid
+          ? "Invalid baseUrl"
+          : `RMM provider baseUrl rejected: ${result.reason}`,
+      };
+    },
+  );
+
+const rmmProviderConfigSchema = z
+  .object({
+    baseUrl: rmmBaseUrlSchema.optional(),
+    apiKey: z.string().max(1000).optional(),
+    clientId: z.string().max(500).optional(),
+    clientSecret: z.string().max(1000).optional(),
+    username: z.string().max(500).optional(),
+    password: z.string().max(1000).optional(),
+    companyId: z.string().max(500).optional(),
+  })
+  .optional();
+
 export const rmmProviderCreateSchema = z.object({
   name: z.string().min(1, "name is required").max(200).trim(),
   provider: z.string().min(1, "provider is required").max(100),
   mode: z.enum(["rmm", "both", "monitoring"]).optional(),
   authType: z.enum(["api_key", "oauth2", "basic"]).optional(),
-  config: z.record(z.unknown()).optional(),
+  config: rmmProviderConfigSchema,
   syncIntervalMinutes: z.number().int().positive().max(1440).optional(),
   notes: z.string().max(2000).trim().optional(),
 });
@@ -834,7 +862,7 @@ export const rmmProviderUpdateSchema = z.object({
   name: z.string().min(1).max(200).trim().optional(),
   mode: z.enum(["rmm", "both", "monitoring"]).optional(),
   status: z.enum(["active", "inactive", "error", "pending"]).optional(),
-  config: z.record(z.unknown()).optional(),
+  config: rmmProviderConfigSchema,
   syncIntervalMinutes: z.number().int().positive().max(1440).optional(),
   notes: z.string().max(2000).trim().optional(),
 });

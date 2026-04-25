@@ -1,4 +1,6 @@
 import dns from 'node:dns/promises';
+import https from 'node:https';
+import http from 'node:http';
 import type { Response } from 'express';
 import { sendBadRequest } from './api-response';
 
@@ -133,4 +135,106 @@ export async function assertExternalUrl(rawUrl: string, res: Response): Promise<
     return null;
   }
   return result.url;
+}
+
+/**
+ * SSRF-safe fetch that eliminates the DNS rebinding TOCTOU gap.
+ *
+ * Unlike the two-step pattern of validateExternalUrl() + fetch(), this
+ * function resolves DNS exactly once, verifies every returned address is
+ * public, and then opens the TCP connection directly to the pinned IP.
+ * The original hostname is preserved in the HTTP Host header and TLS SNI
+ * so the remote server sees a normal request.
+ *
+ * Throws an Error (never returns a failed-validation result) so callers
+ * can distinguish network errors from SSRF guard rejections if needed.
+ */
+export async function ssrfSafeFetch(
+  rawUrl: string,
+  init: {
+    method?: string;
+    headers?: Record<string, string>;
+    body?: string;
+    signal?: AbortSignal;
+  } = {},
+): Promise<{ ok: boolean; status: number }> {
+  const syncResult = validateExternalUrlSync(rawUrl);
+  if (!syncResult.valid) {
+    throw new Error(`SSRF guard: ${syncResult.reason}`);
+  }
+
+  const { url } = syncResult;
+
+  let resolved: Array<{ address: string; family: number }>;
+  try {
+    resolved = await dns.lookup(url.hostname, { all: true });
+  } catch {
+    throw new Error('SSRF guard: hostname could not be resolved');
+  }
+
+  if (!resolved || resolved.length === 0) {
+    throw new Error('SSRF guard: hostname could not be resolved');
+  }
+
+  for (const { address } of resolved) {
+    if (isPrivateIp(address)) {
+      throw new Error(
+        `SSRF guard: hostname resolves to a private/internal IP address (${address}) — SSRF protection block`,
+      );
+    }
+  }
+
+  const { address: pinnedIp, family } = resolved[0];
+
+  const port = url.port
+    ? parseInt(url.port, 10)
+    : url.protocol === 'https:'
+      ? 443
+      : 80;
+
+  const requestPath = (url.pathname || '/') + (url.search || '');
+
+  const requestHeaders: Record<string, string> = {
+    ...(init.headers ?? {}),
+    Host: url.hostname,
+  };
+
+  if (init.body) {
+    requestHeaders['Content-Length'] = String(Buffer.byteLength(init.body, 'utf8'));
+  }
+
+  return new Promise((resolve, reject) => {
+    const options: https.RequestOptions = {
+      hostname: pinnedIp,
+      port,
+      path: requestPath,
+      method: init.method ?? 'POST',
+      headers: requestHeaders,
+      servername: url.hostname,
+      family: family as 4 | 6,
+    };
+
+    const transport = url.protocol === 'https:' ? https : http;
+
+    const req = transport.request(options, (res) => {
+      res.resume();
+      resolve({
+        ok: res.statusCode !== undefined && res.statusCode >= 200 && res.statusCode < 300,
+        status: res.statusCode ?? 0,
+      });
+    });
+
+    req.on('error', reject);
+
+    if (init.signal) {
+      init.signal.addEventListener('abort', () => {
+        req.destroy(new Error('Request aborted'));
+      });
+    }
+
+    if (init.body) {
+      req.write(init.body);
+    }
+    req.end();
+  });
 }

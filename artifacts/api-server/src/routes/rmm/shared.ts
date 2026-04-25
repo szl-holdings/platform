@@ -2,6 +2,7 @@ import { db, } from '@szl-holdings/db';
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'node:crypto';
 import { sql } from 'drizzle-orm';
 import { logger } from '../../lib/logger';
+import { validateExternalUrlSync } from '../../lib/ssrf-guard';
 import { authMiddleware, requireRole } from '../../middlewares/auth';
 import type {
   RmmProviderConfig,
@@ -182,10 +183,25 @@ export function stripSecrets(config: Record<string, unknown>): Record<string, un
 
 export function buildProviderConfig(row: ConnectorRow): RmmProviderConfig {
   const cfg = decryptConfig(row.config);
+  const rawBaseUrl = cfg.baseUrl as string | undefined;
+
+  if (rawBaseUrl !== undefined) {
+    const check = validateExternalUrlSync(rawBaseUrl);
+    if (!check.valid) {
+      logger.error(
+        { connectorId: row.id, provider: row.provider, reason: check.reason },
+        'RMM connector baseUrl blocked by SSRF guard — rejecting provider instantiation',
+      );
+      throw new Error(
+        `Connector ${row.id} baseUrl is not a permitted external address: ${check.reason}`,
+      );
+    }
+  }
+
   return {
     provider: row.provider,
     authType: row.authType as RmmProviderConfig['authType'],
-    baseUrl: cfg.baseUrl as string | undefined,
+    baseUrl: rawBaseUrl,
     apiKey: cfg.apiKey as string | undefined,
     clientId: cfg.clientId as string | undefined,
     clientSecret: cfg.clientSecret as string | undefined,
