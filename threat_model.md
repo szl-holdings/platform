@@ -1,7 +1,7 @@
 # Threat Model
 
 **Platform:** SZL Holdings Governed Decision Infrastructure  
-**Last updated:** 2026-04-20  
+**Last updated:** 2026-04-25  
 **Scope:** Platform-level threat analysis covering all active artifacts, the API server, and supporting infrastructure. Customer-integration-specific threat modeling is out of scope.
 
 ---
@@ -20,6 +20,11 @@ SZL Holdings is a governed decision infrastructure platform delivered as a multi
 - Monorepo: pnpm, Turborepo, TypeScript project references
 
 **Users:** Enterprise operators, analysts, executive viewers, maritime ops, sales/delivery, and pilot customers across a shared multi-tenant PostgreSQL database. All tenants are logically isolated via `org_id` scoping.
+
+**Production scan assumptions:**
+- `NODE_ENV === "production"` for all findings proposed in this scan.
+- Mockup sandbox and other demo-only sandbox surfaces are out of scope unless production reachability is demonstrated.
+- `lib/shared-ui/src/PrivateAppGuard.tsx` is currently treated as non-production because the corresponding `/api/pulse/demo/*` bypasses are disabled in production.
 
 ---
 
@@ -79,11 +84,11 @@ SZL Holdings is a governed decision infrastructure platform delivered as a multi
 ```
 
 **Key data flow security invariants:**
-- Every flow from browser → API crosses `requireAuth` + `tenantScope` middleware
-- Database flows always carry `org_id`; Drizzle ORM prevents raw SQL interpolation
-- AI provider flows never carry raw customer PII in prompts (contract obligation)
-- Object storage flows use signed URLs with expiry; no public ACL permitted
-- Internal service flows require `ALLOY_INTERNAL_TOKEN`; verified with `crypto.timingSafeEqual` on HMAC digests across both `auth.ts::checkInternalToken` and `admin-guard.ts` (AF-001 resolved Apr-2026, Task #2693)
+- Most browser → API flows cross `globalAuthEnforcer`, but standalone and pre-auth-mounted surfaces require separate review (`/api/graphql/ws`, `/mcp/*`).
+- Tenant isolation depends on correct route-group use of `tenantScope` plus per-record/org ownership checks; it is not universal across all route families.
+- Object storage flows are private by default and tracked-file serving is scan-status gated; the older blanket “no virus scanning” assumption is stale.
+- Internal service flows require `ALLOY_INTERNAL_TOKEN` or a narrow loopback trust condition; any bypass that synthesizes elevated identity is a high-risk boundary.
+- Global third-party objects (Stripe customers/sessions, webhook destinations, RMM connector endpoints) must be explicitly bound or validated before server-side use.
 
 ---
 
@@ -132,16 +137,23 @@ SZL Holdings is a governed decision infrastructure platform delivered as a multi
 **Highest-risk code areas:**
 - `artifacts/api-server/src/routes/alloy-governance.ts` — AI policy mutation
 - `artifacts/api-server/src/routes/admin/` — Super-admin operations, impersonation
+- `artifacts/api-server/src/graphql/` — GraphQL HTTP/WS auth boundaries and directive-backed RBAC
 - `artifacts/api-server/src/routes/mcp.ts` — Agent Gateway tool calls (per-tool RBAC)
+- `artifacts/api-server/src/routes/mcp-gateway.ts` and `services/substrate-mcp-gateway/` — MCP governance plane, sidecar auth, SSE/discovery exposure
+- `artifacts/api-server/src/routes/nexus.ts` — Shared AI control plane and loopback orchestration
+- `artifacts/api-server/src/routes/alloy-chat.ts` — Tenantless persistence and cross-tenant chat/KB access
+- `artifacts/api-server/src/routes/fund-inbound-deals.ts` — Internal pipeline records and attachments exposed under baseline auth
+- `artifacts/api-server/src/routes/billing.ts` — Stripe object ownership verification
 - `artifacts/api-server/src/routes/vessels.ts` — Tenant isolation enforced via `tenantScope()` + `org_id` filters (AF-003, AF-007 resolved Apr-2026, Task #1048)
 - `artifacts/api-server/src/lib/ai-engine/src/retrieval/alloy-retrieval.ts` — Retrieval engine tenant filtering
 - `artifacts/api-server/src/routes/documents.ts` — File upload and object storage ACL
 
 **Public vs authenticated vs admin surfaces:**
-- Public: `/health`, `/api/health`, static frontend bundles
-- Authenticated: all `/api/*` routes except health
-- Admin-only: `/api/admin/*`, `/api/scim/v2/*`, backup export endpoint
-- Internal service: endpoints protected by `checkInternalToken` (X-Alloy-Token header)
+- Public intended surfaces: `/health`, `/api/health`, static frontend bundles, and the explicit allowlisted demo/marketing/webhook/discovery routes in `global-auth-enforcer.ts`
+- Authenticated-by-default surfaces: most `/api/*` routes after `globalAuthEnforcer`
+- High-risk special surfaces requiring separate review: `/api/graphql/ws` (standalone WebSocket server outside Express middleware) and `/mcp/*` (sidecar proxy mounted before API auth/CSRF)
+- Admin-only intended surfaces: `/api/admin/*`, `/api/scim/v2/*`, backup export endpoint, and selected governance/control-plane mutations
+- Internal service surfaces: endpoints protected by `checkInternalToken` or the narrow `nexus_loopback` bypass
 
 **Dev-only areas (ignore in production scan):**
 - `scripts/`, `packages/*/src/__tests__/`, `vitest.*.config.ts`, `.github/`
@@ -182,7 +194,7 @@ Every significant mutation generates an audit event in the `audit_log` table, re
 
 ### Information Disclosure
 
-Multi-tenant isolation is the most critical information disclosure surface. Four enforcement layers exist: `org_id` in every DB query, Drizzle ORM scoping, `tenantScope` middleware at the route level, and WebSocket channel prefixing. The previously open Vessels gap (AF-003, AF-007) was closed Apr-2026 (Task #1048) — `routes/vessels.ts` now applies `tenantScope()` + `org_id` filters and migration `0076_vessels_org_id.sql` adds the column at the DB level.
+Multi-tenant isolation is the most critical information disclosure surface. Four intended enforcement layers exist: `org_id` in every DB query, Drizzle ORM scoping, `tenantScope` middleware at the route level, and channel/stream filtering for live transports. The previously open Vessels gap (AF-003, AF-007) was closed Apr-2026 (Task #1048) — `routes/vessels.ts` now applies `tenantScope()` + `org_id` filters and migration `0076_vessels_org_id.sql` adds the column at the DB level. The backup export authority issue (AF-004) also appears fixed in `routes/backup.ts`. Current disclosure hotspots are route families that omit tenant scope or bind global platform objects to an authenticated caller without proving ownership (`alloy-chat`, billing, NEXUS, inbound deals, GraphQL subscriptions).
 
 **Guarantees required:**
 - Every database query that returns tenant-owned data MUST include a `WHERE org_id = ?` clause. The Drizzle ORM layer MUST enforce this; raw SQL bypasses are prohibited.
@@ -190,7 +202,10 @@ Multi-tenant isolation is the most critical information disclosure surface. Four
 - Connector credentials MUST be returned from the API only as masked values (e.g., `***`). Full plaintext credentials MUST NOT appear in API responses.
 - PII (email, user profiles) MUST NOT appear in application logs. Pino structured logging is enforced across all production paths.
 - IP addresses MUST be hashed before storage (`hashIp()` in `lib/audit/src/ip-hash.ts`). Raw IPs MUST NOT be persisted.
-- The backup export endpoint MUST verify that the requesting admin has authority over the requested `orgId` (AF-004 is an open P2 gap).
+- The backup export endpoint MUST verify that the requesting admin has authority over the requested `orgId` (AF-004 verified fixed in this scan; preserve this invariant).
+- Billing routes that accept Stripe identifiers (`customerId`, `sessionId`, email lookup) MUST bind returned objects to the caller's org before disclosure or mutation.
+- Long-lived event streams (GraphQL WS, MCP SSE) MUST authenticate clients and filter events by tenant and role before subscribing.
+- Shared AI control-plane stores (NEXUS memory/skills/tools/orchestrations) MUST persist creator or tenant ownership and enforce it on every read/write path.
 
 ### Denial of Service
 
@@ -210,7 +225,9 @@ RBAC is enforced by `requireRole` middleware on all admin, operator, and executi
 - Role assignment MUST require at least `operator` role for standard changes and `super_admin` for cross-tenant or platform-level changes.
 - Session invalidation MUST occur on role change. `revokeUserSessionsOnRoleChange()` is implemented (AF-010 resolved); it MUST be called on every role modification path including SCIM group changes.
 - Internal token verification MUST use a single, canonical `checkInternalToken()` function across all middlewares (AF-013: currently duplicated with divergent patterns — P2 open gap).
+- GraphQL role directives MUST be backed by actual resolver wrapping or equivalent runtime enforcement; SDL annotations alone are not a control.
 - The MCP Agent Gateway MUST enforce per-tool RBAC checks before invoking any external tool, regardless of the initiating agent's role context.
+- NEXUS and MCP governance/control-plane routes MUST require explicit privileged roles and tenant or ownership binding; baseline authenticated sessions are insufficient.
 - There MUST be no ORM-bypass paths that allow cross-tenant queries without explicit org scoping (AF-014: no ORM-layer guard — P2 open gap).
 
 ---
@@ -221,14 +238,23 @@ RBAC is enforced by `requireRole` middleware on all admin, operator, and executi
 |--------|-------------|----------|--------|
 | AF-001 | `adminGuard` uses non-timing-safe token comparison | P1 | ✅ Resolved Apr-2026 (Task #2693) |
 | AF-003 / AF-007 | Vessels routes and DB tables lack tenant scoping | P1 | ✅ Resolved Apr-2026 (Task #1048) |
-| AF-004 | Backup export accepts arbitrary `orgId` without authority check | P2 | Open |
-| AF-008 | `conversations` table missing `org_id` | P2 | Open |
+| AF-004 | Backup export accepts arbitrary `orgId` without authority check | P2 | ✅ Resolved Apr-2026 (verified 2026-04-25) |
+| AF-008 | `conversations` / AlloyChat persistence lacks `org_id` and is exposed via `/api/alloy-chat/*` | P2 | Open |
 | AF-012 | Sessions not invalidated on `SESSION_SECRET` rotation | P2 | Open |
 | AF-013 | Internal token verification duplicated with divergent patterns | P2 | Open |
 | AF-014 | No ORM-layer cross-tenant query guard | P2 | Open |
+| AF-015 | GraphQL role directives are declared but never enforced at runtime | P1 | Open |
+| AF-016 | GraphQL WebSocket subscriptions accept anonymous clients | P1 | Open |
+| AF-017 | Inbound deal records and attachments are readable/writable by any authenticated user | P1 | Open |
+| AF-018 | Billing routes trust arbitrary global Stripe identifiers without org ownership checks | P1 | Open |
+| AF-019 | RMM connector `baseUrl` is used in server-side fetches without SSRF validation | P2 | Open |
+| AF-020 | NEXUS shared control-plane stores have no tenant/owner/role scoping | P1 | Open |
+| AF-021 | NEXUS loopback orchestration bypass acts as a confused deputy into protected APIs | P1 | Open |
+| AF-022 | MCP gateway governance and proxy routes are reachable to any authenticated user | P1 | Open |
+| AF-023 | Substrate MCP sidecar GET auth bypass exposes `/mcp/sse` and discovery endpoints | P2 | Open |
 | KG009 | OTEL exporter not wired for production | P1 | Open |
-| KG020b | Webhook delivery URL SSRF validation absent | P1 | Open |
-| KG020c | No virus scanning on uploaded files | P2 | Open |
+| KG020b | Direct webhook SSRF validation exists, but DNS-rebinding TOCTOU remains in delivery | P2 | Open (refined 2026-04-25) |
+| KG020c | No virus scanning on uploaded files | P2 | ✅ Resolved Apr-2026 (verified 2026-04-25) |
 | KG020d | No field-level encryption for PII columns | P2 | Open |
 | KG026 | Platform-native MFA not implemented | P1 | Formally accepted — IdP-level MFA is current control |
 
