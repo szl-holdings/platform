@@ -42,6 +42,7 @@ import { seedMarineExtended } from './seed-marine-extended.js';
 import { seedOwnership } from './seed-ownership.js';
 import { seedPrismCounsel } from './seed-prism-counsel.js';
 import { seedPulse } from './seed-pulse.js';
+import { seedUptimeHistory } from './seed-uptime-history.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -134,6 +135,7 @@ async function main() {
   results.push(await runSeed('Carlota Jo Clients', seedCarlotaClients));
   results.push(await runSeed('Agent OS', seedAgentOS));
   results.push(await runSeed('Forge', seedForge));
+  results.push(await runSeed('Uptime History (90-day backfill)', seedUptimeHistory));
   results.push(runSeedScript('Capital & Certification', 'seed-capital-cert.ts'));
   results.push(runSeedScript('MSP Platform', 'seed-msp.ts'));
   results.push(runSeedScript('Marketing OS', 'seed-marketing-os.ts'));

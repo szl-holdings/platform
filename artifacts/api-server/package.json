@@ -16,6 +16,7 @@
     "seed:terra": "tsx src/scripts/seed-terra-distress.ts",
     "seed:ecosystem": "tsx src/scripts/seed-ecosystem.ts",
     "seed:alloy-runtime-agents": "tsx src/scripts/seed-alloy-runtime-agents.ts",
+    "seed:uptime-history": "tsx src/scripts/seed-uptime-history.ts",
     "smoke:cognitive-runtime": "tsx src/scripts/smoke-cognitive-runtime.ts",
     "generate:solution-briefs": "tsx src/scripts/generate-solution-briefs.ts",
     "generate:executive-brief-pdf": "tsx src/scripts/generate-executive-brief-pdf.ts",

@@ -1,5 +1,6 @@
 import {
   boolean,
+  index,
   integer,
   jsonb,
   pgTable,
@@ -9,13 +10,19 @@ import {
   timestamp,
 } from 'drizzle-orm/pg-core';
 
-export const platformStatusChecks = pgTable('platform_status_checks', {
-  id: serial('id').primaryKey(),
-  serviceId: text('service_id').notNull(),
-  status: text('status').notNull().default('operational'),
-  latencyMs: integer('latency_ms'),
-  checkedAt: timestamp('checked_at').notNull().defaultNow(),
-});
+export const platformStatusChecks = pgTable(
+  'platform_status_checks',
+  {
+    id: serial('id').primaryKey(),
+    serviceId: text('service_id').notNull(),
+    status: text('status').notNull().default('operational'),
+    latencyMs: integer('latency_ms'),
+    checkedAt: timestamp('checked_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('idx_status_checks_svc_ts').on(t.serviceId, t.checkedAt),
+  ],
+);
 
 export const platformPublicIncidents = pgTable('platform_incidents', {
   id: serial('id').primaryKey(),
