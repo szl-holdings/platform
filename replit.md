@@ -11,10 +11,10 @@ Do not make changes to the folder `Z`.
 Do not make changes to the file `Y`.
 
 ## System Architecture
-The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.js. It employs a micro-frontend architecture for web applications, managed through a shared gateway proxy. The system has evolved into the FORGE Execution and Evidence Platform (AEEP).
+The platform is a pnpm monorepo built with TypeScript 5.9, React 19, Vite, and Node.js. It employs a micro-frontend architecture for web applications managed through a shared gateway proxy and has evolved into the FORGE Execution and Evidence Platform (AEEP).
 
 **Core Architectural Primitives:**
-- **FORGE Execution Fabric:** Provides human-in-the-loop governance, an Outcome Graph, Proof Chain for audit, and Covenant Policy for permissions.
+- **FORGE Execution Fabric:** Provides human-in-the-loop governance, an Outcome Graph, Proof Chain, and Covenant Policy.
 - **Sovereign Execution Substrate (`@szl/substrate`):** A durable, governed, and replayable runtime for orchestration, planning, governance, and policy enforcement.
 - **Workflow Engine:** Orchestrates durable business processes.
 - **Event Fabric (PRISM Bus):** A cross-domain event bus.
@@ -24,15 +24,15 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 - **Living Signal Mesh & Evidence Graph:** Unifies event/signal handling with a 9-stage pipeline and `EvidenceStore`.
 - **Memory Fabric & FORGE Runtime:** Tiered memory layer with provenance, freshness, retention, and sensitivity tracking.
 
-**Monorepo Structure:** Organized into active/archived artifacts, shared infrastructure, and packages for business observability (ATLAS), AI Control Plane, and NVIDIA-Ready Modules. Drizzle ORM manages PostgreSQL schemas.
+**Monorepo Structure:** Organizes active/archived artifacts, shared infrastructure, and packages for business observability (ATLAS), AI Control Plane, and NVIDIA-Ready Modules. Drizzle ORM manages PostgreSQL schemas.
 
-**UI/UX and Design System (v2):** The Governed-Intelligence Design Language v2 (`@szl-holdings/design-system`) is the single visual source of truth, defining an enterprise accent palette, typography, spacing, and UI components. It adheres to strict design constraints: no neon/glow, max heading size 24px, max motion duration 200ms, and all color values referencing tokens. Authenticated product surfaces are evidence-first.
+**UI/UX and Design System (v2):** The Governed-Intelligence Design Language v2 (`@szl-holdings/design-system`) is the single visual source of truth, defining an enterprise accent palette, typography, spacing, and UI components. It adheres to strict design constraints (e.g., no neon/glow, max heading size 24px, max motion duration 200ms) and ensures all authenticated product surfaces are evidence-first.
 
-**One-of-One Platform Shell:** Unifies user interfaces across applications with shared modules, including an intelligence rail, agent run card, and command palette.
+**One-of-One Platform Shell:** Unifies user interfaces across applications with shared modules like an intelligence rail, agent run card, and command palette.
 
 **API Layers:** Includes REST API, GraphQL API (Apollo Server), and an MCP Gateway.
 
-**AI Infrastructure:** Features a multi-provider AI backend (OpenAI, Anthropic, Gemini), AI evaluation infrastructure, an AI Ops Dashboard, and NVIDIA-Ready Packages.
+**AI Infrastructure:** Features a multi-provider AI backend, AI evaluation infrastructure, an AI Ops Dashboard, and NVIDIA-Ready Packages.
 
 **Forge – AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents.
 
@@ -42,11 +42,9 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 
 **KORA – Decision Intelligence:** A flagship application for executive narratives, signal feeds, and decision centers, characterized by a dark amber design language.
 
-**AI Provenance & Explainability Contract:**
-Every AI-generated output carries a `ProvenanceEnvelope` (`packages/shared-contracts/src/evidence-types.ts`) with: `runId`, `model`, `provider`, `promptHash`, `tokens`, `costEstimateUsd`, `confidence`, `sources[]`, `toolCalls[]`, `governanceVerdict`. The `buildEnvelope()` + `storeProvenance()` helpers in `lib/ai-engine/src/provenance.ts` construct and persist envelopes at each AI call site (nuro-mesh orchestrate, cross-domain-query). API endpoints: `GET /api/provenance/:runId`, `/recent`, `/stats` (authenticated). UI: `AIProvenanceBadge` + `AIProvenanceDrawer` in `lib/shared-ui`. CI check: `scripts/check-provenance-contract.ts`.
+**AI Provenance & Explainability Contract:** Every AI-generated output carries a `ProvenanceEnvelope` with essential metadata (`runId`, `model`, `provider`, `promptHash`, `tokens`, `costEstimateUsd`, `confidence`, `sources[]`, `toolCalls[]`, `governanceVerdict`). This is constructed and persisted at each AI call site, with dedicated API endpoints for retrieval and UI components for display.
 
-**Cross-Domain Signal Bus (Alert Bus):**
-The signal bus is a when/then automation engine that routes signals across product domains. DB tables: `signal_bus_rules` (routing rules with source domain/type filters, severity gates, conditions, and action configs), `signal_bus_routed_events` (audit trail of fired rules), `signal_bus_dead_letters` (failed action executions for replay). Schema: `lib/db/src/schema/signal_mesh.ts`. API: `GET/POST /api/signal-bus/rules`, `PUT/DELETE /api/signal-bus/rules/:ruleId`, `GET /api/signal-bus/events`, `GET /api/signal-bus/dead-letters`, `GET /api/signal-bus/stats`, `POST /api/signal-bus/publish`, `POST /api/signal-bus/test-fire` (scenarios: sanctions-hit, threat-detected, lease-renewal), `POST /api/signal-bus/seed-demo-rules`. Rule engine auto-subscribes to `defaultSignalBus` on startup (`initSignalBusRuleEngine()`), evaluating all rules against every signal published through the existing signal-mesh-bridge. Action types: `open_matter`, `create_briefing_line`, `portfolio_alert`, `raise_threat`, `publish_signal`. UI: Rules Studio page in Command (`/operations/rules-studio`).
+**Cross-Domain Signal Bus (Alert Bus):** A "when/then" automation engine routing signals across product domains. It uses `signal_bus_rules` for routing, `signal_bus_routed_events` for audit, and `signal_bus_dead_letters` for failed actions. An `initSignalBusRuleEngine()` evaluates rules against published signals, triggering actions like `open_matter`, `create_briefing_line`, etc. A Rules Studio in the Command app (`/operations/rules-studio`) provides a UI.
 
 **AEEP Core Packages:**
 - `shared-contracts/`: Agent roles, starter workflows, evidence/policy/retrieval/memory/provenance types.
@@ -75,7 +73,7 @@ The signal bus is a when/then automation engine that routes signals across produ
 
 **Substrate Command Center:** A cross-vertical operator UI for the governed decision substrate, integrated into the `command` artifact at `/command/substrate/`.
 
-## Production Readiness & Audit Status
+**Email Deliverability:** All outbound transactional email uses `artifacts/api-server/src/lib/email.ts`. Features include a suppression list in `email_suppressions` table, automatic suppression via bounce/complaint webhooks (SendGrid, Resend), unsubscribe links, and admin routes for management.
 
 **Last audited:** April 22, 2026  
 **Status:** Demo-ready. Pre-commercial. No critical gaps; 5 HIGH gaps block first paying tenant.

@@ -94,7 +94,12 @@ const TABS = [
 export default function OrgSettingsPage() {
   const { orgSlug } = useParams<{ orgSlug: string }>();
   const [, navigate] = useLocation();
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab && TABS.some((t) => t.id === tab)) return tab;
+    return 'profile';
+  });
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const qc = useQueryClient();
@@ -784,10 +789,10 @@ export default function OrgSettingsPage() {
                   <div className="space-y-3">
                     {[
                       { key: 'inAppEnabled', label: 'In-App', icon: Bell },
-                      { key: 'emailEnabled', label: 'Email', icon: Mail },
+                      { key: 'emailEnabled', label: 'Email Digest', icon: Mail, desc: 'Daily alerts and digest summaries via email' },
                       { key: 'smsEnabled', label: 'SMS', icon: Phone },
                       { key: 'slackEnabled', label: 'Slack', icon: MessageSquare },
-                    ].map(({ key, label, icon: Icon }) => {
+                    ].map(({ key, label, icon: Icon, desc }) => {
                       const current =
                         userNotifForm[key as keyof NotifPrefs] ??
                         userNotifQuery.data?.[key as keyof NotifPrefs] ??
@@ -799,7 +804,10 @@ export default function OrgSettingsPage() {
                         >
                           <div className="flex items-center gap-2">
                             <Icon size={14} className="text-white/40" />
-                            <span className="text-sm">{label}</span>
+                            <div>
+                              <span className="text-sm">{label}</span>
+                              {desc && <p className="text-xs text-white/40 mt-0.5">{desc}</p>}
+                            </div>
                           </div>
                           <button
                             className={`w-11 h-6 rounded-full transition-colors relative ${current ? 'bg-[#c9a84c]' : 'bg-white/15'}`}

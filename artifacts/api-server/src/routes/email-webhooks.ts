@@ -141,17 +141,75 @@ router.get('/notifications/unsubscribe', async (req: Request, res: Response) => 
     return res.status(500).send('Something went wrong. Please try again or contact us at inquiries@szlholdings.com.');
   }
 
+  const resubscribeUrl = `${process.env.APP_URL || 'https://szlholdings.com'}/api/notifications/resubscribe?e=${encodeURIComponent(email)}&t=${encodeURIComponent(token)}`;
+  const settingsUrl = `${process.env.APP_URL || 'https://szlholdings.com'}/settings?tab=account`;
+
   return res.status(200).send(`
     <!DOCTYPE html>
     <html lang="en">
     <head><meta charset="UTF-8"><title>Unsubscribed from Notifications</title>
-    <style>body{font-family:-apple-system,sans-serif;max-width:480px;margin:80px auto;padding:0 24px;color:#374151;}h1{font-size:20px;}p{color:#6b7280;line-height:1.6;}</style>
+    <style>body{font-family:-apple-system,sans-serif;max-width:480px;margin:80px auto;padding:0 24px;color:#374151;}h1{font-size:20px;}p{color:#6b7280;line-height:1.6;}a.undo{display:inline-block;margin-top:8px;padding:8px 20px;background:#c9a84c;color:#fff;text-decoration:none;border-radius:6px;font-weight:500;font-size:14px;}a.undo:hover{background:#b8963f;}</style>
     </head>
     <body>
       <h1>You've been unsubscribed from notification emails.</h1>
       <p>Your preference has been saved — <strong>${email}</strong> will no longer receive notification emails from SZL Holdings.</p>
-      <p>You can re-enable notification emails at any time from your <a href="${process.env.APP_URL || 'https://szlholdings.com'}/settings/notifications">notification settings</a>.</p>
-      <p>If this was a mistake, contact us at <a href="mailto:inquiries@szlholdings.com">inquiries@szlholdings.com</a>.</p>
+      <p>Changed your mind? <a class="undo" href="${resubscribeUrl}">Undo — re-subscribe</a></p>
+      <p>You can also manage your preferences from your <a href="${settingsUrl}">notification settings</a>.</p>
+    </body>
+    </html>
+  `);
+});
+
+router.get('/notifications/resubscribe', async (req: Request, res: Response) => {
+  const email = String(req.query.e ?? '');
+  const token = String(req.query.t ?? '');
+
+  if (!email || !token) {
+    return res.status(400).send('Invalid re-subscribe link.');
+  }
+
+  const valid = verifyUnsubscribeToken(email, token);
+  if (!valid) {
+    logger.warn({ email }, '[notif-resubscribe] Invalid token');
+    return res.status(400).send('Invalid or expired re-subscribe link.');
+  }
+
+  try {
+    const [user] = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(eq(usersTable.email, email.toLowerCase().trim()))
+      .limit(1);
+
+    if (user) {
+      await db
+        .insert(notificationPreferencesTable)
+        .values({ userId: user.id, emailEnabled: true })
+        .onConflictDoUpdate({
+          target: notificationPreferencesTable.userId,
+          set: { emailEnabled: true, updatedAt: new Date() },
+        });
+      logger.info({ email, userId: user.id }, '[notif-resubscribe] email_enabled set to true');
+    } else {
+      logger.warn({ email }, '[notif-resubscribe] No user found for email, skipping preference update');
+    }
+  } catch (err) {
+    logger.error({ email, err }, '[notif-resubscribe] Failed to update notification preferences');
+    return res.status(500).send('Something went wrong. Please try again or contact us at inquiries@szlholdings.com.');
+  }
+
+  const settingsUrl = `${process.env.APP_URL || 'https://szlholdings.com'}/settings?tab=account`;
+
+  return res.status(200).send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head><meta charset="UTF-8"><title>Re-subscribed to Notifications</title>
+    <style>body{font-family:-apple-system,sans-serif;max-width:480px;margin:80px auto;padding:0 24px;color:#374151;}h1{font-size:20px;}p{color:#6b7280;line-height:1.6;}</style>
+    </head>
+    <body>
+      <h1>You're re-subscribed to notification emails.</h1>
+      <p><strong>${email}</strong> will resume receiving notification emails from SZL Holdings.</p>
+      <p>You can manage your email preferences at any time from your <a href="${settingsUrl}">notification settings</a>.</p>
     </body>
     </html>
   `);

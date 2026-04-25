@@ -103,6 +103,8 @@ function isExempt(path: string): boolean {
   if (path === '/api/email/unsubscribe') return true;
   // Digest-specific unsubscribe — public GET link in digest email footer.
   if (path === '/api/notifications/unsubscribe') return true;
+  // Digest re-subscribe — public GET link on the unsubscribe confirmation page.
+  if (path === '/api/notifications/resubscribe') return true;
   if (path === '/api/mcp' || path.startsWith('/api/mcp/')) return true;
   if (path.match(/^\/api\/distribution-os\/linktree\/\d+\/click$/)) return true;
   // Non-production demo PIN verification — stateless read-only PIN check;

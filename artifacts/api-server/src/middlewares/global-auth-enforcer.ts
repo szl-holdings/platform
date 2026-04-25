@@ -210,6 +210,9 @@ const PUBLIC_PREFIXES = [
   // Digest-specific unsubscribe — public GET link in digest email footer.
   // Validates HMAC token and sets email_enabled = false in notification_preferences.
   "/api/notifications/unsubscribe",
+  // Digest re-subscribe — public GET link on the unsubscribe confirmation page.
+  // Validates the same HMAC token and sets email_enabled = true.
+  "/api/notifications/resubscribe",
   // Self-healing orchestrator — only /runs and /runs/:id GET requests are
   // whitelisted here as a prefix (covers the list endpoint and per-run detail).
   // /stats and /policies use PUBLIC_EXACT_PATHS above so the path-prefix match
