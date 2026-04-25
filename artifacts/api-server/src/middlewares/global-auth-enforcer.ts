@@ -230,6 +230,14 @@ const PUBLIC_PREFIXES = [
   // a session. Write routes are still covered by CSRF double-submit
   // protection (global csrfMiddleware in server.ts).
   "/api/sentra/",
+  // Crisis Arena — strictly public surfaces only: leaderboard ranking,
+  // platform summary, and sanitized architect public profiles.
+  // All engagement, submission, triage, award, and graduate endpoints require
+  // a session (enforced both here and in route-level authMiddleware).
+  "/api/crisis-arena/leaderboard",
+  "/api/crisis-arena/summary",
+  "/api/crisis-arena/architects/",
+  "/api/crisis-arena/score",
   // Pulse one-click email unsubscribe — token-protected, accessed from
   // recipient's inbox without a session. Mounted before authMiddleware in
   // routes/pulse.ts; this entry whitelists it past the global auth enforcer.

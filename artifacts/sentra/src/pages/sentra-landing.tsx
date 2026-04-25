@@ -6,12 +6,15 @@ import {
   BarChart3,
   ChevronRight,
   Cpu,
+  Flame,
   Lock,
   Radar,
   RotateCcw,
   Shield,
   ShieldAlert,
   ShieldCheck,
+  Trophy,
+  Users,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -406,6 +409,86 @@ export default function SentraLandingPage() {
             heading="Cyber resilience essays, straight to your inbox"
             subheading="SZL Command essays on incident command, recovery readiness, and the decision infrastructure behind TENAX — delivered weekly."
           />
+        </div>
+      </section>
+
+      <section className="px-6 py-20 border-t border-red-500/5 bg-[#0a0606] relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[600px] h-[400px] bg-red-500/5 rounded-full blur-3xl" />
+        </div>
+        <div className="max-w-5xl mx-auto relative z-10">
+          <div className="flex items-center gap-2 mb-8">
+            <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+              <Flame className="w-4 h-4 text-red-400" />
+            </div>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-red-400/60">
+              NEW · Crisis Arena
+            </span>
+          </div>
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl font-bold text-red-50 mb-4 leading-tight">
+                Crowdsource your crisis scenarios.<br />
+                <span className="text-red-400">Stress-test before impact.</span>
+              </h2>
+              <p className="text-sm text-red-300/60 leading-relaxed mb-6">
+                Post scoped resilience briefs. Crisis architects compete to model your worst-case
+                scenarios — quantified by Business Impact Score and graduated into live tabletop
+                exercises. Every scenario, every verdict, on-chain.
+              </p>
+              <div className="flex items-center gap-3 flex-wrap">
+                <Link href="/crisis-arena/leaderboard">
+                  <button className="flex items-center gap-2 px-5 py-2.5 bg-red-500 hover:bg-red-400 text-[#0a0606] font-semibold rounded-xl transition-all text-sm">
+                    View Hall of Fame <Trophy className="w-4 h-4" />
+                  </button>
+                </Link>
+                <Link href="/crisis-arena/engagements">
+                  <button className="flex items-center gap-2 px-5 py-2.5 bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 text-red-200 font-medium rounded-xl transition-all text-sm">
+                    Post an Engagement <ChevronRight className="w-4 h-4" />
+                  </button>
+                </Link>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {[
+                {
+                  icon: Flame,
+                  label: 'Business Impact Scoring',
+                  desc: 'Every scenario is machine-scored on revenue at risk, RTO/RPO breach, regulatory exposure, and blast radius.',
+                  color: 'text-red-400',
+                },
+                {
+                  icon: Trophy,
+                  label: 'Global Architect Leaderboard',
+                  desc: 'Top crisis architects compete for reputation and payout pools across public and private engagements.',
+                  color: 'text-amber-400',
+                },
+                {
+                  icon: Shield,
+                  label: 'Graduate to Tabletop',
+                  desc: 'Accepted scenarios launch directly into Incident Commander as live exercises — no manual handoff.',
+                  color: 'text-emerald-400',
+                },
+                {
+                  icon: Users,
+                  label: 'Proof Chain Audit Trail',
+                  desc: 'Every submission, triage decision, and payout is logged on-chain. Fully auditable resilience record.',
+                  color: 'text-violet-400',
+                },
+              ].map((feature) => (
+                <div
+                  key={feature.label}
+                  className="flex items-start gap-3 bg-[#120808]/80 border border-red-500/10 rounded-xl p-4"
+                >
+                  <feature.icon className={cn('w-4 h-4 mt-0.5 shrink-0', feature.color)} />
+                  <div>
+                    <div className="text-xs font-bold text-red-100 mb-0.5">{feature.label}</div>
+                    <div className="text-[11px] text-red-300/50 leading-relaxed">{feature.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 

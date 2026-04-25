@@ -100,6 +100,11 @@ router.use(lazyMatch("/geo-intel", () => import("./geo-intel"), "geo-intel"));
 // via the global csrfMiddleware mounted in server.ts.
 router.use(lazyMatch("/sentra", () => import("./sentra"), "sentra"));
 
+// Crisis Arena — crowdsourced business crisis simulation. Public leaderboard
+// endpoints are unauthenticated and rate-limited; all client/architect
+// endpoints enforce auth. Every state change is written to Proof Chain.
+router.use(lazyMatch("/crisis-arena", () => import("./crisis-arena"), "crisis-arena"));
+
 // Lyte legacy surfaces — read-only public GET endpoints backing the 5 legacy
 // decision-intelligence pages. Mounted BEFORE lyte.register so the
 // tenantScope middleware registered at "/lyte" never intercepts these routes.

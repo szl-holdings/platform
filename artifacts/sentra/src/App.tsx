@@ -34,6 +34,7 @@ import {
   BookLock,
   Cpu,
   Eye,
+  Flame,
   GitBranch,
   LayoutDashboard,
   Lock,
@@ -44,6 +45,7 @@ import {
   Shield,
   ShieldAlert,
   ShieldCheck,
+  Trophy,
   Zap,
 } from 'lucide-react';
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
@@ -69,6 +71,10 @@ const MeshExposuresPage = lazy(() => import('@/pages/mesh-exposures'));
 const ContainmentRulesPage = lazy(() => import('@/pages/containment-rules'));
 const MeshDriftPage = lazy(() => import('@/pages/mesh-drift'));
 const MeshConnectorsPage = lazy(() => import('@/pages/mesh-connectors'));
+const CrisisArenaLeaderboardPage = lazy(() => import('@/pages/crisis-arena-leaderboard'));
+const CrisisArenaEngagementsPage = lazy(() => import('@/pages/crisis-arena-engagements'));
+const CrisisArenaArchitectPage = lazy(() => import('@/pages/crisis-arena-architect'));
+const CrisisArenaArchitectProfilePage = lazy(() => import('@/pages/crisis-arena-architect-profile'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -217,6 +223,30 @@ function SentraSidebarContent({
         },
       ],
     },
+    {
+      id: 'crisis-arena',
+      label: 'Crisis Arena',
+      items: [
+        {
+          id: '/crisis-arena/leaderboard',
+          label: 'Hall of Fame',
+          href: '/crisis-arena/leaderboard',
+          icon: <Trophy className="w-3.5 h-3.5" />,
+        },
+        {
+          id: '/crisis-arena/engagements',
+          label: 'Engagements',
+          href: '/crisis-arena/engagements',
+          icon: <Flame className="w-3.5 h-3.5" />,
+        },
+        {
+          id: '/crisis-arena/architect',
+          label: 'Architect Workspace',
+          href: '/crisis-arena/architect',
+          icon: <Zap className="w-3.5 h-3.5" />,
+        },
+      ],
+    },
   ];
 
   return (
@@ -337,6 +367,10 @@ function DashboardRouter() {
         <Route path="/mesh/containment" component={ContainmentRulesPage} />
         <Route path="/mesh/drift" component={MeshDriftPage} />
         <Route path="/mesh/connectors" component={MeshConnectorsPage} />
+        <Route path="/crisis-arena/leaderboard" component={CrisisArenaLeaderboardPage} />
+        <Route path="/crisis-arena/engagements" component={CrisisArenaEngagementsPage} />
+        <Route path="/crisis-arena/architect/:id" component={CrisisArenaArchitectProfilePage} />
+        <Route path="/crisis-arena/architect" component={CrisisArenaArchitectPage} />
         <Route path="/pricing" component={SentraPricingPage} />
         <Route path="/account/billing" component={SentraBillingPage} />
         <Route path="/" component={SentraLandingPage} />
@@ -432,6 +466,24 @@ function AppShell({
       label: 'Approvals',
       group: 'Navigate',
       action: () => navigate('/approvals'),
+    },
+    {
+      id: 'nav-crisis-arena-leaderboard',
+      label: 'Crisis Arena — Hall of Fame',
+      group: 'Crisis Arena',
+      action: () => navigate('/crisis-arena/leaderboard'),
+    },
+    {
+      id: 'nav-crisis-arena-engagements',
+      label: 'Crisis Arena — Engagements',
+      group: 'Crisis Arena',
+      action: () => navigate('/crisis-arena/engagements'),
+    },
+    {
+      id: 'nav-crisis-arena-architect',
+      label: 'Crisis Arena — Architect Workspace',
+      group: 'Crisis Arena',
+      action: () => navigate('/crisis-arena/architect'),
     },
   ];
   const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(paletteCommands);
