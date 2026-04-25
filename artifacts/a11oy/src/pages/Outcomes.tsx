@@ -9,7 +9,7 @@ const VERTICAL_COLORS: Record<string, string> = {
 };
 const VERTICAL_LABELS: Record<string, string> = {
   'lyte-revenue': 'Lyte Revenue', 'vessels-maritime': 'Vessels Maritime', 'terra-real-estate': 'Terra Real Estate',
-  'aegis-defense': 'Aegis Defense', 'prism-counsel': 'PRISM Counsel', 'carlota-jo': 'Carlota Jo', 'alloy-core': 'Alloy Core',
+  'aegis-defense': 'Aegis Defense', 'prism-counsel': 'Counsel', 'carlota-jo': 'Carlota Jo', 'alloy-core': 'Alloy Core',
 };
 const STATUS_COLORS: Record<string, string> = {
   achieved: '#10b981', missed: '#ef4444', blocked: '#f59e0b', in_progress: '#3b82f6', at_risk: '#f59e0b',

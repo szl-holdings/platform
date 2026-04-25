@@ -14,7 +14,7 @@ const FABRIC_LAYERS = [
 const VERTICALS = [
   { label: 'Vessels Maritime', color: '#06b6d4', ops: 'Fleet ops, port scheduling, demurrage risk' },
   { label: 'Lyte Revenue', color: '#3b82f6', ops: 'Pipeline velocity, deal health, CRM signals' },
-  { label: 'PRISM Counsel', color: '#8b5cf6', ops: 'Matter tracking, discovery deadlines, litigation risk' },
+  { label: 'Counsel', color: '#8b5cf6', ops: 'Matter tracking, discovery deadlines, litigation risk' },
   { label: 'Terra Real Estate', color: '#10b981', ops: 'Cap rate monitoring, portfolio valuation' },
   { label: 'Aegis Defense', color: '#ef4444', ops: 'Threat intel, posture assessment, SIGINT' },
   { label: 'Carlota Jo', color: '#f59e0b', ops: 'Advisory matters, client signals, brief generation' },

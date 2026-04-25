@@ -1,27 +1,13 @@
 /**
- * Support tickets status filter — integration tests (task #1454)
+ * Support tickets ?status=open — integration tests (task #1454)
  *
- * Verifies that GET /api/support/tickets?status=open is the contract the
- * Command Center nav badge depends on:
- *  1. Authenticated callers can filter by status without errors
- *  2. Response shape is { tickets: [...] } so the parser can derive a count
- *  3. Unknown status values are silently ignored (no 4xx)
- *  4. The endpoint remains protected — unauthenticated callers get 401
- *
- * Also unit-tests the pure parser used by the badge hook to compute the
- * count from the API response, including malformed payloads.
+ * Contract that the Command Center nav badge depends on.
  */
 
 import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
 
-/**
- * Mirror of artifacts/szl-holdings/src/hooks/useOpenSupportTicketCount.ts
- * `parseOpenTicketCount`. Inlined to avoid cross-package relative imports
- * and to lock the API contract from this side. If the badge hook diverges
- * from this shape, this test will fail.
- */
 function parseOpenTicketCount(data: unknown): number {
   if (!data || typeof data !== 'object') return 0;
   const tickets = (data as { tickets?: unknown }).tickets;

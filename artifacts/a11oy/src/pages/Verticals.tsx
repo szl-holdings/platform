@@ -6,7 +6,7 @@ import { SEED_SIGNALS, SEED_WORKCELLS, SEED_OUTCOMES } from '@workspace/a11oy-fa
 const VERTICALS = [
   { id: 'vessels-maritime', label: 'Vessels Maritime', color: '#06b6d4', icon: '⚓', description: 'Fleet operations, port scheduling, ETA monitoring, demurrage risk and maritime signal mesh.' },
   { id: 'lyte-revenue', label: 'Lyte Revenue', color: '#3b82f6', icon: '◆', description: 'Enterprise pipeline velocity, deal health, forecast modeling, and revenue signal patterns.' },
-  { id: 'prism-counsel', label: 'PRISM Counsel', color: '#8b5cf6', icon: '⚖', description: 'Legal matter tracking, discovery deadlines, document status, and litigation risk scoring.' },
+  { id: 'prism-counsel', label: 'Counsel', color: '#8b5cf6', icon: '⚖', description: 'Legal matter tracking, discovery deadlines, document status, and litigation risk scoring.' },
   { id: 'terra-real-estate', label: 'Terra Real Estate', color: '#10b981', icon: '▣', description: 'Portfolio cap rate monitoring, valuation modeling, and real estate market signal analysis.' },
   { id: 'aegis-defense', label: 'Aegis Defense', color: '#ef4444', icon: '⬡', description: 'Threat intelligence, posture assessment, SIGINT correlation, and defense operational monitoring.' },
   { id: 'carlota-jo', label: 'Carlota Jo', color: '#f59e0b', icon: '◎', description: 'Consulting matter management, client follow-ups, advisory brief generation, and engagement signals.' },

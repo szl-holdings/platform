@@ -18,7 +18,7 @@ const VERTICAL_LABELS: Record<string, string> = {
   'vessels-maritime': 'Vessels Maritime',
   'terra-real-estate': 'Terra Real Estate',
   'aegis-defense': 'Aegis Defense',
-  'prism-counsel': 'PRISM Counsel',
+  'prism-counsel': 'Counsel',
   'carlota-jo': 'Carlota Jo',
   'alloy-core': 'Alloy Core',
 };

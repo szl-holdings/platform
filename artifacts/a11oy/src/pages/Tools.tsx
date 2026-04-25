@@ -34,7 +34,7 @@ const GOVERNANCE_COLORS: Record<string, string> = {
 
 const VERTICAL_LABELS: Record<string, string> = {
   'lyte-revenue': 'Lyte Revenue', 'vessels-maritime': 'Vessels Maritime', 'terra-real-estate': 'Terra Real Estate',
-  'aegis-defense': 'Aegis Defense', 'prism-counsel': 'PRISM Counsel', 'carlota-jo': 'Carlota Jo',
+  'aegis-defense': 'Aegis Defense', 'prism-counsel': 'Counsel', 'carlota-jo': 'Carlota Jo',
   'alloy-core': 'Alloy Core', 'global': 'Global',
 };
 

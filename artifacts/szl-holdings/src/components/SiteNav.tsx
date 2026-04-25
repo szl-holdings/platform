@@ -2,9 +2,10 @@ import { useAuth } from '@szl-holdings/replit-auth-web';
 import { UserButton } from '@szl-holdings/shared-ui/UserButton';
 import { useRole } from '@szl-holdings/shared-ui/use-role';
 import { AnimatePresence, m } from 'framer-motion';
-import { ChevronDown, Menu, X } from 'lucide-react';
+import { ChevronDown, Menu, Terminal, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
+import { useOpenSupportTicketCount } from '@/hooks/useOpenSupportTicketCount';
 import { analytics } from '@/lib/analytics';
 import { cn } from '@/lib/utils';
 
@@ -165,6 +166,7 @@ export function SiteNav() {
   const [location] = useLocation();
   const { isAuthenticated } = useAuth();
   useRole();
+  const { count: openTicketCount } = useOpenSupportTicketCount({ enabled: isAuthenticated });
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 12);
@@ -275,7 +277,47 @@ export function SiteNav() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
             {isAuthenticated ? (
-              <UserButton />
+              <>
+                <Link
+                  href="/admin/command-center"
+                  className="szl-desktop-nav"
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.375rem',
+                    fontSize: '0.75rem', fontWeight: 600,
+                    color: 'hsl(187,80%,60%)',
+                    background: 'hsla(187,80%,50%,0.1)',
+                    border: '1px solid hsla(187,80%,50%,0.2)',
+                    padding: '0.3125rem 0.625rem',
+                    borderRadius: '9999px',
+                    textDecoration: 'none',
+                    transition: 'color 0.15s, background 0.15s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.color = 'hsl(187,80%,72%)'; e.currentTarget.style.background = 'hsla(187,80%,50%,0.15)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = 'hsl(187,80%,60%)'; e.currentTarget.style.background = 'hsla(187,80%,50%,0.1)'; }}
+                >
+                  <Terminal size={12} />
+                  Command Center
+                  {openTicketCount > 0 && (
+                    <span
+                      aria-label={`${openTicketCount} open support tickets`}
+                      data-testid="sitenav-command-center-badge"
+                      style={{
+                        marginLeft: '0.125rem',
+                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        minWidth: '1.125rem', height: '1.125rem',
+                        padding: '0 0.25rem',
+                        borderRadius: '9999px',
+                        background: 'hsl(187,80%,60%)',
+                        color: 'hsl(214,16%,6%)',
+                        fontSize: '0.625rem', fontWeight: 700, lineHeight: 1,
+                      }}
+                    >
+                      {openTicketCount > 99 ? '99+' : openTicketCount}
+                    </span>
+                  )}
+                </Link>
+                <UserButton />
+              </>
             ) : (
               <>
                 <Link href="/login" style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--gi-text-secondary)', textDecoration: 'none', padding: '0.375rem 0.625rem' }} className="szl-desktop-nav">
