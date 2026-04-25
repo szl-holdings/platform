@@ -1,0 +1,113 @@
+# Security & Secret Audit — A11oy Public-Readiness Pass
+
+**Date:** 2026-04-25  
+**Task:** #3474 — Public-readiness audit  
+**Auditor:** Manual sweep (Replit Agent) + `.gitleaks.toml` policy review  
+**Reference:** `security/secret-audit.md` (Phase 9 — last full scan: 2026-04-20)
+
+---
+
+## Executive Summary
+
+**0 true positives.** No live credentials, private keys, or real secrets are committed to the repository.  
+**0 new findings** compared to the Phase 9 audit (2026-04-20).  
+**1 previously documented false positive** (AWS docs example `AKIAIOSFODNN7EXAMPLE` in `.gitleaks.toml` — correctly allowlisted).
+
+The Phase 9 secret audit remains current. This pass confirms the security posture is unchanged for the A11oy Phase 1 additions.
+
+---
+
+## Scan Method
+
+### Tool 1: Manual ripgrep sweep (this pass)
+
+Patterns swept across all git-tracked files (excluding `node_modules`, `pnpm-lock.yaml`):
+
+| Pattern | Result |
+|---------|--------|
+| Tracked `.env*` files | ✓ NONE — `.env` is gitignored and not tracked |
+| Postgres connection strings with passwords | ✓ REVIEWED — all match `postgresql://postgres:postgres@localhost` (CI-only, allowlisted in `.gitleaks.toml`) |
+| PEM `BEGIN PRIVATE KEY` blocks | ✓ NONE in source (template files contain `PLACEHOLDER_PRIVATE_KEY`, correctly allowlisted) |
+| High-entropy JWT tokens (non-placeholder) | ✓ NONE |
+| `sk_live_` Stripe live keys | ✓ NONE (only `sk_live_FAKE…DO_NOT_USE` test fixtures, allowlisted) |
+| `ghp_` GitHub PATs | ✓ NONE real (only example/placeholder forms, allowlisted) |
+| `re_` Resend keys | ✓ NONE real (only `REPLACE_ME` placeholder form) |
+| `phc_` PostHog keys | ✓ NONE real (only `phc_YOUR_PROJECT_API_KEY` placeholder) |
+| `xoxb-` Slack bot tokens | ✓ NONE real |
+| `OPENAI_API_KEY` hardcoded | ✓ NONE (only `YOUR_OPENAI_API_KEY_HERE` placeholder in `.env.example`) |
+
+### Tool 2: `.gitleaks.toml` policy review
+
+The existing `.gitleaks.toml` config:
+- Extends the gitleaks default rule set (150+ provider patterns)
+- Has custom rules for: Expo EAS tokens, Resend production keys, Stripe live keys, PostHog project keys, Slack bot tokens, curl Authorization headers
+- Maintains a carefully tuned allowlist with per-rule justifications
+- Is scheduled to run on every PR and nightly (`.github/workflows/secret-scan.yml`, `.github/workflows/secret-scan-scheduled.yml`)
+
+**No changes required to `.gitleaks.toml`.**
+
+---
+
+## `.env` File Handling
+
+| Check | Result |
+|-------|--------|
+| `.env` tracked by git | ✗ NOT TRACKED — confirmed via `git ls-files` |
+| `.env.local` tracked by git | ✗ NOT TRACKED |
+| `.env.example` contains placeholder-only values | ✓ CONFIRMED — all 568 lines use `REPLACE_ME_*`, `YOUR_*_HERE`, or safe defaults |
+| `.gitignore` covers `.env`, `.env.local`, `.env.*.local`, `.env.*` | ✓ CONFIRMED (lines 53–55, 143) |
+| Production secrets in Replit Secrets (not in source) | ✓ CONFIRMED per operational setup |
+
+---
+
+## Screenshot Review
+
+Screenshots in `docs/assets/screenshots/current/` (approved set):
+- Phase 2 screenshot refresh removed all stale captures (53 files removed in quality-suite-2026-04-25)
+- Current approved set shows demo/seed data only — no real org IDs, customer emails, or credentials visible
+- No raw captures in `screenshots/raw/` (directory is gitignored)
+
+**Result:** ✓ No credential exposure in screenshot assets.
+
+---
+
+## A11oy Phase 1 Review
+
+The new `artifacts/a11oy/` artifact was reviewed for secret exposure:
+- All data is in-memory seed data (referenced from `@workspace/a11oy-fabric` which is not yet built)
+- No API keys or tokens are hardcoded in source files
+- The `SECURITY.md` already documents A11oy's Phase 1 public surface and that mutating endpoints return 501
+- No `.env` file is present in `artifacts/a11oy/`
+
+---
+
+## Rotation Recommendations
+
+| Finding | Recommendation |
+|---------|----------------|
+| Git remote URL contains GitHub integration token (in git config, not in source) | Token is managed by Replit GitHub integration; rotate via the integration dashboard if this audit is published externally |
+| `AEF_API_KEY=dev-insecure-key` in `.env.example` | Already labeled as dev-only; must be replaced before any public-facing AEF deployment |
+| `AEF_S2S_SECRET=dev-s2s-secret` in `.env.example` | Same — dev-only label, must be replaced in production |
+
+---
+
+## CI Gating Status
+
+| Gate | Workflow | Status |
+|------|----------|--------|
+| Secret scan (PR diff) | `secret-scan.yml` | ✓ Active |
+| Secret scan (full history, scheduled) | `secret-scan-scheduled.yml` | ✓ Active |
+| CodeQL | `codeql.yml` | ✓ Active |
+| Dependency audit | `security.yml` | ✓ Active |
+
+---
+
+## Conclusion
+
+The repository is clean for public exposure. No secrets require rotation from anything committed to source. The `.gitleaks.toml` allowlists are well-documented and appropriately scoped. The Phase 9 audit findings are confirmed unchanged.
+
+**Classification:** CLEARED for public GitHub visibility.
+
+---
+
+*Generated by Task #3474 audit pass — 2026-04-25*
