@@ -240,11 +240,29 @@ app.get('/', (_req: Request, res: Response) => {
 
 // --- Substrate MCP gateway proxy ---------------------------------------------
 // Proxies /mcp/* to the substrate-mcp-gateway sidecar (started by start.sh).
-// Mounted before auth/csrf middleware so MCP traffic uses its own
-// SUBSTRATE_GATEWAY_API_KEY bearer auth rather than the api-server session.
+// Mounted before session/csrf middleware so MCP traffic authenticates via
+// SUBSTRATE_GATEWAY_API_KEY bearer token rather than the api-server session.
+// When the API key is configured (production), unauthenticated callers are
+// rejected here before reaching the sidecar — preventing anonymous enumeration
+// of tools, resources, prompts, and live run events.
 {
   const mcpGatewayPort = parseInt(process.env.SUBSTRATE_GATEWAY_PORT ?? '8099', 10);
+  const mcpApiKey = process.env.SUBSTRATE_GATEWAY_API_KEY;
   app.use('/mcp', (req: Request, res: Response) => {
+    // Gate: when SUBSTRATE_GATEWAY_API_KEY is configured, require a matching
+    // Bearer token. Health probes to /mcp/health are exempt so orchestration
+    // infrastructure can check liveness without a token.
+    if (mcpApiKey && req.path !== '/health') {
+      const authHeader = req.headers.authorization ?? '';
+      const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+      if (!token || token !== mcpApiKey) {
+        res.status(401).json({
+          error: 'mcp_unauthorized',
+          detail: 'A valid SUBSTRATE_GATEWAY_API_KEY Bearer token is required.',
+        });
+        return;
+      }
+    }
     const proxyReq = nodeHttp.request(
       {
         host: '127.0.0.1',

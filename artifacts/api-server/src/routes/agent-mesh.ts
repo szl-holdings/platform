@@ -3,7 +3,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { type GatewayEventPayload, gatewayEventBus } from '../lib/gateway-event-bus';
 import { logger } from '../lib/logger';
-import { authMiddleware } from '../middlewares/auth';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 import { loadMeshState, runMeshScan } from '../services/agent-mesh-collector';
 import {
   type GatewayExportRow,
@@ -65,7 +65,7 @@ router.get('/agent-mesh/index', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/agent-mesh/gateway', async (req: Request, res: Response) => {
+router.get('/agent-mesh/gateway', authMiddleware({ required: true }), requireRole('super_admin', 'ops'), async (req: Request, res: Response) => {
   try {
     const limitRaw = Number(req.query.limit);
     const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 200) : 50;
@@ -86,7 +86,7 @@ router.get('/agent-mesh/gateway', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/agent-mesh/gateway/stream', (req: Request, res: Response) => {
+router.get('/agent-mesh/gateway/stream', authMiddleware({ required: true }), requireRole('super_admin', 'ops'), (req: Request, res: Response) => {
   // SSE push channel for newly persisted gateway events. The Containment
   // Rules dashboard subscribes here so filtered views update instantly
   // instead of waiting for the next 30s poll. Optional query params
@@ -188,7 +188,7 @@ function buildCsv(rows: GatewayExportRow[]): string {
   return `${lines.join('\r\n')}\r\n`;
 }
 
-router.get('/agent-mesh/gateway/export.csv', async (req: Request, res: Response) => {
+router.get('/agent-mesh/gateway/export.csv', authMiddleware({ required: true }), requireRole('super_admin', 'ops'), async (req: Request, res: Response) => {
   try {
     const filters: GatewayLiveSummaryFilters = {};
     const decisionRaw = readQueryString(req, 'decision');
@@ -215,7 +215,7 @@ router.get('/agent-mesh/gateway/export.csv', async (req: Request, res: Response)
   }
 });
 
-router.get('/agent-mesh/gateway/latency', async (req: Request, res: Response) => {
+router.get('/agent-mesh/gateway/latency', authMiddleware({ required: true }), requireRole('super_admin', 'ops'), async (req: Request, res: Response) => {
   try {
     const hoursRaw = Number(req.query.hours);
     const windowHours =

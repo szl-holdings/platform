@@ -23,13 +23,13 @@ if (!API_KEY) {
 
 /**
  * MCP calls that are allowed without authentication (public read-only subset).
- * This matches the strategy described in MCP_GATEWAY_STRATEGY.md.
+ * Only schema discovery (tools/list) and the no-op keepalive (ping) are public.
+ * initialize, resources/list, and prompts/list are intentionally excluded —
+ * they expose internal resource names, prompt templates, and capability
+ * fingerprints that should stay behind authentication.
  */
 const PUBLIC_METHODS = new Set([
-  'initialize',
   'tools/list',
-  'resources/list',
-  'prompts/list',
   'ping',
 ]);
 
