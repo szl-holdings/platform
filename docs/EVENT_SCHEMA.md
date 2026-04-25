@@ -171,6 +171,22 @@ Event types use dot-notation: `<domain>.<entity>.<action>`
 
 ---
 
+### Onboarding Domain Events (`onboarding.*`)
+
+These seven events define the canonical activation funnel. See `ANALYTICS-EVENTS.md` for full payload definitions and `docs/ONBOARDING_ARCHITECTURE.md` for stage context.
+
+| Event Type | Description | `event_category` | `domain` |
+|---|---|---|---|
+| `onboarding.signup.completed` | User account confirmed; org profile setup complete | `business` | `system` |
+| `onboarding.workspace.created` | Workspace record written; org slug confirmed active | `business` | `system` |
+| `onboarding.data.first_connected` | First data source or seed dataset connected to the workspace | `business` | `system` |
+| `onboarding.recommendation.first_seen` | First signal, alert, or recommendation viewed with ≥ 2s dwell | `business` | `system` |
+| `onboarding.approval.first_submitted` | First approval, triage, or escalation action submitted | `business` | `system` |
+| `onboarding.outcome.first_verified` | First proof chain entry written for the workspace | `business` | `system` |
+| `onboarding.completed` | All guided setup checklist items marked complete | `business` | `system` |
+
+---
+
 ### System Events (`system.*`)
 
 | Event Type | Description |

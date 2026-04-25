@@ -5,6 +5,14 @@ export {
   SetupAlert,
   type SetupAlertProps,
 } from './ActivationBanner';
+export {
+  GuidedSetupChecklist,
+  type GuidedSetupChecklistProps,
+  type GuidedStep,
+  type OnboardingLifecycleEvent,
+  type OnboardingVariant,
+  type UserRole,
+} from './guided-setup-checklist';
 export { type ChangelogEntry, ChangelogPage } from './changelog-page';
 export { HelpTip, type HelpTipProps } from './help-tip';
 export {
