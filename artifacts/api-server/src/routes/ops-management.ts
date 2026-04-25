@@ -45,6 +45,8 @@ async function ensureSchema(): Promise<void> {
     `ALTER TABLE platform_runbooks ADD COLUMN IF NOT EXISTS affected_services TEXT[] NOT NULL DEFAULT '{}'`,
     `ALTER TABLE platform_alert_rules ADD COLUMN IF NOT EXISTS cooldown_minutes INTEGER NOT NULL DEFAULT 60`,
     `ALTER TABLE platform_alert_rules ADD COLUMN IF NOT EXISTS last_email_sent_at TIMESTAMPTZ`,
+    `ALTER TABLE platform_alert_rules ADD COLUMN IF NOT EXISTS notify_cooldown_minutes INTEGER NOT NULL DEFAULT 60`,
+    `ALTER TABLE platform_alert_rules ADD COLUMN IF NOT EXISTS last_notified_at TIMESTAMPTZ`,
     `CREATE TABLE IF NOT EXISTS platform_alert_rules (
       id SERIAL PRIMARY KEY,
       name TEXT NOT NULL,
@@ -60,9 +62,11 @@ async function ensureSchema(): Promise<void> {
       email_recipients TEXT[] NOT NULL DEFAULT '{}',
       runbook_id INTEGER,
       cooldown_minutes INTEGER NOT NULL DEFAULT 60,
+      notify_cooldown_minutes INTEGER NOT NULL DEFAULT 60,
       last_evaluated_at TIMESTAMPTZ,
       last_fired_at TIMESTAMPTZ,
       last_email_sent_at TIMESTAMPTZ,
+      last_notified_at TIMESTAMPTZ,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )`,
@@ -922,9 +926,10 @@ const alertRuleSchema = z.object({
 router.post('/ops/alert-rules', validateBody(alertRuleSchema), async (req, res) => {
   const b = req.body as z.infer<typeof alertRuleSchema>;
   try {
+    const cooldown = b.cooldownMinutes ?? 60;
     const result = await pool.query<{ id: number }>(
-      `INSERT INTO platform_alert_rules (name, description, metric_name, condition, threshold, window_minutes, severity, enabled, notify_in_app, notify_email, email_recipients, runbook_id, cooldown_minutes)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id`,
+      `INSERT INTO platform_alert_rules (name, description, metric_name, condition, threshold, window_minutes, severity, enabled, notify_in_app, notify_email, email_recipients, runbook_id, cooldown_minutes, notify_cooldown_minutes)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING id`,
       [
         b.name,
         b.description ?? null,
@@ -938,7 +943,8 @@ router.post('/ops/alert-rules', validateBody(alertRuleSchema), async (req, res) 
         b.notifyEmail,
         b.emailRecipients,
         b.runbookId ?? null,
-        b.cooldownMinutes ?? 60,
+        cooldown,
+        cooldown,
       ],
     );
     res.json({ ok: true, id: result.rows[0]?.id });
@@ -1091,6 +1097,10 @@ router.patch('/ops/alert-rules/:id', validateBody(bodyShape({})), async (req, re
       cooldownMinutes: 'cooldown_minutes',
     };
     const bRecord = b as Record<string, unknown>;
+    if ('cooldownMinutes' in b) {
+      params.push(bRecord['cooldownMinutes']);
+      sets.push(`notify_cooldown_minutes = $${params.length}`);
+    }
     for (const [jsKey, dbCol] of Object.entries(fieldMap)) {
       if (jsKey in b) {
         params.push(bRecord[jsKey]);
@@ -1172,6 +1182,8 @@ export async function runAlertRuleEvaluation(triggeredBy: 'scheduled' | 'manual'
     email_recipients: string[];
     cooldown_minutes: number;
     last_email_sent_at: string | null;
+    notify_cooldown_minutes: number;
+    last_notified_at: string | null;
   }>;
 
   // Get current metrics from observability snapshot
@@ -1269,13 +1281,14 @@ export async function runAlertRuleEvaluation(triggeredBy: 'scheduled' | 'manual'
             '[ops] Alert has notify_email=true but no email provider is configured (set SENDGRID_API_KEY, RESEND_API_KEY, or SMTP credentials)',
           );
         } else {
-          // Enforce cooldown: skip if last_email_sent_at is within cooldown_minutes
-          const cooldownMs = (rule.cooldown_minutes ?? 60) * 60 * 1000;
-          const lastSent = rule.last_email_sent_at ? new Date(rule.last_email_sent_at).getTime() : 0;
-          const withinCooldown = lastSent > 0 && (Date.now() - lastSent) < cooldownMs;
+          // Enforce cooldown: skip if last_notified_at is within notify_cooldown_minutes
+          const cooldownMs = (rule.notify_cooldown_minutes ?? rule.cooldown_minutes ?? 60) * 60 * 1000;
+          const lastNotified = rule.last_notified_at ?? rule.last_email_sent_at;
+          const lastNotifiedTs = lastNotified ? new Date(lastNotified).getTime() : 0;
+          const withinCooldown = lastNotifiedTs > 0 && (Date.now() - lastNotifiedTs) < cooldownMs;
           if (withinCooldown) {
             logger.info(
-              { rule: rule.name, cooldownMinutes: rule.cooldown_minutes ?? 60, lastSent: rule.last_email_sent_at },
+              { rule: rule.name, cooldownMinutes: rule.notify_cooldown_minutes ?? rule.cooldown_minutes ?? 60, lastNotifiedAt: rule.last_notified_at },
               '[ops] Alert email skipped — within cooldown window',
             );
           } else {
@@ -1291,42 +1304,62 @@ export async function runAlertRuleEvaluation(triggeredBy: 'scheduled' | 'manual'
               threshold: rule.threshold,
               alertsUrl,
             });
-            // Update last_email_sent_at before sending (optimistic) to prevent burst sends
-            await pool
-              .query(`UPDATE platform_alert_rules SET last_email_sent_at = NOW() WHERE id = $1`, [rule.id])
-              .catch(() => {});
-            for (const recipient of rule.email_recipients) {
-              sendEmail({ to: recipient, subject, html, text, unsubscribeToken: generateUnsubscribeToken(recipient) })
-                .then((result) => {
-                  if (result.success) {
-                    logger.info(
-                      { rule: rule.name, recipient, provider: result.provider },
-                      '[ops] Alert email dispatched',
-                    );
-                  } else {
-                    logger.warn(
-                      { rule: rule.name, recipient, error: result.error },
-                      '[ops] Alert email dispatch failed (non-fatal)',
-                    );
-                  }
-                  logNotificationAudit({
-                    template: 'alert_rule_fired',
-                    recipient,
-                    subject,
-                    entityType: 'alert_rule',
-                    entityId: String(rule.id),
-                    deliveryStatus: result.success ? 'sent' : 'failed',
-                    messageId: result.messageId,
-                    provider: result.provider,
-                    error: result.error,
-                  });
+            // Send to all recipients; await results so we can stamp last_notified_at
+            // only when at least one delivery succeeds.
+            const sendResults = await Promise.all(
+              rule.email_recipients.map((recipient) =>
+                sendEmail({
+                  to: recipient,
+                  subject,
+                  html,
+                  text,
+                  unsubscribeToken: generateUnsubscribeToken(recipient),
                 })
-                .catch((emailErr) => {
-                  logger.warn(
-                    { emailErr, recipient, rule: rule.name },
-                    '[ops] Alert email dispatch threw (non-fatal)',
-                  );
-                });
+                  .then((result) => {
+                    if (result.success) {
+                      logger.info(
+                        { rule: rule.name, recipient, provider: result.provider },
+                        '[ops] Alert email dispatched',
+                      );
+                    } else {
+                      logger.warn(
+                        { rule: rule.name, recipient, error: result.error },
+                        '[ops] Alert email dispatch failed (non-fatal)',
+                      );
+                    }
+                    logNotificationAudit({
+                      template: 'alert_rule_fired',
+                      recipient,
+                      subject,
+                      entityType: 'alert_rule',
+                      entityId: String(rule.id),
+                      deliveryStatus: result.success ? 'sent' : 'failed',
+                      messageId: result.messageId,
+                      provider: result.provider,
+                      error: result.error,
+                    });
+                    return result;
+                  })
+                  .catch((emailErr) => {
+                    logger.warn(
+                      { emailErr, recipient, rule: rule.name },
+                      '[ops] Alert email dispatch threw (non-fatal)',
+                    );
+                    return { success: false as const };
+                  }),
+              ),
+            );
+
+            // Update last_notified_at (and last_email_sent_at for back-compat) only
+            // after at least one email was delivered successfully.
+            const anyDelivered = sendResults.some((r) => r.success);
+            if (anyDelivered) {
+              await pool
+                .query(
+                  `UPDATE platform_alert_rules SET last_notified_at = NOW(), last_email_sent_at = NOW() WHERE id = $1`,
+                  [rule.id],
+                )
+                .catch(() => {});
             }
           }
         }
