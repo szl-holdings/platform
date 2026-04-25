@@ -165,9 +165,9 @@ export default function Shell({ children }: { children: ReactNode }) {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {[
-              { label: 'LUMINA', href: '/pulse/' },
+              { label: 'Pulse', href: '/pulse/' },
               { label: 'Command', href: '/command/' },
-              { label: 'TENAX', href: '/sentra/' },
+              { label: 'Sentra', href: '/sentra/' },
             ].map((link) => (
               <a
                 key={link.href}
