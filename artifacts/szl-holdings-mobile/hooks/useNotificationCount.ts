@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { apiFetch, getApiBase, getCachedAuthToken } from '@/lib/apiClient';
+import { useAuth } from '@/context/AuthContext';
 
 interface NotificationCountResult {
   unreadCount: number;
@@ -7,6 +8,9 @@ interface NotificationCountResult {
 
 export function useNotificationCount(): NotificationCountResult {
   const [unreadCount, setUnreadCount] = useState(0);
+  const { user } = useAuth();
+  const userIdRef = useRef(user?.id);
+  userIdRef.current = user?.id;
   const wsRef = useRef<WebSocket | null>(null);
   const deadRef = useRef(false);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -56,8 +60,15 @@ export function useNotificationCount(): NotificationCountResult {
             type: string;
             channel?: string;
             event?: string;
+            data?: { userId?: string | number };
           };
           if (msg.type === 'message' && msg.channel === 'notifications') {
+            if (msg.event === 'notifications_read') {
+              if (userIdRef.current != null && String(msg.data?.userId) === String(userIdRef.current)) {
+                void fetchCount();
+              }
+              return;
+            }
             void fetchCount();
           }
         } catch {

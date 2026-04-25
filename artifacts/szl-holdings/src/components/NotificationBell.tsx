@@ -39,7 +39,9 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const userIdRef = useRef(user?.id);
+  userIdRef.current = user?.id;
 
   const { data } = useStandardQuery<Notification[]>({
     queryKey: ['navbar-notifications'],
@@ -82,8 +84,15 @@ export function NotificationBell() {
             type: string;
             channel?: string;
             event?: string;
+            data?: { userId?: string | number };
           };
           if (msg.type === 'message' && msg.channel === 'notifications') {
+            if (msg.event === 'notifications_read') {
+              if (userIdRef.current != null && String(msg.data?.userId) === String(userIdRef.current)) {
+                void queryClient.invalidateQueries({ queryKey: ['navbar-notifications'] });
+              }
+              return;
+            }
             void queryClient.invalidateQueries({ queryKey: ['navbar-notifications'] });
           }
         } catch {
