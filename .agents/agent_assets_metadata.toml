@@ -413,3 +413,75 @@ id = "TozltnnxYgoNRwv7zEfsW"
 uri = "file://OPERATIONAL-AUDIT.md"
 type = "text"
 title = "Operational Audit — status of every artifact, security floor, GitHub cleanup, Series A scoring"
+
+[[outputs]]
+id = "19b53UxpxlJ-Y0CS3imlH"
+uri = "file://brand/a11oy-banner.png"
+type = "image"
+title = "A11oy Banner — LinkedIn / GitHub"
+
+[[outputs]]
+id = "EIq-3cZ7QjYXJPPqGV9BW"
+uri = "file://brand/szl-holdings-banner.png"
+type = "image"
+title = "SZL Holdings Banner — Social Preview"
+
+[[outputs]]
+id = "MRGDQ0jpQg5SnctSohuuM"
+uri = "file://brand/social-preview.png"
+type = "image"
+title = "Social Preview Image (1280x640)"
+
+[[outputs]]
+id = "ZUaLWj3a3ElyNA23JREC3"
+uri = "file://brand/screenshots/szl-holdings-dashboard.jpg"
+type = "image"
+title = "SZL Holdings Dashboard"
+
+[[outputs]]
+id = "7MEjMfbR9DSS8mjbqh5_f"
+uri = "file://brand/screenshots/a11oy-execution-fabric.jpg"
+type = "image"
+title = "A11oy — Execution Fabric"
+
+[[outputs]]
+id = "vH2I_cmoNO_d2vkF3ETtm"
+uri = "file://brand/screenshots/forge-command-portal.jpg"
+type = "image"
+title = "FORGE — Unified Command Surface"
+
+[[outputs]]
+id = "pdN8lHH0yBiJSY-A6nLg7"
+uri = "file://brand/screenshots/tenax-cyber-resilience.jpg"
+type = "image"
+title = "TENAX — Cyber Resilience"
+
+[[outputs]]
+id = "sVtRb_NH06mbfXkiyZkbM"
+uri = "file://brand/screenshots/sextant-maritime.jpg"
+type = "image"
+title = "SEXTANT — Maritime Intelligence"
+
+[[outputs]]
+id = "7P6NBK1xNkqfMzL4mIcJD"
+uri = "file://brand/screenshots/domaine-real-estate.jpg"
+type = "image"
+title = "DOMAINE — Real Estate Intelligence"
+
+[[outputs]]
+id = "9p51z0Fwogi4JPuvI1o-8"
+uri = "file://brand/screenshots/paragon-defense.jpg"
+type = "image"
+title = "PARAGON — Defense & Intelligence"
+
+[[outputs]]
+id = "stGWsJ7pGYLFxmgMxBOCe"
+uri = "file://brand/screenshots/counsel-legal-command.jpg"
+type = "image"
+title = "Counsel — Legal Matter Command"
+
+[[outputs]]
+id = "RWGkhNdCHv19MNdhdEfMg"
+uri = "file://docs/a11oy/A11OY.md"
+type = "text"
+title = "A11oy — Competitive Positioning Document"
