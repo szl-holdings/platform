@@ -5,8 +5,10 @@ import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import { validateBody } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
+import { tenantScope } from '../middlewares/tenant-scope';
 
 const copilotRouter: IRouter = Router();
+copilotRouter.use(tenantScope({ required: true }));
 
 const copilotLimit = rateLimit({
   windowMs: 15 * 60 * 1000,

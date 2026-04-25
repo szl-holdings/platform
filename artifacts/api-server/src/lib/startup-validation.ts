@@ -1053,6 +1053,734 @@ export const ENV_SPECS: EnvVarSpec[] = [
     defaultValue: '/tmp/szl-backups',
     group: 'storage',
   },
+
+  // ── Billing (additional) ─────────────────────────────────────────────────
+  {
+    key: 'STRIPE_PUBLISHABLE_KEY',
+    required: false,
+    description: 'Stripe publishable key for client-side Stripe.js initialization',
+    group: 'billing',
+  },
+
+  // ── Platform URLs ─────────────────────────────────────────────────────────
+  {
+    key: 'APP_MODE',
+    required: false,
+    description: 'Application mode label (e.g. production | staging | demo)',
+    group: 'server',
+  },
+  {
+    key: 'APP_URL',
+    required: false,
+    description: 'Canonical application URL (alias for PUBLIC_APP_URL)',
+    group: 'server',
+  },
+  {
+    key: 'APP_BASE_URL',
+    required: false,
+    description: 'Base URL path prefix for the application (useful when hosted under a sub-path)',
+    group: 'server',
+  },
+  {
+    key: 'PLATFORM_UI_URL',
+    required: false,
+    description: 'Public URL of the platform UI (used for cross-service links)',
+    group: 'server',
+  },
+  {
+    key: 'PLATFORM_API_URL',
+    required: false,
+    description: 'Public URL of the platform API (used for cross-service calls)',
+    group: 'server',
+  },
+
+  // ── Domain product toggles ────────────────────────────────────────────────
+  {
+    key: 'AEGIS_ENV',
+    required: false,
+    description: 'Aegis environment label override (e.g. demo | staging | production)',
+    group: 'platform',
+  },
+  {
+    key: 'PRISM_COUNSEL_SEED_DEMO',
+    required: false,
+    description: "Set to 'true' to seed PRISM Counsel demo data on startup",
+    defaultValue: 'false',
+    group: 'platform',
+  },
+  {
+    key: 'SELF_HEALING_DEMO_SEED',
+    required: false,
+    description: "Set to 'true' to seed self-healing orchestrator demo data on startup",
+    defaultValue: 'false',
+    group: 'platform',
+  },
+
+  // ── AI / LLM (additional) ─────────────────────────────────────────────────
+  {
+    key: 'OPENAI_API_KEY',
+    required: false,
+    description: 'OpenAI API key for direct OpenAI calls (non-Replit-proxy path)',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'OPENAI_BASE_URL',
+    required: false,
+    description: 'OpenAI API base URL override (for proxies or Azure OpenAI)',
+    group: 'integrations',
+  },
+  {
+    key: 'HF_PROVIDER',
+    required: false,
+    description: 'HuggingFace inference provider (e.g. hf-inference | together | replicate)',
+    group: 'integrations',
+  },
+  {
+    key: 'HF_EMBED_MODEL',
+    required: false,
+    description: 'HuggingFace embedding model ID (e.g. sentence-transformers/all-MiniLM-L6-v2)',
+    group: 'integrations',
+  },
+  {
+    key: 'ALLOY_POLICY_LLM_MODEL',
+    required: false,
+    description: 'LLM model used for Alloy policy compilation and reasoning',
+    defaultValue: 'gpt-4o',
+    group: 'alloy',
+  },
+  {
+    key: 'AI_BUDGET_DAILY_USD',
+    required: false,
+    description: 'Daily AI spend budget cap in USD — triggers alert at AI_BUDGET_ALERT_PCT',
+    group: 'integrations',
+  },
+  {
+    key: 'AI_BUDGET_HOURLY_USD',
+    required: false,
+    description: 'Hourly AI spend budget cap in USD — triggers alert at AI_BUDGET_ALERT_PCT',
+    group: 'integrations',
+  },
+  {
+    key: 'AI_BUDGET_MONTHLY_USD',
+    required: false,
+    description: 'Monthly AI spend budget cap in USD — triggers alert at AI_BUDGET_ALERT_PCT',
+    group: 'integrations',
+  },
+  {
+    key: 'AI_BUDGET_ALERT_PCT',
+    required: false,
+    description: 'Percentage of AI budget consumed before an alert fires (0–100)',
+    defaultValue: '80',
+    group: 'integrations',
+  },
+  {
+    key: 'AI_REQUIRE_APPROVAL_FOR_HIGH_RISK',
+    required: false,
+    description: "Set to 'true' to require human approval before executing high-risk AI actions",
+    defaultValue: 'true',
+    group: 'integrations',
+  },
+  {
+    key: 'AI_REVIEW_HYDRATE_LIMIT',
+    required: false,
+    description: 'Maximum number of AI review records to hydrate per request',
+    defaultValue: '50',
+    group: 'integrations',
+  },
+  {
+    key: 'AI_TRACE_HYDRATE_LIMIT',
+    required: false,
+    description: 'Maximum number of AI trace records to hydrate per request',
+    defaultValue: '100',
+    group: 'integrations',
+  },
+
+  // ── AEF / Substrate Gateway ──────────────────────────────────────────────
+  {
+    key: 'AEF_API_URL',
+    required: false,
+    description: 'AEF (Agentic Execution Fabric) API base URL',
+    group: 'integrations',
+  },
+  {
+    key: 'AEF_API_KEY',
+    required: false,
+    description: 'AEF API key for authenticating with the execution fabric',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'AEF_GATEWAY_URL',
+    required: false,
+    description: 'AEF gateway URL for agent routing',
+    group: 'integrations',
+  },
+  {
+    key: 'AEF_TENANT_ID',
+    required: false,
+    description: 'AEF tenant ID for multi-tenant fabric isolation',
+    group: 'integrations',
+  },
+  {
+    key: 'SUBSTRATE_GATEWAY_API_KEY',
+    required: false,
+    description: 'Substrate gateway API key for agent mesh authentication',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'SUBSTRATE_GATEWAY_PORT',
+    required: false,
+    description: 'Substrate gateway listen port',
+    defaultValue: '8080',
+    group: 'integrations',
+  },
+  {
+    key: 'SUBSTRATE_SIGNING_KEY',
+    required: false,
+    description: 'Substrate request signing key (hex) for agent-mesh HMAC signatures',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'SUBSTRATE_PYTHON_WORKER_URL',
+    required: false,
+    description: 'URL of the Substrate Python worker for heavy compute tasks',
+    group: 'integrations',
+  },
+  {
+    key: 'MCP_GATEWAY_ENDPOINT',
+    required: false,
+    description: 'MCP (Model Context Protocol) gateway endpoint URL',
+    group: 'integrations',
+  },
+  {
+    key: 'MCP_GATEWAY_UPSTREAM_TIMEOUT_MS',
+    required: false,
+    description: 'Timeout in ms for upstream MCP gateway calls',
+    defaultValue: '30000',
+    group: 'integrations',
+  },
+
+  // ── Security (additional) ─────────────────────────────────────────────────
+  {
+    key: 'SECRET_ENCRYPTION_KEY',
+    required: false,
+    description: 'Generic secret encryption key used by the secrets vault module',
+    sensitive: true,
+    group: 'security',
+  },
+  {
+    key: 'SESSION_MIN_CREATED_AT',
+    required: false,
+    description: 'ISO timestamp — sessions created before this date are invalidated (forced re-login after key rotation)',
+    group: 'auth',
+  },
+  {
+    key: 'INTERNAL_SERVICE_TOKENS',
+    required: false,
+    description: 'Comma-separated list of bearer tokens accepted from trusted internal services',
+    sensitive: true,
+    group: 'security',
+  },
+  {
+    key: 'INTERNAL_TOKENS_ALLOW_LEGACY_ONLY',
+    required: false,
+    description: "Set to 'true' to restrict internal tokens to the legacy single-token format (migration aid)",
+    defaultValue: 'false',
+    group: 'security',
+  },
+  {
+    key: 'UNSUBSCRIBE_SECRET',
+    required: false,
+    description: 'HMAC secret used to sign and verify email unsubscribe tokens',
+    sensitive: true,
+    group: 'security',
+  },
+  {
+    key: 'USAGE_EVENT_SERVICE_TOKEN',
+    required: false,
+    description: 'Bearer token for server-to-server usage event ingestion (POST /api/orgs/:slug/usage/events)',
+    sensitive: true,
+    group: 'security',
+  },
+
+  // ── Integrations — CRM / Ticketing ────────────────────────────────────────
+  {
+    key: 'JIRA_CLIENT_ID',
+    required: false,
+    description: 'Jira OAuth client ID',
+    group: 'integrations',
+  },
+  {
+    key: 'JIRA_CLIENT_SECRET',
+    required: false,
+    description: 'Jira OAuth client secret',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'JIRA_WEBHOOK_SECRET',
+    required: false,
+    description: 'Jira webhook shared secret for payload verification',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'SALESFORCE_CLIENT_ID',
+    required: false,
+    description: 'Salesforce Connected App client ID',
+    group: 'integrations',
+  },
+  {
+    key: 'SALESFORCE_CLIENT_SECRET',
+    required: false,
+    description: 'Salesforce Connected App client secret',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'SALESFORCE_WEBHOOK_SECRET',
+    required: false,
+    description: 'Salesforce outbound message HMAC secret',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'PAGERDUTY_WEBHOOK_SECRET',
+    required: false,
+    description: 'PagerDuty webhook signing secret',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'POWER_AUTOMATE_WEBHOOK_SECRET',
+    required: false,
+    description: 'Power Automate webhook HMAC secret',
+    sensitive: true,
+    group: 'integrations',
+  },
+
+  // ── Email webhooks ────────────────────────────────────────────────────────
+  {
+    key: 'RESEND_WEBHOOK_SECRET',
+    required: false,
+    description: 'Resend email webhook signing secret (svix payload verification)',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'SENDGRID_WEBHOOK_SECRET',
+    required: false,
+    description: 'SendGrid event webhook verification key',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'WEBHOOK_DELIVERY_ALLOWLIST',
+    required: false,
+    description: 'Comma-separated hostname allowlist for outbound webhook delivery (empty = allow all)',
+    group: 'integrations',
+  },
+
+  // ── Analytics ─────────────────────────────────────────────────────────────
+  {
+    key: 'POSTHOG_API_KEY',
+    required: false,
+    description: 'PostHog project API key for product analytics',
+    sensitive: true,
+    group: 'observability',
+  },
+  {
+    key: 'AMPLITUDE_API_KEY',
+    required: false,
+    description: 'Amplitude project API key for product analytics',
+    sensitive: true,
+    group: 'observability',
+  },
+
+  // ── Security feeds ────────────────────────────────────────────────────────
+  {
+    key: 'SIEM_INGEST_TOKEN',
+    required: false,
+    description: 'Bearer token for authenticating SIEM event ingest requests',
+    sensitive: true,
+    group: 'security',
+  },
+  {
+    key: 'TAXII_SERVER_URL',
+    required: false,
+    description: 'TAXII 2.x server URL for STIX threat intelligence feeds',
+    group: 'integrations',
+  },
+  {
+    key: 'OT_ICS_FEED_ENABLED',
+    required: false,
+    description: "Set to 'true' to enable OT/ICS threat feed ingestion",
+    defaultValue: 'false',
+    group: 'features',
+  },
+
+  // ── Data retention ───────────────────────────────────────────────────────
+  {
+    key: 'ATLAS_RETENTION_DAYS',
+    required: false,
+    description: 'Number of days to retain ATLAS entity history before compaction',
+    defaultValue: '90',
+    group: 'atlas',
+  },
+  {
+    key: 'ATLAS_EXPORT_CONCURRENCY',
+    required: false,
+    description: 'Maximum parallel ATLAS export workers',
+    defaultValue: '4',
+    group: 'atlas',
+  },
+  {
+    key: 'ATLAS_EXPORT_POLL_MS',
+    required: false,
+    description: 'Polling interval in ms for ATLAS export progress checks',
+    defaultValue: '2000',
+    group: 'atlas',
+  },
+  {
+    key: 'COMPACTION_DRY_RUN',
+    required: false,
+    description: "Set to 'true' to simulate compaction without deleting records",
+    defaultValue: 'false',
+    group: 'atlas',
+  },
+  {
+    key: 'CORTEX_DRAFT_RETENTION_DAYS',
+    required: false,
+    description: 'Days to keep draft Cortex snapshots before pruning',
+    defaultValue: '7',
+    group: 'platform',
+  },
+  {
+    key: 'CORTEX_SNAPSHOT_INTERVAL_HOURS',
+    required: false,
+    description: 'Hours between automatic Cortex consciousness snapshots',
+    defaultValue: '24',
+    group: 'platform',
+  },
+  {
+    key: 'CHECKPOINT_RETENTION_HOURS',
+    required: false,
+    description: 'Hours to retain incremental checkpoints before rolling into a snapshot',
+    defaultValue: '48',
+    group: 'platform',
+  },
+  {
+    key: 'ENTITY_SNAPSHOT_RETENTION_DAYS',
+    required: false,
+    description: 'Days to retain entity snapshots in the ATLAS store',
+    defaultValue: '30',
+    group: 'atlas',
+  },
+  {
+    key: 'EVIDENCE_RETENTION_DAYS',
+    required: false,
+    description: 'Days to retain risk evidence records before archival',
+    defaultValue: '365',
+    group: 'platform',
+  },
+  {
+    key: 'RECOMMENDATION_RETENTION_DAYS',
+    required: false,
+    description: 'Days to retain AI recommendation records',
+    defaultValue: '90',
+    group: 'platform',
+  },
+  {
+    key: 'SIGNAL_RETENTION_DAYS',
+    required: false,
+    description: 'Days to retain signal records in the signal mesh',
+    defaultValue: '30',
+    group: 'platform',
+  },
+
+  // ── Scheduler intervals ───────────────────────────────────────────────────
+  {
+    key: 'SIGNAL_FUSION_INTERVAL_MINUTES',
+    required: false,
+    description: 'Minutes between signal fusion runs in the Alloy orchestrator',
+    defaultValue: '15',
+    group: 'platform',
+  },
+  {
+    key: 'DRIFT_SAMPLE_INTERVAL_MINUTES',
+    required: false,
+    description: 'Minutes between ownership drift sampling runs',
+    defaultValue: '60',
+    group: 'platform',
+  },
+  {
+    key: 'ALERT_EVAL_INTERVAL_MINUTES',
+    required: false,
+    description: 'Minutes between alert rule evaluation cycles',
+    defaultValue: '5',
+    group: 'platform',
+  },
+  {
+    key: 'COGNITIVE_TELEMETRY_FLUSH_INTERVAL_MS',
+    required: false,
+    description: 'Milliseconds between cognitive telemetry flush operations',
+    defaultValue: '60000',
+    group: 'platform',
+  },
+  {
+    key: 'OTEL_COGNITIVE_ENDPOINT',
+    required: false,
+    description: 'OTLP endpoint for cognitive telemetry spans (separate from main OTLP endpoint)',
+    group: 'observability',
+  },
+  {
+    key: 'STUCK_RUN_HARD_TIMEOUT_MS',
+    required: false,
+    description: 'Milliseconds after which a stuck workflow run is force-terminated',
+    defaultValue: '3600000',
+    group: 'platform',
+  },
+
+  // ── Agent mesh thresholds ─────────────────────────────────────────────────
+  {
+    key: 'MESH_ALERT_DROP_THRESHOLD',
+    required: false,
+    description: 'Resilience index score below which an alert is fired for the agent mesh',
+    defaultValue: '0.5',
+    group: 'platform',
+  },
+  {
+    key: 'MESH_ALERT_SUBINDEX_THRESHOLD',
+    required: false,
+    description: 'Sub-index score below which individual agent alerts are raised',
+    defaultValue: '0.3',
+    group: 'platform',
+  },
+  {
+    key: 'MESH_SCHEDULED_ONLY_ORG_IDS',
+    required: false,
+    description: 'Comma-separated org IDs restricted to scheduled (non-realtime) mesh runs',
+    group: 'platform',
+  },
+  {
+    key: 'MESH_SCHEDULED_ORG_IDS',
+    required: false,
+    description: 'Comma-separated org IDs enabled for scheduled mesh scan runs',
+    group: 'platform',
+  },
+  {
+    key: 'HEALTH_DEGRADED_ALERT_CHANNEL',
+    required: false,
+    description: 'Slack channel or email address for health-degraded alert notifications',
+    group: 'observability',
+  },
+  {
+    key: 'HEALTH_DEGRADED_ALERT_SEVERITY',
+    required: false,
+    description: 'Minimum severity level to trigger health-degraded alerts (info | warn | error)',
+    defaultValue: 'warn',
+    group: 'observability',
+  },
+  {
+    key: 'ALERTS_PAGE_URL',
+    required: false,
+    description: 'Public URL of the alerts management page (embedded in alert notification emails)',
+    group: 'server',
+  },
+  {
+    key: 'GUARDIAN_TIER_CACHE_TTL_MS',
+    required: false,
+    description: 'TTL in ms for Guardian tier resolution cache entries',
+    defaultValue: '300000',
+    group: 'platform',
+  },
+
+  // ── Real estate (Terra) ───────────────────────────────────────────────────
+  {
+    key: 'REAL_ESTATE_DATA_PROVIDER',
+    required: false,
+    description: 'Active real estate data provider (attom | costar | compstak | mls)',
+    group: 'integrations',
+  },
+  {
+    key: 'ATTOM_API_KEY',
+    required: false,
+    description: 'ATTOM Data Solutions API key for property data',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'COSTAR_API_KEY',
+    required: false,
+    description: 'CoStar Group API key for commercial real estate data',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'TERRA_COSTAR_ENABLED',
+    required: false,
+    description: "Set to 'true' to enable live CoStar data in Terra property intelligence",
+    defaultValue: 'false',
+    group: 'features',
+  },
+  {
+    key: 'TERRA_COMPSTAK_ENABLED',
+    required: false,
+    description: "Set to 'true' to enable live CompStak lease comps in Terra",
+    defaultValue: 'false',
+    group: 'features',
+  },
+  {
+    key: 'TERRA_MLS_ENABLED',
+    required: false,
+    description: "Set to 'true' to enable MLS feed integration in Terra",
+    defaultValue: 'false',
+    group: 'features',
+  },
+  {
+    key: 'TERRA_DILIGENCE_TOKEN',
+    required: false,
+    description: 'Bearer token for the Terra diligence data provider',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'TERRA_INGESTION_INTERVAL_MS',
+    required: false,
+    description: 'Milliseconds between Terra property data ingestion cycles',
+    defaultValue: '3600000',
+    group: 'platform',
+  },
+  {
+    key: 'TERRA_EXTENDED_INGESTION_INTERVAL_MS',
+    required: false,
+    description: 'Milliseconds between Terra extended (deep-enrichment) ingestion cycles',
+    defaultValue: '86400000',
+    group: 'platform',
+  },
+
+  // ── Maritime (Vessels) ────────────────────────────────────────────────────
+  {
+    key: 'VESSELS_BOL_HMAC_SECRET',
+    required: false,
+    description: 'HMAC secret for verifying bill-of-lading webhook payloads from the shipping carrier',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'NYC_OPEN_DATA_TOKEN',
+    required: false,
+    description: 'NYC Open Data Socrata app token for increased API rate limits',
+    sensitive: true,
+    group: 'integrations',
+  },
+
+  // ── Integrations — Misc ───────────────────────────────────────────────────
+  {
+    key: 'CONNECT_BASE_URL',
+    required: false,
+    description: 'Base URL for the SZL Connect integration gateway',
+    group: 'integrations',
+  },
+
+  // ── Notifications / digest recipients ────────────────────────────────────
+  {
+    key: 'COMPETITIVE_INTEL_EMAIL_RECIPIENTS',
+    required: false,
+    description: 'Comma-separated email addresses for competitive intelligence digest delivery',
+    group: 'server',
+  },
+  {
+    key: 'COMPETITIVE_INTEL_SLACK_CHANNEL',
+    required: false,
+    description: 'Slack channel for competitive intelligence digest delivery',
+    group: 'integrations',
+  },
+  {
+    key: 'PROOF_CHAIN_DIGEST_EMAIL_RECIPIENTS',
+    required: false,
+    description: 'Comma-separated email addresses for proof-chain digest delivery',
+    group: 'server',
+  },
+  {
+    key: 'PROOF_CHAIN_DIGEST_SLACK_CHANNEL',
+    required: false,
+    description: 'Slack channel for proof-chain digest delivery',
+    group: 'integrations',
+  },
+  {
+    key: 'FOUNDER_ALERT_EMAIL',
+    required: false,
+    description: 'Email address for founder-level operational alerts',
+    group: 'server',
+  },
+  {
+    key: 'SUPPORT_ADMIN_EMAIL',
+    required: false,
+    description: 'Email address that receives new support ticket notifications',
+    group: 'server',
+  },
+  {
+    key: 'SUPPORT_EMAIL_NOTIFICATIONS',
+    required: false,
+    description: "Set to 'true' to enable email notifications for support ticket events",
+    defaultValue: 'true',
+    group: 'server',
+  },
+  {
+    key: 'SZL_INVESTORS_EMAIL',
+    required: false,
+    description: 'Email address for investor-facing notifications and LP portal alerts',
+    group: 'server',
+  },
+
+  // ── Backup (additional) ────────────────────────────────────────────────────
+  {
+    key: 'BACKUP_REMOTE_BACKEND',
+    required: false,
+    description: 'Remote backup backend identifier (e.g. s3 | gcs | azure)',
+    group: 'storage',
+  },
+  {
+    key: 'BACKUP_REMOTE_RPO_HOURS',
+    required: false,
+    description: 'Recovery point objective in hours for remote backup verification',
+    defaultValue: '24',
+    group: 'storage',
+  },
+
+  // ── Runtime performance ───────────────────────────────────────────────────
+  {
+    key: 'NODE_HEAP_LIMIT_MB',
+    required: false,
+    description: 'V8 heap size limit in MB (passed as --max-old-space-size at startup)',
+    group: 'server',
+  },
+
+  // ── Vite client-side env vars ─────────────────────────────────────────────
+  {
+    key: 'VITE_APP_URL',
+    required: false,
+    description: 'App URL injected into Vite bundles for client-side use',
+    group: 'server',
+  },
+  {
+    key: 'VITE_POSTHOG_KEY',
+    required: false,
+    description: 'PostHog project API key injected into Vite bundles for browser-side analytics',
+    sensitive: true,
+    group: 'observability',
+  },
+  {
+    key: 'VITE_AMPLITUDE_API_KEY',
+    required: false,
+    description: 'Amplitude API key injected into Vite bundles for browser-side analytics',
+    sensitive: true,
+    group: 'observability',
+  },
 ];
 
 export interface ValidationResult {
