@@ -26,7 +26,7 @@ import {
 } from '../middlewares/sliding-window-limiter';
 
 const router: IRouter = Router();
-router.use(authMiddleware({ required: false }));
+router.use('/briefings', authMiddleware({ required: false }));
 router.use(perUserApiSlidingLimiter);
 
 const KNOWN_DOMAINS = [

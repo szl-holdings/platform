@@ -83,6 +83,46 @@ pnpm test:unit               # API server unit tests
 pnpm test:integration        # Integration tests (requires live database)
 ```
 
+## Sub-router middleware path-scoping
+
+> **Rule.** Any `authMiddleware`, `tenantScope`, or `requireRole` installed at
+> the **top of a sub-router file** (e.g. `src/routes/foo.ts`) **must be
+> path-scoped** to the prefix that file owns:
+>
+> ```ts
+> // ❌ BAD — runs for every request that reaches this point in the parent
+> //         router's chain. Silently 401/403s sibling routes that share the
+> //         same broad mount prefix.
+> router.use(authMiddleware());
+> router.use(tenantScope({ required: true }));
+>
+> // ✅ GOOD — runs only for requests this file actually handles.
+> router.use('/foo', authMiddleware());
+> router.use('/foo/private', tenantScope({ required: true }));
+> ```
+>
+> **Why.** Most sub-routers are mounted on a parent group via
+> `lazyMatch('/<prefix>', loader)` (see `src/lib/lazy-router.ts`). `lazyMatch`
+> does **not** strip the prefix from `req.url`, and several files share the
+> same broad prefix (e.g. multiple files under `/alloy`, `/nuro-mesh`,
+> `/booking`, `/forge`, `/connectors`). An unprefixed `router.use(authMw)` at
+> the top of one of those files therefore runs for **every** request to the
+> shared prefix and will reject sibling-router traffic that has nothing to do
+> with this file. This footgun has burned us in tasks #718, #1329, the
+> original Carlota Jo `/booking/time-entries` regression, and the task #1395
+> sweep.
+>
+> **Exceptions.** Files mounted via `router.use('/<prefix>', lazyMount(...))`
+> in the parent group already have Express strip the prefix and only invoke
+> the inner router for matching paths, so an unprefixed top-level guard there
+> is not a footgun. Prefer the path-scoped form anyway so the file remains
+> safe if the mount style is ever changed.
+>
+> The static regression test
+> `src/routes/__tests__/sub-router-middleware-path-scope.test.ts` enforces
+> this rule for the files that have been audited; extend it when you add new
+> shared-prefix sub-routers.
+
 ## Notable Source Paths
 
 | Path | Purpose |

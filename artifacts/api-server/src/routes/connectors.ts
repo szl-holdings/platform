@@ -43,7 +43,7 @@ import { authMiddleware, requireRole } from '../middlewares/auth';
 import { computeEventHash } from './audit-chain';
 
 const router: IRouter = Router();
-router.use(authMiddleware());
+router.use('/connectors', authMiddleware());
 
 // ---------------------------------------------------------------------------
 // Per-org runtime state. Drift baselines, run history, enable flag and

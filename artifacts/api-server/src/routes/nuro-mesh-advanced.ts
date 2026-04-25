@@ -29,8 +29,20 @@ import { tenantScope } from '../middlewares/tenant-scope';
 
 const router = Router();
 
-router.use(authMiddleware());
-router.use(tenantScope({ required: true }));
+// Path-scoped to the specific sub-prefixes this file owns. The /nuro-mesh
+// parent in routes/groups/ai.ts is shared with nuro-mesh.ts and
+// consciousness.ts via lazyMatch (which does NOT strip the prefix), so
+// scoping to the broad /nuro-mesh would still gate sibling-router traffic.
+// See "Sub-router middleware path-scoping" in artifacts/api-server/README.md.
+const NURO_MESH_ADVANCED_OWNED_PREFIXES = [
+  '/nuro-mesh/cost',
+  '/nuro-mesh/flywheel',
+  '/nuro-mesh/kernel',
+  '/nuro-mesh/memory',
+  '/nuro-mesh/observability',
+];
+router.use(NURO_MESH_ADVANCED_OWNED_PREFIXES, authMiddleware());
+router.use(NURO_MESH_ADVANCED_OWNED_PREFIXES, tenantScope({ required: true }));
 
 function getOrgId(req: Request): number {
   if (req.user?.roles.includes('super_admin') && req.headers['x-org-id']) {

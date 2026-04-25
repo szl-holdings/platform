@@ -10,7 +10,7 @@ const router: IRouter = Router();
  * Booking admin routes — require authentication.
  * -----------------------------------------------------------------------*/
 
-router.use(authMiddleware());
+router.use('/booking', authMiddleware());
 
 router.get('/booking/health', (_req, res) => {
   res.json({

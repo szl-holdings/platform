@@ -25,7 +25,7 @@ import { authMiddleware } from '../middlewares/auth';
 
 const router = Router();
 
-router.use(authMiddleware());
+router.use('/agent-autonomy', authMiddleware());
 
 router.get('/agent-autonomy/overview', async (_req, res) => {
   try {

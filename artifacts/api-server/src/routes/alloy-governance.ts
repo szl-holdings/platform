@@ -45,7 +45,7 @@ const router: IRouter = Router();
 // routes/groups/alloy.ts which already apply tenantScope({ required: true }),
 // but we keep an explicit gate here so the file cannot silently regress to
 // no-org access if it is ever re-mounted under a different prefix.
-router.use(tenantScope({ required: true }));
+router.use('/alloy/policies', tenantScope({ required: true }));
 
 function getUserOrgIds(user?: AuthenticatedUser): number[] {
   if (!user) return [];

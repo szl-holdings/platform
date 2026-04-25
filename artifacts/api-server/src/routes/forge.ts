@@ -141,7 +141,7 @@ const approveSchema = z.object({
   note: z.string().max(2000).optional(),
 });
 
-router.use(authMiddleware());
+router.use('/forge', authMiddleware());
 
 // ─── Agents ───────────────────────────────────────────────────────────────
 router.get('/forge/agents', validateQuery(listQuerySchema), async (req: Request, res: Response) => {

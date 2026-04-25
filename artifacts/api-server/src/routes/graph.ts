@@ -8,7 +8,7 @@ import { authMiddleware } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
-router.use(authMiddleware({ required: false }));
+router.use('/graph', authMiddleware({ required: false }));
 
 router.get(
   '/graph/entities',

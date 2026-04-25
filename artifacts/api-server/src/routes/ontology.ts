@@ -24,7 +24,7 @@ import { validateBody, validateQuery } from '../lib/validation';
 
 const router: IRouter = Router();
 
-router.use(authMiddleware());
+router.use('/ontology', authMiddleware());
 
 function orgScopeFor(req: Express.Request): number[] | null {
   const user = (req as any).user;

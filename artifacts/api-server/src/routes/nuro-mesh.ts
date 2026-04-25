@@ -21,12 +21,26 @@ import { tenantScope } from '../middlewares/tenant-scope';
 
 const nueroMeshRouter: IRouter = Router();
 
-nueroMeshRouter.use(authMiddleware());
-// Defense-in-depth: even though the parent /nuro-mesh prefix in
-// routes/groups/ai.ts already applies tenantScope({ required: true }),
-// keep an explicit gate here so the file is safe to mount under any
-// future prefix without silently regressing to no-org access.
-nueroMeshRouter.use(tenantScope({ required: true }));
+// Path-scoped to the specific sub-prefixes this file owns. The /nuro-mesh
+// parent in routes/groups/ai.ts is shared with nuro-mesh-advanced.ts and
+// consciousness.ts via lazyMatch (which does NOT strip the prefix), so an
+// unprefixed router.use(authMiddleware()) here would also run for sibling
+// routers' traffic — see "Sub-router middleware path-scoping" in
+// artifacts/api-server/README.md.
+const NURO_MESH_OWNED_PREFIXES = [
+  '/nuro-mesh/agents',
+  '/nuro-mesh/memory',
+  '/nuro-mesh/tool-calls',
+  '/nuro-mesh/advisory',
+  '/nuro-mesh/usage-stats',
+  '/nuro-mesh/causal-patterns',
+  '/nuro-mesh/telemetry',
+  '/nuro-mesh/red-team',
+  '/nuro-mesh/predictive-cache',
+  '/nuro-mesh/prompt-evolution',
+];
+nueroMeshRouter.use(NURO_MESH_OWNED_PREFIXES, authMiddleware());
+nueroMeshRouter.use(NURO_MESH_OWNED_PREFIXES, tenantScope({ required: true }));
 
 const meshRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
