@@ -14,13 +14,14 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { giColors, palette, giProductAccent } from '@/lib/gi-bridge';
 
-const ACCENT = '#0ea5e9';
-const BG = '#020d18';
-const CARD = '#041424';
-const BORDER = 'rgba(14,165,233,0.12)';
-const TEXT = '#e0f2fe';
-const TEXT_DIM = 'rgba(224,242,254,0.4)';
+const ACCENT = giColors.accent.teal;
+const BG = giColors.bg.base;
+const CARD = giColors.bg.surface;
+const BORDER = `${giColors.accent.teal}20`;
+const TEXT = giColors.text.primary;
+const TEXT_DIM = `${giColors.text.primary}66`;
 
 const AGENTS = [
   {
@@ -28,10 +29,10 @@ const AGENTS = [
     name: 'Helmsman',
     role: 'Maritime Intelligence',
     icon: 'anchor',
-    color: '#0ea5e9',
+    color: giColors.accent.teal,
   },
-  { id: 'alloy', name: 'Counsel', role: 'Orchestration', icon: 'git-merge', color: '#c9a84c' },
-  { id: 'sentinel', name: 'Sentinel', role: 'Security', icon: 'shield', color: '#ef4444' },
+  { id: 'alloy', name: 'FORGE', role: 'Orchestration', icon: 'git-merge', color: giProductAccent.holdings },
+  { id: 'sentinel', name: 'Sentinel', role: 'Security', icon: 'shield', color: palette.critical },
 ];
 
 interface Message {

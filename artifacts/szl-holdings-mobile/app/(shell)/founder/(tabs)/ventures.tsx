@@ -13,12 +13,13 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { giColors, palette, giProductAccent } from '@/lib/gi-bridge';
 
-const _ACCENT = '#6366f1';
-const BG = '#0a0a0a';
-const BORDER = 'rgba(255,255,255,0.06)';
-const TEXT = '#e8e8f0';
-const TEXT_DIM = 'rgba(255,255,255,0.45)';
+const _ACCENT = giColors.accent.violet;
+const BG = giColors.bg.base;
+const BORDER = `${giColors.text.primary}0F`;
+const TEXT = giColors.text.primary;
+const TEXT_DIM = `${giColors.text.primary}73`;
 
 const VENTURES = [
   {
@@ -28,7 +29,7 @@ const VENTURES = [
     description:
       'AIS fleet tracking, voyage economics, and sanctions screening covering global shipping routes.',
     url: 'https://vessels.szlholdings.com',
-    color: '#3b82f6',
+    color: palette.low,
     metrics: [
       { label: 'Vessels tracked', value: '50K+' },
       { label: 'Data pts/day', value: '2M+' },
@@ -42,7 +43,7 @@ const VENTURES = [
     description:
       'Unified cybersecurity command converging SOC operations, threat intel, and MSP management.',
     url: 'https://aegis.szlholdings.com',
-    color: '#6366f1',
+    color: giColors.accent.violet,
     metrics: [
       { label: 'Threat vectors', value: '100+' },
       { label: 'Framework', value: 'MITRE' },
@@ -56,7 +57,7 @@ const VENTURES = [
     description:
       'Distress-first real estate platform covering all five NYC boroughs with multi-factor scoring.',
     url: 'https://terra.szlholdings.com',
-    color: '#10b981',
+    color: palette.success,
     metrics: [
       { label: 'Properties', value: '500K+' },
       { label: 'Coverage', value: '5 Boroughs' },
@@ -70,7 +71,7 @@ const VENTURES = [
     description:
       'AI ops dashboard with multi-model routing, cross-portfolio signal aggregation, and observability.',
     url: 'https://lyte.szlholdings.com',
-    color: '#06b6d4',
+    color: giColors.accent.teal,
     metrics: [
       { label: 'AI models', value: '6+' },
       { label: 'Signals/hr', value: '10K+' },
@@ -84,7 +85,7 @@ const VENTURES = [
     description:
       'Strategic advisory platform for high-net-worth clients with secure communication and portal.',
     url: 'https://carlota-jo.szlholdings.com',
-    color: '#f59e0b',
+    color: palette.high,
     metrics: [
       { label: 'Client portal', value: 'Secure' },
       { label: 'Engagement', value: '360°' },
@@ -98,7 +99,7 @@ const VENTURES = [
     description:
       'Holding company with shared infrastructure, authentication, and execution fabric powering all platforms.',
     url: 'https://szlholdings.com',
-    color: '#c4a97e',
+    color: giProductAccent.holdings,
     metrics: [
       { label: 'Platforms', value: '6' },
       { label: 'Founded', value: '2023' },

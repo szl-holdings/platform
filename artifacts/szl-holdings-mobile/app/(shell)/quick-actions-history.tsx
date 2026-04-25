@@ -14,9 +14,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WORKSPACES } from '@/context/WorkspaceContext';
 import { useColors } from '@/hooks/useColors';
 import { apiGet } from '@/lib/apiClient';
+import { giColors, giProductAccent } from '@/lib/gi-bridge';
 
-const ACCENT = '#c9a84c';
-const PURPLE = '#8b7ac8';
+const ACCENT = giProductAccent.holdings;
+const PURPLE = giColors.accent.violet;
 
 export interface DecisionHistoryItem {
   id: string;
@@ -350,7 +351,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
   },
-  resetBtnText: { fontSize: 14, fontFamily: 'Inter_500Medium', color: '#c9a84c' },
+  resetBtnText: { fontSize: 14, fontFamily: 'Inter_500Medium', color: ACCENT },
   refreshBtn: {
     marginTop: 8,
     flexDirection: 'row',

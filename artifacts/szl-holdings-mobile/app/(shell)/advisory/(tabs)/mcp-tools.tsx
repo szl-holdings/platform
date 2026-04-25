@@ -1,5 +1,5 @@
 import { useEmbeddingSearch } from '@szl-holdings/mobile-shared';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Platform,
@@ -12,6 +12,8 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColors } from '@/hooks/useColors';
+import { giProductAccent, giColors, palette } from '@/lib/gi-bridge';
 
 interface McpTool {
   name: string;
@@ -43,13 +45,9 @@ const BUILT_IN_TOOLS: McpTool[] = [
   },
 ];
 
-const ACCENT = '';
-const BG = '#08080f';
-const CARD = 'rgba(25,25,35,0.95)';
-const BORDER = 'rgba(255,255,255,0.06)';
-
 export default function McpToolsScreen() {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
   const [tools, setTools] = useState<McpTool[]>(BUILT_IN_TOOLS);
   const [selected, setSelected] = useState<McpTool | null>(null);
   const [params, setParams] = useState<Record<string, string>>({});
@@ -58,6 +56,9 @@ export default function McpToolsScreen() {
   const [serverStatus, setServerStatus] = useState<'checking' | 'healthy' | 'error'>('checking');
   const [refreshing, setRefreshing] = useState(false);
   const { search } = useEmbeddingSearch({ domain: 'consulting', limit: 5 });
+
+  const accent = giProductAccent.carlota;
+  const s = useMemo(() => makeStyles(colors, accent), [colors, accent]);
 
   const checkHealth = useCallback(async () => {
     try {
@@ -151,20 +152,25 @@ export default function McpToolsScreen() {
   };
 
   const statusColor =
-    serverStatus === 'healthy' ? '#10b981' : serverStatus === 'error' ? '#ef4444' : '#f59e0b';
+    serverStatus === 'healthy'
+      ? giColors.accent.green
+      : serverStatus === 'error'
+        ? giColors.accent.red
+        : giColors.accent.amber;
+
   const hasParams =
     selected?.inputSchema?.properties && Object.keys(selected.inputSchema.properties).length > 0;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
+    <View style={[s.container, { paddingTop: insets.top }]}>
+      <View style={s.header}>
         <View>
-          <Text style={styles.headerTitle}>MCP Tools</Text>
-          <Text style={styles.headerSub}>Model Context Protocol · </Text>
+          <Text style={s.headerTitle}>MCP Tools</Text>
+          <Text style={s.headerSub}>Model Context Protocol</Text>
         </View>
-        <View style={styles.statusBadge}>
-          <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-          <Text style={[styles.statusText, { color: statusColor }]}>
+        <View style={s.statusBadge}>
+          <View style={[s.statusDot, { backgroundColor: statusColor }]} />
+          <Text style={[s.statusText, { color: statusColor }]}>
             {serverStatus === 'healthy' ? 'Online' : serverStatus === 'error' ? 'Offline' : '...'}
           </Text>
         </View>
@@ -174,10 +180,10 @@ export default function McpToolsScreen() {
         contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={accent} />
         }
       >
-        <Text style={styles.sectionLabel}>Available Tools ({tools.length})</Text>
+        <Text style={s.sectionLabel}>Available Tools ({tools.length})</Text>
         {tools.map((tool) => (
           <TouchableOpacity
             key={tool.name}
@@ -187,66 +193,66 @@ export default function McpToolsScreen() {
               setResult(null);
             }}
             style={[
-              styles.toolRow,
+              s.toolRow,
               selected?.name === tool.name && {
-                backgroundColor: `${ACCENT}15`,
-                borderLeftColor: ACCENT,
+                backgroundColor: `${accent}15`,
+                borderLeftColor: accent,
               },
             ]}
             activeOpacity={0.7}
           >
             <View style={{ flex: 1 }}>
-              <Text style={[styles.toolName, selected?.name === tool.name && { color: ACCENT }]}>
+              <Text style={[s.toolName, selected?.name === tool.name && { color: accent }]}>
                 {tool.name}
               </Text>
-              <Text style={styles.toolDesc} numberOfLines={2}>
+              <Text style={s.toolDesc} numberOfLines={2}>
                 {tool.description}
               </Text>
             </View>
           </TouchableOpacity>
         ))}
         {selected && (
-          <View style={styles.callSection}>
-            <Text style={styles.sectionLabel}>Call: {selected.name}</Text>
+          <View style={s.callSection}>
+            <Text style={s.sectionLabel}>Call: {selected.name}</Text>
             {hasParams &&
               Object.entries(selected.inputSchema?.properties!).map(([key, schema]) => (
                 <View key={key} style={{ marginBottom: 8 }}>
-                  <Text style={styles.paramLabel}>{schema.description ?? key}</Text>
+                  <Text style={s.paramLabel}>{schema.description ?? key}</Text>
                   <TextInput
                     value={params[key] ?? ''}
                     onChangeText={(val) => setParams((p) => ({ ...p, [key]: val }))}
                     placeholder={key}
-                    placeholderTextColor="rgba(255,255,255,0.2)"
-                    style={styles.input}
+                    placeholderTextColor={colors.mutedForeground}
+                    style={s.inputField}
                   />
                 </View>
               ))}
             <TouchableOpacity
               onPress={callTool}
               disabled={running}
-              style={[styles.callButton, { backgroundColor: ACCENT }, running && { opacity: 0.6 }]}
+              style={[s.callButton, { backgroundColor: accent }, running && { opacity: 0.6 }]}
               activeOpacity={0.8}
             >
               {running ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size="small" color={palette.onAccent} />
               ) : (
-                <Text style={styles.callButtonText}>Execute Tool</Text>
+                <Text style={s.callButtonText}>Execute Tool</Text>
               )}
             </TouchableOpacity>
             {result && (
               <View
                 style={[
-                  styles.resultCard,
-                  result.isError ? styles.resultError : styles.resultSuccess,
+                  s.resultCard,
+                  result.isError ? s.resultError : s.resultSuccess,
                 ]}
               >
                 <Text
-                  style={[styles.resultStatus, { color: result.isError ? '#ef4444' : '#10b981' }]}
+                  style={[s.resultStatus, { color: result.isError ? giColors.accent.red : giColors.accent.green }]}
                 >
                   {result.isError ? 'Error' : 'Success'} · {result.elapsed}ms
                 </Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <Text style={styles.resultContent}>{result.content}</Text>
+                  <Text style={s.resultContent}>{result.content}</Text>
                 </ScrollView>
               </View>
             )}
@@ -257,103 +263,127 @@ export default function McpToolsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: BG },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-  },
-  headerTitle: { color: '#fff', fontSize: 17, fontWeight: '700', letterSpacing: -0.3 },
-  headerSub: { color: 'rgba(255,255,255,0.35)', fontSize: 10, marginTop: 1 },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderWidth: 1,
-    borderColor: BORDER,
-  },
-  statusDot: { width: 5, height: 5, borderRadius: 3 },
-  statusText: { fontSize: 10, fontWeight: '600' },
-  sectionLabel: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: 'rgba(255,255,255,0.25)',
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 6,
-  },
-  toolRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-    borderLeftWidth: 2,
-    borderLeftColor: 'transparent',
-  },
-  toolName: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.75)',
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-    marginBottom: 2,
-  },
-  toolDesc: { fontSize: 10, color: 'rgba(255,255,255,0.35)', lineHeight: 14 },
-  callSection: {
-    margin: 12,
-    borderRadius: 12,
-    padding: 14,
-    backgroundColor: CARD,
-    borderWidth: 1,
-    borderColor: BORDER,
-  },
-  paramLabel: {
-    fontSize: 9,
-    color: 'rgba(255,255,255,0.4)',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 4,
-  },
-  input: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.7)',
-  },
-  callButton: { borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginTop: 10 },
-  callButtonText: { color: '#fff', fontSize: 13, fontWeight: '700' },
-  resultCard: {
-    marginTop: 10,
-    borderRadius: 8,
-    overflow: 'hidden',
-    borderWidth: 1,
-    maxHeight: 200,
-  },
-  resultError: { backgroundColor: 'rgba(239,68,68,0.05)', borderColor: 'rgba(239,68,68,0.2)' },
-  resultSuccess: { backgroundColor: 'rgba(16,185,129,0.05)', borderColor: 'rgba(16,185,129,0.2)' },
-  resultStatus: { fontSize: 10, fontWeight: '600', padding: 8, paddingBottom: 4 },
-  resultContent: {
-    fontSize: 10,
-    color: 'rgba(255,255,255,0.6)',
-    paddingHorizontal: 8,
-    paddingBottom: 8,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-  },
-});
+function makeStyles(colors: ReturnType<typeof useColors>, accent: string) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    headerTitle: {
+      color: colors.foreground,
+      fontSize: 17,
+      fontFamily: 'SpaceGrotesk_700Bold',
+      letterSpacing: -0.3,
+    },
+    headerSub: { color: colors.mutedForeground, fontSize: 10, fontFamily: 'Inter_400Regular', marginTop: 1 },
+    statusBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 20,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    statusDot: { width: 5, height: 5, borderRadius: 3 },
+    statusText: { fontSize: 10, fontFamily: 'Inter_600SemiBold' },
+    sectionLabel: {
+      fontSize: 9,
+      fontFamily: 'Inter_700Bold',
+      color: colors.mutedForeground,
+      letterSpacing: 1.2,
+      textTransform: 'uppercase',
+      paddingHorizontal: 16,
+      paddingTop: 16,
+      paddingBottom: 6,
+    },
+    toolRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      borderLeftWidth: 2,
+      borderLeftColor: 'transparent',
+    },
+    toolName: {
+      fontSize: 12,
+      fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+      fontWeight: '600',
+      color: colors.foreground,
+      marginBottom: 2,
+    },
+    toolDesc: {
+      fontSize: 10,
+      fontFamily: 'Inter_400Regular',
+      color: colors.mutedForeground,
+      lineHeight: 14,
+    },
+    callSection: {
+      margin: 12,
+      borderRadius: 12,
+      padding: 14,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    paramLabel: {
+      fontSize: 9,
+      fontFamily: 'Inter_500Medium',
+      color: colors.mutedForeground,
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+      marginBottom: 4,
+    },
+    inputField: {
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      fontSize: 12,
+      fontFamily: 'Inter_400Regular',
+      color: colors.foreground,
+    },
+    callButton: { borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginTop: 10 },
+    callButtonText: {
+      color: palette.onAccent,
+      fontSize: 13,
+      fontFamily: 'Inter_700Bold',
+    },
+    resultCard: {
+      marginTop: 10,
+      borderRadius: 8,
+      overflow: 'hidden',
+      borderWidth: 1,
+      maxHeight: 200,
+    },
+    resultError: {
+      backgroundColor: `${giColors.accent.red}0D`,
+      borderColor: `${giColors.accent.red}33`,
+    },
+    resultSuccess: {
+      backgroundColor: `${giColors.accent.green}0D`,
+      borderColor: `${giColors.accent.green}33`,
+    },
+    resultStatus: { fontSize: 10, fontFamily: 'Inter_600SemiBold', padding: 8, paddingBottom: 4 },
+    resultContent: {
+      fontSize: 10,
+      color: colors.mutedForeground,
+      paddingHorizontal: 8,
+      paddingBottom: 8,
+      fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    },
+  });
+}

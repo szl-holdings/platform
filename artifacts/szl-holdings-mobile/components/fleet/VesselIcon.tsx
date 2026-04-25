@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons';
+import { giColors } from '@/lib/gi-bridge';
 
 type FeatherIconName =
   | 'alert-circle'
@@ -47,7 +48,7 @@ interface VesselIconProps {
   style?: object;
 }
 
-export function VesselIcon({ name, size = 16, color = '#e0f2fe', style }: VesselIconProps) {
+export function VesselIcon({ name, size = 16, color = giColors.accent.teal, style }: VesselIconProps) {
   return <Feather name={name} size={size} color={color} style={style} />;
 }
 

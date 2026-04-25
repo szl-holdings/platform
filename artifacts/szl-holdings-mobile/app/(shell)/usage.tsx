@@ -14,8 +14,9 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { apiFetch } from '@/lib/apiClient';
+import { giColors, palette, giProductAccent } from '@/lib/gi-bridge';
 
-const ACCENT = '#c9a84c';
+const ACCENT = giProductAccent.holdings;
 
 async function apiGet<T>(path: string): Promise<T> {
   const raw = await apiFetch<{ data: T } | T>(path, { method: 'GET' });
@@ -87,7 +88,7 @@ export default function UsageScreen() {
       label: 'Active Users',
       value: summary ? fmt(summary.activeUsers) : '—',
       icon: 'users' as const,
-      color: '#6366f1',
+      color: giColors.accent.violet,
       sub: `of ${summary ? fmt(summary.totalMembers) : '—'}`,
     },
     {
@@ -101,14 +102,14 @@ export default function UsageScreen() {
       label: 'Storage',
       value: summary ? fmtBytes(summary.storageBytes) : '—',
       icon: 'hard-drive' as const,
-      color: '#10b981',
+      color: palette.success,
       sub: 'used',
     },
     {
       label: 'Features',
       value: String(features.length),
       icon: 'zap' as const,
-      color: '#f59e0b',
+      color: palette.high,
       sub: 'active',
     },
   ];
@@ -137,7 +138,7 @@ export default function UsageScreen() {
               onPress={() => setDays(p.days)}
             >
               <Text
-                style={[styles.periodBtnText, { color: days === p.days ? '#000' : colors.muted }]}
+                style={[styles.periodBtnText, { color: days === p.days ? giColors.bg.base : colors.muted }]}
               >
                 {p.label}
               </Text>

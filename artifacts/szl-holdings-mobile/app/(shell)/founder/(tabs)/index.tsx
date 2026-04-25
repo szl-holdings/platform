@@ -36,6 +36,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { type Section, SectionNav } from '@/components/founder/SectionNav';
 import { useColors } from '@/hooks/useColors';
+import { giColors, palette, giProductAccent } from '@/lib/gi-bridge';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -59,7 +60,7 @@ const VENTURES = [
     description:
       'AIS fleet tracking, voyage economics, and sanctions screening covering global shipping routes.',
     url: 'https://vessels.szlholdings.com',
-    color: '#3b82f6',
+    color: palette.low,
     metrics: [
       { label: 'Vessels tracked', value: '50K+' },
       { label: 'Data pts/day', value: '2M+' },
@@ -73,7 +74,7 @@ const VENTURES = [
     description:
       'Unified cybersecurity command converging SOC operations, threat intel, and MSP management.',
     url: 'https://aegis.szlholdings.com',
-    color: '#6366f1',
+    color: giColors.accent.violet,
     metrics: [
       { label: 'Threat vectors', value: '100+' },
       { label: 'Framework', value: 'MITRE' },
@@ -87,7 +88,7 @@ const VENTURES = [
     description:
       'Distress-first real estate platform covering all five NYC boroughs with multi-factor scoring.',
     url: 'https://terra.szlholdings.com',
-    color: '#10b981',
+    color: palette.success,
     metrics: [
       { label: 'Properties', value: '500K+' },
       { label: 'Coverage', value: '5 Boroughs' },
@@ -101,7 +102,7 @@ const VENTURES = [
     description:
       'AI ops dashboard with multi-model routing, cross-portfolio signal aggregation, and observability.',
     url: 'https://lyte.szlholdings.com',
-    color: '#06b6d4',
+    color: giColors.accent.teal,
     metrics: [
       { label: 'AI models', value: '6+' },
       { label: 'Signals/hr', value: '10K+' },
@@ -115,7 +116,7 @@ const VENTURES = [
     description:
       'Strategic advisory platform for high-net-worth clients with secure communication and portal.',
     url: 'https://carlota-jo.szlholdings.com',
-    color: '#f59e0b',
+    color: palette.high,
     metrics: [
       { label: 'Client portal', value: 'Secure' },
       { label: 'Engagement', value: '360°' },
@@ -129,7 +130,7 @@ const VENTURES = [
     description:
       'Holding company with shared infrastructure, authentication, and execution fabric powering all platforms.',
     url: 'https://szlholdings.com',
-    color: '#c4a97e',
+    color: giProductAccent.holdings,
     metrics: [
       { label: 'Platforms', value: '6' },
       { label: 'Founded', value: '2023' },
@@ -145,7 +146,7 @@ const MILESTONES = [
     role: 'Founder & CEO',
     company: 'SZL Holdings',
     logoInitials: 'SZL',
-    logoColor: '#c4a97e',
+    logoColor: giProductAccent.holdings,
     detail:
       'Established SZL Holdings as a strategic holding company to develop and operate domain-specific enterprise platforms across maritime, defense, real estate, and private advisory verticals.',
     achievement: '0 → 1: Company formation and shared infrastructure architecture',
@@ -157,7 +158,7 @@ const MILESTONES = [
     role: 'Lead Architect',
     company: 'SZL Holdings',
     logoInitials: 'AL',
-    logoColor: '#9ca3af',
+    logoColor: giColors.text.muted,
     detail:
       'Built and shipped the core workflow orchestration and execution engine. Now the internal execution fabric powering all portfolio decision workflows and API routing.',
     achievement: 'Core platform infrastructure: auth, logging, API, design system',
@@ -169,7 +170,7 @@ const MILESTONES = [
     role: 'Founder, Lead Engineer',
     company: 'Vessels — SZL Holdings',
     logoInitials: 'VS',
-    logoColor: '#3b82f6',
+    logoColor: palette.low,
     detail:
       'Shipped maritime fleet intelligence covering AIS tracking, exception management, voyage economics, and OFAC/UN sanctions screening for enterprise logistics operators.',
     achievement: '50K+ vessels tracked, 2M+ data points/day',
@@ -181,7 +182,7 @@ const MILESTONES = [
     role: 'Founder, Lead Engineer',
     company: 'Lyte — SZL Holdings',
     logoInitials: 'LY',
-    logoColor: '#06b6d4',
+    logoColor: giColors.accent.teal,
     detail:
       'Shipped unified AI operations dashboard with multi-model routing, PRISM intelligence methodology, and cross-portfolio signal aggregation.',
     achievement: '6+ AI models unified, <100ms P95 latency',
@@ -193,7 +194,7 @@ const MILESTONES = [
     role: 'Founder, Lead Engineer',
     company: 'Aegis — SZL Holdings',
     logoInitials: 'AG',
-    logoColor: '#6366f1',
+    logoColor: giColors.accent.violet,
     detail:
       'Shipped unified cybersecurity command surface converging SOC operations (Firestorm), Managed Services (Aegis Operations), and Intelligence Engine (Aegis Labs).',
     achievement: 'MITRE ATT&CK mapping, <1 min automated response',
@@ -205,7 +206,7 @@ const MILESTONES = [
     role: 'Founder, Lead Engineer',
     company: 'Terra — SZL Holdings',
     logoInitials: 'TR',
-    logoColor: '#10b981',
+    logoColor: palette.success,
     detail:
       'Shipped distress-first real estate intelligence platform covering all five NYC boroughs with 12+ data sources and 6–18 month lead-time signal generation.',
     achievement: '500K+ properties indexed across 5 boroughs',
@@ -217,7 +218,7 @@ const MILESTONES = [
     role: 'Founder & CEO',
     company: 'SZL Holdings',
     logoInitials: 'SZL',
-    logoColor: '#c4a97e',
+    logoColor: giProductAccent.holdings,
     detail:
       'Six platforms live. Shared infrastructure compounding across all products. Counsel absorbed as internal execution engine. Carlota Jo native mobile launched.',
     achievement: '6 platforms live · 150K+ LOC · Full compound architecture',
@@ -700,7 +701,7 @@ export default function HomeScreen() {
             <View
               style={[
                 styles.statusDot,
-                { backgroundColor: '#10b981', borderColor: colors.background },
+                { backgroundColor: palette.success, borderColor: colors.background },
               ]}
             />
           </View>
@@ -1192,7 +1193,7 @@ function VentureScreenshot({
     <View
       style={[
         styles.screenshotFrame,
-        { backgroundColor: '#0a0a0a', borderColor: `${venture.color}30` },
+        { backgroundColor: giColors.bg.base, borderColor: `${venture.color}30` },
       ]}
     >
       <View style={[styles.screenshotChrome, { backgroundColor: `${venture.color}15` }]}>

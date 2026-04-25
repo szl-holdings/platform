@@ -13,16 +13,17 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { apiGet } from '@/lib/apiClient';
+import { giColors, palette } from '@/lib/gi-bridge';
 
-const ACCENT = '#F97316';
-const RED = '#EF4444';
-const GREEN = '#10B981';
-const AMBER = '#F59E0B';
-const BG = '#080B12';
-const CARD = '#0D1018';
-const BORDER = 'rgba(232,234,240,0.08)';
-const TEXT = '#E8EAF0';
-const TEXT_DIM = 'rgba(232,234,240,0.45)';
+const ACCENT = giColors.accent.amber;
+const RED = palette.critical;
+const GREEN = palette.success;
+const AMBER = palette.high;
+const BG = giColors.bg.base;
+const CARD = giColors.bg.surface;
+const BORDER = `${giColors.text.primary}14`;
+const TEXT = giColors.text.primary;
+const TEXT_DIM = `${giColors.text.primary}73`;
 
 const AGENT_DEFS = [
   {
@@ -45,7 +46,7 @@ const AGENT_DEFS = [
     id: 'helmsman',
     name: 'Helmsman',
     domain: 'Maritime',
-    color: '#0ea5e9',
+    color: giColors.accent.teal,
     icon: 'anchor',
     model: 'claude-sonnet-4-6',
   },
@@ -53,7 +54,7 @@ const AGENT_DEFS = [
     id: 'eval',
     name: 'Eval Engine',
     domain: 'Research',
-    color: '#8b5cf6',
+    color: giColors.accent.violet,
     icon: 'cpu',
     model: 'gemini-3.1-pro',
   },
@@ -69,7 +70,7 @@ const AGENT_DEFS = [
     id: 'zeus',
     name: 'Zeus',
     domain: 'Infrastructure',
-    color: '#6366f1',
+    color: giColors.accent.violet,
     icon: 'server',
     model: 'gpt-5.2',
   },

@@ -12,6 +12,8 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColors } from '@/hooks/useColors';
+import { palette } from '@/lib/gi-bridge';
 
 interface McpTool {
   name: string;
@@ -43,33 +45,39 @@ const BUILT_IN_TOOLS: McpTool[] = [
   },
 ];
 
-const ACCENT = '#ef4444';
-const BG = '#08080f';
-const CARD = 'rgba(25,25,35,0.95)';
-const BORDER = 'rgba(255,255,255,0.06)';
+const ACCENT = palette.critical;
 
 function ToolRow({
   tool,
   selected,
   onPress,
+  borderColor,
+  nameColor,
+  descColor,
+  dotColor,
 }: {
   tool: McpTool;
   selected: boolean;
   onPress: () => void;
+  borderColor: string;
+  nameColor: string;
+  descColor: string;
+  dotColor: string;
 }) {
   return (
     <TouchableOpacity
       onPress={onPress}
       style={[
         styles.toolRow,
-        selected && { backgroundColor: `${ACCENT}10`, borderColor: `${ACCENT}30` },
+        { borderBottomColor: borderColor },
+        selected && { backgroundColor: `${ACCENT}10`, borderLeftColor: `${ACCENT}` },
       ]}
       activeOpacity={0.7}
     >
-      <View style={styles.toolDot} />
+      <View style={[styles.toolDot, { backgroundColor: dotColor }]} />
       <View style={{ flex: 1 }}>
-        <Text style={[styles.toolName, selected && { color: ACCENT }]}>{tool.name}</Text>
-        <Text style={styles.toolDesc} numberOfLines={2}>
+        <Text style={[styles.toolName, { color: selected ? ACCENT : nameColor }]}>{tool.name}</Text>
+        <Text style={[styles.toolDesc, { color: descColor }]} numberOfLines={2}>
           {tool.description}
         </Text>
       </View>
@@ -79,6 +87,7 @@ function ToolRow({
 
 export default function McpToolsScreen() {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
   const [tools, setTools] = useState<McpTool[]>(BUILT_IN_TOOLS);
   const [selected, setSelected] = useState<McpTool | null>(null);
   const [params, setParams] = useState<Record<string, string>>({});
@@ -181,18 +190,25 @@ export default function McpToolsScreen() {
   };
 
   const statusColor =
-    serverStatus === 'healthy' ? '#10b981' : serverStatus === 'error' ? '#ef4444' : '#f59e0b';
+    serverStatus === 'healthy' ? palette.success : serverStatus === 'error' ? palette.critical : palette.high;
   const hasParams =
     selected?.inputSchema?.properties && Object.keys(selected.inputSchema.properties).length > 0;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.background }]}>
+      <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <View>
-          <Text style={styles.headerTitle}>MCP Tools</Text>
-          <Text style={styles.headerSub}>Model Context Protocol · Aegis</Text>
+          <Text style={[styles.headerTitle, { color: colors.foreground }]}>MCP Tools</Text>
+          <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>
+            Model Context Protocol · PARAGON
+          </Text>
         </View>
-        <View style={styles.statusBadge}>
+        <View
+          style={[
+            styles.statusBadge,
+            { backgroundColor: colors.muted, borderColor: colors.border },
+          ]}
+        >
           <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
           <Text style={[styles.statusText, { color: statusColor }]}>
             {serverStatus === 'healthy' ? 'Online' : serverStatus === 'error' ? 'Offline' : '...'}
@@ -208,7 +224,9 @@ export default function McpToolsScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />
         }
       >
-        <Text style={styles.sectionLabel}>Available Tools ({tools.length})</Text>
+        <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>
+          Available Tools ({tools.length})
+        </Text>
         {tools.map((tool) => (
           <ToolRow
             key={tool.name}
@@ -219,23 +237,43 @@ export default function McpToolsScreen() {
               setParams({});
               setResult(null);
             }}
+            borderColor={colors.border}
+            nameColor={colors.cardForeground}
+            descColor={colors.mutedForeground}
+            dotColor={colors.borderSubtle}
           />
         ))}
 
         {selected && (
-          <View style={styles.callSection}>
-            <Text style={styles.sectionLabel}>Call: {selected.name}</Text>
+          <View
+            style={[
+              styles.callSection,
+              { backgroundColor: colors.card, borderColor: colors.border },
+            ]}
+          >
+            <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>
+              Call: {selected.name}
+            </Text>
 
             {hasParams &&
               Object.entries(selected.inputSchema?.properties!).map(([key, schema]) => (
                 <View key={key} style={{ marginBottom: 8 }}>
-                  <Text style={styles.paramLabel}>{schema.description ?? key}</Text>
+                  <Text style={[styles.paramLabel, { color: colors.mutedForeground }]}>
+                    {schema.description ?? key}
+                  </Text>
                   <TextInput
                     value={params[key] ?? ''}
                     onChangeText={(val) => setParams((p) => ({ ...p, [key]: val }))}
                     placeholder={key}
-                    placeholderTextColor="rgba(255,255,255,0.2)"
-                    style={styles.input}
+                    placeholderTextColor={colors.mutedForeground}
+                    style={[
+                      styles.input,
+                      {
+                        backgroundColor: colors.input,
+                        borderColor: colors.borderSubtle,
+                        color: colors.foreground,
+                      },
+                    ]}
                   />
                 </View>
               ))}
@@ -243,11 +281,11 @@ export default function McpToolsScreen() {
             <TouchableOpacity
               onPress={callTool}
               disabled={running}
-              style={[styles.callButton, running && { opacity: 0.6 }]}
+              style={[styles.callButton, { backgroundColor: ACCENT }, running && { opacity: 0.6 }]}
               activeOpacity={0.8}
             >
               {running ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size="small" color={palette.onAccent} />
               ) : (
                 <Text style={styles.callButtonText}>Execute Tool</Text>
               )}
@@ -261,12 +299,17 @@ export default function McpToolsScreen() {
                 ]}
               >
                 <Text
-                  style={[styles.resultStatus, { color: result.isError ? '#ef4444' : '#10b981' }]}
+                  style={[
+                    styles.resultStatus,
+                    { color: result.isError ? palette.critical : palette.success },
+                  ]}
                 >
                   {result.isError ? 'Error' : 'Success'} · {result.elapsed}ms
                 </Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <Text style={styles.resultContent}>{result.content}</Text>
+                  <Text style={[styles.resultContent, { color: colors.mutedForeground }]}>
+                    {result.content}
+                  </Text>
                 </ScrollView>
               </View>
             )}
@@ -278,7 +321,7 @@ export default function McpToolsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: BG },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -286,10 +329,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: BORDER,
   },
-  headerTitle: { color: '#fff', fontSize: 17, fontWeight: '700', letterSpacing: -0.3 },
-  headerSub: { color: 'rgba(255,255,255,0.35)', fontSize: 10, marginTop: 1 },
+  headerTitle: { fontSize: 17, fontWeight: '700', letterSpacing: -0.3 },
+  headerSub: { fontSize: 10, marginTop: 1 },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -297,16 +339,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.04)',
     borderWidth: 1,
-    borderColor: BORDER,
   },
   statusDot: { width: 5, height: 5, borderRadius: 3 },
   statusText: { fontSize: 10, fontWeight: '600' },
   sectionLabel: {
     fontSize: 9,
     fontWeight: '700',
-    color: 'rgba(255,255,255,0.25)',
     letterSpacing: 1.2,
     textTransform: 'uppercase',
     paddingHorizontal: 16,
@@ -320,7 +359,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: BORDER,
     borderLeftWidth: 2,
     borderLeftColor: 'transparent',
   },
@@ -328,50 +366,41 @@ const styles = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 3,
-    backgroundColor: 'rgba(255,255,255,0.2)',
     flexShrink: 0,
   },
   toolName: {
     fontSize: 12,
     fontWeight: '600',
-    color: 'rgba(255,255,255,0.75)',
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     marginBottom: 2,
   },
-  toolDesc: { fontSize: 10, color: 'rgba(255,255,255,0.35)', lineHeight: 14 },
+  toolDesc: { fontSize: 10, lineHeight: 14 },
   callSection: {
     margin: 12,
     borderRadius: 12,
     padding: 14,
-    backgroundColor: CARD,
     borderWidth: 1,
-    borderColor: BORDER,
   },
   paramLabel: {
     fontSize: 9,
-    color: 'rgba(255,255,255,0.4)',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 4,
   },
   input: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 8,
     fontSize: 12,
-    color: 'rgba(255,255,255,0.7)',
   },
   callButton: {
-    backgroundColor: ACCENT,
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: 'center',
     marginTop: 10,
   },
-  callButtonText: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  callButtonText: { color: palette.onAccent, fontSize: 13, fontWeight: '700' },
   resultCard: {
     marginTop: 10,
     borderRadius: 8,
@@ -379,12 +408,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     maxHeight: 200,
   },
-  resultError: { backgroundColor: 'rgba(239,68,68,0.05)', borderColor: 'rgba(239,68,68,0.2)' },
-  resultSuccess: { backgroundColor: 'rgba(16,185,129,0.05)', borderColor: 'rgba(16,185,129,0.2)' },
+  resultError: { backgroundColor: `${palette.critical}0d`, borderColor: `${palette.critical}33` },
+  resultSuccess: { backgroundColor: `${palette.success}0d`, borderColor: `${palette.success}33` },
   resultStatus: { fontSize: 10, fontWeight: '600', padding: 8, paddingBottom: 4 },
   resultContent: {
     fontSize: 10,
-    color: 'rgba(255,255,255,0.6)',
     paddingHorizontal: 8,
     paddingBottom: 8,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',

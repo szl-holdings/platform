@@ -13,12 +13,13 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { giColors } from '@/lib/gi-bridge';
 
-const ACCENT = '#6366f1';
-const BG = '#0a0a0a';
-const BORDER = 'rgba(255,255,255,0.06)';
-const TEXT = '#e8e8f0';
-const TEXT_DIM = 'rgba(255,255,255,0.45)';
+const ACCENT = giColors.accent.violet;
+const BG = giColors.bg.base;
+const BORDER = `${giColors.text.primary}0F`;
+const TEXT = giColors.text.primary;
+const TEXT_DIM = `${giColors.text.primary}73`;
 
 type Article = {
   id: number;

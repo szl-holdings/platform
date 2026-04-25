@@ -15,21 +15,22 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { featherIcon, VesselIcon } from '@/components/VesselIcon';
 import { useColors } from '@/hooks/useColors';
+import { giColors, palette } from '@/lib/gi-bridge';
 import { api, cacheGetStale, cacheSet, type VesselDetail } from '@/lib/fleet/api';
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
-  low: '#64748b',
+  critical: palette.critical,
+  high: giColors.accent.amber,
+  medium: palette.high,
+  low: giColors.accent.slate,
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  at_sea: '#22c55e',
-  in_port: '#0ea5e9',
-  anchored: '#f59e0b',
-  maintenance: '#ef4444',
-  active: '#22c55e',
+  at_sea: palette.success,
+  in_port: giColors.accent.teal,
+  anchored: palette.high,
+  maintenance: palette.critical,
+  active: palette.success,
 };
 
 const STATUS_LABELS: Record<string, string> = {

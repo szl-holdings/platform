@@ -21,6 +21,7 @@ import { VesselIcon } from '@/components/VesselIcon';
 import { useColors } from '@/hooks/useColors';
 import { useVesselsWebSocket } from '@/hooks/useVesselsWebSocket';
 import { api, CACHE_KEYS, cacheGetStale, cacheSet, type Vessel } from '@/lib/fleet/api';
+import { giColors, palette, giProductAccent } from '@/lib/gi-bridge';
 
 function getApiBase(): string {
   const domain = typeof process !== 'undefined' && process.env.EXPO_PUBLIC_DOMAIN;
@@ -45,11 +46,11 @@ interface StreamEvent {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  at_sea: '#22c55e',
-  in_port: '#0ea5e9',
-  anchored: '#f59e0b',
-  maintenance: '#ef4444',
-  active: '#22c55e',
+  at_sea: palette.success,
+  in_port: giColors.accent.teal,
+  anchored: palette.high,
+  maintenance: palette.critical,
+  active: palette.success,
 };
 const STATUS_LABELS: Record<string, string> = {
   at_sea: 'At Sea',
@@ -224,7 +225,7 @@ interface WatchlistAlert {
 
 const DEMO_WATCHLIST_ALERTS: WatchlistAlert[] = [];
 
-const WATCHLIST_COLORS = { critical: '#ef4444', warning: '#f59e0b', info: '#0ea5e9' };
+const WATCHLIST_COLORS = { critical: palette.critical, warning: palette.high, info: giColors.accent.teal };
 
 function WatchlistAlertBanner({
   alerts,
@@ -498,7 +499,7 @@ export default function FleetScreen() {
           const isConnected = sseStatus === 'connected';
           const isReconnecting = sseStatus === 'reconnecting';
           const label = isConnected ? 'AIS LIVE' : isReconnecting ? 'RECONNECTING' : 'OFFLINE';
-          const badgeColor = isConnected ? colors.primary : isReconnecting ? '#f59e0b' : '#94a3b8';
+          const badgeColor = isConnected ? colors.primary : isReconnecting ? palette.high : giColors.text.muted;
           const badgeBg = isConnected
             ? (colors.greenDim ?? `${colors.primary}15`)
             : isReconnecting

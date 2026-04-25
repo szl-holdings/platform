@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { giColors, palette } from '@/lib/gi-bridge';
 import { useSyncEngine } from '@szl-holdings/mobile-shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
@@ -52,10 +53,10 @@ async function fetchIncidentWithETag(
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: '#EF4444',
-  high: '#F97316',
-  medium: '#F59E0B',
-  low: '#3B82F6',
+  critical: palette.critical,
+  high: giColors.accent.amber,
+  medium: palette.high,
+  low: palette.low,
 };
 
 const STATUS_ORDER = [

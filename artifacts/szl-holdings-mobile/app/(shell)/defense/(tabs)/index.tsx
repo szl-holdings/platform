@@ -23,7 +23,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Polyline } from 'react-native-svg';
 import { useAuth } from '@/context/AuthContext';
 import { useColors } from '@/hooks/useColors';
-
+import { giColors, palette } from '@/lib/gi-bridge';
 import { apiGet } from '@/lib/apiClient';
 
 type IonIconName = ComponentProps<typeof Ionicons>['name'];
@@ -63,43 +63,43 @@ const MITRE_PHASES = [
   {
     phase: 'Recon',
     icon: 'eye-outline' as IonIconName,
-    color: '#64748b',
+    color: giColors.accent.slate,
     techniques: ['T1595', 'T1589'],
   },
   {
     phase: 'Weaponize',
     icon: 'construct-outline' as IonIconName,
-    color: '#7c3aed',
+    color: giColors.accent.violet,
     techniques: ['T1587', 'T1584'],
   },
   {
     phase: 'Delivery',
     icon: 'mail-outline' as IonIconName,
-    color: '#2563eb',
+    color: palette.low,
     techniques: ['T1566', 'T1534'],
   },
   {
     phase: 'Exploit',
     icon: 'flash-outline' as IonIconName,
-    color: '#d97706',
+    color: giColors.accent.amber,
     techniques: ['T1203', 'T1190'],
   },
   {
     phase: 'Install',
     icon: 'download-outline' as IonIconName,
-    color: '#f59e0b',
+    color: palette.high,
     techniques: ['T1548', 'T1543'],
   },
   {
     phase: 'C2',
     icon: 'radio-outline' as IonIconName,
-    color: '#dc2626',
+    color: palette.critical,
     techniques: ['T1071', 'T1573'],
   },
   {
     phase: 'Actions',
     icon: 'skull-outline' as IonIconName,
-    color: '#ef4444',
+    color: palette.critical,
     techniques: ['T1485', 'T1486'],
   },
 ];
@@ -357,8 +357,8 @@ function SeverityRing({ critical, high, medium, low, total }: SeverityRingProps)
 
   const segments = [
     { value: critical, color: colors.red },
-    { value: high, color: '#F97316' },
-    { value: medium, color: '#F59E0B' },
+    { value: high, color: giColors.accent.amber },
+    { value: medium, color: palette.high },
     { value: low, color: colors.blue },
   ];
 
@@ -598,12 +598,12 @@ export default function DashboardScreen() {
       {(isOffline || isDegraded) && (
         <View
           style={{
-            backgroundColor: isOffline ? '#7f1d1d' : '#78350f',
+            backgroundColor: isOffline ? `${palette.critical}30` : `${palette.high}30`,
             paddingHorizontal: 16,
             paddingVertical: 8,
           }}
         >
-          <Text style={{ color: '#fca5a5', fontSize: 11, fontWeight: '600' }}>
+          <Text style={{ color: isOffline ? palette.critical : palette.high, fontSize: 11, fontWeight: '600' }}>
             {isOffline ? 'Offline — threat data may be stale' : 'Connection degraded — retrying…'}
           </Text>
         </View>
@@ -863,8 +863,8 @@ export default function DashboardScreen() {
                     max={maxSev}
                     color={colors.red}
                   />
-                  <TrendBar label="High" count={highCount} max={maxSev} color="#F97316" />
-                  <TrendBar label="Medium" count={mediumCount} max={maxSev} color="#F59E0B" />
+                  <TrendBar label="High" count={highCount} max={maxSev} color={giColors.accent.amber} />
+                  <TrendBar label="Medium" count={mediumCount} max={maxSev} color={palette.high} />
                   <TrendBar label="Low" count={lowCount} max={maxSev} color={colors.blue} />
                 </View>
               </View>
@@ -899,9 +899,9 @@ export default function DashboardScreen() {
                           incident.severity === 'critical'
                             ? colors.red
                             : incident.severity === 'high'
-                              ? '#F97316'
+                              ? giColors.accent.amber
                               : incident.severity === 'medium'
-                                ? '#F59E0B'
+                                ? palette.high
                                 : colors.blue,
                       },
                     ]}

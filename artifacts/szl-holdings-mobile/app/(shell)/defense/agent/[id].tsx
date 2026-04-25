@@ -17,6 +17,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { apiFetchRaw } from '@/lib/apiClient';
+import { giColors, palette } from '@/lib/gi-bridge';
 
 interface AgentDetail {
   id: string | number;
@@ -43,11 +44,11 @@ interface AgentRun {
 }
 
 const STATUS_CONFIG: Record<string, { color: string; label: string }> = {
-  running: { color: '#3b82f6', label: 'Running' },
-  idle: { color: '#6b7280', label: 'Idle' },
-  error: { color: '#ef4444', label: 'Error' },
-  paused: { color: '#f59e0b', label: 'Paused' },
-  completed: { color: '#10b981', label: 'Completed' },
+  running: { color: palette.low, label: 'Running' },
+  idle: { color: giColors.text.muted, label: 'Idle' },
+  error: { color: palette.critical, label: 'Error' },
+  paused: { color: palette.high, label: 'Paused' },
+  completed: { color: palette.success, label: 'Completed' },
 };
 
 function formatMs(ms: number | null): string {
@@ -116,7 +117,7 @@ export default function AgentDetailScreen() {
   }, [refetchAgent, refetchRuns]);
 
   const cfg = agent
-    ? (STATUS_CONFIG[agent.status] ?? { color: '#6b7280', label: agent.status })
+    ? (STATUS_CONFIG[agent.status] ?? { color: giColors.text.muted, label: agent.status })
     : null;
 
   if (agentLoading) {
@@ -214,12 +215,12 @@ export default function AgentDetailScreen() {
             {
               label: 'Success Rate',
               value: agent.successRate != null ? `${Math.round(agent.successRate * 100)}%` : '—',
-              color: '#10b981',
+              color: palette.success,
             },
             {
               label: 'Errors',
               value: String(agent.errorCount ?? '—'),
-              color: agent.errorCount ? '#ef4444' : colors.mutedForeground,
+              color: agent.errorCount ? palette.critical : colors.mutedForeground,
             },
             {
               label: 'Avg Duration',
@@ -250,7 +251,7 @@ export default function AgentDetailScreen() {
         ) : (
           <View style={[styles.runList, { borderColor: colors.borderSubtle }]}>
             {runs.map((run, i) => {
-              const rc = STATUS_CONFIG[run.state] ?? { color: '#6b7280', label: run.state };
+              const rc = STATUS_CONFIG[run.state] ?? { color: giColors.text.muted, label: run.state };
               return (
                 <View
                   key={run.id}
@@ -276,7 +277,7 @@ export default function AgentDetailScreen() {
                       </Text>
                     </View>
                     {run.errorMessage && (
-                      <Text style={[styles.runError, { color: '#ef4444' }]} numberOfLines={2}>
+                      <Text style={[styles.runError, { color: palette.critical }]} numberOfLines={2}>
                         {run.errorMessage}
                       </Text>
                     )}

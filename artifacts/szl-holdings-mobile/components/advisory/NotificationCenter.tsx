@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
+import { giColors, palette, giProductAccent } from '@/lib/gi-bridge';
 
 const TYPE_ICONS: Record<AppNotification['type'], string> = {
   info: 'info',
@@ -25,11 +26,11 @@ const TYPE_ICONS: Record<AppNotification['type'], string> = {
 };
 
 const TYPE_COLORS: Record<AppNotification['type'], string> = {
-  info: '#6E9BD1',
-  success: '#6BB88E',
-  warning: '#D4A55B',
-  error: '#C05050',
-  action_required: '#C8A96A',
+  info: palette.low,
+  success: palette.success,
+  warning: palette.high,
+  error: palette.critical,
+  action_required: giProductAccent.holdings,
 };
 
 function formatTimeAgo(dateStr: string): string {
@@ -382,6 +383,6 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 9,
     fontFamily: 'Inter_600SemiBold',
-    color: '#0e0c09',
+    color: giColors.bg.base,
   },
 });

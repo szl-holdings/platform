@@ -17,6 +17,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { OfflineQueuePanel } from '@/components/OfflineQueuePanel';
 import { useColors } from '@/hooks/useColors';
+import { giColors, palette } from '@/lib/gi-bridge';
 import { apiGet, apiPut } from '@/lib/apiClient';
 import { cacheGetStale, cacheSet } from '@/lib/cache';
 
@@ -57,10 +58,10 @@ function QueuedActionCard({
   onRetry: (item: QueuedAction) => void;
   onDiscard: (objectId: string) => void;
 }) {
-  const actionColor = item.action === 'approve' ? '#22c55e' : '#ef4444';
+  const actionColor = item.action === 'approve' ? giColors.accent.green : giColors.accent.red;
   return (
     <View
-      style={[styles.queuedCard, { backgroundColor: colors.navyLight, borderColor: '#f59e0b40' }]}
+      style={[styles.queuedCard, { backgroundColor: colors.navyLight, borderColor: `${giColors.accent.amber}40` }]}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
         <View
@@ -71,13 +72,13 @@ function QueuedActionCard({
             paddingHorizontal: 7,
             paddingVertical: 3,
             borderRadius: 8,
-            backgroundColor: '#f59e0b15',
+            backgroundColor: `${giColors.accent.amber}15`,
             borderWidth: 1,
-            borderColor: '#f59e0b40',
+            borderColor: `${giColors.accent.amber}40`,
           }}
         >
-          <Feather name="clock" size={9} color="#f59e0b" />
-          <Text style={{ fontSize: 9, fontWeight: '700', color: '#f59e0b', letterSpacing: 0.5 }}>
+          <Feather name="clock" size={9} color={giColors.accent.amber} />
+          <Text style={{ fontSize: 9, fontFamily: 'Inter_700Bold', color: giColors.accent.amber, letterSpacing: 0.5 }}>
             QUEUED OFFLINE
           </Text>
         </View>
@@ -91,7 +92,7 @@ function QueuedActionCard({
             borderColor: `${actionColor}35`,
           }}
         >
-          <Text style={{ fontSize: 9, fontWeight: '700', color: actionColor, letterSpacing: 0.5 }}>
+          <Text style={{ fontSize: 9, fontFamily: 'Inter_700Bold', color: actionColor, letterSpacing: 0.5 }}>
             {item.action.toUpperCase()}
           </Text>
         </View>
@@ -121,13 +122,13 @@ function QueuedActionCard({
             gap: 5,
             paddingVertical: 8,
             borderRadius: 8,
-            backgroundColor: '#c9a84c18',
+            backgroundColor: `${giColors.accent.amber}18`,
             borderWidth: 1,
-            borderColor: '#c9a84c40',
+            borderColor: `${giColors.accent.amber}40`,
           }}
         >
-          <Feather name="upload-cloud" size={11} color="#c9a84c" />
-          <Text style={{ fontSize: 11, fontWeight: '600', color: '#c9a84c' }}>Retry Now</Text>
+          <Feather name="upload-cloud" size={11} color={giColors.accent.amber} />
+          <Text style={{ fontSize: 11, fontFamily: 'Inter_600SemiBold', color: giColors.accent.amber }}>Retry Now</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => onDiscard(item.objectId)}
@@ -139,13 +140,13 @@ function QueuedActionCard({
             gap: 5,
             paddingVertical: 8,
             borderRadius: 8,
-            backgroundColor: '#ef444418',
+            backgroundColor: `${giColors.accent.red}18`,
             borderWidth: 1,
-            borderColor: '#ef444440',
+            borderColor: `${giColors.accent.red}40`,
           }}
         >
-          <Feather name="trash-2" size={11} color="#ef4444" />
-          <Text style={{ fontSize: 11, fontWeight: '600', color: '#ef4444' }}>Discard</Text>
+          <Feather name="trash-2" size={11} color={giColors.accent.red} />
+          <Text style={{ fontSize: 11, fontFamily: 'Inter_600SemiBold', color: giColors.accent.red }}>Discard</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -213,14 +214,14 @@ function ApprovalCard({
 }) {
   const colors = useColors();
   const IMPACT_COLORS: Record<string, string> = {
-    critical: '#ef4444',
-    high: '#f97316',
-    medium: '#f59e0b',
-    low: '#3b82f6',
-    negligible: '#6b7280',
+    critical:   palette.critical,
+    high:       giColors.accent.red,
+    medium:     palette.medium,
+    low:        palette.low,
+    negligible: giColors.accent.slate,
   };
   const impact = item.impactLevel ?? 'medium';
-  const impactColor = IMPACT_COLORS[impact] ?? '#6b7280';
+  const impactColor = IMPACT_COLORS[impact] ?? giColors.accent.slate;
   const reviewStatus = getReviewStatus(item);
   const isPending = reviewStatus === 'pending';
   const objectId = item.objectId ?? String(item.id ?? '');
@@ -248,10 +249,10 @@ function ApprovalCard({
               {
                 backgroundColor:
                   reviewStatus === 'approved'
-                    ? '#22c55e20'
+                    ? `${giColors.accent.green}20`
                     : reviewStatus === 'rejected'
-                      ? '#ef444420'
-                      : '#f59e0b20',
+                      ? `${giColors.accent.red}20`
+                      : `${giColors.accent.amber}20`,
               },
             ]}
           >
@@ -261,10 +262,10 @@ function ApprovalCard({
                 {
                   color:
                     reviewStatus === 'approved'
-                      ? '#22c55e'
+                      ? giColors.accent.green
                       : reviewStatus === 'rejected'
-                        ? '#ef4444'
-                        : '#f59e0b',
+                        ? giColors.accent.red
+                        : giColors.accent.amber,
                 },
               ]}
             >
@@ -310,12 +311,12 @@ function ApprovalCard({
         <Text style={[styles.requestedBy, { color: colors.muted }]}>Via: {item.modelRoute}</Text>
       )}
       {item.approvedAt && (
-        <Text style={[styles.requestedBy, { color: '#22c55e' }]}>
+        <Text style={[styles.requestedBy, { color: giColors.accent.green }]}>
           Approved {relativeTime(item.approvedAt ?? undefined)} by {item.approvedBy ?? 'operator'}
         </Text>
       )}
       {item.rejectedAt && (
-        <Text style={[styles.requestedBy, { color: '#ef4444' }]}>
+        <Text style={[styles.requestedBy, { color: giColors.accent.red }]}>
           Rejected {relativeTime(item.rejectedAt ?? undefined)}
           {item.rejectionReason ? ` — ${item.rejectionReason}` : ''}
         </Text>
@@ -324,23 +325,23 @@ function ApprovalCard({
       {isPending && needsReview(item) && (
         <View style={styles.actionRow}>
           <TouchableOpacity
-            style={[styles.rejectBtn, { borderColor: '#ef4444' }]}
+            style={[styles.rejectBtn, { borderColor: giColors.accent.red }]}
             onPress={() => onReject(objectId)}
             disabled={isProcessing}
           >
-            <Ionicons name="close" size={14} color="#ef4444" />
+            <Ionicons name="close" size={14} color={giColors.accent.red} />
             <Text style={styles.rejectText}>Reject</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.approveBtn, { backgroundColor: isProcessing ? '#22c55e80' : '#22c55e' }]}
+            style={[styles.approveBtn, { backgroundColor: isProcessing ? `${giColors.accent.green}80` : giColors.accent.green }]}
             onPress={() => onApprove(objectId)}
             disabled={isProcessing}
           >
             {isProcessing ? (
-              <ActivityIndicator size="small" color="white" />
+              <ActivityIndicator size="small" color={palette.onAccent} />
             ) : (
               <>
-                <Ionicons name="checkmark" size={14} color="white" />
+                <Ionicons name="checkmark" size={14} color={palette.onAccent} />
                 <Text style={styles.approveBtnText}>Approve</Text>
               </>
             )}
@@ -542,22 +543,22 @@ export default function ApprovalsTab() {
                 paddingHorizontal: 8,
                 paddingVertical: 4,
                 borderRadius: 10,
-                backgroundColor: '#f59e0b15',
+                backgroundColor: `${giColors.accent.amber}15`,
                 borderWidth: 1,
-                borderColor: '#f59e0b30',
+                borderColor: `${giColors.accent.amber}30`,
               }}
             >
-              <Feather name="wifi-off" size={10} color="#f59e0b" />
+              <Feather name="wifi-off" size={10} color={giColors.accent.amber} />
               <Text
-                style={{ fontSize: 9, fontWeight: '700', color: '#f59e0b', letterSpacing: 0.5 }}
+                style={{ fontSize: 9, fontFamily: 'Inter_700Bold', color: giColors.accent.amber, letterSpacing: 0.5 }}
               >
                 OFFLINE
               </Text>
             </View>
           )}
           {pendingCount > 0 && (
-            <View style={[styles.badge, { backgroundColor: '#ef4444' }]}>
-              <Text style={[styles.badgeText, { color: 'white' }]}>{pendingCount}</Text>
+            <View style={[styles.badge, { backgroundColor: giColors.accent.red }]}>
+              <Text style={[styles.badgeText, { color: palette.onAccent }]}>{pendingCount}</Text>
             </View>
           )}
         </View>
@@ -602,8 +603,8 @@ export default function ApprovalsTab() {
             <Text
               style={{
                 fontSize: 10,
-                fontWeight: '700',
-                color: '#f59e0b',
+                fontFamily: 'Inter_700Bold',
+                color: giColors.accent.amber,
                 letterSpacing: 1,
                 marginBottom: 8,
               }}
@@ -694,7 +695,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
   },
-  rejectText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#ef4444' },
+  rejectText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: giColors.accent.red },
   approveBtn: {
     flex: 2,
     flexDirection: 'row',
@@ -704,7 +705,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 8,
   },
-  approveBtnText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: 'white' },
+  approveBtnText: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.onAccent },
   emptyState: { alignItems: 'center', paddingTop: 60, gap: 12 },
   emptyText: { fontSize: 14, fontFamily: 'Inter_400Regular' },
   queuedCard: { borderRadius: 12, borderWidth: 1, padding: 12, marginBottom: 10 },

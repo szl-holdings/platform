@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
+import { palette } from '@/lib/gi-bridge';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
@@ -496,7 +497,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  mapPinText: { fontSize: 9, fontFamily: 'Inter_600SemiBold', color: 'white' },
+  mapPinText: { fontSize: 9, fontFamily: 'Inter_600SemiBold', color: palette.onAccent },
   mapOverlay: { position: 'absolute', bottom: 12, left: 0, right: 0, alignItems: 'center' },
   mapNote: { fontSize: 10, fontFamily: 'Inter_300Light', marginTop: 4 },
   markerDetail: {

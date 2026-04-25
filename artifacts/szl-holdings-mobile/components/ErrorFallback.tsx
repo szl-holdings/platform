@@ -1,5 +1,6 @@
 import type { ErrorFallbackProps } from '@szl-holdings/mobile-shared';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { giColors, giProductAccent, palette } from '@/lib/gi-bridge';
 
 export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
   return (
@@ -18,18 +19,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#090810',
+    backgroundColor: giColors.bg.base,
     padding: 24,
   },
   title: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#c9a84c',
+    color: giProductAccent.holdings,
     marginBottom: 8,
   },
   message: {
     fontSize: 13,
-    color: 'rgba(240,238,255,0.35)',
+    color: giColors.text.muted,
     textAlign: 'center',
     marginBottom: 24,
   },
@@ -37,10 +38,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 6,
-    backgroundColor: '#c9a84c',
+    backgroundColor: giProductAccent.holdings,
   },
   buttonText: {
-    color: '#090810',
+    color: giColors.bg.base,
     fontSize: 14,
     fontWeight: '600',
   },

@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons';
+import { giColors } from '@/lib/gi-bridge';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRef, useState } from 'react';
@@ -189,7 +190,7 @@ export default function MessagesScreen() {
           <Text style={[styles.title, { color: colors.cream }]}>Rosa</Text>
         </View>
         <View style={[styles.onlineIndicator, { borderColor: colors.goldBorder }]}>
-          <View style={[styles.onlineDot, { backgroundColor: '#5a9e6b' }]} />
+          <View style={[styles.onlineDot, { backgroundColor: giColors.accent.green }]} />
           <Text style={[styles.onlineText, { color: colors.creamDim }]}>
             Usually replies same day
           </Text>

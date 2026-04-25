@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useEmbeddingSearch } from '@szl-holdings/mobile-shared';
 import * as Haptics from 'expo-haptics';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -14,18 +14,13 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-const ACCENT = '#c8a96a';
-const BG = '#0e0c09';
-const CARD = '#191611';
-const BORDER = 'rgba(200,169,106,0.12)';
-const TEXT = '#f5f0e8';
-const TEXT_DIM = 'rgba(245,240,232,0.35)';
+import { useColors } from '@/hooks/useColors';
+import { giProductAccent, giColors, palette } from '@/lib/gi-bridge';
 
 const AGENTS = [
-  { id: 'muse', name: 'Muse', role: 'Creative Strategy', icon: 'pen-tool', color: '#c8a96a' },
-  { id: 'alloy', name: 'Counsel', role: 'Orchestration', icon: 'git-merge', color: '#c9a84c' },
-  { id: 'eval', name: 'Eval Engine', role: 'Research', icon: 'search', color: '#8b5cf6' },
+  { id: 'muse',  name: 'Muse',        role: 'Creative Strategy', icon: 'pen-tool',  color: giProductAccent.carlota },
+  { id: 'alloy', name: 'FORGE',       role: 'Orchestration',     icon: 'git-merge', color: giProductAccent.lyte },
+  { id: 'eval',  name: 'Eval Engine', role: 'Research',          icon: 'search',    color: giColors.accent.violet },
 ];
 
 interface Message {
@@ -40,6 +35,7 @@ interface Message {
 
 export default function AgentChatScreen() {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
   const scrollRef = useRef<ScrollView>(null);
   const [selectedAgent, setSelectedAgent] = useState(AGENTS[0]);
   const [input, setInput] = useState('');
@@ -57,6 +53,9 @@ export default function AgentChatScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const { search, buildContextString } = useEmbeddingSearch({ domain: 'consulting', limit: 3 });
+
+  const accent = selectedAgent.color;
+  const s = useMemo(() => makeStyles(colors, accent), [colors, accent]);
 
   const sendMessage = useCallback(async () => {
     if (!input.trim() || isLoading) return;
@@ -123,31 +122,31 @@ export default function AgentChatScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.root, { paddingTop: insets.top }]}
+      style={[s.root, { paddingTop: insets.top }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <View style={styles.header}>
+      <View style={s.header}>
         <TouchableOpacity
-          style={styles.agentSel}
+          style={s.agentSel}
           onPress={() => setShowPicker((p) => !p)}
           activeOpacity={0.7}
         >
-          <View style={[styles.dot, { backgroundColor: selectedAgent.color }]} />
-          <Text style={styles.agentName}>{selectedAgent.name}</Text>
-          <Text style={styles.agentRole}>{selectedAgent.role}</Text>
-          <Feather name="chevron-down" size={14} color={TEXT_DIM} />
+          <View style={[s.dot, { backgroundColor: selectedAgent.color }]} />
+          <Text style={s.agentName}>{selectedAgent.name}</Text>
+          <Text style={s.agentRole}>{selectedAgent.role}</Text>
+          <Feather name="chevron-down" size={14} color={colors.mutedForeground} />
         </TouchableOpacity>
-        <View style={styles.pill}>
-          <View style={styles.pillDot} />
-          <Text style={styles.pillText}>CREATIVE AI</Text>
+        <View style={s.pill}>
+          <View style={s.pillDot} />
+          <Text style={s.pillText}>CREATIVE AI</Text>
         </View>
       </View>
       {showPicker && (
-        <View style={styles.picker}>
+        <View style={s.picker}>
           {AGENTS.map((a) => (
             <TouchableOpacity
               key={a.id}
-              style={styles.pickerRow}
+              style={s.pickerRow}
               onPress={() => {
                 setSelectedAgent(a);
                 setShowPicker(false);
@@ -155,17 +154,17 @@ export default function AgentChatScreen() {
               }}
               activeOpacity={0.7}
             >
-              <View style={[styles.dot, { backgroundColor: a.color }]} />
-              <Text style={styles.pickerName}>{a.name}</Text>
-              <Text style={styles.pickerRole}>{a.role}</Text>
+              <View style={[s.dot, { backgroundColor: a.color }]} />
+              <Text style={s.pickerName}>{a.name}</Text>
+              <Text style={s.pickerRole}>{a.role}</Text>
             </TouchableOpacity>
           ))}
         </View>
       )}
       <ScrollView
         ref={scrollRef}
-        style={styles.msgs}
-        contentContainerStyle={styles.msgsContent}
+        style={s.msgs}
+        contentContainerStyle={s.msgsContent}
         keyboardDismissMode="interactive"
         showsVerticalScrollIndicator={false}
       >
@@ -173,31 +172,31 @@ export default function AgentChatScreen() {
           const isUser = msg.role === 'user';
           const agent = AGENTS.find((a) => a.id === msg.agentId);
           return (
-            <View key={msg.id} style={[styles.row, isUser && styles.rowUser]}>
+            <View key={msg.id} style={[s.row, isUser && s.rowUser]}>
               {!isUser && (
                 <View
                   style={[
-                    styles.avatar,
+                    s.avatar,
                     {
-                      backgroundColor: `${agent?.color ?? ACCENT}18`,
-                      borderColor: `${agent?.color ?? ACCENT}30`,
+                      backgroundColor: `${agent?.color ?? accent}18`,
+                      borderColor: `${agent?.color ?? accent}30`,
                     },
                   ]}
                 >
                   <Feather
                     name={(agent?.icon ?? 'cpu') as any}
                     size={12}
-                    color={agent?.color ?? ACCENT}
+                    color={agent?.color ?? accent}
                   />
                 </View>
               )}
-              <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleAssist]}>
+              <View style={[s.bubble, isUser ? s.bubbleUser : s.bubbleAssist]}>
                 {!isUser && msg.agentName && (
-                  <Text style={[styles.label, { color: agent?.color ?? ACCENT }]}>
+                  <Text style={[s.label, { color: agent?.color ?? accent }]}>
                     {msg.agentName}
                   </Text>
                 )}
-                <Text style={[styles.bubbleText, isUser && { color: BG }]}>
+                <Text style={[s.bubbleText, isUser && { color: colors.background }]}>
                   {msg.streaming ? `${msg.content}▍` : msg.content}
                 </Text>
               </View>
@@ -205,125 +204,148 @@ export default function AgentChatScreen() {
           );
         })}
         {isLoading && (
-          <View style={styles.typing}>
-            <ActivityIndicator size="small" color={ACCENT} />
-            <Text style={styles.typingText}>{selectedAgent.name} crafting…</Text>
+          <View style={s.typing}>
+            <ActivityIndicator size="small" color={accent} />
+            <Text style={s.typingText}>{selectedAgent.name} crafting…</Text>
           </View>
         )}
       </ScrollView>
-      <View style={[styles.bar, { paddingBottom: insets.bottom + 8 }]}>
+      <View style={[s.bar, { paddingBottom: insets.bottom + 8 }]}>
         <TextInput
-          style={styles.input}
+          style={s.inputField}
           value={input}
           onChangeText={setInput}
           placeholder="Ask about strategy, content…"
-          placeholderTextColor={TEXT_DIM}
+          placeholderTextColor={colors.mutedForeground}
           multiline
           maxLength={2000}
         />
         <TouchableOpacity
-          style={[styles.send, (!input.trim() || isLoading) && styles.sendOff]}
+          style={[s.send, (!input.trim() || isLoading) && s.sendOff]}
           onPress={sendMessage}
           disabled={!input.trim() || isLoading}
           activeOpacity={0.7}
         >
-          <Feather name="send" size={16} color={!input.trim() || isLoading ? TEXT_DIM : BG} />
+          <Feather
+            name="send"
+            size={16}
+            color={!input.trim() || isLoading ? colors.mutedForeground : colors.background}
+          />
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: BG },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-  },
-  agentSel: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  dot: { width: 8, height: 8, borderRadius: 4 },
-  agentName: { fontSize: 14, fontWeight: '600', color: TEXT },
-  agentRole: { fontSize: 11, color: TEXT_DIM },
-  pill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: `${ACCENT}15`,
-    borderRadius: 20,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  pillDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: ACCENT },
-  pillText: { fontSize: 9, fontWeight: '700', color: ACCENT, letterSpacing: 1 },
-  picker: {
-    backgroundColor: CARD,
-    borderWidth: 1,
-    borderColor: BORDER,
-    marginHorizontal: 12,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  pickerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12 },
-  pickerName: { fontSize: 13, fontWeight: '600', color: TEXT },
-  pickerRole: { fontSize: 11, color: TEXT_DIM, marginLeft: 4 },
-  msgs: { flex: 1 },
-  msgsContent: { padding: 16, gap: 12 },
-  row: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, maxWidth: '90%' },
-  rowUser: { alignSelf: 'flex-end', flexDirection: 'row-reverse' },
-  avatar: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bubble: { borderRadius: 16, padding: 12, maxWidth: '100%' },
-  bubbleUser: { backgroundColor: ACCENT, borderBottomRightRadius: 4 },
-  bubbleAssist: {
-    backgroundColor: CARD,
-    borderWidth: 1,
-    borderColor: BORDER,
-    borderBottomLeftRadius: 4,
-  },
-  label: { fontSize: 10, fontWeight: '700', letterSpacing: 0.5, marginBottom: 4 },
-  bubbleText: { fontSize: 14, color: TEXT, lineHeight: 20 },
-  typing: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  typingText: { fontSize: 12, color: TEXT_DIM, fontStyle: 'italic' },
-  bar: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: BORDER,
-    backgroundColor: BG,
-  },
-  input: {
-    flex: 1,
-    backgroundColor: CARD,
-    borderWidth: 1,
-    borderColor: BORDER,
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    color: TEXT,
-    fontSize: 14,
-    maxHeight: 120,
-  },
-  send: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: ACCENT,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sendOff: { backgroundColor: `${ACCENT}30` },
-});
+function makeStyles(colors: ReturnType<typeof useColors>, accent: string) {
+  const border = `${accent}18`;
+  return StyleSheet.create({
+    root: { flex: 1, backgroundColor: colors.background },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    agentSel: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    dot: { width: 8, height: 8, borderRadius: 4 },
+    agentName: { fontSize: 14, fontFamily: 'Inter_600SemiBold', color: colors.foreground },
+    agentRole: { fontSize: 11, fontFamily: 'Inter_400Regular', color: colors.mutedForeground },
+    pill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      backgroundColor: `${accent}15`,
+      borderRadius: 20,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+    },
+    pillDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: accent },
+    pillText: {
+      fontSize: 9,
+      fontFamily: 'Inter_700Bold',
+      color: accent,
+      letterSpacing: 1,
+    },
+    picker: {
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginHorizontal: 12,
+      borderRadius: 12,
+      overflow: 'hidden',
+    },
+    pickerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12 },
+    pickerName: { fontSize: 13, fontFamily: 'Inter_600SemiBold', color: colors.foreground },
+    pickerRole: {
+      fontSize: 11,
+      fontFamily: 'Inter_400Regular',
+      color: colors.mutedForeground,
+      marginLeft: 4,
+    },
+    msgs: { flex: 1 },
+    msgsContent: { padding: 16, gap: 12 },
+    row: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, maxWidth: '90%' },
+    rowUser: { alignSelf: 'flex-end', flexDirection: 'row-reverse' },
+    avatar: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    bubble: { borderRadius: 16, padding: 12, maxWidth: '100%' },
+    bubbleUser: { backgroundColor: accent, borderBottomRightRadius: 4 },
+    bubbleAssist: {
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: border,
+      borderBottomLeftRadius: 4,
+    },
+    label: { fontSize: 10, fontFamily: 'Inter_700Bold', letterSpacing: 0.5, marginBottom: 4 },
+    bubbleText: { fontSize: 14, fontFamily: 'Inter_400Regular', color: colors.foreground, lineHeight: 20 },
+    typing: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    typingText: {
+      fontSize: 12,
+      fontFamily: 'Inter_400Regular',
+      color: colors.mutedForeground,
+      fontStyle: 'italic',
+    },
+    bar: {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      gap: 10,
+      paddingHorizontal: 16,
+      paddingTop: 10,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      backgroundColor: colors.background,
+    },
+    inputField: {
+      flex: 1,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 20,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      color: colors.foreground,
+      fontFamily: 'Inter_400Regular',
+      fontSize: 14,
+      maxHeight: 120,
+    },
+    send: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: accent,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    sendOff: { backgroundColor: `${accent}30` },
+  });
+}

@@ -25,12 +25,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { WORKSPACES } from '@/context/WorkspaceContext';
 import { useColors } from '@/hooks/useColors';
+import { giProductAccent, giColors, palette } from '@/lib/gi-bridge';
 import { apiGet, apiPost } from '@/lib/apiClient';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
 const CARD_WIDTH = SCREEN_WIDTH - 48;
-const ACCENT = '#c9a84c';
+const ACCENT = giProductAccent.lyte;
 
 export type QuickActionType =
   | 'approve'
@@ -72,7 +73,7 @@ function urgencyColor(urgency: string, colors: ReturnType<typeof useColors>) {
     case 'high':
       return colors.amber;
     case 'medium':
-      return '#f59e0b';
+      return colors.amber;
     default:
       return colors.blue;
   }
@@ -247,8 +248,8 @@ function ActionCard({ action, isTop, index, onSwipeLeft, onSwipeRight, colors }:
             style={[styles.actionBtn, styles.approveBtn, { backgroundColor: colors.green }]}
             onPress={handleSwipeRight}
           >
-            <Feather name="check" size={16} color="#fff" />
-            <Text style={[styles.actionBtnText, { color: '#fff' }]}>
+            <Feather name="check" size={16} color={palette.onAccent} />
+            <Text style={[styles.actionBtnText, { color: palette.onAccent }]}>
               {action.approveLabel ?? 'Approve'}
             </Text>
           </TouchableOpacity>
@@ -525,8 +526,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     backgroundColor: 'rgba(0,0,0,0.7)',
   },
-  approveLabelPos: { left: 16, borderColor: '#22c55e' },
-  denyLabelPos: { right: 16, borderColor: '#ef4444' },
+  approveLabelPos: { left: 16, borderColor: giColors.accent.green },
+  denyLabelPos: { right: 16, borderColor: giColors.accent.red },
   swipeLabelText: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
   cardTop: { padding: 16, gap: 8 },
   cardDomainRow: {
@@ -623,7 +624,7 @@ const styles = StyleSheet.create({
   resetBtnText: {
     fontSize: 14,
     fontFamily: 'Inter_500Medium',
-    color: '#c9a84c',
+    color: ACCENT,
   },
   emptyActionsRow: {
     marginTop: 8,

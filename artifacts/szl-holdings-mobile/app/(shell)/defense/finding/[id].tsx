@@ -16,6 +16,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { apiGet, apiPut } from '@/lib/apiClient';
+import { giColors, palette } from '@/lib/gi-bridge';
 
 interface FindingDetail {
   id: number;
@@ -52,18 +53,18 @@ async function updateFinding(id: string, data: FindingUpdate): Promise<FindingDe
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: '#EF4444',
-  high: '#F97316',
-  medium: '#F59E0B',
-  low: '#3B82F6',
-  info: '#8B5CF6',
+  critical: palette.critical,
+  high: giColors.accent.amber,
+  medium: palette.high,
+  low: palette.low,
+  info: giColors.accent.violet,
 };
 const STATUS_COLORS: Record<string, string> = {
-  open: '#EF4444',
-  confirmed: '#F59E0B',
-  mitigated: '#10B981',
-  accepted: '#3B82F6',
-  false_positive: '#6B7280',
+  open: palette.critical,
+  confirmed: palette.high,
+  mitigated: palette.success,
+  accepted: palette.low,
+  false_positive: giColors.text.muted,
 };
 const STATUS_LABELS: Record<string, string> = {
   open: 'Open',

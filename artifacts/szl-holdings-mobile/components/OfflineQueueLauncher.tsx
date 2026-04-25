@@ -13,9 +13,10 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { loadAllQueued, OfflineQueuePanel } from '@/components/OfflineQueuePanel';
 import { useColors } from '@/hooks/useColors';
+import { giColors, giProductAccent, palette } from '@/lib/gi-bridge';
 
-const ACCENT = '#c9a84c';
-const AMBER = '#f59e0b';
+const ACCENT = giProductAccent.holdings;
+const AMBER = palette.high;
 
 export function useOfflineQueueCount(): number {
   const [count, setCount] = useState(0);
@@ -153,7 +154,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   badgeText: {
-    color: '#070a14',
+    color: giColors.bg.base,
     fontSize: 9,
     fontFamily: 'Inter_600SemiBold',
   },
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#2a3142',
+    backgroundColor: giColors.bg.raised,
     marginBottom: 10,
   },
   sheetHeader: {

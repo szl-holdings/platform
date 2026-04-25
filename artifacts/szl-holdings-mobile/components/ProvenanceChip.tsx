@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import type React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { giColors, giSpacing } from '@/lib/gi-bridge';
 
 export type ProvenanceStatus = 'live' | 'cached' | 'fallback' | 'loading';
 
@@ -10,11 +11,14 @@ interface Props {
   lastUpdated?: string;
 }
 
-const CONFIG: Record<ProvenanceStatus, { color: string; icon: React.ComponentProps<typeof Feather>['name']; defaultLabel: string }> = {
-  live: { color: '#34d399', icon: 'radio', defaultLabel: 'Live' },
-  cached: { color: '#60a5fa', icon: 'database', defaultLabel: 'Cached' },
-  fallback: { color: '#fbbf24', icon: 'alert-circle', defaultLabel: 'Demo' },
-  loading: { color: '#6b7280', icon: 'loader', defaultLabel: 'Loading' },
+const CONFIG: Record<
+  ProvenanceStatus,
+  { color: string; icon: React.ComponentProps<typeof Feather>['name']; defaultLabel: string }
+> = {
+  live:     { color: giColors.accent.green,  icon: 'radio',         defaultLabel: 'Live'    },
+  cached:   { color: giColors.accent.blue,   icon: 'database',      defaultLabel: 'Cached'  },
+  fallback: { color: giColors.accent.amber,  icon: 'alert-circle',  defaultLabel: 'Demo'    },
+  loading:  { color: giColors.text.muted,    icon: 'loader',        defaultLabel: 'Loading' },
 };
 
 export function ProvenanceChip({ status, label, lastUpdated }: Props) {
@@ -36,9 +40,9 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    gap: giSpacing[1],
+    paddingHorizontal: giSpacing[2],
+    paddingVertical: giSpacing[1],
     borderRadius: 100,
     borderWidth: 1,
   },

@@ -49,6 +49,7 @@ import { AppModeBanner } from '@/components/AppModeBanner';
 import { ErrorFallback } from '@/components/ErrorFallback';
 import { AUTH_TOKEN_KEY, AuthProvider, setLastKnownAppPath } from '@/context/AuthContext';
 import { BiometricSignInProvider } from '@/context/BiometricSignInContext';
+import { giProductAccent, giColors } from '@/lib/gi-bridge';
 import { SessionRevocationToast } from '@/components/SessionRevocationToast';
 import { ScreenshotGuardProvider } from '@/context/ScreenshotGuardContext';
 import { WorkspaceProvider } from '@/context/WorkspaceContext';
@@ -166,7 +167,7 @@ function resolveDeepLinkRoute(data: Record<string, unknown> | undefined | null):
 }
 
 SplashScreen.preventAutoHideAsync();
-SystemUI.setBackgroundColorAsync('#090810');
+SystemUI.setBackgroundColorAsync(giColors.bg.base);
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
@@ -294,8 +295,8 @@ function AppShell() {
         config={{
           appName: 'APEX',
           subtitle: 'Authenticate to access Unified Command',
-          accentColor: '#c9a84c',
-          backgroundColor: '#090810',
+          accentColor: giProductAccent.lyte,
+          backgroundColor: giColors.bg.base,
         }}
       />
     );
@@ -358,15 +359,15 @@ export default function RootLayout() {
                               <AppModeBanner />
                               <AppShell />
                               <SessionRevocationToast />
-                              <OfflineBanner accentColor="#c9a84c" />
-                              <SyncStatusBanner accentColor="#c9a84c" />
-                              <ConflictResolutionModal accentColor="#c9a84c" />
+                              <OfflineBanner accentColor={giProductAccent.lyte} />
+                              <SyncStatusBanner accentColor={giProductAccent.lyte} />
+                              <ConflictResolutionModal accentColor={giProductAccent.lyte} />
                               <CopilotFab
                                 config={{
                                   name: 'Navigator',
                                   icon: '⬡',
                                   agentId: 'cortex',
-                                  accentColor: '#c9a84c',
+                                  accentColor: giProductAccent.lyte,
                                   welcomeMessage:
                                     "I'm Navigator, your unified command intelligence. Ask me about any domain — defense, fleet, properties, operations, advisory, or portfolio.",
                                   placeholderText: 'Ask anything across domains...',

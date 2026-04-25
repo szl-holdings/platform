@@ -13,14 +13,15 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { featherIcon, VesselIcon } from '@/components/VesselIcon';
 import { useColors } from '@/hooks/useColors';
+import { giColors, palette } from '@/lib/gi-bridge';
 import { api, CACHE_KEYS, cacheGetStale, cacheSet, type VoyageEconomics } from '@/lib/fleet/api';
 
 const STATUS_COLORS: Record<string, string> = {
-  at_sea: '#22c55e',
-  loading: '#0ea5e9',
-  completed: '#8b5cf6',
-  planned: '#64748b',
-  cancelled: '#ef4444',
+  at_sea: palette.success,
+  loading: giColors.accent.teal,
+  completed: giColors.accent.violet,
+  planned: giColors.accent.slate,
+  cancelled: palette.critical,
 };
 
 function fmt(n: number): string {

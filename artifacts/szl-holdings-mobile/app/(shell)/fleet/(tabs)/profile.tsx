@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { featherIcon, VesselIcon } from '@/components/VesselIcon';
 import { useAuth } from '@/context/AuthContext';
 import { useColors } from '@/hooks/useColors';
+import { giColors, palette } from '@/lib/gi-bridge';
 
 function InfoRow({ icon, label, value }: { icon: string; label: string; value: string }) {
   const colors = useColors();
@@ -89,8 +90,8 @@ export default function ProfileScreen() {
             },
             {
               domain: 'aegis',
-              label: 'Aegis',
-              color: '#f59e0b',
+              label: 'PARAGON',
+              color: palette.high,
               fetch: async () => {
                 try {
                   const base = process.env.EXPO_PUBLIC_DOMAIN
@@ -106,8 +107,8 @@ export default function ProfileScreen() {
             },
             {
               domain: 'lyte',
-              label: 'Lyte',
-              color: '#00d4ff',
+              label: 'KORA',
+              color: giColors.accent.teal,
               fetch: async () => {
                 try {
                   const base = process.env.EXPO_PUBLIC_DOMAIN

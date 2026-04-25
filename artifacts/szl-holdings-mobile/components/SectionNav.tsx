@@ -1,5 +1,7 @@
 
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useColors } from '@/hooks/useColors';
+import { giColors, giSpacing } from '@/lib/gi-bridge';
 
 export interface Section {
   id: string;
@@ -12,23 +14,51 @@ interface SectionNavProps {
   activeId: string;
   onSelect: (id: string) => void;
   containerStyle?: object;
+  accentColor?: string;
 }
 
-export function SectionNav({ sections, activeId, onSelect, containerStyle }: SectionNavProps) {
+export function SectionNav({
+  sections,
+  activeId,
+  onSelect,
+  containerStyle,
+  accentColor,
+}: SectionNavProps) {
+  const colors = useColors();
+  const accent = accentColor ?? giColors.accent.blue;
+
   return (
-    <View style={[styles.container, containerStyle]}>
+    <View
+      style={[
+        styles.container,
+        { borderBottomColor: colors.borderSubtle },
+        containerStyle,
+      ]}
+    >
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {sections.map((s) => (
-          <TouchableOpacity
-            key={s.id}
-            style={[styles.tab, activeId === s.id && styles.activeTab]}
-            onPress={() => onSelect(s.id)}
-          >
-            <Text style={[styles.tabText, activeId === s.id && styles.activeTabText]}>
-              {s.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {sections.map((s) => {
+          const isActive = activeId === s.id;
+          return (
+            <TouchableOpacity
+              key={s.id}
+              style={[
+                styles.tab,
+                isActive && { borderBottomColor: accent, borderBottomWidth: 2 },
+              ]}
+              onPress={() => onSelect(s.id)}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  { color: isActive ? accent : colors.mutedForeground },
+                  isActive && styles.activeTabText,
+                ]}
+              >
+                {s.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -38,10 +68,8 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
   },
-  tab: { paddingHorizontal: 16, paddingVertical: 10 },
-  activeTab: { borderBottomWidth: 2, borderBottomColor: '#38bdf8' },
-  tabText: { color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: '600' },
-  activeTabText: { color: '#38bdf8' },
+  tab: { paddingHorizontal: giSpacing[4], paddingVertical: 10 },
+  tabText: { fontSize: 13, fontFamily: 'Inter_500Medium' },
+  activeTabText: { fontFamily: 'Inter_600SemiBold' },
 });

@@ -13,14 +13,15 @@ import {
 } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { apiFetchRaw } from '@/lib/apiClient';
+import { giColors, giProductAccent, palette } from '@/lib/gi-bridge';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const ACCENT = '#c9a84c';
-const AMBER = '#f59e0b';
-const RED = '#ef4444';
+const ACCENT = giProductAccent.holdings;
+const AMBER = palette.high;
+const RED = palette.critical;
 
 const CORTEX_QUEUE_KEY = 'cortex:approval-offline-queue';
 const CORTEX_COMMENT_QUEUE_KEY = 'cortex:approval-comment-offline-queue';
@@ -690,13 +691,13 @@ export function OfflineQueuePanel({
       <View
         style={[
           styles.container,
-          { backgroundColor: colors.card ?? '#0d1220', borderColor: '#22c55e40' },
+          { backgroundColor: colors.card ?? giColors.bg.surface, borderColor: `${palette.success}40` },
         ]}
       >
         <View style={styles.header}>
-          <View style={[styles.statusDot, { backgroundColor: '#22c55e' }]} />
-          <Feather name="check-circle" size={13} color="#22c55e" />
-          <Text style={[styles.headerTitle, { color: '#22c55e' }]}>All offline actions synced</Text>
+          <View style={[styles.statusDot, { backgroundColor: palette.success }]} />
+          <Feather name="check-circle" size={13} color={palette.success} />
+          <Text style={[styles.headerTitle, { color: palette.success }]}>All offline actions synced</Text>
         </View>
       </View>
     );
@@ -725,7 +726,7 @@ export function OfflineQueuePanel({
       style={[
         styles.container,
         {
-          backgroundColor: colors.card ?? '#0d1220',
+          backgroundColor: colors.card ?? giColors.bg.surface,
           borderColor: `${accentColor}55`,
         },
       ]}
@@ -735,13 +736,13 @@ export function OfflineQueuePanel({
         <Feather name={headerIcon} size={13} color={accentColor} />
         <Text style={[styles.headerTitle, { color: accentColor }]}>{headerLabel}</Text>
         <View style={{ flex: 1 }} />
-        <Text style={[styles.headerHint, { color: colors.mutedForeground ?? '#6b7280' }]}>
+        <Text style={[styles.headerHint, { color: colors.mutedForeground ?? giColors.text.muted }]}>
           {headerHint}
         </Text>
         <Feather
           name={expanded ? 'chevron-up' : 'chevron-down'}
           size={14}
-          color={colors.mutedForeground ?? '#6b7280'}
+          color={colors.mutedForeground ?? giColors.text.muted}
           style={{ marginLeft: 6 }}
         />
       </TouchableOpacity>
@@ -751,8 +752,8 @@ export function OfflineQueuePanel({
           style={[
             styles.bulkBar,
             {
-              borderColor: colors.border ?? '#1e2433',
-              backgroundColor: `${colors.background ?? '#070a14'}60`,
+              borderColor: colors.border ?? giColors.border.subtle,
+              backgroundColor: `${colors.background ?? giColors.bg.base}60`,
             },
           ]}
         >
@@ -827,7 +828,7 @@ export function OfflineQueuePanel({
                     </Text>
                   </View>
                   <Text
-                    style={[styles.sourceLabel, { color: colors.mutedForeground ?? '#6b7280' }]}
+                    style={[styles.sourceLabel, { color: colors.mutedForeground ?? giColors.text.muted }]}
                   >
                     {conflict.domain.toUpperCase()}
                   </Text>
@@ -835,35 +836,35 @@ export function OfflineQueuePanel({
                   <Text
                     style={[
                       styles.timestamp,
-                      { color: colors.mutedForeground ?? '#6b7280', marginTop: 0 },
+                      { color: colors.mutedForeground ?? giColors.text.muted, marginTop: 0 },
                     ]}
                   >
                     {relative(conflict.timestamp)}
                   </Text>
                 </View>
                 <Text
-                  style={[styles.targetId, { color: colors.foreground ?? '#e5e7eb' }]}
+                  style={[styles.targetId, { color: colors.foreground ?? giColors.text.primary }]}
                   numberOfLines={1}
                 >
                   {targetTail}
                 </Text>
                 <View style={styles.diffBlock}>
-                  <Text style={[styles.diffLabel, { color: colors.mutedForeground ?? '#6b7280' }]}>
+                  <Text style={[styles.diffLabel, { color: colors.mutedForeground ?? giColors.text.muted }]}>
                     YOU SENT
                   </Text>
                   <Text
-                    style={[styles.diffValue, { color: colors.foreground ?? '#e5e7eb' }]}
+                    style={[styles.diffValue, { color: colors.foreground ?? giColors.text.primary }]}
                     numberOfLines={2}
                   >
                     {previewValue(conflict.localBody)}
                   </Text>
                 </View>
                 <View style={styles.diffBlock}>
-                  <Text style={[styles.diffLabel, { color: colors.mutedForeground ?? '#6b7280' }]}>
+                  <Text style={[styles.diffLabel, { color: colors.mutedForeground ?? giColors.text.muted }]}>
                     SERVER NOW
                   </Text>
                   <Text
-                    style={[styles.diffValue, { color: colors.foreground ?? '#e5e7eb' }]}
+                    style={[styles.diffValue, { color: colors.foreground ?? giColors.text.primary }]}
                     numberOfLines={2}
                   >
                     {previewValue(conflict.serverResponse)}
@@ -921,8 +922,8 @@ export function OfflineQueuePanel({
               style={[
                 styles.itemRow,
                 {
-                  borderColor: colors.border ?? '#1e2433',
-                  backgroundColor: `${colors.background ?? '#070a14'}80`,
+                  borderColor: colors.border ?? giColors.border.subtle,
+                  backgroundColor: `${colors.background ?? giColors.bg.base}80`,
                 },
               ]}
             >
@@ -939,18 +940,18 @@ export function OfflineQueuePanel({
                     </Text>
                   </View>
                   <Text
-                    style={[styles.sourceLabel, { color: colors.mutedForeground ?? '#6b7280' }]}
+                    style={[styles.sourceLabel, { color: colors.mutedForeground ?? giColors.text.muted }]}
                   >
                     {item.sourceLabel}
                   </Text>
                 </View>
                 <Text
-                  style={[styles.targetId, { color: colors.foreground ?? '#e5e7eb' }]}
+                  style={[styles.targetId, { color: colors.foreground ?? giColors.text.primary }]}
                   numberOfLines={1}
                 >
                   {item.targetId}
                 </Text>
-                <Text style={[styles.timestamp, { color: colors.mutedForeground ?? '#6b7280' }]}>
+                <Text style={[styles.timestamp, { color: colors.mutedForeground ?? giColors.text.muted }]}>
                   Queued {relative(item.timestamp)}
                 </Text>
               </View>

@@ -1,4 +1,5 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
+import { giColors, palette } from '@/lib/gi-bridge';
 import {
   promptBiometric,
   useFuzzySearch,
@@ -120,10 +121,10 @@ async function updateIncident(id: number, data: IncidentUpdate): Promise<Inciden
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: '#EF4444',
-  high: '#F97316',
-  medium: '#F59E0B',
-  low: '#3B82F6',
+  critical: palette.critical,
+  high: giColors.accent.amber,
+  medium: palette.high,
+  low: palette.low,
 };
 
 const STATUS_ORDER = [

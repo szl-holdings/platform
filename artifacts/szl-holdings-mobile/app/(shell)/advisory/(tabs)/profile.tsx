@@ -17,6 +17,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/AuthContext';
 import { useColors } from '@/hooks/useColors';
+import { giColors, giProductAccent } from '@/lib/gi-bridge';
 
 const SESSION_HISTORY = [
   { id: 1, title: 'Discovery Call', date: 'Feb 15, 2026', duration: '45 min' },
@@ -68,9 +69,9 @@ function SettingRow({
           <Feather
             name={icon as any}
             size={15}
-            color={destructive ? '#c05050' : colors.goldSubtle}
+            color={destructive ? giColors.accent.red : colors.goldSubtle}
           />
-          <Text style={[styles.settingLabel, { color: destructive ? '#c05050' : colors.creamDim }]}>
+          <Text style={[styles.settingLabel, { color: destructive ? giColors.accent.red : colors.creamDim }]}>
             {label}
           </Text>
           <View style={styles.settingRight}>
@@ -181,8 +182,8 @@ export default function ProfileScreen() {
               },
               {
                 domain: 'terra',
-                label: 'Terra',
-                color: '#b8943c',
+                label: 'DOMAINE',
+                color: giProductAccent.terra,
                 fetch: async () => {
                   try {
                     const base = process.env.EXPO_PUBLIC_DOMAIN
@@ -198,8 +199,8 @@ export default function ProfileScreen() {
               },
               {
                 domain: 'lyte',
-                label: 'Lyte',
-                color: '#00d4ff',
+                label: 'KORA',
+                color: giProductAccent.lyte,
                 fetch: async () => {
                   try {
                     const base = process.env.EXPO_PUBLIC_DOMAIN
@@ -343,9 +344,9 @@ export default function ProfileScreen() {
         </View>
 
         <Pressable onPress={handleLogout}>
-          <View style={[styles.logoutRow, { borderColor: 'rgba(192,80,80,0.2)' }]}>
-            <Feather name="log-out" size={14} color="#c05050" />
-            <Text style={[styles.logoutText, { color: '#c05050' }]}>Sign Out</Text>
+          <View style={[styles.logoutRow, { borderColor: `${giColors.accent.red}33` }]}>
+            <Feather name="log-out" size={14} color={giColors.accent.red} />
+            <Text style={[styles.logoutText, { color: giColors.accent.red }]}>Sign Out</Text>
           </View>
         </Pressable>
 

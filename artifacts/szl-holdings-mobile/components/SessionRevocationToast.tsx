@@ -12,6 +12,7 @@ import {
   type SessionRevocationInfo,
   subscribeSessionRevocation,
 } from '@/context/AuthContext';
+import { giColors, giProductAccent } from '@/lib/gi-bridge';
 
 const DISPLAY_DURATION_MS = 4000;
 const SLIDE_DURATION_MS = 300;
@@ -132,7 +133,7 @@ const styles = StyleSheet.create({
   },
   accentBar: {
     width: 3,
-    backgroundColor: '#c9a84c',
+    backgroundColor: giProductAccent.holdings,
   },
   body: {
     flex: 1,
@@ -145,13 +146,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_500Medium',
     letterSpacing: 2,
     textTransform: 'uppercase',
-    color: '#c9a84c',
+    color: giProductAccent.holdings,
   },
   message: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
     lineHeight: 19,
-    color: '#f5f3e8',
+    color: giColors.text.primary,
     letterSpacing: 0.2,
   },
 });

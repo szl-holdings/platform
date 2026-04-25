@@ -1,5 +1,32 @@
 import { giColors, giProductAccent } from '@/lib/gi-bridge';
 
+const _a = giColors.accent;
+const _bg = giColors.bg;
+
+/**
+ * Theme-aware color palette for the CORTEX/APEX mobile app.
+ *
+ * Two modes:
+ *   - `light` — dark-mode palette (used when isDark === true). Semantic accent
+ *     values are taken directly from the GI enterprise accent family via
+ *     giColors.accent.* tokens. This is fully GI-token-driven.
+ *   - `day`   — light-mode palette. Values are intentionally hardcoded because
+ *     the GI design system is dark-first and does not yet define light-mode
+ *     token equivalents. The semantic accent colors here are accessible
+ *     variants (darker, higher-contrast) of the equivalent GI dark-mode tokens,
+ *     correct for legibility on light backgrounds:
+ *
+ *       GI dark token            → day palette equivalent
+ *       ─────────────────────────────────────────────────
+ *       giColors.accent.red     → day.red      (#C42B2B — darker for WCAG AA)
+ *       giColors.accent.amber   → day.amber    (#B07D10 — darker for WCAG AA)
+ *       giColors.accent.green   → day.green    (#0D8A62 — darker for WCAG AA)
+ *       giColors.accent.blue    → day.blue     (#2857C4 — darker for WCAG AA)
+ *       giColors.accent.violet  → day.violet   (#6B38C4 — darker for WCAG AA)
+ *
+ *     When GI adds light-mode token parity (tracked in follow-up #3643),
+ *     replace the day values with giColors.light.accent.* equivalents.
+ */
 const colors = {
   day: {
     background: '#F7F5FF',
@@ -91,43 +118,43 @@ const colors = {
     surfaceElevated: '#131020',
     muted: '#0a091a',
     mutedForeground: 'rgba(240,238,255,0.35)',
-    border: 'rgba(201,168,76,0.15)',
+    border: `${_a.amber}26`,
     borderBright: 'rgba(255,255,255,0.15)',
     borderSubtle: 'rgba(240,238,255,0.06)',
     input: 'rgba(240,238,255,0.06)',
-    primary: '#c9a84c',
+    primary: _a.amber,
     primaryForeground: '#090810',
-    primaryDim: 'rgba(201,168,76,0.12)',
-    primaryBorder: 'rgba(201,168,76,0.2)',
+    primaryDim: `${_a.amber}1f`,
+    primaryBorder: `${_a.amber}33`,
     secondary: '#151222',
     secondaryForeground: '#f0eeff',
-    accent: 'rgba(201,168,76,0.08)',
-    accentForeground: '#c9a84c',
-    destructive: '#ef4444',
+    accent: `${_a.amber}14`,
+    accentForeground: _a.amber,
+    destructive: _a.red,
     destructiveForeground: '#ffffff',
-    gold: '#c9a84c',
-    goldDim: 'rgba(201,168,76,0.12)',
-    goldBorder: 'rgba(201,168,76,0.2)',
-    goldSubtle: 'rgba(201,168,76,0.45)',
-    amber: '#f59e0b',
-    amberDim: 'rgba(245,158,11,0.12)',
-    amberBorder: 'rgba(245,158,11,0.25)',
-    red: '#ef4444',
-    redDim: 'rgba(239,68,68,0.12)',
-    redBorder: 'rgba(239,68,68,0.25)',
-    green: '#10b981',
-    greenDim: 'rgba(16,185,129,0.12)',
-    emerald: '#10b981',
-    emeraldDim: 'rgba(16,185,129,0.10)',
-    blue: '#3b82f6',
-    blueDim: 'rgba(59,130,246,0.12)',
-    violet: '#8b5cf6',
-    violetDim: 'rgba(139,92,246,0.12)',
+    gold: _a.amber,
+    goldDim: `${_a.amber}1f`,
+    goldBorder: `${_a.amber}33`,
+    goldSubtle: `${_a.amber}73`,
+    amber: _a.amber,
+    amberDim: `${_a.amber}1f`,
+    amberBorder: `${_a.amber}40`,
+    red: _a.red,
+    redDim: `${_a.red}1f`,
+    redBorder: `${_a.red}40`,
+    green: _a.green,
+    greenDim: `${_a.green}1f`,
+    emerald: _a.green,
+    emeraldDim: `${_a.green}1a`,
+    blue: _a.blue,
+    blueDim: `${_a.blue}1f`,
+    violet: _a.violet,
+    violetDim: `${_a.violet}1f`,
     cream: '#f0eeff',
     creamDim: 'rgba(240,238,255,0.35)',
     creamFaint: 'rgba(240,238,255,0.08)',
     inkDeep: '#090810',
-    tint: '#c9a84c',
+    tint: _a.amber,
     navy: '#080B12',
     navyLight: '#0D1018',
     navySurface: '#141820',
@@ -147,27 +174,24 @@ const colors = {
     silverDim: 'rgba(142,155,170,0.25)',
     silverSubtle: 'rgba(142,155,170,0.08)',
     silverBorder: 'rgba(142,155,170,0.15)',
-    signals: '#A855F7',
-    critical: '#DC2626',
-    criticalDim: 'rgba(220,38,38,0.18)',
-    criticalLight: 'rgba(220,38,38,0.20)',
-    high: '#F97316',
-    highDim: 'rgba(249,115,22,0.18)',
-    highLight: 'rgba(249,115,22,0.20)',
-    medium: '#F59E0B',
-    mediumDim: 'rgba(245,158,11,0.18)',
-    mediumLight: 'rgba(245,158,11,0.20)',
-    low: '#3B82F6',
-    lowDim: 'rgba(59,130,246,0.18)',
-    lowLight: 'rgba(59,130,246,0.20)',
+    signals: _a.violet,
+    critical: _a.red,
+    criticalDim: `${_a.red}2e`,
+    criticalLight: `${_a.red}33`,
+    high: _a.amber,
+    highDim: `${_a.amber}2e`,
+    highLight: `${_a.amber}33`,
+    medium: _a.amber,
+    mediumDim: `${_a.amber}2e`,
+    mediumLight: `${_a.amber}33`,
+    low: _a.blue,
+    lowDim: `${_a.blue}2e`,
+    lowLight: `${_a.blue}33`,
   },
   radius: 10,
 };
 
 export default colors;
-
-const _a = giColors.accent;
-const _bg = giColors.bg;
 
 export const LYTE_COLORS = {
   primary:          giProductAccent.lyte,
@@ -178,29 +202,29 @@ export const LYTE_COLORS = {
   background:       _bg.base,
   surface:          _bg.surface,
   surfaceElevated:  _bg.overlay,
-  border:           'rgba(201,168,92,0.16)',
+  border:           `${giProductAccent.lyte}29`,
   text:             giColors.text.primary,
   textSecondary:    'rgba(200,216,232,0.65)',
   success:          _a.green,
   warning:          _a.amber,
   error:            _a.red,
   critical:         _a.red,
-  criticalDim:      'rgba(201,96,112,0.18)',
-  criticalLight:    'rgba(201,96,112,0.14)',
+  criticalDim:      `${_a.red}2e`,
+  criticalLight:    `${_a.red}24`,
   high:             _a.amber,
-  highDim:          'rgba(201,168,92,0.18)',
-  highLight:        'rgba(201,168,92,0.14)',
+  highDim:          `${_a.amber}2e`,
+  highLight:        `${_a.amber}24`,
   medium:           _a.amber,
-  mediumDim:        'rgba(201,168,92,0.14)',
-  mediumLight:      'rgba(201,168,92,0.12)',
+  mediumDim:        `${_a.amber}24`,
+  mediumLight:      `${_a.amber}1f`,
   low:              _a.blue,
-  lowDim:           'rgba(77,143,204,0.18)',
-  lowLight:         'rgba(77,143,204,0.14)',
+  lowDim:           `${_a.blue}2e`,
+  lowLight:         `${_a.blue}24`,
   neonGreen:        _a.green,
-  neonGreenLight:   'rgba(91,170,138,0.15)',
-  neonGreenDim:     'rgba(91,170,138,0.08)',
+  neonGreenLight:   `${_a.green}26`,
+  neonGreenDim:     `${_a.green}14`,
   electricBlue:     _a.blue,
-  electricBlueLight:'rgba(77,143,204,0.15)',
-  electricBlueDim:  'rgba(77,143,204,0.08)',
+  electricBlueLight:`${_a.blue}26`,
+  electricBlueDim:  `${_a.blue}14`,
   signals:          _a.violet,
 };

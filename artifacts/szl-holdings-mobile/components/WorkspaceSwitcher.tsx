@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useWorkspace, WORKSPACES, type WorkspaceDomain } from '@/context/WorkspaceContext';
 import { useColors } from '@/hooks/useColors';
+import { palette } from '@/lib/gi-bridge';
 
 const SCREEN_W = Dimensions.get('window').width;
 const DRAWER_W = Math.min(300, SCREEN_W * 0.78);
@@ -185,7 +186,7 @@ export function WorkspaceTrigger({
         {ws?.icon ?? '⬡'}
       </Text>
       {totalBadges > 0 && (
-        <View style={[styles.triggerBadge, { backgroundColor: '#ef4444' }]}>
+        <View style={[styles.triggerBadge, { backgroundColor: palette.critical }]}>
           <Text style={styles.triggerBadgeText}>
             {totalBadges > 9 ? '9+' : String(totalBadges)}
           </Text>
@@ -294,7 +295,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   badgeText: {
-    color: '#fff',
+    color: palette.onAccent,
     fontSize: 10,
     fontFamily: 'Inter_600SemiBold',
   },

@@ -20,20 +20,21 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { giColors, palette } from '@/lib/gi-bridge';
 
-const ACCENT = '#F97316';
-const BG = '#080B12';
-const CARD = '#0D1018';
-const BORDER = 'rgba(249,115,22,0.12)';
-const TEXT = '#E8EAF0';
-const TEXT_DIM = 'rgba(232,234,240,0.45)';
+const ACCENT = giColors.accent.amber;
+const BG = giColors.bg.base;
+const CARD = giColors.bg.surface;
+const BORDER = `${giColors.accent.amber}20`;
+const TEXT = giColors.text.primary;
+const TEXT_DIM = `${giColors.text.primary}73`;
 
 const AGENTS = [
-  { id: 'alloy', name: 'Counsel', role: 'Orchestration', icon: 'git-merge', color: '#F97316' },
-  { id: 'sentinel', name: 'Sentinel', role: 'Security', icon: 'shield', color: '#EF4444' },
-  { id: 'helmsman', name: 'Helmsman', role: 'Maritime', icon: 'anchor', color: '#0ea5e9' },
-  { id: 'eval', name: 'Eval Engine', role: 'Research', icon: 'cpu', color: '#8b5cf6' },
-  { id: 'compass', name: 'Compass', role: 'Readiness', icon: 'compass', color: '#22c55e' },
+  { id: 'alloy', name: 'FORGE', role: 'Orchestration', icon: 'git-merge', color: giColors.accent.amber },
+  { id: 'sentinel', name: 'Sentinel', role: 'Security', icon: 'shield', color: palette.critical },
+  { id: 'helmsman', name: 'Helmsman', role: 'Maritime', icon: 'anchor', color: giColors.accent.teal },
+  { id: 'eval', name: 'Eval Engine', role: 'Research', icon: 'cpu', color: giColors.accent.violet },
+  { id: 'compass', name: 'Compass', role: 'Readiness', icon: 'compass', color: palette.success },
 ];
 
 interface Message {
@@ -336,8 +337,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#EF4444' },
-  liveText: { fontSize: 9, fontWeight: '700', color: '#EF4444', letterSpacing: 1 },
+  liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: palette.critical },
+  liveText: { fontSize: 9, fontWeight: '700', color: palette.critical, letterSpacing: 1 },
   agentPicker: {
     backgroundColor: CARD,
     borderWidth: 1,

@@ -21,6 +21,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, G, Line, Polyline, Rect, Text as SvgText } from 'react-native-svg';
 import { VesselIcon } from '@/components/VesselIcon';
 import { useColors } from '@/hooks/useColors';
+import { giColors, palette } from '@/lib/gi-bridge';
 import { api, CACHE_KEYS, cacheGetStale, cacheSet, type Vessel } from '@/lib/fleet/api';
 import { type VesselPositionUpdate, vesselsWs } from '@/lib/fleet/websocket';
 
@@ -31,12 +32,12 @@ const MIN_SCALE = 1;
 const MAX_SCALE = 8;
 
 const STATUS_COLORS: Record<string, string> = {
-  at_sea: '#22c55e',
-  in_port: '#0ea5e9',
-  anchored: '#f59e0b',
-  maintenance: '#ef4444',
-  active: '#22c55e',
-  delayed: '#f97316',
+  at_sea: palette.success,
+  in_port: giColors.accent.teal,
+  anchored: palette.high,
+  maintenance: palette.critical,
+  active: palette.success,
+  delayed: giColors.accent.amber,
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -289,7 +290,7 @@ function WorldMapCanvas({
                 <Polyline
                   points={routePoints}
                   fill="none"
-                  stroke="#0ea5e9"
+                  stroke={giColors.accent.teal}
                   strokeWidth={1.5}
                   strokeOpacity={0.7}
                   strokeDasharray="5 3"
@@ -349,7 +350,7 @@ function WorldMapCanvas({
                     )}
                     <Circle cx={x} cy={y} r={isSelected ? 5 : 4} fill={color} />
                     {((v as any).activeExceptions ?? 0) > 0 && (
-                      <Circle cx={x + 5} cy={y - 5} r={3} fill="#ef4444" />
+                      <Circle cx={x + 5} cy={y - 5} r={3} fill={palette.critical} />
                     )}
                   </G>
                 );

@@ -15,11 +15,12 @@ import {
   View,
 } from 'react-native';
 import { useColors } from '@/hooks/useColors';
+import { giProductAccent, giColors, giSpacing } from '@/lib/gi-bridge';
 
 const PIN_STORE_KEY = 'cortex_pin_hash';
 const PIN_ATTEMPTS_KEY = 'cortex_pin_attempts';
 const PIN_LOCKOUT_KEY = 'cortex_pin_lockout_until';
-const ACCENT = '#c9a84c';
+const ACCENT = giProductAccent.lyte;
 const PIN_LENGTH = 6;
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 30_000;
@@ -337,7 +338,7 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 12,
     fontFamily: 'Inter_500Medium',
-    color: '#ef4444',
+    color: giColors.accent.red,
     height: 18,
     textAlign: 'center',
   },

@@ -1,5 +1,6 @@
 import { Link } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
+import { giColors, giProductAccent } from '@/lib/gi-bridge';
 
 export default function NotFound() {
   return (
@@ -15,13 +16,13 @@ export default function NotFound() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#090810',
+    backgroundColor: giColors.bg.base,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
   },
   title: {
-    color: '#f0eeff',
+    color: giColors.text.primary,
     fontSize: 18,
     fontFamily: 'Inter_500Medium',
     marginBottom: 16,
@@ -31,7 +32,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   linkText: {
-    color: '#c9a84c',
+    color: giProductAccent.holdings,
     fontSize: 14,
   },
 });

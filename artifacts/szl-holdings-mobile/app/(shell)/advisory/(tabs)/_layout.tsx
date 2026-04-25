@@ -15,8 +15,9 @@ import { SettingsHeaderButton, SettingsHeaderOverlay } from '@/components/Settin
 import { WorkspaceTrigger } from '@/components/WorkspaceSwitcher';
 import { useWorkspace } from '@/context/WorkspaceContext';
 import { useColors } from '@/hooks/useColors';
+import { giColors } from '@/lib/gi-bridge';
 
-const ACCENT = '#10b981';
+const ACCENT = giColors.accent.green;
 
 const advisoryCommands: SpotlightCommand[] = [
   {

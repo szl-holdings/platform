@@ -15,8 +15,9 @@ import { SettingsHeaderButton, SettingsHeaderOverlay } from '@/components/Settin
 import { WorkspaceTrigger } from '@/components/WorkspaceSwitcher';
 import { useWorkspace } from '@/context/WorkspaceContext';
 import { useColors } from '@/hooks/useColors';
+import { palette } from '@/lib/gi-bridge';
 
-const ACCENT = '#ef4444';
+const ACCENT = palette.critical;
 
 const defenseCommands: SpotlightCommand[] = [
   {

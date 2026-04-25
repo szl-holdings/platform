@@ -20,6 +20,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { apiFetchRaw } from '@/lib/apiClient';
+import { giColors, palette } from '@/lib/gi-bridge';
 import type { FeatherIconName } from '@/types/feather-icons';
 
 interface WorkflowRunDetail {
@@ -59,12 +60,12 @@ interface ApprovalItem {
 }
 
 const STATE_CONFIG: Record<string, { color: string; label: string; icon: FeatherIconName }> = {
-  completed: { color: '#10b981', label: 'Completed', icon: 'check-circle' },
-  failed: { color: '#ef4444', label: 'Failed', icon: 'x-circle' },
-  running: { color: '#3b82f6', label: 'Running', icon: 'activity' },
-  queued: { color: '#f59e0b', label: 'Queued', icon: 'clock' },
-  waiting_approval: { color: '#8b5cf6', label: 'Awaiting Approval', icon: 'pause-circle' },
-  canceled: { color: '#6b7280', label: 'Canceled', icon: 'slash' },
+  completed: { color: palette.success, label: 'Completed', icon: 'check-circle' },
+  failed: { color: palette.critical, label: 'Failed', icon: 'x-circle' },
+  running: { color: palette.low, label: 'Running', icon: 'activity' },
+  queued: { color: palette.high, label: 'Queued', icon: 'clock' },
+  waiting_approval: { color: giColors.accent.violet, label: 'Awaiting Approval', icon: 'pause-circle' },
+  canceled: { color: giColors.text.muted, label: 'Canceled', icon: 'slash' },
 };
 
 function formatMs(ms: number | null | undefined): string {
@@ -190,7 +191,7 @@ export default function WorkflowDetailScreen() {
     );
   }
 
-  const cfg = STATE_CONFIG[run.state] ?? { color: '#6b7280', label: run.state, icon: 'circle' };
+  const cfg = STATE_CONFIG[run.state] ?? { color: giColors.text.muted, label: run.state, icon: 'circle' };
   const pendingApprovals = (run.approvals ?? []).filter((a) => a.status === 'pending');
 
   return (
@@ -275,11 +276,11 @@ export default function WorkflowDetailScreen() {
           <View
             style={[
               styles.errorBanner,
-              { backgroundColor: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)' },
+              { backgroundColor: `${palette.critical}14`, borderColor: `${palette.critical}33` },
             ]}
           >
-            <Feather name="alert-circle" size={14} color="#ef4444" />
-            <Text style={[styles.errorText, { color: '#ef4444' }]}>{run.errorMessage}</Text>
+            <Feather name="alert-circle" size={14} color={palette.critical} />
+            <Text style={[styles.errorText, { color: palette.critical }]}>{run.errorMessage}</Text>
           </View>
         )}
 
@@ -313,7 +314,7 @@ export default function WorkflowDetailScreen() {
             <View style={[styles.stepList, { borderColor: colors.borderSubtle }]}>
               {run.steps.map((step, i) => {
                 const sc = STATE_CONFIG[step.status] ?? {
-                  color: '#6b7280',
+                  color: giColors.text.muted,
                   label: step.status,
                   icon: 'circle',
                 };
@@ -343,7 +344,7 @@ export default function WorkflowDetailScreen() {
                         </Text>
                       )}
                       {step.errorMessage && (
-                        <Text style={[styles.stepError, { color: '#ef4444' }]} numberOfLines={2}>
+                        <Text style={[styles.stepError, { color: palette.critical }]} numberOfLines={2}>
                           {step.errorMessage}
                         </Text>
                       )}
@@ -372,20 +373,20 @@ function SwipeableApproval({
 }) {
   const renderRightActions = () => (
     <Pressable
-      style={[styles.swipeAction, { backgroundColor: '#ef4444' }]}
+      style={[styles.swipeAction, { backgroundColor: palette.critical }]}
       onPress={() => onDecide(approval.id, 'rejected')}
     >
-      <Feather name="x" size={20} color="#fff" />
+      <Feather name="x" size={20} color={palette.onAccent} />
       <Text style={styles.swipeActionText}>Reject</Text>
     </Pressable>
   );
 
   const renderLeftActions = () => (
     <Pressable
-      style={[styles.swipeAction, { backgroundColor: '#10b981' }]}
+      style={[styles.swipeAction, { backgroundColor: palette.success }]}
       onPress={() => onDecide(approval.id, 'approved')}
     >
-      <Feather name="check" size={20} color="#fff" />
+      <Feather name="check" size={20} color={palette.onAccent} />
       <Text style={styles.swipeActionText}>Approve</Text>
     </Pressable>
   );
@@ -406,14 +407,14 @@ function SwipeableApproval({
         ]}
       >
         <View style={styles.approvalTop}>
-          <View style={[styles.approvalBadge, { backgroundColor: 'rgba(245,158,11,0.1)' }]}>
-            <Feather name="clock" size={11} color="#f59e0b" />
-            <Text style={[styles.approvalBadgeText, { color: '#f59e0b' }]}>PENDING</Text>
+          <View style={[styles.approvalBadge, { backgroundColor: `${palette.high}1A` }]}>
+            <Feather name="clock" size={11} color={palette.high} />
+            <Text style={[styles.approvalBadgeText, { color: palette.high }]}>PENDING</Text>
           </View>
           {deciding && <ActivityIndicator size="small" color={colors.violet} />}
         </View>
         <Text style={[styles.approvalRole, { color: colors.creamDim }]}>
-          Requested from: <Text style={{ color: '#8b5cf6' }}>{approval.requestedFrom}</Text>
+          Requested from: <Text style={{ color: giColors.accent.violet }}>{approval.requestedFrom}</Text>
         </Text>
         {approval.description && (
           <Text style={[styles.approvalDesc, { color: colors.mutedForeground }]}>
@@ -426,16 +427,16 @@ function SwipeableApproval({
             onPress={() => onDecide(approval.id, 'approved')}
             disabled={deciding}
           >
-            <Feather name="check" size={13} color="#10b981" />
-            <Text style={[styles.quickActionText, { color: '#10b981' }]}>Approve</Text>
+            <Feather name="check" size={13} color={palette.success} />
+            <Text style={[styles.quickActionText, { color: palette.success }]}>Approve</Text>
           </Pressable>
           <Pressable
             style={[styles.quickReject, { borderColor: 'rgba(239,68,68,0.3)' }]}
             onPress={() => onDecide(approval.id, 'rejected')}
             disabled={deciding}
           >
-            <Feather name="x" size={13} color="#ef4444" />
-            <Text style={[styles.quickActionText, { color: '#ef4444' }]}>Reject</Text>
+            <Feather name="x" size={13} color={palette.critical} />
+            <Text style={[styles.quickActionText, { color: palette.critical }]}>Reject</Text>
           </Pressable>
           <Pressable
             style={[styles.quickEscalate, { borderColor: 'rgba(139,92,246,0.3)' }]}
@@ -455,8 +456,8 @@ function SwipeableApproval({
             }}
             disabled={deciding}
           >
-            <Feather name="arrow-up-circle" size={13} color="#8b5cf6" />
-            <Text style={[styles.quickActionText, { color: '#8b5cf6' }]}>Escalate</Text>
+            <Feather name="arrow-up-circle" size={13} color={giColors.accent.violet} />
+            <Text style={[styles.quickActionText, { color: giColors.accent.violet }]}>Escalate</Text>
           </Pressable>
         </View>
       </View>
@@ -571,7 +572,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     gap: 4,
   },
-  swipeActionText: { color: '#fff', fontSize: 10, fontFamily: 'Inter_600SemiBold' },
+  swipeActionText: { color: palette.onAccent, fontSize: 10, fontFamily: 'Inter_600SemiBold' },
   stepList: { borderRadius: 10, borderWidth: 1, overflow: 'hidden' },
   stepRow: { flexDirection: 'row', padding: 12, gap: 10, alignItems: 'flex-start' },
   stepDot: { width: 8, height: 8, borderRadius: 4, marginTop: 5 },

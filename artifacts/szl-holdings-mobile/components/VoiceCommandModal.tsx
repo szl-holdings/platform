@@ -17,9 +17,10 @@ import {
 } from 'react-native';
 import { WORKSPACES } from '@/context/WorkspaceContext';
 import { useColors } from '@/hooks/useColors';
+import { giProductAccent, giColors } from '@/lib/gi-bridge';
 import { useVoiceCommand, type VoiceResultCard } from '@/hooks/useVoiceCommand';
 
-const ACCENT = '#c9a84c';
+const ACCENT = giProductAccent.lyte;
 
 interface VoiceCommandModalProps {
   visible: boolean;
@@ -59,7 +60,7 @@ function PulseRing({ active }: { active: boolean }) {
     return () => anim.current?.stop();
   }, [active]);
 
-  return <Animated.View style={[styles.pulseRing, { transform: [{ scale }], opacity }]} />;
+  return <Animated.View style={[styles.pulseRing, { borderColor: ACCENT, transform: [{ scale }], opacity }]} />;
 }
 
 function ProcessingDots() {
@@ -91,7 +92,7 @@ function ProcessingDots() {
   return (
     <View style={styles.dotsRow}>
       {[dot1, dot2, dot3].map((dot, i) => (
-        <Animated.View key={i} style={[styles.dot, { transform: [{ translateY: dot }] }]} />
+        <Animated.View key={i} style={[styles.dot, { backgroundColor: ACCENT, transform: [{ translateY: dot }] }]} />
       ))}
     </View>
   );
@@ -117,7 +118,7 @@ function ResultCard({
       : card.severity === 'high'
         ? colors.amber
         : card.severity === 'medium'
-          ? '#f59e0b'
+          ? colors.amber
           : card.severity === 'low'
             ? colors.blue
             : undefined;
@@ -206,10 +207,10 @@ export function VoiceCommandModal({ visible, onClose }: VoiceCommandModalProps) 
           <View
             style={[
               styles.sheet,
-              { backgroundColor: '#111018', borderColor: 'rgba(201,168,76,0.15)' },
+              { backgroundColor: colors.card, borderColor: `${ACCENT}26` },
             ]}
           >
-            <View style={styles.sheetHandle} />
+            <View style={[styles.sheetHandle, { backgroundColor: colors.borderBright }]} />
 
             <View style={styles.sheetHeader}>
               <View style={styles.micContainer}>
@@ -217,19 +218,19 @@ export function VoiceCommandModal({ visible, onClose }: VoiceCommandModalProps) 
                 <View
                   style={[
                     styles.micCircle,
-                    { backgroundColor: isListening ? `${ACCENT}20` : 'rgba(255,255,255,0.05)' },
+                    { backgroundColor: isListening ? `${ACCENT}20` : colors.borderSubtle },
                   ]}
                 >
                   <Feather
                     name={isListening ? 'mic' : isProcessing ? 'cpu' : 'mic-off'}
                     size={22}
-                    color={isListening ? ACCENT : '#aaa'}
+                    color={isListening ? ACCENT : colors.mutedForeground}
                   />
                 </View>
               </View>
               <View style={styles.sheetTitleBlock}>
-                <Text style={styles.sheetTitle}>Voice Command</Text>
-                <Text style={styles.sheetSubtitle}>
+                <Text style={[styles.sheetTitle, { color: colors.foreground }]}>Voice Command</Text>
+                <Text style={[styles.sheetSubtitle, { color: colors.mutedForeground }]}>
                   {isListening
                     ? 'Listening — type or speak your query'
                     : isProcessing
@@ -240,21 +241,23 @@ export function VoiceCommandModal({ visible, onClose }: VoiceCommandModalProps) 
                 </Text>
               </View>
               <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
-                <Feather name="x" size={18} color="#aaa" />
+                <Feather name="x" size={18} color={colors.mutedForeground} />
               </TouchableOpacity>
             </View>
 
             {isProcessing && (
-              <View style={styles.processingRow}>
+              <View style={[styles.processingRow, { backgroundColor: `${ACCENT}0f` }]}>
                 <ProcessingDots />
-                <Text style={styles.processingText}>Routing query across ecosystem…</Text>
+                <Text style={[styles.processingText, { color: colors.textSecondary }]}>
+                  Routing query across ecosystem…
+                </Text>
               </View>
             )}
 
             {hasResult && (
               <View style={styles.resultSection}>
-                <View style={[styles.queryBubble, { backgroundColor: 'rgba(201,168,76,0.08)' }]}>
-                  <Text style={styles.queryText}>"{result?.query}"</Text>
+                <View style={[styles.queryBubble, { backgroundColor: `${ACCENT}14` }]}>
+                  <Text style={[styles.queryText, { color: ACCENT }]}>"{result?.query}"</Text>
                 </View>
                 <View
                   style={[
@@ -264,12 +267,14 @@ export function VoiceCommandModal({ visible, onClose }: VoiceCommandModalProps) 
                     },
                   ]}
                 >
-                  <Text style={styles.domainChipText}>
+                  <Text style={[styles.domainChipText, { color: colors.foreground }]}>
                     {WORKSPACES.find((w) => w.id === result?.domain)?.icon}{' '}
                     {WORKSPACES.find((w) => w.id === result?.domain)?.label}
                   </Text>
                 </View>
-                <Text style={styles.responseText}>{result?.response}</Text>
+                <Text style={[styles.responseText, { color: colors.textSecondary }]}>
+                  {result?.response}
+                </Text>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -279,27 +284,32 @@ export function VoiceCommandModal({ visible, onClose }: VoiceCommandModalProps) 
                     <ResultCard key={card.id} card={card} colors={colors} />
                   ))}
                 </ScrollView>
-                <TouchableOpacity style={styles.goBtn} onPress={handleGoToResult}>
-                  <Text style={styles.goBtnText}>
+                <TouchableOpacity
+                  style={[styles.goBtn, { backgroundColor: ACCENT }]}
+                  onPress={handleGoToResult}
+                >
+                  <Text style={[styles.goBtnText, { color: giColors.text.inverse }]}>
                     Open {WORKSPACES.find((w) => w.id === result?.domain)?.label}
                   </Text>
-                  <Feather name="arrow-right" size={14} color="#090810" />
+                  <Feather name="arrow-right" size={14} color={giColors.text.inverse} />
                 </TouchableOpacity>
               </View>
             )}
 
             {(isListening || state === 'idle') && !hasResult && (
               <View style={styles.suggestionsSection}>
-                <Text style={styles.suggestLabel}>Suggested queries</Text>
+                <Text style={[styles.suggestLabel, { color: colors.mutedForeground }]}>
+                  Suggested queries
+                </Text>
                 <View style={styles.suggestionsGrid}>
                   {SUGGESTED_QUERIES.map((q) => (
                     <TouchableOpacity
                       key={q}
-                      style={[styles.suggestionChip, { borderColor: 'rgba(201,168,76,0.2)' }]}
+                      style={[styles.suggestionChip, { borderColor: `${ACCENT}33` }]}
                       onPress={() => handleSuggestion(q)}
                       activeOpacity={0.7}
                     >
-                      <Text style={styles.suggestionText}>{q}</Text>
+                      <Text style={[styles.suggestionText, { color: colors.mutedForeground }]}>{q}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -309,23 +319,23 @@ export function VoiceCommandModal({ visible, onClose }: VoiceCommandModalProps) 
             <View
               style={[
                 styles.inputRow,
-                { borderColor: 'rgba(201,168,76,0.2)', backgroundColor: 'rgba(255,255,255,0.04)' },
+                { borderColor: `${ACCENT}33`, backgroundColor: colors.borderSubtle },
               ]}
             >
-              <Feather name="search" size={16} color="#666" style={{ marginRight: 8 }} />
+              <Feather name="search" size={16} color={colors.mutedForeground} style={{ marginRight: 8 }} />
               <TextInput
                 ref={inputRef}
-                style={styles.textInput}
+                style={[styles.textInput, { color: colors.foreground }]}
                 value={textInput}
                 onChangeText={setTextInput}
                 placeholder='Try "What needs my attention?"'
-                placeholderTextColor="#555"
+                placeholderTextColor={colors.mutedForeground}
                 returnKeyType="send"
                 onSubmitEditing={handleSubmit}
                 editable={!isProcessing}
               />
               <TouchableOpacity onPress={handleSubmit} disabled={!textInput.trim() || isProcessing}>
-                <Feather name="send" size={16} color={textInput.trim() ? ACCENT : '#444'} />
+                <Feather name="send" size={16} color={textInput.trim() ? ACCENT : colors.mutedForeground} />
               </TouchableOpacity>
             </View>
           </View>
@@ -352,7 +362,6 @@ const styles = StyleSheet.create({
     width: 36,
     height: 4,
     borderRadius: 2,
-    backgroundColor: 'rgba(255,255,255,0.15)',
     alignSelf: 'center',
     marginBottom: 4,
   },
@@ -373,7 +382,6 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 26,
     borderWidth: 2,
-    borderColor: ACCENT,
   },
   micCircle: {
     width: 44,
@@ -386,12 +394,10 @@ const styles = StyleSheet.create({
   sheetTitle: {
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
-    color: '#f0eeff',
   },
   sheetSubtitle: {
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(240,238,255,0.5)',
     marginTop: 2,
   },
   closeBtn: { padding: 4 },
@@ -401,19 +407,16 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 16,
     borderRadius: 10,
-    backgroundColor: 'rgba(201,168,76,0.06)',
   },
   dotsRow: { flexDirection: 'row', gap: 6, alignItems: 'center' },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: ACCENT,
   },
   processingText: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(240,238,255,0.6)',
   },
   resultSection: { gap: 10 },
   queryBubble: {
@@ -423,7 +426,6 @@ const styles = StyleSheet.create({
   queryText: {
     fontSize: 13,
     fontFamily: 'Inter_400Regular',
-    color: ACCENT,
     fontStyle: 'italic',
   },
   domainChip: {
@@ -436,12 +438,10 @@ const styles = StyleSheet.create({
   domainChipText: {
     fontSize: 11,
     fontFamily: 'Inter_500Medium',
-    color: '#f0eeff',
   },
   responseText: {
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(240,238,255,0.85)',
     lineHeight: 20,
   },
   cardsRow: { gap: 8, paddingBottom: 4 },
@@ -459,7 +459,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: ACCENT,
     alignSelf: 'flex-start',
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -468,13 +467,11 @@ const styles = StyleSheet.create({
   goBtnText: {
     fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
-    color: '#090810',
   },
   suggestionsSection: { gap: 8 },
   suggestLabel: {
     fontSize: 10,
     fontFamily: 'Inter_600SemiBold',
-    color: 'rgba(240,238,255,0.4)',
     letterSpacing: 1,
   },
   suggestionsGrid: {
@@ -491,7 +488,6 @@ const styles = StyleSheet.create({
   suggestionText: {
     fontSize: 12,
     fontFamily: 'Inter_400Regular',
-    color: 'rgba(240,238,255,0.6)',
   },
   inputRow: {
     flexDirection: 'row',
@@ -505,6 +501,5 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
-    color: '#f0eeff',
   },
 });

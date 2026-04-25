@@ -14,6 +14,7 @@ import { OfflineQueueLauncher } from '@/components/OfflineQueueLauncher';
 import { useNotificationCountContext } from '@/context/NotificationCountContext';
 import { useWorkspace, type WorkspaceDomain } from '@/context/WorkspaceContext';
 import { useColors } from '@/hooks/useColors';
+import { giColors, giProductAccent, giSpacing, palette } from '@/lib/gi-bridge';
 import { apiFetch } from '@/lib/apiClient';
 
 interface TabItem {
@@ -29,56 +30,56 @@ const TABS: TabItem[] = [
     id: 'command',
     label: 'Command',
     icon: 'grid',
-    accent: '#c9a84c',
+    accent: giProductAccent.command,
     route: '/(shell)/',
   },
   {
     id: 'intelligence',
     label: 'APEX',
     icon: 'cpu',
-    accent: '#8b7ac8',
+    accent: giColors.accent.violet,
     route: '/(shell)/intelligence',
   },
   {
     id: 'defense',
     label: 'Defense',
     icon: 'shield',
-    accent: '#ef4444',
+    accent: giColors.accent.red,
     route: '/(shell)/defense',
   },
   {
     id: 'fleet',
     label: 'Fleet',
     icon: 'anchor',
-    accent: '#0ea5e9',
+    accent: giProductAccent.vessels,
     route: '/(shell)/fleet',
   },
   {
     id: 'portfolio',
     label: 'Portfolio',
     icon: 'briefcase',
-    accent: '#94a3b8',
+    accent: giColors.accent.slate,
     route: '/(shell)/portfolio',
   },
   {
     id: 'properties',
     label: 'Terra',
     icon: 'home',
-    accent: '#c87941',
+    accent: giProductAccent.terra,
     route: '/(shell)/properties',
   },
   {
     id: 'operations',
     label: 'Ops',
     icon: 'activity',
-    accent: '#22d3ee',
+    accent: giProductAccent.lyte,
     route: '/(shell)/operations',
   },
   {
     id: 'advisory',
     label: 'Advisory',
     icon: 'users',
-    accent: '#d4b896',
+    accent: giProductAccent.carlota,
     route: '/(shell)/advisory',
   },
 ];
@@ -240,7 +241,7 @@ export function BottomTabBar() {
                   <Feather name={tab.icon} size={18} color={color} />
                   {badge > 0 && (
                     <View
-                      style={[styles.badge, { backgroundColor: isActive ? tab.accent : '#ef4444' }]}
+                      style={[styles.badge, { backgroundColor: isActive ? tab.accent : giColors.accent.red }]}
                     >
                       <Text style={styles.badgeText}>{badge > 99 ? '99+' : String(badge)}</Text>
                     </View>
@@ -263,7 +264,7 @@ export function BottomTabBar() {
         })}
       </ScrollView>
 
-      <View style={styles.utilityRow}>
+      <View style={[styles.utilityRow, { borderTopColor: colors.borderSubtle }]}>
         <TouchableOpacity
           onPress={() => router.navigate('/(shell)/quick-actions' as never)}
           style={styles.utilityTab}
@@ -273,20 +274,20 @@ export function BottomTabBar() {
         >
           <View style={styles.tabInner}>
             {isCommandDeckActive && (
-              <View style={[styles.activeIndicator, { backgroundColor: '#c9a84c' }]} />
+              <View style={[styles.activeIndicator, { backgroundColor: giProductAccent.lyte }]} />
             )}
             <View style={styles.iconWrap}>
               <Feather
                 name="zap"
                 size={18}
-                color={isCommandDeckActive ? '#c9a84c' : colors.mutedForeground}
+                color={isCommandDeckActive ? giProductAccent.lyte : colors.mutedForeground}
               />
             </View>
             <Text
               style={[
                 styles.label,
                 {
-                  color: isCommandDeckActive ? '#c9a84c' : colors.mutedForeground,
+                  color: isCommandDeckActive ? giProductAccent.lyte : colors.mutedForeground,
                   fontFamily: isCommandDeckActive ? 'Inter_600SemiBold' : 'Inter_400Regular',
                 },
               ]}
@@ -316,7 +317,7 @@ export function BottomTabBar() {
                 color={isSettingsActive ? colors.foreground : colors.mutedForeground}
               />
               {unreadCount > 0 && (
-                <View style={[styles.badge, { backgroundColor: '#ef4444' }]}>
+                <View style={[styles.badge, { backgroundColor: giColors.accent.red }]}>
                   <Text style={styles.badgeText}>
                     {unreadCount > 99 ? '99+' : String(unreadCount)}
                   </Text>
@@ -350,20 +351,19 @@ const styles = StyleSheet.create({
     flexGrow: 0,
   },
   tabsScrollContent: {
-    paddingHorizontal: 4,
+    paddingHorizontal: giSpacing[1],
     gap: 0,
   },
   utilityRow: {
     flexDirection: 'row',
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255,255,255,0.06)',
-    marginTop: 6,
-    paddingTop: 4,
+    marginTop: giSpacing[1.5],
+    paddingTop: giSpacing[1],
   },
   tab: {
     minWidth: 64,
     alignItems: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: giSpacing[1],
   },
   utilityTab: {
     flex: 1,
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   badgeText: {
-    color: '#fff',
+    color: palette.onAccent,
     fontSize: 8,
     fontFamily: 'Inter_600SemiBold',
   },

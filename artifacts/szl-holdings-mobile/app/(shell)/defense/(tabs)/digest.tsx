@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { apiGet } from '@/lib/apiClient';
+import { giColors, giSemantic, palette } from '@/lib/gi-bridge';
 
 interface Incident {
   id: number;
@@ -57,11 +58,11 @@ function decisionNeedsReview(d: Decision): boolean {
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
-  low: '#3b82f6',
-  info: '#6b7280',
+  critical: palette.critical,
+  high: giColors.accent.amber,
+  medium: palette.high,
+  low: palette.low,
+  info: giColors.text.muted,
 };
 
 const PILOT_TRUST_METRICS = [
@@ -136,10 +137,10 @@ export default function DigestTab() {
       : 'guarded';
   const postureColor =
     overallPosture === 'critical'
-      ? '#ef4444'
+      ? palette.critical
       : overallPosture === 'elevated'
-        ? '#f59e0b'
-        : '#22c55e';
+        ? palette.high
+        : palette.success;
 
   const keyMetrics = [
     { label: 'Active Incidents', value: String(activeIncidents.length), live: true },
@@ -211,13 +212,13 @@ export default function DigestTab() {
                     <Ionicons
                       name={m.live ? 'radio-button-on' : 'radio-button-off'}
                       size={8}
-                      color={m.live ? '#22c55e' : '#6b7280'}
+                      color={m.live ? palette.success : giColors.text.muted}
                     />
                     <Text
                       style={{
                         fontSize: 8,
                         fontFamily: 'Inter_400Regular',
-                        color: m.live ? '#22c55e' : '#6b7280',
+                        color: m.live ? palette.success : giColors.text.muted,
                       }}
                     >
                       {m.live ? 'live' : 'pilot'}
@@ -246,13 +247,13 @@ export default function DigestTab() {
                   key={inc.id}
                   style={[
                     styles.incidentRow,
-                    { borderColor: `${SEVERITY_COLORS[inc.severity] ?? '#6b7280'}30` },
+                    { borderColor: `${SEVERITY_COLORS[inc.severity] ?? giColors.text.muted}30` },
                   ]}
                 >
                   <View
                     style={[
                       styles.severityDot,
-                      { backgroundColor: SEVERITY_COLORS[inc.severity] ?? '#6b7280' },
+                      { backgroundColor: SEVERITY_COLORS[inc.severity] ?? giColors.text.muted },
                     ]}
                   />
                   <View style={{ flex: 1 }}>
@@ -280,9 +281,9 @@ export default function DigestTab() {
                 {pendingDecisions.slice(0, 4).map((d: Decision) => (
                   <View
                     key={d.id ?? d.objectId}
-                    style={[styles.incidentRow, { borderColor: '#f59e0b30' }]}
+                    style={[styles.incidentRow, { borderColor: giSemantic.warning.border }]}
                   >
-                    <View style={[styles.severityDot, { backgroundColor: '#f59e0b' }]} />
+                    <View style={[styles.severityDot, { backgroundColor: palette.high }]} />
                     <View style={{ flex: 1 }}>
                       <Text style={[styles.incidentTitle, { color: colors.foreground }]}>
                         {d.recommendedAction ??
@@ -294,7 +295,7 @@ export default function DigestTab() {
                         {d.id ?? d.objectId}
                       </Text>
                     </View>
-                    <Ionicons name="time-outline" size={14} color="#f59e0b" />
+                    <Ionicons name="time-outline" size={14} color={palette.high} />
                   </View>
                 ))}
               </View>
@@ -314,10 +315,10 @@ export default function DigestTab() {
                   paddingHorizontal: 6,
                   paddingVertical: 2,
                   borderRadius: 4,
-                  backgroundColor: '#f59e0b20',
+                  backgroundColor: giSemantic.warning.bg,
                 }}
               >
-                <Text style={{ fontSize: 8, fontFamily: 'Inter_600SemiBold', color: '#f59e0b' }}>
+                <Text style={{ fontSize: 8, fontFamily: 'Inter_600SemiBold', color: palette.high }}>
                   PILOT DATA
                 </Text>
               </View>
@@ -330,7 +331,7 @@ export default function DigestTab() {
                     <Text
                       style={[
                         styles.trustValue,
-                        { color: r.status === 'good' ? '#22c55e' : '#f59e0b' },
+                        { color: r.status === 'good' ? palette.success : palette.high },
                       ]}
                     >
                       {r.value}
@@ -338,7 +339,7 @@ export default function DigestTab() {
                     <Ionicons
                       name={r.status === 'good' ? 'checkmark-circle' : 'warning'}
                       size={12}
-                      color={r.status === 'good' ? '#22c55e' : '#f59e0b'}
+                      color={r.status === 'good' ? palette.success : palette.high}
                     />
                   </View>
                 </View>
@@ -363,10 +364,10 @@ export default function DigestTab() {
                       {
                         color:
                           hardeningSummary.overallScore >= 80
-                            ? '#22c55e'
+                            ? palette.success
                             : hardeningSummary.overallScore >= 60
-                              ? '#f59e0b'
-                              : '#ef4444',
+                              ? palette.high
+                              : palette.critical,
                       },
                     ]}
                   >
@@ -381,15 +382,15 @@ export default function DigestTab() {
                       width: `${hardeningSummary.overallScore}%`,
                       backgroundColor:
                         hardeningSummary.overallScore >= 80
-                          ? '#22c55e'
+                          ? palette.success
                           : hardeningSummary.overallScore >= 60
-                            ? '#f59e0b'
-                            : '#ef4444',
+                            ? palette.high
+                            : palette.critical,
                     }}
                   />
                 </View>
               </View>
-              <Text style={[styles.incidentMeta, { color: '#ef4444' }]}>
+              <Text style={[styles.incidentMeta, { color: palette.critical }]}>
                 {hardeningSummary.criticalGaps} critical control gaps
               </Text>
               <Text style={[styles.incidentMeta, { color: colors.muted }]}>
@@ -398,24 +399,24 @@ export default function DigestTab() {
             </View>
           )}
 
-          <View style={[styles.section, { backgroundColor: '#1e3a1e', borderColor: '#22c55e30' }]}>
+          <View style={[styles.section, { backgroundColor: giSemantic.success.bg, borderColor: giSemantic.success.border }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-              <Ionicons name="information-circle" size={14} color="#22c55e" />
-              <Text style={[styles.sectionTitle, { color: '#22c55e' }]}>DATA SOURCES</Text>
+              <Ionicons name="information-circle" size={14} color={palette.success} />
+              <Text style={[styles.sectionTitle, { color: palette.success }]}>DATA SOURCES</Text>
             </View>
-            <Text style={[styles.incidentMeta, { color: '#86efac' }]}>
+            <Text style={[styles.incidentMeta, { color: giSemantic.success.text }]}>
               · Incidents, findings, decisions: live API
             </Text>
-            <Text style={[styles.incidentMeta, { color: '#86efac' }]}>
+            <Text style={[styles.incidentMeta, { color: giSemantic.success.text }]}>
               · Security score: live (hardening-summary endpoint)
             </Text>
-            <Text style={[styles.incidentMeta, { color: '#86efac80' }]}>
+            <Text style={[styles.incidentMeta, { color: `${giSemantic.success.text}80` }]}>
               · Trust quality metrics: seeded pilot data
             </Text>
-            <Text style={[styles.incidentMeta, { color: '#86efac80' }]}>
+            <Text style={[styles.incidentMeta, { color: `${giSemantic.success.text}80` }]}>
               · MTTD/MTTR: not yet instrumented in production
             </Text>
-            <Text style={[styles.incidentMeta, { color: '#86efac80', marginTop: 6 }]}>
+            <Text style={[styles.incidentMeta, { color: `${giSemantic.success.text}80`, marginTop: 6 }]}>
               Updated: {new Date().toLocaleString()}
             </Text>
           </View>

@@ -4,6 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNotificationCountContext } from '@/context/NotificationCountContext';
 import { useColors } from '@/hooks/useColors';
+import { palette } from '@/lib/gi-bridge';
 import { formatBadgeCount, shouldShowBadge } from './SettingsHeaderButton.logic';
 
 export { formatBadgeCount, shouldShowBadge } from './SettingsHeaderButton.logic';
@@ -22,7 +23,7 @@ export function SettingsHeaderButton() {
       <View style={styles.iconWrap}>
         <Feather name="settings" size={16} color={colors.mutedForeground} />
         {shouldShowBadge(unreadCount) && (
-          <View style={[styles.badge, { backgroundColor: '#ef4444' }]}>
+          <View style={[styles.badge, { backgroundColor: palette.critical }]}>
             <Text style={styles.badgeText}>{formatBadgeCount(unreadCount)}</Text>
           </View>
         )}
@@ -75,7 +76,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   badgeText: {
-    color: '#fff',
+    color: palette.onAccent,
     fontSize: 8,
     fontFamily: 'Inter_600SemiBold',
   },

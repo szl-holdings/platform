@@ -18,6 +18,7 @@ import {
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
+import { palette } from '@/lib/gi-bridge';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : '';
 
@@ -120,7 +121,7 @@ function BiometricGate({
           Your document vault is protected.{'\n'}Authenticate to continue.
         </Text>
         {authError ? (
-          <Text style={[gateStyles.error, { color: '#ef4444' }]}>{authError}</Text>
+          <Text style={[gateStyles.error, { color: palette.critical }]}>{authError}</Text>
         ) : null}
         <Pressable
           onPress={handleAuth}
@@ -372,7 +373,7 @@ export default function DocumentsScreen() {
         )}
 
         {uploadError && (
-          <Text style={[styles.uploadError, { color: '#ef4444' }]}>{uploadError}</Text>
+          <Text style={[styles.uploadError, { color: palette.critical }]}>{uploadError}</Text>
         )}
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>

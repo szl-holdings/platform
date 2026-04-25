@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { useColors } from '@/hooks/useColors';
+import { giColors, giProductAccent, giSpacing } from '@/lib/gi-bridge';
 import { useFusionHistory } from '@/hooks/useFusionHistory';
 import { apiFetch, apiStreamFetch } from '@/lib/apiClient';
 
@@ -20,7 +21,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const ACCENT = '#c9a84c';
+const ACCENT = giProductAccent.lyte;
 
 interface DomainSignal {
   title: string;
@@ -68,7 +69,7 @@ function severityColor(sev: string, colors: ReturnType<typeof useColors>): strin
     case 'high':
       return colors.amber;
     case 'medium':
-      return '#f59e0b';
+      return colors.amber;
     case 'low':
       return colors.blue;
     default:
@@ -83,7 +84,7 @@ function riskColor(risk: string, colors: ReturnType<typeof useColors>): string {
     case 'high':
       return colors.amber;
     case 'medium':
-      return '#f59e0b';
+      return colors.amber;
     case 'low':
       return colors.blue;
     default:
@@ -102,7 +103,7 @@ function ScoreBar({ score, color }: { score: number; color: string }) {
 }
 
 const scoreStyles = StyleSheet.create({
-  track: { height: 3, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 2, flex: 1 },
+  track: { height: 3, backgroundColor: giColors.border.subtle, borderRadius: 2, flex: 1 },
   fill: { height: 3, borderRadius: 2 },
 });
 
@@ -191,9 +192,9 @@ function DomainResultCard({
 }
 
 const drStyles = StyleSheet.create({
-  card: { borderRadius: 12, borderWidth: 1, padding: 12, gap: 8 },
-  cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  headerLeft: { flex: 1, gap: 4 },
+  card: { borderRadius: 12, borderWidth: 1, padding: giSpacing[3], gap: giSpacing[2] },
+  cardHeader: { flexDirection: 'row', alignItems: 'center', gap: giSpacing[2] },
+  headerLeft: { flex: 1, gap: giSpacing[1] },
   domainLabel: { fontSize: 12, fontFamily: 'Inter_600SemiBold' },
   scoreRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   scoreText: { fontSize: 10, fontFamily: 'Inter_600SemiBold', width: 30 },
@@ -405,7 +406,7 @@ export function FusionBar() {
             <Feather
               name="arrow-right"
               size={13}
-              color={query.trim().length >= 3 ? '#000' : ACCENT}
+              color={query.trim().length >= 3 ? giColors.text.inverse : ACCENT}
             />
           </TouchableOpacity>
         )}

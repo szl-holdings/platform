@@ -16,6 +16,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/AuthContext';
 import { useColors } from '@/hooks/useColors';
+import { giColors } from '@/lib/gi-bridge';
 
 export default function ProfileScreen() {
   const colors = useColors();
@@ -126,8 +127,8 @@ export default function ProfileScreen() {
             },
             {
               domain: 'lyte',
-              label: 'Lyte',
-              color: '#00d4ff',
+              label: 'KORA',
+              color: giColors.accent.teal,
               fetch: async () => {
                 try {
                   const base = process.env.EXPO_PUBLIC_DOMAIN
@@ -143,8 +144,8 @@ export default function ProfileScreen() {
             },
             {
               domain: 'vessels',
-              label: 'Vessels',
-              color: '#0ea5e9',
+              label: 'SEXTANT',
+              color: giColors.accent.teal,
               fetch: async () => {
                 try {
                   const base = process.env.EXPO_PUBLIC_DOMAIN

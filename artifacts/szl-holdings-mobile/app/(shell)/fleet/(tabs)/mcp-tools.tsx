@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { giColors, palette } from '@/lib/gi-bridge';
 
 interface McpTool {
   name: string;
@@ -43,10 +44,10 @@ const BUILT_IN_TOOLS: McpTool[] = [
   },
 ];
 
-const ACCENT = '';
-const BG = '#08080f';
-const CARD = 'rgba(25,25,35,0.95)';
-const BORDER = 'rgba(255,255,255,0.06)';
+const ACCENT = giColors.accent.teal;
+const BG = giColors.bg.base;
+const CARD = giColors.bg.surface;
+const BORDER = `${giColors.text.primary}0F`;
 
 export default function McpToolsScreen() {
   const insets = useSafeAreaInsets();
@@ -152,7 +153,7 @@ export default function McpToolsScreen() {
   };
 
   const statusColor =
-    serverStatus === 'healthy' ? '#10b981' : serverStatus === 'error' ? '#ef4444' : '#f59e0b';
+    serverStatus === 'healthy' ? palette.success : serverStatus === 'error' ? palette.critical : palette.high;
   const hasParams =
     selected?.inputSchema?.properties && Object.keys(selected.inputSchema.properties).length > 0;
 
@@ -242,7 +243,7 @@ export default function McpToolsScreen() {
                 ]}
               >
                 <Text
-                  style={[styles.resultStatus, { color: result.isError ? '#ef4444' : '#10b981' }]}
+                  style={[styles.resultStatus, { color: result.isError ? palette.critical : palette.success }]}
                 >
                   {result.isError ? 'Error' : 'Success'} · {result.elapsed}ms
                 </Text>

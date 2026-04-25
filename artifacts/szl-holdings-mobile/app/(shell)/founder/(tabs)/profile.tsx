@@ -13,12 +13,13 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { giColors, palette } from '@/lib/gi-bridge';
 
-const ACCENT = '#6366f1';
-const BG = '#0a0a0a';
-const BORDER = 'rgba(255,255,255,0.06)';
-const TEXT = '#e8e8f0';
-const TEXT_DIM = 'rgba(255,255,255,0.45)';
+const ACCENT = giColors.accent.violet;
+const BG = giColors.bg.base;
+const BORDER = `${giColors.text.primary}0F`;
+const TEXT = giColors.text.primary;
+const TEXT_DIM = `${giColors.text.primary}73`;
 
 const SOCIAL_LINKS = [
   { label: 'LinkedIn', icon: 'linkedin' as const, url: 'https://linkedin.com/in/stephenlutar' },
@@ -118,7 +119,7 @@ export default function ProfileScreen() {
           <Text style={styles.sectionLabel}>Get in Touch</Text>
           {submitted ? (
             <View style={styles.successCard}>
-              <Feather name="check-circle" size={24} color="#10b981" />
+              <Feather name="check-circle" size={24} color={palette.success} />
               <Text style={styles.successText}>Message sent. I'll be in touch soon.</Text>
             </View>
           ) : (
@@ -250,5 +251,5 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
   },
-  successText: { color: '#10b981', fontSize: 14, fontWeight: '500', flex: 1 },
+  successText: { color: palette.success, fontSize: 14, fontWeight: '500', flex: 1 },
 });

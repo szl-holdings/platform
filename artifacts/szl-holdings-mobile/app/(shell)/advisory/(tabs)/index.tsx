@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NotificationBell } from '@/components/NotificationCenter';
 import { useAuth } from '@/context/AuthContext';
 import { useColors } from '@/hooks/useColors';
+import { giColors } from '@/lib/gi-bridge';
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : '';
 
@@ -210,12 +211,12 @@ export default function DashboardScreen() {
       {(isOffline || isDegraded) && (
         <View
           style={{
-            backgroundColor: isOffline ? '#7f1d1d' : '#78350f',
+            backgroundColor: isOffline ? `${giColors.accent.red}33` : `${giColors.accent.amber}33`,
             paddingHorizontal: 16,
             paddingVertical: 8,
           }}
         >
-          <Text style={{ color: '#fca5a5', fontSize: 11, fontWeight: '600' }}>
+          <Text style={{ color: isOffline ? giColors.accent.red : giColors.accent.amber, fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>
             {isOffline ? 'Offline — advisory data may be stale' : 'Connection degraded — retrying…'}
           </Text>
         </View>

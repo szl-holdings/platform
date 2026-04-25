@@ -6,10 +6,12 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { QuickActionDeck } from '@/components/QuickActionDeck';
 import { useColors } from '@/hooks/useColors';
+import { giColors, palette, giProductAccent } from '@/lib/gi-bridge';
 
-const ACCENT = '#c9a84c';
-const PURPLE = '#8b7ac8';
-const Terra = '#c87941';
+const ACCENT = giProductAccent.holdings;
+const PURPLE = giColors.accent.violet;
+const DOMAINE = giProductAccent.terra;
+const Terra = DOMAINE;
 
 // ── Terra module shortcuts ─────────────────────────────────────────────────────
 
@@ -158,7 +160,7 @@ const PRIORITY_SIGNALS = [
   {
     id: 's1',
     domain: 'Carlota',
-    domainColor: '#c2a55a',
+    domainColor: giProductAccent.carlota,
     title: 'CRM Pipeline Disconnected',
     detail: 'Real-time data stale 3h42m — client dashboards degraded',
     severity: 'critical' as const,
@@ -166,8 +168,8 @@ const PRIORITY_SIGNALS = [
   },
   {
     id: 's2',
-    domain: 'Lyte',
-    domainColor: '#f59e0b',
+    domain: 'KORA',
+    domainColor: giProductAccent.lyte,
     title: 'API P95 Latency Breach',
     detail: '2.4s vs 2.0s target — SLA penalty risk',
     severity: 'high' as const,
@@ -175,8 +177,8 @@ const PRIORITY_SIGNALS = [
   },
   {
     id: 's3',
-    domain: 'Aegis',
-    domainColor: '#6366f1',
+    domain: 'PARAGON',
+    domainColor: giProductAccent.aegis,
     title: 'Bundle Size Warning',
     detail: '1.34MB vs 900KB budget — MITRE module over-eager',
     severity: 'medium' as const,
@@ -197,8 +199,8 @@ const AWAITING_APPROVAL = [
   },
   {
     id: 'p2',
-    domain: 'Aegis',
-    domainColor: '#6366f1',
+    domain: 'PARAGON',
+    domainColor: giProductAccent.aegis,
     title: 'Critical CVE Patch Deploy',
     requester: 'Aegis SOC',
     due: 'Within 2 hours',
@@ -206,8 +208,8 @@ const AWAITING_APPROVAL = [
   },
   {
     id: 'p3',
-    domain: 'Terra',
-    domainColor: '#4d7c0f',
+    domain: 'DOMAINE',
+    domainColor: giProductAccent.terra,
     title: 'LP Q1 Report — CFO Sign-off',
     requester: 'Finance Lead',
     due: 'Apr 20',
@@ -218,7 +220,7 @@ const AWAITING_APPROVAL = [
 const BUSINESS_HEALTH = {
   score: 76,
   label: 'Moderate',
-  color: '#f59e0b',
+  color: palette.high,
   delta: '+3 pts',
   atRisk: '$8.4M',
   protected: '$1.54M',
@@ -230,10 +232,10 @@ type TabIcon = 'check-circle' | 'alert-triangle' | 'layers';
 // ── helpers ────────────────────────────────────────────────────────────────────
 
 function severityColor(s: string) {
-  if (s === 'critical') return '#ef4444';
-  if (s === 'high') return '#f97316';
-  if (s === 'medium') return '#f59e0b';
-  return '#22c55e';
+  if (s === 'critical') return palette.critical;
+  if (s === 'high') return palette.high;
+  if (s === 'medium') return palette.high;
+  return palette.success;
 }
 
 // ── sub-views ─────────────────────────────────────────────────────────────────
@@ -291,14 +293,14 @@ function BusinessHealthStrip({ colors }: { colors: ReturnType<typeof useColors> 
             style={{
               fontSize: 9,
               fontFamily: 'Inter_600SemiBold',
-              color: '#ef4444',
+              color: palette.critical,
               textTransform: 'uppercase',
               letterSpacing: 0.3,
             }}
           >
             At Risk
           </Text>
-          <Text style={{ fontSize: 14, fontFamily: 'Inter_700Bold', color: '#ef4444' }}>
+          <Text style={{ fontSize: 14, fontFamily: 'Inter_700Bold', color: palette.critical }}>
             {h.atRisk}
           </Text>
         </View>
@@ -307,14 +309,14 @@ function BusinessHealthStrip({ colors }: { colors: ReturnType<typeof useColors> 
             style={{
               fontSize: 9,
               fontFamily: 'Inter_600SemiBold',
-              color: '#22c55e',
+              color: palette.success,
               textTransform: 'uppercase',
               letterSpacing: 0.3,
             }}
           >
             Protected
           </Text>
-          <Text style={{ fontSize: 13, fontFamily: 'Inter_600SemiBold', color: '#22c55e' }}>
+          <Text style={{ fontSize: 13, fontFamily: 'Inter_600SemiBold', color: palette.success }}>
             {h.protected}
           </Text>
         </View>
@@ -438,7 +440,7 @@ function ApprovalsView({ colors }: { colors: ReturnType<typeof useColors> }) {
               borderRadius: 12,
               backgroundColor: colors.card,
               borderWidth: 1,
-              borderColor: isApproved ? '#22c55e30' : isRejected ? '#ef444430' : colors.border,
+              borderColor: isApproved ? `${palette.success}30` : isRejected ? `${palette.critical}30` : colors.border,
               marginBottom: 10,
               opacity: isApproved || isRejected ? 0.6 : 1,
             }}
@@ -487,7 +489,7 @@ function ApprovalsView({ colors }: { colors: ReturnType<typeof useColors> }) {
                     fontFamily: 'Inter_400Regular',
                     color:
                       item.due.includes('Today') || item.due.includes('hours')
-                        ? '#f59e0b'
+                        ? palette.high
                         : colors.mutedForeground,
                   }}
                 >
@@ -537,11 +539,11 @@ function ApprovalsView({ colors }: { colors: ReturnType<typeof useColors> }) {
                     flex: 1,
                     paddingVertical: 9,
                     borderRadius: 8,
-                    backgroundColor: '#22c55e',
+                    backgroundColor: palette.success,
                     alignItems: 'center',
                   }}
                 >
-                  <Text style={{ fontSize: 12, fontFamily: 'Inter_700Bold', color: '#fff' }}>
+                  <Text style={{ fontSize: 12, fontFamily: 'Inter_700Bold', color: palette.onAccent }}>
                     Approve
                   </Text>
                 </TouchableOpacity>
@@ -553,11 +555,11 @@ function ApprovalsView({ colors }: { colors: ReturnType<typeof useColors> }) {
                     borderRadius: 8,
                     backgroundColor: 'transparent',
                     borderWidth: 1,
-                    borderColor: '#ef444440',
+                    borderColor: `${palette.critical}40`,
                     alignItems: 'center',
                   }}
                 >
-                  <Text style={{ fontSize: 12, fontFamily: 'Inter_600SemiBold', color: '#ef4444' }}>
+                  <Text style={{ fontSize: 12, fontFamily: 'Inter_600SemiBold', color: palette.critical }}>
                     Deny
                   </Text>
                 </TouchableOpacity>
@@ -569,13 +571,13 @@ function ApprovalsView({ colors }: { colors: ReturnType<typeof useColors> }) {
                 <Feather
                   name={isApproved ? 'check-circle' : 'x-circle'}
                   size={14}
-                  color={isApproved ? '#22c55e' : '#ef4444'}
+                  color={isApproved ? palette.success : palette.critical}
                 />
                 <Text
                   style={{
                     fontSize: 12,
                     fontFamily: 'Inter_600SemiBold',
-                    color: isApproved ? '#22c55e' : '#ef4444',
+                    color: isApproved ? palette.success : palette.critical,
                   }}
                 >
                   {isApproved ? 'Approved' : 'Denied'}

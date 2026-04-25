@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { giColors, palette } from '@/lib/gi-bridge';
 import { useColors } from '@/hooks/useColors';
 import { apiGet, graphqlRequest } from '@/lib/apiClient';
 
@@ -145,7 +146,7 @@ function getHeatColor(count: number, max: number): string {
 
 function getHeatTextColor(count: number, _max: number): string {
   if (count === 0) return 'rgba(232,234,240,0.2)';
-  return '#FFFFFF';
+  return palette.onAccent;
 }
 
 interface RelatedIncident {
@@ -157,10 +158,10 @@ interface RelatedIncident {
 }
 
 const SEVERITY_COLORS_MITRE: Record<string, string> = {
-  critical: '#EF4444',
-  high: '#F97316',
-  medium: '#F59E0B',
-  low: '#3B82F6',
+  critical: palette.critical,
+  high: giColors.accent.amber,
+  medium: palette.high,
+  low: palette.low,
 };
 
 const GQL_RELATED_INCIDENTS = `

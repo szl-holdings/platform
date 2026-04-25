@@ -17,6 +17,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { apiGet, apiPut } from '@/lib/apiClient';
+import { giColors, palette } from '@/lib/gi-bridge';
 
 interface Finding {
   id: number;
@@ -39,11 +40,11 @@ async function updateFinding(id: number, data: Partial<Finding>): Promise<Findin
 }
 
 const SEVERITY_COLORS: Record<Finding['severity'], string> = {
-  critical: '#EF4444',
-  high: '#F97316',
-  medium: '#F59E0B',
-  low: '#3B82F6',
-  info: '#8B5CF6',
+  critical: palette.critical,
+  high: giColors.accent.amber,
+  medium: palette.high,
+  low: palette.low,
+  info: giColors.accent.violet,
 };
 
 const STATUS_LABELS: Record<Finding['status'], string> = {
@@ -55,11 +56,11 @@ const STATUS_LABELS: Record<Finding['status'], string> = {
 };
 
 const STATUS_COLORS: Record<Finding['status'], string> = {
-  open: '#EF4444',
-  confirmed: '#F59E0B',
-  mitigated: '#10B981',
-  accepted: '#3B82F6',
-  false_positive: '#6B7280',
+  open: palette.critical,
+  confirmed: palette.high,
+  mitigated: palette.success,
+  accepted: palette.low,
+  false_positive: giColors.text.muted,
 };
 
 type SeverityFilter = 'all' | Finding['severity'];
@@ -337,7 +338,7 @@ export default function FindingsScreen() {
                             finding.cvssScore >= 9
                               ? colors.red
                               : finding.cvssScore >= 7
-                                ? '#F97316'
+                                ? giColors.accent.amber
                                 : colors.mutedForeground,
                         },
                       ]}

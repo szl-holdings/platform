@@ -13,16 +13,17 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { featherIcon, VesselIcon } from '@/components/VesselIcon';
 import { useColors } from '@/hooks/useColors';
+import { giColors, palette } from '@/lib/gi-bridge';
 import { api, CACHE_KEYS, cacheGetStale, cacheSet, type FleetException } from '@/lib/fleet/api';
 import { type AlertUpdate, vesselsWs } from '@/lib/fleet/websocket';
 import { scheduleLocalAlert } from '@/lib/notifications';
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
-  low: '#64748b',
-  watch: '#f59e0b',
+  critical: palette.critical,
+  high: giColors.accent.amber,
+  medium: palette.high,
+  low: giColors.accent.slate,
+  watch: palette.high,
 };
 
 const EXCEPTION_ICON_MAP: Record<string, string> = {

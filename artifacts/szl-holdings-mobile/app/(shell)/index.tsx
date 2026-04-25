@@ -21,8 +21,9 @@ import { useWorkspace, WORKSPACES, type WorkspaceDomain } from '@/context/Worksp
 import { TAB_BAR_HEIGHT } from '@/constants/layout';
 import { SettingsHeaderButton } from '@/components/SettingsHeaderButton';
 import { useColors } from '@/hooks/useColors';
+import { giProductAccent, palette } from '@/lib/gi-bridge';
 
-const ACCENT = '#c9a84c';
+const ACCENT = giProductAccent.holdings;
 
 interface CommandSignal {
   id: string;
@@ -103,7 +104,7 @@ function severityColor(sev: string, colors: ReturnType<typeof useColors>) {
     case 'high':
       return colors.amber;
     case 'medium':
-      return '#f59e0b';
+      return palette.high;
     case 'low':
       return colors.blue;
     default:
@@ -495,7 +496,7 @@ export default function CommandFeedScreen() {
             borderRadius: 14,
             backgroundColor: colors.card,
             borderWidth: 1,
-            borderColor: 'rgba(201,168,76,0.25)',
+            borderColor: `${giProductAccent.holdings}40`,
             padding: 16,
             flexDirection: 'row',
             alignItems: 'center',
@@ -511,8 +512,8 @@ export default function CommandFeedScreen() {
               height: 64,
               borderRadius: 32,
               borderWidth: 4,
-              borderColor: 'rgba(201,168,76,0.35)',
-              backgroundColor: 'rgba(201,168,76,0.06)',
+              borderColor: `${giProductAccent.holdings}59`,
+              backgroundColor: `${giProductAccent.holdings}0f`,
             }}
           >
             <Text
@@ -528,7 +529,7 @@ export default function CommandFeedScreen() {
             <Text
               style={{
                 fontSize: 8,
-                color: 'rgba(201,168,76,0.6)',
+                color: `${giProductAccent.holdings}99`,
                 fontFamily: 'Inter_400Regular',
                 letterSpacing: 0.5,
               }}
@@ -564,12 +565,12 @@ export default function CommandFeedScreen() {
                   paddingHorizontal: 6,
                   paddingVertical: 2,
                   borderRadius: 4,
-                  backgroundColor: 'rgba(245,158,11,0.12)',
+                  backgroundColor: `${palette.high}1f`,
                   borderWidth: 1,
-                  borderColor: 'rgba(245,158,11,0.25)',
+                  borderColor: `${palette.high}40`,
                 }}
               >
-                <Text style={{ fontSize: 9, color: '#fbbf24', fontFamily: 'Inter_600SemiBold' }}>
+                <Text style={{ fontSize: 9, color: palette.high, fontFamily: 'Inter_600SemiBold' }}>
                   2 WARN
                 </Text>
               </View>
@@ -578,9 +579,9 @@ export default function CommandFeedScreen() {
                   paddingHorizontal: 6,
                   paddingVertical: 2,
                   borderRadius: 4,
-                  backgroundColor: 'rgba(201,168,76,0.08)',
+                  backgroundColor: `${giProductAccent.holdings}14`,
                   borderWidth: 1,
-                  borderColor: 'rgba(201,168,76,0.18)',
+                  borderColor: `${giProductAccent.holdings}2e`,
                 }}
               >
                 <Text style={{ fontSize: 9, color: ACCENT, fontFamily: 'Inter_600SemiBold' }}>
