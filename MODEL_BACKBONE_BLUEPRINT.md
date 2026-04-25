@@ -1,17 +1,17 @@
 # Model Backbone Blueprint
 ## SZL Holdings — Governed Multi-Agent Runtime (Moonshot Phase 2)
 
-> **Status:** Phase 2 complete — backbone implemented, Lyte lane wired as reference integration.
-> **Phase 3 (Voice & Document Intelligence)** and beyond land in subsequent milestones.
+> **Status:** Phases 2–7 complete — backbone implemented, KORA lane wired as reference integration; specialist stubs promoted per-phase schedule through Cloud/Ops (Phase 7).
+> **Phase 8 (GitHub Push Prep)** is the current milestone.
 
 ---
 
 ## 1. What Is the Agent Backbone?
 
 The backbone is a shared, governed multi-agent runtime that every SZL lane
-(Lyte, Alloy, Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, Command Portal)
+(KORA, A11oy, PARAGON, SEXTANT, DOMAINE, Counsel, Carlota Jo, Unified Command)
 inherits from. It replaces ad-hoc agent code with small specialist modules
-coordinated by **Alloy** — a stateless coordinator that:
+coordinated by the **Alloy coordinator** (`@workspace/alloy`) — a stateless coordinator that:
 
 1. Validates the incoming **AgentRequest envelope**.
 2. Runs the **Policy Evaluator** specialist first (deny → return; requires-approval → route; allowed → proceed).
@@ -190,7 +190,7 @@ setJuryStoreAdapter(new DrizzleJuryStore(db));
 
 ## 7. Lane Integration Pattern
 
-To wire any SZL lane through the backbone, follow the Lyte reference integration
+To wire any SZL lane through the backbone, follow the KORA reference integration
 at `artifacts/api-server/src/routes/lyte-backbone.ts`:
 
 ```typescript
@@ -211,7 +211,7 @@ const response = await coordinate({
 // response.toolCalls    — full tool-call ledger for this run
 ```
 
-**Endpoints registered for Lyte:**
+**Endpoints registered for KORA (lyte-backbone route prefix):**
 - `POST /api/lyte/backbone/analyze` — Submit objective → governed response
 - `GET  /api/lyte/backbone/health`  — Backbone readiness
 - `GET  /api/lyte/backbone/tools`   — Specialist tool catalog
@@ -241,11 +241,12 @@ Rules are loaded from the policy registry (or supplied inline).
 
 | Phase | Lanes | Notes |
 |---|---|---|
-| Phase 2 (now) | Lyte (reference) | All specialist stubs in place; planner + policy live |
-| Phase 3 | Document + Speech | Document and Speech specialists become production |
-| Phase 4 | All lanes (retrieval) | RetrievalSpecialist upgraded with vector search |
-| Phase 5 | All lanes (forecasting + anomaly) | Forecasting and Anomaly specialists go live |
-| Phase 6 | Frontend | UI surfaces consume backbone recommendations directly |
+| Phase 2 (complete) | KORA (reference) | All specialist stubs in place; planner + policy live |
+| Phase 3 (complete) | Document + Speech | Document and Speech specialists promoted to production stubs |
+| Phase 4 (complete) | All lanes (retrieval) | RetrievalSpecialist upgraded with vector search hooks |
+| Phase 5 (complete) | All lanes (forecasting + anomaly) | ForecastingSpecialist and AnomalySpecialist wired to fabric |
+| Phase 6 (complete) | Frontend | UI surfaces consume backbone recommendations directly |
+| Phase 7 (complete) | Cloud/Ops | Secrets separation, tenant isolation, cost controls, audit retention |
 
 ---
 
@@ -255,7 +256,7 @@ Rules are loaded from the policy registry (or supplied inline).
 # Run the api-server locally (backbone is lazy-loaded — no extra setup)
 pnpm --filter @szl-holdings/api-server dev
 
-# Test the Lyte backbone endpoint
+# Test the KORA backbone endpoint
 curl -X POST http://localhost:3000/api/lyte/backbone/analyze \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer <token>' \
@@ -268,4 +269,4 @@ curl http://localhost:3000/api/lyte/backbone/health \
 
 ---
 
-*Last updated: 2026-04-25 — Moonshot Phase 2*
+*Last updated: 2026-04-25 — Moonshot Phase 8 (Push Prep). Brand names reconciled from Phase 1 audit. Phase migration table updated through Phase 7.*

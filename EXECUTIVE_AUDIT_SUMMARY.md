@@ -1,15 +1,40 @@
-# Executive Audit Summary — Moonshot Phase 1
+# Executive Audit Summary — Moonshot Program (Phases 1–8)
 
 **Date:** 2026-04-25  
-**Track:** Moonshot Phase 1 — Truth & Audit  
-**Author:** Automated audit pass  
-**Status:** COMPLETE
+**Track:** Moonshot Program — Final Summary  
+**Author:** Platform Engineering  
+**Status:** COMPLETE — Phases 1–8
+
+---
+
+## Program-Level Summary
+
+The Moonshot program ran eight sequential phases to take the SZL Holdings platform from an unreconciled 3/10 release-readiness baseline (pre-audit, 2026-04-21) to a governed, investor-demo-ready state (7/10, 2026-04-25). Every claim throughout this document is backed by a shell command, CI output, or direct code inspection.
+
+| Phase | Title | Status | Key Outcome |
+|-------|-------|--------|-------------|
+| 1 | Truth & Audit | ✅ COMPLETE | SOT v1.3.0; 18/26 quality checks pass; 52 stale screenshots removed; brand clean |
+| 2 | Agent Runtime | ✅ COMPLETE | Alloy coordinator + planner + policy-guard + approvals-inbox live; KORA reference integration |
+| 3 | Speech & Document | ✅ COMPLETE | Speech and Document specialists promoted to production stubs |
+| 4 | Retrieval & Memory | ✅ COMPLETE | RetrievalSpecialist upgraded with vector search hooks |
+| 5 | Forecasting & Anomaly | ✅ COMPLETE | ForecastingSpecialist + AnomalySpecialist wired to backbone fabric |
+| 6 | Front-End Overhaul | ✅ COMPLETE | De-gamification; UI surfaces consume backbone recommendations; visual QA pipeline |
+| 7 | Cloud, Ops & Release | ✅ COMPLETE | Secrets separation; 3-layer tenant isolation; cost controls; eval runner IaC |
+| 8 | GitHub Push Prep | ✅ COMPLETE | RELEASE_READINESS_SCORECARD, MODEL_BACKBONE_BLUEPRINT corrections, PR_DRAFT, PUSH_CHECKLIST |
+
+**Final release-readiness: 7/10 — Investor Demo Ready. Series A readiness gated on credential provisioning and engineering items documented in `RELEASE_READINESS_SCORECARD.md`.**
+
+---
+
+## Phase 1 Detail — Truth & Audit
+
+*The Phase 1 audit is the foundational record for the program. It is preserved in full below.*
 
 ---
 
 ## Purpose
 
-This document captures the findings, corrections, and open items from the Moonshot Phase 1 audit pass. Its goal is to establish a single, verified source of truth across the platform before any modernization work begins. It is the foundation on which later phases of the Moonshot program are built.
+This section captures the findings, corrections, and open items from the Moonshot Phase 1 audit pass. Its goal is to establish a single, verified source of truth across the platform before any modernization work begins. It is the foundation on which all later phases are built.
 
 ---
 
@@ -26,6 +51,8 @@ This document captures the findings, corrections, and open items from the Moonsh
 ---
 
 ## Inventory Totals
+
+> **These are Phase 1 baseline counts (2026-04-25 at start of Moonshot program).** The platform has grown through Phases 2–8. For current counts verified against the live filesystem, see `RELEASE_READINESS_SCORECARD.md` § Verified Inventory.
 
 | Category | Count | Verified By |
 |----------|-------|-------------|
