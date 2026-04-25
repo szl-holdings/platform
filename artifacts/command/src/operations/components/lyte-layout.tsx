@@ -290,6 +290,7 @@ const ADMIN_NAV = [
   { href: '/operations/admin/exports', label: 'Exports', icon: Download },
   { href: '/operations/admin/seeder', label: 'Seeder', icon: Database },
   { href: '/operations/admin/jobs', label: 'Jobs', icon: Activity },
+  { href: '/operations/admin/kb', label: 'Knowledge Base', icon: BookOpen },
 ];
 
 const PRISM_COLORS: Record<string, string> = {

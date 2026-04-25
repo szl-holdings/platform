@@ -288,6 +288,7 @@ const AdminAudit = lazy(() => import('./operations/pages/admin/audit-log'));
 const AdminExports = lazy(() => import('./operations/pages/admin/export-history'));
 const AdminSeeder = lazy(() => import('./operations/pages/admin/seeder'));
 const AdminJobs = lazy(() => import('./operations/pages/admin/jobs'));
+const AdminKbArticles = lazy(() => import('./operations/pages/admin/kb-articles'));
 
 function getMode(location: string): WorkspaceMode {
   if (location.startsWith('/operations') || location.startsWith('/cognitive')) return 'operations';
@@ -776,6 +777,7 @@ function AppShell() {
               <Route path="/operations/admin/exports" component={() => <AdminExports />} />
               <Route path="/operations/admin/seeder" component={() => <AdminSeeder />} />
               <Route path="/operations/admin/jobs" component={() => <AdminJobs />} />
+              <Route path="/operations/admin/kb" component={() => <AdminKbArticles />} />
 
               <Route>
                 <div className="flex items-center justify-center h-64 text-slate-400 text-sm">
