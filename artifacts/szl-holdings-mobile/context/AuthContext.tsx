@@ -2,6 +2,7 @@ import { setMobileUserTimeZone } from '@szl-holdings/mobile-shared/utils';
 import * as AuthSession from 'expo-auth-session';
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
+import { ALL_BIOMETRIC_SIGNIN_KEYS } from './BiometricSignInContext';
 import {
   createContext,
   type ReactNode,
@@ -177,10 +178,12 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isReady: boolean;
   login: () => Promise<void>;
+  loginWithTokens: (tokens: StoredTokens) => Promise<void>;
   logout: () => Promise<void>;
   signOut: () => Promise<void>;
   buildHeaders: (extra?: Record<string, string>) => Record<string, string>;
   buildWsAuthMessage: () => { type: string; token: string };
+  getAccessToken: () => string | null;
   signals?: unknown[];
   sessionRevocation: SessionRevocationInfo | null;
   dismissSessionRevocation: () => void;
@@ -192,10 +195,12 @@ export const AuthContext = createContext<AuthContextValue>({
   isAuthenticated: false,
   isReady: false,
   login: async () => {},
+  loginWithTokens: async () => {},
   logout: async () => {},
   signOut: async () => {},
   buildHeaders: (extra) => ({ 'Content-Type': 'application/json', ...extra }),
   buildWsAuthMessage: () => ({ type: 'auth', token: '' }),
+  getAccessToken: () => null,
   signals: [],
   sessionRevocation: null,
   dismissSessionRevocation: () => {},
@@ -301,6 +306,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const wipeAuth = useCallback(async () => {
     tokensRef.current = null;
     await clearStoredTokens();
+    if (Platform.OS !== 'web') {
+      await Promise.all(
+        ALL_BIOMETRIC_SIGNIN_KEYS.map((key) =>
+          SecureStore.deleteItemAsync(key).catch(() => {}),
+        ),
+      );
+    }
     setAccessToken(null);
     setUser(null);
   }, []);
@@ -610,6 +622,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
   }, [response, request, redirectUri, fetchUser]);
 
+  const loginWithTokens = useCallback(async (tokens: StoredTokens) => {
+    clearSessionRevocation();
+    setIsLoading(true);
+    try {
+      tokensRef.current = tokens;
+      await persistTokens(tokens);
+      setAccessToken(tokens.token);
+      await fetchUser();
+    } catch (_err) {
+      setIsLoading(false);
+    }
+  }, [fetchUser]);
+
   const login = useCallback(async () => {
     // A successful sign-in attempt invalidates any previous revocation notice.
     clearSessionRevocation();
@@ -647,6 +672,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         isReady: !isLoading,
         login,
+        loginWithTokens,
         logout,
         signOut: logout,
         buildHeaders: (extra?: Record<string, string>) => {
@@ -657,6 +683,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         buildWsAuthMessage: () => {
           return { type: 'auth', token: accessToken ?? '' };
         },
+        getAccessToken: () => accessToken,
         signals: [],
         sessionRevocation,
         dismissSessionRevocation,

@@ -29,6 +29,7 @@ import {
   validateQuery,
 } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
+import { requireStepUp } from './mobile-biometric';
 
 const router: IRouter = Router();
 
@@ -484,6 +485,7 @@ router.post(
 router.post(
   '/approvals/:id/escalate',
   authMiddleware(),
+  requireStepUp,
   requireRole('super_admin', 'admin', 'ops'),
   validateBody(
     bodyShape({

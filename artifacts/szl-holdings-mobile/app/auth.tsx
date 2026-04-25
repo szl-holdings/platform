@@ -1,22 +1,37 @@
+import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Redirect } from 'expo-router';
-import { useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { consumePendingReturnPath, useAuth } from '@/context/AuthContext';
+import { useBiometricSignIn } from '@/context/BiometricSignInContext';
 import { useColors } from '@/hooks/useColors';
 
 const DEFAULT_POST_LOGIN_HREF = '/(shell)';
 
+function getApiBaseUrl(): string {
+  if (process.env.EXPO_PUBLIC_DOMAIN) {
+    return `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
+  }
+  return '';
+}
+
 export default function AuthScreen() {
-  const { isAuthenticated, isLoading, login, sessionRevocation, dismissSessionRevocation } =
-    useAuth();
+  const {
+    isAuthenticated,
+    isLoading,
+    login,
+    loginWithTokens,
+    sessionRevocation,
+    dismissSessionRevocation,
+  } = useAuth();
+  const { status: biometricStatus, isAvailable, signIn: biometricSignIn } = useBiometricSignIn();
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const [biometricLoading, setBiometricLoading] = useState(false);
+  const [biometricError, setBiometricError] = useState<string | null>(null);
 
-  // Resolve the post-login destination on the first render where the user
-  // is authenticated. We consume (and clear) the saved return path stashed
-  // by `recordSessionRevocation`, falling back to the shell home route.
   const postLoginHrefRef = useRef<string | null>(null);
   if (isAuthenticated && postLoginHrefRef.current === null) {
     postLoginHrefRef.current = consumePendingReturnPath() ?? DEFAULT_POST_LOGIN_HREF;
@@ -25,6 +40,30 @@ export default function AuthScreen() {
   if (isAuthenticated) {
     return <Redirect href={(postLoginHrefRef.current ?? DEFAULT_POST_LOGIN_HREF) as any} />;
   }
+
+  const handleBiometricSignIn = useCallback(async () => {
+    setBiometricLoading(true);
+    setBiometricError(null);
+    try {
+      const result = await biometricSignIn(getApiBaseUrl());
+      if (!result) {
+        setBiometricError('Biometric sign-in failed. Please sign in with your account.');
+        return;
+      }
+      await loginWithTokens({
+        token: result.token,
+        refreshToken: result.refreshToken,
+        expiresAt: result.expiresAt,
+        refreshTokenExpiresAt: result.refreshTokenExpiresAt,
+      });
+    } catch {
+      setBiometricError('Something went wrong. Please sign in with your account.');
+    } finally {
+      setBiometricLoading(false);
+    }
+  }, [biometricSignIn, loginWithTokens]);
+
+  const showBiometricOption = biometricStatus.isEnrolled && isAvailable;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -88,21 +127,65 @@ export default function AuthScreen() {
         </View>
 
         <View style={styles.footer}>
-          {isLoading ? (
-            <ActivityIndicator color={colors.gold} />
-          ) : (
-            <Pressable
-              onPress={login}
-              style={({ pressed }) => [
-                styles.loginBtn,
+          {biometricError ? (
+            <View
+              style={[
+                styles.errorBanner,
                 {
-                  backgroundColor: pressed ? 'rgba(201,168,76,0.15)' : 'rgba(201,168,76,0.1)',
-                  borderColor: colors.goldBorder,
+                  borderColor: 'rgba(239,68,68,0.3)',
+                  backgroundColor: 'rgba(239,68,68,0.08)',
                 },
               ]}
             >
-              <Text style={[styles.loginBtnText, { color: colors.gold }]}>Sign In</Text>
-            </Pressable>
+              <Feather name="alert-circle" size={13} color="#ef4444" />
+              <Text style={styles.errorText}>{biometricError}</Text>
+            </View>
+          ) : null}
+
+          {isLoading || biometricLoading ? (
+            <ActivityIndicator color={colors.gold} />
+          ) : (
+            <>
+              {showBiometricOption && (
+                <Pressable
+                  onPress={handleBiometricSignIn}
+                  style={({ pressed }) => [
+                    styles.biometricBtn,
+                    {
+                      backgroundColor: pressed
+                        ? 'rgba(201,168,76,0.2)'
+                        : 'rgba(201,168,76,0.12)',
+                      borderColor: colors.goldBorder,
+                    },
+                  ]}
+                  accessibilityLabel="Sign in with Face ID or Touch ID"
+                  accessibilityRole="button"
+                >
+                  <Feather name="unlock" size={16} color={colors.gold} />
+                  <Text style={[styles.biometricBtnText, { color: colors.gold }]}>
+                    Sign In with Face ID / Touch ID
+                  </Text>
+                </Pressable>
+              )}
+
+              <Pressable
+                onPress={login}
+                style={({ pressed }) => [
+                  styles.loginBtn,
+                  {
+                    backgroundColor: pressed
+                      ? 'rgba(201,168,76,0.15)'
+                      : 'rgba(201,168,76,0.1)',
+                    borderColor: colors.goldBorder,
+                  },
+                ]}
+                accessibilityRole="button"
+              >
+                <Text style={[styles.loginBtnText, { color: colors.gold }]}>
+                  {showBiometricOption ? 'Sign In with Account' : 'Sign In'}
+                </Text>
+              </Pressable>
+            </>
           )}
           <Text style={[styles.disclaimer, { color: 'rgba(240,238,255,0.2)' }]}>
             Restricted access · SZL Holdings principals only
@@ -181,8 +264,23 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   footer: {
-    gap: 16,
+    gap: 12,
     alignItems: 'center',
+  },
+  biometricBtn: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  biometricBtnText: {
+    fontSize: 14,
+    fontFamily: 'Inter_500Medium',
+    letterSpacing: 0.5,
   },
   loginBtn: {
     width: '100%',
@@ -229,5 +327,21 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
     letterSpacing: 1,
     textTransform: 'uppercase',
+  },
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    width: '100%',
+  },
+  errorText: {
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    color: '#ef4444',
+    flex: 1,
+    lineHeight: 16,
   },
 });

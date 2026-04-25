@@ -229,4 +229,6 @@ router.use(
 
 router.use("/signal-bus", lazyMount(() => import("./signal-bus"), "signal-bus"));
 
+router.use(lazyMatch("/mobile-biometric", () => import("./mobile-biometric"), "mobile-biometric"));
+
 export default router;

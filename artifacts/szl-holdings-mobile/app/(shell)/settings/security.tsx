@@ -3,9 +3,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useBiometric } from '@szl-holdings/mobile-shared';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PINModal, { hasPINSet } from '@/components/PINModal';
+import { useAuth } from '@/context/AuthContext';
+import { useBiometricSignIn } from '@/context/BiometricSignInContext';
 import { useScreenshotGuard } from '@/context/ScreenshotGuardContext';
 import { WORKSPACES, type WorkspaceDomain } from '@/context/WorkspaceContext';
 import { useColors } from '@/hooks/useColors';
@@ -61,19 +63,48 @@ function SecuritySection({ title, children }: { title: string; children: React.R
   );
 }
 
+function getApiBaseUrl(): string {
+  if (process.env.EXPO_PUBLIC_DOMAIN) {
+    return `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
+  }
+  return '';
+}
+
+function formatDate(iso: string | null): string {
+  if (!iso) return 'Unknown';
+  try {
+    return new Date(iso).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  } catch {
+    return 'Unknown';
+  }
+}
+
 export default function SecuritySettingsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const {
-    isEnabled: biometricEnabled,
+    isEnabled: biometricLockEnabled,
     enableBiometric,
     disableBiometric,
     isAvailable,
   } = useBiometric();
+  const { getAccessToken } = useAuth();
+  const {
+    status: biometricSignInStatus,
+    isAvailable: biometricHardwareAvailable,
+    checkEnrollment,
+    enroll: enrollBiometricSignIn,
+    revoke: revokeBiometricSignIn,
+  } = useBiometricSignIn();
   const { policies, setPolicy } = useScreenshotGuard();
   const [financialReauth, setFinancialReauth] = useState(true);
   const [pinSet, setPinSet] = useState(false);
   const [pinModalVisible, setPinModalVisible] = useState(false);
+  const [enrollingBiometricSignIn, setEnrollingBiometricSignIn] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem(FINANCIAL_REAUTH_KEY)
@@ -87,17 +118,68 @@ export default function SecuritySettingsScreen() {
       .catch(() => {});
   }, []);
 
-  const handleBiometricToggle = async (val: boolean) => {
+  useEffect(() => {
+    checkEnrollment();
+  }, [checkEnrollment]);
+
+  const handleBiometricLockToggle = async (val: boolean) => {
     try {
       if (val) {
         const enabled = await enableBiometric();
         if (!enabled && isAvailable) {
-          alert('Biometric hardware not enrolled on this device.');
+          Alert.alert('Biometric Unavailable', 'Biometric hardware not enrolled on this device.');
         }
       } else {
         await disableBiometric();
       }
     } catch {}
+  };
+
+  const handleBiometricSignInToggle = async (val: boolean) => {
+    if (val) {
+      if (!biometricHardwareAvailable) {
+        Alert.alert('Unavailable', 'Biometric hardware is not available on this device.');
+        return;
+      }
+      setEnrollingBiometricSignIn(true);
+      try {
+        const token = getAccessToken();
+        if (!token) {
+          Alert.alert('Error', 'Please sign in before enabling biometric sign-in.');
+          return;
+        }
+        const success = await enrollBiometricSignIn(token, getApiBaseUrl());
+        if (!success) {
+          Alert.alert(
+            'Enrollment Failed',
+            'Could not enable biometric sign-in. Please ensure biometrics are enrolled on your device.',
+          );
+        }
+      } catch {
+        Alert.alert('Error', 'Enrollment failed. Please try again.');
+      } finally {
+        setEnrollingBiometricSignIn(false);
+      }
+    } else {
+      Alert.alert(
+        'Disable Biometric Sign-In',
+        'Are you sure you want to disable Face ID / Touch ID sign-in on this device?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Disable',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                const token = getAccessToken();
+                if (!token) return;
+                await revokeBiometricSignIn(token, getApiBaseUrl());
+              } catch {}
+            },
+          },
+        ],
+      );
+    }
   };
 
   const handleFinancialReauthToggle = async (val: boolean) => {
@@ -141,6 +223,43 @@ export default function SecuritySettingsScreen() {
           </Text>
         </View>
 
+        <SecuritySection title="BIOMETRIC SIGN-IN">
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={[styles.settingRow, { borderBottomColor: colors.border }]}>
+              <View style={styles.settingLeft}>
+                <View style={[styles.settingIcon, { backgroundColor: `${ACCENT}15` }]}>
+                  <Feather name="log-in" size={16} color={ACCENT} />
+                </View>
+                <View style={styles.settingTextWrap}>
+                  <Text style={[styles.settingName, { color: colors.foreground }]}>
+                    Face ID / Touch ID Sign-In
+                  </Text>
+                  <Text style={[styles.settingSub, { color: colors.mutedForeground }]}>
+                    {biometricSignInStatus.isEnrolled
+                      ? `Enrolled on ${formatDate(biometricSignInStatus.enrolledAt)}`
+                      : 'Sign in without re-entering your password'}
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={biometricSignInStatus.isEnrolled}
+                onValueChange={handleBiometricSignInToggle}
+                disabled={enrollingBiometricSignIn}
+                trackColor={{ false: '#333', true: `${ACCENT}80` }}
+                thumbColor={biometricSignInStatus.isEnrolled ? ACCENT : '#777'}
+              />
+            </View>
+            {biometricSignInStatus.isEnrolled && (
+              <View style={[styles.enrolledCard, { borderTopColor: colors.border }]}>
+                <Feather name="check-circle" size={13} color={ACCENT} />
+                <Text style={[styles.enrolledText, { color: colors.mutedForeground }]}>
+                  Biometric sign-in is active on this device. Toggle off to revoke.
+                </Text>
+              </View>
+            )}
+          </View>
+        </SecuritySection>
+
         <SecuritySection title="BIOMETRIC AUTHENTICATION">
           <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={[styles.settingRow, { borderBottomColor: colors.border }]}>
@@ -150,7 +269,7 @@ export default function SecuritySettingsScreen() {
                 </View>
                 <View>
                   <Text style={[styles.settingName, { color: colors.foreground }]}>
-                    Face ID / Touch ID
+                    Face ID / Touch ID App Lock
                   </Text>
                   <Text style={[styles.settingSub, { color: colors.mutedForeground }]}>
                     Lock APEX on background
@@ -158,10 +277,10 @@ export default function SecuritySettingsScreen() {
                 </View>
               </View>
               <Switch
-                value={biometricEnabled}
-                onValueChange={handleBiometricToggle}
+                value={biometricLockEnabled}
+                onValueChange={handleBiometricLockToggle}
                 trackColor={{ false: '#333', true: `${ACCENT}80` }}
-                thumbColor={biometricEnabled ? ACCENT : '#777'}
+                thumbColor={biometricLockEnabled ? ACCENT : '#777'}
               />
             </View>
 
@@ -221,8 +340,8 @@ export default function SecuritySettingsScreen() {
             {SECURITY_LEVELS.map((item) => {
               const active =
                 item.level === 'Financial Actions'
-                  ? biometricEnabled && financialReauth
-                  : biometricEnabled;
+                  ? biometricLockEnabled && financialReauth
+                  : biometricLockEnabled;
               return (
                 <View
                   key={item.level}
@@ -401,6 +520,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   settingLeft: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  settingTextWrap: { flex: 1 },
   settingIcon: {
     width: 36,
     height: 36,
@@ -410,6 +530,15 @@ const styles = StyleSheet.create({
   },
   settingName: { fontSize: 14, fontFamily: 'Inter_500Medium' },
   settingSub: { fontSize: 11, fontFamily: 'Inter_400Regular', marginTop: 1 },
+  enrolledCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+  },
+  enrolledText: { fontSize: 11, fontFamily: 'Inter_400Regular', flex: 1, lineHeight: 15 },
   levelCard: {
     borderRadius: 12,
     borderWidth: 1,

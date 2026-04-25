@@ -104,6 +104,34 @@ All outbound transactional email goes through `artifacts/api-server/src/lib/emai
 - **DKIM/SPF/DMARC:** DNS setup instructions documented in `docs/email-deliverability.md`.
 - **Migration:** `lib/db/drizzle/0101_email_suppressions.sql` creates the table idempotently.
 
+## Mobile Biometric Sign-In (SZL Holdings Mobile)
+
+Biometric sign-in is implemented as a real server-side authentication factor with cryptographic proof-of-possession (not just an app lock).
+
+**Architecture:**
+- `lib/db/src/schema/auth.ts` — `deviceBiometricBindingsTable` (device registrations with 90-day TTL), `stepUpAssertionsTable` (step-up claims with `bindingId` FK, 5-min TTL), `biometricChallengesTable` (one-time server nonces, 60s TTL)
+- `artifacts/api-server/src/routes/mobile-biometric.ts` — REST endpoints: `POST /mobile-biometric/challenge` (issues nonce), `POST /mobile-biometric/enroll` (requires auth), `POST /mobile-biometric/authenticate` (PoP flow), `GET /mobile-biometric/status`, `DELETE /mobile-biometric/binding`, `POST /mobile-biometric/step-up` (requires auth + fresh biometric), `DELETE /mobile-biometric/bindings/all`; exports `requireStepUp` middleware
+- `artifacts/szl-holdings-mobile/context/BiometricSignInContext.tsx` — React context with `enroll`, `signIn`, `revoke`, `revokeLocal`, `performStepUp`, `checkEnrollment`; binding token stored in SecureStore; biometric proof computed via `expo-crypto` SHA-256
+- `BiometricSignInProvider` is mounted in `_layout.tsx` inside `AuthProvider`
+
+**Proof-of-possession formula (client + server must match exactly):** `SHA-256(bindingToken + ":" + nonce)` — lowercase hex. The binding token NEVER travels over the wire after enrollment; only the proof is sent. Server verifies using `crypto.timingSafeEqual`.
+
+**Auth flow:** OIDC login → enroll device (server issues `bindingToken`, stored in SecureStore) → subsequent logins: `POST /challenge` for nonce → local biometric prompt → `computeProof(bindingToken, nonce)` → `POST /authenticate` with `{challengeId, deviceId, proof}` → server returns full session token pair. If binding invalid/revoked, client clears all biometric SecureStore keys (`ALL_BIOMETRIC_SIGNIN_KEYS`) and falls back to OIDC.
+
+**Sign-out clears biometric keys:** `AuthContext.wipeAuth()` calls `SecureStore.deleteItemAsync` for all `ALL_BIOMETRIC_SIGNIN_KEYS` on sign-out and session revocation (native only; web no-op).
+
+**`AuthContext` additions:** `loginWithTokens(StoredTokens)` (used by biometric sign-in to hydrate session after authenticate), `getAccessToken()` (exposes current token for enrollment calls).
+
+**UI:**
+- `app/auth.tsx` — shows "Sign In with Face ID / Touch ID" button above OIDC login when device is enrolled and biometric hardware is available; graceful fallback to OIDC if biometric fails
+- `app/(shell)/settings/security.tsx` — biometric sign-in toggle (enroll / revoke), shows enrollment date, plus existing app-lock and screenshot protection settings
+
+**Step-up enforcement:**
+- `requireStepUp` middleware exported from `mobile-biometric.ts`; checks `X-Step-Up-Token` header against `stepUpAssertionsTable`, validates session binding, consumes (marks `usedAt`) on success
+- Applied to `POST /approvals/:id/escalate` (high-risk mutation) as a reference protected route
+
+**Tests:** `artifacts/api-server/src/__tests__/mobile-biometric.test.ts` — 22 tests covering challenge issuance (400 validation), enrollment (400 for bad inputs), authenticate (proof mismatch → 401, replay → 401, valid proof → 200), step-up (no binding → 403, correct proof → 200), `requireStepUp` middleware (missing header → 403 STEP_UP_REQUIRED, invalid token → 403 STEP_UP_INVALID, valid token → 200 + usedAt set), binding revocation, and status listing.
+
 ## Known Platform Issues
 - **Command workflow port detection:** Replit workflow system intermittently fails to detect port 5000 opening within timeout. Vite starts correctly (confirmed by logs). The telemetry initialization was fixed to gracefully handle invalid OTEL endpoint placeholders (see `artifacts/command/src/telemetry.ts`).
 - **Expo CORS:** szl-holdings-mobile has "Unauthorized request" errors from Expo CLI CORS middleware in Replit's proxy environment. Not a code bug.

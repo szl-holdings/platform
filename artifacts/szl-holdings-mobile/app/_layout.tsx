@@ -48,6 +48,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppModeBanner } from '@/components/AppModeBanner';
 import { ErrorFallback } from '@/components/ErrorFallback';
 import { AUTH_TOKEN_KEY, AuthProvider, setLastKnownAppPath } from '@/context/AuthContext';
+import { BiometricSignInProvider } from '@/context/BiometricSignInContext';
 import { SessionRevocationToast } from '@/components/SessionRevocationToast';
 import { ScreenshotGuardProvider } from '@/context/ScreenshotGuardContext';
 import { WorkspaceProvider } from '@/context/WorkspaceContext';
@@ -339,6 +340,7 @@ export default function RootLayout() {
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
+              <BiometricSignInProvider>
               <WorkspaceProvider>
                 <ScreenshotGuardProvider>
                   <NotificationProvider apiBase={API_BASE} getAuthToken={getCortexAuthToken}>
@@ -387,6 +389,7 @@ export default function RootLayout() {
                   </NotificationProvider>
                 </ScreenshotGuardProvider>
               </WorkspaceProvider>
+              </BiometricSignInProvider>
             </AuthProvider>
           </QueryClientProvider>
         </ErrorBoundary>

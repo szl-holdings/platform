@@ -124,6 +124,83 @@ export const sessionsTable = pgTable(
   ],
 );
 
+export const mfaSecretsTable = pgTable(
+  'mfa_secrets',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
+    secret: text('secret').notNull(),
+    enabled: boolean('enabled').notNull().default(false),
+    enabledAt: timestamp('enabled_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex('mfa_secrets_user_unique').on(table.userId)],
+);
+
+export const deviceBiometricBindingsTable = pgTable(
+  'device_biometric_bindings',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
+    deviceId: text('device_id').notNull(),
+    bindingToken: text('binding_token').notNull().unique(),
+    deviceName: text('device_name'),
+    platform: text('platform'),
+    enrolledAt: timestamp('enrolled_at', { withTimezone: true }).notNull().defaultNow(),
+    lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    revokedReason: text('revoked_reason'),
+  },
+  (t) => [
+    uniqueIndex('device_biometric_user_device_unique').on(t.userId, t.deviceId),
+    index('device_biometric_bindings_user_id_idx').on(t.userId),
+    index('device_biometric_bindings_token_idx').on(t.bindingToken),
+  ],
+);
+
+export const stepUpAssertionsTable = pgTable(
+  'step_up_assertions',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
+    token: text('token').notNull().unique(),
+    sessionToken: text('session_token').notNull(),
+    bindingId: integer('binding_id').references(() => deviceBiometricBindingsTable.id, {
+      onDelete: 'set null',
+    }),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    usedAt: timestamp('used_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('step_up_assertions_session_idx').on(t.sessionToken),
+    index('step_up_assertions_token_idx').on(t.token),
+  ],
+);
+
+export const biometricChallengesTable = pgTable(
+  'biometric_challenges',
+  {
+    id: serial('id').primaryKey(),
+    deviceId: text('device_id').notNull(),
+    nonce: text('nonce').notNull().unique(),
+    usedAt: timestamp('used_at', { withTimezone: true }),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('biometric_challenges_device_id_idx').on(t.deviceId),
+    index('biometric_challenges_nonce_idx').on(t.nonce),
+  ],
+);
+
 export const insertUserSchema = createInsertSchema(usersTable).omit({
   id: true,
   createdAt: true,
@@ -143,22 +220,10 @@ export const insertSessionSchema = createInsertSchema(sessionsTable).omit({
 export type InsertSession = z.infer<typeof insertSessionSchema>;
 export type Session = typeof sessionsTable.$inferSelect;
 
-export const mfaSecretsTable = pgTable(
-  'mfa_secrets',
-  {
-    id: serial('id').primaryKey(),
-    userId: integer('user_id')
-      .notNull()
-      .references(() => usersTable.id, { onDelete: 'cascade' }),
-    secret: text('secret').notNull(),
-    enabled: boolean('enabled').notNull().default(false),
-    enabledAt: timestamp('enabled_at', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  },
-  (table) => [uniqueIndex('mfa_secrets_user_unique').on(table.userId)],
-);
-
 export type MfaSecret = typeof mfaSecretsTable.$inferSelect;
+export type DeviceBiometricBinding = typeof deviceBiometricBindingsTable.$inferSelect;
+export type StepUpAssertion = typeof stepUpAssertionsTable.$inferSelect;
+export type BiometricChallenge = typeof biometricChallengesTable.$inferSelect;
 
 export type PlatformRole =
   | 'anonymous_visitor'
@@ -309,10 +374,6 @@ export const ROLE_ALIASES: Record<string, RoleName> = {
   public: 'viewer',
 };
 
-/**
- * Canonical payload roles (from task spec).
- * These are the authoritative role identifiers used in new features and external interfaces.
- */
 export type CanonicalRole =
   | 'anonymous_visitor'
   | 'founder_admin'
@@ -327,11 +388,6 @@ export type CanonicalRole =
   | 'service_coordinator'
   | 'pilot_customer_user';
 
-/**
- * Mapping from legacy RoleName values to canonical payload roles.
- * Multiple legacy roles may map to the same canonical role.
- * Use toCanonicalRole() to resolve a user's effective canonical role.
- */
 export const LEGACY_TO_CANONICAL: Record<RoleName, CanonicalRole> = {
   super_admin: 'founder_admin',
   admin: 'platform_admin',
@@ -351,10 +407,6 @@ export const LEGACY_TO_CANONICAL: Record<RoleName, CanonicalRole> = {
   viewer: 'anonymous_visitor',
 };
 
-/**
- * Mapping from canonical role back to the closest legacy RoleName.
- * Used when creating new users via the canonical interface.
- */
 export const CANONICAL_TO_LEGACY: Record<CanonicalRole, RoleName> = {
   anonymous_visitor: 'viewer',
   founder_admin: 'super_admin',
@@ -370,9 +422,6 @@ export const CANONICAL_TO_LEGACY: Record<CanonicalRole, RoleName> = {
   pilot_customer_user: 'client',
 };
 
-/**
- * Returns the highest-privilege canonical role for a set of legacy role names.
- */
 export function toCanonicalRole(roles: RoleName[]): CanonicalRole {
   const canonicalPriority: CanonicalRole[] = [
     'founder_admin',
@@ -395,26 +444,16 @@ export function toCanonicalRole(roles: RoleName[]): CanonicalRole {
   return 'anonymous_visitor';
 }
 
-/**
- * Returns true if the given role set has the executive_viewer canonical role
- * and NOT a higher-privilege canonical role. Used to enforce read-only access.
- */
 export function isExclusivelyExecutiveViewer(roles: RoleName[]): boolean {
   const canonical = toCanonicalRole(roles);
   return canonical === 'executive_viewer';
 }
 
-/**
- * Read-only canonical roles — these roles cannot perform write operations.
- */
 export const READ_ONLY_CANONICAL_ROLES = new Set<CanonicalRole>([
   'executive_viewer',
   'anonymous_visitor',
 ]);
 
-/**
- * Returns true if the set of legacy roles maps to a read-only canonical role.
- */
 export function isReadOnlyRole(roles: RoleName[]): boolean {
   const canonical = toCanonicalRole(roles);
   return READ_ONLY_CANONICAL_ROLES.has(canonical);
