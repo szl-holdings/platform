@@ -93,6 +93,18 @@ Domain packs extend the same governance infrastructure into domain-specific inte
 
 The FORGE Command Portal is the cross-domain real-time dashboard aggregating signals from all domain packs into a unified executive view with eight-domain SSE feeds and executive briefing.
 
+### A11oy — Live Enterprise Execution Fabric
+
+**A11oy** is the governed agentic layer that sits between enterprise data and enterprise decisions. It senses, structures, correlates, explains, recommends, approves, executes, verifies, and preserves cryptographic proof — in real time, across all seven SZL verticals.
+
+- **Artifact:** `artifacts/a11oy` — serves at `/a11oy/`
+- **API:** Read-side REST API at `/api/a11oy/*` (11 GET endpoints, all public in Phase 1)
+- **Seed data:** 32 business signals × 7 verticals, 5 outcomes, 5 covenant policies, 5 proof packets
+- **Architecture:** Seven-layer in-memory fabric (Coverage Graph, Signal Mesh, State Engine, Causal Core, Action Rail, Covenant Layer, Proof Ledger)
+- **Phase:** Phase 1 Foundation — full type system, fabric primitives, demo seed, read-side API
+- **Phase 2 (planned):** Workcell engine, live AI reasoning, full proof-carrying execution
+- **Docs:** `AGENTS.md` · `CONTEXT.md` · `llms.txt`
+
 ### Walkthrough Video
 
 A 60-second governed-autonomy walkthrough is rendered from `artifacts/szl-demo-video`:

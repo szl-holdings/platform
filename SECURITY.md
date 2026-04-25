@@ -79,6 +79,8 @@ The SZL Holdings platform is built with security as a structural concern, not a 
 
 **Authorization:** Role-based access control with organization scoping. Every route and API endpoint is access-controlled. 11-role hierarchy: `anonymous_visitor`, `founder_admin`, `platform_admin`, `operator`, `analyst`, `executive_viewer`, `ops_manager`, `sales_delivery_user`, `maritime_ops_user`, `service_coordinator`, `pilot_customer_user`. See [access-control-matrix.md](docs/security/access-control-matrix.md) for the full role-permission mapping.
 
+**A11oy Fabric (Phase 1):** The A11oy Execution Fabric (`/api/a11oy/*`) is fully public in Phase 1. All data is in-memory demo data; no real business signals or customer data is served. Mutating endpoints (`/approve`, `/execute`, `/run`) return 501 Not Implemented — they cannot be triggered. Phase 2 will introduce authenticated write paths with covenant policy gates and proof-carrying execution contracts. The A11oy public surface follows the same defense-in-depth patterns as other public SZL demo surfaces.
+
 **Data in Transit:** TLS 1.3 for all connections. WebSocket connections use HMAC-signed tickets with 5-minute TTL.
 
 **Data at Rest:** PostgreSQL encryption at rest on all managed deployments.

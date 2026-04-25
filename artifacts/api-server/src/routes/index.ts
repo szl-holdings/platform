@@ -25,6 +25,7 @@ import * as verifier from "./groups/verifier";
 import * as skillLibrary from "./groups/skill-library";
 import * as crossPlatform from "./groups/cross-platform";
 import decisionsRuntimeRouter from "./decisions-runtime";
+import a11oyFabricRouter from "./a11oy-fabric-api";
 
 const router: IRouter = Router();
 
@@ -111,6 +112,11 @@ router.use(lazyMatch("/crisis-arena", () => import("./crisis-arena"), "crisis-ar
 // Exact paths are whitelisted in global-auth-enforcer.ts.
 router.use(lazyMatch("/lyte", () => import("./lyte-surfaces"), "lyte-surfaces"));
 router.use(lazyMatch("/lyte", () => import("./lyte-intel"), "lyte-intel"));
+
+// A11oy Fabric API — public read-side endpoints for the Live Enterprise Execution Fabric.
+// GET /a11oy/now, /signals, /outcomes, /actions, /proof, /governance, /verticals, /fabric, /workcells.
+// Mutating endpoints (approve, execute, run) are stub-only in Phase 1.
+router.use(a11oyFabricRouter);
 
 // Global Guardian policy check — derives category from request path.
 router.use(guardianPolicyCheck());

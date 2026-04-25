@@ -256,6 +256,11 @@ const PUBLIC_PREFIXES = [
   // 401 for unauthenticated requests; in sandbox/demo mode it serves synthetic
   // seed data publicly. Never exposes live production signals to anonymous users.
   "/api/fabric/",
+  // A11oy Live Enterprise Execution Fabric — all read-side endpoints are fully
+  // public in Phase 1 (demo mode, in-memory data). Mutating endpoints return 501.
+  // Phase 2 will add session-gated write paths; the prefix bypass is intentional
+  // for now so the A11oy demo renders without a session.
+  "/api/a11oy/",
   // Competitive Intel monitor — backs the Command Competitive Atlas page with
   // RSS-derived "Intel Update" alerts about tracked champions (CrowdStrike,
   // Clio, CoStar, Windward, Palantir, ThoughtSpot). The Atlas page is internal-

@@ -1,7 +1,7 @@
 # SZL Holdings Platform
 
 ## Overview
-SZL Holdings offers FORGE, a governed operational intelligence platform for regulated enterprises. It ensures human-in-the-loop governance, immutable record-keeping, and attributable outcomes for all AI recommendations and actions. The platform is a pnpm monorepo supporting web and mobile applications, an API, and a design system. Its core purpose is Governed Workflow Orchestration (FORGE + Command + KORA) and Maritime Intelligence (SEXTANT), with specialized extensions like PARAGON, DOMAINE, Counsel, and Carlota Jo built upon its governed foundation. The business vision is to provide a comprehensive solution for decision intelligence and operational oversight in highly regulated environments, with strong market potential in sectors requiring stringent compliance and auditable AI applications.
+SZL Holdings offers FORGE, a governed operational intelligence platform for regulated enterprises. The platform now includes **A11oy** — the Live Enterprise Execution Fabric — a governed agentic layer that senses business signals, explains their causes, recommends governed actions, executes them in Workcells, and records cryptographic proof of every step. It ensures human-in-the-loop governance, immutable record-keeping, and attributable outcomes for all AI recommendations and actions. The platform is a pnpm monorepo supporting web and mobile applications, an API, and a design system. Its core purpose is Governed Workflow Orchestration (FORGE + Command + KORA) and Maritime Intelligence (SEXTANT), with specialized extensions like PARAGON, DOMAINE, Counsel, and Carlota Jo built upon its governed foundation. The business vision is to provide a comprehensive solution for decision intelligence and operational oversight in highly regulated environments, with strong market potential in sectors requiring stringent compliance and auditable AI applications.
 
 ## User Preferences
 I prefer detailed explanations.
@@ -131,6 +131,46 @@ Biometric sign-in is implemented as a real server-side authentication factor wit
 - Applied to `POST /approvals/:id/escalate` (high-risk mutation) as a reference protected route
 
 **Tests:** `artifacts/api-server/src/__tests__/mobile-biometric.test.ts` — 22 tests covering challenge issuance (400 validation), enrollment (400 for bad inputs), authenticate (proof mismatch → 401, replay → 401, valid proof → 200), step-up (no binding → 403, correct proof → 200), `requireStepUp` middleware (missing header → 403 STEP_UP_REQUIRED, invalid token → 403 STEP_UP_INVALID, valid token → 200 + usedAt set), binding revocation, and status listing.
+
+## A11oy — Live Enterprise Execution Fabric
+
+**Artifact:** `artifacts/a11oy` — web app at `/a11oy/`, port 9090
+
+A11oy is a new governed agentic platform layer that sits between enterprise data and enterprise decisions. Phase 1 delivers the full foundation: TypeScript schema, seven-layer in-memory fabric, 32-signal demo seed, and read-side REST API.
+
+**Seven Fabric Layers (in-memory, Phase 1):**
+1. Coverage Graph — domain completeness tracking
+2. Signal Mesh — ingestion and routing (currently degraded: P95 latency 340ms)
+3. State Engine — authoritative enterprise state
+4. Causal Core — causal reasoning and explanation
+5. Action Rail — governed action recommendation
+6. Covenant Layer — policy evaluation and enforcement
+7. Proof Ledger — cryptographic proof recording
+
+**Demo Seed:** 32 business signals across 7 verticals (lyte-revenue: 6, vessels-maritime: 6, terra-real-estate: 5, aegis-defense: 4, prism-counsel: 4, carlota-jo: 4, alloy-core: 3); 5 outcomes, 5 policies, 5 proof packets, 5 workcells.
+
+**API Endpoints (all public, read-only in Phase 1):**
+- `GET /api/a11oy/now` — current summary
+- `GET /api/a11oy/signals` — signals (filter by vertical, severity, status)
+- `GET /api/a11oy/signals/:id` — signal by ID
+- `GET /api/a11oy/outcomes` — active outcomes
+- `GET /api/a11oy/actions` — recommended actions
+- `GET /api/a11oy/proof` — proof packets
+- `GET /api/a11oy/proof/:entityId` — proof for entity
+- `GET /api/a11oy/governance` — covenant policies
+- `GET /api/a11oy/verticals` — verticals
+- `GET /api/a11oy/fabric` — fabric layer health
+- `GET /api/a11oy/workcells` — workcells
+- Mutating routes (approve, execute, run) return 501 in Phase 1
+
+**Source files:**
+- `artifacts/a11oy/src/a11oy/core/` — types.ts, constants.ts, terminology.ts, demoMode.ts
+- `artifacts/a11oy/src/a11oy/schema/index.ts` — all TypeScript interfaces + Zod validators
+- `artifacts/a11oy/src/a11oy/fabric/` — seven layer implementations
+- `artifacts/a11oy/src/a11oy/demo/` — seed data
+- `artifacts/api-server/src/routes/a11oy-fabric-api.ts` — REST route handlers
+
+**Root docs:** `AGENTS.md`, `CONTEXT.md`, `llms.txt` (all at project root)
 
 ## Known Platform Issues
 - **Command workflow port detection:** Replit workflow system intermittently fails to detect port 5000 opening within timeout. Vite starts correctly (confirmed by logs). The telemetry initialization was fixed to gracefully handle invalid OTEL endpoint placeholders (see `artifacts/command/src/telemetry.ts`).

@@ -1,0 +1,30 @@
+kind = "web"
+    previewPath = "/a11oy/"
+    title = "A11oy — Live Enterprise Execution Fabric"
+    version = "1.0.0"
+    id = "artifacts/a11oy"
+    router = "path"
+
+    [[integratedSkills]]
+    name = "react-vite"
+    version = "1.0.0"
+
+    [[services]]
+    name = "web"
+    paths = [ "/a11oy/" ]
+    localPort = 9090
+
+    [services.development]
+    run = "bash -c 'cd /home/runner/workspace/artifacts/a11oy && exec node_modules/.bin/vite --config vite.config.ts --host ::'"
+
+    [services.production]
+    build = [ "pnpm", "--filter", "@workspace/a11oy", "run", "build" ]
+    publicDir = "artifacts/a11oy/dist/public"
+    serve = "static"
+
+    [[services.production.rewrites]]
+    from = "/*"
+    to = "/index.html"
+
+    [services.env]
+    BASE_PATH = "/a11oy/"
