@@ -28,7 +28,5 @@ kind = "web"
   to = "/index.html"
 
   [services.env]
-  # Shared proxy port (9090) is hardcoded in vite.config.ts; workflow monitors port 9090.
-  # Vite dev server runs on port 8098; shared proxy routes /carlota-jo/ -> 8098.
   VITE_PORT = "8098"
   BASE_PATH = "/carlota-jo/"

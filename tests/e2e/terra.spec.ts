@@ -3,17 +3,24 @@ import { expect, test } from '@playwright/test';
 
 const TERRA_PATH = process.env.TERRA_BASE_PATH ?? '/terra';
 
-let appAvailable = true;
+let appAvailable = false;
 test.beforeAll(async ({ browser }) => {
   const page = await browser.newPage();
-  try {
-    const resp = await page.goto(TERRA_PATH, { timeout: 8000, waitUntil: 'domcontentloaded' });
-    appAvailable = !!resp && resp.status() < 500;
-  } catch {
-    appAvailable = false;
+  const deadline = Date.now() + 45_000;
+  while (Date.now() < deadline) {
+    try {
+      const resp = await page.goto(TERRA_PATH, { timeout: 10000, waitUntil: 'domcontentloaded' });
+      if (resp && resp.status() < 500) {
+        appAvailable = true;
+        break;
+      }
+    } catch {
+      // upstream not ready yet — wait and retry
+    }
+    await page.waitForTimeout(2000);
   }
   await page.close();
-});
+}, 60_000);
 test.beforeEach(async ({}, testInfo) => {
   if (!appAvailable) testInfo.skip();
 });

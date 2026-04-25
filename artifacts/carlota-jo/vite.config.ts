@@ -77,12 +77,27 @@ export default defineConfig({
   },
   optimizeDeps: {
     holdUntilCrawlEnd: false,
+    include: [
+      'react',
+      'react-dom',
+      'react-dom/client',
+      'react-router-dom',
+      'framer-motion',
+      'lucide-react',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-tooltip',
+      '@tanstack/react-query',
+    ],
   },
   server: {
     port: vitePort,
-    strictPort: false,
+    strictPort: true,
     host: '0.0.0.0',
     allowedHosts: true,
+    warmup: {
+      clientFiles: ['src/main.tsx', 'src/App.tsx'],
+    },
     hmr: { clientPort: 443, path: basePath },
     fs: {
       strict: false,
