@@ -8,6 +8,8 @@
  * PUT    /api/orgs/:orgSlug/members/:userId/role — update member role
  * GET    /api/orgs/:orgSlug/notification-prefs — get org notification settings
  * PUT    /api/orgs/:orgSlug/notification-prefs — update org notification settings
+ * GET    /api/orgs/:orgSlug/support-settings   — get support notification email
+ * PUT    /api/orgs/:orgSlug/support-settings   — update support notification email
  * GET    /api/user/profile                 — get current user profile
  * PUT    /api/user/profile                 — update current user profile
  * POST   /api/user/deactivate              — request account deactivation
@@ -28,6 +30,7 @@ import {
   orgMembersTable,
   pool,
   sessionsTable,
+  tenantSettingsTable,
   usersTable,
 } from '@szl-holdings/db';
 import crypto, { pbkdf2Sync, randomBytes } from 'node:crypto';
@@ -999,6 +1002,152 @@ router.get(
       );
     } catch (err) {
       handleRouteError(res, err, 'Failed to get notification preferences');
+    }
+  },
+);
+
+const SUPPORT_NS = 'support';
+const SUPPORT_NOTIFICATION_EMAIL_KEY = 'notification_email';
+
+const supportSettingsSchema = z.object({
+  notificationEmail: z.string().email('Must be a valid email address'),
+});
+
+router.get(
+  '/orgs/:orgSlug/support-settings',
+  readLimiter,
+  authMiddleware(),
+  async (req: Request, res: Response) => {
+    try {
+      const orgSlug = req.params.orgSlug as string;
+
+      const [org] = await db
+        .select({ id: organizationsTable.id })
+        .from(organizationsTable)
+        .where(eq(organizationsTable.slug, orgSlug))
+        .limit(1);
+
+      if (!org) {
+        sendNotFound(res, 'Organization');
+        return;
+      }
+
+      if (!isElevated(req)) {
+        const { membership } = await resolveOrgMembership(orgSlug, req.user?.id, 'admin');
+        if (!membership) {
+          sendForbidden(res, 'Org admin access required');
+          return;
+        }
+      }
+
+      const [setting] = await db
+        .select({ value: tenantSettingsTable.value })
+        .from(tenantSettingsTable)
+        .where(
+          and(
+            eq(tenantSettingsTable.orgId, org.id),
+            eq(tenantSettingsTable.namespace, SUPPORT_NS),
+            eq(tenantSettingsTable.key, SUPPORT_NOTIFICATION_EMAIL_KEY),
+          ),
+        )
+        .limit(1);
+
+      sendSuccess(res, {
+        notificationEmail: (setting?.value as string | null) ?? null,
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to get support settings');
+    }
+  },
+);
+
+router.put(
+  '/orgs/:orgSlug/support-settings',
+  writeLimiter,
+  authMiddleware(),
+  validateBody(supportSettingsSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const orgSlug = req.params.orgSlug as string;
+      const { notificationEmail } = req.body as z.infer<typeof supportSettingsSchema>;
+
+      const [org] = await db
+        .select({ id: organizationsTable.id })
+        .from(organizationsTable)
+        .where(eq(organizationsTable.slug, orgSlug))
+        .limit(1);
+
+      if (!org) {
+        sendNotFound(res, 'Organization');
+        return;
+      }
+
+      if (!isElevated(req)) {
+        const { membership } = await resolveOrgMembership(orgSlug, req.user?.id, 'admin');
+        if (!membership) {
+          sendForbidden(res, 'Org admin access required to update support settings');
+          return;
+        }
+      }
+
+      const existing = await db
+        .select({ id: tenantSettingsTable.id })
+        .from(tenantSettingsTable)
+        .where(
+          and(
+            eq(tenantSettingsTable.orgId, org.id),
+            eq(tenantSettingsTable.namespace, SUPPORT_NS),
+            eq(tenantSettingsTable.key, SUPPORT_NOTIFICATION_EMAIL_KEY),
+          ),
+        )
+        .limit(1);
+
+      if (existing.length > 0) {
+        await db
+          .update(tenantSettingsTable)
+          .set({
+            value: notificationEmail,
+            updatedBy: req.user?.id ?? null,
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(tenantSettingsTable.orgId, org.id),
+              eq(tenantSettingsTable.namespace, SUPPORT_NS),
+              eq(tenantSettingsTable.key, SUPPORT_NOTIFICATION_EMAIL_KEY),
+            ),
+          );
+      } else {
+        await db.insert(tenantSettingsTable).values({
+          orgId: org.id,
+          namespace: SUPPORT_NS,
+          key: SUPPORT_NOTIFICATION_EMAIL_KEY,
+          value: notificationEmail,
+          valueType: 'string',
+          label: 'Support Notification Email',
+          category: 'support',
+          createdBy: req.user?.id ?? null,
+          updatedBy: req.user?.id ?? null,
+        });
+      }
+
+      await db.insert(auditEventsTable).values({
+        userId: req.user?.id,
+        action: 'org_support_notification_email_updated',
+        entityType: 'organization',
+        entityId: String(org.id),
+        ipAddress: hashIp(req.ip ?? null),
+        newValues: { notificationEmail },
+      });
+
+      logger.info(
+        { orgId: org.id, orgSlug, updatedBy: req.user?.id },
+        '[support-settings] Support notification email updated',
+      );
+
+      sendSuccess(res, { notificationEmail });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to update support settings');
     }
   },
 );

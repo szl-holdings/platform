@@ -3,6 +3,7 @@ import {
   supportKnowledgeArticlesTable,
   supportTicketCommentsTable,
   supportTicketsTable,
+  tenantSettingsTable,
 } from '@szl-holdings/db';
 import { randomBytes } from 'node:crypto';
 import { and, desc, eq, ilike, inArray, isNull, or, sql } from 'drizzle-orm';
@@ -210,6 +211,24 @@ router.post(
         priority,
       });
 
+      let adminEmail = SUPPORT_ADMIN_EMAIL;
+      if (orgId !== null) {
+        const [orgEmailSetting] = await db
+          .select({ value: tenantSettingsTable.value })
+          .from(tenantSettingsTable)
+          .where(
+            and(
+              eq(tenantSettingsTable.orgId, orgId),
+              eq(tenantSettingsTable.namespace, 'support'),
+              eq(tenantSettingsTable.key, 'notification_email'),
+            ),
+          )
+          .limit(1);
+        if (orgEmailSetting?.value && typeof orgEmailSetting.value === 'string') {
+          adminEmail = orgEmailSetting.value;
+        }
+      }
+
       const [confirmResult, adminResult] = await Promise.allSettled([
         sendEmail({
           to: submitterEmail,
@@ -218,7 +237,7 @@ router.post(
           text: `Hi ${submitterName},\n\nYour support ticket has been received.\n\nReference: ${ticketRef}\nSubject: ${subject}\n\nWe'll be in touch soon.`,
         }),
         sendEmail({
-          to: SUPPORT_ADMIN_EMAIL,
+          to: adminEmail,
           subject: `[New Ticket] ${ticketRef} — ${subject}`,
           html: adminNotificationHtml,
           text: `New support ticket ${ticketRef} submitted by ${submitterName} <${submitterEmail}>.\n\nSubject: ${subject}\nCategory: ${category}\nPriority: ${priority}\n\n${description}`,

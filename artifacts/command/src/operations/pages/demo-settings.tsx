@@ -4,6 +4,7 @@ import {
   Database,
   Eye,
   Key,
+  LifeBuoy,
   Save,
   Settings,
   Shield,
@@ -29,6 +30,7 @@ const TABS = [
   { key: 'security', label: 'Security', icon: Shield },
   { key: 'roles', label: 'Roles & Access', icon: Users },
   { key: 'data', label: 'Data & Privacy', icon: Database },
+  { key: 'support', label: 'Support', icon: LifeBuoy },
 ];
 
 function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
@@ -91,6 +93,28 @@ export default function DemoSettingsPage() {
     sandboxMode: false,
     demoMode: true,
   });
+
+  const [supportEmail, setSupportEmail] = useState('support@szlholdings.com');
+  const [supportEmailSaving, setSupportEmailSaving] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  async function handleSupportEmailSave() {
+    setSupportEmailSaving('saving');
+    try {
+      const BASE_URL = (import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? '/';
+      const res = await fetch(`${BASE_URL}api/orgs/szl-holdings/support-settings`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ notificationEmail: supportEmail }),
+      });
+      if (!res.ok) throw new Error('Failed');
+      setSupportEmailSaving('saved');
+      setTimeout(() => setSupportEmailSaving('idle'), 2500);
+    } catch {
+      setSupportEmailSaving('error');
+      setTimeout(() => setSupportEmailSaving('idle'), 2500);
+    }
+  }
 
   function set(key: string, val: boolean) {
     setSettings((prev) => ({ ...prev, [key]: val }));
@@ -460,6 +484,78 @@ export default function DemoSettingsPage() {
                 ))}
               </div>
             </div>
+          )}
+          {tab === 'support' && (
+            <>
+              <div className="py-3 space-y-4">
+                <div>
+                  <div className="text-[10px] font-medium mb-1" style={{ color: TEXT.primary }}>
+                    Support Notification Email
+                  </div>
+                  <div className="text-[9px] mb-2" style={{ color: TEXT.secondary }}>
+                    New support tickets will be routed to this address. Falls back to the platform
+                    default when not set.
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="email"
+                      value={supportEmail}
+                      onChange={(e) => setSupportEmail(e.target.value)}
+                      placeholder="support@example.com"
+                      className="flex-1 bg-transparent text-[10px] border rounded px-2 py-1.5"
+                      style={{ color: TEXT.primary, borderColor: BORDER.muted }}
+                    />
+                    <button
+                      onClick={handleSupportEmailSave}
+                      disabled={supportEmailSaving === 'saving'}
+                      className="flex items-center gap-1 text-[9px] px-3 py-1.5 rounded border transition-all shrink-0"
+                      style={{
+                        color:
+                          supportEmailSaving === 'saved'
+                            ? '#6b8f71'
+                            : supportEmailSaving === 'error'
+                              ? '#c45a4a'
+                              : '#d4a054',
+                        background:
+                          supportEmailSaving === 'saved'
+                            ? 'rgba(107,143,113,0.1)'
+                            : supportEmailSaving === 'error'
+                              ? 'rgba(196,90,74,0.1)'
+                              : 'rgba(212,160,84,0.1)',
+                        borderColor:
+                          supportEmailSaving === 'saved'
+                            ? 'rgba(107,143,113,0.3)'
+                            : supportEmailSaving === 'error'
+                              ? 'rgba(196,90,74,0.3)'
+                              : 'rgba(212,160,84,0.3)',
+                        opacity: supportEmailSaving === 'saving' ? 0.6 : 1,
+                      }}
+                    >
+                      <Save className="w-3 h-3" />
+                      {supportEmailSaving === 'saving'
+                        ? 'Saving…'
+                        : supportEmailSaving === 'saved'
+                          ? 'Saved!'
+                          : supportEmailSaving === 'error'
+                            ? 'Error'
+                            : 'Save'}
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  className="rounded px-3 py-2.5 flex items-start gap-2"
+                  style={{ background: BG.elevated, border: `1px solid ${BORDER.subtle}` }}
+                >
+                  <LifeBuoy className="w-3 h-3 mt-0.5 shrink-0" style={{ color: TEXT.muted }} />
+                  <div className="text-[9px]" style={{ color: TEXT.secondary }}>
+                    This setting overrides the <span style={{ color: TEXT.primary }}>SUPPORT_ADMIN_EMAIL</span> environment
+                    variable for this organization. Changes take effect immediately on the next
+                    submitted ticket — no restart required.
+                  </div>
+                </div>
+              </div>
+            </>
           )}
           {tab === 'data' && (
             <>

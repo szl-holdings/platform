@@ -9,6 +9,7 @@ import {
   Building2,
   CheckCircle2,
   ChevronRight,
+  LifeBuoy,
   Loader2,
   Mail,
   MessageSquare,
@@ -86,6 +87,7 @@ const TABS = [
   { id: 'profile', label: 'Organization', icon: Building2 },
   { id: 'team', label: 'Team', icon: Users },
   { id: 'notifications', label: 'Notifications', icon: Bell },
+  { id: 'support', label: 'Support', icon: LifeBuoy },
   { id: 'account', label: 'My Account', icon: User },
 ];
 
@@ -207,6 +209,33 @@ export default function OrgSettingsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['org-notif-prefs', slug] });
       showSuccess('Notification preferences saved');
+    },
+    onError: (err: Error) => showError(err.message),
+  });
+
+  const supportSettingsQuery = useStandardQuery<{ notificationEmail: string | null }>({
+    queryKey: ['org-support-settings', slug],
+    queryFn: () => apiFetch(`/orgs/${slug}/support-settings`),
+    enabled: !!slug && activeTab === 'support',
+  });
+
+  const [supportEmailInput, setSupportEmailInput] = useState('');
+
+  useEffect(() => {
+    if (supportSettingsQuery.data !== undefined) {
+      setSupportEmailInput(supportSettingsQuery.data.notificationEmail ?? '');
+    }
+  }, [supportSettingsQuery.data]);
+
+  const updateSupportSettingsMutation = useStandardMutation({
+    mutationFn: (notificationEmail: string) =>
+      apiFetch(`/orgs/${slug}/support-settings`, {
+        method: 'PUT',
+        body: JSON.stringify({ notificationEmail }),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['org-support-settings', slug] });
+      showSuccess('Support notification email saved');
     },
     onError: (err: Error) => showError(err.message),
   });
@@ -624,6 +653,60 @@ export default function OrgSettingsPage() {
                         <Save size={13} />
                       )}
                       Save Preferences
+                    </button>
+                  </div>
+                )}
+              </div>
+            </m.div>
+          )}
+
+          {activeTab === 'support' && (
+            <m.div
+              key="support"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="space-y-6"
+            >
+              <div className="bg-white/4 border border-white/10 rounded-2xl p-6">
+                <h2 className="text-base font-semibold mb-1">Support Notification Email</h2>
+                <p className="text-xs text-white/40 mb-5">
+                  New support tickets submitted by members of this organization will be routed to
+                  this address. Leave blank to use the platform-level default.
+                </p>
+                {supportSettingsQuery.isLoading ? (
+                  <div className="flex items-center gap-2 text-white/40">
+                    <Loader2 size={14} className="animate-spin" /> Loading...
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs font-medium text-white/60 mb-1.5 block">
+                        Notification Email
+                      </label>
+                      <input
+                        type="email"
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#c9a84c]/60 transition-colors"
+                        placeholder="support@yourcompany.com"
+                        value={supportEmailInput}
+                        onChange={(e) => setSupportEmailInput(e.target.value)}
+                      />
+                      {supportSettingsQuery.data?.notificationEmail === null && !supportEmailInput && (
+                        <p className="text-xs text-white/30 mt-1.5">
+                          Currently using the platform default.
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      className="flex items-center gap-2 px-4 py-2 bg-[#c9a84c]/20 hover:bg-[#c9a84c]/30 border border-[#c9a84c]/30 rounded-lg text-sm text-[#c9a84c] font-medium transition-colors disabled:opacity-50"
+                      onClick={() => updateSupportSettingsMutation.mutate(supportEmailInput)}
+                      disabled={updateSupportSettingsMutation.isPending || !supportEmailInput.trim()}
+                    >
+                      {updateSupportSettingsMutation.isPending ? (
+                        <Loader2 size={13} className="animate-spin" />
+                      ) : (
+                        <Save size={13} />
+                      )}
+                      Save Email
                     </button>
                   </div>
                 )}

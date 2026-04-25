@@ -186,6 +186,20 @@ vi.mock('@szl-holdings/db', () => {
       name: col('name'),
       createdAt: col('created_at'),
     },
+    tenantSettingsTable: {
+      id: col('id'),
+      orgId: col('org_id'),
+      namespace: col('namespace'),
+      key: col('key'),
+      value: col('value'),
+      valueType: col('value_type'),
+      label: col('label'),
+      category: col('category'),
+      createdBy: col('created_by'),
+      updatedBy: col('updated_by'),
+      createdAt: col('created_at'),
+      updatedAt: col('updated_at'),
+    },
   };
 });
 
@@ -756,5 +770,144 @@ describe('GET /gdpr/export — GDPR data export', () => {
     const body = res.body as Record<string, unknown>;
     expect(body.dataSubject).toBeNull();
     expect(body.dataProcessingBasis).toBeDefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Support Settings
+// ---------------------------------------------------------------------------
+
+describe('GET /orgs/:orgSlug/support-settings — get support notification email', () => {
+  beforeEach(() => {
+    _currentUser = makeOrgAdminUser();
+    _selectQueue = [];
+    _insertReturnQueue = [];
+    _updateReturnQueue = [];
+    _deleteReturns = [];
+    _poolQueryQueue = [];
+  });
+
+  it('returns the stored notification email when set', async () => {
+    _selectQueue = [
+      [ORG],
+      [ORG],
+      [ADMIN_MEMBERSHIP],
+      [{ value: 'helpdesk@acme.example' }],
+    ];
+
+    const app = await getApp();
+    const res = await request(app).get('/orgs/acme-corp/support-settings');
+
+    expect(res.status).toBe(200);
+    expect(res.body.notificationEmail).toBe('helpdesk@acme.example');
+  });
+
+  it('returns null when no setting is stored', async () => {
+    _selectQueue = [
+      [ORG],
+      [ORG],
+      [ADMIN_MEMBERSHIP],
+      [],
+    ];
+
+    const app = await getApp();
+    const res = await request(app).get('/orgs/acme-corp/support-settings');
+
+    expect(res.status).toBe(200);
+    expect(res.body.notificationEmail).toBeNull();
+  });
+
+  it('returns 404 when org does not exist', async () => {
+    _selectQueue = [[]];
+
+    const app = await getApp();
+    const res = await request(app).get('/orgs/no-such-org/support-settings');
+
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 403 when caller is a regular member, not an admin', async () => {
+    _currentUser = makeMemberUser();
+    _selectQueue = [
+      [ORG],
+      [ORG],
+      [MEMBER_MEMBERSHIP],
+    ];
+
+    const app = await getApp();
+    const res = await request(app).get('/orgs/acme-corp/support-settings');
+
+    expect(res.status).toBe(403);
+  });
+});
+
+describe('PUT /orgs/:orgSlug/support-settings — update support notification email', () => {
+  beforeEach(() => {
+    _currentUser = makeOrgAdminUser();
+    _selectQueue = [];
+    _insertReturnQueue = [];
+    _updateReturnQueue = [];
+    _deleteReturns = [];
+    _poolQueryQueue = [];
+  });
+
+  it('inserts new setting when none exists and returns the email', async () => {
+    _selectQueue = [
+      [ORG],
+      [ORG],
+      [ADMIN_MEMBERSHIP],
+      [],
+    ];
+    _insertReturnQueue = [[]];
+
+    const app = await getApp();
+    const res = await request(app)
+      .put('/orgs/acme-corp/support-settings')
+      .send({ notificationEmail: 'helpdesk@acme.example' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.notificationEmail).toBe('helpdesk@acme.example');
+  });
+
+  it('updates existing setting when one already exists', async () => {
+    _selectQueue = [
+      [ORG],
+      [ORG],
+      [ADMIN_MEMBERSHIP],
+      [{ id: 99 }],
+    ];
+
+    const app = await getApp();
+    const res = await request(app)
+      .put('/orgs/acme-corp/support-settings')
+      .send({ notificationEmail: 'newdesk@acme.example' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.notificationEmail).toBe('newdesk@acme.example');
+  });
+
+  it('rejects an invalid email address with 400', async () => {
+    const app = await getApp();
+    const res = await request(app)
+      .put('/orgs/acme-corp/support-settings')
+      .send({ notificationEmail: 'not-an-email' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 403 when caller is a regular member', async () => {
+    _currentUser = makeMemberUser();
+    _selectQueue = [
+      [ORG],
+      [ORG],
+      [MEMBER_MEMBERSHIP],
+    ];
+
+    const app = await getApp();
+    const res = await request(app)
+      .put('/orgs/acme-corp/support-settings')
+      .send({ notificationEmail: 'helpdesk@acme.example' });
+
+    expect(res.status).toBe(403);
   });
 });
