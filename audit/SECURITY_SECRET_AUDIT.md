@@ -74,7 +74,7 @@ Screenshots in `docs/assets/screenshots/current/` (approved set):
 ## A11oy Phase 1 Review
 
 The new `artifacts/a11oy/` artifact was reviewed for secret exposure:
-- All data is in-memory seed data (referenced from `@workspace/a11oy-fabric` which is not yet built)
+- All data is in-memory seed data sourced from `@workspace/a11oy-fabric` (the package exists at `lib/a11oy-fabric/`; dependency wiring was fixed in this audit pass)
 - No API keys or tokens are hardcoded in source files
 - The `SECURITY.md` already documents A11oy's Phase 1 public surface and that mutating endpoints return 501
 - No `.env` file is present in `artifacts/a11oy/`
