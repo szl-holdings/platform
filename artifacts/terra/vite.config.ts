@@ -41,7 +41,7 @@ export default defineConfig({
     emptyOutDir: true,
     cssCodeSplit: true,
     rollupOptions: {
-      external: ['worker_threads'],
+      external: ['worker_threads', 'node:worker_threads', 'async_hooks', 'node:async_hooks'],
       output: {
         manualChunks(id): string | undefined {
           if (id.includes('node_modules')) {

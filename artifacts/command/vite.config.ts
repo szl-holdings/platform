@@ -73,6 +73,22 @@ export default defineConfig({
     emptyOutDir: true,
     cssCodeSplit: true,
     rollupOptions: {
+      external: [
+        'fs', 'node:fs',
+        'path', 'node:path',
+        'stream', 'node:stream',
+        'url', 'node:url',
+        'crypto', 'node:crypto',
+        'querystring', 'node:querystring',
+        'os', 'node:os',
+        'http', 'node:http',
+        'https', 'node:https',
+        'net', 'node:net',
+        'tls', 'node:tls',
+        'zlib', 'node:zlib',
+        'worker_threads', 'node:worker_threads',
+        'async_hooks', 'node:async_hooks',
+      ],
       output: {
         manualChunks(id): string | undefined {
           if (id.includes('node_modules')) {

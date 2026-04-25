@@ -1,6 +1,5 @@
 import { ContactModal, useContactModal } from '@szl-holdings/shared-ui/contact-modal';
 import { PricingPage, type PricingTier } from '@szl-holdings/shared-ui/billing';
-import { useNavigate } from 'wouter';
 
 const ACCENT = '#ef4444';
 
@@ -60,7 +59,6 @@ const tiers: PricingTier[] = [
 
 export default function SentraPricingPage() {
   const { isOpen, open, close } = useContactModal('demo');
-  const [, navigate] = useNavigate();
 
   return (
     <>
