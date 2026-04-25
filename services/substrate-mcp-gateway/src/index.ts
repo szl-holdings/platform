@@ -12,7 +12,21 @@
  *   NODE_ENV                    — production | development
  */
 
-import { listWorkflows } from '@szl/substrate';
+import {
+  aegisThreatTriageWorkflow,
+  carlotaJoTaskRoutingWorkflow,
+  crossSystemReconciliationWorkflow,
+  evidenceBasedRecommendationWorkflow,
+  executiveBriefWorkflow,
+  listWorkflows,
+  lyteOperationalDriftWorkflow,
+  opportunityAuditWorkflow,
+  prismCounselEvidencePackagingWorkflow,
+  registerWorkflow,
+  riskEscalationWorkflow,
+  terraPortfolioAnomalyWorkflow,
+  vesselsVoyageAnomalyWorkflow,
+} from '@szl/substrate';
 import express from 'express';
 import { SERVER_INFO } from './descriptor.js';
 import { createHttpTransport } from './transport/http.js';
@@ -21,6 +35,22 @@ import { startStdioTransport } from './transport/stdio.js';
 const IS_STDIO = process.argv.includes('--stdio');
 const PORT = parseInt(process.env.SUBSTRATE_GATEWAY_PORT ?? process.env.PORT ?? '3700', 10);
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+// ─── Register all vertical and reference workflows ────────────────────────────
+// These must be registered before the server begins accepting connections so
+// that every substrate_submit_run call can resolve a workflow definition via
+// lookupWorkflow(). Omitting any entry here causes silent run failures.
+registerWorkflow(aegisThreatTriageWorkflow);
+registerWorkflow(carlotaJoTaskRoutingWorkflow);
+registerWorkflow(crossSystemReconciliationWorkflow);
+registerWorkflow(evidenceBasedRecommendationWorkflow);
+registerWorkflow(executiveBriefWorkflow);
+registerWorkflow(lyteOperationalDriftWorkflow);
+registerWorkflow(opportunityAuditWorkflow);
+registerWorkflow(prismCounselEvidencePackagingWorkflow);
+registerWorkflow(riskEscalationWorkflow);
+registerWorkflow(terraPortfolioAnomalyWorkflow);
+registerWorkflow(vesselsVoyageAnomalyWorkflow);
 
 // Startup check: warn loudly if the workflow registry is empty. Without any
 // registerWorkflow() calls in this process, every substrate_submit_run will
