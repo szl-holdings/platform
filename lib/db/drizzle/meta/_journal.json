@@ -554,6 +554,13 @@
       "when": 1745500000000,
       "tag": "0109_crisis_arena_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 103,
+      "version": "7",
+      "when": 1745600000000,
+      "tag": "0110_backfill_last_digest_sent_at",
+      "breakpoints": true
     }
   ]
 }
