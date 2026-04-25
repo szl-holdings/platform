@@ -11,6 +11,7 @@ import {
   register as registerIntegrations,
 } from './integrations.js';
 import { register as registerObservability } from './observability.js';
+import { register as registerOnboarding } from './onboarding.js';
 import { register as registerPipelineDeals } from './pipeline-deals.js';
 import { register as registerPrivacy } from './privacy.js';
 import { register as registerSeed } from './seed.js';
@@ -36,6 +37,7 @@ registerFunnel(adminRouter);
 registerPipelineDeals(adminRouter);
 registerAppsRegistry(adminRouter);
 registerObservability(adminRouter);
+registerOnboarding(adminRouter);
 registerEmail(adminRouter);
 registerPrivacy(adminRouter);
 

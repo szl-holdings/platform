@@ -57,6 +57,7 @@ import {
   VenturesPanel,
 } from '@/admin/ContentPanels';
 import { FeedbackPanel } from '@/admin/FeedbackPanel';
+import { OnboardingPanel } from '@/admin/OnboardingPanel';
 import { ProvisioningPanel } from '@/admin/ProvisioningPanel';
 import { RevenuePanel } from '@/admin/RevenuePanel';
 import { CapitalReadinessOS } from '@/components/CapitalReadinessOS';
@@ -173,6 +174,7 @@ const ADMIN_SECTIONS = [
   { id: 'capital-readiness', label: 'Capital Readiness', icon: DollarSign },
   { id: 'capital-arsenal', label: 'Capital Management', icon: BookOpen },
   { id: 'certification-readiness', label: 'Cert Readiness', icon: Shield },
+  { id: 'onboarding-status', label: 'Onboarding Status', icon: ClipboardList },
   { id: 'azure-tenants', label: 'Azure Tenants', icon: Cloud },
   { id: 'scim-provisioning', label: 'SCIM Provisioning', icon: Shield },
   { id: 'powerbi', label: 'Power BI', icon: BarChart3 },
@@ -416,6 +418,7 @@ export default function AdminPage() {
               </div>
             )}
             {activeSection === 'certification-readiness' && <CertificationReadinessOS />}
+            {activeSection === 'onboarding-status' && <OnboardingPanel />}
             {activeSection === 'azure-tenants' && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
