@@ -63,6 +63,7 @@ import { RevenuePanel } from '@/admin/RevenuePanel';
 import { CapitalReadinessOS } from '@/components/CapitalReadinessOS';
 import { CertificationReadinessOS } from '@/components/CertificationReadinessOS';
 import { CAPITAL_DOCUMENTS, getDocumentsByChannel } from '@/data/capital-arsenal';
+import { useOpenSupportTicketCount } from '@/hooks/useOpenSupportTicketCount';
 import { cn } from '@/lib/utils';
 
 const API = '/api';
@@ -209,6 +210,7 @@ export default function AdminPage() {
     }
   });
   const [activeSection, setActiveSection] = useState('dashboard');
+  const { count: openTicketCount } = useOpenSupportTicketCount({ enabled: unlocked });
 
   const handleUnlock = () => {
     setUnlocked(true);
@@ -253,6 +255,15 @@ export default function AdminPage() {
               className="flex items-center gap-1.5 text-xs font-medium text-cyan-400 hover:text-cyan-300 transition-colors bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-full"
             >
               <Terminal className="w-3 h-3" /> Command Center
+              {openTicketCount > 0 && (
+                <span
+                  aria-label={`${openTicketCount} open support tickets`}
+                  data-testid="command-center-badge"
+                  className="ml-0.5 inline-flex items-center justify-center min-w-[1.125rem] h-[1.125rem] px-1 rounded-full bg-cyan-400 text-[10px] font-bold text-slate-900 leading-none"
+                >
+                  {openTicketCount > 99 ? '99+' : openTicketCount}
+                </span>
+              )}
             </Link>
             <button
               onClick={() => {
@@ -297,6 +308,15 @@ export default function AdminPage() {
               >
                 <Terminal className="w-3.5 h-3.5 shrink-0" />
                 Command Center
+                {openTicketCount > 0 && (
+                  <span
+                    aria-label={`${openTicketCount} open support tickets`}
+                    data-testid="command-center-sidebar-badge"
+                    className="ml-1 inline-flex items-center justify-center min-w-[1.125rem] h-[1.125rem] px-1 rounded-full bg-cyan-400 text-[10px] font-bold text-slate-900 leading-none"
+                  >
+                    {openTicketCount > 99 ? '99+' : openTicketCount}
+                  </span>
+                )}
                 <ExternalLink className="w-3 h-3 ml-auto opacity-50" />
               </Link>
             </div>
