@@ -136,6 +136,14 @@ export const ENV_SPECS: EnvVarSpec[] = [
     sensitive: true,
     group: 'alloy',
   },
+  {
+    key: 'IP_HASH_SALT',
+    required: false,
+    description:
+      'Salt used to hash client IP addresses for privacy-preserving rate limiting and audit logs — required in production',
+    sensitive: true,
+    group: 'security',
+  },
 
   {
     key: 'STRIPE_SECRET_KEY',
@@ -368,6 +376,682 @@ export const ENV_SPECS: EnvVarSpec[] = [
     description:
       'External uptime monitor ID (Betterstack/UptimeRobot) — informational; used in health status reporting',
     group: 'observability',
+  },
+
+  // ── Server (additional) ──────────────────────────────────────────────────
+  {
+    key: 'BASE_URL',
+    required: false,
+    description: 'Public-facing base URL of the API server (no trailing slash)',
+    group: 'server',
+  },
+
+  // ── Session (additional) ─────────────────────────────────────────────────
+  {
+    key: 'SESSION_TTL_MS',
+    required: false,
+    description: 'Session TTL in milliseconds (default: 86400000 = 24 hours)',
+    defaultValue: '86400000',
+    group: 'auth',
+  },
+  {
+    key: 'OAUTH_STATE_SECRET',
+    required: false,
+    description: 'Secret used to sign OAuth state parameters (CSRF protection) — auto-generated if not set',
+    sensitive: true,
+    group: 'auth',
+  },
+
+  // ── Encryption ───────────────────────────────────────────────────────────
+  {
+    key: 'FIELD_ENCRYPTION_KEY',
+    required: false,
+    description: 'AES-256 key for field-level encryption of PII columns (32 bytes hex)',
+    sensitive: true,
+    group: 'alloy',
+  },
+
+  // ── Admin ────────────────────────────────────────────────────────────────
+  {
+    key: 'ADMIN_PIN',
+    required: false,
+    description: 'Admin PIN for the admin dashboard (hashed comparison)',
+    sensitive: true,
+    group: 'auth',
+  },
+  {
+    key: 'VITE_ADMIN_PIN',
+    required: false,
+    description: '4-digit PIN used by Vite dev proxy (overrides ADMIN_PIN in dev)',
+    sensitive: true,
+    group: 'auth',
+  },
+
+  // ── AI / LLM ─────────────────────────────────────────────────────────────
+  {
+    key: 'AI_EXECUTION_MODE',
+    required: false,
+    description: 'Controls AI execution: real | mock | disabled',
+    defaultValue: 'mock',
+    group: 'integrations',
+  },
+  {
+    key: 'HUGGINGFACE_API_KEY',
+    required: false,
+    description: 'HuggingFace API token for embedding and inference calls',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'HF_TOKEN',
+    required: false,
+    description: 'Alias for HUGGINGFACE_API_KEY',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'AI_INTEGRATIONS_OPENAI_BASE_URL',
+    required: false,
+    description: 'Replit AI Integrations proxy base URL for OpenAI-compatible endpoint',
+    group: 'integrations',
+  },
+  {
+    key: 'AI_INTEGRATIONS_ANTHROPIC_BASE_URL',
+    required: false,
+    description: 'Replit AI Integrations proxy base URL for Anthropic-compatible endpoint',
+    group: 'integrations',
+  },
+  {
+    key: 'AI_INTEGRATIONS_GEMINI_API_KEY',
+    required: false,
+    description: 'Replit AI Integrations proxy key for Gemini-compatible inference',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'AI_INTEGRATIONS_GEMINI_BASE_URL',
+    required: false,
+    description: 'Replit AI Integrations proxy base URL for Gemini-compatible endpoint',
+    group: 'integrations',
+  },
+
+  // ── Azure ─────────────────────────────────────────────────────────────────
+  {
+    key: 'AZURE_AD_TENANT_ID',
+    required: false,
+    description: 'Azure Active Directory tenant ID for SSO / Microsoft Graph',
+    group: 'integrations',
+  },
+  {
+    key: 'AZURE_AD_CLIENT_ID',
+    required: false,
+    description: 'Azure Active Directory client ID for SSO / Microsoft Graph',
+    group: 'integrations',
+  },
+  {
+    key: 'AZURE_AD_CLIENT_SECRET',
+    required: false,
+    description: 'Azure Active Directory client secret for SSO / Microsoft Graph',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'AZURE_STORAGE_CONNECTION_STRING',
+    required: false,
+    description: 'Azure Blob Storage connection string',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'AZURE_DOC_INTEL_ENDPOINT',
+    required: false,
+    description: 'Azure Document Intelligence (Form Recognizer) endpoint URL',
+    group: 'integrations',
+  },
+  {
+    key: 'AZURE_DOC_INTEL_KEY',
+    required: false,
+    description: 'Azure Document Intelligence API key',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'AZURE_REDIS_CONNECTION_STRING',
+    required: false,
+    description: 'Azure Redis Cache connection string',
+    sensitive: true,
+    group: 'integrations',
+  },
+
+  // ── Redis ─────────────────────────────────────────────────────────────────
+  {
+    key: 'REDIS_URL',
+    required: false,
+    description: 'Redis connection URL (standalone)',
+    group: 'integrations',
+  },
+  {
+    key: 'REDIS_HOST',
+    required: false,
+    description: 'Redis host (standalone, used when REDIS_URL is not set)',
+    group: 'integrations',
+  },
+
+  // ── Microsoft 365 / Teams ─────────────────────────────────────────────────
+  {
+    key: 'MICROSOFT_CLIENT_ID',
+    required: false,
+    description: 'Microsoft 365 / Teams OAuth client ID',
+    group: 'integrations',
+  },
+  {
+    key: 'MICROSOFT_CLIENT_SECRET',
+    required: false,
+    description: 'Microsoft 365 / Teams OAuth client secret',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'MICROSOFT_TENANT_ID',
+    required: false,
+    description: 'Microsoft 365 / Teams tenant ID',
+    group: 'integrations',
+  },
+  {
+    key: 'MICROSOFT_GRAPH_TOKEN',
+    required: false,
+    description: 'Microsoft Graph API access token',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'MICROSOFT_TEAMS_WEBHOOK_URL',
+    required: false,
+    description: 'Microsoft Teams incoming webhook URL for notifications',
+    group: 'integrations',
+  },
+
+  // ── Dataverse / Power Platform ────────────────────────────────────────────
+  {
+    key: 'DATAVERSE_ORG_URL',
+    required: false,
+    description: 'Dataverse / Power Platform organization URL',
+    group: 'integrations',
+  },
+  {
+    key: 'DATAVERSE_CLIENT_ID',
+    required: false,
+    description: 'Dataverse OAuth client ID',
+    group: 'integrations',
+  },
+  {
+    key: 'DATAVERSE_CLIENT_SECRET',
+    required: false,
+    description: 'Dataverse OAuth client secret',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'DATAVERSE_TENANT_ID',
+    required: false,
+    description: 'Dataverse tenant ID',
+    group: 'integrations',
+  },
+  {
+    key: 'PURVIEW_ENABLED',
+    required: false,
+    description: 'Enable Purview data governance integration (true | false)',
+    defaultValue: 'false',
+    group: 'integrations',
+  },
+
+  // ── Stripe (additional) ───────────────────────────────────────────────────
+  {
+    key: 'STRIPE_WEBHOOK_SECRET',
+    required: false,
+    description: 'Stripe webhook signing secret (from Stripe dashboard → Webhooks)',
+    sensitive: true,
+    group: 'billing',
+  },
+  {
+    key: 'STRIPE_PRICE_AEGIS_ENTERPRISE',
+    required: false,
+    description: 'Stripe price ID for the Aegis Enterprise product',
+    group: 'billing',
+  },
+  {
+    key: 'STRIPE_PRICE_ADVISORY_RETAINER',
+    required: false,
+    description: 'Stripe price ID for the Advisory Retainer product',
+    group: 'billing',
+  },
+  {
+    key: 'STRIPE_PRICE_PORTFOLIO_REVIEW',
+    required: false,
+    description: 'Stripe price ID for the Portfolio Review product',
+    group: 'billing',
+  },
+  {
+    key: 'STRIPE_PRICE_STRATEGY_SESSION',
+    required: false,
+    description: 'Stripe price ID for the Strategy Session product',
+    group: 'billing',
+  },
+
+  // ── Slack ─────────────────────────────────────────────────────────────────
+  {
+    key: 'SLACK_BOT_TOKEN',
+    required: false,
+    description: 'Slack bot token for sending messages',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'SLACK_SIGNING_SECRET',
+    required: false,
+    description: 'Slack signing secret for verifying webhook payloads',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'SLACK_ALERT_CHANNEL',
+    required: false,
+    description: 'Slack channel ID for operational alerts',
+    group: 'integrations',
+  },
+  {
+    key: 'SLACK_WEBHOOK_URL',
+    required: false,
+    description: 'Slack incoming webhook URL for digest notifications',
+    group: 'integrations',
+  },
+  {
+    key: 'ALLOY_DIGEST_SLACK_CHANNEL',
+    required: false,
+    description: 'Slack channel for daily Alloy digest delivery',
+    group: 'alloy',
+  },
+
+  // ── Email ─────────────────────────────────────────────────────────────────
+  {
+    key: 'EMAIL_PROVIDER',
+    required: false,
+    description: 'Email provider: resend | sendgrid | smtp',
+    defaultValue: 'resend',
+    group: 'integrations',
+  },
+  {
+    key: 'RESEND_API_KEY',
+    required: false,
+    description: 'Resend API key for transactional email delivery',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'SENDGRID_API_KEY',
+    required: false,
+    description: 'SendGrid API key for transactional email delivery',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'SMTP_HOST',
+    required: false,
+    description: 'SMTP server hostname (used when EMAIL_PROVIDER=smtp)',
+    group: 'integrations',
+  },
+  {
+    key: 'SMTP_PORT',
+    required: false,
+    description: 'SMTP server port (used when EMAIL_PROVIDER=smtp)',
+    defaultValue: '587',
+    group: 'integrations',
+  },
+  {
+    key: 'SMTP_USER',
+    required: false,
+    description: 'SMTP username (used when EMAIL_PROVIDER=smtp)',
+    group: 'integrations',
+  },
+  {
+    key: 'SMTP_PASS',
+    required: false,
+    description: 'SMTP password (used when EMAIL_PROVIDER=smtp)',
+    sensitive: true,
+    group: 'integrations',
+  },
+
+  // ── Web Push (VAPID) ──────────────────────────────────────────────────────
+  {
+    key: 'VAPID_PUBLIC_KEY',
+    required: false,
+    description: 'VAPID public key for Web Push notifications',
+    group: 'integrations',
+  },
+  {
+    key: 'VAPID_PRIVATE_KEY',
+    required: false,
+    description: 'VAPID private key for Web Push notifications',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'VAPID_SUBJECT',
+    required: false,
+    description: 'VAPID subject (mailto: or https: URL) for Web Push notifications',
+    group: 'integrations',
+  },
+
+  // ── Alloy (additional) ────────────────────────────────────────────────────
+  {
+    key: 'ALLOY_EMAIL_INGEST_SECRET',
+    required: false,
+    description: 'Secret for verifying inbound Alloy email ingestion webhooks',
+    sensitive: true,
+    group: 'alloy',
+  },
+
+  // ── Guardian Policy Engine ────────────────────────────────────────────────
+  {
+    key: 'GUARDIAN_ENFORCE',
+    required: false,
+    description:
+      'Enforce policy decisions: when true, deny → HTTP 403 and require-approval → HTTP 202. When false, advisory/log-only mode.',
+    defaultValue: 'true',
+    group: 'alloy',
+  },
+  {
+    key: 'GUARDIAN_POLICY_SYNC_INTERVAL_MS',
+    required: false,
+    description: 'How often to sync policies from the policy store (ms)',
+    defaultValue: '60000',
+    group: 'alloy',
+  },
+
+  // ── Object Storage (additional) ───────────────────────────────────────────
+  {
+    key: 'OBJECT_STORAGE_BUCKET_ID',
+    required: false,
+    description: 'Replit Object Storage bucket ID',
+    group: 'storage',
+  },
+  {
+    key: 'OBJECT_STORE_BUCKET',
+    required: false,
+    description: 'Alias for OBJECT_STORAGE_BUCKET_ID',
+    group: 'storage',
+  },
+  {
+    key: 'S3_BUCKET',
+    required: false,
+    description: 'S3-compatible bucket name (for non-Replit deployments)',
+    group: 'storage',
+  },
+  {
+    key: 'DEFAULT_ORG_STORAGE_QUOTA_BYTES',
+    required: false,
+    description: 'Default per-org object storage quota in bytes (default: 5 GB)',
+    defaultValue: '5368709120',
+    group: 'storage',
+  },
+
+  // ── HubSpot ───────────────────────────────────────────────────────────────
+  {
+    key: 'HUBSPOT_ACCESS_TOKEN',
+    required: false,
+    description: 'HubSpot private app access token',
+    sensitive: true,
+    group: 'integrations',
+  },
+
+  // ── DocuSign ──────────────────────────────────────────────────────────────
+  {
+    key: 'DOCUSIGN_CLIENT_ID',
+    required: false,
+    description: 'DocuSign OAuth integration key (client ID)',
+    group: 'integrations',
+  },
+  {
+    key: 'DOCUSIGN_USER_ID',
+    required: false,
+    description: 'DocuSign impersonated user ID (GUID)',
+    group: 'integrations',
+  },
+  {
+    key: 'DOCUSIGN_ACCOUNT_ID',
+    required: false,
+    description: 'DocuSign account ID',
+    group: 'integrations',
+  },
+  {
+    key: 'DOCUSIGN_BASE_URL',
+    required: false,
+    description: 'DocuSign REST API base URL',
+    group: 'integrations',
+  },
+  {
+    key: 'DOCUSIGN_AUTH_URL',
+    required: false,
+    description: 'DocuSign OAuth base URL',
+    group: 'integrations',
+  },
+  {
+    key: 'DOCUSIGN_PRIVATE_KEY',
+    required: false,
+    description: 'DocuSign RSA private key (base64-encoded) for JWT auth',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'DOCUSIGN_CONNECT_HMAC_KEY',
+    required: false,
+    description: 'DocuSign Connect HMAC key for webhook verification',
+    sensitive: true,
+    group: 'integrations',
+  },
+
+  // ── Maps ──────────────────────────────────────────────────────────────────
+  {
+    key: 'GOOGLE_MAPS_API_KEY',
+    required: false,
+    description: 'Google Maps API key for server-side geocoding and routing',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'MAPBOX_ACCESS_TOKEN',
+    required: false,
+    description:
+      'Mapbox access token for server-side and Terra/mobile map tiles (required for distress map — P1-004)',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'VITE_MAPBOX_TOKEN',
+    required: false,
+    description: 'Frontend Mapbox token (Vite build-time, must start with pk.)',
+    sensitive: true,
+    group: 'integrations',
+  },
+
+  // ── Legal / Compliance Feeds ──────────────────────────────────────────────
+  {
+    key: 'COURT_LISTENER_API_KEY',
+    required: false,
+    description: 'CourtListener API key for legal case data feed',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'EQUIFAX_API_KEY',
+    required: false,
+    description: 'Equifax API key for credit/KYB data feed',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'AIS_API_KEY',
+    required: false,
+    description:
+      'AIS vessel tracking API key — required for live vessel positions (P1-005); falls back to demo data without it',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
+    key: 'AIS_FEED_ENABLED',
+    required: false,
+    description: 'Enable AIS vessel tracking data feed (true | false)',
+    defaultValue: 'false',
+    group: 'integrations',
+  },
+  {
+    key: 'LEGAL_FEED_ENABLED',
+    required: false,
+    description: 'Enable legal case data feed (true | false)',
+    defaultValue: 'false',
+    group: 'integrations',
+  },
+  {
+    key: 'SANCTIONS_FEED_ENABLED',
+    required: false,
+    description: 'Enable sanctions data feed (true | false)',
+    defaultValue: 'false',
+    group: 'integrations',
+  },
+  {
+    key: 'STIX_FEED_ENABLED',
+    required: false,
+    description: 'Enable STIX threat intelligence feed (true | false)',
+    defaultValue: 'false',
+    group: 'integrations',
+  },
+
+  // ── Feature Flags (additional) ────────────────────────────────────────────
+  {
+    key: 'SYNTHETIC_ALERTS',
+    required: false,
+    description: 'Enable synthetic alert generation for demo/dev environments (true | false)',
+    defaultValue: 'false',
+    group: 'features',
+  },
+
+  // ── Memory / RAG ──────────────────────────────────────────────────────────
+  {
+    key: 'MEMORY_HYDRATE_LIMIT',
+    required: false,
+    description: 'Maximum number of memory entries to hydrate per request',
+    defaultValue: '100',
+    group: 'platform',
+  },
+  {
+    key: 'MEMORY_EPHEMERAL_MAX_AGE_MIN',
+    required: false,
+    description: 'Maximum age of ephemeral memory entries in minutes',
+    defaultValue: '60',
+    group: 'platform',
+  },
+  {
+    key: 'TRACE_HYDRATE_LIMIT',
+    required: false,
+    description: 'Maximum number of traces to hydrate per request',
+    defaultValue: '50',
+    group: 'platform',
+  },
+  {
+    key: 'TRACE_RETENTION_DAYS',
+    required: false,
+    description: 'Number of days to retain decision traces',
+    defaultValue: '90',
+    group: 'platform',
+  },
+  {
+    key: 'CORTEX_SNAPSHOT_RETENTION_DAYS',
+    required: false,
+    description: 'Number of days to retain Cortex snapshots',
+    defaultValue: '30',
+    group: 'platform',
+  },
+  {
+    key: 'PERSISTENCE_FLUSH_INTERVAL_MS',
+    required: false,
+    description: 'How often to flush the persistence layer (ms)',
+    defaultValue: '5000',
+    group: 'platform',
+  },
+  {
+    key: 'PERSISTENCE_RETENTION_INTERVAL_MS',
+    required: false,
+    description: 'How often to run retention cleanup (ms)',
+    defaultValue: '3600000',
+    group: 'platform',
+  },
+
+  // ── Expo / Mobile ─────────────────────────────────────────────────────────
+  {
+    key: 'EXPO_ACCESS_TOKEN',
+    required: false,
+    description: 'Expo access token for EAS Build API calls from the server',
+    sensitive: true,
+    group: 'integrations',
+  },
+
+  // ── Federated API Gateway ─────────────────────────────────────────────────
+  {
+    key: 'FEDERATION_API_TOKENS',
+    required: false,
+    description: 'Comma-separated list of tokens accepted from federated partner APIs',
+    sensitive: true,
+    group: 'auth',
+  },
+
+  // ── Build Metadata (CI-injected) ──────────────────────────────────────────
+  {
+    key: 'BUILD_VERSION',
+    required: false,
+    description: 'Application version label injected by CI (do not set manually)',
+    defaultValue: '0.0.0',
+    group: 'runtime',
+  },
+  {
+    key: 'BUILD_TIMESTAMP',
+    required: false,
+    description: 'Build timestamp injected by CI (do not set manually)',
+    group: 'runtime',
+  },
+  {
+    key: 'COMMIT_SHA',
+    required: false,
+    description: 'Git commit SHA injected by CI (do not set manually)',
+    group: 'runtime',
+  },
+
+  // ── App-Specific Admin Contacts ───────────────────────────────────────────
+  {
+    key: 'CARLOTA_ADMIN_EMAIL',
+    required: false,
+    description: 'Admin email for Carlota Jo consulting app notifications',
+    group: 'server',
+  },
+  {
+    key: 'STEPHEN_ADMIN_EMAIL',
+    required: false,
+    description: 'Admin email for Stephen site notifications',
+    group: 'server',
+  },
+  {
+    key: 'SZL_INTERNAL_EMAIL',
+    required: false,
+    description: 'Internal SZL email address for platform notifications',
+    group: 'server',
+  },
+
+  // ── Backup ────────────────────────────────────────────────────────────────
+  {
+    key: 'BACKUP_DIR',
+    required: false,
+    description: 'Directory to write backup files (local dev only)',
+    defaultValue: '/tmp/szl-backups',
+    group: 'storage',
   },
 ];
 
