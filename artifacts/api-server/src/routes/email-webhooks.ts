@@ -144,13 +144,13 @@ router.get('/notifications/unsubscribe', async (req: Request, res: Response) => 
   return res.status(200).send(`
     <!DOCTYPE html>
     <html lang="en">
-    <head><meta charset="UTF-8"><title>Unsubscribed from Digest</title>
+    <head><meta charset="UTF-8"><title>Unsubscribed from Notifications</title>
     <style>body{font-family:-apple-system,sans-serif;max-width:480px;margin:80px auto;padding:0 24px;color:#374151;}h1{font-size:20px;}p{color:#6b7280;line-height:1.6;}</style>
     </head>
     <body>
-      <h1>You've been unsubscribed from digest emails.</h1>
-      <p>Your preference has been saved — <strong>${email}</strong> will no longer receive daily digest emails from SZL Holdings.</p>
-      <p>You can re-enable digest emails at any time from your <a href="${process.env.APP_URL || 'https://szlholdings.com'}/settings/notifications">notification settings</a>.</p>
+      <h1>You've been unsubscribed from notification emails.</h1>
+      <p>Your preference has been saved — <strong>${email}</strong> will no longer receive notification emails from SZL Holdings.</p>
+      <p>You can re-enable notification emails at any time from your <a href="${process.env.APP_URL || 'https://szlholdings.com'}/settings/notifications">notification settings</a>.</p>
       <p>If this was a mistake, contact us at <a href="mailto:inquiries@szlholdings.com">inquiries@szlholdings.com</a>.</p>
     </body>
     </html>

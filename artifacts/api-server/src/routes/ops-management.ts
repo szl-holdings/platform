@@ -15,6 +15,19 @@ import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
 
+function buildNotificationUnsubscribeUrl(recipientEmail: string): string {
+  const appUrl = process.env.APP_URL || 'https://szlholdings.com';
+  const token = generateUnsubscribeToken(recipientEmail);
+  return `${appUrl}/api/notifications/unsubscribe?e=${encodeURIComponent(recipientEmail)}&t=${encodeURIComponent(token)}`;
+}
+
+function buildNotificationUnsubscribeHeaders(unsubscribeUrl: string): Record<string, string> {
+  return {
+    'List-Unsubscribe': `<${unsubscribeUrl}>, <mailto:unsubscribe@szlholdings.com?subject=unsubscribe>`,
+    'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+  };
+}
+
 // Valid incident status transitions (state machine)
 const INCIDENT_TRANSITIONS: Record<string, string[]> = {
   open: ['investigating'],
@@ -982,6 +995,7 @@ router.post(
       const alertsUrl =
         process.env.ALERTS_PAGE_URL ??
         `${process.env.APP_BASE_URL ?? 'https://szlholdings.com'}/command/ops/alerts`;
+      const notificationUnsubscribeUrl = buildNotificationUnsubscribeUrl(recipient);
       const { subject, html, text } = buildAlertFiredEmail({
         ruleName: `[TEST] ${ruleName ?? 'Sample Alert Rule'}`,
         severity: 'warning',
@@ -990,8 +1004,9 @@ router.post(
         condition: 'gt',
         threshold: 5,
         alertsUrl,
+        notificationUnsubscribeUrl,
       });
-      const result = await sendEmail({ to: recipient, subject, html, text, unsubscribeToken: generateUnsubscribeToken(recipient) });
+      const result = await sendEmail({ to: recipient, subject, html, text, headers: buildNotificationUnsubscribeHeaders(notificationUnsubscribeUrl) });
       if (!result.success) {
         res.status(502).json({ error: result.error ?? 'Email delivery failed' });
         return;
@@ -1053,18 +1068,20 @@ router.post(
       const alertsUrl =
         process.env.ALERTS_PAGE_URL ??
         `${process.env.APP_BASE_URL ?? 'https://szlholdings.com'}/command/ops/alerts`;
-      const { subject, html, text } = buildAlertFiredEmail({
-        ruleName: `[TEST] ${rule.name}`,
-        severity: rule.severity,
-        metricName: rule.metric_name,
-        metricValue: rule.threshold * 1.1,
-        condition: rule.condition,
-        threshold: rule.threshold,
-        alertsUrl,
-      });
       const results: Array<{ recipient: string; success: boolean; messageId?: string; error?: string }> = [];
       for (const recipient of recipients) {
-        const result = await sendEmail({ to: recipient, subject, html, text, unsubscribeToken: generateUnsubscribeToken(recipient) });
+        const notificationUnsubscribeUrl = buildNotificationUnsubscribeUrl(recipient);
+        const { subject, html, text } = buildAlertFiredEmail({
+          ruleName: `[TEST] ${rule.name}`,
+          severity: rule.severity,
+          metricName: rule.metric_name,
+          metricValue: rule.threshold * 1.1,
+          condition: rule.condition,
+          threshold: rule.threshold,
+          alertsUrl,
+          notificationUnsubscribeUrl,
+        });
+        const result = await sendEmail({ to: recipient, subject, html, text, headers: buildNotificationUnsubscribeHeaders(notificationUnsubscribeUrl) });
         results.push({ recipient, success: result.success, messageId: result.messageId, error: result.error });
         logNotificationAudit({
           template: 'alert_rule_test_send',
@@ -1305,25 +1322,25 @@ export async function runAlertRuleEvaluation(triggeredBy: 'scheduled' | 'manual'
             const alertsUrl =
               process.env.ALERTS_PAGE_URL ??
               `${process.env.APP_BASE_URL ?? 'https://szlholdings.com'}/command/ops/alerts`;
-            const { subject, html, text } = buildAlertFiredEmail({
-              ruleName: rule.name,
-              severity: rule.severity,
-              metricName: rule.metric_name,
-              metricValue: metricVal,
-              condition: rule.condition,
-              threshold: rule.threshold,
-              alertsUrl,
-            });
-            // Send to all recipients; await results so we can stamp last_notified_at
-            // only when at least one delivery succeeds.
             const sendResults = await Promise.all(
-              rule.email_recipients.map((recipient) =>
-                sendEmail({
+              rule.email_recipients.map((recipient) => {
+                const notificationUnsubscribeUrl = buildNotificationUnsubscribeUrl(recipient);
+                const { subject, html, text } = buildAlertFiredEmail({
+                  ruleName: rule.name,
+                  severity: rule.severity,
+                  metricName: rule.metric_name,
+                  metricValue: metricVal,
+                  condition: rule.condition,
+                  threshold: rule.threshold,
+                  alertsUrl,
+                  notificationUnsubscribeUrl,
+                });
+                return sendEmail({
                   to: recipient,
                   subject,
                   html,
                   text,
-                  unsubscribeToken: generateUnsubscribeToken(recipient),
+                  headers: buildNotificationUnsubscribeHeaders(notificationUnsubscribeUrl),
                 })
                   .then((result) => {
                     if (result.success) {
@@ -1356,8 +1373,8 @@ export async function runAlertRuleEvaluation(triggeredBy: 'scheduled' | 'manual'
                       '[ops] Alert email dispatch threw (non-fatal)',
                     );
                     return { success: false as const };
-                  }),
-              ),
+                  });
+              }),
             );
 
             // Update last_notified_at (and last_email_sent_at for back-compat) only

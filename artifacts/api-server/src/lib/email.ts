@@ -386,6 +386,7 @@ export interface AlertFiredEmailOptions {
   condition: string;
   threshold: number;
   alertsUrl?: string;
+  notificationUnsubscribeUrl?: string;
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
@@ -428,7 +429,11 @@ export function buildAlertFiredEmail(opts: AlertFiredEmailOptions): {
       </tr>
     </table>
     <a href="${alertsUrl}" class="cta">View Alerts Dashboard</a>
-    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">This is an automated alert from the SZL Holdings Ops Center. No reply is needed.</p>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">This is an automated alert from the SZL Holdings Ops Center. No reply is needed.</p>${
+      opts.notificationUnsubscribeUrl
+        ? `\n    <p style="margin:8px 0 0;font-size:11px;"><a href="${opts.notificationUnsubscribeUrl}" style="color:#9ca3af;text-decoration:underline;">Unsubscribe from alert emails</a></p>`
+        : ''
+    }
   `);
 
   const text = [
@@ -442,6 +447,9 @@ export function buildAlertFiredEmail(opts: AlertFiredEmailOptions): {
     `View alerts: ${alertsUrl}`,
     ``,
     `This is an automated alert from the SZL Holdings Ops Center.`,
+    ...(opts.notificationUnsubscribeUrl
+      ? [``, `Unsubscribe from alert emails: ${opts.notificationUnsubscribeUrl}`]
+      : []),
   ].join('\n');
 
   return { subject, html, text };

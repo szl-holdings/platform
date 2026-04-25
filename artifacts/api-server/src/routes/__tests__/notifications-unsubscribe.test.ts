@@ -97,7 +97,7 @@ describe('GET /api/notifications/unsubscribe', () => {
       '/api/notifications/unsubscribe?e=user@example.com&t=validtoken',
     );
     expect(res.status).toBe(200);
-    expect(res.text).toContain('unsubscribed from digest emails');
+    expect(res.text).toContain('unsubscribed from notification emails');
     expect(mockInsert).toHaveBeenCalledOnce();
     expect(mockOnConflictDoUpdate).toHaveBeenCalledOnce();
   });

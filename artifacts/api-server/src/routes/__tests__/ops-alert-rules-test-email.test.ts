@@ -181,6 +181,26 @@ describe('POST /ops/alert-rules/test-email', () => {
     expect(callArgs.to).toBe('someone@example.com');
     expect(typeof callArgs.subject).toBe('string');
     expect(typeof callArgs.html).toBe('string');
+    expect(callArgs.headers).toBeDefined();
+    const headers = callArgs.headers as Record<string, string>;
+    expect(headers['List-Unsubscribe']).toContain('/api/notifications/unsubscribe');
+    expect(headers['List-Unsubscribe-Post']).toBe('List-Unsubscribe=One-Click');
+  });
+
+  it('includes a notification unsubscribe URL in the alert email', async () => {
+    mockSendEmail.mockResolvedValue({ success: true, messageId: 'msg-unsub', provider: 'sendgrid' });
+    mockBuildAlertFiredEmail.mockImplementation((opts: Record<string, unknown>) => {
+      expect(opts.notificationUnsubscribeUrl).toBeDefined();
+      expect(String(opts.notificationUnsubscribeUrl)).toContain('/api/notifications/unsubscribe');
+      return { subject: 'test', html: '<p>test</p>', text: 'test' };
+    });
+    const app = await buildApp();
+
+    await request(app)
+      .post('/ops/alert-rules/test-email')
+      .send({ recipient: 'unsub-test@example.com' });
+
+    expect(mockBuildAlertFiredEmail).toHaveBeenCalledOnce();
   });
 
   it('prefixes the ruleName with [TEST] when building the email', async () => {
