@@ -2,6 +2,7 @@ import { boolean, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/p
 
 export const alloyChatKbDocuments = pgTable('alloy_chat_kb_documents', {
   id: text('id').primaryKey(),
+  orgId: integer('org_id'),
   title: text('title').notNull(),
   sourceType: text('source_type').notNull(),
   sourceUrl: text('source_url'),
@@ -15,6 +16,7 @@ export const alloyChatKbDocuments = pgTable('alloy_chat_kb_documents', {
 
 export const alloyChatAdvisories = pgTable('alloy_chat_advisories', {
   id: text('id').primaryKey(),
+  orgId: integer('org_id'),
   category: text('category').notNull(),
   title: text('title').notNull(),
   content: text('content').notNull(),
@@ -26,6 +28,7 @@ export const alloyChatAdvisories = pgTable('alloy_chat_advisories', {
 
 export const alloyChatComparisons = pgTable('alloy_chat_comparisons', {
   id: text('id').primaryKey(),
+  orgId: integer('org_id'),
   prompt: text('prompt').notNull(),
   results: jsonb('results').notNull(),
   ratings: jsonb('ratings'),

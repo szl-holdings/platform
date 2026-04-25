@@ -271,13 +271,21 @@ function chunkText(text: string, chunkSize = 400): string[] {
 
 // ─── Conversation endpoints (from HEAD — streaming, persistent history) ────────
 
-alloyChatRouter.get('/alloy-chat/conversations', async (_req: Request, res: Response) => {
+alloyChatRouter.get('/alloy-chat/conversations', async (req: Request, res: Response) => {
   try {
-    const convos = await db
-      .select()
-      .from(conversations)
-      .orderBy(desc(conversations.createdAt))
-      .limit(50);
+    const tenantOrgId = req.tenantOrgId;
+    const convos = tenantOrgId !== undefined
+      ? await db
+          .select()
+          .from(conversations)
+          .where(eq(conversations.orgId, tenantOrgId))
+          .orderBy(desc(conversations.createdAt))
+          .limit(50)
+      : await db
+          .select()
+          .from(conversations)
+          .orderBy(desc(conversations.createdAt))
+          .limit(50);
     res.json({ conversations: convos });
   } catch {
     res.status(500).json({ error: 'Failed to load conversations' });
@@ -287,9 +295,10 @@ alloyChatRouter.get('/alloy-chat/conversations', async (_req: Request, res: Resp
 alloyChatRouter.post('/alloy-chat/conversations', async (req: Request, res: Response) => {
   try {
     const { title } = req.body as { title?: string };
+    const tenantOrgId = req.tenantOrgId;
     const [newConvo] = await db
       .insert(conversations)
-      .values({ title: title ?? 'New Chat' })
+      .values({ title: title ?? 'New Chat', orgId: tenantOrgId ?? null })
       .returning();
     res.status(201).json(newConvo);
   } catch {
@@ -304,6 +313,21 @@ alloyChatRouter.get(
       const id = parseInt(String(req.params.id!), 10);
       if (Number.isNaN(id)) {
         res.status(400).json({ error: 'Invalid conversation ID' });
+        return;
+      }
+      const tenantOrgId = req.tenantOrgId;
+      const convoRows = await db
+        .select()
+        .from(conversations)
+        .where(eq(conversations.id, id))
+        .limit(1);
+      const convo = convoRows[0];
+      if (!convo) {
+        res.status(404).json({ error: 'Conversation not found' });
+        return;
+      }
+      if (tenantOrgId !== undefined && convo.orgId !== tenantOrgId) {
+        res.status(403).json({ error: 'Access denied' });
         return;
       }
       const msgs = await db
@@ -324,6 +348,23 @@ alloyChatRouter.delete('/alloy-chat/conversations/:id', async (req: Request, res
     if (Number.isNaN(id)) {
       res.status(400).json({ error: 'Invalid conversation ID' });
       return;
+    }
+    const tenantOrgId = req.tenantOrgId;
+    if (tenantOrgId !== undefined) {
+      const convoRows = await db
+        .select()
+        .from(conversations)
+        .where(eq(conversations.id, id))
+        .limit(1);
+      const convo = convoRows[0];
+      if (!convo) {
+        res.status(404).json({ error: 'Conversation not found' });
+        return;
+      }
+      if (convo.orgId !== tenantOrgId) {
+        res.status(403).json({ error: 'Access denied' });
+        return;
+      }
     }
     await db.delete(conversations).where(eq(conversations.id, id));
     res.json({ success: true });
@@ -350,6 +391,24 @@ alloyChatRouter.post(
       return;
     }
 
+    const tenantOrgId = req.tenantOrgId;
+    if (tenantOrgId !== undefined) {
+      const convoRows = await db
+        .select()
+        .from(conversations)
+        .where(eq(conversations.id, id))
+        .limit(1);
+      const convo = convoRows[0];
+      if (!convo) {
+        res.status(404).json({ error: 'Conversation not found' });
+        return;
+      }
+      if (convo.orgId !== tenantOrgId) {
+        res.status(403).json({ error: 'Access denied' });
+        return;
+      }
+    }
+
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -359,7 +418,7 @@ alloyChatRouter.post(
     try {
       await db
         .insert(messages)
-        .values({ conversationId: id, role: 'user', content: content.trim() });
+        .values({ conversationId: id, orgId: tenantOrgId ?? null, role: 'user', content: content.trim() });
 
       const history = await db
         .select()
@@ -421,7 +480,7 @@ alloyChatRouter.post(
       if (fullResponse) {
         await db
           .insert(messages)
-          .values({ conversationId: id, role: 'assistant', content: fullResponse });
+          .values({ conversationId: id, orgId: tenantOrgId ?? null, role: 'assistant', content: fullResponse });
 
         const convo = await db
           .select()
@@ -638,6 +697,7 @@ alloyChatRouter.post(
         if (!validUrl) return;
       }
 
+      const tenantOrgId = req.tenantOrgId ?? null;
       const chunks = chunkText(content, 400);
       const docGroupId = crypto.randomUUID();
       const insertedIds: string[] = [];
@@ -653,10 +713,10 @@ alloyChatRouter.post(
         } catch {}
 
         await pool.query(
-          `INSERT INTO alloy_chat_kb_documents (id, title, source_type, source_url, content, chunk_index, total_chunks, embedding, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+          `INSERT INTO alloy_chat_kb_documents (id, org_id, title, source_type, source_url, content, chunk_index, total_chunks, embedding, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
          ON CONFLICT (id) DO UPDATE SET content = EXCLUDED.content, embedding = EXCLUDED.embedding, updated_at = NOW()`,
-          [id, title, sourceType, sourceUrl || null, chunk, i, chunks.length, embeddingStr],
+          [id, tenantOrgId, title, sourceType, sourceUrl || null, chunk, i, chunks.length, embeddingStr],
         );
         insertedIds.push(id);
       }
@@ -672,8 +732,11 @@ alloyChatRouter.get(
   '/alloy-chat/kb/documents',
   aiLimit,
   authMiddleware({ required: false }),
-  async (_req, res) => {
+  async (req, res) => {
     try {
+      const tenantOrgId = req.tenantOrgId;
+      const orgFilter = tenantOrgId !== undefined ? 'WHERE org_id = $1' : '';
+      const params = tenantOrgId !== undefined ? [tenantOrgId] : [];
       const result = await pool.query(`
       SELECT title, source_type, source_url,
              MIN(created_at) as created_at,
@@ -681,9 +744,10 @@ alloyChatRouter.get(
              COUNT(*) as chunk_count,
              SPLIT_PART(id, '-chunk-', 1) as doc_group_id
       FROM alloy_chat_kb_documents
+      ${orgFilter}
       GROUP BY title, source_type, source_url, SPLIT_PART(id, '-chunk-', 1)
       ORDER BY MIN(created_at) DESC
-    `);
+    `, params);
       sendSuccess(res, { documents: result.rows });
     } catch (err) {
       handleRouteError(res, err, 'Failed to list KB documents');
@@ -698,10 +762,19 @@ alloyChatRouter.delete(
   async (req, res) => {
     try {
       const { groupId } = req.params;
-      const result = await pool.query(
-        `DELETE FROM alloy_chat_kb_documents WHERE id LIKE $1 RETURNING id`,
-        [`${groupId}%`],
-      );
+      const tenantOrgId = req.tenantOrgId;
+      let result;
+      if (tenantOrgId !== undefined) {
+        result = await pool.query(
+          `DELETE FROM alloy_chat_kb_documents WHERE id LIKE $1 AND org_id = $2 RETURNING id`,
+          [`${groupId}%`, tenantOrgId],
+        );
+      } else {
+        result = await pool.query(
+          `DELETE FROM alloy_chat_kb_documents WHERE id LIKE $1 RETURNING id`,
+          [`${groupId}%`],
+        );
+      }
       sendSuccess(res, { deleted: result.rowCount });
     } catch (err) {
       handleRouteError(res, err, 'Failed to delete KB document');
@@ -727,9 +800,15 @@ alloyChatRouter.post(
         queryEmbedding = embResult.embedding;
       } catch {}
 
-      const allDocs = await pool.query(
-        `SELECT id, title, content, embedding, source_type, source_url FROM alloy_chat_kb_documents`,
-      );
+      const tenantOrgId = req.tenantOrgId;
+      const allDocs = tenantOrgId !== undefined
+        ? await pool.query(
+            `SELECT id, title, content, embedding, source_type, source_url FROM alloy_chat_kb_documents WHERE org_id = $1`,
+            [tenantOrgId],
+          )
+        : await pool.query(
+            `SELECT id, title, content, embedding, source_type, source_url FROM alloy_chat_kb_documents`,
+          );
 
       if (allDocs.rows.length === 0) {
         sendSuccess(res, { chunks: [], context: '' });
@@ -801,7 +880,7 @@ alloyChatRouter.post(
   '/alloy-chat/advisory/generate',
   aiLimit,
   authMiddleware({ required: false }),
-  async (_req, res) => {
+  async (req, res) => {
     try {
       const devDomain = process.env.REPLIT_DEV_DOMAIN;
       const baseUrl = devDomain
@@ -886,11 +965,13 @@ Provide actionable insights. This is advisory only — no changes are executed a
       }
 
       const id = `adv-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
+      const tenantOrgId = req.tenantOrgId ?? null;
       await pool.query(
-        `INSERT INTO alloy_chat_advisories (id, category, title, content, severity, is_read, metadata, generated_at)
-       VALUES ($1, $2, $3, $4, $5, FALSE, $6, NOW())`,
+        `INSERT INTO alloy_chat_advisories (id, org_id, category, title, content, severity, is_read, metadata, generated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, FALSE, $7, NOW())`,
         [
           id,
+          tenantOrgId,
           advisoryData.category || 'operational',
           advisoryData.title,
           advisoryData.content,
@@ -913,10 +994,19 @@ alloyChatRouter.get(
   async (req, res) => {
     try {
       const limit = parseInt((req.query as Record<string, string>).limit || '20', 10);
-      const result = await pool.query(
-        `SELECT id, category, title, content, severity, is_read, metadata, generated_at FROM alloy_chat_advisories ORDER BY generated_at DESC LIMIT $1`,
-        [limit],
-      );
+      const tenantOrgId = req.tenantOrgId;
+      let result;
+      if (tenantOrgId !== undefined) {
+        result = await pool.query(
+          `SELECT id, category, title, content, severity, is_read, metadata, generated_at FROM alloy_chat_advisories WHERE org_id = $1 ORDER BY generated_at DESC LIMIT $2`,
+          [tenantOrgId, limit],
+        );
+      } else {
+        result = await pool.query(
+          `SELECT id, category, title, content, severity, is_read, metadata, generated_at FROM alloy_chat_advisories ORDER BY generated_at DESC LIMIT $1`,
+          [limit],
+        );
+      }
       const unreadCount = result.rows.filter((r: any) => !r.is_read).length;
       sendSuccess(res, { advisories: result.rows, unreadCount });
     } catch (err) {
@@ -931,9 +1021,17 @@ alloyChatRouter.post(
   authMiddleware({ required: false }),
   async (req, res) => {
     try {
-      await pool.query(`UPDATE alloy_chat_advisories SET is_read = TRUE WHERE id = $1`, [
-        req.params.id,
-      ]);
+      const tenantOrgId = req.tenantOrgId;
+      if (tenantOrgId !== undefined) {
+        await pool.query(
+          `UPDATE alloy_chat_advisories SET is_read = TRUE WHERE id = $1 AND org_id = $2`,
+          [req.params.id, tenantOrgId],
+        );
+      } else {
+        await pool.query(`UPDATE alloy_chat_advisories SET is_read = TRUE WHERE id = $1`, [
+          req.params.id,
+        ]);
+      }
       sendSuccess(res, { id: req.params.id, isRead: true });
     } catch (err) {
       handleRouteError(res, err, 'Failed to mark advisory as read');
@@ -945,9 +1043,17 @@ alloyChatRouter.post(
   '/alloy-chat/advisory/read-all',
   aiLimit,
   authMiddleware({ required: false }),
-  async (_req, res) => {
+  async (req, res) => {
     try {
-      await pool.query(`UPDATE alloy_chat_advisories SET is_read = TRUE`);
+      const tenantOrgId = req.tenantOrgId;
+      if (tenantOrgId !== undefined) {
+        await pool.query(
+          `UPDATE alloy_chat_advisories SET is_read = TRUE WHERE org_id = $1`,
+          [tenantOrgId],
+        );
+      } else {
+        await pool.query(`UPDATE alloy_chat_advisories SET is_read = TRUE`);
+      }
       sendSuccess(res, { updated: true });
     } catch (err) {
       handleRouteError(res, err, 'Failed to mark all advisories as read');
@@ -1100,10 +1206,11 @@ alloyChatRouter.post(
       );
 
       const id = `cmp-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
+      const cmpTenantOrgId = req.tenantOrgId ?? null;
       try {
         await pool.query(
-          `INSERT INTO alloy_chat_comparisons (id, prompt, results, ratings, created_at) VALUES ($1, $2, $3, $4, NOW())`,
-          [id, prompt, JSON.stringify(results), JSON.stringify({})],
+          `INSERT INTO alloy_chat_comparisons (id, org_id, prompt, results, ratings, created_at) VALUES ($1, $2, $3, $4, $5, NOW())`,
+          [id, cmpTenantOrgId, prompt, JSON.stringify(results), JSON.stringify({})],
         );
       } catch {}
 
@@ -1125,10 +1232,23 @@ alloyChatRouter.post(
         sendError(res, 'Provider and rating are required', 400);
         return;
       }
-      await pool.query(
-        `UPDATE alloy_chat_comparisons SET ratings = COALESCE(ratings, '{}'::jsonb) || $2::jsonb WHERE id = $1`,
-        [req.params.id, JSON.stringify({ [provider]: rating })],
-      );
+      const tenantOrgId = req.tenantOrgId;
+      let result;
+      if (tenantOrgId !== undefined) {
+        result = await pool.query(
+          `UPDATE alloy_chat_comparisons SET ratings = COALESCE(ratings, '{}'::jsonb) || $2::jsonb WHERE id = $1 AND org_id = $3`,
+          [req.params.id, JSON.stringify({ [provider]: rating }), tenantOrgId],
+        );
+      } else {
+        result = await pool.query(
+          `UPDATE alloy_chat_comparisons SET ratings = COALESCE(ratings, '{}'::jsonb) || $2::jsonb WHERE id = $1`,
+          [req.params.id, JSON.stringify({ [provider]: rating })],
+        );
+      }
+      if ((result.rowCount ?? 0) === 0 && tenantOrgId !== undefined) {
+        sendError(res, 'Comparison not found or access denied', 404);
+        return;
+      }
       sendSuccess(res, { id: req.params.id, provider, rating });
     } catch (err) {
       handleRouteError(res, err, 'Failed to save rating');
@@ -1175,9 +1295,15 @@ alloyChatRouter.post(
             kbEmbedding = embResult.embedding;
           } catch {}
 
-          const allDocs = await pool.query(
-            `SELECT id, title, content, embedding FROM alloy_chat_kb_documents LIMIT 200`,
-          );
+          const ctxTenantOrgId = req.tenantOrgId;
+          const allDocs = ctxTenantOrgId !== undefined
+            ? await pool.query(
+                `SELECT id, title, content, embedding FROM alloy_chat_kb_documents WHERE org_id = $1 LIMIT 200`,
+                [ctxTenantOrgId],
+              )
+            : await pool.query(
+                `SELECT id, title, content, embedding FROM alloy_chat_kb_documents LIMIT 200`,
+              );
 
           if (allDocs.rows.length > 0) {
             type Chunk = { title: string; content: string; score: number };
