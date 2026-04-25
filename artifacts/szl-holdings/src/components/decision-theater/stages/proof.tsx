@@ -277,7 +277,7 @@ export function LiveProofStage({
           </div>
         </div>
       </div>
-      <ScenarioCitedRiskRuns emptyHint="No cited risk simulations yet across DOMAINE or Vessels. Save a Monte Carlo run from either product to attach percentile bands and sensitivities to the live audit chain." />
+      <ScenarioCitedRiskRuns emptyHint="No cited risk simulations yet across DOMAINE or SEXTANT. Save a Monte Carlo run from either product to attach percentile bands and sensitivities to the live audit chain." />
     </div>
   );
 }

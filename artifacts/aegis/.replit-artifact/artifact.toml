@@ -1,6 +1,6 @@
 kind = "web"
     previewPath = "/aegis/"
-    title = "SZL Holdings — Investor Pitch Deck"
+    title = "PARAGON — Defense & Intelligence Command"
     version = "1.0.0"
     id = "artifacts/aegis"
     router = "path"

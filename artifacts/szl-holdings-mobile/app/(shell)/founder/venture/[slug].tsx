@@ -168,7 +168,7 @@ const VENTURES_MAP: Record<
     highlights: [
       'Shared PostgreSQL infrastructure with 120+ tables across all platforms',
       'Unified Replit Auth OIDC layer with 11-role RBAC',
-      'Alloy: internal execution fabric and workflow orchestration engine',
+      'FORGE: internal execution fabric and workflow orchestration engine',
       'Shared GraphQL API layer with Apollo Server v5',
       'Command-grade design system with dark-first aesthetic',
     ],

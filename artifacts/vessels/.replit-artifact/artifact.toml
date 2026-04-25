@@ -1,6 +1,6 @@
 kind = "web"
     previewPath = "/vessels/"
-    title = "Vessels Maritime Intelligence"
+    title = "SEXTANT — Maritime Intelligence"
     version = "1.0.0"
     id = "artifacts/vessels"
     router = "path"

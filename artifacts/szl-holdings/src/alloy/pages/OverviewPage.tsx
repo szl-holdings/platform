@@ -313,7 +313,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
             What FORGE Powers
           </div>
           <h2 className="text-2xl md:text-3xl font-bold mb-3">
-            Every platform in the SZL ecosystem runs on Alloy.
+            Every platform in the SZL ecosystem runs on FORGE.
           </h2>
           <p
             className="max-w-xl text-sm leading-relaxed"
@@ -670,7 +670,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
           >
             Documented Outcomes
           </div>
-          <h2 className="text-2xl font-bold text-white">Results from Alloy-powered deployments</h2>
+          <h2 className="text-2xl font-bold text-white">Results from FORGE-powered deployments</h2>
           <p className="text-white/45 text-sm mt-2 max-w-xl leading-relaxed">
             Specific operational outcomes achieved through FORGE's orchestration layer. Documented
             with constraints, timelines, and measured impact.

@@ -129,7 +129,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-lg text-amber-100/60 max-w-2xl mb-8 leading-relaxed">
-            {lyteOneLiner} Built on Alloy. Every recommendation carries its evidence chain.
+            {lyteOneLiner} Built on FORGE. Every recommendation carries its evidence chain.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -152,7 +152,7 @@ export default function LandingPage() {
 
           {/* Proof badge strip */}
           <div className="mt-8 flex flex-wrap gap-2">
-            {['ALLOY-PROOF', 'PRISM-OBSERVE', 'LEDGER-ANCHORED', 'SOC2-READY'].map((b) => (
+            {['FORGE-PROOF', 'PRISM-OBSERVE', 'LEDGER-ANCHORED', 'SOC2-READY'].map((b) => (
               <span key={b} className="proof-badge">
                 {b}
               </span>
@@ -246,7 +246,7 @@ export default function LandingPage() {
                 <span className="text-xs font-mono text-amber-400/50">CURRENT RISK SNAPSHOT</span>
                 <span className="proof-badge">
                   <Shield className="w-2.5 h-2.5" />
-                  ALLOY-PROOF
+                  FORGE-PROOF
                 </span>
               </div>
               {[

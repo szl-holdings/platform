@@ -104,7 +104,7 @@ export default function BriefingHistoryPage() {
                   marginTop: '2px',
                 }}
               >
-                CORTEX-generated executive briefings · Cross-domain intelligence synthesis
+                APEX-generated executive briefings · Cross-domain intelligence synthesis
               </p>
             </div>
             <button

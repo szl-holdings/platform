@@ -310,7 +310,7 @@ export const baseIntelligenceCards: IntelligenceCard[] = [
     title: 'Threat Actor Campaign — Infrastructure Blast Radius',
     severity: 'critical',
     description:
-      'PARAGON is tracking APT-29 lateral movement toward Active Directory. KORA has flagged 2 microservices running on CORP-SRV-08 that are within the blast radius. Isolation of the affected K8s namespace would temporarily reduce KORA monitoring coverage for DOMAINE and Vessels.',
+      'PARAGON is tracking APT-29 lateral movement toward Active Directory. KORA has flagged 2 microservices running on CORP-SRV-08 that are within the blast radius. Isolation of the affected K8s namespace would temporarily reduce KORA monitoring coverage for DOMAINE and SEXTANT.',
     entities: ['PARAGON', 'KORA', 'DOMAINE', 'SEXTANT'],
     action: 'Isolate K8s namespace after backup',
   },

@@ -72,10 +72,10 @@ Founded and operated by Stephen Lutar, SZL is a single-founder, capital-efficien
         content: `• Six platforms live and operational
 • Unified architecture via FORGE backbone — each platform benefits from shared capability
 • Carlota Jo: active client relationships with premium advisory revenue
-• Terra: platform deployed in NYC market with distress data pipeline operational
-• Aegis: SOC platform built to FedRAMP-alignment standards
-• Vessels: maritime intelligence platform live with AIS data integration
-• Lyte: observability platform live with core workflow monitoring capability
+• DOMAINE: platform deployed in NYC market with distress data pipeline operational
+• PARAGON: SOC platform built to FedRAMP-alignment standards
+• SEXTANT: maritime intelligence platform live with AIS data integration
+• KORA: observability platform live with core workflow monitoring capability
 • Capital readiness infrastructure built and operational (this document set)`,
       },
       {
@@ -177,9 +177,9 @@ Payback: Immediate
 
 TRACK 2: SaaS (KORA, SEXTANT, DOMAINE)
 Model: Per-seat or per-unit subscription with enterprise tiers
-Lyte: $150–$400/seat/mo, targeting 10–100 seat deployments
-Vessels: $5,000–$25,000/vessel/year for fleet operators
-Terra: $299–$799/mo broker, $1,500–$5,000/mo investor/fund tier
+KORA: $150–$400/seat/mo, targeting 10–100 seat deployments
+SEXTANT: $5,000–$25,000/vessel/year for fleet operators
+DOMAINE: $299–$799/mo broker, $1,500–$5,000/mo investor/fund tier
 Revenue potential (Yr2): $1.2M ARR combined at conservative adoption
 
 TRACK 3: GOVERNMENT / ENTERPRISE (PARAGON + SEXTANT Federal)
@@ -278,13 +278,13 @@ The common thread: high-consequence domains where visibility failures are expens
         title: 'Slide 3: The Solution',
         content: `SZL Holdings builds command-layer intelligence platforms — not features, not dashboards, not reports. Systems.
 
-• Lyte: Business operations made legible in real time
-• Vessels: Maritime command — from AIS position to operational intelligence
-• Aegis: SOC command — unified defense operations for MSPs and enterprise
-• Terra: NYC/NYS real estate intelligence — from distress signals to deal pipeline
+• KORA: Business operations made legible in real time
+• SEXTANT: Maritime command — from AIS position to operational intelligence
+• PARAGON: SOC command — unified defense operations for MSPs and enterprise
+• DOMAINE: NYC/NYS real estate intelligence — from distress signals to deal pipeline
 • Carlota Jo: Premium advisory generating immediate revenue
 
-All powered by Alloy: a shared AI and automation backbone that makes every platform smarter as the portfolio grows.`,
+All powered by FORGE: a shared AI and automation backbone that makes every platform smarter as the portfolio grows.`,
       },
       {
         title: 'Slide 4: Market Size',
@@ -324,9 +324,9 @@ A competitor building one platform starts from zero. We started from the archite
 ✓ Capital Readiness OS (bank/angel/government document infrastructure)
 
 Next 90 days:
-→ Lyte: revenue tier and first paid customers
-→ Vessels: enterprise fleet operator pilot
-→ Aegis: first MSP partner signed
+→ KORA: revenue tier and first paid customers
+→ SEXTANT: enterprise fleet operator pilot
+→ PARAGON: first MSP partner signed
 → SAM.gov registration and MWBE application initiated`,
       },
       {
@@ -347,10 +347,10 @@ PARAGON + SEXTANT federal — contract-based, annual, $50K–$500K ACV. Supporte
         content: `Platform milestones completed:
 • Six platforms built and live
 • Carlota Jo: active advisory relationships with premium clients
-• Terra: distress data pipeline operational, NYC market coverage live
-• Vessels: AIS data integrated, maritime intelligence layer operational
-• Aegis: SOC platform built, compliance controls aligned with FedRAMP Low requirements
-• Lyte: workflow monitoring live, observability layer operational
+• DOMAINE: distress data pipeline operational, NYC market coverage live
+• SEXTANT: AIS data integrated, maritime intelligence layer operational
+• PARAGON: SOC platform built, compliance controls aligned with FedRAMP Low requirements
+• KORA: workflow monitoring live, observability layer operational
 
 Infrastructure milestones:
 • Capital Readiness OS built and operational
@@ -361,17 +361,17 @@ Infrastructure milestones:
         title: 'Slide 9: Go-To-Market',
         content: `Phase 1 (Months 1–6): Commercial activation
 • Carlota Jo: outbound to 3 target HNW client segments
-• Lyte: 5 pilot deployments via direct outbound to ops-heavy SMBs
-• Terra: broker launch with NYC commercial broker outreach
+• KORA: 5 pilot deployments via direct outbound to ops-heavy SMBs
+• DOMAINE: broker launch with NYC commercial broker outreach
 
 Phase 2 (Months 7–12): Enterprise and government entry
-• Vessels: first fleet operator pilot (maritime logistics or shipping)
-• Aegis: first MSP reseller relationship
+• SEXTANT: first fleet operator pilot (maritime logistics or shipping)
+• PARAGON: first MSP reseller relationship
 • Government: SAM.gov live, MWBE application submitted, SBIR Phase I proposals
 
 Phase 3 (Months 13–24): Scale and raise
-• Lyte: enterprise tier launch with $50K+ ACV targets
-• Aegis: first government contract awarded
+• KORA: enterprise tier launch with $50K+ ACV targets
+• PARAGON: first government contract awarded
 • Series A trigger: $600K+ ARR, government contract in hand, expansion metrics positive`,
       },
       {
@@ -411,7 +411,7 @@ Year 3 (2028) — Series A Ready:
 Non-dilutive sources being pursued in parallel:
 • SBA 7(a) or CDFI loan: $200K–$500K
 • NY MWBE certification → state contract set-asides
-• SBIR Phase I (NSF for KORA, DoD for Vessels/Aegis): $275K each
+• SBIR Phase I (NSF for KORA, DoD for SEXTANT/PARAGON): $275K each
 • NY Excelsior Jobs Program: tax credits on qualifying jobs
 
 Angel equity structure:
@@ -644,7 +644,7 @@ Where legacy AIS tools answer "where is the vessel?", SEXTANT answers "what is t
 
 The result: real-time operational decisions made on 12–48 hour old data, leading to avoidable demurrage charges, missed port windows, and suboptimal routing decisions. Estimated cost of poor maritime intelligence to global shipping: $40B+ annually.
 
-Nobody has built a command layer that integrates all these signals into a unified operational view — until Vessels.`,
+Nobody has built a command layer that integrates all these signals into a unified operational view — until SEXTANT.`,
       },
       {
         title: 'Who Buys SEXTANT',
@@ -1128,13 +1128,13 @@ SZL Holdings positions itself as a command infrastructure company — not a feat
 
 DISTRIBUTION CHANNELS BY PRODUCT:
 
-Lyte: Direct outbound to operations leaders at 50–500 person professional services, healthcare, and financial services firms. Target buyers: COOs, operations directors, business process owners. Supported by content marketing (operational efficiency case studies) and product-led growth (self-serve Essential tier).
+KORA: Direct outbound to operations leaders at 50–500 person professional services, healthcare, and financial services firms. Target buyers: COOs, operations directors, business process owners. Supported by content marketing (operational efficiency case studies) and product-led growth (self-serve Essential tier).
 
-Vessels: Direct outbound to fleet operators and maritime logistics companies. Partnership channel: maritime insurance brokers and port consulting firms who recommend operational tools to clients. Government channel: MARAD, Coast Guard, and DHS SBIR solicitations.
+SEXTANT: Direct outbound to fleet operators and maritime logistics companies. Partnership channel: maritime insurance brokers and port consulting firms who recommend operational tools to clients. Government channel: MARAD, Coast Guard, and DHS SBIR solicitations.
 
-Aegis: MSP partner channel (primary) — recruit 3–5 MSP partners in Year 1 who resell PARAGON to their managed client environments. Direct enterprise channel: CISOs and security directors at 200–1,000 person organizations. Government channel: CMMC consultants and defense contractors.
+PARAGON: MSP partner channel (primary) — recruit 3–5 MSP partners in Year 1 who resell PARAGON to their managed client environments. Direct enterprise channel: CISOs and security directors at 200–1,000 person organizations. Government channel: CMMC consultants and defense contractors.
 
-Terra: Direct outbound to NYC commercial brokers and distressed property investors. Distribution through NYC real estate associations (REBNY, commercial broker networks) and real estate attorney referrals.
+DOMAINE: Direct outbound to NYC commercial brokers and distressed property investors. Distribution through NYC real estate associations (REBNY, commercial broker networks) and real estate attorney referrals.
 
 Carlota Jo: Referral-only. Private network. No public marketing.
 
@@ -1165,10 +1165,10 @@ Cash requirements: Loan proceeds provide 12+ months runway
 
 YEAR 2 (2027) REVENUE PROJECTION
 Carlota Jo: $360,000
-Lyte: $350,000
-Vessels: $300,000
-Terra: $200,000
-Aegis: $250,000
+KORA: $350,000
+SEXTANT: $300,000
+DOMAINE: $200,000
+PARAGON: $250,000
 Total Revenue: $1,460,000
 
 YEAR 2 OPERATING EXPENSES (projected)
@@ -1258,7 +1258,7 @@ Three months of operating expenses held in reserve to provide buffer against rev
 
 Month 13–18 priorities:
 • Hire #2 — Senior Software Engineer: Focus on PARAGON government compliance and SEXTANT data pipeline
-• First government contract pursuit: SBIR Phase I proposals submitted (Aegis/DHS, Vessels/DoD)
+• First government contract pursuit: SBIR Phase I proposals submitted (PARAGON/DHS, SEXTANT/DoD)
 • Enterprise sales motion activation: Dedicated enterprise outreach for KORA and PARAGON
 • MWBE certification completion: NY state procurement access
 
@@ -1397,29 +1397,29 @@ This analysis assumes conservative revenue projections. Carlota Jo achieving 3 c
 
 MONTH 1: $0 (all lines in startup/pilot mode)
 MONTH 2: $0
-MONTH 3: $12,500 (CJ: $9,500; Terra: $3,000; Lyte: $0; Vessels: $0; Aegis: $0)
-MONTH 4: $17,500 (CJ: $9,500; Terra: $3,000; Lyte: $5,000; Vessels: $0; Aegis: $0)
-MONTH 5: $20,000 (CJ: $9,500; Terra: $3,500; Lyte: $7,000; Vessels: $0; Aegis: $0)
-MONTH 6: $33,000 (CJ: $19,000 — 2 clients; Terra: $4,000; Lyte: $7,000; Vessels: $3,000 pilot; Aegis: $0)
-MONTH 7: $40,000 (CJ: $19,000; Terra: $5,000; Lyte: $8,000; Vessels: $5,000; Aegis: $3,000)
-MONTH 8: $45,000 (CJ: $19,000; Terra: $5,000; Lyte: $10,000; Vessels: $5,000; Aegis: $6,000)
-MONTH 9: $60,500 (CJ: $28,500 — 3 clients; Terra: $6,000; Lyte: $12,000; Vessels: $6,000; Aegis: $8,000)
-MONTH 10: $68,000 (CJ: $28,500; Terra: $7,000; Lyte: $14,000; Vessels: $8,000; Aegis: $10,500)
-MONTH 11: $75,000 (CJ: $28,500; Terra: $8,000; Lyte: $16,000; Vessels: $10,000; Aegis: $12,500)
-MONTH 12: $85,000 (CJ: $28,500; Terra: $9,000; Lyte: $18,000; Vessels: $12,000; Aegis: $17,500)
+MONTH 3: $12,500 (CJ: $9,500; DOMAINE: $3,000; KORA: $0; SEXTANT: $0; PARAGON: $0)
+MONTH 4: $17,500 (CJ: $9,500; DOMAINE: $3,000; KORA: $5,000; SEXTANT: $0; PARAGON: $0)
+MONTH 5: $20,000 (CJ: $9,500; DOMAINE: $3,500; KORA: $7,000; SEXTANT: $0; PARAGON: $0)
+MONTH 6: $33,000 (CJ: $19,000 — 2 clients; DOMAINE: $4,000; KORA: $7,000; SEXTANT: $3,000 pilot; PARAGON: $0)
+MONTH 7: $40,000 (CJ: $19,000; DOMAINE: $5,000; KORA: $8,000; SEXTANT: $5,000; PARAGON: $3,000)
+MONTH 8: $45,000 (CJ: $19,000; DOMAINE: $5,000; KORA: $10,000; SEXTANT: $5,000; PARAGON: $6,000)
+MONTH 9: $60,500 (CJ: $28,500 — 3 clients; DOMAINE: $6,000; KORA: $12,000; SEXTANT: $6,000; PARAGON: $8,000)
+MONTH 10: $68,000 (CJ: $28,500; DOMAINE: $7,000; KORA: $14,000; SEXTANT: $8,000; PARAGON: $10,500)
+MONTH 11: $75,000 (CJ: $28,500; DOMAINE: $8,000; KORA: $16,000; SEXTANT: $10,000; PARAGON: $12,500)
+MONTH 12: $85,000 (CJ: $28,500; DOMAINE: $9,000; KORA: $18,000; SEXTANT: $12,000; PARAGON: $17,500)
 
-MONTH 13: $92,000 (CJ: $28,500; Terra: $10,000; Lyte: $22,000; Vessels: $14,000; Aegis: $17,500)
-MONTH 14: $98,000 (CJ: $28,500; Terra: $11,000; Lyte: $24,000; Vessels: $16,000; Aegis: $18,500)
-MONTH 15: $108,000 (CJ: $28,500; Terra: $12,000; Lyte: $28,000; Vessels: $18,000; Aegis: $21,500)
-MONTH 16: $115,000 (CJ: $28,500; Terra: $12,500; Lyte: $30,000; Vessels: $20,000; Aegis: $24,000)
-MONTH 17: $120,000 (CJ: $28,500; Terra: $13,000; Lyte: $32,000; Vessels: $22,000; Aegis: $24,500)
-MONTH 18: $128,000 (CJ: $28,500; Terra: $13,500; Lyte: $34,000; Vessels: $24,000; Aegis: $28,000)
-MONTH 19: $133,000 (CJ: $28,500; Terra: $14,000; Lyte: $36,000; Vessels: $26,000; Aegis: $28,500)
-MONTH 20: $138,000 (CJ: $28,500; Terra: $14,500; Lyte: $38,000; Vessels: $28,000; Aegis: $29,000)
-MONTH 21: $142,000 (CJ: $28,500; Terra: $15,000; Lyte: $40,000; Vessels: $28,500; Aegis: $30,000)
-MONTH 22: $148,000 (CJ: $28,500; Terra: $15,500; Lyte: $42,000; Vessels: $30,000; Aegis: $32,000)
-MONTH 23: $152,000 (CJ: $28,500; Terra: $15,500; Lyte: $44,000; Vessels: $32,000; Aegis: $32,000)
-MONTH 24: $158,000 (CJ: $28,500; Terra: $16,000; Lyte: $46,000; Vessels: $34,000; Aegis: $33,500)
+MONTH 13: $92,000 (CJ: $28,500; DOMAINE: $10,000; KORA: $22,000; SEXTANT: $14,000; PARAGON: $17,500)
+MONTH 14: $98,000 (CJ: $28,500; DOMAINE: $11,000; KORA: $24,000; SEXTANT: $16,000; PARAGON: $18,500)
+MONTH 15: $108,000 (CJ: $28,500; DOMAINE: $12,000; KORA: $28,000; SEXTANT: $18,000; PARAGON: $21,500)
+MONTH 16: $115,000 (CJ: $28,500; DOMAINE: $12,500; KORA: $30,000; SEXTANT: $20,000; PARAGON: $24,000)
+MONTH 17: $120,000 (CJ: $28,500; DOMAINE: $13,000; KORA: $32,000; SEXTANT: $22,000; PARAGON: $24,500)
+MONTH 18: $128,000 (CJ: $28,500; DOMAINE: $13,500; KORA: $34,000; SEXTANT: $24,000; PARAGON: $28,000)
+MONTH 19: $133,000 (CJ: $28,500; DOMAINE: $14,000; KORA: $36,000; SEXTANT: $26,000; PARAGON: $28,500)
+MONTH 20: $138,000 (CJ: $28,500; DOMAINE: $14,500; KORA: $38,000; SEXTANT: $28,000; PARAGON: $29,000)
+MONTH 21: $142,000 (CJ: $28,500; DOMAINE: $15,000; KORA: $40,000; SEXTANT: $28,500; PARAGON: $30,000)
+MONTH 22: $148,000 (CJ: $28,500; DOMAINE: $15,500; KORA: $42,000; SEXTANT: $30,000; PARAGON: $32,000)
+MONTH 23: $152,000 (CJ: $28,500; DOMAINE: $15,500; KORA: $44,000; SEXTANT: $32,000; PARAGON: $32,000)
+MONTH 24: $158,000 (CJ: $28,500; DOMAINE: $16,000; KORA: $46,000; SEXTANT: $34,000; PARAGON: $33,500)
 
 24-MONTH CUMULATIVE REVENUE: $1,988,500`,
       },
@@ -1443,10 +1443,10 @@ YEAR 2 RUN-RATE (Month 24 annualized): $1,896,000 ARR
 
 REVENUE MIX AT MONTH 24:
 • Carlota Jo: $28,500/mo (18.0% of MRR)
-• Lyte: $46,000/mo (29.1%)
-• Vessels: $34,000/mo (21.5%)
-• Terra: $16,000/mo (10.1%)
-• Aegis: $33,500/mo (21.2%)`,
+• KORA: $46,000/mo (29.1%)
+• SEXTANT: $34,000/mo (21.5%)
+• DOMAINE: $16,000/mo (10.1%)
+• PARAGON: $33,500/mo (21.2%)`,
       },
       {
         title: 'Expense Forecast — Month 1–24 (Monthly Detail)',
@@ -2010,7 +2010,7 @@ SZL's FORGE platform and AI-native architecture align with NYSTAR's focus on:
 • Maritime technology (SEXTANT — aligns with NY maritime industry)
 
 SBRA SBIR ASSISTANCE:
-NYSTAR's SBRA program can provide direct assistance navigating federal SBIR applications. This is highly relevant for SZL's SBIR strategy (NSF for KORA, DoD for Vessels/Aegis, DHS for PARAGON).
+NYSTAR's SBRA program can provide direct assistance navigating federal SBIR applications. This is highly relevant for SZL's SBIR strategy (NSF for KORA, DoD for SEXTANT/PARAGON, DHS for PARAGON).
 
 RECOMMENDED ACTION:
 1. Contact NYSTAR (nystar.suny.edu) to identify the closest aligned Innovation Hot Spot
@@ -2297,7 +2297,7 @@ WHY NSF:
 NSF funds fundamental technology innovation. KORA's governed operational intelligence layer — the algorithm that identifies approval bottlenecks from organizational signal data — qualifies as "fundamental R&D" in applied AI/ML for organizational systems.
 
 PHASE I PITCH (NSF format):
-Technical Innovation: Alloy-based ML model that learns organizational approval patterns and predicts bottleneck risk before failures occur. Current state of the art cannot do this without large proprietary training datasets. KORA's approach uses federated learning across anonymized organizational signal data.
+Technical Innovation: FORGE-based ML model that learns organizational approval patterns and predicts bottleneck risk before failures occur. Current state of the art cannot do this without large proprietary training datasets. KORA's approach uses federated learning across anonymized organizational signal data.
 
 Commercial Potential: 500K+ US companies in the target market (50–500 employees, ops-intensive). $12B+ TAM with no dominant solution at the SMB-mid-market layer.
 
@@ -2527,19 +2527,19 @@ DOMAINE establishes SZL in the NYC real estate market — the deepest, most data
 The SZL portfolio was built in reverse order from most companies: we built the infrastructure first, then the products. The FORGE backbone — workflow orchestration, AI intelligence, signal processing, document automation — was designed and built before the first product was deployed. This is why six production platforms can exist with one founding team.
 
 What's live and operational:
-• Alloy: Full workflow orchestration, automation engine, connector mesh, document system
-• Lyte: Business observability layer, process monitoring, workflow analytics
-• Vessels: AIS data integration, maritime intelligence layer, fleet tracking
-• Aegis: SOC command platform, XDR correlation, managed operations layer
-• Terra: Distress data pipeline, ownership intelligence, broker workflow tools
+• FORGE: Full workflow orchestration, automation engine, connector mesh, document system
+• KORA: Business observability layer, process monitoring, workflow analytics
+• SEXTANT: AIS data integration, maritime intelligence layer, fleet tracking
+• PARAGON: SOC command platform, XDR correlation, managed operations layer
+• DOMAINE: Distress data pipeline, ownership intelligence, broker workflow tools
 • Carlota Jo: Active advisory practice with client relationships
 
 Capital infrastructure (what you're looking at right now): Bank-ready business plan, investor materials, NY state program applications, federal program eligibility analysis, SAM.gov registration — all built and operational.
 
 WHAT'S NEXT (90-Day Milestones):
-□ Lyte: First paying customer ($5K MRR), pilot program for 5 accounts
-□ Vessels: First fleet operator pilot agreement signed
-□ Aegis: First MSP partner letter of intent signed
+□ KORA: First paying customer ($5K MRR), pilot program for 5 accounts
+□ SEXTANT: First fleet operator pilot agreement signed
+□ PARAGON: First MSP partner letter of intent signed
 □ SAM.gov: Registration completed
 □ MWBE: Application submitted (if eligible)
 □ SBIR: Phase I proposal submitted to NSF (KORA) or DHS (PARAGON)
@@ -2577,7 +2577,7 @@ Trigger for next round: $600K+ ARR, government contract award, clear path to $3M
 
 SERIES A (24–36 Months)
 Target: $8M–$15M
-Use: Geographic expansion (Vessels: international markets), PARAGON federal scale, KORA enterprise tier
+Use: Geographic expansion (SEXTANT: international markets), PARAGON federal scale, KORA enterprise tier
 Trigger: $3M+ ARR, $1M+ government revenue, 2+ validated enterprise verticals`,
       },
       {

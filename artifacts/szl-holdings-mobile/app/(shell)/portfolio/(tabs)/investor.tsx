@@ -25,7 +25,7 @@ const QUARTERLY_LETTERS = [
     title: 'Q1 2026 Investor Letter',
     quarter: 'Q1 2026',
     excerpt:
-      'PARAGON FedRAMP track opens. Enterprise client expansion across SEXTANT and Lyte. Platform architecture milestone delivered.',
+      'PARAGON FedRAMP track opens. Enterprise client expansion across SEXTANT and KORA. Platform architecture milestone delivered.',
     date: 'March 31, 2026',
   },
   {

@@ -1299,7 +1299,7 @@ export const INITIAL_COALITION: CoalitionPartner[] = [
   },
   {
     id: 'cp-003',
-    name: 'Aegis — Risk Engine',
+    name: 'PARAGON — Risk Engine',
     role: 'Real-Time Risk Scoring',
     domain: 'Finance',
     trustScore: 87,

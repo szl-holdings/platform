@@ -253,7 +253,7 @@ export default function PolicyCenterPage() {
           </a>
           <div className="proof-badge">
             <GitBranch className="w-2.5 h-2.5" />
-            ALLOY-POLICY
+            FORGE-POLICY
           </div>
         </div>
       </div>

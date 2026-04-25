@@ -17,7 +17,7 @@ const entries = [
       { type: "feature", text: "KORA: Watchdog AI Anomaly Detection with 98.2% noise reduction" },
       { type: "feature", text: "KORA: SLO Tracking with burn rate alerts and error budget visualization" },
       { type: "improvement", text: "Admin Panel: Connector Health grid with latency heatmaps and failure analytics" },
-      { type: "fix", text: "SZL Cortex: GPU monitoring panel chart rendering on mobile viewports" },
+      { type: "fix", text: "APEX: GPU monitoring panel chart rendering on mobile viewports" },
     ],
   },
   {
@@ -38,10 +38,10 @@ const entries = [
     version: "v3.6.0",
     date: "February 24, 2026",
     type: "minor",
-    highlight: "SZL Cortex GPU Monitoring + LLM Evaluation launch",
+    highlight: "APEX GPU Monitoring + LLM Evaluation launch",
     changes: [
-      { type: "feature", text: "SZL Cortex: GPU Cluster Monitoring with thermal, utilization, and memory pressure tracking" },
-      { type: "feature", text: "SZL Cortex: LLM Evaluation Studio with automated regression testing and A/B model comparison" },
+      { type: "feature", text: "APEX: GPU Cluster Monitoring with thermal, utilization, and memory pressure tracking" },
+      { type: "feature", text: "APEX: LLM Evaluation Studio with automated regression testing and A/B model comparison" },
       { type: "feature", text: "FORGE: Prediction Studio with multi-channel scenario modeling" },
       { type: "feature", text: "FORGE: Confidence Scoring with probabilistic output and assumption tracking" },
       { type: "improvement", text: "PARAGON: Risk Register redesign with dynamic filtering and bulk status updates" },

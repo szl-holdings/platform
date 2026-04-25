@@ -76,7 +76,7 @@ const platformRegistry = [
     owner: 'Security Engineering',
   },
   {
-    name: 'SZL Cortex',
+    name: 'APEX',
     slug: 'inca',
     type: 'AI Research Command',
     tier: 'Platform',
@@ -313,7 +313,7 @@ const featureFlags = [
   {
     key: 'multi_agent_orchestration',
     label: 'Multi-Agent Orchestration',
-    scope: 'FORGE, SZL Cortex',
+    scope: 'FORGE, APEX',
     enabled: true,
     rollout: 60,
     owner: 'AI Team',

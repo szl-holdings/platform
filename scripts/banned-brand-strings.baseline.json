@@ -279,7 +279,7 @@
     "KORA": 1
   },
   "artifacts/command/src/infrastructure/lib/imperium-data.ts": {
-    "PARAGON": 5,
+    "PARAGON": 6,
     "SEXTANT": 1
   },
   "artifacts/command/src/infrastructure/pages/praetorian-guard.tsx": {
@@ -631,6 +631,7 @@
     "DOMAINE": 1
   },
   "artifacts/command/src/pages/substrate/approval-queue.tsx": {
+    "PARAGON": 1,
     "SEXTANT": 1,
     "DOMAINE": 1,
     "KORA": 1
@@ -640,6 +641,7 @@
     "SEXTANT": 2
   },
   "artifacts/command/src/pages/substrate/trajectory-map.tsx": {
+    "PARAGON": 1,
     "SEXTANT": 1,
     "DOMAINE": 1,
     "KORA": 1
@@ -1212,7 +1214,6 @@
     "PARAGON": 8,
     "KORA": 2,
     "DOMAINE": 2,
-    "Cortex": 1,
     "SEXTANT": 1
   },
   "artifacts/szl-holdings/src/pages/command-center.tsx": {
@@ -1243,7 +1244,6 @@
   "artifacts/szl-holdings/src/pages/control-plane.tsx": {
     "SEXTANT": 3,
     "PARAGON": 5,
-    "Cortex": 2,
     "DOMAINE": 2,
     "KORA": 1
   },
@@ -1620,8 +1620,7 @@
     "KORA": 1,
     "SEXTANT": 4,
     "PARAGON": 3,
-    "DOMAINE": 4,
-    "Nexus": 2
+    "DOMAINE": 4
   },
   "artifacts/szl-holdings/src/pages/nexus-explorer.tsx": {
     "SEXTANT": 2,
@@ -1720,7 +1719,6 @@
     "PARAGON": 6,
     "SEXTANT": 5,
     "DOMAINE": 6,
-    "Nexus": 4,
     "LUMINA": 1
   },
   "artifacts/szl-holdings/src/pages/pulse.tsx": {
@@ -1752,7 +1750,6 @@
   "artifacts/szl-holdings/src/pages/roadmap.tsx": {
     "PARAGON": 6,
     "KORA": 4,
-    "Cortex": 4,
     "DOMAINE": 4,
     "SEXTANT": 3
   },
@@ -1862,7 +1859,6 @@
   },
   "artifacts/szl-holdings/src/pages/updates.tsx": {
     "SEXTANT": 3,
-    "Cortex": 3,
     "PARAGON": 2
   },
   "artifacts/szl-holdings/src/pages/venture-intel/capital-optimizer.tsx": {

@@ -85,9 +85,9 @@ export const ESSAYS: Essay[] = [
 
 <p>The architectural discipline required to make this work is significant. Each vertical has to be built to its own operational vocabulary while exposing its core functionality through the shared fabric's interface contracts.</p>
 
-<p>DOMAINE speaks in property signals, deal stages, and ownership graphs. SEXTANT speaks in vessel tracks, port calls, and route anomalies. PARAGON speaks in threat vectors, indicator correlations, and incident timelines. They're genuinely different domains. The discipline is building each in its native language while routing consequential actions through Alloy.</p>
+<p>DOMAINE speaks in property signals, deal stages, and ownership graphs. SEXTANT speaks in vessel tracks, port calls, and route anomalies. PARAGON speaks in threat vectors, indicator correlations, and incident timelines. They're genuinely different domains. The discipline is building each in its native language while routing consequential actions through FORGE.</p>
 
-<p>This means the vertical teams must resist the temptation to build their own execution logic. Every time you build a workflow inside a vertical instead of in FORGE, you create a governance gap. The rule is simple: if it touches data, it goes through the fabric. If it makes a recommendation, it goes through Alloy. If it executes an action, the proof chain sees it.</p>
+<p>This means the vertical teams must resist the temptation to build their own execution logic. Every time you build a workflow inside a vertical instead of in FORGE, you create a governance gap. The rule is simple: if it touches data, it goes through the fabric. If it makes a recommendation, it goes through FORGE. If it executes an action, the proof chain sees it.</p>
 
 <h3>The compound result</h3>
 

@@ -484,7 +484,7 @@ function AppShell() {
       id: 'cl2',
       surface: 'SEXTANT',
       surfaceAccent: '#0ea5e9',
-      label: 'Vessels: MV Atlantic Falcon sanctions linkage',
+      label: 'SEXTANT: MV Atlantic Falcon sanctions linkage',
       description:
         'SEXTANT flagged Apex Group as beneficiary of a sanctioned vessel voyage — linked to 2024-SEC-441.',
       href: '/vessels/sanctions',
@@ -494,7 +494,7 @@ function AppShell() {
       id: 'cl3',
       surface: 'KORA',
       surfaceAccent: '#0ea5e9',
-      label: 'Lyte: 2 legal decisions pending executive approval',
+      label: 'KORA: 2 legal decisions pending executive approval',
       description:
         "KORA's Decision Center has 2 Counsel-sourced recommendations queued for executive sign-off.",
       href: '/lyte/decision-center',

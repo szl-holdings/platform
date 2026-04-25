@@ -425,7 +425,7 @@ export default function SignalFeed() {
               <h1 className="text-base font-bold text-white">Signal & Event Feed</h1>
             </div>
             <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-              Live feed of cross-platform intelligence signals — DOMAINE, PARAGON, SEXTANT, KORA, Alloy.
+              Live feed of cross-platform intelligence signals — DOMAINE, PARAGON, SEXTANT, KORA, FORGE.
             </p>
           </div>
           <div className="flex items-center gap-2">

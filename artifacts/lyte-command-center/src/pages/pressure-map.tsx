@@ -191,7 +191,7 @@ export default function PressureMapPage() {
             </div>
             <span className="proof-badge">
               <Shield className="w-2.5 h-2.5" />
-              ALLOY-METRICS
+              FORGE-METRICS
             </span>
           </div>
 
@@ -439,7 +439,7 @@ export default function PressureMapPage() {
 
               <div className="proof-badge mt-1 self-start">
                 <Shield className="w-2.5 h-2.5" />
-                ALLOY-P-
+                FORGE-P-
                 {selectedCell.team
                   .toUpperCase()
                   .replace(/[^A-Z]/g, '')

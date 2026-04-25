@@ -7,7 +7,7 @@ const thesis = [
   {
     pillar: "Vertical AI Infrastructure",
     description: "SZL invests in AI-native platforms that solve domain-specific problems at enterprise scale — not general AI wrappers.",
-    examples: ["SZL Cortex: AI research infrastructure", "KORA: AIOps & observability"],
+    examples: ["APEX: AI research infrastructure", "KORA: AIOps & observability"],
     rationale: "Vertical AI compounds moat through proprietary data, domain expertise, and switching costs. We target markets where AI creates 5-10x operational leverage.",
     stage: "Series A priority",
     color: "#8b5cf6",

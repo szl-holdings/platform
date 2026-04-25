@@ -470,7 +470,7 @@ export default function ActionDebtPage() {
           <div className="flex items-center gap-2">
             <span className="proof-badge">
               <Shield className="w-2.5 h-2.5" />
-              ALLOY-DEBT
+              FORGE-DEBT
             </span>
             <span className="text-[10px] font-mono text-red-400/70 flex items-center gap-1">
               <TrendingUp className="w-3 h-3" />

@@ -83,7 +83,7 @@ const DEMO_SELF_MODEL: SelfModel = {
   autonomyTier: 'TIER-2',
   identity: {
     purpose:
-      'Synthesize cross-domain signals into actionable intelligence for executive decision-making. Maintain situational awareness across SEXTANT, DOMAINE, PARAGON, PRISM, Carlota, and Lyte.',
+      'Synthesize cross-domain signals into actionable intelligence for executive decision-making. Maintain situational awareness across SEXTANT, DOMAINE, PARAGON, PRISM, Carlota, and KORA.',
     operatingContext:
       'SZL Holdings — unified executive command layer. Operates under TIER-2 supervised autonomy. Actions above 0.85 confidence auto-approve within policy envelope; below requires human review.',
     boundaryConstraints: [

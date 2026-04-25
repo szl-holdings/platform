@@ -1,6 +1,6 @@
 kind = "web"
   previewPath = "/lyte/"
-  title = "Lyte — Decision Intelligence"
+  title = "KORA — Decision Intelligence"
   version = "1.0.0"
   id = "artifacts/lyte-command-center"
   router = "path"

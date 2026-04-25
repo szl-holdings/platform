@@ -511,7 +511,7 @@ export default function MarketingHomePage() {
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-sky-50 tracking-tight">
-              Who runs on Vessels.
+              Who runs on SEXTANT.
             </h2>
           </m.div>
 

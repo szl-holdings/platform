@@ -167,7 +167,7 @@ export function AlloyStrip() {
               }}
             >
               FORGE is the AI orchestration engine that connects the entire ecosystem. Every
-              intelligent workflow, agent decision, and cross-platform signal flows through Alloy.
+              intelligent workflow, agent decision, and cross-platform signal flows through FORGE.
             </p>
 
             <div className="grid sm:grid-cols-2 gap-3">

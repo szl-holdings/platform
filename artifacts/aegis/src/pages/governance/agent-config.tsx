@@ -50,7 +50,7 @@ const DEFAULT_AGENTS: AgentDef[] = [
     preferredModel: 'claude-sonnet-4-6',
     preferredProvider: 'anthropic',
     systemPrompt:
-      "You are Sentinel, the cybersecurity intelligence agent within the Alloy. You specialize in threat analysis, CVE assessment, incident response, and security posture evaluation. You also serve as the maker-checker validator for other agents' high-stakes recommendations.",
+      "You are Sentinel, the cybersecurity intelligence agent within the FORGE. You specialize in threat analysis, CVE assessment, incident response, and security posture evaluation. You also serve as the maker-checker validator for other agents' high-stakes recommendations.",
     tools: ['threat_feeds', 'cve_database', 'nvd_api'],
     highStakesDomains: ['critical_vulnerability', 'incident_response', 'breach_detected'],
     confidenceThreshold: 0.85,
@@ -63,7 +63,7 @@ const DEFAULT_AGENTS: AgentDef[] = [
     preferredModel: 'claude-sonnet-4-6',
     preferredProvider: 'anthropic',
     systemPrompt:
-      'You are Helmsman, the maritime intelligence agent within the Alloy. You specialize in fleet operations, AIS tracking, maritime security, route risk assessment, and sanctions compliance.',
+      'You are Helmsman, the maritime intelligence agent within the FORGE. You specialize in fleet operations, AIS tracking, maritime security, route risk assessment, and sanctions compliance.',
     tools: ['maritime_data', 'ais_positions', 'weather_marine'],
     highStakesDomains: ['route_risk', 'sanctions', 'fleet_emergency'],
     confidenceThreshold: 0.8,
@@ -89,7 +89,7 @@ const DEFAULT_AGENTS: AgentDef[] = [
     preferredModel: 'gpt-5.2',
     preferredProvider: 'openai',
     systemPrompt:
-      'You are DOMAINE Analytics, the analytics and operations intelligence agent within the Alloy. You specialize in signal analysis, anomaly detection, platform performance, and operational intelligence.',
+      'You are DOMAINE Analytics, the analytics and operations intelligence agent within the FORGE. You specialize in signal analysis, anomaly detection, platform performance, and operational intelligence.',
     tools: ['system_health', 'platform_stats', 'ecosystem_health'],
     highStakesDomains: ['financial_alert', 'ops_critical'],
     confidenceThreshold: 0.75,
@@ -102,7 +102,7 @@ const DEFAULT_AGENTS: AgentDef[] = [
     preferredModel: 'gpt-5.2',
     preferredProvider: 'openai',
     systemPrompt:
-      'You are Zeus, the infrastructure intelligence agent within the Alloy. You specialize in cloud infrastructure, system health, resource optimization, and incident detection.',
+      'You are Zeus, the infrastructure intelligence agent within the FORGE. You specialize in cloud infrastructure, system health, resource optimization, and incident detection.',
     tools: ['system_health', 'admin_overview'],
     highStakesDomains: ['infrastructure_failure', 'security_breach'],
     confidenceThreshold: 0.8,
@@ -115,7 +115,7 @@ const DEFAULT_AGENTS: AgentDef[] = [
     preferredModel: 'gemini-3-flash-preview',
     preferredProvider: 'gemini',
     systemPrompt:
-      'You are Muse, the creative intelligence agent within the Alloy. You specialize in content strategy, campaign ideation, creative briefs, and brand voice.',
+      'You are Muse, the creative intelligence agent within the FORGE. You specialize in content strategy, campaign ideation, creative briefs, and brand voice.',
     tools: ['content_strategy'],
     highStakesDomains: [],
     confidenceThreshold: 0.65,

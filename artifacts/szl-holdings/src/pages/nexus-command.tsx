@@ -704,7 +704,7 @@ function SectionHeader({
 export default function NexusCommandPage() {
   const [now, setNow] = useState(new Date());
   useEffect(() => {
-    document.title = 'Nexus Command — SZL Holdings';
+    document.title = 'PRAXIS Command — SZL Holdings';
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
@@ -798,7 +798,7 @@ export default function NexusCommandPage() {
                         lineHeight: 1,
                       }}
                     >
-                      Nexus Command
+                      PRAXIS Command
                     </h1>
                     <p style={{ fontSize: '11px', color: 'hsl(210,5%,40%)', marginTop: '2px' }}>
                       Unified ecosystem intelligence · {now.toLocaleTimeString()}

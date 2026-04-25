@@ -1046,7 +1046,7 @@ export default function CommandMarketingLanding({ onSignIn }: { onSignIn?: () =>
                 {
                   icon: Network,
                   title: 'Unified architecture',
-                  desc: 'Same infrastructure as every SZL Holdings platform. Shared auth, shared data layer, shared orchestration via Alloy.',
+                  desc: 'Same infrastructure as every SZL Holdings platform. Shared auth, shared data layer, shared orchestration via FORGE.',
                 },
                 {
                   icon: CheckCircle,

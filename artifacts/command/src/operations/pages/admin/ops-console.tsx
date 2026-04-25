@@ -2045,7 +2045,7 @@ export default function OpsConsole() {
                     <span style={{ color: '#d4a054', fontFamily: 'var(--font-mono)' }}>
                       /ops/provider-settings
                     </span>{' '}
-                    in Aegis.
+                    in PARAGON.
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>

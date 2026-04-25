@@ -7,7 +7,7 @@ const updates = [
     tag: 'Platform',
     headline: 'Navigation & page architecture overhaul across all portfolio apps',
     summary:
-      'Completed a comprehensive restructuring of the site architecture across SZL Holdings, SEXTANT, SZL Cortex, Carlota Jo, and Stephen Site. Each app now has clean marketing navigation, proper route structures, and expanded page coverage matching the master payload spec.',
+      'Completed a comprehensive restructuring of the site architecture across SZL Holdings, SEXTANT, APEX, Carlota Jo, and Stephen Site. Each app now has clean marketing navigation, proper route structures, and expanded page coverage matching the master payload spec.',
   },
   {
     date: 'February 2026',
@@ -25,10 +25,10 @@ const updates = [
   },
   {
     date: 'January 2026',
-    tag: 'SZL Cortex',
+    tag: 'APEX',
     headline: 'GPU Monitoring and LLM Evaluation Studio shipped',
     summary:
-      "SZL Cortex's research infrastructure received two major additions: a GPU monitoring module for compute cost optimization and an LLM evaluation studio for benchmarking and comparing model performance across tasks.",
+      "APEX's research infrastructure received two major additions: a GPU monitoring module for compute cost optimization and an LLM evaluation studio for benchmarking and comparing model performance across tasks.",
   },
   {
     date: 'January 2026',

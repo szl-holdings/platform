@@ -159,7 +159,7 @@ function generateReflexiveAction(): ReflexiveAction {
     },
     {
       agent: 'Portfolio Analyst',
-      action: 'Health score recalculated — Vessels: 84 → 87',
+      action: 'Health score recalculated — SEXTANT: 84 → 87',
       trigger: 'Metric refresh cycle',
     },
   ];

@@ -104,7 +104,7 @@ const PRODUCT_INTEGRATIONS = [
     icon: '⚡',
     accent: '#f59e0b',
     description:
-      'Command feeds service health streams, alert data, and operational metrics into Alloy. FORGE returns structured insights, prioritised incidents, and recommended actions.',
+      'Command feeds service health streams, alert data, and operational metrics into FORGE. FORGE returns structured insights, prioritised incidents, and recommended actions.',
     dataIn: ['Service health metrics', 'Alert feeds', 'Performance data', 'Incident history'],
     dataOut: [
       'Structured insight briefs',
@@ -132,7 +132,7 @@ const PRODUCT_INTEGRATIONS = [
     icon: '✨',
     accent: '#f472b6',
     description:
-      'Carlota Jo passes client requests, engagement data, and document requirements to Alloy. FORGE generates documents, manages approval flows, and routes operational tasks.',
+      'Carlota Jo passes client requests, engagement data, and document requirements to FORGE. FORGE generates documents, manages approval flows, and routes operational tasks.',
     dataIn: ['Client requests', 'Engagement history', 'Document requirements', 'Templates'],
     dataOut: ['Draft documents', 'Approval-ready outputs', 'Workflow routing', 'Task assignments'],
   },

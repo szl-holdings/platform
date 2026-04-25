@@ -415,7 +415,7 @@ export default function OwnershipDriftPage() {
           </div>
           <span className="proof-badge">
             <Shield className="w-2.5 h-2.5" />
-            ALLOY-SENSOR
+            FORGE-SENSOR
           </span>
         </div>
         <div className="h-36">

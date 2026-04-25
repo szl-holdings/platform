@@ -283,7 +283,7 @@ const ARTICLES_FALLBACK: Article[] = [
     title: 'What Maritime Intelligence Taught Me About Enterprise Data Architecture',
     slug: 'maritime-intelligence-data',
     excerpt:
-      "Tracking 50,000 vessels in real time across global shipping lanes is a data architecture problem before it's anything else. Here's what I learned building Vessels.",
+      "Tracking 50,000 vessels in real time across global shipping lanes is a data architecture problem before it's anything else. Here's what I learned building SEXTANT.",
     summary:
       "Tracking 50,000 vessels in real time across global shipping lanes is a data architecture problem before it's anything else.",
     publishedAt: '2024-11-10T00:00:00Z',
@@ -311,7 +311,7 @@ const THESIS_FALLBACK = [
   {
     label: 'Compound Architecture',
     content:
-      'The real moat is the compounding nature of the portfolio. Data from SEXTANT informs Aegis. KORA observes all of them. The whole is exponentially more valuable than the sum of its parts.',
+      'The real moat is the compounding nature of the portfolio. Data from SEXTANT informs PARAGON. KORA observes all of them. The whole is exponentially more valuable than the sum of its parts.',
   },
 ];
 

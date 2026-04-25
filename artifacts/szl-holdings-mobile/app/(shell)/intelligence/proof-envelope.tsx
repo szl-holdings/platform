@@ -297,7 +297,7 @@ function ProofCard({
         />
         {liveDecision?.policyReason && (
           <Text style={styles.alloyDecisionText}>
-            <Text style={styles.alloyDecisionLabel}>ALLOY: </Text>
+            <Text style={styles.alloyDecisionLabel}>FORGE: </Text>
             {liveDecision.policyReason}
           </Text>
         )}
@@ -340,7 +340,7 @@ const THREAT_EVIDENCE: EvidenceSource[] = [
     label: 'Cross-Domain Signal Aggregation',
     type: 'model',
     timestamp: FRESH_3M,
-    excerpt: 'Aegis: 3 critical threats. Vessels: 6 alerts. Correlation: 0.71.',
+    excerpt: 'PARAGON: 3 critical threats. SEXTANT: 6 alerts. Correlation: 0.71.',
   },
   {
     id: 'e5',

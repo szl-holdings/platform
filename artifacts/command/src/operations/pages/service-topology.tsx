@@ -129,10 +129,10 @@ const PLATFORM_NODES = [
 const PLATFORM_COLORS: Record<string, string> = {
   Core: '#d4a054',
   Command: '#d4a054',
-  Alloy: '#4B8BDB',
-  Terra: '#4a90b8',
-  Vessels: '#38bdf8',
-  Aegis: '#c45a4a',
+  FORGE: '#4B8BDB',
+  DOMAINE: '#4a90b8',
+  SEXTANT: '#38bdf8',
+  PARAGON: '#c45a4a',
 };
 
 const HEALTH_STYLES = {

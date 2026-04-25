@@ -25,7 +25,7 @@ const PORTFOLIO_EVIDENCE: EvidenceSource[] = [
     type: 'model',
     timestamp: FRESH_2M,
     excerpt:
-      'Aegis: 3 critical threat signals. Vessels: 6 fleet alerts. Terra: 2 covenant triggers. Pulse: 1 executive dissent. Correlation matrix: 0.71 between Aegis/Vessels threat clusters.',
+      'PARAGON: 3 critical threat signals. SEXTANT: 6 fleet alerts. DOMAINE: 2 covenant triggers. LUMINA: 1 executive dissent. Correlation matrix: 0.71 between PARAGON/SEXTANT threat clusters.',
   },
   {
     id: 'ev-cmd2',
@@ -33,7 +33,7 @@ const PORTFOLIO_EVIDENCE: EvidenceSource[] = [
     type: 'api',
     timestamp: FRESH_9M,
     excerpt:
-      'Composite health score: 7.2/10. PRISM: 8.4 (strong). Lyte: 7.1. Vessels: 6.8 (declining). Terra: 7.4. Aegis: 6.9.',
+      'Composite health score: 7.2/10. PRISM: 8.4 (strong). KORA: 7.1. SEXTANT: 6.8 (declining). DOMAINE: 7.4. PARAGON: 6.9.',
   },
   {
     id: 'ev-cmd3',
@@ -87,7 +87,7 @@ const APPROVAL_EVIDENCE: EvidenceSource[] = [
     type: 'api',
     timestamp: FRESH_2M,
     excerpt:
-      '1. Aegis: APT-29 containment (CISO needed). 2. Vessels: Horizon Star emergency port call (Ops). 3. Terra: Meridian acquisition financing (IC). Aggregate exposure: $4.7M decisions.',
+      '1. PARAGON: APT-29 containment (CISO needed). 2. SEXTANT: Horizon Star emergency port call (Ops). 3. DOMAINE: Meridian acquisition financing (IC). Aggregate exposure: $4.7M decisions.',
   },
   {
     id: 'ev-appr2',
