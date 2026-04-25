@@ -33,6 +33,14 @@ const PUBLIC_METHODS = new Set([
   'ping',
 ]);
 
+/**
+ * HTTP GET paths that are allowed without a Bearer token.
+ * Only lightweight, non-sensitive endpoints are whitelisted here.
+ * The SSE stream, tool/resource/prompt inventories are intentionally
+ * excluded — they require a valid SUBSTRATE_GATEWAY_API_KEY.
+ */
+const PUBLIC_GET_PATHS = new Set(['/', '/health']);
+
 export function resolveAuthContext(req: Request): {
   authenticated: boolean;
   actorId: string;
@@ -74,8 +82,10 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
     return;
   }
 
-  // Check if this is a public method
-  if (req.method === 'GET') {
+  // Allow a narrow set of GET paths without a token (health + index).
+  // The SSE stream and inventory endpoints (/sse, /tools, /resources, /prompts)
+  // are intentionally excluded and require a valid Bearer token.
+  if (req.method === 'GET' && PUBLIC_GET_PATHS.has(req.path)) {
     next();
     return;
   }

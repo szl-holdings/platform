@@ -11,6 +11,7 @@ import { type IRouter, type Request, type Response, Router } from 'express';
 import { handleRouteError, sendError, sendSuccess } from '../lib/api-response';
 import { gatewayEventBus } from '../lib/gateway-event-bus';
 import { logger } from '../lib/logger';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
@@ -531,7 +532,7 @@ function buildExposureRow(opts: {
   };
 }
 
-router.get('/mcp-gateway/config', async (_req: Request, res: Response) => {
+router.get('/mcp-gateway/config', authMiddleware(), requireRole('super_admin', 'ops'), async (_req: Request, res: Response) => {
   try {
     await ensureSeeded();
     const [rules, stats] = await Promise.all([loadRules(), loadStats()]);
@@ -549,7 +550,7 @@ router.get('/mcp-gateway/config', async (_req: Request, res: Response) => {
   }
 });
 
-router.get('/mcp-gateway/events', async (req: Request, res: Response) => {
+router.get('/mcp-gateway/events', authMiddleware(), requireRole('super_admin', 'ops'), async (req: Request, res: Response) => {
   try {
     await ensureSeeded();
     const limit = Math.min(Number(req.query.limit ?? 50), 200);
@@ -580,7 +581,7 @@ router.get('/mcp-gateway/events', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/mcp-gateway/latency', async (req: Request, res: Response) => {
+router.get('/mcp-gateway/latency', authMiddleware(), requireRole('super_admin', 'ops'), async (req: Request, res: Response) => {
   try {
     const hoursRaw = Number(req.query.hours);
     const windowHours =
@@ -592,7 +593,7 @@ router.get('/mcp-gateway/latency', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/mcp-gateway/proxy', async (req: Request, res: Response) => {
+router.post('/mcp-gateway/proxy', authMiddleware(), requireRole('super_admin', 'ops'), async (req: Request, res: Response) => {
   const proxyStartedAt = performance.now();
   try {
     await ensureSeeded();
@@ -786,7 +787,7 @@ router.post('/mcp-gateway/proxy', async (req: Request, res: Response) => {
   }
 });
 
-router.patch('/mcp-gateway/rules/:ruleId/enforcement-mode', async (req: Request, res: Response) => {
+router.patch('/mcp-gateway/rules/:ruleId/enforcement-mode', authMiddleware(), requireRole('super_admin', 'ops'), async (req: Request, res: Response) => {
   try {
     await ensureSeeded();
     const ruleId = req.params.ruleId;
