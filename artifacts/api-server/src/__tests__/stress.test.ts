@@ -108,14 +108,12 @@ describe('Stress test — memory regression guard', () => {
   });
 
   describe('OntologyEngine entityCache stays within MAX_CACHE_SIZE (500)', () => {
-    it('caps the cache at 500 after setting 600 entries via public getCacheStats', () => {
+    it('caps the cache at 500 after priming 600 entries', () => {
       const engine = new OntologyEngine();
       disposables.push(engine);
 
-      const setCache = (engine as unknown as { setCache: (e: OntologyEntity) => void }).setCache.bind(engine);
-
       for (let i = 0; i < 600; i++) {
-        setCache(makeEntity(i));
+        engine.primeCache(makeEntity(i));
       }
 
       const cacheStats = engine.getCacheStats();
@@ -136,9 +134,12 @@ describe('Stress test — memory regression guard', () => {
       port = typeof addr === 'object' && addr ? addr.port : 0;
       agent = new http.Agent({ keepAlive: true, maxSockets: 50 });
 
-      for (let i = 0; i < 5; i++) {
-        await httpGet(agent, port, '/api/health/live');
-      }
+      await Promise.all(
+        Array.from({ length: 50 }, () => httpGet(agent, port, '/api/health/live')),
+      );
+      await Promise.all(
+        Array.from({ length: 50 }, () => httpGet(agent, port, '/api/health/live')),
+      );
     }, 15_000);
 
     afterAll(async () => {
@@ -146,7 +147,7 @@ describe('Stress test — memory regression guard', () => {
       await new Promise<void>((resolve) => server.close(() => resolve()));
     });
 
-    it('p95 latency stays under 200ms on /api/health/live', async () => {
+    it('p95 latency stays under 100ms on /api/health/live', async () => {
       const results = await Promise.all(
         Array.from({ length: 50 }, () => httpGet(agent, port, '/api/health/live')),
       );
@@ -162,7 +163,7 @@ describe('Stress test — memory regression guard', () => {
       const p95Index = Math.ceil(latencies.length * 0.95) - 1;
       const p95 = latencies[p95Index]!;
 
-      expect(p95).toBeLessThan(200);
+      expect(p95).toBeLessThan(100);
     });
   });
 });

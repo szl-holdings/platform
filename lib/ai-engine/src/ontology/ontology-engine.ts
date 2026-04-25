@@ -1151,6 +1151,10 @@ export class OntologyEngine {
     return { size: this.entityCache.size, maxSize: this.MAX_CACHE_SIZE };
   }
 
+  primeCache(entity: OntologyEntity): void {
+    this.setCache(entity);
+  }
+
   async getGraphStats(): Promise<{
     totalEntities: number;
     totalRelationships: number;
