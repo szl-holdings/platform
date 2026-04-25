@@ -44,7 +44,11 @@ import {
   validateQuery,
 } from '../lib/validation';
 import { authMiddleware, parseIdParam, requireRole } from '../middlewares/auth';
-import { assertTenantAccess, getUserOrgIds } from '../middlewares/tenant-scope';
+import {
+  assertTenantAccess,
+  getUserOrgIds,
+  recordTenantIsolationViolation,
+} from '../middlewares/tenant-scope';
 
 const router: IRouter = Router();
 
@@ -171,28 +175,28 @@ router.post(
 
 router.get(
   '/billing/subscription-status',
+  authMiddleware(),
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const customerEmail = req.query.email as string | undefined;
-      const customerId = req.query.customerId as string | undefined;
-
-      if (!customerEmail && !customerId) {
-        sendSuccess(res, { subscribed: false, subscription: null });
+      const orgId = req.tenantOrgId;
+      if (!orgId) {
+        sendForbidden(res, 'No organization context');
         return;
       }
 
-      let resolvedCustomerId = customerId;
-      if (!resolvedCustomerId && customerEmail) {
-        const customer = await services.stripe.getCustomerByEmail(customerEmail);
-        if (!customer) {
-          sendSuccess(res, { subscribed: false, subscription: null });
-          return;
-        }
-        resolvedCustomerId = customer.id;
+      const [org] = await db
+        .select({ billingCustomerId: organizationsTable.billingCustomerId })
+        .from(organizationsTable)
+        .where(eq(organizationsTable.id, orgId));
+
+      const resolvedCustomerId = org?.billingCustomerId;
+      if (!resolvedCustomerId) {
+        sendSuccess(res, { subscribed: false, subscription: null, allSubscriptions: [] });
+        return;
       }
 
-      const subscriptions = await services.stripe.listCustomerSubscriptions(resolvedCustomerId!);
+      const subscriptions = await services.stripe.listCustomerSubscriptions(resolvedCustomerId);
       const active = subscriptions.find((s) => s.status === 'active' || s.status === 'trialing');
 
       sendSuccess(res, {
@@ -209,6 +213,7 @@ router.get(
 
 router.post(
   '/billing/customer-portal',
+  authMiddleware(),
   validateBody(billingCustomerPortalSchema),
   requireStripeLive,
   async (req: Request, res: Response) => {
@@ -218,8 +223,25 @@ router.post(
       return;
     }
     try {
-      const { customerId, returnUrl } = req.body as z.infer<typeof billingCustomerPortalSchema>;
-      const session = await services.stripe.createCustomerPortalSession(customerId, returnUrl);
+      const orgId = req.tenantOrgId;
+      if (!orgId) {
+        sendForbidden(res, 'No organization context');
+        return;
+      }
+
+      const [org] = await db
+        .select({ billingCustomerId: organizationsTable.billingCustomerId })
+        .from(organizationsTable)
+        .where(eq(organizationsTable.id, orgId));
+
+      const ownedCustomerId = org?.billingCustomerId;
+      if (!ownedCustomerId) {
+        sendBadRequest(res, 'No Stripe customer record found for this organization');
+        return;
+      }
+
+      const { returnUrl } = req.body as z.infer<typeof billingCustomerPortalSchema>;
+      const session = await services.stripe.createCustomerPortalSession(ownedCustomerId, returnUrl);
       sendSuccess(res, { url: session.url });
     } catch (err) {
       logger.error({ err }, 'Failed to create customer portal session');
@@ -257,33 +279,87 @@ router.post(
   },
 );
 
-router.get('/billing/checkout-session/:sessionId', async (req: Request, res: Response) => {
-  try {
-    const sessionId = req.params.sessionId as string;
-    if (!sessionId) {
-      sendBadRequest(res, 'sessionId is required');
-      return;
-    }
+router.get(
+  '/billing/checkout-session/:sessionId',
+  authMiddleware(),
+  async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.params.sessionId as string;
+      if (!sessionId) {
+        sendBadRequest(res, 'sessionId is required');
+        return;
+      }
 
-    const session = await services.stripe.getCheckoutSession(sessionId);
-    if (!session) {
-      sendNotFound(res, 'Checkout session');
-      return;
-    }
+      const orgId = req.tenantOrgId;
+      if (!orgId) {
+        sendForbidden(res, 'No organization context');
+        return;
+      }
 
-    sendSuccess(res, session);
-  } catch (err) {
-    handleRouteError(res, err, 'Failed to get checkout session');
-  }
-});
+      const [org] = await db
+        .select({ billingCustomerId: organizationsTable.billingCustomerId })
+        .from(organizationsTable)
+        .where(eq(organizationsTable.id, orgId));
+
+      const ownedCustomerId = org?.billingCustomerId;
+      if (!ownedCustomerId) {
+        sendForbidden(res, 'No Stripe customer record found for this organization');
+        return;
+      }
+
+      const session = await services.stripe.getCheckoutSession(sessionId);
+      if (!session) {
+        sendNotFound(res, 'Checkout session');
+        return;
+      }
+
+      const sessionCustomer =
+        typeof session.customer === 'string'
+          ? session.customer
+          : (session.customer as { id?: string } | null)?.id ?? null;
+
+      if (sessionCustomer !== ownedCustomerId) {
+        recordTenantIsolationViolation(
+          req,
+          req.user,
+          orgId,
+          `checkout-session customer mismatch: session=${sessionCustomer} org=${ownedCustomerId}`,
+        );
+        sendForbidden(res, 'Checkout session does not belong to your organization');
+        return;
+      }
+
+      sendSuccess(res, session);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to get checkout session');
+    }
+  },
+);
 
 router.get(
   '/billing/stripe-invoices',
+  authMiddleware(),
   validateQuery(listQuerySchema),
   async (req: Request, res: Response) => {
     try {
-      const customerId = req.query.customerId as string | undefined;
-      const invoices = await services.stripe.listInvoices(customerId);
+      const orgId = req.tenantOrgId;
+      if (!orgId) {
+        sendForbidden(res, 'No organization context');
+        return;
+      }
+
+      const [org] = await db
+        .select({ billingCustomerId: organizationsTable.billingCustomerId })
+        .from(organizationsTable)
+        .where(eq(organizationsTable.id, orgId));
+
+      const ownedCustomerId = org?.billingCustomerId;
+      if (!ownedCustomerId) {
+        sendSuccess(res, []);
+        return;
+      }
+
+      const invoices = await services.stripe.listInvoices(ownedCustomerId);
       sendSuccess(res, invoices);
     } catch (err) {
       handleRouteError(res, err, 'Failed to list Stripe invoices');
