@@ -12,6 +12,7 @@ import { logger } from '../lib/logger';
 import { scanBuffer } from '../lib/malwareScanner';
 import { ObjectNotFoundError, ObjectStorageService } from '../lib/objectStorage';
 import { validateBody } from '../lib/validation';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 import { publicSubmitLimiter, publicUploadLimiter } from '../middlewares/rate-limiters';
 
 const router: IRouter = Router();
@@ -370,10 +371,10 @@ router.post(
   },
 );
 
-// Authenticated listing for partners. The /api/ prefix (without /public)
-// is protected by the global auth enforcer — only signed-in partners can
-// view founder identity, summary, and scoring details.
-router.get('/fund-inbound-deals', async (_req: Request, res: Response) => {
+// Authenticated listing for partners. Requires a valid session AND the
+// `ops` platform role (internal investment team). Super-admin and admin
+// accounts pass through requireRole unconditionally.
+router.get('/fund-inbound-deals', authMiddleware(), requireRole('ops'), async (_req: Request, res: Response) => {
   try {
     const rows = await db
       .select()
@@ -441,9 +442,11 @@ const patchDealSchema = z.object({
 
 /**
  * Authenticated PATCH for partners to update a deal's status and/or internal
- * notes. Auth is enforced upstream by the global enforcer.
+ * notes. Requires a valid session AND the `ops` platform role (internal
+ * investment team). Super-admin and admin accounts pass through requireRole
+ * unconditionally.
  */
-router.patch('/fund-inbound-deals/:pipelineId', async (req: Request, res: Response) => {
+router.patch('/fund-inbound-deals/:pipelineId', authMiddleware(), requireRole('ops'), async (req: Request, res: Response) => {
   try {
     const parsed = patchDealSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -490,12 +493,15 @@ router.patch('/fund-inbound-deals/:pipelineId', async (req: Request, res: Respon
 
 /**
  * Authenticated download for analysts. Streams the GCS-backed file referenced
- * by the attachment at index `idx` for the deal `pipelineId`. Auth is enforced
- * upstream by the global enforcer; index-by-position avoids exposing raw object
- * paths to the client.
+ * by the attachment at index `idx` for the deal `pipelineId`. Requires a valid
+ * session AND the `ops` platform role (internal investment team). Super-admin
+ * and admin accounts pass through requireRole unconditionally.
+ * Index-by-position avoids exposing raw object paths to the client.
  */
 router.get(
   '/fund-inbound-deals/:pipelineId/attachments/:idx',
+  authMiddleware(),
+  requireRole('ops'),
   async (req: Request, res: Response) => {
     try {
       const idx = Number.parseInt(req.params.idx as string, 10);
