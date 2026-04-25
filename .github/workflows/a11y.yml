@@ -1,6 +1,7 @@
 name: Accessibility Checks (advisory)
 
 on:
+  workflow_dispatch:
   pull_request:
     branches: [master, main]
   push:

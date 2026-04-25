@@ -1,9 +1,6 @@
 name: CodeQL Analysis
 on:
-  push:
-    branches: [master, main]
-  pull_request:
-    branches: [master, main]
+  workflow_dispatch:
   schedule:
     - cron: "0 6 * * 1"
 

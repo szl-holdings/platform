@@ -138,6 +138,18 @@ uri = "file://attached_assets/generated_images/cortex-mobile.png"
 type = "image"
 title = "generated_image"
 
+[[generated]]
+id = "HUpqMO5RrcCvMlHBsqlIo"
+uri = "file://brand/a11oy-banner.png"
+type = "image"
+title = "A11oy enterprise banner"
+
+[[generated]]
+id = "tmT_f70GIciNpkP6nn6BE"
+uri = "file://brand/szl-holdings-banner.png"
+type = "image"
+title = "SZL Holdings enterprise banner"
+
 [[outputs]]
 id = "I_ORUhKS2b7MEVDwDdGWJ"
 uri = "file://social-content/banners/linkedin-7-lenses-banner.png"
