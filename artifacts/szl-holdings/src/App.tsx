@@ -1042,6 +1042,18 @@ function App() {
             <Route path="/msp">
               <ExternalRedirect to="/aegis/ops/dashboard" />
             </Route>
+            <Route path="/firestorm">
+              <ExternalRedirect to="/aegis/" />
+            </Route>
+            <Route path="/lyte-command-center">
+              <ExternalRedirect to="/command/" />
+            </Route>
+            <Route path="/imperium">
+              <ExternalRedirect to="/command/" />
+            </Route>
+            <Route path="/prism-counsel">
+              <ExternalRedirect to="/aegis/" />
+            </Route>
             <Route path="/stephen">
               <ExternalRedirect to="/szl-holdings/leadership" />
             </Route>

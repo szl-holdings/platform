@@ -34,8 +34,6 @@ export const PLATFORM_APPS = [
   { slug: 'alloy', name: 'Counsel — Execution Fabric', icon: 'Workflow', color: '#6366f1' },
   { slug: 'lyte', name: 'Lyte Command Center', icon: 'ShoppingBag', color: '#a855f7' },
   { slug: 'vessels', name: 'Vessels Maritime Intelligence', icon: 'Ship', color: '#06b6d4' },
-  { slug: 'firestorm', name: 'Firestorm Security Simulation', icon: 'Flame', color: '#f97316' },
-  { slug: 'inca', name: 'AI Research Lab', icon: 'Brain', color: '#14b8a6' },
   { slug: 'beacon', name: 'Terra', icon: 'BarChart3', color: '#0ea5e9' },
   { slug: 'rosie', name: 'Aegis Operations', icon: 'AlertTriangle', color: '#ef4444' },
   { slug: 'carlota-jo', name: 'Carlota Jo Advisory', icon: 'Crown', color: '#f43f5e' },
@@ -118,30 +116,6 @@ export const APP_INTEGRATIONS: Record<
       'OFAC Sanctions List',
     ],
     doctrineRole: 'OBSERVE',
-  },
-  firestorm: {
-    connectors: [
-      'ai',
-      'slack',
-      'twilio',
-      'monitoring',
-      'posthog',
-      'storage',
-      'cisa',
-      'abuseipdb',
-      'nvd',
-      'mitre',
-    ],
-    description:
-      'Security simulation uses AI analysis, CISA KEV mandatory patches, NVD CVE database, MITRE ATT&CK enterprise techniques, AbuseIPDB IP reputation, and live threat news feeds.',
-    liveFeeds: [
-      'CISA KEV Catalog (1,554+ entries, live)',
-      'NVD National Vulnerability Database (live CVE search)',
-      'MITRE ATT&CK Enterprise Matrix v14 (live GitHub)',
-      'AbuseIPDB IP Reputation',
-      'The Hacker News Live RSS',
-    ],
-    doctrineRole: 'EXECUTE',
   },
   lyte: {
     connectors: ['stripe', 'hubspot', 'gmail', 'storage', 'posthog', 'shipping', 'bls'],
@@ -308,11 +282,6 @@ export const APP_INTEGRATIONS: Record<
       'Microsoft Outlook Contacts (CRM sync)',
     ],
     doctrineRole: 'DECIDE',
-  },
-  'stephen-site': {
-    connectors: ['ai', 'github', 'google', 'storage'],
-    description: 'Legacy slug for Career — Founder Identity site',
-    doctrineRole: 'EXECUTE',
   },
   terra: {
     connectors: ['ai', 'monitoring', 'storage'],

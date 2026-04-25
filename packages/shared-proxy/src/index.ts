@@ -24,7 +24,6 @@ export const SENTRA_PORT = 4099;
 export const TERRA_PORT = 6000;
 export const VESSELS_PORT = 8099;
 export const PULSE_PORT = 5201;
-export const PRISM_COUNSEL_PORT = 7100;
 export const SZL_DEMO_VIDEO_PORT = 8765;
 
 export const PROXY_ROUTES: ProxyRoute[] = [
@@ -36,13 +35,11 @@ export const PROXY_ROUTES: ProxyRoute[] = [
   { prefix: '/carlota-jo/', port: CARLOTA_JO_PORT },
   { prefix: '/command/', port: COMMAND_PORT },
   { prefix: '/counsel/', port: COUNSEL_PORT },
-  { prefix: '/lyte/', port: LYTE_PORT },
   { prefix: '/nexus/', port: NEXUS_PORT },
   { prefix: '/sentra/', port: SENTRA_PORT },
   { prefix: '/terra/', port: TERRA_PORT },
   { prefix: '/vessels/', port: VESSELS_PORT },
   { prefix: '/pulse/', port: PULSE_PORT },
-  { prefix: '/prism-counsel/', port: PRISM_COUNSEL_PORT },
   { prefix: '/szl-demo-video/', port: SZL_DEMO_VIDEO_PORT },
 ];
 
