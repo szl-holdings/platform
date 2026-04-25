@@ -32,19 +32,20 @@
     "@replit/vite-plugin-cartographer": "catalog:",
     "@replit/vite-plugin-dev-banner": "catalog:",
     "@replit/vite-plugin-runtime-error-modal": "catalog:",
+    "@szl-holdings/shared-proxy": "workspace:*",
     "@tailwindcss/vite": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
+    "@workspace/aef-contracts": "workspace:*",
+    "@workspace/aef-sdk": "workspace:*",
     "clsx": "catalog:",
     "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "tailwindcss": "catalog:",
     "vite": "catalog:",
-    "wouter": "^3.3.5",
-    "@workspace/aef-contracts": "workspace:*",
-    "@workspace/aef-sdk": "workspace:*"
+    "wouter": "^3.3.5"
   }
 }

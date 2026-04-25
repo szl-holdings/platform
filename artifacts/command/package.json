@@ -24,6 +24,7 @@
     "@szl-holdings/prism-bus": "workspace:*",
     "@szl-holdings/replit-auth-web": "workspace:*",
     "@szl-holdings/services": "workspace:*",
+    "@szl-holdings/shared-proxy": "workspace:*",
     "@szl-holdings/shared-ui": "workspace:*",
     "@tailwindcss/vite": "catalog:",
     "@tanstack/react-query": "catalog:",

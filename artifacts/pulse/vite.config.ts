@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 import fs from 'node:fs';
 import path from 'node:path';
 import { defineConfig } from 'vite';
-import { sharedProxyPlugin } from '../../packages/proxy-routes.js';
+import { sharedProxyPlugin } from '@szl-holdings/shared-proxy';
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
 
