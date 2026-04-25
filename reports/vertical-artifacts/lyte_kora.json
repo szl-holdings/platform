@@ -1,0 +1,79 @@
+{
+  "brief": {
+    "evidence_count": 3,
+    "headline": "Collapse the DEC-204 approval chain to 3 named approvers",
+    "next_action": "Reduce approver list and require benchmark-backed alternatives before next sync.",
+    "owner_drift_count": 2,
+    "stuck_decision_score": 0.717
+  },
+  "evidence": [
+    {
+      "claim": "Decision DEC-204 open for 19 days, owner reassigned twice",
+      "from_signal": "sig_lyte_decision_age",
+      "id": "ev_lyte_sig_lyte_decision_age",
+      "source": "linear"
+    },
+    {
+      "claim": "Approval doc missing benchmarks for 3 of 5 alternatives",
+      "from_signal": "sig_lyte_evidence_gap",
+      "id": "ev_lyte_sig_lyte_evidence_gap",
+      "source": "notion"
+    },
+    {
+      "claim": "5-person approval chain; 2 approvers OOO this week",
+      "from_signal": "sig_lyte_approval_chain",
+      "id": "ev_lyte_sig_lyte_approval_chain",
+      "source": "manual"
+    }
+  ],
+  "forecast": {
+    "confidence": 0.6,
+    "horizon": "this_week",
+    "method": "stuck-decision-index-v0",
+    "owner_drift_count": 2,
+    "stuck_decision_score": 0.717
+  },
+  "generated_at": "2026-04-25T20:14:52.102517Z",
+  "recommendation": {
+    "confidence": 0.6,
+    "evidence_ids": [
+      "ev_lyte_sig_lyte_decision_age",
+      "ev_lyte_sig_lyte_evidence_gap",
+      "ev_lyte_sig_lyte_approval_chain"
+    ],
+    "id": "rec_lyte_collapse_approval_chain",
+    "input_class": "lyte_decision_signals_v1",
+    "model": "gpt-5.5-2026-04-23",
+    "next_action": "Reduce approver list and require benchmark-backed alternatives before next sync.",
+    "output_class": "decision_debt_recommendation_v1",
+    "owner": "ops@szl",
+    "requires_human_approval": true,
+    "rollback_path": "Restore the 5-person chain and reschedule decision if quality regresses.",
+    "title": "Collapse the DEC-204 approval chain to 3 named approvers",
+    "vertical": "lyte_kora"
+  },
+  "signals": [
+    {
+      "id": "sig_lyte_decision_age",
+      "kind": "decision_age",
+      "source": "linear",
+      "summary": "Decision DEC-204 open for 19 days, owner reassigned twice",
+      "weight": 0.85
+    },
+    {
+      "id": "sig_lyte_evidence_gap",
+      "kind": "evidence_gap",
+      "source": "notion",
+      "summary": "Approval doc missing benchmarks for 3 of 5 alternatives",
+      "weight": 0.7
+    },
+    {
+      "id": "sig_lyte_approval_chain",
+      "kind": "approval_bottleneck",
+      "source": "manual",
+      "summary": "5-person approval chain; 2 approvers OOO this week",
+      "weight": 0.6
+    }
+  ],
+  "vertical": "lyte_kora"
+}

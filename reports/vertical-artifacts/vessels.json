@@ -1,0 +1,81 @@
+{
+  "brief": {
+    "claims_risk_placeholder": "watch",
+    "delay_risk": "elevated",
+    "evidence_count": 3,
+    "headline": "Refresh sanctions screening for counterparty before bunkering",
+    "next_action": "Re-run sanctions screen and document refresh in voyage flight recorder.",
+    "route_risk": "moderate"
+  },
+  "evidence": [
+    {
+      "claim": "ETA drift +18h on charter VL-7714 since last port call",
+      "from_signal": "sig_vessels_eta_drift",
+      "id": "ev_vessels_sig_vessels_eta_drift",
+      "source": "ais"
+    },
+    {
+      "claim": "Beaufort 8 advisory active on planned routing window",
+      "from_signal": "sig_vessels_route_advisory",
+      "id": "ev_vessels_sig_vessels_route_advisory",
+      "source": "weather"
+    },
+    {
+      "claim": "Sanctions screening not refreshed in last 14 days for counterparty",
+      "from_signal": "sig_vessels_compliance_check",
+      "id": "ev_vessels_sig_vessels_compliance_check",
+      "source": "compliance"
+    }
+  ],
+  "forecast": {
+    "claims_risk_placeholder": "watch",
+    "confidence": 0.6,
+    "delay_risk": "elevated",
+    "horizon": "next_voyage",
+    "method": "voyage-risk-baseline-v0",
+    "route_risk": "moderate"
+  },
+  "generated_at": "2026-04-25T20:14:52.114228Z",
+  "recommendation": {
+    "confidence": 0.6,
+    "evidence_ids": [
+      "ev_vessels_sig_vessels_eta_drift",
+      "ev_vessels_sig_vessels_route_advisory",
+      "ev_vessels_sig_vessels_compliance_check"
+    ],
+    "id": "rec_vessels_refresh_sanctions_screen",
+    "input_class": "vessels_voyage_signals_v1",
+    "model": "gpt-5.5-2026-04-23",
+    "next_action": "Re-run sanctions screen and document refresh in voyage flight recorder.",
+    "output_class": "voyage_risk_recommendation_v1",
+    "owner": "vessels-ops@szl",
+    "requires_human_approval": true,
+    "rollback_path": "If counterparty fails refreshed screen, hold bunkering and escalate to compliance.",
+    "title": "Refresh sanctions screening for counterparty before bunkering",
+    "vertical": "vessels"
+  },
+  "signals": [
+    {
+      "id": "sig_vessels_eta_drift",
+      "kind": "delay_risk",
+      "source": "ais",
+      "summary": "ETA drift +18h on charter VL-7714 since last port call",
+      "weight": 0.8
+    },
+    {
+      "id": "sig_vessels_route_advisory",
+      "kind": "route_risk",
+      "source": "weather",
+      "summary": "Beaufort 8 advisory active on planned routing window",
+      "weight": 0.7
+    },
+    {
+      "id": "sig_vessels_compliance_check",
+      "kind": "compliance_gap",
+      "source": "compliance",
+      "summary": "Sanctions screening not refreshed in last 14 days for counterparty",
+      "weight": 0.85
+    }
+  ],
+  "vertical": "vessels"
+}
