@@ -153,3 +153,11 @@ artifacts/szl-holdings/public/briefs/index.json
 
 # Local gitleaks binary (installed on-demand for scanning; not committed to source)
 gitleaks
+
+# ── A11oy Doctrine additions (Task #3481) ─────────────────────────────────────
+# Build output directory
+build
+# Next.js build output
+.next
+# Raw screenshot captures (processed copies go in docs/assets/screenshots/current/)
+screenshots/raw
