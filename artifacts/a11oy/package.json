@@ -13,7 +13,8 @@
     "format": "biome format --write ./src"
   },
   "dependencies": {
-    "@workspace/a11oy-fabric": "workspace:*"
+    "@szl-holdings/brand-registry": "workspace:*",
+    "@szl-holdings/design-system": "workspace:*"
   },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "catalog:",
@@ -30,6 +31,7 @@
     "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "recharts": "catalog:",
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:",
     "vite": "catalog:",

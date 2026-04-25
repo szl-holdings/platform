@@ -1,6 +1,6 @@
 kind = "web"
     previewPath = "/a11oy/"
-    title = "A11oy — Live Enterprise Execution Fabric"
+    title = "A11oy — Brand Orchestration Layer"
     version = "1.0.0"
     id = "artifacts/a11oy"
     router = "path"
