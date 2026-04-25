@@ -13,6 +13,7 @@ body:
       description: Which platform surface or component would this feature affect?
       multiple: true
       options:
+        - A11oy — Brand Orchestration Layer
         - Command — Unified Operations
         - Aegis — Defense & Intelligence
         - Terra — Real Estate Intelligence

@@ -31,6 +31,7 @@ _List the key changes made. Be specific._
 
 _Which applications or libraries are affected?_
 
+- [ ] `a11oy` (A11oy — Brand Orchestration Layer)
 - [ ] `api-server`
 - [ ] `szl-holdings` (Corporate / Marketing)
 - [ ] `command` (Command Portal)
