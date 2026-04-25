@@ -18,20 +18,41 @@ export const CANONICAL_FALLBACK_PORT = 21130;
 // artifact always agrees on a single port.
 export const SHARED_PROXY_PORT = 9090;
 
+// ─── Per-app port constants ──────────────────────────────────────────────────
+//
+// These are the canonical upstream ports for each sub-path artifact. They are
+// exported as named constants so individual app configs (or tests) can refer
+// to a single app's port without having to re-derive it from PROXY_ROUTES.
+// Adding a new sub-path app: declare its constant here, then add a single
+// entry to PROXY_ROUTES below — that is the only change required.
+export const AEGIS_PORT = 3002;
+export const API_PORT = 8080;
+export const CARLOTA_JO_PORT = 8098;
+export const COMMAND_PORT = 5000;
+export const COUNSEL_PORT = 4199;
+export const LYTE_PORT = 7099;
+export const NEXUS_PORT = 8008;
+export const SENTRA_PORT = 4099;
+export const TERRA_PORT = 6000;
+export const VESSELS_PORT = 8099;
+export const PULSE_PORT = 5201;
+export const PRISM_COUNSEL_PORT = 7100;
+export const SZL_DEMO_VIDEO_PORT = 8765;
+
 export const PROXY_ROUTES: ProxyRoute[] = [
-  { prefix: '/aegis/', port: 3002 },
-  { prefix: '/api/', port: 8080 },
-  { prefix: '/carlota-jo/', port: 8098 },
-  { prefix: '/command/', port: 5000 },
-  { prefix: '/counsel/', port: 4199 },
-  { prefix: '/lyte/', port: 7099 },
-  { prefix: '/nexus/', port: 8008 },
-  { prefix: '/sentra/', port: 4099 },
-  { prefix: '/terra/', port: 6000 },
-  { prefix: '/vessels/', port: 8099 },
-  { prefix: '/pulse/', port: 5201 },
-  { prefix: '/prism-counsel/', port: 7100 },
-  { prefix: '/szl-demo-video/', port: 8765 },
+  { prefix: '/aegis/', port: AEGIS_PORT },
+  { prefix: '/api/', port: API_PORT },
+  { prefix: '/carlota-jo/', port: CARLOTA_JO_PORT },
+  { prefix: '/command/', port: COMMAND_PORT },
+  { prefix: '/counsel/', port: COUNSEL_PORT },
+  { prefix: '/lyte/', port: LYTE_PORT },
+  { prefix: '/nexus/', port: NEXUS_PORT },
+  { prefix: '/sentra/', port: SENTRA_PORT },
+  { prefix: '/terra/', port: TERRA_PORT },
+  { prefix: '/vessels/', port: VESSELS_PORT },
+  { prefix: '/pulse/', port: PULSE_PORT },
+  { prefix: '/prism-counsel/', port: PRISM_COUNSEL_PORT },
+  { prefix: '/szl-demo-video/', port: SZL_DEMO_VIDEO_PORT },
 ];
 
 /**

@@ -17,7 +17,15 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { PROXY_ROUTES, SHARED_PROXY_PORT } from '../../packages/proxy-routes.js';
+import {
+  AEGIS_PORT,
+  CARLOTA_JO_PORT,
+  COMMAND_PORT,
+  PROXY_ROUTES,
+  SHARED_PROXY_PORT,
+  TERRA_PORT,
+  VESSELS_PORT,
+} from '../../packages/proxy-routes.js';
 
 const REPO_ROOT = resolve(__dirname, '..', '..');
 
@@ -72,5 +80,24 @@ describe('PROXY_ROUTES invariants', () => {
       expect(route.port).toBeGreaterThan(0);
       expect(route.port).toBeLessThan(65536);
     }
+  });
+});
+
+describe('Per-app port constants are exported and wired into PROXY_ROUTES', () => {
+  // Locks in the second half of Task #1422's "Done looks like":
+  // a single shared file exports the per-app port constants. Each gateway
+  // app named in the task spec must have a named export AND that export
+  // must agree with the corresponding entry in PROXY_ROUTES.
+  it.each([
+    ['/aegis/', AEGIS_PORT],
+    ['/terra/', TERRA_PORT],
+    ['/carlota-jo/', CARLOTA_JO_PORT],
+    ['/vessels/', VESSELS_PORT],
+    ['/command/', COMMAND_PORT],
+  ])('%s is backed by an exported port constant (%i)', (prefix, constant) => {
+    expect(typeof constant).toBe('number');
+    const entry = PROXY_ROUTES.find((r) => r.prefix === prefix);
+    expect(entry).toBeDefined();
+    expect(entry?.port).toBe(constant);
   });
 });
