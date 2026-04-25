@@ -398,6 +398,8 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
 
         const dateLabel = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
         const unsubToken = generateUnsubscribeToken(recipient.email);
+        const appUrl = process.env.APP_URL || "https://szlholdings.com";
+        const digestUnsubscribeUrl = `${appUrl}/api/notifications/unsubscribe?e=${encodeURIComponent(recipient.email)}&t=${encodeURIComponent(unsubToken)}`;
         const emailSubject = `Your Daily Digest — ${dateLabel}`;
 
         // GAP-017: enqueue durably. The digest job touches up to thousands
@@ -418,8 +420,9 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
               actionUrl: n.actionUrl ?? null,
               createdAt: n.createdAt.toISOString(),
             })),
+            unsubscribeUrl: digestUnsubscribeUrl,
           }),
-          text: `Your Daily Digest (${dateLabel}) — ${notifications.length} unread notification(s). Log in to review them at ${process.env.APP_URL || "https://szlholdings.com"}.`,
+          text: `Your Daily Digest (${dateLabel}) — ${notifications.length} unread notification(s). Log in to review them at ${appUrl}.\n\nTo unsubscribe from digest emails: ${digestUnsubscribeUrl}`,
           unsubscribeToken: unsubToken,
         });
 

@@ -1,4 +1,6 @@
 import { Router, type Request, type Response } from 'express';
+import { db, notificationPreferencesTable, usersTable } from '@szl-holdings/db';
+import { eq } from 'drizzle-orm';
 import { logger } from '../lib/logger.js';
 import { addEmailSuppression, verifyUnsubscribeToken } from '../lib/email.js';
 
@@ -99,6 +101,60 @@ router.post('/email-webhooks/resend', async (req: Request, res: Response) => {
 
   logger.info({ processed, eventType }, '[email-webhook/resend] Processed event');
   return res.status(200).json({ ok: true, processed });
+});
+
+router.get('/notifications/unsubscribe', async (req: Request, res: Response) => {
+  const email = String(req.query.e ?? '');
+  const token = String(req.query.t ?? '');
+
+  if (!email || !token) {
+    return res.status(400).send('Invalid unsubscribe link.');
+  }
+
+  const valid = verifyUnsubscribeToken(email, token);
+  if (!valid) {
+    logger.warn({ email }, '[notif-unsubscribe] Invalid token');
+    return res.status(400).send('Invalid or expired unsubscribe link.');
+  }
+
+  try {
+    const [user] = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(eq(usersTable.email, email.toLowerCase().trim()))
+      .limit(1);
+
+    if (user) {
+      await db
+        .insert(notificationPreferencesTable)
+        .values({ userId: user.id, emailEnabled: false })
+        .onConflictDoUpdate({
+          target: notificationPreferencesTable.userId,
+          set: { emailEnabled: false, updatedAt: new Date() },
+        });
+      logger.info({ email, userId: user.id }, '[notif-unsubscribe] email_enabled set to false');
+    } else {
+      logger.warn({ email }, '[notif-unsubscribe] No user found for email, skipping preference update');
+    }
+  } catch (err) {
+    logger.error({ email, err }, '[notif-unsubscribe] Failed to update notification preferences');
+    return res.status(500).send('Something went wrong. Please try again or contact us at inquiries@szlholdings.com.');
+  }
+
+  return res.status(200).send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head><meta charset="UTF-8"><title>Unsubscribed from Digest</title>
+    <style>body{font-family:-apple-system,sans-serif;max-width:480px;margin:80px auto;padding:0 24px;color:#374151;}h1{font-size:20px;}p{color:#6b7280;line-height:1.6;}</style>
+    </head>
+    <body>
+      <h1>You've been unsubscribed from digest emails.</h1>
+      <p>Your preference has been saved — <strong>${email}</strong> will no longer receive daily digest emails from SZL Holdings.</p>
+      <p>You can re-enable digest emails at any time from your <a href="${process.env.APP_URL || 'https://szlholdings.com'}/settings/notifications">notification settings</a>.</p>
+      <p>If this was a mistake, contact us at <a href="mailto:inquiries@szlholdings.com">inquiries@szlholdings.com</a>.</p>
+    </body>
+    </html>
+  `);
 });
 
 router.get('/email/unsubscribe', async (req: Request, res: Response) => {

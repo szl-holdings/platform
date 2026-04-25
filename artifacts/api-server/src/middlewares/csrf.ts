@@ -96,6 +96,8 @@ function isExempt(path: string): boolean {
   if (path.startsWith('/api/email-webhooks/')) return true;
   // Self-service email unsubscribe — public GET link embedded in transactional emails.
   if (path === '/api/email/unsubscribe') return true;
+  // Digest-specific unsubscribe — public GET link in digest email footer.
+  if (path === '/api/notifications/unsubscribe') return true;
   if (path === '/api/mcp' || path.startsWith('/api/mcp/')) return true;
   if (path.match(/^\/api\/distribution-os\/linktree\/\d+\/click$/)) return true;
   // Non-production demo PIN verification — stateless read-only PIN check;

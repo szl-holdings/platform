@@ -674,8 +674,9 @@ export function buildNotificationDigestEmail(params: {
     actionUrl?: string | null;
     createdAt: string;
   }>;
+  unsubscribeUrl?: string;
 }): string {
-  const { userName, date, notifications } = params;
+  const { userName, date, notifications, unsubscribeUrl } = params;
 
   const typeLabel: Record<string, string> = {
     info: 'Info',
@@ -722,6 +723,7 @@ export function buildNotificationDigestEmail(params: {
     <div class="divider"></div>
     <p style="font-size:13px;color:#6b7280;">To manage your notification preferences or turn off digest emails, visit your account settings.</p>
     <a class="cta" href="${process.env.APP_URL || 'https://szlholdings.com'}/settings/notifications">Manage Preferences</a>
+    ${unsubscribeUrl ? `<p style="margin:12px 0 0;font-size:11px;"><a href="${unsubscribeUrl}" style="color:#9ca3af;text-decoration:underline;">Unsubscribe from digest emails</a></p>` : ''}
   `);
 }
 

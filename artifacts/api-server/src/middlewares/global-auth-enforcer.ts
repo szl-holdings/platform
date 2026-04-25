@@ -201,6 +201,9 @@ const PUBLIC_PREFIXES = [
   // Self-service email unsubscribe — public GET link embedded in every transactional
   // email. Validates HMAC token and writes to the email_suppressions table.
   "/api/email/unsubscribe",
+  // Digest-specific unsubscribe — public GET link in digest email footer.
+  // Validates HMAC token and sets email_enabled = false in notification_preferences.
+  "/api/notifications/unsubscribe",
   // Self-healing orchestrator — only /runs and /runs/:id GET requests are
   // whitelisted here as a prefix (covers the list endpoint and per-run detail).
   // /stats and /policies use PUBLIC_EXACT_PATHS above so the path-prefix match
