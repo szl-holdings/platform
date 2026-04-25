@@ -16,6 +16,7 @@ import {
 import { RealtimeStatusIndicator } from '@szl-holdings/shared-ui/realtime-status-indicator';
 import { ServiceStatusRail } from '@szl-holdings/shared-ui/service-status-rail';
 import { useRealtimeChannel } from '@szl-holdings/shared-ui/use-realtime-channel';
+import { useRole } from '@szl-holdings/shared-ui/use-role';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
@@ -46,6 +47,7 @@ import {
   Package,
   Play,
   Radio,
+  Settings,
   Shield,
   Star,
   Store,
@@ -217,6 +219,11 @@ const NURO_FORGE_NAV = [
 const MCP_NAV = [
   { href: '/alloy/mcp-store', label: 'MCP Marketplace', icon: Store, badge: 'New' },
   { href: '/alloy/mcp-tools', label: 'Custom Tool Creator', icon: Code2, badge: 'New' },
+];
+
+const PLATFORM_ADMIN_NAV = [
+  { href: '/admin/platform-settings', label: 'Platform Settings', icon: Settings },
+  { href: '/admin/tenant-health', label: 'Tenant Health', icon: HeartPulse },
 ];
 
 function NavItem({
@@ -466,6 +473,8 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { status: wsStatus } = useRealtimeChannel('workflow-runs');
   const { pendingCount: atlasPendingCount, newCount: atlasNewCount } = useAtlasApprovalsBadge();
+  const { isAdmin, roles: userRoles } = useRole();
+  const isPlatformAdmin = isAdmin || userRoles.includes('super_admin');
   const [, navigate] = useLocation();
   const [workflowCmds, setWorkflowCmds] = useState<CommandItem[]>([]);
   const { trackTourCompleted, trackTourSkipped } = useOnboardingAnalytics({
@@ -725,6 +734,20 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             {MCP_NAV.map((item) => (
               <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
             ))}
+
+            {isPlatformAdmin && (
+              <>
+                <div
+                  className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium"
+                  style={{ color: 'rgba(239,68,68,0.6)' }}
+                >
+                  Platform Admin
+                </div>
+                {PLATFORM_ADMIN_NAV.map((item) => (
+                  <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
+                ))}
+              </>
+            )}
           </nav>
 
           <div className="px-2 mb-2">
