@@ -274,18 +274,16 @@ function chunkText(text: string, chunkSize = 400): string[] {
 alloyChatRouter.get('/alloy-chat/conversations', async (req: Request, res: Response) => {
   try {
     const tenantOrgId = req.tenantOrgId;
-    const convos = tenantOrgId !== undefined
-      ? await db
-          .select()
-          .from(conversations)
-          .where(eq(conversations.orgId, tenantOrgId))
-          .orderBy(desc(conversations.createdAt))
-          .limit(50)
-      : await db
-          .select()
-          .from(conversations)
-          .orderBy(desc(conversations.createdAt))
-          .limit(50);
+    if (tenantOrgId === undefined) {
+      res.status(403).json({ error: 'Tenant context required' });
+      return;
+    }
+    const convos = await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.orgId, tenantOrgId))
+      .orderBy(desc(conversations.createdAt))
+      .limit(50);
     res.json({ conversations: convos });
   } catch {
     res.status(500).json({ error: 'Failed to load conversations' });
@@ -296,9 +294,13 @@ alloyChatRouter.post('/alloy-chat/conversations', async (req: Request, res: Resp
   try {
     const { title } = req.body as { title?: string };
     const tenantOrgId = req.tenantOrgId;
+    if (tenantOrgId === undefined) {
+      res.status(403).json({ error: 'Tenant context required' });
+      return;
+    }
     const [newConvo] = await db
       .insert(conversations)
-      .values({ title: title ?? 'New Chat', orgId: tenantOrgId ?? null })
+      .values({ title: title ?? 'New Chat', orgId: tenantOrgId })
       .returning();
     res.status(201).json(newConvo);
   } catch {
@@ -316,6 +318,10 @@ alloyChatRouter.get(
         return;
       }
       const tenantOrgId = req.tenantOrgId;
+      if (tenantOrgId === undefined) {
+        res.status(403).json({ error: 'Tenant context required' });
+        return;
+      }
       const convoRows = await db
         .select()
         .from(conversations)
@@ -326,7 +332,7 @@ alloyChatRouter.get(
         res.status(404).json({ error: 'Conversation not found' });
         return;
       }
-      if (tenantOrgId !== undefined && convo.orgId !== tenantOrgId) {
+      if (convo.orgId !== tenantOrgId) {
         res.status(403).json({ error: 'Access denied' });
         return;
       }
@@ -350,21 +356,23 @@ alloyChatRouter.delete('/alloy-chat/conversations/:id', async (req: Request, res
       return;
     }
     const tenantOrgId = req.tenantOrgId;
-    if (tenantOrgId !== undefined) {
-      const convoRows = await db
-        .select()
-        .from(conversations)
-        .where(eq(conversations.id, id))
-        .limit(1);
-      const convo = convoRows[0];
-      if (!convo) {
-        res.status(404).json({ error: 'Conversation not found' });
-        return;
-      }
-      if (convo.orgId !== tenantOrgId) {
-        res.status(403).json({ error: 'Access denied' });
-        return;
-      }
+    if (tenantOrgId === undefined) {
+      res.status(403).json({ error: 'Tenant context required' });
+      return;
+    }
+    const convoRows = await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.id, id))
+      .limit(1);
+    const convo = convoRows[0];
+    if (!convo) {
+      res.status(404).json({ error: 'Conversation not found' });
+      return;
+    }
+    if (convo.orgId !== tenantOrgId) {
+      res.status(403).json({ error: 'Access denied' });
+      return;
     }
     await db.delete(conversations).where(eq(conversations.id, id));
     res.json({ success: true });
@@ -392,21 +400,23 @@ alloyChatRouter.post(
     }
 
     const tenantOrgId = req.tenantOrgId;
-    if (tenantOrgId !== undefined) {
-      const convoRows = await db
-        .select()
-        .from(conversations)
-        .where(eq(conversations.id, id))
-        .limit(1);
-      const convo = convoRows[0];
-      if (!convo) {
-        res.status(404).json({ error: 'Conversation not found' });
-        return;
-      }
-      if (convo.orgId !== tenantOrgId) {
-        res.status(403).json({ error: 'Access denied' });
-        return;
-      }
+    if (tenantOrgId === undefined) {
+      res.status(403).json({ error: 'Tenant context required' });
+      return;
+    }
+    const convoRows = await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.id, id))
+      .limit(1);
+    const convo = convoRows[0];
+    if (!convo) {
+      res.status(404).json({ error: 'Conversation not found' });
+      return;
+    }
+    if (convo.orgId !== tenantOrgId) {
+      res.status(403).json({ error: 'Access denied' });
+      return;
     }
 
     res.setHeader('Content-Type', 'text/event-stream');
