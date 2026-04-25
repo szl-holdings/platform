@@ -150,6 +150,24 @@ uri = "file://brand/szl-holdings-banner.png"
 type = "image"
 title = "SZL Holdings enterprise banner"
 
+[[generated]]
+id = "hzRxx0I-l7cHMWYduGAto"
+uri = "file://brand/a11oy-linkedin-banner.png"
+type = "image"
+title = "A11oy LinkedIn profile banner"
+
+[[generated]]
+id = "34XaNe0a1O9xjOHXxl0tw"
+uri = "file://brand/a11oy-linkedin-post.png"
+type = "image"
+title = "A11oy LinkedIn post infographic"
+
+[[generated]]
+id = "tyO1r3Kt2PDmsLouuQh-o"
+uri = "file://brand/szl-linkedin-banner.png"
+type = "image"
+title = "SZL Holdings LinkedIn banner"
+
 [[outputs]]
 id = "I_ORUhKS2b7MEVDwDdGWJ"
 uri = "file://social-content/banners/linkedin-7-lenses-banner.png"
@@ -485,3 +503,21 @@ id = "RWGkhNdCHv19MNdhdEfMg"
 uri = "file://docs/a11oy/A11OY.md"
 type = "text"
 title = "A11oy — Competitive Positioning Document"
+
+[[outputs]]
+id = "JJM4rxyUfSTTmh2QJSWTi"
+uri = "file://brand/a11oy-linkedin-banner.png"
+type = "image"
+title = "A11oy LinkedIn Profile Banner — Use This One"
+
+[[outputs]]
+id = "L3U926_CkVw8fwY7RRuqN"
+uri = "file://brand/a11oy-linkedin-post.png"
+type = "image"
+title = "A11oy LinkedIn Post — Seven-Layer Architecture"
+
+[[outputs]]
+id = "8AjQceWjOrqRkf7nEBqIS"
+uri = "file://brand/szl-linkedin-banner.png"
+type = "image"
+title = "SZL Holdings LinkedIn Banner — 8 Verticals"
