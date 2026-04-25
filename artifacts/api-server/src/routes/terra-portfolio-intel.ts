@@ -24,7 +24,8 @@ type ModuleKey =
   | 'zoning'
   | 'neighborhood-momentum'
   | 'seller-motivation'
-  | 'spatial-walkthrough';
+  | 'spatial-walkthrough'
+  | 'portfolio-dashboard';
 
 const PAYLOAD_CACHE = new Map<ModuleKey, { payload: unknown; expiresAt: number }>();
 const CACHE_TTL_MS = 60_000;
@@ -54,6 +55,7 @@ export async function seedTerraPortfolioModules(): Promise<void> {
     { module: 'neighborhood-momentum', payload: { neighborhoods: NEIGHBORHOODS } },
     { module: 'seller-motivation', payload: { sellers: SELLERS } },
     { module: 'spatial-walkthrough', payload: { property: SPATIAL_DEMO_PROPERTY } },
+    { module: 'portfolio-dashboard', payload: PORTFOLIO_DASHBOARD_PAYLOAD },
   ];
   for (const e of entries) {
     await db
@@ -1363,6 +1365,185 @@ router.get(
       });
     } catch (err) {
       handleRouteError(res, err, 'Failed to load spatial walkthrough demo');
+    }
+  },
+);
+
+// ---------------------------------------------------------------------------
+// Portfolio Dashboard (asset list + NOI trend + asset allocation)
+// ---------------------------------------------------------------------------
+const PORTFOLIO_DASHBOARD_ASSETS = [
+  {
+    id: 'P001',
+    name: 'The Meridian',
+    type: 'Multifamily',
+    location: 'Williamsburg, BK',
+    acquisition_date: 'Mar 2021',
+    acquisition_price: 24800000,
+    current_value: 31200000,
+    noi_annual: 1720000,
+    noi_change_pct: 6.8,
+    occupancy_pct: 96.2,
+    cap_rate: 5.5,
+    debt_amount: 14880000,
+    equity_value: 16320000,
+    irr_pct: 18.4,
+    status: 'performing',
+    units: 54,
+    sqft: 58000,
+  },
+  {
+    id: 'P002',
+    name: 'Corsair Plaza',
+    type: 'Mixed Use',
+    location: 'LIC, Queens',
+    acquisition_date: 'Sep 2022',
+    acquisition_price: 18200000,
+    current_value: 21400000,
+    noi_annual: 1240000,
+    noi_change_pct: 4.2,
+    occupancy_pct: 91.4,
+    cap_rate: 5.8,
+    debt_amount: 10920000,
+    equity_value: 10480000,
+    irr_pct: 14.2,
+    status: 'performing',
+    units: 32,
+    sqft: 42000,
+  },
+  {
+    id: 'P003',
+    name: '125 Pine Commerce',
+    type: 'Office',
+    location: 'Downtown Manhattan',
+    acquisition_date: 'Jan 2020',
+    acquisition_price: 42400000,
+    current_value: 36800000,
+    noi_annual: 2680000,
+    noi_change_pct: -8.4,
+    occupancy_pct: 74.0,
+    cap_rate: 7.3,
+    debt_amount: 25440000,
+    equity_value: 11360000,
+    irr_pct: -4.2,
+    status: 'critical',
+    sqft: 180000,
+  },
+  {
+    id: 'P004',
+    name: 'Thornfield Residences',
+    type: 'Multifamily',
+    location: 'Astoria, Queens',
+    acquisition_date: 'Jun 2022',
+    acquisition_price: 14600000,
+    current_value: 17200000,
+    noi_annual: 1020000,
+    noi_change_pct: 8.1,
+    occupancy_pct: 98.0,
+    cap_rate: 5.9,
+    debt_amount: 8760000,
+    equity_value: 8440000,
+    irr_pct: 16.8,
+    status: 'performing',
+    units: 38,
+    sqft: 38400,
+  },
+  {
+    id: 'P005',
+    name: 'Brooklyn Navy Industrial',
+    type: 'Industrial',
+    location: 'Navy Yard, BK',
+    acquisition_date: 'Nov 2023',
+    acquisition_price: 28400000,
+    current_value: 29200000,
+    noi_annual: 1840000,
+    noi_change_pct: 2.4,
+    occupancy_pct: 100,
+    cap_rate: 6.3,
+    debt_amount: 17040000,
+    equity_value: 12160000,
+    irr_pct: 8.2,
+    status: 'performing',
+    sqft: 82000,
+  },
+  {
+    id: 'P006',
+    name: 'South Fordham Apartments',
+    type: 'Multifamily',
+    location: 'Fordham, Bronx',
+    acquisition_date: 'Apr 2021',
+    acquisition_price: 8200000,
+    current_value: 10800000,
+    noi_annual: 720000,
+    noi_change_pct: 12.4,
+    occupancy_pct: 97.4,
+    cap_rate: 6.7,
+    debt_amount: 4920000,
+    equity_value: 5880000,
+    irr_pct: 22.1,
+    status: 'performing',
+    units: 24,
+    sqft: 28000,
+  },
+  {
+    id: 'P007',
+    name: 'Metro Commons',
+    type: 'Retail Strip',
+    location: 'Bay Ridge, BK',
+    acquisition_date: 'Aug 2019',
+    acquisition_price: 6800000,
+    current_value: 6200000,
+    noi_annual: 420000,
+    noi_change_pct: -3.8,
+    occupancy_pct: 82.0,
+    cap_rate: 6.8,
+    debt_amount: 4080000,
+    equity_value: 2120000,
+    irr_pct: -1.2,
+    status: 'watch',
+    sqft: 14000,
+  },
+];
+
+const PORTFOLIO_DASHBOARD_NOI_TREND = [
+  { q: "Q1 '23", noi: 7.2 },
+  { q: "Q2 '23", noi: 7.6 },
+  { q: "Q3 '23", noi: 7.9 },
+  { q: "Q4 '23", noi: 8.0 },
+  { q: "Q1 '24", noi: 8.4 },
+  { q: "Q2 '24", noi: 8.6 },
+];
+
+const PORTFOLIO_DASHBOARD_ALLOCATION = [
+  { name: 'Multifamily', value: 54, color: '#34d399' },
+  { name: 'Office', value: 23, color: '#60a5fa' },
+  { name: 'Industrial', value: 13, color: '#a78bfa' },
+  { name: 'Mixed Use', value: 7, color: '#c8a060' },
+  { name: 'Retail', value: 3, color: '#f97316' },
+];
+
+const PORTFOLIO_DASHBOARD_PAYLOAD = {
+  assets: PORTFOLIO_DASHBOARD_ASSETS,
+  noiTrend: PORTFOLIO_DASHBOARD_NOI_TREND,
+  allocation: PORTFOLIO_DASHBOARD_ALLOCATION,
+};
+
+router.get(
+  '/terra/portfolio/dashboard',
+  authOptional,
+  async (_req: Request, res: Response) => {
+    try {
+      const payload = await readModulePayload(
+        'portfolio-dashboard',
+        PORTFOLIO_DASHBOARD_PAYLOAD,
+      );
+      sendSuccess(res, {
+        ...(payload as object),
+        dataMode: 'persisted',
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to load portfolio dashboard');
     }
   },
 );

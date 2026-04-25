@@ -1,4 +1,9 @@
-import { db, terraDistressPropertiesTable, terraPropertiesTable } from '@szl-holdings/db';
+import {
+  db,
+  terraCommercialPropertiesTable,
+  terraDistressPropertiesTable,
+  terraPropertiesTable,
+} from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
 import { and, desc, eq, isNotNull, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
@@ -68,49 +73,122 @@ const ATTOM_API_KEY = process.env.ATTOM_API_KEY;
 const COSTAR_API_KEY = process.env.COSTAR_API_KEY;
 const REAL_ESTATE_PROVIDER = process.env.REAL_ESTATE_DATA_PROVIDER ?? 'none';
 
+async function computeDbMarketSignals() {
+  const [aggregates] = await db
+    .select({
+      totalProperties: sql<number>`COUNT(*)::int`,
+      avgCapRate: sql<string | null>`AVG(CAST(cap_rate AS NUMERIC))`,
+      avgOccupancy: sql<string | null>`AVG(CAST(occupancy_rate AS NUMERIC))`,
+      avgVacancy: sql<string | null>`AVG(CAST(market_vacancy_rate AS NUMERIC))`,
+      avgAskingRent: sql<string | null>`AVG(CAST(asking_rent_per_sqft AS NUMERIC))`,
+    })
+    .from(terraCommercialPropertiesTable)
+    .where(eq(terraCommercialPropertiesTable.isActive, true));
+
+  const submarketRows = await db
+    .select({
+      submarket: terraCommercialPropertiesTable.submarketName,
+      propertyType: terraCommercialPropertiesTable.propertyType,
+      properties: sql<number>`COUNT(*)::int`,
+      avgCapRate: sql<string | null>`AVG(CAST(cap_rate AS NUMERIC))`,
+      avgRent: sql<string | null>`AVG(CAST(asking_rent_per_sqft AS NUMERIC))`,
+    })
+    .from(terraCommercialPropertiesTable)
+    .where(
+      and(
+        eq(terraCommercialPropertiesTable.isActive, true),
+        isNotNull(terraCommercialPropertiesTable.submarketName),
+      ),
+    )
+    .groupBy(
+      terraCommercialPropertiesTable.submarketName,
+      terraCommercialPropertiesTable.propertyType,
+    )
+    .limit(20);
+
+  const [distress] = await db
+    .select({ activeDistress: sql<number>`COUNT(*)::int` })
+    .from(terraDistressPropertiesTable)
+    .where(eq(terraDistressPropertiesTable.isActive, true));
+
+  const num = (v: string | null | undefined): number | null =>
+    v === null || v === undefined ? null : Number(Number(v).toFixed(2));
+
+  return {
+    summary: {
+      totalProperties: aggregates?.totalProperties ?? 0,
+      avgCapRatePct: num(aggregates?.avgCapRate),
+      avgOccupancyPct: num(aggregates?.avgOccupancy),
+      avgMarketVacancyPct: num(aggregates?.avgVacancy),
+      avgAskingRentPerSqft: num(aggregates?.avgAskingRent),
+      activeDistressSignals: distress?.activeDistress ?? 0,
+    },
+    markets: submarketRows.map((r) => ({
+      submarket: r.submarket,
+      propertyType: r.propertyType,
+      properties: r.properties,
+      avgCapRatePct: num(r.avgCapRate),
+      avgRentPerSqft: num(r.avgRent),
+    })),
+  };
+}
+
 router.get(
   '/terra/market-intelligence',
   terraRateLimit,
   authMiddleware({ required: false }),
   async (_req, res) => {
     try {
-      const configured = Boolean(ATTOM_API_KEY || COSTAR_API_KEY);
-      if (!configured) {
-        sendSuccess(res, {
-          status: 'NOT_CONFIGURED',
-          note: 'Set ATTOM_API_KEY or COSTAR_API_KEY environment variable to enable live market intelligence. REAL_ESTATE_DATA_PROVIDER can be set to "attom" or "costar" to choose the provider.',
-          provider: REAL_ESTATE_PROVIDER,
-          count: 0,
-          markets: [],
-          fetchedAt: new Date().toISOString(),
-        });
-        return;
-      }
-
       const cacheKey = `market-intelligence:${REAL_ESTATE_PROVIDER}`;
       const data = await getCached(cacheKey, 15 * 60 * 1000, async () => {
+        const dbSignals = await computeDbMarketSignals();
+        let provider: 'db' | 'attom' | 'costar' = 'db';
+        let providerData: unknown = null;
+
         if (REAL_ESTATE_PROVIDER === 'attom' && ATTOM_API_KEY) {
-          const r = await fetch(
-            'https://api.gateway.attomdata.com/propertyapi/v1.0.0/assessment/snapshot?postalcode=10001&pagesize=10',
-            { headers: { apikey: ATTOM_API_KEY, Accept: 'application/json' } },
-          );
-          if (!r.ok) throw new Error(`ATTOM API ${r.status}`);
-          return r.json();
+          try {
+            const r = await fetch(
+              'https://api.gateway.attomdata.com/propertyapi/v1.0.0/assessment/snapshot?postalcode=10001&pagesize=10',
+              { headers: { apikey: ATTOM_API_KEY, Accept: 'application/json' } },
+            );
+            if (r.ok) {
+              providerData = await r.json();
+              provider = 'attom';
+            }
+          } catch {
+            // fall back to db-only signals
+          }
+        } else if (COSTAR_API_KEY) {
+          try {
+            const r = await fetch(
+              'https://api.costar.com/v1/market-analytics?market=nyc&limit=10',
+              {
+                headers: {
+                  Authorization: `Bearer ${COSTAR_API_KEY}`,
+                  Accept: 'application/json',
+                },
+              },
+            );
+            if (r.ok) {
+              providerData = await r.json();
+              provider = 'costar';
+            }
+          } catch {
+            // fall back to db-only signals
+          }
         }
-        if (COSTAR_API_KEY) {
-          const r = await fetch('https://api.costar.com/v1/market-analytics?market=nyc&limit=10', {
-            headers: { Authorization: `Bearer ${COSTAR_API_KEY}`, Accept: 'application/json' },
-          });
-          if (!r.ok) throw new Error(`CoStar API ${r.status}`);
-          return r.json();
-        }
-        throw new Error('No provider configured');
+
+        return { provider, providerData, ...dbSignals };
       });
+
+      const count =
+        (data as { markets?: unknown[] }).markets?.length ??
+        ((data as { summary?: { totalProperties?: number } }).summary?.totalProperties ?? 0);
 
       sendSuccess(res, {
         status: 'ok',
-        provider: REAL_ESTATE_PROVIDER,
-        data,
+        ...data,
+        count,
         fetchedAt: new Date().toISOString(),
       });
     } catch (err) {
@@ -357,6 +435,32 @@ router.get(
   },
 );
 
+let commercialSeedComplete = false;
+let commercialSeedInFlight: Promise<void> | null = null;
+async function ensureCommercialPropertiesSeeded(): Promise<void> {
+  if (commercialSeedComplete) return;
+  if (commercialSeedInFlight) {
+    await commercialSeedInFlight;
+    return;
+  }
+  commercialSeedInFlight = (async () => {
+    try {
+      const [row] = await db
+        .select({ cnt: sql<number>`COUNT(*)::int` })
+        .from(terraCommercialPropertiesTable);
+      if ((row?.cnt ?? 0) === 0) {
+        await runCommercialDataRefresh();
+      }
+      commercialSeedComplete = true;
+    } catch {
+      // leave commercialSeedComplete false so a later request can retry
+    } finally {
+      commercialSeedInFlight = null;
+    }
+  })();
+  await commercialSeedInFlight;
+}
+
 router.get(
   '/terra/commercial/properties',
   terraRateLimit,
@@ -370,6 +474,8 @@ router.get(
       const buildingClass = req.query.buildingClass as string | undefined;
       const limit = Math.min(parseInt(String(req.query.limit ?? '100'), 10), 500);
       const offset = parseInt(String(req.query.offset ?? '0'), 10);
+
+      await ensureCommercialPropertiesSeeded();
 
       const properties = await getCommercialProperties({
         propertyType,

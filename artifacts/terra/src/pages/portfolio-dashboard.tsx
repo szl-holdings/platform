@@ -1,3 +1,4 @@
+import { useStandardQuery } from '@szl-holdings/api-client-react';
 import {
   Activity,
   AlertTriangle,
@@ -10,7 +11,7 @@ import {
   TrendingDown,
   TrendingUp,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Area,
   AreaChart,
@@ -45,7 +46,15 @@ interface PropertyAsset {
   sqft: number;
 }
 
-const PORTFOLIO: PropertyAsset[] = [
+interface PortfolioDashboardPayload {
+  assets: PropertyAsset[];
+  noiTrend: { q: string; noi: number }[];
+  allocation: { name: string; value: number; color: string }[];
+  dataMode?: string;
+  generatedAt?: string;
+}
+
+const FALLBACK_PORTFOLIO: PropertyAsset[] = [
   {
     id: 'P001',
     name: 'The Meridian',
@@ -178,7 +187,7 @@ const PORTFOLIO: PropertyAsset[] = [
   },
 ];
 
-const NOI_TREND = [
+const FALLBACK_NOI_TREND = [
   { q: "Q1 '23", noi: 7.2 },
   { q: "Q2 '23", noi: 7.6 },
   { q: "Q3 '23", noi: 7.9 },
@@ -187,7 +196,7 @@ const NOI_TREND = [
   { q: "Q2 '24", noi: 8.6 },
 ];
 
-const ALLOCATION_DATA = [
+const FALLBACK_ALLOCATION = [
   { name: 'Multifamily', value: 54, color: '#34d399' },
   { name: 'Office', value: 23, color: '#60a5fa' },
   { name: 'Industrial', value: 13, color: '#a78bfa' },
@@ -208,18 +217,49 @@ function formatMoney(n: number) {
 }
 
 export default function PortfolioDashboardPage() {
-  const [selected, setSelected] = useState<PropertyAsset | null>(PORTFOLIO[0]);
+  const { data: apiData, isSuccess } = useStandardQuery<PortfolioDashboardPayload>({
+    queryKey: ['terra-portfolio-dashboard'],
+    queryFn: () =>
+      fetch('/api/terra/portfolio/dashboard')
+        .then((r) => {
+          if (!r.ok) throw new Error(`API error ${r.status}`);
+          return r.json();
+        })
+        .then((d) => (d?.data ?? d) as PortfolioDashboardPayload),
+    staleTime: 60_000,
+    retry: 1,
+  });
 
-  const totalGAV = PORTFOLIO.reduce((s, p) => s + p.current_value, 0);
-  const totalNAV = PORTFOLIO.reduce((s, p) => s + p.equity_value, 0);
-  const totalNOI = PORTFOLIO.reduce((s, p) => s + p.noi_annual, 0);
-  const totalDebt = PORTFOLIO.reduce((s, p) => s + p.debt_amount, 0);
-  const avgOccupancy = (
-    PORTFOLIO.reduce((s, p) => s + p.occupancy_pct, 0) / PORTFOLIO.length
-  ).toFixed(1);
-  const avgCapRate = (PORTFOLIO.reduce((s, p) => s + p.cap_rate, 0) / PORTFOLIO.length).toFixed(2);
-  const watchList = PORTFOLIO.filter((p) => p.status !== 'performing').length;
-  const ltvPct = ((totalDebt / totalGAV) * 100).toFixed(1);
+  // Once the API has answered (even with empty arrays), it is authoritative.
+  // FALLBACK_* values are used only during the initial loading phase.
+  const portfolio: PropertyAsset[] = useMemo(
+    () => (isSuccess ? (apiData?.assets ?? []) : FALLBACK_PORTFOLIO),
+    [apiData, isSuccess],
+  );
+  const noiTrend = isSuccess ? (apiData?.noiTrend ?? []) : FALLBACK_NOI_TREND;
+  const allocationData = isSuccess ? (apiData?.allocation ?? []) : FALLBACK_ALLOCATION;
+
+  const [selected, setSelected] = useState<PropertyAsset | null>(portfolio[0] ?? null);
+
+  useEffect(() => {
+    if (!selected && portfolio[0]) setSelected(portfolio[0]);
+    if (selected && !portfolio.find((p) => p.id === selected.id)) {
+      setSelected(portfolio[0] ?? null);
+    }
+  }, [portfolio, selected]);
+
+  const totalGAV = portfolio.reduce((s, p) => s + p.current_value, 0);
+  const totalNAV = portfolio.reduce((s, p) => s + p.equity_value, 0);
+  const totalNOI = portfolio.reduce((s, p) => s + p.noi_annual, 0);
+  const totalDebt = portfolio.reduce((s, p) => s + p.debt_amount, 0);
+  const avgOccupancy = portfolio.length
+    ? (portfolio.reduce((s, p) => s + p.occupancy_pct, 0) / portfolio.length).toFixed(1)
+    : '0.0';
+  const avgCapRate = portfolio.length
+    ? (portfolio.reduce((s, p) => s + p.cap_rate, 0) / portfolio.length).toFixed(2)
+    : '0.00';
+  const watchList = portfolio.filter((p) => p.status !== 'performing').length;
+  const ltvPct = totalGAV > 0 ? ((totalDebt / totalGAV) * 100).toFixed(1) : '0.0';
 
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ background: '#060c12' }}>
@@ -317,7 +357,7 @@ export default function PortfolioDashboardPage() {
             <div>IRR</div>
           </div>
 
-          {PORTFOLIO.map((asset) => {
+          {portfolio.map((asset) => {
             const st = STATUS_CONFIG[asset.status];
             const isSelected = selected?.id === asset.id;
             return (
@@ -437,7 +477,7 @@ export default function PortfolioDashboardPage() {
               Portfolio NOI Trend ($M)
             </h3>
             <ResponsiveContainer width="100%" height={100}>
-              <AreaChart data={NOI_TREND} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+              <AreaChart data={noiTrend} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                 <XAxis dataKey="q" tick={{ fontSize: 8, fill: 'rgba(200,160,96,0.4)' }} />
                 <YAxis tick={{ fontSize: 8, fill: 'rgba(200,160,96,0.4)' }} />
@@ -473,7 +513,7 @@ export default function PortfolioDashboardPage() {
             <div className="flex items-center gap-3">
               <PieChart width={80} height={80}>
                 <Pie
-                  data={ALLOCATION_DATA}
+                  data={allocationData}
                   cx={40}
                   cy={40}
                   innerRadius={22}
@@ -481,13 +521,13 @@ export default function PortfolioDashboardPage() {
                   dataKey="value"
                   strokeWidth={0}
                 >
-                  {ALLOCATION_DATA.map((entry) => (
+                  {allocationData.map((entry) => (
                     <Cell key={entry.name} fill={entry.color} />
                   ))}
                 </Pie>
               </PieChart>
               <div className="space-y-1.5">
-                {ALLOCATION_DATA.map((d) => (
+                {allocationData.map((d) => (
                   <div key={d.name} className="flex items-center gap-2 text-[9px]">
                     <div
                       className="w-2 h-2 rounded-full shrink-0"
