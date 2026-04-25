@@ -50,6 +50,7 @@ export const notificationPreferencesTable = pgTable('notification_preferences', 
   slackEnabled: boolean('slack_enabled').notNull().default(false),
   inAppEnabled: boolean('in_app_enabled').notNull().default(true),
   digestConfig: jsonb('digest_config'),
+  lastDigestSentAt: timestamp('last_digest_sent_at', { withTimezone: true }),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 

@@ -313,12 +313,16 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
   try {
     const { db } = await import("@szl-holdings/db");
     const { notificationPreferencesTable, notificationsTable, usersTable } = await import("@szl-holdings/db");
-    const { eq, and, gte, desc } = await import("drizzle-orm");
+    const { eq, and, gte, desc, isNull, or, lt } = await import("drizzle-orm");
     const { buildNotificationDigestEmail } = await import("./email");
     const { queueEmail } = await import("./queued-jobs");
 
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const digestCutoff = new Date(Date.now() - 20 * 60 * 60 * 1000);
 
+    // Efficiency pre-filter: exclude users who already received a digest in the
+    // last 20 hours. The per-user atomic claim below is the true idempotency
+    // gate; this filter just avoids loading already-covered users into the loop.
     const emailRecipients = await db
       .select({
         userId: notificationPreferencesTable.userId,
@@ -331,6 +335,10 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
         and(
           eq(notificationPreferencesTable.emailEnabled, true),
           eq(usersTable.isActive, true),
+          or(
+            isNull(notificationPreferencesTable.lastDigestSentAt),
+            lt(notificationPreferencesTable.lastDigestSentAt, digestCutoff),
+          ),
         ),
       );
 
@@ -346,16 +354,6 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
       }
       try {
         const digestKey = date;
-
-        // ── Dedup guard: check if already sent before doing DB work ───────
-        const existingCheck = await pgPool.query(
-          `SELECT 1 FROM digest_emails_sent WHERE digest_type = $1 AND recipient = $2 AND digest_key = $3 LIMIT 1`,
-          ["daily_lyte_digest", recipient.email, digestKey],
-        );
-        if (existingCheck.rows.length > 0) {
-          skipped++;
-          continue;
-        }
 
         const notifications = await db
           .select({
@@ -378,6 +376,22 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
           .limit(20);
 
         if (notifications.length === 0) {
+          skipped++;
+          continue;
+        }
+
+        // ── Atomic claim: single UPDATE...RETURNING prevents duplicate sends
+        // under concurrent job runs. PostgreSQL row-level locking ensures only
+        // one overlapping run wins per user; the loser gets 0 rows and skips.
+        const claimed = await pgPool.query(
+          `UPDATE notification_preferences
+           SET last_digest_sent_at = NOW()
+           WHERE user_id = $1
+             AND (last_digest_sent_at IS NULL OR last_digest_sent_at < $2)
+           RETURNING user_id`,
+          [recipient.userId, digestCutoff],
+        );
+        if (claimed.rows.length === 0) {
           skipped++;
           continue;
         }
@@ -409,7 +423,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
           unsubscribeToken: unsubToken,
         });
 
-        // ── Mark sent AFTER successful queue (dedup for reruns) ───────────
+        // ── Secondary audit record (best-effort) ──────────────────────────
         await pgPool
           .query(
             `INSERT INTO digest_emails_sent (digest_type, recipient, digest_key) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`,
