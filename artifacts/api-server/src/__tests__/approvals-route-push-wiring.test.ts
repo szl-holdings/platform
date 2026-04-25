@@ -12,9 +12,32 @@
  * without exercising the DB / Expo SDK.
  */
 
+import type { OrgMembership, RoleName } from '@szl-holdings/db';
 import express from 'express';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { AuthenticatedUser } from '../middlewares/auth';
+
+const TEST_ORG: OrgMembership = {
+  orgId: 42,
+  orgSlug: 'test-org',
+  orgName: 'Test Org',
+  role: 'admin',
+};
+
+function buildAuthedUser(
+  overrides: Partial<AuthenticatedUser> = {},
+): AuthenticatedUser {
+  const roles: RoleName[] = ['admin'];
+  return {
+    id: 9001,
+    displayName: 'Test Approver',
+    email: 'test@example.com',
+    roles,
+    orgs: [TEST_ORG],
+    ...overrides,
+  };
+}
 
 const sendPushToOrgApproversMock = vi.fn(async () => ({
   targeted: 0,
@@ -40,23 +63,7 @@ vi.mock('@szl-holdings/covenant-policy', () => ({
 
 vi.mock('../middlewares/auth', () => ({
   authMiddleware: () => (req: express.Request, _res: express.Response, next: express.NextFunction) => {
-    req.user = {
-      id: 9001,
-      displayName: 'Test Approver',
-      email: 'test@example.com',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      roles: ['admin'] as any,
-      orgs: [
-        {
-          orgId: 42,
-          orgSlug: 'test-org',
-          orgName: 'Test Org',
-          membershipRole: 'admin',
-          membershipStatus: 'active',
-        },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ] as any,
-    };
+    req.user = buildAuthedUser();
     next();
   },
   requireRole: () => (_req: express.Request, _res: express.Response, next: express.NextFunction) =>
@@ -213,14 +220,11 @@ describe('POST /approvals push notification wiring', () => {
     vi.resetModules();
     vi.doMock('../middlewares/auth', () => ({
       authMiddleware: () => (req: express.Request, _res: express.Response, next: express.NextFunction) => {
-        req.user = {
-          id: 9001,
+        req.user = buildAuthedUser({
           displayName: 'Orphan User',
           email: null,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          roles: ['admin'] as any,
           orgs: [],
-        };
+        });
         next();
       },
       requireRole: () => (_req: express.Request, _res: express.Response, next: express.NextFunction) =>
