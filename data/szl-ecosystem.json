@@ -1,0 +1,211 @@
+{
+  "version": "1.0.0",
+  "generated": "2026-04-25",
+  "description": "SZL Holdings ecosystem map — app routes, operational audit scripts, GitHub Actions, scheduled chats, and Alloy commands",
+  "organization": "SZL Holdings",
+  "apps": [
+    {
+      "name": "SZL Holdings Dashboard",
+      "slug": "szl-holdings",
+      "previewPath": "/",
+      "description": "Main executive dashboard and tenant management portal",
+      "artifactId": "artifacts/szl-holdings",
+      "category": "Core"
+    },
+    {
+      "name": "Unified Command",
+      "slug": "command",
+      "previewPath": "/command/",
+      "description": "Single-pane-of-glass ecosystem command portal",
+      "artifactId": "artifacts/command",
+      "category": "Core"
+    },
+    {
+      "name": "KORA — Decision Intelligence",
+      "slug": "lyte-command-center",
+      "previewPath": "/lyte/",
+      "description": "AI-powered decision intelligence and analytics hub",
+      "artifactId": "artifacts/lyte-command-center",
+      "category": "Intelligence"
+    },
+    {
+      "name": "LUMINA — AI Executive Briefing",
+      "slug": "pulse",
+      "previewPath": "/pulse/",
+      "description": "Automated executive briefing and signal aggregation",
+      "artifactId": "artifacts/pulse",
+      "category": "Intelligence"
+    },
+    {
+      "name": "SEXTANT — Maritime Intelligence",
+      "slug": "vessels",
+      "previewPath": "/vessels/",
+      "description": "Real-time maritime fleet tracking and weather risk intelligence",
+      "artifactId": "artifacts/vessels",
+      "category": "Domain"
+    },
+    {
+      "name": "TENAX — Cyber Resilience Command",
+      "slug": "sentra",
+      "previewPath": "/sentra/",
+      "description": "Security operations, threat detection, and compliance management",
+      "artifactId": "artifacts/sentra",
+      "category": "Domain"
+    },
+    {
+      "name": "DOMAINE — Real Estate Intelligence",
+      "slug": "terra",
+      "previewPath": "/terra/",
+      "description": "Real estate market intelligence and investment analytics",
+      "artifactId": "artifacts/terra",
+      "category": "Domain"
+    },
+    {
+      "name": "Counsel — Legal Matter Command",
+      "slug": "counsel",
+      "previewPath": "/counsel/",
+      "description": "Legal matter management and document intelligence",
+      "artifactId": "artifacts/counsel",
+      "category": "Domain"
+    },
+    {
+      "name": "PARAGON — Defense & Intelligence Command",
+      "slug": "aegis",
+      "previewPath": "/aegis/",
+      "description": "Defense readiness, threat intelligence, and operations command",
+      "artifactId": "artifacts/aegis",
+      "category": "Domain"
+    },
+    {
+      "name": "A11oy — Brand Orchestration Layer",
+      "slug": "a11oy",
+      "previewPath": "/a11oy/",
+      "description": "Brand asset management and design system orchestration",
+      "artifactId": "artifacts/a11oy",
+      "category": "Platform"
+    },
+    {
+      "name": "API Server",
+      "slug": "api-server",
+      "previewPath": "/api/",
+      "description": "Shared Express API server with MCP, Alloy, and domain routes",
+      "artifactId": "artifacts/api-server",
+      "category": "Infrastructure"
+    },
+    {
+      "name": "SZL Holdings Mobile",
+      "slug": "szl-holdings-mobile",
+      "previewPath": "/szl-holdings-mobile/",
+      "description": "React Native mobile command center for iOS and Android",
+      "artifactId": "artifacts/szl-holdings-mobile",
+      "category": "Mobile"
+    }
+  ],
+  "auditScripts": [
+    {
+      "name": "health-check",
+      "path": "scripts/health-check.mjs",
+      "description": "Polls all artifact preview paths and returns HTTP status codes",
+      "cadence": "hourly"
+    },
+    {
+      "name": "db-integrity",
+      "path": "scripts/db-integrity.mjs",
+      "description": "Runs Drizzle schema validation and orphan record checks",
+      "cadence": "daily"
+    },
+    {
+      "name": "secrets-rotation",
+      "path": "scripts/secrets-rotation.mjs",
+      "description": "Identifies API keys expiring within 14 days and pages the ops team",
+      "cadence": "weekly"
+    },
+    {
+      "name": "dependency-audit",
+      "path": "scripts/dependency-audit.mjs",
+      "description": "Runs pnpm audit and surfaces high/critical vulnerabilities",
+      "cadence": "daily"
+    },
+    {
+      "name": "validate",
+      "path": "scripts/validate.mjs",
+      "description": "Validates PluginMesh data files — JSON structure, required fields, duplicate slugs, catalog count",
+      "cadence": "on-demand"
+    }
+  ],
+  "githubActions": [
+    {
+      "name": "CI Pipeline",
+      "file": ".github/workflows/ci.yml",
+      "triggers": ["push", "pull_request"],
+      "jobs": ["typecheck", "lint", "test", "build"]
+    },
+    {
+      "name": "Deploy Production",
+      "file": ".github/workflows/deploy.yml",
+      "triggers": ["push to main"],
+      "jobs": ["build", "deploy-replit"]
+    },
+    {
+      "name": "Security Scan",
+      "file": ".github/workflows/security.yml",
+      "triggers": ["weekly schedule", "on-demand"],
+      "jobs": ["sast-scan", "dependency-audit", "secret-detection"]
+    },
+    {
+      "name": "E2E Tests",
+      "file": ".github/workflows/e2e.yml",
+      "triggers": ["pull_request"],
+      "jobs": ["playwright-e2e"]
+    }
+  ],
+  "scheduledChats": [
+    "weekly-status-report",
+    "release-prep",
+    "incident-triage",
+    "code-quality-sweep",
+    "repo-maintenance",
+    "growth-signals"
+  ],
+  "alloyCommands": [
+    {
+      "command": "alloy run weekly-status-report",
+      "description": "Generates weekly executive brief across all ecosystem domains"
+    },
+    {
+      "command": "alloy run incident-triage --incident_id <id>",
+      "description": "Executes the SZL incident triage protocol for a PagerDuty alert"
+    },
+    {
+      "command": "alloy skill invoke secrets-audit",
+      "description": "Audits all registered secrets for expiry and rotation status"
+    },
+    {
+      "command": "alloy skill invoke dependency-audit",
+      "description": "Runs pnpm audit across the monorepo and creates Linear issues for findings"
+    },
+    {
+      "command": "alloy decision list --status approval_required",
+      "description": "Lists all pending decisions awaiting human approval"
+    },
+    {
+      "command": "alloy research --query <topic> --domains maritime,security,research",
+      "description": "Launches multi-domain research query through available domain agents"
+    }
+  ],
+  "agentsMdStructure": {
+    "path": "AGENTS.md",
+    "sections": [
+      "Project Overview",
+      "Repository Structure",
+      "Development Commands",
+      "Artifact Inventory",
+      "API Conventions",
+      "Database Schema",
+      "MCP Server",
+      "Alloy Skills Registry",
+      "Deployment",
+      "Security Policies"
+    ]
+  }
+}

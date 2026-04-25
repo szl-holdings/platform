@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "pluginmesh": {
+      "command": "node",
+      "args": ["scripts/mcp-server.mjs"],
+      "env": {}
+    },
+    "alloy": {
+      "url": "https://${REPLIT_DEV_DOMAIN}/api/mcp",
+      "headers": {
+        "Authorization": "Bearer ${ALLOY_INTERNAL_TOKEN}",
+        "Content-Type": "application/json"
+      }
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    }
+  }
+}
