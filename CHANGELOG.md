@@ -14,6 +14,9 @@ See `/docs/releases/versioning-policy.md` for the full versioning policy.
 
 ## [Unreleased]
 
+### Fixed
+- **`artifacts/command`**: workflow flap on cold-start (`DIDNT_OPEN_A_PORT 5000`). Root cause: `localPort` matched `VITE_PORT` (5000) so the shared proxy plugin and Vite raced for the same port. Aligned to the standard pattern (`localPort = 9090`, `VITE_PORT = 5000`).
+
 ### In Progress
 - Revenue activation (Stripe billing live for Vessels, Lyte, Terra, Carlota Jo)
 - Enterprise SSO / SCIM 2.0 provisioning

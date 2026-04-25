@@ -12,7 +12,7 @@ version = "1.0.0"
 [[services]]
 name = "web"
 paths = [ "/command/" ]
-localPort = 5000
+localPort = 9090
 autoStart = true
 
 [services.development]
