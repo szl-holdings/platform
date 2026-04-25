@@ -947,6 +947,56 @@ router.post('/ops/alert-rules', validateBody(alertRuleSchema), async (req, res) 
   }
 });
 
+// Free-form test-email endpoint — lets operators verify email delivery without a real rule or alert
+router.post(
+  '/ops/alert-rules/test-email',
+  validateBody(
+    bodyShape({
+      recipient: z.string().email(),
+      ruleName: z.string().optional(),
+    }),
+  ),
+  async (req, res) => {
+    const { recipient, ruleName } = req.body as { recipient: string; ruleName?: string };
+    try {
+      if (!hasEmailProviderConfigured()) {
+        res.status(503).json({ error: 'No email provider configured' });
+        return;
+      }
+      const alertsUrl =
+        process.env.ALERTS_PAGE_URL ??
+        `${process.env.APP_BASE_URL ?? 'https://szlholdings.com'}/command/ops/alerts`;
+      const { subject, html, text } = buildAlertFiredEmail({
+        ruleName: `[TEST] ${ruleName ?? 'Sample Alert Rule'}`,
+        severity: 'warning',
+        metricName: 'api.error_rate',
+        metricValue: 7.4,
+        condition: 'gt',
+        threshold: 5,
+        alertsUrl,
+      });
+      const result = await sendEmail({ to: recipient, subject, html, text, unsubscribeToken: generateUnsubscribeToken(recipient) });
+      if (!result.success) {
+        res.status(502).json({ error: result.error ?? 'Email delivery failed' });
+        return;
+      }
+      logNotificationAudit({
+        template: 'alert_rule_test_email',
+        recipient,
+        subject,
+        entityType: 'alert_rule',
+        entityId: 'test',
+        deliveryStatus: 'sent',
+        messageId: result.messageId,
+        provider: result.provider,
+      });
+      res.json({ ok: true, provider: result.provider as 'sendgrid' | 'resend' | 'smtp' });
+    } catch (_err) {
+      res.status(500).json({ error: 'Failed to send test alert email' });
+    }
+  },
+);
+
 // Test-send endpoint — sends a sample alert email without firing a real alert
 router.post(
   '/ops/alert-rules/:id/test-send',
