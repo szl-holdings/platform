@@ -120,7 +120,7 @@ Re-render with `pnpm --filter @workspace/szl-demo-video render`. Source manifest
 
 ![TENAX — SOC Command](docs/assets/screenshots/current/tenax-soc-command.jpg)
 
-> **Note on these images:** The images above (`assets/readme/products/`) are pre-v2 design generation assets and are candidates for replacement. For verified, post-redesign screenshots captured live on 2026-04-21, see `screenshots/approved/` (10 current screenshots) and `audit/screenshot-catalog.md` for full metadata. Authenticated dashboard surfaces require `DATABASE_URL` to be provisioned — see `audit/deployment-proof.md`.
+> **Note on these images:** The images above (`assets/readme/products/`) are pre-v2 design generation assets and are candidates for replacement. For verified, post-redesign screenshots captured live on 2026-04-21, see `docs/assets/screenshots/current/` (7 current screenshots) and `audit/screenshot-catalog.md` for full metadata. Authenticated dashboard surfaces require `DATABASE_URL` to be provisioned — see `audit/deployment-proof.md`.
 
 ---
 

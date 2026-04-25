@@ -1,0 +1,13 @@
+=== @szl-holdings/design-system ===
+
+> @szl-holdings/design-system@0.1.0 typecheck /home/runner/workspace/packages/design-system
+> tsc -p tsconfig.json --noEmit
+
+Exit: 0
+
+=== @workspace/mockup-sandbox ===
+
+> @workspace/mockup-sandbox@2.0.0 typecheck /home/runner/workspace/artifacts/mockup-sandbox
+> tsc -p tsconfig.json --noEmit
+
+Exit: 0

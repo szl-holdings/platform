@@ -179,9 +179,9 @@ const crossChecks = [
     expected: truth.database.schema_files.count,
   },
   {
-    name: 'README ↔ JSON: DB tables',
-    readmeKey: 'DB tables (canonical, from metrics registry)',
-    expected: truth.database.table_definitions_canonical.count,
+    name: 'README ↔ JSON: DB tables (raw grep)',
+    readmeKey: 'DB tables (raw grep, pgTable declarations)',
+    expected: truth.database.table_definitions_raw_grep.count,
   },
   {
     name: 'README ↔ JSON: DB migrations',
@@ -217,18 +217,28 @@ const crossChecks = [
 
 let failures = 0;
 
-function printChecks(_title, checks) {
+function printChecks(title, checks) {
+  console.log(`\n── ${title} ──`);
   for (const { name, expected, actual } of checks) {
     const ok = expected === actual;
     if (!ok) failures++;
+    const status = ok ? '✓ PASS' : '✗ FAIL';
+    const detail = ok ? `${actual}` : `expected=${expected} actual=${actual}`;
+    console.log(`  ${status}  ${name}: ${detail}`);
   }
 }
+
+console.log(`Source-of-truth validation — ${new Date().toISOString()}`);
+console.log(`SOT version: ${truth.meta.version}  generated: ${truth.meta.generated}`);
 
 printChecks('Phase 1: Filesystem vs source-of-truth.json', fsChecks);
 printChecks('Phase 2: audit/README.md vs source-of-truth.json', crossChecks);
 
+console.log(`\n── Result ──`);
 if (failures > 0) {
+  console.log(`  ✗ FAILED — ${failures} check(s) failed`);
   process.exit(1);
 } else {
+  console.log(`  ✓ ALL PASS — ${fsChecks.length + crossChecks.length} checks passed`);
   process.exit(0);
 }

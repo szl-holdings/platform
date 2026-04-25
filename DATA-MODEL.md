@@ -1,10 +1,10 @@
 # Data Model — SZL Holdings Platform
 
-**Version:** 4.0 | **Date:** April 2026 | **Audience:** Technical advisors, data engineers, enterprise evaluators
+**Version:** 4.1 | **Date:** April 2026 | **Audience:** Technical advisors, data engineers, enterprise evaluators
 
 > **Canonical summary.** For the full schema reference, see [`docs/architecture/data-model.md`](docs/architecture/data-model.md).
 
-**Source of truth:** `lib/db/src/schema/` (166 schema files, 917 tables total)
+**Source of truth:** `lib/db/src/schema/` (170 schema files, 939 pgTable definitions; 730 tables provisioned in live DB)
 
 ---
 
@@ -15,8 +15,9 @@
 | Engine | PostgreSQL 16 |
 | ORM | Drizzle ORM (`@szl-holdings/db`) |
 | Migration strategy | Drizzle migrations (`lib/db/drizzle/`) |
-| Schema files | 166 TypeScript schema files in `lib/db/src/schema/` |
-| Table count | 917 `pgTable` declarations across 166 schema files |
+| Schema files | 170 TypeScript schema files in `lib/db/src/schema/` |
+| Table definitions (raw grep) | 939 `pgTable` declarations across 170 schema files |
+| Provisioned tables (live DB) | 730 (applied via drizzle push; see `audit/source-of-truth.json` §track4_db_verification) |
 | Counting method | `grep -r "= pgTable" lib/db/src/schema/ --include="*.ts" \| wc -l` |
 
 ---

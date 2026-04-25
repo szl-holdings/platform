@@ -1,6 +1,6 @@
 # Product Surfaces — SZL Holdings Platform
 
-**Version:** 4.0 | **Date:** April 2026 | **Audience:** Engineers, product managers, investors, enterprise evaluators
+**Version:** 4.1 | **Date:** April 2026 | **Audience:** Engineers, product managers, investors, enterprise evaluators
 
 > **Canonical summary.** For the full product surface reference, see [`docs/product/product-surfaces.md`](docs/product/product-surfaces.md).
 
@@ -10,46 +10,41 @@
 
 | Type | Examples |
 |------|---------|
-| **Command surface** | KORA (Lyte Command Center), Command Portal, Pulse |
+| **Command surface** | KORA (Lyte Command Center), Command Portal, LUMINA (Pulse) |
 | **Execution fabric** | FORGE (shared backbone, formerly Alloy) |
 | **Mobile command** | APEX (`artifacts/szl-holdings-mobile`) |
 | **Domain pack** | TENAX (Sentra), SEXTANT (Vessels), DOMAINE (Terra), Counsel, Carlota Jo, LUMINA (Pulse), PARAGON (Aegis) |
 | **Corporate platform** | SZL Holdings (web) |
-| **Internal / tooling** | API Server, mockup-sandbox (NEXUS) |
+| **Internal / tooling** | API Server, mockup-sandbox (PRAXIS) |
 | **Media** | SZL Demo Video — see [`artifacts/szl-demo-video/deliverables/`](artifacts/szl-demo-video/deliverables/) |
 
 ---
 
 ## Web Applications
 
-### Lyte — Business Observability
+### KORA — Decision Intelligence
 - **Artifact:** `artifacts/lyte-command-center`
 - **Preview path:** `/lyte/`
 - **Status:** Functional alpha
 - **Audience:** Operations leads, CFOs, PMOs, executive teams
 
-### Aegis — Security & Defense Intelligence
+### PARAGON — Security & Defense Intelligence
 - **Artifact:** `artifacts/aegis`
 - **Preview path:** `/aegis/`
 - **Status:** Functional alpha
 - **Audience:** CISOs, SOC analysts, MSPs, compliance officers
 
-### Vessels — Maritime Intelligence
+### SEXTANT — Maritime Intelligence
 - **Artifact:** `artifacts/vessels`
 - **Preview path:** `/vessels/`
 - **Status:** Functional alpha
 - **Audience:** Fleet executives, maritime operations, insurers
 
-### Terra — Real Estate Intelligence
+### DOMAINE — Real Estate Intelligence
 - **Artifact:** `artifacts/terra`
 - **Preview path:** `/terra/`
 - **Status:** Functional alpha
 - **Audience:** NYC brokers, real estate investors, portfolio managers
-
-### PRISM Counsel — Legal Matter Command *(Archived)*
-- **Artifact:** `artifacts/prism-counsel`
-- **Preview path:** `/prism-counsel/`
-- **Status:** Archived (API routes and schema retained; frontend removed)
 
 ### Counsel — Legal Matter Command
 - **Artifact:** `artifacts/counsel`
@@ -57,19 +52,13 @@
 - **Status:** Functional alpha
 - **Audience:** Legal partners, case managers, discovery analysts
 
-### IMPERIUM — Cloud Sovereignty
-- **Artifact:** `artifacts/imperium`
-- **Preview path:** `/imperium/`
-- **Status:** Functional alpha
-- **Audience:** Cloud infrastructure teams, platform operators, governance officers
-
 ### Carlota Jo — Private Advisory
 - **Artifact:** `artifacts/carlota-jo`
 - **Preview path:** `/carlota-jo/`
 - **Status:** Live
 - **Audience:** Founders, executives, UHNW clients
 
-### Sentra — Cyber Resilience Command
+### TENAX — Cyber Resilience Command
 - **Artifact:** `artifacts/sentra`
 - **Preview path:** `/sentra/`
 - **Status:** Functional alpha
@@ -81,7 +70,7 @@
 - **Status:** Functional alpha
 - **Audience:** Internal administrators, ecosystem operators
 
-### Pulse — AI Executive Briefing
+### LUMINA — AI Executive Briefing
 - **Artifact:** `artifacts/pulse`
 - **Preview path:** `/pulse/`
 - **Status:** Functional alpha
@@ -101,6 +90,17 @@
 
 ---
 
+## Archived Web Surfaces
+
+These surfaces had registered artifacts that have since been removed from disk. Their API routes and schemas remain active on the API server.
+
+| Surface | Former Artifact | Notes |
+|---------|----------------|-------|
+| PRISM Counsel | `artifacts/prism-counsel` | Superseded by Counsel (`artifacts/counsel`); legacy `/api/prism-counsel/*` routes retained |
+| IMPERIUM — Cloud Sovereignty | `artifacts/imperium` | Merged into Command Portal; governance routes active |
+
+---
+
 ## Media Surfaces
 
 ### SZL Holdings — Governed Autonomy Demo
@@ -114,30 +114,25 @@
 
 ## Mobile Surfaces
 
-### CORTEX — Unified Mobile Command
+### APEX — Unified Mobile Command
 - **Artifact:** `artifacts/szl-holdings-mobile`
 - **Preview path:** `/szl-holdings-mobile/`
 - **Status:** Functional alpha
 - **Platform:** iOS + Android (Expo / React Native)
 - **Domains:** All 9 platform domains in one app
 
-### CORTEX Mobile (Next Generation)
-- **Artifact:** `artifacts/cortex-mobile`
-- **Preview path:** `/cortex-mobile/`
-- **Status:** Work in progress
-
 ---
 
 ## Domain-Specific Mobile Apps — Roadmap (Not Yet Built)
 
-> None of the apps below are registered artifacts or built code. They are planned companions to CORTEX (`artifacts/szl-holdings-mobile`). Domain-specific mobile apps will only be split out from CORTEX when a paying customer or design partner requires a standalone experience.
+> None of the apps below are registered artifacts or built code. They are planned companions to APEX (`artifacts/szl-holdings-mobile`). Domain-specific mobile apps will only be split out from APEX when a paying customer or design partner requires a standalone experience.
 
 | App | Planned Artifact | Status |
 |-----|------------------|--------|
-| Aegis Mobile | `artifacts/aegis-mobile` (not registered) | Roadmap — H2 2026 |
-| Vessels Mobile | `artifacts/vessels-mobile` (not registered) | Roadmap — H2 2026 |
-| Terra Mobile | `artifacts/terra-mobile` (not registered) | Roadmap — 2027 |
-| Lyte Mobile | `artifacts/lyte-mobile` (not registered) | Roadmap — 2027 |
+| PARAGON Mobile | `artifacts/paragon-mobile` (not registered) | Roadmap — H2 2026 |
+| SEXTANT Mobile | `artifacts/sextant-mobile` (not registered) | Roadmap — H2 2026 |
+| DOMAINE Mobile | `artifacts/domaine-mobile` (not registered) | Roadmap — 2027 |
+| KORA Mobile | `artifacts/kora-mobile` (not registered) | Roadmap — 2027 |
 | Carlota Jo Mobile | `artifacts/carlota-jo-mobile` (not registered) | Roadmap — H2 2026 |
 
 ---
@@ -151,5 +146,5 @@
 
 ---
 
-*Last verified against codebase: April 2026.*
+*Last verified against codebase: April 25, 2026 (Moonshot Phase 1 audit).*
 *For full surface specifications see [`docs/product/product-surfaces.md`](docs/product/product-surfaces.md).*

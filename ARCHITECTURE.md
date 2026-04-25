@@ -1,6 +1,6 @@
 # Architecture — SZL Holdings Platform
 
-**Version:** 4.0 | **Date:** April 2026 | **Audience:** Technical advisors, enterprise architects, investors
+**Version:** 4.1 | **Date:** April 2026 | **Audience:** Technical advisors, enterprise architects, investors
 
 > **Canonical summary.** For the full architecture reference, see [`docs/architecture/architecture.md`](docs/architecture/architecture.md).
 
@@ -26,16 +26,15 @@ Nothing is opaque. Nothing executes without attribution.
 │  Governed decision infrastructure for consequential operations   │
 ├──────────────────────────────────────────────────────────────────┤
 │  COMMAND SURFACES                                                │
-│  Lyte (flagship)   Command Portal (hub)   CORTEX (mobile)        │
-│  Pulse (briefing)  SZL Holdings (corporate)                      │
+│  KORA (flagship)   Command Portal (hub)   APEX (mobile)          │
+│  LUMINA (briefing)  SZL Holdings (corporate)                     │
 ├──────────────────────────────────────────────────────────────────┤
 │  EXECUTION FABRIC                                                │
-│  Alloy — Workflow orchestration · Approval gates · Audit trail   │
+│  FORGE — Workflow orchestration · Approval gates · Audit trail   │
 ├──────────────────────────────────────────────────────────────────┤
 │  DOMAIN PACKS                                                    │
-│  Aegis (security)   Vessels (maritime)   Terra (real estate)     │
-│  PRISM Counsel (legal)   IMPERIUM (cloud)   Carlota Jo (advisory)│
-│  Sentra (cyber resilience)                                       │
+│  PARAGON (security)   SEXTANT (maritime)   DOMAINE (real estate) │
+│  Counsel (legal)   Carlota Jo (advisory)   TENAX (cyber)         │
 ├──────────────────────────────────────────────────────────────────┤
 │  GOVERNANCE INFRASTRUCTURE (shared by all surfaces)             │
 │  Outcome Graph · Proof Chain · Covenant Policy                   │
@@ -43,7 +42,7 @@ Nothing is opaque. Nothing executes without attribution.
 │  AI Engine · RBAC + Auth                                         │
 ├──────────────────────────────────────────────────────────────────┤
 │  DATA LAYER                                                      │
-│  PostgreSQL 16 (Drizzle) · 917 tables · External feeds           │
+│  PostgreSQL 16 (Drizzle) · 730 provisioned tables · External feeds│
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -53,12 +52,12 @@ Nothing is opaque. Nothing executes without attribution.
 
 | Layer | Path | Contents |
 |-------|------|----------|
-| Artifacts (surfaces) | `artifacts/` | 17 web, mobile, video, and design apps |
-| API Server | `artifacts/api-server/` | Express 5, 256 route files |
+| Artifacts (surfaces) | `artifacts/` | 14 registered web, mobile, video, and design apps |
+| API Server | `artifacts/api-server/` | Express 5, 357 route files |
 | Lib packages | `lib/` | Shared runtime libraries (db, ai-engine, proof-chain, etc.) |
 | Workspace packages | `packages/` | Policy engine, reflection engine, shared-ui, etc. |
 | Scripts | `scripts/` | Seed, smoke, metrics, and CI utilities |
-| Database | `lib/db/src/schema/` | 166 schema files, 917 tables |
+| Database | `lib/db/src/schema/` | 170 schema files, 939 pgTable definitions |
 
 ---
 
@@ -66,11 +65,12 @@ Nothing is opaque. Nothing executes without attribution.
 
 | Metric | Value |
 |--------|-------|
-| Artifacts | 17 |
-| API route files | 256 |
-| Database tables | 917 across 166 schema files |
+| Registered artifacts | 14 |
+| API route files | 357 |
+| Database schema files | 170 across lib/db/src/schema/ |
+| Provisioned DB tables (live) | 730 |
 | Governance primitives | 6 (shared by all surfaces) |
-| Platform surfaces | 10 web + 2 mobile + 1 video + 1 design + 1 API |
+| Platform surfaces | 10 web + 1 mobile + 1 video + 1 design + 1 API |
 
 ---
 
@@ -97,7 +97,7 @@ All surfaces share these primitives — none can be disabled per-tenant:
 3. Recommendation  — AI-generated advisory with evidence (Decision Engine)
 4. Simulation      — Monte Carlo probabilistic risk model (lib/monte-carlo)
 5. Policy          — Covenant Policy permission + approval gate
-6. Execution       — Workflow Engine routes the action (lib/workflow-engine, Alloy)
+6. Execution       — Workflow Engine routes the action (lib/workflow-engine, FORGE)
 7. Proof           — Proof Chain records immutable audit trail (lib/proof-chain)
 8. Outcome         — Outcome Graph tracks result (lib/outcome-graph)
 9. Learning        — Calibration job updates agent priors (packages/reflection-engine)
@@ -107,3 +107,4 @@ All surfaces share these primitives — none can be disabled per-tenant:
 
 *For the full architecture reference see [`docs/architecture/architecture.md`](docs/architecture/architecture.md).*
 *For platform primitives specification see [`docs/platform/platform-primitives.md`](docs/platform/platform-primitives.md).*
+*Counts verified 2026-04-25 by Moonshot Phase 1 audit. Source: `audit/source-of-truth.json` v1.3.0.*
