@@ -521,3 +521,21 @@ id = "8AjQceWjOrqRkf7nEBqIS"
 uri = "file://brand/szl-linkedin-banner.png"
 type = "image"
 title = "SZL Holdings LinkedIn Banner — 8 Verticals"
+
+[[outputs]]
+id = "-fBMfUcRFP9yHC6sfesD4"
+uri = "file://artifacts/szl-demo-video/deliverables/linkedin-4-17.mp4"
+type = "video"
+title = "SZL Demo Video — LinkedIn Widescreen (1920x1080)"
+
+[[outputs]]
+id = "-lF4TkVaBSWJjlTkGZhot"
+uri = "file://artifacts/szl-demo-video/deliverables/linkedin-4-17-square.mp4"
+type = "video"
+title = "SZL Demo Video — LinkedIn Square (1080x1080)"
+
+[[outputs]]
+id = "5eazBQcOWDJEplInb795Z"
+uri = "file://artifacts/szl-demo-video/deliverables/szl-demo-video.zip"
+type = "unspecified"
+title = "Full Demo Package — ZIP (all formats)"
