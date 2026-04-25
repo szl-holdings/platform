@@ -14,11 +14,11 @@ The SZL Holdings platform has passed its public-readiness audit for investor and
 **Key outcomes:**
 - 0 true security positives — no credentials in source
 - 227 unit tests passing
-- 5 artifacts build cleanly; pre-existing failures documented honestly
+- **6 artifacts build cleanly** (A11oy dependency wiring fixed in this pass); pre-existing failures documented honestly
 - Investor proof pack shipped — 7 documents
-- Audit reports complete — 7 documents
+- Audit reports complete — 8 documents
 - GitHub templates updated for A11oy
-- Feature branch pushed to `origin`; PR opened against `master`
+- PR #37 opened against `master` via GitHub Contents API
 
 ---
 
@@ -26,9 +26,12 @@ The SZL Holdings platform has passed its public-readiness audit for investor and
 
 | Item | File | Status |
 |------|------|--------|
+| **A11oy dependency wiring — build now passes** | `artifacts/a11oy/package.json` | ✓ Fixed |
 | Added A11oy to PR template Affected Surfaces | `.github/PULL_REQUEST_TEMPLATE.md` | ✓ Done |
-| Added A11oy to bug report component dropdown | `.github/ISSUE_TEMPLATE/bug_report.yml` | ✓ Done |
-| Added A11oy to feature request component dropdown | `.github/ISSUE_TEMPLATE/feature_request.yml` | ✓ Done |
+| Added A11oy to bug report component dropdown (yml format) | `.github/ISSUE_TEMPLATE/bug_report.yml` | ✓ Done |
+| Added A11oy to feature request component dropdown (yml format) | `.github/ISSUE_TEMPLATE/feature_request.yml` | ✓ Done |
+
+> **Note on issue template format:** The task spec calls for `.yml` structured templates (per task #3474 brief). The local repo uses `.yml` format which provides structured dropdowns and required fields — functionally superior to the legacy `.md` format. GitHub master still has old `.md` format files (`bug_report.md`, `feature_request.md`) that predate the yml conversion; these should be deleted after PR #37 merges.
 
 ---
 
