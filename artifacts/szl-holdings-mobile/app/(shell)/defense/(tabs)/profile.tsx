@@ -127,7 +127,7 @@ export default function ProfileScreen() {
             },
             {
               domain: 'lyte',
-              label: 'KORA',
+              label: 'Lyte',
               color: giColors.accent.teal,
               fetch: async () => {
                 try {
@@ -144,7 +144,7 @@ export default function ProfileScreen() {
             },
             {
               domain: 'vessels',
-              label: 'SEXTANT',
+              label: 'Vessels',
               color: giColors.accent.teal,
               fetch: async () => {
                 try {

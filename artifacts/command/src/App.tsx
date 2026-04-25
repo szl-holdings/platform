@@ -67,6 +67,34 @@ const PilotIntelligencePage = lazy(() =>
   })),
 );
 
+const AgentsPage = lazy(() =>
+  import('./pages/agents/agents-page').then((m) => ({ default: m.AgentsPage })),
+);
+const WorkcellsPage = lazy(() =>
+  import('./pages/agents/workcells-page').then((m) => ({ default: m.WorkcellsPage })),
+);
+const WorkcellDetailPage = lazy(() =>
+  import('./pages/agents/workcell-detail-page').then((m) => ({ default: m.WorkcellDetailPage })),
+);
+const WorkcellReplayPage = lazy(() =>
+  import('./pages/agents/workcell-replay-page').then((m) => ({ default: m.WorkcellReplayPage })),
+);
+const ToolsPage = lazy(() =>
+  import('./pages/agents/tools-page').then((m) => ({ default: m.ToolsPage })),
+);
+const EvalsPage = lazy(() =>
+  import('./pages/agents/evals-page').then((m) => ({ default: m.EvalsPage })),
+);
+const MemoryPage = lazy(() =>
+  import('./pages/agents/memory-page').then((m) => ({ default: m.MemoryPage })),
+);
+const ModelRouterPage = lazy(() =>
+  import('./pages/agents/model-router-page').then((m) => ({ default: m.ModelRouterPage })),
+);
+const SkillsPage = lazy(() =>
+  import('./pages/agents/skills-page').then((m) => ({ default: m.SkillsPage })),
+);
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: { refetchOnWindowFocus: false, staleTime: 30_000, retry: 1 },
@@ -733,6 +761,17 @@ function AppShell() {
               <Route path="/operations/eval-studio" component={() => <EvalStudio />} />
               <Route path="/eval-forge" component={() => <EvalForge />} />
               <Route path="/eval-forge/runs/:runId" component={() => <EvalForge />} />
+
+              {/* A11oy Phase 2 — Agent Runtime */}
+              <Route path="/agents" component={() => <AgentsPage />} />
+              <Route path="/agents/workcells" component={() => <WorkcellsPage />} />
+              <Route path="/agents/workcells/:id/replay" component={() => <WorkcellReplayPage />} />
+              <Route path="/agents/workcells/:id" component={() => <WorkcellDetailPage />} />
+              <Route path="/agents/tools" component={() => <ToolsPage />} />
+              <Route path="/agents/evals" component={() => <EvalsPage />} />
+              <Route path="/agents/memory" component={() => <MemoryPage />} />
+              <Route path="/agents/model-router" component={() => <ModelRouterPage />} />
+              <Route path="/agents/skills" component={() => <SkillsPage />} />
 
               {/* Precision Evolution Runtime (PER) */}
               <Route path="/evolution" component={() => <PERRuntimeOverview />} />

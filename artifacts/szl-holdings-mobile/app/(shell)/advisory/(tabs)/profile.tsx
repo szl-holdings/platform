@@ -182,7 +182,7 @@ export default function ProfileScreen() {
               },
               {
                 domain: 'terra',
-                label: 'DOMAINE',
+                label: 'Terra',
                 color: giProductAccent.terra,
                 fetch: async () => {
                   try {
@@ -199,7 +199,7 @@ export default function ProfileScreen() {
               },
               {
                 domain: 'lyte',
-                label: 'KORA',
+                label: 'Lyte',
                 color: giProductAccent.lyte,
                 fetch: async () => {
                   try {

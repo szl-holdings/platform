@@ -30,7 +30,7 @@ const TEXT = giColors.text.primary;
 const TEXT_DIM = `${giColors.text.primary}73`;
 
 const AGENTS = [
-  { id: 'alloy', name: 'FORGE', role: 'Orchestration', icon: 'git-merge', color: giColors.accent.amber },
+  { id: 'alloy', name: 'Counsel', role: 'Orchestration', icon: 'git-merge', color: giColors.accent.amber },
   { id: 'sentinel', name: 'Sentinel', role: 'Security', icon: 'shield', color: palette.critical },
   { id: 'helmsman', name: 'Helmsman', role: 'Maritime', icon: 'anchor', color: giColors.accent.teal },
   { id: 'eval', name: 'Eval Engine', role: 'Research', icon: 'cpu', color: giColors.accent.violet },

@@ -31,7 +31,7 @@ const AGENTS = [
     icon: 'anchor',
     color: giColors.accent.teal,
   },
-  { id: 'alloy', name: 'FORGE', role: 'Orchestration', icon: 'git-merge', color: giProductAccent.holdings },
+  { id: 'alloy', name: 'Counsel', role: 'Orchestration', icon: 'git-merge', color: giProductAccent.holdings },
   { id: 'sentinel', name: 'Sentinel', role: 'Security', icon: 'shield', color: palette.critical },
 ];
 

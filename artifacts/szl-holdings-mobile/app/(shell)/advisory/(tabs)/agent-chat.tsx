@@ -19,7 +19,7 @@ import { giProductAccent, giColors, palette } from '@/lib/gi-bridge';
 
 const AGENTS = [
   { id: 'muse',  name: 'Muse',        role: 'Creative Strategy', icon: 'pen-tool',  color: giProductAccent.carlota },
-  { id: 'alloy', name: 'FORGE',       role: 'Orchestration',     icon: 'git-merge', color: giProductAccent.lyte },
+  { id: 'alloy', name: 'Counsel',      role: 'Orchestration',     icon: 'git-merge', color: giProductAccent.lyte },
   { id: 'eval',  name: 'Eval Engine', role: 'Research',          icon: 'search',    color: giColors.accent.violet },
 ];
 

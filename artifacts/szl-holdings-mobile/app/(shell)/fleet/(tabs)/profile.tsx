@@ -90,7 +90,7 @@ export default function ProfileScreen() {
             },
             {
               domain: 'aegis',
-              label: 'PARAGON',
+              label: 'Aegis',
               color: palette.high,
               fetch: async () => {
                 try {
@@ -107,7 +107,7 @@ export default function ProfileScreen() {
             },
             {
               domain: 'lyte',
-              label: 'KORA',
+              label: 'Lyte',
               color: giColors.accent.teal,
               fetch: async () => {
                 try {

@@ -158,6 +158,18 @@ const STRATEGY_NAV: NavGroup[] = [
 
 const OPERATIONS_NAV: NavGroup[] = [
   {
+    section: 'A11oy Agent Runtime',
+    items: [
+      { href: '/agents', label: 'Operator Control Plane', icon: Bot },
+      { href: '/agents/workcells', label: 'Workcells', icon: Layers },
+      { href: '/agents/tools', label: 'Tool Registry', icon: Zap },
+      { href: '/agents/evals', label: 'MirrorEval', icon: FlaskConical },
+      { href: '/agents/memory', label: 'Memory Health', icon: Archive },
+      { href: '/agents/model-router', label: 'Model Router', icon: Cpu },
+      { href: '/agents/skills', label: 'Skills', icon: BookOpen },
+    ],
+  },
+  {
     section: 'Global Fabric',
     items: [{ href: '/operations/fabric', label: 'Global Operations Fabric', icon: Globe2 }],
   },

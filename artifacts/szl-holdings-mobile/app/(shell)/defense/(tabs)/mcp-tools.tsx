@@ -200,7 +200,7 @@ export default function McpToolsScreen() {
         <View>
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>MCP Tools</Text>
           <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>
-            Model Context Protocol · PARAGON
+            Model Context Protocol · Aegis
           </Text>
         </View>
         <View

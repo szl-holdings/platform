@@ -10,8 +10,7 @@ import { giColors, palette, giProductAccent } from '@/lib/gi-bridge';
 
 const ACCENT = giProductAccent.holdings;
 const PURPLE = giColors.accent.violet;
-const DOMAINE = giProductAccent.terra;
-const Terra = DOMAINE;
+const TERRA_COLOR = giProductAccent.terra;
 
 // ── Terra module shortcuts ─────────────────────────────────────────────────────
 
@@ -76,7 +75,7 @@ function TerraShortcutsStrip() {
   return (
     <View style={terraStyles.wrapper}>
       <View style={terraStyles.headerRow}>
-        <Feather name="home" size={10} color={Terra} />
+        <Feather name="home" size={10} color={TERRA_COLOR} />
         <Text style={terraStyles.sectionLabel}>Terra SHORTCUTS</Text>
       </View>
       <ScrollView
@@ -93,17 +92,17 @@ function TerraShortcutsStrip() {
             }}
             style={[
               terraStyles.shortcutBtn,
-              { backgroundColor: `${Terra}10`, borderColor: `${Terra}30` },
+              { backgroundColor: `${TERRA_COLOR}10`, borderColor: `${TERRA_COLOR}30` },
             ]}
             activeOpacity={0.75}
             accessibilityLabel={item.label}
             accessibilityRole="button"
           >
-            <Feather name={item.icon} size={14} color={Terra} />
+            <Feather name={item.icon} size={14} color={TERRA_COLOR} />
             <Text style={terraStyles.shortcutLabel}>{item.label}</Text>
             {item.badge && (
-              <View style={[terraStyles.shortcutBadge, { backgroundColor: `${Terra}25` }]}>
-                <Text style={[terraStyles.shortcutBadgeText, { color: Terra }]}>{item.badge}</Text>
+              <View style={[terraStyles.shortcutBadge, { backgroundColor: `${TERRA_COLOR}25` }]}>
+                <Text style={[terraStyles.shortcutBadgeText, { color: TERRA_COLOR }]}>{item.badge}</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -125,7 +124,7 @@ const terraStyles = StyleSheet.create({
   sectionLabel: {
     fontSize: 9,
     fontFamily: 'Inter_600SemiBold',
-    color: Terra,
+    color: TERRA_COLOR,
     letterSpacing: 1.5,
   },
   scrollContent: { paddingHorizontal: 16, gap: 8 },
@@ -141,7 +140,7 @@ const terraStyles = StyleSheet.create({
   shortcutLabel: {
     fontSize: 11,
     fontFamily: 'Inter_500Medium',
-    color: Terra,
+    color: TERRA_COLOR,
   },
   shortcutBadge: {
     paddingHorizontal: 5,
@@ -168,7 +167,7 @@ const PRIORITY_SIGNALS = [
   },
   {
     id: 's2',
-    domain: 'KORA',
+    domain: 'Lyte',
     domainColor: giProductAccent.lyte,
     title: 'API P95 Latency Breach',
     detail: '2.4s vs 2.0s target — SLA penalty risk',
@@ -177,7 +176,7 @@ const PRIORITY_SIGNALS = [
   },
   {
     id: 's3',
-    domain: 'PARAGON',
+    domain: 'Aegis',
     domainColor: giProductAccent.aegis,
     title: 'Bundle Size Warning',
     detail: '1.34MB vs 900KB budget — MITRE module over-eager',
@@ -199,7 +198,7 @@ const AWAITING_APPROVAL = [
   },
   {
     id: 'p2',
-    domain: 'PARAGON',
+    domain: 'Aegis',
     domainColor: giProductAccent.aegis,
     title: 'Critical CVE Patch Deploy',
     requester: 'Aegis SOC',
@@ -208,7 +207,7 @@ const AWAITING_APPROVAL = [
   },
   {
     id: 'p3',
-    domain: 'DOMAINE',
+    domain: 'Terra',
     domainColor: giProductAccent.terra,
     title: 'LP Q1 Report — CFO Sign-off',
     requester: 'Finance Lead',
