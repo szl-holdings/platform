@@ -188,6 +188,19 @@ A11oy is a new governed agentic platform layer that sits between enterprise data
 
 **Root docs:** `AGENTS.md`, `CONTEXT.md`, `llms.txt` (all at project root)
 
+## Onboarding Stall Alerts
+Automated proactive alerts when organizations get stuck mid-onboarding. A daily scheduled job (`daily_onboarding_stall_check`) scans `onboarding_wizard_state` for orgs where `completed_at IS NULL`, `completed_steps` is non-empty, and `updated_at` is older than a configurable threshold. Threshold defaults to 3 days, configurable via `ONBOARDING_STALL_THRESHOLD_DAYS` env var or job payload override. Sends in-app notifications (with WebSocket push) and external alerts (Slack/email/SMS via `queueExternalAlert`) to all super_admin and admin users.
+
+**Files:**
+- `artifacts/api-server/src/jobs/onboarding-stall-check.ts` — core stall-check logic
+- `artifacts/api-server/src/lib/scheduled-jobs.ts` — `DAILY_ONBOARDING_STALL_CHECK` job type and handler
+- `artifacts/api-server/src/lib/durable-init.ts` — cron schedule (`0 9 * * *`)
+- `artifacts/api-server/src/routes/admin/onboarding.ts` — admin endpoints
+
+**Admin API Endpoints:**
+- `GET /api/admin/onboarding-stalled` — list stalled orgs (query param: `thresholdDays`)
+- `POST /api/admin/onboarding-stall-check` — manually trigger stall check and notify admins (body: `{ thresholdDays?: number }`)
+
 ## Known Platform Issues
 - **Command workflow port detection:** Replit workflow system intermittently fails to detect port 5000 opening within timeout. Vite starts correctly (confirmed by logs). The telemetry initialization was fixed to gracefully handle invalid OTEL endpoint placeholders (see `artifacts/command/src/telemetry.ts`).
 - **Expo CORS:** szl-holdings-mobile has "Unauthorized request" errors from Expo CLI CORS middleware in Replit's proxy environment. Not a code bug.

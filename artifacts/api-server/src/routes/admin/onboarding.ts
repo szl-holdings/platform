@@ -1,12 +1,20 @@
 /**
  * Admin Onboarding Status API
  *
- * GET /api/admin/onboarding-status — list all orgs with their onboarding wizard state
+ * GET  /api/admin/onboarding-status       — list all orgs with their onboarding wizard state
  *   Query params:
  *     status   — filter by completion status: "complete" | "in_progress" | "not_started"
  *     org      — search by org name or slug (partial match)
  *     limit    — max rows (default: 100, max: 500)
  *     offset   — pagination offset (default: 0)
+ *
+ * GET  /api/admin/onboarding-stalled      — list orgs stalled mid-onboarding
+ *   Query params:
+ *     thresholdDays — days since last update (default: ONBOARDING_STALL_THRESHOLD_DAYS or 3)
+ *
+ * POST /api/admin/onboarding-stall-check  — manually trigger stall check and notify admins
+ *   Body (optional):
+ *     thresholdDays — override the default threshold
  */
 
 import { db, organizationsTable, pool } from '@szl-holdings/db';
@@ -18,7 +26,8 @@ import {
   sendForbidden,
   sendSuccess,
 } from '../../lib/api-response.js';
-import { readLimiter } from '../../middlewares/rate-limiters.js';
+import { logger } from '../../lib/logger.js';
+import { readLimiter, writeLimiter } from '../../middlewares/rate-limiters.js';
 
 const WIZARD_STEPS = ['profile', 'team', 'notifications', 'integrations'] as const;
 const TOTAL_STEPS = WIZARD_STEPS.length;
@@ -184,6 +193,97 @@ export function register(router: IRouter): void {
         });
       } catch (err) {
         handleRouteError(res, err, 'Failed to fetch onboarding status');
+      }
+    },
+  );
+
+  router.get(
+    '/admin/onboarding-stalled',
+    readLimiter,
+    async (req: Request, res: Response) => {
+      try {
+        if (!requireAdminAccess(req, res)) return;
+
+        const thresholdStr = (req.query as Record<string, string | undefined>).thresholdDays;
+        const envThreshold = Number(process.env.ONBOARDING_STALL_THRESHOLD_DAYS);
+        const thresholdDays = thresholdStr
+          ? Math.max(1, parseInt(thresholdStr, 10) || 3)
+          : Number.isFinite(envThreshold) && envThreshold > 0
+            ? envThreshold
+            : 3;
+
+        const cutoff = new Date(Date.now() - thresholdDays * 24 * 60 * 60 * 1000);
+
+        const { rows: stalledOrgs } = await pool.query<{
+          org_id: number;
+          org_name: string;
+          org_slug: string;
+          current_step: string;
+          completed_steps: string[];
+          updated_at: string;
+        }>(
+          `SELECT ow.org_id,
+                  o.name AS org_name,
+                  o.slug AS org_slug,
+                  ow.current_step,
+                  ow.completed_steps,
+                  ow.updated_at
+           FROM onboarding_wizard_state ow
+           INNER JOIN organizations o ON o.id = ow.org_id
+           WHERE ow.completed_at IS NULL
+             AND jsonb_array_length(ow.completed_steps) > 0
+             AND ow.updated_at < $1
+           ORDER BY ow.updated_at ASC`,
+          [cutoff],
+        );
+
+        const rows = stalledOrgs.map((s) => ({
+          orgId: s.org_id,
+          orgName: s.org_name,
+          orgSlug: s.org_slug,
+          currentStep: s.current_step,
+          completedSteps: s.completed_steps,
+          daysSinceUpdate: Math.round(
+            (Date.now() - new Date(s.updated_at).getTime()) / (24 * 60 * 60 * 1000),
+          ),
+          lastUpdatedAt: s.updated_at,
+          totalSteps: TOTAL_STEPS,
+          progress: Math.round((s.completed_steps.length / TOTAL_STEPS) * 100),
+        }));
+
+        sendSuccess(res, { thresholdDays, stalledCount: rows.length, rows });
+      } catch (err) {
+        handleRouteError(res, err, 'Failed to fetch stalled onboarding orgs');
+      }
+    },
+  );
+
+  router.post(
+    '/admin/onboarding-stall-check',
+    writeLimiter,
+    async (req: Request, res: Response) => {
+      try {
+        if (!requireAdminAccess(req, res)) return;
+
+        const body = (req.body ?? {}) as { thresholdDays?: number };
+        const thresholdDays =
+          typeof body.thresholdDays === 'number' && body.thresholdDays > 0
+            ? body.thresholdDays
+            : undefined;
+
+        const { runOnboardingStallCheck } = await import(
+          '../../jobs/onboarding-stall-check'
+        );
+        const result = await runOnboardingStallCheck(thresholdDays);
+
+        logger.info(
+          { stalledCount: result.stalledCount, adminsNotified: result.adminsNotified },
+          '[admin] Manual onboarding stall check triggered',
+        );
+
+        sendSuccess(res, result);
+      } catch (err) {
+        handleRouteError(res, err, 'Failed to run onboarding stall check');
       }
     },
   );

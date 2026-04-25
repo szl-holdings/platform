@@ -37,6 +37,7 @@ export const NAMED_JOB_TYPES = {
   TERRA_DISTRESS_FINANCIALS_BACKFILL: "terra_distress_financials_backfill",
   OT_ICS_STREAM_FEED: "ot_ics_stream_feed",
   HOURLY_MARKET_DATA_REFRESH: "hourly_market_data_refresh",
+  DAILY_ONBOARDING_STALL_CHECK: "daily_onboarding_stall_check",
 } as const;
 
 export type NamedJobType = typeof NAMED_JOB_TYPES[keyof typeof NAMED_JOB_TYPES];
@@ -92,6 +93,7 @@ registerEntry({ type: NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH, name: "Daily Li
 registerEntry({ type: NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, name: "CORTEX Graph Snapshot Prune", description: "Deletes cortex_graph_snapshots rows whose expires_at is in the past. Each snapshot's expiry is set at insert time from CORTEX_SNAPSHOT_RETENTION_DAYS (default 30). Logs purged row count per run.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.OT_ICS_STREAM_FEED, name: "OT/ICS Live Protocol Stream Feed", description: "Continuously ingests simulated Modbus/DNP3/S7 protocol frames, conversation rows, and rolling anomaly scores into the OT/ICS tables. Runs every 8 seconds so the decoder dashboard reflects live traffic without manual re-seeding. Replace the synthetic generators with real PCAP relay / partner SOC feed clients when a live source is available.", schedule: "continuous", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH, name: "Hourly Market Data Refresh", description: "Fetches delayed/EOD macro indicators (equity indices, FX rates, commodity prices, treasury yields) from Alpha Vantage via the market-data-adapter and warms the in-process LRU cache used by GET /lyte/market-indicators. Credentials are read from ALPHA_VANTAGE_API_KEY. Falls back gracefully to the built-in seed snapshot when the key is absent or the provider is rate-limited. Applies exponential backoff with up to 3 retries per API call.", schedule: "hourly", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK, name: "Daily Onboarding Stall Check", description: "Scans onboarding_wizard_state for organizations that are mid-onboarding (completed_at IS NULL, completed_steps > 0) and whose updated_at is older than a configurable threshold (ONBOARDING_STALL_THRESHOLD_DAYS env var, default 3 days). Sends in-app notifications and optional external alerts to super-admin and admin users listing the stalled organizations so they can follow up proactively.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL, name: "Terra Distress Financials Backfill", description: "Walks active terra_distress_properties rows whose debt_amount + lien_amount is missing or zero and applies the heuristic encumbrance estimator (NYC-grounded ACRIS / DOF tax-lien / HPD norms keyed off distress_type, estimated_value, opportunity_score, days_in_distress) so the lender-exposure endpoint stops reporting isSyntheticExposure: true for the majority of distress rows. Estimate provenance is recorded in raw_data.financialsEstimate so later real-filing ingestion can override without losing audit history. Logs scanned / estimated / coverage % each run.", schedule: "weekly", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY, name: "Guardian Approval Expiry Sweeper", description: "Scans guardian_approval_requests every 5 minutes for pending entries whose expires_at is in the past and flips them to status='expired' so agents waiting on the request can detect the timeout and retry or escalate. Per-tier expiry windows are configured in TIER_CONTROLS (T2=24h, T3=48h, T4=72h; T0/T1/T5 do not auto-expire).", schedule: "hourly", enabled: true });
 
@@ -2156,6 +2158,33 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH, async (job)
       lastStatus: "failed",
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK, async (job) => {
+  const start = Date.now();
+  updateRegistry(NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK, { lastStatus: "running", lastRunAt: Date.now() });
+  const payload = (job.payload ?? {}) as { thresholdDays?: number };
+  try {
+    const { runOnboardingStallCheck } = await import("../jobs/onboarding-stall-check");
+    const result = await runOnboardingStallCheck(payload.thresholdDays);
+    serverTelemetry.recordBusinessEvent({
+      type: "onboarding_stall_check_completed",
+      domain: "platform",
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { stalledCount: result.stalledCount, thresholdDays: result.thresholdDays, adminsNotified: result.adminsNotified },
+    });
+    updateRegistry(NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, ...result, stalledOrgs: undefined }, "daily_onboarding_stall_check: complete");
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "daily_onboarding_stall_check: fatal");
+    updateRegistry(NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK, {
+      lastStatus: "failed",
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK)?.failCount || 0) + 1,
     });
     throw err;
   }
