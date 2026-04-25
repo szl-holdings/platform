@@ -242,4 +242,9 @@ router.use("/signal-bus", lazyMount(() => import("./signal-bus"), "signal-bus"))
 
 router.use(lazyMatch("/mobile-biometric", () => import("./mobile-biometric"), "mobile-biometric"));
 
+// Precision Evolution Runtime (PER) — governed AI evolution control plane.
+// Owns /evolution/* endpoints: candidates, evaluation, calibration, scoring,
+// drift, promotion, rollback, audit, and diagnostics.
+router.use(lazyMatch("/evolution", () => import("./evolution"), "evolution"));
+
 export default router;

@@ -199,6 +199,10 @@ const SelfModelConsole = lazy(() => import('./pages/cognitive/self-model'));
 const WorldModelExplorer = lazy(() => import('./pages/cognitive/world-model'));
 const ReplayLab = lazy(() => import('./pages/replay-lab'));
 const EvalLab = lazy(() => import('./pages/eval-lab'));
+const PERRuntimeOverview = lazy(() => import('./pages/evolution/runtime-overview'));
+const PEREvaluationConsole = lazy(() => import('./pages/evolution/evaluation-console'));
+const PERGovernanceConsole = lazy(() => import('./pages/evolution/governance-console'));
+const PERDiagnostics = lazy(() => import('./pages/evolution/diagnostics'));
 const RunConsole = lazy(() =>
   import('./pages/run-console').then((m) => ({ default: m.RunConsole })),
 );
@@ -412,6 +416,10 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/operations/evidence-explorer', label: 'Evidence Explorer', group: 'Operations' },
   { href: '/operations/eval-studio', label: 'Eval Studio', group: 'Operations' },
   { href: '/eval-forge', label: 'Eval Forge', group: 'Operations' },
+  { href: '/evolution', label: 'PER — Runtime Overview', group: 'Evolution' },
+  { href: '/evolution/evaluation', label: 'PER — Evaluation Console', group: 'Evolution' },
+  { href: '/evolution/governance', label: 'PER — Governance Console', group: 'Evolution' },
+  { href: '/evolution/diagnostics', label: 'PER — Diagnostics', group: 'Evolution' },
   { href: '/governed-cockpit', label: 'Governed Cockpit', group: 'Operations' },
   { href: '/demo', label: 'Demo Launchpad', group: 'Operations' },
   { href: '/cognitive', label: 'Cognitive Command Center', group: 'Cognitive' },
@@ -721,6 +729,13 @@ function AppShell() {
               <Route path="/operations/eval-studio" component={() => <EvalStudio />} />
               <Route path="/eval-forge" component={() => <EvalForge />} />
               <Route path="/eval-forge/runs/:runId" component={() => <EvalForge />} />
+
+              {/* Precision Evolution Runtime (PER) */}
+              <Route path="/evolution" component={() => <PERRuntimeOverview />} />
+              <Route path="/evolution/runtime" component={() => <PERRuntimeOverview />} />
+              <Route path="/evolution/evaluation" component={() => <PEREvaluationConsole />} />
+              <Route path="/evolution/governance" component={() => <PERGovernanceConsole />} />
+              <Route path="/evolution/diagnostics" component={() => <PERDiagnostics />} />
               <Route path="/operations/alloy/trust-console" component={() => <TrustConsole />} />
               <Route path="/operations/alloy/proof" component={() => <AlloyProofPage />} />
               <Route path="/governed-cockpit" component={() => <GovernedCockpitPage />} />

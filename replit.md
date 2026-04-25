@@ -36,6 +36,8 @@ The platform is a pnpm monorepo using TypeScript 5.9, React 19, Vite, and Node.j
 
 **Forge – AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents.
 
+**Precision Evolution Runtime (PER):** A governed, evidence-gated system for continuously evolving agent policies. Full lifecycle: candidate registration → calibration → evaluation → drift-checked promotion → canary rollout → immutable audit. Defaults to simulation mode (`EVOLUTION_MODE=simulation`). Package: `@szl-holdings/evolution-core`. API: 14 endpoints at `/api/evolution/*`. UI: 4 pages in Command at `/evolution/*`. DB: 10 tables in `lib/db/src/schema/precision_evolution.ts`. Docs: `docs/PRECISION_EVOLUTION_ARCHITECTURE.md` and associated files. Tests: 55 unit tests in `packages/evolution-core/src/__tests__/`.
+
 **PRAXIS – Unified Agentic AI Layer:** An internal tooling sandbox for AI agent research, memory management, skill registry, protocol bridging, and AI Control Plane features, accessible at `/nexus/`.
 
 **KORA – Decision Intelligence:** A flagship application for executive narratives, signal feeds, and decision centers, characterized by a dark amber design language.

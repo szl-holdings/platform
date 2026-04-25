@@ -194,6 +194,15 @@ const OPERATIONS_NAV: NavGroup[] = [
     ],
   },
   {
+    section: 'Precision Evolution Runtime',
+    items: [
+      { href: '/evolution', label: 'Runtime Overview', icon: Cpu },
+      { href: '/evolution/evaluation', label: 'Evaluation Console', icon: FlaskConical },
+      { href: '/evolution/governance', label: 'Governance Console', icon: ShieldCheck },
+      { href: '/evolution/diagnostics', label: 'Diagnostics', icon: Activity },
+    ],
+  },
+  {
     section: 'Observability',
     items: [
       { href: '/operations/autonomous-noc', label: 'Autonomous NOC', icon: Bot },

@@ -630,6 +630,9 @@ importers:
       '@szl-holdings/evidence-graph':
         specifier: workspace:*
         version: link:../../packages/evidence-graph
+      '@szl-holdings/evolution-core':
+        specifier: workspace:*
+        version: link:../../packages/evolution-core
       '@szl-holdings/forge-runtime':
         specifier: workspace:*
         version: link:../../lib/forge-runtime
@@ -4118,6 +4121,31 @@ importers:
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+
+  packages/evolution-core:
+    dependencies:
+      '@szl-holdings/db':
+        specifier: workspace:*
+        version: link:../../lib/db
+      '@szl-holdings/nvidia-adapters':
+        specifier: workspace:*
+        version: link:../nvidia-adapters
+      '@szl-holdings/policy-engine':
+        specifier: workspace:*
+        version: link:../policy-engine
+      pino:
+        specifier: ^9
+        version: 9.14.0
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.4(@types/debug@4.1.13)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/executive-briefing:
     dependencies:
