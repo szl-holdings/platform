@@ -1471,8 +1471,9 @@ interface SupportReply {
   contactSubmissionId: number;
   subject: string;
   body: string;
-  sentByUserId: number | null;
-  sentByName: string | null;
+  sentBy: string;
+  emailSuccess: boolean;
+  messageId: string | null;
   sentAt: string;
 }
 
@@ -1502,10 +1503,15 @@ function TicketReplyHistory({ ticketId }: { ticketId: number }) {
       {replies.map((r) => (
         <div
           key={r.id}
-          className="bg-primary/5 border border-primary/15 rounded-lg px-3 py-2 space-y-0.5"
+          className={cn(
+            'border rounded-lg px-3 py-2 space-y-1',
+            r.emailSuccess
+              ? 'bg-primary/5 border-primary/15'
+              : 'bg-red-500/5 border-red-500/20',
+          )}
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[10px] font-semibold text-primary/80">{r.subject}</span>
+            <span className="text-[10px] font-semibold text-primary/80 truncate">{r.subject}</span>
             <span className="text-[9px] text-muted-foreground shrink-0">
               {new Date(r.sentAt).toLocaleString('en-US', {
                 month: 'short',
@@ -1518,9 +1524,18 @@ function TicketReplyHistory({ ticketId }: { ticketId: number }) {
           <p className="text-[11px] text-foreground/80 whitespace-pre-wrap leading-relaxed">
             {r.body}
           </p>
-          {r.sentByName && (
-            <p className="text-[9px] text-muted-foreground">Sent by {r.sentByName}</p>
-          )}
+          <div className="flex items-center justify-between gap-2 pt-0.5">
+            <p className="text-[9px] text-muted-foreground">Sent by {r.sentBy}</p>
+            {r.emailSuccess ? (
+              <span className="flex items-center gap-1 text-[9px] font-medium text-emerald-600">
+                <CheckCircle2 className="w-2.5 h-2.5" /> Delivered
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-[9px] font-medium text-red-500">
+                <XCircle className="w-2.5 h-2.5" /> Delivery failed
+              </span>
+            )}
+          </div>
         </div>
       ))}
     </div>

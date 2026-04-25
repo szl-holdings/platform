@@ -5,7 +5,7 @@ import {
   leadStatusTable,
   supportKnowledgeArticlesTable,
 } from '@szl-holdings/db';
-import { and, desc, eq, ilike, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import type { IRouter } from 'express';
 import { z } from 'zod';
 import { sendBadRequest, sendError, sendNotFound, sendSuccess } from '../../lib/api-response.js';
@@ -504,14 +504,44 @@ export function register(router: IRouter): void {
       });
       const replyToAddr = await getSupportReplyEmail();
 
-      const emailResult = await sendEmail({
-        to: submission.email,
-        subject: emailSubject,
-        html: emailHtml,
-        text: emailText,
-        replyTo: replyToAddr,
-        unsubscribeToken: unsubToken,
-      });
+      // Persist the reply record BEFORE attempting delivery so that any
+      // exception inside sendEmail still leaves an auditable history entry.
+      const [savedReply] = await db
+        .insert(contactSubmissionRepliesTable)
+        .values({
+          contactSubmissionId: id,
+          subject,
+          body,
+          sentBy,
+          emailSuccess: false,
+          messageId: null,
+        })
+        .returning();
+
+      let emailResult: { success: boolean; messageId?: string; provider?: string; error?: string };
+      try {
+        emailResult = await sendEmail({
+          to: submission.email,
+          subject: emailSubject,
+          html: emailHtml,
+          text: emailText,
+          replyTo: replyToAddr,
+          unsubscribeToken: unsubToken,
+        });
+      } catch (sendErr) {
+        logger.error({ sendErr, id }, '[admin/support-queue] sendEmail threw unexpectedly');
+        emailResult = { success: false, error: String(sendErr) };
+      }
+
+      // Update the persisted record with the actual delivery outcome.
+      const [updatedReply] = await db
+        .update(contactSubmissionRepliesTable)
+        .set({
+          emailSuccess: emailResult.success,
+          messageId: emailResult.messageId ?? null,
+        })
+        .where(eq(contactSubmissionRepliesTable.id, savedReply.id))
+        .returning();
 
       logNotificationAudit({
         template: 'support_agent_reply',
@@ -525,21 +555,9 @@ export function register(router: IRouter): void {
         error: emailResult.error,
       });
 
-      const [savedReply] = await db
-        .insert(contactSubmissionRepliesTable)
-        .values({
-          contactSubmissionId: id,
-          subject,
-          body,
-          sentBy,
-          emailSuccess: emailResult.success,
-          messageId: emailResult.messageId ?? null,
-        })
-        .returning();
-
       if (!emailResult.success) {
         logger.warn({ id, error: emailResult.error }, '[admin/support-queue] Reply email failed');
-        res.json({ success: false, sent: false, error: emailResult.error, reply: savedReply });
+        res.json({ success: false, sent: false, error: emailResult.error, reply: updatedReply ?? savedReply });
         return;
       }
 
@@ -548,7 +566,7 @@ export function register(router: IRouter): void {
         sent: true,
         messageId: emailResult.messageId,
         provider: emailResult.provider,
-        reply: savedReply,
+        reply: updatedReply ?? savedReply,
       });
     } catch (err) {
       logger.error({ err }, '[admin/support-queue] POST reply failed');
@@ -578,7 +596,7 @@ export function register(router: IRouter): void {
         .select()
         .from(contactSubmissionRepliesTable)
         .where(eq(contactSubmissionRepliesTable.contactSubmissionId, id))
-        .orderBy(desc(contactSubmissionRepliesTable.sentAt));
+        .orderBy(asc(contactSubmissionRepliesTable.sentAt));
 
       res.json({ replies });
     } catch (err) {
