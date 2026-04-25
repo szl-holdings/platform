@@ -9,8 +9,10 @@
 import { fusionCortex } from '@szl-holdings/ai-engine';
 import { type FusionAlert } from '@szl-holdings/ai-engine';
 import { db, fusionCortexAlertsTable } from '@szl-holdings/db';
-import { eq, gt } from 'drizzle-orm';
+import { and, desc, eq, gt, inArray, sql } from 'drizzle-orm';
 import { logger } from './logger';
+
+const MAX_ALERTS = 200;
 
 let initialized = false;
 
@@ -18,6 +20,7 @@ export async function initFusionPersistence(): Promise<void> {
   if (initialized) return;
   initialized = true;
 
+  await ensureFusionTable();
   await loadPersistedAlerts();
 
   fusionCortex.onAlert((alert) => {
@@ -27,13 +30,54 @@ export async function initFusionPersistence(): Promise<void> {
   });
 }
 
+async function ensureFusionTable(): Promise<void> {
+  try {
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS fusion_cortex_alerts (
+        id SERIAL PRIMARY KEY,
+        alert_id TEXT NOT NULL UNIQUE,
+        title TEXT NOT NULL,
+        summary TEXT NOT NULL,
+        severity TEXT NOT NULL DEFAULT 'medium',
+        category TEXT NOT NULL,
+        confidence NUMERIC(5,4) NOT NULL,
+        affected_domains TEXT[] NOT NULL DEFAULT '{}',
+        affected_entities JSONB NOT NULL DEFAULT '[]',
+        evidence_chain JSONB NOT NULL DEFAULT '[]',
+        recommended_actions TEXT[] NOT NULL DEFAULT '{}',
+        advisory_context TEXT,
+        tags TEXT[] NOT NULL DEFAULT '{}',
+        pattern_id TEXT,
+        status TEXT NOT NULL DEFAULT 'active',
+        generated_at TIMESTAMP NOT NULL,
+        expires_at TIMESTAMP NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS fusion_cortex_alerts_alert_id_idx ON fusion_cortex_alerts (alert_id)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS fusion_cortex_alerts_status_idx ON fusion_cortex_alerts (status)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS fusion_cortex_alerts_severity_idx ON fusion_cortex_alerts (severity)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS fusion_cortex_alerts_generated_at_idx ON fusion_cortex_alerts (generated_at)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS fusion_cortex_alerts_expires_at_idx ON fusion_cortex_alerts (expires_at)`);
+  } catch (err) {
+    logger.warn({ err }, '[fusion-persistence] ensureFusionTable failed — table may already exist');
+  }
+}
+
 async function loadPersistedAlerts(): Promise<void> {
   try {
     const now = new Date();
     const rows = await db
       .select()
       .from(fusionCortexAlertsTable)
-      .where(gt(fusionCortexAlertsTable.expiresAt, now));
+      .where(
+        and(
+          gt(fusionCortexAlertsTable.expiresAt, now),
+          inArray(fusionCortexAlertsTable.status, ['active', 'acknowledged']),
+        ),
+      )
+      .orderBy(desc(fusionCortexAlertsTable.generatedAt))
+      .limit(MAX_ALERTS);
 
     let loaded = 0;
     for (const row of rows) {
@@ -55,20 +99,7 @@ async function loadPersistedAlerts(): Promise<void> {
         generatedAt: row.generatedAt.toISOString(),
         expiresAt: row.expiresAt.toISOString(),
       };
-      fusionCortex.injectAlert({
-        title: alert.title,
-        summary: alert.summary,
-        severity: alert.severity,
-        category: alert.category,
-        confidence: alert.confidence,
-        affectedDomains: alert.affectedDomains,
-        affectedEntities: alert.affectedEntities,
-        evidenceChain: alert.evidenceChain,
-        recommendedActions: alert.recommendedActions,
-        advisoryContext: alert.advisoryContext,
-        tags: alert.tags,
-        patternId: alert.patternId,
-      });
+      fusionCortex.hydrateAlert(alert);
       loaded++;
     }
 

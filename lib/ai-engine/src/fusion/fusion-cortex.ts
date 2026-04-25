@@ -553,6 +553,18 @@ export class FusionCortex {
     return true;
   }
 
+  hydrateAlert(alert: FusionAlert): void {
+    const exists = this.alerts.some((a) => a.id === alert.id);
+    if (exists) return;
+    this.alerts.push(alert);
+    if (this.alerts.length > MAX_ALERTS) {
+      this.alerts.sort(
+        (a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime(),
+      );
+      this.alerts = this.alerts.slice(0, MAX_ALERTS);
+    }
+  }
+
   injectAlert(
     alert: Omit<FusionAlert, 'id' | 'generatedAt' | 'expiresAt' | 'status'>,
   ): FusionAlert {
