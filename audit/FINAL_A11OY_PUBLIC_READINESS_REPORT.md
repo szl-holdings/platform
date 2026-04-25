@@ -169,7 +169,10 @@ The org profile repository (`szl-holdings/.github`) is separate from this repo. 
 **Branch:** `release/a11oy-public-readiness-2026-04`  
 **Base:** `master`  
 **Repo:** `https://github.com/szl-holdings/szl-holdings-platform`  
-**PR URL:** See GitHub — opened via integration after branch push
+**PR URL:** https://github.com/szl-holdings/szl-holdings-platform/pull/37  
+**PR Number:** #37 — OPEN
+
+> Branch pushed and PR created on 2026-04-25 via GitHub Contents API (OAuth workflow-scope workaround). All 18 files uploaded. Branch does not auto-merge — CI and CODEOWNER review required.
 
 ---
 
