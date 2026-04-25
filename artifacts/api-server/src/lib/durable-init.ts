@@ -204,7 +204,19 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.DATA_RETENTION_SWEEP, async (job) =>
         support_tickets: { hasTenantCol: true, piiColumns: { submitter_email: "redacted@purged.invalid", submitter_name: "Purged User" } },
       };
       if (!TABLE_CONFIG[policy.tableName]) {
-        logger.error({ tableName: policy.tableName, policyId: policy.id }, "Retention sweep: tableName not in allowlist — skipping");
+        logger.warn({ tableName: policy.tableName, policyId: policy.id }, "Retention sweep: tableName not in allowlist — skipping policy");
+        await db.insert(dataRetentionAuditLogTable).values({
+          policyId: policy.id,
+          orgId: policy.orgId ?? null,
+          tableName: policy.tableName,
+          action: "purge_failed",
+          actorId: null,
+          actorName: "Scheduler",
+          affectedRows: 0,
+          details: { retentionDays: policy.retentionDays, purgeStrategy: policy.purgeStrategy, orgId: policy.orgId, triggeredBy: "scheduler", skipReason: "tableName not in server allowlist" },
+          status: "error",
+          errorMessage: `Table "${policy.tableName}" is not in the server allowlist — policy was skipped`,
+        }).catch((e) => logger.error({ err: e }, "Retention sweep: failed to write skip audit log"));
         failed++;
         continue;
       }

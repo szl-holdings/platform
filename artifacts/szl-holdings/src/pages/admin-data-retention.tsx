@@ -98,6 +98,7 @@ const STATUS_COLORS: Record<string, string> = {
   success: "hsl(142,60%,50%)",
   failure: "hsl(0,72%,55%)",
   partial: "hsl(45,80%,52%)",
+  error: "hsl(20,90%,55%)",
 };
 
 function describeCronSchedule(expr: string): { label: string; hint: string } {

@@ -52,7 +52,7 @@ export const dataRetentionAuditLogTable = pgTable('data_retention_audit_log', {
   actorName: text('actor_name'),
   affectedRows: integer('affected_rows'),
   details: jsonb('details'),
-  status: text('status', { enum: ['success', 'failure', 'partial'] })
+  status: text('status', { enum: ['success', 'failure', 'partial', 'error'] })
     .notNull()
     .default('success'),
   errorMessage: text('error_message'),
