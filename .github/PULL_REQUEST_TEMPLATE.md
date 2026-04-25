@@ -27,20 +27,21 @@ _List the key changes made. Be specific._
 
 ---
 
-## Affected Artifacts
+## Affected Surfaces
 
 _Which applications or libraries are affected?_
 
+- [ ] `a11oy` (A11oy — Brand Orchestration Layer)
 - [ ] `api-server`
-- [ ] `lyte-command-center`
-- [ ] `firestorm` (Aegis)
-- [ ] `vessels`
-- [ ] `terra`
-- [ ] `carlota-jo`
-- [ ] `szl-holdings`
-- [ ] `stephen-site`
-- [ ] Mobile apps (`szl-holdings-mobile`, `aegis-mobile`, `vessels-mobile`, `lyte-mobile`, `carlota-jo-mobile`, `terra-mobile`, `stephen-mobile`)
+- [ ] `szl-holdings` (Corporate / Marketing)
+- [ ] `command` (Command Portal)
+- [ ] `aegis` (Aegis — Defense & Intelligence)
+- [ ] `vessels` (Vessels — Maritime Intelligence)
+- [ ] `terra` (Terra — Real Estate Intelligence)
+- [ ] `carlota-jo` (Carlota Jo — Advisory)
+- [ ] `szl-holdings-mobile` (CORTEX — Mobile Command)
 - [ ] Shared library (`lib/`)
+- [ ] Platform primitive (`lib/outcome-graph/`, `lib/proof-chain/`, `lib/covenant-policy/`, `lib/monte-carlo/`, `lib/workflow-engine/`)
 - [ ] Infrastructure (`infra/`)
 - [ ] Documentation (`docs/`)
 
