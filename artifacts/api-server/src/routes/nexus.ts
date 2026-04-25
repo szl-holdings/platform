@@ -2,7 +2,7 @@ import { bodyShape } from '@szl-holdings/contracts/common';
 import { type NexusIngestJobRow, type NexusIngestStatus, type NexusMemoryRow, type NexusMemoryTier, type NexusMemoryType, type NexusOrchestrationPlanRow, type NexusOrchestrationStatus, type NexusProtocolToolRow, type NexusSkillPrimitiveType, type NexusSkillRow, type NexusToolProtocol, db, nexusIngestJobsTable, nexusMemoryTable, nexusOrchestrationPlansTable, nexusProtocolToolsTable, nexusSkillsTable } from '@szl-holdings/db';
 import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
-import { type Request, type Response, Router } from 'express';
+import { type NextFunction, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { gatewayInfer } from '../lib/ai-gateway';
 import { handleRouteError, sendCreated, sendError, sendSuccess } from '../lib/api-response';
@@ -15,6 +15,56 @@ import {
 } from '../middlewares/sliding-window-limiter';
 
 const router = Router();
+
+// ─── NEXUS privilege helpers ──────────────────────────────────────────────────
+// The NEXUS control plane (memory, skills, tools, ingest, customizations) is a
+// shared, deployment-wide store. Only operators and administrators may mutate it.
+// Regular authenticated users retain read access to all GET endpoints.
+
+const NEXUS_PRIVILEGED_ROLES = new Set(['super_admin', 'admin', 'ops']);
+
+function isNexusPrivileged(req: Request): boolean {
+  const roles = req.user?.roles ?? [];
+  return roles.some((r) => NEXUS_PRIVILEGED_ROLES.has(r));
+}
+
+/**
+ * Express middleware that gates any mutating NEXUS control-plane route.
+ * Requires the caller to hold the `ops`, `admin`, or `super_admin` role.
+ * Returns 403 for authenticated callers that lack the required role.
+ */
+function requireNexusOps(req: Request, res: Response, next: NextFunction): void {
+  if (!req.user) {
+    sendError(res, 'Authentication required', 401);
+    return;
+  }
+  if (!isNexusPrivileged(req)) {
+    sendError(
+      res,
+      'Insufficient privileges — NEXUS control plane writes require ops or admin role',
+      403,
+    );
+    return;
+  }
+  next();
+}
+
+/**
+ * Returns a sanitized copy of an OrchestrationPlan with rawPayload stripped
+ * from every step. rawPayload contains verbatim excerpts from privileged
+ * internal API responses (threat data, cloud inventory, etc.) and must not
+ * be exposed to callers who lack the ops/admin role.
+ */
+function redactOrchestrationPlan(plan: OrchestrationPlan): OrchestrationPlan {
+  return {
+    ...plan,
+    steps: plan.steps.map((s) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { rawPayload: _raw, ...rest } = s;
+      return rest;
+    }),
+  };
+}
 
 const NEXUS_OWNED_PREFIXES = [
   '/bridge',
@@ -130,6 +180,8 @@ interface OrchestrationPlan {
   stitchedOutput?: string;
   createdAt: string;
   completedAt?: string;
+  /** Identity of the user who created this plan (email or userId string). */
+  createdBy?: string;
 }
 
 interface OrchestrationStep {
@@ -1331,6 +1383,7 @@ function rowToOrchestrationPlan(row: NexusOrchestrationPlanRow): OrchestrationPl
   };
   if (row.stitchedOutput) plan.stitchedOutput = row.stitchedOutput;
   if (row.completedAt) plan.completedAt = row.completedAt.toISOString();
+  if (row.createdBy) plan.createdBy = row.createdBy;
   return plan;
 }
 
@@ -1345,6 +1398,7 @@ async function persistOrchestrationPlanToDB(plan: OrchestrationPlan): Promise<vo
         status: plan.status as NexusOrchestrationStatus,
         steps: plan.steps,
         stitchedOutput: plan.stitchedOutput ?? null,
+        createdBy: plan.createdBy ?? null,
         createdAt: new Date(plan.createdAt),
         completedAt: plan.completedAt ? new Date(plan.completedAt) : null,
       })
@@ -1355,6 +1409,7 @@ async function persistOrchestrationPlanToDB(plan: OrchestrationPlan): Promise<vo
           status: plan.status as NexusOrchestrationStatus,
           steps: plan.steps,
           stitchedOutput: plan.stitchedOutput ?? null,
+          createdBy: plan.createdBy ?? null,
           completedAt: plan.completedAt ? new Date(plan.completedAt) : null,
         },
       });
@@ -1785,6 +1840,7 @@ function sleep(ms: number): Promise<void> {
 
 router.post(
   '/research',
+  requireNexusOps,
   perUserWriteSlidingLimiter,
   validateBody(
     bodyShape({
@@ -1953,6 +2009,7 @@ router.get('/memory', validateQuery(listQuerySchema), async (req: Request, res: 
 
 router.post(
   '/memory',
+  requireNexusOps,
   perUserWriteSlidingLimiter,
   validateBody(
     bodyShape({
@@ -1999,6 +2056,7 @@ router.post(
 
 router.put(
   '/memory/:id',
+  requireNexusOps,
   perUserWriteSlidingLimiter,
   validateBody(
     bodyShape({
@@ -2034,6 +2092,7 @@ router.put(
 
 router.delete(
   '/memory/:id',
+  requireNexusOps,
   validateBody(bodyShape({})),
   perUserWriteSlidingLimiter,
   async (req: Request, res: Response) => {
@@ -2077,6 +2136,7 @@ router.get('/skills', validateQuery(listQuerySchema), async (req: Request, res: 
 
 router.post(
   '/skills/:id/toggle',
+  requireNexusOps,
   perUserWriteSlidingLimiter,
   validateBody(
     bodyShape({
@@ -2104,6 +2164,7 @@ router.post(
 
 router.post(
   '/skills',
+  requireNexusOps,
   perUserWriteSlidingLimiter,
   validateBody(
     bodyShape({
@@ -2160,6 +2221,7 @@ router.post(
 
 router.put(
   '/skills/:id',
+  requireNexusOps,
   perUserWriteSlidingLimiter,
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
@@ -2213,6 +2275,7 @@ router.get('/bridge/tools', validateQuery(listQuerySchema), async (req: Request,
 
 router.post(
   '/bridge/tools',
+  requireNexusOps,
   perUserWriteSlidingLimiter,
   validateBody(
     bodyShape({
@@ -2261,6 +2324,7 @@ router.post(
 
 router.put(
   '/bridge/tools/:id',
+  requireNexusOps,
   perUserWriteSlidingLimiter,
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
@@ -2290,6 +2354,7 @@ router.put(
 
 router.delete(
   '/bridge/tools/:id',
+  requireNexusOps,
   perUserWriteSlidingLimiter,
   async (req: Request, res: Response) => {
     try {
@@ -2312,6 +2377,7 @@ router.delete(
 // entries, then re-runs seedData() so the canonical seed set is restored.
 router.post(
   '/customizations/reset',
+  requireNexusOps,
   perUserWriteSlidingLimiter,
   async (_req: Request, res: Response) => {
     try {
@@ -2783,6 +2849,7 @@ async function runOrchestration(planId: string, intent: string) {
 
 router.post(
   '/orchestrate',
+  requireNexusOps,
   perUserWriteSlidingLimiter,
   validateBody(
     bodyShape({
@@ -2798,12 +2865,14 @@ router.post(
       }
 
       const id = randomUUID();
+      const createdBy = req.user?.email ?? req.user?.id?.toString() ?? 'unknown';
       const plan: OrchestrationPlan = {
         id,
         intent: intent.trim(),
         status: 'planning',
         steps: [],
         createdAt: new Date().toISOString(),
+        createdBy,
       };
       orchestrationStore.set(id, plan);
       void persistOrchestrationPlanToDB(plan);
@@ -2815,11 +2884,23 @@ router.post(
   },
 );
 
-router.get('/orchestrate', async (_req: Request, res: Response) => {
+router.get('/orchestrate', async (req: Request, res: Response) => {
   try {
+    const callerIdentity = req.user?.email ?? req.user?.id?.toString();
+    const elevated = isNexusPrivileged(req);
     const plans = Array.from(orchestrationStore.values())
+      .filter((p) => {
+        // Elevated users (ops/admin) see all plans.
+        // Regular users see only plans they created; plans with no createdBy
+        // (recovered from DB before ownership tracking was added) are admin-only.
+        if (elevated) return true;
+        return callerIdentity !== undefined && p.createdBy === callerIdentity;
+      })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .slice(0, 20);
+      .slice(0, 20)
+      // Strip rawPayload from steps for non-privileged callers (contains verbatim
+      // excerpts from privileged internal API responses).
+      .map((p) => (elevated ? p : redactOrchestrationPlan(p)));
     sendSuccess(res, plans);
   } catch (err) {
     handleRouteError(res, err, 'GET /api/nexus/orchestrate');
@@ -2833,7 +2914,15 @@ router.get('/orchestrate/:id', async (req: Request, res: Response) => {
       sendError(res, 'Orchestration not found', 404);
       return;
     }
-    sendSuccess(res, plan);
+    const callerIdentity = req.user?.email ?? req.user?.id?.toString();
+    const elevated = isNexusPrivileged(req);
+    // Enforce ownership: non-privileged callers may only read their own plans.
+    // Plans with no createdBy (pre-ownership-tracking) are restricted to admins.
+    if (!elevated && (plan.createdBy === undefined || plan.createdBy !== callerIdentity)) {
+      sendError(res, 'Orchestration not found', 404);
+      return;
+    }
+    sendSuccess(res, elevated ? plan : redactOrchestrationPlan(plan));
   } catch (err) {
     handleRouteError(res, err, 'GET /api/nexus/orchestrate/:id');
   }
@@ -2841,11 +2930,18 @@ router.get('/orchestrate/:id', async (req: Request, res: Response) => {
 
 router.post(
   '/orchestrate/:id/retry',
+  requireNexusOps,
   perUserWriteSlidingLimiter,
   async (req: Request, res: Response) => {
     try {
       const plan = orchestrationStore.get(req.params.id as string);
       if (!plan) {
+        sendError(res, 'Orchestration not found', 404);
+        return;
+      }
+      // Enforce ownership: only the creator (or an elevated user) may retry.
+      const callerIdentity = req.user?.email ?? req.user?.id?.toString();
+      if (!isNexusPrivileged(req) && (plan.createdBy === undefined || plan.createdBy !== callerIdentity)) {
         sendError(res, 'Orchestration not found', 404);
         return;
       }
@@ -2977,6 +3073,7 @@ router.get('/ingest', async (_req: Request, res: Response) => {
 
 router.post(
   '/ingest',
+  requireNexusOps,
   perUserWriteSlidingLimiter,
   validateBody(
     bodyShape({
@@ -3028,6 +3125,7 @@ router.get('/ingest/:id', async (req: Request, res: Response) => {
 
 router.post(
   '/ingest/:id/retry',
+  requireNexusOps,
   perUserWriteSlidingLimiter,
   async (req: Request, res: Response) => {
     try {

@@ -117,6 +117,8 @@ export const nexusOrchestrationPlansTable = pgTable(
     status: text('status', { enum: NEXUS_ORCHESTRATION_STATUSES }).notNull().default('planning'),
     steps: jsonb('steps').$type<NexusOrchestrationStepData[]>().notNull().default([]),
     stitchedOutput: text('stitched_output'),
+    /** Email or user-id string of the authenticated caller who created this plan. */
+    createdBy: text('created_by'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     completedAt: timestamp('completed_at'),
   },
