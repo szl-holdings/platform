@@ -28,7 +28,7 @@ Scripts audited for usability:
 
 | Script | Status | Notes |
 |--------|--------|-------|
-| `pnpm build` (turbo) | ✓ Works | 5 artifacts build; a11oy fails (missing package, documented) |
+| `pnpm build` (turbo) | ✓ Works | 6 artifacts build incl. a11oy (dep wiring fixed in this pass) |
 | `pnpm lint` | ✓ Works | Biome lint passes |
 | `pnpm typecheck` | ✓ Partial | Blocked by DATABASE_URL requirement for db codegen |
 | `pnpm test` | ✓ Works | 227 tests pass (database-dependent tests run in CI) |
@@ -183,7 +183,7 @@ No large binary assets committed to tracked source. Investor PDFs in `artifacts/
 | Contribution docs | ✓ UPDATED |
 | Public folder | ✓ CLEAN |
 
-**Overall: Public-ready with two documented pre-existing build failures (terra, vessels/sentra shared-ui) and one Phase 1 incomplete item (a11oy-fabric package).**
+**Overall: Public-ready. A11oy dependency wiring fixed in this pass (6 of 9 artifacts now build cleanly); two documented pre-existing failures remain (terra, vessels/sentra shared-ui).**
 
 ---
 
