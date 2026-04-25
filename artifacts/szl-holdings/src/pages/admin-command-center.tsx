@@ -145,6 +145,7 @@ interface AuditEntry {
   timestamp: string;
   details: string | null;
   ipAddress: string | null;
+  orgName?: string | null;
   entityType?: string;
   entityId?: string;
   orgId?: number;
@@ -2404,8 +2405,9 @@ function AuditPanel() {
         <div className="bg-card border border-border rounded-xl divide-y divide-border/50 overflow-hidden">
           <div className="px-4 py-2 bg-muted/30 grid grid-cols-12 gap-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
             <span className="col-span-2">Action</span>
-            <span className="col-span-3">Actor</span>
-            <span className="col-span-3">Target</span>
+            <span className="col-span-2">Actor</span>
+            <span className="col-span-2">Org</span>
+            <span className="col-span-2">Target</span>
             <span className="col-span-2">IP</span>
             <span className="col-span-2 text-right">Time</span>
           </div>
@@ -2426,10 +2428,20 @@ function AuditPanel() {
                 >
                   {l.action}
                 </span>
-                <span className="col-span-3 text-xs text-foreground truncate font-medium">
+                <span className="col-span-2 text-xs text-foreground truncate font-medium">
                   {l.actor}
                 </span>
-                <span className="col-span-3 text-xs text-muted-foreground truncate">
+                <span className="col-span-2">
+                  {l.orgName ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-violet-500/10 text-violet-600 border-violet-500/20 uppercase tracking-wider truncate max-w-full">
+                      <Building2 className="w-2.5 h-2.5 shrink-0" />
+                      {l.orgName}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-muted-foreground/40">—</span>
+                  )}
+                </span>
+                <span className="col-span-2 text-xs text-muted-foreground truncate">
                   {l.target}
                 </span>
                 <span className="col-span-2 text-[10px] text-muted-foreground font-mono">
@@ -2456,6 +2468,7 @@ function AuditPanel() {
                 { label: 'Event ID', value: selectedEntry.id },
                 { label: 'Action', value: selectedEntry.action },
                 { label: 'Actor', value: selectedEntry.actor },
+                { label: 'Org', value: selectedEntry.orgName ?? '—' },
                 { label: 'Target', value: selectedEntry.target },
                 { label: 'Result', value: selectedEntry.result },
                 { label: 'IP Address', value: selectedEntry.ipAddress ?? '—' },

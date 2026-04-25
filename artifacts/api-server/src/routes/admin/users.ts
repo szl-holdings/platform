@@ -268,14 +268,23 @@ export function register(router: IRouter): void {
       const limitParam = parseInt((req.query.limit as string) ?? '50', 10);
       const limit = format === 'csv' ? 10000 : Math.min(Number.isNaN(limitParam) ? 50 : limitParam, 200);
 
-      // If filtering by tenant/org, resolve the set of member user IDs first
+      // If filtering by tenant/org, resolve the set of member user IDs and the
+      // org name. When a filter is active we know every returned event belongs
+      // to a member of that org, so we can tag all rows with the filtered org
+      // name rather than relying on a per-row subquery.
       let orgMemberUserIds: number[] | null = null;
+      let filteredOrgName: string | null = null;
       if (orgIdParam) {
         const orgId = parseInt(orgIdParam, 10);
         if (Number.isNaN(orgId) || orgId < 1) {
           sendBadRequest(res, 'Invalid orgId — must be a positive integer');
           return;
         }
+        const [orgRow] = await db
+          .select({ name: organizationsTable.name })
+          .from(organizationsTable)
+          .where(eq(organizationsTable.id, orgId));
+        filteredOrgName = orgRow?.name ?? null;
         const members = await db
           .select({ userId: orgMembersTable.userId })
           .from(orgMembersTable)
@@ -314,7 +323,7 @@ export function register(router: IRouter): void {
             res.setHeader('Content-Type', 'text/csv; charset=utf-8');
             res.setHeader('Content-Disposition', 'attachment; filename="audit-log.csv"');
             res.send(
-              ['ID', 'Action', 'Actor', 'Target', 'Result', 'IP Address', 'Timestamp', 'Details']
+              ['ID', 'Action', 'Actor', 'Org', 'Target', 'Result', 'IP Address', 'Timestamp', 'Details']
                 .map(toCsvCell)
                 .join(','),
             );
@@ -340,6 +349,12 @@ export function register(router: IRouter): void {
           newValues: auditEventsTable.newValues,
           ipAddress: auditEventsTable.ipAddress,
           createdAt: auditEventsTable.createdAt,
+          orgName: sql<string | null>`(
+            SELECT CASE WHEN COUNT(DISTINCT o.id) = 1 THEN MAX(o.name) END
+            FROM ${organizationsTable} o
+            INNER JOIN ${orgMembersTable} m ON m.org_id = o.id
+            WHERE m.user_id = ${auditEventsTable.userId}
+          )`,
         })
         .from(auditEventsTable)
         .leftJoin(usersTable, eq(auditEventsTable.userId, usersTable.id))
@@ -355,6 +370,7 @@ export function register(router: IRouter): void {
         timestamp: r.createdAt.toISOString(),
         details: r.newValues ? JSON.stringify(r.newValues).slice(0, 500) : null,
         ipAddress: r.ipAddress,
+        orgName: filteredOrgName ?? r.orgName ?? null,
       }));
       if (format === 'csv') {
         const toCsvCell = (v: string) => `"${String(v ?? '').replace(/"/g, '""')}"`;
@@ -362,6 +378,7 @@ export function register(router: IRouter): void {
           'ID',
           'Action',
           'Actor',
+          'Org',
           'Target',
           'Result',
           'IP Address',
@@ -375,6 +392,7 @@ export function register(router: IRouter): void {
             l.id,
             l.action,
             l.actor,
+            l.orgName ?? '',
             l.target,
             l.result,
             l.ipAddress ?? '',
