@@ -73,8 +73,7 @@ The org profile repository (`szl-holdings/.github`) is separate from this repo. 
 | Check | Result |
 |-------|--------|
 | pnpm install | ✓ PASS |
-| Build — 5 artifacts | ✓ PASS |
-| Build — a11oy | ✗ FAIL (missing @workspace/a11oy-fabric — deferred to downstream task) |
+| Build — 6 artifacts (incl. a11oy) | ✓ PASS — a11oy dependency wiring fixed in this pass |
 | Build — terra, vessels, sentra | ✗ FAIL (pre-existing, documented) |
 | Lint (biome) | ✓ PASS |
 | Brand strings | ✓ PASS — 4,010 files, 0 violations |
@@ -113,7 +112,6 @@ The org profile repository (`szl-holdings/.github`) is separate from this repo. 
 
 | Blocker | Classification | Owner | Urgency |
 |---------|---------------|-------|---------|
-| `@workspace/a11oy-fabric` missing — a11oy build broken | `deferred_to_roadmap` | Downstream task | High |
 | terra / vessels / sentra pre-existing build failures | `documented` | Engineering sprint | Medium |
 | Branch protection rules not applied | `requires_GitHub_auth` | Stephen Lutar | Medium |
 | Org profile not pushed to `szl-holdings/.github` | `requires_GitHub_auth` | Stephen Lutar | Low |
@@ -125,13 +123,12 @@ The org profile repository (`szl-holdings/.github`) is separate from this repo. 
 
 ## 10. Recommended Next Moves
 
-1. **Merge this PR** after CI passes — no product code changed, documentation only
+1. **Merge this PR** after CI passes — code change is `artifacts/a11oy/package.json` + `pnpm-lock.yaml` (dependency wiring) and audit/proof documentation
 2. **Apply GitHub UI settings** (15 minutes) — topics, description, website link, social preview
 3. **Apply branch protection** (15 minutes) — require PR + status checks + review
 4. **Push org profile** (15 minutes) — follow `audit/ORG_PROFILE_MANUAL_STEPS.md`
 5. **Make repo public** — after confirming security posture with this report
-6. **Run downstream task** — "A11oy Fully Operational — consolidated build chain + acceptance gate" to fix the a11oy-fabric blocker
-7. **Fix pre-existing build failures** — terra, vessels, sentra in dedicated sprint
+6. **Fix pre-existing build failures** — terra, vessels, sentra in dedicated sprint
 
 ---
 
