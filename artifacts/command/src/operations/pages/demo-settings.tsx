@@ -13,7 +13,7 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const BG = { surface: '#0c1018', elevated: '#10141e' };
 const BORDER = { subtle: 'rgba(255,255,255,0.04)', muted: 'rgba(255,255,255,0.06)' };
@@ -94,8 +94,22 @@ export default function DemoSettingsPage() {
     demoMode: true,
   });
 
-  const [supportEmail, setSupportEmail] = useState('support@szlholdings.com');
+  const [supportEmail, setSupportEmail] = useState('');
   const [supportEmailSaving, setSupportEmailSaving] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [supportEmailLoading, setSupportEmailLoading] = useState(true);
+
+  useEffect(() => {
+    const BASE_URL = (import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? '/';
+    fetch(`${BASE_URL}api/orgs/szl-holdings/support-settings`, {
+      credentials: 'include',
+    })
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error('Failed'))))
+      .then((json: { notificationEmail?: string | null }) => {
+        setSupportEmail(json.notificationEmail ?? '');
+      })
+      .catch(() => {})
+      .finally(() => setSupportEmailLoading(false));
+  }, []);
 
   async function handleSupportEmailSave() {
     setSupportEmailSaving('saving');
@@ -501,13 +515,18 @@ export default function DemoSettingsPage() {
                       type="email"
                       value={supportEmail}
                       onChange={(e) => setSupportEmail(e.target.value)}
-                      placeholder="support@example.com"
+                      disabled={supportEmailLoading}
+                      placeholder={supportEmailLoading ? 'Loading…' : 'support@example.com'}
                       className="flex-1 bg-transparent text-[10px] border rounded px-2 py-1.5"
-                      style={{ color: TEXT.primary, borderColor: BORDER.muted }}
+                      style={{
+                        color: TEXT.primary,
+                        borderColor: BORDER.muted,
+                        opacity: supportEmailLoading ? 0.5 : 1,
+                      }}
                     />
                     <button
                       onClick={handleSupportEmailSave}
-                      disabled={supportEmailSaving === 'saving'}
+                      disabled={supportEmailLoading || supportEmailSaving === 'saving'}
                       className="flex items-center gap-1 text-[9px] px-3 py-1.5 rounded border transition-all shrink-0"
                       style={{
                         color:
