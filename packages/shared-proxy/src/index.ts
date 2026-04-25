@@ -13,6 +13,7 @@ export interface ProxyRoute {
 export const CANONICAL_FALLBACK_PORT = 21130;
 export const SHARED_PROXY_PORT = 9090;
 
+export const A11OY_PORT = 4110;
 export const AEGIS_PORT = 3002;
 export const API_PORT = 8080;
 export const CARLOTA_JO_PORT = 8098;
@@ -27,6 +28,7 @@ export const PULSE_PORT = 5201;
 export const SZL_DEMO_VIDEO_PORT = 8765;
 
 export const PROXY_ROUTES: ProxyRoute[] = [
+  { prefix: '/a11oy/', port: A11OY_PORT },
   { prefix: '/aegis/', port: AEGIS_PORT },
   { prefix: '/api/', port: API_PORT },
   // '/ws/' routes bare WebSocket upgrades to the api-server platform WS

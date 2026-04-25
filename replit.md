@@ -17,6 +17,10 @@ SZL Holdings offers FORGE, a governed operational intelligence platform for regu
 
 **Phase 3 backend:** `artifacts/api-server/src/routes/a11oy-sovereign-api.ts` — 18 endpoints mounted at `/api/a11oy` covering all Phase 3 surfaces with rich seed data (6 tenants, 5 model profiles, 40+ evals, 15 replays, 12 connectors, 30+ twins, 15 skills, 5 board packets, 50+ telemetry spans).
 
+**A11oy Substrate Engine:** `reports/a11oy-substrate/cli.py` — Python CLI that generates 7 vertical artifact JSON files (pulse, finance_fincept, lyte_kora, terra, vessels, prism_counsel, marketing_growth) under `reports/a11oy-substrate/artifacts/`. Run with `python3 reports/a11oy-substrate/cli.py --all`. Security: output restricted to artifacts dir, atomic writes, 0600 file mode, absolute path redaction. Strategy bundle export: `python3 reports/a11oy-substrate/website/export_strategy_bundle.py`.
+
+**A11oy Networking:** A11oy uses the shared proxy on port 9090 (`@szl-holdings/shared-proxy`) with `VITE_PORT=4110` for its Vite dev server. Route `/a11oy/` → port 4110 is registered in `packages/shared-proxy/src/index.ts`.
+
 **Phase 3 docs:** `docs/A11OY_PHASE3_ARCHITECTURE.md`, `docs/HUMAN_GATED_AUTONOMY.md`, `docs/CONNECTOR_FIREWALL.md`, `docs/MIRROREVAL.md`, `docs/INVESTOR_DEMO_SCRIPT.md`, `docs/A11OY_PHASE3_SECURITY_POSTURE.md`.
 
 The platform is a pnpm monorepo supporting web and mobile applications, an API, and a design system. Its core purpose is Governed Workflow Orchestration (FORGE + Command + KORA) and Maritime Intelligence (SEXTANT), with specialized extensions like PARAGON, DOMAINE, Counsel, and Carlota Jo built upon its governed foundation. The business vision is to provide a comprehensive solution for decision intelligence and operational oversight in highly regulated environments, with strong market potential in sectors requiring stringent compliance and auditable AI applications.

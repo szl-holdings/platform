@@ -1,10 +1,11 @@
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
+import { sharedProxyPlugin } from '@szl-holdings/shared-proxy';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
 import { defineConfig } from 'vite';
 
-const vitePort = Number(process.env.PORT);
+const vitePort = Number(process.env.VITE_PORT) || 4110;
 const basePath = process.env.BASE_PATH || '/a11oy/';
 
 export default defineConfig({
@@ -13,6 +14,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
+    sharedProxyPlugin(),
     ...(process.env.NODE_ENV !== 'production' && process.env.REPL_ID !== undefined
       ? [
           await import('@replit/vite-plugin-cartographer').then((m) =>

@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "@szl-holdings/brand-registry": "workspace:*",
-    "@szl-holdings/design-system": "workspace:*"
+    "@szl-holdings/design-system": "workspace:*",
+    "@szl-holdings/shared-proxy": "workspace:*"
   },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "catalog:",

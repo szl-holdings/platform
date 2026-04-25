@@ -1,0 +1,117 @@
+{
+  "blueprint_version": "1.0.0",
+  "project": "A11oy — Brand Orchestration Layer",
+  "tagline": "Governed Autonomy for Enterprise Operations",
+  "domain": "a11oy.szlholdings.com",
+  "framework": "React + Vite + TailwindCSS",
+  "design_system": "@szl-holdings/design-system",
+  "pages": [
+    {
+      "slug": "/",
+      "title": "Home — The Governing Philosophy",
+      "purpose": "Hero statement + vertical showcase + CTA",
+      "sections": [
+        {
+          "id": "hero",
+          "type": "hero",
+          "headline": "Autonomy without governance is reckless. Governance without autonomy is paralysis.",
+          "subhead": "A11OY is the fusion.",
+          "cta": {"label": "See the Verticals", "href": "#verticals"}
+        },
+        {
+          "id": "philosophy",
+          "type": "narrative",
+          "content": "A11OY is not a product. It is a philosophy — the idea that great enterprise systems are alloys. Diverse elements fused under pressure into something stronger than any single part."
+        },
+        {
+          "id": "verticals",
+          "type": "vertical-grid",
+          "items": [
+            {"id": "pulse", "label": "Pulse", "tagline": "Founder Operating Channel"},
+            {"id": "fincept", "label": "Fincept", "tagline": "Capital Weather"},
+            {"id": "kora", "label": "KORA", "tagline": "Decision Debt Ledger"},
+            {"id": "terra", "label": "Terra", "tagline": "Acquisition Time Machine"},
+            {"id": "sextant", "label": "Sextant", "tagline": "Voyage Risk Exchange"},
+            {"id": "counsel", "label": "PRISM Counsel", "tagline": "Matter Flight Recorder"},
+            {"id": "growth", "label": "Growth Engine", "tagline": "Proof-To-Pipeline"}
+          ]
+        },
+        {
+          "id": "trust",
+          "type": "trust-bar",
+          "items": [
+            "Human-in-the-loop on every recommendation",
+            "Evidence-backed signals with audit trail",
+            "SOC 2 aligned architecture",
+            "Zero third-party data sharing"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "/platform",
+      "title": "Platform Architecture",
+      "purpose": "Technical credibility + twin concept + integration map",
+      "sections": [
+        {
+          "id": "twin-model",
+          "type": "diagram",
+          "concept": "Every vertical creates a Digital Twin — a living model of signals, evidence, forecasts, and recommendations.",
+          "twins": ["Founder Twin", "Capital Twin", "Decision Twin", "Property Twin", "Fleet Twin", "Matter Twin", "Pipeline Twin"]
+        },
+        {
+          "id": "signal-flow",
+          "type": "flow-diagram",
+          "steps": ["Ingest Signals", "Correlate Evidence", "Generate Forecast", "Produce Recommendation", "Human Approval Gate", "Execute + Record Proof"]
+        },
+        {
+          "id": "integrations",
+          "type": "logo-grid",
+          "items": ["GitHub", "Linear", "Sentry", "Stripe", "QuickBooks", "HubSpot", "AIS Maritime", "FEMA", "SEC EDGAR"]
+        }
+      ]
+    },
+    {
+      "slug": "/verticals/:id",
+      "title": "Vertical Detail",
+      "purpose": "Deep-dive into a single vertical with live signal preview",
+      "dynamic": true,
+      "sections": [
+        {"id": "overview", "type": "vertical-hero"},
+        {"id": "signals", "type": "signal-list"},
+        {"id": "recommendation", "type": "recommendation-card"},
+        {"id": "forecast", "type": "forecast-gauge"}
+      ]
+    },
+    {
+      "slug": "/security",
+      "title": "Security & Governance",
+      "purpose": "Trust documentation for enterprise buyers",
+      "sections": [
+        {"id": "governance", "type": "checklist", "items": [
+          "Every recommendation requires human approval",
+          "Full evidence chain: signal → policy → execution → proof",
+          "Atomic writes with file-mode restrictions",
+          "Absolute path redaction in all exports",
+          "Output sandboxed to designated directories"
+        ]},
+        {"id": "compliance", "type": "badge-row", "items": ["SOC 2 Type II", "GDPR Ready", "CCPA Compliant"]}
+      ]
+    }
+  ],
+  "color_palette": {
+    "primary": "#C9A94E",
+    "background": "#0A0A0A",
+    "surface": "#141414",
+    "text_primary": "#E8E8E8",
+    "text_secondary": "#8A8A8A",
+    "accent": "#C9A94E",
+    "danger": "#FF4444",
+    "success": "#22C55E"
+  },
+  "typography": {
+    "heading_font": "Inter, system-ui, sans-serif",
+    "body_font": "Inter, system-ui, sans-serif",
+    "mono_font": "JetBrains Mono, monospace"
+  }
+}

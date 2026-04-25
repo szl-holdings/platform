@@ -27,4 +27,5 @@ kind = "web"
     to = "/index.html"
 
     [services.env]
+    VITE_PORT = "4110"
     BASE_PATH = "/a11oy/"
