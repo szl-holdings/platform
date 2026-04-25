@@ -612,10 +612,14 @@ export function register(router: IRouter): void {
       if (Number.isNaN(id)) { sendBadRequest(res, 'Invalid ticket ID'); return; }
       const body = req.body as { optOut?: boolean };
       const optOut = body.optOut !== false;
-      await pool.query(
+      const result = await pool.query(
         `UPDATE contact_submissions SET email_opt_out = $1, email_opt_out_at = $2 WHERE id = $3`,
         [optOut, optOut ? new Date() : null, id],
       );
+      if ((result.rowCount ?? 0) === 0) {
+        sendNotFound(res, 'Ticket');
+        return;
+      }
       sendSuccess(res, { id, emailOptOut: optOut });
     } catch (err) {
       logger.error({ err }, '[admin/support-queue] POST opt-out failed');
