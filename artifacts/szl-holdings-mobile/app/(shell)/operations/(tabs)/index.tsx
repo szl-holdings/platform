@@ -364,7 +364,7 @@ export default function InboxScreen() {
       severity: actionSeverity(a),
       source: 'Action Queue',
       title: a.title,
-      platform: 'KORA',
+      platform: 'Lyte',
       time: a.dueAt ? timeAgo(a.dueAt) : '—',
       status: a.state,
       actionId: a.id,
@@ -469,7 +469,7 @@ export default function InboxScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.eyebrow}>COMMAND INBOX</Text>
-            <Text style={styles.headerTitle}>KORA</Text>
+            <Text style={styles.headerTitle}>Lyte</Text>
           </View>
           <View style={styles.headerBadges}>
             {criticalCount > 0 && (

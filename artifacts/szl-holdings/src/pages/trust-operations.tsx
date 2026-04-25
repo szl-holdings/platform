@@ -42,7 +42,7 @@ const ADMIN_VISIBILITY = [
   { label: "Real-time connector health", body: "Every external integration connector has a live health indicator in the admin surface — response time, last sync, error rate, and authentication status." },
   { label: "Ingestion pipeline monitoring", body: "Data ingestion pipelines show job status, queue depth, processing latency, and error detail in the admin diagnostics layer — not just success/fail." },
   { label: "Per-tenant audit log access", body: "Tenant admins can access the full audit log for their organization — every action, every approval, every AI decision — from the admin interface." },
-  { label: "Workflow execution visibility", body: "Every FORGE workflow execution is visible in the admin surface: trigger, approval chain, execution, outcome, and SLA status." },
+  { label: "Workflow execution visibility", body: "Every Counsel workflow execution is visible in the admin surface: trigger, approval chain, execution, outcome, and SLA status." },
 ];
 
 const EXTERNAL_DATA_POLICY = [
@@ -62,7 +62,7 @@ const METRICS = [
 export default function TrustOperationsPage() {
   const __pageMeta = usePageMeta({
     title: "Operations — Trust Center · SZL Holdings",
-    description: "Operational model, admin visibility, incident management, external data policy, and supportability for KORA + FORGE.",
+    description: "Operational model, admin visibility, incident management, external data policy, and supportability for Lyte + Counsel.",
     canonical: "https://szlholdings.com/trust/operations",
   });
 

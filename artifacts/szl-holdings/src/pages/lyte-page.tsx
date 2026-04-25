@@ -55,30 +55,30 @@ const SEV_BG: Record<SignalSeverity, string> = {
 };
 
 const DOMAIN_COLOR: Record<string, string> = {
-  PARAGON: "hsl(222,60%,60%)",
-  SEXTANT: "hsl(206,72%,54%)",
-  DOMAINE: "hsl(142,52%,48%)",
+  Aegis: "hsl(222,60%,60%)",
+  Vessels: "hsl(206,72%,54%)",
+  Terra: "hsl(142,52%,48%)",
   "Counsel": "hsl(260,60%,65%)",
   "Carlota Jo": "hsl(340,52%,60%)",
-  FORGE: "hsl(192,72%,48%)",
+  Counsel: "hsl(192,72%,48%)",
   IMPERIUM: "hsl(25,72%,54%)",
 };
 
 const DOMAIN_ICON: Record<string, typeof Shield> = {
-  PARAGON: Shield,
-  SEXTANT: Ship,
-  DOMAINE: Building2,
+  Aegis: Shield,
+  Vessels: Ship,
+  Terra: Building2,
   "Counsel": Briefcase,
   "Carlota Jo": Users,
-  FORGE: Zap,
+  Counsel: Zap,
   IMPERIUM: Layers,
 };
 
 const SOURCE_TO_DOMAIN: Record<string, string> = {
-  terra: "DOMAINE", vessels: "SEXTANT", firestorm: "PARAGON",
-  prism: "Counsel", alloy: "FORGE", "carlota-jo": "Carlota Jo",
+  terra: "Terra", vessels: "Vessels", firestorm: "Aegis",
+  prism: "Counsel", alloy: "Counsel", "carlota-jo": "Carlota Jo",
   carlota: "Carlota Jo", manual: "IMPERIUM", monitor: "IMPERIUM",
-  api: "FORGE", scheduler: "FORGE",
+  api: "Counsel", scheduler: "Counsel",
 };
 
 interface ApiSignal {
@@ -194,20 +194,20 @@ interface SituationItem {
 }
 
 const SIGNAL_STREAM: SignalItem[] = [
-  { id: "s1", domain: "PARAGON", severity: "critical", title: "KEV CVE-2025-1337 — active exploitation confirmed", detail: "3 systems in scope · analyst queue empty · SLA T-2h", age: "4m", status: "new", correlatedTo: "sit1" },
-  { id: "s2", domain: "SEXTANT", severity: "high", title: "Dark vessel detected — AIS signal gap 6h+", detail: "MV Adriatic Star · Last position: Strait of Messina · OFAC check pending", age: "11m", status: "acknowledged", correlatedTo: "sit2" },
+  { id: "s1", domain: "Aegis", severity: "critical", title: "KEV CVE-2025-1337 — active exploitation confirmed", detail: "3 systems in scope · analyst queue empty · SLA T-2h", age: "4m", status: "new", correlatedTo: "sit1" },
+  { id: "s2", domain: "Vessels", severity: "high", title: "Dark vessel detected — AIS signal gap 6h+", detail: "MV Adriatic Star · Last position: Strait of Messina · OFAC check pending", age: "11m", status: "acknowledged", correlatedTo: "sit2" },
   { id: "s3", domain: "Counsel", severity: "high", title: "Motion deadline in 38 hours — no filing draft", detail: "Matter HC-2025-0487 · No owner assigned · LP approval outstanding", age: "22m", status: "new" },
-  { id: "s4", domain: "DOMAINE", severity: "medium", title: "Distress signal threshold breached — 12 properties", detail: "NYC distress pipeline · Ownership graph query triggered · Diligence checklist 34% complete", age: "1h", status: "acknowledged" },
-  { id: "s5", domain: "FORGE", severity: "medium", title: "Approval queue depth: 14 pending > 72h", detail: "6 workflows stalled · 2 require exec review · Escalation paths unset", age: "2h", status: "acknowledged" },
+  { id: "s4", domain: "Terra", severity: "medium", title: "Distress signal threshold breached — 12 properties", detail: "NYC distress pipeline · Ownership graph query triggered · Diligence checklist 34% complete", age: "1h", status: "acknowledged" },
+  { id: "s5", domain: "Counsel", severity: "medium", title: "Approval queue depth: 14 pending > 72h", detail: "6 workflows stalled · 2 require exec review · Escalation paths unset", age: "2h", status: "acknowledged" },
   { id: "s6", domain: "Carlota Jo", severity: "info", title: "Engagement milestone 3 delivered — awaiting confirmation", detail: "Client: Archipelago Capital · Delivery package sent · Response SLA: 48h", age: "3h", status: "acknowledged" },
   { id: "s7", domain: "IMPERIUM", severity: "info", title: "Configuration drift detected — 2 cloud assets", detail: "AWS us-east-1 · Policy violation: unrestricted egress rule · Auto-tagged", age: "4h", status: "new" },
 ];
 
 const SITUATION_BOARD: SituationItem[] = [
-  { id: "sit1", title: "Active Exploitation Response — CVE-2025-1337", domain: "PARAGON", severity: "critical", stage: "Simulation", owner: "Unassigned", pending: "Policy approval", updated: "4m ago" },
-  { id: "sit2", title: "MV Adriatic Star — Maritime Anomaly Investigation", domain: "SEXTANT", severity: "high", stage: "Context", owner: "K. Vasile", pending: "OFAC screening", updated: "11m ago" },
+  { id: "sit1", title: "Active Exploitation Response — CVE-2025-1337", domain: "Aegis", severity: "critical", stage: "Simulation", owner: "Unassigned", pending: "Policy approval", updated: "4m ago" },
+  { id: "sit2", title: "MV Adriatic Star — Maritime Anomaly Investigation", domain: "Vessels", severity: "high", stage: "Context", owner: "K. Vasile", pending: "OFAC screening", updated: "11m ago" },
   { id: "sit3", title: "HC-2025-0487 — Motion Filing Protocol", domain: "Counsel", severity: "high", stage: "Recommendation", owner: "Unassigned", pending: "Owner assignment", updated: "22m ago" },
-  { id: "sit4", title: "NYC Distress Pipeline — Acquisition Review", domain: "DOMAINE", severity: "medium", stage: "Proof", owner: "R. Chen", pending: "LP review", updated: "1h ago" },
+  { id: "sit4", title: "NYC Distress Pipeline — Acquisition Review", domain: "Terra", severity: "medium", stage: "Proof", owner: "R. Chen", pending: "LP review", updated: "1h ago" },
 ];
 
 const STAGE_FLOW = [
@@ -508,15 +508,15 @@ const SIT_PROOF_RECORDS: Record<string, ProofRecord> = {
   sit1: {
     ...SAMPLE_PROOF_RECORD,
     id: "PCH-SIT1-20260416",
-    sourceSystem: "PARAGON SOC Feed",
-    sourceDomain: "PARAGON",
+    sourceSystem: "Aegis SOC Feed",
+    sourceDomain: "Aegis",
     signalType: "threat_intelligence",
     confidence: 0.94,
     reviewState: "unreviewed",
     exportSafety: "pending_review",
     policyChecks: [
       { label: "Role: ops_analyst — permitted", passed: true },
-      { label: "Domain: PARAGON — in scope", passed: true },
+      { label: "Domain: Aegis — in scope", passed: true },
       { label: "Action: approve_execution — permitted", passed: false, note: "Requires owner assignment" },
       { label: "Human-in-loop gate: required before execution", passed: true },
       { label: "Review state: must be human_reviewed before export", passed: false, note: "Export blocked until review complete" },
@@ -532,21 +532,21 @@ const SIT_PROOF_RECORDS: Record<string, ProofRecord> = {
   sit2: {
     ...SAMPLE_PROOF_RECORD,
     id: "PCH-SIT2-20260416",
-    sourceSystem: "SEXTANT AIS Feed",
-    sourceDomain: "SEXTANT",
+    sourceSystem: "Vessels AIS Feed",
+    sourceDomain: "Vessels",
     signalType: "ais_telemetry",
     confidence: 0.91,
     reviewState: "human_reviewed",
     exportSafety: "pending_review",
     policyChecks: [
       { label: "Role: ops_analyst — permitted", passed: true },
-      { label: "Domain: SEXTANT — in scope", passed: true },
+      { label: "Domain: Vessels — in scope", passed: true },
       { label: "Action: request_ofac_screen — permitted", passed: true },
       { label: "Human-in-loop gate: K. Vasile assigned", passed: true },
       { label: "OFAC screening required before execution", passed: false, note: "Screening in progress" },
     ],
     chainLinks: [
-      { id: "c1", event: "AIS dark gap detected — MV Adriatic Star", actor: "System / SEXTANT Feed", timestamp: "16 Apr 2026 07:07:44", hash: "sha256:d1e3f5b7a..." },
+      { id: "c1", event: "AIS dark gap detected — MV Adriatic Star", actor: "System / Vessels Feed", timestamp: "16 Apr 2026 07:07:44", hash: "sha256:d1e3f5b7a..." },
       { id: "c2", event: "Temporal correlation with Counsel filing event", actor: "System / Signal Fusion", timestamp: "16 Apr 2026 08:03:11", hash: "sha256:f2a8c4e6b..." },
       { id: "c3", event: "OFAC screening initiated", actor: "K. Vasile", timestamp: "16 Apr 2026 08:18:55", hash: "sha256:e7b9d3c2f..." },
     ],
@@ -576,21 +576,21 @@ const SIT_PROOF_RECORDS: Record<string, ProofRecord> = {
   sit4: {
     ...SAMPLE_PROOF_RECORD,
     id: "PCH-SIT4-20260416",
-    sourceSystem: "DOMAINE Distress Signal Engine",
-    sourceDomain: "DOMAINE",
+    sourceSystem: "Terra Distress Signal Engine",
+    sourceDomain: "Terra",
     signalType: "distress_property_signal",
     confidence: 0.82,
     reviewState: "peer_reviewed",
     exportSafety: "safe",
     policyChecks: [
       { label: "Role: ops_analyst — permitted", passed: true },
-      { label: "Domain: DOMAINE — in scope", passed: true },
+      { label: "Domain: Terra — in scope", passed: true },
       { label: "Action: request_lp_review — permitted", passed: true },
       { label: "Human-in-loop gate: R. Chen assigned", passed: true },
       { label: "LP review gate: required before acquisition approval", passed: false, note: "LP review pending" },
     ],
     chainLinks: [
-      { id: "c1", event: "Distress threshold breach — 12 properties flagged", actor: "System / DOMAINE Signal Engine", timestamp: "16 Apr 2026 07:18:04", hash: "sha256:b2c4d6e8f..." },
+      { id: "c1", event: "Distress threshold breach — 12 properties flagged", actor: "System / Terra Signal Engine", timestamp: "16 Apr 2026 07:18:04", hash: "sha256:b2c4d6e8f..." },
       { id: "c2", event: "Ownership graph traversal — entity links identified", actor: "System / Outcome Graph", timestamp: "16 Apr 2026 07:18:09", hash: "sha256:d4e6f8a2b..." },
       { id: "c3", event: "Proof record opened — R. Chen assigned", actor: "R. Chen", timestamp: "16 Apr 2026 07:22:41", hash: "sha256:f6a8b2c4d..." },
       { id: "c4", event: "LP review package dispatched", actor: "R. Chen", timestamp: "16 Apr 2026 07:45:00", hash: "sha256:a8b4c6d2e..." },
@@ -601,8 +601,8 @@ const SIT_PROOF_RECORDS: Record<string, ProofRecord> = {
 
 export default function LytePage() {
   const __pageMeta = usePageMeta({
-    title: "KORA — Operational Nerve Center | SZL Holdings",
-    description: "KORA is the governed command surface where the Governed Decision Loop plays out: Signal Ingestion, Risk Surface, Governed Decision with Covenant Policy, and Proof Chain recording — all in one persistent operator interface.",
+    title: "Lyte — Operational Nerve Center | SZL Holdings",
+    description: "Lyte is the governed command surface where the Governed Decision Loop plays out: Signal Ingestion, Risk Surface, Governed Decision with Covenant Policy, and Proof Chain recording — all in one persistent operator interface.",
     canonical: "https://szlholdings.com/lyte",
     ogImage: "https://szlholdings.com/og/og-lyte.jpg",
   });
@@ -798,7 +798,7 @@ export default function LytePage() {
                 </span>
                 <span style={{ width: 1, height: 12, background: BORDER }} />
                 <span style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE }}>
-                  KORA · Operational Nerve Center
+                  Lyte · Operational Nerve Center
                 </span>
                 <span style={{ width: 1, height: 12, background: BORDER }} />
                 <LivePulse healthy={isStreamHealthy} flash={pulseFlash} />
@@ -827,7 +827,7 @@ export default function LytePage() {
                 maxWidth: "54ch",
                 marginBottom: "2.5rem",
               }}>
-                Not a dashboard. Not an AI copilot. KORA is the persistent command surface where signal intelligence meets governed action — with every decision traced, attributed, and measured. Inspired by the world's most consequential operations centers, built for enterprise.
+                Not a dashboard. Not an AI copilot. Lyte is the persistent command surface where signal intelligence meets governed action — with every decision traced, attributed, and measured. Inspired by the world's most consequential operations centers, built for enterprise.
               </p>
 
               <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
@@ -840,7 +840,7 @@ export default function LytePage() {
                   fontSize: "0.875rem", fontWeight: 600,
                   textDecoration: "none",
                 }}>
-                  See KORA live <ArrowRight size={14} />
+                  See Lyte live <ArrowRight size={14} />
                 </Link>
                 <Link href="/lyte/decision-theater" style={{
                   display: "inline-flex", alignItems: "center", gap: "0.5rem",
@@ -871,7 +871,7 @@ export default function LytePage() {
             >
               <div>
                 <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE, marginBottom: "0.375rem" }}>
-                  KORA Command Surface
+                  Lyte Command Surface
                 </p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3vw,2rem)", fontWeight: 700, letterSpacing: "-0.022em", color: TEXT, margin: 0 }}>
                   Persistent three-rail operations view
@@ -1213,7 +1213,7 @@ export default function LytePage() {
                       display: "flex", alignItems: "center", gap: "0.5rem",
                     }}>
                       <Play size={11} style={{ color: LYTE }} />
-                      <span style={{ fontSize: "0.75rem", fontWeight: 600, color: LYTE }}>Route to FORGE workflow</span>
+                      <span style={{ fontSize: "0.75rem", fontWeight: 600, color: LYTE }}>Route to Counsel workflow</span>
                     </button>
                     <button style={{
                       width: "100%", padding: "0.625rem 0.875rem",
@@ -1245,7 +1245,7 @@ export default function LytePage() {
                   </div>
                   <div style={{ marginTop: "1rem", padding: "0.625rem", borderRadius: 6, background: "hsla(142,60%,48%,0.06)", border: "1px solid hsla(142,60%,48%,0.15)" }}>
                     <p style={{ fontSize: "0.6875rem", color: "hsl(142,60%,58%)", fontWeight: 500, lineHeight: 1.5, margin: 0 }}>
-                      Every action routes through FORGE with approval gating and immutable Proof Chain recording.
+                      Every action routes through Counsel with approval gating and immutable Proof Chain recording.
                     </p>
                   </div>
                 </div>
@@ -1265,13 +1265,13 @@ export default function LytePage() {
                 Built on intelligence-grade architectural patterns.
               </h2>
               <p style={{ fontSize: "1rem", lineHeight: 1.72, color: TEXT_SEC, maxWidth: "52ch" }}>
-                KORA absorbs the best patterns from GCHQ's operational nerve centers, entity-layer architectures, Anduril's sense-decide-act architecture, and PLA JOCC's unified command hierarchy — and applies them to governed enterprise operations.
+                Lyte absorbs the best patterns from GCHQ's operational nerve centers, entity-layer architectures, Anduril's sense-decide-act architecture, and PLA JOCC's unified command hierarchy — and applies them to governed enterprise operations.
               </p>
             </m.div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1rem" }}>
               {[
-                { icon: Radio, color: "hsl(192,72%,48%)", title: "Persistent Signal Stream", body: "Live ingestion from all domain packs — PARAGON, SEXTANT, DOMAINE, Counsel, Carlota Jo, IMPERIUM. Severity-ranked, correlation-tagged, continuously updated. No manual aggregation." },
+                { icon: Radio, color: "hsl(192,72%,48%)", title: "Persistent Signal Stream", body: "Live ingestion from all domain packs — Aegis, Vessels, Terra, Counsel, Carlota Jo, IMPERIUM. Severity-ranked, correlation-tagged, continuously updated. No manual aggregation." },
                 { icon: Target, color: "hsl(260,60%,65%)", title: "Active Situation Board", body: "Cross-domain decision objects tracked from signal intake to outcome measurement. Every situation shows stage, owner, pending gate, and progress against the governed decision loop." },
                 { icon: Brain, color: "hsl(340,52%,60%)", title: "Decision Theater", body: "The flagship governed decision flow: signal → AI recommendation with proof → Monte Carlo simulation → policy check → governed execution → immutable proof chain → outcome measurement." },
                 { icon: Lock, color: "hsl(142,60%,48%)", title: "Covenant Policy Enforcement", body: "Every action checked against policy at the platform layer, not the UI layer. Role-based gates, domain scope enforcement, high-risk action guards. Human-in-the-loop is an architectural primitive." },
@@ -1332,7 +1332,7 @@ export default function LytePage() {
                   Watch a governed decision play out end-to-end.
                 </h3>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.7, color: TEXT_SEC, maxWidth: "52ch", marginBottom: 0 }}>
-                  Signal intake. AI recommendation with full provenance. Monte Carlo risk simulation. Covenant Policy check with explanation. FORGE workflow execution. Proof Chain record. Outcome measurement. One continuous, auditable flow.
+                  Signal intake. AI recommendation with full provenance. Monte Carlo risk simulation. Covenant Policy check with explanation. Counsel workflow execution. Proof Chain record. Outcome measurement. One continuous, auditable flow.
                 </p>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem", flexShrink: 0 }}>
@@ -1372,7 +1372,7 @@ export default function LytePage() {
                 Platform Hierarchy
               </p>
               <h2 style={{ fontSize: "clamp(1.5rem,3vw,2.125rem)", fontWeight: 700, letterSpacing: "-0.022em", color: TEXT, maxWidth: "36ch" }}>
-                KORA is one layer of a complete governed decision system.
+                Lyte is one layer of a complete governed decision system.
               </h2>
             </m.div>
 
@@ -1382,21 +1382,21 @@ export default function LytePage() {
                   layer: "01",
                   title: "Platform Command",
                   color: LYTE,
-                  items: ["KORA — Operational nerve center", "APEX — Mobile command", "Command Portal — Ecosystem hub"],
+                  items: ["Lyte — Operational nerve center", "APEX — Mobile command", "Command Portal — Ecosystem hub"],
                   note: "Operator-facing command surfaces",
                 },
                 {
                   layer: "02",
                   title: "Execution Fabric + Primitives",
                   color: "hsl(215,72%,58%)",
-                  items: ["FORGE — Workflow orchestration", "Outcome Graph — Decision memory", "Proof Chain — Immutable audit trail", "Covenant Policy — Governance engine", "Simulation Engine — Risk modeling", "Event Fabric — Signal backbone"],
+                  items: ["Counsel — Workflow orchestration", "Outcome Graph — Decision memory", "Proof Chain — Immutable audit trail", "Covenant Policy — Governance engine", "Simulation Engine — Risk modeling", "Event Fabric — Signal backbone"],
                   note: "Shared governance infrastructure",
                 },
                 {
                   layer: "03",
                   title: "Domain Packs",
                   color: "hsl(260,60%,65%)",
-                  items: ["PARAGON — Security & defense", "SEXTANT — Maritime intelligence", "DOMAINE — Real estate intelligence", "Counsel — Legal operations", "Carlota Jo — Private advisory", "IMPERIUM — Cloud sovereignty"],
+                  items: ["Aegis — Security & defense", "Vessels — Maritime intelligence", "Terra — Real estate intelligence", "Counsel — Legal operations", "Carlota Jo — Private advisory", "IMPERIUM — Cloud sovereignty"],
                   note: "Vertical intelligence extensions",
                 },
               ].map((layer, i) => (
@@ -1433,7 +1433,7 @@ export default function LytePage() {
         <section style={{ borderBottom: `1px solid ${BORDER}`, padding: "clamp(3rem,6vw,4rem) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "1.5rem" }}>
-              Explore KORA's intelligence surfaces
+              Explore Lyte's intelligence surfaces
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1rem" }}>
               {[
@@ -1486,7 +1486,7 @@ export default function LytePage() {
                 Ready to see the full operational picture?
               </h2>
               <p style={{ fontSize: "1rem", lineHeight: 1.7, color: TEXT_SEC, maxWidth: "44ch", margin: "0 auto 2.5rem" }}>
-                We instrument KORA above your most critical domain packs first. Most design partners see meaningful signal coverage within two to three weeks.
+                We instrument Lyte above your most critical domain packs first. Most design partners see meaningful signal coverage within two to three weeks.
               </p>
               <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
                 <Link href="/demo" style={{

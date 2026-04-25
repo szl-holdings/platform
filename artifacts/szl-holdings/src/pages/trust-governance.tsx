@@ -14,7 +14,7 @@ const GOVERNANCE_PRINCIPLES = [
   {
     icon: CheckSquare,
     title: "Human-in-the-Loop Gates Are Configurable, Not Optional",
-    body: "HITL approval gates are built into the FORGE execution model at the action-type level. Which actions require approval, who can approve them, and what information they receive are all configurable — but bypassing a gate requires an explicit, attributed override record. There is no silent skip path.",
+    body: "HITL approval gates are built into the Counsel execution model at the action-type level. Which actions require approval, who can approve them, and what information they receive are all configurable — but bypassing a gate requires an explicit, attributed override record. There is no silent skip path.",
   },
   {
     icon: FileText,
@@ -29,7 +29,7 @@ const GOVERNANCE_PRINCIPLES = [
   {
     icon: Eye,
     title: "Model Behavior Is Observable, Not Opaque",
-    body: "Operators can understand why KORA surfaced a signal or FORGE proposed an action. Signal classification criteria, confidence levels, and routing logic are documented and surfaceable. No black boxes on consequential decisions.",
+    body: "Operators can understand why Lyte surfaced a signal or Counsel proposed an action. Signal classification criteria, confidence levels, and routing logic are documented and surfaceable. No black boxes on consequential decisions.",
   },
   {
     icon: GitBranch,
@@ -49,7 +49,7 @@ const SIX_PRIMITIVES = [
 
 const HITL_MODEL = [
   { action: "Signal classification", gate: "Automated (configurable review threshold)", note: "High-confidence classifications routed without approval; low-confidence queued for review." },
-  { action: "Action recommendation", gate: "Human review required", note: "All FORGE action recommendations are reviewed before dispatch." },
+  { action: "Action recommendation", gate: "Human review required", note: "All Counsel action recommendations are reviewed before dispatch." },
   { action: "Low-impact action", gate: "Single approver", note: "Routine workflow tasks with defined scope." },
   { action: "High-impact action", gate: "Dual approval + rationale", note: "Actions affecting external systems, financials, or customer records." },
   { action: "Emergency override", gate: "Post-hoc review required", note: "Override is permitted; immediately logged and flagged for mandatory review." },
@@ -59,7 +59,7 @@ const HITL_MODEL = [
 export default function TrustGovernancePage() {
   const __pageMeta = usePageMeta({
     title: "AI Governance — Trust Center · SZL Holdings",
-    description: "KORA + FORGE AI governance: human-in-the-loop approval model, decision lineage tracking, override documentation, and responsible AI execution.",
+    description: "Lyte + Counsel AI governance: human-in-the-loop approval model, decision lineage tracking, override documentation, and responsible AI execution.",
     canonical: "https://szlholdings.com/trust/governance",
   });
 
@@ -85,7 +85,7 @@ export default function TrustGovernancePage() {
                   <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.08 }}>AI Governance</h1>
                 </div>
                 <p style={{ fontSize: "clamp(1rem,1.8vw,1.0625rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "52ch" }}>
-                  How KORA + FORGE uses AI responsibly — with human-in-the-loop approval gates,
+                  How Lyte + Counsel uses AI responsibly — with human-in-the-loop approval gates,
                   complete decision lineage, observable model behavior, and documented override
                   processes for every consequential action.
                 </p>
@@ -98,7 +98,7 @@ export default function TrustGovernancePage() {
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
                 <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>Six principles</p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "3rem" }}>
-                  How we build AI into KORA + FORGE.
+                  How we build AI into Lyte + Counsel.
                 </h2>
               </m.div>
               <div className="szl-grid-2">

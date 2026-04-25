@@ -20,7 +20,7 @@ const navLinks = [
 ];
 
 const kpis = [
-  { value: metricDisplay(VESSELS_COUNT), label: 'SEXTANT tracked' },
+  { value: metricDisplay(VESSELS_COUNT), label: 'Vessels tracked' },
   { value: '< 90s', label: 'Alert response time' },
   { value: metricDisplay(VESSELS_UPTIME_SLA), label: 'Platform uptime' },
   { value: '180+', label: 'Ports monitored' },
@@ -349,7 +349,7 @@ function Navbar() {
               V
             </span>
           </div>
-          <span className="font-semibold text-[14px] text-sky-50 tracking-tight">SEXTANT</span>
+          <span className="font-semibold text-[14px] text-sky-50 tracking-tight">Vessels</span>
         </a>
         <div className="hidden md:flex items-center gap-7">
           {navLinks.map((l) => (
@@ -448,7 +448,7 @@ export default function VesselsHome() {
             transition={{ duration: 0.6, delay: 0.35 }}
             className="text-sky-300/60 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed"
           >
-            SEXTANT gives fleet operators, compliance teams, and executive leadership a single,
+            Vessels gives fleet operators, compliance teams, and executive leadership a single,
             authoritative picture of maritime operations — in real time.
           </m.p>
           <m.div
@@ -570,7 +570,7 @@ export default function VesselsHome() {
                 From signal to decision
               </h2>
               <p className="text-sky-300/55 text-base leading-relaxed mb-6">
-                SEXTANT ingests AIS data, weather feeds, port schedules, and cargo records into a
+                Vessels ingests AIS data, weather feeds, port schedules, and cargo records into a
                 unified operational picture. Teams get the context they need to act — not a feed of
                 unprocessed signals.
               </p>
@@ -609,7 +609,7 @@ export default function VesselsHome() {
               Use Cases
             </p>
             <h2 className="text-[1.875rem] sm:text-[2.25rem] font-bold tracking-tight text-sky-50 leading-[1.15]">
-              Who SEXTANT serves
+              Who Vessels serves
             </h2>
           </m.div>
           <div className="grid sm:grid-cols-2 gap-4">
@@ -649,7 +649,7 @@ export default function VesselsHome() {
                 Enterprise-grade from the ground up
               </h2>
               <p className="text-sky-300/55 text-base leading-relaxed">
-                SEXTANT is built for the organisations that operate global fleets — where downtime,
+                Vessels is built for the organisations that operate global fleets — where downtime,
                 data errors, and security failures are not acceptable outcomes.
               </p>
             </m.div>
@@ -708,7 +708,7 @@ export default function VesselsHome() {
               Results from production deployments
             </h2>
             <p className="text-sky-300/50 text-sm mt-3 max-w-lg mx-auto leading-relaxed">
-              Not projections. Specific, documented outcomes from SEXTANT operating in live maritime
+              Not projections. Specific, documented outcomes from Vessels operating in live maritime
               environments.
             </p>
           </m.div>
@@ -728,7 +728,7 @@ export default function VesselsHome() {
               },
               {
                 metric: metricDisplay(VESSELS_COUNT),
-                label: 'SEXTANT monitored',
+                label: 'Vessels monitored',
                 detail: 'Continuous autonomous intelligence across global maritime corridors',
                 accentVar: 'var(--gi-chart-3)',
               },
@@ -835,7 +835,7 @@ export default function VesselsHome() {
               <span className="text-sky-400 font-bold text-[10px]">V</span>
             </div>
             <span className="font-semibold text-[13px] text-sky-300/70 tracking-tight">
-              SEXTANT
+              Vessels
             </span>
             <span className="text-sky-400/25 text-[12px]">
               — Part of the SZL Holdings ecosystem
@@ -855,7 +855,7 @@ export default function VesselsHome() {
               SZL Holdings
             </a>
             <span className="text-sky-400/25 text-[12px]">
-              &copy; {new Date().getFullYear()} SEXTANT
+              &copy; {new Date().getFullYear()} Vessels
             </span>
           </div>
         </div>

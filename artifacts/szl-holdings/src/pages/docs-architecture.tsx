@@ -28,7 +28,7 @@ const LAYERS = [
   {
     icon: GitBranch,
     name: "Execution and audit layer",
-    desc: "Approved actions are executed via the FORGE execution fabric. Every execution step is logged in the immutable audit trail — what was decided, who approved it, what data supported it, and when it occurred. The audit trail cannot be altered post-hoc.",
+    desc: "Approved actions are executed via the Counsel execution fabric. Every execution step is logged in the immutable audit trail — what was decided, who approved it, what data supported it, and when it occurred. The audit trail cannot be altered post-hoc.",
   },
   {
     icon: Layers,
@@ -43,13 +43,13 @@ const PROPERTIES = [
   { label: "Configurable domain vocabulary", detail: "Signal classifiers, threshold parameters, and domain vocabulary are configured per vertical pack — not hardcoded into the base platform." },
   { label: "No autonomous action", detail: "The architecture structurally prevents autonomous action. Human approval is a required layer, not an optional policy overlay." },
   { label: "Incremental enrichment", detail: "Twin enrichment is incremental and source-attributed. Bulk batch re-computation is not required when new signals arrive." },
-  { label: "Observable at every layer", detail: "KORA's observability surface exposes signal volume, processing latency, approval queue depth, and Twin staleness at every layer of the pipeline." },
+  { label: "Observable at every layer", detail: "Lyte's observability surface exposes signal volume, processing latency, approval queue depth, and Twin staleness at every layer of the pipeline." },
 ];
 
 export default function DocsArchitecturePage() {
   const __pageMeta = usePageMeta({
     title: "Architecture — Docs — SZL Holdings",
-    description: "Technical architecture documentation for the KORA + FORGE platform: signal ingestion, twin enrichment, signal-to-action pipeline, governance, and proof chain.",
+    description: "Technical architecture documentation for the Lyte + Counsel platform: signal ingestion, twin enrichment, signal-to-action pipeline, governance, and proof chain.",
     canonical: "https://szlholdings.com/docs/architecture",
   });
 
@@ -75,7 +75,7 @@ export default function DocsArchitecturePage() {
                 Platform architecture.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-white/65">
-                The KORA + FORGE platform is a layered signal-to-action operating system. Each layer has a
+                The Lyte + Counsel platform is a layered signal-to-action operating system. Each layer has a
                 defined input, a defined output, and a defined governance boundary. This page documents how
                 those layers connect.
               </p>

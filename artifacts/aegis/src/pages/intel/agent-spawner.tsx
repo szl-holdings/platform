@@ -26,7 +26,7 @@ const DOMAIN_TEMPLATES = [
       'Tracks fleet anomalies, vessel behavior patterns, and predicts maritime disruptions.',
     defaultInstruction:
       'Monitor vessel AIS data for anomalous behavior, predict port congestion, and surface dark vessel activity in monitored regions.',
-    domain: 'SEXTANT',
+    domain: 'Vessels',
     systemType: 'fast' as const,
     capabilities: [
       'AIS signal analysis',
@@ -45,7 +45,7 @@ const DOMAIN_TEMPLATES = [
       'Auto-triages IT tickets, predicts outages, and orchestrates remediation playbooks.',
     defaultInstruction:
       'Monitor ticket queue for patterns, predict infrastructure failures 4 hours ahead, auto-triage P1 incidents.',
-    domain: 'PARAGON Operations',
+    domain: 'Aegis Operations',
     systemType: 'deep' as const,
     capabilities: [
       'Ticket auto-triage',
@@ -64,7 +64,7 @@ const DOMAIN_TEMPLATES = [
       'Surfaces investment opportunities, predicts market shifts, and scores properties.',
     defaultInstruction:
       'Scan MLS, off-market signals, and economic indicators to surface high-yield opportunities in target markets.',
-    domain: 'DOMAINE',
+    domain: 'Terra',
     systemType: 'deep' as const,
     capabilities: [
       'Off-market opportunity detection',
@@ -75,15 +75,15 @@ const DOMAIN_TEMPLATES = [
   },
   {
     id: 'creative-dir',
-    name: 'FORGE Engine',
+    name: 'Counsel Engine',
     icon: Zap,
     color: 'text-violet-400',
     bg: 'bg-violet-400/10',
     description:
-      "Surfaces prediction scenarios, models confidence distributions, and generates forecast briefs via FORGE's predictive intelligence engine.",
+      "Surfaces prediction scenarios, models confidence distributions, and generates forecast briefs via Counsel's predictive intelligence engine.",
     defaultInstruction:
-      "Analyze signal data, model forward-looking scenarios, and generate confidence-weighted recommendations based on FORGE's predictive models.",
-    domain: 'FORGE',
+      "Analyze signal data, model forward-looking scenarios, and generate confidence-weighted recommendations based on Counsel's predictive models.",
+    domain: 'Counsel',
     systemType: 'fast' as const,
     capabilities: [
       'Scenario modeling',
@@ -140,7 +140,7 @@ const DOMAIN_TEMPLATES = [
       'Enforces agent security policies, detects threats, and orchestrates immune response.',
     defaultInstruction:
       'Monitor all agent actions for policy violations, detect anomalous AI behavior, enforce Policy Shield protocols.',
-    domain: 'PARAGON',
+    domain: 'Aegis',
     systemType: 'fast' as const,
     capabilities: ['Policy enforcement', 'Anomaly detection', 'Action auditing', 'Threat response'],
   },
@@ -168,7 +168,7 @@ const DOMAIN_TEMPLATES = [
 const LIVE_AGENTS = [
   {
     name: 'Maritime Analyst',
-    domain: 'SEXTANT',
+    domain: 'Vessels',
     status: 'active',
     uptime: '14d 6h',
     actions: 1240,
@@ -176,7 +176,7 @@ const LIVE_AGENTS = [
   },
   {
     name: 'IT Sentinel',
-    domain: 'PARAGON Operations',
+    domain: 'Aegis Operations',
     status: 'active',
     uptime: '7d 2h',
     actions: 3847,
@@ -184,15 +184,15 @@ const LIVE_AGENTS = [
   },
   {
     name: 'Deal Scout',
-    domain: 'DOMAINE',
+    domain: 'Terra',
     status: 'active',
     uptime: '21d 0h',
     actions: 892,
     lastAction: '5m ago',
   },
   {
-    name: 'FORGE Engine',
-    domain: 'FORGE',
+    name: 'Counsel Engine',
+    domain: 'Counsel',
     status: 'active',
     uptime: '3d 18h',
     actions: 445,
@@ -208,7 +208,7 @@ const LIVE_AGENTS = [
   },
   {
     name: 'Security Sentinel',
-    domain: 'PARAGON',
+    domain: 'Aegis',
     status: 'active',
     uptime: '30d 0h',
     actions: 7234,
@@ -216,7 +216,7 @@ const LIVE_AGENTS = [
   },
   {
     name: 'Intelligence Router',
-    domain: 'KORA',
+    domain: 'Lyte',
     status: 'active',
     uptime: '30d 0h',
     actions: 52843,

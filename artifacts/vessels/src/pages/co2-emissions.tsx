@@ -125,7 +125,7 @@ export default function CO2EmissionsPage() {
           value={selectedVessel ?? ''}
           onChange={(e) => setSelectedVessel(e.target.value ? Number(e.target.value) : null)}
         >
-          <option value="">All SEXTANT</option>
+          <option value="">All Vessels</option>
           {vessels.map((v) => (
             <option key={v.id} value={v.id}>
               {v.name}

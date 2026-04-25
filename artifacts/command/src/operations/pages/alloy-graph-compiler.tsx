@@ -100,7 +100,7 @@ const EXAMPLE_PLANS: Record<string, CompiledPlan> = {
         id: 'n2',
         kind: 'action',
         label: 'Aggregate Portfolio KPIs',
-        sublabel: 'PRISM + DOMAINE + SEXTANT',
+        sublabel: 'PRISM + Terra + Vessels',
         state: 'ready',
       },
       {
@@ -189,14 +189,14 @@ const EXAMPLE_PLANS: Record<string, CompiledPlan> = {
       {
         id: 'n2',
         kind: 'action',
-        label: 'Assess Affected SEXTANT',
+        label: 'Assess Affected Vessels',
         sublabel: 'AIS + weather overlay',
         state: 'ready',
       },
       {
         id: 'n3',
         kind: 'condition',
-        label: 'SEXTANT at Risk?',
+        label: 'Vessels at Risk?',
         sublabel: 'Exposure threshold',
         state: 'ready',
       },
@@ -682,14 +682,14 @@ export default function AlloyGraphCompilerPage() {
             className="text-[9px] font-mono uppercase tracking-widest"
             style={{ color: ACCENT }}
           >
-            FORGE · Action Graph Compiler
+            Counsel · Action Graph Compiler
           </span>
         </div>
         <h1 className="text-lg font-bold tracking-tight" style={{ color: TEXT.primary }}>
           Action Graph Compiler
         </h1>
         <p className="text-[11px] mt-0.5" style={{ color: TEXT.secondary }}>
-          Define a goal — FORGE compiles it into an executable DAG with branch logic, fallback
+          Define a goal — Counsel compiles it into an executable DAG with branch logic, fallback
           paths, and approval gates.
         </p>
         <div
@@ -789,7 +789,7 @@ export default function AlloyGraphCompilerPage() {
         <textarea
           value={goalInput}
           onChange={(e) => setGoalInput(e.target.value)}
-          placeholder="Describe the goal you want FORGE to compile into an executable plan..."
+          placeholder="Describe the goal you want Counsel to compile into an executable plan..."
           className="w-full h-20 rounded px-3 py-2.5 text-[11px] resize-none outline-none leading-relaxed"
           style={{
             background: BG.elevated,

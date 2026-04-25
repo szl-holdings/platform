@@ -27,7 +27,7 @@ const TEXT_DIM = 'rgba(240,238,255,0.4)';
 const AGENT_DEFS = [
   {
     id: 'alloy',
-    name: 'FORGE',
+    name: 'Counsel',
     domain: 'Orchestration',
     color: ACCENT,
     icon: 'git-merge',
@@ -35,7 +35,7 @@ const AGENT_DEFS = [
   },
   {
     id: 'beacon',
-    name: 'DOMAINE Analytics',
+    name: 'Terra Analytics',
     domain: 'Analytics',
     color: GREEN,
     icon: 'bar-chart-2',
@@ -84,7 +84,7 @@ const AGENT_DEFS = [
 ];
 
 const SKILL_GRAPH = [
-  { agent: 'FORGE', skills: ['orchestration', 'synthesis', 'routing', 'coordination'], score: 97 },
+  { agent: 'Counsel', skills: ['orchestration', 'synthesis', 'routing', 'coordination'], score: 97 },
   {
     agent: 'Sentinel',
     skills: ['threat-analysis', 'CVE', 'incident-response', 'MITRE'],
@@ -147,7 +147,7 @@ export default function AgentsScreen() {
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>FORGE Agents</Text>
+          <Text style={styles.title}>Counsel Agents</Text>
           <Text style={styles.subtitle}>
             Autonomous operations · {AGENT_DEFS.length} agents active
           </Text>

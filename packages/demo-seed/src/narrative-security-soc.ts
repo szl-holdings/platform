@@ -42,7 +42,7 @@ export const SECURITY_SOC_NARRATIVE = {
       severity: 'critical',
       title: 'Credential stuffing — 2,400 failed auth attempts in 3 min from 14 IPs',
       body: 'Auth Service Cluster is under active credential stuffing attack. 2,400 failed login attempts detected from 14 source IPs in a 3-minute window. IP cluster matches CISA KEV-listed botnet signature from 2026-04-10 advisory. MITRE ATT&CK mapping: T1110.004.',
-      source: 'PARAGON Sentinel — Identity Telemetry',
+      source: 'Aegis Sentinel — Identity Telemetry',
       confidence: 0.96,
       detectedAt: '2026-04-14T14:07:33Z',
       cisaKevReference: 'KEV-2026-0247',
@@ -103,22 +103,22 @@ export const SECURITY_SOC_NARRATIVE = {
         {
           step: 1,
           action: '14 IPs blocked at perimeter firewall — confirmed at 14:11:03',
-          tool: 'PARAGON Firewall Connector',
+          tool: 'Aegis Firewall Connector',
         },
         {
           step: 2,
           action: 'Auth Service rate limiting enabled — 5 req/min per IP threshold',
-          tool: 'PARAGON Auth Connector',
+          tool: 'Aegis Auth Connector',
         },
         {
           step: 3,
           action: '3 elevated session tokens rotated — users notified via email',
-          tool: 'PARAGON Identity Connector',
+          tool: 'Aegis Identity Connector',
         },
         {
           step: 4,
           action: 'Auth Service v2.9.0 patch scheduled — deployment at 2026-04-15 02:00 UTC',
-          tool: 'FORGE Workflow',
+          tool: 'Counsel Workflow',
         },
         {
           step: 5,
@@ -155,7 +155,7 @@ export const SECURITY_SOC_NARRATIVE = {
         'GDPR notification draft and timestamp',
         'MITRE ATT&CK technique mapping (T1110.004)',
         'CVE-2025-31982 remediation evidence',
-        'Full PARAGON audit trail — actor attribution on every step',
+        'Full Aegis audit trail — actor attribution on every step',
       ],
       generatedAt: '2026-04-14T15:05:00Z',
     },
@@ -190,7 +190,7 @@ export const SECURITY_SOC_NARRATIVE = {
       step: 'CISO Approval',
       duration: '2 min',
       narrative:
-        'Diana receives the escalation in her PARAGON command view. She approves in 96 seconds — with a note to escalate the patch to P0 and notify legal. No phone call required. The approval is recorded with full attribution.',
+        'Diana receives the escalation in her Aegis command view. She approves in 96 seconds — with a note to escalate the patch to P0 and notify legal. No phone call required. The approval is recorded with full attribution.',
       showIn: ['aegis/approval-gate', 'aegis/audit'],
       roleSwitch: 'ciso-exec',
     },

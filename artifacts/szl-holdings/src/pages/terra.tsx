@@ -63,7 +63,7 @@ const modules = [
 
 export default function TerraPage() {
   useEffect(() => {
-    document.title = 'DOMAINE — Broker Command Platform | SZL Holdings';
+    document.title = 'Terra — Broker Command Platform | SZL Holdings';
   }, []);
 
   return (
@@ -115,7 +115,7 @@ export default function TerraPage() {
                     color: TERRA_ACCENT,
                   }}
                 >
-                  DOMAINE · Broker Command Platform
+                  Terra · Broker Command Platform
                 </span>
               </div>
 
@@ -144,7 +144,7 @@ export default function TerraPage() {
                   marginBottom: '2.5rem',
                 }}
               >
-                DOMAINE turns listings, inquiry routing, agent coordination, and market visibility
+                Terra turns listings, inquiry routing, agent coordination, and market visibility
                 into command. Not a consumer portal — a precision tool for how brokers actually
                 operate.
               </p>
@@ -321,7 +321,7 @@ export default function TerraPage() {
                     maxWidth: '28rem',
                   }}
                 >
-                  DOMAINE isn't a CRM with a listings tab. It's a command surface built specifically
+                  Terra isn't a CRM with a listings tab. It's a command surface built specifically
                   for how commercial brokers move deals, route inquiries, and manage agent
                   workloads.
                 </p>
@@ -447,8 +447,8 @@ export default function TerraPage() {
                   margin: '0 auto 2rem',
                 }}
               >
-                DOMAINE runs on the FORGE intelligence engine. Every signal it surfaces follows the
-                same doctrine as KORA and SEXTANT — observed, understood, decided, executed.
+                Terra runs on the Counsel intelligence engine. Every signal it surfaces follows the
+                same doctrine as Lyte and Vessels — observed, understood, decided, executed.
               </p>
               <div
                 style={{
@@ -458,7 +458,7 @@ export default function TerraPage() {
                   flexWrap: 'wrap',
                 }}
               >
-                {['SZL Holdings', 'FORGE', 'KORA', 'SEXTANT', 'DOMAINE', 'Carlota Jo'].map(
+                {['SZL Holdings', 'Counsel', 'Lyte', 'Vessels', 'Terra', 'Carlota Jo'].map(
                   (name, i) => (
                     <span
                       key={name}

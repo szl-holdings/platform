@@ -111,7 +111,7 @@ const SEVERITY_BG: Record<string, string> = {
 
 const platformLinks = [
   {
-    name: 'DOMAINE',
+    name: 'Terra',
     role: 'OBSERVE',
     subtitle: 'Property Intelligence',
     href: '/terra/',
@@ -119,7 +119,7 @@ const platformLinks = [
     color: '#4d7c0f',
   },
   {
-    name: 'KORA',
+    name: 'Lyte',
     role: 'INTERPRET',
     subtitle: 'Decision Intelligence',
     href: '/command/operations/',
@@ -127,7 +127,7 @@ const platformLinks = [
     color: '#f59e0b',
   },
   {
-    name: 'FORGE Creative',
+    name: 'Counsel Creative',
     role: 'CREATE',
     subtitle: 'Creative Workflows',
     href: '/alloy/creative',
@@ -135,7 +135,7 @@ const platformLinks = [
     color: '#ec4899',
   },
   {
-    name: 'FORGE',
+    name: 'Counsel',
     role: 'EXECUTE',
     subtitle: 'Execution Fabric',
     href: '/alloy/',
@@ -143,7 +143,7 @@ const platformLinks = [
     color: '#6366f1',
   },
   {
-    name: 'PARAGON',
+    name: 'Aegis',
     role: 'DEFEND',
     subtitle: 'Defense & Intelligence',
     href: '/aegis/',
@@ -151,7 +151,7 @@ const platformLinks = [
     color: '#6366f1',
   },
   {
-    name: 'SEXTANT',
+    name: 'Vessels',
     role: 'TRACK',
     subtitle: 'Maritime Intelligence',
     href: '/vessels/',
@@ -572,7 +572,7 @@ export default function CoreCommandCenter() {
                 <SummaryCard
                   label="Distress Properties"
                   value={t?.total_distress_properties ?? '—'}
-                  sub="DOMAINE — NYC + NY"
+                  sub="Terra — NYC + NY"
                   icon={Building}
                   color="#0ea5e9"
                   loading={metricsLoading}
@@ -596,7 +596,7 @@ export default function CoreCommandCenter() {
                 <SummaryCard
                   label="Open Vulnerabilities"
                   value={openVulns}
-                  sub="PARAGON — Active"
+                  sub="Aegis — Active"
                   icon={Shield}
                   color="#ef4444"
                   loading={metricsLoading}
@@ -782,13 +782,13 @@ export default function CoreCommandCenter() {
                   <div className="space-y-1">
                     {[
                       {
-                        label: 'DOMAINE — Property Intelligence',
+                        label: 'Terra — Property Intelligence',
                         href: '/terra/',
                         color: '#4d7c0f',
                         icon: Building,
                       },
                       {
-                        label: 'PARAGON — Defense & Intelligence',
+                        label: 'Aegis — Defense & Intelligence',
                         href: '/aegis/',
                         color: '#6366f1',
                         icon: Shield,
@@ -800,13 +800,13 @@ export default function CoreCommandCenter() {
                         icon: Globe,
                       },
                       {
-                        label: 'SEXTANT — Maritime',
+                        label: 'Vessels — Maritime',
                         href: '/vessels/',
                         color: '#3b82f6',
                         icon: Ship,
                       },
                       {
-                        label: 'FORGE — Creative Workflows',
+                        label: 'Counsel — Creative Workflows',
                         href: '/alloy/creative',
                         color: '#ec4899',
                         icon: Eye,
@@ -855,7 +855,7 @@ export default function CoreCommandCenter() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-base font-bold font-display">
-                  FORGE Intelligence Recommendations
+                  Counsel Intelligence Recommendations
                 </h2>
                 <p className="text-[12px] text-muted-foreground mt-0.5">
                   Cross-platform · All entity types · Explainable scoring

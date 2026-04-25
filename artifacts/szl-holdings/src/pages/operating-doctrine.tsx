@@ -39,7 +39,7 @@ const PILLARS = [
     icon: GitBranch,
     number: "03",
     title: "Staged concentration",
-    body: "Capital, time, and attention are scarce. The company maintains one commercial wedge (KORA + FORGE) while the remainder of the ecosystem is staged as expansion value — visible but not simultaneously chased.",
+    body: "Capital, time, and attention are scarce. The company maintains one commercial wedge (Lyte + Counsel) while the remainder of the ecosystem is staged as expansion value — visible but not simultaneously chased.",
     principle: "One story well-told beats five stories half-told.",
   },
   {
@@ -79,17 +79,17 @@ const PORTFOLIO_COLUMNS = [
     label: "Commercial Wedge",
     color: ACCENT,
     items: [
-      { name: "KORA", desc: "Governed decision command layer" },
-      { name: "FORGE Engine", desc: "Execution and orchestration fabric" },
+      { name: "Lyte", desc: "Governed decision command layer" },
+      { name: "Counsel Engine", desc: "Execution and orchestration fabric" },
     ],
   },
   {
     label: "Expansion Lanes",
     color: "#7ba3d4",
     items: [
-      { name: "PARAGON", desc: "Security & incident command" },
-      { name: "SEXTANT", desc: "Maritime intelligence platform" },
-      { name: "DOMAINE", desc: "Real estate intelligence platform" },
+      { name: "Aegis", desc: "Security & incident command" },
+      { name: "Vessels", desc: "Maritime intelligence platform" },
+      { name: "Terra", desc: "Real estate intelligence platform" },
       { name: "Counsel", desc: "Legal observability (early stage)" },
     ],
   },
@@ -316,7 +316,7 @@ export default function OperatingDoctrinePage() {
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <a href="/command/operations/" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-80" style={{ background: ACCENT, color: "#070a10" }}>
-                    Explore KORA <ArrowRight className="h-4 w-4" />
+                    Explore Lyte <ArrowRight className="h-4 w-4" />
                   </a>
                   <Link href="/ventures" className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:border-white/30">
                     Platform Map <ChevronRight className="h-4 w-4" />

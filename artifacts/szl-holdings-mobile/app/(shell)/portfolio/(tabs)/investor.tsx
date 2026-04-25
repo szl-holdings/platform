@@ -25,7 +25,7 @@ const QUARTERLY_LETTERS = [
     title: 'Q1 2026 Investor Letter',
     quarter: 'Q1 2026',
     excerpt:
-      'PARAGON FedRAMP track opens. Enterprise client expansion across SEXTANT and KORA. Platform architecture milestone delivered.',
+      'Aegis FedRAMP track opens. Enterprise client expansion across Vessels and Lyte. Platform architecture milestone delivered.',
     date: 'March 31, 2026',
   },
   {
@@ -33,7 +33,7 @@ const QUARTERLY_LETTERS = [
     title: 'Q4 2025 Investor Letter',
     quarter: 'Q4 2025',
     excerpt:
-      'Year in review: 6 live platforms, FORGE 2.0 convergence, KORA executive command launch, mobile platform launch.',
+      'Year in review: 6 live platforms, Counsel 2.0 convergence, Lyte executive command launch, mobile platform launch.',
     date: 'December 31, 2025',
   },
   {
@@ -41,7 +41,7 @@ const QUARTERLY_LETTERS = [
     title: 'Q3 2025 Investor Letter',
     quarter: 'Q3 2025',
     excerpt:
-      'SEXTANT dark vessel detection lead time improvements. DOMAINE NYC expansion progressing. PARAGON SOC capabilities expanded.',
+      'Vessels dark vessel detection lead time improvements. Terra NYC expansion progressing. Aegis SOC capabilities expanded.',
     date: 'September 30, 2025',
   },
 ];
@@ -56,24 +56,24 @@ const STRATEGIC_PRIORITIES: Array<{
 }> = [
   {
     title: 'FedRAMP & Federal Expansion',
-    body: 'PARAGON is on the federal readiness track. Defense and intelligence capabilities position the platform for federal sector expansion.',
+    body: 'Aegis is on the federal readiness track. Defense and intelligence capabilities position the platform for federal sector expansion.',
     color: '#6366f1',
     icon: 'shield',
   },
   {
-    title: 'FORGE Scenario API',
-    body: 'External API offering built on the FORGE scenario modeling engine — creates a new commercial revenue vector for enterprise integrations.',
+    title: 'Counsel Scenario API',
+    body: 'External API offering built on the Counsel scenario modeling engine — creates a new commercial revenue vector for enterprise integrations.',
     color: '#8b5cf6',
     icon: 'zap',
   },
   {
     title: 'Maritime Climate Routing',
-    body: 'SEXTANT climate routing overlay for charter optimization and route risk intelligence.',
+    body: 'Vessels climate routing overlay for charter optimization and route risk intelligence.',
     color: '#3b82f6',
     icon: 'anchor',
   },
   {
-    title: 'DOMAINE National Coverage',
+    title: 'Terra National Coverage',
     body: 'Expanding beyond NYC to national distressed property coverage with API-first architecture for institutional integrations.',
     color: '#4d7c0f',
     icon: 'map',

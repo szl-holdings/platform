@@ -93,7 +93,7 @@ const ROLE_VIEWS = [
     label: 'Acquisitions',
     icon: Building2,
     headline: 'See distress signals weeks before the market does.',
-    body: 'DOMAINE ingests primary county records — ACRIS tax liens, lis pendens, foreclosure filings, code violations — weeks before they appear in commercial data aggregators. Every distress signal is enriched with ownership graph, debt stack, and AI-powered underwriting with source citations.',
+    body: 'Terra ingests primary county records — ACRIS tax liens, lis pendens, foreclosure filings, code violations — weeks before they appear in commercial data aggregators. Every distress signal is enriched with ownership graph, debt stack, and AI-powered underwriting with source citations.',
     outcomes: [
       'Primary record ingestion — tax liens, lis pendens, foreclosures weeks early',
       'Ownership graph with beneficial owner tracing and entity structure',
@@ -106,7 +106,7 @@ const ROLE_VIEWS = [
     label: 'Underwriting',
     icon: BarChart3,
     headline: 'Defensible underwriting with full evidence citations.',
-    body: "DOMAINE's AI underwriting model generates valuations with source-cited evidence — comparable sales, cap rate analysis, debt stack, and condition assessment. Every recommendation carries a confidence score and full provenance. Human approval required before any offer action executes.",
+    body: "Terra's AI underwriting model generates valuations with source-cited evidence — comparable sales, cap rate analysis, debt stack, and condition assessment. Every recommendation carries a confidence score and full provenance. Human approval required before any offer action executes.",
     outcomes: [
       'AI underwriting with source citations and confidence scoring',
       'Comparable sales analysis from primary records — not aggregated data',
@@ -119,7 +119,7 @@ const ROLE_VIEWS = [
     label: 'Compliance / Legal',
     icon: ShieldCheck,
     headline: 'Investment decisions with a defensible audit trail.',
-    body: 'Every DOMAINE deal decision is recorded in the Proof Chain — from distress signal detection to underwriting approval to offer submission. When a regulator or counterparty asks what you did and why, you have an answer with source citations and approval records.',
+    body: 'Every Terra deal decision is recorded in the Proof Chain — from distress signal detection to underwriting approval to offer submission. When a regulator or counterparty asks what you did and why, you have an answer with source citations and approval records.',
     outcomes: [
       'Immutable Proof Chain on every deal decision — source, approval, outcome',
       'Deal workflow with mandatory approval gates before execution',
@@ -240,15 +240,15 @@ const RESULTS = [
     label: 'Significant Intelligence Gap',
     severity: 'critical' as const,
     desc: "Your investment sourcing is operating on lagged data and your underwriting lacks documented provenance. You're competing with investors who see distress signals weeks earlier and can reconstruct every investment decision for regulatory or legal review.",
-    cta: 'Request a DOMAINE Briefing',
+    cta: 'Request a Terra Briefing',
   },
   {
     min: 5,
     max: 9,
     label: 'Partial Coverage',
     severity: 'moderate' as const,
-    desc: 'You have some primary source access and deal documentation but the gaps are significant — underwriting attribution is manual, approval chains are informal, and outcome tracking is inconsistent. A scoped DOMAINE pilot could close these gaps systematically.',
-    cta: 'See a DOMAINE Demo',
+    desc: 'You have some primary source access and deal documentation but the gaps are significant — underwriting attribution is manual, approval chains are informal, and outcome tracking is inconsistent. A scoped Terra pilot could close these gaps systematically.',
+    cta: 'See a Terra Demo',
   },
   {
     min: 10,
@@ -256,7 +256,7 @@ const RESULTS = [
     label: 'Process-Mature',
     severity: 'ready' as const,
     desc: 'Your investment process has good structure but relies on manual integration and inconsistent documentation. The opportunity is systematic primary record coverage and AI underwriting with automatic provenance.',
-    cta: 'Explore DOMAINE Features',
+    cta: 'Explore Terra Features',
   },
   {
     min: 14,
@@ -264,7 +264,7 @@ const RESULTS = [
     label: 'Infrastructure-Grade',
     severity: 'ready' as const,
     desc: 'Your investment operation has strong infrastructure. The conversation is about scale — expanding primary record coverage, cross-market distress intelligence, and portfolio-level outcome tracking.',
-    cta: 'Talk to a DOMAINE Expert',
+    cta: 'Talk to a Terra Expert',
   },
 ];
 
@@ -803,7 +803,7 @@ export default function InvestmentReadinessPage() {
       >
         <Link href="/dashboard">
           <span className="text-sm font-bold" style={{ color: TEXT }}>
-            DOMAINE
+            Terra
           </span>
         </Link>
         <div className="flex items-center gap-4">
@@ -835,7 +835,7 @@ export default function InvestmentReadinessPage() {
               className="w-1.5 h-1.5 rounded-full animate-pulse"
               style={{ background: ACCENT }}
             />
-            Real Estate Intelligence · DOMAINE
+            Real Estate Intelligence · Terra
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -890,7 +890,7 @@ export default function InvestmentReadinessPage() {
 
       <footer className="py-12 px-4 text-center border-t" style={{ borderColor: BORDER }}>
         <p className="text-sm" style={{ color: TEXT_SEC }}>
-          DOMAINE — Real Estate Intelligence · SZL Holdings Platform
+          Terra — Real Estate Intelligence · SZL Holdings Platform
         </p>
         <p className="text-xs mt-2" style={{ color: TEXT_SEC }}>
           © 2026 SZL Holdings. All rights reserved.

@@ -28,7 +28,7 @@ import type { PipelineRun, RuntimeStartOptions } from '../types.js';
 
 export const vesselsVoyageAnomalyWorkflow = defineWorkflow({
   id: 'vessels-voyage-anomaly',
-  name: 'SEXTANT — Voyage Event Anomaly Review',
+  name: 'Vessels — Voyage Event Anomaly Review',
   description:
     'Reviews voyage event streams for anomalies: AIS dark periods, unexpected port calls, ' +
     'STS transfers, route deviations, and sanctions proximity. Produces an anomaly report ' +
@@ -39,7 +39,7 @@ export const vesselsVoyageAnomalyWorkflow = defineWorkflow({
 
   policy: definePolicy({
     id: 'vessels-voyage-anomaly-policy',
-    name: 'SEXTANT Voyage Anomaly Policy',
+    name: 'Vessels Voyage Anomaly Policy',
     highRiskCategories: ['escalation', 'notification', 'write-external', 'financial'],
     policyIds: ['pol-001', 'pol-002', 'pol-vessels-anomaly'],
     minimumApprovalTier: 'operator',

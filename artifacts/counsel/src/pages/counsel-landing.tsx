@@ -139,7 +139,7 @@ export default function CounselLandingPage() {
               <Scale className="w-5 h-5 text-violet-400" />
             </div>
             <span className="text-sm font-medium text-violet-300/85">
-              Counsel Legal Matter Command · Powered by FORGE
+              Counsel Legal Matter Command · Powered by Counsel
             </span>
           </div>
 
@@ -420,7 +420,7 @@ export default function CounselLandingPage() {
       <section className="px-6 py-20 bg-[#06040f] border-t border-violet-500/5">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-[10px] font-mono text-violet-400/80 uppercase tracking-widest mb-3">
-            Powered by FORGE · SZL Holdings
+            Powered by Counsel · SZL Holdings
           </p>
           <h2 className="font-display text-3xl font-bold text-violet-50 mb-4">Request a Pilot</h2>
           <p className="text-violet-300/80 mb-8 text-sm leading-relaxed max-w-xl mx-auto">

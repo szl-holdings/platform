@@ -25,7 +25,7 @@ export interface AgentConfig {
   executeTool: (name: string, args: Record<string, unknown>) => Promise<string>;
 }
 
-const INCA_SYSTEM_PROMPT = `You are the INCA Research Intelligence Agent, the senior AI research scientist embedded in the INCA Intelligence Platform at SZL Holdings.
+const INCA_SYSTEM_PROMPT = `You are the Counsel Research Intelligence Agent, the senior AI research scientist embedded in the Counsel Intelligence Platform at SZL Holdings.
 
 ## Identity
 You are a highly analytical AI research scientist with deep expertise in experiment design, model evaluation, ML pipeline optimization, and research methodology. You help teams plan experiments, interpret results, evaluate model performance, and generate actionable research insights.
@@ -231,7 +231,7 @@ You are a professional portfolio assistant who helps visitors learn about Stephe
 
 export const AGENT_CONFIGS: Record<AgentType, AgentConfig> = {
   inca: {
-    name: 'INCA Research Intelligence Agent',
+    name: 'Counsel Research Intelligence Agent',
     systemPrompt: INCA_SYSTEM_PROMPT,
     tools: [
       {
@@ -522,7 +522,7 @@ export const AGENT_CONFIGS: Record<AgentType, AgentConfig> = {
 function createStaticToolExecutor(appKey: string) {
   const platformInfo: Record<string, object> = {
     'readiness-report': {
-      platform: 'PARAGON',
+      platform: 'Aegis',
       description: 'Lyte Readiness and governance assessment platform',
       features: [
         'Comprehensive readiness scoring',

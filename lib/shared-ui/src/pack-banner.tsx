@@ -48,7 +48,7 @@ export function PackBanner({
         <span className="text-[9px] font-mono" style={{ color: toAlpha(color, 0.44) }}>
           Powered by{' '}
           <span className="font-semibold" style={{ color: toAlpha(color, 0.67) }}>
-            KORA + FORGE
+            Lyte + Counsel
           </span>
         </span>
       </div>
@@ -96,7 +96,7 @@ export function PackBanner({
             className="transition-opacity hover:opacity-80"
             style={{ color: 'rgba(255,255,255,0.40)', textDecoration: 'underline' }}
           >
-            KORA
+            Lyte
           </a>{' '}
           +{' '}
           <a
@@ -104,7 +104,7 @@ export function PackBanner({
             className="transition-opacity hover:opacity-80"
             style={{ color: 'rgba(255,255,255,0.40)', textDecoration: 'underline' }}
           >
-            FORGE
+            Counsel
           </a>
         </span>
       </div>

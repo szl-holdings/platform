@@ -188,7 +188,7 @@ A container vessel cuts through morning fog. The horizon is clear.
 NARRATOR (V.O.)
 Alloy. Execution fabric for the decisions that define industries.
 
-MONTAGE: Alloy dashboard, Vessels command, Firestorm alert cascade, INCA research threads.
+MONTAGE: Alloy dashboard, Vessels command, Firestorm alert cascade, Counsel research threads.
 
 NARRATOR (V.O.)
 Seven platforms. One nervous system. Zero tolerance for ambiguity.
@@ -261,7 +261,7 @@ END CARD: alloy.szlholdings.com — Request Access`,
         title: 'Platform Montage',
         sceneNumber: 3,
         visualDescription:
-          '4-panel split of Alloy, Vessels, Firestorm, INCA dashboards — animated data flows',
+          '4-panel split of Alloy, Vessels, Firestorm, Counsel dashboards — animated data flows',
         dialogue: 'NARRATOR: Seven platforms. One nervous system. Zero tolerance for ambiguity.',
         duration: '0:18 – 0:45',
         metadata: { shotType: 'Screen Capture — Montage', transition: 'Smash Cut' },
@@ -407,7 +407,7 @@ END CARD: alloy.szlholdings.com — Request Access`,
       campaignId: horizon.id,
       reviewerName: 'Marcus Chen',
       comment:
-        'Client loved V3. The platform montage is exactly what we asked for. Requesting one additional B-roll shot of the INCA interface for the 0:32 slot.',
+        'Client loved V3. The platform montage is exactly what we asked for. Requesting one additional B-roll shot of the Counsel interface for the 0:32 slot.',
       status: 'pending',
     },
     {

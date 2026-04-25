@@ -116,11 +116,11 @@ interface DomainNotifConfig {
 const domainConfigs: DomainNotifConfig[] = [
   {
     appId: 'aegis',
-    appName: 'PARAGON',
+    appName: 'Aegis',
     generators: [
       () => ({
         appId: 'aegis',
-        appName: 'PARAGON',
+        appName: 'Aegis',
         title: 'Critical Threat Detected',
         message: `APT group activity detected targeting infrastructure — CVE-2024-${1000 + Math.floor(Math.random() * 8999)} exploited`,
         severity: 'critical' as NotifSeverity,
@@ -130,7 +130,7 @@ const domainConfigs: DomainNotifConfig[] = [
         const incidentId = `INC-${1000 + Math.floor(Math.random() * 900)}`;
         return {
           appId: 'aegis',
-          appName: 'PARAGON',
+          appName: 'Aegis',
           title: 'SLA Breach Warning',
           message: `P1 incident #${incidentId} approaching 4h SLA threshold`,
           severity: 'warning' as NotifSeverity,
@@ -140,7 +140,7 @@ const domainConfigs: DomainNotifConfig[] = [
       },
       () => ({
         appId: 'aegis',
-        appName: 'PARAGON',
+        appName: 'Aegis',
         title: 'New MITRE ATT&CK Pattern',
         message: 'TA0002 Execution tactic observed across 3 endpoints in Production VPC',
         severity: 'warning' as NotifSeverity,
@@ -148,7 +148,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: 'aegis',
-        appName: 'PARAGON',
+        appName: 'Aegis',
         title: 'Compliance Drift Detected',
         message: 'SOC 2 Type II readiness score dropped 4.2 points — 6 new control gaps identified',
         severity: 'warning' as NotifSeverity,
@@ -158,7 +158,7 @@ const domainConfigs: DomainNotifConfig[] = [
   },
   {
     appId: 'vessels',
-    appName: 'SEXTANT',
+    appName: 'Vessels',
     generators: [
       () => {
         const vessels = ['MV Prometheus', 'MSC Aurora', 'Pacific Star', 'Nordic Eagle'];
@@ -166,7 +166,7 @@ const domainConfigs: DomainNotifConfig[] = [
         const idx = Math.floor(Math.random() * vessels.length);
         return {
           appId: 'vessels',
-          appName: 'SEXTANT',
+          appName: 'Vessels',
           title: 'Dark Vessel Alert',
           message: `Vessel ${vessels[idx]} AIS signal lost — possible dark vessel activity`,
           severity: 'critical' as NotifSeverity,
@@ -176,7 +176,7 @@ const domainConfigs: DomainNotifConfig[] = [
       },
       () => ({
         appId: 'vessels',
-        appName: 'SEXTANT',
+        appName: 'Vessels',
         title: 'Fleet Route Deviation',
         message: `${['Pacific Express', 'Atlantic Carrier', 'Gulf Runner'][Math.floor(Math.random() * 3)]} deviated ${10 + Math.floor(Math.random() * 40)} NM from planned route`,
         severity: 'warning' as NotifSeverity,
@@ -184,7 +184,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: 'vessels',
-        appName: 'SEXTANT',
+        appName: 'Vessels',
         title: 'Port Congestion Alert',
         message: `${['Rotterdam', 'Shanghai', 'Singapore', 'Los Angeles'][Math.floor(Math.random() * 4)]} port experiencing 18hr delays — 3 fleet vessels affected`,
         severity: 'warning' as NotifSeverity,
@@ -192,7 +192,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: 'vessels',
-        appName: 'SEXTANT',
+        appName: 'Vessels',
         title: 'Cargo Status Update',
         message: 'High-value cargo manifest signed — customs clearance required within 6 hours',
         severity: 'info' as NotifSeverity,
@@ -240,11 +240,11 @@ const domainConfigs: DomainNotifConfig[] = [
   },
   {
     appId: 'lyte',
-    appName: 'KORA',
+    appName: 'Lyte',
     generators: [
       () => ({
         appId: 'lyte',
-        appName: 'KORA',
+        appName: 'Lyte',
         title: 'P1 Incident Triggered',
         message: `Production service degradation detected — ${['API latency spike', 'Database connection pool exhausted', 'CDN edge failure'][Math.floor(Math.random() * 3)]}`,
         severity: 'critical' as NotifSeverity,
@@ -252,7 +252,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: 'lyte',
-        appName: 'KORA',
+        appName: 'Lyte',
         title: 'SLO Burn Rate Alert',
         message: `Error budget for ${['checkout-service', 'auth-api', 'payment-gateway'][Math.floor(Math.random() * 3)]} at ${60 + Math.floor(Math.random() * 35)}% — accelerated consumption detected`,
         severity: 'warning' as NotifSeverity,
@@ -260,7 +260,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: 'lyte',
-        appName: 'KORA',
+        appName: 'Lyte',
         title: 'Anomaly Detected',
         message: 'ML model flagged unusual traffic pattern — 3.4σ deviation from baseline',
         severity: 'warning' as NotifSeverity,
@@ -268,7 +268,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: 'lyte',
-        appName: 'KORA',
+        appName: 'Lyte',
         title: 'On-Call Escalation',
         message: `Incident #${1000 + Math.floor(Math.random() * 900)} auto-escalated after 15min without acknowledgment`,
         severity: 'critical' as NotifSeverity,
@@ -278,11 +278,11 @@ const domainConfigs: DomainNotifConfig[] = [
   },
   {
     appId: 'terra',
-    appName: 'DOMAINE',
+    appName: 'Terra',
     generators: [
       () => ({
         appId: 'terra',
-        appName: 'DOMAINE',
+        appName: 'Terra',
         title: 'Lease Expiry Alert',
         message: `${2 + Math.floor(Math.random() * 5)} properties have leases expiring within 30 days — renewal outreach needed`,
         severity: 'warning' as NotifSeverity,
@@ -290,7 +290,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: 'terra',
-        appName: 'DOMAINE',
+        appName: 'Terra',
         title: 'Vacancy Rate Spike',
         message: `Portfolio vacancy rate increased to ${8 + Math.floor(Math.random() * 7)}% — above 10% threshold approaching`,
         severity: 'warning' as NotifSeverity,
@@ -298,7 +298,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: 'terra',
-        appName: 'DOMAINE',
+        appName: 'Terra',
         title: 'Market Valuation Update',
         message: 'Q1 2026 valuations complete — 3 properties show 12%+ appreciation',
         severity: 'info' as NotifSeverity,
@@ -306,7 +306,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: 'terra',
-        appName: 'DOMAINE',
+        appName: 'Terra',
         title: 'Investment Alert',
         message: 'High-yield acquisition opportunity flagged — cap rate 7.8% in target market',
         severity: 'info' as NotifSeverity,

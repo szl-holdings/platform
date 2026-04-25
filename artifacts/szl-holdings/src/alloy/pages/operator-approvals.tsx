@@ -819,7 +819,7 @@ export default function OperatorApprovalsPage() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#4B8BDB' }}
             >
-              FORGE · Operator Approval Queue
+              Counsel · Operator Approval Queue
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Guardian Approvals</h1>
@@ -827,7 +827,7 @@ export default function OperatorApprovalsPage() {
             Review and resolve actions Guardian flagged as{' '}
             <span className="font-mono">require-approval</span> or tier 8{' '}
             <span className="font-mono">human-approval-mandatory</span>. Decisions write back to the
-            FORGE run ledger and unblock the agent.
+            Counsel run ledger and unblock the agent.
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">

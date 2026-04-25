@@ -87,7 +87,7 @@ const RUNS: ReplayRun[] = [
   {
     runId: 'RUN-3038',
     workflowName: 'Security Posture Audit',
-    pack: 'PARAGON',
+    pack: 'Aegis',
     packColor: '#4f6ef7',
     status: 'completed',
     startedAt: '2026-04-01 06:14:22Z',
@@ -201,7 +201,7 @@ const RUNS: ReplayRun[] = [
         offsetMs: 112,
         event: 'tool_call',
         title: 'aggregate_portfolio_kpis()',
-        detail: 'Fetching KPIs from PRISM, DOMAINE, SEXTANT, PARAGON',
+        detail: 'Fetching KPIs from PRISM, Terra, Vessels, Aegis',
         tool: 'data_aggregator',
         evidence: ['Q1 revenue: $14.2M', 'Asset NAV: $127M', 'Fleet utilization: 87%'],
       },
@@ -256,7 +256,7 @@ const RUNS: ReplayRun[] = [
   {
     runId: 'RUN-3039',
     workflowName: 'Fuel Surcharge Rate Calculator',
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
     status: 'failed',
     startedAt: '2026-03-31 06:44:18Z',
@@ -315,7 +315,7 @@ const RUNS: ReplayRun[] = [
   {
     runId: 'RUN-3037',
     workflowName: 'Asset Valuation Batch',
-    pack: 'DOMAINE',
+    pack: 'Terra',
     packColor: '#a07848',
     status: 'completed',
     startedAt: '2026-03-31 20:00:00Z',
@@ -566,7 +566,7 @@ function mapRealRunToReplay(run: AlloyWorkflowRun): ReplayRun {
   return {
     runId: `RUN-${run.id}`,
     workflowName: `Workflow #${run.workflowId}`,
-    pack: 'FORGE',
+    pack: 'Counsel',
     packColor: '#d4a054',
     status: run.state === 'failed' ? 'failed' : 'completed',
     startedAt: baseTs,
@@ -614,7 +614,7 @@ export default function AlloyReplayTimelinePage() {
             className="text-[9px] font-mono uppercase tracking-widest"
             style={{ color: ACCENT }}
           >
-            FORGE · Execution Replay
+            Counsel · Execution Replay
           </span>
         </div>
         <h1 className="text-lg font-bold tracking-tight" style={{ color: TEXT.primary }}>

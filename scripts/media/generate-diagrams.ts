@@ -54,47 +54,47 @@ function generateEcosystemMapSVG(): string {
   <rect x="340" y="90" width="220" height="70" rx="8" fill="#1a1f2e" stroke="#b45309" stroke-width="1.5"/>
   <text x="450" y="118" text-anchor="middle" class="section-title">SZL HOLDINGS</text>
   <text x="450" y="138" text-anchor="middle" class="product" fill="#d97706">Platform Holding Company</text>
-  <text x="450" y="152" text-anchor="middle" class="desc">KORA · FORGE · Domain Packs</text>
+  <text x="450" y="152" text-anchor="middle" class="desc">Lyte · Counsel · Domain Packs</text>
 
-  <!-- KORA -->
+  <!-- Lyte -->
   <rect x="60" y="220" width="200" height="90" rx="8" fill="#12160d" stroke="#d97706" stroke-width="1.5"/>
   <rect x="60" y="220" width="200" height="4" rx="2" fill="url(#lyteGrad)"/>
-  <text x="160" y="248" text-anchor="middle" class="section-title" fill="#d97706">KORA</text>
+  <text x="160" y="248" text-anchor="middle" class="section-title" fill="#d97706">Lyte</text>
   <text x="160" y="266" text-anchor="middle" class="product">Business Observability</text>
   <text x="160" y="281" text-anchor="middle" class="desc">PRISM · Signal Timeline</text>
   <text x="160" y="295" text-anchor="middle" class="desc">Priority Queue · Exec Accountability</text>
   <rect x="72" y="302" width="50" height="14" rx="3" fill="#78350f"/>
   <text x="97" y="313" text-anchor="middle" class="badge" fill="#fbbf24">FLAGSHIP</text>
 
-  <!-- FORGE -->
+  <!-- Counsel -->
   <rect x="340" y="220" width="220" height="90" rx="8" fill="#0d1520" stroke="#0ea5e9" stroke-width="1.5"/>
   <rect x="340" y="220" width="220" height="4" rx="2" fill="url(#alloyGrad)"/>
-  <text x="450" y="248" text-anchor="middle" class="section-title" fill="#0ea5e9">FORGE</text>
+  <text x="450" y="248" text-anchor="middle" class="section-title" fill="#0ea5e9">Counsel</text>
   <text x="450" y="266" text-anchor="middle" class="product">Execution Fabric</text>
   <text x="450" y="281" text-anchor="middle" class="desc">Signal Routing · Approval Matrix</text>
   <text x="450" y="295" text-anchor="middle" class="desc">Audit Trail · Governance Policies</text>
   <rect x="352" y="302" width="50" height="14" rx="3" fill="#0c4a6e"/>
   <text x="377" y="313" text-anchor="middle" class="badge" fill="#38bdf8">FABRIC</text>
 
-  <!-- PARAGON -->
+  <!-- Aegis -->
   <rect x="60" y="390" width="185" height="80" rx="8" fill="#0f1117" stroke="#6366f1" stroke-width="1.5"/>
-  <text x="152" y="418" text-anchor="middle" class="section-title" fill="#818cf8">PARAGON</text>
+  <text x="152" y="418" text-anchor="middle" class="section-title" fill="#818cf8">Aegis</text>
   <text x="152" y="436" text-anchor="middle" class="product">Defense Intelligence</text>
   <text x="152" y="451" text-anchor="middle" class="desc">SOC · SOAR · MITRE ATT&amp;CK</text>
   <rect x="72" y="458" width="60" height="14" rx="3" fill="#312e81"/>
   <text x="102" y="469" text-anchor="middle" class="badge" fill="#a5b4fc">ALPHA</text>
 
-  <!-- SEXTANT -->
+  <!-- Vessels -->
   <rect x="265" y="390" width="185" height="80" rx="8" fill="#0d151f" stroke="#0891b2" stroke-width="1.5"/>
-  <text x="357" y="418" text-anchor="middle" class="section-title" fill="#22d3ee">SEXTANT</text>
+  <text x="357" y="418" text-anchor="middle" class="section-title" fill="#22d3ee">Vessels</text>
   <text x="357" y="436" text-anchor="middle" class="product">Maritime Intelligence</text>
   <text x="357" y="451" text-anchor="middle" class="desc">AIS · Fleet · Sanctions</text>
   <rect x="277" y="458" width="60" height="14" rx="3" fill="#0c4a6e"/>
   <text x="307" y="469" text-anchor="middle" class="badge" fill="#67e8f9">ALPHA</text>
 
-  <!-- DOMAINE -->
+  <!-- Terra -->
   <rect x="470" y="390" width="185" height="80" rx="8" fill="#0d1711" stroke="#16a34a" stroke-width="1.5"/>
-  <text x="562" y="418" text-anchor="middle" class="section-title" fill="#4ade80">DOMAINE</text>
+  <text x="562" y="418" text-anchor="middle" class="section-title" fill="#4ade80">Terra</text>
   <text x="562" y="436" text-anchor="middle" class="product">Real Estate Intelligence</text>
   <text x="562" y="451" text-anchor="middle" class="desc">Distress · Pipeline · Brokers</text>
   <rect x="482" y="458" width="60" height="14" rx="3" fill="#14532d"/>
@@ -153,7 +153,7 @@ function generateSignalToActionSVG(): string {
 
   <!-- Title -->
   <text x="450" y="38" text-anchor="middle" font-size="18" fill="#f1f5f9" font-weight="700" letter-spacing="-0.02em">Signal → Action Architecture</text>
-  <text x="450" y="56" text-anchor="middle" font-size="10" fill="#64748b" letter-spacing="0.12em">SZL HOLDINGS PLATFORM · KORA + FORGE CORE</text>
+  <text x="450" y="56" text-anchor="middle" font-size="10" fill="#64748b" letter-spacing="0.12em">SZL HOLDINGS PLATFORM · Lyte + Counsel CORE</text>
 
   <!-- Step 1: Signals -->
   <rect x="30" y="90" width="130" height="120" rx="8" fill="#0f1117" stroke="#334155" stroke-width="1"/>
@@ -176,15 +176,15 @@ function generateSignalToActionSVG(): string {
   <text x="260" y="162" text-anchor="middle" class="step-desc">Source tagging</text>
   <text x="260" y="176" text-anchor="middle" class="step-desc">Dedup &amp; merge</text>
   <text x="260" y="190" text-anchor="middle" class="step-desc">Priority scoring</text>
-  <text x="260" y="204" text-anchor="middle" class="step-desc">FORGE fabric</text>
+  <text x="260" y="204" text-anchor="middle" class="step-desc">Counsel fabric</text>
 
   <!-- Arrow 2→3 -->
   <line x1="325" y1="150" x2="360" y2="150" stroke="#d97706" stroke-width="2" marker-end="url(#arrowhead-gold)" opacity="0.8"/>
 
-  <!-- Step 3: Context Engine (KORA) -->
+  <!-- Step 3: Context Engine (Lyte) -->
   <rect x="360" y="80" width="150" height="140" rx="8" fill="#14100a" stroke="#d97706" stroke-width="1.5"/>
   <rect x="360" y="80" width="150" height="4" rx="2" fill="#d97706"/>
-  <text x="435" y="104" text-anchor="middle" class="step-label" fill="#d97706">KORA</text>
+  <text x="435" y="104" text-anchor="middle" class="step-label" fill="#d97706">Lyte</text>
   <text x="435" y="122" text-anchor="middle" class="step-title">Context Engine</text>
   <text x="435" y="140" text-anchor="middle" class="step-desc">PRISM correlation</text>
   <text x="435" y="154" text-anchor="middle" class="step-desc">AI inference layer</text>
@@ -199,7 +199,7 @@ function generateSignalToActionSVG(): string {
   <!-- Step 4: Routing -->
   <rect x="545" y="90" width="130" height="120" rx="8" fill="#0d1520" stroke="#0ea5e9" stroke-width="1.5"/>
   <rect x="545" y="90" width="130" height="4" rx="2" fill="#0ea5e9"/>
-  <text x="610" y="112" text-anchor="middle" class="step-label" fill="#0ea5e9">FORGE</text>
+  <text x="610" y="112" text-anchor="middle" class="step-label" fill="#0ea5e9">Counsel</text>
   <text x="610" y="130" text-anchor="middle" class="step-title">Routing Engine</text>
   <text x="610" y="148" text-anchor="middle" class="step-desc">Policy evaluation</text>
   <text x="610" y="162" text-anchor="middle" class="step-desc">Approval matrix</text>
@@ -246,9 +246,9 @@ function generateSignalToActionSVG(): string {
   <!-- Domain packs note -->
   <rect x="30" y="310" width="480" height="100" rx="8" fill="#0f1117" stroke="#1e293b" stroke-width="1"/>
   <text x="270" y="334" text-anchor="middle" font-size="10" fill="#64748b" letter-spacing="0.1em">DOMAIN PACKS — SAME ARCHITECTURE, VERTICAL DATA</text>
-  <text x="270" y="358" text-anchor="middle" font-size="11" fill="#94a3b8">PARAGON (Security)  ·  SEXTANT (Maritime)  ·  DOMAINE (Real Estate)</text>
+  <text x="270" y="358" text-anchor="middle" font-size="11" fill="#94a3b8">Aegis (Security)  ·  Vessels (Maritime)  ·  Terra (Real Estate)</text>
   <text x="270" y="376" text-anchor="middle" font-size="9" fill="#475569">Each domain pack connects its vertical signal sources into the same</text>
-  <text x="270" y="392" text-anchor="middle" font-size="9" fill="#475569">KORA + FORGE intelligence and execution spine.</text>
+  <text x="270" y="392" text-anchor="middle" font-size="9" fill="#475569">Lyte + Counsel intelligence and execution spine.</text>
 
   <!-- Footer -->
   <text x="450" y="460" text-anchor="middle" font-size="9" fill="#334155">© 2026 SZL Holdings — Proprietary Architecture · Not for Distribution</text>

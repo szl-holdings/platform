@@ -13,7 +13,7 @@ export function SignalStage({ engine }: { engine: EngineState }) {
       .map((evt) => ({
         id: evt.id,
         domain:
-          evt.domain === 'aegis' ? 'PARAGON' : evt.domain === 'vessels' ? 'SEXTANT' : evt.domain,
+          evt.domain === 'aegis' ? 'Aegis' : evt.domain === 'vessels' ? 'Vessels' : evt.domain,
         icon: evt.domain === 'aegis' ? Shield : Ship,
         color: evt.domain === 'aegis' ? '#6366f1' : '#3b82f6',
         type: String(evt.payload.signalType ?? '')
@@ -104,7 +104,7 @@ export function LiveSignalStage({ metrics }: { metrics: LiveMetrics | null }) {
 
   const signalItems = [
     {
-      domain: 'FORGE',
+      domain: 'Counsel',
       color: '#ec4899',
       icon: Brain,
       title: 'AI Recommendation Engine — Active',
@@ -118,7 +118,7 @@ export function LiveSignalStage({ metrics }: { metrics: LiveMetrics | null }) {
       ],
     },
     {
-      domain: 'KORA / DOMAINE',
+      domain: 'Lyte / Terra',
       color: '#10b981',
       icon: BarChart2,
       title: 'Real Estate Signal — Distress Portfolio Active',

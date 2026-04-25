@@ -265,7 +265,7 @@ export default function AutomationsPage() {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <div className="flex items-center gap-3 mb-1">
           <Zap className="w-6 h-6 text-terra-primary" />
-          <h1 className="text-2xl font-display font-bold text-terra-text">FORGE Automation</h1>
+          <h1 className="text-2xl font-display font-bold text-terra-text">Counsel Automation</h1>
         </div>
         <p className="text-sm text-terra-text-secondary">
           Workflow automation — task templates, alerts, retry queue, override panel, and full audit
@@ -421,7 +421,7 @@ export default function AutomationsPage() {
               <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-terra-surface border border-terra-border">
                 <Shield className="w-4 h-4 text-violet-400" />
                 <p className="text-xs text-terra-text-secondary">
-                  FORGE retries failed automations automatically. Override or manually retry below.
+                  Counsel retries failed automations automatically. Override or manually retry below.
                   All overrides are logged to the audit trail.
                 </p>
               </div>

@@ -11,11 +11,11 @@ const PRODUCT_ONELINERS = [
     oneliner: "Governed decision infrastructure — the structural layer between signal detection and action execution, with AI provenance, policy gates, and immutable proof on every consequential decision.",
   },
   {
-    product: "KORA",
+    product: "Lyte",
     oneliner: "The command layer for governed organizations — surfaces execution risk, approval latency, and ownership gaps across connected systems.",
   },
   {
-    product: "FORGE",
+    product: "Counsel",
     oneliner: "The action fabric that turns operational signals into structured, human-approved decisions — with a complete audit trail.",
   },
   {
@@ -23,22 +23,22 @@ const PRODUCT_ONELINERS = [
     oneliner: "Legal operations observability — matter intelligence, deadline tracking, approval governance, and export safety for legal teams.",
   },
   {
-    product: "SEXTANT",
+    product: "Vessels",
     oneliner: "Maritime intelligence — voyage twins, AIS monitoring, route risk, port congestion, and sanctions compliance for fleet operators.",
   },
   {
-    product: "PARAGON",
+    product: "Aegis",
     oneliner: "Security and defense observability — threat twins, incident workflows, and exposure prioritization for complex operating environments.",
   },
   {
-    product: "DOMAINE",
+    product: "Terra",
     oneliner: "Real estate intelligence — property twins, diligence workflows, and distress scoring for institutional operators.",
   },
 ];
 
 const BRAND_GUIDELINES = [
   "Use the full company name 'SZL Holdings' on first reference. Subsequent references may use 'SZL'.",
-  "Product names are capitalized: KORA, FORGE, Counsel, SEXTANT, PARAGON, DOMAINE.",
+  "Product names are capitalized: Lyte, Counsel, Counsel, Vessels, Aegis, Terra.",
   "Do not use 'SZL Holdings Inc.' — the legal entity name is not for press use.",
   "Do not modify logo colors, proportions, or add elements to the logo.",
   "Dark background logos are preferred on dark or colored backgrounds. Light background logos on white.",
@@ -88,7 +88,7 @@ export default function PressPage() {
                 </p>
                 <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>Full (3 sentences)</p>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(38,8%,78%)" }}>
-                  SZL Holdings builds governed decision infrastructure — the structural layer between signal detection and action execution. The platform enforces a nine-step governance loop (Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning) across every domain pack: SEXTANT for maritime intelligence, PARAGON for security and defense, DOMAINE for real estate, Counsel for legal operations, and Carlota Jo for premium advisory. SZL is led by founder Stephen Lutar and is in active design-partner engagement with enterprise teams ahead of a Series A raise in 2026.
+                  SZL Holdings builds governed decision infrastructure — the structural layer between signal detection and action execution. The platform enforces a nine-step governance loop (Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning) across every domain pack: Vessels for maritime intelligence, Aegis for security and defense, Terra for real estate, Counsel for legal operations, and Carlota Jo for premium advisory. SZL is led by founder Stephen Lutar and is in active design-partner engagement with enterprise teams ahead of a Series A raise in 2026.
                 </p>
               </div>
             </div>
@@ -102,7 +102,7 @@ export default function PressPage() {
               </m.div>
               <div className="szl-card" style={{ borderRadius: "0.875rem", padding: "var(--space-card-pad)" }}>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(214,7%,62%)", marginBottom: "1.5rem" }}>
-                  Stephen Lutar is the founder of SZL Holdings and the architect of the KORA + FORGE platform. He is a builder and systems thinker with a background in complex operational environments. His approach is operator-first: the company is built by people who understand the execution environments they serve. Stephen is based in New York.
+                  Stephen Lutar is the founder of SZL Holdings and the architect of the Lyte + Counsel platform. He is a builder and systems thinker with a background in complex operational environments. His approach is operator-first: the company is built by people who understand the execution environments they serve. Stephen is based in New York.
                 </p>
                 <Link href="/founder" className="szl-btn-secondary" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", textDecoration: "none" }}>
                   Full founder profile <ArrowRight size={13} />

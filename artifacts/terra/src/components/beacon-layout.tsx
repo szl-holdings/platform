@@ -189,7 +189,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
                 border: '1px solid rgba(245,158,11,0.2)',
               }}
             >
-              KORA
+              Lyte
             </a>
             <a
               href="/alloy"
@@ -200,7 +200,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
                 border: '1px solid rgba(99,102,241,0.2)',
               }}
             >
-              FORGE
+              Counsel
             </a>
           </div>
         </div>

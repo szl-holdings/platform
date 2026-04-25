@@ -22,7 +22,7 @@ const FLOW_NODES = [
     nodes: [
       'Matter Twin construction',
       'Worldline features',
-      'FORGE AI extraction',
+      'Counsel AI extraction',
       'External feeds merge',
     ],
   },
@@ -75,7 +75,7 @@ export function AlloyMatterFlowDiagram() {
           marginBottom: '1rem',
         }}
       >
-        FORGE — Matter Signal to Governed Action
+        Counsel — Matter Signal to Governed Action
       </div>
 
       <div

@@ -221,7 +221,7 @@ const DEMO_APPROVALS: ScenarioRecommendation[] = [
       'Enable CloudTrail enhanced logging',
       'Notify cloud team',
     ],
-    requestedBy: 'PARAGON Posture Twin',
+    requestedBy: 'Aegis Posture Twin',
     requestedAt: '8m ago',
     approvalStatus: 'pending',
     requiredApprover: 'Cloud Security Lead',
@@ -273,7 +273,7 @@ const DEMO_APPROVALS: ScenarioRecommendation[] = [
       'Restart affected deployments',
       'Audit RBAC bindings',
     ],
-    requestedBy: 'PARAGON App Tier Twin',
+    requestedBy: 'Aegis App Tier Twin',
     requestedAt: '22m ago',
     approvalStatus: 'approved',
     requiredApprover: 'Platform Security Lead',
@@ -667,7 +667,7 @@ export default function AlloyAtlasApprovals() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#4B8BDB' }}
             >
-              FORGE · ATLAS Approvals
+              Counsel · ATLAS Approvals
             </span>
             {isLoading && (
               <Loader2 className="w-3 h-3 animate-spin" style={{ color: 'rgba(75,139,219,0.5)' }} />
@@ -677,7 +677,7 @@ export default function AlloyAtlasApprovals() {
             Scenario Recommendation Handoff
           </h1>
           <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
-            Review and approve ATLAS Scenario Forge recommendations before they enter the FORGE
+            Review and approve ATLAS Scenario Forge recommendations before they enter the Counsel
             execution workflow gate.
           </p>
         </div>
@@ -702,7 +702,7 @@ export default function AlloyAtlasApprovals() {
               {approvals.length}
             </span>{' '}
             live approval{approvals.length !== 1 ? 's' : ''} from the governance workflow queue —
-            approve, reject, or escalate to trigger FORGE execution handoff
+            approve, reject, or escalate to trigger Counsel execution handoff
           </span>
         </div>
       )}

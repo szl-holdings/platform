@@ -93,7 +93,7 @@ function generateResponse(
       response:
         'Fleet operational. 12 vessels active, 1 delayed at Port of Rotterdam due to weather.',
       cards: [
-        { id: '1', label: 'Active SEXTANT', value: '12', trend: 'neutral' },
+        { id: '1', label: 'Active Vessels', value: '12', trend: 'neutral' },
         { id: '2', label: 'On Schedule', value: '11/12', trend: 'up' },
         { id: '3', label: 'Cargo Value', value: '$84.2M', trend: 'up' },
       ],
@@ -108,7 +108,7 @@ function generateResponse(
       ],
     },
     operations: {
-      response: 'Systems healthy. API latency up 12% — KORA agent investigating root cause.',
+      response: 'Systems healthy. API latency up 12% — Lyte agent investigating root cause.',
       cards: [
         { id: '1', label: 'System Health', value: '94%', trend: 'down' },
         {
@@ -132,10 +132,10 @@ function generateResponse(
       ],
     },
     portfolio: {
-      response: 'Portfolio up 2.1% this week. FORGE fund outperforming benchmark by 340bps.',
+      response: 'Portfolio up 2.1% this week. Counsel fund outperforming benchmark by 340bps.',
       cards: [
         { id: '1', label: 'Portfolio Value', value: '$847M', change: '+2.1%', trend: 'up' },
-        { id: '2', label: 'FORGE Alpha', value: '+340bps', trend: 'up' },
+        { id: '2', label: 'Counsel Alpha', value: '+340bps', trend: 'up' },
         { id: '3', label: 'Active Positions', value: '23', trend: 'neutral' },
       ],
     },

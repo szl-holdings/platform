@@ -22,7 +22,7 @@ const SPVS = [
     documents: [{ name: "SPV Formation Docs", status: "finalized" }, { name: "Capital Call Notices", status: "sent" }, { name: "Tax K-1s (2025)", status: "finalized" }],
   },
   {
-    id: "spv-vessels-bridge", name: "SZL-SEXTANT Bridge SPV", company: "SEXTANT", formed: "Jan 2026", status: "active",
+    id: "spv-vessels-bridge", name: "SZL-Vessels Bridge SPV", company: "Vessels", formed: "Jan 2026", status: "active",
     totalCapital: "$2.1M", szlContrib: "$350K", coInvestors: ["Seed angels", "Meridian Capital"],
     coInvestorCount: 4, minTicket: "$50K", waterfall: "No pref, 15% carry above 2× MOIC",
     stage: "Bridge round", ndaStatus: "All signed", closingDate: "Jan 20, 2026",

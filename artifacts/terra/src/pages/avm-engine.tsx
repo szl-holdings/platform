@@ -441,7 +441,7 @@ export default function AvmEnginePage() {
             <div className="flex justify-end mt-3">
               <MicroFeedbackWidget
                 featureId="terra-avm-valuation"
-                featureName="DOMAINE AVM Property Valuation"
+                featureName="Terra AVM Property Valuation"
                 app="terra"
                 compact
                 prompt="Was this valuation useful?"

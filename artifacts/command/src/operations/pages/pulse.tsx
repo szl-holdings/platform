@@ -52,8 +52,8 @@ const EVENT_TYPES = [
   {
     type: 'action_routed',
     messages: [
-      'Action dispatched to PARAGON team',
-      'FORGE workflow triggered automatically',
+      'Action dispatched to Aegis team',
+      'Counsel workflow triggered automatically',
       'Manual approval requested',
     ],
   },
@@ -68,7 +68,7 @@ const EVENT_TYPES = [
   {
     type: 'workflow_executed',
     messages: [
-      'FORGE gate: approval auto-granted',
+      'Counsel gate: approval auto-granted',
       '5-step workflow completed in 4.2s',
       'Template instantiated: incident response',
     ],
@@ -314,7 +314,7 @@ export default function CommandPulse() {
                 {
                   from: 'Execute',
                   to: 'Verify',
-                  type: 'FORGE Workflow',
+                  type: 'Counsel Workflow',
                   color: '#8b5cf6',
                   intensity: 4,
                 },
@@ -348,7 +348,7 @@ export default function CommandPulse() {
               items={[
                 { name: 'Signal Pipeline', load: 67, color: '#f59e0b' },
                 { name: 'Action Queue', load: 45, color: '#3b82f6' },
-                { name: 'FORGE Engine', load: 52, color: '#d4a054' },
+                { name: 'Counsel Engine', load: 52, color: '#d4a054' },
                 { name: 'Event Bus', load: 38, color: '#10b981' },
                 { name: 'Priority Engine', load: 73, color: '#ef4444' },
                 { name: 'Digest Writer', load: 29, color: '#8b5cf6' },
@@ -366,7 +366,7 @@ export default function CommandPulse() {
               { label: 'Workflows', value: '89', color: '#8b5cf6' },
               { label: 'Self-Heal', value: '98%', color: '#10b981' },
               { label: 'MTTR', value: '2.4s', color: '#06b6d4' },
-              { label: 'FORGE', value: 'Active', color: '#d4a054' },
+              { label: 'Counsel', value: 'Active', color: '#d4a054' },
               { label: 'Blockers', value: '3', color: '#ef4444' },
               { label: 'Actions', value: '47', color: '#ec4899' },
             ]}

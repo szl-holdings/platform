@@ -389,7 +389,7 @@ export class FusionEngine {
         significance: 'high',
       })),
       actionableInsights: [
-        'Route to FORGE for full cross-domain synthesis',
+        'Route to Counsel for full cross-domain synthesis',
         'Assign to multi-agent investigation workflow',
         'Generate comprehensive intelligence briefing',
       ],

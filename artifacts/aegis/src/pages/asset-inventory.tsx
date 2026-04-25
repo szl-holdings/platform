@@ -104,7 +104,7 @@ export default function AssetInventoryPage() {
     mutationFn: ({ entityId, actionType, assignedTo }: any) =>
       api.workflowActions.create({ entityType: 'asset', entityId, actionType, assignedTo }),
     onSuccess: () => {
-      toast.success('Workflow action triggered via FORGE engine');
+      toast.success('Workflow action triggered via Counsel engine');
       queryClient.invalidateQueries({ queryKey: ['aegis-assets'] });
     },
     onError: () => toast.error('Failed to trigger workflow'),

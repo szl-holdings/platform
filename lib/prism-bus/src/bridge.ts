@@ -70,7 +70,7 @@ export const PRISM_DOMAIN_TOOLS: Record<PrismDomain, string[]> = {
 export const PRISM_BUILT_IN_TOOLS: PrismToolDescriptor[] = [
   {
     name: 'alloy_research',
-    description: "Perform deep research using FORGE's PRISM intelligence engine",
+    description: "Perform deep research using Counsel's PRISM intelligence engine",
     inputSchema: {
       type: 'object',
       properties: {
@@ -109,7 +109,7 @@ export const PRISM_BUILT_IN_TOOLS: PrismToolDescriptor[] = [
   },
   {
     name: 'alloy_launch_workflow',
-    description: 'Launch a FORGE RUNTIME workflow with specified parameters',
+    description: 'Launch a Counsel RUNTIME workflow with specified parameters',
     inputSchema: {
       type: 'object',
       properties: {

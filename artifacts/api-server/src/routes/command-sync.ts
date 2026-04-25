@@ -141,7 +141,7 @@ const PARTNER_SEEDS: PartnerSeed[] = [
   },
   {
     id: 'cp-002',
-    name: 'PARAGON SIEM',
+    name: 'Aegis SIEM',
     role: 'Security Information & Event Management',
     domain: 'Security',
     trustScore: 95,
@@ -165,7 +165,7 @@ const PARTNER_SEEDS: PartnerSeed[] = [
   },
   {
     id: 'cp-004',
-    name: 'SEXTANT — Maritime Intelligence',
+    name: 'Vessels — Maritime Intelligence',
     role: 'Operational Domain Signal',
     domain: 'Operations',
     trustScore: 82,

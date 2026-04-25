@@ -17,7 +17,7 @@ const THREADS = [
         text: 'Legal team is at capacity. VP unavailable until tomorrow. Recommending reroute to CFO backup.',
       },
       {
-        author: 'System (FORGE)',
+        author: 'System (Counsel)',
         time: '1.5h ago',
         text: 'Reroute initiated to CFO backup approver. ETA: 2 hours. Correlation ID: gf-2026-q1-001.',
       },
@@ -41,7 +41,7 @@ const THREADS = [
         text: 'TechCorp usage dropped 35% this month. NPS is 42 points down. Competitive offer confirmed.',
       },
       {
-        author: 'FORGE (AI)',
+        author: 'Counsel (AI)',
         time: '55m ago',
         text: 'Model predicts 88% churn probability if no executive contact within 12h. Recommend CEO engagement.',
       },
@@ -110,7 +110,7 @@ export default function InterventionWorkspace() {
         <h1 className="text-2xl font-bold text-white">Intervention Workspace</h1>
         <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
           Comment threads, action selection, reroute/escalate/approve/defer/assign — all in context
-          of the workflow and FORGE intelligence.
+          of the workflow and Counsel intelligence.
         </p>
       </div>
 
@@ -188,19 +188,19 @@ export default function InterventionWorkspace() {
                       className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                       style={{
                         background:
-                          c.author.startsWith('System') || c.author.startsWith('FORGE')
+                          c.author.startsWith('System') || c.author.startsWith('Counsel')
                             ? 'rgba(139,92,246,0.15)'
                             : 'rgba(14,165,233,0.15)',
                         color:
-                          c.author.startsWith('System') || c.author.startsWith('FORGE')
+                          c.author.startsWith('System') || c.author.startsWith('Counsel')
                             ? '#8b7ac8'
                             : '#4a90b8',
-                        border: `1px solid ${c.author.startsWith('System') || c.author.startsWith('FORGE') ? 'rgba(139,92,246,0.3)' : 'rgba(14,165,233,0.3)'}`,
+                        border: `1px solid ${c.author.startsWith('System') || c.author.startsWith('Counsel') ? 'rgba(139,92,246,0.3)' : 'rgba(14,165,233,0.3)'}`,
                       }}
                     >
                       {c.author.startsWith('System')
                         ? 'AS'
-                        : c.author.startsWith('FORGE')
+                        : c.author.startsWith('Counsel')
                           ? 'AL'
                           : c.author
                               .split(' ')
@@ -256,7 +256,7 @@ export default function InterventionWorkspace() {
                       border: '1px solid rgba(75,139,219,0.2)',
                     }}
                   >
-                    <ExternalLink className="w-3 h-3" /> Run in FORGE
+                    <ExternalLink className="w-3 h-3" /> Run in Counsel
                   </a>
                 </div>
                 <div className="flex items-center gap-2">

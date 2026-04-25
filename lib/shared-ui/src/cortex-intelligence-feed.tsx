@@ -57,15 +57,15 @@ const SEVERITY_CONFIG: Record<
 };
 
 const DOMAIN_META: Record<string, { label: string; icon: string; color: string }> = {
-  vessels: { label: 'SEXTANT', icon: '⚓', color: '#0ea5e9' },
-  firestorm: { label: 'PARAGON', icon: '⬡', color: '#ef4444' },
-  aegis: { label: 'PARAGON', icon: '⬡', color: '#ef4444' },
-  terra: { label: 'DOMAINE', icon: '⬢', color: '#22c55e' },
-  lyte: { label: 'KORA', icon: '⚡', color: '#f59e0b' },
+  vessels: { label: 'Vessels', icon: '⚓', color: '#0ea5e9' },
+  firestorm: { label: 'Aegis', icon: '⬡', color: '#ef4444' },
+  aegis: { label: 'Aegis', icon: '⬡', color: '#ef4444' },
+  terra: { label: 'Terra', icon: '⬢', color: '#22c55e' },
+  lyte: { label: 'Lyte', icon: '⚡', color: '#f59e0b' },
   prism: { label: 'PRISM', icon: '⚖', color: '#a855f7' },
   szl: { label: 'Portfolio', icon: '◆', color: '#c9a84c' },
   'szl-holdings': { label: 'Portfolio', icon: '◆', color: '#c9a84c' },
-  inca: { label: 'INCA', icon: '◈', color: '#8b5cf6' },
+  inca: { label: 'Counsel', icon: '◈', color: '#8b5cf6' },
   msp: { label: 'MSP', icon: '◇', color: '#6366f1' },
 };
 
@@ -415,10 +415,10 @@ const SEVERITY_FILTERS: Array<{ key: string; label: string; color: string }> = [
 
 const DOMAIN_FILTERS = [
   { key: 'all', label: 'All Domains' },
-  { key: 'vessels', label: 'SEXTANT' },
-  { key: 'firestorm', label: 'PARAGON' },
-  { key: 'terra', label: 'DOMAINE' },
-  { key: 'lyte', label: 'KORA' },
+  { key: 'vessels', label: 'Vessels' },
+  { key: 'firestorm', label: 'Aegis' },
+  { key: 'terra', label: 'Terra' },
+  { key: 'lyte', label: 'Lyte' },
   { key: 'prism', label: 'PRISM' },
   { key: 'szl', label: 'Portfolio' },
 ];

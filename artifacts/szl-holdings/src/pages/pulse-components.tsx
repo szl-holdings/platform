@@ -29,7 +29,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'lyte',
-    name: 'KORA',
+    name: 'Lyte',
     icon: () => null,
     color: '#f59e0b',
     domain: 'observability',
@@ -39,7 +39,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'aegis',
-    name: 'PARAGON',
+    name: 'Aegis',
     icon: Shield,
     color: '#3b82f6',
     domain: 'security',
@@ -49,7 +49,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'vessels',
-    name: 'SEXTANT',
+    name: 'Vessels',
     icon: Anchor,
     color: '#06b6d4',
     domain: 'maritime',
@@ -59,7 +59,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'terra',
-    name: 'DOMAINE',
+    name: 'Terra',
     icon: Globe,
     color: '#10b981',
     domain: 'real-estate',
@@ -99,7 +99,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'alloy',
-    name: 'FORGE',
+    name: 'Counsel',
     icon: Cpu,
     color: '#64748b',
     domain: 'automation',
@@ -109,7 +109,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'lyte-cc',
-    name: 'KORA CC',
+    name: 'Lyte CC',
     icon: Radio,
     color: '#f97316',
     domain: 'command',
@@ -139,7 +139,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'aegis-mobile',
-    name: 'PARAGON Mobile',
+    name: 'Aegis Mobile',
     icon: Shield,
     color: '#3b82f6',
     domain: 'mobile',
@@ -149,7 +149,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'vessels-mobile',
-    name: 'SEXTANT Mobile',
+    name: 'Vessels Mobile',
     icon: Anchor,
     color: '#06b6d4',
     domain: 'mobile',
@@ -159,7 +159,7 @@ export const PLATFORM_APPS = [
   },
   {
     id: 'terra-mobile',
-    name: 'DOMAINE Mobile',
+    name: 'Terra Mobile',
     icon: Globe,
     color: '#10b981',
     domain: 'mobile',
@@ -180,11 +180,11 @@ export const PLATFORM_APPS = [
 ];
 
 export const AGENT_TYPES = [
-  { id: 'aegis-autonomous', domain: 'aegis', name: 'PARAGON SOC', color: '#3b82f6' },
-  { id: 'vessels-autonomous', domain: 'vessels', name: 'SEXTANT Fleet', color: '#06b6d4' },
-  { id: 'terra-autonomous', domain: 'terra', name: 'DOMAINE Analyst', color: '#10b981' },
-  { id: 'lyte-autonomous', domain: 'lyte', name: 'KORA Ops', color: '#f59e0b' },
-  { id: 'nexus-autonomous', domain: 'praxis', name: 'PRAXIS Fusion', color: '#ec4899' },
+  { id: 'aegis-autonomous', domain: 'aegis', name: 'Aegis SOC', color: '#3b82f6' },
+  { id: 'vessels-autonomous', domain: 'vessels', name: 'Vessels Fleet', color: '#06b6d4' },
+  { id: 'terra-autonomous', domain: 'terra', name: 'Terra Analyst', color: '#10b981' },
+  { id: 'lyte-autonomous', domain: 'lyte', name: 'Lyte Ops', color: '#f59e0b' },
+  { id: 'nexus-autonomous', domain: 'nexus', name: 'Nexus Fusion', color: '#ec4899' },
   { id: 'inca-autonomous', domain: 'inca', name: 'Inca Lab', color: '#8b5cf6' },
   { id: 'msp-autonomous', domain: 'msp', name: 'MSP Watchdog', color: '#64748b' },
   { id: 'lexis-autonomous', domain: 'legal', name: 'Lexis Legal', color: '#a855f7' },
@@ -613,7 +613,7 @@ export const GitTicker = memo(function GitTicker() {
   const commits = [
     {
       hash: 'e0798e0',
-      msg: 'feat: Platform LUMINA — ecosystem dashboard',
+      msg: 'feat: Platform Pulse — ecosystem dashboard',
       author: 'stephen',
       time: '2m ago',
       files: 4,
@@ -797,14 +797,14 @@ export const AgentNeuralMesh = memo(function AgentNeuralMesh() {
 export function DomainHealthGrid() {
   const domains = [
     { name: 'SZL Holdings', load: 23, color: '#d4a054' },
-    { name: 'KORA Platform', load: 41, color: '#f59e0b' },
-    { name: 'PARAGON Defense', load: 67, color: '#3b82f6' },
-    { name: 'SEXTANT Maritime', load: 35, color: '#06b6d4' },
-    { name: 'DOMAINE Real Estate', load: 28, color: '#10b981' },
+    { name: 'Lyte Platform', load: 41, color: '#f59e0b' },
+    { name: 'Aegis Defense', load: 67, color: '#3b82f6' },
+    { name: 'Vessels Maritime', load: 35, color: '#06b6d4' },
+    { name: 'Terra Real Estate', load: 28, color: '#10b981' },
     { name: 'Carlota Jo', load: 19, color: '#c4a265' },
     { name: 'Counsel', load: 44, color: '#8b5cf6' },
     { name: 'PRAXIS Fusion', load: 52, color: '#ec4899' },
-    { name: 'FORGE Fabric', load: 31, color: '#64748b' },
+    { name: 'Counsel Fabric', load: 31, color: '#64748b' },
     { name: 'API Gateway', load: 58, color: '#d4a054' },
     { name: 'Neural Mesh', load: 73, color: '#f59e0b' },
     { name: 'Event Bus', load: 45, color: '#3b82f6' },
@@ -867,16 +867,16 @@ export function DomainHealthGrid() {
 
 export function CrossDomainIntelFlow() {
   const flows = [
-    { from: 'PARAGON', to: 'KORA', type: 'Threat → Priority Signal', color: '#3b82f6', intensity: 3 },
+    { from: 'Aegis', to: 'Lyte', type: 'Threat → Priority Signal', color: '#3b82f6', intensity: 3 },
     {
-      from: 'SEXTANT',
-      to: 'DOMAINE',
+      from: 'Vessels',
+      to: 'Terra',
       type: 'Port Data → Supply Chain',
       color: '#06b6d4',
       intensity: 2,
     },
     {
-      from: 'DOMAINE',
+      from: 'Terra',
       to: 'PRAXIS',
       type: 'Deal → Compliance Review',
       color: '#10b981',
@@ -889,8 +889,8 @@ export function CrossDomainIntelFlow() {
       color: '#ec4899',
       intensity: 5,
     },
-    { from: 'FORGE', to: 'All', type: 'Execution Fabric Dispatch', color: '#64748b', intensity: 3 },
-    { from: 'KORA', to: 'PARAGON', type: 'Anomaly → Investigation', color: '#f59e0b', intensity: 2 },
+    { from: 'Counsel', to: 'All', type: 'Execution Fabric Dispatch', color: '#64748b', intensity: 3 },
+    { from: 'Lyte', to: 'Aegis', type: 'Anomaly → Investigation', color: '#f59e0b', intensity: 2 },
   ];
   const [activeFlow, setActiveFlow] = useState(0);
   useEffect(() => {

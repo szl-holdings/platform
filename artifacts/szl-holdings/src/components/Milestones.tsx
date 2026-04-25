@@ -9,15 +9,15 @@ const milestones = [
   },
   {
     date: 'Q3 2022',
-    title: 'SEXTANT launched',
+    title: 'Vessels launched',
     description:
-      'SEXTANT Maritime Intelligence enters private beta with first fleet operator clients.',
+      'Vessels Maritime Intelligence enters private beta with first fleet operator clients.',
   },
   {
     date: 'Q1 2023',
-    title: 'FORGE engine operational',
+    title: 'Counsel engine operational',
     description:
-      'FORGE execution fabric reaches operational status powering predictive intelligence across the ecosystem.',
+      'Counsel execution fabric reaches operational status powering predictive intelligence across the ecosystem.',
   },
   {
     date: 'Q2 2023',
@@ -27,15 +27,15 @@ const milestones = [
   },
   {
     date: 'Q4 2023',
-    title: 'KORA enters production',
+    title: 'Lyte enters production',
     description:
-      'KORA decision intelligence platform operational, delivering continuous operational observability and risk detection for enterprise clients.',
+      'Lyte decision intelligence platform operational, delivering continuous operational observability and risk detection for enterprise clients.',
   },
   {
     date: '2024–2025',
     title: 'Ecosystem expansion',
     description:
-      'KORA and FORGE platforms launched. Shared infrastructure layer connects all operating platforms.',
+      'Lyte and Counsel platforms launched. Shared infrastructure layer connects all operating platforms.',
   },
 ];
 

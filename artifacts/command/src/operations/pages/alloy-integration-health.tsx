@@ -142,7 +142,7 @@ const INTEGRATIONS: Integration[] = [
   },
   {
     id: 'openai',
-    name: 'OpenAI (via FORGE)',
+    name: 'OpenAI (via Counsel)',
     category: 'AI Inference',
     icon: '🧠',
     status: 'healthy',

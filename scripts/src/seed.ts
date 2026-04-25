@@ -427,7 +427,7 @@ async function seed() {
       },
       {
         key: 'lyte_command_center',
-        name: 'KORA Command Center',
+        name: 'Lyte Command Center',
         description: 'Business observability command center',
         isEnabled: true,
         rolloutPercentage: 100,
@@ -673,13 +673,13 @@ async function seed() {
     },
     {
       slug: 'vessels',
-      name: 'SEXTANT Tracker',
+      name: 'Vessels Tracker',
       description: 'Maritime vessel tracking and cargo management',
       icon: 'Ship',
       color: '#06b6d4',
       status: 'active',
       version: '0.5.0',
-      ownerTeam: 'SEXTANT',
+      ownerTeam: 'Vessels',
     },
     {
       slug: 'firestorm',
@@ -693,13 +693,13 @@ async function seed() {
     },
     {
       slug: 'lyte-command-center',
-      name: 'KORA Command Center',
+      name: 'Lyte Command Center',
       description: 'Business observability and operational decisions',
       icon: 'Monitor',
       color: '#0ea5e9',
       status: 'active',
       version: '1.0.0',
-      ownerTeam: 'KORA',
+      ownerTeam: 'Lyte',
     },
     {
       slug: 'dreamscape',
@@ -713,13 +713,13 @@ async function seed() {
     },
     {
       slug: 'readiness-report',
-      name: 'KORA Readiness',
-      description: 'Operational readiness and maturity scoring module within KORA',
+      name: 'Lyte Readiness',
+      description: 'Operational readiness and maturity scoring module within Lyte',
       icon: 'Shield',
       color: '#10b981',
       status: 'active',
       version: '1.0.0',
-      ownerTeam: 'KORA',
+      ownerTeam: 'Lyte',
     },
     {
       slug: 'control-plane',
@@ -838,7 +838,7 @@ async function seed() {
         status: 'active',
       },
       {
-        name: 'SEXTANT API Integration',
+        name: 'Vessels API Integration',
         description: 'Integrate MarineTraffic API for live vessel data',
         status: 'active',
       },
@@ -848,7 +848,7 @@ async function seed() {
         status: 'active',
       },
       {
-        name: 'KORA Command Center Build',
+        name: 'Lyte Command Center Build',
         description: 'Business observability command center for portfolio operations',
         status: 'active',
       },
@@ -858,8 +858,8 @@ async function seed() {
         status: 'active',
       },
       {
-        name: 'KORA Readiness Module',
-        description: 'Portfolio-wide maturity scoring and readiness tracking within KORA',
+        name: 'Lyte Readiness Module',
+        description: 'Portfolio-wide maturity scoring and readiness tracking within Lyte',
         status: 'completed',
       },
       {
@@ -1980,7 +1980,7 @@ async function seed() {
       sourceType: 'monitoring',
       severity: 'high',
       title: 'Error rate spike on vessel service',
-      body: 'Error rate on SEXTANT API exceeded 5% threshold. Currently at 8.2%',
+      body: 'Error rate on Vessels API exceeded 5% threshold. Currently at 8.2%',
       status: 'new',
       metadata: { errorRate: '8.2%', threshold: '5%' },
     },
@@ -2192,9 +2192,9 @@ async function seed() {
         colorPalette: { primary: '#1e40af', secondary: '#f59e0b' },
       },
       {
-        name: 'SEXTANT Fleet Showcase',
+        name: 'Vessels Fleet Showcase',
         description: 'Commercial video highlighting maritime fleet capabilities',
-        clientName: 'SEXTANT Division',
+        clientName: 'Vessels Division',
         type: 'commercial',
         status: 'pre_production',
       },
@@ -2240,10 +2240,10 @@ async function seed() {
         deadline: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
       },
       {
-        name: 'SEXTANT Fleet Showcase',
+        name: 'Vessels Fleet Showcase',
         description:
           'Commercial video highlighting maritime fleet capabilities and tracking technology',
-        clientName: 'SEXTANT Division',
+        clientName: 'Vessels Division',
         status: 'pre_production',
         category: 'commercial',
         targetAudience: 'Shipping companies, logistics partners',
@@ -2274,7 +2274,7 @@ async function seed() {
         campaignId: dCampaigns[0].id,
         title: 'Brand Story - Episode 1: Origins',
         content:
-          'FADE IN:\n\nEXT. CITY SKYLINE - DAWN\n\nNARRATOR (V.O.)\nEvery great journey begins with a single step. For SZL Holdings, that step was taken in a small office in 2020...\n\nCUT TO:\nINT. MODERN OFFICE - DAY\n\nStephen sits at his desk, multiple monitors displaying code and dashboards.\n\nNARRATOR (V.O.)\nWhat started as a vision to unify technology consulting has grown into a portfolio of innovative solutions...\n\nMONTAGE: Various SZL products in action - SEXTANT tracking ships, Firestorm campaigns running, Dreamscape creative workflows...',
+          'FADE IN:\n\nEXT. CITY SKYLINE - DAWN\n\nNARRATOR (V.O.)\nEvery great journey begins with a single step. For SZL Holdings, that step was taken in a small office in 2020...\n\nCUT TO:\nINT. MODERN OFFICE - DAY\n\nStephen sits at his desk, multiple monitors displaying code and dashboards.\n\nNARRATOR (V.O.)\nWhat started as a vision to unify technology consulting has grown into a portfolio of innovative solutions...\n\nMONTAGE: Various SZL products in action - Vessels tracking ships, Firestorm campaigns running, Dreamscape creative workflows...',
         version: 3,
         status: 'approved',
         notes: 'Final approved version after client feedback',
@@ -3097,7 +3097,7 @@ async function seed() {
     .values([
       {
         slug: 'vessels',
-        name: 'SEXTANT',
+        name: 'Vessels',
         description: 'Maritime intelligence and fleet tracking platform',
         sector: 'Maritime Tech',
         status: 'active',
@@ -3142,7 +3142,7 @@ async function seed() {
       },
       {
         slug: 'lyte',
-        name: 'KORA',
+        name: 'Lyte',
         description: 'Business observability command center for operational decisions',
         sector: 'DevOps',
         status: 'active',
@@ -3154,7 +3154,7 @@ async function seed() {
       },
       {
         slug: 'inca',
-        name: 'INCA',
+        name: 'Counsel',
         description: 'AI research command center for ML experiments and model lifecycle',
         sector: 'AI/ML',
         status: 'active',
@@ -3185,7 +3185,7 @@ async function seed() {
   await db.insert(holdingsMilestonesTable).values([
     {
       ventureId: ventures[0].id,
-      title: 'SEXTANT v2.0 Launch',
+      title: 'Vessels v2.0 Launch',
       description: 'Major platform update with real-time AIS integration',
       date: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       category: 'product_launch',
@@ -3220,14 +3220,14 @@ async function seed() {
     },
     {
       ventureId: ventures[3].id,
-      title: 'KORA v1.0 GA',
-      description: 'General availability release of KORA Command Center',
+      title: 'Lyte v1.0 GA',
+      description: 'General availability release of Lyte Command Center',
       date: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       category: 'product_launch',
     },
     {
       ventureId: ventures[4].id,
-      title: 'INCA Research Lab Founded',
+      title: 'Counsel Research Lab Founded',
       description: 'Established dedicated AI/ML research lab',
       date: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       category: 'milestone',
@@ -3364,7 +3364,7 @@ async function seed() {
       company: 'EnterpriseCorp',
       subject: 'Partnership Proposal',
       message:
-        "We'd like to explore a strategic partnership around your SEXTANT and Firestorm platforms.",
+        "We'd like to explore a strategic partnership around your Vessels and Firestorm platforms.",
       status: 'replied',
     },
   ]);
@@ -3374,29 +3374,29 @@ async function seed() {
     .values([
       {
         key: 'lyte_readiness_enabled',
-        name: 'KORA Readiness',
-        description: 'Enable KORA Readiness tracking module',
+        name: 'Lyte Readiness',
+        description: 'Enable Lyte Readiness tracking module',
         isEnabled: true,
         rolloutPercentage: 100,
       },
       {
         key: 'lyte_value_at_risk_enabled',
-        name: 'KORA Value at Risk',
-        description: 'Enable value-at-risk scoring on KORA signals',
+        name: 'Lyte Value at Risk',
+        description: 'Enable value-at-risk scoring on Lyte signals',
         isEnabled: true,
         rolloutPercentage: 100,
       },
       {
         key: 'vessels_command_mode_enabled',
-        name: 'SEXTANT Command Mode',
+        name: 'Vessels Command Mode',
         description: 'Enable command mode for vessels dashboard',
         isEnabled: true,
         rolloutPercentage: 100,
       },
       {
         key: 'alloy_admin_enabled',
-        name: 'FORGE Admin',
-        description: 'Enable FORGE admin panel and workflow controls',
+        name: 'Counsel Admin',
+        description: 'Enable Counsel admin panel and workflow controls',
         isEnabled: true,
         rolloutPercentage: 100,
       },
@@ -3409,22 +3409,22 @@ async function seed() {
       },
       {
         key: 'alloy_signal_ingestion_enabled',
-        name: 'FORGE Signal Ingestion',
+        name: 'Counsel Signal Ingestion',
         description: 'Enable external signal ingestion API',
         isEnabled: true,
         rolloutPercentage: 100,
       },
       {
         key: 'vessels_exception_command_enabled',
-        name: 'SEXTANT Exception Command',
+        name: 'Vessels Exception Command',
         description: 'Enable exception resolution commands for vessels',
         isEnabled: true,
         rolloutPercentage: 100,
       },
       {
         key: 'lyte_saved_views_enabled',
-        name: 'KORA Saved Views',
-        description: 'Enable saved views for KORA signal and action feeds',
+        name: 'Lyte Saved Views',
+        description: 'Enable saved views for Lyte signal and action feeds',
         isEnabled: true,
         rolloutPercentage: 100,
       },

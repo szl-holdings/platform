@@ -9,7 +9,7 @@ const ecosystemNodes = [
   },
   {
     id: 'alloy',
-    name: 'FORGE · ENGINE',
+    name: 'Counsel · ENGINE',
     type: 'engine',
     x: 50,
     y: 15,
@@ -25,7 +25,7 @@ const ecosystemNodes = [
   },
   {
     id: 'vessels',
-    name: 'SEXTANT · TRACK',
+    name: 'Vessels · TRACK',
     type: 'subsidiary',
     x: 18,
     y: 30,
@@ -33,7 +33,7 @@ const ecosystemNodes = [
   },
   {
     id: 'terra',
-    name: 'DOMAINE · INTELLIGENCE',
+    name: 'Terra · INTELLIGENCE',
     type: 'subsidiary',
     x: 15,
     y: 75,
@@ -41,7 +41,7 @@ const ecosystemNodes = [
   },
   {
     id: 'aegis',
-    name: 'PARAGON · DEFEND',
+    name: 'Aegis · DEFEND',
     type: 'subsidiary',
     x: 50,
     y: 85,

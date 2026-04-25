@@ -61,7 +61,7 @@ const ALL_STOPS: DemoStop[] = [
   {
     id: 'lyte-signals',
     label: 'Signals Console',
-    domain: 'KORA',
+    domain: 'Lyte',
     domainColor: ACCENT,
     description: '47 live signals surfaced, prioritized by impact and urgency.',
     href: '/lyte/signals',
@@ -72,7 +72,7 @@ const ALL_STOPS: DemoStop[] = [
   {
     id: 'lyte-decision-twin',
     label: 'Decision Twin',
-    domain: 'KORA',
+    domain: 'Lyte',
     domainColor: ACCENT,
     description:
       'Simulate approve / delay / reroute / escalate with downstream impact and confidence bands.',
@@ -85,7 +85,7 @@ const ALL_STOPS: DemoStop[] = [
   {
     id: 'alloy-policy-compiler',
     label: 'Policy Compiler',
-    domain: 'FORGE',
+    domain: 'Counsel',
     domainColor: '#d4a054',
     description:
       'Plain-English → validated, versioned, rollback-able policy objects with workflow coverage.',
@@ -97,7 +97,7 @@ const ALL_STOPS: DemoStop[] = [
   {
     id: 'terra-why-now',
     label: 'Why This Property Now',
-    domain: 'DOMAINE',
+    domain: 'Terra',
     domainColor: '#4ade80',
     description:
       'Ranked acquisition thesis combining liens, violations, ownership complexity, and neighborhood trend.',
@@ -110,7 +110,7 @@ const ALL_STOPS: DemoStop[] = [
   {
     id: 'terra-map',
     label: 'Property Intelligence Map',
-    domain: 'DOMAINE',
+    domain: 'Terra',
     domainColor: '#4ade80',
     description: 'NYC property opportunity map with distress scoring and ownership graph.',
     href: '/terra/property-map-page',
@@ -121,7 +121,7 @@ const ALL_STOPS: DemoStop[] = [
   {
     id: 'aegis-adversary',
     label: 'Adversary Narrative Engine',
-    domain: 'PARAGON',
+    domain: 'Aegis',
     domainColor: '#f87171',
     description:
       'Readable incident storyline: attack chain, MITRE mapping, affected assets, confidence.',
@@ -134,7 +134,7 @@ const ALL_STOPS: DemoStop[] = [
   {
     id: 'vessels-voyage-risk',
     label: 'Voyage Risk Twin',
-    domain: 'SEXTANT',
+    domain: 'Vessels',
     domainColor: '#60a5fa',
     description:
       'Route-level risk: AIS gaps, sanctions, weather, voyage economics → explained risk + alternatives.',
@@ -158,8 +158,8 @@ const ALL_STOPS: DemoStop[] = [
   },
   {
     id: 'alloy-audit',
-    label: 'FORGE Audit Trail',
-    domain: 'FORGE',
+    label: 'Counsel Audit Trail',
+    domain: 'Counsel',
     domainColor: '#d4a054',
     description: 'Every decision, every agent action, every approval — immutable proof chain.',
     href: `${BASE}/operations/alloy/receipts`,
@@ -280,7 +280,7 @@ const DEMO_PATHS: Record<DemoLength, { label: string; description: string; stopI
   },
   20: {
     label: '20-Minute',
-    description: 'Full wedge. KORA + FORGE + DOMAINE as the live-data proof.',
+    description: 'Full wedge. Lyte + Counsel + Terra as the live-data proof.',
     stopIds: [
       'command-overview',
       'lyte-signals',
@@ -947,31 +947,31 @@ export function DemoLaunchpad() {
               </p>
               {[
                 {
-                  label: 'KORA — Decision Intelligence',
+                  label: 'Lyte — Decision Intelligence',
                   color: '#4ade80',
                   href: '/lyte/',
                   status: 'LIVE',
                 },
                 {
-                  label: 'FORGE — Policy Compiler',
+                  label: 'Counsel — Policy Compiler',
                   color: '#4ade80',
                   href: `${BASE}/operations/alloy/policy-compiler`,
                   status: 'LIVE',
                 },
                 {
-                  label: 'DOMAINE — Real Estate Intelligence',
+                  label: 'Terra — Real Estate Intelligence',
                   color: '#4ade80',
                   href: '/terra/',
                   status: 'LIVE',
                 },
                 {
-                  label: 'PARAGON — Cyber Resilience',
+                  label: 'Aegis — Cyber Resilience',
                   color: '#4ade80',
                   href: '/aegis/',
                   status: 'LIVE',
                 },
                 {
-                  label: 'SEXTANT — Maritime Intelligence',
+                  label: 'Vessels — Maritime Intelligence',
                   color: '#4ade80',
                   href: '/vessels/',
                   status: 'LIVE',
@@ -1037,31 +1037,31 @@ export function DemoLaunchpad() {
               {[
                 {
                   label: 'Decision Twin',
-                  domain: 'KORA',
+                  domain: 'Lyte',
                   color: ACCENT,
                   href: '/lyte/decision-twin',
                 },
                 {
                   label: 'Policy Compiler',
-                  domain: 'FORGE',
+                  domain: 'Counsel',
                   color: ACCENT,
                   href: `${BASE}/operations/alloy/policy-compiler`,
                 },
                 {
                   label: 'Why This Property Now',
-                  domain: 'DOMAINE',
+                  domain: 'Terra',
                   color: '#4ade80',
                   href: '/terra/why-this-property-now',
                 },
                 {
                   label: 'Adversary Narrative Engine',
-                  domain: 'PARAGON',
+                  domain: 'Aegis',
                   color: '#f87171',
                   href: '/aegis/adversary-narrative-engine',
                 },
                 {
                   label: 'Voyage Risk Twin',
-                  domain: 'SEXTANT',
+                  domain: 'Vessels',
                   color: '#60a5fa',
                   href: '/vessels/voyage-risk-twin',
                 },
@@ -1175,8 +1175,8 @@ export function DemoLaunchpad() {
                   'Open this page, then launch each stop — mark complete as you go.',
                   'Decision Twin runs in full simulation mode — no live write-back.',
                   'Policy Compiler shows real compilation with sandbox validation.',
-                  'DOMAINE data is NYC Open Data (city-provided, CC0 licensed).',
-                  'PARAGON incidents are labeled SCENARIO throughout all views.',
+                  'Terra data is NYC Open Data (city-provided, CC0 licensed).',
+                  'Aegis incidents are labeled SCENARIO throughout all views.',
                   'Use Reset to restore clean state before a fresh audience.',
                 ].map((note, i) => (
                   <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>

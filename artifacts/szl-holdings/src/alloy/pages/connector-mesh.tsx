@@ -28,12 +28,12 @@ export default function ConnectorMesh() {
             className="text-xs font-medium uppercase tracking-widest"
             style={{ color: '#4B8BDB' }}
           >
-            FORGE · Connector Mesh
+            Counsel · Connector Mesh
           </span>
         </div>
         <h1 className="text-2xl font-bold text-white">Connector Mesh</h1>
         <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          All integrations, data connectors, health status, and API credentials powering FORGE
+          All integrations, data connectors, health status, and API credentials powering Counsel
           automation.
         </p>
       </div>

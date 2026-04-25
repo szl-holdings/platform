@@ -7,7 +7,7 @@ const thesis = [
   {
     pillar: "Vertical AI Infrastructure",
     description: "SZL invests in AI-native platforms that solve domain-specific problems at enterprise scale — not general AI wrappers.",
-    examples: ["APEX: AI research infrastructure", "KORA: AIOps & observability"],
+    examples: ["SZL Cortex: AI research infrastructure", "Lyte: AIOps & observability"],
     rationale: "Vertical AI compounds moat through proprietary data, domain expertise, and switching costs. We target markets where AI creates 5-10x operational leverage.",
     stage: "Series A priority",
     color: "#8b5cf6",
@@ -15,7 +15,7 @@ const thesis = [
   {
     pillar: "Intelligence-as-a-Service",
     description: "Platforms that transform raw data streams into actionable intelligence for operators and executives.",
-    examples: ["DOMAINE: Real estate market intelligence", "SEXTANT: Maritime analytics"],
+    examples: ["Terra: Real estate market intelligence", "Vessels: Maritime analytics"],
     rationale: "IaaS companies have durable ARR with high NRR. The data moat builds over time, creating barriers that pure-software competitors cannot replicate.",
     stage: "Growth focus",
     color: "#10b981",
@@ -23,7 +23,7 @@ const thesis = [
   {
     pillar: "Security & Trust Infrastructure",
     description: "Cybersecurity and compliance platforms that become mission-critical in an AI-accelerated threat landscape.",
-    examples: ["PARAGON: Red team / security simulation"],
+    examples: ["Aegis: Red team / security simulation"],
     rationale: "Security spend is non-discretionary. Regulatory tailwinds (NIS2, DORA, SEC rules) are forcing enterprises to validate resilience continuously.",
     stage: "Seed to Series A",
     color: "#ef4444",

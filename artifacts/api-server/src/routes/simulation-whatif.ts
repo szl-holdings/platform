@@ -37,7 +37,7 @@ function computeWhatIf(vars: Record<string, number>, _iterations: number): Domai
 
   return [
     {
-      domain: 'SEXTANT',
+      domain: 'Vessels',
       icon: '⚓',
       color: '#0ea5e9',
       impactLabel: 'Fuel Cost Delta',
@@ -53,7 +53,7 @@ function computeWhatIf(vars: Record<string, number>, _iterations: number): Domai
       affectedEntities: oil !== 0 ? ['MV Poseidon', 'MV Argo', 'MV Triton'] : [],
     },
     {
-      domain: 'DOMAINE',
+      domain: 'Terra',
       icon: '⬢',
       color: '#22c55e',
       impactLabel: 'Portfolio Valuation',
@@ -127,7 +127,7 @@ function computeWhatIf(vars: Record<string, number>, _iterations: number): Domai
         Math.abs(market) > 15 ? ['Emerging Markets Client', 'PE Strategy Engagement'] : [],
     },
     {
-      domain: 'PARAGON',
+      domain: 'Aegis',
       icon: '🛡',
       color: '#ef4444',
       impactLabel: 'Threat Surface',

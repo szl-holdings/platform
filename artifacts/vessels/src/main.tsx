@@ -24,7 +24,7 @@ if ('serviceWorker' in navigator && !import.meta.env.DEV) {
 }
 
 createRoot(document.getElementById('root')!).render(
-  <ErrorBoundary appName="SEXTANT Maritime Intelligence" accentColor="#4a90b8">
+  <ErrorBoundary appName="Vessels Maritime Intelligence" accentColor="#4a90b8">
     <GraphQLProvider>
       <App />
     </GraphQLProvider>

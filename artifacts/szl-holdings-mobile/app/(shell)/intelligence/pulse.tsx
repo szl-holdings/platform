@@ -40,7 +40,7 @@ async function ensureDailyBriefNotification(): Promise<void> {
     const id = await Notifications.scheduleNotificationAsync({
       content: {
         title: "LUMINA — today's brief is ready",
-        body: 'Your 06:00 executive briefing from FORGE is available to read.',
+        body: 'Your 06:00 executive briefing from Counsel is available to read.',
         data: { route: '/intelligence/pulse' },
         sound: true,
       },
@@ -439,7 +439,7 @@ export default function PulseScreen() {
               <Text style={styles.classifText}>EXEC-RESTRICTED</Text>
             </View>
           </View>
-          <Text style={styles.headerSub}>AI Executive Briefing · FORGE</Text>
+          <Text style={styles.headerSub}>AI Executive Briefing · Counsel</Text>
         </View>
         <TouchableOpacity
           onPress={() => {

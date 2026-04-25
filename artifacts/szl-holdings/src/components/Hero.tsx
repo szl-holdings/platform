@@ -105,7 +105,7 @@ export function Hero() {
                   fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
                 }}
               >
-                KORA + FORGE
+                Lyte + Counsel
               </span>
             </m.div>
 
@@ -130,7 +130,7 @@ export function Hero() {
               className="text-[15px] sm:text-base leading-relaxed mb-8"
               style={{ color: 'hsl(210,10%,55%)', maxWidth: '36rem' }}
             >
-              KORA + FORGE helps teams surface critical business signals, route action fast, and
+              Lyte + Counsel helps teams surface critical business signals, route action fast, and
               verify follow-through across the workflows that usually break between systems.
             </m.p>
 
@@ -187,8 +187,8 @@ export function Hero() {
               className="flex flex-wrap gap-8 sm:gap-10"
             >
               {[
-                { value: 'KORA', label: 'Decision Intelligence' },
-                { value: 'FORGE', label: 'Execution Orchestration' },
+                { value: 'Lyte', label: 'Decision Intelligence' },
+                { value: 'Counsel', label: 'Execution Orchestration' },
                 { value: 'One', label: 'Unified Operating Layer' },
               ].map((stat) => (
                 <div key={stat.label} className="flex flex-col">
@@ -248,10 +248,10 @@ export function Hero() {
               </p>
               <div className="space-y-2">
                 {[
-                  { signal: 'Approval stuck 6 days', source: 'KORA Signal' },
-                  { signal: 'No owner on critical path', source: 'KORA Signal' },
-                  { signal: 'Action routed, unverified', source: 'FORGE Engine' },
-                  { signal: 'Follow-through confirmed', source: 'FORGE Engine' },
+                  { signal: 'Approval stuck 6 days', source: 'Lyte Signal' },
+                  { signal: 'No owner on critical path', source: 'Lyte Signal' },
+                  { signal: 'Action routed, unverified', source: 'Counsel Engine' },
+                  { signal: 'Follow-through confirmed', source: 'Counsel Engine' },
                 ].map((item, i) => (
                   <m.div
                     key={item.signal}

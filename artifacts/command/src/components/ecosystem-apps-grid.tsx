@@ -11,7 +11,7 @@ export const ECOSYSTEM_APPS = [
   },
   {
     href: '/lyte-command-center/',
-    label: 'KORA Command Center',
+    label: 'Lyte Command Center',
     description:
       'AIOps observability hub — autonomous NOC, SLO tracking, and self-healing workflows',
     icon: Zap,

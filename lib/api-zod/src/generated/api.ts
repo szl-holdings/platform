@@ -184,7 +184,7 @@ export const ListDecisionsResponse = zod.object({
           rawInput: zod.string().nullish(),
           rawOutput: zod.string().nullish(),
         })
-        .describe('Schema-validated FORGE decision object (v2.0.0)'),
+        .describe('Schema-validated Counsel decision object (v2.0.0)'),
     )
     .optional(),
 });
@@ -279,7 +279,7 @@ export const GetDecisionResponse = zod.object({
       rawOutput: zod.string().nullish(),
     })
     .optional()
-    .describe('Schema-validated FORGE decision object (v2.0.0)'),
+    .describe('Schema-validated Counsel decision object (v2.0.0)'),
   approvalPolicy: zod
     .object({
       requiresApproval: zod.boolean().optional(),
@@ -358,7 +358,7 @@ export const ApproveDecisionResponse = zod.object({
       rawOutput: zod.string().nullish(),
     })
     .optional()
-    .describe('Schema-validated FORGE decision object (v2.0.0)'),
+    .describe('Schema-validated Counsel decision object (v2.0.0)'),
   message: zod.string().optional(),
 });
 
@@ -429,7 +429,7 @@ export const RejectDecisionResponse = zod.object({
       rawOutput: zod.string().nullish(),
     })
     .optional()
-    .describe('Schema-validated FORGE decision object (v2.0.0)'),
+    .describe('Schema-validated Counsel decision object (v2.0.0)'),
   message: zod.string().optional(),
 });
 
@@ -3337,7 +3337,7 @@ export const ListPlatformDecisionsResponse = zod.object({
           rawInput: zod.string().nullish(),
           rawOutput: zod.string().nullish(),
         })
-        .describe('Schema-validated FORGE decision object (v2.0.0)'),
+        .describe('Schema-validated Counsel decision object (v2.0.0)'),
     )
     .optional(),
 });
@@ -3412,7 +3412,7 @@ export const GetPlatformDecisionResponse = zod
     rawInput: zod.string().nullish(),
     rawOutput: zod.string().nullish(),
   })
-  .describe('Schema-validated FORGE decision object (v2.0.0)');
+  .describe('Schema-validated Counsel decision object (v2.0.0)');
 
 /**
  * @summary Approve a platform-level decision

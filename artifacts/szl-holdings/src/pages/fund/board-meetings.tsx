@@ -41,7 +41,7 @@ type BoardMeeting = {
 
 const MEETINGS: BoardMeeting[] = [
   {
-    id: "m1", company: "SEXTANT", companyColor: "#4a90b8", type: "board",
+    id: "m1", company: "Vessels", companyColor: "#4a90b8", type: "board",
     date: "Apr 22, 2026", time: "10:00 AM EST", location: "Video — Zoom",
     status: "upcoming", recordingAvailable: false,
     attendees: ["S. Lutar (Observer)", "J. Moreira (CEO)", "K. Singh (CFO)", "A. Peters (Lead Investor)", "M. Chen (Independent)"],
@@ -63,7 +63,7 @@ const MEETINGS: BoardMeeting[] = [
     notes: "",
   },
   {
-    id: "m2", company: "PARAGON", companyColor: "#c45a4a", type: "board",
+    id: "m2", company: "Aegis", companyColor: "#c45a4a", type: "board",
     date: "Apr 18, 2026", time: "2:00 PM EST", location: "Video — Zoom",
     status: "completed", recordingAvailable: true,
     attendees: ["S. Lutar (Observer)", "D. Ramirez (CEO)", "L. Park (CTO)", "R. Okonkwo (Lead Investor)", "T. Harrington (Independent)"],
@@ -88,7 +88,7 @@ const MEETINGS: BoardMeeting[] = [
     notes: "Strong Q1. Bridge approved unanimously. SOC facility tabled pending additional vendor bids.",
   },
   {
-    id: "m3", company: "DOMAINE", companyColor: "#c8953c", type: "board",
+    id: "m3", company: "Terra", companyColor: "#c8953c", type: "board",
     date: "Apr 15, 2026", time: "11:00 AM EST", location: "In-Person — SZL HQ",
     status: "completed", recordingAvailable: false,
     attendees: ["S. Lutar (Board Observer)", "P. Nguyen (CEO)", "Y. Adeyemi (CFO)", "C. Markus (Lead Investor)"],
@@ -110,7 +110,7 @@ const MEETINGS: BoardMeeting[] = [
     notes: "Strong revenue recognition quarter. Enterprise deals closing Q2. Follow-on deferred to next meeting.",
   },
   {
-    id: "m4", company: "KORA", companyColor: "#6aaa72", type: "committee",
+    id: "m4", company: "Lyte", companyColor: "#6aaa72", type: "committee",
     date: "May 5, 2026", time: "9:00 AM EST", location: "Video — Google Meet",
     status: "upcoming", recordingAvailable: false,
     attendees: ["S. Lutar (Observer)", "A. Osei (CEO)", "B. Kowalski (CTO)"],
@@ -130,22 +130,22 @@ const MEETINGS: BoardMeeting[] = [
 ];
 
 const ACTION_ITEMS: ActionItem[] = [
-  { id: "a1", description: "Draft Series A extension docs — fully executed copies to SZL by Apr 25", owner: "PARAGON Legal", dueDate: "Apr 25, 2026", status: "in_progress", meetingId: "m2", company: "PARAGON" },
-  { id: "a2", description: "Send CISO offer letter pending board authorization", owner: "PARAGON HR", dueDate: "Apr 22, 2026", status: "open", meetingId: "m2", company: "PARAGON" },
-  { id: "a3", description: "Provide 3 additional SOC facility vendor bids for next meeting", owner: "PARAGON COO", dueDate: "May 15, 2026", status: "open", meetingId: "m2", company: "PARAGON" },
-  { id: "a4", description: "Finalize ELC Realty enterprise contract — legal review complete", owner: "DOMAINE Legal", dueDate: "Apr 30, 2026", status: "in_progress", meetingId: "m3", company: "DOMAINE" },
-  { id: "a5", description: "Prepare Draft Budget Revision FY2026 for SEXTANT board package", owner: "SEXTANT CFO", dueDate: "Apr 20, 2026", status: "overdue", meetingId: "m1", company: "SEXTANT" },
-  { id: "a6", description: "Submit Q1 financial statements to SZL for LP reporting consolidation", owner: "DOMAINE CFO", dueDate: "Apr 18, 2026", status: "completed", meetingId: "m3", company: "DOMAINE" },
-  { id: "a7", description: "Share Port of Rotterdam LOI draft for SZL review", owner: "SEXTANT CEO", dueDate: "Apr 28, 2026", status: "open", meetingId: "m1", company: "SEXTANT" },
+  { id: "a1", description: "Draft Series A extension docs — fully executed copies to SZL by Apr 25", owner: "Aegis Legal", dueDate: "Apr 25, 2026", status: "in_progress", meetingId: "m2", company: "Aegis" },
+  { id: "a2", description: "Send CISO offer letter pending board authorization", owner: "Aegis HR", dueDate: "Apr 22, 2026", status: "open", meetingId: "m2", company: "Aegis" },
+  { id: "a3", description: "Provide 3 additional SOC facility vendor bids for next meeting", owner: "Aegis COO", dueDate: "May 15, 2026", status: "open", meetingId: "m2", company: "Aegis" },
+  { id: "a4", description: "Finalize ELC Realty enterprise contract — legal review complete", owner: "Terra Legal", dueDate: "Apr 30, 2026", status: "in_progress", meetingId: "m3", company: "Terra" },
+  { id: "a5", description: "Prepare Draft Budget Revision FY2026 for Vessels board package", owner: "Vessels CFO", dueDate: "Apr 20, 2026", status: "overdue", meetingId: "m1", company: "Vessels" },
+  { id: "a6", description: "Submit Q1 financial statements to SZL for LP reporting consolidation", owner: "Terra CFO", dueDate: "Apr 18, 2026", status: "completed", meetingId: "m3", company: "Terra" },
+  { id: "a7", description: "Share Port of Rotterdam LOI draft for SZL review", owner: "Vessels CEO", dueDate: "Apr 28, 2026", status: "open", meetingId: "m1", company: "Vessels" },
 ];
 
 const RESOLUTIONS_ARCHIVE = [
-  { id: "res-001", company: "PARAGON", date: "Apr 18, 2026", title: "Approve Series A extension — $2M bridge at same valuation", status: "adopted" },
-  { id: "res-002", company: "PARAGON", date: "Apr 18, 2026", title: "Authorize CISO hire at executive compensation band", status: "adopted" },
-  { id: "res-003", company: "DOMAINE", date: "Apr 15, 2026", title: "Approve Q1 2026 financial statements for LP reporting", status: "adopted" },
-  { id: "res-004", company: "DOMAINE", date: "Apr 15, 2026", title: "Authorize enterprise deal — ELC Realty Group ($180K ARR)", status: "adopted" },
-  { id: "res-005", company: "SEXTANT", date: "Feb 10, 2026", title: "Approve bridge financing — $1.5M convertible note", status: "adopted" },
-  { id: "res-006", company: "KORA", date: "Jan 20, 2026", title: "Approve equity option grant pool expansion to 12%", status: "adopted" },
+  { id: "res-001", company: "Aegis", date: "Apr 18, 2026", title: "Approve Series A extension — $2M bridge at same valuation", status: "adopted" },
+  { id: "res-002", company: "Aegis", date: "Apr 18, 2026", title: "Authorize CISO hire at executive compensation band", status: "adopted" },
+  { id: "res-003", company: "Terra", date: "Apr 15, 2026", title: "Approve Q1 2026 financial statements for LP reporting", status: "adopted" },
+  { id: "res-004", company: "Terra", date: "Apr 15, 2026", title: "Authorize enterprise deal — ELC Realty Group ($180K ARR)", status: "adopted" },
+  { id: "res-005", company: "Vessels", date: "Feb 10, 2026", title: "Approve bridge financing — $1.5M convertible note", status: "adopted" },
+  { id: "res-006", company: "Lyte", date: "Jan 20, 2026", title: "Approve equity option grant pool expansion to 12%", status: "adopted" },
 ];
 
 const STATUS_STYLES: Record<MeetingStatus, { label: string; color: string; bg: string }> = {

@@ -3,19 +3,19 @@ import { m } from 'framer-motion';
 const PROOF_ITEMS = [
   {
     label: 'Approval latency detection',
-    sublabel: 'KORA · Operational decision intelligence',
+    sublabel: 'Lyte · Operational decision intelligence',
     accent: 'hsl(192,80%,48%)',
     accentRgb: '6,182,212',
   },
   {
     label: 'Dark vessel pre-detection',
-    sublabel: 'SEXTANT · Before formal designation',
+    sublabel: 'Vessels · Before formal designation',
     accent: 'hsl(210,78%,44%)',
     accentRgb: '34,104,175',
   },
   {
     label: 'Decision velocity',
-    sublabel: 'FORGE · Workflow orchestration',
+    sublabel: 'Counsel · Workflow orchestration',
     accent: 'hsl(222,68%,58%)',
     accentRgb: '86,122,214',
   },
@@ -29,7 +29,7 @@ const PROOF_ITEMS = [
 
 const proofs = [
   {
-    platform: 'KORA',
+    platform: 'Lyte',
     view: 'Command View',
     desc: 'Signals surfaced, owners identified, value at risk quantified across business operations.',
     accent: 'hsl(192, 80%, 48%)',
@@ -38,7 +38,7 @@ const proofs = [
     status: 'Live',
   },
   {
-    platform: 'SEXTANT',
+    platform: 'Vessels',
     view: 'Fleet Command',
     desc: 'Route visibility, voyage economics, and exceptions in one operational layer.',
     accent: 'hsl(210, 78%, 44%)',
@@ -47,7 +47,7 @@ const proofs = [
     status: 'Live',
   },
   {
-    platform: 'FORGE',
+    platform: 'Counsel',
     view: 'Architecture',
     desc: '6-layer pipeline: Inputs → Normalization → Reasoning → Orchestration → Outputs → Governance.',
     accent: 'hsl(222, 68%, 58%)',
@@ -56,9 +56,9 @@ const proofs = [
     status: 'Live',
   },
   {
-    platform: 'KORA',
-    view: 'KORA Readiness',
-    desc: 'KORA Readiness is a first-class module within KORA for execution tracking and maturity scoring.',
+    platform: 'Lyte',
+    view: 'Lyte Readiness',
+    desc: 'Lyte Readiness is a first-class module within Lyte for execution tracking and maturity scoring.',
     accent: 'hsl(192, 80%, 48%)',
     accentRgb: '6, 182, 212',
     href: '/command/operations/',

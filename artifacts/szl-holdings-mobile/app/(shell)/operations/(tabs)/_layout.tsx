@@ -53,7 +53,7 @@ const operationsCommands: SpotlightCommand[] = [
   },
   {
     id: 'nav-ai',
-    label: 'KORA AI',
+    label: 'Lyte AI',
     description: 'AIOps intelligence assistant',
     icon: '🤖',
     group: 'Navigate',
@@ -87,7 +87,7 @@ function NativeTabLayout() {
             selected: 'bubble.left.and.bubble.right.fill',
           }}
         />
-        <Label>KORA AI</Label>
+        <Label>Lyte AI</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="signals" options={{ href: null } as any} />
       <NativeTabs.Trigger name="board-mode" options={{ href: null } as any} />
@@ -161,7 +161,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="agent-chat"
         options={{
-          title: 'KORA AI',
+          title: 'Lyte AI',
           tabBarIcon: ({ color }) =>
             isIOS ? (
               <SymbolView name="bubble.left.and.bubble.right.fill" tintColor={color} size={22} />

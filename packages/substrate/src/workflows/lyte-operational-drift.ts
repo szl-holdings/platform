@@ -28,9 +28,9 @@ import type { PipelineRun, RuntimeStartOptions } from '../types.js';
 
 export const lyteOperationalDriftWorkflow = defineWorkflow({
   id: 'lyte-operational-drift',
-  name: 'KORA — Operational Drift Review',
+  name: 'Lyte — Operational Drift Review',
   description:
-    'Detects gradual operational drift across KORA infrastructure: SLO creep, ' +
+    'Detects gradual operational drift across Lyte infrastructure: SLO creep, ' +
     'configuration divergence, and capacity trend anomalies. Produces a drift ' +
     'packet with prioritised remediation steps gated through operator approval.',
   version: '1.0.0',
@@ -39,7 +39,7 @@ export const lyteOperationalDriftWorkflow = defineWorkflow({
 
   policy: definePolicy({
     id: 'lyte-drift-policy',
-    name: 'KORA Operational Drift Policy',
+    name: 'Lyte Operational Drift Policy',
     highRiskCategories: ['infrastructure', 'write-external', 'financial', 'deletion'],
     policyIds: ['pol-001', 'pol-002', 'pol-lyte-drift'],
     minimumApprovalTier: 'operator',
@@ -53,7 +53,7 @@ export const lyteOperationalDriftWorkflow = defineWorkflow({
       name: 'Retrieve: Drift Signal Corpus',
       description:
         'Pulls SLO compliance history, configuration snapshots, resource utilisation trends, ' +
-        'and alert timelines from the KORA metrics store and trace index.',
+        'and alert timelines from the Lyte metrics store and trace index.',
       retrieverAdapterId: 'lyte-retriever',
       topK: 40,
       minRelevanceScore: 0.4,

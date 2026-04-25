@@ -292,7 +292,7 @@ export default function WorkspaceHome() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#4B8BDB' }}
             >
-              FORGE · Workspace
+              Counsel · Workspace
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Command Home</h1>

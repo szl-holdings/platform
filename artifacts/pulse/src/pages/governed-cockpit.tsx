@@ -151,7 +151,7 @@ export default function GovernedCockpit() {
             className="text-xs uppercase tracking-widest font-semibold"
             style={{ color: '#4a6070' }}
           >
-            Executive Intelligence · Deterministic Fallback (FORGE integration active)
+            Executive Intelligence · Deterministic Fallback (Counsel integration active)
           </span>
         </div>
 

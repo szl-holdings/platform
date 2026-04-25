@@ -125,7 +125,7 @@ export default function GovernedCockpit() {
             </div>
             <div>
               <div className="text-sm font-semibold" style={{ color: '#c8d8e8' }}>
-                PARAGON — Governed Security Intelligence
+                Aegis — Governed Security Intelligence
               </div>
               <div className="text-xs" style={{ color: '#4a6070' }}>
                 Every threat, compliance gap, and risk carries a full proof chain
@@ -148,7 +148,7 @@ export default function GovernedCockpit() {
             className="text-xs uppercase tracking-widest font-semibold"
             style={{ color: '#4a6070' }}
           >
-            Live Threat Intelligence · Deterministic Fallback (FORGE integration active)
+            Live Threat Intelligence · Deterministic Fallback (Counsel integration active)
           </span>
         </div>
 

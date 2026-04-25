@@ -403,7 +403,7 @@ export function PulseBriefingPanel({
         }}
       >
         <span style={{ fontSize: '0.62rem', color: '#394560' }}>
-          FORGE · {section?.agentName ?? 'FORGE'} ·{' '}
+          Counsel · {section?.agentName ?? 'Counsel'} ·{' '}
           {new Date(section?.lastUpdated ?? data.briefingDate).toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',

@@ -523,13 +523,13 @@ export function buildWelcomeEmail(name: string, _email: string): string {
   return szlBrand(`
     <h2>Welcome to SZL Holdings</h2>
     <p>Hello ${name},</p>
-    <p>You're now connected to SZL Holdings — we build <strong>KORA</strong>, a business observability platform that surfaces revenue stalls, approval gaps, and ownership drift before they compound.</p>
-    <p>Powered by <strong>FORGE</strong>, our execution fabric that routes signals to accountable action.</p>
+    <p>You're now connected to SZL Holdings — we build <strong>Lyte</strong>, a business observability platform that surfaces revenue stalls, approval gaps, and ownership drift before they compound.</p>
+    <p>Powered by <strong>Counsel</strong>, our execution fabric that routes signals to accountable action.</p>
     <div class="highlight">
-      <p><strong>KORA</strong> — Business observability. Surfaces what's stalling, aging, or drifting before it costs you.</p>
+      <p><strong>Lyte</strong> — Business observability. Surfaces what's stalling, aging, or drifting before it costs you.</p>
     </div>
     <div class="highlight">
-      <p><strong>FORGE</strong> — Execution fabric. Workflow orchestration, signal routing, audit trail, and policy-gated action.</p>
+      <p><strong>Counsel</strong> — Execution fabric. Workflow orchestration, signal routing, audit trail, and policy-gated action.</p>
     </div>
     <p>Explore the platform:</p>
     <a class="cta" href="${process.env.VITE_APP_URL || 'https://szlholdings.com'}">Visit SZL Holdings</a>

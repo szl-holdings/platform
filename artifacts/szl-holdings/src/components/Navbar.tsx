@@ -7,9 +7,9 @@ import { NotificationBell } from './NotificationBell';
 
 const navLinks = [
   { label: 'Ecosystem', href: '/ecosystem' },
-  { label: 'FORGE', href: '/alloy', external: '/alloy/' },
-  { label: 'KORA', href: '/lyte', external: '/command/operations/' },
-  { label: 'SEXTANT', href: '/vessels', external: '/vessels/' },
+  { label: 'Counsel', href: '/alloy', external: '/alloy/' },
+  { label: 'Lyte', href: '/lyte', external: '/command/operations/' },
+  { label: 'Vessels', href: '/vessels', external: '/vessels/' },
   { label: 'Trust', href: '/trust' },
   { label: 'LUMINA', href: '/pulse' },
   { label: 'Leadership', href: '/leadership' },

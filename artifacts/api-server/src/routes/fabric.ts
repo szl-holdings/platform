@@ -361,7 +361,7 @@ function computeLiveCorrelations(signals: Array<ReturnType<typeof mapBusSignal>>
 const PRODUCTS = [
   {
     id: 'lyte',
-    label: 'KORA',
+    label: 'Lyte',
     color: '#d4a054',
     icon: '⚡',
     status: 'healthy',
@@ -370,7 +370,7 @@ const PRODUCTS = [
   },
   {
     id: 'vessels',
-    label: 'SEXTANT',
+    label: 'Vessels',
     color: '#0ea5e9',
     icon: '⚓',
     status: 'warning',
@@ -379,7 +379,7 @@ const PRODUCTS = [
   },
   {
     id: 'terra',
-    label: 'DOMAINE',
+    label: 'Terra',
     color: '#22c55e',
     icon: '⬢',
     status: 'healthy',
@@ -397,7 +397,7 @@ const PRODUCTS = [
   },
   {
     id: 'aegis',
-    label: 'PARAGON',
+    label: 'Aegis',
     color: '#ef4444',
     icon: '⚔',
     status: 'critical',

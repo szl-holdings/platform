@@ -394,7 +394,7 @@ export default function PortCongestionPage() {
         {[
           { label: 'Ports Critical', value: criticalCount, icon: AlertTriangle, color: '#ef4444' },
           { label: 'Ports Congested', value: congestedCount, icon: Activity, color: '#f97316' },
-          { label: 'SEXTANT Waiting', value: totalWaiting, icon: Ship, color: '#38bdf8' },
+          { label: 'Vessels Waiting', value: totalWaiting, icon: Ship, color: '#38bdf8' },
           { label: 'Avg Wait Time', value: `${avgWait}h`, icon: Clock, color: '#a78bfa' },
         ].map(({ label, value, icon: Icon, color }) => (
           <div
@@ -536,13 +536,13 @@ export default function PortCongestionPage() {
                 <div className="grid grid-cols-4 gap-3">
                   {[
                     {
-                      label: 'SEXTANT at Anchor',
+                      label: 'Vessels at Anchor',
                       value: selectedPort.vessels_anchored,
                       icon: Anchor,
                       color: '#38bdf8',
                     },
                     {
-                      label: 'SEXTANT Waiting',
+                      label: 'Vessels Waiting',
                       value: selectedPort.vessels_waiting,
                       icon: Ship,
                       color: '#f97316',

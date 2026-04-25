@@ -24,12 +24,12 @@ interface Notification {
 
 const APP_SOURCES = [
   { id: 'all', label: 'All Sources' },
-  { id: 'aegis', label: 'PARAGON' },
-  { id: 'vessels', label: 'SEXTANT' },
-  { id: 'terra', label: 'DOMAINE' },
-  { id: 'lyte', label: 'KORA' },
+  { id: 'aegis', label: 'Aegis' },
+  { id: 'vessels', label: 'Vessels' },
+  { id: 'terra', label: 'Terra' },
+  { id: 'lyte', label: 'Lyte' },
   { id: 'carlota-jo', label: 'Carlota Jo' },
-  { id: 'alloy', label: 'FORGE' },
+  { id: 'alloy', label: 'Counsel' },
   { id: 'system', label: 'System' },
 ];
 

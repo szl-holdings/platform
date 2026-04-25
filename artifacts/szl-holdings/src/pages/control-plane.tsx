@@ -28,7 +28,7 @@ const platformRegistry = [
     owner: 'Stephen Lutar',
   },
   {
-    name: 'FORGE',
+    name: 'Counsel',
     slug: 'alloy',
     type: 'Intelligence Engine',
     tier: 'Flagship',
@@ -52,7 +52,7 @@ const platformRegistry = [
     owner: 'Decision Intelligence Team',
   },
   {
-    name: 'SEXTANT',
+    name: 'Vessels',
     slug: 'vessels',
     type: 'Maritime Command',
     tier: 'Flagship',
@@ -64,7 +64,7 @@ const platformRegistry = [
     owner: 'Maritime Ops',
   },
   {
-    name: 'PARAGON',
+    name: 'Aegis',
     slug: 'aegis',
     type: 'Cyber Defense',
     tier: 'Platform',
@@ -88,7 +88,7 @@ const platformRegistry = [
     owner: 'AI Research',
   },
   {
-    name: 'DOMAINE',
+    name: 'Terra',
     slug: 'terra',
     type: 'Portfolio Intelligence',
     tier: 'Platform',
@@ -100,7 +100,7 @@ const platformRegistry = [
     owner: 'Real Estate Ops',
   },
   {
-    name: 'PARAGON Operations',
+    name: 'Aegis Operations',
     slug: 'msp',
     type: 'Incident Command',
     tier: 'Platform',
@@ -297,7 +297,7 @@ const featureFlags = [
   {
     key: 'predictive_scoring',
     label: 'Predictive Risk Scoring',
-    scope: 'PARAGON, SEXTANT',
+    scope: 'Aegis, Vessels',
     enabled: true,
     rollout: 100,
     owner: 'Platform',
@@ -313,7 +313,7 @@ const featureFlags = [
   {
     key: 'multi_agent_orchestration',
     label: 'Multi-Agent Orchestration',
-    scope: 'FORGE, APEX',
+    scope: 'Counsel, SZL Cortex',
     enabled: true,
     rollout: 60,
     owner: 'AI Team',
@@ -329,7 +329,7 @@ const featureFlags = [
   {
     key: 'advanced_analytics',
     label: 'Advanced Analytics Export',
-    scope: 'KORA, DOMAINE',
+    scope: 'Lyte, Terra',
     enabled: false,
     rollout: 0,
     owner: 'Analytics',
@@ -337,7 +337,7 @@ const featureFlags = [
   {
     key: 'voice_interface',
     label: 'Voice Command Interface',
-    scope: 'PARAGON Operations, PARAGON',
+    scope: 'Aegis Operations, Aegis',
     enabled: false,
     rollout: 0,
     owner: 'AI Team',
@@ -365,7 +365,7 @@ const auditLog = [
     id: 'AUD-2840',
     actor: 'Platform CI',
     action: 'Deployment completed',
-    target: 'SEXTANT v3.1.2 → production',
+    target: 'Vessels v3.1.2 → production',
     time: '2 hr ago',
     severity: 'info',
   },
@@ -413,7 +413,7 @@ const auditLog = [
     id: 'AUD-2834',
     actor: 'Platform CI',
     action: 'Deployment completed',
-    target: 'FORGE v3.8.0 → production',
+    target: 'Counsel v3.8.0 → production',
     time: '3 days ago',
     severity: 'info',
   },

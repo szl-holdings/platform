@@ -163,7 +163,7 @@ export default function LandingPage() {
         <div className="relative text-center max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/5 text-[11px] text-cyan-400 font-mono mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-            Business Observability · Powered by FORGE
+            Business Observability · Powered by Counsel
           </div>
 
           <h1 className="font-display font-bold text-[52px] leading-[1.05] tracking-tight text-white mb-6">
@@ -404,7 +404,7 @@ export default function LandingPage() {
           ))}
         </div>
         <p className="text-[11px] text-slate-600 uppercase tracking-widest">
-          Powered by FORGE · SZL Holdings
+          Powered by Counsel · SZL Holdings
         </p>
       </section>
 

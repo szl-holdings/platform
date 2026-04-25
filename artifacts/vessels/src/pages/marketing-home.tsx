@@ -195,7 +195,7 @@ function LiveFleetPanel() {
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-[11px] font-medium text-sky-300/60 tracking-wide uppercase">
-              Live Fleet — 214 SEXTANT Tracked
+              Live Fleet — 214 Vessels Tracked
             </span>
           </div>
           <span className="text-[10px] text-sky-400/70 font-mono">Updated 12s ago</span>
@@ -425,7 +425,7 @@ export default function MarketingHomePage() {
       <section className="border-y border-sky-500/8 bg-[#060d1a]">
         <div className="max-w-6xl mx-auto px-5 sm:px-6 py-6 sm:py-8 grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            { value: 214, suffix: '+', label: 'SEXTANT tracked' },
+            { value: 214, suffix: '+', label: 'Vessels tracked' },
             { value: 84, suffix: '%', label: 'On-time arrival rate' },
             { value: 47, label: 'Countries covered' },
             { value: 99, suffix: '.97%', label: 'Platform uptime' },
@@ -665,7 +665,7 @@ export default function MarketingHomePage() {
               Platform Walkthrough
             </p>
             <h2 className="text-3xl sm:text-4xl font-bold text-sky-50 mb-3 tracking-tight">
-              How SEXTANT works in practice
+              How Vessels works in practice
             </h2>
             <p className="text-sky-300/70 text-[14px] max-w-xl mx-auto">
               From AIS connection to full fleet intelligence in under 15 minutes.
@@ -678,7 +678,7 @@ export default function MarketingHomePage() {
                 {
                   step: '01',
                   title: 'Connect your AIS feed',
-                  body: 'SEXTANT ingests AIS data from public feeds (Digitraffic, BarentsWatch) or your existing provider. Demo dashboards use simulated AIS data where commercial feeds are not contracted. Historical voyage data loads automatically. Fleet roster builds from your existing records in minutes.',
+                  body: 'Vessels ingests AIS data from public feeds (Digitraffic, BarentsWatch) or your existing provider. Demo dashboards use simulated AIS data where commercial feeds are not contracted. Historical voyage data loads automatically. Fleet roster builds from your existing records in minutes.',
                   tag: 'Setup',
                 },
                 {
@@ -736,7 +736,7 @@ export default function MarketingHomePage() {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl sm:text-4xl font-bold text-sky-50 mb-4 tracking-tight">
-              See SEXTANT{' '}
+              See Vessels{' '}
               <span className="bg-gradient-to-r from-cyan-300 to-teal-400 bg-clip-text text-transparent">
                 in action.
               </span>
@@ -785,7 +785,7 @@ export default function MarketingHomePage() {
         onClose={() => setDemoOpen(false)}
         type="demo"
         app="vessels"
-        subtitle="SEXTANT — Maritime Fleet Intelligence"
+        subtitle="Vessels — Maritime Fleet Intelligence"
       />
     </div>
   );

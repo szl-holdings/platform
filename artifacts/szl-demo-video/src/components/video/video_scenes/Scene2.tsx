@@ -8,12 +8,12 @@ export function Scene2() {
   useEffect(() => {
     const timers = [
       setTimeout(() => setActiveSurface(0), 0), // LUMINA
-      setTimeout(() => setActiveSurface(1), 2500), // SEXTANT
-      setTimeout(() => setActiveSurface(2), 5000), // DOMAINE
-      setTimeout(() => setActiveSurface(3), 7500), // PARAGON
+      setTimeout(() => setActiveSurface(1), 2500), // Vessels
+      setTimeout(() => setActiveSurface(2), 5000), // Terra
+      setTimeout(() => setActiveSurface(3), 7500), // Aegis
       setTimeout(() => setActiveSurface(4), 10000), // Carlota Jo
       setTimeout(() => setActiveSurface(5), 12500), // TENAX
-      setTimeout(() => setActiveSurface(6), 15000), // KORA
+      setTimeout(() => setActiveSurface(6), 15000), // Lyte
       setTimeout(() => setActiveSurface(7), 17500), // Counsel
       setTimeout(() => setActiveSurface(8), 20000), // Counsel
       setTimeout(() => setActiveSurface(9), 22500), // Unified Command
@@ -57,7 +57,7 @@ export function Scene2() {
       ),
     },
     {
-      name: 'SEXTANT',
+      name: 'Vessels',
       desc: 'MARITIME INTELLIGENCE',
       color: 'var(--color-vessels)',
       mock: (
@@ -108,7 +108,7 @@ export function Scene2() {
       ),
     },
     {
-      name: 'DOMAINE',
+      name: 'Terra',
       desc: 'REAL ESTATE',
       color: 'var(--color-terra)',
       mock: (
@@ -143,7 +143,7 @@ export function Scene2() {
       ),
     },
     {
-      name: 'PARAGON',
+      name: 'Aegis',
       desc: 'DEFENSE & INTEL',
       color: 'var(--color-aegis)',
       mock: (
@@ -237,7 +237,7 @@ export function Scene2() {
       ),
     },
     {
-      name: 'KORA',
+      name: 'Lyte',
       desc: 'DECISION INTELLIGENCE',
       color: 'var(--color-lyte-cyan)',
       mock: (
@@ -324,11 +324,11 @@ export function Scene2() {
           </div>
           <div className="grid grid-cols-2 gap-[1vw]">
             <div className="bg-[var(--color-bg-base)] border border-[var(--color-aegis)]/30 p-[1vw] rounded">
-              <div className="font-mono text-[0.6vw] text-[var(--color-text-muted)]">PARAGON</div>
+              <div className="font-mono text-[0.6vw] text-[var(--color-text-muted)]">Aegis</div>
               <div className="font-mono text-[1.2vw] text-[var(--color-text-primary)]">61</div>
             </div>
             <div className="bg-[var(--color-bg-base)] border border-[var(--color-vessels)]/30 p-[1vw] rounded">
-              <div className="font-mono text-[0.6vw] text-[var(--color-text-muted)]">SEXTANT</div>
+              <div className="font-mono text-[0.6vw] text-[var(--color-text-muted)]">Vessels</div>
               <div className="font-mono text-[1.2vw] text-[var(--color-text-primary)]">
                 82 <span className="text-[0.6vw] text-[var(--color-text-muted)]">($847M)</span>
               </div>
@@ -341,7 +341,7 @@ export function Scene2() {
               </div>
             </div>
             <div className="bg-[var(--color-bg-base)] border border-[var(--color-lyte-cyan)]/30 p-[1vw] rounded">
-              <div className="font-mono text-[0.6vw] text-[var(--color-text-muted)]">KORA</div>
+              <div className="font-mono text-[0.6vw] text-[var(--color-text-muted)]">Lyte</div>
               <div className="font-mono text-[1.2vw] text-[var(--color-text-primary)]">
                 88 <span className="text-[0.6vw] text-[var(--color-text-muted)]">(99.97%)</span>
               </div>

@@ -71,8 +71,8 @@ const STATUS_CFG: Record<
 const HANDOFFS: AgentHandoff[] = [
   {
     id: 'A2A-0041',
-    fromAgent: 'FORGE Orchestrator',
-    toAgent: 'SEXTANT Route Optimizer',
+    fromAgent: 'Counsel Orchestrator',
+    toAgent: 'Vessels Route Optimizer',
     toAgentType: 'internal',
     subtask: 'Calculate alternate routes for 3 vessels affected by Pacific storm',
     context: 'Storm impact radius: 450nm · Fleet: Pacific cluster · SLA: 6h deadline',
@@ -81,7 +81,7 @@ const HANDOFFS: AgentHandoff[] = [
     completedAt: '2026-04-01 03:24:18Z',
     receiptId: 'REC-A2A-0041',
     confidence: 0.92,
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
     evidence: [
       '3 vessels within storm radius',
@@ -93,8 +93,8 @@ const HANDOFFS: AgentHandoff[] = [
   },
   {
     id: 'A2A-0040',
-    fromAgent: 'FORGE Orchestrator',
-    toAgent: 'DOMAINE Valuation Agent',
+    fromAgent: 'Counsel Orchestrator',
+    toAgent: 'Terra Valuation Agent',
     toAgentType: 'internal',
     subtask: 'Run DCF valuation on 2 assets flagged by ownership conflict detector',
     context:
@@ -104,7 +104,7 @@ const HANDOFFS: AgentHandoff[] = [
     completedAt: '2026-04-01 01:06:38Z',
     receiptId: 'REC-A2A-0040',
     confidence: 0.88,
-    pack: 'DOMAINE',
+    pack: 'Terra',
     packColor: '#a07848',
     evidence: [
       'TA-007: NAV $14.2M, 3 conflicting owners',
@@ -116,21 +116,21 @@ const HANDOFFS: AgentHandoff[] = [
   },
   {
     id: 'A2A-0039',
-    fromAgent: 'FORGE Orchestrator',
-    toAgent: 'PARAGON Compliance Agent',
+    fromAgent: 'Counsel Orchestrator',
+    toAgent: 'Aegis Compliance Agent',
     toAgentType: 'internal',
     subtask: 'Verify security controls for Q1 compliance certification',
     context: 'Framework: NIST CSF · Scope: 47 controls · Deadline: Q1 close',
     status: 'in_progress',
     initiatedAt: '2026-04-01 03:00:00Z',
-    pack: 'PARAGON',
+    pack: 'Aegis',
     packColor: '#4f6ef7',
     confidence: 0.79,
     evidence: ['28/47 controls assessed so far', '3 medium gaps identified', '0 critical findings'],
   },
   {
     id: 'A2A-0038',
-    fromAgent: 'FORGE Orchestrator',
+    fromAgent: 'Counsel Orchestrator',
     toAgent: 'PRISM Legal Research Agent',
     toAgentType: 'internal',
     subtask: 'Research jurisdiction-specific charter compliance requirements for Vessel MV-009',
@@ -142,7 +142,7 @@ const HANDOFFS: AgentHandoff[] = [
   },
   {
     id: 'A2A-0037',
-    fromAgent: 'FORGE Orchestrator',
+    fromAgent: 'Counsel Orchestrator',
     toAgent: 'ext:weather-forecast-api',
     toAgentType: 'remote',
     subtask: 'Fetch 72h weather forecast for Pacific shipping corridor (lat 30-45N, lon 140-165E)',
@@ -152,7 +152,7 @@ const HANDOFFS: AgentHandoff[] = [
     completedAt: '2026-04-01 03:20:04Z',
     receiptId: 'REC-A2A-0037',
     confidence: 0.97,
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
     evidence: [
       'Storm system detected 38.2N 151.4E',
@@ -164,7 +164,7 @@ const HANDOFFS: AgentHandoff[] = [
   },
   {
     id: 'A2A-0036',
-    fromAgent: 'FORGE Orchestrator',
+    fromAgent: 'Counsel Orchestrator',
     toAgent: 'ext:credit-rating-service',
     toAgentType: 'remote',
     subtask: 'Fetch current credit rating for charter counterparty: Maritime Holdings Ltd',
@@ -172,7 +172,7 @@ const HANDOFFS: AgentHandoff[] = [
     status: 'failed',
     initiatedAt: '2026-04-01 02:55:00Z',
     completedAt: '2026-04-01 02:56:12Z',
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
     failureReason: 'Remote agent returned error 429 — rate limit exceeded. Retry scheduled in 2h.',
   },
@@ -386,7 +386,7 @@ function mapApiHandoff(h: Record<string, unknown>): AgentHandoff {
   const respSchema = (h.responseSchema as Record<string, unknown>) ?? {};
   return {
     id: String(h.id ?? h.contractId ?? `A2A-${Date.now()}`),
-    fromAgent: String(h.sourcePackId ?? 'FORGE Orchestrator'),
+    fromAgent: String(h.sourcePackId ?? 'Counsel Orchestrator'),
     toAgent: String(h.targetPackId ?? h.targetEndpoint ?? 'External Agent'),
     toAgentType: h.targetPackId ? 'internal' : 'remote',
     subtask: String(h.description ?? h.name ?? 'Delegated subtask'),
@@ -394,7 +394,7 @@ function mapApiHandoff(h: Record<string, unknown>): AgentHandoff {
     status: toHandoffStatus(h.status),
     initiatedAt: String(h.createdAt ?? new Date().toISOString()),
     confidence: typeof h.confidence === 'number' ? h.confidence : undefined,
-    pack: String(h.sourcePackId ?? 'FORGE'),
+    pack: String(h.sourcePackId ?? 'Counsel'),
     packColor: '#d4a054',
     evidence: typeof h.examples === 'string' ? [h.examples] : [],
     result: String(respSchema.description ?? '—'),
@@ -404,7 +404,7 @@ function mapApiHandoff(h: Record<string, unknown>): AgentHandoff {
 function mapApiHandoffHistory(h: Record<string, unknown>): AgentHandoff {
   return {
     id: String(h.id ?? `A2A-HIS-${Date.now()}`),
-    fromAgent: String(h.sourcePackId ?? 'FORGE Orchestrator'),
+    fromAgent: String(h.sourcePackId ?? 'Counsel Orchestrator'),
     toAgent: String(h.targetPackId ?? 'External Agent'),
     toAgentType: h.targetPackId ? 'internal' : 'remote',
     subtask: String(h.taskDescription ?? h.requestSummary ?? 'Delegated subtask'),
@@ -414,7 +414,7 @@ function mapApiHandoffHistory(h: Record<string, unknown>): AgentHandoff {
     completedAt: h.completedAt ? String(h.completedAt) : undefined,
     receiptId: h.receiptId ? String(h.receiptId) : undefined,
     confidence: typeof h.confidence === 'number' ? h.confidence : undefined,
-    pack: String(h.sourcePackId ?? 'FORGE'),
+    pack: String(h.sourcePackId ?? 'Counsel'),
     packColor: '#d4a054',
     evidence: Array.isArray(h.evidenceItems) ? (h.evidenceItems as string[]) : [],
     result: typeof h.result === 'string' ? h.result : undefined,
@@ -461,7 +461,7 @@ export default function AlloyAgentHandoffsPage() {
             className="text-[9px] font-mono uppercase tracking-widest"
             style={{ color: ACCENT }}
           >
-            FORGE · A2A Protocol
+            Counsel · A2A Protocol
           </span>
         </div>
         <h1 className="text-lg font-bold tracking-tight" style={{ color: TEXT.primary }}>
@@ -479,7 +479,7 @@ export default function AlloyAgentHandoffsPage() {
       >
         <Network className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: '#4a90b8' }} />
         <p className="text-[9px] leading-relaxed" style={{ color: TEXT.secondary }}>
-          FORGE implements the A2A (Agent-to-Agent) delegation protocol. When the orchestrator
+          Counsel implements the A2A (Agent-to-Agent) delegation protocol. When the orchestrator
           delegates a subtask, it sends a structured handoff with full context, receives a
           delegation receipt, and tracks status until completion. Internal agents and remote APIs
           are treated uniformly.

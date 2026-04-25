@@ -27,7 +27,7 @@ import type { PipelineRun, RuntimeStartOptions } from '../types.js';
 
 export const terraPortfolioAnomalyWorkflow = defineWorkflow({
   id: 'terra-portfolio-anomaly',
-  name: 'DOMAINE — Property Portfolio Anomaly and Event Intelligence',
+  name: 'Terra — Property Portfolio Anomaly and Event Intelligence',
   description:
     'Monitors the real-estate portfolio for anomalies: distress signals, valuation outliers, ' +
     'tenant risk events, and market dislocation. Produces an intelligence packet with ' +
@@ -38,7 +38,7 @@ export const terraPortfolioAnomalyWorkflow = defineWorkflow({
 
   policy: definePolicy({
     id: 'terra-portfolio-anomaly-policy',
-    name: 'DOMAINE Portfolio Anomaly Policy',
+    name: 'Terra Portfolio Anomaly Policy',
     highRiskCategories: ['financial', 'write-external', 'escalation', 'deletion'],
     policyIds: ['pol-001', 'pol-002', 'pol-terra-anomaly'],
     minimumApprovalTier: 'operator',

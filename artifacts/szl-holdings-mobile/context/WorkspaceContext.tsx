@@ -44,7 +44,7 @@ export const WORKSPACES: WorkspaceConfig[] = [
     icon: '🛡',
     accent: '#ef4444',
     route: '/(shell)/defense',
-    description: 'PARAGON SOC & threat intelligence',
+    description: 'Aegis SOC & threat intelligence',
   },
   {
     id: 'fleet',
@@ -52,7 +52,7 @@ export const WORKSPACES: WorkspaceConfig[] = [
     icon: '⚓',
     accent: '#0ea5e9',
     route: '/(shell)/fleet',
-    description: 'SEXTANT maritime intelligence',
+    description: 'Vessels maritime intelligence',
   },
   {
     id: 'properties',
@@ -60,7 +60,7 @@ export const WORKSPACES: WorkspaceConfig[] = [
     icon: '🏛',
     accent: '#c87941',
     route: '/(shell)/properties',
-    description: 'DOMAINE real estate intelligence',
+    description: 'Terra real estate intelligence',
   },
   {
     id: 'operations',
@@ -68,7 +68,7 @@ export const WORKSPACES: WorkspaceConfig[] = [
     icon: '⚡',
     accent: '#22d3ee',
     route: '/(shell)/operations',
-    description: 'KORA AIOps & business observability',
+    description: 'Lyte AIOps & business observability',
   },
   {
     id: 'advisory',

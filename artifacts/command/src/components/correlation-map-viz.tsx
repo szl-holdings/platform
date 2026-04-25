@@ -56,21 +56,21 @@ const EDGE_COLORS: Record<string, string> = {
 const DEMO_NODES: GraphNode[] = [
   {
     id: 'domain-vessels',
-    label: 'SEXTANT',
+    label: 'Vessels',
     type: 'domain',
     domain: 'vessels',
     description: 'Maritime fleet operations across 14 active vessels',
   },
   {
     id: 'domain-aegis',
-    label: 'PARAGON',
+    label: 'Aegis',
     type: 'domain',
     domain: 'aegis',
     description: 'Cybersecurity posture and threat intelligence',
   },
   {
     id: 'domain-terra',
-    label: 'DOMAINE',
+    label: 'Terra',
     type: 'domain',
     domain: 'terra',
     description: 'Real estate portfolio — 127 assets across 9 markets',
@@ -84,7 +84,7 @@ const DEMO_NODES: GraphNode[] = [
   },
   {
     id: 'domain-lyte',
-    label: 'KORA',
+    label: 'Lyte',
     type: 'domain',
     domain: 'lyte',
     description: 'Platform reliability and SLO management',
@@ -192,7 +192,7 @@ const DEMO_EDGES: GraphEdge[] = [
     label: 'monitors',
     strength: 0.82,
     type: 'dependency',
-    description: 'PARAGON monitors Singapore port authority access',
+    description: 'Aegis monitors Singapore port authority access',
     lastActive: Date.now() - 7200000,
   },
   {
@@ -232,7 +232,7 @@ const DEMO_EDGES: GraphEdge[] = [
     label: 'informs',
     strength: 0.67,
     type: 'correlative',
-    description: 'Pattern detection informs PARAGON threat posture',
+    description: 'Pattern detection informs Aegis threat posture',
     lastActive: Date.now() - 2700000,
   },
   {
@@ -252,7 +252,7 @@ const DEMO_EDGES: GraphEdge[] = [
     label: 'belongs',
     strength: 0.9,
     type: 'dependency',
-    description: 'DFW-Industrial-7 is part of the DOMAINE portfolio',
+    description: 'DFW-Industrial-7 is part of the Terra portfolio',
     lastActive: Date.now() - 86400000,
   },
 ];

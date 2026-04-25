@@ -91,9 +91,9 @@ function SourceBadge({ source }: { source: string }) {
     source === 'constellation'
       ? 'CONSTELLATION'
       : source === 'terra-transactions'
-        ? 'DOMAINE Transactions'
+        ? 'Terra Transactions'
         : source === 'terra-distress-db'
-          ? 'DOMAINE Distress DB'
+          ? 'Terra Distress DB'
           : source;
   return (
     <span

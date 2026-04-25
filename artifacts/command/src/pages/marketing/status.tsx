@@ -59,19 +59,19 @@ const BASELINE_SERVICES: ServiceHealth[] = [
   { name: 'API Gateway', status: 'operational', uptime: '99.99%', responseTimeMs: 42 },
   { name: 'Identity & Auth', status: 'operational', uptime: '99.99%', responseTimeMs: 38 },
   {
-    name: 'PARAGON — Defense Intelligence',
+    name: 'Aegis — Defense Intelligence',
     status: 'operational',
     uptime: '99.98%',
     responseTimeMs: 71,
   },
-  { name: 'SEXTANT — Fleet Command', status: 'operational', uptime: '99.97%', responseTimeMs: 65 },
+  { name: 'Vessels — Fleet Command', status: 'operational', uptime: '99.97%', responseTimeMs: 65 },
   {
-    name: 'DOMAINE — Real Estate Intel',
+    name: 'Terra — Real Estate Intel',
     status: 'operational',
     uptime: '99.99%',
     responseTimeMs: 55,
   },
-  { name: 'KORA — AIOps Command', status: 'operational', uptime: '99.95%', responseTimeMs: 88 },
+  { name: 'Lyte — AIOps Command', status: 'operational', uptime: '99.95%', responseTimeMs: 88 },
   { name: 'Counsel', status: 'operational', uptime: '100%', responseTimeMs: 45 },
   { name: 'SZL Holdings', status: 'operational', uptime: '99.99%', responseTimeMs: 50 },
   { name: 'Carlota Jo Consulting', status: 'operational', uptime: '99.99%', responseTimeMs: 43 },
@@ -83,7 +83,7 @@ const BASELINE_SERVICES: ServiceHealth[] = [
   },
   { name: 'Command Portal', status: 'operational', uptime: '100%', responseTimeMs: 35 },
   {
-    name: 'PARAGON — Defense & Intelligence',
+    name: 'Aegis — Defense & Intelligence',
     status: 'operational',
     uptime: '99.97%',
     responseTimeMs: 76,
@@ -93,7 +93,7 @@ const BASELINE_SERVICES: ServiceHealth[] = [
 const INCIDENTS = [
   {
     date: 'Apr 3, 2026',
-    title: 'Elevated API latency in SEXTANT platform',
+    title: 'Elevated API latency in Vessels platform',
     status: 'Resolved',
     duration: '47m',
     severity: 'degraded' as ServiceStatus,
@@ -120,7 +120,7 @@ const INCIDENTS = [
   },
   {
     date: 'Feb 14, 2026',
-    title: 'KORA anomaly detection pipeline degraded',
+    title: 'Lyte anomaly detection pipeline degraded',
     status: 'Resolved',
     duration: '1h 8m',
     severity: 'degraded' as ServiceStatus,
@@ -129,7 +129,7 @@ const INCIDENTS = [
   },
   {
     date: 'Jan 31, 2026',
-    title: 'DOMAINE property indexing slowdown',
+    title: 'Terra property indexing slowdown',
     status: 'Resolved',
     duration: '35m',
     severity: 'degraded' as ServiceStatus,

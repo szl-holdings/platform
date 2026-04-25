@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-const SEXTANT = [
+const VESSELS_DATA = [
   {
     id: 'MV-001',
     name: 'Pacific Navigator',
@@ -418,7 +418,7 @@ function TwinCanvas({ vesselId }: { vesselId: string }) {
 }
 
 export default function DigitalTwinPage() {
-  const [selectedVessel, setSelectedVessel] = useState(SEXTANT[0]);
+  const [selectedVessel, setSelectedVessel] = useState(VESSELS_DATA[0]);
   const [running, setRunning] = useState(true);
   const [replayMode, setReplayMode] = useState(false);
   const [replayIdx, setReplayIdx] = useState(0);

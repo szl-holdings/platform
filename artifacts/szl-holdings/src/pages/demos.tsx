@@ -8,7 +8,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 const DEMOS = [
   {
     id: "lyte",
-    title: "KORA Decision Intelligence",
+    title: "Lyte Decision Intelligence",
     subtitle: "See what's invisible before it costs you",
     description: "Revenue stall detection, approval aging, ownership drift, KPI monitoring — all surfaced in a single command layer with governed action routing.",
     icon: BarChart3,
@@ -16,11 +16,11 @@ const DEMOS = [
     colorMuted: "hsla(191,92%,44%,0.08)",
     colorBorder: "hsla(191,92%,44%,0.20)",
     href: "/command/operations/",
-    cta: "Open KORA",
+    cta: "Open Lyte",
   },
   {
     id: "aegis",
-    title: "PARAGON Security Command",
+    title: "Aegis Security Command",
     subtitle: "Unified defense and intelligence",
     description: "SOC operations, SOAR automation, threat intelligence, incident response, and vulnerability management in a single surface. Real-time alert correlation and playbook execution.",
     icon: ShieldCheck,
@@ -28,11 +28,11 @@ const DEMOS = [
     colorMuted: "hsla(0,72%,56%,0.08)",
     colorBorder: "hsla(0,72%,56%,0.22)",
     href: "/aegis/",
-    cta: "Open PARAGON",
+    cta: "Open Aegis",
   },
   {
     id: "vessels",
-    title: "SEXTANT Maritime Intelligence",
+    title: "Vessels Maritime Intelligence",
     subtitle: "Fleet visibility built for command",
     description: "AIS tracking, route risk scoring, dark vessel detection, sanctions compliance, and predictive maintenance. Every vessel, every route, every risk — visible.",
     icon: Ship,
@@ -40,11 +40,11 @@ const DEMOS = [
     colorMuted: "hsla(200,80%,52%,0.08)",
     colorBorder: "hsla(200,80%,52%,0.20)",
     href: "/vessels/",
-    cta: "Open SEXTANT",
+    cta: "Open Vessels",
   },
   {
     id: "terra",
-    title: "DOMAINE Real Estate Intelligence",
+    title: "Terra Real Estate Intelligence",
     subtitle: "The operating surface for serious real estate",
     description: "Property twin, distress detection, ownership analysis, MLS integration, deal pipeline management, and diligence workflows with LP-ready export.",
     icon: Building2,
@@ -52,7 +52,7 @@ const DEMOS = [
     colorMuted: "hsla(140,50%,46%,0.08)",
     colorBorder: "hsla(140,50%,46%,0.20)",
     href: "/terra/",
-    cta: "Open DOMAINE",
+    cta: "Open Terra",
   },
   {
     id: "prism-counsel",
@@ -70,7 +70,7 @@ const DEMOS = [
     id: "mobile",
     title: "SZL Mobile Command",
     subtitle: "The portfolio in your pocket — no install",
-    description: "Tour the SZL Holdings Mobile Command app directly in your browser. Dashboard, portfolio health, and the KORA command inbox — rendered as faithful in-browser phone previews. No Expo Go required.",
+    description: "Tour the SZL Holdings Mobile Command app directly in your browser. Dashboard, portfolio health, and the Lyte command inbox — rendered as faithful in-browser phone previews. No Expo Go required.",
     icon: Smartphone,
     color: "hsl(38,72%,58%)",
     colorMuted: "hsla(38,72%,58%,0.08)",
@@ -80,7 +80,7 @@ const DEMOS = [
   },
   {
     id: "alloy",
-    title: "FORGE Execution Fabric",
+    title: "Counsel Execution Fabric",
     subtitle: "Governed action routing",
     description: "Workflow orchestration, connector mesh, human-in-the-loop gates, decision lineage, and enterprise governance. The execution layer that makes every other pack actionable.",
     icon: Layers,
@@ -88,12 +88,12 @@ const DEMOS = [
     colorMuted: "hsla(258,55%,68%,0.08)",
     colorBorder: "hsla(258,55%,68%,0.20)",
     href: "/alloy",
-    cta: "Open FORGE",
+    cta: "Open Counsel",
   },
 ];
 
 export default function DemosPage() {
-  const __pageMeta = usePageMeta({ title: "Live Demos — SZL Holdings", description: "Explore live demos of every SZL platform product. KORA, PARAGON, SEXTANT, DOMAINE, Counsel, and FORGE." });
+  const __pageMeta = usePageMeta({ title: "Live Demos — SZL Holdings", description: "Explore live demos of every SZL platform product. Lyte, Aegis, Vessels, Terra, Counsel, and Counsel." });
 
   return (
     <>
@@ -175,7 +175,7 @@ export default function DemosPage() {
             </div>
             <p style={{ fontSize: "0.875rem", color: "hsl(214,7%,55%)", lineHeight: 1.6, marginBottom: "1rem" }}>
               Schedule a live session with our team. We'll walk through any domain pack, show the signal-to-action pipeline,
-              and demonstrate how FORGE governs every step.
+              and demonstrate how Counsel governs every step.
             </p>
             <Link href="/contact">
               <span style={{ fontSize: "0.8125rem", fontWeight: 500, color: "hsl(38,72%,58%)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.375rem" }}>

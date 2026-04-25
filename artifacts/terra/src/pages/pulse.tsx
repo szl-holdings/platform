@@ -129,7 +129,7 @@ export default function TerraPulse() {
       <ParticleField accentColor="#10b981" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <PulseHeader
-          title="DOMAINE Market LUMINA"
+          title="Terra Market LUMINA"
           subtitle={`Real estate intelligence — ${dealVolume} active deals · 5 analysis agents`}
           accentColor="#10b981"
         />
@@ -358,7 +358,7 @@ export default function TerraPulse() {
             className="text-[9px] uppercase tracking-[0.25em]"
             style={{ color: 'rgba(255,255,255,0.08)' }}
           >
-            DOMAINE — Real Estate Intelligence — Market LUMINA
+            Terra — Real Estate Intelligence — Market LUMINA
           </p>
         </div>
       </div>

@@ -422,18 +422,18 @@ const lyteCommands: CommandItem[] = [
   },
   {
     id: 'nav-alloy-actions',
-    label: 'FORGE Action Queue',
+    label: 'Counsel Action Queue',
     icon: '⚙️',
-    group: 'FORGE',
+    group: 'Counsel',
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/alloy/actions');
     },
   },
   {
     id: 'nav-alloy-templates',
-    label: 'FORGE Workflow Templates',
+    label: 'Counsel Workflow Templates',
     icon: '🔄',
-    group: 'FORGE',
+    group: 'Counsel',
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/alloy/templates');
     },
@@ -442,7 +442,7 @@ const lyteCommands: CommandItem[] = [
     id: 'nav-alloy-gates',
     label: 'Write-Back Gates',
     icon: '🔒',
-    group: 'FORGE',
+    group: 'Counsel',
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/alloy/gates');
     },
@@ -451,7 +451,7 @@ const lyteCommands: CommandItem[] = [
     id: 'nav-alloy-compiler',
     label: 'Action Graph Compiler',
     icon: '🗂️',
-    group: 'FORGE',
+    group: 'Counsel',
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/alloy/compiler');
     },
@@ -460,7 +460,7 @@ const lyteCommands: CommandItem[] = [
     id: 'nav-alloy-replay',
     label: 'Execution Replay Timeline',
     icon: '▶️',
-    group: 'FORGE',
+    group: 'Counsel',
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/alloy/replay');
     },
@@ -469,7 +469,7 @@ const lyteCommands: CommandItem[] = [
     id: 'nav-alloy-simulate',
     label: 'Policy Simulation Console',
     icon: '🧪',
-    group: 'FORGE',
+    group: 'Counsel',
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/alloy/simulate');
     },
@@ -478,7 +478,7 @@ const lyteCommands: CommandItem[] = [
     id: 'nav-alloy-handoffs',
     label: 'Agent Handoffs (A2A)',
     icon: '🔗',
-    group: 'FORGE',
+    group: 'Counsel',
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/alloy/handoffs');
     },
@@ -487,7 +487,7 @@ const lyteCommands: CommandItem[] = [
     id: 'nav-alloy-receipts',
     label: 'Trust Receipts',
     icon: '🛡️',
-    group: 'FORGE',
+    group: 'Counsel',
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/alloy/receipts');
     },
@@ -769,7 +769,7 @@ function PrivateApp({
   setCmdOpen: (v: boolean) => void;
 }) {
   return (
-    <PowerUserProvider shortcuts={lyteShortcuts} appName="KORA" accentColor={COMMAND_ACCENT}>
+    <PowerUserProvider shortcuts={lyteShortcuts} appName="Lyte" accentColor={COMMAND_ACCENT}>
       <div className="flex flex-col h-screen bg-[#080c14]">
         <EcosystemNav
           currentAppId="command"
@@ -787,7 +787,7 @@ function PrivateApp({
         open={cmdOpen}
         onClose={() => setCmdOpen(false)}
         commands={lyteCommands}
-        appName="KORA"
+        appName="Lyte"
         accentColor={COMMAND_ACCENT}
       />
     </PowerUserProvider>

@@ -13,7 +13,7 @@ const FAQ_GROUPS = [
     questions: [
       {
         q: "What is SZL Holdings?",
-        a: "SZL Holdings is building governed decision infrastructure — the structural layer between signal detection and action execution. The core platform — KORA + FORGE — is a shared execution fabric deployed across multiple domain-specific packs: Counsel (legal operations), SEXTANT (maritime), PARAGON (security and defense), and DOMAINE (real estate).",
+        a: "SZL Holdings is building governed decision infrastructure — the structural layer between signal detection and action execution. The core platform — Lyte + Counsel — is a shared execution fabric deployed across multiple domain-specific packs: Counsel (legal operations), Vessels (maritime), Aegis (security and defense), and Terra (real estate).",
       },
       {
         q: "What is business observability?",
@@ -24,8 +24,8 @@ const FAQ_GROUPS = [
         a: "SZL Holdings is in the design-partner phase. The platform is live and functional — not vaporware. Active engagement with early enterprise teams is underway for Counsel. No fake revenue figures, client counts, or audit certifications are claimed.",
       },
       {
-        q: "What is KORA + FORGE?",
-        a: "KORA is the command layer — it surfaces signals from connected systems and presents them in a structured, prioritized format for operator action. FORGE is the execution fabric — it routes signals to recommendations, manages the human-in-the-loop approval chain, and executes approved actions through a connector mesh.",
+        q: "What is Lyte + Counsel?",
+        a: "Lyte is the command layer — it surfaces signals from connected systems and presents them in a structured, prioritized format for operator action. Counsel is the execution fabric — it routes signals to recommendations, manages the human-in-the-loop approval chain, and executes approved actions through a connector mesh.",
       },
     ],
   },
@@ -35,11 +35,11 @@ const FAQ_GROUPS = [
     questions: [
       {
         q: "How does the signal-to-action pipeline work?",
-        a: "Signals are ingested from connected systems and classified by type, severity, and urgency. They are enriched with context (owner attribution, historical pattern, risk scoring) and passed to FORGE, which generates a structured recommendation. That recommendation is reviewed and approved by a human before any execution takes place. The full pipeline — signal, interpretation, recommendation, approval decision, execution, outcome — is written to an immutable audit trail.",
+        a: "Signals are ingested from connected systems and classified by type, severity, and urgency. They are enriched with context (owner attribution, historical pattern, risk scoring) and passed to Counsel, which generates a structured recommendation. That recommendation is reviewed and approved by a human before any execution takes place. The full pipeline — signal, interpretation, recommendation, approval decision, execution, outcome — is written to an immutable audit trail.",
       },
       {
         q: "Does the AI make decisions autonomously?",
-        a: "No. AI in KORA + FORGE is advisory. Every consequential action requires explicit human approval before execution. Human-in-the-loop gates are built into the FORGE execution model at the action-type level. They cannot be bypassed without creating an explicit override record — which is itself logged and flagged for mandatory review.",
+        a: "No. AI in Lyte + Counsel is advisory. Every consequential action requires explicit human approval before execution. Human-in-the-loop gates are built into the Counsel execution model at the action-type level. They cannot be bypassed without creating an explicit override record — which is itself logged and flagged for mandatory review.",
       },
       {
         q: "What is multi-tenant isolation?",
@@ -47,7 +47,7 @@ const FAQ_GROUPS = [
       },
       {
         q: "What is a domain pack?",
-        a: "Domain packs are vertical-specific configurations of the KORA + FORGE platform. They provide domain-specific signal vocabulary, workflow logic, and twin models for a particular operating domain (legal, maritime, defense, real estate). They do not bypass the core governance model — they extend it.",
+        a: "Domain packs are vertical-specific configurations of the Lyte + Counsel platform. They provide domain-specific signal vocabulary, workflow logic, and twin models for a particular operating domain (legal, maritime, defense, real estate). They do not bypass the core governance model — they extend it.",
       },
       {
         q: "What is the Proof Chain?",
@@ -153,7 +153,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 export default function FaqPage() {
   const __pageMeta = usePageMeta({
     title: "FAQ — SZL Holdings",
-    description: "Frequently asked questions about SZL Holdings, KORA + FORGE, platform architecture, security, investment, and legal topics.",
+    description: "Frequently asked questions about SZL Holdings, Lyte + Counsel, platform architecture, security, investment, and legal topics.",
     canonical: "https://szlholdings.com/faq",
   });
 

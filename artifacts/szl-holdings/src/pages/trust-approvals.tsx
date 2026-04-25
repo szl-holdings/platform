@@ -57,7 +57,7 @@ const HITL_PRINCIPLES = [
   {
     icon: CheckSquare,
     title: "Gate enforced at the execution layer",
-    body: "The human approval gate is implemented in the FORGE workflow execution layer, not deferred to per-app logic. Bypassing the gate requires an explicit, attributed override record written to the audit trail — there is no silent skip path.",
+    body: "The human approval gate is implemented in the Counsel workflow execution layer, not deferred to per-app logic. Bypassing the gate requires an explicit, attributed override record written to the audit trail — there is no silent skip path.",
   },
   {
     icon: Users,
@@ -87,18 +87,18 @@ const HITL_PRINCIPLES = [
 ];
 
 const APPROVAL_PATH_STAGES = [
-  { id: "trigger", label: "Trigger", desc: "Signal detected and classified. FORGE generates structured action recommendation with evidence package.", color: "var(--color-lyte-light)" },
+  { id: "trigger", label: "Trigger", desc: "Signal detected and classified. Counsel generates structured action recommendation with evidence package.", color: "var(--color-lyte-light)" },
   { id: "route", label: "Route", desc: "Approval tier assigned based on action type and risk model. Request routed to designated approver(s) for the tenant.", color: "hsl(40,90%,54%)" },
   { id: "review", label: "Review", desc: "Approver(s) receive full context: signal, interpretation, recommendation, confidence, and proposed action scope.", color: "hsl(25,90%,55%)" },
   { id: "decide", label: "Decide", desc: "Approver approves, modifies, defers, or rejects. For T3+ actions, rationale field is mandatory before submission.", color: "hsl(258,55%,68%)" },
-  { id: "execute", label: "Execute", desc: "Only on approval: FORGE executes the scoped action through the appropriate connector. SLA clock starts.", color: "var(--color-alloy-light)" },
+  { id: "execute", label: "Execute", desc: "Only on approval: Counsel executes the scoped action through the appropriate connector. SLA clock starts.", color: "var(--color-alloy-light)" },
   { id: "record", label: "Record", desc: "Complete approval path — every step, every decision, every attribution — written to the immutable audit trail.", color: "hsl(145,62%,46%)" },
 ];
 
 export default function TrustApprovalsPage() {
   const __pageMeta = usePageMeta({
     title: "Approvals — Trust Center · SZL Holdings",
-    description: "Approval path model, tiered HITL gates, sign-off workflows, and escalation model for KORA + FORGE.",
+    description: "Approval path model, tiered HITL gates, sign-off workflows, and escalation model for Lyte + Counsel.",
     canonical: "https://szlholdings.com/trust/approvals",
   });
 
@@ -124,7 +124,7 @@ export default function TrustApprovalsPage() {
                   <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.08 }}>Approval Model</h1>
                 </div>
                 <p style={{ fontSize: "clamp(1rem,1.8vw,1.0625rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "52ch" }}>
-                  Every consequential action in KORA + FORGE passes through a tiered approval path.
+                  Every consequential action in Lyte + Counsel passes through a tiered approval path.
                   The gate is enforced at the workflow execution layer — bypass requires an explicit,
                   logged override. Approvers receive full context. Every decision — including overrides
                   — is permanently recorded.

@@ -177,7 +177,7 @@ function generateDemoRuns(): WorkflowRun[] {
       errorMessage: null,
       retryCount: 0,
       maxRetries: 3,
-      metadata: { workflowName: 'PRISM Signal Ingest', owner: 'KORA' },
+      metadata: { workflowName: 'PRISM Signal Ingest', owner: 'Lyte' },
       createdAt: h(2.1),
       updatedAt: h(1.8),
     },
@@ -194,7 +194,7 @@ function generateDemoRuns(): WorkflowRun[] {
       errorMessage: null,
       retryCount: 0,
       maxRetries: 3,
-      metadata: { workflowName: 'AIS Position Batch', owner: 'SEXTANT' },
+      metadata: { workflowName: 'AIS Position Batch', owner: 'Vessels' },
       createdAt: h(3.1),
       updatedAt: h(2.7),
     },
@@ -229,7 +229,7 @@ function generateDemoRuns(): WorkflowRun[] {
       errorMessage: null,
       retryCount: 0,
       maxRetries: 3,
-      metadata: { workflowName: 'DOMAINE Distress Scanner', owner: 'DOMAINE' },
+      metadata: { workflowName: 'Terra Distress Scanner', owner: 'Terra' },
       createdAt: h(5.1),
       updatedAt: h(4.6),
     },
@@ -263,7 +263,7 @@ function generateDemoRuns(): WorkflowRun[] {
       errorMessage: null,
       retryCount: 0,
       maxRetries: 3,
-      metadata: { workflowName: 'Threat Feed Aggregation', owner: 'PARAGON' },
+      metadata: { workflowName: 'Threat Feed Aggregation', owner: 'Aegis' },
       createdAt: h(6.1),
       updatedAt: h(5.5),
     },
@@ -298,7 +298,7 @@ function generateDemoRuns(): WorkflowRun[] {
         "Schema validation failed: missing required field 'campaign_id' in creative payload",
       retryCount: 0,
       maxRetries: 3,
-      metadata: { workflowName: 'Creative Asset Pipeline', owner: 'FORGE Creative' },
+      metadata: { workflowName: 'Creative Asset Pipeline', owner: 'Counsel Creative' },
       createdAt: h(8.1),
       updatedAt: h(7.9),
     },
@@ -717,7 +717,7 @@ export default function ExecutionRuns() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#4B8BDB' }}
             >
-              FORGE · Execution Fabric
+              Counsel · Execution Fabric
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Execution Runs</h1>

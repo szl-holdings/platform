@@ -92,7 +92,7 @@ export default function GeoDecisionCenter() {
                 </p>
                 <div className="flex items-center justify-between text-[11px]">
                   <span className="text-sky-400/50">Impacted Assets</span>
-                  <span className="text-red-400 font-mono">3 SEXTANT</span>
+                  <span className="text-red-400 font-mono">3 Vessels</span>
                 </div>
               </div>
             </div>

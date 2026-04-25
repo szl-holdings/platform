@@ -36,34 +36,34 @@ const KNOWN_FILES: Record<string, Omit<GalleryEntry, 'file'>> = {
       'Main marketing landing page. Dark-premium aesthetic with the core thesis: "Signal → visibility → forecast → governed action."',
   },
   'lyte-overview.jpg': {
-    label: 'KORA — Business Observability',
-    product: 'KORA',
+    label: 'Lyte — Business Observability',
+    product: 'Lyte',
     description:
-      'KORA marketing and command surface. PRISM framework: People, Revenue, Infrastructure, Security, Market.',
+      'Lyte marketing and command surface. PRISM framework: People, Revenue, Infrastructure, Security, Market.',
   },
   'lyte-dashboard.jpg': {
-    label: 'KORA — Command Dashboard',
-    product: 'KORA',
+    label: 'Lyte — Command Dashboard',
+    product: 'Lyte',
     description:
-      'KORA command center dashboard with PRISM panels, signal timeline, and priority action queue.',
+      'Lyte command center dashboard with PRISM panels, signal timeline, and priority action queue.',
   },
   'aegis-overview.jpg': {
-    label: 'PARAGON — Defense & Intelligence',
-    product: 'PARAGON',
+    label: 'Aegis — Defense & Intelligence',
+    product: 'Aegis',
     description:
-      'PARAGON unified defense and intelligence platform. SOC, managed operations, and intelligence engine in one console.',
+      'Aegis unified defense and intelligence platform. SOC, managed operations, and intelligence engine in one console.',
   },
   'vessels-overview.jpg': {
-    label: 'SEXTANT — Fleet Command',
-    product: 'SEXTANT',
+    label: 'Vessels — Fleet Command',
+    product: 'Vessels',
     description:
-      'SEXTANT maritime intelligence platform. Fleet tracking, voyage economics, and exception-based operations.',
+      'Vessels maritime intelligence platform. Fleet tracking, voyage economics, and exception-based operations.',
   },
   'terra-overview.jpg': {
-    label: 'DOMAINE — Real Estate Intelligence',
-    product: 'DOMAINE',
+    label: 'Terra — Real Estate Intelligence',
+    product: 'Terra',
     description:
-      'DOMAINE real estate intelligence platform. Distress signal detection, ownership analysis, and deal pipeline.',
+      'Terra real estate intelligence platform. Distress signal detection, ownership analysis, and deal pipeline.',
   },
   'mobile-view.jpg': {
     label: 'SZL Holdings — Mobile Responsive',
@@ -74,7 +74,7 @@ const KNOWN_FILES: Record<string, Omit<GalleryEntry, 'file'>> = {
   'platform-map.svg': {
     label: 'Platform Architecture Map',
     product: 'Architecture',
-    description: 'Full platform architecture diagram showing KORA, FORGE, and domain packs.',
+    description: 'Full platform architecture diagram showing Lyte, Counsel, and domain packs.',
   },
   'ecosystem-map.svg': {
     label: 'Ecosystem Map',
@@ -115,11 +115,11 @@ function generateGalleryMarkdown(entries: GalleryEntry[]): string {
 
   const productOrder = [
     'SZL Holdings',
-    'KORA',
-    'FORGE',
-    'PARAGON',
-    'SEXTANT',
-    'DOMAINE',
+    'Lyte',
+    'Counsel',
+    'Aegis',
+    'Vessels',
+    'Terra',
     'Carlota Jo',
     'Architecture',
     'Profile',

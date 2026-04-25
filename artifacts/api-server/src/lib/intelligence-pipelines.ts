@@ -199,7 +199,7 @@ const PIPELINES: PipelineConfig[] = [
   },
   {
     id: 'inca-research-synthesis',
-    name: 'INCA Research Intelligence Pipeline',
+    name: 'Counsel Research Intelligence Pipeline',
     description:
       'Multi-step pipeline for research analysis: ingest papers, classify relevance, score impact, recommend applications',
     domain: 'inca',

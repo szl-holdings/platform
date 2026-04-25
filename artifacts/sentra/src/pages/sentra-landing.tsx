@@ -137,7 +137,7 @@ export default function SentraLandingPage() {
               <Shield className="w-5 h-5 text-red-400" />
             </div>
             <span className="text-sm font-medium text-red-400/60">
-              TENAX Cyber Resilience Command · Powered by FORGE
+              TENAX Cyber Resilience Command · Powered by Counsel
             </span>
           </div>
 
@@ -495,7 +495,7 @@ export default function SentraLandingPage() {
       <section className="px-6 py-20 bg-[#070404] border-t border-red-500/5">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-[10px] font-mono text-red-400/80 uppercase tracking-widest mb-3">
-            Powered by FORGE · SZL Holdings
+            Powered by Counsel · SZL Holdings
           </p>
           <h2 className="font-display text-3xl font-bold text-red-50 mb-4">Request a Pilot</h2>
           <p className="text-red-300/85 mb-8 text-sm leading-relaxed max-w-xl mx-auto">

@@ -126,7 +126,7 @@ export default function PortAnalytics() {
           <div className="text-2xl font-display font-bold">{ports.length}</div>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
-          <div className="text-xs text-muted-foreground mb-1">Total SEXTANT in Port</div>
+          <div className="text-xs text-muted-foreground mb-1">Total Vessels in Port</div>
           <div className="text-2xl font-display font-bold">
             {ports.reduce((a, p) => a + p.vessels, 0)}
           </div>

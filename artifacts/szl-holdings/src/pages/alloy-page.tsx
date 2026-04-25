@@ -15,7 +15,7 @@ const OPERATING_LOOP = [
     phase: "Ingestion",
     step: "01",
     icon: Database,
-    description: "FORGE receives structured signal feeds from all connected packs and integrations — Counsel, DOMAINE, SEXTANT, PARAGON, Carlota Jo, and external data sources. Every signal enters the pipeline with source attribution, timestamp, and context metadata intact.",
+    description: "Counsel receives structured signal feeds from all connected packs and integrations — Counsel, Terra, Vessels, Aegis, Carlota Jo, and external data sources. Every signal enters the pipeline with source attribution, timestamp, and context metadata intact.",
   },
   {
     phase: "Normalization",
@@ -45,7 +45,7 @@ const OPERATING_LOOP = [
     phase: "Workflow Execution",
     step: "06",
     icon: GitBranch,
-    description: "Consequential actions pass through human approval gates before execution. FORGE tracks SLAs, escalates stalled approvals, and verifies that actions taken match actions authorized. Nothing executes without confirmation.",
+    description: "Consequential actions pass through human approval gates before execution. Counsel tracks SLAs, escalates stalled approvals, and verifies that actions taken match actions authorized. Nothing executes without confirmation.",
   },
   {
     phase: "Proof Chain",
@@ -63,7 +63,7 @@ const OPERATING_LOOP = [
     phase: "Extensibility",
     step: "09",
     icon: Puzzle,
-    description: "FORGE is designed to extend — new domain packs plug in via the connector mesh, new evaluation criteria can be configured without code changes, and new workflow types can be registered against existing approval infrastructure.",
+    description: "Counsel is designed to extend — new domain packs plug in via the connector mesh, new evaluation criteria can be configured without code changes, and new workflow types can be registered against existing approval infrastructure.",
   },
 ];
 
@@ -71,7 +71,7 @@ const CAPABILITIES = [
   {
     icon: GitBranch,
     title: "Workflow Orchestration",
-    body: "FORGE routes work through structured workflows with role-based assignment, escalation paths, and SLA tracking. Every task has an owner, a deadline, and a record. No action falls through untracked.",
+    body: "Counsel routes work through structured workflows with role-based assignment, escalation paths, and SLA tracking. Every task has an owner, a deadline, and a record. No action falls through untracked.",
   },
   {
     icon: CheckSquare,
@@ -81,7 +81,7 @@ const CAPABILITIES = [
   {
     icon: AlertOctagon,
     title: "Escalation Logic",
-    body: "When actions stall, FORGE escalates automatically — reassignment, supervisor notification, or hard stops for high-risk situations. Nothing falls through silently. Every exception is tracked.",
+    body: "When actions stall, Counsel escalates automatically — reassignment, supervisor notification, or hard stops for high-risk situations. Nothing falls through silently. Every exception is tracked.",
   },
   {
     icon: FileText,
@@ -91,27 +91,27 @@ const CAPABILITIES = [
   {
     icon: Download,
     title: "Export & Write-Back Controls",
-    body: "FORGE governs how outputs leave the system — structured exports, redaction controls, and write-back authorizations. Every data movement has an owner and a record.",
+    body: "Counsel governs how outputs leave the system — structured exports, redaction controls, and write-back authorizations. Every data movement has an owner and a record.",
   },
   {
     icon: Layers,
     title: "Signal Normalization",
-    body: "FORGE normalizes signals from KORA and connected systems into a structured action queue — standardized priority, context, and routing logic regardless of the originating pack or data source.",
+    body: "Counsel normalizes signals from Lyte and connected systems into a structured action queue — standardized priority, context, and routing logic regardless of the originating pack or data source.",
   },
   {
     icon: Workflow,
     title: "Connector Mesh",
-    body: "FORGE's connector layer integrates with CRMs, communication tools, approval systems, and vertical-specific platforms. Execution happens where work already lives — no rip and replace.",
+    body: "Counsel's connector layer integrates with CRMs, communication tools, approval systems, and vertical-specific platforms. Execution happens where work already lives — no rip and replace.",
   },
   {
     icon: RefreshCw,
     title: "Cross-Pack Orchestration",
-    body: "A single FORGE action can span multiple domain packs. An PARAGON incident can trigger a DOMAINE diligence hold. A Counsel approval can gate a SEXTANT cargo clearance. FORGE orchestrates across the platform.",
+    body: "A single Counsel action can span multiple domain packs. An Aegis incident can trigger a Terra diligence hold. A Counsel approval can gate a Vessels cargo clearance. Counsel orchestrates across the platform.",
   },
   {
     icon: Zap,
     title: "Execution Verification",
-    body: "FORGE doesn't just route. It verifies outcomes — confirming actions taken, tracking exceptions where actions weren't taken, and escalating when execution diverges from approval.",
+    body: "Counsel doesn't just route. It verifies outcomes — confirming actions taken, tracking exceptions where actions weren't taken, and escalating when execution diverges from approval.",
   },
 ];
 
@@ -141,18 +141,18 @@ const PIPELINE_STEPS = [
 ];
 
 const EXPANSION_LANES = [
-  { name: "KORA", desc: "The governed command surface routes signals from all domain packs into FORGE for cross-domain governed action." },
-  { name: "Counsel", desc: "Legal workflow approvals, settlement decisions, and compliance filings run through FORGE approval gates." },
-  { name: "DOMAINE", desc: "Acquisition decisions, diligence approvals, and LP-ready exports governed through FORGE action chains." },
-  { name: "SEXTANT", desc: "Rerouting decisions, port notifications, and regulatory filings routed with human approval and full audit record." },
-  { name: "PARAGON", desc: "Security incident response, remediation actions, and compliance evidence governed through analyst-gated workflows." },
-  { name: "Carlota Jo", desc: "Intake authorizations, service milestone confirmations, and delivery approvals structured through FORGE." },
+  { name: "Lyte", desc: "The governed command surface routes signals from all domain packs into Counsel for cross-domain governed action." },
+  { name: "Counsel", desc: "Legal workflow approvals, settlement decisions, and compliance filings run through Counsel approval gates." },
+  { name: "Terra", desc: "Acquisition decisions, diligence approvals, and LP-ready exports governed through Counsel action chains." },
+  { name: "Vessels", desc: "Rerouting decisions, port notifications, and regulatory filings routed with human approval and full audit record." },
+  { name: "Aegis", desc: "Security incident response, remediation actions, and compliance evidence governed through analyst-gated workflows." },
+  { name: "Carlota Jo", desc: "Intake authorizations, service milestone confirmations, and delivery approvals structured through Counsel." },
 ];
 
 export default function AlloyPage() {
   const __pageMeta = usePageMeta({
-    title: "FORGE — Execution Fabric & Action Spine | SZL Holdings",
-    description: "FORGE is the execution Primitive beneath every SZL Holdings domain pack. Governed workflow orchestration, Covenant Policy enforcement, Proof Chain recording, and Outcome Graph tracking — from signal ingestion to verified execution.",
+    title: "Counsel — Execution Fabric & Action Spine | SZL Holdings",
+    description: "Counsel is the execution Primitive beneath every SZL Holdings domain pack. Governed workflow orchestration, Covenant Policy enforcement, Proof Chain recording, and Outcome Graph tracking — from signal ingestion to verified execution.",
     canonical: "https://szlholdings.com/platform/alloy",
     ogImage: "https://szlholdings.com/og/og-alloy.jpg",
   });
@@ -176,7 +176,7 @@ export default function AlloyPage() {
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                 <span className="szl-badge-alloy" style={{ borderRadius: "9999px", marginBottom: "1.75rem", display: "inline-block" }}>
-                  FORGE · Execution Fabric & Action Spine
+                  Counsel · Execution Fabric & Action Spine
                 </span>
               </m.div>
   
@@ -203,7 +203,7 @@ export default function AlloyPage() {
                       marginBottom: "0.875rem",
                     }}
                   >
-                    FORGE is the execution Primitive beneath every SZL Holdings domain pack. Every signal — from KORA, from any domain pack, or from any integration — enters FORGE's operating loop: ingestion, normalization, evaluation, ranking, routing, governed execution, and Proof Chain recording.
+                    Counsel is the execution Primitive beneath every SZL Holdings domain pack. Every signal — from Lyte, from any domain pack, or from any integration — enters Counsel's operating loop: ingestion, normalization, evaluation, ranking, routing, governed execution, and Proof Chain recording.
                   </p>
                   <p
                     style={{
@@ -218,7 +218,7 @@ export default function AlloyPage() {
                   </p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                     <Link href="/demo" className="szl-btn-primary">
-                      See FORGE in action <ArrowRight size={15} />
+                      See Counsel in action <ArrowRight size={15} />
                     </Link>
                     <Link href="/trust/architecture" className="szl-btn-secondary">
                       Architecture overview
@@ -234,7 +234,7 @@ export default function AlloyPage() {
                   style={{ borderRadius: "0.875rem", padding: "clamp(1.25rem,3vw,1.75rem)" }}
                 >
                   <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>
-                    FORGE's full pipeline
+                    Counsel's full pipeline
                   </p>
                   {PIPELINE_STEPS.map((item, i) => (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.875rem", marginBottom: i < PIPELINE_STEPS.length - 1 ? "0.5rem" : 0 }}>
@@ -313,18 +313,18 @@ export default function AlloyPage() {
             </div>
           </section>
   
-          {/* Relationship to KORA and expansion lanes */}
+          {/* Relationship to Lyte and expansion lanes */}
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
                 <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
-                  FORGE Across the Platform
+                  Counsel Across the Platform
                 </p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "1.25rem" }}>
                   One execution fabric. Every domain pack inherits it.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
-                  FORGE is not built once per pack. It is the shared execution Primitive that every domain pack inherits. When a new domain pack joins the platform, it gets FORGE's full approval, audit, routing, and governance stack from day one.
+                  Counsel is not built once per pack. It is the shared execution Primitive that every domain pack inherits. When a new domain pack joins the platform, it gets Counsel's full approval, audit, routing, and governance stack from day one.
                 </p>
               </m.div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
@@ -393,7 +393,7 @@ export default function AlloyPage() {
                     Not just logging. Full attribution for every decision, action, and export.
                   </h2>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "46ch", marginBottom: "1.5rem" }}>
-                    FORGE's audit trail is designed for capital, compliance, and customer diligence — not just internal debugging. Every field is structured, exportable, and tied to an actor, a timestamp, and an authorization basis. Export logs capture where data went, who authorized it, and what controls applied.
+                    Counsel's audit trail is designed for capital, compliance, and customer diligence — not just internal debugging. Every field is structured, exportable, and tied to an actor, a timestamp, and an authorization basis. Export logs capture where data went, who authorized it, and what controls applied.
                   </p>
                   <Link href="/trust/governance" className="szl-btn-ghost" style={{ paddingLeft: 0 }}>
                     See governance architecture <ArrowRight size={14} />
@@ -434,7 +434,7 @@ export default function AlloyPage() {
                   Every export and write-back is governed, not assumed.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
-                  FORGE treats data movement as a consequential action. Exports to Word, PDF, or external systems require authorization. Write-backs to connected platforms are tracked. Redaction rules apply at the record level. Nothing leaves without a record of where it went.
+                  Counsel treats data movement as a consequential action. Exports to Word, PDF, or external systems require authorization. Write-backs to connected platforms are tracked. Redaction rules apply at the record level. Nothing leaves without a record of where it went.
                 </p>
               </m.div>
               <div style={{ display: "grid", gap: "1rem" }} className="lg:grid-cols-3">
@@ -477,7 +477,7 @@ export default function AlloyPage() {
                   From intent to verified execution — with accountability at every step.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "3rem" }}>
-                  FORGE's product layer turns goals into governed DAGs, replays every decision, simulates policy outcomes before going live, and delegates to specialized agents with structured receipts.
+                  Counsel's product layer turns goals into governed DAGs, replays every decision, simulates policy outcomes before going live, and delegates to specialized agents with structured receipts.
                 </p>
               </m.div>
               <div style={{ display: "grid", gap: "1rem" }} className="lg:grid-cols-2 xl:grid-cols-3">
@@ -486,7 +486,7 @@ export default function AlloyPage() {
                     icon: GitBranch,
                     tag: "Action Graph Compiler",
                     title: "Goal → Executable DAG",
-                    body: "Define an objective. FORGE compiles it into an executable plan with branch logic, fallback paths, and approval gates — rendered as an interactive DAG before any execution begins.",
+                    body: "Define an objective. Counsel compiles it into an executable plan with branch logic, fallback paths, and approval gates — rendered as an interactive DAG before any execution begins.",
                     badge: "Simulation-first",
                   },
                   {
@@ -507,7 +507,7 @@ export default function AlloyPage() {
                     icon: Send,
                     tag: "A2A Protocol",
                     title: "Agent Handoff & Delegation",
-                    body: "FORGE delegates subtasks to specialized agents — internal or remote — using the A2A protocol. Every delegation is tracked with a structured receipt including status and completion verification.",
+                    body: "Counsel delegates subtasks to specialized agents — internal or remote — using the A2A protocol. Every delegation is tracked with a structured receipt including status and completion verification.",
                     badge: "Tracked receipts",
                   },
                   {
@@ -521,7 +521,7 @@ export default function AlloyPage() {
                     icon: Eye,
                     tag: "Governance",
                     title: "Clearly Marked Boundaries",
-                    body: "FORGE is explicit about what is simulation versus live execution. Policy gates are structural, not configurable away. Human approval is enforced — not optional — for consequential actions.",
+                    body: "Counsel is explicit about what is simulation versus live execution. Policy gates are structural, not configurable away. Human approval is enforced — not optional — for consequential actions.",
                     badge: "No autonomous execution",
                   },
                 ].map((cap, i) => {
@@ -572,7 +572,7 @@ export default function AlloyPage() {
                     Ready to add execution accountability to your workflows?
                   </h2>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "48ch" }}>
-                    Talk to us about applying FORGE to one critical workflow — with KORA for cross-domain signal observability and FORGE for governed, auditable execution.
+                    Talk to us about applying Counsel to one critical workflow — with Lyte for cross-domain signal observability and Counsel for governed, auditable execution.
                   </p>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", flexShrink: 0 }}>

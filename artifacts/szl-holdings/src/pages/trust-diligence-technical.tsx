@@ -9,8 +9,8 @@ const SECTIONS = [
     icon: Layers,
     title: "Architecture Layers",
     items: [
-      "KORA is the command layer — orchestrates agents, handles query decomposition, routes to domain packs",
-      "FORGE is the action spine — manages write-back, connector execution, and proof chain attachment",
+      "Lyte is the command layer — orchestrates agents, handles query decomposition, routes to domain packs",
+      "Counsel is the action spine — manages write-back, connector execution, and proof chain attachment",
       "Six-stage signal → action pipeline: Ingest → Parse → Enrich → Decide → Approve → Execute",
       "Domain packs (Legal, Maritime, Real Estate, Defense) are isolated, composable units",
       "Digital twin per domain allows state modeling without live system dependency",

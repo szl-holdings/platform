@@ -61,8 +61,8 @@ const BRIEFINGS: Briefing[] = [
         summary:
           'Five independent signals across maritime, cyber, financial, and legal domains converge on coordinated disruption of Red Sea shipping corridors. APT-41 targeting logistics companies coincides with vessel rerouting and insurance premium spikes. Confidence: 94%. Immediate action required on vessel rerouting and contract force majeure triggers.',
         evidence: [
-          'SEXTANT AIS anomaly detection',
-          'PARAGON APT-41 IOC match',
+          'Vessels AIS anomaly detection',
+          'Aegis APT-41 IOC match',
           'SZL insurance premium data',
           'PRISM contract review queue',
         ],
@@ -79,7 +79,7 @@ const BRIEFINGS: Briefing[] = [
           '2 portfolio companies identified with >40% China supply chain dependency. Current geopolitical tensions elevate risk of sudden disruption. Combined exposure: $180M across semiconductor components and rare earth materials. Risk score upgraded from MEDIUM to HIGH.',
         evidence: [
           'SZL Holdings portfolio analysis',
-          'DOMAINE supply chain mapping',
+          'Terra supply chain mapping',
           'PRISM contract database',
         ],
         recommendation:
@@ -110,8 +110,8 @@ const BRIEFINGS: Briefing[] = [
         summary:
           'Vessel rerouting patterns predict 15-20% increase in Rotterdam port throughput over next 4-6 weeks. Warehouse vacancy rates already declining from 8.2% to 6.1%. 2-3 week window for pre-positioning.',
         evidence: [
-          'SEXTANT rerouting analysis',
-          'DOMAINE market intelligence',
+          'Vessels rerouting analysis',
+          'Terra market intelligence',
           'Port authority data',
         ],
         recommendation:

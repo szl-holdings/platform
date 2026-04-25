@@ -81,7 +81,7 @@ const EXECUTION_TYPES: {
     id: 'workflow_trigger',
     label: 'Workflow Trigger',
     icon: <GitBranch className="w-4 h-4" />,
-    description: 'Launch an existing FORGE workflow',
+    description: 'Launch an existing Counsel workflow',
   },
   {
     id: 'script',
@@ -320,7 +320,7 @@ export default function McpToolCreator() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#4B8BDB' }}
             >
-              FORGE · Custom MCP Tools
+              Counsel · Custom MCP Tools
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">MCP Tool Creator</h1>

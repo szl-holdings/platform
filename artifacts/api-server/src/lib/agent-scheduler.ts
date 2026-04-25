@@ -372,7 +372,7 @@ export async function registerDefaultSchedules(): Promise<void> {
     },
     {
       agentId: 'inca-autonomous',
-      name: 'INCA Research Scanner',
+      name: 'Counsel Research Scanner',
       domain: 'inca' as const,
       intervalMs: 15 * 60 * 1000,
       enabled: true,

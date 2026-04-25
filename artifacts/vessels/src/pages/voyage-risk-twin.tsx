@@ -375,7 +375,7 @@ const SCENARIOS: VoyageScenario[] = [
           {
             signal:
               'Route passes Khor Fakkan anchorage — active STS coordination zone (12 events in 90 days)',
-            source: 'SEXTANT STS Intelligence',
+            source: 'Vessels STS Intelligence',
             confidence: 80,
           },
           {
@@ -555,7 +555,7 @@ const SCENARIOS: VoyageScenario[] = [
           },
           {
             signal: 'Cape route does not intersect known STS coordination areas',
-            source: 'SEXTANT STS Intelligence',
+            source: 'Vessels STS Intelligence',
             confidence: 92,
           },
         ],
@@ -744,7 +744,7 @@ const SCENARIOS: VoyageScenario[] = [
           {
             signal:
               'Route passes Ceuta Strait — 31 documented STS events in 90 days, 8 involving sanctioned cargo',
-            source: 'SEXTANT STS Intelligence',
+            source: 'Vessels STS Intelligence',
             confidence: 80,
           },
         ],

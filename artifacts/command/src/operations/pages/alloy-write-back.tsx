@@ -20,7 +20,7 @@ const TEXT = {
   tertiary: 'rgba(255,255,255,0.28)',
   muted: 'rgba(255,255,255,0.14)',
 };
-const FORGE = '#4B8BDB';
+const Counsel = '#4B8BDB';
 const _ALLOY_DIM = 'rgba(75,139,219,0.12)';
 
 type GateStatus = 'pending' | 'approved' | 'rejected' | 'held';
@@ -49,7 +49,7 @@ const GATE_ITEMS: WriteBackItem[] = [
     description:
       'Approved Q2 pricing revision will be written to the charter rate system. This action is irreversible without a full rollback workflow.',
     target: 'Charter Rate System',
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
     status: 'pending',
     requestedBy: 'Fleet Ops',
@@ -65,7 +65,7 @@ const GATE_ITEMS: WriteBackItem[] = [
     description:
       'Full asset valuation dataset export for external auditor. Contains appraisal values, income data, and cap rates for 14 assets.',
     target: 'Secure Auditor Portal',
-    pack: 'DOMAINE',
+    pack: 'Terra',
     packColor: '#a07848',
     status: 'pending',
     requestedBy: 'Finance',
@@ -81,7 +81,7 @@ const GATE_ITEMS: WriteBackItem[] = [
     description:
       'Asset valuation workflow completed. Results will overwrite existing NAV records in the asset management system.',
     target: 'Asset Management System',
-    pack: 'DOMAINE',
+    pack: 'Terra',
     packColor: '#a07848',
     status: 'approved',
     requestedBy: 'Finance',
@@ -93,11 +93,11 @@ const GATE_ITEMS: WriteBackItem[] = [
   {
     id: 'GW-1033',
     type: 'export',
-    title: 'PARAGON — Security posture export for board',
+    title: 'Aegis — Security posture export for board',
     description:
       'Board-level security posture summary export. Sanitized for external distribution, no operational details included.',
     target: 'Board Reporting Package',
-    pack: 'PARAGON',
+    pack: 'Aegis',
     packColor: '#4f6ef7',
     status: 'approved',
     requestedBy: 'Lisa Monroe',
@@ -173,12 +173,12 @@ export default function AlloyWriteBackPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Lock className="w-3.5 h-3.5" style={{ color: FORGE }} />
+            <Lock className="w-3.5 h-3.5" style={{ color: Counsel }} />
             <span
               className="text-[9px] font-mono uppercase tracking-widest"
-              style={{ color: FORGE }}
+              style={{ color: Counsel }}
             >
-              FORGE Gating
+              Counsel Gating
             </span>
           </div>
           <h1 className="text-lg font-bold tracking-tight" style={{ color: TEXT.primary }}>
@@ -212,9 +212,9 @@ export default function AlloyWriteBackPage() {
       {/* Safety notice */}
       <div
         className="rounded-md p-3 flex items-start gap-3"
-        style={{ background: 'rgba(75,139,219,0.04)', border: `1px solid ${FORGE}20` }}
+        style={{ background: 'rgba(75,139,219,0.04)', border: `1px solid ${Counsel}20` }}
       >
-        <Shield className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: FORGE }} />
+        <Shield className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: Counsel }} />
         <p className="text-[10px] leading-relaxed" style={{ color: TEXT.secondary }}>
           All external system writes and data exports pass through this gate before execution.
           Irreversible operations are flagged with additional confirmation requirements. No data
@@ -235,7 +235,7 @@ export default function AlloyWriteBackPage() {
             className="px-3 py-2 text-[9px] font-medium uppercase tracking-widest transition-colors"
             style={{
               color: activeTab === t.id ? TEXT.primary : TEXT.tertiary,
-              borderBottom: activeTab === t.id ? `2px solid ${FORGE}` : '2px solid transparent',
+              borderBottom: activeTab === t.id ? `2px solid ${Counsel}` : '2px solid transparent',
               marginBottom: '-1px',
             }}
           >
@@ -272,7 +272,7 @@ export default function AlloyWriteBackPage() {
                   {item.type === 'write_back' ? (
                     <Database className="w-4 h-4" style={{ color: '#c45a4a' }} />
                   ) : (
-                    <Download className="w-4 h-4" style={{ color: FORGE }} />
+                    <Download className="w-4 h-4" style={{ color: Counsel }} />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">

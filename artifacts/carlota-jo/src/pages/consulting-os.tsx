@@ -532,7 +532,7 @@ export default function ConsultingOS() {
               const insightEvidence = [
                 {
                   id: `cjo-${i}-1`,
-                  label: 'FORGE Pattern Engine — Engagement Similarity',
+                  label: 'Counsel Pattern Engine — Engagement Similarity',
                   type: 'model' as const,
                   excerpt: insight.body,
                 },

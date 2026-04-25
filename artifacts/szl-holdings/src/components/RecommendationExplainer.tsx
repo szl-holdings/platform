@@ -306,7 +306,7 @@ export const SAMPLE_RECOMMENDATIONS: Recommendation[] = [
     confidence: 91,
     confidenceLabel: 'Very High',
     priority: 'critical',
-    modelVersion: 'FORGE v2.4.1',
+    modelVersion: 'Counsel v2.4.1',
     generatedAt: new Date(Date.now() - 12 * 60000).toISOString(),
     evidence: [
       {
@@ -345,13 +345,13 @@ export const SAMPLE_RECOMMENDATIONS: Recommendation[] = [
   },
   {
     id: 'rec-002',
-    title: 'Accelerate DOMAINE portfolio hedge — interest rate exposure',
+    title: 'Accelerate Terra portfolio hedge — interest rate exposure',
     rationale:
-      'Federal Reserve forward guidance signals 25bps increase. 4 DOMAINE assets floating-rate exposure exceeds risk threshold.',
+      'Federal Reserve forward guidance signals 25bps increase. 4 Terra assets floating-rate exposure exceeds risk threshold.',
     confidence: 74,
     confidenceLabel: 'High',
     priority: 'high',
-    modelVersion: 'FORGE v2.4.1',
+    modelVersion: 'Counsel v2.4.1',
     generatedAt: new Date(Date.now() - 35 * 60000).toISOString(),
     evidence: [
       {

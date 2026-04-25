@@ -180,7 +180,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
   },
   {
     id: 'alloy',
-    name: 'FORGE',
+    name: 'Counsel',
     subtitle: 'Execution Fabric · Governed Orchestration',
     path: '/alloy',
     accent: '#60a5fa',
@@ -198,7 +198,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
   },
   {
     id: 'aegis',
-    name: 'PARAGON',
+    name: 'Aegis',
     subtitle: 'Domain Pack · Unified Defense & Intelligence',
     path: '/aegis/',
     accent: '#8b7ac8',
@@ -207,7 +207,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
   },
   {
     id: 'vessels',
-    name: 'SEXTANT',
+    name: 'Vessels',
     subtitle: 'Domain Pack · Maritime Intelligence',
     path: '/vessels/',
     accent: '#38bdf8',
@@ -216,7 +216,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
   },
   {
     id: 'terra',
-    name: 'DOMAINE',
+    name: 'Terra',
     subtitle: 'Domain Pack · Real Estate Intelligence',
     path: '/terra/',
     accent: '#c87941',
@@ -1310,7 +1310,7 @@ function getDomainSearchResults(q: string): SearchResult[] {
   const searchableContent = [
     {
       keywords: ['fleet', 'vessel', 'ship', 'port', 'maritime', 'route', 'anchor'],
-      app: 'SEXTANT',
+      app: 'Vessels',
       icon: '🚢',
       accent: '#4a90b8',
       href: '/vessels/',
@@ -1361,7 +1361,7 @@ function getDomainSearchResults(q: string): SearchResult[] {
         'execution',
         'run',
       ],
-      app: 'FORGE',
+      app: 'Counsel',
       icon: '⬡',
       accent: '#60a5fa',
       href: '/alloy/',

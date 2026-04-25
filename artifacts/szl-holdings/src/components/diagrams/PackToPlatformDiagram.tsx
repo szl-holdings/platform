@@ -4,7 +4,7 @@ import { Package } from 'lucide-react';
 const PACKS = [
   {
     id: 'aegis',
-    label: 'PARAGON',
+    label: 'Aegis',
     sublabel: 'Defense & security ops',
     color: 'hsl(358,75%,58%)',
     bg: 'hsla(358,75%,58%,0.10)',
@@ -12,7 +12,7 @@ const PACKS = [
   },
   {
     id: 'vessels',
-    label: 'SEXTANT',
+    label: 'Vessels',
     sublabel: 'Maritime logistics',
     color: 'hsl(210,80%,60%)',
     bg: 'hsla(210,80%,60%,0.10)',
@@ -20,7 +20,7 @@ const PACKS = [
   },
   {
     id: 'terra',
-    label: 'DOMAINE',
+    label: 'Terra',
     sublabel: 'Real estate intelligence',
     color: 'hsl(145,62%,46%)',
     bg: 'hsla(145,62%,40%,0.10)',
@@ -37,8 +37,8 @@ const PACKS = [
 ];
 
 const PLATFORM_LAYERS = [
-  { label: 'KORA command layer', color: 'var(--color-lyte-light)' },
-  { label: 'FORGE action spine + HITL approval', color: 'var(--color-alloy-light)' },
+  { label: 'Lyte command layer', color: 'var(--color-lyte-light)' },
+  { label: 'Counsel action spine + HITL approval', color: 'var(--color-alloy-light)' },
   { label: 'Proof Chain + audit trail', color: 'hsl(145,62%,46%)' },
   { label: 'GraphQL control plane', color: 'hsl(258,55%,68%)' },
   { label: 'Model mesh + Worldline', color: 'hsl(40,90%,54%)' },

@@ -216,10 +216,10 @@ const BLOCK_PALETTE: BlockDef[] = [
 const BRAND_THEMES = [
   { value: 'szl', label: 'SZL Holdings', color: '#c2a55a' },
   { value: 'carlota', label: 'Carlota Jo', color: '#a855f7' },
-  { value: 'aegis', label: 'PARAGON', color: '#06b6d4' },
-  { value: 'terra', label: 'DOMAINE', color: '#22c55e' },
-  { value: 'vessels', label: 'SEXTANT', color: '#3b82f6' },
-  { value: 'lyte', label: 'KORA', color: '#8b5cf6' },
+  { value: 'aegis', label: 'Aegis', color: '#06b6d4' },
+  { value: 'terra', label: 'Terra', color: '#22c55e' },
+  { value: 'vessels', label: 'Vessels', color: '#3b82f6' },
+  { value: 'lyte', label: 'Lyte', color: '#8b5cf6' },
   { value: 'prism', label: 'PRAXIS', color: '#e879f9' },
   { value: 'neutral', label: 'Neutral', color: '#64748b' },
 ];
@@ -228,10 +228,10 @@ const DOMAIN_TEMPLATES = [
   { key: 'szl_quarterly_investor', label: 'SZL — Quarterly Investor Letter' },
   { key: 'szl_portfolio', label: 'SZL — Portfolio Overview' },
   { key: 'carlota_engagement_summary', label: 'Carlota Jo — Engagement Summary' },
-  { key: 'aegis_security_assessment', label: 'PARAGON — Security Assessment' },
-  { key: 'terra_property_analysis', label: 'DOMAINE — Property Analysis' },
-  { key: 'vessels_voyage', label: 'SEXTANT — Voyage Report' },
-  { key: 'lyte_weekly_briefing', label: 'KORA — Weekly Briefing' },
+  { key: 'aegis_security_assessment', label: 'Aegis — Security Assessment' },
+  { key: 'terra_property_analysis', label: 'Terra — Property Analysis' },
+  { key: 'vessels_voyage', label: 'Vessels — Voyage Report' },
+  { key: 'lyte_weekly_briefing', label: 'Lyte — Weekly Briefing' },
   { key: 'prism_legal_memo', label: 'PRAXIS — Legal Memo' },
 ];
 

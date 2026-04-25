@@ -122,9 +122,9 @@ agentEventBus.subscribe(
       event.sourceDomain === 'aegis'
         ? ['COVENANT', 'HELM CONSOLE']
         : event.sourceDomain === 'lyte'
-          ? ['FORGE RUNTIME', 'HELM CONSOLE']
+          ? ['Counsel RUNTIME', 'HELM CONSOLE']
           : event.sourceDomain === 'vessels'
-            ? ['FORGE RUNTIME', 'HELM CONSOLE']
+            ? ['Counsel RUNTIME', 'HELM CONSOLE']
             : ['HELM CONSOLE'];
 
     await dispatchCrossAppSignal({

@@ -140,7 +140,7 @@ const NODES: GraphNode[] = [
     r: 38,
     kind: 'core',
     link: alloyProduct.link ?? '/alloy',
-    linkLabel: 'Open FORGE',
+    linkLabel: 'Open Counsel',
     description: alloyProduct.description,
     capabilities: CAPABILITIES.alloy,
     secondaryLinks: SECONDARY_LINKS.alloy,
@@ -293,7 +293,7 @@ export default function FounderArchitecture() {
               maxWidth: '60ch',
             }}
           >
-            FORGE is the shared execution fabric beneath every SZL vertical. Every product routes
+            Counsel is the shared execution fabric beneath every SZL vertical. Every product routes
             consequential actions through the same governance layer, the same approval surface, and
             the same proof chain.{' '}
             <strong style={{ color: 'hsl(38, 8%, 95%)', fontWeight: 500 }}>

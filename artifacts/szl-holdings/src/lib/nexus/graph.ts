@@ -555,7 +555,7 @@ export const NEXUS_EDGES: EdgeRecord[] = [
     confidence: 68,
     strength: 0.68,
     inferred: true,
-    evidenceSources: ['PARAGON IP correlation', 'ASN routing overlap'],
+    evidenceSources: ['Aegis IP correlation', 'ASN routing overlap'],
     discoveredAt: '2026-04-10',
   },
   {

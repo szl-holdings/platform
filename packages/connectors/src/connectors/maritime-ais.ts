@@ -89,7 +89,7 @@ export const maritimeAisConnector: Connector<AisMessage> = {
   name: 'Maritime AIS Feed',
   kind: 'maritime',
   description:
-    'Live AIS positions from a global aggregator. Used to populate the SEXTANT watchlist and proximity graph.',
+    'Live AIS positions from a global aggregator. Used to populate the Vessels watchlist and proximity graph.',
   source: 'ais://global-aggregator',
   schedule: { intervalSec: 300, maxRetries: 3, timeoutMs: 10_000 },
   recordSchema: AisMessageSchema,

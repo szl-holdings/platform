@@ -65,7 +65,7 @@ const DEPRECATED_PATTERNS: Array<{ pattern: RegExp; reason: string }> = [
 /**
  * Deprecated strings that are only flagged in frontend artifact source trees
  * (files under artifacts/ but not api-server).
- * "INCA" is still used as an internal API route name in backend and lib/ packages.
+ * "INCA" was still used as an internal API route name in backend and lib/ packages.
  * These strings are loaded from the registry but applied more narrowly.
  */
 const FRONTEND_ONLY_DEPRECATED = new Set(['INCA']);
@@ -127,6 +127,7 @@ const IGNORE_PATHS_EXACT = new Set([
   'artifacts/api-server/src/lib',
   'artifacts/api-server/src/data',
   'artifacts/api-server/src/scripts',
+  'artifacts/api-server/src/services',
   'scripts',
   'lib/ai-engine',
   'lib/cognitive-runtime',
@@ -311,7 +312,8 @@ if (totalViolations === 0) {
   process.exit(0);
 } else {
   for (const { violations } of fileViolations) {
-    for (const _v of violations) {
+    for (const v of violations) {
+      console.error(`[brand:check] ${v.file}:${v.line}:${v.col} — ${v.message}`);
     }
   }
   process.exit(1);

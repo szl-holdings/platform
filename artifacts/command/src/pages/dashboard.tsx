@@ -109,7 +109,7 @@ export function Dashboard() {
     {
       id: 'deploy-workflow',
       label: 'Deploy your first workflow',
-      description: 'Choose a template and launch it through FORGE',
+      description: 'Choose a template and launch it through Counsel',
       completed: activation.workflowDeployed,
       href: `${BASE}/alloy/factory-floor`,
     },

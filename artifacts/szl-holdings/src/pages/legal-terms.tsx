@@ -8,7 +8,7 @@ const SECTIONS = [
     id: "introduction",
     heading: "1. Introduction and Acceptance",
     lines: [
-      `These Terms of Service ("Terms") govern your access to and use of the websites, platforms, APIs, and services operated by SZL Holdings Ltd ("SZL Holdings", "we", "us", or "our"), including KORA, FORGE, PARAGON, DOMAINE, SEXTANT, Counsel, and associated services (collectively, the "Services").`,
+      `These Terms of Service ("Terms") govern your access to and use of the websites, platforms, APIs, and services operated by SZL Holdings Ltd ("SZL Holdings", "we", "us", or "our"), including Lyte, Counsel, Aegis, Terra, Vessels, Counsel, and associated services (collectively, the "Services").`,
       `By accessing or using the Services, you agree to be bound by these Terms. If you are entering into these Terms on behalf of an organisation, you represent that you have authority to bind that organisation. If you do not agree to these Terms, do not access or use the Services.`,
       `SZL Holdings reserves the right to update these Terms at any time. Continued use of the Services after such changes constitutes acceptance of the updated Terms. Material changes will be communicated by email or notice within the platform.`,
     ],

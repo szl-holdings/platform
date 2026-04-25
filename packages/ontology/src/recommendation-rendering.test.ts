@@ -64,7 +64,7 @@ function assertProofChain(rec: Recommendation, label: string) {
 // maritime — Vessels Maritime Intelligence
 // ---------------------------------------------------------------------------
 
-describe('recommendation rendering — maritime (SEXTANT)', () => {
+describe('recommendation rendering — maritime (Vessels)', () => {
   it('renders a complete vessel-reroute recommendation with all 8 proof-chain fields', () => {
     const rec = createRecommendation({
       domain: 'maritime',
@@ -237,7 +237,7 @@ describe('recommendation rendering — finance (SZL Treasury / LUMINA)', () => {
 // real-estate — Terra Real Estate Intelligence
 // ---------------------------------------------------------------------------
 
-describe('recommendation rendering — real-estate (DOMAINE)', () => {
+describe('recommendation rendering — real-estate (Terra)', () => {
   it('renders a property acquisition recommendation with all 8 proof-chain fields', () => {
     const rec = createRecommendation({
       domain: 'real-estate',

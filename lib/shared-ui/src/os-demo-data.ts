@@ -819,11 +819,11 @@ export const PULSE_RECOMMENDATIONS: Recommendation[] = [
     priority: 'P0',
     title: 'Cross-variant alert: 3 P0 recommendations require executive attention',
     summary:
-      'Three P0 recommendations are open across the platform: PARAGON (active threat containment), SEXTANT (OFAC sanctions proximity), and SZL Holdings (Q2 pipeline at risk). Combined value at risk: $50.6M.',
+      'Three P0 recommendations are open across the platform: Aegis (active threat containment), Vessels (OFAC sanctions proximity), and SZL Holdings (Q2 pipeline at risk). Combined value at risk: $50.6M.',
     rationale:
       'No P0 recommendation has been actioned in the past 90 minutes. Escalation policy requires executive awareness when P0s remain open beyond 60 minutes without assigned approver.',
     proposedAction:
-      'Review each P0 and assign approver or escalate to the appropriate decision owner. PARAGON requires SOC lead action within the next 30 minutes.',
+      'Review each P0 and assign approver or escalate to the appropriate decision owner. Aegis requires SOC lead action within the next 30 minutes.',
     confidence: 0.98,
     valueAtRisk: 50600000,
     autonomyMode: 'approve_each',
@@ -839,7 +839,7 @@ export const PULSE_RECOMMENDATIONS: Recommendation[] = [
     evidence: [
       ev(
         'e-pls-1',
-        'Decision Center — PARAGON',
+        'Decision Center — Aegis',
         'derived',
         'aeg-001: Active threat lateral movement, 14 endpoints without EDR. Open 25 minutes. Approver: unassigned.',
         1500,
@@ -847,7 +847,7 @@ export const PULSE_RECOMMENDATIONS: Recommendation[] = [
       ),
       ev(
         'e-pls-2',
-        'Decision Center — SEXTANT',
+        'Decision Center — Vessels',
         'derived',
         'ves-001: OFAC sanctions proximity alert, MV Meridian Star. Open 15 minutes. Approver: unassigned.',
         900,
@@ -882,7 +882,7 @@ export const PULSE_SOURCE_HEALTH: SourceHealthRecord[] = [
   },
   {
     sourceId: 'pls-aegis',
-    sourceName: 'PARAGON Feed',
+    sourceName: 'Aegis Feed',
     connector: 'internal',
     status: 'healthy',
     lastSeenAt: new Date(Date.now() - 30000).toISOString(),
@@ -891,7 +891,7 @@ export const PULSE_SOURCE_HEALTH: SourceHealthRecord[] = [
   },
   {
     sourceId: 'pls-vessels',
-    sourceName: 'SEXTANT Feed',
+    sourceName: 'Vessels Feed',
     connector: 'internal',
     status: 'healthy',
     lastSeenAt: new Date(Date.now() - 60000).toISOString(),
@@ -928,7 +928,7 @@ export const COMMAND_SOURCE_HEALTH: SourceHealthRecord[] = [
   },
   {
     sourceId: 'cmd-vessels',
-    sourceName: 'SEXTANT',
+    sourceName: 'Vessels',
     connector: 'internal',
     status: 'healthy',
     lastSeenAt: new Date(Date.now() - 60000).toISOString(),
@@ -937,7 +937,7 @@ export const COMMAND_SOURCE_HEALTH: SourceHealthRecord[] = [
   },
   {
     sourceId: 'cmd-aegis',
-    sourceName: 'PARAGON',
+    sourceName: 'Aegis',
     connector: 'internal',
     status: 'healthy',
     lastSeenAt: new Date(Date.now() - 30000).toISOString(),
@@ -946,7 +946,7 @@ export const COMMAND_SOURCE_HEALTH: SourceHealthRecord[] = [
   },
   {
     sourceId: 'cmd-terra',
-    sourceName: 'DOMAINE',
+    sourceName: 'Terra',
     connector: 'internal',
     status: 'healthy',
     lastSeenAt: new Date(Date.now() - 120000).toISOString(),

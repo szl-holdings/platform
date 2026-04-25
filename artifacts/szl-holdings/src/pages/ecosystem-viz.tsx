@@ -5,11 +5,11 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const portfolio = [
-  { name: "FORGE", sector: "Execution Fabric · ENGINE", stage: "Core", ownership: 100, arr: "$5.1M", growth: "+148%", headcount: 22, color: "#6366f1", status: "Hypergrowth" },
-  { name: "KORA", sector: "Decision Intelligence · PRAXIS", stage: "Growth", ownership: 100, arr: "$3.1M", growth: "+28%", headcount: 21, color: "#f59e0b", status: "Scaling" },
-  { name: "SEXTANT", sector: "Maritime Intelligence", stage: "Growth", ownership: 100, arr: "$1.8M", growth: "+51%", headcount: 12, color: "#06b6d4", status: "Scaling" },
-  { name: "DOMAINE", sector: "Property Intelligence · OBSERVE", stage: "Growth", ownership: 100, arr: "$2.4M", growth: "+34%", headcount: 18, color: "#4d7c0f", status: "Scaling" },
-  { name: "PARAGON", sector: "Defense & Intelligence", stage: "Growth", ownership: 100, arr: "$2.4M", growth: "+84%", headcount: 28, color: "#6366f1", status: "Hypergrowth" },
+  { name: "Counsel", sector: "Execution Fabric · ENGINE", stage: "Core", ownership: 100, arr: "$5.1M", growth: "+148%", headcount: 22, color: "#6366f1", status: "Hypergrowth" },
+  { name: "Lyte", sector: "Decision Intelligence · PRAXIS", stage: "Growth", ownership: 100, arr: "$3.1M", growth: "+28%", headcount: 21, color: "#f59e0b", status: "Scaling" },
+  { name: "Vessels", sector: "Maritime Intelligence", stage: "Growth", ownership: 100, arr: "$1.8M", growth: "+51%", headcount: 12, color: "#06b6d4", status: "Scaling" },
+  { name: "Terra", sector: "Property Intelligence · OBSERVE", stage: "Growth", ownership: 100, arr: "$2.4M", growth: "+34%", headcount: 18, color: "#4d7c0f", status: "Scaling" },
+  { name: "Aegis", sector: "Defense & Intelligence", stage: "Growth", ownership: 100, arr: "$2.4M", growth: "+84%", headcount: 28, color: "#6366f1", status: "Hypergrowth" },
   { name: "SZL APEX", sector: "AI Research · MLOps", stage: "Early", ownership: 100, arr: "$0.4M", growth: "+93%", headcount: 6, color: "#a855f7", status: "Hypergrowth" },
   { name: "Carlota Jo", sector: "Consulting", stage: "Mature", ownership: 100, arr: "$4.4M", growth: "+18%", headcount: 14, color: "#64748b", status: "Profitable" },
 ];
@@ -55,7 +55,7 @@ export default function EcosystemViz() {
             { label: "Combined ARR", value: `$${totalARR.toFixed(1)}M`, color: "text-emerald-400" },
             { label: "Portfolio Companies", value: portfolio.length, color: "text-sky-400" },
             { label: "Total Headcount", value: totalHeadcount, color: "text-primary" },
-            { label: "Fastest Growth", value: "FORGE +148%", color: "text-indigo-400" },
+            { label: "Fastest Growth", value: "Counsel +148%", color: "text-indigo-400" },
           ].map(({ label, value, color }) => (
             <Card key={label}><CardContent className="p-4"><p className="text-xs text-muted-foreground">{label}</p><p className={`text-xl font-bold ${color}`}>{value}</p></CardContent></Card>
           ))}

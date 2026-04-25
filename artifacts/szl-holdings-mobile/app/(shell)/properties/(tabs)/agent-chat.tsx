@@ -25,12 +25,12 @@ const TEXT_DIM = 'rgba(245,240,232,0.35)';
 const AGENTS = [
   {
     id: 'beacon',
-    name: 'DOMAINE Analytics',
+    name: 'Terra Analytics',
     role: 'Real Estate Intelligence',
     icon: 'home',
     color: '#b8943c',
   },
-  { id: 'alloy', name: 'FORGE', role: 'Orchestration', icon: 'git-merge', color: '#c9a84c' },
+  { id: 'alloy', name: 'Counsel', role: 'Orchestration', icon: 'git-merge', color: '#c9a84c' },
   { id: 'eval', name: 'Eval Engine', role: 'Research', icon: 'search', color: '#8b5cf6' },
 ];
 
@@ -54,9 +54,9 @@ export default function AgentChatScreen() {
       id: 'welcome',
       role: 'assistant',
       agentId: 'beacon',
-      agentName: 'DOMAINE Analytics',
+      agentName: 'Terra Analytics',
       content:
-        'DOMAINE Analytics ready. I analyze real estate markets, property valuations, pipeline risk, and investment opportunities. What property intelligence do you need?',
+        'Terra Analytics ready. I analyze real estate markets, property valuations, pipeline risk, and investment opportunities. What property intelligence do you need?',
       timestamp: Date.now() - 60000,
     },
   ]);
@@ -145,7 +145,7 @@ export default function AgentChatScreen() {
         </TouchableOpacity>
         <View style={styles.pill}>
           <View style={styles.pillDot} />
-          <Text style={styles.pillText}>DOMAINE AI</Text>
+          <Text style={styles.pillText}>Terra AI</Text>
         </View>
       </View>
       {showPicker && (

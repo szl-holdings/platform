@@ -124,7 +124,7 @@ const DEMO_STATE: RuntimeState = {
     },
     {
       id: 'run-004',
-      name: 'PARAGON Threat Correlation',
+      name: 'Aegis Threat Correlation',
       agent: 'AEGIS-Watch',
       status: 'running',
       objective:
@@ -136,7 +136,7 @@ const DEMO_STATE: RuntimeState = {
     },
     {
       id: 'run-005',
-      name: 'SEXTANT Voyage Anomalies',
+      name: 'Vessels Voyage Anomalies',
       agent: 'Maritime-AI',
       status: 'paused',
       objective: 'Detect anomalous voyage deviations and cross-reference with charter agreements',
@@ -159,7 +159,7 @@ const DEMO_STATE: RuntimeState = {
     },
     {
       id: 'obj-2',
-      title: 'Prepare CISO briefing on PARAGON bundle exposure',
+      title: 'Prepare CISO briefing on Aegis bundle exposure',
       agent: 'AEGIS-Watch',
       priority: 2,
       status: 'active',
@@ -254,12 +254,12 @@ const DEMO_STATE: RuntimeState = {
       agent: 'ATLAS-Core',
       type: 'belief-revision',
       summary:
-        'Updated cross-domain risk model after Carlota CRM outage data propagated. Raised KORA exposure estimate from 0.42 → 0.61.',
+        'Updated cross-domain risk model after Carlota CRM outage data propagated. Raised Lyte exposure estimate from 0.42 → 0.61.',
       at: '14:10',
       impact: 'high',
       evidence: [
         'CRM freshness gap 3h42m',
-        'KORA ops queue spike +28%',
+        'Lyte ops queue spike +28%',
         'Prior model calibration error detected',
       ],
     },
@@ -281,7 +281,7 @@ const DEMO_STATE: RuntimeState = {
       agent: 'Maritime-AI',
       type: 'trust-adjustment',
       summary:
-        'Reduced confidence in SEXTANT AIS data feed after 3 consecutive anomaly false positives on VYG-class voyages. Trust weight reduced 0.82 → 0.71.',
+        'Reduced confidence in Vessels AIS data feed after 3 consecutive anomaly false positives on VYG-class voyages. Trust weight reduced 0.82 → 0.71.',
       at: '13:10',
       impact: 'medium',
       evidence: [

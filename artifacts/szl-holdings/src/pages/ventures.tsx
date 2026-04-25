@@ -6,14 +6,14 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 
 const core = [
   {
-    name: "KORA",
+    name: "Lyte",
     type: "Decision Intelligence Platform",
     stage: "Core now",
     href: "/command/operations/",
     body: "The market-facing software wedge: execution visibility, risk surfacing, ownership clarity, and next action in one command surface.",
   },
   {
-    name: "FORGE",
+    name: "Counsel",
     type: "Execution Fabric",
     stage: "Core now",
     href: "/alloy/",
@@ -24,21 +24,21 @@ const core = [
 const lanes = [
   {
     icon: Ship,
-    name: "SEXTANT",
+    name: "Vessels",
     type: "Expansion lane",
     href: "/vessels/",
     body: "A future vertical application for maritime intelligence once the core narrative has earned the right to expand.",
   },
   {
     icon: ShieldCheck,
-    name: "PARAGON",
+    name: "Aegis",
     type: "Expansion lane",
     href: "/aegis/",
     body: "A command surface for security, incident, and managed operations environments where observability and execution discipline matter.",
   },
   {
     icon: Building2,
-    name: "DOMAINE",
+    name: "Terra",
     type: "Expansion lane",
     href: "/terra/",
     body: "A real-estate intelligence lane for markets where ownership complexity, signal fragmentation, and process delay create opportunity.",
@@ -56,7 +56,7 @@ export default function VenturesPage() {
   const __pageMeta = usePageMeta({
     title: "Platform Map \u2014 SZL Holdings",
     description:
-      "The focused platform map for SZL Holdings: KORA and FORGE as the commercial wedge, with additional lanes staged as expansion value.",
+      "The focused platform map for SZL Holdings: Lyte and Counsel as the commercial wedge, with additional lanes staged as expansion value.",
     canonical: "https://szlholdings.com/ventures",
   });
 
@@ -76,7 +76,7 @@ export default function VenturesPage() {
               </h1>
               <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
                 The company should not be presented as several equal go-to-market motions at once.
-                KORA + FORGE is the commercial center. The rest of the ecosystem remains visible as
+                Lyte + Counsel is the commercial center. The rest of the ecosystem remains visible as
                 staged expansion value built on the same operating spine.
               </p>
             </div>
@@ -90,7 +90,7 @@ export default function VenturesPage() {
               </div>
               <div className="mt-8 grid gap-6 md:grid-cols-2">
                 {core.map((item) => {
-                  const Icon = item.name === "KORA" ? Radar : Workflow;
+                  const Icon = item.name === "Lyte" ? Radar : Workflow;
                   return (
                     <a
                       key={item.name}

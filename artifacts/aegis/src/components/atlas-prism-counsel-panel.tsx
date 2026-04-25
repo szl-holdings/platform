@@ -441,7 +441,7 @@ export function AtlasPrismCounselPanel({ matterId, isDemo = true }: AtlasPrismCo
         <Lock className="w-3 h-3 shrink-0" style={{ color: TEXT.tertiary }} />
         <p className="text-[9px]" style={{ color: TEXT.tertiary }}>
           Branch execution requires <span style={{ color: TEXT.secondary }}>lead_counsel</span>{' '}
-          approval — governed via FORGE proof chain
+          approval — governed via Counsel proof chain
         </p>
       </div>
     </div>

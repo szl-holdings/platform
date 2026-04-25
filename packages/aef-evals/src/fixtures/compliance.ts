@@ -5,7 +5,7 @@ export const complianceFixtures: GoldenFixtureSet = {
   profileId: 'lyte_governance_ops',
   domain: 'compliance',
   description:
-    'Golden retrieval fixtures for the KORA Governance Operations profile. Covers compliance control lookup, regulation citation, audit finding retrieval, and remediation evidence search.',
+    'Golden retrieval fixtures for the Lyte Governance Operations profile. Covers compliance control lookup, regulation citation, audit finding retrieval, and remediation evidence search.',
   queries: [
     {
       queryId: 'cmp-q001',

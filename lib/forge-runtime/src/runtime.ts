@@ -171,7 +171,7 @@ export class ForgeRuntime {
           !this.dryRunCompletedSignatures.has(taskSignature)
         ) {
           throw new Error(
-            `FORGE: tenant policy requires a dry run before live execution for task "${task.label}". Submit with isDryRun=true first.`,
+            `Counsel: tenant policy requires a dry run before live execution for task "${task.label}". Submit with isDryRun=true first.`,
           );
         }
 
@@ -212,7 +212,7 @@ export class ForgeRuntime {
           executionId,
           domain: task.domain,
           type: 'execution_started',
-          label: `FORGE: ${task.label}`,
+          label: `Counsel: ${task.label}`,
           payload: {
             taskType: task.type,
             approvalClass: sandboxBase.approvalClass,
@@ -312,10 +312,10 @@ export class ForgeRuntime {
 
   async approveAndRun(executionId: string, approvalId: string): Promise<ForgeExecution> {
     const execution = this.executions.get(executionId);
-    if (!execution) throw new Error(`FORGE: Execution ${executionId} not found`);
+    if (!execution) throw new Error(`Counsel: Execution ${executionId} not found`);
     if (execution.status !== 'awaiting_approval') {
       throw new Error(
-        `FORGE: Execution ${executionId} is not awaiting approval (status: ${execution.status})`,
+        `Counsel: Execution ${executionId} is not awaiting approval (status: ${execution.status})`,
       );
     }
 
@@ -362,7 +362,7 @@ export class ForgeRuntime {
         const tenantActive = this.tenantActiveCount.get(execution.task.tenantId) ?? 0;
         if (tenantActive >= tenantPolicy.maxConcurrentExecutions) {
           execution.status = 'failed';
-          execution.error = `FORGE: tenant '${execution.task.tenantId}' exceeded maxConcurrentExecutions (${tenantPolicy.maxConcurrentExecutions})`;
+          execution.error = `Counsel: tenant '${execution.task.tenantId}' exceeded maxConcurrentExecutions (${tenantPolicy.maxConcurrentExecutions})`;
           execution.completedAt = Date.now();
           execution.latencyMs = execution.completedAt - execution.startedAt;
           span.setStatus('error', execution.error);
@@ -406,7 +406,7 @@ export class ForgeRuntime {
           execution.status = execution.task.isDryRun ? 'dry_run_complete' : 'completed';
           execution.result = {
             simulated: true,
-            message: `FORGE: no handler registered for task type '${execution.task.type}'`,
+            message: `Counsel: no handler registered for task type '${execution.task.type}'`,
           };
           execution.completedAt = Date.now();
           execution.latencyMs = execution.completedAt - execution.startedAt;
@@ -468,7 +468,7 @@ export class ForgeRuntime {
             executionId: execution.executionId,
             domain: execution.task.domain,
             type: 'log_snapshot',
-            description: `FORGE execution complete: ${execution.task.label}`,
+            description: `Counsel execution complete: ${execution.task.label}`,
             data: { result: execution.result, costUsd: execution.costUsd },
           });
           execution.evidenceIds.push(ev.evidenceId);
@@ -478,7 +478,7 @@ export class ForgeRuntime {
           executionId: execution.executionId,
           domain: execution.task.domain,
           type: 'execution_completed',
-          label: `FORGE done: ${execution.task.label}`,
+          label: `Counsel done: ${execution.task.label}`,
           durationMs: execution.latencyMs,
           payload: { costUsd, isDryRun: execution.task.isDryRun },
         });
@@ -515,7 +515,7 @@ export class ForgeRuntime {
           executionId: execution.executionId,
           domain: execution.task.domain,
           type: 'execution_failed',
-          label: `FORGE failed: ${execution.task.label}`,
+          label: `Counsel failed: ${execution.task.label}`,
           durationMs: execution.latencyMs,
           payload: { error: execution.error },
         });

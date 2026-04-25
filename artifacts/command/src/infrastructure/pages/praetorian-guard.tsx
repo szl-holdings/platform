@@ -371,7 +371,7 @@ export default function PraetorianGuard() {
           </div>
           <div className="flex items-center gap-2">
             <RefreshCw className="w-3 h-3 text-slate-600" />
-            <span className="text-[10px] font-mono text-slate-600">PARAGON linked</span>
+            <span className="text-[10px] font-mono text-slate-600">Aegis linked</span>
           </div>
         </div>
         <div>

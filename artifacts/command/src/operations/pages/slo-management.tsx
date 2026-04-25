@@ -158,7 +158,7 @@ const SEED: SLO[] = [
   },
   {
     id: 's2',
-    name: 'FORGE Workflow Completion Rate',
+    name: 'Counsel Workflow Completion Rate',
     service: 'szl-alloy-workflow',
     metric: 'completion_rate',
     target: 99.5,
@@ -1105,8 +1105,8 @@ export default function SLOManagement() {
           >
             X-SZL-Correlation-ID
           </code>{' '}
-          end-to-end, propagated across service boundaries from API gateway through FORGE workflow
-          steps and audit log entries. FORGE workflow spans are instrumented with{' '}
+          end-to-end, propagated across service boundaries from API gateway through Counsel workflow
+          steps and audit log entries. Counsel workflow spans are instrumented with{' '}
           <code
             className="font-mono text-[9px] px-1 py-0.5 rounded"
             style={{ background: 'rgba(255,255,255,0.06)' }}

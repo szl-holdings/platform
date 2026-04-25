@@ -155,7 +155,7 @@ export default function ApprovalQueue() {
             Approval Queue
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
-            FORGE artifact approvals requiring human review
+            Counsel artifact approvals requiring human review
           </p>
         </div>
         {pending > 0 && (

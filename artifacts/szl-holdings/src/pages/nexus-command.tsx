@@ -28,7 +28,7 @@ import { SiteNav } from '@/components/SiteNav';
 const PLATFORMS = [
   {
     key: 'lyte',
-    name: 'KORA',
+    name: 'Lyte',
     desc: 'Business Observability',
     accent: '#22d3ee',
     icon: Eye,
@@ -38,7 +38,7 @@ const PLATFORMS = [
   },
   {
     key: 'vessels',
-    name: 'SEXTANT',
+    name: 'Vessels',
     desc: 'Maritime Intelligence',
     accent: '#38bdf8',
     icon: Ship,
@@ -48,7 +48,7 @@ const PLATFORMS = [
   },
   {
     key: 'aegis',
-    name: 'PARAGON',
+    name: 'Aegis',
     desc: 'Defense & Intel Command',
     accent: '#818cf8',
     icon: Shield,
@@ -58,7 +58,7 @@ const PLATFORMS = [
   },
   {
     key: 'terra',
-    name: 'DOMAINE',
+    name: 'Terra',
     desc: 'Real Estate Intelligence',
     accent: '#4ade80',
     icon: BarChart3,
@@ -78,7 +78,7 @@ const PLATFORMS = [
   },
   {
     key: 'alloy',
-    name: 'FORGE',
+    name: 'Counsel',
     desc: 'Execution Fabric',
     accent: '#60a5fa',
     icon: Layers,
@@ -106,7 +106,7 @@ const AGGREGATE_KPIS = [
     accent: '#f59e0b',
   },
   {
-    label: 'Fleet SEXTANT',
+    label: 'Fleet Vessels',
     value: '847',
     change: '+5.1%',
     up: true,
@@ -145,7 +145,7 @@ const ACTIONS = [
     title: 'Resolve C2 beacon alert — APT29 infrastructure detected',
     urgency: 'immediate' as const,
     owner: 'J. Chen',
-    team: 'PARAGON SOC',
+    team: 'Aegis SOC',
     due: '30m',
     value: 2400000,
   },
@@ -154,7 +154,7 @@ const ACTIONS = [
     title: 'Approve vessel route deviation — MV Pacific Horizon sanctions zone',
     urgency: 'immediate' as const,
     owner: 'S. Park',
-    team: 'SEXTANT Ops',
+    team: 'Vessels Ops',
     due: '1h',
     value: 850000,
   },
@@ -172,16 +172,16 @@ const ACTIONS = [
     title: 'Review distress scoring model update — Brooklyn submarket',
     urgency: 'today' as const,
     owner: 'M. Thompson',
-    team: 'DOMAINE Engine',
+    team: 'Terra Engine',
     due: 'EOD',
     value: 1200000,
   },
   {
     id: 'A-5',
-    title: 'Deploy FORGE workflow v3.2 — cross-platform signal routing',
+    title: 'Deploy Counsel workflow v3.2 — cross-platform signal routing',
     urgency: 'this_week' as const,
     owner: 'K. Nguyen',
-    team: 'FORGE Core',
+    team: 'Counsel Core',
     due: 'Wed',
     value: 0,
   },
@@ -1105,13 +1105,13 @@ export default function NexusCommandPage() {
                       {
                         insight:
                           'Sanctions risk elevated for 3 vessels transiting Red Sea corridor',
-                        source: 'SEXTANT + PARAGON',
+                        source: 'Vessels + Aegis',
                         accent: '#38bdf8',
                       },
                       {
                         insight:
                           'Brooklyn distress score up 12% — 4 new acquisition targets identified',
-                        source: 'DOMAINE Engine',
+                        source: 'Terra Engine',
                         accent: '#4ade80',
                       },
                       {
@@ -1121,8 +1121,8 @@ export default function NexusCommandPage() {
                       },
                       {
                         insight:
-                          'Cross-platform signal: insurance fraud pattern detected across DOMAINE + PRAXIS',
-                        source: 'FORGE Correlation',
+                          'Cross-platform signal: insurance fraud pattern detected across Terra + PRAXIS',
+                        source: 'Counsel Correlation',
                         accent: '#818cf8',
                       },
                     ].map((item, idx) => (

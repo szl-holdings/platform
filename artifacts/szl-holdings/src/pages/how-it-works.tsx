@@ -24,8 +24,8 @@ const STACK_LAYERS = [
   {
     number: "03",
     title: "Governed Decision",
-    subtitle: "KORA Command Layer + Covenant Policy + FORGE",
-    desc: "KORA surfaces the Risk Surface as actionable intelligence — governed recommendations with source citations and confidence scores, not static dashboards. Covenant Policy determines who can approve, what conditions apply, and when human-in-the-loop is required. FORGE then orchestrates the approved action as a durable, auditable workflow with escalation paths and SLA tracking.",
+    subtitle: "Lyte Command Layer + Covenant Policy + Counsel",
+    desc: "Lyte surfaces the Risk Surface as actionable intelligence — governed recommendations with source citations and confidence scores, not static dashboards. Covenant Policy determines who can approve, what conditions apply, and when human-in-the-loop is required. Counsel then orchestrates the approved action as a durable, auditable workflow with escalation paths and SLA tracking.",
     icon: Zap,
     color: "#d4a054",
   },
@@ -41,16 +41,16 @@ const STACK_LAYERS = [
 
 const VERTICALS = [
   { name: "Counsel", domain: "Legal intelligence — domain pack", signal: "Claims, deadlines, documents, communications", output: "Governed legal actions, demand packets, Proof Chain audit trails", href: "/counsel", color: "#d4a054" },
-  { name: "DOMAINE", domain: "Real estate intelligence — domain pack", signal: "PLUTO, FEMA, permits, market data", output: "Acquisition signals, diligence workflows, governed LP reports", href: "/solutions/terra", color: "hsl(140,50%,38%)" },
-  { name: "SEXTANT", domain: "Maritime intelligence — domain pack", signal: "AIS, NWS, NOAA, port statistics", output: "Route optimization, weather routing, governed fleet commands", href: "/solutions/vessels", color: "#4a90b8" },
-  { name: "PARAGON", domain: "Security & defense — domain pack", signal: "CISA, NVD, MITRE ATT&CK, threat feeds", output: "Threat triage, governed incident response, compliance evidence", href: "/solutions/aegis", color: "#c45a4a" },
+  { name: "Terra", domain: "Real estate intelligence — domain pack", signal: "PLUTO, FEMA, permits, market data", output: "Acquisition signals, diligence workflows, governed LP reports", href: "/solutions/terra", color: "hsl(140,50%,38%)" },
+  { name: "Vessels", domain: "Maritime intelligence — domain pack", signal: "AIS, NWS, NOAA, port statistics", output: "Route optimization, weather routing, governed fleet commands", href: "/solutions/vessels", color: "#4a90b8" },
+  { name: "Aegis", domain: "Security & defense — domain pack", signal: "CISA, NVD, MITRE ATT&CK, threat feeds", output: "Threat triage, governed incident response, compliance evidence", href: "/solutions/aegis", color: "#c45a4a" },
 ];
 
 const DIFFERENTIATORS = [
   { title: "Signal → Action, not dashboards", desc: "Every screen moves from ingested signal to recommended action to governed execution. No static charts that require interpretation — the Governed Decision Loop is the interface." },
   { title: "One loop. Every domain pack.", desc: "The same Signal Ingestion → Risk Surface → Governed Decision → Proof Chain loop runs across every domain pack. Domain expertise — the signals, models, and actions specific to each industry — lives in the pack, not the platform primitives." },
   { title: "Traceable AI, not magic", desc: "Every AI output shows what informed it, which model processed it, and what confidence it carries. Covenant Policy determines what the AI can recommend and what a human must approve. When AI fails, you see why." },
-  { title: "Governance as a structural primitive", desc: "Governance isn't a feature — it's a structural constraint. The six platform primitives — Covenant Policy, Proof Chain, Outcome Graph, FORGE, Simulation Engine, and Event Fabric — are built-in infrastructure, not bolt-ons. Domain packs inherit them without rebuilding them." },
+  { title: "Governance as a structural primitive", desc: "Governance isn't a feature — it's a structural constraint. The six platform primitives — Covenant Policy, Proof Chain, Outcome Graph, Counsel, Simulation Engine, and Event Fabric — are built-in infrastructure, not bolt-ons. Domain packs inherit them without rebuilding them." },
 ];
 
 export default function HowItWorksPage() {
@@ -76,7 +76,7 @@ export default function HowItWorksPage() {
             Signal Ingestion → Risk Surface → Governed Decision → Proof Chain.
           </h1>
           <p className="text-base text-slate-400 max-w-2xl leading-relaxed mb-3">
-            SZL is a governed operational intelligence platform. The same four-step loop runs across every domain pack — security, real estate, maritime, legal — with purpose-built intelligence in each pack and six shared Primitives (Covenant Policy, Proof Chain, Outcome Graph, FORGE, Simulation Engine, and Event Fabric) at the platform layer.
+            SZL is a governed operational intelligence platform. The same four-step loop runs across every domain pack — security, real estate, maritime, legal — with purpose-built intelligence in each pack and six shared Primitives (Covenant Policy, Proof Chain, Outcome Graph, Counsel, Simulation Engine, and Event Fabric) at the platform layer.
           </p>
           <p className="text-sm text-slate-500 max-w-2xl leading-relaxed mb-8">
             This page explains what happens from the moment a data signal enters the platform to the moment a governed decision is recorded in the immutable Proof Chain.
@@ -108,7 +108,7 @@ export default function HowItWorksPage() {
         <section className="max-w-5xl mx-auto px-6 py-16 border-t border-white/[0.06]">
           <h2 className="text-xl font-semibold text-slate-100 mb-2">One Governed Decision Loop. Every Domain Pack.</h2>
           <p className="text-sm text-slate-400 max-w-2xl mb-8">
-            The same four-step Governed Decision Loop powers every domain pack. Domain expertise — the signals, models, risk surfaces, and governed actions specific to each industry — lives in the pack. The six platform Primitives — Covenant Policy, Proof Chain, Outcome Graph, FORGE, Simulation Engine, and Event Fabric — are shared infrastructure that every pack inherits.
+            The same four-step Governed Decision Loop powers every domain pack. Domain expertise — the signals, models, risk surfaces, and governed actions specific to each industry — lives in the pack. The six platform Primitives — Covenant Policy, Proof Chain, Outcome Graph, Counsel, Simulation Engine, and Event Fabric — are shared infrastructure that every pack inherits.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {VERTICALS.map((v) => (

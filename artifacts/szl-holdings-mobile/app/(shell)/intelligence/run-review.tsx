@@ -444,7 +444,7 @@ export default function RunReviewScreen() {
         <View style={styles.headerCenter}>
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>Run Review</Text>
           <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>
-            Cognitive loop traces · FORGE runtime
+            Cognitive loop traces · Counsel runtime
           </Text>
         </View>
         <TouchableOpacity onPress={() => runsQuery.refetch()} style={styles.refreshBtn}>
@@ -522,7 +522,7 @@ export default function RunReviewScreen() {
               {activeFilter === 'all' ? 'No runs recorded' : `No ${activeFilter} runs`}
             </Text>
             <Text style={[styles.emptySub, { color: colors.mutedForeground }]}>
-              FORGE cognitive runs will appear here
+              Counsel cognitive runs will appear here
             </Text>
           </View>
         ) : (

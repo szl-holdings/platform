@@ -191,7 +191,7 @@ export default function UsageMetering() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#10b981' }}
             >
-              FORGE · Usage Metering
+              Counsel · Usage Metering
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Usage Metering</h1>

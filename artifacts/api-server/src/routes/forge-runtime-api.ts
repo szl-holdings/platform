@@ -18,9 +18,9 @@ const router: IRouter = Router();
 router.get('/forge/status', authMiddleware(), async (_req: Request, res: Response) => {
   try {
     const stats = forgeRuntime.getStats();
-    sendSuccess(res, { runtime: 'FORGE RUNTIME', status: 'active', stats });
+    sendSuccess(res, { runtime: 'Counsel RUNTIME', status: 'active', stats });
   } catch (err) {
-    handleRouteError(res, err, 'FORGE status');
+    handleRouteError(res, err, 'Counsel status');
   }
 });
 
@@ -117,7 +117,7 @@ router.post(
         isDryRun: task.isDryRun,
       });
     } catch (err) {
-      handleRouteError(res, err, 'FORGE submit');
+      handleRouteError(res, err, 'Counsel submit');
     }
   },
 );
@@ -162,7 +162,7 @@ router.get(
         error: execution.error,
       });
     } catch (err) {
-      handleRouteError(res, err, 'FORGE execution detail');
+      handleRouteError(res, err, 'Counsel execution detail');
     }
   },
 );
@@ -211,7 +211,7 @@ router.post(
         approvalId: execution.approvalId,
       });
     } catch (err) {
-      handleRouteError(res, err, 'FORGE approve-and-run');
+      handleRouteError(res, err, 'Counsel approve-and-run');
     }
   },
 );
@@ -244,7 +244,7 @@ router.get(
 
       sendSuccess(res, { executions: history, count: history.length });
     } catch (err) {
-      handleRouteError(res, err, 'FORGE history');
+      handleRouteError(res, err, 'Counsel history');
     }
   },
 );
@@ -289,7 +289,7 @@ router.get(
 
       sendSuccess(res, { events, count: events.length });
     } catch (err) {
-      handleRouteError(res, err, 'FORGE timeline');
+      handleRouteError(res, err, 'Counsel timeline');
     }
   },
 );
@@ -337,7 +337,7 @@ router.get(
 
       sendSuccess(res, { evidence, count: evidence.length });
     } catch (err) {
-      handleRouteError(res, err, 'FORGE evidence');
+      handleRouteError(res, err, 'Counsel evidence');
     }
   },
 );
@@ -400,7 +400,7 @@ router.post(
 
       sendCreated(res, { tenantId, registered: true });
     } catch (err) {
-      handleRouteError(res, err, 'FORGE tenant-policy');
+      handleRouteError(res, err, 'Counsel tenant-policy');
     }
   },
 );

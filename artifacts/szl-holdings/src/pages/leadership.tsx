@@ -17,7 +17,7 @@ const THESIS_POINTS = [
   },
   {
     label: "Architecture before go-to-market",
-    body: "Building one shared spine (FORGE) beneath multiple vertical operating systems is a deliberate architectural bet. It creates compounding leverage: every improvement to the execution fabric benefits every platform simultaneously.",
+    body: "Building one shared spine (Counsel) beneath multiple vertical operating systems is a deliberate architectural bet. It creates compounding leverage: every improvement to the execution fabric benefits every platform simultaneously.",
   },
   {
     label: "Disciplined honesty as strategy",
@@ -28,28 +28,28 @@ const THESIS_POINTS = [
 const CASE_STUDIES = [
   {
     label: "Maritime Intelligence",
-    product: "SEXTANT",
+    product: "Vessels",
     outcome: "AIS analytics (live public feeds plus simulated demo data), route intelligence, and fleet command for maritime operators — replacing fragmented data feeds with a single command surface.",
     accent: "#22d3ee",
     href: "/vessels/",
   },
   {
     label: "Security Operations",
-    product: "PARAGON",
+    product: "Aegis",
     outcome: "Unified SOC command, XDR correlation, managed operations, and governed analyst intelligence — built on the principle that defense, operations, and intelligence must share one accountable data layer.",
     accent: "#ef4444",
     href: "/aegis/",
   },
   {
     label: "Real Estate Intelligence",
-    product: "DOMAINE",
+    product: "Terra",
     outcome: "Broker command system replacing spreadsheet workflows with live market intelligence, client CRM, and deal pipeline automation — designed for high-volume, precision-oriented operators.",
     accent: "#4ade80",
     href: "/terra/",
   },
   {
     label: "Business Observability",
-    product: "KORA",
+    product: "Lyte",
     outcome: "The operations intelligence layer: surfacing what's about to break before it does — across revenue, ops, and customer signals — in a single command surface with governed execution.",
     accent: "#d4a054",
     href: "/command/operations/",
@@ -64,9 +64,9 @@ const ECOSYSTEM_HEALTH = [
 ];
 
 const CURRENT_FOCUS = [
-  "Design-partner engagements for KORA — working directly with operators on one instrumented workflow",
+  "Design-partner engagements for Lyte — working directly with operators on one instrumented workflow",
   "Investor conversations with a tight principal-only process — no intermediaries",
-  "Architecture refinement across the FORGE execution fabric based on real operator feedback",
+  "Architecture refinement across the Counsel execution fabric based on real operator feedback",
   "Disciplined company-building: no premature scale, no artificial traction signals",
 ];
 
@@ -333,13 +333,13 @@ export default function LeadershipPage() {
                 <text x="400" y="149" textAnchor="middle" fill="rgba(212,160,84,0.5)" fontSize="7" fontFamily="monospace">HOLDINGS</text>
                 {/* Satellite nodes with edges */}
                 {[
-                  { cx: 180, cy: 60, label: "PARAGON", sub: "Defense", color: "#ef4444" },
-                  { cx: 620, cy: 60, label: "SEXTANT", sub: "Maritime", color: "#22d3ee" },
-                  { cx: 140, cy: 200, label: "DOMAINE", sub: "Real Estate", color: "#4ade80" },
-                  { cx: 660, cy: 200, label: "KORA", sub: "AIOps", color: "#818cf8" },
+                  { cx: 180, cy: 60, label: "Aegis", sub: "Defense", color: "#ef4444" },
+                  { cx: 620, cy: 60, label: "Vessels", sub: "Maritime", color: "#22d3ee" },
+                  { cx: 140, cy: 200, label: "Terra", sub: "Real Estate", color: "#4ade80" },
+                  { cx: 660, cy: 200, label: "Lyte", sub: "AIOps", color: "#818cf8" },
                   { cx: 400, cy: 20, label: "IMPERIUM", sub: "Cloud", color: "#a78bfa" },
                   { cx: 260, cy: 250, label: "Carlota Jo", sub: "Advisory", color: "#f472b6" },
-                  { cx: 540, cy: 250, label: "PRAXIS", sub: "→ PARAGON Legal", color: "#fbbf24" },
+                  { cx: 540, cy: 250, label: "PRAXIS", sub: "→ Aegis Legal", color: "#fbbf24" },
                 ].map((node) => (
                   <g key={node.label}>
                     <line x1={node.cx} y1={node.cy} x2="400" y2="140" stroke={`${node.color}25`} strokeWidth="1" strokeDasharray="4 4" />

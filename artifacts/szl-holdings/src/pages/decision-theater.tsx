@@ -14,13 +14,13 @@ const BORDER = "hsla(0,0%,100%,0.07)";
 const TEXT = "hsl(38,8%,94%)";
 const TEXT_SEC = "hsl(214,7%,60%)";
 const TEXT_FAINT = "hsl(214,7%,38%)";
-const KORA = "hsl(192,72%,48%)";
+const Lyte = "hsl(192,72%,48%)";
 const MONO = "var(--font-mono)";
 
 const DOMAIN_ICON: Record<CaseDomain, typeof Shield> = {
-  PARAGON: Shield,
-  SEXTANT: Ship,
-  DOMAINE: Building2,
+  Aegis: Shield,
+  Vessels: Ship,
+  Terra: Building2,
   "Counsel": Briefcase,
   "Carlota Jo": Users,
 };
@@ -79,7 +79,7 @@ function CaseSelectorCard({ c, active, onSelect }: { c: DecisionCase; active: bo
 
 export default function DecisionTheaterPage() {
   const __pageMeta = usePageMeta({
-    title: "Decision Theater — KORA",
+    title: "Decision Theater — Lyte",
     description: "Walk a live decision case from signal to learning through the nine-stage governed decision loop.",
   });
 
@@ -101,13 +101,13 @@ export default function DecisionTheaterPage() {
               style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", fontSize: "0.75rem", color: TEXT_FAINT, textDecoration: "none", fontFamily: MONO }}
             >
               <ArrowLeft size={12} />
-              Back to KORA
+              Back to Lyte
             </Link>
           </div>
   
           {/* Header */}
           <header style={{ marginBottom: "2rem" }}>
-            <p style={{ fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA, marginBottom: "0.625rem" }}>
+            <p style={{ fontSize: "0.6875rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: Lyte, marginBottom: "0.625rem" }}>
               Decision Theater · Flagship Governed Flow
             </p>
             <h1 style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", fontWeight: 700, letterSpacing: "-0.02em", color: TEXT, margin: "0 0 0.75rem" }}>

@@ -187,7 +187,7 @@ curl -X POST https://[host]/api/projects \\
         ]}
       />
 
-      <SubSectionHeader id="samples-vessels" title="SEXTANT" />
+      <SubSectionHeader id="samples-vessels" title="Vessels" />
       <LanguageTabs
         tabs={[
           {
@@ -252,7 +252,7 @@ curl https://[host]/api/vessels/42 \\
         ]}
       />
 
-      <SubSectionHeader id="samples-alloy" title="FORGE Signal Ingestion" />
+      <SubSectionHeader id="samples-alloy" title="Counsel Signal Ingestion" />
       <LanguageTabs
         tabs={[
           {

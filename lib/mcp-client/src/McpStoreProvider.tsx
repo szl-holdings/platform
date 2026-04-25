@@ -60,10 +60,10 @@ export function McpStoreProvider({
 
   const nativeServer: McpServerConfig = {
     id: NATIVE_SERVER_ID,
-    name: 'FORGE MCP Server',
+    name: 'Counsel MCP Server',
     url: mcpBaseUrl,
     transport: 'http',
-    description: 'Native SZL FORGE MCP server — built-in tools and enterprise capabilities',
+    description: 'Native SZL Counsel MCP server — built-in tools and enterprise capabilities',
     isNative: true,
     isConnected: true,
   };
@@ -77,7 +77,7 @@ export function McpStoreProvider({
     [NATIVE_SERVER_ID]: {
       status: 'connected',
       serverUrl: mcpBaseUrl,
-      serverName: 'FORGE MCP Server',
+      serverName: 'Counsel MCP Server',
       lastPing: new Date(),
     },
   });

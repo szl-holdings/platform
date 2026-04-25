@@ -30,7 +30,7 @@ export default function GovernancePage({ onNavigate }: NavProps) {
           Built to orchestrate workflows without losing accountability
         </h1>
         <p className="text-white/50 max-w-2xl leading-relaxed">
-          FORGE's governance layer wraps every workflow in accountability controls. Human approval
+          Counsel's governance layer wraps every workflow in accountability controls. Human approval
           is not bolted on — it's designed in. Every high-stakes output requires a human decision,
           every decision is recorded, every rejection is captured.
         </p>
@@ -46,9 +46,9 @@ export default function GovernancePage({ onNavigate }: NavProps) {
       >
         <div className="md:flex md:gap-12 md:items-center">
           <div className="md:flex-1 mb-6 md:mb-0">
-            <h2 className="text-xl font-bold mb-3">The FORGE governance principle</h2>
+            <h2 className="text-xl font-bold mb-3">The Counsel governance principle</h2>
             <p className="text-white/60 leading-relaxed">
-              Automation accelerates work. Governance keeps it accountable. FORGE is designed on the
+              Automation accelerates work. Governance keeps it accountable. Counsel is designed on the
               premise that the right place for human judgment is not everywhere — but it must be
               precisely where it matters.
             </p>
@@ -165,7 +165,7 @@ export default function GovernancePage({ onNavigate }: NavProps) {
         >
           <div className="flex flex-col md:flex-row items-center gap-3 flex-wrap justify-center">
             {[
-              { label: 'FORGE Output', sub: 'Generated with confidence score', color: '#4B8BDB' },
+              { label: 'Counsel Output', sub: 'Generated with confidence score', color: '#4B8BDB' },
               { label: '→', sub: '', color: 'rgba(255,255,255,0.2)' },
               { label: 'Confidence Gate', sub: 'Auto-route if above threshold', color: '#3b82f6' },
               { label: '→', sub: '', color: 'rgba(255,255,255,0.2)' },

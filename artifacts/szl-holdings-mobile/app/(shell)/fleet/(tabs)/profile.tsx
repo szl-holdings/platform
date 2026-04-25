@@ -39,7 +39,7 @@ export default function ProfileScreen() {
   const themeLabel = mode === 'dark' ? 'Dark' : mode === 'light' ? 'Light' : 'System';
 
   const handleLogout = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out of SEXTANT?', [
+    Alert.alert('Sign Out', 'Are you sure you want to sign out of Vessels?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign Out', style: 'destructive', onPress: logout },
     ]);
@@ -72,7 +72,7 @@ export default function ProfileScreen() {
           fetchers={[
             {
               domain: 'vessels',
-              label: 'SEXTANT',
+              label: 'Vessels',
               color: colors.primary,
               fetch: async () => {
                 try {
@@ -89,7 +89,7 @@ export default function ProfileScreen() {
             },
             {
               domain: 'aegis',
-              label: 'PARAGON',
+              label: 'Aegis',
               color: '#f59e0b',
               fetch: async () => {
                 try {
@@ -106,7 +106,7 @@ export default function ProfileScreen() {
             },
             {
               domain: 'lyte',
-              label: 'KORA',
+              label: 'Lyte',
               color: '#00d4ff',
               fetch: async () => {
                 try {
@@ -173,9 +173,9 @@ export default function ProfileScreen() {
         </SectionCard>
 
         <SectionCard title="APP INFO">
-          <InfoRow icon="anchor" label="App" value="SEXTANT — Fleet Command" />
+          <InfoRow icon="anchor" label="App" value="Vessels — Fleet Command" />
           <InfoRow icon="info" label="Version" value="1.0.0" />
-          <InfoRow icon="server" label="Backend" value="SEXTANT Maritime Intelligence API" />
+          <InfoRow icon="server" label="Backend" value="Vessels Maritime Intelligence API" />
           <InfoRow icon="wifi" label="Connectivity" value="Offline cache + WebSocket live data" />
         </SectionCard>
 
@@ -261,7 +261,7 @@ export default function ProfileScreen() {
 
         <View style={styles.footer}>
           <Text style={[styles.footerText, { color: colors.textFaint }]}>
-            SEXTANT Maritime Intelligence
+            Vessels Maritime Intelligence
           </Text>
           <Text style={[styles.footerText, { color: colors.textFaint }]}>
             Fleet command for maritime operations

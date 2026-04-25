@@ -29,10 +29,10 @@ const TEXT = '#f0eeff';
 const TEXT_DIM = 'rgba(240,238,255,0.4)';
 
 const AGENTS = [
-  { id: 'alloy', name: 'FORGE', role: 'Orchestration', icon: 'git-merge', color: '#c9a84c' },
+  { id: 'alloy', name: 'Counsel', role: 'Orchestration', icon: 'git-merge', color: '#c9a84c' },
   {
     id: 'beacon',
-    name: 'DOMAINE Analytics',
+    name: 'Terra Analytics',
     role: 'Analytics',
     icon: 'bar-chart-2',
     color: '#22c55e',
@@ -97,9 +97,9 @@ export default function AgentChatScreen() {
       id: 'welcome',
       role: 'assistant',
       content:
-        'FORGE orchestration active. I coordinate all domain agents across the SZL Holdings platform. Ask me anything about your portfolio, operations, or intelligence.',
+        'Counsel orchestration active. I coordinate all domain agents across the SZL Holdings platform. Ask me anything about your portfolio, operations, or intelligence.',
       agentId: 'alloy',
-      agentName: 'FORGE',
+      agentName: 'Counsel',
       timestamp: Date.now() - 60000,
     },
   ]);

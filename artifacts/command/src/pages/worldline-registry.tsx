@@ -54,12 +54,12 @@ const DOMAIN_CONFIG: Record<
   Domain,
   { label: string; color: string; icon: typeof Globe; appPath: string }
 > = {
-  aegis: { label: 'PARAGON — Defense', color: '#ef4444', icon: Shield, appPath: '/aegis' },
-  terra: { label: 'DOMAINE — Real Estate', color: '#10b981', icon: Globe, appPath: '/terra' },
-  vessels: { label: 'SEXTANT — Maritime', color: '#06b6d4', icon: Network, appPath: '/vessels' },
-  alloy: { label: 'FORGE — Execution', color: '#4B8BDB', icon: Zap, appPath: '/command' },
+  aegis: { label: 'Aegis — Defense', color: '#ef4444', icon: Shield, appPath: '/aegis' },
+  terra: { label: 'Terra — Real Estate', color: '#10b981', icon: Globe, appPath: '/terra' },
+  vessels: { label: 'Vessels — Maritime', color: '#06b6d4', icon: Network, appPath: '/vessels' },
+  alloy: { label: 'Counsel — Execution', color: '#4B8BDB', icon: Zap, appPath: '/command' },
   prism: { label: 'Prism — Counsel', color: '#f59e0b', icon: Globe, appPath: '/command' },
-  lyte: { label: 'KORA — AIOps', color: '#d4a054', icon: Activity, appPath: '/command' },
+  lyte: { label: 'Lyte — AIOps', color: '#d4a054', icon: Activity, appPath: '/command' },
 };
 
 const STATE_CONFIG: Record<
@@ -103,7 +103,7 @@ const DEMO_WORLDLINES: Worldline[] = [
     twins: [
       {
         id: 'tw-terra-001',
-        name: 'DOMAINE Property Fabric',
+        name: 'Terra Property Fabric',
         domain: 'terra',
         state: 'stable',
         driftScore: 4,
@@ -114,7 +114,7 @@ const DEMO_WORLDLINES: Worldline[] = [
       },
       {
         id: 'tw-vessels-001',
-        name: 'SEXTANT Fleet Twin',
+        name: 'Vessels Fleet Twin',
         domain: 'vessels',
         state: 'stable',
         driftScore: 7,
@@ -125,7 +125,7 @@ const DEMO_WORLDLINES: Worldline[] = [
       },
       {
         id: 'tw-alloy-001',
-        name: 'FORGE Execution Fabric',
+        name: 'Counsel Execution Fabric',
         domain: 'alloy',
         state: 'stable',
         driftScore: 2,
@@ -158,7 +158,7 @@ const DEMO_WORLDLINES: Worldline[] = [
     twins: [
       {
         id: 'tw-aeg-001',
-        name: 'PARAGON Posture Twin',
+        name: 'Aegis Posture Twin',
         domain: 'aegis',
         state: 'degraded',
         driftScore: 28,
@@ -169,7 +169,7 @@ const DEMO_WORLDLINES: Worldline[] = [
       },
       {
         id: 'tw-lyte-001',
-        name: 'KORA AIOps Twin',
+        name: 'Lyte AIOps Twin',
         domain: 'lyte',
         state: 'degraded',
         driftScore: 21,
@@ -191,7 +191,7 @@ const DEMO_WORLDLINES: Worldline[] = [
     twins: [
       {
         id: 'tw-aeg-002',
-        name: 'PARAGON OT/ICS Twin',
+        name: 'Aegis OT/ICS Twin',
         domain: 'aegis',
         state: 'awaiting_approval',
         driftScore: 18,
@@ -213,7 +213,7 @@ const DEMO_WORLDLINES: Worldline[] = [
     twins: [
       {
         id: 'tw-vessels-002',
-        name: 'SEXTANT Cargo Twin',
+        name: 'Vessels Cargo Twin',
         domain: 'vessels',
         state: 'awaiting_approval',
         driftScore: 12,
@@ -227,7 +227,7 @@ const DEMO_WORLDLINES: Worldline[] = [
   {
     id: 'WL-SIM-001',
     label: 'WL-SIM-001',
-    description: 'Valuation stress simulation — DOMAINE reroute scenario for Q3 stress test',
+    description: 'Valuation stress simulation — Terra reroute scenario for Q3 stress test',
     status: 'simulation',
     originDomain: 'terra',
     createdAt: 'Apr 10, 2026',
@@ -235,7 +235,7 @@ const DEMO_WORLDLINES: Worldline[] = [
     twins: [
       {
         id: 'tw-terra-sim-001',
-        name: 'DOMAINE Stress Scenario',
+        name: 'Terra Stress Scenario',
         domain: 'terra',
         state: 'stable',
         driftScore: 0,

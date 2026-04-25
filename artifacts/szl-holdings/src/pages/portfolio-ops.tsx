@@ -59,7 +59,7 @@ const apps: AppReadiness[] = [
     confidence: 'High',
   },
   {
-    name: 'FORGE',
+    name: 'Counsel',
     slug: 'alloy',
     icon: Zap,
     accent: 'hsl(222,68%,58%)',
@@ -75,7 +75,7 @@ const apps: AppReadiness[] = [
     confidence: 'High',
   },
   {
-    name: 'KORA',
+    name: 'Lyte',
     slug: 'command',
     icon: Activity,
     accent: 'hsl(192,80%,48%)',
@@ -91,7 +91,7 @@ const apps: AppReadiness[] = [
     confidence: 'High',
   },
   {
-    name: 'SEXTANT',
+    name: 'Vessels',
     slug: 'vessels',
     icon: Ship,
     accent: 'hsl(210,78%,44%)',
@@ -107,7 +107,7 @@ const apps: AppReadiness[] = [
     confidence: 'High',
   },
   {
-    name: 'PARAGON',
+    name: 'Aegis',
     slug: 'aegis',
     icon: Shield,
     accent: 'hsl(24,88%,52%)',
@@ -139,7 +139,7 @@ const apps: AppReadiness[] = [
     confidence: 'Medium',
   },
   {
-    name: 'DOMAINE',
+    name: 'Terra',
     slug: 'terra',
     icon: Building,
     accent: 'hsl(140,56%,40%)',
@@ -155,7 +155,7 @@ const apps: AppReadiness[] = [
     confidence: 'High',
   },
   {
-    name: 'PARAGON Operations',
+    name: 'Aegis Operations',
     slug: 'msp',
     icon: Activity,
     accent: 'hsl(356,70%,52%)',

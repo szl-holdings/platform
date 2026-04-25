@@ -49,7 +49,7 @@ const ROUTING_FACTORS = [
 export default function DocsModelMeshPage() {
   const __pageMeta = usePageMeta({
     title: "Governed Inference — Docs — SZL Holdings",
-    description: "Governed inference documentation: AI model routing, versioning, cost tracking, quality signals, and governance integration in the KORA + FORGE platform.",
+    description: "Governed inference documentation: AI model routing, versioning, cost tracking, quality signals, and governance integration in the Lyte + Counsel platform.",
     canonical: "https://szlholdings.com/docs/model-mesh",
   });
 
@@ -75,7 +75,7 @@ export default function DocsModelMeshPage() {
                 Governed Inference.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-white/65">
-                Governed inference is the AI model management layer of the KORA + FORGE platform. It handles
+                Governed inference is the AI model management layer of the Lyte + Counsel platform. It handles
                 model routing, versioning, cost tracking, quality signal collection, and governance integration.
                 No model in the platform operates outside this layer — all inference is tracked, governed, and
                 accountable.

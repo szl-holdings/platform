@@ -21,7 +21,7 @@ const USE_CASES = [
     steps: [
       { signal: true, text: "Compliance clock fires — demand deadline 14 days out on Ramirez v. Empire Transit, matter readiness score 61/100" },
       { text: "Attorney opens matter command surface: PRAXIS scoring surfaces two critical gaps — incomplete medical chronology and missing lost wage documentation" },
-      { text: "FORGE routes gap remediation tasks to paralegal: medical records request to Dr. Okonkwo's office, W-2 documentation workflow initiated" },
+      { text: "Counsel routes gap remediation tasks to paralegal: medical records request to Dr. Okonkwo's office, W-2 documentation workflow initiated" },
       { text: "Partner reviews completed demand package — readiness score rises to 94/100, approves filing via the governed approval gate" },
       { proof: true, text: "Proof Chain records the readiness state at filing: which records were reviewed, who approved the package, and when the decision was made" },
     ],
@@ -47,7 +47,7 @@ const USE_CASES = [
       { text: "Counsel scores the matter across six pillars: Posture 70, Readiness 45, Integrity 80, Strategy 55, Money 60, Governance 100" },
       { text: "Compliance clocks started automatically: 30-day acknowledgement clock (NY Reg 68), 15-day verification clock, and notice of claim deadline entered in calendar" },
       { text: "National Indemnity Group insurer profile attached — adjuster behavior patterns, average time-to-offer, and prior matter outcomes surfaced" },
-      { proof: true, text: "FORGE routes matter to assigned attorney with full intake packet; Proof Chain records the intake state, clock start timestamps, and routing decision" },
+      { proof: true, text: "Counsel routes matter to assigned attorney with full intake packet; Proof Chain records the intake state, clock start timestamps, and routing decision" },
     ],
   },
 ];
@@ -227,11 +227,11 @@ export default function SolutionsPrismCounselPage() {
         </section>
   
         <section className="max-w-5xl mx-auto px-6 py-16">
-          <h2 className="text-xl font-semibold text-slate-100 mb-2">How KORA + FORGE Power It</h2>
-          <p className="text-sm text-slate-500 mb-8">Counsel is built on the KORA + FORGE platform spine — not bolted on as a side project</p>
+          <h2 className="text-xl font-semibold text-slate-100 mb-2">How Lyte + Counsel Power It</h2>
+          <p className="text-sm text-slate-500 mb-8">Counsel is built on the Lyte + Counsel platform spine — not bolted on as a side project</p>
           <div className="grid grid-cols-2 gap-4">
             <div className="rounded-lg border border-white/[0.06] p-5" style={{ background: "#0c1220" }}>
-              <h3 className="text-sm font-semibold text-slate-200 mb-2">KORA — Command Surface</h3>
+              <h3 className="text-sm font-semibold text-slate-200 mb-2">Lyte — Command Surface</h3>
               <ul className="space-y-1.5 text-[11px] text-slate-400">
                 <li>PRAXIS scoring framework applied to legal matter health</li>
                 <li>Dashboard, watchlist, and forecast surfaces</li>
@@ -240,7 +240,7 @@ export default function SolutionsPrismCounselPage() {
               </ul>
             </div>
             <div className="rounded-lg border border-white/[0.06] p-5" style={{ background: "#0c1220" }}>
-              <h3 className="text-sm font-semibold text-slate-200 mb-2">FORGE — Execution Fabric</h3>
+              <h3 className="text-sm font-semibold text-slate-200 mb-2">Counsel — Execution Fabric</h3>
               <ul className="space-y-1.5 text-[11px] text-slate-400">
                 <li>Workflow orchestration for approval chains</li>
                 <li>Audit trail infrastructure for legal accountability</li>
@@ -353,7 +353,7 @@ export default function SolutionsPrismCounselPage() {
           <span className="px-3 py-1 rounded text-[10px] font-medium bg-[#d4a054]/10 text-[#d4a054] border border-[#d4a054]/20">
             FUNCTIONAL ALPHA
           </span>
-          <p className="text-sm text-slate-500 mt-4 mb-2">Built on the KORA + FORGE platform spine</p>
+          <p className="text-sm text-slate-500 mt-4 mb-2">Built on the Lyte + Counsel platform spine</p>
           <p className="text-[10px] text-slate-600">SZL Holdings · Counsel · {new Date().getFullYear()}</p>
         </section>
       </div>

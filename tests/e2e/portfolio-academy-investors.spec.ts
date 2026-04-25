@@ -79,7 +79,7 @@ test.describe('Portfolio Dashboard — /portfolio', () => {
 
     // Tile names rendered in the dashboard. Note: the Aegis vertical is
     // surfaced as the "Sentra" product tile in the portfolio UI.
-    const tiles = ['KORA', 'DOMAINE', 'SEXTANT', 'TENAX', 'FORGE', 'Carlota Jo'];
+    const tiles = ['Lyte', 'Terra', 'Vessels', 'TENAX', 'Counsel', 'Carlota Jo'];
     for (const name of tiles) {
       await expect(page.locator(`:text("${name}")`).first()).toBeVisible({ timeout: 15_000 });
     }
@@ -98,7 +98,7 @@ test.describe('Portfolio Dashboard — /portfolio', () => {
     await expect(errorBanner).toBeVisible({ timeout: 15_000 });
 
     // Tiles should still render (with placeholder values) even when the API fails.
-    await expect(page.locator(':text("KORA")').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator(':text("Lyte")').first()).toBeVisible({ timeout: 15_000 });
   });
 });
 

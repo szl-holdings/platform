@@ -55,7 +55,7 @@ export function AlloyBackbone() {
                 fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
               }}
             >
-              Powered by FORGE
+              Powered by Counsel
             </p>
             <h2
               style={{
@@ -78,7 +78,7 @@ export function AlloyBackbone() {
                 marginBottom: '2rem',
               }}
             >
-              FORGE is the intelligence and orchestration layer powering workflows, signals,
+              Counsel is the intelligence and orchestration layer powering workflows, signals,
               outputs, and decision support across the SZL ecosystem.
             </p>
             <a

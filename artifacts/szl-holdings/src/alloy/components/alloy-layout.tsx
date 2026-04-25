@@ -63,14 +63,14 @@ const ALLOY_ACCENT = '#4B8BDB';
 
 const SZL_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: 'szl-alloy',
-  appName: 'FORGE',
+  appName: 'Counsel',
   accentColor: ALLOY_ACCENT,
   steps: [
     {
       id: 'welcome',
-      title: 'Welcome to FORGE',
+      title: 'Welcome to Counsel',
       description:
-        'FORGE is the execution fabric of SZL Holdings — automate workflows, orchestrate connectors, and govern every decision with full auditability.',
+        'Counsel is the execution fabric of SZL Holdings — automate workflows, orchestrate connectors, and govern every decision with full auditability.',
       placement: 'center',
       icon: Zap,
     },
@@ -114,7 +114,7 @@ const SZL_ONBOARDING_CONFIG: OnboardingConfig = {
       id: 'ecosystem',
       title: 'Cross-Domain Navigation',
       description:
-        'Switch between domain packs (DOMAINE, SEXTANT, PARAGON) using the ecosystem links at the bottom of the sidebar — all sharing the same data layer.',
+        'Switch between domain packs (Terra, Vessels, Aegis) using the ecosystem links at the bottom of the sidebar — all sharing the same data layer.',
       placement: 'center',
       icon: Globe,
     },
@@ -143,7 +143,7 @@ const SZL_ONBOARDING_CONFIG: OnboardingConfig = {
     {
       id: 'visit-domain',
       label: 'Visit a Domain Pack',
-      description: 'Navigate to DOMAINE, SEXTANT, or PARAGON',
+      description: 'Navigate to Terra, Vessels, or Aegis',
     },
   ],
 };
@@ -536,7 +536,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
         commands={alloyCommands}
-        appName="FORGE"
+        appName="Counsel"
         accentColor="#4B8BDB"
         placeholder="Navigate to any screen or / for slash commands..."
       />
@@ -576,7 +576,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-sm tracking-wide text-white leading-none">
-                  FORGE
+                  Counsel
                 </span>
                 <span
                   className="text-[9px] uppercase tracking-widest leading-none mt-0.5"
@@ -753,7 +753,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
           <div className="px-2 mb-2">
             <GettingStartedChecklist
               appId="szl-alloy"
-              appName="FORGE"
+              appName="Counsel"
               items={SZL_ONBOARDING_CONFIG.checklist ?? []}
               accentColor={ALLOY_ACCENT}
               onReplayTour={() => {
@@ -848,7 +848,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
                 border: '1px solid rgba(77,124,15,0.2)',
               }}
             >
-              DOMAINE
+              Terra
             </a>
             <a
               href="/command/operations/"
@@ -859,7 +859,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
                 border: '1px solid rgba(245,158,11,0.2)',
               }}
             >
-              KORA
+              Lyte
             </a>
             <a
               href="/vessels/"
@@ -870,7 +870,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
                 border: '1px solid rgba(56,189,248,0.2)',
               }}
             >
-              SEXTANT
+              Vessels
             </a>
           </div>
         </div>
@@ -955,7 +955,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
         <main className="flex-1 overflow-auto p-4 md:p-6" style={{ background: '#080c14' }}>
-          <SectionErrorBoundary sectionName="FORGE">{children}</SectionErrorBoundary>
+          <SectionErrorBoundary sectionName="Counsel">{children}</SectionErrorBoundary>
         </main>
         <ServiceStatusRail />
       </div>

@@ -143,7 +143,7 @@ async function main() {
       {
         name: "maritime-delay-cascade",
         domain: "vessels",
-        description: "Port delay signal triggers cross-domain cascade to DOMAINE and Legal",
+        description: "Port delay signal triggers cross-domain cascade to Terra and Legal",
         trigger: { type: "signal", domain: "vessels", signal: "port_delay_hours", value: 48 },
         expected_cascade: ["terra", "prism-counsel"],
         expectations: {

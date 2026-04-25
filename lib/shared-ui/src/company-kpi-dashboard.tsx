@@ -100,7 +100,7 @@ export const DEMO_COMPANY_KPIS: CompanyKPI[] = [
     change: -61,
     changeLabel: 'vs 30d ago',
     lane: 'company',
-    description: 'P95 end-to-end workflow execution latency across FORGE',
+    description: 'P95 end-to-end workflow execution latency across Counsel',
   },
   {
     id: 'approval-latency',
@@ -112,7 +112,7 @@ export const DEMO_COMPANY_KPIS: CompanyKPI[] = [
     change: -68,
     changeLabel: 'vs 30d ago',
     lane: 'company',
-    description: 'Average time for human-in-the-loop approval tasks in KORA',
+    description: 'Average time for human-in-the-loop approval tasks in Lyte',
   },
   {
     id: 'exception-rate',
@@ -244,7 +244,7 @@ export const DEMO_COMPANY_KPIS: CompanyKPI[] = [
     change: +34.5,
     changeLabel: 'vs 30d ago',
     lane: 'security',
-    description: 'Composite security posture index across Firestorm & PARAGON Operations',
+    description: 'Composite security posture index across Firestorm & Aegis Operations',
   },
   {
     id: 'threat-d2c',
@@ -268,7 +268,7 @@ export const DEMO_COMPANY_KPIS: CompanyKPI[] = [
     change: +12,
     changeLabel: 'vs 30d ago',
     lane: 'advisory',
-    description: 'Weighted average accuracy across INCA production AI models',
+    description: 'Weighted average accuracy across Counsel production AI models',
   },
   {
     id: 'client-engagement',

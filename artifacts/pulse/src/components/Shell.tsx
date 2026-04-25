@@ -248,7 +248,7 @@ export default function Shell({ children }: { children: ReactNode }) {
             </span>
           </div>
           <span style={{ fontSize: '0.62rem', color: 'var(--pulse-text-muted)' }}>
-            FORGE v3.1 · Multi-Agent Synthesis
+            Counsel v3.1 · Multi-Agent Synthesis
           </span>
         </div>
 

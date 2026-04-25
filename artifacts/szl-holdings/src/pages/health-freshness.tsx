@@ -83,7 +83,7 @@ const SAMPLE_CONNECTORS: ConnectorHealth[] = [
   {
     id: 'ais-marinetraffic',
     name: 'AIS Maritime Feed',
-    domain: 'SEXTANT',
+    domain: 'Vessels',
     domainIcon: Ship,
     domainColor: 'hsl(206,72%,54%)',
     source: 'MarineTraffic API',
@@ -98,7 +98,7 @@ const SAMPLE_CONNECTORS: ConnectorHealth[] = [
   {
     id: 'gdelt-events',
     name: 'GDELT Event Feed',
-    domain: 'PARAGON',
+    domain: 'Aegis',
     domainIcon: Shield,
     domainColor: 'hsl(222,60%,60%)',
     source: 'GDELT 2.0',
@@ -113,7 +113,7 @@ const SAMPLE_CONNECTORS: ConnectorHealth[] = [
   {
     id: 'terra-nyc-transfers',
     name: 'NYC Property Transfers',
-    domain: 'DOMAINE',
+    domain: 'Terra',
     domainIcon: Building2,
     domainColor: 'hsl(142,52%,48%)',
     source: 'ACRIS / PLUTO',
@@ -128,7 +128,7 @@ const SAMPLE_CONNECTORS: ConnectorHealth[] = [
   {
     id: 'alloy-workflow-events',
     name: 'Workflow State Events',
-    domain: 'FORGE',
+    domain: 'Counsel',
     domainIcon: Zap,
     domainColor: 'hsl(192,72%,48%)',
     source: 'Internal Event Bus',
@@ -143,7 +143,7 @@ const SAMPLE_CONNECTORS: ConnectorHealth[] = [
   {
     id: 'ofac-sdn',
     name: 'OFAC SDN List',
-    domain: 'SEXTANT',
+    domain: 'Vessels',
     domainIcon: Ship,
     domainColor: 'hsl(206,72%,54%)',
     source: 'OFAC.treas.gov',
@@ -158,7 +158,7 @@ const SAMPLE_CONNECTORS: ConnectorHealth[] = [
   {
     id: 'nvd-cve',
     name: 'NVD CVE Feed',
-    domain: 'PARAGON',
+    domain: 'Aegis',
     domainIcon: Shield,
     domainColor: 'hsl(222,60%,60%)',
     source: 'NIST NVD',
@@ -175,7 +175,7 @@ const SAMPLE_CONNECTORS: ConnectorHealth[] = [
   {
     id: 'weather-noaa',
     name: 'NOAA Weather & Routing',
-    domain: 'SEXTANT',
+    domain: 'Vessels',
     domainIcon: Ship,
     domainColor: 'hsl(206,72%,54%)',
     source: 'NOAA / OPC',
@@ -190,7 +190,7 @@ const SAMPLE_CONNECTORS: ConnectorHealth[] = [
   {
     id: 'alloy-ai-traces',
     name: 'AI Inference Traces',
-    domain: 'FORGE',
+    domain: 'Counsel',
     domainIcon: Zap,
     domainColor: 'hsl(192,72%,48%)',
     source: 'Internal Telemetry',
@@ -205,7 +205,7 @@ const SAMPLE_CONNECTORS: ConnectorHealth[] = [
   {
     id: 'terra-costar',
     name: 'CoStar Market Data',
-    domain: 'DOMAINE',
+    domain: 'Terra',
     domainIcon: Building2,
     domainColor: 'hsl(142,52%,48%)',
     source: 'CoStar API',
@@ -222,7 +222,7 @@ const SAMPLE_CONNECTORS: ConnectorHealth[] = [
   {
     id: 'internal-signals',
     name: 'Internal Signal Bus',
-    domain: 'FORGE',
+    domain: 'Counsel',
     domainIcon: Zap,
     domainColor: 'hsl(192,72%,48%)',
     source: 'PRAXIS Bus',
@@ -584,7 +584,7 @@ export default function HealthFreshnessPage() {
                     textDecoration: 'none',
                   }}
                 >
-                  KORA
+                  Lyte
                 </Link>
                 <span style={{ color: TEXT_FAINT, fontSize: '0.75rem' }}>›</span>
                 <span

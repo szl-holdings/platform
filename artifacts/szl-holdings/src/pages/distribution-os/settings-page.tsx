@@ -175,7 +175,7 @@ const RECOMMENDED_LINKTREE = [
     destination: 'https://szlholdings.com/contact',
     tag: 'contact',
   },
-  { label: 'KORA — AI Ops for SMBs', destination: 'https://szlholdings.com/lyte', tag: 'lyte' },
+  { label: 'Lyte — AI Ops for SMBs', destination: 'https://szlholdings.com/lyte', tag: 'lyte' },
   {
     label: 'Insights — Founder Essays',
     destination: 'https://szlholdings.com/insights',

@@ -401,7 +401,7 @@ export default function PredictionsPage() {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <div className="flex items-center gap-3 mb-1">
           <Brain className="w-6 h-6 text-violet-400" />
-          <h1 className="text-2xl font-display font-bold text-terra-text">FORGE Intelligence</h1>
+          <h1 className="text-2xl font-display font-bold text-terra-text">Counsel Intelligence</h1>
         </div>
         <p className="text-sm text-terra-text-secondary">
           Close likelihood · Pricing confidence · Stall risk · Deal health — no black boxes. Every
@@ -412,7 +412,7 @@ export default function PredictionsPage() {
       <div className="flex items-center gap-2 px-4 py-3 rounded-xl border border-violet-500/30 bg-violet-500/10">
         <Shield className="w-4 h-4 text-violet-400 flex-shrink-0" />
         <p className="text-xs text-violet-300">
-          <span className="font-semibold">FORGE Explainability Standard:</span> Every AI output
+          <span className="font-semibold">Counsel Explainability Standard:</span> Every AI output
           below includes probability, confidence score, rationale, assumptions, risk factors, and a
           specific recommended next action with owner and due date.
         </p>

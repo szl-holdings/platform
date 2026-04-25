@@ -80,7 +80,7 @@ test.describe('Ecosystem Command Portal — Dashboard Content', () => {
     expect(hasError).toBe(false);
 
     const domainContent = page
-      .locator(":text('KORA'), :text('PARAGON'), :text('SEXTANT'), :text('DOMAINE'), :text('PRISM')")
+      .locator(":text('Lyte'), :text('Aegis'), :text('Vessels'), :text('Terra'), :text('PRISM')")
       .first();
     await expect(domainContent).toBeVisible({ timeout: 15000 });
   });

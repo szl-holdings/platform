@@ -1,7 +1,7 @@
 export const openApiSpec = {
   openapi: '3.1.0',
   info: {
-    title: 'FORGE Embedding Fabric API',
+    title: 'Counsel Embedding Fabric API',
     version: '0.1.0',
     description:
       'REST gateway for AEF: embed, rerank, hybrid-search, ingest, index operations, and evals. ' +

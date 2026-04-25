@@ -148,7 +148,7 @@ const LyteContext = createContext<LyteContextValue>({
 
 const BASE_PLATFORMS: PlatformHealth[] = [
   {
-    name: 'KORA Command Center',
+    name: 'Lyte Command Center',
     slug: 'lyte-command-center',
     status: 'unknown',
     uptime: 0,
@@ -158,7 +158,7 @@ const BASE_PLATFORMS: PlatformHealth[] = [
     slaCompliance: 0,
   },
   {
-    name: 'PARAGON Defense',
+    name: 'Aegis Defense',
     slug: 'firestorm',
     status: 'unknown',
     uptime: 0,
@@ -168,7 +168,7 @@ const BASE_PLATFORMS: PlatformHealth[] = [
     slaCompliance: 0,
   },
   {
-    name: 'SEXTANT Maritime',
+    name: 'Vessels Maritime',
     slug: 'vessels',
     status: 'unknown',
     uptime: 0,
@@ -178,7 +178,7 @@ const BASE_PLATFORMS: PlatformHealth[] = [
     slaCompliance: 0,
   },
   {
-    name: 'DOMAINE Real Estate',
+    name: 'Terra Real Estate',
     slug: 'terra',
     status: 'unknown',
     uptime: 0,

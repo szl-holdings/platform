@@ -331,7 +331,7 @@ export default function DarkVesselDetection() {
       <div className="grid grid-cols-4 gap-4">
         {[
           {
-            label: 'Dark SEXTANT Active',
+            label: 'Dark Vessels Active',
             value: '5',
             icon: EyeOff,
             color: 'text-red-400',
@@ -378,7 +378,7 @@ export default function DarkVesselDetection() {
       <div className="flex gap-1 border-b border-border">
         {(
           [
-            { key: 'dark', label: 'Dark SEXTANT', count: darkVessels.length },
+            { key: 'dark', label: 'Dark Vessels', count: darkVessels.length },
             { key: 'sts', label: 'STS Transfers', count: shipToShipAlerts.length },
             { key: 'iuu', label: 'IUU Fishing', count: iuuAlerts.length },
           ] as { key: 'dark' | 'sts' | 'iuu'; label: string; count: number }[]

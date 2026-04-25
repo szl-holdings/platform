@@ -433,7 +433,7 @@ export default function FundIntelligenceHub() {
                   { item: "Carlota Jo runway compressed to 9 months — intervention rec. pending", urgency: "high" },
                   { item: "LP re-up conversations needed: Meridian Capital, Astor Family Office", urgency: "medium" },
                   { item: "3 co-investor NDAs expiring in 30 days", urgency: "medium" },
-                  { item: "SEXTANT Q1 financial data overdue from portfolio company", urgency: "low" },
+                  { item: "Vessels Q1 financial data overdue from portfolio company", urgency: "low" },
                 ].map((a, i) => (
                   <div key={i} className="flex items-start gap-2 py-1.5 border-b border-white/[0.04] last:border-0">
                     <div className={`mt-1.5 h-1.5 w-1.5 rounded-full flex-shrink-0 ${a.urgency === "high" ? "bg-[#c45a4a]" : a.urgency === "medium" ? "bg-[#d4a054]" : "bg-white/30"}`} />

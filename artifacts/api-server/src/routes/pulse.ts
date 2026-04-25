@@ -232,10 +232,10 @@ router.get('/unsubscribe', async (req: Request, res: Response): Promise<void> =>
 router.use(authMiddleware({ required: true }));
 
 const AGENT_NAMES: Record<string, string> = {
-  alloy: 'FORGE',
+  alloy: 'Counsel',
   helmsman: 'Helmsman',
   sentinel: 'Sentinel',
-  terra: 'DOMAINE',
+  terra: 'Terra',
   lexis: 'Lexis',
   atlas: 'Atlas',
   beacon: 'Beacon',

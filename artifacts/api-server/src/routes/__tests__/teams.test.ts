@@ -393,7 +393,7 @@ describe('GET /teams/:team', () => {
     ];
     store.apps = [
       { slug: 'pulse', name: 'LUMINA', ownerTeam: 'Platform' },
-      { slug: 'terra', name: 'DOMAINE', ownerTeam: 'Other' },
+      { slug: 'terra', name: 'Terra', ownerTeam: 'Other' },
     ];
     const app = await makeApp();
     const r = await request(app).get('/teams/Platform');

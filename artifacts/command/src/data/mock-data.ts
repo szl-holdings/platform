@@ -3,7 +3,7 @@ import type { CommandAction, DomainData, IntelligenceCard, TimelineEvent } from 
 export const baseDomainData: DomainData[] = [
   {
     id: 'aegis',
-    name: 'PARAGON',
+    name: 'Aegis',
     icon: 'ShieldAlert',
     color: 'var(--color-aegis)',
     score: 61,
@@ -22,13 +22,13 @@ export const baseDomainData: DomainData[] = [
   },
   {
     id: 'vessels',
-    name: 'SEXTANT',
+    name: 'Vessels',
     icon: 'Ship',
     color: 'var(--color-vessels)',
     score: 82,
     status: 'Fleet nominal',
     kpis: [
-      { label: 'SEXTANT at Sea', value: '23', trend: 'neutral' },
+      { label: 'Vessels at Sea', value: '23', trend: 'neutral' },
       { label: 'Cargo Value', value: '$847M', trend: 'up' },
       { label: 'ETA Delays', value: '2', trend: 'down' },
     ],
@@ -60,7 +60,7 @@ export const baseDomainData: DomainData[] = [
   },
   {
     id: 'lyte',
-    name: 'KORA',
+    name: 'Lyte',
     icon: 'Activity',
     color: 'var(--color-lyte)',
     score: 88,
@@ -98,7 +98,7 @@ export const baseDomainData: DomainData[] = [
   },
   {
     id: 'terra',
-    name: 'DOMAINE',
+    name: 'Terra',
     icon: 'Building2',
     color: 'var(--color-terra)',
     score: 69,
@@ -213,9 +213,9 @@ export const baseTimelineEvents: TimelineEvent[] = [
     time: '52m ago',
     domain: 'szl',
     severity: 'info',
-    title: 'FORGE Fund III capital call',
+    title: 'Counsel Fund III capital call',
     detail:
-      '$14.7M drawdown request received from FORGE Holdings management; requires executive approval.',
+      '$14.7M drawdown request received from Counsel Holdings management; requires executive approval.',
   },
   {
     id: 8,
@@ -247,9 +247,9 @@ export const baseTimelineEvents: TimelineEvent[] = [
     time: '2h ago',
     domain: 'szl',
     severity: 'info',
-    title: 'FORGE Holdings Q1 earnings',
+    title: 'Counsel Holdings Q1 earnings',
     detail:
-      'Portfolio company FORGE Holdings confirmed Q1 revenue +22% YoY, exceeding projections.',
+      'Portfolio company Counsel Holdings confirmed Q1 revenue +22% YoY, exceeding projections.',
   },
   {
     id: 12,
@@ -267,7 +267,7 @@ export const baseTimelineEvents: TimelineEvent[] = [
     severity: 'high',
     title: 'Litigation hold notice issued',
     detail:
-      'New preservation order for Titan Infrastructure matter — IT and KORA notified to retain logs.',
+      'New preservation order for Titan Infrastructure matter — IT and Lyte notified to retain logs.',
   },
   {
     id: 14,
@@ -302,7 +302,7 @@ export const baseIntelligenceCards: IntelligenceCard[] = [
     severity: 'high',
     description:
       'MV Kestrel Meridian delay at Singapore directly impacts Horizon Logistics, an SZL Holdings portfolio company representing 12% of fund NAV. Three PRISM clients have Horizon as a material contract counterparty. Recommend flagging Horizon Logistics for force majeure clause review and alerting PRISM counsel.',
-    entities: ['SEXTANT', 'SZL Holdings', 'PRAXIS'],
+    entities: ['Vessels', 'SZL Holdings', 'PRAXIS'],
     action: 'Initiate force majeure review',
   },
   {
@@ -310,8 +310,8 @@ export const baseIntelligenceCards: IntelligenceCard[] = [
     title: 'Threat Actor Campaign — Infrastructure Blast Radius',
     severity: 'critical',
     description:
-      'PARAGON is tracking APT-29 lateral movement toward Active Directory. KORA has flagged 2 microservices running on CORP-SRV-08 that are within the blast radius. Isolation of the affected K8s namespace would temporarily reduce KORA monitoring coverage for DOMAINE and SEXTANT.',
-    entities: ['PARAGON', 'KORA', 'DOMAINE', 'SEXTANT'],
+      'Aegis is tracking APT-29 lateral movement toward Active Directory. Lyte has flagged 2 microservices running on CORP-SRV-08 that are within the blast radius. Isolation of the affected K8s namespace would temporarily reduce Lyte monitoring coverage for Terra and Vessels.',
+    entities: ['Aegis', 'Lyte', 'Terra', 'Vessels'],
     action: 'Isolate K8s namespace after backup',
   },
   {
@@ -320,7 +320,7 @@ export const baseIntelligenceCards: IntelligenceCard[] = [
     severity: 'high',
     description:
       'Five PRISM matters reach simultaneous discovery deadlines in the next 7 days. Combined potential exposure of $94M requires SZL Holdings to confirm reserve adequacy before the April board meeting. Phoenix market decline compounds risk on two matters with real-estate-collateralized claims.',
-    entities: ['PRAXIS', 'SZL Holdings', 'DOMAINE'],
+    entities: ['PRAXIS', 'SZL Holdings', 'Terra'],
     action: 'Schedule CFO reserve review',
   },
   {
@@ -328,8 +328,8 @@ export const baseIntelligenceCards: IntelligenceCard[] = [
     title: 'Real Estate Downturn — Portfolio Sensitivity',
     severity: 'medium',
     description:
-      "DOMAINE's Phoenix MSA data shows a 3.2% comp decline over 30 days. Two SZL Holdings portfolio companies — Sunstate Realty Partners and Meridian Development — have Phoenix-heavy balance sheets totaling $340M. Recommend running sensitivity analysis before next capital allocation meeting.",
-    entities: ['DOMAINE', 'SZL Holdings'],
+      "Terra's Phoenix MSA data shows a 3.2% comp decline over 30 days. Two SZL Holdings portfolio companies — Sunstate Realty Partners and Meridian Development — have Phoenix-heavy balance sheets totaling $340M. Recommend running sensitivity analysis before next capital allocation meeting.",
+    entities: ['Terra', 'SZL Holdings'],
     action: 'Run sensitivity analysis',
   },
 ];
@@ -360,7 +360,7 @@ export const baseCommandActions: CommandAction[] = [
     id: 'act-4',
     domain: 'szl',
     priority: 'medium',
-    text: 'Approve Q1 capital call: FORGE Fund III — $14.7M drawdown',
+    text: 'Approve Q1 capital call: Counsel Fund III — $14.7M drawdown',
     buttonText: 'Approve',
   },
   {

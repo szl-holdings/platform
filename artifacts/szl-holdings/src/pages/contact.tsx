@@ -22,7 +22,7 @@ interface FormState {
 }
 
 const INQUIRY_TYPES: { value: InquiryType; label: string; desc: string }[] = [
-  { value: "demo", label: "Demo request", desc: "See KORA + FORGE on a staged workflow" },
+  { value: "demo", label: "Demo request", desc: "See Lyte + Counsel on a staged workflow" },
   { value: "design-partner", label: "Design partner", desc: "Work directly with the founder to instrument one real workflow" },
   { value: "general", label: "General inquiry", desc: "Investors, partnerships, or other conversations" },
   { value: "partner", label: "Partner / integration", desc: "Technical or commercial partnership discussions" },

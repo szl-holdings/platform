@@ -120,9 +120,9 @@ describe('buildSystemPrompt', () => {
     expect(prompt).toContain('vessels');
   });
 
-  it('uses FORGE for consolidated domain', () => {
+  it('uses Counsel for consolidated domain', () => {
     const prompt = buildSystemPrompt('consolidated');
-    expect(prompt).toContain('FORGE');
+    expect(prompt).toContain('Counsel');
   });
 
   it('requires JSON response format', () => {

@@ -226,7 +226,7 @@ export default function ProfileScreen() {
             fetchers={[
               {
                 domain: 'lyte',
-                label: 'KORA',
+                label: 'Lyte',
                 color: LYTE_COLORS.electricBlue,
                 fetch: async () => {
                   try {
@@ -243,7 +243,7 @@ export default function ProfileScreen() {
               },
               {
                 domain: 'aegis',
-                label: 'PARAGON',
+                label: 'Aegis',
                 color: '#f59e0b',
                 fetch: async () => {
                   try {
@@ -260,7 +260,7 @@ export default function ProfileScreen() {
               },
               {
                 domain: 'vessels',
-                label: 'SEXTANT',
+                label: 'Vessels',
                 color: '#0ea5e9',
                 fetch: async () => {
                   try {
@@ -292,7 +292,7 @@ export default function ProfileScreen() {
           </View>
           <View>
             <Text style={styles.avatarName}>On-Call Engineer</Text>
-            <Text style={styles.avatarRole}>KORA Operations</Text>
+            <Text style={styles.avatarRole}>Lyte Operations</Text>
             {!permissionGranted && (
               <Pressable style={styles.notifBanner} onPress={handleEnableNotifications}>
                 <Feather name="bell-off" size={12} color={LYTE_COLORS.high} />
@@ -378,7 +378,7 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>KORA Mobile · v1.0.0</Text>
+          <Text style={styles.footerText}>Lyte Mobile · v1.0.0</Text>
           <Text style={styles.footerSub}>Business Observability On-Call Companion</Text>
         </View>
       </ScrollView>

@@ -9,7 +9,7 @@ const SECTIONS = [
     icon: Layers,
     title: "Architecture Moat",
     items: [
-      "KORA + FORGE is a vertically-integrated agentic AI stack — not a thin wrapper on a foundation model",
+      "Lyte + Counsel is a vertically-integrated agentic AI stack — not a thin wrapper on a foundation model",
       "Domain pack architecture creates compounding depth: each vertical (Legal, Maritime, Real Estate, Defense) deepens independently",
       "Digital twin layer enables state modeling that competitors cannot replicate without equivalent data history",
       "Proof Chain provides tamper-evident decision lineage — a structural compliance advantage in regulated markets",

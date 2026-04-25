@@ -1704,7 +1704,7 @@ router.post('/certification/seed', ...auth, validateBody(bodyShape({})), async (
         title: 'Other Scientific and Technical Consulting Services',
         businessLine: 'Technical Consulting',
         isSetAsideEligible: true,
-        notes: 'Maritime, INCA research-adjacent',
+        notes: 'Maritime, Counsel research-adjacent',
       },
       {
         naicsCode: '541990',

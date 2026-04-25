@@ -212,19 +212,19 @@ function describecsrfDomain(
 
 // ── Run CSRF tests across all domains ────────────────────────────────────────
 
-describecsrfDomain('SEXTANT — alerts', ['/api/vessels/alerts']);
-describecsrfDomain('SEXTANT — orders', ['/api/vessels/orders']);
-describecsrfDomain('DOMAINE — properties & leases', ['/api/terra/properties', '/api/terra/leases']);
-describecsrfDomain('DOMAINE — pro-forma', ['/api/terra/pro-forma']);
+describecsrfDomain('Vessels — alerts', ['/api/vessels/alerts']);
+describecsrfDomain('Vessels — orders', ['/api/vessels/orders']);
+describecsrfDomain('Terra — properties & leases', ['/api/terra/properties', '/api/terra/leases']);
+describecsrfDomain('Terra — pro-forma', ['/api/terra/pro-forma']);
 describecsrfDomain('Counsel — matters', ['/api/prism/matters']);
 describecsrfDomain('Counsel — documents', ['/api/prism/documents']);
 describecsrfDomain('Firestorm — findings', ['/api/firestorm/findings']);
 describecsrfDomain('Firestorm — assessments', ['/api/firestorm/assessments']);
-describecsrfDomain('KORA — scenarios', ['/api/lyte/scenarios']);
-describecsrfDomain('KORA — decisions', ['/api/lyte/decisions']);
-describecsrfDomain('FORGE — channels', ['/api/alloy/channels']);
-describecsrfDomain('FORGE — chat', ['/api/alloy/chat']);
-describecsrfDomain('PARAGON — portfolios', ['/api/aegis/portfolios']);
+describecsrfDomain('Lyte — scenarios', ['/api/lyte/scenarios']);
+describecsrfDomain('Lyte — decisions', ['/api/lyte/decisions']);
+describecsrfDomain('Counsel — channels', ['/api/alloy/channels']);
+describecsrfDomain('Counsel — chat', ['/api/alloy/chat']);
+describecsrfDomain('Aegis — portfolios', ['/api/aegis/portfolios']);
 describecsrfDomain('SZL Holdings — ventures', ['/api/szl-holdings/ventures']);
 describecsrfDomain('Agents — runs', ['/api/agents/runs']);
 describecsrfDomain('Verifier', ['/api/verifier']);
@@ -234,8 +234,8 @@ describecsrfDomain('Signals', ['/api/signals']);
 
 // ── PATCH / DELETE round-trips ────────────────────────────────────────────────
 
-describecsrfDomain('SEXTANT — alerts (PATCH)', ['/api/vessels/alerts'], 'PATCH');
-describecsrfDomain('DOMAINE — properties (PATCH)', ['/api/terra/properties'], 'PATCH');
+describecsrfDomain('Vessels — alerts (PATCH)', ['/api/vessels/alerts'], 'PATCH');
+describecsrfDomain('Terra — properties (PATCH)', ['/api/terra/properties'], 'PATCH');
 describecsrfDomain('Counsel — matters (DELETE)', ['/api/prism/matters'], 'DELETE');
 describecsrfDomain('Firestorm — findings (DELETE)', ['/api/firestorm/findings'], 'DELETE');
 

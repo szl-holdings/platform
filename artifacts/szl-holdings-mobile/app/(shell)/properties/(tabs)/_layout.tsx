@@ -53,7 +53,7 @@ const propertiesCommands: SpotlightCommand[] = [
   },
   {
     id: 'nav-terra',
-    label: 'DOMAINE Modules',
+    label: 'Terra Modules',
     description: 'Rent Roll, Construction, Tenant Screening & more',
     icon: '🏗',
     group: 'Navigate',
@@ -64,7 +64,7 @@ const propertiesCommands: SpotlightCommand[] = [
     label: 'Rent Roll',
     description: 'Live tenant rent roll & lease status',
     icon: '📄',
-    group: 'DOMAINE',
+    group: 'Terra',
     action: () => router.push('/(shell)/properties/rent-roll'),
   },
   {
@@ -72,7 +72,7 @@ const propertiesCommands: SpotlightCommand[] = [
     label: 'Construction Monitor',
     description: 'Track active construction & renovation projects',
     icon: '🏗',
-    group: 'DOMAINE',
+    group: 'Terra',
     action: () => router.push('/(shell)/properties/construction-monitor'),
   },
   {
@@ -80,7 +80,7 @@ const propertiesCommands: SpotlightCommand[] = [
     label: 'Tenant Screening',
     description: 'AI-powered applicant screening & scoring',
     icon: '🔍',
-    group: 'DOMAINE',
+    group: 'Terra',
     action: () => router.push('/(shell)/properties/tenant-screening'),
   },
   {
@@ -118,7 +118,7 @@ function NativeTabLayout() {
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="terra-modules">
         <Icon sf={{ default: 'building.columns', selected: 'building.columns.fill' }} />
-        <Label>DOMAINE</Label>
+        <Label>Terra</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="agent-chat">
         <Icon
@@ -209,7 +209,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="terra-modules"
         options={{
-          title: 'DOMAINE',
+          title: 'Terra',
           tabBarIcon: ({ color }) =>
             isIOS ? (
               <SymbolView name="building.columns.fill" tintColor={color} size={22} />

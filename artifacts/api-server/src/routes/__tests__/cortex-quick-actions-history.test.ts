@@ -174,7 +174,7 @@ describe('GET /cortex/quick-actions/history', () => {
         priority: 'high',
         status: 'rejected',
         requestedById: 9,
-        requestedByRole: 'PARAGON SOC',
+        requestedByRole: 'Aegis SOC',
         approvedById: null,
         approvedAt: null,
         rejectedById: 1,

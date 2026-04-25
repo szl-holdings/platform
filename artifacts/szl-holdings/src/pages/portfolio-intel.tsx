@@ -6,12 +6,12 @@ import { useState } from "react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const companies = [
-  { name: "FORGE", vertical: "Execution Fabric · ENGINE", stage: "Core Platform", arr: "$5.1M", growth: "+148%", employees: 22, valuation: "$42M", status: "Outperforming", icon: Brain, color: "#6366f1" },
-  { name: "KORA", vertical: "Business Observability · PRAXIS", stage: "Growth", arr: "$4.2M", growth: "+93%", employees: 41, valuation: "$35M", status: "Outperforming", icon: Zap, color: "#f59e0b" },
-  { name: "SEXTANT", vertical: "Maritime Intelligence", stage: "Series A", arr: "$1.2M", growth: "+48%", employees: 22, valuation: "$14M", status: "Performing", icon: Globe, color: "#3b82f6" },
-  { name: "PARAGON", vertical: "Defense & Intelligence", stage: "Growth", arr: "$2.4M", growth: "+84%", employees: 28, valuation: "$18M", status: "Performing", icon: Shield, color: "#6366f1" },
+  { name: "Counsel", vertical: "Execution Fabric · ENGINE", stage: "Core Platform", arr: "$5.1M", growth: "+148%", employees: 22, valuation: "$42M", status: "Outperforming", icon: Brain, color: "#6366f1" },
+  { name: "Lyte", vertical: "Business Observability · PRAXIS", stage: "Growth", arr: "$4.2M", growth: "+93%", employees: 41, valuation: "$35M", status: "Outperforming", icon: Zap, color: "#f59e0b" },
+  { name: "Vessels", vertical: "Maritime Intelligence", stage: "Series A", arr: "$1.2M", growth: "+48%", employees: 22, valuation: "$14M", status: "Performing", icon: Globe, color: "#3b82f6" },
+  { name: "Aegis", vertical: "Defense & Intelligence", stage: "Growth", arr: "$2.4M", growth: "+84%", employees: 28, valuation: "$18M", status: "Performing", icon: Shield, color: "#6366f1" },
   { name: "SZL APEX", vertical: "AI / ML Research", stage: "Series A", arr: "$1.8M", growth: "+112%", employees: 19, valuation: "$22M", status: "Outperforming", icon: Brain, color: "#8b5cf6" },
-  { name: "DOMAINE", vertical: "Property Intelligence · OBSERVE", stage: "Growth", arr: "$3.1M", growth: "+61%", employees: 34, valuation: "$28M", status: "Performing", icon: Building2, color: "#4d7c0f" },
+  { name: "Terra", vertical: "Property Intelligence · OBSERVE", stage: "Growth", arr: "$3.1M", growth: "+61%", employees: 34, valuation: "$28M", status: "Performing", icon: Building2, color: "#4d7c0f" },
 ];
 
 const portfolioValue = [
@@ -170,9 +170,9 @@ export default function PortfolioIntel() {
 
 // ─── M&A Signals ──────────────────────────────────────────────────────────────
 const maSignals = [
-  { company: "KORA", signal: "Inbound Interest", description: "3 strategic acquirers in discussion; indicative offers $55–70M range", priority: "high", date: "Mar 2026" },
-  { company: "DOMAINE", signal: "Strategic Merger", description: "Early conversations with enterprise analytics consolidator; exploring $50M+ deal", priority: "medium", date: "Feb 2026" },
-  { company: "PARAGON", signal: "PE Buyout Interest", description: "CrowdStrike partner fund conducting preliminary due diligence", priority: "medium", date: "Mar 2026" },
+  { company: "Lyte", signal: "Inbound Interest", description: "3 strategic acquirers in discussion; indicative offers $55–70M range", priority: "high", date: "Mar 2026" },
+  { company: "Terra", signal: "Strategic Merger", description: "Early conversations with enterprise analytics consolidator; exploring $50M+ deal", priority: "medium", date: "Feb 2026" },
+  { company: "Aegis", signal: "PE Buyout Interest", description: "CrowdStrike partner fund conducting preliminary due diligence", priority: "medium", date: "Mar 2026" },
   { company: "SZL APEX", signal: "Secondary Sale", description: "Early investor seeking liquidity; secondary at $18M pre-money implied", priority: "low", date: "Jan 2026" },
 ];
 
@@ -216,12 +216,12 @@ function MASignalsPanel() {
 
 // ─── IRR Model ────────────────────────────────────────────────────────────────
 const irrData = [
-  { company: "FORGE", invested: 3.2, currentVal: 42, moic: 13.1, irr: 148, stage: "Core Platform" },
-  { company: "KORA", invested: 4.2, currentVal: 35, moic: 8.3, irr: 94, stage: "Growth" },
+  { company: "Counsel", invested: 3.2, currentVal: 42, moic: 13.1, irr: 148, stage: "Core Platform" },
+  { company: "Lyte", invested: 4.2, currentVal: 35, moic: 8.3, irr: 94, stage: "Growth" },
   { company: "SZL APEX", invested: 2.1, currentVal: 22, moic: 10.5, irr: 112, stage: "Series A" },
-  { company: "DOMAINE", invested: 3.8, currentVal: 28, moic: 7.4, irr: 78, stage: "Growth" },
-  { company: "PARAGON", invested: 2.5, currentVal: 18, moic: 7.2, irr: 84, stage: "Growth" },
-  { company: "SEXTANT", invested: 1.8, currentVal: 14, moic: 7.8, irr: 61, stage: "Series A" },
+  { company: "Terra", invested: 3.8, currentVal: 28, moic: 7.4, irr: 78, stage: "Growth" },
+  { company: "Aegis", invested: 2.5, currentVal: 18, moic: 7.2, irr: 84, stage: "Growth" },
+  { company: "Vessels", invested: 1.8, currentVal: 14, moic: 7.8, irr: 61, stage: "Series A" },
 ];
 
 function IRRModelPanel() {

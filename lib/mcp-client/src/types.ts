@@ -110,7 +110,7 @@ export const DOMAIN_TOOLS: Record<McpDomain, string[]> = {
 export const BUILT_IN_MCP_TOOLS: McpTool[] = [
   {
     name: 'alloy_research',
-    description: "Perform deep research using FORGE's intelligence engine",
+    description: "Perform deep research using Counsel's intelligence engine",
     inputSchema: {
       type: 'object',
       properties: {
@@ -127,7 +127,7 @@ export const BUILT_IN_MCP_TOOLS: McpTool[] = [
   },
   {
     name: 'alloy_create_artifact',
-    description: 'Create a structured artifact (report, brief, summary) via FORGE',
+    description: 'Create a structured artifact (report, brief, summary) via Counsel',
     inputSchema: {
       type: 'object',
       properties: {
@@ -145,7 +145,7 @@ export const BUILT_IN_MCP_TOOLS: McpTool[] = [
   },
   {
     name: 'alloy_launch_workflow',
-    description: 'Launch an FORGE workflow with specified parameters',
+    description: 'Launch an Counsel workflow with specified parameters',
     inputSchema: {
       type: 'object',
       properties: {
@@ -158,7 +158,7 @@ export const BUILT_IN_MCP_TOOLS: McpTool[] = [
   },
   {
     name: 'query_audit_log',
-    description: 'Query the FORGE audit log for recent actions',
+    description: 'Query the Counsel audit log for recent actions',
     inputSchema: {
       type: 'object',
       properties: {
@@ -206,7 +206,7 @@ export const BUILT_IN_MCP_TOOLS: McpTool[] = [
   },
   {
     name: 'lyte_health_check',
-    description: 'Get current system health status and alerts from KORA',
+    description: 'Get current system health status and alerts from Lyte',
     inputSchema: {
       type: 'object',
       properties: {

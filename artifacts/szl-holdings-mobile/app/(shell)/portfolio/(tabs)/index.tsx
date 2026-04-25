@@ -788,7 +788,7 @@ export default function CommandScreen() {
                 color="#4d7c0f"
               />
               <KpiRow
-                label="Fleet SEXTANT"
+                label="Fleet Vessels"
                 value={kpis.aggregate.fleetVessels}
                 icon="anchor"
                 color={colors.blue}

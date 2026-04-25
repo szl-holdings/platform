@@ -74,7 +74,7 @@ export const DEMO_SUMMARY = {
     'Context assembly (Twin model)',
     'AI recommendation generation',
     'Human approval gate',
-    'Governed execution (FORGE)',
+    'Governed execution (Counsel)',
     'Outcome capture',
     'Executive summary',
     'Proof chain / audit trail',
@@ -98,7 +98,7 @@ export { seedSignalMesh } from './seed-signal-mesh';
 export const SIGNAL_MESH_NARRATIVES = [
   {
     id: 'vessels-port-congestion',
-    label: 'SEXTANT — Port Congestion + Route Exception Cluster',
+    label: 'Vessels — Port Congestion + Route Exception Cluster',
     domain: 'maritime',
   },
   {

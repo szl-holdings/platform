@@ -116,7 +116,7 @@ export default function AuthScreen() {
           {[
             'Unified signals across all domain packs',
             'Governed approvals — confirm from anywhere',
-            'FORGE workflow orchestration',
+            'Counsel workflow orchestration',
             'Full audit trail — every action attributed',
           ].map((f) => (
             <View key={f} style={styles.featureRow}>

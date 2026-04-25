@@ -109,24 +109,24 @@ const operatingThesis = [
 const proofObjects = [
   {
     title: "Approval latency detection",
-    platform: "KORA",
+    platform: "Lyte",
     color: "#4a90b8",
     outcome:
       "Designed and built a signal compression and prioritization layer to surface approval queue stalling that was invisible to leadership. The system ranks severity, exposes root cause context, and routes next actions to the right owner.",
   },
   {
     title: "Pre-designation behavioral fingerprinting",
-    platform: "SEXTANT",
+    platform: "Vessels",
     color: "#4a90b8",
     outcome:
       "Built an AIS anomaly detection system to identify sanctions-risk vessel behavior before formal regulatory designation — using pattern analysis across large vessel datasets to detect behavioral laundering and position manipulation.",
   },
   {
     title: "Workflow orchestration engine",
-    platform: "FORGE",
+    platform: "Counsel",
     color: "#8b7ac8",
     outcome:
-      "Designed and built the six-layer FORGE orchestration engine: signal ingestion, normalization, reasoning, routing, outputs, and governance. Human approval gates at every critical decision point. Audit trail on every execution.",
+      "Designed and built the six-layer Counsel orchestration engine: signal ingestion, normalization, reasoning, routing, outputs, and governance. Human approval gates at every critical decision point. Audit trail on every execution.",
   },
   {
     title: "Matter Twin architecture",

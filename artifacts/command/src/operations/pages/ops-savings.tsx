@@ -58,7 +58,7 @@ const ACTIONS: AutomationAction[] = [
   {
     id: 'a2',
     type: 'Alert Triage & Routing',
-    description: 'FORGE auto-classifies and routes alerts to correct owner',
+    description: 'Counsel auto-classifies and routes alerts to correct owner',
     count: 2840,
     avgMinsPerManual: 4.5,
     hourlyRate: 140,

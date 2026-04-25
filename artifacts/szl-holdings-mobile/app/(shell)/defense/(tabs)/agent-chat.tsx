@@ -29,7 +29,7 @@ const TEXT = '#E8EAF0';
 const TEXT_DIM = 'rgba(232,234,240,0.45)';
 
 const AGENTS = [
-  { id: 'alloy', name: 'FORGE', role: 'Orchestration', icon: 'git-merge', color: '#F97316' },
+  { id: 'alloy', name: 'Counsel', role: 'Orchestration', icon: 'git-merge', color: '#F97316' },
   { id: 'sentinel', name: 'Sentinel', role: 'Security', icon: 'shield', color: '#EF4444' },
   { id: 'helmsman', name: 'Helmsman', role: 'Maritime', icon: 'anchor', color: '#0ea5e9' },
   { id: 'eval', name: 'Eval Engine', role: 'Research', icon: 'cpu', color: '#8b5cf6' },

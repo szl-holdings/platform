@@ -145,7 +145,7 @@ const SCENARIOS: SimScenario[] = [
     name: 'Charter rate update at 2AM',
     description:
       'Apply a new fuel surcharge rate change (>$50K fleet-wide impact) at 2:00 AM outside business hours.',
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
     impactEstimate: '$72,000',
     timeOfDay: '02:00 AM',
@@ -189,7 +189,7 @@ const SCENARIOS: SimScenario[] = [
     name: 'Export portfolio data to external auditor',
     description:
       'Send full Q1 real estate valuation dataset to external auditor without redaction pre-check.',
-    pack: 'DOMAINE',
+    pack: 'Terra',
     packColor: '#a07848',
     impactEstimate: '$0',
     timeOfDay: '10:30 AM',
@@ -233,7 +233,7 @@ const SCENARIOS: SimScenario[] = [
     name: 'Security incident auto-remediation (known pattern)',
     description:
       'Attempt to auto-remediate a known brute-force pattern using the remediation playbook without approval.',
-    pack: 'PARAGON',
+    pack: 'Aegis',
     packColor: '#4f6ef7',
     impactEstimate: '$0',
     timeOfDay: '3:45 PM',
@@ -405,7 +405,7 @@ export default function AlloyPolicySimPage() {
             className="text-[9px] font-mono uppercase tracking-widest"
             style={{ color: ACCENT }}
           >
-            FORGE · COVENANT
+            Counsel · COVENANT
           </span>
         </div>
         <h1 className="text-lg font-bold tracking-tight" style={{ color: TEXT.primary }}>
@@ -434,7 +434,7 @@ export default function AlloyPolicySimPage() {
         <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: '#4a90b8' }} />
         <div className="flex-1">
           <p className="text-[9px] leading-relaxed" style={{ color: TEXT.secondary }}>
-            COVENANT is FORGE's policy engine. Every proposed action is evaluated against active
+            COVENANT is Counsel's policy engine. Every proposed action is evaluated against active
             policy rules before execution. This console simulates those evaluations without
             triggering real workflows.
           </p>

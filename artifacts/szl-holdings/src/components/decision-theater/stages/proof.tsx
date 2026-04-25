@@ -123,8 +123,8 @@ export function ProofStage({ engine }: { engine: EngineState }) {
         title={scenarioId ? `Cited Risk Simulations · ${scenarioId}` : 'Cited Risk Simulations'}
         emptyHint={
           scenarioId
-            ? `No simulation runs cited for scenario ${scenarioId}. Save a run from the DOMAINE or SEXTANT Risk Simulation page to attach percentile bands and sensitivities to this proof envelope.`
-            : 'No cited risk simulations yet. Save a run from DOMAINE or SEXTANT to attach it here.'
+            ? `No simulation runs cited for scenario ${scenarioId}. Save a run from the Terra or Vessels Risk Simulation page to attach percentile bands and sensitivities to this proof envelope.`
+            : 'No cited risk simulations yet. Save a run from Terra or Vessels to attach it here.'
         }
       />
     </div>
@@ -277,7 +277,7 @@ export function LiveProofStage({
           </div>
         </div>
       </div>
-      <ScenarioCitedRiskRuns emptyHint="No cited risk simulations yet across DOMAINE or SEXTANT. Save a Monte Carlo run from either product to attach percentile bands and sensitivities to the live audit chain." />
+      <ScenarioCitedRiskRuns emptyHint="No cited risk simulations yet across Terra or Vessels. Save a Monte Carlo run from either product to attach percentile bands and sensitivities to the live audit chain." />
     </div>
   );
 }

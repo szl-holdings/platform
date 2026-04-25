@@ -190,7 +190,7 @@ export default function McpToolsScreen() {
       <View style={styles.header}>
         <View>
           <Text style={styles.headerTitle}>MCP Tools</Text>
-          <Text style={styles.headerSub}>Model Context Protocol · PARAGON</Text>
+          <Text style={styles.headerSub}>Model Context Protocol · Aegis</Text>
         </View>
         <View style={styles.statusBadge}>
           <View style={[styles.statusDot, { backgroundColor: statusColor }]} />

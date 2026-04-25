@@ -8,7 +8,7 @@ const SECTIONS = [
     id: "introduction",
     heading: "1. Introduction",
     lines: [
-      `SZL Holdings Ltd ("SZL Holdings", "we", "us", or "our") is committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our websites, use our platforms (including KORA, FORGE, PARAGON, DOMAINE, SEXTANT, and Counsel), or communicate with us.`,
+      `SZL Holdings Ltd ("SZL Holdings", "we", "us", or "our") is committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our websites, use our platforms (including Lyte, Counsel, Aegis, Terra, Vessels, and Counsel), or communicate with us.`,
       `Please read this policy carefully. If you disagree with its terms, please discontinue use of our services. By accessing or using our services, you agree to this Privacy Policy.`,
     ],
   },

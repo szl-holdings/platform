@@ -504,7 +504,7 @@ export default function DecisionObjects() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#4B8BDB' }}
             >
-              FORGE · Decision Objects
+              Counsel · Decision Objects
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Decision Objects</h1>
@@ -534,7 +534,7 @@ export default function DecisionObjects() {
           }}
         >
           <Radio className="w-3 h-3 shrink-0 animate-pulse" />
-          Demo Environment — Showing illustrative decision objects. Connect the FORGE API for live
+          Demo Environment — Showing illustrative decision objects. Connect the Counsel API for live
           data.
         </div>
       )}

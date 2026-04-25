@@ -24,7 +24,7 @@ const TEXT_DIM = 'rgba(245,240,232,0.35)';
 
 const AGENTS = [
   { id: 'muse', name: 'Muse', role: 'Creative Strategy', icon: 'pen-tool', color: '#c8a96a' },
-  { id: 'alloy', name: 'FORGE', role: 'Orchestration', icon: 'git-merge', color: '#c9a84c' },
+  { id: 'alloy', name: 'Counsel', role: 'Orchestration', icon: 'git-merge', color: '#c9a84c' },
   { id: 'eval', name: 'Eval Engine', role: 'Research', icon: 'search', color: '#8b5cf6' },
 ];
 

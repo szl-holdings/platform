@@ -239,7 +239,7 @@ export default function PilotOnboarding() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#f59e0b' }}
             >
-              FORGE · Pilot Onboarding
+              Counsel · Pilot Onboarding
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Pilot Onboarding Wizard</h1>
@@ -486,7 +486,7 @@ export default function PilotOnboarding() {
               className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold"
               style={{ background: '#10b981', color: '#000' }}
             >
-              <Zap className="w-3 h-3" /> Open FORGE Workspace
+              <Zap className="w-3 h-3" /> Open Counsel Workspace
             </a>
             <a
               href="/alloy/policies"

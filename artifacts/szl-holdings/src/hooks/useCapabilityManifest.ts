@@ -93,26 +93,26 @@ export const PRODUCT_DISPLAY: Record<
   string,
   { label: string; color: string; href: string; appStatus: string }
 > = {
-  'KORA (Business Observability)': {
-    label: 'KORA',
+  'Lyte (Business Observability)': {
+    label: 'Lyte',
     color: '#d4a054',
     href: '/lyte',
     appStatus: 'Beta',
   },
-  'PARAGON (Defense & Intelligence)': {
-    label: 'PARAGON',
+  'Aegis (Defense & Intelligence)': {
+    label: 'Aegis',
     color: '#c45a4a',
     href: '/solutions/aegis',
     appStatus: 'Beta',
   },
-  'SEXTANT (Maritime Intelligence)': {
-    label: 'SEXTANT',
+  'Vessels (Maritime Intelligence)': {
+    label: 'Vessels',
     color: '#4a90b8',
     href: '/solutions/vessels',
     appStatus: 'Partial',
   },
-  'DOMAINE (Real Estate Intelligence)': {
-    label: 'DOMAINE',
+  'Terra (Real Estate Intelligence)': {
+    label: 'Terra',
     color: '#c8953c',
     href: '/solutions/terra',
     appStatus: 'Beta',

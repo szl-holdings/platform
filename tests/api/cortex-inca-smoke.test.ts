@@ -1,9 +1,9 @@
 /**
- * CORTEX & INCA API Smoke Tests
+ * CORTEX & Counsel API Smoke Tests
  *
  * Covers routes not previously tested in cross-app-smoke.test.ts:
  *   - CORTEX Intelligence: /cortex/* (cross-domain fusion engine)
- *   - INCA (Aegis Intelligence): /inca/* (AI research & model management)
+ *   - Counsel (Aegis Intelligence): /inca/* (AI research & model management)
  *   - Autopilot: /autopilot/* (autonomous operations)
  *   - Command Portal: /snapshot, /search (unified command endpoints)
  *
@@ -186,9 +186,9 @@ afterAll(async () => {
   } catch {}
 });
 
-// ── Domain: INCA (Aegis Intelligence) ─────────────────────────────────────────
+// ── Domain: Counsel (Aegis Intelligence) ─────────────────────────────────────────
 
-describe('Domain: INCA (PARAGON Intelligence)', () => {
+describe('Domain: Counsel (Aegis Intelligence)', () => {
   it('GET /inca/health returns 200 with status ok', async () => {
     const app = buildAuthApp();
     const router = (await import('../../artifacts/api-server/src/routes/inca')).default;

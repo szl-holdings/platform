@@ -48,7 +48,7 @@ import { cn } from '@/lib/utils';
 const apps = [
   {
     id: 'aegis',
-    name: 'PARAGON',
+    name: 'Aegis',
     subtitle: 'Defense & Intelligence Command',
     category: 'security',
     status: 'live',
@@ -64,7 +64,7 @@ const apps = [
   },
   {
     id: 'terra',
-    name: 'DOMAINE',
+    name: 'Terra',
     subtitle: 'Property Intelligence — OBSERVE',
     category: 'intelligence',
     status: 'live',
@@ -80,7 +80,7 @@ const apps = [
   },
   {
     id: 'vessels',
-    name: 'SEXTANT',
+    name: 'Vessels',
     subtitle: 'Maritime Intelligence',
     category: 'intelligence',
     status: 'live',
@@ -96,7 +96,7 @@ const apps = [
   },
   {
     id: 'lyte',
-    name: 'KORA',
+    name: 'Lyte',
     subtitle: 'Business Observability',
     category: 'operations',
     status: 'live',
@@ -112,7 +112,7 @@ const apps = [
   },
   {
     id: 'alloy-predictive',
-    name: 'FORGE — Predictive',
+    name: 'Counsel — Predictive',
     subtitle: 'Execution Fabric — ENGINE',
     category: 'ai',
     status: 'live',
@@ -121,7 +121,7 @@ const apps = [
     path: '/alloy/creative',
     obsSlug: 'alloy',
     description:
-      "FORGE's predictive intelligence layer — scenario modeling, confidence scoring, and decision intelligence powering the UNDERSTAND layer across the SZL ecosystem.",
+      "Counsel's predictive intelligence layer — scenario modeling, confidence scoring, and decision intelligence powering the UNDERSTAND layer across the SZL ecosystem.",
     features: ['Scenario Modeling', 'Confidence Scoring', 'Prediction Studio', 'Risk Analysis'],
     kpi: '$5.1M ARR',
     market: '$14.8B TAM',
@@ -157,7 +157,7 @@ const kpiStrip = [
   { label: 'Portfolio ARR', value: '$35M+', trend: '+142% YoY', up: true },
   { label: 'Addressable Market', value: '$2.4B+', trend: '6 verticals', up: true },
   { label: 'Platforms Live', value: '7', trend: '1 beta', up: true },
-  { label: 'Daily AI Inferences', value: '18M+', trend: 'KORA AI fabric', up: true },
+  { label: 'Daily AI Inferences', value: '18M+', trend: 'Lyte AI fabric', up: true },
   { label: 'Deployed Capital', value: '$180M+', trend: 'Since 2021', up: true },
   { label: 'Continents Active', value: '3', trend: 'DC · London · Singapore', up: true },
 ];
@@ -165,7 +165,7 @@ const kpiStrip = [
 const WATCHLIST_DELTAS = [
   {
     entity: 'MV Adriatic Star',
-    domain: 'SEXTANT',
+    domain: 'Vessels',
     change: 'AIS gap 6h20m',
     severity: 'high',
     dir: 'down',
@@ -173,7 +173,7 @@ const WATCHLIST_DELTAS = [
   },
   {
     entity: 'CVE-2025-1337',
-    domain: 'PARAGON',
+    domain: 'Aegis',
     change: 'KEV exploitation confirmed',
     severity: 'critical',
     dir: 'down',
@@ -181,14 +181,14 @@ const WATCHLIST_DELTAS = [
   },
   {
     entity: 'NYC Portfolio Cluster A',
-    domain: 'DOMAINE',
+    domain: 'Terra',
     change: '+2 properties at distress threshold',
     severity: 'medium',
     dir: 'down',
     icon: Building,
   },
   {
-    entity: 'FORGE Approval Queue',
+    entity: 'Counsel Approval Queue',
     domain: 'Platform',
     change: '14 pending, 6 exceed 72h SLA',
     severity: 'high',
@@ -209,7 +209,7 @@ const PENDING_ACTIONS = [
   {
     id: 'pa1',
     title: 'Isolate auth-svc, api-gw, reporting hosts',
-    domain: 'PARAGON',
+    domain: 'Aegis',
     priority: 'critical',
     due: 'T+2h',
     owner: null,
@@ -217,7 +217,7 @@ const PENDING_ACTIONS = [
   {
     id: 'pa2',
     title: 'OFAC screening — MV Adriatic Star',
-    domain: 'SEXTANT',
+    domain: 'Vessels',
     priority: 'high',
     due: 'T+6h',
     owner: 'K. Vasile',
@@ -242,22 +242,22 @@ const PENDING_ACTIONS = [
 
 const CROSS_DOMAIN_CORRELATIONS = [
   {
-    from: 'PARAGON',
+    from: 'Aegis',
     to: 'IMPERIUM',
     type: 'causal',
     label: 'KEV exploit → cloud drift vector',
     strength: 0.87,
   },
   {
-    from: 'SEXTANT',
-    to: 'DOMAINE',
+    from: 'Vessels',
+    to: 'Terra',
     type: 'temporal',
     label: 'Dark vessel ↔ portfolio exposure',
     strength: 0.54,
   },
   {
-    from: 'FORGE',
-    to: 'PARAGON',
+    from: 'Counsel',
+    to: 'Aegis',
     type: 'causal',
     label: 'Approval stall → incident response lag',
     strength: 0.63,
@@ -265,17 +265,17 @@ const CROSS_DOMAIN_CORRELATIONS = [
 ];
 
 const STALE_SOURCES = [
-  { source: 'CoStar Market Data', domain: 'DOMAINE', staleFor: '5h', errorMsg: 'Auth token expired' },
-  { source: 'NVD CVE Feed', domain: 'PARAGON', staleFor: '3h', errorMsg: 'Rate limit exceeded' },
+  { source: 'CoStar Market Data', domain: 'Terra', staleFor: '5h', errorMsg: 'Auth token expired' },
+  { source: 'NVD CVE Feed', domain: 'Aegis', staleFor: '3h', errorMsg: 'Rate limit exceeded' },
 ];
 
 const POSTURE_TREND = [71, 74, 73, 76, 74, 72, 75, 76, 75, 78, 76, 78];
 
 const AI_BRIEF_PARAGRAPHS = [
   'The SZL ecosystem is operating at a composite posture of 76/100 — moderately elevated risk across security and operational dimensions. Two critical items require executive attention within the next two hours.',
-  'PARAGON has confirmed active exploitation of CVE-2025-1337 across three internal hosts (auth-svc, api-gw, reporting). Correlated IMPERIUM drift confirms the attack vector was the unrestricted egress rule on sg-0xf823b1a. Isolation and remediation are the immediate priority.',
-  "SEXTANT flags MV Adriatic Star with a 6h20m AIS dark gap last fixed at Strait of Messina. OFAC screening is in progress. The temporal correlation with DOMAINE's NYC portfolio distress cluster warrants monitoring but does not indicate direct causation.",
-  'Platform operations: 14 FORGE workflows are queued, six exceeding the 72-hour SLA threshold, which is compounding response latency in the PARAGON incident stream. Escalation required.',
+  'Aegis has confirmed active exploitation of CVE-2025-1337 across three internal hosts (auth-svc, api-gw, reporting). Correlated IMPERIUM drift confirms the attack vector was the unrestricted egress rule on sg-0xf823b1a. Isolation and remediation are the immediate priority.',
+  "Vessels flags MV Adriatic Star with a 6h20m AIS dark gap last fixed at Strait of Messina. OFAC screening is in progress. The temporal correlation with Terra's NYC portfolio distress cluster warrants monitoring but does not indicate direct causation.",
+  'Platform operations: 14 Counsel workflows are queued, six exceeding the 72-hour SLA threshold, which is compounding response latency in the Aegis incident stream. Escalation required.',
 ];
 
 const SEV_COLORS: Record<string, string> = {
@@ -463,7 +463,7 @@ function AIBriefPanel() {
           <Sparkles className="w-3.5 h-3.5 text-primary" />
           AI Executive Brief
         </h3>
-        <span className="text-[10px] text-muted-foreground font-mono">FORGE · 4m ago</span>
+        <span className="text-[10px] text-muted-foreground font-mono">Counsel · 4m ago</span>
       </div>
       <div className="space-y-2">
         {AI_BRIEF_PARAGRAPHS.slice(0, expanded ? undefined : 2).map((para, i) => (
@@ -492,7 +492,7 @@ function AIBriefPanel() {
           Evidence sources
         </p>
         <div className="flex flex-wrap gap-1">
-          {['PARAGON SOC', 'SEXTANT AIS', 'OFAC SDN', 'PRAXIS Calendar', 'IMPERIUM Drift'].map(
+          {['Aegis SOC', 'Vessels AIS', 'OFAC SDN', 'PRAXIS Calendar', 'IMPERIUM Drift'].map(
             (src) => (
               <span
                 key={src}
@@ -702,7 +702,7 @@ function TerraIntelPanel() {
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
           <Building className="w-3.5 h-3.5" style={{ color: '#4d7c0f' }} />
-          DOMAINE Intel
+          Terra Intel
         </h3>
         <a
           href="/terra/"
@@ -710,7 +710,7 @@ function TerraIntelPanel() {
           rel="noopener noreferrer"
           className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
         >
-          DOMAINE <ArrowUpRight className="w-2.5 h-2.5" />
+          Terra <ArrowUpRight className="w-2.5 h-2.5" />
         </a>
       </div>
 
@@ -1364,7 +1364,7 @@ export default function CommandCenter() {
                 <Target className="w-3.5 h-3.5 text-primary" />
                 <h3 className="text-xs font-semibold">Recommendations</h3>
                 <span className="ml-auto text-[10px] text-muted-foreground font-mono">
-                  FORGE v2.4.1
+                  Counsel v2.4.1
                 </span>
               </div>
               <div className="space-y-2">
@@ -1383,7 +1383,7 @@ export default function CommandCenter() {
             {/* Stale source warnings */}
             <StaleSourcesWarning />
 
-            {/* DOMAINE Intel — live portfolio data from DOMAINE */}
+            {/* Terra Intel — live portfolio data from Terra */}
             <TerraIntelPanel />
 
             {/* Watchlist Deltas */}

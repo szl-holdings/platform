@@ -127,7 +127,7 @@ describe('OpenAPI contract — Health endpoints', () => {
 
 // ── Domain: Vessels ───────────────────────────────────────────────────────────
 
-describe('OpenAPI contract — SEXTANT domain', () => {
+describe('OpenAPI contract — Vessels domain', () => {
   it('defines GET /vessels fleet list endpoint', () => {
     expect(spec.paths).toHaveProperty('/vessels');
     expect(spec.paths['/vessels']).toHaveProperty('get');
@@ -154,7 +154,7 @@ describe('OpenAPI contract — SEXTANT domain', () => {
 
 // ── Domain: Aegis / Firestorm (SOC) ──────────────────────────────────────────
 
-describe('OpenAPI contract — PARAGON / Firestorm domain', () => {
+describe('OpenAPI contract — Aegis / Firestorm domain', () => {
   it('defines GET /firestorm/campaigns campaigns list endpoint', () => {
     expect(spec.paths).toHaveProperty('/firestorm/campaigns');
     expect(spec.paths['/firestorm/campaigns']).toHaveProperty('get');
@@ -181,7 +181,7 @@ describe('OpenAPI contract — PARAGON / Firestorm domain', () => {
 
 // ── Domain: Lyte (AIOps) ──────────────────────────────────────────────────────
 
-describe('OpenAPI contract — KORA domain', () => {
+describe('OpenAPI contract — Lyte domain', () => {
   it('defines GET /lyte/products products list endpoint', () => {
     expect(spec.paths).toHaveProperty('/lyte/products');
     expect(spec.paths['/lyte/products']).toHaveProperty('get');
@@ -203,7 +203,7 @@ describe('OpenAPI contract — KORA domain', () => {
 
 // ── Domain: AI Engine (Alloy) ─────────────────────────────────────────────────
 
-describe('OpenAPI contract — AI Engine (FORGE) domain', () => {
+describe('OpenAPI contract — AI Engine (Counsel) domain', () => {
   it('defines AI decision list endpoint GET /ai/decision', () => {
     expect(spec.paths).toHaveProperty('/ai/decision');
     expect(spec.paths['/ai/decision']).toHaveProperty('get');
@@ -514,9 +514,9 @@ describe('GraphQL schema — domain type coverage (static analysis)', () => {
     expect(src).toContain('extend type Query');
   });
 
-  it('DOMAINE GraphQL domain defines terra-related types', () => {
+  it('Terra GraphQL domain defines terra-related types', () => {
     const src = readDomainTypeDefs('terra.ts');
-    expect(src).toContain('DOMAINE');
+    expect(src).toContain('Terra');
   });
 
   it('schema.ts imports all 7 major domain type definitions', () => {

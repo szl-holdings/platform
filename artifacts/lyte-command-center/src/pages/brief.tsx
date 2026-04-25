@@ -5,12 +5,12 @@ const FIVE_MOVES = [
   {
     icon: <Shield className="w-4 h-4 text-amber-300" />,
     title: 'Proof-chain on every card',
-    body: 'Every decision card carries a replayable evidence record: model run, tool calls, adversarial checks, policy evaluation, and approver identity. No other vendor ships this end-to-end. Competitors offer observability dashboards; KORA ships an attestation trail that survives a compliance review.',
+    body: 'Every decision card carries a replayable evidence record: model run, tool calls, adversarial checks, policy evaluation, and approver identity. No other vendor ships this end-to-end. Competitors offer observability dashboards; Lyte ships an attestation trail that survives a compliance review.',
   },
   {
     icon: <Target className="w-4 h-4 text-amber-300" />,
     title: 'Adversarial validation before promotion',
-    body: "Six structured challenges run against every recommendation before it reaches a human: contradiction, stale-data, missing-evidence, policy-compliance, confidence-floor, and falsification. Cards that don't pass all six never reach the decision queue. Enterprise AI platforms recommend; KORA challenges before surfacing.",
+    body: "Six structured challenges run against every recommendation before it reaches a human: contradiction, stale-data, missing-evidence, policy-compliance, confidence-floor, and falsification. Cards that don't pass all six never reach the decision queue. Enterprise AI platforms recommend; Lyte challenges before surfacing.",
   },
   {
     icon: <Lock className="w-4 h-4 text-amber-300" />,
@@ -20,7 +20,7 @@ const FIVE_MOVES = [
   {
     icon: <Brain className="w-4 h-4 text-amber-300" />,
     title: 'Entity-first ontology',
-    body: 'Every decision card is anchored to a typed entity from the Entity Graph — company, vessel, asset, person, workflow. This produces a navigable evidence graph, not a flat log. Enterprise AIP platforms pioneered entity-first operations; KORA brings that model to mid-market operators without a six-figure contract.',
+    body: 'Every decision card is anchored to a typed entity from the Entity Graph — company, vessel, asset, person, workflow. This produces a navigable evidence graph, not a flat log. Enterprise AIP platforms pioneered entity-first operations; Lyte brings that model to mid-market operators without a six-figure contract.',
   },
   {
     icon: <Eye className="w-4 h-4 text-amber-300" />,
@@ -107,7 +107,7 @@ export default function BriefPage() {
             </div>
             <div>
               <h1 className="text-lg font-semibold text-amber-100 font-display">
-                KORA Differentiation Brief
+                Lyte Differentiation Brief
               </h1>
               <p className="text-[11px] text-amber-400/50 mt-0.5">
                 v1.0 · April 19, 2026 · Strategy — investor diligence, enterprise sales, engineering
@@ -131,14 +131,14 @@ export default function BriefPage() {
         </p>
         <p className="text-sm text-amber-300/80 leading-relaxed">
           Every "AI ops" vendor ships observability or automation. None ship governed decision
-          infrastructure. KORA's moat is the combination that none of them have packaged cleanly: a{' '}
+          infrastructure. Lyte's moat is the combination that none of them have packaged cleanly: a{' '}
           <strong className="text-amber-200">proof-chain on every card</strong>,{' '}
           <strong className="text-amber-200">adversarial validation before promotion</strong>,{' '}
           <strong className="text-amber-200">constitution-as-code governance</strong>,{' '}
           <strong className="text-amber-200">entity-first ontology</strong>, and{' '}
           <strong className="text-amber-200">autonomy modes</strong> that let operators dial between
           observe-only and auto-execute. This brief maps the competitive landscape, names the five
-          moves only KORA makes, and sets a 90-day roadmap for deepening the moat.
+          moves only Lyte makes, and sets a 90-day roadmap for deepening the moat.
         </p>
       </div>
 
@@ -146,7 +146,7 @@ export default function BriefPage() {
       <div className="space-y-3">
         <div className="flex items-center gap-2 px-1">
           <Zap className="w-3.5 h-3.5 text-amber-400" />
-          <p className="text-xs font-semibold text-amber-100">Five Moves Only KORA Makes</p>
+          <p className="text-xs font-semibold text-amber-100">Five Moves Only Lyte Makes</p>
         </div>
         <div className="space-y-2">
           {FIVE_MOVES.map((m, i) => (
@@ -181,7 +181,7 @@ export default function BriefPage() {
               </div>
               <div>
                 <p className="text-[10px] font-mono text-amber-400/40 uppercase mb-1">
-                  KORA's Delta
+                  Lyte's Delta
                 </p>
                 <p className="text-xs text-amber-400/70">{c.gap}</p>
               </div>

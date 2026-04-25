@@ -187,13 +187,13 @@ async function executeJob(job: typeof pcBackgroundJobsTable.$inferSelect): Promi
     if (tenantPolicy.requiresDryRunFirst && tenantPolicy.requiresDryRunFirst === true) {
       logger.info(
         { jobId: job.id, jobType: job.jobType },
-        '[prism-queue] Tenant requiresDryRunFirst — dry run must be completed via FORGE API before this job runs in production',
+        '[prism-queue] Tenant requiresDryRunFirst — dry run must be completed via Counsel API before this job runs in production',
       );
     }
     if (tenantPolicy.allowedDomains?.length > 0) {
       logger.debug(
         { jobId: job.id, jobType: job.jobType, tenantId, maxConcurrent: tenantActiveMax },
-        '[forge-queue] FORGE tenant policy applied to job execution',
+        '[forge-queue] Counsel tenant policy applied to job execution',
       );
     }
   }

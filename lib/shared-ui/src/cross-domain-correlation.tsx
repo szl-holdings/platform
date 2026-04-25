@@ -31,11 +31,11 @@ const DOMAIN_COLORS: Record<string, string> = {
 };
 
 const DOMAIN_LABELS: Record<string, string> = {
-  aegis: 'PARAGON',
-  firestorm: 'PARAGON',
-  vessels: 'SEXTANT',
-  terra: 'DOMAINE',
-  lyte: 'KORA',
+  aegis: 'Aegis',
+  firestorm: 'Aegis',
+  vessels: 'Vessels',
+  terra: 'Terra',
+  lyte: 'Lyte',
   prism: 'PRISM',
   'szl-holdings': 'SZL Holdings',
   'carlota-jo': 'Carlota Jo',

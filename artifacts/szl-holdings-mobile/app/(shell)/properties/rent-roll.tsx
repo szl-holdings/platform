@@ -384,7 +384,7 @@ export default function RentRollScreen() {
           <Feather name="arrow-left" size={18} color={colors.cream} />
         </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>DOMAINE · RENT ROLL</Text>
+          <Text style={[styles.eyebrow, { color: `${ACCENT}cc` }]}>Terra · RENT ROLL</Text>
           <Text style={[styles.title, { color: colors.cream }]}>Lease Ledger</Text>
         </View>
         {expiringCount > 0 && (

@@ -204,7 +204,7 @@ const LANES: Lane[] = [
   {
     id: "real-estate",
     name: "Real Estate Intelligence",
-    artifact: "DOMAINE",
+    artifact: "Terra",
     artifactPath: "/terra/",
     accentColor: "#5baa8a",
     icon: Building2,
@@ -247,7 +247,7 @@ const LANES: Lane[] = [
       {
         idea: "Opportunity Score Ranking",
         source: "CoStar ranked property results",
-        ourVersion: "Each property in DOMAINE listings and pipeline shows an Opportunity Score (0–100) calculated from distress signals, cap rate delta, neighborhood momentum, and AI confidence — most actionable deals surface first",
+        ourVersion: "Each property in Terra listings and pipeline shows an Opportunity Score (0–100) calculated from distress signals, cap rate delta, neighborhood momentum, and AI confidence — most actionable deals surface first",
         status: "adopted",
         location: "terra/src/pages/dashboard.tsx",
       },
@@ -266,7 +266,7 @@ const LANES: Lane[] = [
         location: "terra/src/pages/comparable-sales.tsx",
       },
     ],
-    oneOfOneThesis: "DOMAINE is the only real estate platform that fuses AI distress forecasting, climate risk quantification, and governed underwriting in a single proof chain — every acquisition thesis is backed by an evidence trail from data ingestion through to the decision. CoStar shows you the market. DOMAINE tells you what to do about it and proves why.",
+    oneOfOneThesis: "Terra is the only real estate platform that fuses AI distress forecasting, climate risk quantification, and governed underwriting in a single proof chain — every acquisition thesis is backed by an evidence trail from data ingestion through to the decision. CoStar shows you the market. Terra tells you what to do about it and proves why.",
     oneOfOneEvidence: [
       "Distress Engine generates a scored distress forecast per property with agent-verified signals",
       "Property Twin renders a full underwriting model with scenario branches and AI confidence weights",
@@ -276,7 +276,7 @@ const LANES: Lane[] = [
   {
     id: "maritime",
     name: "Maritime Intelligence",
-    artifact: "SEXTANT",
+    artifact: "Vessels",
     artifactPath: "/vessels/",
     accentColor: "#3b82f6",
     icon: Ship,
@@ -338,7 +338,7 @@ const LANES: Lane[] = [
         location: "vessels/src/pages/trade-flow-heatmap.tsx",
       },
     ],
-    oneOfOneThesis: "SEXTANT is the only maritime platform where every dark vessel detection, sanctions match, and route anomaly generates a governed decision record — including which agent identified it, the confidence weight, and what action was taken under which policy tier. Windward shows risk. SEXTANT proves what was done about it.",
+    oneOfOneThesis: "Vessels is the only maritime platform where every dark vessel detection, sanctions match, and route anomaly generates a governed decision record — including which agent identified it, the confidence weight, and what action was taken under which policy tier. Windward shows risk. Vessels proves what was done about it.",
     oneOfOneEvidence: [
       "Dark Fleet Economics page quantifies the financial exposure of each dark vessel with proof-linked evidence",
       "Sanctions Chain Explorer traces the full corporate ownership chain behind each flagged entity",
@@ -387,7 +387,7 @@ const LANES: Lane[] = [
       {
         idea: "Context-Aware AI Sidebar",
         source: "Palantir AIP Assist",
-        ourVersion: "LUMINA Constellation page provides a cross-product intelligence assistant that surfaces connections between briefing items across TENAX, SEXTANT, DOMAINE, and KORA — one query spans the whole platform",
+        ourVersion: "LUMINA Constellation page provides a cross-product intelligence assistant that surfaces connections between briefing items across TENAX, Vessels, Terra, and Lyte — one query spans the whole platform",
         status: "adopted",
         location: "pulse/src/pages/Constellation.tsx",
       },
@@ -409,7 +409,7 @@ const LANES: Lane[] = [
   {
     id: "decision-intelligence",
     name: "Decision Intelligence",
-    artifact: "KORA",
+    artifact: "Lyte",
     artifactPath: "/lyte/",
     accentColor: "#c9a85c",
     icon: BarChart3,
@@ -471,7 +471,7 @@ const LANES: Lane[] = [
         location: "lyte-command-center/src/pages/decision-twin.tsx",
       },
     ],
-    oneOfOneThesis: "KORA is the only decision intelligence platform that attaches a governed proof chain to every workflow signal — showing not just the insight but the policy state, ownership assignment, and confidence drift over time. ThoughtSpot answers questions. KORA governs decisions.",
+    oneOfOneThesis: "Lyte is the only decision intelligence platform that attaches a governed proof chain to every workflow signal — showing not just the insight but the policy state, ownership assignment, and confidence drift over time. ThoughtSpot answers questions. Lyte governs decisions.",
     oneOfOneEvidence: [
       "Ownership Drift page tracks which decisions have gone unassigned and for how long, with financial exposure per gap",
       "Policy Center encodes guardrail rules that block or flag signals before they reach human review queues",
@@ -531,7 +531,7 @@ const LANES: Lane[] = [
       {
         idea: "Investor Update Automation",
         source: "Visible.vc automated KPI pulls",
-        ourVersion: "SZL Holdings Investors Hub auto-compiles portfolio KPIs from TENAX, SEXTANT, DOMAINE, and KORA into an investor-ready view with last-updated timestamps per metric — no manual reporting",
+        ourVersion: "SZL Holdings Investors Hub auto-compiles portfolio KPIs from TENAX, Vessels, Terra, and Lyte into an investor-ready view with last-updated timestamps per metric — no manual reporting",
         status: "adopted",
         location: "szl-holdings/src/pages/",
       },

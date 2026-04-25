@@ -32,7 +32,7 @@ const MODELS = [
   {
     id: 'maritime-specialist',
     name: 'Maritime Specialist',
-    type: 'Domain — SEXTANT',
+    type: 'Domain — Vessels',
     latency: '95ms',
     cost: '$0.0004/req',
     requests: 892,

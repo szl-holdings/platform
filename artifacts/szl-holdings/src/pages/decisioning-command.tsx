@@ -128,13 +128,13 @@ const DEMO_SIGNAL_GROUPS = [
     customSummary: "Critical security incident INC-2026-0412 detected with APT-41 lateral movement across 3 subsidiaries. 47 assets affected. Regulatory disclosure review required.",
     customReasoning: "Priority score: 89/100. Financial exposure: $15,000,000. Regulatory exposure detected — legal review may be required. Cross-domain impact detected in: prism, szl-holdings. Confidence: 91%.",
     signals: [
-      { id: "s4", domain: "aegis", type: "incident_severity", value: 0.91, source: "PARAGON SIEM", timestamp: Date.now() - 7200000 },
-      { id: "s5", domain: "aegis", type: "affected_assets", value: 47, source: "PARAGON Asset Registry", timestamp: Date.now() - 7100000 },
+      { id: "s4", domain: "aegis", type: "incident_severity", value: 0.91, source: "Aegis SIEM", timestamp: Date.now() - 7200000 },
+      { id: "s5", domain: "aegis", type: "affected_assets", value: 47, source: "Aegis Asset Registry", timestamp: Date.now() - 7100000 },
     ],
     evidence: [
-      { label: "Incident ID", value: "INC-2026-0412 (Critical)", source: "PARAGON SIEM" },
+      { label: "Incident ID", value: "INC-2026-0412 (Critical)", source: "Aegis SIEM" },
       { label: "Threat Actor", value: "APT-41 — Lateral movement across 3 subsidiaries", source: "Threat Intelligence" },
-      { label: "Assets Affected", value: "47 (23 classified systems)", source: "PARAGON Asset Registry" },
+      { label: "Assets Affected", value: "47 (23 classified systems)", source: "Aegis Asset Registry" },
       { label: "Regulatory Obligation", value: "SEC 72-hour disclosure window triggered", source: "Compliance Engine" },
     ],
   },
@@ -151,7 +151,7 @@ const DEMO_SIGNAL_GROUPS = [
       crossDomainBlastRadius: ["terra", "prism"],
     },
     customTitle: "Vessel Delay at Shanghai Exceeds 24h Threshold",
-    customSummary: "MV Pacific Star reported a 32h delay at Port of Shanghai. 12 DOMAINE properties flagged, 8 PRAXIS contracts may require force-majeure review.",
+    customSummary: "MV Pacific Star reported a 32h delay at Port of Shanghai. 12 Terra properties flagged, 8 PRAXIS contracts may require force-majeure review.",
     customReasoning: "Priority score: 58/100. Financial exposure: $890,000. Cross-domain impact detected in: terra, prism. Confidence: 76%.",
     signals: [
       { id: "s6", domain: "vessels", type: "port_delay_hours", value: 32, source: "AIS Tracking", timestamp: Date.now() - 14400000 },
@@ -159,7 +159,7 @@ const DEMO_SIGNAL_GROUPS = [
     evidence: [
       { label: "Vessel", value: "MV Pacific Star (IMO 9876543)", source: "AIS Tracking" },
       { label: "Delay", value: "32h at Port of Shanghai", source: "Port Authority" },
-      { label: "Properties Flagged", value: "12 in Pudong logistics corridor", source: "DOMAINE Intelligence" },
+      { label: "Properties Flagged", value: "12 in Pudong logistics corridor", source: "Terra Intelligence" },
       { label: "Contracts at Risk", value: "8 with milestone delivery clauses", source: "Counsel" },
     ],
   },
@@ -571,9 +571,9 @@ function RunHistoryPanel({
         >
           <option value="">All domains</option>
           <option value="szl-holdings">SZL Holdings</option>
-          <option value="aegis">PARAGON</option>
-          <option value="vessels">SEXTANT</option>
-          <option value="terra">DOMAINE</option>
+          <option value="aegis">Aegis</option>
+          <option value="vessels">Vessels</option>
+          <option value="terra">Terra</option>
         </select>
       </div>
 
@@ -690,7 +690,7 @@ const AUTO_REFRESH_INTERVAL_MS = 90_000;
 
 export default function DecisioningCommandPage() {
   const __pageMeta = usePageMeta({
-    title: "Decisioning Command — KORA",
+    title: "Decisioning Command — Lyte",
     description: "SZL unified Decision, Policy & Action Engine surface — turn signals into governed, explainable, executable action.",
   });
 

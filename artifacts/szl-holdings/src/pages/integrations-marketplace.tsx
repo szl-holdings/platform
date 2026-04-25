@@ -18,7 +18,7 @@ const CONNECTORS = [
     statusColor: "hsl(142,62%,48%)",
     tagline: "Real-time CRM intelligence — pipe your Salesforce signals into the SZL decision engine.",
     description:
-      "The SZL Salesforce Connector is a managed package that bridges your Salesforce org with the SZL FORGE intelligence engine. Pipeline health, escalated cases, forecast revisions, and converted leads flow automatically — giving executive leadership a unified risk view across every revenue motion.",
+      "The SZL Salesforce Connector is a managed package that bridges your Salesforce org with the SZL Counsel intelligence engine. Pipeline health, escalated cases, forecast revisions, and converted leads flow automatically — giving executive leadership a unified risk view across every revenue motion.",
     features: [
       "Live pipeline health and weighted forecast analytics",
       "Escalated case signals surfaced in seconds, not hours",
@@ -49,7 +49,7 @@ const CONNECTORS = [
     statusColor: "hsl(142,62%,48%)",
     tagline: "Sprint health, SLA signals, and bi-directional sync — powered by SZL intelligence.",
     description:
-      "The SZL Jira Connector is a Atlassian Connect Cloud app that delivers sprint health signals, blocked-issue alerts, and SLA breach detection directly into the SZL FORGE engine. Install once and your engineering execution data flows alongside your commercial intelligence — portfolio leadership sees both in one view.",
+      "The SZL Jira Connector is a Atlassian Connect Cloud app that delivers sprint health signals, blocked-issue alerts, and SLA breach detection directly into the SZL Counsel engine. Install once and your engineering execution data flows alongside your commercial intelligence — portfolio leadership sees both in one view.",
     features: [
       "Sprint burndown risk detection before retrospectives reveal it",
       "Blocked-issue alerts tagged with issue keys and sprint context",
@@ -58,7 +58,7 @@ const CONNECTORS = [
       "Real-time webhooks — no polling delay",
       "Issue Glance panel shows SZL context on every Jira ticket",
       "Admin config page embedded in Jira — no CLI needed",
-      "Bi-directional issue creation from SZL FORGE signals",
+      "Bi-directional issue creation from SZL Counsel signals",
     ],
     supportedEditions: ["Jira Software Cloud", "Jira Service Management Cloud"],
     installUrl: "#jira-install",
@@ -80,7 +80,7 @@ const SHARED_FEATURES = [
     icon: Zap,
     title: "Signal-Native",
     description:
-      "Every event from both platforms is normalized into the SZL signal schema and ingested through the FORGE engine — searchable, rankable, and actionable.",
+      "Every event from both platforms is normalized into the SZL signal schema and ingested through the Counsel engine — searchable, rankable, and actionable.",
   },
   {
     icon: RefreshCw,
@@ -101,13 +101,13 @@ const SETUP_STEPS = {
     { step: "01", label: "Install Package", detail: "One-click install from AppExchange into your Salesforce org" },
     { step: "02", label: "Authorize OAuth", detail: "Click Connect in SZL portal — OAuth flow handles token storage automatically" },
     { step: "03", label: "Configure Metadata", detail: "Review SZL Config custom metadata record — defaults are pre-configured" },
-    { step: "04", label: "Verify & Sync", detail: "Test connection, run first sync, signals appear in FORGE Signal Feed" },
+    { step: "04", label: "Verify & Sync", detail: "Test connection, run first sync, signals appear in Counsel Signal Feed" },
   ],
   jira: [
     { step: "01", label: "Install App", detail: "One-click install from Atlassian Marketplace into your Jira Cloud site" },
     { step: "02", label: "Complete Wizard", detail: "Post-install wizard opens automatically — click Authorize SZL Platform" },
     { step: "03", label: "Set Preferences", detail: "Configure sync interval and feature flags in the embedded admin panel" },
-    { step: "04", label: "View Signals", detail: "Navigate to SZL FORGE Signal Feed — sprint health and Jira signals visible" },
+    { step: "04", label: "View Signals", detail: "Navigate to SZL Counsel Signal Feed — sprint health and Jira signals visible" },
   ],
 };
 
@@ -181,7 +181,7 @@ export default function IntegrationsMarketplacePage() {
                   marginBottom: "0",
                 }}
               >
-                SZL Holdings integrations are published on the Salesforce AppExchange and Atlassian Marketplace — enterprise-grade, security-reviewed, and wired directly into the FORGE intelligence engine.
+                SZL Holdings integrations are published on the Salesforce AppExchange and Atlassian Marketplace — enterprise-grade, security-reviewed, and wired directly into the Counsel intelligence engine.
               </p>
             </m.div>
           </section>

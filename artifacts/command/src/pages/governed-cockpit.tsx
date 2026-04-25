@@ -21,7 +21,7 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 const PORTFOLIO_EVIDENCE: EvidenceSource[] = [
   {
     id: 'ev-cmd1',
-    label: 'Cross-Domain Signal Aggregation — FORGE',
+    label: 'Cross-Domain Signal Aggregation — Counsel',
     type: 'model',
     timestamp: FRESH_2M,
     excerpt:
@@ -56,19 +56,19 @@ const PORTFOLIO_EVIDENCE: EvidenceSource[] = [
 const CORRELATION_EVIDENCE: EvidenceSource[] = [
   {
     id: 'ev-cor1',
-    label: 'PARAGON Threat Signal — APT-29 Activity',
+    label: 'Aegis Threat Signal — APT-29 Activity',
     type: 'signal',
     timestamp: FRESH_2M,
     excerpt:
-      'Lateral movement detected in treasury network segment. 3 SEXTANT counterparties share same infrastructure provider. Possible correlated exposure.',
+      'Lateral movement detected in treasury network segment. 3 Vessels counterparties share same infrastructure provider. Possible correlated exposure.',
   },
   {
     id: 'ev-cor2',
-    label: 'SEXTANT Counterparty Risk Data',
+    label: 'Vessels Counterparty Risk Data',
     type: 'api',
     timestamp: FRESH_9M,
     excerpt:
-      "Sanctions flag on 'Starline Maritime SA'. Parent entity linked to 2 other active SEXTANT counterparties via beneficial ownership registry.",
+      "Sanctions flag on 'Starline Maritime SA'. Parent entity linked to 2 other active Vessels counterparties via beneficial ownership registry.",
   },
   {
     id: 'ev-cor3',
@@ -76,7 +76,7 @@ const CORRELATION_EVIDENCE: EvidenceSource[] = [
     type: 'signal',
     timestamp: FRESH_2M,
     excerpt:
-      'Rate regime shift increases credit spreads. DOMAINE portfolio LTV covenant headroom compressed to 1.3%. Cross-domain contagion vector identified.',
+      'Rate regime shift increases credit spreads. Terra portfolio LTV covenant headroom compressed to 1.3%. Cross-domain contagion vector identified.',
   },
 ];
 
@@ -95,7 +95,7 @@ const APPROVAL_EVIDENCE: EvidenceSource[] = [
     type: 'signal',
     timestamp: FRESH_9M,
     excerpt:
-      'PARAGON item: 2h in queue (SLA: 4h). SEXTANT item: 47min in queue (SLA: 2h). DOMAINE item: 14min in queue (SLA: 48h). All within SLA.',
+      'Aegis item: 2h in queue (SLA: 4h). Vessels item: 47min in queue (SLA: 2h). Terra item: 14min in queue (SLA: 48h). All within SLA.',
   },
   {
     id: 'ev-appr3',
@@ -264,7 +264,7 @@ export default function GovernedCockpit() {
             className="text-xs uppercase tracking-widest font-semibold"
             style={{ color: '#4a6070' }}
           >
-            Cross-Domain Intelligence · Deterministic Fallback (FORGE integration active)
+            Cross-Domain Intelligence · Deterministic Fallback (Counsel integration active)
           </span>
         </div>
 
@@ -305,9 +305,9 @@ export default function GovernedCockpit() {
         >
           <div className="space-y-2">
             <p className="text-sm" style={{ color: '#c8d8e8' }}>
-              47 signals ingested across PARAGON, SEXTANT, DOMAINE, and LUMINA in the last 2 minutes.
-              Composite portfolio health: 7.2/10. FORGE has correlated signals across domains —
-              notable overlap between PARAGON threat activity and SEXTANT counterparty exposure.
+              47 signals ingested across Aegis, Vessels, Terra, and LUMINA in the last 2 minutes.
+              Composite portfolio health: 7.2/10. Counsel has correlated signals across domains —
+              notable overlap between Aegis threat activity and Vessels counterparty exposure.
               Market regime classified as 'Late cycle / Rate stress' with 18% base rate for
               drawdown.
             </p>
@@ -318,10 +318,10 @@ export default function GovernedCockpit() {
               <div className="grid grid-cols-5 gap-2">
                 {[
                   { label: 'PRAXIS', value: '8.4', color: '#00e878' },
-                  { label: 'KORA', value: '7.1', color: '#7a99b8' },
-                  { label: 'SEXTANT', value: '6.8', color: '#ffb700' },
-                  { label: 'DOMAINE', value: '7.4', color: ACCENT },
-                  { label: 'PARAGON', value: '6.9', color: '#ffb700' },
+                  { label: 'Lyte', value: '7.1', color: '#7a99b8' },
+                  { label: 'Vessels', value: '6.8', color: '#ffb700' },
+                  { label: 'Terra', value: '7.4', color: ACCENT },
+                  { label: 'Aegis', value: '6.9', color: '#ffb700' },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="text-center">
                     <div className="text-xs" style={{ color: '#4a6070' }}>
@@ -338,22 +338,22 @@ export default function GovernedCockpit() {
         </ProofEnvelope>
 
         <ProofEnvelope
-          title="Cross-Domain Correlation: PARAGON Threat ↔ SEXTANT Counterparty Exposure"
+          title="Cross-Domain Correlation: Aegis Threat ↔ Vessels Counterparty Exposure"
           accentColor={color.accent.amber}
           evidence={CORRELATION_EVIDENCE}
           timestamp={FRESH_2M}
           confidence={71}
           policyState={'requires-approval' as PolicyState}
-          policyReason="Cross-domain action (PARAGON + SEXTANT + DOMAINE) requires multi-domain approval chain"
+          policyReason="Cross-domain action (Aegis + Vessels + Terra) requires multi-domain approval chain"
           autonomyMode={autonomyMode}
           onAutonomyChange={setAutonomyMode}
         >
           <div className="space-y-2">
             <p className="text-sm" style={{ color: '#c8d8e8' }}>
-              FORGE has detected a correlated exposure across three domains: the APT-29
-              infrastructure provider identified in the PARAGON incident shares hosting with two
-              active SEXTANT counterparties. Separately, the LUMINA rate signal is compressing
-              DOMAINE's LTV covenant headroom — creating a potential cross-domain contagion vector.
+              Counsel has detected a correlated exposure across three domains: the APT-29
+              infrastructure provider identified in the Aegis incident shares hosting with two
+              active Vessels counterparties. Separately, the LUMINA rate signal is compressing
+              Terra's LTV covenant headroom — creating a potential cross-domain contagion vector.
               This correlation is flagged for multi-domain approval chain.
             </p>
             <div
@@ -365,7 +365,7 @@ export default function GovernedCockpit() {
               </span>
               <span style={{ color: '#7a99b8' }}>
                 {' '}
-                PARAGON (threat infrastructure) → SEXTANT (counterparty hosting) → DOMAINE (credit
+                Aegis (threat infrastructure) → Vessels (counterparty hosting) → Terra (credit
                 spread impact via LUMINA rate signal). Recommend unified response brief for CRO
                 review.
               </span>
@@ -393,7 +393,7 @@ export default function GovernedCockpit() {
             <div className="mt-3 space-y-2">
               {[
                 {
-                  domain: 'PARAGON',
+                  domain: 'Aegis',
                   item: 'APT-29 containment',
                   approver: 'CISO',
                   elapsed: '2h',
@@ -401,7 +401,7 @@ export default function GovernedCockpit() {
                   color: color.accent.red,
                 },
                 {
-                  domain: 'SEXTANT',
+                  domain: 'Vessels',
                   item: 'Horizon Star emergency port call',
                   approver: 'Ops Director',
                   elapsed: '47m',
@@ -409,7 +409,7 @@ export default function GovernedCockpit() {
                   color: color.accent.amber,
                 },
                 {
-                  domain: 'DOMAINE',
+                  domain: 'Terra',
                   item: 'Meridian acquisition financing',
                   approver: 'Investment Committee',
                   elapsed: '14m',

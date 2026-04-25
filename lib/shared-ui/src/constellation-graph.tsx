@@ -61,7 +61,7 @@ const DOMAIN_BASE_PATH: Record<string, string> = {
   terra: '/terra',
   vessels: '/vessels',
   aegis: '/aegis',
-  prism: '/aegis', // Prism Counsel currently surfaces inside PARAGON Command
+  prism: '/aegis', // Prism Counsel currently surfaces inside Aegis Command
   lyte: '/aegis',
   imperium: '/command',
   'carlota-jo': '/carlota-jo',
@@ -69,11 +69,11 @@ const DOMAIN_BASE_PATH: Record<string, string> = {
 };
 
 const DOMAIN_LABEL: Record<string, string> = {
-  terra: 'DOMAINE',
-  vessels: 'SEXTANT',
-  aegis: 'PARAGON',
+  terra: 'Terra',
+  vessels: 'Vessels',
+  aegis: 'Aegis',
   prism: 'Prism Counsel',
-  lyte: 'KORA',
+  lyte: 'Lyte',
   imperium: 'Command',
   'carlota-jo': 'Carlota Jo',
   platform: 'Platform',
@@ -3604,7 +3604,7 @@ export function ConstellationGraph({
                   data-testid="constellation-attach-to-case"
                   title={
                     traceOriginId
-                      ? 'Attach the trace bundle to an PARAGON case as evidence'
+                      ? 'Attach the trace bundle to an Aegis case as evidence'
                       : 'Run a trace first to enable attach'
                   }
                 >
@@ -3805,7 +3805,7 @@ export function ConstellationGraph({
                     textTransform: 'uppercase',
                   }}
                 >
-                  Attach trace to PARAGON case
+                  Attach trace to Aegis case
                 </div>
                 <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>
                   {(() => {

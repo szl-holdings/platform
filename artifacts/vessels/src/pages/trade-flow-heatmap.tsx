@@ -535,7 +535,7 @@ export default function TradeFlowHeatmap() {
             color: 'text-orange-400',
           },
           {
-            label: 'SEXTANT Tracked',
+            label: 'Vessels Tracked',
             value: COMMODITIES.reduce((s, c) => s + c.vessels, 0),
             sub: 'across all flows',
             icon: Ship,

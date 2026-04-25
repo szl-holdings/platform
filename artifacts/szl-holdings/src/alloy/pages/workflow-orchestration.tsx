@@ -618,7 +618,7 @@ export default function WorkflowOrchestration() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#4B8BDB' }}
             >
-              FORGE · Workflow Orchestration
+              Counsel · Workflow Orchestration
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Workflow Orchestration</h1>
@@ -645,7 +645,7 @@ export default function WorkflowOrchestration() {
           }}
         >
           <Radio className="w-3 h-3 shrink-0 animate-pulse" />
-          Demo Environment — Showing illustrative workflows. Connect the FORGE API for live data.
+          Demo Environment — Showing illustrative workflows. Connect the Counsel API for live data.
           <DataStateBadge state="demo" className="ml-auto" />
         </div>
       )}

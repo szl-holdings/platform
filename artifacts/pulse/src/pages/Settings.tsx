@@ -968,23 +968,23 @@ export default function Settings() {
         </form>
       </div>
 
-      {/* FORGE agents info */}
+      {/* Counsel agents info */}
       <div className="section-card" style={{ padding: '18px 20px', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
           <Zap size={15} color="var(--pulse-text-muted)" />
           <h3 style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--pulse-text)' }}>
-            FORGE Agents
+            Counsel Agents
           </h3>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
           {[
-            { agent: 'FORGE', role: 'Orchestration & synthesis', domain: 'Executive' },
+            { agent: 'Counsel', role: 'Orchestration & synthesis', domain: 'Executive' },
             { agent: 'Helmsman', role: 'Maritime intelligence', domain: 'Fleet' },
-            { agent: 'Sentinel', role: 'Security & threats', domain: 'PARAGON' },
-            { agent: 'DOMAINE', role: 'Real estate analytics', domain: 'Property' },
+            { agent: 'Sentinel', role: 'Security & threats', domain: 'Aegis' },
+            { agent: 'Terra', role: 'Real estate analytics', domain: 'Property' },
             { agent: 'Lexis', role: 'Legal & compliance', domain: 'Counsel' },
             { agent: 'Atlas', role: 'Financial & portfolio', domain: 'Holdings' },
-            { agent: 'KORA', role: 'Platform health', domain: 'Operations' },
+            { agent: 'Lyte', role: 'Platform health', domain: 'Operations' },
           ].map((a) => (
             <div
               key={a.agent}

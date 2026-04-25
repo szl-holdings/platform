@@ -8,7 +8,7 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 const SOLUTIONS = [
   {
     icon: ShieldCheck,
-    name: "PARAGON",
+    name: "Aegis",
     slug: "aegis",
     domain: "Defense & Intelligence",
     tagline: "SOC command, XDR, and managed security operations — for high-consequence environments where observability and execution discipline are non-negotiable.",
@@ -20,7 +20,7 @@ const SOLUTIONS = [
   },
   {
     icon: Ship,
-    name: "SEXTANT",
+    name: "Vessels",
     slug: "vessels",
     domain: "Maritime Intelligence",
     tagline: "Fleet visibility, voyage performance, and operational exceptions — decision intelligence for assets underway in complex, distributed environments.",
@@ -32,7 +32,7 @@ const SOLUTIONS = [
   },
   {
     icon: Building2,
-    name: "DOMAINE",
+    name: "Terra",
     slug: "terra",
     domain: "Real Estate Intelligence",
     tagline: "Distress tracking, deal pipeline, and market signal — the governed decision system applied to a data-rich, execution-poor industry that desperately needs a Covenant Policy layer.",
@@ -100,7 +100,7 @@ export default function SolutionsPage() {
                 </h1>
                 <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,62%)", maxWidth: "52ch" }}>
                   Domain packs are governed extensions of the platform — not peer products. Each pack inherits
-                  the same six-primitive layer (Covenant Policy, Proof Chain, Outcome Graph, FORGE, Simulation Engine, and Event Fabric) and adds the signal
+                  the same six-primitive layer (Covenant Policy, Proof Chain, Outcome Graph, Counsel, Simulation Engine, and Event Fabric) and adds the signal
                   vocabulary, decision models, and domain intelligence specific to its industry.
                 </p>
               </m.div>
@@ -189,7 +189,7 @@ export default function SolutionsPage() {
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", marginBottom: "1.75rem" }}>
                   The governed decision system is designed to extend to any operating environment
                   with complex signals, consequential decisions, and auditability requirements. A new domain pack
-                  inherits all six platform primitives — Covenant Policy, Proof Chain, Outcome Graph, FORGE, Simulation Engine, and Event Fabric — from day one.
+                  inherits all six platform primitives — Covenant Policy, Proof Chain, Outcome Graph, Counsel, Simulation Engine, and Event Fabric — from day one.
                   Let's talk about yours.
                 </p>
                 <Link href="/contact" className="szl-btn-primary">

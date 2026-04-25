@@ -21,7 +21,7 @@ const SURFACE = "hsla(0,0%,100%,0.035)";
 const TEXT = "hsl(38,8%,94%)";
 const TEXT_SEC = "hsl(214,7%,60%)";
 const TEXT_FAINT = "hsl(214,7%,57%)";
-const KORA = "hsl(192,72%,48%)";
+const Lyte = "hsl(192,72%,48%)";
 const MONO = "var(--font-mono)";
 
 const fadeUp = {
@@ -34,11 +34,11 @@ const fadeUp = {
 
 const LOOP_STEPS = [
   { n: "01", label: "Signal", icon: Radio, color: "#0ea5e9", body: "Risk indicators, anomalies, and threshold breaches are detected, normalized, and routed by the Event Fabric — cross-domain context and correlation ID attached." },
-  { n: "02", label: "Context", icon: Layers, color: "#8b5cf6", body: "Cross-domain enrichment via PRAXIS Bus. A sanctions alert in SEXTANT triggers a legal flag in Counsel, a risk entry in KORA." },
+  { n: "02", label: "Context", icon: Layers, color: "#8b5cf6", body: "Cross-domain enrichment via PRAXIS Bus. A sanctions alert in Vessels triggers a legal flag in Counsel, a risk entry in Lyte." },
   { n: "03", label: "Recommendation", icon: Brain, color: "#ec4899", body: "An AI agent proposes an action with source citations, confidence score, and full provenance. No opaque verdicts. Every output traceable." },
   { n: "04", label: "Simulation", icon: BarChart3, color: "#f59e0b", body: "The Monte Carlo engine models risk before action. Operators see expected outcomes, confidence intervals, and the variables that matter most." },
   { n: "05", label: "Policy", icon: ShieldCheck, color: "#10b981", body: "Covenant Policy enforces who can approve and what conditions apply — at the platform layer, not the UI. Non-delegatable." },
-  { n: "06", label: "Execution", icon: Zap, color: "#6366f1", body: "FORGE orchestrates the approved action as a durable, multi-step process with checkpoint recovery and agent coordination." },
+  { n: "06", label: "Execution", icon: Zap, color: "#6366f1", body: "Counsel orchestrates the approved action as a durable, multi-step process with checkpoint recovery and agent coordination." },
   { n: "07", label: "Proof", icon: FileCheck, color: "#14b8a6", body: "The Proof Chain records the complete trail: signal, recommendation, simulation, policy decision, approval, execution. Immutable and queryable." },
   { n: "08", label: "Outcome", icon: Target, color: "#ef4444", body: "The Outcome Graph records the real-world result. Was the action effective? The data calibrates future AI confidence scores." },
   { n: "09", label: "Learning", icon: BookOpen, color: "#f97316", body: "Historical outcomes feed back into simulation models and agent confidence calibration. The platform improves with every governed decision." },
@@ -48,10 +48,10 @@ const PLATFORM_TIERS = [
   {
     tier: "Layer 01",
     title: "Platform Command",
-    color: KORA,
+    color: Lyte,
     note: "Operator-facing command surfaces",
     items: [
-      { name: getProduct("lyte")?.name ?? "KORA", note: "Operational nerve center — signal stream, situation board, governed action panel" },
+      { name: getProduct("lyte")?.name ?? "Lyte", note: "Operational nerve center — signal stream, situation board, governed action panel" },
       { name: "APEX", note: "Mobile command — all domains, biometric auth, iOS + Android" },
       { name: "Command Portal", note: "Ecosystem hub — cross-domain oversight" },
     ],
@@ -62,7 +62,7 @@ const PLATFORM_TIERS = [
     color: "hsl(215,72%,58%)",
     note: "Shared governance infrastructure",
     items: [
-      { name: getProduct("alloy")?.name ?? "FORGE", note: "Workflow orchestration and governed execution" },
+      { name: getProduct("alloy")?.name ?? "Counsel", note: "Workflow orchestration and governed execution" },
       { name: "Outcome Graph", note: "Decision lifecycle and consequence measurement" },
       { name: "Proof Chain", note: "Immutable AI provenance and audit trail" },
       { name: "Covenant Policy", note: "Human-in-the-loop governance at the platform layer" },
@@ -76,9 +76,9 @@ const PLATFORM_TIERS = [
     color: "hsl(260,60%,65%)",
     note: "Vertical intelligence extensions",
     items: [
-      { name: "PARAGON", note: "Security & defense — SOC, XDR, MITRE ATT&CK, threat intelligence" },
-      { name: "SEXTANT", note: "Maritime — fleet command, AIS, sanctions, voyage economics" },
-      { name: "DOMAINE", note: "Real estate — distress signals, deal pipeline, ownership graph" },
+      { name: "Aegis", note: "Security & defense — SOC, XDR, MITRE ATT&CK, threat intelligence" },
+      { name: "Vessels", note: "Maritime — fleet command, AIS, sanctions, voyage economics" },
+      { name: "Terra", note: "Real estate — distress signals, deal pipeline, ownership graph" },
       { name: "Counsel", note: "Legal — matter command, deadline tracking, governed demand" },
       { name: "Carlota Jo", note: "Advisory — discreet intake, managed delivery, governed delivery" },
       { name: "IMPERIUM", note: "Cloud sovereignty — multi-cloud governance, policy enforcement" },
@@ -89,7 +89,7 @@ const PLATFORM_TIERS = [
 const DOMAIN_PACKS = [
   {
     icon: ShieldCheck,
-    slug: getProduct("aegis")?.name ?? "PARAGON",
+    slug: getProduct("aegis")?.name ?? "Aegis",
     category: getProduct("aegis")?.tagline ?? "Security & Defense",
     desc: "SOC command, threat intelligence, MITRE ATT&CK mapping, and SOAR playbooks for environments where every decision has consequence. Policy-gated, fully audited.",
     color: "hsl(222,60%,60%)",
@@ -98,7 +98,7 @@ const DOMAIN_PACKS = [
   },
   {
     icon: Ship,
-    slug: getProduct("vessels")?.name ?? "SEXTANT",
+    slug: getProduct("vessels")?.name ?? "Vessels",
     category: getProduct("vessels")?.tagline ?? "Maritime Intelligence",
     desc: "Fleet command, AIS telemetry, voyage economics, dark vessel detection, and sanctions screening for fleet operators. Same proof chain, maritime intelligence layer.",
     color: "hsl(206,72%,54%)",
@@ -107,7 +107,7 @@ const DOMAIN_PACKS = [
   },
   {
     icon: Building2,
-    slug: getProduct("terra")?.name ?? "DOMAINE",
+    slug: getProduct("terra")?.name ?? "Terra",
     category: getProduct("terra")?.tagline ?? "Real Estate Intelligence",
     desc: "NYC distress property pipeline, ownership entity graph, deal pipeline, and broker workflow. Data-rich intelligence with a governed underwriting flow.",
     color: "hsl(142,52%,48%)",
@@ -172,12 +172,12 @@ const ONE_SHELL_PRIMITIVES = [
     key: "DashboardShell",
     label: "Unified Shell",
     note: "Collapsible sidebar, top-bar, mobile drawer — shared chrome across all 13 surfaces.",
-    color: KORA,
+    color: Lyte,
   },
   {
     key: "EcosystemNav",
     label: "Ecosystem Nav",
-    note: "Jump instantly between KORA, TENAX, Counsel, SEXTANT, DOMAINE, LUMINA and every domain pack.",
+    note: "Jump instantly between Lyte, TENAX, Counsel, Vessels, Terra, LUMINA and every domain pack.",
     color: "hsl(260,60%,65%)",
   },
   {
@@ -373,7 +373,7 @@ export default function HomePage() {
                     SZL Holdings
                   </span>
                   <span style={{ width: 1, height: 12, background: BORDER }} />
-                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA }}>
+                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: Lyte }}>
                     Governed Decision Operating System
                   </span>
                 </div>
@@ -404,7 +404,7 @@ export default function HomePage() {
                   fontSize: "0.6875rem",
                   fontFamily: MONO,
                   letterSpacing: "0.04em",
-                  color: KORA,
+                  color: Lyte,
                   marginBottom: "1.5rem",
                 }}>
                   Signal → Context → Recommendation → Simulation → Policy → Execution → Proof → Outcome → Learning
@@ -414,9 +414,9 @@ export default function HomePage() {
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "2.5rem", alignItems: "center" }}>
                   {[
                     { label: "SZL Holdings", note: "governed platform", color: "hsl(38,72%,58%)" },
-                    { label: "FORGE", note: "execution fabric", color: "hsl(215,72%,58%)" },
-                    { label: "KORA", note: "flagship command", color: "hsl(192,72%,48%)" },
-                    { label: "PARAGON · SEXTANT · DOMAINE · Counsel · CJ · IMPERIUM", note: "domain packs", color: "hsl(260,60%,65%)" },
+                    { label: "Counsel", note: "execution fabric", color: "hsl(215,72%,58%)" },
+                    { label: "Lyte", note: "flagship command", color: "hsl(192,72%,48%)" },
+                    { label: "Aegis · Vessels · Terra · Counsel · CJ · IMPERIUM", note: "domain packs", color: "hsl(260,60%,65%)" },
                   ].map((item, i) => (
                     <div key={item.label} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                       {i > 0 && <span style={{ color: "hsla(0,0%,100%,0.2)", fontSize: "0.75rem" }}>→</span>}
@@ -443,7 +443,7 @@ export default function HomePage() {
                     style={{
                       display: "inline-flex", alignItems: "center", gap: "0.5rem",
                       padding: "0.875rem 1.75rem",
-                      background: KORA,
+                      background: Lyte,
                       color: "hsl(214,18%,4%)",
                       borderRadius: "0.375rem",
                       fontSize: "0.9375rem", fontWeight: 700,
@@ -465,7 +465,7 @@ export default function HomePage() {
                       textDecoration: "none",
                     }}
                   >
-                    See KORA — the nerve center <ArrowUpRight size={14} />
+                    See Lyte — the nerve center <ArrowUpRight size={14} />
                   </Link>
                   <Link
                     href="/design-partner"
@@ -512,7 +512,7 @@ export default function HomePage() {
               >
                 {EVIDENCE_STATS.map((s, i) => (
                   <div key={i} style={{ flex: 1, background: BG, padding: "1rem 0.875rem", textAlign: "center" }}>
-                    <p style={{ fontSize: "1.25rem", fontWeight: 700, fontFamily: MONO, color: KORA, margin: 0 }}>{s.value}</p>
+                    <p style={{ fontSize: "1.25rem", fontWeight: 700, fontFamily: MONO, color: Lyte, margin: 0 }}>{s.value}</p>
                     <p style={{ fontSize: "0.625rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_FAINT, margin: 0 }}>{s.label}</p>
                   </div>
                 ))}
@@ -597,7 +597,7 @@ export default function HomePage() {
           <section ref={loopRef} style={{ borderBottom: `1px solid ${BORDER}`, padding: "clamp(4rem,8vw,5.5rem) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} style={{ marginBottom: "3rem" }}>
-                <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA, marginBottom: "0.75rem" }}>
+                <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: Lyte, marginBottom: "0.75rem" }}>
                   The Decision Loop
                 </p>
                 <h2 style={{ fontSize: "clamp(1.75rem,3.5vw,2.625rem)", fontWeight: 700, letterSpacing: "-0.026em", color: TEXT, maxWidth: "28ch", marginBottom: "1rem" }}>
@@ -765,7 +765,7 @@ export default function HomePage() {
                   One shell. Thirteen surfaces.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: TEXT_SEC, maxWidth: "54ch" }}>
-                  Every domain pack — TENAX, Counsel, SEXTANT, DOMAINE, PARAGON, Carlota Jo — runs inside the same shared shell. One navigation model, one design language, one intelligence rail. Not a design coincidence: a platform architecture decision.
+                  Every domain pack — TENAX, Counsel, Vessels, Terra, Aegis, Carlota Jo — runs inside the same shared shell. One navigation model, one design language, one intelligence rail. Not a design coincidence: a platform architecture decision.
                 </p>
               </m.div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1px", background: BORDER, borderRadius: "10px", overflow: "hidden", border: `1px solid ${BORDER}` }}>
@@ -802,7 +802,7 @@ export default function HomePage() {
                     Vertical intelligence built on shared governance.
                   </h2>
                 </div>
-                <Link href="/solutions" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", fontSize: "0.875rem", fontWeight: 600, color: KORA, textDecoration: "none" }}>
+                <Link href="/solutions" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", fontSize: "0.875rem", fontWeight: 600, color: Lyte, textDecoration: "none" }}>
                   All domain packs <ArrowRight size={13} />
                 </Link>
               </m.div>
@@ -969,7 +969,7 @@ export default function HomePage() {
                       onClick={() => analytics.trustCenterView("trust-section", "/")}
                       style={{
                         display: "inline-flex", alignItems: "center", gap: "0.375rem",
-                        fontSize: "0.875rem", fontWeight: 600, color: KORA,
+                        fontSize: "0.875rem", fontWeight: 600, color: Lyte,
                         textDecoration: "none", padding: "0.5rem 1rem",
                         border: "1px solid hsla(192,72%,48%,0.3)", borderRadius: "0.375rem",
                       }}
@@ -1021,7 +1021,7 @@ export default function HomePage() {
             </div>
           </section>
   
-          {/* ── KORA CTA ────────────────────────────────────────────── */}
+          {/* ── Lyte CTA ────────────────────────────────────────────── */}
           <section style={{ borderBottom: `1px solid ${BORDER}`, padding: "clamp(4rem,8vw,5.5rem) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div
@@ -1034,12 +1034,12 @@ export default function HomePage() {
                   padding: "3rem 3.5rem",
                   borderRadius: "12px",
                   background: `linear-gradient(135deg, hsla(192,72%,48%,0.07) 0%, hsla(215,72%,58%,0.04) 100%)`,
-                  border: `1px solid ${KORA}20`,
+                  border: `1px solid ${Lyte}20`,
                 }}
               >
                 <div>
-                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: KORA, marginBottom: "0.75rem" }}>
-                    KORA — Operational Nerve Center
+                  <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: Lyte, marginBottom: "0.75rem" }}>
+                    Lyte — Operational Nerve Center
                   </p>
                   <h3 style={{ fontSize: "clamp(1.5rem,3vw,2.25rem)", fontWeight: 700, letterSpacing: "-0.022em", color: TEXT, marginBottom: "1rem", maxWidth: "30ch" }}>
                     The command surface that sees everything — and routes it to the right action.
@@ -1054,13 +1054,13 @@ export default function HomePage() {
                     style={{
                       display: "inline-flex", alignItems: "center", gap: "0.5rem",
                       padding: "0.875rem 1.75rem",
-                      background: KORA, color: "hsl(214,18%,4%)",
+                      background: Lyte, color: "hsl(214,18%,4%)",
                       borderRadius: "0.375rem",
                       fontSize: "0.9375rem", fontWeight: 700,
                       textDecoration: "none", whiteSpace: "nowrap",
                     }}
                   >
-                    Open KORA <ArrowRight size={15} />
+                    Open Lyte <ArrowRight size={15} />
                   </Link>
                   <Link
                     href="/demo"
@@ -1105,7 +1105,7 @@ export default function HomePage() {
                     style={{
                       display: "inline-flex", alignItems: "center", gap: "0.5rem",
                       padding: "0.875rem 1.75rem",
-                      background: KORA, color: "hsl(214,18%,4%)",
+                      background: Lyte, color: "hsl(214,18%,4%)",
                       borderRadius: "0.375rem",
                       fontSize: "0.9375rem", fontWeight: 700,
                       textDecoration: "none",

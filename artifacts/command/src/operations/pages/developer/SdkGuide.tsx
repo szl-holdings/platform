@@ -111,7 +111,7 @@ const alerts = await client.analytics.getCommandAlerts();`,
             name: 'Maritime',
             icon: Globe,
             color: 'text-tag-maritime',
-            code: `// SEXTANT fleet management
+            code: `// Vessels fleet management
 const fleet = await client.maritime.getFleet();
 const voyages = await client.maritime.getVoyages();
 const alerts = await client.maritime.getAlerts();`,
@@ -120,7 +120,7 @@ const alerts = await client.maritime.getAlerts();`,
             name: 'AI / ML',
             icon: Zap,
             color: 'text-tag-ai',
-            code: `// FORGE signal queue
+            code: `// Counsel signal queue
 const signals = await client.alloy.getSignals();
 
 // AI intelligence

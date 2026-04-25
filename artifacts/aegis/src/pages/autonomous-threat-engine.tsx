@@ -377,7 +377,7 @@ export default function AutonomousThreatEngine() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: ACCENT }}
             >
-              PARAGON · Autonomous Threat Engine
+              Aegis · Autonomous Threat Engine
             </span>
             <span
               className="px-1.5 py-0.5 rounded text-[8px] font-bold animate-pulse"

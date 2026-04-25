@@ -24,12 +24,12 @@ const LYTE = "hsl(192,72%,48%)";
 const MONO = "var(--font-mono)";
 
 const DOMAIN_CONFIG: Record<string, { color: string; icon: typeof Shield; shortName: string }> = {
-  PARAGON:        { color: "hsl(222,60%,60%)", icon: Shield, shortName: "PARAGON" },
-  SEXTANT:      { color: "hsl(206,72%,54%)", icon: Ship, shortName: "SEXTANT" },
-  DOMAINE:        { color: "hsl(142,52%,48%)", icon: Building2, shortName: "DOMAINE" },
+  Aegis:        { color: "hsl(222,60%,60%)", icon: Shield, shortName: "Aegis" },
+  Vessels:      { color: "hsl(206,72%,54%)", icon: Ship, shortName: "Vessels" },
+  Terra:        { color: "hsl(142,52%,48%)", icon: Building2, shortName: "Terra" },
   "Counsel": { color: "hsl(260,60%,65%)", icon: Briefcase, shortName: "Prism" },
   "Carlota Jo": { color: "hsl(340,52%,60%)", icon: Users, shortName: "CJ" },
-  FORGE:        { color: "hsl(192,72%,48%)", icon: Zap, shortName: "FORGE" },
+  Counsel:        { color: "hsl(192,72%,48%)", icon: Zap, shortName: "Counsel" },
   IMPERIUM:     { color: "hsl(25,72%,54%)", icon: Layers, shortName: "Imp." },
 };
 
@@ -79,7 +79,7 @@ interface FusionSignal {
 const FUSION_SIGNALS_FALLBACK: FusionSignal[] = [
   {
     id: "sf1",
-    domain: "PARAGON",
+    domain: "Aegis",
     severity: "critical",
     title: "KEV CVE-2025-1337 active exploitation — 3 internal hosts confirmed",
     sourceType: "threat_intelligence",
@@ -92,7 +92,7 @@ const FUSION_SIGNALS_FALLBACK: FusionSignal[] = [
   },
   {
     id: "sf2",
-    domain: "SEXTANT",
+    domain: "Vessels",
     severity: "high",
     title: "MV Adriatic Star — AIS dark gap 6h20m, last fix Strait of Messina",
     sourceType: "ais_telemetry",
@@ -116,7 +116,7 @@ const FUSION_SIGNALS_FALLBACK: FusionSignal[] = [
   },
   {
     id: "sf4",
-    domain: "FORGE",
+    domain: "Counsel",
     severity: "high",
     title: "Approval queue depth 14 workflows — 6 exceed 72h threshold",
     sourceType: "workflow_monitor",
@@ -129,7 +129,7 @@ const FUSION_SIGNALS_FALLBACK: FusionSignal[] = [
   },
   {
     id: "sf5",
-    domain: "DOMAINE",
+    domain: "Terra",
     severity: "medium",
     title: "NYC portfolio distress threshold — 12 properties, $340M exposure",
     sourceType: "market_intelligence",
@@ -310,22 +310,22 @@ const SIG_PROOF_RECORDS: Record<string, ProofRecord> = {
   sf1: {
     ...SAMPLE_PROOF_RECORD,
     id: "PCH-SF1-20260416",
-    sourceSystem: "PARAGON SOC Feed",
-    sourceDomain: "PARAGON",
+    sourceSystem: "Aegis SOC Feed",
+    sourceDomain: "Aegis",
     signalType: "threat_intelligence",
     confidence: 0.94,
     reviewState: "unreviewed",
     exportSafety: "pending_review",
     policyChecks: [
       { label: "Role: ops_analyst — permitted", passed: true },
-      { label: "Domain: PARAGON — in scope", passed: true },
+      { label: "Domain: Aegis — in scope", passed: true },
       { label: "Action: recommend_isolation — permitted", passed: true },
       { label: "Human-in-loop gate: required before execution", passed: true },
       { label: "Review state: must be human_reviewed before export", passed: false, note: "Export blocked until review complete" },
     ],
     chainLinks: [
       { id: "c1", event: "Signal ingested — KEV CVE-2025-1337 active exploitation", actor: "System / PRAXIS Bus", timestamp: "16 Apr 2026 08:14:22", hash: "sha256:a3f7b2c1d..." },
-      { id: "c2", event: "Correlated with IMPERIUM drift event (sf6) and SEXTANT anomaly (sf4)", actor: "System / Signal Fusion", timestamp: "16 Apr 2026 08:14:24", hash: "sha256:9e1d4f2a8..." },
+      { id: "c2", event: "Correlated with IMPERIUM drift event (sf6) and Vessels anomaly (sf4)", actor: "System / Signal Fusion", timestamp: "16 Apr 2026 08:14:24", hash: "sha256:9e1d4f2a8..." },
       { id: "c3", event: "AI recommendation generated — isolate affected hosts", actor: "Model: gpt-4o-mini", timestamp: "16 Apr 2026 08:14:27", hash: "sha256:b4e8f3c6d..." },
     ],
     metadata: { "Signal ID": "SIG-20260416-001", "MITRE Technique": "T1071.001", "Correlation ID": "CORR-SF1-SF6", "SLA": "T-2h" },
@@ -333,21 +333,21 @@ const SIG_PROOF_RECORDS: Record<string, ProofRecord> = {
   sf2: {
     ...SAMPLE_PROOF_RECORD,
     id: "PCH-SF2-20260416",
-    sourceSystem: "SEXTANT AIS Feed",
-    sourceDomain: "SEXTANT",
+    sourceSystem: "Vessels AIS Feed",
+    sourceDomain: "Vessels",
     signalType: "ais_telemetry",
     confidence: 0.91,
     reviewState: "human_reviewed",
     exportSafety: "pending_review",
     policyChecks: [
       { label: "Role: ops_analyst — permitted", passed: true },
-      { label: "Domain: SEXTANT — in scope", passed: true },
+      { label: "Domain: Vessels — in scope", passed: true },
       { label: "Action: initiate_ofac_screen — permitted", passed: true },
       { label: "Human-in-loop gate: K. Vasile assigned", passed: true },
       { label: "OFAC screening required before execution", passed: false, note: "Screening in progress" },
     ],
     chainLinks: [
-      { id: "c1", event: "AIS dark gap detected — MV Adriatic Star (6h20m)", actor: "System / SEXTANT Feed", timestamp: "16 Apr 2026 07:07:44", hash: "sha256:d1e3f5b7a..." },
+      { id: "c1", event: "AIS dark gap detected — MV Adriatic Star (6h20m)", actor: "System / Vessels Feed", timestamp: "16 Apr 2026 07:07:44", hash: "sha256:d1e3f5b7a..." },
       { id: "c2", event: "Temporal correlation with Counsel filing event (sf5)", actor: "System / Signal Fusion", timestamp: "16 Apr 2026 08:03:11", hash: "sha256:f2a8c4e6b..." },
     ],
     metadata: { "Signal ID": "SIG-20260416-002", "Last AIS fix": "37.42N, 15.61E", "Gap duration": "6h20m", "OFAC status": "Pending" },
@@ -356,7 +356,7 @@ const SIG_PROOF_RECORDS: Record<string, ProofRecord> = {
 
 export default function SignalFusionPage() {
   const __pageMeta = usePageMeta({
-    title: "Signal Fusion Panel — KORA | SZL Holdings",
+    title: "Signal Fusion Panel — Lyte | SZL Holdings",
     description: "Cross-domain signal aggregation showing where signals originate, how they correlate, and confidence levels. Inspired by Five Eyes STONE GHOST and NSA signal fusion architectures.",
     canonical: "https://szlholdings.com/lyte/signal-fusion",
   });
@@ -422,7 +422,7 @@ export default function SignalFusionPage() {
               <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
                   <Link href="/lyte" style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, textDecoration: "none" }}>
-                    KORA
+                    Lyte
                   </Link>
                   <ChevronRight size={10} style={{ color: TEXT_FAINT }} />
                   <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE }}>
@@ -433,7 +433,7 @@ export default function SignalFusionPage() {
                   Every signal. Every domain. One fusion layer.
                 </h1>
                 <p style={{ fontSize: "0.6875rem", fontFamily: MONO, letterSpacing: "0.04em", color: LYTE, marginBottom: "0.875rem" }}>
-                  PARAGON · SEXTANT · DOMAINE · Counsel · Carlota Jo · FORGE · IMPERIUM
+                  Aegis · Vessels · Terra · Counsel · Carlota Jo · Counsel · IMPERIUM
                 </p>
                 <p style={{ fontSize: "clamp(0.9375rem,1.6vw,1.0625rem)", lineHeight: 1.72, color: TEXT_SEC, maxWidth: "54ch", marginBottom: "2rem" }}>
                   Cross-domain signal aggregation showing where signals originate, how they correlate across domains, and what confidence the system places in each one. Inspired by Five Eyes STONE GHOST and NSA's multi-source correlation architecture.
@@ -881,7 +881,7 @@ export default function SignalFusionPage() {
                       Open Decision Theater <ArrowRight size={13} />
                     </Link>
                     <Link href="/lyte" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: "transparent", color: TEXT_SEC, border: `1px solid ${BORDER}`, borderRadius: 6, fontSize: "0.8125rem", fontWeight: 500, textDecoration: "none" }}>
-                      Back to KORA
+                      Back to Lyte
                     </Link>
                   </div>
                 </div>

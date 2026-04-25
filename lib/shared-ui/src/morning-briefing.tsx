@@ -25,13 +25,13 @@ export interface DailyBriefing {
 }
 
 const DOMAIN_META: Record<string, { icon: string; label: string; color: string }> = {
-  vessels: { icon: '⚓', label: 'SEXTANT', color: '#0ea5e9' },
-  terra: { icon: '⬢', label: 'DOMAINE', color: '#22c55e' },
-  aegis: { icon: '🛡', label: 'PARAGON', color: '#ef4444' },
+  vessels: { icon: '⚓', label: 'Vessels', color: '#0ea5e9' },
+  terra: { icon: '⬢', label: 'Terra', color: '#22c55e' },
+  aegis: { icon: '🛡', label: 'Aegis', color: '#ef4444' },
   prism: { icon: '⚖', label: 'PRISM', color: '#a855f7' },
   szl: { icon: '◆', label: 'Portfolio', color: '#f59e0b' },
   carlota: { icon: '◈', label: 'Carlota Jo', color: '#ec4899' },
-  lyte: { icon: '⚡', label: 'KORA', color: '#06b6d4' },
+  lyte: { icon: '⚡', label: 'Lyte', color: '#06b6d4' },
 };
 
 function generateDemoBriefing(date: Date): DailyBriefing {
@@ -48,7 +48,7 @@ function generateDemoBriefing(date: Date): DailyBriefing {
     date: dateStr,
     generatedAt: date.toISOString(),
     headline: '3 critical signals overnight. Portfolio NAV up 1.2%. Settlement deadline in 48h.',
-    narrative: `Good morning. APEX has aggregated overnight intelligence across all domains. SEXTANT flagged 3 diversions near monitored corridors. DOMAINE identified 2 distressed properties in your watchlist markets. PRISM has a settlement deadline approaching for case #P-2024-187. Portfolio NAV closed at $284.2M, up 1.2% driven by maritime yield expansion.`,
+    narrative: `Good morning. APEX has aggregated overnight intelligence across all domains. Vessels flagged 3 diversions near monitored corridors. Terra identified 2 distressed properties in your watchlist markets. PRISM has a settlement deadline approaching for case #P-2024-187. Portfolio NAV closed at $284.2M, up 1.2% driven by maritime yield expansion.`,
     portfolioNav: 284.2,
     navChange: 1.2,
     activeAlerts: 47,
@@ -56,7 +56,7 @@ function generateDemoBriefing(date: Date): DailyBriefing {
     signals: [
       {
         domain: 'vessels',
-        title: '3 SEXTANT Diverted Near Monitored Corridors',
+        title: '3 Vessels Diverted Near Monitored Corridors',
         summary:
           'MV Poseidon, MV Argo, and MV Triton changed course within 24h. Poseidon now 12nm from Bandar Abbas.',
         metric: '3 diversions',
@@ -98,7 +98,7 @@ function generateDemoBriefing(date: Date): DailyBriefing {
         domain: 'lyte',
         title: 'API Latency Elevated Across 2 Services',
         summary:
-          'Counsel API p95 at 340ms (+22%). DOMAINE data pipeline processing delay of 8min vs 3min baseline.',
+          'Counsel API p95 at 340ms (+22%). Terra data pipeline processing delay of 8min vs 3min baseline.',
         metric: 'p95: 340ms',
         trend: 'down',
         severity: 'medium',

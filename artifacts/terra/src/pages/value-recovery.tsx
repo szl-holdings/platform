@@ -27,7 +27,7 @@ export default function ValueRecovery() {
         value_at_risk: 0,
         approval_sla: 'ON TRACK',
       },
-      action: 'Rerouted to CFO backup via FORGE',
+      action: 'Rerouted to CFO backup via Counsel',
       cycle_time_saved: '6.2h',
       correlation_id: 'gf-2026-q1-001',
       recovered: 840000,
@@ -48,7 +48,7 @@ export default function ValueRecovery() {
             className="text-xs font-medium uppercase tracking-widest"
             style={{ color: '#0ea5e9' }}
           >
-            KORA · Value Recovery
+            Lyte · Value Recovery
           </span>
         </div>
         <h1 className="text-2xl font-bold text-white">Value Recovery View</h1>
@@ -69,7 +69,7 @@ export default function ValueRecovery() {
             label: 'Value Recovered (30d)',
             value: formatCurrency(recoveredAmount),
             color: '#10b981',
-            sub: 'Via FORGE interventions',
+            sub: 'Via Counsel interventions',
           },
           {
             label: 'Recovery Rate',

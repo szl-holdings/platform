@@ -319,7 +319,7 @@ function AegisReplayContent() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#8b7ac8' }}
             >
-              PARAGON · ATLAS Replay Engine
+              Aegis · ATLAS Replay Engine
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Attack Path Replay</h1>
@@ -372,7 +372,7 @@ function AegisReplayContent() {
             className="text-[10px] font-bold uppercase tracking-widest font-mono"
             style={{ color: '#8b7ac8' }}
           >
-            PARAGON · ATLAS Replay Engine
+            Aegis · ATLAS Replay Engine
           </span>
           {isLoading && (
             <Loader2

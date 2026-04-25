@@ -7,7 +7,7 @@ const developments = [
     tagColor: 'hsl(192,70%,46%)',
     tagBg: 'hsla(192,70%,46%,0.10)',
     tagBorder: 'hsla(192,70%,46%,0.20)',
-    title: 'KORA observability layer expanded',
+    title: 'Lyte observability layer expanded',
     body: 'Advanced workflow friction analysis and KPI drift detection rolled out to all enterprise clients. Signal card architecture now surfaces consequence framing automatically.',
   },
   {
@@ -16,7 +16,7 @@ const developments = [
     tagColor: 'hsl(208,65%,52%)',
     tagBg: 'hsla(208,65%,48%,0.10)',
     tagBorder: 'hsla(208,65%,48%,0.20)',
-    title: 'SEXTANT intelligence layer expanded',
+    title: 'Vessels intelligence layer expanded',
     body: 'Advanced anomaly detection and route deviation alerting rolled out to all fleet operator clients. Route intelligence now covers 94% of major global shipping lanes.',
   },
   {

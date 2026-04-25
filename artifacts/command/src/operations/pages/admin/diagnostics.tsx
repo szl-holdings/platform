@@ -253,7 +253,7 @@ export default function AdminDiagnosticsPage() {
             <MetricCard
               label="Pending Approvals"
               value={dashboard?.product.pendingApprovals ?? 0}
-              sub="FORGE action queue"
+              sub="Counsel action queue"
               icon={BarChart3}
             />
             <MetricCard

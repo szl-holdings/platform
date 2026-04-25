@@ -24,7 +24,7 @@ import { MarketingNav } from '../../../components/marketing/MarketingNav';
 
 const appData = {
   terra: {
-    name: 'DOMAINE',
+    name: 'Terra',
     tagline: 'Real Estate Intelligence',
     color: 'text-[#40856a]',
     accentHex: '#40856a',
@@ -33,7 +33,7 @@ const appData = {
     description:
       'Evidence-backed property analytics, market forecasting, and deal pipeline management for institutional real estate investors.',
     longDescription:
-      'DOMAINE aggregates geospatial signals, public record data, and proprietary market feeds to give institutional investors a comprehensive picture of any asset—before they commit capital. From underwriting to asset management, the entire real estate lifecycle lives in a single command interface.',
+      'Terra aggregates geospatial signals, public record data, and proprietary market feeds to give institutional investors a comprehensive picture of any asset—before they commit capital. From underwriting to asset management, the entire real estate lifecycle lives in a single command interface.',
     features: [
       {
         title: 'Market Forecasting',
@@ -70,7 +70,7 @@ const appData = {
     ],
   },
   vessels: {
-    name: 'SEXTANT',
+    name: 'Vessels',
     tagline: 'Fleet Command',
     color: 'text-[#0ea5e9]',
     accentHex: '#0ea5e9',
@@ -79,7 +79,7 @@ const appData = {
     description:
       'Real-time AIS tracking, predictive maintenance, and route optimization for modern maritime operations.',
     longDescription:
-      'SEXTANT unifies global AIS feeds, IoT sensor streams, and weather routing algorithms into a single operational picture for fleet operators. Whether you run 3 vessels or 300, SEXTANT scales to your operational tempo.',
+      'Vessels unifies global AIS feeds, IoT sensor streams, and weather routing algorithms into a single operational picture for fleet operators. Whether you run 3 vessels or 300, Vessels scales to your operational tempo.',
     features: [
       {
         title: 'Real-time AIS Tracking',
@@ -117,13 +117,13 @@ const appData = {
       },
     ],
     stats: [
-      { v: '180K+', l: 'SEXTANT tracked globally' },
+      { v: '180K+', l: 'Vessels tracked globally' },
       { v: '<1s', l: 'AIS update latency' },
       { v: '60%', l: 'Downtime reduction' },
     ],
   },
   lyte: {
-    name: 'KORA',
+    name: 'Lyte',
     tagline: 'AIOps Command',
     color: 'text-[#d4a054]',
     accentHex: '#d4a054',
@@ -132,7 +132,7 @@ const appData = {
     description:
       'Autonomous incident detection, ML-driven root cause analysis, and SRE automation for complex distributed systems.',
     longDescription:
-      "KORA eliminates the MTTD/MTTR grind by continuously learning your system's normal operating envelope and triggering enriched alerts the instant something deviates—with root cause and suggested remediation already attached.",
+      "Lyte eliminates the MTTD/MTTR grind by continuously learning your system's normal operating envelope and triggering enriched alerts the instant something deviates—with root cause and suggested remediation already attached.",
     features: [
       {
         title: 'Autonomous Detection',
@@ -169,7 +169,7 @@ const appData = {
     ],
   },
   aegis: {
-    name: 'PARAGON',
+    name: 'Aegis',
     tagline: 'Defense & Intelligence',
     color: 'text-[#3b82f6]',
     accentHex: '#3b82f6',
@@ -178,7 +178,7 @@ const appData = {
     description:
       'Unified threat intelligence, SOC command, and incident response orchestration for national security and enterprise defense.',
     longDescription:
-      'PARAGON ingests threat intelligence from 900+ OSINT, dark web, and ISACs feeds and correlates them with your internal telemetry to give SOC analysts a real-time, ranked picture of active threats—with enriched context and one-click response workflows.',
+      'Aegis ingests threat intelligence from 900+ OSINT, dark web, and ISACs feeds and correlates them with your internal telemetry to give SOC analysts a real-time, ranked picture of active threats—with enriched context and one-click response workflows.',
     features: [
       {
         title: 'Threat Intelligence Fusion',

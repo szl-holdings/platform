@@ -419,9 +419,9 @@ const ACTION_QUEUE: QueueItem[] = [
     confidence: 94,
     age_hours: 48,
     type: 'approval',
-    evidence: 'SLA breach detected by FORGE workflow monitor',
+    evidence: 'SLA breach detected by Counsel workflow monitor',
     next_action: 'Escalate to VP Legal with 24h deadline',
-    linked_product: 'FORGE',
+    linked_product: 'Counsel',
     linked_href: '/alloy',
   },
   {
@@ -434,9 +434,9 @@ const ACTION_QUEUE: QueueItem[] = [
     confidence: 88,
     age_hours: 24,
     type: 'escalation',
-    evidence: 'FORGE churn model v3.2 + usage telemetry',
+    evidence: 'Counsel churn model v3.2 + usage telemetry',
     next_action: 'Schedule executive call within 24h',
-    linked_product: 'FORGE',
+    linked_product: 'Counsel',
     linked_href: '/alloy',
   },
   {
@@ -451,7 +451,7 @@ const ACTION_QUEUE: QueueItem[] = [
     type: 'ownership',
     evidence: 'Workflow graph gap detected automatically',
     next_action: 'Assign compliance owner and unblock pipeline',
-    linked_product: 'DOMAINE',
+    linked_product: 'Terra',
     linked_href: '/terra/',
   },
   {
@@ -469,15 +469,15 @@ const ACTION_QUEUE: QueueItem[] = [
   {
     id: 'q-005',
     title: 'Contract Workflow Step 4 Failed — No Approver',
-    reason: 'FORGE run failed at step 4. No approver assigned. Retry available.',
+    reason: 'Counsel run failed at step 4. No approver assigned. Retry available.',
     owner: null,
     risk: 840000,
     confidence: 100,
     age_hours: 6,
     type: 'exception',
-    evidence: 'FORGE execution engine — run #GF-2026-Q1-001',
+    evidence: 'Counsel execution engine — run #GF-2026-Q1-001',
     next_action: 'Assign approver or reroute workflow',
-    linked_product: 'FORGE',
+    linked_product: 'Counsel',
     linked_href: '/alloy',
   },
 ];
@@ -498,7 +498,7 @@ const SIGNAL_FEED = [
   {
     time: '15m ago',
     type: 'event',
-    text: 'FORGE workflow #GF-2026-Q1-001 entered exception state',
+    text: 'Counsel workflow #GF-2026-Q1-001 entered exception state',
     severity: 'high' as const,
   },
   {
@@ -516,7 +516,7 @@ const SIGNAL_FEED = [
   {
     time: '1h ago',
     type: 'event',
-    text: 'New distress signal forwarded from DOMAINE — Northgate portfolio cluster',
+    text: 'New distress signal forwarded from Terra — Northgate portfolio cluster',
     severity: 'medium' as const,
   },
 ];
@@ -525,7 +525,7 @@ const CORRELATION_ITEMS = [
   {
     entity: 'Northgate Group',
     type: 'Account',
-    connections: ['Contract #NG-2026-R1', 'Approval Chain #AC-847', 'FORGE Run #GF-001'],
+    connections: ['Contract #NG-2026-R1', 'Approval Chain #AC-847', 'Counsel Run #GF-001'],
     risk: '$840K',
   },
   {

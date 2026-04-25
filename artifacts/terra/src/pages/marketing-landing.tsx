@@ -213,7 +213,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             >
               <Building2 size={13} style={{ color: ACCENT_LIGHT }} />
             </div>
-            <span className="font-bold text-sm tracking-tight text-white">DOMAINE</span>
+            <span className="font-bold text-sm tracking-tight text-white">Terra</span>
             <span
               aria-hidden="true"
               className="hidden sm:inline text-[9px] tracking-[0.14em] uppercase ml-1"
@@ -325,7 +325,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             className="text-[17px] sm:text-[19px] leading-[1.8] max-w-[600px] mt-7 mb-10"
             style={{ color: 'rgba(255,255,255,0.65)' }}
           >
-            DOMAINE gives investors, brokers, and portfolio teams a single intelligence surface — from
+            Terra gives investors, brokers, and portfolio teams a single intelligence surface — from
             distressed property discovery through ownership analysis, pipeline management, and deal
             execution.
           </p>
@@ -412,7 +412,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 .
               </p>
               <p>
-                DOMAINE replaces the 14 browser tabs, three paid data services, and two hours of
+                Terra replaces the 14 browser tabs, three paid data services, and two hours of
                 morning research that currently stand between you and your first actionable lead of
                 the day.
               </p>
@@ -474,7 +474,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
         </div>
       </section>
 
-      {/* DOMAINE DOCTRINE */}
+      {/* Terra DOCTRINE */}
       <section id="doctrine" className="relative py-24 sm:py-32 px-6">
         <div className="max-w-[1100px] mx-auto">
           <Reveal>
@@ -483,13 +483,13 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 font-mono"
                 style={{ color: 'rgba(255,255,255,0.65)' }}
               >
-                The DOMAINE Doctrine
+                The Terra Doctrine
               </p>
               <h2 className="text-[clamp(1.5rem,3.5vw,2.4rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
                 Five phases. One operating system.
               </h2>
               <p className="text-[15px] leading-[1.85]" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                Every serious real estate operation moves through the same sequence. DOMAINE
+                Every serious real estate operation moves through the same sequence. Terra
                 structures it into a repeatable, intelligence-driven workflow.
               </p>
             </div>
@@ -729,7 +729,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 className="text-[17px] leading-[1.8] max-w-[560px] mx-auto"
                 style={{ color: 'rgba(255,255,255,0.65)' }}
               >
-                DOMAINE is available to qualified operators in three tiers. No free trials. No demo
+                Terra is available to qualified operators in three tiers. No free trials. No demo
                 accounts. Real intelligence from day one.
               </p>
             </div>
@@ -841,7 +841,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
               Platform Walkthrough
             </p>
             <h2 className="text-[clamp(1.6rem,3vw,2.1rem)] font-bold text-white mb-3 tracking-tight">
-              How DOMAINE works in practice
+              How Terra works in practice
             </h2>
             <p className="text-[14px] max-w-xl mx-auto" style={{ color: 'rgba(255,255,255,0.65)' }}>
               From data connection to first distress lead in under 30 minutes.
@@ -857,7 +857,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 {
                   step: '01',
                   title: 'Connect your market data sources',
-                  body: 'DOMAINE ingests public records data automatically — NYC ACRIS, DOB, HPD, tax records, court filings. Your existing CRM and deal tracking tools connect in one click.',
+                  body: 'Terra ingests public records data automatically — NYC ACRIS, DOB, HPD, tax records, court filings. Your existing CRM and deal tracking tools connect in one click.',
                   tag: 'Setup',
                 },
                 {
@@ -869,7 +869,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 {
                   step: '03',
                   title: 'Ownership resolution unlocks the deal',
-                  body: "LLC unmasking and entity resolution identify the real decision-maker behind every property — not the registered agent. DOMAINE surfaces contact pathways that don't exist in any other platform.",
+                  body: "LLC unmasking and entity resolution identify the real decision-maker behind every property — not the registered agent. Terra surfaces contact pathways that don't exist in any other platform.",
                   tag: 'Sourcing',
                 },
                 {
@@ -881,7 +881,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 {
                   step: '05',
                   title: 'AI analyst contextualizes every opportunity',
-                  body: 'The DOMAINE AI copilot answers questions about any property, compares opportunity sets, and synthesizes market intelligence on demand. Not a search box — a reasoning layer with real domain knowledge.',
+                  body: 'The Terra AI copilot answers questions about any property, compares opportunity sets, and synthesizes market intelligence on demand. Not a search box — a reasoning layer with real domain knowledge.',
                   tag: 'Intelligence',
                 },
               ].map((item) => (
@@ -958,7 +958,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
               >
                 <Building2 size={12} style={{ color: ACCENT_LIGHT }} />
               </div>
-              <span className="text-sm font-bold text-white">DOMAINE</span>
+              <span className="text-sm font-bold text-white">Terra</span>
               <span
                 className="text-[9px] font-mono ml-1"
                 style={{ color: 'rgba(255,255,255,0.65)' }}
@@ -968,9 +968,9 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             </div>
             <div className="flex items-center gap-4">
               {[
-                { name: 'KORA', href: '/command/operations/' },
-                { name: 'SEXTANT', href: '/vessels/' },
-                { name: 'PARAGON', href: '/aegis/' },
+                { name: 'Lyte', href: '/command/operations/' },
+                { name: 'Vessels', href: '/vessels/' },
+                { name: 'Aegis', href: '/aegis/' },
                 { name: 'Carlota Jo', href: '/carlota-jo/' },
                 { name: 'SZL', href: '/szl-holdings/' },
               ].map((l) => (
@@ -1044,7 +1044,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
         onClose={() => setDemoOpen(false)}
         type={demoType}
         app="terra"
-        subtitle="DOMAINE — Real Estate Intelligence"
+        subtitle="Terra — Real Estate Intelligence"
       />
     </div>
   );

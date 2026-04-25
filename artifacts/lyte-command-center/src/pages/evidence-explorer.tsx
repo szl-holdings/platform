@@ -33,7 +33,7 @@ const TYPE_CONFIG: Record<
     border: 'border-purple-500/20',
   },
   alloy: {
-    label: 'FORGE / AI',
+    label: 'Counsel / AI',
     icon: <Bot className="w-3.5 h-3.5" />,
     color: 'text-amber-400',
     bg: 'bg-amber-500/8',

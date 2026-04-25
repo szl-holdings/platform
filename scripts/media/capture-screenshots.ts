@@ -41,7 +41,7 @@ const TARGETS: ScreenshotTarget[] = [
   },
   {
     product: 'lyte',
-    name: 'KORA — Marketing Landing',
+    name: 'Lyte — Marketing Landing',
     url: `${BASE_URL}/lyte-command-center/`,
     filename: 'lyte-overview.jpg',
     viewport: { width: 1440, height: 900 },
@@ -49,7 +49,7 @@ const TARGETS: ScreenshotTarget[] = [
   },
   {
     product: 'lyte',
-    name: 'KORA — Command Center Dashboard',
+    name: 'Lyte — Command Center Dashboard',
     url: `${BASE_URL}/lyte-command-center/dashboard`,
     filename: 'lyte-dashboard.jpg',
     viewport: { width: 1440, height: 900 },
@@ -57,7 +57,7 @@ const TARGETS: ScreenshotTarget[] = [
   },
   {
     product: 'aegis',
-    name: 'PARAGON — Defense Intelligence Landing',
+    name: 'Aegis — Defense Intelligence Landing',
     url: `${BASE_URL}/aegis/`,
     filename: 'aegis-landing.jpg',
     viewport: { width: 1440, height: 900 },
@@ -65,7 +65,7 @@ const TARGETS: ScreenshotTarget[] = [
   },
   {
     product: 'aegis',
-    name: 'PARAGON — SOC Command Center',
+    name: 'Aegis — SOC Command Center',
     url: `${BASE_URL}/aegis/dashboard`,
     filename: 'aegis-overview.jpg',
     viewport: { width: 1440, height: 900 },
@@ -73,7 +73,7 @@ const TARGETS: ScreenshotTarget[] = [
   },
   {
     product: 'vessels',
-    name: 'SEXTANT — Fleet Command Landing',
+    name: 'Vessels — Fleet Command Landing',
     url: `${BASE_URL}/vessels/`,
     filename: 'vessels-landing.jpg',
     viewport: { width: 1440, height: 900 },
@@ -81,7 +81,7 @@ const TARGETS: ScreenshotTarget[] = [
   },
   {
     product: 'vessels',
-    name: 'SEXTANT — Fleet Dashboard',
+    name: 'Vessels — Fleet Dashboard',
     url: `${BASE_URL}/vessels/fleet`,
     filename: 'vessels-overview.jpg',
     viewport: { width: 1440, height: 900 },
@@ -89,7 +89,7 @@ const TARGETS: ScreenshotTarget[] = [
   },
   {
     product: 'terra',
-    name: 'DOMAINE — Real Estate Intelligence',
+    name: 'Terra — Real Estate Intelligence',
     url: `${BASE_URL}/terra/`,
     filename: 'terra-landing.jpg',
     viewport: { width: 1440, height: 900 },

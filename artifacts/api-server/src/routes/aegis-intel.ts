@@ -1,4 +1,4 @@
-// Aegis Intelligence routes (formerly known as INCA — route paths and table names retain the inca prefix for backwards compatibility)
+// Aegis Intelligence routes (formerly known as Counsel — route paths and table names retain the inca prefix for backwards compatibility)
 import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import {
@@ -271,7 +271,7 @@ const incaLiveLimit = rateLimit({
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "INCA rate limit exceeded." },
+  message: { error: "Counsel rate limit exceeded." },
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
@@ -308,7 +308,7 @@ async function fetchJson(url: string, timeoutMs = 10000): Promise<unknown> {
   try {
     const res = await fetch(url, {
       signal: controller.signal,
-      headers: { "User-Agent": "SZL-INCA/1.0", Accept: "application/json" },
+      headers: { "User-Agent": "SZL-Counsel/1.0", Accept: "application/json" },
     });
     clearTimeout(timer);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -325,7 +325,7 @@ async function fetchArxivXml(query: string, maxResults: number, category?: strin
     const q = category ? `${query} cat:${category}` : query;
     const res = await fetch(
       `https://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(q)}&max_results=${maxResults}&sortBy=submittedDate&sortOrder=descending`,
-      { signal: controller.signal, headers: { "User-Agent": "SZL-INCA/1.0" } },
+      { signal: controller.signal, headers: { "User-Agent": "SZL-Counsel/1.0" } },
     );
     clearTimeout(timer);
     if (!res.ok) throw new Error(`arXiv HTTP ${res.status}`);

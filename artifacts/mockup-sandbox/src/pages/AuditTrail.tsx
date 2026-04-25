@@ -33,17 +33,17 @@ function generateAuditEntries(): AuditEntry[] {
   const agents = [
     {
       slug: 'aegis',
-      name: 'PARAGON Intel Agent',
+      name: 'Aegis Intel Agent',
       actions: ['fetch_threat_feed', 'score_vulnerability', 'correlate_incidents'],
     },
     {
       slug: 'vessels',
-      name: 'SEXTANT Route Agent',
+      name: 'Vessels Route Agent',
       actions: ['query_fleet_positions', 'assess_port_risk', 'compute_voyage_economics'],
     },
     {
       slug: 'terra',
-      name: 'DOMAINE Distress Agent',
+      name: 'Terra Distress Agent',
       actions: ['scan_distress_signals', 'score_property_risk', 'generate_acquisition_brief'],
     },
     {
@@ -113,7 +113,7 @@ function generateAuditEntries(): AuditEntry[] {
       'Delivery channel: push (mobile) primary, email fallback. SMS reserved for P0 alerts only.',
     ],
     cross_domain_correlate: [
-      'Joined PARAGON threat signals with SEXTANT port-risk events on (timestamp, geo_region) key. 14 correlations found, 3 above threshold.',
+      'Joined Aegis threat signals with Vessels port-risk events on (timestamp, geo_region) key. 14 correlations found, 3 above threshold.',
       'Applied graph-based propagation to find second-order correlations. Direct matches are obvious; graph catches latent connections.',
     ],
     surface_anomalies: [
@@ -121,11 +121,11 @@ function generateAuditEntries(): AuditEntry[] {
       'Anomaly score penalized for known maintenance windows. Prevents false alerts during scheduled downtime.',
     ],
     prioritize_actions: [
-      'Ranked by (severity × asset_value × time_sensitivity). Normalized across domains so PARAGON and DOMAINE actions are comparable.',
+      'Ranked by (severity × asset_value × time_sensitivity). Normalized across domains so Aegis and Terra actions are comparable.',
       "Deprioritized actions requiring > 2 approval hops — they won't close today regardless of urgency.",
     ],
     plan_agent_sequence: [
-      'Analyzed intent graph to identify parallelizable steps. PARAGON and SEXTANT runs have no data dependency — scheduled concurrently.',
+      'Analyzed intent graph to identify parallelizable steps. Aegis and Vessels runs have no data dependency — scheduled concurrently.',
       'Rejected sequential execution — would add 4.2s median latency per dependent step. Parallel saves ~12s on this plan.',
     ],
     stitch_outputs: [
@@ -194,9 +194,9 @@ function generateAuditEntries(): AuditEntry[] {
 }
 
 const EXAMPLE_INTENTS = [
-  "Summarize today's threat risk across PARAGON and SEXTANT, then draft an executive brief in LUMINA format.",
-  'Pull the latest KPIs from SZL Holdings, DOMAINE, and SEXTANT, and compile a cross-portfolio snapshot.',
-  'Cross-reference Prism Counsel open matters against PARAGON threat intel and flag any intersecting risk vectors.',
+  "Summarize today's threat risk across Aegis and Vessels, then draft an executive brief in LUMINA format.",
+  'Pull the latest KPIs from SZL Holdings, Terra, and Vessels, and compile a cross-portfolio snapshot.',
+  'Cross-reference Prism Counsel open matters against Aegis threat intel and flag any intersecting risk vectors.',
 ];
 
 const ALTERNATIVES: Record<string, string[]> = {
@@ -258,7 +258,7 @@ const OUTPUT_SUMMARIES: Record<string, [string, string]> = {
   ],
   correlate_incidents: [
     'Found 6 correlated incident clusters. Largest cluster: 4 incidents sharing source IP and MITRE T1059.',
-    '3 new correlations surfaced. 1 cross-domain: PARAGON threat actor IP matches SEXTANT port-call destination.',
+    '3 new correlations surfaced. 1 cross-domain: Aegis threat actor IP matches Vessels port-call destination.',
   ],
   query_fleet_positions: [
     'Retrieved positions for 34 active vessels. 2 in high-risk zones per sanctions overlay.',
@@ -269,11 +269,11 @@ const OUTPUT_SUMMARIES: Record<string, [string, string]> = {
     'All 6 planned port calls cleared. No sanctions flags. Minor weather delay risk at Rotterdam (+18hrs).',
   ],
   compile_executive_brief: [
-    'Brief compiled: 5 insights across PARAGON (2), DOMAINE (1), SEXTANT (1), Command (1). Delivery scheduled 06:45.',
-    'Brief compiled: 4 insights. Top item: cross-domain correlation between PARAGON threat actor and SEXTANT port call.',
+    'Brief compiled: 5 insights across Aegis (2), Terra (1), Vessels (1), Command (1). Delivery scheduled 06:45.',
+    'Brief compiled: 4 insights. Top item: cross-domain correlation between Aegis threat actor and Vessels port call.',
   ],
   plan_agent_sequence: [
-    'Planned 6-step sequence. Steps 1–2 parallelized (PARAGON + SEXTANT). Step 3 gates on both. Est. total: 4.8s.',
+    'Planned 6-step sequence. Steps 1–2 parallelized (Aegis + Vessels). Step 3 gates on both. Est. total: 4.8s.',
     'Planned 4-step sequence. All steps sequential due to data dependency chain. Est. total: 3.2s.',
   ],
   stitch_outputs: [

@@ -4,10 +4,10 @@ import { Link } from 'wouter';
 
 const ecosystemLinks = [
   { label: 'SZL Holdings', href: '/' },
-  { label: 'KORA', href: '/command/operations/' },
-  { label: 'SEXTANT', href: '/vessels/' },
-  { label: 'PARAGON', href: '/aegis/' },
-  { label: 'DOMAINE', href: '/terra/' },
+  { label: 'Lyte', href: '/command/operations/' },
+  { label: 'Vessels', href: '/vessels/' },
+  { label: 'Aegis', href: '/aegis/' },
+  { label: 'Terra', href: '/terra/' },
 ];
 
 export default function Footer() {

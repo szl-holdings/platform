@@ -145,12 +145,12 @@ export default function ProfileTab() {
             justifyContent: 'space-between',
           }}
         >
-          <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>DOMAINE · PROFILE</Text>
+          <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>Terra · PROFILE</Text>
           <NotificationHub
             fetchers={[
               {
                 domain: 'terra',
-                label: 'DOMAINE',
+                label: 'Terra',
                 color: colors.gold,
                 fetch: async () => {
                   try {
@@ -167,7 +167,7 @@ export default function ProfileTab() {
               },
               {
                 domain: 'lyte',
-                label: 'KORA',
+                label: 'Lyte',
                 color: '#00d4ff',
                 fetch: async () => {
                   try {
@@ -184,7 +184,7 @@ export default function ProfileTab() {
               },
               {
                 domain: 'aegis',
-                label: 'PARAGON',
+                label: 'Aegis',
                 color: '#f59e0b',
                 fetch: async () => {
                   try {
@@ -331,7 +331,7 @@ export default function ProfileTab() {
       </View>
 
       <Text style={[styles.version, { color: colors.mutedForeground }]}>
-        DOMAINE Mobile v1.0.0 · NYC Market Intelligence
+        Terra Mobile v1.0.0 · NYC Market Intelligence
       </Text>
     </ScrollView>
   );

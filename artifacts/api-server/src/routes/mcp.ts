@@ -270,7 +270,7 @@ const DOMAIN_TOOLS: McpTool[] = [
   {
     name: 'inca_experiment_status',
     description:
-      'Query ML experiment results, model metrics, and AI research insights from the INCA platform',
+      'Query ML experiment results, model metrics, and AI research insights from the Counsel platform',
     inputSchema: {
       type: 'object',
       properties: {

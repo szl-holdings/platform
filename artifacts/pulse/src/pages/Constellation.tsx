@@ -7,11 +7,11 @@ const ACCENT = '#c8a84b';
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') || '/pulse';
 const DOMAINS = ['terra', 'vessels', 'aegis', 'prism', 'lyte'] as const;
 const LABELS: Record<string, string> = {
-  terra: 'DOMAINE',
-  vessels: 'SEXTANT',
-  aegis: 'PARAGON',
+  terra: 'Terra',
+  vessels: 'Vessels',
+  aegis: 'Aegis',
   prism: 'Prism Counsel',
-  lyte: 'KORA',
+  lyte: 'Lyte',
 };
 
 function readDomainFromSearch(): string | null {

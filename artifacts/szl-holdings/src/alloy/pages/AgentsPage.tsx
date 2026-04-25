@@ -49,7 +49,7 @@ export default function AgentsPage() {
         </div>
         <h1 className="text-3xl md:text-4xl font-bold mb-4">Agent workflow gallery</h1>
         <p className="text-white/50 max-w-2xl leading-relaxed">
-          FORGE's agent library is the modular workforce behind every workflow. Each agent has a
+          Counsel's agent library is the modular workforce behind every workflow. Each agent has a
           defined role, specific inputs and outputs, and clear escalation behaviour.
         </p>
       </div>

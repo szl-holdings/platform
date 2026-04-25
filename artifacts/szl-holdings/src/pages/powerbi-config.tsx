@@ -122,7 +122,7 @@ const REPORTS: Array<{
   {
     id: 'security_posture',
     name: 'Security Posture Report',
-    app: 'PARAGON',
+    app: 'Aegis',
     appPath: '/aegis/powerbi',
     description:
       'Real-time security posture metrics, incident trends, control effectiveness, and compliance scores.',
@@ -132,7 +132,7 @@ const REPORTS: Array<{
   {
     id: 'portfolio_analytics',
     name: 'Portfolio Analytics Report',
-    app: 'DOMAINE',
+    app: 'Terra',
     appPath: '/terra/powerbi',
     description:
       'Property-level and portfolio-wide analytics including NOI, occupancy, IRR, and distress signals.',
@@ -142,7 +142,7 @@ const REPORTS: Array<{
   {
     id: 'operational_kpis',
     name: 'Operational KPIs Report',
-    app: 'KORA',
+    app: 'Lyte',
     appPath: '/command/operations/powerbi',
     description:
       'Business observability KPIs including SLA performance, escalation rates, and PRAXIS health scores.',
@@ -268,7 +268,7 @@ export default function PowerBiConfigPage() {
                   </h1>
                   <p className="text-sm text-muted-foreground mt-1">
                     Connect your Microsoft Power BI workspace to embed live analytics reports across
-                    PARAGON, DOMAINE, and KORA. Credentials are encrypted at rest using AES-256-GCM.
+                    Aegis, Terra, and Lyte. Credentials are encrypted at rest using AES-256-GCM.
                   </p>
                 </div>
               </div>

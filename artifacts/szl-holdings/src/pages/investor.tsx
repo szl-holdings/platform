@@ -28,47 +28,47 @@ const WHY_NOW = [
 
 const WEDGE_PLATFORM = [
   {
-    title: "KORA as the command layer",
-    body: "KORA surfaces what matters — approval latency, ownership gaps, execution risk, threshold crossings — across all connected systems. Every vertical inherits this signal layer.",
+    title: "Lyte as the command layer",
+    body: "Lyte surfaces what matters — approval latency, ownership gaps, execution risk, threshold crossings — across all connected systems. Every vertical inherits this signal layer.",
   },
   {
-    title: "FORGE as the action spine",
-    body: "FORGE routes signals to structured recommendations, manages the human-in-the-loop approval chain, and executes approved actions via a connector mesh. Built once. Shared across all verticals.",
+    title: "Counsel as the action spine",
+    body: "Counsel routes signals to structured recommendations, manages the human-in-the-loop approval chain, and executes approved actions via a connector mesh. Built once. Shared across all verticals.",
   },
   {
     title: "Domain packs as the expansion model",
-    body: "Each vertical — Counsel, SEXTANT, PARAGON, DOMAINE — is a domain pack layered on top of the shared platform. New verticals inherit signal ingestion, AI governance, workflow orchestration, and audit infrastructure without rebuilding from scratch.",
+    body: "Each vertical — Counsel, Vessels, Aegis, Terra — is a domain pack layered on top of the shared platform. New verticals inherit signal ingestion, AI governance, workflow orchestration, and audit infrastructure without rebuilding from scratch.",
   },
 ];
 
 const VERTICALS = [
   { icon: Target, name: "Counsel", color: "#d4a054", wedge: true, body: "Legal matter observability — deadlines, exposure tracking, approval governance, export safety. The commercial wedge. First vertical entering design-partner engagement." },
-  { icon: Ship, name: "SEXTANT", color: "#4a90b8", body: "Maritime intelligence — voyage twins, AIS monitoring, route risk, port congestion, sanctions compliance. Second vertical. Infrastructure ready." },
-  { icon: ShieldCheck, name: "PARAGON", color: "#c45a4a", body: "Security and defense observability — threat twins, incident workflows, exposure prioritization. Third vertical. Architecture shared." },
-  { icon: Home, name: "DOMAINE", color: "#c8953c", body: "Real estate intelligence — property twins, diligence workflows, distress scoring. Fourth vertical. Same execution model." },
+  { icon: Ship, name: "Vessels", color: "#4a90b8", body: "Maritime intelligence — voyage twins, AIS monitoring, route risk, port congestion, sanctions compliance. Second vertical. Infrastructure ready." },
+  { icon: ShieldCheck, name: "Aegis", color: "#c45a4a", body: "Security and defense observability — threat twins, incident workflows, exposure prioritization. Third vertical. Architecture shared." },
+  { icon: Home, name: "Terra", color: "#c8953c", body: "Real estate intelligence — property twins, diligence workflows, distress scoring. Fourth vertical. Same execution model." },
   { icon: BriefcaseBusiness, name: "Carlota Jo", color: "#8b7ac8", body: "Advisory and consulting intelligence. Premium client-facing layer. Near-term revenue opportunity while the software matures." },
 ];
 
 const PROOF_TODAY = [
   "Live Counsel product across full workflow — signal detection, twin enrichment, approval gates, export safety, audit trail",
-  "SEXTANT Maritime Intelligence: voyage twin, AIS monitoring, sanctions compliance surface, port risk",
-  "PARAGON Defense: threat twin, incident workflows, exposure prioritization",
-  "DOMAINE Real Estate: property twin, distress scoring, diligence workflows",
-  "FORGE execution fabric running across all verticals — same connector mesh, same governance model",
+  "Vessels Maritime Intelligence: voyage twin, AIS monitoring, sanctions compliance surface, port risk",
+  "Aegis Defense: threat twin, incident workflows, exposure prioritization",
+  "Terra Real Estate: property twin, distress scoring, diligence workflows",
+  "Counsel execution fabric running across all verticals — same connector mesh, same governance model",
   "GitHub is real code, not a demonstration repository",
   "This investor surface is built on the same platform it describes",
 ];
 
 const MILESTONES = [
-  { phase: "Now", label: "KORA proof", items: ["Counsel in active design-partner engagement", "Full workflow demo available on request", "Architecture and trust surface complete and reviewable"] },
-  { phase: "Next", label: "FORGE maturity", items: ["First paid pilot contract signed", "SEXTANT entering design-partner phase", "SOC 2 Type II audit preparation underway"] },
-  { phase: "Later", label: "Expansion", items: ["PARAGON and DOMAINE design-partner engagement", "Cross-vertical analytics via shared KORA command layer", "Enterprise GTM with Microsoft 365 integration"] },
+  { phase: "Now", label: "Lyte proof", items: ["Counsel in active design-partner engagement", "Full workflow demo available on request", "Architecture and trust surface complete and reviewable"] },
+  { phase: "Next", label: "Counsel maturity", items: ["First paid pilot contract signed", "Vessels entering design-partner phase", "SOC 2 Type II audit preparation underway"] },
+  { phase: "Later", label: "Expansion", items: ["Aegis and Terra design-partner engagement", "Cross-vertical analytics via shared Lyte command layer", "Enterprise GTM with Microsoft 365 integration"] },
 ];
 
 export default function InvestorPage() {
   const __pageMeta = usePageMeta({
     title: "Investor — SZL Holdings",
-    description: "SZL Holdings investor overview — company thesis, wedge and platform logic, why KORA first, proof today, honest milestones, contact.",
+    description: "SZL Holdings investor overview — company thesis, wedge and platform logic, why Lyte first, proof today, honest milestones, contact.",
     canonical: "https://szlholdings.com/investor",
   });
 

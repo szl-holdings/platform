@@ -31,16 +31,16 @@ async function seedCanonical() {
       },
       {
         slug: 'alloy',
-        name: 'FORGE',
+        name: 'Counsel',
         description:
-          'Execution fabric and predictive intelligence engine powering KORA and SEXTANT',
+          'Execution fabric and predictive intelligence engine powering Lyte and Vessels',
         productType: 'platform',
         parentSlug: 'szl-holdings',
         isActive: true,
       },
       {
         slug: 'lyte',
-        name: 'KORA',
+        name: 'Lyte',
         description:
           'Business observability command center — signals, ownership, approvals, escalations',
         productType: 'platform',
@@ -49,15 +49,15 @@ async function seedCanonical() {
       },
       {
         slug: 'lyte-readiness',
-        name: 'KORA Readiness',
-        description: 'First-class readiness and maturity assessment module within KORA',
+        name: 'Lyte Readiness',
+        description: 'First-class readiness and maturity assessment module within Lyte',
         productType: 'module',
         parentSlug: 'lyte',
         isActive: true,
       },
       {
         slug: 'vessels',
-        name: 'SEXTANT',
+        name: 'Vessels',
         description:
           'Maritime intelligence — fleet operations, voyage economics, AIS anomaly detection',
         productType: 'vertical',
@@ -701,7 +701,7 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte',
-        source: 'DOMAINE',
+        source: 'Terra',
         sourceType: 'monitoring',
         severity: 'medium',
         title: 'Q1 revenue forecast drift — 8.3% below plan as of EOD',
@@ -718,13 +718,13 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte',
-        source: 'DOMAINE',
+        source: 'Terra',
         sourceType: 'monitoring',
         severity: 'medium',
         title: 'TechCorp account — usage down 35%, NPS drop 42 pts',
         body: 'TechCorp (acct-4821) 30-day API usage down 35%. Support ticket volume up 80%. Competitor evaluation confirmed.',
         whyItMatters:
-          '$480K ARR at risk. FORGE model: 88% churn probability without executive engagement in 12h.',
+          '$480K ARR at risk. Counsel model: 88% churn probability without executive engagement in 12h.',
         valueAtRiskCents: 48000000,
         confidence: 'high',
         ownerState: 'assigned',
@@ -735,7 +735,7 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte',
-        source: 'DOMAINE',
+        source: 'Terra',
         sourceType: 'monitoring',
         severity: 'medium',
         title: 'Northgate contract approval SLA breach — 48h overdue',
@@ -752,7 +752,7 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte-readiness',
-        source: 'KORA Readiness',
+        source: 'Lyte Readiness',
         sourceType: 'manual',
         severity: 'medium',
         title: 'NIST CSF gap — 3 critical controls unresolved, audit in 14 days',
@@ -820,7 +820,7 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte',
-        source: 'DOMAINE',
+        source: 'Terra',
         sourceType: 'monitoring',
         severity: 'low',
         title: 'Apex Logistics vendor onboarding — compliance step has no owner',
@@ -871,7 +871,7 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte',
-        source: 'DOMAINE',
+        source: 'Terra',
         sourceType: 'monitoring',
         severity: 'low',
         title: 'Lambda cold starts +340% — order-processor post-deploy',
@@ -1113,9 +1113,9 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte-readiness',
-        title: 'Maritime Ops Deployment — SEXTANT V2',
+        title: 'Maritime Ops Deployment — Vessels V2',
         description:
-          'V2 SEXTANT platform deployment with real-time AIS, voyage economics, and exception alerting.',
+          'V2 Vessels platform deployment with real-time AIS, voyage economics, and exception alerting.',
         category: 'operational',
         status: 'on_track',
         readinessScore: '88.5',
@@ -1124,7 +1124,7 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte-readiness',
-        title: 'FORGE Execution Fabric — Production Hardening',
+        title: 'Counsel Execution Fabric — Production Hardening',
         description:
           'Workflow engine capacity, approval state machine testing, and escalation path validation.',
         category: 'technical',
@@ -1135,8 +1135,8 @@ async function seedCanonical() {
       {
         orgId,
         productSlug: 'lyte-readiness',
-        title: 'Operator Team Readiness — KORA Training',
-        description: '7 operators trained on KORA command center. 4 certified. 3 in progress.',
+        title: 'Operator Team Readiness — Lyte Training',
+        description: '7 operators trained on Lyte command center. 4 certified. 3 in progress.',
         category: 'people',
         status: 'on_track',
         readinessScore: '71.4',
@@ -1202,32 +1202,32 @@ async function seedCanonical() {
     .values([
       {
         key: 'lyte_readiness_enabled',
-        name: 'KORA Readiness Module',
-        description: 'Enable the KORA Readiness maturity assessment module',
+        name: 'Lyte Readiness Module',
+        description: 'Enable the Lyte Readiness maturity assessment module',
         isEnabled: true,
         rolloutPercentage: 100,
         product: 'lyte',
       },
       {
         key: 'lyte_value_at_risk_enabled',
-        name: 'KORA Value at Risk Calculations',
-        description: 'Show value_at_risk_cents on signals and exceptions in the KORA UI',
+        name: 'Lyte Value at Risk Calculations',
+        description: 'Show value_at_risk_cents on signals and exceptions in the Lyte UI',
         isEnabled: true,
         rolloutPercentage: 100,
         product: 'lyte',
       },
       {
         key: 'vessels_command_mode_enabled',
-        name: 'SEXTANT Command Mode',
-        description: 'Full voyage exception and escalation command mode in SEXTANT',
+        name: 'Vessels Command Mode',
+        description: 'Full voyage exception and escalation command mode in Vessels',
         isEnabled: true,
         rolloutPercentage: 100,
         product: 'vessels',
       },
       {
         key: 'alloy_admin_enabled',
-        name: 'FORGE Admin Console',
-        description: 'Enable the FORGE workflow/DAG admin console',
+        name: 'Counsel Admin Console',
+        description: 'Enable the Counsel workflow/DAG admin console',
         isEnabled: false,
         rolloutPercentage: 0,
         product: 'alloy',
@@ -1242,7 +1242,7 @@ async function seedCanonical() {
       },
       {
         key: 'vessels_fuel_efficiency_scoring',
-        name: 'SEXTANT Fuel Efficiency Scoring',
+        name: 'Vessels Fuel Efficiency Scoring',
         description: 'Real-time fuel efficiency scoring per voyage',
         isEnabled: true,
         rolloutPercentage: 80,
@@ -1250,8 +1250,8 @@ async function seedCanonical() {
       },
       {
         key: 'alloy_predictive_intelligence',
-        name: 'FORGE Predictive Intelligence',
-        description: 'Confidence-weighted predictions and risk scenario modeling in FORGE',
+        name: 'Counsel Predictive Intelligence',
+        description: 'Confidence-weighted predictions and risk scenario modeling in Counsel',
         isEnabled: false,
         rolloutPercentage: 0,
         product: 'alloy',
@@ -1274,7 +1274,7 @@ async function seedCanonical() {
       },
       {
         key: 'lyte_owner_state_tracking',
-        name: 'KORA Owner State Tracking',
+        name: 'Lyte Owner State Tracking',
         description: 'Track owner_state on signals (assigned/unassigned/ambiguous/stale/escalated)',
         isEnabled: true,
         rolloutPercentage: 100,

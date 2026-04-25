@@ -91,11 +91,11 @@ const DOMAIN_ROUTE_KEYWORDS: Record<string, string[]> = {
 
 const DOMAIN_META: Record<string, { label: string; icon: string; accent: string; route: string }> =
   {
-    vessels: { label: 'SEXTANT', icon: '⚓', accent: '#0ea5e9', route: '/(shell)/fleet' },
-    firestorm: { label: 'PARAGON', icon: '⬡', accent: '#ef4444', route: '/(shell)/defense' },
-    terra: { label: 'DOMAINE', icon: '⬢', accent: '#22c55e', route: '/(shell)/properties' },
-    lyte: { label: 'KORA', icon: '⚡', accent: '#f59e0b', route: '/(shell)/operations' },
-    inca: { label: 'INCA', icon: '◈', accent: '#8b5cf6', route: '/(shell)/advisory' },
+    vessels: { label: 'Vessels', icon: '⚓', accent: '#0ea5e9', route: '/(shell)/fleet' },
+    firestorm: { label: 'Aegis', icon: '⬡', accent: '#ef4444', route: '/(shell)/defense' },
+    terra: { label: 'Terra', icon: '⬢', accent: '#22c55e', route: '/(shell)/properties' },
+    lyte: { label: 'Lyte', icon: '⚡', accent: '#f59e0b', route: '/(shell)/operations' },
+    inca: { label: 'Counsel', icon: '◈', accent: '#8b5cf6', route: '/(shell)/advisory' },
     msp: { label: 'MSP', icon: '◆', accent: '#6366f1', route: '/(shell)/operations' },
     prism: { label: 'PRISM', icon: '⚖', accent: '#a855f7', route: '/(shell)/advisory' },
     szl: { label: 'Portfolio', icon: '◆', accent: '#c9a84c', route: '/(shell)/portfolio' },

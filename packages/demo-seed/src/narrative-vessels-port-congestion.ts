@@ -18,7 +18,7 @@ export type VesselsPortCongestionNarrative = typeof VESSELS_PORT_CONGESTION_NARR
 
 export const VESSELS_PORT_CONGESTION_NARRATIVE = {
   id: 'vessels-port-congestion',
-  title: 'SEXTANT — Port Congestion + Route Exception Cluster',
+  title: 'Vessels — Port Congestion + Route Exception Cluster',
   domain: 'maritime' as const,
   org: 'Arcturus Shipping',
   personas: ['fleet-operator', 'compliance-auditor'],

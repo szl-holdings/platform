@@ -81,7 +81,7 @@ export function BiometricLockScreen({ onUnlocked }: Props) {
         <Text
           style={[styles.title, { color: colors.foreground, fontFamily: 'SpaceGrotesk_700Bold' }]}
         >
-          PARAGON Locked
+          Aegis Locked
         </Text>
         <Text
           style={[
@@ -169,7 +169,7 @@ export function BiometricLockScreen({ onUnlocked }: Props) {
               { color: colors.mutedForeground, fontFamily: 'Inter_400Regular' },
             ]}
           >
-            PARAGON · SOC Command Center
+            Aegis · SOC Command Center
           </Text>
         </View>
       </View>

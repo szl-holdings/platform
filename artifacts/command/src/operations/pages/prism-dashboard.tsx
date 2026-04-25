@@ -41,7 +41,7 @@ const LENS_RECOMMENDED_ACTIONS: Record<string, Array<{ title: string; confidence
     { title: "Update data retention policy documentation", confidence: "medium", impact: "Compliance", eta: "1w", type: "review" },
   ],
   talent_stability: [
-    { title: "Schedule 1:1s for 3 at-risk ICs flagged by FORGE", confidence: "medium", impact: "Retention", eta: "1w", type: "action" },
+    { title: "Schedule 1:1s for 3 at-risk ICs flagged by Counsel", confidence: "medium", impact: "Retention", eta: "1w", type: "action" },
     { title: "Backfill plan for Engineering role at 60-day mark", confidence: "low", impact: "Capacity", eta: "2w", type: "review" },
   ],
   market_position: [
@@ -119,9 +119,9 @@ const DEMO_PRISM_LENSES: PrismScore[] = [
   },
   {
     id: 1006, lens: "talent_stability", score: 69, previousScore: 67, trend: "up", trendDelta: 2.0,
-    summary: "Voluntary attrition at 8% annualized. 3 ICs flagged at-risk by FORGE retention model. Engineering backfill open 60 days.",
+    summary: "Voluntary attrition at 8% annualized. 3 ICs flagged at-risk by Counsel retention model. Engineering backfill open 60 days.",
     topSignals: [
-      { title: "3 ICs flagged at-risk", severity: "medium", source: "FORGE Retention Model" },
+      { title: "3 ICs flagged at-risk", severity: "medium", source: "Counsel Retention Model" },
       { title: "Senior Eng role open 60 days", severity: "medium", source: "Greenhouse" },
     ],
     scoredAt: new Date(now - 1 * 3600 * 1000).toISOString(),

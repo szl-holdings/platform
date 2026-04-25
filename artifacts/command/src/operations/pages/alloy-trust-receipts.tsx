@@ -62,7 +62,7 @@ const RECEIPTS: TrustReceipt[] = [
     receiptId: 'TRC-3038-A',
     runId: 'RUN-3038',
     workflowName: 'Security Posture Audit',
-    pack: 'PARAGON',
+    pack: 'Aegis',
     packColor: '#4f6ef7',
     status: 'verified',
     generatedAt: '2026-04-01T06:14:24Z',
@@ -118,7 +118,7 @@ const RECEIPTS: TrustReceipt[] = [
     modelUsed: 'gpt-4o',
     inputs: {
       Trigger: 'Scheduled — Stephen Lutar',
-      'KPI Sources': 'PRISM, DOMAINE, SEXTANT, PARAGON',
+      'KPI Sources': 'PRISM, Terra, Vessels, Aegis',
       Period: 'Q1 2026 (Jan 1 – Mar 31)',
       'Data Completeness': '93%',
     },
@@ -155,7 +155,7 @@ const RECEIPTS: TrustReceipt[] = [
     receiptId: 'TRC-3039-F',
     runId: 'RUN-3039',
     workflowName: 'Fuel Surcharge Rate Calculator',
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
     status: 'failed',
     generatedAt: '2026-03-31T06:44:18Z',
@@ -197,7 +197,7 @@ const RECEIPTS: TrustReceipt[] = [
     receiptId: 'TRC-3037-A',
     runId: 'RUN-3037',
     workflowName: 'Asset Valuation Batch',
-    pack: 'DOMAINE',
+    pack: 'Terra',
     packColor: '#a07848',
     status: 'verified',
     generatedAt: '2026-03-31T20:00:04Z',
@@ -532,7 +532,7 @@ function mapApiReceipt(r: Record<string, unknown>): TrustReceipt {
     receiptId: String(r.receiptId ?? r.id ?? `REC-${Date.now()}`),
     runId: String(provenance.correlationId ?? r.contentId ?? '—'),
     workflowName: String(r.contentType ?? 'Workflow'),
-    pack: 'FORGE',
+    pack: 'Counsel',
     packColor: '#d4a054',
     status: RECEIPT_STATUS_MAP[rawStatus] ?? 'partial',
     generatedAt: String(r.createdAt ?? new Date().toISOString()),
@@ -599,7 +599,7 @@ export default function AlloyTrustReceiptsPage() {
             className="text-[9px] font-mono uppercase tracking-widest"
             style={{ color: ACCENT }}
           >
-            FORGE · Trust Layer
+            Counsel · Trust Layer
           </span>
         </div>
         <h1 className="text-lg font-bold tracking-tight" style={{ color: TEXT.primary }}>

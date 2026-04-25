@@ -66,7 +66,7 @@ export const szlHoldingsTheme: BrandTheme = {
 };
 
 export const vesselsTheme: BrandTheme = {
-  name: 'SEXTANT Maritime Intelligence',
+  name: 'Vessels Maritime Intelligence',
   slug: 'vessels',
   colors: {
     primary: colors.lane.vessels.primary,
@@ -192,7 +192,7 @@ export const stephenTheme = stephenLutarTheme;
 // ─── Supporting app themes ────────────────────────────────────────────────────
 
 export const alloyCreativeTheme: BrandTheme = {
-  name: 'FORGE Creative',
+  name: 'Counsel Creative',
   slug: 'alloy-creative',
   colors: {
     primary: colors.laneAccents.dreamscape.primary,
@@ -223,7 +223,7 @@ export const alloyCreativeTheme: BrandTheme = {
 };
 
 export const terraTheme: BrandTheme = {
-  name: 'DOMAINE Real Estate',
+  name: 'Terra Real Estate',
   slug: 'terra',
   colors: {
     primary: colors.laneAccents.terra.primary,
@@ -254,7 +254,7 @@ export const terraTheme: BrandTheme = {
 };
 
 export const lyteTheme: BrandTheme = {
-  name: 'KORA Command Center',
+  name: 'Lyte Command Center',
   slug: 'lyte',
   colors: {
     primary: colors.laneAccents.lyte.primary,
@@ -285,7 +285,7 @@ export const lyteTheme: BrandTheme = {
 };
 
 export const aegisTheme: BrandTheme = {
-  name: 'PARAGON — Unified Defense & Intelligence Command',
+  name: 'Aegis — Unified Defense & Intelligence Command',
   slug: 'aegis',
   colors: {
     primary: colors.laneAccents.aegis.primary,
@@ -318,7 +318,7 @@ export const aegisTheme: BrandTheme = {
 };
 
 export const alloyTheme: BrandTheme = {
-  name: 'FORGE Command',
+  name: 'Counsel Command',
   slug: 'alloy',
   colors: {
     primary: colors.laneAccents.alloy.primary,

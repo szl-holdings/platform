@@ -62,7 +62,7 @@ export interface OracleBrief {
 
 // Domain color mapping
 const _DOMAIN_COLORS: Record<string, string> = {
-  'SEXTANT + Threat': '#ef4444',
+  'Vessels + Threat': '#ef4444',
   'Threat + Legal': '#f97316',
   'Property + Financial': '#4ade80',
   Financial: '#f59e0b',
@@ -194,7 +194,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
       sectionNumber: 1,
       title: `Escalating Sanctions Exposure — ${sanctionsEntities.map((e) => e.label).join(', ')}`,
       severity: deriveSeverity(entityIdArr, ofacAnomalies, graph),
-      domain: 'SEXTANT + Threat + Financial',
+      domain: 'Vessels + Threat + Financial',
       domainColor: '#ef4444',
       analystConfidence: Math.round(ofacConf * 0.95),
       analystNote: `High confidence. Composite signal across AIS routing, OFAC name match, and financial flow anomaly. ${ofacConf >= 85 ? 'Recommend immediate legal review before any new transactions with linked entities.' : 'Further corroborating evidence recommended before formal action.'}`,
@@ -265,7 +265,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
           priority: 'immediate',
           action:
             'Notify CISO — initiate threat hunt on any SZL systems with implicated entity API connections',
-          owner: 'PARAGON SOC',
+          owner: 'Aegis SOC',
           entityIds: entityIdArr,
         },
         {
@@ -333,7 +333,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
           priority: 'today',
           action:
             'Commission independent appraisal and lender covenant review on affected distressed assets',
-          owner: 'DOMAINE Engine',
+          owner: 'Terra Engine',
           entityIds: entityIdArr,
         },
         {
@@ -522,7 +522,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
     findings: [
       {
         label: 'Platform Status',
-        detail: 'SEXTANT, PRISM, DOMAINE, PARAGON, FORGE — all operational · Zero incidents',
+        detail: 'Vessels, PRISM, Terra, Aegis, Counsel — all operational · Zero incidents',
         severity: 'info',
         entityIds: [],
       },

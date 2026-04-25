@@ -64,7 +64,7 @@ const SCHEMAS_FALLBACK: DecisionSchema[] = [
     id: "sch1",
     name: "Cyber Incident Response",
     category: "Security Operations",
-    domain: "PARAGON",
+    domain: "Aegis",
     color: "hsl(222,60%,60%)",
     icon: Shield,
     description: "Structured response protocol for confirmed cyber incidents — from initial signal triage through containment, eradication, and proof-chain recording.",
@@ -75,12 +75,12 @@ const SCHEMAS_FALLBACK: DecisionSchema[] = [
       "Critical vulnerability + active threat actor correlation",
     ],
     actionSequence: [
-      { stage: "Signal", action: "Ingest threat signal from PARAGON SOC feed", owner: "SOC Analyst", timeout: "5m" },
+      { stage: "Signal", action: "Ingest threat signal from Aegis SOC feed", owner: "SOC Analyst", timeout: "5m" },
       { stage: "Context", action: "Enrich via MITRE ATT&CK and asset ownership graph", owner: "System", timeout: "2m" },
       { stage: "Recommendation", action: "AI generates containment options with evidence lineage", owner: "AI Agent", gate: "Confidence ≥ 0.80" },
       { stage: "Simulation", action: "Model impact of containment on service availability", owner: "System", timeout: "3m" },
       { stage: "Policy", action: "Covenant Policy checks approver eligibility for isolation action", owner: "System" },
-      { stage: "Execution", action: "FORGE orchestrates isolation workflow with checkpoint recovery", owner: "SOC Lead", gate: "Approver: security_lead" },
+      { stage: "Execution", action: "Counsel orchestrates isolation workflow with checkpoint recovery", owner: "SOC Lead", gate: "Approver: security_lead" },
       { stage: "Proof", action: "Proof Chain records full chain: detection → action → isolation", owner: "System" },
       { stage: "Outcome", action: "Outcome Graph measures time-to-containment vs simulation", owner: "System", timeout: "24h" },
     ],
@@ -97,7 +97,7 @@ const SCHEMAS_FALLBACK: DecisionSchema[] = [
     id: "sch2",
     name: "Maritime Anomaly Investigation",
     category: "Fleet Operations",
-    domain: "SEXTANT",
+    domain: "Vessels",
     color: "hsl(206,72%,54%)",
     icon: Ship,
     description: "Systematic investigation of dark vessel events, AIS signal gaps, and sanctions exposure — with OFAC screening integrated into the governed approval flow.",
@@ -108,7 +108,7 @@ const SCHEMAS_FALLBACK: DecisionSchema[] = [
       "Sanctions list match score exceeds 0.75",
     ],
     actionSequence: [
-      { stage: "Signal", action: "Ingest AIS gap signal from SEXTANT telemetry feed", owner: "System" },
+      { stage: "Signal", action: "Ingest AIS gap signal from Vessels telemetry feed", owner: "System" },
       { stage: "Context", action: "Correlate last known position, cargo manifest, port schedule", owner: "System", timeout: "5m" },
       { stage: "Recommendation", action: "AI risk assessment with OFAC screening results", owner: "AI Agent", gate: "OFAC API response received" },
       { stage: "Simulation", action: "Model cargo and voyage P&L impact scenarios", owner: "System" },
@@ -130,7 +130,7 @@ const SCHEMAS_FALLBACK: DecisionSchema[] = [
     id: "sch3",
     name: "Distressed Asset Acquisition Review",
     category: "Investment Operations",
-    domain: "DOMAINE",
+    domain: "Terra",
     color: "hsl(142,52%,48%)",
     icon: Building2,
     description: "End-to-end acquisition workflow for distressed real estate — from initial distress signal through underwriting, LP approval, and post-acquisition outcome tracking.",
@@ -141,12 +141,12 @@ const SCHEMAS_FALLBACK: DecisionSchema[] = [
       "Broker network signal: off-market interest confirmed",
     ],
     actionSequence: [
-      { stage: "Signal", action: "Ingest distress signal composite from DOMAINE intelligence feed", owner: "System" },
+      { stage: "Signal", action: "Ingest distress signal composite from Terra intelligence feed", owner: "System" },
       { stage: "Context", action: "Build ownership entity graph, debt stack, lien history", owner: "System" },
       { stage: "Recommendation", action: "AI generates acquisition thesis with comparable analysis", owner: "AI Agent", gate: "Diligence checklist ≥60% complete" },
       { stage: "Simulation", action: "Model IRR scenarios: base/bull/bear with sensitivity analysis", owner: "System" },
       { stage: "Policy", action: "Investment committee approval threshold check", owner: "System" },
-      { stage: "Execution", action: "Route to LP approval workflow via FORGE with deal memorandum", owner: "Investment Lead", gate: "Approver: investment_committee" },
+      { stage: "Execution", action: "Route to LP approval workflow via Counsel with deal memorandum", owner: "Investment Lead", gate: "Approver: investment_committee" },
       { stage: "Proof", action: "Record complete underwriting chain for LP reporting", owner: "System" },
       { stage: "Outcome", action: "Track against projected IRR and acquisition thesis at 12/24/36m", owner: "Investment Lead" },
     ],
@@ -245,7 +245,7 @@ const SCHEMAS_FALLBACK: DecisionSchema[] = [
       { stage: "Recommendation", action: "AI generates remediation options ranked by risk reduction", owner: "AI Agent", gate: "Confidence ≥ 0.85" },
       { stage: "Simulation", action: "Model service impact of remediation options", owner: "System" },
       { stage: "Policy", action: "Check approval chain based on asset criticality tier", owner: "System" },
-      { stage: "Execution", action: "Apply remediation via FORGE with automatic rollback gate", owner: "Cloud Ops", gate: "Approver: cloud_ops_lead" },
+      { stage: "Execution", action: "Apply remediation via Counsel with automatic rollback gate", owner: "Cloud Ops", gate: "Approver: cloud_ops_lead" },
       { stage: "Proof", action: "Record violation → detection → remediation → verification chain", owner: "System" },
       { stage: "Outcome", action: "Verify policy compliance restoration and track recurrence", owner: "System" },
     ],
@@ -305,7 +305,7 @@ function StepRow({ step, index }: { step: SchemaStep; index: number }) {
 
 export default function DecisionSchemaLibraryPage() {
   const __pageMeta = usePageMeta({
-    title: "Decision Schema Library — KORA | SZL Holdings",
+    title: "Decision Schema Library — Lyte | SZL Holdings",
     description: "Reusable decision templates that encode institutional knowledge — trigger patterns, action sequences, policy gates, and expected outcomes. Inspired by DARPA KAIROS schema-based event reasoning.",
     canonical: "https://szlholdings.com/lyte/decision-schemas",
   });
@@ -357,7 +357,7 @@ export default function DecisionSchemaLibraryPage() {
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
-                  <Link href="/lyte" style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, textDecoration: "none" }}>KORA</Link>
+                  <Link href="/lyte" style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, textDecoration: "none" }}>Lyte</Link>
                   <ChevronRight size={10} style={{ color: TEXT_FAINT }} />
                   <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE }}>Decision Schema Library</span>
                 </div>
@@ -525,7 +525,7 @@ export default function DecisionSchemaLibraryPage() {
                     {/* Action sequence */}
                     <div style={{ background: BG, padding: "1.25rem 1.5rem" }}>
                       <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "0.75rem" }}>
-                        Action Sequence — {schema.actionSequence.length} stages · FORGE-orchestrated
+                        Action Sequence — {schema.actionSequence.length} stages · Counsel-orchestrated
                       </p>
                       <div>
                         {schema.actionSequence.map((step, i) => (
@@ -604,7 +604,7 @@ export default function DecisionSchemaLibraryPage() {
                   </p>
                   <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap" }}>
                     <Link href="/lyte" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: LYTE, color: "hsl(214,18%,4%)", borderRadius: 6, fontSize: "0.8125rem", fontWeight: 600, textDecoration: "none" }}>
-                      Back to KORA <ArrowRight size={13} />
+                      Back to Lyte <ArrowRight size={13} />
                     </Link>
                     <Link href="/lyte/governance-posture" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: "transparent", color: TEXT_SEC, border: `1px solid ${BORDER}`, borderRadius: 6, fontSize: "0.8125rem", fontWeight: 500, textDecoration: "none" }}>
                       Governance Posture <ArrowUpRight size={13} />

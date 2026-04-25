@@ -408,10 +408,10 @@ export type ApprovedCTA =
   | 'View Case Studies'
   | 'Read the Insights'
   | 'Start a Private Inquiry'
-  | 'Explore FORGE'
-  | 'Explore KORA'
-  | 'Explore SEXTANT'
-  | 'Explore DOMAINE'
+  | 'Explore Counsel'
+  | 'Explore Lyte'
+  | 'Explore Vessels'
+  | 'Explore Terra'
   | 'Explore Carlota Jo'
   | 'Meet the Founder';
 
@@ -425,10 +425,10 @@ export const APPROVED_CTAS: ApprovedCTA[] = [
   'View Case Studies',
   'Read the Insights',
   'Start a Private Inquiry',
-  'Explore FORGE',
-  'Explore KORA',
-  'Explore SEXTANT',
-  'Explore DOMAINE',
+  'Explore Counsel',
+  'Explore Lyte',
+  'Explore Vessels',
+  'Explore Terra',
   'Explore Carlota Jo',
   'Meet the Founder',
 ];

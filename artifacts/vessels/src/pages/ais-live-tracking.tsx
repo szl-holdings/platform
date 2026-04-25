@@ -1079,7 +1079,7 @@ export default function AisLiveTrackingPage() {
 
       <div className="grid grid-cols-5 gap-px shrink-0" style={{ background: BORDER.subtle }}>
         {[
-          { label: 'SEXTANT tracked', value: String(stats.total), color: ACCENT },
+          { label: 'Vessels tracked', value: String(stats.total), color: ACCENT },
           { label: 'Underway', value: String(stats.underway), color: '#22c55e' },
           {
             label: 'Active alerts',

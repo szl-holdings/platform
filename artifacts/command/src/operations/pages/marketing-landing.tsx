@@ -481,7 +481,7 @@ export default function CommandMarketingLanding({ onSignIn }: { onSignIn?: () =>
               {
                 label: 'Business Observability',
                 items: ['Revenue velocity', 'Approval aging', 'Ownership gaps', 'Decision latency'],
-                note: 'KORA',
+                note: 'Lyte',
                 highlight: true,
               },
             ].map((col) => (
@@ -1238,9 +1238,9 @@ export default function CommandMarketingLanding({ onSignIn }: { onSignIn?: () =>
             </div>
             <div className="flex items-center gap-4">
               {[
-                { name: 'DOMAINE', href: '/terra/' },
-                { name: 'SEXTANT', href: '/vessels/' },
-                { name: 'PARAGON', href: '/aegis/' },
+                { name: 'Terra', href: '/terra/' },
+                { name: 'Vessels', href: '/vessels/' },
+                { name: 'Aegis', href: '/aegis/' },
                 { name: 'Carlota Jo', href: '/carlota-jo/' },
                 { name: 'SZL', href: '/szl-holdings/' },
               ].map((l) => (

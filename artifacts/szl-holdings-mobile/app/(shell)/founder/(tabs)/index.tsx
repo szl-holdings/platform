@@ -54,21 +54,21 @@ const PROFILE = {
 const VENTURES = [
   {
     slug: 'vessels',
-    name: 'SEXTANT',
+    name: 'Vessels',
     tagline: 'Maritime Intelligence',
     description:
       'AIS fleet tracking, voyage economics, and sanctions screening covering global shipping routes.',
     url: 'https://vessels.szlholdings.com',
     color: '#3b82f6',
     metrics: [
-      { label: 'SEXTANT tracked', value: '50K+' },
+      { label: 'Vessels tracked', value: '50K+' },
       { label: 'Data pts/day', value: '2M+' },
       { label: 'Coverage', value: 'Global' },
     ],
   },
   {
     slug: 'aegis',
-    name: 'PARAGON',
+    name: 'Aegis',
     tagline: 'Defense & Intelligence',
     description:
       'Unified cybersecurity command converging SOC operations, threat intel, and MSP management.',
@@ -82,7 +82,7 @@ const VENTURES = [
   },
   {
     slug: 'terra',
-    name: 'DOMAINE',
+    name: 'Terra',
     tagline: 'Real Estate Intelligence',
     description:
       'Distress-first real estate platform covering all five NYC boroughs with multi-factor scoring.',
@@ -96,7 +96,7 @@ const VENTURES = [
   },
   {
     slug: 'lyte',
-    name: 'KORA',
+    name: 'Lyte',
     tagline: 'Business Observability',
     description:
       'AI ops dashboard with multi-model routing, cross-portfolio signal aggregation, and observability.',
@@ -153,7 +153,7 @@ const MILESTONES = [
   },
   {
     year: '2024 Q1',
-    event: 'Shipped FORGE — Execution Fabric',
+    event: 'Shipped Counsel — Execution Fabric',
     role: 'Lead Architect',
     company: 'SZL Holdings',
     logoInitials: 'AL',
@@ -165,9 +165,9 @@ const MILESTONES = [
   },
   {
     year: '2024 Q2',
-    event: 'SEXTANT Maritime Intelligence',
+    event: 'Vessels Maritime Intelligence',
     role: 'Founder, Lead Engineer',
-    company: 'SEXTANT — SZL Holdings',
+    company: 'Vessels — SZL Holdings',
     logoInitials: 'VS',
     logoColor: '#3b82f6',
     detail:
@@ -177,9 +177,9 @@ const MILESTONES = [
   },
   {
     year: '2024 Q2',
-    event: 'KORA Command Center',
+    event: 'Lyte Command Center',
     role: 'Founder, Lead Engineer',
-    company: 'KORA — SZL Holdings',
+    company: 'Lyte — SZL Holdings',
     logoInitials: 'LY',
     logoColor: '#06b6d4',
     detail:
@@ -189,21 +189,21 @@ const MILESTONES = [
   },
   {
     year: '2024 Q3',
-    event: 'PARAGON — Defense & Intelligence',
+    event: 'Aegis — Defense & Intelligence',
     role: 'Founder, Lead Engineer',
-    company: 'PARAGON — SZL Holdings',
+    company: 'Aegis — SZL Holdings',
     logoInitials: 'AG',
     logoColor: '#6366f1',
     detail:
-      'Shipped unified cybersecurity command surface converging SOC operations (Firestorm), Managed Services (PARAGON Operations), and Intelligence Engine (PARAGON Labs).',
+      'Shipped unified cybersecurity command surface converging SOC operations (Firestorm), Managed Services (Aegis Operations), and Intelligence Engine (Aegis Labs).',
     achievement: 'MITRE ATT&CK mapping, <1 min automated response',
     highlight: false,
   },
   {
     year: '2024 Q3',
-    event: 'DOMAINE — Real Estate Intelligence',
+    event: 'Terra — Real Estate Intelligence',
     role: 'Founder, Lead Engineer',
-    company: 'DOMAINE — SZL Holdings',
+    company: 'Terra — SZL Holdings',
     logoInitials: 'TR',
     logoColor: '#10b981',
     detail:
@@ -219,7 +219,7 @@ const MILESTONES = [
     logoInitials: 'SZL',
     logoColor: '#c4a97e',
     detail:
-      'Six platforms live. Shared infrastructure compounding across all products. FORGE absorbed as internal execution engine. Carlota Jo native mobile launched.',
+      'Six platforms live. Shared infrastructure compounding across all products. Counsel absorbed as internal execution engine. Carlota Jo native mobile launched.',
     achievement: '6 platforms live · 150K+ LOC · Full compound architecture',
     highlight: true,
   },
@@ -228,7 +228,7 @@ const MILESTONES = [
 const CASE_STUDIES_FALLBACK: CaseStudy[] = [
   {
     id: -1,
-    title: 'Maritime Sanctions Screening at Scale — SEXTANT',
+    title: 'Maritime Sanctions Screening at Scale — Vessels',
     slug: 'vessels-sanctions-screening',
     summary:
       'Designed and shipped a real-time OFAC/UN sanctions screening pipeline processing 2M+ AIS data points per day across 50K+ tracked vessels. Integrated automated exception management and voyage economics for enterprise logistics operators.',
@@ -236,15 +236,15 @@ const CASE_STUDIES_FALLBACK: CaseStudy[] = [
   },
   {
     id: -2,
-    title: 'Unified SOC Command Surface — PARAGON',
+    title: 'Unified SOC Command Surface — Aegis',
     slug: 'aegis-soc-command',
     summary:
-      'Converged three disparate security toolsets (Firestorm incident response, PARAGON Operations MSP management, and PARAGON Labs threat intelligence) into a single operator command surface mapped to the MITRE ATT&CK framework.',
+      'Converged three disparate security toolsets (Firestorm incident response, Aegis Operations MSP management, and Aegis Labs threat intelligence) into a single operator command surface mapped to the MITRE ATT&CK framework.',
     outcome: 'Mean time to containment reduced from 18 minutes to under 60 seconds.',
   },
   {
     id: -3,
-    title: 'Distress-First Real Estate Intelligence — DOMAINE',
+    title: 'Distress-First Real Estate Intelligence — Terra',
     slug: 'terra-distress-signals',
     summary:
       'Built a multi-factor distress scoring engine across all five NYC boroughs aggregating 12+ public data sources — including tax liens, foreclosure filings, HPD violations, and zoning changes — to surface acquisition targets 6–18 months before market-wide discovery.',
@@ -311,7 +311,7 @@ const THESIS_FALLBACK = [
   {
     label: 'Compound Architecture',
     content:
-      'The real moat is the compounding nature of the portfolio. Data from SEXTANT informs PARAGON. KORA observes all of them. The whole is exponentially more valuable than the sum of its parts.',
+      'The real moat is the compounding nature of the portfolio. Data from Vessels informs Aegis. Lyte observes all of them. The whole is exponentially more valuable than the sum of its parts.',
   },
 ];
 
@@ -458,7 +458,7 @@ export default function HomeScreen() {
       return {
         ...v,
         metrics: v.metrics.map((m) =>
-          m.label === 'SEXTANT tracked' ? { ...m, value: liveVesselCount.toLocaleString() } : m,
+          m.label === 'Vessels tracked' ? { ...m, value: liveVesselCount.toLocaleString() } : m,
         ),
       };
     }
@@ -569,10 +569,10 @@ export default function HomeScreen() {
       `Web: https://stephenlutar.com`,
       '',
       'SZL Holdings Portfolio:',
-      '• SEXTANT — Maritime Fleet Intelligence',
-      '• PARAGON — Cybersecurity Command',
-      '• DOMAINE — Real Estate Intelligence',
-      '• KORA — AI Operations Platform',
+      '• Vessels — Maritime Fleet Intelligence',
+      '• Aegis — Cybersecurity Command',
+      '• Terra — Real Estate Intelligence',
+      '• Lyte — AI Operations Platform',
       '• Carlota Jo — Private Advisory',
     ].join('\n');
 

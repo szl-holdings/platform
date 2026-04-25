@@ -259,7 +259,7 @@ function PermissionScreen({
 
       <Text style={styles.permissionTitle}>Camera Access Required</Text>
       <Text style={styles.permissionBody}>
-        The AR Property Viewer needs camera access to overlay DOMAINE intelligence on buildings around
+        The AR Property Viewer needs camera access to overlay Terra intelligence on buildings around
         you.
       </Text>
 
@@ -323,7 +323,7 @@ function mapTerraToARProperty(p: TerraAPIProperty, index: number): ARProperty {
     opportunity: distress > 50 ? 'buy' : distress > 25 ? 'watch' : 'avoid',
     signals:
       distress > 50
-        ? ['Distress score elevated', 'Opportunity flagged by DOMAINE AI']
+        ? ['Distress score elevated', 'Opportunity flagged by Terra AI']
         : ['No active distress signals', 'Market activity normal'],
   };
 }
@@ -443,7 +443,7 @@ export default function ARPropertyViewerScreen() {
             {scanning ? (
               <View style={styles.scanningLabel}>
                 <Text style={styles.scanningText}>Scanning building…</Text>
-                <Text style={styles.scanningSubText}>Pulling DOMAINE data</Text>
+                <Text style={styles.scanningSubText}>Pulling Terra data</Text>
               </View>
             ) : (
               <View style={styles.lockedLabel}>
@@ -464,7 +464,7 @@ export default function ARPropertyViewerScreen() {
                 onPress={() => router.push('/(shell)/properties' as never)}
               >
                 <Feather name="external-link" size={14} color={ACCENT} />
-                <Text style={styles.arActionBtnText}>Open in DOMAINE</Text>
+                <Text style={styles.arActionBtnText}>Open in Terra</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.arActionBtn, { borderColor: 'rgba(34,197,94,0.3)' }]}

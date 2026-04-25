@@ -48,9 +48,9 @@ const MODEL_MESH_ROWS = [
 ];
 
 const DOMAIN_AGENTS = [
-  { name: "FORGE", domain: "Platform", role: "Execution fabric and orchestration layer routing signals across all domain packs", color: "hsl(258,55%,68%)" },
-  { name: "Helmsman", domain: "Maritime — SEXTANT", role: "Voyage risk, sanctions screening, route optimization, and regulatory compliance", color: "hsl(200,65%,52%)" },
-  { name: "Sentinel", domain: "Security — PARAGON", role: "Threat triage, playbook recommendation, and security incident classification", color: "hsl(145,62%,46%)" },
+  { name: "Counsel", domain: "Platform", role: "Execution fabric and orchestration layer routing signals across all domain packs", color: "hsl(258,55%,68%)" },
+  { name: "Helmsman", domain: "Maritime — Vessels", role: "Voyage risk, sanctions screening, route optimization, and regulatory compliance", color: "hsl(200,65%,52%)" },
+  { name: "Sentinel", domain: "Security — Aegis", role: "Threat triage, playbook recommendation, and security incident classification", color: "hsl(145,62%,46%)" },
   { name: "Eval Engine", domain: "Evaluation", role: "Model confidence calibration, output scoring, drift detection, and adversarial resistance testing", color: "hsl(38,80%,56%)" },
 ];
 
@@ -74,7 +74,7 @@ const HARD_BOUNDARIES = [
 export default function TrustAIPage() {
   const __pageMeta = usePageMeta({
     title: "AI Policy — Trust Center · SZL Holdings",
-    description: "AI usage model, source-grounding, governed inference layer, and generated-vs-source controls for KORA + FORGE.",
+    description: "AI usage model, source-grounding, governed inference layer, and generated-vs-source controls for Lyte + Counsel.",
     canonical: "https://szlholdings.com/trust/ai",
   });
 
@@ -100,7 +100,7 @@ export default function TrustAIPage() {
                   <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.08 }}>AI Policy</h1>
                 </div>
                 <p style={{ fontSize: "clamp(1rem,1.8vw,1.0625rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "52ch" }}>
-                  Every AI capability in KORA + FORGE — from Copilot recommendations to signal classification
+                  Every AI capability in Lyte + Counsel — from Copilot recommendations to signal classification
                   to document generation — operates within a governance framework that enforces source grounding,
                   human approval, complete decision lineage, and hard boundaries on autonomous action.
                 </p>
@@ -153,7 +153,7 @@ export default function TrustAIPage() {
                   Operating boundaries. Applied to every tenant, every pack, every environment.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.68, color: "hsl(214,7%,58%)", maxWidth: "60ch", marginBottom: "2.5rem" }}>
-                  These boundaries are policy commitments enforced through the FORGE execution layer
+                  These boundaries are policy commitments enforced through the Counsel execution layer
                   and Covenant Policy Engine — not user-facing toggles. Where a boundary is enforced
                   structurally (tenant scoping, source attribution) versus by approval-gated workflow
                   (external sends, financial writes), the difference is documented in the Architecture page.

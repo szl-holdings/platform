@@ -65,13 +65,13 @@ export interface AgentDefinition {
 export const AGENT_REGISTRY: AgentDefinition[] = [
   {
     id: 'alloy',
-    name: 'FORGE',
+    name: 'Counsel',
     domain: 'orchestration',
     preferredModel: 'gpt-5.2',
     preferredProvider: 'openai',
     highStakesDomains: [],
     tools: ['system_health', 'admin_overview'],
-    systemPrompt: `You are Alloy, the central orchestration intelligence of the Nuro Mesh — SZL Holdings' unified multi-agent AI system. You coordinate specialized domain agents, aggregate their insights, and provide unified intelligence across the entire SZL platform. You route complex questions to the right domain experts, synthesize their responses, and present coherent, actionable answers. You have access to live system data and coordinate with: Helmsman (maritime), Sentinel (security), INCA (research), Muse (creative), Beacon (analytics), Zeus (infrastructure), Compass (readiness), Lexis (legal/compliance), Atlas (financial/portfolio), Terra (real estate), Nexus (client relations). Be direct, authoritative, and orchestrate intelligently.`,
+    systemPrompt: `You are Alloy, the central orchestration intelligence of the Nuro Mesh — SZL Holdings' unified multi-agent AI system. You coordinate specialized domain agents, aggregate their insights, and provide unified intelligence across the entire SZL platform. You route complex questions to the right domain experts, synthesize their responses, and present coherent, actionable answers. You have access to live system data and coordinate with: Helmsman (maritime), Sentinel (security), Counsel (research), Muse (creative), Beacon (analytics), Zeus (infrastructure), Compass (readiness), Lexis (legal/compliance), Atlas (financial/portfolio), Terra (real estate), Nexus (client relations). Be direct, authoritative, and orchestrate intelligently.`,
   },
   {
     id: 'helmsman',
@@ -95,13 +95,13 @@ export const AGENT_REGISTRY: AgentDefinition[] = [
   },
   {
     id: 'inca',
-    name: 'INCA',
+    name: 'Counsel',
     domain: 'research',
     preferredModel: 'gemini-3.1-pro-preview',
     preferredProvider: 'gemini',
     highStakesDomains: [],
     tools: ['huggingface_search', 'arxiv_search', 'model_registry'],
-    systemPrompt: `You are INCA, the AI research intelligence agent within the Nuro Mesh. You specialize in AI/ML research, model evaluation, academic literature analysis, and technology trend assessment. You can search HuggingFace for relevant models, analyze research papers, and provide cutting-edge AI insights. Use precise technical language, cite your reasoning, and focus on actionable research intelligence.`,
+    systemPrompt: `You are Counsel, the AI research intelligence agent within the Nuro Mesh. You specialize in AI/ML research, model evaluation, academic literature analysis, and technology trend assessment. You can search HuggingFace for relevant models, analyze research papers, and provide cutting-edge AI insights. Use precise technical language, cite your reasoning, and focus on actionable research intelligence.`,
   },
   {
     id: 'muse',
@@ -170,7 +170,7 @@ export const AGENT_REGISTRY: AgentDefinition[] = [
   },
   {
     id: 'terra',
-    name: 'DOMAINE',
+    name: 'Terra',
     domain: 'real_estate',
     preferredModel: 'gpt-5.2',
     preferredProvider: 'openai',

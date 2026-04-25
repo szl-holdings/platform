@@ -86,9 +86,9 @@ export default function S05Architecture() {
             </div>
             <div style={{ flex: 1, display: 'flex', gap: '1.5vw', flexWrap: 'wrap' }}>
               {[
-                'PARAGON — Security',
-                'SEXTANT — Maritime',
-                'DOMAINE — Real Estate',
+                'Aegis — Security',
+                'Vessels — Maritime',
+                'Terra — Real Estate',
                 'Counsel — Legal',
                 'Carlota Jo — Advisory',
                 'IMPERIUM — Cloud',
@@ -153,7 +153,7 @@ export default function S05Architecture() {
             </div>
             <div style={{ flex: 1, display: 'flex', gap: '1.5vw', flexWrap: 'wrap' }}>
               {[
-                'FORGE Runtime',
+                'Counsel Runtime',
                 'Outcome Graph',
                 'Proof Chain',
                 'Covenant Policy',
@@ -219,7 +219,7 @@ export default function S05Architecture() {
               </div>
             </div>
             <div style={{ flex: 1, display: 'flex', gap: '1.5vw', flexWrap: 'wrap' }}>
-              {['KORA Command Center', 'APEX Mobile', 'Command Portal'].map((d) => (
+              {['Lyte Command Center', 'APEX Mobile', 'Command Portal'].map((d) => (
                 <span
                   key={d}
                   style={{

@@ -21,17 +21,17 @@ const EXAMPLE_INTENTS = [
   {
     label: 'Risk Brief',
     intent:
-      "Summarize today's threat risk across PARAGON and SEXTANT, then draft an executive brief in LUMINA format.",
+      "Summarize today's threat risk across Aegis and Vessels, then draft an executive brief in LUMINA format.",
   },
   {
     label: 'Portfolio Snapshot',
     intent:
-      'Pull the latest KPIs from SZL Holdings, DOMAINE, and SEXTANT, and compile a cross-portfolio snapshot.',
+      'Pull the latest KPIs from SZL Holdings, Terra, and Vessels, and compile a cross-portfolio snapshot.',
   },
   {
     label: 'Compliance Check',
     intent:
-      'Cross-reference Prism Counsel open matters against PARAGON threat intel and flag any intersecting risk vectors.',
+      'Cross-reference Prism Counsel open matters against Aegis threat intel and flag any intersecting risk vectors.',
   },
 ];
 
@@ -71,25 +71,25 @@ const STEP_EXPLANATIONS: Record<
   }
 > = {
   aegis: {
-    why: 'PARAGON was selected first because the intent mentions threat risk — PARAGON owns the threat-intelligence domain and its output is required by the LUMINA stitching step.',
+    why: 'Aegis was selected first because the intent mentions threat risk — Aegis owns the threat-intelligence domain and its output is required by the LUMINA stitching step.',
     how: 'Dispatched `GET /api/aegis/threat-summary` with tenant-scoped auth. Response includes CVSS-weighted top threats, active incident count, and MITRE technique coverage.',
     alternatives: [
-      'Pull from SEXTANT first (rejected — no threat context dependency)',
+      'Pull from Vessels first (rejected — no threat context dependency)',
       'Use cached threat snapshot (rejected — staleness > 15 min at call time)',
     ],
     confidence: 0.94,
   },
   vessels: {
-    why: 'SEXTANT was included because maritime risk is part of the SZL cross-portfolio surface area and the Fleet Command module has recent high-severity alerts.',
-    how: 'Called `GET /api/vessels/fleet-risk` returning per-vessel risk scores and one port-call flag. Result fed into LUMINA stitching alongside PARAGON output.',
+    why: 'Vessels was included because maritime risk is part of the SZL cross-portfolio surface area and the Fleet Command module has recent high-severity alerts.',
+    how: 'Called `GET /api/vessels/fleet-risk` returning per-vessel risk scores and one port-call flag. Result fed into LUMINA stitching alongside Aegis output.',
     alternatives: [
-      "Skip SEXTANT (rejected — user's portfolio includes maritime exposure)",
+      "Skip Vessels (rejected — user's portfolio includes maritime exposure)",
       'Use AIS snapshot (rejected — live position data available within rate limit)',
     ],
     confidence: 0.88,
   },
   terra: {
-    why: 'DOMAINE distress signals are part of the SZL portfolio KPI roll-up. 3 properties crossed the distress threshold since last brief.',
+    why: 'Terra distress signals are part of the SZL portfolio KPI roll-up. 3 properties crossed the distress threshold since last brief.',
     how: 'Called `GET /api/terra/distress-summary` with `?top=5&since=24h`. Returns property IDs, distress scores, and recommended actions.',
     alternatives: [
       'Use cached portfolio snapshot (rejected — 3 new distress signals since cache)',
@@ -107,7 +107,7 @@ const STEP_EXPLANATIONS: Record<
     confidence: 0.96,
   },
   command: {
-    why: 'Command provides the cross-domain correlation layer — it detects when signals from PARAGON and SEXTANT share a threat actor or geo region.',
+    why: 'Command provides the cross-domain correlation layer — it detects when signals from Aegis and Vessels share a threat actor or geo region.',
     how: 'Called `GET /api/command/correlations?domains=aegis,vessels` with the current run ID. Returns correlated events with confidence scores.',
     alternatives: [
       'Manual correlation in stitching step (rejected — Command has pre-built correlation graph)',
@@ -116,7 +116,7 @@ const STEP_EXPLANATIONS: Record<
     confidence: 0.89,
   },
   'szl-holdings': {
-    why: 'SZL Holdings contains the consolidated KPI store — governance score, FORGE run metrics, and portfolio health index.',
+    why: 'SZL Holdings contains the consolidated KPI store — governance score, Counsel run metrics, and portfolio health index.',
     how: 'Called `GET /api/holdings/kpi-snapshot` returning the 12 canonical KPIs with trend deltas. Snapshot is tenant-scoped and auth-gated.',
     alternatives: [
       'Pull KPIs from individual domain APIs (rejected — Holdings aggregates and normalizes units)',

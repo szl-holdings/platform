@@ -36,7 +36,7 @@ export function listScenarios(filter?: { domain?: string; tags?: string[] }): Sc
 
 const AegisSOCThreatScenario: ScenarioDefinition = {
   id: 'aegis-soc-threat-triage-v1',
-  name: 'PARAGON SOC — Critical Threat Triage',
+  name: 'Aegis SOC — Critical Threat Triage',
   domain: 'aegis',
   description:
     'A real-world SOC incident where a ransomware lateral movement was detected across 14 endpoints. Tests agent threat classification, escalation routing, and containment decision quality.',
@@ -193,7 +193,7 @@ registerScenario(AegisSOCThreatScenario);
 
 const VesselsVoyagePnLScenario: ScenarioDefinition = {
   id: 'vessels-voyage-pnl-optimization-v1',
-  name: 'SEXTANT — Voyage P&L Optimization Decision',
+  name: 'Vessels — Voyage P&L Optimization Decision',
   domain: 'vessels',
   description:
     'A voyage P&L optimization request where the agent recommends route changes based on fuel costs, weather, and port conditions. Tests reasoning quality and operator override patterns.',
@@ -304,7 +304,7 @@ registerScenario(VesselsVoyagePnLScenario);
 
 const VesselsCharterNegotiationScenario: ScenarioDefinition = {
   id: 'vessels-charter-rate-negotiation-v1',
-  name: 'SEXTANT — Charter Rate Negotiation Analysis',
+  name: 'Vessels — Charter Rate Negotiation Analysis',
   domain: 'vessels',
   description:
     'Agent evaluates competing charter party offers for a handymax vessel and recommends the optimal fixture. Tests commercial reasoning, rate benchmarking against Baltic indices, and clause risk assessment.',
@@ -446,7 +446,7 @@ registerScenario(VesselsCharterNegotiationScenario);
 
 const TerraPortfolioStressScenario: ScenarioDefinition = {
   id: 'terra-portfolio-stress-test-v1',
-  name: 'DOMAINE — Portfolio Stress Test Under Rate Shock',
+  name: 'Terra — Portfolio Stress Test Under Rate Shock',
   domain: 'terra',
   description:
     'Agent models the impact of a 200bps rate shock on a mixed-use real estate portfolio and recommends repositioning actions. Tests DCF sensitivity, LTV covenant breach detection, and disposition prioritization.',
@@ -661,7 +661,7 @@ registerScenario(TerraPortfolioStressScenario);
 
 const TerraAssetValuationScenario: ScenarioDefinition = {
   id: 'terra-asset-valuation-override-v1',
-  name: 'DOMAINE — Asset Valuation Dispute & Appraisal Override',
+  name: 'Terra — Asset Valuation Dispute & Appraisal Override',
   domain: 'terra',
   description:
     'Agent reconciles a 12% discrepancy between internal model valuation and third-party appraisal for a Grade-A office asset. Tests valuation methodology reasoning, assumption sensitivity, and flagging of appraisal override risk.',

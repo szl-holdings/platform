@@ -98,7 +98,7 @@ export default function VesselsIntelligence() {
           evidence={[
             {
               id: 'v-sanc-1',
-              label: 'OFAC SDN List — FORGE Sync',
+              label: 'OFAC SDN List — Counsel Sync',
               type: 'api',
               excerpt: `${allEntities.length} entity matches detected across ${sanctionsArray.length} vessels`,
             },
@@ -150,7 +150,7 @@ export default function VesselsIntelligence() {
           evidence={[
             {
               id: 'v-route-1',
-              label: 'FORGE Maritime Risk Classifier',
+              label: 'Counsel Maritime Risk Classifier',
               type: 'model',
               excerpt:
                 'Composite score from piracy, weather, chokepoint, and sanctions data layers.',

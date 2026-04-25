@@ -73,7 +73,7 @@ export const PLATFORM_PRODUCTS: Record<string, PlatformProduct> = {
   },
   aegis: {
     id: 'aegis',
-    name: 'PARAGON',
+    name: 'Aegis',
     tagline: 'Defense and intelligence operations',
     description:
       'SOC command surface with live threat intelligence feeds and governed incident response.',
@@ -89,7 +89,7 @@ export const PLATFORM_PRODUCTS: Record<string, PlatformProduct> = {
   },
   terra: {
     id: 'terra',
-    name: 'DOMAINE',
+    name: 'Terra',
     tagline: 'Real estate intelligence for the governed era',
     description:
       'NYC-first property intelligence platform with live distress data, underwriting copilot, and spatial intelligence.',
@@ -108,7 +108,7 @@ export const PLATFORM_PRODUCTS: Record<string, PlatformProduct> = {
   },
   vessels: {
     id: 'vessels',
-    name: 'SEXTANT',
+    name: 'Vessels',
     tagline: 'Maritime intelligence with governance built in',
     description:
       'Fleet command, voyage economics, sanctions screening, and dark vessel detection for maritime operators.',
@@ -131,7 +131,7 @@ export const PLATFORM_PRODUCTS: Record<string, PlatformProduct> = {
     name: 'Command',
     tagline: 'Unified operational command',
     description:
-      'Merged KORA + Imperium command surface for cross-domain real-time monitoring and governed decision execution.',
+      'Merged Lyte + Imperium command surface for cross-domain real-time monitoring and governed decision execution.',
     status: 'partial',
     previewPath: '/command/',
     audience: 'Platform operators, internal command teams',

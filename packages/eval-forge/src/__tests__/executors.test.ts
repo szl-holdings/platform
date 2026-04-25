@@ -97,7 +97,7 @@ describe('real-infer path', () => {
 });
 
 describe('buildSuiteExecutor + runEvalSuite integration', () => {
-  it('executes every FORGE suite end-to-end with the heuristic fallback', async () => {
+  it('executes every Counsel suite end-to-end with the heuristic fallback', async () => {
     for (const suite of FORGE_SUITES) {
       const exec = buildSuiteExecutor(suite, null);
       const report = await runEvalSuite(suite, exec, { triggeredBy: 'test', maxConcurrency: 4 });

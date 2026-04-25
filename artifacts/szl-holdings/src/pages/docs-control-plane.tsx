@@ -55,7 +55,7 @@ const SCHEMA_EXAMPLES = [
 export default function DocsControlPlanePage() {
   const __pageMeta = usePageMeta({
     title: "Covenant Policy — Docs — SZL Holdings",
-    description: "Covenant Policy documentation for KORA + FORGE: the governance rules engine that defines what the platform can and cannot do on behalf of any principal.",
+    description: "Covenant Policy documentation for Lyte + Counsel: the governance rules engine that defines what the platform can and cannot do on behalf of any principal.",
     canonical: "https://szlholdings.com/docs/covenant-policy",
   });
 
@@ -81,7 +81,7 @@ export default function DocsControlPlanePage() {
                 Covenant Policy.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-white/65">
-                Covenant Policy is the governance rules engine in KORA + FORGE. It defines — in explicit,
+                Covenant Policy is the governance rules engine in Lyte + Counsel. It defines — in explicit,
                 versioned, auditable form — what the platform is and is not permitted to do on behalf of any
                 principal. No model invocation, workflow action, or data export occurs outside the boundary
                 defined by the tenant's active Covenant. The Governance API is the surface through which

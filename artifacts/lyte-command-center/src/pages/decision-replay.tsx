@@ -355,7 +355,7 @@ export default function DecisionReplayPage() {
           </span>
         </div>
         <p className="text-sm text-amber-100/50">
-          Reconstruct who knew what, when — with the full proof chain anchored to the FORGE ledger.
+          Reconstruct who knew what, when — with the full proof chain anchored to the Counsel ledger.
           Use Replay mode to step through events sequentially.
         </p>
       </div>
@@ -364,7 +364,7 @@ export default function DecisionReplayPage() {
       <div className="flex items-center gap-4 flex-wrap">
         <span className="text-[10px] font-mono text-amber-400/40">EVENT TYPES:</span>
         {[
-          { type: 'alloy', label: 'FORGE Signal / System', color: '#f59e0b' },
+          { type: 'alloy', label: 'Counsel Signal / System', color: '#f59e0b' },
           { type: 'human', label: 'Human Actor', color: '#38bdf8' },
           { type: 'escalation', label: 'Escalation', color: '#f87171' },
         ].map((l) => (
@@ -455,7 +455,7 @@ export default function DecisionReplayPage() {
             <p className="text-[10px] font-mono text-amber-400/40 uppercase">Proof Coverage</p>
             <div className="space-y-2">
               {[
-                { label: 'FORGE Signals', value: alloyEvents, color: '#f59e0b' },
+                { label: 'Counsel Signals', value: alloyEvents, color: '#f59e0b' },
                 { label: 'Human Actions', value: humanEvents, color: '#38bdf8' },
                 { label: 'Total Events', value: totalEvents, color: '#a78bfa' },
               ].map((m) => (

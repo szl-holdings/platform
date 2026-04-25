@@ -9,11 +9,11 @@ const PLATFORM_DOCS = [
   {
     icon: Eye,
     title: "Platform Overview",
-    desc: "What KORA + FORGE is, how the signal-to-action pipeline works, and where it fits in your operating environment.",
+    desc: "What Lyte + Counsel is, how the signal-to-action pipeline works, and where it fits in your operating environment.",
     links: [
       { label: "Platform overview", href: "/platform" },
-      { label: "KORA — Decision Intelligence", href: "/lyte" },
-      { label: "FORGE — Execution Fabric", href: "/alloy-fabric" },
+      { label: "Lyte — Decision Intelligence", href: "/lyte" },
+      { label: "Counsel — Execution Fabric", href: "/alloy-fabric" },
     ],
     color: "var(--color-lyte)",
     colorMuted: "var(--color-lyte-muted)",
@@ -35,12 +35,12 @@ const PLATFORM_DOCS = [
   {
     icon: Layers,
     title: "Domain Solutions",
-    desc: "Vertical packs that extend the KORA + FORGE platform into legal operations, defense, maritime, and real estate.",
+    desc: "Vertical packs that extend the Lyte + Counsel platform into legal operations, defense, maritime, and real estate.",
     links: [
       { label: "Solutions overview", href: "/solutions" },
-      { label: "PARAGON — Defense & Intelligence", href: "/solutions/aegis" },
-      { label: "SEXTANT — Maritime", href: "/solutions/vessels" },
-      { label: "DOMAINE — Real Estate", href: "/solutions/terra" },
+      { label: "Aegis — Defense & Intelligence", href: "/solutions/aegis" },
+      { label: "Vessels — Maritime", href: "/solutions/vessels" },
+      { label: "Terra — Real Estate", href: "/solutions/terra" },
     ],
     color: "var(--color-alloy-light)",
     colorMuted: "var(--color-alloy-muted)",
@@ -121,9 +121,9 @@ const TECHNICAL_DOCS = [
 
 const PILOT_PAGES = [
   { label: "Counsel pilot", href: "/pilot/counsel", desc: "Legal operations — matter twin, workflow, trust controls, 30/60/90 milestones" },
-  { label: "DOMAINE pilot", href: "/pilot/terra", desc: "Real estate diligence — property twin, official data, 30/60/90 milestones" },
-  { label: "SEXTANT pilot", href: "/pilot/vessels", desc: "Maritime operations — voyage twin, compliance controls, 30/60/90 milestones" },
-  { label: "PARAGON pilot", href: "/pilot/aegis", desc: "Security operations — threat twin, KEV/NVD, 30/60/90 milestones" },
+  { label: "Terra pilot", href: "/pilot/terra", desc: "Real estate diligence — property twin, official data, 30/60/90 milestones" },
+  { label: "Vessels pilot", href: "/pilot/vessels", desc: "Maritime operations — voyage twin, compliance controls, 30/60/90 milestones" },
+  { label: "Aegis pilot", href: "/pilot/aegis", desc: "Security operations — threat twin, KEV/NVD, 30/60/90 milestones" },
 ];
 
 const CAPABILITY_MATRIX = [
@@ -147,7 +147,7 @@ const DOT = ({ active }: { active: boolean }) => (
 export default function DocsPage() {
   const __pageMeta = usePageMeta({
     title: "Docs — SZL Holdings",
-    description: "Platform documentation, technical architecture, trust controls, capability matrix, pilot pages, and design partner resources for KORA + FORGE.",
+    description: "Platform documentation, technical architecture, trust controls, capability matrix, pilot pages, and design partner resources for Lyte + Counsel.",
     canonical: "https://szlholdings.com/docs",
   });
 
@@ -322,7 +322,7 @@ export default function DocsPage() {
                   <thead>
                     <tr style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(214,12%,8%,0.60)" }}>
                       <th style={{ textAlign: "left", padding: "0.875rem 1.25rem", fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", width: "40%" }}>Capability</th>
-                      {["KORA", "FORGE", "PARAGON", "SEXTANT", "DOMAINE"].map((col) => (
+                      {["Lyte", "Counsel", "Aegis", "Vessels", "Terra"].map((col) => (
                         <th key={col} style={{ textAlign: "center", padding: "0.875rem 1rem", fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-szl-text-muted)" }}>{col}</th>
                       ))}
                     </tr>

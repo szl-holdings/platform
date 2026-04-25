@@ -948,7 +948,7 @@ export default function AegisUnifiedOverview() {
           compact
           provenance={
             {
-              source: 'PARAGON SOC Engine',
+              source: 'Aegis SOC Engine',
               lastUpdated: new Date().toISOString(),
               freshness: 'realtime',
               confidence: 'high',
@@ -1010,10 +1010,10 @@ export default function AegisUnifiedOverview() {
             Product Demo View
           </div>
           <div className="text-[13px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>
-            You're viewing PARAGON — SZL's unified defense and intelligence platform. Three workspaces
+            You're viewing Aegis — SZL's unified defense and intelligence platform. Three workspaces
             (Command, Defense, Labs) share a single intelligence layer with cross-module
             correlation. Every signal, incident, and SLA metric demonstrates the kind of operational
-            visibility PARAGON provides.
+            visibility Aegis provides.
           </div>
         </div>
       )}

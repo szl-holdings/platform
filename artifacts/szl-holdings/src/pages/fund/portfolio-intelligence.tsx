@@ -23,7 +23,7 @@ type Company = {
 
 const COMPANIES: Company[] = [
   {
-    id: "lyte", name: "KORA", color: "#6aaa72", healthScore: 91, arr: "$12.4M", burnRate: "$380K/mo",
+    id: "lyte", name: "Lyte", color: "#6aaa72", healthScore: 91, arr: "$12.4M", burnRate: "$380K/mo",
     runway: 38, growth: 18, burnAccel: -3, status: "healthy", nrr: "124%", employees: 41, stage: "Series B",
     signals: [
       { type: "positive", message: "NRR held at 124% for 3rd consecutive quarter" },
@@ -41,7 +41,7 @@ const COMPANIES: Company[] = [
     cohortBenchmark: { medianGrowth: 12, medianBurn: 420, medianRunway: 28 },
   },
   {
-    id: "aegis", name: "PARAGON", color: "#4a90b8", healthScore: 84, arr: "$8.2M", burnRate: "$290K/mo",
+    id: "aegis", name: "Aegis", color: "#4a90b8", healthScore: 84, arr: "$8.2M", burnRate: "$290K/mo",
     runway: 26, growth: 14, burnAccel: 5, status: "healthy", nrr: "118%", employees: 28, stage: "Series A",
     signals: [
       { type: "positive", message: "DoD contract renewal secured — $2.1M TCV" },
@@ -77,7 +77,7 @@ const COMPANIES: Company[] = [
     cohortBenchmark: { medianGrowth: 12, medianBurn: 160, medianRunway: 18 },
   },
   {
-    id: "vessels", name: "SEXTANT", color: "#d4a054", healthScore: 78, arr: "$4.2M", burnRate: "$195K/mo",
+    id: "vessels", name: "Vessels", color: "#d4a054", healthScore: 78, arr: "$4.2M", burnRate: "$195K/mo",
     runway: 22, growth: 11, burnAccel: 8, status: "watch", nrr: "108%", employees: 22, stage: "Series A",
     signals: [
       { type: "warning", message: "Revenue growth decelerated from 18% to 11% MoM" },

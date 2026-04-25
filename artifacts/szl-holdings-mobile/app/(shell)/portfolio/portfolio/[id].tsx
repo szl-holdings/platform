@@ -37,7 +37,7 @@ const VENTURES: Record<
 > = {
   aegis: {
     id: 'aegis',
-    name: 'PARAGON',
+    name: 'Aegis',
     subtitle: 'Defense & Intelligence Command',
     accentColor: '#6366f1',
     status: 'live',
@@ -56,7 +56,7 @@ const VENTURES: Record<
     strategicNotes:
       'Flagship enterprise security platform. FedRAMP certification targeted Q3 2026. Federal sector expansion underway.',
     description:
-      'PARAGON is a unified defense and intelligence command platform purpose-built for organizations where a single breach can be existential. Real-time threat intelligence, AI-simulated adversary campaigns, and NATO-aligned targeting workflows in a single operator interface.',
+      'Aegis is a unified defense and intelligence command platform purpose-built for organizations where a single breach can be existential. Real-time threat intelligence, AI-simulated adversary campaigns, and NATO-aligned targeting workflows in a single operator interface.',
     launchDate: 'January 2024',
     team: '12 engineers, 3 intelligence analysts',
     nextMilestone: 'FedRAMP Authorization',
@@ -64,7 +64,7 @@ const VENTURES: Record<
   },
   vessels: {
     id: 'vessels',
-    name: 'SEXTANT',
+    name: 'Vessels',
     subtitle: 'Maritime Intelligence',
     accentColor: '#3b82f6',
     status: 'live',
@@ -72,7 +72,7 @@ const VENTURES: Record<
     arr: '$8.2M',
     market: '$15.4B TAM',
     metrics: [
-      { label: 'SEXTANT Monitored', value: '52,000+' },
+      { label: 'Vessels Monitored', value: '52,000+' },
       { label: 'Shipping Lanes', value: '340+' },
       { label: 'Dark Vessel Lead Time', value: '34 days' },
       { label: 'Port Congestion Alerts', value: 'Real-time' },
@@ -83,7 +83,7 @@ const VENTURES: Record<
     strategicNotes:
       'Maritime domain awareness for commodity traders and compliance teams. Climate routing overlay coming Q3 2026.',
     description:
-      'SEXTANT delivers maritime intelligence for commodity traders, compliance teams, and defense logistics. Dark vessel detection, port congestion forecasting, and AIS prediction with a 34-day lead time advantage over competitors.',
+      'Vessels delivers maritime intelligence for commodity traders, compliance teams, and defense logistics. Dark vessel detection, port congestion forecasting, and AIS prediction with a 34-day lead time advantage over competitors.',
     launchDate: 'September 2023',
     team: '8 engineers, 2 domain experts',
     nextMilestone: 'Climate Routing Overlay',
@@ -91,7 +91,7 @@ const VENTURES: Record<
   },
   terra: {
     id: 'terra',
-    name: 'DOMAINE',
+    name: 'Terra',
     subtitle: 'Real Estate Intelligence',
     accentColor: '#4d7c0f',
     status: 'live',
@@ -110,7 +110,7 @@ const VENTURES: Record<
     strategicNotes:
       'NYC beachhead for distress property intelligence. Expanding to national coverage. API launch Q4 2026.',
     description:
-      'DOMAINE delivers real estate intelligence for institutional investors and operators in NYC and beyond. Distress property tracking, portfolio risk analysis, and hyperlocal pricing signals with two-percentage-point accuracy.',
+      'Terra delivers real estate intelligence for institutional investors and operators in NYC and beyond. Distress property tracking, portfolio risk analysis, and hyperlocal pricing signals with two-percentage-point accuracy.',
     launchDate: 'March 2024',
     team: '6 engineers, 1 real estate analyst',
     nextMilestone: 'National Coverage Expansion',
@@ -118,7 +118,7 @@ const VENTURES: Record<
   },
   lyte: {
     id: 'lyte',
-    name: 'KORA',
+    name: 'Lyte',
     subtitle: 'Business Observability',
     accentColor: '#f59e0b',
     status: 'live',
@@ -137,7 +137,7 @@ const VENTURES: Record<
     strategicNotes:
       'Core observability layer for the SZL ecosystem. AI-native anomaly forecast launching Q2 2026.',
     description:
-      'KORA is the SZL execution nervous system — business observability that detects signals in under 4 minutes across commerce, infrastructure, and human behavior. AI-native anomaly forecasting identifies what will fail before it does.',
+      'Lyte is the SZL execution nervous system — business observability that detects signals in under 4 minutes across commerce, infrastructure, and human behavior. AI-native anomaly forecasting identifies what will fail before it does.',
     launchDate: 'June 2023',
     team: '10 engineers, 2 data scientists',
     nextMilestone: 'AI Anomaly Forecast GA',
@@ -145,7 +145,7 @@ const VENTURES: Record<
   },
   alloy: {
     id: 'alloy',
-    name: 'FORGE',
+    name: 'Counsel',
     subtitle: 'Execution Fabric',
     accentColor: '#8b5cf6',
     status: 'live',
@@ -164,7 +164,7 @@ const VENTURES: Record<
     strategicNotes:
       'The backbone of the SZL platform stack. Scenario Model Library public launch Q2 2026.',
     description:
-      'FORGE is the execution fabric that powers every automation, prediction, and approval workflow across the SZL platform. Sub-200ms latency, 12,400+ scenario models, and a human-in-the-loop approval layer trusted by enterprise operators.',
+      'Counsel is the execution fabric that powers every automation, prediction, and approval workflow across the SZL platform. Sub-200ms latency, 12,400+ scenario models, and a human-in-the-loop approval layer trusted by enterprise operators.',
     launchDate: 'November 2022',
     team: '14 engineers, 1 ML researcher',
     nextMilestone: 'Scenario Model Library Launch',

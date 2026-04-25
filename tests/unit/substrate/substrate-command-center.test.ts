@@ -102,7 +102,7 @@ const SAMPLE_APPROVAL: PendingApproval = {
   tenant: 'Pacific Freight Corp',
   riskLevel: 'high',
   policyId: 'pol-vessels-v2',
-  policyName: 'SEXTANT Standard v2',
+  policyName: 'Vessels Standard v2',
   action: 'Recommend cargo route change',
   requestedAt: new Date().toISOString(),
   requestedBy: 'voyage-optimizer',

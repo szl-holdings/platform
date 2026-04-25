@@ -41,9 +41,9 @@ const SAMPLE_EVENTS: TimelineEvent[] = [
     id: 't2',
     timestamp: new Date(Date.now() - 3_600_000 * 5),
     label: 'Recommendation Generated',
-    description: 'FORGE synthesized 3 countermeasures from 7 evidence signals',
+    description: 'Counsel synthesized 3 countermeasures from 7 evidence signals',
     severity: 'info',
-    actor: 'FORGE',
+    actor: 'Counsel',
     meta: { confidence: '82%', model: 'gpt-4o' },
   },
   {
@@ -68,14 +68,14 @@ const SAMPLE_EVENTS: TimelineEvent[] = [
     label: 'Baseline Established',
     description: 'Ownership Drift calibration completed for Q2',
     severity: 'neutral',
-    actor: 'KORA',
+    actor: 'Lyte',
   },
 ];
 
 const SAMPLE_NODES: GraphNode[] = [
   {
     id: 'alloy',
-    label: 'FORGE',
+    label: 'Counsel',
     x: 0.5,
     y: 0.15,
     radius: 14,
@@ -84,8 +84,8 @@ const SAMPLE_NODES: GraphNode[] = [
   },
   { id: 'guardian', label: 'Guardian', x: 0.2, y: 0.45, radius: 10, color: 'var(--gi-accent-violet)' },
   { id: 'pulse', label: 'LUMINA', x: 0.8, y: 0.45, radius: 10, color: 'var(--gi-accent-amber)' },
-  { id: 'lyte', label: 'KORA', x: 0.35, y: 0.75, radius: 10, color: 'var(--gi-accent-green)' },
-  { id: 'vessels', label: 'SEXTANT', x: 0.65, y: 0.75, radius: 10, color: '#14b8a6' },
+  { id: 'lyte', label: 'Lyte', x: 0.35, y: 0.75, radius: 10, color: 'var(--gi-accent-green)' },
+  { id: 'vessels', label: 'Vessels', x: 0.65, y: 0.75, radius: 10, color: '#14b8a6' },
 ];
 
 const SAMPLE_EDGES: GraphEdge[] = [
@@ -451,7 +451,7 @@ export default function DesignSystemPage() {
               <NarrativePanel
                 headline="Action Debt threshold breach — three compounding delays identified."
                 paragraphs={NARRATIVE_PARAGRAPHS}
-                attribution="Synthesized by FORGE · 7 signals · 91% evidence coverage · Traceable to audit log #2026-04-18-0047"
+                attribution="Synthesized by Counsel · 7 signals · 91% evidence coverage · Traceable to audit log #2026-04-18-0047"
                 collapseAfter={2}
                 accentColor="var(--gi-accent-blue)"
               />

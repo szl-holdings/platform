@@ -20,7 +20,7 @@ export const TERRA_DISTRESS_NARRATIVE = {
   scenario: {
     name: '1847 Flatbush Ave, Brooklyn — Compounded Distress (Lis Pendens + Tax Lien)',
     summary:
-      'A 12-unit Brooklyn multifamily owned by GreenHouse Realty LLC has been in lis pendens for 136 days with no cure plan. Three days ago, a $147K NYC tax lien was filed against the same property. DOMAINE detected the compounded distress, scored the opportunity at 87, and surfaced a recommendation to open a diligence file with a defensive offer band of $1.95M – $2.10M.',
+      'A 12-unit Brooklyn multifamily owned by GreenHouse Realty LLC has been in lis pendens for 136 days with no cure plan. Three days ago, a $147K NYC tax lien was filed against the same property. Terra detected the compounded distress, scored the opportunity at 87, and surfaced a recommendation to open a diligence file with a defensive offer band of $1.95M – $2.10M.',
     propertyId: 'dp-001',
     address: '1847 Flatbush Ave, Brooklyn NY 11210',
     propertyType: 'Multifamily — 12 units',
@@ -70,14 +70,14 @@ export const TERRA_DISTRESS_NARRATIVE = {
       title:
         '1847 Flatbush Ave — Tax lien filed against active lis pendens property (136 days in distress)',
       body: "GreenHouse Realty LLC's 12-unit multifamily at 1847 Flatbush Ave is now under compounded distress. Lis pendens has been active for 136 days with no cure plan. NYC Department of Finance filed a $147,000 tax lien on 2026-04-13. Estimated equity cushion remains 45%. Owner has not responded to lender's last 3 outreach attempts. Opportunity score: 87.",
-      source: 'DOMAINE — Distress Engine + ACRIS / NYC Department of Finance feed',
+      source: 'Terra — Distress Engine + ACRIS / NYC Department of Finance feed',
       confidence: 0.94,
       detectedAt: '2026-04-14T08:42:00Z',
     },
     context: {
       id: 'demo-context-terra-001',
       summary:
-        'DOMAINE assembled 11 signals across title, tax, ownership, comparable sales, climate, zoning, rent roll, and lender posture into a single Property Twin.',
+        'Terra assembled 11 signals across title, tax, ownership, comparable sales, climate, zoning, rent roll, and lender posture into a single Property Twin.',
       signals: [
         {
           source: 'Title',
@@ -123,7 +123,7 @@ export const TERRA_DISTRESS_NARRATIVE = {
     },
     recommendation: {
       id: 'demo-rec-terra-001',
-      agent: 'DOMAINE Underwriting Copilot',
+      agent: 'Terra Underwriting Copilot',
       action:
         'Open formal diligence file. Approach owner directly through escrow attorney with discounted-payoff offer band $1.95M – $2.10M (subject to title and rent-roll diligence). Place ARV reserve at $3.45M. Stage acquisition through SPV-Apex-BK-2026-04.',
       rationale:
@@ -146,38 +146,38 @@ export const TERRA_DISTRESS_NARRATIVE = {
       steps: [
         {
           step: 1,
-          action: 'Diligence file 1847-FLAT-2026 opened in DOMAINE Diligence Room',
-          tool: 'DOMAINE Diligence Room',
+          action: 'Diligence file 1847-FLAT-2026 opened in Terra Diligence Room',
+          tool: 'Terra Diligence Room',
         },
         {
           step: 2,
           action: 'Title abstract ordered through First American — ETA 2026-04-17',
-          tool: 'FORGE Title Connector',
+          tool: 'Counsel Title Connector',
         },
         {
           step: 3,
           action: 'Standing offer letter generated and queued through Cohen & Park escrow',
-          tool: 'DOMAINE Document Engine',
+          tool: 'Terra Document Engine',
         },
         {
           step: 4,
           action: 'Comparable sales packet exported with 3-comp narrative + ARV bridge',
-          tool: 'DOMAINE Comps Export',
+          tool: 'Terra Comps Export',
         },
         {
           step: 5,
           action: 'Rent-roll abstraction job queued — 12 leases',
-          tool: 'DOMAINE Lease Abstraction',
+          tool: 'Terra Lease Abstraction',
         },
         {
           step: 6,
           action: "GreenHouse Realty LLC's other 4 properties added to watchlist",
-          tool: 'DOMAINE Watchlist',
+          tool: 'Terra Watchlist',
         },
         {
           step: 7,
           action: 'SPV-Apex-BK-2026-04 staged in pipeline at offer band $1.95M – $2.10M',
-          tool: 'DOMAINE Pipeline',
+          tool: 'Terra Pipeline',
         },
       ],
       completedAt: '2026-04-14T13:08:00Z',
@@ -198,7 +198,7 @@ export const TERRA_DISTRESS_NARRATIVE = {
       id: 'demo-exsummary-terra-001',
       headline:
         '1847 Flatbush — Compounded distress detected, defensive offer accepted in 9 days, ARV upside $1.4M',
-      body: "DOMAINE detected a tax lien stacking onto a 136-day lis pendens, scored the opportunity at 87, and surfaced a defensive acquisition recommendation. Managing Partner approved in 2.5 hours. Diligence file opened, title ordered, comps exported, rent roll abstracted, and a watchlist created for the LLC's other holdings — all within the same business day. Owner counter accepted at $2.05M against a $3.45M ARV. Proof chain complete.",
+      body: "Terra detected a tax lien stacking onto a 136-day lis pendens, scored the opportunity at 87, and surfaced a defensive acquisition recommendation. Managing Partner approved in 2.5 hours. Diligence file opened, title ordered, comps exported, rent roll abstracted, and a watchlist created for the LLC's other holdings — all within the same business day. Owner counter accepted at $2.05M against a $3.45M ARV. Proof chain complete.",
       generatedAt: '2026-04-23T11:00:00Z',
     },
     proofChain: {
@@ -207,13 +207,13 @@ export const TERRA_DISTRESS_NARRATIVE = {
         {
           timestamp: '2026-04-14T08:42:00Z',
           event: 'Compounded distress detected',
-          actor: 'DOMAINE Distress Engine',
+          actor: 'Terra Distress Engine',
           source: 'ACRIS + NYC DOF feed',
         },
         {
           timestamp: '2026-04-14T08:46:00Z',
           event: 'Underwriting recommendation generated',
-          actor: 'DOMAINE Underwriting Copilot',
+          actor: 'Terra Underwriting Copilot',
           aiModel: 'Terra-UW-v2',
           confidence: 0.91,
         },
@@ -221,12 +221,12 @@ export const TERRA_DISTRESS_NARRATIVE = {
           timestamp: '2026-04-14T11:20:00Z',
           event: 'Recommendation approved — Marcus Holt',
           actor: 'Marcus Holt',
-          tool: 'DOMAINE Approval Gate',
+          tool: 'Terra Approval Gate',
         },
         {
           timestamp: '2026-04-14T13:08:00Z',
           event: 'All execution steps confirmed — diligence file open, offer queued',
-          actor: 'DOMAINE',
+          actor: 'Terra',
           reference: '1847-FLAT-2026',
         },
         {
@@ -245,21 +245,21 @@ export const TERRA_DISTRESS_NARRATIVE = {
       step: 'Distress Signal',
       duration: '2 min',
       narrative:
-        'Marcus opens the DOMAINE dashboard. A high-priority signal is at the top: 1847 Flatbush Ave is now under compounded distress — an active lis pendens AND a brand-new tax lien. DOMAINE detected this automatically from ACRIS and NYC DOF feeds — not from a broker email.',
+        'Marcus opens the Terra dashboard. A high-priority signal is at the top: 1847 Flatbush Ave is now under compounded distress — an active lis pendens AND a brand-new tax lien. Terra detected this automatically from ACRIS and NYC DOF feeds — not from a broker email.',
       showIn: ['terra/dashboard', 'terra/distress-engine', 'terra/distress-radar'],
     },
     {
       step: 'Property Twin Assembly',
       duration: '2 min',
       narrative:
-        'DOMAINE builds the Property Twin: 11 signals — title status, tax filings, ownership graph, lender posture, 3 fresh comps, rent roll with below-market leases, climate band, zoning, permits, owner outreach history, and the likely auction window. One surface — no tab switching.',
+        'Terra builds the Property Twin: 11 signals — title status, tax filings, ownership graph, lender posture, 3 fresh comps, rent roll with below-market leases, climate band, zoning, permits, owner outreach history, and the likely auction window. One surface — no tab switching.',
       showIn: ['terra/property/dp-001', 'terra/property-twin-view', 'terra/ownership-graph'],
     },
     {
       step: 'Underwriting Recommendation',
       duration: '2 min',
       narrative:
-        "DOMAINE's Underwriting Copilot recommends a defensive offer band of $1.95M – $2.10M with an ARV reserve of $3.45M. Rationale spans equity cushion, comps, rent-roll upside, clean zoning, and disengaged owner. Confidence 91%.",
+        "Terra's Underwriting Copilot recommends a defensive offer band of $1.95M – $2.10M with an ARV reserve of $3.45M. Rationale spans equity cushion, comps, rent-roll upside, clean zoning, and disengaged owner. Confidence 91%.",
       showIn: ['terra/underwriting-copilot', 'terra/why-this-property', 'terra/comparable-sales'],
     },
     {
@@ -273,7 +273,7 @@ export const TERRA_DISTRESS_NARRATIVE = {
       step: 'Diligence Execution',
       duration: '2 min',
       narrative:
-        "DOMAINE opens the diligence file, orders title, generates the standing offer letter, exports the comparable sales packet, abstracts the rent roll, adds the LLC's 4 other properties to watchlist, and stages the SPV — all within the same business day.",
+        "Terra opens the diligence file, orders title, generates the standing offer letter, exports the comparable sales packet, abstracts the rent roll, adds the LLC's 4 other properties to watchlist, and stages the SPV — all within the same business day.",
       showIn: ['terra/diligence-room', 'terra/document-engine', 'terra/lease-abstraction'],
     },
     {

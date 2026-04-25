@@ -31,7 +31,7 @@ const CASE_STUDY = {
     market:
       'Financial District office absorption running at 2.1% — one of the lowest submarkets in NYC. Comparable sales averaging $410–480 psf.',
     brokerContext:
-      'DOMAINE Commercial had the exclusive. Agent Chen was managing 6 active listings. No dedicated inquiry classification or routing was in use.',
+      'Terra Commercial had the exclusive. Agent Chen was managing 6 active listings. No dedicated inquiry classification or routing was in use.',
   },
   constraints: [
     'Owner required close within 90 days of listing expiration',
@@ -41,12 +41,12 @@ const CASE_STUDY = {
   ],
   system: {
     headline:
-      'DOMAINE Distress Engine surfaced the debt maturity signal. Inquiry Routing filtered and routed the right buyer.',
+      'Terra Distress Engine surfaced the debt maturity signal. Inquiry Routing filtered and routed the right buyer.',
     steps: [
       {
         label: 'Distress Engine',
         description:
-          'DOMAINE flagged the debt maturity event and long DOM combination. Opportunity score recalibrated to 78 after manual review override — signaling motivated seller, not weak asset.',
+          'Terra flagged the debt maturity event and long DOM combination. Opportunity score recalibrated to 78 after manual review override — signaling motivated seller, not weak asset.',
       },
       {
         label: 'Inquiry Classification',
@@ -66,12 +66,12 @@ const CASE_STUDY = {
       {
         label: 'Showing Coordination',
         description:
-          'DOMAINE logged showing date, attendees, and follow-up cadence. Agent returned next action within 24 hours of each touchpoint.',
+          'Terra logged showing date, attendees, and follow-up cadence. Agent returned next action within 24 hours of each touchpoint.',
       },
     ],
   },
   howItWorked:
-    'Cerberus submitted a full-price cash offer at $118M within 12 days of first contact. DOMAINE tracked every inquiry touchpoint, routing decision, and agent action in the audit trail. Close completed in 61 days from offer submission.',
+    'Cerberus submitted a full-price cash offer at $118M within 12 days of first contact. Terra tracked every inquiry touchpoint, routing decision, and agent action in the audit trail. Close completed in 61 days from offer submission.',
   outcome: {
     closedAt: '$118,000,000',
     daysFromSignal: 61,
@@ -89,7 +89,7 @@ const CASE_STUDY = {
     { label: 'Commission earned', value: '$2.36M', color: TERRA_ACCENT },
   ],
   whyItMatters:
-    "This wasn't a hard-to-sell building — it was a misrouted opportunity. The distress signal was real. The buyer was real. The gap was the system connecting them. DOMAINE's Inquiry Routing Engine and Distress Signal layer closed that gap in 60 days.",
+    "This wasn't a hard-to-sell building — it was a misrouted opportunity. The distress signal was real. The buyer was real. The gap was the system connecting them. Terra's Inquiry Routing Engine and Distress Signal layer closed that gap in 60 days.",
 };
 
 const fadeUp = {

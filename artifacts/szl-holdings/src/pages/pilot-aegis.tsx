@@ -48,8 +48,8 @@ const TRUST_CONTROLS = [
 
 export default function PilotAegisPage() {
   const __pageMeta = usePageMeta({
-    title: "Pilot — PARAGON — SZL Holdings",
-    description: "PARAGON pilot: instrument one security operations workflow with official threat intelligence, governance controls, and proof chain output. 30/60/90 day success path.",
+    title: "Pilot — Aegis — SZL Holdings",
+    description: "Aegis pilot: instrument one security operations workflow with official threat intelligence, governance controls, and proof chain output. 30/60/90 day success path.",
     canonical: "https://szlholdings.com/pilot/aegis",
   });
 
@@ -65,13 +65,13 @@ export default function PilotAegisPage() {
             <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#c45a4a]/20 bg-[#c45a4a]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#c45a4a]">
                 <ShieldAlert className="h-3.5 w-3.5" />
-                PARAGON Pilot
+                Aegis Pilot
               </div>
               <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
                 One threat category instrumented. Readiness proven with real threat intelligence.
               </h1>
               <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
-                The PARAGON pilot takes one security operations workflow — from vulnerability detection and official
+                The Aegis pilot takes one security operations workflow — from vulnerability detection and official
                 threat enrichment through exposure prioritization, governance review, and response authorization —
                 and instruments it with real-time observability, authoritative threat intelligence, and governed
                 execution. Not a SIEM alert. A structured proof of security readiness improvement.
@@ -124,7 +124,7 @@ export default function PilotAegisPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Integration requirements</p>
               <h2 className="mt-3 text-2xl font-semibold text-white">Official threat intelligence sources used in the pilot</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">
-                PARAGON enriches Threat Twins with authoritative government and vendor threat intelligence. Every risk
+                Aegis enriches Threat Twins with authoritative government and vendor threat intelligence. Every risk
                 score is traceable to its originating source — CISA, NIST, or vendor advisory.
               </p>
               <div className="mt-6 space-y-2">
@@ -275,7 +275,7 @@ export default function PilotAegisPage() {
                     Open live TENAX app <ArrowRight className="h-4 w-4" />
                   </a>
                   <Link href="/solutions/aegis" className="inline-flex items-center gap-2 rounded-xl border border-white/12 px-5 py-2.5 text-sm font-semibold text-white/75 transition hover:border-white/25 hover:bg-white/5">
-                    PARAGON product overview
+                    Aegis product overview
                   </Link>
                 </div>
               </div>

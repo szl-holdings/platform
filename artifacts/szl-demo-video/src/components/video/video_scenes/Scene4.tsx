@@ -66,7 +66,7 @@ export function Scene4() {
               transition={easeOutFast}
             >
               <div className="font-mono text-[0.6vw] text-[var(--color-vessels)] mb-[0.5vh]">
-                MARITIME (SEXTANT)
+                MARITIME (Vessels)
               </div>
               <div className="font-body text-[1vw] text-[var(--color-text-primary)] font-medium leading-snug">
                 Sanctioned tanker PACIFIC MERIDIAN detected in Gulf.
@@ -90,7 +90,7 @@ export function Scene4() {
               transition={easeOutFast}
             >
               <div className="font-mono text-[0.6vw] text-[var(--color-terra)] mb-[0.5vh]">
-                REAL ESTATE (DOMAINE)
+                REAL ESTATE (Terra)
               </div>
               <div className="font-body text-[1vw] text-[var(--color-text-primary)] font-medium leading-snug">
                 Counterparty exposure to Meridian Tower lessee.

@@ -222,7 +222,7 @@ export default function PiracySanctionsPage() {
           </div>
           <div className="text-right">
             <p className="text-lg font-bold font-mono text-orange-400">{DARK_VESSELS.length}</p>
-            <p className="text-[9px] text-sky-400/40">Dark SEXTANT</p>
+            <p className="text-[9px] text-sky-400/40">Dark Vessels</p>
           </div>
           <div className="text-right">
             <p className="text-lg font-bold font-mono text-amber-400">
@@ -345,7 +345,7 @@ export default function PiracySanctionsPage() {
               AIS Dark-Vessel Detection
             </p>
             <p className="text-[10px] text-sky-400/50">
-              SEXTANT detected via satellite AIS correlation, RF spectrum analysis, and optical
+              Vessels detected via satellite AIS correlation, RF spectrum analysis, and optical
               imagery cross-referencing when transponder is off or manipulated.
             </p>
           </div>

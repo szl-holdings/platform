@@ -157,7 +157,7 @@ export async function seedConstellationDemo(): Promise<ConstellationSeedResult> 
       labels: ['physical-security', 'access-control', 'demo'],
       name: 'Harbor View Tower — Unauthorized Access Incident',
       description:
-        'Security breach: unauthorized personnel accessed server room on Floor 12 during the title dispute discovery period. PARAGON flagged correlation with litigation timeline as a potential evidence-tampering risk.',
+        'Security breach: unauthorized personnel accessed server room on Floor 12 during the title dispute discovery period. Aegis flagged correlation with litigation timeline as a potential evidence-tampering risk.',
       provenance: provenance('aegis-demo-seed'),
       confidence: 0.85,
       sensitivityTier: 'restricted',
@@ -188,7 +188,7 @@ export async function seedConstellationDemo(): Promise<ConstellationSeedResult> 
       labels: ['revenue', 'occupancy', 'real-estate', 'demo'],
       name: 'Harbor View Tower — Occupancy Revenue Decline',
       description:
-        'KORA detected a 23% QoQ occupancy revenue decline at Harbor View Tower. Correlated with the ongoing title dispute uncertainty and the physical security incident. AI recommendation: engage distressed asset advisory.',
+        'Lyte detected a 23% QoQ occupancy revenue decline at Harbor View Tower. Correlated with the ongoing title dispute uncertainty and the physical security incident. AI recommendation: engage distressed asset advisory.',
       provenance: provenance('lyte-demo-seed'),
       confidence: 0.91,
       sensitivityTier: 'internal',

@@ -8,7 +8,7 @@ const TRUST_PILLARS = [
   {
     icon: UserCheck,
     name: "Human-in-the-loop by architecture",
-    desc: "Human approval is not a policy configuration in KORA + FORGE — it is a structural property of the platform. The signal-to-action pipeline cannot route from AI recommendation to execution without passing through a human decision gate. This is enforced at the architecture level, not the policy level.",
+    desc: "Human approval is not a policy configuration in Lyte + Counsel — it is a structural property of the platform. The signal-to-action pipeline cannot route from AI recommendation to execution without passing through a human decision gate. This is enforced at the architecture level, not the policy level.",
   },
   {
     icon: Lock,
@@ -57,7 +57,7 @@ const DOMAIN_CONSIDERATIONS = [
     ],
   },
   {
-    domain: "Maritime (SEXTANT)",
+    domain: "Maritime (Vessels)",
     items: [
       "OFAC sanctions screening on all counterparties and destinations",
       "SOLAS and ISM compliance context integrated into risk scoring",
@@ -66,7 +66,7 @@ const DOMAIN_CONSIDERATIONS = [
     ],
   },
   {
-    domain: "Security (PARAGON)",
+    domain: "Security (Aegis)",
     items: [
       "NIST and SOC 2 framework alignment in all governance report outputs",
       "Authorized security team approval for all remediation recommendations",
@@ -75,7 +75,7 @@ const DOMAIN_CONSIDERATIONS = [
     ],
   },
   {
-    domain: "Real estate (DOMAINE)",
+    domain: "Real estate (Terra)",
     items: [
       "Official data provenance — all enrichment traces to PLUTO, FEMA, Census, or county records",
       "Investment committee approval required for all diligence export packets",
@@ -88,7 +88,7 @@ const DOMAIN_CONSIDERATIONS = [
 export default function DocsTrustPage() {
   const __pageMeta = usePageMeta({
     title: "Trust — Docs — SZL Holdings",
-    description: "Technical trust documentation for KORA + FORGE: human-in-the-loop architecture, immutable audit trail, proof chain, role-scoped access, and domain-specific governance.",
+    description: "Technical trust documentation for Lyte + Counsel: human-in-the-loop architecture, immutable audit trail, proof chain, role-scoped access, and domain-specific governance.",
     canonical: "https://szlholdings.com/docs/trust",
   });
 
@@ -114,7 +114,7 @@ export default function DocsTrustPage() {
                 Trust documentation.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-white/65">
-                Trust in the KORA + FORGE platform is an architectural property, not a product feature.
+                Trust in the Lyte + Counsel platform is an architectural property, not a product feature.
                 This page documents the trust controls, governance commitments, and domain-specific compliance
                 considerations that apply across all verticals and all operator environments.
               </p>

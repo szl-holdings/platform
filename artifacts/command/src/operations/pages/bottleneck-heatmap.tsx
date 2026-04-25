@@ -40,7 +40,7 @@ interface BottleneckChain {
 
 const HEAT_GRID: HeatCell[] = [
   {
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     function: 'Fleet Approvals',
     level: 'critical',
     blockedItems: 5,
@@ -51,7 +51,7 @@ const HEAT_GRID: HeatCell[] = [
     value: '$3.1M',
   },
   {
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     function: 'Charter Contracts',
     level: 'high',
     blockedItems: 2,
@@ -62,7 +62,7 @@ const HEAT_GRID: HeatCell[] = [
     value: '$890K',
   },
   {
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     function: 'Fuel Procurement',
     level: 'high',
     blockedItems: 3,
@@ -73,7 +73,7 @@ const HEAT_GRID: HeatCell[] = [
     value: '$1.2M',
   },
   {
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     function: 'Route Planning',
     level: 'medium',
     blockedItems: 1,
@@ -84,7 +84,7 @@ const HEAT_GRID: HeatCell[] = [
     value: '$320K',
   },
   {
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     function: 'Port Clearance',
     level: 'medium',
     blockedItems: 2,
@@ -139,7 +139,7 @@ const HEAT_GRID: HeatCell[] = [
     value: '$0',
   },
   {
-    pack: 'DOMAINE',
+    pack: 'Terra',
     function: 'Lease Renewals',
     level: 'high',
     blockedItems: 2,
@@ -150,7 +150,7 @@ const HEAT_GRID: HeatCell[] = [
     value: '$320K',
   },
   {
-    pack: 'DOMAINE',
+    pack: 'Terra',
     function: 'Asset Refinancing',
     level: 'medium',
     blockedItems: 1,
@@ -161,7 +161,7 @@ const HEAT_GRID: HeatCell[] = [
     value: '$290K',
   },
   {
-    pack: 'DOMAINE',
+    pack: 'Terra',
     function: 'Inspections',
     level: 'low',
     blockedItems: 0,
@@ -172,7 +172,7 @@ const HEAT_GRID: HeatCell[] = [
     value: '$0',
   },
   {
-    pack: 'DOMAINE',
+    pack: 'Terra',
     function: 'Tenant Comms',
     level: 'clear',
     blockedItems: 0,
@@ -183,7 +183,7 @@ const HEAT_GRID: HeatCell[] = [
     value: '$0',
   },
   {
-    pack: 'PARAGON',
+    pack: 'Aegis',
     function: 'Vendor Onboarding',
     level: 'medium',
     blockedItems: 1,
@@ -194,7 +194,7 @@ const HEAT_GRID: HeatCell[] = [
     value: '$140K',
   },
   {
-    pack: 'PARAGON',
+    pack: 'Aegis',
     function: 'Threat Assessments',
     level: 'low',
     blockedItems: 0,
@@ -205,7 +205,7 @@ const HEAT_GRID: HeatCell[] = [
     value: '$0',
   },
   {
-    pack: 'PARAGON',
+    pack: 'Aegis',
     function: 'Access Controls',
     level: 'clear',
     blockedItems: 0,
@@ -216,7 +216,7 @@ const HEAT_GRID: HeatCell[] = [
     value: '$0',
   },
   {
-    pack: 'PARAGON',
+    pack: 'Aegis',
     function: 'Audit Compliance',
     level: 'clear',
     blockedItems: 0,
@@ -231,7 +231,7 @@ const HEAT_GRID: HeatCell[] = [
 const CHAINS: BottleneckChain[] = [
   {
     id: 'CHN-001',
-    title: 'SEXTANT fleet ETA compliance failure chain',
+    title: 'Vessels fleet ETA compliance failure chain',
     steps: [
       { label: 'Fuel pricing submitted', status: 'clear' },
       { label: 'Finance VP approval', status: 'blocked', age: '22h' },
@@ -241,7 +241,7 @@ const CHAINS: BottleneckChain[] = [
     ],
     totalAge: '22h',
     impact: '$2.1M',
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
   },
   {
@@ -261,7 +261,7 @@ const CHAINS: BottleneckChain[] = [
   },
   {
     id: 'CHN-003',
-    title: 'DOMAINE lease renewal legal hold chain',
+    title: 'Terra lease renewal legal hold chain',
     steps: [
       { label: 'Tenant signature received', status: 'clear' },
       { label: 'Exhibit B required', status: 'blocked', age: '48h' },
@@ -270,7 +270,7 @@ const CHAINS: BottleneckChain[] = [
     ],
     totalAge: '48h',
     impact: '$320K',
-    pack: 'DOMAINE',
+    pack: 'Terra',
     packColor: '#a07848',
   },
 ];
@@ -315,7 +315,7 @@ const OWNER_CONFIDENCE_COLORS: Record<string, string> = {
   gap: '#c45a4a',
 };
 
-const PACKS = ['All', 'SEXTANT', 'PRAXIS', 'DOMAINE', 'PARAGON'];
+const PACKS = ['All', 'Vessels', 'PRAXIS', 'Terra', 'Aegis'];
 const PACK_COLORS: Record<string, string> = {
   SEXTANT: '#38bdf8',
   PRISM: '#d4a054',

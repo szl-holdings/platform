@@ -8,10 +8,10 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 import { useCapabilityManifest } from "@/hooks/useCapabilityManifest";
 
 const TRUST_SOLUTION_BRIEFS: Array<{ slug: string; product: string; label: string; href: string }> = [
-  { slug: "lyte", product: "KORA (Business Observability)", label: "KORA — Decision Intelligence", href: "/briefs/lyte-solution-brief.pdf" },
-  { slug: "aegis", product: "PARAGON (Defense & Intelligence)", label: "PARAGON — Unified Defense", href: "/briefs/aegis-solution-brief.pdf" },
-  { slug: "vessels", product: "SEXTANT (Maritime Intelligence)", label: "SEXTANT — Maritime Intelligence", href: "/briefs/vessels-solution-brief.pdf" },
-  { slug: "terra", product: "DOMAINE (Real Estate Intelligence)", label: "DOMAINE — Real Estate Intelligence", href: "/briefs/terra-solution-brief.pdf" },
+  { slug: "lyte", product: "Lyte (Business Observability)", label: "Lyte — Decision Intelligence", href: "/briefs/lyte-solution-brief.pdf" },
+  { slug: "aegis", product: "Aegis (Defense & Intelligence)", label: "Aegis — Unified Defense", href: "/briefs/aegis-solution-brief.pdf" },
+  { slug: "vessels", product: "Vessels (Maritime Intelligence)", label: "Vessels — Maritime Intelligence", href: "/briefs/vessels-solution-brief.pdf" },
+  { slug: "terra", product: "Terra (Real Estate Intelligence)", label: "Terra — Real Estate Intelligence", href: "/briefs/terra-solution-brief.pdf" },
   { slug: "carlota-jo", product: "Carlota Jo (Private Advisory)", label: "Carlota Jo — Private Advisory", href: "/briefs/carlota-jo-solution-brief.pdf" },
 ];
 
@@ -24,7 +24,7 @@ const sections = [
     content: [
       {
         label: "Observe, Execute, Verify",
-        body: "KORA + FORGE is built around three layers: signal ingestion (observability), action routing (execution), and outcome confirmation (accountability). Each layer has a defined function and a defined interface. Signals surface at the observability layer and compound into decisions at the execution layer.",
+        body: "Lyte + Counsel is built around three layers: signal ingestion (observability), action routing (execution), and outcome confirmation (accountability). Each layer has a defined function and a defined interface. Signals surface at the observability layer and compound into decisions at the execution layer.",
       },
       {
         label: "Explicit state",
@@ -32,7 +32,7 @@ const sections = [
       },
       {
         label: "Generalized architecture",
-        body: "The same architecture extends across verticals — DOMAINE, SEXTANT, PARAGON, Carlota Jo. Common event schema, entity model, and API layer. This is the prerequisite for cross-domain traceability.",
+        body: "The same architecture extends across verticals — Terra, Vessels, Aegis, Carlota Jo. Common event schema, entity model, and API layer. This is the prerequisite for cross-domain traceability.",
       },
     ],
   },

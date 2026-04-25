@@ -130,7 +130,7 @@ export async function seedPlatformData(): Promise<void> {
       .values([
         {
           key: 'alloy',
-          name: 'FORGE',
+          name: 'Counsel',
           description:
             'Execution Fabric — signal ingest, workflow orchestration, artifact management',
           category: 'platform' as const,
@@ -152,7 +152,7 @@ export async function seedPlatformData(): Promise<void> {
         },
         {
           key: 'terra',
-          name: 'DOMAINE',
+          name: 'Terra',
           description: 'Predictive intelligence and business analytics',
           category: 'intelligence' as const,
           isActive: true,

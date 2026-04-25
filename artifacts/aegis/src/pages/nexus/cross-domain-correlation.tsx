@@ -47,7 +47,7 @@ const SIGNALS: DomainSignal[] = [
   {
     id: 'SIG-001',
     domain: 'maritime',
-    source: 'SEXTANT AIS Feed',
+    source: 'Vessels AIS Feed',
     timestamp: '2024-03-15T14:22:00Z',
     signal: '3 LNG carriers diverted from Red Sea corridor — unusual rerouting pattern',
     severity: 'high',
@@ -56,7 +56,7 @@ const SIGNALS: DomainSignal[] = [
   {
     id: 'SIG-002',
     domain: 'cyber',
-    source: 'PARAGON Threat Intel',
+    source: 'Aegis Threat Intel',
     timestamp: '2024-03-15T14:18:00Z',
     signal: 'APT-41 infrastructure detected targeting shipping logistics companies',
     severity: 'critical',
@@ -83,7 +83,7 @@ const SIGNALS: DomainSignal[] = [
   {
     id: 'SIG-005',
     domain: 'real-estate',
-    source: 'DOMAINE Intel',
+    source: 'Terra Intel',
     timestamp: '2024-03-15T13:30:00Z',
     signal: 'Port-adjacent warehouse vacancy rates dropping in Rotterdam & Singapore',
     severity: 'medium',
@@ -92,7 +92,7 @@ const SIGNALS: DomainSignal[] = [
   {
     id: 'SIG-006',
     domain: 'infrastructure',
-    source: 'KORA AIOps',
+    source: 'Lyte AIOps',
     timestamp: '2024-03-15T13:15:00Z',
     signal: 'CDN edge node latency spike in MENA region — possible infrastructure targeting',
     severity: 'high',
@@ -101,7 +101,7 @@ const SIGNALS: DomainSignal[] = [
   {
     id: 'SIG-007',
     domain: 'maritime',
-    source: 'SEXTANT Fleet',
+    source: 'Vessels Fleet',
     timestamp: '2024-03-15T12:55:00Z',
     signal: 'Dark vessel activity increase near Bab al-Mandab strait — 4 AIS gaps detected',
     severity: 'critical',
@@ -110,7 +110,7 @@ const SIGNALS: DomainSignal[] = [
   {
     id: 'SIG-008',
     domain: 'cyber',
-    source: 'PARAGON SIEM',
+    source: 'Aegis SIEM',
     timestamp: '2024-03-15T12:40:00Z',
     signal: 'Spear-phishing campaign targeting logistics operations teams — OceanLotus TTPs',
     severity: 'high',
@@ -157,7 +157,7 @@ const INITIAL_CORRELATIONS: Correlation[] = [
     description:
       'Vessel rerouting patterns predict increased demand at alternative ports (Rotterdam, Singapore). Warehouse vacancy rates already declining — early mover advantage window of 2-3 weeks.',
     recommendation:
-      'Accelerate Rotterdam warehouse acquisition pipeline. Lock in Singapore logistics space before pricing adjusts. Flag for DOMAINE portfolio committee review.',
+      'Accelerate Rotterdam warehouse acquisition pipeline. Lock in Singapore logistics space before pricing adjusts. Flag for Terra portfolio committee review.',
     status: 'new',
     detectedAt: '2024-03-15T14:35:00Z',
   },

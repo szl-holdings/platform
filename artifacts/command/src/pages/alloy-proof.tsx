@@ -74,11 +74,11 @@ const APPROVAL_COLOR: Record<ApprovalMode, string> = {
 };
 
 const AUTONOMY_DESCRIPTIONS: Record<AutonomyMode, string> = {
-  observe: 'Read-only — FORGE watches and logs only',
-  recommend: 'FORGE surfaces recommendations; humans decide',
-  draft: 'FORGE drafts content or plans for human review',
-  'ask-to-act': 'FORGE proposes actions and waits for explicit approval',
-  'approved-act': 'FORGE executes autonomously within approved bounds',
+  observe: 'Read-only — Counsel watches and logs only',
+  recommend: 'Counsel surfaces recommendations; humans decide',
+  draft: 'Counsel drafts content or plans for human review',
+  'ask-to-act': 'Counsel proposes actions and waits for explicit approval',
+  'approved-act': 'Counsel executes autonomously within approved bounds',
 };
 
 const DOMAIN_OPTIONS = ['aegis', 'vessels', 'terra', 'prism', 'pulse', 'custom'];
@@ -456,7 +456,7 @@ export function AlloyProofPage() {
             </span>
           </div>
           <div style={{ fontSize: 26, fontWeight: 800, color: '#f8fafc', letterSpacing: -0.5 }}>
-            FORGE Recommendation Surface
+            Counsel Recommendation Surface
           </div>
           <div style={{ fontSize: 14, color: '#64748b', marginTop: 4 }}>
             Every recommendation carries a full proof envelope — evidence, freshness, confidence,
@@ -601,7 +601,7 @@ export function AlloyProofPage() {
             transition: 'background 0.2s',
           }}
         >
-          {loading ? 'Running through FORGE…' : 'Generate Recommendation via FORGE'}
+          {loading ? 'Running through Counsel…' : 'Generate Recommendation via Counsel'}
         </button>
 
         {error && (
@@ -678,7 +678,7 @@ export function AlloyProofPage() {
               marginBottom: 10,
             }}
           >
-            FORGE Runtime — Five Autonomy Modes
+            Counsel Runtime — Five Autonomy Modes
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {(Object.entries(AUTONOMY_DESCRIPTIONS) as [AutonomyMode, string][]).map(

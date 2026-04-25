@@ -221,7 +221,7 @@ describe('Phase 2: Evidence-Based Recommendation', () => {
 
 // ─── Vertical Workflow Packs ──────────────────────────────────────────────────
 
-describe('Vertical: KORA — Operational Drift Review', () => {
+describe('Vertical: Lyte — Operational Drift Review', () => {
   it('dry-run completes', async () => {
     const { lyteOperationalDriftWorkflow } = await import('./lyte-operational-drift.js');
     const rt = makeSyntheticRuntime();
@@ -258,7 +258,7 @@ describe('Vertical: KORA — Operational Drift Review', () => {
   });
 });
 
-describe('Vertical: PARAGON — Threat Triage', () => {
+describe('Vertical: Aegis — Threat Triage', () => {
   it('dry-run produces triage stage results', async () => {
     const { aegisThreatTriageWorkflow } = await import('./aegis-threat-triage.js');
     const rt = makeSyntheticRuntime();
@@ -284,7 +284,7 @@ describe('Vertical: PARAGON — Threat Triage', () => {
   });
 });
 
-describe('Vertical: SEXTANT — Voyage Anomaly Review', () => {
+describe('Vertical: Vessels — Voyage Anomaly Review', () => {
   it('dry-run completes voyage anomaly pipeline', async () => {
     const { vesselsVoyageAnomalyWorkflow } = await import('./vessels-voyage-anomaly.js');
     const rt = makeSyntheticRuntime();
@@ -315,7 +315,7 @@ describe('Vertical: SEXTANT — Voyage Anomaly Review', () => {
   });
 });
 
-describe('Vertical: DOMAINE — Portfolio Anomaly', () => {
+describe('Vertical: Terra — Portfolio Anomaly', () => {
   it('dry-run identifies portfolio anomaly stages', async () => {
     const { terraPortfolioAnomalyWorkflow } = await import('./terra-portfolio-anomaly.js');
     const rt = makeSyntheticRuntime();

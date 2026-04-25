@@ -6,9 +6,9 @@
  * network, no mocks required.
  *
  * Context:
- *   - Task #1439 renamed "INCA AI Research" → "AI Research Lab" (2026-04-23).
+ *   - Task #1439 renamed "Counsel AI Research" → "AI Research Lab" (2026-04-23).
  *     The slug, route path, and appSlug remain "inca" — only display names changed.
- *   - If a future edit reverts the display name back to an INCA-branded string,
+ *   - If a future edit reverts the display name back to an Counsel-branded string,
  *     this test will catch it immediately.
  */
 
@@ -23,12 +23,12 @@ describe('brand-name regressions', () => {
       expect(incaApp).toBeDefined();
     });
 
-    it('display name is "AI Research Lab" — not the deprecated INCA brand', () => {
+    it('display name is "AI Research Lab" — not the deprecated Counsel brand', () => {
       expect(incaApp?.name).toBe('AI Research Lab');
     });
 
-    it('does not contain the deprecated "INCA" string in the display name', () => {
-      expect(incaApp?.name).not.toMatch(/INCA/i);
+    it('does not contain the deprecated "Counsel" string in the display name', () => {
+      expect(incaApp?.name).not.toMatch(/Counsel/i);
     });
   });
 });

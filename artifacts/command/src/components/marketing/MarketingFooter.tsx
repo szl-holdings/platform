@@ -21,22 +21,22 @@ export function MarketingFooter() {
           <ul className="space-y-3">
             <li>
               <Link href="/marketing/apps/aegis" className="hover:text-white transition-colors">
-                PARAGON
+                Aegis
               </Link>
             </li>
             <li>
               <Link href="/marketing/apps/vessels" className="hover:text-white transition-colors">
-                SEXTANT
+                Vessels
               </Link>
             </li>
             <li>
               <Link href="/marketing/apps/terra" className="hover:text-white transition-colors">
-                DOMAINE
+                Terra
               </Link>
             </li>
             <li>
               <Link href="/marketing/apps/lyte" className="hover:text-white transition-colors">
-                KORA
+                Lyte
               </Link>
             </li>
             <li>

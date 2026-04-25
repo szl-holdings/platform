@@ -15,7 +15,7 @@ export default function LegalPrivacyPage() {
         </div>
         <div className="space-y-6 text-[14px] text-sky-300/50 leading-relaxed">
           <p>
-            SEXTANT, operated by SZL Holdings, processes personal data only as required to deliver
+            Vessels, operated by SZL Holdings, processes personal data only as required to deliver
             the maritime intelligence platform and respond to enquiries.
           </p>
           <h2 className="text-[16px] font-bold text-sky-200">Data we collect</h2>
@@ -25,7 +25,7 @@ export default function LegalPrivacyPage() {
           </p>
           <h2 className="text-[16px] font-bold text-sky-200">How we use it</h2>
           <p>
-            To operate the SEXTANT platform, respond to demo and commercial enquiries, and improve
+            To operate the Vessels platform, respond to demo and commercial enquiries, and improve
             product experience through aggregated analytics.
           </p>
           <h2 className="text-[16px] font-bold text-sky-200">Data security</h2>

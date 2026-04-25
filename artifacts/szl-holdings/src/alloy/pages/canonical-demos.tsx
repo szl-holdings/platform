@@ -65,10 +65,10 @@ const DEMO_CONFIGS: Record<
         label: 'Agent Processes',
         phase: 'agent',
         description:
-          'FORGE routes to Finance agent (KORA). Cross-references vendor history, contract terms, and similar invoices. Identifies: no corresponding PO, vendor flagged for duplicate billing in Q1.',
+          'Counsel routes to Finance agent (Lyte). Cross-references vendor history, contract terms, and similar invoices. Identifies: no corresponding PO, vendor flagged for duplicate billing in Q1.',
         icon: <Zap className="w-3.5 h-3.5" />,
         durationMs: 1800,
-        evidence: 'KORA confidence: 88% · 3 evidence sources · Maker-checker: Sentinel validated',
+        evidence: 'Lyte confidence: 88% · 3 evidence sources · Maker-checker: Sentinel validated',
       },
       {
         id: 3,
@@ -129,7 +129,7 @@ const DEMO_CONFIGS: Record<
     audience: 'Ops & Finance Buyers',
     duration: '~4 min',
     tagline:
-      'Manual workflow → FORGE automates → evidence retrieval → resolution → time savings shown',
+      'Manual workflow → Counsel automates → evidence retrieval → resolution → time savings shown',
     icon: <Zap className="w-4 h-4" />,
     color: '#4B8BDB',
     steps: [
@@ -145,7 +145,7 @@ const DEMO_CONFIGS: Record<
       },
       {
         id: 2,
-        label: 'FORGE Activates Research Agent',
+        label: 'Counsel Activates Research Agent',
         phase: 'agent',
         description:
           'AI research agent dispatched. Queries: company financials, press coverage, product releases, patent filings, LinkedIn headcount changes, pricing data.',
@@ -158,7 +158,7 @@ const DEMO_CONFIGS: Record<
         label: 'Evidence Retrieved & Synthesized',
         phase: 'decision',
         description:
-          'Apex Systems: $42M ARR (est), 22% YoY growth, 3 new enterprise wins this quarter. Product gap: no mobile-native workflow. Pricing: 15% above FORGE list.',
+          'Apex Systems: $42M ARR (est), 22% YoY growth, 3 new enterprise wins this quarter. Product gap: no mobile-native workflow. Pricing: 15% above Counsel list.',
         icon: <FileText className="w-3.5 h-3.5" />,
         durationMs: 800,
         evidence: '14 sources · 3 evidence chains · Confidence markers per claim',
@@ -203,17 +203,17 @@ const DEMO_CONFIGS: Record<
         icon: <Eye className="w-3.5 h-3.5" />,
         durationMs: 400,
         evidence:
-          'Query source: FORGE console · Agent routing: AI research agent + KORA (analytics)',
+          'Query source: Counsel console · Agent routing: AI research agent + Lyte (analytics)',
       },
       {
         id: 2,
         label: 'Multi-Source Synthesis',
         phase: 'agent',
         description:
-          'AI research agent queries Arxiv, HuggingFace, web sources, and internal knowledge. KORA correlates with platform metrics. Responses synthesized by FORGE orchestrator.',
+          'AI research agent queries Arxiv, HuggingFace, web sources, and internal knowledge. Lyte correlates with platform metrics. Responses synthesized by Counsel orchestrator.',
         icon: <Zap className="w-3.5 h-3.5" />,
         durationMs: 2400,
-        evidence: 'Agents: SZL APEX + KORA · Sources: 11 · Avg confidence: 82%',
+        evidence: 'Agents: SZL APEX + Lyte · Sources: 11 · Avg confidence: 82%',
       },
       {
         id: 3,
@@ -558,7 +558,7 @@ export default function CanonicalDemos() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#10b981' }}
             >
-              FORGE · Canonical Demos
+              Counsel · Canonical Demos
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Canonical Demo Flows</h1>

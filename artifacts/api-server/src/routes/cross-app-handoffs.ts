@@ -41,10 +41,10 @@ const HANDOFF_DEFINITIONS: Record<
     sourceDomain: 'lyte',
     targetDomain: 'global',
     sourceApp: 'Command',
-    targetApp: 'FORGE RUNTIME',
+    targetApp: 'Counsel RUNTIME',
     triggerCondition: 'Priority signal detected with severity >= high',
     governedAction:
-      'FORGE creates governed execution workflow with human-in-the-loop approval gate',
+      'Counsel creates governed execution workflow with human-in-the-loop approval gate',
     severity: 'high',
   },
   aegis_threat_to_covenant: {
@@ -63,10 +63,10 @@ const HANDOFF_DEFINITIONS: Record<
     sourceDomain: 'vessels',
     targetDomain: 'global',
     sourceApp: 'Vessels Maritime Intelligence',
-    targetApp: 'FORGE RUNTIME',
+    targetApp: 'Counsel RUNTIME',
     triggerCondition: 'Voyage anomaly or route risk detected above threshold',
     governedAction:
-      'FORGE creates command workflow for rerouting decision with compliance audit trail',
+      'Counsel creates command workflow for rerouting decision with compliance audit trail',
     severity: 'high',
   },
   terra_blocker_to_carlota: {
@@ -285,13 +285,13 @@ router.get('/cross-app/family/health', authMiddleware(), (_req: Request, res: Re
     const prismStats = prismBus.getStats();
 
     const appHealth = [
-      { app: 'Command', domain: 'lyte', status: 'active', handoffTarget: 'FORGE RUNTIME' },
+      { app: 'Command', domain: 'lyte', status: 'active', handoffTarget: 'Counsel RUNTIME' },
       { app: 'Aegis SOC', domain: 'aegis', status: 'active', handoffTarget: 'COVENANT' },
       {
         app: 'Vessels Maritime',
         domain: 'vessels',
         status: 'active',
-        handoffTarget: 'FORGE RUNTIME',
+        handoffTarget: 'Counsel RUNTIME',
       },
       { app: 'Terra Real Estate', domain: 'terra', status: 'active', handoffTarget: 'Carlota Jo' },
       { app: 'SZL Holdings', domain: 'szl', status: 'active', handoffTarget: 'ATLAS' },

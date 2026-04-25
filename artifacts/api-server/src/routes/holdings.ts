@@ -184,19 +184,19 @@ router.get("/holdings/ecosystem-health", async (_req, res) => {
       return;
     }
     const results = await Promise.all([
-      probePlatform("alloy", "FORGE", "Execution Fabric", () =>
+      probePlatform("alloy", "Counsel", "Execution Fabric", () =>
         db.select({ n: sql<number>`count(*)::int` }).from(alloyWorkflows)
       ),
-      probePlatform("lyte", "KORA", "Business Observability", () =>
+      probePlatform("lyte", "Lyte", "Business Observability", () =>
         db.select({ n: sql<number>`count(*)::int` }).from(lyteIncidentsTable)
       ),
-      probePlatform("vessels", "SEXTANT", "Maritime Command", () =>
+      probePlatform("vessels", "Vessels", "Maritime Command", () =>
         db.select({ n: sql<number>`count(*)::int` }).from(vesselsTable)
       ),
-      probePlatform("aegis", "PARAGON", "Defense & Intelligence", () =>
+      probePlatform("aegis", "Aegis", "Defense & Intelligence", () =>
         db.select({ n: sql<number>`count(*)::int` }).from(firestormIncidentsTable)
       ),
-      probePlatform("terra", "DOMAINE", "Real Estate Intelligence", () =>
+      probePlatform("terra", "Terra", "Real Estate Intelligence", () =>
         db.select({ n: sql<number>`count(*)::int` }).from(terraDistressPropertiesTable)
       ),
       probePlatform("carlotaJo", "Carlota Jo", "Private Advisory", () =>

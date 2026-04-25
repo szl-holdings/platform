@@ -59,7 +59,7 @@ export class ForgeSandbox {
     if (!allowed) {
       const violation: ForgeSandboxViolation = {
         type: 'host_blocked',
-        detail: `Host '${host}' is not in the FORGE sandbox allowed list`,
+        detail: `Host '${host}' is not in the Counsel sandbox allowed list`,
         blockedValue: host,
       };
       this.violations.push(violation);
@@ -74,7 +74,7 @@ export class ForgeSandbox {
     if (!allowed) {
       const violation: ForgeSandboxViolation = {
         type: 'tool_blocked',
-        detail: `Tool '${toolName}' is not permitted in this FORGE execution context`,
+        detail: `Tool '${toolName}' is not permitted in this Counsel execution context`,
         blockedValue: toolName,
       };
       this.violations.push(violation);
@@ -91,7 +91,7 @@ export class ForgeSandbox {
     if (!allowed) {
       const violation: ForgeSandboxViolation = {
         type: 'domain_blocked',
-        detail: `Domain '${domain}' is outside the FORGE sandbox boundary`,
+        detail: `Domain '${domain}' is outside the Counsel sandbox boundary`,
         blockedValue: domain,
       };
       this.violations.push(violation);
@@ -104,7 +104,7 @@ export class ForgeSandbox {
     if (durationMs > this.policy.maxDurationMs) {
       const violation: ForgeSandboxViolation = {
         type: 'duration_exceeded',
-        detail: `Execution duration ${durationMs}ms exceeded FORGE limit ${this.policy.maxDurationMs}ms`,
+        detail: `Execution duration ${durationMs}ms exceeded Counsel limit ${this.policy.maxDurationMs}ms`,
       };
       this.violations.push(violation);
       return violation;
@@ -116,7 +116,7 @@ export class ForgeSandbox {
     if (this.policy.maxCostUsd != null && costUsd > this.policy.maxCostUsd) {
       const violation: ForgeSandboxViolation = {
         type: 'cost_exceeded',
-        detail: `Execution cost $${costUsd.toFixed(4)} exceeded FORGE limit $${this.policy.maxCostUsd.toFixed(4)}`,
+        detail: `Execution cost $${costUsd.toFixed(4)} exceeded Counsel limit $${this.policy.maxCostUsd.toFixed(4)}`,
       };
       this.violations.push(violation);
       return violation;

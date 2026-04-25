@@ -43,7 +43,7 @@ export default function AutomationAnalytics() {
             className="text-xs font-medium uppercase tracking-widest"
             style={{ color: '#4B8BDB' }}
           >
-            FORGE · Automation Analytics
+            Counsel · Automation Analytics
           </span>
         </div>
         <h1 className="text-2xl font-bold text-white">Automation Analytics</h1>

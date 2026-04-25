@@ -49,12 +49,12 @@ const FALLBACK_CONTENT: OverviewContent = {
       "SZL Holdings builds the platform layer between signal detection and action execution — enforcing governance, attribution, and outcome tracking on every consequential enterprise decision. The governance is the OS. Domain packs are the applications.",
   },
   platformMap: [
-    { name: "KORA", role: "Flagship command surface — PRAXIS framework, signal-to-action loop, five-pillar intelligence", color: "#d4a054", href: "/lyte" },
-    { name: "FORGE", role: "Execution fabric — workflow orchestration, approval gates, immutable audit trail", color: "#8b7ac8", href: "/alloy-fabric" },
+    { name: "Lyte", role: "Flagship command surface — PRAXIS framework, signal-to-action loop, five-pillar intelligence", color: "#d4a054", href: "/lyte" },
+    { name: "Counsel", role: "Execution fabric — workflow orchestration, approval gates, immutable audit trail", color: "#8b7ac8", href: "/alloy-fabric" },
     { name: "APEX", role: "Unified mobile command — all domain workspaces, biometric auth, offline sync", color: "#4a90b8", href: "/cortex" },
-    { name: "PARAGON", role: "Domain pack — Security & defense intelligence, SOC command, threat governance", color: "#c45a4a", href: "/solutions/aegis" },
-    { name: "SEXTANT", role: "Domain pack — Maritime intelligence, voyage twins, route risk, sanctions compliance", color: "#4a90b8", href: "/solutions/vessels" },
-    { name: "DOMAINE", role: "Domain pack — Real estate intelligence, distress pipeline, ownership graph, deal workflow", color: "#c8953c", href: "/solutions/terra" },
+    { name: "Aegis", role: "Domain pack — Security & defense intelligence, SOC command, threat governance", color: "#c45a4a", href: "/solutions/aegis" },
+    { name: "Vessels", role: "Domain pack — Maritime intelligence, voyage twins, route risk, sanctions compliance", color: "#4a90b8", href: "/solutions/vessels" },
+    { name: "Terra", role: "Domain pack — Real estate intelligence, distress pipeline, ownership graph, deal workflow", color: "#c8953c", href: "/solutions/terra" },
     { name: "Counsel", role: "Domain pack — Legal matter command, deadlines, proof chain, export safety", color: "#6aaa72", href: "/counsel" },
     { name: "Carlota Jo", role: "Domain pack — Premium advisory, client portal, structured delivery model", color: "#a0a0c0", href: "/carlota-jo" },
   ],
@@ -229,8 +229,8 @@ export default function InvestorsOverviewPage() {
                   <h3 className="mt-4 text-base font-semibold text-white">Entry motion</h3>
                   <p className="mt-2 text-sm leading-6 text-white/60">
                     Design partner program — 3–6 partners per domain, co-designing the product in exchange for
-                    early access and preferred pricing. Primary domains: maritime (SEXTANT), security (PARAGON),
-                    real estate (DOMAINE).
+                    early access and preferred pricing. Primary domains: maritime (Vessels), security (Aegis),
+                    real estate (Terra).
                   </p>
                 </div>
                 <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">

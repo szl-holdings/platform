@@ -588,7 +588,7 @@ function AegisScenarioBranchesContent() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#8b7ac8' }}
             >
-              PARAGON · Scenario Forge
+              Aegis · Scenario Forge
             </span>
             {isLoading && (
               <Loader2

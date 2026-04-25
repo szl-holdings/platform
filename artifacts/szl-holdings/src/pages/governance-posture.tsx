@@ -47,7 +47,7 @@ interface DomainHealth {
 
 const DOMAIN_HEALTH_FALLBACK: DomainHealth[] = [
   {
-    domain: "PARAGON",
+    domain: "Aegis",
     color: "hsl(222,60%,60%)",
     icon: Shield,
     policyCount: 24,
@@ -62,7 +62,7 @@ const DOMAIN_HEALTH_FALLBACK: DomainHealth[] = [
     lastReviewed: "2d ago",
   },
   {
-    domain: "SEXTANT",
+    domain: "Vessels",
     color: "hsl(206,72%,54%)",
     icon: Ship,
     policyCount: 18,
@@ -77,7 +77,7 @@ const DOMAIN_HEALTH_FALLBACK: DomainHealth[] = [
     lastReviewed: "5d ago",
   },
   {
-    domain: "DOMAINE",
+    domain: "Terra",
     color: "hsl(142,52%,48%)",
     icon: Building2,
     policyCount: 14,
@@ -140,18 +140,18 @@ const DOMAIN_HEALTH_FALLBACK: DomainHealth[] = [
 
 interface ApprovalItem { id: string; title: string; domain: string; priority: string; requestedBy: string; age: string; dueIn: string; status: string; }
 const APPROVAL_QUEUE_FALLBACK: ApprovalItem[] = [
-  { id: "a1", title: "KEV response — isolation approval", domain: "PARAGON", priority: "critical", requestedBy: "SOC Analyst", age: "4h", dueIn: "T-2h", status: "pending" },
-  { id: "a2", title: "LP notification — NYC distressed portfolio", domain: "DOMAINE", priority: "high", requestedBy: "Investment Lead", age: "18h", dueIn: "T-6h", status: "pending" },
-  { id: "a3", title: "MV Adriatic Star — OFAC filing decision", domain: "SEXTANT", priority: "high", requestedBy: "Compliance Officer", age: "11h", dueIn: "T-12h", status: "escalated" },
+  { id: "a1", title: "KEV response — isolation approval", domain: "Aegis", priority: "critical", requestedBy: "SOC Analyst", age: "4h", dueIn: "T-2h", status: "pending" },
+  { id: "a2", title: "LP notification — NYC distressed portfolio", domain: "Terra", priority: "high", requestedBy: "Investment Lead", age: "18h", dueIn: "T-6h", status: "pending" },
+  { id: "a3", title: "MV Adriatic Star — OFAC filing decision", domain: "Vessels", priority: "high", requestedBy: "Compliance Officer", age: "11h", dueIn: "T-12h", status: "escalated" },
   { id: "a4", title: "HC-2025-0487 — filing route selection", domain: "Counsel", priority: "high", requestedBy: "Lead Attorney", age: "22h", dueIn: "T-14h", status: "pending" },
   { id: "a5", title: "Cloud configuration change — sg-0xf823b1a", domain: "IMPERIUM", priority: "medium", requestedBy: "Cloud Ops", age: "4h", dueIn: "T-20h", status: "pending" },
 ];
 
 interface ViolationItem { id: string; domain: string; type: string; detail: string; severity: string; timestamp: string; status: string; }
 const VIOLATION_LOG_FALLBACK: ViolationItem[] = [
-  { id: "v1", domain: "FORGE", type: "SLA breach", detail: "Approval queue depth exceeded 72h threshold", severity: "high", timestamp: "2h ago", status: "open" },
-  { id: "v2", domain: "DOMAINE", type: "Override without justification", detail: "Policy gate bypassed on acquisition sign-off", severity: "high", timestamp: "1d ago", status: "open" },
-  { id: "v3", domain: "SEXTANT", type: "Review state gap", detail: "AI recommendation exported without review completion", severity: "medium", timestamp: "3d ago", status: "resolved" },
+  { id: "v1", domain: "Counsel", type: "SLA breach", detail: "Approval queue depth exceeded 72h threshold", severity: "high", timestamp: "2h ago", status: "open" },
+  { id: "v2", domain: "Terra", type: "Override without justification", detail: "Policy gate bypassed on acquisition sign-off", severity: "high", timestamp: "1d ago", status: "open" },
+  { id: "v3", domain: "Vessels", type: "Review state gap", detail: "AI recommendation exported without review completion", severity: "medium", timestamp: "3d ago", status: "resolved" },
   { id: "v4", domain: "IMPERIUM", type: "Configuration drift", detail: "Unrestricted egress rule persisted 4h after detection", severity: "medium", timestamp: "4h ago", status: "open" },
 ];
 
@@ -588,7 +588,7 @@ function LiveActivityTab(props: {
 
 export default function GovernancePosturePage() {
   const __pageMeta = usePageMeta({
-    title: "Governance Posture Dashboard — KORA | SZL Holdings",
+    title: "Governance Posture Dashboard — Lyte | SZL Holdings",
     description: "CISO-grade governance dashboard: policy coverage, approval throughput, override rates, trust health by domain, and governance maturity scores. Inspired by BSI IT-Grundschutz and Romania CYBERINT.",
     canonical: "https://szlholdings.com/lyte/governance-posture",
   });
@@ -597,7 +597,7 @@ export default function GovernancePosturePage() {
   const [ledgerDecision, setLedgerDecision] = useState<string>("");
   const [ledgerDomain, setLedgerDomain] = useState<string>("");
   const [ledgerWindow, setLedgerWindow] = useState<"15m" | "1h" | "24h" | "7d">("1h");
-  const [activeDomain, setActiveDomain] = useState<string>("PARAGON");
+  const [activeDomain, setActiveDomain] = useState<string>("Aegis");
 
   interface GovApiResponse {
     domains: Array<Omit<DomainHealth, "icon"> & { iconKey: string }>;
@@ -641,7 +641,7 @@ export default function GovernancePosturePage() {
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem" }}>
-                  <Link href="/lyte" style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, textDecoration: "none" }}>KORA</Link>
+                  <Link href="/lyte" style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, textDecoration: "none" }}>Lyte</Link>
                   <ChevronRight size={10} style={{ color: TEXT_FAINT }} />
                   <span style={{ fontSize: "0.6rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: LYTE }}>Governance Posture</span>
                   <HelpTip
@@ -1062,7 +1062,7 @@ export default function GovernancePosturePage() {
                   </p>
                   <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap" }}>
                     <Link href="/lyte" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: LYTE, color: "hsl(214,18%,4%)", borderRadius: 6, fontSize: "0.8125rem", fontWeight: 600, textDecoration: "none" }}>
-                      Back to KORA <ArrowRight size={13} />
+                      Back to Lyte <ArrowRight size={13} />
                     </Link>
                     <Link href="/trust/governance" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.625rem 1.125rem", background: "transparent", color: TEXT_SEC, border: `1px solid ${BORDER}`, borderRadius: 6, fontSize: "0.8125rem", fontWeight: 500, textDecoration: "none" }}>
                       Trust & Governance <ArrowUpRight size={13} />

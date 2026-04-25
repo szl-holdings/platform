@@ -151,12 +151,12 @@ export const LEGAL_COMPLIANCE_NARRATIVE = {
           step: 3,
           action:
             'Letter transmitted to Continental General (certified mail + email) — ref RIV-2026-0130',
-          tool: 'FORGE Communication Connector',
+          tool: 'Counsel Communication Connector',
         },
         {
           step: 4,
           action: 'Client (Elena Rivera) notified — plain-language summary sent',
-          tool: 'FORGE Email Connector',
+          tool: 'Counsel Email Connector',
         },
         {
           step: 5,

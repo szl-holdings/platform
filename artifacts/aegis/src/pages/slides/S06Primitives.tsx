@@ -21,7 +21,7 @@ export default function S06Primitives() {
       color: '#f59e0b',
     },
     {
-      name: 'FORGE Runtime',
+      name: 'Counsel Runtime',
       desc: 'Durable workflow orchestration — multi-step execution with checkpoint recovery and agent coordination',
       color: '#6366f1',
     },

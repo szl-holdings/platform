@@ -257,7 +257,7 @@ export default function ProfileScreen() {
                 },
                 {
                   domain: 'aegis',
-                  label: 'PARAGON',
+                  label: 'Aegis',
                   color: '#f59e0b',
                   fetch: async () => {
                     try {
@@ -274,7 +274,7 @@ export default function ProfileScreen() {
                 },
                 {
                   domain: 'lyte',
-                  label: 'KORA',
+                  label: 'Lyte',
                   color: '#00d4ff',
                   fetch: async () => {
                     try {

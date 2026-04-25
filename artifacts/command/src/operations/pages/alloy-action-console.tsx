@@ -19,7 +19,7 @@ const TEXT = {
   tertiary: 'rgba(255,255,255,0.28)',
   muted: 'rgba(255,255,255,0.14)',
 };
-const FORGE = '#4B8BDB';
+const Counsel = '#4B8BDB';
 const ALLOY_DIM = 'rgba(75,139,219,0.12)';
 
 type RunState = 'queued' | 'running' | 'waiting_approval' | 'completed' | 'failed' | 'canceled';
@@ -60,7 +60,7 @@ const ACTIONS: ActionItem[] = [
     id: 2,
     runId: 'RUN-3040',
     workflowName: 'Vessel ETA Compliance Check',
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
     state: 'running',
     triggeredBy: 'Fleet Ops',
@@ -72,7 +72,7 @@ const ACTIONS: ActionItem[] = [
     id: 3,
     runId: 'RUN-3039',
     workflowName: 'Fuel Surcharge Rate Calculator',
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
     state: 'failed',
     triggeredBy: 'System',
@@ -86,7 +86,7 @@ const ACTIONS: ActionItem[] = [
     id: 4,
     runId: 'RUN-3038',
     workflowName: 'Security Posture Audit',
-    pack: 'PARAGON',
+    pack: 'Aegis',
     packColor: '#4f6ef7',
     state: 'completed',
     triggeredBy: 'Lisa Monroe',
@@ -100,7 +100,7 @@ const ACTIONS: ActionItem[] = [
     id: 5,
     runId: 'RUN-3037',
     workflowName: 'Asset Valuation Batch',
-    pack: 'DOMAINE',
+    pack: 'Terra',
     packColor: '#a07848',
     state: 'completed',
     triggeredBy: 'Finance',
@@ -126,7 +126,7 @@ const ACTIONS: ActionItem[] = [
     id: 7,
     runId: 'RUN-3035',
     workflowName: 'Charter Contract Compliance Check',
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
     state: 'canceled',
     triggeredBy: 'Fleet Ops',
@@ -138,7 +138,7 @@ const ACTIONS: ActionItem[] = [
 
 const STATE_CONFIG: Record<RunState, { label: string; color: string; bg: string; icon: any }> = {
   queued: { label: 'Queued', color: '#8b7ac8', bg: 'rgba(139,122,200,0.08)', icon: Clock },
-  running: { label: 'Running', color: FORGE, bg: ALLOY_DIM, icon: Activity },
+  running: { label: 'Running', color: Counsel, bg: ALLOY_DIM, icon: Activity },
   waiting_approval: {
     label: 'Awaiting Approval',
     color: '#d4a054',
@@ -190,9 +190,9 @@ export default function AlloyActionConsolePage() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <Zap className="w-3.5 h-3.5" style={{ color: FORGE }} />
-          <span className="text-[9px] font-mono uppercase tracking-widest" style={{ color: FORGE }}>
-            FORGE Action Console
+          <Zap className="w-3.5 h-3.5" style={{ color: Counsel }} />
+          <span className="text-[9px] font-mono uppercase tracking-widest" style={{ color: Counsel }}>
+            Counsel Action Console
           </span>
         </div>
         <h1 className="text-lg font-bold tracking-tight" style={{ color: TEXT.primary }}>
@@ -246,7 +246,7 @@ export default function AlloyActionConsolePage() {
             className="px-3 py-2 text-[9px] font-medium uppercase tracking-widest transition-colors capitalize"
             style={{
               color: tab === t ? TEXT.primary : TEXT.tertiary,
-              borderBottom: tab === t ? `2px solid ${FORGE}` : '2px solid transparent',
+              borderBottom: tab === t ? `2px solid ${Counsel}` : '2px solid transparent',
               marginBottom: '-1px',
             }}
           >
@@ -359,8 +359,8 @@ export default function AlloyActionConsolePage() {
                           className="flex items-center gap-1 px-2.5 py-1 rounded text-[9px] font-medium"
                           style={{
                             background: ALLOY_DIM,
-                            border: `1px solid ${FORGE}30`,
-                            color: FORGE,
+                            border: `1px solid ${Counsel}30`,
+                            color: Counsel,
                           }}
                         >
                           <RotateCcw className="w-2.5 h-2.5" /> Retry ({a.retryCount}/{a.maxRetries}

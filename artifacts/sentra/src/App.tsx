@@ -567,21 +567,21 @@ function AppShell({
     },
     {
       id: 'cl2',
-      surface: 'KORA',
+      surface: 'Lyte',
       surfaceAccent: '#0ea5e9',
       label: '3 pending decisions in Decision Center',
       description:
-        "KORA's Decision Center has 3 TENAX-sourced recommendations queued for approval.",
+        "Lyte's Decision Center has 3 TENAX-sourced recommendations queued for approval.",
       href: '/lyte/decision-center',
       preservedContext: { surface: 'sentra' },
     },
     {
       id: 'cl3',
-      surface: 'SEXTANT',
+      surface: 'Vessels',
       surfaceAccent: '#0ea5e9',
       label: 'Fleet asset under active threat — MV Atlantic Falcon',
       description:
-        "SEXTANT flagged MV Atlantic Falcon's onboard systems for a related CVE exposure.",
+        "Vessels flagged MV Atlantic Falcon's onboard systems for a related CVE exposure.",
       href: '/vessels/fleet',
       preservedContext: { surface: 'sentra' },
     },

@@ -147,7 +147,7 @@ function exportWaterfallCSV(
   name: string,
 ) {
   const rows = [
-    ['DOMAINE — Investor Waterfall Export'],
+    ['Terra — Investor Waterfall Export'],
     ['Structure Name', name],
     ['Export Date', new Date().toLocaleDateString()],
     [],

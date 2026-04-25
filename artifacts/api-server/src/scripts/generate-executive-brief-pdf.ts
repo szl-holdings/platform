@@ -28,19 +28,19 @@ const DOMAINS: Array<{ name: string; tagline: string; detail: string }> = [
       "Outside-counsel telemetry, matter risk scoring, and spend governance for in-house legal teams.",
   },
   {
-    name: "SEXTANT",
+    name: "Vessels",
     tagline: "Maritime intelligence",
     detail:
       "Fleet positioning, fuel & port analytics, and trading-grade alerts for maritime operators and lenders.",
   },
   {
-    name: "PARAGON",
+    name: "Aegis",
     tagline: "Security & defense observability",
     detail:
       "Cross-tenant cyber and physical-security signal fusion with continuous control attestations.",
   },
   {
-    name: "DOMAINE",
+    name: "Terra",
     tagline: "Real estate intelligence",
     detail:
       "Pro forma, lease abstraction, 1031 exchange, and waterfall modeling tied to live market signals.",

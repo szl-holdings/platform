@@ -73,7 +73,7 @@ export default function CustomBrief() {
           Custom Brief Builder
         </h1>
         <p style={{ fontSize: '0.85rem', color: 'var(--pulse-text-muted)' }}>
-          Request a focused intelligence briefing on any entity, topic, or scenario. FORGE agents
+          Request a focused intelligence briefing on any entity, topic, or scenario. Counsel agents
           will synthesize a tailored brief.
         </p>
       </div>

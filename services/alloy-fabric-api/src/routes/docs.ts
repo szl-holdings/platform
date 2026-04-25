@@ -3,7 +3,7 @@ import type { IRouter, Request, Response } from 'express';
 const API_DOCS = {
   openapi: '3.1.0',
   info: {
-    title: 'FORGE Embedding Fabric API',
+    title: 'Counsel Embedding Fabric API',
     description: 'Governed, multi-tenant, evidence-first retrieval layer for SZL Holdings.',
     version: '1.0.0',
   },

@@ -9,8 +9,8 @@ const stages = [
     color: 'hsl(190,90%,55%)',
     rgb: '14,201,224',
     number: '01',
-    platform: 'KORA',
-    desc: "KORA ingests operational data — approvals, ownership, workflow state — and surfaces anomalies, latency events, and risk before they compound. You see what's actually happening across your business.",
+    platform: 'Lyte',
+    desc: "Lyte ingests operational data — approvals, ownership, workflow state — and surfaces anomalies, latency events, and risk before they compound. You see what's actually happening across your business.",
   },
   {
     id: 'understand',
@@ -19,8 +19,8 @@ const stages = [
     color: 'hsl(214,80%,65%)',
     rgb: '92,155,228',
     number: '02',
-    platform: 'KORA + FORGE Engine',
-    desc: 'The FORGE execution engine normalizes raw signal across platforms and applies reasoning to classify, contextualize, and connect events. Pattern recognition separates noise from consequence.',
+    platform: 'Lyte + Counsel Engine',
+    desc: 'The Counsel execution engine normalizes raw signal across platforms and applies reasoning to classify, contextualize, and connect events. Pattern recognition separates noise from consequence.',
   },
   {
     id: 'execute',
@@ -29,8 +29,8 @@ const stages = [
     color: 'hsl(205,85%,55%)',
     rgb: '38,164,218',
     number: '03',
-    platform: 'SEXTANT + FORGE Engine',
-    desc: 'The FORGE engine orchestrates multi-step workflows — routing tasks, triggering actions, escalating decisions — while SEXTANT commands maritime execution with the same precision applied to fleet operations.',
+    platform: 'Vessels + Counsel Engine',
+    desc: 'The Counsel engine orchestrates multi-step workflows — routing tasks, triggering actions, escalating decisions — while Vessels commands maritime execution with the same precision applied to fleet operations.',
   },
   {
     id: 'advise',
@@ -252,25 +252,25 @@ export function EcosystemLogic() {
             <div className="space-y-2.5">
               {[
                 {
-                  entity: 'KORA',
+                  entity: 'Lyte',
                   role: 'Business observability. Surfaces risk before it hits execution.',
                   accent: 'hsl(190,90%,55%)',
                   accentRgb: '14,201,224',
                 },
                 {
-                  entity: 'SEXTANT',
+                  entity: 'Vessels',
                   role: 'Maritime command. Fleet intelligence in one layer.',
                   accent: 'hsl(205,85%,55%)',
                   accentRgb: '38,164,218',
                 },
                 {
-                  entity: 'PARAGON',
+                  entity: 'Aegis',
                   role: 'Unified defense & intelligence. SOC, managed ops, and AI research in one platform.',
                   accent: 'hsl(232,68%,60%)',
                   accentRgb: '92,102,204',
                 },
                 {
-                  entity: 'DOMAINE',
+                  entity: 'Terra',
                   role: 'Real estate intelligence. Portfolio tracking and deal pipeline.',
                   accent: 'hsl(160,70%,45%)',
                   accentRgb: '34,168,120',

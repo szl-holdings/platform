@@ -129,7 +129,7 @@ const featureFlags = [
 
 export default function TerraPlatformPage() {
   useEffect(() => {
-    document.title = 'DOMAINE Platform — Broker Command Surface | SZL Holdings';
+    document.title = 'Terra Platform — Broker Command Surface | SZL Holdings';
   }, []);
 
   return (
@@ -167,7 +167,7 @@ export default function TerraPlatformPage() {
                     color: TERRA_ACCENT,
                   }}
                 >
-                  DOMAINE · Platform
+                  Terra · Platform
                 </span>
               </div>
               <h1
@@ -194,7 +194,7 @@ export default function TerraPlatformPage() {
                   marginBottom: '2rem',
                 }}
               >
-                DOMAINE is structured around eight core modules. Each one follows the same signal
+                Terra is structured around eight core modules. Each one follows the same signal
                 doctrine: what happened, why it matters, who owns it, what comes next, and what
                 value is at risk.
               </p>

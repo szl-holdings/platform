@@ -485,7 +485,7 @@ function ConsoleInner() {
         >
           Platform Console
         </div>
-        <h1 className="text-3xl font-bold text-white mb-2">FORGE Control Plane</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">Counsel Control Plane</h1>
         <p className="text-white/40 text-sm">
           Live workflow management, signal monitoring, artifact approvals, and system
           administration.

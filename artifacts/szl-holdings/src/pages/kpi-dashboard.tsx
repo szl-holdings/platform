@@ -373,11 +373,11 @@ function SystemHealthStrip({
   }, []);
 
   const statusItems = [
-    { label: 'FORGE', ok: true, accent: 'hsl(214,80%,65%)' },
-    { label: 'DOMAINE', ok: true, accent: 'hsl(88,42%,44%)' },
-    { label: 'SEXTANT', ok: true, accent: 'hsl(205,85%,55%)' },
-    { label: 'PARAGON', ok: true, accent: 'hsl(232,68%,60%)' },
-    { label: 'KORA', ok: true, accent: 'hsl(190,90%,55%)' },
+    { label: 'Counsel', ok: true, accent: 'hsl(214,80%,65%)' },
+    { label: 'Terra', ok: true, accent: 'hsl(88,42%,44%)' },
+    { label: 'Vessels', ok: true, accent: 'hsl(205,85%,55%)' },
+    { label: 'Aegis', ok: true, accent: 'hsl(232,68%,60%)' },
+    { label: 'Lyte', ok: true, accent: 'hsl(190,90%,55%)' },
     { label: 'Carlota Jo', ok: true, accent: 'hsl(38,55%,58%)' },
   ];
 
@@ -1060,7 +1060,7 @@ export default function KpiDashboardPage() {
                     <StatCard
                       label="Workflow Runs"
                       value={agg.totalWorkflowRuns}
-                      sub="FORGE orchestration"
+                      sub="Counsel orchestration"
                       accent="hsl(214,80%,65%)"
                       href={platforms?.alloy?.href}
                       icon={Layers}
@@ -1069,7 +1069,7 @@ export default function KpiDashboardPage() {
                     <StatCard
                       label="Active Incidents"
                       value={agg.activeIncidents}
-                      sub="KORA + PARAGON"
+                      sub="Lyte + Aegis"
                       accent="hsl(38,72%,58%)"
                       icon={TrendingUp}
                       delay={0.05}
@@ -1077,16 +1077,16 @@ export default function KpiDashboardPage() {
                     <StatCard
                       label="Distress Properties"
                       value={agg.distressProperties}
-                      sub="DOMAINE engine"
+                      sub="Terra engine"
                       accent="hsl(88,42%,52%)"
                       href={platforms?.terra?.href}
                       icon={BarChart3}
                       delay={0.1}
                     />
                     <StatCard
-                      label="Fleet SEXTANT"
+                      label="Fleet Vessels"
                       value={agg.fleetVessels}
-                      sub="SEXTANT tracker"
+                      sub="Vessels tracker"
                       accent="hsl(205,85%,55%)"
                       href={platforms?.vessels?.href}
                       icon={Ship}
@@ -1095,7 +1095,7 @@ export default function KpiDashboardPage() {
                     <StatCard
                       label="Active Deals"
                       value={agg.activeDeals}
-                      sub="DOMAINE pipeline"
+                      sub="Terra pipeline"
                       accent="hsl(142,62%,48%)"
                       icon={TrendingUp}
                       delay={0.2}
@@ -1103,7 +1103,7 @@ export default function KpiDashboardPage() {
                     <StatCard
                       label="Security Findings"
                       value={agg.securityFindings}
-                      sub="PARAGON SOC"
+                      sub="Aegis SOC"
                       accent="hsl(232,68%,60%)"
                       href={platforms?.aegis?.href}
                       icon={Shield}
@@ -1126,7 +1126,7 @@ export default function KpiDashboardPage() {
                   </div>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     <PlatformBlock
-                      name="FORGE"
+                      name="Counsel"
                       icon={Layers}
                       accent="hsl(214,80%,65%)"
                       href={platforms?.alloy?.href}
@@ -1137,7 +1137,7 @@ export default function KpiDashboardPage() {
                       ]}
                     />
                     <PlatformBlock
-                      name="DOMAINE"
+                      name="Terra"
                       icon={BarChart3}
                       accent="hsl(88,42%,52%)"
                       href={platforms?.terra?.href}
@@ -1151,18 +1151,18 @@ export default function KpiDashboardPage() {
                       ]}
                     />
                     <PlatformBlock
-                      name="SEXTANT"
+                      name="Vessels"
                       icon={Ship}
                       accent="hsl(205,85%,55%)"
                       href={platforms?.vessels?.href}
                       delay={0.2}
                       metrics={[
-                        { label: 'Tracked SEXTANT', value: platforms?.vessels?.trackedVessels },
+                        { label: 'Tracked Vessels', value: platforms?.vessels?.trackedVessels },
                         { label: 'Fleets', value: platforms?.vessels?.fleets },
                       ]}
                     />
                     <PlatformBlock
-                      name="PARAGON"
+                      name="Aegis"
                       icon={Shield}
                       accent="hsl(232,68%,60%)"
                       href={platforms?.aegis?.href}
@@ -1173,7 +1173,7 @@ export default function KpiDashboardPage() {
                       ]}
                     />
                     <PlatformBlock
-                      name="KORA"
+                      name="Lyte"
                       icon={Eye}
                       accent="hsl(190,90%,55%)"
                       href={platforms?.lyte?.href}

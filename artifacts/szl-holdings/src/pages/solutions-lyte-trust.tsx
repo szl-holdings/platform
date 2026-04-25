@@ -8,7 +8,7 @@ const GOVERNANCE_CONTROLS = [
   {
     icon: Eye,
     title: "Observable AI decisions",
-    body: "Every AI-generated insight, recommendation, and action in the KORA command surface includes the signals, models, and logic that informed it. No opaque outputs. Full decision lineage.",
+    body: "Every AI-generated insight, recommendation, and action in the Lyte command surface includes the signals, models, and logic that informed it. No opaque outputs. Full decision lineage.",
   },
   {
     icon: Brain,
@@ -22,8 +22,8 @@ const GOVERNANCE_CONTROLS = [
   },
   {
     icon: Workflow,
-    title: "FORGE execution governance",
-    body: "Every workflow executed through FORGE — from task routing to escalation — is logged with trigger condition, actor identity, approval state, and outcome. Complete action audit trail.",
+    title: "Counsel execution governance",
+    body: "Every workflow executed through Counsel — from task routing to escalation — is logged with trigger condition, actor identity, approval state, and outcome. Complete action audit trail.",
   },
   {
     icon: FileCheck2,
@@ -46,8 +46,8 @@ const TRUST_LAYERS = [
 
 export default function SolutionsLyteTrustPage() {
   const __pageMeta = usePageMeta({
-    title: "KORA Trust & AI Governance · SZL Holdings",
-    description: "How KORA governs AI decisions, model routing, data boundaries, and execution workflows with full observability and audit trails.",
+    title: "Lyte Trust & AI Governance · SZL Holdings",
+    description: "How Lyte governs AI decisions, model routing, data boundaries, and execution workflows with full observability and audit trails.",
     canonical: "https://szlholdings.com/solutions/lyte/trust",
   });
 
@@ -60,13 +60,13 @@ export default function SolutionsLyteTrustPage() {
         <section className="max-w-5xl mx-auto px-6 pt-32 pb-16">
           <div className="flex items-center gap-2 mb-4">
             <Zap className="w-5 h-5 text-[#d4a054]" />
-            <span className="text-[11px] font-medium text-[#d4a054] uppercase tracking-widest">KORA · Trust</span>
+            <span className="text-[11px] font-medium text-[#d4a054] uppercase tracking-widest">Lyte · Trust</span>
           </div>
           <h1 className="text-4xl font-bold text-slate-100 leading-tight mb-4">
             AI you can audit. Actions you can trace.
           </h1>
           <p className="text-base text-slate-400 max-w-2xl leading-relaxed mb-8">
-            KORA is the command surface for the entire SZL platform. Every AI decision, model selection, workflow execution, and data access is observable, governed, and auditable — because business intelligence without governance is just noise.
+            Lyte is the command surface for the entire SZL platform. Every AI decision, model selection, workflow execution, and data access is observable, governed, and auditable — because business intelligence without governance is just noise.
           </p>
           <div className="flex items-center gap-3">
             <Link href="/lyte">
@@ -103,7 +103,7 @@ export default function SolutionsLyteTrustPage() {
         <section className="max-w-5xl mx-auto px-6 py-16 border-t border-white/[0.06]">
           <h2 className="text-xl font-semibold text-slate-100 mb-2">Trust Architecture</h2>
           <p className="text-sm text-slate-400 max-w-2xl mb-8">
-            Structural trust guarantees built into KORA at the platform level.
+            Structural trust guarantees built into Lyte at the platform level.
           </p>
           <div className="space-y-3">
             {TRUST_LAYERS.map((t) => (
@@ -123,7 +123,7 @@ export default function SolutionsLyteTrustPage() {
             <Shield className="w-8 h-8 text-[#d4a054] mx-auto mb-4" />
             <h2 className="text-lg font-semibold text-slate-100 mb-2">Governed by design</h2>
             <p className="text-sm text-slate-400 max-w-xl mx-auto mb-6">
-              KORA doesn't bolt on governance after the fact. Trust, auditability, and human oversight are structural constraints that shape every feature. See the platform trust center for the full architecture.
+              Lyte doesn't bolt on governance after the fact. Trust, auditability, and human oversight are structural constraints that shape every feature. See the platform trust center for the full architecture.
             </p>
             <Link href="/trust">
               <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-[#d4a054]/10 text-[#d4a054] border border-[#d4a054]/20 hover:bg-[#d4a054]/20 transition-colors cursor-pointer">

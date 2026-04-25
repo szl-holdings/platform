@@ -34,7 +34,7 @@ export default function S04Loop() {
       n: '06',
       label: 'Execution',
       color: '#6366f1',
-      desc: 'FORGE orchestrates the approved action as a durable process',
+      desc: 'Counsel orchestrates the approved action as a durable process',
     },
     {
       n: '07',

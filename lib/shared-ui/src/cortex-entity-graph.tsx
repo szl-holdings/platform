@@ -572,7 +572,7 @@ export function CortexEntityGraph({
                 textTransform: 'uppercase' as const,
               }}
             >
-              {d === 'all' ? 'All Domains' : d === 'firestorm' ? 'PARAGON' : d.toUpperCase()}
+              {d === 'all' ? 'All Domains' : d === 'firestorm' ? 'Aegis' : d.toUpperCase()}
             </button>
           );
         })}
@@ -758,7 +758,7 @@ export function CortexEntityGraph({
                   style={{ width: 8, height: 8, borderRadius: '50%', background: c, flexShrink: 0 }}
                 />
                 <span style={{ fontSize: 10, color: '#ffffff60', fontFamily: 'system-ui' }}>
-                  {d === 'firestorm' ? 'PARAGON' : d === 'szl-holdings' ? 'Portfolio' : d}
+                  {d === 'firestorm' ? 'Aegis' : d === 'szl-holdings' ? 'Portfolio' : d}
                 </span>
               </div>
             ))}

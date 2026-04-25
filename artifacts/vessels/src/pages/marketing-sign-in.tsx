@@ -12,7 +12,7 @@ export default function SignInPage() {
             <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center mx-auto mb-4">
               <Ship className="w-6 h-6 text-sky-400" />
             </div>
-            <h1 className="text-[22px] font-bold text-sky-50 mb-1">Sign in to SEXTANT</h1>
+            <h1 className="text-[22px] font-bold text-sky-50 mb-1">Sign in to Vessels</h1>
             <p className="text-sky-300/40 text-[13px]">Access your fleet command dashboard</p>
           </div>
           <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-2xl p-7 space-y-4">

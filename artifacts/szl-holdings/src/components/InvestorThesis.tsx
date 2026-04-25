@@ -48,7 +48,7 @@ const investorPaths = [
   },
   {
     type: 'Enterprise Clients',
-    desc: 'Mid-to-large enterprises evaluating KORA, SEXTANT, or the broader ecosystem for production deployment.',
+    desc: 'Mid-to-large enterprises evaluating Lyte, Vessels, or the broader ecosystem for production deployment.',
     cta: 'Platform Demo',
     accentRgb: '92,155,228',
   },

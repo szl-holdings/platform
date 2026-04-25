@@ -40,7 +40,7 @@ export const ESSAYS: Essay[] = [
 
 <p>Second: the approval surface must be designed. Most systems present approval as a pop-up: "Are you sure?" That's not governance. Governance means surfacing the right information at the right moment so the human can make an informed decision, not just rubber-stamp a machine. The UI is a governance artifact.</p>
 
-<p>Third: the audit record must be immutable. Not a database table that can be edited — a proof chain that shows state transitions and is structurally resistant to retroactive modification. FORGE's proof chain is not a legal requirement (though it satisfies legal requirements). It's an engineering requirement. You cannot have governed systems without tamper-evident records.</p>
+<p>Third: the audit record must be immutable. Not a database table that can be edited — a proof chain that shows state transitions and is structurally resistant to retroactive modification. Counsel's proof chain is not a legal requirement (though it satisfies legal requirements). It's an engineering requirement. You cannot have governed systems without tamper-evident records.</p>
 
 <h3>Why constraint creates capability</h3>
 
@@ -67,11 +67,11 @@ export const ESSAYS: Essay[] = [
 
 <h3>What a "spine" actually means</h3>
 
-<p>FORGE is the execution fabric. It handles workflow orchestration, AI agent coordination, connector management, signal ingestion, approval routing, and audit logging. Every other platform in the SZL portfolio runs on top of it. KORA doesn't have its own workflow engine. SEXTANT doesn't have its own audit system. DOMAINE doesn't have its own approval layer. They're all FORGE surfaces.</p>
+<p>Counsel is the execution fabric. It handles workflow orchestration, AI agent coordination, connector management, signal ingestion, approval routing, and audit logging. Every other platform in the SZL portfolio runs on top of it. Lyte doesn't have its own workflow engine. Vessels doesn't have its own audit system. Terra doesn't have its own approval layer. They're all Counsel surfaces.</p>
 
 <p>This is not a cost-cutting measure. It's a compounding bet.</p>
 
-<p>When we improve FORGE's confidence scoring, every vertical gets better predictions. When we add a new connector to FORGE, every vertical gains that integration. When we harden FORGE's proof chain, every vertical gets stronger audit evidence. The marginal cost of adding capability to the fabric is near zero per vertical — it's already there.</p>
+<p>When we improve Counsel's confidence scoring, every vertical gets better predictions. When we add a new connector to Counsel, every vertical gains that integration. When we harden Counsel's proof chain, every vertical gets stronger audit evidence. The marginal cost of adding capability to the fabric is near zero per vertical — it's already there.</p>
 
 <h3>The failure mode this avoids</h3>
 
@@ -85,9 +85,9 @@ export const ESSAYS: Essay[] = [
 
 <p>The architectural discipline required to make this work is significant. Each vertical has to be built to its own operational vocabulary while exposing its core functionality through the shared fabric's interface contracts.</p>
 
-<p>DOMAINE speaks in property signals, deal stages, and ownership graphs. SEXTANT speaks in vessel tracks, port calls, and route anomalies. PARAGON speaks in threat vectors, indicator correlations, and incident timelines. They're genuinely different domains. The discipline is building each in its native language while routing consequential actions through FORGE.</p>
+<p>Terra speaks in property signals, deal stages, and ownership graphs. Vessels speaks in vessel tracks, port calls, and route anomalies. Aegis speaks in threat vectors, indicator correlations, and incident timelines. They're genuinely different domains. The discipline is building each in its native language while routing consequential actions through Alloy.</p>
 
-<p>This means the vertical teams must resist the temptation to build their own execution logic. Every time you build a workflow inside a vertical instead of in FORGE, you create a governance gap. The rule is simple: if it touches data, it goes through the fabric. If it makes a recommendation, it goes through FORGE. If it executes an action, the proof chain sees it.</p>
+<p>This means the vertical teams must resist the temptation to build their own execution logic. Every time you build a workflow inside a vertical instead of in Counsel, you create a governance gap. The rule is simple: if it touches data, it goes through the fabric. If it makes a recommendation, it goes through Alloy. If it executes an action, the proof chain sees it.</p>
 
 <h3>The compound result</h3>
 
@@ -132,7 +132,7 @@ export const ESSAYS: Essay[] = [
 
 <p>AI point solutions help analysts ask questions but don't proactively surface what matters. They wait to be prompted. An enterprise that has to remember to ask the right questions is still running on human working memory, with all its limits.</p>
 
-<p>KORA exists to close this gap. It's not a monitoring tool. It's a signal conversion layer — the piece of infrastructure that sits between raw data and executable human action, with governance built into the pipeline.</p>
+<p>Lyte exists to close this gap. It's not a monitoring tool. It's a signal conversion layer — the piece of infrastructure that sits between raw data and executable human action, with governance built into the pipeline.</p>
     `.trim(),
   },
   {

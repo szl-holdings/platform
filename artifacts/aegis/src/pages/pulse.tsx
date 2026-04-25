@@ -223,7 +223,7 @@ export default function AegisPulse() {
       <ParticleField accentColor="#3b82f6" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <PulseHeader
-          title="PARAGON Threat LUMINA"
+          title="Aegis Threat LUMINA"
           subtitle={`SOC operations — ${totalThreats.toLocaleString()} threats processed · 6 defense agents active`}
           accentColor="#3b82f6"
         />
@@ -444,9 +444,9 @@ export default function AegisPulse() {
             items={[
               { label: 'SIEM', value: 'Elastic', color: '#3b82f6' },
               { label: 'EDR', value: 'Active', color: '#10b981' },
-              { label: 'SOAR', value: 'FORGE', color: '#d4a054' },
+              { label: 'SOAR', value: 'Counsel', color: '#d4a054' },
               { label: 'Threat Intel', value: 'MISP', color: '#ef4444' },
-              { label: 'GRC', value: 'PARAGON', color: '#8b5cf6' },
+              { label: 'GRC', value: 'Aegis', color: '#8b5cf6' },
               { label: 'MSP', value: 'Multi', color: '#64748b' },
               { label: 'Zero Trust', value: 'Active', color: '#06b6d4' },
               { label: 'Detection', value: 'ML', color: '#f59e0b' },
@@ -460,7 +460,7 @@ export default function AegisPulse() {
             className="text-[9px] uppercase tracking-[0.25em]"
             style={{ color: 'rgba(255,255,255,0.08)' }}
           >
-            PARAGON — Unified Defense & Intelligence Command — Threat LUMINA
+            Aegis — Unified Defense & Intelligence Command — Threat LUMINA
           </p>
         </div>
       </div>

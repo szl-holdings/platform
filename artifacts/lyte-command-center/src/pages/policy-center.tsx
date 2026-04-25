@@ -264,10 +264,10 @@ export default function PolicyCenterPage() {
           <Code2 className="w-4 h-4 text-amber-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-amber-100">Policy Compiler — FORGE</p>
+          <p className="text-xs font-semibold text-amber-100">Policy Compiler — Counsel</p>
           <p className="text-[10px] text-amber-400/50 mt-0.5 leading-snug">
             Write operating rules in plain English and compile them into validated, versioned,
-            rollback-able policy objects. The Policy Compiler is FORGE's signature innovation.
+            rollback-able policy objects. The Policy Compiler is Counsel's signature innovation.
           </p>
         </div>
         <a

@@ -30,11 +30,11 @@ const PROCESS = [
 
 const SCOPE = [
   "szlholdings.com and all subdomains",
-  "KORA platform and all authenticated surfaces",
-  "FORGE execution fabric and API endpoints",
+  "Lyte platform and all authenticated surfaces",
+  "Counsel execution fabric and API endpoints",
   "Authentication and authorization systems",
   "Data handling and storage infrastructure",
-  "Counsel, SEXTANT, PARAGON, DOMAINE, and Carlota Jo applications",
+  "Counsel, Vessels, Aegis, Terra, and Carlota Jo applications",
 ];
 
 const OUT_OF_SCOPE = [

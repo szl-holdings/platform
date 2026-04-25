@@ -27,7 +27,7 @@ const TEXT_DIM = 'rgba(232,234,240,0.45)';
 const AGENT_DEFS = [
   {
     id: 'alloy',
-    name: 'FORGE',
+    name: 'Counsel',
     domain: 'Orchestration',
     color: ACCENT,
     icon: 'git-merge',
@@ -59,7 +59,7 @@ const AGENT_DEFS = [
   },
   {
     id: 'beacon',
-    name: 'DOMAINE Analytics',
+    name: 'Terra Analytics',
     domain: 'Analytics',
     color: GREEN,
     icon: 'bar-chart-2',
@@ -150,11 +150,11 @@ function AgentCard({
 }
 
 const DELEGATION_CHAIN = [
-  { from: 'User', to: 'FORGE', action: 'Query: threat landscape', ts: '14:32:01' },
-  { from: 'FORGE', to: 'Sentinel', action: 'Route: security analysis', ts: '14:32:02' },
+  { from: 'User', to: 'Counsel', action: 'Query: threat landscape', ts: '14:32:01' },
+  { from: 'Counsel', to: 'Sentinel', action: 'Route: security analysis', ts: '14:32:02' },
   { from: 'Sentinel', to: 'Eval Engine', action: 'Delegate: CVE research', ts: '14:32:03' },
-  { from: 'Sentinel', to: 'FORGE', action: 'Return: enriched response', ts: '14:32:05' },
-  { from: 'FORGE', to: 'User', action: 'Synthesized answer', ts: '14:32:06' },
+  { from: 'Sentinel', to: 'Counsel', action: 'Return: enriched response', ts: '14:32:05' },
+  { from: 'Counsel', to: 'User', action: 'Synthesized answer', ts: '14:32:06' },
 ];
 
 const CONNECTORS = [
@@ -210,7 +210,7 @@ export default function AgentsScreen() {
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <Text style={styles.title}>Agent Operations</Text>
-        <Text style={styles.subtitle}>FORGE · Real-time autonomy</Text>
+        <Text style={styles.subtitle}>Counsel · Real-time autonomy</Text>
       </View>
 
       <View style={styles.statsRow}>

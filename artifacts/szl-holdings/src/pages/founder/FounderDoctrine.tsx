@@ -22,7 +22,7 @@ const PILLARS = [
     number: 'III',
     title: 'The proof chain records everything.',
     detail:
-      "Every state transition in the platform is logged in FORGE's proof chain: what signal arrived, what the AI inferred, what was recommended, who approved, what was executed, and what the outcome was. The record is tamper-evident and auditable by design.",
+      "Every state transition in the platform is logged in Counsel's proof chain: what signal arrived, what the AI inferred, what was recommended, who approved, what was executed, and what the outcome was. The record is tamper-evident and auditable by design.",
     principle: "If you can't reconstruct the decision, you can't govern it.",
   },
   {

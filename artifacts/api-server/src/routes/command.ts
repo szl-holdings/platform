@@ -571,7 +571,7 @@ async function buildSnapshot() {
     domains: [
       {
         id: 'aegis',
-        name: 'PARAGON',
+        name: 'Aegis',
         icon: 'ShieldAlert',
         color: 'var(--color-aegis)',
         score: aegis.score,
@@ -609,7 +609,7 @@ async function buildSnapshot() {
       },
       {
         id: 'vessels',
-        name: 'SEXTANT',
+        name: 'Vessels',
         icon: 'Ship',
         color: 'var(--color-vessels)',
         score: vessels.score,
@@ -649,7 +649,7 @@ async function buildSnapshot() {
       },
       {
         id: 'lyte',
-        name: 'KORA',
+        name: 'Lyte',
         icon: 'Activity',
         color: 'var(--color-lyte)',
         score: lyte.score,
@@ -703,7 +703,7 @@ async function buildSnapshot() {
       },
       {
         id: 'terra',
-        name: 'DOMAINE',
+        name: 'Terra',
         icon: 'Building2',
         color: 'var(--color-terra)',
         score: terra.score,
@@ -1132,7 +1132,7 @@ async function computeAlerts(
         t.severity === 'critical' ? 'critical' : t.severity === 'high' ? 'high' : 'medium';
       alerts.push({
         id: `aegis-${i}`,
-        domain: 'PARAGON',
+        domain: 'Aegis',
         domainColor: DOMAIN_COLOR.Aegis,
         priority: sev,
         title: t.name ?? t.title ?? 'Threat detected',
@@ -1161,7 +1161,7 @@ async function computeAlerts(
       .forEach((e, i) => {
         alerts.push({
           id: `terra-${i}`,
-          domain: 'DOMAINE',
+          domain: 'Terra',
           domainColor: DOMAIN_COLOR.Terra,
           priority: e.severity === 'critical' ? 'critical' : 'high',
           title: e.title ?? 'Geopolitical event',
@@ -1209,7 +1209,7 @@ async function computeAlerts(
   if (lyte.heapPct > 80) {
     alerts.push({
       id: 'lyte-heap',
-      domain: 'KORA',
+      domain: 'Lyte',
       domainColor: DOMAIN_COLOR.Lyte,
       priority: lyte.heapPct > 90 ? 'critical' : 'high',
       title: `Heap utilisation at ${lyte.heapPct}%`,
@@ -1223,7 +1223,7 @@ async function computeAlerts(
   if (lyte.cpuLoad > 60) {
     alerts.push({
       id: 'lyte-cpu',
-      domain: 'KORA',
+      domain: 'Lyte',
       domainColor: DOMAIN_COLOR.Lyte,
       priority: lyte.cpuLoad > 80 ? 'high' : 'medium',
       title: `CPU load at ${lyte.cpuLoad}%`,
@@ -1236,7 +1236,7 @@ async function computeAlerts(
   if (lyte.recentRestart) {
     alerts.push({
       id: 'lyte-restart',
-      domain: 'KORA',
+      domain: 'Lyte',
       domainColor: DOMAIN_COLOR.Lyte,
       priority: 'medium',
       title: 'API server restart detected',
@@ -1663,10 +1663,10 @@ router.get('/costs', requireAnyAuth(), async (_req: Request, res: Response) => {
     const RATE_CARD = COST_RATE_CARD;
     const DOMAIN_BUDGETS = COST_DOMAIN_BUDGETS;
     const DOMAIN_NAMES: Record<string, string> = {
-      aegis: 'PARAGON',
-      vessels: 'SEXTANT',
-      terra: 'DOMAINE',
-      lyte: 'KORA',
+      aegis: 'Aegis',
+      vessels: 'Vessels',
+      terra: 'Terra',
+      lyte: 'Lyte',
       prism: 'PRISM',
       szl: 'SZL Holdings',
       carlota: 'Carlota Jo',
@@ -1900,7 +1900,7 @@ async function computeSlas(): Promise<CommandSla[]> {
     const breach = lyteLatency.p95 > 2000;
     slas.push({
       id: 'lyte-latency',
-      domain: 'KORA',
+      domain: 'Lyte',
       domainColor: DOMAIN_COLOR.Lyte,
       name: 'API Response Time P95',
       metric: '95th percentile latency',
@@ -1920,7 +1920,7 @@ async function computeSlas(): Promise<CommandSla[]> {
   if (lyteAvail !== null) {
     slas.push({
       id: 'lyte-uptime',
-      domain: 'KORA',
+      domain: 'Lyte',
       domainColor: DOMAIN_COLOR.Lyte,
       name: 'Service Uptime',
       metric: 'Health-check pass rate',
@@ -1939,7 +1939,7 @@ async function computeSlas(): Promise<CommandSla[]> {
   if (aegisErr) {
     slas.push({
       id: 'aegis-errors',
-      domain: 'PARAGON',
+      domain: 'Aegis',
       domainColor: DOMAIN_COLOR.Aegis,
       name: 'Aegis Error Rate',
       metric: 'Errors per request',
@@ -1958,7 +1958,7 @@ async function computeSlas(): Promise<CommandSla[]> {
   if (vesselsAvail !== null) {
     slas.push({
       id: 'vessels-uptime',
-      domain: 'SEXTANT',
+      domain: 'Vessels',
       domainColor: DOMAIN_COLOR.Vessels,
       name: 'Fleet Tracking Uptime',
       metric: 'Vessels service health',
@@ -2266,10 +2266,10 @@ router.get(
 router.get('/releases', requireAnyAuth(), async (_req: Request, res: Response) => {
   try {
     const DOMAIN_BY_APP: Record<string, { domain: string; color: string }> = {
-      'api-server': { domain: 'KORA', color: DOMAIN_COLOR.Lyte },
-      vessels: { domain: 'SEXTANT', color: DOMAIN_COLOR.Vessels },
-      aegis: { domain: 'PARAGON', color: DOMAIN_COLOR.Aegis },
-      terra: { domain: 'DOMAINE', color: DOMAIN_COLOR.Terra },
+      'api-server': { domain: 'Lyte', color: DOMAIN_COLOR.Lyte },
+      vessels: { domain: 'Vessels', color: DOMAIN_COLOR.Vessels },
+      aegis: { domain: 'Aegis', color: DOMAIN_COLOR.Aegis },
+      terra: { domain: 'Terra', color: DOMAIN_COLOR.Terra },
       prism: { domain: 'PRISM', color: DOMAIN_COLOR.PRISM },
       command: { domain: 'Command', color: '#8b7ac8' },
       'szl-holdings': { domain: 'SZL Holdings', color: DOMAIN_COLOR.SZL },

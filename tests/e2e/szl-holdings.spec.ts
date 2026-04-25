@@ -136,7 +136,7 @@ test.describe('SZL Holdings — Investor & Platform Pages', () => {
 
     const content = page
       .locator(
-        ":text('KORA'), :text('PARAGON'), :text('SEXTANT'), :text('DOMAINE'), :text('Ecosystem'), :text('Portfolio')",
+        ":text('Lyte'), :text('Aegis'), :text('Vessels'), :text('Terra'), :text('Ecosystem'), :text('Portfolio')",
       )
       .first();
     await expect(content).toBeVisible({ timeout: 15000 });
@@ -282,7 +282,7 @@ test.describe('SZL Holdings — User Journey: Platform Navigation', () => {
 
     const navLink = page
       .locator(
-        "nav a[href*='platform'], nav a:has-text('Platform'), nav a[href*='nexus'], nav a:has-text('PRAXIS'), nav a[href*='lyte'], nav a:has-text('KORA'), nav a[href*='trust'], nav a:has-text('Trust')",
+        "nav a[href*='platform'], nav a:has-text('Platform'), nav a[href*='nexus'], nav a:has-text('PRAXIS'), nav a[href*='lyte'], nav a:has-text('Lyte'), nav a[href*='trust'], nav a:has-text('Trust')",
       )
       .first();
     const hasNavLink = await navLink.isVisible({ timeout: 8000 }).catch(() => false);
@@ -421,7 +421,7 @@ test.describe('SZL Holdings — Portfolio Dashboard', () => {
     await page.goto(`${BASE_PATH}portfolio`.replace('//', '/'));
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
 
-    const modules = ['KORA', 'DOMAINE', 'SEXTANT', 'TENAX', 'FORGE', 'Carlota Jo'];
+    const modules = ['Lyte', 'Terra', 'Vessels', 'TENAX', 'Counsel', 'Carlota Jo'];
     for (const name of modules) {
       const tile = page.locator(`:text("${name}")`).first();
       await expect(tile).toBeVisible({ timeout: 15000 });
@@ -440,7 +440,7 @@ test.describe('SZL Holdings — Portfolio Dashboard', () => {
       .isVisible({ timeout: 10000 })
       .catch(() => false);
 
-    const hasTile = await page.locator(':text("KORA")').first().isVisible({ timeout: 5000 }).catch(() => false);
+    const hasTile = await page.locator(':text("Lyte")').first().isVisible({ timeout: 5000 }).catch(() => false);
 
     expect(hasDataNotice || hasTile).toBeTruthy();
   });

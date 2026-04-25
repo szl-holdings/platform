@@ -8,14 +8,14 @@
     { "term": "LUMINA", "replacement": "Pulse", "reason": "Old internal codename — current product display name is Pulse (AI Executive Briefing)" },
     { "term": "KORA", "replacement": "Lyte", "reason": "Old internal codename — current product display name is Lyte (Decision Intelligence)" },
     { "term": "SEXTANT", "replacement": "Vessels", "reason": "Old internal codename — current product display name is Vessels (Maritime Intelligence)" },
+    { "term": "INCA", "replacement": "Counsel", "reason": "Old internal codename — current product display name is Counsel (Legal Matter Command)" },
+    { "term": "FORGE", "replacement": "Counsel", "reason": "Old internal codename — current product display name is Counsel; also used as runtime prefix in lib/forge-runtime strings" },
     { "term": "NEXUS", "replacement": "PRAXIS", "reason": "Trademark conflict (HubSpot, Salesforce, dozens of enterprise products)" },
     { "term": "Nexus", "replacement": "PRAXIS", "reason": "Trademark conflict (HubSpot, Salesforce, dozens of enterprise products)" },
     { "term": "PRISM Counsel", "replacement": "Counsel", "reason": "PRISM has NSA program brand association; prefix removed" },
     { "term": "PRISM-Counsel", "replacement": "Counsel", "reason": "PRISM has NSA program brand association; prefix removed" },
     { "term": "CORTEX", "replacement": "APEX", "reason": "Trademark conflict (Palo Alto Networks; multiple infosec products)" },
-    { "term": "Cortex", "replacement": "APEX", "reason": "Trademark conflict (Palo Alto Networks; multiple infosec products)" },
-    { "term": "Alloy", "replacement": "FORGE", "reason": "Trademark conflict (Rippling/fintech automation; enterprise workflow tools)" },
-    { "term": "ALLOY", "replacement": "FORGE", "reason": "Trademark conflict (Rippling/fintech automation; enterprise workflow tools)" }
+    { "term": "Cortex", "replacement": "APEX", "reason": "Trademark conflict (Palo Alto Networks; multiple infosec products)" }
   ],
   "$fileAllowlistComment": "Whole-file exemptions. Use sparingly; prefer lineAllowlist. Globs are not supported — list explicit paths relative to repo root, or directory prefixes ending with '/'.",
   "fileAllowlist": [

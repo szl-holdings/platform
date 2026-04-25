@@ -21,7 +21,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 const DOMAIN = 'terra';
 const ACCENT = '#10b981';
-const DOMAIN_LABEL = 'DOMAINE — Real Estate Intelligence';
+const DOMAIN_LABEL = 'Terra — Real Estate Intelligence';
 const WORKFLOW_KEY = 'terra-deal-underwriting';
 
 const SIGNAL_TYPES = [

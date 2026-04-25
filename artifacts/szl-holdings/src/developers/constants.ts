@@ -63,8 +63,8 @@ export const NAV: NavSection[] = [
     subsections: [
       { id: 'samples-auth', label: 'Authentication' },
       { id: 'samples-projects', label: 'Projects' },
-      { id: 'samples-vessels', label: 'SEXTANT' },
-      { id: 'samples-alloy', label: 'FORGE Signals' },
+      { id: 'samples-vessels', label: 'Vessels' },
+      { id: 'samples-alloy', label: 'Counsel Signals' },
     ],
   },
   {
@@ -221,20 +221,20 @@ export const WEBHOOK_EVENTS = [
   { event: 'project.updated', description: 'A project was updated (metadata or status).' },
   {
     event: 'workflow.run.completed',
-    description: 'An FORGE workflow run reached a terminal state.',
+    description: 'An Counsel workflow run reached a terminal state.',
   },
   {
     event: 'workflow.run.failed',
-    description: 'An FORGE workflow run encountered an unrecoverable error.',
+    description: 'An Counsel workflow run encountered an unrecoverable error.',
   },
   {
     event: 'signal.ingested',
-    description: 'An external signal was accepted by the FORGE ingest pipeline.',
+    description: 'An external signal was accepted by the Counsel ingest pipeline.',
   },
   { event: 'vessel.alert.triggered', description: 'A vessel tracking alert condition was met.' },
   {
     event: 'security.incident.created',
-    description: 'A new security incident was opened in PARAGON SOC.',
+    description: 'A new security incident was opened in Aegis SOC.',
   },
   { event: 'billing.invoice.paid', description: 'A billing invoice was successfully settled.' },
   { event: 'user.role.changed', description: "A user's role assignment was modified." },

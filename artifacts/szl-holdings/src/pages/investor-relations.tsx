@@ -25,7 +25,7 @@ const capitalPaths = [
   {
     icon: HandCoins,
     title: "Angel / seed path",
-    body: "Use equity conversations to accelerate product proof, customer acquisition, and the commercial maturation of KORA + FORGE.",
+    body: "Use equity conversations to accelerate product proof, customer acquisition, and the commercial maturation of Lyte + Counsel.",
     bullets: ["Clear wedge story", "Design-partner pipeline", "Product + GTM milestones"],
   },
   {
@@ -63,7 +63,7 @@ export default function InvestorRelationsPage() {
   const __pageMeta = usePageMeta({
     title: "Investor Relations \u2014 SZL Holdings",
     description:
-      "Capital and partner materials for SZL Holdings, centered on the KORA + FORGE raise story.",
+      "Capital and partner materials for SZL Holdings, centered on the Lyte + Counsel raise story.",
     canonical: "https://szlholdings.com/investor-relations",
   });
 
@@ -121,7 +121,7 @@ export default function InvestorRelationsPage() {
                 Capital materials for a disciplined company narrative.
               </h1>
               <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
-                SZL Holdings is running a focused capital story around KORA + FORGE. The objective is
+                SZL Holdings is running a focused capital story around Lyte + Counsel. The objective is
                 to align lenders, investors, and design partners around one commercial wedge, one
                 product narrative, and one execution plan.
               </p>
@@ -241,7 +241,7 @@ export default function InvestorRelationsPage() {
                     <div className="flex items-start gap-3">
                       <Radar className="mt-1 h-5 w-5 shrink-0 text-[#d4a054]" />
                       <p className="text-sm leading-7 text-white/80">
-                        Keep the ask simple: KORA + FORGE now, expansion lanes later, proof and customer
+                        Keep the ask simple: Lyte + Counsel now, expansion lanes later, proof and customer
                         truth as the filter for everything else.
                       </p>
                     </div>

@@ -33,7 +33,7 @@ const WORKFLOW_STEPS = [
   {
     step: "05",
     label: "Action & Export",
-    body: "Rerouting decisions, port notifications, and regulatory filings routed through FORGE with human approval gate, SLA tracking, and a full audit record of every decision made during the voyage.",
+    body: "Rerouting decisions, port notifications, and regulatory filings routed through Counsel with human approval gate, SLA tracking, and a full audit record of every decision made during the voyage.",
   },
 ];
 
@@ -49,8 +49,8 @@ const CAPABILITIES = [
   { icon: Wind, title: "Weather & Route Risk", body: "NWS marine forecasts integrated into route analysis. Weather deviation risk scored and surfaced before it becomes a commercial incident." },
   { icon: Map, title: "Port Intelligence", body: "BTS port data, pre-arrival conditions, and berth availability layered onto arrival schedules. Congestion and delay signals surfaced ahead of time." },
   { icon: AlertTriangle, title: "Exception Detection", body: "Port delays, cargo holds, crew incidents, and OFAC flags surfaced as structured exceptions — scored by severity and commercial impact." },
-  { icon: Anchor, title: "Pre-Arrival Workflow", body: "Pre-arrival checklists, berth scheduling, agent coordination, and customs workflows routed through FORGE with approval gates and follow-through tracking." },
-  { icon: FileText, title: "Regulatory Audit Trail", body: "Every maritime operation leaves a compliance footprint — SEXTANT captures it automatically with full attribution for cargo, crew, customs, and port operations." },
+  { icon: Anchor, title: "Pre-Arrival Workflow", body: "Pre-arrival checklists, berth scheduling, agent coordination, and customs workflows routed through Counsel with approval gates and follow-through tracking." },
+  { icon: FileText, title: "Regulatory Audit Trail", body: "Every maritime operation leaves a compliance footprint — Vessels captures it automatically with full attribution for cargo, crew, customs, and port operations." },
 ];
 
 const TRUST_CONTROLS = [
@@ -65,7 +65,7 @@ const TRUST_CONTROLS = [
 const ALLOY_INHERITED = [
   {
     capability: "Approval Gates",
-    description: "Every material voyage decision — rerouting, cargo hold, port exception — requires explicit human approval through FORGE's HITL gate before execution.",
+    description: "Every material voyage decision — rerouting, cargo hold, port exception — requires explicit human approval through Counsel's HITL gate before execution.",
   },
   {
     capability: "Signal Normalization",
@@ -81,7 +81,7 @@ const ALLOY_INHERITED = [
   },
   {
     capability: "Connector Mesh",
-    description: "SEXTANT integrates with fleet management systems, port agent platforms, and regulatory databases through FORGE's connector layer — no disruption to existing tools.",
+    description: "Vessels integrates with fleet management systems, port agent platforms, and regulatory databases through Counsel's connector layer — no disruption to existing tools.",
   },
   {
     capability: "Explainability",
@@ -100,8 +100,8 @@ const UNIQUE_TO_VESSELS = [
 
 export default function VesselsPublicPage() {
   const __pageMeta = usePageMeta({
-    title: "SEXTANT — Voyage Twin & Maritime Intelligence | SZL Holdings",
-    description: "SEXTANT gives maritime operators a command layer above fleet operations. Voyage Twin, weather and route risk, USCG AIS, OFAC screening, and governed action routing.",
+    title: "Vessels — Voyage Twin & Maritime Intelligence | SZL Holdings",
+    description: "Vessels gives maritime operators a command layer above fleet operations. Voyage Twin, weather and route risk, USCG AIS, OFAC screening, and governed action routing.",
     canonical: "https://szlholdings.com/products/vessels",
   });
 
@@ -122,7 +122,7 @@ export default function VesselsPublicPage() {
                 </span>
               </div>
               <span style={{ fontSize: "0.8125rem", color: "hsl(214,7%,60%)", lineHeight: 1.5 }}>
-                SEXTANT is in active design partner engagements with maritime operators. Architecture and core capabilities are established. We are not yet in general availability. If this is the right fit, we want to hear from you.
+                Vessels is in active design partner engagements with maritime operators. Architecture and core capabilities are established. We are not yet in general availability. If this is the right fit, we want to hear from you.
               </span>
             </div>
           </div>
@@ -144,7 +144,7 @@ export default function VesselsPublicPage() {
                     <Ship size={16} color="hsl(206,72%,52%)" />
                   </div>
                   <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(206,72%,52%)" }}>
-                    SEXTANT · Maritime Intelligence
+                    Vessels · Maritime Intelligence
                   </span>
                 </div>
               </m.div>
@@ -155,7 +155,7 @@ export default function VesselsPublicPage() {
                     Command-grade visibility for assets underway.
                   </h1>
                   <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,64%)", maxWidth: "50ch", marginBottom: "0.875rem" }}>
-                    SEXTANT gives maritime operators a command layer above fleet operations. Voyage Twin tracks every signal across position, cargo, weather, crew, and compliance. FORGE routes action through governed workflows with full audit trail.
+                    Vessels gives maritime operators a command layer above fleet operations. Voyage Twin tracks every signal across position, cargo, weather, crew, and compliance. Counsel routes action through governed workflows with full audit trail.
                   </p>
                   <p style={{ fontSize: "clamp(0.9375rem,1.6vw,1rem)", lineHeight: 1.72, color: "hsl(214,7%,52%)", maxWidth: "50ch", marginBottom: "2.25rem" }}>
                     From weather deviation to regulatory filing — with human approval at every material decision point.
@@ -168,7 +168,7 @@ export default function VesselsPublicPage() {
   
                 <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.15 }} style={{ borderRadius: "0.875rem", padding: "clamp(1.25rem,3vw,1.75rem)", background: "hsla(206,72%,40%,0.04)", border: "1px solid hsla(206,72%,40%,0.15)" }}>
                   <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>
-                    What SEXTANT answers
+                    What Vessels answers
                   </p>
                   {[
                     "Which voyages have weather exposure above acceptable threshold?",
@@ -203,10 +203,10 @@ export default function VesselsPublicPage() {
                     Why maritime. Why now.
                   </h2>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "46ch", marginBottom: "1.25rem" }}>
-                    Maritime is a domain where critical decisions — rerouting, cargo holds, regulatory filings — are still made from fragmented data, disconnected systems, and manual reconciliation. SEXTANT applies FORGE's operating loop to the voyage lifecycle: a domain where the cost of undetected risk compounds fast and audit trails are legally required.
+                    Maritime is a domain where critical decisions — rerouting, cargo holds, regulatory filings — are still made from fragmented data, disconnected systems, and manual reconciliation. Vessels applies Counsel's operating loop to the voyage lifecycle: a domain where the cost of undetected risk compounds fast and audit trails are legally required.
                   </p>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,54%)", maxWidth: "46ch" }}>
-                    The architecture generalizes from Counsel's operating model — a structured object (Voyage Twin, parallel to Matter Twin), signal enrichment from authoritative public data sources, governed action routing through FORGE, and a compliance-ready audit footprint.
+                    The architecture generalizes from Counsel's operating model — a structured object (Voyage Twin, parallel to Matter Twin), signal enrichment from authoritative public data sources, governed action routing through Counsel, and a compliance-ready audit footprint.
                   </p>
                 </m.div>
                 <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: 0.08 }}>
@@ -282,18 +282,18 @@ export default function VesselsPublicPage() {
             </div>
           </section>
   
-          {/* FORGE inheritance */}
+          {/* Counsel inheritance */}
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
                 <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(206,72%,52%)", marginBottom: "1rem" }}>
-                  What SEXTANT Inherits from FORGE
+                  What Vessels Inherits from Counsel
                 </p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "1.25rem" }}>
-                  The execution fabric comes with every lane. SEXTANT builds on top of it.
+                  The execution fabric comes with every lane. Vessels builds on top of it.
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
-                  SEXTANT does not rebuild what FORGE already provides. Every capability below is inherited from the shared platform — the same infrastructure that governs Counsel, DOMAINE, PARAGON, and Carlota Jo.
+                  Vessels does not rebuild what Counsel already provides. Every capability below is inherited from the shared platform — the same infrastructure that governs Counsel, Terra, Aegis, and Carlota Jo.
                 </p>
               </m.div>
               <div style={{ display: "grid", gap: "1rem", marginBottom: "2.5rem" }} className="lg:grid-cols-3 md:grid-cols-2">
@@ -321,7 +321,7 @@ export default function VesselsPublicPage() {
             </div>
           </section>
   
-          {/* Unique to SEXTANT */}
+          {/* Unique to Vessels */}
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <div style={{ display: "grid", gap: "clamp(3rem,6vw,5rem)", alignItems: "start" }} className="lg:grid-cols-2">
@@ -329,7 +329,7 @@ export default function VesselsPublicPage() {
                   <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(206,72%,52%)", marginBottom: "1rem" }}>Signal Sources</p>
                   <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, marginBottom: "1.25rem" }}>Authoritative maritime data in every voyage model.</h2>
                   <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "46ch" }}>
-                    SEXTANT connects to authoritative government and regulatory data sources — USCG AIS, NWS marine, BTS port data, and OFAC screening — and weaves those signals into each voyage's twin in real time.
+                    Vessels connects to authoritative government and regulatory data sources — USCG AIS, NWS marine, BTS port data, and OFAC screening — and weaves those signals into each voyage's twin in real time.
                   </p>
                 </m.div>
                 <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: 0.08 }}>
@@ -349,12 +349,12 @@ export default function VesselsPublicPage() {
             </div>
           </section>
   
-          {/* What's unique to SEXTANT */}
+          {/* What's unique to Vessels */}
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
                 <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(206,72%,52%)", marginBottom: "1rem" }}>
-                  What's Unique to SEXTANT
+                  What's Unique to Vessels
                 </p>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "2.5rem" }}>
                   Maritime-specific capabilities built on the shared platform.
@@ -406,7 +406,7 @@ export default function VesselsPublicPage() {
                     label: "Architecture",
                     status: "Established",
                     statusColor: "hsl(142,60%,46%)",
-                    description: "Voyage Twin model, signal integration schema, FORGE connector design, and audit trail structure are defined and validated.",
+                    description: "Voyage Twin model, signal integration schema, Counsel connector design, and audit trail structure are defined and validated.",
                   },
                   {
                     label: "Core Capabilities",
@@ -418,7 +418,7 @@ export default function VesselsPublicPage() {
                     label: "General Availability",
                     status: "Not Yet",
                     statusColor: "hsl(214,7%,50%)",
-                    description: "SEXTANT is not generally available. We are working with a small number of design partner operators under structured engagements.",
+                    description: "Vessels is not generally available. We are working with a small number of design partner operators under structured engagements.",
                   },
                 ].map((item, i) => (
                   <m.div

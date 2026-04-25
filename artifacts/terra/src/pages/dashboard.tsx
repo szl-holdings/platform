@@ -289,7 +289,7 @@ export default function TerraIntelligence() {
                 border: `1px solid ${DS.accent.gold}20`,
               }}
             >
-              DOMAINE
+              Terra
             </span>
           </div>
           <p className="text-[10px] mt-0.5 font-mono" style={{ color: DS.text.muted }}>
@@ -354,12 +354,12 @@ export default function TerraIntelligence() {
           compact
           provenance={
             {
-              source: 'DOMAINE Property Intelligence Engine',
+              source: 'Terra Property Intelligence Engine',
               lastUpdated: new Date().toISOString(),
               freshness: dataMode === 'live' ? 'realtime' : 'minutes',
               confidence: 'high',
               dataState: dataMode,
-              owner: 'DOMAINE Acquisitions',
+              owner: 'Terra Acquisitions',
             } as DataProvenanceInfo
           }
         />
@@ -392,9 +392,9 @@ export default function TerraIntelligence() {
             {activeRole === 'analyst' &&
               `${topDeals.length} deals in pipeline. ${topAgents.length} active brokers. ${OPPORTUNITY_QUEUE.filter((o) => o.flag === 'urgent').length} inquiries require same-day response. Broker SLA warning on aging inquiries.`}
             {activeRole === 'admin' &&
-              `Data mode: ${dataMode}. All DOMAINE intelligence sources connected. Property map token: ${mapToken ? 'Active' : 'Inactive'}.`}
+              `Data mode: ${dataMode}. All Terra intelligence sources connected. Property map token: ${mapToken ? 'Active' : 'Inactive'}.`}
             {activeRole === 'buyer' &&
-              "You're viewing DOMAINE — SZL's property intelligence platform. Distress detection, ownership stack analysis, and broker orchestration all demonstrated with sample market data."}
+              "You're viewing Terra — SZL's property intelligence platform. Distress detection, ownership stack analysis, and broker orchestration all demonstrated with sample market data."}
           </div>
         </div>
       )}

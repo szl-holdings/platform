@@ -158,7 +158,7 @@ export default function RunViewer() {
             Workflow Runs
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
-            FORGE workflow execution history and state
+            Counsel workflow execution history and state
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">

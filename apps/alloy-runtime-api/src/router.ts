@@ -103,7 +103,7 @@ export function createRouter(): Router {
     res.status(200).json({
       service: 'alloy-runtime-api',
       version: '0.2.0',
-      description: 'AEEP FORGE Execution and Evidence Platform — unified v1 runtime API',
+      description: 'AEEP Counsel Execution and Evidence Platform — unified v1 runtime API',
       authentication: {
         method: 'API Key',
         header: 'X-Api-Key',

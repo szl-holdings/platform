@@ -5,7 +5,7 @@ const credibilityBlocks = [
     label: 'Architecture philosophy',
     value: 'Signal-first',
     description:
-      'KORA and FORGE are designed around the signal-to-action pipeline — not dashboards bolted onto existing workflow tools.',
+      'Lyte and Counsel are designed around the signal-to-action pipeline — not dashboards bolted onto existing workflow tools.',
   },
   {
     label: 'Execution model',
@@ -23,7 +23,7 @@ const credibilityBlocks = [
     label: 'Design stage',
     value: 'Design-partner',
     description:
-      'KORA + FORGE is in active design-partner mode. Purpose-built for operators who want to co-develop the platform with direct founder access.',
+      'Lyte + Counsel is in active design-partner mode. Purpose-built for operators who want to co-develop the platform with direct founder access.',
   },
 ];
 
@@ -78,7 +78,7 @@ export function TrustSection() {
               maxWidth: '36rem',
             }}
           >
-            KORA and FORGE are not built for the demo — they are built for the operator. The
+            Lyte and Counsel are not built for the demo — they are built for the operator. The
             architecture reflects that.
           </p>
         </m.div>

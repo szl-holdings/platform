@@ -20,7 +20,7 @@ const capabilities = [
 function FlowDiagram() {
   const nodes = [
     { label: 'Inputs', x: 8 },
-    { label: 'FORGE', x: 38, highlight: true },
+    { label: 'Counsel', x: 38, highlight: true },
     { label: 'Agents', x: 62 },
     { label: 'Outputs', x: 90 },
   ];
@@ -142,7 +142,7 @@ export function AlloyStrip() {
                   color: 'hsl(218,50%,68%)',
                 }}
               >
-                Powered by FORGE
+                Powered by Counsel
               </div>
             </div>
             <h2
@@ -166,8 +166,8 @@ export function AlloyStrip() {
                 maxWidth: '30rem',
               }}
             >
-              FORGE is the AI orchestration engine that connects the entire ecosystem. Every
-              intelligent workflow, agent decision, and cross-platform signal flows through FORGE.
+              Counsel is the AI orchestration engine that connects the entire ecosystem. Every
+              intelligent workflow, agent decision, and cross-platform signal flows through Alloy.
             </p>
 
             <div className="grid sm:grid-cols-2 gap-3">
@@ -257,7 +257,7 @@ export function AlloyStrip() {
                     letterSpacing: '-0.003em',
                   }}
                 >
-                  View FORGE <ArrowUpRight size={12} />
+                  View Counsel <ArrowUpRight size={12} />
                 </a>
               </div>
               <FlowDiagram />
