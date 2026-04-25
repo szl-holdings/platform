@@ -229,7 +229,17 @@ router.get('/unsubscribe', async (req: Request, res: Response): Promise<void> =>
   </body></html>`);
 });
 
-router.use(authMiddleware({ required: true }));
+const PULSE_AUTHENTICATED_PREFIXES = [
+  '/briefings',
+  '/confidence',
+  '/custom',
+  '/dissents',
+  '/domain-panel',
+  '/export',
+  '/subscriptions',
+  '/today',
+];
+router.use(PULSE_AUTHENTICATED_PREFIXES, authMiddleware({ required: true }));
 
 const AGENT_NAMES: Record<string, string> = {
   alloy: 'Counsel',

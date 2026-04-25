@@ -112,16 +112,20 @@ pnpm test:integration        # Integration tests (requires live database)
 > original Carlota Jo `/booking/time-entries` regression, and the task #1395
 > sweep.
 >
-> **Exceptions.** Files mounted via `router.use('/<prefix>', lazyMount(...))`
-> in the parent group already have Express strip the prefix and only invoke
-> the inner router for matching paths, so an unprefixed top-level guard there
-> is not a footgun. Prefer the path-scoped form anyway so the file remains
-> safe if the mount style is ever changed.
+> **`lazyMount`-mounted files (task #3453).** Files mounted via
+> `router.use('/<prefix>', lazyMount(...))` in the parent group already have
+> Express strip the prefix and only invoke the inner router for matching
+> paths, so an unprefixed top-level guard there is not a footgun *today*.
+> However, if the mount style is ever changed to `lazyMatch` the same
+> footgun resurfaces. Task #3453 defensively path-scoped all remaining
+> `lazyMount`-mounted files (innovation-engine, knowledge-graph,
+> prism-counsel-{s31,review,pilot,pilot-one}, nexus, provenance, signal-bus,
+> pulse) using their owned route prefixes.
 >
 > The static regression test
 > `src/routes/__tests__/sub-router-middleware-path-scope.test.ts` enforces
-> this rule for the files that have been audited; extend it when you add new
-> shared-prefix sub-routers.
+> this rule for all audited files (tasks #718, #1395, #3453); extend it when
+> you add new shared-prefix sub-routers.
 
 ## Notable Source Paths
 

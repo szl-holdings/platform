@@ -11,8 +11,9 @@
  * Background: alloy-digest.ts, agent-os.ts, consciousness.ts and
  * carlota-time-tracking were each broken by this footgun in past tasks
  * (#718, #1329, original Carlota Jo bug). This test enumerates the files
- * tightened in the task #1395 sweep and asserts each one keeps the
- * defensive `router.use('/<owner-path>', ...)` form.
+ * tightened in the task #1395 sweep (and the task #3453 wider sweep of
+ * lazyMount-mounted files) and asserts each one keeps the defensive
+ * `router.use('/<owner-path>', ...)` form.
  *
  * If a future change drops the leading path string and reverts to the
  * unprefixed `router.use(authMiddleware())` / `router.use(tenantScope(...))`
@@ -119,6 +120,60 @@ const EXPECTATIONS: ScopedExpectation[] = [
   {
     file: 'alloy-governance.ts',
     mustContain: [`router.use('/alloy/policies', tenantScope({ required: true }));`],
+  },
+
+  // ── Task #3453 sweep — lazyMount-mounted files ────────────────────────
+  {
+    file: 'innovation-engine.ts',
+    mustContain: [`router.use(INNOVATION_ENGINE_OWNED_PREFIXES, authMiddleware());`],
+  },
+  {
+    file: 'knowledge-graph.ts',
+    mustContain: [`router.use(KNOWLEDGE_GRAPH_OWNED_PREFIXES, authMiddleware({ required: true }));`],
+  },
+  {
+    file: 'prism-counsel-s31.ts',
+    mustContain: [
+      `router.use(PRISM_COUNSEL_S31_OWNED_PREFIXES, authMiddleware());`,
+      `router.use(PRISM_COUNSEL_S31_OWNED_PREFIXES, tenantScope({ required: true }));`,
+    ],
+  },
+  {
+    file: 'prism-counsel-review.ts',
+    mustContain: [
+      `router.use('/review-desk', authMiddleware());`,
+      `router.use('/review-desk', tenantScope({ required: true }));`,
+    ],
+  },
+  {
+    file: 'prism-counsel-pilot.ts',
+    mustContain: [
+      `router.use(PRISM_COUNSEL_PILOT_OWNED_PREFIXES, authMiddleware());`,
+      `router.use(PRISM_COUNSEL_PILOT_OWNED_PREFIXES, tenantScope({ required: true }));`,
+    ],
+  },
+  {
+    file: 'prism-counsel-pilot-one.ts',
+    mustContain: [
+      `router.use(PRISM_COUNSEL_PILOT_ONE_OWNED_PREFIXES, authMiddleware());`,
+      `router.use(PRISM_COUNSEL_PILOT_ONE_OWNED_PREFIXES, tenantScope({ required: true }));`,
+    ],
+  },
+  {
+    file: 'nexus.ts',
+    mustContain: [`router.use(NEXUS_OWNED_PREFIXES, authMiddleware({ required: true }));`],
+  },
+  {
+    file: 'provenance.ts',
+    mustContain: [`router.use('/', authMiddleware());`],
+  },
+  {
+    file: 'signal-bus.ts',
+    mustContain: [`router.use(SIGNAL_BUS_OWNED_PREFIXES, authMiddleware());`],
+  },
+  {
+    file: 'pulse.ts',
+    mustContain: [`router.use(PULSE_AUTHENTICATED_PREFIXES, authMiddleware({ required: true }));`],
   },
 ];
 

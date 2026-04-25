@@ -15,7 +15,19 @@ import {
 } from '../middlewares/sliding-window-limiter';
 
 const router = Router();
-router.use(authMiddleware({ required: true }));
+
+const NEXUS_OWNED_PREFIXES = [
+  '/bridge',
+  '/customizations',
+  '/ingest',
+  '/memory',
+  '/orchestrate',
+  '/patterns',
+  '/research',
+  '/skills',
+  '/status',
+];
+router.use(NEXUS_OWNED_PREFIXES, authMiddleware({ required: true }));
 router.use(perUserApiSlidingLimiter);
 
 // ─── In-memory stores ────────────────────────────────────────────────────────

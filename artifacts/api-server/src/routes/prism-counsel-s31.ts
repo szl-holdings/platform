@@ -23,8 +23,22 @@ import { worldlineEngine } from '../services/prism-worldline';
 
 const router: Router = Router();
 
-router.use(authMiddleware());
-router.use(tenantScope({ required: true }));
+const PRISM_COUNSEL_S31_OWNED_PREFIXES = [
+  '/admin',
+  '/copilot',
+  '/costs',
+  '/data-products',
+  '/forecast-diff',
+  '/hf-gateway',
+  '/m365',
+  '/matter-twin',
+  '/model-mesh',
+  '/pressure-graph',
+  '/proof-chain',
+  '/worldline',
+];
+router.use(PRISM_COUNSEL_S31_OWNED_PREFIXES, authMiddleware());
+router.use(PRISM_COUNSEL_S31_OWNED_PREFIXES, tenantScope({ required: true }));
 
 const ModelRouteSchema = z.object({
   lane: z.enum([

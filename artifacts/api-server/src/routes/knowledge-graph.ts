@@ -53,10 +53,22 @@ import { authMiddleware, requireRole } from '../middlewares/auth';
 
 const router = Router();
 
-// All knowledge routes require authentication. This middleware runs first and sets
-// req.user via the codebase's custom session/token resolver. Individual admin-only
-// sub-routes add requireRole() on top of this base auth.
-router.use(authMiddleware({ required: true }));
+const KNOWLEDGE_GRAPH_OWNED_PREFIXES = [
+  '/centrality',
+  '/communities',
+  '/cross-domain',
+  '/embed',
+  '/embedding-models',
+  '/entities',
+  '/graph',
+  '/graph-query',
+  '/rag-context',
+  '/reembed',
+  '/relationships',
+  '/search',
+  '/stats',
+];
+router.use(KNOWLEDGE_GRAPH_OWNED_PREFIXES, authMiddleware({ required: true }));
 
 /** Safely parses an integer query param with optional min/max bounds.
  * Returns `fallback` for NaN/out-of-range values and clamps to [min, max] when provided. */

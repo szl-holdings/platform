@@ -9,7 +9,7 @@ import { authMiddleware } from '../middlewares/auth';
 
 const router = Router();
 
-router.use(authMiddleware());
+router.use('/', authMiddleware());
 
 router.get('/stats', (_req: Request, res: Response) => {
   try {

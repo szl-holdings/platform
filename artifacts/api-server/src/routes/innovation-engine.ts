@@ -13,7 +13,14 @@ import { authMiddleware } from '../middlewares/auth';
 
 const router: IRouter = Router();
 
-router.use(authMiddleware());
+const INNOVATION_ENGINE_OWNED_PREFIXES = [
+  '/ambient-signals',
+  '/correlations',
+  '/decision-items',
+  '/energy-metrics',
+  '/stakeholder-views',
+];
+router.use(INNOVATION_ENGINE_OWNED_PREFIXES, authMiddleware());
 
 const now = () => Date.now();
 

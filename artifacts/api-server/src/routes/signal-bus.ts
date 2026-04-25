@@ -15,7 +15,17 @@ import { handleRouteError } from '../lib/api-response.js';
 import { logger } from '../lib/logger.js';
 
 const router = Router();
-router.use(authMiddleware());
+
+const SIGNAL_BUS_OWNED_PREFIXES = [
+  '/dead-letters',
+  '/events',
+  '/publish',
+  '/rules',
+  '/seed-demo-rules',
+  '/stats',
+  '/test-fire',
+];
+router.use(SIGNAL_BUS_OWNED_PREFIXES, authMiddleware());
 
 const SEVERITY_ORDER = ['info', 'low', 'medium', 'high', 'critical'] as const;
 

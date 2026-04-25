@@ -16,8 +16,8 @@ import { tenantScope } from '../middlewares/tenant-scope';
 
 const router = Router();
 
-router.use(authMiddleware());
-router.use(tenantScope({ required: true }));
+router.use('/review-desk', authMiddleware());
+router.use('/review-desk', tenantScope({ required: true }));
 
 const _REVIEW_LIFECYCLE_STATES = [
   'new',

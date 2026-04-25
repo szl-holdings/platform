@@ -30,8 +30,18 @@ import { settlementFrictionEngine } from '../services/prism-settlement-friction'
 
 const router = Router();
 
-router.use(authMiddleware());
-router.use(tenantScope({ required: true }));
+const PRISM_COUNSEL_PILOT_ONE_OWNED_PREFIXES = [
+  '/admin',
+  '/boards',
+  '/copilot',
+  '/forecasts',
+  '/friction',
+  '/portfolio',
+  '/pressure',
+  '/worldline',
+];
+router.use(PRISM_COUNSEL_PILOT_ONE_OWNED_PREFIXES, authMiddleware());
+router.use(PRISM_COUNSEL_PILOT_ONE_OWNED_PREFIXES, tenantScope({ required: true }));
 
 const matterIdParamSchema = z.object({ matterId: z.coerce.number().int().positive() });
 const userIdParamSchema = z.object({ userId: z.coerce.number().int().positive() });

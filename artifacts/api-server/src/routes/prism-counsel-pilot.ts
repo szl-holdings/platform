@@ -26,8 +26,19 @@ import { pilotReview, pilotSignoff } from '../services/prism-pilot-review';
 
 const router = Router();
 
-router.use(authMiddleware());
-router.use(tenantScope({ required: true }));
+const PRISM_COUNSEL_PILOT_OWNED_PREFIXES = [
+  '/admin',
+  '/exports',
+  '/forecasts',
+  '/ingest',
+  '/matter-desk',
+  '/reviews',
+  '/signoffs',
+  '/today',
+  '/what-changed',
+];
+router.use(PRISM_COUNSEL_PILOT_OWNED_PREFIXES, authMiddleware());
+router.use(PRISM_COUNSEL_PILOT_OWNED_PREFIXES, tenantScope({ required: true }));
 
 const matterIdParamSchema = z.object({ matterId: z.coerce.number().int().positive() });
 
