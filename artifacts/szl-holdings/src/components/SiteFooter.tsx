@@ -47,6 +47,8 @@ const FOOTER_COLS = [
   {
     heading: 'Resources',
     links: [
+      { label: 'A11OY Philosophy', href: '/a11oy' },
+      { label: 'Competitive Brief', href: '/a11oy#competitive' },
       { label: 'Insights', href: '/insights' },
       { label: 'Case Studies', href: '/case-studies' },
       { label: 'FAQ', href: '/faq' },

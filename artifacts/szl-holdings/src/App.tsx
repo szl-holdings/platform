@@ -128,6 +128,7 @@ const HealthFreshnessPage = lazy(() => import("@/pages/health-freshness"));
 const DecisionSchemaLibraryPage = lazy(() => import("@/pages/decision-schema-library"));
 const GovernancePosturePage = lazy(() => import("@/pages/governance-posture"));
 const AlloyPublicPage = lazy(() => import("@/pages/alloy-page"));
+const A11oyPhilosophyPage = lazy(() => import("@/pages/a11oy-philosophy"));
 const SolutionsPage = lazy(() => import("@/pages/solutions"));
 const SolutionsAegisPage = lazy(() => import("@/pages/solutions-aegis"));
 const SolutionsVesselsPage = lazy(() => import("@/pages/solutions-vessels"));
@@ -624,6 +625,12 @@ function App() {
             </Route>
             <Route path="/decision-center">
               <Suspense fallback={<PageLoader />}><DecisionCenterPage /></Suspense>
+            </Route>
+            <Route path="/a11oy">
+              <Suspense fallback={<PageLoader />}><A11oyPhilosophyPage /></Suspense>
+            </Route>
+            <Route path="/a11oy-philosophy">
+              <Suspense fallback={<PageLoader />}><A11oyPhilosophyPage /></Suspense>
             </Route>
             <Route path="/platform/alloy">
               <Suspense fallback={<PageLoader />}><AlloyPublicPage /></Suspense>

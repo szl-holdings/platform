@@ -93,6 +93,16 @@ const NAV_ITEMS = [
     ],
   },
   {
+    label: 'A11OY',
+    href: '/a11oy',
+    children: [
+      { label: 'A11OY Philosophy', href: '/a11oy', note: 'The governing philosophy' },
+      { label: 'Competitive Landscape', href: '/a11oy#competitive', note: 'vs. Palantir, ServiceNow, C3.ai & more' },
+      { label: 'Download Whitepapers', href: '/a11oy#downloads', note: 'Philosophy & competitive brief PDFs' },
+      { label: 'Counsel — Execution Fabric', href: '/alloy-fabric', note: 'The product implementation' },
+    ],
+  },
+  {
     label: 'Company',
     href: '/company',
     children: [
@@ -140,6 +150,10 @@ const NAV_LINKS_MOBILE = [
   { label: 'Terra', href: '/solutions/terra', primary: false },
   { label: 'Counsel', href: '/counsel', primary: false },
   { label: 'Carlota Jo', href: '/carlota-jo/', primary: false },
+  { label: '— A11OY Philosophy —', href: '/a11oy', primary: false, section: true },
+  { label: 'A11OY Philosophy', href: '/a11oy', primary: false },
+  { label: 'Competitive Landscape', href: '/a11oy#competitive', primary: false },
+  { label: 'Download Whitepapers', href: '/a11oy#downloads', primary: false },
   { label: '— Proof —', href: '/product-readiness', primary: false, section: true },
   { label: 'Product Readiness Matrix', href: '/product-readiness', primary: false },
   { label: 'Trust Center Status', href: '/trust-center/status', primary: false },

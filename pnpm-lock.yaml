@@ -2099,6 +2099,9 @@ importers:
       i18next-browser-languagedetector:
         specifier: ^8.2.1
         version: 8.2.1
+      jspdf:
+        specifier: ^4.2.1
+        version: 4.2.1
       posthog-js:
         specifier: ^1.369.1
         version: 1.369.1
