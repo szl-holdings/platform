@@ -1,6 +1,7 @@
 import { type ChildProcess, spawn } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import type { Plugin } from 'vite';
+import { SHARED_PROXY_PORT } from '../../packages/proxy-routes.js';
 
 export function apiServerPlugin(): Plugin {
   let child: ChildProcess | null = null;
@@ -13,7 +14,7 @@ export function apiServerPlugin(): Plugin {
       ['--max-old-space-size=512', '--enable-source-maps', resolve(apiRoot, 'dist/index.mjs')],
       {
         cwd: apiRoot,
-        env: { ...process.env, PORT: '9090', __FAST_START_SERVER: '1' },
+        env: { ...process.env, PORT: String(SHARED_PROXY_PORT), __FAST_START_SERVER: '1' },
         stdio: ['ignore', 'pipe', 'pipe'],
       },
     );

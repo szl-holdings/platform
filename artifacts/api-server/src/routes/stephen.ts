@@ -1,4 +1,5 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
+import { SHARED_PROXY_PORT } from '../../../../packages/proxy-routes.js';
 import {
   alloySignals,
   db,
@@ -653,7 +654,6 @@ router.post(
   },
 );
 
-const SHARED_PROXY_PORT = 9090;
 const PROXY_BASE = process.env.REPLIT_DEV_DOMAIN
   ? `https://${process.env.REPLIT_DEV_DOMAIN}`
   : `http://localhost:${SHARED_PROXY_PORT}`;

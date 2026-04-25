@@ -24,8 +24,18 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const SHARED_PROXY_PORT = 9090;
 const CANONICAL_ROUTES_PATH = path.resolve(__dirname, '../packages/proxy-routes.ts');
+
+function loadSharedProxyPort() {
+  const source = fs.readFileSync(CANONICAL_ROUTES_PATH, 'utf8');
+  const m = source.match(/SHARED_PROXY_PORT\s*=\s*(\d+)/);
+  if (!m) {
+    throw new Error(
+      `[shared-proxy] Failed to parse SHARED_PROXY_PORT from ${CANONICAL_ROUTES_PATH}`,
+    );
+  }
+  return Number(m[1]);
+}
 
 function loadProxyRoutes() {
   const source = fs.readFileSync(CANONICAL_ROUTES_PATH, 'utf8');
@@ -52,6 +62,7 @@ function loadFallbackPort() {
   return Number(m[1]);
 }
 
+const SHARED_PROXY_PORT = loadSharedProxyPort();
 const PROXY_ROUTES = loadProxyRoutes();
 const CANONICAL_FALLBACK_PORT = loadFallbackPort();
 

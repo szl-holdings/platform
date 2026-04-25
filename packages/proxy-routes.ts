@@ -16,6 +16,10 @@ export const CANONICAL_FALLBACK_PORT = 21130;
 // OS load-balances incoming connections. This value must not be overridden
 // via any environment variable — it is intentionally hardcoded here so every
 // artifact always agrees on a single port.
+//
+// Port choice: 9090 (not 5000). Port 5000 is assigned to the /command/
+// artifact's own Vite dev server (see PROXY_ROUTES below) and therefore
+// cannot double as the shared proxy port. 9090 has no conflicting assignment.
 export const SHARED_PROXY_PORT = 9090;
 
 // ─── Per-app port constants ──────────────────────────────────────────────────

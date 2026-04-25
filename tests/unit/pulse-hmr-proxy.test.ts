@@ -33,6 +33,16 @@ describe('PROXY_ROUTES — LUMINA registration', () => {
     expect(typeof SHARED_PROXY_PORT).toBe('number');
     expect(SHARED_PROXY_PORT).toBeGreaterThan(0);
   });
+
+  it('SHARED_PROXY_PORT does not collide with any artifact port in PROXY_ROUTES', () => {
+    const conflicting = PROXY_ROUTES.find((r) => r.port === SHARED_PROXY_PORT);
+    expect(conflicting).toBeUndefined();
+  });
+
+  it('SHARED_PROXY_PORT is a valid unprivileged port number', () => {
+    expect(SHARED_PROXY_PORT).toBeGreaterThanOrEqual(1024);
+    expect(SHARED_PROXY_PORT).toBeLessThanOrEqual(65535);
+  });
 });
 
 // ─── Upgrade / HMR routing logic ─────────────────────────────────────────────
