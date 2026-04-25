@@ -19,14 +19,14 @@ chore(audit): A11oy public-readiness — audit suite, investor proof pack, repo 
 
 Final public-readiness pass for the SZL Holdings platform repository. Runs the full audit suite, ships the investor proof pack, hardens repo hygiene, and documents all gaps with honest classification.
 
-This PR does **not** merge product features — it ships the audit documentation, proof pack, and GitHub presentation materials needed to make the repo investor-ready. No application code was modified.
+This PR ships the audit documentation, proof pack, and GitHub presentation materials needed to make the repo investor-ready. It also includes one dependency fix: `artifacts/a11oy/package.json` now declares `@workspace/a11oy-fabric` as a workspace dependency, which was the only change needed to make A11oy build cleanly (the package already existed at `lib/a11oy-fabric/` and was in `pnpm-workspace.yaml`).
 
 ---
 
 ## What Changed
 
 ### Audit Reports (`audit/`)
-- `BUILD_TEST_REPORT.md` — full build/lint/typecheck/test results; a11oy build failure (missing @workspace/a11oy-fabric) documented as deferred blocker
+- `BUILD_TEST_REPORT.md` — full build/lint/typecheck/test results; a11oy build dependency wiring fixed in this pass — 6 artifacts now build cleanly
 - `SECURITY_SECRET_AUDIT.md` — confirms 0 true positives; Phase 9 audit posture unchanged; AEF Phase 1 reviewed
 - `REPO_HYGIENE_REPORT.md` — .gitignore complete, .env secure, LICENSE intact, CI comprehensive, contribution docs updated
 - `GITHUB_PRESENTATION_CHECKLIST.md` — repo description, topics, social preview, branch protection, visibility checklist
@@ -51,18 +51,19 @@ This PR does **not** merge product features — it ships the audit documentation
 
 ## Affected Surfaces
 
-- [x] `a11oy` (A11oy — Brand Orchestration Layer) — audit and proof pack
+- [x] `a11oy` (A11oy — Brand Orchestration Layer) — audit, proof pack, dependency fix
 - [x] Documentation (`docs/`, `audit/`, `proof-pack/`)
 - [x] `.github/` templates
+- [x] `artifacts/a11oy/package.json` + `pnpm-lock.yaml` — dependency declaration
 
 ---
 
 ## Quality Checklist
 
 ### Code Quality
-- [x] CI passes locally — 227 unit tests pass; biome lint passes; a11oy build failure is pre-existing blocker documented in BUILD_TEST_REPORT.md
+- [x] CI passes locally — 227 unit tests pass; biome lint passes; a11oy builds cleanly (dependency wiring fixed)
 - [x] No debug artifacts, console.log, or commented-out code left in
-- [x] PR is scoped to stated changes — audit documentation only, no application code
+- [x] PR is scoped to stated changes — audit documentation + one dependency declaration fix (`artifacts/a11oy/package.json`)
 
 ### Security
 - [x] No secrets, credentials, or tokens committed — 0 true positives confirmed in SECURITY_SECRET_AUDIT.md
