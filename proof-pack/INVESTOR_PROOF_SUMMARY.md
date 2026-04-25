@@ -17,7 +17,7 @@ This is an honest, no-overclaiming inventory of the SZL Holdings platform as of 
 | Capability | Evidence |
 |------------|----------|
 | **9 domain-specific AI command surfaces** — KORA, TENAX, Counsel, SEXTANT, DOMAINE, LUMINA, PARAGON, Carlota Jo, SZL Holdings Dashboard | Running on Replit Reserved VM; buildable from source |
-| **A11oy Brand Orchestration Layer** (Phase 1 scaffold) | Artifact deployed at `/a11oy`; UI routes functional; data layer in progress |
+| **A11oy Brand Orchestration Layer** (Phase 1) | Artifact at `/a11oy`; builds cleanly (dependency wiring fixed in this audit pass); all 36 UI routes functional with seed data |
 | **Centralized API server** with 357+ route files | Express + Drizzle ORM; type-safe via OpenAPI codegen |
 | **PostgreSQL database** with 132 migrations, 170 schema files | Drizzle ORM; schema-driven multi-tenant data model |
 | **Multi-tenant RBAC** — 11-role hierarchy, org_id scoping | Enforced at middleware level; `globalAuthEnforcer` deny-by-default |
@@ -49,7 +49,6 @@ This is an honest, no-overclaiming inventory of the SZL Holdings platform as of 
 
 | Item | Status |
 |------|--------|
-| `@workspace/a11oy-fabric` seed data package | Planned — a11oy build blocked until this is scaffolded |
 | A11oy write paths (workcell approval, execution, proof signing) | Phase 2 — covenant policy gates for mutating endpoints |
 | Public production deployment of all 9 surfaces | Currently Replit Reserved VM; cloud (Azure Bicep templates exist) |
 | RevenueCat mobile billing | Integrated in mobile; requires production credentials |
@@ -86,7 +85,6 @@ Screenshots in `docs/assets/screenshots/current/` (95 A11oy captures + domain su
 
 | Item | Priority | Timeline |
 |------|----------|----------|
-| `@workspace/a11oy-fabric` package — complete a11oy build | High | Next sprint (downstream task queued) |
 | Resolve terra / vessels / sentra pre-existing build failures | Medium | Dedicated sprint |
 | Full workspace typecheck (requires DATABASE_URL in CI) | Low | Already runs in CI; local env constraint only |
 | Branch protection rules applied in GitHub UI | Medium | Manual step; 30 minutes |
