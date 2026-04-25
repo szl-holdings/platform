@@ -1,6 +1,6 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { alertEvaluationRunsTable, db, pool } from '@szl-holdings/db';
-import { desc } from 'drizzle-orm';
+import { SQL, and, desc, gte, lte } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { requireOpsReady } from '../lib/boot-orchestrator';
@@ -115,6 +115,16 @@ async function ensureSchema(): Promise<void> {
       is_critical BOOLEAN NOT NULL DEFAULT false,
       description TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS alert_evaluation_runs (
+      id SERIAL PRIMARY KEY,
+      evaluated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      rules_checked INTEGER NOT NULL DEFAULT 0,
+      rules_fired INTEGER NOT NULL DEFAULT 0,
+      duration_ms INTEGER NOT NULL DEFAULT 0,
+      errors TEXT,
+      metrics JSONB,
+      triggered_by TEXT NOT NULL DEFAULT 'scheduled'
     )`,
   ];
   for (const sql of migrations) {
@@ -1395,14 +1405,43 @@ router.post('/ops/alert-rules/evaluate', validateBody(bodyShape({})), async (_re
   }
 });
 
-router.get('/ops/alert-rules/evaluation-history', validateQuery(listQuerySchema), async (req, res) => {
+const evalHistoryQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(200).optional(),
+  from: z.string().max(64).optional(),
+  to: z.string().max(64).optional(),
+});
+
+router.get('/ops/alert-rules/evaluation-history', validateQuery(evalHistoryQuerySchema), async (req, res) => {
   try {
-    const limit = Math.min(parseInt((req.query.limit as string) ?? '50', 10), 200);
+    const limit = Math.min((req.query.limit as number | undefined) ?? 50, 200);
+    const fromStr = req.query.from as string | undefined;
+    const toStr = req.query.to as string | undefined;
+
+    const conditions: (SQL<unknown> | undefined)[] = [];
+    if (fromStr) {
+      const fromDate = new Date(fromStr);
+      if (!isNaN(fromDate.getTime())) {
+        conditions.push(gte(alertEvaluationRunsTable.evaluatedAt, fromDate));
+      }
+    }
+    if (toStr) {
+      const toDate = new Date(toStr);
+      if (!isNaN(toDate.getTime())) {
+        // Set to end-of-day so the selected day is fully included
+        toDate.setUTCHours(23, 59, 59, 999);
+        conditions.push(lte(alertEvaluationRunsTable.evaluatedAt, toDate));
+      }
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
     const runs = await db
       .select()
       .from(alertEvaluationRunsTable)
+      .where(whereClause)
       .orderBy(desc(alertEvaluationRunsTable.evaluatedAt))
       .limit(limit);
+
     const lastRun = runs[0] ?? null;
     res.json({ runs, lastRun });
   } catch (err) {

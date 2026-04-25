@@ -51,13 +51,13 @@ interface AlertEvent {
 
 interface EvalRun {
   id: number;
-  triggered_by: string;
-  started_at: string;
-  completed_at: string | null;
-  rules_evaluated: number;
-  rules_fired: number;
-  duration_ms: number | null;
-  error: string | null;
+  triggeredBy: string;
+  evaluatedAt: string;
+  rulesChecked: number;
+  rulesFired: number;
+  durationMs: number;
+  errors: string | null;
+  metrics: Record<string, number> | null;
 }
 
 const severityColor = (s: string) =>
@@ -555,19 +555,30 @@ export default function OpsAlertsPage() {
   } | null>(null);
   const [activeTab, setActiveTab] = useState<'rules' | 'events' | 'history'>('rules');
   const [evalHistory, setEvalHistory] = useState<EvalRun[]>([]);
+  const [historyFrom, setHistoryFrom] = useState('');
+  const [historyTo, setHistoryTo] = useState('');
   const { confirm: productionConfirm } = useProductionConfirm();
 
+  const loadHistory = useCallback(async (from?: string, to?: string) => {
+    const params = new URLSearchParams({ limit: '100' });
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    const hRes = await fetch(`${BASE}/ops/alert-rules/evaluation-history?${params}`, {
+      credentials: 'include',
+    });
+    if (hRes.ok) setEvalHistory(((await hRes.json()) as { runs: EvalRun[] }).runs ?? []);
+  }, []);
+
   const load = useCallback(async () => {
-    const [rRes, eRes, hRes] = await Promise.all([
+    const [rRes, eRes] = await Promise.all([
       fetch(`${BASE}/ops/alert-rules`, { credentials: 'include' }),
       fetch(`${BASE}/ops/alert-events?limit=50`, { credentials: 'include' }),
-      fetch(`${BASE}/ops/alert-rules/evaluation-history?limit=50`, { credentials: 'include' }),
     ]);
     setRules(((await rRes.json()) as { rules: AlertRule[] }).rules ?? []);
     setEvents(((await eRes.json()) as { events: AlertEvent[] }).events ?? []);
-    if (hRes.ok) setEvalHistory(((await hRes.json()) as { runs: EvalRun[] }).runs ?? []);
+    await loadHistory();
     setLoading(false);
-  }, []);
+  }, [loadHistory]);
 
   useEffect(() => {
     load();
@@ -792,97 +803,169 @@ export default function OpsAlertsPage() {
             </div>
           )
         ) : activeTab === 'history' ? (
-          evalHistory.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '4rem 0', color: 'hsl(210,5%,48%)' }}>
-              No evaluation runs recorded yet.
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {evalHistory.map((run) => (
-                <div
-                  key={run.id}
+          <div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                marginBottom: '1rem',
+                flexWrap: 'wrap',
+              }}
+            >
+              <span style={{ fontSize: 11, color: 'hsl(210,5%,50%)' }}>Filter by date:</span>
+              <input
+                type="date"
+                value={historyFrom}
+                onChange={(e) => setHistoryFrom(e.target.value)}
+                style={{
+                  background: 'hsla(0,0%,100%,0.05)',
+                  border: '1px solid hsla(0,0%,100%,0.1)',
+                  borderRadius: 5,
+                  color: 'hsl(38,12%,82%)',
+                  fontSize: 11,
+                  padding: '3px 7px',
+                }}
+              />
+              <span style={{ fontSize: 11, color: 'hsl(210,5%,40%)' }}>–</span>
+              <input
+                type="date"
+                value={historyTo}
+                onChange={(e) => setHistoryTo(e.target.value)}
+                style={{
+                  background: 'hsla(0,0%,100%,0.05)',
+                  border: '1px solid hsla(0,0%,100%,0.1)',
+                  borderRadius: 5,
+                  color: 'hsl(38,12%,82%)',
+                  fontSize: 11,
+                  padding: '3px 7px',
+                }}
+              />
+              <button
+                onClick={() => loadHistory(historyFrom || undefined, historyTo || undefined)}
+                style={{
+                  padding: '3px 10px',
+                  borderRadius: 5,
+                  fontSize: 11,
+                  background: 'hsla(210,55%,52%,0.12)',
+                  border: '1px solid hsla(210,55%,52%,0.3)',
+                  color: 'hsl(210,55%,70%)',
+                  cursor: 'pointer',
+                }}
+              >
+                Apply
+              </button>
+              {(historyFrom || historyTo) && (
+                <button
+                  onClick={() => {
+                    setHistoryFrom('');
+                    setHistoryTo('');
+                    loadHistory();
+                  }}
                   style={{
-                    background: 'hsla(0,0%,100%,0.025)',
-                    border: `1px solid ${run.error ? 'hsla(0,72%,51%,0.2)' : 'hsla(0,0%,100%,0.07)'}`,
-                    borderRadius: 8,
-                    padding: '0.75rem 1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '1rem',
-                    flexWrap: 'wrap',
+                    padding: '3px 10px',
+                    borderRadius: 5,
+                    fontSize: 11,
+                    background: 'transparent',
+                    border: '1px solid hsla(0,0%,100%,0.1)',
+                    color: 'hsl(210,5%,50%)',
+                    cursor: 'pointer',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Clock size={13} style={{ color: run.error ? '#f87171' : '#34d399', flexShrink: 0 }} />
-                    <div>
-                      <span style={{ fontSize: 12, fontFamily: 'monospace', color: 'hsl(38,12%,82%)' }}>
-                        {new Date(run.started_at).toLocaleString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          second: '2-digit',
-                        })}
+                  Clear
+                </button>
+              )}
+            </div>
+            {evalHistory.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3rem 0', color: 'hsl(210,5%,48%)' }}>
+                No evaluation runs recorded yet.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {evalHistory.map((run) => (
+                  <div
+                    key={run.id}
+                    style={{
+                      background: 'hsla(0,0%,100%,0.025)',
+                      border: `1px solid ${run.errors ? 'hsla(0,72%,51%,0.2)' : 'hsla(0,0%,100%,0.07)'}`,
+                      borderRadius: 8,
+                      padding: '0.75rem 1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '1rem',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <Clock size={13} style={{ color: run.errors ? '#f87171' : '#34d399', flexShrink: 0 }} />
+                      <div>
+                        <span style={{ fontSize: 12, fontFamily: 'monospace', color: 'hsl(38,12%,82%)' }}>
+                          {new Date(run.evaluatedAt).toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                          })}
+                        </span>
+                        {run.errors && (
+                          <span style={{ display: 'block', fontSize: 11, color: '#f87171', marginTop: 2 }}>
+                            {run.errors}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 11, color: 'hsl(210,5%,50%)' }}>
+                        Triggered by:{' '}
+                        <strong style={{ color: 'hsl(210,5%,68%)', fontFamily: 'monospace' }}>
+                          {run.triggeredBy}
+                        </strong>
                       </span>
-                      {run.error && (
-                        <span style={{ display: 'block', fontSize: 11, color: '#f87171', marginTop: 2 }}>
-                          {run.error}
+                      <span style={{ fontSize: 11, color: 'hsl(210,5%,50%)' }}>
+                        Evaluated:{' '}
+                        <strong style={{ color: 'hsl(38,12%,78%)' }}>{run.rulesChecked}</strong>
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          color: run.rulesFired > 0 ? '#f59e0b' : 'hsl(210,5%,50%)',
+                        }}
+                      >
+                        Fired:{' '}
+                        <strong style={{ color: run.rulesFired > 0 ? '#f59e0b' : 'hsl(38,12%,78%)' }}>
+                          {run.rulesFired}
+                        </strong>
+                      </span>
+                      {run.durationMs > 0 && (
+                        <span style={{ fontSize: 11, color: 'hsl(210,5%,42%)' }}>
+                          {run.durationMs}ms
                         </span>
                       )}
+                      <span
+                        style={{
+                          fontSize: 9,
+                          fontWeight: 700,
+                          padding: '1px 6px',
+                          borderRadius: 4,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.06em',
+                          background: run.errors
+                            ? 'hsla(0,72%,51%,0.12)'
+                            : 'hsla(152,50%,42%,0.1)',
+                          color: run.errors ? '#f87171' : '#34d399',
+                          border: `1px solid ${run.errors ? 'hsla(0,72%,51%,0.25)' : 'hsla(152,50%,42%,0.2)'}`,
+                        }}
+                      >
+                        {run.errors ? 'failed' : 'completed'}
+                      </span>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 11, color: 'hsl(210,5%,50%)' }}>
-                      Triggered by:{' '}
-                      <strong style={{ color: 'hsl(210,5%,68%)', fontFamily: 'monospace' }}>
-                        {run.triggered_by}
-                      </strong>
-                    </span>
-                    <span style={{ fontSize: 11, color: 'hsl(210,5%,50%)' }}>
-                      Evaluated:{' '}
-                      <strong style={{ color: 'hsl(38,12%,78%)' }}>{run.rules_evaluated}</strong>
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: run.rules_fired > 0 ? '#f59e0b' : 'hsl(210,5%,50%)',
-                      }}
-                    >
-                      Fired:{' '}
-                      <strong style={{ color: run.rules_fired > 0 ? '#f59e0b' : 'hsl(38,12%,78%)' }}>
-                        {run.rules_fired}
-                      </strong>
-                    </span>
-                    {run.duration_ms !== null && (
-                      <span style={{ fontSize: 11, color: 'hsl(210,5%,42%)' }}>
-                        {run.duration_ms}ms
-                      </span>
-                    )}
-                    <span
-                      style={{
-                        fontSize: 9,
-                        fontWeight: 700,
-                        padding: '1px 6px',
-                        borderRadius: 4,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.06em',
-                        background: run.error
-                          ? 'hsla(0,72%,51%,0.12)'
-                          : run.completed_at
-                            ? 'hsla(152,50%,42%,0.1)'
-                            : 'hsla(210,55%,52%,0.12)',
-                        color: run.error ? '#f87171' : run.completed_at ? '#34d399' : '#93c5fd',
-                        border: `1px solid ${run.error ? 'hsla(0,72%,51%,0.25)' : run.completed_at ? 'hsla(152,50%,42%,0.2)' : 'hsla(210,55%,52%,0.3)'}`,
-                      }}
-                    >
-                      {run.error ? 'failed' : run.completed_at ? 'completed' : 'running'}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
+                ))}
+              </div>
+            )}
+          </div>
         ) : events.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '4rem 0', color: 'hsl(210,5%,48%)' }}>
             No alert events recorded yet.
