@@ -1,0 +1,185 @@
+import type { ReactNode } from 'react';
+
+export function StatusPill({ status }: { status: 'LIVE' | 'DEMO' | 'GATED' | 'APPROVED' | 'ROADMAP' }) {
+  const styles: Record<string, { bg: string; color: string }> = {
+    LIVE:    { bg: 'rgba(16,185,129,0.15)', color: '#10b981' },
+    DEMO:    { bg: 'rgba(245,158,11,0.15)',  color: '#f59e0b' },
+    GATED:   { bg: 'rgba(139,92,246,0.15)', color: '#8b5cf6' },
+    APPROVED:{ bg: 'rgba(59,130,246,0.15)', color: '#3b82f6' },
+    ROADMAP: { bg: 'rgba(77,96,122,0.2)',   color: '#9bacc4' },
+  };
+  const s = styles[status] ?? styles.DEMO;
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-medium"
+      style={{ backgroundColor: s.bg, color: s.color }}
+    >
+      {status === 'LIVE' && <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: s.color }} />}
+      {status}
+    </span>
+  );
+}
+
+export function DemoBadge() {
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-mono"
+      style={{ backgroundColor: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.25)' }}
+    >
+      Demo data
+    </span>
+  );
+}
+
+export function ApprovalGate({ label = 'Requires human approval' }: { label?: string }) {
+  return (
+    <div
+      className="flex items-center gap-2 px-3 py-2 rounded text-xs font-medium"
+      style={{ backgroundColor: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.25)', color: '#a78bfa' }}
+    >
+      <svg width="12" height="12" fill="none" viewBox="0 0 16 16">
+        <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 6.5a1 1 0 011 1v2a1 1 0 01-2 0v-2a1 1 0 011-1zm0-2.5a1 1 0 100-2 1 1 0 000 2z" fill="currentColor"/>
+      </svg>
+      {label}
+    </div>
+  );
+}
+
+export function PageHeader({
+  label,
+  title,
+  subtitle,
+  status,
+  children,
+}: {
+  label: string;
+  title: string;
+  subtitle?: string;
+  status?: 'LIVE' | 'DEMO' | 'GATED' | 'APPROVED' | 'ROADMAP';
+  children?: ReactNode;
+}) {
+  return (
+    <div className="mb-8">
+      <div className="flex items-center gap-3 mb-2">
+        <span className="text-xs font-mono" style={{ color: 'var(--color-a11oy-gold)' }}>{label}</span>
+        {status && <StatusPill status={status} />}
+        <DemoBadge />
+      </div>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-display font-semibold tracking-tight" style={{ color: 'var(--color-a11oy-text)' }}>
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="mt-1 text-sm" style={{ color: 'var(--color-a11oy-text-sub)' }}>{subtitle}</p>
+          )}
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return (
+    <div
+      className={`rounded-lg border p-4 ${className}`}
+      style={{ backgroundColor: 'var(--color-a11oy-card)', borderColor: 'var(--color-a11oy-border)' }}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function SectionTitle({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="text-sm font-display font-semibold mb-3" style={{ color: 'var(--color-a11oy-text)' }}>
+      {children}
+    </h2>
+  );
+}
+
+export function KpiCard({ label, value, sub, accent }: { label: string; value: string | number; sub?: string; accent?: string }) {
+  return (
+    <div
+      className="rounded-lg border p-4 flex flex-col gap-1"
+      style={{ backgroundColor: 'var(--color-a11oy-card)', borderColor: 'var(--color-a11oy-border)' }}
+    >
+      <div className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{label}</div>
+      <div className="text-2xl font-display font-semibold" style={{ color: accent ?? 'var(--color-a11oy-text)' }}>
+        {value}
+      </div>
+      {sub && <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{sub}</div>}
+    </div>
+  );
+}
+
+export function SeverityDot({ severity }: { severity: 'critical' | 'high' | 'medium' | 'low' | 'info' }) {
+  const colors: Record<string, string> = {
+    critical: '#ef4444',
+    high: '#f59e0b',
+    medium: '#f59e0b',
+    low: '#10b981',
+    info: '#3b82f6',
+  };
+  return (
+    <span
+      className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+      style={{ backgroundColor: colors[severity] ?? '#9bacc4' }}
+    />
+  );
+}
+
+export function HashId({ id }: { id: string }) {
+  return (
+    <span className="font-mono text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+      {id}
+    </span>
+  );
+}
+
+export function ActionButton({
+  children,
+  variant = 'primary',
+  disabled,
+  onClick,
+}: {
+  children: ReactNode;
+  variant?: 'primary' | 'ghost' | 'danger';
+  disabled?: boolean;
+  onClick?: () => void;
+}) {
+  const styles: Record<string, { bg: string; color: string; border: string }> = {
+    primary: { bg: 'var(--color-a11oy-blue)', color: 'white', border: 'transparent' },
+    ghost: { bg: 'transparent', color: 'var(--color-a11oy-text-sub)', border: 'var(--color-a11oy-border)' },
+    danger: { bg: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'rgba(239,68,68,0.25)' },
+  };
+  const s = styles[variant];
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="px-3 py-1.5 rounded text-xs font-medium border transition-opacity"
+      style={{
+        backgroundColor: s.bg,
+        color: s.color,
+        borderColor: s.border,
+        opacity: disabled ? 0.5 : 1,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function VerticalBadge({ vertical, color }: { vertical: string; color: string }) {
+  return (
+    <span
+      className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono"
+      style={{ backgroundColor: `${color}18`, color, border: `1px solid ${color}30` }}
+    >
+      {vertical}
+    </span>
+  );
+}

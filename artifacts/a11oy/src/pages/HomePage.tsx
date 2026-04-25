@@ -42,8 +42,10 @@ export function HomePage() {
     <Layout>
       <HeroSection data={data} />
       <PhilosophySection />
+      <PipelineSection />
       <FabricSection />
       <ProofSection />
+      <SurfacesGridSection />
       <CtaSection />
     </Layout>
   );
@@ -106,14 +108,14 @@ function HeroSection({ data }: { data: NowData | null }) {
 
         <div className="flex flex-wrap items-center justify-center gap-4">
           <a
-            href={`${BASE}/command`}
+            href={`${BASE}/now`}
             className="px-6 py-3 rounded font-medium text-sm transition-all"
             style={{ backgroundColor: 'var(--color-a11oy-blue)', color: 'white', textDecoration: 'none' }}
           >
-            Open Command Surface
+            Open Now Board
           </a>
           <a
-            href={`${BASE}/fabric`}
+            href={`${BASE}/investor-demo`}
             className="px-6 py-3 rounded font-medium text-sm border transition-all"
             style={{
               borderColor: 'var(--color-a11oy-border)',
@@ -122,7 +124,7 @@ function HeroSection({ data }: { data: NowData | null }) {
               backgroundColor: 'transparent',
             }}
           >
-            Explore the Fabric
+            Investor Demo →
           </a>
         </div>
 
@@ -177,6 +179,62 @@ function PhilosophySection() {
           chain of custody from the originating signal through causal reasoning, policy evaluation,
           approval, and verified execution. Not for compliance theater. For operational certainty.
         </p>
+      </div>
+    </section>
+  );
+}
+
+function PipelineSection() {
+  const stages = [
+    { abbr: 'SENSE', label: 'Sense', icon: '◎', desc: 'Ingest signals across all enterprise domains' },
+    { abbr: 'STRUCTURE', label: 'Structure', icon: '⬡', desc: 'Normalize and classify signal context' },
+    { abbr: 'CORRELATE', label: 'Correlate', icon: '⟳', desc: 'Link cause-effect chains across verticals' },
+    { abbr: 'EXPLAIN', label: 'Explain', icon: '△', desc: 'Generate causal narrative for operators' },
+    { abbr: 'RECOMMEND', label: 'Recommend', icon: '→', desc: 'Propose governed, ranked response options' },
+    { abbr: 'APPROVE', label: 'Approve', icon: '◇', desc: 'Human gates every material action' },
+    { abbr: 'EXECUTE', label: 'Execute', icon: '▶', desc: 'Orchestrate authorized action across systems' },
+    { abbr: 'VERIFY', label: 'Verify', icon: '✓', desc: 'Confirm execution outcome matches intent' },
+    { abbr: 'PROVE', label: 'Prove', icon: '◈', desc: 'Record cryptographic proof of full chain' },
+  ];
+  return (
+    <section className="py-20 px-6">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-12">
+          <h2
+            className="font-display font-semibold text-2xl tracking-tight mb-3"
+            style={{ color: 'var(--color-a11oy-text)' }}
+          >
+            One Pipeline. Nine Stages. Every Decision.
+          </h2>
+          <p className="text-sm max-w-xl mx-auto" style={{ color: 'var(--color-a11oy-text-sub)' }}>
+            Every business event flows through the same governed sequence — no shortcuts, no gaps.
+          </p>
+        </div>
+        <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-px rounded overflow-hidden border" style={{ borderColor: 'var(--color-a11oy-border)' }}>
+          {stages.map((s, i) => (
+            <div
+              key={s.abbr}
+              className="flex flex-col items-center gap-1.5 py-5 px-2 text-center relative"
+              style={{ backgroundColor: 'var(--color-a11oy-deep)' }}
+            >
+              {i < stages.length - 1 && (
+                <span className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 text-xs z-10" style={{ color: 'var(--color-a11oy-border)' }}>→</span>
+              )}
+              <span className="text-lg" style={{ color: 'var(--color-a11oy-blue)' }}>{s.icon}</span>
+              <span className="font-mono text-xs font-bold" style={{ color: 'var(--color-a11oy-text)', fontSize: '10px' }}>{s.abbr}</span>
+              <span className="text-xs leading-tight hidden sm:block" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: '10px' }}>{s.desc}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 text-center">
+          <a
+            href={`${BASE}/investor-demo`}
+            className="text-xs font-mono"
+            style={{ color: 'var(--color-a11oy-blue)', textDecoration: 'none' }}
+          >
+            Walk through a live decision end-to-end →
+          </a>
+        </div>
       </div>
     </section>
   );
@@ -346,6 +404,71 @@ function ProofSection() {
   );
 }
 
+const SURFACES = [
+  { path: '/now',           label: 'Live Now Board',      icon: '⚡', desc: 'Real-time fabric pulse' },
+  { path: '/command',       label: 'Command Surface',     icon: '🎯', desc: 'Unified action hub' },
+  { path: '/signals',       label: 'Signal Mesh',         icon: '📡', desc: 'Inbound intelligence feed' },
+  { path: '/actions',       label: 'Action Rail',         icon: '🔩', desc: 'Pending execution queue' },
+  { path: '/proof',         label: 'Proof Ledger',        icon: '🔏', desc: 'Cryptographic audit trail' },
+  { path: '/governance',    label: 'Governance',          icon: '⚖️', desc: 'Policy & approval engine' },
+  { path: '/agents',        label: 'Agent Registry',      icon: '🤖', desc: 'Live agent catalogue' },
+  { path: '/workcells',     label: 'Workcell Engine',     icon: '🏭', desc: 'Multi-agent orchestration' },
+  { path: '/evals',         label: 'Eval Sandbox',        icon: '🧪', desc: 'Mirror-world dry-runs' },
+  { path: '/connectors',    label: 'Connector Firewall',  icon: '🔌', desc: 'Enterprise integrations' },
+  { path: '/twins',         label: 'Twin Foundry',        icon: '🪞', desc: 'Digital entity models' },
+  { path: '/trust',         label: 'Trust Center',        icon: '🛡️', desc: 'Credential & compliance' },
+  { path: '/model-router',  label: 'Model Router',        icon: '🔀', desc: 'Adaptive LLM selection' },
+  { path: '/skills',        label: 'Skill Library',       icon: '📚', desc: 'Reusable agent skills' },
+  { path: '/replay',        label: 'Replay Theater',      icon: '🎬', desc: 'Workcell replay & audit' },
+  { path: '/sovereign',     label: 'Sovereign Mode',      icon: '🔒', desc: 'Air-gapped deployment' },
+  { path: '/boardroom',     label: 'Boardroom Mode',      icon: '📊', desc: 'Executive live view' },
+  { path: '/investor-demo', label: 'Investor Demo',       icon: '🚀', desc: 'Guided product walkthrough' },
+];
+
+function SurfacesGridSection() {
+  return (
+    <section
+      className="border-t py-16 px-6"
+      style={{ borderColor: 'var(--color-a11oy-border)', backgroundColor: 'var(--color-a11oy-surface)' }}
+    >
+      <div className="max-w-5xl mx-auto">
+        <div className="text-xs font-mono mb-2" style={{ color: 'var(--color-a11oy-gold)' }}>
+          ALL 19 SURFACES
+        </div>
+        <h2 className="text-2xl font-display font-semibold mb-2" style={{ color: 'var(--color-a11oy-text)' }}>
+          Every Layer. One Fabric.
+        </h2>
+        <p className="text-sm mb-8 leading-relaxed" style={{ color: 'var(--color-a11oy-text-sub)' }}>
+          Navigate directly to any A11oy execution surface.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {SURFACES.map(s => (
+            <a
+              key={s.path}
+              href={`${BASE}${s.path}`}
+              style={{
+                backgroundColor: 'var(--color-a11oy-card)',
+                borderColor: 'var(--color-a11oy-border)',
+                color: 'var(--color-a11oy-text)',
+                textDecoration: 'none',
+              }}
+              className="rounded-lg border p-4 flex flex-col gap-1 hover:opacity-80 transition-opacity"
+            >
+              <span className="text-lg leading-none">{s.icon}</span>
+              <span className="text-sm font-medium leading-tight mt-1" style={{ color: 'var(--color-a11oy-text)' }}>
+                {s.label}
+              </span>
+              <span className="text-xs leading-snug" style={{ color: 'var(--color-a11oy-text-sub)' }}>
+                {s.desc}
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function CtaSection() {
   return (
     <section className="py-20 px-6 text-center">
@@ -373,7 +496,7 @@ function CtaSection() {
             Open Command Surface
           </a>
           <a
-            href={`${BASE}/fabric`}
+            href={`${BASE}/now`}
             className="px-6 py-3 rounded font-medium text-sm border transition-all"
             style={{
               borderColor: 'var(--color-a11oy-border)',
@@ -381,7 +504,7 @@ function CtaSection() {
               textDecoration: 'none',
             }}
           >
-            Explore the Fabric →
+            Live Fabric View →
           </a>
         </div>
       </div>

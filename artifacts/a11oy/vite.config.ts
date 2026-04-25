@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 import path from 'node:path';
 import { defineConfig } from 'vite';
 
-const vitePort = Number(process.env.VITE_PORT) || 9090;
+const vitePort = Number(process.env.PORT);
 const basePath = process.env.BASE_PATH || '/a11oy/';
 
 export default defineConfig({
@@ -38,8 +38,8 @@ export default defineConfig({
     cssCodeSplit: true,
   },
   server: {
-    port: vitePort,
-    strictPort: true,
+    port: vitePort || undefined,
+    strictPort: !!vitePort,
     host: '0.0.0.0',
     allowedHosts: true,
     hmr: { clientPort: 443, path: basePath },
@@ -49,7 +49,7 @@ export default defineConfig({
     },
   },
   preview: {
-    port: vitePort,
+    port: vitePort || undefined,
     host: '0.0.0.0',
     allowedHosts: true,
   },
