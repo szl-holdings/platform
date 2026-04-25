@@ -97,6 +97,29 @@ The FORGE Command Portal is the cross-domain real-time dashboard aggregating sig
 
 **A11oy** is the governed agentic layer that sits between enterprise data and enterprise decisions. It senses, structures, correlates, explains, recommends, approves, executes, verifies, and preserves cryptographic proof — in real time, across all seven SZL verticals.
 
+## A11oy Doctrine
+
+The A11oy Doctrine is the repo-native operating system for every AI agent, Replit task, Codex session, and human contributor working in this repo. Read `AGENTS.md` before touching any file.
+
+**Core Execution Loop:**
+
+```
+Context → Plan → Patch → Test → Screenshot → Verify → Proof → Commit
+```
+
+| Document | Purpose |
+|----------|---------|
+| **[AGENTS.md](./AGENTS.md)** | Authoritative operating doctrine: core loop, forbidden actions, naming rules, done criteria |
+| **[docs/A11OY_DOCTRINE.md](./docs/A11OY_DOCTRINE.md)** | Product thesis, operating philosophy, and five principle categories |
+| **[docs/A11OY_AGENT_DOCTRINE.md](./docs/A11OY_AGENT_DOCTRINE.md)** | All 18 named agents with full specifications and sample prompts |
+| **[docs/A11OY_DEFINITION_OF_DONE.md](./docs/A11OY_DEFINITION_OF_DONE.md)** | Full done checklist — a task is not done without this |
+| **[docs/A11OY_PUBLIC_CLAIMS_DOCTRINE.md](./docs/A11OY_PUBLIC_CLAIMS_DOCTRINE.md)** | Blocked claims, required qualifiers, soften-or-remove rule |
+| **[docs/A11OY_SCREENSHOT_DOCTRINE.md](./docs/A11OY_SCREENSHOT_DOCTRINE.md)** | Screenshot quality rules and blocked screenshot types |
+| **[docs/A11OY_SECURITY_DOCTRINE.md](./docs/A11OY_SECURITY_DOCTRINE.md)** | Security rules, secret hygiene, .gitignore requirements |
+| **[docs/A11OY_RELEASE_DOCTRINE.md](./docs/A11OY_RELEASE_DOCTRINE.md)** | Release readiness checklist and nine-category scoring |
+
+Quick agent reference and copy-ready prompts: [`skills/a11oy-code/`](./skills/a11oy-code/)
+
 - **Artifact:** `artifacts/a11oy` — serves at `/a11oy/`
 - **API:** Read-side REST API at `/api/a11oy/*` (11 GET endpoints, all public in Phase 1)
 - **Seed data:** 32 business signals × 7 verticals, 5 outcomes, 5 covenant policies, 5 proof packets
