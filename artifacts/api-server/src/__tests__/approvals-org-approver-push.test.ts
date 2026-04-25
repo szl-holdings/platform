@@ -2,24 +2,28 @@
  * Tests for the high/critical approval mobile push notification flow added
  * for Task #1393.
  *
- * Verifies via the `__orgApproverInternals` seam that:
+ * Verifies via the typed `__orgApproverInternals` seam that:
  *   1. `sendPushToOrgApprovers` fans out one push per resolved approver
  *      user (every user surfaced by the orgMembers ⨝ userRoles ⨝ roles
  *      ⨝ pushTokens query).
- *   2. Users gated out by `isAlertCategoryAllowedForUser` (e.g. quiet
+ *   2. The full CORTEX mobile app-id family is targeted by default
+ *      (cortex-mobile, cortex-advisory, aegis-mobile, lyte-mobile,
+ *      terra-mobile, stephen-mobile) and is forwarded to the role-resolver.
+ *   3. Users gated out by `isAlertCategoryAllowedForUser` (e.g. quiet
  *      hours, `alerts_approvals_enabled=false`) do NOT receive a push.
- *   3. Targeted/sent counts are aggregated correctly even when a single
+ *   4. Targeted/sent counts are aggregated correctly even when a single
  *      per-user delivery throws.
- *   4. The Quick-Actions deep-link payload is forwarded to every
- *      recipient delivery and the helper passes through `appId: 'cortex'`.
+ *   5. The Quick-Actions deep-link payload (`screen` + `deepLink`) is
+ *      forwarded to every recipient delivery.
  *
  * The DB and Expo SDK are mocked so the test runs without a database or
- * network. The seam (`__orgApproverInternals`) lets the test substitute
- * the per-user delivery + preference gate without re-implementing the
- * full DB stack.
+ * network. The seam (`__orgApproverInternals`, typed via
+ * `OrgApproverInternals`) lets the test substitute the per-user delivery
+ * + preference gate without re-implementing the full DB stack.
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { OrgApproverInternals, SendResult } from '../lib/expo-push';
 
 vi.mock('@szl-holdings/db', () => {
   return {
@@ -73,50 +77,59 @@ beforeEach(() => {
   vi.resetModules();
 });
 
-async function loadHelperWith(opts: {
-  resolveUserIds?: (orgId: number, appId: string) => Promise<number[]>;
-  isAllowed?: (userId: number) => Promise<boolean>;
-  sendToUser?: (userId: number) => Promise<{ sent: number; failed: number }>;
-}) {
+const noopSendResult: SendResult = { sent: 1, failed: 0, tickets: [] };
+
+async function loadHelperWith(overrides: Partial<OrgApproverInternals>) {
   const mod = await import('../lib/expo-push');
-  const sendToUser = vi.fn(async (userId: number) =>
-    opts.sendToUser ? opts.sendToUser(userId) : { sent: 1, failed: 0 },
-  );
-  const isAllowed = vi.fn(async (userId: number) =>
-    opts.isAllowed ? opts.isAllowed(userId) : true,
-  );
-  const resolveUserIds = vi.fn(async (orgId: number, appId: string) =>
-    opts.resolveUserIds ? opts.resolveUserIds(orgId, appId) : [],
-  );
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (mod.__orgApproverInternals as any).resolveUserIds = resolveUserIds;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (mod.__orgApproverInternals as any).isAllowed = isAllowed;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (mod.__orgApproverInternals as any).sendToUser = (
-    userId: number,
-    payload: unknown,
-    callOpts: unknown,
-  ) => {
-    sendToUser(userId);
-    // Capture for downstream assertions on payload shape + appId.
-    sendToUser.mock.calls[sendToUser.mock.calls.length - 1] = [
-      userId,
-      payload,
-      callOpts,
-    ] as unknown as [number];
-    return Promise.resolve({ sent: 1, failed: 0, tickets: [] });
-  };
-
-  return { mod, sendToUser, isAllowed, resolveUserIds };
+  const seam = mod.__orgApproverInternals;
+  if (overrides.resolveUserIds) seam.resolveUserIds = overrides.resolveUserIds;
+  if (overrides.isAllowed) seam.isAllowed = overrides.isAllowed;
+  if (overrides.sendToUser) seam.sendToUser = overrides.sendToUser;
+  return mod;
 }
 
 describe('sendPushToOrgApprovers', () => {
+  it('targets the full CORTEX mobile app-id family by default', async () => {
+    const resolveUserIds = vi
+      .fn<OrgApproverInternals['resolveUserIds']>()
+      .mockResolvedValue([]);
+    const mod = await loadHelperWith({ resolveUserIds });
+
+    await mod.sendPushToOrgApprovers(
+      77,
+      { title: 't', body: 'b' },
+      { severity: 'high' },
+    );
+
+    expect(resolveUserIds).toHaveBeenCalledTimes(1);
+    const [orgIdArg, appIdsArg] = resolveUserIds.mock.calls[0]!;
+    expect(orgIdArg).toBe(77);
+    expect(appIdsArg).toEqual(mod.CORTEX_MOBILE_APP_IDS);
+    // Sanity: the family must include at least the canonical workspace ids.
+    expect(appIdsArg).toEqual(
+      expect.arrayContaining([
+        'cortex-mobile',
+        'cortex-advisory',
+        'aegis-mobile',
+        'lyte-mobile',
+        'terra-mobile',
+        'stephen-mobile',
+      ]),
+    );
+  });
+
   it('fans out to every approver user surfaced by the DB query', async () => {
-    const { mod, sendToUser, isAllowed, resolveUserIds } = await loadHelperWith({
-      resolveUserIds: async () => [11, 22, 33],
-    });
+    const sendToUser = vi
+      .fn<OrgApproverInternals['sendToUser']>()
+      .mockResolvedValue(noopSendResult);
+    const isAllowed = vi
+      .fn<OrgApproverInternals['isAllowed']>()
+      .mockResolvedValue(true);
+    const resolveUserIds = vi
+      .fn<OrgApproverInternals['resolveUserIds']>()
+      .mockResolvedValue([11, 22, 33]);
+
+    const mod = await loadHelperWith({ resolveUserIds, isAllowed, sendToUser });
 
     const result = await mod.sendPushToOrgApprovers(
       42,
@@ -127,57 +140,61 @@ describe('sendPushToOrgApprovers', () => {
         sound: 'default',
         channelId: 'critical-alerts',
       },
-      { appId: 'cortex', severity: 'high' },
+      { severity: 'high' },
     );
 
-    expect(resolveUserIds).toHaveBeenCalledWith(42, 'cortex');
     expect(result.targeted).toBe(3);
     expect(result.sent).toBe(3);
     expect(isAllowed).toHaveBeenCalledTimes(3);
     expect(sendToUser).toHaveBeenCalledTimes(3);
-
-    const calls = sendToUser.mock.calls as unknown as Array<
-      [number, { data?: Record<string, unknown> }, { appId?: string }]
-    >;
-    const userIds = calls.map((c) => c[0]).sort();
+    const userIds = sendToUser.mock.calls.map((c) => c[0]).sort();
     expect(userIds).toEqual([11, 22, 33]);
-    for (const call of calls) {
+    for (const call of sendToUser.mock.calls) {
       const payload = call[1];
       const callOpts = call[2];
       expect(payload.data?.screen).toBe('/(shell)/quick-actions');
-      expect(callOpts.appId).toBe('cortex');
+      expect(callOpts?.appId).toBe('cortex-mobile');
     }
   });
 
   it('skips users whose alert preferences disallow approvals (muted / quiet hours)', async () => {
-    const { mod, sendToUser, isAllowed } = await loadHelperWith({
-      resolveUserIds: async () => [1, 2, 3],
-      isAllowed: async (userId) => userId !== 2,
-    });
+    const sendToUser = vi
+      .fn<OrgApproverInternals['sendToUser']>()
+      .mockResolvedValue(noopSendResult);
+    const isAllowed = vi
+      .fn<OrgApproverInternals['isAllowed']>()
+      .mockImplementation(async (userId) => userId !== 2);
+    const resolveUserIds = vi
+      .fn<OrgApproverInternals['resolveUserIds']>()
+      .mockResolvedValue([1, 2, 3]);
+
+    const mod = await loadHelperWith({ resolveUserIds, isAllowed, sendToUser });
 
     const result = await mod.sendPushToOrgApprovers(
       99,
       { title: 't', body: 'b' },
-      { appId: 'cortex', severity: 'high' },
+      { severity: 'high' },
     );
 
     expect(result.targeted).toBe(3);
     expect(isAllowed).toHaveBeenCalledTimes(3);
     expect(sendToUser).toHaveBeenCalledTimes(2);
-    const calls = sendToUser.mock.calls as unknown as Array<[number]>;
-    const userIds = calls.map((c) => c[0]).sort();
+    const userIds = sendToUser.mock.calls.map((c) => c[0]).sort();
     expect(userIds).toEqual([1, 3]);
   });
 
   it('returns zero counts and never gates / delivers when no approver rows are found', async () => {
-    const { mod, sendToUser, isAllowed } = await loadHelperWith({
-      resolveUserIds: async () => [],
-    });
+    const sendToUser = vi.fn<OrgApproverInternals['sendToUser']>();
+    const isAllowed = vi.fn<OrgApproverInternals['isAllowed']>();
+    const resolveUserIds = vi
+      .fn<OrgApproverInternals['resolveUserIds']>()
+      .mockResolvedValue([]);
+    const mod = await loadHelperWith({ resolveUserIds, isAllowed, sendToUser });
 
     const result = await mod.sendPushToOrgApprovers(
       7,
       { title: 't', body: 'b' },
-      { appId: 'cortex', severity: 'critical' },
+      { severity: 'critical' },
     );
 
     expect(result).toEqual({ targeted: 0, sent: 0, failed: 0 });
@@ -186,46 +203,63 @@ describe('sendPushToOrgApprovers', () => {
   });
 
   it('passes the critical severity flag through to the alert-category gate', async () => {
-    const isAllowedReal = vi.fn(async () => true);
-    const mod = await import('../lib/expo-push');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (mod.__orgApproverInternals as any).resolveUserIds = vi.fn(async () => [1]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (mod.__orgApproverInternals as any).isAllowed = isAllowedReal;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (mod.__orgApproverInternals as any).sendToUser = vi
-      .fn()
-      .mockResolvedValue({ sent: 1, failed: 0, tickets: [] });
+    const isAllowed = vi
+      .fn<OrgApproverInternals['isAllowed']>()
+      .mockResolvedValue(true);
+    const sendToUser = vi
+      .fn<OrgApproverInternals['sendToUser']>()
+      .mockResolvedValue(noopSendResult);
+    const resolveUserIds = vi
+      .fn<OrgApproverInternals['resolveUserIds']>()
+      .mockResolvedValue([1]);
+    const mod = await loadHelperWith({ resolveUserIds, isAllowed, sendToUser });
 
     await mod.sendPushToOrgApprovers(
       1,
       { title: 't', body: 'b' },
-      { appId: 'cortex', severity: 'critical' },
+      { severity: 'critical' },
     );
-    expect(isAllowedReal).toHaveBeenCalledWith(1, 'approvals', { severity: 'critical' });
+    expect(isAllowed).toHaveBeenCalledWith(1, 'approvals', { severity: 'critical' });
   });
 
   it('does not fail the whole batch when a single per-user delivery throws', async () => {
-    const mod = await import('../lib/expo-push');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (mod.__orgApproverInternals as any).resolveUserIds = vi.fn(async () => [1, 2, 3]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (mod.__orgApproverInternals as any).isAllowed = vi.fn(async () => true);
-    const sendSpy = vi.fn(async (userId: number) => {
-      if (userId === 2) throw new Error('boom');
-      return { sent: 1, failed: 0, tickets: [] };
+    const sendToUser = vi
+      .fn<OrgApproverInternals['sendToUser']>()
+      .mockImplementation(async (userId: number) => {
+        if (userId === 2) throw new Error('boom');
+        return noopSendResult;
+      });
+    const mod = await loadHelperWith({
+      resolveUserIds: vi
+        .fn<OrgApproverInternals['resolveUserIds']>()
+        .mockResolvedValue([1, 2, 3]),
+      isAllowed: vi.fn<OrgApproverInternals['isAllowed']>().mockResolvedValue(true),
+      sendToUser,
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (mod.__orgApproverInternals as any).sendToUser = sendSpy;
 
     const result = await mod.sendPushToOrgApprovers(
       1,
       { title: 't', body: 'b' },
-      { appId: 'cortex', severity: 'high' },
+      { severity: 'high' },
     );
 
     expect(result.targeted).toBe(3);
     expect(result.sent).toBe(2);
-    expect(sendSpy).toHaveBeenCalledTimes(3);
+    expect(sendToUser).toHaveBeenCalledTimes(3);
+  });
+
+  it('honors a caller-supplied appIds override (custom subset only)', async () => {
+    const resolveUserIds = vi
+      .fn<OrgApproverInternals['resolveUserIds']>()
+      .mockResolvedValue([]);
+    const mod = await loadHelperWith({ resolveUserIds });
+
+    await mod.sendPushToOrgApprovers(
+      1,
+      { title: 't', body: 'b' },
+      { severity: 'high', appIds: ['aegis-mobile'] },
+    );
+
+    expect(resolveUserIds).toHaveBeenCalledWith(1, ['aegis-mobile']);
   });
 });

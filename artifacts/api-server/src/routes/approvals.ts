@@ -243,7 +243,11 @@ router.post(
 
       // Best-effort: wake mobile approvers when a high- or critical-priority
       // approval is created so they can act from the Quick Actions screen.
-      // Honors per-user alert prefs + quiet hours via sendPushToOrgApprovers.
+      // Honors per-user alert prefs + quiet hours via sendPushToOrgApprovers,
+      // which fans out across the full CORTEX mobile app-id family
+      // (cortex-mobile, cortex-advisory, aegis-mobile, lyte-mobile,
+      // terra-mobile, stephen-mobile) so an approver is reached on whichever
+      // workspace they last registered a token from.
       // Fire-and-forget so push failures never block approval creation.
       if (
         typeof orgId === 'number' &&
@@ -276,7 +280,7 @@ router.post(
                 sound: 'default',
                 channelId: 'critical-alerts',
               },
-              { appId: 'cortex', severity: resolvedPriority },
+              { severity: resolvedPriority },
             ),
           )
           .catch((err) => {

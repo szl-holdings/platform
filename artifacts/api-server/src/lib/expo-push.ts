@@ -357,15 +357,39 @@ export async function sendPushToUser(
  * org-scoped approval requests. Mirrors the role gate on
  * `requireRole(...)` for the approval review endpoints.
  */
-const APPROVER_ROLE_NAMES = ['super_admin', 'admin', 'ops', 'compliance'] as const;
+const APPROVER_ROLE_NAMES: readonly string[] = [
+  'super_admin',
+  'admin',
+  'ops',
+  'compliance',
+];
+
+/**
+ * Mobile push-token `app_id` values for the CORTEX unified mobile app and
+ * its workspace variants. Source of truth: the taxonomy comment on
+ * `routes/push-tokens.ts`. Approval pushes target this entire family so
+ * an approver receives the alert regardless of which workspace they last
+ * registered a token from.
+ */
+export const CORTEX_MOBILE_APP_IDS: readonly string[] = [
+  'cortex-mobile',
+  'cortex-advisory',
+  'aegis-mobile',
+  'lyte-mobile',
+  'terra-mobile',
+  'stephen-mobile',
+];
 
 /**
  * Resolve the set of user IDs in `orgId` that hold any of
  * `APPROVER_ROLE_NAMES` and have at least one active mobile push token
- * registered for `appId`. Returns an empty array on any lookup failure
- * so callers can stay best-effort.
+ * whose `app_id` is in `appIds`. Returns an empty array on any lookup
+ * failure so callers can stay best-effort.
  */
-async function getApproverUserIdsForOrg(orgId: number, appId: string): Promise<number[]> {
+async function getApproverUserIdsForOrg(
+  orgId: number,
+  appIds: readonly string[],
+): Promise<number[]> {
   try {
     const rows = await db
       .selectDistinct({ userId: orgMembersTable.userId })
@@ -376,15 +400,15 @@ async function getApproverUserIdsForOrg(orgId: number, appId: string): Promise<n
       .where(
         and(
           eq(orgMembersTable.orgId, orgId),
-          inArray(rolesTable.name, APPROVER_ROLE_NAMES as unknown as string[]),
-          eq(pushTokensTable.appId, appId),
+          inArray(rolesTable.name, [...APPROVER_ROLE_NAMES]),
+          inArray(pushTokensTable.appId, [...appIds]),
           eq(pushTokensTable.isActive, true),
         ),
       );
     return rows.map((r) => r.userId).filter((id): id is number => typeof id === 'number');
   } catch (err) {
     logger.warn(
-      { err, orgId, appId },
+      { err, orgId, appIds },
       '[expo-push] Failed to resolve org approver user ids; skipping push',
     );
     return [];
@@ -403,12 +427,27 @@ async function getApproverUserIdsForOrg(orgId: number, appId: string): Promise<n
  * delivery can never block approval creation.
  */
 /**
- * Indirection seam used by `sendPushToOrgApprovers` so unit tests can
- * substitute the per-user delivery + preference gate without having to
- * stand up the full DB + Expo stack. Production code never reassigns
- * these fields.
+ * Typed indirection seam used by `sendPushToOrgApprovers` so unit tests
+ * can substitute the per-user delivery + preference gate + role lookup
+ * without having to stand up the full DB + Expo stack. Production code
+ * never reassigns these fields — they're effectively `readonly` once
+ * the module is initialised.
  */
-export const __orgApproverInternals = {
+export interface OrgApproverInternals {
+  resolveUserIds: (orgId: number, appIds: readonly string[]) => Promise<number[]>;
+  isAllowed: (
+    userId: number,
+    category: AlertCategory,
+    opts?: { severity?: 'low' | 'medium' | 'high' | 'critical'; now?: Date },
+  ) => Promise<boolean>;
+  sendToUser: (
+    userId: number,
+    payload: PushMessagePayload,
+    opts?: { templateId?: string; appId?: string },
+  ) => Promise<SendResult>;
+}
+
+export const __orgApproverInternals: OrgApproverInternals = {
   resolveUserIds: getApproverUserIdsForOrg,
   isAllowed: isAlertCategoryAllowedForUser,
   sendToUser: sendPushToUser,
@@ -418,12 +457,25 @@ export async function sendPushToOrgApprovers(
   orgId: number,
   payload: PushMessagePayload,
   opts: {
-    appId: string;
+    /**
+     * Mobile push-token `app_id` values to target. Defaults to the full
+     * CORTEX mobile family (`CORTEX_MOBILE_APP_IDS`) so an approver is
+     * reached on whatever workspace they last registered a token from.
+     */
+    appIds?: readonly string[];
     severity?: 'low' | 'medium' | 'high' | 'critical';
     templateId?: string;
-  },
+    /**
+     * Identifier used as the per-delivery `appId` on the resulting
+     * `sendPushToUser` call (for history / template-preference lookups).
+     * Defaults to `'cortex-mobile'`, the canonical CORTEX app id.
+     */
+    deliveryAppId?: string;
+  } = {},
 ): Promise<{ targeted: number; sent: number; failed: number }> {
-  const userIds = await __orgApproverInternals.resolveUserIds(orgId, opts.appId);
+  const appIds = opts.appIds ?? CORTEX_MOBILE_APP_IDS;
+  const deliveryAppId = opts.deliveryAppId ?? 'cortex-mobile';
+  const userIds = await __orgApproverInternals.resolveUserIds(orgId, appIds);
   if (userIds.length === 0) {
     return { targeted: 0, sent: 0, failed: 0 };
   }
@@ -438,14 +490,14 @@ export async function sendPushToOrgApprovers(
         });
         if (!allowed) return;
         const result = await __orgApproverInternals.sendToUser(userId, payload, {
-          appId: opts.appId,
+          appId: deliveryAppId,
           templateId: opts.templateId,
         });
         sent += result.sent;
         failed += result.failed;
       } catch (err) {
         logger.warn(
-          { err, userId, orgId, appId: opts.appId },
+          { err, userId, orgId, deliveryAppId },
           '[expo-push] Org-approver push failed for user',
         );
       }
@@ -453,7 +505,7 @@ export async function sendPushToOrgApprovers(
   );
 
   logger.info(
-    { orgId, appId: opts.appId, targeted: userIds.length, sent, failed },
+    { orgId, appIds, deliveryAppId, targeted: userIds.length, sent, failed },
     '[expo-push] Org approvers push complete',
   );
   return { targeted: userIds.length, sent, failed };
