@@ -1,17 +1,14 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Award,
+  Activity,
+  BarChart2,
   ChevronRight,
   ExternalLink,
-  Flame,
   Globe,
   Loader2,
   Shield,
-  Star,
   TrendingUp,
-  Trophy,
   Users,
-  Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
@@ -59,13 +56,11 @@ interface SummaryData {
 }
 
 const BADGE_STYLE: Record<ArchetypeBadge, { bg: string; text: string; border: string }> = {
-  'Black Swan': { bg: 'bg-red-500/10', text: 'text-red-300', border: 'border-red-500/30' },
-  Cascade: { bg: 'bg-orange-500/10', text: 'text-orange-300', border: 'border-orange-500/30' },
-  Insider: { bg: 'bg-amber-500/10', text: 'text-amber-300', border: 'border-amber-500/30' },
-  Regulator: { bg: 'bg-violet-500/10', text: 'text-violet-300', border: 'border-violet-500/30' },
+  'Black Swan': { bg: 'bg-[color:var(--gi-error-bg)]', text: 'text-[color:var(--gi-accent-red)]', border: 'border-[color:var(--gi-error-border)]' },
+  Cascade:      { bg: 'bg-[color:var(--gi-warning-bg)]', text: 'text-[color:var(--gi-accent-amber)]', border: 'border-[color:var(--gi-warning-border)]' },
+  Insider:      { bg: 'bg-[color:var(--gi-warning-bg)]', text: 'text-[color:var(--gi-accent-amber)]', border: 'border-[color:var(--gi-warning-border)]' },
+  Regulator:    { bg: 'bg-[color:var(--gi-neutral-bg)]', text: 'text-[color:var(--gi-accent-violet)]', border: 'border-[color:var(--gi-neutral-border)]' },
 };
-
-const RANK_ICON: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
 
 function formatUsd(v: number): string {
   if (v >= 1_000_000_000) return `$${(v / 1_000_000_000).toFixed(1)}B`;
@@ -98,34 +93,30 @@ export default function CrisisArenaLeaderboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0606] text-red-50 overflow-x-hidden">
-      <section className="relative px-6 pt-20 pb-12 text-center">
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-red-500/8 rounded-full blur-3xl" />
-        </div>
-        <div className="relative z-10 max-w-3xl mx-auto">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-              <Flame className="w-5 h-5 text-red-400" />
+    <div className="min-h-screen overflow-x-hidden" style={{ background: 'var(--gi-bg-base)', color: 'var(--gi-text-primary)' }}>
+      <section className="relative px-6 pt-16 pb-10 border-b" style={{ borderColor: 'var(--gi-border-subtle)' }}>
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-7 h-7 rounded-md flex items-center justify-center" style={{ background: 'var(--gi-error-bg)', border: '1px solid var(--gi-error-border)' }}>
+              <Activity className="w-3.5 h-3.5" style={{ color: 'var(--gi-accent-red)' }} />
             </div>
-            <span className="text-sm font-medium text-red-400/60">Sentra · Crisis Arena</span>
+            <span className="text-xs font-mono uppercase tracking-wider" style={{ color: 'var(--gi-text-muted)' }}>Sentra · Adversarial Simulation Program</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-red-50 mb-4 leading-tight">
-            Public Hall of Fame
+          <h1 className="text-2xl font-bold mb-2" style={{ letterSpacing: '-0.02em', color: 'var(--gi-text-primary)' }}>
+            Analyst Performance Registry
           </h1>
-          <p className="text-red-200/60 max-w-xl mx-auto text-sm leading-relaxed mb-8">
-            The world's top crisis architects — ranked by Business Impact Score, reputation, and
-            total revenue-at-risk surfaced across client engagements.
+          <p className="text-sm leading-relaxed mb-6 max-w-xl" style={{ color: 'var(--gi-text-secondary)' }}>
+            Scenario analysts ranked by accepted submissions, business impact surfaced, and archetype coverage across active engagements.
           </p>
-          <div className="flex items-center justify-center gap-4 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap">
             <Link href="/crisis-arena/engagements">
-              <button className="flex items-center gap-2 px-5 py-2.5 bg-red-500 hover:bg-red-400 text-[#0a0606] font-semibold rounded-xl transition-all text-sm">
-                View Engagements <ChevronRight className="w-4 h-4" />
+              <button className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-md transition-colors" style={{ background: 'var(--gi-accent-red)', color: 'var(--gi-bg-base)' }}>
+                Active Engagements <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </Link>
             <Link href="/crisis-arena/architect">
-              <button className="flex items-center gap-2 px-5 py-2.5 bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 text-red-200 font-medium rounded-xl transition-all text-sm">
-                Architect Workspace <Zap className="w-4 h-4" />
+              <button className="flex items-center gap-2 px-4 py-2 text-xs font-medium rounded-md transition-colors" style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-default)', color: 'var(--gi-text-secondary)' }}>
+                Analyst Workspace
               </button>
             </Link>
           </div>
@@ -133,21 +124,22 @@ export default function CrisisArenaLeaderboard() {
       </section>
 
       {summary && (
-        <section className="px-6 pb-12 max-w-5xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <section className="px-6 py-8 max-w-5xl mx-auto border-b" style={{ borderColor: 'var(--gi-border-subtle)' }}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { icon: Globe, label: 'Total Impact Surfaced', value: formatUsd(summary.totalImpactUsd), color: 'text-red-400' },
-              { icon: Trophy, label: 'Accepted Scenarios', value: summary.totalAccepted.toString(), color: 'text-amber-400' },
-              { icon: Users, label: 'Crisis Architects', value: summary.totalArchitects.toString(), color: 'text-violet-400' },
-              { icon: Shield, label: 'Open Engagements', value: summary.openEngagements.toString(), color: 'text-emerald-400' },
+              { icon: Globe, label: 'Impact Surfaced', value: formatUsd(summary.totalImpactUsd), accent: 'var(--gi-accent-red)' },
+              { icon: BarChart2, label: 'Accepted Scenarios', value: summary.totalAccepted.toString(), accent: 'var(--gi-accent-amber)' },
+              { icon: Users, label: 'Registered Analysts', value: summary.totalArchitects.toString(), accent: 'var(--gi-accent-violet)' },
+              { icon: Shield, label: 'Open Engagements', value: summary.openEngagements.toString(), accent: 'var(--gi-accent-green)' },
             ].map((stat) => (
               <div
                 key={stat.label}
-                className="bg-[#120a0a]/80 border border-red-500/10 rounded-xl p-5 text-center"
+                className="rounded-lg p-4"
+                style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-subtle)' }}
               >
-                <stat.icon className={cn('w-5 h-5 mx-auto mb-2', stat.color)} />
-                <div className="text-2xl font-bold text-red-50 mb-1">{stat.value}</div>
-                <div className="text-[10px] font-mono uppercase tracking-wider text-red-400/50">
+                <stat.icon className="w-4 h-4 mb-2" style={{ color: stat.accent }} />
+                <div className="text-xl font-bold font-mono mb-0.5" style={{ color: 'var(--gi-text-primary)' }}>{stat.value}</div>
+                <div className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--gi-text-muted)' }}>
                   {stat.label}
                 </div>
               </div>
@@ -156,46 +148,46 @@ export default function CrisisArenaLeaderboard() {
         </section>
       )}
 
-      <section className="px-6 pb-20 max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-red-100 flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-amber-400" /> Global Rankings
+      <section className="px-6 pb-16 max-w-5xl mx-auto">
+        <div className="flex items-center justify-between mt-8 mb-5">
+          <h2 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--gi-text-primary)' }}>
+            <TrendingUp className="w-4 h-4" style={{ color: 'var(--gi-accent-amber)' }} />
+            Analyst Rankings
           </h2>
-          <span className="text-[10px] font-mono text-red-400/50 uppercase tracking-wider">
-            Ranked by Reputation
+          <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: 'var(--gi-text-muted)' }}>
+            Ranked by Performance Score
           </span>
         </div>
 
         {loading && (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 text-red-400 animate-spin" />
+            <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'var(--gi-text-muted)' }} />
           </div>
         )}
 
         {!loading && data && (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {data.leaderboard.map((entry) => (
               <div
                 key={entry.id}
-                className={cn(
-                  'bg-[#120a0a]/80 border rounded-xl p-5 cursor-pointer transition-all',
-                  selected?.id === entry.id
-                    ? 'border-red-500/40'
-                    : 'border-red-500/10 hover:border-red-500/25',
-                )}
+                className="rounded-lg p-4 cursor-pointer transition-all"
+                style={{
+                  background: 'var(--gi-bg-surface)',
+                  border: selected?.id === entry.id
+                    ? '1px solid var(--gi-border-strong)'
+                    : '1px solid var(--gi-border-subtle)',
+                }}
                 onClick={() => setSelected(selected?.id === entry.id ? null : entry)}
               >
                 <div className="flex items-center gap-4">
-                  <div className="text-xl w-8 text-center shrink-0">
-                    {RANK_ICON[entry.rank] ?? (
-                      <span className="text-sm font-mono text-red-400/50">#{entry.rank}</span>
-                    )}
+                  <div className="text-xs font-mono w-8 text-center shrink-0" style={{ color: 'var(--gi-text-muted)' }}>
+                    #{entry.rank}
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="text-sm font-bold text-red-100">{entry.displayName}</span>
-                      <span className="text-[11px] font-mono text-red-400/50">@{entry.handle}</span>
+                      <span className="text-sm font-semibold" style={{ color: 'var(--gi-text-primary)' }}>{entry.displayName}</span>
+                      <span className="text-[11px] font-mono" style={{ color: 'var(--gi-text-muted)' }}>@{entry.handle}</span>
                       {entry.badges.map((b) => (
                         <span
                           key={b}
@@ -211,32 +203,32 @@ export default function CrisisArenaLeaderboard() {
                       ))}
                     </div>
                     {entry.topScenarioTitles[0] && (
-                      <p className="text-[11px] text-red-300/50 truncate">
-                        Top: {entry.topScenarioTitles[0]}
+                      <p className="text-[11px] truncate" style={{ color: 'var(--gi-text-muted)' }}>
+                        Lead scenario: {entry.topScenarioTitles[0]}
                       </p>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-6 shrink-0">
+                  <div className="flex items-center gap-5 shrink-0">
                     <div className="text-center">
-                      <div className="text-base font-bold text-red-300 font-mono">
+                      <div className="text-sm font-bold font-mono" style={{ color: 'var(--gi-text-primary)' }}>
                         {entry.reputationScore.toLocaleString()}
                       </div>
-                      <div className="text-[9px] text-red-400/40 uppercase tracking-wider">Rep</div>
+                      <div className="text-[9px] uppercase tracking-wider" style={{ color: 'var(--gi-text-muted)' }}>Score</div>
                     </div>
                     <div className="text-center hidden sm:block">
-                      <div className="text-base font-bold text-amber-300 font-mono">
+                      <div className="text-sm font-bold font-mono" style={{ color: 'var(--gi-accent-amber)' }}>
                         {entry.acceptedCount}
                       </div>
-                      <div className="text-[9px] text-red-400/40 uppercase tracking-wider">
+                      <div className="text-[9px] uppercase tracking-wider" style={{ color: 'var(--gi-text-muted)' }}>
                         Accepted
                       </div>
                     </div>
                     <div className="text-center hidden md:block">
-                      <div className="text-base font-bold text-emerald-300 font-mono">
+                      <div className="text-sm font-bold font-mono" style={{ color: 'var(--gi-accent-green)' }}>
                         {formatUsd(entry.totalImpactUsd)}
                       </div>
-                      <div className="text-[9px] text-red-400/40 uppercase tracking-wider">
+                      <div className="text-[9px] uppercase tracking-wider" style={{ color: 'var(--gi-text-muted)' }}>
                         Impact
                       </div>
                     </div>
@@ -244,42 +236,42 @@ export default function CrisisArenaLeaderboard() {
                       href={`/crisis-arena/architect/${entry.id}`}
                       onClick={(e: React.MouseEvent) => e.stopPropagation()}
                     >
-                      <ExternalLink className="w-4 h-4 text-red-400/40 hover:text-red-400 transition-colors" />
+                      <ExternalLink className="w-3.5 h-3.5 transition-colors" style={{ color: 'var(--gi-text-muted)' }} />
                     </Link>
                   </div>
                 </div>
 
                 {selected?.id === entry.id && (
-                  <div className="mt-4 pt-4 border-t border-red-500/10 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="mt-4 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4" style={{ borderTop: '1px solid var(--gi-border-subtle)' }}>
                     <div>
-                      <div className="text-[10px] text-red-400/50 font-mono uppercase mb-2">
+                      <div className="text-[10px] font-mono uppercase mb-2" style={{ color: 'var(--gi-text-muted)' }}>
                         Top Scenarios
                       </div>
                       <ul className="space-y-1.5">
                         {entry.topScenarioTitles.map((t, i) => (
-                          <li key={i} className="flex items-start gap-2 text-[11px] text-red-300/70">
-                            <Star className="w-3 h-3 text-amber-400 shrink-0 mt-0.5" />
+                          <li key={i} className="flex items-start gap-2 text-[11px]" style={{ color: 'var(--gi-text-secondary)' }}>
+                            <span className="w-3.5 h-3.5 flex items-center justify-center shrink-0 mt-0.5 text-[9px] font-mono" style={{ color: 'var(--gi-text-muted)' }}>{i + 1}.</span>
                             {t}
                           </li>
                         ))}
                       </ul>
                     </div>
                     <div>
-                      <div className="text-[10px] text-red-400/50 font-mono uppercase mb-2">
-                        Stats
+                      <div className="text-[10px] font-mono uppercase mb-2" style={{ color: 'var(--gi-text-muted)' }}>
+                        Performance Metrics
                       </div>
                       <div className="space-y-1.5 text-[11px]">
                         <div className="flex justify-between">
-                          <span className="text-red-400/50">Submissions</span>
-                          <span className="font-mono text-red-300">{entry.submissionCount}</span>
+                          <span style={{ color: 'var(--gi-text-muted)' }}>Total Submissions</span>
+                          <span className="font-mono" style={{ color: 'var(--gi-text-primary)' }}>{entry.submissionCount}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-red-400/50">Accepted</span>
-                          <span className="font-mono text-emerald-400">{entry.acceptedCount}</span>
+                          <span style={{ color: 'var(--gi-text-muted)' }}>Accepted</span>
+                          <span className="font-mono" style={{ color: 'var(--gi-accent-green)' }}>{entry.acceptedCount}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-red-400/50">Hit rate</span>
-                          <span className="font-mono text-red-300">
+                          <span style={{ color: 'var(--gi-text-muted)' }}>Acceptance Rate</span>
+                          <span className="font-mono" style={{ color: 'var(--gi-text-primary)' }}>
                             {entry.submissionCount > 0
                               ? Math.round((entry.acceptedCount / entry.submissionCount) * 100)
                               : 0}
@@ -287,8 +279,8 @@ export default function CrisisArenaLeaderboard() {
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-red-400/50">Total Impact</span>
-                          <span className="font-mono text-amber-400">
+                          <span style={{ color: 'var(--gi-text-muted)' }}>Impact Surfaced</span>
+                          <span className="font-mono" style={{ color: 'var(--gi-accent-amber)' }}>
                             {formatUsd(entry.totalImpactUsd)}
                           </span>
                         </div>
@@ -302,22 +294,24 @@ export default function CrisisArenaLeaderboard() {
         )}
 
         {!loading && data?.monthlyMovers && data.monthlyMovers.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-lg font-bold text-red-100 flex items-center gap-2 mb-6">
-              <TrendingUp className="w-5 h-5 text-emerald-400" /> Monthly Movers
+          <div className="mt-10">
+            <h2 className="text-sm font-bold flex items-center gap-2 mb-5" style={{ color: 'var(--gi-text-primary)' }}>
+              <Activity className="w-4 h-4" style={{ color: 'var(--gi-accent-green)' }} />
+              Period Momentum
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               {data.monthlyMovers.map((mover, i) => (
                 <div
                   key={mover.architectId}
-                  className="bg-[#0a0f0a]/80 border border-emerald-500/10 rounded-xl p-4"
+                  className="rounded-lg p-4"
+                  style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-subtle)' }}
                 >
-                  <div className="text-[10px] font-mono text-emerald-400/50 uppercase tracking-wider mb-2">
-                    #{i + 1} this month
+                  <div className="text-[10px] font-mono uppercase tracking-wider mb-2" style={{ color: 'var(--gi-text-muted)' }}>
+                    #{i + 1} this period
                   </div>
-                  <div className="text-sm font-bold text-emerald-100">@{mover.handle}</div>
-                  <div className="text-[11px] text-emerald-400/60 mt-1">
-                    +{mover.gain.toFixed(0)} rep
+                  <div className="text-sm font-semibold" style={{ color: 'var(--gi-text-primary)' }}>@{mover.handle}</div>
+                  <div className="text-[11px] mt-1" style={{ color: 'var(--gi-accent-green)' }}>
+                    +{mover.gain.toFixed(0)} pts
                   </div>
                 </div>
               ))}
@@ -326,39 +320,39 @@ export default function CrisisArenaLeaderboard() {
         )}
 
         {!loading && data?.archetypeSpecialists && (
-          <div className="mt-12">
-            <h2 className="text-lg font-bold text-red-100 flex items-center gap-2 mb-6">
-              <Award className="w-5 h-5 text-violet-400" /> Archetype Specialists
+          <div className="mt-10">
+            <h2 className="text-sm font-bold flex items-center gap-2 mb-5" style={{ color: 'var(--gi-text-primary)' }}>
+              <BarChart2 className="w-4 h-4" style={{ color: 'var(--gi-accent-violet)' }} />
+              Archetype Specialists
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {Object.entries(data.archetypeSpecialists).map(([arch, spec]) => (
                 <div
                   key={arch}
-                  className="bg-[#120a0a]/80 border border-red-500/10 rounded-xl p-4"
+                  className="rounded-lg p-4"
+                  style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-subtle)' }}
                 >
-                  <div className="text-[10px] font-mono text-red-400/50 uppercase tracking-wider mb-2">
+                  <div className="text-[10px] font-mono uppercase tracking-wider mb-2" style={{ color: 'var(--gi-text-muted)' }}>
                     {arch.replace('_', ' ')}
                   </div>
-                  <div className="text-sm font-bold text-red-100">@{spec.handle}</div>
-                  <div className="text-[11px] text-red-400/40 mt-1">{spec.count} accepted</div>
+                  <div className="text-sm font-semibold" style={{ color: 'var(--gi-text-primary)' }}>@{spec.handle}</div>
+                  <div className="text-[11px] mt-1" style={{ color: 'var(--gi-text-muted)' }}>{spec.count} accepted</div>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        <div className="mt-16 text-center">
-          <div className="inline-block bg-[#120a0a]/80 border border-red-500/10 rounded-2xl px-8 py-8 max-w-xl">
-            <TrendingUp className="w-8 h-8 text-red-400 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-red-100 mb-2">Become a Crisis Architect</h3>
-            <p className="text-[12px] text-red-300/60 mb-6 leading-relaxed">
-              Submit adversarial business crisis scenarios against real client engagements. Earn
-              reputation from accepted scenarios and rank on the global leaderboard. Accepted
-              scenarios graduate into live tabletop exercises.
+        <div className="mt-14 border-t pt-10" style={{ borderColor: 'var(--gi-border-subtle)' }}>
+          <div className="rounded-lg px-6 py-6 max-w-xl" style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-default)' }}>
+            <Activity className="w-6 h-6 mb-3" style={{ color: 'var(--gi-accent-red)' }} />
+            <h3 className="text-sm font-bold mb-1" style={{ color: 'var(--gi-text-primary)' }}>Submit Adversarial Scenarios</h3>
+            <p className="text-xs leading-relaxed mb-5" style={{ color: 'var(--gi-text-secondary)' }}>
+              Contribute crisis scenarios to active engagements. Accepted submissions are scored for business impact and archetype coverage, then graduated into live tabletop exercises.
             </p>
             <Link href="/crisis-arena/architect">
-              <button className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-400 text-[#0a0606] font-semibold rounded-xl transition-all text-sm mx-auto">
-                Open Architect Workspace <ChevronRight className="w-4 h-4" />
+              <button className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-md transition-colors" style={{ background: 'var(--gi-accent-red)', color: 'var(--gi-bg-base)' }}>
+                Open Analyst Workspace <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </Link>
           </div>

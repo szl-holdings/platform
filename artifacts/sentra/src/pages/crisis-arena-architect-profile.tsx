@@ -1,13 +1,12 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Award,
+  Activity,
+  BarChart2,
   ChevronLeft,
-  Flame,
   Loader2,
   Shield,
-  Star,
-  Trophy,
-  Zap,
+  TrendingUp,
+  Users,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'wouter';
@@ -53,20 +52,36 @@ interface PublicArchitectProfile {
   highlights: HighlightEntry[];
 }
 
-const BADGE_STYLE: Record<ArchetypeBadge, { bg: string; text: string; border: string }> = {
-  'Black Swan': { bg: 'bg-red-500/10', text: 'text-red-300', border: 'border-red-500/30' },
-  Cascade: { bg: 'bg-orange-500/10', text: 'text-orange-300', border: 'border-orange-500/30' },
-  Insider: { bg: 'bg-amber-500/10', text: 'text-amber-300', border: 'border-amber-500/30' },
-  Regulator: { bg: 'bg-violet-500/10', text: 'text-violet-300', border: 'border-violet-500/30' },
+const BADGE_STYLE: Record<ArchetypeBadge, { bg: string; border: string; text: string }> = {
+  'Black Swan': {
+    bg: 'bg-[color:var(--gi-error-bg)]',
+    border: 'border-[color:var(--gi-error-border)]',
+    text: 'text-[color:var(--gi-error-text)]',
+  },
+  Cascade: {
+    bg: 'bg-[color:var(--gi-warning-bg)]',
+    border: 'border-[color:var(--gi-warning-border)]',
+    text: 'text-[color:var(--gi-warning-text)]',
+  },
+  Insider: {
+    bg: 'bg-[color:var(--gi-neutral-bg)]',
+    border: 'border-[color:var(--gi-neutral-border)]',
+    text: 'text-[color:var(--gi-neutral-text)]',
+  },
+  Regulator: {
+    bg: 'bg-[color:var(--gi-accent-violet)]/10',
+    border: 'border-[color:var(--gi-accent-violet)]/30',
+    text: 'text-[color:var(--gi-accent-violet)]',
+  },
 };
 
 const ARCHETYPE_COLORS: Record<ThreatArchetype, string> = {
-  ransomware: 'text-red-300',
-  cascade: 'text-orange-300',
-  supply_chain: 'text-amber-300',
-  regulatory: 'text-violet-300',
-  insider: 'text-rose-300',
-  black_swan: 'text-red-400',
+  ransomware: 'text-[color:var(--gi-error-text)]',
+  cascade: 'text-[color:var(--gi-warning-text)]',
+  supply_chain: 'text-[color:var(--gi-accent-amber)]',
+  regulatory: 'text-[color:var(--gi-accent-violet)]',
+  insider: 'text-[color:var(--gi-accent-blue)]',
+  black_swan: 'text-[color:var(--gi-error-text)]',
 };
 
 function formatUsd(v: number): string {
@@ -107,7 +122,7 @@ export default function CrisisArenaArchitectProfile() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full min-h-[60vh]">
-        <Loader2 className="w-6 h-6 text-red-400 animate-spin" />
+        <Loader2 className="w-6 h-6 text-[color:var(--gi-accent-blue)] animate-spin" />
       </div>
     );
   }
@@ -115,11 +130,13 @@ export default function CrisisArenaArchitectProfile() {
   if (notFound || !profile) {
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-[60vh] gap-4">
-        <Shield className="w-10 h-10 text-red-400/30" />
-        <p className="text-red-400/50 text-sm">Architect profile not found or is private.</p>
+        <Shield className="w-10 h-10 text-[color:var(--gi-text-muted)]" />
+        <p className="text-[color:var(--gi-text-muted)] text-sm">
+          Analyst profile not found or is private.
+        </p>
         <Link href="/crisis-arena/leaderboard">
-          <button className="flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-300 rounded-xl text-xs hover:bg-red-500/15 transition-colors">
-            <ChevronLeft className="w-3.5 h-3.5" /> Back to Leaderboard
+          <button className="flex items-center gap-2 px-4 py-2 bg-[color:var(--gi-bg-surface)] border border-[color:var(--gi-border-default)] text-[color:var(--gi-text-secondary)] rounded-xl text-xs hover:border-[color:var(--gi-border-strong)] transition-colors">
+            <ChevronLeft className="w-3.5 h-3.5" /> Back to Analyst Rankings
           </button>
         </Link>
       </div>
@@ -135,23 +152,27 @@ export default function CrisisArenaArchitectProfile() {
     <div className="space-y-8 animate-fade-in p-6 max-w-5xl mx-auto">
       <div className="flex items-center gap-3 mb-2">
         <Link href="/crisis-arena/leaderboard">
-          <button className="flex items-center gap-1.5 text-[11px] text-red-400/50 hover:text-red-400 transition-colors">
-            <ChevronLeft className="w-3.5 h-3.5" /> Hall of Fame
+          <button className="flex items-center gap-1.5 text-[11px] text-[color:var(--gi-text-muted)] hover:text-[color:var(--gi-text-secondary)] transition-colors">
+            <ChevronLeft className="w-3.5 h-3.5" /> Analyst Rankings
           </button>
         </Link>
-        <span className="text-red-400/20">·</span>
-        <span className="text-[11px] text-red-400/40">Architect Profile</span>
+        <span className="text-[color:var(--gi-border-subtle)]">·</span>
+        <span className="text-[11px] text-[color:var(--gi-text-muted)]">Analyst Profile</span>
       </div>
 
-      <div className="bg-[#0f0808]/80 border border-red-500/15 rounded-2xl p-7">
+      <div className="bg-[color:var(--gi-bg-surface)] border border-[color:var(--gi-border-subtle)] rounded-2xl p-7">
         <div className="flex items-start gap-6 flex-wrap">
-          <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
-            <Flame className="w-7 h-7 text-red-400" />
+          <div className="w-16 h-16 rounded-2xl bg-[color:var(--gi-accent-blue)]/10 border border-[color:var(--gi-accent-blue)]/20 flex items-center justify-center shrink-0">
+            <Activity className="w-7 h-7 text-[color:var(--gi-accent-blue)]" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-2">
-              <h1 className="text-2xl font-bold text-red-50">{profile.displayName}</h1>
-              <span className="text-sm font-mono text-red-400/40">@{profile.handle}</span>
+              <h1 className="text-2xl font-bold text-[color:var(--gi-text-primary)]">
+                {profile.displayName}
+              </h1>
+              <span className="text-sm font-mono text-[color:var(--gi-text-muted)]">
+                @{profile.handle}
+              </span>
             </div>
             <div className="flex items-center gap-2 flex-wrap mb-3">
               {profile.badges.map((b) => (
@@ -169,18 +190,20 @@ export default function CrisisArenaArchitectProfile() {
               ))}
             </div>
             {profile.bio && (
-              <p className="text-sm text-red-300/60 leading-relaxed max-w-lg">{profile.bio}</p>
+              <p className="text-sm text-[color:var(--gi-text-secondary)] leading-relaxed max-w-lg">
+                {profile.bio}
+              </p>
             )}
-            <p className="text-[10px] text-red-400/30 font-mono mt-2">
-              Architect since {new Date(profile.joinedAt).toLocaleDateString()}
+            <p className="text-[10px] text-[color:var(--gi-text-muted)] font-mono mt-2">
+              Analyst since {new Date(profile.joinedAt).toLocaleDateString()}
             </p>
           </div>
           <div className="flex flex-col items-end gap-1 shrink-0">
-            <div className="text-3xl font-bold text-red-300 font-mono">
+            <div className="text-3xl font-bold text-[color:var(--gi-accent-blue)] font-mono">
               {profile.reputationScore.toLocaleString()}
             </div>
-            <div className="text-[10px] text-red-400/40 uppercase tracking-wider">
-              Reputation Score
+            <div className="text-[10px] text-[color:var(--gi-text-muted)] uppercase tracking-wider">
+              Performance Score
             </div>
           </div>
         </div>
@@ -188,32 +211,69 @@ export default function CrisisArenaArchitectProfile() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Accepted', value: profile.acceptedCount.toString(), icon: Trophy, color: 'text-emerald-400' },
-          { label: 'Submissions', value: profile.submissionCount.toString(), icon: Zap, color: 'text-red-400' },
-          { label: 'Hit Rate', value: `${hitRate}%`, icon: Star, color: 'text-amber-400' },
-          { label: 'Total Impact', value: formatUsd(profile.totalImpactUsd), icon: Shield, color: 'text-violet-400' },
+          {
+            label: 'Accepted',
+            value: profile.acceptedCount.toString(),
+            icon: Users,
+            color: 'text-[color:var(--gi-success-text)]',
+          },
+          {
+            label: 'Submissions',
+            value: profile.submissionCount.toString(),
+            icon: Activity,
+            color: 'text-[color:var(--gi-accent-blue)]',
+          },
+          {
+            label: 'Acceptance Rate',
+            value: `${hitRate}%`,
+            icon: TrendingUp,
+            color: 'text-[color:var(--gi-accent-amber)]',
+          },
+          {
+            label: 'Total Impact',
+            value: formatUsd(profile.totalImpactUsd),
+            icon: Shield,
+            color: 'text-[color:var(--gi-accent-violet)]',
+          },
         ].map((stat) => (
-          <div key={stat.label} className="bg-[#0f0808]/80 border border-red-500/10 rounded-xl p-4 text-center">
+          <div
+            key={stat.label}
+            className="bg-[color:var(--gi-bg-surface)] border border-[color:var(--gi-border-subtle)] rounded-xl p-4 text-center"
+          >
             <stat.icon className={cn('w-4 h-4 mx-auto mb-2', stat.color)} />
-            <div className="text-xl font-bold text-red-50 font-mono">{stat.value}</div>
-            <div className="text-[9px] text-red-400/40 uppercase tracking-wider">{stat.label}</div>
+            <div className="text-xl font-bold text-[color:var(--gi-text-primary)] font-mono">
+              {stat.value}
+            </div>
+            <div className="text-[9px] text-[color:var(--gi-text-muted)] uppercase tracking-wider">
+              {stat.label}
+            </div>
           </div>
         ))}
       </div>
 
       {profile.archetypeStats.length > 0 && (
         <div>
-          <h2 className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Award className="w-3.5 h-3.5" /> Archetype Specialisations
+          <h2 className="text-[10px] text-[color:var(--gi-text-muted)] font-mono uppercase tracking-wider mb-4 flex items-center gap-2">
+            <BarChart2 className="w-3.5 h-3.5" /> Threat Archetype Coverage
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {profile.archetypeStats.map((stat) => (
-              <div key={stat.archetype} className="bg-[#0f0808]/80 border border-red-500/10 rounded-xl p-4">
-                <div className={cn('text-[10px] font-mono uppercase tracking-wider mb-2', ARCHETYPE_COLORS[stat.archetype])}>
+              <div
+                key={stat.archetype}
+                className="bg-[color:var(--gi-bg-surface)] border border-[color:var(--gi-border-subtle)] rounded-xl p-4"
+              >
+                <div
+                  className={cn(
+                    'text-[10px] font-mono uppercase tracking-wider mb-2',
+                    ARCHETYPE_COLORS[stat.archetype],
+                  )}
+                >
                   {stat.archetype.replace('_', ' ')}
                 </div>
-                <div className="text-base font-bold text-red-50">{stat.count} accepted</div>
-                <div className="text-[10px] text-red-400/30 mt-1">
+                <div className="text-base font-bold text-[color:var(--gi-text-primary)]">
+                  {stat.count} accepted
+                </div>
+                <div className="text-[10px] text-[color:var(--gi-text-muted)] mt-1">
                   Avg BIS: {stat.count > 0 ? Math.round(stat.totalScore / stat.count) : 0}
                 </div>
               </div>
@@ -224,22 +284,35 @@ export default function CrisisArenaArchitectProfile() {
 
       {profile.highlights.length > 0 && (
         <div>
-          <h2 className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Star className="w-3.5 h-3.5 text-amber-400" /> Top Accepted Scenarios
+          <h2 className="text-[10px] text-[color:var(--gi-text-muted)] font-mono uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Activity className="w-3.5 h-3.5 text-[color:var(--gi-accent-blue)]" /> Top Accepted
+            Scenarios
           </h2>
           <div className="space-y-3">
             {profile.highlights.map((h, i) => (
-              <div key={i} className="bg-[#0f0808]/80 border border-red-500/10 rounded-xl p-5">
+              <div
+                key={i}
+                className="bg-[color:var(--gi-bg-surface)] border border-[color:var(--gi-border-subtle)] rounded-xl p-5"
+              >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-2">
-                      <span className={cn('text-[9px] font-mono uppercase tracking-wider', ARCHETYPE_COLORS[h.archetype])}>
+                      <span
+                        className={cn(
+                          'text-[9px] font-mono uppercase tracking-wider',
+                          ARCHETYPE_COLORS[h.archetype],
+                        )}
+                      >
                         {h.archetype.replace('_', ' ')}
                       </span>
-                      <span className="text-[9px] text-red-400/30">{relativeTime(h.acceptedAt)}</span>
+                      <span className="text-[9px] text-[color:var(--gi-text-muted)]">
+                        {relativeTime(h.acceptedAt)}
+                      </span>
                     </div>
-                    <div className="text-sm font-bold text-red-100 mb-1">{h.title}</div>
-                    <div className="text-[10px] text-red-400/40 font-mono">
+                    <div className="text-sm font-bold text-[color:var(--gi-text-primary)] mb-1">
+                      {h.title}
+                    </div>
+                    <div className="text-[10px] text-[color:var(--gi-text-muted)] font-mono">
                       Blast radius: {h.blastRadius.join(', ')}
                     </div>
                   </div>
@@ -248,15 +321,17 @@ export default function CrisisArenaArchitectProfile() {
                       className={cn(
                         'text-xl font-bold font-mono',
                         h.businessImpactScore >= 80
-                          ? 'text-red-400'
+                          ? 'text-[color:var(--gi-error-text)]'
                           : h.businessImpactScore >= 60
-                            ? 'text-amber-400'
-                            : 'text-slate-400',
+                            ? 'text-[color:var(--gi-accent-amber)]'
+                            : 'text-[color:var(--gi-text-secondary)]',
                       )}
                     >
                       {h.businessImpactScore}
                     </div>
-                    <div className="text-[8px] text-red-400/30 uppercase">BIS</div>
+                    <div className="text-[8px] text-[color:var(--gi-text-muted)] uppercase">
+                      BIS
+                    </div>
                   </div>
                 </div>
               </div>
@@ -267,8 +342,9 @@ export default function CrisisArenaArchitectProfile() {
 
       <div className="flex items-center justify-center pt-4">
         <Link href="/crisis-arena/leaderboard">
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 text-red-200 font-medium rounded-xl transition-all text-sm">
-            <Trophy className="w-4 h-4 text-amber-400" /> View Full Leaderboard
+          <button className="flex items-center gap-2 px-5 py-2.5 bg-[color:var(--gi-bg-surface)] hover:border-[color:var(--gi-border-strong)] border border-[color:var(--gi-border-default)] text-[color:var(--gi-text-secondary)] font-medium rounded-xl transition-all text-sm">
+            <Users className="w-4 h-4 text-[color:var(--gi-accent-blue)]" /> View Full Analyst
+            Rankings
           </button>
         </Link>
       </div>

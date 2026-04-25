@@ -34,7 +34,6 @@ import {
   BookLock,
   Cpu,
   Eye,
-  Flame,
   GitBranch,
   LayoutDashboard,
   Lock,
@@ -45,7 +44,7 @@ import {
   Shield,
   ShieldAlert,
   ShieldCheck,
-  Trophy,
+  Users,
   Zap,
 } from 'lucide-react';
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
@@ -226,23 +225,23 @@ function SentraSidebarContent({
     },
     {
       id: 'crisis-arena',
-      label: 'Crisis Arena',
+      label: 'Adversarial Simulation',
       items: [
         {
           id: '/crisis-arena/leaderboard',
-          label: 'Hall of Fame',
+          label: 'Analyst Rankings',
           href: '/crisis-arena/leaderboard',
-          icon: <Trophy className="w-3.5 h-3.5" />,
+          icon: <Users className="w-3.5 h-3.5" />,
         },
         {
           id: '/crisis-arena/engagements',
           label: 'Engagements',
           href: '/crisis-arena/engagements',
-          icon: <Flame className="w-3.5 h-3.5" />,
+          icon: <Activity className="w-3.5 h-3.5" />,
         },
         {
           id: '/crisis-arena/architect',
-          label: 'Architect Workspace',
+          label: 'Analyst Workspace',
           href: '/crisis-arena/architect',
           icon: <Zap className="w-3.5 h-3.5" />,
         },
@@ -471,20 +470,20 @@ function AppShell({
     },
     {
       id: 'nav-crisis-arena-leaderboard',
-      label: 'Crisis Arena — Hall of Fame',
-      group: 'Crisis Arena',
+      label: 'Adversarial Simulation — Analyst Rankings',
+      group: 'Adversarial Simulation',
       action: () => navigate('/crisis-arena/leaderboard'),
     },
     {
       id: 'nav-crisis-arena-engagements',
-      label: 'Crisis Arena — Engagements',
-      group: 'Crisis Arena',
+      label: 'Adversarial Simulation — Engagements',
+      group: 'Adversarial Simulation',
       action: () => navigate('/crisis-arena/engagements'),
     },
     {
       id: 'nav-crisis-arena-architect',
-      label: 'Crisis Arena — Architect Workspace',
-      group: 'Crisis Arena',
+      label: 'Adversarial Simulation — Analyst Workspace',
+      group: 'Adversarial Simulation',
       action: () => navigate('/crisis-arena/architect'),
     },
   ];

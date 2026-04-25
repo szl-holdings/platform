@@ -1,14 +1,13 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
+  Activity,
   CheckCircle2,
   ChevronRight,
   Clock,
   DollarSign,
-  Flame,
   Loader2,
   Plus,
   Shield,
-  Trophy,
   Users,
   X,
   XCircle,
@@ -670,17 +669,17 @@ export default function CrisisArenaEngagements() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Flame className="w-5 h-5 text-red-400" />
-            <h1 className="text-2xl font-bold text-red-50">Crisis Arena — Engagements</h1>
+            <Activity className="w-5 h-5" style={{ color: 'var(--gi-accent-red)' }} />
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--gi-text-primary)' }}>Adversarial Simulation — Engagements</h1>
           </div>
-          <p className="text-sm text-red-300/50">
-            Post a scoped crisis scenario brief and manage incoming architect submissions.
+          <p className="text-sm" style={{ color: 'var(--gi-text-muted)' }}>
+            Post a scoped crisis scenario brief and manage incoming analyst submissions.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/crisis-arena/leaderboard">
-            <button className="flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/15 text-red-300 rounded-xl text-xs font-medium hover:bg-red-500/15 transition-colors">
-              <Trophy className="w-3.5 h-3.5" /> Leaderboard
+            <button className="flex items-center gap-2 px-4 py-2 text-xs font-medium rounded-md transition-colors" style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-default)', color: 'var(--gi-text-secondary)' }}>
+              <Users className="w-3.5 h-3.5" /> Rankings
             </button>
           </Link>
           <button
@@ -705,13 +704,13 @@ export default function CrisisArenaEngagements() {
           </div>
           <div className="text-center">
             <p className="text-sm font-semibold text-red-100 mb-1">Sign in to access client engagements</p>
-            <p className="text-xs text-red-400/50 max-w-xs">
-              The engagements board is a private workspace for authenticated clients. The public leaderboard is available without sign-in.
+            <p className="text-xs max-w-xs" style={{ color: 'var(--gi-text-muted)' }}>
+              The engagements board is a private workspace for authenticated clients. The analyst performance registry is available without sign-in.
             </p>
           </div>
           <Link href="/crisis-arena/leaderboard">
-            <button className="flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-300 rounded-xl text-xs hover:bg-red-500/15 transition-colors">
-              <Trophy className="w-3.5 h-3.5 text-amber-400" /> View Public Leaderboard
+            <button className="flex items-center gap-2 px-4 py-2 text-xs rounded-md transition-colors" style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-default)', color: 'var(--gi-text-secondary)' }}>
+              <Users className="w-3.5 h-3.5" style={{ color: 'var(--gi-accent-amber)' }} /> View Analyst Rankings
             </button>
           </Link>
         </div>

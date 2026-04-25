@@ -21,7 +21,7 @@ const SURFACE = "hsla(0,0%,100%,0.035)";
 const TEXT = "hsl(38,8%,94%)";
 const TEXT_SEC = "hsl(214,7%,60%)";
 const TEXT_FAINT = "hsl(214,7%,57%)";
-const Lyte = "hsl(192,72%,48%)";
+const Lyte = "#c9a85c";
 const MONO = "var(--font-mono)";
 
 const fadeUp = {
@@ -33,22 +33,22 @@ const fadeUp = {
 };
 
 const LOOP_STEPS = [
-  { n: "01", label: "Signal", icon: Radio, color: "#0ea5e9", body: "Risk indicators, anomalies, and threshold breaches are detected, normalized, and routed by the Event Fabric — cross-domain context and correlation ID attached." },
-  { n: "02", label: "Context", icon: Layers, color: "#8b5cf6", body: "Cross-domain enrichment via PRAXIS Bus. A sanctions alert in Vessels triggers a legal flag in Counsel, a risk entry in Lyte." },
-  { n: "03", label: "Recommendation", icon: Brain, color: "#ec4899", body: "An AI agent proposes an action with source citations, confidence score, and full provenance. No opaque verdicts. Every output traceable." },
-  { n: "04", label: "Simulation", icon: BarChart3, color: "#f59e0b", body: "The Monte Carlo engine models risk before action. Operators see expected outcomes, confidence intervals, and the variables that matter most." },
-  { n: "05", label: "Policy", icon: ShieldCheck, color: "#10b981", body: "Covenant Policy enforces who can approve and what conditions apply — at the platform layer, not the UI. Non-delegatable." },
-  { n: "06", label: "Execution", icon: Zap, color: "#6366f1", body: "Counsel orchestrates the approved action as a durable, multi-step process with checkpoint recovery and agent coordination." },
-  { n: "07", label: "Proof", icon: FileCheck, color: "#14b8a6", body: "The Proof Chain records the complete trail: signal, recommendation, simulation, policy decision, approval, execution. Immutable and queryable." },
-  { n: "08", label: "Outcome", icon: Target, color: "#ef4444", body: "The Outcome Graph records the real-world result. Was the action effective? The data calibrates future AI confidence scores." },
-  { n: "09", label: "Learning", icon: BookOpen, color: "#f97316", body: "Historical outcomes feed back into simulation models and agent confidence calibration. The platform improves with every governed decision." },
+  { n: "01", label: "Signal", icon: Radio, color: "#4d8fcc", body: "Risk indicators, anomalies, and threshold breaches are detected, normalized, and routed by the Event Fabric — cross-domain context and correlation ID attached." },
+  { n: "02", label: "Context", icon: Layers, color: "#6bb5c2", body: "Cross-domain enrichment via PRAXIS Bus. A sanctions alert in Vessels triggers a legal flag in Counsel, a risk entry in Lyte." },
+  { n: "03", label: "Recommendation", icon: Brain, color: "#9b7cc8", body: "An AI agent proposes an action with source citations, confidence score, and full provenance. No opaque verdicts. Every output traceable." },
+  { n: "04", label: "Simulation", icon: BarChart3, color: "#c9a85c", body: "The Monte Carlo engine models risk before action. Operators see expected outcomes, confidence intervals, and the variables that matter most." },
+  { n: "05", label: "Policy", icon: ShieldCheck, color: "#5baa8a", body: "Covenant Policy enforces who can approve and what conditions apply — at the platform layer, not the UI. Non-delegatable." },
+  { n: "06", label: "Execution", icon: Zap, color: "#4d8fcc", body: "Counsel orchestrates the approved action as a durable, multi-step process with checkpoint recovery and agent coordination." },
+  { n: "07", label: "Proof", icon: FileCheck, color: "#3ea89a", body: "The Proof Chain records the complete trail: signal, recommendation, simulation, policy decision, approval, execution. Immutable and queryable." },
+  { n: "08", label: "Outcome", icon: Target, color: "#c97a64", body: "The Outcome Graph records the real-world result. Was the action effective? The data calibrates future AI confidence scores." },
+  { n: "09", label: "Learning", icon: BookOpen, color: "#5baa8a", body: "Historical outcomes feed back into simulation models and agent confidence calibration. The platform improves with every governed decision." },
 ];
 
 const PLATFORM_TIERS = [
   {
     tier: "Layer 01",
     title: "Platform Command",
-    color: Lyte,
+    color: "#c9a85c",
     note: "Operator-facing command surfaces",
     items: [
       { name: getProduct("lyte")?.name ?? "Lyte", note: "Operational nerve center — signal stream, situation board, governed action panel" },
@@ -59,7 +59,7 @@ const PLATFORM_TIERS = [
   {
     tier: "Layer 02",
     title: "Execution Fabric + Primitives",
-    color: "hsl(215,72%,58%)",
+    color: "#4d8fcc",
     note: "Shared governance infrastructure",
     items: [
       { name: getProduct("alloy")?.name ?? "Counsel", note: "Workflow orchestration and governed execution" },
@@ -73,7 +73,7 @@ const PLATFORM_TIERS = [
   {
     tier: "Layer 03",
     title: "Domain Packs",
-    color: "hsl(260,60%,65%)",
+    color: "#9b7cc8",
     note: "Vertical intelligence extensions",
     items: [
       { name: "Aegis", note: "Security & defense — SOC, XDR, MITRE ATT&CK, threat intelligence" },
@@ -92,7 +92,7 @@ const DOMAIN_PACKS = [
     slug: getProduct("aegis")?.name ?? "Aegis",
     category: getProduct("aegis")?.tagline ?? "Security & Defense",
     desc: "SOC command, threat intelligence, MITRE ATT&CK mapping, and SOAR playbooks for environments where every decision has consequence. Policy-gated, fully audited.",
-    color: "hsl(222,60%,60%)",
+    color: "#9b7cc8",
     href: "/solutions/aegis",
     capabilities: ["Threat classification", "SOC workflow", "AI triage with approval gates", "Compliance audit trail"],
   },
@@ -101,7 +101,7 @@ const DOMAIN_PACKS = [
     slug: getProduct("vessels")?.name ?? "Vessels",
     category: getProduct("vessels")?.tagline ?? "Maritime Intelligence",
     desc: "Fleet command, AIS telemetry, voyage economics, dark vessel detection, and sanctions screening for fleet operators. Same proof chain, maritime intelligence layer.",
-    color: "hsl(206,72%,54%)",
+    color: "#4d8fcc",
     href: "/solutions/vessels",
     capabilities: ["AIS telemetry (live + simulated)", "Voyage P&L", "Dark vessel detection", "Sanctions screening"],
   },
@@ -110,7 +110,7 @@ const DOMAIN_PACKS = [
     slug: getProduct("terra")?.name ?? "Terra",
     category: getProduct("terra")?.tagline ?? "Real Estate Intelligence",
     desc: "NYC distress property pipeline, ownership entity graph, deal pipeline, and broker workflow. Data-rich intelligence with a governed underwriting flow.",
-    color: "hsl(142,52%,48%)",
+    color: "#5baa8a",
     href: "/solutions/terra",
     capabilities: ["Distress signal detection", "Ownership graph", "Deal pipeline", "Acquisition approval gates"],
   },
@@ -119,7 +119,7 @@ const DOMAIN_PACKS = [
     slug: getProduct("prism-counsel")?.name ?? "Counsel",
     category: getProduct("prism-counsel")?.tagline ?? "Legal Intelligence",
     desc: "Matter twins, deadline tracking, and governed demand workflows for litigation teams. Governed legal operations with approval gates and Proof Chain.",
-    color: "hsl(260,60%,65%)",
+    color: "#9b7cc8",
     href: "/counsel",
     capabilities: ["Matter lifecycle command", "Deadline tracking", "Evidence-assisted review", "Immutable audit trail"],
   },
@@ -128,7 +128,7 @@ const DOMAIN_PACKS = [
     slug: getProduct("carlota-jo")?.name ?? "Carlota Jo",
     category: getProduct("carlota-jo")?.tagline ?? "Premium Advisory",
     desc: "Discreet client intake, managed service delivery, and advisory operations for UHNW principals. Governance-grade document handling and audit trail.",
-    color: "hsl(340,52%,60%)",
+    color: "#7a99b8",
     href: "/solutions/carlota-jo",
     capabilities: ["Client intake & onboarding", "Service catalog", "Secure document delivery", "Advisory audit trail"],
   },
@@ -137,7 +137,7 @@ const DOMAIN_PACKS = [
     slug: "IMPERIUM",
     category: "Cloud Sovereignty",
     desc: "Multi-cloud governance, policy enforcement, and cloud estate visibility — the same governance primitives applied to infrastructure control and compliance.",
-    color: "hsl(25,72%,54%)",
+    color: "#7a99b8",
     href: "/solutions/imperium",
     capabilities: ["Cloud policy enforcement", "Multi-cloud visibility", "Configuration drift detection", "Infrastructure audit trail"],
   },
@@ -172,54 +172,54 @@ const ONE_SHELL_PRIMITIVES = [
     key: "DashboardShell",
     label: "Unified Shell",
     note: "Collapsible sidebar, top-bar, mobile drawer — shared chrome across all 13 surfaces.",
-    color: Lyte,
+    color: "#c9a85c",
   },
   {
     key: "EcosystemNav",
     label: "Ecosystem Nav",
     note: "Jump instantly between Lyte, TENAX, Counsel, Vessels, Terra, LUMINA and every domain pack.",
-    color: "hsl(260,60%,65%)",
+    color: "#9b7cc8",
   },
   {
     key: "CommandPalette",
     label: "⌘K Command Palette",
     note: "Full-keyboard search across pages, entities, and actions — available in every surface.",
-    color: "hsl(215,60%,60%)",
+    color: "#4d8fcc",
   },
   {
     key: "SentientLayer",
     label: "⌘J Intelligence Rail",
     note: "Persistent AI briefing layer: Now (live signals), Next (queued actions), Links (cross-domain).",
-    color: "hsl(340,52%,60%)",
+    color: "#c96070",
   },
 ];
 
 const AUDIENCE_PATHS = [
-  { icon: TrendingUp, label: "Executive buyer", desc: "Value prop, ROI frame, and design-partner path.", href: "/platform", accent: "hsl(192,72%,48%)", briefHref: "/trust/diligence/executive" },
-  { icon: Code2, label: "Technical evaluator", desc: "Architecture, stack, and integration surface.", href: "/architecture", accent: "hsl(215,60%,60%)", briefHref: "/trust/diligence/technical" },
-  { icon: Shield, label: "Security reviewer", desc: "Controls, AI governance, and audit trail.", href: "/trust", accent: "hsl(340,60%,58%)", briefHref: "/trust/diligence/security" },
-  { icon: Handshake, label: "Design partner", desc: "Work directly with the founding team.", href: "/design-partner", accent: "hsl(38,72%,58%)" },
-  { icon: BarChart3, label: "Investor", desc: "Market thesis, moat, and data room.", href: "/investor", accent: "hsl(145,60%,50%)", briefHref: "/trust/diligence/investor" },
+  { icon: TrendingUp, label: "Executive buyer", desc: "Value prop, ROI frame, and design-partner path.", href: "/platform", accent: "#c9a85c", briefHref: "/trust/diligence/executive" },
+  { icon: Code2, label: "Technical evaluator", desc: "Architecture, stack, and integration surface.", href: "/architecture", accent: "#4d8fcc", briefHref: "/trust/diligence/technical" },
+  { icon: Shield, label: "Security reviewer", desc: "Controls, AI governance, and audit trail.", href: "/trust", accent: "#c96070", briefHref: "/trust/diligence/security" },
+  { icon: Handshake, label: "Design partner", desc: "Work directly with the founding team.", href: "/design-partner", accent: "#5baa8a" },
+  { icon: BarChart3, label: "Investor", desc: "Market thesis, moat, and data room.", href: "/investor", accent: "#9b7cc8", briefHref: "/trust/diligence/investor" },
 ] as Array<{ icon: typeof TrendingUp; label: string; desc: string; href: string; accent: string; briefHref?: string }>;
 
 const TICKER_ITEMS = [
-  { label: "Signal", color: "#0ea5e9" },
+  { label: "Signal", color: "#4d8fcc" },
   { label: "→", color: "hsla(0,0%,100%,0.2)" },
-  { label: "Context", color: "#8b5cf6" },
+  { label: "Context", color: "#6bb5c2" },
   { label: "→", color: "hsla(0,0%,100%,0.2)" },
-  { label: "Recommendation", color: "#ec4899" },
+  { label: "Recommendation", color: "#9b7cc8" },
   { label: "→", color: "hsla(0,0%,100%,0.2)" },
-  { label: "Simulation", color: "#f59e0b" },
+  { label: "Simulation", color: "#c9a85c" },
   { label: "→", color: "hsla(0,0%,100%,0.2)" },
-  { label: "Policy", color: "#10b981" },
+  { label: "Policy", color: "#5baa8a" },
   { label: "→", color: "hsla(0,0%,100%,0.2)" },
-  { label: "Execution", color: "#818cf8" },
+  { label: "Execution", color: "#4d8fcc" },
   { label: "→", color: "hsla(0,0%,100%,0.2)" },
-  { label: "Proof", color: "#14b8a6" },
+  { label: "Proof", color: "#3ea89a" },
   { label: "→", color: "hsla(0,0%,100%,0.2)" },
-  { label: "Outcome", color: "#ef4444" },
+  { label: "Outcome", color: "#c97a64" },
   { label: "→", color: "hsla(0,0%,100%,0.2)" },
-  { label: "Learning", color: "#f97316" },
+  { label: "Learning", color: "#5baa8a" },
   { label: "·", color: "hsla(0,0%,100%,0.15)" },
   { label: "Nine stages", color: "hsla(0,0%,100%,0.50)", mono: true },
   { label: "·", color: "hsla(0,0%,100%,0.15)" },
@@ -361,7 +361,7 @@ export default function HomePage() {
               overflow: "hidden",
             }}
           >
-            <div style={{ position: "absolute", top: "-20%", left: "50%", transform: "translateX(-50%)", width: "900px", height: "500px", borderRadius: "50%", background: "radial-gradient(ellipse at center, hsla(192,72%,48%,0.07) 0%, transparent 70%)", pointerEvents: "none" }} />
+            <div style={{ position: "absolute", top: "-20%", left: "50%", transform: "translateX(-50%)", width: "900px", height: "500px", borderRadius: "50%", background: "radial-gradient(ellipse at center, rgba(201,168,92,0.05) 0%, transparent 70%)", pointerEvents: "none" }} />
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
               <m.div
                 initial={{ opacity: 0, y: 20 }}
@@ -413,10 +413,10 @@ export default function HomePage() {
                 {/* Platform hierarchy pills */}
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "2.5rem", alignItems: "center" }}>
                   {[
-                    { label: "SZL Holdings", note: "governed platform", color: "hsl(38,72%,58%)" },
-                    { label: "Counsel", note: "execution fabric", color: "hsl(215,72%,58%)" },
-                    { label: "Lyte", note: "flagship command", color: "hsl(192,72%,48%)" },
-                    { label: "Aegis · Vessels · Terra · Counsel · CJ · IMPERIUM", note: "domain packs", color: "hsl(260,60%,65%)" },
+                    { label: "SZL Holdings", note: "governed platform", color: "#c9a85c" },
+                    { label: "Counsel", note: "execution fabric", color: "#4d8fcc" },
+                    { label: "Lyte", note: "flagship command", color: "#c9a85c" },
+                    { label: "Aegis · Vessels · Terra · Counsel · CJ · IMPERIUM", note: "domain packs", color: "#9b7cc8" },
                   ].map((item, i) => (
                     <div key={item.label} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                       {i > 0 && <span style={{ color: "hsla(0,0%,100%,0.2)", fontSize: "0.75rem" }}>→</span>}
@@ -880,21 +880,21 @@ export default function HomePage() {
                     examples: "Datadog, Grafana, New Relic",
                     what: "Show what happened. Monitor signals. Trigger alerts.",
                     gap: "No decision governance. No approval gates. No outcome tracking. The gap between alert and action is informal.",
-                    accent: "hsl(215,60%,55%)",
+                    accent: "#4d8fcc",
                   },
                   {
                     category: "AI Copilots",
                     examples: "ChatGPT, Copilot, AI assistants",
                     what: "Generate recommendations. Summarize data. Draft outputs.",
                     gap: "No provenance. No policy enforcement. No confidence calibration. Recommendations without accountability.",
-                    accent: "hsl(260,60%,60%)",
+                    accent: "#9b7cc8",
                   },
                   {
                     category: "Workflow Tools",
                     examples: "Zapier, Camunda, n8n",
                     what: "Automate sequences. Connect systems. Execute triggers.",
                     gap: "No governance layer. No simulation. No audit trail on the decision. Execution without attribution.",
-                    accent: "hsl(340,52%,55%)",
+                    accent: "#c96070",
                   },
                 ].map((col, i) => (
                   <m.div
@@ -940,10 +940,10 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: 0.2 }}
-                style={{ padding: "1.25rem 1.75rem", borderRadius: "0.75rem", background: "hsla(192,72%,48%,0.04)", border: "1px solid hsla(192,72%,48%,0.12)" }}
+                style={{ padding: "1.25rem 1.75rem", borderRadius: "0.75rem", background: "rgba(201,168,92,0.04)", border: "1px solid rgba(201,168,92,0.12)" }}
               >
                 <p style={{ fontSize: "0.875rem", lineHeight: 1.65, color: TEXT_SEC }}>
-                  <span style={{ fontWeight: 600, color: "hsl(192,72%,56%)" }}>SZL Holdings</span> governs the decision — not just the signal, the model, or the workflow step. The nine-step loop connects signal to outcome with policy gates, simulation, attribution, and proof at every transition. This is a structural difference, not a feature difference.
+                  <span style={{ fontWeight: 600, color: "#c9a85c" }}>SZL Holdings</span> governs the decision — not just the signal, the model, or the workflow step. The nine-step loop connects signal to outcome with policy gates, simulation, attribution, and proof at every transition. This is a structural difference, not a feature difference.
                 </p>
               </m.div>
             </div>
@@ -971,7 +971,7 @@ export default function HomePage() {
                         display: "inline-flex", alignItems: "center", gap: "0.375rem",
                         fontSize: "0.875rem", fontWeight: 600, color: Lyte,
                         textDecoration: "none", padding: "0.5rem 1rem",
-                        border: "1px solid hsla(192,72%,48%,0.3)", borderRadius: "0.375rem",
+                        border: "1px solid rgba(201,168,92,0.28)", borderRadius: "0.375rem",
                       }}
                     >
                       Trust Center <ExternalLink size={13} />
@@ -1006,8 +1006,8 @@ export default function HomePage() {
                         transition={{ duration: 0.4, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
                         style={{ display: "flex", alignItems: "flex-start", gap: "0.875rem", padding: "1.125rem 1.25rem", borderRadius: "8px", background: SURFACE, border: `1px solid ${BORDER}`, cursor: "default" }}
                       >
-                        <div style={{ width: 32, height: 32, borderRadius: 7, background: "hsla(142,60%,48%,0.12)", border: "1px solid hsla(142,60%,48%,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                          <Icon size={14} style={{ color: "hsl(142,60%,48%)" }} />
+                        <div style={{ width: 32, height: 32, borderRadius: 7, background: "rgba(91,170,138,0.12)", border: "1px solid rgba(91,170,138,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <Icon size={14} style={{ color: "#5baa8a" }} />
                         </div>
                         <div>
                           <p style={{ fontSize: "0.875rem", fontWeight: 700, color: TEXT, marginBottom: "0.3rem" }}>{tp.title}</p>
@@ -1033,7 +1033,7 @@ export default function HomePage() {
                   display: "grid", gridTemplateColumns: "1fr auto", gap: "3rem", alignItems: "center",
                   padding: "3rem 3.5rem",
                   borderRadius: "12px",
-                  background: `linear-gradient(135deg, hsla(192,72%,48%,0.07) 0%, hsla(215,72%,58%,0.04) 100%)`,
+                  background: `linear-gradient(135deg, rgba(201,168,92,0.07) 0%, rgba(77,143,204,0.04) 100%)`,
                   border: `1px solid ${Lyte}20`,
                 }}
               >

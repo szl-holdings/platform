@@ -1,16 +1,14 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
+  Activity,
   AlertTriangle,
-  Award,
   CheckCircle2,
   ChevronRight,
   Clock,
-  Flame,
   Loader2,
   Plus,
   Shield,
-  Star,
-  Trophy,
+  Users,
   X,
   Zap,
 } from 'lucide-react';
@@ -549,17 +547,17 @@ export default function CrisisArenaArchitect() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Flame className="w-5 h-5 text-red-400" />
-            <h1 className="text-2xl font-bold text-red-50">Architect Workspace</h1>
+            <Activity className="w-5 h-5" style={{ color: 'var(--gi-accent-red)' }} />
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--gi-text-primary)' }}>Analyst Workspace</h1>
           </div>
-          <p className="text-sm text-red-300/50">
-            Browse open engagements, draft and submit crisis scenarios, track your reputation.
+          <p className="text-sm" style={{ color: 'var(--gi-text-muted)' }}>
+            Browse open engagements, draft and submit adversarial scenarios, track your performance.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/crisis-arena/leaderboard">
-            <button className="flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/15 text-red-300 rounded-xl text-xs font-medium hover:bg-red-500/15 transition-colors">
-              <Trophy className="w-3.5 h-3.5" /> Leaderboard
+            <button className="flex items-center gap-2 px-4 py-2 text-xs font-medium rounded-md transition-colors" style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-default)', color: 'var(--gi-text-secondary)' }}>
+              <Users className="w-3.5 h-3.5" /> Rankings
             </button>
           </Link>
         </div>
@@ -567,15 +565,15 @@ export default function CrisisArenaArchitect() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Reputation', value: totalRep.toLocaleString(), icon: Star, color: 'text-amber-400' },
-          { label: 'Accepted', value: String(accepted), icon: CheckCircle2, color: 'text-emerald-400' },
-          { label: 'Pending', value: String(pending), icon: Clock, color: 'text-amber-400' },
-          { label: 'Total', value: String(mySubmissions.length), icon: Zap, color: 'text-red-400' },
+          { label: 'Performance Score', value: totalRep.toLocaleString(), icon: Activity, accent: 'var(--gi-accent-amber)' },
+          { label: 'Accepted', value: String(accepted), icon: CheckCircle2, accent: 'var(--gi-accent-green)' },
+          { label: 'Pending', value: String(pending), icon: Clock, accent: 'var(--gi-accent-amber)' },
+          { label: 'Total', value: String(mySubmissions.length), icon: Zap, accent: 'var(--gi-accent-red)' },
         ].map((stat) => (
-          <div key={stat.label} className="bg-[#0f0808]/80 border border-red-500/10 rounded-xl p-4">
-            <stat.icon className={cn('w-4 h-4 mb-2', stat.color)} />
-            <div className="text-xl font-bold text-red-50 font-mono">{stat.value}</div>
-            <div className="text-[9px] text-red-400/40 uppercase tracking-wider">{stat.label}</div>
+          <div key={stat.label} className="rounded-lg p-4" style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-subtle)' }}>
+            <stat.icon className="w-4 h-4 mb-2" style={{ color: stat.accent }} />
+            <div className="text-xl font-bold font-mono" style={{ color: 'var(--gi-text-primary)' }}>{stat.value}</div>
+            <div className="text-[9px] uppercase tracking-wider" style={{ color: 'var(--gi-text-muted)' }}>{stat.label}</div>
           </div>
         ))}
       </div>
