@@ -15,9 +15,9 @@ import {
   Shield,
   Workflow,
 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { nexusApi } from '../lib/api';
-import type { NexusStatus, Page } from '../lib/types';
+import { useState } from 'react';
+import type { Page } from '../lib/types';
+import OrgSwitcher, { MOCK_ORGS, type MockOrg } from './OrgSwitcher';
 
 const NAV_ITEMS: Array<{
   id: Page;
@@ -75,14 +75,6 @@ const NAV_ITEMS: Array<{
   },
 ];
 
-const DEFAULT_STATUS: NexusStatus = {
-  activeSwarms: 0,
-  memoryItems: 0,
-  enabledSkills: 0,
-  registeredTools: 0,
-  orchestrationsToday: 0,
-};
-
 export default function Layout({
   page,
   navigate,
@@ -93,22 +85,7 @@ export default function Layout({
   children: React.ReactNode;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [status, setStatus] = useState<NexusStatus>(DEFAULT_STATUS);
-
-  const fetchStatus = useCallback(async () => {
-    try {
-      const s = await nexusApi.getStatus();
-      setStatus(s);
-    } catch {
-      // keep last known
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchStatus();
-    const id = setInterval(fetchStatus, 10000);
-    return () => clearInterval(id);
-  }, [fetchStatus]);
+  const [org, setOrg] = useState<MockOrg>(MOCK_ORGS[0]);
 
   return (
     <div className="flex h-screen bg-nexus-bg overflow-hidden">
@@ -119,8 +96,8 @@ export default function Layout({
         onMouseEnter={() => setExpanded(true)}
         onMouseLeave={() => setExpanded(false)}
       >
-        <div className="flex items-center h-14 px-3 border-b border-nexus">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center h-14 px-2 border-b border-nexus gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <div className="w-8 h-8 rounded bg-nexus-cyan/10 border border-nexus-cyan/30 flex items-center justify-center shrink-0">
               <span className="text-nexus-cyan font-mono font-bold text-sm">N</span>
             </div>
@@ -133,6 +110,10 @@ export default function Layout({
               </div>
             )}
           </div>
+        </div>
+
+        <div className="px-1.5 py-2 border-b border-nexus">
+          <OrgSwitcher org={org} onChange={setOrg} expanded={expanded} />
         </div>
 
         <div className="flex-1 flex flex-col gap-0.5 py-3 px-1.5 overflow-hidden overflow-y-auto">
@@ -186,27 +167,27 @@ export default function Layout({
               <div className="flex items-center justify-between text-[10px]">
                 <span className="text-muted-foreground">Swarms</span>
                 <span
-                  className={`font-mono ${status.activeSwarms > 0 ? 'text-nexus-cyan' : 'text-muted-foreground/50'}`}
+                  className={`font-mono ${org.swarms > 0 ? 'text-nexus-cyan' : 'text-muted-foreground/50'}`}
                 >
-                  {status.activeSwarms}
+                  {org.swarms}
                 </span>
               </div>
               <div className="flex items-center justify-between text-[10px]">
                 <span className="text-muted-foreground">Memory</span>
-                <span className="font-mono text-muted-foreground/80">{status.memoryItems}</span>
+                <span className="font-mono text-muted-foreground/80">{org.memory.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-[10px]">
                 <span className="text-muted-foreground">Skills</span>
-                <span className="font-mono text-nexus-green">{status.enabledSkills}</span>
+                <span className="font-mono text-nexus-green">{org.skills}</span>
               </div>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-1 py-1">
               <div
                 className={`w-1.5 h-1.5 rounded-full pulse-dot ${
-                  status.activeSwarms > 0 ? 'bg-nexus-cyan' : 'bg-muted-foreground/30'
+                  org.swarms > 0 ? 'bg-nexus-cyan' : 'bg-muted-foreground/30'
                 }`}
-                title={`${status.activeSwarms} active swarms`}
+                title={`${org.swarms} active swarms`}
               />
             </div>
           )}
@@ -215,50 +196,58 @@ export default function Layout({
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <main className="flex-1 overflow-y-auto">{children}</main>
-        <StatusStrip status={status} />
+        <StatusStrip org={org} />
       </div>
     </div>
   );
 }
 
-function StatusStrip({ status }: { status: NexusStatus }) {
+function StatusStrip({ org }: { org: MockOrg }) {
   return (
     <div className="h-7 bg-nexus-surface border-t border-nexus flex items-center px-4 gap-6 shrink-0">
       <StatusItem
         icon={<Activity className="w-3 h-3" />}
         label="Swarms"
-        value={status.activeSwarms}
-        active={status.activeSwarms > 0}
+        value={org.swarms}
+        active={org.swarms > 0}
         color="cyan"
       />
       <StatusItem
         icon={<Database className="w-3 h-3" />}
         label="Memory"
-        value={status.memoryItems}
+        value={org.memory}
         color="default"
       />
       <StatusItem
         icon={<Layers className="w-3 h-3" />}
         label="Skills"
-        value={status.enabledSkills}
+        value={org.skills}
         color="green"
       />
       <StatusItem
         icon={<Globe className="w-3 h-3" />}
         label="Tools"
-        value={status.registeredTools}
+        value={org.tools}
         color="default"
       />
       <StatusItem
         icon={<Workflow className="w-3 h-3" />}
         label="Orchestrations"
-        value={status.orchestrationsToday}
+        value={org.orchestrations}
         color="default"
       />
 
-      <div className="ml-auto flex items-center gap-1.5">
-        <div className="w-1.5 h-1.5 rounded-full bg-nexus-green pulse-dot" />
-        <span className="text-[10px] text-muted-foreground/60 font-mono">PRAXIS ONLINE</span>
+      <div className="ml-auto flex items-center gap-3">
+        <div
+          className="text-[10px] font-mono px-2 py-0.5 rounded border"
+          style={{ color: org.color, borderColor: `${org.color}40`, backgroundColor: `${org.color}10` }}
+        >
+          {org.name}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full bg-nexus-green pulse-dot" />
+          <span className="text-[10px] text-muted-foreground/60 font-mono">PRAXIS ONLINE</span>
+        </div>
       </div>
     </div>
   );
@@ -292,7 +281,7 @@ function StatusItem({
     <div className={`flex items-center gap-1 text-[10px] font-mono ${colorClass}`}>
       {icon}
       <span className="text-muted-foreground/40">{label}</span>
-      <span>{value}</span>
+      <span>{value.toLocaleString()}</span>
     </div>
   );
 }
