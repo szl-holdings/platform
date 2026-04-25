@@ -59,6 +59,14 @@ const operationsCommands: SpotlightCommand[] = [
     group: 'Navigate',
     action: () => router.push('/(shell)/operations/(tabs)/agent-chat'),
   },
+  {
+    id: 'nav-onboarding',
+    label: 'Onboarding Status',
+    description: 'Organization setup progress',
+    icon: '📋',
+    group: 'Navigate',
+    action: () => router.push('/(shell)/operations/onboarding' as never),
+  },
 ];
 
 function NativeTabLayout() {

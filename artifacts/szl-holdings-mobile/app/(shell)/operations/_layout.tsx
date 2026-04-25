@@ -13,6 +13,7 @@ export default function OperationsLayout() {
           <Stack.Screen name="receipts" />
           <Stack.Screen name="agent-chat" />
           <Stack.Screen name="mcp-tools" />
+          <Stack.Screen name="onboarding" />
         </Stack>
       </LyteProvider>
     </LyteNotificationProvider>
