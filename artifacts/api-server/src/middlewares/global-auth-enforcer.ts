@@ -234,6 +234,13 @@ const PUBLIC_PREFIXES = [
   // Simulation what-if engine — POST route is public so the Strategy simulation
   // page can compute cross-domain scenario impacts in demo mode without a session.
   "/api/simulation/",
+  // Alloy Meridian — cognitive observability OS read-only surfaces: model router
+  // status, agent constellation health, forecast council results, signal graph,
+  // Decision Weather, Counterfactual Ledger, Flight Recorder, MCP registry, and
+  // Founder Intent doctrine. All read-only. Governance mutation routes
+  // (evaluate, mcp-governance/check) are POST but still safe to expose
+  // unauthenticated since they perform no data writes.
+  "/api/meridian/",
   // Demo reset — POST /api/demo/reset is public so the Demo Launchpad presenter
   // can reset scenario state without being logged in. Mounted pre-auth in app.ts;
   // this PUBLIC_PREFIXES entry is kept as defense-in-depth, scoped to exact path only.

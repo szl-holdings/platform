@@ -146,6 +146,13 @@ router.use(lazyMatch("/n8n", () => import("./n8n"), "n8n"));
 // Mounted BEFORE guardianPolicyCheck so unauthenticated views can hydrate.
 router.use("/helios", lazyMount(() => import("./helios/index"), "helios"));
 
+// Alloy Meridian — Cognitive observability OS with model router, agent
+// constellation, forecast council, signal graph, decision weather,
+// counterfactual ledger, flight recorder, founder intent, and MCP governance.
+// Owns /meridian/* endpoints. Mounted BEFORE guardianPolicyCheck so
+// read-only intelligence surfaces work in demo/unauthenticated mode.
+router.use(lazyMatch("/meridian", () => import("./meridian"), "meridian"));
+
 // Global Guardian policy check — derives category from request path.
 router.use(guardianPolicyCheck());
 
@@ -276,6 +283,5 @@ router.use(lazyMatch("/mobile-biometric", () => import("./mobile-biometric"), "m
 // Owns /evolution/* endpoints: candidates, evaluation, calibration, scoring,
 // drift, promotion, rollback, audit, and diagnostics.
 router.use(lazyMatch("/evolution", () => import("./evolution"), "evolution"));
-
 
 export default router;
