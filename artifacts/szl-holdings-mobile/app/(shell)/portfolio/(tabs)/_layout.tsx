@@ -11,6 +11,7 @@ import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs';
 import { SymbolView } from 'expo-symbols';
 import { useEffect, useState } from 'react';
 import { Platform, View } from 'react-native';
+import { SettingsHeaderButton, SettingsHeaderOverlay } from '@/components/SettingsHeaderButton';
 import { WorkspaceTrigger } from '@/components/WorkspaceSwitcher';
 import { useWorkspace } from '@/context/WorkspaceContext';
 import { useColors } from '@/hooks/useColors';
@@ -136,6 +137,7 @@ function ClassicTabLayout() {
           headerTransparent: true,
           headerTitle: '',
           headerLeft: () => <WorkspaceTrigger accentColor={ACCENT} />,
+          headerRight: () => <SettingsHeaderButton />,
           tabBarIcon: ({ color }) =>
             isIOS ? (
               <SymbolView name="gauge.medium" tintColor={color} size={22} />
@@ -208,6 +210,7 @@ export default function PortfolioTabLayout() {
   return (
     <View style={{ flex: 1 }}>
       {isLiquidGlassAvailable() ? <NativeTabLayout /> : <ClassicTabLayout />}
+      {isLiquidGlassAvailable() && <SettingsHeaderOverlay />}
       <SpotlightFab
         onPress={() => setSpotlightOpen(true)}
         accentColor={ACCENT}

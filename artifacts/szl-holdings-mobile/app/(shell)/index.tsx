@@ -19,6 +19,7 @@ import { WorkspaceTrigger } from '@/components/WorkspaceSwitcher';
 import { useAuth } from '@/context/AuthContext';
 import { useWorkspace, WORKSPACES, type WorkspaceDomain } from '@/context/WorkspaceContext';
 import { TAB_BAR_HEIGHT } from '@/constants/layout';
+import { SettingsHeaderButton } from '@/components/SettingsHeaderButton';
 import { useColors } from '@/hooks/useColors';
 
 const ACCENT = '#c9a84c';
@@ -357,12 +358,7 @@ export default function CommandFeedScreen() {
           >
             <Feather name="layers" size={16} color={colors.mutedForeground} />
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => router.navigate('/(shell)/settings' as never)}
-            style={[styles.headerIconBtn, { borderColor: colors.border }]}
-          >
-            <Feather name="settings" size={16} color={colors.mutedForeground} />
-          </TouchableOpacity>
+          <SettingsHeaderButton />
         </View>
       </View>
 
