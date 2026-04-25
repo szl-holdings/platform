@@ -78,3 +78,33 @@ These demo narratives are grounded in what the current codebase can actually sup
 - Every number is code-derived, not hand-maintained
 - The primitives are packages, not PowerPoint
 - The gaps are disclosed, not hidden
+
+---
+
+## Demo 4: Registry & Release Confidence Walk-Through
+
+**Duration:** 6 minutes
+**Artifacts:** API Server, Command
+**Primitives Used:** Prompt Registry, Eval OS, Run Ledger, Policy Engine
+
+*This demo is suited to a technical buyer or engineering evaluator who wants to understand how the platform governs AI model and prompt changes without breaking production.*
+
+### Narrative
+
+1. **Prompt Registry** — Open `lib/prompt-registry/README.md`. Show the versioned prompt inventory: 14 active prompts, semver lifecycle, allowed data scopes, and eval scores. Highlight the `signal-fusion@3.0.0` promotion path (EVAL → STAGING → ACTIVE) and the `hallucination-detector@0.9.0` currently in `rollback-candidate` state.
+
+2. **Rollback Demonstration** — Walk through the rollback procedure for a prompt in `rollback-candidate` status. Update the registry entry status, restart the worker — under 5 minutes end-to-end. A Phase 8 CLI (`pnpm registry:prompt set-status`) will automate this to a single command. The rollback is recorded in `docs/FIX_LOG.md`.
+
+3. **Eval OS** — Show `lib/eval-os/README.md`. Walk through the 7 active eval suites with their scores. Point out: gate compliance on `core-policy-suite` is 1.00 across all scenarios — no policy gate was bypassed in any evaluated scenario.
+
+4. **Run Ledger** — Show `lib/run-ledger/README.md`. Recent run history table: 8 runs in the last 14 days, `run-008` flagged as `rollback-trigger`. Every run shows input tokens, cost, outcome, and operator. Append-only — no human can modify or delete a record.
+
+5. **Inference/Eval Boundary** — Open `infra/INFERENCE_VS_TRAINING_BOUNDARY.md`. Show the hard boundary diagram: inference path (api-server, policy-engine, proof-chain) vs eval path (eval-os, run-ledger, aef-evals) are on separate Azure App Service plans, separate Key Vaults, separate billing meters. A `RUN_MODE` environment variable is enforced at the policy layer — an eval workload cannot masquerade as a production inference call.
+
+6. **AEF Eval Results** — Show the AEF eval summary: 55 scenarios across 7 categories. Gate compliance: 1.00. Policy-violation scenarios: all 8 correctly blocked. Overall: 0.929.
+
+### Key Talking Points
+- Every prompt in production is version-pinned — `latest` is never used
+- Rollback is a documented 5-minute procedure, not a war room incident
+- The inference/eval boundary is enforced in infrastructure, not just in convention
+- Policy gate compliance is 1.00 across all evaluated scenarios — governance is not aspirational, it is tested

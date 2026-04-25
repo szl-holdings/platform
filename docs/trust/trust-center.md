@@ -1,7 +1,7 @@
 # SZL Holdings — Trust Center
 
-**Version:** 4.0  
-**Date:** April 2026
+**Version:** 5.0  
+**Date:** April 25, 2026 (Phase 7 — Cloud, Ops & Release refresh)
 
 ---
 
@@ -99,6 +99,26 @@ Risk scores, anomaly flags, and priority rankings are accompanied by contributin
 ### Model Accountability
 
 Model versions are logged. Predictions are associated with the model version that produced them. Drift is monitored. When model behaviour changes materially, the platform flags it.
+
+---
+
+## Inference/Eval Boundary and AI Registry Governance
+
+*(Added Phase 7 — April 2026)*
+
+SZL Holdings enforces a hard boundary between live production inference workloads and offline training and evaluation workloads. These paths share no API keys, no Azure resources, and no billing meters.
+
+**Inference path** (production): API Server → Policy Engine → Proof Chain → Response. Every call is governed by the Covenant Policy Engine and logged in the append-only proof chain.
+
+**Eval/training path** (offline): Scheduled jobs → Eval OS runner → Run Ledger → Registry update. This path runs on a separate Azure App Service plan with a separate Key Vault. It cannot process production user requests.
+
+The boundary is enforced via the `RUN_MODE` environment variable, checked by `lib/policy-engine` before any model call. An eval-mode workload routed to a production endpoint is rejected with HTTP 403 and an audit event.
+
+**Model and Prompt Registries:** Every AI model and prompt version used in production is registered with semver versioning, a declared risk tier, allowed data scopes, and a documented rollback procedure. No prompt reaches production without passing an evaluation suite with a minimum overall score of 0.85 and a policy-adherence score of 1.00. Rollback from any prompt version to the previous stable version completes in under 5 minutes.
+
+**Run Ledger:** Every evaluation run — including its inputs, outputs, scores, cost, and operator — is recorded in an append-only ledger. No human can modify or delete a ledger record. This gives compliance and audit teams a permanent, tamper-resistant history of AI governance decisions.
+
+**Ops Hardening (April 2026):** A structured review of secrets handling, tenant isolation, audit retention, and cost controls identified 15 gaps across all four areas. 14 were closed in Phase 7. The one accepted gap (customer-facing cost dashboard) has no security or compliance impact and is a post-GA roadmap item. Full record: `audit/phase7-ops-hardening.md`.
 
 ---
 

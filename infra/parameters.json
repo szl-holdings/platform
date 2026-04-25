@@ -43,6 +43,18 @@
     },
     "alertWebhookUrl": {
       "value": ""
+    },
+    "deployEvalRunner": {
+      "value": false
+    },
+    "evalAppServicePlanId": {
+      "value": ""
+    },
+    "evalKeyVaultName": {
+      "value": ""
+    },
+    "evalDatabaseUrlSecretUri": {
+      "value": ""
     }
   }
 }

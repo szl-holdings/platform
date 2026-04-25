@@ -263,6 +263,29 @@ module staticWebApps 'modules/staticwebapp.bicep' = [for app in frontendApps: {
   }
 }]
 
+@description('Deploy the offline eval runner on a separate App Service Plan (set to true only when deploying the eval environment)')
+param deployEvalRunner bool = false
+
+@description('Resource ID of the SEPARATE App Service Plan for the eval runner (not the production plan)')
+param evalAppServicePlanId string = ''
+
+@description('Name of the eval-only Key Vault (kv-szl-eval). Must already exist in this resource group.')
+param evalKeyVaultName string = ''
+
+@description('Eval database connection string secret URI from the eval Key Vault')
+param evalDatabaseUrlSecretUri string = ''
+
+module evalRunner 'modules/eval-runner.bicep' = if (deployEvalRunner) {
+  name: 'eval-runner'
+  params: {
+    location: location
+    appServicePlanId: evalAppServicePlanId
+    evalKeyVaultName: evalKeyVaultName
+    evalDatabaseUrlSecretUri: evalDatabaseUrlSecretUri
+    logAnalyticsId: logAnalytics.id
+  }
+}
+
 output apiUrl string = 'https://${containerApp.outputs.fqdn}'
 output keyVaultUrl string = keyVault.outputs.vaultUri
 output storageAccountName string = storageName
