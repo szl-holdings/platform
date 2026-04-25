@@ -63,6 +63,10 @@ import type {
   SignalCorrelation,
   ValidationResult,
 } from './types.js';
+import { routeQuery } from './cost-performance-router.js';
+import { getCachedResponse, setCachedResponse } from './prompt-cache.js';
+import { recordStrategyOutcome } from './meta-learning.js';
+import { runShadowCouncil, shouldRunShadowCouncil } from './shadow-council.js';
 
 setLlmIntrospector(async (prompt: string): Promise<string> => {
   try {
@@ -134,7 +138,7 @@ export const AGENT_REGISTRY: AgentDefinition[] = [
     id: 'inca',
     name: 'INCA',
     domain: 'research',
-    preferredModel: 'gemini-3.1-pro-preview',
+    preferredModel: 'gemini-2.0-flash-exp',
     preferredProvider: 'gemini',
     highStakesDomains: [],
     tools: ['huggingface_search', 'arxiv_search', 'model_registry'],
@@ -153,7 +157,7 @@ export const AGENT_REGISTRY: AgentDefinition[] = [
     id: 'muse',
     name: 'Muse',
     domain: 'creative',
-    preferredModel: 'gemini-3-flash-preview',
+    preferredModel: 'gemini-2.0-flash-lite',
     preferredProvider: 'gemini',
     highStakesDomains: [],
     tools: ['content_strategy'],
@@ -907,6 +911,22 @@ export async function callAgent(
       options.orgId,
     );
     actualModel = modelDecision.model;
+  } else {
+    try {
+      const cpDecision = routeQuery(
+        query,
+        {
+          tenantId: options?.orgId ?? undefined,
+          preferenceHints: { prioritizeQuality: true },
+        },
+        query.length,
+        [agent.domain],
+      );
+      if (cpDecision.selectedProvider === agent.preferredProvider) {
+        actualModel = cpDecision.selectedModel;
+      }
+    } catch {
+    }
   }
 
   const selfModel = selfModelEngine.getSelfModel();
@@ -990,8 +1010,17 @@ export async function callAgent(
 
   const fullPrompt = `${agent.systemPrompt}${learningSection}${consciousnessDirective}${graphContextSection}\n\n${focusedContext}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with a confidence score (0-100) on a new line in format: CONFIDENCE: [score]`;
 
+  const _cacheContextPrefix = focusedContext.slice(0, 2_000);
+  const _cachedEntry = getCachedResponse(agent.systemPrompt, _cacheContextPrefix, actualModel);
+  if (_cachedEntry) {
+    response = _cachedEntry.cachedContent;
+    tokensUsed = Math.ceil(_cachedEntry.estimatedTokens * 0.1);
+    success = true;
+  }
+
   let _forkId: string | undefined;
 
+  if (!success) {
   try {
     if (agent.preferredProvider === 'anthropic') {
       const modelToUse =
@@ -1006,6 +1035,7 @@ export async function callAgent(
       response = result.content[0]?.type === 'text' ? result.content[0].text : '';
       tokensUsed = result.usage.input_tokens + result.usage.output_tokens;
       success = true;
+      setCachedResponse(agent.systemPrompt, _cacheContextPrefix, actualModel, response);
     } else if (agent.preferredProvider === 'openai') {
       const systemWithLearning = `${agent.systemPrompt}${learningSection}${consciousnessDirective}${graphContextSection}`;
       const result = await openai.chat.completions.create({
@@ -1022,6 +1052,7 @@ export async function callAgent(
       response = result.choices[0]?.message?.content ?? '';
       tokensUsed = result.usage?.total_tokens ?? 0;
       success = true;
+      setCachedResponse(agent.systemPrompt, _cacheContextPrefix, actualModel, response);
     } else if (agent.preferredProvider === 'gemini') {
       try {
         const result = await geminiAi.models.generateContent({
@@ -1031,6 +1062,7 @@ export async function callAgent(
         });
         response = result.text ?? '';
         success = true;
+        setCachedResponse(agent.systemPrompt, _cacheContextPrefix, actualModel, response);
       } catch {
         const fallbackModel = budgetManager.getModelForBudget(
           'gpt-5.2',
@@ -1053,6 +1085,7 @@ export async function callAgent(
   } catch {
     response = `[${agent.name} unavailable — domain expertise offline]`;
     success = false;
+  }
   }
 
   const latencyMs = Date.now() - startTime;
@@ -2912,6 +2945,21 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       ...(options.orgId !== undefined ? { orgId: options.orgId } : {}),
     });
 
+    try {
+      recordStrategyOutcome(trajectory, {
+        routingLane: isHighStakes ? 'heavy_reasoning' : 'general',
+        primaryModel: targetAgents[0]?.preferredModel ?? 'unknown',
+        reasoningDepth: isHighStakes ? 'extended' : 'standard',
+        usedCoalition: false,
+        coalitionSize: 0,
+        usedSpeculative: false,
+        usedShadowCouncil: shouldRunShadowCouncil(isHighStakes, 'high') && synthesis.length > 100,
+        costUsd: totalTokens * 0.000015,
+      });
+    } catch {
+      // meta-learning record is best-effort
+    }
+
     const recentTrajectories = trajectoryStore.getTrajectories(20);
     if (recentTrajectories.length >= 3) {
       goalEngine.integrateTrajectoryInsights(
@@ -3095,6 +3143,21 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       void runRedTeamProtocol(orchestrationId, query, agentResponses, 2)
         .then((result) => {
           redTeam = result;
+        })
+        .catch(() => {});
+    }
+
+    if (shouldRunShadowCouncil(isHighStakes, 'high') && synthesis.length > 100) {
+      void runShadowCouncil(synthesis, routedDomains[0] ?? 'general', query, orchestrationId)
+        .then((result) => {
+          if (result.wasRevised) {
+            innerMonologue.addThought(
+              'self_correction',
+              `Shadow Council revised synthesis: ${result.revisionRationale.slice(0, 200)}`,
+              'cautious',
+              60,
+            );
+          }
         })
         .catch(() => {});
     }

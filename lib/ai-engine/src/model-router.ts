@@ -49,6 +49,24 @@ export interface TenantFeatureToggles {
 const HIGH_RISK_LANES: RouteClass[] = ['planning', 'reasoning', 'tool_calling'];
 
 const COST_PER_TOKEN_USD: Record<string, number> = {
+  // OpenAI
+  'gpt-5.5': 0.000015,
+  'gpt-5.2': 0.000010,
+  'gpt-4o': 0.000005,
+  'gpt-4o-mini': 0.00000015,
+  // Anthropic
+  'claude-opus-4-7': 0.000015,
+  'claude-sonnet-4-6': 0.000003,
+  'claude-3-5-sonnet-20241022': 0.000003,
+  // DeepSeek
+  'deepseek-r1': 0.00000055,
+  'deepseek-v3': 0.00000027,
+  // Gemini
+  'gemini-3.1-pro-preview': 0.00000125,
+  'gemini-2.0-flash-exp': 0.00000125,
+  'gemini-3-flash-preview': 0.000000075,
+  'gemini-2.0-flash-lite': 0.000000075,
+  // HuggingFace / Qwen
   'Qwen/Qwen3-8B': 0.0000002,
   'Qwen/Qwen3-0.6B': 0.00000005,
   'Qwen/Qwen2.5-VL-7B-Instruct': 0.0000002,
