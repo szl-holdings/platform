@@ -128,6 +128,7 @@
     "@workspace/reflection-engine": "workspace:*",
     "@workspace/run-ledger": "workspace:*",
     "@workspace/self-model": "workspace:*",
+    "@workspace/integrations-openai-ai-server": "workspace:*",
     "@workspace/skill-library": "workspace:*",
     "@workspace/tool-mesh": "workspace:*",
     "@workspace/trace-graph": "workspace:*",

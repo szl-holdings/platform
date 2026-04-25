@@ -62,6 +62,9 @@ router.use(lazyMatch("/infrastructure", () => import("./infrastructure-status"),
 // PRISM Counsel — public matters CRUD.
 router.use(lazyMatch("/counsel", () => import("./counsel"), "counsel"));
 
+// Counsel Knowledge Index — graph+vector RAG over matter documents.
+router.use(lazyMatch("/counsel-knowledge", () => import("./counsel-knowledge"), "counsel-knowledge"));
+
 // Cross-platform intelligence — read-only (auth-gated in production).
 crossPlatform.register(router);
 

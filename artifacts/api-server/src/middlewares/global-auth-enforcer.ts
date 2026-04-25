@@ -304,6 +304,11 @@ const PUBLIC_PREFIXES = [
   // Mutating routes (create/edit/archive KB articles) are under
   // /admin/kb-articles and remain protected by admin auth.
   "/api/support/knowledge",
+  // Counsel Knowledge Index — graph+vector RAG over matter documents.
+  // All endpoints (upload, status, query, seed) are public in the demo
+  // surface; the route handler scopes results per-matter via matterId.
+  // Mutating write routes remain covered by CSRF double-submit protection.
+  "/api/counsel-knowledge/",
 ];
 
 /**

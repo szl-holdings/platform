@@ -26,6 +26,7 @@ import { useUserPreferences } from '@szl-holdings/shared-ui/use-user-preferences
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   Bell,
+  Brain,
   Briefcase,
   CheckCircle2,
   Clock,
@@ -59,6 +60,7 @@ const ApprovalsPage = lazy(() => import('./pages/approvals'));
 const TrustProvenancePage = lazy(() => import('./pages/trust-provenance'));
 const AefKnowledgeSearchPage = lazy(() => import('./pages/aef-knowledge-search'));
 const ForecastPage = lazy(() => import('./pages/forecast'));
+const MatterKnowledgePage = lazy(() => import('./pages/matter-knowledge'));
 const EvidenceExplorerPage = lazy(() =>
   import('@szl-holdings/shared-ui/evidence-explorer').then((m) => ({
     default: () => <m.EvidenceExplorer domainFilter="legal" title="Counsel Evidence Explorer" />,
@@ -166,6 +168,12 @@ function CounselSidebarContent({
       id: 'intelligence',
       label: 'Intelligence',
       items: [
+        {
+          id: '/knowledge',
+          label: 'Matter Knowledge',
+          href: '/knowledge',
+          icon: <Brain className="w-3.5 h-3.5" />,
+        },
         {
           id: '/aef-search',
           label: 'AEF Knowledge Search',
@@ -298,6 +306,7 @@ function DashboardRouter() {
         <Route path="/alerts" component={AlertsPage} />
         <Route path="/approvals" component={ApprovalsPage} />
         <Route path="/trust" component={TrustProvenancePage} />
+        <Route path="/knowledge" component={MatterKnowledgePage} />
         <Route path="/aef-search" component={AefKnowledgeSearchPage} />
         <Route path="/forecast" component={ForecastPage} />
         <Route path="/pricing" component={CounselPricingPage} />
@@ -395,6 +404,12 @@ function AppShell() {
       label: 'Trust & Provenance',
       group: 'Navigate',
       action: () => navigate('/trust'),
+    },
+    {
+      id: 'nav-knowledge',
+      label: 'Matter Knowledge',
+      group: 'Navigate',
+      action: () => navigate('/knowledge'),
     },
     {
       id: 'nav-aef-search',
