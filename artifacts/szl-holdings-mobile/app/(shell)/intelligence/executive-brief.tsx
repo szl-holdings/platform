@@ -1,7 +1,10 @@
 import { Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import * as Speech from 'expo-speech';
+import { useCallback, useRef, useState } from 'react';
+import { SpeechSpecialist } from '@szl-holdings/speech-specialist';
+import { ExpoSpeechTTSAdapter } from '@/lib/expo-speech-tts-adapter';
 import {
   ActivityIndicator,
   Linking,
@@ -203,6 +206,56 @@ export default function ExecutiveBriefScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [mode, setMode] = useState<BriefMode>('daily');
+  const [audioPlaying, setAudioPlaying] = useState(false);
+
+  const specialistRef = useRef(
+    new SpeechSpecialist({ tts: new ExpoSpeechTTSAdapter() }),
+  );
+
+  const handlePlayBrief = useCallback(
+    (brief: ExecutiveBrief | undefined, pulse: PulseBrief | undefined) => {
+      if (audioPlaying) {
+        Speech.stop();
+        setAudioPlaying(false);
+        return;
+      }
+
+      let headline = 'Executive Briefing';
+      let situation = '';
+      const beliefs: string[] = [];
+      const recommendations: string[] = [];
+
+      if (pulse) {
+        headline = pulse.headline;
+        situation = pulse.leadSentence;
+        pulse.sections.slice(0, 3).forEach((s, i) => {
+          beliefs.push(`${i + 1}. ${s.title}: ${s.keyJudgment}`);
+        });
+        pulse.recommendedActions.slice(0, 2).forEach((a, i) => {
+          recommendations.push(`${i + 1}. ${a.action}`);
+        });
+      } else if (brief) {
+        headline = `Platform health at ${Math.round(brief.overallHealthScore * 100)} percent.`;
+        situation = brief.highlights.slice(0, 3).join(' ');
+      }
+
+      setAudioPlaying(true);
+      specialistRef.current
+        .renderBriefing({
+          briefId: `cortex-${Date.now()}`,
+          domain: 'cortex',
+          headline,
+          situation,
+          beliefs,
+          recommendations,
+          locale: 'en-US',
+          voice: { voiceId: 'executive-neutral-v1', locale: 'en-US', style: 'authoritative', speakingRate: 0.9 },
+        })
+        .then(() => setAudioPlaying(false))
+        .catch(() => setAudioPlaying(false));
+    },
+    [audioPlaying],
+  );
 
   const briefingQuery = useQuery<ExecutiveBrief>({
     queryKey: ['exec-brief-cross-domain'],
@@ -251,9 +304,21 @@ export default function ExecutiveBriefScreen() {
             Narrative engine · Constellation snapshot
           </Text>
         </View>
-        <TouchableOpacity onPress={handleRefresh} style={styles.refreshBtn}>
-          <Feather name="refresh-cw" size={16} color={colors.mutedForeground} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            onPress={() => handlePlayBrief(brief, pulse)}
+            style={[styles.audioBtn, audioPlaying && { opacity: 0.75 }]}
+          >
+            <Feather
+              name={audioPlaying ? 'square' : 'volume-2'}
+              size={15}
+              color={audioPlaying ? ACCENT : colors.mutedForeground}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleRefresh} style={styles.refreshBtn}>
+            <Feather name="refresh-cw" size={16} color={colors.mutedForeground} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={[styles.modeBar, { borderBottomColor: colors.border }]}>
@@ -583,6 +648,8 @@ const styles = StyleSheet.create({
   liveIndicator: { width: 7, height: 7, borderRadius: 4, backgroundColor: ACCENT },
   headerTitle: { fontSize: 17, fontWeight: '700', letterSpacing: -0.3 },
   headerSub: { fontSize: 11, marginTop: 1 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  audioBtn: { padding: 8 },
   refreshBtn: { padding: 8 },
   modeBar: {
     flexDirection: 'row',

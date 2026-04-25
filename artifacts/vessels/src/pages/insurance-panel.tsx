@@ -1,7 +1,7 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { cn } from '@szl-holdings/shared-ui/utils';
-import { Activity, AlertTriangle, DollarSign, FileText, Shield, TrendingUp } from 'lucide-react';
+import { Activity, AlertTriangle, Cpu, DollarSign, FileSearch, FileText, Link2, Shield, TrendingUp } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 interface Claim {
@@ -544,6 +544,64 @@ export default function InsurancePanelPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              <div className="rounded-xl border border-sky-500/12 bg-sky-500/3 p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.25)' }}>
+                    <FileSearch className="w-3 h-3 text-sky-400" />
+                  </div>
+                  <p className="text-[10px] font-semibold text-sky-200">Document Intelligence — Exception Filing</p>
+                  <div className="ml-auto flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                    <Cpu className="w-2 h-2" />
+                    v0.1.0
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {[
+                    {
+                      stage: 'ocr',
+                      label: `${selectedClaim.type} claim document — ${selectedClaim.vessel}`,
+                      text: `Claim ${selectedClaim.id} filed ${selectedClaim.dateReported}. Amount: $${selectedClaim.estimatedAmount.toLocaleString()}. Insurer: ${selectedClaim.insurer}. Status: ${selectedClaim.status.replace('_', ' ')}.`,
+                      evidenceRefs: [`ev-clm-${selectedClaim.id}-01`],
+                      confidence: 0.96,
+                      proofHash: `0x${selectedClaim.id.replace(/\W/g, '').slice(0, 6)}a1…f902`,
+                    },
+                    {
+                      stage: 'qa',
+                      label: `Coverage question — ${selectedClaim.vessel}`,
+                      text: `QA answer: "Is this incident covered under the ${selectedClaim.type} policy?" → "${selectedClaim.status === 'denied' ? 'Coverage denied — exclusion clause applies. See policy §7.3.' : selectedClaim.status === 'settled' ? 'Settled at $' + Math.round(selectedClaim.estimatedAmount * 0.87).toLocaleString() + ' (87% of claim). Final release executed.' : 'Coverage confirmed subject to deductible. Adjustor review in progress.'}" `,
+                      evidenceRefs: [`ev-clm-${selectedClaim.id}-02`, `ev-clm-${selectedClaim.id}-03`],
+                      confidence: 0.89,
+                      proofHash: `0x${selectedClaim.id.replace(/\W/g, '').slice(0, 6)}b9…22de`,
+                    },
+                  ].map((chunk, i) => (
+                    <div key={i} className="rounded-lg p-2.5 bg-sky-500/3 border border-sky-500/8">
+                      <div className="flex items-start gap-2">
+                        <span className={cn(
+                          'shrink-0 px-1.5 py-0.5 rounded text-[8px] font-mono uppercase mt-0.5',
+                          chunk.stage === 'ocr' ? 'bg-sky-500/15 text-sky-300' : 'bg-emerald-500/15 text-emerald-300',
+                        )}>
+                          {chunk.stage}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] font-semibold text-sky-200 mb-1">{chunk.label}</p>
+                          <p className="text-[9px] text-sky-300/60 leading-relaxed mb-1.5">{chunk.text}</p>
+                          <div className="flex items-center gap-x-2.5 flex-wrap text-[8px] font-mono text-sky-400/35">
+                            <span className="flex items-center gap-0.5"><Link2 className="w-2 h-2" />{chunk.evidenceRefs.join(', ')}</span>
+                            <span>{chunk.proofHash}</span>
+                            <span className={chunk.confidence >= 0.93 ? 'text-emerald-400/60' : 'text-amber-400/60'}>
+                              conf {Math.round(chunk.confidence * 100)}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[8px] font-mono text-sky-400/25">
+                  lane: vessels-insurance-exception · pipeline: ocr→layout→qa · {selectedClaim.id}
+                </p>
               </div>
             </div>
           )}

@@ -21,12 +21,15 @@ import {
   Lock,
   Printer,
   Shield,
+  Square,
   TrendingDown,
   Users,
+  Volume2,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useRoute, useSearch } from 'wouter';
 import { type SignalItem, signalItems } from '@/data/seed';
+import { useBriefingAudio } from '@/lib/use-briefing-audio';
 
 const BASE = (import.meta.env.BASE_URL ?? '/lyte/').replace(/\/$/, '');
 
@@ -180,6 +183,7 @@ export default function BriefingPage() {
   const [, params] = useRoute('/briefing/:id');
   const search = useSearch();
   const [copied, setCopied] = useState(false);
+  const { state: audioState, play: playBrief, stop: stopBrief, isAvailable: audioAvailable } = useBriefingAudio();
 
   const signalId = params?.id ?? '';
   const signal = signalItems.find((s) => s.id === signalId);
@@ -294,6 +298,33 @@ export default function BriefingPage() {
               <Link2 className="w-3.5 h-3.5" />
               {copied ? 'Link copied' : 'Copy share link'}
             </button>
+            {audioAvailable && (
+              audioState === 'playing' ? (
+                <button
+                  type="button"
+                  onClick={stopBrief}
+                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border border-red-300 bg-red-50 hover:bg-red-100 text-red-700"
+                >
+                  <Square className="w-3.5 h-3.5" /> Stop Audio
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => signal && playBrief({
+                    briefId: signalId,
+                    domain: 'lyte',
+                    headline: signal.title,
+                    situation: `Severity ${signal.severity}. Confidence ${Math.round(signal.confidence * 100)}%.`,
+                    recommendations: best ? [`${DECISION_TWIN_ACTION_LABELS[best.action]}: ${best.description.slice(0, 120)}`] : [],
+                  })}
+                  disabled={!signal || audioState === 'loading'}
+                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-700 disabled:opacity-50"
+                >
+                  <Volume2 className="w-3.5 h-3.5" />
+                  {audioState === 'loading' ? 'Preparing…' : 'Listen'}
+                </button>
+              )
+            )}
             <button
               type="button"
               onClick={() => window.print()}

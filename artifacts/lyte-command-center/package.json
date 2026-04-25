@@ -44,6 +44,7 @@
     "@szl-holdings/design-system": "workspace:*",
     "@szl-holdings/observability": "workspace:*",
     "@workspace/simulation": "workspace:*",
-    "@workspace/approvals-inbox": "workspace:*"
+    "@workspace/approvals-inbox": "workspace:*",
+    "@szl-holdings/speech-specialist": "workspace:*"
   }
 }

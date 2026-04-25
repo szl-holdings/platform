@@ -1,11 +1,13 @@
-import { AlertTriangle, ArrowLeft, Clock, Shield, } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Clock, Shield, Square, Volume2 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useEcosystemData } from '../hooks/use-ecosystem-data';
 import { getDomainColor, getSeverityColor } from '../lib/utils';
+import { useBriefingAudio } from '../lib/use-briefing-audio';
 
 export function ExecutiveBriefing() {
   const [, navigate] = useLocation();
   const { data, sseConnected } = useEcosystemData();
+  const { state: audioState, play: playBrief, stop: stopBrief, isAvailable: audioAvailable } = useBriefingAudio();
 
   const today = new Date();
   const dateStr = today.toLocaleDateString('en-US', {
@@ -77,18 +79,60 @@ export function ExecutiveBriefing() {
             EXECUTIVE BRIEFING
           </span>
         </div>
-        {sseConnected && (
-          <div
-            className="flex items-center gap-1.5 text-xs font-mono"
-            style={{ color: 'var(--color-low)' }}
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full"
-              style={{ backgroundColor: 'var(--color-low)', boxShadow: '0 0 6px var(--color-low)' }}
-            />
-            LIVE
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          {audioAvailable && (
+            audioState === 'playing' ? (
+              <button
+                type="button"
+                onClick={stopBrief}
+                className="flex items-center gap-1.5 text-xs font-mono px-3 py-1 rounded"
+                style={{
+                  color: 'var(--color-critical)',
+                  backgroundColor: 'color-mix(in srgb, var(--color-critical) 10%, transparent)',
+                  border: '1px solid color-mix(in srgb, var(--color-critical) 30%, transparent)',
+                }}
+              >
+                <Square className="w-3 h-3" /> Stop Audio
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled={!data || audioState === 'loading'}
+                onClick={() => data && playBrief({
+                  briefId: `cmd-brief-${Date.now()}`,
+                  domain: 'command',
+                  headline: `Platform-wide morning briefing. ${data.domains.filter((d: {score:number}) => d.score < 65).length} critical domain(s) require attention.`,
+                  situation: `${data.domains.length} domains monitored. Overall platform health at ${Math.round(data.domains.reduce((s: number, d: {score:number}) => s + d.score, 0) / Math.max(data.domains.length, 1))}%.`,
+                  recommendations: data.actions
+                    ?.filter((a: {priority:string}) => a.priority === 'critical')
+                    .slice(0, 3)
+                    .map((a: {text:string}) => a.text),
+                })}
+                className="flex items-center gap-1.5 text-xs font-mono px-3 py-1 rounded disabled:opacity-40"
+                style={{
+                  color: 'var(--color-fg-muted)',
+                  backgroundColor: 'var(--color-surface-base)',
+                  border: '1px solid var(--color-surface-border)',
+                }}
+              >
+                <Volume2 className="w-3 h-3" />
+                {audioState === 'loading' ? 'Preparing…' : 'Listen'}
+              </button>
+            )
+          )}
+          {sseConnected && (
+            <div
+              className="flex items-center gap-1.5 text-xs font-mono"
+              style={{ color: 'var(--color-low)' }}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ backgroundColor: 'var(--color-low)', boxShadow: '0 0 6px var(--color-low)' }}
+              />
+              LIVE
+            </div>
+          )}
+        </div>
       </div>
 
       <main className="flex-1 p-6 lg:p-8 max-w-[1200px] mx-auto w-full flex flex-col gap-8">

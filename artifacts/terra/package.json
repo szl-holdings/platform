@@ -54,6 +54,7 @@
     "@szl-holdings/api-client-react": "workspace:*",
     "@szl-holdings/brand-registry": "workspace:*",
     "@szl-holdings/config": "workspace:*",
-    "@szl-holdings/domain-claims": "workspace:*"
+    "@szl-holdings/domain-claims": "workspace:*",
+    "@szl-holdings/document-intelligence": "workspace:*"
   }
 }

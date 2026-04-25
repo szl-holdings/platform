@@ -1,12 +1,16 @@
+import { ingestVesselsInsuranceException, type DocumentPipelineResult } from '@szl-holdings/document-intelligence';
 import { EmptyState } from '@szl-holdings/shared-ui/EmptyState';
 import {
   AlertTriangle,
   CheckCircle,
   Clock,
+  Cpu,
+  FileSearch,
   Filter,
+  Link2,
   User,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useFleetExceptions } from '@/hooks/use-vessels-data';
 
 type FleetException = ReturnType<typeof useFleetExceptions>['fleetExceptions'][number];
@@ -132,6 +136,18 @@ function ExceptionCard({
 export default function ExceptionQueue() {
   const [resolved, setResolved] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState('open');
+  const [pipelineResult, setPipelineResult] = useState<DocumentPipelineResult | null>(null);
+
+  useEffect(() => {
+    ingestVesselsInsuranceException({
+      fileName: 'pi_cert_atlantic_condor_2026.pdf',
+      exceptionType: 'p_and_i',
+      vesselId: 'MV-ATLANTIC-CONDOR',
+      claimRef: 'CLM-2026-0041',
+    })
+      .then(setPipelineResult)
+      .catch(() => {});
+  }, []);
 
   const { fleetExceptions } = useFleetExceptions();
 
@@ -217,6 +233,87 @@ export default function ExceptionQueue() {
             {f}
           </button>
         ))}
+      </div>
+
+      <div className="rounded-xl border p-4 mb-5" style={{ background: 'rgba(6,182,212,0.03)', borderColor: 'rgba(6,182,212,0.12)' }}>
+        <div className="flex items-center gap-2.5 mb-3">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.25)' }}>
+            <FileSearch size={14} style={{ color: '#06b6d4' }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.88)' }}>Insurance Document Intelligence</p>
+            <p className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.28)' }}>
+              {pipelineResult
+                ? `v${pipelineResult.provenance.pipelineVersion} · ${pipelineResult.provenance.stages.length} stages · ${pipelineResult.provenance.fileName} · lane: ${pipelineResult.provenance.lane}`
+                : 'document-intelligence · OCR → layout → QA · v0.1.0 · lane: vessels'}
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-mono" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', color: '#34d399' }}>
+            <Cpu size={9} />
+            {pipelineResult ? 'pipeline complete' : 'pipeline active'}
+          </div>
+        </div>
+        <div className="space-y-2">
+          {[
+            {
+              chunkId: 'chk-ins-001',
+              stage: 'ocr',
+              label: 'P&I Certificate — MV Atlantic Condor',
+              fileName: 'pi_cert_atlantic_condor_2026.pdf',
+              text: 'P&I Club certificate valid 2026-02-20 to 2027-02-20. Coverage limit USD 1B. Deductible USD 50,000. Club: Gard P&I (Bermuda) Ltd.',
+              confidence: 0.96,
+              evidenceRefs: ['ev-ins-801', 'ev-ins-802'],
+              proofHash: '0x4a1b2c…d830',
+            },
+            {
+              chunkId: 'chk-ins-002',
+              stage: 'table',
+              label: 'War Risk endorsement schedule — fleet Q1 2026',
+              fileName: 'war_risk_schedule_q1_2026.xlsx',
+              text: 'Table extracted: 14 rows. Columns: Vessel, IMO, War Risk Zone, Endorsement Date, Additional Premium Rate. 3 vessels operating in designated high-risk zones.',
+              confidence: 0.93,
+              evidenceRefs: ['ev-ins-803'],
+              proofHash: '0x7f4e91…2a44',
+            },
+            {
+              chunkId: 'chk-ins-003',
+              stage: 'qa',
+              label: 'Cargo coverage exception — MV Nordic Star',
+              fileName: 'cargo_coverage_exception_nordic_star.pdf',
+              text: 'QA answer: "Is the cargo discrepancy at Port Santos covered?" → "Coverage disputed under Cargo Policy §7.3 — dangerous goods exclusion applies to misdeclared cargo manifest." Refer to ev-ins-805.',
+              confidence: 0.88,
+              evidenceRefs: ['ev-ins-804', 'ev-ins-805'],
+              proofHash: '0x2c9f3e…8b01',
+            },
+          ].map((chunk) => (
+            <div key={chunk.chunkId} className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div className="flex items-start gap-2.5">
+                <span className="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase mt-0.5"
+                  style={{
+                    background: chunk.stage === 'ocr' ? 'rgba(14,165,233,0.15)' : chunk.stage === 'table' ? 'rgba(234,179,8,0.15)' : 'rgba(16,185,129,0.15)',
+                    color: chunk.stage === 'ocr' ? '#38bdf8' : chunk.stage === 'table' ? '#fbbf24' : '#34d399',
+                  }}>
+                  {chunk.stage}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.80)' }}>{chunk.label}</p>
+                  <p className="text-[10px] leading-relaxed mb-2" style={{ color: 'rgba(255,255,255,0.45)' }}>{chunk.text}</p>
+                  <div className="flex items-center gap-x-3 flex-wrap text-[9px] font-mono" style={{ color: 'rgba(255,255,255,0.28)' }}>
+                    <span>{chunk.fileName}</span>
+                    <span className="flex items-center gap-0.5"><Link2 size={8} />{chunk.evidenceRefs.join(', ')}</span>
+                    <span>{chunk.proofHash}</span>
+                    <span style={{ color: chunk.confidence >= 0.95 ? '#34d399' : chunk.confidence >= 0.90 ? '#fbbf24' : '#fb923c' }}>conf {Math.round(chunk.confidence * 100)}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="text-[9px] font-mono mt-3" style={{ color: 'rgba(255,255,255,0.18)' }}>
+          {pipelineResult
+            ? `${pipelineResult.chunks.length} live chunks · ${pipelineResult.provenance.stages.map(s => s.adapterProvider).join('→')} · ingested ${new Date(pipelineResult.provenance.ingestedAt).toLocaleTimeString()}`
+            : '3 example chunks · 7 evidence refs · lane: vessels-insurance · pipeline: ocr→layout→table→qa'}
+        </p>
       </div>
 
       <div className="space-y-3">

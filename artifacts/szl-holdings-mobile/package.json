@@ -18,6 +18,7 @@
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@szl-holdings/api-client-react": "workspace:*",
+    "@szl-holdings/speech-specialist": "workspace:*",
     "@szl-holdings/mobile-shared": "workspace:*",
     "@tanstack/react-query": "catalog:",
     "@types/jest": "^29.5.14",

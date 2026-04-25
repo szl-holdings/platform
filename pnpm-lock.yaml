@@ -1106,6 +1106,9 @@ importers:
       '@szl-holdings/domain-claims':
         specifier: workspace:*
         version: link:../../packages/domain-claims
+      '@szl-holdings/speech-specialist':
+        specifier: workspace:*
+        version: link:../../packages/speech-specialist
       '@szl-holdings/telemetry-standards':
         specifier: workspace:*
         version: link:../../packages/telemetry-standards
@@ -1233,6 +1236,9 @@ importers:
       '@szl-holdings/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
+      '@szl-holdings/document-intelligence':
+        specifier: workspace:*
+        version: link:../../packages/document-intelligence
       '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
@@ -1351,6 +1357,9 @@ importers:
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@szl-holdings/speech-specialist':
+        specifier: workspace:*
+        version: link:../../packages/speech-specialist
       '@workspace/approvals-inbox':
         specifier: workspace:*
         version: link:../../packages/approvals-inbox
@@ -2115,6 +2124,9 @@ importers:
       '@szl-holdings/mobile-shared':
         specifier: workspace:*
         version: link:../../lib/mobile-shared
+      '@szl-holdings/speech-specialist':
+        specifier: workspace:*
+        version: link:../../packages/speech-specialist
       '@tanstack/react-query':
         specifier: 'catalog:'
         version: 5.99.0(react@19.1.0)
@@ -2262,6 +2274,9 @@ importers:
       '@szl-holdings/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
+      '@szl-holdings/document-intelligence':
+        specifier: workspace:*
+        version: link:../../packages/document-intelligence
       '@szl-holdings/domain-claims':
         specifier: workspace:*
         version: link:../../packages/domain-claims
@@ -2383,6 +2398,9 @@ importers:
       '@szl-holdings/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
+      '@szl-holdings/document-intelligence':
+        specifier: workspace:*
+        version: link:../../packages/document-intelligence
       '@szl-holdings/domain-claims':
         specifier: workspace:*
         version: link:../../packages/domain-claims
@@ -4007,6 +4025,12 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
+  packages/document-intelligence:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+
   packages/domain-claims:
     dependencies:
       '@szl-holdings/platform-registry':
@@ -4503,6 +4527,12 @@ importers:
       vitest:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/speech-specialist:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
 
   packages/substrate:
     dependencies:
