@@ -36,6 +36,7 @@ export const NAMED_JOB_TYPES = {
   CORTEX_GRAPH_SNAPSHOT_PRUNE: "cortex_graph_snapshot_prune",
   TERRA_DISTRESS_FINANCIALS_BACKFILL: "terra_distress_financials_backfill",
   OT_ICS_STREAM_FEED: "ot_ics_stream_feed",
+  HOURLY_MARKET_DATA_REFRESH: "hourly_market_data_refresh",
 } as const;
 
 export type NamedJobType = typeof NAMED_JOB_TYPES[keyof typeof NAMED_JOB_TYPES];
@@ -90,6 +91,7 @@ registerEntry({ type: NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, name: "On-Call Han
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH, name: "Daily Live Signal Refresh", description: "Rolls timestamps forward on the seeded firestorm_incidents, vessels_alerts, and vessels_events delay rows so the Innovation Layer always shows fresh-looking activity (within the last 24-48h). Also rotates one row per table — closing the oldest open record and re-opening the most-recently-resolved one — to give the feed visible motion across reloads. Idempotent and safe to run repeatedly.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, name: "CORTEX Graph Snapshot Prune", description: "Deletes cortex_graph_snapshots rows whose expires_at is in the past. Each snapshot's expiry is set at insert time from CORTEX_SNAPSHOT_RETENTION_DAYS (default 30). Logs purged row count per run.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.OT_ICS_STREAM_FEED, name: "OT/ICS Live Protocol Stream Feed", description: "Continuously ingests simulated Modbus/DNP3/S7 protocol frames, conversation rows, and rolling anomaly scores into the OT/ICS tables. Runs every 8 seconds so the decoder dashboard reflects live traffic without manual re-seeding. Replace the synthetic generators with real PCAP relay / partner SOC feed clients when a live source is available.", schedule: "continuous", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH, name: "Hourly Market Data Refresh", description: "Fetches delayed/EOD macro indicators (equity indices, FX rates, commodity prices, treasury yields) from Alpha Vantage via the market-data-adapter and warms the in-process LRU cache used by GET /lyte/market-indicators. Credentials are read from ALPHA_VANTAGE_API_KEY. Falls back gracefully to the built-in seed snapshot when the key is absent or the provider is rate-limited. Applies exponential backoff with up to 3 retries per API call.", schedule: "hourly", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL, name: "Terra Distress Financials Backfill", description: "Walks active terra_distress_properties rows whose debt_amount + lien_amount is missing or zero and applies the heuristic encumbrance estimator (NYC-grounded ACRIS / DOF tax-lien / HPD norms keyed off distress_type, estimated_value, opportunity_score, days_in_distress) so the lender-exposure endpoint stops reporting isSyntheticExposure: true for the majority of distress rows. Estimate provenance is recorded in raw_data.financialsEstimate so later real-filing ingestion can override without losing audit history. Logs scanned / estimated / coverage % each run.", schedule: "weekly", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY, name: "Guardian Approval Expiry Sweeper", description: "Scans guardian_approval_requests every 5 minutes for pending entries whose expires_at is in the past and flips them to status='expired' so agents waiting on the request can detect the timeout and retry or escalate. Per-tier expiry windows are configured in TIER_CONTROLS (T2=24h, T3=48h, T4=72h; T0/T1/T5 do not auto-expire).", schedule: "hourly", enabled: true });
 
@@ -2120,6 +2122,41 @@ durableJobQueue.register(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL, asy
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL)?.failCount || 0) + 1,
     });
     logger.error({ err, jobId: job.id }, "terra_distress_financials_backfill: failed");
+    throw err;
+  }
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, "hourly_market_data_refresh: starting market data refresh");
+  updateRegistry(NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH, { lastStatus: "running", lastRunAt: Date.now() });
+  try {
+    const { getMarketData, invalidateMarketCache } = await import("../lib/market-data-adapter");
+    invalidateMarketCache();
+    const snapshot = await getMarketData(true);
+    const count = snapshot.indicators.length;
+    const provider = snapshot.provider;
+    const hasLive = snapshot.indicators.some((i) => i.dataQuality !== "seed");
+    serverTelemetry.recordBusinessEvent({
+      type: "hourly_market_data_refresh_completed",
+      domain: "lyte",
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { count, provider, providerConfigured: snapshot.providerConfigured, hasLive },
+    });
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH, {
+      lastStatus: "completed",
+      lastDurationMs: Date.now() - start,
+      runCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH)?.runCount || 0) + 1,
+    });
+    logger.info({ jobId: job.id, count, provider, hasLive, durationMs: Date.now() - start }, "hourly_market_data_refresh: complete");
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "hourly_market_data_refresh: fatal");
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH, {
+      lastStatus: "failed",
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH)?.failCount || 0) + 1,
+    });
     throw err;
   }
 });

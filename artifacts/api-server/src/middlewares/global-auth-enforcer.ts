@@ -112,6 +112,12 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/lyte/signal-fusion",
   "/api/lyte/governance-domains",
   "/api/lyte/decision-schemas",
+  // Lyte macro market indicators — delayed/EOD feed via Alpha Vantage.
+  // Public read surface; same pattern as lyte-surfaces.ts routes above.
+  // Refresh POST is also public — no user data involved; worst case is an
+  // extra Alpha Vantage API call which is rate-limited by the adapter.
+  "/api/lyte/market-indicators",
+  "/api/lyte/market-indicators/refresh",
   // Investor Hub company fundamentals — read-only descriptive metrics keyed by
   // category='fundamentals' in holdings_metrics. Public so the marketing
   // /investors page can render live values without a session, with a static

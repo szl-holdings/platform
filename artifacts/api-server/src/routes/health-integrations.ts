@@ -267,6 +267,60 @@ async function checkRedis(): Promise<IntegrationHealth> {
   };
 }
 
+/**
+ * Checks the Alpha Vantage market data feed health.
+ *
+ * - unconfigured: ALPHA_VANTAGE_API_KEY not set (adapter in seed-fallback mode)
+ * - healthy:      key present and last snapshot is fresh (not stale)
+ * - degraded:     key present but last snapshot is stale (data may be outdated)
+ */
+async function checkAlphaVantageMarketFeed(): Promise<IntegrationHealth> {
+  const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
+  if (!apiKey) {
+    return {
+      name: 'alpha-vantage-market-feed',
+      status: 'unconfigured',
+      lastChecked: new Date().toISOString(),
+      details: {
+        provider: 'Alpha Vantage',
+        mode: 'seed-fallback',
+        note: 'Set ALPHA_VANTAGE_API_KEY to enable live delayed/EOD market feeds',
+      },
+    };
+  }
+
+  try {
+    const { getMarketData } = await import('../lib/market-data-adapter');
+    const snapshot = await getMarketData(false);
+    const staleIndicators = snapshot.indicators.filter((i) => i.isStale).length;
+    const total = snapshot.indicators.length;
+    const hasData = total > 0;
+    const allStale = total > 0 && staleIndicators === total;
+
+    return {
+      name: 'alpha-vantage-market-feed',
+      status: hasData && !allStale ? 'healthy' : allStale ? 'degraded' : 'unavailable',
+      lastChecked: new Date().toISOString(),
+      details: {
+        provider: snapshot.provider,
+        providerConfigured: snapshot.providerConfigured,
+        indicatorCount: total,
+        staleCount: staleIndicators,
+        refreshedAt: snapshot.refreshedAt,
+        nextRefreshAt: snapshot.nextRefreshAt,
+        cacheAgeSeconds: snapshot.cacheAgeSeconds,
+      },
+    };
+  } catch (err) {
+    return {
+      name: 'alpha-vantage-market-feed',
+      status: 'unavailable',
+      lastChecked: new Date().toISOString(),
+      error: (err as Error).message?.slice(0, 120),
+    };
+  }
+}
+
 let cachedHealth: { data: IntegrationHealth[]; checkedAt: number } | null = null;
 const CACHE_TTL_MS = 30_000;
 
@@ -286,6 +340,7 @@ async function runAllChecks(): Promise<IntegrationHealth[]> {
     checkAzureServices(),
     checkDynamics365(),
     checkRedis(),
+    checkAlphaVantageMarketFeed(),
   ]);
 
   cachedHealth = { data: checks, checkedAt: Date.now() };

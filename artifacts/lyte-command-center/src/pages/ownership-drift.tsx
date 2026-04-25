@@ -19,6 +19,8 @@ import {
   YAxis,
 } from 'recharts';
 import { useOwnershipDrift } from '@/data/api';
+import { useMarketIndicators } from '@/data/market-api';
+import { MarketTicker } from '@/components/MarketTicker';
 import {
   bootstrapInterventions,
   claimDrift,
@@ -351,6 +353,7 @@ export default function OwnershipDriftPage() {
 
   const [filter, setFilter] = useState<'all' | 'critical' | 'warn' | 'info'>('all');
   const { data, isLoading, error } = useOwnershipDrift();
+  const { data: marketSnapshot } = useMarketIndicators();
 
   if (isLoading) {
     return <div className="p-6 text-xs font-mono text-amber-400/50">Loading ownership drift…</div>;
@@ -380,6 +383,9 @@ export default function OwnershipDriftPage() {
           Work stalled because responsibility is unclear or contested — with evidence per stall.
         </p>
       </div>
+
+      {/* Market context strip */}
+      {marketSnapshot && <MarketTicker snapshot={marketSnapshot} compact />}
 
       {/* KPI row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

@@ -118,6 +118,10 @@ router.use(lazyMatch("/lyte", () => import("./lyte-intel"), "lyte-intel"));
 // Mutating endpoints (approve, execute, run) are stub-only in Phase 1.
 router.use(a11oyFabricRouter);
 
+// Lyte market indicators — delayed/EOD macro feed backed by Alpha Vantage.
+// Public read endpoint; mounted before tenantScope group.
+router.use(lazyMatch("/lyte", () => import("./lyte-market"), "lyte-market"));
+
 // Global Guardian policy check — derives category from request path.
 router.use(guardianPolicyCheck());
 

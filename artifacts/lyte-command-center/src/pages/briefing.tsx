@@ -30,6 +30,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useRoute, useSearch } from 'wouter';
 import { type SignalItem, signalItems } from '@/data/seed';
 import { useBriefingAudio } from '@/lib/use-briefing-audio';
+import { useMarketIndicators } from '@/data/market-api';
+import { MarketTicker } from '@/components/MarketTicker';
 
 const BASE = (import.meta.env.BASE_URL ?? '/lyte/').replace(/\/$/, '');
 
@@ -184,6 +186,7 @@ export default function BriefingPage() {
   const search = useSearch();
   const [copied, setCopied] = useState(false);
   const { state: audioState, play: playBrief, stop: stopBrief, isAvailable: audioAvailable } = useBriefingAudio();
+  const { data: marketSnapshot } = useMarketIndicators();
 
   const signalId = params?.id ?? '';
   const signal = signalItems.find((s) => s.id === signalId);
@@ -282,6 +285,11 @@ export default function BriefingPage() {
       `}</style>
 
       <div className="no-print sticky top-0 z-10 bg-white border-b border-slate-200">
+        {marketSnapshot && (
+          <div className="max-w-5xl mx-auto px-6 pt-2">
+            <MarketTicker snapshot={marketSnapshot} compact />
+          </div>
+        )}
         <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between gap-3">
           <Link
             href="/decision-twin"

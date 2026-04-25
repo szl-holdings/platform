@@ -73,6 +73,11 @@ const EXEMPT_PATHS = new Set([
   // and refreshes the resilience index for the demo. No per-user state mutated;
   // path is also in the unauthenticated PUBLIC_PREFIXES allowlist.
   '/api/agent-mesh/scan',
+  // Lyte market-data cache flush — public POST that invalidates the in-process
+  // LRU cache and triggers a re-fetch from Alpha Vantage (or returns the seed
+  // snapshot when the key is absent). No per-user state is read or modified;
+  // CSRF double-submit is not applicable.
+  '/api/lyte/market-indicators/refresh',
 ]);
 
 // Risk evidence store — public POST/DELETE endpoints accept any

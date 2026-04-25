@@ -14,6 +14,7 @@ import { jobQueue } from './lib/job-queue';
 import { logger } from './lib/logger';
 import { startPrismBusBridge, stopPrismBusBridge } from './lib/prism-bus-bridge';
 import { failFastOnInvalidConfig } from './lib/startup-validation';
+import { validateMarketDataConfig } from './lib/market-data-adapter';
 import { initWebSocket } from './lib/websocket';
 import './lib/platform-jobs';
 import { agentScheduler, registerDefaultSchedules } from './lib/agent-scheduler';
@@ -82,6 +83,7 @@ import { runAlertRuleEvaluation } from './routes/ops-management';
 import { bootstrapChainState } from './routes/signal-chains';
 
 failFastOnInvalidConfig();
+validateMarketDataConfig();
 
 initializeForgeDomainEventSubscriptions();
 

@@ -14,8 +14,10 @@ import {
 import { useEffect } from 'react';
 import { Link } from 'wouter';
 import { useBoardView } from '@/data/api';
+import { useMarketIndicators, useRefreshMarketIndicators } from '@/data/market-api';
 import { bootstrapInterventions, useInterventions } from '@/data/interventions';
 import { type BoardMetric, type BoardRisk, debtItems, driftItems } from '@/data/seed';
+import { MarketTicker } from '@/components/MarketTicker';
 
 function MetricCard({ metric }: { metric: BoardMetric }) {
   const trendIcon =
@@ -133,6 +135,8 @@ export default function BoardViewPage() {
   }, []);
 
   const { data, isLoading, error } = useBoardView();
+  const { data: marketSnapshot } = useMarketIndicators();
+  const refreshMarket = useRefreshMarketIndicators();
   if (isLoading) {
     return <div className="p-6 text-xs font-mono text-amber-400/50">Loading board view…</div>;
   }
@@ -239,6 +243,15 @@ export default function BoardViewPage() {
           </p>
         </div>
       </div>
+
+      {/* Market indicators */}
+      {marketSnapshot && (
+        <MarketTicker
+          snapshot={marketSnapshot}
+          onRefresh={() => refreshMarket.mutate()}
+          isRefreshing={refreshMarket.isPending}
+        />
+      )}
 
       {/* Metrics */}
       <div>

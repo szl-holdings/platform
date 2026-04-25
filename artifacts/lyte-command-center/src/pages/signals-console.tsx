@@ -19,6 +19,8 @@ import {
 import { useMemo, useState } from 'react';
 import { Link } from 'wouter';
 import { type Severity, type SignalItem, signalItems } from '@/data/seed';
+import { useMarketIndicators } from '@/data/market-api';
+import { MarketTicker } from '@/components/MarketTicker';
 
 const SEV_CONFIG: Record<Severity, { label: string; color: string; bg: string; border: string }> = {
   critical: {
@@ -398,6 +400,7 @@ export default function SignalsConsolePage() {
   const [search, setSearch] = useState('');
   const [filterSeverity, setFilterSeverity] = useState<string>('all');
   const [expandedId, setExpandedId] = useState<string | null>('sig-001');
+  const { data: marketSnapshot } = useMarketIndicators();
 
   const filtered = useMemo(() => {
     return signalItems.filter((s) => {
@@ -445,6 +448,10 @@ export default function SignalsConsolePage() {
           </div>
         </div>
       </div>
+
+      {marketSnapshot && (
+        <MarketTicker snapshot={marketSnapshot} compact />
+      )}
 
       <NLSignalQueryBar value={search} onChange={setSearch} />
 

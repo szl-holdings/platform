@@ -695,6 +695,15 @@ export const ENV_SPECS: EnvVarSpec[] = [
     group: 'integrations',
   },
   {
+    key: 'ALPHA_VANTAGE_API_KEY',
+    required: false,
+    description:
+      'Alpha Vantage API key for delayed/EOD macro market indicators (equities, FX, commodities, treasury yields). ' +
+      'When absent the Lyte macro indicator panel falls back to a built-in seed snapshot with isStale=true.',
+    sensitive: true,
+    group: 'integrations',
+  },
+  {
     key: 'SMTP_HOST',
     required: false,
     description: 'SMTP server hostname (used when EMAIL_PROVIDER=smtp)',
@@ -1926,6 +1935,22 @@ export function validateStartupConfig(): ValidationResult {
     } else {
       warnings.push(
         `ALLOY_INTERNAL_TOKEN is short (${alloyToken.length} chars) — use a 32+ character secret in production`,
+      );
+    }
+  }
+
+  const alphaVantageKey = process.env.ALPHA_VANTAGE_API_KEY;
+  if (!alphaVantageKey) {
+    if (isProduction) {
+      errors.push(
+        'ALPHA_VANTAGE_API_KEY is not set. This key is required in production for the Lyte macro ' +
+          'indicator panel. Without it, all market indicator requests return the built-in seed snapshot ' +
+          '(dataQuality=seed, isStale=true). Set ALPHA_VANTAGE_API_KEY in Replit Secrets.',
+      );
+    } else {
+      warnings.push(
+        'ALPHA_VANTAGE_API_KEY is not set — Lyte market indicators will use the built-in seed snapshot. ' +
+          'Set the key to enable live Alpha Vantage delayed/EOD feeds.',
       );
     }
   }

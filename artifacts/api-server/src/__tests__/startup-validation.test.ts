@@ -81,6 +81,7 @@ const MIN_PROD_ENV: NodeJS.ProcessEnv = {
   ALLOY_INTERNAL_TOKEN: 'b'.repeat(64),
   CONNECTOR_ENCRYPTION_KEY: 'a'.repeat(64),
   MFA_SECRET_ENCRYPTION_KEY: 'c'.repeat(64),
+  ALPHA_VANTAGE_API_KEY: 'test-alpha-vantage-key-prod-validation',
 };
 
 /**
@@ -272,6 +273,15 @@ describe('validateStartupConfig — production mode', () => {
     const result = validateStartupConfig();
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.includes('MFA_SECRET_ENCRYPTION_KEY'))).toBe(true);
+  });
+
+  it('errors when ALPHA_VANTAGE_API_KEY is absent in production (fail-fast)', () => {
+    setProductionEnv({ ALPHA_VANTAGE_API_KEY: undefined as unknown as string });
+    delete process.env.ALPHA_VANTAGE_API_KEY;
+
+    const result = validateStartupConfig();
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('ALPHA_VANTAGE_API_KEY'))).toBe(true);
   });
 
   it('errors when ALLOY_REQUIRE_APPROVAL_CRITICAL is false in production', () => {

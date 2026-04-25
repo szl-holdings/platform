@@ -18,6 +18,8 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'wouter';
 import { useDecisionReplay } from '@/data/api';
+import { useMarketIndicators } from '@/data/market-api';
+import { MarketTicker } from '@/components/MarketTicker';
 import {
   bootstrapInterventions,
   formatTimestamp,
@@ -328,6 +330,7 @@ export default function DecisionReplayPage() {
   }, [playing, totalEvents]);
 
   const isReplayMode = computeIsReplayMode({ revealedCount, playing });
+  const { data: marketSnapshot } = useMarketIndicators();
 
   if (isLoading) {
     return <div className="p-6 text-xs font-mono text-amber-400/50">Loading decision replay…</div>;
@@ -359,6 +362,9 @@ export default function DecisionReplayPage() {
           Use Replay mode to step through events sequentially.
         </p>
       </div>
+
+      {/* Market context strip */}
+      {marketSnapshot && <MarketTicker snapshot={marketSnapshot} compact />}
 
       {/* Legend */}
       <div className="flex items-center gap-4 flex-wrap">
