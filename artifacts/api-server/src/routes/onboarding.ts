@@ -5,6 +5,7 @@
  * GET    /api/onboarding/wizard/:orgSlug   — get wizard progress
  * PUT    /api/onboarding/wizard/:orgSlug   — update wizard step
  * POST   /api/onboarding/wizard/:orgSlug/complete — mark onboarding complete
+ * POST   /api/onboarding/wizard/:orgSlug/reset    — reset wizard to default state (org-admin or super-admin)
  */
 
 import { hashIp } from '@szl-holdings/audit';
@@ -410,6 +411,61 @@ router.post(
       sendSuccess(res, { message: 'Onboarding complete', completedAt: state.completedAt });
     } catch (err) {
       handleRouteError(res, err, 'Failed to complete onboarding');
+    }
+  },
+);
+
+router.post(
+  '/onboarding/wizard/:orgSlug/reset',
+  writeLimiter,
+  authMiddleware(),
+  validateBody(bodyShape({})),
+  async (req: Request, res: Response) => {
+    try {
+      const orgSlug = req.params.orgSlug as string;
+      const user = req.user!;
+
+      const [org] = await db
+        .select()
+        .from(organizationsTable)
+        .where(eq(organizationsTable.slug, orgSlug))
+        .limit(1);
+
+      if (!org) {
+        sendNotFound(res, 'Organization');
+        return;
+      }
+
+      if (!user.roles.includes('super_admin')) {
+        const [membership] = await db
+          .select()
+          .from(orgMembersTable)
+          .where(and(eq(orgMembersTable.orgId, org.id), eq(orgMembersTable.userId, user.id)))
+          .limit(1);
+        if (
+          !membership ||
+          (ORG_ROLE_HIERARCHY[membership.role] ?? 0) < ORG_ROLE_HIERARCHY.admin
+        ) {
+          sendForbidden(res, 'Org admin role required');
+          return;
+        }
+      }
+
+      await saveWizardState(org.id, defaultWizardState());
+
+      await db.insert(auditEventsTable).values({
+        userId: user.id,
+        action: 'onboarding_wizard_reset',
+        entityType: 'organization',
+        entityId: String(org.id),
+        ipAddress: hashIp(req.ip ?? null),
+      });
+
+      logger.info({ userId: user.id, orgId: org.id }, '[onboarding] Wizard reset');
+
+      sendSuccess(res, { message: 'Onboarding wizard reset', orgSlug });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to reset onboarding wizard');
     }
   },
 );
