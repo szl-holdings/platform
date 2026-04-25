@@ -290,6 +290,16 @@ export default function AdminPage() {
                 </button>
               );
             })}
+            <div className="mt-3 pt-3 border-t border-border/40">
+              <Link
+                href="/admin/command-center"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+              >
+                <Terminal className="w-3.5 h-3.5 shrink-0" />
+                Command Center
+                <ExternalLink className="w-3 h-3 ml-auto opacity-50" />
+              </Link>
+            </div>
           </nav>
         </aside>
 
