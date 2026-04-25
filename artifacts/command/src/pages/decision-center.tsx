@@ -1,4 +1,5 @@
 import { DecisionCenter } from '@szl-holdings/shared-ui/DecisionCenter';
+import { AlloyKernelPanel } from '@/components/AlloyKernelPanel';
 import {
   SHARED_EVAL_RESULTS,
   VARIANT_RECOMMENDATIONS,
@@ -84,6 +85,8 @@ export default function DecisionCenterPage() {
           />
         )}
       </div>
+
+      <AlloyKernelPanel />
     </div>
   );
 }

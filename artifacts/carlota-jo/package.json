@@ -40,6 +40,7 @@
     "wouter": "^3.3.5"
   },
   "dependencies": {
+    "@szl/alloy": "workspace:*",
     "@szl-holdings/analytics": "workspace:*",
     "@szl-holdings/brand-registry": "workspace:*",
     "@szl-holdings/config": "workspace:*",

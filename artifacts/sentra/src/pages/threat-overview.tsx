@@ -1,5 +1,6 @@
 import { AlertTriangle, Info, } from 'lucide-react';
 import { DataProvenance } from '@/lib/data-provenance';
+import { AlloyKernelPanel } from '@/components/AlloyKernelPanel';
 
 export default function ThreatOverview() {
   return (
@@ -134,6 +135,8 @@ export default function ThreatOverview() {
           </div>
         </div>
       </div>
+
+      <AlloyKernelPanel />
     </div>
   );
 }

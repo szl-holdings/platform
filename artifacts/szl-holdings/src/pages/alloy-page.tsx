@@ -8,6 +8,7 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { AlloyKernelPanel } from "@/components/AlloyKernelPanel";
 import { AlloyOperatingLoopDiagram } from "@/components/diagrams/AlloyOperatingLoopDiagram";
 
 const OPERATING_LOOP = [
@@ -587,6 +588,9 @@ export default function AlloyPage() {
             </div>
           </section>
   
+          <div className="container mx-auto max-w-4xl px-6 pb-16">
+            <AlloyKernelPanel />
+          </div>
         </main>
         <SiteFooter />
       </div>

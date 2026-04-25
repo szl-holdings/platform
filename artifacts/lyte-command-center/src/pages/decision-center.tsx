@@ -1,4 +1,5 @@
 import { StatusBadge as DSStatusBadge, type StatusVariant } from '@szl-holdings/design-system';
+import { AlloyKernelPanel } from '@/components/AlloyKernelPanel';
 import {
   Activity,
   AlertTriangle,
@@ -1074,6 +1075,8 @@ export default function DecisionCenter() {
       {selectedCardId && (
         <DetailDrawer cardId={selectedCardId} onClose={() => setSelectedCardId(null)} />
       )}
+
+      <AlloyKernelPanel />
     </div>
   );
 }

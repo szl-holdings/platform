@@ -461,6 +461,9 @@ importers:
       '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
+      '@szl/alloy':
+        specifier: workspace:*
+        version: link:../../packages/szl-alloy
       '@tanstack/react-query':
         specifier: 'catalog:'
         version: 5.99.0(react@19.1.0)
@@ -997,6 +1000,9 @@ importers:
       '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
+      '@szl/alloy':
+        specifier: workspace:*
+        version: link:../../packages/szl-alloy
       i18next:
         specifier: ^26.0.3
         version: 26.0.3(typescript@5.9.3)
@@ -1130,6 +1136,9 @@ importers:
       '@szl/a11oy-runtime':
         specifier: workspace:*
         version: link:../../packages/a11oy-runtime
+      '@szl/alloy':
+        specifier: workspace:*
+        version: link:../../packages/szl-alloy
       '@szl/substrate-client':
         specifier: workspace:*
         version: link:../../packages/substrate-client
@@ -1275,6 +1284,9 @@ importers:
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../../lib/services
+      '@szl/alloy':
+        specifier: workspace:*
+        version: link:../../packages/szl-alloy
       '@tanstack/query-persist-client-core':
         specifier: ^5.99.0
         version: 5.99.0
@@ -1460,6 +1472,9 @@ importers:
       '@szl-holdings/speech-specialist':
         specifier: workspace:*
         version: link:../../packages/speech-specialist
+      '@szl/alloy':
+        specifier: workspace:*
+        version: link:../../packages/szl-alloy
       '@workspace/approvals-inbox':
         specifier: workspace:*
         version: link:../../packages/approvals-inbox
@@ -1635,6 +1650,9 @@ importers:
       '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
+      '@szl/alloy':
+        specifier: workspace:*
+        version: link:../../packages/szl-alloy
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
@@ -1749,6 +1767,9 @@ importers:
       '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
+      '@szl/alloy':
+        specifier: workspace:*
+        version: link:../../packages/szl-alloy
       clsx:
         specifier: 'catalog:'
         version: 2.1.1
@@ -1849,6 +1870,9 @@ importers:
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../../lib/services
+      '@szl/alloy':
+        specifier: workspace:*
+        version: link:../../packages/szl-alloy
       '@tanstack/query-persist-client-core':
         specifier: ^5.99.0
         version: 5.99.0
@@ -2060,6 +2084,9 @@ importers:
       '@szl-holdings/workflow-runtime':
         specifier: workspace:*
         version: link:../../packages/workflow-runtime
+      '@szl/alloy':
+        specifier: workspace:*
+        version: link:../../packages/szl-alloy
       clsx:
         specifier: 'catalog:'
         version: 2.1.1
@@ -2389,6 +2416,9 @@ importers:
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
+      '@szl/alloy':
+        specifier: workspace:*
+        version: link:../../packages/szl-alloy
       '@tanstack/query-persist-client-core':
         specifier: ^5.99.0
         version: 5.99.0
@@ -2525,6 +2555,9 @@ importers:
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../../lib/services
+      '@szl/alloy':
+        specifier: workspace:*
+        version: link:../../packages/szl-alloy
       '@tanstack/query-persist-client-core':
         specifier: ^5.99.0
         version: 5.99.0
@@ -4816,6 +4849,9 @@ importers:
       '@szl-holdings/policy-engine':
         specifier: workspace:*
         version: link:../policy-engine
+      '@szl-holdings/prompt-registry':
+        specifier: workspace:*
+        version: link:../prompt-registry
       '@workspace/forge':
         specifier: workspace:*
         version: link:../forge
@@ -4832,6 +4868,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/telemetry-standards:
     dependencies:

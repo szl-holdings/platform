@@ -1,6 +1,7 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { AnimatedCounter } from '@szl-holdings/shared-ui/animated-counter';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
+import { AlloyKernelPanel } from '@/components/AlloyKernelPanel';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
 import {
@@ -487,6 +488,8 @@ export default function MaritimeIntelligence() {
           </Card>
         </div>
       </div>
+
+      <AlloyKernelPanel />
     </div>
   );
 }

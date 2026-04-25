@@ -40,6 +40,7 @@
     "wouter": "^3.3.5"
   },
   "dependencies": {
+    "@szl/alloy": "workspace:*",
     "@szl-holdings/brand-registry": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",
     "@szl-holdings/observability": "workspace:*",

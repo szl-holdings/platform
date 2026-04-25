@@ -1,5 +1,6 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { AlloyKernelPanel } from '@/components/AlloyKernelPanel';
 import {
   AlertTriangle,
   ArrowRight,
@@ -752,6 +753,8 @@ export default function BriefingEngine() {
           </button>
         </div>
       )}
+
+      <AlloyKernelPanel />
     </div>
   );
 }

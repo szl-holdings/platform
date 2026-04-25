@@ -35,6 +35,7 @@
     "wouter": "^3.3.5"
   },
   "dependencies": {
+    "@szl/alloy": "workspace:*",
     "@szl-holdings/analytics": "workspace:*",
     "@szl-holdings/covenant-policy": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",

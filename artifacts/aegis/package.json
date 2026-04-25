@@ -14,6 +14,7 @@
     "format": "biome format --write ./src"
   },
   "dependencies": {
+    "@szl/alloy": "workspace:*",
     "@szl-holdings/api-client-react": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",
     "@szl-holdings/env": "workspace:*",

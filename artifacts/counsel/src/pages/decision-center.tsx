@@ -1,4 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
+import { AlloyKernelPanel } from '@/components/AlloyKernelPanel';
 import {
   type AutonomyMode,
   type ProofEvidenceSource as EvidenceSource,
@@ -286,6 +287,8 @@ export default function DecisionCenter() {
           </div>
         </div>
       </div>
+
+      <AlloyKernelPanel />
     </div>
   );
 }

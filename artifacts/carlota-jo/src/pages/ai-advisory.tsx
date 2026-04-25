@@ -1,6 +1,7 @@
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@szl-holdings/shared-ui/ui/card';
 import { useRealtimeChannel } from '@szl-holdings/shared-ui/use-realtime-channel';
+import { AlloyKernelPanel } from '@/components/AlloyKernelPanel';
 import {
   Brain,
   FileText,
@@ -396,6 +397,8 @@ export default function AIAdvisory() {
       </div>
 
       <CarlotaGraphQLPanel />
+
+      <AlloyKernelPanel />
     </div>
   );
 }

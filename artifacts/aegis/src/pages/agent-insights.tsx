@@ -2,6 +2,7 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { AgentInsightsWidget } from '@szl-holdings/shared-ui/agent-insights-widget';
 import { MicroFeedbackWidget } from '@szl-holdings/shared-ui/micro-feedback-widget';
 import { Brain, Radio, ShieldAlert, Zap } from 'lucide-react';
+import { AlloyKernelPanel } from '@/components/AlloyKernelPanel';
 
 const ACCENT = '#ef4444';
 
@@ -115,6 +116,8 @@ export default function AgentInsightsPage() {
       <div className="text-[10px] text-orange-400/30 text-center pt-2">
         Powered by SZL Agent OS — autonomous security intelligence running 24/7
       </div>
+
+      <AlloyKernelPanel />
     </div>
   );
 }

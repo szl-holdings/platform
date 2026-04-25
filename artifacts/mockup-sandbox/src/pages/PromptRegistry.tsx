@@ -1,3 +1,4 @@
+import { AlloyKernelPanel } from '@/components/AlloyKernelPanel';
 import {
   ArrowUp,
   BarChart2,
@@ -628,6 +629,8 @@ export default function PromptRegistry() {
           {filtered.map((p) => <PromptCard key={p.id} prompt={p} />)}
         </div>
       )}
+
+      <AlloyKernelPanel />
     </div>
   );
 }
