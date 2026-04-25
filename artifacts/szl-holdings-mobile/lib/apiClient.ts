@@ -670,6 +670,20 @@ export async function getAuthToken(): Promise<string | null> {
   return t;
 }
 
+async function refreshMobileCsrfToken(): Promise<void> {
+  try {
+    await fetch(`${getApiBase()}/api/csrf-token`, { method: 'GET', credentials: 'include' });
+  } catch {
+    // best-effort — Bearer auth bypasses CSRF on the server anyway
+  }
+}
+
+function isMobileCsrfError(status: number, body: unknown): boolean {
+  if (status !== 403) return false;
+  const code = (body as { code?: string } | null)?.code;
+  return code === 'CSRF_TOKEN_MISSING' || code === 'CSRF_TOKEN_MISMATCH';
+}
+
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const method = ((init?.method ?? 'GET') as string).toUpperCase();
   const isApiPath = path.startsWith('/api/');
@@ -699,19 +713,33 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     }
   }
 
-  const token = await getAuthToken();
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(init?.headers as Record<string, string>),
+  let csrfRetried = false;
+
+  const doFetch = async (): Promise<T> => {
+    const token = await getAuthToken();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(init?.headers as Record<string, string>),
+    };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const res = await fetch(`${getApiBase()}${path}`, { ...init, headers });
+    if (!res.ok) {
+      await handleAuthRevocation(res);
+      if (!csrfRetried) {
+        const body = await res.clone().json().catch(() => null);
+        if (isMobileCsrfError(res.status, body)) {
+          csrfRetried = true;
+          await refreshMobileCsrfToken();
+          return doFetch();
+        }
+      }
+      throw new Error(`API error ${res.status}: ${path}`);
+    }
+    if (res.status === 204) return null as T;
+    return res.json() as Promise<T>;
   };
-  if (token) headers.Authorization = `Bearer ${token}`;
-  const res = await fetch(`${getApiBase()}${path}`, { ...init, headers });
-  if (!res.ok) {
-    await handleAuthRevocation(res);
-    throw new Error(`API error ${res.status}: ${path}`);
-  }
-  if (res.status === 204) return null as T;
-  return res.json() as Promise<T>;
+
+  return doFetch();
 }
 
 export async function apiFetchRaw(path: string, init?: RequestInit): Promise<Response> {

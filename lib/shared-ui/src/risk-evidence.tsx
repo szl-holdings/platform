@@ -108,17 +108,60 @@ function mergeRuns(...lists: SavedRiskRun[][]): SavedRiskRun[] {
 
 const API_BASE = '/api/risk-evidence';
 
+const CSRF_COOKIE_NAME = 'csrf_token';
+const CSRF_HEADER_NAME = 'x-csrf-token';
+const CSRF_MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+function readCsrfTokenFromCookie(): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie
+    .split(';')
+    .map((c) => c.trim())
+    .find((c) => c.startsWith(`${CSRF_COOKIE_NAME}=`));
+  if (!match) return null;
+  return decodeURIComponent(match.slice(CSRF_COOKIE_NAME.length + 1));
+}
+
+async function fetchFreshCsrfToken(): Promise<void> {
+  try {
+    await fetch('/api/csrf-token', { method: 'GET', credentials: 'include' });
+  } catch {
+    // best-effort
+  }
+}
+
 async function fetchJson(url: string, init?: RequestInit): Promise<unknown> {
-  const res = await fetch(url, {
-    credentials: 'include',
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...init?.headers,
-    },
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  const method = ((init?.method ?? 'GET') as string).toUpperCase();
+  const needsCsrf = CSRF_MUTATING_METHODS.has(method);
+  let csrfRetried = false;
+
+  const doFetch = async (): Promise<unknown> => {
+    const csrfToken = needsCsrf ? readCsrfTokenFromCookie() : null;
+    const res = await fetch(url, {
+      credentials: 'include',
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(needsCsrf && csrfToken ? { [CSRF_HEADER_NAME]: csrfToken } : {}),
+        ...init?.headers,
+      },
+    });
+    if (!res.ok) {
+      if (res.status === 403 && !csrfRetried) {
+        const body = await res.json().catch(() => null) as { code?: string } | null;
+        const code = body?.code;
+        if (code === 'CSRF_TOKEN_MISSING' || code === 'CSRF_TOKEN_MISMATCH') {
+          csrfRetried = true;
+          await fetchFreshCsrfToken();
+          return doFetch();
+        }
+      }
+      throw new Error(`HTTP ${res.status}`);
+    }
+    return res.json();
+  };
+
+  return doFetch();
 }
 
 export async function fetchRiskRunEvidence(domain: string): Promise<SavedRiskRun[]> {
@@ -198,10 +241,10 @@ export async function deleteRiskRunEvidence(domain: string, evidenceId: string):
     existing.filter((r) => r.evidenceId !== evidenceId),
   );
   try {
-    await fetch(`${API_BASE}/${encodeURIComponent(domain)}/${encodeURIComponent(evidenceId)}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    });
+    await fetchJson(
+      `${API_BASE}/${encodeURIComponent(domain)}/${encodeURIComponent(evidenceId)}`,
+      { method: 'DELETE' },
+    );
   } catch {
     /* offline — local cache already updated */
   }

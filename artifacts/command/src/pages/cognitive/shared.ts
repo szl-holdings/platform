@@ -30,58 +30,113 @@ export function apiUrl(path: string) {
   return `${base}/api${path}`;
 }
 
-export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const method = init?.method ?? 'GET';
-  const start = performance.now();
+const CSRF_COOKIE_NAME = 'csrf_token';
+const CSRF_HEADER_NAME = 'x-csrf-token';
+const CSRF_MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+function readCsrfTokenFromCookie(): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie
+    .split(';')
+    .map((c) => c.trim())
+    .find((c) => c.startsWith(`${CSRF_COOKIE_NAME}=`));
+  if (!match) return null;
+  return decodeURIComponent(match.slice(CSRF_COOKIE_NAME.length + 1));
+}
+
+async function fetchFreshCsrfToken(apiBase: string): Promise<void> {
   try {
-    const res = await fetch(url, {
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...init?.headers },
-      ...init,
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      const err = new Error(`HTTP ${res.status}: ${text || res.statusText}`) as Error & {
-        httpStatus?: number;
+    await fetch(`${apiBase}/csrf-token`, { method: 'GET', credentials: 'include' });
+  } catch {
+    // best-effort
+  }
+}
+
+export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const method = (init?.method ?? 'GET').toUpperCase();
+  const start = performance.now();
+  const needsCsrf = CSRF_MUTATING_METHODS.has(method);
+  let csrfRetried = false;
+
+  const doFetch = async (): Promise<T> => {
+    const csrfToken = needsCsrf ? readCsrfTokenFromCookie() : null;
+    try {
+      const mergedHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(needsCsrf && csrfToken ? { [CSRF_HEADER_NAME]: csrfToken } : {}),
+        ...(init?.headers as Record<string, string> | undefined),
       };
-      err.httpStatus = res.status;
+      const res = await fetch(url, {
+        credentials: 'include',
+        ...init,
+        headers: mergedHeaders,
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        if (res.status === 403 && !csrfRetried) {
+          let errBody: { code?: string } | null = null;
+          try { errBody = JSON.parse(text); } catch { /* ignore */ }
+          const code = errBody?.code;
+          if (code === 'CSRF_TOKEN_MISSING' || code === 'CSRF_TOKEN_MISMATCH') {
+            csrfRetried = true;
+            // Derive the CSRF endpoint base from the URL being fetched so
+            // this works whether the caller uses apiUrl() → /command/api/...
+            // or a direct /api/... path.
+            // e.g. "/command/api/agents/runs" → "/command/api"
+            // e.g. "/api/vessels/alerts"      → "/api"
+            const urlPath = url.startsWith('http')
+              ? (() => { try { return new URL(url).pathname; } catch { return url; } })()
+              : url;
+            const prefixMatch = urlPath.match(/^(.*?\/api)(?:\/|$)/);
+            const csrfBase = prefixMatch ? prefixMatch[1] : '/api';
+            await fetchFreshCsrfToken(csrfBase);
+            return doFetch();
+          }
+        }
+        const err = new Error(`HTTP ${res.status}: ${text || res.statusText}`) as Error & {
+          httpStatus?: number;
+        };
+        err.httpStatus = res.status;
+        throw err;
+      }
+      const result = (await res.json()) as T;
+      recordSpan({
+        name: 'app.api_call',
+        attributes: {
+          [AGENT_RUN_ATTRS.API_CALL_PATH]: url,
+          [AGENT_RUN_ATTRS.API_CALL_METHOD]: method,
+          [AGENT_RUN_ATTRS.API_CALL_STATUS]: res.status,
+          [AGENT_RUN_ATTRS.API_CALL_LATENCY_MS]: Math.round(performance.now() - start),
+        },
+        durationMs: Math.round(performance.now() - start),
+        status: 'ok',
+      });
+      return result;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      const status =
+        (err as { httpStatus?: number })?.httpStatus ??
+        (() => {
+          const m = /HTTP\s+(\d+)/i.exec(message);
+          return m ? Number(m[1]) : 0;
+        })();
+      recordSpan({
+        name: 'app.api_call',
+        attributes: {
+          [AGENT_RUN_ATTRS.API_CALL_PATH]: url,
+          [AGENT_RUN_ATTRS.API_CALL_METHOD]: method,
+          [AGENT_RUN_ATTRS.API_CALL_STATUS]: status,
+          [AGENT_RUN_ATTRS.API_CALL_LATENCY_MS]: Math.round(performance.now() - start),
+        },
+        durationMs: Math.round(performance.now() - start),
+        status: 'error',
+        errorMessage: message,
+      });
       throw err;
     }
-    const result = (await res.json()) as T;
-    recordSpan({
-      name: 'app.api_call',
-      attributes: {
-        [AGENT_RUN_ATTRS.API_CALL_PATH]: url,
-        [AGENT_RUN_ATTRS.API_CALL_METHOD]: method,
-        [AGENT_RUN_ATTRS.API_CALL_STATUS]: res.status,
-        [AGENT_RUN_ATTRS.API_CALL_LATENCY_MS]: Math.round(performance.now() - start),
-      },
-      durationMs: Math.round(performance.now() - start),
-      status: 'ok',
-    });
-    return result;
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    const status =
-      (err as { httpStatus?: number })?.httpStatus ??
-      (() => {
-        const m = /HTTP\s+(\d+)/i.exec(message);
-        return m ? Number(m[1]) : 0;
-      })();
-    recordSpan({
-      name: 'app.api_call',
-      attributes: {
-        [AGENT_RUN_ATTRS.API_CALL_PATH]: url,
-        [AGENT_RUN_ATTRS.API_CALL_METHOD]: method,
-        [AGENT_RUN_ATTRS.API_CALL_STATUS]: status,
-        [AGENT_RUN_ATTRS.API_CALL_LATENCY_MS]: Math.round(performance.now() - start),
-      },
-      durationMs: Math.round(performance.now() - start),
-      status: 'error',
-      errorMessage: message,
-    });
-    throw err;
-  }
+  };
+
+  return doFetch();
 }
 
 export interface OtelSpan {

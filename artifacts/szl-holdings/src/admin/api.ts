@@ -1,8 +1,23 @@
 const API = '/api';
 
 function getCsrfToken(): string {
+  if (typeof document === 'undefined') return '';
   const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
   return match ? decodeURIComponent(match[1]) : '';
+}
+
+async function fetchFreshCsrfToken(): Promise<void> {
+  try {
+    await fetch(`${API}/csrf-token`, { method: 'GET', credentials: 'include' });
+  } catch {
+    // best-effort
+  }
+}
+
+function isCsrfErrorBody(status: number, body: unknown): boolean {
+  if (status !== 403) return false;
+  const code = (body as { code?: string } | null)?.code;
+  return code === 'CSRF_TOKEN_MISSING' || code === 'CSRF_TOKEN_MISMATCH';
 }
 
 export interface Site {
@@ -147,33 +162,61 @@ export interface Service {
 export async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
   const method = (opts?.method ?? 'GET').toUpperCase();
   const needsCsrf = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
-  const res = await fetch(`${API}${path}`, {
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(needsCsrf ? { 'x-csrf-token': getCsrfToken() } : {}),
-      ...opts?.headers,
-    },
-    ...opts,
-  });
-  if (!res.ok) throw new Error(`API error ${res.status}`);
-  const json = await res.json();
-  return json.data ?? json;
+  let csrfRetried = false;
+
+  const doFetch = async (): Promise<T> => {
+    const res = await fetch(`${API}${path}`, {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(needsCsrf ? { 'x-csrf-token': getCsrfToken() } : {}),
+        ...opts?.headers,
+      },
+      ...opts,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      if (isCsrfErrorBody(res.status, body) && !csrfRetried) {
+        csrfRetried = true;
+        await fetchFreshCsrfToken();
+        return doFetch();
+      }
+      throw new Error(`API error ${res.status}`);
+    }
+    const json = await res.json();
+    return json.data ?? json;
+  };
+
+  return doFetch();
 }
 
 export async function apiFetchAdmin<T>(path: string, opts?: RequestInit): Promise<T> {
   const method = (opts?.method ?? 'GET').toUpperCase();
   const needsCsrf = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
-  const res = await fetch(`${API}${path}`, {
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(needsCsrf ? { 'x-csrf-token': getCsrfToken() } : {}),
-      ...((opts?.headers as Record<string, string>) || {}),
-    },
-    ...opts,
-  });
-  if (!res.ok) throw new Error(`API error ${res.status}`);
-  const json = await res.json();
-  return json.data ?? json;
+  let csrfRetried = false;
+
+  const doFetch = async (): Promise<T> => {
+    const res = await fetch(`${API}${path}`, {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(needsCsrf ? { 'x-csrf-token': getCsrfToken() } : {}),
+        ...((opts?.headers as Record<string, string>) || {}),
+      },
+      ...opts,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      if (isCsrfErrorBody(res.status, body) && !csrfRetried) {
+        csrfRetried = true;
+        await fetchFreshCsrfToken();
+        return doFetch();
+      }
+      throw new Error(`API error ${res.status}`);
+    }
+    const json = await res.json();
+    return json.data ?? json;
+  };
+
+  return doFetch();
 }

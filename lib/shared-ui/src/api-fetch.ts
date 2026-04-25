@@ -27,6 +27,18 @@ function csrfHeaders(): Record<string, string> {
   return { [CSRF_HEADER_NAME]: token };
 }
 
+async function refreshCsrfToken(): Promise<void> {
+  try {
+    await fetch(`${API_BASE}/csrf-token`, { method: 'GET', credentials: 'include' });
+  } catch {
+    // ignore — best-effort refresh
+  }
+}
+
+function isCsrfError(status: number, code?: string): boolean {
+  return status === 403 && (code === 'CSRF_TOKEN_MISSING' || code === 'CSRF_TOKEN_MISMATCH');
+}
+
 export interface PaginationMeta {
   page: number;
   limit: number;
@@ -313,6 +325,7 @@ export async function apiFetch<T>(path: string, options?: ApiFetchOptions): Prom
 
   let lastErr: unknown;
   let didRetryAfterRefresh = false;
+  let didRetryAfterCsrf = false;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     if (attempt > 0) {
@@ -380,6 +393,15 @@ export async function apiFetch<T>(path: string, options?: ApiFetchOptions): Prom
             // fall through and surface the original 401 below
           }
           if (refreshed) continue;
+        }
+
+        if (isCsrfError(res.status, errBody.code) && !didRetryAfterCsrf) {
+          didRetryAfterCsrf = true;
+          await refreshCsrfToken();
+          // Decrement so the for-loop's attempt++ lands back on the same
+          // slot — CSRF refresh does not consume a transient retry budget.
+          attempt--;
+          continue;
         }
 
         if (attempt < retries && isTransientError(apiErr)) {

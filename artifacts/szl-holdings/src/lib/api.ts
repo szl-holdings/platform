@@ -55,34 +55,62 @@ export async function apiRequest<T = unknown>(
 
   const url = path.startsWith('http') ? path : `${BASE}${path}`;
   const needsCsrf = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
-  let csrfToken = needsCsrf ? getCsrfTokenFromCookie() : '';
-  if (needsCsrf && !csrfToken) {
-    try {
-      await fetch(`${BASE}/api/csrf-token`, { credentials: 'include' });
-      csrfToken = getCsrfTokenFromCookie();
-    } catch {
-      // ignore — request may still succeed for exempt endpoints
+
+  const ensureCsrfToken = async (): Promise<string> => {
+    let token = needsCsrf ? getCsrfTokenFromCookie() : '';
+    if (needsCsrf && !token) {
+      try {
+        await fetch(`${BASE}/api/csrf-token`, { credentials: 'include' });
+        token = getCsrfTokenFromCookie();
+      } catch {
+        // ignore — request may still succeed for exempt endpoints
+      }
     }
-  }
-  const res = await fetch(url, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      'x-requested-with': 'XMLHttpRequest',
-      ...(needsCsrf && csrfToken ? { 'x-csrf-token': csrfToken } : {}),
-    },
-    credentials: 'include',
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
+    return token;
+  };
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => res.statusText);
-    throw new Error(`${method} ${path} → ${res.status}: ${text}`);
-  }
+  let csrfToken = await ensureCsrfToken();
+  let csrfRetried = false;
 
-  if (res.status === 204 || res.headers.get('content-length') === '0') {
-    return undefined as T;
-  }
+  const doFetch = async (): Promise<T> => {
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-requested-with': 'XMLHttpRequest',
+        ...(needsCsrf && csrfToken ? { 'x-csrf-token': csrfToken } : {}),
+      },
+      credentials: 'include',
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
 
-  return res.json() as Promise<T>;
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => null) as { code?: string } | null;
+      const code = errBody?.code;
+      if (
+        res.status === 403 &&
+        (code === 'CSRF_TOKEN_MISSING' || code === 'CSRF_TOKEN_MISMATCH') &&
+        !csrfRetried
+      ) {
+        csrfRetried = true;
+        try {
+          await fetch(`${BASE}/api/csrf-token`, { credentials: 'include' });
+        } catch {
+          // best-effort
+        }
+        csrfToken = getCsrfTokenFromCookie();
+        return doFetch();
+      }
+      const text = errBody ? JSON.stringify(errBody) : res.statusText;
+      throw new Error(`${method} ${path} → ${res.status}: ${text}`);
+    }
+
+    if (res.status === 204 || res.headers.get('content-length') === '0') {
+      return undefined as T;
+    }
+
+    return res.json() as Promise<T>;
+  };
+
+  return doFetch();
 }
