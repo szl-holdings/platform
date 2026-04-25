@@ -172,7 +172,8 @@ setInterval(
 
 // On startup: detect gaps (server-down periods) and backfill them as 'outage'
 // so the 90-day chart shows continuous data rather than blank holes.
-async function backfillGap(): Promise<void> {
+// Exported for unit testing.
+export async function backfillGap(): Promise<void> {
   try {
     const result = await pool.query<{ last_checked: Date }>(
       `SELECT MAX(checked_at) AS last_checked FROM platform_status_checks`,
