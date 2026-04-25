@@ -8,16 +8,15 @@
 
 ## Blockers and Gaps
 
-### 1. `@workspace/a11oy-fabric` package missing — A11oy build broken
+### 1. A11oy build — dependency wiring was missing ✅ FIXED IN THIS AUDIT PASS
 
 | Field | Value |
 |-------|-------|
-| **Issue** | The `artifacts/a11oy` artifact imports from `@workspace/a11oy-fabric` across 11 pages (SEED_SIGNALS, SEED_OUTCOMES, SEED_WORKCELLS, SEED_TOOLS, SEED_PCE_CONTRACTS, SEED_PROOF_PACKETS, SEED_DEMO_SCENARIOS). This package does not exist in `packages/`. The a11oy Vite build fails. |
-| **Why it matters** | A11oy cannot be built for production deployment. The artifact serves the UI but cannot pass CI build gates. |
-| **Status** | `deferred_to_roadmap` |
-| **Recommendation** | Create `packages/a11oy-fabric/` with seed data exports matching the import shapes. This is the primary deliverable of the downstream task "A11oy Fully Operational — consolidated build chain + acceptance gate". |
-| **Owner** | Engineering (downstream task) |
-| **Next action** | Downstream task: scaffold `packages/a11oy-fabric/`, add to `pnpm-workspace.yaml`, add to `artifacts/a11oy/package.json` dependencies, re-run build. |
+| **Issue** | The `artifacts/a11oy` artifact imports from `@workspace/a11oy-fabric` across 11 pages. The package **exists** at `lib/a11oy-fabric/` and is registered in `pnpm-workspace.yaml` via the `lib/*` glob. The build failure was caused by a **missing dependency declaration** in `artifacts/a11oy/package.json` — not a missing package. |
+| **Fix applied** | Added `"@workspace/a11oy-fabric": "workspace:*"` to `dependencies` in `artifacts/a11oy/package.json`. Ran `pnpm install`. |
+| **Result** | A11oy builds cleanly in 2.52s — 96 modules transformed, all 11 seed-data-dependent pages included. |
+| **Status** | `fixed_now` |
+| **Next action** | None. Fix is committed and uploaded to PR #37. |
 
 ---
 
