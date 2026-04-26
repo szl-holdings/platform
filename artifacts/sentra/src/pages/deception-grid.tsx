@@ -4,16 +4,23 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Activity,
+  AlertTriangle,
+  Bot,
+  CheckCircle2,
+  Clock,
   Database,
   Eye,
   FileText,
   Globe,
   HardDrive,
   Key,
+  Layers,
   Network,
   RefreshCw,
   Server,
   Shield,
+  Target,
+  Timer,
   TrendingUp,
   Zap,
 } from 'lucide-react';
@@ -413,6 +420,163 @@ export default function DeceptionGrid() {
               )}
             </>
           )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div>
+          <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <Server className="w-3.5 h-3.5 text-[#c9b787]" />
+            Honeypot Fleet Management
+          </h2>
+          <div className="space-y-2">
+            {[
+              { name: 'HoneyDB-Oracle-1', type: 'High Interaction', protocol: 'Oracle TNS', interactions: 847, lastHit: '3m ago', status: 'engaged' },
+              { name: 'HoneySSH-DMZ-4', type: 'High Interaction', protocol: 'SSH', interactions: 1234, lastHit: '1m ago', status: 'triggered' },
+              { name: 'HoneyHTTP-Prod-2', type: 'Low Interaction', protocol: 'HTTP/S', interactions: 456, lastHit: '8m ago', status: 'active' },
+              { name: 'HoneySMB-Internal', type: 'Low Interaction', protocol: 'SMB', interactions: 89, lastHit: '22m ago', status: 'active' },
+              { name: 'HoneyRDP-VDI-1', type: 'High Interaction', protocol: 'RDP', interactions: 312, lastHit: '5m ago', status: 'engaged' },
+            ].map((hp) => (
+              <div key={hp.name} className={cn(
+                'rounded-xl border p-3',
+                hp.status === 'triggered' ? 'border-[#f5f5f5]/30 bg-[#f5f5f5]/5' :
+                hp.status === 'engaged' ? 'border-[#c9b787]/20 bg-white/3' :
+                'border-white/8 bg-white/3',
+              )}>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <Server className="w-3.5 h-3.5 text-[#c9b787]" />
+                    <span className="text-[11px] font-medium text-white">{hp.name}</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#8a8a8a]/10 text-[#8a8a8a] border border-[#8a8a8a]/20">{hp.type}</span>
+                  </div>
+                  <span className={cn(
+                    'text-[9px] px-1.5 py-0.5 rounded border',
+                    hp.status === 'triggered' ? 'text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10' :
+                    hp.status === 'engaged' ? 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10' :
+                    'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
+                  )}>
+                    {hp.status}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-[10px] text-zinc-500">
+                  <span>{hp.protocol}</span>
+                  <span>{hp.interactions} interactions</span>
+                  <span>Last: {hp.lastHit}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <Key className="w-3.5 h-3.5 text-[#c9b787]" />
+            Honeytoken Deployment Tracker
+          </h2>
+          <div className="space-y-2">
+            {[
+              { token: 'AWS_ACCESS_KEY_AKIAI...', type: 'Fake AWS Key', location: 'S3 bucket config', triggered: true, triggerCount: 3, lastTriggered: '12m ago' },
+              { token: 'db_admin:P@ssw0rd_honey', type: 'Fake DB Credential', location: 'Internal wiki page', triggered: true, triggerCount: 1, lastTriggered: '2h ago' },
+              { token: 'api_key_7f3d2e...', type: 'Fake API Key', location: 'GitHub private repo', triggered: false, triggerCount: 0, lastTriggered: 'never' },
+              { token: 'vpn_cert_honeypot.pem', type: 'Fake VPN Cert', location: 'Shared drive /certs', triggered: false, triggerCount: 0, lastTriggered: 'never' },
+              { token: 'admin@corp.com:Tr0ub4d', type: 'Fake Email Cred', location: 'Phishing response DB', triggered: true, triggerCount: 7, lastTriggered: '45m ago' },
+            ].map((ht) => (
+              <div key={ht.token} className={cn(
+                'rounded-xl border p-3',
+                ht.triggered ? 'border-[#c9b787]/20 bg-[#c9b787]/3' : 'border-white/8 bg-white/3',
+              )}>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-mono text-white truncate max-w-[180px]">{ht.token}</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#c9b787]/10 text-[#c9b787] border border-[#c9b787]/20">{ht.type}</span>
+                  </div>
+                  {ht.triggered && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded border text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10 animate-pulse">TRIGGERED</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-3 text-[10px] text-zinc-500">
+                  <span>{ht.location}</span>
+                  <span>{ht.triggerCount} triggers</span>
+                  <span>Last: {ht.lastTriggered}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div>
+          <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <Timer className="w-3.5 h-3.5 text-[#8a8a8a]" />
+            Tarpit Configuration
+          </h2>
+          <div className="space-y-2">
+            {[
+              { name: 'SSH Tarpit — Endlessh', protocol: 'SSH (22)', mode: 'Connection hold', avgDrain: '47 min', activeTraps: 12, status: 'active' },
+              { name: 'HTTP Tarpit — Slow Loris', protocol: 'HTTP (80)', mode: 'Slow response drip', avgDrain: '23 min', activeTraps: 8, status: 'active' },
+              { name: 'SMTP Tarpit', protocol: 'SMTP (25)', mode: 'Greylisting loop', avgDrain: '35 min', activeTraps: 4, status: 'active' },
+              { name: 'DNS Tarpit — Sinkhole', protocol: 'DNS (53)', mode: 'Delayed NXDOMAIN', avgDrain: '12 min', activeTraps: 31, status: 'active' },
+            ].map((tp) => (
+              <div key={tp.name} className="rounded-xl border border-white/8 bg-white/3 p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] font-medium text-white">{tp.name}</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded border text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10">{tp.status}</span>
+                </div>
+                <div className="flex items-center gap-3 text-[10px] text-zinc-500">
+                  <span>{tp.protocol}</span>
+                  <span>{tp.mode}</span>
+                  <span className="text-[#c9b787]">Avg drain: {tp.avgDrain}</span>
+                  <span>{tp.activeTraps} active</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <Layers className="w-3.5 h-3.5 text-[#c9b787]" />
+            Deception-as-a-Service Orchestration
+          </h2>
+          <div className="space-y-2">
+            {[
+              { service: 'Honeypot Auto-Deploy', description: 'Automatically deploys decoys based on threat landscape changes', status: 'running', lastAction: 'Deployed 2 new SSH decoys in DMZ' },
+              { service: 'Honeynet Topology Sync', description: 'Mirrors production network topology for realistic honeynet placement', status: 'running', lastAction: 'Synced 47 network segments' },
+              { service: 'Token Rotation Engine', description: 'Rotates honeytokens on a schedule to prevent attacker fingerprinting', status: 'running', lastAction: 'Rotated 12 tokens across 5 locations' },
+              { service: 'Deception Analytics', description: 'Analyzes attacker behavior patterns to optimize decoy placement', status: 'running', lastAction: 'Updated placement model with 847 new interactions' },
+            ].map((svc) => (
+              <div key={svc.service} className="rounded-xl border border-white/8 bg-white/3 p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] font-medium text-white">{svc.service}</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded border text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10">{svc.status}</span>
+                </div>
+                <p className="text-[10px] text-zinc-400 mb-1">{svc.description}</p>
+                <p className="text-[10px] text-[#c9b787]">{svc.lastAction}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-[#c9b787]/20 bg-[#c9b787]/5 p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <CheckCircle2 className="w-4 h-4 text-[#c9b787]" />
+          <span className="text-xs font-semibold text-[#c9b787]">Zero False-Positive Deception Alert Feed</span>
+          <span className="text-[9px] text-zinc-500 font-mono ml-auto">All alerts verified — 0% false positive rate</span>
+        </div>
+        <div className="grid grid-cols-4 gap-3">
+          {[
+            { label: 'Total Deception Alerts', value: '2,847', color: '#f5f5f5' },
+            { label: 'Verified True Positive', value: '2,847', color: '#c9b787' },
+            { label: 'False Positive Rate', value: '0.00%', color: '#c9b787' },
+            { label: 'Avg Alert-to-Intel', value: '4.2s', color: '#8a8a8a' },
+          ].map((s) => (
+            <div key={s.label} className="text-center">
+              <div className="text-lg font-bold font-mono" style={{ color: s.color }}>{s.value}</div>
+              <div className="text-[9px] text-zinc-500">{s.label}</div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

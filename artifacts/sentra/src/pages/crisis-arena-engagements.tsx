@@ -1,6 +1,7 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
+  Bot,
   CheckCircle2,
   ChevronRight,
   Clock,
@@ -715,6 +716,53 @@ export default function CrisisArenaEngagements() {
           </Link>
         </div>
       )}
+
+      <div className="rounded-xl border border-[#f5f5f5]/20 bg-[#f5f5f5]/5 p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <Bot className="w-4 h-4 text-[#f5f5f5]" />
+          <span className="text-sm font-bold text-[#f5f5f5]">Agentic AI Attack Framework</span>
+          <span className="text-[9px] px-2 py-0.5 rounded-full border border-[#f5f5f5]/30 bg-[#f5f5f5]/10 text-[#f5f5f5] font-mono uppercase ml-auto">
+            Unit 42 Research
+          </span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-4">
+          {[
+            { title: 'Autonomous Red Team Agents', desc: '16 specialist agents by kill chain phase — reconnaissance, weaponization, delivery, exploitation, persistence, C2, exfiltration', agents: 16, status: 'active' },
+            { title: 'Purple Team Closed-Loop', desc: 'Real-time attack → detect → remediate cycle with automated validation and gap analysis', agents: 8, status: 'active' },
+            { title: 'Digital Twin Attack Sandbox', desc: 'Zero production impact — full infrastructure simulation with realistic traffic and behavior patterns', agents: 4, status: 'active' },
+            { title: 'AI Swarm Attack Drills', desc: 'Coordinated multi-agent attack scenarios testing parallel defense capabilities', agents: 12, status: 'active' },
+            { title: '25-Minute Ransomware Chain', desc: 'Full autonomous ransomware simulation from initial access to encryption — testing detection at every phase', agents: 7, status: 'ready' },
+            { title: 'Supply Chain Compromise Sim', desc: 'Multi-stage supply chain attack via compromised dependencies, build pipelines, and artifact registries', agents: 5, status: 'ready' },
+          ].map((scenario) => (
+            <div key={scenario.title} className="rounded-xl border border-[#f5f5f5]/15 bg-[#f5f5f5]/3 p-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[11px] font-medium text-[#f5f5f5]">{scenario.title}</span>
+                <span className={cn(
+                  'text-[9px] px-1.5 py-0.5 rounded border',
+                  scenario.status === 'active' ? 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10' : 'text-[#8a8a8a] border-[#8a8a8a]/30 bg-[#8a8a8a]/10',
+                )}>
+                  {scenario.status}
+                </span>
+              </div>
+              <p className="text-[10px] text-[#f5f5f5]/50 mb-1.5 leading-relaxed">{scenario.desc}</p>
+              <div className="text-[10px] text-[#f5f5f5]/40 font-mono">{scenario.agents} agents</div>
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-4 gap-3">
+          {[
+            { label: 'Red Team Agents', value: '16', color: '#f5f5f5' },
+            { label: 'Scenarios Available', value: '24', color: '#c9b787' },
+            { label: 'Exercises Run (30d)', value: '47', color: '#c9b787' },
+            { label: 'Detection Gap Found', value: '12', color: '#f5f5f5' },
+          ].map((s) => (
+            <div key={s.label} className="text-center">
+              <div className="text-lg font-bold font-mono" style={{ color: s.color }}>{s.value}</div>
+              <div className="text-[9px] text-[#f5f5f5]/40">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {!loading && !requiresAuth && (
         <div className="space-y-4">

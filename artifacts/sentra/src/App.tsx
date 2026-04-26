@@ -166,6 +166,8 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { path: '/soc', label: 'SOC Dashboard', icon: Shield, comp: L(() => import('@/pages/soc-dashboard')) },
       { path: '/agentic-soc', label: 'Agentic SOC', icon: Bot, comp: L(() => import('@/pages/agentic-soc')) },
+      { path: '/autonomous-soc', label: 'Autonomous SOC Command', icon: Brain, comp: L(() => import('@/pages/autonomous-soc-command')) },
+      { path: '/ai-swarm-defense', label: 'AI Swarm Defense', icon: Shield, comp: L(() => import('@/pages/ai-swarm-defense')) },
       { path: '/alerts', label: 'Alerts', icon: AlertTriangle, comp: L(() => import('@/pages/alerts')) },
       { path: '/incidents', label: 'Incidents', icon: Bug, comp: L(() => import('@/pages/incidents-page')) },
       { path: '/investigations', label: 'Investigations', icon: Search, comp: L(() => import('@/pages/investigations-board')) },
@@ -206,6 +208,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { path: '/soar/playbooks', label: 'SOAR Playbooks', icon: BookOpen, comp: L(() => import('@/pages/soar-playbooks')) },
       { path: '/soar/builder', label: 'SOAR Builder', icon: Workflow, comp: L(() => import('@/pages/soar-builder')) },
+      { path: '/soar/automation-hub', label: 'SOAR Automation Hub', icon: Workflow, comp: L(() => import('@/pages/soar-automation-hub')) },
       { path: '/response', label: 'Response Orchestration', icon: Zap, comp: L(() => import('@/pages/response-orchestration')) },
       { path: '/watchlists', label: 'Watchlists', icon: Eye, comp: L(() => import('@/pages/watchlists')) },
       { path: '/xdr', label: 'XDR Console', icon: Network, comp: L(() => import('@/pages/xdr-console')) },
@@ -229,6 +232,7 @@ const NAV_SECTIONS: NavSection[] = [
     label: 'Digital Twin & ATLAS',
     items: [
       { path: '/threat-twin-view', label: 'Threat Twin', icon: Shield, comp: L(() => import('@/pages/threat-twin-view')) },
+      { path: '/mitre-atlas', label: 'MITRE ATLAS Overlay', icon: Layers, comp: L(() => import('@/pages/mitre-atlas-overlay')) },
       { path: '/atlas-runtime', label: 'Threat Mesh', icon: Layers, comp: L(() => import('@/pages/atlas-runtime')) },
       { path: '/atlas-runtime/correlation', label: 'Worldline Correlation', icon: Network, comp: L(() => import('@/pages/atlas-correlation')) },
       { path: '/replay', label: 'Incident Replay', icon: RotateCcw, comp: L(() => import('@/pages/replay')) },
@@ -264,6 +268,7 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/compliance/zero-trust', label: 'Zero Trust', icon: KeyRound, comp: L(() => import('@/pages/zero-trust-scorecard')) },
       { path: '/compliance/vulnerabilities', label: 'Vulnerabilities', icon: Bug, comp: L(() => import('@/pages/vulnerability-dashboard')) },
       { path: '/compliance/vuln-lifecycle', label: 'Vuln Lifecycle', icon: GitBranch, comp: L(() => import('@/pages/vuln-lifecycle')) },
+      { path: '/attack-surface', label: 'Attack Surface Command', icon: Globe, comp: L(() => import('@/pages/attack-surface-command')) },
       { path: '/compliance/assets', label: 'Asset Inventory', icon: Server, comp: L(() => import('@/pages/asset-inventory')) },
       { path: '/compliance/risk-scoring', label: 'Risk Scoring', icon: Gauge, comp: L(() => import('@/pages/risk-scoring')) },
       { path: '/compliance/executive-risk', label: 'Executive Risk', icon: TrendingUp, comp: L(() => import('@/pages/executive-risk')) },
@@ -320,6 +325,8 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/hunt', label: 'Hunt Proposer', icon: Brain, comp: L(() => import('@/pages/hunt')) },
       { path: '/remediation', label: 'Remediation Plans', icon: ShieldCheck, comp: L(() => import('@/pages/remediation-plans')) },
       { path: '/red-team', label: 'Red-Team Library', icon: Crosshair, comp: L(() => import('@/pages/red-team')) },
+      { path: '/frontier-ai-lab', label: 'Frontier AI Threat Lab', icon: Brain, comp: L(() => import('@/pages/frontier-ai-threat-lab')) },
+      { path: '/weaponized-intel', label: 'Weaponized Intel Feed', icon: Radio, comp: L(() => import('@/pages/weaponized-intel-feed')) },
     ],
   },
   {

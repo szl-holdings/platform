@@ -2,6 +2,7 @@ import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Card, CardContent, } from '@szl-holdings/shared-ui/ui/card';
+import { cn } from '@szl-holdings/shared-ui/utils';
 import { Clock, MapPin, Users } from 'lucide-react';
 
 interface LiveAlert {
@@ -347,6 +348,140 @@ export default function IdentityThreat() {
                     </div>
                   </CardContent>
                 </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-[#f5f5f5]/20 bg-[#f5f5f5]/5 p-5 mb-6">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-lg bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 flex items-center justify-center">
+            <Users className="w-5 h-5 text-[#f5f5f5]" />
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-[#f5f5f5]">89%</div>
+            <div className="text-[11px] text-[#f5f5f5]/60">of breaches involve identity weaknesses (Unit 42, 2025)</div>
+          </div>
+        </div>
+        <p className="text-[11px] text-zinc-400 leading-relaxed">
+          Identity-based attacks now dominate the threat landscape. Credential theft, privilege escalation, and compromised service accounts are the primary entry vector across ransomware, APT, and insider threat campaigns.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        {[
+          { label: 'Machine-to-Human Ratio', value: '82:1', sub: 'Machine identities vastly outnumber human accounts', color: '#c9b787' },
+          { label: 'Avg Escalation Time', value: '< 40 min', sub: 'From initial compromise to privilege escalation', color: '#f5f5f5' },
+          { label: 'Deepfake Attempts (30d)', value: '7', sub: 'Voice/video impersonation attacks detected', color: '#f5f5f5' },
+          { label: 'Autonomous Detection', value: '97.3%', sub: 'AI-driven anomaly detection accuracy', color: '#c9b787' },
+        ].map((m) => (
+          <div key={m.label} className="rounded-xl border border-white/8 bg-white/3 p-4">
+            <div className="text-[10px] text-zinc-500 mb-1">{m.label}</div>
+            <div className="text-xl font-bold font-mono" style={{ color: m.color }}>{m.value}</div>
+            <div className="text-[10px] text-zinc-500 mt-0.5">{m.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+            Autonomous Identity Anomaly Detection
+          </h3>
+          <div className="space-y-2">
+            {[
+              { time: '08:41', event: 'Impossible travel detected — NY → Moscow in 22min', action: 'Account suspended, MFA reset triggered', confidence: 98, severity: 'critical' },
+              { time: '09:03', event: 'Service account accessed from new geo for first time', action: 'Risk score elevated, SOC notified', confidence: 94, severity: 'high' },
+              { time: '09:15', event: 'Lateral movement pattern — 4 systems in 3 minutes', action: 'Microsegmentation enforced, session terminated', confidence: 96, severity: 'critical' },
+              { time: '09:28', event: 'Privilege escalation — standard user → domain admin', action: 'Role revoked, manager notified', confidence: 91, severity: 'high' },
+              { time: '10:02', event: 'OAuth token used from unregistered device', action: 'Token revoked, device enrollment required', confidence: 89, severity: 'medium' },
+            ].map((evt) => (
+              <div key={evt.time + evt.event} className={cn(
+                'rounded-xl border p-3',
+                evt.severity === 'critical' ? 'border-[#f5f5f5]/20 bg-[#f5f5f5]/3' : 'border-white/8 bg-white/3',
+              )}>
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <span className="text-[11px] font-medium text-white">{evt.event}</span>
+                  <span className={cn(
+                    'text-[9px] px-1.5 py-0.5 rounded border shrink-0',
+                    evt.severity === 'critical' ? 'text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10' : evt.severity === 'high' ? 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10' : 'text-zinc-400 border-zinc-700 bg-zinc-800/50',
+                  )}>
+                    {evt.severity}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-[10px] text-zinc-500">
+                  <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {evt.time}</span>
+                  <span className="text-[#c9b787]">{evt.action}</span>
+                  <span className="ml-auto font-mono">{evt.confidence}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+              Machine Identity Dashboard (82:1 Ratio)
+            </h3>
+            <div className="space-y-2">
+              {[
+                { type: 'Service Accounts', count: 1_247, monitored: 1_180, risk: 'low' },
+                { type: 'API Keys & Tokens', count: 3_892, monitored: 3_654, risk: 'medium' },
+                { type: 'TLS Certificates', count: 847, monitored: 847, risk: 'low' },
+                { type: 'SSH Keys', count: 2_341, monitored: 1_987, risk: 'high' },
+                { type: 'Service Principals', count: 456, monitored: 423, risk: 'low' },
+                { type: 'Managed Identities', count: 1_089, monitored: 1_089, risk: 'low' },
+              ].map((mi) => (
+                <div key={mi.type} className="rounded-xl border border-white/8 bg-white/3 p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11px] font-medium text-white">{mi.type}</span>
+                    <span className={cn(
+                      'text-[9px] px-1.5 py-0.5 rounded border',
+                      mi.risk === 'high' ? 'text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10' :
+                      mi.risk === 'medium' ? 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10' :
+                      'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
+                    )}>
+                      {mi.risk} risk
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 text-[10px] text-zinc-500">
+                    <span>{mi.count.toLocaleString()} total</span>
+                    <span className="text-[#c9b787]">{mi.monitored.toLocaleString()} monitored</span>
+                    <span>{Math.round((mi.monitored / mi.count) * 100)}% coverage</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+              Deepfake & Synthetic Identity Detection
+            </h3>
+            <div className="space-y-2">
+              {[
+                { type: 'Voice Clone Attack', target: 'CFO wire transfer approval', status: 'blocked', method: 'Voice watermark analysis', confidence: 97 },
+                { type: 'Video Deepfake', target: 'CEO Zoom impersonation', status: 'blocked', method: 'Liveness detection + metadata analysis', confidence: 99 },
+                { type: 'Synthetic Resume', target: 'Engineering candidate screening', status: 'flagged', method: 'Cross-reference identity databases', confidence: 84 },
+              ].map((df) => (
+                <div key={df.type + df.target} className="rounded-xl border border-[#c9b787]/20 bg-white/3 p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11px] font-medium text-white">{df.type}</span>
+                    <span className={cn(
+                      'text-[9px] px-1.5 py-0.5 rounded border',
+                      df.status === 'blocked' ? 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10' : 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
+                    )}>
+                      {df.status}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-zinc-400 mb-1">{df.target}</div>
+                  <div className="flex items-center gap-3 text-[10px] text-zinc-500">
+                    <span>{df.method}</span>
+                    <span className="text-[#c9b787] font-mono ml-auto">{df.confidence}%</span>
+                  </div>
+                </div>
               ))}
             </div>
           </div>

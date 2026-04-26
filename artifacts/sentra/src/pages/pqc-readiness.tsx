@@ -336,15 +336,146 @@ export default function PqcReadiness() {
       <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5">
         <div className="flex items-center gap-2 mb-3">
           <AlertTriangle className="w-4 h-4 text-amber-400" />
-          <h3 className="text-[13px] font-medium text-amber-400">Harvest-Now Decrypt-Later Risk</h3>
+          <h3 className="text-[13px] font-medium text-amber-400">Harvest-Now Decrypt-Later Risk Assessment</h3>
         </div>
-        <p className="text-[12px] text-white/35 leading-relaxed">
+        <p className="text-[12px] text-white/35 leading-relaxed mb-4">
           Adversaries are already capturing encrypted traffic for future quantum decryption.
           Every day of delay increases the volume of harvestable ciphertext. The a11oy governance
           layer prioritizes PQC migration based on data sensitivity and key lifetime — starting
           with long-lived keys and highly sensitive evidence chains that will remain valuable to
           adversaries for decades.
         </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+          {[
+            { label: 'Estimated Harvestable Traffic', value: '4.7 PB', detail: 'Since monitoring began (18 months)', risk: 'critical' },
+            { label: 'High-Value Targets', value: '23', detail: 'Systems with 10+ year data sensitivity', risk: 'critical' },
+            { label: 'Avg Key Lifetime', value: '7.2 years', detail: 'Across vulnerable cryptographic assets', risk: 'high' },
+            { label: 'Nation-State Interest', value: 'HIGH', detail: 'APT groups known to harvest encrypted data', risk: 'critical' },
+          ].map((item) => (
+            <div key={item.label} className={cn(
+              'rounded-lg p-3 border',
+              item.risk === 'critical' ? 'bg-red-500/5 border-red-500/15' : 'bg-amber-500/5 border-amber-500/15',
+            )}>
+              <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">{item.label}</div>
+              <div className={cn(
+                'text-lg font-bold font-mono',
+                item.risk === 'critical' ? 'text-red-400' : 'text-amber-400',
+              )}>
+                {item.value}
+              </div>
+              <div className="text-[10px] text-white/25 mt-0.5">{item.detail}</div>
+            </div>
+          ))}
+        </div>
+        <div className="space-y-2">
+          <h4 className="text-[11px] font-medium text-white/50">Priority Data Categories</h4>
+          {[
+            { category: 'Executive Communications', sensitivity: '25+ years', volume: '340 GB/month', priority: 1, migrated: false },
+            { category: 'M&A Transaction Data', sensitivity: '15+ years', volume: '89 GB/month', priority: 2, migrated: false },
+            { category: 'Customer PII & Financial', sensitivity: '10+ years', volume: '1.2 TB/month', priority: 3, migrated: true },
+            { category: 'IP & Trade Secrets', sensitivity: '20+ years', volume: '560 GB/month', priority: 4, migrated: false },
+            { category: 'Government Contract Data', sensitivity: '30+ years', volume: '78 GB/month', priority: 5, migrated: false },
+          ].map((cat) => (
+            <div key={cat.category} className="flex items-center gap-3 py-2 px-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+              <span className="text-[10px] font-mono text-white/25 w-6">P{cat.priority}</span>
+              <span className="text-[11px] text-white/50 flex-1">{cat.category}</span>
+              <span className="text-[10px] text-white/25 font-mono">{cat.sensitivity}</span>
+              <span className="text-[10px] text-white/25 font-mono">{cat.volume}</span>
+              <span className={cn(
+                'text-[9px] px-1.5 py-0.5 rounded font-mono',
+                cat.migrated ? 'text-emerald-400 bg-emerald-400/10' : 'text-amber-400 bg-amber-400/10',
+              )}>
+                {cat.migrated ? 'PQC Migrated' : 'Vulnerable'}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-[13px] font-medium text-white mb-3 flex items-center gap-2">
+          <Clock className="w-3.5 h-3.5 text-white/30" /> Quantum Threat Timeline
+        </h2>
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5">
+          <div className="relative">
+            <div className="absolute left-4 top-0 bottom-0 w-px bg-white/[0.08]" />
+            <div className="space-y-6">
+              {[
+                { year: '2024', label: 'Current State', description: 'NIST finalizes FIPS 203/204/205 standards. Hybrid implementations begin. Harvest-now-decrypt-later attacks accelerate.', status: 'deployed' as const, highlight: true },
+                { year: '2025', label: 'Hybrid Migration', description: 'Deploy hybrid classical+PQC for all agent mesh TLS. Begin dual-signing governance attestations. First PQC-protected evidence chains.', status: 'in-progress' as const, highlight: true },
+                { year: '2026', label: 'Full PQC Rollout', description: 'Complete migration to ML-KEM-1024 for all key exchange. ML-DSA-65 for all digital signatures. Remove classical-only code paths.', status: 'planned' as const, highlight: false },
+                { year: '2027', label: 'Validation & Certification', description: 'FIPS 140-3 validation for PQC module. Third-party audit. Performance benchmarking across all security levels.', status: 'not-started' as const, highlight: false },
+                { year: '2028–2030', label: 'Quantum Computing Threat Window', description: 'Leading estimates suggest cryptographically-relevant quantum computers may emerge. Organizations without PQC migration face catastrophic data exposure.', status: 'not-started' as const, highlight: false },
+              ].map((milestone) => {
+                const sc = STATUS_CONFIG[milestone.status];
+                return (
+                  <div key={milestone.year} className="relative pl-10">
+                    <div className={cn(
+                      'absolute left-[10px] w-3 h-3 rounded-full border-2',
+                      milestone.status === 'deployed' ? 'bg-emerald-400 border-emerald-400/50' :
+                      milestone.status === 'in-progress' ? 'bg-amber-400 border-amber-400/50 animate-pulse' :
+                      'bg-white/10 border-white/20',
+                    )} />
+                    <div className={cn(
+                      'rounded-lg p-4 border',
+                      milestone.highlight ? 'bg-white/[0.03] border-white/[0.08]' : 'bg-white/[0.01] border-white/[0.04]',
+                    )}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[12px] font-bold text-white font-mono">{milestone.year}</span>
+                        <span className="text-[11px] text-white/50">{milestone.label}</span>
+                        <span className={cn('flex items-center gap-1 text-[10px] font-mono ml-auto', sc.color)}>
+                          <sc.icon className="w-3 h-3" />
+                          {sc.label}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-white/30 leading-relaxed">{milestone.description}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5">
+        <h2 className="text-[13px] font-medium text-white mb-3 flex items-center gap-2">
+          <Key className="w-3.5 h-3.5 text-white/30" /> Cryptographic Algorithm Inventory
+        </h2>
+        <div className="grid grid-cols-12 gap-3 px-3 py-2 border-b border-white/[0.04] text-[10px] font-mono uppercase tracking-wider text-white/25">
+          <div className="col-span-3">Algorithm</div>
+          <div className="col-span-2">Usage</div>
+          <div className="col-span-2">Instances</div>
+          <div className="col-span-3">Quantum Risk</div>
+          <div className="col-span-2">Migration</div>
+        </div>
+        {[
+          { algo: 'RSA-2048', usage: 'TLS Certificates', instances: 142, risk: 'Broken by Shor\'s', migration: 'ML-KEM-768' },
+          { algo: 'ECDSA P-256', usage: 'Code Signing', instances: 89, risk: 'Broken by Shor\'s', migration: 'ML-DSA-65' },
+          { algo: 'ECDH P-256', usage: 'Key Exchange', instances: 234, risk: 'Broken by Shor\'s', migration: 'ML-KEM-768' },
+          { algo: 'Ed25519', usage: 'Agent Identities', instances: 456, risk: 'Broken by Shor\'s', migration: 'ML-DSA-44' },
+          { algo: 'AES-256-GCM', usage: 'Data Encryption', instances: 1_847, risk: 'Weakened (Grover)', migration: 'AES-256 (safe)' },
+          { algo: 'SHA-256', usage: 'Hash Functions', instances: 3_291, risk: 'Weakened (Grover)', migration: 'SHA-256 (safe)' },
+          { algo: 'X25519', usage: 'Key Agreement', instances: 567, risk: 'Broken by Shor\'s', migration: 'X25519MLKEM768' },
+        ].map((row) => {
+          const isBroken = row.risk.includes('Broken');
+          return (
+            <div key={row.algo} className="grid grid-cols-12 gap-3 items-center px-3 py-2.5 border-b border-white/[0.03]">
+              <div className="col-span-3 text-[11px] font-mono text-white/50">{row.algo}</div>
+              <div className="col-span-2 text-[11px] text-white/30">{row.usage}</div>
+              <div className="col-span-2 text-[11px] font-mono text-white/40">{row.instances.toLocaleString()}</div>
+              <div className="col-span-3">
+                <span className={cn(
+                  'text-[10px] px-1.5 py-0.5 rounded',
+                  isBroken ? 'text-red-400 bg-red-400/10' : 'text-amber-400 bg-amber-400/10',
+                )}>
+                  {row.risk}
+                </span>
+              </div>
+              <div className="col-span-2 text-[10px] font-mono text-white/30">{row.migration}</div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
