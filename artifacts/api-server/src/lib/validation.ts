@@ -1637,3 +1637,6 @@ export const voyageRiskMemoPdfBodySchema = z.object({
   sanctionsRefresh: z.object({}).passthrough().optional(),
   provenance: z.object({}).passthrough().optional(),
 }).passthrough();
+
+// Re-export parsePagination so route files can import it from validation
+export { parsePagination } from './api-response';

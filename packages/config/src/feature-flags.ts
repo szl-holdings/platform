@@ -72,6 +72,54 @@ export const FEATURE_FLAGS: Record<string, FeatureFlag> = {
     notes:
       'Disabled by default. PRAXIS is an internal prototype and should not be publicly accessible.',
   },
+  SEPA_BACS_RAILS: {
+    id: 'SEPA_BACS_RAILS',
+    description: 'Enable SEPA (EU) and BACS (UK) international payment rails in billing.',
+    enabledFor: ['production', 'pilot', 'demo', 'internal-preview', 'local-dev'],
+    notes: 'Flows through Stripe. Requires mandate acceptance from customer.',
+  },
+  ESIGNATURE_INTEGRATION: {
+    id: 'ESIGNATURE_INTEGRATION',
+    description: 'Enable DocuSign e-signature integration in Counsel for contract signing.',
+    enabledFor: ['production', 'pilot', 'demo', 'internal-preview', 'local-dev'],
+    notes: 'Configure ESIGNATURE_PROVIDER env var: docusign | hellosign | internal.',
+  },
+  PUBLIC_API_V1: {
+    id: 'PUBLIC_API_V1',
+    description: 'Enable public developer API v1 with OpenAPI spec and API key management.',
+    enabledFor: ['production', 'pilot', 'demo', 'internal-preview', 'local-dev'],
+    notes: 'OpenAPI spec at /api/v1/openapi.json. SDK at @szl-holdings/sdk.',
+  },
+  OUTBOUND_WEBHOOKS: {
+    id: 'OUTBOUND_WEBHOOKS',
+    description: 'Enable outbound webhook subscriptions with retry logic and delivery logs.',
+    enabledFor: ['production', 'pilot', 'demo', 'internal-preview', 'local-dev'],
+    notes: 'Extends existing /api/webhooks surface with persistent endpoint storage.',
+  },
+  PLUGIN_ARCHITECTURE: {
+    id: 'PLUGIN_ARCHITECTURE',
+    description: 'Enable plugin/extension architecture for domain module registration.',
+    enabledFor: ['production', 'pilot', 'internal-preview', 'local-dev'],
+    notes: 'Requires governance:proof-chain and governance:autonomy capabilities. See @szl-holdings/plugin-host.',
+  },
+  BILLING_DISPUTES: {
+    id: 'BILLING_DISPUTES',
+    description: 'Enable chargeback and dispute management in billing admin.',
+    enabledFor: ['production', 'pilot', 'demo', 'internal-preview', 'local-dev'],
+    notes: 'Pulls dispute data from Stripe. Surfaces in admin billing with response workflow.',
+  },
+  STABLECOIN_TREASURY: {
+    id: 'STABLECOIN_TREASURY',
+    description: 'Enable stablecoin treasury visibility (USDC, USDT, DAI) alongside fiat.',
+    enabledFor: ['production', 'pilot', 'demo', 'internal-preview', 'local-dev'],
+    notes: 'Reads balances from Coinbase Commerce. Configure TREASURY_PROVIDER env var.',
+  },
+  COURT_FILING_AUTOMATION: {
+    id: 'COURT_FILING_AUTOMATION',
+    description: 'Enable electronic court filing adapter in Counsel.',
+    enabledFor: ['production', 'pilot', 'demo', 'internal-preview', 'local-dev'],
+    notes: 'Supports PACER, NYSCEF, CA eCourt, Tyler eFSP. Manual fallback for unsupported jurisdictions.',
+  },
 };
 
 export function isFlagEnabled(flagId: string, runtimeMode: RuntimeMode): boolean {

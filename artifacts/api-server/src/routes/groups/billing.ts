@@ -65,4 +65,31 @@ export function register(router: IRouter): void {
 
   router.use('/connectors', _writeLimiter);
   router.use(lazyMatch('/connectors', () => import('../connectors'), 'connectors'));
+
+  router.use('/billing/intl', _writeLimiter);
+  router.use('/billing/intl', optionalIdempotencyMiddleware);
+  router.use(
+    lazyMatch(
+      ['/billing/intl', '/billing/disputes'],
+      () => import('../international-payment-rails'),
+      'international-payment-rails',
+    ),
+  );
+
+  router.use('/billing/disputes', _writeLimiter);
+  router.use(
+    lazyMatch(
+      '/billing/disputes',
+      () => import('../billing-disputes'),
+      'billing-disputes',
+    ),
+  );
+
+  router.use('/treasury', _readLimiter);
+  router.use('/treasury', _writeLimiter);
+  router.use(lazyMatch('/treasury', () => import('../treasury'), 'treasury'));
+
+  router.use('/plugins', _readLimiter);
+  router.use('/plugins', _writeLimiter);
+  router.use(lazyMatch('/plugins', () => import('../plugin-registry'), 'plugin-registry'));
 }

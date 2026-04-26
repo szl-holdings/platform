@@ -73,6 +73,15 @@ router.use(lazyMatch("/counsel", () => import("./counsel"), "counsel"));
 // Counsel Knowledge Index — graph+vector RAG over matter documents.
 router.use(lazyMatch("/counsel-knowledge", () => import("./counsel-knowledge"), "counsel-knowledge"));
 
+// Counsel E-Signature — DocuSign adapter for contract signing.
+router.use(lazyMatch("/counsel/esignature", () => import("./esignature"), "esignature"));
+
+// Counsel Court Filing Automation — electronic filing preparation and submission.
+router.use(lazyMatch("/counsel/court-filings", () => import("./court-filings"), "court-filings"));
+
+// Public API v1 — developer-facing versioned REST surface with OpenAPI spec.
+router.use(lazyMatch(["/v1", "/v1/api-keys", "/v1/openapi.json"], () => import("./public-api-v1"), "public-api-v1"));
+
 // Cross-platform intelligence — read-only (auth-gated in production).
 crossPlatform.register(router);
 

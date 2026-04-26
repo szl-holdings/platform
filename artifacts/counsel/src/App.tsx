@@ -31,6 +31,8 @@ import {
   CheckCircle2,
   Clock,
   Database,
+  FileSignature,
+  FileText,
   LayoutDashboard,
   Menu,
   Network,
@@ -66,6 +68,8 @@ const EvidenceExplorerPage = lazy(() =>
     default: () => <m.EvidenceExplorer domainFilter="legal" title="Counsel Evidence Explorer" />,
   })),
 );
+const EsignaturePage = lazy(() => import('./pages/esignature'));
+const CourtFilingsPage = lazy(() => import('./pages/court-filings'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -161,6 +165,18 @@ function CounselSidebarContent({
           label: 'Trust & Provenance',
           href: '/trust',
           icon: <Shield className="w-3.5 h-3.5" />,
+        },
+        {
+          id: '/esignature',
+          label: 'E-Signature',
+          href: '/esignature',
+          icon: <FileSignature className="w-3.5 h-3.5" />,
+        },
+        {
+          id: '/court-filings',
+          label: 'Court Filings',
+          href: '/court-filings',
+          icon: <FileText className="w-3.5 h-3.5" />,
         },
       ],
     },
@@ -312,6 +328,8 @@ function DashboardRouter() {
         <Route path="/pricing" component={CounselPricingPage} />
         <Route path="/account/billing" component={CounselBillingPage} />
         <Route path="/evidence" component={EvidenceExplorerPage} />
+        <Route path="/esignature" component={EsignaturePage} />
+        <Route path="/court-filings" component={CourtFilingsPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-violet-400/40">Page not found</p>
