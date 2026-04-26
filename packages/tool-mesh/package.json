@@ -66,11 +66,13 @@
     "@workspace/aef-contracts": "workspace:*",
     "@workspace/aef-sdk": "workspace:*",
     "@szl-holdings/ai-control-plane": "workspace:*",
+    "@szl-holdings/db": "workspace:*",
     "@szl-holdings/forge-runtime": "workspace:*",
     "@szl-holdings/policy-engine": "workspace:*",
     "@workspace/cognitive-observability": "workspace:*",
     "@workspace/guardian": "workspace:*",
     "@workspace/trace-graph": "workspace:*",
+    "drizzle-orm": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

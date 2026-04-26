@@ -69,8 +69,10 @@ async function openaiChatCompletion(
           completionTokens: data.usage.completion_tokens ?? 0,
           totalTokens: data.usage.total_tokens ?? 0,
         }
-      : undefined,
+      : null,
     latencyMs: Date.now() - start,
+    toolCalls: [],
+    raw: data,
   };
 }
 

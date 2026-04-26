@@ -1,3 +1,4 @@
+import { desc, gte, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import type { ToolHandler } from '../gateway.js';
 import type { ToolManifest } from '../manifest.js';
@@ -41,11 +42,60 @@ export const METRICS_QUERY_TOOL_MANIFEST: ToolManifest = {
 
 export const metricsQueryHandler: ToolHandler = async (input) => {
   const parsed = MetricsQueryInputSchema.parse(input);
+  const { db, agentUsageStats } = await import('@szl-holdings/db');
+
+  const startDate = parsed.startTime ? new Date(parsed.startTime) : (() => {
+    const d = new Date();
+    d.setHours(d.getHours() - 24);
+    return d;
+  })();
+
+  const rows = await db
+    .select()
+    .from(agentUsageStats)
+    .where(gte(agentUsageStats.recordedAt, startDate))
+    .orderBy(desc(agentUsageStats.recordedAt))
+    .limit(100);
+
+  const agentFilter = parsed.labels?.agent;
+  const providerFilter = parsed.labels?.provider;
+  const filtered = rows.filter((r) => {
+    if (agentFilter && r.agentId !== agentFilter) return false;
+    if (providerFilter && r.provider !== providerFilter) return false;
+    return true;
+  });
+
+  const dataPoints = filtered.map((r) => ({
+    timestamp: r.recordedAt?.toISOString(),
+    agentId: r.agentId,
+    agentName: r.agentName,
+    domain: r.domain,
+    tokensUsed: r.tokensUsed,
+    latencyMs: r.latencyMs,
+    success: r.success,
+    provider: r.provider,
+    model: r.model,
+  }));
+
+  const summary = {
+    totalRequests: filtered.length,
+    successRate: filtered.length > 0
+      ? Math.round((filtered.filter((r) => r.success).length / filtered.length) * 100) / 100
+      : 1.0,
+    avgLatencyMs: filtered.length > 0
+      ? Math.round(filtered.reduce((s, r) => s + r.latencyMs, 0) / filtered.length)
+      : 0,
+    totalTokensUsed: filtered.reduce((s, r) => s + r.tokensUsed, 0),
+  };
+
   return {
     metric: parsed.metric,
     labels: parsed.labels ?? {},
-    dataPoints: [],
-    message: `Metrics query for "${parsed.metric}" (stub — wire observability backend)`,
+    step: parsed.step,
+    rangeStart: startDate.toISOString(),
+    rangeEnd: parsed.endTime ?? new Date().toISOString(),
+    dataPoints,
+    summary,
   };
 };
 
@@ -87,12 +137,29 @@ export const WORKFLOW_TRIGGER_TOOL_MANIFEST: ToolManifest = {
 
 export const workflowTriggerHandler: ToolHandler = async (input) => {
   const parsed = WorkflowTriggerInputSchema.parse(input);
+  const { db, platformJobRunsTable } = await import('@szl-holdings/db');
+
+  const runId = `run-${Date.now()}`;
+
+  if (!parsed.dryRun) {
+    await db.insert(platformJobRunsTable).values({
+      runId,
+      workflowType: parsed.workflowId,
+      domain: 'platform',
+      triggeredBy: 'agent-tool-call',
+      status: 'pending',
+      payload: parsed.payload,
+    });
+  }
+
   return {
     workflowId: parsed.workflowId,
-    runId: parsed.dryRun ? null : `run-${Date.now()}`,
+    runId: parsed.dryRun ? null : runId,
     dryRun: parsed.dryRun,
     status: parsed.dryRun ? 'validated' : 'triggered',
-    message: `Workflow ${parsed.dryRun ? 'validated' : 'triggered'}: ${parsed.workflowId} (stub — wire workflow engine)`,
+    message: parsed.dryRun
+      ? `Workflow '${parsed.workflowId}' validated successfully`
+      : `Workflow '${parsed.workflowId}' triggered with runId ${runId}`,
   };
 };
 
@@ -157,12 +224,31 @@ export const NOTIFICATION_SEND_TOOL_MANIFEST: ToolManifest = {
 
 export const notificationSendHandler: ToolHandler = async (input) => {
   const parsed = NotificationSendInputSchema.parse(input);
+  const { db, platformJobRunsTable } = await import('@szl-holdings/db');
+
+  const messageId = `msg-${Date.now()}`;
+  await db.insert(platformJobRunsTable).values({
+    runId: messageId,
+    workflowType: 'notification_send',
+    domain: 'communication',
+    triggeredBy: 'agent-tool-call',
+    status: 'pending',
+    payload: {
+      channel: parsed.channel,
+      recipients: parsed.recipients,
+      subject: parsed.subject ?? null,
+      body: parsed.body.slice(0, 500),
+      priority: parsed.priority,
+    },
+  });
+
   return {
-    messageId: `msg-${Date.now()}`,
+    messageId,
     channel: parsed.channel,
     recipientCount: parsed.recipients.length,
+    priority: parsed.priority,
     status: 'queued',
-    message: `Notification queued for ${parsed.recipients.length} recipient(s) via ${parsed.channel} (stub — wire notification backend)`,
+    message: `Notification queued for ${parsed.recipients.length} recipient(s) via ${parsed.channel} (priority: ${parsed.priority})`,
   };
 };
 
@@ -209,12 +295,29 @@ export const EXTERNAL_WEBHOOK_TOOL_MANIFEST: ToolManifest = {
 
 export const externalWebhookHandler: ToolHandler = async (input) => {
   const parsed = ExternalWebhookCallInputSchema.parse(input);
+  const { db, platformJobRunsTable } = await import('@szl-holdings/db');
+
+  const deliveryId = `del-${Date.now()}`;
+  await db.insert(platformJobRunsTable).values({
+    runId: deliveryId,
+    workflowType: 'webhook_delivery',
+    domain: 'integrations',
+    triggeredBy: 'agent-tool-call',
+    status: 'pending',
+    payload: {
+      endpointId: parsed.endpointId,
+      eventType: parsed.eventType,
+      payload: parsed.payload,
+      retryOnFailure: parsed.retryOnFailure,
+    },
+  });
+
   return {
-    deliveryId: `del-${Date.now()}`,
+    deliveryId,
     endpointId: parsed.endpointId,
     eventType: parsed.eventType,
-    status: 'delivered',
-    message: `Webhook event ${parsed.eventType} delivered to ${parsed.endpointId} (stub — wire webhook delivery engine)`,
+    status: 'queued',
+    message: `Webhook '${parsed.eventType}' queued for delivery to endpoint ${parsed.endpointId}`,
   };
 };
 
@@ -267,13 +370,32 @@ export const INFRA_PROVISION_TOOL_MANIFEST: ToolManifest = {
 
 export const infraProvisionHandler: ToolHandler = async (input) => {
   const parsed = InfraProvisionInputSchema.parse(input);
+  const { db, platformJobRunsTable } = await import('@szl-holdings/db');
+
+  const provisionId = `prov-${Date.now()}`;
+  const rollbackId = `rollback-${Date.now()}`;
+
+  await db.insert(platformJobRunsTable).values({
+    runId: provisionId,
+    workflowType: 'infrastructure_provision',
+    domain: 'infrastructure',
+    triggeredBy: 'agent-tool-call',
+    status: 'pending',
+    payload: {
+      resourceType: parsed.resourceType,
+      environment: parsed.environment,
+      spec: parsed.spec,
+      rollbackId,
+    },
+  });
+
   return {
-    provisionId: `prov-${Date.now()}`,
+    provisionId,
     resourceType: parsed.resourceType,
     environment: parsed.environment,
     status: 'provisioning',
-    rollbackId: `rollback-${Date.now()}`,
-    message: `Infrastructure provision queued for ${parsed.resourceType} in ${parsed.environment} (stub — wire IaC backend)`,
+    rollbackId,
+    message: `Infrastructure provision for ${parsed.resourceType} in ${parsed.environment} queued (rollbackId: ${rollbackId})`,
   };
 };
 

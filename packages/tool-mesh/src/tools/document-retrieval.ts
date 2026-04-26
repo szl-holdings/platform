@@ -230,10 +230,11 @@ export const documentRetrievalHandler: ToolHandler = async (input) => {
     };
 
     return result;
-  } catch (err) {
+  } catch (err: unknown) {
     if (err instanceof AefUnavailableError) {
+      const e = err as AefUnavailableError;
       throw new Error(
-        `[document-retrieval] AEF gateway unreachable. ${err.message} ` +
+        `[document-retrieval] AEF gateway unreachable. ${e.message} ` +
           'Verify AEF_GATEWAY_URL is correct and the AEF API service is running.',
       );
     }
@@ -241,8 +242,9 @@ export const documentRetrievalHandler: ToolHandler = async (input) => {
       throw new Error('[document-retrieval] AEF authentication failed. Check AEF_API_KEY.');
     }
     if (err instanceof AefPolicyError) {
+      const e = err as AefPolicyError;
       throw new Error(
-        `[document-retrieval] AEF policy guard rejected this retrieval request: ${err.message}`,
+        `[document-retrieval] AEF policy guard rejected this retrieval request: ${e.message}`,
       );
     }
     throw err;

@@ -11,9 +11,11 @@ export * from './schema-validator.js';
 export * from './server-registry.js';
 export * from './stub-generator.js';
 export * from './tools/document-retrieval.js';
+export * from './tools/domain-data-tools.js';
 export * from './tools/finance-tools.js';
 export * from './tools/graph-query.js';
 export * from './tools/operations-tools.js';
 export * from './tools/security-tools.js';
+export * from './tools/tool-init-registry.js';
 
 export const TOOL_MESH_VERSION = '2.0.0' as const;

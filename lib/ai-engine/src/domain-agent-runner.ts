@@ -11,6 +11,7 @@ export interface ConversationMessage {
   content: string;
   toolCallId?: string;
   toolName?: string;
+  toolArguments?: Record<string, unknown>;
 }
 
 export interface NativeToolCall {
@@ -23,6 +24,7 @@ export interface StructuredCompletionResult {
   content: string | null;
   toolCalls: NativeToolCall[];
   stopReason: 'stop' | 'tool_calls' | 'max_tokens' | 'other';
+  usage?: { promptTokens: number; completionTokens: number };
 }
 
 export interface ChatInterface {
@@ -42,6 +44,7 @@ export interface ChatInterface {
       content: string;
       toolCallId?: string;
       name?: string;
+      toolArguments?: Record<string, unknown>;
     }>,
     tools: Array<{
       type: 'function';
@@ -382,6 +385,15 @@ export class DomainAgentRunner {
               ...(m.toolName !== undefined ? { name: m.toolName } : {}),
             };
           }
+          if (m.role === 'assistant' && m.toolCallId !== undefined) {
+            return {
+              role: 'assistant' as const,
+              content: m.content,
+              toolCallId: m.toolCallId,
+              name: m.toolName,
+              toolArguments: m.toolArguments,
+            };
+          }
           return {
             role: m.role as 'user' | 'assistant',
             content: m.content,
@@ -420,6 +432,7 @@ export class DomainAgentRunner {
           content: `[native_tool_call:${toolCall.name}]`,
           toolCallId: toolCall.id,
           toolName: toolCall.name,
+          toolArguments: toolCall.arguments,
         });
       }
 

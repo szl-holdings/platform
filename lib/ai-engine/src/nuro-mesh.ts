@@ -68,6 +68,7 @@ import { routeQuery } from './cost-performance-router.js';
 import { getCachedResponse, setCachedResponse } from './prompt-cache.js';
 import { recordStrategyOutcome } from './meta-learning.js';
 import { runShadowCouncil, shouldRunShadowCouncil } from './shadow-council.js';
+import { runAgentToolLoop } from './agent-tool-loop.js';
 
 setLlmIntrospector(async (prompt: string): Promise<string> => {
   try {
@@ -1020,6 +1021,33 @@ export async function callAgent(
 
   if (!success) {
   try {
+    const toolSystemPrompt = `${agent.systemPrompt}${learningSection}${consciousnessDirective}${graphContextSection}`;
+    const toolUserQuery = `${focusedContext}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with: CONFIDENCE: [0-100]`;
+
+    if (agent.tools.length > 0) {
+      try {
+        const loopResult = await runAgentToolLoop(
+          agent,
+          toolSystemPrompt,
+          toolUserQuery,
+          actualModel,
+          2048,
+        );
+        if (loopResult.response) {
+          response = loopResult.response;
+          tokensUsed = loopResult.tokensUsed;
+          success = true;
+          setCachedResponse(agent.systemPrompt, _cacheContextPrefix, actualModel, response);
+        }
+      } catch (toolLoopErr) {
+        console.warn(
+          '[nuro-mesh] Tool loop failed — falling back to direct LLM completion',
+          { agentId: agent.id, err: String(toolLoopErr) },
+        );
+      }
+    }
+
+    if (!success) {
     if (agent.preferredProvider === 'anthropic') {
       const modelToUse =
         actualModel !== agent.preferredModel && !actualModel.startsWith('claude')
@@ -1035,14 +1063,10 @@ export async function callAgent(
       success = true;
       setCachedResponse(agent.systemPrompt, _cacheContextPrefix, actualModel, response);
     } else if (agent.preferredProvider === 'openai') {
-      const systemWithLearning = `${agent.systemPrompt}${learningSection}${consciousnessDirective}${graphContextSection}`;
       const result = await createResponse(
         [
-          { role: 'system', content: systemWithLearning },
-          {
-            role: 'user',
-            content: `${focusedContext}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with: CONFIDENCE: [0-100]`,
-          },
+          { role: 'system', content: toolSystemPrompt },
+          { role: 'user', content: toolUserQuery },
         ],
         { model: actualModel, maxOutputTokens: 2048 },
       );
@@ -1077,6 +1101,7 @@ export async function callAgent(
         tokensUsed = fallback.usage.promptTokens + fallback.usage.completionTokens;
         success = true;
       }
+    }
     }
   } catch {
     response = `[${agent.name} unavailable — domain expertise offline]`;

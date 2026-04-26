@@ -1,6 +1,7 @@
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { ai as geminiAi } from '@szl-holdings/ai-engine/providers/gemini';
 import { createResponse, createResponseStream, openai } from '@szl-holdings/ai-engine/providers/openai';
+import { runAgentToolLoop } from '@szl-holdings/ai-engine/agent-tool-loop';
 import { buildEnvelope, storeProvenance } from '@szl-holdings/ai-engine/provenance';
 import {
   advisoryFindings,
@@ -564,6 +565,7 @@ async function callAgent(
     callerUserId?: number | null;
     callerRoles?: string[];
     action?: string;
+    onToolEvent?: (event: { type: string; [key: string]: unknown }) => void;
   },
 ): Promise<{
   agentId: string;
@@ -610,9 +612,55 @@ async function callAgent(
   let tokensUsed = 0;
   let success = false;
 
-  const fullPrompt = `${agent.systemPrompt}\n\n## Shared Context from Nuro Mesh\n${context}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with a confidence score (0-100) on a new line in format: CONFIDENCE: [score]`;
+  const systemPrompt = agent.systemPrompt;
+  const userQuery = `## Shared Context from Nuro Mesh\n${context}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with a confidence score (0-100) on a new line in format: CONFIDENCE: [score]`;
+  const fullPrompt = `${systemPrompt}\n\n${userQuery}`;
 
   try {
+    if (agent.tools.length > 0) {
+      try {
+        const loopResult = await runAgentToolLoop(
+          agent,
+          systemPrompt,
+          userQuery,
+          agent.preferredModel,
+          2048,
+          {
+            onToolCallStart: (events) => {
+              opts?.onToolEvent?.({
+                type: 'tool_call_start',
+                agentId: agent.id,
+                agentName: agent.name,
+                tools: events.map((e) => ({ toolName: e.toolName, toolCallId: e.toolCallId })),
+              });
+            },
+            onToolCallResult: (event) => {
+              opts?.onToolEvent?.({
+                type: 'tool_call_result',
+                agentId: agent.id,
+                agentName: agent.name,
+                toolName: event.toolName,
+                toolCallId: event.toolCallId,
+                success: event.success,
+                toolOutput: event.toolOutput.slice(0, 1024),
+              });
+            },
+          },
+        );
+        if (loopResult.response) {
+          response = loopResult.response;
+          tokensUsed = loopResult.tokensUsed;
+          success = true;
+        }
+      } catch (toolLoopErr) {
+        logger.warn(
+          { agentId: agent.id, err: String(toolLoopErr) },
+          '[nuro-mesh:route] Tool loop failed — falling back to direct LLM completion',
+        );
+      }
+    }
+
+    if (!success) {
     if (agent.preferredProvider === 'anthropic') {
       const result = await anthropic.messages.create({
         model: agent.preferredModel,
@@ -625,11 +673,8 @@ async function callAgent(
     } else if (agent.preferredProvider === 'openai') {
       const result = await createResponse(
         [
-          { role: 'system', content: agent.systemPrompt },
-          {
-            role: 'user',
-            content: `## Shared Context\n${context}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with: CONFIDENCE: [0-100]`,
-          },
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userQuery },
         ],
         { model: agent.preferredModel, maxOutputTokens: 2048 },
       );
@@ -648,8 +693,8 @@ async function callAgent(
       } catch {
         const fallback = await createResponse(
           [
-            { role: 'system', content: agent.systemPrompt },
-            { role: 'user', content: fullPrompt },
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userQuery },
           ],
           { model: 'gpt-5.2', maxOutputTokens: 2048 },
         );
@@ -657,6 +702,7 @@ async function callAgent(
         tokensUsed = fallback.usage.promptTokens + fallback.usage.completionTokens;
         success = true;
       }
+    }
     }
   } catch {
     response = `[${agent.name} unavailable — domain expertise offline]`;
@@ -838,6 +884,12 @@ nueroMeshRouter.post(
             callerUserId,
             callerRoles,
             action: 'orchestrate',
+            onToolEvent: (event) => {
+              try {
+                res.write(`data: ${JSON.stringify(event)}\n\n`);
+              } catch {
+              }
+            },
           });
         }),
       );

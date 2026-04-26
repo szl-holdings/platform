@@ -46,6 +46,8 @@ export const agentToolCalls = pgTable('agent_tool_calls', {
   success: boolean('success').notNull().default(true),
   latencyMs: integer('latency_ms').notNull().default(0),
   calledAt: timestamp('called_at', { withTimezone: true }).defaultNow().notNull(),
+  governanceVerdict: text('governance_verdict'),
+  traceId: text('trace_id'),
 });
 
 export const advisoryFindings = pgTable('advisory_findings', {
