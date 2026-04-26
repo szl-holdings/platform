@@ -86,7 +86,7 @@ Use this checklist when performing GitHub operations manually through the web in
 
 ## 5. Create Release v0.1.0
 
-1. Navigate to: `https://github.com/stephenlutar2-hash/szl-holdings-platform/releases/new`
+1. Navigate to: `https://github.com/szl-holdings/szl-holdings-platform/releases/new`
 2. Click **Choose a tag** → Type `v0.1.0` → Click **Create new tag: v0.1.0 on publish**
 3. Target: `master`
 4. **Release title:** `v0.1.0 — Initial Public Platform Release`
@@ -98,7 +98,7 @@ Use this checklist when performing GitHub operations manually through the web in
 
 ## 6. Bootstrap Issue Labels
 
-Navigate to: `https://github.com/stephenlutar2-hash/szl-holdings-platform/labels`
+Navigate to: `https://github.com/szl-holdings/szl-holdings-platform/labels`
 
 Delete any default labels that don't fit. Create the following:
 
@@ -130,7 +130,7 @@ See `ops/github/wiki-manual-steps.md` for the complete wiki setup workflow.
 Summary:
 1. Enable wiki in repository Settings → Features → Wikis
 2. Create first page through GitHub UI to initialize wiki repo
-3. Clone wiki repo: `git clone https://github.com/stephenlutar2-hash/szl-holdings-platform.wiki.git ../szl-holdings-platform.wiki`
+3. Clone wiki repo: `git clone https://github.com/szl-holdings/szl-holdings-platform.wiki.git ../szl-holdings-platform.wiki`
 4. Run wiki sync pipeline: validate → export → commit
 5. Verify sidebar, footer, and image rendering
 

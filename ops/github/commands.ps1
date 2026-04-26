@@ -4,7 +4,7 @@
 # Prerequisites: gh CLI installed and authenticated (gh auth login)
 # =============================================================================
 
-$REPO = "stephenlutar2-hash/szl-holdings-platform"
+$REPO = "szl-holdings/szl-holdings-platform"
 $USERNAME = "stephenlutar2-hash"
 
 Write-Host "================================================================" -ForegroundColor Cyan

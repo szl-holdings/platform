@@ -8,7 +8,7 @@ Step-by-step instructions for updating `szl-holdings-platform` repository brandi
 
 The About section (visible on the repository homepage) controls the description, website link, and topic display.
 
-1. Go to: `https://github.com/stephenlutar2-hash/szl-holdings-platform`
+1. Go to: `https://github.com/szl-holdings/szl-holdings-platform`
 2. Click the **gear icon (⚙)** next to "About" (top-right of the repo summary panel)
 3. Set **Description** to:
    ```
@@ -51,7 +51,7 @@ In the same About gear icon dialog, or via the Topics field:
 
 GitHub social preview images must be uploaded through the repository Settings page.
 
-1. Go to: `https://github.com/stephenlutar2-hash/szl-holdings-platform/settings`
+1. Go to: `https://github.com/szl-holdings/szl-holdings-platform/settings`
 2. Scroll to **Social preview**
 3. Click **Edit**
 4. Click **Upload an image...**
@@ -70,7 +70,7 @@ GitHub social preview images must be uploaded through the repository Settings pa
 
 ## Step 4 — Verify Screenshots Render Correctly
 
-1. Go to: `https://github.com/stephenlutar2-hash/szl-holdings-platform`
+1. Go to: `https://github.com/szl-holdings/szl-holdings-platform`
 2. Scroll to the Screenshots section in the README
 3. Confirm all four images render:
    - Landing hero

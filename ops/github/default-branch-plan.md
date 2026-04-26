@@ -54,7 +54,7 @@ master (single published branch — always clean and buildable)
 ### For `szl-holdings-platform` (Master)
 
 Apply the following branch protection rules at:  
-`https://github.com/stephenlutar2-hash/szl-holdings-platform/settings/branches`
+`https://github.com/szl-holdings/szl-holdings-platform/settings/branches`
 
 | Rule | Setting | Rationale |
 |------|---------|-----------|
@@ -70,7 +70,7 @@ Apply the following branch protection rules at:
 
 **CLI command (requires `gh auth login`):**
 ```bash
-gh api repos/stephenlutar2-hash/szl-holdings-platform/branches/master/protection \
+gh api repos/szl-holdings/szl-holdings-platform/branches/master/protection \
   --method PUT \
   --field required_status_checks=null \
   --field enforce_admins=true \
@@ -141,7 +141,7 @@ Any workflow YAML files in `.github/workflows/` that specify `branches: [master]
 ### Step 5: Verify
 
 ```bash
-gh repo view stephenlutar2-hash/szl-holdings-platform --json defaultBranchRef
+gh repo view szl-holdings/szl-holdings-platform --json defaultBranchRef
 ```
 
 ---

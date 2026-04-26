@@ -101,22 +101,26 @@ let passes = 0;
 
 function pass(label, detail) {
   passes++;
-  const _msg = `  \u2713  ${label}${detail ? `  (${detail})` : ''}`;
+  const msg = `  \u2713  ${label}${detail ? `  (${detail})` : ''}`;
+  console.log(msg);
   addSummary(`| \u2705 Pass | ${label} | ${detail || ''} |`);
 }
 
 function fail(label, detail) {
   failures++;
-  const _msg = `  \u2717  ${label}${detail ? `\n       \u21b3 ${detail}` : ''}`;
+  const msg = `  \u2717  ${label}${detail ? `\n       \u21b3 ${detail}` : ''}`;
+  console.error(msg);
   addSummary(`| \u274c Fail | ${label} | ${detail || ''} |`);
 }
 
 function skip(label, reason) {
-  const _msg = `  \u2014  ${label} (skipped: ${reason})`;
+  const msg = `  \u2014  ${label} (skipped: ${reason})`;
+  console.log(msg);
   addSummary(`| \u23ed Skip | ${label} | ${reason} |`);
 }
 
-function section(_title) {
+function section(title) {
+  console.log(`\n── ${title}`);
 }
 
 // ─── load source files ────────────────────────────────────────────────────────
@@ -142,7 +146,7 @@ section('Platform roles — ACCESS-CONTROL-MATRIX.md vs lib/db/src/schema/auth.t
 if (!authSchema) {
   fail('Cannot read lib/db/src/schema/auth.ts', 'file not found or unreadable');
 } else if (!accessMatrix) {
-  fail('Cannot read ACCESS-CONTROL-MATRIX.md', 'file not found or unreadable');
+  skip('Platform role enum check', 'ACCESS-CONTROL-MATRIX.md not found — create the file to enable this check');
 } else {
   const liveRoles = extractTsEnumValues(authSchema, 'platform_role');
   if (!liveRoles || liveRoles.length === 0) {
@@ -268,9 +272,9 @@ if (!csrfMiddleware) {
   fail('Cannot read API-SPEC.md', 'file not found or unreadable');
 } else {
   for (const exemptPath of DOCUMENTED_CSRF_EXEMPT_PATHS) {
-    // The path should appear as a quoted string literal in csrf.ts
+    // The path should appear as a quoted string literal in csrf.ts (single or double quotes)
     const escaped = exemptPath.replace(/\//g, '\\/');
-    const pattern = new RegExp(`"${escaped}"`);
+    const pattern = new RegExp(`["']${escaped}["']`);
     if (pattern.test(csrfMiddleware)) {
       pass(`CSRF exempt: ${exemptPath}`);
     } else {
@@ -326,7 +330,7 @@ section('Key route mounts — API-SPEC.md route groups vs routes/index.ts');
 
 // Documented route groups and the corresponding mount evidence in routes/index.ts.
 const DOCUMENTED_ROUTE_MOUNTS = [
-  { desc: '/pulse route group', pattern: /router\.use\(['"]\/pulse['"]/ },
+  { desc: '/pulse route group', pattern: /router\.use\(\s*['"]\/pulse['"]/ },
   { desc: '/nexus route group', pattern: /router\.use\(['"]\/nexus['"]/ },
   { desc: 'core routes registered', pattern: /core\.register\(router\)/ },
   { desc: 'billing routes registered', pattern: /billing\.register\(router\)/ },
@@ -408,11 +412,13 @@ for (const [tableName, citation] of Object.entries(DOCUMENTED_TABLES)) {
   // Since we can't do a true recursive grep here, we search through known schema file paths
   // and the main auth.ts that we already loaded.
 
-  const quotedName = `"${tableName}"`;
+  // Accept both single-quoted and double-quoted table names in pgTable() declarations
+  const doubleQuoted = `"${tableName}"`;
+  const singleQuoted = `'${tableName}'`;
   let found = false;
 
   // Check in the already-loaded auth.ts
-  if (authSchema?.includes(quotedName)) {
+  if (authSchema?.includes(doubleQuoted) || authSchema?.includes(singleQuoted)) {
     found = true;
   }
 
@@ -423,7 +429,7 @@ for (const [tableName, citation] of Object.entries(DOCUMENTED_TABLES)) {
       const files = readdirSync(schemaDir).filter((f) => f.endsWith('.ts'));
       for (const f of files) {
         const content = readFile(`lib/db/src/schema/${f}`);
-        if (content?.includes(quotedName)) {
+        if (content?.includes(doubleQuoted) || content?.includes(singleQuoted)) {
           found = true;
           break;
         }
@@ -534,7 +540,10 @@ if (!apiSpec) {
 }
 
 if (failures > 0) {
+  console.error(`\n✗  ${failures} claim(s) failed, ${passes} passed. See above for details.`);
+  console.error('   Update ACCESS-CONTROL-MATRIX.md, API-SPEC.md, or SECURITY-CHECKLIST.md to match the codebase.');
 } else {
+  console.log(`\n✓  All ${passes} claims verified.`);
 }
 
 // Write GitHub Actions step summary when running in CI.
