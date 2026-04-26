@@ -217,6 +217,11 @@ const AlloyTrustReceipts = lazy(() => import('@lyte/pages/alloy-trust-receipts')
 const AlloyIntegrationHealth = lazy(() => import('@lyte/pages/alloy-integration-health'));
 const AlloyGraphCompiler = lazy(() => import('@lyte/pages/alloy-graph-compiler'));
 const AlloyPolicyCompiler = lazy(() => import('@lyte/pages/alloy-policy-compiler'));
+const OmniaHubPage = lazy(() => import('./pages/omnia/index'));
+const OmniaWorldModelPage = lazy(() => import('./pages/omnia/world-model'));
+const OmniaNarrativePage = lazy(() => import('./pages/omnia/narrative'));
+const OmniaRipplePage = lazy(() => import('./pages/omnia/ripple'));
+const OmniaStoryPage = lazy(() => import('./pages/omnia/story'));
 const CognitiveCommandCenter = lazy(() => import('./pages/cognitive/index'));
 const CognitiveLoopPage = lazy(() => import('./pages/cognitive/loop'));
 const AlloyProofPage = lazy(() =>
@@ -478,6 +483,11 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/evolution/diagnostics', label: 'PER — Diagnostics', group: 'Evolution' },
   { href: '/governed-cockpit', label: 'Governed Cockpit', group: 'Operations' },
   { href: '/demo', label: 'Demo Launchpad', group: 'Operations' },
+  { href: '/omnia', label: 'OMNIA Hub', group: 'OMNIA' },
+  { href: '/omnia/world-model', label: 'World Model', group: 'OMNIA' },
+  { href: '/omnia/narrative', label: 'Synthesis Narrative', group: 'OMNIA' },
+  { href: '/omnia/ripple', label: 'Ripple / Impact View', group: 'OMNIA' },
+  { href: '/omnia/story', label: 'Story Mode', group: 'OMNIA' },
   { href: '/cognitive', label: 'Cognitive Command Center', group: 'Cognitive' },
   { href: '/cognitive/loop', label: 'Live Cognitive Loop', group: 'Cognitive' },
   { href: '/cognitive/self-model', label: 'Self-Model Console', group: 'Cognitive' },
@@ -650,6 +660,12 @@ function AppShell() {
                 path="/strategy/cross-platform/pilots"
                 component={() => <PilotIntelligencePage />}
               />
+
+              <Route path="/omnia" component={() => <OmniaHubPage />} />
+              <Route path="/omnia/world-model" component={() => <OmniaWorldModelPage />} />
+              <Route path="/omnia/narrative" component={() => <OmniaNarrativePage />} />
+              <Route path="/omnia/ripple" component={() => <OmniaRipplePage />} />
+              <Route path="/omnia/story" component={() => <OmniaStoryPage />} />
 
               <Route path="/cognitive" component={() => <CognitiveCommandCenter />} />
               <Route path="/cognitive/loop" component={() => <CognitiveLoopPage />} />

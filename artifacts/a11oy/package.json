@@ -20,7 +20,8 @@
     "@workspace/a11oy-fabric": "workspace:*",
     "graphql": "^16.13.2",
     "graphql-ws": "^6.0.8",
-    "urql": "^5.0.1"
+    "urql": "^5.0.1",
+    "@szl-holdings/omnia-shell": "workspace:*"
   },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "catalog:",

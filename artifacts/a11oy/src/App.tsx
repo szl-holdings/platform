@@ -60,6 +60,7 @@ const PluginHub = lazy(() => import('./pages/PluginHub').then(m => ({ default: m
 const DeepResearch = lazy(() => import('./pages/DeepResearch').then(m => ({ default: m.DeepResearch })));
 const CiAction = lazy(() => import('./pages/CiAction').then(m => ({ default: m.CiAction })));
 const AgiConvergence = lazy(() => import('./pages/AgiConvergence').then(m => ({ default: m.AgiConvergence })));
+const OmniaAdoptionPage = lazy(() => import('./pages/OmniaAdoption').then(m => ({ default: m.OmniaAdoption })));
 
 export default function App() {
   return (
@@ -108,6 +109,7 @@ export default function App() {
         <Route path={`${base}/action`} component={CiAction} />
         <Route path={`${base}/convergence`} component={AgiConvergence} />
         <Route path={`${base}/about`} component={About} />
+        <Route path={`${base}/omnia-adoption`} component={OmniaAdoptionPage} />
         <Route>
           <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--color-a11oy-navy)', color: 'var(--color-a11oy-text)' }}>
             <div className="text-center">

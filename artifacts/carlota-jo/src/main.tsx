@@ -2,6 +2,7 @@ import { configurePlausible } from '@szl-holdings/analytics';
 import { GraphQLProvider } from '@szl-holdings/graphql-client/provider';
 import { initAnalytics, initSentry, initWebVitals } from '@szl-holdings/observability/react';
 import { ErrorBoundary } from '@szl-holdings/shared-ui/error-boundary';
+import { OmniaShellProvider } from '@szl-holdings/omnia-shell/provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot } from 'react-dom/client';
 import App from './App';
@@ -24,7 +25,9 @@ createRoot(document.getElementById('root')!).render(
   <ErrorBoundary appName="Carlota Jo Consulting" accentColor="#8b7ac8">
     <QueryClientProvider client={queryClient}>
       <GraphQLProvider>
-        <App />
+        <OmniaShellProvider config={{ artifactId: 'carlota-jo', accentColor: '#8b7ac8' }}>
+          <App />
+        </OmniaShellProvider>
       </GraphQLProvider>
     </QueryClientProvider>
   </ErrorBoundary>,

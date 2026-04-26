@@ -370,6 +370,9 @@ importers:
       '@szl-holdings/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
+      '@szl-holdings/omnia-shell':
+        specifier: workspace:*
+        version: link:../../packages/omnia-shell
       '@szl-holdings/shared-proxy':
         specifier: workspace:*
         version: link:../../packages/shared-proxy
@@ -476,6 +479,9 @@ importers:
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@szl-holdings/omnia-shell':
+        specifier: workspace:*
+        version: link:../../packages/omnia-shell
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../../lib/services
@@ -1024,6 +1030,9 @@ importers:
       '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
+      '@szl-holdings/omnia-shell':
+        specifier: workspace:*
+        version: link:../../packages/omnia-shell
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
@@ -1160,6 +1169,9 @@ importers:
       '@szl-holdings/domain-claims':
         specifier: workspace:*
         version: link:../../packages/domain-claims
+      '@szl-holdings/omnia-shell':
+        specifier: workspace:*
+        version: link:../../packages/omnia-shell
       '@szl-holdings/speech-specialist':
         specifier: workspace:*
         version: link:../../packages/speech-specialist
@@ -1308,6 +1320,9 @@ importers:
       '@szl-holdings/offline-engine':
         specifier: workspace:*
         version: link:../../lib/offline-engine
+      '@szl-holdings/omnia-shell':
+        specifier: workspace:*
+        version: link:../../packages/omnia-shell
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
@@ -1502,6 +1517,9 @@ importers:
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@szl-holdings/omnia-shell':
+        specifier: workspace:*
+        version: link:../../packages/omnia-shell
       '@szl-holdings/speech-specialist':
         specifier: workspace:*
         version: link:../../packages/speech-specialist
@@ -1866,6 +1884,9 @@ importers:
       '@szl-holdings/domain-claims':
         specifier: workspace:*
         version: link:../../packages/domain-claims
+      '@szl-holdings/omnia-shell':
+        specifier: workspace:*
+        version: link:../../packages/omnia-shell
       '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
@@ -1963,6 +1984,9 @@ importers:
       '@szl-holdings/offline-engine':
         specifier: workspace:*
         version: link:../../lib/offline-engine
+      '@szl-holdings/omnia-shell':
+        specifier: workspace:*
+        version: link:../../packages/omnia-shell
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
@@ -2168,6 +2192,9 @@ importers:
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@szl-holdings/omnia-shell':
+        specifier: workspace:*
+        version: link:../../packages/omnia-shell
       '@szl-holdings/platform-registry':
         specifier: workspace:*
         version: link:../../packages/config
@@ -2524,6 +2551,9 @@ importers:
       '@szl-holdings/monte-carlo':
         specifier: workspace:*
         version: link:../../lib/monte-carlo
+      '@szl-holdings/omnia-shell':
+        specifier: workspace:*
+        version: link:../../packages/omnia-shell
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
@@ -2657,6 +2687,9 @@ importers:
       '@szl-holdings/offline-engine':
         specifier: workspace:*
         version: link:../../lib/offline-engine
+      '@szl-holdings/omnia-shell':
+        specifier: workspace:*
+        version: link:../../packages/omnia-shell
       '@szl-holdings/prism-bus':
         specifier: workspace:*
         version: link:../../lib/prism-bus
@@ -4700,6 +4733,28 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+
+  packages/omnia-shell:
+    dependencies:
+      clsx:
+        specifier: 'catalog:'
+        version: 2.1.1
+      lucide-react:
+        specifier: 'catalog:'
+        version: 0.545.0(react@19.1.0)
+      tailwind-merge:
+        specifier: 'catalog:'
+        version: 3.5.0
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.0
+        version: 19.2.3(@types/react@19.2.14)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   packages/ontology:
     dependencies:

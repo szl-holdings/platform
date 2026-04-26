@@ -1,4 +1,5 @@
 import { initAnalytics, initSentry } from '@szl-holdings/observability/react';
+import { OmniaShellProvider } from '@szl-holdings/omnia-shell/provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRoot } from 'react-dom/client';
 import App from './App';
@@ -18,6 +19,8 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
-    <App />
+    <OmniaShellProvider config={{ artifactId: 'pulse', accentColor: '#f59e0b' }}>
+      <App />
+    </OmniaShellProvider>
   </QueryClientProvider>,
 );

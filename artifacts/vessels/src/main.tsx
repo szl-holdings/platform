@@ -2,6 +2,7 @@ import { configurePlausible } from '@szl-holdings/analytics';
 import { GraphQLProvider } from '@szl-holdings/graphql-client/provider';
 import { initAnalytics, initSentry, initWebVitals } from '@szl-holdings/observability/react';
 import { ErrorBoundary } from '@szl-holdings/shared-ui/error-boundary';
+import { OmniaShellProvider } from '@szl-holdings/omnia-shell/provider';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
@@ -26,7 +27,9 @@ if ('serviceWorker' in navigator && !import.meta.env.DEV) {
 createRoot(document.getElementById('root')!).render(
   <ErrorBoundary appName="SEXTANT Maritime Intelligence" accentColor="#4a90b8">
     <GraphQLProvider>
-      <App />
+      <OmniaShellProvider config={{ artifactId: 'vessels', accentColor: '#0ea5e9' }}>
+        <App />
+      </OmniaShellProvider>
     </GraphQLProvider>
   </ErrorBoundary>,
 );

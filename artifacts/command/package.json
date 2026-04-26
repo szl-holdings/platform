@@ -69,6 +69,7 @@
     "leaflet": "^1.9.4",
     "react-leaflet": "^5.0.0",
     "@szl-holdings/speech-specialist": "workspace:*",
-    "@szl/a11oy-runtime": "workspace:*"
+    "@szl/a11oy-runtime": "workspace:*",
+    "@szl-holdings/omnia-shell": "workspace:*"
   }
 }

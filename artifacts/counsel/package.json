@@ -53,6 +53,7 @@
     "@szl-holdings/brand-registry": "workspace:*",
     "@workspace/aef-sdk": "workspace:*",
     "@workspace/aef-contracts": "workspace:*",
-    "@szl-holdings/document-intelligence": "workspace:*"
+    "@szl-holdings/document-intelligence": "workspace:*",
+    "@szl-holdings/omnia-shell": "workspace:*"
   }
 }

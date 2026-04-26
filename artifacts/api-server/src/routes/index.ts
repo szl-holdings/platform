@@ -334,4 +334,10 @@ router.use(meshObservabilityRouter);
 // MCP Ecosystem Command Center — topology, sessions, tool catalog, governed execution
 router.use(lazyMatch("/ecosystem", () => import("./ecosystem-command"), "ecosystem-command"));
 
+// OMNIA — unified portfolio world model, synthesis narrative, cross-portfolio search,
+// entity ripple analysis, public story mode, and shell adoption telemetry.
+// Public endpoints: /omnia/narrative, /omnia/story, /omnia/search, /omnia/graph, /omnia/notifications
+// Adoption beacon: POST /omnia/adoption/beacon (unauthenticated, fire-and-forget)
+router.use(lazyMatch("/omnia", () => import("./omnia"), "omnia"));
+
 export default router;

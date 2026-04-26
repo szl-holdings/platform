@@ -19,6 +19,14 @@ Ask before making major changes.
 Do not make changes to the folder `Z`.
 Do not make changes to the file `Y`.
 
+## OMNIA — Unified Portfolio Intelligence Layer (added)
+- **Package:** `packages/omnia-shell` (`@szl-holdings/omnia-shell`) — shared shell primitives: `OmniaShellProvider`, `OmniaTopBar`, `OmniaCommandPalette`, `Provenance`, `OmniaBreadcrumb`, `OmniaNotificationInbox`, hooks, and types.
+- **API:** `artifacts/api-server/src/routes/omnia.ts` — world model routes at `/api/omnia/*`: `/graph`, `/entities`, `/narrative`, `/search`, `/notifications`, `/ripple/:entityId`, `/story`, `/adoption`, `/adoption/beacon`.
+- **Command Surface pages:** `artifacts/command/src/pages/omnia/` — hub (`index.tsx`), world model graph (`world-model.tsx`), synthesis narrative (`narrative.tsx`), ripple impact view (`ripple.tsx`), public story mode (`story.tsx`). All accessible via `/omnia/*` routes and listed under the `OMNIA` group in Command nav.
+- **A11oy Adoption Dashboard:** `artifacts/a11oy/src/pages/OmniaAdoption.tsx` at `/a11oy/omnia-adoption` — tracks shell version, ⌘K coverage, beacon freshness, and adoption rate across all 12 artifacts.
+- **Shell adoption:** `OmniaShellProvider` is now wired into `main.tsx` for all 11 web artifacts: command, holdings, aegis, sentra, terra, vessels, counsel, a11oy, pulse, carlota-jo, lyte-command-center. Each fires an adoption beacon to `/api/omnia/adoption/beacon` on first mount.
+- **Mobile:** Two new screens in `szl-holdings-mobile/app/(shell)/`: `omnia-notifications.tsx` (cross-portfolio inbox with filter, mark-read, refresh) and `omnia-voice.tsx` (voice/text query surface with TTS read-back via expo-speech).
+
 ## System Architecture
 The platform is a pnpm monorepo built with TypeScript 5.9, React 19, Vite, and Node.js, employing a micro-frontend architecture for web applications. It has evolved into the FORGE Execution and Evidence Platform (AEEP).
 
