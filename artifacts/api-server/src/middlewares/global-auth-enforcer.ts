@@ -162,6 +162,10 @@ const PUBLIC_EXACT_PATHS = new Set([
   // Explorer. The mutating /api/graph/* endpoints are NOT covered here and
   // continue to enforce auth + tenant scope via routes/groups/graph.ts.
   "/api/graph/stream",
+  // Mission Runbooks list endpoint — exact path covers GET /api/mission-runbooks
+  // (the bare list URL without a trailing slash). Sub-paths are covered by the
+  // "/api/mission-runbooks/" prefix entry in PUBLIC_PREFIXES below.
+  "/api/mission-runbooks",
   // Helios — Frontier Intelligence & Evolution Engine read-only GET endpoints.
   // Exact-path entries ensure mutating routes (PATCH /proposals/:id/status,
   // PATCH /scanners/:id/toggle, POST /scanners/:id/run, POST /mcp) remain
@@ -374,6 +378,14 @@ const PUBLIC_PREFIXES = [
   // are NOT covered here and enforce auth via session/token.
   "/api/helios/mythos/",
   "/api/helios/memos/",
+  // Mission Runbooks — in-memory runbook library and run orchestration backing
+  // the Unified Command "Mission Runbooks" page. Fully public (same model as
+  // action-store / self-healing) because it operates on seeded demo state
+  // and does not read or write any tenant-scoped production data.
+  // Trailing slash ensures prefix match is boundary-safe and cannot bleed into
+  // future routes beginning with /api/mission-runbooks- (e.g. a hypothetical
+  // /api/mission-runbooks-archive route would not be accidentally whitelisted).
+  "/api/mission-runbooks/",
 ];
 
 /**

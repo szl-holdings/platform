@@ -240,7 +240,7 @@ const OPERATIONS_NAV: NavGroup[] = [
       { href: '/operations/digest', label: 'Digest Center', icon: FileText },
       { href: '/operations/finops', label: 'FinOps', icon: DollarSign },
       { href: '/operations/on-call', label: 'On-Call', icon: Phone },
-      { href: '/operations/runbook-studio', label: 'Runbook Studio', icon: BookOpen },
+      { href: '/operations/runbook-studio', label: 'Mission Runbooks', icon: BookOpen },
       { href: '/operations/noise-reduction', label: 'Noise Reduction', icon: Bell },
     ],
   },

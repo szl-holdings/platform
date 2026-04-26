@@ -47,8 +47,6 @@
     "wouter": "^3.3.5"
   },
   "dependencies": {
-    "@szl/alloy": "workspace:*",
-    "@szl/substrate-client": "workspace:*",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
@@ -60,17 +58,20 @@
     "@opentelemetry/semantic-conventions": "^1.40.0",
     "@szl-holdings/brand-registry": "workspace:*",
     "@szl-holdings/config": "workspace:*",
-    "@szl-holdings/domain-claims": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",
+    "@szl-holdings/domain-claims": "workspace:*",
+    "@szl-holdings/omnia-shell": "workspace:*",
+    "@szl-holdings/speech-specialist": "workspace:*",
     "@szl-holdings/telemetry-standards": "workspace:*",
+    "@szl/a11oy-runtime": "workspace:*",
+    "@szl/alloy": "workspace:*",
+    "@szl/substrate-client": "workspace:*",
     "@tanstack/query-persist-client-core": "^5.99.0",
     "@tanstack/query-sync-storage-persister": "^5.99.0",
     "@types/leaflet": "^1.9.21",
+    "@workspace/tokens": "workspace:*",
+    "jspdf": "^4.2.1",
     "leaflet": "^1.9.4",
-    "react-leaflet": "^5.0.0",
-    "@szl-holdings/speech-specialist": "workspace:*",
-    "@szl/a11oy-runtime": "workspace:*",
-    "@szl-holdings/omnia-shell": "workspace:*",
-    "@workspace/tokens": "workspace:*"
+    "react-leaflet": "^5.0.0"
   }
 }

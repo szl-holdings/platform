@@ -86,6 +86,9 @@ router.use(lazyMatch("/counsel/esignature", () => import("./esignature"), "esign
 // Counsel Court Filing Automation — electronic filing preparation and submission.
 router.use(lazyMatch("/counsel/court-filings", () => import("./court-filings"), "court-filings"));
 
+// Mission Runbooks — CRUD + run orchestration (public for internal command UI)
+router.use("/mission-runbooks", lazyMount(() => import("./v1-mission-runbooks"), "v1-mission-runbooks"));
+
 // Public API v1 — developer-facing versioned REST surface with OpenAPI spec.
 router.use(lazyMatch(["/v1", "/v1/api-keys", "/v1/openapi.json"], () => import("./public-api-v1"), "public-api-v1"));
 
@@ -271,6 +274,7 @@ router.use(lazyMatch(["/traces", "/runs"], () => import("./traces"), "traces"));
 // ACR Governance — v1 approval interrupts and run ledger (auth-gated)
 router.use(lazyMatch("/v1/approvals", () => import("./v1-approvals"), "v1-approvals"));
 router.use(lazyMatch("/v1/runs", () => import("./v1-runs"), "v1-runs"));
+
 router.use(lazyMatch("/reflections", () => import("./reflections"), "reflections"));
 router.use(lazyMatch("/plans", () => import("./plans"), "plans"));
 router.use(lazyMatch("/replay", () => import("./replay"), "replay"));
