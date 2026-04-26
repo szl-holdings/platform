@@ -7,9 +7,14 @@ import {
   ChevronDown,
   ChevronRight,
   Clock,
+  FlaskConical,
+  Lock,
   RefreshCw,
   RotateCcw,
   ShieldCheck,
+  Sparkles,
+  ThumbsDown,
+  ThumbsUp,
   Users,
   Workflow,
   Wrench,
@@ -291,6 +296,276 @@ function ApprovalsTimeline({ approvals }: { approvals: ApprovalDecision[] }) {
   );
 }
 
+const DUAL_TIERS = new Set(['dual-approved', 'regulated', 'sovereign']);
+
+function deterministicRandom(seed: number) {
+  let s = seed;
+  return () => {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    return ((s >>> 0) / 0xffffffff);
+  };
+}
+
+function buildSignatureStub(requestId: string): { pubKey: string; sig: string } {
+  const seed = requestId.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  const rng = deterministicRandom(seed);
+  const hexByte = () => Math.floor(rng() * 256).toString(16).padStart(2, '0');
+  const pubKey = Array.from({ length: 8 }, hexByte).join('');
+  const sig = Array.from({ length: 8 }, hexByte).join('');
+  return { pubKey, sig };
+}
+
+function CryptoVerificationBadge({ requestId, status }: { requestId: string; status: string }) {
+  const [open, setOpen] = useState(false);
+  const { pubKey, sig } = buildSignatureStub(requestId);
+  const isDecided = status !== 'pending';
+
+  if (!isDecided) {
+    return (
+      <div
+        className="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-mono"
+        style={{ color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+      >
+        <Lock className="w-3 h-3" />
+        Proof chain sealed on decision
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen((p) => !p)}
+        className="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-mono transition-colors"
+        style={{ color: '#8b7ac8', background: 'rgba(139,122,200,0.08)', border: '1px solid rgba(139,122,200,0.25)' }}
+      >
+        <Lock className="w-3 h-3" />
+        Ed25519 Proof Chain
+        {open ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+      </button>
+      {open && (
+        <div
+          className="mt-1.5 p-2 rounded text-[10px] font-mono space-y-1"
+          style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.05)', color: 'rgba(200,210,225,0.8)' }}
+        >
+          <div style={{ color: '#d4a054', marginBottom: 4 }} className="text-[9px] uppercase tracking-widest">
+            Demo mode — proof chain schema (live verification in follow-up task #3860)
+          </div>
+          <div><span style={{ color: 'rgba(255,255,255,0.4)' }}>Algorithm:</span> Ed25519 (ECDH-SPKI)</div>
+          <div><span style={{ color: 'rgba(255,255,255,0.4)' }}>Public Key:</span> {pubKey}… (sealed at verdict time)</div>
+          <div><span style={{ color: 'rgba(255,255,255,0.4)' }}>Signature:</span> {sig}… (base64url, tamper-detectable)</div>
+          <div><span style={{ color: 'rgba(255,255,255,0.4)' }}>Payload:</span> {requestId.slice(0, 12)}:verdict:actor:timestamp</div>
+          <div style={{ color: 'rgba(255,255,255,0.45)' }}>When connected to the backend, the UI will call verifyApprovalSignature() to confirm this signature over the stored decision payload and display a real pass/fail result.</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface CounterfactualBullet {
+  verdict: 'approve' | 'deny';
+  bullets: string[];
+  confidence: number;
+}
+
+function buildCounterfactual(approval: GuardianApprovalRequest): { approve: CounterfactualBullet; deny: CounterfactualBullet } {
+  const seed = approval.requestId.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  const rng = deterministicRandom(seed);
+  const tierRisk: Record<string, number> = { advisory: 1, supervised: 2, 'operator-approved': 3, 'dual-approved': 4, regulated: 5, sovereign: 6 };
+  const risk = tierRisk[approval.tier] ?? 3;
+  const high = risk >= 4;
+
+  return {
+    approve: {
+      verdict: 'approve',
+      confidence: Math.round((high ? 0.55 + rng() * 0.15 : 0.72 + rng() * 0.12) * 100) / 100,
+      bullets: [
+        `Agent proceeds with "${approval.action}" under ${approval.tier} tier policy controls.`,
+        high ? 'Rollback window of 48h verified; reversal capability confirmed pre-execution.' : 'Execution completes with full audit trail applied.',
+        high ? 'Dual-approval record and Ed25519 proof chain preserved for compliance.' : 'Action logged and indexed to evidence chain for auditability.',
+        'Cost and latency impact within projected budget envelope.',
+        'No external state changes occur beyond the approved action scope.',
+      ],
+    },
+    deny: {
+      verdict: 'deny',
+      confidence: Math.round((high ? 0.72 + rng() * 0.12 : 0.58 + rng() * 0.15) * 100) / 100,
+      bullets: [
+        `Action "${approval.action}" is blocked; agent workflow pauses at current step.`,
+        high ? 'Denial escalated to governance memory; prevents repeated auto-approval attempts.' : 'Denial logged to audit trail; no state changes occur.',
+        'Agent receives structured feedback — policyReason injected into context for replanning.',
+        high ? 'Compliance record created; denial counts toward tier re-evaluation.' : 'Override window remains open 24h if additional context warrants reconsideration.',
+        'No external calls, data writes, or financial commitments initiated.',
+      ],
+    },
+  };
+}
+
+function CounterfactualPreviewPanel({ approval }: { approval: GuardianApprovalRequest }) {
+  const [open, setOpen] = useState(false);
+  const { approve, deny } = buildCounterfactual(approval);
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen((p) => !p)}
+        className="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-mono transition-colors"
+        style={{ color: '#8b7ac8', background: 'rgba(139,122,200,0.08)', border: '1px solid rgba(139,122,200,0.25)' }}
+      >
+        <Sparkles className="w-3 h-3" />
+        Counterfactual Preview
+        <span className="text-[8px] px-1 py-px rounded" style={{ color: '#d4a054', background: 'rgba(212,160,84,0.12)', border: '1px solid rgba(212,160,84,0.25)' }}>DEMO</span>
+        {open ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+      </button>
+      {open && (
+        <div
+          className="mt-2 grid md:grid-cols-2 gap-3 p-3 rounded"
+          style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(139,122,200,0.15)' }}
+        >
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <ThumbsUp className="w-3 h-3" style={{ color: '#22c55e' }} />
+              <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color: '#22c55e' }}>
+                If Approved · {Math.round(approve.confidence * 100)}% confidence
+              </span>
+            </div>
+            <ul className="flex flex-col gap-1">
+              {approve.bullets.map((b, i) => (
+                <li key={i} className="flex items-start gap-1.5 text-[10px]" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                  <span style={{ color: '#22c55e', marginTop: 2 }}>·</span>
+                  {b}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5 mb-2">
+              <ThumbsDown className="w-3 h-3" style={{ color: '#ef4444' }} />
+              <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color: '#ef4444' }}>
+                If Denied · {Math.round(deny.confidence * 100)}% confidence
+              </span>
+            </div>
+            <ul className="flex flex-col gap-1">
+              {deny.bullets.map((b, i) => (
+                <li key={i} className="flex items-start gap-1.5 text-[10px]" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                  <span style={{ color: '#ef4444', marginTop: 2 }}>·</span>
+                  {b}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+type QuorumVerdict = 'approve' | 'deny' | 'escalate';
+
+interface EvaluatorResult {
+  evaluatorId: string;
+  persona: string;
+  verdict: QuorumVerdict;
+  reasoning: string;
+  confidence: number;
+}
+
+function buildQuorum(approval: GuardianApprovalRequest): EvaluatorResult[] {
+  const seed = approval.requestId.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  const rng = deterministicRandom(seed + 99);
+  const tierRisk: Record<string, number> = { advisory: 1, supervised: 2, 'operator-approved': 3, 'dual-approved': 4, regulated: 5, sovereign: 6 };
+  const risk = tierRisk[approval.tier] ?? 3;
+
+  const personas = [
+    { id: 'risk-auditor', persona: 'Risk Auditor', bias: 'conservative' },
+    { id: 'ops-efficiency', persona: 'Operations Lead', bias: 'permissive' },
+    { id: 'security-analyst', persona: 'Security Analyst', bias: 'conservative' },
+  ];
+
+  return personas.map((p) => {
+    const base = p.bias === 'conservative' ? Math.max(0.1, 0.6 - risk * 0.08) : Math.min(0.9, 0.7 - risk * 0.04);
+    const roll = rng();
+    const verdict: QuorumVerdict = roll < base ? 'approve' : roll < base + 0.15 ? 'escalate' : 'deny';
+    const confidence = Math.round((0.55 + rng() * 0.35) * 100) / 100;
+    const domainLabel = '';
+    const reasoning = verdict === 'approve'
+      ? `[${p.persona}] Action "${approval.action}"${domainLabel} within acceptable range for ${approval.tier} tier. Evidence chain supports proceeding at risk level ${risk}/6.`
+      : verdict === 'escalate'
+      ? `[${p.persona}] Confidence insufficient for autonomous decision at risk level ${risk}/6. Escalating to human arbiter.`
+      : `[${p.persona}] Action "${approval.action}" should be denied. Risk profile ${risk}/6 exceeds ${p.persona.toLowerCase()} threshold.`;
+    return { evaluatorId: p.id, persona: p.persona, verdict, reasoning, confidence };
+  });
+}
+
+const QUORUM_VERDICT_COLORS: Record<QuorumVerdict, string> = {
+  approve: '#22c55e',
+  deny: '#ef4444',
+  escalate: '#d4a054',
+};
+
+function ConsensusQuorumPanel({ approval }: { approval: GuardianApprovalRequest }) {
+  const [open, setOpen] = useState(false);
+  const evaluators = buildQuorum(approval);
+  const tally = evaluators.reduce(
+    (t, e) => { t[e.verdict]++; return t; },
+    { approve: 0, deny: 0, escalate: 0 } as Record<QuorumVerdict, number>,
+  );
+  const maxVotes = Math.max(...Object.values(tally));
+  const majority = maxVotes > evaluators.length / 2;
+  const topVerdict = (Object.entries(tally).sort(([, a], [, b]) => b - a)[0]?.[0] ?? 'escalate') as QuorumVerdict;
+  const autoEscalated = !majority;
+  const finalVerdict = autoEscalated ? 'escalate' : topVerdict;
+  const finalColor = QUORUM_VERDICT_COLORS[finalVerdict];
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen((p) => !p)}
+        className="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-mono transition-colors"
+        style={{ color: finalColor, background: `${finalColor}10`, border: `1px solid ${finalColor}30` }}
+      >
+        <FlaskConical className="w-3 h-3" />
+        Consensus Quorum: {finalVerdict.toUpperCase()}{autoEscalated ? ' (escalated)' : ''}
+        <span className="text-[8px] px-1 py-px rounded" style={{ color: '#d4a054', background: 'rgba(212,160,84,0.12)', border: '1px solid rgba(212,160,84,0.25)' }}>DEMO</span>
+        {open ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+      </button>
+      {open && (
+        <div
+          className="mt-2 p-3 rounded space-y-2"
+          style={{ background: 'rgba(0,0,0,0.2)', border: `1px solid ${finalColor}20` }}
+        >
+          <div className="flex items-center gap-4 mb-3">
+            <div className="flex items-center gap-2">
+              {(['approve', 'deny', 'escalate'] as QuorumVerdict[]).map((v) => (
+                <span key={v} className="text-[9px] font-mono px-1.5 py-0.5 rounded uppercase" style={{ color: QUORUM_VERDICT_COLORS[v], background: `${QUORUM_VERDICT_COLORS[v]}12`, border: `1px solid ${QUORUM_VERDICT_COLORS[v]}30` }}>
+                  {tally[v]} {v}
+                </span>
+              ))}
+            </div>
+            {autoEscalated && (
+              <span className="text-[9px] font-mono" style={{ color: '#d4a054' }}>No majority → auto-escalated</span>
+            )}
+          </div>
+          {evaluators.map((ev) => (
+            <div
+              key={ev.evaluatorId}
+              className="p-2 rounded text-[10px]"
+              style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.04)' }}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span style={{ color: QUORUM_VERDICT_COLORS[ev.verdict] }} className="font-mono font-bold uppercase text-[9px]">{ev.verdict}</span>
+                <span style={{ color: 'rgba(255,255,255,0.65)' }} className="font-semibold">{ev.persona}</span>
+                <span style={{ color: 'rgba(255,255,255,0.35)' }} className="font-mono">{Math.round(ev.confidence * 100)}% confidence</span>
+              </div>
+              <div style={{ color: 'rgba(255,255,255,0.6)' }}>{ev.reasoning}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ApprovalRow({
   approval,
   expanded,
@@ -412,6 +687,15 @@ function ApprovalRow({
 
       {expanded && (
         <div className="px-3 pb-3 pt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+          <div className="flex items-center gap-2 flex-wrap mt-2 mb-3">
+            <CryptoVerificationBadge requestId={approval.requestId} status={approval.status} />
+          </div>
+
+          <div className="flex flex-col gap-2 mb-3">
+            <CounterfactualPreviewPanel approval={approval} />
+            {DUAL_TIERS.has(approval.tier) && <ConsensusQuorumPanel approval={approval} />}
+          </div>
+
           <div className="grid md:grid-cols-2 gap-3 mt-2">
             <div>
               <div

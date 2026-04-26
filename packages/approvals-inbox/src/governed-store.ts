@@ -18,6 +18,7 @@ import {
   type ApprovalRequest,
   ApprovalRequestSchema,
 } from '@szl-holdings/contracts/governance';
+import { signApprovalDecision } from '@workspace/guardian/crypto';
 import { randomUUID } from 'node:crypto';
 
 // ─── Store ───────────────────────────────────────────────────────────────────
@@ -225,7 +226,13 @@ export function decideApproval(
 
   const now = Date.now();
   const resolvedDecisionId = opts.decisionId ?? randomUUID();
-  const signature = Buffer.from(`${opts.actor}:${now}:${opts.verdict}`).toString('base64');
+  const { signature, publicKeyHex } = signApprovalDecision({
+    requestId: opts.requestId,
+    verdict: opts.verdict,
+    actor: opts.actor,
+    decidedAt: now,
+    tenantId: req.tenantId,
+  });
   const decision = ApprovalDecisionSchema.parse({
     decisionId: resolvedDecisionId,
     requestId: opts.requestId,
@@ -234,6 +241,7 @@ export function decideApproval(
     reason: opts.reason,
     decidedAt: now,
     signature,
+    publicKeyHex,
   });
 
   store.saveDecision(decision);

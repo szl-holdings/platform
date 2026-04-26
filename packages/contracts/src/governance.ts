@@ -53,8 +53,10 @@ export const ApprovalDecisionSchema = z.object({
   actor: z.string().min(1),
   reason: z.string().min(1).max(2048),
   decidedAt: z.number().int().positive(),
-  /** Signature blob — actor + decidedAt + verdict, base64-encoded. */
+  /** Ed25519 signature over requestId:verdict:actor:decidedAt, base64url-encoded. */
   signature: z.string().optional(),
+  /** SPKI-DER hex-encoded Ed25519 public key used to produce this signature. */
+  publicKeyHex: z.string().optional(),
 });
 export type ApprovalDecision = z.infer<typeof ApprovalDecisionSchema>;
 

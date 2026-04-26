@@ -271,6 +271,7 @@ const GuardianApprovalsPage = lazy(() => import('./pages/guardian-approvals'));
 const PolicyManagerPage = lazy(() => import('./pages/policy-manager'));
 const GovernanceTiersPage = lazy(() => import('./pages/governance-tiers'));
 const GuardrailConfigsPage = lazy(() => import('./pages/guardrail-configs'));
+const GuardrailHealthPage = lazy(() => import('./pages/guardrail-health'));
 const ApprovalsCenter = lazy(() => import('@lyte/pages/approvals-center'));
 const CommandInbox = lazy(() => import('@lyte/pages/command-inbox'));
 const OwnershipMap = lazy(() => import('@lyte/pages/ownership-map-new'));
@@ -401,6 +402,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/operations/policy-manager', label: 'Policy Manager', group: 'Operations' },
   { href: '/operations/governance-tiers', label: 'Governance Tiers', group: 'Operations' },
   { href: '/operations/guardrail-configs', label: 'Guardrail Configs', group: 'Operations' },
+  { href: '/operations/guardrail-health', label: 'Guardrail Health', group: 'Operations' },
   { href: '/operations/structured-intelligence', label: 'Structured Intelligence', group: 'Operations' },
   { href: '/operations/inbox', label: 'Command Inbox', group: 'Operations' },
   { href: '/operations/ownership', label: 'Ownership Map', group: 'Operations' },
@@ -701,6 +703,10 @@ function AppShell() {
               <Route
                 path="/operations/guardrail-configs"
                 component={() => <GuardrailConfigsPage />}
+              />
+              <Route
+                path="/operations/guardrail-health"
+                component={() => <GuardrailHealthPage />}
               />
               <Route path="/operations/inbox" component={() => <CommandInbox />} />
               <Route path="/operations/ownership" component={() => <OwnershipMap />} />

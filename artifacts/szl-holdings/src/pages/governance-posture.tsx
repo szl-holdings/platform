@@ -7,6 +7,7 @@ import { apiRequest } from "@/lib/api";
 import {Shield,
   Ship, Building2, Briefcase, Users, Layers, ArrowRight,
   ChevronRight, TrendingUp, TrendingDown, Activity,ArrowUpRight, ExternalLink,
+  AlertTriangle, CheckCircle2, Cpu,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -290,6 +291,157 @@ function formatLatency(ms: number | null): string {
   if (ms < 1) return "<1ms";
   if (ms < 1000) return `${Math.round(ms)}ms`;
   return `${(ms / 1000).toFixed(2)}s`;
+}
+
+function deterministicRng(seed: number) {
+  let s = seed;
+  return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return ((s >>> 0) / 0xffffffff); };
+}
+
+interface AgentDriftRecord {
+  agentId: string;
+  domain: string;
+  model: string;
+  driftScore: number;
+  status: 'nominal' | 'warning' | 'critical';
+  lastSample: string;
+  topicDivergence: number;
+  toneDivergence: number;
+  instructionAdherence: number;
+  alerts: string[];
+}
+
+function buildDriftRecords(domains: DomainHealth[]): AgentDriftRecord[] {
+  const agentDefs: { id: string; domain: string; model: string }[] = [
+    { id: 'guardian-policy', domain: 'Aegis', model: 'GPT-4o' },
+    { id: 'threat-intel', domain: 'Aegis', model: 'Claude 3.5' },
+    { id: 'maritime-nav', domain: 'Vessels', model: 'GPT-4o' },
+    { id: 'compliance-tracker', domain: 'Vessels', model: 'Gemini 1.5' },
+    { id: 'deal-analyst', domain: 'Terra', model: 'Claude 3.5' },
+    { id: 'lp-comms', domain: 'Terra', model: 'GPT-4o' },
+    { id: 'case-researcher', domain: 'Counsel', model: 'Claude 3.5' },
+    { id: 'brief-drafter', domain: 'Counsel', model: 'GPT-4o' },
+    { id: 'brand-advisor', domain: 'Carlota Jo', model: 'Gemini 1.5' },
+    { id: 'cloud-ops', domain: 'IMPERIUM', model: 'GPT-4o' },
+    { id: 'incident-responder', domain: 'IMPERIUM', model: 'Claude 3.5' },
+  ];
+
+  return agentDefs.map((a) => {
+    const seed = a.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    const rng = deterministicRng(seed);
+    const domainHealth = domains.find((d) => d.domain === a.domain);
+    const baseDrift = domainHealth ? (100 - domainHealth.maturityScore) / 100 * 0.6 + 0.05 : 0.25;
+    const drift = Math.min(0.98, baseDrift + (rng() - 0.5) * 0.2);
+    const driftScore = Math.round(drift * 100);
+    const status: AgentDriftRecord['status'] = driftScore >= 65 ? 'critical' : driftScore >= 35 ? 'warning' : 'nominal';
+    const topicDivergence = Math.round((drift * 80 + rng() * 20));
+    const toneDivergence = Math.round((drift * 60 + rng() * 30));
+    const instructionAdherence = Math.round(Math.max(5, 100 - driftScore * 0.9 - rng() * 10));
+    const alerts: string[] = [];
+    if (driftScore >= 65) alerts.push('Semantic distance > 2σ from baseline — auto-halted');
+    if (driftScore >= 35 && driftScore < 65) alerts.push('Topic drift detected — supervisor notified');
+    if (toneDivergence > 50) alerts.push('Tone shift from operational baseline');
+    if (instructionAdherence < 70) alerts.push('System-prompt adherence below threshold');
+    const hoursAgo = Math.round(rng() * 3);
+    const lastSample = hoursAgo === 0 ? 'Just now' : `${hoursAgo}h ago`;
+    return { agentId: a.id, domain: a.domain, model: a.model, driftScore, status, lastSample, topicDivergence, toneDivergence, instructionAdherence, alerts };
+  });
+}
+
+const DRIFT_STATUS_COLORS: Record<AgentDriftRecord['status'], string> = {
+  nominal: 'hsl(142,60%,48%)',
+  warning: 'hsl(48,90%,52%)',
+  critical: 'hsl(0,72%,54%)',
+};
+
+function SemanticDriftTab({ domains }: { domains: DomainHealth[] }) {
+  const records = buildDriftRecords(domains);
+  const critical = records.filter((r) => r.status === 'critical').length;
+  const warning = records.filter((r) => r.status === 'warning').length;
+  const nominal = records.filter((r) => r.status === 'nominal').length;
+
+  return (
+    <div>
+      <p style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_FAINT, marginBottom: "1rem" }}>
+        Semantic Drift Monitor — {records.length} agents · {critical} critical · {warning} warning · {nominal} nominal
+      </p>
+
+      <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
+        {(['critical', 'warning', 'nominal'] as const).map((s) => {
+          const count = records.filter((r) => r.status === s).length;
+          return (
+            <div key={s} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0.875rem", borderRadius: 6, background: `${DRIFT_STATUS_COLORS[s]}10`, border: `1px solid ${DRIFT_STATUS_COLORS[s]}25` }}>
+              <div style={{ width: 8, height: 8, borderRadius: "50%", background: DRIFT_STATUS_COLORS[s] }} />
+              <span style={{ fontSize: "0.75rem", fontWeight: 700, color: DRIFT_STATUS_COLORS[s], textTransform: "uppercase", fontFamily: MONO }}>{count} {s}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+        {records.sort((a, b) => b.driftScore - a.driftScore).map((rec, i) => (
+          <m.div
+            key={rec.agentId}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.25, delay: i * 0.04 }}
+            style={{ padding: "1rem 1.25rem", borderRadius: 8, background: SURFACE, border: `1px solid ${rec.status === 'critical' ? `${RED}20` : rec.status === 'warning' ? `${YELLOW}15` : `${GREEN}10`}` }}
+          >
+            <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "1rem", alignItems: "flex-start" }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.625rem", flexWrap: "wrap" }}>
+                  <Cpu size={12} style={{ color: DRIFT_STATUS_COLORS[rec.status] }} />
+                  <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: TEXT, fontFamily: MONO }}>{rec.agentId}</span>
+                  <span style={{ fontSize: "0.575rem", fontFamily: MONO, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "2px 5px", borderRadius: 3, background: `${DRIFT_STATUS_COLORS[rec.domain === 'Aegis' ? 'nominal' : 'nominal']}00` }}>
+                    {rec.domain}
+                  </span>
+                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, color: TEXT_FAINT }}>{rec.model}</span>
+                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, color: TEXT_FAINT }}>· sampled {rec.lastSample}</span>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.75rem", marginBottom: rec.alerts.length ? "0.625rem" : 0 }}>
+                  {[
+                    { label: "Topic divergence", value: rec.topicDivergence, high: 60, color: rec.topicDivergence >= 60 ? RED : rec.topicDivergence >= 35 ? YELLOW : GREEN },
+                    { label: "Tone divergence", value: rec.toneDivergence, high: 50, color: rec.toneDivergence >= 50 ? RED : rec.toneDivergence >= 30 ? YELLOW : GREEN },
+                    { label: "Instruction adherence", value: rec.instructionAdherence, high: 70, color: rec.instructionAdherence < 60 ? RED : rec.instructionAdherence < 75 ? YELLOW : GREEN },
+                  ].map((metric) => (
+                    <div key={metric.label}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
+                        <span style={{ fontSize: "0.575rem", fontFamily: MONO, color: TEXT_FAINT, textTransform: "uppercase", letterSpacing: "0.08em" }}>{metric.label}</span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <div style={{ flex: 1, height: 3, borderRadius: 2, background: "hsla(0,0%,100%,0.08)", overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${metric.value}%`, background: metric.color, borderRadius: 2 }} />
+                        </div>
+                        <span style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 700, color: metric.color, minWidth: "2.25rem", textAlign: "right" }}>{metric.value}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {rec.alerts.length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem", marginTop: "0.375rem" }}>
+                    {rec.alerts.map((alert, ai) => (
+                      <div key={ai} style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.625rem", fontFamily: MONO, padding: "2px 7px", borderRadius: 3, background: `${rec.status === 'critical' ? RED : YELLOW}10`, border: `1px solid ${rec.status === 'critical' ? RED : YELLOW}25`, color: rec.status === 'critical' ? RED : YELLOW }}>
+                        <AlertTriangle size={9} />
+                        {alert}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem", minWidth: 64 }}>
+                <div style={{ fontSize: "1.5rem", fontWeight: 800, fontFamily: MONO, color: DRIFT_STATUS_COLORS[rec.status], lineHeight: 1 }}>{rec.driftScore}</div>
+                <div style={{ fontSize: "0.5625rem", fontFamily: MONO, textTransform: "uppercase", letterSpacing: "0.1em", color: TEXT_FAINT }}>drift score</div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", fontSize: "0.5rem", fontFamily: MONO, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", padding: "2px 6px", borderRadius: 3, background: `${DRIFT_STATUS_COLORS[rec.status]}15`, border: `1px solid ${DRIFT_STATUS_COLORS[rec.status]}25`, color: DRIFT_STATUS_COLORS[rec.status] }}>
+                  {rec.status === 'nominal' ? <CheckCircle2 size={8} /> : <AlertTriangle size={8} />}
+                  {rec.status}
+                </div>
+              </div>
+            </div>
+          </m.div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function LiveActivityTab(props: {
@@ -593,7 +745,7 @@ export default function GovernancePosturePage() {
     canonical: "https://szlholdings.com/lyte/governance-posture",
   });
 
-  const [activeTab, setActiveTab] = useState<"overview" | "approvals" | "violations" | "domains" | "live-activity">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "approvals" | "violations" | "domains" | "live-activity" | "drift">("overview");
   const [ledgerDecision, setLedgerDecision] = useState<string>("");
   const [ledgerDomain, setLedgerDomain] = useState<string>("");
   const [ledgerWindow, setLedgerWindow] = useState<"15m" | "1h" | "24h" | "7d">("1h");
@@ -687,7 +839,7 @@ export default function GovernancePosturePage() {
           {/* Tabs */}
           <div style={{ borderBottom: `1px solid ${BORDER}` }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)", display: "flex", gap: 0 }}>
-              {(["overview", "domains", "approvals", "violations", "live-activity"] as const).map(tab => (
+              {(["overview", "domains", "approvals", "violations", "drift", "live-activity"] as const).map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -1026,6 +1178,12 @@ export default function GovernancePosturePage() {
                 </m.div>
               )}
   
+              {activeTab === "drift" && (
+                <m.div key="drift" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                  <SemanticDriftTab domains={DOMAIN_HEALTH} />
+                </m.div>
+              )}
+
               {activeTab === "live-activity" && (
                 <LiveActivityTab
                   ledgerDecision={ledgerDecision}

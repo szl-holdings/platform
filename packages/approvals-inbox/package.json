@@ -22,7 +22,8 @@
     }
   },
   "dependencies": {
-    "@szl-holdings/contracts": "workspace:*"
+    "@szl-holdings/contracts": "workspace:*",
+    "@workspace/guardian": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:"

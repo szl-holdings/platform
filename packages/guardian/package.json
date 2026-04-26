@@ -20,6 +20,18 @@
     "./decision-engine": {
       "types": "./dist/decision-engine.d.ts",
       "import": "./src/decision-engine.ts"
+    },
+    "./crypto": {
+      "types": "./dist/crypto.d.ts",
+      "import": "./src/crypto.ts"
+    },
+    "./telemetry-buffer": {
+      "types": "./dist/telemetry-buffer.d.ts",
+      "import": "./src/telemetry-buffer.ts"
+    },
+    "./guardrail-prober": {
+      "types": "./dist/guardrail-prober.d.ts",
+      "import": "./src/guardrail-prober.ts"
     }
   },
   "dependencies": {
