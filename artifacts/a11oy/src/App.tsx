@@ -61,6 +61,8 @@ const DeepResearch = lazy(() => import('./pages/DeepResearch').then(m => ({ defa
 const CiAction = lazy(() => import('./pages/CiAction').then(m => ({ default: m.CiAction })));
 const AgiConvergence = lazy(() => import('./pages/AgiConvergence').then(m => ({ default: m.AgiConvergence })));
 const OmniaAdoptionPage = lazy(() => import('./pages/OmniaAdoption').then(m => ({ default: m.OmniaAdoption })));
+const Solutions = lazy(() => import('./pages/Solutions').then(m => ({ default: m.Solutions })));
+
 
 export default function App() {
   return (
@@ -108,6 +110,7 @@ export default function App() {
         <Route path={`${base}/deep-research`} component={DeepResearch} />
         <Route path={`${base}/action`} component={CiAction} />
         <Route path={`${base}/convergence`} component={AgiConvergence} />
+        <Route path={`${base}/solutions`} component={Solutions} />
         <Route path={`${base}/about`} component={About} />
         <Route path={`${base}/omnia-adoption`} component={OmniaAdoptionPage} />
         <Route>

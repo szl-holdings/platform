@@ -388,6 +388,9 @@ importers:
       graphql-ws:
         specifier: ^6.0.8
         version: 6.0.8(graphql@16.13.2)(ws@8.20.0)
+      jspdf:
+        specifier: ^4.2.1
+        version: 4.2.1
       urql:
         specifier: ^5.0.1
         version: 5.0.1(graphql@16.13.2)(react@19.1.0)

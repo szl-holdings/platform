@@ -242,6 +242,7 @@ export function HomePage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '2.25rem' }}>
           {[
             { label: 'Platform', href: b('/fabric') },
+            { label: 'Solutions', href: b('/solutions') },
             { label: 'Proof Chain', href: b('/proof') },
             { label: 'Governance', href: b('/governance') },
             { label: 'Now Board', href: b('/now') },
