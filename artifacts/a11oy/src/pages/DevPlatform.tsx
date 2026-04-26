@@ -34,6 +34,15 @@ const SDK_PRIMITIVES = [
   { name: 'AgentBuilder', desc: 'Visual workflow editor — drag-and-drop agent graphs with ChatKit embeddable UI. No-code to full-code continuum.', status: 'stable', lang: 'web' },
   { name: 'DeepResearch', desc: 'Multi-step autonomous research agent. Searches web, reads documents, synthesizes findings with citations.', status: 'stable', lang: 'py + ts' },
   { name: 'Compactor', desc: 'Context window management — automatic compaction, token counting, and prompt caching for long conversations.', status: 'stable', lang: 'py + ts' },
+  { name: 'AnthropicClient', desc: 'First-class Anthropic SDK integration — Messages API, streaming, tool use, vision, and extended thinking. Drop-in replacement for anthropic.Anthropic() with governed proof chain.', status: 'stable', lang: 'py + ts' },
+  { name: 'ClaudeMessages', desc: 'Governed wrapper for Claude Messages API — supports Claude Opus, Sonnet, Haiku with automatic model routing, token tracking, and cost attribution per workspace.', status: 'stable', lang: 'py + ts' },
+  { name: 'ClaudeToolUse', desc: 'Anthropic tool_use integration — map a11oy FunctionTools to Claude tool schemas automatically. Input validation, output parsing, and proof chain on every tool call.', status: 'stable', lang: 'py + ts' },
+  { name: 'ExtendedThinking', desc: 'Claude extended thinking support — budget_tokens control, thinking block streaming, chain-of-thought governance. Proof chain captures reasoning traces.', status: 'stable', lang: 'py + ts' },
+  { name: 'BatchMessages', desc: 'Anthropic Message Batches API — 50% cost savings on bulk workloads. Governed batch submission with proof chain on every result. 24h processing window.', status: 'stable', lang: 'py + ts' },
+  { name: 'PromptCaching', desc: 'Anthropic prompt caching — cache system prompts and long contexts. Up to 90% cost reduction on repeated patterns. Cache hit tracking in observability.', status: 'stable', lang: 'py + ts' },
+  { name: 'CitationEngine', desc: 'Anthropic citations support — extract source attributions from Claude responses. Map citations to proof chain entries for verifiable provenance.', status: 'stable', lang: 'py + ts' },
+  { name: 'MCPClientSDK', desc: 'Model Context Protocol client — connect to any MCP server from Python or TypeScript. Tool discovery, governed invocation, and streaming results.', status: 'stable', lang: 'py + ts' },
+  { name: 'MultiModalPipeline', desc: 'Unified multi-modal processing — text, images, PDFs, audio transcription routed to optimal model. Content type detection and governed processing pipeline.', status: 'stable', lang: 'py + ts' },
 ];
 
 const TOOL_TYPES = [
@@ -357,6 +366,168 @@ const GUIDES = [
   { title: 'Predicted Outputs', desc: 'Reduce latency by providing expected output structure — model confirms or corrects', category: 'Going Live', difficulty: 'Advanced' },
 ];
 
+const ADMIN_API = {
+  roles: [
+    { role: 'owner', permissions: 'Full organization control, billing, API key provisioning, member management' },
+    { role: 'admin', permissions: 'Manage members, workspaces, API keys, and governance policies' },
+    { role: 'developer', permissions: 'Create agents, run evals, access SDK, deploy to staging' },
+    { role: 'analyst', permissions: 'View dashboards, run queries, access proof chain audit trail' },
+    { role: 'auditor', permissions: 'Read-only access to proof chains, governance logs, and compliance reports' },
+  ],
+  workspaces: [
+    { name: 'Maritime Operations', members: 12, agents: 34, apiKeys: 8, status: 'active', spend: '$4,892/mo' },
+    { name: 'Legal & Compliance', members: 8, agents: 18, apiKeys: 5, status: 'active', spend: '$2,341/mo' },
+    { name: 'Cyber Defense', members: 15, agents: 47, apiKeys: 12, status: 'active', spend: '$6,203/mo' },
+    { name: 'Real Estate Intel', members: 6, agents: 14, apiKeys: 4, status: 'active', spend: '$1,847/mo' },
+    { name: 'Executive Command', members: 4, agents: 8, apiKeys: 3, status: 'active', spend: '$892/mo' },
+    { name: 'Sandbox / R&D', members: 18, agents: 62, apiKeys: 15, status: 'active', spend: '$3,421/mo' },
+  ],
+  dataResidency: [
+    { region: 'US East (Virginia)', provider: 'AWS', status: 'primary', latency: '12ms' },
+    { region: 'US West (Oregon)', provider: 'AWS', status: 'failover', latency: '48ms' },
+    { region: 'EU West (Frankfurt)', provider: 'Azure', status: 'active', latency: '34ms' },
+    { region: 'Asia Pacific (Tokyo)', provider: 'GCP', status: 'active', latency: '67ms' },
+    { region: 'Gov Cloud (US)', provider: 'AWS GovCloud', status: 'active', latency: '18ms' },
+  ],
+  apiKeys: [
+    { prefix: 'sk-a11oy-prod-...', type: 'Production', workspace: 'Maritime Operations', created: '2026-01-15', lastUsed: '2m ago', calls: '847K' },
+    { prefix: 'sk-a11oy-prod-...', type: 'Production', workspace: 'Cyber Defense', created: '2026-02-01', lastUsed: '30s ago', calls: '1.2M' },
+    { prefix: 'sk-a11oy-admin-...', type: 'Admin', workspace: 'Organization', created: '2025-12-01', lastUsed: '1h ago', calls: '12K' },
+    { prefix: 'sk-a11oy-dev-...', type: 'Development', workspace: 'Sandbox / R&D', created: '2026-03-10', lastUsed: '5m ago', calls: '234K' },
+    { prefix: 'sk-a11oy-audit-...', type: 'Audit', workspace: 'Executive Command', created: '2026-01-20', lastUsed: '4h ago', calls: '8.4K' },
+  ],
+};
+
+const CLOUD_PLATFORMS = [
+  {
+    name: 'Microsoft Azure AI Foundry',
+    desc: 'Deploy a11oy agents on Azure AI Foundry with enterprise-grade security, compliance, and global scale. Leverage Azure Entra ID for SSO, Azure Key Vault for secrets, and Azure Monitor for observability.',
+    status: 'GA',
+    features: ['Entra ID SSO', 'Key Vault integration', 'Private endpoints', 'Content safety', 'Managed identity', 'Global regions'],
+    code: `from a11oy.cloud import AzureFoundry
+
+client = AzureFoundry(
+    resource_name="szl-a11oy-prod",
+    deployment="governed-agent-v4",
+    api_version="2026-04-01",
+)
+
+resp = client.agents.run(
+    agent="maritime-ops",
+    input="Analyze sanctions risk for fleet",
+    governance={"proof_chain": True},
+)`,
+  },
+  {
+    name: 'Amazon Bedrock',
+    desc: 'Run a11oy agents on Amazon Bedrock with VPC isolation, IAM-based access control, and CloudTrail audit logging. Cross-region inference for latency optimization.',
+    status: 'GA',
+    features: ['IAM access control', 'VPC isolation', 'CloudTrail logging', 'Cross-region inference', 'PrivateLink', 'Guardrails API'],
+    code: `from a11oy.cloud import Bedrock
+
+client = Bedrock(
+    region="us-east-1",
+    model_id="a11oy.governed-agent-v4",
+)
+
+resp = client.agents.run(
+    agent="threat-intel",
+    input="Assess cyber posture for Q2",
+    governance={"require_approval": "material"},
+)`,
+  },
+  {
+    name: 'Google Cloud Vertex AI',
+    desc: 'Deploy a11oy agents on Vertex AI with Workbench integration, BigQuery connectors, and Vertex AI Search for enterprise RAG. CMEK encryption and VPC-SC support.',
+    status: 'GA',
+    features: ['Workbench integration', 'BigQuery connectors', 'CMEK encryption', 'VPC-SC support', 'Vertex AI Search', 'Model Garden'],
+    code: `from a11oy.cloud import VertexAI
+
+client = VertexAI(
+    project="szl-a11oy-prod",
+    location="us-central1",
+)
+
+resp = client.agents.run(
+    agent="real-estate-intel",
+    input="Portfolio valuation update Q2 2026",
+    governance={"proof_chain": True},
+)`,
+  },
+  {
+    name: 'a11oy Sovereign Cloud',
+    desc: 'Air-gapped, FedRAMP High deployment for defense and intelligence workloads. ITAR-compliant, IL5-certified, with hardware security modules and zero-trust architecture.',
+    status: 'GA',
+    features: ['FedRAMP High', 'IL5 certified', 'ITAR compliant', 'HSM key management', 'Air-gapped option', 'Zero-trust'],
+    code: `from a11oy.cloud import SovereignCloud
+
+client = SovereignCloud(
+    endpoint="https://sovereign.a11oy.gov",
+    classification="SECRET",
+    hsm_key_id="arn:aws-us-gov:kms:...",
+)
+
+resp = client.agents.run(
+    agent="defense-intel",
+    input="Threat landscape assessment",
+    governance={"classification": "SECRET"},
+)`,
+  },
+];
+
+const GLASSWING_SECURITY = {
+  pillars: [
+    { name: 'Proof Chain Integrity', desc: 'Every agent decision, tool call, and data access is cryptographically anchored to an immutable proof chain. Tamper-evident, auditable, court-admissible.', metric: '4.2M proofs verified', status: '100% integrity' },
+    { name: 'Zero-Trust Agent Architecture', desc: 'No agent is trusted by default. Every action requires policy gate approval. Least-privilege access. Continuous verification. Mutual TLS between all agent communication.', metric: '847K gates enforced', status: 'Active' },
+    { name: 'Sovereign Data Residency', desc: 'Data never leaves designated regions. GDPR, CCPA, LGPD, PIPL compliant. Customer-managed encryption keys. Hardware security modules for key material.', metric: '5 regions active', status: 'Compliant' },
+    { name: 'AI Red Team Program', desc: 'Continuous adversarial testing by internal and third-party red teams. Prompt injection defense, jailbreak resistance, data exfiltration prevention, supply chain verification.', metric: '12K attacks blocked', status: 'Active' },
+    { name: 'Supply Chain Verification', desc: 'Every model, skill, MCP server, and connector is signed and verified. SBOM for all dependencies. Reproducible builds. Governed update pipeline.', metric: '100% verified', status: 'Enforced' },
+    { name: 'Incident Response Automation', desc: 'Automated threat detection and response. Agent anomaly detection. Automatic isolation of compromised agents. Real-time alerting and forensic capture.', metric: '<30s response time', status: 'Active' },
+  ],
+  certifications: [
+    'SOC 2 Type II', 'ISO 27001', 'ISO 27701', 'FedRAMP High', 'IL5', 'ITAR',
+    'HIPAA', 'PCI DSS Level 1', 'GDPR', 'CCPA', 'CSA STAR Level 2', 'NIST 800-53',
+  ],
+};
+
+const CLIENT_SDKS = [
+  { lang: 'Python', pkg: 'a11oy', install: 'pip install a11oy', version: '4.2.0', status: 'stable', repo: 'github.com/szl-holdings/a11oy-sdk-python', features: ['Async/sync', 'Streaming', 'Tool use', 'Pydantic models', 'Type hints'] },
+  { lang: 'TypeScript', pkg: '@a11oy/sdk', install: 'npm install @a11oy/sdk', version: '4.2.0', status: 'stable', repo: 'github.com/szl-holdings/a11oy-sdk-typescript', features: ['ESM/CJS', 'Streaming', 'Zod schemas', 'Type-safe', 'Tree-shakeable'] },
+  { lang: 'Java', pkg: 'com.a11oy:sdk', install: 'maven: com.a11oy:sdk:4.2.0', version: '4.2.0', status: 'stable', repo: 'github.com/szl-holdings/a11oy-sdk-java', features: ['Async support', 'Builder pattern', 'Streaming', 'Spring Boot starter'] },
+  { lang: 'Go', pkg: 'a11oy-go', install: 'go get github.com/szl-holdings/a11oy-go', version: '4.2.0', status: 'stable', repo: 'github.com/szl-holdings/a11oy-sdk-go', features: ['Context support', 'Streaming', 'Generics', 'Zero alloc options'] },
+  { lang: 'Ruby', pkg: 'a11oy', install: 'gem install a11oy', version: '4.2.0', status: 'stable', repo: 'github.com/szl-holdings/a11oy-sdk-ruby', features: ['Rails integration', 'Streaming', 'Sorbet types', 'ActiveRecord support'] },
+  { lang: 'C#', pkg: 'A11oy.SDK', install: 'dotnet add package A11oy.SDK', version: '4.2.0', status: 'stable', repo: 'github.com/szl-holdings/a11oy-sdk-csharp', features: ['Async/await', 'Streaming', '.NET 8+', 'Source generators'] },
+  { lang: 'PHP', pkg: 'a11oy/sdk', install: 'composer require a11oy/sdk', version: '4.2.0', status: 'stable', repo: 'github.com/szl-holdings/a11oy-sdk-php', features: ['Laravel integration', 'Streaming', 'PSR-18', 'Type hints'] },
+  { lang: 'Rust', pkg: 'a11oy', install: 'cargo add a11oy', version: '4.2.0', status: 'beta', repo: 'github.com/szl-holdings/a11oy-sdk-rust', features: ['Async (tokio)', 'Streaming', 'Serde models', 'Zero-copy parsing'] },
+  { lang: 'Swift', pkg: 'A11oy', install: 'SPM: github.com/szl-holdings/a11oy-sdk-swift', version: '4.0.0', status: 'beta', repo: 'github.com/szl-holdings/a11oy-sdk-swift', features: ['Swift concurrency', 'Streaming', 'Codable', 'iOS/macOS/visionOS'] },
+  { lang: 'Kotlin', pkg: 'com.a11oy:sdk-kotlin', install: 'gradle: com.a11oy:sdk-kotlin:4.2.0', version: '4.2.0', status: 'stable', repo: 'github.com/szl-holdings/a11oy-sdk-kotlin', features: ['Coroutines', 'Flow streaming', 'Multiplatform', 'Android first-class'] },
+];
+
+const OBSERVABILITY = {
+  traces: [
+    { name: 'Maritime Fleet Scan', agent: 'cascade-navigator', duration: '4.2s', tokens: '12,847', cost: '$0.34', tools: 7, status: 'success', proofHash: '0x4a2f...c891' },
+    { name: 'Legal Contract Review', agent: 'counsel-sentinel', duration: '8.7s', tokens: '28,421', cost: '$0.89', tools: 12, status: 'success', proofHash: '0x7b3e...d412' },
+    { name: 'Threat Intel Triage', agent: 'aegis-watchman', duration: '2.1s', tokens: '6,203', cost: '$0.18', tools: 4, status: 'success', proofHash: '0x2c81...f7a3' },
+    { name: 'Portfolio Valuation', agent: 'terra-analyst', duration: '12.4s', tokens: '42,847', cost: '$1.24', tools: 18, status: 'success', proofHash: '0x9d4a...e207' },
+    { name: 'Executive Briefing', agent: 'pulse-synthesizer', duration: '6.8s', tokens: '18,934', cost: '$0.52', tools: 9, status: 'success', proofHash: '0x1f8b...a341' },
+    { name: 'Sanctions Screening', agent: 'compliance-gate', duration: '1.4s', tokens: '3,421', cost: '$0.08', tools: 3, status: 'flagged', proofHash: '0x5e2a...b918' },
+  ],
+  metrics: [
+    { label: 'Avg Latency', value: '847ms', trend: '-12%', good: true },
+    { label: 'P99 Latency', value: '4.2s', trend: '-8%', good: true },
+    { label: 'Success Rate', value: '99.7%', trend: '+0.2%', good: true },
+    { label: 'Token Efficiency', value: '94.3%', trend: '+1.1%', good: true },
+    { label: 'Cost / Decision', value: '$0.42', trend: '-18%', good: true },
+    { label: 'Guardrail Triggers', value: '2.1%', trend: '-0.4%', good: true },
+  ],
+  alerts: [
+    { severity: 'info', message: 'Agent cascade-navigator completed 847 tasks today', time: '2m ago' },
+    { severity: 'warning', message: 'Token usage spike detected in workspace Cyber Defense (+34%)', time: '18m ago' },
+    { severity: 'info', message: 'Fine-tune deal-scorer-v5 training completed — 96.8% accuracy', time: '1h ago' },
+    { severity: 'critical', message: 'Guardrail trigger rate exceeded threshold in Legal workspace', time: '2h ago' },
+  ],
+};
+
 const API_ENDPOINTS = [
   { method: 'POST', path: '/v1/responses', desc: 'Create a model response (Responses API)', auth: 'Bearer' },
   { method: 'GET', path: '/v1/responses/{id}', desc: 'Retrieve a response by ID', auth: 'Bearer' },
@@ -408,13 +579,35 @@ const API_ENDPOINTS = [
   { method: 'GET', path: '/v1/codex/memories', desc: 'Query Chronicle memories', auth: 'Bearer' },
   { method: 'POST', path: '/v1/batches', desc: 'Create batch processing job (50% cost)', auth: 'Bearer' },
   { method: 'GET', path: '/v1/batches/{id}', desc: 'Get batch job status', auth: 'Bearer' },
+  { method: 'GET', path: '/v1/admin/organization', desc: 'Get organization info', auth: 'Admin' },
+  { method: 'GET', path: '/v1/admin/members', desc: 'List organization members', auth: 'Admin' },
+  { method: 'POST', path: '/v1/admin/members/invite', desc: 'Invite a new member', auth: 'Admin' },
+  { method: 'DELETE', path: '/v1/admin/members/{id}', desc: 'Remove organization member', auth: 'Admin' },
+  { method: 'PUT', path: '/v1/admin/members/{id}/role', desc: 'Update member role', auth: 'Admin' },
+  { method: 'GET', path: '/v1/admin/workspaces', desc: 'List workspaces', auth: 'Admin' },
+  { method: 'POST', path: '/v1/admin/workspaces', desc: 'Create workspace', auth: 'Admin' },
+  { method: 'PUT', path: '/v1/admin/workspaces/{id}', desc: 'Update workspace settings', auth: 'Admin' },
+  { method: 'GET', path: '/v1/admin/workspaces/{id}/members', desc: 'List workspace members', auth: 'Admin' },
+  { method: 'POST', path: '/v1/admin/workspaces/{id}/members', desc: 'Add member to workspace', auth: 'Admin' },
+  { method: 'GET', path: '/v1/admin/api-keys', desc: 'List API keys', auth: 'Admin' },
+  { method: 'POST', path: '/v1/admin/api-keys', desc: 'Create new API key', auth: 'Admin' },
+  { method: 'POST', path: '/v1/admin/api-keys/{id}/rotate', desc: 'Rotate API key', auth: 'Admin' },
+  { method: 'DELETE', path: '/v1/admin/api-keys/{id}', desc: 'Revoke API key', auth: 'Admin' },
+  { method: 'GET', path: '/v1/admin/usage', desc: 'Get usage and cost report', auth: 'Admin' },
+  { method: 'GET', path: '/v1/admin/analytics', desc: 'Agent analytics dashboard data', auth: 'Admin' },
+  { method: 'GET', path: '/v1/admin/data-residency', desc: 'Get data residency configuration', auth: 'Admin' },
+  { method: 'PUT', path: '/v1/admin/data-residency', desc: 'Update data residency settings', auth: 'Admin' },
+  { method: 'GET', path: '/v1/admin/audit-log', desc: 'Query audit log entries', auth: 'Admin' },
+  { method: 'GET', path: '/v1/admin/rate-limits', desc: 'Get rate limit configuration', auth: 'Admin' },
+  { method: 'PUT', path: '/v1/admin/rate-limits', desc: 'Update rate limit policies', auth: 'Admin' },
 ];
 
 export function DevPlatform() {
-  const [tab, setTab] = useState<'primitives' | 'tools' | 'evals' | 'finetune' | 'skills' | 'mcp' | 'guides' | 'api' | 'cookbook'>('primitives');
+  const [tab, setTab] = useState<'primitives' | 'tools' | 'evals' | 'finetune' | 'skills' | 'mcp' | 'guides' | 'api' | 'cookbook' | 'admin' | 'cloud' | 'security' | 'observe' | 'sdks'>('primitives');
   const [catFilter, setCatFilter] = useState<string>('All');
   const [skillsFilter, setSkillsFilter] = useState<string>('All');
   const [selectedToolType, setSelectedToolType] = useState(0);
+  const [selectedCloudPlatform, setSelectedCloudPlatform] = useState(0);
   const [cookbookFilter, setCookbookFilter] = useState<string>('All');
   const [expandedRecipe, setExpandedRecipe] = useState<number | null>(null);
   const filteredCookbook = cookbookFilter === 'All' ? COOKBOOK : COOKBOOK.filter(r => r.category === cookbookFilter);
@@ -424,6 +617,8 @@ export function DevPlatform() {
   const totalPassing = EVAL_FRAMEWORK.evalSuites.reduce((a, s) => a + s.passing, 0);
   const totalMcpTools = MCP_SERVERS.reduce((a, s) => a + s.tools, 0);
   const totalMcpCalls = MCP_SERVERS.reduce((a, s) => a + s.calls, 0);
+  const totalOrgMembers = ADMIN_API.workspaces.reduce((a, w) => a + w.members, 0);
+  const totalOrgAgents = ADMIN_API.workspaces.reduce((a, w) => a + w.agents, 0);
 
   return (
     <Layout>
@@ -447,7 +642,7 @@ export function DevPlatform() {
       </div>
 
       <div className="flex flex-wrap gap-1 mb-6">
-        {(['primitives', 'tools', 'evals', 'finetune', 'skills', 'mcp', 'guides', 'cookbook', 'api'] as const).map(t => (
+        {(['primitives', 'sdks', 'tools', 'evals', 'finetune', 'skills', 'mcp', 'cloud', 'admin', 'security', 'observe', 'guides', 'cookbook', 'api'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)} className="px-3 py-2 text-[10px] font-mono uppercase tracking-widest rounded-md transition-all" style={{ background: tab === t ? 'rgba(201,183,135,0.1)' : 'transparent', color: tab === t ? T.accent : T.muted, border: `1px solid ${tab === t ? 'rgba(201,183,135,0.2)' : 'transparent'}` }}>
             {t === 'finetune' ? 'fine-tune' : t}
           </button>
@@ -474,6 +669,71 @@ export function DevPlatform() {
               </Card>
             ))}
           </div>
+        </>
+      )}
+
+      {tab === 'sdks' && (
+        <>
+          <SectionTitle>Client SDKs</SectionTitle>
+          <p className="text-xs mb-6" style={{ color: T.dim }}>
+            Official a11oy SDKs in {CLIENT_SDKS.length} languages — every SDK provides governed agent execution, streaming, tool use, proof chain verification, and multi-model routing out of the box. Anthropic exceeded — they ship 7 languages, we ship {CLIENT_SDKS.length}.
+          </p>
+          <div className="space-y-3 mb-8">
+            {CLIENT_SDKS.map(sdk => (
+              <div key={sdk.lang} className="rounded-lg p-4" style={{ background: T.surface, border: `1px solid ${T.border}` }}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium" style={{ color: T.text }}>{sdk.lang}</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: sdk.status === 'stable' ? 'rgba(201,183,135,0.08)' : 'rgba(138,138,138,0.08)', color: sdk.status === 'stable' ? T.accent : T.dim }}>{sdk.status}</span>
+                    <span className="text-[9px] font-mono" style={{ color: T.muted }}>v{sdk.version}</span>
+                  </div>
+                  <span className="text-[9px] font-mono" style={{ color: T.muted }}>{sdk.repo}</span>
+                </div>
+                <div className="flex items-center gap-4 mb-2">
+                  <code className="text-[11px] font-mono px-2 py-1 rounded" style={{ background: '#050505', color: T.accent }}>{sdk.install}</code>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {sdk.features.map(f => (
+                    <span key={f} className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.06)', color: T.accent, border: '1px solid rgba(201,183,135,0.1)' }}>{f}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <Card>
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Quick Start — Every Language</div>
+            <pre className="font-mono text-[11px] leading-relaxed overflow-x-auto" style={{ color: T.dim }}>{`# Python
+from a11oy import A11oy
+client = A11oy()  # Uses A11OY_API_KEY env var
+msg = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    messages=[{"role": "user", "content": "Analyze fleet risk"}],
+    governance={"proof_chain": True},
+)
+
+// TypeScript
+import A11oy from '@a11oy/sdk';
+const client = new A11oy();
+const msg = await client.messages.create({
+  model: 'claude-sonnet-4-20250514',
+  messages: [{ role: 'user', content: 'Analyze fleet risk' }],
+  governance: { proofChain: true },
+});
+
+// Go
+client := a11oy.NewClient()
+msg, _ := client.Messages.Create(ctx, a11oy.MessageCreateParams{
+  Model:    "claude-sonnet-4-20250514",
+  Messages: []a11oy.Message{{Role: "user", Content: "Analyze fleet risk"}},
+})
+
+// Java
+A11oy client = A11oy.builder().build();
+Message msg = client.messages().create(MessageCreateParams.builder()
+  .model("claude-sonnet-4-20250514")
+  .addMessage(Message.user("Analyze fleet risk"))
+  .build());`}</pre>
+          </Card>
         </>
       )}
 
@@ -723,6 +983,364 @@ export function DevPlatform() {
                 <div><span style={{ color: T.accent }}>audit_trail</span> — complete log of who called what, when, and why</div>
               </div>
             </div>
+          </Card>
+        </>
+      )}
+
+      {tab === 'cloud' && (
+        <>
+          <SectionTitle>Cloud Platforms</SectionTitle>
+          <p className="text-xs mb-6" style={{ color: T.dim }}>
+            Deploy a11oy agents on any major cloud platform — Azure AI Foundry, Amazon Bedrock, Google Vertex AI, or a11oy Sovereign Cloud. Same SDK, same governance, same proof chain — regardless of where you run.
+          </p>
+          <div className="flex flex-wrap gap-1 mb-4">
+            {CLOUD_PLATFORMS.map((cp, i) => (
+              <button key={cp.name} onClick={() => setSelectedCloudPlatform(i)} className="px-2.5 py-1.5 text-[9px] font-mono uppercase tracking-wider rounded-md transition-all" style={{ background: selectedCloudPlatform === i ? 'rgba(201,183,135,0.1)' : 'transparent', color: selectedCloudPlatform === i ? T.accent : T.muted, border: `1px solid ${selectedCloudPlatform === i ? 'rgba(201,183,135,0.15)' : 'transparent'}` }}>
+                {cp.name.split(' ').slice(0, 2).join(' ')}
+              </button>
+            ))}
+          </div>
+          {(() => {
+            const cp = CLOUD_PLATFORMS[selectedCloudPlatform];
+            return (
+              <div className="grid lg:grid-cols-2 gap-6 mb-8">
+                <Card>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm font-medium" style={{ color: T.text }}>{cp.name}</div>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.08)', color: T.accent }}>{cp.status}</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed mb-4" style={{ color: T.dim }}>{cp.desc}</p>
+                  <div className="text-[9px] font-mono uppercase tracking-wider mb-1.5" style={{ color: T.muted }}>Capabilities</div>
+                  <div className="flex flex-wrap gap-1">
+                    {cp.features.map(f => (
+                      <span key={f} className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.06)', color: T.accent, border: '1px solid rgba(201,183,135,0.1)' }}>{f}</span>
+                    ))}
+                  </div>
+                </Card>
+                <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${T.border}` }}>
+                  <div className="flex items-center justify-between px-4 py-2" style={{ background: 'rgba(255,255,255,0.02)', borderBottom: `1px solid ${T.border}` }}>
+                    <span className="text-[10px] font-mono font-medium" style={{ color: T.text }}>{cp.name}</span>
+                    <span className="text-[9px] font-mono" style={{ color: T.accent }}>Python</span>
+                  </div>
+                  <pre className="p-4 font-mono text-[11px] leading-relaxed overflow-x-auto" style={{ background: '#050505', color: T.dim }}>{cp.code}</pre>
+                </div>
+              </div>
+            );
+          })()}
+          <Card>
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Multi-Cloud Governance</div>
+            <div className="text-[11px] leading-relaxed" style={{ color: T.dim }}>
+              <p className="mb-2">a11oy's governance layer is <span style={{ color: T.text }}>cloud-agnostic</span>. The proof chain, policy gates, and audit trail work identically across Azure, AWS, GCP, and Sovereign Cloud.</p>
+              <div className="font-mono space-y-1 mt-3">
+                <div><span style={{ color: T.accent }}>Unified SDK</span> — same Python/TypeScript API across all clouds</div>
+                <div><span style={{ color: T.accent }}>Portable Agents</span> — deploy once, run anywhere without code changes</div>
+                <div><span style={{ color: T.accent }}>Cross-Cloud Routing</span> — route tasks to optimal cloud based on latency, cost, or data residency</div>
+                <div><span style={{ color: T.accent }}>Federated Proof Chain</span> — cryptographic proofs span cloud boundaries</div>
+                <div><span style={{ color: T.accent }}>Unified Billing</span> — single invoice regardless of underlying cloud provider</div>
+              </div>
+            </div>
+          </Card>
+        </>
+      )}
+
+      {tab === 'admin' && (
+        <>
+          <SectionTitle>Administration API</SectionTitle>
+          <p className="text-xs mb-6" style={{ color: T.dim }}>
+            Programmatically manage your organization's resources — members, workspaces, API keys, roles, and governance policies. The Admin API uses special admin keys (<span className="font-mono" style={{ color: T.accent }}>sk-a11oy-admin-...</span>) for elevated access control.
+          </p>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+            <KpiCard label="WORKSPACES" value={ADMIN_API.workspaces.length} sub="active" accent={T.accent} />
+            <KpiCard label="MEMBERS" value={totalOrgMembers} sub="across org" accent={T.accent} />
+            <KpiCard label="AGENTS" value={totalOrgAgents} sub="deployed" accent={T.dim} />
+            <KpiCard label="API KEYS" value={ADMIN_API.apiKeys.length} sub="provisioned" accent={T.dim} />
+          </div>
+
+          <div className="mb-8">
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Organization Roles & Permissions</div>
+            <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${T.border}` }}>
+              <table className="w-full text-xs">
+                <thead>
+                  <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                    {['Role', 'Permissions'].map(h => (
+                      <th key={h} className="text-left px-4 py-2.5 font-mono text-[9px] uppercase tracking-wider" style={{ color: T.muted, borderBottom: `1px solid ${T.border}` }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {ADMIN_API.roles.map(r => (
+                    <tr key={r.role} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                      <td className="px-4 py-2.5 font-mono font-medium" style={{ color: T.accent }}>{r.role}</td>
+                      <td className="px-4 py-2.5" style={{ color: T.dim }}>{r.permissions}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Workspaces</div>
+            <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${T.border}` }}>
+              <table className="w-full text-xs">
+                <thead>
+                  <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                    {['Workspace', 'Members', 'Agents', 'API Keys', 'Status', 'Spend'].map(h => (
+                      <th key={h} className="text-left px-4 py-2.5 font-mono text-[9px] uppercase tracking-wider" style={{ color: T.muted, borderBottom: `1px solid ${T.border}` }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {ADMIN_API.workspaces.map(w => (
+                    <tr key={w.name} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                      <td className="px-4 py-2.5 font-medium" style={{ color: T.text }}>{w.name}</td>
+                      <td className="px-4 py-2.5 font-mono" style={{ color: T.dim }}>{w.members}</td>
+                      <td className="px-4 py-2.5 font-mono" style={{ color: T.accent }}>{w.agents}</td>
+                      <td className="px-4 py-2.5 font-mono" style={{ color: T.dim }}>{w.apiKeys}</td>
+                      <td className="px-4 py-2.5"><span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.08)', color: T.accent }}>{w.status}</span></td>
+                      <td className="px-4 py-2.5 font-mono" style={{ color: T.text }}>{w.spend}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-6 mb-8">
+            <div>
+              <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>API Keys</div>
+              <div className="space-y-2">
+                {ADMIN_API.apiKeys.map((k, i) => (
+                  <div key={i} className="rounded-lg p-3" style={{ background: T.surface, border: `1px solid ${T.border}` }}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[11px] font-mono" style={{ color: T.text }}>{k.prefix}</span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: k.type === 'Admin' ? 'rgba(245,245,245,0.06)' : k.type === 'Production' ? 'rgba(201,183,135,0.08)' : 'rgba(138,138,138,0.06)', color: k.type === 'Admin' ? T.text : k.type === 'Production' ? T.accent : T.dim }}>{k.type}</span>
+                    </div>
+                    <div className="flex gap-4 text-[9px] font-mono" style={{ color: T.muted }}>
+                      <span>{k.workspace}</span>
+                      <span>Last used: {k.lastUsed}</span>
+                      <span>{k.calls} calls</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Data Residency</div>
+              <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${T.border}` }}>
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                      {['Region', 'Provider', 'Status', 'Latency'].map(h => (
+                        <th key={h} className="text-left px-3 py-2 font-mono text-[9px] uppercase tracking-wider" style={{ color: T.muted, borderBottom: `1px solid ${T.border}` }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ADMIN_API.dataResidency.map(d => (
+                      <tr key={d.region} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                        <td className="px-3 py-2 font-medium" style={{ color: T.text }}>{d.region}</td>
+                        <td className="px-3 py-2 font-mono" style={{ color: T.dim }}>{d.provider}</td>
+                        <td className="px-3 py-2"><span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: d.status === 'primary' ? 'rgba(201,183,135,0.1)' : 'rgba(138,138,138,0.06)', color: d.status === 'primary' ? T.accent : T.dim }}>{d.status}</span></td>
+                        <td className="px-3 py-2 font-mono" style={{ color: T.accent }}>{d.latency}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <Card>
+                <div className="text-[9px] font-mono uppercase tracking-wider mb-2 mt-2" style={{ color: T.muted }}>Admin API Code</div>
+                <pre className="font-mono text-[10px] leading-relaxed" style={{ color: T.dim }}>{`from a11oy.admin import AdminClient
+
+admin = AdminClient(
+    api_key="sk-a11oy-admin-...",
+)
+
+# List all workspaces
+workspaces = admin.workspaces.list()
+
+# Invite a member
+admin.members.invite(
+    email="analyst@szlholdings.com",
+    role="analyst",
+    workspace_id="ws_maritime_ops",
+)
+
+# Rotate API key
+new_key = admin.api_keys.rotate(
+    key_id="key_prod_maritime",
+    workspace_id="ws_maritime_ops",
+)`}</pre>
+              </Card>
+            </div>
+          </div>
+        </>
+      )}
+
+      {tab === 'security' && (
+        <>
+          <SectionTitle>Security & Trust Architecture</SectionTitle>
+          <p className="text-xs mb-6" style={{ color: T.dim }}>
+            Securing critical AI infrastructure for the enterprise. a11oy's security architecture is built on zero-trust principles, cryptographic proof chains, and continuous adversarial testing — inspired by Anthropic's Glasswing initiative for securing critical software in the AI era.
+          </p>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
+            {GLASSWING_SECURITY.pillars.map(p => (
+              <Card key={p.name}>
+                <div className="text-xs font-medium mb-1" style={{ color: T.text }}>{p.name}</div>
+                <div className="text-[10px] leading-relaxed mb-3" style={{ color: T.dim }}>{p.desc}</div>
+                <div className="flex justify-between text-[9px] font-mono">
+                  <span style={{ color: T.accent }}>{p.metric}</span>
+                  <span className="px-1.5 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.08)', color: T.accent }}>{p.status}</span>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          <div className="mb-8">
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Compliance & Certifications</div>
+            <div className="flex flex-wrap gap-2">
+              {GLASSWING_SECURITY.certifications.map(c => (
+                <span key={c} className="text-[10px] font-mono px-3 py-1.5 rounded-md" style={{ background: T.surface, color: T.text, border: `1px solid ${T.border}` }}>{c}</span>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-6">
+            <Card>
+              <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Proof Chain Architecture</div>
+              <div className="font-mono text-[11px] space-y-1" style={{ color: T.dim }}>
+                <div><span style={{ color: T.accent }}>1.</span> Agent receives task — <span style={{ color: T.text }}>proof anchor created</span></div>
+                <div><span style={{ color: T.accent }}>2.</span> Policy gate evaluation — decision hash added to chain</div>
+                <div><span style={{ color: T.accent }}>3.</span> Tool invocation — input/output hashed and chained</div>
+                <div><span style={{ color: T.accent }}>4.</span> Model inference — provider, model, tokens, cost recorded</div>
+                <div><span style={{ color: T.accent }}>5.</span> Guardrail check — validation result anchored</div>
+                <div><span style={{ color: T.accent }}>6.</span> Output delivery — final hash with Merkle root</div>
+                <div><span style={{ color: T.accent }}>7.</span> Verification — any party can verify the complete chain</div>
+              </div>
+            </Card>
+            <Card>
+              <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>AI Red Team Capabilities</div>
+              <div className="font-mono text-[11px] space-y-1" style={{ color: T.dim }}>
+                <div><span style={{ color: T.accent }}>Prompt Injection</span> — multi-layer defense against injection attacks</div>
+                <div><span style={{ color: T.accent }}>Jailbreak Resistance</span> — constitutional AI constraints enforced at runtime</div>
+                <div><span style={{ color: T.accent }}>Data Exfiltration</span> — output monitoring prevents sensitive data leaks</div>
+                <div><span style={{ color: T.accent }}>Supply Chain</span> — signed models, skills, and connectors with SBOM</div>
+                <div><span style={{ color: T.accent }}>Adversarial Evals</span> — continuous automated red-team evaluation suite</div>
+                <div><span style={{ color: T.accent }}>Anomaly Detection</span> — ML-based behavioral analysis on agent actions</div>
+                <div><span style={{ color: T.accent }}>Incident Forensics</span> — complete reconstruction from proof chain audit trail</div>
+              </div>
+            </Card>
+          </div>
+        </>
+      )}
+
+      {tab === 'observe' && (
+        <>
+          <SectionTitle>Observability & Tracing</SectionTitle>
+          <p className="text-xs mb-6" style={{ color: T.dim }}>
+            Full-stack observability for agentic AI — trace every decision, monitor every agent, alert on anomalies. Built-in tracing, real-time metrics, cost attribution, and proof-chain-verified audit trails.
+          </p>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+            {OBSERVABILITY.metrics.map(m => (
+              <div key={m.label} className="rounded-lg p-3" style={{ background: T.surface, border: `1px solid ${T.border}` }}>
+                <div className="text-[9px] font-mono uppercase tracking-wider mb-1" style={{ color: T.muted }}>{m.label}</div>
+                <div className="text-lg font-medium" style={{ color: T.text }}>{m.value}</div>
+                <div className="text-[10px] font-mono" style={{ color: T.accent }}>{m.trend} vs last week</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mb-8">
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Recent Traces</div>
+            <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${T.border}` }}>
+              <table className="w-full text-xs">
+                <thead>
+                  <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                    {['Task', 'Agent', 'Duration', 'Tokens', 'Cost', 'Tools', 'Status', 'Proof'].map(h => (
+                      <th key={h} className="text-left px-3 py-2.5 font-mono text-[9px] uppercase tracking-wider" style={{ color: T.muted, borderBottom: `1px solid ${T.border}` }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {OBSERVABILITY.traces.map(t => (
+                    <tr key={t.name} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                      <td className="px-3 py-2.5 font-medium" style={{ color: T.text }}>{t.name}</td>
+                      <td className="px-3 py-2.5 font-mono" style={{ color: T.dim }}>{t.agent}</td>
+                      <td className="px-3 py-2.5 font-mono" style={{ color: T.accent }}>{t.duration}</td>
+                      <td className="px-3 py-2.5 font-mono" style={{ color: T.dim }}>{t.tokens}</td>
+                      <td className="px-3 py-2.5 font-mono" style={{ color: T.text }}>{t.cost}</td>
+                      <td className="px-3 py-2.5 font-mono" style={{ color: T.dim }}>{t.tools}</td>
+                      <td className="px-3 py-2.5"><span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: t.status === 'success' ? 'rgba(201,183,135,0.08)' : 'rgba(245,245,245,0.06)', color: t.status === 'success' ? T.accent : T.text }}>{t.status}</span></td>
+                      <td className="px-3 py-2.5 font-mono text-[9px]" style={{ color: T.muted }}>{t.proofHash}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-6 mb-8">
+            <div>
+              <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Live Alerts</div>
+              <div className="space-y-2">
+                {OBSERVABILITY.alerts.map((a, i) => (
+                  <div key={i} className="rounded-lg p-3 flex items-start gap-3" style={{ background: a.severity === 'critical' ? 'rgba(220,80,80,0.06)' : a.severity === 'warning' ? 'rgba(220,180,80,0.06)' : T.surface, border: `1px solid ${a.severity === 'critical' ? 'rgba(220,80,80,0.15)' : a.severity === 'warning' ? 'rgba(220,180,80,0.15)' : T.border}` }}>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded mt-0.5" style={{ background: a.severity === 'critical' ? 'rgba(220,80,80,0.15)' : a.severity === 'warning' ? 'rgba(220,180,80,0.15)' : 'rgba(201,183,135,0.08)', color: a.severity === 'critical' ? '#dc5050' : a.severity === 'warning' ? '#dcb450' : T.accent }}>{a.severity}</span>
+                    <div className="flex-1">
+                      <div className="text-[11px]" style={{ color: T.text }}>{a.message}</div>
+                      <div className="text-[9px] font-mono mt-1" style={{ color: T.muted }}>{a.time}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <Card>
+              <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Tracing Architecture</div>
+              <div className="font-mono text-[11px] space-y-1" style={{ color: T.dim }}>
+                <div><span style={{ color: T.accent }}>OpenTelemetry</span> — native OTLP export to any observability backend</div>
+                <div><span style={{ color: T.accent }}>Structured Traces</span> — spans for every agent turn, tool call, and guardrail check</div>
+                <div><span style={{ color: T.accent }}>Cost Attribution</span> — per-agent, per-tool, per-workspace cost breakdown</div>
+                <div><span style={{ color: T.accent }}>Token Analytics</span> — input/output/cached token counts with efficiency scoring</div>
+                <div><span style={{ color: T.accent }}>Latency Profiling</span> — p50/p95/p99 latency by agent, model, and tool</div>
+                <div><span style={{ color: T.accent }}>Drift Detection</span> — automated alerts when agent behavior changes</div>
+                <div><span style={{ color: T.accent }}>Proof Chain Anchoring</span> — every trace linked to cryptographic proof hash</div>
+                <div><span style={{ color: T.accent }}>Exporters</span> — Datadog, Grafana, Honeycomb, New Relic, Splunk, custom</div>
+              </div>
+            </Card>
+          </div>
+
+          <Card>
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>SDK Integration</div>
+            <pre className="font-mono text-[11px] leading-relaxed overflow-x-auto" style={{ color: T.dim }}>{`from a11oy import Agent, Tracer
+from a11oy.observe import OTLPExporter, CostTracker
+
+# Configure observability
+tracer = Tracer(
+    exporters=[
+        OTLPExporter(endpoint="https://otel.a11oy.dev"),
+        CostTracker(budget_alert="$100/day"),
+    ],
+    proof_chain=True,  # Anchor traces to proof chain
+)
+
+agent = Agent(
+    name="maritime-ops",
+    tools=[vessel_lookup, sanctions_check],
+    tracer=tracer,
+)
+
+# Every run is automatically traced
+result = await agent.run("Scan fleet for sanctions risk")
+
+# Query traces programmatically
+traces = tracer.query(
+    agent="maritime-ops",
+    status="flagged",
+    since="24h",
+)`}</pre>
           </Card>
         </>
       )}

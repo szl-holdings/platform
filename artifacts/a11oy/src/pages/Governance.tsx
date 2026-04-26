@@ -1,5 +1,6 @@
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, DemoBadge, ApprovalGate, ActionButton } from '../components/ui';
+import { useAlloyApprovals, useAlloyWorkflows, useApprovalSubscription } from '../graphql';
 
 const POLICIES = [
   {
@@ -48,13 +49,22 @@ const ENFORCEMENT_STYLES: Record<string, { color: string }> = {
 };
 
 export function Governance() {
+  const { data: pendingApprovals } = useAlloyApprovals({ status: 'pending', limit: 10 });
+  const { data: allApprovals } = useAlloyApprovals({ limit: 50 });
+  const { data: waitingWorkflows } = useAlloyWorkflows({ status: 'waiting_approval', limit: 10 });
+  const { data: incomingApproval } = useApprovalSubscription();
+
+  const isLive = pendingApprovals.length > 0 || allApprovals.length > 0 || waitingWorkflows.length > 0;
+  const pendingCount = isLive ? pendingApprovals.length : 2;
+  const totalGatesToday = isLive ? allApprovals.length : 12;
+
   return (
     <Layout>
       <PageHeader
         label="COVENANT GOVERNANCE"
         title="Policy Gates & Approvals"
         subtitle="Every action passes through the Covenant Layer before execution. Policy gates are explicit, logged, and non-bypassable by design."
-        status="DEMO"
+        status={isLive ? 'LIVE' : 'DEMO'}
       />
 
       <div className="p-4 rounded-lg mb-8 border" style={{ backgroundColor: 'rgba(176,141,82,0.06)', borderColor: 'rgba(176,141,82,0.25)' }}>
@@ -64,10 +74,18 @@ export function Governance() {
         </div>
       </div>
 
+      {incomingApproval && (
+        <div className="mb-4 p-3 rounded-lg border animate-pulse" style={{ backgroundColor: 'rgba(201,183,135,0.08)', borderColor: 'rgba(201,183,135,0.3)' }}>
+          <div className="text-xs font-mono" style={{ color: '#c9b787' }}>
+            NEW APPROVAL REQUIRED — Workflow {incomingApproval.workflowId?.slice(0, 8)} · {incomingApproval.reason ?? 'Review requested'}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <KpiCard label="ACTIVE POLICIES" value="5" sub="+1 constitutional" accent="#c9b787" />
-        <KpiCard label="GATES PENDING" value="2" sub="Awaiting human approval" accent="#c9b787" />
-        <KpiCard label="GATES TODAY" value="12" sub="All passed or approved" accent="#c9b787" />
+        <KpiCard label="GATES PENDING" value={String(pendingCount)} sub="Awaiting human approval" accent="#c9b787" />
+        <KpiCard label="GATES TODAY" value={String(totalGatesToday)} sub={isLive ? 'from GraphQL' : 'all passed or approved'} accent="#c9b787" />
         <KpiCard label="BYPASS ATTEMPTS" value="0" sub="Zero-tolerance enforced" accent="#b08d52" />
       </div>
 
