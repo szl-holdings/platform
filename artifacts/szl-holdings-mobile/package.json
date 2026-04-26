@@ -76,12 +76,13 @@
     "@tanstack/query-async-storage-persister": "^5.99.0",
     "@tanstack/query-persist-client-core": "^5.99.0",
     "@tanstack/query-sync-storage-persister": "^5.99.0",
+    "@workspace/tokens": "workspace:*",
     "expo-av": "~16.0.8",
     "expo-camera": "^17.0.10",
+    "expo-file-system": "~19.0.21",
     "expo-screen-capture": "^8.0.9",
     "expo-speech": "^14.0.8",
     "graphql": "^16.13.2",
-    "urql": "^5.0.1",
-    "@workspace/tokens": "workspace:*"
+    "urql": "^5.0.1"
   }
 }

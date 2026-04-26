@@ -33,6 +33,7 @@ import internalA11oyRouter from "./internal-a11oy-api";
 import apiKeysRouter from "./api-keys";
 import oauthRouter from "./oauth";
 import meshObservabilityRouter from "./mesh-observability";
+import openaiConversationsRouter from "./openai/conversations";
 
 const router: IRouter = Router();
 
@@ -388,5 +389,18 @@ router.use(lazyMatch("/ecosystem", () => import("./ecosystem-command"), "ecosyst
 // Public endpoints: /omnia/narrative, /omnia/story, /omnia/search, /omnia/graph, /omnia/notifications
 // Adoption beacon: POST /omnia/adoption/beacon (unauthenticated, fire-and-forget)
 router.use(lazyMatch("/omnia", () => import("./omnia"), "omnia"));
+
+// OpenAI Voice & Audio — conversational voice sessions (gpt-audio speech-to-speech)
+// and TTS audio briefing generation for Pulse and mobile.
+// POST /openai/conversations                    — create ephemeral voice session (no DB, returns random id)
+// GET  /openai/conversations/:id/messages       — stub: returns []
+// POST /openai/conversations/:id/voice-messages — SSE streaming voice-to-voice (web, Command portal)
+// POST /openai/voice-messages                   — SSE streaming voice-to-voice (generic web)
+// POST /openai/voice-query                      — non-streaming voice query with audio response (mobile)
+// POST /openai/text-query                       — AI text query for OMNIA (mobile text input)
+// POST /openai/briefing-audio                   — stream MP3 TTS for a briefing text (Pulse Listen button)
+// POST /openai/voice-approval                   — auditable voice-driven HITL action approval with provenance
+// GET  /openai/daily-briefing/today             — today's daily briefing audio+provenance (mobile)
+router.use("/openai", openaiConversationsRouter);
 
 export default router;

@@ -38,6 +38,7 @@ import {
   Lock,
   Map,
   Menu,
+  Mic,
   Network,
   Phone,
   Play,
@@ -55,9 +56,10 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { FabricShellProvider, useFabricShell } from '../lib/fabric-shell-context';
+import { VoiceCommandPanel } from './voice-command-panel';
 
 export type WorkspaceMode = 'strategy' | 'operations' | 'infrastructure';
 
@@ -627,8 +629,9 @@ function UnifiedLayoutInner({
   mode: WorkspaceMode;
   onModeChange: (m: WorkspaceMode) => void;
 }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [voicePanelOpen, setVoicePanelOpen] = useState(false);
   const { user } = useAuth();
   const userRoles: string[] = (user as { roles?: string[] } | null | undefined)?.roles ?? [];
   const isAdmin = userRoles.some((r) => ADMIN_ROLES.has(r));
@@ -877,6 +880,26 @@ function UnifiedLayoutInner({
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
             <button
+              type="button"
+              aria-label="Voice command"
+              onClick={() => setVoicePanelOpen((o) => !o)}
+              title="Open voice command"
+              style={{
+                padding: 4,
+                borderRadius: 4,
+                background: voicePanelOpen ? `${T.accent}18` : 'none',
+                border: `1px solid ${voicePanelOpen ? `${T.accent}40` : 'transparent'}`,
+                color: voicePanelOpen ? T.accent : T.textDim,
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Mic style={{ width: 14, height: 14 }} />
+            </button>
+            <button
               aria-label="Notifications"
               style={{
                 padding: 4,
@@ -927,6 +950,18 @@ function UnifiedLayoutInner({
       </div>
 
       <GlobalEvidenceDrawerShell />
+      <VoiceCommandPanel
+        open={voicePanelOpen}
+        onClose={() => setVoicePanelOpen(false)}
+        onNavigate={(path, external) => {
+          setVoicePanelOpen(false);
+          if (external) {
+            window.location.href = path;
+          } else {
+            setLocation(path);
+          }
+        }}
+      />
     </div>
   );
 }

@@ -13,9 +13,12 @@ import {
   Send,
   Shield,
   Sparkles,
+  Square,
+  Volume2,
+  VolumeX,
   Zap,
 } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useLocation } from 'wouter';
 import AgentBadge from '../components/AgentBadge';
 import ConfidenceChip from '../components/ConfidenceChip';
@@ -679,12 +682,123 @@ function SectionCard({
   );
 }
 
+type AudioBriefState = 'idle' | 'loading' | 'playing' | 'error';
+
+function getAudioApiBase() {
+  const base = import.meta.env.BASE_URL?.replace(/\/$/, '') || '';
+  return `${base}/api`;
+}
+
 export default function TodaysBrief() {
   const { data: brief, isLoading, error } = useTodaysBrief();
   const generate = useGenerateBriefing();
   const [exporting, setExporting] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [, navigate] = useLocation();
+
+  const [audioBriefState, setAudioBriefState] = useState<AudioBriefState>('idle');
+  const [audioDownloadUrl, setAudioDownloadUrl] = useState<string | null>(null);
+  const [audioProvenance, setAudioProvenance] = useState<{
+    model: string; voice: string; format: string; generatedAt: string; briefId?: string; source?: string;
+  } | null>(null);
+  const audioBriefRef = useRef<HTMLAudioElement | null>(null);
+  const audioObjectUrlRef = useRef<string | null>(null);
+  const audioAbortRef = useRef<AbortController | null>(null);
+
+  const handleListen = useCallback(async () => {
+    if (!brief) return;
+    if (audioBriefState === 'playing') {
+      audioAbortRef.current?.abort();
+      audioBriefRef.current?.pause();
+      if (audioObjectUrlRef.current) {
+        URL.revokeObjectURL(audioObjectUrlRef.current);
+        audioObjectUrlRef.current = null;
+      }
+      setAudioBriefState('idle');
+      return;
+    }
+
+    audioAbortRef.current?.abort();
+    const abort = new AbortController();
+    audioAbortRef.current = abort;
+
+    setAudioBriefState('loading');
+
+    const parts: string[] = [];
+    parts.push(`Executive Briefing — ${brief.date}. Edition: ${brief.edition}.`);
+    parts.push(brief.headline);
+    if (brief.leadSentence) parts.push(brief.leadSentence);
+    if (brief.recommendedActions?.length) {
+      const actionSummaries = brief.recommendedActions
+        .map((a) => `[${a.priority}] ${a.action}`)
+        .join('. ');
+      parts.push('Recommended actions: ' + actionSummaries);
+    }
+
+    try {
+      const res = await fetch(`${getAudioApiBase()}/openai/briefing-audio`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: parts.join('\n\n'),
+          briefId: brief.id,
+          voice: 'nova',
+        }),
+        credentials: 'include',
+        signal: abort.signal,
+      });
+
+      if (!res.ok) throw new Error('Audio generation failed');
+
+      const data = await res.json() as {
+        audioBase64: string;
+        mimeType: string;
+        provenance?: { model: string; voice: string; format: string; generatedAt: string; briefId?: string };
+        source?: string;
+      };
+      if (abort.signal.aborted) return;
+
+      if (data.provenance) {
+        setAudioProvenance({ ...data.provenance, source: data.source });
+      }
+
+      const binaryStr = atob(data.audioBase64);
+      const bytes = new Uint8Array(binaryStr.length);
+      for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+      const blob = new Blob([bytes], { type: data.mimeType || 'audio/mpeg' });
+
+      // Create a persistent download URL (separate from the playback URL)
+      const downloadUrl = URL.createObjectURL(blob);
+      setAudioDownloadUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return downloadUrl;
+      });
+
+      const url = URL.createObjectURL(blob);
+      audioObjectUrlRef.current = url;
+
+      const audio = new Audio(url);
+      audioBriefRef.current = audio;
+      setAudioBriefState('playing');
+
+      audio.onended = () => {
+        setAudioBriefState('idle');
+        URL.revokeObjectURL(url);
+        audioObjectUrlRef.current = null;
+      };
+      audio.onerror = () => setAudioBriefState('error');
+      abort.signal.addEventListener('abort', () => {
+        audio.pause();
+      });
+      audio.play().catch(() => setAudioBriefState('error'));
+    } catch (err) {
+      if ((err as Error).name === 'AbortError') {
+        setAudioBriefState('idle');
+        return;
+      }
+      setAudioBriefState('error');
+    }
+  }, [brief, audioBriefState]);
 
   const handleGenerate = async () => {
     setGenerateError(null);
@@ -924,6 +1038,63 @@ export default function TodaysBrief() {
               )}
               <button
                 type="button"
+                onClick={handleListen}
+                disabled={audioBriefState === 'loading'}
+                title={audioBriefState === 'playing' ? 'Stop audio briefing' : 'Listen to this briefing via AI voice'}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '8px 14px',
+                  borderRadius: 6,
+                  background: audioBriefState === 'playing'
+                    ? 'rgba(120,180,255,0.18)'
+                    : audioBriefState === 'error'
+                    ? 'rgba(224,80,80,0.10)'
+                    : 'rgba(120,180,255,0.08)',
+                  border: audioBriefState === 'playing'
+                    ? '1px solid rgba(120,180,255,0.55)'
+                    : audioBriefState === 'error'
+                    ? '1px solid rgba(224,80,80,0.40)'
+                    : '1px solid rgba(120,180,255,0.28)',
+                  color: audioBriefState === 'error' ? '#e05050' : '#9bc4ff',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  cursor: audioBriefState === 'loading' ? 'wait' : 'pointer',
+                }}
+              >
+                {audioBriefState === 'loading' && <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />}
+                {audioBriefState === 'playing' && <Square size={13} />}
+                {audioBriefState === 'idle' && <Volume2 size={13} />}
+                {audioBriefState === 'error' && <VolumeX size={13} />}
+                {audioBriefState === 'loading' ? 'Generating…' : audioBriefState === 'playing' ? 'Stop' : audioBriefState === 'error' ? 'Retry Audio' : 'Listen'}
+              </button>
+              {audioDownloadUrl && (
+                <a
+                  href={audioDownloadUrl}
+                  download={`briefing-${brief?.id ?? 'audio'}.mp3`}
+                  title="Download this briefing as an MP3 audio file"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '8px 14px',
+                    borderRadius: 6,
+                    background: 'rgba(120,180,255,0.06)',
+                    border: '1px solid rgba(120,180,255,0.22)',
+                    color: '#9bc4ff',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Download size={13} />
+                  MP3
+                </a>
+              )}
+              <button
+                type="button"
                 onClick={handleExport}
                 disabled={exporting}
                 title="Download a branded PDF of this briefing"
@@ -945,6 +1116,33 @@ export default function TodaysBrief() {
                 {exporting ? 'Preparing PDF…' : 'Export PDF'}
               </button>
             </div>
+            {/* Provenance envelope — shown after audio is generated */}
+            {audioProvenance && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                marginTop: 8,
+                padding: '5px 10px',
+                borderRadius: 6,
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                width: 'fit-content',
+              }}>
+                <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em' }}>
+                  AUDIO PROVENANCE
+                </span>
+                <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.5)' }}>
+                  {audioProvenance.model} · {audioProvenance.voice} · {audioProvenance.format.toUpperCase()}
+                </span>
+                {audioProvenance.source === 'cache' && (
+                  <span style={{ fontSize: '0.65rem', color: 'rgba(120,200,100,0.7)', fontWeight: 600 }}>CACHED</span>
+                )}
+                <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.25)' }}>
+                  {new Date(audioProvenance.generatedAt).toLocaleTimeString()}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

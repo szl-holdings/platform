@@ -1,38 +1,43 @@
 /**
- * Command Portal — Briefing Audio Hook
+ * Command Portal — Briefing Audio Hook (OpenAI TTS)
  *
- * Wires the executive briefing audio render path for the Unified Command Portal.
- * Routes through SpeechSpecialist.renderBriefing() with BrowserWebSpeechTTSAdapter —
- * the same abstraction layer used by the speech-specialist backbone.
- * Swap to a real NIM/ElevenLabs/Azure adapter via specialist.setAdapters() when ready.
+ * Streams high-quality TTS audio from the OpenAI gpt-5-mini model
+ * via the /api/openai/briefing-audio endpoint. Replaces the former
+ * BrowserWebSpeechTTSAdapter with a real AI voice.
+ *
+ * Provenance from the response headers is captured and exposed
+ * to consumers for display alongside the audio player.
  */
 
-import {
-  BrowserWebSpeechTTSAdapter,
-  SpeechSpecialist,
-  type BriefingAudioProvenance,
-} from '@szl-holdings/speech-specialist';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 export type AudioPlayerState = 'idle' | 'loading' | 'playing' | 'done' | 'error';
-export type { BriefingAudioProvenance };
+
+export interface BriefingAudioProvenance {
+  model: string;
+  voice: string;
+  generatedAt: string;
+  briefId?: string;
+}
+
+function getApiBase() {
+  const base = import.meta.env.BASE_URL?.replace(/\/$/, '') || '';
+  return `${base}/api`;
+}
 
 /**
- * Hook that wraps SpeechSpecialist.renderBriefing() for use in React components.
- * The specialist is created with the BrowserWebSpeechTTSAdapter so audio plays
- * through the browser's native speech synthesis engine.
+ * Hook that streams TTS audio for an executive briefing from the OpenAI
+ * /openai/briefing-audio endpoint. Audio is played through a browser <audio>
+ * element via a streaming object URL for low-latency playback.
  */
 export function useBriefingAudio() {
   const [state, setState] = useState<AudioPlayerState>('idle');
   const [provenance, setProvenance] = useState<BriefingAudioProvenance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const objectUrlRef = useRef<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
-  const specialist = useMemo(
-    () => new SpeechSpecialist({ tts: new BrowserWebSpeechTTSAdapter() }),
-    [],
-  );
-
-  const isAvailable =
-    typeof window !== 'undefined' && typeof window.speechSynthesis !== 'undefined';
+  const isAvailable = typeof window !== 'undefined';
 
   const play = useCallback(
     async (params: {
@@ -44,31 +49,103 @@ export function useBriefingAudio() {
       recommendations?: string[];
     }) => {
       if (!isAvailable) return;
+
+      abortRef.current?.abort();
+      const abort = new AbortController();
+      abortRef.current = abort;
+
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+        objectUrlRef.current = null;
+      }
+      audioRef.current?.pause();
+
       setState('loading');
+
+      const parts: string[] = [];
+      if (params.headline) parts.push(params.headline);
+      if (params.situation) parts.push(params.situation);
+      if (params.beliefs?.length) {
+        parts.push('Key beliefs: ' + params.beliefs.join('. '));
+      }
+      if (params.recommendations?.length) {
+        parts.push('Recommendations: ' + params.recommendations.join('. '));
+      }
+      const text = parts.join('\n\n');
+
       try {
-        setState('playing');
-        const result = await specialist.renderBriefing({
-          briefId: params.briefId,
-          domain: params.domain,
-          headline: params.headline,
-          situation: params.situation ?? '',
-          beliefs: params.beliefs,
-          recommendations: params.recommendations,
-          locale: 'en-US',
-          outputFormat: 'wav',
+        const res = await fetch(`${getApiBase()}/openai/briefing-audio`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text,
+            briefId: params.briefId,
+            voice: 'nova',
+          }),
+          credentials: 'include',
+          signal: abort.signal,
         });
-        setProvenance(result.provenance);
+
+        if (!res.ok) throw new Error('Audio generation failed');
+
+        const data = await res.json() as {
+          audioBase64: string;
+          mimeType: string;
+          provenance?: { model?: string; voice?: string; generatedAt?: string };
+        };
+        if (abort.signal.aborted) return;
+
+        const prov = data.provenance ?? {};
+        setProvenance({
+          model: prov.model ?? 'gpt-4o-mini-tts',
+          voice: prov.voice ?? 'nova',
+          generatedAt: prov.generatedAt ?? new Date().toISOString(),
+          briefId: params.briefId,
+        });
+
+        const binaryStr = atob(data.audioBase64);
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+        const blob = new Blob([bytes], { type: data.mimeType || 'audio/mpeg' });
+
+        const url = URL.createObjectURL(blob);
+        objectUrlRef.current = url;
+
+        const audio = new Audio(url);
+        audioRef.current = audio;
+
+        setState('playing');
+
+        await new Promise<void>((resolve, reject) => {
+          audio.onended = () => resolve();
+          audio.onerror = () => reject(new Error('Audio playback failed'));
+          if (abort.signal) {
+            abort.signal.addEventListener('abort', () => {
+              audio.pause();
+              resolve();
+            });
+          }
+          audio.play().catch(reject);
+        });
+
         setState('done');
-      } catch {
+      } catch (err) {
+        if ((err as Error).name === 'AbortError') {
+          setState('idle');
+          return;
+        }
         setState('error');
       }
     },
-    [specialist, isAvailable],
+    [isAvailable],
   );
 
   const stop = useCallback(() => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
+    abortRef.current?.abort();
+    audioRef.current?.pause();
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
     }
     setState('idle');
   }, []);

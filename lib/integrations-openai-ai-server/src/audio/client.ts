@@ -113,19 +113,31 @@ export async function voiceChat(
   audioBuffer: Buffer,
   voice: "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer" = "alloy",
   inputFormat: "wav" | "mp3" = "wav",
-  outputFormat: "wav" | "mp3" = "mp3"
+  outputFormat: "wav" | "mp3" = "mp3",
+  systemPrompt?: string
 ): Promise<{ transcript: string; audioResponse: Buffer }> {
+  type AudioContentPart = {
+    type: "input_audio";
+    input_audio: { data: string; format: "wav" | "mp3" };
+  };
+  type VoiceChatMessage =
+    | { role: "system"; content: string }
+    | { role: "user"; content: AudioContentPart[] };
+
   const audioBase64 = audioBuffer.toString("base64");
+  const messages: VoiceChatMessage[] = [];
+  if (systemPrompt) {
+    messages.push({ role: "system", content: systemPrompt });
+  }
+  messages.push({
+    role: "user",
+    content: [{ type: "input_audio", input_audio: { data: audioBase64, format: inputFormat } }],
+  });
   const response = await openai.chat.completions.create({
     model: "gpt-audio",
     modalities: ["text", "audio"],
     audio: { voice, format: outputFormat },
-    messages: [{
-      role: "user",
-      content: [
-        { type: "input_audio", input_audio: { data: audioBase64, format: inputFormat } },
-      ],
-    }],
+    messages: messages as Parameters<typeof openai.chat.completions.create>[0]["messages"],
   });
   const message = response.choices[0]?.message as any;
   const transcript = message?.audio?.transcript || message?.content || "";

@@ -1,5 +1,6 @@
-import { getApiBase } from '@/lib/apiClient';
-import * as Speech from 'expo-speech';
+import { apiGet, apiPost } from '@/lib/apiClient';
+import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
 import {
   Activity,
   Globe,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  Alert,
   Animated,
   Easing,
   FlatList,
@@ -30,6 +32,15 @@ import {
 
 const ACCENT = '#8b7ac8';
 
+interface DailyBriefingPayload {
+  briefingDate: string;
+  headline?: string;
+  audioBase64: string;
+  mimeType: string;
+  provenance?: { model: string; voice: string; format: string; generatedAt: string };
+  source?: string;
+}
+
 interface QueryResult {
   id: string;
   query: string;
@@ -37,6 +48,7 @@ interface QueryResult {
   sources: { domain: string; entity: string; confidence: number }[];
   timestamp: string;
   type: 'voice' | 'text';
+  audioBase64?: string;
 }
 
 const SUGGESTED_QUERIES = [
@@ -61,41 +73,22 @@ const DOMAIN_COLORS: Record<string, string> = {
   lyte: '#3b82f6',
 };
 
-const MOCK_RESPONSES: Record<string, string> = {
-  nav: 'Portfolio NAV stands at $1.24B — up 0.4% over the last 24 hours. Real estate: $841M · Maritime: $243M · Liquid: $112M · Advisory fees: $44M.',
-  threat: 'Two active threat alerts: (1) APT-41 cluster elevated to HIGH confidence — 14 IOC matches across Aegis; (2) MV Stellarwind route deviation — 82% insurance tier breach probability.',
-  vessel: 'MV Stellarwind is 14 nm off its planned route. All other 6 vessels are tracking normally. Weather radar clear across all active corridors.',
-  terra: '14 of 16 properties are fully covenant-compliant. TER-4402 is on watch with DSCR 1.01x. TER-8821 was restored to compliance yesterday after a governance action.',
-  hitl: 'Three HITL approvals are pending in A11oy: (1) Counterparty risk model update; (2) Maritime reinsurance renewal; (3) Legal matter CJL-2291 posture change.',
-  legal: 'One urgent matter: CJL-2291 — response deadline in 48 hours. Assigned to M. Okafor. No draft filed yet. Two supporting matters are in discovery.',
-};
-
-function getAutoResponse(query: string): { response: string; sources: QueryResult['sources'] } {
+function inferSources(query: string): QueryResult['sources'] {
   const q = query.toLowerCase();
-  let response = 'OMNIA synthesis is processing your query across the portfolio world model. Please check the Command portal for detailed cross-domain analysis.';
-  let sources: QueryResult['sources'] = [{ domain: 'command', entity: 'World Model', confidence: 0.92 }];
-
   if (q.includes('nav') || q.includes('portfolio') || q.includes('value')) {
-    response = MOCK_RESPONSES.nav;
-    sources = [{ domain: 'holdings', entity: 'Portfolio NAV', confidence: 0.96 }, { domain: 'a11oy', entity: 'Proof Ledger', confidence: 0.99 }];
+    return [{ domain: 'holdings', entity: 'Portfolio NAV', confidence: 0.96 }, { domain: 'a11oy', entity: 'Proof Ledger', confidence: 0.99 }];
   } else if (q.includes('threat') || q.includes('alert') || q.includes('security')) {
-    response = MOCK_RESPONSES.threat;
-    sources = [{ domain: 'aegis', entity: 'APT-41 Cluster', confidence: 0.92 }, { domain: 'vessels', entity: 'MV Stellarwind', confidence: 0.88 }];
-  } else if (q.includes('vessel') || q.includes('ship') || q.includes('course')) {
-    response = MOCK_RESPONSES.vessel;
-    sources = [{ domain: 'vessels', entity: 'MV Stellarwind', confidence: 0.98 }];
+    return [{ domain: 'aegis', entity: 'Threat Monitor', confidence: 0.92 }];
+  } else if (q.includes('vessel') || q.includes('ship') || q.includes('course') || q.includes('maritime')) {
+    return [{ domain: 'vessels', entity: 'Fleet Tracker', confidence: 0.98 }];
   } else if (q.includes('terra') || q.includes('property') || q.includes('real estate')) {
-    response = MOCK_RESPONSES.terra;
-    sources = [{ domain: 'terra', entity: 'Portfolio Compliance', confidence: 0.95 }];
+    return [{ domain: 'terra', entity: 'Portfolio Compliance', confidence: 0.95 }];
   } else if (q.includes('hitl') || q.includes('approval') || q.includes('a11oy')) {
-    response = MOCK_RESPONSES.hitl;
-    sources = [{ domain: 'a11oy', entity: 'HITL Queue', confidence: 0.99 }];
+    return [{ domain: 'a11oy', entity: 'HITL Queue', confidence: 0.99 }];
   } else if (q.includes('legal') || q.includes('matter') || q.includes('counsel')) {
-    response = MOCK_RESPONSES.legal;
-    sources = [{ domain: 'counsel', entity: 'Matter CJL-2291', confidence: 0.87 }];
+    return [{ domain: 'counsel', entity: 'Matter Dashboard', confidence: 0.87 }];
   }
-
-  return { response, sources };
+  return [{ domain: 'command', entity: 'World Model', confidence: 0.92 }];
 }
 
 export default function OmniaVoiceScreen() {
@@ -105,8 +98,24 @@ export default function OmniaVoiceScreen() {
   const [processing, setProcessing] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [currentSpeakId, setCurrentSpeakId] = useState<string | null>(null);
+  const [privacyMode, setPrivacyMode] = useState(false);
+  const [dailyBriefing, setDailyBriefing] = useState<DailyBriefingPayload | null>(null);
+  const [briefingLoading, setBriefingLoading] = useState(true);
+  const [briefingPlaying, setBriefingPlaying] = useState(false);
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const scrollRef = useRef<ScrollView>(null);
+
+  const recordingRef = useRef<Audio.Recording | null>(null);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const briefingSoundRef = useRef<Audio.Sound | null>(null);
+  const conversationIdRef = useRef<string | null>(null);
+
+  // Create a persistent conversation session for the lifetime of this screen
+  useEffect(() => {
+    apiPost<{ id: string }>('/api/openai/conversations', {})
+      .then((data) => { conversationIdRef.current = data.id; })
+      .catch(() => { /* session creation failed — queries will run without history */ });
+  }, []);
 
   useEffect(() => {
     if (listening) {
@@ -121,62 +130,277 @@ export default function OmniaVoiceScreen() {
     }
   }, [listening]);
 
-  const submitQuery = useCallback(
-    async (q: string) => {
-      if (!q.trim() || processing) return;
-      const trimmed = q.trim();
-      setQuery('');
-      setProcessing(true);
+  // Fetch today's daily briefing audio from the API on mount
+  useEffect(() => {
+    setBriefingLoading(true);
+    apiGet<DailyBriefingPayload>('/api/openai/daily-briefing/today')
+      .then((data) => setDailyBriefing(data))
+      .catch(() => setDailyBriefing(null))
+      .finally(() => setBriefingLoading(false));
+  }, []);
 
-      await new Promise((r) => setTimeout(r, 900));
+  useEffect(() => {
+    return () => {
+      recordingRef.current?.stopAndUnloadAsync().catch(() => {});
+      soundRef.current?.unloadAsync().catch(() => {});
+      briefingSoundRef.current?.unloadAsync().catch(() => {});
+    };
+  }, []);
 
-      const { response, sources } = getAutoResponse(trimmed);
+  const playDailyBriefing = useCallback(async () => {
+    if (!dailyBriefing?.audioBase64) return;
+    if (briefingPlaying) {
+      if (briefingSoundRef.current) {
+        await briefingSoundRef.current.stopAsync().catch(() => {});
+        await briefingSoundRef.current.unloadAsync().catch(() => {});
+        briefingSoundRef.current = null;
+      }
+      setBriefingPlaying(false);
+      return;
+    }
+    try {
+      setBriefingPlaying(true);
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: false, playsInSilentModeIOS: true, staysActiveInBackground: true });
+      const tmpUri = `${FileSystem.cacheDirectory}daily-brief-${Date.now()}.mp3`;
+      await FileSystem.writeAsStringAsync(tmpUri, dailyBriefing.audioBase64, { encoding: FileSystem.EncodingType.Base64 });
+      const { sound } = await Audio.Sound.createAsync({ uri: tmpUri }, { shouldPlay: true });
+      briefingSoundRef.current = sound;
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (!status.isLoaded) return;
+        if (status.didJustFinish) {
+          setBriefingPlaying(false);
+          sound.unloadAsync().catch(() => {});
+          briefingSoundRef.current = null;
+        }
+      });
+    } catch {
+      setBriefingPlaying(false);
+    }
+  }, [dailyBriefing, briefingPlaying]);
+
+  const playAudioBase64 = useCallback(async (base64: string, resultId: string) => {
+    try {
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync();
+        soundRef.current = null;
+      }
+
+      setSpeaking(true);
+      setCurrentSpeakId(resultId);
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: true,
+      });
+
+      const tmpUri = `${FileSystem.cacheDirectory}omnia-response-${Date.now()}.mp3`;
+      await FileSystem.writeAsStringAsync(tmpUri, base64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: tmpUri },
+        { shouldPlay: true },
+      );
+      soundRef.current = sound;
+
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (!status.isLoaded) return;
+        if (status.didJustFinish) {
+          setSpeaking(false);
+          setCurrentSpeakId(null);
+          sound.unloadAsync().catch(() => {});
+        }
+      });
+    } catch (err) {
+      setSpeaking(false);
+      setCurrentSpeakId(null);
+    }
+  }, []);
+
+  const stopAudio = useCallback(async () => {
+    if (soundRef.current) {
+      await soundRef.current.stopAsync().catch(() => {});
+      await soundRef.current.unloadAsync().catch(() => {});
+      soundRef.current = null;
+    }
+    setSpeaking(false);
+    setCurrentSpeakId(null);
+  }, []);
+
+  const speakResult = useCallback(async (result: QueryResult) => {
+    if (currentSpeakId === result.id && speaking) {
+      await stopAudio();
+      return;
+    }
+    await stopAudio();
+
+    if (result.audioBase64) {
+      await playAudioBase64(result.audioBase64, result.id);
+      return;
+    }
+
+    try {
+      setSpeaking(true);
+      setCurrentSpeakId(result.id);
+
+      const data = await apiPost<{ audioBase64: string; mimeType: string }>(
+        '/api/openai/briefing-audio',
+        { text: result.response, voice: 'nova' },
+      );
+
+      await playAudioBase64(data.audioBase64, result.id);
+    } catch {
+      setSpeaking(false);
+      setCurrentSpeakId(null);
+    }
+  }, [currentSpeakId, speaking, stopAudio, playAudioBase64]);
+
+  const submitTextQuery = useCallback(async (q: string) => {
+    if (!q.trim() || processing) return;
+    const trimmed = q.trim();
+    setQuery('');
+    setProcessing(true);
+
+    try {
+      let response = 'OMNIA synthesis is processing your query. Check the Command portal for detailed analysis.';
+      try {
+        const data = await apiPost<{ response?: string }>('/api/openai/text-query', {
+          query: trimmed,
+          ...(conversationIdRef.current ? { conversationId: conversationIdRef.current } : {}),
+        });
+        response = data.response ?? response;
+      } catch {
+        /* network error — use fallback message */
+      }
+
       const result: QueryResult = {
         id: `q-${Date.now()}`,
         query: trimmed,
         response,
-        sources,
+        sources: inferSources(trimmed),
         timestamp: new Date().toISOString(),
-        type: listening ? 'voice' : 'text',
+        type: 'text',
       };
 
       setResults((prev) => [result, ...prev]);
+    } catch {
+      const result: QueryResult = {
+        id: `q-${Date.now()}`,
+        query: trimmed,
+        response: 'Network error — unable to reach OMNIA. Please check your connection.',
+        sources: [],
+        timestamp: new Date().toISOString(),
+        type: 'text',
+      };
+      setResults((prev) => [result, ...prev]);
+    } finally {
       setProcessing(false);
-      setListening(false);
-    },
-    [processing, listening],
-  );
+    }
+  }, [processing]);
 
-  const handleMicPress = useCallback(() => {
+  const submitVoiceQuery = useCallback(async (audioBase64: string) => {
+    setProcessing(true);
+
+    try {
+      const data = await apiPost<{
+        userTranscript?: string;
+        assistantTranscript?: string;
+        audioBase64?: string;
+      }>('/api/openai/voice-query', {
+        audio: audioBase64,
+        ...(conversationIdRef.current ? { conversationId: conversationIdRef.current } : {}),
+      });
+
+      const userQuery = data.userTranscript?.trim() || 'Voice query';
+      const response = data.assistantTranscript?.trim() || 'OMNIA could not process the voice input.';
+
+      const result: QueryResult = {
+        id: `v-${Date.now()}`,
+        query: userQuery,
+        response,
+        sources: inferSources(userQuery),
+        timestamp: new Date().toISOString(),
+        type: 'voice',
+        audioBase64: data.audioBase64,
+      };
+
+      setResults((prev) => [result, ...prev]);
+
+      if (data.audioBase64) {
+        await playAudioBase64(data.audioBase64, result.id);
+      }
+    } catch {
+      const result: QueryResult = {
+        id: `v-${Date.now()}`,
+        query: 'Voice query',
+        response: 'Voice processing failed. Please try again or use the text input.',
+        sources: [],
+        timestamp: new Date().toISOString(),
+        type: 'voice',
+      };
+      setResults((prev) => [result, ...prev]);
+    } finally {
+      setProcessing(false);
+    }
+  }, [playAudioBase64]);
+
+  // When privacy mode is enabled mid-recording, force-stop the mic immediately
+  useEffect(() => {
+    if (privacyMode && listening && recordingRef.current) {
+      recordingRef.current.stopAndUnloadAsync().catch(() => {}).finally(() => {
+        recordingRef.current = null;
+        setListening(false);
+      });
+    }
+  }, [privacyMode, listening]);
+
+  const handleMicPress = useCallback(async () => {
+    if (privacyMode) return;
     if (listening) {
       setListening(false);
-      if (query.trim()) submitQuery(query);
-    } else {
-      setListening(true);
-      setTimeout(() => {
-        setListening(false);
-      }, 5000);
-    }
-  }, [listening, query, submitQuery]);
+      if (recordingRef.current) {
+        try {
+          await recordingRef.current.stopAndUnloadAsync();
+          const uri = recordingRef.current.getURI();
+          recordingRef.current = null;
 
-  const speakResult = useCallback((result: QueryResult) => {
-    if (currentSpeakId === result.id && speaking) {
-      Speech.stop();
-      setSpeaking(false);
-      setCurrentSpeakId(null);
+          if (uri) {
+            const base64 = await FileSystem.readAsStringAsync(uri, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            await submitVoiceQuery(base64);
+          }
+        } catch {
+          recordingRef.current = null;
+          Alert.alert('Recording Error', 'Could not process the recording. Please try again.');
+        }
+      }
       return;
     }
-    Speech.stop();
-    setSpeaking(true);
-    setCurrentSpeakId(result.id);
-    Speech.speak(result.response, {
-      language: 'en-US',
-      pitch: 1.0,
-      rate: 0.95,
-      onDone: () => { setSpeaking(false); setCurrentSpeakId(null); },
-      onError: () => { setSpeaking(false); setCurrentSpeakId(null); },
-    });
-  }, [currentSpeakId, speaking]);
+
+    try {
+      const { status } = await Audio.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Microphone Access', 'Microphone permission is required for voice queries.');
+        return;
+      }
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY,
+      );
+      recordingRef.current = recording;
+      setListening(true);
+    } catch {
+      Alert.alert('Recording Error', 'Could not start recording. Please try again.');
+    }
+  }, [listening, submitVoiceQuery]);
 
   return (
     <KeyboardAvoidingView
@@ -185,10 +409,67 @@ export default function OmniaVoiceScreen() {
     >
       <View style={styles.header}>
         <Globe size={18} color={ACCENT} />
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>OMNIA Voice Query</Text>
           <Text style={styles.headerSubtitle}>Ask anything about the portfolio</Text>
         </View>
+        <TouchableOpacity
+          onPress={() => setPrivacyMode((p) => !p)}
+          style={[styles.privacyToggle, privacyMode && styles.privacyToggleActive]}
+          accessibilityLabel={privacyMode ? 'Privacy mode on — tap to unmute' : 'Enable privacy mode'}
+        >
+          {privacyMode ? (
+            <MicOff size={14} color="rgba(239,68,68,0.9)" />
+          ) : (
+            <Mic size={14} color="rgba(255,255,255,0.4)" />
+          )}
+        </TouchableOpacity>
+      </View>
+
+      {/* Privacy mode banner */}
+      {privacyMode && (
+        <View style={styles.privacyBanner}>
+          <MicOff size={10} color="rgba(239,68,68,0.8)" />
+          <Text style={styles.privacyBannerText}>Privacy mode — microphone muted</Text>
+        </View>
+      )}
+
+      {/* Daily Briefing Card */}
+      <View style={styles.dailyBriefingCard}>
+        <View style={styles.dailyBriefingHeader}>
+          <Zap size={13} color={ACCENT} />
+          <Text style={styles.dailyBriefingLabel}>TODAY'S BRIEFING</Text>
+          {dailyBriefing?.source === 'cache' && (
+            <Text style={styles.cachedBadge}>CACHED</Text>
+          )}
+        </View>
+        {briefingLoading ? (
+          <Text style={styles.dailyBriefingHint}>Fetching today's intelligence briefing…</Text>
+        ) : dailyBriefing ? (
+          <>
+            <Text style={styles.dailyBriefingHeadline} numberOfLines={2}>
+              {dailyBriefing.headline ?? 'Daily Executive Intelligence Briefing'}
+            </Text>
+            <View style={styles.dailyBriefingFooter}>
+              <Text style={styles.dailyBriefingDate}>{dailyBriefing.briefingDate}</Text>
+              <TouchableOpacity onPress={playDailyBriefing} style={styles.briefingPlayBtn}>
+                {briefingPlaying ? (
+                  <VolumeX size={13} color={ACCENT} />
+                ) : (
+                  <Volume2 size={13} color={ACCENT} />
+                )}
+                <Text style={styles.briefingPlayText}>{briefingPlaying ? 'Stop' : 'Listen'}</Text>
+              </TouchableOpacity>
+            </View>
+            {dailyBriefing.provenance && (
+              <Text style={styles.provenanceText}>
+                {dailyBriefing.provenance.model} · {dailyBriefing.provenance.voice} · {dailyBriefing.provenance.format.toUpperCase()}
+              </Text>
+            )}
+          </>
+        ) : (
+          <Text style={styles.dailyBriefingHint}>No briefing available — connect to generate one.</Text>
+        )}
       </View>
 
       {results.length === 0 && !processing && (
@@ -202,7 +483,7 @@ export default function OmniaVoiceScreen() {
             {SUGGESTED_QUERIES.map((sq) => (
               <TouchableOpacity
                 key={sq}
-                onPress={() => submitQuery(sq)}
+                onPress={() => submitTextQuery(sq)}
                 style={styles.suggestionChip}
               >
                 <Text style={styles.suggestionText}>{sq}</Text>
@@ -221,7 +502,7 @@ export default function OmniaVoiceScreen() {
         {processing && (
           <View style={styles.processingRow}>
             <Activity size={14} color={ACCENT} />
-            <Text style={styles.processingText}>Querying portfolio world model…</Text>
+            <Text style={styles.processingText}>Querying OMNIA intelligence layer…</Text>
           </View>
         )}
         {[...results].reverse().map((result) => (
@@ -260,9 +541,26 @@ export default function OmniaVoiceScreen() {
       </ScrollView>
 
       <View style={styles.inputArea}>
-        <Animated.View style={[styles.micBtn, { transform: [{ scale: pulseAnim }] }, listening && styles.micBtnActive]}>
-          <TouchableOpacity onPress={handleMicPress} style={styles.micBtnInner}>
-            {listening ? <MicOff size={22} color="#fff" /> : <Mic size={22} color={ACCENT} />}
+        <Animated.View
+          style={[
+            styles.micBtn,
+            { transform: [{ scale: pulseAnim }] },
+            listening && styles.micBtnActive,
+            privacyMode && styles.micBtnPrivacy,
+          ]}
+        >
+          <TouchableOpacity
+            onPress={handleMicPress}
+            style={styles.micBtnInner}
+            disabled={processing || privacyMode}
+          >
+            {privacyMode ? (
+              <MicOff size={22} color="rgba(239,68,68,0.6)" />
+            ) : listening ? (
+              <MicOff size={22} color="#fff" />
+            ) : (
+              <Mic size={22} color={ACCENT} />
+            )}
           </TouchableOpacity>
         </Animated.View>
         <TextInput
@@ -271,17 +569,17 @@ export default function OmniaVoiceScreen() {
           onChangeText={setQuery}
           placeholder="Ask about the portfolio…"
           placeholderTextColor="rgba(255,255,255,0.3)"
-          onSubmitEditing={() => submitQuery(query)}
+          onSubmitEditing={() => submitTextQuery(query)}
           returnKeyType="send"
-          editable={!processing}
+          editable={!processing && !listening}
           multiline={false}
         />
         <TouchableOpacity
-          onPress={() => submitQuery(query)}
-          disabled={!query.trim() || processing}
-          style={[styles.sendBtn, (!query.trim() || processing) && styles.sendBtnDisabled]}
+          onPress={() => submitTextQuery(query)}
+          disabled={!query.trim() || processing || listening}
+          style={[styles.sendBtn, (!query.trim() || processing || listening) && styles.sendBtnDisabled]}
         >
-          <Send size={15} color={!query.trim() || processing ? 'rgba(255,255,255,0.2)' : ACCENT} />
+          <Send size={15} color={!query.trim() || processing || listening ? 'rgba(255,255,255,0.2)' : ACCENT} />
         </TouchableOpacity>
       </View>
 
@@ -299,6 +597,34 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#060b12',
+  },
+  privacyToggle: {
+    padding: 7,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  privacyToggleActive: {
+    backgroundColor: 'rgba(239,68,68,0.1)',
+    borderColor: 'rgba(239,68,68,0.3)',
+  },
+  privacyBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(239,68,68,0.06)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(239,68,68,0.15)',
+  },
+  privacyBannerText: {
+    fontSize: 11,
+    color: 'rgba(239,68,68,0.85)',
+    fontWeight: '600',
+    letterSpacing: 0.4,
   },
   header: {
     flexDirection: 'row',
@@ -320,6 +646,77 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'rgba(255,255,255,0.4)',
     marginTop: 1,
+  },
+  dailyBriefingCard: {
+    marginHorizontal: 16,
+    marginTop: 14,
+    marginBottom: 4,
+    padding: 14,
+    backgroundColor: `${ACCENT}0a`,
+    borderWidth: 1,
+    borderColor: `${ACCENT}25`,
+    borderRadius: 12,
+  },
+  dailyBriefingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 6,
+  },
+  dailyBriefingLabel: {
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 1.3,
+    color: ACCENT,
+    flex: 1,
+  },
+  cachedBadge: {
+    fontSize: 8,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+    color: 'rgba(120,200,100,0.8)',
+  },
+  dailyBriefingHeadline: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: 'rgba(235,230,220,0.88)',
+    lineHeight: 18,
+    marginBottom: 8,
+  },
+  dailyBriefingFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dailyBriefingDate: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.35)',
+  },
+  briefingPlayBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    backgroundColor: `${ACCENT}18`,
+    borderWidth: 1,
+    borderColor: `${ACCENT}35`,
+    borderRadius: 8,
+  },
+  briefingPlayText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: ACCENT,
+  },
+  provenanceText: {
+    fontSize: 10,
+    color: 'rgba(255,255,255,0.2)',
+    marginTop: 6,
+  },
+  dailyBriefingHint: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.35)',
+    fontStyle: 'italic',
   },
   suggestionsSection: {
     paddingTop: 16,
@@ -467,6 +864,11 @@ const styles = StyleSheet.create({
   micBtnActive: {
     backgroundColor: '#ef444430',
     borderColor: '#ef444460',
+  },
+  micBtnPrivacy: {
+    backgroundColor: 'rgba(239,68,68,0.06)',
+    borderColor: 'rgba(239,68,68,0.2)',
+    opacity: 0.7,
   },
   micBtnInner: {
     flex: 1,

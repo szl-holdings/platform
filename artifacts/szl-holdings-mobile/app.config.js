@@ -30,6 +30,7 @@ module.exports = {
         NSUserNotificationUsageDescription:
           'APEX sends cross-domain alerts, signals, and executive briefings.',
         ITSAppUsesNonExemptEncryption: false,
+        UIBackgroundModes: ['audio'],
       },
       privacyManifests: {
         NSPrivacyAccessedAPITypes: [
