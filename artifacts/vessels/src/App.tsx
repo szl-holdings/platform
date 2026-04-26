@@ -341,6 +341,7 @@ const VoyageRiskTwinPage = lazy(() => import('@/pages/voyage-risk-twin'));
 const GovernedCockpitPage = lazy(() => import('@/pages/governed-cockpit'));
 const GeoDecisionCenterPage = lazy(() => import('@/pages/geo-decision-center'));
 const RiskSimulationPage = lazy(() => import('@/pages/risk-simulation'));
+const VoyageCalculatorPage = lazy(() => import('@/pages/voyage-calculator'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -794,6 +795,13 @@ function VesselsSidebarContent({
           href: '/risk-simulation',
           icon: <Calculator className="w-3.5 h-3.5" />,
         },
+        {
+          id: 'voyage-calculator',
+          label: 'Voyage Calculator',
+          href: '/voyage-calculator',
+          icon: <DollarSign className="w-3.5 h-3.5" />,
+          badge: 'NEW',
+        },
       ],
     },
     {
@@ -1139,6 +1147,7 @@ function DashboardRouter() {
         <Route path="/governed-cockpit" component={GovernedCockpitPage} />
         <Route path="/geo-decision-center" component={GeoDecisionCenterPage} />
         <Route path="/risk-simulation" component={RiskSimulationPage} />
+        <Route path="/voyage-calculator" component={VoyageCalculatorPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>

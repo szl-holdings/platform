@@ -44,7 +44,8 @@
     "./market-data": "./src/market-data/index.ts",
     "./multi-agent-coordinator": "./src/multi-agent-coordinator.ts",
     "./agent-tool-loop": "./src/agent-tool-loop.ts",
-    "./tool-bridge": "./src/tool-bridge.ts"
+    "./tool-bridge": "./src/tool-bridge.ts",
+    "./data-fabric": "./src/data-fabric/index.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",

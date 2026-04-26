@@ -141,6 +141,7 @@ const DiligenceRoomPage = lazy(() => import('@/pages/diligence-room'));
 const RiskSimulationPage = lazy(() => import('@/pages/risk-simulation'));
 const WhyThisPropertyNow = lazy(() => import('@/pages/why-this-property-now'));
 const SourcingInbox = lazy(() => import('@/pages/sourcing-inbox'));
+const CapRateModel = lazy(() => import('@/pages/cap-rate-model'));
 
 function PageLoader() {
   return (
@@ -258,6 +259,7 @@ function PrivateRouter() {
         <Route path="/why-this-property/:propertyId" component={WhyThisPropertyNow} />
         <Route path="/why-this-property" component={WhyThisPropertyNow} />
         <Route path="/sourcing-inbox" component={SourcingInbox} />
+        <Route path="/cap-rate-model" component={CapRateModel} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -353,6 +355,15 @@ const terraCommands: CommandItem[] = [
     group: 'Navigation',
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/broker-overview');
+    },
+  },
+  {
+    id: 'nav-cap-rate',
+    label: 'Cap Rate Model',
+    icon: '📊',
+    group: 'Navigation',
+    action: () => {
+      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/cap-rate-model');
     },
   },
   ...createBaselineWebActions(

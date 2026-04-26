@@ -21,6 +21,7 @@ import {
   ChevronDown,
   ChevronRight,
   Compass,
+  Dice5,
   FlaskConical,
   GitBranch,
   Layers,
@@ -70,6 +71,8 @@ const AefKnowledgeSearchPage = lazy(() => import('@/pages/aef-knowledge-search')
 const ForecastPage = lazy(() => import('@/pages/forecast'));
 const ScenarioComposerPage = lazy(() => import('@/pages/scenario-composer'));
 const CausalIntelligencePage = lazy(() => import('@/pages/causal-intelligence'));
+const BacktestingPage = lazy(() => import('@/pages/backtesting'));
+const MonteCarloFabricPage = lazy(() => import('@/pages/monte-carlo-fabric'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -176,6 +179,20 @@ const NAV_GROUPS: NavGroup[] = [
         label: 'Scenario Composer',
         href: '/scenarios',
         icon: <Waves className="w-3.5 h-3.5" />,
+      },
+      {
+        label: 'Backtesting',
+        href: '/backtesting',
+        icon: <FlaskConical className="w-3.5 h-3.5" />,
+        badge: 'NEW',
+        badgeColor: 'amber' as const,
+      },
+      {
+        label: 'Monte Carlo',
+        href: '/monte-carlo',
+        icon: <Dice5 className="w-3.5 h-3.5" />,
+        badge: 'NEW',
+        badgeColor: 'amber' as const,
       },
     ],
   },
@@ -582,6 +599,8 @@ function DashboardRoutes() {
         <Route path="/aef-search" component={AefKnowledgeSearchPage} />
         <Route path="/forecast" component={ForecastPage} />
         <Route path="/causal" component={CausalIntelligencePage} />
+        <Route path="/backtesting" component={BacktestingPage} />
+        <Route path="/monte-carlo" component={MonteCarloFabricPage} />
         <Route path="/scenarios" component={ScenarioComposerPage} />
         {/* Default: redirect to overview */}
         <Route component={OverviewPage} />

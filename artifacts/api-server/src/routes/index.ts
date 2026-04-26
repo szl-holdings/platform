@@ -71,10 +71,34 @@ router.use(lazyMatch("/simulation", () => import("./simulation-whatif"), "simula
 // GET  /stress-drill/drills/:id/debrief + /debrief/pdf
 router.use(lazyMatch("/stress-drill", () => import("./stress-drill"), "stress-drill"));
 
+// Causal scenario backtest — historical event replay & accuracy metrics.
+// GET  /scenarios/backtest/events   — list historical shock events
+// POST /scenarios/backtest/run      — run backtest against selected events
+// GET  /scenarios/backtest/accuracy — aggregate model accuracy
+router.use(lazyMatch("/scenarios/backtest", () => import("./scenario-backtest"), "scenario-backtest"));
+
 // Causal scenario & shock-propagation engine — public (demo surface).
 // GET /scenarios/library  — shock taxonomy
 // POST /scenarios/run     — propagates stacked shocks across the entity graph
 router.use(lazyMatch("/scenarios", () => import("./scenarios"), "scenarios"));
+
+// Monte Carlo Fabric — configurable stochastic simulation with probability bands.
+// GET  /monte-carlo-fabric/scenarios, /monte-carlo-fabric/distributions
+// POST /monte-carlo-fabric/simulate
+router.use(lazyMatch("/monte-carlo-fabric", () => import("./monte-carlo-fabric"), "monte-carlo-fabric"));
+
+// Premium Data Fabric — adapter registry, health, cost metering, unified entity fetch.
+// GET /data-fabric/adapters, /data-fabric/data, /data-fabric/costs, /data-fabric/health
+router.use(lazyMatch("/data-fabric", () => import("./data-fabric"), "data-fabric"));
+
+// Terra predictive cap-rate model — ML-driven cap rate forecasting.
+// GET /terra/cap-rate/predict, /terra/cap-rate/history, /terra/cap-rate/compare
+router.use(lazyMatch("/terra/cap-rate", () => import("./terra-cap-rate"), "terra-cap-rate"));
+
+// Vessels voyage economics calculator — charter rates, bunker costs, canal fees, P&L.
+// GET  /vessels/voyage-calc/vessel-classes, routes, bunker-prices, canal-fees, charter-rates
+// POST /vessels/voyage-calc/estimate
+router.use(lazyMatch("/vessels/voyage-calc", () => import("./vessels-voyage-calc"), "vessels-voyage-calc"));
 
 // Infrastructure status — public.
 router.use(lazyMatch("/infrastructure", () => import("./infrastructure-status"), "infrastructure-status"));
