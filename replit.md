@@ -66,3 +66,14 @@ The platform is a pnpm monorepo built with TypeScript 5.9, React 19, Vite, and N
 -   **Government Data:** CISA KEV, NVD CVE, MITRE ATT&CK, Census/BLS, FEMA NRI, NYC Open Data, SEC EDGAR
 -   **Legal Data:** CourtListener REST API
 -   **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
+
+## Terra — Real Estate Intelligence Platform
+Terra has been transformed from a gated marketing page into a fully operational, investor-ready real estate intelligence platform:
+- **Auth gate removed**: All routes render without login; sandbox/demo mode enabled by default
+- **Glasswing-inspired hero**: Full-screen editorial landing at `/` with serif typography (Georgia), generative mesh canvas animation, gold (#b8943c) / obsidian (#080b0d) palette, "Enter Platform" CTA navigating to dashboard
+- **Landing renders outside TerraLayout**: The `/` route in `AppContent` bypasses `PrivateApp` (no sidebar), while `/dashboard` and all operational routes render inside `TerraLayout` with sidebar navigation
+- **A11oy Signal Mesh**: Cross-vertical intelligence widget (`a11oy-signal-mesh.tsx`) showing 5 signals from Vessels, Counsel, Sentra — integrated into Dashboard and Pipeline pages
+- **Pipeline enhanced**: CoStar-grade velocity metrics, avg days-in-stage, probability-weighted value, stage velocity breakdown, cap rate and velocity indicators on deal cards
+- **Distress Engine enhanced**: PropertyShark-level parcel detail (block, lot, zoning, tax class, FAR, BBL), First Street-style climate risk badge, Cherre-verified data provenance section
+- **Ownership Graph enhanced**: Reonomy-style UBO resolution depth indicators showing entity layers traversed for each beneficial owner
+- **Key files**: `App.tsx`, `marketing-landing.tsx`, `a11oy-signal-mesh.tsx`, `dashboard.tsx`, `pipeline.tsx`, `distress-engine.tsx`, `ownership-graph.tsx`

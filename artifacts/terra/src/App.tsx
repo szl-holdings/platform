@@ -26,7 +26,6 @@ import {
   PowerUserProvider,
 } from '@szl-holdings/shared-ui/keyboard-shortcuts';
 import { LANE_ACCENT_HEX } from '@szl-holdings/shared-ui/lane-colors';
-import { PrivateAppGuard } from '@szl-holdings/shared-ui/PrivateAppGuard';
 import {
   SandboxModeBanner,
   SandboxModeProvider,
@@ -38,7 +37,7 @@ import { useSessionRevocationToast } from '@szl-holdings/shared-ui/use-session-r
 import { persistQueryClient } from '@tanstack/query-persist-client-core';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { lazy, Suspense, useEffect, useRef } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Redirect, Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 import { TerraLayout } from '@/components/terra-layout';
 import { TERRA_DEMO_NARRATIVE } from '@/data/demo-narrative';
@@ -435,29 +434,15 @@ function AppContent({
   cmdOpen: boolean;
   setCmdOpen: (v: boolean) => void;
 }) {
-  const { user, isLoading, isAuthenticated, login } = useAuth();
-  const [location, navigate] = useLocation();
-  const prevAuth = useRef(isAuthenticated);
-
-  const params = new URLSearchParams(window.location.search);
-  const hasDemoParam = params.get('view') === 'app' || params.get('demo') === 'true';
-  const hasDemoToken =
-    typeof window !== 'undefined' && !!window.sessionStorage.getItem('szl-demo-token');
-  const demoMode = hasDemoParam || hasDemoToken;
+  const { user } = useAuth();
+  const [location] = useLocation();
   const { sandboxActive, enableSandbox } = useSandboxMode();
 
   useEffect(() => {
-    if (demoMode && !sandboxActive) {
+    if (!sandboxActive) {
       enableSandbox();
     }
-  }, [demoMode, sandboxActive, enableSandbox]);
-
-  useEffect(() => {
-    if (!prevAuth.current && isAuthenticated) {
-      navigate('/dashboard');
-    }
-    prevAuth.current = isAuthenticated;
-  }, [isAuthenticated, navigate]);
+  }, [sandboxActive, enableSandbox]);
 
   useEffect(() => {
     if (user) {
@@ -473,6 +458,15 @@ function AppContent({
   }, [user?.id]);
 
   const normalizedPath = location.replace(/\/+$/, '') || '/';
+
+  if (normalizedPath === '/') {
+    return (
+      <Suspense fallback={<div style={{ height: '100vh', background: '#080b0d' }} />}>
+        <TerraMarketingLanding />
+      </Suspense>
+    );
+  }
+
   if (normalizedPath === '/pulse') {
     return (
       <Suspense fallback={<div style={{ height: '100vh', background: '#0a0c10' }} />}>
@@ -489,44 +483,7 @@ function AppContent({
     );
   }
 
-  if (isLoading) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh',
-          background: '#0a0c10',
-        }}
-      >
-        <div
-          style={{
-            width: 22,
-            height: 22,
-            border: '2px solid rgba(45,106,79,0.2)',
-            borderTopColor: TERRA_ACCENT,
-            borderRadius: '50%',
-            animation: 'spin 0.8s linear infinite',
-          }}
-        />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated && !demoMode) {
-    return (
-      <Suspense fallback={<div style={{ height: '100vh', background: '#0a0c10' }} />}>
-        <TerraMarketingLanding onSignIn={login} />
-      </Suspense>
-    );
-  }
-
-  return (
-    <PrivateAppGuard appName="Terra" accentColor={TERRA_ACCENT}>
-      <PrivateApp cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
-    </PrivateAppGuard>
-  );
+  return <PrivateApp cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;
 }
 
 function App() {

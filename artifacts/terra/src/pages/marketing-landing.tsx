@@ -1,141 +1,121 @@
-import { aboutSzlParagraph, copyrightLine } from '@szl-holdings/brand-registry';
-import { ContactModal } from '@szl-holdings/shared-ui/contact-modal';
-import { NewsletterSubscribe } from '@szl-holdings/shared-ui/newsletter-subscribe';
-import {
-  Activity,
-  ArrowRight,
-  BarChart3,
-  Building2,
-  DollarSign,
-  Eye,
-  Flame,
-  Layers,
-  Menu,
-  Search,
-  Shield,
-  Users,
-  X,
-} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'wouter';
+import {
+  ArrowRight,
+  Building2,
+  Activity,
+  BarChart3,
+  Eye,
+  Layers,
+  Network,
+  Shield,
+  TrendingUp,
+} from 'lucide-react';
 
-const _ACCENT = '#c9b787';
-const ACCENT_LIGHT = '#c9b787';
-const _ACCENT_LIGHT_BG = '#c9b787';
-const BTN_BG = '#f5f5f5';
-const BTN_TEXT = '#0a0a0a';
-const _BRASS = '#c9b787';
-const BRASS_LIGHT = '#c9b787';
-const BG = '#0a0a0a';
-const BG2 = '#111111';
+const GOLD = '#b8943c';
+const GOLD_LIGHT = '#c9b787';
+const OBSIDIAN = '#080b0d';
 
-const doctrine = [
-  {
-    phase: 'Foundation',
-    desc: 'Establish your data layer. Property ownership, LLC chains, tax records, and debt positions — resolved and de-duped.',
-    icon: Layers,
-  },
-  {
-    phase: 'Watch',
-    desc: 'Surface distress before the market does. Pre-foreclosure, lis pendens, auction calendars, tax liens, expired listings.',
-    icon: Eye,
-  },
-  {
-    phase: 'Pipeline',
-    desc: 'Move leads to deals in a structured acquisition workflow. Stage-gated, scored, and assigned.',
-    icon: Activity,
-  },
-  {
-    phase: 'Intelligence',
-    desc: 'Cross-reference ownership, debt maturity, hold duration, and market comps to rank and prioritize every opportunity.',
-    icon: BarChart3,
-  },
-  {
-    phase: 'Action',
-    desc: 'Execute. Outreach, diligence, underwriting, and deal routing — from one operating surface.',
-    icon: ArrowRight,
-  },
-];
+function GenerativeMesh() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    let raf: number;
+    let frame = 0;
 
-const capabilities = [
-  {
-    icon: Flame,
-    title: 'Distress Intelligence',
-    desc: 'Real-time pre-foreclosure tracking, lis pendens filings, auction calendars, and tax lien discovery across all NYC boroughs. AI-scored opportunity ranking.',
-  },
-  {
-    icon: Search,
-    title: 'Ownership Resolution',
-    desc: 'LLC unmasking and entity resolution to identify beneficial owners, cross-reference debt maturity timelines, hold duration, and off-market propensity.',
-  },
-  {
-    icon: Activity,
-    title: 'Deal Pipeline',
-    desc: 'Stage-gated acquisition and disposition pipeline with ownership assignments, priority scoring, and CRM-native workflow.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Market Intelligence',
-    desc: 'Comparable sales, price-per-sqft trends, borough-level dynamics, and off-market opportunity discovery — updated continuously.',
-  },
-  {
-    icon: Users,
-    title: 'Broker Operations',
-    desc: 'Broker-native CRM with contact management, deal history, tenant profiles, lease schedules, and performance scorecards.',
-  },
-  {
-    icon: DollarSign,
-    title: 'Investment Analysis',
-    desc: 'IRR modeling, cap rate analysis, and scenario planning. Climate risk overlays, FEMA zone cross-referencing, portfolio-level tracking.',
-  },
-];
+    const resize = () => {
+      canvas.width = canvas.offsetWidth * 2;
+      canvas.height = canvas.offsetHeight * 2;
+    };
+    resize();
+    window.addEventListener('resize', resize);
 
-const useCases = [
-  {
-    title: 'Off-Market Discovery',
-    desc: 'Surface properties before they list. Distress signals, LLC ownership chains, and debt maturity flags create your sourcing edge.',
-  },
-  {
-    title: 'Deal Sourcing at Scale',
-    desc: 'Run structured outreach from a distress queue — not a spreadsheet. Convert property intelligence into live pipeline.',
-  },
-  {
-    title: 'Portfolio Review',
-    desc: 'Track lease expirations, occupancy gaps, and value-add opportunities across your entire hold.',
-  },
-  {
-    title: 'Broker Management',
-    desc: 'Performance scorecards, response analytics, and deal attribution — for a serious brokerage operation.',
-  },
-  {
-    title: 'Distressed Opportunity Tracking',
-    desc: 'Monitor pre-foreclosure through REO. Score, prioritize, and act — before the market catches up.',
-  },
-  {
-    title: 'Diligence & Approvals',
-    desc: 'Structure the diligence process. Ownership verification, document collection, and deal approvals in one auditable workflow.',
-  },
-];
+    const nodes: { x: number; y: number; vx: number; vy: number }[] = [];
+    for (let i = 0; i < 60; i++) {
+      nodes.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+      });
+    }
 
-const buyers = [
-  {
-    role: 'Investors & Acquisitions',
-    desc: 'Source distressed opportunities, analyze ownership structures, model returns, and track deals from discovery to close.',
-  },
-  {
-    role: 'Brokers & Agents',
-    desc: 'Manage your deal pipeline, track client relationships, monitor market movement, and hit your numbers.',
-  },
-  {
-    role: 'Portfolio Teams',
-    desc: 'Monitor property health, track lease expirations, model renewals, and surface disposition opportunities.',
-  },
-  {
-    role: 'Lenders & Capital',
-    desc: 'Underwrite with confidence. Cross-reference ownership, distress signals, market comps, and borrower history.',
-  },
-];
+    const draw = () => {
+      frame++;
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
 
-function useInView(threshold = 0.1) {
+      for (const n of nodes) {
+        n.x += n.vx;
+        n.y += n.vy;
+        if (n.x < 0 || n.x > w) n.vx *= -1;
+        if (n.y < 0 || n.y > h) n.vy *= -1;
+      }
+
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 200) {
+            const alpha = (1 - dist / 200) * 0.08;
+            ctx.strokeStyle = `rgba(184, 148, 60, ${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      for (const n of nodes) {
+        const pulse = (Math.sin(frame * 0.02 + n.x * 0.01) + 1) / 2;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 1.5 + pulse, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(184, 148, 60, ${0.15 + pulse * 0.15})`;
+        ctx.fill();
+      }
+
+      const gridSize = 80;
+      ctx.strokeStyle = 'rgba(184, 148, 60, 0.03)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < w; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = 0; y < h; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full"
+      style={{ opacity: 0.6 }}
+    />
+  );
+}
+
+function useInView(threshold = 0.15) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -158,30 +138,63 @@ function useInView(threshold = 0.1) {
 
 function Reveal({
   children,
-  className = '',
   delay = 0,
 }: {
   children: React.ReactNode;
-  className?: string;
   delay?: number;
 }) {
   const { ref, visible } = useInView();
   return (
     <div
       ref={ref}
-      className={`transition-all duration-700 ease-out ${visible ? 'translate-y-0' : 'translate-y-6'} ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
+      className="transition-all duration-700 ease-out"
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(24px)',
+        transitionDelay: `${delay}ms`,
+      }}
     >
       {children}
     </div>
   );
 }
 
-export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => void }) {
-  const [mobileNav, setMobileNav] = useState(false);
+const CAPABILITIES = [
+  {
+    icon: Eye,
+    title: 'Distress Intelligence',
+    desc: 'Pre-foreclosure tracking, lis pendens filings, auction calendars, and tax lien discovery across all five NYC boroughs. AI-scored opportunity ranking.',
+  },
+  {
+    icon: Network,
+    title: 'Ownership Resolution',
+    desc: 'LLC unmasking and entity resolution to identify beneficial owners. Cross-reference debt maturity, hold duration, and off-market propensity.',
+  },
+  {
+    icon: Activity,
+    title: 'Deal Pipeline',
+    desc: 'Stage-gated acquisition workflow with probability-weighted values, velocity metrics, and days-in-stage tracking across your entire book.',
+  },
+  {
+    icon: BarChart3,
+    title: 'Market Intelligence',
+    desc: 'Submarket heat mapping, comparable sales pricing, absorption analytics, and market cycle positioning — updated continuously.',
+  },
+  {
+    icon: Layers,
+    title: 'ATLAS Spatial Runtime',
+    desc: 'Property digital twins with AVM sync, drift monitoring, submarket pressure overlays, and spatial memory across 36 months of market data.',
+  },
+  {
+    icon: Shield,
+    title: 'Governed Intelligence',
+    desc: 'Every insight is traceable. Data provenance, confidence scoring, and audit trails — built for institutional-grade decision-making.',
+  },
+];
+
+export default function TerraMarketingLanding() {
+  const [, navigate] = useLocation();
   const [scrolled, setScrolled] = useState(false);
-  const [demoOpen, setDemoOpen] = useState(false);
-  const [demoType, setDemoType] = useState<'demo' | 'consultation' | 'trial'>('demo');
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40);
@@ -192,15 +205,18 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
   return (
     <div
       className="min-h-screen overflow-x-hidden"
-      style={{ background: BG, color: '#c8ccd6', fontFamily: "'Inter', system-ui, sans-serif" }}
+      style={{
+        background: OBSIDIAN,
+        color: 'rgba(255,255,255,0.7)',
+        fontFamily: "'Inter', system-ui, sans-serif",
+      }}
     >
-      {/* NAV */}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-400 ${scrolled ? 'border-b' : ''}`}
         style={{
-          background: scrolled ? 'rgba(10,12,16,0.96)' : 'transparent',
+          background: scrolled ? 'rgba(8,11,13,0.96)' : 'transparent',
           backdropFilter: scrolled ? 'blur(20px)' : 'none',
-          borderColor: 'rgba(255,255,255,0.05)',
+          borderColor: 'rgba(184,148,60,0.08)',
         }}
       >
         <div className="max-w-[1100px] mx-auto px-6 w-full flex items-center justify-between">
@@ -208,371 +224,222 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <div
               className="p-1.5 rounded-lg"
               style={{
-                background: 'rgba(201,183,135,0.12)',
-                border: `1px solid rgba(45,106,79,0.22)`,
+                background: 'rgba(184,148,60,0.08)',
+                border: '1px solid rgba(184,148,60,0.15)',
               }}
             >
-              <Building2 size={13} style={{ color: ACCENT_LIGHT }} />
+              <Building2 size={13} style={{ color: GOLD_LIGHT }} />
             </div>
             <span className="font-bold text-sm tracking-tight text-white">Terra</span>
             <span
-              aria-hidden="true"
               className="hidden sm:inline text-[9px] tracking-[0.14em] uppercase ml-1"
-              style={{ color: 'rgba(255,255,255,0.65)', fontFamily: 'monospace' }}
+              style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}
             >
-              Property Intelligence
+              Real Estate Intelligence
             </span>
           </div>
-          <div className="hidden md:flex items-center gap-7">
-            {[
-              { label: 'Platform', href: '#platform' },
-              { label: 'Doctrine', href: '#doctrine' },
-              { label: 'Capabilities', href: '#capabilities' },
-              { label: "Who It's For", href: '#buyers' },
-            ].map((l) => (
-              <a
-                key={l.label}
-                href={l.href}
-                className="text-[11px] tracking-[0.06em] uppercase font-medium transition-colors"
-                style={{ color: 'rgba(255,255,255,0.65)' }}
-                onMouseOver={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
-                onMouseOut={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
-              >
-                {l.label}
-              </a>
-            ))}
-            <button
-              onClick={onSignIn}
-              className="text-[12px] font-semibold px-5 py-1.5 rounded-lg transition-all"
-              style={{ background: BTN_BG, color: BTN_TEXT }}
-            >
-              Sign in
-            </button>
-          </div>
           <button
-            className="md:hidden p-2"
-            onClick={() => setMobileNav(!mobileNav)}
-            style={{ color: 'rgba(255,255,255,0.65)' }}
+            onClick={() => navigate('/dashboard')}
+            className="text-[12px] font-semibold px-5 py-1.5 rounded-lg transition-all"
+            style={{ background: GOLD, color: OBSIDIAN }}
           >
-            {mobileNav ? <X size={20} /> : <Menu size={20} />}
+            Enter Platform
           </button>
         </div>
       </nav>
 
-      {mobileNav && (
-        <div
-          className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-7 md:hidden"
-          style={{ background: 'rgba(10,12,16,0.98)', backdropFilter: 'blur(16px)' }}
-        >
-          {[
-            { label: 'Platform', href: '#platform' },
-            { label: 'Doctrine', href: '#doctrine' },
-            { label: 'Capabilities', href: '#capabilities' },
-            { label: "Who It's For", href: '#buyers' },
-          ].map((l) => (
-            <a
-              key={l.label}
-              href={l.href}
-              onClick={() => setMobileNav(false)}
-              className="text-lg tracking-wide"
-              style={{ color: 'rgba(255,255,255,0.55)' }}
-            >
-              {l.label}
-            </a>
-          ))}
-          <button
-            onClick={() => {
-              onSignIn?.();
-              setMobileNav(false);
-            }}
-            className="mt-4 text-sm font-semibold px-8 py-3 rounded-xl"
-            style={{ background: BTN_BG, color: BTN_TEXT }}
-          >
-            Sign in
-          </button>
-        </div>
-      )}
-
-      {/* HERO */}
-      <section className="relative pt-32 sm:pt-44 pb-24 sm:pb-32 max-w-[1100px] mx-auto px-6">
-        <div className="absolute top-0 left-0 right-0 h-[600px] pointer-events-none overflow-hidden">
+      <section className="relative pt-36 sm:pt-48 pb-28 sm:pb-36">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <GenerativeMesh />
           <div
-            className="absolute top-[200px] left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full"
+            className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full"
             style={{
-              background: 'radial-gradient(ellipse, rgba(45,106,79,0.035) 0%, transparent 70%)',
+              background: 'radial-gradient(ellipse, rgba(184,148,60,0.04) 0%, transparent 70%)',
             }}
           />
         </div>
 
-        <Reveal>
-          <p
-            className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-8 font-mono"
-            style={{ color: 'rgba(255,255,255,0.65)' }}
-          >
-            SZL Holdings &middot; Property / Portfolio / Broker Intelligence
-          </p>
-        </Reveal>
-
-        <Reveal delay={80}>
-          <h1 className="text-[clamp(2.6rem,6.5vw,4.8rem)] font-extrabold leading-[1.03] tracking-[-0.03em] text-white max-w-[860px]">
-            The operating surface for
-            <br />
-            <span style={{ color: ACCENT_LIGHT }}>serious real estate.</span>
-          </h1>
-        </Reveal>
-
-        <Reveal delay={180}>
-          <p
-            className="text-[17px] sm:text-[19px] leading-[1.8] max-w-[600px] mt-7 mb-10"
-            style={{ color: 'rgba(255,255,255,0.65)' }}
-          >
-            Terra gives investors, brokers, and portfolio teams a single intelligence surface — from
-            distressed property discovery through ownership analysis, pipeline management, and deal
-            execution.
-          </p>
-        </Reveal>
-
-        <Reveal delay={280}>
-          <div className="flex flex-wrap gap-3 mb-20">
-            <button
-              onClick={onSignIn}
-              className="inline-flex items-center gap-2 text-[13px] font-semibold px-7 py-3 rounded-lg transition-all"
-              style={{ background: BTN_BG, color: BTN_TEXT }}
+        <div className="relative max-w-[1100px] mx-auto px-6">
+          <Reveal>
+            <p
+              className="text-[10px] font-semibold tracking-[0.25em] uppercase mb-8 font-mono"
+              style={{ color: GOLD_LIGHT }}
             >
-              Sign In <ArrowRight size={14} />
-            </button>
-            <a
-              href="./dashboard?demo=true"
-              className="inline-flex items-center gap-2 text-[13px] font-medium px-7 py-3 rounded-lg transition-all"
-              style={{ color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.12)' }}
-            >
-              Try Platform Demo →
-            </a>
-          </div>
-        </Reveal>
+              SZL Holdings &middot; Real Estate Intelligence
+            </p>
+          </Reveal>
 
-        <Reveal delay={360}>
-          <div
-            className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-xl overflow-hidden"
-            style={{ background: 'rgba(255,255,255,0.04)' }}
-          >
-            {[
-              { value: '1,025+', label: 'Distress properties' },
-              { value: '$4.8B', label: 'Pipeline tracked' },
-              { value: '5 boroughs', label: 'NYC coverage' },
-              { value: '6 modules', label: 'Intelligence domains' },
-            ].map((s) => (
-              <div key={s.label} className="py-5 px-5" style={{ background: BG }}>
-                <span className="text-[22px] font-extrabold font-mono text-white block">
-                  {s.value}
-                </span>
-                <span
-                  className="text-[10px] tracking-[0.06em] uppercase mt-1 block"
-                  style={{ color: 'rgba(255,255,255,0.60)' }}
-                >
-                  {s.label}
-                </span>
-              </div>
-            ))}
-          </div>
-        </Reveal>
+          <Reveal delay={100}>
+            <h1
+              className="max-w-[820px] leading-[1.05] tracking-[-0.025em] text-white"
+              style={{
+                fontSize: 'clamp(2.8rem, 6vw, 4.6rem)',
+                fontFamily: "'Georgia', 'Times New Roman', serif",
+                fontWeight: 400,
+              }}
+            >
+              The intelligence surface for{' '}
+              <span style={{ color: GOLD_LIGHT, fontStyle: 'italic' }}>
+                serious real estate.
+              </span>
+            </h1>
+          </Reveal>
+
+          <Reveal delay={200}>
+            <p
+              className="text-[17px] sm:text-[19px] leading-[1.85] max-w-[580px] mt-8 mb-12"
+              style={{ color: 'rgba(255,255,255,0.5)' }}
+            >
+              Terra gives investors, brokers, and portfolio teams a single operating surface
+              — from distressed property discovery through ownership analysis, pipeline
+              management, and deal execution. NYC and NYS, live.
+            </p>
+          </Reveal>
+
+          <Reveal delay={300}>
+            <div className="flex flex-wrap gap-3 mb-20">
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="inline-flex items-center gap-2.5 text-[13px] font-semibold px-7 py-3.5 rounded-lg transition-all hover:opacity-90"
+                style={{ background: GOLD, color: OBSIDIAN }}
+              >
+                Enter Platform <ArrowRight size={14} />
+              </button>
+              <button
+                onClick={() => navigate('/distress-engine')}
+                className="inline-flex items-center gap-2 text-[13px] font-medium px-7 py-3.5 rounded-lg transition-all hover:border-white/20"
+                style={{
+                  color: 'rgba(255,255,255,0.55)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }}
+              >
+                View Distress Engine →
+              </button>
+            </div>
+          </Reveal>
+
+          <Reveal delay={400}>
+            <div
+              className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-xl overflow-hidden"
+              style={{ background: 'rgba(184,148,60,0.06)' }}
+            >
+              {[
+                { value: '1,025+', label: 'Distress properties tracked' },
+                { value: '$4.8B', label: 'Pipeline value monitored' },
+                { value: '5', label: 'NYC boroughs covered' },
+                { value: '12', label: 'Intelligence modules' },
+              ].map((s) => (
+                <div key={s.label} className="py-5 px-5" style={{ background: OBSIDIAN }}>
+                  <span
+                    className="text-[22px] font-bold font-mono block"
+                    style={{ color: GOLD_LIGHT }}
+                  >
+                    {s.value}
+                  </span>
+                  <span
+                    className="text-[10px] tracking-[0.04em] uppercase mt-1 block"
+                    style={{ color: 'rgba(255,255,255,0.35)' }}
+                  >
+                    {s.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        </div>
       </section>
 
-      {/* PLATFORM THESIS */}
-      <section id="platform" className="relative py-24 sm:py-32 px-6">
+      <section className="relative py-24 sm:py-32 px-6">
         <div className="max-w-[720px] mx-auto">
           <Reveal>
             <p
-              className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-6 font-mono"
-              style={{ color: 'rgba(255,255,255,0.65)' }}
+              className="text-[10px] font-semibold tracking-[0.25em] uppercase mb-6 font-mono"
+              style={{ color: GOLD_LIGHT }}
             >
               The thesis
             </p>
-            <h2 className="text-[clamp(1.6rem,3.5vw,2.6rem)] font-bold leading-[1.15] tracking-tight text-white mb-8">
+            <h2
+              className="text-[clamp(1.6rem,3.5vw,2.6rem)] leading-[1.15] tracking-tight text-white mb-8"
+              style={{
+                fontFamily: "'Georgia', 'Times New Roman', serif",
+                fontWeight: 400,
+              }}
+            >
               Information asymmetry wins deals.
             </h2>
           </Reveal>
           <Reveal delay={80}>
             <div
               className="text-[16px] leading-[2] space-y-6"
-              style={{ color: 'rgba(255,255,255,0.65)' }}
+              style={{ color: 'rgba(255,255,255,0.45)' }}
             >
               <p>
-                The brokers and investors who consistently win in NYC real estate
-                <span style={{ color: 'rgba(255,255,255,0.65)' }}> see distress signals first</span>
-                , understand
-                <span style={{ color: 'rgba(255,255,255,0.65)' }}>
-                  {' '}
+                The brokers and investors who consistently win in NYC real estate{' '}
+                <span style={{ color: 'rgba(255,255,255,0.7)' }}>see distress signals first</span>,
+                understand{' '}
+                <span style={{ color: 'rgba(255,255,255,0.7)' }}>
                   ownership structures fastest
                 </span>
-                , and close deals with
-                <span style={{ color: 'rgba(255,255,255,0.65)' }}>
-                  {' '}
+                , and close deals with{' '}
+                <span style={{ color: 'rgba(255,255,255,0.7)' }}>
                   more context than anyone else in the room
-                </span>
-                .
+                </span>.
               </p>
               <p>
                 Terra replaces the 14 browser tabs, three paid data services, and two hours of
-                morning research that currently stand between you and your first actionable lead of
+                morning research that stand between you and your first actionable lead of
                 the day.
               </p>
             </div>
           </Reveal>
+        </div>
+      </section>
 
-          <Reveal delay={160}>
-            <div
-              className="mt-14 rounded-2xl p-6 sm:p-8"
+      <section className="relative py-24 sm:py-32 px-6">
+        <div className="max-w-[1100px] mx-auto">
+          <Reveal>
+            <p
+              className="text-[10px] font-semibold tracking-[0.25em] uppercase mb-4 font-mono"
+              style={{ color: GOLD_LIGHT }}
+            >
+              Intelligence Modules
+            </p>
+            <h2
+              className="text-[clamp(1.5rem,3vw,2.2rem)] leading-[1.15] tracking-tight text-white mb-12"
               style={{
-                background: 'rgba(45,106,79,0.04)',
-                border: '1px solid rgba(201,183,135,0.08)',
+                fontFamily: "'Georgia', 'Times New Roman', serif",
+                fontWeight: 400,
               }}
             >
-              <div className="flex justify-between items-center mb-6">
-                <span
-                  className="text-[9px] font-bold tracking-[0.15em] uppercase font-mono"
-                  style={{ color: 'rgba(255,255,255,0.65)' }}
-                >
-                  NYC Distress Snapshot — Demo
-                </span>
-                <span
-                  className="flex items-center gap-1.5 text-[9px] font-mono"
-                  style={{ color: '#c9b787' }}
-                >
-                  <span
-                    className="w-1.5 h-1.5 rounded-full animate-pulse"
-                    style={{ background: ACCENT_LIGHT }}
-                  />
-                  Engine Active
-                </span>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-                {[
-                  { label: 'Pre-Foreclosure', count: '340+', color: '#c9b787' },
-                  { label: 'Active Foreclosure', count: '180+', color: '#c0503a' },
-                  { label: 'Tax Lien', count: '290+', color: '#8b5cf6' },
-                  { label: 'Auction Imminent', count: '95', color: '#c05840' },
-                  { label: 'REO / Bank-Owned', count: '120+', color: '#3a6a9a' },
-                ].map((d) => (
-                  <div key={d.label} className="text-center">
-                    <span
-                      className="text-[22px] font-extrabold font-mono block"
-                      style={{ color: d.color }}
-                    >
-                      {d.count}
-                    </span>
-                    <span
-                      className="text-[10px] mt-1 block"
-                      style={{ color: 'rgba(255,255,255,0.65)' }}
-                    >
-                      {d.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* Terra DOCTRINE */}
-      <section id="doctrine" className="relative py-24 sm:py-32 px-6">
-        <div className="max-w-[1100px] mx-auto">
-          <Reveal>
-            <div className="max-w-[560px] mb-14">
-              <p
-                className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 font-mono"
-                style={{ color: 'rgba(255,255,255,0.65)' }}
-              >
-                The Terra Doctrine
-              </p>
-              <h2 className="text-[clamp(1.5rem,3.5vw,2.4rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
-                Five phases. One operating system.
-              </h2>
-              <p className="text-[15px] leading-[1.85]" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                Every serious real estate operation moves through the same sequence. Terra
-                structures it into a repeatable, intelligence-driven workflow.
-              </p>
-            </div>
+              Built for how serious operators actually work.
+            </h2>
           </Reveal>
 
-          <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-            {doctrine.map((d, i) => (
-              <Reveal key={d.phase} delay={i * 60}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {CAPABILITIES.map((cap, i) => (
+              <Reveal key={cap.title} delay={i * 60}>
                 <div
-                  className="p-5 rounded-xl h-full"
-                  style={{ background: BG2, border: '1px solid rgba(255,255,255,0.05)' }}
-                >
-                  <div className="flex items-center gap-2 mb-4">
-                    <div
-                      className="w-7 h-7 rounded-lg flex items-center justify-center"
-                      style={{
-                        background: 'rgba(201,183,135,0.08)',
-                        border: '1px solid rgba(201,183,135,0.15)',
-                      }}
-                    >
-                      <d.icon size={13} style={{ color: ACCENT_LIGHT }} />
-                    </div>
-                    <span
-                      className="text-[9px] font-bold tracking-[0.12em] uppercase font-mono"
-                      style={{ color: 'rgba(255,255,255,0.65)' }}
-                    >
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                  </div>
-                  <h3 className="text-[13px] font-bold text-white mb-2">{d.phase}</h3>
-                  <p
-                    className="text-[12px] leading-[1.75]"
-                    style={{ color: 'rgba(255,255,255,0.65)' }}
-                  >
-                    {d.desc}
-                  </p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CAPABILITIES */}
-      <section id="capabilities" className="relative py-24 sm:py-32 px-6">
-        <div className="max-w-[1100px] mx-auto">
-          <Reveal>
-            <div className="max-w-[560px] mb-14">
-              <p
-                className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 font-mono"
-                style={{ color: 'rgba(255,255,255,0.65)' }}
-              >
-                Platform Capabilities
-              </p>
-              <h2 className="text-[clamp(1.5rem,3.5vw,2.4rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
-                Six domains. Every angle covered.
-              </h2>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {capabilities.map((c, i) => (
-              <Reveal key={c.title} delay={i * 50}>
-                <div
-                  className="p-6 rounded-xl h-full"
-                  style={{ background: BG2, border: '1px solid rgba(255,255,255,0.05)' }}
+                  className="rounded-xl p-6 h-full transition-all hover:border-white/10"
+                  style={{
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                  }}
                 >
                   <div
                     className="w-8 h-8 rounded-lg flex items-center justify-center mb-4"
                     style={{
-                      background: 'rgba(201,183,135,0.08)',
-                      border: '1px solid rgba(201,183,135,0.15)',
+                      background: 'rgba(184,148,60,0.08)',
+                      border: '1px solid rgba(184,148,60,0.12)',
                     }}
                   >
-                    <c.icon size={14} style={{ color: ACCENT_LIGHT }} />
+                    <cap.icon size={15} style={{ color: GOLD_LIGHT }} />
                   </div>
-                  <h3 className="text-[14px] font-bold text-white mb-2">{c.title}</h3>
+                  <h3 className="text-sm font-semibold text-white mb-2">{cap.title}</h3>
                   <p
-                    className="text-[13px] leading-[1.8]"
-                    style={{ color: 'rgba(255,255,255,0.65)' }}
+                    className="text-[13px] leading-[1.7]"
+                    style={{ color: 'rgba(255,255,255,0.4)' }}
                   >
-                    {c.desc}
+                    {cap.desc}
                   </p>
                 </div>
               </Reveal>
@@ -581,486 +448,71 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
         </div>
       </section>
 
-      {/* USE CASES */}
       <section className="relative py-24 sm:py-32 px-6">
-        <div className="max-w-[1100px] mx-auto">
-          <Reveal>
-            <div className="max-w-[520px] mb-14">
-              <p
-                className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 font-mono"
-                style={{ color: 'rgba(255,255,255,0.65)' }}
-              >
-                Use Cases
-              </p>
-              <h2 className="text-[clamp(1.5rem,3.5vw,2.4rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
-                Real problems. Real workflow.
-              </h2>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {useCases.map((u, i) => (
-              <Reveal key={u.title} delay={i * 50}>
-                <div
-                  className="p-6 rounded-xl h-full"
-                  style={{ background: BG2, border: '1px solid rgba(255,255,255,0.05)' }}
-                >
-                  <h3 className="text-[13px] font-bold text-white mb-2">{u.title}</h3>
-                  <p
-                    className="text-[12px] leading-[1.8]"
-                    style={{ color: 'rgba(255,255,255,0.65)' }}
-                  >
-                    {u.desc}
-                  </p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* WHO IT'S FOR */}
-      <section id="buyers" className="relative py-24 sm:py-32 px-6">
-        <div className="max-w-[1100px] mx-auto">
-          <Reveal>
-            <div className="max-w-[520px] mb-14">
-              <p
-                className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 font-mono"
-                style={{ color: 'rgba(255,255,255,0.65)' }}
-              >
-                Who It's For
-              </p>
-              <h2 className="text-[clamp(1.5rem,3.5vw,2.4rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
-                Built for the people who close deals.
-              </h2>
-            </div>
-          </Reveal>
-
-          <div
-            className="grid grid-cols-1 sm:grid-cols-2 gap-px rounded-2xl overflow-hidden"
-            style={{ background: 'rgba(255,255,255,0.04)' }}
-          >
-            {buyers.map((b) => (
-              <div key={b.role} className="p-8" style={{ background: BG }}>
-                <h3 className="text-[14px] font-bold text-white mb-3">{b.role}</h3>
-                <p
-                  className="text-[13px] leading-[1.85]"
-                  style={{ color: 'rgba(255,255,255,0.65)' }}
-                >
-                  {b.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* TRUST / GOVERNANCE */}
-      <section className="relative py-20 sm:py-24 px-6">
-        <div className="max-w-[760px] mx-auto">
+        <div className="max-w-[720px] mx-auto">
           <Reveal>
             <div
-              className="p-8 sm:p-10 rounded-2xl"
-              style={{ background: BG2, border: '1px solid rgba(255,255,255,0.05)' }}
+              className="rounded-xl p-8 text-center"
+              style={{
+                background: 'rgba(184,148,60,0.04)',
+                border: '1px solid rgba(184,148,60,0.08)',
+              }}
             >
-              <div className="flex items-center gap-3 mb-6">
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center"
-                  style={{
-                    background: 'rgba(201,183,135,0.08)',
-                    border: '1px solid rgba(201,183,135,0.15)',
-                  }}
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <TrendingUp size={16} style={{ color: GOLD_LIGHT }} />
+                <span
+                  className="text-[10px] font-semibold tracking-[0.2em] uppercase font-mono"
+                  style={{ color: GOLD_LIGHT }}
                 >
-                  <Shield size={14} style={{ color: ACCENT_LIGHT }} />
-                </div>
-                <p
-                  className="text-[10px] font-semibold tracking-[0.16em] uppercase font-mono"
-                  style={{ color: 'rgba(255,255,255,0.65)' }}
-                >
-                  Trust & Governance
-                </p>
+                  A11oy Signal Mesh
+                </span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {[
-                  {
-                    label: 'Data sourcing',
-                    value: 'County records, court filings, public registries',
-                  },
-                  {
-                    label: 'Access control',
-                    value: 'Role-based permissions with full audit trail',
-                  },
-                  {
-                    label: 'Accuracy',
-                    value: 'Confidence scoring on every opportunity — no silent guesses',
-                  },
-                ].map((t) => (
-                  <div key={t.label}>
-                    <p
-                      className="text-[10px] font-semibold uppercase tracking-wider mb-1"
-                      style={{ color: 'rgba(255,255,255,0.60)' }}
-                    >
-                      {t.label}
-                    </p>
-                    <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                      {t.value}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      <section id="access" className="relative py-28 sm:py-36 px-6">
-        <div className="max-w-[900px] mx-auto">
-          <Reveal>
-            <div className="text-center mb-14">
-              <p
-                className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-6 font-mono"
-                style={{ color: 'rgba(255,255,255,0.65)' }}
-              >
-                Ready to operate at a higher level
-              </p>
-              <h2 className="text-[clamp(2rem,5vw,3.5rem)] font-extrabold leading-[1.08] tracking-tight text-white mb-6">
-                Three ways in.
-              </h2>
-              <p
-                className="text-[17px] leading-[1.8] max-w-[560px] mx-auto"
-                style={{ color: 'rgba(255,255,255,0.65)' }}
-              >
-                Terra is available to qualified operators in three tiers. No free trials. No demo
-                accounts. Real intelligence from day one.
-              </p>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
-            {[
-              {
-                tier: 'Demo',
-                desc: 'Scheduled live walkthrough with your team. See the full distress engine, ownership resolution, and pipeline in action on live NYC data.',
-                cta: 'Book a Demo',
-                accent: BRASS_LIGHT,
-                note: '30 min · No commitment',
-                highlight: false,
-                ctaType: 'demo' as const,
-              },
-              {
-                tier: 'Pilot',
-                desc: '90-day structured pilot for a single acquisition team or brokerage desk. Includes onboarding, data integration, and dedicated success support.',
-                cta: 'Start a Pilot',
-                accent: '#c9b787',
-                note: '90 days · Scoped engagement',
-                highlight: true,
-                ctaType: 'trial' as const,
-              },
-              {
-                tier: 'Enterprise',
-                desc: 'Full deployment for portfolio teams, multi-desk brokerages, or institutional investors requiring custom data integrations and role-based access.',
-                cta: 'Enterprise Inquiry',
-                accent: 'rgba(255,255,255,0.5)',
-                note: 'Custom terms · SLA included',
-                highlight: false,
-                ctaType: 'consultation' as const,
-              },
-            ].map((t) => (
-              <div
-                key={t.tier}
-                className="p-6 rounded-2xl flex flex-col"
+              <h3
+                className="text-[clamp(1.2rem,2.5vw,1.6rem)] leading-[1.2] tracking-tight text-white mb-4"
                 style={{
-                  background: t.highlight ? `rgba(45,106,79,0.06)` : BG2,
-                  border: t.highlight
-                    ? `1px solid rgba(45,106,79,0.18)`
-                    : `1px solid rgba(255,255,255,0.05)`,
+                  fontFamily: "'Georgia', 'Times New Roman', serif",
+                  fontWeight: 400,
                 }}
               >
-                <div
-                  className="text-[10px] font-bold tracking-[0.14em] uppercase mb-3 font-mono"
-                  style={{ color: t.accent }}
-                >
-                  {t.tier}
-                </div>
-                <p
-                  className="text-[13px] leading-[1.85] flex-1 mb-5"
-                  style={{ color: 'rgba(255,255,255,0.65)' }}
-                >
-                  {t.desc}
-                </p>
-                <div>
-                  <button
-                    onClick={() => {
-                      setDemoType(t.ctaType);
-                      setDemoOpen(true);
-                    }}
-                    className="w-full text-[12px] font-semibold py-2.5 rounded-lg transition-all mb-2"
-                    style={{
-                      background: t.highlight ? BTN_BG : 'rgba(255,255,255,0.05)',
-                      color: t.highlight ? '#fff' : t.accent,
-                      border: t.highlight ? 'none' : `1px solid rgba(255,255,255,0.07)`,
-                    }}
-                  >
-                    {t.cta} →
-                  </button>
-                  <p className="text-[10px] text-center" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                    {t.note}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <Reveal delay={100}>
-            <div className="flex items-center justify-center gap-2 text-center">
-              <span className="text-[12px]" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                Already have access?
-              </span>
-              <button
-                onClick={onSignIn}
-                className="text-[12px] font-semibold"
-                style={{ color: ACCENT_LIGHT }}
+                Real estate doesn&rsquo;t exist in isolation.
+              </h3>
+              <p
+                className="text-[14px] leading-[1.8] mb-6"
+                style={{ color: 'rgba(255,255,255,0.4)' }}
               >
-                Sign in →
+                Terra operates within A11oy&rsquo;s governed intelligence fabric. Maritime delays
+                from Vessels trigger logistics clause alerts. Cyber posture changes from Sentra
+                affect insured property values. Lease expiry clusters surface in Counsel. Every
+                lane is connected.
+              </p>
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="inline-flex items-center gap-2 text-[13px] font-semibold px-6 py-3 rounded-lg transition-all hover:opacity-90"
+                style={{ background: GOLD, color: OBSIDIAN }}
+              >
+                See It Live <ArrowRight size={14} />
               </button>
             </div>
           </Reveal>
         </div>
       </section>
 
-      {/* PRODUCT TOUR */}
-      <section
-        className="py-24 sm:py-32 px-6"
-        style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}
+      <footer
+        className="py-12 px-6 border-t"
+        style={{ borderColor: 'rgba(255,255,255,0.04)' }}
       >
-        <div className="max-w-[1100px] mx-auto">
-          <div className="text-center mb-16">
-            <p
-              className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3"
-              style={{ color: '#c9b787' }}
-            >
-              Platform Walkthrough
-            </p>
-            <h2 className="text-[clamp(1.6rem,3vw,2.1rem)] font-bold text-white mb-3 tracking-tight">
-              How Terra works in practice
-            </h2>
-            <p className="text-[14px] max-w-xl mx-auto" style={{ color: 'rgba(255,255,255,0.65)' }}>
-              From data connection to first distress lead in under 30 minutes.
-            </p>
+        <div className="max-w-[1100px] mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Building2 size={12} style={{ color: GOLD_LIGHT }} />
+            <span className="text-[11px] font-mono" style={{ color: 'rgba(255,255,255,0.25)' }}>
+              Terra &middot; SZL Holdings
+            </span>
           </div>
-          <div className="relative">
-            <div
-              className="hidden md:block absolute left-[39px] top-0 bottom-0 w-px"
-              style={{ background: 'rgba(255,255,255,0.03)' }}
-            />
-            <div className="space-y-10">
-              {[
-                {
-                  step: '01',
-                  title: 'Connect your market data sources',
-                  body: 'Terra ingests public records data automatically — NYC ACRIS, DOB, HPD, tax records, court filings. Your existing CRM and deal tracking tools connect in one click.',
-                  tag: 'Setup',
-                },
-                {
-                  step: '02',
-                  title: 'Distress scores surface within minutes',
-                  body: 'The PRISM engine begins scoring every property in your selected market by acquisition urgency. Pre-foreclosure, lis pendens, auction calendar, tax arrears, and ownership signals combined into a single ranked list.',
-                  tag: 'Intelligence',
-                },
-                {
-                  step: '03',
-                  title: 'Ownership resolution unlocks the deal',
-                  body: "LLC unmasking and entity resolution identify the real decision-maker behind every property — not the registered agent. Terra surfaces contact pathways that don't exist in any other platform.",
-                  tag: 'Sourcing',
-                },
-                {
-                  step: '04',
-                  title: 'Pipeline manages the acquisition workflow',
-                  body: 'Move properties from watchlist to active deal in a structured, stage-gated workflow. Every property carries its distress context, comparable data, and ownership resolution into the deal stage.',
-                  tag: 'Execution',
-                },
-                {
-                  step: '05',
-                  title: 'AI analyst contextualizes every opportunity',
-                  body: 'The Terra AI copilot answers questions about any property, compares opportunity sets, and synthesizes market intelligence on demand. Not a search box — a reasoning layer with real domain knowledge.',
-                  tag: 'Intelligence',
-                },
-              ].map((item) => (
-                <div key={item.step} className="flex items-start gap-8 md:gap-10">
-                  <div className="flex-shrink-0 w-20 text-right">
-                    <div
-                      className="inline-flex items-center justify-center w-10 h-10 rounded-full text-[11px] font-bold"
-                      style={{
-                        background: 'rgba(64,133,106,0.12)',
-                        color: '#c9b787',
-                        border: '1px solid rgba(64,133,106,0.2)',
-                      }}
-                    >
-                      {item.step}
-                    </div>
-                  </div>
-                  <div
-                    className="flex-1 pb-10 border-b"
-                    style={{ borderColor: 'rgba(255,255,255,0.03)' }}
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-[16px] font-semibold text-white">{item.title}</h3>
-                      <span
-                        className="text-[9px] font-mono px-2 py-0.5 rounded"
-                        style={{
-                          background: 'rgba(64,133,106,0.08)',
-                          color: '#c9b787',
-                          border: '1px solid rgba(64,133,106,0.1)',
-                        }}
-                      >
-                        {item.tag}
-                      </span>
-                    </div>
-                    <p
-                      className="text-[13.5px] leading-relaxed"
-                      style={{ color: 'rgba(255,255,255,0.65)' }}
-                    >
-                      {item.body}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* NEWSLETTER */}
-      <section
-        className="py-20 sm:py-24 border-t px-6"
-        style={{ borderColor: 'rgba(255,255,255,0.05)', background: '#080d12' }}
-      >
-        <div className="max-w-2xl mx-auto">
-          <NewsletterSubscribe
-            utmSource="terra"
-            variant="inline"
-            heading="Intelligence briefings from SZL Command"
-            subheading="Insights on governed AI, real estate intelligence, and operational decision-making — straight from the founding team."
-          />
-        </div>
-      </section>
-
-      <section style={{ padding: '80px 24px', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-        <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
-          <p style={{ fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.25em', color: '#5e5e5e', marginBottom: 20, textTransform: 'uppercase' as const }}>
-            Part of the SZL Holdings ecosystem
-          </p>
-          <p style={{ fontSize: 22, fontWeight: 600, color: '#f5f5f5', marginBottom: 14 }}>
-            Orchestrated by <span style={{ color: '#c9b787' }}>a11oy</span>
-          </p>
-          <p style={{ fontSize: 13, color: '#8a8a8a', lineHeight: 1.8, maxWidth: 520, margin: '0 auto' }}>
-            Every decision in Terra follows the same governed path — Signal, Context, Recommendation, Simulation, Policy, Execution, Proof, Outcome. The same proof chain. The same attribution. The same governance.
-          </p>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="border-t px-6 py-10" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-        <div className="max-w-[1100px] mx-auto flex flex-col gap-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5">
-              <div
-                className="p-1.5 rounded-lg"
-                style={{
-                  background: 'rgba(201,183,135,0.08)',
-                  border: '1px solid rgba(201,183,135,0.15)',
-                }}
-              >
-                <Building2 size={12} style={{ color: ACCENT_LIGHT }} />
-              </div>
-              <span className="text-sm font-bold text-white">Terra</span>
-              <span
-                className="text-[9px] font-mono ml-1"
-                style={{ color: 'rgba(255,255,255,0.65)' }}
-              >
-                Property Intelligence
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              {[
-                { name: 'Lyte', href: '/command/operations/' },
-                { name: 'Vessels', href: '/vessels/' },
-                { name: 'Aegis', href: '/aegis/' },
-                { name: 'Carlota Jo', href: '/carlota-jo/' },
-                { name: 'SZL', href: '/szl-holdings/' },
-              ].map((l) => (
-                <a
-                  key={l.name}
-                  href={l.href}
-                  className="text-[10px] transition-colors"
-                  style={{ color: 'rgba(255,255,255,0.65)' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
-                >
-                  {l.name}
-                </a>
-              ))}
-            </div>
-          </div>
-          <p
-            className="text-[10px] leading-relaxed mb-4 max-w-[540px]"
-            style={{ color: 'rgba(255,255,255,0.65)' }}
-          >
-            {aboutSzlParagraph()}
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p
-              className="text-[11px] text-center sm:text-left"
-              style={{ color: 'rgba(255,255,255,0.65)' }}
-            >
-              {copyrightLine()}
-            </p>
-            <div className="flex items-center gap-4">
-              <a
-                href="https://x.com/szlholdings"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[10px] transition-colors"
-                style={{ color: 'rgba(255,255,255,0.65)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
-              >
-                X
-              </a>
-              <a
-                href="https://linkedin.com/company/szlholdings"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[10px] transition-colors"
-                style={{ color: 'rgba(255,255,255,0.65)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
-              >
-                LinkedIn
-              </a>
-              <a
-                href="https://medium.com/@stephen_38454"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[10px] transition-colors"
-                style={{ color: 'rgba(255,255,255,0.65)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
-              >
-                Medium
-              </a>
-            </div>
-          </div>
+          <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.15)' }}>
+            &copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.
+          </span>
         </div>
       </footer>
-
-      <ContactModal
-        isOpen={demoOpen}
-        onClose={() => setDemoOpen(false)}
-        type={demoType}
-        app="terra"
-        subtitle="Terra — Real Estate Intelligence"
-      />
     </div>
   );
 }

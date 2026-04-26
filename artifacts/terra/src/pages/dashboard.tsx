@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link } from 'wouter';
+import { A11oySignalMesh } from '@/components/a11oy-signal-mesh';
 import { AgentAvatar, RiskBadge, StageBadge } from '@/components/brokerage-ui';
 import { agents } from '@/data/brokerage';
 import { properties } from '@/data/portfolio';
@@ -1252,7 +1253,8 @@ export default function TerraIntelligence() {
         )}
       </div>
 
-      {/* Action Loop — cross-cutting pattern */}
+      <A11oySignalMesh />
+
       <ActionLoop
         title="Priority Field Actions"
         actions={[

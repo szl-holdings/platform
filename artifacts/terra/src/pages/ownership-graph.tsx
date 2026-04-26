@@ -393,26 +393,56 @@ export default function OwnershipGraphPage() {
                   ))}
                 </div>
                 <div className="mt-3">
-                  <div
-                    className="text-[10px] font-semibold mb-2 uppercase tracking-wider"
-                    style={{ color: 'rgba(255,255,255,0.3)' }}
-                  >
-                    Ultimate Beneficial Owners
-                  </div>
-                  {(summary.ultimateBeneficialOwners ?? []).map((ubo: any) => (
-                    <div key={ubo.id} className="flex items-center gap-2 py-1">
-                      <User className="w-3 h-3" style={{ color: '#c8a060' }} />
-                      <span className="text-xs" style={{ color: '#e8edf8' }}>
-                        {ubo.name}
-                      </span>
-                      <span
-                        className="ml-auto text-[10px] font-mono"
-                        style={{ color: 'rgba(255,255,255,0.4)' }}
-                      >
-                        {ubo.pct}%
-                      </span>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div
+                      className="text-[10px] font-semibold uppercase tracking-wider"
+                      style={{ color: 'rgba(255,255,255,0.3)' }}
+                    >
+                      Ultimate Beneficial Owners
                     </div>
-                  ))}
+                    <span
+                      className="text-[8px] font-mono px-1.5 py-0.5 rounded"
+                      style={{
+                        color: '#c8a060',
+                        background: 'rgba(200,160,96,0.08)',
+                        border: '1px solid rgba(200,160,96,0.15)',
+                      }}
+                    >
+                      Reonomy UBO
+                    </span>
+                  </div>
+                  {(summary.ultimateBeneficialOwners ?? []).map((ubo: any, idx: number) => {
+                    const depth = (ubo.depth ?? idx + 1);
+                    const depthLabel = depth === 1 ? 'Direct' : depth === 2 ? '2 layers' : `${depth} layers`;
+                    const depthColor = depth === 1 ? '#40856a' : depth <= 2 ? '#c8a060' : '#c04a2a';
+                    return (
+                      <div key={ubo.id} className="flex items-center gap-2 py-1.5 border-b" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
+                        <User className="w-3 h-3" style={{ color: '#c8a060' }} />
+                        <span className="text-xs flex-1" style={{ color: '#e8edf8' }}>
+                          {ubo.name}
+                        </span>
+                        <span
+                          className="text-[8px] font-mono px-1.5 py-0.5 rounded"
+                          style={{
+                            color: depthColor,
+                            background: `${depthColor}12`,
+                            border: `1px solid ${depthColor}30`,
+                          }}
+                        >
+                          {depthLabel}
+                        </span>
+                        <span
+                          className="text-[10px] font-mono font-semibold w-10 text-right"
+                          style={{ color: 'rgba(255,255,255,0.5)' }}
+                        >
+                          {ubo.pct}%
+                        </span>
+                      </div>
+                    );
+                  })}
+                  <div className="mt-2 text-[9px] font-mono" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                    Depth = entity layers traversed to resolve beneficial owner
+                  </div>
                 </div>
               </div>
             )}
