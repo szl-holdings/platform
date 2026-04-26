@@ -264,6 +264,11 @@ const PUBLIC_PREFIXES = [
   // (evaluate, mcp-governance/check) are POST but still safe to expose
   // unauthenticated since they perform no data writes.
   "/api/meridian/",
+  // Meridian MCP Activation registry (Task #3717 thin slice) — read-only registry
+  // of the 15 governed external MCP servers and their activation status. No data
+  // writes. Public so the MCP Activation dashboard at /meridian/mcp-activation
+  // can render in demo/unauthenticated mode without a session.
+  "/api/meridian-mcp/",
   // Demo reset — POST /api/demo/reset is public so the Demo Launchpad presenter
   // can reset scenario state without being logged in. Mounted pre-auth in app.ts;
   // this PUBLIC_PREFIXES entry is kept as defense-in-depth, scoped to exact path only.

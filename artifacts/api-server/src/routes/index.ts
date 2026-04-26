@@ -172,6 +172,12 @@ router.use("/helios", lazyMount(() => import("./helios/index"), "helios"));
 // read-only intelligence surfaces work in demo/unauthenticated mode.
 router.use(lazyMatch("/meridian", () => import("./meridian"), "meridian"));
 
+// Meridian MCP Activation registry (Task #3717 thin slice).
+// Distinct from mcp.ts (internal JSON-RPC gateway) — this is a read-only
+// registry of the 15 governed external MCP servers and their activation status.
+// Owns /meridian-mcp/* endpoints.
+router.use(lazyMatch("/meridian-mcp", () => import("./meridian-mcp-activation"), "meridian-mcp-activation"));
+
 // Global Guardian policy check — derives category from request path.
 router.use(guardianPolicyCheck());
 

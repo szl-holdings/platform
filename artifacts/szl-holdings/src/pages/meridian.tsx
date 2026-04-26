@@ -874,6 +874,27 @@ export default function MeridianPage() {
               </p>
             </div>
           </div>
+          <Link
+            href="/meridian/mcp-activation"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontSize: '10px',
+              fontWeight: 600,
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              color: 'rgba(56,189,248,0.6)',
+              textDecoration: 'none',
+              marginTop: '6px',
+              transition: 'color 0.15s',
+            }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = 'rgba(56,189,248,0.9)')}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = 'rgba(56,189,248,0.6)')}
+          >
+            <Shield className="w-3 h-3" />
+            MCP Activation
+          </Link>
           <div className="flex gap-1 mt-2">
             {(['layers', 'proximity', 'geofence', 'alerts'] as const).map((panel) => (
               <button

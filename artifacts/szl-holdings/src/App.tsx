@@ -178,6 +178,7 @@ const InsightsArticlePage = lazy(() => import("@/pages/insights-article"));
 const CoreCommandPage = lazy(() => import("@/pages/core-command"));
 const MeridianPage = lazy(() => import("@/pages/meridian"));
 const MeridianIntelligencePage = lazy(() => import("@/pages/meridian-intelligence"));
+const MeridianMcpActivationPage = lazy(() => import("@/pages/meridian-mcp-activation"));
 const ControlPlanePage = lazy(() => import("@/pages/control-plane"));
 const PortfolioOpsPage = lazy(() => import("@/pages/portfolio-ops"));
 const OpsIncidentsPage = lazy(() => import("@/pages/ops-incidents"));
@@ -1457,6 +1458,9 @@ function App() {
             </Route>
             <Route path="/core">
               <Suspense fallback={<PageLoader />}><CoreCommandPage /></Suspense>
+            </Route>
+            <Route path="/meridian/mcp-activation">
+              <Suspense fallback={<PageLoader />}><MeridianMcpActivationPage /></Suspense>
             </Route>
             <Route path="/meridian">
               <Suspense fallback={<PageLoader />}><MeridianPage /></Suspense>
