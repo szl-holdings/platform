@@ -9,7 +9,9 @@ import {
   ChevronRight,
   Info,
   RefreshCw,
+  Send,
   Target,
+  X,
 } from 'lucide-react';
 import { useState } from 'react';
 import { type Citation, CitationPanel } from '../components/CitationPanel';
@@ -580,8 +582,295 @@ function BriefView({ brief }: { brief: ExecBrief }) {
   );
 }
 
+type OrgChannel = 'in_app' | 'push' | 'email' | 'sms' | 'slack' | 'teams' | 'webhook';
+
+const CHANNEL_LABELS: Record<OrgChannel, string> = {
+  in_app: 'In-App',
+  push: 'Push Notification',
+  email: 'Email',
+  sms: 'SMS',
+  slack: 'Slack',
+  teams: 'Microsoft Teams',
+  webhook: 'Webhook',
+};
+
+const CHANNEL_DESCRIPTIONS: Record<OrgChannel, string> = {
+  in_app: 'Always delivered — in-app notification to all org members',
+  push: 'Expo push notification to org members with the mobile app',
+  email: 'Formatted HTML email to verified email addresses',
+  sms: 'SMS to members with phone numbers (Twilio)',
+  slack: 'Org Slack channel via webhook (env: SLACK_WEBHOOK_URL)',
+  teams: 'Microsoft Teams channel card (env: TEAMS_WEBHOOK_URL)',
+  webhook: 'Generic outbound webhook with HMAC signature',
+};
+
+async function publishOrgBriefing(
+  briefingId: string,
+  channels: OrgChannel[],
+): Promise<{ success: boolean; message?: string; error?: string }> {
+  const res = await fetch(`${API_PREFIX}/pulse/org/publications`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ briefingId, channels }),
+  });
+  return res.json() as Promise<{ success: boolean; message?: string; error?: string }>;
+}
+
+async function fetchChannelStatus(): Promise<{ configuredChannels?: OrgChannel[] }> {
+  const res = await fetch(`${API_PREFIX}/pulse/org/channel-status`, { credentials: 'include' });
+  if (!res.ok) return {};
+  const body = (await res.json()) as { configuredChannels?: OrgChannel[] };
+  return body;
+}
+
+function OrgPublishDialog({
+  brief,
+  onClose,
+}: {
+  brief: ExecBrief;
+  onClose: () => void;
+}) {
+  const ALL_CHANNELS: OrgChannel[] = ['in_app', 'push', 'email', 'sms', 'slack', 'teams', 'webhook'];
+  const [selectedChannels, setSelectedChannels] = useState<OrgChannel[]>(['in_app', 'push', 'email']);
+  const [publishing, setPublishing] = useState(false);
+  const [result, setResult] = useState<{ success: boolean; message?: string } | null>(null);
+  const [configuredChannels, setConfiguredChannels] = useState<OrgChannel[] | null>(null);
+
+  useState(() => {
+    fetchChannelStatus().then((s) => {
+      if (s.configuredChannels) setConfiguredChannels(s.configuredChannels);
+    }).catch(() => {
+      setConfiguredChannels(ALL_CHANNELS);
+    });
+  });
+
+  const toggleChannel = (ch: OrgChannel) => {
+    if (ch === 'in_app') return;
+    setSelectedChannels((prev) =>
+      prev.includes(ch) ? prev.filter((c) => c !== ch) : [...prev, ch],
+    );
+  };
+
+  const handlePublish = async () => {
+    if (!brief.briefingId && !brief.id) return;
+    setPublishing(true);
+    setResult(null);
+    try {
+      const briefingId = brief.briefingId ?? brief.id;
+      const res = await publishOrgBriefing(briefingId, selectedChannels);
+      setResult({ success: res.success, message: res.message ?? res.error });
+    } catch (err) {
+      setResult({ success: false, message: err instanceof Error ? err.message : 'Publish failed' });
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const riskColor = brief.overallRisk === 'CRITICAL' ? '#e53e3e'
+    : brief.overallRisk === 'HIGH' ? '#e8855b'
+    : brief.overallRisk === 'MEDIUM' ? '#c8a84b'
+    : '#4eca8b';
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0,0,0,0.65)',
+        zIndex: 1000,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px',
+      }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        style={{
+          background: '#101216',
+          border: '1px solid rgba(200,168,75,0.2)',
+          borderRadius: 12,
+          padding: '24px',
+          width: '100%',
+          maxWidth: 520,
+          boxShadow: '0 24px 80px rgba(0,0,0,0.7)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Send size={15} color="#c8a84b" />
+            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff' }}>
+              Publish Org-Wide
+            </span>
+          </div>
+          <button
+            onClick={onClose}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', padding: 4 }}
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div
+          style={{
+            padding: '10px 14px',
+            borderRadius: 7,
+            background: 'rgba(255,255,255,0.025)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            marginBottom: 18,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <span
+              style={{
+                fontSize: '0.62rem',
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: riskColor,
+                padding: '2px 6px',
+                background: `${riskColor}18`,
+                border: `1px solid ${riskColor}35`,
+                borderRadius: 4,
+              }}
+            >
+              {brief.overallRisk} RISK
+            </span>
+            <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              {brief.domain}
+            </span>
+          </div>
+          <p style={{ margin: 0, fontSize: '0.82rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.4 }}>
+            {brief.headline}
+          </p>
+        </div>
+
+        <div style={{ marginBottom: 18 }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 10 }}>
+            Delivery Channels
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {ALL_CHANNELS.map((ch) => {
+              const isSelected = selectedChannels.includes(ch);
+              const isConfigured = !configuredChannels || configuredChannels.includes(ch);
+              const isLocked = ch === 'in_app';
+              return (
+                <button
+                  key={ch}
+                  onClick={() => toggleChannel(ch)}
+                  disabled={isLocked || (!isConfigured && !isSelected)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 10,
+                    padding: '10px 12px',
+                    borderRadius: 7,
+                    background: isSelected ? 'rgba(200,168,75,0.08)' : 'rgba(255,255,255,0.025)',
+                    border: `1px solid ${isSelected ? 'rgba(200,168,75,0.3)' : 'rgba(255,255,255,0.06)'}`,
+                    cursor: isLocked ? 'default' : 'pointer',
+                    textAlign: 'left',
+                    width: '100%',
+                    opacity: !isConfigured && !isSelected ? 0.4 : 1,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: 4,
+                      border: `1.5px solid ${isSelected ? '#c8a84b' : 'rgba(255,255,255,0.2)'}`,
+                      background: isSelected ? 'rgba(200,168,75,0.2)' : 'transparent',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      marginTop: 1,
+                    }}
+                  >
+                    {isSelected && <CheckCircle2 size={10} color="#c8a84b" />}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 600, color: isSelected ? '#c8a84b' : 'rgba(255,255,255,0.7)' }}>
+                      {CHANNEL_LABELS[ch]}
+                      {isLocked && <span style={{ marginLeft: 6, fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)' }}>(always on)</span>}
+                      {!isConfigured && <span style={{ marginLeft: 6, fontSize: '0.65rem', color: 'rgba(232,133,91,0.7)' }}>not configured</span>}
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: 1 }}>
+                      {CHANNEL_DESCRIPTIONS[ch]}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {result && (
+          <div
+            style={{
+              marginBottom: 14,
+              padding: '9px 12px',
+              borderRadius: 6,
+              fontSize: '0.78rem',
+              background: result.success ? 'rgba(78,202,139,0.08)' : 'rgba(229,62,62,0.08)',
+              border: `1px solid ${result.success ? 'rgba(78,202,139,0.3)' : 'rgba(229,62,62,0.3)'}`,
+              color: result.success ? '#4eca8b' : '#e05050',
+            }}
+          >
+            {result.message}
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 8 }}>
+          {!result?.success && (
+            <button
+              onClick={handlePublish}
+              disabled={publishing || selectedChannels.length === 0}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                padding: '10px 18px',
+                borderRadius: 7,
+                background: 'rgba(200,168,75,0.12)',
+                border: '1px solid rgba(200,168,75,0.35)',
+                color: '#c8a84b',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                cursor: publishing || selectedChannels.length === 0 ? 'not-allowed' : 'pointer',
+                opacity: publishing || selectedChannels.length === 0 ? 0.6 : 1,
+              }}
+            >
+              <Send size={13} style={{ animation: publishing ? 'spin 1s linear infinite' : 'none' }} />
+              {publishing ? 'Publishing…' : `Publish to ${selectedChannels.length} Channel${selectedChannels.length !== 1 ? 's' : ''}`}
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            style={{
+              padding: '10px 18px',
+              borderRadius: 7,
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: 'rgba(255,255,255,0.5)',
+              fontSize: '0.82rem',
+              cursor: 'pointer',
+            }}
+          >
+            {result?.success ? 'Close' : 'Cancel'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function BriefingEngine() {
   const [domain, setDomain] = useState<Domain>('consolidated');
+  const [showPublishDialog, setShowPublishDialog] = useState(false);
   const qc = useQueryClient();
 
   const { data, isLoading, error } = useStandardQuery({
@@ -628,30 +917,56 @@ export default function BriefingEngine() {
             Evidence-first executive briefs · Cognitive runtime · Verifier-gated
           </p>
         </div>
-        <button
-          onClick={() => generateMutation.mutate()}
-          disabled={isGenerating}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            padding: '8px 14px',
-            borderRadius: 7,
-            background: isGenerating ? 'rgba(200,168,75,0.06)' : 'rgba(200,168,75,0.1)',
-            border: '1px solid rgba(200,168,75,0.25)',
-            color: isGenerating ? 'rgba(200,168,75,0.4)' : '#c8a84b',
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            cursor: isGenerating ? 'not-allowed' : 'pointer',
-          }}
-        >
-          <RefreshCw
-            size={13}
-            style={{ animation: isGenerating ? 'spin 1s linear infinite' : 'none' }}
-          />
-          {isGenerating ? 'Generating…' : 'Generate New Brief'}
-        </button>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {brief && (
+            <button
+              onClick={() => setShowPublishDialog(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '8px 14px',
+                borderRadius: 7,
+                background: 'rgba(78,202,139,0.08)',
+                border: '1px solid rgba(78,202,139,0.25)',
+                color: '#4eca8b',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              <Send size={13} />
+              Publish Org-Wide
+            </button>
+          )}
+          <button
+            onClick={() => generateMutation.mutate()}
+            disabled={isGenerating}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 14px',
+              borderRadius: 7,
+              background: isGenerating ? 'rgba(200,168,75,0.06)' : 'rgba(200,168,75,0.1)',
+              border: '1px solid rgba(200,168,75,0.25)',
+              color: isGenerating ? 'rgba(200,168,75,0.4)' : '#c8a84b',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              cursor: isGenerating ? 'not-allowed' : 'pointer',
+            }}
+          >
+            <RefreshCw
+              size={13}
+              style={{ animation: isGenerating ? 'spin 1s linear infinite' : 'none' }}
+            />
+            {isGenerating ? 'Generating…' : 'Generate New Brief'}
+          </button>
+        </div>
       </div>
+      {showPublishDialog && brief && (
+        <OrgPublishDialog brief={brief} onClose={() => setShowPublishDialog(false)} />
+      )}
 
       <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>
         {(Object.keys(DOMAIN_LABELS) as Domain[]).map((d) => {

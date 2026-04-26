@@ -46,6 +46,7 @@ export const NAMED_JOB_TYPES = {
   DEMO_USAGE_SEEDER: "demo_usage_seeder",
   DAILY_NET30_AGING_SNAPSHOT: "daily_net30_aging_snapshot",
   HOURLY_NET30_DUNNING: "hourly_net30_dunning",
+  HOURLY_ORG_PUBLICATION_SCHEDULER: "hourly_org_publication_scheduler",
 } as const;
 
 export type NamedJobType = (typeof NAMED_JOB_TYPES)[keyof typeof NAMED_JOB_TYPES];
@@ -156,6 +157,7 @@ registerEntry({
   schedule: 'hourly',
   enabled: true,
 });
+registerEntry({ type: NAMED_JOB_TYPES.HOURLY_ORG_PUBLICATION_SCHEDULER, name: "Hourly Org Publication Scheduler", description: "Checks pulse_org_schedules for due recurrence entries (next_run_at <= now, paused=false) and triggers org-wide fan-out publications for each due schedule. Advances next_run_at after enqueuing each publication. Compatible with the org fan-out v2 channel adapters (email, SMS, Slack, Teams, push, webhook, in-app).", schedule: "hourly", enabled: true });
 
 durableJobQueue.register(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, async (job) => {
   const start = Date.now();
@@ -3821,6 +3823,111 @@ durableJobQueue.register(NAMED_JOB_TYPES.DEMO_USAGE_SEEDER, async (job) => {
       lastStatus: 'failed',
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.DEMO_USAGE_SEEDER)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
+});
+
+
+// ── Org fan-out publication scheduler ──────────────────────────────────────
+
+durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_ORG_PUBLICATION_SCHEDULER, async (job) => {
+  const start = Date.now();
+  let triggered = 0;
+  let skipped = 0;
+  updateRegistry(NAMED_JOB_TYPES.HOURLY_ORG_PUBLICATION_SCHEDULER, { lastStatus: "running" });
+  try {
+    const { db, pulseOrgSchedulesTable, pulseOrgPublicationsTable } = await import("@szl-holdings/db");
+    const { fanOutOrgPublication } = await import("../routes/pulse-org");
+    const { lt, eq, and, isNotNull } = await import("drizzle-orm");
+    const { randomBytes } = await import("node:crypto");
+
+    const now = new Date();
+    const dueSchedules = await db.select().from(pulseOrgSchedulesTable).where(
+      and(
+        eq(pulseOrgSchedulesTable.paused, false),
+        lt(pulseOrgSchedulesTable.nextRunAt, now),
+        isNotNull(pulseOrgSchedulesTable.nextRunAt),
+      )
+    ).limit(100);
+
+    for (const schedule of dueSchedules) {
+      if (!schedule.pinnedBriefingId) {
+        logger.warn({ scheduleId: schedule.scheduleId }, "[pulse-org-scheduler] No pinned briefing ID, skipping");
+        skipped++;
+        continue;
+      }
+
+      try {
+        const publicationId = `pub-sched-${Date.now()}-${randomBytes(4).toString("hex")}`;
+        const channels = (Array.isArray(schedule.channels) ? schedule.channels : []) as string[];
+
+        await db.insert(pulseOrgPublicationsTable).values({
+          publicationId,
+          briefingId: schedule.pinnedBriefingId,
+          domain: schedule.domain ?? "consolidated",
+          channels,
+          scheduleId: schedule.id,
+          status: "queued",
+          totalRecipients: 0,
+        });
+
+        const freq = schedule.frequency as "daily" | "weekdays" | "weekly" | "monthly" | "custom";
+        const interval = schedule.interval ?? 1;
+        const weekdays = (Array.isArray(schedule.weekdays) ? schedule.weekdays : []) as number[];
+        const timeOfDay = schedule.timeOfDay ?? "09:00";
+
+        const [hh, mm] = timeOfDay.split(":").map(Number);
+        const next = new Date(now);
+        if (freq === "daily") {
+          next.setDate(next.getDate() + interval);
+        } else if (freq === "weekdays") {
+          let tries = 0;
+          do { next.setDate(next.getDate() + 1); tries++; } while ((next.getDay() === 0 || next.getDay() === 6) && tries < 14);
+        } else if (freq === "weekly") {
+          const targetDays = weekdays.length > 0 ? weekdays : [1];
+          let tries = 0;
+          do { next.setDate(next.getDate() + 1); tries++; } while (!targetDays.includes(next.getDay()) && tries < 21);
+        } else if (freq === "monthly") {
+          next.setMonth(next.getMonth() + interval);
+        } else {
+          next.setDate(next.getDate() + 1);
+        }
+        next.setHours(hh ?? 9, mm ?? 0, 0, 0);
+
+        await db.update(pulseOrgSchedulesTable).set({
+          nextRunAt: next,
+          lastRunAt: now,
+          updatedAt: new Date(),
+        }).where(eq(pulseOrgSchedulesTable.id, schedule.id));
+
+        void fanOutOrgPublication(publicationId, schedule.orgId ?? null).catch((err: unknown) => {
+          logger.error({ err, publicationId, scheduleId: schedule.scheduleId }, "[pulse-org-scheduler] fan-out error");
+        });
+
+        triggered++;
+        logger.info({ scheduleId: schedule.scheduleId, publicationId }, "[pulse-org-scheduler] Triggered org publication");
+      } catch (err) {
+        skipped++;
+        logger.error({ err, scheduleId: schedule.scheduleId }, "[pulse-org-scheduler] Failed to trigger org publication");
+      }
+    }
+
+    serverTelemetry.recordBusinessEvent({
+      type: "hourly_org_publication_scheduler_completed",
+      domain: "pulse",
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { triggered, skipped },
+    });
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_ORG_PUBLICATION_SCHEDULER, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, triggered, skipped }, "hourly_org_publication_scheduler: complete");
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "hourly_org_publication_scheduler: fatal");
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_ORG_PUBLICATION_SCHEDULER, {
+      lastStatus: "failed",
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_ORG_PUBLICATION_SCHEDULER)?.failCount || 0) + 1,
     });
     throw err;
   }

@@ -1,5 +1,6 @@
 import {
   boolean,
+  index,
   integer,
   jsonb,
   numeric,
@@ -157,6 +158,128 @@ export const pulsePersonalizedNarrativesTable = pgTable(
   },
   (t) => [uniqueIndex('pulse_personalized_narratives_user_date_unique').on(t.userId, t.dateKey)],
 );
+
+export const pulseOrgPublicationsTable = pgTable(
+  'pulse_org_publications',
+  {
+    id: serial('id').primaryKey(),
+    publicationId: text('publication_id').notNull().unique(),
+    briefingId: text('briefing_id').notNull(),
+    domain: text('domain').notNull().default('consolidated'),
+    channels: jsonb('channels').notNull().$type<string[]>().default([]),
+    scheduleId: integer('schedule_id'),
+    status: text('status', { enum: ['queued', 'in_progress', 'completed', 'failed', 'cancelled'] })
+      .notNull()
+      .default('queued'),
+    totalRecipients: integer('total_recipients').notNull().default(0),
+    deliveredCount: integer('delivered_count').notNull().default(0),
+    failedCount: integer('failed_count').notNull().default(0),
+    suppressedCount: integer('suppressed_count').notNull().default(0),
+    publishedBy: integer('published_by'),
+    audienceFilter: jsonb('audience_filter').$type<Record<string, unknown>>(),
+    metadata: jsonb('metadata').$type<Record<string, unknown>>(),
+    enqueuedAt: timestamp('enqueued_at').notNull().defaultNow(),
+    completedAt: timestamp('completed_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+);
+
+export const pulseOrgPublicationDeliveriesTable = pgTable(
+  'pulse_org_publication_deliveries',
+  {
+    id: serial('id').primaryKey(),
+    publicationId: text('publication_id').notNull(),
+    userId: integer('user_id').notNull(),
+    channel: text('channel').notNull(),
+    status: text('status', { enum: ['queued', 'delivered', 'failed', 'suppressed', 'retrying'] })
+      .notNull()
+      .default('queued'),
+    attempts: integer('attempts').notNull().default(0),
+    lastError: text('last_error'),
+    providerMessageId: text('provider_message_id'),
+    suppressReason: text('suppress_reason'),
+    deliveredAt: timestamp('delivered_at'),
+    nextRetryAt: timestamp('next_retry_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('pulse_org_deliveries_pub_user_channel_unique').on(
+      t.publicationId,
+      t.userId,
+      t.channel,
+    ),
+    index('pulse_org_deliveries_pub_status_idx').on(t.publicationId, t.status),
+    index('pulse_org_deliveries_retry_idx').on(t.nextRetryAt),
+  ],
+);
+
+export const pulseOrgSchedulesTable = pgTable('pulse_org_schedules', {
+  id: serial('id').primaryKey(),
+  scheduleId: text('schedule_id').notNull().unique(),
+  orgId: integer('org_id'),
+  domain: text('domain').notNull().default('consolidated'),
+  channels: jsonb('channels').notNull().$type<string[]>().default([]),
+  pinnedBriefingId: text('pinned_briefing_id'),
+  frequency: text('frequency', {
+    enum: ['daily', 'weekdays', 'weekly', 'monthly', 'custom'],
+  }).notNull(),
+  interval: integer('interval').notNull().default(1),
+  weekdays: jsonb('weekdays').$type<number[]>().default([]),
+  timeOfDay: text('time_of_day').notNull().default('09:00'),
+  timezone: text('timezone').notNull().default('UTC'),
+  paused: boolean('paused').notNull().default(false),
+  nextRunAt: timestamp('next_run_at'),
+  lastRunAt: timestamp('last_run_at'),
+  createdBy: integer('created_by'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const pulseOrgUserPreferencesTable = pgTable(
+  'pulse_org_user_preferences',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id').notNull(),
+    emailOptOut: boolean('email_opt_out').notNull().default(false),
+    smsOptOut: boolean('sms_opt_out').notNull().default(false),
+    slackDmOptOut: boolean('slack_dm_opt_out').notNull().default(false),
+    pushOptOut: boolean('push_opt_out').notNull().default(false),
+    unsubscribeToken: text('unsubscribe_token').notNull().unique(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('pulse_org_user_prefs_user_unique').on(t.userId)],
+);
+
+export const pulseOrgChannelConfigsTable = pgTable(
+  'pulse_org_channel_configs',
+  {
+    id: serial('id').primaryKey(),
+    orgId: integer('org_id').notNull().unique(),
+    slackWebhookUrl: text('slack_webhook_url'),
+    slackChannel: text('slack_channel'),
+    teamsWebhookUrl: text('teams_webhook_url'),
+    smsSenderId: text('sms_sender_id'),
+    outboundWebhookUrl: text('outbound_webhook_url'),
+    outboundWebhookSecret: text('outbound_webhook_secret'),
+    emailFromName: text('email_from_name'),
+    emailFromAddress: text('email_from_address'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+);
+
+export const pulseOrgAuditLogTable = pgTable('pulse_org_audit_log', {
+  id: serial('id').primaryKey(),
+  action: text('action').notNull(),
+  entityType: text('entity_type').notNull(),
+  entityId: text('entity_id'),
+  userId: integer('user_id'),
+  metadata: jsonb('metadata').$type<Record<string, unknown>>(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
 
 export const pulseExecBriefsTable = pgTable('pulse_exec_briefs', {
   id: text('id').primaryKey(),

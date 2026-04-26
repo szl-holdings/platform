@@ -243,6 +243,12 @@ router.use(
   perUserApiSlidingLimiter,
   lazyMount(() => import("./pulse"), "pulse-aliased"),
 );
+// Pulse org-wide fan-out v2 — org publications, schedules, preferences, unsubscribe
+router.use(
+  "/pulse/org",
+  perUserApiSlidingLimiter,
+  lazyMount(() => import("./pulse-org"), "pulse-org"),
+);
 router.use("/executive", perUserApiSlidingLimiter, lazyMount(() => import("./executive-briefings"), "executive-briefings"));
 router.use(lazyMatch("/evals", () => import("./evals"), "evals"));
 router.use(lazyMatch("/briefings", () => import("./briefings"), "briefings"));

@@ -10,6 +10,7 @@ import {
   Mail,
   Pause,
   Play,
+  Send,
   Shield,
   X,
   Zap,
@@ -143,6 +144,16 @@ export default function Settings() {
   const [subMessage, setSubMessage] = useState<string | null>(null);
   const [subError, setSubError] = useState<string | null>(null);
 
+  // Org briefing delivery opt-out state
+  const [orgPrefs, setOrgPrefs] = useState({
+    emailOptOut: false,
+    smsOptOut: false,
+    slackDmOptOut: false,
+    pushOptOut: false,
+  });
+  const [orgPrefsBusy, setOrgPrefsBusy] = useState(false);
+  const [orgPrefsMessage, setOrgPrefsMessage] = useState<string | null>(null);
+
   const initialised = useRef(false);
 
   const refreshSubscriptions = async () => {
@@ -231,6 +242,53 @@ export default function Settings() {
     }
   };
 
+  const refreshOrgPrefs = async () => {
+    try {
+      const res = await fetch('/api/pulse/org/preferences/me', { credentials: 'include' });
+      if (!res.ok) return;
+      const body = (await res.json()) as {
+        emailOptOut?: boolean;
+        smsOptOut?: boolean;
+        slackDmOptOut?: boolean;
+        pushOptOut?: boolean;
+      };
+      setOrgPrefs({
+        emailOptOut: body.emailOptOut ?? false,
+        smsOptOut: body.smsOptOut ?? false,
+        slackDmOptOut: body.slackDmOptOut ?? false,
+        pushOptOut: body.pushOptOut ?? false,
+      });
+    } catch {
+      // ignore
+    }
+  };
+
+  const saveOrgPrefs = async (update: Partial<typeof orgPrefs>) => {
+    setOrgPrefsBusy(true);
+    setOrgPrefsMessage(null);
+    try {
+      const res = await fetch('/api/pulse/org/preferences/me', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(update),
+      });
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        setOrgPrefsMessage(body.error ?? `Failed (HTTP ${res.status})`);
+      } else {
+        setOrgPrefs((prev) => ({ ...prev, ...update }));
+        setOrgPrefsMessage('Preferences saved.');
+        setTimeout(() => setOrgPrefsMessage(null), 2500);
+        trackEvent('pulse_org_prefs_updated', { changes: Object.keys(update) });
+      }
+    } catch (err) {
+      setOrgPrefsMessage(err instanceof Error ? err.message : 'Failed to save preferences.');
+    } finally {
+      setOrgPrefsBusy(false);
+    }
+  };
+
   useEffect(() => {
     if (initialised.current) return;
     initialised.current = true;
@@ -255,6 +313,7 @@ export default function Settings() {
         setLoadError(err instanceof Error ? err.message : 'Failed to load settings');
       });
     void refreshSubscriptions();
+    void refreshOrgPrefs();
   }, []);
 
   const handleToggle = (key: string) => {
@@ -966,6 +1025,104 @@ export default function Settings() {
             Subscribe to Daily Briefing
           </button>
         </form>
+      </div>
+
+      {/* Org Briefing Delivery */}
+      <div className="section-card" style={{ padding: '18px 20px', marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <Send size={15} color="var(--pulse-text-muted)" />
+          <h3 style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--pulse-text)' }}>
+            Org Briefing Delivery
+          </h3>
+        </div>
+        <p style={{ fontSize: '0.75rem', color: 'var(--pulse-text-muted)', marginBottom: 14, lineHeight: 1.5 }}>
+          Org-wide briefings are published by administrators and delivered across multiple channels.
+          In-app delivery is always on. Opt out of individual channels here.
+        </p>
+
+        {orgPrefsMessage && (
+          <div
+            style={{
+              marginBottom: 12,
+              padding: '7px 12px',
+              borderRadius: 6,
+              fontSize: '0.78rem',
+              background: orgPrefsMessage.includes('aved') ? 'rgba(78,202,139,0.1)' : 'rgba(224,80,80,0.1)',
+              border: `1px solid ${orgPrefsMessage.includes('aved') ? 'rgba(78,202,139,0.3)' : 'rgba(224,80,80,0.3)'}`,
+              color: orgPrefsMessage.includes('aved') ? '#4eca8b' : '#e05050',
+            }}
+          >
+            {orgPrefsMessage}
+          </div>
+        )}
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {([
+            { key: 'emailOptOut', label: 'Email', description: 'Opt out of org briefing email delivery' },
+            { key: 'pushOptOut', label: 'Push Notification', description: 'Opt out of mobile push notifications for org briefings' },
+            { key: 'smsOptOut', label: 'SMS', description: 'Opt out of SMS delivery for org briefings' },
+            { key: 'slackDmOptOut', label: 'Slack DM', description: 'Opt out of Slack direct message delivery' },
+          ] as Array<{ key: keyof typeof orgPrefs; label: string; description: string }>).map((item) => {
+            const isOptedOut = orgPrefs[item.key];
+            return (
+              <div
+                key={item.key}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '10px 12px',
+                  borderRadius: 6,
+                  background: 'rgba(0,0,0,0.15)',
+                  border: '1px solid var(--pulse-border)',
+                  gap: 12,
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--pulse-text)' }}>
+                    {item.label}
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--pulse-text-muted)' }}>
+                    {item.description}
+                  </div>
+                </div>
+                <button
+                  onClick={() => void saveOrgPrefs({ [item.key]: !isOptedOut })}
+                  disabled={orgPrefsBusy}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    padding: '5px 12px',
+                    borderRadius: 5,
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    cursor: orgPrefsBusy ? 'not-allowed' : 'pointer',
+                    background: isOptedOut ? 'rgba(229,62,62,0.1)' : 'rgba(78,202,139,0.08)',
+                    border: `1px solid ${isOptedOut ? 'rgba(229,62,62,0.3)' : 'rgba(78,202,139,0.25)'}`,
+                    color: isOptedOut ? '#e05050' : '#4eca8b',
+                    opacity: orgPrefsBusy ? 0.6 : 1,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {orgPrefsBusy ? (
+                    <Loader size={11} style={{ animation: 'spin 1s linear infinite' }} />
+                  ) : isOptedOut ? (
+                    <X size={11} />
+                  ) : (
+                    <Check size={11} />
+                  )}
+                  {isOptedOut ? 'Opted Out' : 'Receiving'}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        <p style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)', marginTop: 10, lineHeight: 1.5 }}>
+          Click a channel to toggle opt-in/opt-out. Changes take effect immediately for future publications.
+          You can also unsubscribe via the link in any org briefing email.
+        </p>
       </div>
 
       {/* Counsel agents info */}
