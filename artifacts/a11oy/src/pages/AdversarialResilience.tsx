@@ -346,6 +346,114 @@ export function AdversarialResilience() {
           </Card>
         </div>
       </div>
+
+      <div className="mt-8">
+        <SectionTitle>Data Poisoning Defense</SectionTitle>
+        <p className="text-xs mb-4" style={{ color: T.dim }}>
+          Active defense against training data, knowledge base, and RAG store poisoning — statistical drift detection, hash-verified data provenance, and adversarial sample filtering.
+        </p>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {[
+            { id: 'DP-001', name: 'Training Data Integrity', metric: '99.97%', detail: 'Hash-verified training dataset provenance chain', checks: 'Statistical distribution monitoring + anomaly detection on input features', status: 'active' },
+            { id: 'DP-002', name: 'RAG Store Validation', metric: '99.92%', detail: 'Vector embedding integrity verification on every retrieval', checks: 'Cosine similarity drift detection + document provenance hashing', status: 'active' },
+            { id: 'DP-003', name: 'Knowledge Base Quarantine', metric: '14', detail: 'Suspicious entries quarantined in last 30 days', checks: 'Content fingerprinting + source reputation scoring + human review gate', status: 'active' },
+            { id: 'DP-004', name: 'Adversarial Sample Filter', metric: '847', detail: 'Adversarial samples detected and filtered this quarter', checks: 'ART-based detection + perturbation analysis + gradient masking', status: 'active' },
+            { id: 'DP-005', name: 'Backdoor Detection', metric: '0', detail: 'Backdoor triggers found in production models', checks: 'Neural cleanse scanning + activation analysis + fine-pruning defense', status: 'active' },
+            { id: 'DP-006', name: 'Label Flip Defense', metric: '99.98%', detail: 'Label integrity across all supervised datasets', checks: 'Consensus-based label verification + outlier detection', status: 'active' },
+          ].map(defense => (
+            <Card key={defense.id}>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] font-mono" style={{ color: T.dim }}>{defense.id}</span>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.1)', color: T.accent }}>{defense.status}</span>
+              </div>
+              <div className="text-sm font-medium mb-1" style={{ color: T.text }}>{defense.name}</div>
+              <div className="text-xl font-mono font-bold mb-1" style={{ color: T.accent }}>{defense.metric}</div>
+              <div className="text-[10px] mb-2" style={{ color: T.dim }}>{defense.detail}</div>
+              <div className="text-[9px]" style={{ color: T.muted }}>{defense.checks}</div>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <SectionTitle>Post-Quantum Cryptography Readiness</SectionTitle>
+        <p className="text-xs mb-4" style={{ color: T.dim }}>
+          NIST PQC migration readiness for all cryptographic operations — proof chain hashing, credential signing, inter-agent communication, and data-at-rest encryption.
+        </p>
+        <div className="grid md:grid-cols-2 gap-4 mb-8">
+          {[
+            { algorithm: 'ML-KEM (CRYSTALS-Kyber)', type: 'Key Encapsulation', nistStatus: 'FIPS 203 — Finalized', a11oyStatus: 'Deployed', usage: 'Inter-agent encrypted communication + connector handshakes', readiness: 100 },
+            { algorithm: 'ML-DSA (CRYSTALS-Dilithium)', type: 'Digital Signature', nistStatus: 'FIPS 204 — Finalized', a11oyStatus: 'Deployed', usage: 'Proof Ledger hash signing + multi-signatory attestation', readiness: 100 },
+            { algorithm: 'SLH-DSA (SPHINCS+)', type: 'Stateless Hash Signature', nistStatus: 'FIPS 205 — Finalized', a11oyStatus: 'Deployed', usage: 'Backup signing for critical governance actions', readiness: 100 },
+            { algorithm: 'FN-DSA (FALCON)', type: 'Lattice Signature', nistStatus: 'Draft Standard', a11oyStatus: 'Testing', usage: 'Planned for high-throughput agent credential signing', readiness: 72 },
+          ].map(pqc => (
+            <Card key={pqc.algorithm}>
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <div className="text-sm font-medium" style={{ color: T.text }}>{pqc.algorithm}</div>
+                  <div className="text-[9px] font-mono" style={{ color: T.dim }}>{pqc.type}</div>
+                </div>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: pqc.a11oyStatus === 'Deployed' ? 'rgba(201,183,135,0.1)' : 'rgba(59,130,246,0.1)', color: pqc.a11oyStatus === 'Deployed' ? T.accent : '#3b82f6' }}>{pqc.a11oyStatus}</span>
+              </div>
+              <div className="text-[10px] mb-2" style={{ color: T.dim }}>{pqc.usage}</div>
+              <div className="text-[9px] font-mono mb-2" style={{ color: T.muted }}>NIST: {pqc.nistStatus}</div>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-2 rounded-full" style={{ background: T.surface }}>
+                  <div className="h-2 rounded-full transition-all" style={{ width: `${pqc.readiness}%`, background: pqc.readiness === 100 ? T.accent : '#3b82f6' }} />
+                </div>
+                <span className="text-[10px] font-mono" style={{ color: pqc.readiness === 100 ? T.accent : '#3b82f6' }}>{pqc.readiness}%</span>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <SectionTitle>Frontier AI Exposure Analysis</SectionTitle>
+        <p className="text-xs mb-4" style={{ color: T.dim }}>
+          Risk assessment for frontier AI model capabilities — tracking dual-use risks, capability thresholds, and governance requirements as foundation models approach dangerous capability levels.
+        </p>
+        <div className="space-y-3 mb-8">
+          {[
+            { id: 'FAE-001', capability: 'Autonomous Code Generation', riskLevel: 'high', exposure: 'Active — multiple agents generate and execute code autonomously', mitigation: 'Sandboxed execution + code review gate + output validation against test suite', threshold: 'Self-modifying code detected → immediate halt + human review' },
+            { id: 'FAE-002', capability: 'Multi-Step Reasoning Chains', riskLevel: 'medium', exposure: 'Active — planner agents decompose complex multi-step workflows', mitigation: 'Step-by-step governance validation + counterfactual analysis at each step', threshold: 'Reasoning chain > 15 steps → requires explicit approval' },
+            { id: 'FAE-003', capability: 'Tool Use & API Manipulation', riskLevel: 'high', exposure: 'Active — agents invoke 50+ tools across connectors and MCP servers', mitigation: 'Connector Firewall + MCP token scoping + tool call sequence governance', threshold: 'Unauthorized tool chain detected → action blocked + forensic capture' },
+            { id: 'FAE-004', capability: 'Persuasion & Social Engineering', riskLevel: 'critical', exposure: 'Monitored — frontier models show increasing persuasion capability', mitigation: 'Constitutional constraints on agent-to-human communication + sycophancy detection', threshold: 'Manipulation pattern detected → agent suspended + behavioral audit' },
+            { id: 'FAE-005', capability: 'Self-Replication Potential', riskLevel: 'critical', exposure: 'Not observed — but actively monitored per Anthropic RSP', mitigation: 'Code execution sandboxing + resource limit enforcement + replication pattern detection', threshold: 'Any self-replication attempt → immediate system-wide halt' },
+            { id: 'FAE-006', capability: 'Deceptive Alignment', riskLevel: 'high', exposure: 'Actively tested — MirrorEval specifically probes for deceptive behavior', mitigation: 'Behavioral audit + shadow twin comparison + reward hacking detection', threshold: 'Deceptive pattern confirmed → agent quarantined + full forensic analysis' },
+          ].map(fae => {
+            const riskColors: Record<string, string> = { critical: '#ef4444', high: '#f59e0b', medium: '#3b82f6', low: '#8a8a8a' };
+            return (
+              <Card key={fae.id} style={{ borderLeft: `3px solid ${riskColors[fae.riskLevel]}` }}>
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-mono" style={{ color: T.dim }}>{fae.id}</span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: `${riskColors[fae.riskLevel]}18`, color: riskColors[fae.riskLevel] }}>{fae.riskLevel}</span>
+                    </div>
+                    <div className="text-sm font-medium mb-1" style={{ color: T.text }}>{fae.capability}</div>
+                    <div className="text-[10px] mb-1" style={{ color: T.dim }}>{fae.exposure}</div>
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-3 mt-2">
+                  <div className="p-2 rounded" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.1)' }}>
+                    <div className="text-[9px] font-mono mb-1" style={{ color: T.accent }}>MITIGATION</div>
+                    <div className="text-[10px]" style={{ color: T.dim }}>{fae.mitigation}</div>
+                  </div>
+                  <div className="p-2 rounded" style={{ background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.1)' }}>
+                    <div className="text-[9px] font-mono mb-1" style={{ color: '#ef4444' }}>THRESHOLD</div>
+                    <div className="text-[10px]" style={{ color: T.dim }}>{fae.threshold}</div>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="p-3 rounded-lg text-xs flex items-center gap-2" style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.15)', color: T.muted }}>
+        <span className="w-1.5 h-1.5 rounded-full" style={{ background: T.accent }} /> Adversarial Resilience — governance stress testing, data poisoning defense, post-quantum cryptography readiness, and frontier AI exposure analysis.
+      </div>
     </Layout>
   );
 }

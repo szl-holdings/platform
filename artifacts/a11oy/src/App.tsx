@@ -126,6 +126,12 @@ const AgentBom = lazy(() => import('./pages/AgentBom').then(m => ({ default: m.A
 const DelegationChainPage = lazy(() => import('./pages/DelegationChain').then(m => ({ default: m.DelegationChain })));
 const TrustExchange = lazy(() => import('./pages/TrustExchange').then(m => ({ default: m.TrustExchange })));
 const CareEngine = lazy(() => import('./pages/CareEngine').then(m => ({ default: m.CareEngine })));
+const PrecisionAI = lazy(() => import('./pages/PrecisionAI').then(m => ({ default: m.PrecisionAI })));
+const WeaponizedIntel = lazy(() => import('./pages/WeaponizedIntel').then(m => ({ default: m.WeaponizedIntel })));
+const AgentZeroTrust = lazy(() => import('./pages/AgentZeroTrust').then(m => ({ default: m.AgentZeroTrust })));
+const AtlasShield = lazy(() => import('./pages/AtlasShield').then(m => ({ default: m.AtlasShield })));
+const SwarmOrchestrator = lazy(() => import('./pages/SwarmOrchestrator').then(m => ({ default: m.SwarmOrchestrator })));
+const PlaybookEngine = lazy(() => import('./pages/PlaybookEngine').then(m => ({ default: m.PlaybookEngine })));
 
 export default function App() {
   return (
@@ -228,6 +234,12 @@ export default function App() {
         <Route path={`${base}/delegation-chain`} component={DelegationChainPage} />
         <Route path={`${base}/trust-exchange`} component={TrustExchange} />
         <Route path={`${base}/care`} component={CareEngine} />
+        <Route path={`${base}/precision-ai`} component={PrecisionAI} />
+        <Route path={`${base}/weaponized-intel`} component={WeaponizedIntel} />
+        <Route path={`${base}/agent-zero-trust`} component={AgentZeroTrust} />
+        <Route path={`${base}/atlas-shield`} component={AtlasShield} />
+        <Route path={`${base}/swarm-orchestrator`} component={SwarmOrchestrator} />
+        <Route path={`${base}/playbook-engine`} component={PlaybookEngine} />
         <Route path={`${base}/atlas`}>
           <WithShell><AtlasSection /></WithShell>
         </Route>

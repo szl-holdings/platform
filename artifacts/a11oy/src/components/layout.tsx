@@ -163,6 +163,17 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'DEFENSE',
+    items: [
+      { href: '/precision-ai',       label: 'Precision AI' },
+      { href: '/weaponized-intel',    label: 'Weaponized Intel' },
+      { href: '/agent-zero-trust',    label: 'Agent Zero Trust' },
+      { href: '/atlas-shield',        label: 'ATLAS Shield' },
+      { href: '/swarm-orchestrator',  label: 'Swarm Orchestrator' },
+      { href: '/playbook-engine',     label: 'Playbook Engine' },
+    ],
+  },
+  {
     label: 'OPERATIONS',
     items: [
       { href: '/control-tower', label: 'Control Tower' },
