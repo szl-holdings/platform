@@ -1395,6 +1395,12 @@ alloyChatRouter.post(
         } catch {}
       }
 
+      // NOTE: AlloyChat uses the conversational AI provider (services.ai.chatCompletion),
+      // not governedStructuredCall(). This is a free-form conversational endpoint that
+      // does not produce structured JSON decisions — there is no Zod schema to validate
+      // against and no "structured output" contract. governedStructuredCall() is the
+      // governed pipeline for the four structured decision routes (/ai/triage, /ai/extract,
+      // /ai/plan, /ai/evals/run) where the output must conform to a Zod schema.
       const result = await services.ai.chatCompletion(augmentedMessages, { maxTokens });
       sendSuccess(res, {
         content: result.content,

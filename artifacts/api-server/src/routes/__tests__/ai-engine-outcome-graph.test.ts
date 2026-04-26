@@ -146,9 +146,9 @@ vi.mock('@szl-holdings/ai-engine', () => ({
   runEvals: vi.fn(async () => ({ passed: 0, failed: 0, results: [] })),
   runEvaluatorHooksForTrace: vi.fn(async () => []),
   safeFallbackDecision: vi.fn((msg: string) => ({ error: msg })),
-  structuredCompletion: vi.fn(async (_msgs: unknown, _route: unknown, _validate: unknown) => ({
+  governedStructuredCall: vi.fn(async () => ({
     result: {
-      // triage shape
+      // triage / plan shared shape
       priority: 'P2',
       urgency: 'standard',
       category: 'security',
@@ -160,7 +160,6 @@ vi.mock('@szl-holdings/ai-engine', () => ({
       suggestedActions: [],
       requiresHumanReview: false,
       confidence: 0.8,
-      // plan shape (same result reused)
       action: 'Escalate to ops team',
       actionType: 'escalate',
       evidence: [],
@@ -171,21 +170,68 @@ vi.mock('@szl-holdings/ai-engine', () => ({
       sla: null,
       reasoning: 'High confidence escalation required',
       alternatives: [],
+      // extract shape
+      entities: [],
+      relationships: [],
     },
-    raw: '{}',
+    runId: 'gsc_test-run-1',
+    provenance: {
+      runId: 'gsc_test-run-1',
+      agentId: 'alloy',
+      domain: 'alloy',
+      model: 'test-model',
+      provider: 'test-provider',
+      promptHash: 'abc123',
+      promptTokens: 10,
+      completionTokens: 20,
+      totalTokens: 30,
+      latencyMs: 100,
+      governanceVerdict: 'allowed',
+      covenantFailures: [],
+      generatedAt: new Date().toISOString(),
+    },
     completion: {
       content: '{}',
       model: 'test-model',
       provider: 'test-provider',
-      usage: { promptTokens: 10, completionTokens: 20 },
+      usage: { promptTokens: 10, completionTokens: 20, totalTokens: 30 },
       latencyMs: 100,
       finishReason: 'stop',
+      toolCalls: [],
+      raw: {},
     },
   })),
+  proofChain: {
+    record: vi.fn(),
+    recordRefusal: vi.fn(),
+    getEntries: vi.fn(() => []),
+    getRefusalIncidents: vi.fn(() => []),
+    getStats: vi.fn(() => ({
+      totalCalls: 0,
+      schemaAdherenceRate: 100,
+      refusalCount: 0,
+      refusalRate: 0,
+      policyBlockCount: 0,
+      policyBlockRate: 0,
+      avgConfidence: null,
+      byDomain: {},
+      recentOutputs: [],
+      openRefusalIncidents: 0,
+      generatedAt: new Date().toISOString(),
+    })),
+  },
+  RefusalError: class RefusalError extends Error {
+    runId = 'test';
+    incidentId = 'test';
+    domain = 'test';
+    constructor(msg: string) { super(msg); this.name = 'RefusalError'; }
+  },
+  PolicyBlockError: class PolicyBlockError extends Error {
+    runId = 'test';
+    failedRules: string[] = [];
+    constructor(msg: string) { super(msg); this.name = 'PolicyBlockError'; }
+  },
   updateTraceStatus: vi.fn(),
-  validateActionDecision: vi.fn((v: unknown) => v),
-  validateExtractedEntities: vi.fn((v: unknown) => v),
-  validateTriageDecision: vi.fn((v: unknown) => v),
 }));
 
 // ---------------------------------------------------------------------------

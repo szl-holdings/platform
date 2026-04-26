@@ -142,45 +142,7 @@ export async function chatCompletionWithFallback(
   throw lastError || new Error('All models failed');
 }
 
-export async function structuredCompletion<T>(
-  messages: HFChatMessage[],
-  route: RouteResult,
-  validator: (raw: unknown) => {
-    valid: boolean;
-    decision?: T | null;
-    result?: T | null;
-    errors: string[];
-  },
-): Promise<{ result: T; raw: string; completion: HFCompletionResult }> {
-  const systemMsg = messages.find((m) => m.role === 'system');
-  if (systemMsg) {
-    systemMsg.content +=
-      '\n\nIMPORTANT: You MUST respond with valid JSON only. No markdown, no code blocks, no explanation outside the JSON.';
-  }
-
-  const completion = await chatCompletionWithFallback(messages, route, {
-    responseFormat: { type: 'json_object' },
-  });
-
-  let parsed: unknown;
-  const raw = completion.content;
-  try {
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('No JSON object found in response');
-    parsed = JSON.parse(jsonMatch[0]);
-  } catch (err) {
-    throw new Error(
-      `Failed to parse structured output: ${err instanceof Error ? err.message : String(err)}\nRaw: ${raw.slice(0, 500)}`,
-    );
-  }
-
-  const validation = validator(parsed);
-  if (!validation.valid) {
-    throw new Error(
-      `Schema validation failed: ${validation.errors.join(', ')}\nRaw: ${raw.slice(0, 500)}`,
-    );
-  }
-
-  const result = (validation.decision ?? validation.result) as T;
-  return { result, raw, completion };
-}
+// structuredCompletion() has been removed.
+// Use governedStructuredCall() from '@szl-holdings/ai-engine' for all structured inference.
+// governedStructuredCall() accepts a Zod schema, validates output via .safeParse(),
+// records refusals as first-class governance events, and writes to the Proof Chain.

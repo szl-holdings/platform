@@ -208,8 +208,20 @@ export {
   type HFChatMessage,
   type HFCompletionResult,
   type HFToolDef,
-  structuredCompletion,
 } from './providers/hf-client.js';
+export {
+  type CovenantRule,
+  type CovenantVerdict,
+  type GovernedCallOptions,
+  type GovernedCallResult,
+  governedStructuredCall,
+  PolicyBlockError,
+  proofChain,
+  type ProofChainEntry,
+  RefusalError,
+  type RefusalIncident,
+  type StructuredIntelligenceStats,
+} from './governed-structured-call.js';
 export {
   getModelSlots,
   getRouteConfig,

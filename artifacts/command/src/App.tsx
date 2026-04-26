@@ -220,6 +220,9 @@ const RetrievalProofChainPage = lazy(() =>
   import('./pages/retrieval-proof-chain').then((m) => ({ default: m.RetrievalProofChainPage })),
 );
 const GovernedCockpitPage = lazy(() => import('./pages/governed-cockpit'));
+const StructuredIntelligencePage = lazy(() =>
+  import('./pages/structured-intelligence').then((m) => ({ default: m.StructuredIntelligencePage })),
+);
 const DemoLaunchpadPage = lazy(() =>
   import('./pages/demo-launchpad').then((m) => ({ default: m.DemoLaunchpad })),
 );
@@ -390,6 +393,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/operations/policy-manager', label: 'Policy Manager', group: 'Operations' },
   { href: '/operations/governance-tiers', label: 'Governance Tiers', group: 'Operations' },
   { href: '/operations/guardrail-configs', label: 'Guardrail Configs', group: 'Operations' },
+  { href: '/operations/structured-intelligence', label: 'Structured Intelligence', group: 'Operations' },
   { href: '/operations/inbox', label: 'Command Inbox', group: 'Operations' },
   { href: '/operations/ownership', label: 'Ownership Map', group: 'Operations' },
   { href: '/operations/escalation', label: 'Escalation Center', group: 'Operations' },
@@ -790,6 +794,7 @@ function AppShell() {
               <Route path="/operations/alloy/proof" component={() => <AlloyProofPage />} />
               <Route path="/operations/retrieval/proof-chain" component={() => <RetrievalProofChainPage />} />
               <Route path="/governed-cockpit" component={() => <GovernedCockpitPage />} />
+              <Route path="/operations/structured-intelligence" component={() => <StructuredIntelligencePage />} />
               <Route path="/demo" component={() => <DemoLaunchpadPage />} />
               <Route path="/demo-launchpad" component={() => <DemoLaunchpadPage />} />
               <Route path="/competitive-atlas" component={() => <CompetitiveAtlasPage />} />

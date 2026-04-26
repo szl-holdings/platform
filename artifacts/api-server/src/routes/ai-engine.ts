@@ -18,20 +18,27 @@ import {
   getApprovalPolicy,
   getModelSlots,
   getRouteConfig,
+  governedStructuredCall,
   type HFChatMessage,
+  PolicyBlockError,
+  proofChain,
   type RiskLevel,
+  RefusalError,
   type RouteClass,
   routeModel,
   runEvals,
   runEvaluatorHooksForTrace,
   safeFallbackDecision,
-  structuredCompletion,
   type TriageDecision,
   updateTraceStatus,
-  validateActionDecision,
-  validateExtractedEntities,
-  validateTriageDecision,
 } from '@szl-holdings/ai-engine';
+import {
+  actionDecisionSchema,
+  evalResponseSchema,
+  extractedEntitiesSchema,
+  planningResultSchema,
+  triageDecisionSchema,
+} from '@szl-holdings/schemas/ai';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { recordRecommendation } from '@szl-holdings/outcome-graph';
 import { Router } from 'express';
@@ -304,11 +311,13 @@ router.post(
         { role: 'user', content: context ? `Context: ${context}\n\nInput: ${input}` : input },
       ];
 
-      const { result, raw, completion } = await structuredCompletion<TriageDecision>(
-        messages,
-        route,
-        validateTriageDecision,
-      );
+      const governed = await governedStructuredCall(messages, route, triageDecisionSchema, {
+        domain: 'alloy',
+        schemaName: 'TriageDecision',
+        riskTier: 'medium',
+        softBlock: false,
+      });
+      const { result, completion } = { result: governed.result, completion: governed.completion };
 
       res.locals.aiUsage = {
         model: completion.model,
@@ -326,7 +335,8 @@ router.post(
         priority: result.priority,
         routeTo: result.routeTo,
         confidence: result.confidence,
-        rawOutput: raw.slice(0, 1000),
+        governedRunId: governed.runId,
+        schemaAdherent: true,
       });
 
       const trace = captureTrace({
@@ -374,6 +384,22 @@ router.post(
 
       res.json({ decision: result, model: completion.model, latencyMs: completion.latencyMs, outcomeGraphId });
     } catch (err) {
+      if (err instanceof RefusalError) {
+        logger.warn({ runId: err.runId, incidentId: err.incidentId, domain: err.domain }, 'Model refusal in /ai/triage');
+        res.status(503).json({
+          error: 'Model refusal',
+          refusalIncidentId: err.incidentId,
+          governanceEvent: 'REFUSAL_INCIDENT',
+          message: err.message,
+          fallback: { priority: 'P2', urgency: 'standard', category: 'unknown', routeTo: 'operations', summary: 'Refusal incident created — manual triage required', requiresHumanReview: true, confidence: 0 },
+        });
+        return;
+      }
+      if (err instanceof PolicyBlockError) {
+        logger.warn({ runId: err.runId, rules: err.failedRules }, 'Policy block in /ai/triage');
+        res.status(422).json({ error: 'Covenant policy block', failedRules: err.failedRules, message: err.message });
+        return;
+      }
       logger.error({ err }, 'AI triage error');
       res.status(500).json({
         error: 'Triage failed',
@@ -422,11 +448,13 @@ router.post(
         { role: 'user', content: input },
       ];
 
-      const { result, completion } = await structuredCompletion<ExtractedEntities>(
-        messages,
-        route,
-        validateExtractedEntities,
-      );
+      const governed = await governedStructuredCall(messages, route, extractedEntitiesSchema, {
+        domain: 'alloy',
+        schemaName: 'ExtractedEntities',
+        riskTier: 'low',
+        softBlock: true,
+      });
+      const { result, completion } = { result: governed.result, completion: governed.completion };
 
       res.locals.aiUsage = {
         model: completion.model,
@@ -441,6 +469,8 @@ router.post(
         model: completion.model,
         latencyMs: completion.latencyMs,
         entityCount: result.entities.length,
+        governedRunId: governed.runId,
+        schemaAdherent: true,
       });
 
       const extractTrace = captureTrace({
@@ -463,6 +493,15 @@ router.post(
 
       res.json({ result, model: completion.model, latencyMs: completion.latencyMs });
     } catch (err) {
+      if (err instanceof RefusalError) {
+        logger.warn({ runId: err.runId, incidentId: err.incidentId }, 'Model refusal in /ai/extract');
+        res.status(503).json({ error: 'Model refusal', refusalIncidentId: err.incidentId, governanceEvent: 'REFUSAL_INCIDENT', message: err.message, fallback: { entities: [], relationships: [], summary: 'Refusal incident created', confidence: 0 } });
+        return;
+      }
+      if (err instanceof PolicyBlockError) {
+        res.status(422).json({ error: 'Covenant policy block', failedRules: err.failedRules, message: err.message });
+        return;
+      }
       logger.error({ err }, 'AI extract error');
       res.status(500).json({
         error: 'Extraction failed',
@@ -523,11 +562,13 @@ Consider constraints: ${constraints?.join('; ') || 'none specified'}`,
         },
       ];
 
-      const { result, raw, completion } = await structuredCompletion<ActionDecision>(
-        messages,
-        route,
-        validateActionDecision,
-      );
+      const governed = await governedStructuredCall(messages, route, planningResultSchema, {
+        domain: 'alloy',
+        schemaName: 'PlanningResult',
+        riskTier: 'high',
+        softBlock: false,
+      });
+      const { result, completion } = { result: governed.result, completion: governed.completion };
 
       res.locals.aiUsage = {
         model: completion.model,
@@ -544,7 +585,8 @@ Consider constraints: ${constraints?.join('; ') || 'none specified'}`,
         actionType: result.actionType,
         approvalRequired: result.approvalRequired,
         confidence: result.confidence,
-        rawOutput: raw.slice(0, 1000),
+        governedRunId: governed.runId,
+        schemaAdherent: true,
       });
 
       const planTrace = captureTrace({
@@ -593,6 +635,15 @@ Consider constraints: ${constraints?.join('; ') || 'none specified'}`,
 
       res.json({ plan: result, model: completion.model, latencyMs: completion.latencyMs, outcomeGraphId });
     } catch (err) {
+      if (err instanceof RefusalError) {
+        logger.warn({ runId: err.runId, incidentId: err.incidentId }, 'Model refusal in /ai/plan');
+        res.status(503).json({ error: 'Model refusal', refusalIncidentId: err.incidentId, governanceEvent: 'REFUSAL_INCIDENT', message: err.message, fallback: safeFallbackDecision('model-refusal') });
+        return;
+      }
+      if (err instanceof PolicyBlockError) {
+        res.status(422).json({ error: 'Covenant policy block', failedRules: err.failedRules, message: err.message });
+        return;
+      }
       logger.error({ err }, 'AI plan error');
       res.status(500).json({
         error: 'Planning failed',
@@ -811,31 +862,31 @@ router.post(
 
       const report = await runEvals(
         async (input, category) => {
-          const route = routeModel(
-            category === 'risk_extraction'
-              ? 'reasoning'
-              : category === 'owner_assignment'
-                ? 'triage'
-                : 'reasoning',
-          );
+          const routeClass =
+            category === 'risk_extraction' ? 'reasoning' :
+            category === 'owner_assignment' ? 'triage' :
+            'reasoning';
+          const route = routeModel(routeClass as RouteClass);
           const messages: HFChatMessage[] = [
             {
               role: 'system',
-              content:
-                "You are Alloy's AI engine. Respond with valid JSON matching the required schema.",
+              content: "You are Alloy's AI engine. Respond with valid JSON matching the evalResponse schema.",
             },
             { role: 'user', content: input || 'Generate a safe fallback response.' },
           ];
           try {
-            const completion = await chatCompletionWithFallback(messages, route);
-            let parsed: Record<string, unknown>;
-            try {
-              const match = completion.content.match(/\{[\s\S]*\}/);
-              parsed = match ? JSON.parse(match[0]) : {};
-            } catch {
-              parsed = {};
-            }
-            return { output: parsed, model: completion.model, latencyMs: completion.latencyMs };
+            const governed = await governedStructuredCall(messages, route, evalResponseSchema, {
+              domain: 'eval',
+              schemaName: 'evalResponse',
+              agentId: 'eval-runner',
+              riskTier: 'low',
+              softBlock: true,
+            });
+            return {
+              output: governed.result as unknown as Record<string, unknown>,
+              model: governed.completion.model,
+              latencyMs: governed.completion.latencyMs,
+            };
           } catch {
             return {
               output: safeFallbackDecision('eval-error') as unknown as Record<string, unknown>,
@@ -1227,6 +1278,38 @@ router.get('/ai/approval-matrix', (_req, res) => {
     description: 'Approval requirements and SLAs by risk level',
     executionMode: process.env.AI_EXECUTION_MODE ?? 'propose_only',
   });
+});
+
+router.get('/ai/structured-intelligence', (_req, res) => {
+  const stats = proofChain.getStats();
+  const recentEntries = proofChain.getEntries(20);
+  const refusalIncidents = proofChain.getRefusalIncidents(20);
+  res.json({
+    stats,
+    recentProofChainEntries: recentEntries,
+    refusalIncidents,
+    pipeline: {
+      engine: 'governedStructuredCall',
+      schemaValidation: 'zod-native',
+      provenanceEnvelopes: true,
+      covenantPolicy: true,
+      proofChain: true,
+      refusalDetection: true,
+    },
+    generatedAt: new Date().toISOString(),
+  });
+});
+
+router.get('/ai/structured-intelligence/refusal-incidents', (_req, res) => {
+  const incidents = proofChain.getRefusalIncidents(50);
+  res.json({ incidents, total: incidents.length, generatedAt: new Date().toISOString() });
+});
+
+router.get('/ai/structured-intelligence/proof-chain', (_req, res) => {
+  const domain = typeof _req.query.domain === 'string' ? _req.query.domain : undefined;
+  const limit = Math.min(parseInt(String(_req.query.limit ?? '50'), 10), 200);
+  const entries = proofChain.getEntries(limit, domain);
+  res.json({ entries, total: entries.length, generatedAt: new Date().toISOString() });
 });
 
 export default router;
