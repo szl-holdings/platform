@@ -34,7 +34,7 @@ function toPolicy(status: string | undefined): PolicyState | undefined {
 }
 
 const DOMAIN_COLORS: Record<string, string> = {
-  maritime: '#0ea5e9',
+  maritime: '#4d8fcc',
   'real-estate': '#22c55e',
   legal: '#a855f7',
   security: '#ef4444',

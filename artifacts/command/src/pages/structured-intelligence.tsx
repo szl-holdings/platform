@@ -321,7 +321,7 @@ export function StructuredIntelligencePage() {
                   value={stats.avgConfidence !== null ? `${(stats.avgConfidence * 100).toFixed(0)}%` : '—'}
                   sub="Across schema-validated outputs"
                   icon={Zap}
-                  color="#0ea5e9"
+                  color="#4d8fcc"
                 />
               </div>
 

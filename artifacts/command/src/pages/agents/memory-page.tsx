@@ -37,7 +37,7 @@ const MEMORY_TIERS = [
     freshnessScore: 0.90,
     lastCompactionAt: new Date(Date.now() - 172800_000).toISOString(),
     policyAdherence: 0.98,
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     description: 'Operator instructions, tool schemas, Covenant Policies, skill definitions, domain knowledge.',
   },
   {

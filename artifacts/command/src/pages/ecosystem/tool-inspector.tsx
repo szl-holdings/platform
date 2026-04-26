@@ -42,7 +42,7 @@ const DOMAIN_COLORS: Record<string, string> = {
   counsel:   '#a78bfa',
   terra:     '#22c55e',
   aegis:     '#ef4444',
-  vessels:   '#0ea5e9',
+  vessels:   '#4d8fcc',
   observability: '#f59e0b',
 };
 

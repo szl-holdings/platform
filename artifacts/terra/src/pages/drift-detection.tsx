@@ -23,10 +23,10 @@ export default function DriftDetection() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <Radar className="w-4 h-4" style={{ color: '#0ea5e9' }} />
+          <Radar className="w-4 h-4" style={{ color: '#4d8fcc' }} />
           <span
             className="text-xs font-medium uppercase tracking-widest"
-            style={{ color: '#0ea5e9' }}
+            style={{ color: '#4d8fcc' }}
           >
             Lyte · Drift Detection
           </span>
@@ -188,9 +188,9 @@ export default function DriftDetection() {
                 href="/causal-drilldown"
                 className="text-[9px] px-2.5 py-1 rounded font-medium hover:opacity-80 transition-opacity flex items-center gap-1"
                 style={{
-                  color: '#0ea5e9',
-                  background: 'rgba(14,165,233,0.1)',
-                  border: '1px solid rgba(14,165,233,0.2)',
+                  color: '#4d8fcc',
+                  background: 'rgba(77,143,204,0.1)',
+                  border: '1px solid rgba(77,143,204,0.2)',
                 }}
               >
                 Drill down →

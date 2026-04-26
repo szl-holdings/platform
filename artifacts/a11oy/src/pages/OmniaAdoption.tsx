@@ -20,7 +20,7 @@ const ARTIFACT_META: Record<string, { color: string; name: string }> = {
   aegis: { color: '#ef4444', name: 'Aegis' },
   sentra: { color: '#22c55e', name: 'Sentra' },
   terra: { color: '#22c55e', name: 'Terra' },
-  vessels: { color: '#0ea5e9', name: 'Vessels' },
+  vessels: { color: '#4d8fcc', name: 'Vessels' },
   counsel: { color: '#8b5cf6', name: 'Counsel' },
   a11oy: { color: '#c9b787', name: 'A11oy' },
   pulse: { color: '#f59e0b', name: 'Pulse' },

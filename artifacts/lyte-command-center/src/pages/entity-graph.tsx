@@ -50,7 +50,7 @@ const NODE_TYPE_CONFIG: Record<
   },
   deliverable: {
     icon: <CheckCircle2 className="w-3.5 h-3.5" />,
-    color: 'text-[#c9b787]',
+    color: 'text-[#c9a85c]',
     bg: 'bg-[#c9b787]/10',
     border: 'border-[#c9b787]/20',
     label: 'Deliverable',

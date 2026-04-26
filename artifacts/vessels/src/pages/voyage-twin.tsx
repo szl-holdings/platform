@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-const ACCENT = '#0ea5e9';
+const ACCENT = '#4d8fcc';
 const API_BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 
 const KNOWN_VOYAGES = [
@@ -119,11 +119,11 @@ function SnapshotRow({
         isSelected ? 'ring-1 ring-sky-400/40' : 'hover:border-sky-500/15',
       )}
       style={{
-        background: isSelected ? 'rgba(14,165,233,0.06)' : 'rgba(10,22,40,0.6)',
+        background: isSelected ? 'rgba(77,143,204,0.06)' : 'rgba(10,22,40,0.6)',
         borderColor: hasAnomaly
           ? 'rgba(248,113,113,0.25)'
           : isSelected
-            ? 'rgba(14,165,233,0.2)'
+            ? 'rgba(77,143,204,0.2)'
             : 'rgba(255,255,255,0.05)',
       }}
     >

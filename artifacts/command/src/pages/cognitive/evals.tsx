@@ -567,7 +567,7 @@ export default function CognitiveEvals() {
             {
               label: 'Total Cases',
               value: suites.reduce((s, x) => s + x.totalCases, 0),
-              color: '#0ea5e9',
+              color: '#4d8fcc',
             },
             {
               label: 'Red-Team Cases',

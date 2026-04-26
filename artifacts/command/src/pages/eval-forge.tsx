@@ -404,7 +404,7 @@ function EvalForgeDashboard() {
         >
           {[
             { label: 'Eval Suites', value: suites.length, color: ACCENT },
-            { label: 'Total Cases', value: totalCases, color: '#0ea5e9' },
+            { label: 'Total Cases', value: totalCases, color: '#4d8fcc' },
             { label: 'Red-Team Cases', value: totalRedTeam, color: '#ef4444' },
             {
               label: 'Avg Pass Rate',
@@ -529,8 +529,8 @@ function EvalForgeDashboard() {
                                   <span
                                     style={{
                                       fontSize: 10,
-                                      color: '#0ea5e9',
-                                      background: '#0ea5e915',
+                                      color: '#4d8fcc',
+                                      background: '#4d8fcc15',
                                       padding: '2px 8px',
                                       borderRadius: 4,
                                     }}
@@ -979,8 +979,8 @@ function EvalForgeRunDetail({ runId }: { runId: string }) {
                   <span
                     style={{
                       fontSize: 11,
-                      color: '#0ea5e9',
-                      background: '#0ea5e915',
+                      color: '#4d8fcc',
+                      background: '#4d8fcc15',
                       padding: '2px 8px',
                       borderRadius: 4,
                     }}

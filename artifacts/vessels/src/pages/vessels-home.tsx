@@ -171,7 +171,7 @@ function FleetCommandVisual({
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, w, h);
       // Grid lines (lat/lon style)
-      ctx.strokeStyle = 'rgba(14,165,233,0.05)';
+      ctx.strokeStyle = 'rgba(77,143,204,0.05)';
       ctx.lineWidth = 0.5;
       for (let i = 0; i <= 8; i++) {
         const x = (w / 8) * i;
@@ -203,7 +203,7 @@ function FleetCommandVisual({
           y2 = v2.y * h;
         ctx.beginPath();
         ctx.setLineDash([4, 8]);
-        ctx.strokeStyle = 'rgba(14,165,233,0.12)';
+        ctx.strokeStyle = 'rgba(77,143,204,0.12)';
         ctx.lineWidth = 1;
         ctx.moveTo(x1, y1);
         const cx = (x1 + x2) / 2 + (Math.random() * 0 - 0);
@@ -418,8 +418,8 @@ export default function VesselsHome() {
       {/* Hero */}
       <section className="relative min-h-screen flex items-center justify-center pt-[60px] overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-[radial-gradient(ellipse_at_top,rgba(14,165,233,0.07)_0%,transparent_65%)]" />
-          <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-sky-500/10" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-[radial-gradient(ellipse_at_top,rgba(77,143,204,0.07)_0%,transparent_65%)]" />
+          <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-[rgba(77,143,204,0.10)]" />
         </div>
         <div className="relative z-10 max-w-5xl mx-auto px-6 py-24 text-center">
           <m.div

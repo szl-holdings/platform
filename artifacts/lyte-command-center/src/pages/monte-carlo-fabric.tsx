@@ -223,7 +223,7 @@ function CdfChart({ data }: { data: { value: number; probability: number }[] }) 
     <div className="space-y-1">
       <p className="text-[10px] text-white/30 font-mono uppercase tracking-wider">CDF</p>
       <svg viewBox={`0 0 ${w} ${h}`} className="w-full" style={{ height: h }}>
-        <polyline points={points} fill="none" stroke="#c9b787" strokeWidth="1.5" opacity="0.6" />
+        <polyline points={points} fill="none" stroke="#c9a85c" strokeWidth="1.5" opacity="0.6" />
         <line x1="0" y1={h * 0.5} x2={w} y2={h * 0.5} stroke="white" strokeWidth="0.5" opacity="0.1" strokeDasharray="4" />
         <text x="2" y={h * 0.5 - 2} fill="white" fontSize="8" opacity="0.2">P50</text>
       </svg>
@@ -278,7 +278,7 @@ export default function MonteCarloFabricPage() {
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
       <div>
         <h1 className="text-lg font-semibold text-[#f5f5f5] tracking-tight flex items-center gap-2">
-          <Dice5 className="w-5 h-5 text-[#c9b787]" />
+          <Dice5 className="w-5 h-5 text-[#c9a85c]" />
           Monte Carlo Simulation Engine
         </h1>
         <p className="text-[11px] text-white/30 mt-0.5">
@@ -329,7 +329,7 @@ export default function MonteCarloFabricPage() {
             <button
               onClick={() => simulateMutation.mutate()}
               disabled={simulateMutation.isPending}
-              className="w-full h-9 rounded bg-[#c9b787]/20 border border-[#c9b787]/30 text-[#c9b787] text-[12px] font-semibold hover:bg-[#c9b787]/30 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+              className="w-full h-9 rounded bg-[#c9b787]/20 border border-[#c9b787]/30 text-[#c9a85c] text-[12px] font-semibold hover:bg-[#c9b787]/30 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               {simulateMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
               Run Simulation
@@ -360,14 +360,14 @@ export default function MonteCarloFabricPage() {
         <div className="lg:col-span-3 space-y-4">
           {!result && !simulateMutation.isPending && (
             <div className="flex flex-col items-center justify-center h-64 rounded-lg border border-white/[0.06] bg-white/[0.02] text-white/20 text-[12px]">
-              <Dice5 className="w-8 h-8 mb-2 text-[#c9b787]/20" />
+              <Dice5 className="w-8 h-8 mb-2 text-[#c9a85c]/20" />
               Select a scenario and run a simulation
             </div>
           )}
 
           {simulateMutation.isPending && (
             <div className="flex flex-col items-center justify-center h-64 rounded-lg border border-white/[0.06] bg-white/[0.02]">
-              <Loader2 className="w-5 h-5 text-[#c9b787] animate-spin" />
+              <Loader2 className="w-5 h-5 text-[#c9a85c] animate-spin" />
               <p className="text-[11px] text-white/30 mt-2">Running {iterations.toLocaleString()} iterations...</p>
             </div>
           )}
@@ -394,7 +394,7 @@ export default function MonteCarloFabricPage() {
                       className={cn(
                         'px-3 py-1.5 rounded text-[11px] font-medium border transition-colors',
                         selectedOutput === o.id || (!selectedOutput && o.id === result.outputs[0]?.id)
-                          ? 'border-[#c9b787]/30 bg-[#c9b787]/10 text-[#c9b787]'
+                          ? 'border-[#c9b787]/30 bg-[#c9b787]/10 text-[#c9a85c]'
                           : 'border-white/[0.06] bg-white/[0.02] text-white/40 hover:text-white/60',
                       )}
                     >

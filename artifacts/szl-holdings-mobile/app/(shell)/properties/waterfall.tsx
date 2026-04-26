@@ -20,7 +20,7 @@ const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
   ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
   : '/api';
 
-const ACCENT = '#0ea5e9';
+const ACCENT = '#4d8fcc';
 
 interface WaterfallTier {
   id: string;
@@ -185,7 +185,7 @@ export default function WaterfallScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
-        colors={['rgba(14,165,233,0.07)', 'transparent']}
+        colors={['rgba(77,143,204,0.07)', 'transparent']}
         style={[styles.headerGradient, { height: topPad + 100 }]}
       />
 

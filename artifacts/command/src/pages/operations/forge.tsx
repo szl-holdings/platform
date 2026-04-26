@@ -80,7 +80,7 @@ const DOMAIN_COLORS: Record<string, string> = {
   infrastructure: '#14b8a6',
   legal: '#ec4899',
   custom: '#64748b',
-  vessels: '#0ea5e9',
+  vessels: '#4d8fcc',
   terra: '#22c55e',
   counsel: '#a78bfa',
 };

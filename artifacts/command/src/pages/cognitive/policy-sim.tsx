@@ -16,7 +16,7 @@ const TIER_RANK: Record<AutonomyTier, number> = {
 
 const TIER_COLOR: Record<AutonomyTier, string> = {
   'read-only': '#475569',
-  advisory: '#0ea5e9',
+  advisory: '#4d8fcc',
   supervised: '#f59e0b',
   autonomous: '#22c55e',
 };

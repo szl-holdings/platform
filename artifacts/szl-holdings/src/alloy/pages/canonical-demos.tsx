@@ -327,7 +327,7 @@ const PHASE_COLORS: Record<string, string> = {
   agent: '#4B8BDB',
   decision: '#8b5cf6',
   approval: '#10b981',
-  action: '#0ea5e9',
+  action: '#4d8fcc',
   audit: '#6b7280',
 };
 

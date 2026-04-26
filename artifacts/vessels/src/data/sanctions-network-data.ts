@@ -622,7 +622,7 @@ export const ENTITY_TYPE_CONFIG: Record<
   EntityNodeType,
   { label: string; color: string; abbr: string }
 > = {
-  vessel: { label: 'Vessel', color: '#0ea5e9', abbr: 'VSL' },
+  vessel: { label: 'Vessel', color: '#4d8fcc', abbr: 'VSL' },
   beneficial_owner: { label: 'Beneficial Owner', color: '#a78bfa', abbr: 'UBO' },
   registered_owner: { label: 'Registered Owner', color: '#818cf8', abbr: 'REG' },
   ship_manager: { label: 'Ship Manager', color: '#34d399', abbr: 'MGR' },

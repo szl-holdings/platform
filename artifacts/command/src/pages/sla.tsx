@@ -55,7 +55,7 @@ const FALLBACK_SLAS: SLADefinition[] = [
   {
     id: 's2',
     domain: 'Vessels',
-    domainColor: '#0ea5e9',
+    domainColor: '#4d8fcc',
     name: 'Fleet Uptime',
     metric: 'Vessel availability %',
     target: 99.5,

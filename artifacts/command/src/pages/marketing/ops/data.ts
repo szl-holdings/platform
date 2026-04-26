@@ -71,7 +71,7 @@ export const OPS_FEATURES: Record<string, OpsFeature> = {
     longDescription:
       'The SLA Dashboard reads directly from production metrics (Lyte API latency p95, error rate, throughput, plus health-check pass-rate) and shows monthly compliance against every objective. Burn-rate alerts fire before you blow the budget, not after.',
     icon: Activity,
-    accent: '#0ea5e9',
+    accent: '#4d8fcc',
     bgGradient: 'from-sky-500/20',
     capabilities: [
       {
@@ -271,7 +271,7 @@ export const OPS_FEATURES: Record<string, OpsFeature> = {
     longDescription:
       'Team & Access shows the live roster gated by role: super_admin, admin, ops, and compliance see the membership, role assignments, last-active timestamps, and team groupings — all sourced from the same users table that powers authentication.',
     icon: Users,
-    accent: '#0ea5e9',
+    accent: '#4d8fcc',
     bgGradient: 'from-sky-500/20',
     capabilities: [
       {

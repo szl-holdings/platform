@@ -39,7 +39,7 @@ function computeWhatIf(vars: Record<string, number>, _iterations: number): Domai
     {
       domain: 'Vessels',
       icon: '⚓',
-      color: '#0ea5e9',
+      color: '#4d8fcc',
       impactLabel: 'Fuel Cost Delta',
       impactValue: oil !== 0 ? `${oil > 0 ? '+' : ''}$${(oil * 0.18).toFixed(1)}M` : 'Neutral',
       trend: oil > 0 ? 'down' : oil < 0 ? 'up' : 'flat',

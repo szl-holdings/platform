@@ -391,7 +391,7 @@ const STATE_BOARD_KPIS = [
     unit: ' agents',
     delta: '1 on probation',
     trend: 'flat',
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     causal: 'Carlota Brand Sentiment agent trust score declining; review queued',
   },
 ];
@@ -2181,7 +2181,7 @@ function RiskOpportunityHeatmapSection() {
           heatOpps.map((opp) => {
             const x = opp.probability;
             const y = 1 - opp.valueScore;
-            const color = opp.level === 'high' ? '#22c55e' : '#0ea5e9';
+            const color = opp.level === 'high' ? '#22c55e' : '#4d8fcc';
             const isHov = hovered === opp.id;
             const isSel = selected === opp.id;
 
@@ -2420,7 +2420,7 @@ function RiskOpportunityHeatmapSection() {
             Opportunities
           </div>
           {heatOpps.map((opp, i) => {
-            const oppColor = opp.level === 'high' ? '#22c55e' : '#0ea5e9';
+            const oppColor = opp.level === 'high' ? '#22c55e' : '#4d8fcc';
             return (
               <div
                 key={opp.id}
@@ -2692,7 +2692,7 @@ function DecisionLogSection() {
 
   const catColor: Record<LogEntry['category'], string> = {
     Risk: '#ef4444',
-    Opportunity: '#0ea5e9',
+    Opportunity: '#4d8fcc',
     Recommendation: ACCENT,
   };
 

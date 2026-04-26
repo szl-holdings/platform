@@ -870,13 +870,13 @@ router.post(
 const pdfStyles = StyleSheet.create({
   page: { fontFamily: 'Helvetica', fontSize: 9, padding: 40, backgroundColor: '#ffffff' },
   header: { fontSize: 16, fontWeight: 'bold', marginBottom: 4, color: '#0a1628' },
-  subheader: { fontSize: 11, fontWeight: 'bold', marginBottom: 4, color: '#0ea5e9' },
+  subheader: { fontSize: 11, fontWeight: 'bold', marginBottom: 4, color: '#4d8fcc' },
   sectionTitle: {
     fontSize: 9,
     fontWeight: 'bold',
     textTransform: 'uppercase',
     letterSpacing: 1,
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     marginTop: 12,
     marginBottom: 4,
     borderBottomWidth: 1,

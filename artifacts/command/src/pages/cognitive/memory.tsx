@@ -185,7 +185,7 @@ const SEEDED_RECORDS: MemoryRecord[] = [
 
 const TYPE_COLORS: Record<MemoryType, string> = {
   working: '#8b7ac8',
-  episodic: '#0ea5e9',
+  episodic: '#4d8fcc',
   semantic: '#22c55e',
   procedural: '#f59e0b',
 };
@@ -193,7 +193,7 @@ const TYPE_COLORS: Record<MemoryType, string> = {
 const TIER_COLORS: Record<MemoryTier, string> = {
   hot: '#ef4444',
   warm: '#f59e0b',
-  cold: '#0ea5e9',
+  cold: '#4d8fcc',
   archived: '#475569',
 };
 
@@ -206,7 +206,7 @@ const PROVENANCE_ICONS: Record<MemoryRecord['provenanceType'], string> = {
 
 const DOMAIN_COLORS: Record<string, string> = {
   aegis: '#ef4444',
-  vessels: '#0ea5e9',
+  vessels: '#4d8fcc',
   terra: '#22c55e',
   prism: '#a855f7',
   venture: '#f59e0b',

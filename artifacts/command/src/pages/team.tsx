@@ -138,7 +138,7 @@ const FALLBACK_MEMBERS: TeamMember[] = [
 
 const FALLBACK_TEAMS = [
   { name: 'Executive', count: 1, color: '#f59e0b' },
-  { name: 'Maritime Ops', count: 2, color: '#0ea5e9' },
+  { name: 'Maritime Ops', count: 2, color: '#4d8fcc' },
   { name: 'Aegis SOC', count: 1, color: '#ef4444' },
   { name: 'Legal', count: 1, color: '#a855f7' },
   { name: 'Terra', count: 1, color: '#22c55e' },

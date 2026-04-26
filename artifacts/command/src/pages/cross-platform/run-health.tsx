@@ -84,7 +84,7 @@ function AutonomyBar({ mix }: { mix: ProductHealth['autonomyMix'] }) {
   const bars = [
     { label: 'autonomous', color: '#22c55e', value: pct(mix.autonomous) },
     { label: 'supervised', color: '#f59e0b', value: pct(mix.supervised) },
-    { label: 'advisory', color: '#0ea5e9', value: pct(mix.advisory) },
+    { label: 'advisory', color: '#4d8fcc', value: pct(mix.advisory) },
     { label: 'read-only', color: '#64748b', value: pct(mix.readOnly) },
   ];
 

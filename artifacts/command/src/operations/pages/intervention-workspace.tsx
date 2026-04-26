@@ -61,8 +61,8 @@ const ACTION_STYLES: Record<string, { color: string; bg: string; border: string;
     },
     reroute: {
       color: '#4a90b8',
-      bg: 'rgba(14,165,233,0.1)',
-      border: 'rgba(14,165,233,0.25)',
+      bg: 'rgba(77,143,204,0.1)',
+      border: 'rgba(77,143,204,0.25)',
       label: 'Reroute',
     },
     escalate: {
@@ -154,7 +154,7 @@ export default function InterventionWorkspace() {
                       color: t.status === 'in_progress' ? '#4a90b8' : '#d4a054',
                       background:
                         t.status === 'in_progress'
-                          ? 'rgba(14,165,233,0.12)'
+                          ? 'rgba(77,143,204,0.12)'
                           : 'rgba(212,160,84,0.12)',
                     }}
                   >
@@ -190,12 +190,12 @@ export default function InterventionWorkspace() {
                         background:
                           c.author.startsWith('System') || c.author.startsWith('Counsel')
                             ? 'rgba(139,92,246,0.15)'
-                            : 'rgba(14,165,233,0.15)',
+                            : 'rgba(77,143,204,0.15)',
                         color:
                           c.author.startsWith('System') || c.author.startsWith('Counsel')
                             ? '#8b7ac8'
                             : '#4a90b8',
-                        border: `1px solid ${c.author.startsWith('System') || c.author.startsWith('Counsel') ? 'rgba(139,92,246,0.3)' : 'rgba(14,165,233,0.3)'}`,
+                        border: `1px solid ${c.author.startsWith('System') || c.author.startsWith('Counsel') ? 'rgba(139,92,246,0.3)' : 'rgba(77,143,204,0.3)'}`,
                       }}
                     >
                       {c.author.startsWith('System')

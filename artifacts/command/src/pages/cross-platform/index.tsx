@@ -19,7 +19,7 @@ const SURFACES = [
     description:
       'Unified search across all evidence nodes — policy decisions, compliance events, distress signals, threat actors, and more — with product filters.',
     icon: Database,
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     stat: '15 evidence nodes',
   },
   {

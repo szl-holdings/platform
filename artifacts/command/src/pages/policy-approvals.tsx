@@ -134,9 +134,9 @@ const TIER_COLORS: Record<string, { fg: string; bg: string; border: string }> = 
     border: 'rgba(212,160,84,0.30)',
   },
   'external-client-facing': {
-    fg: '#0ea5e9',
-    bg: 'rgba(14,165,233,0.10)',
-    border: 'rgba(14,165,233,0.30)',
+    fg: '#4d8fcc',
+    bg: 'rgba(77,143,204,0.10)',
+    border: 'rgba(77,143,204,0.30)',
   },
   'autonomous-reversible': {
     fg: '#22c55e',
@@ -217,7 +217,7 @@ function StatusPill({ status }: { status: ApprovalStatus }) {
 const MODE_COLORS: Record<PolicyMode, string> = {
   observe: '#7c8a9a',
   recommend: '#8b7ac8',
-  draft: '#0ea5e9',
+  draft: '#4d8fcc',
   'approval-required': '#d4a054',
   'auto-within-guardrails': '#22c55e',
 };
@@ -240,7 +240,7 @@ const RISK_COLOR: Record<string, string> = {
 const TIER_BADGE_COLORS: Record<string, string> = {
   working: '#7c8a9a',
   session: '#8b7ac8',
-  episodic: '#0ea5e9',
+  episodic: '#4d8fcc',
   semantic: '#22c55e',
   workflow: '#d4a054',
   entity: '#c9a227',

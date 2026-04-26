@@ -25,7 +25,7 @@ const OUTCOME_STYLES: Record<string, { color: string; bg: string; label: string 
 const AUTONOMY_COLORS: Record<string, string> = {
   autonomous: '#22c55e',
   supervised: '#f59e0b',
-  advisory: '#0ea5e9',
+  advisory: '#4d8fcc',
   'read-only': '#64748b',
 };
 
@@ -136,7 +136,7 @@ function PolicyEventBadge({ event }: { event: string }) {
     ? '#ef4444'
     : event.includes('approval') || event.includes('approved')
       ? '#22c55e'
-      : '#0ea5e9';
+      : '#4d8fcc';
   return (
     <span
       style={{
@@ -458,8 +458,8 @@ function RunDetailPanel({ run, onReplay }: { run: RunDetail; onReplay: (runId: s
                 style={{
                   fontSize: 10,
                   fontWeight: 700,
-                  color: ev.kind === 'read' ? '#0ea5e9' : '#a855f7',
-                  background: ev.kind === 'read' ? '#0ea5e915' : '#a855f715',
+                  color: ev.kind === 'read' ? '#4d8fcc' : '#a855f7',
+                  background: ev.kind === 'read' ? '#4d8fcc15' : '#a855f715',
                   padding: '1px 6px',
                   borderRadius: 3,
                 }}

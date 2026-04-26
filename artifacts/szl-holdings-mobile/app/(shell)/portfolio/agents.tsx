@@ -53,7 +53,7 @@ const AGENT_DEFS = [
     id: 'helmsman',
     name: 'Helmsman',
     domain: 'Maritime',
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     icon: 'anchor',
     model: 'claude-sonnet-4-6',
   },

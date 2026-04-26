@@ -58,6 +58,7 @@ import os from 'node:os';
 import { z } from 'zod';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
+import { DOMAIN_COLOR_BY_NAME } from '../lib/domain-colors';
 
 const router: IRouter = Router();
 
@@ -1001,17 +1002,7 @@ router.post(
 // Ops endpoints — back the Command Portal ops pages with real DB-derived data
 // ---------------------------------------------------------------------------
 
-const DOMAIN_COLOR: Record<string, string> = {
-  Aegis: '#ef4444',
-  Vessels: '#0ea5e9',
-  Lyte: '#f97316',
-  Terra: '#22c55e',
-  PRISM: '#a855f7',
-  SZL: '#f59e0b',
-  'SZL Holdings': '#f59e0b',
-  'Carlota Jo': '#ec4899',
-  Stephen: '#8b7ac8',
-};
+const DOMAIN_COLOR = DOMAIN_COLOR_BY_NAME;
 
 /**
  * GET /api/command/alerts
@@ -2725,7 +2716,7 @@ router.get('/health', requireAnyAuth(), async (_req: Request, res: Response) => 
       {
         key: 'operational',
         label: 'Operational',
-        color: '#0ea5e9',
+        color: '#4d8fcc',
         weight: 0.3,
         score: operationalScore,
         signals: [
@@ -3559,7 +3550,7 @@ router.get('/enterprise-state', requireAnyAuth(), async (_req: Request, res: Res
         unit: ' agents',
         delta: probationCount > 0 ? `${probationCount} under review` : 'All nominal',
         trend: 'flat',
-        color: '#0ea5e9',
+        color: '#4d8fcc',
         causal: 'Domain agents tracked across Aegis, Vessels, Lyte, Terra, PRISM, Carlota.',
       },
     ];

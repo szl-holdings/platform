@@ -30,10 +30,10 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-const ACCENT = '#0ea5e9';
+const ACCENT = '#4d8fcc';
 const BG_CARD = 'rgba(10,22,40,0.85)';
 const BG_CARD_INNER = 'rgba(255,255,255,0.03)';
-const BORDER = 'rgba(14,165,233,0.12)';
+const BORDER = 'rgba(77,143,204,0.12)';
 
 // ── Data contracts ───────────────────────────────────────────────────────────
 
@@ -1423,8 +1423,8 @@ export default function VoyageRiskTwinPage() {
           disabled={memoLoading}
           className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium border transition-all disabled:opacity-60"
           style={{
-            background: memoExported ? 'rgba(52,211,153,0.10)' : 'rgba(14,165,233,0.08)',
-            borderColor: memoExported ? 'rgba(52,211,153,0.30)' : 'rgba(14,165,233,0.25)',
+            background: memoExported ? 'rgba(52,211,153,0.10)' : 'rgba(77,143,204,0.08)',
+            borderColor: memoExported ? 'rgba(52,211,153,0.30)' : 'rgba(77,143,204,0.25)',
             color: memoExported ? '#34d399' : ACCENT,
           }}
         >
@@ -1472,9 +1472,9 @@ export default function VoyageRiskTwinPage() {
               )}
               style={{
                 background:
-                  scenarioId === scn.id ? 'rgba(14,165,233,0.06)' : 'rgba(255,255,255,0.02)',
+                  scenarioId === scn.id ? 'rgba(77,143,204,0.06)' : 'rgba(255,255,255,0.02)',
                 borderColor:
-                  scenarioId === scn.id ? 'rgba(14,165,233,0.25)' : 'rgba(255,255,255,0.06)',
+                  scenarioId === scn.id ? 'rgba(77,143,204,0.25)' : 'rgba(255,255,255,0.06)',
               }}
             >
               <div className="flex items-center gap-2 mb-1">
@@ -1539,7 +1539,7 @@ export default function VoyageRiskTwinPage() {
         style={{ background: BG_CARD, borderColor: BORDER }}
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="p-2 rounded-lg shrink-0" style={{ background: 'rgba(14,165,233,0.08)' }}>
+          <div className="p-2 rounded-lg shrink-0" style={{ background: 'rgba(77,143,204,0.08)' }}>
             <Ship className="w-4 h-4 text-sky-400" />
           </div>
           <div className="min-w-0">
@@ -1834,8 +1834,8 @@ export default function VoyageRiskTwinPage() {
                 disabled={memoLoading}
                 className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium border transition-all disabled:opacity-60"
                 style={{
-                  background: memoExported ? 'rgba(52,211,153,0.08)' : 'rgba(14,165,233,0.06)',
-                  borderColor: memoExported ? 'rgba(52,211,153,0.25)' : 'rgba(14,165,233,0.20)',
+                  background: memoExported ? 'rgba(52,211,153,0.08)' : 'rgba(77,143,204,0.06)',
+                  borderColor: memoExported ? 'rgba(52,211,153,0.25)' : 'rgba(77,143,204,0.20)',
                   color: memoExported ? '#34d399' : ACCENT,
                 }}
               >

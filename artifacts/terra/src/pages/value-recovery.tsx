@@ -46,7 +46,7 @@ export default function ValueRecovery() {
           <TrendingDown className="w-4 h-4" style={{ color: '#10b981' }} />
           <span
             className="text-xs font-medium uppercase tracking-widest"
-            style={{ color: '#0ea5e9' }}
+            style={{ color: '#4d8fcc' }}
           >
             Lyte · Value Recovery
           </span>
@@ -74,7 +74,7 @@ export default function ValueRecovery() {
           {
             label: 'Recovery Rate',
             value: '91%',
-            color: '#0ea5e9',
+            color: '#4d8fcc',
             sub: 'Intervention success rate',
           },
         ].map((c) => (

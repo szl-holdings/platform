@@ -17,7 +17,7 @@ const LOOP_STEPS = [
     n: '01',
     label: 'Signal',
     icon: Radio,
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     body: 'Risk indicators, anomalies, and threshold breaches are detected, normalized, and routed by the Event Fabric — cross-domain context and correlation ID attached.',
     primitives: ['event-fabric'],
   },
@@ -88,7 +88,7 @@ const LOOP_STEPS = [
 ];
 
 const PRIMITIVES: Record<string, { label: string; color: string }> = {
-  'event-fabric': { label: 'Event Fabric', color: '#0ea5e9' },
+  'event-fabric': { label: 'Event Fabric', color: '#4d8fcc' },
   'outcome-graph': { label: 'Outcome Graph', color: '#ef4444' },
   'proof-chain': { label: 'Proof Chain', color: '#14b8a6' },
   simulation: { label: 'Decision Simulation', color: '#f59e0b' },

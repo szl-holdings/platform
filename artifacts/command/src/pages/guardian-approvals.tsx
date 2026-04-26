@@ -167,7 +167,7 @@ const STATUS_COLORS: Record<ApprovalStatus, { fg: string; bg: string; border: st
 
 const ROLLBACK_STATUS_COLORS: Record<RollbackStatus, { fg: string; bg: string; border: string }> = {
   pending: { fg: '#d4a054', bg: 'rgba(212,160,84,0.12)', border: 'rgba(212,160,84,0.35)' },
-  'in-progress': { fg: '#0ea5e9', bg: 'rgba(14,165,233,0.12)', border: 'rgba(14,165,233,0.35)' },
+  'in-progress': { fg: '#4d8fcc', bg: 'rgba(77,143,204,0.12)', border: 'rgba(77,143,204,0.35)' },
   completed: { fg: '#22c55e', bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.35)' },
   failed: { fg: '#ef4444', bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.35)' },
 };

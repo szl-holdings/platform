@@ -161,11 +161,11 @@ export default function EvalLab() {
             <span
               style={{
                 fontSize: 11,
-                color: '#0ea5e9',
-                background: '#0ea5e920',
+                color: '#4d8fcc',
+                background: '#4d8fcc20',
                 padding: '2px 10px',
                 borderRadius: 20,
-                border: '1px solid #0ea5e940',
+                border: '1px solid #4d8fcc40',
                 fontWeight: 600,
               }}
             >
@@ -230,7 +230,7 @@ export default function EvalLab() {
                   color: '#22c55e',
                 },
                 { label: 'Suites w/ Regression', value: suitesWithRegression, color: '#f59e0b' },
-                { label: 'Run Sources', value: strategiesCompared, color: '#0ea5e9' },
+                { label: 'Run Sources', value: strategiesCompared, color: '#4d8fcc' },
               ].map((m) => (
                 <div
                   key={m.label}
@@ -368,8 +368,8 @@ export default function EvalLab() {
                         <span
                           style={{
                             fontSize: 10,
-                            color: '#0ea5e9',
-                            background: '#0ea5e915',
+                            color: '#4d8fcc',
+                            background: '#4d8fcc15',
                             padding: '2px 8px',
                             borderRadius: 4,
                             marginLeft: 12,

@@ -31,7 +31,7 @@
   /* ── Text ────────────────────────────────────────────────── */
   --gi-text-primary:     #c8d8e8;
   --gi-text-secondary:   #7a99b8;
-  --gi-text-muted:       #7ba0bc;
+  --gi-text-muted:       #4a6070;
   --gi-text-inverse:     #060b12;
   --gi-text-link:        #4d8fcc;
   --gi-text-placeholder: #3a5060;
@@ -103,7 +103,7 @@
 
   /* ── Typography — families ───────────────────────────────── */
   --gi-font-sans:    'Inter', 'DM Sans', system-ui, sans-serif;
-  --gi-font-display: 'DM Sans', 'Inter', system-ui, sans-serif;
+  --gi-font-display: 'Space Grotesk', 'DM Sans', 'Inter', system-ui, sans-serif;
   --gi-font-mono:    'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
 
   /* ── Typography — scale ──────────────────────────────────── */

@@ -9,12 +9,17 @@
 import { color } from './index.js';
 
 export const domainAccents = {
-  lyte: color.accent.blue,
-  vessels: color.accent.blue,
-  terra: color.accent.green,
-  aegis: color.accent.violet,
-  prism: color.accent.violet,
-  carlota: color.accent.blue,
+  command:  color.accent.blue,
+  holdings: color.accent.teal,
+  pulse:    color.accent.amber,
+  lyte:     color.accent.amber,
+  sentra:   color.accent.red,
+  vessels:  color.accent.blue,
+  terra:    color.accent.green,
+  counsel:  color.accent.violet,
+  aegis:    color.accent.violet,
+  carlota:  color.accent.violet,
+  prism:    color.accent.violet,
 } as const;
 
 export type DomainAccentKey = keyof typeof domainAccents;

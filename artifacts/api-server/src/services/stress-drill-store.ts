@@ -365,7 +365,7 @@ export const SCENARIO_LIBRARY: CrisisScenario[] = [
     tagline: 'Category 4 hurricane makes landfall. Tenant property is damaged; tenant defaults.',
     archetype: 'cascade',
     icon: '🌀',
-    accentColor: '#0ea5e9',
+    accentColor: '#4d8fcc',
     durationHours: 72,
     summary:
       'A Category 4 hurricane makes landfall near Houston. Two terra properties sustain major structural damage. The primary industrial tenant invokes force majeure and stops rent. The team must activate BCP, engage insurers, coordinate emergency repairs, and manage LP communication — all while a potential tenant default threatens covenant compliance.',

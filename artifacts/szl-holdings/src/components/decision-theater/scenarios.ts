@@ -15,7 +15,7 @@ export const LOOP_STAGES = [
     id: 'signal',
     label: 'Signal',
     icon: Radio,
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     description: 'Ingest raw signals from domain packs',
   },
   {

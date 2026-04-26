@@ -151,7 +151,7 @@ export default function BacktestingPage() {
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
       <div>
         <h1 className="text-lg font-semibold text-[#f5f5f5] tracking-tight flex items-center gap-2">
-          <FlaskConical className="w-5 h-5 text-[#c9b787]" />
+          <FlaskConical className="w-5 h-5 text-[#c9a85c]" />
           Causal Scenario Backtesting
         </h1>
         <p className="text-[11px] text-white/30 mt-0.5">
@@ -204,7 +204,7 @@ export default function BacktestingPage() {
             <button
               onClick={() => backtestMutation.mutate()}
               disabled={backtestMutation.isPending}
-              className="w-full h-9 rounded bg-[#c9b787]/20 border border-[#c9b787]/30 text-[#c9b787] text-[12px] font-semibold hover:bg-[#c9b787]/30 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+              className="w-full h-9 rounded bg-[#c9b787]/20 border border-[#c9b787]/30 text-[#c9a85c] text-[12px] font-semibold hover:bg-[#c9b787]/30 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               {backtestMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
               Run Backtest
@@ -215,14 +215,14 @@ export default function BacktestingPage() {
         <div className="lg:col-span-3 space-y-4">
           {!summary && !backtestMutation.isPending && (
             <div className="flex flex-col items-center justify-center h-64 rounded-lg border border-white/[0.06] bg-white/[0.02] text-white/20 text-[12px]">
-              <FlaskConical className="w-8 h-8 mb-2 text-[#c9b787]/20" />
+              <FlaskConical className="w-8 h-8 mb-2 text-[#c9a85c]/20" />
               Select events and run a backtest to validate model accuracy
             </div>
           )}
 
           {backtestMutation.isPending && (
             <div className="flex items-center justify-center h-64 rounded-lg border border-white/[0.06] bg-white/[0.02]">
-              <Loader2 className="w-5 h-5 text-[#c9b787] animate-spin" />
+              <Loader2 className="w-5 h-5 text-[#c9a85c] animate-spin" />
             </div>
           )}
 
@@ -234,7 +234,7 @@ export default function BacktestingPage() {
                   <span className="text-[10px] text-white/30 font-mono">{summary.modelVersion} · {summary.totalEvents} events</span>
                 </div>
                 <div className="flex items-center justify-center gap-8">
-                  <GaugeRing value={summary.overallAccuracy} label="Overall Accuracy" color="#c9b787" />
+                  <GaugeRing value={summary.overallAccuracy} label="Overall Accuracy" color="#c9a85c" />
                   <GaugeRing value={summary.directionalAccuracy} label="Directional Accuracy" color="#4ade80" />
                   <div className="flex flex-col items-center gap-1">
                     <div className="w-[72px] h-[72px] rounded-full border-4 border-white/[0.04] flex items-center justify-center">

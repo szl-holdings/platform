@@ -162,7 +162,7 @@ function PriorityBadge({ priority }: { priority: 'critical' | 'high' | 'medium' 
   const styles = {
     critical: 'bg-red-500/10 text-red-400 border-red-500/20',
     high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-    medium: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+    medium: 'bg-[#c9b787]/10 text-[#c9a85c] border-[#c9b787]/20',
   };
   return (
     <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border uppercase tracking-wider ${styles[priority]}`}>
@@ -173,7 +173,7 @@ function PriorityBadge({ priority }: { priority: 'critical' | 'high' | 'medium' 
 
 function ConfidenceBar({ value, showLabel = true }: { value: number; showLabel?: boolean }) {
   const pct = Math.round(value * 100);
-  const color = pct >= 75 ? '#22c55e' : pct >= 60 ? '#c9b787' : '#ef4444';
+  const color = pct >= 75 ? '#22c55e' : pct >= 60 ? '#c9a85c' : '#ef4444';
   return (
     <div className="flex items-center gap-1.5">
       <div className="h-1 flex-1 bg-white/[0.06] rounded-full overflow-hidden">
@@ -191,10 +191,10 @@ function StrengthBar({ value }: { value: number }) {
       <div className="h-1.5 flex-1 bg-white/[0.06] rounded-full overflow-hidden">
         <div
           className="h-full rounded-full"
-          style={{ width: `${pct}%`, backgroundColor: `rgba(201,183,135,${0.4 + value * 0.6})` }}
+          style={{ width: `${pct}%`, backgroundColor: `rgba(201,168,92,${0.4 + value * 0.6})` }}
         />
       </div>
-      <span className="text-[9px] font-mono text-[#c9b787] w-8 text-right">{pct}%</span>
+      <span className="text-[9px] font-mono text-[#c9a85c] w-8 text-right">{pct}%</span>
     </div>
   );
 }
@@ -202,7 +202,7 @@ function StrengthBar({ value }: { value: number }) {
 function DirectionIcon({ direction }: { direction: 'positive' | 'negative' | 'non-linear' }) {
   if (direction === 'positive') return <TrendingUp className="w-3 h-3 text-green-400" />;
   if (direction === 'negative') return <TrendingDown className="w-3 h-3 text-red-400" />;
-  return <GitBranch className="w-3 h-3 text-[#c9b787]" />;
+  return <GitBranch className="w-3 h-3 text-[#c9a85c]" />;
 }
 
 function PnLBand({
@@ -239,7 +239,7 @@ function PnLBand({
     <div className="grid grid-cols-3 gap-2">
       {[
         { label: 'Bear', value: low, color: '#ef4444' },
-        { label: 'Base', value: mid, color: '#c9b787' },
+        { label: 'Base', value: mid, color: '#c9a85c' },
         { label: 'Bull', value: high, color: '#22c55e' },
       ].map(({ label, value, color }) => (
         <div key={label} className="rounded border border-white/[0.06] bg-white/[0.02] p-2.5 text-center">
@@ -256,7 +256,7 @@ function PnLBand({
 function SensitivityPill({ sensitivity }: { sensitivity: 'high' | 'medium' | 'low' }) {
   const styles = {
     high: 'text-red-400 bg-red-500/10 border-red-500/20',
-    medium: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+    medium: 'text-[#c9a85c] bg-[#c9b787]/10 border-[#c9b787]/20',
     low: 'text-[#5e5e5e] bg-white/[0.03] border-white/[0.06]',
   };
   return (
@@ -278,7 +278,7 @@ function CausalDriversPanel({ drivers }: { drivers: CausalDriver[] }) {
   return (
     <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4">
       <div className="flex items-center gap-2 mb-4">
-        <Brain className="w-4 h-4 text-[#c9b787]" />
+        <Brain className="w-4 h-4 text-[#c9a85c]" />
         <h2 className="text-sm font-semibold text-[#f5f5f5]">Inferred Causal Drivers</h2>
         <span className="ml-auto text-[9px] font-mono text-[#5e5e5e]">{drivers.length} drivers · daily refresh</span>
       </div>
@@ -366,7 +366,7 @@ function AssumptionsEditor({
               <span className="text-[10px] font-medium text-[#e0e0e0] flex-1">{a.label}</span>
               <SensitivityPill sensitivity={a.sensitivity} />
               {isDirty && (
-                <span className="text-[8px] font-mono text-[#c9b787] bg-[#c9b787]/10 border border-[#c9b787]/20 px-1 py-0.5 rounded">
+                <span className="text-[8px] font-mono text-[#c9a85c] bg-[#c9b787]/10 border border-[#c9b787]/20 px-1 py-0.5 rounded">
                   edited
                 </span>
               )}
@@ -447,7 +447,7 @@ function ScenarioCard({
         onClick={() => setExpanded(!expanded)}
       >
         <div className="w-7 h-7 rounded-md bg-[#c9b787]/10 border border-[#c9b787]/20 flex items-center justify-center shrink-0 mt-0.5">
-          <Sparkles className="w-3.5 h-3.5 text-[#c9b787]" />
+          <Sparkles className="w-3.5 h-3.5 text-[#c9a85c]" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -510,7 +510,7 @@ function ScenarioCard({
           <div>
             <button
               onClick={() => setShowAnalogue(!showAnalogue)}
-              className="flex items-center gap-1.5 text-[10px] font-mono text-[#5e5e5e] hover:text-[#c9b787] transition-colors w-full text-left"
+              className="flex items-center gap-1.5 text-[10px] font-mono text-[#5e5e5e] hover:text-[#c9a85c] transition-colors w-full text-left"
             >
               <BookOpen className="w-3 h-3" />
               Historical analogue — {scenario.historicalAnalogue.period}
@@ -531,12 +531,12 @@ function ScenarioCard({
           <div>
             <button
               onClick={() => setShowAssumptions(!showAssumptions)}
-              className="flex items-center gap-1.5 text-[10px] font-mono text-[#5e5e5e] hover:text-[#c9b787] transition-colors w-full text-left"
+              className="flex items-center gap-1.5 text-[10px] font-mono text-[#5e5e5e] hover:text-[#c9a85c] transition-colors w-full text-left"
             >
               <Edit3 className="w-3 h-3" />
               Assumptions
               {dirtyCount > 0 && (
-                <span className="ml-1.5 text-[8px] font-mono text-[#c9b787] bg-[#c9b787]/10 border border-[#c9b787]/20 px-1 py-0.5 rounded">
+                <span className="ml-1.5 text-[8px] font-mono text-[#c9a85c] bg-[#c9b787]/10 border border-[#c9b787]/20 px-1 py-0.5 rounded">
                   {dirtyCount} edited
                 </span>
               )}
@@ -557,7 +557,7 @@ function ScenarioCard({
           <div>
             <button
               onClick={() => setShowProvenance(!showProvenance)}
-              className="flex items-center gap-1.5 text-[10px] font-mono text-[#5e5e5e] hover:text-[#c9b787] transition-colors w-full text-left"
+              className="flex items-center gap-1.5 text-[10px] font-mono text-[#5e5e5e] hover:text-[#c9a85c] transition-colors w-full text-left"
             >
               <Hash className="w-3 h-3" />
               Provenance envelope
@@ -581,7 +581,7 @@ function ScenarioCard({
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
             {dirtyCount > 0 && (
-              <span className="text-[10px] text-[#c9b787] font-mono">{dirtyCount} assumption override{dirtyCount > 1 ? 's' : ''} will be applied</span>
+              <span className="text-[10px] text-[#c9a85c] font-mono">{dirtyCount} assumption override{dirtyCount > 1 ? 's' : ''} will be applied</span>
             )}
           </div>
         </div>
@@ -617,7 +617,7 @@ function PromotedResult({
         <div className="grid grid-cols-3 gap-2">
           {[
             { label: 'Bear', value: sr.portfolioPnLLow, color: '#ef4444' },
-            { label: 'Base', value: sr.portfolioPnLMid, color: '#c9b787' },
+            { label: 'Base', value: sr.portfolioPnLMid, color: '#c9a85c' },
             { label: 'Bull', value: sr.portfolioPnLHigh, color: '#22c55e' },
           ].map(({ label, value, color }) => (
             <div key={label} className="rounded border border-white/[0.06] bg-white/[0.02] p-3 text-center">
@@ -649,7 +649,7 @@ function PromotedResult({
           </button>
           <a
             href="/scenarios"
-            className="flex-1 py-2 rounded bg-[#c9b787]/10 border border-[#c9b787]/20 text-xs text-[#c9b787] text-center hover:bg-[#c9b787]/20 transition-colors"
+            className="flex-1 py-2 rounded bg-[#c9b787]/10 border border-[#c9b787]/20 text-xs text-[#c9a85c] text-center hover:bg-[#c9b787]/20 transition-colors"
           >
             Open Scenario Composer
           </a>
@@ -705,7 +705,7 @@ export default function CausalIntelligencePage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-foreground flex items-center gap-2">
-            <Brain className="w-5 h-5 text-[#c9b787]" />
+            <Brain className="w-5 h-5 text-[#c9a85c]" />
             Causal Intelligence
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -744,7 +744,7 @@ export default function CausalIntelligencePage() {
       {/* Loading skeleton */}
       {isLoading && (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-5 h-5 text-[#c9b787] animate-spin" />
+          <Loader2 className="w-5 h-5 text-[#c9a85c] animate-spin" />
           <span className="ml-2 text-sm text-[#5e5e5e]">Running causal inference…</span>
         </div>
       )}
@@ -765,7 +765,7 @@ export default function CausalIntelligencePage() {
           {/* RIGHT: Suggested Scenarios */}
           <div className="xl:col-span-2 space-y-4">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-[#c9b787]" />
+              <Sparkles className="w-3.5 h-3.5 text-[#c9a85c]" />
               <h2 className="text-xs font-semibold text-[#f5f5f5]">Suggested Scenarios</h2>
               <span className="text-[9px] font-mono text-[#5e5e5e]">
                 {suggestions.length} suggestions · generated {suggestionsQ.data ? new Date(suggestionsQ.data.generatedAt).toLocaleString() : '—'}
@@ -780,7 +780,7 @@ export default function CausalIntelligencePage() {
             )}
 
             {promotingId && (
-              <div className="flex items-center gap-2 p-3 rounded border border-[#c9b787]/20 bg-[#c9b787]/5 text-[#c9b787] text-xs">
+              <div className="flex items-center gap-2 p-3 rounded border border-[#c9b787]/20 bg-[#c9b787]/5 text-[#c9a85c] text-xs">
                 <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
                 Promoting scenario to engine…
               </div>

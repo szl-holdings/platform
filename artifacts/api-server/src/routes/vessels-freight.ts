@@ -2,6 +2,7 @@ import { type IRouter, type RequestHandler, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { LRUCache } from 'lru-cache';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
+import { DOMAIN_COLORS } from '../lib/domain-colors';
 import { authMiddleware } from '../middlewares/auth';
 
 const router: IRouter = Router();
@@ -60,7 +61,7 @@ const CLASS_BASELINES: ClassBaseline[] = [
     key: 'capesize',
     label: 'Capesize',
     dwt: '100,000–180,000 DWT',
-    color: '#38bdf8',
+    color: '#4d8fcc',
     baseTce: 28450,
     volatility: 0.07,
     routes: ['C5 (WA→CHN)', 'C3 (BRA→CHN)', 'Transatlantic'],

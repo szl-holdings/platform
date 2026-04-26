@@ -20,12 +20,12 @@ import type { WorkcellStatus, Workcell } from '@szl/a11oy-runtime';
 const STATUS_CONFIG: Record<WorkcellStatus, { label: string; color: string; icon: typeof CheckCircle2 }> = {
   intake: { label: 'Intake', color: '#64748b', icon: Eye },
   planning: { label: 'Planning', color: '#8b7ac8', icon: GitBranch },
-  context_building: { label: 'Context Building', color: '#0ea5e9', icon: Layers },
+  context_building: { label: 'Context Building', color: '#4d8fcc', icon: Layers },
   risk_review: { label: 'Risk Review', color: '#d4a054', icon: AlertTriangle },
   action_brief_created: { label: 'Brief Created', color: '#8b7ac8', icon: FileCheck },
   approval_required: { label: 'Approval Required', color: '#f59e0b', icon: Clock },
   approved: { label: 'Approved', color: '#22c55e', icon: CheckCircle2 },
-  executing: { label: 'Executing', color: '#0ea5e9', icon: PlayCircle },
+  executing: { label: 'Executing', color: '#4d8fcc', icon: PlayCircle },
   verifying: { label: 'Verifying', color: '#8b7ac8', icon: ShieldCheck },
   proven: { label: 'Proven', color: '#22c55e', icon: ShieldCheck },
   blocked: { label: 'Blocked', color: '#ef4444', icon: XCircle },
@@ -33,7 +33,7 @@ const STATUS_CONFIG: Record<WorkcellStatus, { label: string; color: string; icon
   archived: { label: 'Archived', color: '#475569', icon: Eye },
 };
 
-const PRIORITY_COLOR = { low: '#64748b', medium: '#0ea5e9', high: '#d4a054', critical: '#ef4444' };
+const PRIORITY_COLOR = { low: '#64748b', medium: '#4d8fcc', high: '#d4a054', critical: '#ef4444' };
 
 export function WorkcellsPage() {
   const [, navigate] = useLocation();

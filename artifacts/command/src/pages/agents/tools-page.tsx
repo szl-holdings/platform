@@ -5,7 +5,7 @@ import type { ToolRisk } from '@szl/a11oy-runtime';
 
 const RISK_CONFIG: Record<ToolRisk, { label: string; color: string }> = {
   read_only: { label: 'Read Only', color: '#22c55e' },
-  low: { label: 'Low', color: '#0ea5e9' },
+  low: { label: 'Low', color: '#4d8fcc' },
   medium: { label: 'Medium', color: '#d4a054' },
   high: { label: 'High', color: '#f97316' },
   critical: { label: 'Critical', color: '#ef4444' },
@@ -13,7 +13,7 @@ const RISK_CONFIG: Record<ToolRisk, { label: string; color: string }> = {
 
 const CATEGORY_COLORS: Record<string, string> = {
   intelligence: '#8b7ac8',
-  governance: '#0ea5e9',
+  governance: '#4d8fcc',
   finance: '#d4a054',
   compliance: '#f59e0b',
   execution: '#f97316',

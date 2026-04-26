@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-const ACCENT = '#0ea5e9';
+const ACCENT = '#4d8fcc';
 const API_BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 
 const KNOWN_VESSELS = [
@@ -105,14 +105,14 @@ function HopCard({ hop, isLast }: { hop: ChainHop; isLast: boolean }) {
             'w-8 h-8 rounded-full flex items-center justify-center border flex-shrink-0',
             isSanctioned ? 'border-red-500/40 bg-red-500/10' : 'border-sky-500/20 bg-sky-500/05',
           )}
-          style={{ background: isSanctioned ? 'rgba(239,68,68,0.08)' : 'rgba(14,165,233,0.06)' }}
+          style={{ background: isSanctioned ? 'rgba(239,68,68,0.08)' : 'rgba(77,143,204,0.06)' }}
         >
           <Icon className={cn('w-3.5 h-3.5', isSanctioned ? 'text-red-400' : 'text-sky-400')} />
         </div>
         {!isLast && (
           <div
             className="w-px flex-1 mt-1 mb-1"
-            style={{ background: isSanctioned ? 'rgba(239,68,68,0.3)' : 'rgba(14,165,233,0.15)' }}
+            style={{ background: isSanctioned ? 'rgba(239,68,68,0.3)' : 'rgba(77,143,204,0.15)' }}
           />
         )}
       </div>

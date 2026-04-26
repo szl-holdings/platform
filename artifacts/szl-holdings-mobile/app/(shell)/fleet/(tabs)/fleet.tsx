@@ -651,7 +651,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 12,
     borderWidth: 1,
-    backgroundColor: 'rgba(14,165,233,0.04)',
+    backgroundColor: 'rgba(77,143,204,0.04)',
   },
   searchInput: { flex: 1, fontSize: 13, fontFamily: 'Inter_400Regular' },
   filterBar: { marginTop: 10 },

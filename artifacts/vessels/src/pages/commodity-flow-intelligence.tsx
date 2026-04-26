@@ -327,8 +327,8 @@ export default function CommodityFlowIntelligence() {
 
   const BG = '#060e1a';
   const SURFACE = '#081018';
-  const BORDER = 'rgba(14,165,233,0.1)';
-  const _SKY = '#0ea5e9';
+  const BORDER = 'rgba(77,143,204,0.1)';
+  const _SKY = '#4d8fcc';
 
   const { data: chokepointsData, isError: isChokepointsError } =
     useStandardQuery<ChokepointsResponse>({
@@ -360,7 +360,7 @@ export default function CommodityFlowIntelligence() {
           <div className="flex items-center gap-2.5">
             <div
               className="w-7 h-7 rounded flex items-center justify-center"
-              style={{ background: 'rgba(14,165,233,0.12)', border: `1px solid ${BORDER}` }}
+              style={{ background: 'rgba(77,143,204,0.12)', border: `1px solid ${BORDER}` }}
             >
               <Layers className="w-3.5 h-3.5 text-sky-400" />
             </div>
@@ -755,7 +755,7 @@ export default function CommodityFlowIntelligence() {
                   <Tooltip
                     contentStyle={{
                       background: '#081018',
-                      border: '1px solid rgba(14,165,233,0.2)',
+                      border: '1px solid rgba(77,143,204,0.2)',
                       borderRadius: 6,
                       fontSize: 11,
                     }}
@@ -767,7 +767,7 @@ export default function CommodityFlowIntelligence() {
                     fill="#f97316"
                     fillOpacity={0.8}
                   />
-                  <Bar dataKey="port" name="Port" stackId="a" fill="#0ea5e9" fillOpacity={0.8} />
+                  <Bar dataKey="port" name="Port" stackId="a" fill="#4d8fcc" fillOpacity={0.8} />
                   <Bar
                     dataKey="canal"
                     name="Canal"
@@ -781,7 +781,7 @@ export default function CommodityFlowIntelligence() {
               <div className="flex items-center gap-4 mt-2 justify-center">
                 {[
                   ['Bunker', '#f97316'],
-                  ['Port', '#0ea5e9'],
+                  ['Port', '#4d8fcc'],
                   ['Canal', '#a855f7'],
                 ].map(([label, color]) => (
                   <div key={label} className="flex items-center gap-1">
@@ -819,8 +819,8 @@ export default function CommodityFlowIntelligence() {
                   <div
                     className="w-8 h-8 rounded flex items-center justify-center shrink-0"
                     style={{
-                      background: 'rgba(14,165,233,0.08)',
-                      border: '1px solid rgba(14,165,233,0.12)',
+                      background: 'rgba(77,143,204,0.08)',
+                      border: '1px solid rgba(77,143,204,0.12)',
                     }}
                   >
                     <Ship className="w-3.5 h-3.5 text-sky-400" />

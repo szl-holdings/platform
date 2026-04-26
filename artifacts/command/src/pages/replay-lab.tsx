@@ -560,7 +560,7 @@ export default function ReplayLab() {
             >
               {[
                 { label: 'Scenarios', value: scenarios.length, color: ACCENT },
-                { label: 'Total Snapshots', value: totalSnapshots, color: '#0ea5e9' },
+                { label: 'Total Snapshots', value: totalSnapshots, color: '#4d8fcc' },
                 { label: 'Replay Runs', value: runs.length, color: '#22c55e' },
                 {
                   label: 'Avg GT Match',

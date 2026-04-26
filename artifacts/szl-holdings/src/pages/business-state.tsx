@@ -2857,7 +2857,7 @@ function OpportunityModule() {
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
         {opps.map((opp, i) => {
-          const color = opp.level === 'high' ? '#22c55e' : '#0ea5e9';
+          const color = opp.level === 'high' ? '#22c55e' : '#4d8fcc';
           const decision = store.oppDecisions[opp.id];
           const isSnoozing = snoozeTarget === opp.id;
           const isRejecting = rejectTarget === opp.id;
@@ -3806,7 +3806,7 @@ function DecisionLogModule() {
 
   const catColor: Record<LogEntry['category'], string> = {
     Risk: '#ef4444',
-    Opportunity: '#0ea5e9',
+    Opportunity: '#4d8fcc',
     Recommendation: ACCENT,
   };
 

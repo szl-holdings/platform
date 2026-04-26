@@ -116,7 +116,7 @@ export function PilotIntelligencePage() {
               {
                 label: '7-Day Runs',
                 value: pipeline.weeklyRuns.toLocaleString(),
-                color: '#0ea5e9',
+                color: '#4d8fcc',
               },
             ].map((m) => (
               <div key={m.label} className="text-center">
@@ -252,7 +252,7 @@ export function PilotIntelligencePage() {
                     </div>
                     <div
                       className="text-sm font-mono font-bold"
-                      style={{ color: acct.weeklyRuns > 0 ? '#0ea5e9' : 'rgba(255,255,255,0.25)' }}
+                      style={{ color: acct.weeklyRuns > 0 ? '#4d8fcc' : 'rgba(255,255,255,0.25)' }}
                     >
                       {acct.weeklyRuns.toLocaleString()}
                     </div>

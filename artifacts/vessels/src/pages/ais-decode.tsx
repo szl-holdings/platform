@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-const ACCENT = '#0ea5e9';
+const ACCENT = '#4d8fcc';
 
 interface BehaviourClass {
   behaviour: string;
@@ -44,7 +44,7 @@ const SAMPLE_NMEA = '!AIVDM,1,1,,A,15N4cJ`P00G?Uf6E`FepT@3n00Sa,0*73';
 
 function ScoreBar({ score }: { score: number }) {
   const pct = Math.round(score * 100);
-  const color = pct > 55 ? '#ef4444' : pct > 30 ? '#f97316' : '#0ea5e9';
+  const color = pct > 55 ? '#ef4444' : pct > 30 ? '#f97316' : '#4d8fcc';
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">

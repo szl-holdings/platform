@@ -120,8 +120,8 @@ const STATUS_STYLE: Record<
   fresh: {
     dot: 'bg-sky-400',
     label: 'Fresh',
-    bg: 'rgba(14,165,233,0.05)',
-    border: 'rgba(14,165,233,0.12)',
+    bg: 'rgba(77,143,204,0.05)',
+    border: 'rgba(77,143,204,0.12)',
   },
   stale: {
     dot: 'bg-amber-400',
@@ -324,7 +324,7 @@ const FALLBACK_DIMENSIONS: DimensionScore[] = [
     key: 'operational',
     label: 'Operational',
     icon: Activity,
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     score: 74,
     weight: 0.3,
     signals: [

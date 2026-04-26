@@ -137,10 +137,10 @@ export function WorkcellDetailPage() {
   }
 
   const statusColor: Record<string, string> = {
-    proven: '#22c55e', blocked: '#ef4444', executing: '#0ea5e9',
+    proven: '#22c55e', blocked: '#ef4444', executing: '#4d8fcc',
     approval_required: '#f59e0b', approved: '#22c55e', planning: '#8b7ac8',
     action_brief_created: '#8b7ac8', risk_review: '#d4a054',
-    verifying: '#8b7ac8', rejected: '#ef4444', intake: '#64748b', context_building: '#0ea5e9', archived: '#475569',
+    verifying: '#8b7ac8', rejected: '#ef4444', intake: '#64748b', context_building: '#4d8fcc', archived: '#475569',
   };
 
   return (

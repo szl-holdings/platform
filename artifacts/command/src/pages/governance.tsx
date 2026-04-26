@@ -184,7 +184,7 @@ const FALLBACK_POLICIES: Policy[] = [
 ];
 
 const CATEGORY_COLORS: Record<PolicyCategory, string> = {
-  data: '#0ea5e9',
+  data: '#4d8fcc',
   access: '#a855f7',
   compliance: '#22c55e',
   security: '#ef4444',

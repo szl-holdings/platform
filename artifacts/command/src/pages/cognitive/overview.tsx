@@ -166,7 +166,7 @@ const DEMO_TRACES: ApiTrace[] = [
 
 const DOMAIN_COLOR: Record<string, string> = {
   aegis: '#ef4444',
-  vessels: '#0ea5e9',
+  vessels: '#4d8fcc',
   terra: '#22c55e',
   prism: '#a855f7',
   pulse: '#f59e0b',
@@ -496,7 +496,7 @@ export default function CognitiveConsolesOverview() {
             title="Eval Console"
             href="/cognitive/evals"
             icon={FlaskConical}
-            accent="#0ea5e9"
+            accent="#4d8fcc"
             primaryStat={`${(latestPassRate * 100).toFixed(1)}%`}
             primaryLabel="Latest pass rate"
             secondaryStat={String(regressions.length)}

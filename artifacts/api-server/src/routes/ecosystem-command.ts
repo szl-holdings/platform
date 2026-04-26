@@ -15,6 +15,7 @@ import { and, desc, eq, gte, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { createHash, randomUUID } from 'node:crypto';
 import { sendError, sendSuccess, handleRouteError } from '../lib/api-response';
+import { DOMAIN_COLORS as GI_DOMAIN_COLORS } from '../lib/domain-colors';
 import { logger } from '../lib/logger';
 import { authMiddleware, requireRole } from '../middlewares/auth';
 
@@ -179,15 +180,15 @@ const MCP_SERVER_CATALOG = [
   },
 ];
 
-// Domain → color mapping (matches existing app palette)
+// Domain → color mapping — all hex values from GI design-language tokens
 const DOMAIN_COLORS: Record<string, string> = {
-  substrate: '#22d3ee',
-  core:      '#8b7ac8',
-  counsel:   '#a78bfa',
-  terra:     '#22c55e',
-  aegis:     '#ef4444',
-  vessels:   '#0ea5e9',
-  observability: '#f59e0b',
+  substrate:     GI_DOMAIN_COLORS.vessels,
+  core:          GI_DOMAIN_COLORS.command,
+  counsel:       GI_DOMAIN_COLORS.counsel,
+  terra:         GI_DOMAIN_COLORS.terra,
+  aegis:         GI_DOMAIN_COLORS.aegis,
+  vessels:       GI_DOMAIN_COLORS.vessels,
+  observability: GI_DOMAIN_COLORS.lyte,
 };
 
 // Domain tool counts (static fallback — enriched by live registry below)

@@ -60,12 +60,12 @@ const ACTION_TYPES = [
 ];
 
 const DOMAIN_COLORS: Record<string, string> = {
-  vessels: 'text-sky-400',
-  aegis: 'text-violet-400',
-  terra: 'text-emerald-400',
-  billing: 'text-amber-400',
-  auth: 'text-rose-400',
-  audit: 'text-zinc-400',
+  vessels: 'text-[#4d8fcc]',
+  aegis:   'text-[#9b7cc8]',
+  terra:   'text-[#5baa8a]',
+  billing: 'text-[#c9a85c]',
+  auth:    'text-[#c96070]',
+  audit:   'text-[#7a99b8]',
 };
 
 function RiskBadge({ level }: { level: string }) {
@@ -85,7 +85,7 @@ function RiskBadge({ level }: { level: string }) {
 function OutcomeIcon({ outcome }: { outcome: string }) {
   if (outcome === 'success') return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />;
   if (outcome === 'failure') return <AlertTriangle className="w-3.5 h-3.5 text-red-400" />;
-  return <Info className="w-3.5 h-3.5 text-zinc-400" />;
+  return <Info className="w-3.5 h-3.5 text-[#7a99b8]" />;
 }
 
 function relTime(dateStr: string) {
@@ -270,8 +270,8 @@ export default function AuditLogPanelPage() {
     <div className="p-6 space-y-5 max-w-4xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-xl font-bold text-sky-50">Audit Log</h1>
-          <p className="text-xs text-sky-400/50 mt-0.5">
+          <h1 className="font-display text-xl font-bold text-[var(--gi-text-primary)]">Audit Log</h1>
+          <p className="text-xs text-[var(--gi-text-muted)] mt-0.5">
             Hash-chained compliance ledger ·{' '}
             {displayTotal > 0
               ? `${displayTotal} events`
@@ -280,7 +280,7 @@ export default function AuditLogPanelPage() {
         </div>
         <button
           onClick={() => refetch()}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs hover:bg-sky-500/15 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[rgba(77,143,204,0.08)] border border-[rgba(77,143,204,0.18)] text-[#4d8fcc] text-xs hover:bg-[rgba(77,143,204,0.14)] transition-colors"
         >
           <RefreshCw className="w-3 h-3" />
           Refresh
@@ -297,8 +297,8 @@ export default function AuditLogPanelPage() {
 
       {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-2 flex-1 min-w-[200px] bg-[#0a1628]/80 border border-sky-500/10 rounded-lg px-3 py-2">
-          <Search className="w-3.5 h-3.5 text-sky-400/40 shrink-0" />
+        <div className="flex items-center gap-2 flex-1 min-w-[200px] bg-[var(--gi-bg-surface)] border border-[var(--gi-border-subtle)] rounded-lg px-3 py-2">
+          <Search className="w-3.5 h-3.5 text-[var(--gi-text-muted)] shrink-0" />
           <input
             type="text"
             placeholder="Search actions, actors…"
@@ -307,19 +307,19 @@ export default function AuditLogPanelPage() {
               setSearch(e.target.value);
               setPage(0);
             }}
-            className="flex-1 bg-transparent text-sm text-sky-100 placeholder:text-sky-400/30 outline-none"
+            className="flex-1 bg-transparent text-sm text-[var(--gi-text-primary)] placeholder:text-[var(--gi-text-placeholder)] outline-none"
           />
         </div>
 
         <div className="flex items-center gap-1.5">
-          <Filter className="w-3 h-3 text-sky-400/40" />
+          <Filter className="w-3 h-3 text-[var(--gi-text-muted)]" />
           <select
             value={actionTypeFilter}
             onChange={(e) => {
               setActionTypeFilter(e.target.value);
               setPage(0);
             }}
-            className="bg-[#0a1628]/80 border border-sky-500/10 rounded-lg px-2 py-1.5 text-[11px] text-sky-300 outline-none"
+            className="bg-[var(--gi-bg-surface)] border border-[var(--gi-border-subtle)] rounded-lg px-2 py-1.5 text-[11px] text-[var(--gi-text-secondary)] outline-none"
           >
             <option value="">All action types</option>
             {ACTION_TYPES.filter(Boolean).map((t) => (
@@ -335,7 +335,7 @@ export default function AuditLogPanelPage() {
               setRiskFilter(e.target.value);
               setPage(0);
             }}
-            className="bg-[#0a1628]/80 border border-sky-500/10 rounded-lg px-2 py-1.5 text-[11px] text-sky-300 outline-none"
+            className="bg-[var(--gi-bg-surface)] border border-[var(--gi-border-subtle)] rounded-lg px-2 py-1.5 text-[11px] text-[var(--gi-text-secondary)] outline-none"
           >
             <option value="">All risk levels</option>
             {['low', 'medium', 'high', 'critical'].map((r) => (
@@ -348,52 +348,52 @@ export default function AuditLogPanelPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
+      <div className="bg-[var(--gi-bg-surface)] border border-[var(--gi-border-subtle)] rounded-xl overflow-hidden">
         {/* Header */}
-        <div className="grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-x-4 px-4 py-2.5 border-b border-sky-500/10">
+        <div className="grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-x-4 px-4 py-2.5 border-b border-[var(--gi-border-subtle)]">
           <span />
-          <span className="text-[10px] text-sky-400/40 uppercase tracking-wider">Action</span>
-          <span className="text-[10px] text-sky-400/40 uppercase tracking-wider">Domain</span>
-          <span className="text-[10px] text-sky-400/40 uppercase tracking-wider">Risk</span>
-          <span className="text-[10px] text-sky-400/40 uppercase tracking-wider">Time</span>
-          <span className="text-[10px] text-sky-400/40 uppercase tracking-wider">Hash</span>
+          <span className="text-[10px] text-[var(--gi-text-muted)] uppercase tracking-wider">Action</span>
+          <span className="text-[10px] text-[var(--gi-text-muted)] uppercase tracking-wider">Domain</span>
+          <span className="text-[10px] text-[var(--gi-text-muted)] uppercase tracking-wider">Risk</span>
+          <span className="text-[10px] text-[var(--gi-text-muted)] uppercase tracking-wider">Time</span>
+          <span className="text-[10px] text-[var(--gi-text-muted)] uppercase tracking-wider">Hash</span>
         </div>
 
         {isLoading ? (
           <div className="p-5 space-y-2.5 animate-pulse">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-12 bg-sky-500/5 rounded-lg" />
+              <div key={i} className="h-12 bg-[var(--gi-bg-raised)] rounded-lg" />
             ))}
           </div>
         ) : events.length === 0 ? (
           <div className="p-8 text-center">
-            <Activity className="w-8 h-8 text-sky-400/20 mx-auto mb-2" />
-            <p className="text-sm text-sky-400/40">No events found</p>
+            <Activity className="w-8 h-8 text-[var(--gi-text-muted)] mx-auto mb-2" />
+            <p className="text-sm text-[var(--gi-text-muted)]">No events found</p>
           </div>
         ) : (
           events.map((ev) => (
             <div
               key={ev.id}
-              className="grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-x-4 items-start px-4 py-3 border-b border-sky-500/5 last:border-0 hover:bg-sky-500/3 transition-colors"
+              className="grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-x-4 items-start px-4 py-3 border-b border-[var(--gi-border-subtle)] last:border-0 hover:bg-[var(--gi-bg-hover)] transition-colors"
             >
               <OutcomeIcon outcome={ev.outcome} />
               <div className="min-w-0">
-                <p className="text-xs text-sky-100 leading-snug truncate">{ev.action}</p>
-                <p className="text-[10px] text-sky-400/50 mt-0.5">{ev.actorLabel}</p>
+                <p className="text-xs text-[var(--gi-text-primary)] leading-snug truncate">{ev.action}</p>
+                <p className="text-[10px] text-[var(--gi-text-muted)] mt-0.5">{ev.actorLabel}</p>
               </div>
               <span
                 className={cn(
                   'text-[11px] font-medium capitalize',
-                  DOMAIN_COLORS[ev.domain] ?? 'text-sky-400/60',
+                  DOMAIN_COLORS[ev.domain] ?? 'text-[var(--gi-text-secondary)]',
                 )}
               >
                 {ev.domain}
               </span>
               <RiskBadge level={ev.riskLevel} />
-              <span className="text-[11px] text-sky-400/50 whitespace-nowrap">
+              <span className="text-[11px] text-[var(--gi-text-muted)] whitespace-nowrap">
                 {relTime(ev.createdAt)}
               </span>
-              <span className="text-[10px] font-mono text-sky-400/25 whitespace-nowrap">
+              <span className="text-[10px] font-mono text-[var(--gi-text-muted)] opacity-40 whitespace-nowrap">
                 {ev.eventHash.slice(0, 8)}…
               </span>
             </div>
@@ -401,22 +401,22 @@ export default function AuditLogPanelPage() {
         )}
 
         {/* Pagination */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-t border-sky-500/10">
+        <div className="flex items-center justify-between px-4 py-2.5 border-t border-[var(--gi-border-subtle)]">
           <button
             disabled={page === 0}
             onClick={() => setPage((p) => p - 1)}
-            className="text-[11px] text-sky-400 disabled:opacity-30 hover:text-sky-300 transition-colors"
+            className="text-[11px] text-[#4d8fcc] disabled:opacity-30 hover:text-[var(--gi-text-primary)] transition-colors"
           >
             ← Previous
           </button>
-          <span className="text-[10px] text-sky-400/40">
+          <span className="text-[10px] text-[var(--gi-text-muted)]">
             Page {page + 1}
             {displayTotal > 0 ? ` · ${displayTotal} total events` : ''}
           </span>
           <button
             disabled={!hasNextPage}
             onClick={() => setPage((p) => p + 1)}
-            className="text-[11px] text-sky-400 disabled:opacity-30 hover:text-sky-300 transition-colors"
+            className="text-[11px] text-[#4d8fcc] disabled:opacity-30 hover:text-[var(--gi-text-primary)] transition-colors"
           >
             Next →
           </button>

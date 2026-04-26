@@ -38,6 +38,7 @@ import { and, eq, gte, inArray, isNull, lte, or, type SQL } from 'drizzle-orm';
 import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
+import { DOMAIN_COLORS } from '../lib/domain-colors';
 import { logger } from '../lib/logger';
 import { validateQuery } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
@@ -55,12 +56,12 @@ const PRODUCT_META: Record<
   Product,
   { label: string; color: string; icon: string; drillBase: string }
 > = {
-  lyte: { label: 'Lyte AIOps', color: '#d4a054', icon: '⚡', drillBase: '/operations/runs' },
-  vessels: { label: 'Vessels', color: '#0ea5e9', icon: '⚓', drillBase: '/vessels' },
-  terra: { label: 'Terra', color: '#22c55e', icon: '⬢', drillBase: '/terra' },
-  prism: { label: 'Counsel', color: '#a855f7', icon: '⚖', drillBase: '/prism-counsel' },
-  aegis: { label: 'Aegis Security', color: '#ef4444', icon: '⚔', drillBase: '/aegis' },
-  carlota: { label: 'Carlota Jo', color: '#f59e0b', icon: '◉', drillBase: '/carlota-jo' },
+  lyte: { label: 'Lyte AIOps', color: DOMAIN_COLORS.lyte, icon: '⚡', drillBase: '/operations/runs' },
+  vessels: { label: 'Vessels', color: DOMAIN_COLORS.vessels, icon: '⚓', drillBase: '/vessels' },
+  terra: { label: 'Terra', color: DOMAIN_COLORS.terra, icon: '⬢', drillBase: '/terra' },
+  prism: { label: 'Counsel', color: DOMAIN_COLORS.prism, icon: '⚖', drillBase: '/prism-counsel' },
+  aegis: { label: 'Aegis Security', color: DOMAIN_COLORS.aegis, icon: '⚔', drillBase: '/aegis' },
+  carlota: { label: 'Carlota Jo', color: DOMAIN_COLORS.carlota, icon: '◉', drillBase: '/carlota-jo' },
 };
 
 // ────────────────────────────────────────────────────────────────────────────

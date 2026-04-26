@@ -321,7 +321,7 @@ function TabLoading() {
 
 function getDomainColor(domain: string): string {
   const colors: Record<string, string> = {
-    Vessels: '#0ea5e9', vessels: '#0ea5e9',
+    Vessels: '#4d8fcc', vessels: '#4d8fcc',
     Terra: '#10b981', terra: '#10b981',
     Aegis: '#ef4444', aegis: '#ef4444',
     Counsel: '#8b5cf6', counsel: '#8b5cf6',
@@ -352,7 +352,7 @@ function OverviewTab({ data }: { data: OverviewResponse | undefined }) {
           <MetricTile label="Value Generated" value={`$${data.totalValueMM}M`} sub="Prevented losses & savings" color="#10b981" icon={TrendingUp} />
           <MetricTile label="Governed Decisions" value={data.totalDecisions.toLocaleString()} sub="This quarter" color={ACCENT} icon={Brain} />
           <MetricTile label="Avg Calibration" value={`${data.avgCalibration}%`} sub="Confidence accuracy" color="#f59e0b" icon={Target} />
-          <MetricTile label="Active Agents" value={data.activeAgents} sub="Across all domains" color="#0ea5e9" icon={Zap} />
+          <MetricTile label="Active Agents" value={data.activeAgents} sub="Across all domains" color="#4d8fcc" icon={Zap} />
           <MetricTile label="Intelligence Chains" value={data.crossDomainChains} sub="Multi-domain correlations" color="#8b5cf6" icon={GitBranch} />
           <MetricTile label="Learning Velocity" value={`+${data.learningVelocityPct}%`} sub="QoQ improvement" color="#ec4899" icon={Activity} />
         </div>

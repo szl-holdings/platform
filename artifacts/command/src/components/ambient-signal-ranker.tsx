@@ -19,7 +19,7 @@ interface AmbientSignal {
 const DOMAIN_COLORS: Record<string, string> = {
   firestorm: "#ef4444",
   aegis: "#ef4444",
-  vessels: "#0ea5e9",
+  vessels: "#4d8fcc",
   terra: "#22c55e",
   prism: "#8b5cf6",
   lyte: "#f59e0b",

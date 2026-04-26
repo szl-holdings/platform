@@ -25,8 +25,8 @@ const statusConfig: Record<string, { label: string; color: string; dotColor: str
   },
   in_port: {
     label: 'In Port',
-    color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
-    dotColor: 'bg-sky-400',
+    color: 'text-[#4d8fcc] bg-[rgba(77,143,204,0.10)] border-[rgba(77,143,204,0.20)]',
+    dotColor: 'bg-[#4d8fcc]',
   },
   anchored: {
     label: 'Anchored',
@@ -45,8 +45,8 @@ const statusConfig: Record<string, { label: string; color: string; dotColor: str
   },
   inactive: {
     label: 'Inactive',
-    color: 'text-sky-400/40 bg-sky-500/5 border-sky-500/10',
-    dotColor: 'bg-sky-400/40',
+    color: 'text-[#4d8fcc/40] bg-[rgba(77,143,204,0.05)] border-[rgba(77,143,204,0.10)]',
+    dotColor: 'bg-[rgba(77,143,204,0.40)]',
   },
   delayed: {
     label: 'Delayed',
@@ -68,8 +68,8 @@ const statusConfig: Record<string, { label: string; color: string; dotColor: str
 function RosterRow({ v }: { v: RosterVessel }) {
   const sc = statusConfig[v.status] ?? {
     label: v.status,
-    color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
-    dotColor: 'bg-sky-400',
+    color: 'text-[#4d8fcc] bg-[rgba(77,143,204,0.10)] border-[rgba(77,143,204,0.20)]',
+    dotColor: 'bg-[#4d8fcc]',
   };
   const lat = v.latitude ? parseFloat(v.latitude) : null;
   const lon = v.longitude ? parseFloat(v.longitude) : null;
@@ -78,15 +78,15 @@ function RosterRow({ v }: { v: RosterVessel }) {
 
   return (
     <Link href={`/vessel/${v.id}`}>
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl px-4 py-3 hover:border-sky-500/20 hover:bg-sky-500/5 cursor-pointer transition-all">
+      <div className="bg-[#0a1628]/80 border border-[rgba(77,143,204,0.10)] rounded-xl px-4 py-3 hover:border-[rgba(77,143,204,0.20)] hover:bg-[rgba(77,143,204,0.05)] cursor-pointer transition-all">
         <div className="flex items-center gap-4">
-          <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0">
-            <Ship className="w-4 h-4 text-sky-400/60" />
+          <div className="w-8 h-8 rounded-lg bg-[rgba(77,143,204,0.10)] flex items-center justify-center shrink-0">
+            <Ship className="w-4 h-4 text-[#4d8fcc/60]" />
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <p className="text-sm font-semibold text-sky-100">{v.name}</p>
+              <p className="text-sm font-semibold text-[var(--gi-text-primary)]">{v.name}</p>
               <Badge variant="outline" className={cn('text-[9px] shrink-0', sc.color)}>
                 <span className={cn('w-1 h-1 rounded-full mr-1', sc.dotColor)} />
                 {sc.label}
@@ -101,7 +101,7 @@ function RosterRow({ v }: { v: RosterVessel }) {
                 </Badge>
               )}
             </div>
-            <p className="text-[10px] text-sky-400/40 mt-0.5">
+            <p className="text-[10px] text-[#4d8fcc]/40 mt-0.5">
               {v.vesselType && <span>{v.vesselType.replace(/_/g, ' ')} · </span>}
               {v.imo && <span>IMO {v.imo} · </span>}
               {v.flag && <span>{v.flag}</span>}
@@ -111,13 +111,13 @@ function RosterRow({ v }: { v: RosterVessel }) {
           <div className="hidden md:flex items-center gap-6 shrink-0 text-right">
             {v.destination && (
               <div>
-                <p className="text-[9px] text-sky-400/30 flex items-center gap-1 justify-end">
+                <p className="text-[9px] text-[#4d8fcc]/30 flex items-center gap-1 justify-end">
                   <MapPin className="w-2.5 h-2.5" />
                   Destination
                 </p>
                 <p className="text-[11px] text-sky-200 font-medium">{v.destination}</p>
                 {eta && (
-                  <p className="text-[9px] text-sky-400/40 flex items-center gap-1 justify-end mt-0.5">
+                  <p className="text-[9px] text-[#4d8fcc]/40 flex items-center gap-1 justify-end mt-0.5">
                     <Clock className="w-2.5 h-2.5" />
                     ETA {eta.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                   </p>
@@ -127,12 +127,12 @@ function RosterRow({ v }: { v: RosterVessel }) {
 
             {lat !== null && lon !== null && (
               <div>
-                <p className="text-[9px] text-sky-400/30">Position</p>
+                <p className="text-[9px] text-[#4d8fcc]/30">Position</p>
                 <p className="text-[11px] font-mono text-sky-300">
                   {lat.toFixed(2)}°, {lon.toFixed(2)}°
                 </p>
                 {v.speed && (
-                  <p className="text-[9px] text-sky-400/40 mt-0.5">
+                  <p className="text-[9px] text-[#4d8fcc]/40 mt-0.5">
                     {parseFloat(v.speed).toFixed(1)} kn
                   </p>
                 )}
@@ -141,7 +141,7 @@ function RosterRow({ v }: { v: RosterVessel }) {
 
             {tce !== null && tce > 0 && (
               <div>
-                <p className="text-[9px] text-sky-400/30 flex items-center gap-1 justify-end">
+                <p className="text-[9px] text-[#4d8fcc]/30 flex items-center gap-1 justify-end">
                   <TrendingUp className="w-2.5 h-2.5" />
                   TCE/day
                 </p>
@@ -149,7 +149,7 @@ function RosterRow({ v }: { v: RosterVessel }) {
                   ${Math.round(tce).toLocaleString()}
                 </p>
                 {v.charterType && (
-                  <p className="text-[9px] text-sky-400/40 mt-0.5 capitalize">
+                  <p className="text-[9px] text-[#4d8fcc]/40 mt-0.5 capitalize">
                     {v.charterType.replace(/_/g, ' ')}
                   </p>
                 )}
@@ -158,13 +158,13 @@ function RosterRow({ v }: { v: RosterVessel }) {
 
             {v.mmsi && !v.destination && lat === null && (
               <div>
-                <p className="text-[9px] text-sky-400/30">MMSI</p>
+                <p className="text-[9px] text-[#4d8fcc]/30">MMSI</p>
                 <p className="text-[11px] font-mono text-sky-300">{v.mmsi}</p>
               </div>
             )}
           </div>
 
-          <ChevronRight className="w-4 h-4 text-sky-400/20 shrink-0" />
+          <ChevronRight className="w-4 h-4 text-[#4d8fcc]/20 shrink-0" />
         </div>
       </div>
     </Link>
@@ -211,16 +211,16 @@ export default function VesselsListPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-xl font-bold text-sky-50">Vessel Roster</h1>
-          <p className="text-xs text-sky-400/50 mt-0.5">
+          <p className="text-xs text-[#4d8fcc]/50 mt-0.5">
             {roster.length} vessels · SZL Maritime fleet
             {isLive && <span className="ml-2 text-emerald-400/60">· live</span>}
-            {!isLive && !isLoading && <span className="ml-2 text-sky-400/40">· loading</span>}
+            {!isLive && !isLoading && <span className="ml-2 text-[#4d8fcc]/40">· loading</span>}
           </p>
         </div>
         <button
           onClick={() => refetch()}
           disabled={isLoading || isRefetching}
-          className="p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400/60 hover:text-sky-300 transition-all disabled:opacity-40"
+          className="p-2 rounded-lg bg-[rgba(77,143,204,0.10)] border border-sky-500/20 text-[#4d8fcc/60] hover:text-sky-300 transition-all disabled:opacity-40"
         >
           <RefreshCw className={cn('w-3.5 h-3.5', (isLoading || isRefetching) && 'animate-spin')} />
         </button>
@@ -228,12 +228,12 @@ export default function VesselsListPage() {
 
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-sky-400/40" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#4d8fcc]/40" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search vessels, destination..."
-            className="pl-8 pr-3 py-2 bg-[#0a1628]/80 border border-sky-500/10 rounded-lg text-xs text-sky-200 placeholder:text-sky-400/30 focus:outline-none focus:border-sky-500/30 w-56"
+            className="pl-8 pr-3 py-2 bg-[#0a1628]/80 border border-[rgba(77,143,204,0.10)] rounded-lg text-xs text-sky-200 placeholder:text-[#4d8fcc]/30 focus:outline-none focus:border-sky-500/30 w-56"
           />
         </div>
         <div className="flex items-center gap-1 flex-wrap">
@@ -244,8 +244,8 @@ export default function VesselsListPage() {
               className={cn(
                 'text-[10px] px-2 py-1.5 rounded-lg border transition-all capitalize',
                 statusFilter === s
-                  ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                  : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                  ? 'bg-[rgba(77,143,204,0.10)] border-sky-500/30 text-sky-300'
+                  : 'border-[rgba(77,143,204,0.10)] text-[#4d8fcc]/40 hover:text-sky-300',
               )}
             >
               {s === 'all' ? 'All' : statusConfig[s]?.label || s}
@@ -253,7 +253,7 @@ export default function VesselsListPage() {
           ))}
         </div>
         <div className="ml-auto flex items-center gap-1">
-          <span className="text-[10px] text-sky-400/40 mr-1">Sort:</span>
+          <span className="text-[10px] text-[#4d8fcc]/40 mr-1">Sort:</span>
           {[
             { id: 'name', label: 'Name' },
             { id: 'type', label: 'Type' },
@@ -266,8 +266,8 @@ export default function VesselsListPage() {
               className={cn(
                 'text-[10px] px-2 py-1.5 rounded-lg border transition-all',
                 sortBy === s.id
-                  ? 'bg-sky-500/10 border-sky-500/30 text-sky-300'
-                  : 'border-sky-500/10 text-sky-400/40 hover:text-sky-300',
+                  ? 'bg-[rgba(77,143,204,0.10)] border-sky-500/30 text-sky-300'
+                  : 'border-[rgba(77,143,204,0.10)] text-[#4d8fcc]/40 hover:text-sky-300',
               )}
             >
               {s.label}

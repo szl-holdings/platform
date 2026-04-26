@@ -80,7 +80,7 @@ const LOOP_STEPS: LoopStep[] = [
     id: 'simulation',
     label: 'Simulation',
     icon: Activity,
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     description: 'Monte Carlo scenario modeling — best / base / worst case analysis',
   },
   {

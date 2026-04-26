@@ -424,7 +424,7 @@ export default function CommandModePage() {
               {
                 label: 'In Port / Loading',
                 count: vessels.filter((v) => ['in_port', 'loading'].includes(v.status)).length,
-                color: '#0ea5e9',
+                color: '#4d8fcc',
               },
               {
                 label: 'Delayed / Exception',

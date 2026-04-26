@@ -22,7 +22,7 @@ export const ECOSYSTEM_APPS = [
     label: 'Stephen Site',
     description: 'Personal portfolio and thought-leadership platform for executive communications',
     icon: Globe,
-    color: '#0ea5e9',
+    color: '#4d8fcc',
   },
   {
     href: '/cortex-mobile/',

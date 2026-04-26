@@ -156,7 +156,7 @@ export function exportVoyagesToPdf(ctx: VoyageExportContext): void {
   th { background: #f8fafc; color: #475569; font-weight: 600; font-size: 9px;
        text-transform: uppercase; letter-spacing: 0.04em; }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-  .bar { display: inline-block; height: 8px; background: #0ea5e9;
+  .bar { display: inline-block; height: 8px; background: #4d8fcc;
          border-radius: 2px; vertical-align: middle; }
   .bar-cell { width: 30%; }
   .bar-cell .bar-wrap { display: block; background: #f1f5f9; border-radius: 2px; height: 8px;
@@ -167,7 +167,7 @@ export function exportVoyagesToPdf(ctx: VoyageExportContext): void {
   .neg { color: #dc2626; }
   @media print { .noprint { display: none; } body { padding: 0; } }
   .noprint { position: fixed; top: 12px; right: 12px;
-             background: #0ea5e9; color: white; padding: 8px 14px;
+             background: #4d8fcc; color: white; padding: 8px 14px;
              border: 0; border-radius: 6px; font-size: 12px; cursor: pointer; }
 </style>
 </head>

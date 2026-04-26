@@ -152,7 +152,7 @@ const SZL_ONBOARDING_CONFIG: OnboardingConfig = {
 };
 
 const COMMAND_LOOP = [
-  { phase: 'DETECT', color: '#0ea5e9', active: false },
+  { phase: 'DETECT', color: '#4d8fcc', active: false },
   { phase: 'INTERPRET', color: '#f59e0b', active: false, link: '/command/operations/' },
   { phase: 'DECIDE', color: '#8b5cf6', active: false },
   { phase: 'EXECUTE', color: '#4B8BDB', active: true },

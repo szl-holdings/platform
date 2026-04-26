@@ -261,7 +261,7 @@ export default function ProfileScreen() {
               {
                 domain: 'vessels',
                 label: 'Vessels',
-                color: '#0ea5e9',
+                color: '#4d8fcc',
                 fetch: async () => {
                   try {
                     const base = process.env.EXPO_PUBLIC_DOMAIN

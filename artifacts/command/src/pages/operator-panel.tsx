@@ -795,7 +795,7 @@ export function OperatorPanel() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 8 }}>
                 {[
                   { icon: '⬢', label: 'Terra Deal', color: '#22c55e' },
-                  { icon: '⚓', label: 'Vessels Alert', color: '#0ea5e9' },
+                  { icon: '⚓', label: 'Vessels Alert', color: '#4d8fcc' },
                   { icon: '⚖', label: 'Counsel Matter', color: '#a855f7' },
                   { icon: '◉', label: 'Pulse Briefing', color: '#f59e0b' },
                   { icon: '◆', label: 'Ontology Query', color: ACCENT },

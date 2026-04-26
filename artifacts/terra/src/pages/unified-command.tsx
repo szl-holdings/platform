@@ -262,7 +262,7 @@ export default function UnifiedCommandDashboard() {
 
         <div
           className="rounded-xl border p-4 cursor-pointer hover:opacity-90 transition-all"
-          style={{ borderColor: '#0ea5e940', background: '#0ea5e908' }}
+          style={{ borderColor: '#4d8fcc40', background: '#4d8fcc08' }}
           onClick={() => (window.location.href = '/vessels/')}
         >
           <div className="flex items-center gap-2 mb-3">

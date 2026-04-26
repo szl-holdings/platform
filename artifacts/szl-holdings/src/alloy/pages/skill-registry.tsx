@@ -225,7 +225,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   Orchestration: '#8b5cf6',
   Messaging: '#f59e0b',
   Admin: '#ef4444',
-  Processing: '#0ea5e9',
+  Processing: '#4d8fcc',
   Browsing: '#6b7280',
 };
 

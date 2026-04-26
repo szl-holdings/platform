@@ -86,7 +86,7 @@ const RISK_COLORS: Record<RiskLevel, string> = {
 
 const STATUS_COLORS: Record<PlanStepStatus, string> = {
   pending: '#64748b',
-  ready: '#0ea5e9',
+  ready: '#4d8fcc',
   running: '#22c55e',
   blocked: '#ef4444',
   completed: '#10b981',
@@ -96,7 +96,7 @@ const STATUS_COLORS: Record<PlanStepStatus, string> = {
 
 const PLAN_STATUS_COLORS: Record<PlanGraph['status'], string> = {
   draft: '#64748b',
-  ready: '#0ea5e9',
+  ready: '#4d8fcc',
   executing: '#22c55e',
   completed: '#10b981',
   failed: '#ef4444',
@@ -495,7 +495,7 @@ function StepDetailPanel({
           { label: 'Status', value: step.status, color: STATUS_COLORS[step.status] },
           { label: 'Risk', value: step.riskLevel, color: RISK_COLORS[step.riskLevel] },
           { label: 'Risk score', value: step.estimatedRisk.toFixed(2), color: undefined },
-          { label: 'Value', value: step.estimatedValue.toFixed(2), color: '#0ea5e9' },
+          { label: 'Value', value: step.estimatedValue.toFixed(2), color: '#4d8fcc' },
           { label: 'Route class', value: step.route.routeClass, color: '#8b7ac8' },
           { label: 'Provider', value: step.route.modelProvider ?? '—', color: undefined },
           { label: 'Model', value: step.route.model ?? '—', color: undefined },
@@ -969,7 +969,7 @@ export default function PlannerStudio() {
                       {
                         label: 'Confidence',
                         value: `${(selectedPlan.confidence * 100).toFixed(0)}%`,
-                        color: '#0ea5e9',
+                        color: '#4d8fcc',
                       },
                       {
                         label: 'Est. Cost',

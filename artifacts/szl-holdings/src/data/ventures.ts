@@ -440,7 +440,7 @@ export const ventures: Venture[] = [
       'Enterprise operators, fund managers, and business intelligence teams managing data-intensive portfolios.',
     category: 'Command Systems',
     status: 'Live',
-    accentColor: '#0ea5e9',
+    accentColor: '#4d8fcc',
     description:
       'Terra turns Census Bureau, BLS, FEMA, and SEC EDGAR data into continuous business telemetry — detecting KPI drift, market anomalies, and value leakage before they compound. Part of the OBSERVE layer in the SZL intelligence doctrine.',
     painSolved:

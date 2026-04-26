@@ -712,13 +712,13 @@ export default function GuardrailConfigsPage() {
                             item.enforcement === 'enforce'
                               ? '#ef4444'
                               : item.enforcement === 'monitor'
-                                ? '#0ea5e9'
+                                ? '#4d8fcc'
                                 : '#7c8a9a',
                           background:
                             item.enforcement === 'enforce'
                               ? 'rgba(239,68,68,0.10)'
                               : item.enforcement === 'monitor'
-                                ? 'rgba(14,165,233,0.10)'
+                                ? 'rgba(77,143,204,0.10)'
                                 : 'rgba(124,138,154,0.10)',
                           border: '1px solid rgba(255,255,255,0.10)',
                         }}

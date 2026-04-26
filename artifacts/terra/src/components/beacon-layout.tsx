@@ -17,7 +17,7 @@ import { type ReactNode, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 
 const COMMAND_LOOP = [
-  { phase: 'DETECT', color: '#0ea5e9', active: true },
+  { phase: 'DETECT', color: '#4d8fcc', active: true },
   { phase: 'INTERPRET', color: '#f59e0b', active: false, link: '/command/operations/' },
   { phase: 'DECIDE', color: '#8b5cf6', active: false, link: '/alloy/' },
   { phase: 'EXECUTE', color: '#4B8BDB', active: false, link: '/alloy/' },
@@ -66,8 +66,8 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
             <div
               className="p-1.5 rounded-lg shadow-lg"
               style={{
-                background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
-                boxShadow: '0 0 12px rgba(14,165,233,0.3)',
+                background: 'linear-gradient(135deg, #4d8fcc, #3b82f6)',
+                boxShadow: '0 0 12px rgba(77,143,204,0.3)',
               }}
             >
               <Eye className="w-4 h-4 text-white" />
@@ -78,7 +78,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
               </span>
               <span
                 className="text-[9px] uppercase tracking-widest leading-none mt-0.5"
-                style={{ color: '#0ea5e9' }}
+                style={{ color: '#4d8fcc' }}
               >
                 Observability Core
               </span>
@@ -143,12 +143,12 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
                   'flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative',
                   isActive ? 'text-sky-400' : 'text-slate-400 hover:text-white hover:bg-white/5',
                 )}
-                style={{ background: isActive ? 'rgba(14,165,233,0.08)' : undefined }}
+                style={{ background: isActive ? 'rgba(77,143,204,0.08)' : undefined }}
               >
                 {isActive && (
                   <div
                     className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full"
-                    style={{ background: '#0ea5e9' }}
+                    style={{ background: '#4d8fcc' }}
                   />
                 )}
                 <item.icon
@@ -257,14 +257,14 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
             <div className="hidden sm:flex items-center gap-2">
               <div className="text-right">
                 <div className="text-xs font-medium text-white">Stephen Lutar</div>
-                <div className="text-[10px]" style={{ color: 'rgba(14,165,233,0.7)' }}>
+                <div className="text-[10px]" style={{ color: 'rgba(77,143,204,0.7)' }}>
                   SZL Holdings
                 </div>
               </div>
               <div
                 className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border"
                 style={{
-                  background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+                  background: 'linear-gradient(135deg, #4d8fcc, #3b82f6)',
                   borderColor: 'rgba(255,255,255,0.1)',
                 }}
               >

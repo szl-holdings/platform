@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { MarketingFooter } from '@/components/MarketingFooter';
 import { MarketingNav } from '@/components/MarketingNav';
 
-const ACCENT = '#0ea5e9';
+const ACCENT = '#4d8fcc';
 const BG = '#060c14';
 
 const tiers = [
@@ -156,7 +156,7 @@ export default function MarketingPricingPage() {
                 className="relative rounded-2xl p-8 text-left flex flex-col"
                 style={{
                   background: tier.highlight
-                    ? `linear-gradient(135deg, rgba(14,165,233,0.12), rgba(14,165,233,0.06))`
+                    ? `linear-gradient(135deg, rgba(77,143,204,0.12), rgba(77,143,204,0.06))`
                     : 'rgba(255,255,255,0.04)',
                   border: tier.highlight
                     ? `1px solid ${ACCENT}40`

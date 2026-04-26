@@ -32,7 +32,11 @@ const ROLE_STYLES: Record<string, { label: string; cls: string; icon: typeof Shi
     cls: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
     icon: Crown,
   },
-  ops: { label: 'Operations', cls: 'bg-sky-500/10 text-sky-400 border-sky-500/20', icon: Shield },
+  ops: {
+    label: 'Operations',
+    cls: 'bg-[rgba(77,143,204,0.10)] text-[#4d8fcc] border-[rgba(77,143,204,0.20)]',
+    icon: Shield,
+  },
   compliance: {
     label: 'Compliance',
     cls: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
@@ -143,14 +147,14 @@ function MemberAvatar({ member }: { member: TeamMember }) {
   const status = onlineStatus(member.lastSeenAt);
   return (
     <div className="relative shrink-0">
-      <div className="w-9 h-9 rounded-full bg-sky-500/10 border border-sky-500/20 flex items-center justify-center">
-        <span className="text-[11px] font-bold text-sky-300">
+      <div className="w-9 h-9 rounded-full bg-[rgba(77,143,204,0.10)] border border-[rgba(77,143,204,0.20)] flex items-center justify-center">
+        <span className="text-[11px] font-bold text-[#4d8fcc]">
           {initials(member.displayName ?? member.username)}
         </span>
       </div>
       <span
         className={cn(
-          'absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#06101f]',
+          'absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[var(--gi-bg-base)]',
           status === 'online'
             ? 'bg-emerald-400'
             : status === 'away'
@@ -196,14 +200,14 @@ export default function TeamPanelPage() {
     <div className="p-6 space-y-6 max-w-3xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-xl font-bold text-sky-50">Team</h1>
-          <p className="text-xs text-sky-400/50 mt-0.5">
+          <h1 className="font-display text-xl font-bold text-[var(--gi-text-primary)]">Team</h1>
+          <p className="text-xs text-[var(--gi-text-muted)] mt-0.5">
             {members.length} member{members.length !== 1 ? 's' : ''} · {onlineCount} online
           </p>
         </div>
         <button
           onClick={() => refetch()}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs hover:bg-sky-500/15 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[rgba(77,143,204,0.08)] border border-[rgba(77,143,204,0.18)] text-[#4d8fcc] text-xs hover:bg-[rgba(77,143,204,0.14)] transition-colors"
         >
           <RefreshCw className="w-3 h-3" />
           Refresh
@@ -213,7 +217,7 @@ export default function TeamPanelPage() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: 'Total members', value: members.length, icon: Users, color: 'text-sky-400' },
+          { label: 'Total members', value: members.length, icon: Users, color: 'text-[#4d8fcc]' },
           { label: 'Online now', value: onlineCount, icon: UserCheck, color: 'text-emerald-400' },
           {
             label: 'Admins',
@@ -223,10 +227,10 @@ export default function TeamPanelPage() {
           },
           { label: 'Pending invites', value: 2, icon: Mail, color: 'text-amber-400' },
         ].map((s) => (
-          <div key={s.label} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+          <div key={s.label} className="bg-[var(--gi-bg-surface)] border border-[var(--gi-border-subtle)] rounded-xl p-4">
             <s.icon className={cn('w-4 h-4 mb-2', s.color)} />
             <p className={cn('text-lg font-bold font-display', s.color)}>{s.value}</p>
-            <p className="text-[10px] text-sky-400/40 uppercase tracking-wider mt-0.5">{s.label}</p>
+            <p className="text-[10px] text-[var(--gi-text-muted)] uppercase tracking-wider mt-0.5">{s.label}</p>
           </div>
         ))}
       </div>
@@ -238,7 +242,7 @@ export default function TeamPanelPage() {
           placeholder="Search by name or email…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 bg-[#0a1628]/80 border border-sky-500/10 rounded-lg px-3 py-2 text-sm text-sky-100 placeholder:text-sky-400/30 outline-none focus:border-sky-500/30 transition-colors"
+          className="flex-1 bg-[var(--gi-bg-surface)] border border-[var(--gi-border-subtle)] rounded-lg px-3 py-2 text-sm text-[var(--gi-text-primary)] placeholder:text-[var(--gi-text-placeholder)] outline-none focus:border-[var(--gi-border-focus)] transition-colors"
         />
         <div className="flex items-center gap-1.5">
           {[null, ...roles].map((r) => (
@@ -248,8 +252,8 @@ export default function TeamPanelPage() {
               className={cn(
                 'text-[10px] px-2.5 py-1 rounded-full border transition-colors capitalize',
                 roleFilter === r
-                  ? 'bg-sky-500/15 border-sky-500/30 text-sky-300'
-                  : 'bg-transparent border-sky-500/10 text-sky-400/50 hover:border-sky-500/20 hover:text-sky-400',
+                  ? 'bg-[rgba(77,143,204,0.12)] border-[rgba(77,143,204,0.28)] text-[#4d8fcc]'
+                  : 'bg-transparent border-[var(--gi-border-subtle)] text-[var(--gi-text-muted)] hover:border-[var(--gi-border-default)] hover:text-[var(--gi-text-secondary)]',
               )}
             >
               {r ?? 'All'}
@@ -259,25 +263,25 @@ export default function TeamPanelPage() {
       </div>
 
       {/* Member list */}
-      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl overflow-hidden">
+      <div className="bg-[var(--gi-bg-surface)] border border-[var(--gi-border-subtle)] rounded-xl overflow-hidden">
         {isLoading ? (
           <div className="p-5 space-y-3 animate-pulse">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-14 bg-sky-500/5 rounded-lg" />
+              <div key={i} className="h-14 bg-[var(--gi-bg-raised)] rounded-lg" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="p-8 text-center">
-            <Users className="w-8 h-8 text-sky-400/20 mx-auto mb-2" />
-            <p className="text-sm text-sky-400/40">No members found</p>
+            <Users className="w-8 h-8 text-[var(--gi-text-muted)] mx-auto mb-2" />
+            <p className="text-sm text-[var(--gi-text-muted)]">No members found</p>
           </div>
         ) : (
           <div>
-            <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-x-4 px-4 py-2 border-b border-sky-500/10">
+            <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-x-4 px-4 py-2 border-b border-[var(--gi-border-subtle)]">
               <span />
-              <span className="text-[10px] text-sky-400/40 uppercase tracking-wider">Member</span>
-              <span className="text-[10px] text-sky-400/40 uppercase tracking-wider">Role</span>
-              <span className="text-[10px] text-sky-400/40 uppercase tracking-wider">
+              <span className="text-[10px] text-[var(--gi-text-muted)] uppercase tracking-wider">Member</span>
+              <span className="text-[10px] text-[var(--gi-text-muted)] uppercase tracking-wider">Role</span>
+              <span className="text-[10px] text-[var(--gi-text-muted)] uppercase tracking-wider">
                 Last active
               </span>
               <span />
@@ -285,20 +289,20 @@ export default function TeamPanelPage() {
             {filtered.map((m) => (
               <div
                 key={m.id}
-                className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-x-4 items-center px-4 py-3 border-b border-sky-500/5 last:border-0 hover:bg-sky-500/3 transition-colors"
+                className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-x-4 items-center px-4 py-3 border-b border-[var(--gi-border-subtle)] last:border-0 hover:bg-[var(--gi-bg-hover)] transition-colors"
               >
                 <MemberAvatar member={m} />
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-sky-100 truncate">
+                  <p className="text-sm font-medium text-[var(--gi-text-primary)] truncate">
                     {m.displayName ?? m.username ?? `User #${m.id}`}
                   </p>
-                  <p className="text-[11px] text-sky-400/40 truncate">{m.email ?? '—'}</p>
+                  <p className="text-[11px] text-[var(--gi-text-muted)] truncate">{m.email ?? '—'}</p>
                 </div>
                 <RoleBadge role={m.role} />
-                <span className="text-[11px] text-sky-400/50 whitespace-nowrap">
+                <span className="text-[11px] text-[var(--gi-text-muted)] whitespace-nowrap">
                   {relativeTime(m.lastSeenAt)}
                 </span>
-                <button className="text-sky-400/30 hover:text-sky-400 transition-colors p-1">
+                <button className="text-[var(--gi-text-muted)] hover:text-[var(--gi-text-secondary)] transition-colors p-1">
                   <MoreHorizontal className="w-4 h-4" />
                 </button>
               </div>
@@ -308,14 +312,14 @@ export default function TeamPanelPage() {
       </div>
 
       {/* Invite CTA */}
-      <div className="flex items-center justify-between bg-sky-500/5 border border-sky-500/15 rounded-xl px-5 py-4">
+      <div className="flex items-center justify-between bg-[rgba(77,143,204,0.05)] border border-[rgba(77,143,204,0.15)] rounded-xl px-5 py-4">
         <div>
-          <p className="text-sm font-medium text-sky-100">Invite team members</p>
-          <p className="text-[11px] text-sky-400/50 mt-0.5">
+          <p className="text-sm font-medium text-[var(--gi-text-primary)]">Invite team members</p>
+          <p className="text-[11px] text-[var(--gi-text-muted)] mt-0.5">
             Add colleagues and assign fleet access roles
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-medium hover:bg-sky-500/15 transition-colors">
+        <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[rgba(77,143,204,0.08)] border border-[rgba(77,143,204,0.20)] text-[#4d8fcc] text-xs font-medium hover:bg-[rgba(77,143,204,0.14)] transition-colors">
           <Mail className="w-3.5 h-3.5" />
           Send invite
         </button>

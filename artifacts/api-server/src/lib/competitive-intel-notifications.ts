@@ -140,7 +140,7 @@ function buildEmailDigest(alerts: IntelAlert[]): { subject: string; html: string
     ` — ${counter.length} counter / ${adopt.length} adopt`;
 
   const renderRow = (a: IntelAlert) => {
-    const recColor = a.recommendation === 'counter' ? '#dc2626' : '#0ea5e9';
+    const recColor = a.recommendation === 'counter' ? '#dc2626' : '#4d8fcc';
     return `
       <div style="border-left:3px solid ${recColor};padding:12px 16px;margin:12px 0;background:#f9fafb;border-radius:4px;">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${recColor};margin-bottom:4px;">

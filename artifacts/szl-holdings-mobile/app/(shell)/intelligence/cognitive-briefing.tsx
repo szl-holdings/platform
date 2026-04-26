@@ -114,7 +114,7 @@ interface AccountabilityResponse {
 }
 
 const DOMAIN_META: Record<string, { label: string; icon: string; color: string }> = {
-  vessels: { label: 'Vessels', icon: '⚓', color: '#0ea5e9' },
+  vessels: { label: 'Vessels', icon: '⚓', color: '#4d8fcc' },
   aegis: { label: 'Aegis', icon: '⬡', color: '#ef4444' },
   firestorm: { label: 'Aegis', icon: '⬡', color: '#ef4444' },
   terra: { label: 'Terra', icon: '⬢', color: '#22c55e' },

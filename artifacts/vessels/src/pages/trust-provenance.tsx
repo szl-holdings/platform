@@ -11,7 +11,7 @@ import { Activity, AlertCircle, Anchor, Clock, FileSearch, Loader2, Shield } fro
 import { useEffect, useState } from 'react';
 import { PendingAutonomyApprovalsPanel } from '../components/pending-autonomy-approvals';
 
-const ACCENT = '#0ea5e9';
+const ACCENT = '#4d8fcc';
 const DOMAIN = 'vessels';
 
 interface SimulationData {

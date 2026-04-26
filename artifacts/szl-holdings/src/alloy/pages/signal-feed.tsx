@@ -256,7 +256,7 @@ const SEVERITY_CONFIG: Record<
 const SOURCE_CONFIG: Record<string, { color: string; label: string }> = {
   terra: { color: '#10b981', label: 'Terra' },
   aegis: { color: '#ef4444', label: 'Aegis' },
-  vessels: { color: '#0ea5e9', label: 'Vessels' },
+  vessels: { color: '#4d8fcc', label: 'Vessels' },
   lyte: { color: '#8b5cf6', label: 'Lyte' },
   alloy: { color: '#4B8BDB', label: 'Counsel' },
 };

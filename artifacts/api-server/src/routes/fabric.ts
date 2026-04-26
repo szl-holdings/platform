@@ -24,6 +24,7 @@ import { defaultSignalBus } from '@szl-holdings/signal-mesh';
 import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendBadRequest, sendSuccess } from '../lib/api-response';
+import { DOMAIN_COLORS } from '../lib/domain-colors';
 import { getSignals as getAtlasSignals } from '../lib/atlas-execution-engine';
 import { dbListRuns } from '../lib/decisioning-store';
 import { logger } from '../lib/logger';
@@ -371,7 +372,7 @@ const PRODUCTS = [
   {
     id: 'vessels',
     label: 'Vessels',
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     icon: '⚓',
     status: 'warning',
     signalCount: 31,
@@ -380,7 +381,7 @@ const PRODUCTS = [
   {
     id: 'terra',
     label: 'Terra',
-    color: '#22c55e',
+    color: DOMAIN_COLORS.terra,
     icon: '⬢',
     status: 'healthy',
     signalCount: 19,
@@ -389,7 +390,7 @@ const PRODUCTS = [
   {
     id: 'prism',
     label: 'Counsel',
-    color: '#a855f7',
+    color: DOMAIN_COLORS.prism,
     icon: '⚖',
     status: 'healthy',
     signalCount: 14,
@@ -398,7 +399,7 @@ const PRODUCTS = [
   {
     id: 'aegis',
     label: 'Aegis',
-    color: '#ef4444',
+    color: DOMAIN_COLORS.aegis,
     icon: '⚔',
     status: 'critical',
     signalCount: 23,
@@ -407,7 +408,7 @@ const PRODUCTS = [
   {
     id: 'carlota',
     label: 'Carlota Jo',
-    color: '#f59e0b',
+    color: DOMAIN_COLORS.carlota,
     icon: '◉',
     status: 'healthy',
     signalCount: 8,
@@ -416,7 +417,7 @@ const PRODUCTS = [
   {
     id: 'pulse',
     label: 'Pulse',
-    color: '#8b7ac8',
+    color: DOMAIN_COLORS.pulse,
     icon: '◆',
     status: 'healthy',
     signalCount: 11,

@@ -18,7 +18,7 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const PRODUCT_COLORS: Record<string, string> = {
   lyte: '#d4a054',
-  vessels: '#0ea5e9',
+  vessels: '#4d8fcc',
   terra: '#22c55e',
   prism: '#a855f7',
   aegis: '#ef4444',
@@ -29,12 +29,12 @@ const OUTCOME_META: Record<string, { color: string; icon: typeof CheckCircle }> 
   escalated: { color: '#ef4444', icon: AlertCircle },
   'under-review': { color: '#f59e0b', icon: Clock },
   resolved: { color: '#22c55e', icon: CheckCircle },
-  informational: { color: '#0ea5e9', icon: CheckCircle },
+  informational: { color: '#4d8fcc', icon: CheckCircle },
 };
 
 function strengthBar(value: number) {
   const pct = Math.round(value * 100);
-  const color = value >= 0.85 ? '#ef4444' : value >= 0.72 ? '#f59e0b' : '#0ea5e9';
+  const color = value >= 0.85 ? '#ef4444' : value >= 0.72 ? '#f59e0b' : '#4d8fcc';
   return (
     <div className="flex items-center gap-2">
       <div className="w-20 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>

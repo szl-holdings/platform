@@ -31,7 +31,7 @@ export default function GeoDecisionCenter() {
             'flex items-center gap-2 px-4 py-2 rounded-lg border transition-all font-medium text-sm',
             isDisrupted
               ? 'bg-red-500/10 border-red-500/40 text-red-400 hover:bg-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.1)]'
-              : 'bg-sky-500/10 border-sky-500/40 text-sky-400 hover:bg-sky-500/20 shadow-[0_0_15px_rgba(14,165,233,0.1)]',
+              : 'bg-sky-500/10 border-sky-500/40 text-sky-400 hover:bg-sky-500/20 shadow-[0_0_15px_rgba(77,143,204,0.1)]',
           )}
         >
           <RefreshCw className={cn('w-4 h-4', isDisrupted && 'animate-spin')} />

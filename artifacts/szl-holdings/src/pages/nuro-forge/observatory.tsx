@@ -97,7 +97,7 @@ const MODEL_METRICS = [
     errorRate: 1.5,
     drift: 0.34,
     status: 'degraded',
-    color: '#0ea5e9',
+    color: '#4d8fcc',
   },
   {
     model: 'Grok 3',

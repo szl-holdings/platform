@@ -34,8 +34,8 @@ export function ModelRouterPage() {
     <div style={{ background: '#080c14', minHeight: '100vh', color: '#e2e8f0', fontFamily: 'system-ui, sans-serif' }}>
       {/* Header */}
       <div style={{ borderBottom: '1px solid #1e293b', padding: '20px 32px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ width: 36, height: 36, background: 'rgba(14,165,233,0.15)', border: '1px solid rgba(14,165,233,0.3)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Cpu size={18} color="#0ea5e9" />
+        <div style={{ width: 36, height: 36, background: 'rgba(77,143,204,0.15)', border: '1px solid rgba(77,143,204,0.3)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Cpu size={18} color="#4d8fcc" />
         </div>
         <div>
           <div style={{ fontSize: 18, fontWeight: 700, color: '#f8fafc' }}>Model Router</div>
@@ -51,7 +51,7 @@ export function ModelRouterPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, borderBottom: '1px solid #1e293b' }}>
         {[
           { label: 'Total Tokens (7d)', value: (totalTokens / 1000).toFixed(0) + 'K', color: '#8b7ac8', icon: Activity },
-          { label: 'Total Calls (7d)', value: totalCalls.toLocaleString(), color: '#0ea5e9', icon: Zap },
+          { label: 'Total Calls (7d)', value: totalCalls.toLocaleString(), color: '#4d8fcc', icon: Zap },
           { label: 'Avg Latency', value: `${((ROUTING_METRICS.reduce((s, r) => s + r.avgLatencyMs, 0) / ROUTING_METRICS.length) / 1000).toFixed(2)}s`, color: '#d4a054', icon: Clock },
           { label: 'Total Cost (7d)', value: `$${totalCost.toFixed(2)}`, color: '#22c55e', icon: DollarSign },
         ].map((s) => (
@@ -79,8 +79,8 @@ export function ModelRouterPage() {
                   key={p.id}
                   onClick={() => setActiveProvider(p.id)}
                   style={{
-                    background: isActive ? 'rgba(14,165,233,0.08)' : '#0f172a',
-                    border: `1px solid ${isActive ? 'rgba(14,165,233,0.3)' : '#1e293b'}`,
+                    background: isActive ? 'rgba(77,143,204,0.08)' : '#0f172a',
+                    border: `1px solid ${isActive ? 'rgba(77,143,204,0.3)' : '#1e293b'}`,
                     borderRadius: 10, padding: 14, cursor: 'pointer',
                   }}
                 >
@@ -133,7 +133,7 @@ export function ModelRouterPage() {
               <div key={r.operator} style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr 1fr 0.8fr 0.8fr 1fr', padding: '12px 16px', borderBottom: i < ROUTING_METRICS.length - 1 ? '1px solid rgba(30,41,59,0.5)' : 'none' }}>
                 <div style={{ fontSize: 12, color: '#e2e8f0', fontWeight: 500 }}>{r.operator}</div>
                 <div>
-                  <span style={{ fontSize: 10, color: r.model === 'reasoning' ? '#8b7ac8' : '#0ea5e9', background: r.model === 'reasoning' ? 'rgba(139,122,200,0.1)' : 'rgba(14,165,233,0.1)', border: `1px solid ${r.model === 'reasoning' ? 'rgba(139,122,200,0.25)' : 'rgba(14,165,233,0.25)'}`, borderRadius: 10, padding: '2px 8px' }}>
+                  <span style={{ fontSize: 10, color: r.model === 'reasoning' ? '#8b7ac8' : '#4d8fcc', background: r.model === 'reasoning' ? 'rgba(139,122,200,0.1)' : 'rgba(77,143,204,0.1)', border: `1px solid ${r.model === 'reasoning' ? 'rgba(139,122,200,0.25)' : 'rgba(77,143,204,0.25)'}`, borderRadius: 10, padding: '2px 8px' }}>
                     {r.model}
                   </span>
                 </div>

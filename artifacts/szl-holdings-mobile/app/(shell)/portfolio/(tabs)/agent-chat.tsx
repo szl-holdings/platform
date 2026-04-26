@@ -39,7 +39,7 @@ const AGENTS = [
   },
   { id: 'sentinel', name: 'Sentinel', role: 'Security', icon: 'shield', color: '#ef4444' },
   { id: 'compass', name: 'Compass', role: 'Readiness', icon: 'compass', color: '#8b5cf6' },
-  { id: 'helmsman', name: 'Helmsman', role: 'Maritime', icon: 'anchor', color: '#0ea5e9' },
+  { id: 'helmsman', name: 'Helmsman', role: 'Maritime', icon: 'anchor', color: '#4d8fcc' },
 ];
 
 interface Message {

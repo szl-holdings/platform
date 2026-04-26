@@ -290,7 +290,7 @@ export default function ExceptionQueue() {
               <div className="flex items-start gap-2.5">
                 <span className="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase mt-0.5"
                   style={{
-                    background: chunk.stage === 'ocr' ? 'rgba(14,165,233,0.15)' : chunk.stage === 'table' ? 'rgba(234,179,8,0.15)' : 'rgba(16,185,129,0.15)',
+                    background: chunk.stage === 'ocr' ? 'rgba(77,143,204,0.15)' : chunk.stage === 'table' ? 'rgba(234,179,8,0.15)' : 'rgba(16,185,129,0.15)',
                     color: chunk.stage === 'ocr' ? '#38bdf8' : chunk.stage === 'table' ? '#fbbf24' : '#34d399',
                   }}>
                   {chunk.stage}

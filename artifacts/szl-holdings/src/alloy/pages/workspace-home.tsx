@@ -48,7 +48,7 @@ const SEVERITY_COLORS: Record<string, string> = {
 const SOURCE_COLORS: Record<string, string> = {
   terra: '#10b981',
   aegis: '#ef4444',
-  vessels: '#0ea5e9',
+  vessels: '#4d8fcc',
   lyte: '#8b5cf6',
   alloy: '#4B8BDB',
 };

@@ -120,7 +120,7 @@ const INITIAL_ALERTS: Alert[] = [
   {
     id: 'a1',
     domain: 'Vessels',
-    domainColor: '#0ea5e9',
+    domainColor: '#4d8fcc',
     priority: 'critical',
     title: 'Engine room fire suppression triggered — MV Poseidon',
     description:
@@ -181,7 +181,7 @@ const INITIAL_ALERTS: Alert[] = [
   {
     id: 'a6',
     domain: 'Vessels',
-    domainColor: '#0ea5e9',
+    domainColor: '#4d8fcc',
     priority: 'medium',
     title: 'MV Argo fuel consumption 18% above forecast',
     description: 'Current heading optimization suggests 4.2% reduction if route adjusted by 12°N.',

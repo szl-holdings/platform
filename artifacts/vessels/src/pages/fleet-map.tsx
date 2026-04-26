@@ -367,7 +367,7 @@ interface AisVessel {
 function navStatusColor(navStatus: number): string {
   if (navStatus === 0) return '#22c55e';
   if (navStatus === 1) return '#f59e0b';
-  if (navStatus === 5) return '#0ea5e9';
+  if (navStatus === 5) return '#4d8fcc';
   return '#64748b';
 }
 

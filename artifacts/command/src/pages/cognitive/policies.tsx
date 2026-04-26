@@ -14,7 +14,7 @@ const TIER_META: Record<AutonomyTier, { color: string; label: string; descriptio
     description: 'Agent may only observe and surface data. No action or recommendation generation.',
   },
   advisory: {
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     label: 'Advisory',
     description:
       'Agent generates recommendations but all actions require explicit human approval before execution.',

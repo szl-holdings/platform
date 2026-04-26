@@ -78,7 +78,7 @@ function KpiCard({
 
 function CommandLoopPanel({ activePhase }: { activePhase: string }) {
   const phases = [
-    { phase: 'DETECT', color: '#0ea5e9', current: activePhase === 'DETECT' },
+    { phase: 'DETECT', color: '#4d8fcc', current: activePhase === 'DETECT' },
     { phase: 'INTERPRET', color: '#f59e0b', current: false, link: '/command/operations/' },
     { phase: 'DECIDE', color: '#8b5cf6', current: false, link: '/alloy/' },
     { phase: 'EXECUTE', color: '#4B8BDB', current: false, link: '/alloy/' },
@@ -168,10 +168,10 @@ export default function ExecutiveOverview() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Eye className="w-4 h-4" style={{ color: '#0ea5e9' }} />
+            <Eye className="w-4 h-4" style={{ color: '#4d8fcc' }} />
             <span
               className="text-xs font-medium uppercase tracking-widest"
-              style={{ color: '#0ea5e9' }}
+              style={{ color: '#4d8fcc' }}
             >
               Lyte · Executive Overview
             </span>
@@ -233,7 +233,7 @@ export default function ExecutiveOverview() {
             <a
               href="/workflow-health"
               className="text-xs hover:text-white transition-colors"
-              style={{ color: '#0ea5e9' }}
+              style={{ color: '#4d8fcc' }}
             >
               View all →
             </a>
@@ -331,13 +331,13 @@ export default function ExecutiveOverview() {
           style={{ borderColor: 'rgba(255,255,255,0.05)' }}
         >
           <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4" style={{ color: '#0ea5e9' }} />
+            <Zap className="w-4 h-4" style={{ color: '#4d8fcc' }} />
             <span className="text-sm font-semibold text-white">Recent Signals & Events</span>
           </div>
           <a
             href="/drift-detection"
             className="text-xs hover:text-white transition-colors"
-            style={{ color: '#0ea5e9' }}
+            style={{ color: '#4d8fcc' }}
           >
             View drift events →
           </a>
@@ -371,19 +371,19 @@ export default function ExecutiveOverview() {
 
       <div
         className="rounded-xl border p-5"
-        style={{ borderColor: 'rgba(14,165,233,0.2)', background: 'rgba(14,165,233,0.04)' }}
+        style={{ borderColor: 'rgba(77,143,204,0.2)', background: 'rgba(77,143,204,0.04)' }}
       >
         <div className="flex items-center gap-2 mb-3">
-          <TrendingUp className="w-4 h-4" style={{ color: '#0ea5e9' }} />
+          <TrendingUp className="w-4 h-4" style={{ color: '#4d8fcc' }} />
           <span className="text-sm font-semibold text-white">
             Golden Flow Demo — Active Scenario
           </span>
           <span
             className="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ml-2"
             style={{
-              color: '#0ea5e9',
-              background: 'rgba(14,165,233,0.15)',
-              border: '1px solid rgba(14,165,233,0.3)',
+              color: '#4d8fcc',
+              background: 'rgba(77,143,204,0.15)',
+              border: '1px solid rgba(77,143,204,0.3)',
             }}
           >
             LIVE TRACE
@@ -396,7 +396,7 @@ export default function ExecutiveOverview() {
         </p>
         <div className="flex gap-2">
           {[
-            { label: 'DETECT', desc: 'Lyte saw it', color: '#0ea5e9', active: true },
+            { label: 'DETECT', desc: 'Lyte saw it', color: '#4d8fcc', active: true },
             { label: 'INTERPRET', desc: 'Lyte routed it', color: '#f59e0b', active: true },
             { label: 'DECIDE', desc: 'Counsel modeled it', color: '#8b5cf6', active: true },
             { label: 'EXECUTE', desc: 'Counsel ran it', color: '#4B8BDB', active: true },

@@ -139,5 +139,5 @@ html, body, #root {
   to   { transform: rotate(360deg); }
 }
 
-.animate-fadeIn    { animation: fadeIn 0.3s ease-out forwards; }
+.animate-fadeIn    { animation: fadeIn 0.2s ease-out forwards; }
 .live-indicator    { animation: live-pulse 2s ease-in-out infinite; }

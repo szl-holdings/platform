@@ -381,7 +381,7 @@ const SEEDED_VERIFIER_RESULTS: VerifierResult[] = [
 
 const DOMAIN_COLORS: Record<string, string> = {
   aegis: '#ef4444',
-  vessels: '#0ea5e9',
+  vessels: '#4d8fcc',
   terra: '#22c55e',
   prism: '#a855f7',
   default: '#8b7ac8',
@@ -398,7 +398,7 @@ const SEVERITY_COLORS: Record<VerifierSeverity, string> = {
   blocker: '#ef4444',
   major: '#f97316',
   minor: '#f59e0b',
-  info: '#0ea5e9',
+  info: '#4d8fcc',
 };
 
 const CHECK_ICONS: Record<CheckStatus, string> = {
@@ -410,7 +410,7 @@ const CHECK_ICONS: Record<CheckStatus, string> = {
 
 const OUTPUT_TYPE_COLORS: Record<VerifierResult['outputType'], string> = {
   recommendation: '#8b7ac8',
-  report: '#0ea5e9',
+  report: '#4d8fcc',
   plan: '#22c55e',
   action: '#ef4444',
   notification: '#f59e0b',

@@ -299,7 +299,7 @@ export function OwnerCargoForceGraph({
       >
         <defs>
           <radialGradient id="ocg-bg" cx="50%" cy="50%" r="65%">
-            <stop offset="0%" stopColor="rgba(14,165,233,0.06)" />
+            <stop offset="0%" stopColor="rgba(77,143,204,0.06)" />
             <stop offset="100%" stopColor="rgba(10,22,40,0)" />
           </radialGradient>
         </defs>

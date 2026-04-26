@@ -7,7 +7,7 @@ export const ACCENT = '#8b7ac8';
 
 export const DOMAIN_COLORS: Record<string, string> = {
   aegis: '#ef4444',
-  vessels: '#0ea5e9',
+  vessels: '#4d8fcc',
   terra: '#22c55e',
   prism: '#a855f7',
   pulse: '#f59e0b',

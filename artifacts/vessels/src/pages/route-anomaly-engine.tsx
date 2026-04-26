@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-const ACCENT = '#0ea5e9';
+const ACCENT = '#4d8fcc';
 const API_BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 
 const SEVERITY_CONFIG: Record<

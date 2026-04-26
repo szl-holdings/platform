@@ -18,7 +18,7 @@ import { OPERATORS, AUTONOMY_LEVELS } from '@szl/a11oy-runtime';
 const RISK_COLOR: Record<string, string> = {
   observe_only: '#64748b',
   recommend_only: '#8b7ac8',
-  draft_only: '#0ea5e9',
+  draft_only: '#4d8fcc',
   execute_approved: '#d4a054',
   full_demo_autopilot: '#22c55e',
 };
@@ -78,7 +78,7 @@ export function AgentsPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, borderBottom: '1px solid #1e293b' }}>
         {[
           { label: 'Active Operators', value: '9', icon: Bot, color: '#8b7ac8' },
-          { label: 'Total Calls (24h)', value: totalCalls.toLocaleString(), icon: Activity, color: '#0ea5e9' },
+          { label: 'Total Calls (24h)', value: totalCalls.toLocaleString(), icon: Activity, color: '#4d8fcc' },
           { label: 'Success Rate', value: `${(successRate * 100).toFixed(1)}%`, icon: TrendingUp, color: '#22c55e' },
           { label: 'Avg Latency', value: `${(avgLatencyMs / 1000).toFixed(2)}s`, icon: Clock, color: '#d4a054' },
         ].map((s) => (

@@ -161,7 +161,7 @@ function DirectionIcon({ direction }: { direction: 'up' | 'down' | 'flat' }) {
 
 function ConfidenceBar({ value }: { value: number }) {
   const pct = Math.round(value * 100);
-  const color = pct >= 80 ? '#22c55e' : pct >= 65 ? '#c9b787' : '#ef4444';
+  const color = pct >= 80 ? '#22c55e' : pct >= 65 ? '#c9a85c' : '#ef4444';
   return (
     <div className="flex items-center gap-1.5">
       <div className="h-1 flex-1 bg-white/[0.06] rounded-full overflow-hidden">
@@ -213,7 +213,7 @@ function SensitivityHeatMap({
                     <div
                       className="mx-auto w-7 h-5 rounded flex items-center justify-center text-[9px] font-mono"
                       style={{
-                        backgroundColor: `rgba(201,183,135,${v * 0.7})`,
+                        backgroundColor: `rgba(201,168,92,${v * 0.7})`,
                         color: opacity > 50 ? '#f5f5f5' : '#5e5e5e',
                       }}
                     >
@@ -306,7 +306,7 @@ export default function ScenarioComposerPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-foreground flex items-center gap-2">
-            <FlaskConical className="w-5 h-5 text-[#c9b787]" />
+            <FlaskConical className="w-5 h-5 text-[#c9a85c]" />
             Scenario Composer
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -316,7 +316,7 @@ export default function ScenarioComposerPage() {
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={loadWorkedExample}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-[#c9b787]/30 bg-[#c9b787]/5 text-[#c9b787] text-xs hover:bg-[#c9b787]/10 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-[#c9b787]/30 bg-[#c9b787]/5 text-[#c9a85c] text-xs hover:bg-[#c9b787]/10 transition-colors"
           >
             <Sparkles className="w-3 h-3" />
             Load worked example
@@ -335,7 +335,7 @@ export default function ScenarioComposerPage() {
         {/* LEFT: Shock library */}
         <div className="lg:col-span-1 space-y-3">
           <div className="flex items-center gap-2">
-            <Layers className="w-3.5 h-3.5 text-[#c9b787]" />
+            <Layers className="w-3.5 h-3.5 text-[#c9a85c]" />
             <h2 className="text-xs font-semibold text-[#f5f5f5]">Shock Library</h2>
             <span className="text-[9px] font-mono text-[#5e5e5e]">{library.length} events</span>
           </div>
@@ -383,7 +383,7 @@ export default function ScenarioComposerPage() {
                     ) : (
                       <button
                         onClick={(e) => { e.stopPropagation(); addShock(def); }}
-                        className="p-1 rounded bg-[#c9b787]/10 text-[#c9b787] hover:bg-[#c9b787]/20 transition-colors"
+                        className="p-1 rounded bg-[#c9b787]/10 text-[#c9a85c] hover:bg-[#c9b787]/20 transition-colors"
                       >
                         <Plus className="w-3 h-3" />
                       </button>
@@ -403,7 +403,7 @@ export default function ScenarioComposerPage() {
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] text-[#5e5e5e] font-mono">Magnitude</span>
-                          <span className="text-[10px] text-[#c9b787] font-mono">
+                          <span className="text-[10px] text-[#c9a85c] font-mono">
                             {applied.magnitude} {def.unit}
                           </span>
                         </div>
@@ -440,7 +440,7 @@ export default function ScenarioComposerPage() {
           {/* Scenario config */}
           <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4 space-y-4">
             <div className="flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5 text-[#c9b787]" />
+              <Zap className="w-3.5 h-3.5 text-[#c9a85c]" />
               <h2 className="text-xs font-semibold text-[#f5f5f5]">Compose Scenario</h2>
             </div>
 
@@ -469,7 +469,7 @@ export default function ScenarioComposerPage() {
                       onClick={() => setHorizonWeeks(w)}
                       className={`flex-1 py-1.5 rounded text-[10px] font-mono border transition-colors ${
                         horizonWeeks === w
-                          ? 'border-[#c9b787]/40 bg-[#c9b787]/10 text-[#c9b787]'
+                          ? 'border-[#c9b787]/40 bg-[#c9b787]/10 text-[#c9a85c]'
                           : 'border-white/[0.06] bg-white/[0.02] text-[#5e5e5e] hover:text-[#8a8a8a]'
                       }`}
                     >
@@ -487,7 +487,7 @@ export default function ScenarioComposerPage() {
                   Active shocks ({activeShocks.length})
                 </span>
                 {activeShocks.length > 0 && (
-                  <span className="text-[9px] font-mono text-[#c9b787]">
+                  <span className="text-[9px] font-mono text-[#c9a85c]">
                     {activeShocks.length} event{activeShocks.length > 1 ? 's' : ''} stacked
                   </span>
                 )}
@@ -499,7 +499,7 @@ export default function ScenarioComposerPage() {
                     Add shocks from the library or{' '}
                     <button
                       onClick={loadWorkedExample}
-                      className="text-[#c9b787] underline underline-offset-2"
+                      className="text-[#c9a85c] underline underline-offset-2"
                     >
                       load the worked example
                     </button>
@@ -533,7 +533,7 @@ export default function ScenarioComposerPage() {
                             onChange={(e) => updateMagnitude(def.id, parseFloat(e.target.value))}
                             className="w-24 h-1 accent-[#c9b787]"
                           />
-                          <span className="text-[10px] font-mono text-[#c9b787]">
+                          <span className="text-[10px] font-mono text-[#c9a85c]">
                             {s.magnitude % 1 === 0 ? s.magnitude : s.magnitude.toFixed(1)} {def.unit}
                           </span>
                         </div>
@@ -583,7 +583,7 @@ export default function ScenarioComposerPage() {
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     { label: 'Bear', value: result.portfolioPnLLow, color: '#ef4444' },
-                    { label: 'Base', value: result.portfolioPnLMid, color: '#c9b787' },
+                    { label: 'Base', value: result.portfolioPnLMid, color: '#c9a85c' },
                     { label: 'Bull', value: result.portfolioPnLHigh, color: '#22c55e' },
                   ].map(({ label, value, color }) => (
                     <div

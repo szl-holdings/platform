@@ -165,7 +165,7 @@ interface Snapshot {
 // ---------------------------------------------------------------------------
 const PRODUCT_COLORS: Record<string, string> = {
   lyte: '#d4a054',
-  vessels: '#0ea5e9',
+  vessels: '#4d8fcc',
   terra: '#22c55e',
   prism: '#a855f7',
   aegis: '#ef4444',
@@ -177,7 +177,7 @@ const SEVERITY_COLORS: Record<string, string> = {
   high: '#f97316',
   warning: '#f59e0b',
   medium: '#f59e0b',
-  info: '#0ea5e9',
+  info: '#4d8fcc',
   low: '#64748b',
 };
 const STATUS_COLORS: Record<string, string> = {
@@ -185,17 +185,17 @@ const STATUS_COLORS: Record<string, string> = {
   warning: '#f59e0b',
   critical: '#ef4444',
   degraded: '#f97316',
-  running: '#0ea5e9',
+  running: '#4d8fcc',
   completed: '#22c55e',
   awaiting_approval: '#f59e0b',
   open: '#ef4444',
   ack: '#f59e0b',
-  resolving: '#0ea5e9',
+  resolving: '#4d8fcc',
   applied: '#22c55e',
   pending: '#8b7ac8',
   autonomous: '#22c55e',
   supervised: '#f59e0b',
-  advisory: '#0ea5e9',
+  advisory: '#4d8fcc',
 };
 
 function Dot({ color, pulse: p = false }: { color: string; pulse?: boolean }) {
@@ -421,7 +421,7 @@ function SignalsPanel({
         icon={Radio}
         title="Active Signals"
         count={signals.length}
-        accent="#0ea5e9"
+        accent="#4d8fcc"
         layout={layout}
       />
       {layout.collapsed ? null : (
@@ -907,7 +907,7 @@ function ConnectorsPanel({
       <PanelHeader
         icon={Network}
         title="Connector Health"
-        accent="#0ea5e9"
+        accent="#4d8fcc"
         layout={layout}
         right={
           degraded.length > 0 ? (

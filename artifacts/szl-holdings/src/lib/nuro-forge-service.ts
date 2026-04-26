@@ -200,7 +200,7 @@ const SEED_MODELS: NuroModel[] = [
     draws: 10,
     avgLatency: 95,
     costPer1k: 0.1,
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     specialties: ['Edge', 'Cost-Optimal', 'Operations'],
     status: 'degraded',
   },

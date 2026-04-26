@@ -86,7 +86,7 @@ const TRUST_METRICS: TrustMetric[] = [
     trend: 'down',
     isGoodWhenHigh: false,
     unit: 'sec',
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     description:
       'Average time from alert ingestion to agent classification and priority assignment',
   },
@@ -98,7 +98,7 @@ const TRUST_METRICS: TrustMetric[] = [
     trend: 'down',
     isGoodWhenHigh: false,
     unit: 'sec',
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     description: 'Average time from triage to recommended action (excluding human approval wait)',
   },
   {
@@ -109,7 +109,7 @@ const TRUST_METRICS: TrustMetric[] = [
     trend: 'down',
     isGoodWhenHigh: false,
     unit: 'sec',
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     description: 'Average end-to-end time from alert to confirmed resolution',
   },
   {
@@ -190,7 +190,7 @@ const DOMAIN_ROWS: DomainTrustRow[] = [
   {
     domain: 'Vessels Maritime',
     icon: '⚓',
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     acceptanceRate: 0.88,
     overrideRate: 0.12,
     executionSuccessRate: 0.982,
@@ -319,7 +319,7 @@ const TREND_COLORS = { improving: '#22c55e', stable: '#64748b', degrading: '#ef4
 const OUTCOME_COLORS = {
   accepted: '#22c55e',
   overridden: '#f59e0b',
-  escalated: '#0ea5e9',
+  escalated: '#4d8fcc',
   failed: '#ef4444',
 };
 

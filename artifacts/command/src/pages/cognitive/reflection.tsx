@@ -292,7 +292,7 @@ const SEEDED_REFLECTIONS: Reflection[] = [
 
 const DOMAIN_COLORS: Record<string, string> = {
   aegis: '#ef4444',
-  vessels: '#0ea5e9',
+  vessels: '#4d8fcc',
   terra: '#22c55e',
   prism: '#a855f7',
   default: '#8b7ac8',
@@ -321,7 +321,7 @@ const SKILL_STATUS_COLORS: Record<CandidateSkillStatus, string> = {
 
 const IMPACT_COLORS: Record<string, string> = {
   low: '#64748b',
-  medium: '#0ea5e9',
+  medium: '#4d8fcc',
   high: '#22c55e',
 };
 
@@ -505,7 +505,7 @@ export default function ReflectionConsole() {
           { label: 'Total Reflections', value: reflections.length, color: ACCENT },
           { label: 'Candidate Skills', value: allCandidateSkills.length, color: '#f59e0b' },
           { label: 'Skills Adopted', value: adoptedSkills, color: '#22c55e' },
-          { label: 'Under Review', value: proposedSkills, color: '#0ea5e9' },
+          { label: 'Under Review', value: proposedSkills, color: '#4d8fcc' },
         ].map((m) => (
           <div
             key={m.label}

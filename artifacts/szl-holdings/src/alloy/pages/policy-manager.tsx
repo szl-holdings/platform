@@ -229,9 +229,9 @@ const KIND_CONFIG: Record<
   },
   model_routing: {
     label: 'Model Routing',
-    color: '#0ea5e9',
-    bg: 'rgba(14,165,233,0.06)',
-    border: 'rgba(14,165,233,0.2)',
+    color: '#4d8fcc',
+    bg: 'rgba(77,143,204,0.06)',
+    border: 'rgba(77,143,204,0.2)',
     icon: <Zap className="w-3.5 h-3.5" />,
   },
   cost_control: {

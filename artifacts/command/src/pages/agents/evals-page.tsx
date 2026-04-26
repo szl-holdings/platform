@@ -51,8 +51,8 @@ export function EvalsPage() {
     <div style={{ background: '#080c14', minHeight: '100vh', color: '#e2e8f0', fontFamily: 'system-ui, sans-serif' }}>
       {/* Header */}
       <div style={{ borderBottom: '1px solid #1e293b', padding: '20px 32px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ width: 36, height: 36, background: 'rgba(14,165,233,0.15)', border: '1px solid rgba(14,165,233,0.3)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <FlaskConical size={18} color="#0ea5e9" />
+        <div style={{ width: 36, height: 36, background: 'rgba(77,143,204,0.15)', border: '1px solid rgba(77,143,204,0.3)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <FlaskConical size={18} color="#4d8fcc" />
         </div>
         <div>
           <div style={{ fontSize: 18, fontWeight: 700, color: '#f8fafc' }}>MirrorEval</div>
@@ -91,8 +91,8 @@ export function EvalsPage() {
                   key={row.workcellId}
                   onClick={() => setSelectedId(isSelected ? null : row.workcellId)}
                   style={{
-                    background: isSelected ? 'rgba(14,165,233,0.05)' : '#0f172a',
-                    border: `1px solid ${isSelected ? 'rgba(14,165,233,0.25)' : '#1e293b'}`,
+                    background: isSelected ? 'rgba(77,143,204,0.05)' : '#0f172a',
+                    border: `1px solid ${isSelected ? 'rgba(77,143,204,0.25)' : '#1e293b'}`,
                     borderRadius: 10, padding: '14px 16px', cursor: 'pointer',
                   }}
                 >

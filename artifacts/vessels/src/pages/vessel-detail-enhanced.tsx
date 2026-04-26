@@ -48,7 +48,7 @@ const statusConfig: Record<string, { label: string; color: string; dotColor: str
   in_port: {
     label: 'In Port',
     color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
-    dotColor: '#0ea5e9',
+    dotColor: '#4d8fcc',
   },
   anchored: {
     label: 'Anchored',
@@ -168,7 +168,7 @@ export default function VesselDetailEnhancedPage() {
   const sc = statusConfig[vessel.status] ?? {
     label: vessel.status,
     color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
-    dotColor: '#0ea5e9',
+    dotColor: '#4d8fcc',
   };
 
   const sanctionsTierCfg = sanctionsData ? (TIER_CONFIG[sanctionsData.tier] ?? TIER_CONFIG.clear!) : null;

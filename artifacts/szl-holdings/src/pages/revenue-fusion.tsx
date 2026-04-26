@@ -76,7 +76,7 @@ const REVENUE_STREAMS: RevenueStream[] = [
     label: 'Maritime Revenue',
     domain: 'Vessels',
     icon: '⚓',
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     totalRevenue: 21400000,
     mrr: 1783333,
     qoqChange: 7.3,
@@ -293,7 +293,7 @@ export default function RevenueFusionPage() {
               label: 'MRR (Combined)',
               value: formatCurrency(107000 + 1783333 + 570000 + 300000),
               sub: '+14% growth rate',
-              color: '#0ea5e9',
+              color: '#4d8fcc',
             },
             {
               label: 'Revenue Streams',

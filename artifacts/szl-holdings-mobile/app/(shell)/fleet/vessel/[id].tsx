@@ -901,7 +901,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     borderTopWidth: 0.5,
-    borderTopColor: 'rgba(14,165,233,0.1)',
+    borderTopColor: 'rgba(77,143,204,0.1)',
   },
   rygIconWrap: {
     width: 30,

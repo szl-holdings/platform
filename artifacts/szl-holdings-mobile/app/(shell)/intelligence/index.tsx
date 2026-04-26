@@ -91,7 +91,7 @@ const SEV_COLORS: Record<string, string> = {
 };
 
 const DOMAIN_META: Record<string, { label: string; icon: string; color: string }> = {
-  vessels: { label: 'Vessels', icon: '⚓', color: '#0ea5e9' },
+  vessels: { label: 'Vessels', icon: '⚓', color: '#4d8fcc' },
   firestorm: { label: 'Aegis', icon: '⬡', color: '#ef4444' },
   aegis: { label: 'Aegis', icon: '⬡', color: '#ef4444' },
   terra: { label: 'Terra', icon: '⬢', color: '#22c55e' },
@@ -679,7 +679,7 @@ export default function APEXIntelligenceScreen() {
                   route: '/(shell)/intelligence/proof-envelope',
                   label: 'Proof Envelope',
                   icon: 'shield' as const,
-                  color: '#0ea5e9',
+                  color: '#4d8fcc',
                   sub: 'Governed Intelligence cockpit',
                 },
               ].map(({ route, label, icon, color, sub }) => (

@@ -50,7 +50,7 @@ export const WORKSPACES: WorkspaceConfig[] = [
     id: 'fleet',
     label: 'Fleet',
     icon: '⚓',
-    accent: '#0ea5e9',
+    accent: '#4d8fcc',
     route: '/(shell)/fleet',
     description: 'Vessels maritime intelligence',
   },

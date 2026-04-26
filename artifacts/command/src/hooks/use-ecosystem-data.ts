@@ -25,7 +25,7 @@ const DEMO_SNAPSHOT: EcosystemSnapshot = {
       id: 'vessels',
       name: 'Vessels',
       icon: 'ship',
-      color: '#0ea5e9',
+      color: '#4d8fcc',
       score: 87,
       status: 'Operational',
       kpis: [

@@ -63,7 +63,7 @@ const PLATFORMS = [
     name: 'Vessels',
     icon: Anchor,
     desc: 'Maritime Fleet Management',
-    color: '#0ea5e9',
+    color: '#4d8fcc',
   },
   {
     id: 'terra',

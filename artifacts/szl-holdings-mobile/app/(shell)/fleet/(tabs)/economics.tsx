@@ -501,7 +501,7 @@ const styles = StyleSheet.create({
   expandTitle: { fontSize: 9, letterSpacing: 0.5, fontFamily: 'Inter_500Medium' },
   costRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   costLabel: { width: 60, fontSize: 10, fontFamily: 'Inter_400Regular' },
-  costBarWrap: { flex: 1, height: 4, backgroundColor: 'rgba(14,165,233,0.1)', borderRadius: 2 },
+  costBarWrap: { flex: 1, height: 4, backgroundColor: 'rgba(77,143,204,0.1)', borderRadius: 2 },
   costBar: { height: 4, borderRadius: 2 },
   costValue: {
     width: 48,
@@ -511,7 +511,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
   },
   marginRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
-  marginBarWrap: { flex: 1, height: 6, backgroundColor: 'rgba(14,165,233,0.1)', borderRadius: 3 },
+  marginBarWrap: { flex: 1, height: 6, backgroundColor: 'rgba(77,143,204,0.1)', borderRadius: 3 },
   marginBar: { height: 6, borderRadius: 3 },
   marginPctText: { fontSize: 12, fontWeight: '700' as const, fontFamily: 'Inter_700Bold' },
   emptyState: { alignItems: 'center', paddingVertical: 60, gap: 8 },

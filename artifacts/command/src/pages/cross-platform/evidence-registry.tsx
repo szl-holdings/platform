@@ -9,7 +9,7 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const PRODUCT_COLORS: Record<string, string> = {
   lyte: '#d4a054',
-  vessels: '#0ea5e9',
+  vessels: '#4d8fcc',
   terra: '#22c55e',
   prism: '#a855f7',
   aegis: '#ef4444',
@@ -24,10 +24,10 @@ const KIND_COLORS: Record<string, string> = {
   'threat-signal': '#ef4444',
   'threat-actor': '#ef4444',
   'engagement-flag': '#f59e0b',
-  'cargo-event': '#0ea5e9',
+  'cargo-event': '#4d8fcc',
   'asset-link': '#22c55e',
   'run-record': '#d4a054',
-  'route-deviation': '#0ea5e9',
+  'route-deviation': '#4d8fcc',
   'portfolio-cluster': '#22c55e',
   'counterparty-risk': '#a855f7',
 };

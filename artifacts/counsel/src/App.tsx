@@ -586,7 +586,7 @@ function AppShell() {
     {
       id: 'cl2',
       surface: 'Vessels',
-      surfaceAccent: '#0ea5e9',
+      surfaceAccent: '#4d8fcc',
       label: 'Vessels: MV Atlantic Falcon sanctions linkage',
       description:
         'Vessels flagged Apex Group as beneficiary of a sanctioned vessel voyage — linked to 2024-SEC-441.',
@@ -596,7 +596,7 @@ function AppShell() {
     {
       id: 'cl3',
       surface: 'Lyte',
-      surfaceAccent: '#0ea5e9',
+      surfaceAccent: '#4d8fcc',
       label: 'Lyte: 2 legal decisions pending executive approval',
       description:
         "Lyte's Decision Center has 2 Counsel-sourced recommendations queued for executive sign-off.",

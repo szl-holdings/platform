@@ -16,7 +16,7 @@ const PHASE_ICONS: Record<Phase, string> = {
 };
 
 const PHASE_COLORS: Record<Phase, string> = {
-  perceive: '#0ea5e9',
+  perceive: '#4d8fcc',
   reason: '#a855f7',
   plan: '#f59e0b',
   act: '#22c55e',
@@ -552,7 +552,7 @@ function PhaseDetail({
             label="Model"
             value={snapshot.model.replace('gpt-4o-', '4o-').replace('claude-3-5-sonnet-', 'cs-')}
           />
-          <StatPill label="Latency" value={`${snapshot.latencyMs}ms`} color="#0ea5e9" />
+          <StatPill label="Latency" value={`${snapshot.latencyMs}ms`} color="#4d8fcc" />
           <StatPill
             label="Tokens"
             value={`${snapshot.inputTokens + snapshot.outputTokens}`}
@@ -603,7 +603,7 @@ function PhaseDetail({
                 style={{
                   width: `${Math.min(100, snapshot.inputTokens / 30)}%`,
                   height: '100%',
-                  background: '#0ea5e9',
+                  background: '#4d8fcc',
                   borderRadius: 2,
                 }}
               />
@@ -1007,7 +1007,7 @@ export default function CognitiveTraces() {
             {
               label: 'Phases Logged',
               value: traces.reduce((s, t) => s + t.phases.length, 0),
-              color: '#0ea5e9',
+              color: '#4d8fcc',
             },
             {
               label: 'Regression Flags',
@@ -1245,7 +1245,7 @@ export default function CognitiveTraces() {
                   <StatPill
                     label="Total Latency"
                     value={`${(selectedTrace.totalLatencyMs / 1000).toFixed(2)}s`}
-                    color="#0ea5e9"
+                    color="#4d8fcc"
                   />
                   <StatPill
                     label="Total Cost"

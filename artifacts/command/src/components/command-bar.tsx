@@ -169,7 +169,7 @@ const PLATFORM_APPS: PlatformApp[] = [
     label: 'Stephen Site',
     description: 'Personal portfolio and thought-leadership platform',
     icon: Globe,
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     external: true,
     category: 'Ecosystem',
   },

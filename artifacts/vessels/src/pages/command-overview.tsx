@@ -892,7 +892,7 @@ export default function CommandOverviewPage() {
       {/* Fleet metrics strip */}
       <div
         className="rounded-xl border overflow-hidden"
-        style={{ borderColor: 'rgba(14,165,233,0.12)', background: 'rgba(14,165,233,0.015)' }}
+        style={{ borderColor: 'rgba(77,143,204,0.12)', background: 'rgba(77,143,204,0.015)' }}
       >
         <div className="grid grid-cols-4 md:grid-cols-8">
           {[
@@ -906,49 +906,49 @@ export default function CommandOverviewPage() {
               label: 'At Sea',
               value: atSea,
               color: 'text-emerald-400',
-              borderColor: 'rgba(14,165,233,0.08)',
+              borderColor: 'rgba(77,143,204,0.08)',
             },
             {
               label: 'In Port',
               value: inPort,
               color: 'text-sky-300',
-              borderColor: 'rgba(14,165,233,0.08)',
+              borderColor: 'rgba(77,143,204,0.08)',
             },
             {
               label: 'Delayed',
               value: delayed,
               color: 'text-orange-400',
-              borderColor: 'rgba(14,165,233,0.08)',
+              borderColor: 'rgba(77,143,204,0.08)',
             },
             {
               label: 'Maintenance',
               value: maintenanceCount,
               color: 'text-red-400',
-              borderColor: 'rgba(14,165,233,0.08)',
+              borderColor: 'rgba(77,143,204,0.08)',
             },
             {
               label: 'Exceptions',
               value: criticalExceptions,
               color: criticalExceptions > 0 ? 'text-red-400' : 'text-sky-400/40',
-              borderColor: 'rgba(14,165,233,0.08)',
+              borderColor: 'rgba(77,143,204,0.08)',
             },
             {
               label: 'Util.',
               value: `${fleetUtil}%`,
               color: 'text-violet-400',
-              borderColor: 'rgba(14,165,233,0.08)',
+              borderColor: 'rgba(77,143,204,0.08)',
             },
             {
               label: 'Weather',
               value: weatherAffected,
               color: 'text-amber-400',
-              borderColor: 'rgba(14,165,233,0.08)',
+              borderColor: 'rgba(77,143,204,0.08)',
             },
           ].map((item, i) => (
             <div
               key={item.label}
               className="px-3 py-3 text-center"
-              style={{ borderLeft: i > 0 ? '1px solid rgba(14,165,233,0.08)' : 'none' }}
+              style={{ borderLeft: i > 0 ? '1px solid rgba(77,143,204,0.08)' : 'none' }}
             >
               <p className={cn('text-lg font-bold font-display leading-none', item.color)}>
                 {item.value}
@@ -1021,7 +1021,7 @@ export default function CommandOverviewPage() {
         <PackBanner
           vertical="Maritime Intelligence Pack"
           description="Vessels runs on the Lyte + Counsel core — AIS processing, anomaly detection, sanctions screening, and route exception modeling all powered by the same intelligence fabric."
-          accentColor="#0ea5e9"
+          accentColor="#4d8fcc"
         />
       </div>
     </div>
@@ -1270,13 +1270,13 @@ function MaritimeIntelligencePanels() {
   return (
     <div
       className="rounded-xl border overflow-hidden"
-      style={{ borderColor: 'rgba(14,165,233,0.10)', background: 'rgba(14,165,233,0.015)' }}
+      style={{ borderColor: 'rgba(77,143,204,0.10)', background: 'rgba(77,143,204,0.015)' }}
     >
       <div
         className="px-4 py-3 flex items-center gap-3"
         style={{
-          borderBottom: '1px solid rgba(14,165,233,0.08)',
-          background: 'rgba(14,165,233,0.03)',
+          borderBottom: '1px solid rgba(77,143,204,0.08)',
+          background: 'rgba(77,143,204,0.03)',
         }}
       >
         <Navigation className="w-3.5 h-3.5 text-sky-400/70" />
@@ -1304,10 +1304,10 @@ function MaritimeIntelligencePanels() {
               onClick={() => setActivePanel(id)}
               className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-medium transition-all"
               style={{
-                background: activePanel === id ? 'rgba(14,165,233,0.15)' : 'transparent',
+                background: activePanel === id ? 'rgba(77,143,204,0.15)' : 'transparent',
                 color: activePanel === id ? '#38bdf8' : 'rgba(148,196,222,0.4)',
                 border:
-                  activePanel === id ? '1px solid rgba(14,165,233,0.25)' : '1px solid transparent',
+                  activePanel === id ? '1px solid rgba(77,143,204,0.25)' : '1px solid transparent',
               }}
             >
               <Icon className="w-3 h-3" />

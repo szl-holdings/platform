@@ -33,7 +33,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   {
     id: 'c1',
     domain: 'Vessels',
-    domainColor: '#0ea5e9',
+    domainColor: '#4d8fcc',
     type: 'security',
     severity: 'major',
     title: 'Emergency patch: AIS transponder authentication bypass',
@@ -113,7 +113,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   {
     id: 'c6',
     domain: 'Vessels',
-    domainColor: '#0ea5e9',
+    domainColor: '#4d8fcc',
     type: 'fix',
     severity: 'patch',
     title: 'Fuel consumption reporting precision fix',
@@ -209,7 +209,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   {
     id: 'c12',
     domain: 'Vessels',
-    domainColor: '#0ea5e9',
+    domainColor: '#4d8fcc',
     type: 'config',
     severity: 'patch',
     title: 'Route watchlist expanded to 12 straits',
@@ -236,7 +236,7 @@ const TYPE_ICONS: Record<ChangeType, React.ElementType> = {
 const TYPE_COLORS: Record<ChangeType, string> = {
   deploy: '#8b7ac8',
   feature: '#22c55e',
-  fix: '#0ea5e9',
+  fix: '#4d8fcc',
   security: 'var(--color-critical)',
   config: 'var(--color-medium)',
   breaking: 'var(--color-high)',

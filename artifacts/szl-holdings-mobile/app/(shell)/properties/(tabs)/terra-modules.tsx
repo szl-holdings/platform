@@ -102,7 +102,7 @@ const MODULES: TerraModule[] = [
     icon: 'dollar-sign',
     route: '/(shell)/properties/waterfall',
     badge: 'Finance',
-    badgeColor: '#0ea5e9',
+    badgeColor: '#4d8fcc',
   },
 ];
 

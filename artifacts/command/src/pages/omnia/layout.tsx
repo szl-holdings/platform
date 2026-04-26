@@ -121,7 +121,7 @@ export function OmniaLayout({ title, subtitle, children }: OmniaLayoutProps) {
               { href: '/aegis', label: 'Aegis', accent: '#ef4444' },
               { href: '/sentra', label: 'Sentra', accent: '#22c55e' },
               { href: '/terra', label: 'Terra', accent: '#22c55e' },
-              { href: '/vessels', label: 'Vessels', accent: '#0ea5e9' },
+              { href: '/vessels', label: 'Vessels', accent: '#4d8fcc' },
               { href: '/counsel', label: 'Counsel', accent: '#8b5cf6' },
               { href: '/a11oy', label: 'A11oy', accent: '#c9b787' },
             ].map((app) => (

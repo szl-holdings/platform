@@ -42,6 +42,7 @@ import { type IRouter, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendBadRequest, sendNotFound, sendSuccess } from '../lib/api-response';
 import { type ExportColumn, runExport } from '../lib/export-service';
+import { DOMAIN_COLORS } from '../lib/domain-colors';
 import { logger } from '../lib/logger';
 import { orchestrate } from '../lib/multi-agent-orchestrator';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
@@ -91,14 +92,14 @@ const DOMAIN_ROUTE_KEYWORDS: Record<string, string[]> = {
 
 const DOMAIN_META: Record<string, { label: string; icon: string; accent: string; route: string }> =
   {
-    vessels: { label: 'Vessels', icon: '⚓', accent: '#0ea5e9', route: '/(shell)/fleet' },
-    firestorm: { label: 'Aegis', icon: '⬡', accent: '#ef4444', route: '/(shell)/defense' },
-    terra: { label: 'Terra', icon: '⬢', accent: '#22c55e', route: '/(shell)/properties' },
-    lyte: { label: 'Lyte', icon: '⚡', accent: '#f59e0b', route: '/(shell)/operations' },
-    inca: { label: 'Counsel', icon: '◈', accent: '#8b5cf6', route: '/(shell)/advisory' },
-    msp: { label: 'MSP', icon: '◆', accent: '#6366f1', route: '/(shell)/operations' },
-    prism: { label: 'PRISM', icon: '⚖', accent: '#a855f7', route: '/(shell)/advisory' },
-    szl: { label: 'Portfolio', icon: '◆', accent: '#c9a84c', route: '/(shell)/portfolio' },
+    vessels: { label: 'Vessels', icon: '⚓', accent: DOMAIN_COLORS.vessels, route: '/(shell)/fleet' },
+    firestorm: { label: 'Aegis', icon: '⬡', accent: DOMAIN_COLORS.aegis, route: '/(shell)/defense' },
+    terra: { label: 'Terra', icon: '⬢', accent: DOMAIN_COLORS.terra, route: '/(shell)/properties' },
+    lyte: { label: 'Lyte', icon: '⚡', accent: DOMAIN_COLORS.lyte, route: '/(shell)/operations' },
+    inca: { label: 'Counsel', icon: '◈', accent: DOMAIN_COLORS.counsel, route: '/(shell)/advisory' },
+    msp: { label: 'MSP', icon: '◆', accent: DOMAIN_COLORS.counsel, route: '/(shell)/operations' },
+    prism: { label: 'PRISM', icon: '⚖', accent: DOMAIN_COLORS.prism, route: '/(shell)/advisory' },
+    szl: { label: 'Portfolio', icon: '◆', accent: DOMAIN_COLORS.holdings, route: '/(shell)/portfolio' },
   };
 
 function inferDomains(query: string): string[] {

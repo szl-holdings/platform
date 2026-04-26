@@ -250,7 +250,7 @@ const INVESTOR_KPIS = [
     prefix: '',
     suffix: '',
     sub: 'Tracked NYC properties',
-    color: '#0ea5e9',
+    color: '#4d8fcc',
     icon: Building,
     field: 'distress' as const,
   },
@@ -574,7 +574,7 @@ export default function CoreCommandCenter() {
                   value={t?.total_distress_properties ?? '—'}
                   sub="Terra — NYC + NY"
                   icon={Building}
-                  color="#0ea5e9"
+                  color="#4d8fcc"
                   loading={metricsLoading}
                 />
                 <SummaryCard
@@ -682,7 +682,7 @@ export default function CoreCommandCenter() {
                         label: 'Total Leads',
                         value: t?.total_leads ?? '—',
                         icon: TrendingUp,
-                        color: '#0ea5e9',
+                        color: '#4d8fcc',
                       },
                       {
                         label: 'Total Deals',
@@ -930,7 +930,7 @@ export default function CoreCommandCenter() {
                           className="text-2xl font-bold font-display"
                           style={{
                             color:
-                              rec.score >= 80 ? '#ef4444' : rec.score >= 65 ? '#f59e0b' : '#0ea5e9',
+                              rec.score >= 80 ? '#ef4444' : rec.score >= 65 ? '#f59e0b' : '#4d8fcc',
                           }}
                         >
                           {Math.round(rec.score)}

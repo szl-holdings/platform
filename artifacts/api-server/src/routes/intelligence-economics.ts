@@ -85,8 +85,8 @@ type IntegrationRow = {
 // ---------------------------------------------------------------------------
 
 const DOMAIN_COLORS: Record<string, string> = {
-  vessels: '#0ea5e9',
-  maritime: '#0ea5e9',
+  vessels: '#4d8fcc',
+  maritime: '#4d8fcc',
   terra: '#10b981',
   'real-estate': '#10b981',
   aegis: '#ef4444',
@@ -237,8 +237,8 @@ router.get('/overview', ...auth, async (_req, res) => {
 
     // Derive top agents from live domain run data; fall back to seeds
     const AGENT_SEEDS_OV: Record<string, { name: string; color: string }> = {
-      vessels: { name: 'Helmsman', color: '#0ea5e9' },
-      maritime: { name: 'Helmsman', color: '#0ea5e9' },
+      vessels: { name: 'Helmsman', color: '#4d8fcc' },
+      maritime: { name: 'Helmsman', color: '#4d8fcc' },
       aegis: { name: 'Sentinel', color: '#ef4444' },
       defense: { name: 'Sentinel', color: '#ef4444' },
       terra: { name: 'Domaine AI', color: '#10b981' },
@@ -267,7 +267,7 @@ router.get('/overview', ...auth, async (_req, res) => {
     const topAgents = liveTopAgents.length > 0
       ? liveTopAgents
       : [
-          { name: 'Helmsman', domain: 'Vessels', color: '#0ea5e9', valueMM: 8.2 },
+          { name: 'Helmsman', domain: 'Vessels', color: '#4d8fcc', valueMM: 8.2 },
           { name: 'Sentinel', domain: 'Aegis', color: '#ef4444', valueMM: 6.7 },
           { name: 'Domaine AI', domain: 'Terra', color: '#10b981', valueMM: 4.1 },
           { name: 'Lexis', domain: 'Counsel', color: '#8b5cf6', valueMM: 2.9 },
@@ -293,7 +293,7 @@ router.get('/overview', ...auth, async (_req, res) => {
         { name: 'Economy', score: Math.min(99, Math.round(totalValueMM * 4 + 70)), color: '#10b981' },
         { name: 'Calibration', score: avgCalibration, color: '#f59e0b' },
         { name: 'Compound Intel', score: crossDomainChains > 0 ? Math.min(99, 60 + crossDomainChains * 2) : 82, color: '#8b5cf6' },
-        { name: 'Trust', score: 88, color: '#0ea5e9' },
+        { name: 'Trust', score: 88, color: '#4d8fcc' },
         { name: 'Velocity', score: Math.min(95, Math.round(memEntities / 1000 + 60)), color: '#ec4899' },
         { name: 'Provenance', score: 96, color: '#6366f1' },
       ],
@@ -388,7 +388,7 @@ router.get('/agent-economy', ...auth, async (req, res) => {
     }
 
     const seedAgents: AgentRow[] = [
-      { name: 'Helmsman', domain: 'Vessels', color: '#0ea5e9', role: 'Route optimization & weather avoidance', valueMM: 8.2, costSavedK: 312, decisions: 3241, acceptanceRate: 94 },
+      { name: 'Helmsman', domain: 'Vessels', color: '#4d8fcc', role: 'Route optimization & weather avoidance', valueMM: 8.2, costSavedK: 312, decisions: 3241, acceptanceRate: 94 },
       { name: 'Sentinel', domain: 'Aegis', color: '#ef4444', role: 'Threat detection & containment', valueMM: 6.7, costSavedK: 241, decisions: 2180, acceptanceRate: 88 },
       { name: 'Domaine AI', domain: 'Terra', color: '#10b981', role: 'Portfolio stress testing & reallocation', valueMM: 4.1, costSavedK: 142, decisions: 1820, acceptanceRate: 92 },
       { name: 'Lexis', domain: 'Counsel', color: '#8b5cf6', role: 'Contract risk & compliance review', valueMM: 2.9, costSavedK: 88, decisions: 2140, acceptanceRate: 96 },

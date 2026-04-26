@@ -1,7 +1,7 @@
 # GI Design Language v2 — Design System Reference
 
-**Version:** 2.0 (April 2026)  
-**Package:** `@szl-holdings/design-system`  
+**Version:** 2.1 (April 2026)
+**Package:** `@szl-holdings/design-system`
 **Token file:** `packages/design-system/src/tokens/gi-tokens.css`
 
 ---
@@ -219,4 +219,196 @@ import { DesignSystemProvider } from '@szl-holdings/design-system';
 | `Toast` system | ToastContainer + useToast hook, 5 variants, auto-dismiss |
 | `Breadcrumb` | Accessible breadcrumb with icon slots |
 | Extended `v` object | CSS var references for all new tokens in `vars.ts` |
-| Neon palette deprecated | All `accent.neon.*` values removed from product surfaces |
+| Neon palette deprecated | All `accent.neon.*` values deprecated for product surfaces |
+| `--gi-text-muted` corrected | Fixed: was `#7ba0bc` (matched secondary), now `#4a6070` (correct muted) |
+
+---
+
+## Typography
+
+### Font Families
+
+| Role | CSS Variable | Stack | When to use |
+|------|-------------|-------|-------------|
+| Sans (body) | `--gi-font-sans` | Inter → DM Sans → system-ui | All UI body text, labels, data |
+| Display | `--gi-font-display` | DM Sans → Inter → system-ui | Marketing headlines, hero text |
+| Mono | `--gi-font-mono` | JetBrains Mono → Fira Code → Cascadia Code | Code, hashes, IDs, timestamps |
+
+**De-facto system standard:** `Space Grotesk` is used as the display/heading typeface across all command-surface artifacts (loaded from Google Fonts). This is an accepted de-facto standard and should be treated as the canonical display face for product headings until the token is updated.
+
+**Intentional exceptions:**
+- **Pulse** uses `Crimson Pro` (serif) for editorial prose blocks — deliberate intelligence memo aesthetic.
+- **Carlota Jo** uses `Cormorant Garamond` (serif) for all headings — boutique consulting brand identity.
+
+### Text Style Presets
+
+| Preset | Size | Weight | Use |
+|--------|------|--------|-----|
+| `page-title` | 20px | 600 | Top-level page heading |
+| `section-title` | 14px | 600 | Card/section heading |
+| `card-title` | 13px | 600 | Card-level heading |
+| `body` | 13px | 400 | General UI body |
+| `body-sm` | 12px | 400 | Secondary UI body |
+| `label` | 11px | 500 | Form labels, column headers |
+| `caption` | 11px | 400 | Metadata, timestamps |
+| `metric` | 24px | 600 | KPI headline number |
+| `metric-sm` | 18px | 600 | Secondary KPI |
+| `code` | 12px | 400 | Code, hashes (mono) |
+
+**Rule:** Authenticated product headings must not exceed `text-2xl` (24px / `--gi-text-2xl`). Larger type belongs on landing pages, pitch decks, and marketing surfaces only.
+
+---
+
+## Density Rules
+
+Density modes control spatial rhythm across all authenticated surfaces. Set via `data-density` attribute.
+
+| Mode | Page Padding | Section Gap | Card Padding | Row Height | Input Height | Font |
+|------|-------------|------------|-------------|-----------|-------------|------|
+| `comfortable` | 32px | 24px | 20px | 56px | 40px | 13px |
+| `compact` | 24px | 16px | 14px | 40px | 32px | 12px |
+| `dense` | 16px | 12px | 10px | 32px | 28px | 11px |
+
+**Default by surface type:**
+- Command surfaces (Command, Sentra, Vessels, Lyte, Pulse): `compact`
+- Landing / marketing pages: `comfortable`
+- Log / audit surfaces: `dense`
+
+---
+
+## Motion Budget
+
+| Case | Max duration | Easing | CSS Variable |
+|------|-------------|--------|-------------|
+| Color / opacity transitions | 100ms | standard | `--gi-duration-fast` |
+| Panel open/close, slide-in | 200ms | decelerate | `--gi-duration-normal` |
+| Page route transitions | 200ms | decelerate | `--gi-duration-normal` |
+| Decorative / hero animations | **prohibited** | — | — |
+| Looping pulse indicators | 2–4s, opacity only | ease-in-out | custom |
+| Skeleton shimmer | 1.5s | ease | custom |
+
+**Rules:**
+- No `transform: scale()` animations on data content
+- No `rotate()` or complex keyframe sequences in authenticated surfaces
+- Prefer `opacity` + subtle `translateY` (≤8px) for appear/disappear
+- `@media (prefers-reduced-motion: reduce)` enforced in every artifact's CSS
+- Background glow / shadow pulsing animations are prohibited on product surfaces
+
+---
+
+## Navigation Patterns
+
+### Sidebar Navigation
+
+- Background: `--gi-bg-surface`
+- Nav items: `--gi-density-row-height` tall, left-padded per density
+- Active item: product-accent background at 8% opacity, accent-colored text, optional 2px left border
+- Hover item: `--gi-bg-hover` background
+- Section labels: 10px, semibold, uppercase, `--gi-text-muted`, 0.06em letter-spacing
+- Icon size: 16px compact, 18px comfortable
+
+### Top Bar
+
+- Height: 44px compact, 52px comfortable
+- Background: `--gi-bg-surface` / `--gi-bg-overlay`
+- Border-bottom: `--gi-border-subtle`
+- Contains: breadcrumb/context, search trigger, density toggle, user/org switcher
+
+### Command Palette (⌘K)
+
+- Full-overlay modal, `--gi-shadow-4` elevation
+- Background: `--gi-bg-overlay`
+- Search input: full-width, 16px, sans font
+- Results: categorised list, max 8 visible before scroll
+- Selected item: product-accent highlight at 10% opacity
+- Dismiss: `Escape` or click-away
+
+---
+
+## Component Patterns
+
+### Empty State
+
+- Icon: 32px, `--gi-text-muted`
+- Headline: 14px semibold, primary text
+- Body: 13px secondary text, max 2 sentences
+- CTA: optional ghost or secondary button
+- No stock illustrations; no full-bleed background images
+
+### Loading / Skeleton State
+
+- Prefer skeleton shimmer over spinner for content placeholders
+- Shimmer base: `#162030` → `#1e3248`, 1.5s ease loop
+- Spinner: action feedback only (form submit, async in-progress)
+- Loading text: "Loading…" 11px muted — never branded copy for loading states
+
+### Error State
+
+- `ErrorState` component: error icon (accent red), headline, message, optional retry CTA
+- Inline form errors: `--gi-error-text`, 12px, below the field
+- Full-page errors: centered panel on `--gi-bg-base`, never full-page red backgrounds
+
+### Tables
+
+- Header: 10–11px uppercase, `--gi-text-muted`, 0.06em letter-spacing
+- Row height: `--gi-density-row-height`
+- Row hover: `--gi-bg-hover`
+- Row selected: product-accent at 6% opacity + 2px left accent border
+- Borders: `--gi-border-subtle` horizontal only (no vertical grid lines)
+- Numeric columns: right-aligned, monospace font
+- Status column: `StatusBadge` component, not raw colored spans
+- Zebra striping: discouraged; use hover highlight instead
+
+### Forms
+
+- Label: 11px semibold, `--gi-text-secondary`, 4px gap below
+- Input height: `--gi-density-input-height`
+- Border: `--gi-border-default`; focus → `--gi-border-focus`
+- Helper text: 11px, `--gi-text-muted`, below the input
+- Error text: 11px, `--gi-error-text`, below helper text
+- Required marker: `*` in `--gi-accent-red`, after label
+- Disabled: 50% opacity, `not-allowed` cursor
+- Button row: right-aligned, primary + ghost cancel pattern
+
+---
+
+## Intentional Brand Exceptions
+
+These deviations are documented and must not be reverted without design review.
+
+| Artifact | Exception | Reason |
+|---------|-----------|--------|
+| Carlota Jo | Light theme, Cormorant Garamond, stone/cream palette | Boutique consulting brand — deliberately not SZL platform aesthetic |
+| Pulse | Crimson Pro serif for prose blocks | Intelligence memo editorial voice |
+| SZL Holdings marketing | Space Grotesk, gradient hero sections | Marketing surface — different register than product |
+| Mobile (day mode) | Purple-toned light palette | Own light-mode theme distinct from gi-light |
+
+---
+
+## Per-Artifact Token Pattern
+
+### Pattern A — Direct gi-tokens (preferred for new work)
+
+Used by: SZL Holdings, Command, Aegis, Pulse
+
+```css
+@import "@szl-holdings/design-system/tokens/css";
+/* reference --gi-* vars directly */
+background: var(--gi-bg-surface);
+color: var(--gi-text-primary);
+border: 1px solid var(--gi-border-default);
+```
+
+### Pattern B — shadcn HSL bridge (legacy pattern)
+
+Used by: Sentra, Vessels, Lyte, Terra, Counsel
+
+Artifacts using shadcn `ui` components define a `--background`, `--foreground`, `--primary` etc. layer that remaps gi-token values to HSL variables. This is accepted where shadcn is already in use; new artifacts should prefer Pattern A.
+
+```css
+:root {
+  --background: 216 30% 4%;   /* --gi-bg-base */
+  --foreground: 205 18% 92%;  /* --gi-text-primary */
+  --primary: 210 52% 55%;     /* product accent */
+}
+```

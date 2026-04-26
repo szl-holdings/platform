@@ -38,7 +38,7 @@ const ENTITY_COLORS: Record<string, string> = {
   deal: '#22c55e',
   matter: '#8b5cf6',
   threat: '#ef4444',
-  vessel: '#0ea5e9',
+  vessel: '#4d8fcc',
   property: '#f59e0b',
   task: '#3b82f6',
   default: ACCENT,

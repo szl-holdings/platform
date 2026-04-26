@@ -90,7 +90,7 @@ export function AtlasScenePanel({ vesselId, isDemo }: AtlasScenePanelProps) {
   const v = DEMO_VESSEL;
   const vesselIdStr = vesselId != null ? String(vesselId) : undefined;
   const displayId = vesselIdStr ? `VSL-${vesselIdStr.slice(-6).toUpperCase()}` : v.imo;
-  const ACCENT = '#0ea5e9';
+  const ACCENT = '#4d8fcc';
 
   const tabs: { id: Tab; label: string; icon: typeof Anchor }[] = [
     { id: 'position', label: 'Position & Voyage', icon: MapPin },
@@ -102,8 +102,8 @@ export function AtlasScenePanel({ vesselId, isDemo }: AtlasScenePanelProps) {
     <div
       style={{
         borderRadius: '0.75rem',
-        background: 'rgba(14,165,233,0.04)',
-        border: '1px solid rgba(14,165,233,0.14)',
+        background: 'rgba(77,143,204,0.04)',
+        border: '1px solid rgba(77,143,204,0.14)',
         overflow: 'hidden',
       }}
     >
@@ -135,9 +135,9 @@ export function AtlasScenePanel({ vesselId, isDemo }: AtlasScenePanelProps) {
                 fontFamily: 'monospace',
                 padding: '0.1rem 0.4rem',
                 borderRadius: '2rem',
-                background: 'rgba(14,165,233,0.1)',
+                background: 'rgba(77,143,204,0.1)',
                 color: ACCENT,
-                border: '1px solid rgba(14,165,233,0.25)',
+                border: '1px solid rgba(77,143,204,0.25)',
               }}
             >
               DEMO
@@ -262,9 +262,9 @@ export function AtlasScenePanel({ vesselId, isDemo }: AtlasScenePanelProps) {
                 alignItems: 'center',
                 gap: '0.5rem',
                 padding: '0.5rem 0.625rem',
-                background: 'rgba(14,165,233,0.05)',
+                background: 'rgba(77,143,204,0.05)',
                 borderRadius: '0.375rem',
-                border: '1px solid rgba(14,165,233,0.12)',
+                border: '1px solid rgba(77,143,204,0.12)',
               }}
             >
               <Activity style={{ width: 12, height: 12, color: ACCENT, flexShrink: 0 }} />

@@ -30,7 +30,7 @@ export default function CausalDrilldown() {
   ];
 
   const phaseColors: Record<string, string> = {
-    DETECT: '#0ea5e9',
+    DETECT: '#4d8fcc',
     INTERPRET: '#f59e0b',
     DECIDE: '#8b5cf6',
     EXECUTE: '#4B8BDB',
@@ -41,10 +41,10 @@ export default function CausalDrilldown() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <GitBranch className="w-4 h-4" style={{ color: '#0ea5e9' }} />
+          <GitBranch className="w-4 h-4" style={{ color: '#4d8fcc' }} />
           <span
             className="text-xs font-medium uppercase tracking-widest"
-            style={{ color: '#0ea5e9' }}
+            style={{ color: '#4d8fcc' }}
           >
             Lyte · Causal Drilldown
           </span>
@@ -60,12 +60,12 @@ export default function CausalDrilldown() {
         <div
           key={chain.id}
           className="rounded-xl border"
-          style={{ borderColor: 'rgba(14,165,233,0.2)', background: 'rgba(14,165,233,0.02)' }}
+          style={{ borderColor: 'rgba(77,143,204,0.2)', background: 'rgba(77,143,204,0.02)' }}
         >
-          <div className="px-5 py-4 border-b" style={{ borderColor: 'rgba(14,165,233,0.1)' }}>
+          <div className="px-5 py-4 border-b" style={{ borderColor: 'rgba(77,143,204,0.1)' }}>
             <div
               className="text-[10px] font-medium uppercase tracking-widest mb-1"
-              style={{ color: 'rgba(14,165,233,0.6)' }}
+              style={{ color: 'rgba(77,143,204,0.6)' }}
             >
               Correlation ID: {chain.correlation_id}
             </div>
@@ -78,11 +78,11 @@ export default function CausalDrilldown() {
           <div className="p-5 space-y-6">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Activity className="w-3.5 h-3.5" style={{ color: '#0ea5e9' }} />
+                <Activity className="w-3.5 h-3.5" style={{ color: '#4d8fcc' }} />
                 <span className="text-xs font-semibold text-white">Lyte Detections</span>
                 <span
                   className="text-[9px] px-1.5 py-0.5 rounded font-bold"
-                  style={{ color: '#0ea5e9', background: 'rgba(14,165,233,0.15)' }}
+                  style={{ color: '#4d8fcc', background: 'rgba(77,143,204,0.15)' }}
                 >
                   DETECT / VERIFY
                 </span>

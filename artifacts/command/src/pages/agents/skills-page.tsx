@@ -4,7 +4,7 @@ import { SKILLS } from '@szl/a11oy-runtime';
 
 const DOMAIN_COLORS: Record<string, string> = {
   revops: '#8b7ac8',
-  all: '#0ea5e9',
+  all: '#4d8fcc',
   command: '#d4a054',
   aegis: '#ef4444',
   vessels: '#22c55e',
@@ -94,7 +94,7 @@ export function SkillsPage() {
               <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Required Inputs</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 {selectedSkill.requiredInputs.map((inp) => (
-                  <span key={inp} style={{ fontSize: 10, color: '#0ea5e9', background: 'rgba(14,165,233,0.08)', border: '1px solid rgba(14,165,233,0.2)', borderRadius: 4, padding: '2px 8px' }}>{inp}</span>
+                  <span key={inp} style={{ fontSize: 10, color: '#4d8fcc', background: 'rgba(77,143,204,0.08)', border: '1px solid rgba(77,143,204,0.2)', borderRadius: 4, padding: '2px 8px' }}>{inp}</span>
                 ))}
               </div>
             </div>

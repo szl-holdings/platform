@@ -28,7 +28,7 @@ interface GraphEdge {
 }
 
 const DOMAIN_COLORS: Record<string, string> = {
-  vessels: '#0ea5e9',
+  vessels: '#4d8fcc',
   aegis: '#ef4444',
   firestorm: '#ef4444',
   terra: '#22c55e',

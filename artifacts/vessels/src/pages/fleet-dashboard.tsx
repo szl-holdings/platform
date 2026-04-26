@@ -166,7 +166,7 @@ function FleetMap({
                 y={y - 2}
                 width={4}
                 height={4}
-                fill="#0ea5e9"
+                fill="#4d8fcc"
                 opacity={0.6}
                 transform={`rotate(45 ${x} ${y})`}
               />
@@ -1164,7 +1164,7 @@ export default function FleetDashboard() {
               <div
                 className="absolute top-0 left-0 right-0 h-[2px]"
                 style={{
-                  background: 'linear-gradient(90deg, #0ea5e9, rgba(14,165,233,0.3), transparent)',
+                  background: 'linear-gradient(90deg, #4d8fcc, rgba(77,143,204,0.3), transparent)',
                 }}
               />
               <div className="flex items-center gap-0.5 px-3 py-1.5 overflow-x-auto">
@@ -1195,7 +1195,7 @@ export default function FleetDashboard() {
                     options={{
                       filename: 'fleet-manifest',
                       title: 'Fleet Manifest',
-                      accentColor: '#0ea5e9',
+                      accentColor: '#4d8fcc',
                     }}
                   />
                 </div>
@@ -1330,7 +1330,7 @@ export default function FleetDashboard() {
             <div className="mx-3 mt-2">
               <ActivationBanner
                 steps={activationSteps}
-                accentColor="#0ea5e9"
+                accentColor="#4d8fcc"
                 storageKey="vessels_activation_banner"
                 variant="banner"
                 onNavigate={handleNavigate}
@@ -1341,11 +1341,11 @@ export default function FleetDashboard() {
           {activeRole === 'executive' && (
             <div
               className="mx-3 mt-2 rounded-xl border p-3"
-              style={{ borderColor: 'rgba(14,165,233,0.15)', background: 'rgba(14,165,233,0.04)' }}
+              style={{ borderColor: 'rgba(77,143,204,0.15)', background: 'rgba(77,143,204,0.04)' }}
             >
               <div
                 className="text-[10px] uppercase tracking-wider font-semibold mb-1"
-                style={{ color: 'rgba(14,165,233,0.5)' }}
+                style={{ color: 'rgba(77,143,204,0.5)' }}
               >
                 Executive Briefing
               </div>
@@ -1368,11 +1368,11 @@ export default function FleetDashboard() {
           {activeRole === 'buyer' && (
             <div
               className="mx-3 mt-2 rounded-xl border p-3"
-              style={{ borderColor: 'rgba(14,165,233,0.15)', background: 'rgba(14,165,233,0.04)' }}
+              style={{ borderColor: 'rgba(77,143,204,0.15)', background: 'rgba(77,143,204,0.04)' }}
             >
               <div
                 className="text-[10px] uppercase tracking-wider font-semibold mb-1"
-                style={{ color: 'rgba(14,165,233,0.5)' }}
+                style={{ color: 'rgba(77,143,204,0.5)' }}
               >
                 Product Demo View
               </div>
@@ -1420,25 +1420,25 @@ export default function FleetDashboard() {
           <div
             className="mx-3 mt-2 mb-1 rounded-lg px-3 py-2 flex items-center gap-2 overflow-x-auto flex-wrap"
             style={{
-              background: 'rgba(14,165,233,0.03)',
-              border: '1px solid rgba(14,165,233,0.1)',
+              background: 'rgba(77,143,204,0.03)',
+              border: '1px solid rgba(77,143,204,0.1)',
             }}
           >
             <span
               className="text-[8px] font-mono uppercase tracking-widest flex-shrink-0"
-              style={{ color: 'rgba(14,165,233,0.35)' }}
+              style={{ color: 'rgba(77,143,204,0.35)' }}
             >
               Intelligence Sources
             </span>
             {[
               { label: 'AIS Live', active: true, color: '#22c55e' },
-              { label: 'SAR', active: roster.some((v) => v.status === 'dark'), color: '#0ea5e9' },
+              { label: 'SAR', active: roster.some((v) => v.status === 'dark'), color: '#4d8fcc' },
               {
                 label: 'RF GEOINT',
                 active: roster.some((v) => v.status === 'detained'),
                 color: '#8b5cf6',
               },
-              { label: 'Port State', active: true, color: '#0ea5e9' },
+              { label: 'Port State', active: true, color: '#4d8fcc' },
               { label: 'Sanctions DB', active: true, color: '#f97316' },
               { label: 'OFAC/EU/UN', active: true, color: '#f97316' },
             ].map((src) => (
@@ -1464,7 +1464,7 @@ export default function FleetDashboard() {
             ))}
             <span
               className="text-[8px] font-mono ml-auto flex-shrink-0"
-              style={{ color: 'rgba(14,165,233,0.2)' }}
+              style={{ color: 'rgba(77,143,204,0.2)' }}
             >
               Multi-source · Fused · {roster.length} vessels tracked
             </span>
@@ -1574,7 +1574,7 @@ export default function FleetDashboard() {
         <div className="flex items-center gap-0 px-4 pt-0 border-b border-sky-500/10 relative">
           <div
             className="absolute top-0 left-0 right-0 h-[2px]"
-            style={{ background: 'linear-gradient(90deg, rgba(14,165,233,0.4), transparent)' }}
+            style={{ background: 'linear-gradient(90deg, rgba(77,143,204,0.4), transparent)' }}
           />
           {intelTabs.map((tab) => (
             <button

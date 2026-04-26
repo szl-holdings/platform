@@ -32,7 +32,7 @@ type Tab = 'suites' | 'results' | 'compare';
 
 const EVAL_TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; label: string }> = {
   rule: { icon: <Shield className="h-3.5 w-3.5" />, color: '#8b7ac8', label: 'Rule Eval' },
-  simulation: { icon: <Brain className="h-3.5 w-3.5" />, color: '#0ea5e9', label: 'Simulation' },
+  simulation: { icon: <Brain className="h-3.5 w-3.5" />, color: '#4d8fcc', label: 'Simulation' },
   'recommendation-quality': {
     icon: <CheckCircle className="h-3.5 w-3.5" />,
     color: '#22c55e',
@@ -1127,11 +1127,11 @@ export default function EvalStudio() {
             <span
               style={{
                 fontSize: 11,
-                color: '#0ea5e9',
-                background: '#0ea5e920',
+                color: '#4d8fcc',
+                background: '#4d8fcc20',
                 padding: '2px 10px',
                 borderRadius: 20,
-                border: '1px solid #0ea5e940',
+                border: '1px solid #4d8fcc40',
                 fontWeight: 600,
               }}
             >
@@ -1156,7 +1156,7 @@ export default function EvalStudio() {
           >
             {[
               { label: 'Eval Suites', value: suites.length, color: ACCENT },
-              { label: 'Total Cases', value: totalCases, color: '#0ea5e9' },
+              { label: 'Total Cases', value: totalCases, color: '#4d8fcc' },
               { label: 'Red-Team Cases', value: totalRedTeam, color: '#ef4444' },
               {
                 label: 'Avg Pass Rate',

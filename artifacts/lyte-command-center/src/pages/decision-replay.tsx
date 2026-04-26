@@ -85,7 +85,7 @@ const CONNECTOR_COLORS: Record<ReplayEvent['evidenceType'], string> = {
 
 const EVIDENCE_BORDER_COLOR: Record<ReplayEvent['evidenceType'], string> = {
   alloy: 'rgba(245,158,11,0.4)',
-  human: 'rgba(14,165,233,0.4)',
+  human: 'rgba(77,143,204,0.4)',
   system: 'rgba(167,139,250,0.4)',
   escalation: 'rgba(239,68,68,0.4)',
 };
@@ -184,7 +184,7 @@ function EventNode({
                 event.evidenceType === 'alloy'
                   ? 'rgba(245,158,11,0.15)'
                   : event.evidenceType === 'human'
-                    ? 'rgba(14,165,233,0.15)'
+                    ? 'rgba(77,143,204,0.15)'
                     : 'rgba(239,68,68,0.15)',
             }}
           >

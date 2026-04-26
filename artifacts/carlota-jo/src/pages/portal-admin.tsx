@@ -659,7 +659,7 @@ export default function PortalAdminPage() {
             {
               label: 'Total Users',
               value: portals.reduce((s, p) => s + p.userCount, 0).toString(),
-              color: '#0ea5e9',
+              color: '#4d8fcc',
             },
             {
               label: 'Engagements',

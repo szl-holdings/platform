@@ -686,7 +686,7 @@ export default function FactoryFloor() {
                     (w) => w.workflow.trigger === 'webhook' || w.workflow.trigger === 'signal',
                   )
                   .reduce((a, w) => a + w.counts.running, 0),
-                color: '#0ea5e9',
+                color: '#4d8fcc',
               },
               {
                 stage: 'Transform',

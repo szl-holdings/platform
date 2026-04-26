@@ -49,7 +49,7 @@ interface DecisionSchema {
 }
 
 const STAGE_COLORS: Record<string, string> = {
-  Signal: "#0ea5e9",
+  Signal: "#4d8fcc",
   Context: "#8b5cf6",
   Recommendation: "#ec4899",
   Simulation: "#f59e0b",

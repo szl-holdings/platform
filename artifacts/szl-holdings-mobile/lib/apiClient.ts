@@ -214,7 +214,7 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
         domain: 'fleet',
         label: 'Fleet',
         icon: '⚓',
-        accent: '#0ea5e9',
+        accent: '#4d8fcc',
         activeCount: 1,
         criticalCount: 0,
         status: 'operational',

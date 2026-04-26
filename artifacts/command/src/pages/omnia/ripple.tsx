@@ -19,7 +19,7 @@ const ACCENT = '#8b7ac8';
 const DOMAIN_COLORS: Record<string, string> = {
   aegis: '#ef4444',
   sentra: '#22c55e',
-  vessels: '#0ea5e9',
+  vessels: '#4d8fcc',
   terra: '#22c55e',
   counsel: '#8b5cf6',
   command: '#8b7ac8',

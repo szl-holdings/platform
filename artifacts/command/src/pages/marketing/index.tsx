@@ -32,7 +32,7 @@ export function MarketingHome() {
       name: 'Vessels',
       icon: Anchor,
       desc: 'Maritime fleet management & routing',
-      color: 'text-[#0ea5e9]',
+      color: 'text-[#4d8fcc]',
     },
     {
       id: 'terra',

@@ -81,7 +81,7 @@ export async function seedHoldingsFundops() {
         stage: 'Series A',
         founded: '2021',
         website: 'https://lyte.szlholdings.com',
-        color: '#0ea5e9',
+        color: '#4d8fcc',
         metrics: { arr: '$4.2M', customers: 31, nrr: '127%', runway: '28 months' },
         metadata: { employees: 41, hq: 'New York, NY' },
       },
