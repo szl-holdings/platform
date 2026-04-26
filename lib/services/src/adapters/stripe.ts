@@ -962,4 +962,213 @@ export class StripeAdapter extends ServiceAdapter {
 
     return { verified, event };
   }
+
+  /**
+   * createBankAccountTokenFromPlaid — converts a Plaid processor token into a
+   * Stripe bank account token. The token is subsequently attached to the
+   * Stripe customer as a payment method for ACH debits.
+   */
+  async createBankAccountTokenFromPlaid(
+    processorToken: string,
+  ): Promise<{ id: string; bank_account?: { bank_name?: string; last4?: string } }> {
+    if (!this.isLive) {
+      return { id: `btok_demo_${Date.now()}`, bank_account: { bank_name: 'Demo Bank', last4: '0000' } };
+    }
+    const params = new URLSearchParams();
+    params.set('bank_account[account_holder_type]', 'company');
+    params.set('bank_account[country]', 'US');
+    params.set('bank_account[currency]', 'usd');
+    params.set('bank_account[token]', processorToken);
+
+    const data = (await this.stripeRequest('/tokens', {
+      method: 'POST',
+      body: params.toString(),
+    })) as { id: string; bank_account?: { bank_name?: string; last4?: string } };
+
+    return data;
+  }
+
+  /**
+   * createAchCharge — initiates an ACH bank debit charge.
+   *
+   * Uses the Stripe Charges API (POST /v1/charges) with the customer's
+   * attached bank account source (`ba_*`). This is the correct Stripe path
+   * for ACH charges that originate from a Plaid processor token, since:
+   *   btok_* → attachBankAccountToCustomer → ba_* (customer source)
+   * and the Charges API is the standard way to debit a `ba_*` source.
+   *
+   * Stripe sends charge.pending → charge.succeeded | charge.failed webhooks
+   * for ACH charges, which are already handled by billing-webhook.ts.
+   */
+  async createAchCharge(options: {
+    amount: number;
+    currency: string;
+    customerId: string;
+    paymentMethodId: string; // ba_* bank account source ID
+    invoiceId: string;
+    orgId: number;
+    internalInvoiceId?: string;
+  }): Promise<{ id: string; status: string; amount: number }> {
+    if (!this.isLive) {
+      return {
+        id: `ch_demo_ach_${Date.now()}`,
+        status: 'pending',
+        amount: options.amount,
+      };
+    }
+
+    // Use the Stripe Charges API to debit the bank account source (ba_*).
+    // PaymentIntents require pm_us_bank_account (Financial Connections);
+    // ba_* bank account sources must go through the legacy Charges API.
+    const params = new URLSearchParams();
+    params.set('amount', String(options.amount));
+    params.set('currency', options.currency);
+    params.set('customer', options.customerId);
+    params.set('source', options.paymentMethodId); // ba_* bank account source
+    params.set('metadata[invoiceId]', options.invoiceId);
+    params.set('metadata[internalInvoiceId]', options.internalInvoiceId ?? options.invoiceId);
+    params.set('metadata[orgId]', String(options.orgId));
+    params.set('metadata[rail]', 'ach');
+
+    const data = (await this.stripeRequest('/charges', {
+      method: 'POST',
+      body: params.toString(),
+    })) as { id: string; status: string; amount: number };
+
+    return { id: data.id, status: data.status, amount: data.amount };
+  }
+
+  /**
+   * attachBankAccountToCustomer — converts a Plaid processor bank account token
+   * (btok_*) into a Customer Source and returns the resulting bank account
+   * object. Callers should persist the returned `id` (ba_*) as the payment
+   * method reference rather than the raw bank token.
+   */
+  async attachBankAccountToCustomer(
+    customerId: string,
+    bankToken: string,
+  ): Promise<{ id: string; bank_name?: string; last4?: string }> {
+    if (!this.isLive) {
+      return { id: `ba_demo_${Date.now()}`, bank_name: 'Demo Bank', last4: '0000' };
+    }
+    const params = new URLSearchParams();
+    params.set('source', bankToken);
+    const data = (await this.stripeRequest(`/customers/${customerId}/sources`, {
+      method: 'POST',
+      body: params.toString(),
+    })) as { id: string; bank_name?: string; last4?: string };
+    return { id: data.id, bank_name: data.bank_name, last4: data.last4 };
+  }
+
+  /**
+   * markInvoicePaidOutOfBand — marks a Stripe invoice as paid without charging
+   * a payment method. Used when an out-of-band payment (e.g. confirmed crypto
+   * on-chain) settles the obligation so Stripe invoice state stays in sync.
+   */
+  async markInvoicePaidOutOfBand(stripeInvoiceId: string): Promise<void> {
+    if (!this.isLive) {
+      return;
+    }
+    const params = new URLSearchParams();
+    params.set('paid_out_of_band', 'true');
+    await this.stripeRequest(`/invoices/${stripeInvoiceId}/pay`, {
+      method: 'POST',
+      body: params.toString(),
+    });
+  }
+
+  /**
+   * payStripeInvoice — pays an existing Stripe invoice with a specific payment
+   * method. Used by the card rail to charge via the Stripe Invoices API so the
+   * payment appears in the Stripe dashboard ledger.
+   */
+  async payStripeInvoice(
+    stripeInvoiceId: string,
+    paymentMethodId: string,
+  ): Promise<{ status: string }> {
+    if (!this.isLive) {
+      return { status: 'paid' };
+    }
+    const body = new URLSearchParams({ payment_method: paymentMethodId });
+    const result = (await this.stripeRequest(`/invoices/${stripeInvoiceId}/pay`, {
+      method: 'POST',
+      body: body.toString(),
+    })) as { status: string };
+    return { status: result.status };
+  }
+
+  /**
+   * createPaymentIntentForRail — creates a Stripe PaymentIntent with
+   * `confirm: true` for a one-off card charge initiated from the unified rail
+   * adapter (i.e., when there is no existing Stripe invoice to pay).
+   */
+  async createPaymentIntentForRail(params: {
+    amount: number;
+    currency: string;
+    paymentMethodId: string;
+    internalInvoiceId: string;
+    orgId: number;
+  }): Promise<{ id: string; status: string }> {
+    if (!this.isLive) {
+      return { id: `pi_demo_${Date.now()}`, status: 'succeeded' };
+    }
+    const body = new URLSearchParams({
+      amount: String(params.amount),
+      currency: params.currency,
+      payment_method: params.paymentMethodId,
+      confirm: 'true',
+      'automatic_payment_methods[enabled]': 'true',
+      'automatic_payment_methods[allow_redirects]': 'never',
+      'metadata[internalInvoiceId]': params.internalInvoiceId,
+      'metadata[orgId]': String(params.orgId),
+      'metadata[rail]': 'card',
+    });
+    const result = (await this.stripeRequest('/payment_intents', {
+      method: 'POST',
+      body: body.toString(),
+    })) as { id: string; status: string };
+    return { id: result.id, status: result.status };
+  }
+
+  /**
+   * getStripePayouts — retrieves recently paid-out transfers for reconciliation.
+   * Returns the payouts with their associated balance transaction details.
+   */
+  async getStripePayouts(
+    createdAfterUnix: number,
+    limit = 50,
+  ): Promise<
+    Array<{
+      id: string;
+      amount: number;
+      currency: string;
+      arrivalDate: number;
+      status: string;
+      description?: string;
+    }>
+  > {
+    if (!this.isLive) {
+      return [];
+    }
+    const data = (await this.stripeRequest(
+      `/payouts?status=paid&created[gte]=${createdAfterUnix}&limit=${limit}`,
+    )) as {
+      data: Array<{
+        id: string;
+        amount: number;
+        currency: string;
+        arrival_date: number;
+        status: string;
+        description?: string;
+      }>;
+    };
+    return data.data.map((p) => ({
+      id: p.id,
+      amount: p.amount,
+      currency: p.currency,
+      arrivalDate: p.arrival_date,
+      status: p.status,
+      description: p.description,
+    }));
+  }
 }

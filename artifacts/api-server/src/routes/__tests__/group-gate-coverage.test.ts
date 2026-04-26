@@ -42,6 +42,16 @@ const EXEMPTIONS = new Set([
   // available, but the route is not hard-blocked for users without an active org.
   // The /connectors handlers themselves enforce ownership checks at the record level.
   'data-services.ts::/connectors',
+
+  // billing.ts — payment-rail webhook receivers (Plaid, Coinbase Commerce)
+  // These routes MUST be exempt from tenantScope: payment processors deliver
+  // events server-to-server without any user session. Auth is enforced instead
+  // by cryptographic webhook signature verification (HMAC/JWS) in each handler.
+  // Unauthenticated payloads with invalid or missing signatures are rejected 400.
+  // In demo mode (no API keys configured) signature checks are skipped to allow
+  // local development without live credentials.
+  'billing.ts::/webhooks/plaid',
+  'billing.ts::/webhooks/coinbase',
 ]);
 
 function isExempt(file: string, prefix: string): boolean {

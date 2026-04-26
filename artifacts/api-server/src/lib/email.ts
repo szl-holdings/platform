@@ -2036,3 +2036,166 @@ export function buildAgentTicketReplyEmail(params: {
   ].join('\n');
   return { subject, html, text };
 }
+
+// ─── ACH payment failed dunning email ─────────────────────────────────────────
+
+export interface AchPaymentFailedEmailOptions {
+  userName: string;
+  invoiceId: string;
+  amount: string;
+  currency: string;
+  returnCode?: string;
+  reason: string;
+  billingUrl?: string;
+}
+
+export function buildAchPaymentFailedEmail(opts: AchPaymentFailedEmailOptions): string {
+  const billingUrl =
+    opts.billingUrl ??
+    `${process.env.APP_URL ?? 'https://szlholdings.com'}/billing/invoices/${opts.invoiceId}`;
+
+  return szlBrand(`
+    <h2 style="color:#dc2626;">&#9888; ACH Payment Failed — Action Required</h2>
+    <p>Hello ${opts.userName},</p>
+    <p>Your ACH bank transfer for Invoice <strong>#${opts.invoiceId}</strong> was returned by your bank and could not be processed.</p>
+    <div class="highlight">
+      <p class="label">Invoice</p>
+      <p>#${opts.invoiceId}</p>
+      <p class="label" style="margin-top:8px;">Amount</p>
+      <p>${opts.currency} ${opts.amount}</p>${
+        opts.returnCode
+          ? `
+      <p class="label" style="margin-top:8px;">Return Code</p>
+      <p style="font-family:monospace;font-weight:700;">${opts.returnCode}</p>`
+          : ''
+      }
+      <p class="label" style="margin-top:8px;">Reason</p>
+      <p>${opts.reason}</p>
+    </div>
+    <p>To keep your account in good standing, please update your payment method and retry the payment:</p>
+    <a class="cta" href="${billingUrl}">Update Payment &amp; Retry</a>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">If you believe this was an error, please contact your bank or reach us at <strong>billing@szlholdings.com</strong>.</p>
+  `);
+}
+
+// ─── Crypto payment failure dunning email ─────────────────────────────────────
+
+export interface CryptoPaymentFailedEmailOptions {
+  userName: string;
+  invoiceId: string;
+  amount: string;
+  currency: string;
+  reason: 'failed' | 'expired' | 'underpaid' | 'overpaid' | 'delayed';
+  coinbaseChargeCode?: string;
+  billingUrl?: string;
+}
+
+export function buildCryptoPaymentFailedEmail(opts: CryptoPaymentFailedEmailOptions): string {
+  const billingUrl =
+    opts.billingUrl ??
+    `${process.env.APP_URL ?? 'https://szlholdings.com'}/billing/invoices/${opts.invoiceId}`;
+
+  const reasonText: Record<CryptoPaymentFailedEmailOptions['reason'], string> = {
+    failed: 'The crypto payment could not be confirmed on-chain.',
+    expired: 'The payment window expired before a transaction was detected. Coinbase Commerce charges expire after 60 minutes.',
+    underpaid: 'The amount received was less than the invoice total. Partial crypto payments cannot be automatically applied.',
+    overpaid: 'An overpayment was detected. Please contact us to arrange a credit or refund of the excess.',
+    delayed: 'Your crypto transaction has been detected but is awaiting additional network confirmations. We will notify you once it clears.',
+  };
+
+  const headingColor = opts.reason === 'delayed' ? '#d97706' : '#dc2626';
+  const heading =
+    opts.reason === 'delayed'
+      ? '&#9203; Crypto Payment Awaiting Confirmation'
+      : '&#9888; Crypto Payment Issue — Action Required';
+
+  return szlBrand(`
+    <h2 style="color:${headingColor};">${heading}</h2>
+    <p>Hello ${opts.userName},</p>
+    <p>${reasonText[opts.reason]}</p>
+    <div class="highlight">
+      <p class="label">Invoice</p>
+      <p>#${opts.invoiceId}</p>
+      <p class="label" style="margin-top:8px;">Amount Due</p>
+      <p>${opts.currency} ${opts.amount}</p>${
+        opts.coinbaseChargeCode
+          ? `
+      <p class="label" style="margin-top:8px;">Coinbase Charge Reference</p>
+      <p style="font-family:monospace;">${opts.coinbaseChargeCode}</p>`
+          : ''
+      }
+    </div>
+    ${
+      opts.reason !== 'delayed'
+        ? `<p>To keep your account current, you can retry payment via a different method:</p>
+    <a class="cta" href="${billingUrl}">Retry Payment</a>`
+        : `<p>No action is required at this time. We will update you as soon as the transaction is confirmed.</p>
+    <a class="cta" href="${billingUrl}">View Invoice</a>`
+    }
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">Questions? Contact us at <strong>billing@szlholdings.com</strong>.</p>
+  `);
+}
+
+export function buildCryptoPaymentFailedEmailSubject(
+  opts: Pick<CryptoPaymentFailedEmailOptions, 'reason' | 'invoiceId'>,
+): string {
+  if (opts.reason === 'delayed') {
+    return `Crypto payment awaiting confirmation — Invoice #${opts.invoiceId}`;
+  }
+  return `Crypto payment issue — Invoice #${opts.invoiceId}`;
+}
+
+// ─── Settlement reconciliation alert email ────────────────────────────────────
+
+export interface ReconciliationMismatchEmailOptions {
+  mismatchCount: number;
+  totalChecked: number;
+  mismatches: Array<{
+    invoiceId: string;
+    rail: string;
+    expectedAmount: string;
+    actualAmount?: string;
+    issue: string;
+  }>;
+  reportDate: string;
+  adminUrl?: string;
+}
+
+export function buildReconciliationMismatchEmail(opts: ReconciliationMismatchEmailOptions): string {
+  const adminUrl =
+    opts.adminUrl ??
+    `${process.env.APP_URL ?? 'https://szlholdings.com'}/admin/billing/reconciliation`;
+
+  const mismatchRows = opts.mismatches
+    .slice(0, 10)
+    .map(
+      (m) => `
+    <tr style="border-top:1px solid #f3f4f6;">
+      <td style="padding:8px 4px;font-family:monospace;font-size:12px;">${m.invoiceId}</td>
+      <td style="padding:8px 4px;text-transform:uppercase;font-size:12px;">${m.rail}</td>
+      <td style="padding:8px 4px;font-size:12px;">${m.expectedAmount}</td>
+      <td style="padding:8px 4px;font-size:12px;">${m.actualAmount ?? '—'}</td>
+      <td style="padding:8px 4px;color:#dc2626;font-size:12px;">${m.issue}</td>
+    </tr>`,
+    )
+    .join('');
+
+  return szlBrand(`
+    <h2 style="color:#dc2626;">&#9888; Settlement Reconciliation — Mismatches Detected</h2>
+    <p>The daily settlement reconciliation job for <strong>${opts.reportDate}</strong> completed with <strong>${opts.mismatchCount}</strong> mismatch(es) out of ${opts.totalChecked} records checked.</p>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin:16px 0;">
+      <thead>
+        <tr style="background:#f9fafb;">
+          <th style="padding:8px 4px;text-align:left;font-weight:600;color:#374151;">Invoice ID</th>
+          <th style="padding:8px 4px;text-align:left;font-weight:600;color:#374151;">Rail</th>
+          <th style="padding:8px 4px;text-align:left;font-weight:600;color:#374151;">Expected</th>
+          <th style="padding:8px 4px;text-align:left;font-weight:600;color:#374151;">Actual</th>
+          <th style="padding:8px 4px;text-align:left;font-weight:600;color:#374151;">Issue</th>
+        </tr>
+      </thead>
+      <tbody>${mismatchRows}</tbody>
+    </table>
+    ${opts.mismatches.length > 10 ? `<p style="font-size:12px;color:#6b7280;">Showing 10 of ${opts.mismatches.length} mismatches. View all in the admin panel.</p>` : ''}
+    <a class="cta" href="${adminUrl}">Open Reconciliation Dashboard</a>
+  `);
+}

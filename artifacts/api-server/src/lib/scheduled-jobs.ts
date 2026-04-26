@@ -3,6 +3,7 @@ import { durableJobQueue } from "@szl-holdings/forge-runtime";
 import { serverTelemetry } from "@szl-holdings/observability";
 
 export const NAMED_JOB_TYPES = {
+  DAILY_SETTLEMENT_RECONCILIATION: "daily_settlement_reconciliation",
   WEEKLY_ECOSYSTEM_HEALTH_BRIEFING: "weekly_ecosystem_health_briefing",
   DAILY_LYTE_DIGEST: "daily_lyte_digest",
   DAILY_READINESS_DIGEST: "daily_readiness_digest",
@@ -63,6 +64,7 @@ function registerEntry(entry: Omit<JobScheduleEntry, "runCount" | "failCount">) 
   jobRegistry.set(entry.type, { ...entry, runCount: 0, failCount: 0 });
 }
 
+registerEntry({ type: NAMED_JOB_TYPES.DAILY_SETTLEMENT_RECONCILIATION, name: "Daily Settlement Reconciliation", description: "Pulls Coinbase Commerce settlements and Stripe ACH payouts, matches them to internal invoices, and flags mismatches. Sends a reconciliation alert email to the configured billing admin address (BILLING_RECONCILIATION_EMAIL) when mismatches are detected. Safe to run multiple times per day; idempotent by revenue event idempotency keys.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, name: "Weekly Ecosystem Health Briefing", description: "Generates and delivers the weekly Ecosystem Autopilot briefing — capability maturity changes, drift alerts, feature usage trends, feedback sentiment shifts, and competitive positioning deltas. Delivered via email, Slack, and in-app notification.", schedule: "weekly", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, name: "Daily Pulse Briefing Digest", description: "Delivers the latest published Pulse briefing to all active email subscribers. Filters sections per subscription's domain selection and tracks last-sent briefing to prevent duplicate delivery.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, name: "Daily Lyte Digest", description: "Summarizes the day's signals, incidents, and actions across the Lyte observability platform. Sends digest to subscribed operators.", schedule: "daily", enabled: true });
@@ -305,6 +307,200 @@ async function enqueueNamedJob(type: NamedJobType, payload: Record<string, unkno
     return undefined;
   }
 }
+
+// ─── Settlement Reconciliation ────────────────────────────────────────────────
+
+durableJobQueue.register(NAMED_JOB_TYPES.DAILY_SETTLEMENT_RECONCILIATION, async (job) => {
+  const start = Date.now();
+  updateRegistry(NAMED_JOB_TYPES.DAILY_SETTLEMENT_RECONCILIATION, { lastStatus: "running", lastRunAt: start });
+
+  try {
+    const { getCoinbaseSettlements } = await import('./coinbase-adapter');
+    const { services } = await import('@szl-holdings/services');
+    const { db, revenueEventsTable, invoicesTable } = await import('@szl-holdings/db');
+    const { eq, gte } = await import('drizzle-orm');
+    const { sendEmail, buildReconciliationMismatchEmail } = await import('./email');
+
+    const reportDate = new Date().toISOString().slice(0, 10);
+    const windowStart = new Date();
+    windowStart.setDate(windowStart.getDate() - 7);
+
+    // 1. Pull Coinbase settlements for the 7-day window.
+    // Returns: Array<{ chargeId, code, amountUsd, currency, settledAt, metadata, transactionId, network }>
+    const coinbaseSettlements = await getCoinbaseSettlements(windowStart, new Date());
+
+    // 2. Pull Stripe ACH payouts for the 7-day window.
+    // getStripePayouts(createdAfterUnix, limit) → Array<{ id, amount, currency, arrivalDate, status }>
+    const stripePayouts = await services.stripe
+      .getStripePayouts(Math.floor(windowStart.getTime() / 1000), 100)
+      .catch((err: unknown) => {
+        logger.warn({ err }, '[settlement-job] Failed to fetch Stripe payouts; skipping Stripe reconciliation');
+        return [] as Array<{ id: string; amount: number; currency: string; arrivalDate: number; status: string }>;
+      });
+
+    // 3. Pull all rail revenue events in the window
+    const events = await db
+      .select()
+      .from(revenueEventsTable)
+      .where(
+        gte(revenueEventsTable.createdAt, windowStart),
+      );
+
+    const railEvents = events.filter(
+      (e) =>
+        e.eventType === 'ach.charge.initiated' ||
+        e.eventType === 'ach.charge.succeeded' ||
+        e.eventType === 'crypto.charge.failed' ||
+        e.eventType === 'crypto.charge.confirmed',
+    );
+
+    // 4. Cross-reference & flag mismatches
+    const mismatches: Array<{
+      invoiceId: string;
+      rail: string;
+      expectedAmount: string;
+      actualAmount?: string;
+      issue: string;
+    }> = [];
+
+    let totalChecked = 0;
+
+    // Build lookup maps for O(1) matching
+    // Coinbase settlements: keyed by chargeId and by metadata.invoiceId
+    const coinbaseByChargeId = new Map(
+      coinbaseSettlements.map((cs: { chargeId: string; metadata?: Record<string, string>; amountUsd: string }) => [cs.chargeId, cs]),
+    );
+    const coinbaseByInvoiceId = new Map(
+      coinbaseSettlements
+        .filter((cs: { metadata?: Record<string, string> }) => cs.metadata?.['invoiceId'])
+        .map((cs: { chargeId: string; metadata: Record<string, string>; amountUsd: string }) => [cs.metadata['invoiceId'], cs]),
+    );
+
+    // Stripe payouts: keyed by amount+currency for loose matching (no invoice-level granularity)
+    const stripePayoutAmounts = new Set(
+      stripePayouts.map((p) => `${p.currency.toLowerCase()}-${p.amount}`),
+    );
+
+    for (const evt of railEvents) {
+      totalChecked++;
+      const rail = evt.eventType.startsWith('ach') ? 'ach' : 'crypto';
+      const expectedAmount = evt.amount ?? '0';
+      const invoiceRef = evt.invoiceId ?? 'unknown';
+      const evtMeta = (evt.metadata as Record<string, unknown>) ?? {};
+
+      if (rail === 'crypto' && evt.eventType === 'crypto.charge.confirmed') {
+        // Match against Coinbase settlements by chargeId (stored in event metadata) or invoiceId
+        const coinbaseChargeId = evtMeta['coinbaseChargeId'] as string | undefined;
+        const matched =
+          (coinbaseChargeId && coinbaseByChargeId.has(coinbaseChargeId)) ||
+          coinbaseByInvoiceId.has(String(invoiceRef));
+
+        if (!matched) {
+          mismatches.push({
+            invoiceId: String(invoiceRef),
+            rail: 'crypto',
+            expectedAmount,
+            issue: 'Confirmed crypto charge not found in Coinbase settlement list for the reconciliation window',
+          });
+        }
+      }
+
+      if (rail === 'ach' && evt.eventType === 'ach.charge.initiated') {
+        // For each ACH charge initiated in the window, verify there is a
+        // corresponding ach.charge.succeeded event with the same chargeId.
+        // This is more reliable than payout-amount matching: Stripe payouts are
+        // batch aggregates (not invoice-level), so amount matching produces
+        // false positives/negatives. Charge-level idempotency keys are exact.
+        const initiatedChargeId = evtMeta['chargeId'] as string | undefined;
+        if (initiatedChargeId) {
+          const hasSucceeded = railEvents.some(
+            (e) =>
+              e.eventType === 'ach.charge.succeeded' &&
+              ((e.metadata as Record<string, unknown>)?.['chargeId'] as string) === initiatedChargeId,
+          );
+          // Only flag as mismatch if we have payouts data (live Stripe env) and
+          // the charge is old enough to have settled (>3 business days ≈ 5 calendar days).
+          const initiatedAt = evt.createdAt ? new Date(evt.createdAt) : null;
+          const settlementCutoff = new Date();
+          settlementCutoff.setDate(settlementCutoff.getDate() - 5);
+          if (!hasSucceeded && initiatedAt && initiatedAt < settlementCutoff && stripePayouts.length > 0) {
+            mismatches.push({
+              invoiceId: String(invoiceRef),
+              rail: 'ach',
+              expectedAmount,
+              issue: `ACH charge ${initiatedChargeId} initiated >5 days ago but no succeeded event found — possible missed webhook`,
+            });
+          }
+        }
+      }
+    }
+
+    // 5. Check for invoices still 'open' more than 7 days after ACH initiation
+    const achInitiated = railEvents.filter((e) => e.eventType === 'ach.charge.initiated');
+    const staleCutoff = new Date();
+    staleCutoff.setDate(staleCutoff.getDate() - 7);
+
+    for (const evt of achInitiated) {
+      if (evt.createdAt && evt.createdAt < staleCutoff) {
+        // Prefer internalInvoiceId from metadata (numeric DB PK) to avoid
+        // treating Stripe in_xxx IDs as the canonical invoice reference.
+        const meta = (evt.metadata as Record<string, unknown> | null) ?? {};
+        const candidateId = meta['internalInvoiceId'] ?? evt.invoiceId;
+        if (!candidateId) continue;
+        const rawId = parseInt(String(candidateId), 10);
+        if (isNaN(rawId)) continue;
+        const [inv] = await db
+          .select({ id: invoicesTable.id, status: invoicesTable.status, amount: invoicesTable.amount })
+          .from(invoicesTable)
+          .where(eq(invoicesTable.id, rawId));
+        if (inv && inv.status === 'open') {
+          totalChecked++;
+          mismatches.push({
+            invoiceId: String(inv.id),
+            rail: 'ach',
+            expectedAmount: String(inv.amount),
+            issue: 'ACH charge initiated >7 days ago but invoice still open — may have been missed by webhook',
+          });
+        }
+      }
+    }
+
+    // 6. Alert if mismatches found
+    if (mismatches.length > 0) {
+      const adminEmail = process.env.BILLING_RECONCILIATION_EMAIL ?? process.env.ADMIN_EMAIL;
+      if (adminEmail) {
+        await sendEmail({
+          to: adminEmail,
+          subject: `Settlement reconciliation: ${mismatches.length} mismatch(es) — ${reportDate}`,
+          html: buildReconciliationMismatchEmail({
+            mismatchCount: mismatches.length,
+            totalChecked,
+            mismatches,
+            reportDate,
+          }),
+          text: `Settlement reconciliation for ${reportDate} found ${mismatches.length} mismatch(es) out of ${totalChecked} records.`,
+        });
+      }
+    }
+
+    updateRegistry(NAMED_JOB_TYPES.DAILY_SETTLEMENT_RECONCILIATION, {
+      lastStatus: "completed",
+      lastDurationMs: Date.now() - start,
+    });
+    logger.info(
+      { jobId: job.id, totalChecked, mismatchCount: mismatches.length },
+      "daily_settlement_reconciliation: complete",
+    );
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "daily_settlement_reconciliation: fatal");
+    updateRegistry(NAMED_JOB_TYPES.DAILY_SETTLEMENT_RECONCILIATION, {
+      lastStatus: "failed",
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_SETTLEMENT_RECONCILIATION)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
+});
 
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
   const start = Date.now();

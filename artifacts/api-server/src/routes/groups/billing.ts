@@ -86,6 +86,34 @@ export function register(router: IRouter): void {
     ),
   );
 
+  router.use('/billing/ach', _writeLimiter);
+  router.use('/billing/ach', optionalIdempotencyMiddleware);
+  router.use('/billing/crypto', _writeLimiter);
+  router.use('/billing/crypto', optionalIdempotencyMiddleware);
+  router.use('/billing/rails', _readLimiter);
+  router.use('/billing/rails', _writeLimiter);
+  router.use(
+    lazyMatch(
+      ['/billing/ach', '/billing/crypto', '/billing/rails'],
+      () => import('../billing-rails'),
+      'billing-rails',
+    ),
+  );
+
+  // Webhook routes must NOT be under /billing (which has tenantScope({ required: true })).
+  // External providers (Plaid, Coinbase Commerce) send unauthenticated HTTP POST requests;
+  // they cannot provide a tenant auth token. Signature verification in the handler provides
+  // the necessary security. A per-IP rate limiter is used instead of per-user.
+  router.use('/webhooks/plaid', _readLimiter);
+  router.use('/webhooks/coinbase', _readLimiter);
+  router.use(
+    lazyMatch(
+      ['/webhooks/plaid', '/webhooks/coinbase'],
+      () => import('../billing-rails'),
+      'billing-rails-webhooks',
+    ),
+  );
+
   router.use('/treasury', tenantScope({ required: true }));
   router.use('/treasury', _readLimiter);
   router.use('/treasury', _writeLimiter);

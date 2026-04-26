@@ -465,6 +465,226 @@ async function handleTaxIdDeleted(event: StripeEventPayload): Promise<void> {
   });
 }
 
+// ─── ACH-specific handlers ────────────────────────────────────────────────────
+
+/**
+ * handleChargePending — fires when a Stripe ACH charge is initiated but not
+ * yet settled (3–5 business days expected). We do NOT change the invoice status
+ * yet; the `ach.charge.initiated` revenue event is already written by the
+ * payment-rail-adapter. This handler writes the audit trail and logs the event.
+ */
+async function handleChargePending(event: StripeEventPayload): Promise<void> {
+  const charge = event.data.object;
+  const paymentMethodDetails = charge['payment_method_details'] as Record<string, unknown> | undefined;
+  // Detect ACH from both legacy Charges API (ach_debit) and PaymentIntents (us_bank_account)
+  const isAch =
+    (charge['payment_method_types'] as string[] | undefined)?.includes('us_bank_account') ||
+    paymentMethodDetails?.['type'] === 'us_bank_account' ||
+    paymentMethodDetails?.['type'] === 'ach_debit';
+
+  if (!isAch) return;
+
+  logger.info(
+    { chargeId: charge['id'], amount: charge['amount'] },
+    '[webhook] ACH charge.pending',
+  );
+
+  const metadata = charge['metadata'] as Record<string, string> | undefined;
+  const orgId = resolveOrgId(metadata, 'charge.pending', event.id);
+
+  await writeBillingAudit({
+    action: 'ach.charge.pending',
+    resource: 'charge',
+    resourceId: charge['id'] as string,
+    orgId,
+    stripeEventId: event.id,
+    stripeCustomerId: charge['customer'] as string | null,
+    after: {
+      rail: 'ach',
+      status: 'pending',
+      amount: (charge['amount'] as number) / 100,
+      invoiceId: metadata?.['invoiceId'],
+    },
+  });
+}
+
+/**
+ * handleChargeSucceeded — fires when an ACH charge fully settles. For ACH
+ * PaymentIntents the invoiceId is stored in metadata; we mark the internal
+ * invoice as paid and append a revenue event.
+ */
+async function handleChargeSucceeded(event: StripeEventPayload): Promise<void> {
+  const charge = event.data.object;
+  const paymentMethodDetails = charge['payment_method_details'] as Record<string, unknown> | undefined;
+  const isAch =
+    (charge['payment_method_types'] as string[] | undefined)?.includes('us_bank_account') ||
+    paymentMethodDetails?.['type'] === 'us_bank_account' ||
+    paymentMethodDetails?.['type'] === 'ach_debit';
+
+  if (!isAch) return;
+
+  logger.info(
+    { chargeId: charge['id'], amount: charge['amount'] },
+    '[webhook] ACH charge.succeeded',
+  );
+
+  const metadata = charge['metadata'] as Record<string, string> | undefined;
+  const orgId = resolveOrgId(metadata, 'charge.succeeded', event.id);
+  // internalInvoiceId is the integer PK from our DB; invoiceId may be a Stripe in_xxx ID
+  const rawInvoiceId = metadata?.['internalInvoiceId'] ?? metadata?.['invoiceId'];
+  const invoiceId = rawInvoiceId ? parseInt(rawInvoiceId, 10) : null;
+
+  if (orgId && invoiceId && !isNaN(invoiceId)) {
+    await db
+      .update(invoicesTable)
+      .set({ status: 'paid', paidAt: new Date() } as Record<string, unknown>)
+      .where(and(eq(invoicesTable.id, invoiceId), eq(invoicesTable.orgId, orgId)));
+  }
+
+  await db
+    .insert(revenueEventsTable)
+    .values({
+      eventType: 'ach.charge.succeeded',
+      product: 'platform',
+      customerId: charge['customer'] as string | undefined,
+      invoiceId: metadata?.['invoiceId'],
+      amount: charge['amount'] ? String((charge['amount'] as number) / 100) : null,
+      currency: (charge['currency'] as string) ?? 'usd',
+      idempotencyKey: `ach-succeeded-${event.id}`,
+      metadata: { rail: 'ach', stripeEventId: event.id, chargeId: charge['id'], orgId },
+    })
+    .onConflictDoNothing();
+
+  await writeBillingAudit({
+    action: 'ach.charge.succeeded',
+    resource: 'charge',
+    resourceId: charge['id'] as string,
+    orgId,
+    stripeEventId: event.id,
+    stripeCustomerId: charge['customer'] as string | null,
+    after: {
+      rail: 'ach',
+      status: 'succeeded',
+      invoiceId: rawInvoiceId,
+      amount: (charge['amount'] as number) / 100,
+    },
+  });
+}
+
+/**
+ * handleChargeFailed — fires when an ACH payment fails (insufficient funds,
+ * account closed, etc.). Returns the invoice to 'open', records the ACH
+ * return code, and triggers the dunning flow with an ACH-specific template.
+ */
+async function handleChargeFailed(event: StripeEventPayload): Promise<void> {
+  const charge = event.data.object;
+  const paymentMethodDetails = charge['payment_method_details'] as Record<string, unknown> | undefined;
+  const isAch =
+    (charge['payment_method_types'] as string[] | undefined)?.includes('us_bank_account') ||
+    paymentMethodDetails?.['type'] === 'us_bank_account' ||
+    paymentMethodDetails?.['type'] === 'ach_debit';
+
+  if (!isAch) return;
+
+  logger.info(
+    { chargeId: charge['id'], amount: charge['amount'] },
+    '[webhook] ACH charge.failed',
+  );
+
+  const metadata = charge['metadata'] as Record<string, string> | undefined;
+  const orgId = resolveOrgId(metadata, 'charge.failed', event.id);
+  const rawInvoiceId = metadata?.['internalInvoiceId'] ?? metadata?.['invoiceId'];
+  const invoiceId = rawInvoiceId ? parseInt(rawInvoiceId, 10) : null;
+  const failureCode = charge['failure_code'] as string | undefined;
+  const failureMessage = charge['failure_message'] as string | undefined;
+
+  if (orgId && invoiceId && !isNaN(invoiceId)) {
+    await db
+      .update(invoicesTable)
+      .set({ status: 'open' } as Record<string, unknown>)
+      .where(and(eq(invoicesTable.id, invoiceId), eq(invoicesTable.orgId, orgId)));
+  }
+
+  const invoiceForDunning = await resolveInvoiceForDunning(metadata);
+  if (invoiceForDunning) {
+    await triggerAchDunning(invoiceForDunning, failureCode, failureMessage);
+  }
+
+  await writeBillingAudit({
+    action: 'ach.charge.failed',
+    resource: 'charge',
+    resourceId: charge['id'] as string,
+    orgId,
+    stripeEventId: event.id,
+    stripeCustomerId: charge['customer'] as string | null,
+    after: {
+      rail: 'ach',
+      status: 'failed',
+      invoiceId: rawInvoiceId,
+      failureCode,
+      failureMessage,
+    },
+  });
+}
+
+async function resolveInvoiceForDunning(
+  metadata: Record<string, string> | undefined,
+): Promise<typeof invoicesTable.$inferSelect | null> {
+  // Prefer internalInvoiceId (integer DB PK) over invoiceId which may be a
+  // Stripe in_xxx or pi_xxx ID. This prevents dunning from silently no-oping
+  // when metadata.invoiceId contains a Stripe string identifier.
+  const rawInvoiceId = metadata?.['internalInvoiceId'] ?? metadata?.['invoiceId'];
+  const orgId = metadata?.['orgId'] ? parseInt(metadata['orgId'], 10) : null;
+  if (!rawInvoiceId || !orgId) return null;
+  const invoiceId = parseInt(rawInvoiceId, 10);
+  if (isNaN(invoiceId)) return null;
+  const [invoice] = await db
+    .select()
+    .from(invoicesTable)
+    .where(and(eq(invoicesTable.id, invoiceId), eq(invoicesTable.orgId, orgId)));
+  return invoice ?? null;
+}
+
+async function triggerAchDunning(
+  invoice: typeof invoicesTable.$inferSelect,
+  returnCode?: string,
+  failureMessage?: string,
+): Promise<void> {
+  try {
+    const { sendEmail, buildAchPaymentFailedEmail } = await import('./email');
+    const { pool } = await import('@szl-holdings/db');
+    const userRes = await pool.query<{ email: string; display_name: string }>(
+      `SELECT u.email, u.display_name
+       FROM users u
+       JOIN user_organizations uo ON uo.user_id = u.id
+       WHERE uo.org_id = $1 AND uo.role IN ('owner','admin','ops')
+       LIMIT 3`,
+      [invoice.orgId],
+    );
+
+    const { describeAchReturn } = await import('./plaid-adapter');
+    const reason = returnCode ? describeAchReturn(returnCode) : (failureMessage ?? 'ACH payment failed');
+
+    for (const row of userRes.rows) {
+      void sendEmail({
+        to: row.email,
+        subject: `Action required: ACH payment failed — Invoice #${invoice.id}`,
+        html: buildAchPaymentFailedEmail({
+          userName: row.display_name ?? row.email,
+          invoiceId: String(invoice.id),
+          amount: invoice.amount,
+          currency: invoice.currency.toUpperCase(),
+          returnCode,
+          reason,
+        }),
+        text: `ACH payment failed for Invoice #${invoice.id} (${invoice.currency.toUpperCase()} ${invoice.amount}). Reason: ${reason}`,
+      });
+    }
+  } catch (err) {
+    logger.warn({ err, invoiceId: invoice.id }, '[webhook] Failed to dispatch ACH dunning email');
+  }
+}
+
 // ─── Dispatcher map ───────────────────────────────────────────────────────────
 
 const HANDLERS: Record<string, WebhookHandler> = {
@@ -478,6 +698,9 @@ const HANDLERS: Record<string, WebhookHandler> = {
   'invoice.paid': handleInvoicePaid,
   'invoice.payment_failed': handleInvoicePaymentFailed,
   'charge.refunded': handleChargeRefunded,
+  'charge.pending': handleChargePending,
+  'charge.succeeded': handleChargeSucceeded,
+  'charge.failed': handleChargeFailed,
   'payment_intent.succeeded': handlePaymentIntentSucceeded,
 };
 

@@ -246,6 +246,26 @@ export const agentChatSchema = z.object({
   stream: z.boolean().optional().default(false),
 });
 
+// ─── ACH / Plaid schemas ──────────────────────────────────────────────────────
+
+export const achLinkTokenSchema = z.object({
+  redirectUri: z.string().url().max(2048).optional(),
+});
+
+export const achExchangeTokenSchema = z.object({
+  publicToken: z.string().min(1, 'publicToken is required').max(500),
+  accountId: z.string().min(1, 'accountId is required').max(200),
+});
+
+export const billingRailChargeInvoiceSchema = z.object({
+  invoiceId: z.number().int().positive(),
+  paymentMethodId: z.number().int().positive(),
+});
+
+export const billingRailCryptoChargeSchema = z.object({
+  invoiceId: z.number().int().positive(),
+});
+
 export const jobEnqueueSchema = z.object({
   type: z.string().min(1, "type is required").max(200),
   payload: z.record(z.unknown()).optional(),

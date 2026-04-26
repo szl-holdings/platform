@@ -66,7 +66,9 @@ export const invoicesTable = pgTable(
     stripeInvoiceId: text('stripe_invoice_id'),
     amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
     currency: text('currency').notNull().default('usd'),
-    status: text('status', { enum: ['draft', 'open', 'paid', 'void', 'uncollectible'] })
+    status: text('status', {
+      enum: ['draft', 'open', 'paid', 'void', 'uncollectible', 'ach_pending', 'crypto_pending'],
+    })
       .notNull()
       .default('draft'),
     paidAt: timestamp('paid_at'),
@@ -531,7 +533,9 @@ export const billingRailAccountsTable = pgTable(
       .default('card'),
     externalAccountId: text('external_account_id'),
     accountLabel: text('account_label'),
-    status: text('status', { enum: ['active', 'pending', 'inactive', 'rejected'] })
+    status: text('status', {
+      enum: ['active', 'pending', 'inactive', 'rejected', 'pending_verification'],
+    })
       .notNull()
       .default('pending'),
     isDefault: boolean('is_default').notNull().default(false),
