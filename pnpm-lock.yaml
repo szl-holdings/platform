@@ -4035,6 +4035,9 @@ importers:
       '@szl-holdings/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@workspace/guardian':
+        specifier: workspace:*
+        version: link:../guardian
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
