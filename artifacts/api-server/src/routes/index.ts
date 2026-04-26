@@ -268,6 +268,10 @@ router.use("/provenance", lazyMount(() => import("./provenance"), "provenance"))
 // Mounted BEFORE the legacy /nexus router so v1 paths take precedence.
 router.use(lazyMatch(["/nexus/v1"], () => import("./nexus-v1"), "nexus-v1"));
 
+// NEXUS MCP Fabric — bidirectional governed MCP control plane.
+// Handles external server registry, session tracking, anomaly detection, and governed workflows.
+router.use(lazyMatch("/nexus-mcp", () => import("./nexus-mcp"), "nexus-mcp"));
+
 router.use("/nexus", lazyMount(() => import("./nexus"), "nexus"));
 
 // NEXUS Ontology Fabric — unified entity registry + adjacency graph

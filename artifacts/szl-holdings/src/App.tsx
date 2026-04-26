@@ -118,6 +118,7 @@ const SupportSubmitPage = lazy(() => import("@/pages/support-submit"));
 const SupportTicketsPage = lazy(() => import("@/pages/support-tickets"));
 const SupportTicketDetailPage = lazy(() => import("@/pages/support-ticket-detail"));
 const AdminDataRetentionPage = lazy(() => import("@/pages/admin-data-retention"));
+const NexusMcpAdminPage = lazy(() => import("@/pages/nexus-mcp-admin"));
 
 // New platform-repositioning pages
 const DecisioningCommandPage = lazy(() => import("@/pages/decisioning-command"));
@@ -1187,6 +1188,9 @@ function App() {
             </Route>
             <Route path="/admin/data-retention">
               <RequireAuth><Suspense fallback={<PageLoader />}><AdminDataRetentionPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/nexus-mcp">
+              <RequireAuth><RequireAdmin><Suspense fallback={<PageLoader />}><NexusMcpAdminPage /></Suspense></RequireAdmin></RequireAuth>
             </Route>
             <Route path="/admin/growth-command">
               <RequireAuth><RequireAdmin><Suspense fallback={<PageLoader />}><AdminGrowthCommandPage /></Suspense></RequireAdmin></RequireAuth>

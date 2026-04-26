@@ -22,6 +22,15 @@ const RunLedgerPage = lazy(() =>
 const RunLedgerList = lazy(() =>
   import('./run-ledger').then((m) => ({ default: m.RunLedgerList })),
 );
+const McpObservatory = lazy(() =>
+  import('./observatory').then((m) => ({ default: m.McpObservatory })),
+);
+const McpSessionDetail = lazy(() =>
+  import('./observatory/session-detail').then((m) => ({ default: m.McpSessionDetail })),
+);
+const WorkflowComposer = lazy(() =>
+  import('./observatory/compose').then((m) => ({ default: m.WorkflowComposer })),
+);
 
 function PageLoader() {
   return (
@@ -49,6 +58,10 @@ export function SubstrateCommandCenter() {
           {/* ACR Run Ledger — backed by /api/v1/runs */}
           <Route path="/substrate/ledger" component={RunLedgerList} />
           <Route path="/substrate/ledger/:runId" component={RunLedgerPage} />
+          {/* MCP Observatory — bidirectional governed MCP control plane */}
+          <Route path="/substrate/observatory/compose" component={WorkflowComposer} />
+          <Route path="/substrate/observatory/:id" component={McpSessionDetail} />
+          <Route path="/substrate/observatory" component={McpObservatory} />
           <Route component={TrajectoryMap} />
         </Switch>
       </Suspense>

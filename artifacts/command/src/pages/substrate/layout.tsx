@@ -2,6 +2,7 @@ import {
   Activity,
   CheckSquare,
   ChevronRight,
+  Eye,
   FlaskConical,
   GitBranch,
   Layers,
@@ -61,6 +62,13 @@ const NAV_SECTIONS: Array<{ heading: string; items: NavItem[] }> = [
   {
     heading: 'Analysis',
     items: [{ href: '/substrate/counterfactual', label: 'Counterfactual Diff', icon: GitBranch }],
+  },
+  {
+    heading: 'MCP Fabric',
+    items: [
+      { href: '/substrate/observatory', label: 'MCP Observatory', icon: Eye },
+      { href: '/substrate/observatory/compose', label: 'Workflow Composer', icon: Zap },
+    ],
   },
 ];
 
