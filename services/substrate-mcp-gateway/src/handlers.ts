@@ -36,8 +36,30 @@ import {
 } from '@workspace/tool-mesh';
 import { z } from 'zod';
 import { type McpToolDescriptor, SUBSTRATE_TOOLS } from './descriptor.js';
+import {
+  buildNexusEnvelopes,
+  delegateToAgent,
+  getActiveCorrelations,
+  getAgentRegistry,
+  getCorrelationById,
+  getCorrelationHistory,
+  getEvidenceGraph,
+  getEvidenceRecommendations,
+  getEvidenceTrace,
+  getSignalsForDomain,
+  lookupProof,
+  getRecentProofs,
+  startConvergenceBridge,
+  type NexusSignalDomain,
+} from './nexus-fabric.js';
 import { emitRunEvent, emitToolListChanged } from './run-events.js';
+import { getCurrentTenantId } from './request-context.js';
 import { getAllRuns, getRun, storeRun, updateRun } from './run-store.js';
+
+// ─── Start NEXUS Convergence Bridge ──────────────────────────────────────────
+// Subscribe to Prism Bus cross-domain correlation events and buffer them
+// for the nexus://convergence/* MCP resources.
+startConvergenceBridge();
 
 // ─── Per-server dynamic tool cache ────────────────────────────────────────────
 // HTTP-connected servers: tool schemas fetched on connect, cleared on disconnect.
@@ -510,12 +532,34 @@ export async function handleToolCall(
   toolName: string,
   rawParams: unknown,
   actorId: string,
-): Promise<ToolResult> {
+): Promise<ToolResult & { _nexus?: import('./nexus-fabric.js').NexusEnvelopes }> {
   const t0 = Date.now();
   let success = false;
   try {
     const result = await dispatchTool(toolName, rawParams, actorId);
     success = !result.isError;
+
+    // ── Attach NEXUS consciousness + proof envelopes ──────────────────────────
+    // Every tool response gets metacognitive confidence metadata and a
+    // cryptographic proof envelope. We build the envelopes from the serialized
+    // response text so the proof hash covers the actual content delivered to the
+    // client. This includes agent_delegate — its outer envelope records the MCP
+    // tool invocation, while the inner proof (inside delegateToAgent) records
+    // the delegation act itself. Two distinct events → two distinct proof records.
+    const responseText = result.content.map((c) => c.text).join('');
+    // Pass the effective tenantId from the request context so evaluateCovenant()
+    // can use the real tenant authorization decision instead of keyword heuristics alone.
+    const effectiveTenant = getCurrentTenantId();
+    const nexusEnvelopes = buildNexusEnvelopes({
+      toolName,
+      actor: actorId,
+      responseText,
+      isError: result.isError ?? false,
+      tenantId: effectiveTenant,
+    });
+    (result as ToolResult & { _nexus?: import('./nexus-fabric.js').NexusEnvelopes })._nexus =
+      nexusEnvelopes;
+
     return result;
   } finally {
     recordTool(toolName, success, Date.now() - t0);
@@ -553,6 +597,8 @@ async function dispatchTool(
     case 'substrate_disable_server':
     case 'disable_server':
       return handleDisableServer(rawParams);
+    case 'agent_delegate':
+      return handleAgentDelegate(rawParams, actorId);
     default: {
       const manifest = defaultToolRegistry.getToolDetails(toolName);
       if (manifest) {
@@ -1126,6 +1172,55 @@ async function handleDisableServer(rawParams: unknown): Promise<ToolResult> {
   });
 }
 
+// ── agent_delegate ─────────────────────────────────────────────────────────────
+
+const AgentDelegateSchema = z.object({
+  targetAgentId: z.string().min(1),
+  taskDescription: z.string().min(1),
+  context: z.record(z.unknown()).optional().default({}),
+  urgency: z.enum(['low', 'medium', 'high', 'critical']).optional().default('medium'),
+});
+
+async function handleAgentDelegate(rawParams: unknown, actorId: string): Promise<ToolResult> {
+  const parsed = AgentDelegateSchema.safeParse(rawParams);
+  if (!parsed.success) {
+    return err('Invalid parameters', parsed.error.flatten());
+  }
+
+  const { targetAgentId, taskDescription, context, urgency } = parsed.data;
+
+  try {
+    const result = await delegateToAgent({
+      targetAgentId,
+      taskDescription,
+      context,
+      urgency,
+      actor: actorId,
+    });
+
+    return ok({
+      taskId: result.taskId,
+      targetAgent: result.targetAgent,
+      domain: result.domain,
+      status: result.status,
+      response: result.response,
+      confidence: result.confidence,
+      latencyMs: result.latencyMs,
+      proofHash: result.proofHash,
+      verificationPath: `/mcp/nexus/verify/${result.proofHash}`,
+      completedAt: result.completedAt,
+      ...(result.status === 'pending_approval'
+        ? { governanceNote: 'This delegation requires operator approval before execution proceeds. Check substrate_list_approvals for the pending gate.' }
+        : {}),
+    });
+  } catch (e) {
+    return err(
+      `Agent delegation failed: ${e instanceof Error ? e.message : String(e)}`,
+      { targetAgentId, hint: 'Query nexus://agents/registry to verify available agents.' },
+    );
+  }
+}
+
 // ─── Resource Handlers ────────────────────────────────────────────────────────
 
 const RUN_SCHEMA = {
@@ -1259,9 +1354,16 @@ const COUNTERFACTUAL_DIFF_SCHEMA = {
 
 export async function handleResourceRead(
   uri: string,
+  tenantId?: string,
 ): Promise<
   { contents: Array<{ uri: string; mimeType: string; text: string }> } | { error: string }
 > {
+  // Resolve effective tenantId:
+  //   1. Explicit caller-provided tenantId (e.g. agent delegation from gateway handler)
+  //   2. Per-request AsyncLocalStorage tenant, already mapped from actorId by transport
+  //   3. undefined = no tenant context (open-access for non-HTTP callers)
+  const effectiveTenantId = tenantId ?? getCurrentTenantId();
+
   switch (uri) {
     case 'substrate://schema/run':
       return {
@@ -1309,8 +1411,248 @@ export async function handleResourceRead(
         ],
       };
     }
-    default:
+    // ── NEXUS Convergence Resources ─────────────────────────────────────────────
+    case 'nexus://convergence/active': {
+      const correlations = getActiveCorrelations();
+      return {
+        contents: [{
+          uri,
+          mimeType: 'application/json',
+          text: JSON.stringify({
+            resourceType: 'nexus:convergence:active',
+            count: correlations.length,
+            generatedAt: new Date().toISOString(),
+            description: 'Live cross-domain intelligence correlations from the PRAXIS Convergence Engine.',
+            _dataSource: 'synthetic',
+            correlations,
+          }, null, 2),
+        }],
+      };
+    }
+
+    case 'nexus://convergence/history': {
+      const history = getCorrelationHistory(50);
+      return {
+        contents: [{
+          uri,
+          mimeType: 'application/json',
+          text: JSON.stringify({
+            resourceType: 'nexus:convergence:history',
+            count: history.length,
+            generatedAt: new Date().toISOString(),
+            _dataSource: 'synthetic',
+            correlations: history,
+          }, null, 2),
+        }],
+      };
+    }
+
+    // ── NEXUS Signal Stream Resources ────────────────────────────────────────────
+    case 'nexus://signals/maritime':
+    case 'nexus://signals/security':
+    case 'nexus://signals/realestate':
+    case 'nexus://signals/legal':
+    case 'nexus://signals/all': {
+      const domainPart = uri.replace('nexus://signals/', '') as NexusSignalDomain;
+      const signals = await getSignalsForDomain(domainPart, effectiveTenantId);
+      return {
+        contents: [{
+          uri,
+          mimeType: 'application/json',
+          text: JSON.stringify({
+            resourceType: `nexus:signals:${domainPart}`,
+            domain: domainPart,
+            count: signals.length,
+            generatedAt: new Date().toISOString(),
+            _tenantScope: effectiveTenantId ?? 'global',
+            _dataSource: signals.length > 0 ? 'live' : 'synthetic',
+            signals,
+          }, null, 2),
+        }],
+      };
+    }
+
+    // ── NEXUS Agent Registry Resource ─────────────────────────────────────────────
+    case 'nexus://agents/registry': {
+      const agents = getAgentRegistry();
+      return {
+        contents: [{
+          uri,
+          mimeType: 'application/json',
+          text: JSON.stringify({
+            resourceType: 'nexus:agents:registry',
+            count: agents.length,
+            generatedAt: new Date().toISOString(),
+            description: 'NuroMesh domain agents discoverable and delegatable via MCP. Use agent_delegate tool to route tasks.',
+            delegationTool: 'agent_delegate',
+            agents,
+          }, null, 2),
+        }],
+      };
+    }
+
+    // ── NEXUS Evidence Graph Resources ────────────────────────────────────────────
+    case 'nexus://evidence/graph': {
+      const items = getEvidenceGraph();
+      return {
+        contents: [{
+          uri,
+          mimeType: 'application/json',
+          text: JSON.stringify({
+            resourceType: 'nexus:evidence:graph',
+            count: items.length,
+            generatedAt: new Date().toISOString(),
+            description: 'Current evidence items with provenance chains. Shows the raw intelligence items that underpin AI recommendations.',
+            _dataSource: 'synthetic',
+            evidenceItems: items,
+          }, null, 2),
+        }],
+      };
+    }
+
+    case 'nexus://evidence/recommendations': {
+      const recs = getEvidenceRecommendations();
+      return {
+        contents: [{
+          uri,
+          mimeType: 'application/json',
+          text: JSON.stringify({
+            resourceType: 'nexus:evidence:recommendations',
+            count: recs.length,
+            generatedAt: new Date().toISOString(),
+            description: 'Active AI recommendations with supporting evidence chains and policy evaluation status.',
+            _dataSource: 'synthetic',
+            recommendations: recs,
+          }, null, 2),
+        }],
+      };
+    }
+
+    // ── NEXUS Proof Verification Resource ─────────────────────────────────────────
+    case 'nexus://proof/recent': {
+      const proofs = getRecentProofs(20);
+      return {
+        contents: [{
+          uri,
+          mimeType: 'application/json',
+          text: JSON.stringify({
+            resourceType: 'nexus:proof:recent',
+            count: proofs.length,
+            generatedAt: new Date().toISOString(),
+            description: 'Most recent proof records. Use the verificationPath on any proof envelope to retrieve individual records.',
+            proofs,
+          }, null, 2),
+        }],
+      };
+    }
+
+    default: {
+      // ── Template URI handling ──────────────────────────────────────────────────
+
+      // nexus://signals/{domain}/{tenantId} — per-tenant subscription channel
+      // The convergence bridge emits notifications ONLY on the tenant-specific URI
+      // when a tenantId is present on the Prism Bus event. This eliminates the
+      // cross-tenant timing/volume leakage that would occur with global broadcasts.
+      if (uri.startsWith('nexus://signals/')) {
+        const remainder = uri.replace('nexus://signals/', '');
+        const parts = remainder.split('/');
+        if (parts.length === 2) {
+          const [domainPart, uriTenantId] = parts as [string, string];
+          const validDomains: NexusSignalDomain[] = ['maritime', 'security', 'realestate', 'legal', 'all'];
+          if (validDomains.includes(domainPart as NexusSignalDomain)) {
+            // Use the request-context tenant as the authoritative tenant for access control;
+            // fall back to the URI tenant segment for subscription-driven reads.
+            const resolvedTenant = effectiveTenantId ?? uriTenantId;
+            const signals = await getSignalsForDomain(domainPart as NexusSignalDomain, resolvedTenant);
+            return {
+              contents: [{
+                uri,
+                mimeType: 'application/json',
+                text: JSON.stringify({
+                  resourceType: `nexus:signals:${domainPart}:tenant`,
+                  domain: domainPart,
+                  tenantId: uriTenantId,
+                  count: signals.length,
+                  generatedAt: new Date().toISOString(),
+                  _tenantScope: uriTenantId,
+                  _dataSource: signals.length > 0 ? 'live' : 'synthetic',
+                  signals,
+                }, null, 2),
+              }],
+            };
+          }
+        }
+      }
+
+      // nexus://convergence/{id} — individual correlation detail
+      if (uri.startsWith('nexus://convergence/')) {
+        const correlationId = uri.slice('nexus://convergence/'.length);
+        const correlation = getCorrelationById(correlationId);
+        if (!correlation) {
+          return { error: `Convergence correlation '${correlationId}' not found. Query nexus://convergence/active for current IDs.` };
+        }
+        return {
+          contents: [{
+            uri,
+            mimeType: 'application/json',
+            text: JSON.stringify({
+              resourceType: 'nexus:convergence:detail',
+              generatedAt: new Date().toISOString(),
+              _dataSource: 'synthetic',
+              correlation,
+              signalDecomposition: {
+                note: 'Full signal decomposition available via nexus://evidence/trace/{id} for each contributing signal.',
+                evidenceGraphUri: 'nexus://evidence/graph',
+              },
+            }, null, 2),
+          }],
+        };
+      }
+
+      // nexus://evidence/trace/{id} — individual decision trace
+      if (uri.startsWith('nexus://evidence/trace/')) {
+        const traceId = uri.slice('nexus://evidence/trace/'.length);
+        const trace = getEvidenceTrace(traceId);
+        if (!trace) {
+          return { error: `Evidence trace '${traceId}' not found. Query nexus://evidence/recommendations for active recommendation IDs.` };
+        }
+        return {
+          contents: [{
+            uri,
+            mimeType: 'application/json',
+            text: JSON.stringify({
+              resourceType: 'nexus:evidence:trace',
+              generatedAt: new Date().toISOString(),
+              _dataSource: 'synthetic',
+              trace,
+            }, null, 2),
+          }],
+        };
+      }
+
+      // nexus://proof/verify/{hash} — proof verification by hash
+      if (uri.startsWith('nexus://proof/verify/')) {
+        const hash = uri.slice('nexus://proof/verify/'.length);
+        const record = lookupProof(hash);
+        if (!record) {
+          return { error: `Proof hash '${hash}' not found in the verification store. Proofs are retained for the most recent 2,000 tool calls.` };
+        }
+        return {
+          contents: [{
+            uri,
+            mimeType: 'application/json',
+            text: JSON.stringify({
+              resourceType: 'nexus:proof:verification',
+              verified: true,
+              record,
+              verifiedAt: new Date().toISOString(),
+            }, null, 2),
+          }],
+        };
+      }
+
       return { error: `Unknown resource URI: ${uri}` };
+    }
   }
 }
 

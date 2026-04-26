@@ -19,9 +19,23 @@ import type { NextFunction, Request, Response } from 'express';
 const PUBLIC_METHODS = new Set(['tools/list', 'ping']);
 
 /**
- * HTTP GET paths that are allowed without a Bearer token.
+ * HTTP GET paths that are allowed without a Bearer token (exact match).
  */
 const PUBLIC_GET_PATHS = new Set(['/', '/health']);
+
+/**
+ * HTTP GET path prefixes that are allowed without a Bearer token
+ * (matched against router-relative `req.path`, i.e. the portion AFTER
+ * the mount point — so for `app.use('/mcp', router)`, `req.path` is
+ * `/nexus/verify/:hash`, not `/mcp/nexus/verify/:hash`).
+ *
+ * /nexus/verify/ is intentionally public: it is a read-only, hash-gated
+ * lookup. Callers can only retrieve proof metadata they already have the hash
+ * for, so exempting it from auth does not expose sensitive data while enabling
+ * external auditors to independently verify proof records without needing a
+ * gateway API key.
+ */
+const PUBLIC_GET_PATH_PREFIXES: string[] = ['/nexus/verify/'];
 
 export function resolveAuthContext(req: Request): {
   authenticated: boolean;
@@ -66,6 +80,11 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   }
 
   if (req.method === 'GET' && PUBLIC_GET_PATHS.has(req.path)) {
+    next();
+    return;
+  }
+
+  if (req.method === 'GET' && PUBLIC_GET_PATH_PREFIXES.some((prefix) => req.path.startsWith(prefix))) {
     next();
     return;
   }

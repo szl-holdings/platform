@@ -118,6 +118,9 @@ export interface NexusMcpServerConfig {
   /** Enable Discovery (change notifications when tools/resources/prompts change) */
   enableDiscovery?: boolean;
 
+  /** Enable Resource Subscriptions (MCP resources/subscribe capability with push notifications) */
+  enableResourceSubscription?: boolean;
+
   /** Enable Roots (tenant-scoped filesystem boundary enforcement) */
   enableRoots?: boolean;
 
@@ -174,7 +177,10 @@ export class NexusMcpServer {
 
     const capabilities: Record<string, unknown> = {
       tools: { listChanged: config.enableDiscovery ?? true },
-      resources: { subscribe: false, listChanged: config.enableDiscovery ?? true },
+      resources: {
+        subscribe: config.enableResourceSubscription ?? false,
+        listChanged: config.enableDiscovery ?? true,
+      },
       prompts: { listChanged: config.enableDiscovery ?? true },
       logging: {},
     };
@@ -397,9 +403,28 @@ export class NexusMcpServer {
       let outcome: 'success' | 'error' = 'success';
       let errorMsg: string | undefined;
       let content: ToolContent;
+      let extraMeta: Record<string, unknown> | undefined;
       try {
         const raw = await handler(typedArgs, ctx);
-        content = textContent(raw);
+        // Detect if the handler returned a pre-formed CallToolResult (has a
+        // content[] array) and pass it through verbatim, preserving any _meta
+        // structured metadata the gateway may have attached. This allows
+        // higher-level handlers (e.g. the NEXUS governance layer in
+        // nexus-gateway-server.ts) to produce first-class MCP metadata fields
+        // without having them re-serialized into a single text blob.
+        if (
+          raw !== null &&
+          typeof raw === 'object' &&
+          'content' in raw &&
+          Array.isArray((raw as Record<string, unknown>)['content'])
+        ) {
+          const r = raw as { content: ToolContent; isError?: boolean; _meta?: Record<string, unknown> };
+          content = r.content;
+          if (r.isError) { outcome = 'error'; }
+          if (r._meta) { extraMeta = r._meta; }
+        } else {
+          content = textContent(raw);
+        }
       } catch (e) {
         outcome = 'error';
         errorMsg = e instanceof Error ? e.message : String(e);
@@ -429,7 +454,11 @@ export class NexusMcpServer {
         userId: ctx.userId ?? null,
       });
 
-      return { content, ...(outcome === 'error' ? { isError: true } : {}) } as CallToolResult;
+      return {
+        content,
+        ...(outcome === 'error' ? { isError: true } : {}),
+        ...(extraMeta ? { _meta: extraMeta } : {}),
+      } as CallToolResult;
     });
   }
 
@@ -446,7 +475,7 @@ export class NexusMcpServer {
       const ctx: TenantContext = self._config.tenantContext ?? { tenantId: 'system' };
       const start = Date.now();
       try {
-        const result = await handler(uri, ctx);
+        const result = await handler(String(_uri), ctx);
         const latencyMs = Date.now() - start;
         void self._writeProofChain({
           entryType: 'resource_read',
@@ -527,6 +556,18 @@ export class NexusMcpServer {
     // Also fire to in-process subscribers (e.g., SSE fan-out)
     for (const listener of this._externalNotifyListeners) {
       try { listener(type); } catch { /* non-fatal */ }
+    }
+  }
+
+  /** Notify subscribed MCP clients that a specific resource has been updated. */
+  async notifyResourceUpdated(uri: string): Promise<void> {
+    try {
+      await this._sdk.server.notification({
+        method: 'notifications/resources/updated',
+        params: { uri },
+      });
+    } catch {
+      // Client may not be connected yet
     }
   }
 

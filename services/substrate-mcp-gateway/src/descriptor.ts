@@ -19,12 +19,15 @@ export const SERVER_INFO = {
 
 export const CAPABILITIES = {
   tools: { listChanged: true },
-  resources: { subscribe: false, listChanged: false },
+  resources: { subscribe: true, listChanged: true },
   prompts: { listChanged: false },
   logging: {},
   extensions: {
     'szl/governed-autonomy': { version: '1.0', description: 'Policy-gated approval gates and evidence-chain enforcement' },
     'szl/counterfactual-replay': { version: '1.0', description: 'Counterfactual run replay for governance audit' },
+    'szl/praxis-consciousness': { version: '1.0', description: 'Every MCP response includes x-nexus-consciousness metacognitive metadata and x-nexus-proof cryptographic envelope' },
+    'szl/praxis-convergence': { version: '1.0', description: 'Cross-domain intelligence convergence engine available as MCP Resources' },
+    'szl/praxis-federation': { version: '1.0', description: 'NuroMesh domain agents discoverable and delegatable via MCP' },
   },
 } as const;
 
@@ -320,6 +323,44 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
       additionalProperties: false,
     },
   },
+
+  {
+    name: 'agent_delegate',
+    description:
+      'Delegate a specialized task to a NuroMesh domain agent via the PRAXIS Intelligence Fabric. ' +
+      'Routes the task through the full governance stack: policy check, approval gate (if required), ' +
+      'consciousness assessment, and proof-chain entry. ' +
+      'Use nexus://agents/registry to discover available agents and their capabilities. ' +
+      'Returns: { taskId, targetAgent, domain, status, response, confidence, latencyMs, proofHash }',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        targetAgentId: {
+          type: 'string',
+          description:
+            'Agent ID or canonical name from nexus://agents/registry ' +
+            "(e.g. 'helmsman' / 'Vessels', 'sentinel' / 'Sentra', 'terra' / 'Terra', 'lexis' / 'Counsel')",
+        },
+        taskDescription: {
+          type: 'string',
+          description: 'Natural-language description of the task to delegate to the agent',
+        },
+        context: {
+          type: 'object',
+          description: 'Structured context parameters to pass to the agent (arbitrary JSON object)',
+        },
+        urgency: {
+          type: 'string',
+          enum: ['low', 'medium', 'high', 'critical'],
+          description:
+            "Task urgency level. 'critical' bypasses standard queuing; " +
+            "'high' engages priority routing through NuroMesh. Default: medium",
+        },
+      },
+      required: ['targetAgentId', 'taskDescription'],
+      additionalProperties: false,
+    },
+  },
 ];
 
 // ─── Resource Definitions ─────────────────────────────────────────────────────
@@ -363,6 +404,127 @@ export const SUBSTRATE_RESOURCES: McpResourceDescriptor[] = [
       'Current list of policy profiles registered in the Substrate policy adapter. ' +
       'Each entry includes the policy ID, name, high-risk categories, ' +
       'and minimum approval tier.',
+    mimeType: 'application/json',
+  },
+
+  // ─── NEXUS Intelligence Fabric Resources ─────────────────────────────────────
+
+  {
+    uri: 'nexus://convergence/active',
+    name: 'PRAXIS Active Convergence Correlations',
+    description:
+      'Currently live cross-domain intelligence correlations from the PRAXIS Convergence Engine. ' +
+      'Each entry spans multiple domains (maritime, security, real estate, legal) and includes ' +
+      'the compound risk score, contributing signal domains, and recommended actions. ' +
+      'Surfaces compound risk spanning all SZL domains simultaneously for cross-domain threat assessment.',
+    mimeType: 'application/json',
+  },
+  {
+    uri: 'nexus://convergence/history',
+    name: 'PRAXIS Convergence History',
+    description:
+      'Recent convergence events with resolution status. Shows how cross-domain correlations ' +
+      'were detected, escalated, and resolved. Includes resolved and active entries.',
+    mimeType: 'application/json',
+  },
+  {
+    uri: 'nexus://convergence/{id}',
+    name: 'PRAXIS Convergence Correlation Detail',
+    description:
+      'Full signal decomposition for a specific convergence correlation by ID. ' +
+      'Includes contributing domain signals, compound risk breakdown, ' +
+      'and the evidence chain used to derive the correlation.',
+    mimeType: 'application/json',
+  },
+
+  {
+    uri: 'nexus://signals/maritime',
+    name: 'PRAXIS Maritime Signal Stream',
+    description:
+      'Real-time maritime domain intelligence signals from the Prism Bus. ' +
+      'Each signal includes intake score, entity resolution, policy evaluation result, ' +
+      'and recommendation (if above threshold). Respects tenant isolation.',
+    mimeType: 'application/json',
+  },
+  {
+    uri: 'nexus://signals/security',
+    name: 'PRAXIS Security Signal Stream',
+    description:
+      'Real-time cybersecurity intelligence signals from the Prism Bus. ' +
+      'Includes threat triage results, CVE signals, and incident alerts with full pipeline metadata.',
+    mimeType: 'application/json',
+  },
+  {
+    uri: 'nexus://signals/realestate',
+    name: 'PRAXIS Real Estate Signal Stream',
+    description:
+      'Real-time real estate market signals from the Prism Bus. ' +
+      'Includes portfolio anomalies, valuation alerts, and deal pipeline signals.',
+    mimeType: 'application/json',
+  },
+  {
+    uri: 'nexus://signals/legal',
+    name: 'PRAXIS Legal Signal Stream',
+    description:
+      'Real-time legal and compliance signals from the Prism Bus. ' +
+      'Includes regulatory deadlines, Counsel matter alerts, and compliance risks.',
+    mimeType: 'application/json',
+  },
+  {
+    uri: 'nexus://signals/all',
+    name: 'PRAXIS Aggregate Signal Stream',
+    description:
+      'Aggregate real-time signal stream across all SZL domains (maritime, security, real estate, legal). ' +
+      'The broadest signal surface available over MCP — receive intelligence from all domains simultaneously.',
+    mimeType: 'application/json',
+  },
+  {
+    uri: 'nexus://signals/{domain}/{tenantId}',
+    name: 'PRAXIS Tenant-Scoped Signal Channel',
+    description:
+      'Per-tenant subscription channel for domain signal updates. ' +
+      'Subscribe to nexus://signals/{domain}/{tenantId} to receive notifications ONLY for your tenant\'s events. ' +
+      'The convergence bridge emits on this URI when a Prism Bus event carries a matching tenantId, ' +
+      'eliminating cross-tenant timing and volume leakage from shared global notification channels.',
+    mimeType: 'application/json',
+  },
+
+  {
+    uri: 'nexus://agents/registry',
+    name: 'PRAXIS NuroMesh Agent Registry',
+    description:
+      'Discoverable registry of NuroMesh domain agents available for delegation via the agent_delegate tool. ' +
+      'Each entry includes canonical agent name, domain specializations, capabilities, ' +
+      'confidence profiles, and supported delegation protocols. ' +
+      'This makes SZL the first MCP deployment with a governed multi-agent mesh discoverable over MCP.',
+    mimeType: 'application/json',
+  },
+
+  {
+    uri: 'nexus://evidence/graph',
+    name: 'PRAXIS Evidence Graph',
+    description:
+      'Current evidence items with provenance chains and confidence scores. ' +
+      'Shows the raw intelligence items that underpin AI recommendations — ' +
+      'from sensor intake through enrichment, scoring, and policy evaluation.',
+    mimeType: 'application/json',
+  },
+  {
+    uri: 'nexus://evidence/recommendations',
+    name: 'PRAXIS Evidence Recommendations',
+    description:
+      'Active AI recommendations with their supporting evidence chains and policy evaluation status. ' +
+      'Each recommendation includes confidence score, supporting evidence IDs, ' +
+      'and whether approval is required before execution.',
+    mimeType: 'application/json',
+  },
+  {
+    uri: 'nexus://evidence/trace/{id}',
+    name: 'PRAXIS Decision Trace',
+    description:
+      'Full provenance trace for a specific AI decision, showing every stage from raw signal ' +
+      'through enrichment, scoring, recommendation, policy evaluation, and final outcome. ' +
+      'External auditors can use this with a traceId to independently verify any AI decision.',
     mimeType: 'application/json',
   },
 ];

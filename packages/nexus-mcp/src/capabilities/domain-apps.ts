@@ -229,28 +229,28 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 export function createDomainApps(): NexusApp[] {
   return [
     {
-      appId: 'sextant-fleet-map',
+      appId: 'vessels-fleet-map',
       domain: 'maritime',
       title: 'Vessels Fleet Position Map',
       description: 'Live maritime fleet positions, voyage status, weather alerts, and AIS anomaly detection.',
       renderHtml: async (ctx: TenantContext) => buildFleetMapApp(ctx),
     },
     {
-      appId: 'tenax-threat-timeline',
+      appId: 'sentra-threat-timeline',
       domain: 'security',
       title: 'Sentra Live Threat Timeline',
       description: 'Real-time cybersecurity threat feed, CVE tracking, compliance scores, and incident status.',
       renderHtml: async (ctx: TenantContext) => buildThreatTimelineApp(ctx),
     },
     {
-      appId: 'domaine-property-comparison',
+      appId: 'terra-property-comparison',
       domain: 'real-estate',
       title: 'Terra Property Comparison Card',
       description: 'Distressed property opportunities, portfolio analytics, and market signal comparisons.',
       renderHtml: async (ctx: TenantContext) => buildPropertyComparisonApp(ctx),
     },
     {
-      appId: 'kora-case-status',
+      appId: 'lyte-case-status',
       domain: 'analytics',
       title: 'Lyte Decision Intelligence Dashboard',
       description: 'Pending approvals, active workflow runs, platform health, and decision queue status.',

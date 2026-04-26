@@ -1703,4 +1703,149 @@ router.get(
   },
 );
 
+// ── NEXUS Intelligence Fabric — Proof Verification ────────────────────────────
+// Every tool response from this MCP endpoint includes an x-nexus-proof
+// envelope with a cryptographic proof hash. External auditors and MCP
+// clients can use this endpoint to verify any issued proof.
+
+const SHA256_HEX_RE = /^[0-9a-f]{64}$/i;
+
+/**
+ * In-process proof registry for proofs issued by the Alloy MCP Server layer.
+ *
+ * FUTURE INTEGRATION POINT:
+ * Call `registerAlloyProof(record)` wherever the Alloy orchestration layer
+ * (A11oy) creates proof envelopes for its own wrapped tool responses. Once
+ * wired, `/api/mcp/nexus/verify/:hash` will find Alloy-issued proofs here
+ * without proxying to the Substrate MCP Gateway.
+ *
+ * Current status: the Substrate MCP Gateway is the sole proof issuer in
+ * this deployment. All verification is proxied to the gateway's canonical
+ * `/mcp/nexus/verify/:hash` endpoint. This local store activates once
+ * A11oy issues NEXUS-wrapped responses and calls registerAlloyProof().
+ */
+interface AlloyProofRecord {
+  proofHash: string;
+  toolName: string;
+  actor: string;
+  issuedAt: string;
+  confidence: number;
+  covenantAllowed: boolean;
+  covenantReason: string;
+  responseDigest: string;
+}
+
+const alloyProofStore = new Map<string, AlloyProofRecord>();
+const alloyProofOrder: string[] = [];
+
+/**
+ * Register a proof record issued by the Alloy MCP Server.
+ * Wire this from the A11oy orchestration layer when it wraps tool responses
+ * with NEXUS consciousness + proof envelopes.
+ */
+export function registerAlloyProof(record: AlloyProofRecord): void {
+  if (!alloyProofStore.has(record.proofHash)) {
+    alloyProofStore.set(record.proofHash, record);
+    alloyProofOrder.push(record.proofHash);
+    if (alloyProofOrder.length > 2_000) {
+      const evicted = alloyProofOrder.shift();
+      if (evicted) alloyProofStore.delete(evicted);
+    }
+  }
+}
+
+// GET /api/mcp/nexus/verify/:hash — verify a NEXUS proof hash
+router.get('/mcp/nexus/verify/:hash', async (req: Request, res: Response) => {
+  const { hash } = req.params;
+
+  if (!SHA256_HEX_RE.test(hash)) {
+    res.status(400).json({
+      verified: false,
+      error: 'INVALID_HASH_FORMAT',
+      message: 'Proof hash must be a 64-character lowercase SHA-256 hex string.',
+      hint: 'Retrieve the proofHash from the x-nexus-proof envelope included in any NEXUS-wrapped tool response.',
+    });
+    return;
+  }
+
+  // Check the local Alloy MCP Server proof store first
+  const localRecord = alloyProofStore.get(hash);
+  if (localRecord) {
+    res.json({
+      verified: true,
+      source: 'alloy-mcp-server',
+      ...localRecord,
+      verifiedAt: new Date().toISOString(),
+      _nexusNote: 'Proof verified against the Alloy MCP Server in-process proof registry.',
+    });
+    return;
+  }
+
+  // Attempt to proxy to the Substrate MCP Gateway for proofs issued there
+  const gatewayUrl = process.env['SUBSTRATE_MCP_GATEWAY_URL'];
+  if (gatewayUrl) {
+    try {
+      const upstream = await fetch(`${gatewayUrl}/mcp/nexus/verify/${encodeURIComponent(hash)}`, {
+        headers: { Accept: 'application/json' },
+        signal: AbortSignal.timeout(5_000),
+      });
+      if (upstream.ok) {
+        const gatewayResult = await upstream.json() as unknown;
+        res.json({
+          ...(typeof gatewayResult === 'object' && gatewayResult !== null ? gatewayResult : {}),
+          source: 'substrate-mcp-gateway',
+          proxyVerifiedAt: new Date().toISOString(),
+        });
+        return;
+      }
+      if (upstream.status === 404) {
+        res.status(404).json({
+          verified: false,
+          error: 'PROOF_NOT_FOUND',
+          message: `No proof record found for hash '${hash}' in either the Alloy MCP Server or Substrate MCP Gateway.`,
+          hint: 'Proofs are retained for the most recent 2,000 tool calls per server. Older proofs are evicted from the in-process store.',
+          lookupAttemptedAt: new Date().toISOString(),
+        });
+        return;
+      }
+    } catch {
+      // Gateway unreachable — fall through to informational response
+    }
+  }
+
+  // Gateway not configured or unreachable — return informational response
+  res.status(404).json({
+    verified: false,
+    error: 'PROOF_NOT_FOUND',
+    message: `No proof record found for hash '${hash}'.`,
+    hint: [
+      'Proofs issued by the Alloy MCP Server are available here immediately after a tool call.',
+      'Proofs issued by the Substrate MCP Gateway are available at that gateway\'s /mcp/nexus/verify/:hash endpoint.',
+      'Set the SUBSTRATE_MCP_GATEWAY_URL environment variable to enable cross-gateway verification.',
+    ].join(' '),
+    lookupAttemptedAt: new Date().toISOString(),
+  });
+});
+
+// GET /api/mcp/nexus/proofs — list recent proof records from this server
+router.get(
+  '/mcp/nexus/proofs',
+  authMiddleware({ required: true }),
+  (req: Request, res: Response) => {
+    const limit = Math.min(100, parseInt(String(req.query['limit'] ?? '20'), 10));
+    const proofs = alloyProofOrder
+      .slice(-limit)
+      .reverse()
+      .map((h) => alloyProofStore.get(h))
+      .filter((r): r is AlloyProofRecord => r !== undefined);
+    res.json({
+      count: proofs.length,
+      limit,
+      source: 'alloy-mcp-server',
+      generatedAt: new Date().toISOString(),
+      proofs,
+    });
+  },
+);
+
 export default router;
