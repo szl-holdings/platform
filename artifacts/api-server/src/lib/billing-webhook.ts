@@ -26,6 +26,8 @@ import {
   db,
   fulfillmentsTable,
   invoicesTable,
+  net30InvoicePaymentsTable,
+  net30InvoicesTable,
   organizationsTable,
   revenueEventsTable,
   subscriptionsTable,
@@ -299,6 +301,109 @@ async function handleInvoicePaid(event: StripeEventPayload): Promise<void> {
     after: { status: 'paid', amount: (invoice['amount_paid'] as number) / 100 },
   });
 
+  // ── NET-30 reconciliation ───────────────────────────────────────────────────
+  // If this Stripe invoice ID matches a net30_invoices row (set when the
+  // invoice was finalized via POST /billing/net30/invoices/:id/send), record
+  // the payment and recompute the outstanding balance automatically.
+  if (invoice['id']) {
+    const stripeInvId = invoice['id'] as string;
+    const [net30Inv] = await db
+      .select()
+      .from(net30InvoicesTable)
+      .where(eq(net30InvoicesTable.stripeInvoiceId, stripeInvId))
+      .limit(1);
+
+    if (net30Inv) {
+      const amountPaid = invoice['amount_paid'] as number ?? 0;
+      const amountDollars = (amountPaid / 100).toFixed(2);
+      const paymentIntentId = invoice['payment_intent'] as string | undefined;
+
+      // ── Dedup: skip insert when payment_intent.succeeded already recorded this PI ─
+      // Both invoice.paid and payment_intent.succeeded can fire for the same
+      // underlying payment. If the PI handler already inserted a row for this
+      // payment_intent ID we skip the insert here; the reconciliation pass below
+      // will compute the correct totals either way.
+      let skipInsert = false;
+      if (paymentIntentId) {
+        const [existing] = await db
+          .select({ id: net30InvoicePaymentsTable.id })
+          .from(net30InvoicePaymentsTable)
+          .where(
+            and(
+              eq(net30InvoicePaymentsTable.invoiceId, net30Inv.id),
+              eq(net30InvoicePaymentsTable.stripePaymentIntentId, paymentIntentId),
+            ),
+          )
+          .limit(1);
+        skipInsert = !!existing;
+      }
+
+      if (!skipInsert) {
+        // Insert payment record (idempotent: unique index on reference prevents
+        // duplicate rows if this exact Stripe event is redelivered).
+        const idempotencyKey = `stripe-webhook-${event.id}`;
+        await db
+          .insert(net30InvoicePaymentsTable)
+          .values({
+            invoiceId: net30Inv.id,
+            amount: amountDollars,
+            currency: (invoice['currency'] as string) ?? 'usd',
+            method: 'stripe',
+            reference: idempotencyKey,
+            stripePaymentIntentId: paymentIntentId,
+            paidAt: new Date(),
+            notes: `Auto-recorded from Stripe webhook event ${event.id}`,
+            metadata: { stripeEventId: event.id, stripeInvoiceId: stripeInvId },
+          })
+          .onConflictDoNothing();
+      } else {
+        logger.info(
+          { net30InvoiceId: net30Inv.id, paymentIntentId, stripeEventId: event.id },
+          '[webhook] invoice.paid: payment_intent row already exists — skipping duplicate insert',
+        );
+      }
+
+      // Recompute balance and status
+      const allPayments = await db
+        .select({ amount: net30InvoicePaymentsTable.amount })
+        .from(net30InvoicePaymentsTable)
+        .where(eq(net30InvoicePaymentsTable.invoiceId, net30Inv.id));
+      const allCredits = await db
+        .select({ amount: net30InvoicesTable.creditApplied })
+        .from(net30InvoicesTable)
+        .where(eq(net30InvoicesTable.id, net30Inv.id))
+        .limit(1);
+
+      const totalPaid = allPayments.reduce((s, p) => s + parseFloat(String(p.amount)), 0);
+      const creditApplied = parseFloat(String(allCredits[0]?.amount ?? '0'));
+      const totalAmount = parseFloat(String(net30Inv.totalAmount));
+      const outstanding = Math.max(0, totalAmount - totalPaid - creditApplied);
+      const newStatus =
+        net30Inv.status === 'void' || net30Inv.status === 'in_collections'
+          ? net30Inv.status
+          : outstanding <= 0
+            ? 'paid'
+            : 'partial';
+
+      await db
+        .update(net30InvoicesTable)
+        .set({
+          paidAmount: String(totalPaid),
+          outstandingBalance: String(outstanding),
+          status: newStatus,
+          paidAt: outstanding <= 0 && !net30Inv.paidAt ? new Date() : net30Inv.paidAt,
+          dunningPausedAt: outstanding <= 0 ? new Date() : net30Inv.dunningPausedAt,
+          updatedAt: new Date(),
+        })
+        .where(eq(net30InvoicesTable.id, net30Inv.id));
+
+      logger.info(
+        { net30InvoiceId: net30Inv.id, stripeInvId, outstanding, newStatus },
+        '[webhook] invoice.paid: NET-30 balance reconciled',
+      );
+    }
+  }
+
   // Fire-and-forget: compute and persist the tax decision for this invoice so
   // the tax engine is integrated into the real payment flow. Failures are logged
   // but do NOT block the webhook response or billing record writes.
@@ -409,6 +514,98 @@ async function handlePaymentIntentSucceeded(event: StripeEventPayload): Promise<
   logger.info(
     { paymentIntentId: pi['id'], amount: pi['amount'] },
     '[webhook] payment_intent.succeeded',
+  );
+
+  // ── NET-30 partial payment reconciliation ─────────────────────────────────
+  // When a customer pays a portion of a NET-30 invoice via a separate payment
+  // intent (e.g. partial settlement), the payment_intent metadata carries
+  // net30InvoiceId. We record an idempotent payment row and recompute the
+  // outstanding balance so the AR aging and invoice status stay accurate.
+  const metadata = pi['metadata'] as Record<string, string> | undefined;
+  const rawNet30Id = metadata?.['net30InvoiceId'];
+  if (!rawNet30Id) return; // not a NET-30 payment intent
+
+  const net30InvoiceId = parseInt(rawNet30Id, 10);
+  if (isNaN(net30InvoiceId) || net30InvoiceId <= 0) {
+    logger.warn({ eventId: event.id, rawNet30Id }, '[webhook] payment_intent.succeeded: invalid net30InvoiceId in metadata');
+    return;
+  }
+
+  const [net30Inv] = await db
+    .select()
+    .from(net30InvoicesTable)
+    .where(eq(net30InvoicesTable.id, net30InvoiceId))
+    .limit(1);
+
+  if (!net30Inv) {
+    logger.warn({ eventId: event.id, net30InvoiceId }, '[webhook] payment_intent.succeeded: NET-30 invoice not found');
+    return;
+  }
+
+  // Idempotent: one payment row per Stripe payment intent ID
+  const amountCents = (pi['amount_received'] as number | undefined) ?? (pi['amount'] as number | undefined) ?? 0;
+  const amountDollars = (amountCents / 100).toFixed(2);
+  const idempotencyKey = `pi-succeeded-${event.id}`;
+
+  await db
+    .insert(net30InvoicePaymentsTable)
+    .values({
+      invoiceId: net30Inv.id,
+      amount: amountDollars,
+      currency: (pi['currency'] as string) ?? 'usd',
+      method: 'stripe',
+      reference: idempotencyKey,
+      stripePaymentIntentId: pi['id'] as string,
+      paidAt: new Date(),
+      notes: `Partial payment from Stripe payment_intent.succeeded event ${event.id}`,
+      metadata: { stripeEventId: event.id, stripePaymentIntentId: pi['id'] },
+    })
+    .onConflictDoNothing();
+
+  // Recompute balance and status from all recorded payments
+  const allPayments = await db
+    .select({ amount: net30InvoicePaymentsTable.amount })
+    .from(net30InvoicePaymentsTable)
+    .where(eq(net30InvoicePaymentsTable.invoiceId, net30Inv.id));
+
+  const totalPaid = allPayments.reduce((s, p) => s + parseFloat(String(p.amount)), 0);
+  const creditApplied = parseFloat(String(net30Inv.creditApplied ?? '0'));
+  const totalAmount = parseFloat(String(net30Inv.totalAmount));
+  const outstanding = Math.max(0, totalAmount - totalPaid - creditApplied);
+  const newStatus =
+    net30Inv.status === 'void' || net30Inv.status === 'in_collections'
+      ? net30Inv.status
+      : outstanding <= 0
+        ? 'paid'
+        : totalPaid > 0
+          ? 'partial'
+          : net30Inv.status;
+
+  await db
+    .update(net30InvoicesTable)
+    .set({
+      paidAmount: String(totalPaid),
+      outstandingBalance: String(outstanding),
+      status: newStatus,
+      paidAt: outstanding <= 0 && !net30Inv.paidAt ? new Date() : net30Inv.paidAt,
+      dunningPausedAt: outstanding <= 0 ? new Date() : net30Inv.dunningPausedAt,
+      updatedAt: new Date(),
+    })
+    .where(eq(net30InvoicesTable.id, net30Inv.id));
+
+  await writeBillingAudit({
+    action: 'net30_invoice.partial_payment_recorded',
+    resource: 'net30_invoice',
+    resourceId: String(net30Inv.id),
+    orgId: net30Inv.orgId,
+    stripeEventId: event.id,
+    stripeCustomerId: pi['customer'] as string | null,
+    after: { paidAmount: totalPaid, outstandingBalance: outstanding, status: newStatus },
+  });
+
+  logger.info(
+    { net30InvoiceId: net30Inv.id, amountDollars, outstanding, newStatus },
+    '[webhook] payment_intent.succeeded: NET-30 partial payment reconciled',
   );
 }
 

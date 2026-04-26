@@ -1999,6 +1999,71 @@ export function buildLpDataRoomDocEmail(opts: {
   return { subject, html, text };
 }
 
+// ─── NET-30 Invoice / Dunning Email ──────────────────────────────────────────
+
+export interface Net30DunningEmailOptions {
+  invoiceNumber: string;
+  customerName: string;
+  totalAmount: number;
+  outstandingBalance: number;
+  currency: string;
+  dueDate: string;
+  daysOverdue?: number;
+  poNumber?: string;
+  hostedUrl?: string;
+  isInitialSend?: boolean;
+}
+
+export function buildNet30DunningEmail(opts: Net30DunningEmailOptions): string {
+  const {
+    invoiceNumber,
+    customerName,
+    totalAmount,
+    outstandingBalance,
+    currency,
+    dueDate,
+    daysOverdue,
+    poNumber,
+    hostedUrl,
+    isInitialSend,
+  } = opts;
+
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: currency.toUpperCase(), minimumFractionDigits: 2 }).format(n);
+
+  const isOverdue = (daysOverdue ?? 0) > 0;
+  const headerColor = isInitialSend ? '#6366f1' : isOverdue ? (daysOverdue! >= 30 ? '#dc2626' : '#d97706') : '#6366f1';
+  const headline = isInitialSend
+    ? `Invoice ${invoiceNumber} — Payment Due ${dueDate}`
+    : isOverdue
+      ? `REMINDER: Invoice ${invoiceNumber} is ${daysOverdue} Day${daysOverdue === 1 ? '' : 's'} Past Due`
+      : `Upcoming Payment: Invoice ${invoiceNumber} Due ${dueDate}`;
+
+  const intro = isInitialSend
+    ? `<p>Dear ${customerName},</p><p>Please find your invoice details below. Payment is due by <strong>${dueDate}</strong>.</p>`
+    : isOverdue
+      ? `<p>Dear ${customerName},</p><p>This is a reminder that Invoice ${invoiceNumber} is <strong style="color:${headerColor};">${daysOverdue} day${daysOverdue === 1 ? '' : 's'} past due</strong>. Please arrange payment at your earliest convenience to avoid further escalation.</p>`
+      : `<p>Dear ${customerName},</p><p>This is a courtesy reminder that Invoice ${invoiceNumber} is due on <strong>${dueDate}</strong>. Please arrange payment before the due date.</p>`;
+
+  const ctaButton = hostedUrl
+    ? `<a href="${hostedUrl}" class="cta" style="background:${headerColor};">Pay Invoice Online</a>`
+    : '';
+
+  return szlBrand(`
+    <h2 style="color:${headerColor};">${headline}</h2>
+    ${intro}
+    <table style="width:100%;border-collapse:collapse;font-size:14px;margin:20px 0;">
+      <tr><td style="padding:8px 0;color:#6b7280;font-weight:500;width:40%;">Invoice Number</td><td style="padding:8px 0;"><strong>${invoiceNumber}</strong></td></tr>
+      ${poNumber ? `<tr style="border-top:1px solid #f3f4f6;"><td style="padding:8px 0;color:#6b7280;font-weight:500;">PO Number</td><td style="padding:8px 0;">${poNumber}</td></tr>` : ''}
+      <tr style="border-top:1px solid #f3f4f6;"><td style="padding:8px 0;color:#6b7280;font-weight:500;">Invoice Total</td><td style="padding:8px 0;">${fmt(totalAmount)}</td></tr>
+      <tr style="border-top:1px solid #f3f4f6;"><td style="padding:8px 0;color:#6b7280;font-weight:500;">Due Date</td><td style="padding:8px 0;">${dueDate}</td></tr>
+      <tr style="border-top:1px solid #f3f4f6;"><td style="padding:8px 0;color:#6b7280;font-weight:500;"><strong>Outstanding Balance</strong></td><td style="padding:8px 0;"><strong style="color:${headerColor};font-size:16px;">${fmt(outstandingBalance)}</strong></td></tr>
+    </table>
+    ${ctaButton}
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">Questions? Reply to this email or contact our billing team. Please reference invoice ${invoiceNumber} in all correspondence.</p>
+  `);
+}
+
 // ─── Agent Ticket Reply Email ─────────────────────────────────────────────────
 
 export function buildAgentTicketReplyEmail(params: {

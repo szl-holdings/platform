@@ -44,6 +44,8 @@ export const NAMED_JOB_TYPES = {
   DAILY_STRIPE_USAGE_RECORD: "daily_stripe_usage_record",
   HOURLY_OVERAGE_THRESHOLD_CHECK: "hourly_overage_threshold_check",
   DEMO_USAGE_SEEDER: "demo_usage_seeder",
+  DAILY_NET30_AGING_SNAPSHOT: "daily_net30_aging_snapshot",
+  HOURLY_NET30_DUNNING: "hourly_net30_dunning",
 } as const;
 
 export type NamedJobType = (typeof NAMED_JOB_TYPES)[keyof typeof NAMED_JOB_TYPES];
@@ -136,6 +138,8 @@ registerEntry({
   schedule: 'on_demand',
   enabled: true,
 });
+registerEntry({ type: NAMED_JOB_TYPES.DAILY_NET30_AGING_SNAPSHOT, name: "Daily NET-30 AR Aging Snapshot", description: "Computes AR aging buckets (current, 1–30, 31–60, 61–90, 90+ days overdue) across all outstanding NET-30 invoices for every organization and writes a snapshot row to net30_aging_snapshots for historical trend analysis. Used by the AR Aging dashboard and finance reporting.", schedule: "daily", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.HOURLY_NET30_DUNNING, name: "NET-30 Dunning Pass", description: "Scans all sent/partial NET-30 invoices whose nextDunningAt is now due and dunningPausedAt is null. Sends templated reminder emails per the org's configured dunning cadence (default: +3, +7, +14, +21 days past due), advances dunningStep, logs each dispatch to net30_dunning_log, and schedules the next reminder. Skips invoices in collections or with paused dunning.", schedule: "hourly", enabled: true });
 registerEntry({
   type: NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL,
   name: 'DOMAINE Distress Financials Backfill',
@@ -3262,6 +3266,22 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_USAGE_AGGREGATION, async (job) =
   }
 });
 
+durableJobQueue.register(NAMED_JOB_TYPES.DAILY_NET30_AGING_SNAPSHOT, async (job) => {
+  const start = Date.now();
+  updateRegistry(NAMED_JOB_TYPES.DAILY_NET30_AGING_SNAPSHOT, { lastStatus: "running", lastRunAt: Date.now() });
+  try {
+    const { runDailyNet30AgingSnapshot } = await import("../routes/billing-net30");
+    const result = await runDailyNet30AgingSnapshot();
+    serverTelemetry.recordBusinessEvent({ type: "daily_net30_aging_snapshot_completed", domain: "billing", durationMs: Date.now() - start, success: result.errors === 0, metadata: result });
+    updateRegistry(NAMED_JOB_TYPES.DAILY_NET30_AGING_SNAPSHOT, { lastStatus: result.errors > 0 ? "failed" : "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, ...result }, "daily_net30_aging_snapshot: complete");
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "daily_net30_aging_snapshot: fatal");
+    updateRegistry(NAMED_JOB_TYPES.DAILY_NET30_AGING_SNAPSHOT, { lastStatus: "failed", lastDurationMs: Date.now() - start, failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_NET30_AGING_SNAPSHOT)?.failCount || 0) + 1 });
+    throw err;
+  }
+});
+
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_STRIPE_USAGE_RECORD, async (job) => {
   const start = Date.now();
   logger.info({ jobId: job.id }, 'daily_stripe_usage_record: starting');
@@ -3802,6 +3822,22 @@ durableJobQueue.register(NAMED_JOB_TYPES.DEMO_USAGE_SEEDER, async (job) => {
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.DEMO_USAGE_SEEDER)?.failCount || 0) + 1,
     });
+    throw err;
+  }
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_NET30_DUNNING, async (job) => {
+  const start = Date.now();
+  updateRegistry(NAMED_JOB_TYPES.HOURLY_NET30_DUNNING, { lastStatus: "running", lastRunAt: Date.now() });
+  try {
+    const { runNet30DunningPass } = await import("../routes/billing-net30");
+    const result = await runNet30DunningPass();
+    serverTelemetry.recordBusinessEvent({ type: "hourly_net30_dunning_completed", domain: "billing", durationMs: Date.now() - start, success: result.errors === 0, metadata: result });
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_NET30_DUNNING, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, ...result }, "hourly_net30_dunning: complete");
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, "hourly_net30_dunning: fatal");
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_NET30_DUNNING, { lastStatus: "failed", lastDurationMs: Date.now() - start, failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_NET30_DUNNING)?.failCount || 0) + 1 });
     throw err;
   }
 });

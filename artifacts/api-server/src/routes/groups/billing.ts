@@ -86,6 +86,16 @@ export function register(router: IRouter): void {
     ),
   );
 
+  router.use('/billing/net30', _readLimiter);
+  router.use('/billing/net30', _writeLimiter);
+  router.use(
+    lazyMatch(
+      '/billing/net30',
+      () => import('../billing-net30'),
+      'billing-net30',
+    ),
+  );
+
   router.use('/billing/ach', _writeLimiter);
   router.use('/billing/ach', optionalIdempotencyMiddleware);
   router.use('/billing/crypto', _writeLimiter);
