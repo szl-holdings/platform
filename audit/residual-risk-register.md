@@ -58,6 +58,8 @@
 | RR-113 | TypeScript Typecheck and Integration Tests Not Run | | LOW | Track 5/CI | OPEN | Typecheck timed out; integration tests require live DB. Unit tests 116/116 pass. Reproducer: `pnpm --filter @workspace/api-server exec tsc --noEmit` |
 | RR-114 | alloy-runtime-api Express 4 Boot Failure | | HIGH | Platform | **RESOLVED** ✓ | Upgraded to express@^5; `path-to-regexp@8.4.2` workspace override incompatibility fixed. Service now boots: `/healthz` → 200. |
 | RR-115 | AEF Startup Guards Require Auth Secrets | | LOW | Ops | OPEN (by design) | `alloy-fabric-api` needs `AEF_BEARER_TOKEN`/`AEF_API_KEY`; `alloy-fabric-ingest-control` needs `AEF_S2S_SECRET`. Correct security posture. |
+| RR-116 | @xmldom/xmldom 0.8.12 — 4× HIGH CVEs | GHSA-crh6-fp67-6883 (DoS), GHSA-5fg8-2547-mr8q (XML injection), GHSA-h6q6-9hqw-rwfv (DocumentType injection), GHSA-fq42-c5rg-92c2 (PI/comment injection) | HIGH | Platform Security | **RESOLVED** ✓ (2026-04-26, Task #2960) — `pnpm.overrides["@xmldom/xmldom"]: "^0.9.10"` added to root `package.json`; `pnpm install` applied; `pnpm audit` no longer reports these CVEs. |
+| RR-117 | xlsx/SheetJS — 2× HIGH CVEs (no patch) | GHSA-4r6h-8v6p-xvw6 (Prototype Pollution), GHSA-5pgg-2g8v-p4x9 (ReDoS) | HIGH | Platform Security | **ACCEPTED** — upstream "Patched versions: <0.0.0" means no npm-published fix exists. `xlsx` is used for server-side spreadsheet export only (no user-supplied XML parsed at the vulnerable path). Mitigations: (1) inputs validated via Zod before reaching xlsx; (2) rate-limited behind auth. Reassess when upstream publishes a patch or alternative library identified. |
 
 ---
 

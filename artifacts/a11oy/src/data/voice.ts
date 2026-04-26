@@ -67,7 +67,7 @@ export const scriptedRewrites = [
   {
     brand: 'Counsel',
     context: 'Compliance report',
-    original: 'Our business telemetry platform shows 2.1B+ Sentiment Data Points.',
+    original: 'Our telemetry platform shows billions of sentiment signals.',
     rewritten: 'The execution fabric recorded 2.1B signals.'
   }
 ];

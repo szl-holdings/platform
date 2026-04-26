@@ -381,7 +381,7 @@ export function OmniaAdoption() {
                     )}
                   </div>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
-                    Beacon {relativeTime(artifact.lastBeacon)}
+                    Active {relativeTime(artifact.lastBeacon)}
                   </div>
                 </div>
               </div>

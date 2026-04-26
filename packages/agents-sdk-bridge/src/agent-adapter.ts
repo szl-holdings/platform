@@ -1,5 +1,5 @@
 /**
- * SzlAgentAdapter — wraps each Nuro Mesh AgentDefinition as an @openai/agents Agent.
+ * SzlAgentAdapter — wraps each SZL AgentDefinition as an @openai/agents Agent.
  *
  * Maps:
  *   - AgentDefinition.systemPrompt → Agent.instructions
@@ -20,7 +20,7 @@ import type { SzlToolAdapterOptions } from './tool-adapter.js';
 import { SzlGuardrailAdapter } from './guardrail-adapter.js';
 
 /**
- * Minimal shape of a Nuro Mesh AgentDefinition.
+ * Minimal shape of a SZL AgentDefinition.
  * Matches the full type in lib/ai-engine/src/nuro-mesh.ts.
  */
 export interface AgentDefinitionLike {
@@ -55,7 +55,7 @@ export interface SzlAgentAdapterOptions extends SzlToolAdapterOptions {
 }
 
 /**
- * SzlAgentAdapter — converts a Nuro Mesh AgentDefinition into an SDK Agent.
+ * SzlAgentAdapter — converts a SZL AgentDefinition into an SDK Agent.
  */
 export class SzlAgentAdapter {
   private readonly toolAdapter: SzlToolAdapter;
@@ -124,7 +124,7 @@ export class SzlAgentAdapter {
   }
 
   /**
-   * Retrieve an already-adapted agent by its Nuro Mesh ID.
+   * Retrieve an already-adapted agent by its SZL agent ID.
    */
   get(agentId: string): Agent | undefined {
     return this.agentRegistry.get(agentId);
@@ -181,7 +181,7 @@ export class SzlAgentAdapter {
     // Non-OpenAI providers (Anthropic, Gemini, etc.) are not natively supported
     // by the @openai/agents SDK. We pass the model name through so a custom
     // ModelProvider registered on the Runner can intercept and route to the correct
-    // backend. Silently dropping the model to undefined would ignore the Nuro Mesh
+    // backend. Silently dropping the model to undefined would ignore the SZL
     // agent's provider preference entirely.
     if (model) {
       console.warn(

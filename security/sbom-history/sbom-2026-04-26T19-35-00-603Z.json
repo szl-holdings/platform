@@ -2,9 +2,9 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
   "version": 1,
-  "serialNumber": "urn:uuid:ee982d76-8c94-402f-9dad-6980546094b2",
+  "serialNumber": "urn:uuid:efd55704-b2eb-4355-99f8-1e5e616a5f06",
   "metadata": {
-    "timestamp": "2026-04-26T19:57:32.827Z",
+    "timestamp": "2026-04-26T19:35:00.598Z",
     "scanStatus": "success",
     "tools": [
       {
@@ -20,9 +20,9 @@
     },
     "statistics": {
       "totalPackages": 854,
-      "vulnerabilitiesFound": 0,
+      "vulnerabilitiesFound": 4,
       "critical": 0,
-      "high": 0,
+      "high": 4,
       "moderate": 0,
       "low": 0
     }
@@ -5149,9 +5149,126 @@
     {
       "type": "library",
       "name": "@xmldom/xmldom",
-      "version": "0.9.10",
-      "purl": "pkg:npm/@xmldom/xmldom@0.9.10"
+      "version": "0.8.12",
+      "purl": "pkg:npm/@xmldom/xmldom@0.8.12"
     }
   ],
-  "vulnerabilities": []
+  "vulnerabilities": [
+    {
+      "id": "npm-advisory-1116960",
+      "source": {
+        "name": "npmjs",
+        "url": "https://github.com/advisories/GHSA-2v35-w6hq-6mfw"
+      },
+      "ratings": [
+        {
+          "severity": "high",
+          "score": 0,
+          "vector": null
+        }
+      ],
+      "cwes": [
+        "CWE-674"
+      ],
+      "description": "xmldom: Uncontrolled recursion in XML serialization leads to DoS",
+      "recommendation": "Upgrade @xmldom/xmldom to a non-vulnerable version. Vulnerable range: <0.8.13",
+      "affects": [
+        {
+          "ref": "pkg:npm/@xmldom/xmldom",
+          "versions": [
+            {
+              "range": "<0.8.13"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npm-advisory-1116963",
+      "source": {
+        "name": "npmjs",
+        "url": "https://github.com/advisories/GHSA-f6ww-3ggp-fr8h"
+      },
+      "ratings": [
+        {
+          "severity": "high",
+          "score": 0,
+          "vector": null
+        }
+      ],
+      "cwes": [
+        "CWE-91"
+      ],
+      "description": "xmldom has XML injection through unvalidated DocumentType serialization",
+      "recommendation": "Upgrade @xmldom/xmldom to a non-vulnerable version. Vulnerable range: <0.8.13",
+      "affects": [
+        {
+          "ref": "pkg:npm/@xmldom/xmldom",
+          "versions": [
+            {
+              "range": "<0.8.13"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npm-advisory-1116966",
+      "source": {
+        "name": "npmjs",
+        "url": "https://github.com/advisories/GHSA-x6wf-f3px-wcqx"
+      },
+      "ratings": [
+        {
+          "severity": "high",
+          "score": 0,
+          "vector": null
+        }
+      ],
+      "cwes": [
+        "CWE-91"
+      ],
+      "description": "xmldom has XML node injection through unvalidated processing instruction serialization",
+      "recommendation": "Upgrade @xmldom/xmldom to a non-vulnerable version. Vulnerable range: <0.8.13",
+      "affects": [
+        {
+          "ref": "pkg:npm/@xmldom/xmldom",
+          "versions": [
+            {
+              "range": "<0.8.13"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "npm-advisory-1116969",
+      "source": {
+        "name": "npmjs",
+        "url": "https://github.com/advisories/GHSA-j759-j44w-7fr8"
+      },
+      "ratings": [
+        {
+          "severity": "high",
+          "score": 0,
+          "vector": null
+        }
+      ],
+      "cwes": [
+        "CWE-91"
+      ],
+      "description": "xmldom has XML node injection through unvalidated comment serialization",
+      "recommendation": "Upgrade @xmldom/xmldom to a non-vulnerable version. Vulnerable range: <0.8.13",
+      "affects": [
+        {
+          "ref": "pkg:npm/@xmldom/xmldom",
+          "versions": [
+            {
+              "range": "<0.8.13"
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }

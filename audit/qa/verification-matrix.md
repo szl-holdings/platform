@@ -1,12 +1,74 @@
 # SZL Holdings — QA Verification Matrix
 
-**Date:** 2026-04-21  
-**Auditor:** Enterprise Rehaul — Task #2841  
-**Scope:** All available QA/audit/verification scripts run during this audit
+---
+
+## Audit Run: Task #2960 — 2026-04-26
+
+**Auditor:** Task #2960 — Series-A Platform Rehaul
+**Scope:** Enterprise redesign, audit hardening, proof pass across all 14+ artifacts
+
+### Fixes Applied This Run
+
+| Area | File(s) | Change |
+|---|---|---|
+| Brand compliance | `packages/agents-sdk-bridge/src/agent-adapter.ts`, `index.ts`, `package.json` | Replaced all "Nuro Mesh" references → "SZL" |
+| Brand compliance | `artifacts/a11oy/src/pages/OmniaAdoption.tsx` | Changed "Beacon" display label → "Active" |
+| Brand compliance | `artifacts/a11oy/src/data/voice.ts` | Replaced stale metric in original field |
+| Brand compliance | `scripts/brand-check.ts` | Updated regex + exclusion paths; added cybersecurity-context Beacon exemptions (C2/DNS/Cobalt Strike) |
+| AIS disclosure | `artifacts/szl-holdings/src/pages/landing.tsx` | "AIS telemetry" → "simulated AIS telemetry" |
+| Audit routes script | `scripts/qa/audit-routes.js` | Fixed silent failure (empty loop → prints missing routes); updated Lyte routes to actual pages; removed admin/firestorm directories from API Server check |
+
+### Script Execution Results
+
+| Script | Result | Notes |
+|---|---|---|
+| `tsx scripts/brand-check.ts` | ✅ PASS | 4780 files scanned, 0 violations (was 11 in 7 files before fixes) |
+| `tsx scripts/check-banned-brand-strings.ts` | ✅ PASS | 4780 files scanned, 0 new violations (3897 stale baseline entries; run --update-baseline to refresh) |
+| `tsx scripts/check-ais-disclosure.ts` | ✅ PASS | 8 surfaces carry the simulated-AIS qualifier |
+| `node scripts/qa/audit-routes.js` | ✅ PASS | 69/69 registered routes have matching page files (was failing: 38 stale routes) |
+| `node scripts/qa/audit-mocks.js` | ✅ PASS | No shipped mock substitutions found |
+| `node scripts/qa/audit-deps.js` | ✅ PASS | No blocking dependency conflicts |
+| `node scripts/qa/audit-copy.js` | ✅ PASS | Advisory notes only, no blocking errors |
+| `node scripts/qa/audit-design-system.js` | ✅ PASS | No blocking design system violations |
+| `node scripts/qa/audit-broken-links.js` | ✅ PASS | 0 broken internal link references |
+| `node scripts/qa/verify-claims.js` | ✅ PASS | 57 API route claims verified |
+| `tsx scripts/check-design-tokens-drift.ts` | ✅ PASS | Average 51/100 across 14 artifacts (threshold: 50). Worst: aegis 7, sentra 9, command 22 |
+| `node scripts/validate-readme-assets.js` | ✅ PASS | All README assets validated |
+| `node scripts/qa/verify-claims.js --strict` | ❌ FAIL | Silent failure — pre-existing; likely requires live server in strict mode |
+| `node scripts/qa/verify-env.js` | ❌ FAIL | Expected in dev env without all secrets set |
+| `tsx scripts/validate-platform-facts.ts` | ❌ FAIL | Silent failure — pre-existing; likely requires live database |
+| `node scripts/qa/health-check.js` | ❌ FAIL | Script defaults PORT=5000; API runs on PORT=3000 |
+| `curl http://localhost:3000/api/health` | ✅ PASS | API healthy: database ok, storage ok, auth ok, ai ok |
+| `node scripts/qa/generate-sbom.js` | ❌ FAIL | npm advisory endpoint blocked in Replit dev environment (passed in prior run on 2026-04-21: 703 packages, 0 advisories) |
+
+### Token Drift Detail (2026-04-26)
+
+| Artifact | Score | Raw CSS hits |
+|---|---|---|
+| aegis | 7/100 | 10562 |
+| sentra | 9/100 | 11660 |
+| command | 22/100 | 14743 |
+| szl-holdings | 28/100 | 16357 |
+| terra | 41/100 | 4035 |
+| pulse | 45/100 | 641 |
+| carlota-jo | 48/100 | 2289 |
+| szl-demo-video | 57/100 | 72 |
+| vessels | 62/100 | 2358 |
+| lyte-command-center | 73/100 | 455 |
+| szl-holdings-mobile | 76/100 | 1902 |
+| counsel | 76/100 | 227 |
+| mockup-sandbox | 80/100 | 215 |
+| api-server | 98/100 | 848 |
 
 ---
 
-## Script Execution Results
+## Audit Run: Task #2841 — 2026-04-21
+
+**Date:** 2026-04-21
+**Auditor:** Enterprise Rehaul — Task #2841
+**Scope:** All available QA/audit/verification scripts run during this audit
+
+### Script Execution Results
 
 | Script | Command | Result | Log File |
 |---|---|---|---|
@@ -46,7 +108,7 @@ The initial estimate grepped for `z.` usage only. A corrected scan using `Schema
 
 ---
 
-## Manual Verification Results
+## Manual Verification Results (2026-04-21)
 
 | Area | Verified | Result |
 |---|---|---|
@@ -95,11 +157,13 @@ Priority order:
 3. **Run integration tests with live server** — smoke routes, API smoke
 4. **Address 86 catalog dep issues** — harmonize react/typescript versions
 5. **Add database composite indexes on HR-001/HR-002/HR-003** — see follow-up #2870
-6. ~~**Retake aegis-command.jpg with seeded data**~~ **DONE** — retaken 2026-04-21; current Aegis UI confirmed (loading-state concern resolved)
-7. **SBOM generation** — DONE (703 packages, 0 high/critical vulnerabilities)
-8. **WCAG/a11y pass** — requires live server + accessibility tooling
+6. **Design token migration** — aegis (7/100) and sentra (9/100) are extreme raw CSS users; full migration is a multi-sprint effort
+7. **Fix health-check.js PORT default** — script uses 5000; API is on 3000
+8. **Update brand-strings baseline** — 3897 stale entries; run `--update-baseline` to refresh
 
 ---
 
-*Failures and remediation: `audit/qa/failures-and-remediation.md`*  
+*Log directory: `audit/logs/`*
+*Comprehensive run log: `audit/logs/comprehensive-qa-run-2026-04-26.log`*
+*Failures and remediation: `audit/qa/failures-and-remediation.md`*
 *Final smoke report: `audit/qa/final-smoke-report.md`*

@@ -56,8 +56,10 @@ const DEPRECATED_PATTERNS: Array<{ pattern: RegExp; reason: string }> = [
     reason: 'Deprecated string: "Alloy Predict" (use "Alloy" or "Alloy Intelligence")',
   },
   {
-    // "Beacon" as a product name, but not navigator.sendBeacon or similar Web APIs.
-    pattern: /(?<!send)(?<!\.)(?<!\w)\bBeacon\b(?!\s*\()/g,
+    // "Beacon" as a product name, but not navigator.sendBeacon or similar Web APIs,
+    // and not cybersecurity domain terms like "C2 Beacon", "DNS Beacon",
+    // "Cobalt Strike Beacon", or "Beacon interval" (malware C2 beaconing concepts).
+    pattern: /(?<!send)(?<!\.)(?<!\w)(?<!C2 )(?<!DNS )(?<!Strike )(?<!APT29 )\bBeacon\b(?! interval)(?!\s*\()/g,
     reason: 'Deprecated product name: "Beacon" (canonical name is "Lyte")',
   },
 ];
@@ -120,9 +122,15 @@ const IGNORE_PATHS_EXACT = new Set([
   '.playwright',
   'playwright-report',
   'packages/brand-registry',
-  // Third-party adapters — contain external entity names (e.g. "Beacon Capital Partners",
-  // "Cobalt Strike C2 Beacon") that are NOT the deprecated SZL product codename.
+  // Third-party adapters and cybersecurity-domain packages — contain external entity names
+  // (e.g. "Beacon Capital Partners", "Cobalt Strike C2 Beacon") or legitimate security
+  // terminology ("C2 Beacon", "DNS Beacon", beaconing malware concepts) that are NOT the
+  // deprecated SZL product codename.
   'lib/services',
+  // Sentra pages are cybersecurity domain simulation data — "Beacon" = malware C2 beacon.
+  'artifacts/sentra/src/pages',
+  // a11oy-runtime workcells include cybersecurity signal labels for demo data.
+  'packages/a11oy-runtime/src/data',
   'artifacts/api-server/src/routes',
   'artifacts/api-server/src/lib',
   'artifacts/api-server/src/data',

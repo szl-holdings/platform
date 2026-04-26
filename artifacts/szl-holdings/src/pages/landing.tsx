@@ -40,7 +40,7 @@ const LOOP = [
 
 const VERTICALS = [
   { name: "Aegis", category: "Security & Defense", href: "/solutions/aegis", desc: "SOC command, threat intelligence, MITRE mapping, and governed SOAR playbooks." },
-  { name: "Vessels", category: "Maritime Intelligence", href: "/solutions/vessels", desc: "Fleet command, AIS telemetry, sanctions screening, and voyage economics." },
+  { name: "Vessels", category: "Maritime Intelligence", href: "/solutions/vessels", desc: "Fleet command, simulated AIS telemetry, sanctions screening, and voyage economics." },
   { name: "Terra", category: "Real Estate Intelligence", href: "/solutions/terra", desc: "Distress property pipeline, ownership entity graph, and governed underwriting." },
   { name: "Counsel", category: "Legal Operations", href: "/counsel", desc: "Matter twins, deadline tracking, and governed demand workflows for litigation teams." },
   { name: "Carlota Jo", category: "Private Advisory", href: "/carlota-jo/", desc: "Discreet client intake, managed service delivery, and advisory operations for UHNW principals." },

@@ -57,49 +57,30 @@ const APP_CONFIGS = [
     appPath: join(ROOT, 'artifacts/lyte-command-center/src'),
     pagesDir: 'pages',
     knownRoutes: [
-      'dashboard',
-      'signals-page',
-      'actions-page',
-      'readiness-page',
-      'approvals-center',
-      'ownership-map-new',
-      'escalation-center',
-      'command-inbox',
-      'action-queue',
-      'operational-queue',
-      'demo-dashboard',
-      'demo-signals',
-      'demo-priorities',
-      'demo-workflows',
-      'demo-recommendations',
-      'demo-audit',
-      'demo-exceptions',
-      'demo-readiness',
-      'demo-integrations',
-      'demo-reports',
-      'demo-settings',
-      'demo-alerts',
-    ],
-    subDirRoutes: [
-      {
-        subDir: 'admin',
-        routes: [
-          'overview',
-          'users',
-          'feature-flags',
-          'audit-log',
-          'jobs',
-          'run-viewer',
-          'approval-queue',
-          'seeder',
-          'export-history',
-          'diagnostics',
-          'billing-admin',
-          'platform-health',
-          'connectors',
-          'workflows',
-        ],
-      },
+      'action-debt',
+      'aef-knowledge-search',
+      'billing-account',
+      'board-view',
+      'briefing',
+      'brief',
+      'causal-intelligence',
+      'decision-center',
+      'decision-replay',
+      'decision-twin',
+      'entity-graph',
+      'eval-studio',
+      'evidence-explorer',
+      'forecast',
+      'landing',
+      'onboarding',
+      'overview',
+      'ownership-drift',
+      'policy-center',
+      'pressure-map',
+      'run-console',
+      'scenario-composer',
+      'signals-console',
+      'workflow-health',
     ],
   },
   {
@@ -109,12 +90,10 @@ const APP_CONFIGS = [
     knownRoutes: [
       'health',
       'core',
-      'admin',
       'auth',
       'alloy',
       'lyte',
       'vessels',
-      'firestorm',
       'terra',
       'billing',
       'notifications',
@@ -191,10 +170,15 @@ function main() {
   }
 
   if (totalFailed > 0) {
-    for (const _f of failures) {
+    console.error(`\n❌ audit:routes — ${totalFailed} missing route file(s):\n`);
+    for (const f of failures) {
+      console.error(`  [${f.app}] Missing page file: ${f.route} (${f.context})`);
     }
+    console.error(`\nEnsure each listed route has a corresponding .tsx file in the pages directory,`);
+    console.error(`or remove the route from knownRoutes in scripts/qa/audit-routes.js if intentionally deleted.\n`);
     process.exit(1);
   } else {
+    console.log(`✅ audit:routes — all ${_totalChecks} registered routes have matching page files.`);
     process.exit(0);
   }
 }

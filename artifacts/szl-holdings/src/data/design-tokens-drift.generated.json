@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-04-26T14:19:02.739Z",
+  "generatedAt": "2026-04-26T19:43:16.950Z",
   "threshold": 50,
-  "averageScore": 52,
+  "averageScore": 51,
   "totalArtifacts": 14,
   "artifacts": [
     {
@@ -9,10 +9,10 @@
       "dir": "artifacts/sentra",
       "title": "Sentra — Cyber Resilience Command",
       "kind": "web",
-      "lines": 12809,
-      "files": 36,
-      "violations": 1148,
-      "score": 10,
+      "lines": 128768,
+      "files": 266,
+      "violations": 11660,
+      "score": 9,
       "top": [
         {
           "file": "artifacts/sentra/src/pages/crisis-arena-engagements.tsx",
@@ -24,12 +24,66 @@
           ]
         },
         {
-          "file": "artifacts/sentra/src/pages/sentra-landing.tsx",
-          "count": 128,
+          "file": "artifacts/sentra/src/pages/xdr-incident-workbench.tsx",
+          "count": 171,
           "examples": [
             "#f5f5f5",
             "#c9b787",
+            "#8a8a8a"
+          ]
+        },
+        {
+          "file": "artifacts/sentra/src/pages/consciousness.tsx",
+          "count": 170,
+          "examples": [
+            "#f5f5f5",
+            "#f5f5f5",
+            "#f5f5f5"
+          ]
+        },
+        {
+          "file": "artifacts/sentra/src/pages/command-home.tsx",
+          "count": 162,
+          "examples": [
+            "#0a0a0a",
+            "#f5f5f5",
+            "#f5f5f5"
+          ]
+        },
+        {
+          "file": "artifacts/sentra/src/pages/intel/agent-autonomy.tsx",
+          "count": 150,
+          "examples": [
+            "#c9b787",
+            "#f5f5f5",
             "#c9b787"
+          ]
+        },
+        {
+          "file": "artifacts/sentra/src/pages/soc-dashboard.tsx",
+          "count": 144,
+          "examples": [
+            "#c9b787",
+            "#f5f5f5",
+            "#8a8a8a"
+          ]
+        },
+        {
+          "file": "artifacts/sentra/src/pages/adversary-narrative-engine.tsx",
+          "count": 139,
+          "examples": [
+            "#2041",
+            "#c9b787",
+            "#c9b787"
+          ]
+        },
+        {
+          "file": "artifacts/sentra/src/pages/threat-twin-view.tsx",
+          "count": 136,
+          "examples": [
+            "#c9b787",
+            "#c9b787",
+            "#64748b"
           ]
         },
         {
@@ -42,66 +96,12 @@
           ]
         },
         {
-          "file": "artifacts/sentra/src/pages/containment-rules.tsx",
-          "count": 94,
-          "examples": [
-            "#f5f5f5",
-            "#f5f5f5",
-            "#f5f5f5"
-          ]
-        },
-        {
-          "file": "artifacts/sentra/src/pages/mesh-map.tsx",
-          "count": 71,
+          "file": "artifacts/sentra/src/pages/threat-intel-feed.tsx",
+          "count": 120,
           "examples": [
             "#c9b787",
-            "#8a8a8a",
+            "#c9b787",
             "#c9b787"
-          ]
-        },
-        {
-          "file": "artifacts/sentra/src/index.css",
-          "count": 56,
-          "examples": [
-            "#c96070",
-            "#020a14",
-            "hsl(...)"
-          ]
-        },
-        {
-          "file": "artifacts/sentra/src/pages/mesh-exposures.tsx",
-          "count": 50,
-          "examples": [
-            "#f5f5f5",
-            "#f5f5f5",
-            "#f5f5f5"
-          ]
-        },
-        {
-          "file": "artifacts/sentra/src/pages/dashboard.tsx",
-          "count": 43,
-          "examples": [
-            "#f5f5f5",
-            "#c9b787",
-            "#f5f5f5"
-          ]
-        },
-        {
-          "file": "artifacts/sentra/src/pages/incident-commander.tsx",
-          "count": 43,
-          "examples": [
-            "#f5f5f5",
-            "#f5f5f5",
-            "#f5f5f5"
-          ]
-        },
-        {
-          "file": "artifacts/sentra/src/lib/data-provenance.tsx",
-          "count": 35,
-          "examples": [
-            "#f5f5f5",
-            "#f5f5f5",
-            "#f5f5f5"
           ]
         }
       ]
@@ -212,9 +212,9 @@
       "dir": "artifacts/szl-holdings-mobile",
       "title": "SZL Holdings — Mobile Command",
       "kind": "mobile",
-      "lines": 80208,
-      "files": 237,
-      "violations": 1889,
+      "lines": 80857,
+      "files": 238,
+      "violations": 1902,
       "score": 76,
       "top": [
         {
@@ -416,11 +416,20 @@
       "dir": "artifacts/pulse",
       "title": "Pulse — AI Executive Briefing",
       "kind": "web",
-      "lines": 10762,
-      "files": 33,
-      "violations": 537,
-      "score": 50,
+      "lines": 11679,
+      "files": 34,
+      "violations": 641,
+      "score": 45,
       "top": [
+        {
+          "file": "artifacts/pulse/src/pages/Watchlist.tsx",
+          "count": 83,
+          "examples": [
+            "#5090e8",
+            "#e05050",
+            "#4eca8b"
+          ]
+        },
         {
           "file": "artifacts/pulse/src/pages/BriefingEngine.tsx",
           "count": 81,
@@ -431,8 +440,8 @@
           ]
         },
         {
-          "file": "artifacts/pulse/src/pages/SystemHealth.tsx",
-          "count": 64,
+          "file": "artifacts/pulse/src/pages/TodaysBrief.tsx",
+          "count": 69,
           "examples": [
             "#4eca8b",
             "#c8a84b",
@@ -440,8 +449,8 @@
           ]
         },
         {
-          "file": "artifacts/pulse/src/pages/TodaysBrief.tsx",
-          "count": 48,
+          "file": "artifacts/pulse/src/pages/SystemHealth.tsx",
+          "count": 64,
           "examples": [
             "#4eca8b",
             "#c8a84b",
@@ -501,15 +510,6 @@
             "#c8a84b",
             "#c8a84b"
           ]
-        },
-        {
-          "file": "artifacts/pulse/src/App.tsx",
-          "count": 21,
-          "examples": [
-            "#0a0b0d",
-            "#c8a84b",
-            "#ef4444"
-          ]
         }
       ]
     },
@@ -518,9 +518,9 @@
       "dir": "artifacts/aegis",
       "title": "SZL Holdings — Investor Pitch Deck",
       "kind": "web",
-      "lines": 112980,
+      "lines": 112992,
       "files": 227,
-      "violations": 10559,
+      "violations": 10562,
       "score": 7,
       "top": [
         {
@@ -620,10 +620,10 @@
       "dir": "artifacts/command",
       "title": "Unified Command",
       "kind": "web",
-      "lines": 188877,
-      "files": 356,
-      "violations": 14576,
-      "score": 23,
+      "lines": 189749,
+      "files": 357,
+      "violations": 14743,
+      "score": 22,
       "top": [
         {
           "file": "artifacts/command/src/operations/pages/ai-quality-dashboard.tsx",
@@ -680,6 +680,15 @@
           ]
         },
         {
+          "file": "artifacts/command/src/pages/operator-panel.tsx",
+          "count": 151,
+          "examples": [
+            "#22c55e",
+            "#22c55e18",
+            "#22c55e"
+          ]
+        },
+        {
           "file": "artifacts/command/src/operations/pages/dashboard.tsx",
           "count": 150,
           "examples": [
@@ -705,15 +714,6 @@
             "#7c8a9a",
             "#6b8f71"
           ]
-        },
-        {
-          "file": "artifacts/command/src/pages/operations/fabric.tsx",
-          "count": 135,
-          "examples": [
-            "#d4a054",
-            "#0ea5e9",
-            "#22c55e"
-          ]
         }
       ]
     },
@@ -722,9 +722,9 @@
       "dir": "artifacts/terra",
       "title": "Terra — Real Estate Intelligence",
       "kind": "web",
-      "lines": 68305,
+      "lines": 68309,
       "files": 125,
-      "violations": 4034,
+      "violations": 4035,
       "score": 41,
       "top": [
         {
@@ -926,9 +926,9 @@
       "dir": "artifacts/szl-holdings",
       "title": "SZL Holdings Dashboard",
       "kind": "web",
-      "lines": 226956,
+      "lines": 227132,
       "files": 498,
-      "violations": 16324,
+      "violations": 16357,
       "score": 28,
       "top": [
         {
@@ -968,6 +968,15 @@
           ]
         },
         {
+          "file": "artifacts/szl-holdings/src/pages/distribution-os/leads-page.tsx",
+          "count": 167,
+          "examples": [
+            "#4a90b8",
+            "#5a9c5a",
+            "#d4a054"
+          ]
+        },
+        {
           "file": "artifacts/szl-holdings/src/pages/intelligence-exchange.tsx",
           "count": 166,
           "examples": [
@@ -1004,15 +1013,6 @@
           ]
         },
         {
-          "file": "artifacts/szl-holdings/src/pages/distribution-os/leads-page.tsx",
-          "count": 156,
-          "examples": [
-            "#4a90b8",
-            "#5a9c5a",
-            "#d4a054"
-          ]
-        },
-        {
           "file": "artifacts/szl-holdings/src/pages/distribution-os/developer-api.tsx",
           "count": 149,
           "examples": [
@@ -1028,9 +1028,9 @@
       "dir": "artifacts/vessels",
       "title": "Vessels Maritime Intelligence",
       "kind": "web",
-      "lines": 61585,
+      "lines": 61589,
       "files": 142,
-      "violations": 2357,
+      "violations": 2358,
       "score": 62,
       "top": [
         {
@@ -1232,7 +1232,7 @@
       "dir": "artifacts/mockup-sandbox",
       "title": "PRAXIS — Unified Agentic AI Layer",
       "kind": "design",
-      "lines": 10740,
+      "lines": 10741,
       "files": 31,
       "violations": 215,
       "score": 80,
@@ -1334,8 +1334,8 @@
       "dir": "artifacts/api-server",
       "title": "API Server",
       "kind": "web",
-      "lines": 367905,
-      "files": 726,
+      "lines": 371563,
+      "files": 742,
       "violations": 848,
       "score": 98,
       "top": [

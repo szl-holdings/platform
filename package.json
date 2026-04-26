@@ -195,7 +195,8 @@
       "@tootallnate/once": "3.0.1",
       "@esbuild-kit/core-utils>esbuild": "0.27.3",
       "protobufjs": "^7.5.5",
-      "protocol-buffers-schema": "^3.6.1"
+      "protocol-buffers-schema": "^3.6.1",
+      "@xmldom/xmldom": "^0.9.10"
     }
   }
 }

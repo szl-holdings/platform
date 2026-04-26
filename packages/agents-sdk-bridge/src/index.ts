@@ -4,7 +4,7 @@
  * Bridges the @openai/agents SDK into the SZL governed platform:
  *   - SzlTracingProcessor: dual-exports SDK traces to Trace Graph + Cognitive Observability
  *   - SzlToolAdapter: converts Tool Mesh manifests into SDK tool() definitions
- *   - SzlAgentAdapter: wraps Nuro Mesh AgentDefinitions as SDK Agent instances
+ *   - SzlAgentAdapter: wraps SZL AgentDefinitions as SDK Agent instances
  *   - SzlGuardrailAdapter: bridges SDK guardrails to the Policy Engine's evaluateFull()
  *   - PII filter: respects trace_include_sensitive_data and SZL's PII redactor
  */
