@@ -266,6 +266,12 @@ const PUBLIC_PREFIXES = [
   // POST /scenarios/run are public so Lyte's Scenario Composer and the SZL
   // Holdings portfolio card can run scenarios without a session (demo mode).
   "/api/scenarios/",
+  // Adversarial red-team & crisis stress-drill suite.
+  // GET /stress-drill/scenarios is fully public (scenario library).
+  // POST /stress-drill/drills and lifecycle routes enforce auth via authMiddleware
+  // in the route handler. Global enforcer passes all stress-drill paths through;
+  // individual protected routes re-apply authentication themselves.
+  "/api/stress-drill/",
   // Alloy Meridian — cognitive observability OS read-only surfaces: model router
   // status, agent constellation health, forecast council results, signal graph,
   // Decision Weather, Counterfactual Ledger, Flight Recorder, MCP registry, and

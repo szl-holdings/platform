@@ -259,6 +259,7 @@ const OperatorPanel = lazy(() =>
 const EvidenceExplorer = lazy(() => import('./pages/evidence-explorer'));
 const EvalStudio = lazy(() => import('./pages/eval-studio'));
 const EvalForge = lazy(() => import('./pages/eval-forge'));
+const StressDrillPage = lazy(() => import('./pages/stress-drill'));
 const ForgePage = lazy(() =>
   import('./pages/operations/forge').then((m) => ({ default: m.ForgePage })),
 );
@@ -384,6 +385,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/strategy', label: 'Strategy Dashboard', group: 'Strategy' },
   { href: '/strategy/executive-briefing', label: 'Executive Briefing', group: 'Strategy' },
   { href: '/strategy/simulation', label: 'Simulation', group: 'Strategy' },
+  { href: '/strategy/stress-drill', label: 'Crisis Stress Drill', group: 'Strategy' },
   { href: '/strategy/briefing', label: 'Briefing History', group: 'Strategy' },
   { href: '/strategy/correlation-map', label: 'Correlation Map', group: 'Strategy' },
   { href: '/strategy/signal-chains', label: 'Signal Chains', group: 'Strategy' },
@@ -628,6 +630,7 @@ function AppShell() {
                 component={() => <ExecutiveBriefingPage />}
               />
               <Route path="/strategy/simulation" component={() => <SimulationPage />} />
+              <Route path="/strategy/stress-drill" component={() => <StressDrillPage />} />
               <Route path="/decisions" component={() => <DecisionCenterPage />} />
               <Route path="/intelligence/evidence" component={() => <EvidenceExplorerPage />} />
               <Route

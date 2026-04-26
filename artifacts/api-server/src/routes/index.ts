@@ -63,6 +63,13 @@ router.use(lazyMatch("/self-healing", () => import("./self-healing"), "self-heal
 // Simulation what-if engine — POST route is public.
 router.use(lazyMatch("/simulation", () => import("./simulation-whatif"), "simulation-whatif"));
 
+// Adversarial red-team & crisis stress-drill suite.
+// All state is isolated in-memory — no production tables touched.
+// GET  /stress-drill/scenarios
+// POST /stress-drill/drills + lifecycle routes
+// GET  /stress-drill/drills/:id/debrief + /debrief/pdf
+router.use(lazyMatch("/stress-drill", () => import("./stress-drill"), "stress-drill"));
+
 // Causal scenario & shock-propagation engine — public (demo surface).
 // GET /scenarios/library  — shock taxonomy
 // POST /scenarios/run     — propagates stacked shocks across the entity graph
