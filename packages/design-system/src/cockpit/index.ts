@@ -23,3 +23,5 @@ export type {
   TimelineLaneProps,
 } from './TimelineLane.js';
 export { TimelineLane } from './TimelineLane.js';
+export type { StepFlowProps, StepFlowStep, StepFlowStatus } from './StepFlow.js';
+export { StepFlow } from './StepFlow.js';

@@ -1,3 +1,5 @@
+export * from './ComparisonTable.js';
+export * from './DataCard.js';
 export * from './DataGrid.js';
 export * from './FilterBar.js';
 export * from './MetricStat.js';
