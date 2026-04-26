@@ -1,12 +1,17 @@
 import { Feather } from '@expo/vector-icons';
 import { useSyncEngine } from '@szl-holdings/mobile-shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import * as Haptics from 'expo-haptics';
+import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   Modal,
+  PanResponder,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -17,6 +22,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { OfflineQueuePanel } from '@/components/OfflineQueuePanel';
+import { VoiceNoteCapture } from '@/components/VoiceNoteCapture';
 import { TAB_BAR_HEIGHT } from '@/constants/layout';
 import { useColors } from '@/hooks/useColors';
 import { apiFetch } from '@/lib/apiClient';
@@ -716,6 +722,117 @@ function QueuedDecisionCard({
   );
 }
 
+const SWIPE_THRESHOLD = 110;
+const SWIPE_ACTION_WIDTH = 72;
+
+function SwipeableApprovalCard({
+  approval,
+  colors,
+  onReview,
+  onEscalate,
+  onQuickApprove,
+  onQuickReject,
+  isOffline,
+  queuedComments,
+  onEnqueueComment,
+}: {
+  approval: Approval;
+  colors: ReturnType<typeof useColors>;
+  onReview: (approval: Approval) => void;
+  onEscalate: (approval: Approval) => void;
+  onQuickApprove: (approval: Approval) => void;
+  onQuickReject: (approval: Approval) => void;
+  isOffline: boolean;
+  queuedComments: QueuedComment[];
+  onEnqueueComment: (approvalId: number, approvalTitle: string, body: string) => Promise<void>;
+}) {
+  const translateX = useRef(new Animated.Value(0)).current;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_evt, gestureState) => {
+        const { dx, dy } = gestureState;
+        return Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.5;
+      },
+      onPanResponderMove: Animated.event([null, { dx: translateX }], {
+        useNativeDriver: false,
+      }),
+      onPanResponderRelease: (_evt, gestureState) => {
+        const { dx } = gestureState;
+        if (dx > SWIPE_THRESHOLD) {
+          if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          Animated.spring(translateX, { toValue: 0, useNativeDriver: false }).start();
+          onQuickApprove(approval);
+        } else if (dx < -SWIPE_THRESHOLD) {
+          if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          Animated.spring(translateX, { toValue: 0, useNativeDriver: false }).start();
+          onQuickReject(approval);
+        } else {
+          Animated.spring(translateX, { toValue: 0, useNativeDriver: false, tension: 80, friction: 8 }).start();
+        }
+      },
+      onPanResponderTerminate: () => {
+        Animated.spring(translateX, { toValue: 0, useNativeDriver: false }).start();
+      },
+    }),
+  ).current;
+
+  const approveOpacity = translateX.interpolate({
+    inputRange: [0, SWIPE_ACTION_WIDTH],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+  const rejectOpacity = translateX.interpolate({
+    inputRange: [-SWIPE_ACTION_WIDTH, 0],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  return (
+    <View style={{ position: 'relative', overflow: 'hidden', borderRadius: 10 }}>
+      {/* Approve background (revealed on right swipe) */}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.swipeRevealLeft,
+          { opacity: approveOpacity },
+        ]}
+      >
+        <Feather name="check-circle" size={22} color="#22c55e" />
+        <Text style={styles.swipeRevealLabelApprove}>APPROVE</Text>
+      </Animated.View>
+
+      {/* Reject background (revealed on left swipe) */}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.swipeRevealRight,
+          { opacity: rejectOpacity },
+        ]}
+      >
+        <Text style={styles.swipeRevealLabelReject}>REJECT</Text>
+        <Feather name="x-circle" size={22} color="#ef4444" />
+      </Animated.View>
+
+      {/* Card */}
+      <Animated.View
+        style={{ transform: [{ translateX }] }}
+        {...panResponder.panHandlers}
+      >
+        <ApprovalCard
+          approval={approval}
+          colors={colors}
+          onReview={onReview}
+          onEscalate={onEscalate}
+          isOffline={isOffline}
+          queuedComments={queuedComments}
+          onEnqueueComment={onEnqueueComment}
+        />
+      </Animated.View>
+    </View>
+  );
+}
+
 function ReviewModal({
   approval,
   visible,
@@ -938,6 +1055,38 @@ async function saveQueuedEscalations(items: QueuedEscalation[]): Promise<void> {
   } catch {}
 }
 
+const APPROVAL_NOTIF_SEEN_KEY = 'approval-inbox:notif-seen-ids:v2';
+
+async function notifyNewApprovals(currentIds: number[]): Promise<void> {
+  try {
+    const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+    const raw = await AsyncStorage.getItem(APPROVAL_NOTIF_SEEN_KEY);
+    const seenIds: number[] = raw ? (JSON.parse(raw) as number[]) : [];
+    const seenSet = new Set(seenIds);
+    const newIds = currentIds.filter((id) => !seenSet.has(id));
+    if (newIds.length === 0) return;
+    const perm = await Notifications.getPermissionsAsync();
+    let status = perm.status;
+    if (status !== 'granted') {
+      const req = await Notifications.requestPermissionsAsync();
+      status = req.status;
+    }
+    if (status !== 'granted') return;
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `${newIds.length} new approval${newIds.length > 1 ? 's' : ''} pending`,
+        body: 'New agentic operator plans are waiting for your review.',
+        data: { route: '/(shell)/intelligence/approval-inbox' },
+        sound: true,
+      },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 2 },
+    });
+    await AsyncStorage.setItem(APPROVAL_NOTIF_SEEN_KEY, JSON.stringify(currentIds));
+  } catch {
+    // best-effort
+  }
+}
+
 export default function ApprovalInboxScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -951,6 +1100,7 @@ export default function ApprovalInboxScreen() {
   const [offlineComments, setOfflineComments] = useState<QueuedComment[]>([]);
   const [offlineEscalations, setOfflineEscalations] = useState<QueuedEscalation[]>([]);
   const [queueLoaded, setQueueLoaded] = useState(false);
+  const [voiceNoteVisible, setVoiceNoteVisible] = useState(false);
 
   const syncEngine = useSyncEngine();
   const isOffline = !syncEngine.isOnline;
@@ -1038,7 +1188,6 @@ export default function ApprovalInboxScreen() {
       qc.invalidateQueries({ queryKey: ['approval-audit-trail', variables.id] });
       setModalVisible(false);
       setReviewTarget(null);
-      Alert.alert('Decision recorded', 'The approval decision has been submitted and logged.');
     },
     onError: () => {
       Alert.alert('Error', 'Failed to submit decision. Please try again.');
@@ -1269,9 +1418,69 @@ export default function ApprovalInboxScreen() {
         );
         return;
       }
-      reviewMutation.mutate({ id: reviewTarget.id, decision, note });
+      reviewMutation.mutate(
+        { id: reviewTarget.id, decision, note },
+        {
+          onSuccess: () => {
+            Alert.alert('Decision recorded', 'The approval decision has been submitted and logged.');
+          },
+        },
+      );
     },
     [reviewTarget, reviewMutation, isOffline, enqueueDecisionOffline],
+  );
+
+  const handleQuickApprove = useCallback(
+    (approval: Approval) => {
+      if (isOffline) {
+        enqueueDecisionOffline(approval, 'approved', '').catch(() => {});
+        Alert.alert('Queued offline', 'Approval queued — will sync when back online.');
+        return;
+      }
+      reviewMutation.mutate(
+        { id: approval.id, decision: 'approved', note: '' },
+        {
+          onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ['cognitive-approvals'] });
+            Alert.alert('Approved', `"${approval.title.substring(0, 50)}" has been approved.`);
+          },
+        },
+      );
+    },
+    [isOffline, enqueueDecisionOffline, reviewMutation, qc],
+  );
+
+  const handleQuickReject = useCallback(
+    (approval: Approval) => {
+      Alert.alert(
+        'Confirm Rejection',
+        `Reject "${approval.title.substring(0, 60)}"? You can add a note in the full review.`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Reject',
+            style: 'destructive',
+            onPress: () => {
+              if (isOffline) {
+                enqueueDecisionOffline(approval, 'rejected', '').catch(() => {});
+                Alert.alert('Queued offline', 'Rejection queued — will sync when back online.');
+                return;
+              }
+              reviewMutation.mutate(
+                { id: approval.id, decision: 'rejected', note: '' },
+                {
+                  onSuccess: () => {
+                    qc.invalidateQueries({ queryKey: ['cognitive-approvals'] });
+                    Alert.alert('Rejected', `"${approval.title.substring(0, 50)}" has been rejected.`);
+                  },
+                },
+              );
+            },
+          },
+        ],
+      );
+    },
+    [isOffline, enqueueDecisionOffline, reviewMutation, qc],
   );
 
   const STATUS_FILTERS: Array<{ key: StatusFilter; label: string }> = [
@@ -1284,6 +1493,12 @@ export default function ApprovalInboxScreen() {
   const queuedIdsForFilter =
     statusFilter === 'pending' ? new Set(offlineQueue.map((q) => q.approvalId)) : new Set<number>();
   const pendingApprovals = approvals.filter((a) => !queuedIdsForFilter.has(a.id));
+
+  useEffect(() => {
+    if (statusFilter === 'pending' && pendingApprovals.length > 0) {
+      void notifyNewApprovals(pendingApprovals.map((a) => a.id));
+    }
+  }, [pendingApprovals, statusFilter]);
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -1316,6 +1531,12 @@ export default function ApprovalInboxScreen() {
               <Text style={[styles.offlinePillText, { color: '#f59e0b' }]}>OFFLINE</Text>
             </View>
           )}
+          <TouchableOpacity
+            onPress={() => setVoiceNoteVisible(true)}
+            style={[styles.refreshBtn, { backgroundColor: `${ACCENT}12`, borderRadius: 8, borderWidth: 1, borderColor: `${ACCENT}30` }]}
+          >
+            <Feather name="mic" size={15} color={ACCENT} />
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => approvalsQuery.refetch()} style={styles.refreshBtn}>
             <Feather name="refresh-cw" size={16} color={colors.mutedForeground} />
           </TouchableOpacity>
@@ -1422,12 +1643,14 @@ export default function ApprovalInboxScreen() {
           </View>
         ) : (
           pendingApprovals.map((approval) => (
-            <ApprovalCard
+            <SwipeableApprovalCard
               key={approval.id}
               approval={approval}
               colors={colors}
               onReview={openReview}
               onEscalate={openEscalate}
+              onQuickApprove={handleQuickApprove}
+              onQuickReject={handleQuickReject}
               isOffline={isOffline}
               queuedComments={offlineComments.filter((c) => c.approvalId === approval.id)}
               onEnqueueComment={enqueueCommentOffline}
@@ -1460,6 +1683,11 @@ export default function ApprovalInboxScreen() {
         onSubmit={handleSubmitEscalation}
         isPending={escalateMutation.isPending}
         isOffline={isOffline}
+      />
+
+      <VoiceNoteCapture
+        visible={voiceNoteVisible}
+        onClose={() => setVoiceNoteVisible(false)}
       />
     </View>
   );
@@ -1728,4 +1956,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   submitBtnText: { fontSize: 14, fontWeight: '700' },
+  swipeRevealLeft: {
+    position: 'absolute', top: 0, left: 0, bottom: 0, right: 0,
+    backgroundColor: '#22c55e20',
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 20,
+    gap: 8,
+  },
+  swipeRevealRight: {
+    position: 'absolute', top: 0, left: 0, bottom: 0, right: 0,
+    backgroundColor: '#ef444420',
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingRight: 20,
+    gap: 8,
+  },
+  swipeRevealLabelApprove: {
+    fontSize: 11, fontWeight: '700', color: '#22c55e', letterSpacing: 0.5,
+  },
+  swipeRevealLabelReject: {
+    fontSize: 11, fontWeight: '700', color: '#ef4444', letterSpacing: 0.5,
+  },
 });

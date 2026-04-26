@@ -1,6 +1,8 @@
 import { Feather } from '@expo/vector-icons';
+import { Audio } from 'expo-av';
+import * as Speech from 'expo-speech';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -15,6 +17,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ProvenanceChip } from '@/components/ProvenanceChip';
 
 type FeatherIconName = React.ComponentProps<typeof Feather>['name'];
 
@@ -337,6 +340,26 @@ function DissentForm({ briefId, onSuccess }: { briefId: string; onSuccess: () =>
   );
 }
 
+function buildBriefSpeechText(brief: TodaysBrief): string {
+  const lines: string[] = [
+    `Pulse Executive Briefing for ${brief.date}.`,
+    `Overall risk level: ${brief.overallRisk}.`,
+    `Overall confidence: ${Math.round(brief.overallConfidence * 100)} percent.`,
+    brief.headline,
+    brief.leadSentence,
+  ];
+  for (const sec of brief.sections) {
+    lines.push(`${sec.agentName}: ${sec.keyJudgment}`);
+  }
+  if (brief.recommendedActions.length > 0) {
+    lines.push('Recommended actions:');
+    for (const action of brief.recommendedActions) {
+      lines.push(`${action.priority}: ${action.action}, owned by ${action.owner}.`);
+    }
+  }
+  return lines.join(' ');
+}
+
 export default function PulseScreen() {
   const insets = useSafeAreaInsets();
   const _colors = useColors();
@@ -345,6 +368,64 @@ export default function PulseScreen() {
   const [activeTab, setActiveTab] = useState<Tab>('brief');
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['executive']));
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const isSpeakingRef = useRef(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (Platform.OS !== 'web') {
+          await Audio.setAudioModeAsync({
+            allowsRecordingIOS: false,
+            playsInSilentModeIOS: true,
+            staysActiveInBackground: true,
+            interruptionModeIOS: 1,
+            interruptionModeAndroid: 1,
+            shouldDuckAndroid: false,
+          });
+        }
+      } catch {
+        // best-effort — audio mode setup failure should not block UI
+      }
+    })();
+    return () => {
+      if (isSpeakingRef.current) {
+        Speech.stop().catch(() => {});
+      }
+    };
+  }, []);
+
+  const playBriefing = useCallback(
+    async (brief: TodaysBrief) => {
+      if (isSpeakingRef.current) {
+        await Speech.stop();
+        isSpeakingRef.current = false;
+        setIsSpeaking(false);
+        return;
+      }
+      const text = buildBriefSpeechText(brief);
+      isSpeakingRef.current = true;
+      setIsSpeaking(true);
+      Speech.speak(text, {
+        language: 'en-US',
+        pitch: 1.0,
+        rate: Platform.OS === 'ios' ? 0.5 : 1.0,
+        onDone: () => {
+          isSpeakingRef.current = false;
+          setIsSpeaking(false);
+        },
+        onError: () => {
+          isSpeakingRef.current = false;
+          setIsSpeaking(false);
+        },
+        onStopped: () => {
+          isSpeakingRef.current = false;
+          setIsSpeaking(false);
+        },
+      });
+    },
+    [],
+  );
 
   const {
     data: briefData,
@@ -430,7 +511,7 @@ export default function PulseScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
-        <View>
+        <View style={{ flex: 1 }}>
           <View style={styles.headerRow}>
             <View style={styles.activeDot} />
             <Text style={styles.headerTitle}>Pulse</Text>
@@ -441,24 +522,68 @@ export default function PulseScreen() {
           </View>
           <Text style={styles.headerSub}>AI Executive Briefing · Counsel</Text>
         </View>
-        <TouchableOpacity
-          onPress={() => {
-            const envUrl = process.env.EXPO_PUBLIC_PULSE_URL;
-            const apiBase = getApiBase();
-            const target =
-              envUrl && envUrl.length > 0
-                ? envUrl
-                : apiBase
-                  ? `${apiBase.replace(/\/api\/?$/, '')}/pulse/`
-                  : '/pulse/';
-            Linking.openURL(target);
-          }}
-          style={styles.openBtn}
-        >
-          <Feather name="external-link" size={12} color="#546078" />
-          <Text style={styles.openBtnText}>Open</Text>
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          {brief && (
+            <TouchableOpacity
+              onPress={() => playBriefing(brief)}
+              style={[
+                styles.audioBtn,
+                isSpeaking
+                  ? { backgroundColor: '#ef444420', borderColor: '#ef444460' }
+                  : { backgroundColor: `${ACCENT}15`, borderColor: `${ACCENT}40` },
+              ]}
+            >
+              <Feather
+                name={isSpeaking ? 'stop-circle' : 'volume-2'}
+                size={14}
+                color={isSpeaking ? '#ef4444' : ACCENT}
+              />
+              <Text style={[styles.audioBtnText, { color: isSpeaking ? '#ef4444' : ACCENT }]}>
+                {isSpeaking ? 'Stop' : 'Listen'}
+              </Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            onPress={() => {
+              const envUrl = process.env.EXPO_PUBLIC_PULSE_URL;
+              const apiBase = getApiBase();
+              const target =
+                envUrl && envUrl.length > 0
+                  ? envUrl
+                  : apiBase
+                    ? `${apiBase.replace(/\/api\/?$/, '')}/pulse/`
+                    : '/pulse/';
+              Linking.openURL(target);
+            }}
+            style={styles.openBtn}
+          >
+            <Feather name="external-link" size={12} color="#546078" />
+            <Text style={styles.openBtnText}>Open</Text>
+          </TouchableOpacity>
+        </View>
       </View>
+
+      {/* Audio Player Banner */}
+      {isSpeaking && (
+        <View style={styles.audioBanner}>
+          <View style={styles.audioWave}>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <View
+                key={i}
+                style={[
+                  styles.audioWaveBar,
+                  { height: [8, 14, 10, 16, 8][i - 1], backgroundColor: ACCENT },
+                ]}
+              />
+            ))}
+          </View>
+          <Text style={styles.audioBannerText}>Playing briefing…</Text>
+          <ProvenanceChip status="live" label="TTS Audio" />
+          <TouchableOpacity onPress={() => { Speech.stop(); setIsSpeaking(false); isSpeakingRef.current = false; }}>
+            <Feather name="x" size={14} color="#546078" />
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Tabs */}
       <View style={styles.tabs}>
@@ -1033,4 +1158,41 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(26,32,53,0.6)',
   },
   cancelBtnText: { fontSize: 13, fontWeight: '600', color: '#546078' },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  audioBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  audioBtnText: { fontSize: 11, fontWeight: '700' },
+  audioBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(200,168,75,0.06)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(200,168,75,0.12)',
+  },
+  audioWave: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    height: 20,
+  },
+  audioWaveBar: {
+    width: 3,
+    borderRadius: 2,
+    opacity: 0.85,
+  },
+  audioBannerText: { flex: 1, fontSize: 11, color: '#8a96b0' },
 });
