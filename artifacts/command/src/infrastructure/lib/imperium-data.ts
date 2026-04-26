@@ -927,7 +927,7 @@ export const CENTURION_PROFILES = [
   },
 ];
 
-export type GeoLayer = 'SIGINT' | 'INFRASTRUCTURE' | 'PERSONNEL' | 'WEATHER';
+export type GeoLayer = 'SIGINT' | 'INFRASTRUCTURE' | 'PERSONNEL' | 'WEATHER' | 'RF_INTEL';
 export type GeoThreat = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'NOMINAL';
 
 export interface GeoPin {

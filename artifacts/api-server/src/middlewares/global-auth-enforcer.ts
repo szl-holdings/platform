@@ -274,6 +274,11 @@ const PUBLIC_PREFIXES = [
   // a session. Write routes are still covered by CSRF double-submit
   // protection (global csrfMiddleware in server.ts).
   "/api/sentra/",
+  // RF Intelligence — satellite AIS correlation engine, anomaly detection,
+  // and geo-intel surface. All endpoints are read-only GET routes backed by
+  // an in-memory simulation store. Public so the Command geo-intel map and
+  // the Vessels satellite RF dashboard can hydrate without a session.
+  "/api/rf-intel/",
   // Crisis Arena — strictly public surfaces only: leaderboard ranking,
   // platform summary, and sanitized architect public profiles.
   // All engagement, submission, triage, award, and graduate endpoints require

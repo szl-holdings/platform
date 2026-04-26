@@ -116,6 +116,10 @@ router.use(lazyMatch("/agent-mesh", () => import("./agent-mesh"), "agent-mesh"))
 // guardianPolicyCheck so the map loads without auth.
 router.use(lazyMatch("/geo-intel", () => import("./geo-intel"), "geo-intel"));
 
+// RF Intelligence — satellite AIS correlation engine, anomaly detection, and geo-intel surface.
+// Public endpoints (no auth) — consumed by Command geo-intel map and Vessels dashboard.
+router.use(lazyMatch("/rf-intel", () => import("./rf-intel"), "rf-intel"));
+
 // Sentra cyber resilience cockpit — incidents + alerts CRUD. Public demo
 // surface (in-memory store). Write paths carry CSRF double-submit protection
 // via the global csrfMiddleware mounted in server.ts.

@@ -182,3 +182,4 @@ export * from './plugin_registry';
 export * from './billing_disputes';
 export * from './treasury';
 export * from './court_filings';
+export * from './rf_intel';

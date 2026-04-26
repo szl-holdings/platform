@@ -21,6 +21,7 @@ import {
   Filter,
   Globe2,
   Navigation,
+  Radio,
   RefreshCw,
   Search,
   Shield,
@@ -40,6 +41,7 @@ const LAYER_CONFIG: Record<GeoLayer, { label: string; icon: React.ElementType; c
   INFRASTRUCTURE: { label: 'INFRASTRUCTURE', icon: Building2, color: '#c9a227' },
   PERSONNEL: { label: 'PERSONNEL', icon: Users, color: '#60a5fa' },
   WEATHER: { label: 'WEATHER', icon: CloudRain, color: '#a78bfa' },
+  RF_INTEL: { label: 'RF INTEL', icon: Radio, color: '#34d399' },
 };
 
 const THREAT_CONFIG: Record<GeoThreat, { color: string; icon: React.ElementType }> = {
@@ -81,7 +83,7 @@ function isValidGeoIntelResponse(data: unknown): data is GeoIntelResponse {
     const p = pin as Record<string, unknown>;
     if (typeof p.id !== 'string') return false;
     if (typeof p.lat !== 'number' || typeof p.lng !== 'number') return false;
-    if (!['SIGINT', 'INFRASTRUCTURE', 'PERSONNEL', 'WEATHER'].includes(p.layer as string)) return false;
+    if (!['SIGINT', 'INFRASTRUCTURE', 'PERSONNEL', 'WEATHER', 'RF_INTEL'].includes(p.layer as string)) return false;
     if (!['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'NOMINAL'].includes(p.threat as string)) return false;
   }
   return true;
@@ -468,7 +470,7 @@ export default function GeospatialIntelligence() {
   const feed = useGeoIntelFeed();
 
   const [activeLayers, setActiveLayers] = useState<Set<GeoLayer>>(
-    new Set(['SIGINT', 'INFRASTRUCTURE', 'PERSONNEL', 'WEATHER']),
+    new Set(['SIGINT', 'INFRASTRUCTURE', 'PERSONNEL', 'WEATHER', 'RF_INTEL']),
   );
   const [selected, setSelected] = useState<GeoPin | null>(null);
   const [flyTarget, setFlyTarget] = useState<{ lat: number; lng: number } | null>(null);

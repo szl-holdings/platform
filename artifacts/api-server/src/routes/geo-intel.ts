@@ -27,10 +27,11 @@
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { incidentsStore, type Incident, type IncidentSeverity } from '../services/sentra-store';
 import { computeStatus, type ThreatLevel } from '../services/infrastructure-service';
+import { getActiveRfAnomalies, type RfAnomaly } from '../services/rf-intel-store';
 
 const router: IRouter = Router();
 
-type GeoLayer = 'SIGINT' | 'INFRASTRUCTURE' | 'PERSONNEL' | 'WEATHER';
+type GeoLayer = 'SIGINT' | 'INFRASTRUCTURE' | 'PERSONNEL' | 'WEATHER' | 'RF_INTEL';
 type GeoThreat = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'NOMINAL';
 type Classification = 'OPEN' | 'RESTRICTED' | 'CONFIDENTIAL' | 'SOVEREIGN';
 
@@ -421,6 +422,54 @@ const WEATHER_PINS: GeoPin[] = [
   },
 ];
 
+// ─── RF Intel pins from satellite correlation engine ──────────────────────────
+//
+// RF_INTEL is a distinct sublayer from SIGINT — it originates from the
+// satellite AIS correlation engine, not from the Sentra cyber-incident store.
+// Pins represent active RF anomalies (spoofing, dark vessels, position jumps).
+
+function anomalyTypeToThreat(anomaly: RfAnomaly): GeoThreat {
+  if (anomaly.severity === 'critical') return 'CRITICAL';
+  if (anomaly.severity === 'high') return 'HIGH';
+  if (anomaly.severity === 'medium') return 'MEDIUM';
+  return 'LOW';
+}
+
+function anomalyTypeLabel(t: RfAnomaly['anomalyType']): string {
+  switch (t) {
+    case 'SPOOFING': return 'AIS SPOOFING';
+    case 'DARK_VESSEL': return 'DARK VESSEL';
+    case 'POSITION_JUMP': return 'POSITION JUMP';
+    case 'AIS_GAP': return 'AIS GAP';
+    default: return 'RF ANOMALY';
+  }
+}
+
+function buildRfIntelPins(): GeoPin[] {
+  const anomalies = getActiveRfAnomalies();
+  return anomalies.map((a) => ({
+    id: `geo-rf-${a.id.toLowerCase()}`,
+    layer: 'RF_INTEL' as GeoLayer,
+    lat: a.lat,
+    lng: a.lon,
+    label: `RF INTEL — ${anomalyTypeLabel(a.anomalyType)}`,
+    sublabel: `${a.vesselName} · IMO ${a.imoNumber}`,
+    classification: a.anomalyType === 'SPOOFING' || a.anomalyType === 'POSITION_JUMP'
+      ? 'CONFIDENTIAL' as const
+      : 'RESTRICTED' as const,
+    threat: anomalyTypeToThreat(a),
+    stale: false,
+    updatedAt: a.updatedAt,
+    detail: {
+      summary: a.description,
+      source: `Satellite RF / ${a.satellitePassId} · Correlation ${a.correlationScore}%`,
+      timestamp: relativeTimestamp(a.updatedAt),
+      confidence: a.confidencePercent,
+      tags: [...a.tags, `CORR-${a.correlationScore}%`, a.anomalyType],
+    },
+  }));
+}
+
 // ─── Generation counter ───────────────────────────────────────────────────────
 // Tracks how many 30-second poll windows have elapsed since the epoch.
 // Increments predictably so clients can detect missed updates.
@@ -436,10 +485,11 @@ function currentGeneration(): number {
 router.get('/geo-intel/pins', (_req: Request, res: Response) => {
   const sigintPins = buildSigintPins();
   const infraPins = buildInfraPins();
-  const allPins: GeoPin[] = [...sigintPins, ...infraPins, ...PERSONNEL_PINS, ...WEATHER_PINS];
+  const rfPins = buildRfIntelPins();
+  const allPins: GeoPin[] = [...sigintPins, ...infraPins, ...PERSONNEL_PINS, ...WEATHER_PINS, ...rfPins];
 
   // Filter out any stale pins. Resolved incidents are excluded upstream;
-  // only non-resolved incidents, live infra, personnel, and weather are included.
+  // only non-resolved incidents, live infra, personnel, weather, and RF anomalies are included.
   const activePins = allPins.filter((p) => !p.stale);
 
   res.json({
@@ -453,7 +503,8 @@ router.get('/geo-intel/pins', (_req: Request, res: Response) => {
 router.get('/geo-intel/meta', (_req: Request, res: Response) => {
   const sigintPins = buildSigintPins();
   const infraPins = buildInfraPins();
-  const all = [...sigintPins, ...infraPins, ...PERSONNEL_PINS, ...WEATHER_PINS];
+  const rfPins = buildRfIntelPins();
+  const all = [...sigintPins, ...infraPins, ...PERSONNEL_PINS, ...WEATHER_PINS, ...rfPins];
   const active = all.filter((p) => !p.stale);
 
   const status = computeStatus();
@@ -467,6 +518,7 @@ router.get('/geo-intel/meta', (_req: Request, res: Response) => {
       INFRASTRUCTURE: active.filter((p) => p.layer === 'INFRASTRUCTURE').length,
       PERSONNEL: active.filter((p) => p.layer === 'PERSONNEL').length,
       WEATHER: active.filter((p) => p.layer === 'WEATHER').length,
+      RF_INTEL: active.filter((p) => p.layer === 'RF_INTEL').length,
     },
     infrastructureStatus: {
       aquilaScore: status.aquilaScore,
