@@ -140,6 +140,12 @@
     },
     {
       "path": "./packages/shared-contracts"
+    },
+    {
+      "path": "./packages/db-repository"
+    },
+    {
+      "path": "./packages/db-schema"
     }
   ]
 }

@@ -319,6 +319,7 @@ const DEFAULT_SCHEDULES: ScheduleDefinition[] = [
   { name: "proof_chain_digest_daily_0700", jobType: NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, cronExpression: "0 7 * * *", payload: {}, maxRetries: 3 },
   { name: "atlas_snapshot_compaction_0200", jobType: NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, cronExpression: "0 2 * * *", payload: { retainDays: 7, domains: ["vessels", "terra", "aegis", "prism"] }, maxRetries: 2 },
   { name: "atlas_retention_prune_0330", jobType: NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, cronExpression: "30 3 * * *", payload: {}, maxRetries: 1 },
+  { name: "traces_retention_prune_0400", jobType: NAMED_JOB_TYPES.TRACES_RETENTION_PRUNE, cronExpression: "0 4 * * *", payload: {}, maxRetries: 1 },
   { name: "platform_lyte_digest_0700", jobType: PLATFORM_JOB_TYPES.LYTE_DIGEST, cronExpression: "0 7 * * *", payload: { period: "daily" }, maxRetries: 2 },
   { name: "platform_readiness_digest_0700", jobType: PLATFORM_JOB_TYPES.READINESS_DIGEST, cronExpression: "0 7 * * *", payload: {}, maxRetries: 2 },
   { name: "platform_exception_summary_0700", jobType: PLATFORM_JOB_TYPES.EXCEPTION_SUMMARY, cronExpression: "0 7 * * *", payload: { domain: "platform" }, maxRetries: 2 },

@@ -47,6 +47,7 @@ export const NAMED_JOB_TYPES = {
   DAILY_NET30_AGING_SNAPSHOT: "daily_net30_aging_snapshot",
   HOURLY_NET30_DUNNING: "hourly_net30_dunning",
   HOURLY_ORG_PUBLICATION_SCHEDULER: "hourly_org_publication_scheduler",
+  TRACES_RETENTION_PRUNE: "traces_retention_prune",
 } as const;
 
 export type NamedJobType = (typeof NAMED_JOB_TYPES)[keyof typeof NAMED_JOB_TYPES];
@@ -94,6 +95,7 @@ registerEntry({ type: NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, name: "Daily Pro
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, name: "Executive Digest Dispatcher", description: "Runs every minute. Finds users whose digest_config.enabled=true and whose deliveryHour+deliveryMinute match the current local time in their configured IANA timezone. Sends an Expo push (generic body, no cross-tenant aggregates) with a deepLink to the briefing workspace; the workspace then loads the tenant-scoped digest in-app.", schedule: "minutely", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, name: "ATLAS Snapshot Compaction", description: "Compacts ATLAS spatial twin snapshots older than 7 days by merging intermediate frames into summary records. Reduces storage growth while preserving full worldline replay fidelity for audits and proof bundles.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, name: "ATLAS Retention Prune", description: "Deletes records from atlas_signals, atlas_evidence, atlas_outcomes, and atlas_runs older than the configured retention threshold (defaults to 90 days, override via ATLAS_RETENTION_DAYS env var or job payload retainDays). Prevents unbounded growth of ATLAS persistence tables.", schedule: "daily", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.TRACES_RETENTION_PRUNE, name: "Traces Retention Prune", description: "Deletes completed/failed trace records from the traces and trace_spans tables older than the configured retention window (defaults to 90 days, override via TRACES_RETENTION_DAYS env var or job payload retainDays). Running traces are never pruned. Batched deletes keep lock duration short on the 256 MB traces table.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_COMPETITIVE_INTEL_POLL, name: "Daily Competitive Intel Poll", description: "Polls product blogs / RSS feeds for the champions tracked in the SZL Competitive Atlas (CrowdStrike, Clio, CoStar, Windward, Palantir, ThoughtSpot, Darktrace) and surfaces new major-feature announcements as Intel Update alerts in the Command Competitive Atlas page with adopt/counter/monitor recommendations.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, name: "Launch Publish Scheduler", description: "Sweeps Distribution OS (dos_articles, dos_carousel_projects, dos_x_posts, dos_content_calendar_items) every 5 minutes for items whose scheduled publish time has arrived but whose status is still ready/approved/queued/scheduled, and triggers the matching Medium / Substack / LinkedIn / X publish helper. Newsletters auto-publish only when pinned to a calendar slot whose scheduledDate has arrived. Successful publishes flip the source row to published and record the external URL; failures are retried with per-item exponential backoff (1 min → 1 hr cap, terminal flip after 5 attempts) and surfaced on the Distribution OS dashboard via dos_automation_runs.", schedule: "minutely" as JobScheduleEntry["schedule"], enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, name: "Agent Mesh Telemetry Scan", description: "Re-scans local agent runtime config files (Claude Desktop, Cursor, Claude Code, Codex), refreshes the Sentra Mesh Map data, recomputes the resilience index, and fires Sentra alerts whenever the overall index or any sub-index drops materially since the last run. Runs every 15 minutes per scheduled org.", schedule: "hourly", enabled: true });
@@ -3947,6 +3949,121 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_NET30_DUNNING, async (job) => {
     updateRegistry(NAMED_JOB_TYPES.HOURLY_NET30_DUNNING, { lastStatus: "failed", lastDurationMs: Date.now() - start, failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_NET30_DUNNING)?.failCount || 0) + 1 });
     throw err;
   }
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.TRACES_RETENTION_PRUNE, async (job) => {
+  const start = Date.now();
+  updateRegistry(NAMED_JOB_TYPES.TRACES_RETENTION_PRUNE, {
+    lastStatus: 'running',
+    lastRunAt: Date.now(),
+  });
+
+  const payload = (job.payload ?? {}) as {
+    retainDays?: number;
+    dryRun?: boolean;
+    batchSize?: number;
+  };
+  const envDays = Number(process.env.TRACES_RETENTION_DAYS);
+  const retainDays =
+    Number.isFinite(payload.retainDays) && (payload.retainDays as number) > 0
+      ? Math.floor(payload.retainDays as number)
+      : Number.isFinite(envDays) && envDays > 0
+        ? Math.floor(envDays)
+        : 90;
+  const dryRun = payload.dryRun === true;
+  const batchSize =
+    Number.isFinite(payload.batchSize) && (payload.batchSize as number) > 0
+      ? Math.min(Math.floor(payload.batchSize as number), 50_000)
+      : 5_000;
+  const cutoff = new Date(Date.now() - retainDays * 24 * 60 * 60 * 1000);
+
+  // Child tables MUST be pruned before the parent `traces` table.
+  // Both trace_spans and trace_events are guarded by a subquery that checks
+  // the parent trace is terminal AND old enough. Once traces are deleted the
+  // subquery would return no rows, so children must come first.
+  const tableTargets: Array<{ table: string; column: string; guard?: string }> = [
+    {
+      table: 'trace_spans',
+      column: 'started_at',
+      guard: "AND trace_id IN (SELECT trace_id FROM traces WHERE status IN ('completed','failed','rolled-back') AND started_at < $1)",
+    },
+    {
+      table: 'trace_events',
+      column: 'occurred_at',
+      guard: "AND trace_id IN (SELECT trace_id FROM traces WHERE status IN ('completed','failed','rolled-back') AND started_at < $1)",
+    },
+    { table: 'traces', column: 'started_at', guard: "AND status IN ('completed','failed','rolled-back')" },
+  ];
+
+  const counts: Record<string, number> = {};
+  let totalDeleted = 0;
+  let failed = 0;
+
+  try {
+    const { pool } = await import('@szl-holdings/db');
+    const MAX_BATCHES_PER_TABLE = 1_000;
+    for (const target of tableTargets) {
+      const guardClause = target.guard ?? '';
+      try {
+        if (dryRun) {
+          const result = await pool.query(
+            `SELECT COUNT(*)::int AS cnt FROM "${target.table}" WHERE "${target.column}" < $1 ${guardClause}`,
+            [cutoff],
+          );
+          const cnt = (result.rows[0]?.cnt as number) ?? 0;
+          counts[target.table] = cnt;
+        } else {
+          let tableDeleted = 0;
+          for (let batch = 0; batch < MAX_BATCHES_PER_TABLE; batch++) {
+            const result = await pool.query(
+              `WITH victims AS (
+                 SELECT ctid FROM "${target.table}"
+                 WHERE "${target.column}" < $1 ${guardClause}
+                 LIMIT $2
+               )
+               DELETE FROM "${target.table}" t USING victims v WHERE t.ctid = v.ctid`,
+              [cutoff, batchSize],
+            );
+            const rows = result.rowCount ?? 0;
+            tableDeleted += rows;
+            if (rows < batchSize) break;
+          }
+          counts[target.table] = tableDeleted;
+          totalDeleted += tableDeleted;
+        }
+      } catch (err) {
+        failed++;
+        logger.warn({ err, table: target.table }, 'traces_retention_prune: table prune failed');
+      }
+    }
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, 'traces_retention_prune: fatal — db not available');
+    updateRegistry(NAMED_JOB_TYPES.TRACES_RETENTION_PRUNE, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.TRACES_RETENTION_PRUNE)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
+
+  serverTelemetry.recordBusinessEvent({
+    type: 'traces_retention_prune_completed',
+    domain: 'traces',
+    durationMs: Date.now() - start,
+    success: failed === 0,
+    metadata: { retainDays, cutoff: cutoff.toISOString(), dryRun, counts, totalDeleted, failed },
+  });
+  updateRegistry(NAMED_JOB_TYPES.TRACES_RETENTION_PRUNE, {
+    lastStatus: failed === 0 ? 'completed' : 'failed',
+    lastDurationMs: Date.now() - start,
+    ...(failed > 0
+      ? { failCount: (jobRegistry.get(NAMED_JOB_TYPES.TRACES_RETENTION_PRUNE)?.failCount || 0) + 1 }
+      : {}),
+  });
+  logger.info(
+    { retainDays, cutoff: cutoff.toISOString(), dryRun, counts, totalDeleted, failed, durationMs: Date.now() - start },
+    'traces_retention_prune: complete',
+  );
 });
 
 let namedJobsStarted = false;
