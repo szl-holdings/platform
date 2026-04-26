@@ -57,6 +57,7 @@
     "@szl-holdings/config": "workspace:*",
     "@szl-holdings/domain-claims": "workspace:*",
     "@szl-holdings/document-intelligence": "workspace:*",
-    "@szl-holdings/omnia-shell": "workspace:*"
+    "@szl-holdings/omnia-shell": "workspace:*",
+    "@workspace/tokens": "workspace:*"
   }
 }

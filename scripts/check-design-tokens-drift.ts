@@ -32,7 +32,7 @@
  * remains the strict gate for AEEP runtime packages and is unaffected.
  */
 
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
+import { appendFileSync, existsSync, readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
 import { TOKEN_GOVERNED_ARTIFACTS } from '../packages/tokens/src/manifest.ts';
@@ -40,6 +40,7 @@ import { TOKEN_GOVERNED_ARTIFACTS } from '../packages/tokens/src/manifest.ts';
 const ROOT = resolve(import.meta.dirname ?? process.cwd(), '..');
 const OUT_PATH = join(ROOT, 'scripts/design-tokens-drift.report.json');
 const HISTORY_PATH = join(ROOT, 'scripts/design-tokens-drift.history.json');
+const AUDIT_JSONL_PATH = join(ROOT, 'audit/design-token-history.jsonl');
 const PUBLISH_PATH = join(
   ROOT,
   'artifacts/mockup-sandbox/src/data/design-tokens-drift.generated.json',
@@ -47,6 +48,14 @@ const PUBLISH_PATH = join(
 const HISTORY_PUBLISH_PATH = join(
   ROOT,
   'artifacts/mockup-sandbox/src/data/design-tokens-drift-history.generated.json',
+);
+const SZL_HOLDINGS_PUBLISH_PATH = join(
+  ROOT,
+  'artifacts/szl-holdings/src/data/design-tokens-drift.generated.json',
+);
+const SZL_HOLDINGS_HISTORY_PUBLISH_PATH = join(
+  ROOT,
+  'artifacts/szl-holdings/src/data/design-tokens-drift-history.generated.json',
 );
 const HISTORY_LIMIT = 60;
 
@@ -200,6 +209,8 @@ function main(): void {
   writeFileSync(OUT_PATH, JSON.stringify(payload, null, 2) + '\n', 'utf-8');
   mkdirSync(dirname(PUBLISH_PATH), { recursive: true });
   writeFileSync(PUBLISH_PATH, JSON.stringify(payload, null, 2) + '\n', 'utf-8');
+  mkdirSync(dirname(SZL_HOLDINGS_PUBLISH_PATH), { recursive: true });
+  writeFileSync(SZL_HOLDINGS_PUBLISH_PATH, JSON.stringify(payload, null, 2) + '\n', 'utf-8');
 
   // ---------------------------------------------------------------------------
   // Trend / history append. Stored as a rolling window of {ts, average, perArtifact}
@@ -216,10 +227,16 @@ function main(): void {
     : [];
   const perArtifact: Record<string, number> = {};
   for (const r of reports) perArtifact[r.id] = r.score;
-  history.push({ ts: payload.generatedAt, averageScore, perArtifact });
+  const historyEntry: HistoryEntry = { ts: payload.generatedAt, averageScore, perArtifact };
+  history.push(historyEntry);
   while (history.length > HISTORY_LIMIT) history.shift();
   writeFileSync(HISTORY_PATH, JSON.stringify(history, null, 2) + '\n', 'utf-8');
   writeFileSync(HISTORY_PUBLISH_PATH, JSON.stringify(history, null, 2) + '\n', 'utf-8');
+  writeFileSync(SZL_HOLDINGS_HISTORY_PUBLISH_PATH, JSON.stringify(history, null, 2) + '\n', 'utf-8');
+
+  // Append single-line JSONL entry to the committed audit trail.
+  mkdirSync(dirname(AUDIT_JSONL_PATH), { recursive: true });
+  appendFileSync(AUDIT_JSONL_PATH, JSON.stringify(historyEntry) + '\n', 'utf-8');
 
   console.log(
     `\nNEXUS tokens-as-code drift report — average score ${averageScore}/100 across ${reports.length} artifacts`,
@@ -229,7 +246,9 @@ function main(): void {
     console.log(`  ${bar}  ${String(r.score).padStart(3)}  ${r.id.padEnd(22)}  ${r.violations} hits / ${r.lines} lines`);
   }
   console.log(`\nReport: ${relative(ROOT, OUT_PATH)}`);
-  console.log(`Published to NEXUS: ${relative(ROOT, PUBLISH_PATH)}\n`);
+  console.log(`Published to NEXUS: ${relative(ROOT, PUBLISH_PATH)}`);
+  console.log(`Published to SZL Holdings: ${relative(ROOT, SZL_HOLDINGS_PUBLISH_PATH)}`);
+  console.log(`Audit trail: ${relative(ROOT, AUDIT_JSONL_PATH)}\n`);
 
   if (checkMode && averageScore < threshold) {
     console.error(`FAIL: average compliance ${averageScore} < threshold ${threshold}`);

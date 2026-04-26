@@ -297,6 +297,7 @@ const AlloyWorkflowOrchestration = lazy(() => import("@/alloy/pages/workflow-orc
 const AlloyConnectorMesh = lazy(() => import("@/alloy/pages/connector-mesh"));
 const AlloyGovernanceAudit = lazy(() => import("@/alloy/pages/governance-audit"));
 const AlloyEnterpriseGovernance = lazy(() => import("@/alloy/pages/enterprise-governance"));
+const DesignTokenGovernancePage = lazy(() => import("@/pages/design-token-governance"));
 const AlloyAtlasApprovals = lazy(() => import("@/alloy/pages/atlas-approvals"));
 const AlloyOperatorApprovals = lazy(() => import("@/alloy/pages/operator-approvals"));
 const AlloyAutomationAnalytics = lazy(() => import("@/alloy/pages/automation-analytics"));
@@ -1617,6 +1618,11 @@ function App() {
             {/* Governed Intelligence — Hero Proof Surface */}
             <Route path="/governed-cockpit">
               <Suspense fallback={<PageLoader />}><GovernedCockpitPage /></Suspense>
+            </Route>
+
+            {/* Design Token Governance Dashboard */}
+            <Route path="/design-token-governance">
+              <Suspense fallback={<PageLoader />}><DesignTokenGovernancePage /></Suspense>
             </Route>
 
             {/* Catch-all → 404 */}

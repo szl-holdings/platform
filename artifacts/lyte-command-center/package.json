@@ -47,6 +47,7 @@
     "@workspace/simulation": "workspace:*",
     "@workspace/approvals-inbox": "workspace:*",
     "@szl-holdings/speech-specialist": "workspace:*",
-    "@szl-holdings/omnia-shell": "workspace:*"
+    "@szl-holdings/omnia-shell": "workspace:*",
+    "@workspace/tokens": "workspace:*"
   }
 }

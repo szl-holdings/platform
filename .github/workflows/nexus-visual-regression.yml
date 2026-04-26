@@ -1,0 +1,94 @@
+name: PRAXIS Visual Regression
+
+on:
+  workflow_dispatch:
+    inputs:
+      update_baselines:
+        description: 'Update baseline screenshots (commit to PR branch after)'
+        required: false
+        default: 'false'
+        type: boolean
+  pull_request:
+    branches: [master, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: praxis-visual-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  praxis-visual-regression:
+    name: PRAXIS Visual Regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@fe52bf0ad0164d2310b5e4d5d7bfec47b67e3f9d # v4.0.0
+        with: { version: 10 }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: '24', cache: 'pnpm' }
+      - name: Cache node_modules
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            node_modules
+            **/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+      - run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Build PRAXIS catalog (mockup-sandbox)
+        run: pnpm --filter @workspace/mockup-sandbox run build
+        env:
+          NODE_ENV: production
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Serve PRAXIS catalog via Vite preview
+        run: |
+          pnpm --filter @workspace/mockup-sandbox exec vite preview --port 3333 --host &
+          echo $! > /tmp/vite-preview.pid
+          # Wait for server to be ready
+          for i in $(seq 1 20); do
+            if curl -sf http://localhost:3333 > /dev/null 2>&1; then
+              echo "Server ready after ${i}s"
+              break
+            fi
+            sleep 1
+          done
+
+      - name: Run PRAXIS visual regression tests
+        run: pnpm exec playwright test tests/e2e/nexus-visual-regression.spec.ts
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:3333
+          PLAYWRIGHT_UPDATE_SNAPSHOTS: ${{ inputs.update_baselines == 'true' && '1' || '0' }}
+          CI: true
+
+      - name: Stop preview server
+        if: always()
+        run: |
+          if [ -f /tmp/vite-preview.pid ]; then
+            kill "$(cat /tmp/vite-preview.pid)" 2>/dev/null || true
+          fi
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: praxis-visual-regression-report
+          path: playwright-report/
+          retention-days: 14
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: failure()
+        with:
+          name: praxis-visual-regression-diffs
+          path: |
+            test-results/
+            tests/e2e/snapshots/nexus/
+          retention-days: 14

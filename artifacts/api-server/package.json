@@ -169,7 +169,8 @@
     "web-push": "^3.6.7",
     "ws": "^8.20.0",
     "xlsx": "^0.18.5",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@workspace/tokens": "workspace:*"
   },
   "devDependencies": {
     "@types/compression": "^1.8.1",

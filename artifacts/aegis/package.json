@@ -28,7 +28,8 @@
     "@szl-holdings/brand-registry": "workspace:*",
     "@szl-holdings/config": "workspace:*",
     "@szl-holdings/domain-claims": "workspace:*",
-    "@szl-holdings/omnia-shell": "workspace:*"
+    "@szl-holdings/omnia-shell": "workspace:*",
+    "@workspace/tokens": "workspace:*"
   },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "catalog:",

@@ -79,5 +79,8 @@
     "@szl-holdings/design-system": "workspace:*",
     "@szl/alloy": "workspace:*",
     "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@workspace/tokens": "workspace:*"
   }
 }
