@@ -527,6 +527,128 @@ router.post(
   },
 );
 
+// ─── Scaled Batch Monte Carlo — 10k+ iterations with SSE progress ─────────────
+//
+// POST /monte-carlo/batch
+//
+// An explicit endpoint that accepts a scenarioId + iteration count (up to 50k),
+// spawns a simulation job, then streams SSE progress events until the job
+// completes and emits a final 'complete' event with the full result.
+//
+// This is the canonical path for large-scale batch simulation. The standard
+// /monte-carlo/simulate endpoints cap at 20k iterations; this endpoint extends
+// to 50k and provides real-time progress over SSE in a single request.
+//
+// Query params:
+//   ?stream=true  (default) — keep connection open and stream SSE events.
+//   ?stream=false           — launch the job and return the jobId immediately.
+
+const batchSimulateSchema = z.object({
+  scenarioId: z.string().min(1).max(200),
+  iterations: z.number().int().min(1_000).max(50_000).default(10_000),
+  batchSize: z.number().int().min(100).max(5_000).default(1_000),
+  label: z.string().max(200).optional(),
+});
+
+router.post(
+  '/monte-carlo/batch',
+  simulationLimiter,
+  authMiddleware(),
+  validateBody(batchSimulateSchema),
+  (req, res) => {
+    try {
+      const body = req.body as z.infer<typeof batchSimulateSchema>;
+      const { scenarioId, iterations, batchSize, label } = body;
+
+      const wantStream = req.query.stream !== 'false';
+      const creatorUserId = req.user ? String(req.user.id) : null;
+      const creatorTenantId = req.user?.orgs?.[0]?.orgId ? String(req.user.orgs[0].orgId) : null;
+
+      const job = startSimulationJob(
+        scenarioId,
+        { iterations, batchSize },
+        creatorUserId,
+        creatorTenantId,
+      );
+
+      if (!wantStream) {
+        // Fire-and-forget mode — client will poll /monte-carlo/jobs/:id
+        res.status(202).json({
+          jobId: job.jobId,
+          scenarioId,
+          iterations,
+          batchSize,
+          label,
+          streamUrl: `/monte-carlo/jobs/${job.jobId}/stream`,
+          message: 'Batch simulation job started. Stream progress via the streamUrl.',
+        });
+        return;
+      }
+
+      // SSE streaming mode
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.setHeader('X-Accel-Buffering', 'no');
+      res.setHeader('X-Batch-Job-Id', job.jobId);
+      res.flushHeaders();
+
+      const sendEvent = (event: string, data: unknown) => {
+        res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+      };
+
+      // Send initial 'started' event
+      sendEvent('started', {
+        jobId: job.jobId,
+        scenarioId,
+        iterations,
+        batchSize,
+        label,
+        startedAt: new Date().toISOString(),
+      });
+
+      const poll = setInterval(() => {
+        const current = getJob(job.jobId);
+        if (!current) {
+          sendEvent('error', { error: 'Batch job disappeared from store' });
+          clearInterval(poll);
+          res.end();
+          return;
+        }
+
+        if (current.progress) {
+          sendEvent('progress', {
+            jobId: current.jobId,
+            iteration: current.progress.iteration,
+            totalIterations: current.progress.totalIterations,
+            percentComplete: current.progress.percentComplete,
+            elapsedMs: current.progress.elapsedMs,
+            estimatedRemainingMs: current.progress.estimatedRemainingMs,
+            throughputPerSec:
+              current.progress.elapsedMs > 0
+                ? Math.round((current.progress.iteration / current.progress.elapsedMs) * 1000)
+                : 0,
+          });
+        }
+
+        if (current.status === 'complete') {
+          sendEvent('complete', buildCompletePayload(current));
+          clearInterval(poll);
+          res.end();
+        } else if (current.status === 'error') {
+          sendEvent('error', { jobId: current.jobId, error: current.error });
+          clearInterval(poll);
+          res.end();
+        }
+      }, 300);
+
+      req.on('close', () => clearInterval(poll));
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to start batch simulation');
+    }
+  },
+);
+
 router.post('/monte-carlo/cleanup', authMiddleware(), validateBody(bodyShape({})), (req, res) => {
   if (!isAdmin(req)) {
     res.status(403).json({ error: 'Forbidden: admin role required' });

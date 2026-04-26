@@ -5,10 +5,10 @@ import { eq } from 'drizzle-orm';
 import { type NextFunction, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { gatewayInfer } from '../lib/ai-gateway';
-import { handleRouteError, sendCreated, sendError, sendSuccess } from '../lib/api-response';
+import { handleRouteError, sendBadRequest, sendCreated, sendError, sendSuccess } from '../lib/api-response';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
-import { authMiddleware } from '../middlewares/auth';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 import {
   perUserApiSlidingLimiter,
   perUserWriteSlidingLimiter,
@@ -3157,6 +3157,294 @@ router.post(
     }
   },
 );
+
+// ─── Cross-Domain Entity Resolution ──────────────────────────────────────────
+//
+// Uses NEXUS memory entries of type 'entity' to resolve and deduplicate
+// real-world entities across domains.
+//
+// GET  /nexus/entity-resolve?q=...         — match entities by name / identifier
+// GET  /nexus/entity-duplicates?minConf=70 — find cross-domain duplicate clusters
+
+/** Extract normalised searchable tokens from a NEXUS memory item's key/value/tags */
+function nexusEntitySearchable(row: NexusMemoryRow): string[] {
+  const tokens: string[] = [row.key ?? '', row.value ?? ''];
+  if (Array.isArray(row.tags)) tokens.push(...(row.tags as string[]));
+  try {
+    const meta = row.metadata as Record<string, unknown>;
+    if (meta?.label && typeof meta.label === 'string') tokens.push(meta.label);
+    if (meta?.aliases && Array.isArray(meta.aliases))
+      tokens.push(...(meta.aliases as string[]));
+    if (meta?.identifiers && typeof meta.identifiers === 'object') {
+      for (const v of Object.values(meta.identifiers as Record<string, string>)) {
+        if (typeof v === 'string') tokens.push(v);
+      }
+    }
+    if (meta?.domain && typeof meta.domain === 'string') tokens.push(meta.domain);
+    if (meta?.domains && Array.isArray(meta.domains))
+      tokens.push(...(meta.domains as string[]));
+  } catch { /* ignore */ }
+  return tokens.map((t) => t.toLowerCase().trim()).filter(Boolean);
+}
+
+router.get('/entity-resolve', authMiddleware({ required: true }), requireRole('admin', 'operator', 'analyst'), async (req, res) => {
+  try {
+    const query = String(req.query.q ?? '').trim();
+    if (!query) {
+      sendBadRequest(res, 'Query parameter q is required');
+      return;
+    }
+
+    const lower = query.toLowerCase();
+
+    // Load all entity-type memory rows (with limit)
+    // Gracefully handle case where nexus_memory table doesn't exist yet (unmigrated DB)
+    let rows: NexusMemoryRow[] = [];
+    try {
+      rows = await db
+        .select()
+        .from(nexusMemoryTable)
+        .where(eq(nexusMemoryTable.type, 'entity'))
+        .limit(500);
+    } catch (dbErr) {
+      const err = dbErr as { code?: string; cause?: { code?: string } };
+      const pgCode = err?.code ?? err?.cause?.code;
+      if (pgCode === '42P01') {
+        // Table doesn't exist yet (pending migration) — return empty result
+        sendSuccess(res, { query, matchCount: 0, matches: [], crossDomainResolution: null, note: 'nexus_memory table pending migration' });
+        return;
+      }
+      throw dbErr;
+    }
+
+    type Match = {
+      id: string;
+      key: string;
+      value: string;
+      tags: string[];
+      tier: string;
+      confidence: number;
+      matchedOn: string;
+      matchType: 'exact-key' | 'identifier' | 'alias' | 'partial';
+      metadata: unknown;
+    };
+
+    const matches: Match[] = [];
+
+    for (const row of rows) {
+      const tokens = nexusEntitySearchable(row);
+      let best: { confidence: number; matchedOn: string; matchType: Match['matchType'] } | null = null;
+
+      // Exact key match
+      if ((row.key ?? '').toLowerCase() === lower) {
+        best = { confidence: 100, matchedOn: row.key ?? '', matchType: 'exact-key' };
+      }
+
+      // Identifier value match
+      if (!best) {
+        try {
+          const meta = row.metadata as Record<string, unknown>;
+          const ids = meta?.identifiers as Record<string, string> | undefined;
+          if (ids) {
+            for (const [k, v] of Object.entries(ids)) {
+              if (typeof v === 'string' && v.toLowerCase() === lower) {
+                best = { confidence: 95, matchedOn: `${k}:${v}`, matchType: 'identifier' };
+                break;
+              }
+            }
+          }
+        } catch { /* ignore */ }
+      }
+
+      // Exact alias match
+      if (!best) {
+        const matched = tokens.find((t) => t === lower);
+        if (matched) {
+          best = { confidence: 85, matchedOn: matched, matchType: 'alias' };
+        }
+      }
+
+      // Partial match
+      if (!best) {
+        const matched = tokens.find((t) => t.includes(lower) || lower.includes(t));
+        if (matched) {
+          const overlap = Math.min(lower.length, matched.length) / Math.max(lower.length, matched.length);
+          const score = Math.round(40 + overlap * 40);
+          if (score >= 40) {
+            best = { confidence: score, matchedOn: matched, matchType: 'partial' };
+          }
+        }
+      }
+
+      if (best) {
+        matches.push({
+          id: row.id,
+          key: row.key ?? '',
+          value: row.value ?? '',
+          tags: (row.tags ?? []) as string[],
+          tier: row.tier,
+          confidence: best.confidence,
+          matchedOn: best.matchedOn,
+          matchType: best.matchType,
+          metadata: row.metadata,
+        });
+      }
+    }
+
+    matches.sort((a, b) => b.confidence - a.confidence);
+    const top = matches.slice(0, 20);
+
+    // Cross-domain resolution — find related entities sharing identifiers
+    let crossDomainResolution = null;
+    if (top[0]) {
+      const primary = top[0];
+      let primaryIds: Record<string, string> = {};
+      try {
+        const meta = primary.metadata as Record<string, unknown>;
+        if (meta?.identifiers && typeof meta.identifiers === 'object') {
+          primaryIds = meta.identifiers as Record<string, string>;
+        }
+      } catch { /* ignore */ }
+
+      const related = matches.slice(1).filter((m) => {
+        if (m.id === primary.id) return false;
+        try {
+          const meta = m.metadata as Record<string, unknown>;
+          const mIds = meta?.identifiers as Record<string, string> | undefined;
+          if (mIds && Object.keys(primaryIds).length > 0) {
+            return Object.entries(primaryIds).some(
+              ([, v]) => Object.values(mIds).some((mv) => mv === v && v.length > 2),
+            );
+          }
+        } catch { /* ignore */ }
+        return false;
+      });
+
+      crossDomainResolution = {
+        primaryId: primary.id,
+        primaryKey: primary.key,
+        relatedEntityCount: related.length,
+        relatedEntityIds: related.map((r) => r.id),
+        confidence: primary.confidence,
+      };
+    }
+
+    sendSuccess(res, {
+      query,
+      matchCount: matches.length,
+      matches: top.map((m) => ({
+        entityId: m.id,
+        key: m.key,
+        tier: m.tier,
+        tags: m.tags,
+        confidence: m.confidence,
+        matchedOn: m.matchedOn,
+        matchType: m.matchType,
+      })),
+      crossDomainResolution,
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'GET /nexus/entity-resolve');
+  }
+});
+
+router.get('/entity-duplicates', authMiddleware({ required: true }), requireRole('admin', 'operator', 'analyst'), async (req, res) => {
+  try {
+    const minConfidence = parseInt(String(req.query.minConfidence ?? '70'), 10);
+    const threshold = isNaN(minConfidence) ? 70 : Math.max(40, Math.min(100, minConfidence));
+
+    let rows: NexusMemoryRow[] = [];
+    try {
+      rows = await db
+        .select()
+        .from(nexusMemoryTable)
+        .where(eq(nexusMemoryTable.type, 'entity'))
+        .limit(500);
+    } catch (dbErr) {
+      const err = dbErr as { code?: string; cause?: { code?: string } };
+      const pgCode = err?.code ?? err?.cause?.code;
+      if (pgCode === '42P01') {
+        sendSuccess(res, { clusterCount: 0, totalDuplicateEntities: 0, clusters: [], note: 'nexus_memory table pending migration' });
+        return;
+      }
+      throw dbErr;
+    }
+
+    type Cluster = {
+      canonicalId: string;
+      canonicalKey: string;
+      memberIds: string[];
+      memberKeys: string[];
+      sharedTokens: string[];
+      confidence: number;
+    };
+
+    const visited = new Set<string>();
+    const clusters: Cluster[] = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      const a = rows[i]!;
+      if (visited.has(a.id)) continue;
+
+      const tokensA = nexusEntitySearchable(a);
+      const clusterMembers: NexusMemoryRow[] = [a];
+      const sharedTokens: string[] = [];
+
+      for (let j = i + 1; j < rows.length; j++) {
+        const b = rows[j]!;
+        if (visited.has(b.id)) continue;
+
+        const tokensB = nexusEntitySearchable(b);
+        const overlap = tokensA.filter(
+          (t) => t.length > 3 && tokensB.includes(t),
+        );
+
+        let confidence = 0;
+        // Strong signal: shared tokens including identifier values
+        confidence += Math.min(overlap.length * 20, 60);
+
+        // Check shared identifiers
+        try {
+          const metaA = a.metadata as Record<string, unknown>;
+          const metaB = b.metadata as Record<string, unknown>;
+          const idsA = metaA?.identifiers as Record<string, string> | undefined;
+          const idsB = metaB?.identifiers as Record<string, string> | undefined;
+          if (idsA && idsB) {
+            const idOverlap = Object.values(idsA).filter(
+              (v) => v.length > 2 && Object.values(idsB).includes(v),
+            );
+            confidence += idOverlap.length * 40;
+          }
+        } catch { /* ignore */ }
+
+        if (confidence >= threshold) {
+          clusterMembers.push(b);
+          for (const t of overlap) sharedTokens.push(t);
+        }
+      }
+
+      if (clusterMembers.length >= 2) {
+        for (const m of clusterMembers) visited.add(m.id);
+        clusters.push({
+          canonicalId: clusterMembers[0]!.id,
+          canonicalKey: clusterMembers[0]!.key ?? '',
+          memberIds: clusterMembers.map((m) => m.id),
+          memberKeys: clusterMembers.map((m) => m.key ?? ''),
+          sharedTokens: [...new Set(sharedTokens)].slice(0, 10),
+          confidence: Math.min(100, threshold),
+        });
+      }
+    }
+
+    sendSuccess(res, {
+      clusterCount: clusters.length,
+      totalDuplicateEntities: clusters.reduce((s, c) => s + c.memberIds.length, 0),
+      clusters,
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'GET /nexus/entity-duplicates');
+  }
+});
 
 // ─── Status Route ─────────────────────────────────────────────────────────────
 

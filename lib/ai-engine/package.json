@@ -40,13 +40,16 @@
     "./providers/openai/image": "./src/providers/openai/image/index.ts",
     "./providers/openai/audio": "./src/providers/openai/audio/index.ts",
     "./digital-twins/twin-engine-spatial": "./src/digital-twins/twin-engine-spatial.ts",
-    "./provenance": "./src/provenance.ts"
+    "./provenance": "./src/provenance.ts",
+    "./market-data": "./src/market-data/index.ts",
+    "./multi-agent-coordinator": "./src/multi-agent-coordinator.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
     "@google/genai": "^1.44.0",
     "@szl-holdings/db": "workspace:*",
     "@szl-holdings/env": "workspace:*",
+    "@szl-holdings/proof-chain": "workspace:*",
     "@szl-holdings/services": "workspace:*",
     "drizzle-orm": "catalog:",
     "openai": "^6.27.0",

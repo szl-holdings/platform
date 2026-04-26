@@ -16,6 +16,7 @@ import {
   perUserApiSlidingLimiter,
   perUserWriteSlidingLimiter,
 } from '../middlewares/sliding-window-limiter';
+import { runBacktest, startSimulationJob, getJob } from '../lib/monte-carlo-service';
 
 const scenarioCreateSchema = z.object({
   scenarioId: z.string().min(1, 'scenarioId is required').max(200).trim(),
@@ -358,6 +359,200 @@ router.post(
       await persistRun(run);
 
       res.status(201).json(run);
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : 'Internal error' });
+    }
+  },
+);
+
+// ─── Historical Backtesting ───────────────────────────────────────────────────
+//
+// POST /replay/backtest
+//
+// Accepts a scenario ID, a set of historical data points (shock observations),
+// and an optional prior simulation result ID.  Runs the causal scenario engine's
+// shock-propagation model against the historical snapshots and returns a
+// BacktestResult with ground-truth match statistics.
+//
+// When no simulation result is provided the endpoint first launches a quick
+// Monte Carlo run (10 000 iterations) for the scenario, then runs the backtest
+// against that result. This is the zero-config path.
+
+/**
+ * Translates a replay-store scenario ID (e.g. "aegis-soc-threat-triage-v1")
+ * to the corresponding DOMAIN_SCENARIO_LIBRARY ID understood by the Monte Carlo
+ * engine (e.g. "aegis/cyber-risk-quantification").
+ *
+ * Returns undefined when the replay scenario has no matching Monte Carlo scenario,
+ * which causes the backtest endpoint to return a 422 with a clear message.
+ */
+const REPLAY_TO_MC_SCENARIO_MAP: Record<string, string> = {
+  'aegis-soc-threat-triage-v1': 'aegis/cyber-risk-quantification',
+  'vessels-voyage-pnl-optimization-v1': 'vessels/voyage-cost',
+  'terra-portfolio-valuation-v1': 'terra/property-investment-returns',
+  'prism-compliance-breach-v1': 'prism/litigation-outcome',
+};
+
+function resolveMonteCarloScenarioId(replayScenarioId: string): string | undefined {
+  // If the caller already supplies a Monte Carlo library ID, pass it straight through.
+  if (replayScenarioId.includes('/')) return replayScenarioId;
+  return REPLAY_TO_MC_SCENARIO_MAP[replayScenarioId];
+}
+
+const backtestSchema = z.object({
+  scenarioId: z.string().min(1).max(200).trim(),
+  historicalData: z
+    .array(
+      z.object({
+        date: z.string(),
+        values: z.record(z.number()),
+        shocks: z.array(z.string()).optional(),
+      }),
+    )
+    .min(1)
+    .max(500)
+    .optional(),
+  simulationResultId: z.string().max(200).optional(),
+  autoSimulate: z.boolean().optional(),
+  simulationIterations: z.number().int().min(100).max(50_000).optional(),
+});
+
+router.post(
+  '/replay/backtest',
+  authMiddleware({ required: true }),
+  requireRole('admin', 'operator', 'analyst'),
+  perUserWriteSlidingLimiter,
+  validateBody(backtestSchema),
+  async (req, res) => {
+    try {
+      const body = req.body as z.infer<typeof backtestSchema>;
+      const { scenarioId, simulationIterations = 10_000, autoSimulate = true } = body;
+
+      // Validate the scenario exists
+      const scenario = await getScenario(scenarioId);
+      if (!scenario) {
+        res.status(404).json({ error: `Scenario '${scenarioId}' not found` });
+        return;
+      }
+
+      // Build synthetic historical data from snapshots when not provided
+      let historicalData = body.historicalData;
+      if (!historicalData || historicalData.length === 0) {
+        const snapshots = await listSnapshots(scenarioId);
+        if (snapshots.length === 0) {
+          res.status(422).json({
+            error:
+              'No historicalData provided and no snapshots exist for this scenario. ' +
+              'Either provide historicalData or create snapshots first.',
+          });
+          return;
+        }
+        historicalData = snapshots.map((snap, idx) => ({
+          date: snap.capturedAt,
+          values: {
+            snapshotIndex: idx,
+            ...(snap.historicalContext as Record<string, number> | undefined ?? {}),
+          },
+          shocks: [],
+        }));
+      }
+
+      // Resolve the Monte Carlo library scenario ID from the replay-store scenario ID.
+      // Replay scenarios use kebab-style IDs (e.g. "aegis-soc-threat-triage-v1") while
+      // the Monte Carlo engine uses slash-style IDs (e.g. "aegis/cyber-risk-quantification").
+      const mcScenarioId = resolveMonteCarloScenarioId(scenarioId);
+      if (!mcScenarioId) {
+        res.status(422).json({
+          error:
+            `Replay scenario '${scenarioId}' has no linked Monte Carlo scenario. ` +
+            'Add an entry to REPLAY_TO_MC_SCENARIO_MAP in replay.ts or supply a ' +
+            'pre-computed simulationResultId with autoSimulate=false.',
+        });
+        return;
+      }
+
+      // Run a quick Monte Carlo simulation to get a SimulationResult
+      let simulationResult: import('../lib/monte-carlo-service').SimulationResult | undefined;
+
+      if (!autoSimulate && body.simulationResultId) {
+        // Caller supplied a pre-computed job ID — look it up from the in-process job store.
+        const existingJob = getJob(body.simulationResultId);
+        if (existingJob?.status === 'complete' && existingJob.result) {
+          simulationResult = existingJob.result;
+        }
+      }
+
+      if (!simulationResult) {
+        // No pre-computed result available — run a fresh Monte Carlo simulation.
+        const userId = req.user ? String(req.user.id) : 'system';
+        const tenantId = req.user?.orgs?.[0]?.orgId ? String(req.user.orgs[0].orgId) : null;
+        const job = startSimulationJob(
+          mcScenarioId,
+          { iterations: simulationIterations, batchSize: Math.min(1_000, simulationIterations) },
+          userId,
+          tenantId,
+        );
+
+        // Wait for the job to complete (up to 30s for ≤10k runs)
+        const started = Date.now();
+        await new Promise<void>((resolve) => {
+          const check = () => {
+            if (job.status === 'complete' || job.status === 'error' || Date.now() - started > 30_000) {
+              resolve();
+            } else {
+              setTimeout(check, 250);
+            }
+          };
+          check();
+        });
+
+        if (job.status === 'error' || !job.result) {
+          res.status(500).json({ error: `Simulation job failed: ${job.error ?? 'unknown'}` });
+          return;
+        }
+
+        simulationResult = job.result;
+      }
+
+      if (!simulationResult) {
+        res.status(422).json({ error: 'Could not obtain a simulation result for backtesting' });
+        return;
+      }
+
+      // Run the backtest — must use the Monte Carlo library ID, not the replay-store ID.
+      const outputId = `bt-${scenarioId}-${Date.now()}`;
+      const backtestResult = runBacktest(
+        mcScenarioId,
+        historicalData as import('../lib/monte-carlo-service').HistoricalDataPoint[],
+        simulationResult,
+        outputId,
+      );
+
+      // Persist the run summary
+      const run = {
+        runId: outputId,
+        scenarioId,
+        scenarioName: scenario.name,
+        startedAt: new Date().toISOString(),
+        completedAt: new Date().toISOString(),
+        totalSnapshots: historicalData.length,
+        successful: Math.round(historicalData.length * backtestResult.overallAccuracy),
+        failed: historicalData.length - Math.round(historicalData.length * backtestResult.overallAccuracy),
+        avgLatencyMs: 0,
+        groundTruthMatchRate: backtestResult.overallAccuracy,
+        totalCostUsd: 0,
+      };
+      await persistRun(run);
+
+      res.json({
+        outputId,
+        scenarioId,
+        scenarioName: scenario.name,
+        historicalPointsAnalysed: historicalData.length,
+        simulationIterations,
+        backtestResult,
+        run,
+      });
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : 'Internal error' });
     }

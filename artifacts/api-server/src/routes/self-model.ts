@@ -7,6 +7,9 @@ import {
   requestHelpIfBelowThreshold,
   SELF_MODEL_VERSION,
   updateAfterRun,
+  analyseCalibrationDrift,
+  extractDriftFromSelfModel,
+  shouldSurfaceDrift,
 } from '@workspace/self-model';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
@@ -210,5 +213,88 @@ router.get('/self-model/stats', authMiddleware(), (_req, res) => {
     handleRouteError(res, err, 'Failed to fetch self-model stats');
   }
 });
+
+// ─── Calibration Drift ────────────────────────────────────────────────────────
+//
+// GET  /self-model/calibration-drift?agentId=...&alertThreshold=minor
+//
+// Analyses the stored performance history for a given agentId and returns a
+// CalibrationReport that includes the Expected Calibration Error (ECE),
+// confidence bias (over- or under-confidence), and any active drift alert.
+//
+// Designed to surface calibration drift to the operator dashboard so engineers
+// can trigger recalibration or retraining before production quality degrades.
+
+router.get(
+  '/self-model/calibration-drift',
+  authMiddleware(),
+  validateQuery(
+    z.object({
+      agentId: z.string().min(1).max(200).optional(),
+      domain: z.string().max(100).optional(),
+      alertThreshold: z.enum(['none', 'minor', 'moderate', 'severe']).optional(),
+    }),
+  ),
+  async (req, res) => {
+    try {
+      const {
+        agentId,
+        domain,
+        alertThreshold = 'minor',
+      } = req.query as {
+        agentId?: string;
+        domain?: string;
+        alertThreshold?: 'none' | 'minor' | 'moderate' | 'severe';
+      };
+
+      if (agentId) {
+        // Single-agent drift report
+        const state = defaultSelfModelStore.get(agentId);
+        if (!state) {
+          sendNotFound(res, `Agent '${agentId}'`);
+          return;
+        }
+
+        const report = extractDriftFromSelfModel(agentId, state, {
+          domain,
+          alertThreshold,
+        });
+
+        sendSuccess(res, {
+          report,
+          surfaceOnDashboard: shouldSurfaceDrift(report, alertThreshold),
+        });
+        return;
+      }
+
+      // All agents — return a summary of drift status across the fleet
+      const allAgents = defaultSelfModelStore.list();
+      const reports = allAgents.map((state) => {
+        const report = extractDriftFromSelfModel(state.runtimeId, state, { domain, alertThreshold });
+        return {
+          agentId: state.runtimeId,
+          driftSeverity: report.driftSeverity,
+          driftScore: report.driftScore,
+          confidenceBias: report.confidenceBias,
+          successRate: report.successRate,
+          windowSizeRuns: report.windowSizeRuns,
+          alert: report.alert,
+          surfaceOnDashboard: shouldSurfaceDrift(report, alertThreshold),
+        };
+      });
+
+      const alertCount = reports.filter((r) => r.surfaceOnDashboard).length;
+
+      sendSuccess(res, {
+        totalAgents: reports.length,
+        alertingAgents: alertCount,
+        alertThreshold,
+        reports,
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to compute calibration drift');
+    }
+  },
+);
 
 export default router;

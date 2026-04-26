@@ -31,6 +31,7 @@ import {
   riskLevelToDepth,
   toRiskLevel,
 } from './shared';
+import { getDomainAutonomyLevel } from '../../middlewares/zero-trust';
 
 const router = Router();
 
@@ -197,6 +198,63 @@ router.post(
         sendError(res, 'Governance pre-flight failed: scope exceeded', 403, 'FORBIDDEN', {
           blockedReason: govCheck.blockedReason,
           violatedPolicies: govCheck.violatedPolicies,
+        });
+        return;
+      }
+
+      // Graduated autonomy gate — check each requested domain's autonomy level.
+      // 'manual' and 'propose-only' domains require human approval before autonomous execution.
+      const requestedDomains = Array.isArray(domains) && domains.length > 0
+        ? domains
+        : ['lyte', 'vessels', 'terra'];
+      const blockedDomains = requestedDomains.filter((d: string) => {
+        const level = getDomainAutonomyLevel(d);
+        return level === 'manual' || level === 'propose-only';
+      });
+
+      if (blockedDomains.length > 0) {
+        const autonomyDecisionId = `ct-aut-${randomUUID()}`;
+        try {
+          await insertDecision({
+            decisionId: autonomyDecisionId,
+            workflowId: sessionId ?? null,
+            signalIds: [],
+            recommendedAction: query,
+            rationaleSummary: `[AUTONOMY GATE] Domains ${blockedDomains.join(', ')} require human approval before autonomous execution.`,
+            evidenceRefs: [
+              makeEvidenceRef({
+                source: 'autonomy-gate: graduated-autonomy-check',
+                sourceType: 'policy',
+                content: `Domains ${blockedDomains.join(', ')} are in restricted autonomy mode. Action queued for approval.`,
+                relevanceScore: 1.0,
+              }),
+            ],
+            confidence: 0,
+            ownerSuggestion: 'Promote domain autonomy level to full-auto to enable auto-execution',
+            approvalRequired: true,
+            riskLevel: toRiskLevel(riskLevel),
+            fallbackPlan: `Use PUT /api/autonomy/level to set ${blockedDomains.join(', ')} to 'full-auto'`,
+            modelRoute: 'alloy-orchestrator',
+            schemaVersion: '2.0.0',
+            status: 'proposed',
+            rawInput: query,
+            rawOutput: null,
+            createdAt: new Date().toISOString(),
+          });
+        } catch (dbErr) {
+          logger.warn({ err: dbErr }, 'control-tower: failed to persist autonomy-blocked decision');
+        }
+
+        res.status(202).json({
+          status: 'pending_approval',
+          message: `Autonomy gate blocked execution: domains [${blockedDomains.join(', ')}] require approval.`,
+          decisionId: autonomyDecisionId,
+          autonomyGate: {
+            blockedDomains,
+            autonomyLevels: Object.fromEntries(
+              blockedDomains.map((d: string) => [d, getDomainAutonomyLevel(d)]),
+            ),
+          },
         });
         return;
       }

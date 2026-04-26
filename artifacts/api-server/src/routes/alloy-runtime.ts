@@ -25,6 +25,8 @@ import {
   validateQuery,
 } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
+import { getDomainAutonomyLevel } from '../middlewares/zero-trust';
+import { coordinatorAgent } from '@szl-holdings/ai-engine/multi-agent-coordinator';
 
 const router: IRouter = Router();
 
@@ -351,6 +353,77 @@ router.post(
       });
     } catch (err) {
       handleRouteError(res, err, 'Failed to replay workflow run');
+    }
+  },
+);
+
+// POST /agents/coordinate — multi-agent collaboration: decomposes the task into
+// sub-tasks, delegates each to a specialist agent (annotating every step in the
+// proof-chain via CoordinatorAgent), and synthesises a final answer.
+router.post(
+  '/agents/coordinate',
+  authMiddleware(),
+  async (req: Request, res: Response) => {
+    try {
+      const { query, domain } = req.body as {
+        query?: string;
+        domain?: string;
+      };
+
+      if (!query || typeof query !== 'string' || !query.trim()) {
+        sendBadRequest(res, 'query is required');
+        return;
+      }
+
+      // Graduated autonomy gate — domain comes from body so we apply it inline.
+      const effectiveDomain = (domain ?? 'alloy').trim() || 'alloy';
+      const autonomyLevel = getDomainAutonomyLevel(effectiveDomain);
+      res.setHeader('X-Autonomy-Domain', effectiveDomain);
+      res.setHeader('X-Autonomy-Level', autonomyLevel);
+      if (autonomyLevel === 'manual' && (req.isInternalAgent ?? false)) {
+        res.status(403).json({
+          error: 'MANUAL_DOMAIN_ONLY',
+          message: `Domain '${effectiveDomain}' requires direct operator action. Automated agents cannot execute this operation.`,
+        });
+        return;
+      }
+
+      // CoordinatorAgent.run() decomposes → delegates (with per-step proof-chain
+      // annotation via annotateProofChain()) → synthesises results.
+      const result = await coordinatorAgent.run(query.trim(), domain);
+
+      // Record final coordination summary in the proof-chain ledger
+      const ledgerEntry: LedgerEntry = makeLedgerEntry(
+        result.runId,
+        'checkpoint',
+        `Multi-agent coordination: ${query.trim().slice(0, 80)}`,
+        {
+          metadata: {
+            actor: req.user?.id ?? 'system',
+            agentsInvolved: result.agentsInvolved,
+            stepCount: result.steps.length,
+            subTaskCount: result.subTaskResults.length,
+            success: result.success,
+            totalDurationMs: result.totalDurationMs,
+            proofEntryIds: result.subTaskResults.map((r) => r.proofEntryId),
+          },
+        },
+      );
+      defaultLedger.record(ledgerEntry);
+
+      logger.info(
+        {
+          runId: result.runId,
+          agentsInvolved: result.agentsInvolved,
+          success: result.success,
+          totalDurationMs: result.totalDurationMs,
+        },
+        'Multi-agent coordination complete',
+      );
+
+      sendSuccess(res, result);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to coordinate agents');
     }
   },
 );

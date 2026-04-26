@@ -552,6 +552,165 @@ export function dataControls(options: {
   };
 }
 
+// ─── Graduated Autonomy Levels ────────────────────────────────────────────────
+//
+// Operators can configure per-domain trust tiers that control how much
+// autonomous execution authority an agent receives:
+//
+//   manual          → No automation; operator must initiate every action.
+//   propose-only    → Agent surfaces proposals; operator approves before any change.
+//   auto-with-audit → Agent acts autonomously but every action is audit-logged and
+//                     an approval context is attached for post-hoc review.
+//   full-auto       → Agent acts without gate; policy engine and proof-chain still
+//                     record all steps (reserved for high-trust environments).
+
+export type DomainAutonomyLevel = 'manual' | 'propose-only' | 'auto-with-audit' | 'full-auto';
+
+export interface DomainAutonomyConfig {
+  domain: string;
+  level: DomainAutonomyLevel;
+  allowedRoles?: PermissionClass[];
+  requireStepUp?: boolean;
+  auditAll?: boolean;
+}
+
+/** In-memory store for per-domain autonomy configs (overridable via DB in production). */
+const domainAutonomyStore = new Map<string, DomainAutonomyConfig>([
+  ['vessels', { domain: 'vessels', level: 'propose-only', auditAll: true }],
+  ['terra', { domain: 'terra', level: 'propose-only', auditAll: true }],
+  ['aegis', { domain: 'aegis', level: 'auto-with-audit', auditAll: true }],
+  ['prism', { domain: 'prism', level: 'manual', requireStepUp: true, auditAll: true }],
+  ['nexus', { domain: 'nexus', level: 'auto-with-audit', auditAll: true }],
+  ['lyte', { domain: 'lyte', level: 'auto-with-audit', auditAll: true }],
+  ['alloy', { domain: 'alloy', level: 'propose-only', auditAll: true }],
+]);
+
+/**
+ * Read the current autonomy level for a domain.
+ */
+export function getDomainAutonomyLevel(domain: string): DomainAutonomyLevel {
+  return domainAutonomyStore.get(domain)?.level ?? 'propose-only';
+}
+
+/**
+ * Update the autonomy level for a domain (operator-configurable).
+ */
+export function setDomainAutonomyLevel(
+  domain: string,
+  level: DomainAutonomyLevel,
+  partial: Partial<Omit<DomainAutonomyConfig, 'domain' | 'level'>> = {},
+): void {
+  const existing = domainAutonomyStore.get(domain) ?? { domain, level: 'propose-only' };
+  domainAutonomyStore.set(domain, { ...existing, ...partial, domain, level });
+}
+
+/**
+ * List all configured domain autonomy levels.
+ */
+export function listDomainAutonomyConfigs(): DomainAutonomyConfig[] {
+  return Array.from(domainAutonomyStore.values());
+}
+
+/**
+ * Per-domain graduated autonomy gate middleware.
+ *
+ * Reads the configured trust level for `domain` and enforces it:
+ *
+ *   manual          → 403 — operator must call this endpoint manually with
+ *                     explicit intent; automated agents are blocked.
+ *   propose-only    → req.ztAutomationGate = 'propose_only' + 202-style label.
+ *   auto-with-audit → req.ztApprovalContext attached for audit; request proceeds.
+ *   full-auto       → passes through with header label only.
+ *
+ * Usage:
+ *   router.post('/vessels/route', authMiddleware(), domainAutonomyGate('vessels'), handler)
+ */
+export function domainAutonomyGate(domain: string) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const config = domainAutonomyStore.get(domain) ?? { domain, level: 'propose-only' };
+    const level = config.level;
+    const isAgent = req.isInternalAgent ?? false;
+    const env = req.ztEnvironment ?? 'production';
+
+    res.setHeader('X-Autonomy-Domain', domain);
+    res.setHeader('X-Autonomy-Level', level);
+
+    if (level === 'manual') {
+      if (isAgent) {
+        logger.warn({
+          msg: 'Domain autonomy gate MANUAL — agent request blocked',
+          domain,
+          path: req.path,
+          method: req.method,
+          userId: req.user?.id,
+        });
+        res.status(403).json({
+          error: 'MANUAL_DOMAIN_ONLY',
+          message: `Domain '${domain}' requires direct operator action. Automated agents cannot execute this operation.`,
+          ztControl: 'domain_autonomy_gate',
+          domain,
+          level,
+        });
+        return;
+      }
+      // Human-initiated request in manual domain — pass through with label
+      next();
+      return;
+    }
+
+    if (level === 'propose-only') {
+      req.ztAutomationGate = 'propose_only';
+      res.setHeader('X-Aegis-Automation-Gate', 'propose_only');
+      logger.info({
+        msg: 'Domain autonomy gate PROPOSE_ONLY',
+        domain,
+        path: req.path,
+        isAgent,
+        env,
+      });
+      next();
+      return;
+    }
+
+    if (level === 'auto-with-audit') {
+      // Attach approval context for post-hoc audit review
+      req.ztAutomationGate = 'approved_execute';
+      req.ztApprovalContext = {
+        gate: 'approval_required',
+        requestedBy: req.user?.id,
+        requestedAt: new Date().toISOString(),
+        actionClass: `auto-with-audit:${domain}`,
+        environment: env,
+        approvalState: 'pending',
+      };
+      res.setHeader('X-Aegis-Automation-Gate', 'approved_execute');
+      res.setHeader('X-Autonomy-Audit', 'true');
+      logger.info({
+        msg: 'Domain autonomy gate AUTO_WITH_AUDIT — execution permitted, audit context attached',
+        domain,
+        path: req.path,
+        isAgent,
+        env,
+      });
+      next();
+      return;
+    }
+
+    // full-auto — no gate, label only
+    req.ztAutomationGate = 'approved_execute';
+    res.setHeader('X-Aegis-Automation-Gate', 'approved_execute');
+    res.setHeader('X-Autonomy-Level', 'full-auto');
+    logger.info({
+      msg: 'Domain autonomy gate FULL_AUTO — execution permitted',
+      domain,
+      path: req.path,
+      isAgent,
+      env,
+    });
+    next();
+  };
+}
+
 // ─── Connector Trust Score ────────────────────────────────────────────────────
 
 export const CONNECTOR_TRUST_SCORES: Record<

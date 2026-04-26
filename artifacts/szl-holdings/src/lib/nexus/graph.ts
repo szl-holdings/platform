@@ -663,3 +663,274 @@ export function getEntitiesByDomain(
 ): EntityRecord[] {
   return graph.entities.filter((e) => e.domains.includes(domain));
 }
+
+// ─── Cross-Domain Entity Resolution ──────────────────────────────────────────
+//
+// Uses the existing `aliases` array and `identifiers` map on each EntityRecord
+// to deduplicate entities that appear under different names or IDs across
+// multiple domains (e.g. a vessel owner who is also a real estate investor).
+
+export interface EntityResolutionMatch {
+  entity: EntityRecord;
+  matchType: 'exact-id' | 'alias-name' | 'identifier-value';
+  matchedOn: string;
+  confidence: number; // 0–100
+}
+
+/**
+ * Resolve a free-text query or identifier string to matching entities.
+ *
+ * Searches in order:
+ *   1. Exact entity ID match (confidence 100)
+ *   2. Identifier value match across all identifier types (confidence 95)
+ *   3. Canonical label exact match (confidence 90)
+ *   4. Alias exact match (confidence 85)
+ *   5. Partial alias / label match (confidence proportional to overlap, min 40)
+ *
+ * Returns results ranked by confidence descending.
+ */
+export function resolveEntityByQuery(
+  query: string,
+  graph: KnowledgeGraph = KNOWLEDGE_GRAPH,
+): EntityResolutionMatch[] {
+  const q = query.trim();
+  if (!q) return [];
+
+  const lower = q.toLowerCase();
+  const results: EntityResolutionMatch[] = [];
+
+  for (const entity of graph.entities) {
+    // 1. Exact entity ID
+    if (entity.id === q) {
+      results.push({ entity, matchType: 'exact-id', matchedOn: entity.id, confidence: 100 });
+      continue;
+    }
+
+    // 2. Identifier value match (IMO, LEI, MMSI, bahamasReg, etc.)
+    let identifierHit = false;
+    for (const [idKey, idVal] of Object.entries(entity.identifiers)) {
+      if (idVal.toLowerCase() === lower) {
+        results.push({
+          entity,
+          matchType: 'identifier-value',
+          matchedOn: `${idKey}:${idVal}`,
+          confidence: 95,
+        });
+        identifierHit = true;
+        break;
+      }
+    }
+    if (identifierHit) continue;
+
+    // 3. Canonical label exact match
+    if (entity.label.toLowerCase() === lower) {
+      results.push({ entity, matchType: 'alias-name', matchedOn: entity.label, confidence: 90 });
+      continue;
+    }
+
+    // 4. Alias exact match
+    const exactAlias = entity.aliases.find((a) => a.toLowerCase() === lower);
+    if (exactAlias) {
+      results.push({ entity, matchType: 'alias-name', matchedOn: exactAlias, confidence: 85 });
+      continue;
+    }
+
+    // 5. Partial label / alias match
+    const candidates = [entity.label, ...entity.aliases];
+    let bestPartial = 0;
+    let bestMatchedOn = '';
+    for (const candidate of candidates) {
+      const candLower = candidate.toLowerCase();
+      if (candLower.includes(lower) || lower.includes(candLower)) {
+        const overlap = Math.min(lower.length, candLower.length) / Math.max(lower.length, candLower.length);
+        const score = Math.round(40 + overlap * 40);
+        if (score > bestPartial) {
+          bestPartial = score;
+          bestMatchedOn = candidate;
+        }
+      }
+    }
+    if (bestPartial >= 40) {
+      results.push({
+        entity,
+        matchType: 'alias-name',
+        matchedOn: bestMatchedOn,
+        confidence: bestPartial,
+      });
+    }
+  }
+
+  return results.sort((a, b) => b.confidence - a.confidence);
+}
+
+export interface DuplicateCluster {
+  canonicalId: string; // highest-confidence / highest-risk entity in the cluster
+  members: EntityRecord[];
+  sharedIdentifiers: Record<string, string[]>; // identifierKey → [values]
+  sharedAliases: string[];
+  crossDomains: Domain[];
+  resolutionConfidence: number;
+}
+
+/**
+ * Find entities that likely represent the same real-world entity across domains.
+ *
+ * Detection heuristics (in order of weight):
+ *   - Shared identifier values (e.g. same LEI, same IMO number) → strong signal
+ *   - Alias overlap (≥1 alias in common after normalisation) → medium signal
+ *   - Name similarity above threshold → weak signal
+ *
+ * Returns clusters of ≥2 entities that are probable duplicates.
+ */
+export function findCrossdomainDuplicates(
+  graph: KnowledgeGraph = KNOWLEDGE_GRAPH,
+  options: { minConfidence?: number } = {},
+): DuplicateCluster[] {
+  const { minConfidence = 70 } = options;
+  const entities = graph.entities;
+  const visited = new Set<string>();
+  const clusters: DuplicateCluster[] = [];
+
+  for (let i = 0; i < entities.length; i++) {
+    const a = entities[i]!;
+    if (visited.has(a.id)) continue;
+
+    const cluster: EntityRecord[] = [a];
+
+    for (let j = i + 1; j < entities.length; j++) {
+      const b = entities[j]!;
+      if (visited.has(b.id)) continue;
+
+      let confidence = 0;
+      const sharedIdentifierKeys: string[] = [];
+
+      // Shared identifier value check
+      for (const [keyA, valA] of Object.entries(a.identifiers)) {
+        for (const [keyB, valB] of Object.entries(b.identifiers)) {
+          if (valA.toLowerCase() === valB.toLowerCase() && valA.length > 2) {
+            confidence += 40;
+            sharedIdentifierKeys.push(`${keyA}=${valA}`);
+          }
+        }
+      }
+
+      // Alias overlap check
+      const normA = [a.label, ...a.aliases].map((s) => s.toLowerCase().replace(/[^a-z0-9]/g, ''));
+      const normB = [b.label, ...b.aliases].map((s) => s.toLowerCase().replace(/[^a-z0-9]/g, ''));
+      const aliasOverlap = normA.filter((s) => normB.includes(s) && s.length > 3);
+      if (aliasOverlap.length > 0) {
+        confidence += 30 * Math.min(aliasOverlap.length, 2);
+      }
+
+      // Name similarity (token overlap)
+      const tokA = a.label.toLowerCase().split(/\s+/);
+      const tokB = b.label.toLowerCase().split(/\s+/);
+      const tokenOverlap = tokA.filter((t) => t.length > 3 && tokB.includes(t));
+      if (tokenOverlap.length >= 2) {
+        confidence += 20;
+      }
+
+      if (confidence >= minConfidence) {
+        cluster.push(b);
+      }
+    }
+
+    if (cluster.length >= 2) {
+      // Mark all cluster members as visited so they don't start new clusters
+      for (const member of cluster) visited.add(member.id);
+
+      // Determine canonical entity: highest riskScore, or first if tied
+      const canonical = cluster.reduce((best, e) => (e.riskScore > best.riskScore ? e : best));
+
+      // Collect shared identifiers and aliases
+      const allIdentifiers: Record<string, Set<string>> = {};
+      const allAliases = new Set<string>();
+      const allDomains = new Set<Domain>();
+
+      for (const member of cluster) {
+        for (const [k, v] of Object.entries(member.identifiers)) {
+          if (!allIdentifiers[k]) allIdentifiers[k] = new Set();
+          allIdentifiers[k].add(v);
+        }
+        for (const alias of member.aliases) allAliases.add(alias);
+        for (const domain of member.domains) allDomains.add(domain);
+      }
+
+      const sharedIdentifiers: Record<string, string[]> = {};
+      for (const [k, vs] of Object.entries(allIdentifiers)) {
+        if (vs.size > 0) sharedIdentifiers[k] = [...vs];
+      }
+
+      // Confidence = average pairwise similarity capped at 100
+      const resolutionConfidence = Math.min(100, Math.round(
+        cluster.slice(1).reduce((sum) => sum + minConfidence, 0) / Math.max(cluster.length - 1, 1),
+      ));
+
+      clusters.push({
+        canonicalId: canonical.id,
+        members: cluster,
+        sharedIdentifiers,
+        sharedAliases: [...allAliases],
+        crossDomains: [...allDomains],
+        resolutionConfidence,
+      });
+    }
+  }
+
+  return clusters;
+}
+
+/**
+ * Resolve a specific entity across all domains by any known identifier or alias.
+ * Returns the entity and all related entities it might be duplicated with.
+ */
+export function resolveEntityCrossdom(
+  entityIdOrQuery: string,
+  graph: KnowledgeGraph = KNOWLEDGE_GRAPH,
+): {
+  primary: EntityRecord | null;
+  relatedEntities: EntityRecord[];
+  sharedIdentifiers: Record<string, string>;
+  confidence: number;
+} {
+  const matches = resolveEntityByQuery(entityIdOrQuery, graph);
+  if (matches.length === 0) return { primary: null, relatedEntities: [], sharedIdentifiers: {}, confidence: 0 };
+
+  const primary = matches[0]!.entity;
+  const confidence = matches[0]!.confidence;
+
+  // Find other entities that share identifiers or aliases with the primary
+  const relatedEntities: EntityRecord[] = [];
+  const sharedIdentifiers: Record<string, string> = { ...primary.identifiers };
+
+  for (const entity of graph.entities) {
+    if (entity.id === primary.id) continue;
+
+    let isRelated = false;
+
+    // Share any identifier value
+    for (const [, val] of Object.entries(primary.identifiers)) {
+      for (const [, eVal] of Object.entries(entity.identifiers)) {
+        if (val.toLowerCase() === eVal.toLowerCase() && val.length > 2) {
+          isRelated = true;
+        }
+      }
+    }
+
+    // Share any alias
+    if (!isRelated) {
+      const primaryNorm = [primary.label, ...primary.aliases].map((s) => s.toLowerCase());
+      const entityNorm = [entity.label, ...entity.aliases].map((s) => s.toLowerCase());
+      if (primaryNorm.some((a) => entityNorm.includes(a))) {
+        isRelated = true;
+      }
+    }
+
+    if (isRelated) {
+      relatedEntities.push(entity);
+      Object.assign(sharedIdentifiers, entity.identifiers);
+    }
+  }
+
+  return { primary, relatedEntities, sharedIdentifiers, confidence };
+}

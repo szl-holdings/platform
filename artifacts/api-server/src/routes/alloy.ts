@@ -41,6 +41,26 @@ import {
   setAutonomyMode,
   type AutonomyMode,
 } from "../lib/autonomy-store";
+import {
+  setDomainAutonomyLevel,
+  type DomainAutonomyLevel,
+} from "../middlewares/zero-trust";
+
+/**
+ * Maps the DB-backed AutonomyMode (5-tier graduated scale) to the zero-trust
+ * middleware DomainAutonomyLevel (4-tier enforcement gate) so that both stores
+ * remain in sync whenever an operator updates the autonomy mode via the API.
+ */
+function autonomyModeToGateLevel(mode: AutonomyMode): DomainAutonomyLevel {
+  switch (mode) {
+    case 'observe':      return 'manual';
+    case 'recommend':    return 'propose-only';
+    case 'draft':        return 'propose-only';
+    case 'ask-to-act':   return 'auto-with-audit';
+    case 'approved-act': return 'full-auto';
+    default:             return 'propose-only';
+  }
+}
 
 const upsertFeatureFlagSchema = z.object({
   key: z.string().min(1).max(100).regex(/^[a-z0-9_-]+$/i),
@@ -1592,6 +1612,10 @@ router.patch(
         before,
         after: record,
       });
+      // Sync the zero-trust in-memory domain gate so that the per-domain
+      // autonomy middleware (domainAutonomyGate) immediately reflects the
+      // new policy without waiting for a process restart.
+      setDomainAutonomyLevel(record.domain, autonomyModeToGateLevel(record.mode as AutonomyMode));
       logger.info(
         { tenantOrgId, domain: record.domain, mode: record.mode, updatedBy },
         "alloy.autonomy-mode.updated",

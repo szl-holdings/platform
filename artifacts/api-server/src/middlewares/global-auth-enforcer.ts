@@ -118,6 +118,11 @@ const PUBLIC_EXACT_PATHS = new Set([
   // extra Alpha Vantage API call which is rate-limited by the adapter.
   "/api/lyte/market-indicators",
   "/api/lyte/market-indicators/refresh",
+  // Lyte market feed adapters (FRED, Yahoo Finance) — read-only public endpoints.
+  // List adapters, fetch all adapter data, or fetch a specific adapter's data.
+  // No user data involved; feeds are read-only macro indicators.
+  "/api/lyte/market-feeds",
+  "/api/lyte/market-feeds/data",
   // Investor Hub company fundamentals — read-only descriptive metrics keyed by
   // category='fundamentals' in holdings_metrics. Public so the marketing
   // /investors page can render live values without a session, with a static
@@ -518,6 +523,12 @@ export function globalAuthEnforcer(
 
   // Lyte Decision Replay sub-paths: /api/lyte/decision-replay/:id
   if (req.method === "GET" && path.startsWith("/api/lyte/decision-replay/")) {
+    next();
+    return;
+  }
+
+  // Lyte market feed adapter sub-paths: /api/lyte/market-feeds/:id (e.g. /fred, /yahoo)
+  if (req.method === "GET" && path.startsWith("/api/lyte/market-feeds/")) {
     next();
     return;
   }

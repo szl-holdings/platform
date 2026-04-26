@@ -68,4 +68,59 @@ router.post('/lyte/market-indicators/refresh', writeLimiter, noAuth, async (_req
   }
 });
 
+// ─── Multi-Feed Adapters (FRED + Yahoo Finance) ───────────────────────────────
+//
+// GET /lyte/market-feeds         — list all registered feed adapters
+// GET /lyte/market-feeds/data    — fetch all configured feed adapters' data
+// GET /lyte/market-feeds/:id     — fetch a specific adapter's data (e.g. 'fred')
+
+router.get('/lyte/market-feeds', noAuth, async (_req, res) => {
+  try {
+    const { marketFeedRegistry } = await import('@szl-holdings/ai-engine/market-data');
+    const adapters = marketFeedRegistry.listAdapters();
+    res.json({ adapters, count: adapters.length });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Failed to list feed adapters' });
+  }
+});
+
+router.get('/lyte/market-feeds/data', noAuth, async (req, res) => {
+  try {
+    const { marketFeedRegistry } = await import('@szl-holdings/ai-engine/market-data');
+    const adapterParam = req.query.adapters as string | undefined;
+    const adapterIds = adapterParam ? adapterParam.split(',').map((s) => s.trim()) : undefined;
+    const data = await marketFeedRegistry.fetchAll(adapterIds);
+    res.json({
+      ...data,
+      fetchedAt: new Date().toISOString(),
+      adapterCount: Object.keys(data.byAdapter).length,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Failed to fetch feed data' });
+  }
+});
+
+router.get('/lyte/market-feeds/:id', noAuth, async (req, res) => {
+  try {
+    const { marketFeedRegistry } = await import('@szl-holdings/ai-engine/market-data');
+    const adapterId = req.params.id as string;
+    const adapter = marketFeedRegistry.get(adapterId);
+    if (!adapter) {
+      res.status(404).json({ error: `Feed adapter '${adapterId}' not found` });
+      return;
+    }
+    const indicators = await adapter.fetch();
+    res.json({
+      adapterId,
+      displayName: adapter.displayName,
+      configured: adapter.isConfigured(),
+      indicators,
+      count: indicators.length,
+      fetchedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Failed to fetch adapter data' });
+  }
+});
+
 export default router;
