@@ -408,4 +408,13 @@ router.use(lazyMatch("/omnia", () => import("./omnia"), "omnia"));
 // GET  /openai/daily-briefing/today             — today's daily briefing audio+provenance (mobile)
 router.use("/openai", openaiConversationsRouter);
 
+// Carlota Jo Consulting — AI advisor chat, booking, portal, and CRM routes
+router.use(
+  lazyMatch(
+    ["/booking", "/carlota", "/portal"],
+    () => import("./carlota-jo"),
+    "carlota-jo",
+  ),
+);
+
 export default router;

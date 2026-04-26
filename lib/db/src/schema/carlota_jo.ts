@@ -188,6 +188,27 @@ export const insertCarlotaScenarioSchema = createInsertSchema(carlotaScenariosTa
 export type InsertCarlotaScenario = z.infer<typeof insertCarlotaScenarioSchema>;
 export type CarlotaScenario = typeof carlotaScenariosTable.$inferSelect;
 
+export const carlotaChatSessionsTable = pgTable('carlota_chat_sessions', {
+  id: serial('id').primaryKey(),
+  sessionId: text('session_id').notNull().unique(),
+  name: text('name'),
+  email: text('email'),
+  messages: jsonb('messages').$type<Array<{ role: string; content: string }>>().notNull().default([]),
+  qualificationScore: integer('qualification_score').notNull().default(0),
+  signals: jsonb('signals').$type<string[]>().notNull().default([]),
+  qualified: boolean('qualified').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const insertCarlotaChatSessionSchema = createInsertSchema(carlotaChatSessionsTable).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCarlotaChatSession = z.infer<typeof insertCarlotaChatSessionSchema>;
+export type CarlotaChatSession = typeof carlotaChatSessionsTable.$inferSelect;
+
 export const carlotaRadarCompetitorsTable = pgTable('carlota_radar_competitors', {
   id: serial('id').primaryKey(),
   organizationId: integer('organization_id'),

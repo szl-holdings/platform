@@ -1,3 +1,4 @@
+import AdvisorChat from '@/components/AdvisorChat';
 import { McpOverlay } from '@szl-holdings/mcp-client';
 import {
   clearUser as clearSentryUser,
@@ -607,9 +608,12 @@ const carlotaShortcuts: KeyboardShortcut[] = [
   { key: 'S', description: 'Go to Services', category: 'Navigation' },
 ];
 
+const PLATFORM_ROUTES_HIDE_CHAT = ['/concierge', '/governed-cockpit', '/portal-admin', '/client-portal'];
+
 function AppShell() {
   const [location] = useLocation();
   const showSidebar = isPlatformRoute(location);
+  const hideChat = PLATFORM_ROUTES_HIDE_CHAT.some((r) => location.startsWith(r));
   return (
     <div style={{ minHeight: '100vh' }}>
       <EcosystemNav
@@ -626,6 +630,7 @@ function AppShell() {
       >
         <Router />
       </div>
+      {!hideChat && <AdvisorChat />}
       <style>{`
         @media (max-width: 1023px) {
           .platform-shell-content { margin-left: 0 !important; }

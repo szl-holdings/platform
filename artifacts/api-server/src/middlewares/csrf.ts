@@ -83,6 +83,15 @@ const EXEMPT_PATHS = new Set([
   // authenticate via HTTP Basic Auth (client_id + hashed secret), not browser
   // cookies. CSRF double-submit protection does not apply.
   '/api/oauth/token',
+  // Carlota Jo AI advisor chat — public visitor-facing endpoint embedded on the
+  // marketing site. No per-user state mutated; session is keyed by a client-
+  // generated UUID, not a browser session cookie. Rate-limited in the route handler.
+  '/api/carlota/advisor/chat',
+  // Carlota Jo booking reservation — public visitor-facing action (same model
+  // as /api/contact / /api/demo-requests). No per-user authenticated state;
+  // the booking is scoped to the provided email/name fields. Auth-gated CRUD
+  // routes (PATCH/DELETE /booking/reservations/:id) are covered by authMiddleware.
+  '/api/booking/reservations',
 ]);
 
 // Risk evidence store — public POST/DELETE endpoints accept any

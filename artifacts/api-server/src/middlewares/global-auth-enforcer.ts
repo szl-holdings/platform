@@ -68,6 +68,18 @@ const PUBLIC_EXACT_PATHS = new Set([
   // /api/booking/time-entries and /api/booking/services). The route handler
   // applies its own validation (400 for missing fields) and rate limiting.
   "/api/booking/invoices/email",
+  // Carlota Jo AI advisor chat — public endpoint for website visitors to engage
+  // with the AI qualification assistant before booking. Rate-limited (5 req/hour
+  // per IP) inside the route handler. No PII required; session key is client-generated.
+  "/api/carlota/advisor/chat",
+  // Carlota Jo booking paths used by the embedded inline scheduler in AdvisorChat.
+  // Both are needed without a session: availability is read-only, reservations POST
+  // is the visitor-facing booking action (same model as /api/contact / /api/demo-requests).
+  // Admin CRUD on reservations (GET list, PATCH, DELETE) is protected by authMiddleware
+  // in the route handler itself.
+  // NOTE: routes live at /booking/... in carlota-jo.ts (no /carlota prefix there).
+  "/api/booking/availability",
+  "/api/booking/reservations",
   "/api/stream/ais-nmea",
   "/api/stream/siem-events",
   "/api/stream/market-data",

@@ -1,8 +1,10 @@
+import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { ingestCarlotaService } from '@szl-holdings/ai-engine/domain-embedding-hooks';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
   type CarlotaRadarPendingSignal,
   carlotaAdvisoryClientsTable,
+  carlotaChatSessionsTable,
   carlotaClientCompetitorsTable,
   carlotaClientMarginHistoryTable,
   carlotaClientMarketTrendTable,
@@ -315,6 +317,57 @@ router.post(
           amount: amount.toFixed(2),
         })
         .returning();
+
+      // ── Ontology: register Person + Engagement entities for booking ──────────
+      try {
+        const { registerEntity, entityUri, registerEdge } = await import('@szl-holdings/ontology');
+        const personKey = email.replace(/[@.]/g, '-');
+        await registerEntity({
+          kind: 'person',
+          namespace: 'carlota-jo',
+          identifier: personKey,
+          sourceTable: 'carlota_reservations',
+          sourceId: row.confirmationId,
+          displayName: name,
+          attributes: { email, company: company ?? null, phone: phone ?? null, source: 'booking-flow' },
+        });
+        const personUri = entityUri('person', 'carlota-jo', personKey);
+        const bookingId = `booking-${row.confirmationId}`;
+        await registerEntity({
+          kind: 'briefing',
+          namespace: 'carlota-jo',
+          identifier: bookingId,
+          sourceTable: 'carlota_reservations',
+          sourceId: row.confirmationId,
+          displayName: `Booking: ${tier} — ${service}`,
+          attributes: { confirmationId: row.confirmationId, service, tier, date, time, amount: amount.toFixed(2), source: 'booking-flow' },
+        });
+        const engagementUri = entityUri('briefing', 'carlota-jo', bookingId);
+        await registerEdge({ fromUri: personUri, toUri: engagementUri, relation: 'booked' });
+      } catch (ontologyErr) {
+        logger.warn({ err: ontologyErr }, '[carlota-booking] Ontology registration failed');
+      }
+
+      // ── Alert bus — publish booking signal ───────────────────────────────────
+      try {
+        const { prismBus } = await import('@szl-holdings/prism-bus');
+        prismBus.publish({
+          type: 'domain_signal',
+          domain: 'global',
+          sourceId: row.confirmationId,
+          severity: 'medium',
+          payload: {
+            title: `Consultation booked — ${name}`,
+            description: `Carlota Jo consultation booked: ${tier} / ${service} on ${date}. Confirmation: ${row.confirmationId}.`,
+            source: 'carlota-jo-booking',
+            email,
+            name,
+            confirmationId: row.confirmationId,
+          },
+        });
+      } catch (busErr) {
+        logger.warn({ err: busErr }, '[carlota-booking] Prism bus publish failed');
+      }
 
       res.json({
         success: true,
@@ -3760,5 +3813,440 @@ router.get('/carlota/scenarios', authMiddleware(), async (req, res) => {
     handleRouteError(res, err, 'Failed to list scenarios');
   }
 });
+
+// ── AI Advisor Chat ─────────────────────────────────────────────────────────────
+
+const CARLOTA_ENGAGEMENT_TIERS = `
+Engagement tiers:
+- Strategy Session (slug: strategy-session): A focused 90-minute consultation ($4,500). Ideal for those exploring how household management can be improved.
+- Portfolio Review (slug: portfolio-review): Comprehensive assessment of all properties and household systems ($45,000 one-time). For those managing multiple estates.
+- Advisory Retainer (slug: advisory-retainer): Ongoing monthly engagement ($18,000/month). Full operational partnership with Rosa and the Carlota Jo team.
+
+The practice serves principals with one or more high-value properties who need expert operational management. Carlota Jo does not serve short-term rentals or commercial properties.
+`.trim();
+
+interface ServiceSource {
+  id: number;
+  slug: string;
+  name: string;
+  category: string | null;
+  snippet: string;
+}
+
+function scoreServiceRelevance(
+  service: { name: string; summary: string | null; description: string | null; category: string | null; capabilities: unknown },
+  query: string,
+): number {
+  const haystack = [service.name, service.summary, service.description, service.category]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  const words = query.toLowerCase().split(/\W+/).filter((w) => w.length > 3);
+  if (words.length === 0) return 1;
+  const hits = words.filter((w) => haystack.includes(w)).length;
+  return hits / words.length;
+}
+
+async function retrieveRelevantServices(query: string): Promise<ServiceSource[]> {
+  try {
+    const services = await db
+      .select({
+        id: carlotaServicesTable.id,
+        slug: carlotaServicesTable.slug,
+        name: carlotaServicesTable.name,
+        summary: carlotaServicesTable.summary,
+        description: carlotaServicesTable.description,
+        category: carlotaServicesTable.category,
+        capabilities: carlotaServicesTable.capabilities,
+      })
+      .from(carlotaServicesTable)
+      .where(eq(carlotaServicesTable.isActive, 'true'))
+      .orderBy(carlotaServicesTable.sortOrder)
+      .limit(20);
+
+    if (services.length === 0) return [];
+
+    const scored = services
+      .map((s) => ({ ...s, score: scoreServiceRelevance(s, query) }))
+      .sort((a, b) => b.score - a.score);
+
+    const top = scored.slice(0, 3).filter((s) => s.score > 0);
+    const fallback = top.length === 0 ? scored.slice(0, 2) : top;
+
+    return fallback.map((s) => ({
+      id: s.id,
+      slug: s.slug,
+      name: s.name,
+      category: s.category,
+      snippet: (s.summary ?? s.description ?? s.name).slice(0, 200),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function buildServicesContext(sources: ServiceSource[]): string {
+  if (sources.length === 0) {
+    return `Carlota Jo is a white-glove household and estate management consultancy led by Rosa, offering services including Residence Operations, Property Coordination, Household Systems, Vendor Management, Lifestyle & Admin, and Special Projects.`;
+  }
+  const lines = sources.map((s) => `- [SVC-${s.id}] ${s.name}${s.category ? ` (${s.category})` : ''}: ${s.snippet}`);
+  return `Carlota Jo is a white-glove household and estate management consultancy led by Rosa.\nRelevant services for this conversation:\n${lines.join('\n')}`;
+}
+
+const advisorChatLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many messages. Please try again in a few minutes.' },
+  validate: { xForwardedForHeader: false, ip: false },
+}) as unknown as RequestHandler;
+
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+function detectQualificationSignals(messages: ChatMessage[]): {
+  qualified: boolean;
+  score: number;
+  signals: string[];
+} {
+  const transcript = messages.map((m) => m.content).join(' ').toLowerCase();
+  const signals: string[] = [];
+  let score = 0;
+
+  if (/multiple propert|several propert|second home|primary residence|estate/.test(transcript)) {
+    signals.push('multi-property');
+    score += 30;
+  }
+  if (/staff|house manager|housekeeper|chef|driver|personal assistant/.test(transcript)) {
+    signals.push('has-staff');
+    score += 20;
+  }
+  if (/book|schedule|consult|meeting|talk to rosa|speak with/.test(transcript)) {
+    signals.push('booking-intent');
+    score += 25;
+  }
+  if (/mayfair|belgravia|chelsea|hamptons|palm beach|greenwich|aspen|monaco|dubai/.test(transcript)) {
+    signals.push('hni-location');
+    score += 15;
+  }
+  if (/relocat|moving|transition|renovation|redecor/.test(transcript)) {
+    signals.push('special-project');
+    score += 10;
+  }
+
+  return { qualified: score >= 30, score, signals };
+}
+
+router.post(
+  '/carlota/advisor/chat',
+  advisorChatLimit,
+  validateBody(
+    bodyShape({
+      message: z.string().min(1).max(2000),
+      sessionId: z.string().optional(),
+      history: z
+        .array(
+          z.object({
+            role: z.enum(['user', 'assistant']),
+            content: z.string().max(4000),
+          }),
+        )
+        .max(20)
+        .optional(),
+      name: z.string().optional(),
+      email: z.string().email().optional(),
+    }),
+  ),
+  async (req: Request, res: Response) => {
+    try {
+      const { message, sessionId, history = [], name, email } = req.body as {
+        message: string;
+        sessionId?: string;
+        history?: ChatMessage[];
+        name?: string;
+        email?: string;
+      };
+
+      const sessionKey = sessionId ?? `anon-${Date.now()}`;
+      const allMessages: ChatMessage[] = [...history, { role: 'user', content: message }];
+
+      const { qualified, score, signals } = detectQualificationSignals(allMessages);
+
+      const queryText = allMessages.map((m) => m.content).join(' ');
+      const sources = await retrieveRelevantServices(queryText);
+      const servicesContext = buildServicesContext(sources);
+
+      const systemPrompt = `You are Rosa's AI advisor — a knowledgeable, warm, and discreet assistant for Carlota Jo, a white-glove household and estate management consultancy.
+
+${servicesContext}
+
+${CARLOTA_ENGAGEMENT_TIERS}
+
+Your role:
+- Answer questions about Carlota Jo's services clearly and confidently, citing the relevant service by name
+- Gently qualify prospects by understanding their household complexity, properties, and operational needs
+- If they seem like a good fit, suggest booking a complimentary strategy session with Rosa
+- Maintain a tone that is sophisticated, unhurried, and personal — never pushy or salesy
+- Keep responses concise (2-4 sentences typically) unless detail is genuinely needed
+- If asked about pricing, share it openly and frame it in terms of value
+
+${name ? `The visitor's name is ${name}.` : ''}
+
+When you believe the visitor is a strong fit for Carlota Jo's services, end your response with exactly the text: [[SUGGEST_BOOKING]]`;
+
+      const anthropicMessages = allMessages.map((m) => ({
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+      }));
+
+      let aiResponse: string;
+      try {
+        const completion = await anthropic.messages.create({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 600,
+          system: systemPrompt,
+          messages: anthropicMessages,
+        });
+        const block = completion.content[0];
+        aiResponse = block.type === 'text' ? block.text : 'I apologise — something went wrong. Please try again.';
+      } catch (aiErr) {
+        logger.warn({ err: aiErr }, '[carlota-advisor] AI call failed, using fallback');
+        aiResponse =
+          "Thank you for reaching out. Rosa would be delighted to learn more about your household needs. Would you like to schedule a complimentary conversation? [[SUGGEST_BOOKING]]";
+      }
+
+      const suggestBooking = aiResponse.includes('[[SUGGEST_BOOKING]]');
+      const cleanResponse = aiResponse.replace('[[SUGGEST_BOOKING]]', '').trim();
+
+      const updatedMessages: ChatMessage[] = [
+        ...allMessages,
+        { role: 'assistant', content: cleanResponse },
+      ];
+      const finalQualification = detectQualificationSignals(updatedMessages);
+
+      // ── Persist every chat session to DB (upsert) ──────────────────────────
+      try {
+        await db
+          .insert(carlotaChatSessionsTable)
+          .values({
+            sessionId: sessionKey,
+            name: name ?? null,
+            email: email ?? null,
+            messages: updatedMessages as Array<{ role: string; content: string }>,
+            qualificationScore: finalQualification.score,
+            signals: finalQualification.signals,
+            qualified: finalQualification.qualified,
+          })
+          .onConflictDoUpdate({
+            target: carlotaChatSessionsTable.sessionId,
+            set: {
+              name: name ?? null,
+              email: email ?? null,
+              messages: updatedMessages as Array<{ role: string; content: string }>,
+              qualificationScore: finalQualification.score,
+              signals: finalQualification.signals,
+              qualified: finalQualification.qualified,
+              updatedAt: new Date(),
+            },
+          });
+      } catch (dbErr) {
+        logger.warn({ err: dbErr }, '[carlota-advisor] Chat session DB persist failed');
+      }
+
+      // ── Ontology entities — always write when we have any identity ──────────
+      try {
+        const { registerEntity, entityUri, registerEdge } = await import('@szl-holdings/ontology');
+        const personKey = email ? email.replace(/[@.]/g, '-') : `anon-${sessionKey.replace(/[^A-Za-z0-9_.:-]/g, '-')}`;
+        await registerEntity({
+          kind: 'person',
+          namespace: 'carlota-jo',
+          identifier: personKey,
+          sourceTable: 'carlota_chat_sessions',
+          sourceId: sessionKey,
+          displayName: name ?? email ?? `Anonymous (${sessionKey})`,
+          attributes: { email: email ?? null, name: name ?? null, qualificationScore: finalQualification.score, source: 'advisor-chat', sessionId: sessionKey },
+        });
+        const personUri = entityUri('person', 'carlota-jo', personKey);
+        const engagementId = `eng-${sessionKey.replace(/[^A-Za-z0-9_.:-]/g, '-')}`;
+        await registerEntity({
+          kind: 'briefing',
+          namespace: 'carlota-jo',
+          identifier: engagementId,
+          sourceTable: 'carlota_chat_sessions',
+          sourceId: sessionKey,
+          displayName: `Lead engagement — ${name ?? email ?? sessionKey}`,
+          attributes: { sessionId: sessionKey, qualificationScore: finalQualification.score, signals: finalQualification.signals, source: 'advisor-chat' },
+        });
+        const engagementUri = entityUri('briefing', 'carlota-jo', engagementId);
+        await registerEdge({ fromUri: personUri, toUri: engagementUri, relation: 'initiated' });
+      } catch (ontologyErr) {
+        logger.warn({ err: ontologyErr }, '[carlota-advisor] Ontology registration failed');
+      }
+
+      // ── Alert bus — publish when qualified (with or without email) ──────────
+      if (finalQualification.qualified) {
+        try {
+          const { prismBus } = await import('@szl-holdings/prism-bus');
+          prismBus.publish({
+            type: 'domain_signal',
+            domain: 'global',
+            sourceId: sessionKey,
+            severity: 'medium',
+            payload: {
+              title: `New qualified lead — ${name ?? email ?? 'anonymous'}`,
+              description: `Carlota Jo AI advisor qualified a prospect (score: ${finalQualification.score}). Signals: ${finalQualification.signals.join(', ')}.`,
+              source: 'carlota-jo-advisor',
+              email: email ?? null,
+              name: name ?? null,
+              signals: finalQualification.signals,
+              score: finalQualification.score,
+            },
+          });
+        } catch (busErr) {
+          logger.warn({ err: busErr }, '[carlota-advisor] Prism bus publish failed');
+        }
+      }
+
+      broadcastWs('bookings', 'advisor-chat', {
+        sessionId: sessionKey,
+        qualified: finalQualification.qualified,
+        score: finalQualification.score,
+      });
+
+      res.json({
+        success: true,
+        response: cleanResponse,
+        sessionId: sessionKey,
+        suggestBooking: suggestBooking || (finalQualification.qualified && finalQualification.score >= 40),
+        qualification: {
+          score: finalQualification.score,
+          qualified: finalQualification.qualified,
+          signals: finalQualification.signals,
+        },
+        sources,
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to process advisor chat');
+    }
+  },
+);
+
+// ── CRM Pipeline ───────────────────────────────────────────────────────────────
+
+router.get(
+  '/carlota/pipeline',
+  authMiddleware(),
+  requireRole('admin', 'editor', 'exec'),
+  validateQuery(listQuerySchema),
+  async (req, res) => {
+    try {
+      const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+
+      const [inquiries, reservations, chatSessions, inquiryCount, reservationCount, chatCount] = await Promise.all([
+        db
+          .select()
+          .from(carlotaInquiriesTable)
+          .orderBy(desc(carlotaInquiriesTable.createdAt))
+          .limit(limit)
+          .offset(offset),
+        db
+          .select()
+          .from(carlotaReservationsTable)
+          .orderBy(desc(carlotaReservationsTable.createdAt))
+          .limit(limit)
+          .offset(offset),
+        db
+          .select()
+          .from(carlotaChatSessionsTable)
+          .orderBy(desc(carlotaChatSessionsTable.createdAt))
+          .limit(limit)
+          .offset(offset),
+        db
+          .select({ count: sql<number>`count(*)::int` })
+          .from(carlotaInquiriesTable),
+        db
+          .select({ count: sql<number>`count(*)::int` })
+          .from(carlotaReservationsTable),
+        db
+          .select({ count: sql<number>`count(*)::int` })
+          .from(carlotaChatSessionsTable),
+      ]);
+
+      const leads = [
+        ...inquiries.map((inq) => ({
+          id: `inq-${inq.id}`,
+          type: 'inquiry' as const,
+          name: inq.name,
+          email: inq.email,
+          company: inq.company,
+          phone: inq.phone,
+          service: inq.service,
+          message: inq.message,
+          status: inq.status ?? 'new',
+          source: 'web-form',
+          createdAt: inq.createdAt,
+          updatedAt: inq.updatedAt,
+        })),
+        ...reservations.map((res) => ({
+          id: `rsv-${res.id}`,
+          type: 'reservation' as const,
+          name: res.name,
+          email: res.email,
+          company: res.company,
+          phone: res.phone,
+          service: res.service,
+          message: res.notes,
+          status: res.status ?? 'booked',
+          source: 'booking-flow',
+          amount: res.amount,
+          confirmationId: res.confirmationId,
+          preferredDate: `${res.date} ${res.time}`,
+          createdAt: res.createdAt,
+          updatedAt: res.updatedAt,
+        })),
+        ...chatSessions.map((chat) => ({
+          id: `chat-${chat.id}`,
+          type: 'chat' as const,
+          name: chat.name ?? 'Anonymous',
+          email: chat.email,
+          company: null,
+          phone: null,
+          service: null,
+          message: chat.messages.length > 0
+            ? chat.messages.filter((m) => m.role === 'user').slice(-1)[0]?.content ?? ''
+            : '',
+          status: chat.qualified ? 'qualified' : 'new',
+          source: 'advisor-chat',
+          qualificationScore: chat.qualificationScore,
+          signals: chat.signals,
+          messageCount: chat.messages.length,
+          createdAt: chat.createdAt,
+          updatedAt: chat.updatedAt,
+        })),
+      ].sort((a, b) => {
+        const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bTime - aTime;
+      });
+
+      const total = (inquiryCount[0]?.count ?? 0) + (reservationCount[0]?.count ?? 0) + (chatCount[0]?.count ?? 0);
+
+      sendSuccess(res, {
+        leads,
+        summary: {
+          inquiries: inquiryCount[0]?.count ?? 0,
+          reservations: reservationCount[0]?.count ?? 0,
+          chats: chatCount[0]?.count ?? 0,
+          total,
+        },
+      }, 200, { page, limit, total });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to fetch pipeline');
+    }
+  },
+);
 
 export default router;

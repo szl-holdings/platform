@@ -99,6 +99,14 @@ const ECOSYSTEM_APPS_NAV: NavGroup = {
   ],
 };
 
+const CARLOTA_NAV: NavGroup = {
+  section: 'Carlota Jo',
+  items: [
+    { href: '/carlota/pipeline', label: 'Lead Pipeline', icon: Users },
+    { href: '/carlota-jo/', label: 'Consulting Site', icon: Globe, external: true },
+  ],
+};
+
 const STRATEGY_NAV: NavGroup[] = [
   {
     section: 'ATLAS Spatial Runtime',
@@ -152,6 +160,7 @@ const STRATEGY_NAV: NavGroup[] = [
       { href: '/cognitive/policy-sim', label: 'Policy Simulation', icon: FlaskConical },
     ],
   },
+  CARLOTA_NAV,
   ECOSYSTEM_APPS_NAV,
 ];
 
