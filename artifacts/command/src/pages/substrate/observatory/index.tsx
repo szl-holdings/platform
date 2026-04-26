@@ -430,7 +430,7 @@ export function McpObservatory() {
                     ))}
                   </div>
                 </div>
-                <div className="divide-y" style={{ divideColor: 'hsla(0,0%,100%,0.04)' }}>
+                <div className="divide-y divide-white/[0.04]">
                   {filteredSessions.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12">
                       <Server className="w-8 h-8 mb-3" style={{ color: 'hsl(214,7%,25%)' }} />

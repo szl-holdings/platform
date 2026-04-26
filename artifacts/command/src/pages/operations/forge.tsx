@@ -639,7 +639,7 @@ function mapRunToExecution(r: ForgeExecRun, idx: number): ToolExecution {
     confidence: r.status === 'success' ? 0.9 : 0.6,
     latencyMs: r.latencyMs ?? 0,
     timestamp: r.startedAt,
-    input: r.input ?? {},
+    input: (r.input as Record<string, unknown> | undefined) ?? {},
   };
 }
 
@@ -818,7 +818,7 @@ function ObservatoryTab() {
                           {JSON.stringify(exec.input, null, 2)}
                         </pre>
                       </div>
-                      {exec.output && (
+                      {exec.output != null && (
                         <div>
                           <div style={{ fontSize: 10, color: FG_MUT, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6, fontFamily: 'monospace' }}>Output</div>
                           <pre style={{ fontSize: 10, color: '#94a3b8', background: 'rgba(0,0,0,0.3)', borderRadius: 6, padding: '8px 10px', overflow: 'auto', maxHeight: 100, margin: 0, border: `1px solid ${BORDER}` }}>
@@ -869,8 +869,8 @@ function manifestToEntry(m: ToolManifest): ToolCatalogEntry {
     executions24h: 0,
     successRate: 1,
     avgLatencyMs: 0,
-    failureModes: m.failureModes ?? [],
-    inputSchema: m.inputSchema ?? { type: 'object', properties: {}, required: [] },
+    failureModes: (m.failureModes ?? []).map((f) => ({ ...f, retryable: f.retryable ?? false })),
+    inputSchema: (m.inputSchema ?? { type: 'object', properties: {}, required: [] as string[] }) as Record<string, unknown>,
   };
 }
 
@@ -1153,7 +1153,7 @@ function ConsoleTab() {
                     <div style={{ fontSize: 11, fontWeight: 700, color: execResult.outcome === 'allow' ? '#22c55e' : '#f59e0b', marginBottom: 4 }}>
                       {execResult.outcome === 'allow' ? '✓ Execution Completed' : '⚠ Approval Required'}
                     </div>
-                    {execResult.output && (
+                    {execResult.output != null && (
                       <pre style={{ fontSize: 10, color: '#94a3b8', margin: 0, overflow: 'auto', maxHeight: 80 }}>
                         {JSON.stringify(execResult.output, null, 2)}
                       </pre>

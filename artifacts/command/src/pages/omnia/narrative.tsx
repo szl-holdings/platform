@@ -118,7 +118,7 @@ export default function OmniaNarrativePage() {
     >
       <div style={{ maxWidth: 820 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <div style={{ display: 'flex', align: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ padding: '4px 12px', background: `${ACCENT}15`, border: `1px solid ${ACCENT}35`, borderRadius: 20, fontSize: 11, fontWeight: 600, color: ACCENT, letterSpacing: '0.06em' }}>
               LIVE · Cycle #{n.version}
             </div>

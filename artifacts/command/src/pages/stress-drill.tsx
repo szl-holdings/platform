@@ -412,7 +412,7 @@ export default function StressDrillPage() {
   if (view === 'library') {
     return (
       <div style={{ minHeight: '100vh', background: '#060c1a', color: '#e2e8f0' }}>
-        <EcosystemNav />
+        <EcosystemNav currentAppId="command" currentAppName="Unified Command" />
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
           <div style={{ marginBottom: 32 }}>
             <div
@@ -631,7 +631,7 @@ export default function StressDrillPage() {
 
     return (
       <div style={{ minHeight: '100vh', background: '#060c1a', color: '#e2e8f0' }}>
-        <EcosystemNav />
+        <EcosystemNav currentAppId="command" currentAppName="Unified Command" />
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
           {/* Header */}
           <div
@@ -1174,7 +1174,7 @@ export default function StressDrillPage() {
 
     return (
       <div style={{ minHeight: '100vh', background: '#060c1a', color: '#e2e8f0' }}>
-        <EcosystemNav />
+        <EcosystemNav currentAppId="command" currentAppName="Unified Command" />
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px' }}>
           {/* Header */}
           <div
@@ -1516,7 +1516,7 @@ export default function StressDrillPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#060c1a', color: '#e2e8f0' }}>
-      <EcosystemNav />
+      <EcosystemNav currentAppId="command" currentAppName="Unified Command" />
       <div style={{ maxWidth: 800, margin: '0 auto', padding: 48, textAlign: 'center', color: '#64748b' }}>
         Loading…
       </div>

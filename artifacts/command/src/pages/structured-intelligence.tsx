@@ -106,8 +106,8 @@ function MetricCard({
   return (
     <div className={`${bgMap[variant]} border border-white/8 rounded-xl p-5 flex flex-col gap-3`}>
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${color}18` }}>
-          <Icon size={16} className="" style={{ color }} />
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${color}18`, color }}>
+          <Icon size={16} />
         </div>
         <span className="text-xs text-white/50 font-medium uppercase tracking-wider">{label}</span>
       </div>

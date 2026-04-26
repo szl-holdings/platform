@@ -145,7 +145,7 @@ export function AgentsPage() {
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', align: 'center', gap: 4 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <span style={{ fontSize: 10, color: '#64748b' }}>Max autonomy:</span>
                       <span style={{ fontSize: 10, color: RISK_COLOR[op.maxAutonomyLevel], fontWeight: 600, marginLeft: 4 }}>
                         {AUTONOMY_LEVELS[op.maxAutonomyLevel].label}

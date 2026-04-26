@@ -36,9 +36,10 @@ function getAllPolicies(): string[] {
   return Object.values(POLICY_PROFILES).flat();
 }
 
-function PolicyBadge({ result }: { result: 'pass' | 'fail' }) {
+function PolicyBadge({ result }: { result: 'pass' | 'warn' | 'fail' }) {
   const config = {
     pass: { color: '#22c55e', label: 'PASS' },
+    warn: { color: '#f59e0b', label: 'WARN' },
     fail: { color: '#ef4444', label: 'FAIL' },
   }[result];
   return (

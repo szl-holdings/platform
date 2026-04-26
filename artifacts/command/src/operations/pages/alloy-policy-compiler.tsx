@@ -80,7 +80,7 @@ function fromServerVersion(v: ServerPolicyVersion): PolicyVersion {
     savedAt: savedAtMs,
     message: v.message,
     signers: Array.isArray(v.signers) ? v.signers : [],
-    isActive: !!(v.policy as Record<string, unknown>).isActive,
+    isActive: !!(v.policy as unknown as Record<string, unknown>).isActive,
   };
 }
 

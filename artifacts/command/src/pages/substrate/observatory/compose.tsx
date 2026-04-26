@@ -526,7 +526,7 @@ export function WorkflowComposer() {
               <Globe className="w-3.5 h-3.5" style={{ color: '#8b5cf6' }} />
               <span className="text-xs font-semibold">Available External Servers</span>
             </div>
-            <div className="divide-y" style={{ divideColor: 'hsla(0,0%,100%,0.06)' }}>
+            <div className="divide-y divide-white/[0.06]">
               {externalServers.map((s) => (
                 <div key={s.id} className="flex items-center gap-3 px-4 py-2.5">
                   <div

@@ -7,7 +7,7 @@ import { sharedProxyPlugin } from '@szl-holdings/shared-proxy';
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
 
-const vitePort = Number(process.env.VITE_PORT) || 5000;
+const vitePort = Number(process.env.VITE_PORT ?? process.env.PORT) || 5050;
 const basePath = process.env.BASE_PATH || '/command/';
 
 function healthCheckPlugin(): Plugin {
