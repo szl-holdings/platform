@@ -1,160 +1,153 @@
-# Screenshot Manifest — SZL Holdings
+# Screenshot Manifest
 
-**Generated:** 2026-04-25
-**A11oy PNG captures:** 95 pass, 45 fail (of 140 total = 28 targets × 5 viewports)
-**Artifact hero JPGs:** 7 (captured 2026-04-21, renamed with date suffix 2026-04-25)
+**Generated:** 2026-04-26T12:19:33.153Z
+**Base URL:** https://5b0811fe-3c02-42f1-86f4-1effe6ec70df-00-hpmimumb9x88-tirfwson.picard.replit.dev
+**Summary:** 131 passed, 9 failed of 140
 
-| File | Target | Viewport | Status |
-|------|--------|----------|--------|
-| a11oy-hero-2026-04--desktop-1440.png | a11oy-hero | desktop-1440 | ✅ |
-| a11oy-hero-2026-04--wide-1600.png | a11oy-hero | wide-1600 | ✅ |
-| a11oy-hero-2026-04--social-1200.png | a11oy-hero | social-1200 | ✅ |
-| a11oy-hero-2026-04--linkedin-square-1080.png | a11oy-hero | linkedin-square-1080 | ✅ |
-| a11oy-hero-2026-04--linkedin-portrait-1080.png | a11oy-hero | linkedin-portrait-1080 | ✅ |
-| a11oy-now-board-2026-04--desktop-1440.png | a11oy-now-board | desktop-1440 | ✅ |
-| a11oy-now-board-2026-04--wide-1600.png | a11oy-now-board | wide-1600 | ✅ |
-| a11oy-now-board-2026-04--social-1200.png | a11oy-now-board | social-1200 | ✅ |
-| a11oy-now-board-2026-04--linkedin-square-1080.png | a11oy-now-board | linkedin-square-1080 | ✅ |
-| a11oy-now-board-2026-04--linkedin-portrait-1080.png | a11oy-now-board | linkedin-portrait-1080 | ✅ |
-| a11oy-command-surface-2026-04--desktop-1440.png | a11oy-command-surface | desktop-1440 | ✅ |
-| a11oy-command-surface-2026-04--wide-1600.png | a11oy-command-surface | wide-1600 | ✅ |
-| a11oy-command-surface-2026-04--social-1200.png | a11oy-command-surface | social-1200 | ✅ |
-| a11oy-command-surface-2026-04--linkedin-square-1080.png | a11oy-command-surface | linkedin-square-1080 | ✅ |
-| a11oy-command-surface-2026-04--linkedin-portrait-1080.png | a11oy-command-surface | linkedin-portrait-1080 | ✅ |
-| a11oy-signal-mesh-2026-04--desktop-1440.png | a11oy-signal-mesh | desktop-1440 | ✅ |
-| a11oy-signal-mesh-2026-04--wide-1600.png | a11oy-signal-mesh | wide-1600 | ✅ |
-| a11oy-signal-mesh-2026-04--social-1200.png | a11oy-signal-mesh | social-1200 | ✅ |
-| a11oy-signal-mesh-2026-04--linkedin-square-1080.png | a11oy-signal-mesh | linkedin-square-1080 | ✅ |
-| a11oy-signal-mesh-2026-04--linkedin-portrait-1080.png | a11oy-signal-mesh | linkedin-portrait-1080 | ✅ |
-| a11oy-action-rail-2026-04--desktop-1440.png | a11oy-action-rail | desktop-1440 | ✅ |
-| a11oy-action-rail-2026-04--wide-1600.png | a11oy-action-rail | wide-1600 | ✅ |
-| a11oy-action-rail-2026-04--social-1200.png | a11oy-action-rail | social-1200 | ✅ |
-| a11oy-action-rail-2026-04--linkedin-square-1080.png | a11oy-action-rail | linkedin-square-1080 | ✅ |
-| a11oy-action-rail-2026-04--linkedin-portrait-1080.png | a11oy-action-rail | linkedin-portrait-1080 | ✅ |
-| a11oy-proof-ledger-2026-04--desktop-1440.png | a11oy-proof-ledger | desktop-1440 | ✅ |
-| a11oy-proof-ledger-2026-04--wide-1600.png | a11oy-proof-ledger | wide-1600 | ✅ |
-| a11oy-proof-ledger-2026-04--social-1200.png | a11oy-proof-ledger | social-1200 | ✅ |
-| a11oy-proof-ledger-2026-04--linkedin-square-1080.png | a11oy-proof-ledger | linkedin-square-1080 | ✅ |
-| a11oy-proof-ledger-2026-04--linkedin-portrait-1080.png | a11oy-proof-ledger | linkedin-portrait-1080 | ✅ |
-| a11oy-covenant-governance-2026-04--desktop-1440.png | a11oy-covenant-governance | desktop-1440 | ✅ |
-| a11oy-covenant-governance-2026-04--wide-1600.png | a11oy-covenant-governance | wide-1600 | ✅ |
-| a11oy-covenant-governance-2026-04--social-1200.png | a11oy-covenant-governance | social-1200 | ✅ |
-| a11oy-covenant-governance-2026-04--linkedin-square-1080.png | a11oy-covenant-governance | linkedin-square-1080 | ✅ |
-| a11oy-covenant-governance-2026-04--linkedin-portrait-1080.png | a11oy-covenant-governance | linkedin-portrait-1080 | ✅ |
-| a11oy-operator-control-plane-2026-04--desktop-1440.png | a11oy-operator-control-plane | desktop-1440 | ✅ |
-| a11oy-operator-control-plane-2026-04--wide-1600.png | a11oy-operator-control-plane | wide-1600 | ✅ |
-| a11oy-operator-control-plane-2026-04--social-1200.png | a11oy-operator-control-plane | social-1200 | ✅ |
-| a11oy-operator-control-plane-2026-04--linkedin-square-1080.png | a11oy-operator-control-plane | linkedin-square-1080 | ✅ |
-| a11oy-operator-control-plane-2026-04--linkedin-portrait-1080.png | a11oy-operator-control-plane | linkedin-portrait-1080 | ✅ |
-| a11oy-workcells-2026-04--desktop-1440.png | a11oy-workcells | desktop-1440 | ✅ |
-| a11oy-workcells-2026-04--wide-1600.png | a11oy-workcells | wide-1600 | ✅ |
-| a11oy-workcells-2026-04--social-1200.png | a11oy-workcells | social-1200 | ✅ |
-| a11oy-workcells-2026-04--linkedin-square-1080.png | a11oy-workcells | linkedin-square-1080 | ✅ |
-| a11oy-workcells-2026-04--linkedin-portrait-1080.png | a11oy-workcells | linkedin-portrait-1080 | ✅ |
-| a11oy-workcell-replay-2026-04--desktop-1440.png | a11oy-workcell-replay | desktop-1440 | ✅ |
-| a11oy-workcell-replay-2026-04--wide-1600.png | a11oy-workcell-replay | wide-1600 | ✅ |
-| a11oy-workcell-replay-2026-04--social-1200.png | a11oy-workcell-replay | social-1200 | ✅ |
-| a11oy-workcell-replay-2026-04--linkedin-square-1080.png | a11oy-workcell-replay | linkedin-square-1080 | ✅ |
-| a11oy-workcell-replay-2026-04--linkedin-portrait-1080.png | a11oy-workcell-replay | linkedin-portrait-1080 | ✅ |
-| a11oy-mirror-eval-2026-04--desktop-1440.png | a11oy-mirror-eval | desktop-1440 | ✅ |
-| a11oy-mirror-eval-2026-04--wide-1600.png | a11oy-mirror-eval | wide-1600 | ✅ |
-| a11oy-mirror-eval-2026-04--social-1200.png | a11oy-mirror-eval | social-1200 | ✅ |
-| a11oy-mirror-eval-2026-04--linkedin-square-1080.png | a11oy-mirror-eval | linkedin-square-1080 | ✅ |
-| a11oy-mirror-eval-2026-04--linkedin-portrait-1080.png | a11oy-mirror-eval | linkedin-portrait-1080 | ✅ |
-| a11oy-connector-firewall-2026-04--desktop-1440.png | a11oy-connector-firewall | desktop-1440 | ✅ |
-| a11oy-connector-firewall-2026-04--wide-1600.png | a11oy-connector-firewall | wide-1600 | ✅ |
-| a11oy-connector-firewall-2026-04--social-1200.png | a11oy-connector-firewall | social-1200 | ✅ |
-| a11oy-connector-firewall-2026-04--linkedin-square-1080.png | a11oy-connector-firewall | linkedin-square-1080 | ✅ |
-| a11oy-connector-firewall-2026-04--linkedin-portrait-1080.png | a11oy-connector-firewall | linkedin-portrait-1080 | ✅ |
-| a11oy-twin-foundry-2026-04--desktop-1440.png | a11oy-twin-foundry | desktop-1440 | ✅ |
-| a11oy-twin-foundry-2026-04--wide-1600.png | a11oy-twin-foundry | wide-1600 | ✅ |
-| a11oy-twin-foundry-2026-04--social-1200.png | a11oy-twin-foundry | social-1200 | ✅ |
-| a11oy-twin-foundry-2026-04--linkedin-square-1080.png | a11oy-twin-foundry | linkedin-square-1080 | ✅ |
-| a11oy-twin-foundry-2026-04--linkedin-portrait-1080.png | a11oy-twin-foundry | linkedin-portrait-1080 | ✅ |
-| a11oy-model-router-2026-04--desktop-1440.png | a11oy-model-router | desktop-1440 | ✅ |
-| a11oy-model-router-2026-04--wide-1600.png | a11oy-model-router | wide-1600 | ✅ |
-| a11oy-model-router-2026-04--social-1200.png | a11oy-model-router | social-1200 | ✅ |
-| a11oy-model-router-2026-04--linkedin-square-1080.png | a11oy-model-router | linkedin-square-1080 | ✅ |
-| a11oy-model-router-2026-04--linkedin-portrait-1080.png | a11oy-model-router | linkedin-portrait-1080 | ✅ |
-| a11oy-skills-library-2026-04--desktop-1440.png | a11oy-skills-library | desktop-1440 | ✅ |
-| a11oy-skills-library-2026-04--wide-1600.png | a11oy-skills-library | wide-1600 | ✅ |
-| a11oy-skills-library-2026-04--social-1200.png | a11oy-skills-library | social-1200 | ✅ |
-| a11oy-skills-library-2026-04--linkedin-square-1080.png | a11oy-skills-library | linkedin-square-1080 | ✅ |
-| a11oy-skills-library-2026-04--linkedin-portrait-1080.png | a11oy-skills-library | linkedin-portrait-1080 | ✅ |
-| a11oy-trust-center-2026-04--desktop-1440.png | a11oy-trust-center | desktop-1440 | ✅ |
-| a11oy-trust-center-2026-04--wide-1600.png | a11oy-trust-center | wide-1600 | ✅ |
-| a11oy-trust-center-2026-04--social-1200.png | a11oy-trust-center | social-1200 | ✅ |
-| a11oy-trust-center-2026-04--linkedin-square-1080.png | a11oy-trust-center | linkedin-square-1080 | ✅ |
-| a11oy-trust-center-2026-04--linkedin-portrait-1080.png | a11oy-trust-center | linkedin-portrait-1080 | ✅ |
-| a11oy-sovereign-2026-04--desktop-1440.png | a11oy-sovereign | desktop-1440 | ✅ |
-| a11oy-sovereign-2026-04--wide-1600.png | a11oy-sovereign | wide-1600 | ✅ |
-| a11oy-sovereign-2026-04--social-1200.png | a11oy-sovereign | social-1200 | ✅ |
-| a11oy-sovereign-2026-04--linkedin-square-1080.png | a11oy-sovereign | linkedin-square-1080 | ✅ |
-| a11oy-sovereign-2026-04--linkedin-portrait-1080.png | a11oy-sovereign | linkedin-portrait-1080 | ✅ |
-| a11oy-boardroom-mode-2026-04--desktop-1440.png | a11oy-boardroom-mode | desktop-1440 | ✅ |
-| a11oy-boardroom-mode-2026-04--wide-1600.png | a11oy-boardroom-mode | wide-1600 | ✅ |
-| a11oy-boardroom-mode-2026-04--social-1200.png | a11oy-boardroom-mode | social-1200 | ✅ |
-| a11oy-boardroom-mode-2026-04--linkedin-square-1080.png | a11oy-boardroom-mode | linkedin-square-1080 | ✅ |
-| a11oy-boardroom-mode-2026-04--linkedin-portrait-1080.png | a11oy-boardroom-mode | linkedin-portrait-1080 | ✅ |
-| a11oy-investor-demo-2026-04--desktop-1440.png | a11oy-investor-demo | desktop-1440 | ✅ |
-| a11oy-investor-demo-2026-04--wide-1600.png | a11oy-investor-demo | wide-1600 | ✅ |
-| a11oy-investor-demo-2026-04--social-1200.png | a11oy-investor-demo | social-1200 | ✅ |
-| a11oy-investor-demo-2026-04--linkedin-square-1080.png | a11oy-investor-demo | linkedin-square-1080 | ✅ |
-| a11oy-investor-demo-2026-04--linkedin-portrait-1080.png | a11oy-investor-demo | linkedin-portrait-1080 | ✅ |
-| command-portal-hero-2026-04--desktop-1440.png | command-hero | desktop-1440 | ❌ |
-| command-portal-hero-2026-04--wide-1600.png | command-hero | wide-1600 | ❌ |
-| command-portal-hero-2026-04--social-1200.png | command-hero | social-1200 | ❌ |
-| command-portal-hero-2026-04--linkedin-square-1080.png | command-hero | linkedin-square-1080 | ❌ |
-| command-portal-hero-2026-04--linkedin-portrait-1080.png | command-hero | linkedin-portrait-1080 | ❌ |
-| paragon-aegis-hero-2026-04--desktop-1440.png | aegis-hero | desktop-1440 | ❌ |
-| paragon-aegis-hero-2026-04--wide-1600.png | aegis-hero | wide-1600 | ❌ |
-| paragon-aegis-hero-2026-04--social-1200.png | aegis-hero | social-1200 | ❌ |
-| paragon-aegis-hero-2026-04--linkedin-square-1080.png | aegis-hero | linkedin-square-1080 | ❌ |
-| paragon-aegis-hero-2026-04--linkedin-portrait-1080.png | aegis-hero | linkedin-portrait-1080 | ❌ |
-| tenax-sentra-hero-2026-04--desktop-1440.png | sentra-hero | desktop-1440 | ❌ |
-| tenax-sentra-hero-2026-04--wide-1600.png | sentra-hero | wide-1600 | ❌ |
-| tenax-sentra-hero-2026-04--social-1200.png | sentra-hero | social-1200 | ❌ |
-| tenax-sentra-hero-2026-04--linkedin-square-1080.png | sentra-hero | linkedin-square-1080 | ❌ |
-| tenax-sentra-hero-2026-04--linkedin-portrait-1080.png | sentra-hero | linkedin-portrait-1080 | ❌ |
-| lumina-pulse-hero-2026-04--desktop-1440.png | pulse-hero | desktop-1440 | ❌ |
-| lumina-pulse-hero-2026-04--wide-1600.png | pulse-hero | wide-1600 | ❌ |
-| lumina-pulse-hero-2026-04--social-1200.png | pulse-hero | social-1200 | ❌ |
-| lumina-pulse-hero-2026-04--linkedin-square-1080.png | pulse-hero | linkedin-square-1080 | ❌ |
-| lumina-pulse-hero-2026-04--linkedin-portrait-1080.png | pulse-hero | linkedin-portrait-1080 | ❌ |
-| counsel-hero-2026-04--desktop-1440.png | counsel-hero | desktop-1440 | ❌ |
-| counsel-hero-2026-04--wide-1600.png | counsel-hero | wide-1600 | ❌ |
-| counsel-hero-2026-04--social-1200.png | counsel-hero | social-1200 | ❌ |
-| counsel-hero-2026-04--linkedin-square-1080.png | counsel-hero | linkedin-square-1080 | ❌ |
-| counsel-hero-2026-04--linkedin-portrait-1080.png | counsel-hero | linkedin-portrait-1080 | ❌ |
-| domaine-terra-hero-2026-04--desktop-1440.png | terra-hero | desktop-1440 | ❌ |
-| domaine-terra-hero-2026-04--wide-1600.png | terra-hero | wide-1600 | ❌ |
-| domaine-terra-hero-2026-04--social-1200.png | terra-hero | social-1200 | ❌ |
-| domaine-terra-hero-2026-04--linkedin-square-1080.png | terra-hero | linkedin-square-1080 | ❌ |
-| domaine-terra-hero-2026-04--linkedin-portrait-1080.png | terra-hero | linkedin-portrait-1080 | ❌ |
-| sextant-vessels-hero-2026-04--desktop-1440.png | vessels-hero | desktop-1440 | ❌ |
-| sextant-vessels-hero-2026-04--wide-1600.png | vessels-hero | wide-1600 | ❌ |
-| sextant-vessels-hero-2026-04--social-1200.png | vessels-hero | social-1200 | ❌ |
-| sextant-vessels-hero-2026-04--linkedin-square-1080.png | vessels-hero | linkedin-square-1080 | ❌ |
-| sextant-vessels-hero-2026-04--linkedin-portrait-1080.png | vessels-hero | linkedin-portrait-1080 | ❌ |
-| carlota-jo-hero-2026-04--desktop-1440.png | carlota-jo-hero | desktop-1440 | ❌ |
-| carlota-jo-hero-2026-04--wide-1600.png | carlota-jo-hero | wide-1600 | ❌ |
-| carlota-jo-hero-2026-04--social-1200.png | carlota-jo-hero | social-1200 | ❌ |
-| carlota-jo-hero-2026-04--linkedin-square-1080.png | carlota-jo-hero | linkedin-square-1080 | ❌ |
-| carlota-jo-hero-2026-04--linkedin-portrait-1080.png | carlota-jo-hero | linkedin-portrait-1080 | ❌ |
-| apex-mobile-hero-2026-04--desktop-1440.png | mobile-hero | desktop-1440 | ❌ |
-| apex-mobile-hero-2026-04--wide-1600.png | mobile-hero | wide-1600 | ❌ |
-| apex-mobile-hero-2026-04--social-1200.png | mobile-hero | social-1200 | ❌ |
-| apex-mobile-hero-2026-04--linkedin-square-1080.png | mobile-hero | linkedin-square-1080 | ❌ |
-| apex-mobile-hero-2026-04--linkedin-portrait-1080.png | mobile-hero | linkedin-portrait-1080 | ❌ |
+### Known Failures
+Chromium WebGL renderer crash at viewport 3+ for aegis/vessels/command — these apps use heavy Three.js/WebGL rendering that exhausts the Chromium renderer process after 2 contexts.
 
-## Artifact Hero JPGs (captured 2026-04-21)
+---
 
-| File | Status |
-|------|--------|
-| carlota-jo-client-portal-2026-04-21.jpg | ✅ |
-| domaine-deal-pipeline-2026-04-21.jpg | ✅ |
-| forge-command-portal-executive-2026-04-21.jpg | ✅ |
-| kora-praxis-command-2026-04-21.jpg | ✅ |
-| sextant-fleet-command-2026-04-21.jpg | ✅ |
-| szl-holdings-dashboard-2026-04-21.jpg | ✅ |
-| tenax-soc-command-2026-04-21.jpg | ✅ |
+| Filename | Route | Viewport | Captured At | Caption | Quality | Notes | Recommended Usage |
+|----------|-------|----------|-------------|---------|---------|-------|-------------------|
+| `a11oy-hero-2026-04--desktop-1440.png` | `/a11oy/` | desktop-1440 | 2026-04-26 | A11oy governance dashboard — signal-to-proof in one surface | ✅ pass | Clean capture | README, org profile, investor demo |
+| `a11oy-hero-2026-04--wide-1600.png` | `/a11oy/` | wide-1600 | 2026-04-26 | A11oy governance dashboard — signal-to-proof in one surface | ✅ pass | Clean capture | README, org profile, investor demo |
+| `a11oy-hero-2026-04--social-1200.png` | `/a11oy/` | social-1200 | 2026-04-26 | A11oy governance dashboard — signal-to-proof in one surface | ✅ pass | Clean capture | README, org profile, investor demo |
+| `a11oy-hero-2026-04--linkedin-square-1080.png` | `/a11oy/` | linkedin-square-1080 | 2026-04-26 | A11oy governance dashboard — signal-to-proof in one surface | ✅ pass | Clean capture | README, org profile, investor demo |
+| `a11oy-hero-2026-04--linkedin-portrait-1080.png` | `/a11oy/` | linkedin-portrait-1080 | 2026-04-26 | A11oy governance dashboard — signal-to-proof in one surface | ✅ pass | Clean capture | README, org profile, investor demo |
+| `a11oy-now-board-2026-04--desktop-1440.png` | `/a11oy/now` | desktop-1440 | 2026-04-26 | Now Board — real-time signal stream with causal attribution | ✅ pass | Clean capture | README, investor demo, LinkedIn |
+| `a11oy-now-board-2026-04--wide-1600.png` | `/a11oy/now` | wide-1600 | 2026-04-26 | Now Board — real-time signal stream with causal attribution | ✅ pass | Clean capture | README, investor demo, LinkedIn |
+| `a11oy-now-board-2026-04--social-1200.png` | `/a11oy/now` | social-1200 | 2026-04-26 | Now Board — real-time signal stream with causal attribution | ✅ pass | Clean capture | README, investor demo, LinkedIn |
+| `a11oy-now-board-2026-04--linkedin-square-1080.png` | `/a11oy/now` | linkedin-square-1080 | 2026-04-26 | Now Board — real-time signal stream with causal attribution | ✅ pass | Clean capture | README, investor demo, LinkedIn |
+| `a11oy-now-board-2026-04--linkedin-portrait-1080.png` | `/a11oy/now` | linkedin-portrait-1080 | 2026-04-26 | Now Board — real-time signal stream with causal attribution | ✅ pass | Clean capture | README, investor demo, LinkedIn |
+| `a11oy-command-surface-2026-04--desktop-1440.png` | `/a11oy/command` | desktop-1440 | 2026-04-26 | Command Surface — unified operator view across all verticals | ✅ pass | Clean capture | README, org profile, investor demo, Medium |
+| `a11oy-command-surface-2026-04--wide-1600.png` | `/a11oy/command` | wide-1600 | 2026-04-26 | Command Surface — unified operator view across all verticals | ✅ pass | Clean capture | README, org profile, investor demo, Medium |
+| `a11oy-command-surface-2026-04--social-1200.png` | `/a11oy/command` | social-1200 | 2026-04-26 | Command Surface — unified operator view across all verticals | ✅ pass | Clean capture | README, org profile, investor demo, Medium |
+| `a11oy-command-surface-2026-04--linkedin-square-1080.png` | `/a11oy/command` | linkedin-square-1080 | 2026-04-26 | Command Surface — unified operator view across all verticals | ✅ pass | Clean capture | README, org profile, investor demo, Medium |
+| `a11oy-command-surface-2026-04--linkedin-portrait-1080.png` | `/a11oy/command` | linkedin-portrait-1080 | 2026-04-26 | Command Surface — unified operator view across all verticals | ✅ pass | Clean capture | README, org profile, investor demo, Medium |
+| `a11oy-signal-mesh-2026-04--desktop-1440.png` | `/a11oy/signals` | desktop-1440 | 2026-04-26 | Signal Mesh — correlated business signals across seven verticals | ✅ pass | Clean capture | investor demo, LinkedIn, carousel |
+| `a11oy-signal-mesh-2026-04--wide-1600.png` | `/a11oy/signals` | wide-1600 | 2026-04-26 | Signal Mesh — correlated business signals across seven verticals | ✅ pass | Clean capture | investor demo, LinkedIn, carousel |
+| `a11oy-signal-mesh-2026-04--social-1200.png` | `/a11oy/signals` | social-1200 | 2026-04-26 | Signal Mesh — correlated business signals across seven verticals | ✅ pass | Clean capture | investor demo, LinkedIn, carousel |
+| `a11oy-signal-mesh-2026-04--linkedin-square-1080.png` | `/a11oy/signals` | linkedin-square-1080 | 2026-04-26 | Signal Mesh — correlated business signals across seven verticals | ✅ pass | Clean capture | investor demo, LinkedIn, carousel |
+| `a11oy-signal-mesh-2026-04--linkedin-portrait-1080.png` | `/a11oy/signals` | linkedin-portrait-1080 | 2026-04-26 | Signal Mesh — correlated business signals across seven verticals | ✅ pass | Clean capture | investor demo, LinkedIn, carousel |
+| `a11oy-action-rail-2026-04--desktop-1440.png` | `/a11oy/actions` | desktop-1440 | 2026-04-26 | Action Rail — human-approved execution queue | ✅ pass | Clean capture | investor demo, Medium |
+| `a11oy-action-rail-2026-04--wide-1600.png` | `/a11oy/actions` | wide-1600 | 2026-04-26 | Action Rail — human-approved execution queue | ✅ pass | Clean capture | investor demo, Medium |
+| `a11oy-action-rail-2026-04--social-1200.png` | `/a11oy/actions` | social-1200 | 2026-04-26 | Action Rail — human-approved execution queue | ✅ pass | Clean capture | investor demo, Medium |
+| `a11oy-action-rail-2026-04--linkedin-square-1080.png` | `/a11oy/actions` | linkedin-square-1080 | 2026-04-26 | Action Rail — human-approved execution queue | ✅ pass | Clean capture | investor demo, Medium |
+| `a11oy-action-rail-2026-04--linkedin-portrait-1080.png` | `/a11oy/actions` | linkedin-portrait-1080 | 2026-04-26 | Action Rail — human-approved execution queue | ✅ pass | Clean capture | investor demo, Medium |
+| `a11oy-proof-ledger-2026-04--desktop-1440.png` | `/a11oy/proof` | desktop-1440 | 2026-04-26 | Proof Ledger — cryptographic audit trail for every governed action | ✅ pass | Clean capture | README, investor demo, LinkedIn |
+| `a11oy-proof-ledger-2026-04--wide-1600.png` | `/a11oy/proof` | wide-1600 | 2026-04-26 | Proof Ledger — cryptographic audit trail for every governed action | ✅ pass | Clean capture | README, investor demo, LinkedIn |
+| `a11oy-proof-ledger-2026-04--social-1200.png` | `/a11oy/proof` | social-1200 | 2026-04-26 | Proof Ledger — cryptographic audit trail for every governed action | ✅ pass | Clean capture | README, investor demo, LinkedIn |
+| `a11oy-proof-ledger-2026-04--linkedin-square-1080.png` | `/a11oy/proof` | linkedin-square-1080 | 2026-04-26 | Proof Ledger — cryptographic audit trail for every governed action | ✅ pass | Clean capture | README, investor demo, LinkedIn |
+| `a11oy-proof-ledger-2026-04--linkedin-portrait-1080.png` | `/a11oy/proof` | linkedin-portrait-1080 | 2026-04-26 | Proof Ledger — cryptographic audit trail for every governed action | ✅ pass | Clean capture | README, investor demo, LinkedIn |
+| `a11oy-covenant-governance-2026-04--desktop-1440.png` | `/a11oy/governance` | desktop-1440 | 2026-04-26 | Covenant Governance — policy-enforced approval gates | ✅ pass | Clean capture | investor demo, LinkedIn |
+| `a11oy-covenant-governance-2026-04--wide-1600.png` | `/a11oy/governance` | wide-1600 | 2026-04-26 | Covenant Governance — policy-enforced approval gates | ✅ pass | Clean capture | investor demo, LinkedIn |
+| `a11oy-covenant-governance-2026-04--social-1200.png` | `/a11oy/governance` | social-1200 | 2026-04-26 | Covenant Governance — policy-enforced approval gates | ✅ pass | Clean capture | investor demo, LinkedIn |
+| `a11oy-covenant-governance-2026-04--linkedin-square-1080.png` | `/a11oy/governance` | linkedin-square-1080 | 2026-04-26 | Covenant Governance — policy-enforced approval gates | ✅ pass | Clean capture | investor demo, LinkedIn |
+| `a11oy-covenant-governance-2026-04--linkedin-portrait-1080.png` | `/a11oy/governance` | linkedin-portrait-1080 | 2026-04-26 | Covenant Governance — policy-enforced approval gates | ✅ pass | Clean capture | investor demo, LinkedIn |
+| `a11oy-operator-control-plane-2026-04--desktop-1440.png` | `/a11oy/agents` | desktop-1440 | 2026-04-26 | Operator Control Plane — agent orchestration with full visibility | ✅ pass | Clean capture | investor demo, carousel |
+| `a11oy-operator-control-plane-2026-04--wide-1600.png` | `/a11oy/agents` | wide-1600 | 2026-04-26 | Operator Control Plane — agent orchestration with full visibility | ✅ pass | Clean capture | investor demo, carousel |
+| `a11oy-operator-control-plane-2026-04--social-1200.png` | `/a11oy/agents` | social-1200 | 2026-04-26 | Operator Control Plane — agent orchestration with full visibility | ✅ pass | Clean capture | investor demo, carousel |
+| `a11oy-operator-control-plane-2026-04--linkedin-square-1080.png` | `/a11oy/agents` | linkedin-square-1080 | 2026-04-26 | Operator Control Plane — agent orchestration with full visibility | ✅ pass | Clean capture | investor demo, carousel |
+| `a11oy-operator-control-plane-2026-04--linkedin-portrait-1080.png` | `/a11oy/agents` | linkedin-portrait-1080 | 2026-04-26 | Operator Control Plane — agent orchestration with full visibility | ✅ pass | Clean capture | investor demo, carousel |
+| `a11oy-workcells-2026-04--desktop-1440.png` | `/a11oy/workcells` | desktop-1440 | 2026-04-26 | Workcells — sandboxed agent execution units | ✅ pass | Clean capture | investor demo |
+| `a11oy-workcells-2026-04--wide-1600.png` | `/a11oy/workcells` | wide-1600 | 2026-04-26 | Workcells — sandboxed agent execution units | ✅ pass | Clean capture | investor demo |
+| `a11oy-workcells-2026-04--social-1200.png` | `/a11oy/workcells` | social-1200 | 2026-04-26 | Workcells — sandboxed agent execution units | ✅ pass | Clean capture | investor demo |
+| `a11oy-workcells-2026-04--linkedin-square-1080.png` | `/a11oy/workcells` | linkedin-square-1080 | 2026-04-26 | Workcells — sandboxed agent execution units | ✅ pass | Clean capture | investor demo |
+| `a11oy-workcells-2026-04--linkedin-portrait-1080.png` | `/a11oy/workcells` | linkedin-portrait-1080 | 2026-04-26 | Workcells — sandboxed agent execution units | ✅ pass | Clean capture | investor demo |
+| `a11oy-workcell-replay-2026-04--desktop-1440.png` | `/a11oy/replay` | desktop-1440 | 2026-04-26 | Workcell Replay — step-by-step playback of any governed execution | ✅ pass | Clean capture | investor demo |
+| `a11oy-workcell-replay-2026-04--wide-1600.png` | `/a11oy/replay` | wide-1600 | 2026-04-26 | Workcell Replay — step-by-step playback of any governed execution | ✅ pass | Clean capture | investor demo |
+| `a11oy-workcell-replay-2026-04--social-1200.png` | `/a11oy/replay` | social-1200 | 2026-04-26 | Workcell Replay — step-by-step playback of any governed execution | ✅ pass | Clean capture | investor demo |
+| `a11oy-workcell-replay-2026-04--linkedin-square-1080.png` | `/a11oy/replay` | linkedin-square-1080 | 2026-04-26 | Workcell Replay — step-by-step playback of any governed execution | ✅ pass | Clean capture | investor demo |
+| `a11oy-workcell-replay-2026-04--linkedin-portrait-1080.png` | `/a11oy/replay` | linkedin-portrait-1080 | 2026-04-26 | Workcell Replay — step-by-step playback of any governed execution | ✅ pass | Clean capture | investor demo |
+| `a11oy-mirror-eval-2026-04--desktop-1440.png` | `/a11oy/evals` | desktop-1440 | 2026-04-26 | MirrorEval — AI reasoning evaluation against ground truth | ✅ pass | Clean capture | investor demo, LinkedIn |
+| `a11oy-mirror-eval-2026-04--wide-1600.png` | `/a11oy/evals` | wide-1600 | 2026-04-26 | MirrorEval — AI reasoning evaluation against ground truth | ✅ pass | Clean capture | investor demo, LinkedIn |
+| `a11oy-mirror-eval-2026-04--social-1200.png` | `/a11oy/evals` | social-1200 | 2026-04-26 | MirrorEval — AI reasoning evaluation against ground truth | ✅ pass | Clean capture | investor demo, LinkedIn |
+| `a11oy-mirror-eval-2026-04--linkedin-square-1080.png` | `/a11oy/evals` | linkedin-square-1080 | 2026-04-26 | MirrorEval — AI reasoning evaluation against ground truth | ✅ pass | Clean capture | investor demo, LinkedIn |
+| `a11oy-mirror-eval-2026-04--linkedin-portrait-1080.png` | `/a11oy/evals` | linkedin-portrait-1080 | 2026-04-26 | MirrorEval — AI reasoning evaluation against ground truth | ✅ pass | Clean capture | investor demo, LinkedIn |
+| `a11oy-connector-firewall-2026-04--desktop-1440.png` | `/a11oy/connectors` | desktop-1440 | 2026-04-26 | Connector Firewall — governed integration layer with policy enforcement | ✅ pass | Clean capture | investor demo |
+| `a11oy-connector-firewall-2026-04--wide-1600.png` | `/a11oy/connectors` | wide-1600 | 2026-04-26 | Connector Firewall — governed integration layer with policy enforcement | ✅ pass | Clean capture | investor demo |
+| `a11oy-connector-firewall-2026-04--social-1200.png` | `/a11oy/connectors` | social-1200 | 2026-04-26 | Connector Firewall — governed integration layer with policy enforcement | ✅ pass | Clean capture | investor demo |
+| `a11oy-connector-firewall-2026-04--linkedin-square-1080.png` | `/a11oy/connectors` | linkedin-square-1080 | 2026-04-26 | Connector Firewall — governed integration layer with policy enforcement | ✅ pass | Clean capture | investor demo |
+| `a11oy-connector-firewall-2026-04--linkedin-portrait-1080.png` | `/a11oy/connectors` | linkedin-portrait-1080 | 2026-04-26 | Connector Firewall — governed integration layer with policy enforcement | ✅ pass | Clean capture | investor demo |
+| `a11oy-twin-foundry-2026-04--desktop-1440.png` | `/a11oy/twins` | desktop-1440 | 2026-04-26 | Twin Foundry — digital twin construction for decision simulation | ✅ pass | Clean capture | investor demo |
+| `a11oy-twin-foundry-2026-04--wide-1600.png` | `/a11oy/twins` | wide-1600 | 2026-04-26 | Twin Foundry — digital twin construction for decision simulation | ✅ pass | Clean capture | investor demo |
+| `a11oy-twin-foundry-2026-04--social-1200.png` | `/a11oy/twins` | social-1200 | 2026-04-26 | Twin Foundry — digital twin construction for decision simulation | ✅ pass | Clean capture | investor demo |
+| `a11oy-twin-foundry-2026-04--linkedin-square-1080.png` | `/a11oy/twins` | linkedin-square-1080 | 2026-04-26 | Twin Foundry — digital twin construction for decision simulation | ✅ pass | Clean capture | investor demo |
+| `a11oy-twin-foundry-2026-04--linkedin-portrait-1080.png` | `/a11oy/twins` | linkedin-portrait-1080 | 2026-04-26 | Twin Foundry — digital twin construction for decision simulation | ✅ pass | Clean capture | investor demo |
+| `a11oy-model-router-2026-04--desktop-1440.png` | `/a11oy/model-router` | desktop-1440 | 2026-04-26 | Model Router — intelligent multi-provider AI routing with cost governance | ✅ pass | Clean capture | investor demo |
+| `a11oy-model-router-2026-04--wide-1600.png` | `/a11oy/model-router` | wide-1600 | 2026-04-26 | Model Router — intelligent multi-provider AI routing with cost governance | ✅ pass | Clean capture | investor demo |
+| `a11oy-model-router-2026-04--social-1200.png` | `/a11oy/model-router` | social-1200 | 2026-04-26 | Model Router — intelligent multi-provider AI routing with cost governance | ✅ pass | Clean capture | investor demo |
+| `a11oy-model-router-2026-04--linkedin-square-1080.png` | `/a11oy/model-router` | linkedin-square-1080 | 2026-04-26 | Model Router — intelligent multi-provider AI routing with cost governance | ✅ pass | Clean capture | investor demo |
+| `a11oy-model-router-2026-04--linkedin-portrait-1080.png` | `/a11oy/model-router` | linkedin-portrait-1080 | 2026-04-26 | Model Router — intelligent multi-provider AI routing with cost governance | ✅ pass | Clean capture | investor demo |
+| `a11oy-skills-library-2026-04--desktop-1440.png` | `/a11oy/skills` | desktop-1440 | 2026-04-26 | Skills Library — composable agent capability registry | ✅ pass | Clean capture | investor demo |
+| `a11oy-skills-library-2026-04--wide-1600.png` | `/a11oy/skills` | wide-1600 | 2026-04-26 | Skills Library — composable agent capability registry | ✅ pass | Clean capture | investor demo |
+| `a11oy-skills-library-2026-04--social-1200.png` | `/a11oy/skills` | social-1200 | 2026-04-26 | Skills Library — composable agent capability registry | ✅ pass | Clean capture | investor demo |
+| `a11oy-skills-library-2026-04--linkedin-square-1080.png` | `/a11oy/skills` | linkedin-square-1080 | 2026-04-26 | Skills Library — composable agent capability registry | ✅ pass | Clean capture | investor demo |
+| `a11oy-skills-library-2026-04--linkedin-portrait-1080.png` | `/a11oy/skills` | linkedin-portrait-1080 | 2026-04-26 | Skills Library — composable agent capability registry | ✅ pass | Clean capture | investor demo |
+| `a11oy-trust-center-2026-04--desktop-1440.png` | `/a11oy/trust` | desktop-1440 | 2026-04-26 | Trust Center — platform-level governance and compliance posture | ✅ pass | Clean capture | investor demo, LinkedIn |
+| `a11oy-trust-center-2026-04--wide-1600.png` | `/a11oy/trust` | wide-1600 | 2026-04-26 | Trust Center — platform-level governance and compliance posture | ✅ pass | Clean capture | investor demo, LinkedIn |
+| `a11oy-trust-center-2026-04--social-1200.png` | `/a11oy/trust` | social-1200 | 2026-04-26 | Trust Center — platform-level governance and compliance posture | ✅ pass | Clean capture | investor demo, LinkedIn |
+| `a11oy-trust-center-2026-04--linkedin-square-1080.png` | `/a11oy/trust` | linkedin-square-1080 | 2026-04-26 | Trust Center — platform-level governance and compliance posture | ✅ pass | Clean capture | investor demo, LinkedIn |
+| `a11oy-trust-center-2026-04--linkedin-portrait-1080.png` | `/a11oy/trust` | linkedin-portrait-1080 | 2026-04-26 | Trust Center — platform-level governance and compliance posture | ✅ pass | Clean capture | investor demo, LinkedIn |
+| `a11oy-sovereign-2026-04--desktop-1440.png` | `/a11oy/sovereign` | desktop-1440 | 2026-04-26 | Sovereign — data sovereignty and jurisdiction control | ✅ pass | Clean capture | investor demo |
+| `a11oy-sovereign-2026-04--wide-1600.png` | `/a11oy/sovereign` | wide-1600 | 2026-04-26 | Sovereign — data sovereignty and jurisdiction control | ✅ pass | Clean capture | investor demo |
+| `a11oy-sovereign-2026-04--social-1200.png` | `/a11oy/sovereign` | social-1200 | 2026-04-26 | Sovereign — data sovereignty and jurisdiction control | ✅ pass | Clean capture | investor demo |
+| `a11oy-sovereign-2026-04--linkedin-square-1080.png` | `/a11oy/sovereign` | linkedin-square-1080 | 2026-04-26 | Sovereign — data sovereignty and jurisdiction control | ✅ pass | Clean capture | investor demo |
+| `a11oy-sovereign-2026-04--linkedin-portrait-1080.png` | `/a11oy/sovereign` | linkedin-portrait-1080 | 2026-04-26 | Sovereign — data sovereignty and jurisdiction control | ✅ pass | Clean capture | investor demo |
+| `a11oy-boardroom-mode-2026-04--desktop-1440.png` | `/a11oy/boardroom` | desktop-1440 | 2026-04-26 | Boardroom Mode — executive-ready governed decision briefing | ✅ pass | Clean capture | README, org profile, investor demo, LinkedIn, carousel |
+| `a11oy-boardroom-mode-2026-04--wide-1600.png` | `/a11oy/boardroom` | wide-1600 | 2026-04-26 | Boardroom Mode — executive-ready governed decision briefing | ✅ pass | Clean capture | README, org profile, investor demo, LinkedIn, carousel |
+| `a11oy-boardroom-mode-2026-04--social-1200.png` | `/a11oy/boardroom` | social-1200 | 2026-04-26 | Boardroom Mode — executive-ready governed decision briefing | ✅ pass | Clean capture | README, org profile, investor demo, LinkedIn, carousel |
+| `a11oy-boardroom-mode-2026-04--linkedin-square-1080.png` | `/a11oy/boardroom` | linkedin-square-1080 | 2026-04-26 | Boardroom Mode — executive-ready governed decision briefing | ✅ pass | Clean capture | README, org profile, investor demo, LinkedIn, carousel |
+| `a11oy-boardroom-mode-2026-04--linkedin-portrait-1080.png` | `/a11oy/boardroom` | linkedin-portrait-1080 | 2026-04-26 | Boardroom Mode — executive-ready governed decision briefing | ✅ pass | Clean capture | README, org profile, investor demo, LinkedIn, carousel |
+| `a11oy-investor-demo-2026-04--desktop-1440.png` | `/a11oy/investor-demo` | desktop-1440 | 2026-04-26 | Investor Demo — guided walkthrough of A11oy governed execution | ✅ pass | Clean capture | investor demo, README, LinkedIn |
+| `a11oy-investor-demo-2026-04--wide-1600.png` | `/a11oy/investor-demo` | wide-1600 | 2026-04-26 | Investor Demo — guided walkthrough of A11oy governed execution | ✅ pass | Clean capture | investor demo, README, LinkedIn |
+| `a11oy-investor-demo-2026-04--social-1200.png` | `/a11oy/investor-demo` | social-1200 | 2026-04-26 | Investor Demo — guided walkthrough of A11oy governed execution | ✅ pass | Clean capture | investor demo, README, LinkedIn |
+| `a11oy-investor-demo-2026-04--linkedin-square-1080.png` | `/a11oy/investor-demo` | linkedin-square-1080 | 2026-04-26 | Investor Demo — guided walkthrough of A11oy governed execution | ✅ pass | Clean capture | investor demo, README, LinkedIn |
+| `a11oy-investor-demo-2026-04--linkedin-portrait-1080.png` | `/a11oy/investor-demo` | linkedin-portrait-1080 | 2026-04-26 | Investor Demo — guided walkthrough of A11oy governed execution | ✅ pass | Clean capture | investor demo, README, LinkedIn |
+| `command-portal-hero-2026-04--desktop-1440.png` | `/command/` | desktop-1440 | 2026-04-26 | FORGE Command Portal — cross-domain real-time executive dashboard | ✅ pass | Clean capture | README, investor demo |
+| `command-portal-hero-2026-04--wide-1600.png` | `/command/` | wide-1600 | 2026-04-26 | FORGE Command Portal — cross-domain real-time executive dashboard | ✅ pass | Clean capture | README, investor demo |
+| `command-portal-hero-2026-04--social-1200.png` | `/command/` | social-1200 | — | FORGE Command Portal — cross-domain real-time executive dashboard | ❌ fail | Chromium WebGL renderer crash — Chromium process terminated after 2 contexts whe | README, investor demo |
+| `command-portal-hero-2026-04--linkedin-square-1080.png` | `/command/` | linkedin-square-1080 | — | FORGE Command Portal — cross-domain real-time executive dashboard | ❌ fail | Chromium WebGL renderer crash — Chromium process terminated after 2 contexts whe | README, investor demo |
+| `command-portal-hero-2026-04--linkedin-portrait-1080.png` | `/command/` | linkedin-portrait-1080 | — | FORGE Command Portal — cross-domain real-time executive dashboard | ❌ fail | Chromium WebGL renderer crash — Chromium process terminated after 2 contexts whe | README, investor demo |
+| `paragon-aegis-hero-2026-04--desktop-1440.png` | `/aegis/` | desktop-1440 | 2026-04-26 | Aegis investor pitch deck and ATLAS runtime interface | ✅ pass | Clean capture | investor demo |
+| `paragon-aegis-hero-2026-04--wide-1600.png` | `/aegis/` | wide-1600 | 2026-04-26 | Aegis investor pitch deck and ATLAS runtime interface | ✅ pass | Clean capture | investor demo |
+| `paragon-aegis-hero-2026-04--social-1200.png` | `/aegis/` | social-1200 | — | Aegis investor pitch deck and ATLAS runtime interface | ❌ fail | Chromium WebGL renderer crash — Chromium process terminated after 2 contexts whe | investor demo |
+| `paragon-aegis-hero-2026-04--linkedin-square-1080.png` | `/aegis/` | linkedin-square-1080 | — | Aegis investor pitch deck and ATLAS runtime interface | ❌ fail | Chromium WebGL renderer crash — Chromium process terminated after 2 contexts whe | investor demo |
+| `paragon-aegis-hero-2026-04--linkedin-portrait-1080.png` | `/aegis/` | linkedin-portrait-1080 | — | Aegis investor pitch deck and ATLAS runtime interface | ❌ fail | Chromium WebGL renderer crash — Chromium process terminated after 2 contexts whe | investor demo |
+| `tenax-sentra-hero-2026-04--desktop-1440.png` | `/sentra/` | desktop-1440 | 2026-04-26 | Sentra cyber resilience dashboard — exposure mapping and recovery readiness | ✅ pass | Clean capture | README, investor demo |
+| `tenax-sentra-hero-2026-04--wide-1600.png` | `/sentra/` | wide-1600 | 2026-04-26 | Sentra cyber resilience dashboard — exposure mapping and recovery readiness | ✅ pass | Clean capture | README, investor demo |
+| `tenax-sentra-hero-2026-04--social-1200.png` | `/sentra/` | social-1200 | 2026-04-26 | Sentra cyber resilience dashboard — exposure mapping and recovery readiness | ✅ pass | Clean capture | README, investor demo |
+| `tenax-sentra-hero-2026-04--linkedin-square-1080.png` | `/sentra/` | linkedin-square-1080 | 2026-04-26 | Sentra cyber resilience dashboard — exposure mapping and recovery readiness | ✅ pass | Clean capture | README, investor demo |
+| `tenax-sentra-hero-2026-04--linkedin-portrait-1080.png` | `/sentra/` | linkedin-portrait-1080 | 2026-04-26 | Sentra cyber resilience dashboard — exposure mapping and recovery readiness | ✅ pass | Clean capture | README, investor demo |
+| `lumina-pulse-hero-2026-04--desktop-1440.png` | `/pulse/` | desktop-1440 | 2026-04-26 | Pulse executive intelligence briefing — source-cited cross-domain digest | ✅ pass | Clean capture | README, investor demo |
+| `lumina-pulse-hero-2026-04--wide-1600.png` | `/pulse/` | wide-1600 | 2026-04-26 | Pulse executive intelligence briefing — source-cited cross-domain digest | ✅ pass | Clean capture | README, investor demo |
+| `lumina-pulse-hero-2026-04--social-1200.png` | `/pulse/` | social-1200 | 2026-04-26 | Pulse executive intelligence briefing — source-cited cross-domain digest | ✅ pass | Clean capture | README, investor demo |
+| `lumina-pulse-hero-2026-04--linkedin-square-1080.png` | `/pulse/` | linkedin-square-1080 | 2026-04-26 | Pulse executive intelligence briefing — source-cited cross-domain digest | ✅ pass | Clean capture | README, investor demo |
+| `lumina-pulse-hero-2026-04--linkedin-portrait-1080.png` | `/pulse/` | linkedin-portrait-1080 | 2026-04-26 | Pulse executive intelligence briefing — source-cited cross-domain digest | ✅ pass | Clean capture | README, investor demo |
+| `counsel-hero-2026-04--desktop-1440.png` | `/counsel/` | desktop-1440 | 2026-04-26 | Counsel — agentic legal matter management with obligation tracking | ✅ pass | Clean capture | README, investor demo |
+| `counsel-hero-2026-04--wide-1600.png` | `/counsel/` | wide-1600 | 2026-04-26 | Counsel — agentic legal matter management with obligation tracking | ✅ pass | Clean capture | README, investor demo |
+| `counsel-hero-2026-04--social-1200.png` | `/counsel/` | social-1200 | 2026-04-26 | Counsel — agentic legal matter management with obligation tracking | ✅ pass | Clean capture | README, investor demo |
+| `counsel-hero-2026-04--linkedin-square-1080.png` | `/counsel/` | linkedin-square-1080 | 2026-04-26 | Counsel — agentic legal matter management with obligation tracking | ✅ pass | Clean capture | README, investor demo |
+| `counsel-hero-2026-04--linkedin-portrait-1080.png` | `/counsel/` | linkedin-portrait-1080 | 2026-04-26 | Counsel — agentic legal matter management with obligation tracking | ✅ pass | Clean capture | README, investor demo |
+| `domaine-terra-hero-2026-04--desktop-1440.png` | `/terra/` | desktop-1440 | 2026-04-26 | Terra real estate intelligence — distress pipeline and ownership graph | ✅ pass | Clean capture | README, investor demo |
+| `domaine-terra-hero-2026-04--wide-1600.png` | `/terra/` | wide-1600 | 2026-04-26 | Terra real estate intelligence — distress pipeline and ownership graph | ✅ pass | Clean capture | README, investor demo |
+| `domaine-terra-hero-2026-04--social-1200.png` | `/terra/` | social-1200 | 2026-04-26 | Terra real estate intelligence — distress pipeline and ownership graph | ✅ pass | Clean capture | README, investor demo |
+| `domaine-terra-hero-2026-04--linkedin-square-1080.png` | `/terra/` | linkedin-square-1080 | 2026-04-26 | Terra real estate intelligence — distress pipeline and ownership graph | ✅ pass | Clean capture | README, investor demo |
+| `domaine-terra-hero-2026-04--linkedin-portrait-1080.png` | `/terra/` | linkedin-portrait-1080 | 2026-04-26 | Terra real estate intelligence — distress pipeline and ownership graph | ✅ pass | Clean capture | README, investor demo |
+| `sextant-vessels-hero-2026-04--desktop-1440.png` | `/vessels/` | desktop-1440 | 2026-04-26 | Vessels maritime fleet command — AIS tracking and voyage economics | ✅ pass | Clean capture | README, investor demo |
+| `sextant-vessels-hero-2026-04--wide-1600.png` | `/vessels/` | wide-1600 | 2026-04-26 | Vessels maritime fleet command — AIS tracking and voyage economics | ✅ pass | Clean capture | README, investor demo |
+| `sextant-vessels-hero-2026-04--social-1200.png` | `/vessels/` | social-1200 | — | Vessels maritime fleet command — AIS tracking and voyage economics | ❌ fail | Chromium WebGL renderer crash — Chromium process terminated after 2 contexts whe | README, investor demo |
+| `sextant-vessels-hero-2026-04--linkedin-square-1080.png` | `/vessels/` | linkedin-square-1080 | — | Vessels maritime fleet command — AIS tracking and voyage economics | ❌ fail | Chromium WebGL renderer crash — Chromium process terminated after 2 contexts whe | README, investor demo |
+| `sextant-vessels-hero-2026-04--linkedin-portrait-1080.png` | `/vessels/` | linkedin-portrait-1080 | — | Vessels maritime fleet command — AIS tracking and voyage economics | ❌ fail | Chromium WebGL renderer crash — Chromium process terminated after 2 contexts whe | README, investor demo |
+| `carlota-jo-hero-2026-04--desktop-1440.png` | `/carlota-jo/` | desktop-1440 | 2026-04-26 | Carlota Jo — premium advisory operations for UHNW clients | ✅ pass | Clean capture | README, investor demo |
+| `carlota-jo-hero-2026-04--wide-1600.png` | `/carlota-jo/` | wide-1600 | 2026-04-26 | Carlota Jo — premium advisory operations for UHNW clients | ✅ pass | Clean capture | README, investor demo |
+| `carlota-jo-hero-2026-04--social-1200.png` | `/carlota-jo/` | social-1200 | 2026-04-26 | Carlota Jo — premium advisory operations for UHNW clients | ✅ pass | Clean capture | README, investor demo |
+| `carlota-jo-hero-2026-04--linkedin-square-1080.png` | `/carlota-jo/` | linkedin-square-1080 | 2026-04-26 | Carlota Jo — premium advisory operations for UHNW clients | ✅ pass | Clean capture | README, investor demo |
+| `carlota-jo-hero-2026-04--linkedin-portrait-1080.png` | `/carlota-jo/` | linkedin-portrait-1080 | 2026-04-26 | Carlota Jo — premium advisory operations for UHNW clients | ✅ pass | Clean capture | README, investor demo |
+| `apex-mobile-hero-2026-04--desktop-1440.png` | `/szl-holdings-mobile/` | desktop-1440 | 2026-04-26 | APEX mobile command — all domain workspaces in one native app | ✅ pass | Clean capture | investor demo |
+| `apex-mobile-hero-2026-04--wide-1600.png` | `/szl-holdings-mobile/` | wide-1600 | 2026-04-26 | APEX mobile command — all domain workspaces in one native app | ✅ pass | Clean capture | investor demo |
+| `apex-mobile-hero-2026-04--social-1200.png` | `/szl-holdings-mobile/` | social-1200 | 2026-04-26 | APEX mobile command — all domain workspaces in one native app | ✅ pass | Clean capture | investor demo |
+| `apex-mobile-hero-2026-04--linkedin-square-1080.png` | `/szl-holdings-mobile/` | linkedin-square-1080 | 2026-04-26 | APEX mobile command — all domain workspaces in one native app | ✅ pass | Clean capture | investor demo |
+| `apex-mobile-hero-2026-04--linkedin-portrait-1080.png` | `/szl-holdings-mobile/` | linkedin-portrait-1080 | 2026-04-26 | APEX mobile command — all domain workspaces in one native app | ✅ pass | Clean capture | investor demo |
