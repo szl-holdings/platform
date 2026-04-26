@@ -27,11 +27,11 @@ interface ExternalAgent {
 const EXTERNAL_AGENTS: ExternalAgent[] = [
   {
     id: 'ext-codex', name: 'OpenAI Codex', vendor: 'OpenAI', category: 'coding', status: 'harnessed',
-    protocol: 'Responses API + Agents SDK', capabilities: ['Code generation', 'Multi-file editing', 'Sandbox execution', 'PR creation', 'Test synthesis'],
-    harnessMode: 'Full orchestration — a11oy dispatches tasks, Codex executes in sandboxed workspace, results flow through proof chain',
-    tasksRouted: 2847, avgLatency: '4.2s', trustScore: 92, costPer1k: '$8.40',
-    governanceAdapter: 'CodexGovernanceAdapter — wraps all file ops in proof hashes, enforces code review gates, applies guardrails before merge',
-    description: 'OpenAI\'s cloud-based coding agent. a11oy harnesses Codex for high-throughput code generation tasks, sandboxed execution, and automated PR workflows — all governed by the proof chain.',
+    protocol: 'Codex SDK (TS/Py) + MCP Server + App Server + GitHub Action', capabilities: ['Cloud sandboxed execution', 'Subagent workflows', 'Parallel agent spawning', 'Worktrees & git isolation', 'Skills & plugins', 'MCP tool serving', 'Hooks (pre/post tool use)', 'Memories & Chronicle', 'Computer use & browser', 'Non-interactive CI/CD mode', 'GitHub/Slack/Linear integrations', 'Enterprise governance'],
+    harnessMode: 'Full orchestration — a11oy runs Codex via SDK (thread.run()), MCP server (codex mcp-server), and GitHub Actions. Subagents spawned in parallel for exploration, review, and triage. Hooks inject proof chain into every tool call.',
+    tasksRouted: 8421, avgLatency: '3.8s', trustScore: 96, costPer1k: '$6.20',
+    governanceAdapter: 'CodexGovernanceAdapter — hooks.json injects PreToolUse/PostToolUse proof hashing, PermissionRequest gates enforce guardrails, Chronicle memories persist governed decisions, worktree isolation prevents cross-task contamination',
+    description: 'OpenAI\'s full-stack coding agent — cloud sandboxes, subagent workflows, skills, plugins, MCP server, hooks, memories, computer use. a11oy harnesses Codex at every layer: SDK for programmatic control, MCP server for tool interop, hooks for governance injection, skills for domain specialization, and subagents for parallel execution. The deepest integration in the mesh.',
   },
   {
     id: 'ext-cursor', name: 'Cursor', vendor: 'Anysphere', category: 'coding', status: 'harnessed',
@@ -138,6 +138,14 @@ const EXTERNAL_AGENTS: ExternalAgent[] = [
     description: 'Role-based multi-agent orchestration. a11oy harnesses CrewAI\'s delegation patterns for assembling vertical-specialist teams with governed execution.',
   },
   {
+    id: 'ext-huggingface', name: 'HuggingFace', vendor: 'Hugging Face', category: 'infrastructure', status: 'harnessed',
+    protocol: 'Inference API + Hub API + Transformers.js', capabilities: ['Model hosting', 'Inference endpoints', 'Model hub', 'Dataset hosting', 'Spaces deployment', 'Open-source models', 'GGUF quantization'],
+    harnessMode: 'Model infrastructure — a11oy uses HuggingFace as the open-model backbone, hosting fine-tuned models, running inference endpoints, and accessing 800K+ open models',
+    tasksRouted: 6847, avgLatency: '1.4s', trustScore: 93, costPer1k: '$0.80',
+    governanceAdapter: 'HuggingFaceAdapter — model provenance verification, license compliance check, output governance, proof chain on inference results, dataset audit trail',
+    description: 'The open-source AI platform. a11oy harnesses HuggingFace for open model hosting, inference endpoints, dataset management, and model evaluation — 800K+ models governed by the proof chain. Fine-tuned domain models deployed as governed inference endpoints.',
+  },
+  {
     id: 'ext-perplexity', name: 'Perplexity', vendor: 'Perplexity AI', category: 'research', status: 'harnessed',
     protocol: 'Sonar API', capabilities: ['Real-time search', 'Citation-backed answers', 'Deep research', 'Multi-step reasoning', 'Source verification'],
     harnessMode: 'Research engine — a11oy routes all real-time knowledge queries through Perplexity, governs citation accuracy',
@@ -160,7 +168,9 @@ const ROUTING_RULES = [
   { pattern: 'Multi-file refactoring', routed: 'Claude Code', reason: 'Strongest multi-step reasoning, highest trust score for complex changes', fallback: 'Cursor' },
   { pattern: 'Full issue-to-PR', routed: 'Devin', reason: 'Highest autonomy, handles complete SDLC workflows', fallback: 'Codex' },
   { pattern: 'UI component generation', routed: 'v0', reason: 'Best-in-class generative UI with React/Tailwind', fallback: 'Replit Agent' },
-  { pattern: 'Code generation (bulk)', routed: 'OpenAI Codex', reason: 'Fastest sandboxed execution, best cost/throughput ratio for generation', fallback: 'Claude Code' },
+  { pattern: 'Code generation (bulk)', routed: 'OpenAI Codex', reason: 'Cloud sandboxed execution, subagent parallelism, best cost/throughput', fallback: 'Claude Code' },
+  { pattern: 'CI/CD automation', routed: 'OpenAI Codex', reason: 'Non-interactive mode, GitHub Actions, worktree isolation', fallback: 'Devin' },
+  { pattern: 'Codebase exploration', routed: 'OpenAI Codex (Subagents)', reason: 'Parallel subagents — one per concern (security, tests, maintainability)', fallback: 'Claude Code' },
   { pattern: 'Precision editing', routed: 'Cursor', reason: 'Best inline editing UX, deep codebase-aware predictions', fallback: 'Windsurf' },
   { pattern: 'Full-stack scaffolding', routed: 'Replit Agent', reason: 'Complete environment setup — database, deployment, packages', fallback: 'Devin' },
   { pattern: 'Real-time research', routed: 'Perplexity', reason: 'Citation-backed, real-time search with source verification', fallback: 'Claude Code' },
@@ -168,11 +178,17 @@ const ROUTING_RULES = [
   { pattern: 'Workflow orchestration', routed: 'LangGraph', reason: 'Stateful, persistent, cyclic workflow graphs', fallback: 'CrewAI' },
   { pattern: 'AWS infrastructure', routed: 'Amazon Q Developer', reason: 'Native AWS integration, IAM-scoped execution', fallback: 'Codex' },
   { pattern: 'Tool interop', routed: 'MCP Servers', reason: 'Universal protocol, governed by Connector Firewall', fallback: 'Direct API' },
+  { pattern: 'Open-model inference', routed: 'HuggingFace', reason: 'Largest open-model hub, governed inference endpoints, license-compliant', fallback: 'Self-hosted' },
+  { pattern: 'Model fine-tuning & eval', routed: 'HuggingFace', reason: 'Dataset hosting, model eval, GGUF quantization pipeline', fallback: 'Codex' },
 ];
+
+const hCount = EXTERNAL_AGENTS.filter(a => a.status === 'harnessed').length;
+const avCount = EXTERNAL_AGENTS.filter(a => a.status === 'available').length;
+const evCount = EXTERNAL_AGENTS.filter(a => a.status === 'evaluating').length;
 
 const GOVERNANCE_TERMINAL = [
   { type: 'system', text: 'a11oy agent-mesh v2.4.0 — universal agentic harness' },
-  { type: 'system', text: '16 external agents registered · 12 harnessed · 3 available · 1 evaluating' },
+  { type: 'system', text: `${EXTERNAL_AGENTS.length} external agents registered · ${hCount} harnessed · ${avCount} available · ${evCount} evaluating` },
   { type: 'system', text: 'Governance mode: FULL · Proof chain: ACTIVE · MirrorEval: CONTINUOUS' },
   { type: 'divider', text: '─'.repeat(76) },
   { type: 'user', text: '→ Refactor the auth service to support multi-tenant JWT validation' },
@@ -217,7 +233,7 @@ export function AgentMesh() {
       <PageHeader
         label="UNIVERSAL AGENTIC HARNESS"
         title="Agent Mesh"
-        subtitle="a11oy orchestrates every major agentic AI — Codex, Cursor, Claude Code, Devin, Copilot, Windsurf, Replit, Perplexity, LangGraph, MCP — all governed by one proof chain."
+        subtitle="a11oy orchestrates every major agentic AI — Codex, Cursor, Claude Code, Devin, Copilot, Windsurf, Replit, HuggingFace, Perplexity, LangGraph, MCP — all governed by one proof chain."
         status="LIVE"
       />
 

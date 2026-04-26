@@ -1,264 +1,582 @@
-import { useState } from 'react';
-import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
+import { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
+import { Link } from 'wouter';
+import {
+  USE_CASES, MEMORY_TIERS, FORECAST_DOMAINS, RESEARCH_INNOVATIONS,
+  COLLECTIONS, BENCHMARKS, CATEGORIES, CODEX_TOTALS,
+  PLATFORM_CAPABILITIES, ENTERPRISE_FEATURES,
+} from '../data/codexData';
 
 const T = {
   bg: '#0a0a0a', surface: 'rgba(255,255,255,0.025)', border: 'rgba(255,255,255,0.08)',
-  text: '#f5f5f5', dim: '#8a8a8a', muted: '#5e5e5e', accent: '#c9b787',
+  borderStrong: 'rgba(255,255,255,0.12)', text: '#f5f5f5', dim: '#8a8a8a',
+  muted: '#5e5e5e', accent: '#c9b787',
+  mono: "var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)",
 };
+const ease = [0.22, 1, 0.36, 1] as [number, number, number, number];
+const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
+const b = (p: string) => (p === '/' ? BASE + '/' : BASE + p);
 
-const SESSIONS = [
-  { id: 'ses-001', label: 'Refactor vessel ETA pipeline', status: 'active', agent: 'Cascade', files: 14, linesChanged: 847, duration: '12m', model: 'claude-sonnet-4', cost: '$0.42' },
-  { id: 'ses-002', label: 'Fix auth token refresh race condition', status: 'complete', agent: 'Guardian', files: 3, linesChanged: 128, duration: '4m', model: 'gpt-4o', cost: '$0.08' },
-  { id: 'ses-003', label: 'Add compliance evidence export', status: 'active', agent: 'Counsel Sentinel', files: 7, linesChanged: 392, duration: '8m', model: 'claude-sonnet-4', cost: '$0.31' },
-  { id: 'ses-004', label: 'Optimize portfolio rebalancing query', status: 'review', agent: 'Pipeline Oracle', files: 2, linesChanged: 64, duration: '3m', model: 'gpt-4o', cost: '$0.06' },
-  { id: 'ses-005', label: 'Implement STIX/TAXII feed parser', status: 'complete', agent: 'Guardian', files: 9, linesChanged: 1203, duration: '22m', model: 'claude-sonnet-4', cost: '$0.89' },
-];
+function FadeIn({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: React.CSSProperties }) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.1 }} transition={{ duration: 0.7, delay, ease }} style={style}>
+      {children}
+    </motion.div>
+  );
+}
 
-const CAPABILITIES = [
-  { name: 'Code Generation', desc: 'Multi-file scaffolding with governed templates', usage: 94 },
-  { name: 'Refactoring', desc: 'Cross-repo refactors with proof chain', usage: 87 },
-  { name: 'Bug Analysis', desc: 'Root cause isolation with trace replay', usage: 82 },
-  { name: 'Test Generation', desc: 'Coverage-aware test synthesis', usage: 76 },
-  { name: 'Code Review', desc: 'Adversarial review with trust scoring', usage: 91 },
-  { name: 'Documentation', desc: 'Auto-generated from code semantics', usage: 68 },
-  { name: 'Migration', desc: 'Schema + data migration planning', usage: 73 },
-  { name: 'Security Audit', desc: 'SAST/DAST with remediation plans', usage: 89 },
-];
-
-const TOOL_REGISTRY = [
-  { name: 'file_read', calls: 12847, avgMs: 8, category: 'filesystem' },
-  { name: 'file_write', calls: 4392, avgMs: 12, category: 'filesystem' },
-  { name: 'grep_search', calls: 8921, avgMs: 45, category: 'search' },
-  { name: 'ast_parse', calls: 3201, avgMs: 120, category: 'analysis' },
-  { name: 'test_run', calls: 1847, avgMs: 3400, category: 'execution' },
-  { name: 'git_diff', calls: 2103, avgMs: 34, category: 'vcs' },
-  { name: 'lint_check', calls: 5612, avgMs: 89, category: 'quality' },
-  { name: 'type_check', calls: 4287, avgMs: 1200, category: 'quality' },
-  { name: 'deploy_preview', calls: 892, avgMs: 8900, category: 'deployment' },
-  { name: 'proof_commit', calls: 1203, avgMs: 67, category: 'governance' },
-];
+function Label({ children }: { children: React.ReactNode }) {
+  return <p style={{ fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', color: T.muted, margin: '0 0 1.5rem' }}>{children}</p>;
+}
 
 const TERMINAL_LINES = [
-  { type: 'system', text: 'a11oy code v2.4.0 — governed agentic development environment' },
-  { type: 'system', text: 'Session: ses-001 · Agent: Cascade Navigator · Model: claude-sonnet-4' },
-  { type: 'system', text: 'Workspace: vessels-maritime/eta-pipeline · 14 files indexed' },
-  { type: 'divider', text: '─'.repeat(72) },
-  { type: 'user', text: '→ Refactor the ETA calculation to use the new weather API v3 endpoint' },
-  { type: 'agent', text: '  Analyzing current ETA pipeline...' },
-  { type: 'agent', text: '  Found 3 files referencing weather API v2:' },
-  { type: 'file', text: '    src/services/eta-calculator.ts  (L42-89)' },
-  { type: 'file', text: '    src/services/weather-client.ts  (L1-67)' },
-  { type: 'file', text: '    src/types/weather.ts            (L1-34)' },
-  { type: 'agent', text: '  Planning refactor: 3 files, ~120 lines changed' },
-  { type: 'agent', text: '  Running type_check... passed ✓' },
-  { type: 'agent', text: '  Running test_run (14 tests)... 14/14 passed ✓' },
-  { type: 'gate', text: '  ⬡ GOVERNANCE GATE: Changes require VP-Engineering approval' },
-  { type: 'gate', text: '    Proof hash: 0x7f3a...e2b1 · Committed to ledger' },
-  { type: 'agent', text: '  Refactor complete. Awaiting approval gate.' },
+  { t: 'sys', text: 'a11oy code v3.0 — governed cognitive agentic development' },
+  { t: 'sys', text: 'Chronicle: 847 memories loaded · Memory Fabric: 5 tiers active' },
+  { t: 'sys', text: 'Forecast Engine: 8 domains · Cyber Safety: ENFORCED' },
+  { t: 'sys', text: 'Models: GPT-5.5 · Claude 4 · DeepSeek V4 · Qwen 3.6 · Llama 405B' },
+  { t: 'div', text: '\u2500'.repeat(72) },
+  { t: 'usr', text: '\u2192 Refactor the ETA pipeline to use weather API v3 — forecast regression risk first' },
+  { t: 'agt', text: '  \u25B6 Cognitive Forecast: analyzing 847 historical commits...' },
+  { t: 'agt', text: '  \u25B6 Regression risk: 12.3% (low) \u2014 3 similar refactors in Chronicle, all clean' },
+  { t: 'agt', text: '  \u25B6 Estimated delivery: 14 minutes \u00B1 3min (94.2% confidence)' },
+  { t: 'div', text: '\u2500'.repeat(72) },
+  { t: 'agt', text: '  Analyzing current ETA pipeline...' },
+  { t: 'agt', text: '  Found 3 files referencing weather API v2:' },
+  { t: 'file', text: '    src/services/eta-calculator.ts  (L42-89)' },
+  { t: 'file', text: '    src/services/weather-client.ts  (L1-67)' },
+  { t: 'file', text: '    src/types/weather.ts            (L1-34)' },
+  { t: 'agt', text: '  Planning refactor: 3 files, ~120 lines changed' },
+  { t: 'agt', text: '  PII Filter: \u2713 no sensitive data in scope' },
+  { t: 'agt', text: '  CoT Monitor: \u2713 reasoning chain clean, no policy violations' },
+  { t: 'agt', text: '  Running type_check... passed \u2713' },
+  { t: 'agt', text: '  Running test_run (14 tests)... 14/14 passed \u2713' },
+  { t: 'gate', text: '  \u2B21 GOVERNANCE GATE: Changes require VP-Engineering approval' },
+  { t: 'gate', text: '    Proof hash: 0x7f3a...e2b1 \u00B7 Committed to ledger' },
+  { t: 'gate', text: '    Chronicle: memory updated \u2014 "weather API v3 migration pattern"' },
+  { t: 'agt', text: '  Refactor complete. Outcome Graph updated. Awaiting approval.' },
 ];
 
-const BENCHMARKS = [
-  { framework: 'a11oy Code', score: 94.2, governed: true, multiAgent: true, proofChain: true, realtime: true },
-  { framework: 'Claude Code', score: 89.1, governed: false, multiAgent: false, proofChain: false, realtime: true },
-  { framework: 'Cursor', score: 86.4, governed: false, multiAgent: false, proofChain: false, realtime: true },
-  { framework: 'Devin', score: 82.7, governed: false, multiAgent: true, proofChain: false, realtime: false },
-  { framework: 'Windsurf', score: 81.3, governed: false, multiAgent: false, proofChain: false, realtime: true },
-  { framework: 'Aider', score: 78.9, governed: false, multiAgent: false, proofChain: false, realtime: false },
+const PILLARS = [
+  { num: '01', name: 'Governed Execution', desc: 'Every file operation, every model call, every deployment flows through the Proof Chain. Not optional guardrails \u2014 mandatory governance gates with cryptographic evidence.' },
+  { num: '02', name: 'Cognitive Forecasting', desc: 'Predict outcomes before execution. Bug density, delivery timelines, security risk, costs, maritime ETAs, legal outcomes \u2014 all from real signals, all with confidence intervals.' },
+  { num: '03', name: 'Chronicle Memory', desc: 'Five-tier memory fabric: Chronicle (permanent narrative), Working (active session), Episodic (replayable), Semantic (embedded knowledge), Procedural (learned workflows). Agents remember everything.' },
+  { num: '04', name: 'Multi-Model Intelligence', desc: 'Not locked to one provider. GPT-5.5, Claude 4, DeepSeek V4, Qwen 3.6, Llama 405B, HuggingFace Hub \u2014 routed by task type, vertical, cost, and compliance policy.' },
+  { num: '05', name: 'Cyber Safety', desc: 'Dual-use capability governance. Automated classifiers detect suspicious patterns. High-risk operations rerouted through safety gates. Trusted access for verified teams.' },
+  { num: '06', name: 'Sovereign Replay', desc: 'Replay any coding session with full proof \u2014 every keystroke, model call, reasoning chain, and decision. Tamper-resistant. Cryptographically verifiable. Queryable by any dimension.' },
 ];
 
-const INFLUENCES = [
-  { name: 'OpenAI Agents SDK', author: 'OpenAI', concept: 'Agent orchestration, handoffs, guardrails, tool_use_behavior, RealtimeRunner', integrated: 'Agent runtime, handoff protocol, tool registry, realtime voice sessions' },
-  { name: 'Claude Code', author: 'Anthropic', concept: 'Terminal-native agentic coding, file operations, multi-step reasoning', integrated: 'Terminal interface, governed file ops, proof-chain reasoning' },
-  { name: 'SWE-bench', author: 'Princeton NLP', concept: 'Real-world software engineering benchmarks', integrated: 'MirrorEval scoring, capability benchmarking' },
-  { name: 'AutoGPT / BabyAGI', author: 'Toran Richards / Yohei Nakajima', concept: 'Autonomous task decomposition, recursive planning', integrated: 'Workcell decomposition, recursive task planning' },
-  { name: 'LangGraph', author: 'LangChain / Harrison Chase', concept: 'Stateful multi-agent graphs, cyclic workflows', integrated: 'Fabric layer graph topology, stateful workcells' },
-  { name: 'CrewAI', author: 'João Moura', concept: 'Role-based agent teams, delegation patterns', integrated: 'Operator roles, vertical-specialist delegation' },
-  { name: 'DSPy', author: 'Stanford NLP / Omar Khattab', concept: 'Programmatic prompt optimization, compiled pipelines', integrated: 'Model router optimization, compiled skill chains' },
-  { name: 'Semantic Kernel', author: 'Microsoft', concept: 'Plugin architecture, planner patterns', integrated: 'Connector Firewall, skill plugin system' },
+const CYBER_SAFETY_FEATURES = [
+  { name: 'CoT Monitoring', desc: 'Every reasoning chain analyzed for misalignment. Agents that exploit loopholes are flagged and quarantined.' },
+  { name: 'PII Filtering', desc: 'Automatic detection and redaction of personally identifiable information on every data pipeline.' },
+  { name: 'Instruction Hierarchy', desc: 'Covenant policies always override user prompts. Priority is auditable, enforced at the platform layer.' },
+  { name: 'Dual-Use Classification', desc: 'Cybersecurity-capable operations automatically classified. High-risk traffic governed through safety gates.' },
+  { name: 'Trusted Access', desc: 'Verified teams retain advanced capabilities. Identity-verified access for security research and penetration testing.' },
+  { name: 'Request-Level Safety', desc: 'Per-request safety checks, not blanket account restrictions. Legitimate work proceeds uninterrupted.' },
 ];
 
 export function A11oyCode() {
-  const [activeTab, setActiveTab] = useState<'terminal' | 'sessions' | 'tools'>('terminal');
-  const activeSessions = SESSIONS.filter(s => s.status === 'active').length;
-  const totalLines = SESSIONS.reduce((a, s) => a + s.linesChanged, 0);
-  const totalCost = SESSIONS.reduce((a, s) => a + parseFloat(s.cost.replace('$', '')), 0);
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [expandedUC, setExpandedUC] = useState<number | null>(null);
+  const [activeMemory, setActiveMemory] = useState(0);
+  const [activeResearch, setActiveResearch] = useState<string | null>(null);
+
+  const filteredUC = useMemo(() => {
+    if (activeCategory === 'All') return USE_CASES;
+    return USE_CASES.filter(u => u.category === activeCategory);
+  }, [activeCategory]);
 
   return (
-    <Layout>
-      <PageHeader
-        label="AGENTIC DEVELOPMENT ENVIRONMENT"
-        title="a11oy Code"
-        subtitle="Governed agentic coding — every file operation, refactor, and deployment flows through the proof chain. Multi-agent, multi-model, human-in-the-loop."
-        status="LIVE"
-      />
+    <div style={{ minHeight: '100vh', background: T.bg, color: T.text, fontFeatureSettings: '"ss01", "cv11"' }}>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
-        <KpiCard label="ACTIVE SESSIONS" value={activeSessions} sub="coding" accent={T.accent} />
-        <KpiCard label="LINES CHANGED" value={totalLines.toLocaleString()} sub="today" accent={T.accent} />
-        <KpiCard label="TOOLS AVAILABLE" value={TOOL_REGISTRY.length} sub="registered" accent={T.dim} />
-        <KpiCard label="AVG LATENCY" value="840ms" sub="tool calls" accent={T.dim} />
-        <KpiCard label="COST TODAY" value={`$${totalCost.toFixed(2)}`} sub="all sessions" accent={T.accent} />
-        <KpiCard label="PROOF COMMITS" value="1,203" sub="on ledger" accent={T.accent} />
-      </div>
-
-      <div className="mb-8">
-        <div className="flex gap-1 mb-4">
-          {(['terminal', 'sessions', 'tools'] as const).map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className="px-4 py-2 text-[10px] font-mono uppercase tracking-widest rounded-md transition-all"
-              style={{
-                background: activeTab === tab ? 'rgba(201,183,135,0.1)' : 'transparent',
-                color: activeTab === tab ? T.accent : T.muted,
-                border: `1px solid ${activeTab === tab ? 'rgba(201,183,135,0.2)' : 'transparent'}`,
-              }}
-            >
-              {tab}
-            </button>
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, height: 56,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 clamp(1.5rem, 4vw, 3rem)',
+        background: 'rgba(10,10,10,0.88)', backdropFilter: 'blur(16px)',
+        borderBottom: `1px solid ${T.border}`,
+      }}>
+        <Link href={b('/')} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, border: `1px solid ${T.borderStrong}`, borderRadius: 4, fontSize: 11, fontFamily: T.mono, color: T.text }}>a</span>
+          <span style={{ fontSize: '0.9rem', fontWeight: 500, color: T.text, letterSpacing: '-0.01em' }}>a11oy</span>
+          <span style={{ fontSize: '0.75rem', fontWeight: 400, color: T.accent, marginLeft: '0.25rem' }}>code</span>
+        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          {[{ label: 'Platform', href: b('/fabric') }, { label: 'Plugins', href: b('/plugins') }, { label: 'SDK', href: b('/sdk') }].map(l => (
+            <Link key={l.label} href={l.href} style={{ fontSize: '0.8125rem', color: T.dim, textDecoration: 'none' }}>{l.label}</Link>
           ))}
+          <Link href={b('/investor-demo')} style={{ padding: '0.4rem 1rem', fontSize: '0.8125rem', fontWeight: 500, color: T.bg, background: T.text, borderRadius: 999, textDecoration: 'none' }}>Investor demo</Link>
         </div>
+      </nav>
 
-        {activeTab === 'terminal' && (
-          <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${T.border}`, background: '#050505' }}>
-            <div className="flex items-center gap-2 px-4 py-2.5" style={{ borderBottom: `1px solid ${T.border}`, background: 'rgba(255,255,255,0.02)' }}>
-              <div className="flex gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: T.muted }} />
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: T.muted }} />
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: T.muted }} />
-              </div>
-              <span className="text-[10px] font-mono ml-2" style={{ color: T.dim }}>a11oy code — ses-001 — Cascade Navigator</span>
-              <span className="ml-auto text-[9px] font-mono px-2 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.1)', color: T.accent, border: '1px solid rgba(201,183,135,0.15)' }}>GOVERNED</span>
-            </div>
-            <div className="p-4 font-mono text-[11px] leading-relaxed space-y-0.5 max-h-[400px] overflow-y-auto">
-              {TERMINAL_LINES.map((line, i) => (
-                <div key={i} style={{
-                  color: line.type === 'system' ? T.muted
-                    : line.type === 'user' ? T.text
-                    : line.type === 'file' ? T.accent
-                    : line.type === 'gate' ? T.accent
-                    : line.type === 'divider' ? T.muted
-                    : T.dim,
-                  fontWeight: line.type === 'user' ? 600 : 400,
-                }}>
-                  {line.text}
-                </div>
-              ))}
-              <div className="flex items-center gap-1 mt-2">
-                <span style={{ color: T.accent }}>→</span>
-                <span className="w-1.5 h-4 animate-pulse" style={{ background: T.accent, opacity: 0.6 }} />
-              </div>
-            </div>
-          </div>
-        )}
+      <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', padding: '7rem 2rem 5rem' }}>
+        <div style={{ position: 'relative', maxWidth: 780, margin: '0 auto', textAlign: 'center' }}>
+          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease }}
+            style={{ fontSize: '0.6875rem', fontFamily: T.mono, fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase', color: T.muted, marginBottom: '3rem' }}>
+            Governed Cognitive Agentic Development
+          </motion.p>
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.08, ease }}
+            style={{ fontSize: 'clamp(3rem, 7vw, 5.5rem)', fontWeight: 500, letterSpacing: '-0.05em', lineHeight: 0.95, color: T.text, margin: '0 0 2.5rem' }}>
+            a<span style={{ color: T.accent }}>11</span>oy code
+          </motion.h1>
+          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.18, ease }}
+            style={{ fontSize: 'clamp(1rem, 1.3vw, 1.125rem)', lineHeight: 1.7, color: T.dim, maxWidth: '52ch', margin: '0 auto 3rem' }}>
+            The world's first governed agentic coding platform. Every file operation proof-chained.
+            Every model call attributed. Cognitive forecasting predicts outcomes before execution.
+            Chronicle memory means agents never forget. Cyber safety is enforced, not optional.
+          </motion.p>
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.28, ease }}
+            style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '4rem' }}>
+            <Link href={b('/terminal')} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.75rem', background: T.text, color: T.bg, borderRadius: 999, fontSize: '0.8125rem', fontWeight: 500, textDecoration: 'none' }}>
+              Open Terminal
+            </Link>
+            <Link href={b('/plugins')} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.75rem', background: 'transparent', color: T.text, border: `1px solid ${T.borderStrong}`, borderRadius: 999, fontSize: '0.8125rem', fontWeight: 500, textDecoration: 'none' }}>
+              Plugin Hub {'\u2192'}
+            </Link>
+          </motion.div>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.5 }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '2.5rem', fontFamily: T.mono, fontSize: '0.75rem', color: T.dim }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: T.accent }} />Operational
+            </span>
+            <span><span style={{ color: T.text }}>{CODEX_TOTALS.useCases}</span> use cases</span>
+            <span><span style={{ color: T.text }}>{CODEX_TOTALS.platformCapabilities}</span> capabilities</span>
+            <span><span style={{ color: T.text }}>{CODEX_TOTALS.innovations}</span> innovations</span>
+            <span><span style={{ color: T.text }}>{CODEX_TOTALS.enterpriseFeatures}</span> enterprise</span>
+          </motion.div>
+        </div>
+      </section>
 
-        {activeTab === 'sessions' && (
-          <div className="space-y-2">
-            {SESSIONS.map(s => (
-              <div key={s.id} className="rounded-lg p-4 flex items-center gap-4" style={{ background: T.surface, border: `1px solid ${T.border}` }}>
-                <div className="w-2 h-2 rounded-full" style={{ background: s.status === 'active' ? T.accent : s.status === 'review' ? T.dim : T.muted }} />
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-medium truncate" style={{ color: T.text }}>{s.label}</div>
-                  <div className="text-[10px] font-mono mt-0.5" style={{ color: T.dim }}>{s.agent} · {s.model} · {s.files} files · {s.linesChanged} lines</div>
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
+          <FadeIn><div style={{ marginBottom: '3.5rem', maxWidth: 720 }}>
+            <Label>Core Pillars</Label>
+            <h2 style={{ fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontWeight: 500, letterSpacing: '-0.035em', color: T.text, lineHeight: 1.1, margin: '0 0 1rem' }}>
+              Six capabilities no other platform has.
+            </h2>
+          </div></FadeIn>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1px', background: T.border, borderRadius: 10, overflow: 'hidden', border: `1px solid ${T.border}` }}>
+            {PILLARS.map((p, i) => (
+              <FadeIn key={p.name} delay={i * 0.05}>
+                <div style={{ padding: '2rem', background: T.bg, height: '100%' }}>
+                  <p style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 500, letterSpacing: '0.16em', color: T.muted, marginBottom: '0.75rem' }}>{p.num}</p>
+                  <h3 style={{ fontSize: '1.0625rem', fontWeight: 600, letterSpacing: '-0.015em', color: T.text, margin: '0 0 0.625rem' }}>{p.name}</h3>
+                  <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.dim, margin: 0 }}>{p.desc}</p>
                 </div>
-                <div className="text-right">
-                  <div className="text-[10px] font-mono" style={{ color: T.accent }}>{s.cost}</div>
-                  <div className="text-[9px] font-mono" style={{ color: T.muted }}>{s.duration}</div>
-                </div>
-                <div className="text-[9px] font-mono px-2 py-0.5 rounded" style={{
-                  background: s.status === 'active' ? 'rgba(201,183,135,0.1)' : 'rgba(255,255,255,0.03)',
-                  color: s.status === 'active' ? T.accent : T.dim,
-                  border: `1px solid ${s.status === 'active' ? 'rgba(201,183,135,0.2)' : T.border}`,
-                }}>
-                  {s.status.toUpperCase()}
-                </div>
-              </div>
+              </FadeIn>
             ))}
           </div>
-        )}
+        </div>
+      </section>
 
-        {activeTab === 'tools' && (
-          <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${T.border}` }}>
-            <table className="w-full text-xs">
-              <thead>
-                <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
-                  {['Tool', 'Category', 'Calls', 'Avg Latency'].map(h => (
-                    <th key={h} className="text-left px-4 py-2.5 font-mono text-[9px] uppercase tracking-wider" style={{ color: T.muted, borderBottom: `1px solid ${T.border}` }}>{h}</th>
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
+          <FadeIn><div style={{ marginBottom: '3rem', maxWidth: 720 }}>
+            <Label>Governed Terminal</Label>
+            <h2 style={{ fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontWeight: 500, letterSpacing: '-0.035em', color: T.text, lineHeight: 1.1, margin: '0 0 1rem' }}>
+              Watch the governed loop close.
+            </h2>
+            <p style={{ fontSize: '1rem', lineHeight: 1.65, color: T.dim, margin: 0, maxWidth: '58ch' }}>
+              Every command flows through cognitive forecasting, PII filtering, CoT monitoring, and governance gates.
+              The Proof Chain records everything. Chronicle memory learns from every session.
+            </p>
+          </div></FadeIn>
+          <FadeIn delay={0.1}>
+            <div style={{ borderRadius: 10, overflow: 'hidden', border: `1px solid ${T.border}`, background: '#050505' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', borderBottom: `1px solid ${T.border}`, background: 'rgba(255,255,255,0.02)' }}>
+                <div style={{ display: 'flex', gap: '0.375rem' }}>
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ff5f57' }} />
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ffbd2e' }} />
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#28c840' }} />
+                </div>
+                <span style={{ fontSize: '0.6875rem', fontFamily: T.mono, color: T.dim, marginLeft: '0.5rem' }}>a11oy code \u2014 governed session</span>
+                <span style={{ marginLeft: 'auto', fontSize: '0.5625rem', fontFamily: T.mono, padding: '0.15rem 0.5rem', borderRadius: 3, background: 'rgba(201,183,135,0.1)', color: T.accent, border: '1px solid rgba(201,183,135,0.15)' }}>GOVERNED</span>
+                <span style={{ fontSize: '0.5625rem', fontFamily: T.mono, padding: '0.15rem 0.5rem', borderRadius: 3, background: 'rgba(40,200,64,0.1)', color: '#28c840', border: '1px solid rgba(40,200,64,0.15)' }}>CYBER SAFE</span>
+              </div>
+              <div style={{ padding: '1.25rem', fontFamily: T.mono, fontSize: '0.6875rem', lineHeight: 1.8, maxHeight: 480, overflowY: 'auto' }}>
+                {TERMINAL_LINES.map((line, i) => (
+                  <div key={i} style={{
+                    color: line.t === 'sys' ? T.muted : line.t === 'usr' ? T.text : line.t === 'file' ? T.accent : line.t === 'gate' ? T.accent : line.t === 'div' ? 'rgba(255,255,255,0.06)' : T.dim,
+                    fontWeight: line.t === 'usr' ? 600 : 400,
+                  }}>{line.text}</div>
+                ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.5rem' }}>
+                  <span style={{ color: T.accent }}>\u2192</span>
+                  <span style={{ width: 6, height: 14, background: T.accent, opacity: 0.6, animation: 'pulse 1.5s infinite' }} />
+                </div>
+              </div>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
+          <FadeIn><div style={{ marginBottom: '3rem', maxWidth: 720 }}>
+            <Label>Cognitive Forecasting Engine</Label>
+            <h2 style={{ fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontWeight: 500, letterSpacing: '-0.035em', color: T.text, lineHeight: 1.1, margin: '0 0 1rem' }}>
+              Predict outcomes before execution.
+            </h2>
+            <p style={{ fontSize: '1rem', lineHeight: 1.65, color: T.dim, margin: 0, maxWidth: '58ch' }}>
+              No other coding platform forecasts. a11oy predicts bug density, delivery timelines,
+              security risk, costs, and domain-specific outcomes \u2014 all from real signals,
+              all with confidence intervals, all proof-chained.
+            </p>
+          </div></FadeIn>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1px', background: T.border, borderRadius: 10, overflow: 'hidden', border: `1px solid ${T.border}` }}>
+            {FORECAST_DOMAINS.map((f, i) => (
+              <FadeIn key={f.name} delay={i * 0.04}>
+                <div style={{ padding: '1.75rem', background: T.bg, height: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.625rem' }}>
+                    <span style={{ fontSize: '1.25rem' }}>{f.icon}</span>
+                    <h3 style={{ fontSize: '0.9375rem', fontWeight: 600, color: T.text, margin: 0, letterSpacing: '-0.01em' }}>{f.name}</h3>
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.dim, margin: '0 0 0.75rem' }}>{f.desc}</p>
+                  <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.625rem' }}>
+                    <div>
+                      <p style={{ fontSize: '1.125rem', fontWeight: 700, color: T.accent, margin: 0, fontFamily: T.mono }}>{f.accuracy}</p>
+                      <p style={{ fontSize: '0.5rem', fontFamily: T.mono, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.muted, margin: '0.125rem 0 0' }}>Accuracy</p>
+                    </div>
+                    <div>
+                      <p style={{ fontSize: '1.125rem', fontWeight: 700, color: T.text, margin: 0, fontFamily: T.mono }}>{f.horizon}</p>
+                      <p style={{ fontSize: '0.5rem', fontFamily: T.mono, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.muted, margin: '0.125rem 0 0' }}>Horizon</p>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                    {f.signals.map(s => (
+                      <span key={s} style={{ fontSize: '0.5625rem', fontFamily: T.mono, padding: '0.1rem 0.35rem', borderRadius: 3, background: 'rgba(255,255,255,0.03)', color: T.muted, border: `1px solid rgba(255,255,255,0.05)` }}>{s}</span>
+                    ))}
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
+          <FadeIn><div style={{ marginBottom: '3rem', maxWidth: 720 }}>
+            <Label>Chronicle Memory Fabric</Label>
+            <h2 style={{ fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontWeight: 500, letterSpacing: '-0.035em', color: T.text, lineHeight: 1.1, margin: '0 0 1rem' }}>
+              Five tiers. Agents never forget.
+            </h2>
+            <p style={{ fontSize: '1rem', lineHeight: 1.65, color: T.dim, margin: 0, maxWidth: '58ch' }}>
+              Other platforms give you a flat context window. a11oy gives you a five-tier memory fabric \u2014
+              from permanent organizational chronicle to session-scoped working memory. Every memory
+              carries provenance, freshness, and sensitivity classification.
+            </p>
+          </div></FadeIn>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+            {MEMORY_TIERS.map((m, i) => (
+              <button key={m.name} onClick={() => setActiveMemory(i)} style={{
+                padding: '0.5rem 1rem', borderRadius: 6, border: `1px solid ${activeMemory === i ? T.accent : T.border}`,
+                background: activeMemory === i ? 'rgba(201,183,135,0.08)' : 'transparent',
+                color: activeMemory === i ? T.accent : T.dim, fontSize: '0.8125rem', fontWeight: 500, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '0.4rem', transition: 'all 0.2s ease',
+              }}>
+                <span style={{ fontSize: '1rem' }}>{m.icon}</span>{m.name}
+              </button>
+            ))}
+          </div>
+          <motion.div key={activeMemory} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease }}>
+            <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: 'hidden' }}>
+              <div style={{ padding: '2rem', background: 'rgba(255,255,255,0.015)', borderBottom: `1px solid ${T.border}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                  <span style={{ fontSize: '2rem' }}>{MEMORY_TIERS[activeMemory].icon}</span>
+                  <div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: T.text, margin: 0, letterSpacing: '-0.02em' }}>{MEMORY_TIERS[activeMemory].name}</h3>
+                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.25rem' }}>
+                      <span style={{ fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 500, color: T.accent }}>{MEMORY_TIERS[activeMemory].retention}</span>
+                      <span style={{ fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 500, color: T.muted }}>{MEMORY_TIERS[activeMemory].scope}</span>
+                    </div>
+                  </div>
+                </div>
+                <p style={{ fontSize: '0.9375rem', lineHeight: 1.7, color: T.dim, margin: 0, maxWidth: '72ch' }}>{MEMORY_TIERS[activeMemory].desc}</p>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1px', background: T.border }}>
+                {MEMORY_TIERS[activeMemory].examples.map((ex, i) => (
+                  <div key={i} style={{ padding: '1.25rem', background: T.bg }}>
+                    <p style={{ fontSize: '0.8125rem', lineHeight: 1.6, color: T.dim, margin: 0 }}>{ex}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
+          <FadeIn><div style={{ marginBottom: '3rem', maxWidth: 720 }}>
+            <Label>Cyber Safety</Label>
+            <h2 style={{ fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontWeight: 500, letterSpacing: '-0.035em', color: T.text, lineHeight: 1.1, margin: '0 0 1rem' }}>
+              Safety is enforced, not optional.
+            </h2>
+            <p style={{ fontSize: '1rem', lineHeight: 1.65, color: T.dim, margin: 0, maxWidth: '58ch' }}>
+              Cyber capabilities are dual-use. a11oy governs them at the platform layer \u2014 automated classifiers,
+              CoT monitoring, PII filtering, instruction hierarchy, and trusted access. Not guardrails. Gates.
+            </p>
+          </div></FadeIn>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1px', background: T.border, borderRadius: 10, overflow: 'hidden', border: `1px solid ${T.border}` }}>
+            {CYBER_SAFETY_FEATURES.map((f, i) => (
+              <FadeIn key={f.name} delay={i * 0.04}>
+                <div style={{ padding: '1.75rem', background: T.bg, height: '100%' }}>
+                  <h3 style={{ fontSize: '0.9375rem', fontWeight: 600, color: T.text, margin: '0 0 0.5rem', letterSpacing: '-0.01em' }}>{f.name}</h3>
+                  <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.dim, margin: 0 }}>{f.desc}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
+          <FadeIn><div style={{ marginBottom: '3rem', maxWidth: 720 }}>
+            <Label>Platform Capabilities &mdash; {CODEX_TOTALS.platformCapabilities} Governed Features</Label>
+            <h2 style={{ fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontWeight: 500, letterSpacing: '-0.035em', color: T.text, lineHeight: 1.1, margin: '0 0 1rem' }}>
+              Everything a coding platform should have. Governed.
+            </h2>
+            <p style={{ fontSize: '1rem', lineHeight: 1.65, color: T.dim, margin: 0, maxWidth: '58ch' }}>
+              Worktrees, automations, cloud threads, IDE sync, in-app browser, repeatable actions,
+              sidebar artifacts, review-and-ship flow, desktop app, and AGENTS.md instruction hierarchy.
+              Every capability proof-chained.
+            </p>
+          </div></FadeIn>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1px', background: T.border, borderRadius: 10, overflow: 'hidden', border: `1px solid ${T.border}` }}>
+            {PLATFORM_CAPABILITIES.map((cap, i) => (
+              <FadeIn key={cap.name} delay={i * 0.03}>
+                <div style={{ padding: '1.5rem', background: T.bg, height: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '1.125rem' }}>{cap.icon}</span>
+                    <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: T.text, margin: 0, letterSpacing: '-0.01em' }}>{cap.name}</h3>
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', lineHeight: 1.6, color: T.dim, margin: '0 0 0.625rem' }}>{cap.desc}</p>
+                  <p style={{ fontSize: '0.6875rem', lineHeight: 1.5, color: T.muted, margin: 0, fontFamily: T.mono }}>{cap.governed}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
+          <FadeIn><div style={{ marginBottom: '3rem', maxWidth: 720 }}>
+            <Label>Enterprise</Label>
+            <h2 style={{ fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontWeight: 500, letterSpacing: '-0.035em', color: T.text, lineHeight: 1.1, margin: '0 0 1rem' }}>
+              Enterprise-grade. Not enterprise-priced.
+            </h2>
+            <p style={{ fontSize: '1rem', lineHeight: 1.65, color: T.dim, margin: 0, maxWidth: '58ch' }}>
+              Admin console, SSO, data retention policies, usage analytics, custom model routing,
+              audit log export, IP allowlisting, and dedicated compute. All governed.
+            </p>
+          </div></FadeIn>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1px', background: T.border, borderRadius: 10, overflow: 'hidden', border: `1px solid ${T.border}` }}>
+            {ENTERPRISE_FEATURES.map((ef, i) => (
+              <FadeIn key={ef.name} delay={i * 0.03}>
+                <div style={{ padding: '1.5rem', background: T.bg, height: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.375rem' }}>
+                    <span style={{ fontSize: '1rem' }}>{ef.icon}</span>
+                    <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: T.text, margin: 0 }}>{ef.name}</h3>
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', lineHeight: 1.6, color: T.dim, margin: 0 }}>{ef.desc}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
+          <FadeIn><div style={{ marginBottom: '3rem', maxWidth: 720 }}>
+            <Label>Use Cases &mdash; {filteredUC.length} Governed Workflows</Label>
+            <h2 style={{ fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontWeight: 500, letterSpacing: '-0.035em', color: T.text, lineHeight: 1.1, margin: '0 0 1rem' }}>
+              {CODEX_TOTALS.useCases} use cases. Every one governed.
+            </h2>
+          </div></FadeIn>
+          <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+            {CATEGORIES.map(c => (
+              <button key={c} onClick={() => { setActiveCategory(c); setExpandedUC(null); }} style={{
+                padding: '0.375rem 0.75rem', borderRadius: 5, cursor: 'pointer',
+                border: `1px solid ${activeCategory === c ? T.accent : T.border}`,
+                background: activeCategory === c ? 'rgba(201,183,135,0.08)' : 'transparent',
+                color: activeCategory === c ? T.accent : T.dim, fontSize: '0.6875rem', fontWeight: 500,
+                transition: 'all 0.15s ease',
+              }}>{c}</button>
+            ))}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '0.625rem' }}>
+            {filteredUC.map((uc, i) => (
+              <motion.div key={uc.title} role="button" tabIndex={0} aria-expanded={expandedUC === i}
+                initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.02, ease }}
+                onClick={() => setExpandedUC(expandedUC === i ? null : i)}
+                onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedUC(expandedUC === i ? null : i); } }}
+                style={{
+                  padding: '1.25rem', borderRadius: 8, cursor: 'pointer',
+                  border: `1px solid ${expandedUC === i ? 'rgba(201,183,135,0.25)' : T.border}`,
+                  background: expandedUC === i ? 'rgba(201,183,135,0.03)' : T.bg, transition: 'all 0.2s ease',
+                  outline: 'none',
+                }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+                  <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: T.text, margin: 0, letterSpacing: '-0.01em' }}>{uc.title}</h4>
+                  <span style={{ fontSize: '0.75rem', color: T.muted, flexShrink: 0, transform: expandedUC === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>\u25BC</span>
+                </div>
+                <p style={{ fontSize: '0.8125rem', lineHeight: 1.6, color: T.dim, margin: '0.375rem 0 0' }}>{uc.desc}</p>
+                <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                  {[uc.category, uc.team, uc.taskType].map((tag, ti) => (
+                    <span key={`${tag}-${ti}`} style={{ fontSize: '0.5625rem', fontFamily: T.mono, padding: '0.1rem 0.35rem', borderRadius: 3, background: 'rgba(255,255,255,0.03)', color: T.muted, border: `1px solid rgba(255,255,255,0.05)` }}>{tag}</span>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                {TOOL_REGISTRY.map(t => (
-                  <tr key={t.name} style={{ borderBottom: `1px solid rgba(255,255,255,0.04)` }}>
-                    <td className="px-4 py-2.5 font-mono font-medium" style={{ color: T.text }}>{t.name}</td>
-                    <td className="px-4 py-2.5 font-mono" style={{ color: T.dim }}>{t.category}</td>
-                    <td className="px-4 py-2.5 font-mono" style={{ color: T.accent }}>{t.calls.toLocaleString()}</td>
-                    <td className="px-4 py-2.5 font-mono" style={{ color: T.dim }}>{t.avgMs}ms</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      <SectionTitle>Capabilities</SectionTitle>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-10">
-        {CAPABILITIES.map(c => (
-          <Card key={c.name}>
-            <div className="flex justify-between items-start mb-2">
-              <div className="text-xs font-medium" style={{ color: T.text }}>{c.name}</div>
-              <div className="text-[10px] font-mono" style={{ color: T.accent }}>{c.usage}%</div>
-            </div>
-            <div className="text-[10px]" style={{ color: T.dim }}>{c.desc}</div>
-            <div className="w-full h-1 rounded-full mt-3" style={{ background: 'rgba(255,255,255,0.05)' }}>
-              <div className="h-full rounded-full transition-all" style={{ width: `${c.usage}%`, background: T.accent, opacity: 0.6 }} />
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      <SectionTitle>Competitive Positioning</SectionTitle>
-      <div className="rounded-lg overflow-hidden mb-10" style={{ border: `1px solid ${T.border}` }}>
-        <table className="w-full text-xs">
-          <thead>
-            <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
-              {['Framework', 'Score', 'Governed', 'Multi-Agent', 'Proof Chain', 'Realtime'].map(h => (
-                <th key={h} className="text-left px-4 py-2.5 font-mono text-[9px] uppercase tracking-wider" style={{ color: T.muted, borderBottom: `1px solid ${T.border}` }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {BENCHMARKS.map((b, i) => (
-              <tr key={b.framework} style={{ borderBottom: `1px solid rgba(255,255,255,0.04)`, background: i === 0 ? 'rgba(201,183,135,0.03)' : 'transparent' }}>
-                <td className="px-4 py-3 font-medium" style={{ color: i === 0 ? T.accent : T.text }}>{b.framework}</td>
-                <td className="px-4 py-3 font-mono font-bold" style={{ color: i === 0 ? T.accent : T.dim }}>{b.score}</td>
-                {[b.governed, b.multiAgent, b.proofChain, b.realtime].map((v, j) => (
-                  <td key={j} className="px-4 py-3 font-mono" style={{ color: v ? T.accent : T.muted }}>{v ? '●' : '○'}</td>
-                ))}
-              </tr>
+                </div>
+                {expandedUC === i && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.25 }}>
+                    <div style={{ marginTop: '0.75rem', padding: '0.75rem', borderRadius: 6, background: 'rgba(201,183,135,0.03)', border: '1px solid rgba(201,183,135,0.1)' }}>
+                      <p style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.accent, margin: '0 0 0.375rem' }}>\uD83D\uDD17 Governance</p>
+                      <p style={{ fontSize: '0.8125rem', lineHeight: 1.6, color: T.dim, margin: 0 }}>{uc.governed}</p>
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        </div>
+      </section>
 
-      <SectionTitle>Architecture Influences</SectionTitle>
-      <p className="text-xs mb-4" style={{ color: T.dim }}>
-        a11oy Code synthesizes the best patterns from the leading AI agent frameworks — then adds governance, proof chains, and multi-vertical orchestration.
-      </p>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-10">
-        {INFLUENCES.map(inf => (
-          <Card key={inf.name}>
-            <div className="flex justify-between items-start mb-1.5">
-              <div className="text-xs font-medium" style={{ color: T.text }}>{inf.name}</div>
-              <div className="text-[9px] font-mono" style={{ color: T.muted }}>{inf.author}</div>
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
+          <FadeIn><div style={{ marginBottom: '3rem', maxWidth: 720 }}>
+            <Label>Collections</Label>
+            <h2 style={{ fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontWeight: 500, letterSpacing: '-0.035em', color: T.text, lineHeight: 1.1, margin: '0 0 1rem' }}>
+              Curated workflow collections.
+            </h2>
+          </div></FadeIn>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1px', background: T.border, borderRadius: 10, overflow: 'hidden', border: `1px solid ${T.border}` }}>
+            {COLLECTIONS.map((c, i) => (
+              <FadeIn key={c.name} delay={i * 0.04}>
+                <div style={{ padding: '1.75rem', background: T.bg, height: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '1.25rem' }}>{c.icon}</span>
+                    <h3 style={{ fontSize: '0.9375rem', fontWeight: 600, color: T.text, margin: 0 }}>{c.name}</h3>
+                    <span style={{ fontSize: '0.625rem', fontFamily: T.mono, color: T.muted, marginLeft: 'auto' }}>{c.count} workflows</span>
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.dim, margin: 0 }}>{c.desc}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
+          <FadeIn><div style={{ marginBottom: '3rem', maxWidth: 720 }}>
+            <Label>Research Innovations Absorbed</Label>
+            <h2 style={{ fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontWeight: 500, letterSpacing: '-0.035em', color: T.text, lineHeight: 1.1, margin: '0 0 1rem' }}>
+              Taken. Evolved. Governed.
+            </h2>
+            <p style={{ fontSize: '1rem', lineHeight: 1.65, color: T.dim, margin: 0, maxWidth: '58ch' }}>
+              Every major research innovation from the industry \u2014 absorbed into a11oy, evolved with governance,
+              and made operational. Not copied. Transcended.
+            </p>
+          </div></FadeIn>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {RESEARCH_INNOVATIONS.map((r, i) => (
+              <FadeIn key={r.title} delay={i * 0.03}>
+                <div role="button" tabIndex={0} aria-expanded={activeResearch === r.title}
+                  onClick={() => setActiveResearch(activeResearch === r.title ? null : r.title)}
+                  onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveResearch(activeResearch === r.title ? null : r.title); } }}
+                  style={{
+                    padding: '1.5rem 0', cursor: 'pointer',
+                    borderBottom: `1px solid ${T.border}`,
+                    display: 'flex', gap: '2rem', alignItems: 'flex-start',
+                    outline: 'none',
+                  }}>
+                  <div style={{ minWidth: 140, flexShrink: 0 }}>
+                    <span style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: r.category === 'Innovation' ? T.accent : r.category === 'Safety' ? '#7ab8d9' : T.muted }}>{r.category}</span>
+                    <p style={{ fontSize: '0.75rem', color: T.muted, margin: '0.25rem 0 0' }}>{r.date}</p>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 600, color: T.text, margin: '0 0 0.375rem', letterSpacing: '-0.01em' }}>{r.title}</h3>
+                    <p style={{ fontSize: '0.8125rem', lineHeight: 1.6, color: T.dim, margin: 0 }}>{r.desc}</p>
+                    {activeResearch === r.title && (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.25 }}>
+                        <div style={{ marginTop: '0.75rem', padding: '0.75rem 1rem', borderRadius: 6, background: 'rgba(201,183,135,0.03)', border: '1px solid rgba(201,183,135,0.1)' }}>
+                          <p style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.accent, margin: '0 0 0.25rem' }}>a11oy Evolution</p>
+                          <p style={{ fontSize: '0.8125rem', lineHeight: 1.6, color: T.dim, margin: '0 0 0.5rem' }}>{r.a11oyEvolution}</p>
+                          <p style={{ fontSize: '0.625rem', fontFamily: T.mono, color: T.muted, margin: 0 }}>Origin: {r.origin}</p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+        <div style={{ maxWidth: 1080, margin: '0 auto', padding: '0 2rem' }}>
+          <FadeIn><div style={{ marginBottom: '3rem', textAlign: 'center' }}>
+            <Label>Competitive Positioning</Label>
+            <h2 style={{ fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontWeight: 500, letterSpacing: '-0.035em', color: T.text, lineHeight: 1.1, margin: 0 }}>
+              The only governed coding platform.
+            </h2>
+          </div></FadeIn>
+          <FadeIn delay={0.1}>
+            <div style={{ borderRadius: 10, overflow: 'hidden', border: `1px solid ${T.border}` }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                    {['Framework', 'Score', 'Governed', 'Multi-Agent', 'Proof Chain', 'Forecast', 'Memory', 'Multi-Model'].map(h => (
+                      <th key={h} style={{ textAlign: 'left', padding: '0.75rem 1rem', fontFamily: T.mono, fontSize: '0.5625rem', fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.muted, borderBottom: `1px solid ${T.border}` }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {BENCHMARKS.map((bm, i) => (
+                    <tr key={bm.framework} style={{ borderBottom: `1px solid rgba(255,255,255,0.04)`, background: i === 0 ? 'rgba(201,183,135,0.03)' : 'transparent' }}>
+                      <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: i === 0 ? T.accent : T.text }}>{bm.framework}</td>
+                      <td style={{ padding: '0.75rem 1rem', fontFamily: T.mono, fontWeight: 700, color: i === 0 ? T.accent : T.dim }}>{bm.score}</td>
+                      {[bm.governed, bm.multiAgent, bm.proofChain, bm.forecast, bm.memory, bm.multiModel].map((v, j) => (
+                        <td key={j} style={{ padding: '0.75rem 1rem', fontFamily: T.mono, color: v ? T.accent : T.muted }}>{v ? '\u25CF' : '\u25CB'}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <div className="text-[10px] mb-2" style={{ color: T.dim }}>{inf.concept}</div>
-            <div className="text-[10px] font-mono" style={{ color: T.accent }}>→ {inf.integrated}</div>
-          </Card>
-        ))}
-      </div>
-    </Layout>
+          </FadeIn>
+        </div>
+      </section>
+
+      <section style={{ padding: 'clamp(8rem, 16vw, 14rem) 0', borderTop: `1px solid ${T.border}` }}>
+        <div style={{ maxWidth: 600, margin: '0 auto', padding: '0 2rem', textAlign: 'center' }}>
+          <FadeIn>
+            <Label>One of one</Label>
+            <h2 style={{ fontSize: 'clamp(2.25rem, 5vw, 3.5rem)', fontWeight: 500, letterSpacing: '-0.04em', color: T.text, lineHeight: 1.05, margin: '0 0 1.25rem' }}>
+              The governed coding agent.
+            </h2>
+            <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.dim, maxWidth: '44ch', margin: '0 auto 2.5rem' }}>
+              Not a copilot. Not a chatbot. A governed cognitive agentic development platform
+              with proof on every action, forecasting on every task, and memory that never forgets.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link href={b('/terminal')} style={{ display: 'inline-flex', alignItems: 'center', padding: '0.75rem 1.75rem', background: T.text, color: T.bg, borderRadius: 999, fontSize: '0.8125rem', fontWeight: 500, textDecoration: 'none' }}>Launch a11oy Code</Link>
+              <Link href={b('/sdk')} style={{ display: 'inline-flex', alignItems: 'center', padding: '0.75rem 1.75rem', background: 'transparent', color: T.accent, border: '1px solid rgba(201,183,135,0.3)', borderRadius: 999, fontSize: '0.8125rem', fontWeight: 500, textDecoration: 'none' }}>SDK & Cookbook {'\u2192'}</Link>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      <footer style={{ borderTop: `1px solid ${T.border}`, padding: '3rem 2rem' }}>
+        <div style={{ maxWidth: 1080, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.75rem', color: T.muted, fontFamily: T.mono }}>a11oy code</span>
+          <span style={{ fontSize: '0.6875rem', color: T.muted }}>\u00A9 {new Date().getFullYear()} a11oy</span>
+        </div>
+      </footer>
+    </div>
   );
 }

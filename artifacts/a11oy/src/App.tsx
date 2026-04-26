@@ -56,6 +56,7 @@ const AgentViz = lazy(() => import('./pages/AgentViz').then(m => ({ default: m.A
 const DevPlatform = lazy(() => import('./pages/DevPlatform').then(m => ({ default: m.DevPlatform })));
 const A11oyCode = lazy(() => import('./pages/A11oyCode').then(m => ({ default: m.A11oyCode })));
 const AgentMesh = lazy(() => import('./pages/AgentMesh').then(m => ({ default: m.AgentMesh })));
+const PluginHub = lazy(() => import('./pages/PluginHub').then(m => ({ default: m.PluginHub })));
 
 export default function App() {
   return (
@@ -99,6 +100,7 @@ export default function App() {
         <Route path={`${base}/sdk`} component={DevPlatform} />
         <Route path={`${base}/a11oy-code`} component={A11oyCode} />
         <Route path={`${base}/agent-mesh`} component={AgentMesh} />
+        <Route path={`${base}/plugins`} component={PluginHub} />
         <Route path={`${base}/about`} component={About} />
         <Route>
           <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--color-a11oy-navy)', color: 'var(--color-a11oy-text)' }}>
