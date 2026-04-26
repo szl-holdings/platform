@@ -115,7 +115,7 @@ export function Recommendations() {
         label="RECOMMENDATIONS"
         title="Decision Intelligence"
         subtitle="Evidence-backed recommendations with adversarial validation. Every insight is traceable to proof envelopes and undergoes structured tradecraft checks before promotion."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-3 gap-3 mb-8">

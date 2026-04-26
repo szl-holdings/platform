@@ -129,7 +129,7 @@ export function SkillsLibrary() {
                       <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{skill.domain}</span>
                     </div>
                   </div>
-                  <StatusPill status={skill.status as 'LIVE' | 'DEMO' | 'ROADMAP'} />
+                  <StatusPill status={skill.status as 'LIVE' | 'ROADMAP'} />
                 </div>
                 <p className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-sub)' }}>{skill.description}</p>
                 <div className="grid grid-cols-3 gap-2 text-xs">

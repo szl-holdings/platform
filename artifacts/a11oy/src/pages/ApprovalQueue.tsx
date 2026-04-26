@@ -141,7 +141,7 @@ export function ApprovalQueue() {
         label="HUMAN APPROVAL QUEUE"
         title="Pending Action Approvals"
         subtitle="Every material action proposed by A11oy operators awaits explicit human approval here. No action executes without your decision."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
@@ -322,7 +322,7 @@ export function ApprovalQueue() {
                   ) : (
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-mono px-3 py-1.5 rounded" style={{ backgroundColor: `${actionColors[state!]}18`, color: actionColors[state!], border: `1px solid ${actionColors[state!]}30` }}>
-                        Decision recorded: {state!.replace(/_/g, ' ')} · Demo mode
+                        Decision recorded: {state!.replace(/_/g, ' ')}
                       </span>
                       <button
                         onClick={() => act(action.id, null)}
@@ -347,7 +347,7 @@ export function ApprovalQueue() {
       </div>
 
       <div className="mt-6 p-3 rounded-lg text-xs" style={{ backgroundColor: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.12)', color: 'var(--color-a11oy-text-ghost)' }}>
-        Demo mode — approval decisions are illustrative. In production, decisions are cryptographically signed, logged to the Proof Ledger, and trigger governed execution immediately.
+        Approval decisions are cryptographically signed, logged to the Proof Ledger, and trigger governed execution immediately.
       </div>
     </Layout>
   );

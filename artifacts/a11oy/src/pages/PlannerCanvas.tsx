@@ -147,7 +147,7 @@ export function PlannerCanvas() {
         label="PLANNER CANVAS"
         title="Plan Decomposition DAG"
         subtitle="Objectives decompose into animated dependency graphs. Agents assigned to nodes, resource estimates shown, step-through controls for operator review."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

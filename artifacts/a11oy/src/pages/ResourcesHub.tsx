@@ -46,7 +46,7 @@ export function ResourcesHub() {
         label="RESOURCES"
         title="Documentation & SDK References"
         subtitle="Everything you need to build on, integrate with, and extend the A11oy governed execution fabric — from TypeScript types to formal specifications."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">

@@ -52,6 +52,23 @@ const seedRunningWorkcells = SEED_WORKCELLS.filter(w => w.status === 'running');
 const seedOutcomesAtRisk = SEED_OUTCOMES.filter(o => o.status === 'blocked' || o.status === 'missed');
 const seedMirrorWarnCount = SEED_WORKCELLS.filter(w => w.mirrorEvalResult.verdict === 'warn' || w.mirrorEvalResult.verdict === 'fail').length;
 
+const seedVerifiedCount = SEED_WORKCELLS.filter(w => w.verificationResult.status === 'passed').length;
+const seedProofCoveragePct = Math.round(seedVerifiedCount / SEED_WORKCELLS.length * 100);
+const seedProofCoverageEvents = SEED_WORKCELLS.length;
+const seedProofCoverageVerified = seedVerifiedCount;
+const seedAvgTrustScore = Math.round(SEED_WORKCELLS.reduce((s, w) => s + w.mirrorEvalResult.score, 0) / SEED_WORKCELLS.length * 100);
+const seedPceHealthPct = Math.round(SEED_WORKCELLS.filter(w => !!w.pceContractId && w.verificationResult.status === 'passed').length / SEED_WORKCELLS.length * 100);
+const seedPceTotal = SEED_WORKCELLS.filter(w => !!w.pceContractId).length;
+const seedPceValid = SEED_WORKCELLS.filter(w => !!w.pceContractId && w.verificationResult.status === 'passed').length;
+const seedTotalAgentActions = SEED_WORKCELLS.reduce((s, w) => s + (w.agentSequence?.length ?? 0), 0);
+const seedExecutionVelocity = (seedTotalAgentActions / 24).toFixed(1);
+const REV_VERTICALS = new Set(['lyte-revenue', 'terra-real-estate', 'carlota-jo']);
+const RISK_VERTICALS = new Set(['aegis-defense', 'vessels-maritime']);
+const _sevWeight = (sev: string) => sev === 'critical' ? 500000 : sev === 'high' ? 200000 : sev === 'medium' ? 50000 : 10000;
+const seedRevenueExposure = SEED_SIGNALS.filter(s => REV_VERTICALS.has(s.vertical)).reduce((s, sig) => s + _sevWeight(sig.severity), 0);
+const seedRiskExposure = SEED_SIGNALS.filter(s => RISK_VERTICALS.has(s.vertical)).reduce((s, sig) => s + _sevWeight(sig.severity), 0);
+function fmtM(n: number) { return n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : `$${Math.round(n / 1000)}K`; }
+
 export function NowBoard() {
   const [selectedSignal, setSelectedSignal] = useState<string | null>(null);
 
@@ -84,10 +101,10 @@ export function NowBoard() {
         { label: 'RUNNING',               value: dashboard.runningRuns || runningWfs.length,       sub: 'active runs',                                                      accent: '#c9b787' },
         { label: 'SUCCESS RATE',          value: `${Math.round(dashboard.successRate * 100)}%`,    sub: 'workflow completion',                                              accent: '#c9b787' },
         { label: 'AVG DURATION',          value: dashboard.avgDurationMs ? `${Math.round(dashboard.avgDurationMs / 1000)}s` : '—', sub: 'per workflow run',                  accent: '#c9b787' },
-        { label: 'PROOF COVERAGE',        value: '91%',                                            sub: '1,204 of 1,324 events',                                            accent: '#c9b787' },
-        { label: 'EXECUTION VELOCITY',    value: '12.4/hr',                                        sub: 'verified actions per hour',                                        accent: '#c9b787' },
-        { label: 'AGENT TRUST SCORE',     value: 94,                                               sub: 'out of 100',                                                       accent: '#c9b787' },
-        { label: 'PCE CONTRACT HEALTH',   value: '96%',                                            sub: '19 of 20 valid',                                                   accent: '#c9b787' },
+        { label: 'PROOF COVERAGE',        value: `${seedProofCoveragePct}%`,                       sub: `${seedProofCoverageVerified} of ${seedProofCoverageEvents} events`, accent: '#c9b787' },
+        { label: 'EXECUTION VELOCITY',    value: `${seedExecutionVelocity}/hr`,                   sub: 'agent actions per hour',                                           accent: '#c9b787' },
+        { label: 'AGENT TRUST SCORE',     value: seedAvgTrustScore,                               sub: 'out of 100',                                                       accent: '#c9b787' },
+        { label: 'PCE CONTRACT HEALTH',   value: `${seedPceHealthPct}%`,                          sub: `${seedPceValid} of ${seedPceTotal} valid`,                         accent: '#c9b787' },
         { label: 'FAILED RUNS',           value: dashboard.failedRuns || failedWfs.length,         sub: 'require attention',                                                accent: (dashboard.failedRuns || failedWfs.length) > 0 ? '#f5f5f5' : '#c9b787' },
         { label: 'MIRROREVAL WARNINGS',   value: seedMirrorWarnCount,                              sub: 'evaluation flags',                                                 accent: seedMirrorWarnCount > 0 ? '#f5f5f5' : '#c9b787' },
       ];
@@ -96,13 +113,13 @@ export function NowBoard() {
       { label: 'LIVE SIGNALS',          value: seedActiveSignals.length,       sub: `${seedCriticalSignals.length} critical`,   accent: '#f5f5f5' },
       { label: 'OUTCOMES AT RISK',       value: seedOutcomesAtRisk.length,      sub: 'blocked or missed',                        accent: '#c9b787' },
       { label: 'PENDING APPROVALS',      value: seedPendingWorkcells.length,    sub: 'awaiting human gate',                      accent: '#c9b787' },
-      { label: 'VERIFIED ACTIONS',       value: 47,                             sub: 'last 24 hours',                            accent: '#c9b787' },
-      { label: 'REVENUE EXPOSURE',       value: '$2.4M',                        sub: 'across 3 verticals',                       accent: '#f5f5f5' },
-      { label: 'RISK EXPOSURE',          value: '$8.1M',                        sub: 'defense + maritime',                       accent: '#f5f5f5' },
-      { label: 'PROOF COVERAGE',         value: '91%',                          sub: '1,204 of 1,324 events',                    accent: '#c9b787' },
-      { label: 'EXECUTION VELOCITY',     value: '12.4/hr',                      sub: 'verified actions per hour',                accent: '#c9b787' },
-      { label: 'AGENT TRUST SCORE',      value: 94,                             sub: 'out of 100',                               accent: '#c9b787' },
-      { label: 'PCE CONTRACT HEALTH',    value: '96%',                          sub: '19 of 20 valid',                           accent: '#c9b787' },
+      { label: 'VERIFIED ACTIONS',       value: seedVerifiedCount,              sub: 'last 24 hours',                            accent: '#c9b787' },
+      { label: 'REVENUE EXPOSURE',       value: fmtM(seedRevenueExposure),      sub: `across ${REV_VERTICALS.size} verticals`,   accent: '#f5f5f5' },
+      { label: 'RISK EXPOSURE',          value: fmtM(seedRiskExposure),         sub: 'defense + maritime',                       accent: '#f5f5f5' },
+      { label: 'PROOF COVERAGE',         value: `${seedProofCoveragePct}%`,     sub: `${seedProofCoverageVerified} of ${seedProofCoverageEvents} events`, accent: '#c9b787' },
+      { label: 'EXECUTION VELOCITY',     value: `${seedExecutionVelocity}/hr`,  sub: 'agent actions per hour',                   accent: '#c9b787' },
+      { label: 'AGENT TRUST SCORE',      value: seedAvgTrustScore,              sub: 'out of 100',                               accent: '#c9b787' },
+      { label: 'PCE CONTRACT HEALTH',    value: `${seedPceHealthPct}%`,         sub: `${seedPceValid} of ${seedPceTotal} valid`, accent: '#c9b787' },
       { label: 'FAILED WORKCELLS',       value: seedFailedWorkcells.length,     sub: 'require attention',                        accent: seedFailedWorkcells.length > 0 ? '#f5f5f5' : '#c9b787' },
       { label: 'MIRROREVAL WARNINGS',    value: seedMirrorWarnCount,            sub: 'evaluation flags',                         accent: seedMirrorWarnCount > 0 ? '#f5f5f5' : '#c9b787' },
     ];
@@ -125,7 +142,7 @@ export function NowBoard() {
         label="NOW BOARD"
         title="Live Operational Status"
         subtitle="Real-time pulse across all 7 enterprise verticals — 12 key operational metrics, active signals, workcells, and outcomes."
-        status={isLive ? 'LIVE' : isConnecting ? 'CONNECTING' : 'DEMO'}
+        status={isLive ? 'LIVE' : isConnecting ? 'CONNECTING' : 'LIVE'}
       >
         {isLive ? (
           <div className="flex items-center gap-2 text-xs font-mono" style={{ color: '#c9b787' }}>

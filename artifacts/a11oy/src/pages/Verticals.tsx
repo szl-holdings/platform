@@ -22,7 +22,7 @@ export function Verticals() {
         label="ENTERPRISE VERTICALS"
         title="Vertical Coverage Map"
         subtitle="A11oy operates across 7 enterprise verticals. Each vertical has dedicated agent operators, signal schemas, governance policies, and proof coverage."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">

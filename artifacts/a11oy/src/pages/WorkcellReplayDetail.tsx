@@ -64,7 +64,7 @@ export function WorkcellReplayDetail() {
         label="WORKCELL REPLAY"
         title={`↩ ${wc.name}`}
         subtitle="Step-by-step replay of the workcell execution trace with latency, agent roles, and evidence chain."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid lg:grid-cols-3 gap-6">

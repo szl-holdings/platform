@@ -115,7 +115,7 @@ export function Outcomes() {
         label="OUTCOME GRAPH"
         title="Enterprise Outcome Intelligence"
         subtitle="Actions mapped to business KPIs across 6 dimensions: revenue impact, risk delta, SLA adherence, cost efficiency, compliance score, and cycle time."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

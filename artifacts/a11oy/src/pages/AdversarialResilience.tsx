@@ -156,7 +156,7 @@ export function AdversarialResilience() {
         label="ADVERSARIAL RESILIENCE"
         title="Governance Stress Testing"
         subtitle="Simulated attack vectors — prompt injection, privilege escalation, data exfiltration — animated through each governance layer to show interception in action."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

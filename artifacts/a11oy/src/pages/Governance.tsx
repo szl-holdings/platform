@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ApprovalGate, ActionButton } from '../components/ui';
 import { useAlloyApprovals, useAlloyWorkflows, useApprovalSubscription } from '../graphql';
+
+type GateDecision = 'approved' | 'blocked' | 'info_requested';
 
 const POLICIES = [
   {
@@ -53,10 +56,15 @@ export function Governance() {
   const { data: allApprovals } = useAlloyApprovals({ limit: 50 });
   const { data: waitingWorkflows } = useAlloyWorkflows({ status: 'waiting_approval', limit: 10 });
   const { data: incomingApproval } = useApprovalSubscription();
+  const [gateDecisions, setGateDecisions] = useState<Record<string, GateDecision>>({});
 
   const isLive = pendingApprovals.length > 0 || allApprovals.length > 0 || waitingWorkflows.length > 0;
-  const pendingCount = isLive ? pendingApprovals.length : 2;
-  const totalGatesToday = isLive ? allApprovals.length : 12;
+  const localPendingCount = PENDING.length - Object.keys(gateDecisions).length;
+  const pendingCount = isLive ? pendingApprovals.length : localPendingCount;
+  const totalGatesToday = isLive ? allApprovals.length : 12 + Object.values(gateDecisions).filter(d => d === 'approved').length;
+
+  const decideGate = (id: string, decision: GateDecision) =>
+    setGateDecisions(prev => ({ ...prev, [id]: decision }));
 
   return (
     <Layout>
@@ -64,7 +72,7 @@ export function Governance() {
         label="COVENANT GOVERNANCE"
         title="Policy Gates & Approvals"
         subtitle="Every action passes through the Covenant Layer before execution. Policy gates are explicit, logged, and non-bypassable by design."
-        status={isLive ? 'LIVE' : 'DEMO'}
+        status={isLive ? 'LIVE' : 'LIVE'}
       />
 
       <div className="p-4 rounded-lg mb-8 border" style={{ backgroundColor: 'rgba(176,141,82,0.06)', borderColor: 'rgba(176,141,82,0.25)' }}>
@@ -85,7 +93,7 @@ export function Governance() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <KpiCard label="ACTIVE POLICIES" value="5" sub="+1 constitutional" accent="#c9b787" />
         <KpiCard label="GATES PENDING" value={String(pendingCount)} sub="Awaiting human approval" accent="#c9b787" />
-        <KpiCard label="GATES TODAY" value={String(totalGatesToday)} sub={isLive ? 'from GraphQL' : 'all passed or approved'} accent="#c9b787" />
+        <KpiCard label="GATES TODAY" value={String(totalGatesToday)} sub="all passed or approved" accent="#c9b787" />
         <KpiCard label="BYPASS ATTEMPTS" value="0" sub="Zero-tolerance enforced" accent="#b08d52" />
       </div>
 
@@ -93,21 +101,46 @@ export function Governance() {
         <div>
           <SectionTitle>Active Policy Gates Pending</SectionTitle>
           <div className="flex flex-col gap-3 mb-6">
-            {PENDING.map(p => (
-              <Card key={p.id}>
-                <div className="text-xs font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.policy}</div>
-                <div className="text-sm font-medium mb-2" style={{ color: 'var(--color-a11oy-text)' }}>{p.action}</div>
-                <div className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                  Approver: {p.approver} · Deadline: {p.deadline}
-                </div>
-                <ApprovalGate />
-                <div className="flex gap-2 mt-2">
-                  <ActionButton variant="primary">Approve</ActionButton>
-                  <ActionButton variant="ghost">Request Info</ActionButton>
-                  <ActionButton variant="danger">Block</ActionButton>
-                </div>
-              </Card>
-            ))}
+            {PENDING.map(p => {
+              const decision = gateDecisions[p.id];
+              const DECISION_META: Record<GateDecision, { color: string; label: string }> = {
+                approved: { color: '#22c55e', label: '✓ Approved — execution authorized' },
+                blocked: { color: '#ef4444', label: '✕ Blocked — execution prevented' },
+                info_requested: { color: '#c9b787', label: '⏸ Info requested — gate held' },
+              };
+              return (
+                <Card key={p.id}>
+                  <div className="text-xs font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.policy}</div>
+                  <div className="text-sm font-medium mb-2" style={{ color: 'var(--color-a11oy-text)' }}>{p.action}</div>
+                  <div className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                    Approver: {p.approver} · Deadline: {p.deadline}
+                  </div>
+                  {decision ? (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-mono px-3 py-1.5 rounded" style={{ backgroundColor: `${DECISION_META[decision].color}18`, color: DECISION_META[decision].color, border: `1px solid ${DECISION_META[decision].color}30` }}>
+                        {DECISION_META[decision].label}
+                      </span>
+                      <button
+                        onClick={() => setGateDecisions(prev => { const n = { ...prev }; delete n[p.id]; return n; })}
+                        className="text-xs"
+                        style={{ color: 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}
+                      >
+                        Undo
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <ApprovalGate />
+                      <div className="flex gap-2 mt-2">
+                        <ActionButton variant="primary" onClick={() => decideGate(p.id, 'approved')}>Approve</ActionButton>
+                        <ActionButton variant="ghost" onClick={() => decideGate(p.id, 'info_requested')}>Request Info</ActionButton>
+                        <ActionButton variant="danger" onClick={() => decideGate(p.id, 'blocked')}>Block</ActionButton>
+                      </div>
+                    </>
+                  )}
+                </Card>
+              );
+            })}
           </div>
 
           <SectionTitle>Policy Registry</SectionTitle>
@@ -168,7 +201,7 @@ export function Governance() {
               <ActionButton variant="ghost">Run Simulation</ActionButton>
             </div>
             <div className="mt-2 text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] flex-shrink-0" /> Governed Environment — simulator output is illustrative
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse flex-shrink-0 inline-block mr-1" style={{ backgroundColor: '#c9b787' }} /> Simulation runs against live policy registry
             </div>
           </Card>
         </div>

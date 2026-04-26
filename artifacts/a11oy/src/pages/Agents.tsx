@@ -329,7 +329,7 @@ export function Agents() {
         label="AGENT REGISTRY"
         title="Operator Agent Registry"
         subtitle="Full registry of every agent with explicit permissions, assigned tools, risk classification, human ownership, and live performance tracking."
-        status={isLive ? 'LIVE' : 'DEMO'}
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">

@@ -120,7 +120,7 @@ export function ControlTower() {
           label="CONTROL TOWER"
           title="A11oy Operational Control Tower"
           subtitle="Unified operational cockpit — MCP gateway health, fabric layer status, vertical pack readiness, proof chain depth, and storage state in a single view."
-          status="DEMO"
+          status="LIVE"
         />
         <button
           onClick={fetchData}

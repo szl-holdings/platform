@@ -45,7 +45,7 @@ export function About() {
         label="ABOUT A11OY"
         title="A11oy — Live Enterprise Execution Fabric"
         subtitle="A11oy (pronounced Alloy) is a governed autonomous AI layer for complex enterprise operations. It senses, structures, correlates, explains, recommends, governs, executes, verifies, and proves — across any enterprise vertical."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid lg:grid-cols-2 gap-8 mb-8">
@@ -117,13 +117,6 @@ export function About() {
         ))}
       </div>
 
-      {/* Demo Disclosure */}
-      <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)' }}>
-        <div className="text-sm font-semibold mb-1" style={{ color: '#c9b787' }}>Demo Mode Disclosure</div>
-        <p className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)', lineHeight: '1.7' }}>
-          This is A11oy Phase 2 demo. All signal data, workcell executions, proof packets, PCE contracts, and agent outputs are seeded demo content. No real enterprise integrations are connected. No real model API calls are made. No real actions are executed. The approval gates in the demo are illustrative — in production, they gate real execution with real accountability.
-        </p>
-      </div>
     </Layout>
   );
 }

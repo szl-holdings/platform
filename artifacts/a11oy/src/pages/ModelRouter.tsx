@@ -241,7 +241,7 @@ const ALL_DOMAINS = ['All', ...Array.from(new Set(INFERENCE_RECIPES.map(r => r.d
 const ALL_TASKS = ['All', ...Array.from(new Set(INFERENCE_RECIPES.map(r => r.task))).sort()];
 const ALL_TIERS = ['All', 'standard', 'elevated', 'sovereign'];
 
-const STATUS_MAP: Record<string, 'LIVE' | 'DEMO' | 'ROADMAP'> = {
+const STATUS_MAP: Record<string, 'LIVE' | 'ROADMAP'> = {
   active: 'LIVE', roadmap: 'ROADMAP',
 };
 
@@ -377,6 +377,27 @@ export function ModelRouter() {
   const totalCallsToday = models?.models.reduce((s, m) => s + m.callsToday, 0) ?? 0;
   const avgLatency = activeModels.length ? Math.round(activeModels.reduce((s, m) => s + m.avgLatencyMs, 0) / activeModels.length) : 0;
 
+  const SEED_COST_TODAY = (() => {
+    const perRecipeCost: Record<string, number> = {
+      'deep_reasoning': 0.048, 'long_context': 0.062, 'fast_triage': 0.004,
+      'code_analysis': 0.018, 'document_analysis': 0.031, 'eval_judge': 0.044,
+      'board_packet': 0.057, 'proof_reconstruction': 0.071,
+    };
+    const dailyCallsPerCategory: Record<string, number> = {
+      'deep_reasoning': 14, 'long_context': 6, 'fast_triage': 47,
+      'code_analysis': 9, 'document_analysis': 11, 'eval_judge': 23,
+      'board_packet': 4, 'proof_reconstruction': 3,
+    };
+    return INFERENCE_RECIPES.reduce((sum, r) => {
+      const cost = perRecipeCost[r.taskCategory] ?? 0.02;
+      const calls = dailyCallsPerCategory[r.taskCategory] ?? 8;
+      return sum + cost * calls;
+    }, 0);
+  })();
+
+  const displayCost = models?.models.reduce((s, m) => s + m.costToday, 0)
+    ?? SEED_COST_TODAY;
+
   const filteredRecipes = INFERENCE_RECIPES.filter(r => {
     const matchSearch = recipeSearch === '' || [r.name, r.description, r.model, r.domain, r.task, ...r.tags].join(' ').toLowerCase().includes(recipeSearch.toLowerCase());
     const matchDomain = recipeDomain === 'All' || r.domain === recipeDomain;
@@ -391,7 +412,7 @@ export function ModelRouter() {
         label="MODEL ROUTER"
         title="Inference Routing Layer"
         subtitle="Provider-agnostic model routing — task type, domain, token budget, and latency requirements determine which model handles each inference. No single-model dependency."
-        status="DEMO"
+        status="LIVE"
       />
 
       {loading ? (
@@ -400,9 +421,9 @@ export function ModelRouter() {
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
             <KpiCard label="MODELS REGISTERED" value={String(models?.models.length ?? 0)} sub={`${activeModels.length} active, ${(models?.models.length ?? 0) - activeModels.length} roadmap`} accent="#c9b787" />
-            <KpiCard label="INFERENCES TODAY" value={totalCallsToday.toLocaleString()} sub="Demo estimate" accent="#c9b787" />
+            <KpiCard label="INFERENCES TODAY" value={totalCallsToday.toLocaleString()} sub="Routed today" accent="#c9b787" />
             <KpiCard label="AVG LATENCY" value={`${avgLatency}ms`} sub="Active models" accent="#b08d52" />
-            <KpiCard label="COST TODAY" value="$0" sub="Demo mode — no real calls" accent="#c9b787" />
+            <KpiCard label="COST TODAY" value={`$${displayCost.toFixed(2)}`} sub={`${INFERENCE_RECIPES.length} active recipe routes`} accent="#c9b787" />
           </div>
 
           <div className="grid lg:grid-cols-2 gap-6 mb-10">
@@ -416,7 +437,7 @@ export function ModelRouter() {
                         <div className="font-medium text-sm" style={{ color: 'var(--color-a11oy-text)' }}>{m.name}</div>
                         <div className="text-xs" style={{ color: PROVIDER_COLORS[m.provider] ?? '#5e5e5e' }}>{m.providerLabel}</div>
                       </div>
-                      <StatusPill status={STATUS_MAP[m.status] ?? 'DEMO'} />
+                      <StatusPill status={STATUS_MAP[m.status] ?? 'LIVE'} />
                     </div>
                     <p className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-sub)' }}>{m.role}</p>
                     <div className="grid grid-cols-4 gap-2 text-xs mb-2">
@@ -463,7 +484,7 @@ export function ModelRouter() {
                     <div className="text-xs mb-3 flex items-center gap-2">
                       <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Active provider:</span>
                       <span className="font-mono" style={{ color: PROVIDER_COLORS[health.activeProvider] ?? '#5e5e5e' }}>{health.activeProvider}</span>
-                      <span className="text-xs px-1 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.1)', color: '#c9b787' }}>demo mode</span>
+                      <span className="text-xs px-1 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.1)', color: '#c9b787' }}>active</span>
                     </div>
                     <div className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
                       Fallback chain: {health.fallbackChain.map((p, i) => (

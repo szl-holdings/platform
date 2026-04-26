@@ -137,7 +137,7 @@ export function ProofLedger() {
         label="PROOF LEDGER"
         title="Immutable Proof Chain"
         subtitle="Every governed execution is a connected chain: signal detected → context assembled → recommendation generated → policy evaluated → approval → execution → verification. Each node is cryptographically hashed."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">

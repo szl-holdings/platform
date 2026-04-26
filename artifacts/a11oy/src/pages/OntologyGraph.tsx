@@ -85,7 +85,7 @@ export function OntologyGraph() {
         label="DOMAIN ONTOLOGY"
         title="Ontology Graph"
         subtitle="Interactive knowledge graph: signals, agents, outcomes, and policies interconnect across all verticals. Click nodes to explore causal chains."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">

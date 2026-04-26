@@ -56,7 +56,7 @@ export function ConstellationGraph() {
         label="CONSTELLATION MAP"
         title="12-Vertical Constellation"
         subtitle="The A11oy constellation — 12 governed applications connected by the signal mesh, proof chain, and MCP gateway. Every edge is a governed data flow."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

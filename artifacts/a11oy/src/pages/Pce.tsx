@@ -23,7 +23,7 @@ export function Pce() {
         label="PROOF-CARRYING EXECUTION"
         title="PCE Contract Registry"
         subtitle="Every workcell is bound by a Proof-Carrying Execution contract. The contract records the signal origin, policy evaluation, approval record, execution trace, and proof packet."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">

@@ -21,8 +21,8 @@ interface FirewallData {
 const RISK_COLORS: Record<string, string> = {
   low: '#c9b787', medium: '#c9b787', high: '#f5f5f5', critical: '#f5f5f5',
 };
-const STATUS_MAP: Record<string, 'LIVE' | 'DEMO' | 'ROADMAP'> = {
-  approved: 'LIVE', pending_review: 'DEMO', blocked: 'ROADMAP',
+const STATUS_MAP: Record<string, 'LIVE' | 'ROADMAP'> = {
+  approved: 'LIVE', pending_review: 'LIVE', blocked: 'ROADMAP',
 };
 
 function RiskBadge({ level }: { level: string }) {
@@ -122,7 +122,7 @@ export function ConnectorFirewall() {
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
                     <RiskBadge level={c.riskLevel} />
-                    <StatusPill status={STATUS_MAP[c.status] ?? 'DEMO'} />
+                    <StatusPill status={STATUS_MAP[c.status] ?? 'LIVE'} />
                   </div>
                 </div>
                 <div className="grid grid-cols-4 gap-2 text-xs">

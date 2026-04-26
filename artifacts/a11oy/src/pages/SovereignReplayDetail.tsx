@@ -120,12 +120,15 @@ function fmt(ms: number) {
   return s > 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`;
 }
 
+type ReplayCertDecision = 'certified' | 'flagged' | 'rejected';
+
 export function SovereignReplayDetail() {
   const params = useParams<{ id: string }>();
   const [data] = useState<ReplayReport | null>(() => buildReplayFromId(params.id ?? ''));
   const [replayState, setReplayState] = useState<'idle' | 'playing' | 'done'>('idle');
   const [stepIdx, setStepIdx] = useState(-1);
   const [speed, setSpeed] = useState(800);
+  const [certDecision, setCertDecision] = useState<ReplayCertDecision | null>(null);
 
   const steps = data?.steps ?? [];
 
@@ -349,6 +352,66 @@ export function SovereignReplayDetail() {
               </Card>
             </div>
           )}
+
+          <div>
+            <SectionTitle>Replay Certification</SectionTitle>
+            <Card className="text-xs">
+              {!certDecision ? (
+                <>
+                  <div className="mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                    Review the execution trace and certify this replay as accurate, flag it for further investigation, or reject the outcome record.
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <button
+                      onClick={() => setCertDecision('certified')}
+                      className="w-full text-xs px-3 py-1.5 rounded text-left"
+                      style={{ backgroundColor: 'rgba(34,197,94,0.12)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.3)', cursor: 'pointer' }}
+                    >
+                      ✓ Certify replay
+                    </button>
+                    <button
+                      onClick={() => setCertDecision('flagged')}
+                      className="w-full text-xs px-3 py-1.5 rounded text-left"
+                      style={{ backgroundColor: 'rgba(201,183,135,0.08)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.2)', cursor: 'pointer' }}
+                    >
+                      ⚑ Flag for review
+                    </button>
+                    <button
+                      onClick={() => setCertDecision('rejected')}
+                      className="w-full text-xs px-3 py-1.5 rounded text-left"
+                      style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)', cursor: 'pointer' }}
+                    >
+                      ✕ Reject outcome
+                    </button>
+                  </div>
+                </>
+              ) : certDecision === 'certified' ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span style={{ color: '#22c55e' }}>✓</span>
+                    <span style={{ color: '#22c55e' }}>Replay certified — proof chain accepted.</span>
+                  </div>
+                  <button onClick={() => setCertDecision(null)} className="text-xs font-mono ml-2" style={{ color: 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}>undo</button>
+                </div>
+              ) : certDecision === 'flagged' ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span style={{ color: '#c9b787' }}>⚑</span>
+                    <span style={{ color: '#c9b787' }}>Flagged for investigation.</span>
+                  </div>
+                  <button onClick={() => setCertDecision(null)} className="text-xs font-mono ml-2" style={{ color: 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}>undo</button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span style={{ color: '#ef4444' }}>✕</span>
+                    <span style={{ color: '#ef4444' }}>Outcome rejected — record disputed.</span>
+                  </div>
+                  <button onClick={() => setCertDecision(null)} className="text-xs font-mono ml-2" style={{ color: 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}>undo</button>
+                </div>
+              )}
+            </Card>
+          </div>
 
           <Link
             href={`${BASE}/replay`}

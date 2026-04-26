@@ -10,7 +10,7 @@ interface TermLine {
 
 const WELCOME: TermLine[] = [
   { kind: 'system', text: '┌──────────────────────────────────────────────────────────────┐' },
-  { kind: 'system', text: '│  A11oy Terminal CLI  ·  v4.2.0  ·  Governed Environment      │' },
+  { kind: 'system', text: '│  A11oy Terminal CLI  ·  v0.3.0  ·  Governed Environment      │' },
   { kind: 'system', text: '│  Fabric operational — all systems nominal.                   │' },
   { kind: 'system', text: '│  Type  help  to see available commands.                      │' },
   { kind: 'system', text: '└──────────────────────────────────────────────────────────────┘' },
@@ -43,7 +43,7 @@ const COMMANDS: Record<string, (args: string[]) => string[]> = {
     '  version               Show version info',
     '  clear                 Clear terminal',
   ],
-  version: () => ['A11oy Terminal CLI v4.2.0', 'Fabric schema: 4.0.0', 'MCP server: mcp:a11oy-prod', 'Self-test: PASS · All gates nominal'],
+  version: () => ['A11oy Terminal CLI v0.3.0', 'Fabric schema: 4.0.0', 'MCP server: mcp:a11oy-prod', 'Self-test: PASS · All gates nominal'],
   now: () => {
     const active = SEED_SIGNALS.filter(s => s.status === 'active' || s.status === 'escalated');
     const critical = SEED_SIGNALS.filter(s => s.severity === 'critical');

@@ -47,7 +47,7 @@ export function SignalMesh() {
         label="SIGNAL MESH"
         title="Signal Ingestion & Routing"
         subtitle={`The fabric's sensory layer — ingesting, normalizing, deduplicating, and routing ${SEED_SIGNALS.length} business signals across all 7 enterprise verticals.`}
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">

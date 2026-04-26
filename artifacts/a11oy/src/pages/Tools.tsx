@@ -127,7 +127,7 @@ export function Tools() {
         label="TOOL REGISTRY"
         title="Operator Tool Registry"
         subtitle="Discrete, composable tools available to A11oy operators. Each tool has a defined input schema, output schema, and governance flags."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

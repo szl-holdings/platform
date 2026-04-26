@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 
-export function StatusPill({ status }: { status: 'LIVE' | 'DEMO' | 'GATED' | 'APPROVED' | 'ROADMAP' | 'WARN' | 'ERROR' | 'CONNECTING' }) {
+export function StatusPill({ status }: { status: 'LIVE' | 'GATED' | 'APPROVED' | 'ROADMAP' | 'WARN' | 'ERROR' | 'CONNECTING' }) {
   const styles: Record<string, { bg: string; color: string }> = {
     LIVE:       { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
-    DEMO:       { bg: 'rgba(138,138,138,0.15)',  color: '#8a8a8a' },
     GATED:      { bg: 'rgba(94,94,94,0.15)', color: '#5e5e5e' },
     APPROVED:   { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
     ROADMAP:    { bg: 'rgba(94,94,94,0.15)',   color: '#5e5e5e' },
@@ -12,7 +11,7 @@ export function StatusPill({ status }: { status: 'LIVE' | 'DEMO' | 'GATED' | 'AP
     ERROR:      { bg: 'rgba(245,245,245,0.12)',  color: '#f5f5f5' },
     CONNECTING: { bg: 'rgba(94,94,94,0.15)',     color: '#5e5e5e' },
   };
-  const s = styles[status] ?? styles.DEMO;
+  const s = styles[status] ?? styles.LIVE;
   return (
     <span
       className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-medium"
@@ -24,16 +23,6 @@ export function StatusPill({ status }: { status: 'LIVE' | 'DEMO' | 'GATED' | 'AP
   );
 }
 
-export function DemoBadge() {
-  return (
-    <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-mono"
-      style={{ backgroundColor: 'rgba(138,138,138,0.12)', color: '#8a8a8a', border: '1px solid rgba(138,138,138,0.25)' }}
-    >
-      Demo data
-    </span>
-  );
-}
 
 export function ApprovalGate({
   label = 'Requires human approval',
@@ -91,7 +80,7 @@ export function PageHeader({
   label: string;
   title: string;
   subtitle?: string;
-  status?: 'LIVE' | 'DEMO' | 'GATED' | 'APPROVED' | 'ROADMAP' | 'WARN' | 'ERROR' | 'CONNECTING';
+  status?: 'LIVE' | 'GATED' | 'APPROVED' | 'ROADMAP' | 'WARN' | 'ERROR' | 'CONNECTING';
   children?: ReactNode;
 }) {
   return (

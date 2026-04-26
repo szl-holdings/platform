@@ -103,7 +103,7 @@ export function Memory() {
         label="OPERATOR MEMORY"
         title="Memory & Context Stores"
         subtitle="Short-term operational context, long-term domain knowledge, proof cache, and context packs — all scoped by operator and workcell."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

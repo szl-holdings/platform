@@ -72,7 +72,7 @@ export function ArchitectureOverview() {
         label="ARCHITECTURE"
         title="Seven-Layer Execution Fabric"
         subtitle="A11oy's governed execution fabric — from raw signal ingestion to immutable proof. Every layer is monitored, every action is traceable, every decision carries proof."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">

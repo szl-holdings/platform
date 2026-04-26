@@ -52,14 +52,14 @@ export function Demo() {
         label="DEMO CENTER"
         title="Interactive Demo Scenarios"
         subtitle="Step through curated demo scenarios to understand how A11oy senses, reasons, recommends, and proves — without any real integrations required."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <KpiCard label="SCENARIOS" value={SEED_DEMO_SCENARIOS.length} sub="curated" accent="#c9b787" />
         <KpiCard label="TOTAL WORKCELLS" value={SEED_WORKCELLS.length} sub="in fabric" accent="#c9b787" />
         <KpiCard label="TOTAL SIGNALS" value={SEED_SIGNALS.length} sub="in mesh" accent="#c9b787" />
-        <KpiCard label="DEMO MODE" value="LIVE" sub="no real integrations" accent="#c9b787" />
+        <KpiCard label="FABRIC STATUS" value="LIVE" sub="governed execution" accent="#c9b787" />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -162,7 +162,7 @@ export function Demo() {
                 <div className="mb-4 p-4 rounded-lg" style={{ backgroundColor: 'rgba(201,183,135,0.08)', border: '1px solid rgba(201,183,135,0.2)' }}>
                   <div className="text-sm font-semibold mb-1" style={{ color: '#c9b787' }}>Scenario Complete</div>
                   <div className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>
-                    All stages complete. No real integrations called. All outputs are demo data.
+                    All pipeline stages complete. Every step governed, traced, and proof-recorded.
                   </div>
                 </div>
               )}

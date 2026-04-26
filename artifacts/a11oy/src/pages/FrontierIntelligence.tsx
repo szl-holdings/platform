@@ -216,7 +216,7 @@ export function FrontierIntelligence() {
         label="FRONTIER INTELLIGENCE"
         title="Competitive Positioning Matrix"
         subtitle="A11oy is not trying to replace the enterprise. A11oy is the governed intelligence layer that lets the enterprise observe, decide, approve, execute, verify, and learn across every operational domain."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">

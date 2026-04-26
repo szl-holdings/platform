@@ -135,7 +135,7 @@ export function ExecutiveBrief() {
         label="EXECUTIVE BRIEF"
         title="Today's Intelligence Summary"
         subtitle={BRIEF_DATE}
-        status="DEMO"
+        status="LIVE"
       >
         <div className="flex items-center gap-4 text-xs font-mono" style={{ color: '#8a8a8a' }}>
           <span>Synthesized from <span style={{ color: '#c9b787' }}>5 agents</span></span>

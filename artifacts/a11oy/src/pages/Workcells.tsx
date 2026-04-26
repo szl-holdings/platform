@@ -36,7 +36,7 @@ export function Workcells() {
         label="WORKCELLS"
         title="Execution Workcell Engine"
         subtitle="Every workcell is a governed, traceable execution context. Inspect signal inputs, agent sequences, PCE contracts, and proof packets."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

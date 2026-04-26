@@ -43,7 +43,7 @@ export function ApplicationsCatalog() {
         label="APPLICATIONS CATALOG"
         title="Governed Applications"
         subtitle="All 12 applications governed by the A11oy execution fabric. Each application operates across the seven-layer decision loop with proof-chain coverage on every material action."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">

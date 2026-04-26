@@ -140,7 +140,7 @@ export function Counterfactuals() {
         label="COUNTERFACTUAL EXPLORER"
         title="What-If Analysis"
         subtitle="For any completed execution, explore alternate decisions: different model, lower threshold, no approval, delayed response. See impact deltas side-by-side."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

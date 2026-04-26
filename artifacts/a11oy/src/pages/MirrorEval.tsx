@@ -177,7 +177,7 @@ export function MirrorEval() {
         label="MIRROREVAL 2.0"
         title="14-Dimension Evaluation Harness"
         subtitle="Every action brief, tool plan, and board packet is scored across 14 dimensions before it can proceed. Regression trends, per-agent sparklines, and multi-model radar charts."
-        status="DEMO"
+        status="LIVE"
       />
 
       {loading ? (

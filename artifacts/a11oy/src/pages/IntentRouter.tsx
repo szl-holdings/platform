@@ -95,7 +95,7 @@ export function IntentRouter() {
         label="INTENT ROUTER"
         title="Intent Classification & Routing"
         subtitle="Natural language intents classified by domain, entities extracted, priority assigned, and routed to the right operator agents."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

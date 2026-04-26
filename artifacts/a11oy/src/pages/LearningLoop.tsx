@@ -97,7 +97,7 @@ export function LearningLoop() {
         label="LEARNING LOOP"
         title="Outcome Learning Loop"
         subtitle="Past outcomes improve future decisions. Calibration curves, drift detection, acceptance rates, and a lessons-learned timeline — all feeding back into the system."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

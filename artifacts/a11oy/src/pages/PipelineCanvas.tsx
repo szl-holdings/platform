@@ -163,7 +163,7 @@ export function PipelineCanvas() {
         label="PIPELINE CANVAS"
         title="Live Orchestration Pipeline"
         subtitle="Watch a governed intent flow through all 11 layers — from natural language capture to proof-carrying execution and outcome learning."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

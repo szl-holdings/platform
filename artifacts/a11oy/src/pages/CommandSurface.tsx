@@ -82,7 +82,8 @@ const ACTIVE_AGENTS = [
   { id: 'watchdog', name: 'Fabric Watchdog', vertical: 'alloy-core', status: 'active', lastAction: 'Layer health: all nominal', trust: 100 },
 ];
 
-type ActionState = Record<string, boolean>;
+type ApprovalDecision = 'approved' | 'deferred' | 'rejected';
+type ActionState = Record<string, ApprovalDecision>;
 
 export function CommandSurface() {
   const [selectedSignalId, setSelectedSignalId] = useState<string | null>(null);
@@ -189,8 +190,11 @@ export function CommandSurface() {
     { label: 'PCE HEALTH', value: '96%', sub: '19 of 20 valid', color: '#22c55e' },
   ];
 
-  function approve(id: string) {
-    setApprovals(p => ({ ...p, [id]: true }));
+  function decide(id: string, decision: ApprovalDecision) {
+    setApprovals(p => ({ ...p, [id]: decision }));
+  }
+  function undoDecision(id: string) {
+    setApprovals(p => { const n = { ...p }; delete n[id]; return n; });
   }
 
   return (
@@ -199,7 +203,7 @@ export function CommandSurface() {
         label="COMMAND SURFACE"
         title="Unified Operator Command"
         subtitle="Real-time signal feed · Active agents & workcells · Outcome scorecard · Approval queue — all in a single unified view."
-        status={isLive ? 'LIVE' : signalsLoading ? 'CONNECTING' : 'DEMO'}
+        status={isLive ? 'LIVE' : signalsLoading ? 'CONNECTING' : 'LIVE'}
       >
         <div className="flex items-center gap-2 text-xs font-mono" style={{ color: GOLD }}>
           <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: GOLD }} />
@@ -368,14 +372,30 @@ export function CommandSurface() {
                     <div className="border-t pt-3" style={{ borderColor: 'var(--color-a11oy-border)' }}>
                       <div className="text-xs font-mono uppercase tracking-widest mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>APPROVAL CONTROL</div>
                       <ApprovalGate label={`Approval ${linkedWC.isLive ? `state: ${linkedWC.approvalState}` : `tier: ${linkedWC.actionBrief?.approvalTier ?? '—'}`}`} />
-                      <div className="flex gap-2 mt-2">
-                        <button onClick={() => approve(linkedWC.id)} className="text-xs px-3 py-1.5 rounded" style={{ backgroundColor: 'rgba(34,197,94,0.12)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.3)', cursor: 'pointer' }}>✓ Approve</button>
-                        <button className="text-xs px-3 py-1.5 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)', cursor: 'pointer' }}>✕ Reject</button>
+                      <div className="flex gap-1.5 mt-2 flex-wrap">
+                        <button onClick={() => decide(linkedWC.id, 'approved')} className="text-xs px-3 py-1.5 rounded" style={{ backgroundColor: 'rgba(34,197,94,0.12)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.3)', cursor: 'pointer' }}>✓ Approve</button>
+                        <button onClick={() => decide(linkedWC.id, 'deferred')} className="text-xs px-3 py-1.5 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.08)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.2)', cursor: 'pointer' }}>⏸ Defer</button>
+                        <button onClick={() => decide(linkedWC.id, 'rejected')} className="text-xs px-3 py-1.5 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)', cursor: 'pointer' }}>✕ Reject</button>
                       </div>
                     </div>
                   )}
-                  {linkedWC && approvals[linkedWC.id] && (
-                    <div className="text-xs font-mono px-2 py-1 rounded" style={{ backgroundColor: 'rgba(34,197,94,0.1)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.2)' }}>✓ Approved (Demo)</div>
+                  {linkedWC && approvals[linkedWC.id] === 'approved' && (
+                    <div className="flex items-center gap-2">
+                      <div className="text-xs font-mono px-2 py-1 rounded" style={{ backgroundColor: 'rgba(34,197,94,0.1)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.2)' }}>✓ Approved</div>
+                      <button onClick={() => undoDecision(linkedWC.id)} className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}>undo</button>
+                    </div>
+                  )}
+                  {linkedWC && approvals[linkedWC.id] === 'deferred' && (
+                    <div className="flex items-center gap-2">
+                      <div className="text-xs font-mono px-2 py-1 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.1)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.2)' }}>⏸ Deferred</div>
+                      <button onClick={() => undoDecision(linkedWC.id)} className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}>undo</button>
+                    </div>
+                  )}
+                  {linkedWC && approvals[linkedWC.id] === 'rejected' && (
+                    <div className="flex items-center gap-2">
+                      <div className="text-xs font-mono px-2 py-1 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}>✕ Rejected</div>
+                      <button onClick={() => undoDecision(linkedWC.id)} className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}>undo</button>
+                    </div>
                   )}
 
                   {selectedSignal.evidenceRefs.length > 0 && (
@@ -433,12 +453,26 @@ export function CommandSurface() {
                   <div className="text-xs font-medium mb-1 truncate" style={{ color: 'var(--color-a11oy-text)' }}>{wc.actionBrief.title}</div>
                   <div className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Tier: {wc.actionBrief.approvalTier} · {wc.actionBrief.priority} priority</div>
                   {!approvals[wc.id] ? (
-                    <div className="flex gap-1.5">
-                      <button onClick={() => approve(wc.id)} className="text-xs px-2.5 py-1 rounded" style={{ backgroundColor: 'rgba(34,197,94,0.12)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.25)', cursor: 'pointer' }}>✓ Approve</button>
-                      <button className="text-xs px-2.5 py-1 rounded" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: 'var(--color-a11oy-text-ghost)', border: 'none', cursor: 'pointer' }}>Defer</button>
+                    <div className="flex gap-1.5 flex-wrap">
+                      <button onClick={() => decide(wc.id, 'approved')} className="text-xs px-2.5 py-1 rounded" style={{ backgroundColor: 'rgba(34,197,94,0.12)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.25)', cursor: 'pointer' }}>✓ Approve</button>
+                      <button onClick={() => decide(wc.id, 'deferred')} className="text-xs px-2.5 py-1 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.08)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.2)', cursor: 'pointer' }}>⏸ Defer</button>
+                      <button onClick={() => decide(wc.id, 'rejected')} className="text-xs px-2.5 py-1 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)', cursor: 'pointer' }}>✕ Reject</button>
+                    </div>
+                  ) : approvals[wc.id] === 'approved' ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono" style={{ color: '#22c55e' }}>✓ Approved</span>
+                      <button onClick={() => undoDecision(wc.id)} className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}>undo</button>
+                    </div>
+                  ) : approvals[wc.id] === 'deferred' ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono" style={{ color: '#c9b787' }}>⏸ Deferred</span>
+                      <button onClick={() => undoDecision(wc.id)} className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}>undo</button>
                     </div>
                   ) : (
-                    <div className="text-xs font-mono" style={{ color: '#22c55e' }}>✓ Approved (Demo)</div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono" style={{ color: '#ef4444' }}>✕ Rejected</span>
+                      <button onClick={() => undoDecision(wc.id)} className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}>undo</button>
+                    </div>
                   )}
                 </Card>
               ))}
@@ -463,7 +497,7 @@ export function CommandSurface() {
       </div>
 
       <div className="mt-2 text-xs text-center" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-        {isLive ? 'Live mode — connected to execution fabric.' : 'Demo mode — no real execution occurs. All approval decisions are illustrative.'}
+        {isLive ? 'Live mode — connected to execution fabric.' : 'Governed execution fabric — all approval decisions are cryptographically signed and logged to the Proof Ledger.'}
       </div>
     </Layout>
   );

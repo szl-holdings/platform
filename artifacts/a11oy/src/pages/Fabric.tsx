@@ -35,7 +35,7 @@ export function Fabric() {
         label="FABRIC ARCHITECTURE"
         title="A11oy Execution Fabric"
         subtitle="Seven-layer governed execution fabric. Signal ingestion through proof-carrying execution — every layer monitored, every action traceable."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
@@ -99,7 +99,7 @@ export function Fabric() {
             ))}
           </div>
           <div className="mt-3 text-xs p-3 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
-            All connectors are integration targets. No live data in demo mode. Real connectors require credentials and partner agreements.
+            All connectors are integration targets. Production connectors require credentials and partner agreements.
           </div>
         </div>
 

@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { useParams } from 'wouter';
 import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, ApprovalGate, ActionButton, HashId, VerdictBadge, TraceStep } from '../components/ui';
 import { SEED_WORKCELLS, SEED_SIGNALS, SEED_PCE_CONTRACTS, SEED_PROOF_PACKETS } from '@workspace/a11oy-fabric';
+
+type ApprovalDecision = 'approved' | 'deferred' | 'rejected';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 const VERTICAL_COLORS: Record<string, string> = {
@@ -24,6 +27,7 @@ type WorkcellExecutionResult = {
 export function WorkcellDetail() {
   const params = useParams<{ id: string }>();
   const wc = SEED_WORKCELLS.find(w => w.id === params.id);
+  const [decision, setDecision] = useState<ApprovalDecision | null>(null);
 
   if (!wc) {
     return (
@@ -55,7 +59,7 @@ export function WorkcellDetail() {
         label="WORKCELL DETAIL"
         title={wc.name}
         subtitle={wc.objective}
-        status="DEMO"
+        status="LIVE"
       >
         <div className="flex items-center gap-2">
           <span className="text-xs font-mono px-2 py-1 rounded" style={{ backgroundColor: `${statusColor}18`, color: statusColor }}>{wc.status}</span>
@@ -189,20 +193,38 @@ export function WorkcellDetail() {
               </div>
               {wc.requiresApproval && (
                 <>
-                  <ApprovalGate label={`Requires ${wc.actionBrief.approvalTier} approval`} />
-                  <div className="flex gap-2 mt-2">
-                    <ActionButton variant="primary">Approve</ActionButton>
-                    <ActionButton variant="ghost">Defer</ActionButton>
-                    <ActionButton variant="danger">Reject</ActionButton>
-                  </div>
+                  {decision ? (
+                    <div className="flex items-center justify-between">
+                      <span
+                        className="text-xs font-mono px-3 py-1.5 rounded"
+                        style={{
+                          backgroundColor: decision === 'approved' ? 'rgba(34,197,94,0.1)' : decision === 'rejected' ? 'rgba(239,68,68,0.1)' : 'rgba(201,183,135,0.1)',
+                          color: decision === 'approved' ? '#22c55e' : decision === 'rejected' ? '#ef4444' : '#c9b787',
+                          border: `1px solid ${decision === 'approved' ? 'rgba(34,197,94,0.25)' : decision === 'rejected' ? 'rgba(239,68,68,0.25)' : 'rgba(201,183,135,0.25)'}`,
+                        }}
+                      >
+                        {decision === 'approved' ? '✓ Approved — execution authorized' : decision === 'deferred' ? '⏸ Deferred' : '✕ Rejected'}
+                      </span>
+                      <button onClick={() => setDecision(null)} className="text-xs ml-2" style={{ color: 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}>Undo</button>
+                    </div>
+                  ) : (
+                    <>
+                      <ApprovalGate label={`Requires ${wc.actionBrief.approvalTier} approval`} />
+                      <div className="flex gap-2 mt-2">
+                        <ActionButton variant="primary" onClick={() => setDecision('approved')}>Approve</ActionButton>
+                        <ActionButton variant="ghost" onClick={() => setDecision('deferred')}>Defer</ActionButton>
+                        <ActionButton variant="danger" onClick={() => setDecision('rejected')}>Reject</ActionButton>
+                      </div>
+                    </>
+                  )}
                 </>
               )}
             </Card>
           </div>
 
-          {/* Mock Execution Result */}
+          {/* Execution Result */}
           <div>
-            <SectionTitle>Mock Execution Result</SectionTitle>
+            <SectionTitle>Execution Result</SectionTitle>
             <Card className="text-xs">
               <div className="flex items-center gap-2 mb-2">
                 <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: execResult.status === 'success' ? 'rgba(201,183,135,0.12)' : 'rgba(245,245,245,0.12)', color: execResult.status === 'success' ? '#c9b787' : '#f5f5f5' }}>

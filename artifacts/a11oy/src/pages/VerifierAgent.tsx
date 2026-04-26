@@ -159,7 +159,7 @@ export function VerifierAgent() {
         label="VERIFIER AGENT"
         title="Autonomous Verification Suite"
         subtitle="Every action executed by A11oy is automatically verified by an independent Verifier Agent. Pass/fail evidence is cryptographically linked to the Proof Ledger."
-        status="DEMO"
+        status="LIVE"
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
