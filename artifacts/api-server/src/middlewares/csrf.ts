@@ -144,6 +144,21 @@ export function csrfMiddleware(req: Request, res: Response, next: NextFunction):
     return next();
   }
 
+  // NEXUS v1 orchestrator — server-side router calling domain endpoints via
+  // localhost. No browser involved; no CSRF attack surface. The header must be
+  // the literal sentinel value '1', the request MUST originate from the loopback
+  // interface (127.0.0.1 / ::1), and the path must not touch admin or org routes.
+  // Requiring the loopback source ensures an external client that merely sets this
+  // header cannot exploit the bypass — traffic from the internet never arrives on
+  // the loopback adapter.
+  const nexusOrch = req.headers['x-nexus-orchestrator'] as string | undefined;
+  const url = req.originalUrl || req.url;
+  const remoteAddr = req.socket?.remoteAddress ?? '';
+  const isLoopback = remoteAddr === '127.0.0.1' || remoteAddr === '::1' || remoteAddr === '::ffff:127.0.0.1';
+  if (nexusOrch === '1' && isLoopback && !url.startsWith('/api/admin') && !url.startsWith('/api/orgs')) {
+    return next();
+  }
+
   // API clients (mobile apps, CLI tools) that authenticate via bearer token do
   // not use browser cookies, so CSRF double-submit protection does not apply.
   // CSRF attacks rely on the browser automatically attaching session cookies to

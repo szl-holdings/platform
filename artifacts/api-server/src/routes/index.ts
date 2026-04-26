@@ -251,6 +251,10 @@ skillLibrary.register(router);
 
 router.use("/provenance", lazyMount(() => import("./provenance"), "provenance"));
 
+// NEXUS Unified Intelligence Protocol v1 — single-endpoint API across all domains.
+// Mounted BEFORE the legacy /nexus router so v1 paths take precedence.
+router.use(lazyMatch(["/nexus/v1"], () => import("./nexus-v1"), "nexus-v1"));
+
 router.use("/nexus", lazyMount(() => import("./nexus"), "nexus"));
 
 // NEXUS Ontology Fabric — unified entity registry + adjacency graph

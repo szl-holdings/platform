@@ -1,4 +1,5 @@
 export * from './generated/api';
+export * from './nexus-v1';
 export * from './per';
 export type {
   ActivityLog,
