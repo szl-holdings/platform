@@ -14,8 +14,15 @@
  *   POST /stress-drill/drills/:id/respond     — log team response to an inject
  *   POST /stress-drill/drills/:id/complete    — finalise and score
  *   POST /stress-drill/drills/:id/abort       — abort drill
+ *   POST /stress-drill/drills/:id/participants — add participant
  *   GET  /stress-drill/drills/:id/debrief     — scored debrief
- *   GET  /stress-drill/drills/:id/debrief/pdf — PDF debrief export (application/pdf via pdfkit)
+ *   GET  /stress-drill/drills/:id/debrief/pdf — PDF debrief export
+ *   GET  /stress-drill/leaderboard            — opt-in leaderboard (tenant-scoped)
+ *   POST /stress-drill/leaderboard/opt-in     — opt in to leaderboard (caller identity)
+ *   POST /stress-drill/leaderboard/opt-out    — opt out of leaderboard (caller identity)
+ *   GET  /stress-drill/leaderboard/my-status  — caller's opt-in status
+ *   GET  /stress-drill/resilience             — resilience score history (tenant-scoped)
+ *   GET  /stress-drill/resilience/latest      — latest resilience score (tenant-scoped, auth required)
  */
 
 import { type IRouter, type Request, type Response, Router } from 'express';
@@ -38,14 +45,22 @@ import { logger } from '../lib/logger';
 import {
   type ScenarioId,
   type CrisisInject,
+  type DimensionScore,
   abortDrill,
+  addParticipant,
   advanceDrill,
   completeDrill,
   createDrill,
   getDrill,
+  getLeaderboard,
+  getLatestResilienceScore,
+  getResilienceHistory,
   getScenario,
+  isParticipantOptedIn,
   listDrills,
   listScenarios,
+  optInParticipant,
+  optOutParticipant,
   respondToInject,
   startDrill,
 } from '../services/stress-drill-store';
@@ -117,6 +132,7 @@ interface DebriefPdfParams {
   scenarioTagline: string;
   grade: string;
   overallScore: number;
+  resilienceScore: number;
   verdict: string;
   totalInjects: number;
   detected: number;
@@ -127,6 +143,20 @@ interface DebriefPdfParams {
   humanApprovalsGiven: number;
   humanApprovalsRequired: number;
   completedAt: string;
+  dimensions: {
+    timeToDetect: DimensionScore;
+    timeToRespond: DimensionScore;
+    runbookAdherence: DimensionScore;
+    businessImpactContainment: DimensionScore;
+  };
+  participantScores: Array<{
+    label: string;
+    responsesGiven: number;
+    detectRate: number;
+    resolveRate: number;
+    avgResponseMinutes: number | null;
+    grade: string;
+  }>;
   domainBreakdown: Array<{ domain: string; injectCount: number; detected: number; resolved: number }>;
   missedSteps: string[];
   recommendations: string[];
@@ -165,10 +195,13 @@ function buildDebriefPdf(p: DebriefPdfParams): PassThrough {
   const sevColor = (s: string): [number, number, number] =>
     s === 'critical' ? RED : s === 'high' ? [249, 115, 22] : s === 'medium' ? AMBER : MUTED;
 
+  const dimColor = (score: number): [number, number, number] =>
+    score >= 80 ? GREEN : score >= 60 ? AMBER : RED;
+
   doc.rect(0, 0, doc.page.width, doc.page.height).fill(BG);
 
   doc.font('Helvetica-Bold').fontSize(9).fillColor(MUTED)
-    .text('CRISIS STRESS DRILL — DEBRIEF REPORT', M, M, { width: W });
+    .text('GAME DAY — RESILIENCE DEBRIEF REPORT', M, M, { width: W });
   doc.moveDown(0.3);
   doc.font('Helvetica-Bold').fontSize(22).fillColor(TEXT)
     .text(p.scenarioName, M, doc.y, { width: W - 120 });
@@ -184,38 +217,13 @@ function buildDebriefPdf(p: DebriefPdfParams): PassThrough {
 
   doc.moveDown(0.6);
   doc.font('Helvetica').fontSize(11).fillColor(TEXT)
-    .text(`Operator: ${p.operatorLabel}   ·   Completed: ${new Date(p.completedAt).toLocaleString()}`, M, doc.y, { width: W });
+    .text(`Operator: ${p.operatorLabel}   ·   Completed: ${new Date(p.completedAt).toLocaleString()}   ·   Resilience Score: ${p.resilienceScore}`, M, doc.y, { width: W });
   doc.moveDown(0.4);
 
   doc.rect(M, doc.y, W, 0.5).fill(PRIMARY);
   doc.moveDown(0.4);
   doc.font('Helvetica').fontSize(11).fillColor(TEXT)
     .text(p.verdict, M, doc.y, { width: W });
-  doc.moveDown(0.8);
-
-  const stats = [
-    { label: 'Injects Fired', value: String(p.totalInjects), color: TEXT },
-    { label: 'Detected', value: String(p.detected), color: GREEN },
-    { label: 'Resolved', value: String(p.resolved), color: PURPLE },
-    { label: 'Missed', value: String(p.missed), color: RED },
-    { label: 'Avg Detect', value: p.avgDetectMinutes != null ? `${p.avgDetectMinutes}m` : 'N/A', color: AMBER },
-    { label: 'Avg Resolve', value: p.avgResolveMinutes != null ? `${p.avgResolveMinutes}m` : 'N/A', color: PURPLE },
-    { label: 'Human Approvals', value: `${p.humanApprovalsGiven}/${p.humanApprovalsRequired}`, color: BLUE },
-  ];
-  const colW = W / 3;
-  const rowH = 52;
-  stats.forEach((s, i) => {
-    const col = i % 3;
-    const row = Math.floor(i / 3);
-    const x = M + col * colW;
-    const y = doc.y + row * rowH;
-    doc.rect(x + 2, y, colW - 4, rowH - 4).fill(SURFACE);
-    doc.font('Helvetica').fontSize(8).fillColor(MUTED)
-      .text(s.label.toUpperCase(), x + 8, y + 8, { width: colW - 16 });
-    doc.font('Helvetica-Bold').fontSize(20).fillColor(s.color)
-      .text(s.value, x + 8, y + 20, { width: colW - 16 });
-  });
-  doc.y += rowH * Math.ceil(stats.length / 3) + 4;
   doc.moveDown(0.8);
 
   const h2 = (label: string) => {
@@ -226,6 +234,72 @@ function buildDebriefPdf(p: DebriefPdfParams): PassThrough {
     doc.rect(M, doc.y, W, 0.5).fill(PRIMARY);
     doc.moveDown(0.4);
   };
+
+  h2('4-Dimension Resilience Scoring');
+  const dims = [
+    { ...p.dimensions.timeToDetect, abbr: 'TTD' },
+    { ...p.dimensions.timeToRespond, abbr: 'TTR' },
+    { ...p.dimensions.runbookAdherence, abbr: 'RBA' },
+    { ...p.dimensions.businessImpactContainment, abbr: 'BIC' },
+  ];
+  const dimColW = W / 2;
+  dims.forEach((d, i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const x = M + col * dimColW;
+    const y = doc.y + row * 52;
+    doc.rect(x + 2, y, dimColW - 4, 48).fill(SURFACE);
+    doc.font('Helvetica-Bold').fontSize(9).fillColor(MUTED)
+      .text(`${d.abbr} — ${d.label}`, x + 8, y + 6, { width: dimColW - 16 });
+    doc.font('Helvetica-Bold').fontSize(22).fillColor(dimColor(d.score))
+      .text(`${d.score}`, x + 8, y + 20, { width: 50 });
+    doc.font('Helvetica').fontSize(8).fillColor(MUTED)
+      .text(d.detail, x + 60, y + 24, { width: dimColW - 76 });
+  });
+  doc.y += 52 * 2 + 8;
+  doc.moveDown(0.4);
+
+  const stats = [
+    { label: 'Injects Fired', value: String(p.totalInjects), color: TEXT },
+    { label: 'Detected', value: String(p.detected), color: GREEN },
+    { label: 'Resolved', value: String(p.resolved), color: PURPLE },
+    { label: 'Missed', value: String(p.missed), color: RED },
+    { label: 'Avg Detect', value: p.avgDetectMinutes != null ? `${p.avgDetectMinutes}m` : 'N/A', color: AMBER },
+    { label: 'Avg Resolve', value: p.avgResolveMinutes != null ? `${p.avgResolveMinutes}m` : 'N/A', color: PURPLE },
+    { label: 'Human Approvals', value: `${p.humanApprovalsGiven}/${p.humanApprovalsRequired}`, color: BLUE },
+    { label: 'Resilience Score', value: String(p.resilienceScore), color: PRIMARY },
+  ];
+  const colW = W / 4;
+  const rowH = 52;
+  stats.forEach((s, i) => {
+    const col = i % 4;
+    const row = Math.floor(i / 4);
+    const x = M + col * colW;
+    const y = doc.y + row * rowH;
+    doc.rect(x + 2, y, colW - 4, rowH - 4).fill(SURFACE);
+    doc.font('Helvetica').fontSize(8).fillColor(MUTED)
+      .text(s.label.toUpperCase(), x + 8, y + 8, { width: colW - 16 });
+    doc.font('Helvetica-Bold').fontSize(18).fillColor(s.color)
+      .text(s.value, x + 8, y + 22, { width: colW - 16 });
+  });
+  doc.y += rowH * Math.ceil(stats.length / 4) + 4;
+  doc.moveDown(0.8);
+
+  if (p.participantScores.length > 0) {
+    h2('Participant Performance');
+    p.participantScores.forEach((ps) => {
+      if (doc.y + 30 > doc.page.height - 72) { doc.addPage(); doc.rect(0, 0, doc.page.width, doc.page.height).fill(BG); }
+      const gc = gradeColor(ps.grade);
+      doc.font('Helvetica-Bold').fontSize(10).fillColor(gc)
+        .text(`${ps.grade}`, M, doc.y, { width: 20 });
+      doc.font('Helvetica-Bold').fontSize(10).fillColor(TEXT)
+        .text(ps.label, M + 25, doc.y, { width: 140 });
+      doc.font('Helvetica').fontSize(9).fillColor(MUTED)
+        .text(`${ps.responsesGiven} responses   Detect: ${ps.detectRate}%   Resolve: ${ps.resolveRate}%   Avg: ${ps.avgResponseMinutes != null ? ps.avgResponseMinutes + 'm' : 'N/A'}`,
+          M + 170, doc.y, { width: W - 170 });
+      doc.moveDown(0.5);
+    });
+  }
 
   h2('Inject Timeline');
   const fired = p.timeline.filter((t) => t.firedAt !== null);
@@ -278,7 +352,7 @@ function buildDebriefPdf(p: DebriefPdfParams): PassThrough {
   doc.rect(M, doc.y, W, 0.5).fill(MUTED);
   doc.moveDown(0.4);
   doc.font('Helvetica').fontSize(8).fillColor(MUTED)
-    .text(`SZL Holdings — Crisis Stress Drill Debrief  \u00B7  ${new Date().toISOString()}  \u00B7  CONFIDENTIAL — INTERNAL USE ONLY`, M, doc.y, { width: W, align: 'center' });
+    .text(`SZL Holdings — Game Day Resilience Debrief  \u00B7  ${new Date().toISOString()}  \u00B7  CONFIDENTIAL — INTERNAL USE ONLY`, M, doc.y, { width: W, align: 'center' });
 
   doc.end();
   return stream;
@@ -298,8 +372,15 @@ function callerLabel(req: Request): string {
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
 const createDrillSchema = z.object({
-  scenarioId: z.enum(['ransomware-cfo', 'sanctions-sweep', 'hurricane-default']),
+  scenarioId: z.enum([
+    'ransomware-cfo',
+    'sanctions-sweep',
+    'hurricane-default',
+    'contract-breach-cascade',
+    'multi-domain-simultaneous',
+  ]),
   operatorLabel: z.string().min(1).max(200).optional(),
+  participants: z.array(z.string().min(1).max(200)).max(50).optional(),
 });
 
 const respondSchema = z.object({
@@ -308,6 +389,11 @@ const respondSchema = z.object({
   notes: z.string().max(2000).default(''),
   humanApprovalGiven: z.boolean().default(false),
 });
+
+const addParticipantSchema = z.object({
+  label: z.string().min(1).max(200),
+});
+
 
 // ─── Scenario Library (public) ─────────────────────────────────────────────────
 
@@ -377,6 +463,7 @@ router.post(
         tenantId: callerTenantId(req),
         scenarioId: body.scenarioId as ScenarioId,
         operatorLabel: body.operatorLabel ?? callerLabel(req),
+        participants: body.participants,
       });
       if (!drill) {
         sendBadRequest(res, 'Failed to create drill');
@@ -510,6 +597,28 @@ router.post(
   },
 );
 
+// ─── Add Participant ──────────────────────────────────────────────────────────
+
+router.post(
+  '/stress-drill/drills/:id/participants',
+  authMiddleware({ required: true }),
+  validateBody(addParticipantSchema),
+  (req: Request, res: Response) => {
+    try {
+      if (!req.user) { sendUnauthorized(res); return; }
+      const drill = getDrill(req.params.id as string);
+      if (!drill) { sendNotFound(res, 'Drill'); return; }
+      if (drill.tenantId !== callerTenantId(req)) { sendNotFound(res, 'Drill'); return; }
+      const body = req.body as z.infer<typeof addParticipantSchema>;
+      const updated = addParticipant(drill.id, body.label);
+      if (!updated) { sendBadRequest(res, 'Failed to add participant'); return; }
+      sendSuccess(res, updated);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to add participant');
+    }
+  },
+);
+
 // ─── Complete Drill ───────────────────────────────────────────────────────────
 
 router.post(
@@ -526,7 +635,7 @@ router.post(
         sendBadRequest(res, 'Drill cannot be completed in current state');
         return;
       }
-      logger.info({ drillId: drill.id, score: updated.score?.overallScore }, '[stress-drill] drill completed');
+      logger.info({ drillId: drill.id, score: updated.score?.overallScore, resilience: updated.score?.resilienceScore }, '[stress-drill] drill completed');
       sendSuccess(res, updated);
     } catch (err) {
       handleRouteError(res, err, 'Failed to complete drill');
@@ -636,6 +745,7 @@ router.get(
         scenarioTagline: scenario?.tagline ?? '',
         grade: score.grade,
         overallScore: score.overallScore,
+        resilienceScore: score.resilienceScore,
         verdict: score.verdict,
         totalInjects: score.totalInjects,
         detected: score.detected,
@@ -646,6 +756,8 @@ router.get(
         humanApprovalsGiven: score.humanApprovalsGiven,
         humanApprovalsRequired: score.humanApprovalsRequired,
         completedAt: score.completedAt,
+        dimensions: score.dimensions,
+        participantScores: score.participantScores,
         domainBreakdown: score.domainBreakdown,
         missedSteps: score.missedSteps,
         recommendations: score.recommendations,
@@ -653,7 +765,7 @@ router.get(
           severity: s.inject.severity,
           domain: s.inject.domain,
           title: s.inject.title,
-          runbookRef: s.inject.runbookRef,
+          runbookRef: s.inject.runbookRef ?? '',
           firedAt: s.firedAt,
           responseType: s.response?.responseType ?? null,
           notes: s.response?.notes ?? null,
@@ -663,11 +775,105 @@ router.get(
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader(
         'Content-Disposition',
-        `attachment; filename="debrief-${drill.id}-${drill.scenarioId}.pdf"`,
+        `attachment; filename="game-day-debrief-${drill.id}-${drill.scenarioId}.pdf"`,
       );
       stream.pipe(res);
     } catch (err) {
       handleRouteError(res, err, 'Failed to export debrief');
+    }
+  },
+);
+
+// ─── Leaderboard ──────────────────────────────────────────────────────────────
+
+router.get(
+  '/stress-drill/leaderboard',
+  authMiddleware({ required: true }),
+  (req: Request, res: Response) => {
+    try {
+      if (!req.user) { sendUnauthorized(res); return; }
+      const entries = getLeaderboard(callerTenantId(req));
+      sendSuccess(res, { leaderboard: entries });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to load leaderboard');
+    }
+  },
+);
+
+router.post(
+  '/stress-drill/leaderboard/opt-in',
+  authMiddleware({ required: true }),
+  (req: Request, res: Response) => {
+    try {
+      if (!req.user) { sendUnauthorized(res); return; }
+      const label = callerLabel(req);
+      const tid = callerTenantId(req);
+      optInParticipant(tid, label);
+      sendSuccess(res, { optedIn: true, label });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to opt in');
+    }
+  },
+);
+
+router.post(
+  '/stress-drill/leaderboard/opt-out',
+  authMiddleware({ required: true }),
+  (req: Request, res: Response) => {
+    try {
+      if (!req.user) { sendUnauthorized(res); return; }
+      const label = callerLabel(req);
+      const tid = callerTenantId(req);
+      optOutParticipant(tid, label);
+      sendSuccess(res, { optedIn: false, label });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to opt out');
+    }
+  },
+);
+
+router.get(
+  '/stress-drill/leaderboard/my-status',
+  authMiddleware({ required: true }),
+  (req: Request, res: Response) => {
+    try {
+      if (!req.user) { sendUnauthorized(res); return; }
+      const label = callerLabel(req);
+      const tid = callerTenantId(req);
+      const optedIn = isParticipantOptedIn(tid, label);
+      sendSuccess(res, { optedIn, label });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to load opt-in status');
+    }
+  },
+);
+
+// ─── Resilience Score History ─────────────────────────────────────────────────
+
+router.get(
+  '/stress-drill/resilience',
+  authMiddleware({ required: true }),
+  (req: Request, res: Response) => {
+    try {
+      if (!req.user) { sendUnauthorized(res); return; }
+      const history = getResilienceHistory(callerTenantId(req));
+      sendSuccess(res, { history });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to load resilience history');
+    }
+  },
+);
+
+router.get(
+  '/stress-drill/resilience/latest',
+  authMiddleware({ required: true }),
+  (req: Request, res: Response) => {
+    try {
+      if (!req.user) { sendUnauthorized(res); return; }
+      const score = getLatestResilienceScore(callerTenantId(req));
+      sendSuccess(res, { resilienceScore: score });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to load resilience score');
     }
   },
 );

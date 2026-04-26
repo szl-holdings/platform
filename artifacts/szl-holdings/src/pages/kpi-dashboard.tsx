@@ -884,6 +884,224 @@ function RunHealthWidget() {
   );
 }
 
+function ResilienceScoreWidget() {
+  const [score, setScore] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/stress-drill/resilience/latest')
+      .then((r) => {
+        if (!r.ok) return null;
+        return r.json() as Promise<{ resilienceScore: number | null }>;
+      })
+      .then((j) => {
+        if (j && j.resilienceScore !== null) setScore(j.resilienceScore);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const scoreColor =
+    score === null
+      ? 'hsl(210,5%,38%)'
+      : score >= 80
+        ? 'hsl(142,62%,52%)'
+        : score >= 60
+          ? 'hsl(38,72%,58%)'
+          : 'hsl(0,72%,62%)';
+
+  return (
+    <m.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        borderRadius: '14px',
+        background:
+          'radial-gradient(ellipse at top left, hsla(0,72%,55%,0.06) 0%, hsla(0,0%,100%,0.018) 60%)',
+        border: '1px solid hsla(0,72%,55%,0.18)',
+        padding: '1.25rem 1.5rem',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '2px',
+          background: 'linear-gradient(90deg, hsl(38,55%,55%)70, transparent)',
+        }}
+      />
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '1rem',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+          <div
+            style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '7px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'hsla(0,72%,55%,0.12)',
+              border: '1px solid hsla(0,72%,55%,0.2)',
+            }}
+          >
+            <Shield size={13} style={{ color: 'hsl(0,72%,65%)' }} />
+          </div>
+          <span
+            style={{
+              fontSize: '13px',
+              fontWeight: 700,
+              color: 'hsl(38,12%,88%)',
+              letterSpacing: '-0.01em',
+            }}
+          >
+            Resilience Score
+          </span>
+          <span
+            style={{
+              fontSize: '9px',
+              fontWeight: 700,
+              color: 'hsl(38,55%,58%)',
+              background: 'hsla(38,55%,55%,0.12)',
+              padding: '1px 7px',
+              borderRadius: '10px',
+              border: '1px solid hsla(38,55%,55%,0.2)',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+            }}
+          >
+            GAME DAY
+          </span>
+        </div>
+        <a
+          href="/command/strategy/game-day"
+          style={{
+            fontSize: '11px',
+            color: 'hsl(38,55%,58%)',
+            textDecoration: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '3px',
+            opacity: 0.8,
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.opacity = '1';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.opacity = '0.8';
+          }}
+        >
+          Open Game Day <ArrowUpRight size={11} />
+        </a>
+      </div>
+
+      {loading && (
+        <div style={{ display: 'flex', gap: '8px', height: '60px', alignItems: 'center' }}>
+          {[80, 60, 90].map((w, i) => (
+            <div
+              key={i}
+              style={{
+                flex: 1,
+                height: `${w}%`,
+                borderRadius: '4px',
+                background: 'hsla(0,0%,100%,0.06)',
+                animation: 'pulse 1.5s ease-in-out infinite',
+                animationDelay: `${i * 0.1}s`,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {!loading && score !== null && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div
+              style={{
+                fontSize: '3rem',
+                fontWeight: 800,
+                color: scoreColor,
+                lineHeight: 1,
+                fontFamily: "'Space Grotesk', system-ui",
+                letterSpacing: '-0.04em',
+              }}
+            >
+              {score}
+            </div>
+            <div
+              style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: 'hsl(210,5%,40%)',
+                marginTop: '0.25rem',
+              }}
+            >
+              / 100
+            </div>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                width: '100%',
+                height: '8px',
+                background: 'hsla(0,0%,100%,0.06)',
+                borderRadius: '4px',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  width: `${score}%`,
+                  height: '100%',
+                  background: `linear-gradient(90deg, ${scoreColor}, ${scoreColor}90)`,
+                  borderRadius: '4px',
+                  transition: 'width 1s ease',
+                }}
+              />
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginTop: '0.5rem',
+                fontSize: '10px',
+                color: 'hsl(210,5%,40%)',
+              }}
+            >
+              <span>Composite score from latest Game Day drill</span>
+              <span style={{ color: scoreColor, fontWeight: 700 }}>
+                {score >= 80 ? 'Strong' : score >= 60 ? 'Moderate' : 'Needs Improvement'}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!loading && score === null && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <AlertTriangle size={14} style={{ color: 'hsl(38,72%,58%)' }} />
+          <p style={{ fontSize: '12px', color: 'hsl(210,5%,44%)', margin: 0 }}>
+            No resilience score recorded yet — run a Game Day drill to establish baseline.
+          </p>
+        </div>
+      )}
+    </m.div>
+  );
+}
+
 export default function KpiDashboardPage() {
   const [data, setData] = useState<KpiData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -1206,6 +1424,21 @@ export default function KpiDashboardPage() {
                     </p>
                   </div>
                   <RunHealthWidget />
+
+                  <div style={{ marginTop: '1.5rem', marginBottom: '0.625rem' }}>
+                    <p
+                      style={{
+                        fontSize: '9px',
+                        fontWeight: 700,
+                        letterSpacing: '0.12em',
+                        textTransform: 'uppercase',
+                        color: 'hsl(210,5%,36%)',
+                      }}
+                    >
+                      Crisis Resilience
+                    </p>
+                  </div>
+                  <ResilienceScoreWidget />
                 </>
               )}
             </div>

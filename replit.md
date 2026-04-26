@@ -45,6 +45,7 @@ The platform is a pnpm monorepo built with TypeScript 5.9, React 19, Vite, and N
 - **AI Provenance & Explainability Contract:** Every AI-generated output carries a `ProvenanceEnvelope` with essential metadata.
 
 **Other Technical Implementations:**
+- **Red-Team Game Day Engine:** Live competitive crisis simulation with synthetic traffic injection, 4-dimension resilience scoring (TTD, TTR, Runbook Adherence, Business Impact Containment), per-participant scoring, leaderboard with opt-in privacy, resilience score trending on executive dashboard, 5 starter scenarios, and branded PDF debrief export. Accessible at `/strategy/game-day` in Command.
 - **Cross-Domain Signal Bus (Alert Bus):** A "When/then" automation engine routing signals across product domains.
 - **AEEP Core Packages:** Includes contracts, agent core, workflow runtime, retrieval core, memory core, memory fabric, evidence ledger, policy guard, domain profiles, and platform metrics registry, featuring a two-stage retrieval pipeline, multimodal retrieval, and scoped memory management.
 - **Email Deliverability:** All outbound transactional email uses a centralized library with suppression lists.
