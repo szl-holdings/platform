@@ -161,3 +161,30 @@ build
 .next
 # Raw screenshot captures (processed copies go in docs/assets/screenshots/current/)
 screenshots/raw
+
+# ── Rehaul 2/9 — Repo hygiene additions (Task #2937) ──────────────────────────
+# Launch-series zip archives and unpacked dirs (removed; canonical: audit/launch/)
+/X-LAUNCH-SERIES/
+/X-LAUNCH-SERIES.zip
+/a11oy-launch-content/
+/a11oy-launch-content.zip
+# Demo asset exports (removed; carousel/screenshots not committed)
+/demo-assets/
+# Root launch/ directory (content migrated to audit/launch/)
+/launch/
+# media/ root (screenshots migrated to docs/media/screenshots/)
+/media/screenshots/
+/media/brand-kit/
+# Root-level screenshot and capture dirs (stray captures; use docs/media/screenshots/)
+/launch-shots/
+/screenshots/
+# Generated output and backup dirs
+/output/
+/backups/
+/deliverables/
+# Social and SharePoint content dirs (not source code)
+/social-content/
+/spfx-webparts/
+# Root-level build/generation scripts (noise at repo root)
+/build_carousel.py
+/build_video.sh
