@@ -257,6 +257,10 @@ const PUBLIC_PREFIXES = [
   // Simulation what-if engine — POST route is public so the Strategy simulation
   // page can compute cross-domain scenario impacts in demo mode without a session.
   "/api/simulation/",
+  // Causal scenario & shock-propagation engine — GET /scenarios/library and
+  // POST /scenarios/run are public so Lyte's Scenario Composer and the SZL
+  // Holdings portfolio card can run scenarios without a session (demo mode).
+  "/api/scenarios/",
   // Alloy Meridian — cognitive observability OS read-only surfaces: model router
   // status, agent constellation health, forecast council results, signal graph,
   // Decision Weather, Counterfactual Ledger, Flight Recorder, MCP registry, and

@@ -9,6 +9,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { apiRequest } from "@/lib/api";
+import { ScenarioCard } from "@/components/ScenarioCard";
 
 interface EcosystemSummary {
   checkedAt: string;
@@ -430,6 +431,11 @@ export default function PortfolioPage() {
               status="active"
               loading={isLoading}
             />
+          </div>
+
+          {/* Causal Scenario Engine card */}
+          <div style={{ marginBottom: "2rem" }}>
+            <ScenarioCard />
           </div>
 
           {/* Quick links row */}

@@ -38,6 +38,7 @@ import {
   Users,
   Workflow,
   Zap,
+  Waves,
 } from 'lucide-react';
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
@@ -67,6 +68,7 @@ const DecisionReplayPage = lazy(() => import('@/pages/decision-replay'));
 const BoardViewPage = lazy(() => import('@/pages/board-view'));
 const AefKnowledgeSearchPage = lazy(() => import('@/pages/aef-knowledge-search'));
 const ForecastPage = lazy(() => import('@/pages/forecast'));
+const ScenarioComposerPage = lazy(() => import('@/pages/scenario-composer'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -162,6 +164,13 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Policy Center', href: '/policies', icon: <Lock className="w-3.5 h-3.5" /> },
       { label: 'Eval Studio', href: '/eval', icon: <FlaskConical className="w-3.5 h-3.5" /> },
       { label: 'Forecast Fabric', href: '/forecast', icon: <TrendingUp className="w-3.5 h-3.5" /> },
+      {
+        label: 'Scenario Composer',
+        href: '/scenarios',
+        icon: <Waves className="w-3.5 h-3.5" />,
+        badge: 'NEW',
+        badgeColor: 'amber' as const,
+      },
     ],
   },
   {
@@ -566,6 +575,7 @@ function DashboardRoutes() {
         <Route path="/decision-replay/:id" component={DecisionReplayPage} />
         <Route path="/aef-search" component={AefKnowledgeSearchPage} />
         <Route path="/forecast" component={ForecastPage} />
+        <Route path="/scenarios" component={ScenarioComposerPage} />
         {/* Default: redirect to overview */}
         <Route component={OverviewPage} />
       </Switch>

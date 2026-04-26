@@ -61,6 +61,11 @@ router.use(lazyMatch("/self-healing", () => import("./self-healing"), "self-heal
 // Simulation what-if engine — POST route is public.
 router.use(lazyMatch("/simulation", () => import("./simulation-whatif"), "simulation-whatif"));
 
+// Causal scenario & shock-propagation engine — public (demo surface).
+// GET /scenarios/library  — shock taxonomy
+// POST /scenarios/run     — propagates stacked shocks across the entity graph
+router.use(lazyMatch("/scenarios", () => import("./scenarios"), "scenarios"));
+
 // Infrastructure status — public.
 router.use(lazyMatch("/infrastructure", () => import("./infrastructure-status"), "infrastructure-status"));
 

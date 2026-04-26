@@ -65,6 +65,11 @@ const EXEMPT_PATHS = new Set([
   // surface to clear in-memory scenario state without a browser session.
   // No per-user state modified; memory flush is safe without CSRF protection.
   '/api/demo/reset',
+  // Causal scenario engine — POST /scenarios/run is public (no per-user state
+  // written; scenario inputs and results are entirely in-process deterministic
+  // computation). Called from Lyte's Scenario Composer and the SZL Holdings
+  // portfolio card without a browser session in demo mode.
+  '/api/scenarios/run',
   // Agent Mesh telemetry rescan — public POST that re-reads local config files
   // and refreshes the resilience index for the demo. No per-user state mutated;
   // path is also in the unauthenticated PUBLIC_PREFIXES allowlist.
