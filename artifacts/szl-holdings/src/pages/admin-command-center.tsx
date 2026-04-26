@@ -51,7 +51,7 @@ import {
   Zap,
 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
 
 const API = '/api';
@@ -3479,6 +3479,7 @@ export default function AdminCommandCenter() {
   const [section, setSection] = useState<Section>('overview');
   const { prefs, setPreference, isLoaded } = useUserPreferences();
   const [sidebarOpen, setSidebarOpen] = useState(() => !prefs.sidebar_collapsed);
+  const [currentPath] = useLocation();
   const userOverriddenRef = useRef(false);
 
   useEffect(() => {
@@ -3595,7 +3596,10 @@ export default function AdminCommandCenter() {
           <Link
             href="/admin/platform-settings"
             className={cn(
-              'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/50',
+              'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors',
+              currentPath === '/admin/platform-settings'
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
             )}
             title={!sidebarOpen ? 'Platform Settings' : undefined}
           >
@@ -3605,7 +3609,10 @@ export default function AdminCommandCenter() {
           <Link
             href="/admin/tenant-health"
             className={cn(
-              'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/50',
+              'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors',
+              currentPath === '/admin/tenant-health'
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
             )}
             title={!sidebarOpen ? 'Tenant Health' : undefined}
           >

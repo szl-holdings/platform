@@ -668,3 +668,138 @@ test.describe('SZL Holdings — Accessibility (WCAG 2.1 AA)', () => {
     });
   }
 });
+
+// ---------------------------------------------------------------------------
+// Admin Command Center — Sidebar active state (Task #1483)
+//
+// Verifies that the "Platform Settings" and "Tenant Health" sidebar links
+// highlight (text-primary / bg-primary\/10) when the browser URL matches
+// their respective routes, using wouter's useLocation() hook.
+// ---------------------------------------------------------------------------
+
+const ADMIN_AUTH_USER_URL = '**/api/auth/user';
+const ADMIN_MY_ROLES_URL = '**/api/auth/my-roles';
+const ADMIN_CC_ROUTE = '/admin/command-center';
+
+const ADMIN_MOCK_USER = {
+  user: {
+    id: 99,
+    displayName: 'E2E Admin',
+    email: 'e2e-admin@szl.test',
+    roles: ['admin', 'super_admin'],
+  },
+};
+
+function joinAdminBase(path: string): string {
+  const base = (process.env.SZL_BASE_PATH ?? '/').replace(/\/$/, '');
+  return `${base}${path}` || path;
+}
+
+async function mockAdminAuth(page: import('@playwright/test').Page) {
+  await page.route(ADMIN_AUTH_USER_URL, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(ADMIN_MOCK_USER),
+    }),
+  );
+  await page.route(ADMIN_MY_ROLES_URL, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ roles: ['admin', 'super_admin'] }),
+    }),
+  );
+  await page.route('**/api/admin/**', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({}),
+    }),
+  );
+}
+
+test.describe('Admin Command Center — Sidebar active state', () => {
+  test.beforeEach(async ({ page }) => {
+    await mockAdminAuth(page);
+    await page.goto(joinAdminBase(ADMIN_CC_ROUTE));
+    await page.waitForLoadState('networkidle', { timeout: 20_000 }).catch(() => null);
+  });
+
+  // Hard-assert the sidebar links exist and are inactive while viewing /admin/command-center.
+  test('sidebar links are present and not highlighted on /admin/command-center', async ({
+    page,
+  }) => {
+    const platformLink = page.locator('a[href="/admin/platform-settings"]').first();
+    const tenantLink = page.locator('a[href="/admin/tenant-health"]').first();
+    await expect(platformLink).toBeVisible({ timeout: 15_000 });
+    await expect(tenantLink).toBeVisible({ timeout: 15_000 });
+    expect((await platformLink.getAttribute('class')) ?? '').not.toContain('text-primary');
+    expect((await tenantLink.getAttribute('class')) ?? '').not.toContain('text-primary');
+  });
+
+  // Real navigation: click the Platform Settings link and verify it leads to the correct URL.
+  test('clicking Platform Settings link navigates to /admin/platform-settings', async ({
+    page,
+  }) => {
+    const link = page.locator('a[href="/admin/platform-settings"]').first();
+    await expect(link).toBeVisible({ timeout: 15_000 });
+    await Promise.all([
+      page.waitForURL('**/admin/platform-settings', { timeout: 15_000 }),
+      link.click(),
+    ]);
+    expect(new URL(page.url()).pathname).toBe('/admin/platform-settings');
+  });
+
+  // Real navigation: click the Tenant Health link and verify it leads to the correct URL.
+  test('clicking Tenant Health link navigates to /admin/tenant-health', async ({ page }) => {
+    const link = page.locator('a[href="/admin/tenant-health"]').first();
+    await expect(link).toBeVisible({ timeout: 15_000 });
+    await Promise.all([
+      page.waitForURL('**/admin/tenant-health', { timeout: 15_000 }),
+      link.click(),
+    ]);
+    expect(new URL(page.url()).pathname).toBe('/admin/tenant-health');
+  });
+
+  // Active-state: simulate being on /admin/platform-settings via pushState so the
+  // AdminCommandCenter (and its sidebar) stay mounted while useLocation() updates.
+  test('Platform Settings link is highlighted when URL is /admin/platform-settings', async ({
+    page,
+  }) => {
+    const link = page.locator('a[href="/admin/platform-settings"]').first();
+    await expect(link).toBeVisible({ timeout: 15_000 });
+    await page.evaluate(() => {
+      window.history.pushState({}, '', '/admin/platform-settings');
+      window.dispatchEvent(new PopStateEvent('popstate', { state: {} }));
+    });
+    await expect(link).toHaveClass(/text-primary/, { timeout: 3_000 });
+  });
+
+  // Active-state: same for /admin/tenant-health.
+  test('Tenant Health link is highlighted when URL is /admin/tenant-health', async ({ page }) => {
+    const link = page.locator('a[href="/admin/tenant-health"]').first();
+    await expect(link).toBeVisible({ timeout: 15_000 });
+    await page.evaluate(() => {
+      window.history.pushState({}, '', '/admin/tenant-health');
+      window.dispatchEvent(new PopStateEvent('popstate', { state: {} }));
+    });
+    await expect(link).toHaveClass(/text-primary/, { timeout: 3_000 });
+  });
+
+  // Exclusivity: only the matching link is highlighted; the other stays inactive.
+  test('only Platform Settings is highlighted when URL is /admin/platform-settings', async ({
+    page,
+  }) => {
+    const platformLink = page.locator('a[href="/admin/platform-settings"]').first();
+    const tenantLink = page.locator('a[href="/admin/tenant-health"]').first();
+    await expect(platformLink).toBeVisible({ timeout: 15_000 });
+    await expect(tenantLink).toBeVisible({ timeout: 15_000 });
+    await page.evaluate(() => {
+      window.history.pushState({}, '', '/admin/platform-settings');
+      window.dispatchEvent(new PopStateEvent('popstate', { state: {} }));
+    });
+    await expect(platformLink).toHaveClass(/text-primary/, { timeout: 3_000 });
+    expect((await tenantLink.getAttribute('class')) ?? '').not.toContain('text-primary');
+  });
+});
