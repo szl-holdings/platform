@@ -24,10 +24,31 @@ class VerticalSpec:
     purpose: str
     module: str  # importable Python module path
     research_seams: tuple[str, ...]
+    mcp_capabilities: tuple[str, ...] = ()  # MCP capability IDs this pack references
     pack_status: str = "live"  # 'live' | 'stub' | 'roadmap'
 
 
 REGISTRY: tuple[VerticalSpec, ...] = (
+    VerticalSpec(
+        id="platform",
+        title="Platform / AgentOps",
+        purpose="AgentOps Source Of Truth — Release Gate Intelligence",
+        module="services.verticals.platform",
+        pack_status="live",
+        research_seams=(
+            "OpenTelemetry / GenAI tracing",
+            "Langfuse",
+            "Arize Phoenix",
+            "OpenLIT",
+        ),
+        mcp_capabilities=(
+            "github.list_prs",
+            "github.get_pr",
+            "github.merge_pr",
+            "posthog.get_feature_flags",
+            "slack.post_message",
+        ),
+    ),
     VerticalSpec(
         id="pulse",
         title="Pulse",
@@ -120,12 +141,20 @@ REGISTRY: tuple[VerticalSpec, ...] = (
         title="Sentra Cyber",
         purpose="Cyber Resilience Command",
         module="services.verticals.sentra_cyber",
-        pack_status="stub",
+        pack_status="live",
         research_seams=(
             "MITRE ATT&CK navigator",
             "OpenCTI",
             "Elastic SIEM",
             "OTEL security signals",
+        ),
+        mcp_capabilities=(
+            "sentry.list_issues",
+            "sentry.get_issue",
+            "sentry.resolve_issue",
+            "pagerduty.list_incidents",
+            "pagerduty.trigger_incident",
+            "slack.post_message",
         ),
     ),
     VerticalSpec(

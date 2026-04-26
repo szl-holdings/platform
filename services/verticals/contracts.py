@@ -37,6 +37,14 @@ from typing import Any, Iterable
 # regression in test_contracts so anyone touching the contract is aware.
 DEFAULT_MODEL: str = "gpt-5.5-2026-04-23"
 
+# Policy-approved models that may appear in recommendation envelopes.
+# Includes the default (standard tier) and critical-path (pro tier) models.
+# Vertical packs emit DEFAULT_MODEL; the control plane may re-stamp with the
+# critical-path model when policy routing selects it for a given input_class.
+ALLOWED_MODELS: frozenset[str] = frozenset(
+    {DEFAULT_MODEL, "gpt-5.5-pro-2026-04-23"}
+)
+
 # Locked, ordered set of fields. Adding a field is a breaking change for the
 # substrate; any addition must update the registered version below and the
 # corresponding tests.
@@ -148,8 +156,11 @@ def validate_recommendation(rec: Recommendation | dict[str, Any]) -> list[str]:
         errors.append("requires_human_approval must be a bool")
     if not isinstance(payload["model"], str) or not payload["model"]:
         errors.append("model must be a non-empty string")
-    elif payload["model"] != DEFAULT_MODEL:
-        errors.append(f"model must equal {DEFAULT_MODEL!r}, got {payload['model']!r}")
+    elif payload["model"] not in ALLOWED_MODELS:
+        errors.append(
+            f"model must be one of allowed models {sorted(ALLOWED_MODELS)!r}, "
+            f"got {payload['model']!r}"
+        )
     if not isinstance(payload["input_class"], str) or not payload["input_class"]:
         errors.append("input_class must be a non-empty string")
     if not isinstance(payload["output_class"], str) or not payload["output_class"]:
@@ -171,6 +182,7 @@ def validate_many(recs: Iterable[Recommendation | dict[str, Any]]) -> dict[str, 
 
 
 __all__ = [
+    "ALLOWED_MODELS",
     "CONTRACT_VERSION",
     "DEFAULT_MODEL",
     "REQUIRED_FIELDS",

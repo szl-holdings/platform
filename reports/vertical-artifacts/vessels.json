@@ -35,7 +35,7 @@
     "method": "voyage-risk-baseline-v0",
     "route_risk": "moderate"
   },
-  "generated_at": "2026-04-25T20:14:52.114228Z",
+  "generated_at": "2026-04-26T13:38:38.718669Z",
   "recommendation": {
     "confidence": 0.6,
     "evidence_ids": [

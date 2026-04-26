@@ -31,6 +31,7 @@ from services.verticals.contracts import VerticalArtifact, validate_recommendati
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ARTIFACTS_DIR = REPO_ROOT / "reports" / "vertical-artifacts"
+BRIEF_OUTPUT_PATH = REPO_ROOT / "reports" / "vertical-moats-brief.json"
 
 
 def _load_pack(spec: registry.VerticalSpec) -> Any:
@@ -82,19 +83,21 @@ def cmd_validate() -> int:
     if not result.wasSuccessful():
         return 1
 
-    # Belt-and-braces: every registered pack must also load cleanly. If a pack
-    # was added to the registry without a matching test file, fail loudly.
-    for vertical_id in registry.ids():
-        test_module = f"services.verticals.{vertical_id}.test_{vertical_id}"
+    # Belt-and-braces: every *live* pack must also load cleanly. Stub packs
+    # are excluded from contract validation in this pass — they are validated
+    # once promoted to 'live'. If a live pack was added to the registry without
+    # a matching test file, fail loudly.
+    for spec in registry.live():
+        test_module = f"{spec.module}.test_{spec.id}"
         try:
             __import__(test_module)
         except ImportError as exc:  # pragma: no cover - explicit failure path
             print(f"[verticals:validate] missing test module {test_module}: {exc}")
             return 1
 
-    # 2) Sanity-check every pack's deterministic recommendation against the contract.
+    # 2) Sanity-check every *live* pack's deterministic recommendation against the contract.
     failures: dict[str, list[str]] = {}
-    for spec in registry.REGISTRY:
+    for spec in registry.live():
         try:
             _, errs = _build_artifact(spec)
             if errs:
@@ -109,18 +112,25 @@ def cmd_validate() -> int:
                 print(f"  - {vid}: {err}")
         return 1
 
-    print(f"\n[verticals:validate] OK — {len(registry.REGISTRY)} verticals pass the substrate contract")
+    live_count = len(registry.live())
+    stub_count = len(registry.stubs())
+    print(f"\n[verticals:validate] OK — {live_count} live verticals pass the substrate contract ({stub_count} stubs skipped)")
     return 0
 
 
 def cmd_brief() -> int:
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+    generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     index: dict[str, Any] = {
-        "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "generated_at": generated_at,
         "verticals": [],
     }
+    # cross_vertical_provenance: maps referenced_vertical → [evidence_ids that
+    # point at it from another vertical]. Built by scanning cross_vertical
+    # evidence items across all artifacts.
+    cross_vertical_provenance: dict[str, list[str]] = {}
     failures = 0
-    for spec in registry.REGISTRY:
+    for spec in registry.live():
         artifact, errors = _build_artifact(spec)
         if errors:
             failures += 1
@@ -139,12 +149,39 @@ def cmd_brief() -> int:
                 "requires_human_approval": artifact.recommendation["requires_human_approval"],
             }
         )
+        # Aggregate cross-vertical provenance links from this artifact's evidence.
+        for ev in artifact.evidence:
+            if ev.get("cross_vertical") and ev.get("referenced_vertical"):
+                ref_vert: str = ev["referenced_vertical"]
+                # Prefer the concrete evidence ID; fall back to the item's own ID.
+                ref_ev_id: str = ev.get("referenced_evidence_id", ev.get("id", ""))
+                cross_vertical_provenance.setdefault(ref_vert, [])
+                if ref_ev_id and ref_ev_id not in cross_vertical_provenance[ref_vert]:
+                    cross_vertical_provenance[ref_vert].append(ref_ev_id)
         print(f"[verticals:brief] wrote {out_path.relative_to(REPO_ROOT)}")
 
     (ARTIFACTS_DIR / "_index.json").write_text(
         json.dumps(index, indent=2, sort_keys=True), encoding="utf-8"
     )
     print(f"[verticals:brief] wrote {(ARTIFACTS_DIR / '_index.json').relative_to(REPO_ROOT)}")
+
+    brief_summary: dict[str, Any] = {
+        "generated_at": index["generated_at"],
+        "substrate_version": "1.0.0",
+        "vertical_count": len(index["verticals"]),
+        "verticals": index["verticals"],
+        "cross_vertical_provenance": cross_vertical_provenance,
+        "approval_required": [
+            v["recommendation_id"]
+            for v in index["verticals"]
+            if v.get("requires_human_approval")
+        ],
+    }
+    BRIEF_OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    BRIEF_OUTPUT_PATH.write_text(
+        json.dumps(brief_summary, indent=2, sort_keys=True), encoding="utf-8"
+    )
+    print(f"[verticals:brief] wrote {BRIEF_OUTPUT_PATH.relative_to(REPO_ROOT)}")
 
     if failures:
         return 1

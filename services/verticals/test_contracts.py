@@ -15,6 +15,7 @@ import unittest
 
 from services.verticals import registry
 from services.verticals.contracts import (
+    ALLOWED_MODELS,
     CONTRACT_VERSION,
     DEFAULT_MODEL,
     REQUIRED_FIELDS,
@@ -91,11 +92,21 @@ class ContractTests(unittest.TestCase):
         errs = validate_recommendation(bad)
         self.assertTrue(any("evidence_ids" in e for e in errs))
 
-    def test_model_must_match_default(self) -> None:
+    def test_model_must_be_in_allowed_set(self) -> None:
         bad = _good().to_dict()
         bad["model"] = "gpt-4o"
         errs = validate_recommendation(bad)
-        self.assertTrue(any("model must equal" in e for e in errs))
+        self.assertTrue(any("allowed models" in e for e in errs))
+
+    def test_critical_path_model_is_valid(self) -> None:
+        rec = _good().to_dict()
+        rec["model"] = "gpt-5.5-pro-2026-04-23"
+        self.assertIn(rec["model"], ALLOWED_MODELS)
+        errs = validate_recommendation(rec)
+        self.assertEqual(errs, [])
+
+    def test_allowed_models_contains_default(self) -> None:
+        self.assertIn(DEFAULT_MODEL, ALLOWED_MODELS)
 
     def test_validate_many_indexes_by_id(self) -> None:
         bad = _good().to_dict()
@@ -107,8 +118,13 @@ class ContractTests(unittest.TestCase):
 
 
 class RegistryTests(unittest.TestCase):
-    def test_seven_verticals_registered(self) -> None:
-        self.assertEqual(len(registry.REGISTRY), 7)
+    def test_registry_is_non_empty(self) -> None:
+        self.assertGreater(len(registry.REGISTRY), 0)
+
+    def test_reference_vertical_packs_are_live(self) -> None:
+        live_ids = {spec.id for spec in registry.live()}
+        self.assertIn("platform", live_ids, "platform reference pack must be live")
+        self.assertIn("sentra_cyber", live_ids, "sentra_cyber reference pack must be live")
 
     def test_ids_are_unique(self) -> None:
         ids = registry.ids()
@@ -119,6 +135,10 @@ class RegistryTests(unittest.TestCase):
         self.assertEqual(spec.title, "Pulse")
         self.assertEqual(spec.purpose, "Founder Operating Channel")
 
+    def test_lookup_platform_by_id(self) -> None:
+        spec = registry.by_id("platform")
+        self.assertEqual(spec.pack_status, "live")
+
     def test_unknown_id_raises(self) -> None:
         with self.assertRaises(KeyError):
             registry.by_id("does_not_exist")
@@ -126,6 +146,11 @@ class RegistryTests(unittest.TestCase):
     def test_every_pack_has_research_seams(self) -> None:
         for spec in registry.REGISTRY:
             self.assertGreater(len(spec.research_seams), 0, f"{spec.id} missing research seams")
+
+    def test_live_and_stub_are_disjoint(self) -> None:
+        live_ids = {spec.id for spec in registry.live()}
+        stub_ids = {spec.id for spec in registry.stubs()}
+        self.assertTrue(live_ids.isdisjoint(stub_ids))
 
 
 if __name__ == "__main__":

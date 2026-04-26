@@ -1,0 +1,95 @@
+{
+  "brief": {
+    "confidence": 0.78,
+    "evidence_count": 4,
+    "headline": "Remediate CVE-2026-0142 across all production services within 24h",
+    "risk_score": 2.52,
+    "rollback": "If patch breaks functionality, pin to last-known-good version and re-escalate.",
+    "signal_count": 3,
+    "top_decision": "Patch affected dependencies and redeploy; validate via DAST scan."
+  },
+  "evidence": [
+    {
+      "claim": "Attack surface increased by 12 new internet-facing endpoints",
+      "from_signal": "sig_sentra_threat_surface",
+      "id": "ev_sentra_sig_sentra_threat_surface",
+      "kind": "threat_surface_expansion",
+      "source": "sentra-posture"
+    },
+    {
+      "claim": "CVE-2026-0142 (CVSS 9.8) affects 3 production dependencies",
+      "from_signal": "sig_sentra_cve_critical",
+      "id": "ev_sentra_sig_sentra_cve_critical",
+      "kind": "critical_cve",
+      "source": "nvd-feed"
+    },
+    {
+      "claim": "Unusual lateral movement pattern detected in prod VPC",
+      "from_signal": "sig_sentra_anomaly",
+      "id": "ev_sentra_sig_sentra_anomaly",
+      "kind": "behavioral_anomaly",
+      "source": "siem"
+    },
+    {
+      "claim": "Platform MCP registry health evidence (ev_platform_sig_platform_mcp_registry) referenced by Cyber pack \u2014 expanded attack surface includes MCP server endpoints.",
+      "cross_vertical": true,
+      "from_signal": "sig_platform_mcp_registry",
+      "id": "ev_sentra_cross_platform_mcp_health",
+      "kind": "cross_vertical_provenance",
+      "referenced_evidence_id": "ev_platform_sig_platform_mcp_registry",
+      "referenced_vertical": "platform",
+      "source": "platform-vertical/mcp-registry"
+    }
+  ],
+  "forecast": {
+    "confidence": 0.78,
+    "horizon": "72h",
+    "method": "threat-weighted-baseline-v0",
+    "signal_pressure": 2.52,
+    "summary": "Elevated cyber risk profile. CVE remediation required within SLA window."
+  },
+  "generated_at": "2026-04-26T13:38:38.736319Z",
+  "recommendation": {
+    "confidence": 0.78,
+    "evidence_ids": [
+      "ev_sentra_sig_sentra_threat_surface",
+      "ev_sentra_sig_sentra_cve_critical",
+      "ev_sentra_sig_sentra_anomaly",
+      "ev_sentra_cross_platform_mcp_health"
+    ],
+    "id": "rec_sentra_cve_remediation",
+    "input_class": "cyber",
+    "model": "gpt-5.5-2026-04-23",
+    "next_action": "Patch affected dependencies and redeploy; validate via DAST scan.",
+    "output_class": "sentra_brief_v1",
+    "owner": "ciso@szl",
+    "requires_human_approval": true,
+    "rollback_path": "If patch breaks functionality, pin to last-known-good version and re-escalate.",
+    "title": "Remediate CVE-2026-0142 across all production services within 24h",
+    "vertical": "sentra-cyber"
+  },
+  "signals": [
+    {
+      "id": "sig_sentra_threat_surface",
+      "kind": "threat_surface_expansion",
+      "source": "sentra-posture",
+      "summary": "Attack surface increased by 12 new internet-facing endpoints",
+      "weight": 0.85
+    },
+    {
+      "id": "sig_sentra_cve_critical",
+      "kind": "critical_cve",
+      "source": "nvd-feed",
+      "summary": "CVE-2026-0142 (CVSS 9.8) affects 3 production dependencies",
+      "weight": 0.95
+    },
+    {
+      "id": "sig_sentra_anomaly",
+      "kind": "behavioral_anomaly",
+      "source": "siem",
+      "summary": "Unusual lateral movement pattern detected in prod VPC",
+      "weight": 0.72
+    }
+  ],
+  "vertical": "sentra_cyber"
+}

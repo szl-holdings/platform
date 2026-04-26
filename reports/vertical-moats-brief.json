@@ -1,5 +1,23 @@
 {
+  "approval_required": [
+    "rec_platform_release_gate",
+    "rec_pulse_release_freeze_review",
+    "rec_fin_pricing_response",
+    "rec_lyte_collapse_approval_chain",
+    "rec_terra_close_diligence_gap",
+    "rec_vessels_refresh_sanctions_screen",
+    "rec_counsel_lock_response_brief",
+    "rec_growth_proof_to_pipeline",
+    "rec_sentra_cve_remediation"
+  ],
+  "cross_vertical_provenance": {
+    "platform": [
+      "ev_platform_sig_platform_mcp_registry"
+    ]
+  },
   "generated_at": "2026-04-26T13:38:38.679865Z",
+  "substrate_version": "1.0.0",
+  "vertical_count": 9,
   "verticals": [
     {
       "artifact_path": "reports/vertical-artifacts/platform.json",

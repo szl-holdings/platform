@@ -19,6 +19,6 @@ def build(
         evidence_ids=[e["id"] for e in evidence],
         next_action="Patch affected dependencies and redeploy; validate via DAST scan.",
         rollback_path="If patch breaks functionality, pin to last-known-good version and re-escalate.",
-        input_class="sentra_signals_v1",
+        input_class="cyber",
         output_class="sentra_brief_v1",
     )
