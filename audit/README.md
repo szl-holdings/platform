@@ -30,28 +30,28 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 
 ## Canonical Numbers (Quick Reference)
 
-> Updated 2026-04-25 by Moonshot Phase 1 audit. Source: `audit/source-of-truth.json` v1.3.0.
+> Updated 2026-04-26 by GitHub Alignment audit. Source: `audit/source-of-truth.json` v1.4.0.
 
 | Metric | Verified Count | Source |
 |--------|---------------|--------|
-| Registered artifacts (with artifact.toml) | 14 | `find artifacts -name artifact.toml \| wc -l` |
-| Total artifact directories on disk | 14 | `ls artifacts/ \| wc -l` |
+| Registered artifacts (with artifact.toml) | 15 | `find artifacts -name artifact.toml \| wc -l` |
+| Total artifact directories on disk | 17 | `ls artifacts/ \| wc -l` |
 | Domain packs (active) | 7 | Inventory (TENAX, SEXTANT, DOMAINE, Counsel, Carlota Jo, LUMINA, PARAGON) |
 | Platform primitives | 6 | Inventory |
 | RBAC roles | 11 | README / trust docs |
-| Domain packages (`packages/`) | 84 | `ls packages/ \| wc -l` |
-| Shared library packages (`lib/`) | 42 | `ls lib/ \| wc -l` |
+| Domain packages (`packages/`) | 95 | `ls packages/ \| wc -l` |
+| Shared library packages (`lib/`) | 51 | `ls lib/ \| wc -l` |
 | Apps (`apps/`) | 3 | `ls apps/ \| wc -l` |
-| Services (`services/`) | 5 | `ls services/ \| wc -l` |
+| Services (`services/`) | 6 | `ls services/ \| wc -l` |
 | Workers (`workers/`) | 5 | `ls workers/ \| wc -l` |
-| DB schema files | 170 | `find lib/db/src/schema -name '*.ts' \| wc -l` |
-| DB tables (raw grep, pgTable declarations) | 939 | `grep -r '= pgTable' lib/db/src/schema/ --include='*.ts' \| wc -l` |
+| DB schema files | 182 | `find lib/db/src/schema -name '*.ts' \| wc -l` |
+| DB tables (raw grep, pgTable declarations) | 978 | `grep -r '= pgTable' lib/db/src/schema/ --include='*.ts' \| wc -l` |
 | DB tables (live, provisioned via drizzle push) | 730 | Track 4 DB verification (2026-04-21) |
-| DB migrations (SQL files) | 132 | `ls lib/db/drizzle/ \| grep -v meta \| wc -l` |
-| API route files | 357 | `find artifacts/api-server/src/routes -name '*.ts' ! -name '*.test.ts' ! -name '*.spec.ts' \| wc -l` |
-| API route groups (top-level, excl. __tests__) | 12 | `find artifacts/api-server/src/routes -mindepth 1 -maxdepth 1 -type d \| grep -v '__tests__' \| wc -l` |
-| CI workflows | 23 | `ls .github/workflows/ \| wc -l` |
-| Environment variables (in .env.example) | 213 | `grep -cE '^[A-Z_]+=' .env.example` |
+| DB migrations (SQL files) | 137 | `ls lib/db/drizzle/ \| grep -v meta \| wc -l` |
+| API route files | 385 | `find artifacts/api-server/src/routes -name '*.ts' ! -name '*.test.ts' ! -name '*.spec.ts' \| wc -l` |
+| API route groups (top-level, excl. __tests__) | 13 | `find artifacts/api-server/src/routes -mindepth 1 -maxdepth 1 -type d \| grep -v '__tests__' \| wc -l` |
+| CI workflows | 24 | `ls .github/workflows/ \| wc -l` |
+| Environment variables (in .env.example) | 275 | `grep -cE '^[A-Z_]+=' .env.example` |
 
 ---
 

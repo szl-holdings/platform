@@ -6,6 +6,20 @@
 
 This checklist covers everything needed to make the repo shine for investors, enterprise evaluators, and technical reviewers. Items marked **[UI]** require manual action in the GitHub web UI.
 
+## 2026-04-26 Alignment Addendum
+
+Current GitHub connector status:
+
+- Open PRs: none.
+- Open issues: none.
+- Prior PR #37 is closed and not merged.
+- The current Replit export is 2091 commits ahead of `origin/main`; `origin/main` has one GitHub-only archived workflow commit now preserved in the alignment branch.
+- Updated branch for review: `codex/a11oy-github-alignment-2026-04-26`.
+- Current audit packet: `audit/GITHUB_ALIGNMENT_REPORT_2026-04-26.md`.
+- Current PR body: `PR_DRAFT.md`.
+
+Security note: a GitHub credential was previously present in local git remote configuration and has been removed from `origin`/`github`. Rotate that token before treating the workstation as clean.
+
 ---
 
 ## 1. Repository Name

@@ -100,10 +100,12 @@ All screenshots are verified, unmodified captures from the live platform. No moc
 
 | Metric | Count |
 |--------|-------|
-| Deployable artifacts | 16 |
-| Packages | 93 |
-| Shared libraries | 51 |
-| Domain verticals | 8 |
+| Registered deployable artifacts | 15 |
+| Workspace packages and libraries | 146 |
+| API route files | 385 |
+| Provisioned PostgreSQL tables | 730 |
+| Active domain packs | 7 |
+| GitHub Actions workflows | 24 |
 | A11oy operator surfaces | 19 |
 
 ---
@@ -148,13 +150,13 @@ All screenshots are verified, unmodified captures from the live platform. No moc
 
 ## Current Status
 
-**Active prototype / demo platform under development.**
+**Active prototype / investor demo platform under development.**
 
 - A11oy Phase 1: fully implemented across 19 operator surfaces
-- Eight domain pack verticals: implemented and active with demo data
+- Seven active domain packs: implemented or partially implemented with demo-safe data
 - AI recommendations: multi-provider routing with governed policy constraints
 - Authentication: OIDC/PKCE with multi-role RBAC
-- All screenshots are from the active platform — no mockups or AI-generated imagery
+- All screenshots are from the active platform - no mockups or AI-generated imagery
 
 ---
 

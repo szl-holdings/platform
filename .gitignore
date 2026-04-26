@@ -44,6 +44,7 @@ Thumbs.db
 .local/
 .canvas/
 .cursor/
+.config/
 .github/instructions/
 
 # Attached assets (user-pasted payload dumps)

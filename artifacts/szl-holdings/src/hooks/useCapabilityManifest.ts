@@ -93,6 +93,12 @@ export const PRODUCT_DISPLAY: Record<
   string,
   { label: string; color: string; href: string; appStatus: string }
 > = {
+  'A11oy (Live Enterprise Execution Fabric)': {
+    label: 'A11oy',
+    color: '#6f8cff',
+    href: '/a11oy',
+    appStatus: 'Phase 1',
+  },
   'Lyte (Business Observability)': {
     label: 'Lyte',
     color: '#d4a054',

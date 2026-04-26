@@ -1,22 +1,23 @@
 {
   "meta": {
-    "generated": "2026-04-25",
-    "track": "Moonshot Phase 1 — Truth & Audit",
-    "version": "1.3.0",
+    "generated": "2026-04-26",
+    "track": "GitHub Alignment — Truth & Audit Refresh",
+    "version": "1.4.0",
     "note": "Canonical verified counts for the SZL Holdings platform. Every count below was produced by the exact shell command listed. Run from workspace root to reproduce. Downstream tracks should treat these as the ground-truth baseline and re-run commands to verify before making claims. Database table count uses raw grep (= pgTable) — see track4_db_verification for canonical Drizzle count from live DB (730 provisioned tables)."
   },
   "artifacts": {
     "registered": {
-      "count": 14,
+      "count": 15,
       "command": "find artifacts -name artifact.toml | wc -l",
-      "computed": "2026-04-25",
+      "computed": "2026-04-26",
       "breakdown": {
-        "web": 11,
+        "web": 12,
         "mobile": 1,
         "video": 1,
         "design": 1
       },
       "list": [
+        "artifacts/a11oy",
         "artifacts/aegis",
         "artifacts/api-server",
         "artifacts/carlota-jo",
@@ -34,35 +35,35 @@
       ]
     },
     "on_disk_unregistered": {
-      "count": 0,
+      "count": 2,
       "command": "for d in artifacts/*/; do [ ! -f \"${d}.replit-artifact/artifact.toml\" ] && echo \"${d}\"; done | wc -l",
-      "computed": "2026-04-25",
-      "list": [],
-      "note": "All previously unregistered artifact directories (audit, cortex-mobile, firestorm, imperium, internal-audit, prism-counsel) have been removed from disk. See ORIGINALITY_REPORT.md §2 Vestigial Directories Removed."
+      "computed": "2026-04-26",
+      "list": ["artifacts/helios", "artifacts/pluginmesh"],
+      "note": "Two unregistered artifact directories are present in the Replit export and should be reviewed before public release. They are not counted as registered deployable artifacts until an artifact.toml is added."
     },
     "total_on_disk": {
-      "count": 14,
+      "count": 17,
       "command": "ls artifacts/ | wc -l",
-      "computed": "2026-04-25"
+      "computed": "2026-04-26"
     }
   },
   "packages": {
     "domain_packages_dir": {
-      "count": 84,
+      "count": 95,
       "command": "ls packages/ | wc -l",
-      "computed": "2026-04-25",
-      "note": "Filesystem-verified count of all entries under packages/. +2 since v1.2.0 (2026-04-21). Run 'pnpm metrics:generate' to refresh docs/platform-facts.md."
+      "computed": "2026-04-26",
+      "note": "Filesystem-verified count of all entries under packages/. Run 'pnpm metrics:generate' to refresh docs/platform-facts.md."
     },
     "shared_lib_packages": {
-      "count": 42,
+      "count": 51,
       "command": "ls lib/ | wc -l",
-      "computed": "2026-04-25"
+      "computed": "2026-04-26"
     },
     "total_packages": {
-      "count": 126,
+      "count": 146,
       "command": "echo $(( $(ls packages/ | wc -l) + $(ls lib/ | wc -l) ))",
-      "computed": "2026-04-25",
-      "note": "packages/ (84) + lib/ (42) = 126. Prior count was 123 (82+41)."
+      "computed": "2026-04-26",
+      "note": "packages/ (95) + lib/ (51) = 146."
     },
     "apps": {
       "count": 3,
@@ -71,36 +72,49 @@
       "list": ["alloy-embedding-api", "alloy-ingestion-orchestrator", "alloy-runtime-api"]
     },
     "services": {
-      "count": 5,
+      "count": 6,
       "command": "ls services/ | wc -l",
-      "computed": "2026-04-25",
-      "list": ["alloy-fabric-api", "alloy-fabric-ingest-control", "lyte-metrics-store", "substrate-mcp-gateway", "substrate-py-workers"]
+      "computed": "2026-04-26",
+      "list": [
+        "alloy-fabric-api",
+        "alloy-fabric-ingest-control",
+        "lyte-metrics-store",
+        "substrate-mcp-gateway",
+        "substrate-py-workers",
+        "verticals"
+      ]
     },
     "workers": {
       "count": 5,
       "command": "ls workers/ | wc -l",
       "computed": "2026-04-25",
-      "list": ["alloy-embed-worker", "alloy-rank-worker", "alloy-rerank-worker", "alloy-vector-worker", "substrate-python"]
+      "list": [
+        "alloy-embed-worker",
+        "alloy-rank-worker",
+        "alloy-rerank-worker",
+        "alloy-vector-worker",
+        "substrate-python"
+      ]
     }
   },
   "database": {
     "schema_files": {
-      "count": 170,
+      "count": 182,
       "command": "find lib/db/src/schema -name '*.ts' | wc -l",
-      "computed": "2026-04-25",
-      "note": "Filesystem-verified. +5 since v1.2.0 (2026-04-21 count was 165)."
+      "computed": "2026-04-26",
+      "note": "Filesystem-verified from the current Replit export."
     },
     "table_definitions_raw_grep": {
-      "count": 939,
+      "count": 978,
       "command": "grep -r '= pgTable' lib/db/src/schema/ --include='*.ts' | wc -l",
-      "computed": "2026-04-25",
-      "note": "Raw grep count; may include re-exports. Canonical live DB provisioned count is 730 (see track4_db_verification). +24 since v1.2.0 (prior raw grep was 915)."
+      "computed": "2026-04-26",
+      "note": "Raw grep count; may include re-exports. Canonical live DB provisioned count remains 730 (see track4_db_verification) until a live DB inventory is rerun."
     },
     "migration_files": {
-      "count": 132,
+      "count": 137,
       "command": "ls lib/db/drizzle/ | grep -v '^meta$' | wc -l",
-      "computed": "2026-04-25",
-      "note": "Includes files with duplicate sequence numbers (parallel branching). +17 since v1.2.0 (prior count 115). Full list: see audit/database-surface.md."
+      "computed": "2026-04-26",
+      "note": "Includes files with duplicate sequence numbers (parallel branching). Full list: see audit/database-surface.md."
     },
     "rollback_scripts": {
       "count": 5,
@@ -110,15 +124,15 @@
   },
   "api": {
     "route_files": {
-      "count": 357,
+      "count": 385,
       "command": "find artifacts/api-server/src/routes -name '*.ts' ! -name '*.test.ts' ! -name '*.spec.ts' | wc -l",
-      "computed": "2026-04-25",
-      "note": "+10 since v1.2.0 (2026-04-21 count was 347)."
+      "computed": "2026-04-26",
+      "note": "Filesystem-verified from the current Replit export."
     },
     "route_groups_top_level": {
-      "count": 12,
+      "count": 13,
       "command": "find artifacts/api-server/src/routes -mindepth 1 -maxdepth 1 -type d | grep -v '__tests__' | wc -l",
-      "computed": "2026-04-25",
+      "computed": "2026-04-26",
       "list": [
         "admin",
         "control-tower",
@@ -127,6 +141,7 @@
         "domain-agents",
         "firestorm",
         "groups",
+        "helios",
         "intelligence",
         "metering",
         "rmm",
@@ -145,17 +160,17 @@
   },
   "ci": {
     "workflows": {
-      "count": 23,
+      "count": 24,
       "command": "ls .github/workflows/ | wc -l",
-      "computed": "2026-04-25",
-      "note": "+5 since v1.2.0 (2026-04-21 count was 18)."
+      "computed": "2026-04-26",
+      "note": "Includes the archived PRISM Counsel workflow preserved from origin/main."
     }
   },
   "env": {
     "declared_vars": {
-      "count": 213,
+      "count": 275,
       "command": "grep -cE '^[A-Z_]+=' .env.example",
-      "computed": "2026-04-25"
+      "computed": "2026-04-26"
     }
   },
   "mobile": {
@@ -169,13 +184,28 @@
   },
   "domain_packs": {
     "count": 7,
-    "active": ["TENAX (Sentra)", "SEXTANT (Vessels)", "DOMAINE (Terra)", "Counsel", "Carlota Jo", "LUMINA (Pulse)", "PARAGON (Aegis)"],
+    "active": [
+      "TENAX (Sentra)",
+      "SEXTANT (Vessels)",
+      "DOMAINE (Terra)",
+      "Counsel",
+      "Carlota Jo",
+      "LUMINA (Pulse)",
+      "PARAGON (Aegis)"
+    ],
     "archived": ["IMPERIUM", "PRISM Counsel"],
     "note": "Canonical display names per ORIGINALITY_REPORT.md. PARAGON supersedes Aegis (security/defense). TENAX supersedes Sentra in display; slug /sentra/ retained. LUMINA supersedes Pulse in display; slug /pulse/ retained. Archived packs have API routes and schemas retained but no registered artifact."
   },
   "platform_primitives": {
     "count": 6,
-    "list": ["Outcome Graph", "Proof Chain", "Covenant Policy", "Decision Simulation", "Workflow Engine", "Event Fabric"]
+    "list": [
+      "Outcome Graph",
+      "Proof Chain",
+      "Covenant Policy",
+      "Decision Simulation",
+      "Workflow Engine",
+      "Event Fabric"
+    ]
   },
   "track4_db_verification": {
     "verified_date": "2026-04-21",
@@ -219,12 +249,12 @@
     },
     "schema": {
       "primary_schema_files": {
-        "count": 170,
+        "count": 182,
         "command": "find lib/db/src/schema -name '*.ts' | wc -l",
-        "note": "Updated 2026-04-25 from 165."
+        "note": "Updated 2026-04-26 from the current Replit export."
       },
       "pgTable_call_sites": {
-        "count": 939,
+        "count": 978,
         "command": "grep -r '= pgTable' lib/db/src/schema/ --include='*.ts' | wc -l",
         "note": "Raw grep; may overcount re-exports. Live provisioned count is 730."
       },
@@ -236,9 +266,9 @@
     },
     "migrations": {
       "drizzle_sql_files": {
-        "count": 132,
+        "count": 137,
         "command": "ls lib/db/drizzle/ | grep -v '^meta$' | wc -l",
-        "note": "Updated 2026-04-25. Track 4 verification run (2026-04-21) recorded 115; canonical count is now 132 (database.migration_files.count) after +17 new migrations. This section reflects current filesystem state.",
+        "note": "Updated 2026-04-26. Track 4 verification run (2026-04-21) recorded 115; canonical current filesystem count is 137 (database.migration_files.count). This section reflects current filesystem state.",
         "track4_snapshot_count": 115,
         "track4_snapshot_date": "2026-04-21"
       },
@@ -256,7 +286,11 @@
       },
       "orphaned_files_resolved": {
         "count": 3,
-        "files": ["0010_szl_saas_layer_tables.sql", "0028_crdt_change_events.sql", "0028_multi_channel_notifications.sql"],
+        "files": [
+          "0010_szl_saas_layer_tables.sql",
+          "0028_crdt_change_events.sql",
+          "0028_multi_channel_notifications.sql"
+        ],
         "resolution": "Registered as journal idx 91, 92, 93 with IF NOT EXISTS guards"
       },
       "rollback_scripts": {
@@ -274,9 +308,22 @@
         "count": 20,
         "command": "ls scripts/seed-*.ts scripts/seed-*.sh | wc -l"
       },
-      "domains_with_full_coverage": ["KORA/Lyte", "SEXTANT/Vessels", "TENAX/Sentra", "LUMINA/Pulse", "Carlota Jo", "Agent/AI infra"],
-      "domains_with_partial_coverage": ["DOMAINE/Terra (1031 Exchange + Lease Abstraction thin)", "Counsel (M365 surfaces thin)"],
-      "surfaces_depending_only_on_static_json": ["KORA/Lyte command-cards/incidents/playbooks (by design)", "SEXTANT/Vessels fleets/AI-briefings (by design)"]
+      "domains_with_full_coverage": [
+        "KORA/Lyte",
+        "SEXTANT/Vessels",
+        "TENAX/Sentra",
+        "LUMINA/Pulse",
+        "Carlota Jo",
+        "Agent/AI infra"
+      ],
+      "domains_with_partial_coverage": [
+        "DOMAINE/Terra (1031 Exchange + Lease Abstraction thin)",
+        "Counsel (M365 surfaces thin)"
+      ],
+      "surfaces_depending_only_on_static_json": [
+        "KORA/Lyte command-cards/incidents/playbooks (by design)",
+        "SEXTANT/Vessels fleets/AI-briefings (by design)"
+      ]
     },
     "public_claims_status": "COUNTS UPDATED 2026-04-25 — see Moonshot Phase 1 audit. All stale counts reconciled.",
     "open_drift_items": 0,
