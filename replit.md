@@ -16,8 +16,6 @@ Key capabilities include:
 I prefer detailed explanations.
 I want iterative development.
 Ask before making major changes.
-Do not make changes to the folder `Z`.
-Do not make changes to the file `Y`.
 
 ## System Architecture
 The platform is a pnpm monorepo built with TypeScript 5.9, React 19, Vite, and Node.js, employing a micro-frontend architecture for web applications. It has evolved into the FORGE Execution and Evidence Platform (AEEP).
@@ -88,3 +86,85 @@ The platform is a pnpm monorepo built with TypeScript 5.9, React 19, Vite, and N
 -   **Government Data:** CISA KEV, NVD CVE, MITRE ATT&CK, Census/BLS, FEMA NRI, NYC Open Data, SEC EDGAR
 -   **Legal Data:** CourtListener REST API
 -   **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
+
+## Canonical Commands
+
+### Development (Replit)
+```bash
+pnpm dev          # start all artifacts in parallel (equivalent to clicking Run)
+```
+
+### Production
+```bash
+# Note: `pnpm start` is an alias for `pnpm dev` in package.json.
+# For a true production-mode start, set NODE_ENV before running:
+NODE_ENV=production pnpm dev     # start all artifacts with production env overrides
+```
+
+### First-time / fresh-clone bootstrap
+```bash
+bash scripts/bootstrap.sh        # idempotent: install → codegen → migrate → seed → validate
+```
+
+### Pre-flight diagnostics (run before starting)
+```bash
+bash scripts/doctor.sh           # check env vars, ports, DB connectivity, API health
+```
+
+### Verify platform after start
+```bash
+bash scripts/verify.sh           # env validation + API health check
+```
+
+### Other helper scripts
+```bash
+bash scripts/release/alpha.sh           # alpha release gate (env → brand → typecheck → tests)
+bash scripts/release/alpha.sh --publish # gate + publish GitHub release draft
+bash scripts/screenshots/refresh.sh     # refresh product screenshots (platform must be running)
+bash scripts/inventory/generate.sh      # generate workspace artifact inventory
+node scripts/qa/verify-env.js           # structured env var check (required / recommended / optional)
+pnpm run verify:health                  # API health check via scripts/qa/health-check.js
+```
+
+## Environment Contract
+
+### Required (API server exits on missing)
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `SESSION_SECRET` | Session signing secret (≥32 chars) |
+| `SECRET_ENCRYPTION_KEY` | Field-level encryption key (≥32 chars) |
+| `ISSUER_URL` | OIDC/auth issuer URL |
+| `PUBLIC_APP_URL` | Canonical public URL |
+
+Validation is enforced at startup by `artifacts/api-server/src/lib/startup-validation.ts`. Missing required vars produce a detailed error log and `process.exit(1)`.
+
+### Recommended (service degrades to demo/mock mode if absent)
+`ALLOY_INTERNAL_TOKEN`, `CONNECTOR_ENCRYPTION_KEY`, `IP_HASH_SALT`, `OAUTH_STATE_SECRET`, `ADMIN_PIN`, `CORS_ORIGINS`, `SENTRY_DSN`, `OTEL_EXPORTER_OTLP_ENDPOINT`
+
+See `.env.example` for the full list with descriptions.
+
+## Boot Sequence (API Server)
+
+1. `failFastOnInvalidConfig()` — validates env vars, exits on missing required vars.
+2. Database migrations (`runMigrations()`) — applies pending Drizzle schema changes.
+3. `runBootSeedSequence()` — seeds platform defaults, guardian tiers, knowledge base, etc.
+4. GraphQL, WebSocket, agent scheduler, health watcher, and self-monitor initialize.
+5. HTTP handler switches from 503 "starting" to live — server is fully ready.
+
+During steps 1–4, the server responds 503 to all requests (fail-safe behaviour).
+
+## Health Check Endpoints
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /healthz` | Liveness — server, DB, auth, AI, storage, backup status |
+| `GET /readyz` | Readiness — DB connected and migrations complete |
+| `GET /health/detailed` | Full diagnostics (admin/internal token required in production) |
+
+All endpoints are on the `api-server` artifact (external port 80 / internal port 8080).
+
+## Runtime Audit
+
+Full runtime model, port map, env contract, and boot sequence documentation:
+`audit/runtime/replit-runtime-audit.md`

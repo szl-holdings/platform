@@ -92,20 +92,48 @@ results.summary = {
 };
 
 if (JSON_MODE) {
+  process.stdout.write(JSON.stringify(results, null, 2) + '\n');
 } else {
-  const _pad = (s, n) => String(s).padEnd(n);
+  const pad = (s, n) => String(s).padEnd(n);
+
+  console.log('\n=== Required Variables ===');
   for (const v of results.required) {
-    const _icon = v.status === 'PASS' ? '✅' : '❌';
-    const _blocker = v.blocker ? ` [${v.blocker}]` : '';
+    const icon = v.status === 'PASS' ? '✅' : '❌';
+    const blocker = v.blocker ? ` [${v.blocker}]` : '';
+    console.log(`  ${icon}  ${pad(v.key, 30)} ${v.status}${blocker}  — ${v.desc}`);
   }
+
+  console.log('\n=== Recommended Variables ===');
   for (const v of results.recommended) {
-    const _icon = v.status === 'PASS' ? '✅' : '⚠️ ';
-    const _blocker = v.blocker ? ` [${v.blocker}]` : '';
+    const icon = v.status === 'PASS' ? '✅' : '⚠️ ';
+    const blocker = v.blocker ? ` [${v.blocker}]` : '';
+    console.log(`  ${icon}  ${pad(v.key, 30)} ${v.status}${blocker}  — ${v.desc}`);
   }
+
+  console.log('\n=== Optional Variables ===');
   for (const v of results.optional) {
-    const _icon = v.status === 'SET' ? '🔵' : '⬜';
+    const icon = v.status === 'SET' ? '🔵' : '⬜';
+    console.log(`  ${icon}  ${pad(v.key, 30)} ${v.status}  — ${v.desc}`);
   }
-  const _s = results.summary;
+
+  const s = results.summary;
+  console.log('\n=== Summary ===');
+  console.log(`  Required  : ${s.required_passed}/${s.required_total} passed`);
+  console.log(`  Recommended: ${s.recommended_present}/${s.recommended_total} present`);
+  console.log(`  Optional  : ${s.optional_set}/${s.optional_total} set`);
+  console.log(`  Overall   : ${s.overall}`);
+
+  if (requiredFailed > 0) {
+    console.error(
+      `\n❌ ${requiredFailed} required variable(s) missing. Set them in Replit Secrets before starting the server.`,
+    );
+  } else if (recommendedMissing > 0) {
+    console.warn(
+      `\n⚠️  ${recommendedMissing} recommended variable(s) not set. The platform will start in degraded/demo mode for those services.`,
+    );
+  } else {
+    console.log('\n✅ All required and recommended variables are set.');
+  }
 }
 
 const shouldFail = requiredFailed > 0 || (STRICT && recommendedMissing > 0);
