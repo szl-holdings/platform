@@ -2,6 +2,7 @@ import {
   Activity,
   BarChart2,
   BookOpen,
+  BookmarkCheck,
   ChevronRight,
   Cpu,
   FileText,
@@ -22,6 +23,7 @@ const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') || '/pulse';
 
 const NAV_ITEMS = [
   { href: `${BASE}/`, label: "Today's Brief", icon: Radio },
+  { href: `${BASE}/watchlist`, label: 'My Watchlist', icon: BookmarkCheck },
   { href: `${BASE}/library`, label: 'Briefing Library', icon: BookOpen },
   { href: `${BASE}/engine`, label: 'Brief Engine', icon: Cpu },
   { href: `${BASE}/confidence`, label: 'Confidence', icon: BarChart2 },

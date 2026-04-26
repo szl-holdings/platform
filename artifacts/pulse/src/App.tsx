@@ -29,6 +29,7 @@ import Library from './pages/Library';
 import Settings from './pages/Settings';
 import SystemHealth from './pages/SystemHealth';
 import TodaysBrief from './pages/TodaysBrief';
+import Watchlist from './pages/Watchlist';
 
 const DecisionCenterPage = lazy(() => import('@/pages/decision-center'));
 const GovernedCockpitPage = lazy(() => import('@/pages/governed-cockpit'));
@@ -388,6 +389,12 @@ function PulsePalette() {
       action: () => navigate(`${BASE}/`),
     },
     {
+      id: 'nav-watchlist',
+      label: 'My Watchlist',
+      group: 'Navigate',
+      action: () => navigate(`${BASE}/watchlist`),
+    },
+    {
       id: 'nav-library',
       label: 'Briefing Library',
       group: 'Navigate',
@@ -474,6 +481,7 @@ export default function App() {
             <Switch>
               <Route path={`${BASE}/`} component={TodaysBrief} />
               <Route path={`${BASE}`} component={TodaysBrief} />
+              <Route path={`${BASE}/watchlist`} component={Watchlist} />
               <Route path={`${BASE}/library`} component={Library} />
               <Route path={`${BASE}/library/:id`} component={BriefingDetail} />
               <Route path={`${BASE}/confidence`} component={ConfidenceDashboard} />

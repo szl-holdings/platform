@@ -89,6 +89,75 @@ export const pulseSavedBriefingsTable = pgTable(
   (t) => [uniqueIndex('pulse_saved_briefings_user_briefing_unique').on(t.userId, t.briefingId)],
 );
 
+export const pulseWatchlistTable = pgTable(
+  'pulse_watchlist',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id').notNull(),
+    entityUri: text('entity_uri').notNull(),
+    entityType: text('entity_type').notNull(),
+    entityLabel: text('entity_label').notNull(),
+    domain: text('domain').notNull(),
+    metadata: jsonb('metadata').$type<Record<string, unknown>>(),
+    addedAt: timestamp('added_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('pulse_watchlist_user_entity_unique').on(t.userId, t.entityUri)],
+);
+
+export const pulseFollowUpsTable = pgTable('pulse_follow_ups', {
+  id: serial('id').primaryKey(),
+  followUpId: text('follow_up_id').notNull().unique(),
+  briefingId: text('briefing_id').notNull(),
+  sectionId: text('section_id'),
+  userId: integer('user_id').notNull(),
+  question: text('question').notNull(),
+  answer: text('answer'),
+  status: text('status', { enum: ['pending', 'answered', 'failed'] })
+    .notNull()
+    .default('pending'),
+  provenance: jsonb('provenance').$type<Record<string, unknown>>(),
+  askedAt: timestamp('asked_at').notNull().defaultNow(),
+  answeredAt: timestamp('answered_at'),
+});
+
+export const pulsePushScheduleTable = pgTable(
+  'pulse_push_schedule',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id').notNull().unique(),
+    enabled: boolean('enabled').notNull().default(true),
+    deliveryHourUtc: integer('delivery_hour_utc').notNull().default(7),
+    lastDeliveredAt: timestamp('last_delivered_at'),
+    lastBriefingId: text('last_briefing_id'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+);
+
+// Per-user generated personalized briefing narratives.
+// Generated asynchronously from last-24h published sections scoped to the
+// user's watchlist domains and entity labels. Cached per (userId, dateKey).
+export const pulsePersonalizedNarrativesTable = pgTable(
+  'pulse_personalized_narratives',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id').notNull(),
+    dateKey: text('date_key').notNull(),
+    sourceBriefingId: text('source_briefing_id'),
+    narrative: text('narrative'),
+    watchedDomains: jsonb('watched_domains').$type<string[]>().notNull().default([]),
+    watchedEntityUris: jsonb('watched_entity_uris').$type<string[]>().notNull().default([]),
+    filteredSectionCount: integer('filtered_section_count'),
+    status: text('status', { enum: ['pending', 'ready', 'failed'] })
+      .notNull()
+      .default('pending'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('pulse_personalized_narratives_user_date_unique').on(t.userId, t.dateKey)],
+);
+
 export const pulseExecBriefsTable = pgTable('pulse_exec_briefs', {
   id: text('id').primaryKey(),
   briefingId: text('briefing_id'),

@@ -82,6 +82,7 @@ import { initFusionPersistence } from './lib/fusion-persistence';
 import { providerHealth } from './lib/provider-health';
 import { registerQueuedJobHandlers } from './lib/queued-jobs';
 import { startAtlasExportProcessor, stopAtlasExportProcessor } from './jobs/atlas-export-processor';
+import { runPulsePushDelivery } from './jobs/pulse-push-delivery';
 import { runAlertRuleEvaluation } from './routes/ops-management';
 import { bootstrapChainState } from './routes/signal-chains';
 import { twinRegistry } from '@szl-holdings/ai-engine';
@@ -640,6 +641,17 @@ export async function bootstrap(
       );
     }, SCHEDULED_NOTIF_INTERVAL_MS);
     scheduledNotifInterval.unref();
+
+    // Pulse morning briefing push delivery: runs every 15 minutes, dispatches
+    // to users whose delivery_hour_utc matches the current UTC hour and who
+    // have not already received a push today. No-ops outside configured hours.
+    const PULSE_PUSH_INTERVAL_MS = 15 * 60 * 1000;
+    const pulsePushInterval = setInterval(() => {
+      runPulsePushDelivery().catch((err) =>
+        logger.warn({ err }, '[pulse-push] Delivery run error (non-fatal)'),
+      );
+    }, PULSE_PUSH_INTERVAL_MS);
+    pulsePushInterval.unref();
 
     // Step 3b: Register all job handlers and agent schedules BEFORE starting the scheduler.
     // This ensures no durable job is dequeued before its handler exists (prevents dead-lettering

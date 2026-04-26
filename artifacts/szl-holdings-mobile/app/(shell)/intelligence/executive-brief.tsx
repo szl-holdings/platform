@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import * as Speech from 'expo-speech';
 import { useCallback, useRef, useState } from 'react';
@@ -12,6 +12,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -202,11 +203,23 @@ function DomainCard({
   );
 }
 
+interface FollowUp {
+  id: number;
+  sectionId: string;
+  question: string;
+  answer: string | null;
+  status: 'pending' | 'answered';
+  createdAt: string;
+}
+
 export default function ExecutiveBriefScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const qc = useQueryClient();
   const [mode, setMode] = useState<BriefMode>('daily');
   const [audioPlaying, setAudioPlaying] = useState(false);
+  const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+  const [followUpText, setFollowUpText] = useState('');
 
   const specialistRef = useRef(
     new SpeechSpecialist({ tts: new ExpoSpeechTTSAdapter() }),
@@ -264,15 +277,53 @@ export default function ExecutiveBriefScreen() {
     staleTime: 2 * 60 * 1000,
   });
 
-  const pulseQuery = useQuery<{ briefing: PulseBrief }>({
+  const pulseQuery = useQuery<{
+    briefing: PulseBrief;
+    personalized: boolean;
+    watchedDomains: string[];
+    watchedEntityUris: string[];
+    filteredSectionCount?: number;
+    totalSectionCount?: number;
+  }>({
     queryKey: ['exec-brief-pulse'],
-    queryFn: () => apiFetch<{ briefing: PulseBrief }>(BRIEF_ENDPOINTS.pulseToday),
+    queryFn: () => apiFetch(BRIEF_ENDPOINTS.pulseToday),
     staleTime: 5 * 60 * 1000,
     retry: 1,
   });
 
   const brief = briefingQuery.data;
   const pulse = pulseQuery.data?.briefing;
+  const isPersonalized = pulseQuery.data?.personalized ?? false;
+  const watchedDomains = pulseQuery.data?.watchedDomains ?? [];
+
+  const followUpsQuery = useQuery<{ followUps: FollowUp[] }>({
+    queryKey: ['pulse-follow-ups', pulse?.id],
+    queryFn: () => apiFetch(`/api/pulse/follow-ups/${pulse!.id}`),
+    enabled: !!pulse?.id,
+    refetchInterval: (data) =>
+      data?.state?.data?.followUps?.some((f: FollowUp) => f.status === 'pending') ? 3000 : false,
+  });
+
+  const askFollowUpMutation = useMutation({
+    mutationFn: (input: { briefingId: string; sectionId: string; question: string }) =>
+      apiFetch('/api/pulse/follow-ups', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pulse-follow-ups', pulse?.id] });
+      setFollowUpText('');
+    },
+  });
+
+  const handleAskFollowUp = () => {
+    if (!followUpText.trim() || !pulse?.id || !activeSectionId) return;
+    askFollowUpMutation.mutate({
+      briefingId: pulse.id,
+      sectionId: activeSectionId,
+      question: followUpText.trim(),
+    });
+  };
 
   const handleRefresh = () => {
     briefingQuery.refetch();
@@ -340,6 +391,21 @@ export default function ExecutiveBriefScreen() {
             </Text>
           </TouchableOpacity>
         ))}
+        {isPersonalized && (
+          <View style={[styles.personalizedChip, { borderColor: `${ACCENT}35`, backgroundColor: `${ACCENT}10` }]}>
+            <Feather name="user-check" size={10} color={ACCENT} />
+            <Text style={[styles.personalizedChipText, { color: ACCENT }]}>
+              {watchedDomains.length} watched
+            </Text>
+          </View>
+        )}
+        <TouchableOpacity
+          onPress={() => router.push('/(shell)/intelligence/watchlist' as never)}
+          style={[styles.openWebBtn, { borderColor: `${ACCENT}40`, backgroundColor: `${ACCENT}08` }]}
+        >
+          <Feather name="bookmark" size={11} color={ACCENT} />
+          <Text style={[styles.openWebBtnText, { color: ACCENT }]}>Watchlist</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
             Linking.openURL(pulseWebUrl);
@@ -434,12 +500,16 @@ export default function ExecutiveBriefScreen() {
                     </Text>
                     {pulse.sections.map((sec) => {
                       const conf = confidenceColor(sec.confidence);
+                      const isActive = activeSectionId === sec.id;
+                      const sectionFollowUps = (followUpsQuery.data?.followUps ?? []).filter(
+                        (f) => f.sectionId === sec.id,
+                      );
                       return (
                         <View
                           key={sec.id}
                           style={[
                             styles.sectionCard,
-                            { backgroundColor: colors.card, borderColor: colors.border },
+                            { backgroundColor: colors.card, borderColor: isActive ? `${ACCENT}50` : colors.border },
                           ]}
                         >
                           <View style={{ flex: 1 }}>
@@ -464,10 +534,63 @@ export default function ExecutiveBriefScreen() {
                             </Text>
                             <Text
                               style={[styles.keyJudgment, { color: colors.foreground }]}
-                              numberOfLines={3}
+                              numberOfLines={isActive ? undefined : 3}
                             >
                               {sec.keyJudgment}
                             </Text>
+                            {sectionFollowUps.map((fu) => (
+                              <View
+                                key={fu.id}
+                                style={[
+                                  styles.followUpBubble,
+                                  { backgroundColor: `${ACCENT}08`, borderColor: `${ACCENT}20` },
+                                ]}
+                              >
+                                <Text style={[styles.followUpQ, { color: ACCENT }]}>
+                                  Q: {fu.question}
+                                </Text>
+                                {fu.status === 'pending' ? (
+                                  <ActivityIndicator size="small" color={ACCENT} style={{ marginTop: 4 }} />
+                                ) : (
+                                  <Text style={[styles.followUpA, { color: colors.foreground }]}>
+                                    {fu.answer}
+                                  </Text>
+                                )}
+                              </View>
+                            ))}
+                            {isActive && (
+                              <View style={[styles.followUpInput, { borderColor: `${ACCENT}30` }]}>
+                                <TextInput
+                                  style={[styles.followUpTextInput, { color: colors.foreground }]}
+                                  placeholder="Ask a follow-up question…"
+                                  placeholderTextColor={colors.mutedForeground}
+                                  value={followUpText}
+                                  onChangeText={setFollowUpText}
+                                  multiline
+                                  returnKeyType="send"
+                                  autoFocus
+                                />
+                                <TouchableOpacity
+                                  onPress={handleAskFollowUp}
+                                  disabled={!followUpText.trim() || askFollowUpMutation.isPending}
+                                  style={[styles.followUpSendBtn, { opacity: followUpText.trim() ? 1 : 0.4 }]}
+                                >
+                                  <Feather name="send" size={14} color={ACCENT} />
+                                </TouchableOpacity>
+                              </View>
+                            )}
+                            <TouchableOpacity
+                              onPress={() => {
+                                setActiveSectionId(isActive ? null : sec.id);
+                                if (!isActive) setFollowUpText('');
+                              }}
+                              style={styles.askBtn}
+                            >
+                              <Feather name={isActive ? 'chevron-up' : 'message-circle'} size={12} color={ACCENT} />
+                              <Text style={[styles.askBtnText, { color: ACCENT }]}>
+                                {isActive ? 'Close' : `Ask${sectionFollowUps.length > 0 ? ` (${sectionFollowUps.length})` : ''}`}
+                              </Text>
+                            </TouchableOpacity>
                           </View>
                         </View>
                       );
@@ -792,4 +915,22 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', paddingTop: 60, gap: 10 },
   emptyText: { fontSize: 15, fontWeight: '500' },
   emptySub: { fontSize: 12 },
+  followUpBubble: {
+    marginTop: 8, borderRadius: 8, borderWidth: 1, padding: 10, gap: 4,
+  },
+  followUpQ: { fontSize: 12, fontWeight: '600' },
+  followUpA: { fontSize: 12, lineHeight: 17 },
+  followUpInput: {
+    flexDirection: 'row', alignItems: 'flex-end', marginTop: 10,
+    borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, gap: 8,
+  },
+  followUpTextInput: { flex: 1, fontSize: 13, maxHeight: 80 },
+  followUpSendBtn: { padding: 4 },
+  askBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 8, paddingVertical: 2 },
+  askBtnText: { fontSize: 11, fontWeight: '600' },
+  personalizedChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, borderWidth: 1,
+  },
+  personalizedChipText: { fontSize: 10, fontWeight: '700' },
 });

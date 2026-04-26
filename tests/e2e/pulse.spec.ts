@@ -254,6 +254,55 @@ test.describe('Pulse — Failure paths', () => {
   });
 });
 
+test.describe('Pulse — Watchlist & Personalized Briefings', () => {
+  test('navigating to /watchlist loads the watchlist page without crashing', async ({ page }) => {
+    await page.goto(`${PULSE_BASE || ''}/watchlist`, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const content = await page.content();
+    // Should not show a different product or a blank crash
+    const hasPulseBranding =
+      content.includes('Pulse') ||
+      content.includes('Watchlist') ||
+      content.includes('watchlist') ||
+      content.includes('Executive Briefing');
+    expect(hasPulseBranding).toBe(true);
+  });
+
+  test('watchlist page does not render an error boundary', async ({ page }) => {
+    await page.goto(`${PULSE_BASE || ''}/watchlist`, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator('text=Something went wrong').first();
+    expect(await errorBoundary.isVisible().catch(() => false)).toBe(false);
+  });
+
+  test('today\'s brief page renders without error boundary', async ({ page }) => {
+    await page.goto(`${PULSE_BASE || ''}`, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator('text=Something went wrong').first();
+    expect(await errorBoundary.isVisible().catch(() => false)).toBe(false);
+  });
+
+  test('push schedule settings page or watchlist renders without JS errors', async ({ page }) => {
+    const jsErrors: string[] = [];
+    page.on('pageerror', (err) => jsErrors.push(err.message));
+
+    await page.goto(`${PULSE_BASE || ''}/watchlist`, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+
+    const criticalErrors = jsErrors.filter(
+      (e) =>
+        !e.includes('ResizeObserver') &&
+        !e.includes('Non-Error promise rejection') &&
+        !e.includes('Network request failed') &&
+        !e.includes('fetch'),
+    );
+    expect(criticalErrors.length).toBe(0);
+  });
+});
+
 test.describe('Pulse — Accessibility (axe-core)', () => {
   test('homepage has no critical/serious a11y violations', async ({ page }) => {
     await page.goto(PULSE_BASE || '/', { waitUntil: 'domcontentloaded' });

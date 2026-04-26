@@ -627,3 +627,167 @@ export function useRequestCustomBrief() {
     },
   });
 }
+
+// ─── Watchlist ────────────────────────────────────────────────────────────────
+
+export interface WatchlistItem {
+  id: number;
+  userId: number;
+  entityUri: string;
+  entityType: string;
+  entityLabel: string;
+  domain: string;
+  metadata?: Record<string, unknown>;
+  addedAt: string;
+  updatedAt: string;
+}
+
+export function useWatchlist() {
+  return useQuery({
+    queryKey: ['pulse', 'watchlist'],
+    queryFn: () =>
+      apiFetch<{ success: true; watchlist: WatchlistItem[]; total: number }>('/api/pulse/watchlist').then((d) => d.watchlist),
+    enabled: !isDemoMode(),
+  });
+}
+
+export interface AddWatchlistInput {
+  entityUri: string;
+  entityType: string;
+  entityLabel: string;
+  domain: string;
+  metadata?: Record<string, unknown>;
+}
+
+export function useAddToWatchlist() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: AddWatchlistInput) =>
+      apiFetch<{ success: true; item: WatchlistItem; created: boolean }>('/api/pulse/watchlist', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pulse', 'watchlist'] });
+      qc.invalidateQueries({ queryKey: ['pulse', 'personalized'] });
+    },
+  });
+}
+
+export function useRemoveFromWatchlist() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) =>
+      apiFetch<{ success: true }>(`/api/pulse/watchlist/${id}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pulse', 'watchlist'] });
+      qc.invalidateQueries({ queryKey: ['pulse', 'personalized'] });
+    },
+  });
+}
+
+export function usePersonalizedBrief() {
+  return useQuery({
+    queryKey: ['pulse', 'personalized'],
+    queryFn: () =>
+      apiFetch<{
+        success: true;
+        briefing: Briefing | null;
+        watchlist: WatchlistItem[];
+        watchedDomains: string[];
+        personalized: boolean;
+      }>('/api/pulse/briefings/personalized'),
+    enabled: !isDemoMode(),
+  });
+}
+
+// ─── Follow-ups ───────────────────────────────────────────────────────────────
+
+export interface FollowUp {
+  id: number;
+  followUpId: string;
+  briefingId: string;
+  sectionId: string | null;
+  userId: number;
+  question: string;
+  answer: string | null;
+  status: 'pending' | 'answered' | 'failed';
+  provenance: Record<string, unknown> | null;
+  askedAt: string;
+  answeredAt: string | null;
+}
+
+export function useFollowUps(briefingId: string | undefined) {
+  return useQuery({
+    queryKey: ['pulse', 'follow-ups', briefingId],
+    queryFn: () =>
+      apiFetch<{ success: true; followUps: FollowUp[]; total: number }>(
+        `/api/pulse/follow-ups/${briefingId}`,
+      ).then((d) => d.followUps),
+    enabled: !!briefingId && !isDemoMode(),
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (Array.isArray(data) && data.some((f: FollowUp) => f.status === 'pending')) return 3000;
+      return false;
+    },
+  });
+}
+
+export interface AskFollowUpInput {
+  briefingId: string;
+  sectionId?: string;
+  question: string;
+}
+
+export function useAskFollowUp() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: AskFollowUpInput) => {
+      if (isDemoMode()) {
+        return Promise.reject(new Error('Follow-up questions are not available in demo mode.'));
+      }
+      return apiFetch<{ success: true; followUp: FollowUp }>('/api/pulse/follow-ups', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      });
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['pulse', 'follow-ups', vars.briefingId] });
+    },
+  });
+}
+
+// ─── Push notification schedule ───────────────────────────────────────────────
+
+export interface PushSchedule {
+  userId: number;
+  enabled: boolean;
+  deliveryHourUtc: number;
+  lastDeliveredAt: string | null;
+  lastBriefingId: string | null;
+}
+
+export function usePushSchedule() {
+  return useQuery({
+    queryKey: ['pulse', 'push-schedule'],
+    queryFn: () =>
+      apiFetch<{ success: true; schedule: PushSchedule }>('/api/pulse/push-schedule').then(
+        (d) => d.schedule,
+      ),
+    enabled: !isDemoMode(),
+  });
+}
+
+export function useUpdatePushSchedule() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { enabled?: boolean; deliveryHourUtc?: number }) =>
+      apiFetch<{ success: true; schedule: PushSchedule }>('/api/pulse/push-schedule', {
+        method: 'PUT',
+        body: JSON.stringify(input),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pulse', 'push-schedule'] });
+    },
+  });
+}

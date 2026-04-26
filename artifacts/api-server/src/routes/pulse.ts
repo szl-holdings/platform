@@ -13,6 +13,10 @@ import {
   pulseCustomBriefsTable,
   pulseDissentsTable,
   pulseEmailSubscriptionsTable,
+  pulseFollowUpsTable,
+  pulsePersonalizedNarrativesTable,
+  pulsePushScheduleTable,
+  pulseWatchlistTable,
 } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
@@ -1069,6 +1073,248 @@ router.get(
     });
   },
 );
+
+// ─── Personalized briefing (must be registered BEFORE /briefings/:id) ─────────
+
+// Map section agentId to its canonical domain for personalization filtering.
+// This mirrors SECTION_BLUEPRINT and ensures watchlist domain matches section domain
+// even when the section JSON does not explicitly carry a `domain` field.
+const AGENT_TO_DOMAIN: Record<string, string> = {
+  alloy: 'executive',
+  helmsman: 'maritime',
+  sentinel: 'security',
+  terra: 'real_estate',
+  lexis: 'legal',
+  atlas: 'financial',
+  beacon: 'platform',
+  zeus: 'security',
+};
+
+function resolveSectionDomain(section: Record<string, unknown>): string | null {
+  if (typeof section.domain === 'string' && section.domain) return section.domain;
+  if (typeof section.agentId === 'string' && section.agentId)
+    return AGENT_TO_DOMAIN[section.agentId.toLowerCase()] ?? null;
+  return null;
+}
+
+router.get('/briefings/personalized', authMiddleware(), async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) { sendUnauthorized(res); return; }
+  const watchlistRows = await db
+    .select()
+    .from(pulseWatchlistTable)
+    .where(eq(pulseWatchlistTable.userId, req.user.id));
+
+  const watchedDomains = [...new Set(watchlistRows.map((w) => w.domain))];
+  const watchedEntityUris = watchlistRows.map((w) => w.entityUri);
+
+  // Latest published briefing
+  const latest = await db
+    .select()
+    .from(pulseBriefingsTable)
+    .where(eq(pulseBriefingsTable.status, 'published'))
+    .orderBy(desc(pulseBriefingsTable.generatedAt))
+    .limit(1);
+
+  if (latest.length === 0) {
+    res.json({ success: true, briefing: null, watchlist: watchlistRows, watchedDomains, personalized: watchedDomains.length > 0 });
+    return;
+  }
+
+  const brief = latest[0]!;
+  const allSections = (brief.sections as Array<Record<string, unknown>>) ?? [];
+
+  // Filter sections by domain (primary), falling back to agentId→domain map.
+  // Always include the executive summary regardless of watchlist.
+  const filteredSections = watchedDomains.length === 0
+    ? allSections
+    : allSections.filter((s) => {
+        const sectionDomain = resolveSectionDomain(s);
+        if (!sectionDomain) return false;
+        if (sectionDomain === 'executive') return true; // always include
+        return watchedDomains.includes(sectionDomain);
+      });
+
+  // Gather sections from all briefings published in the last 24h for the
+  // watched domains. These are the live "alert bus signals" for this user's scope:
+  // each published briefing section represents a domain intelligence update.
+  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const recentBriefings = watchedDomains.length > 0
+    ? await db
+        .select({
+          id: pulseBriefingsTable.id,
+          date: pulseBriefingsTable.date,
+          headline: pulseBriefingsTable.headline,
+          generatedAt: pulseBriefingsTable.generatedAt,
+          sections: pulseBriefingsTable.sections,
+        })
+        .from(pulseBriefingsTable)
+        .where(
+          and(
+            eq(pulseBriefingsTable.status, 'published'),
+            gte(pulseBriefingsTable.generatedAt, since24h),
+          ),
+        )
+        .orderBy(desc(pulseBriefingsTable.generatedAt))
+        .limit(10)
+    : [];
+
+  // Extract domain-scoped sections from the last-24h briefings as live signals.
+  const recentSignals = recentBriefings.flatMap((b) => {
+    const secs = (b.sections as Array<Record<string, unknown>>) ?? [];
+    return secs
+      .filter((s) => {
+        const d = resolveSectionDomain(s);
+        return d && watchedDomains.includes(d);
+      })
+      .map((s) => ({
+        briefingId: b.id,
+        briefingDate: b.date,
+        briefingGeneratedAt: b.generatedAt,
+        domain: resolveSectionDomain(s),
+        agentId: s.agentId,
+        title: s.title,
+        keyJudgment: s.keyJudgment,
+        confidence: s.confidence,
+        riskLevel: s.riskLevel,
+      }));
+  });
+
+  // Derive human-readable entity labels from URIs (e.g. "maritime:vessel:mv-pacific-dawn" → "mv pacific dawn")
+  const entityLabels = watchlistRows.map((w) =>
+    w.entityLabel.toLowerCase(),
+  );
+
+  // Score each filtered section: +1 for each watched entity label that appears
+  // in the section title or keyJudgment. Sections with higher scores are
+  // promoted to the top of the personalized briefing list.
+  const scoredSections = filteredSections.map((s) => {
+    const haystack = [
+      typeof s.title === 'string' ? s.title.toLowerCase() : '',
+      typeof s.keyJudgment === 'string' ? s.keyJudgment.toLowerCase() : '',
+    ].join(' ');
+    const entityMatchScore = entityLabels.reduce((acc, label) => {
+      return acc + (label.length > 2 && haystack.includes(label) ? 1 : 0);
+    }, 0);
+    return { section: s, entityMatchScore };
+  });
+
+  // Sort: entity-matched sections first, then by original order (stable sort)
+  scoredSections.sort((a, b) => b.entityMatchScore - a.entityMatchScore);
+
+  // Annotate sections with provenance metadata
+  const annotatedSections = scoredSections.map(({ section: s, entityMatchScore }) => ({
+    ...s,
+    _provenance: {
+      source: 'pulse-briefing-engine',
+      briefingId: brief.id,
+      generatedAt: brief.generatedAt,
+      domain: resolveSectionDomain(s),
+      personalizedFor: req.user!.id,
+      watchedEntityUris,
+      entityMatchScore,
+    },
+  }));
+
+  // ── Per-user materialized narrative ──────────────────────────────────────
+  // Check for an existing generated narrative for this user/today in the DB.
+  // If not found, insert a pending record and trigger async generation.
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const existingNarrative = await db
+    .select()
+    .from(pulsePersonalizedNarrativesTable)
+    .where(
+      and(
+        eq(pulsePersonalizedNarrativesTable.userId, req.user!.id),
+        eq(pulsePersonalizedNarrativesTable.dateKey, todayKey),
+      ),
+    )
+    .limit(1);
+
+  let narrativeRecord = existingNarrative[0] ?? null;
+
+  if (!narrativeRecord) {
+    const [inserted] = await db
+      .insert(pulsePersonalizedNarrativesTable)
+      .values({
+        userId: req.user!.id,
+        dateKey: todayKey,
+        sourceBriefingId: brief.id,
+        watchedDomains,
+        watchedEntityUris,
+        filteredSectionCount: filteredSections.length,
+        status: 'pending',
+      })
+      .onConflictDoNothing()
+      .returning();
+    narrativeRecord = inserted ?? null;
+
+    // Trigger async generation for this user
+    if (narrativeRecord && watchedDomains.length > 0) {
+      const capturedRecord = narrativeRecord;
+      setImmediate(async () => {
+        try {
+          const sectionContext = annotatedSections
+            .slice(0, 5)
+            .map((s) => {
+              const domain = resolveSectionDomain(s as Record<string, unknown>);
+              const title = typeof (s as Record<string, unknown>).title === 'string' ? (s as Record<string, unknown>).title : '';
+              const keyJudgment = typeof (s as Record<string, unknown>).keyJudgment === 'string' ? (s as Record<string, unknown>).keyJudgment : '';
+              return `[${domain ?? 'unknown'}] ${title}: ${keyJudgment}`;
+            })
+            .join('\n');
+          const entityList = watchlistRows.map((w) => `${w.entityLabel} (${w.entityType}/${w.domain})`).join(', ');
+          const prompt = `You are the Pulse agentic briefing operator generating a personalized executive briefing for a senior decision-maker.
+
+The executive is monitoring these specific entities: ${entityList || 'general portfolio'}.
+Watched domains: ${watchedDomains.join(', ') || 'all domains'}.
+
+Today's intelligence sections relevant to this executive (${annotatedSections.length} of ${allSections.length} total sections):
+${sectionContext}
+
+Write a 3-5 sentence personalized executive narrative that:
+1. Opens with the single most critical development affecting their watched entities
+2. Synthesizes cross-domain implications specific to their focus areas
+3. Closes with the highest-priority decision or action required today
+
+Write in an authoritative, decision-grade intelligence style. Reference specific entities and domains from the context.`;
+
+          const generatedNarrative = await gatewayInfer(prompt, { maxTokens: 400 });
+          await db
+            .update(pulsePersonalizedNarrativesTable)
+            .set({
+              narrative: generatedNarrative,
+              status: 'ready',
+              updatedAt: new Date(),
+            })
+            .where(eq(pulsePersonalizedNarrativesTable.id, capturedRecord.id));
+        } catch (err) {
+          logger.error({ err, userId: req.user?.id, dateKey: todayKey }, '[personalized-brief] Generation failed');
+          await db
+            .update(pulsePersonalizedNarrativesTable)
+            .set({ status: 'failed', updatedAt: new Date() })
+            .where(eq(pulsePersonalizedNarrativesTable.id, capturedRecord.id));
+        }
+      });
+    }
+  }
+
+  res.json({
+    success: true,
+    briefing: {
+      ...brief,
+      sections: annotatedSections,
+    },
+    personalizedNarrative: narrativeRecord?.narrative ?? null,
+    narrativeStatus: narrativeRecord?.status ?? 'not_generated',
+    watchlist: watchlistRows,
+    watchedDomains,
+    watchedEntityUris,
+    recentSignals,
+    personalized: watchedDomains.length > 0,
+    filteredSectionCount: filteredSections.length,
+    totalSectionCount: allSections.length,
+  });
+});
 
 router.get(
   '/briefings/:id',
@@ -2188,5 +2434,234 @@ router.delete('/subscriptions/:id', async (req: Request, res: Response): Promise
     message: 'Subscription cancelled.',
   });
 });
+
+// ─── Watchlist ────────────────────────────────────────────────────────────────
+
+router.get('/watchlist', authMiddleware(), async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) { sendUnauthorized(res); return; }
+  const rows = await db
+    .select()
+    .from(pulseWatchlistTable)
+    .where(eq(pulseWatchlistTable.userId, req.user.id))
+    .orderBy(desc(pulseWatchlistTable.addedAt));
+  res.json({ success: true, watchlist: rows, total: rows.length });
+});
+
+router.post(
+  '/watchlist',
+  authMiddleware(),
+  validateBody(
+    bodyShape({
+      entityUri: z.string().min(1),
+      entityType: z.string().min(1),
+      entityLabel: z.string().min(1),
+      domain: z.string().min(1),
+      metadata: z.record(z.unknown()).optional(),
+    }),
+  ),
+  async (req: Request, res: Response): Promise<void> => {
+    if (!req.user) { sendUnauthorized(res); return; }
+    const { entityUri, entityType, entityLabel, domain, metadata } = req.body as {
+      entityUri: string; entityType: string; entityLabel: string; domain: string;
+      metadata?: Record<string, unknown>;
+    };
+    const existing = await db
+      .select()
+      .from(pulseWatchlistTable)
+      .where(and(eq(pulseWatchlistTable.userId, req.user.id), eq(pulseWatchlistTable.entityUri, entityUri)))
+      .limit(1);
+    if (existing.length > 0) {
+      res.json({ success: true, item: existing[0], created: false });
+      return;
+    }
+    const [row] = await db
+      .insert(pulseWatchlistTable)
+      .values({ userId: req.user.id, entityUri, entityType, entityLabel, domain, metadata })
+      .returning();
+    res.status(201).json({ success: true, item: row, created: true });
+  },
+);
+
+router.delete('/watchlist/:id', authMiddleware(), async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) { sendUnauthorized(res); return; }
+  const id = parseInt(String(req.params.id ?? ''), 10);
+  if (!Number.isFinite(id)) { sendBadRequest(res, 'invalid watchlist id'); return; }
+  const result = await db
+    .delete(pulseWatchlistTable)
+    .where(and(eq(pulseWatchlistTable.id, id), eq(pulseWatchlistTable.userId, req.user.id)))
+    .returning();
+  if (result.length === 0) { sendNotFound(res, 'Watchlist item'); return; }
+  res.json({ success: true });
+});
+
+// ─── Follow-ups ───────────────────────────────────────────────────────────────
+
+const followUpWriteLimit = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { xForwardedForHeader: false, ip: false },
+});
+
+router.get('/follow-ups/:briefingId', authMiddleware(), async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) { sendUnauthorized(res); return; }
+  const { briefingId } = req.params as { briefingId: string };
+  const rows = await db
+    .select()
+    .from(pulseFollowUpsTable)
+    .where(and(eq(pulseFollowUpsTable.briefingId, briefingId), eq(pulseFollowUpsTable.userId, req.user.id)))
+    .orderBy(pulseFollowUpsTable.askedAt);
+  res.json({ success: true, followUps: rows, total: rows.length });
+});
+
+router.post(
+  '/follow-ups',
+  authMiddleware(),
+  followUpWriteLimit,
+  validateBody(
+    bodyShape({
+      briefingId: z.string().min(1),
+      sectionId: z.string().optional(),
+      question: z.string().min(1).max(1000),
+    }),
+  ),
+  async (req: Request, res: Response): Promise<void> => {
+    if (!req.user) { sendUnauthorized(res); return; }
+    const { briefingId, sectionId, question } = req.body as {
+      briefingId: string; sectionId?: string; question: string;
+    };
+    const followUpId = `fu-${Date.now()}-${randomBytes(4).toString('hex')}`;
+    const [row] = await db
+      .insert(pulseFollowUpsTable)
+      .values({
+        followUpId,
+        briefingId,
+        sectionId: sectionId ?? null,
+        userId: req.user.id,
+        question,
+        status: 'pending',
+      })
+      .returning();
+
+    res.status(202).json({ success: true, followUp: row });
+
+    setImmediate(async () => {
+      try {
+        const brief = await db
+          .select()
+          .from(pulseBriefingsTable)
+          .where(eq(pulseBriefingsTable.id, briefingId))
+          .limit(1);
+        const briefRow = brief[0];
+        // Build context: global brief headline + lead + specific section if sectionId provided
+        let sectionContext = '';
+        let sectionAgent = 'pulse-agentic-operator';
+        let sectionDomain = 'executive';
+        if (briefRow && sectionId) {
+          const sections = (briefRow.sections as Array<Record<string, unknown>>) ?? [];
+          const sec = sections.find((s) => (s.id ?? s.agentId) === sectionId);
+          if (sec) {
+            sectionDomain = resolveSectionDomain(sec) ?? 'executive';
+            sectionAgent = typeof sec.agentId === 'string' ? sec.agentId : sectionAgent;
+            const keyJudgment = typeof sec.keyJudgment === 'string' ? sec.keyJudgment : '';
+            const title = typeof sec.title === 'string' ? sec.title : '';
+            const gaps = typeof sec.gaps === 'string' ? sec.gaps : '';
+            sectionContext = `\n\nSection "${title}" (agent: ${sectionAgent}, domain: ${sectionDomain}, confidence: ${sec.confidence ?? 'unknown'}%)\nKey judgment: ${keyJudgment}${gaps ? `\nGaps: ${gaps}` : ''}`;
+          }
+        }
+        const globalContext = briefRow
+          ? `Briefing date: ${briefRow.date}. Classification: ${briefRow.classification}. Overall risk: ${briefRow.overallRisk}. Overall confidence: ${Math.round((briefRow.overallConfidence as number ?? 0) * 100)}%.\nHeadline: "${briefRow.headline}".\nLead: ${briefRow.leadSentence}.`
+          : 'No briefing context available.';
+        const prompt = `You are the Pulse agentic briefing operator. A user has asked a follow-up question about an executive intelligence briefing.\n\nBriefing context:\n${globalContext}${sectionContext}\n\nUser question: ${question}\n\nProvide a concise, intelligence-grade answer (2-5 sentences) that is factual, actionable, and sourced from the briefing context. Reference specific figures, entities, or judgments from the context where possible. If you cannot answer with high confidence from the context provided, acknowledge the gap explicitly and indicate what additional data would resolve it.`;
+        const answeredAt = new Date();
+        const aiAnswer = await gatewayInfer(prompt, { maxTokens: 500 });
+        await db
+          .update(pulseFollowUpsTable)
+          .set({
+            answer: aiAnswer,
+            status: 'answered',
+            answeredAt,
+            provenance: {
+              source: 'pulse-agentic-operator',
+              agentId: sectionAgent,
+              domain: sectionDomain,
+              briefingId,
+              briefingDate: briefRow?.date ?? null,
+              briefingGeneratedAt: briefRow?.generatedAt?.toISOString() ?? null,
+              sectionId: sectionId ?? null,
+              model: 'gateway',
+              answeredAt: answeredAt.toISOString(),
+              contextUsed: {
+                hasGlobalBrief: !!briefRow,
+                hasSectionContext: !!sectionContext,
+                briefingClassification: briefRow?.classification ?? null,
+                overallRisk: briefRow?.overallRisk ?? null,
+              },
+            },
+          })
+          .where(eq(pulseFollowUpsTable.followUpId, followUpId));
+      } catch (err) {
+        logger.error({ err, followUpId }, 'Failed to generate follow-up answer');
+        await db
+          .update(pulseFollowUpsTable)
+          .set({ status: 'failed' })
+          .where(eq(pulseFollowUpsTable.followUpId, followUpId));
+      }
+    });
+  },
+);
+
+// ─── Push notification schedule ───────────────────────────────────────────────
+
+router.get('/push-schedule', authMiddleware(), async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) { sendUnauthorized(res); return; }
+  const rows = await db
+    .select()
+    .from(pulsePushScheduleTable)
+    .where(eq(pulsePushScheduleTable.userId, req.user.id))
+    .limit(1);
+  const schedule = rows[0] ?? {
+    userId: req.user.id,
+    enabled: true,
+    deliveryHourUtc: 7,
+    lastDeliveredAt: null,
+    lastBriefingId: null,
+  };
+  res.json({ success: true, schedule });
+});
+
+router.put(
+  '/push-schedule',
+  authMiddleware(),
+  validateBody(
+    bodyShape({
+      enabled: z.boolean().optional(),
+      deliveryHourUtc: z.number().int().min(0).max(23).optional(),
+    }),
+  ),
+  async (req: Request, res: Response): Promise<void> => {
+    if (!req.user) { sendUnauthorized(res); return; }
+    const { enabled, deliveryHourUtc } = req.body as { enabled?: boolean; deliveryHourUtc?: number };
+    const [row] = await db
+      .insert(pulsePushScheduleTable)
+      .values({
+        userId: req.user.id,
+        enabled: enabled ?? true,
+        deliveryHourUtc: deliveryHourUtc ?? 7,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: pulsePushScheduleTable.userId,
+        set: {
+          ...(enabled !== undefined && { enabled }),
+          ...(deliveryHourUtc !== undefined && { deliveryHourUtc }),
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    res.json({ success: true, schedule: row });
+  },
+);
 
 export default router;

@@ -7,7 +7,9 @@ export const ACCENT = '#c9a84c';
 
 export const ENDPOINTS = {
   briefing: '/api/briefings',
-  pulseToday: '/api/pulse/today',
+  // Use the personalized endpoint so the briefing is scoped to the user's
+  // watchlist domains. Falls back to full briefing when watchlist is empty.
+  pulseToday: '/api/pulse/briefings/personalized',
 } as const;
 
 export function healthColor(score: number): string {

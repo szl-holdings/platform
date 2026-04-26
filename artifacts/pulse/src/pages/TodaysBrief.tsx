@@ -7,12 +7,15 @@ import {
   Clock,
   Download,
   ExternalLink,
+  Loader2,
+  MessageCircle,
   MessageSquare,
+  Send,
   Shield,
   Sparkles,
   Zap,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useLocation } from 'wouter';
 import AgentBadge from '../components/AgentBadge';
 import ConfidenceChip from '../components/ConfidenceChip';
@@ -20,7 +23,15 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { HeliosFrontierBriefing } from '../components/HeliosFrontierBriefing';
 import MeshCard from '../components/MeshCard';
 import { BriefSkeleton } from '../components/SkeletonRow';
-import { exportBriefingPdf, isDemoMode, useGenerateBriefing, useTodaysBrief } from '../lib/api';
+import {
+  exportBriefingPdf,
+  type FollowUp,
+  isDemoMode,
+  useAskFollowUp,
+  useFollowUps,
+  useGenerateBriefing,
+  useTodaysBrief,
+} from '../lib/api';
 import { PULSE_SYNTHESIZED_LABEL } from '../lib/claims';
 import { AGENTS, type BriefingSection, getRiskColor, type RiskLevel } from '../lib/data';
 
@@ -144,8 +155,172 @@ function RiskBadge({ risk }: { risk: RiskLevel }) {
   );
 }
 
-function SectionCard({ section, onFileDissent }: { section: BriefingSection; onFileDissent?: (sectionTitle: string) => void }) {
+function FollowUpBubble({ followUp, accentColor }: { followUp: FollowUp; accentColor: string }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <div
+          style={{
+            maxWidth: '78%', padding: '8px 12px', borderRadius: '10px 10px 2px 10px',
+            background: `${accentColor}12`, border: `1px solid ${accentColor}25`,
+            fontSize: '0.82rem', color: 'rgba(255,255,255,0.85)', lineHeight: 1.5,
+          }}
+        >
+          {followUp.question}
+        </div>
+      </div>
+      {followUp.status === 'pending' && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingLeft: 4, color: 'rgba(255,255,255,0.35)', fontSize: '0.75rem' }}>
+          <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
+          Thinking…
+        </div>
+      )}
+      {followUp.status === 'answered' && followUp.answer && (
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{
+            width: 24, height: 24, borderRadius: 6, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: `${accentColor}10`, border: `1px solid ${accentColor}25`,
+          }}>
+            <Bot size={12} color={accentColor} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                padding: '8px 12px', borderRadius: '2px 10px 10px 10px',
+                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                fontSize: '0.82rem', color: 'rgba(255,255,255,0.85)', lineHeight: 1.6,
+              }}
+            >
+              {followUp.answer}
+            </div>
+            {followUp.provenance && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 5, fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>
+                <Shield size={9} />
+                Provenance: {String((followUp.provenance as { source?: unknown }).source ?? 'pulse-operator')}
+                {followUp.answeredAt && ` · ${new Date(followUp.answeredAt).toLocaleTimeString()}`}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      {followUp.status === 'failed' && (
+        <div style={{ paddingLeft: 32, fontSize: '0.75rem', color: '#e05050' }}>
+          Unable to answer — please try again.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FollowUpPanel({
+  briefingId,
+  sectionId,
+  accentColor,
+}: {
+  briefingId: string;
+  sectionId: string;
+  accentColor: string;
+}) {
+  const { data: followUps = [] } = useFollowUps(briefingId);
+  const askMutation = useAskFollowUp();
+  const [question, setQuestion] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const sectionFollowUps = followUps.filter((f) => !f.sectionId || f.sectionId === sectionId);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = question.trim();
+    if (!q || askMutation.isPending) return;
+    askMutation.mutate({ briefingId, sectionId, question: q });
+    setQuestion('');
+  };
+
+  if (isDemoMode()) {
+    return (
+      <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 12 }}>
+        <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)' }}>
+          Sign in to ask follow-up questions on intelligence items.
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        marginTop: 16, padding: '14px 16px', borderRadius: 8,
+        background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.07)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
+        <MessageCircle size={12} color={accentColor} />
+        <span style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: accentColor }}>
+          Ask Follow-up
+        </span>
+        {sectionFollowUps.length > 0 && (
+          <span style={{
+            fontSize: '0.65rem', padding: '1px 6px', borderRadius: 10,
+            background: `${accentColor}12`, border: `1px solid ${accentColor}25`, color: accentColor,
+          }}>
+            {sectionFollowUps.length}
+          </span>
+        )}
+      </div>
+
+      {sectionFollowUps.length > 0 && (
+        <div style={{ marginBottom: 12 }}>
+          {sectionFollowUps.map((f) => (
+            <FollowUpBubble key={f.followUpId} followUp={f} accentColor={accentColor} />
+          ))}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 8 }}>
+        <input
+          ref={inputRef}
+          type="text"
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          placeholder="Ask about this intelligence item…"
+          disabled={askMutation.isPending}
+          style={{
+            flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 6, padding: '8px 12px', color: 'rgba(255,255,255,0.9)', fontSize: '0.82rem',
+            outline: 'none',
+          }}
+        />
+        <button
+          type="submit"
+          disabled={!question.trim() || askMutation.isPending}
+          title="Submit follow-up question"
+          style={{
+            padding: '8px 12px', borderRadius: 6, flexShrink: 0,
+            background: question.trim() ? `${accentColor}15` : 'rgba(255,255,255,0.04)',
+            border: question.trim() ? `1px solid ${accentColor}40` : '1px solid rgba(255,255,255,0.08)',
+            color: question.trim() ? accentColor : 'rgba(255,255,255,0.3)',
+            cursor: question.trim() && !askMutation.isPending ? 'pointer' : 'default',
+            display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.78rem',
+          }}
+        >
+          {askMutation.isPending ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={13} />}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function SectionCard({
+  section,
+  briefingId,
+  onFileDissent,
+}: {
+  section: BriefingSection;
+  briefingId?: string;
+  onFileDissent?: (sectionTitle: string) => void;
+}) {
   const [expanded, setExpanded] = useState(false);
+  const [showFollowUp, setShowFollowUp] = useState(false);
   const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>('recommend');
   const agent = AGENTS[section.agentId];
 
@@ -445,27 +620,58 @@ function SectionCard({ section, onFileDissent }: { section: BriefingSection; onF
                   UTC · {agent?.name}
                 </span>
               </div>
-              <button
-                type="button"
-                onClick={() => onFileDissent?.(section.title)}
-                title={`File a dissent against the ${section.title} assessment`}
-                style={{
-                  background: 'transparent',
-                  border: '1px solid var(--pulse-border-bright)',
-                  color: 'var(--pulse-text-dim)',
-                  padding: '4px 10px',
-                  borderRadius: 4,
-                  fontSize: '0.7rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 4,
-                }}
-              >
-                <MessageSquare size={11} />
-                File Dissent
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowFollowUp(!showFollowUp)}
+                  title="Ask a follow-up question about this intelligence item"
+                  style={{
+                    background: showFollowUp ? `${agent?.color ?? '#c8a84b'}12` : 'transparent',
+                    border: showFollowUp ? `1px solid ${agent?.color ?? '#c8a84b'}40` : '1px solid var(--pulse-border-bright)',
+                    color: showFollowUp ? (agent?.color ?? '#c8a84b') : 'var(--pulse-text-dim)',
+                    padding: '4px 10px',
+                    borderRadius: 4,
+                    fontSize: '0.7rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  <MessageCircle size={11} />
+                  Ask Follow-up
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onFileDissent?.(section.title)}
+                  title={`File a dissent against the ${section.title} assessment`}
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid var(--pulse-border-bright)',
+                    color: 'var(--pulse-text-dim)',
+                    padding: '4px 10px',
+                    borderRadius: 4,
+                    fontSize: '0.7rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  <MessageSquare size={11} />
+                  File Dissent
+                </button>
+              </div>
             </div>
+
+            {/* Follow-up panel */}
+            {showFollowUp && briefingId && (
+              <FollowUpPanel
+                briefingId={briefingId}
+                sectionId={section.id}
+                accentColor={agent?.color ?? '#c8a84b'}
+              />
+            )}
           </div>
         )}
       </div>
@@ -931,7 +1137,7 @@ export default function TodaysBrief() {
           </div>
           {brief.sections.map((section) => (
             <ErrorBoundary key={section.id} name={`section:${section.id}`}>
-              <SectionCard section={section} onFileDissent={handleFileDissent} />
+              <SectionCard section={section} briefingId={brief.id} onFileDissent={handleFileDissent} />
             </ErrorBoundary>
           ))}
         </div>

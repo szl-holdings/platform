@@ -9,7 +9,29 @@ import { WorkspaceSwitcher } from '@/components/WorkspaceSwitcher';
 import { useAuth } from '@/context/AuthContext';
 import { NotificationCountProvider } from '@/context/NotificationCountContext';
 import { useOfflineQueue, type QueueEntry } from '@/hooks/useOfflineQueue';
-import { getApiBase } from '@/lib/apiClient';
+import { apiFetch, getApiBase } from '@/lib/apiClient';
+import { registerForPushNotificationsAsync } from '@/hooks/usePushNotifications';
+
+async function ensurePulsePushSchedule(): Promise<void> {
+  try {
+    const token = await registerForPushNotificationsAsync();
+    if (token) {
+      await apiFetch('/api/push-tokens', {
+        method: 'POST',
+        body: JSON.stringify({ token, platform: 'ios', appId: 'cortex-mobile' }),
+      }).catch(() => {});
+    }
+    // PUT with default values ensures a row is persisted for this user so the
+    // delivery job can find them. If a row already exists, this is a no-op
+    // because the API uses onConflictDoUpdate with unchanged values.
+    await apiFetch('/api/pulse/push-schedule', {
+      method: 'PUT',
+      body: JSON.stringify({ enabled: true, deliveryHourUtc: 7 }),
+    }).catch(() => {});
+  } catch {
+    // best-effort — never throw from shell
+  }
+}
 
 async function defaultActionExecutor(entry: QueueEntry): Promise<void> {
   const url = `${getApiBase()}/api/offline-sync`;
@@ -26,6 +48,14 @@ export default function ShellLayout() {
   const [isOffline, setIsOffline] = useState(false);
   const wasOfflineRef = useRef(false);
   const { queueCount, totalQueueCount, flush } = useOfflineQueue();
+  const pushRegisteredRef = useRef(false);
+
+  useEffect(() => {
+    if (isAuthenticated && !pushRegisteredRef.current) {
+      pushRegisteredRef.current = true;
+      ensurePulsePushSchedule();
+    }
+  }, [isAuthenticated]);
 
   // `queueCount` is the count of items flush() can actually process (our szl:offline queue).
   // `totalQueueCount` includes legacy queue entries from other flows — those are counted for
