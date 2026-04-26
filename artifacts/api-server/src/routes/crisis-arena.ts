@@ -61,7 +61,7 @@ import {
   updateSubmission,
   upsertArchitectProfile,
 } from '../services/crisis-arena-store';
-import { incidentsStore } from '../services/sentra-store';
+import { db, sentraIncidentsTable } from '@szl-holdings/db';
 
 const router: IRouter = Router();
 
@@ -683,27 +683,31 @@ router.post(
       const now = new Date().toISOString();
 
       const incidentId = `INC-${new Date().getFullYear()}-ARENA-${sub.id.slice(-4).toUpperCase()}`;
-      incidentsStore.set(incidentId, {
-        id: incidentId,
-        title: `[Crisis Arena] ${sub.title}`,
-        description: `${sub.narrative}\n\n--- Kill Chain ---\n${sub.killChain.map((s) => `${s.phase}: ${s.technique} — ${s.description}`).join('\n')}`,
-        severity: sub.businessImpactScore >= 80 ? 'critical' : sub.businessImpactScore >= 60 ? 'high' : 'medium',
-        status: 'open',
-        mitreStage: sub.killChain[0]?.phase ?? 'Initial Access',
-        detectedAt: now,
-        updatedAt: now,
-        affectedAssets: [],
-        tags: ['crisis-arena', sub.archetype],
-        timeline: [
-          {
-            id: randomUUID(),
-            type: 'system',
-            message: `Tabletop exercise graduated from Crisis Arena submission ${sub.id} (BIS: ${sub.businessImpactScore})`,
-            actor: 'Crisis Arena',
-            timestamp: now,
-          },
-        ],
-      });
+      const nowDate = new Date(now);
+      await db
+        .insert(sentraIncidentsTable)
+        .values({
+          id: incidentId,
+          title: `[Crisis Arena] ${sub.title}`,
+          description: `${sub.narrative}\n\n--- Kill Chain ---\n${sub.killChain.map((s) => `${s.phase}: ${s.technique} — ${s.description}`).join('\n')}`,
+          severity: sub.businessImpactScore >= 80 ? 'critical' : sub.businessImpactScore >= 60 ? 'high' : 'medium',
+          status: 'open',
+          mitreStage: sub.killChain[0]?.phase ?? 'Initial Access',
+          detectedAt: nowDate,
+          updatedAt: nowDate,
+          affectedAssets: [],
+          tags: ['crisis-arena', sub.archetype],
+          timeline: [
+            {
+              id: randomUUID(),
+              type: 'system',
+              message: `Tabletop exercise graduated from Crisis Arena submission ${sub.id} (BIS: ${sub.businessImpactScore})`,
+              actor: 'Crisis Arena',
+              timestamp: now,
+            },
+          ],
+        })
+        .onConflictDoNothing();
 
       await updateSubmission(sub.id, { status: 'graduated', graduatedIncidentId: incidentId, updatedAt: now });
       await insertTriageEvent({

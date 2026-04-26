@@ -145,6 +145,7 @@ export * from './revenue_events';
 export * from './scim';
 export * from './self_healing';
 export * from './self_improvement';
+export * from './sentra';
 export * from './settings';
 // ./skill_library is intentionally NOT re-exported: its `skill_runs` table
 // duplicates the canonical one in ./cognitive_runtime and produces a

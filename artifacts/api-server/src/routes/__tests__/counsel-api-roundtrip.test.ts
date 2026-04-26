@@ -212,25 +212,21 @@ describe('GET /counsel/matters — response contract & provenance', () => {
     expect(Array.isArray(res.body.matters)).toBe(true);
   });
 
-  it('returns provenance:seeded when org was empty before this request', async () => {
+  it('returns provenance:live when org has no matters (DB-seeded via migrations)', async () => {
     const app = await buildApp();
     _selectQueue = [
-      [],
-      [],
       [],
     ];
     const res = await request(app).get('/counsel/matters');
     expect(res.status).toBe(200);
-    expect(res.body.provenance).toBe('seeded');
-    expect(Array.isArray(res.body.matters)).toBe(true);
+    expect(res.body.provenance).toBe('live');
+    expect(res.body.matters).toEqual([]);
   });
 
-  it('returns provenance:live when org already had matters before request', async () => {
+  it('returns provenance:live when org already had matters in DB', async () => {
     const app = await buildApp();
     const matter = makeMatter();
     _selectQueue = [
-      [{ id: matter.id }],
-      [{ id: matter.id }],
       [{ id: matter.id }],
       [matter],
       [],
@@ -240,6 +236,8 @@ describe('GET /counsel/matters — response contract & provenance', () => {
     const res = await request(app).get('/counsel/matters');
     expect(res.status).toBe(200);
     expect(res.body.provenance).toBe('live');
+    expect(res.body.matters.length).toBe(1);
+    expect(res.body.matters[0].id).toBe(matter.id);
   });
 });
 

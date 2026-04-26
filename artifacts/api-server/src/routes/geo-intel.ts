@@ -24,8 +24,10 @@
  * POST /api/sentra/incidents appears on the map on the very next poll.
  */
 
+import { db, sentraIncidentsTable } from '@szl-holdings/db';
+import { not, inArray } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
-import { incidentsStore, type Incident, type IncidentSeverity } from '../services/sentra-store';
+import { type Incident, type IncidentSeverity } from '../services/sentra-store';
 import { computeStatus, type ThreatLevel } from '../services/infrastructure-service';
 import { getActiveRfAnomalies, type RfAnomaly } from '../services/rf-intel-store';
 
@@ -163,14 +165,32 @@ function coordForIncident(incident: Incident): GeoCoord {
 
 const ACTIVE_STATUSES = new Set(['open', 'triaging', 'escalated']);
 
-function buildSigintPins(): GeoPin[] {
+async function buildSigintPins(): Promise<GeoPin[]> {
+  const rows = await db
+    .select()
+    .from(sentraIncidentsTable)
+    .where(not(inArray(sentraIncidentsTable.status, ['resolved'])));
+
   const pins: GeoPin[] = [];
-  for (const [, incident] of incidentsStore) {
+  for (const row of rows) {
+    const incident: Incident = {
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      severity: row.severity as IncidentSeverity,
+      status: row.status as Incident['status'],
+      mitreStage: row.mitreStage,
+      detectedAt: row.detectedAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+      resolvedAt: row.resolvedAt?.toISOString(),
+      assignedTo: row.assignedTo ?? undefined,
+      affectedAssets: (row.affectedAssets as string[]) ?? [],
+      tags: (row.tags as string[]) ?? [],
+      timeline: [],
+    };
+
     const isActive = ACTIVE_STATUSES.has(incident.status);
     const isContained = incident.status === 'contained';
-    const isResolved = incident.status === 'resolved';
-
-    if (isResolved) continue; // fully resolved — exclude
 
     const coord = coordForIncident(incident);
     const threat = isContained
@@ -482,8 +502,8 @@ function currentGeneration(): number {
 
 // ─── Route handlers ───────────────────────────────────────────────────────────
 
-router.get('/geo-intel/pins', (_req: Request, res: Response) => {
-  const sigintPins = buildSigintPins();
+router.get('/geo-intel/pins', async (_req: Request, res: Response) => {
+  const sigintPins = await buildSigintPins();
   const infraPins = buildInfraPins();
   const rfPins = buildRfIntelPins();
   const allPins: GeoPin[] = [...sigintPins, ...infraPins, ...PERSONNEL_PINS, ...WEATHER_PINS, ...rfPins];
@@ -500,8 +520,8 @@ router.get('/geo-intel/pins', (_req: Request, res: Response) => {
   });
 });
 
-router.get('/geo-intel/meta', (_req: Request, res: Response) => {
-  const sigintPins = buildSigintPins();
+router.get('/geo-intel/meta', async (_req: Request, res: Response) => {
+  const sigintPins = await buildSigintPins();
   const infraPins = buildInfraPins();
   const rfPins = buildRfIntelPins();
   const all = [...sigintPins, ...infraPins, ...PERSONNEL_PINS, ...WEATHER_PINS, ...rfPins];

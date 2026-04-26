@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
+import { db, sentraAlertsTable } from '@szl-holdings/db';
 import type { NormalizedAlert } from '../siem/adapter-interface';
 import { getAdapter } from '../siem/registry';
 import { normalizeWebhookPayload } from '../siem/adapters/generic-webhook';
-import { alertsStore } from './sentra-store';
 import { logger } from '../lib/logger';
 
 export interface SiemConnection {
@@ -20,20 +20,26 @@ export interface SiemConnection {
 
 export const siemConnectionsStore: Map<string, SiemConnection> = new Map();
 
-function onAlertIngested(connection: SiemConnection, alert: NormalizedAlert): void {
-  const sentraAlert = {
-    id: alert.id,
-    title: alert.title,
-    severity: alert.severity,
-    source: alert.source,
-    status: 'open' as const,
-    description: alert.description,
-    asset: alert.asset,
-    detectedAt: alert.detectedAt,
-  };
-  alertsStore.push(sentraAlert);
-  connection.alertsIngested += 1;
-  logger.info({ connectionId: connection.id, alertId: alert.id }, '[siem] alert ingested');
+async function onAlertIngested(connection: SiemConnection, alert: NormalizedAlert): Promise<void> {
+  try {
+    await db
+      .insert(sentraAlertsTable)
+      .values({
+        id: alert.id,
+        title: alert.title,
+        severity: alert.severity as 'critical' | 'high' | 'medium' | 'low',
+        source: alert.source,
+        status: 'open',
+        description: alert.description,
+        asset: alert.asset ?? null,
+        detectedAt: new Date(alert.detectedAt),
+      })
+      .onConflictDoNothing();
+    connection.alertsIngested += 1;
+    logger.info({ connectionId: connection.id, alertId: alert.id }, '[siem] alert ingested');
+  } catch (err) {
+    logger.error({ connectionId: connection.id, alertId: alert.id, err }, '[siem] failed to ingest alert');
+  }
 }
 
 export function startConnection(connection: SiemConnection): void {
@@ -41,7 +47,7 @@ export function startConnection(connection: SiemConnection): void {
   if (!adapter) return;
   if (connection.adapterId === 'generic-webhook') return;
   adapter.start(connection.id, { ...connection.config, connectionName: connection.name }, (alert) => {
-    onAlertIngested(connection, alert);
+    void onAlertIngested(connection, alert);
   });
 }
 
@@ -99,6 +105,6 @@ export function ingestWebhookAlert(connectionId: string, payload: unknown): { ok
   if (conn.adapterId !== 'generic-webhook') return { ok: false, error: 'Not a webhook connection' };
 
   const alert: NormalizedAlert = normalizeWebhookPayload(payload, connectionId, conn.name);
-  onAlertIngested(conn, alert);
+  void onAlertIngested(conn, alert);
   return { ok: true };
 }
