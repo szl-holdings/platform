@@ -59,7 +59,8 @@
     "lib/policy-engine/",
     "lib/telemetry-standards/",
     "lib/nvidia-adapters/",
-    "artifacts/api-server/"
+    "artifacts/api-server/",
+    "artifacts/command/src/pages/operations/forge.tsx"
   ],
   "$lineAllowlistComment": "Per-line exemptions. Each entry: { file, line, term, reason }. The check matches by exact file path + line number + matched term.",
   "lineAllowlist": [

@@ -250,6 +250,9 @@ const RunConsole = lazy(() =>
 const EvidenceExplorer = lazy(() => import('./pages/evidence-explorer'));
 const EvalStudio = lazy(() => import('./pages/eval-studio'));
 const EvalForge = lazy(() => import('./pages/eval-forge'));
+const ForgePage = lazy(() =>
+  import('./pages/operations/forge').then((m) => ({ default: m.ForgePage })),
+);
 const TrustConsole = lazy(() => import('./pages/trust-console'));
 const CognitiveMemory = lazy(() => import('./pages/cognitive/memory'));
 const CognitivePlanner = lazy(() => import('./pages/cognitive/planner'));
@@ -386,6 +389,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/strategy/competitive-atlas', label: 'Competitive Atlas', group: 'Strategy' },
   { href: '/decisions', label: 'Decision Center', group: 'Strategy' },
   { href: '/intelligence/evidence', label: 'Evidence Explorer', group: 'Strategy' },
+  { href: '/operations/forge', label: 'Tool Intelligence Hub', group: 'Operations' },
   { href: '/operations', label: 'Executive Command', group: 'Operations' },
   { href: '/operations/pulse', label: 'Pulse', group: 'Operations' },
   { href: '/operations/prism', label: 'PRISM Dashboard', group: 'Operations' },
@@ -791,6 +795,7 @@ function AppShell() {
               <Route path="/operations/eval-studio" component={() => <EvalStudio />} />
               <Route path="/eval-forge" component={() => <EvalForge />} />
               <Route path="/eval-forge/runs/:runId" component={() => <EvalForge />} />
+              <Route path="/operations/forge" component={() => <ForgePage />} />
 
               {/* A11oy Phase 2 — Agent Runtime */}
               <Route path="/agents" component={() => <AgentsPage />} />

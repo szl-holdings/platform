@@ -167,6 +167,12 @@ const OPERATIONS_NAV: NavGroup[] = [
     ],
   },
   {
+    section: 'Tool Intelligence',
+    items: [
+      { href: '/operations/forge', label: 'Tool Intelligence Hub', icon: Sigma },
+    ],
+  },
+  {
     section: 'Global Fabric',
     items: [{ href: '/operations/fabric', label: 'Global Operations Fabric', icon: Globe2 }],
   },
