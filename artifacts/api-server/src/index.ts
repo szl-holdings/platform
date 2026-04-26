@@ -37,6 +37,7 @@ import {
 import { runOpsMgmtBootInit } from './routes/ops-management';
 import { ensurePlatformFlags } from './lib/platform-flags';
 import { runMigrations } from './lib/run-migrations';
+import { runStartupSmokeCheck } from './lib/startup-smoke-check';
 import { startSelfMonitoring, stopSelfMonitoring } from './lib/self-monitor';
 import { startScheduledTriggerChecks, stopScheduledTriggerChecks } from '@szl-holdings/ai-engine';
 import './lib/terra-nyc-ingestion';
@@ -212,6 +213,16 @@ export async function bootstrap(
   memoryMonitor.unref();
 
   logger.info({ port, host: '0.0.0.0' }, 'Server listening');
+
+  // Best-effort artifact reachability smoke check. Deferred ~6s after
+  // listen so the shared proxy / artifact dev servers have a moment to
+  // bind their ports — running too early generates noisy false
+  // negatives during cold-start. Never blocks startup.
+  setTimeout(() => {
+    runStartupSmokeCheck(logger).catch((err) =>
+      logger.warn({ err }, '[smoke] Startup smoke check failed (non-fatal)'),
+    );
+  }, 6_000).unref();
 
   // Schedule analytics aggregation every hour
   setInterval(
@@ -396,22 +407,29 @@ export async function bootstrap(
   startMeshPublisher(30_000);
 
   try {
-    // Step 1: Run all migrations — single await, schema fully guaranteed before any seed executes
-    // Retry up to 5 times with exponential backoff to handle transient DB connection issues on startup
+    // Step 1: Run all migrations — single await, schema fully guaranteed before any seed executes.
+    // Retry up to 8 times with jittered exponential backoff so a single
+    // transient DB connection timeout cannot crash the bootstrap. The inner
+    // run-migrations module also retries the dedicated CONNECT step
+    // independently, so genuine outages are bounded by both layers and
+    // total wall time stays under ~2 minutes even in the worst case.
     let migrationsComplete = false;
-    for (let attempt = 1; attempt <= 5; attempt++) {
+    const MIGRATION_ATTEMPTS = 8;
+    for (let attempt = 1; attempt <= MIGRATION_ATTEMPTS; attempt++) {
       try {
         await runMigrations();
         migrationsComplete = true;
         break;
       } catch (migErr) {
-        const isLast = attempt === 5;
+        const isLast = attempt === MIGRATION_ATTEMPTS;
         logger.warn(
           { migErr, attempt, isLast },
-          `[bootstrap] Migration attempt ${attempt} failed${isLast ? ' — giving up' : ' — retrying'}`,
+          `[bootstrap] Migration attempt ${attempt} failed${isLast ? ' — giving up' : ' — retrying with jittered backoff'}`,
         );
         if (isLast) throw migErr;
-        await new Promise((r) => setTimeout(r, Math.min(1000 * attempt, 8000)));
+        const baseMs = Math.min(1000 * 2 ** (attempt - 1), 12_000);
+        const jitter = Math.floor(Math.random() * 750);
+        await new Promise((r) => setTimeout(r, baseMs + jitter));
       }
     }
     if (migrationsComplete) {

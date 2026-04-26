@@ -99,7 +99,16 @@ export class LegalRecordsFeedAdapter extends BaseFeedAdapter {
 
   constructor(config?: Partial<FeedAdapterConfig>) {
     super(createLegalRecordsConfig(config));
-    this.apiToken = getEnv().COURTLISTENER_API_TOKEN ?? null;
+    // Prefer COURT_LISTENER_API_TOKEN (canonical name); accept legacy env
+    // names so deployments don't break during the rename. process.env is read
+    // directly for the new canonical name because the env-contract still
+    // declares the legacy COURTLISTENER_API_TOKEN.
+    this.apiToken =
+      process.env.COURT_LISTENER_API_TOKEN ||
+      process.env.COURT_LISTENER_API_KEY ||
+      process.env.COURT_LISTENER_TOKEN ||
+      getEnv().COURTLISTENER_API_TOKEN ||
+      null;
     this.baseUrl = 'https://www.courtlistener.com/api/rest/v3';
     this.searchQueries = this.buildSearchQueries();
   }

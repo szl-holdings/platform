@@ -5,8 +5,36 @@ const COURT_LISTENER_BASE = 'https://www.courtlistener.com/api/rest/v4';
 const REQUEST_CACHE = new LRUCache<string, { data: unknown; ts: number }>({ max: 500 });
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
+/**
+ * Resolve the CourtListener API token. The canonical env var is
+ * `COURT_LISTENER_API_TOKEN`; legacy names are accepted as fallbacks so
+ * existing deployments do not break during the rename. When no token is
+ * configured the helper logs a single warning so operators can see in the
+ * logs that the integration is rate-limited (1 req/s instead of 5,000/day
+ * for authenticated users).
+ */
 function getApiKey(): string | undefined {
-  return process.env.COURT_LISTENER_API_KEY;
+  return (
+    process.env.COURT_LISTENER_API_TOKEN ||
+    process.env.COURT_LISTENER_API_KEY ||
+    process.env.COURT_LISTENER_TOKEN ||
+    process.env.COURTLISTENER_API_TOKEN ||
+    undefined
+  );
+}
+
+let _missingTokenWarningLogged = false;
+function warnIfMissingTokenOnce(): void {
+  if (_missingTokenWarningLogged) return;
+  if (getApiKey()) return;
+  _missingTokenWarningLogged = true;
+  logger.warn(
+    {
+      component: 'court-listener',
+      hint: 'Set COURT_LISTENER_API_TOKEN to enable authenticated access (5,000 req/day).',
+    },
+    '[court-listener] No API token configured — falling back to public endpoint with strict rate limits',
+  );
 }
 
 function cacheKey(endpoint: string, params: Record<string, string>): string {
@@ -24,6 +52,7 @@ async function courtListenerFetch(
   }
 
   const apiKey = getApiKey();
+  if (!apiKey) warnIfMissingTokenOnce();
   const url = new URL(`${COURT_LISTENER_BASE}${endpoint}`);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 

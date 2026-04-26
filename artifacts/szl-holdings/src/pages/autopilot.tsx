@@ -968,6 +968,35 @@ function NextBestActionPanel() {
 
 // ─── Tab: Forge Client Satisfaction Engine ────────────────────────────────────
 
+/**
+ * The Forge tab visualises NPS / CSAT / response-rate values that are not
+ * yet sourced from a live survey pipeline. Until the live aggregator
+ * lands, render an "Illustrative" pill on the headline KPI tiles so the
+ * surface is honest about its provenance.
+ */
+const FORGE_KPIS_ARE_ILLUSTRATIVE = true;
+const IllustrativeBadge = () => (
+  <span
+    style={{
+      display: 'inline-block',
+      marginLeft: '0.4rem',
+      padding: '1px 6px',
+      fontSize: '8px',
+      fontWeight: 700,
+      letterSpacing: '0.06em',
+      textTransform: 'uppercase',
+      color: '#fbbf24',
+      background: 'rgba(251,191,36,0.12)',
+      border: '1px solid rgba(251,191,36,0.35)',
+      borderRadius: '4px',
+      verticalAlign: 'middle',
+    }}
+    title="Static reference data — live survey pipeline pending"
+  >
+    Illustrative
+  </span>
+);
+
 const FORGE_CLIENTS = [
   { name: "SZL Holdings",   app: "szl-holdings",   nps: 72, csat: 91, responseRate: 84, trend: "up"   as const },
   { name: "Aegis Security", app: "aegis",           nps: 68, csat: 88, responseRate: 76, trend: "up"   as const },
@@ -1017,7 +1046,10 @@ function ForgeTab() {
           { label: "Clients Tracked",  value: `${FORGE_CLIENTS.length}`, sub: "active accounts", color: "#a78bfa" },
         ].map(m => (
           <Card key={m.label}>
-            <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.375rem" }}>{m.label}</p>
+            <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.375rem" }}>
+              {m.label}
+              {FORGE_KPIS_ARE_ILLUSTRATIVE && <IllustrativeBadge />}
+            </p>
             <p style={{ fontSize: "1.75rem", fontWeight: 700, color: m.color, letterSpacing: "-0.02em" }}>{m.value}</p>
             <p style={{ fontSize: "11px", color: "hsl(210,5%,48%)" }}>{m.sub}</p>
           </Card>

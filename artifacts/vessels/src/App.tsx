@@ -1,4 +1,15 @@
+import { readEnvFeatureFlags } from '@szl-holdings/config';
 import { PolicyModeBadge } from '@szl-holdings/design-system/proof/policy-mode-badge';
+
+/**
+ * `VITE_FEATURE_VESSELS_COMMERCIAL` gates the Insurance & P&I, Trading
+ * Desk and marketing /platform routes — these are stub surfaces without a
+ * backing data pipeline. Resolved once at module init.
+ */
+const { vesselsCommercial: VESSELS_COMMERCIAL_ENABLED } = readEnvFeatureFlags(
+  import.meta.env as unknown as Record<string, unknown>,
+);
+const COMMERCIAL_GATED_NAV_IDS = new Set(['insurance-panel', 'trading-desk']);
 import { McpOverlay } from '@szl-holdings/mcp-client';
 import {
   clearUser as clearSentryUser,
@@ -491,7 +502,7 @@ function VesselsSidebarContent({
   const [location, navigate] = useLocation();
   const accent = useEffectiveAccent(VESSELS_BRAND_ACCENT);
 
-  const primarySections: SidebarNavSection[] = [
+  const primarySectionsRaw: SidebarNavSection[] = [
     {
       id: 'os-layer',
       label: 'OS Layer',
@@ -838,6 +849,13 @@ function VesselsSidebarContent({
     },
   ];
 
+  const primarySections: SidebarNavSection[] = VESSELS_COMMERCIAL_ENABLED
+    ? primarySectionsRaw
+    : primarySectionsRaw.map((section) => ({
+        ...section,
+        items: section.items.filter((item) => !COMMERCIAL_GATED_NAV_IDS.has(item.id)),
+      }));
+
   const fleetStatusFooter = expanded ? (
     <div className="space-y-3">
       <div
@@ -1076,7 +1094,9 @@ function DashboardRouter() {
         <Route path="/voyage-pnl" component={VoyagePnLPage} />
         <Route path="/trade-flow-heatmap" component={TradeFlowHeatmapPage} />
         <Route path="/intelligence-briefs" component={IntelligenceBriefsPage} />
-        <Route path="/trading-desk" component={TradingDeskPage} />
+        {VESSELS_COMMERCIAL_ENABLED && (
+          <Route path="/trading-desk" component={TradingDeskPage} />
+        )}
         <Route path="/digital-twin" component={DigitalTwinPage} />
         <Route path="/autonomous-routing" component={AutonomousRoutingPage} />
         <Route path="/predictive-maintenance-ml" component={PredictiveMaintenancePage} />
@@ -1094,7 +1114,9 @@ function DashboardRouter() {
         <Route path="/crew-tracker" component={CrewTrackerPage} />
         <Route path="/bunker-optimizer" component={BunkerOptimizerPage} />
         <Route path="/psc-inspector" component={PscInspectorPage} />
-        <Route path="/insurance-panel" component={InsurancePanelPage} />
+        {VESSELS_COMMERCIAL_ENABLED && (
+          <Route path="/insurance-panel" component={InsurancePanelPage} />
+        )}
         <Route path="/decision-center" component={DecisionCenterPage} />
         <Route path="/atlas-runtime" component={VesselsAtlasRuntimePage} />
         <Route path="/atlas-execute" component={VesselsAtlasExecutePage} />
@@ -1447,7 +1469,9 @@ function AppContent({
       <Switch>
         <Route path="/pulse" component={VesselsPulse} />
         <Route path="/" component={MarketingHomePage} />
-        <Route path="/platform" component={MarketingPlatformPage} />
+        {VESSELS_COMMERCIAL_ENABLED && (
+          <Route path="/platform" component={MarketingPlatformPage} />
+        )}
         <Route path="/capabilities" component={MarketingCapabilitiesPage} />
         <Route path="/use-cases" component={MarketingUseCasesPage} />
         <Route path="/security" component={MarketingSecurityPage} />

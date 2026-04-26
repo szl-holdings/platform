@@ -127,8 +127,46 @@ export async function runMigrations(): Promise<void> {
       '[migrations] DATABASE_URL must be set to run migrations on a dedicated connection',
     );
   }
-  const client = new PgClient({ connectionString });
-  await client.connect();
+
+  // Resilient connect: a single TCP timeout on the dedicated migration
+  // connection used to crash the whole bootstrap (the outer retry loop in
+  // index.ts would back off, but each attempt allocated a new client and the
+  // failure mode looked indistinguishable from a permanent outage). Retry the
+  // initial CONNECT step up to 6 times with jittered exponential backoff so
+  // the server can ride out a slow DB warm-up window.
+  const MAX_CONNECT_ATTEMPTS = 6;
+  let client: InstanceType<typeof PgClient> | null = null;
+  for (let attempt = 1; attempt <= MAX_CONNECT_ATTEMPTS; attempt++) {
+    // Dedicated client opened directly against DATABASE_URL so the
+    // migration run never holds a checkout from the shared application
+    // pool. See `__tests__/run-migrations-isolation.test.ts` — that
+    // contract is enforced as a regression guard.
+    const candidate = new PgClient({ connectionString });
+    try {
+      await candidate.connect();
+      client = candidate;
+      break;
+    } catch (connectErr) {
+      const isLast = attempt === MAX_CONNECT_ATTEMPTS;
+      try {
+        await candidate.end();
+      } catch {
+        /* connect failed; nothing to close */
+      }
+      logger.warn(
+        { connectErr, attempt, isLast },
+        `[migrations] Dedicated connection attempt ${attempt} failed${isLast ? ' — giving up' : ' — retrying'}`,
+      );
+      if (isLast) throw connectErr;
+      const baseMs = Math.min(1500 * 2 ** (attempt - 1), 12_000);
+      const jitter = Math.floor(Math.random() * 750);
+      await new Promise((r) => setTimeout(r, baseMs + jitter));
+    }
+  }
+  if (!client) {
+    // Defensive — the loop above always either assigns or throws.
+    throw new Error('[migrations] Could not establish dedicated connection');
+  }
   try {
     let totalApplied = 0;
     let totalSkipped = 0;

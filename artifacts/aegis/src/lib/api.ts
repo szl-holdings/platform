@@ -214,6 +214,13 @@ export const api = {
     threatSummary: () => apiFetch<any>('/aegis/live/threat-summary'),
     complianceSummary: () => apiFetch<any>('/aegis/live/compliance-summary'),
     assetRisk: () => apiFetch<any>('/aegis/live/asset-risk'),
+    /**
+     * Single-call CISO Executive Dashboard headline KPIs. Returns
+     * { aggregateRisk, activeThreats, openCriticals, meanTimeToRespondMin,
+     *   compliancePct, generatedAt } with each metric independently
+     *   nullable when its underlying source is unavailable.
+     */
+    cisoKpis: () => apiFetch<any>('/aegis/ciso-kpis'),
   },
   tradecraft: {
     decisions: (params?: string) =>

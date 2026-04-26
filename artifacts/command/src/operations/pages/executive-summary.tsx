@@ -11,7 +11,7 @@ import {
   TrendingUp,
   Zap,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Area,
   AreaChart,
@@ -21,6 +21,60 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+
+interface OverviewKpis {
+  revenue30dUsd: number | null;
+  threatScore: number | null;
+  infraHealthPct: number | null;
+  generatedAt: string;
+}
+
+/**
+ * Fetch live overview KPIs from /api/command/overview-kpis. Returns null
+ * (and the page falls back to its illustrative defaults) when the
+ * endpoint is unavailable or returns an error — never throws.
+ */
+function useOverviewKpis(): OverviewKpis | null {
+  const [data, setData] = useState<OverviewKpis | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/command/overview-kpis', { credentials: 'include' });
+        if (!res.ok) return;
+        const body = (await res.json()) as Partial<OverviewKpis>;
+        if (cancelled) return;
+        setData({
+          revenue30dUsd:
+            typeof body.revenue30dUsd === 'number' ? body.revenue30dUsd : null,
+          threatScore: typeof body.threatScore === 'number' ? body.threatScore : null,
+          infraHealthPct:
+            typeof body.infraHealthPct === 'number' ? body.infraHealthPct : null,
+          generatedAt: body.generatedAt ?? new Date().toISOString(),
+        });
+      } catch {
+        /* keep fallback */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return data;
+}
+
+/**
+ * Compact USD formatter for the revenue tile (e.g. $1.2M, $450K, $1.4B).
+ * Falls back to "—" when no value is available.
+ */
+function formatRevenueCompact(usd: number | null): string {
+  if (usd == null || !Number.isFinite(usd)) return '—';
+  const abs = Math.abs(usd);
+  if (abs >= 1e9) return `$${(usd / 1e9).toFixed(1)}B`;
+  if (abs >= 1e6) return `$${(usd / 1e6).toFixed(1)}M`;
+  if (abs >= 1e3) return `$${(usd / 1e3).toFixed(1)}K`;
+  return `$${Math.round(usd)}`;
+}
 
 const HEALTH_TREND = [
   { day: 'Mon', score: 94 },
@@ -97,6 +151,19 @@ const HIGHLIGHT_CONFIG = {
 export default function ExecutiveSummaryPage() {
   const [generating, setGenerating] = useState(false);
   const [period, setPeriod] = useState<'7d' | '30d' | '90d'>('7d');
+  const liveKpis = useOverviewKpis();
+  // Each tile renders the live value when present, otherwise an
+  // "Illustrative" fallback so the panel stays informative on
+  // cold-start. The illustrative numbers below mirror the prior
+  // hand-curated example so demos still tell a coherent story.
+  const revenueLabel =
+    liveKpis?.revenue30dUsd != null ? formatRevenueCompact(liveKpis.revenue30dUsd) : '$1.2M';
+  const revenueIsLive = liveKpis?.revenue30dUsd != null;
+  const threatScore = liveKpis?.threatScore ?? 18;
+  const threatIsLive = liveKpis?.threatScore != null;
+  const infraHealthPct = liveKpis?.infraHealthPct ?? 99;
+  const infraIsLive = liveKpis?.infraHealthPct != null;
+  const kpiSource = liveKpis ? 'Live · /api/command/overview-kpis' : 'Illustrative · awaiting live data';
 
   function handleGenerate() {
     setGenerating(true);
@@ -207,31 +274,37 @@ export default function ExecutiveSummaryPage() {
           </div>
         </div>
 
-        {/* Health Score */}
+        {/* Headline KPIs — Revenue · Threat Score · Infra Health */}
         <div className="grid grid-cols-3 gap-4">
           <div
             className="rounded-2xl border p-4"
             style={{ borderColor: 'rgba(52,211,153,0.2)', background: 'rgba(52,211,153,0.05)' }}
           >
-            <p className="text-[9px] text-white/30 mb-1">Overall Health Score</p>
-            <p className="text-4xl font-black font-mono text-emerald-400">92</p>
-            <p className="text-[9px] text-white/30 mt-1">/100 — Good</p>
+            <p className="text-[9px] text-white/30 mb-1">Fund Revenue (30d)</p>
+            <p className="text-4xl font-black font-mono text-emerald-400">{revenueLabel}</p>
+            <p className="text-[9px] text-white/30 mt-1">
+              {revenueIsLive ? 'Live · portfolio company financials' : `Illustrative · ${kpiSource}`}
+            </p>
           </div>
           <div
             className="rounded-2xl border p-4"
-            style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}
+            style={{ borderColor: 'rgba(249,115,22,0.2)', background: 'rgba(249,115,22,0.05)' }}
           >
-            <p className="text-[9px] text-white/30 mb-1">Total Incidents</p>
-            <p className="text-4xl font-black font-mono text-white">3</p>
-            <p className="text-[9px] text-white/30 mt-1">vs 8 prior period (−62%)</p>
+            <p className="text-[9px] text-white/30 mb-1">Threat Score</p>
+            <p className="text-4xl font-black font-mono text-orange-400">{threatScore}</p>
+            <p className="text-[9px] text-white/30 mt-1">
+              {threatIsLive ? '/100 · weighted threat intel feed' : `Illustrative · awaiting feed`}
+            </p>
           </div>
           <div
             className="rounded-2xl border p-4"
             style={{ borderColor: 'rgba(96,165,250,0.2)', background: 'rgba(96,165,250,0.05)' }}
           >
-            <p className="text-[9px] text-white/30 mb-1">Avg Resolution Time</p>
-            <p className="text-4xl font-black font-mono text-blue-400">4.2m</p>
-            <p className="text-[9px] text-white/30 mt-1">vs 18.4m prior period (−77%)</p>
+            <p className="text-[9px] text-white/30 mb-1">Infra Health</p>
+            <p className="text-4xl font-black font-mono text-blue-400">{infraHealthPct}%</p>
+            <p className="text-[9px] text-white/30 mt-1">
+              {infraIsLive ? 'healthy probes · last 1h' : `Illustrative · awaiting probes`}
+            </p>
           </div>
         </div>
 

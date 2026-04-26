@@ -67,10 +67,18 @@ const MOCK_OPINIONS: CourtListenerOpinion[] = [
 export class CourtListenerAdapter extends ServiceAdapter {
   readonly name = "courtlistener";
   readonly description =
-    "CourtListener — free federal court opinions, docket tracking, PACER integration, and legal citation search. API token optional for higher rate limits. Falls back to demo mode when COURT_LISTENER_TOKEN is absent.";
-  readonly requiredEnvVars = ["COURT_LISTENER_TOKEN"];
+    "CourtListener — free federal court opinions, docket tracking, PACER integration, and legal citation search. API token optional for higher rate limits. Set COURT_LISTENER_API_TOKEN for authenticated 5,000 req/day quota; falls back to demo mode when no token is present.";
+  readonly requiredEnvVars = ["COURT_LISTENER_API_TOKEN"];
 
-  private get token(): string | undefined { return process.env.COURT_LISTENER_TOKEN; }
+  private get token(): string | undefined {
+    return (
+      process.env.COURT_LISTENER_API_TOKEN ||
+      process.env.COURT_LISTENER_API_KEY ||
+      process.env.COURT_LISTENER_TOKEN ||
+      process.env.COURTLISTENER_API_TOKEN ||
+      undefined
+    );
+  }
 
   override get supportsMockMode(): boolean { return true; }
 

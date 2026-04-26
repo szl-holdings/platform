@@ -75,17 +75,46 @@ async function safeFetchCount(url: string): Promise<number | null> {
   }
 }
 
+/**
+ * Try the single-call aggregator first. If it 404s (older deployments) or
+ * fails for any reason, fall back to the four legacy per-counter endpoints
+ * so the badge bar still works during a rolling deploy / upgrade.
+ */
+async function fetchAggregated(): Promise<OpsBadgeCounts | null> {
+  try {
+    const res = await fetch('/api/command/badge-counts', { credentials: 'include' });
+    if (!res.ok) return null;
+    const body = (await res.json()) as Partial<OpsBadgeCounts>;
+    return {
+      alerts: typeof body.alerts === 'number' ? body.alerts : null,
+      slaBreaches: typeof body.slaBreaches === 'number' ? body.slaBreaches : null,
+      governancePending:
+        typeof body.governancePending === 'number' ? body.governancePending : null,
+      costOverBudget: typeof body.costOverBudget === 'number' ? body.costOverBudget : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function refresh(): Promise<void> {
   if (inFlight) return;
   inFlight = true;
   try {
-    const [alerts, slaBreaches, governancePending, costOverBudget] = await Promise.all([
-      safeFetchCount('/api/command/alerts/count'),
-      safeFetchCount('/api/command/sla/breaches'),
-      safeFetchCount('/api/governance/pending'),
-      safeFetchCount('/api/command/costs/over-budget'),
-    ]);
-    snapshot = { alerts, slaBreaches, governancePending, costOverBudget };
+    const aggregated = await fetchAggregated();
+    if (aggregated) {
+      snapshot = aggregated;
+    } else {
+      // Fan-out fallback: aggregator unavailable, fetch each counter
+      // individually so the badge bar continues to function.
+      const [alerts, slaBreaches, governancePending, costOverBudget] = await Promise.all([
+        safeFetchCount('/api/command/alerts/count'),
+        safeFetchCount('/api/command/sla/breaches'),
+        safeFetchCount('/api/governance/pending'),
+        safeFetchCount('/api/command/costs/over-budget'),
+      ]);
+      snapshot = { alerts, slaBreaches, governancePending, costOverBudget };
+    }
     subscribers.forEach((cb) => cb());
   } finally {
     inFlight = false;

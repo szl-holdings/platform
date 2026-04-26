@@ -127,3 +127,49 @@ export function isFlagEnabled(flagId: string, runtimeMode: RuntimeMode): boolean
   if (!flag) return false;
   return flag.enabledFor.includes(runtimeMode);
 }
+
+/**
+ * Coerce env values that may be undefined / "true" / "1" / "false" / "0" /
+ * "yes" / "no" into a boolean. Anything truthy other than the explicit
+ * disable strings is treated as "on" so operators can simply set
+ * `FEATURE_FOO=1`.
+ */
+function coerceFlag(raw: unknown): boolean {
+  if (raw == null) return false;
+  const value = String(raw).trim().toLowerCase();
+  if (value === '' || value === 'false' || value === '0' || value === 'no' || value === 'off') {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Env-resolved feature flags consumable from web frontends through Vite's
+ * `import.meta.env.*` mechanism, and from Node services through
+ * `process.env.*`. Vite inlines any variable prefixed with `VITE_` at
+ * build time; the matching `FEATURE_*` form is honoured for server-side
+ * reads. Both spellings resolve to the same boolean.
+ */
+export interface EnvFeatureFlagSnapshot {
+  vesselsCommercial: boolean;
+  aegisExtendedModules: boolean;
+}
+
+/**
+ * Read env-resolved flag values from a record-shaped env object. Pass
+ * `import.meta.env` from a Vite-built frontend or `process.env` from a
+ * Node process. Unknown / missing / empty values resolve to `false`.
+ */
+export function readEnvFeatureFlags(
+  env: Record<string, unknown> | undefined,
+): EnvFeatureFlagSnapshot {
+  const safeEnv = env ?? {};
+  return {
+    vesselsCommercial:
+      coerceFlag(safeEnv.VITE_FEATURE_VESSELS_COMMERCIAL) ||
+      coerceFlag(safeEnv.FEATURE_VESSELS_COMMERCIAL),
+    aegisExtendedModules:
+      coerceFlag(safeEnv.VITE_FEATURE_AEGIS_EXTENDED_MODULES) ||
+      coerceFlag(safeEnv.FEATURE_AEGIS_EXTENDED_MODULES),
+  };
+}

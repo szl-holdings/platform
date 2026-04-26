@@ -355,9 +355,25 @@ interface AssetRiskData {
   dbAssets?: AssetRiskItem[];
   aptEntities?: AssetRiskItem[];
 }
+interface CisoKpiData {
+  aggregateRisk?: number | null;
+  activeThreats?: number | null;
+  openCriticals?: number | null;
+  meanTimeToRespondMin?: number | null;
+  compliancePct?: number | null;
+}
 export default function CisoDashboard() {
   const radial = [{ name: 'ZT', uv: 78, fill: '#22d3ee' }];
 
+  // Single-call aggregator — preferred source for the four headline tiles.
+  // Falls back gracefully (per-tile) to the existing live-data queries when
+  // a sub-metric is null or the endpoint itself is unavailable.
+  const cisoKpis = useStandardQuery<CisoKpiData>({
+    queryKey: ['ciso', 'ciso-kpis'],
+    queryFn: () => api.liveData.cisoKpis() as Promise<CisoKpiData>,
+    staleTime: 60_000,
+    retry: false,
+  });
   const threatSummary = useStandardQuery<ThreatSummaryData>({
     queryKey: ['ciso', 'threat-summary'],
     queryFn: () => api.liveData.threatSummary() as Promise<ThreatSummaryData>,
@@ -380,16 +396,23 @@ export default function CisoDashboard() {
   const ts = threatSummary.data;
   const cp = complianceQuery.data;
   const ar = assetRisk.data;
-  const liveLoaded = !!(ts || cp || ar);
+  const ciso = cisoKpis.data;
+  const liveLoaded = !!(ts || cp || ar || ciso);
 
+  // Prefer the single-call aggregator's value for each headline tile, then
+  // fall back to the per-source queries, then to the static panel value.
   const dbAssets = ar?.dbAssets ?? [];
-  const aggregateRisk =
+  const fallbackRisk =
     dbAssets.length > 0
       ? Math.round(dbAssets.reduce((s, a) => s + (a.risk ?? 0), 0) / dbAssets.length)
       : null;
-  const openCriticals = ts ? (ts.criticalAlerts ?? 0) + (ts.incidentsOpenLast24h ?? 0) : null;
-  const mttr = ts?.meanTimeToRespond ?? null;
-  const overallCompliance = cp?.overallScore ?? null;
+  const aggregateRisk = ciso?.aggregateRisk ?? fallbackRisk;
+  const openCriticals =
+    ciso?.openCriticals ?? (ts ? (ts.criticalAlerts ?? 0) + (ts.incidentsOpenLast24h ?? 0) : null);
+  const mttr = ciso?.meanTimeToRespondMin != null
+    ? `${ciso.meanTimeToRespondMin}m`
+    : (ts?.meanTimeToRespond ?? null);
+  const overallCompliance = ciso?.compliancePct ?? cp?.overallScore ?? null;
 
   const headlineKpis = liveLoaded
     ? [

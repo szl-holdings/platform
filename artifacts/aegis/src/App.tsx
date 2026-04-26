@@ -1,3 +1,4 @@
+import { readEnvFeatureFlags } from '@szl-holdings/config';
 import { PrivateAppGuard } from '@szl-holdings/shared-ui';
 import { AnalyticsProvider } from '@szl-holdings/shared-ui/analytics-provider';
 import { AppModeBanner, AppModeProvider } from '@szl-holdings/shared-ui/app-mode-banner';
@@ -622,7 +623,30 @@ const NAV_SECTIONS: NavSection[] = [
   },
 ];
 
-const ALL_ROUTES: NavItem[] = NAV_SECTIONS.flatMap((s) => s.items);
+/**
+ * Aegis ships several "extended" modules (the entire Threat Intelligence
+ * section and the Identity Blast Radius page) that depend on data
+ * pipelines still under construction. Hide them — both from sidebar and
+ * router — unless `VITE_FEATURE_AEGIS_EXTENDED_MODULES` is set.
+ */
+const { aegisExtendedModules: AEGIS_EXTENDED_MODULES_ENABLED } = readEnvFeatureFlags(
+  import.meta.env as unknown as Record<string, unknown>,
+);
+const AEGIS_EXTENDED_SECTION_IDS = new Set(['intelligence']);
+const AEGIS_EXTENDED_ITEM_PATHS = new Set(['/identity-blast-radius']);
+
+function filterExtendedSections(sections: NavSection[]): NavSection[] {
+  if (AEGIS_EXTENDED_MODULES_ENABLED) return sections;
+  return sections
+    .filter((sec) => !AEGIS_EXTENDED_SECTION_IDS.has(sec.id))
+    .map((sec) => ({
+      ...sec,
+      items: sec.items.filter((item) => !AEGIS_EXTENDED_ITEM_PATHS.has(item.path)),
+    }));
+}
+
+const VISIBLE_NAV_SECTIONS = filterExtendedSections(NAV_SECTIONS);
+const ALL_ROUTES: NavItem[] = VISIBLE_NAV_SECTIONS.flatMap((s) => s.items);
 
 const SLIDES_NAV: NavItem = {
   path: '/slides',
@@ -656,7 +680,7 @@ function buildSidebarSections(): SidebarNavSection[] {
       },
     ],
   };
-  const sections: SidebarNavSection[] = NAV_SECTIONS.map((sec) => ({
+  const sections: SidebarNavSection[] = VISIBLE_NAV_SECTIONS.map((sec) => ({
     id: sec.id,
     label: sec.label,
     items: sec.items

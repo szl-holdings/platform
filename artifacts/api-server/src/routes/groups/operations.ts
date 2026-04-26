@@ -40,6 +40,15 @@ export function register(router: IRouter): void {
     lazyMount(() => import('../governance-counts'), 'governance-counts'),
   );
 
+  // Aegis CISO Executive Dashboard live KPI aggregator. Mounted under
+  // /aegis so the URL reads /api/aegis/ciso-kpis. Read-rate-limited to
+  // match the other badge/aggregator endpoints.
+  router.use('/aegis', _readLimiter);
+  router.use(
+    '/aegis',
+    lazyMount(() => import('../aegis-ciso-kpis'), 'aegis-ciso-kpis'),
+  );
+
   router.use('/business-events', _writeLimiter);
   router.use(
     lazyMatch(

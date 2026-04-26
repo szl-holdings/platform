@@ -2037,6 +2037,250 @@ router.get('/sla/breaches', requireAnyAuth(), async (_req: Request, res: Respons
 });
 
 /**
+ * GET /api/command/badge-counts
+ *
+ * Single-call aggregation of the four Ops Center grid badges so the layout
+ * and grid components can stop firing four separate requests every 30s.
+ * Each sub-count is computed independently inside a `try` and degrades to
+ * `null` (rather than failing the whole request) so a partial DB hiccup
+ * never blanks the entire badge bar. Frontend hook still falls back to
+ * the legacy per-counter endpoints when this aggregator is unavailable.
+ */
+router.get('/badge-counts', requireAnyAuth(), async (req: Request, res: Response) => {
+  const tenantId = req.user?.orgs?.[0]?.orgId?.toString() ?? null;
+  const isAdmin = req.user?.roles?.some((r) => r === 'super_admin' || r === 'admin') ?? false;
+
+  // Active alerts — re-uses computeAlerts so badge cannot drift from inbox.
+  const alertsP = (async () => {
+    try {
+      const rawAlerts = await computeAlerts({ tenantId, isAdmin });
+      const states = await loadAlertStates(tenantId);
+      const alerts = applyAlertStates(rawAlerts, states, new Map());
+      return alerts.filter((a) => a.status === 'active').length;
+    } catch (err) {
+      logger.warn({ err }, 'badge-counts: alerts subcount failed');
+      return null;
+    }
+  })();
+
+  // SLA breaches — re-uses computeSlas so badge cannot drift from /sla.
+  const slaP = (async () => {
+    try {
+      const slas = await computeSlas();
+      return slas.filter((s) => s.breach).length;
+    } catch (err) {
+      logger.warn({ err }, 'badge-counts: sla subcount failed');
+      return null;
+    }
+  })();
+
+  // Cost over-budget — same MTD spend logic as /costs/over-budget.
+  const costP = (async () => {
+    try {
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const mtdEvents = await db
+        .select({
+          featureKey: usageEventsTable.featureKey,
+          total: sql<number>`COALESCE(SUM(${usageEventsTable.quantity}), 0)::int`,
+        })
+        .from(usageEventsTable)
+        .where(gte(usageEventsTable.recordedAt, monthStart))
+        .groupBy(usageEventsTable.featureKey);
+      const domainSpend = new Map<string, number>();
+      Object.keys(COST_DOMAIN_BUDGETS).forEach((d) => domainSpend.set(d, 0));
+      for (const e of mtdEvents) {
+        const r = COST_RATE_CARD[e.featureKey];
+        if (!r) continue;
+        domainSpend.set(
+          r.domain,
+          (domainSpend.get(r.domain) ?? 0) + Number(e.total) * r.unitCost,
+        );
+      }
+      return Array.from(domainSpend.entries()).filter(
+        ([d, spent]) => spent > (COST_DOMAIN_BUDGETS[d] ?? Infinity),
+      ).length;
+    } catch (err) {
+      logger.warn({ err }, 'badge-counts: cost subcount failed');
+      return null;
+    }
+  })();
+
+  // Governance pending — mirrors routes/governance-counts.ts logic but
+  // inlined here so we don't add a cross-router dependency. Keep these
+  // two implementations in sync if the criteria change.
+  const govP = (async () => {
+    try {
+      const orgIds = req.user?.orgs?.map((o) => o.orgId).filter((id): id is number => typeof id === 'number') ?? [];
+      const orgFilter =
+        orgIds.length > 0 ? inArray(approvalRequestsTable.orgId, orgIds) : undefined;
+      const [row] = await db
+        .select({ count: sql<number>`COUNT(*)::int` })
+        .from(approvalRequestsTable)
+        .where(
+          and(
+            eq(approvalRequestsTable.status, 'pending'),
+            eq(approvalRequestsTable.resourceType, 'policy'),
+            orgFilter,
+          ),
+        );
+      return Number(row?.count ?? 0);
+    } catch (err) {
+      logger.warn({ err }, 'badge-counts: governance subcount failed');
+      return null;
+    }
+  })();
+
+  const [alerts, slaBreaches, costOverBudget, governancePending] = await Promise.all([
+    alertsP,
+    slaP,
+    costP,
+    govP,
+  ]);
+  sendSuccess(res, {
+    alerts,
+    slaBreaches,
+    costOverBudget,
+    governancePending,
+    generatedAt: new Date().toISOString(),
+  });
+});
+
+/**
+ * GET /api/command/overview-kpis
+ *
+ * Aggregated platform-wide KPIs for the Executive Summary panel. The
+ * response covers three orthogonal pillars so the panel can render a
+ * single trustworthy snapshot:
+ *
+ *   - revenue30dUsd  : sum of fund_portfolio_financials.revenue across
+ *                       portfolio companies whose period_end falls in
+ *                       the last ~30 days (the canonical fund revenue
+ *                       feed). When no rows are available within the
+ *                       window we fall back to the most recent
+ *                       reporting period across all companies so
+ *                       quarterly cadences still light up the tile.
+ *   - threatScore    : 0..100 weighted score derived from the
+ *                       intelligence_cache "threats" payload (used by
+ *                       the Aegis surface). Higher = more critical
+ *                       severity-adjusted threats currently observed.
+ *   - infraHealthPct : percent of health_checks rows reporting status
+ *                       'healthy' over the last hour (services × probes,
+ *                       so this directly mirrors the Replit-platform
+ *                       infrastructure health our self-monitor publishes).
+ *
+ * Each sub-metric degrades to `null` independently when its source
+ * query fails, so one missing table never blanks the whole panel.
+ */
+router.get('/overview-kpis', requireAnyAuth(), async (_req: Request, res: Response) => {
+  // 1. Fund revenue — sum across portfolio company financials. We prefer
+  //    the trailing-30-day window; if none of the rows close in that
+  //    window (typical for quarterly reporting) we fall back to the
+  //    latest reported period per company so the tile still renders.
+  const revenue30dUsdP = (async (): Promise<number | null> => {
+    try {
+      const since30d = new Date(Date.now() - 30 * 86400000)
+        .toISOString()
+        .slice(0, 10);
+      const [windowRow] = await db
+        .select({
+          sum: sql<number | null>`COALESCE(SUM(${fundPortfolioFinancialsTable.revenue}), 0)::float`,
+          n: sql<number>`COUNT(*)::int`,
+        })
+        .from(fundPortfolioFinancialsTable)
+        .where(gte(fundPortfolioFinancialsTable.periodEnd, since30d));
+      const windowed = Number(windowRow?.sum ?? 0);
+      if (Number(windowRow?.n ?? 0) > 0) return windowed;
+
+      // Fallback: take the *latest reported period per company* and sum
+      // those — never sum across periods (which would double-count
+      // companies that have multiple historical filings). DISTINCT ON
+      // gives one row per company, ordered by most-recent period_end.
+      const [latestRow] = await db.execute<{ total: number; n: number }>(
+        sql`SELECT COALESCE(SUM(latest.revenue), 0)::float AS total,
+                   COUNT(*)::int AS n
+              FROM (
+                SELECT DISTINCT ON (company_slug) revenue
+                  FROM fund_portfolio_financials
+                 WHERE revenue IS NOT NULL
+                 ORDER BY company_slug, period_end DESC
+              ) AS latest`,
+      ) as unknown as Array<{ total: number; n: number }>;
+      if (!latestRow || Number(latestRow.n ?? 0) === 0) return null;
+      return Number(latestRow.total ?? 0);
+    } catch (err) {
+      logger.warn({ err }, 'overview-kpis: revenue30dUsd query failed');
+      return null;
+    }
+  })();
+
+  // 2. Threat score — derived from the cached AlienVault / OTX
+  //    aggregator that Aegis reads. We weight criticals 4x, highs 2x,
+  //    medium 1x and clamp to 0..100. When no payload exists yet
+  //    (cold-start), return null so the UI shows "—" rather than 0.
+  const threatScoreP = (async (): Promise<number | null> => {
+    try {
+      const [row] = await db
+        .select({ data: intelligenceCacheTable.data })
+        .from(intelligenceCacheTable)
+        .where(eq(intelligenceCacheTable.key, 'threats'))
+        .limit(1);
+      if (!row?.data) return null;
+      const items = Array.isArray(row.data)
+        ? (row.data as Array<{ severity?: string }>)
+        : [];
+      if (items.length === 0) return null;
+      let weighted = 0;
+      for (const item of items) {
+        const sev = String(item.severity ?? '').toLowerCase();
+        if (sev === 'critical') weighted += 4;
+        else if (sev === 'high') weighted += 2;
+        else weighted += 1;
+      }
+      return Math.max(0, Math.min(100, weighted));
+    } catch (err) {
+      logger.warn({ err }, 'overview-kpis: threatScore query failed');
+      return null;
+    }
+  })();
+
+  // 3. Infrastructure health — fraction of recent health_checks rows
+  //    whose status is 'healthy', across all monitored services.
+  //    1-hour window keeps the tile responsive to outages.
+  const infraHealthPctP = (async (): Promise<number | null> => {
+    try {
+      const since1h = new Date(Date.now() - 3600_000);
+      const [row] = await db
+        .select({
+          total: sql<number>`COUNT(*)::int`,
+          healthy: sql<number>`COUNT(*) FILTER (WHERE ${healthChecksTable.status} = 'healthy')::int`,
+        })
+        .from(healthChecksTable)
+        .where(gte(healthChecksTable.checkedAt, since1h));
+      const total = Number(row?.total ?? 0);
+      const healthy = Number(row?.healthy ?? 0);
+      if (total === 0) return null;
+      return Math.round((healthy / total) * 100);
+    } catch (err) {
+      logger.warn({ err }, 'overview-kpis: infraHealthPct query failed');
+      return null;
+    }
+  })();
+
+  const [revenue30dUsd, threatScore, infraHealthPct] = await Promise.all([
+    revenue30dUsdP,
+    threatScoreP,
+    infraHealthPctP,
+  ]);
+  sendSuccess(res, {
+    revenue30dUsd,
+    threatScore,
+    infraHealthPct,
+    generatedAt: new Date().toISOString(),
+  });
+});
+
+/**
  * GET /api/command/governance
  *
  * Returns governance policies from the guardian_policies table.
