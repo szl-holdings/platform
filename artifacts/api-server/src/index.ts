@@ -38,6 +38,7 @@ import { runOpsMgmtBootInit } from './routes/ops-management';
 import { ensurePlatformFlags } from './lib/platform-flags';
 import { runMigrations } from './lib/run-migrations';
 import { startSelfMonitoring, stopSelfMonitoring } from './lib/self-monitor';
+import { startScheduledTriggerChecks, stopScheduledTriggerChecks } from '@szl-holdings/ai-engine';
 import './lib/terra-nyc-ingestion';
 import './lib/terra-nyc-extended-ingestion';
 import { startOtIcsStreamFeed } from './jobs/ot-ics-stream-feed';
@@ -630,6 +631,12 @@ export async function bootstrap(
     // Step 3c: Start the scheduler AFTER all handlers are registered
     await bootstrapStep('startDurableScheduler', startDurableScheduler, 30_000);
 
+    // Step 3d: Start autonomous fine-tuning trigger checks (non-blocking, check hourly)
+    if (process.env.AUTONOMOUS_TRAINING_ENABLED === 'true') {
+      startScheduledTriggerChecks(60 * 60 * 1000);
+      logger.info('[fine-tuning] Autonomous training trigger scheduler started');
+    }
+
     // Step 4: Demo seeds + ops-mgmt init — SERIALISED behind a single
     // background chain (OBS-007 root-cause fix).
     //
@@ -799,6 +806,7 @@ export async function bootstrap(
 
     stopDomainNotificationGenerators();
     stopSelfMonitoring();
+    stopScheduledTriggerChecks();
     stopHealthDegradationWatcher();
     stopPrismBusBridge();
     stopAtlasExportProcessor();

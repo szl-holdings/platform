@@ -104,9 +104,12 @@ export {
 export {
   type DatasetExportResult,
   type ExportFormat,
+  exportDPODataset,
   exportTrainingData,
   type HuggingFaceSample,
+  type OpenAIDPOSample,
   type OpenAITrainingSample,
+  serializeDPOToJSONL,
   serializeToHuggingFaceJSON,
   serializeToJSONL,
 } from './fine-tuning/dataset-exporter.js';
@@ -128,6 +131,34 @@ export {
   pollJobStatus,
   submitFineTuningJob,
 } from './fine-tuning/job-manager.js';
+export {
+  type QualityCheckResult,
+  runDataQualityGate,
+} from './fine-tuning/data-quality-gate.js';
+export {
+  activateCanary,
+  type CanaryRouteDecision,
+  type CanaryStatus,
+  getAllCanaryStatuses,
+  getCanaryStatus,
+  performCanaryPromotion,
+  performCanaryRollback,
+  recordCanaryOutcome,
+  routeCanaryRequest,
+  runIdleCanaryChecks,
+} from './fine-tuning/canary-manager.js';
+export {
+  checkAndTriggerTraining,
+  getPipelineHealth,
+  getTriggerConfig,
+  isAutonomousTrainingGloballyEnabled,
+  runTriggerCheckForAllAgents,
+  setGlobalTrainingKillSwitch,
+  startScheduledTriggerChecks,
+  stopScheduledTriggerChecks,
+  type TriggerEvaluationResult,
+  upsertTriggerConfig,
+} from './fine-tuning/training-trigger.js';
 export {
   deprecateFineTunedModel,
   type FineTunedModelInfo,

@@ -5,26 +5,45 @@
  * - Listing fine-tuning jobs
  * - Viewing model lineage (base model + dataset version)
  * - Comparing eval results between base and tuned models
- * - Triggering new fine-tuning runs
+ * - Triggering new fine-tuning runs (including DPO format)
  * - Tracking cumulative training costs
+ * - Trigger configuration (enable/disable, thresholds)
+ * - Canary status and manual promote/rollback
+ * - Data quality reports
+ * - Pipeline health
  */
 
 import {
+  activateCanary,
   cancelFineTuningJob,
+  checkAndTriggerTraining,
   curateDatasetForAgent,
   deprecateFineTunedModel,
   exportTrainingData,
   type FineTuningProvider,
+  getAllCanaryStatuses,
   getAllFineTunedModels,
   getAllSupportedAgents,
+  getCanaryStatus,
   getModelLineage,
+  getPipelineHealth,
+  getTriggerConfig,
+  isAutonomousTrainingGloballyEnabled,
   listFineTuningJobs,
+  performCanaryPromotion,
+  performCanaryRollback,
   pollJobStatus,
   promoteFineTunedModel,
+  recordCanaryOutcome,
   resolveModelForAgent,
+  runDataQualityGate,
+  runTriggerCheckForAllAgents,
   serializeToHuggingFaceJSON,
   serializeToJSONL,
+  serializeDPOToJSONL,
+  setGlobalTrainingKillSwitch,
   submitFineTuningJob,
+  upsertTriggerConfig,
 } from '@szl-holdings/ai-engine';
 import { db, fineTunedModelRegistry, fineTuningDatasets, fineTuningJobs } from '@szl-holdings/db';
 import { desc, eq } from 'drizzle-orm';
@@ -37,8 +56,9 @@ const fineTuningRouter: IRouter = Router();
 
 const submitJobSchema = z.object({
   agentId: z.string().min(1).max(100),
-  provider: z.enum(['openai', 'huggingface']).optional(),
+  provider: z.enum(['openai', 'gemini']).optional(),
   baseModel: z.string().max(200).optional(),
+  format: z.enum(['openai-jsonl', 'openai-dpo']).optional(),
   hyperparameters: z
     .object({
       nEpochs: z.number().int().min(1).max(50).optional(),
@@ -49,18 +69,36 @@ const submitJobSchema = z.object({
   options: z
     .object({
       minSamples: z.number().int().min(1).optional(),
+      skipQualityGate: z.boolean().optional(),
     })
     .optional(),
 });
 
 const datasetPreviewSchema = z.object({
   agentId: z.string().min(1).max(100),
-  format: z.enum(['openai-jsonl', 'huggingface-json']).optional(),
+  format: z.enum(['openai-jsonl', 'openai-dpo', 'huggingface-json']).optional(),
   curate: z.boolean().optional(),
 });
 
 const lifecycleSchema = z.object({
   lifecycle: z.enum(['staging', 'canary', 'active', 'deprecated']),
+});
+
+const triggerConfigSchema = z.object({
+  enabled: z.boolean().optional(),
+  correctionThreshold: z.number().int().min(1).max(10000).optional(),
+  evalScoreDropThreshold: z.number().min(0).max(1).optional(),
+  calibrationBiasThreshold: z.number().min(0).max(1).optional(),
+  cooldownHours: z.number().int().min(1).max(720).optional(),
+});
+
+const canaryActivateSchema = z.object({
+  trafficPct: z.number().int().min(1).max(100).optional(),
+  promoteThreshold: z.number().int().min(10).max(10000).optional(),
+});
+
+const canaryOutcomeSchema = z.object({
+  success: z.boolean(),
 });
 
 fineTuningRouter.get('/fine-tuning/jobs', async (req: Request, res: Response) => {
@@ -95,6 +133,7 @@ fineTuningRouter.post(
         agentId,
         provider = 'openai',
         baseModel,
+        format,
         hyperparameters,
         options,
       } = req.body as z.infer<typeof submitJobSchema>;
@@ -107,15 +146,16 @@ fineTuningRouter.post(
         return;
       }
 
-      const defaultModels: Record<FineTuningProvider, string> = {
+      const defaultModels: Record<string, string> = {
         openai: 'gpt-4o-mini-2024-07-18',
-        huggingface: 'Qwen/Qwen3-8B',
+        gemini: 'gemini-1.5-flash-001',
       };
 
       const job = await submitFineTuningJob({
         agentId,
-        provider,
-        baseModel: baseModel ?? defaultModels[provider],
+        provider: provider as FineTuningProvider,
+        baseModel: baseModel ?? defaultModels[provider] ?? 'gpt-4o-mini-2024-07-18',
+        format: format as 'openai-jsonl' | 'openai-dpo' | undefined,
         hyperparameters,
         options,
       });
@@ -126,7 +166,7 @@ fineTuningRouter.post(
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to submit fine-tuning job';
-      const statusCode = msg.includes('Insufficient') ? 422 : 500;
+      const statusCode = msg.includes('Insufficient') || msg.includes('quality gate') ? 422 : 500;
       sendError(
         res,
         msg,
@@ -272,8 +312,10 @@ fineTuningRouter.post(
       } = req.body as z.infer<typeof datasetPreviewSchema>;
 
       const result = curate
-        ? await curateDatasetForAgent(agentId, format)
-        : await exportTrainingData(agentId, format, { maxSamples: 50 });
+        ? await curateDatasetForAgent(agentId, format as 'openai-jsonl' | 'huggingface-json')
+        : await exportTrainingData(agentId, format as 'openai-jsonl' | 'huggingface-json', {
+            maxSamples: 50,
+          });
 
       const preview = result.samples.slice(0, 5);
 
@@ -293,8 +335,8 @@ fineTuningRouter.post(
   },
 );
 
-fineTuningRouter.get(
-  '/fine-tuning/datasets/:agentId/export',
+fineTuningRouter.post(
+  '/fine-tuning/datasets/:agentId/quality-check',
   async (req: Request, res: Response) => {
     try {
       const agentId = String(req.params.agentId);
@@ -303,6 +345,38 @@ fineTuningRouter.get(
         | 'huggingface-json';
 
       const result = await curateDatasetForAgent(agentId, format);
+      const qualityReport = await runDataQualityGate(
+        result.samples as unknown[],
+        result.sourceBreakdown as unknown as Record<string, number>,
+      );
+
+      res.json({
+        agentId,
+        sampleCount: result.sampleCount,
+        sourceBreakdown: result.sourceBreakdown,
+        qualityReport,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to run quality check';
+      sendError(res, msg);
+    }
+  },
+);
+
+fineTuningRouter.get(
+  '/fine-tuning/datasets/:agentId/export',
+  async (req: Request, res: Response) => {
+    try {
+      const agentId = String(req.params.agentId);
+      const format = ((req.query.format as string) ?? 'openai-jsonl') as
+        | 'openai-jsonl'
+        | 'openai-dpo'
+        | 'huggingface-json';
+
+      const result = await curateDatasetForAgent(
+        agentId,
+        format === 'openai-dpo' ? 'openai-dpo' : format,
+      );
 
       if (format === 'openai-jsonl') {
         const content = serializeToJSONL(
@@ -314,6 +388,21 @@ fineTuningRouter.get(
         res.setHeader(
           'Content-Disposition',
           `attachment; filename="${agentId}-${result.version}.jsonl"`,
+        );
+        res.send(content);
+      } else if (format === 'openai-dpo') {
+        const content = serializeDPOToJSONL(
+          result.samples as Array<{
+            input: { messages: Array<{ role: string; content: string }> };
+            preferred_output: Array<{ role: string; content: string }>;
+            non_preferred_output: Array<{ role: string; content: string }>;
+            quality_weight?: number;
+          }>,
+        );
+        res.setHeader('Content-Type', 'application/jsonl');
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename="${agentId}-${result.version}-dpo.jsonl"`,
         );
         res.send(content);
       } else {
@@ -399,7 +488,7 @@ fineTuningRouter.get('/fine-tuning/costs', async (req: Request, res: Response) =
 fineTuningRouter.get('/fine-tuning/router/:agentId', async (req: Request, res: Response) => {
   try {
     const agentId = String(req.params.agentId);
-    const baseModel = (req.query.baseModel as string) ?? 'gpt-5.2';
+    const baseModel = (req.query.baseModel as string) ?? 'gpt-4o-mini-2024-07-18';
     const preferFineTuned = req.query.preferFineTuned !== 'false';
     const minLifecycle = (req.query.minLifecycle as 'staging' | 'canary' | 'active') ?? 'canary';
 
@@ -413,6 +502,7 @@ fineTuningRouter.get('/fine-tuning/router/:agentId', async (req: Request, res: R
       resolvedModel: resolution.model,
       provider: resolution.provider,
       isFineTuned: resolution.isFineTuned,
+      isCanary: resolution.isCanary,
       fineTunedInfo: resolution.fineTunedInfo,
       fallbackModel: resolution.isFineTuned ? baseModel : undefined,
     });
@@ -422,12 +512,202 @@ fineTuningRouter.get('/fine-tuning/router/:agentId', async (req: Request, res: R
   }
 });
 
+fineTuningRouter.get('/fine-tuning/triggers', async (_req: Request, res: Response) => {
+  try {
+    const agents = getAllSupportedAgents();
+    const configs = await Promise.all(agents.map((a) => getTriggerConfig(a)));
+    const globalEnabled = isAutonomousTrainingGloballyEnabled();
+    res.json({ globalEnabled, agents: configs });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Failed to get trigger configs';
+    sendError(res, msg);
+  }
+});
+
+fineTuningRouter.get('/fine-tuning/triggers/:agentId', async (req: Request, res: Response) => {
+  try {
+    const agentId = String(req.params.agentId);
+    const config = await getTriggerConfig(agentId);
+    res.json(config);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Failed to get trigger config';
+    sendError(res, msg);
+  }
+});
+
+fineTuningRouter.patch(
+  '/fine-tuning/triggers/:agentId',
+  validateBody(triggerConfigSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const agentId = String(req.params.agentId);
+      const updates = req.body as z.infer<typeof triggerConfigSchema>;
+      await upsertTriggerConfig(agentId, updates);
+      const updated = await getTriggerConfig(agentId);
+      res.json({ success: true, config: updated });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to update trigger config';
+      sendError(res, msg);
+    }
+  },
+);
+
+fineTuningRouter.post(
+  '/fine-tuning/triggers/global',
+  async (req: Request, res: Response) => {
+    try {
+      const { enabled } = req.body as { enabled?: boolean };
+      if (typeof enabled !== 'boolean') {
+        sendBadRequest(res, "'enabled' boolean field is required");
+        return;
+      }
+      setGlobalTrainingKillSwitch(enabled);
+      res.json({ success: true, globalEnabled: enabled });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to set global kill switch';
+      sendError(res, msg);
+    }
+  },
+);
+
+fineTuningRouter.post(
+  '/fine-tuning/triggers/:agentId/check',
+  async (req: Request, res: Response) => {
+    try {
+      const agentId = String(req.params.agentId);
+      const dryRun = req.query.dryRun === 'true';
+      const provider = (req.query.provider as 'openai' | 'gemini') ?? 'openai';
+
+      const result = await checkAndTriggerTraining(agentId, { dryRun, provider });
+      res.json(result);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to evaluate trigger';
+      sendError(res, msg);
+    }
+  },
+);
+
+fineTuningRouter.post('/fine-tuning/triggers/check-all', async (req: Request, res: Response) => {
+  try {
+    const dryRun = req.query.dryRun === 'true';
+    const results = await runTriggerCheckForAllAgents({ dryRun });
+    res.json({ results, total: results.length, triggered: results.filter((r) => r.shouldTrigger).length });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Failed to run trigger checks';
+    sendError(res, msg);
+  }
+});
+
+fineTuningRouter.get('/fine-tuning/canary', async (_req: Request, res: Response) => {
+  try {
+    const statuses = await getAllCanaryStatuses();
+    res.json({ canaries: statuses, total: statuses.length });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Failed to get canary statuses';
+    sendError(res, msg);
+  }
+});
+
+fineTuningRouter.get('/fine-tuning/canary/:agentId', async (req: Request, res: Response) => {
+  try {
+    const agentId = String(req.params.agentId);
+    const status = await getCanaryStatus(agentId);
+    if (!status) {
+      res.json({ agentId, canary: null, message: 'No active canary for this agent' });
+      return;
+    }
+    res.json({ agentId, canary: status });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Failed to get canary status';
+    sendError(res, msg);
+  }
+});
+
+fineTuningRouter.post(
+  '/fine-tuning/models/:modelId/canary/activate',
+  validateBody(canaryActivateSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const modelId = decodeURIComponent(String(req.params.modelId));
+      const { trafficPct, promoteThreshold } = req.body as z.infer<typeof canaryActivateSchema>;
+      await activateCanary(modelId, trafficPct, promoteThreshold);
+      res.json({ success: true, modelId, trafficPct: trafficPct ?? 10 });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to activate canary';
+      sendError(res, msg);
+    }
+  },
+);
+
+fineTuningRouter.post(
+  '/fine-tuning/models/:modelId/canary/promote',
+  async (req: Request, res: Response) => {
+    try {
+      const modelId = decodeURIComponent(String(req.params.modelId));
+      await performCanaryPromotion(modelId, 1.0, 0);
+      res.json({ success: true, modelId, action: 'promoted' });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to promote canary';
+      sendError(res, msg);
+    }
+  },
+);
+
+fineTuningRouter.post(
+  '/fine-tuning/models/:modelId/canary/rollback',
+  async (req: Request, res: Response) => {
+    try {
+      const modelId = decodeURIComponent(String(req.params.modelId));
+      const reason = (req.body as { reason?: string }).reason ?? 'Manual rollback via API';
+      await performCanaryRollback(modelId, reason);
+      res.json({ success: true, modelId, action: 'rolled_back' });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to rollback canary';
+      sendError(res, msg);
+    }
+  },
+);
+
+fineTuningRouter.post(
+  '/fine-tuning/models/:modelId/canary/outcome',
+  validateBody(canaryOutcomeSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const modelId = decodeURIComponent(String(req.params.modelId));
+      const { success } = req.body as z.infer<typeof canaryOutcomeSchema>;
+      await recordCanaryOutcome(modelId, success);
+      res.json({ success: true, modelId });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to record canary outcome';
+      sendError(res, msg);
+    }
+  },
+);
+
+fineTuningRouter.get('/fine-tuning/pipeline/health', async (_req: Request, res: Response) => {
+  try {
+    const health = await getPipelineHealth();
+    const canaries = await getAllCanaryStatuses();
+
+    res.json({
+      ...health,
+      activeCanaries: canaries,
+      activeCanaryCount: canaries.length,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Failed to get pipeline health';
+    sendError(res, msg);
+  }
+});
+
 fineTuningRouter.get('/fine-tuning/summary', async (_req: Request, res: Response) => {
   try {
-    const [jobs, models, datasets] = await Promise.all([
+    const [jobs, models, datasets, pipelineHealth, canaries] = await Promise.all([
       db.select().from(fineTuningJobs).orderBy(desc(fineTuningJobs.createdAt)).limit(10),
       db.select().from(fineTunedModelRegistry).where(eq(fineTunedModelRegistry.isActive, true)),
       db.select().from(fineTuningDatasets).orderBy(desc(fineTuningDatasets.createdAt)).limit(5),
+      getPipelineHealth(),
+      getAllCanaryStatuses(),
     ]);
 
     const totalCost = jobs.reduce((s, j) => s + (j.trainingCostUsd ?? 0), 0);
@@ -438,15 +718,25 @@ fineTuningRouter.get('/fine-tuning/summary', async (_req: Request, res: Response
         activeModels: models.length,
         registeredDatasets: datasets.length,
         totalTrainingCostUsd: parseFloat(totalCost.toFixed(4)),
+        activeCanaries: canaries.length,
+      },
+      pipeline: {
+        globalEnabled: pipelineHealth.globalEnabled,
+        lastTriggerCheck: pipelineHealth.lastTriggerCheck,
+        schedulerRunning: pipelineHealth.schedulerRunning,
+        activeCanaries: canaries,
       },
       jobStatusBreakdown: countByField(jobs, 'status'),
       modelLifecycleBreakdown: countByField(models, 'lifecycle'),
+      providerBreakdown: countByField(jobs, 'provider'),
       recentJobs: jobs.slice(0, 5).map((j) => ({
         jobId: j.jobId,
         agentId: j.agentId,
         status: j.status,
         provider: j.provider,
         datasetSize: j.datasetSize,
+        qualityGatePassed: j.qualityGatePassed,
+        triggeredBy: j.triggeredBy,
         submittedAt: j.submittedAt,
       })),
       supportedAgents: getAllSupportedAgents(),

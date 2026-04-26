@@ -3,6 +3,7 @@
  *
  * Extends the base model registry so agents can be routed to their fine-tuned variants
  * with automatic fallback to base models when not available.
+ * Supports percentage-based canary traffic splitting with auto-promotion/rollback.
  */
 
 import { db, fineTunedModelRegistry, fineTuningJobs } from '@szl-holdings/db';
@@ -21,6 +22,9 @@ export interface FineTunedModelInfo {
   costPer1kOutput?: number;
   registeredAt: string;
   promotedAt?: string;
+  canaryTrafficPct?: number;
+  canaryRequestsTotal?: number;
+  canaryRequestsSuccess?: number;
 }
 
 const _modelCache = new Map<string, { model: FineTunedModelInfo; expiresAt: number }>();
@@ -74,6 +78,11 @@ export async function getActiveFineTunedModel(
       ...(best.costPer1kInput != null ? { costPer1kInput: best.costPer1kInput } : {}),
       ...(best.costPer1kOutput != null ? { costPer1kOutput: best.costPer1kOutput } : {}),
       ...(_promotedAt !== undefined ? { promotedAt: _promotedAt } : {}),
+      ...(best.canaryTrafficPct != null ? { canaryTrafficPct: best.canaryTrafficPct } : {}),
+      ...(best.canaryRequestsTotal != null ? { canaryRequestsTotal: best.canaryRequestsTotal } : {}),
+      ...(best.canaryRequestsSuccess != null
+        ? { canaryRequestsSuccess: best.canaryRequestsSuccess }
+        : {}),
     };
 
     _modelCache.set(cacheKey, { model: result, expiresAt: Date.now() + CACHE_TTL_MS });
@@ -89,19 +98,60 @@ export async function resolveModelForAgent(
   options?: {
     preferFineTuned?: boolean;
     minLifecycle?: 'staging' | 'canary' | 'active';
+    trackOutcome?: boolean;
   },
 ): Promise<{
   model: string;
   provider: string;
   isFineTuned: boolean;
+  isCanary: boolean;
   fineTunedInfo?: FineTunedModelInfo;
 }> {
   const preferFineTuned = options?.preferFineTuned ?? true;
 
   if (!preferFineTuned) {
-    return { model: baseModel, provider: detectProvider(baseModel), isFineTuned: false };
+    return { model: baseModel, provider: detectProvider(baseModel), isFineTuned: false, isCanary: false };
   }
 
+  // Query canary model FIRST — explicit separate lookup ensures that when both
+  // active and canary exist, the canary traffic-split is actually applied.
+  // (A combined query with lifecycle priority always resolves to the active model,
+  // bypassing the canary split entirely.)
+  const canaryModel = await getActiveFineTunedModel(agentId, ['canary']);
+
+  if (canaryModel) {
+    const canaryPct = canaryModel.canaryTrafficPct ?? 10;
+    const useCanary = Math.random() * 100 < canaryPct;
+
+    if (useCanary) {
+      // Always record canary routing so totalRequests stays accurate.
+      // recordCanaryOutcome (called by callers when response is known) then
+      // only increments the success counter — no double-counting.
+      void recordCanaryRequest(canaryModel.modelId).catch(() => {});
+      return {
+        model: canaryModel.modelId,
+        provider: canaryModel.provider,
+        isFineTuned: true,
+        isCanary: true,
+        fineTunedInfo: canaryModel,
+      };
+    }
+
+    // Traffic NOT routed to canary — send to the production active model (not base).
+    const activeModel = await getActiveFineTunedModel(agentId, ['active']);
+    if (activeModel) {
+      return {
+        model: activeModel.modelId,
+        provider: activeModel.provider,
+        isFineTuned: true,
+        isCanary: false,
+        fineTunedInfo: activeModel,
+      };
+    }
+    return { model: baseModel, provider: detectProvider(baseModel), isFineTuned: false, isCanary: false };
+  }
+
+  // No canary present: resolve best available fine-tuned model.
   const lifecyclePriority: Array<'staging' | 'canary' | 'active'> =
     options?.minLifecycle === 'active'
       ? ['active']
@@ -112,15 +162,35 @@ export async function resolveModelForAgent(
   const fineTuned = await getActiveFineTunedModel(agentId, lifecyclePriority);
 
   if (!fineTuned) {
-    return { model: baseModel, provider: detectProvider(baseModel), isFineTuned: false };
+    return { model: baseModel, provider: detectProvider(baseModel), isFineTuned: false, isCanary: false };
   }
 
   return {
     model: fineTuned.modelId,
     provider: fineTuned.provider,
     isFineTuned: true,
+    isCanary: false,
     fineTunedInfo: fineTuned,
   };
+}
+
+async function recordCanaryRequest(modelId: string): Promise<void> {
+  const [model] = await db
+    .select()
+    .from(fineTunedModelRegistry)
+    .where(eq(fineTunedModelRegistry.modelId, modelId))
+    .limit(1);
+
+  if (!model) return;
+
+  const newTotal = (model.canaryRequestsTotal ?? 0) + 1;
+
+  await db
+    .update(fineTunedModelRegistry)
+    .set({ canaryRequestsTotal: newTotal })
+    .where(eq(fineTunedModelRegistry.modelId, modelId));
+
+  invalidateModelCache(model.agentId);
 }
 
 export async function getAllFineTunedModels(): Promise<FineTunedModelInfo[]> {
@@ -145,6 +215,11 @@ export async function getAllFineTunedModels(): Promise<FineTunedModelInfo[]> {
       ...(m.costPer1kInput != null ? { costPer1kInput: m.costPer1kInput } : {}),
       ...(m.costPer1kOutput != null ? { costPer1kOutput: m.costPer1kOutput } : {}),
       ...(_pAt !== undefined ? { promotedAt: _pAt } : {}),
+      ...(m.canaryTrafficPct != null ? { canaryTrafficPct: m.canaryTrafficPct } : {}),
+      ...(m.canaryRequestsTotal != null ? { canaryRequestsTotal: m.canaryRequestsTotal } : {}),
+      ...(m.canaryRequestsSuccess != null
+        ? { canaryRequestsSuccess: m.canaryRequestsSuccess }
+        : {}),
     } satisfies FineTunedModelInfo;
   });
 }
@@ -222,6 +297,6 @@ export async function getModelLineage(modelId: string): Promise<{
 function detectProvider(model: string): string {
   if (model.startsWith('gpt') || model.startsWith('ft:')) return 'openai';
   if (model.startsWith('claude')) return 'anthropic';
-  if (model.startsWith('gemini')) return 'gemini';
-  return 'huggingface';
+  if (model.startsWith('gemini') || model.startsWith('tunedModels/')) return 'gemini';
+  return 'openai';
 }

@@ -5,13 +5,16 @@
  * the correction is stored as a training signal. Future queries from the
  * corrected agent will have relevant past corrections injected into the
  * system prompt.
+ *
+ * Also performs cross-agent knowledge distillation: when a correction is
+ * stored, keyword overlap with other agents' domain configs is checked and
+ * derived training pairs are generated for related agents.
  */
-import { alloyAgentCorrections, db } from '@szl-holdings/db';
+import { agentTrainingPairs, alloyAgentCorrections, auditLogsTable, db } from '@szl-holdings/db';
 import { desc, eq } from 'drizzle-orm';
 
 const logger = {
-  warn: (_obj: Record<string, unknown>, _msg: string) =>
-    {},
+  warn: (_obj: Record<string, unknown>, _msg: string) => {},
 };
 
 export interface CorrectionRecord {
@@ -48,6 +51,64 @@ function extractKeywords(text: string): string[] {
     .slice(0, 12);
 }
 
+async function performCrossAgentDistillation(
+  sourceAgentId: string,
+  correctedOutput: string,
+  originalOutput: string,
+  topicKeywords: string[],
+): Promise<void> {
+  try {
+    const { DOMAIN_CURATOR_CONFIGS } = await import('../fine-tuning/domain-curators.js');
+
+    const KEYWORD_OVERLAP_THRESHOLD = 2;
+
+    for (const config of DOMAIN_CURATOR_CONFIGS) {
+      if (config.agentId === sourceAgentId) continue;
+
+      const overlapCount = topicKeywords.filter((kw) =>
+        config.keywords.some(
+          (domainKw) => kw.includes(domainKw.toLowerCase()) || domainKw.toLowerCase().includes(kw),
+        ),
+      ).length;
+
+      if (overlapCount < KEYWORD_OVERLAP_THRESHOLD) continue;
+
+      const syntheticQuestion = `Based on a correction from ${sourceAgentId} domain: ${originalOutput.slice(0, 400)}`;
+      const syntheticAnswer = `Cross-domain insight (${config.domain}): ${correctedOutput.slice(0, 800)}`;
+
+      await db
+        .insert(agentTrainingPairs)
+        .values({
+          agentId: config.agentId,
+          question: syntheticQuestion,
+          answer: syntheticAnswer,
+          category: 'cross_agent_distillation',
+          isActive: true,
+        })
+        .onConflictDoNothing();
+
+      // Persist source traceability to the audit log since agentTrainingPairs has no source column
+      void db
+        .insert(auditLogsTable)
+        .values({
+          actionType: 'fine_tuning.distillation.pair_created',
+          entityType: 'agent_training_pair',
+          entityId: config.agentId,
+          payloadJson: {
+            source: 'cross_agent_distillation',
+            sourceAgentId,
+            targetAgentId: config.agentId,
+            domain: config.domain,
+            overlapCount,
+          } as Record<string, unknown>,
+        })
+        .catch(() => {});
+    }
+  } catch (err) {
+    logger.warn({ err }, 'Cross-agent distillation failed — skipping');
+  }
+}
+
 export async function storeCorrection(
   record: CorrectionRecord & { orgId?: number | null },
 ): Promise<void> {
@@ -63,6 +124,18 @@ export async function storeCorrection(
       validationStatus: record.validationStatus,
       topicKeywords: keywords,
     });
+
+    if (
+      record.validationStatus !== 'REJECTED' &&
+      record.correctedOutput !== record.originalOutput
+    ) {
+      void performCrossAgentDistillation(
+        record.sourceAgentId,
+        record.correctedOutput,
+        record.originalOutput,
+        keywords,
+      ).catch(() => {});
+    }
   } catch (err) {
     logger.warn({ err }, 'storeCorrection DB write failed — correction not persisted');
   }

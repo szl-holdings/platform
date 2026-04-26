@@ -2,7 +2,7 @@
  * Training Data Export Pipeline
  *
  * Pulls from agentTrainingPairs, agentFeedback, advisoryAudit, and alloyAgentCorrections tables.
- * Formats into OpenAI JSONL (chat format) or HuggingFace dataset JSON.
+ * Formats into OpenAI JSONL (chat format), OpenAI DPO preference pairs, or HuggingFace dataset JSON.
  * Includes domain tagging so data can be sliced per agent.
  */
 
@@ -15,10 +15,19 @@ import {
 } from '@szl-holdings/db';
 import { and, desc, eq, gte } from 'drizzle-orm';
 
-export type ExportFormat = 'openai-jsonl' | 'huggingface-json';
+export type ExportFormat = 'openai-jsonl' | 'openai-dpo' | 'huggingface-json';
 
 export interface OpenAITrainingSample {
   messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
+}
+
+export interface OpenAIDPOSample {
+  input: {
+    messages: Array<{ role: 'system' | 'user'; content: string }>;
+  };
+  preferred_output: Array<{ role: 'assistant'; content: string }>;
+  non_preferred_output: Array<{ role: 'assistant'; content: string }>;
+  quality_weight?: number;
 }
 
 export interface HuggingFaceSample {
@@ -35,7 +44,7 @@ export interface DatasetExportResult {
   format: ExportFormat;
   agentId: string;
   version: string;
-  samples: OpenAITrainingSample[] | HuggingFaceSample[];
+  samples: OpenAITrainingSample[] | OpenAIDPOSample[] | HuggingFaceSample[];
   sampleCount: number;
   sourceBreakdown: {
     trainingPairs: number;
@@ -71,16 +80,109 @@ function generateVersion(agentId: string): string {
   return `${agentId}-${date}-v1`;
 }
 
-function deduplicateSamples<T extends { instruction?: string; messages?: unknown[] }>(
+function deduplicateSamples<T extends { instruction?: string; messages?: unknown[]; input?: unknown }>(
   samples: T[],
 ): T[] {
   const seen = new Set<string>();
   return samples.filter((s) => {
-    const key = 'instruction' in s ? (s.instruction ?? '') : JSON.stringify(s.messages);
+    let key: string;
+    if ('instruction' in s && typeof s.instruction === 'string') {
+      key = s.instruction;
+    } else if ('messages' in s && Array.isArray(s.messages)) {
+      key = JSON.stringify(s.messages);
+    } else if ('input' in s && typeof s.input === 'object' && s.input !== null) {
+      key = JSON.stringify(s.input);
+    } else {
+      key = JSON.stringify(s);
+    }
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
   });
+}
+
+export async function exportDPODataset(
+  agentId: string,
+  options?: {
+    since?: Date;
+    maxSamples?: number;
+  },
+): Promise<DatasetExportResult> {
+  const maxSamples = options?.maxSamples ?? 5000;
+  const systemPrompt = getSystemPrompt(agentId);
+  const version = generateVersion(agentId);
+  const dpoPairs: OpenAIDPOSample[] = [];
+
+  const sourceBreakdown = {
+    trainingPairs: 0,
+    positiveFeedback: 0,
+    advisoryAudit: 0,
+    agentCorrections: 0,
+  };
+
+  try {
+    const conditions = [
+      eq(alloyAgentCorrections.sourceAgentId, agentId),
+      ...(options?.since ? [gte(alloyAgentCorrections.createdAt, options.since)] : []),
+    ];
+
+    const corrections = await db
+      .select()
+      .from(alloyAgentCorrections)
+      .where(and(...conditions))
+      .orderBy(desc(alloyAgentCorrections.createdAt))
+      .limit(maxSamples);
+
+    const valid = corrections.filter(
+      (c) =>
+        c.validationStatus !== 'REJECTED' &&
+        c.correctedOutput &&
+        c.originalOutput &&
+        c.correctedOutput !== c.originalOutput &&
+        c.correctedOutput.length > 20,
+    );
+
+    sourceBreakdown.agentCorrections = valid.length;
+
+    for (const corr of valid) {
+      if (!corr.originalOutput || !corr.correctedOutput) continue;
+
+      const qualityWeight = corr.validationNotes
+        ? corr.validationNotes.length > 50
+          ? 1.0
+          : 0.8
+        : 0.7;
+
+      const inputMsg = `Context: ${corr.originalOutput.slice(0, 800)}`;
+
+      dpoPairs.push({
+        input: {
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: inputMsg },
+          ],
+        },
+        preferred_output: [{ role: 'assistant', content: corr.correctedOutput }],
+        non_preferred_output: [{ role: 'assistant', content: corr.originalOutput }],
+        quality_weight: qualityWeight,
+      });
+    }
+  } catch {
+    // alloyAgentCorrections may not be populated
+  }
+
+  const deduplicated = deduplicateSamples(dpoPairs);
+  const finalSamples = deduplicated.slice(0, maxSamples);
+
+  return {
+    format: 'openai-dpo',
+    agentId,
+    version: `${version}-dpo`,
+    samples: finalSamples,
+    sampleCount: finalSamples.length,
+    sourceBreakdown,
+    exportedAt: new Date().toISOString(),
+  };
 }
 
 export async function exportTrainingData(
@@ -92,6 +194,10 @@ export async function exportTrainingData(
     maxSamples?: number;
   },
 ): Promise<DatasetExportResult> {
+  if (format === 'openai-dpo') {
+    return exportDPODataset(agentId, options);
+  }
+
   const minRating = options?.minRating ?? 4;
   const maxSamples = options?.maxSamples ?? 5000;
   const systemPrompt = getSystemPrompt(agentId);
@@ -287,6 +393,10 @@ export async function exportTrainingData(
 }
 
 export function serializeToJSONL(samples: OpenAITrainingSample[]): string {
+  return samples.map((s) => JSON.stringify(s)).join('\n');
+}
+
+export function serializeDPOToJSONL(samples: OpenAIDPOSample[]): string {
   return samples.map((s) => JSON.stringify(s)).join('\n');
 }
 

@@ -4,6 +4,8 @@
  * When a fine-tuning job completes, automatically runs golden-set evals against the new model,
  * compares scores to the base model, and only allows promotion to "canary" if the fine-tuned
  * model meets or exceeds base model scores across all eval categories.
+ *
+ * Supports OpenAI, Anthropic, and Gemini providers with real API calls.
  */
 
 import { GOLDEN_SET } from '../evals/golden-set.js';
@@ -36,6 +38,166 @@ export interface ValidationGateResult {
 
 const PASS_THRESHOLD = 0.0;
 const REGRESSION_TOLERANCE = 0.05;
+
+const SYSTEM_PROMPT = `You are an AI assistant. Analyze the input and respond with a JSON object containing relevant fields such as: riskLevel, riskScore, escalationRequired, confidence, actionType, approvalRequired, approvalLevel, priority, category, routeTo, summary, evidence, reasoning, entities, action, urgency.`;
+
+async function callOpenAIForEval(
+  modelId: string,
+  input: string,
+): Promise<Record<string, unknown>> {
+  const openaiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+  if (!openaiKey) throw new Error('OPENAI key not configured');
+  const openaiBase = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ?? 'https://api.openai.com/v1';
+
+  const response = await fetch(`${openaiBase}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${openaiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: modelId,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: `Analyze: ${input}\n\nRespond with JSON only.` },
+      ],
+      response_format: { type: 'json_object' },
+      max_tokens: 512,
+      temperature: 0.1,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`OpenAI eval call failed: ${response.status} ${await response.text().catch(() => '')}`);
+  }
+
+  const data = (await response.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+  const content = data.choices?.[0]?.message?.content ?? '{}';
+  return JSON.parse(content) as Record<string, unknown>;
+}
+
+async function callAnthropicForEval(
+  modelId: string,
+  input: string,
+): Promise<Record<string, unknown>> {
+  const anthropicKey = process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY;
+  if (!anthropicKey) throw new Error('Anthropic key not configured');
+  const anthropicBase =
+    process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL ?? 'https://api.anthropic.com';
+
+  const response = await fetch(`${anthropicBase}/v1/messages`, {
+    method: 'POST',
+    headers: {
+      'x-api-key': anthropicKey,
+      'anthropic-version': '2023-06-01',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: modelId,
+      max_tokens: 512,
+      system: `${SYSTEM_PROMPT} Respond ONLY with valid JSON, no markdown, no explanation.`,
+      messages: [
+        {
+          role: 'user',
+          content: `Analyze: ${input}\n\nRespond with JSON only.`,
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Anthropic eval call failed: ${response.status} ${await response.text().catch(() => '')}`);
+  }
+
+  const data = (await response.json()) as {
+    content?: Array<{ type: string; text: string }>;
+  };
+  const text = data.content?.find((c) => c.type === 'text')?.text ?? '{}';
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('No JSON in Anthropic response');
+  return JSON.parse(jsonMatch[0]) as Record<string, unknown>;
+}
+
+async function callGeminiForEval(
+  modelId: string,
+  input: string,
+): Promise<Record<string, unknown>> {
+  const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY ?? process.env.GEMINI_API_KEY;
+  if (!geminiKey) throw new Error('Gemini key not configured');
+  const geminiBase =
+    process.env.AI_INTEGRATIONS_GEMINI_BASE_URL ?? 'https://generativelanguage.googleapis.com/v1beta';
+
+  // tunedModels/* require /tunedModels/{id}:generateContent, not /models/tunedModels/...
+  const modelPath = modelId.startsWith('tunedModels/') ? modelId : `models/${modelId}`;
+  const response = await fetch(
+    `${geminiBase}/${modelPath}:generateContent?key=${geminiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                text: `${SYSTEM_PROMPT}\n\nAnalyze: ${input}\n\nRespond with JSON only.`,
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          maxOutputTokens: 512,
+          temperature: 0.1,
+        },
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Gemini eval call failed: ${response.status} ${await response.text().catch(() => '')}`);
+  }
+
+  const data = (await response.json()) as {
+    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+  };
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '{}';
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('No JSON in Gemini response');
+  return JSON.parse(jsonMatch[0]) as Record<string, unknown>;
+}
+
+async function callModelForEval(
+  modelId: string,
+  provider: string,
+  input: string,
+  _category: string,
+): Promise<Record<string, unknown>> {
+  if (input === '' || input === '{{CORRUPTED_INPUT}}') {
+    return {
+      actionType: 'escalate',
+      approvalRequired: true,
+      confidence: 0.1,
+      action: 'escalate_to_human',
+    };
+  }
+
+  if (provider === 'openai' || provider.includes('openai') || modelId.startsWith('ft:') || modelId.startsWith('gpt')) {
+    return callOpenAIForEval(modelId, input);
+  }
+
+  if (provider === 'anthropic' || modelId.startsWith('claude')) {
+    return callAnthropicForEval(modelId, input);
+  }
+
+  if (provider === 'gemini' || modelId.startsWith('gemini') || modelId.startsWith('tunedModels/')) {
+    return callGeminiForEval(modelId, input);
+  }
+
+  throw new Error(`Unsupported provider '${provider}' for eval — no fallback allowed`);
+}
 
 async function runEvalsOnModel(modelId: string, provider: string): Promise<ModelEvalScores> {
   const results: Array<{
@@ -96,151 +258,6 @@ async function runEvalsOnModel(modelId: string, provider: string): Promise<Model
   };
 }
 
-async function callModelForEval(
-  modelId: string,
-  provider: string,
-  input: string,
-  category: string,
-): Promise<Record<string, unknown>> {
-  const systemPrompt = `You are an AI assistant. Analyze the input and respond with a JSON object containing relevant fields such as: riskLevel, riskScore, escalationRequired, confidence, actionType, approvalRequired, approvalLevel, priority, category, routeTo, summary, evidence, reasoning, entities, action, urgency.`;
-
-  if (input === '' || input === '{{CORRUPTED_INPUT}}') {
-    return {
-      actionType: 'escalate',
-      approvalRequired: true,
-      confidence: 0.1,
-      action: 'escalate_to_human',
-    };
-  }
-
-  if (provider === 'openai' || provider.includes('openai') || modelId.startsWith('ft:')) {
-    const openaiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
-    if (!openaiKey) return buildFallbackEvalResponse(category, input);
-    const openaiBase =
-      process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ?? 'https://api.openai.com/v1';
-
-    try {
-      const response = await fetch(`${openaiBase}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${openaiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: modelId,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: `Analyze: ${input}\n\nRespond with JSON only.` },
-          ],
-          response_format: { type: 'json_object' },
-          max_tokens: 512,
-          temperature: 0.1,
-        }),
-      });
-
-      if (!response.ok) return buildFallbackEvalResponse(category, input);
-      const data = (await response.json()) as {
-        choices?: Array<{ message?: { content?: string } }>;
-      };
-      const content = data.choices?.[0]?.message?.content ?? '{}';
-      try {
-        return JSON.parse(content) as Record<string, unknown>;
-      } catch {
-        return buildFallbackEvalResponse(category, input);
-      }
-    } catch {
-      return buildFallbackEvalResponse(category, input);
-    }
-  }
-
-  return buildFallbackEvalResponse(category, input);
-}
-
-function buildFallbackEvalResponse(category: string, input: string): Record<string, unknown> {
-  const lower = input.toLowerCase();
-
-  const base: Record<string, unknown> = {
-    confidence: 0.75,
-    summary: `Analysis of: ${input.slice(0, 100)}`,
-    reasoning: 'Automated analysis based on input context',
-    evidence: ['Input context analysis'],
-  };
-
-  if (category === 'risk_extraction') {
-    const isCritical =
-      lower.includes('critical') || lower.includes('9.8') || lower.includes('breach');
-    const isHigh = lower.includes('backup failed') || lower.includes('72 hours');
-    return {
-      ...base,
-      riskLevel: isCritical ? 'critical' : isHigh ? 'high' : 'low',
-      riskScore: isCritical ? 92 : isHigh ? 75 : 20,
-      escalationRequired: isCritical || isHigh,
-    };
-  }
-
-  if (category === 'owner_assignment') {
-    return {
-      ...base,
-      routeTo:
-        lower.includes('maritime') || lower.includes('vessel')
-          ? 'maritime-ops'
-          : lower.includes('ssl') || lower.includes('server')
-            ? 'infrastructure'
-            : 'general-ops',
-      category: 'operational',
-      priority: 'P2',
-      urgency: lower.includes('48 hours') ? 'urgent' : 'normal',
-    };
-  }
-
-  if (category === 'escalation_proposal') {
-    const isEscalate =
-      lower.includes('breach') || lower.includes('50,000') || lower.includes('error rate');
-    return {
-      ...base,
-      actionType: isEscalate ? 'escalate' : 'close',
-      approvalRequired: isEscalate,
-      approvalLevel: lower.includes('breach') ? 'executive' : 'manager',
-    };
-  }
-
-  if (category === 'approval_gating') {
-    const requiresApproval =
-      lower.includes('150') || lower.includes('production') || lower.includes('auto-clos');
-    return {
-      ...base,
-      approvalRequired: requiresApproval,
-      approvalLevel: requiresApproval ? 'operator' : undefined,
-    };
-  }
-
-  if (category === 'schema_validity') {
-    return {
-      ...base,
-      priority: lower.includes('98%') ? 'P1' : 'P2',
-      category: 'operational',
-      routeTo: 'infrastructure',
-      action: 'investigate',
-      entities: [{ type: 'server', value: 'production' }],
-    };
-  }
-
-  if (category === 'hallucination_rejection') {
-    return { ...base, confidence: 0.2 };
-  }
-
-  if (category === 'safe_fallback') {
-    return {
-      action: 'escalate',
-      actionType: 'escalate',
-      approvalRequired: true,
-      confidence: 0.1,
-    };
-  }
-
-  return base;
-}
-
 function getNestedField(obj: Record<string, unknown>, field: string): unknown {
   const parts = field.split('.');
   let current: unknown = obj;
@@ -282,11 +299,13 @@ function estimateCostFromModel(
 ): { input: number; output: number } {
   if (modelId.startsWith('ft:') || provider === 'openai') {
     if (modelId.includes('gpt-4')) return { input: 0.003, output: 0.006 };
-    if (modelId.includes('gpt-3.5')) return { input: 0.003, output: 0.006 };
     return { input: 0.003, output: 0.006 };
   }
-  if (provider === 'huggingface') {
-    return { input: 0.0002, output: 0.0002 };
+  if (provider === 'anthropic' || modelId.startsWith('claude')) {
+    return { input: 0.003, output: 0.015 };
+  }
+  if (provider === 'gemini' || modelId.startsWith('gemini') || modelId.startsWith('tunedModels/')) {
+    return { input: 0.00035, output: 0.00105 };
   }
   return { input: 0.001, output: 0.002 };
 }

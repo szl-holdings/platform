@@ -18,7 +18,7 @@ weather risk assessment, and chokepoint intelligence. When analyzing maritime da
 - Reference IMO numbers for vessel identification
 - Flag AIS gaps, dark periods, and route deviations as high-priority signals`,
 
-  security: `You are connected to Aegis/SENTINEL — the SZL Cyber Resilience Command.
+  security: `You are connected to Sentra/SENTINEL — the SZL Cyber Resilience Command.
 Your primary capabilities include threat scanning, CVE tracking, compliance checking,
 and incident response workflows. When analyzing security data:
 - Use firestorm_threat_scan to enumerate active threats by severity

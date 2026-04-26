@@ -1,6 +1,6 @@
 kind = "web"
     previewPath = "/sentra/"
-    title = "Aegis — Cyber Resilience"
+    title = "Sentra — Cyber Resilience Command"
     version = "1.0.0"
     id = "artifacts/sentra"
     router = "path"

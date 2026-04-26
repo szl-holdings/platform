@@ -1,23 +1,26 @@
 /**
  * Fine-Tuning Job Manager
  *
- * Submits fine-tuning jobs to OpenAI and HuggingFace APIs, polls for status,
- * handles failures/retries, stores job metadata in fine_tuning_jobs DB table,
- * and emits events on completion.
+ * Submits fine-tuning jobs to OpenAI and Gemini APIs, polls for status,
+ * handles failures/retries, runs data quality gates before submission,
+ * stores job metadata in fine_tuning_jobs DB table, and emits events on completion.
  */
 
-import { db, fineTunedModelRegistry, fineTuningDatasets, fineTuningJobs } from '@szl-holdings/db';
+import { db, auditLogsTable, fineTunedModelRegistry, fineTuningDatasets, fineTuningJobs } from '@szl-holdings/db';
 import { desc, eq } from 'drizzle-orm';
-import { serializeToJSONL } from './dataset-exporter.js';
+import { serializeToJSONL, serializeDPOToJSONL, type OpenAIDPOSample } from './dataset-exporter.js';
 import { curateDatasetForAgent } from './domain-curators.js';
 import { runValidationGate, type ValidationGateResult } from './validation-gate.js';
+import { runDataQualityGate } from './data-quality-gate.js';
 
-export type FineTuningProvider = 'openai' | 'huggingface';
+export type FineTuningProvider = 'openai' | 'gemini';
 
 export interface FineTuningJobRequest {
   agentId: string;
   provider: FineTuningProvider;
   baseModel: string;
+  format?: 'openai-jsonl' | 'openai-dpo';
+  triggeredBy?: 'manual' | 'auto';
   hyperparameters?: {
     nEpochs?: number;
     batchSize?: number;
@@ -26,6 +29,7 @@ export interface FineTuningJobRequest {
   options?: {
     since?: Date;
     minSamples?: number;
+    skipQualityGate?: boolean;
   };
 }
 
@@ -53,6 +57,7 @@ export interface FineTuningJobStatus {
   errorMessage?: string;
   evalScores?: Record<string, unknown>;
   promotedToLifecycle?: string;
+  qualityReport?: Record<string, unknown>;
 }
 
 const MIN_SAMPLES_DEFAULT = 10;
@@ -62,6 +67,7 @@ async function submitOpenAIFineTuning(
   baseModel: string,
   hyperparameters: FineTuningJobRequest['hyperparameters'],
   suffix: string,
+  isDPO = false,
 ): Promise<{ providerJobId: string }> {
   const openaiKey = process.env.OPENAI_FINE_TUNING_API_KEY;
   if (!openaiKey)
@@ -97,6 +103,10 @@ async function submitOpenAIFineTuning(
 
   if (hyperparameters?.nEpochs) ftBody.hyperparameters = { n_epochs: hyperparameters.nEpochs };
 
+  if (isDPO) {
+    ftBody.method = { type: 'dpo' };
+  }
+
   const ftResponse = await fetch(`${openaiBase}/fine_tuning/jobs`, {
     method: 'POST',
     headers: {
@@ -115,44 +125,86 @@ async function submitOpenAIFineTuning(
   return { providerJobId: ftData.id };
 }
 
-async function submitHuggingFaceFineTuning(
-  _samples: string,
+async function submitGeminiFineTuning(
+  samples: string,
   baseModel: string,
   agentId: string,
   hyperparameters: FineTuningJobRequest['hyperparameters'],
 ): Promise<{ providerJobId: string }> {
-  const hfToken = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
-  if (!hfToken) throw new Error('HF_TOKEN not configured');
+  const geminiKey = process.env.GEMINI_FINE_TUNING_API_KEY ?? process.env.GEMINI_API_KEY ?? process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
+  if (!geminiKey) throw new Error('GEMINI_FINE_TUNING_API_KEY not configured');
 
-  const jobId = `${agentId}-${baseModel.replace(/[^a-z0-9]/gi, '-')}-${Date.now()}`;
+  const geminiBase =
+    process.env.GEMINI_FINE_TUNING_BASE_URL ?? 'https://generativelanguage.googleapis.com/v1beta';
 
-  const body = {
-    model_name_or_path: baseModel,
-    output_dir: `./models/${jobId}`,
-    num_train_epochs: hyperparameters?.nEpochs ?? 3,
-    per_device_train_batch_size: hyperparameters?.batchSize ?? 4,
-    learning_rate: hyperparameters?.learningRateMultiplier
-      ? 5e-5 * hyperparameters.learningRateMultiplier
-      : 5e-5,
-    task: 'text-generation',
+  let trainingData: Array<{ text_input: string; output: string }> = [];
+  try {
+    const lines = samples.split('\n').filter(Boolean);
+    for (const line of lines) {
+      const parsed = JSON.parse(line) as {
+        messages?: Array<{ role: string; content: string }>;
+      };
+      if (parsed.messages) {
+        const userMsg = parsed.messages.find((m) => m.role === 'user')?.content ?? '';
+        const assistantMsg = parsed.messages.find((m) => m.role === 'assistant')?.content ?? '';
+        if (userMsg && assistantMsg) {
+          trainingData.push({ text_input: userMsg, output: assistantMsg });
+        }
+      }
+    }
+  } catch {
+    throw new Error('Failed to parse training data for Gemini format');
+  }
+
+  if (trainingData.length === 0) {
+    throw new Error('No valid training samples for Gemini fine-tuning');
+  }
+
+  const displayName = `${agentId}-${new Date().toISOString().split('T')[0]}`;
+
+  const requestBody = {
+    display_name: displayName,
+    base_model: baseModel,
+    tuning_task: {
+      training_data: {
+        examples: {
+          examples: trainingData.slice(0, 500),
+        },
+      },
+      hyperparameters: {
+        ...(hyperparameters?.nEpochs ? { epoch_count: hyperparameters.nEpochs } : {}),
+        ...(hyperparameters?.batchSize ? { batch_size: hyperparameters.batchSize } : {}),
+        ...(hyperparameters?.learningRateMultiplier
+          ? { learning_rate_multiplier: hyperparameters.learningRateMultiplier }
+          : {}),
+      },
+    },
   };
 
-  const response = await fetch('https://api.huggingface.co/api/autotrain/v1/projects', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${hfToken}`,
-      'Content-Type': 'application/json',
+  const response = await fetch(
+    `${geminiBase}/tunedModels?key=${geminiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
     },
-    body: JSON.stringify(body),
-  });
+  );
 
   if (!response.ok) {
     const err = await response.text().catch(() => '');
-    throw new Error(`HuggingFace fine-tuning submission failed: ${response.status} ${err}`);
+    throw new Error(`Gemini fine-tuning submission failed: ${response.status} ${err}`);
   }
 
-  const data = (await response.json()) as { id: string; name: string };
-  return { providerJobId: data.id ?? `hf-${jobId}` };
+  const data = (await response.json()) as { name?: string; metadata?: { tunedModel?: string } };
+  // `data.name` is the operation resource (e.g. "operations/abc123") returned by the API.
+  // A missing `name` means the response is malformed — we cannot poll without it.
+  if (!data.name) {
+    throw new Error(
+      `Gemini fine-tuning submission succeeded but response contained no operation name. ` +
+        `Cannot track job lifecycle. Raw response keys: ${Object.keys(data).join(', ')}`,
+    );
+  }
+  return { providerJobId: data.name };
 }
 
 async function pollOpenAIJobStatus(providerJobId: string): Promise<{
@@ -194,41 +246,80 @@ async function pollOpenAIJobStatus(providerJobId: string): Promise<{
   };
 }
 
-async function pollHuggingFaceJobStatus(providerJobId: string): Promise<{
+async function pollGeminiJobStatus(providerJobId: string): Promise<{
   status: string;
   fineTunedModelId?: string;
   error?: string;
 }> {
-  const hfToken = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
-  if (!hfToken) throw new Error('HF_TOKEN not configured');
+  const geminiKey = process.env.GEMINI_FINE_TUNING_API_KEY ?? process.env.GEMINI_API_KEY ?? process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
+  if (!geminiKey) throw new Error('GEMINI_FINE_TUNING_API_KEY not configured');
 
-  const response = await fetch(
-    `https://api.huggingface.co/api/autotrain/v1/projects/${providerJobId}`,
-    {
-      headers: { Authorization: `Bearer ${hfToken}` },
-    },
-  );
+  const geminiBase =
+    process.env.GEMINI_FINE_TUNING_BASE_URL ?? 'https://generativelanguage.googleapis.com/v1beta';
+
+  const url = `${geminiBase}/${providerJobId}?key=${geminiKey}`;
+
+  const response = await fetch(url, {
+    headers: { 'Content-Type': 'application/json' },
+  });
 
   if (!response.ok) {
     const errBody = await response.text().catch(() => '');
-    throw new Error(`HuggingFace job poll failed: ${response.status} ${errBody}`);
+    throw new Error(`Gemini job poll failed: ${response.status} ${errBody}`);
   }
 
-  const data = (await response.json()) as { status: string; model_id?: string; error?: string };
-  return {
-    status: data.status === 'completed' ? 'succeeded' : data.status,
-    ...(data.model_id !== undefined ? { fineTunedModelId: data.model_id } : {}),
-    ...(data.error !== undefined ? { error: data.error } : {}),
+  const data = (await response.json()) as {
+    done?: boolean;
+    error?: { message: string };
+    response?: { name?: string };
+    metadata?: {
+      tunedModel?: string;
+      state?: string;
+      totalSteps?: number;
+      completedSteps?: number;
+    };
   };
+
+  if (data.error) {
+    return { status: 'failed', error: data.error.message };
+  }
+
+  if (data.done) {
+    const modelName = data.response?.name ?? data.metadata?.tunedModel;
+    return {
+      status: 'succeeded',
+      ...(modelName ? { fineTunedModelId: modelName } : {}),
+    };
+  }
+
+  const state = data.metadata?.state?.toLowerCase() ?? 'running';
+  return { status: state === 'active' || state === 'creating' ? 'running' : state };
 }
 
 export async function submitFineTuningJob(
   request: FineTuningJobRequest,
 ): Promise<FineTuningJobStatus> {
-  const { agentId, provider, baseModel, hyperparameters, options } = request;
+  const {
+    agentId,
+    provider,
+    baseModel,
+    hyperparameters,
+    options,
+    format = 'openai-jsonl',
+    triggeredBy = 'manual',
+  } = request;
   const minSamples = options?.minSamples ?? MIN_SAMPLES_DEFAULT;
+  const isDPO = format === 'openai-dpo';
 
-  const dataset = await curateDatasetForAgent(agentId, 'openai-jsonl', (options?.since !== undefined ? { since: options.since } : {}));
+  // DPO preference-pair training is only supported by the OpenAI fine-tuning API.
+  if (isDPO && provider !== 'openai') {
+    throw new Error(
+      `DPO format (openai-dpo) is only supported with provider 'openai', got '${provider}'.`,
+    );
+  }
+
+  const exportFormat = isDPO ? 'openai-dpo' : 'openai-jsonl';
+  const dataset = await curateDatasetForAgent(agentId, exportFormat, (options?.since !== undefined ? { since: options.since } : {}));
 
   if (dataset.sampleCount < minSamples) {
     throw new Error(
@@ -236,38 +327,85 @@ export async function submitFineTuningJob(
     );
   }
 
+  let qualityReportData: Record<string, unknown> | undefined;
+
+  if (!options?.skipQualityGate) {
+    const qGateResult = await runDataQualityGate(
+      dataset.samples as unknown[],
+      dataset.sourceBreakdown as unknown as Record<string, number>,
+      { minSamples },
+    );
+    qualityReportData = qGateResult as unknown as Record<string, unknown>;
+
+    // Audit: quality gate decision
+    void db
+      .insert(auditLogsTable)
+      .values({
+        actionType: qGateResult.passed
+          ? 'fine_tuning.quality_gate.passed'
+          : 'fine_tuning.quality_gate.blocked',
+        entityType: 'fine_tuning_dataset',
+        entityId: agentId,
+        payloadJson: {
+          agentId,
+          sampleCount: dataset.sampleCount,
+          passed: qGateResult.passed,
+          blockedReasons: qGateResult.blockedReasons,
+          warnings: qGateResult.warnings,
+          score: qGateResult.score,
+        } as Record<string, unknown>,
+      })
+      .catch(() => {});
+
+    if (!qGateResult.passed) {
+      throw new Error(
+        `Training data quality gate failed: ${qGateResult.blockedReasons.join('; ')}`,
+      );
+    }
+  }
+
   const jobId = `ft-${agentId}-${provider}-${Date.now()}`;
   const suffix = `${agentId}-${new Date().toISOString().split('T')[0]}`;
-  const jsonlContent = serializeToJSONL(
-    dataset.samples as Array<{
-      messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
-    }>,
-  );
+
+  // Guard against double-suffix if dataset version already ends with '-dpo' (idempotent re-export)
+  const DPO_SUFFIX = '-dpo';
+  const versionWithDPO = isDPO
+    ? dataset.version.endsWith(DPO_SUFFIX)
+      ? dataset.version
+      : `${dataset.version}${DPO_SUFFIX}`
+    : dataset.version;
+
+  let jsonlContent: string;
+  if (isDPO) {
+    jsonlContent = serializeDPOToJSONL(dataset.samples as OpenAIDPOSample[]);
+  } else {
+    jsonlContent = serializeToJSONL(
+      dataset.samples as Array<{
+        messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
+      }>,
+    );
+  }
 
   let providerJobId: string;
 
   if (provider === 'openai') {
-    const result = await submitOpenAIFineTuning(jsonlContent, baseModel, hyperparameters, suffix);
+    const result = await submitOpenAIFineTuning(jsonlContent, baseModel, hyperparameters, suffix, isDPO);
     providerJobId = result.providerJobId;
   } else {
-    const result = await submitHuggingFaceFineTuning(
-      jsonlContent,
-      baseModel,
-      agentId,
-      hyperparameters,
-    );
+    const result = await submitGeminiFineTuning(jsonlContent, baseModel, agentId, hyperparameters);
     providerJobId = result.providerJobId;
   }
 
   await db
     .insert(fineTuningDatasets)
     .values({
-      version: dataset.version,
+      version: versionWithDPO,
       agentId,
       domain: dataset.format,
-      format: 'openai-jsonl',
+      format: exportFormat,
       sampleCount: dataset.sampleCount,
       sourceBreakdown: dataset.sourceBreakdown,
+      ...(qualityReportData ? { qualityReport: qualityReportData } : {}),
     })
     .onConflictDoNothing();
 
@@ -279,18 +417,46 @@ export async function submitFineTuningJob(
       provider,
       baseModel,
       status: 'pending',
-      datasetVersion: dataset.version,
+      datasetVersion: versionWithDPO,
       datasetSize: dataset.sampleCount,
+      triggeredBy,
+      qualityGatePassed: qualityReportData ? true : undefined,
+      qualityReport: qualityReportData,
       hyperparameters: {
         providerJobId,
         nEpochs: hyperparameters?.nEpochs ?? 3,
         batchSize: hyperparameters?.batchSize ?? 4,
         learningRateMultiplier: hyperparameters?.learningRateMultiplier ?? 1.0,
+        format: exportFormat,
+        isDPO,
       },
     })
     .returning();
 
   if (!inserted) throw new Error('Failed to insert fine-tuning job record');
+
+  // Audit: job submission lifecycle event
+  void db
+    .insert(auditLogsTable)
+    .values({
+      actionType: 'fine_tuning.job.submitted',
+      entityType: 'fine_tuning_job',
+      entityId: jobId,
+      payloadJson: {
+        jobId,
+        agentId,
+        provider,
+        baseModel,
+        triggeredBy,
+        format: exportFormat,
+        isDPO,
+        datasetVersion: versionWithDPO,
+        datasetSize: dataset.sampleCount,
+        qualityGatePassed: qualityReportData != null,
+        providerJobId,
+      } as Record<string, unknown>,
+    })
+    .catch(() => {});
 
   return {
     jobId,
@@ -300,8 +466,9 @@ export async function submitFineTuningJob(
     baseModel,
     status: 'pending',
     datasetSize: dataset.sampleCount,
-    datasetVersion: dataset.version,
+    datasetVersion: versionWithDPO,
     submittedAt: inserted.submittedAt.toISOString(),
+    ...(qualityReportData ? { qualityReport: qualityReportData } : {}),
   };
 }
 
@@ -337,7 +504,7 @@ export async function pollJobStatus(jobId: string): Promise<FineTuningJobStatus>
     if (job.provider === 'openai') {
       polledStatus = await pollOpenAIJobStatus(providerJobId);
     } else {
-      polledStatus = await pollHuggingFaceJobStatus(providerJobId);
+      polledStatus = await pollGeminiJobStatus(providerJobId);
     }
   } catch (pollErr) {
     const errMsg = pollErr instanceof Error ? pollErr.message : String(pollErr);
@@ -347,7 +514,6 @@ export async function pollJobStatus(jobId: string): Promise<FineTuningJobStatus>
     const MAX_CONSECUTIVE_POLL_ERRORS = 5;
 
     if (consecutivePollErrors >= MAX_CONSECUTIVE_POLL_ERRORS) {
-      // Mark as permanently failed after repeated consecutive poll errors.
       await db
         .update(fineTuningJobs)
         .set({
@@ -366,7 +532,6 @@ export async function pollJobStatus(jobId: string): Promise<FineTuningJobStatus>
       return mapJobToStatus(failed ?? job);
     }
 
-    // Transient error — keep current status, bump counter, surface error message.
     await db
       .update(fineTuningJobs)
       .set({
@@ -385,7 +550,6 @@ export async function pollJobStatus(jobId: string): Promise<FineTuningJobStatus>
   const updatePayload: JobUpdate = {
     status: providerStatus,
     updatedAt: new Date(),
-    // Reset retry counter on any successful provider response.
     hyperparameters: { ...hp, consecutivePollErrors: 0 },
     ...(polledStatus.fineTunedModelId ? { fineTunedModelId: polledStatus.fineTunedModelId } : {}),
     ...(polledStatus.trainingCost ? { trainingCostUsd: polledStatus.trainingCost } : {}),
@@ -490,6 +654,8 @@ function mapProviderStatus(providerStatus: string): FineTuningJobStatus['status'
     validating_files: 'preparing',
     queued: 'preparing',
     running: 'running',
+    creating: 'running',
+    active: 'running',
     succeeded: 'succeeded',
     failed: 'failed',
     cancelled: 'cancelled',
@@ -502,6 +668,7 @@ function mapProviderStatus(providerStatus: string): FineTuningJobStatus['status'
 function mapJobToStatus(job: typeof fineTuningJobs.$inferSelect): FineTuningJobStatus {
   const _completedAt = job.completedAt?.toISOString();
   const _evalScores = job.evalScores as Record<string, unknown> | null;
+  const _qualityReport = job.qualityReport as Record<string, unknown> | null;
   return {
     jobId: job.jobId,
     internalId: job.id,
@@ -518,6 +685,7 @@ function mapJobToStatus(job: typeof fineTuningJobs.$inferSelect): FineTuningJobS
     ...(job.errorMessage != null ? { errorMessage: job.errorMessage } : {}),
     ...(_evalScores != null ? { evalScores: _evalScores } : {}),
     ...(job.promotedToLifecycle != null ? { promotedToLifecycle: job.promotedToLifecycle } : {}),
+    ...(_qualityReport != null ? { qualityReport: _qualityReport } : {}),
   };
 }
 

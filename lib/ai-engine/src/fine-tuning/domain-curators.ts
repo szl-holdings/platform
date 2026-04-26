@@ -289,6 +289,25 @@ export async function curateDatasetForAgent(
     });
     const enriched = domainRelevant.map((s) => enrichOpenAISample(s, config));
     filteredSamples = enriched.slice(0, config.maxSamples) as typeof rawResult.samples;
+  } else if (format === 'openai-dpo') {
+    // DPO samples are {input, preferred_output, non_preferred_output} — filter by keyword
+    // overlap in the input messages, but do NOT reshape or enrich to avoid corrupting
+    // the chosen/rejected pair structure.
+    const dpoPairs = rawResult.samples as Array<{
+      input: { messages: Array<{ role: string; content: string }> };
+      preferred_output: Array<{ role: string; content: string }>;
+      non_preferred_output: Array<{ role: string; content: string }>;
+      quality_weight?: number;
+    }>;
+    const domainRelevant = dpoPairs.filter((s) => {
+      const text = s.input.messages.map((m) => m.content).join(' ');
+      return (
+        config.keywords.length === 0 ||
+        filterByKeywords(text, config.keywords) ||
+        config.preferredCategories.some((cat) => text.toLowerCase().includes(cat))
+      );
+    });
+    filteredSamples = domainRelevant.slice(0, config.maxSamples) as typeof rawResult.samples;
   } else {
     const hfSamples = rawResult.samples as Array<{
       instruction: string;
