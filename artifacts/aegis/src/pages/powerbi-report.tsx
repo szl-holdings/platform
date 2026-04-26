@@ -18,7 +18,7 @@ const SAMPLE_METRICS = [
     unit: '/ 100',
     delta: '-8 pts',
     up: false,
-    color: 'text-emerald-400',
+    color: 'text-[#c9b787]',
   },
   {
     label: 'Open Incidents',
@@ -26,7 +26,7 @@ const SAMPLE_METRICS = [
     unit: '',
     delta: '-3 this week',
     up: false,
-    color: 'text-blue-400',
+    color: 'text-[#c9b787]',
   },
   {
     label: 'Controls Passing',
@@ -34,7 +34,7 @@ const SAMPLE_METRICS = [
     unit: '',
     delta: '+1.4%',
     up: true,
-    color: 'text-emerald-400',
+    color: 'text-[#c9b787]',
   },
   {
     label: 'Threat Intel Hits',
@@ -42,7 +42,7 @@ const SAMPLE_METRICS = [
     unit: '',
     delta: '+2 today',
     up: false,
-    color: 'text-amber-400',
+    color: 'text-[#c9b787]',
   },
   {
     label: 'MTTR (hrs)',
@@ -50,7 +50,7 @@ const SAMPLE_METRICS = [
     unit: 'hrs',
     delta: '-0.8',
     up: false,
-    color: 'text-emerald-400',
+    color: 'text-[#c9b787]',
   },
   {
     label: 'Compliance Score',
@@ -58,16 +58,16 @@ const SAMPLE_METRICS = [
     unit: '',
     delta: '+3.1%',
     up: true,
-    color: 'text-emerald-400',
+    color: 'text-[#c9b787]',
   },
 ];
 
 const FRAMEWORK_SCORES = [
-  { name: 'NIST CSF', score: 82, color: '#3b82f6' },
-  { name: 'ISO 27001', score: 76, color: '#8b5cf6' },
-  { name: 'SOC 2', score: 91, color: '#10b981' },
-  { name: 'CIS Controls', score: 79, color: '#f59e0b' },
-  { name: 'MITRE ATT&CK', score: 65, color: '#f43f5e' },
+  { name: 'NIST CSF', score: 82, color: '#c9b787' },
+  { name: 'ISO 27001', score: 76, color: '#8a8a8a' },
+  { name: 'SOC 2', score: 91, color: '#c9b787' },
+  { name: 'CIS Controls', score: 79, color: '#c9b787' },
+  { name: 'MITRE ATT&CK', score: 65, color: '#f5f5f5' },
 ];
 
 const INCIDENT_TREND = [
@@ -126,7 +126,7 @@ export default function AegisPowerBiReport() {
       <div className="flex items-start justify-between gap-4 animate-fade-in-up">
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-3">
-            <Shield className="w-6 h-6 text-blue-400" />
+            <Shield className="w-6 h-6 text-[#c9b787]" />
             Security Posture Analytics
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -149,10 +149,10 @@ export default function AegisPowerBiReport() {
       </div>
 
       {fetchError && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 flex items-start gap-3 animate-fade-in-up">
-          <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+        <div className="rounded-xl border border-[#f5f5f5]/20 bg-[#f5f5f5]/5 p-4 flex items-start gap-3 animate-fade-in-up">
+          <AlertTriangle className="w-4 h-4 text-[#f5f5f5] mt-0.5 flex-shrink-0" />
           <div className="text-xs text-muted-foreground">
-            <strong className="text-red-400">Embed error:</strong> {fetchError}
+            <strong className="text-[#f5f5f5]">Embed error:</strong> {fetchError}
           </div>
         </div>
       )}
@@ -162,14 +162,14 @@ export default function AegisPowerBiReport() {
         title="Security Posture Report"
         description="Real-time risk posture, incident trends, and compliance scoring"
         height={520}
-        accentColor="#3b82f6"
+        accentColor="#c9b787"
         onConfigureClick={fetchEmbedToken}
       />
 
       {!embedConfig && (
         <>
-          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 flex items-start gap-3 animate-fade-in-up">
-            <Info className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+          <div className="rounded-xl border border-[#c9b787]/20 bg-[#c9b787]/5 p-4 flex items-start gap-3 animate-fade-in-up">
+            <Info className="w-4 h-4 text-[#c9b787] mt-0.5 flex-shrink-0" />
             <div className="text-xs text-muted-foreground leading-relaxed">
               <strong className="text-foreground">Sample data shown below.</strong> Click "Load Live
               Report" to fetch a server-minted embed token and load live Power BI data. Configure
@@ -190,7 +190,7 @@ export default function AegisPowerBiReport() {
                 <div
                   className={cn(
                     'text-[10px] font-medium mt-1',
-                    m.up ? 'text-emerald-400' : 'text-red-400/80',
+                    m.up ? 'text-[#c9b787]' : 'text-[#f5f5f5]/80',
                   )}
                 >
                   {m.delta}
@@ -202,7 +202,7 @@ export default function AegisPowerBiReport() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in-up">
             <div className="bg-card border border-border rounded-2xl p-5">
               <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-400" /> Incident Volume Trend
+                <AlertTriangle className="w-4 h-4 text-[#c9b787]" /> Incident Volume Trend
               </h3>
               <div className="space-y-1">
                 {INCIDENT_TREND.map((d) => {
@@ -212,15 +212,15 @@ export default function AegisPowerBiReport() {
                       <span className="text-[10px] text-muted-foreground w-6">{d.month}</span>
                       <div className="flex-1 h-5 bg-muted/30 rounded-sm overflow-hidden flex">
                         <div
-                          className="bg-red-500/70 h-full"
+                          className="bg-[#f5f5f5]/70 h-full"
                           style={{ width: `${(d.critical / maxBar) * 100}%` }}
                         />
                         <div
-                          className="bg-orange-400/70 h-full"
+                          className="bg-[#c9b787]/70 h-full"
                           style={{ width: `${(d.high / maxBar) * 100}%` }}
                         />
                         <div
-                          className="bg-amber-400/40 h-full"
+                          className="bg-[#c9b787]/40 h-full"
                           style={{ width: `${(d.medium / maxBar) * 100}%` }}
                         />
                       </div>
@@ -235,7 +235,7 @@ export default function AegisPowerBiReport() {
 
             <div className="bg-card border border-border rounded-2xl p-5">
               <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Framework Compliance Scores
+                <CheckCircle2 className="w-4 h-4 text-[#c9b787]" /> Framework Compliance Scores
               </h3>
               <div className="space-y-3">
                 {FRAMEWORK_SCORES.map((f) => (

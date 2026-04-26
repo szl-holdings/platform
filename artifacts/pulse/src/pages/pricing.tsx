@@ -14,7 +14,7 @@ const tiers: PricingTier[] = [
     cta: 'Start Free Trial',
     ctaType: 'checkout',
     checkoutPlanId: 'pulse-executive-monthly',
-    badge: 'LUMINA Executive',
+    badge: 'Pulse Executive',
     highlight: true,
     features: [
       'Daily AI executive briefing',
@@ -69,7 +69,7 @@ export default function PulsePricingPage() {
       />
       <PricingPage
         productKey="pulse"
-        productName="LUMINA"
+        productName="Pulse"
         accentColor={ACCENT}
         tiers={tiers}
         headline="Executive Intelligence, Delivered Daily"

@@ -55,9 +55,9 @@ interface RevenueData {
 }
 
 const churnRiskBadgeVariant: Record<string, string> = {
-  low: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  high: 'bg-red-500/10 text-red-400 border-red-500/20',
+  low: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  medium: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  high: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
 };
 
 export default function MRRDashboard() {
@@ -147,17 +147,17 @@ export default function MRRDashboard() {
                       {card.label}
                     </p>
                     <card.icon
-                      className={`w-4 h-4 ${card.up ? 'text-emerald-400' : 'text-red-400'}`}
+                      className={`w-4 h-4 ${card.up ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}
                     />
                   </div>
                   <p className="text-2xl font-bold">{card.value}</p>
                   <div className="flex items-center gap-1.5 mt-1.5">
                     {card.up ? (
-                      <TrendingUp className="w-3 h-3 text-emerald-400" />
+                      <TrendingUp className="w-3 h-3 text-[#c9b787]" />
                     ) : (
-                      <TrendingDown className="w-3 h-3 text-red-400" />
+                      <TrendingDown className="w-3 h-3 text-[#f5f5f5]" />
                     )}
-                    <span className={`text-xs ${card.up ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <span className={`text-xs ${card.up ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}>
                       {card.change}
                     </span>
                   </div>
@@ -183,8 +183,8 @@ export default function MRRDashboard() {
                 <AreaChart data={trendData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="mrrGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#c9b787" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#c9b787" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
@@ -206,7 +206,7 @@ export default function MRRDashboard() {
                     type="monotone"
                     dataKey="mrr"
                     name="MRR"
-                    stroke="#3b82f6"
+                    stroke="#c9b787"
                     fill="url(#mrrGrad)"
                     strokeWidth={2}
                   />
@@ -219,7 +219,7 @@ export default function MRRDashboard() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-emerald-400" />
+              <TrendingUp className="w-4 h-4 text-[#c9b787]" />
               Revenue Waterfall
             </CardTitle>
           </CardHeader>
@@ -243,18 +243,18 @@ export default function MRRDashboard() {
                   <Bar
                     dataKey="newBusiness"
                     name="New"
-                    fill="#22c55e"
+                    fill="#c9b787"
                     radius={[4, 4, 0, 0]}
                     stackId="a"
                   />
                   <Bar
                     dataKey="expansion"
                     name="Expansion"
-                    fill="#3b82f6"
+                    fill="#c9b787"
                     radius={[4, 4, 0, 0]}
                     stackId="a"
                   />
-                  <Bar dataKey="churned" name="Churned" fill="#ef4444" radius={[0, 0, 4, 4]} />
+                  <Bar dataKey="churned" name="Churned" fill="#f5f5f5" radius={[0, 0, 4, 4]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -266,7 +266,7 @@ export default function MRRDashboard() {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm flex items-center gap-2">
-              <Users className="w-4 h-4 text-violet-400" />
+              <Users className="w-4 h-4 text-[#8a8a8a]" />
               MRR by Client
             </CardTitle>
             <span className="text-xs text-muted-foreground">{byClient.length} clients</span>

@@ -237,15 +237,15 @@ const ACTORS: ThreatActor[] = [
 ];
 
 const THREAT_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#eab308',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#8a8a8a',
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  active: '#ef4444',
-  elevated: '#f97316',
-  monitoring: '#eab308',
+  active: '#f5f5f5',
+  elevated: '#c9b787',
+  monitoring: '#8a8a8a',
 };
 
 export default function ThreatActorProfiling() {
@@ -265,7 +265,7 @@ export default function ThreatActorProfiling() {
               className="w-7 h-7 rounded-md flex items-center justify-center"
               style={{ background: 'rgba(168,85,247,0.15)' }}
             >
-              <Users className="w-4 h-4 text-purple-400" />
+              <Users className="w-4 h-4 text-[#8a8a8a]" />
             </div>
             <h1 className="text-lg font-bold tracking-tight">Threat Actor Profiling</h1>
           </div>
@@ -277,8 +277,8 @@ export default function ThreatActorProfiling() {
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
           style={{ background: 'rgba(168,85,247,0.06)', border: '1px solid rgba(168,85,247,0.15)' }}
         >
-          <Radio className="w-3.5 h-3.5 text-purple-400" />
-          <span className="text-[10px] font-mono text-purple-400">
+          <Radio className="w-3.5 h-3.5 text-[#8a8a8a]" />
+          <span className="text-[10px] font-mono text-[#8a8a8a]">
             {ACTORS.filter((a) => a.activeStatus === 'active').length} Active Threat Groups
           </span>
         </div>
@@ -611,15 +611,15 @@ export default function ThreatActorProfiling() {
                 style={{ background: DS.surface, border: `1px solid ${DS.border}` }}
               >
                 <div className="flex items-center gap-2 mb-4">
-                  <TrendingUp className="w-4 h-4 text-purple-400" />
-                  <h3 className="text-xs font-semibold text-purple-400">Predicted Next Moves</h3>
+                  <TrendingUp className="w-4 h-4 text-[#8a8a8a]" />
+                  <h3 className="text-xs font-semibold text-[#8a8a8a]">Predicted Next Moves</h3>
                 </div>
                 <div className="space-y-3">
                   {selected.predictedNextMoves.map((move, i) => (
                     <div key={i} className="flex items-start gap-2.5">
                       <span
                         className="text-[9px] font-mono w-4 shrink-0 mt-0.5"
-                        style={{ color: '#8b5cf6' }}
+                        style={{ color: '#8a8a8a' }}
                       >
                         {i + 1}.
                       </span>
@@ -638,8 +638,8 @@ export default function ThreatActorProfiling() {
                 style={{ background: DS.surface, border: `1px solid ${DS.border}` }}
               >
                 <div className="flex items-center gap-2 mb-4">
-                  <Target className="w-4 h-4 text-red-400" />
-                  <h3 className="text-xs font-semibold text-red-400">Likely Target Profiles</h3>
+                  <Target className="w-4 h-4 text-[#f5f5f5]" />
+                  <h3 className="text-xs font-semibold text-[#f5f5f5]">Likely Target Profiles</h3>
                 </div>
                 <div className="space-y-2">
                   {selected.likelyTargets.map((t, i) => (
@@ -647,11 +647,11 @@ export default function ThreatActorProfiling() {
                       key={i}
                       className="flex items-center gap-2 p-2 rounded-lg"
                       style={{
-                        background: 'rgba(239,68,68,0.05)',
-                        border: '1px solid rgba(239,68,68,0.1)',
+                        background: 'rgba(245,245,245,0.05)',
+                        border: '1px solid rgba(245,245,245,0.1)',
                       }}
                     >
-                      <ChevronRight className="w-3 h-3 text-red-400/60 shrink-0" />
+                      <ChevronRight className="w-3 h-3 text-[#f5f5f5]/60 shrink-0" />
                       <p className="text-[11px]" style={{ color: DS.text.secondary }}>
                         {t}
                       </p>
@@ -685,7 +685,7 @@ export default function ThreatActorProfiling() {
                   >
                     <span
                       className="text-[9px] font-mono px-2 py-0.5 rounded w-16 text-center shrink-0"
-                      style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171' }}
+                      style={{ background: 'rgba(245,245,245,0.1)', color: '#f5f5f5' }}
                     >
                       {ioc.type}
                     </span>

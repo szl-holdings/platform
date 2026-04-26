@@ -122,9 +122,9 @@ const privilegedSessions = [
 ];
 
 const sevColor: Record<string, string> = {
-  Critical: 'bg-red-500/10 text-red-400 border-red-500/20',
-  High: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  Medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  Critical: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  High: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  Medium: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
 };
 
 function formatRelative(iso?: string): string {
@@ -178,22 +178,22 @@ export default function IdentityThreat() {
 
   const headlineStats = liveLoaded
     ? [
-        { label: 'Active Identity Alerts', value: String(idAlerts.length), color: 'text-red-400' },
-        { label: 'Total Live Alerts', value: String(liveAlerts.length), color: 'text-orange-400' },
+        { label: 'Active Identity Alerts', value: String(idAlerts.length), color: 'text-[#f5f5f5]' },
+        { label: 'Total Live Alerts', value: String(liveAlerts.length), color: 'text-[#c9b787]' },
         {
           label: 'Open Incidents',
           value: String(
             liveIncidents.filter((i) => i.status !== 'resolved' && i.status !== 'closed').length,
           ),
-          color: 'text-amber-400',
+          color: 'text-[#c9b787]',
         },
-        { label: 'MFA Coverage', value: '94%', color: 'text-emerald-400' },
+        { label: 'MFA Coverage', value: '94%', color: 'text-[#c9b787]' },
       ]
     : [
-        { label: 'Active Identity Alerts', value: '5', color: 'text-red-400' },
-        { label: 'Compromised Accounts', value: '3', color: 'text-orange-400' },
-        { label: 'Privileged Sessions', value: '3', color: 'text-amber-400' },
-        { label: 'MFA Coverage', value: '94%', color: 'text-emerald-400' },
+        { label: 'Active Identity Alerts', value: '5', color: 'text-[#f5f5f5]' },
+        { label: 'Compromised Accounts', value: '3', color: 'text-[#c9b787]' },
+        { label: 'Privileged Sessions', value: '3', color: 'text-[#c9b787]' },
+        { label: 'MFA Coverage', value: '94%', color: 'text-[#c9b787]' },
       ];
 
   return (
@@ -209,7 +209,7 @@ export default function IdentityThreat() {
         <div className="flex flex-wrap gap-2 mt-2">
           <Badge
             variant="outline"
-            className={`text-[10px] ${liveLoaded ? 'text-emerald-300 border-emerald-500/30' : 'text-amber-300 border-amber-500/30'}`}
+            className={`text-[10px] ${liveLoaded ? 'text-[#c9b787] border-[#c9b787]/30' : 'text-[#c9b787] border-[#c9b787]/30'}`}
           >
             {liveLoaded
               ? `Live · /aegis/live/threats · ${liveAlerts.length} alerts streamed`
@@ -240,15 +240,15 @@ export default function IdentityThreat() {
             {displayAlerts.map((alert) => (
               <Card
                 key={alert.id}
-                className={alert.severity === 'Critical' ? 'border-red-500/30' : ''}
+                className={alert.severity === 'Critical' ? 'border-[#f5f5f5]/30' : ''}
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
                     <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${alert.severity === 'Critical' ? 'bg-red-500/10' : alert.severity === 'High' ? 'bg-orange-500/10' : 'bg-amber-500/10'}`}
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${alert.severity === 'Critical' ? 'bg-[#f5f5f5]/10' : alert.severity === 'High' ? 'bg-[#c9b787]/10' : 'bg-[#c9b787]/10'}`}
                     >
                       <Users
-                        className={`w-4 h-4 ${alert.severity === 'Critical' ? 'text-red-400' : alert.severity === 'High' ? 'text-orange-400' : 'text-amber-400'}`}
+                        className={`w-4 h-4 ${alert.severity === 'Critical' ? 'text-[#f5f5f5]' : alert.severity === 'High' ? 'text-[#c9b787]' : 'text-[#c9b787]'}`}
                       />
                     </div>
                     <div className="flex-1">
@@ -271,7 +271,7 @@ export default function IdentityThreat() {
                           {alert.time}
                         </span>
                         <span
-                          className={`${alert.status === 'Blocked' || alert.status === 'Locked' || alert.status === 'Revoked' || alert.status === 'Disabled' ? 'text-emerald-400' : 'text-amber-400'}`}
+                          className={`${alert.status === 'Blocked' || alert.status === 'Locked' || alert.status === 'Revoked' || alert.status === 'Disabled' ? 'text-[#c9b787]' : 'text-[#c9b787]'}`}
                         >
                           → {alert.status}
                         </span>
@@ -291,7 +291,7 @@ export default function IdentityThreat() {
             </h3>
             <div className="space-y-3">
               {compromisedAccounts.map((acct) => (
-                <Card key={acct.account} className="border-red-500/20">
+                <Card key={acct.account} className="border-[#f5f5f5]/20">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -303,10 +303,10 @@ export default function IdentityThreat() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xl font-bold text-red-400">{acct.riskScore}</p>
+                        <p className="text-xl font-bold text-[#f5f5f5]">{acct.riskScore}</p>
                         <p className="text-[10px] text-muted-foreground">risk score</p>
                         <p
-                          className={`text-[10px] mt-0.5 ${acct.mfaEnabled ? 'text-emerald-400' : 'text-red-400'}`}
+                          className={`text-[10px] mt-0.5 ${acct.mfaEnabled ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}
                         >
                           {acct.mfaEnabled ? 'MFA On' : 'No MFA'}
                         </p>
@@ -340,7 +340,7 @@ export default function IdentityThreat() {
                       </div>
                       <Badge
                         variant="outline"
-                        className={`text-[10px] ${sess.risk === 'High' ? 'text-red-400 bg-red-500/10 border-red-500/20' : sess.risk === 'Medium' ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'}`}
+                        className={`text-[10px] ${sess.risk === 'High' ? 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20' : sess.risk === 'Medium' ? 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20' : 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20'}`}
                       >
                         {sess.risk}
                       </Badge>

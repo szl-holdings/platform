@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-const ACCENT = '#ef4444';
+const ACCENT = '#f5f5f5';
 const DS = {
   surface: 'rgba(255,255,255,0.025)',
   border: 'rgba(255,255,255,0.06)',
@@ -67,12 +67,12 @@ interface PlaybookStep {
 
 const KILL_CHAIN: { id: KillChainStage; label: string; color: string }[] = [
   { id: 'recon', label: 'Recon', color: '#6b7280' },
-  { id: 'weaponize', label: 'Weaponize', color: '#8b5cf6' },
-  { id: 'deliver', label: 'Deliver', color: '#3b82f6' },
-  { id: 'exploit', label: 'Exploit', color: '#f59e0b' },
-  { id: 'install', label: 'Install', color: '#f97316' },
-  { id: 'c2', label: 'C2', color: '#ef4444' },
-  { id: 'actions', label: 'Actions', color: '#dc2626' },
+  { id: 'weaponize', label: 'Weaponize', color: '#8a8a8a' },
+  { id: 'deliver', label: 'Deliver', color: '#c9b787' },
+  { id: 'exploit', label: 'Exploit', color: '#c9b787' },
+  { id: 'install', label: 'Install', color: '#c9b787' },
+  { id: 'c2', label: 'C2', color: '#f5f5f5' },
+  { id: 'actions', label: 'Actions', color: '#f5f5f5' },
 ];
 
 const SEED_THREATS: ThreatIncident[] = [
@@ -167,10 +167,10 @@ function ThreatCard({
 }) {
   const stage = KILL_CHAIN.find((k) => k.id === threat.killChainStage)!;
   const statusConfig: Record<ThreatStatus, { label: string; color: string }> = {
-    detected: { label: 'Detected', color: '#f59e0b' },
-    classified: { label: 'Classified', color: '#8b5cf6' },
+    detected: { label: 'Detected', color: '#c9b787' },
+    classified: { label: 'Classified', color: '#8a8a8a' },
     auto_contained: { label: 'Auto-Contained', color: '#6b8f71' },
-    pending_approval: { label: 'Approval Required', color: '#ef4444' },
+    pending_approval: { label: 'Approval Required', color: '#f5f5f5' },
     contained: { label: 'Contained', color: '#6b8f71' },
     dismissed: { label: 'Dismissed', color: '#6b7280' },
   };
@@ -211,7 +211,7 @@ function ThreatCard({
             </span>
             <span
               className="text-[10px] font-bold font-mono ml-auto"
-              style={{ color: threat.confidenceScore > 90 ? ACCENT : '#f59e0b' }}
+              style={{ color: threat.confidenceScore > 90 ? ACCENT : '#c9b787' }}
             >
               {threat.confidenceScore}%
             </span>
@@ -221,7 +221,7 @@ function ThreatCard({
               className="h-full rounded-full"
               style={{
                 width: `${threat.confidenceScore}%`,
-                background: threat.confidenceScore > 90 ? ACCENT : '#f59e0b',
+                background: threat.confidenceScore > 90 ? ACCENT : '#c9b787',
               }}
             />
           </div>
@@ -232,7 +232,7 @@ function ThreatCard({
           </div>
           <div
             className="text-[11px] font-bold font-mono"
-            style={{ color: threat.blastRadius > 70 ? ACCENT : '#f59e0b' }}
+            style={{ color: threat.blastRadius > 70 ? ACCENT : '#c9b787' }}
           >
             {threat.blastRadius}
           </div>
@@ -248,10 +248,10 @@ function ThreatCard({
       {threat.requiresApproval && threat.status === 'pending_approval' && (
         <div
           className="mt-2 flex items-center gap-2 p-2 rounded-lg"
-          style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}
+          style={{ background: 'rgba(245,245,245,0.1)', border: '1px solid rgba(245,245,245,0.2)' }}
         >
-          <Clock className="w-3 h-3 text-red-400" />
-          <span className="text-[10px] text-red-400">
+          <Clock className="w-3 h-3 text-[#f5f5f5]" />
+          <span className="text-[10px] text-[#f5f5f5]">
             Human approval required — {threat.approvalTimeout}s timeout
           </span>
         </div>
@@ -381,7 +381,7 @@ export default function AutonomousThreatEngine() {
             </span>
             <span
               className="px-1.5 py-0.5 rounded text-[8px] font-bold animate-pulse"
-              style={{ background: 'rgba(239,68,68,0.15)', color: ACCENT }}
+              style={{ background: 'rgba(245,245,245,0.15)', color: ACCENT }}
             >
               AUTONOMOUS ACTIVE
             </span>
@@ -397,8 +397,8 @@ export default function AutonomousThreatEngine() {
           className="flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-all"
           style={{
             color: autonomous ? ACCENT : 'rgba(255,255,255,0.5)',
-            borderColor: autonomous ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.1)',
-            background: autonomous ? 'rgba(239,68,68,0.08)' : 'transparent',
+            borderColor: autonomous ? 'rgba(245,245,245,0.3)' : 'rgba(255,255,255,0.1)',
+            background: autonomous ? 'rgba(245,245,245,0.08)' : 'transparent',
           }}
         >
           {autonomous ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
@@ -412,13 +412,13 @@ export default function AutonomousThreatEngine() {
           {
             label: 'Critical Severity',
             value: criticalCount.toString(),
-            color: '#f97316',
+            color: '#c9b787',
             pulse: criticalCount > 0,
           },
           {
             label: 'Approval Required',
             value: pendingApproval.toString(),
-            color: '#f59e0b',
+            color: '#c9b787',
             pulse: pendingApproval > 0,
           },
           {
@@ -520,7 +520,7 @@ export default function AutonomousThreatEngine() {
                         </span>
                       ))}
                     </div>
-                    <div className="mt-2 text-[10px] font-mono" style={{ color: '#8b5cf6' }}>
+                    <div className="mt-2 text-[10px] font-mono" style={{ color: '#8a8a8a' }}>
                       {selectedThreat.mitreId} · {selectedThreat.mitreTactic.replace(/_/g, ' ')}
                     </div>
                   </div>
@@ -535,7 +535,7 @@ export default function AutonomousThreatEngine() {
                       </div>
                     ))}
                     {selectedThreat.adversaryGroup && (
-                      <div className="mt-2 text-[10px]" style={{ color: '#f59e0b' }}>
+                      <div className="mt-2 text-[10px]" style={{ color: '#c9b787' }}>
                         Actor: {selectedThreat.adversaryGroup}
                       </div>
                     )}
@@ -596,7 +596,7 @@ export default function AutonomousThreatEngine() {
                         {step.requiresApproval && step.status === 'pending' && (
                           <span
                             className="text-[8px] px-1.5 py-0.5 rounded"
-                            style={{ background: '#f59e0b15', color: '#f59e0b' }}
+                            style={{ background: '#c9b78715', color: '#c9b787' }}
                           >
                             APPROVAL
                           </span>

@@ -13,8 +13,8 @@ const OPERATORS = [
 ];
 
 const VERTICAL_COLORS: Record<string, string> = {
-  'lyte-revenue': '#3b82f6', 'vessels-maritime': '#06b6d4', 'terra-real-estate': '#10b981',
-  'aegis-defense': '#ef4444', 'prism-counsel': '#8b5cf6', 'carlota-jo': '#f59e0b', 'alloy-core': '#6366f1',
+  'lyte-revenue': '#c9b787', 'vessels-maritime': '#8a8a8a', 'terra-real-estate': '#c9b787',
+  'aegis-defense': '#f5f5f5', 'prism-counsel': '#8a8a8a', 'carlota-jo': '#c9b787', 'alloy-core': '#8a8a8a',
 };
 
 const HANDOFFS = [
@@ -42,12 +42,12 @@ export function Agents() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
-        <KpiCard label="ACTIVE WORKCELLS" value={activeWC.length} sub="running" accent="#f59e0b" />
-        <KpiCard label="OPERATORS" value={OPERATORS.length} sub="registered" accent="#10b981" />
-        <KpiCard label="TASKS TODAY" value={totalTasks} sub="completed" accent="#3b82f6" />
-        <KpiCard label="PENDING GATES" value={SEED_WORKCELLS.filter(w => w.requiresApproval && w.status === 'running').length} sub="approval needed" accent="#8b5cf6" />
-        <KpiCard label="AVG TRUST SCORE" value={avgTrust} sub="out of 100" accent="#10b981" />
-        <KpiCard label="FAILED CELLS" value={failedWC.length} sub="need attention" accent={failedWC.length > 0 ? '#ef4444' : '#10b981'} />
+        <KpiCard label="ACTIVE WORKCELLS" value={activeWC.length} sub="running" accent="#c9b787" />
+        <KpiCard label="OPERATORS" value={OPERATORS.length} sub="registered" accent="#c9b787" />
+        <KpiCard label="TASKS TODAY" value={totalTasks} sub="completed" accent="#c9b787" />
+        <KpiCard label="PENDING GATES" value={SEED_WORKCELLS.filter(w => w.requiresApproval && w.status === 'running').length} sub="approval needed" accent="#8a8a8a" />
+        <KpiCard label="AVG TRUST SCORE" value={avgTrust} sub="out of 100" accent="#c9b787" />
+        <KpiCard label="FAILED CELLS" value={failedWC.length} sub="need attention" accent={failedWC.length > 0 ? '#f5f5f5' : '#c9b787'} />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -65,13 +65,13 @@ export function Agents() {
               </thead>
               <tbody>
                 {OPERATORS.map((op, i) => {
-                  const color = VERTICAL_COLORS[op.vertical] ?? '#9bacc4';
+                  const color = VERTICAL_COLORS[op.vertical] ?? '#5e5e5e';
                   return (
                     <tr
                       key={op.id}
                       className="cursor-pointer"
                       onClick={() => setSelectedOp(op.id === selectedOp ? null : op.id)}
-                      style={{ backgroundColor: selectedOp === op.id ? 'rgba(59,130,246,0.06)' : i % 2 === 0 ? 'var(--color-a11oy-card)' : 'var(--color-a11oy-deep)', borderBottom: '1px solid var(--color-a11oy-border)' }}
+                      style={{ backgroundColor: selectedOp === op.id ? 'rgba(201,183,135,0.06)' : i % 2 === 0 ? 'var(--color-a11oy-card)' : 'var(--color-a11oy-deep)', borderBottom: '1px solid var(--color-a11oy-border)' }}
                     >
                       <td className="px-3 py-2 font-medium" style={{ color: 'var(--color-a11oy-text)' }}>{op.name}</td>
                       <td className="px-3 py-2">
@@ -79,14 +79,14 @@ export function Agents() {
                       </td>
                       <td className="px-3 py-2">
                         <div className="flex items-center gap-2">
-                          <ProgressBar value={op.trustScore} max={100} color={op.trustScore >= 95 ? '#10b981' : op.trustScore >= 80 ? '#f59e0b' : '#ef4444'} />
-                          <span className="font-mono" style={{ color: '#10b981', whiteSpace: 'nowrap' }}>{op.trustScore}</span>
+                          <ProgressBar value={op.trustScore} max={100} color={op.trustScore >= 95 ? '#c9b787' : op.trustScore >= 80 ? '#c9b787' : '#f5f5f5'} />
+                          <span className="font-mono" style={{ color: '#c9b787', whiteSpace: 'nowrap' }}>{op.trustScore}</span>
                         </div>
                       </td>
                       <td className="px-3 py-2 font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{op.tasksToday}</td>
                       <td className="px-3 py-2 font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{op.avgLatencyMs}ms</td>
                       <td className="px-3 py-2">
-                        <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(16,185,129,0.12)', color: '#10b981' }}>{op.status}</span>
+                        <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.12)', color: '#c9b787' }}>{op.status}</span>
                       </td>
                     </tr>
                   );
@@ -107,7 +107,7 @@ export function Agents() {
                     <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Model: {op.model}</div>
                   </div>
                   <div className="text-right text-xs">
-                    <div className="font-mono" style={{ color: '#10b981' }}>Trust: {op.trustScore}/100</div>
+                    <div className="font-mono" style={{ color: '#c9b787' }}>Trust: {op.trustScore}/100</div>
                     <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>${op.costPerCallUSD.toFixed(3)}/call</div>
                   </div>
                 </div>
@@ -150,9 +150,9 @@ export function Agents() {
                       <div className="truncate" style={{ color: 'var(--color-a11oy-text)' }}>{wc.name}</div>
                     </td>
                     <td className="px-3 py-2"><VerdictBadge verdict={wc.mirrorEvalResult.verdict} /></td>
-                    <td className="px-3 py-2 font-mono" style={{ color: '#10b981' }}>{Math.round(wc.mirrorEvalResult.score * 100)}%</td>
+                    <td className="px-3 py-2 font-mono" style={{ color: '#c9b787' }}>{Math.round(wc.mirrorEvalResult.score * 100)}%</td>
                     <td className="px-3 py-2 font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{wc.mirrorEvalResult.evaluatorModel}</td>
-                    <td className="px-3 py-2" style={{ color: wc.mirrorEvalResult.flags.length > 0 ? '#f59e0b' : '#10b981' }}>
+                    <td className="px-3 py-2" style={{ color: wc.mirrorEvalResult.flags.length > 0 ? '#c9b787' : '#c9b787' }}>
                       {wc.mirrorEvalResult.flags.length > 0 ? wc.mirrorEvalResult.flags[0] : '—'}
                     </td>
                   </tr>
@@ -173,7 +173,7 @@ export function Agents() {
                   <div className="font-medium truncate mb-0.5" style={{ color: 'var(--color-a11oy-text)' }}>{wc.name}</div>
                   <div className="truncate" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{wc.objective}</div>
                   {wc.requiresApproval && (
-                    <div className="mt-1 text-xs font-mono" style={{ color: '#8b5cf6' }}>⚬ approval pending</div>
+                    <div className="mt-1 text-xs font-mono" style={{ color: '#8a8a8a' }}>⚬ approval pending</div>
                   )}
                 </Card>
               ))}
@@ -185,7 +185,7 @@ export function Agents() {
             <SectionTitle>Handoff Map</SectionTitle>
             <div className="flex flex-col gap-2">
               {HANDOFFS.map((h, i) => {
-                const color = VERTICAL_COLORS[h.vertical] ?? '#9bacc4';
+                const color = VERTICAL_COLORS[h.vertical] ?? '#5e5e5e';
                 return (
                   <div key={i} className="text-xs flex items-center gap-2">
                     <div className="flex-1 px-2 py-1.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-card)', border: '1px solid var(--color-a11oy-border)' }}>
@@ -208,23 +208,23 @@ export function Agents() {
                 <div>
                   <div className="flex justify-between mb-1">
                     <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Short-term</span>
-                    <span className="font-mono" style={{ color: '#10b981' }}>84 KB / 512 KB</span>
+                    <span className="font-mono" style={{ color: '#c9b787' }}>84 KB / 512 KB</span>
                   </div>
-                  <ProgressBar value={84} max={512} color="#10b981" />
+                  <ProgressBar value={84} max={512} color="#c9b787" />
                 </div>
                 <div>
                   <div className="flex justify-between mb-1">
                     <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Long-term</span>
-                    <span className="font-mono" style={{ color: '#3b82f6' }}>1.2 MB / 10 MB</span>
+                    <span className="font-mono" style={{ color: '#c9b787' }}>1.2 MB / 10 MB</span>
                   </div>
-                  <ProgressBar value={1200} max={10000} color="#3b82f6" />
+                  <ProgressBar value={1200} max={10000} color="#c9b787" />
                 </div>
                 <div>
                   <div className="flex justify-between mb-1">
                     <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Proof cache</span>
-                    <span className="font-mono" style={{ color: '#8b5cf6' }}>342 KB / 1 MB</span>
+                    <span className="font-mono" style={{ color: '#8a8a8a' }}>342 KB / 1 MB</span>
                   </div>
-                  <ProgressBar value={342} max={1000} color="#8b5cf6" />
+                  <ProgressBar value={342} max={1000} color="#8a8a8a" />
                 </div>
               </div>
             </Card>
@@ -255,7 +255,7 @@ export function Agents() {
               <div className="flex flex-col gap-2">
                 {failedWC.map(wc => (
                   <Card key={wc.id} className="text-xs">
-                    <div className="font-medium mb-0.5" style={{ color: '#ef4444' }}>{wc.name}</div>
+                    <div className="font-medium mb-0.5" style={{ color: '#f5f5f5' }}>{wc.name}</div>
                     <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Status: error — replay available</div>
                   </Card>
                 ))}

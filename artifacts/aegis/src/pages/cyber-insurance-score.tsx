@@ -42,7 +42,7 @@ const DIMENSIONS = [
     score: 72,
     weight: 30,
     icon: Shield,
-    color: '#3b82f6',
+    color: '#c9b787',
     trend: '+4',
     items: [
       {
@@ -75,7 +75,7 @@ const DIMENSIONS = [
     score: 61,
     weight: 25,
     icon: Clock,
-    color: '#f97316',
+    color: '#c9b787',
     trend: '-2',
     items: [
       {
@@ -103,7 +103,7 @@ const DIMENSIONS = [
     score: 74,
     weight: 25,
     icon: Users,
-    color: '#8b5cf6',
+    color: '#8a8a8a',
     trend: '+7',
     items: [
       { label: 'MFA Coverage', status: 'pass', note: '94% of users — Microsoft Authenticator' },
@@ -136,7 +136,7 @@ const DIMENSIONS = [
     score: 58,
     weight: 20,
     icon: Target,
-    color: '#ef4444',
+    color: '#f5f5f5',
     trend: '-8',
     items: [
       {
@@ -254,7 +254,7 @@ const INSURER_BENCHMARKS = [
 ];
 
 function ScoreGauge({ score }: { score: number }) {
-  const color = score >= 75 ? '#22c55e' : score >= 60 ? '#eab308' : '#ef4444';
+  const color = score >= 75 ? '#c9b787' : score >= 60 ? '#8a8a8a' : '#f5f5f5';
   const label = score >= 75 ? 'Strong' : score >= 60 ? 'Moderate' : 'At Risk';
   const data = [{ score, fill: color }];
 
@@ -293,15 +293,15 @@ function ScoreGauge({ score }: { score: number }) {
 }
 
 function StatusIcon({ status }: { status: string }) {
-  if (status === 'pass') return <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />;
-  if (status === 'warn') return <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />;
-  return <XCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />;
+  if (status === 'pass') return <CheckCircle className="w-3.5 h-3.5 text-[#c9b787] shrink-0" />;
+  if (status === 'warn') return <AlertTriangle className="w-3.5 h-3.5 text-[#c9b787] shrink-0" />;
+  return <XCircle className="w-3.5 h-3.5 text-[#f5f5f5] shrink-0" />;
 }
 
 const PRIORITY_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#eab308',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#8a8a8a',
 };
 
 export default function CyberInsuranceScore() {
@@ -318,9 +318,9 @@ export default function CyberInsuranceScore() {
           <div className="flex items-center gap-2 mb-1">
             <div
               className="w-7 h-7 rounded-md flex items-center justify-center"
-              style={{ background: 'rgba(34,197,94,0.15)' }}
+              style={{ background: 'rgba(201,183,135,0.15)' }}
             >
-              <Award className="w-4 h-4 text-emerald-400" />
+              <Award className="w-4 h-4 text-[#c9b787]" />
             </div>
             <h1 className="text-lg font-bold tracking-tight">Cyber Insurance Score</h1>
           </div>
@@ -353,9 +353,9 @@ export default function CyberInsuranceScore() {
             className="mt-3 flex items-center gap-2 text-[10px]"
             style={{ color: DS.text.tertiary }}
           >
-            <TrendingDown className="w-3.5 h-3.5 text-red-400" />
+            <TrendingDown className="w-3.5 h-3.5 text-[#f5f5f5]" />
             <span>
-              -3 pts from last month · <span className="text-amber-400">Needs improvement</span>
+              -3 pts from last month · <span className="text-[#c9b787]">Needs improvement</span>
             </span>
           </div>
         </div>
@@ -375,8 +375,8 @@ export default function CyberInsuranceScore() {
               <AreaChart data={SCORE_TREND}>
                 <defs>
                   <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#c9b787" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#c9b787" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis
@@ -402,10 +402,10 @@ export default function CyberInsuranceScore() {
                 <Area
                   type="monotone"
                   dataKey="score"
-                  stroke="#22c55e"
+                  stroke="#c9b787"
                   fill="url(#scoreGrad)"
                   strokeWidth={2}
-                  dot={{ fill: '#22c55e', r: 2 }}
+                  dot={{ fill: '#c9b787', r: 2 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -435,9 +435,9 @@ export default function CyberInsuranceScore() {
                   className="text-[9px] px-1.5 py-0"
                   style={{
                     background:
-                      ins.status === 'eligible' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
-                    color: ins.status === 'eligible' ? '#22c55e' : '#f87171',
-                    border: `1px solid ${ins.status === 'eligible' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                      ins.status === 'eligible' ? 'rgba(201,183,135,0.1)' : 'rgba(245,245,245,0.1)',
+                    color: ins.status === 'eligible' ? '#c9b787' : '#f5f5f5',
+                    border: `1px solid ${ins.status === 'eligible' ? 'rgba(201,183,135,0.2)' : 'rgba(245,245,245,0.2)'}`,
                   }}
                 >
                   {ins.status === 'eligible' ? 'Eligible' : `Need +${ins.min - OVERALL_SCORE} pts`}
@@ -479,7 +479,7 @@ export default function CyberInsuranceScore() {
                 </span>
                 <span
                   className="text-[10px] font-mono"
-                  style={{ color: parseFloat(dim.trend) > 0 ? '#22c55e' : '#ef4444' }}
+                  style={{ color: parseFloat(dim.trend) > 0 ? '#c9b787' : '#f5f5f5' }}
                 >
                   {dim.trend} pts
                 </span>
@@ -564,7 +564,7 @@ export default function CyberInsuranceScore() {
                   >
                     {rec.priority.toUpperCase()}
                   </Badge>
-                  <span className="text-[9px] font-mono font-bold text-emerald-400">
+                  <span className="text-[9px] font-mono font-bold text-[#c9b787]">
                     {rec.impact}
                   </span>
                 </div>

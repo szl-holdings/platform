@@ -24,11 +24,11 @@ interface ApiTechnician {
 }
 
 const statusConfig: Record<string, { color: string; label: string; textColor: string }> = {
-  available: { color: 'bg-emerald-400', label: 'Available', textColor: 'text-emerald-400' },
-  busy: { color: 'bg-red-400', label: 'Busy', textColor: 'text-red-400' },
-  'on-call': { color: 'bg-amber-400', label: 'On-Call', textColor: 'text-amber-400' },
-  'on-site': { color: 'bg-amber-400', label: 'On-Site', textColor: 'text-amber-400' },
-  traveling: { color: 'bg-blue-400', label: 'Traveling', textColor: 'text-blue-400' },
+  available: { color: 'bg-[#c9b787]', label: 'Available', textColor: 'text-[#c9b787]' },
+  busy: { color: 'bg-[#f5f5f5]', label: 'Busy', textColor: 'text-[#f5f5f5]' },
+  'on-call': { color: 'bg-[#c9b787]', label: 'On-Call', textColor: 'text-[#c9b787]' },
+  'on-site': { color: 'bg-[#c9b787]', label: 'On-Site', textColor: 'text-[#c9b787]' },
+  traveling: { color: 'bg-[#c9b787]', label: 'Traveling', textColor: 'text-[#c9b787]' },
   off: { color: 'bg-zinc-500', label: 'Off Duty', textColor: 'text-zinc-400' },
   'off-duty': { color: 'bg-zinc-500', label: 'Off Duty', textColor: 'text-zinc-400' },
 };
@@ -84,11 +84,11 @@ function TechnicianCard({ tech, index }: { tech: Technician | ApiTechnician; ind
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Active</p>
         </div>
         <div className="text-center p-2 rounded-lg bg-muted/30">
-          <p className="text-lg font-display font-bold text-emerald-400">{resolvedToday}</p>
+          <p className="text-lg font-display font-bold text-[#c9b787]">{resolvedToday}</p>
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Resolved</p>
         </div>
         <div className="text-center p-2 rounded-lg bg-muted/30">
-          <p className="text-lg font-display font-bold text-cyan-400">{avgResponseTime}</p>
+          <p className="text-lg font-display font-bold text-[#8a8a8a]">{avgResponseTime}</p>
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Avg Resp</p>
         </div>
       </div>
@@ -100,10 +100,10 @@ function TechnicianCard({ tech, index }: { tech: Technician | ApiTechnician; ind
             className={cn(
               'text-xs font-semibold',
               utilization >= 80
-                ? 'text-red-400'
+                ? 'text-[#f5f5f5]'
                 : utilization >= 50
-                  ? 'text-amber-400'
-                  : 'text-emerald-400',
+                  ? 'text-[#c9b787]'
+                  : 'text-[#c9b787]',
             )}
           >
             {utilization}%
@@ -114,10 +114,10 @@ function TechnicianCard({ tech, index }: { tech: Technician | ApiTechnician; ind
             className={cn(
               'h-full rounded-full transition-all',
               utilization >= 80
-                ? 'bg-red-400'
+                ? 'bg-[#f5f5f5]'
                 : utilization >= 50
-                  ? 'bg-amber-400'
-                  : 'bg-emerald-400',
+                  ? 'bg-[#c9b787]'
+                  : 'bg-[#c9b787]',
             )}
             style={{ width: `${utilization}%` }}
           />
@@ -188,20 +188,20 @@ export default function TechniciansPage() {
           {
             label: 'Available',
             value: available.toString(),
-            color: 'text-emerald-400',
+            color: 'text-[#c9b787]',
             icon: CheckCircle2,
           },
-          { label: 'Busy / Assigned', value: busy.toString(), color: 'text-red-400', icon: Wrench },
+          { label: 'Busy / Assigned', value: busy.toString(), color: 'text-[#f5f5f5]', icon: Wrench },
           {
             label: 'Resolved Today',
             value: totalResolved.toString(),
-            color: 'text-cyan-400',
+            color: 'text-[#8a8a8a]',
             icon: BarChart3,
           },
           {
             label: 'Avg Utilization',
             value: `${avgUtilization}%`,
-            color: avgUtilization >= 70 ? 'text-amber-400' : 'text-emerald-400',
+            color: avgUtilization >= 70 ? 'text-[#c9b787]' : 'text-[#c9b787]',
             icon: Clock,
           },
         ].map((stat, i) => (
@@ -247,12 +247,12 @@ export default function TechniciansPage() {
                 <div className="w-32 text-sm text-foreground truncate">{tech.name}</div>
                 <div className="flex-1 h-3 rounded-full bg-muted overflow-hidden flex">
                   <div
-                    className="h-full bg-red-400/80"
+                    className="h-full bg-[#f5f5f5]/80"
                     style={{ width: `${(tech.activeTickets ?? 0) * 8}%` }}
                     title="Active tickets"
                   />
                   <div
-                    className="h-full bg-emerald-400/80"
+                    className="h-full bg-[#c9b787]/80"
                     style={{ width: `${(tech.resolvedToday ?? 0) * 5}%` }}
                     title="Resolved today"
                   />
@@ -272,10 +272,10 @@ export default function TechniciansPage() {
         </div>
         <div className="flex items-center gap-6 mt-4 pt-3 border-t border-border/30">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <div className="w-3 h-3 rounded bg-red-400/80" /> Active Tickets
+            <div className="w-3 h-3 rounded bg-[#f5f5f5]/80" /> Active Tickets
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <div className="w-3 h-3 rounded bg-emerald-400/80" /> Resolved Today
+            <div className="w-3 h-3 rounded bg-[#c9b787]/80" /> Resolved Today
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <div className="w-3 h-3 rounded bg-primary/40" /> Other Work

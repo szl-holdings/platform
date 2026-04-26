@@ -7,7 +7,7 @@ export function TopBar() {
   const { currentOrg, setOrg } = useOrg();
 
   const orgs: { id: OrgId; name: string }[] = [
-    { id: 'szl', name: 'SZL Holdings' },
+    { id: 'szl', name: 'a11oy' },
     { id: 'acme', name: 'Acme Industries' },
     { id: 'northwind', name: 'Northwind Labs' }
   ];

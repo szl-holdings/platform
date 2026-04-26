@@ -170,11 +170,11 @@ export default function ModelRegistry() {
         </div>
         <div className="bg-card/60 border border-border rounded-xl p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Deployed</p>
-          <p className="text-2xl font-bold text-emerald-400">{deployedCount}</p>
+          <p className="text-2xl font-bold text-[#c9b787]">{deployedCount}</p>
         </div>
         <div className="bg-card/60 border border-border rounded-xl p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Endpoints</p>
-          <p className="text-2xl font-bold text-cyan-400">{totalEndpoints}</p>
+          <p className="text-2xl font-bold text-[#8a8a8a]">{totalEndpoints}</p>
         </div>
         <div className="bg-card/60 border border-border rounded-xl p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Frameworks</p>
@@ -242,10 +242,10 @@ export default function ModelRegistry() {
                   className={cn(
                     'px-2.5 py-1 rounded-full text-xs font-medium capitalize',
                     m.status === 'deployed'
-                      ? 'bg-emerald-400/10 text-emerald-400'
+                      ? 'bg-[#c9b787]/10 text-[#c9b787]'
                       : m.status === 'validating'
-                        ? 'bg-cyan-400/10 text-cyan-400'
-                        : 'bg-amber-400/10 text-amber-400',
+                        ? 'bg-[#8a8a8a]/10 text-[#8a8a8a]'
+                        : 'bg-[#c9b787]/10 text-[#c9b787]',
                   )}
                 >
                   {m.status}
@@ -256,7 +256,7 @@ export default function ModelRegistry() {
                     m.stage === 'production'
                       ? 'bg-primary/10 text-primary'
                       : m.stage === 'staging'
-                        ? 'bg-amber-400/10 text-amber-400'
+                        ? 'bg-[#c9b787]/10 text-[#c9b787]'
                         : 'bg-muted text-muted-foreground',
                   )}
                 >

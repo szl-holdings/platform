@@ -48,10 +48,10 @@ interface Worldline {
 }
 
 const SEVERITY_CONFIG: Record<Worldline['severity'], { color: string; label: string }> = {
-  critical: { color: '#ef4444', label: 'Critical' },
-  high: { color: '#f59e0b', label: 'High' },
+  critical: { color: '#f5f5f5', label: 'Critical' },
+  high: { color: '#c9b787', label: 'High' },
   medium: { color: '#d4a054', label: 'Medium' },
-  none: { color: '#10b981', label: 'None' },
+  none: { color: '#c9b787', label: 'None' },
 };
 
 const MERGE_CONFIG: Record<
@@ -59,16 +59,16 @@ const MERGE_CONFIG: Record<
   { color: string; label: string; bg: string; border: string }
 > = {
   ready: {
-    color: '#10b981',
+    color: '#c9b787',
     label: 'Ready to Merge',
-    bg: 'rgba(16,185,129,0.08)',
-    border: 'rgba(16,185,129,0.2)',
+    bg: 'rgba(201,183,135,0.08)',
+    border: 'rgba(201,183,135,0.2)',
   },
   blocked: {
-    color: '#ef4444',
+    color: '#f5f5f5',
     label: 'Merge Blocked',
-    bg: 'rgba(239,68,68,0.08)',
-    border: 'rgba(239,68,68,0.2)',
+    bg: 'rgba(245,245,245,0.08)',
+    border: 'rgba(245,245,245,0.2)',
   },
   in_review: {
     color: '#8b7ac8',
@@ -89,16 +89,16 @@ const STATE_CONFIG: Record<
   { color: string; label: string; bg: string; border: string }
 > = {
   stable: {
-    color: '#10b981',
+    color: '#c9b787',
     label: 'Stable',
-    bg: 'rgba(16,185,129,0.08)',
-    border: 'rgba(16,185,129,0.2)',
+    bg: 'rgba(201,183,135,0.08)',
+    border: 'rgba(201,183,135,0.2)',
   },
   degraded: {
-    color: '#f59e0b',
+    color: '#c9b787',
     label: 'Degraded',
-    bg: 'rgba(245,158,11,0.08)',
-    border: 'rgba(245,158,11,0.2)',
+    bg: 'rgba(201,183,135,0.08)',
+    border: 'rgba(201,183,135,0.2)',
   },
   awaiting_approval: {
     color: '#8b7ac8',
@@ -107,10 +107,10 @@ const STATE_CONFIG: Record<
     border: 'rgba(139,122,200,0.2)',
   },
   offline: {
-    color: '#ef4444',
+    color: '#f5f5f5',
     label: 'Offline',
-    bg: 'rgba(239,68,68,0.08)',
-    border: 'rgba(239,68,68,0.2)',
+    bg: 'rgba(245,245,245,0.08)',
+    border: 'rgba(245,245,245,0.2)',
   },
 };
 
@@ -288,7 +288,7 @@ const WORLDLINES: Worldline[] = [
 
 function DriftBadge({ score }: { score: number }) {
   const color =
-    score === 0 ? '#6b7280' : score <= 5 ? '#10b981' : score <= 15 ? '#f59e0b' : '#ef4444';
+    score === 0 ? '#6b7280' : score <= 5 ? '#c9b787' : score <= 15 ? '#c9b787' : '#f5f5f5';
   return (
     <span
       className="text-[8px] font-bold font-mono px-1.5 py-0.5 rounded"
@@ -361,11 +361,11 @@ function RemergeModal({ worldline, onClose }: { worldline: Worldline; onClose: (
             <div
               className="w-10 h-10 rounded-full flex items-center justify-center"
               style={{
-                background: 'rgba(16,185,129,0.1)',
-                border: '1px solid rgba(16,185,129,0.25)',
+                background: 'rgba(201,183,135,0.1)',
+                border: '1px solid rgba(201,183,135,0.25)',
               }}
             >
-              <CheckCircle className="w-5 h-5" style={{ color: '#10b981' }} />
+              <CheckCircle className="w-5 h-5" style={{ color: '#c9b787' }} />
             </div>
             <div className="text-sm font-bold text-white">Re-merge Request Submitted</div>
             <div className="text-[11px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
@@ -437,7 +437,7 @@ function RemergeModal({ worldline, onClose }: { worldline: Worldline; onClose: (
                 className="text-[9px] font-bold uppercase tracking-widest mb-1.5"
                 style={{ color: 'rgba(255,255,255,0.3)' }}
               >
-                Remediation Justification <span style={{ color: '#ef4444' }}>*</span>
+                Remediation Justification <span style={{ color: '#f5f5f5' }}>*</span>
               </div>
               <textarea
                 value={justification}
@@ -456,10 +456,10 @@ function RemergeModal({ worldline, onClose }: { worldline: Worldline; onClose: (
 
             <div
               className="rounded-lg border p-3"
-              style={{ borderColor: 'rgba(245,158,11,0.15)', background: 'rgba(245,158,11,0.04)' }}
+              style={{ borderColor: 'rgba(201,183,135,0.15)', background: 'rgba(201,183,135,0.04)' }}
             >
               <div className="flex items-start gap-2">
-                <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" style={{ color: '#f59e0b' }} />
+                <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" style={{ color: '#c9b787' }} />
                 <div className="text-[9px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
                   Re-merging requires approval from a minimum of{' '}
                   <strong className="text-white">2 reviewers</strong>. All affected twin proofs will
@@ -566,13 +566,13 @@ export default function AegisWorldlineRegistry() {
           {
             label: 'Merge Blocked',
             value: blockedCount,
-            color: blockedCount > 0 ? '#ef4444' : '#10b981',
+            color: blockedCount > 0 ? '#f5f5f5' : '#c9b787',
             pulse: blockedCount > 0,
           },
           {
             label: 'In Review',
             value: inReviewCount,
-            color: inReviewCount > 0 ? '#f59e0b' : '#10b981',
+            color: inReviewCount > 0 ? '#c9b787' : '#c9b787',
             pulse: inReviewCount > 0,
           },
           { label: 'Simulations', value: simCount, color: '#8b7ac8' },
@@ -608,7 +608,7 @@ export default function AegisWorldlineRegistry() {
           const isSelected = selected?.id === wl.id;
           const sev = SEVERITY_CONFIG[wl.severity];
           const allStable = wl.twins.every((t) => t.state === 'stable');
-          const lineColor = wl.id === 'WL-ALPHA' ? '#10b981' : sev.color;
+          const lineColor = wl.id === 'WL-ALPHA' ? '#c9b787' : sev.color;
           const canMerge =
             wl.id !== 'WL-ALPHA' && wl.status !== 'archived' && wl.mergeStatus !== 'merged';
 
@@ -674,7 +674,7 @@ export default function AegisWorldlineRegistry() {
                       </div>
                       <div
                         className="text-[9px]"
-                        style={{ color: allStable ? '#10b981' : lineColor }}
+                        style={{ color: allStable ? '#c9b787' : lineColor }}
                       >
                         {allStable ? 'All stable' : 'Needs attention'}
                       </div>
@@ -736,7 +736,7 @@ export default function AegisWorldlineRegistry() {
                       </div>
                       {wl.id !== 'WL-ALPHA' && (
                         <div className="flex items-center gap-2 mt-2">
-                          <div className="w-2 h-2 rounded-full" style={{ background: '#10b981' }} />
+                          <div className="w-2 h-2 rounded-full" style={{ background: '#c9b787' }} />
                           <span
                             className="text-[9px] font-mono"
                             style={{ color: 'rgba(255,255,255,0.35)' }}
@@ -798,7 +798,7 @@ export default function AegisWorldlineRegistry() {
                                   <CheckCircle
                                     className="w-2 h-2 shrink-0"
                                     style={{
-                                      color: tw.proofState === 'verified' ? '#10b981' : '#f59e0b',
+                                      color: tw.proofState === 'verified' ? '#c9b787' : '#c9b787',
                                     }}
                                   />
                                   {e}
@@ -839,9 +839,9 @@ export default function AegisWorldlineRegistry() {
                         <button
                           className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg border transition-colors hover:bg-white/5"
                           style={{
-                            color: '#10b981',
-                            borderColor: 'rgba(16,185,129,0.25)',
-                            background: 'rgba(16,185,129,0.06)',
+                            color: '#c9b787',
+                            borderColor: 'rgba(201,183,135,0.25)',
+                            background: 'rgba(201,183,135,0.06)',
                           }}
                           onClick={(e) => {
                             e.stopPropagation();

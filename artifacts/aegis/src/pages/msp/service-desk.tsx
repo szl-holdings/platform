@@ -58,36 +58,36 @@ function formatTimeRemaining(
 }
 
 const urgencyStyles = {
-  breached: 'text-red-400 bg-red-500/10 border-red-500/20',
-  critical: 'text-red-400 bg-red-500/10 border-red-500/20 animate-pulse',
-  warning: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-  ok: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+  breached: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20',
+  critical: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20 animate-pulse',
+  warning: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+  ok: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
 };
 
 const priorityConfig = {
   critical: {
     icon: ArrowUp,
-    color: 'text-red-400 bg-red-500/10 border-red-500/20',
+    color: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20',
     label: 'Critical',
   },
   high: {
     icon: ArrowUp,
-    color: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
+    color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
     label: 'High',
   },
   medium: {
     icon: Minus,
-    color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+    color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
     label: 'Medium',
   },
-  low: { icon: ArrowDown, color: 'text-blue-400 bg-blue-500/10 border-blue-500/20', label: 'Low' },
+  low: { icon: ArrowDown, color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20', label: 'Low' },
 };
 
 const statusConfig = {
-  open: { icon: Circle, color: 'text-blue-400', label: 'Open' },
-  'in-progress': { icon: Timer, color: 'text-amber-400', label: 'In Progress' },
-  waiting: { icon: Pause, color: 'text-purple-400', label: 'Waiting' },
-  resolved: { icon: CheckCircle2, color: 'text-emerald-400', label: 'Resolved' },
+  open: { icon: Circle, color: 'text-[#c9b787]', label: 'Open' },
+  'in-progress': { icon: Timer, color: 'text-[#c9b787]', label: 'In Progress' },
+  waiting: { icon: Pause, color: 'text-[#8a8a8a]', label: 'Waiting' },
+  resolved: { icon: CheckCircle2, color: 'text-[#c9b787]', label: 'Resolved' },
   closed: { icon: CheckCircle2, color: 'text-muted-foreground', label: 'Closed' },
 };
 
@@ -296,25 +296,25 @@ export default function ServiceDeskPage() {
           {
             label: 'Critical Tickets',
             value: criticalCount.toString(),
-            color: 'text-red-400',
+            color: 'text-[#f5f5f5]',
             icon: AlertTriangle,
           },
           {
             label: 'SLA Breached',
             value: breachedCount.toString(),
-            color: 'text-orange-400',
+            color: 'text-[#c9b787]',
             icon: Clock,
           },
           {
             label: 'Open / Unassigned',
             value: openCount.toString(),
-            color: 'text-blue-400',
+            color: 'text-[#c9b787]',
             icon: Circle,
           },
           {
             label: 'In Progress',
             value: inProgressCount.toString(),
-            color: 'text-amber-400',
+            color: 'text-[#c9b787]',
             icon: Timer,
           },
         ].map((stat, i) => (

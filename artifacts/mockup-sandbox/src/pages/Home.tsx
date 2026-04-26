@@ -53,7 +53,7 @@ const PILLARS = [
     name: 'Cross-App Orchestrator',
     tagline: 'Agent of agents',
     description:
-      'Routes user intents to the right artifact — Aegis, Vessels, Terra, LUMINA, Command, SZL Holdings, Carlota Jo, Lyte, Prism Counsel, Imperium — via the API server and stitches multi-app workflows together.',
+      'Routes user intents to the right artifact — Aegis, Vessels, Terra, Pulse, Command, SZL Holdings, Carlota Jo, Lyte, Prism Counsel, Imperium — via the API server and stitches multi-app workflows together.',
     accent: 'var(--gi-accent-amber)',
     bullets: [
       'Knows capabilities of every SZL artifact',

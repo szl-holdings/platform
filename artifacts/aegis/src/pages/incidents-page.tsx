@@ -121,19 +121,19 @@ const statusOrder = [
   'closed',
 ];
 const statusColors: Record<string, string> = {
-  detection: 'bg-red-500/10 text-red-400 border-red-500/20',
-  triage: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  investigation: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  containment: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  remediation: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-  closed: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  detection: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  triage: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  investigation: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  containment: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  remediation: 'bg-[#8a8a8a]/10 text-[#8a8a8a] border-[#8a8a8a]/20',
+  closed: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
 };
 
 const _severityColors: Record<string, string> = {
-  low: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  critical: 'bg-red-500/10 text-red-400 border-red-500/20',
+  low: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  medium: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  high: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  critical: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
 };
 
 interface IncidentPayload {
@@ -280,7 +280,7 @@ function IncidentDetailSidePane({
       >
         <div className="px-5 py-4 border-b border-white/10 sticky top-0 bg-[#0A0D14] z-10 flex items-center justify-between">
           <div>
-            <p className="text-[9px] font-mono text-red-400/50 uppercase tracking-widest mb-0.5">
+            <p className="text-[9px] font-mono text-[#f5f5f5]/50 uppercase tracking-widest mb-0.5">
               Incident Detail
             </p>
             <h2 className="text-sm font-semibold text-white leading-tight line-clamp-1">
@@ -298,13 +298,13 @@ function IncidentDetailSidePane({
         <div className="flex border-b border-white/10 px-5">
           <button
             onClick={() => setPaneTab('detail')}
-            className={`flex items-center gap-1.5 px-0 py-2.5 mr-5 text-xs font-medium border-b-2 -mb-px transition-all ${paneTab === 'detail' ? 'border-red-500 text-red-300' : 'border-transparent text-white/40 hover:text-white/60'}`}
+            className={`flex items-center gap-1.5 px-0 py-2.5 mr-5 text-xs font-medium border-b-2 -mb-px transition-all ${paneTab === 'detail' ? 'border-[#f5f5f5] text-[#f5f5f5]' : 'border-transparent text-white/40 hover:text-white/60'}`}
           >
             <FileText className="w-3 h-3" /> Detail
           </button>
           <button
             onClick={() => setPaneTab('atlas')}
-            className={`flex items-center gap-1.5 px-0 py-2.5 text-xs font-medium border-b-2 -mb-px transition-all ${paneTab === 'atlas' ? 'border-red-500 text-red-300' : 'border-transparent text-white/40 hover:text-white/60'}`}
+            className={`flex items-center gap-1.5 px-0 py-2.5 text-xs font-medium border-b-2 -mb-px transition-all ${paneTab === 'atlas' ? 'border-[#f5f5f5] text-[#f5f5f5]' : 'border-transparent text-white/40 hover:text-white/60'}`}
           >
             <Activity className="w-3 h-3" /> ATLAS Scene
           </button>
@@ -454,18 +454,18 @@ export default function IncidentsPage() {
           className="flex items-center gap-3 px-4 py-3 rounded-lg border animate-pulse"
           style={{
             background:
-              liveAlert.severity === 'critical' ? 'rgba(239,68,68,0.12)' : 'rgba(249,115,22,0.10)',
+              liveAlert.severity === 'critical' ? 'rgba(245,245,245,0.12)' : 'rgba(201,183,135,0.10)',
             borderColor:
-              liveAlert.severity === 'critical' ? 'rgba(239,68,68,0.4)' : 'rgba(249,115,22,0.3)',
+              liveAlert.severity === 'critical' ? 'rgba(245,245,245,0.4)' : 'rgba(201,183,135,0.3)',
           }}
         >
           <AlertTriangle
             className="w-4 h-4 shrink-0"
-            style={{ color: liveAlert.severity === 'critical' ? '#ef4444' : '#f97316' }}
+            style={{ color: liveAlert.severity === 'critical' ? '#f5f5f5' : '#c9b787' }}
           />
           <span
             className="text-sm font-semibold"
-            style={{ color: liveAlert.severity === 'critical' ? '#ef4444' : '#f97316' }}
+            style={{ color: liveAlert.severity === 'critical' ? '#f5f5f5' : '#c9b787' }}
           >
             {liveAlert.severity?.toUpperCase()} incident received live
           </span>
@@ -514,7 +514,7 @@ export default function IncidentsPage() {
             options={{
               filename: 'incidents',
               title: 'Incident Response Log',
-              accentColor: '#ef4444',
+              accentColor: '#f5f5f5',
             }}
           />
           <Dialog open={open} onOpenChange={setOpen}>
@@ -615,12 +615,12 @@ export default function IncidentsPage() {
                   <p className="text-2xl font-bold font-display mt-1">{count}</p>
                 </div>
                 <div
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center ${status === 'detection' ? 'bg-red-500/10' : status === 'closed' ? 'bg-emerald-500/10' : 'bg-primary/10'} group-hover:scale-110 transition-transform`}
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center ${status === 'detection' ? 'bg-[#f5f5f5]/10' : status === 'closed' ? 'bg-[#c9b787]/10' : 'bg-primary/10'} group-hover:scale-110 transition-transform`}
                 >
                   {status === 'detection' ? (
-                    <AlertTriangle className="w-5 h-5 text-red-400" />
+                    <AlertTriangle className="w-5 h-5 text-[#f5f5f5]" />
                   ) : status === 'closed' ? (
-                    <Shield className="w-5 h-5 text-emerald-400" />
+                    <Shield className="w-5 h-5 text-[#c9b787]" />
                   ) : (
                     <Clock className="w-5 h-5 text-primary" />
                   )}
@@ -714,7 +714,7 @@ export default function IncidentsPage() {
               icon={Shield}
               headline="No active incidents"
               description="Defenses are holding — no incidents have been opened or escalated. New incidents created from alerts, hunts, or analyst escalations will land here."
-              accentColor="#10b981"
+              accentColor="#c9b787"
               className="border border-dashed border-border rounded-lg"
             />
           ) : (

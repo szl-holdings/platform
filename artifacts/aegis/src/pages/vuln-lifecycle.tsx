@@ -167,23 +167,23 @@ const VULNS: Vulnerability[] = [
 ];
 
 const severityColor: Record<string, string> = {
-  critical: 'text-red-400 bg-red-500/10 border-red-500/30',
-  high: 'text-orange-400 bg-orange-500/10 border-orange-500/30',
-  medium: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-  low: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
+  critical: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/30',
+  high: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  medium: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  low: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
 };
 
 const statusConfig: Record<string, string> = {
-  open: 'text-red-400 bg-red-500/10 border-red-500/30',
-  'in-remediation': 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-  verified: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
-  accepted: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
+  open: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/30',
+  'in-remediation': 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  verified: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  accepted: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
   'false-positive': 'text-zinc-400 bg-zinc-500/10 border-zinc-500/30',
 };
 
 function EPSSBadge({ score }: { score: number }) {
   const color =
-    score > 0.8 ? '#ef4444' : score > 0.5 ? '#f97316' : score > 0.2 ? '#f59e0b' : '#10b981';
+    score > 0.8 ? '#f5f5f5' : score > 0.5 ? '#c9b787' : score > 0.2 ? '#c9b787' : '#c9b787';
   return (
     <div className="flex items-center gap-1">
       <div className="w-8 h-1.5 rounded-full bg-white/8">
@@ -221,7 +221,7 @@ export default function VulnLifecycle() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Bug className="w-5 h-5 text-orange-400" />
+            <Bug className="w-5 h-5 text-[#c9b787]" />
             <h1 className="text-lg font-semibold text-white">Vulnerability Lifecycle Management</h1>
           </div>
           <p className="text-xs text-zinc-500">
@@ -238,28 +238,28 @@ export default function VulnLifecycle() {
             label: 'Critical Open',
             value: criticalOpen,
             sub: 'requiring immediate action',
-            color: '#ef4444',
+            color: '#f5f5f5',
             icon: AlertTriangle,
           },
           {
             label: 'KEV Exposures',
             value: kevCount,
             sub: 'CISA known exploited vulns',
-            color: '#ef4444',
+            color: '#f5f5f5',
             icon: Zap,
           },
           {
             label: 'In Remediation',
             value: VULNS.filter((v) => v.status === 'in-remediation').length,
             sub: 'actively being patched',
-            color: '#f59e0b',
+            color: '#c9b787',
             icon: RefreshCw,
           },
           {
             label: 'Avg Risk Score',
             value: avgRiskScore,
             sub: 'composite EPSS + criticality',
-            color: '#8b5cf6',
+            color: '#8a8a8a',
             icon: BarChart3,
           },
         ].map((m) => {
@@ -293,7 +293,7 @@ export default function VulnLifecycle() {
             className={cn(
               'px-2.5 py-1 rounded-lg text-[11px] border transition-colors',
               filter === f.id
-                ? 'bg-orange-500/15 border-orange-500/30 text-orange-400'
+                ? 'bg-[#c9b787]/15 border-[#c9b787]/30 text-[#c9b787]'
                 : 'border-white/8 bg-white/3 text-zinc-400 hover:text-zinc-300',
             )}
           >
@@ -313,7 +313,7 @@ export default function VulnLifecycle() {
                 className={cn(
                   'w-full rounded-xl border p-3 text-left transition-all',
                   selectedVuln?.id === vuln.id
-                    ? 'border-orange-500/30 bg-orange-500/5'
+                    ? 'border-[#c9b787]/30 bg-[#c9b787]/5'
                     : 'border-white/8 bg-white/3 hover:bg-white/5',
                 )}
               >
@@ -323,12 +323,12 @@ export default function VulnLifecycle() {
                       <span className="text-xs font-medium text-white">{vuln.title}</span>
                       <span className="text-[10px] text-zinc-500 font-mono">{vuln.cve}</span>
                       {vuln.kev && (
-                        <span className="text-[10px] px-1 py-0.5 rounded bg-red-500/15 border border-red-500/30 text-red-400">
+                        <span className="text-[10px] px-1 py-0.5 rounded bg-[#f5f5f5]/15 border border-[#f5f5f5]/30 text-[#f5f5f5]">
                           KEV
                         </span>
                       )}
                       {vuln.activelyExploited && (
-                        <span className="text-[10px] px-1 py-0.5 rounded bg-orange-500/15 border border-orange-500/30 text-orange-400">
+                        <span className="text-[10px] px-1 py-0.5 rounded bg-[#c9b787]/15 border border-[#c9b787]/30 text-[#c9b787]">
                           ⚡ Active
                         </span>
                       )}
@@ -369,7 +369,7 @@ export default function VulnLifecycle() {
                 <div className="mt-2">
                   <div className="flex items-center justify-between text-[10px] mb-0.5">
                     <span className="text-zinc-500">Risk Score</span>
-                    <span className="text-orange-400 font-medium">{vuln.riskScore}/100</span>
+                    <span className="text-[#c9b787] font-medium">{vuln.riskScore}/100</span>
                   </div>
                   <div className="h-1 rounded-full bg-white/8">
                     <div
@@ -378,10 +378,10 @@ export default function VulnLifecycle() {
                         width: `${vuln.riskScore}%`,
                         background:
                           vuln.riskScore > 80
-                            ? '#ef4444'
+                            ? '#f5f5f5'
                             : vuln.riskScore > 60
-                              ? '#f97316'
-                              : '#f59e0b',
+                              ? '#c9b787'
+                              : '#c9b787',
                       }}
                     />
                   </div>
@@ -397,13 +397,13 @@ export default function VulnLifecycle() {
             <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">
               Vuln Detail
             </h2>
-            <div className="rounded-xl border border-orange-500/20 bg-white/2 p-4 space-y-4">
+            <div className="rounded-xl border border-[#c9b787]/20 bg-white/2 p-4 space-y-4">
               <div>
                 <div className="text-sm font-semibold text-white mb-1">{selectedVuln.title}</div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs text-zinc-400 font-mono">{selectedVuln.cve}</span>
                   {selectedVuln.kev && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/15 border border-red-500/30 text-red-400">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#f5f5f5]/15 border border-[#f5f5f5]/30 text-[#f5f5f5]">
                       CISA KEV
                     </span>
                   )}
@@ -414,7 +414,7 @@ export default function VulnLifecycle() {
                   {
                     label: 'CVSS Score',
                     value: selectedVuln.cvss.toString(),
-                    color: selectedVuln.cvss >= 9 ? '#ef4444' : '#f97316',
+                    color: selectedVuln.cvss >= 9 ? '#f5f5f5' : '#c9b787',
                   },
                   { label: 'Severity', value: selectedVuln.severity, color: '' },
                   { label: 'Asset', value: selectedVuln.asset, color: '' },
@@ -447,13 +447,13 @@ export default function VulnLifecycle() {
                       className="h-full rounded-full"
                       style={{
                         width: `${selectedVuln.epss * 100}%`,
-                        background: selectedVuln.epss > 0.8 ? '#ef4444' : '#f97316',
+                        background: selectedVuln.epss > 0.8 ? '#f5f5f5' : '#c9b787',
                       }}
                     />
                   </div>
                   <span
                     className="text-xs font-bold"
-                    style={{ color: selectedVuln.epss > 0.8 ? '#ef4444' : '#f97316' }}
+                    style={{ color: selectedVuln.epss > 0.8 ? '#f5f5f5' : '#c9b787' }}
                   >
                     {(selectedVuln.epss * 100).toFixed(1)}%
                   </span>
@@ -468,7 +468,7 @@ export default function VulnLifecycle() {
                 </div>
                 <div
                   className="text-2xl font-bold"
-                  style={{ color: selectedVuln.riskScore > 80 ? '#ef4444' : '#f97316' }}
+                  style={{ color: selectedVuln.riskScore > 80 ? '#f5f5f5' : '#c9b787' }}
                 >
                   {selectedVuln.riskScore}
                   <span className="text-sm text-zinc-500 font-normal">/100</span>
@@ -480,7 +480,7 @@ export default function VulnLifecycle() {
               <div className="flex gap-2">
                 <button
                   onClick={() => toast.success('Remediation task created and assigned')}
-                  className="flex-1 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs hover:bg-orange-500/20 transition-colors"
+                  className="flex-1 py-1.5 rounded-lg bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787] text-xs hover:bg-[#c9b787]/20 transition-colors"
                 >
                   Assign Remediation
                 </button>

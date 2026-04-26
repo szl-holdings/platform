@@ -34,7 +34,7 @@ test.beforeEach(async ({}, testInfo) => {
   if (!appAvailable) testInfo.skip();
 });
 
-test.describe('LUMINA — Smoke Tests', () => {
+test.describe('Pulse — Smoke Tests', () => {
   test('HTML title is Pulse-specific (not a generic error page)', async ({ page }) => {
     await page.goto(PULSE_BASE || '/', { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(
@@ -43,7 +43,7 @@ test.describe('LUMINA — Smoke Tests', () => {
     ).catch(() => null);
     const title = await page.title();
     const content = await page.content();
-    const hasPulseBranding = /pulse/i.test(title) || content.includes('LUMINA') || content.includes('Executive Briefing');
+    const hasPulseBranding = /pulse/i.test(title) || content.includes('Pulse') || content.includes('Executive Briefing');
     expect(hasPulseBranding).toBe(true);
   });
 
@@ -53,7 +53,7 @@ test.describe('LUMINA — Smoke Tests', () => {
 
     const pageContent = await page.content();
     const hasPulseBranding =
-      pageContent.includes('LUMINA') ||
+      pageContent.includes('Pulse') ||
       pageContent.includes('Executive Briefing') ||
       pageContent.includes('executive-briefing');
     expect(hasPulseBranding).toBe(true);
@@ -89,7 +89,7 @@ test.describe('LUMINA — Smoke Tests', () => {
   });
 });
 
-test.describe('LUMINA — API write paths', () => {
+test.describe('Pulse — API write paths', () => {
   const API_BASE =
     process.env.API_BASE_URL ?? `https://${process.env.REPLIT_DEV_DOMAIN ?? 'localhost'}/api`;
 
@@ -149,7 +149,7 @@ test.describe('LUMINA — API write paths', () => {
   });
 });
 
-test.describe('LUMINA — Library UI flows', () => {
+test.describe('Pulse — Library UI flows', () => {
   test('Library page renders briefing list or auth gate — no crash', async ({ page }) => {
     const resp = await page.goto(`${PULSE_BASE || ''}/library`, {
       waitUntil: 'domcontentloaded',
@@ -228,7 +228,7 @@ test.describe('LUMINA — Library UI flows', () => {
   });
 });
 
-test.describe('LUMINA — Failure paths', () => {
+test.describe('Pulse — Failure paths', () => {
   test('unknown route returns a non-5xx response', async ({ page }) => {
     const resp = await page.goto(`${PULSE_BASE || ''}/this-route-does-not-exist-abc123`, {
       waitUntil: 'domcontentloaded',
@@ -248,13 +248,13 @@ test.describe('LUMINA — Failure paths', () => {
 
     const content = await page.content();
     const title = await page.title();
-    const isPulseContent = content.includes('LUMINA') || title.includes('LUMINA');
+    const isPulseContent = content.includes('Pulse') || title.includes('Pulse');
     const isWrongProduct = content.includes('SZL Holdings Dashboard') && !isPulseContent;
     expect(isWrongProduct).toBe(false);
   });
 });
 
-test.describe('LUMINA — Accessibility (axe-core)', () => {
+test.describe('Pulse — Accessibility (axe-core)', () => {
   test('homepage has no critical/serious a11y violations', async ({ page }) => {
     await page.goto(PULSE_BASE || '/', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
@@ -272,7 +272,7 @@ test.describe('LUMINA — Accessibility (axe-core)', () => {
         .map((v) => `[${v.impact}] ${v.id}: ${v.description} (${v.nodes.length} node(s))`)
         .join('\n');
       expect
-        .soft(criticalOrSerious, `LUMINA a11y violations:\n${summary}`)
+        .soft(criticalOrSerious, `Pulse a11y violations:\n${summary}`)
         .toHaveLength(0);
     }
 

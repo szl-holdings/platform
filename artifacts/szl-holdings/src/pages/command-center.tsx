@@ -484,7 +484,7 @@ function AIBriefPanel() {
           href="/pulse/"
           className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 ml-auto"
         >
-          Open LUMINA <ArrowUpRight className="w-2.5 h-2.5" />
+          Open Pulse <ArrowUpRight className="w-2.5 h-2.5" />
         </Link>
       </div>
       <div className="mt-3 pt-3 border-t border-border/30">

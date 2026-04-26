@@ -54,9 +54,9 @@ const typeIcons: Record<string, typeof Server> = {
 };
 
 const statusConfig = {
-  online: { color: 'text-emerald-400 bg-emerald-500/10', icon: CheckCircle2, label: 'Online' },
-  warning: { color: 'text-amber-400 bg-amber-500/10', icon: AlertTriangle, label: 'Warning' },
-  critical: { color: 'text-red-400 bg-red-500/10', icon: XCircle, label: 'Critical' },
+  online: { color: 'text-[#c9b787] bg-[#c9b787]/10', icon: CheckCircle2, label: 'Online' },
+  warning: { color: 'text-[#c9b787] bg-[#c9b787]/10', icon: AlertTriangle, label: 'Warning' },
+  critical: { color: 'text-[#f5f5f5] bg-[#f5f5f5]/10', icon: XCircle, label: 'Critical' },
   offline: { color: 'text-zinc-400 bg-zinc-500/10', icon: XCircle, label: 'Offline' },
 };
 
@@ -81,7 +81,7 @@ function UsageBar({
 }) {
   const warn = thresholds?.warn ?? 75;
   const crit = thresholds?.crit ?? 90;
-  const color = value >= crit ? 'bg-red-400' : value >= warn ? 'bg-amber-400' : 'bg-emerald-400';
+  const color = value >= crit ? 'bg-[#f5f5f5]' : value >= warn ? 'bg-[#c9b787]' : 'bg-[#c9b787]';
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
@@ -155,8 +155,8 @@ function DeviceCard({ device, index }: { device: Device; index: number }) {
 
       {device.alerts > 0 && (
         <div className="mt-3 pt-3 border-t border-border/30 flex items-center gap-1.5">
-          <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-          <span className="text-xs font-semibold text-red-400">
+          <AlertTriangle className="w-3.5 h-3.5 text-[#f5f5f5]" />
+          <span className="text-xs font-semibold text-[#f5f5f5]">
             {device.alerts} active alert{device.alerts > 1 ? 's' : ''}
           </span>
         </div>
@@ -231,9 +231,9 @@ export default function DevicesPage() {
               <Skeleton key={i} className="h-20 rounded-xl" />
             ))
           : [
-              { label: 'Online', value: online, color: 'text-emerald-400', icon: CheckCircle2 },
-              { label: 'Warning', value: warning, color: 'text-amber-400', icon: AlertTriangle },
-              { label: 'Critical', value: critical, color: 'text-red-400', icon: XCircle },
+              { label: 'Online', value: online, color: 'text-[#c9b787]', icon: CheckCircle2 },
+              { label: 'Warning', value: warning, color: 'text-[#c9b787]', icon: AlertTriangle },
+              { label: 'Critical', value: critical, color: 'text-[#f5f5f5]', icon: XCircle },
               { label: 'Offline', value: offline, color: 'text-zinc-400', icon: Activity },
             ].map((stat, i) => (
               <motion.div

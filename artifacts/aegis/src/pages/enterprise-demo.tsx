@@ -120,9 +120,9 @@ export default function EnterpriseDemo() {
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
         <div className="mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-red-500/20 bg-red-500/5 mb-6">
-            <Shield className="w-3.5 h-3.5 text-red-400" />
-            <span className="text-[11px] font-semibold text-red-400/80 tracking-[0.1em] uppercase">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#f5f5f5]/20 bg-[#f5f5f5]/5 mb-6">
+            <Shield className="w-3.5 h-3.5 text-[#f5f5f5]" />
+            <span className="text-[11px] font-semibold text-[#f5f5f5]/80 tracking-[0.1em] uppercase">
               Enterprise Briefing
             </span>
           </div>
@@ -138,8 +138,8 @@ export default function EnterpriseDemo() {
         {status === 'success' ? (
           <div className="bg-[#110e0e]/80 border border-white/8 rounded-2xl p-8 sm:p-10">
             <div className="flex items-start gap-4 mb-6">
-              <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-                <CheckCircle className="w-5 h-5 text-emerald-400" />
+              <div className="w-10 h-10 rounded-full bg-[#c9b787]/10 border border-[#c9b787]/20 flex items-center justify-center shrink-0">
+                <CheckCircle className="w-5 h-5 text-[#c9b787]" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-white mb-2">Request received</h2>
@@ -177,7 +177,7 @@ export default function EnterpriseDemo() {
                   value={form.companyName}
                   onChange={(e) => setForm((p) => ({ ...p, companyName: e.target.value }))}
                   placeholder="Acme Corp"
-                  className="w-full bg-white/3 border border-white/8 rounded-lg px-4 py-3 text-[14px] text-white placeholder:text-gray-600 focus:outline-none focus:border-red-500/40 transition-colors"
+                  className="w-full bg-white/3 border border-white/8 rounded-lg px-4 py-3 text-[14px] text-white placeholder:text-gray-600 focus:outline-none focus:border-[#f5f5f5]/40 transition-colors"
                 />
               </div>
               <div>
@@ -189,7 +189,7 @@ export default function EnterpriseDemo() {
                   value={form.contactName}
                   onChange={(e) => setForm((p) => ({ ...p, contactName: e.target.value }))}
                   placeholder="Jane Smith"
-                  className="w-full bg-white/3 border border-white/8 rounded-lg px-4 py-3 text-[14px] text-white placeholder:text-gray-600 focus:outline-none focus:border-red-500/40 transition-colors"
+                  className="w-full bg-white/3 border border-white/8 rounded-lg px-4 py-3 text-[14px] text-white placeholder:text-gray-600 focus:outline-none focus:border-[#f5f5f5]/40 transition-colors"
                 />
               </div>
             </div>
@@ -205,7 +205,7 @@ export default function EnterpriseDemo() {
                   value={form.email}
                   onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                   placeholder="jane@acme.com"
-                  className="w-full bg-white/3 border border-white/8 rounded-lg px-4 py-3 text-[14px] text-white placeholder:text-gray-600 focus:outline-none focus:border-red-500/40 transition-colors"
+                  className="w-full bg-white/3 border border-white/8 rounded-lg px-4 py-3 text-[14px] text-white placeholder:text-gray-600 focus:outline-none focus:border-[#f5f5f5]/40 transition-colors"
                 />
               </div>
               <div>
@@ -215,7 +215,7 @@ export default function EnterpriseDemo() {
                 <select
                   value={form.seats}
                   onChange={(e) => setForm((p) => ({ ...p, seats: e.target.value }))}
-                  className="w-full bg-white/3 border border-white/8 rounded-lg px-4 py-3 text-[14px] text-white focus:outline-none focus:border-red-500/40 transition-colors"
+                  className="w-full bg-white/3 border border-white/8 rounded-lg px-4 py-3 text-[14px] text-white focus:outline-none focus:border-[#f5f5f5]/40 transition-colors"
                 >
                   <option value="" className="bg-[#1a1515]">
                     Select range
@@ -248,14 +248,14 @@ export default function EnterpriseDemo() {
                     onClick={() => toggleAddOn(addon.id)}
                     className={`flex items-center gap-2.5 px-4 py-3 rounded-lg border text-left transition-all text-[13px] ${
                       form.addOns.includes(addon.id)
-                        ? 'border-red-500/40 bg-red-500/8 text-white'
+                        ? 'border-[#f5f5f5]/40 bg-[#f5f5f5]/8 text-white'
                         : 'border-white/8 bg-white/2 text-gray-400 hover:border-white/15 hover:text-gray-300'
                     }`}
                   >
                     <div
                       className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0 ${
                         form.addOns.includes(addon.id)
-                          ? 'border-red-500 bg-red-500'
+                          ? 'border-[#f5f5f5] bg-[#f5f5f5]'
                           : 'border-gray-600'
                       }`}
                     >
@@ -286,14 +286,14 @@ export default function EnterpriseDemo() {
                 onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
                 rows={4}
                 placeholder="Tell us about your current threat landscape, stack, or pain points..."
-                className="w-full bg-white/3 border border-white/8 rounded-lg px-4 py-3 text-[14px] text-white placeholder:text-gray-600 focus:outline-none focus:border-red-500/40 transition-colors resize-none"
+                className="w-full bg-white/3 border border-white/8 rounded-lg px-4 py-3 text-[14px] text-white placeholder:text-gray-600 focus:outline-none focus:border-[#f5f5f5]/40 transition-colors resize-none"
               />
             </div>
 
             {status === 'error' && (
-              <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/8 border border-red-500/20">
-                <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                <p className="text-[13px] text-red-300">{resultMessage}</p>
+              <div className="flex items-start gap-3 p-4 rounded-xl bg-[#f5f5f5]/8 border border-[#f5f5f5]/20">
+                <AlertTriangle className="w-4 h-4 text-[#f5f5f5] shrink-0 mt-0.5" />
+                <p className="text-[13px] text-[#f5f5f5]">{resultMessage}</p>
               </div>
             )}
 

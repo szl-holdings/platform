@@ -4,8 +4,8 @@ import { PageHeader, Card, SectionTitle, KpiCard, SeverityDot, VerticalBadge, Se
 import { SEED_SIGNALS } from '@workspace/a11oy-fabric';
 
 const VERTICAL_COLORS: Record<string, string> = {
-  'lyte-revenue': '#3b82f6', 'vessels-maritime': '#06b6d4', 'terra-real-estate': '#10b981',
-  'aegis-defense': '#ef4444', 'prism-counsel': '#8b5cf6', 'carlota-jo': '#f59e0b', 'alloy-core': '#6366f1',
+  'lyte-revenue': '#c9b787', 'vessels-maritime': '#8a8a8a', 'terra-real-estate': '#c9b787',
+  'aegis-defense': '#f5f5f5', 'prism-counsel': '#8a8a8a', 'carlota-jo': '#c9b787', 'alloy-core': '#8a8a8a',
 };
 const VERTICAL_LABELS: Record<string, string> = {
   'lyte-revenue': 'Lyte Revenue', 'vessels-maritime': 'Vessels Maritime', 'terra-real-estate': 'Terra Real Estate',
@@ -51,10 +51,10 @@ export function SignalMesh() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <KpiCard label="TOTAL SIGNALS" value={SEED_SIGNALS.length} sub="in mesh" accent="#3b82f6" />
-        <KpiCard label="ACTIVE" value={active.length} sub="unresolved" accent="#ef4444" />
-        <KpiCard label="CRITICAL" value={critical.length} sub="requires attention" accent="#ef4444" />
-        <KpiCard label="MESH HEALTH" value="99.2%" sub="uptime" accent="#10b981" />
+        <KpiCard label="TOTAL SIGNALS" value={SEED_SIGNALS.length} sub="in mesh" accent="#c9b787" />
+        <KpiCard label="ACTIVE" value={active.length} sub="unresolved" accent="#f5f5f5" />
+        <KpiCard label="CRITICAL" value={critical.length} sub="requires attention" accent="#f5f5f5" />
+        <KpiCard label="MESH HEALTH" value="99.2%" sub="uptime" accent="#c9b787" />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -67,7 +67,7 @@ export function SignalMesh() {
               {Object.entries(VERTICAL_LABELS).map(([id, label]) => {
                 const sigs = SEED_SIGNALS.filter(s => s.vertical === id);
                 const activeSigs = sigs.filter(s => s.status === 'active' || s.status === 'escalated');
-                const color = VERTICAL_COLORS[id] ?? '#9bacc4';
+                const color = VERTICAL_COLORS[id] ?? '#5e5e5e';
                 return (
                   <button
                     key={id}
@@ -83,7 +83,7 @@ export function SignalMesh() {
                       <VerticalBadge vertical={label} color={color} />
                       <div className="flex items-center gap-4 text-xs font-mono">
                         <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{sigs.length}</span>
-                        <span style={{ color: activeSigs.length > 0 ? '#f59e0b' : '#10b981' }}>{activeSigs.length} active</span>
+                        <span style={{ color: activeSigs.length > 0 ? '#c9b787' : '#c9b787' }}>{activeSigs.length} active</span>
                       </div>
                     </div>
                   </button>
@@ -106,7 +106,7 @@ export function SignalMesh() {
                     <div className="flex items-center gap-3">
                       <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{l.latency}</span>
                       <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{l.throughput}</span>
-                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: l.status === 'ok' ? '#10b981' : '#ef4444' }} />
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: l.status === 'ok' ? '#c9b787' : '#f5f5f5' }} />
                     </div>
                   </div>
                 </Card>
@@ -126,7 +126,7 @@ export function SignalMesh() {
                       <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>{s.domain}</div>
                     </div>
                     <div className="text-right">
-                      <div className="font-mono" style={{ color: '#f59e0b' }}>{s.status}</div>
+                      <div className="font-mono" style={{ color: '#c9b787' }}>{s.status}</div>
                       <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{s.rate}</div>
                     </div>
                   </div>
@@ -147,8 +147,8 @@ export function SignalMesh() {
                 onClick={() => setFilterSeverity(s)}
                 className="text-xs px-2 py-0.5 rounded font-mono"
                 style={{
-                  backgroundColor: filterSeverity === s ? 'rgba(59,130,246,0.15)' : 'var(--color-a11oy-muted)',
-                  color: filterSeverity === s ? '#3b82f6' : 'var(--color-a11oy-text-ghost)',
+                  backgroundColor: filterSeverity === s ? 'rgba(201,183,135,0.15)' : 'var(--color-a11oy-muted)',
+                  color: filterSeverity === s ? '#c9b787' : 'var(--color-a11oy-text-ghost)',
                   border: 'none', cursor: 'pointer',
                 }}
               >
@@ -172,7 +172,7 @@ export function SignalMesh() {
                 {filtered.map((s, i) => (
                   <tr key={s.id} style={{ backgroundColor: i % 2 === 0 ? 'var(--color-a11oy-card)' : 'var(--color-a11oy-deep)', borderBottom: '1px solid var(--color-a11oy-border)' }}>
                     <td className="px-3 py-2"><SeverityDot severity={s.severity} /></td>
-                    <td className="px-3 py-2"><VerticalBadge vertical={VERTICAL_LABELS[s.vertical] ?? s.vertical} color={VERTICAL_COLORS[s.vertical] ?? '#9bacc4'} /></td>
+                    <td className="px-3 py-2"><VerticalBadge vertical={VERTICAL_LABELS[s.vertical] ?? s.vertical} color={VERTICAL_COLORS[s.vertical] ?? '#5e5e5e'} /></td>
                     <td className="px-3 py-2" style={{ color: 'var(--color-a11oy-text)', maxWidth: 220 }}><div className="truncate">{s.title}</div></td>
                     <td className="px-3 py-2 whitespace-nowrap" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{s.owner}</td>
                     <td className="px-3 py-2"><SeverityBadge severity={s.status} /></td>

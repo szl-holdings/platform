@@ -54,31 +54,31 @@ const CATEGORY_META: CategoryMeta[] = [
     id: 'mfa_credential',
     label: 'MFA & Credential Hardening',
     icon: Key,
-    color: 'text-purple-400',
+    color: 'text-[#8a8a8a]',
   },
   {
     id: 'application_hardening',
     label: 'Application Hardening',
     icon: Globe,
-    color: 'text-blue-400',
+    color: 'text-[#c9b787]',
   },
   {
     id: 'config_hardening',
     label: 'Configuration Hardening',
     icon: Settings,
-    color: 'text-amber-400',
+    color: 'text-[#c9b787]',
   },
   {
     id: 'dependency_supply_chain',
     label: 'Dependency & Supply Chain',
     icon: Package,
-    color: 'text-teal-400',
+    color: 'text-[#c9b787]',
   },
   {
     id: 'vulnerability_assessment',
     label: 'Vulnerability Assessment Coverage',
     icon: Search,
-    color: 'text-orange-400',
+    color: 'text-[#c9b787]',
   },
 ];
 
@@ -89,28 +89,28 @@ const statusConfig: Record<
   implemented: {
     label: 'Implemented',
     icon: CheckCircle,
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-500/10 border-emerald-500/20',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10 border-[#c9b787]/20',
   },
   partial: {
     label: 'Partial',
     icon: AlertTriangle,
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/10 border-amber-500/20',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10 border-[#c9b787]/20',
   },
   not_implemented: {
     label: 'Not Implemented',
     icon: XCircle,
-    color: 'text-red-400',
-    bg: 'bg-red-500/10 border-red-500/20',
+    color: 'text-[#f5f5f5]',
+    bg: 'bg-[#f5f5f5]/10 border-[#f5f5f5]/20',
   },
 };
 
 const priorityColors: Record<string, string> = {
-  critical: 'bg-red-500/15 text-red-400 border-red-500/30',
-  high: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
-  medium: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-  low: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+  critical: 'bg-[#f5f5f5]/15 text-[#f5f5f5] border-[#f5f5f5]/30',
+  high: 'bg-[#c9b787]/15 text-[#c9b787] border-[#c9b787]/30',
+  medium: 'bg-[#c9b787]/15 text-[#c9b787] border-[#c9b787]/30',
+  low: 'bg-[#c9b787]/15 text-[#c9b787] border-[#c9b787]/30',
 };
 
 function ControlCard({
@@ -153,7 +153,7 @@ function ControlCard({
 
   return (
     <div
-      className={`border rounded-xl overflow-hidden transition-all ${control.status === 'not_implemented' && control.priority === 'critical' ? 'border-red-500/30 bg-red-500/3' : 'border-zinc-800 bg-zinc-900/20'}`}
+      className={`border rounded-xl overflow-hidden transition-all ${control.status === 'not_implemented' && control.priority === 'critical' ? 'border-[#f5f5f5]/30 bg-[#f5f5f5]/3' : 'border-zinc-800 bg-zinc-900/20'}`}
     >
       <div
         className="flex items-start gap-3 p-4 cursor-pointer hover:bg-zinc-800/20 transition-colors"
@@ -215,13 +215,13 @@ function ControlCard({
           {control.description && <p className="text-sm text-zinc-300">{control.description}</p>}
 
           {control.recommendedAction && (
-            <div className="bg-orange-500/5 border border-orange-500/15 rounded-lg px-3 py-2">
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-orange-400/80 mb-1 flex items-center gap-1">
+            <div className="bg-[#c9b787]/5 border border-[#c9b787]/15 rounded-lg px-3 py-2">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-[#c9b787]/80 mb-1 flex items-center gap-1">
                 <AlertTriangle className="w-3 h-3" /> Recommended Action
               </div>
-              <p className="text-sm text-orange-200/90">{control.recommendedAction}</p>
+              <p className="text-sm text-[#c9b787]/90">{control.recommendedAction}</p>
               {control.dueDate && (
-                <p className="text-[10px] text-orange-400/60 mt-1 flex items-center gap-1">
+                <p className="text-[10px] text-[#c9b787]/60 mt-1 flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
                   Due: {new Date(control.dueDate).toLocaleDateString()}
                 </p>
@@ -271,7 +271,7 @@ function ControlCard({
               <Button
                 size="sm"
                 variant="outline"
-                className="h-7 px-3 text-[11px] border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
+                className="h-7 px-3 text-[11px] border-[#c9b787]/30 text-[#c9b787] hover:bg-[#c9b787]/10"
                 onClick={() => workflowMutation.mutate('assign_owner')}
                 disabled={workflowMutation.isPending}
               >
@@ -283,7 +283,7 @@ function ControlCard({
               <Button
                 size="sm"
                 variant="outline"
-                className="h-7 px-3 text-[11px] border-red-500/30 text-red-400 hover:bg-red-500/10"
+                className="h-7 px-3 text-[11px] border-[#f5f5f5]/30 text-[#f5f5f5] hover:bg-[#f5f5f5]/10"
                 onClick={() => workflowMutation.mutate('escalate')}
                 disabled={workflowMutation.isPending}
               >
@@ -295,7 +295,7 @@ function ControlCard({
               <Button
                 size="sm"
                 variant="outline"
-                className="h-7 px-3 text-[11px] border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+                className="h-7 px-3 text-[11px] border-[#c9b787]/30 text-[#c9b787] hover:bg-[#c9b787]/10"
                 onClick={() =>
                   updateMutation.mutate({
                     status: 'implemented',
@@ -370,7 +370,7 @@ export default function HardeningControlsPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <Shield className="w-5 h-5 text-orange-400" />
+            <Shield className="w-5 h-5 text-[#c9b787]" />
             Hardening & Control Mapping
           </h1>
           <p className="text-sm text-zinc-400 mt-0.5">
@@ -394,7 +394,7 @@ export default function HardeningControlsPage() {
         <Card className="col-span-2 md:col-span-1 bg-zinc-900/50 border-zinc-700">
           <CardContent className="p-4 text-center">
             <div
-              className={`text-4xl font-bold ${overallScore >= 80 ? 'text-emerald-400' : overallScore >= 60 ? 'text-amber-400' : 'text-red-400'}`}
+              className={`text-4xl font-bold ${overallScore >= 80 ? 'text-[#c9b787]' : overallScore >= 60 ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}
             >
               {overallScore}%
             </div>
@@ -402,38 +402,38 @@ export default function HardeningControlsPage() {
             <Progress value={overallScore} className="h-1.5 mt-2" />
           </CardContent>
         </Card>
-        <Card className="bg-emerald-500/5 border-emerald-500/20">
+        <Card className="bg-[#c9b787]/5 border-[#c9b787]/20">
           <CardContent className="p-4">
-            <div className="text-xs text-emerald-400 font-medium mb-1">Implemented</div>
-            <div className="text-3xl font-bold text-emerald-400">{implemented}</div>
+            <div className="text-xs text-[#c9b787] font-medium mb-1">Implemented</div>
+            <div className="text-3xl font-bold text-[#c9b787]">{implemented}</div>
             <div className="text-[10px] text-zinc-500 mt-1">of {totalControls} controls</div>
           </CardContent>
         </Card>
-        <Card className="bg-amber-500/5 border-amber-500/20">
+        <Card className="bg-[#c9b787]/5 border-[#c9b787]/20">
           <CardContent className="p-4">
-            <div className="text-xs text-amber-400 font-medium mb-1">Partial</div>
-            <div className="text-3xl font-bold text-amber-400">{partial}</div>
+            <div className="text-xs text-[#c9b787] font-medium mb-1">Partial</div>
+            <div className="text-3xl font-bold text-[#c9b787]">{partial}</div>
             <div className="text-[10px] text-zinc-500 mt-1">In progress</div>
           </CardContent>
         </Card>
-        <Card className="bg-red-500/5 border-red-500/20">
+        <Card className="bg-[#f5f5f5]/5 border-[#f5f5f5]/20">
           <CardContent className="p-4">
-            <div className="text-xs text-red-400 font-medium mb-1">Not Implemented</div>
-            <div className="text-3xl font-bold text-red-400">{notImplemented}</div>
+            <div className="text-xs text-[#f5f5f5] font-medium mb-1">Not Implemented</div>
+            <div className="text-3xl font-bold text-[#f5f5f5]">{notImplemented}</div>
             <div className="text-[10px] text-zinc-500 mt-1">Gaps to close</div>
           </CardContent>
         </Card>
         <Card
-          className={`${criticalGaps > 0 ? 'bg-red-500/10 border-red-500/30' : 'bg-zinc-900/50 border-zinc-700'}`}
+          className={`${criticalGaps > 0 ? 'bg-[#f5f5f5]/10 border-[#f5f5f5]/30' : 'bg-zinc-900/50 border-zinc-700'}`}
         >
           <CardContent className="p-4">
             <div
-              className={`text-xs font-medium mb-1 ${criticalGaps > 0 ? 'text-red-400 animate-pulse' : 'text-zinc-400'}`}
+              className={`text-xs font-medium mb-1 ${criticalGaps > 0 ? 'text-[#f5f5f5] animate-pulse' : 'text-zinc-400'}`}
             >
               Critical Gaps
             </div>
             <div
-              className={`text-3xl font-bold ${criticalGaps > 0 ? 'text-red-400' : 'text-zinc-500'}`}
+              className={`text-3xl font-bold ${criticalGaps > 0 ? 'text-[#f5f5f5]' : 'text-zinc-500'}`}
             >
               {criticalGaps}
             </div>
@@ -474,7 +474,7 @@ export default function HardeningControlsPage() {
                     {criticalGapCount > 0 && (
                       <Badge
                         variant="outline"
-                        className="text-[10px] bg-red-500/10 text-red-400 border-red-500/20"
+                        className="text-[10px] bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20"
                       >
                         {criticalGapCount} critical gap{criticalGapCount > 1 ? 's' : ''}
                       </Badge>
@@ -485,7 +485,7 @@ export default function HardeningControlsPage() {
                       <Progress value={score} className="h-1.5" />
                     </div>
                     <span
-                      className={`text-xs font-medium ${score >= 80 ? 'text-emerald-400' : score >= 60 ? 'text-amber-400' : 'text-red-400'}`}
+                      className={`text-xs font-medium ${score >= 80 ? 'text-[#c9b787]' : score >= 60 ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}
                     >
                       {score}%
                     </span>

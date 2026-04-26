@@ -133,23 +133,23 @@ interface RmmHealthResponse {
 }
 
 const statusColor: Record<string, string> = {
-  online: 'text-emerald-400 bg-emerald-500/10',
-  critical: 'text-red-400 bg-red-500/10',
-  warning: 'text-amber-400 bg-amber-500/10',
+  online: 'text-[#c9b787] bg-[#c9b787]/10',
+  critical: 'text-[#f5f5f5] bg-[#f5f5f5]/10',
+  warning: 'text-[#c9b787] bg-[#c9b787]/10',
   offline: 'text-muted-foreground bg-muted',
 };
 
 const actionStatusColor: Record<string, string> = {
-  pending_approval: 'text-amber-400 bg-amber-500/10',
-  approved: 'text-blue-400 bg-blue-500/10',
-  executing: 'text-purple-400 bg-purple-500/10 animate-pulse',
-  completed: 'text-emerald-400 bg-emerald-500/10',
-  failed: 'text-red-400 bg-red-500/10',
+  pending_approval: 'text-[#c9b787] bg-[#c9b787]/10',
+  approved: 'text-[#c9b787] bg-[#c9b787]/10',
+  executing: 'text-[#8a8a8a] bg-[#8a8a8a]/10 animate-pulse',
+  completed: 'text-[#c9b787] bg-[#c9b787]/10',
+  failed: 'text-[#f5f5f5] bg-[#f5f5f5]/10',
   cancelled: 'text-muted-foreground bg-muted',
 };
 
 function MetricBar({ value, label }: { value: number; label: string }) {
-  const color = value >= 85 ? 'bg-red-500' : value >= 70 ? 'bg-amber-500' : 'bg-emerald-500';
+  const color = value >= 85 ? 'bg-[#f5f5f5]' : value >= 70 ? 'bg-[#c9b787]' : 'bg-[#c9b787]';
   return (
     <div>
       <div className="flex justify-between text-[10px] mb-0.5">
@@ -180,9 +180,9 @@ function formatActionType(t: string): string {
 function ProviderBadge({ provider, status }: { provider: string; status: string }) {
   const color =
     status === 'active'
-      ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+      ? 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20'
       : status === 'error'
-        ? 'text-red-400 bg-red-500/10 border-red-500/20'
+        ? 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20'
         : 'text-muted-foreground bg-muted border-border';
   const labels: Record<string, string> = {
     ninjaone: 'NinjaOne',
@@ -269,8 +269,8 @@ function RemoteActionModal({ device, onClose, onSubmit, loading }: ActionModalPr
             </div>
           )}
           {DESTRUCTIVE.includes(actionType) && (
-            <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/20">
-              <p className="text-xs text-red-400 flex items-center gap-1.5">
+            <div className="p-3 rounded-lg bg-[#f5f5f5]/5 border border-[#f5f5f5]/20">
+              <p className="text-xs text-[#f5f5f5] flex items-center gap-1.5">
                 <AlertTriangle className="w-3.5 h-3.5" /> Destructive action — will require approval
                 before execution
               </p>
@@ -508,7 +508,7 @@ export default function RMMConsole() {
           <p className="text-sm text-muted-foreground mt-1">
             Live endpoint monitoring, remote actions, and automated healing
             {activeProviders > 0 && (
-              <span className="text-emerald-400 ml-1">
+              <span className="text-[#c9b787] ml-1">
                 · {activeProviders} live provider{activeProviders > 1 ? 's' : ''} connected
               </span>
             )}
@@ -563,31 +563,31 @@ export default function RMMConsole() {
           {
             label: 'Total Endpoints',
             value: totalEndpoints,
-            color: 'text-sky-400',
+            color: 'text-[#8a8a8a]',
             icon: <Server className="w-4 h-4" />,
           },
           {
             label: 'Online',
             value: onlineCount,
-            color: 'text-emerald-400',
+            color: 'text-[#c9b787]',
             icon: <Wifi className="w-4 h-4" />,
           },
           {
             label: 'Alerts / Warnings',
             value: alertCount,
-            color: alertCount > 0 ? 'text-red-400' : 'text-muted-foreground',
+            color: alertCount > 0 ? 'text-[#f5f5f5]' : 'text-muted-foreground',
             icon: <AlertTriangle className="w-4 h-4" />,
           },
           {
             label: 'Pending Approvals',
             value: pendingApprovals,
-            color: pendingApprovals > 0 ? 'text-amber-400' : 'text-muted-foreground',
+            color: pendingApprovals > 0 ? 'text-[#c9b787]' : 'text-muted-foreground',
             icon: <Clock className="w-4 h-4" />,
           },
           {
             label: 'Active Providers',
             value: activeProviders,
-            color: activeProviders > 0 ? 'text-blue-400' : 'text-muted-foreground',
+            color: activeProviders > 0 ? 'text-[#c9b787]' : 'text-muted-foreground',
             icon: <Activity className="w-4 h-4" />,
           },
         ].map(({ label, value, color, icon }) => (
@@ -613,7 +613,7 @@ export default function RMMConsole() {
             {tab.label}
             {tab.count !== null && (
               <span
-                className={`text-[10px] px-1.5 py-0.5 rounded-full ${tab.alert ? 'bg-amber-500/20 text-amber-400' : 'bg-muted text-muted-foreground'}`}
+                className={`text-[10px] px-1.5 py-0.5 rounded-full ${tab.alert ? 'bg-[#c9b787]/20 text-[#c9b787]' : 'bg-muted text-muted-foreground'}`}
               >
                 {tab.count}
               </span>
@@ -635,15 +635,15 @@ export default function RMMConsole() {
             {systemMetrics && (
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse" /> Live
                   Monitored Server
                 </p>
                 <Card
-                  className={`border-2 ${systemMetrics.metrics.cpu.percent > 85 || systemMetrics.metrics.memory.percent > 90 ? 'border-amber-500/30' : 'border-emerald-500/20'}`}
+                  className={`border-2 ${systemMetrics.metrics.cpu.percent > 85 || systemMetrics.metrics.memory.percent > 90 ? 'border-[#c9b787]/30' : 'border-[#c9b787]/20'}`}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-start gap-4">
-                      <div className={`w-2 h-2 rounded-full mt-1.5 bg-emerald-500 animate-pulse`} />
+                      <div className={`w-2 h-2 rounded-full mt-1.5 bg-[#c9b787] animate-pulse`} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-semibold text-sm font-mono">
@@ -652,7 +652,7 @@ export default function RMMConsole() {
                           <Badge variant="outline" className="text-[10px]">
                             SZL Infrastructure
                           </Badge>
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#c9b787]/10 text-[#c9b787]">
                             LIVE
                           </span>
                         </div>
@@ -698,16 +698,16 @@ export default function RMMConsole() {
                       key={ep.id}
                       className={
                         ep.status === 'critical'
-                          ? 'border-red-500/30'
+                          ? 'border-[#f5f5f5]/30'
                           : ep.status === 'warning'
-                            ? 'border-amber-500/20'
+                            ? 'border-[#c9b787]/20'
                             : ''
                       }
                     >
                       <CardContent className="p-4">
                         <div className="flex items-start gap-4">
                           <div
-                            className={`w-2 h-2 rounded-full mt-1.5 ${ep.status === 'online' ? 'bg-emerald-500' : ep.status === 'critical' ? 'bg-red-500 animate-pulse' : ep.status === 'warning' ? 'bg-amber-500' : 'bg-zinc-500'}`}
+                            className={`w-2 h-2 rounded-full mt-1.5 ${ep.status === 'online' ? 'bg-[#c9b787]' : ep.status === 'critical' ? 'bg-[#f5f5f5] animate-pulse' : ep.status === 'warning' ? 'bg-[#c9b787]' : 'bg-zinc-500'}`}
                           />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
@@ -738,19 +738,19 @@ export default function RMMConsole() {
                             )}
                             <div className="flex gap-3 mt-1.5 flex-wrap">
                               {ep.patchesPending > 0 && (
-                                <span className="flex items-center gap-1 text-[10px] text-amber-400">
+                                <span className="flex items-center gap-1 text-[10px] text-[#c9b787]">
                                   <Package className="w-3 h-3" />
                                   {ep.patchesPending} patches
                                 </span>
                               )}
                               {ep.threats > 0 && (
-                                <span className="flex items-center gap-1 text-[10px] text-red-400">
+                                <span className="flex items-center gap-1 text-[10px] text-[#f5f5f5]">
                                   <Shield className="w-3 h-3" />
                                   {ep.threats} threat
                                 </span>
                               )}
                               {ep.alerts > 0 && (
-                                <span className="flex items-center gap-1 text-[10px] text-orange-400">
+                                <span className="flex items-center gap-1 text-[10px] text-[#c9b787]">
                                   <AlertTriangle className="w-3 h-3" />
                                   {ep.alerts} alert{ep.alerts > 1 ? 's' : ''}
                                 </span>
@@ -783,7 +783,7 @@ export default function RMMConsole() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <Package className="w-4 h-4 text-amber-400" />
+                  <Package className="w-4 h-4 text-[#c9b787]" />
                   Patch Approval Queue
                 </CardTitle>
               </CardHeader>
@@ -800,12 +800,12 @@ export default function RMMConsole() {
                       <div className="flex flex-col items-end gap-1">
                         <Badge
                           variant="outline"
-                          className={`text-[10px] ${g.severity === 'Critical' ? 'text-red-400 bg-red-500/10 border-red-500/20' : g.severity === 'High' ? 'text-orange-400 bg-orange-500/10 border-orange-500/20' : 'text-muted-foreground'}`}
+                          className={`text-[10px] ${g.severity === 'Critical' ? 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20' : g.severity === 'High' ? 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20' : 'text-muted-foreground'}`}
                         >
                           {g.severity}
                         </Badge>
                         {g.autoApprove && (
-                          <span className="text-[10px] text-emerald-400">Auto-approved</span>
+                          <span className="text-[10px] text-[#c9b787]">Auto-approved</span>
                         )}
                       </div>
                     </div>
@@ -823,7 +823,7 @@ export default function RMMConsole() {
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm flex items-center gap-2">
-                    <Cpu className="w-4 h-4 text-blue-400" />
+                    <Cpu className="w-4 h-4 text-[#c9b787]" />
                     API Server — Live
                   </CardTitle>
                 </CardHeader>
@@ -898,9 +898,9 @@ export default function RMMConsole() {
                   key={action.id}
                   className={
                     action.status === 'pending_approval'
-                      ? 'border-amber-500/20'
+                      ? 'border-[#c9b787]/20'
                       : action.status === 'failed'
-                        ? 'border-red-500/20'
+                        ? 'border-[#f5f5f5]/20'
                         : ''
                   }
                 >
@@ -930,7 +930,7 @@ export default function RMMConsole() {
                           {action.approvedBy && <span> · Approved by {action.approvedBy}</span>}
                         </p>
                         {action.errorMessage && (
-                          <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1">
+                          <p className="text-[10px] text-[#f5f5f5] mt-1 flex items-center gap-1">
                             <XCircle className="w-3 h-3" />
                             {action.errorMessage}
                           </p>
@@ -941,7 +941,7 @@ export default function RMMConsole() {
                           <button
                             onClick={() => approveActionMutation.mutate(action.id)}
                             disabled={approveActionMutation.isPending}
-                            className="text-[10px] px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded hover:bg-emerald-500/20 flex items-center gap-1 transition-colors"
+                            className="text-[10px] px-2 py-1 bg-[#c9b787]/10 text-[#c9b787] border border-[#c9b787]/20 rounded hover:bg-[#c9b787]/20 flex items-center gap-1 transition-colors"
                           >
                             <CheckSquare className="w-3 h-3" />
                             Approve
@@ -957,13 +957,13 @@ export default function RMMConsole() {
                         </div>
                       )}
                       {action.status === 'completed' && (
-                        <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                        <CheckCircle className="w-4 h-4 text-[#c9b787] shrink-0 mt-0.5" />
                       )}
                       {action.status === 'failed' && (
-                        <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                        <XCircle className="w-4 h-4 text-[#f5f5f5] shrink-0 mt-0.5" />
                       )}
                       {action.status === 'executing' && (
-                        <Activity className="w-4 h-4 text-purple-400 shrink-0 mt-0.5 animate-pulse" />
+                        <Activity className="w-4 h-4 text-[#8a8a8a] shrink-0 mt-0.5 animate-pulse" />
                       )}
                     </div>
                   </CardContent>
@@ -1002,11 +1002,11 @@ export default function RMMConsole() {
                   key={exec.id}
                   className={
                     exec.status === 'pending_approval'
-                      ? 'border-amber-500/20'
+                      ? 'border-[#c9b787]/20'
                       : exec.status === 'failed'
-                        ? 'border-red-500/20'
+                        ? 'border-[#f5f5f5]/20'
                         : exec.status === 'completed'
-                          ? 'border-emerald-500/10'
+                          ? 'border-[#c9b787]/10'
                           : ''
                   }
                 >
@@ -1023,7 +1023,7 @@ export default function RMMConsole() {
                             {formatActionType(exec.status)}
                           </span>
                           {exec.healingConfidenceScore !== null && (
-                            <span className="text-[10px] text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] text-[#c9b787] bg-[#c9b787]/10 px-1.5 py-0.5 rounded">
                               {exec.healingConfidenceScore}% confidence
                             </span>
                           )}
@@ -1038,7 +1038,7 @@ export default function RMMConsole() {
                           <button
                             onClick={() => approveHealingMutation.mutate(exec.id)}
                             disabled={approveHealingMutation.isPending}
-                            className="text-[10px] px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded hover:bg-emerald-500/20 flex items-center gap-1"
+                            className="text-[10px] px-2 py-1 bg-[#c9b787]/10 text-[#c9b787] border border-[#c9b787]/20 rounded hover:bg-[#c9b787]/20 flex items-center gap-1"
                           >
                             <CheckSquare className="w-3 h-3" />
                             Approve & Run

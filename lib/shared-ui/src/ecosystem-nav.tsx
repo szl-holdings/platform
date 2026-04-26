@@ -69,25 +69,25 @@ const ENV_CHIP_STYLE: Record<
   { dot: string; label: string; color: string; border: string; bg: string }
 > = {
   production: {
-    dot: 'hsl(152 55% 50%)',
+    dot: '#c9b787',
     label: 'Production',
-    color: 'hsl(152 35% 78%)',
-    border: 'hsla(152 55% 50% / 0.30)',
-    bg: 'hsla(152 55% 30% / 0.10)',
+    color: '#c9b787',
+    border: 'rgba(201,183,135,0.25)',
+    bg: 'rgba(201,183,135,0.08)',
   },
   pilot: {
-    dot: 'hsl(42 80% 55%)',
+    dot: '#8a8a8a',
     label: 'Pilot',
-    color: 'hsl(42 50% 80%)',
-    border: 'hsla(42 80% 50% / 0.30)',
-    bg: 'hsla(42 80% 30% / 0.10)',
+    color: '#8a8a8a',
+    border: 'rgba(138,138,138,0.25)',
+    bg: 'rgba(138,138,138,0.08)',
   },
   sandbox: {
-    dot: 'hsl(210 40% 60%)',
+    dot: '#5e5e5e',
     label: 'Sandbox',
-    color: 'hsl(210 25% 78%)',
-    border: 'hsla(210 40% 50% / 0.28)',
-    bg: 'hsla(210 40% 30% / 0.10)',
+    color: '#8a8a8a',
+    border: 'rgba(94,94,94,0.25)',
+    bg: 'rgba(94,94,94,0.08)',
   },
 };
 
@@ -172,10 +172,10 @@ function useRecentItems() {
 const ECOSYSTEM_APPS: EcosystemApp[] = [
   {
     id: 'szl-holdings',
-    name: 'SZL Holdings',
-    subtitle: 'Ecosystem · Parent Company',
+    name: 'a11oy',
+    subtitle: 'Ecosystem · Brand Orchestration',
     path: '/',
-    accent: '#94a3b8',
+    accent: '#c9b787',
     icon: '◆',
     description: 'Premium Command Systems Ecosystem',
   },
@@ -184,7 +184,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     name: 'Counsel',
     subtitle: 'Execution Fabric · Governed Orchestration',
     path: '/alloy',
-    accent: '#60a5fa',
+    accent: '#c9b787',
     icon: '⬡',
     description: 'Execution Fabric & Governed Orchestration Engine',
   },
@@ -193,7 +193,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     name: 'Command',
     subtitle: 'Command Surface · Unified Workspace',
     path: '/command/',
-    accent: '#22d3ee',
+    accent: '#8a8a8a',
     icon: '◆',
     description: 'Unified Command — Strategy, Operations & Infrastructure',
   },
@@ -202,7 +202,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     name: 'Aegis',
     subtitle: 'Domain Pack · Unified Defense & Intelligence',
     path: '/aegis/',
-    accent: '#8b7ac8',
+    accent: '#c9b787',
     icon: '⬡',
     description: 'Unified Defense, Managed Operations & AI Intelligence',
   },
@@ -211,7 +211,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     name: 'Vessels',
     subtitle: 'Domain Pack · Maritime Intelligence',
     path: '/vessels/',
-    accent: '#38bdf8',
+    accent: '#8a8a8a',
     icon: '⚓',
     description: 'Maritime Command Intelligence Platform',
   },
@@ -220,7 +220,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     name: 'Terra',
     subtitle: 'Domain Pack · Real Estate Intelligence',
     path: '/terra/',
-    accent: '#c87941',
+    accent: '#c9b787',
     icon: '⬢',
     description: 'Real Estate Broker Command Platform',
   },
@@ -229,7 +229,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     name: 'Carlota Jo',
     subtitle: 'Domain Pack · Premium Advisory',
     path: '/carlota-jo/',
-    accent: '#d4b896',
+    accent: '#c9b787',
     icon: '◈',
     description: 'Premium Advisory — High-Trust Client Operations',
   },
@@ -238,37 +238,37 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     name: 'Counsel',
     subtitle: 'Domain Pack · Legal Command',
     path: '/prism-counsel/',
-    accent: '#a78bfa',
+    accent: '#8a8a8a',
     icon: '⚖',
     description: 'Legal Command — Matter Intelligence, Obligation Graph & Proof Chain',
   },
   {
     id: 'szl-leadership',
     name: 'Leadership',
-    subtitle: 'Founder · SZL Holdings',
+    subtitle: 'Founder',
     path: '/leadership',
-    accent: '#94a3b8',
+    accent: '#5e5e5e',
     icon: '○',
     description: 'Stephen Lutar — Founder & Systems Architect',
   },
 ];
 
 const LEVEL_COLORS: Record<EcosystemNotification['level'], string> = {
-  info: '#4a90b8',
-  warning: '#d4a054',
-  critical: '#c45a4a',
+  info: '#8a8a8a',
+  warning: '#c9b787',
+  critical: '#f5f5f5',
 };
 
 const LEVEL_BG: Record<EcosystemNotification['level'], string> = {
-  info: 'rgba(59,130,246,0.12)',
-  warning: 'rgba(245,158,11,0.12)',
-  critical: 'rgba(239,68,68,0.12)',
+  info: 'rgba(138,138,138,0.08)',
+  warning: 'rgba(201,183,135,0.08)',
+  critical: 'rgba(245,245,245,0.08)',
 };
 
 const LEVEL_DOT: Record<EcosystemNotification['level'], string> = {
-  info: '#4a90b8',
-  warning: '#d4a054',
-  critical: '#c45a4a',
+  info: '#8a8a8a',
+  warning: '#c9b787',
+  critical: '#f5f5f5',
 };
 
 function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () => void) {

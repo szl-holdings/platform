@@ -124,7 +124,7 @@ export default function PulsePage() {
                 className="text-xl font-bold tracking-tight"
                 style={{ color: 'rgba(255,255,255,0.9)' }}
               >
-                Platform LUMINA
+                Platform Pulse
               </h1>
               <span
                 className="px-2 py-0.5 rounded text-[10px] font-semibold tracking-wider"
@@ -422,7 +422,7 @@ export default function PulsePage() {
             className="text-[9px] uppercase tracking-[0.25em]"
             style={{ color: 'rgba(255,255,255,0.08)' }}
           >
-            SZL Holdings — Platform LUMINA — Real-Time Ecosystem Intelligence
+            SZL Holdings — Platform Pulse — Real-Time Ecosystem Intelligence
           </p>
         </div>
       </div>

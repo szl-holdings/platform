@@ -47,20 +47,20 @@ const DECISION_ICONS: Record<string, LucideIcon> = {
 };
 
 const CONFIDENCE_COLORS: Record<string, string> = {
-  high: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
-  moderate: 'text-amber-400 border-amber-500/30 bg-amber-500/10',
-  low: 'text-orange-400 border-orange-500/30 bg-orange-500/10',
-  insufficient: 'text-red-400 border-red-500/30 bg-red-500/10',
+  high: 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
+  moderate: 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
+  low: 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
+  insufficient: 'text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10',
 };
 
 const NOTE_TYPE_COLORS: Record<string, string> = {
-  observation: 'text-blue-400',
-  hypothesis: 'text-purple-400',
-  assumption: 'text-amber-400',
-  gap: 'text-orange-400',
-  dissent: 'text-red-400',
-  key_judgment: 'text-emerald-400',
-  evidence_note: 'text-cyan-400',
+  observation: 'text-[#c9b787]',
+  hypothesis: 'text-[#8a8a8a]',
+  assumption: 'text-[#c9b787]',
+  gap: 'text-[#c9b787]',
+  dissent: 'text-[#f5f5f5]',
+  key_judgment: 'text-[#c9b787]',
+  evidence_note: 'text-[#8a8a8a]',
   general: 'text-zinc-400',
 };
 
@@ -179,7 +179,7 @@ export function TradecraftPanel({
     >
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-800">
         <div className="flex items-center gap-1.5">
-          <Brain className="w-3.5 h-3.5 text-blue-400" />
+          <Brain className="w-3.5 h-3.5 text-[#c9b787]" />
           <span className="text-xs font-semibold text-zinc-100">{title}</span>
           {decisions.length > 0 && (
             <Badge
@@ -212,7 +212,7 @@ export function TradecraftPanel({
             className={cn(
               'flex-1 flex items-center justify-center gap-1 py-1.5 text-[9px] font-mono uppercase tracking-wider transition-colors',
               activeTab === tab.id
-                ? 'text-zinc-100 border-b-2 border-blue-500'
+                ? 'text-zinc-100 border-b-2 border-[#c9b787]'
                 : 'text-muted-foreground hover:text-zinc-300',
             )}
           >
@@ -253,13 +253,13 @@ export function TradecraftPanel({
                       </Badge>
                       {d.approvalRequired && (
                         <div
-                          className="w-1.5 h-1.5 rounded-full bg-amber-400"
+                          className="w-1.5 h-1.5 rounded-full bg-[#c9b787]"
                           title="Approval Required"
                         />
                       )}
                       {d.humanReviewRequired && (
                         <div
-                          className="w-1.5 h-1.5 rounded-full bg-blue-400"
+                          className="w-1.5 h-1.5 rounded-full bg-[#c9b787]"
                           title="Human Review Required"
                         />
                       )}
@@ -297,7 +297,7 @@ export function TradecraftPanel({
                   key={idx}
                   className={cn(
                     'p-2 rounded-lg border text-[10px]',
-                    c.critical ? 'bg-red-500/5 border-red-500/20' : 'bg-zinc-950 border-zinc-800',
+                    c.critical ? 'bg-[#f5f5f5]/5 border-[#f5f5f5]/20' : 'bg-zinc-950 border-zinc-800',
                   )}
                 >
                   <span className="font-semibold text-zinc-300">{c.field}:</span>
@@ -320,12 +320,12 @@ export function TradecraftPanel({
                 className={cn(
                   'p-2 rounded-lg border text-[10px]',
                   note.isKey
-                    ? 'bg-emerald-500/5 border-emerald-500/20'
+                    ? 'bg-[#c9b787]/5 border-[#c9b787]/20'
                     : 'bg-zinc-950 border-zinc-800',
                 )}
               >
                 <div className="flex items-center gap-1 mb-1">
-                  {note.isKey && <Star className="w-2.5 h-2.5 text-emerald-400" />}
+                  {note.isKey && <Star className="w-2.5 h-2.5 text-[#c9b787]" />}
                   <span
                     className={cn(
                       'text-[9px] font-mono uppercase font-bold',
@@ -405,7 +405,7 @@ export function RelatedCasesPanel({
             className="flex items-center justify-between px-2 py-1.5 rounded bg-zinc-950 border border-zinc-800"
           >
             <div className="flex items-center gap-1.5">
-              <span className="text-[8px] font-mono text-blue-400 px-1 py-0 rounded border border-blue-500/20 bg-blue-500/5">
+              <span className="text-[8px] font-mono text-[#c9b787] px-1 py-0 rounded border border-[#c9b787]/20 bg-[#c9b787]/5">
                 CASE
               </span>
               <span className="text-[10px] font-mono text-zinc-300">{cid}</span>
@@ -419,7 +419,7 @@ export function RelatedCasesPanel({
             className="flex items-center justify-between px-2 py-1.5 rounded bg-zinc-950 border border-zinc-800"
           >
             <div className="flex items-center gap-1.5">
-              <span className="text-[8px] font-mono text-orange-400 px-1 py-0 rounded border border-orange-500/20 bg-orange-500/5">
+              <span className="text-[8px] font-mono text-[#c9b787] px-1 py-0 rounded border border-[#c9b787]/20 bg-[#c9b787]/5">
                 INC
               </span>
               <span className="text-[10px] font-mono text-zinc-300">{iid}</span>
@@ -454,19 +454,19 @@ interface EvidenceQueryResult {
 }
 
 const FRESHNESS_COLORS: Record<string, string> = {
-  current: 'text-emerald-400',
-  recent: 'text-amber-400',
-  stale: 'text-orange-400',
+  current: 'text-[#c9b787]',
+  recent: 'text-[#c9b787]',
+  stale: 'text-[#c9b787]',
   unknown: 'text-zinc-500',
 };
 
 const SOURCE_TYPE_COLORS: Record<string, string> = {
-  alert: 'text-red-400',
-  incident: 'text-orange-400',
-  incident_timeline: 'text-amber-400',
-  case_summary: 'text-cyan-400',
-  analyst_note: 'text-blue-400',
-  prior_decision: 'text-purple-400',
+  alert: 'text-[#f5f5f5]',
+  incident: 'text-[#c9b787]',
+  incident_timeline: 'text-[#c9b787]',
+  case_summary: 'text-[#8a8a8a]',
+  analyst_note: 'text-[#c9b787]',
+  prior_decision: 'text-[#8a8a8a]',
 };
 
 export function EvidenceIndexPanel({
@@ -505,7 +505,7 @@ export function EvidenceIndexPanel({
   return (
     <div className="rounded-xl bg-zinc-900 border border-zinc-800 flex flex-col max-h-[420px]">
       <div className="flex items-center gap-1.5 px-3 py-2 border-b border-zinc-800">
-        <Database className="w-3 h-3 text-blue-400" />
+        <Database className="w-3 h-3 text-[#c9b787]" />
         <span className="text-[10px] font-semibold text-zinc-100">Evidence Index</span>
         {result && (
           <Badge variant="outline" className="text-[8px] px-1 py-0 ml-auto text-zinc-500">
@@ -539,14 +539,14 @@ export function EvidenceIndexPanel({
 
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {result?.confidenceDowngraded && (
-          <div className="flex items-start gap-2 p-2 rounded-lg bg-amber-500/5 border border-amber-500/20 text-[10px]">
-            <AlertCircle className="w-3 h-3 text-amber-400 mt-0.5 shrink-0" />
-            <span className="text-amber-300">{result.weakRetrievalWarning}</span>
+          <div className="flex items-start gap-2 p-2 rounded-lg bg-[#c9b787]/5 border border-[#c9b787]/20 text-[10px]">
+            <AlertCircle className="w-3 h-3 text-[#c9b787] mt-0.5 shrink-0" />
+            <span className="text-[#c9b787]">{result.weakRetrievalWarning}</span>
           </div>
         )}
 
         {queryMutation.isError && (
-          <div className="flex items-center gap-1.5 text-[10px] text-red-400 p-2 rounded bg-red-500/5 border border-red-500/20">
+          <div className="flex items-center gap-1.5 text-[10px] text-[#f5f5f5] p-2 rounded bg-[#f5f5f5]/5 border border-[#f5f5f5]/20">
             <AlertCircle className="w-3 h-3" />
             Evidence query failed. Check connection.
           </div>

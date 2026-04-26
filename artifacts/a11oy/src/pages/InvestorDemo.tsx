@@ -6,9 +6,9 @@ import { DemoBadge, ApprovalGate } from '../components/ui';
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 
 const STAGE_CTAS: Record<number, { label: string; path: string; color: string }> = {
-  2: { label: 'Enter Command Surface →', path: '/command', color: '#8b5cf6' },
-  4: { label: 'View Workcell Replay →', path: '/replay', color: '#3b82f6' },
-  10: { label: 'Generate Board Packet →', path: '/boardroom', color: '#ec4899' },
+  2: { label: 'Enter Command Surface →', path: '/command', color: '#8a8a8a' },
+  4: { label: 'View Workcell Replay →', path: '/replay', color: '#c9b787' },
+  10: { label: 'Generate Board Packet →', path: '/boardroom', color: '#c9b787' },
 };
 
 const STAGES = [
@@ -172,17 +172,17 @@ const STAGES = [
 ];
 
 const CAT_COLORS: Record<string, string> = {
-  MARKET: '#ef4444', PRODUCT: '#8b5cf6', ARCHITECTURE: '#3b82f6',
-  GOVERNANCE: '#10b981', SECURITY: '#f59e0b', INTELLIGENCE: '#06b6d4',
-  COMPLIANCE: '#b08d52', EXECUTIVE: '#ec4899', BUSINESS: '#6366f1',
-  INVESTMENT: '#10b981',
+  MARKET: '#f5f5f5', PRODUCT: '#8a8a8a', ARCHITECTURE: '#c9b787',
+  GOVERNANCE: '#c9b787', SECURITY: '#c9b787', INTELLIGENCE: '#8a8a8a',
+  COMPLIANCE: '#b08d52', EXECUTIVE: '#c9b787', BUSINESS: '#8a8a8a',
+  INVESTMENT: '#c9b787',
 };
 const TYPE_BG: Record<string, string> = {
-  problem: 'rgba(239,68,68,0.04)', solution: 'rgba(139,92,246,0.04)',
-  technical: 'rgba(59,130,246,0.04)', governance: 'rgba(16,185,129,0.04)',
-  security: 'rgba(245,158,11,0.04)', intelligence: 'rgba(6,182,212,0.04)',
-  compliance: 'rgba(176,141,82,0.04)', executive: 'rgba(236,72,153,0.04)',
-  business: 'rgba(99,102,241,0.04)', investment: 'rgba(16,185,129,0.08)',
+  problem: 'rgba(245,245,245,0.04)', solution: 'rgba(138,138,138,0.04)',
+  technical: 'rgba(201,183,135,0.04)', governance: 'rgba(201,183,135,0.04)',
+  security: 'rgba(201,183,135,0.04)', intelligence: 'rgba(138,138,138,0.04)',
+  compliance: 'rgba(176,141,82,0.04)', executive: 'rgba(201,183,135,0.04)',
+  business: 'rgba(138,138,138,0.04)', investment: 'rgba(201,183,135,0.08)',
 };
 
 export function InvestorDemo() {
@@ -222,7 +222,7 @@ export function InvestorDemo() {
             <button
               onClick={() => setAutoPlay(a => !a)}
               className="text-xs px-3 py-1.5 rounded font-medium"
-              style={{ backgroundColor: autoPlay ? 'rgba(16,185,129,0.15)' : 'rgba(59,130,246,0.12)', color: autoPlay ? '#10b981' : '#3b82f6', border: `1px solid ${autoPlay ? 'rgba(16,185,129,0.3)' : 'rgba(59,130,246,0.25)'}` }}
+              style={{ backgroundColor: autoPlay ? 'rgba(201,183,135,0.15)' : 'rgba(201,183,135,0.12)', color: autoPlay ? '#c9b787' : '#c9b787', border: `1px solid ${autoPlay ? 'rgba(201,183,135,0.3)' : 'rgba(201,183,135,0.25)'}` }}
             >
               {autoPlay ? '⏸ Pause' : '▶ Auto-play'}
             </button>
@@ -236,7 +236,7 @@ export function InvestorDemo() {
               key={i}
               onClick={() => setStage(i)}
               className="text-xs px-2 py-1 rounded font-mono"
-              style={{ backgroundColor: stage === i ? `${CAT_COLORS[s.category] ?? '#3b82f6'}22` : 'var(--color-a11oy-muted)', color: stage === i ? (CAT_COLORS[s.category] ?? '#3b82f6') : 'var(--color-a11oy-text-ghost)', border: `1px solid ${stage === i ? (CAT_COLORS[s.category] ?? '#3b82f6') + '40' : 'var(--color-a11oy-border)'}` }}
+              style={{ backgroundColor: stage === i ? `${CAT_COLORS[s.category] ?? '#c9b787'}22` : 'var(--color-a11oy-muted)', color: stage === i ? (CAT_COLORS[s.category] ?? '#c9b787') : 'var(--color-a11oy-text-ghost)', border: `1px solid ${stage === i ? (CAT_COLORS[s.category] ?? '#c9b787') + '40' : 'var(--color-a11oy-border)'}` }}
             >
               {s.step}
             </button>
@@ -244,9 +244,9 @@ export function InvestorDemo() {
         </div>
 
         {/* Main slide */}
-        <div className="rounded-xl border p-8 mb-6" style={{ backgroundColor: TYPE_BG[current.type] ?? 'rgba(59,130,246,0.04)', borderColor: `${CAT_COLORS[current.category] ?? '#3b82f6'}30`, minHeight: 420 }}>
+        <div className="rounded-xl border p-8 mb-6" style={{ backgroundColor: TYPE_BG[current.type] ?? 'rgba(201,183,135,0.04)', borderColor: `${CAT_COLORS[current.category] ?? '#c9b787'}30`, minHeight: 420 }}>
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ color: CAT_COLORS[current.category] ?? '#9bacc4', backgroundColor: `${CAT_COLORS[current.category] ?? '#9bacc4'}18` }}>
+            <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ color: CAT_COLORS[current.category] ?? '#5e5e5e', backgroundColor: `${CAT_COLORS[current.category] ?? '#5e5e5e'}18` }}>
               {current.category}
             </span>
             <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>STEP {current.step} / {STAGES.length}</span>
@@ -257,8 +257,8 @@ export function InvestorDemo() {
 
           <div className="grid grid-cols-3 gap-4 mb-6">
             {current.metrics.map(m => (
-              <div key={m.label} className="p-4 rounded-lg border text-center" style={{ borderColor: `${CAT_COLORS[current.category] ?? '#3b82f6'}25`, backgroundColor: `${CAT_COLORS[current.category] ?? '#3b82f6'}08` }}>
-                <div className="text-2xl font-bold font-mono mb-1" style={{ color: CAT_COLORS[current.category] ?? '#3b82f6' }}>{m.value}</div>
+              <div key={m.label} className="p-4 rounded-lg border text-center" style={{ borderColor: `${CAT_COLORS[current.category] ?? '#c9b787'}25`, backgroundColor: `${CAT_COLORS[current.category] ?? '#c9b787'}08` }}>
+                <div className="text-2xl font-bold font-mono mb-1" style={{ color: CAT_COLORS[current.category] ?? '#c9b787' }}>{m.value}</div>
                 <div className="text-xs font-medium mb-0.5" style={{ color: 'var(--color-a11oy-text-sub)' }}>{m.label}</div>
                 <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{m.sub}</div>
               </div>
@@ -266,8 +266,8 @@ export function InvestorDemo() {
           </div>
 
           {current.highlight && (
-            <div className="p-4 rounded-lg" style={{ backgroundColor: `${CAT_COLORS[current.category] ?? '#3b82f6'}12`, border: `1px solid ${CAT_COLORS[current.category] ?? '#3b82f6'}25` }}>
-              <p className="text-sm font-medium" style={{ color: CAT_COLORS[current.category] ?? '#3b82f6' }}>{current.highlight}</p>
+            <div className="p-4 rounded-lg" style={{ backgroundColor: `${CAT_COLORS[current.category] ?? '#c9b787'}12`, border: `1px solid ${CAT_COLORS[current.category] ?? '#c9b787'}25` }}>
+              <p className="text-sm font-medium" style={{ color: CAT_COLORS[current.category] ?? '#c9b787' }}>{current.highlight}</p>
             </div>
           )}
 
@@ -279,7 +279,7 @@ export function InvestorDemo() {
                 onReject={() => setApprovalGranted(false)}
               />
               {approvalGranted && (
-                <div className="mt-2 text-xs px-3 py-2 rounded" style={{ backgroundColor: 'rgba(16,185,129,0.08)', color: '#10b981', border: '1px solid rgba(16,185,129,0.2)' }}>
+                <div className="mt-2 text-xs px-3 py-2 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.08)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.2)' }}>
                   ✓ Approved — Workcell proceeds. Proof packet generated. Ledger updated.
                 </div>
               )}
@@ -321,7 +321,7 @@ export function InvestorDemo() {
 
           <div className="flex gap-1">
             {STAGES.map((_, i) => (
-              <div key={i} className="h-1.5 rounded-full" style={{ width: i === stage ? 24 : 8, backgroundColor: i === stage ? (CAT_COLORS[current.category] ?? '#3b82f6') : 'var(--color-a11oy-border)', transition: 'all 0.3s' }} />
+              <div key={i} className="h-1.5 rounded-full" style={{ width: i === stage ? 24 : 8, backgroundColor: i === stage ? (CAT_COLORS[current.category] ?? '#c9b787') : 'var(--color-a11oy-border)', transition: 'all 0.3s' }} />
             ))}
           </div>
 
@@ -329,7 +329,7 @@ export function InvestorDemo() {
             onClick={() => setStage(s => Math.min(STAGES.length - 1, s + 1))}
             disabled={stage === STAGES.length - 1}
             className="text-xs px-4 py-2 rounded font-medium"
-            style={{ backgroundColor: 'rgba(59,130,246,0.12)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.25)', opacity: stage === STAGES.length - 1 ? 0.4 : 1 }}
+            style={{ backgroundColor: 'rgba(201,183,135,0.12)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.25)', opacity: stage === STAGES.length - 1 ? 0.4 : 1 }}
           >
             Next →
           </button>

@@ -77,7 +77,7 @@ export const SCENE_CAPTIONS: SceneCaptions = {
     { startMs: 9000, endMs: 12000, text: 'Provenance is not optional.' },
   ],
   reel: [
-    { startMs: 0, endMs: 2500, text: 'LUMINA — executive briefing, principal eyes only.' },
+    { startMs: 0, endMs: 2500, text: 'Pulse — executive briefing, principal eyes only.' },
     { startMs: 2500, endMs: 5000, text: 'Vessels — maritime intelligence with human approval.' },
     { startMs: 5000, endMs: 7500, text: 'Terra — real estate intelligence across $4.2B+ AUM.' },
     {
@@ -86,7 +86,7 @@ export const SCENE_CAPTIONS: SceneCaptions = {
       text: 'Aegis — defense and intel, blocked by policy until cleared.',
     },
     { startMs: 10000, endMs: 12500, text: 'Carlota Jo — private advisory, judgment-led.' },
-    { startMs: 12500, endMs: 15000, text: 'TENAX — cyber posture under guardian approval.' },
+    { startMs: 12500, endMs: 15000, text: 'Aegis — cyber posture under guardian approval.' },
     { startMs: 15000, endMs: 17500, text: 'Lyte — decision intelligence with confidence scores.' },
     {
       startMs: 17500,

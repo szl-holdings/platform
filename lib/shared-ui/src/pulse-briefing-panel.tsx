@@ -218,7 +218,7 @@ export function PulseBriefingPanel({
               color: '#c8a84b',
             }}
           >
-            LUMINA ·{' '}
+            Pulse ·{' '}
             {new Date(data.briefingDate).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric',
@@ -257,7 +257,7 @@ export function PulseBriefingPanel({
           onMouseLeave={(e) => (e.currentTarget.style.color = '#546078')}
         >
           <ExternalLink size={10} />
-          Open in LUMINA
+          Open in Pulse
         </a>
       </div>
 

@@ -34,12 +34,12 @@ const DS = {
 };
 
 const ENTITY_TYPE_COLORS: Record<string, string> = {
-  revenue: '#10b981',
-  operations: '#3b82f6',
-  data: '#8b5cf6',
-  'supply-chain': '#f97316',
-  compliance: '#eab308',
-  brand: '#ec4899',
+  revenue: '#c9b787',
+  operations: '#c9b787',
+  data: '#8a8a8a',
+  'supply-chain': '#c9b787',
+  compliance: '#8a8a8a',
+  brand: '#c9b787',
 };
 
 const ENTITY_ICONS: Record<string, typeof Building2> = {
@@ -52,10 +52,10 @@ const ENTITY_ICONS: Record<string, typeof Building2> = {
 };
 
 const SEV_CONFIG: Record<string, { color: string; bg: string }> = {
-  critical: { color: '#ef4444', bg: 'rgba(239,68,68,0.08)' },
-  high: { color: '#f97316', bg: 'rgba(249,115,22,0.08)' },
-  medium: { color: '#eab308', bg: 'rgba(234,179,8,0.08)' },
-  low: { color: '#22c55e', bg: 'rgba(34,197,94,0.08)' },
+  critical: { color: '#f5f5f5', bg: 'rgba(245,245,245,0.08)' },
+  high: { color: '#c9b787', bg: 'rgba(201,183,135,0.08)' },
+  medium: { color: '#8a8a8a', bg: 'rgba(138,138,138,0.08)' },
+  low: { color: '#c9b787', bg: 'rgba(201,183,135,0.08)' },
 };
 
 function fmt(n: number | null | undefined) {
@@ -126,21 +126,21 @@ export default function BusinessImpactMap() {
 
   const riskTrendColor =
     execNarrative.riskTrend === 'increasing'
-      ? 'text-red-400'
+      ? 'text-[#f5f5f5]'
       : execNarrative.riskTrend === 'decreasing'
-        ? 'text-emerald-400'
-        : 'text-yellow-400';
+        ? 'text-[#c9b787]'
+        : 'text-[#c9b787]';
 
   return (
     <div className="p-6 space-y-6" style={{ maxWidth: 1280, margin: '0 auto' }}>
-      <CognitiveBreadcrumbs accent="#10b981" />
+      <CognitiveBreadcrumbs accent="#c9b787" />
       <div className="flex items-start justify-between">
         <div>
           <h1
             className="text-xl font-bold flex items-center gap-2"
             style={{ color: DS.text.primary }}
           >
-            <TrendingUp className="w-5 h-5 text-emerald-400" />
+            <TrendingUp className="w-5 h-5 text-[#c9b787]" />
             Business Impact Map
           </h1>
           <p className="text-sm mt-1" style={{ color: DS.text.secondary }}>
@@ -149,14 +149,14 @@ export default function BusinessImpactMap() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <CopyLinkButton accent="#10b981" />
+          <CopyLinkButton accent="#c9b787" />
           <button
             onClick={() => refetch()}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors"
             style={{
-              background: 'rgba(16,185,129,0.08)',
-              color: '#10b981',
-              border: '1px solid rgba(16,185,129,0.2)',
+              background: 'rgba(201,183,135,0.08)',
+              color: '#c9b787',
+              border: '1px solid rgba(201,183,135,0.2)',
             }}
           >
             <RefreshCw className="w-3 h-3" />
@@ -168,7 +168,7 @@ export default function BusinessImpactMap() {
       {denied && (
         <AccessDeniedNotice
           status={(error as HttpError).status}
-          accent="#10b981"
+          accent="#c9b787"
           resourceLabel="the business impact map"
         />
       )}
@@ -176,14 +176,14 @@ export default function BusinessImpactMap() {
       {!denied && !isLoading && execNarrative.executiveSummary && (
         <div
           className="rounded-xl p-5 space-y-4"
-          style={{ background: 'rgba(16,185,129,0.04)', border: '1px solid rgba(16,185,129,0.15)' }}
+          style={{ background: 'rgba(201,183,135,0.04)', border: '1px solid rgba(201,183,135,0.15)' }}
         >
           <div className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-emerald-400" />
+            <BarChart3 className="w-4 h-4 text-[#c9b787]" />
             <h2 className="text-sm font-semibold" style={{ color: DS.text.primary }}>
               Executive Narrative
             </h2>
-            <Badge className="ml-auto text-[9px] bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+            <Badge className="ml-auto text-[9px] bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20">
               Verified
             </Badge>
           </div>
@@ -192,22 +192,22 @@ export default function BusinessImpactMap() {
           </p>
           <div className="grid grid-cols-5 gap-4">
             {[
-              { label: 'Risk Score', value: execNarrative.riskScore, color: 'text-red-400' },
+              { label: 'Risk Score', value: execNarrative.riskScore, color: 'text-[#f5f5f5]' },
               { label: 'Risk Trend', value: execNarrative.riskTrend, color: riskTrendColor },
               {
                 label: 'Total Exposure',
                 value: fmt(execNarrative.totalEstimatedExposure),
-                color: 'text-orange-400',
+                color: 'text-[#c9b787]',
               },
               {
                 label: 'Active Incidents',
                 value: execNarrative.activeIncidentCount,
-                color: 'text-blue-400',
+                color: 'text-[#c9b787]',
               },
               {
                 label: 'Critical Findings',
                 value: execNarrative.criticalFindings,
-                color: 'text-red-400',
+                color: 'text-[#f5f5f5]',
               },
             ].map(({ label, value, color }) => (
               <div
@@ -227,7 +227,7 @@ export default function BusinessImpactMap() {
 
       {!denied && isLoading && (
         <div className="flex items-center justify-center py-16">
-          <div className="w-6 h-6 border-2 border-emerald-500/40 border-t-emerald-400 rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-[#c9b787]/40 border-t-emerald-400 rounded-full animate-spin" />
         </div>
       )}
 
@@ -334,8 +334,8 @@ export default function BusinessImpactMap() {
                           className={cn(
                             'text-[9px] shrink-0',
                             impact.status === 'closed'
-                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                              : 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+                              ? 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20'
+                              : 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
                           )}
                         >
                           {impact.status}
@@ -350,7 +350,7 @@ export default function BusinessImpactMap() {
                       </div>
                     </button>
                     <div className="text-right shrink-0">
-                      <p className="text-base font-bold text-orange-400">
+                      <p className="text-base font-bold text-[#c9b787]">
                         {fmt(impact.estimatedFinancialImpact)}
                       </p>
                       <p className="text-[10px]" style={{ color: DS.text.muted }}>
@@ -365,9 +365,9 @@ export default function BusinessImpactMap() {
                       }
                       className="flex items-center gap-1 text-[10px] px-2 py-1.5 rounded transition-colors shrink-0"
                       style={{
-                        background: 'rgba(59,130,246,0.1)',
-                        color: '#3b82f6',
-                        border: '1px solid rgba(59,130,246,0.25)',
+                        background: 'rgba(201,183,135,0.1)',
+                        color: '#c9b787',
+                        border: '1px solid rgba(201,183,135,0.25)',
                       }}
                       aria-label="Open proof chain"
                     >
@@ -440,11 +440,11 @@ export default function BusinessImpactMap() {
                               key={i}
                               className="flex items-center gap-2 p-2.5 rounded-lg text-[10px]"
                               style={{
-                                background: 'rgba(59,130,246,0.06)',
-                                border: '1px solid rgba(59,130,246,0.12)',
+                                background: 'rgba(201,183,135,0.06)',
+                                border: '1px solid rgba(201,183,135,0.12)',
                               }}
                             >
-                              <FileText className="w-3 h-3 text-blue-400 shrink-0" />
+                              <FileText className="w-3 h-3 text-[#c9b787] shrink-0" />
                               <div className="flex-1 min-w-0">
                                 <p style={{ color: DS.text.primary }}>{cit.source}</p>
                                 <p className="font-mono truncate" style={{ color: DS.text.muted }}>
@@ -453,7 +453,7 @@ export default function BusinessImpactMap() {
                               </div>
                               <span
                                 className="font-bold shrink-0"
-                                style={{ color: cit.confidence > 90 ? '#10b981' : '#f59e0b' }}
+                                style={{ color: cit.confidence > 90 ? '#c9b787' : '#c9b787' }}
                               >
                                 {cit.confidence}%
                               </span>
@@ -520,7 +520,7 @@ export default function BusinessImpactMap() {
                         </div>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="text-sm font-bold text-red-400">
+                        <p className="text-sm font-bold text-[#f5f5f5]">
                           {fmt(f.estimatedFineExposure)}
                         </p>
                         <p className="text-[9px]" style={{ color: DS.text.muted }}>

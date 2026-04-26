@@ -101,9 +101,9 @@ const huntTimeline = [
 ];
 
 const sevColor: Record<string, string> = {
-  Critical: 'bg-red-500/10 text-red-400 border-red-500/20',
-  High: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  Medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  Critical: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  High: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  Medium: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
 };
 
 export default function ThreatHunting() {
@@ -183,7 +183,7 @@ export default function ThreatHunting() {
                   </div>
                   <div className="text-right shrink-0">
                     <p
-                      className={`text-xl font-bold ${hunt.hits > 10 ? 'text-red-400' : hunt.hits > 5 ? 'text-orange-400' : 'text-amber-400'}`}
+                      className={`text-xl font-bold ${hunt.hits > 10 ? 'text-[#f5f5f5]' : hunt.hits > 5 ? 'text-[#c9b787]' : 'text-[#c9b787]'}`}
                     >
                       {hunt.hits}
                     </p>
@@ -203,8 +203,8 @@ export default function ThreatHunting() {
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
-                      <Eye className="w-4 h-4 text-red-400" />
+                    <div className="w-8 h-8 rounded-lg bg-[#f5f5f5]/10 flex items-center justify-center shrink-0">
+                      <Eye className="w-4 h-4 text-[#f5f5f5]" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -214,7 +214,7 @@ export default function ThreatHunting() {
                         </Badge>
                         <Badge
                           variant="outline"
-                          className={`text-[10px] ${ioc.reputation === 'Malicious' ? 'text-red-400 bg-red-500/10 border-red-500/20' : 'text-amber-400 bg-amber-500/10 border-amber-500/20'}`}
+                          className={`text-[10px] ${ioc.reputation === 'Malicious' ? 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20' : 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20'}`}
                         >
                           {ioc.reputation}
                         </Badge>
@@ -244,7 +244,7 @@ export default function ThreatHunting() {
                 {event.time}
               </span>
               <div
-                className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${event.severity === 'Critical' ? 'bg-red-500' : event.severity === 'High' ? 'bg-orange-500' : 'bg-amber-500'}`}
+                className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${event.severity === 'Critical' ? 'bg-[#f5f5f5]' : event.severity === 'High' ? 'bg-[#c9b787]' : 'bg-[#c9b787]'}`}
               />
               <p className="text-xs">{event.event}</p>
               <Badge

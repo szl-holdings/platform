@@ -75,51 +75,51 @@ const nodeTypeConfig: Record<
   { color: string; bg: string; border: string; label: string; icon: React.ElementType }
 > = {
   trigger: {
-    color: '#ef4444',
-    bg: 'bg-red-500/10',
-    border: 'border-red-500/30',
+    color: '#f5f5f5',
+    bg: 'bg-[#f5f5f5]/10',
+    border: 'border-[#f5f5f5]/30',
     label: 'Trigger',
     icon: Zap,
   },
   action: {
-    color: '#3b82f6',
-    bg: 'bg-blue-500/10',
-    border: 'border-blue-500/30',
+    color: '#c9b787',
+    bg: 'bg-[#c9b787]/10',
+    border: 'border-[#c9b787]/30',
     label: 'Action',
     icon: Play,
   },
   condition: {
-    color: '#f59e0b',
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/30',
+    color: '#c9b787',
+    bg: 'bg-[#c9b787]/10',
+    border: 'border-[#c9b787]/30',
     label: 'Condition',
     icon: GitBranch,
   },
   enrich: {
-    color: '#8b5cf6',
-    bg: 'bg-purple-500/10',
-    border: 'border-purple-500/30',
+    color: '#8a8a8a',
+    bg: 'bg-[#8a8a8a]/10',
+    border: 'border-[#8a8a8a]/30',
     label: 'Enrich',
     icon: Database,
   },
   notify: {
-    color: '#06b6d4',
-    bg: 'bg-cyan-500/10',
-    border: 'border-cyan-500/30',
+    color: '#8a8a8a',
+    bg: 'bg-[#8a8a8a]/10',
+    border: 'border-[#8a8a8a]/30',
     label: 'Notify',
     icon: Mail,
   },
   approve: {
-    color: '#f97316',
-    bg: 'bg-orange-500/10',
-    border: 'border-orange-500/30',
+    color: '#c9b787',
+    bg: 'bg-[#c9b787]/10',
+    border: 'border-[#c9b787]/30',
     label: 'Approve',
     icon: User,
   },
   loop: {
-    color: '#10b981',
-    bg: 'bg-emerald-500/10',
-    border: 'border-emerald-500/30',
+    color: '#c9b787',
+    bg: 'bg-[#c9b787]/10',
+    border: 'border-[#c9b787]/30',
     label: 'Loop',
     icon: RefreshCw,
   },
@@ -136,10 +136,10 @@ const NODE_PALETTE: { type: NodeType; label: string }[] = [
 ];
 
 const STATUS_COLOR: Record<string, string> = {
-  completed: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
-  awaiting_approval: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-  failed: 'text-red-400 bg-red-500/10 border-red-500/30',
-  running: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
+  completed: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  awaiting_approval: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  failed: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/30',
+  running: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
 };
 
 function relTime(iso: string) {
@@ -331,7 +331,7 @@ export default function SOARBuilder() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Zap className="w-5 h-5 text-cyan-400" />
+            <Zap className="w-5 h-5 text-[#8a8a8a]" />
             <h1 className="text-lg font-semibold text-white">SOAR Visual Playbook Builder</h1>
           </div>
           <p className="text-xs text-zinc-500">
@@ -353,7 +353,7 @@ export default function SOARBuilder() {
           <button
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 text-xs font-medium hover:bg-cyan-500/25 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#8a8a8a]/15 border border-[#8a8a8a]/30 text-[#8a8a8a] text-xs font-medium hover:bg-[#8a8a8a]/25 transition-colors disabled:opacity-50"
           >
             {saveMutation.isPending ? (
               <>
@@ -375,7 +375,7 @@ export default function SOARBuilder() {
           className={cn(
             'flex items-center gap-1.5 text-xs px-3 py-2 border-b-2 transition-colors',
             tab === 'builder'
-              ? 'border-cyan-400 text-cyan-300'
+              ? 'border-[#8a8a8a] text-[#8a8a8a]'
               : 'border-transparent text-zinc-500 hover:text-zinc-300',
           )}
         >
@@ -386,13 +386,13 @@ export default function SOARBuilder() {
           className={cn(
             'flex items-center gap-1.5 text-xs px-3 py-2 border-b-2 transition-colors',
             tab === 'runs'
-              ? 'border-cyan-400 text-cyan-300'
+              ? 'border-[#8a8a8a] text-[#8a8a8a]'
               : 'border-transparent text-zinc-500 hover:text-zinc-300',
           )}
         >
           <History className="w-3 h-3" /> Run History{' '}
           {runs.length > 0 && (
-            <span className="text-[10px] px-1 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400">
+            <span className="text-[10px] px-1 py-0.5 rounded-full bg-[#8a8a8a]/20 text-[#8a8a8a]">
               {runs.length}
             </span>
           )}
@@ -417,7 +417,7 @@ export default function SOARBuilder() {
                     className={cn(
                       'w-full rounded-xl border p-3 text-left transition-all',
                       selectedPlaybook?.id === pb.id
-                        ? 'border-cyan-500/30 bg-cyan-500/5'
+                        ? 'border-[#8a8a8a]/30 bg-[#8a8a8a]/5'
                         : 'border-white/8 bg-white/3 hover:bg-white/5',
                     )}
                   >
@@ -429,9 +429,9 @@ export default function SOARBuilder() {
                         className={cn(
                           'text-[9px] px-1 py-0.5 rounded border shrink-0 capitalize',
                           pb.status === 'active'
-                            ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10'
+                            ? 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10'
                             : pb.status === 'draft'
-                              ? 'text-amber-400 border-amber-500/30 bg-amber-500/10'
+                              ? 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10'
                               : 'text-zinc-400 border-zinc-500/30 bg-zinc-500/10',
                         )}
                       >
@@ -442,7 +442,7 @@ export default function SOARBuilder() {
                     <div className="flex items-center gap-3 text-[9px] text-zinc-500">
                       <span>{pb.nodeCount} nodes</span>
                       {pb.runCount > 0 && (
-                        <span className="text-emerald-400">{pb.successRate}% success</span>
+                        <span className="text-[#c9b787]">{pb.successRate}% success</span>
                       )}
                       <span>{pb.runCount} runs</span>
                     </div>
@@ -526,12 +526,12 @@ export default function SOARBuilder() {
                                 {cfg.label}
                               </span>
                               {!node.auto && (
-                                <span className="text-[9px] text-orange-400 bg-orange-500/10 px-1 py-0.5 rounded">
+                                <span className="text-[9px] text-[#c9b787] bg-[#c9b787]/10 px-1 py-0.5 rounded">
                                   👤 Human
                                 </span>
                               )}
                               {node.auto && (
-                                <span className="text-[9px] text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded">
+                                <span className="text-[9px] text-[#c9b787] bg-[#c9b787]/10 px-1 py-0.5 rounded">
                                   ⚡ Auto
                                 </span>
                               )}
@@ -574,13 +574,13 @@ export default function SOARBuilder() {
                     {
                       label: 'Success Rate',
                       value: `${selectedPlaybook.successRate}%`,
-                      color: '#10b981',
+                      color: '#c9b787',
                     },
                     { label: 'Nodes', value: String(selectedPlaybook.nodeCount) },
                     {
                       label: 'Status',
                       value: selectedPlaybook.status,
-                      color: selectedPlaybook.status === 'active' ? '#10b981' : '#f59e0b',
+                      color: selectedPlaybook.status === 'active' ? '#c9b787' : '#c9b787',
                     },
                   ].map((stat) => (
                     <div key={stat.label} className="flex items-center justify-between text-[11px]">
@@ -598,7 +598,7 @@ export default function SOARBuilder() {
                 <button
                   onClick={() => executeMutation.mutate(selectedPlaybook.id)}
                   disabled={executeMutation.isPending}
-                  className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 text-xs font-medium hover:bg-cyan-500/25 transition-colors disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-[#8a8a8a]/15 border border-[#8a8a8a]/30 text-[#8a8a8a] text-xs font-medium hover:bg-[#8a8a8a]/25 transition-colors disabled:opacity-50"
                 >
                   {executeMutation.isPending ? (
                     <>
@@ -614,7 +614,7 @@ export default function SOARBuilder() {
                 <button
                   onClick={() => deleteMutation.mutate(selectedPlaybook.id)}
                   disabled={deleteMutation.isPending}
-                  className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs hover:bg-red-500/15 transition-colors disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 text-[#f5f5f5] text-xs hover:bg-[#f5f5f5]/15 transition-colors disabled:opacity-50"
                 >
                   <Trash2 className="w-3.5 h-3.5" /> Delete Playbook
                 </button>
@@ -715,7 +715,7 @@ export default function SOARBuilder() {
                   </div>
                   <div>
                     <span className="text-zinc-500">Failed: </span>
-                    <span className={run.stepsFailed > 0 ? 'text-red-400' : 'text-emerald-400'}>
+                    <span className={run.stepsFailed > 0 ? 'text-[#f5f5f5]' : 'text-[#c9b787]'}>
                       {run.stepsFailed}
                     </span>
                   </div>
@@ -730,10 +730,10 @@ export default function SOARBuilder() {
                   </div>
                 )}
                 {run.incidentId && (
-                  <div className="text-[10px] text-cyan-400 mt-1">Linked: {run.incidentId}</div>
+                  <div className="text-[10px] text-[#8a8a8a] mt-1">Linked: {run.incidentId}</div>
                 )}
                 {run.status === 'awaiting_approval' && (
-                  <div className="flex items-center gap-1.5 text-[10px] text-amber-400 mt-2 px-2 py-1.5 rounded bg-amber-500/10 border border-amber-500/20">
+                  <div className="flex items-center gap-1.5 text-[10px] text-[#c9b787] mt-2 px-2 py-1.5 rounded bg-[#c9b787]/10 border border-[#c9b787]/20">
                     <Clock className="w-3 h-3" /> Paused at approval gate — awaiting CISO
                     authorization
                   </div>

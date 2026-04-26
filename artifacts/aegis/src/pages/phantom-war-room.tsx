@@ -16,8 +16,8 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-const ACCENT = '#ef4444';
-const PHANTOM_ACCENT = '#a855f7';
+const ACCENT = '#f5f5f5';
+const PHANTOM_ACCENT = '#8a8a8a';
 const DS = {
   surface: 'rgba(255,255,255,0.025)',
   border: 'rgba(255,255,255,0.06)',
@@ -77,7 +77,7 @@ const ADVERSARY_PROFILES: Record<
   'nation-state-apt': {
     label: 'Nation-State APT',
     icon: Globe,
-    color: '#ef4444',
+    color: '#f5f5f5',
     traits: [
       'Long-dwell infiltration',
       'Supply chain compromise',
@@ -88,13 +88,13 @@ const ADVERSARY_PROFILES: Record<
   'ransomware-gang': {
     label: 'Ransomware Gang',
     icon: Lock,
-    color: '#f97316',
+    color: '#c9b787',
     traits: ['Double extortion', 'RaaS deployment', 'AD takeover', 'Backup destruction'],
   },
   'insider-threat': {
     label: 'Malicious Insider',
     icon: Users,
-    color: '#f59e0b',
+    color: '#c9b787',
     traits: [
       'Privileged access abuse',
       'Staged data theft',
@@ -105,13 +105,13 @@ const ADVERSARY_PROFILES: Record<
   hacktivist: {
     label: 'Hacktivist',
     icon: RadioTower,
-    color: '#3b82f6',
+    color: '#c9b787',
     traits: ['DDoS campaigns', 'Defacement', 'Data leaks', 'Disruptive attacks'],
   },
   cybercriminal: {
     label: 'Cybercriminal',
     icon: Database,
-    color: '#8b5cf6',
+    color: '#8a8a8a',
     traits: ['BEC fraud', 'Credential theft', 'Cryptojacking', 'PII exfiltration'],
   },
 };
@@ -882,13 +882,13 @@ function generateSteps(
 
 const KILL_CHAIN_STAGES = [
   { id: 'recon', label: 'Recon', color: '#6b7280' },
-  { id: 'initial-access', label: 'Access', color: '#8b5cf6' },
-  { id: 'execution', label: 'Exec', color: '#3b82f6' },
-  { id: 'persistence', label: 'Persist', color: '#06b6d4' },
-  { id: 'escalation', label: 'Priv Esc', color: '#f59e0b' },
-  { id: 'lateral', label: 'Lateral', color: '#f97316' },
-  { id: 'collection', label: 'Collect', color: '#ef4444' },
-  { id: 'exfil-impact', label: 'Impact', color: '#dc2626' },
+  { id: 'initial-access', label: 'Access', color: '#8a8a8a' },
+  { id: 'execution', label: 'Exec', color: '#c9b787' },
+  { id: 'persistence', label: 'Persist', color: '#8a8a8a' },
+  { id: 'escalation', label: 'Priv Esc', color: '#c9b787' },
+  { id: 'lateral', label: 'Lateral', color: '#c9b787' },
+  { id: 'collection', label: 'Collect', color: '#f5f5f5' },
+  { id: 'exfil-impact', label: 'Impact', color: '#f5f5f5' },
 ];
 
 const STAGE_TO_CHAIN: Record<string, string> = {
@@ -1283,7 +1283,7 @@ export default function PhantomWarRoom() {
                       className="rounded-lg p-2 text-center"
                       style={{ background: 'rgba(255,255,255,0.04)' }}
                     >
-                      <div className="text-sm font-bold font-mono" style={{ color: '#f97316' }}>
+                      <div className="text-sm font-bold font-mono" style={{ color: '#c9b787' }}>
                         {Math.min(100, (tmpl.blastRadius ?? 70) + (sophistication - 3) * 6)}%
                       </div>
                       <div className="text-[9px]" style={{ color: DS.text.muted }}>
@@ -1336,14 +1336,14 @@ export default function PhantomWarRoom() {
               {
                 label: 'Detection Rate',
                 value: `${detectionRate}%`,
-                color: detectionRate > 60 ? '#6b8f71' : '#ef4444',
+                color: detectionRate > 60 ? '#6b8f71' : '#f5f5f5',
               },
               {
                 label: 'Steps Detected',
                 value: `${detectedCount} / ${visibleSteps.length}`,
-                color: '#f59e0b',
+                color: '#c9b787',
               },
-              { label: 'Blast Radius', value: `${campaign.blastRadius}%`, color: '#ef4444' },
+              { label: 'Blast Radius', value: `${campaign.blastRadius}%`, color: '#f5f5f5' },
             ].map((c) => (
               <div
                 key={c.label}
@@ -1482,11 +1482,11 @@ export default function PhantomWarRoom() {
                           {step.mitre}
                         </span>
                         <span
-                          className={`text-[8px] px-1.5 py-0.5 rounded font-bold ml-auto ${step.detected ? 'text-green-400' : 'text-red-400'}`}
+                          className={`text-[8px] px-1.5 py-0.5 rounded font-bold ml-auto ${step.detected ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}
                           style={{
                             background: step.detected
                               ? 'rgba(74,222,128,0.12)'
-                              : 'rgba(239,68,68,0.12)',
+                              : 'rgba(245,245,245,0.12)',
                           }}
                         >
                           {step.detected ? 'DETECTED' : 'MISSED'}
@@ -1560,7 +1560,7 @@ export default function PhantomWarRoom() {
                     <div className="text-[9px] mb-1" style={{ color: DS.text.muted }}>
                       Predicted Financial Impact
                     </div>
-                    <div className="text-[10px] leading-relaxed" style={{ color: '#ef4444' }}>
+                    <div className="text-[10px] leading-relaxed" style={{ color: '#f5f5f5' }}>
                       {campaign.predictedImpact}
                     </div>
                   </div>
@@ -1569,11 +1569,11 @@ export default function PhantomWarRoom() {
 
               <div
                 className="rounded-xl border p-4"
-                style={{ borderColor: 'rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.03)' }}
+                style={{ borderColor: 'rgba(245,245,245,0.2)', background: 'rgba(245,245,245,0.03)' }}
               >
                 <div
                   className="text-[10px] font-bold uppercase tracking-wider mb-3"
-                  style={{ color: '#ef4444' }}
+                  style={{ color: '#f5f5f5' }}
                 >
                   Detection Coverage Gaps
                 </div>
@@ -1584,11 +1584,11 @@ export default function PhantomWarRoom() {
                       <div
                         key={s.id}
                         className="flex items-center gap-2 p-2 rounded-lg"
-                        style={{ background: 'rgba(239,68,68,0.08)' }}
+                        style={{ background: 'rgba(245,245,245,0.08)' }}
                       >
-                        <AlertTriangle className="w-3 h-3 text-red-400 shrink-0" />
+                        <AlertTriangle className="w-3 h-3 text-[#f5f5f5] shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <div className="text-[10px] font-semibold text-red-300 truncate">
+                          <div className="text-[10px] font-semibold text-[#f5f5f5] truncate">
                             {s.technique}
                           </div>
                           <div className="text-[9px] font-mono" style={{ color: DS.text.muted }}>
@@ -1640,7 +1640,7 @@ export default function PhantomWarRoom() {
                       className="text-center rounded-lg p-2"
                       style={{ background: 'rgba(255,255,255,0.04)' }}
                     >
-                      <div className="text-lg font-bold font-mono text-red-400">{missedCount}</div>
+                      <div className="text-lg font-bold font-mono text-[#f5f5f5]">{missedCount}</div>
                       <div className="text-[9px]" style={{ color: DS.text.muted }}>
                         Gaps Found
                       </div>

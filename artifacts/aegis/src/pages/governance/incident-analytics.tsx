@@ -41,7 +41,7 @@ interface Finding {
 
 function DemoDataBanner({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-amber-400/10 border border-amber-400/20 text-xs text-amber-400 font-mono">
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-[#c9b787]/10 border border-[#c9b787]/20 text-xs text-[#c9b787] font-mono">
       <Info size={12} />
       <span>{label} — seeded pilot data, not yet wired to live pipeline</span>
     </div>
@@ -55,7 +55,7 @@ function MetricCard({
   sub,
   trend,
   icon: Icon,
-  color = '#f59e0b',
+  color = '#c9b787',
 }: {
   label: string;
   value: string | number;
@@ -66,7 +66,7 @@ function MetricCard({
   color?: string;
 }) {
   const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
-  const trendColor = trend === 'up' ? '#22c55e' : trend === 'down' ? '#ef4444' : '#6b7280';
+  const trendColor = trend === 'up' ? '#c9b787' : trend === 'down' ? '#f5f5f5' : '#6b7280';
   return (
     <div className="bg-[#0d1117] border border-[#1e2a3a] rounded-xl p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between">
@@ -123,10 +123,10 @@ const ANALYST_WORKLOAD = [
 ];
 
 const RESOLUTION_BY_SEVERITY = [
-  { name: 'Critical', value: 12, color: '#ef4444' },
-  { name: 'High', value: 28, color: '#f97316' },
-  { name: 'Medium', value: 45, color: '#f59e0b' },
-  { name: 'Low', value: 15, color: '#3b82f6' },
+  { name: 'Critical', value: 12, color: '#f5f5f5' },
+  { name: 'High', value: 28, color: '#c9b787' },
+  { name: 'Medium', value: 45, color: '#c9b787' },
+  { name: 'Low', value: 15, color: '#c9b787' },
 ];
 
 export default function IncidentAnalyticsPage() {
@@ -150,7 +150,7 @@ export default function IncidentAnalyticsPage() {
     <div className="min-h-screen bg-[#07090d] text-white p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-center gap-3 mb-1">
-          <Activity size={22} className="text-amber-400" />
+          <Activity size={22} className="text-[#c9b787]" />
           <h1 className="text-xl font-bold text-white font-mono tracking-tight">
             Incident Analytics
           </h1>
@@ -167,7 +167,7 @@ export default function IncidentAnalyticsPage() {
             sub="Pilot demo data"
             trend="up"
             icon={Clock}
-            color="#22c55e"
+            color="#c9b787"
           />
           <MetricCard
             label="Mean Time to Respond"
@@ -176,7 +176,7 @@ export default function IncidentAnalyticsPage() {
             sub="Pilot demo data"
             trend="up"
             icon={Target}
-            color="#22c55e"
+            color="#c9b787"
           />
           <MetricCard
             label="Active Incidents"
@@ -185,7 +185,7 @@ export default function IncidentAnalyticsPage() {
             sub={`${totalIncidents} total in system`}
             trend="flat"
             icon={AlertTriangle}
-            color="#f59e0b"
+            color="#c9b787"
           />
           <MetricCard
             label="Resolution Rate"
@@ -193,7 +193,7 @@ export default function IncidentAnalyticsPage() {
             sub={`${closedIncidents.length} of ${totalIncidents} closed`}
             trend="up"
             icon={CheckCircle2}
-            color="#22c55e"
+            color="#c9b787"
           />
         </div>
 
@@ -219,7 +219,7 @@ export default function IncidentAnalyticsPage() {
                 <Line
                   type="monotone"
                   dataKey="mttd"
-                  stroke="#22c55e"
+                  stroke="#c9b787"
                   strokeWidth={2}
                   dot={{ r: 3 }}
                   name="MTTD (min)"
@@ -227,7 +227,7 @@ export default function IncidentAnalyticsPage() {
                 <Line
                   type="monotone"
                   dataKey="mttr"
-                  stroke="#f59e0b"
+                  stroke="#c9b787"
                   strokeWidth={2}
                   dot={{ r: 3 }}
                   name="MTTR (min)"
@@ -236,8 +236,8 @@ export default function IncidentAnalyticsPage() {
             </ResponsiveContainer>
             <div className="flex gap-4 mt-2">
               {[
-                { label: 'MTTD (min)', color: '#22c55e' },
-                { label: 'MTTR (min)', color: '#f59e0b' },
+                { label: 'MTTD (min)', color: '#c9b787' },
+                { label: 'MTTR (min)', color: '#c9b787' },
               ].map((l) => (
                 <div key={l.label} className="flex items-center gap-1">
                   <div className="w-3 h-0.5" style={{ backgroundColor: l.color }} />
@@ -263,7 +263,7 @@ export default function IncidentAnalyticsPage() {
                     borderRadius: 8,
                   }}
                 />
-                <Bar dataKey="rate" fill="#f59e0b" radius={[4, 4, 0, 0]} name="Escalation %" />
+                <Bar dataKey="rate" fill="#c9b787" radius={[4, 4, 0, 0]} name="Escalation %" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -288,10 +288,10 @@ export default function IncidentAnalyticsPage() {
                         width: `${Math.min(100, (d.avgDelayMin / d.slaMin) * 100)}%`,
                         backgroundColor:
                           d.avgDelayMin > d.slaMin * 0.8
-                            ? '#ef4444'
+                            ? '#f5f5f5'
                             : d.avgDelayMin > d.slaMin * 0.5
-                              ? '#f59e0b'
-                              : '#22c55e',
+                              ? '#c9b787'
+                              : '#c9b787',
                       }}
                     />
                     <div
@@ -368,14 +368,14 @@ export default function IncidentAnalyticsPage() {
                     <td className="py-3 pr-6 text-white">{a.analyst}</td>
                     <td className="py-3 pr-6">
                       <span
-                        className={`px-2 py-0.5 rounded text-xs font-bold ${a.active >= 6 ? 'bg-red-500/20 text-red-400' : a.active >= 4 ? 'bg-amber-500/20 text-amber-400' : 'bg-green-500/20 text-green-400'}`}
+                        className={`px-2 py-0.5 rounded text-xs font-bold ${a.active >= 6 ? 'bg-[#f5f5f5]/20 text-[#f5f5f5]' : a.active >= 4 ? 'bg-[#c9b787]/20 text-[#c9b787]' : 'bg-[#c9b787]/20 text-[#c9b787]'}`}
                       >
                         {a.active}
                       </span>
                     </td>
                     <td className="py-3 pr-6 text-[#8b9ab0]">{a.closed}</td>
                     <td className="py-3 pr-6">
-                      <span className={a.escalated > 2 ? 'text-red-400' : 'text-[#8b9ab0]'}>
+                      <span className={a.escalated > 2 ? 'text-[#f5f5f5]' : 'text-[#8b9ab0]'}>
                         {a.escalated}
                       </span>
                     </td>
@@ -383,10 +383,10 @@ export default function IncidentAnalyticsPage() {
                       <span
                         className={
                           a.avgMttr > 200
-                            ? 'text-red-400'
+                            ? 'text-[#f5f5f5]'
                             : a.avgMttr > 160
-                              ? 'text-amber-400'
-                              : 'text-green-400'
+                              ? 'text-[#c9b787]'
+                              : 'text-[#c9b787]'
                         }
                       >
                         {a.avgMttr}min

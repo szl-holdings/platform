@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { sentraTwin } from '@/data/sentra-twin';
 import { DataProvenance } from '@/lib/data-provenance';
 
-const ACCENT = '#ef4444';
+const ACCENT = '#f5f5f5';
 const DRIFT_EVIDENCE: EvidenceSource[] = [
   {
     id: 'ev-ctrl-001',
@@ -60,7 +60,7 @@ export default function ControlDrift() {
             <div
               className={cn(
                 'text-2xl font-display font-bold mb-2',
-                family.drift > 0 ? 'text-red-400' : 'text-emerald-400',
+                family.drift > 0 ? 'text-[#f5f5f5]' : 'text-[#c9b787]',
               )}
             >
               {family.drift > 0 ? family.drift : family.count}
@@ -80,8 +80,8 @@ export default function ControlDrift() {
             <div key={i} className="sentra-panel p-6">
               <div className="flex justify-between items-start">
                 <div className="flex gap-4 flex-1">
-                  <div className="w-12 h-12 rounded bg-red-500/10 flex items-center justify-center shrink-0">
-                    <ShieldAlert className="w-6 h-6 text-red-500" />
+                  <div className="w-12 h-12 rounded bg-[#f5f5f5]/10 flex items-center justify-center shrink-0">
+                    <ShieldAlert className="w-6 h-6 text-[#f5f5f5]" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
@@ -106,9 +106,9 @@ export default function ControlDrift() {
                         autonomyMode={autonomyMode}
                         onAutonomyChange={setAutonomyMode}
                       >
-                        <div className="p-4 bg-emerald-500/5 rounded border border-emerald-500/10 flex items-center justify-between">
+                        <div className="p-4 bg-[#c9b787]/5 rounded border border-[#c9b787]/10 flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                            <CheckCircle2 className="w-4 h-4 text-[#c9b787]" />
                             <div>
                               <div className="text-xs font-bold text-slate-200">
                                 Automated Remediation Available
@@ -118,7 +118,7 @@ export default function ControlDrift() {
                               </p>
                             </div>
                           </div>
-                          <button className="px-4 py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition-colors">
+                          <button className="px-4 py-1.5 rounded bg-[#c9b787] hover:bg-[#c9b787] text-white text-[11px] font-bold transition-colors">
                             Apply Fix
                           </button>
                         </div>

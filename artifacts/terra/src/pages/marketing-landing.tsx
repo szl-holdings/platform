@@ -18,14 +18,15 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-const _ACCENT = '#2d6a4f';
-const ACCENT_LIGHT = '#5a9e82';
-const _ACCENT_LIGHT_BG = '#40856a';
-const BTN_BG = '#1e6e52';
-const _BRASS = '#9a7840';
-const BRASS_LIGHT = '#b8943c';
-const BG = '#0a0c10';
-const BG2 = '#0f1218';
+const _ACCENT = '#c9b787';
+const ACCENT_LIGHT = '#c9b787';
+const _ACCENT_LIGHT_BG = '#c9b787';
+const BTN_BG = '#f5f5f5';
+const BTN_TEXT = '#0a0a0a';
+const _BRASS = '#c9b787';
+const BRASS_LIGHT = '#c9b787';
+const BG = '#0a0a0a';
+const BG2 = '#111111';
 
 const doctrine = [
   {
@@ -207,7 +208,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <div
               className="p-1.5 rounded-lg"
               style={{
-                background: 'rgba(45,106,79,0.12)',
+                background: 'rgba(201,183,135,0.12)',
                 border: `1px solid rgba(45,106,79,0.22)`,
               }}
             >
@@ -243,7 +244,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <button
               onClick={onSignIn}
               className="text-[12px] font-semibold px-5 py-1.5 rounded-lg transition-all"
-              style={{ background: BTN_BG, color: '#fff' }}
+              style={{ background: BTN_BG, color: BTN_TEXT }}
             >
               Sign in
             </button>
@@ -285,7 +286,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
               setMobileNav(false);
             }}
             className="mt-4 text-sm font-semibold px-8 py-3 rounded-xl"
-            style={{ background: BTN_BG, color: '#fff' }}
+            style={{ background: BTN_BG, color: BTN_TEXT }}
           >
             Sign in
           </button>
@@ -336,7 +337,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <button
               onClick={onSignIn}
               className="inline-flex items-center gap-2 text-[13px] font-semibold px-7 py-3 rounded-lg transition-all"
-              style={{ background: BTN_BG, color: '#fff' }}
+              style={{ background: BTN_BG, color: BTN_TEXT }}
             >
               Sign In <ArrowRight size={14} />
             </button>
@@ -424,7 +425,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
               className="mt-14 rounded-2xl p-6 sm:p-8"
               style={{
                 background: 'rgba(45,106,79,0.04)',
-                border: '1px solid rgba(45,106,79,0.10)',
+                border: '1px solid rgba(201,183,135,0.08)',
               }}
             >
               <div className="flex justify-between items-center mb-6">
@@ -436,7 +437,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 </span>
                 <span
                   className="flex items-center gap-1.5 text-[9px] font-mono"
-                  style={{ color: '#5a9e82' }}
+                  style={{ color: '#c9b787' }}
                 >
                   <span
                     className="w-1.5 h-1.5 rounded-full animate-pulse"
@@ -447,7 +448,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
                 {[
-                  { label: 'Pre-Foreclosure', count: '340+', color: '#b8943c' },
+                  { label: 'Pre-Foreclosure', count: '340+', color: '#c9b787' },
                   { label: 'Active Foreclosure', count: '180+', color: '#c0503a' },
                   { label: 'Tax Lien', count: '290+', color: '#8b5cf6' },
                   { label: 'Auction Imminent', count: '95', color: '#c05840' },
@@ -506,8 +507,8 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                     <div
                       className="w-7 h-7 rounded-lg flex items-center justify-center"
                       style={{
-                        background: 'rgba(45,106,79,0.10)',
-                        border: '1px solid rgba(45,106,79,0.16)',
+                        background: 'rgba(201,183,135,0.08)',
+                        border: '1px solid rgba(201,183,135,0.15)',
                       }}
                     >
                       <d.icon size={13} style={{ color: ACCENT_LIGHT }} />
@@ -560,8 +561,8 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                   <div
                     className="w-8 h-8 rounded-lg flex items-center justify-center mb-4"
                     style={{
-                      background: 'rgba(45,106,79,0.10)',
-                      border: '1px solid rgba(45,106,79,0.16)',
+                      background: 'rgba(201,183,135,0.08)',
+                      border: '1px solid rgba(201,183,135,0.15)',
                     }}
                   >
                     <c.icon size={14} style={{ color: ACCENT_LIGHT }} />
@@ -666,8 +667,8 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center"
                   style={{
-                    background: 'rgba(45,106,79,0.10)',
-                    border: '1px solid rgba(45,106,79,0.16)',
+                    background: 'rgba(201,183,135,0.08)',
+                    border: '1px solid rgba(201,183,135,0.15)',
                   }}
                 >
                   <Shield size={14} style={{ color: ACCENT_LIGHT }} />
@@ -750,7 +751,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 tier: 'Pilot',
                 desc: '90-day structured pilot for a single acquisition team or brokerage desk. Includes onboarding, data integration, and dedicated success support.',
                 cta: 'Start a Pilot',
-                accent: '#5a9e82',
+                accent: '#c9b787',
                 note: '90 days · Scoped engagement',
                 highlight: true,
                 ctaType: 'trial' as const,
@@ -836,7 +837,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
           <div className="text-center mb-16">
             <p
               className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3"
-              style={{ color: '#5a9e82' }}
+              style={{ color: '#c9b787' }}
             >
               Platform Walkthrough
             </p>
@@ -891,7 +892,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                       className="inline-flex items-center justify-center w-10 h-10 rounded-full text-[11px] font-bold"
                       style={{
                         background: 'rgba(64,133,106,0.12)',
-                        color: '#5a9e82',
+                        color: '#c9b787',
                         border: '1px solid rgba(64,133,106,0.2)',
                       }}
                     >
@@ -908,7 +909,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                         className="text-[9px] font-mono px-2 py-0.5 rounded"
                         style={{
                           background: 'rgba(64,133,106,0.08)',
-                          color: '#5a9e82',
+                          color: '#c9b787',
                           border: '1px solid rgba(64,133,106,0.1)',
                         }}
                       >
@@ -944,6 +945,20 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
         </div>
       </section>
 
+      <section style={{ padding: '80px 24px', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
+          <p style={{ fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.25em', color: '#5e5e5e', marginBottom: 20, textTransform: 'uppercase' as const }}>
+            Part of the SZL Holdings ecosystem
+          </p>
+          <p style={{ fontSize: 22, fontWeight: 600, color: '#f5f5f5', marginBottom: 14 }}>
+            Orchestrated by <span style={{ color: '#c9b787' }}>a11oy</span>
+          </p>
+          <p style={{ fontSize: 13, color: '#8a8a8a', lineHeight: 1.8, maxWidth: 520, margin: '0 auto' }}>
+            Every decision in Terra follows the same governed path — Signal, Context, Recommendation, Simulation, Policy, Execution, Proof, Outcome. The same proof chain. The same attribution. The same governance.
+          </p>
+        </div>
+      </section>
+
       {/* FOOTER */}
       <footer className="border-t px-6 py-10" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
         <div className="max-w-[1100px] mx-auto flex flex-col gap-6">
@@ -952,8 +967,8 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
               <div
                 className="p-1.5 rounded-lg"
                 style={{
-                  background: 'rgba(45,106,79,0.10)',
-                  border: '1px solid rgba(45,106,79,0.16)',
+                  background: 'rgba(201,183,135,0.08)',
+                  border: '1px solid rgba(201,183,135,0.15)',
                 }}
               >
                 <Building2 size={12} style={{ color: ACCENT_LIGHT }} />

@@ -26,9 +26,9 @@ const ORACLES = [
     domains: ['Strategy', 'Research', 'Synthesis', 'Cross-domain'],
     specialty: 'Deep reasoning, report generation, scenario modeling',
     mystique: 'Highest-capability model for complex analytical tasks',
-    color: 'text-amber-400',
-    bg: 'bg-amber-400/10',
-    border: 'border-amber-400/20',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
+    border: 'border-[#c9b787]/20',
     confidence: 94,
     available: true,
   },
@@ -45,9 +45,9 @@ const ORACLES = [
     domains: ['Maritime', 'Logistics', 'Trade routes', 'Port operations'],
     specialty: 'Fleet intelligence, disruption prediction, vessel anomaly detection',
     mystique: 'Domain specialist for maritime logistics and fleet operations',
-    color: 'text-cyan-400',
-    bg: 'bg-cyan-400/10',
-    border: 'border-cyan-400/20',
+    color: 'text-[#8a8a8a]',
+    bg: 'bg-[#8a8a8a]/10',
+    border: 'border-[#8a8a8a]/20',
     confidence: 91,
     available: true,
   },
@@ -64,9 +64,9 @@ const ORACLES = [
     domains: ['Finance', 'Investment', 'Risk', 'Portfolio'],
     specialty: 'DCF modeling, market sentiment, risk-adjusted returns',
     mystique: 'Specialized for investment analysis and market regime detection',
-    color: 'text-yellow-400',
-    bg: 'bg-yellow-400/10',
-    border: 'border-yellow-400/20',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
+    border: 'border-[#c9b787]/20',
     confidence: 89,
     available: true,
   },
@@ -83,9 +83,9 @@ const ORACLES = [
     domains: ['Security', 'Compliance', 'Threat intel', 'Policy'],
     specialty: 'Threat classification, IOC analysis, policy enforcement',
     mystique: 'Specialized for threat classification and compliance assessment',
-    color: 'text-orange-400',
-    bg: 'bg-orange-400/10',
-    border: 'border-orange-400/20',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
+    border: 'border-[#c9b787]/20',
     confidence: 96,
     available: true,
   },
@@ -102,9 +102,9 @@ const ORACLES = [
     domains: ['Creative', 'Marketing', 'Brand', 'Content'],
     specialty: 'Content ideation, voice consistency, campaign optimization',
     mystique: 'Specialized for content strategy and brand voice consistency',
-    color: 'text-violet-400',
-    bg: 'bg-violet-400/10',
-    border: 'border-violet-400/20',
+    color: 'text-[#8a8a8a]',
+    bg: 'bg-[#8a8a8a]/10',
+    border: 'border-[#8a8a8a]/20',
     confidence: 84,
     available: true,
   },
@@ -121,9 +121,9 @@ const ORACLES = [
     domains: ['Engineering', 'Architecture', 'Code review', 'Systems'],
     specialty: 'Code quality, architecture patterns, technical strategy',
     mystique: 'Specialized for code analysis and architecture review',
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-400/10',
-    border: 'border-emerald-400/20',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
+    border: 'border-[#c9b787]/20',
     confidence: 88,
     available: false,
   },
@@ -139,7 +139,7 @@ const EXAMPLE_CONSULTATIONS = [
       'El Niño weather pattern will increase Suez Canal delays by 15–22%. Red Sea tensions remain elevated — recommend rerouting 3 key fleet segments via Cape of Good Hope. Panama Canal water levels critical through April.',
   },
   {
-    question: "What is the SZL Holdings portfolio's greatest systemic risk in Q2 2026?",
+    question: "What is the Aegis portfolio's greatest systemic risk in Q2 2026?",
     oracle: 'Primary AI Model',
     confidence: 91,
     summary:
@@ -163,7 +163,7 @@ interface ComparisonResult {
 }
 
 const COMPARISON_QUESTION =
-  'What is the single highest-leverage action SZL Holdings could take in the next 90 days?';
+  'What is the single highest-leverage action Aegis could take in the next 90 days?';
 const COMPARISON_RESULTS: ComparisonResult[] = [
   {
     oracle: 'Primary AI Model',
@@ -233,8 +233,8 @@ export default function AiAdvisor() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-1">
-          <div className="w-8 h-8 rounded-lg bg-amber-400/15 flex items-center justify-center">
-            <Eye className="w-4 h-4 text-amber-400" />
+          <div className="w-8 h-8 rounded-lg bg-[#c9b787]/15 flex items-center justify-center">
+            <Eye className="w-4 h-4 text-[#c9b787]" />
           </div>
           <h1 className="text-xl font-display font-bold text-foreground tracking-tight">
             AI Advisor
@@ -302,7 +302,7 @@ export default function AiAdvisor() {
                   <span>{oracle.accuracy}% acc</span>
                   <span>{oracle.latency}</span>
                 </div>
-                {!oracle.available && <span className="text-amber-400/60 font-mono">Degraded</span>}
+                {!oracle.available && <span className="text-[#c9b787]/60 font-mono">Degraded</span>}
               </div>
               <div className="mt-2">
                 <div className="h-1 bg-border rounded-full overflow-hidden">
@@ -314,16 +314,16 @@ export default function AiAdvisor() {
                     style={{
                       width: `${oracle.confidence}%`,
                       background: oracle.color.includes('amber')
-                        ? '#f59e0b'
+                        ? '#c9b787'
                         : oracle.color.includes('cyan')
-                          ? '#06b6d4'
+                          ? '#8a8a8a'
                           : oracle.color.includes('yellow')
-                            ? '#eab308'
+                            ? '#8a8a8a'
                             : oracle.color.includes('orange')
-                              ? '#f97316'
+                              ? '#c9b787'
                               : oracle.color.includes('violet')
-                                ? '#8b5cf6'
-                                : '#22c55e',
+                                ? '#8a8a8a'
+                                : '#c9b787',
                     }}
                   />
                 </div>
@@ -336,7 +336,7 @@ export default function AiAdvisor() {
       {/* Consultation interface */}
       <div className="bg-card/60 border border-border rounded-xl p-5">
         <h3 className="text-sm font-display font-semibold text-foreground mb-4 flex items-center gap-2">
-          <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
+          <HelpCircle className="w-3.5 h-3.5 text-[#c9b787]" />
           Consult the Oracle
         </h3>
         <div className="space-y-3">
@@ -377,8 +377,8 @@ export default function AiAdvisor() {
               !selectedOracle || !question.trim()
                 ? 'bg-muted/20 text-muted-foreground cursor-not-allowed'
                 : consulting
-                  ? 'bg-amber-400/10 text-amber-400 cursor-wait'
-                  : 'bg-amber-400/15 text-amber-400 hover:bg-amber-400/25 border border-amber-400/30',
+                  ? 'bg-[#c9b787]/10 text-[#c9b787] cursor-wait'
+                  : 'bg-[#c9b787]/15 text-[#c9b787] hover:bg-[#c9b787]/25 border border-[#c9b787]/30',
             )}
           >
             {consulting ? (
@@ -394,13 +394,13 @@ export default function AiAdvisor() {
           </button>
 
           {consultResult && (
-            <div className="bg-amber-400/5 border border-amber-400/20 rounded-xl p-4">
+            <div className="bg-[#c9b787]/5 border border-[#c9b787]/20 rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                <span className="text-xs font-bold text-[#c9b787] flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5" />
                   Oracle Interpretation
                 </span>
-                <span className="text-[10px] font-mono text-amber-400/70">
+                <span className="text-[10px] font-mono text-[#c9b787]/70">
                   Confidence: {consultResult.confidence}%
                 </span>
               </div>
@@ -409,7 +409,7 @@ export default function AiAdvisor() {
               </p>
               <div className="mt-2 h-1.5 bg-border rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-amber-400/80 rounded-full"
+                  className="h-full bg-[#c9b787]/80 rounded-full"
                   style={{ width: `${consultResult.confidence}%` }}
                 />
               </div>
@@ -477,10 +477,10 @@ export default function AiAdvisor() {
                           className={cn(
                             'h-full rounded-full',
                             result.confidence >= 90
-                              ? 'bg-emerald-400'
+                              ? 'bg-[#c9b787]'
                               : result.confidence >= 80
-                                ? 'bg-amber-400'
-                                : 'bg-blue-400',
+                                ? 'bg-[#c9b787]'
+                                : 'bg-[#c9b787]',
                           )}
                           style={{ width: `${result.confidence}%` }}
                         />
@@ -497,12 +497,12 @@ export default function AiAdvisor() {
                         key={j}
                         className="flex items-start gap-1.5 text-[10px] text-muted-foreground"
                       >
-                        <CheckCircle2 className="w-3 h-3 text-emerald-400/60 shrink-0 mt-0.5" />
+                        <CheckCircle2 className="w-3 h-3 text-[#c9b787]/60 shrink-0 mt-0.5" />
                         {r}
                       </div>
                     ))}
                   </div>
-                  <p className="text-[10px] text-amber-400/70 font-mono">⚠ {result.caveats}</p>
+                  <p className="text-[10px] text-[#c9b787]/70 font-mono">⚠ {result.caveats}</p>
                 </div>
               ))}
             </div>

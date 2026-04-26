@@ -140,10 +140,10 @@ const FUNDS: FundView[] = [
 ];
 
 const RISK_COLORS: Record<string, string> = {
-  low: '#4ade80',
-  medium: '#f59e0b',
-  high: '#f97316',
-  critical: '#ef4444',
+  low: '#c9b787',
+  medium: '#c9b787',
+  high: '#c9b787',
+  critical: '#f5f5f5',
 };
 
 function fmt(n: number): string {
@@ -164,30 +164,30 @@ export default function MultiFundView() {
   const avgCompliance = FUNDS.reduce((s, f) => s + f.complianceScore / FUNDS.length, 0);
 
   return (
-    <div className="h-full overflow-auto bg-[#080510] text-red-50" style={{ fontFamily: 'ui-monospace, monospace' }}>
+    <div className="h-full overflow-auto bg-[#080510] text-[#f5f5f5]" style={{ fontFamily: 'ui-monospace, monospace' }}>
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
-                <Layers className="w-5 h-5 text-red-400" />
+              <div className="p-2 rounded-lg bg-[#f5f5f5]/10 border border-[#f5f5f5]/20">
+                <Layers className="w-5 h-5 text-[#f5f5f5]" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-red-100">Multi-Fund View</h1>
-                <p className="text-xs text-red-400/60 mt-0.5">Aegis GP · {FUNDS.length} funds · Separate fund access controls + consolidated GP roll-up</p>
+                <h1 className="text-xl font-bold text-[#f5f5f5]">Multi-Fund View</h1>
+                <p className="text-xs text-[#f5f5f5]/60 mt-0.5">Aegis GP · {FUNDS.length} funds · Separate fund access controls + consolidated GP roll-up</p>
               </div>
             </div>
             <div className="flex items-center gap-1 p-1 bg-white/[0.03] rounded-lg">
               <button
                 onClick={() => setViewMode('gp')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-all ${viewMode === 'gp' ? 'bg-red-500/20 text-red-300' : 'text-red-400/50 hover:text-red-400/80'}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-all ${viewMode === 'gp' ? 'bg-[#f5f5f5]/20 text-[#f5f5f5]' : 'text-[#f5f5f5]/50 hover:text-[#f5f5f5]/80'}`}
               >
                 <Globe className="w-3 h-3" /> GP Roll-up
               </button>
               <button
                 onClick={() => setViewMode('fund')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-all ${viewMode === 'fund' ? 'bg-red-500/20 text-red-300' : 'text-red-400/50 hover:text-red-400/80'}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-all ${viewMode === 'fund' ? 'bg-[#f5f5f5]/20 text-[#f5f5f5]' : 'text-[#f5f5f5]/50 hover:text-[#f5f5f5]/80'}`}
               >
                 <Layers className="w-3 h-3" /> Fund Views
               </button>
@@ -201,18 +201,18 @@ export default function MultiFundView() {
             {/* Consolidated KPIs */}
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
               {[
-                { label: 'Total AUM', value: fmt(totalAum), icon: DollarSign, color: '#60a5fa' },
-                { label: 'Total NAV', value: fmt(totalNav), icon: TrendingUp, color: '#4ade80' },
-                { label: 'Weighted IRR', value: `${weightedIrr.toFixed(1)}%`, icon: Percent, color: '#a78bfa' },
-                { label: 'Active Incidents', value: String(totalIncidents), icon: AlertTriangle, color: totalIncidents > 0 ? '#f97316' : '#4ade80' },
-                { label: 'Avg Compliance', value: `${avgCompliance.toFixed(0)}%`, icon: Shield, color: '#38bdf8' },
+                { label: 'Total AUM', value: fmt(totalAum), icon: DollarSign, color: '#c9b787' },
+                { label: 'Total NAV', value: fmt(totalNav), icon: TrendingUp, color: '#c9b787' },
+                { label: 'Weighted IRR', value: `${weightedIrr.toFixed(1)}%`, icon: Percent, color: '#c9b787' },
+                { label: 'Active Incidents', value: String(totalIncidents), icon: AlertTriangle, color: totalIncidents > 0 ? '#c9b787' : '#c9b787' },
+                { label: 'Avg Compliance', value: `${avgCompliance.toFixed(0)}%`, icon: Shield, color: '#8a8a8a' },
               ].map((kpi) => (
                 <div key={kpi.label} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
                   <div className="flex items-center gap-1.5 mb-2">
                     <kpi.icon className="w-3.5 h-3.5" style={{ color: kpi.color }} />
-                    <p className="text-[10px] text-red-400/50">{kpi.label}</p>
+                    <p className="text-[10px] text-[#f5f5f5]/50">{kpi.label}</p>
                   </div>
-                  <p className="text-lg font-bold text-red-100">{kpi.value}</p>
+                  <p className="text-lg font-bold text-[#f5f5f5]">{kpi.value}</p>
                 </div>
               ))}
             </div>
@@ -220,14 +220,14 @@ export default function MultiFundView() {
             {/* Fund Comparison Table */}
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
               <div className="p-4 border-b border-white/[0.06]">
-                <h3 className="text-xs font-mono uppercase tracking-wider text-red-400/60">Fund Comparison — GP View</h3>
+                <h3 className="text-xs font-mono uppercase tracking-wider text-[#f5f5f5]/60">Fund Comparison — GP View</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-[11px]">
                   <thead>
                     <tr className="border-b border-white/[0.06]">
                       {['Fund', 'Strategy', 'Vintage', 'AUM', 'NAV', 'IRR', 'TVPI', 'DPI', 'Risk', 'Compliance'].map((h) => (
-                        <th key={h} className="px-4 py-2.5 text-left text-red-400/40 font-normal whitespace-nowrap">{h}</th>
+                        <th key={h} className="px-4 py-2.5 text-left text-[#f5f5f5]/40 font-normal whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -239,22 +239,22 @@ export default function MultiFundView() {
                         className="border-b border-white/[0.04] hover:bg-white/[0.02] cursor-pointer"
                       >
                         <td className="px-4 py-3">
-                          <p className="text-red-100 font-semibold whitespace-nowrap">{fund.name}</p>
+                          <p className="text-[#f5f5f5] font-semibold whitespace-nowrap">{fund.name}</p>
                           {fund.activeIncidents > 0 && (
-                            <span className="text-[9px] text-red-400">⚠ {fund.activeIncidents} incident</span>
+                            <span className="text-[9px] text-[#f5f5f5]">⚠ {fund.activeIncidents} incident</span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-red-400/60 whitespace-nowrap">{fund.strategy}</td>
-                        <td className="px-4 py-3 text-red-300/70">{fund.vintage}</td>
-                        <td className="px-4 py-3 text-red-200 font-mono">{fmt(fund.aum)}</td>
-                        <td className="px-4 py-3 text-red-200 font-mono">{fmt(fund.nav)}</td>
+                        <td className="px-4 py-3 text-[#f5f5f5]/60 whitespace-nowrap">{fund.strategy}</td>
+                        <td className="px-4 py-3 text-[#f5f5f5]/70">{fund.vintage}</td>
+                        <td className="px-4 py-3 text-[#f5f5f5] font-mono">{fmt(fund.aum)}</td>
+                        <td className="px-4 py-3 text-[#f5f5f5] font-mono">{fmt(fund.nav)}</td>
                         <td className="px-4 py-3">
-                          <span className={`font-bold ${fund.irr >= 20 ? 'text-green-400' : fund.irr >= 10 ? 'text-amber-400' : 'text-red-400'}`}>
+                          <span className={`font-bold ${fund.irr >= 20 ? 'text-[#c9b787]' : fund.irr >= 10 ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}>
                             {fund.irr.toFixed(1)}%
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-red-200">{fund.tvpi.toFixed(2)}x</td>
-                        <td className="px-4 py-3 text-red-200">{fund.dpi.toFixed(2)}x</td>
+                        <td className="px-4 py-3 text-[#f5f5f5]">{fund.tvpi.toFixed(2)}x</td>
+                        <td className="px-4 py-3 text-[#f5f5f5]">{fund.dpi.toFixed(2)}x</td>
                         <td className="px-4 py-3">
                           <span
                             className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded"
@@ -268,10 +268,10 @@ export default function MultiFundView() {
                             <div className="w-12 h-1 bg-white/[0.06] rounded-full overflow-hidden">
                               <div
                                 className="h-full rounded-full"
-                                style={{ width: `${fund.complianceScore}%`, background: fund.complianceScore >= 95 ? '#4ade80' : '#f59e0b' }}
+                                style={{ width: `${fund.complianceScore}%`, background: fund.complianceScore >= 95 ? '#c9b787' : '#c9b787' }}
                               />
                             </div>
-                            <span className="text-red-300/60">{fund.complianceScore}%</span>
+                            <span className="text-[#f5f5f5]/60">{fund.complianceScore}%</span>
                           </div>
                         </td>
                       </tr>
@@ -294,20 +294,20 @@ export default function MultiFundView() {
                   onClick={() => setSelectedFund(fund)}
                   className={`flex-shrink-0 flex items-start gap-2.5 px-3 py-2.5 rounded-lg border text-left transition-all ${
                     selectedFund?.id === fund.id
-                      ? 'border-red-500/40 bg-red-500/10'
-                      : 'border-white/[0.06] bg-white/[0.02] hover:border-red-500/20'
+                      ? 'border-[#f5f5f5]/40 bg-[#f5f5f5]/10'
+                      : 'border-white/[0.06] bg-white/[0.02] hover:border-[#f5f5f5]/20'
                   }`}
                 >
                   <div>
-                    <p className="text-[11px] font-semibold text-red-100 whitespace-nowrap">{fund.name}</p>
-                    <p className="text-[9px] text-red-400/50 mt-0.5">{fund.strategy}</p>
+                    <p className="text-[11px] font-semibold text-[#f5f5f5] whitespace-nowrap">{fund.name}</p>
+                    <p className="text-[9px] text-[#f5f5f5]/50 mt-0.5">{fund.strategy}</p>
                   </div>
                   <div className="flex flex-col items-end gap-0.5">
-                    <span className="text-[10px] font-bold" style={{ color: fund.irr >= 20 ? '#4ade80' : fund.irr >= 10 ? '#f59e0b' : '#ef4444' }}>
+                    <span className="text-[10px] font-bold" style={{ color: fund.irr >= 20 ? '#c9b787' : fund.irr >= 10 ? '#c9b787' : '#f5f5f5' }}>
                       {fund.irr.toFixed(1)}% IRR
                     </span>
-                    {fund.activeIncidents > 0 && <AlertTriangle className="w-3 h-3 text-red-400" />}
-                    {!fund.activeIncidents && <CheckCircle className="w-3 h-3 text-green-400/60" />}
+                    {fund.activeIncidents > 0 && <AlertTriangle className="w-3 h-3 text-[#f5f5f5]" />}
+                    {!fund.activeIncidents && <CheckCircle className="w-3 h-3 text-[#c9b787]/60" />}
                   </div>
                 </button>
               ))}
@@ -324,27 +324,27 @@ export default function MultiFundView() {
                 >
                   {/* Access Badge */}
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-500/10 border border-red-500/20">
-                      <Shield className="w-3 h-3 text-red-400" />
-                      <span className="text-[10px] text-red-300">GP Access</span>
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#f5f5f5]/10 border border-[#f5f5f5]/20">
+                      <Shield className="w-3 h-3 text-[#f5f5f5]" />
+                      <span className="text-[10px] text-[#f5f5f5]">GP Access</span>
                     </div>
                     {selectedFund.lpAccess && (
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                        <Eye className="w-3 h-3 text-blue-400" />
-                        <span className="text-[10px] text-blue-300">LP Access Enabled</span>
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#c9b787]/10 border border-[#c9b787]/20">
+                        <Eye className="w-3 h-3 text-[#c9b787]" />
+                        <span className="text-[10px] text-[#c9b787]">LP Access Enabled</span>
                       </div>
                     )}
                     {!selectedFund.lpAccess && (
                       <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06]">
-                        <Lock className="w-3 h-3 text-red-400/40" />
-                        <span className="text-[10px] text-red-400/40">LP Access Restricted</span>
+                        <Lock className="w-3 h-3 text-[#f5f5f5]/40" />
+                        <span className="text-[10px] text-[#f5f5f5]/40">LP Access Restricted</span>
                       </div>
                     )}
                   </div>
 
                   {/* Performance Metrics */}
                   <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
-                    <h3 className="text-xs font-mono uppercase tracking-wider text-red-400/60 mb-4">Performance — {selectedFund.name}</h3>
+                    <h3 className="text-xs font-mono uppercase tracking-wider text-[#f5f5f5]/60 mb-4">Performance — {selectedFund.name}</h3>
                     <div className="grid grid-cols-4 gap-4">
                       {[
                         { label: 'AUM', value: fmt(selectedFund.aum) },
@@ -357,50 +357,50 @@ export default function MultiFundView() {
                         { label: 'Distributed %', value: `${selectedFund.distributionRate}%` },
                       ].map((m) => (
                         <div key={m.label}>
-                          <p className="text-[10px] text-red-400/40">{m.label}</p>
-                          <p className="text-sm font-bold text-red-100 mt-0.5 font-mono">{m.value}</p>
+                          <p className="text-[10px] text-[#f5f5f5]/40">{m.label}</p>
+                          <p className="text-sm font-bold text-[#f5f5f5] mt-0.5 font-mono">{m.value}</p>
                         </div>
                       ))}
                     </div>
-                    <p className="text-[10px] text-red-400/30 mt-3">NAV as of {selectedFund.lastNav} · Currency: {selectedFund.currency}</p>
+                    <p className="text-[10px] text-[#f5f5f5]/30 mt-3">NAV as of {selectedFund.lastNav} · Currency: {selectedFund.currency}</p>
                   </div>
 
                   {/* Portfolio Positions */}
                   <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
-                    <h3 className="text-xs font-mono uppercase tracking-wider text-red-400/60 mb-4">Portfolio Positions</h3>
+                    <h3 className="text-xs font-mono uppercase tracking-wider text-[#f5f5f5]/60 mb-4">Portfolio Positions</h3>
                     <div className="space-y-2">
                       {selectedFund.positions.map((pos) => (
                         <div key={pos.id} className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02]">
                           <div className="flex items-center gap-3">
-                            <Building2 className="w-3.5 h-3.5 text-red-400/40" />
+                            <Building2 className="w-3.5 h-3.5 text-[#f5f5f5]/40" />
                             <div>
-                              <p className="text-[12px] font-semibold text-red-100">{pos.name}</p>
+                              <p className="text-[12px] font-semibold text-[#f5f5f5]">{pos.name}</p>
                               <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-[10px] text-red-400/50">{pos.type}</span>
+                                <span className="text-[10px] text-[#f5f5f5]/50">{pos.type}</span>
                                 <span className={`text-[9px] px-1 py-0.5 rounded font-mono ${
-                                  pos.status === 'active' ? 'bg-green-500/10 text-green-400' :
-                                  pos.status === 'watchlist' ? 'bg-amber-500/10 text-amber-400' :
-                                  'bg-white/[0.04] text-red-400/40'
+                                  pos.status === 'active' ? 'bg-[#c9b787]/10 text-[#c9b787]' :
+                                  pos.status === 'watchlist' ? 'bg-[#c9b787]/10 text-[#c9b787]' :
+                                  'bg-white/[0.04] text-[#f5f5f5]/40'
                                 }`}>{pos.status}</span>
                               </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-4 text-right">
                             <div>
-                              <p className="text-[11px] font-bold text-red-100">{fmt(pos.nav)}</p>
-                              <p className="text-[9px] text-red-400/40">NAV</p>
+                              <p className="text-[11px] font-bold text-[#f5f5f5]">{fmt(pos.nav)}</p>
+                              <p className="text-[9px] text-[#f5f5f5]/40">NAV</p>
                             </div>
                             <div>
-                              <p className={`text-[11px] font-bold ${pos.irr >= 20 ? 'text-green-400' : pos.irr >= 10 ? 'text-amber-400' : 'text-red-400'}`}>
+                              <p className={`text-[11px] font-bold ${pos.irr >= 20 ? 'text-[#c9b787]' : pos.irr >= 10 ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}>
                                 {pos.irr.toFixed(1)}%
                               </p>
-                              <p className="text-[9px] text-red-400/40">IRR</p>
+                              <p className="text-[9px] text-[#f5f5f5]/40">IRR</p>
                             </div>
                             <div>
-                              <p className={`text-[11px] font-bold ${pos.riskScore < 30 ? 'text-green-400' : pos.riskScore < 50 ? 'text-amber-400' : 'text-red-400'}`}>
+                              <p className={`text-[11px] font-bold ${pos.riskScore < 30 ? 'text-[#c9b787]' : pos.riskScore < 50 ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}>
                                 {pos.riskScore}
                               </p>
-                              <p className="text-[9px] text-red-400/40">Risk</p>
+                              <p className="text-[9px] text-[#f5f5f5]/40">Risk</p>
                             </div>
                           </div>
                         </div>
@@ -411,8 +411,8 @@ export default function MultiFundView() {
               </AnimatePresence>
             ) : (
               <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-8 text-center">
-                <Layers className="w-8 h-8 text-red-400/20 mx-auto mb-3" />
-                <p className="text-sm text-red-400/40">Select a fund to view details</p>
+                <Layers className="w-8 h-8 text-[#f5f5f5]/20 mx-auto mb-3" />
+                <p className="text-sm text-[#f5f5f5]/40">Select a fund to view details</p>
               </div>
             )}
           </div>

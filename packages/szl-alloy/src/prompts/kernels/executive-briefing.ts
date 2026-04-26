@@ -5,7 +5,7 @@ export const executiveBriefingKernel: PromptKernel = {
   version: '1.0.0',
   name: 'Executive Briefing',
   description:
-    'Synthesizes signals, news, and internal metrics into a personalized daily executive briefing — LUMINA/Superhuman Morning Brief style with priority ranking and decision prompts.',
+    'Synthesizes signals, news, and internal metrics into a personalized daily executive briefing — Pulse/Superhuman Morning Brief style with priority ranking and decision prompts.',
   pattern: 'research-and-cite',
   domain: 'executive',
   verticals: ['pulse', 'command', 'szl-holdings', 'aegis'],

@@ -30,18 +30,18 @@ const DS = {
 };
 
 const EVENT_COLORS: Record<string, string> = {
-  'initial-detection': '#3b82f6',
-  'alert-correlation': '#8b5cf6',
-  'lateral-movement': '#ef4444',
-  'credential-access': '#f97316',
-  containment: '#10b981',
+  'initial-detection': '#c9b787',
+  'alert-correlation': '#8a8a8a',
+  'lateral-movement': '#f5f5f5',
+  'credential-access': '#c9b787',
+  containment: '#c9b787',
 };
 
 const SEV_CONFIG: Record<string, { color: string; bg: string }> = {
-  critical: { color: '#ef4444', bg: 'rgba(239,68,68,0.08)' },
-  high: { color: '#f97316', bg: 'rgba(249,115,22,0.08)' },
-  medium: { color: '#eab308', bg: 'rgba(234,179,8,0.08)' },
-  low: { color: '#22c55e', bg: 'rgba(34,197,94,0.08)' },
+  critical: { color: '#f5f5f5', bg: 'rgba(245,245,245,0.08)' },
+  high: { color: '#c9b787', bg: 'rgba(201,183,135,0.08)' },
+  medium: { color: '#8a8a8a', bg: 'rgba(138,138,138,0.08)' },
+  low: { color: '#c9b787', bg: 'rgba(201,183,135,0.08)' },
 };
 
 function CitationBadge({
@@ -52,9 +52,9 @@ function CitationBadge({
   return (
     <div
       className="flex items-center gap-2 p-2 rounded-lg text-[10px]"
-      style={{ background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)' }}
+      style={{ background: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)' }}
     >
-      <FileText className="w-3 h-3 text-blue-400 shrink-0" />
+      <FileText className="w-3 h-3 text-[#c9b787] shrink-0" />
       <div className="flex-1 min-w-0">
         <p className="font-medium truncate" style={{ color: DS.text.primary }}>
           {cit.source}
@@ -67,7 +67,7 @@ function CitationBadge({
         <p
           className="font-bold"
           style={{
-            color: cit.confidence > 95 ? '#10b981' : cit.confidence > 85 ? '#f59e0b' : '#ef4444',
+            color: cit.confidence > 95 ? '#c9b787' : cit.confidence > 85 ? '#c9b787' : '#f5f5f5',
           }}
         >
           {cit.confidence}%
@@ -134,21 +134,21 @@ export default function IncidentProofChain() {
 
   return (
     <div className="p-6 space-y-6" style={{ maxWidth: 1280, margin: '0 auto' }}>
-      <CognitiveBreadcrumbs accent="#3b82f6" />
+      <CognitiveBreadcrumbs accent="#c9b787" />
       <div className="flex items-start justify-between">
         <div>
           <h1
             className="text-xl font-bold flex items-center gap-2"
             style={{ color: DS.text.primary }}
           >
-            <Link2 className="w-5 h-5 text-blue-400" />
+            <Link2 className="w-5 h-5 text-[#c9b787]" />
             Incident Proof Chain
             <HelpTip
               tipId="aegis.incident-proof-chain"
               platform="aegis"
               title="Incident Proof Chain"
               content="A citation-backed timeline for each incident. Every detection, enrichment, model output, and analyst decision is recorded with its source, confidence, and verifier approval — so the response is fully auditable."
-              accentColor="#3b82f6"
+              accentColor="#c9b787"
               iconSize={13}
             />
           </h1>
@@ -158,14 +158,14 @@ export default function IncidentProofChain() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <CopyLinkButton accent="#3b82f6" />
+          <CopyLinkButton accent="#c9b787" />
           <button
             onClick={() => refetch()}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors"
             style={{
-              background: 'rgba(59,130,246,0.08)',
-              color: '#3b82f6',
-              border: '1px solid rgba(59,130,246,0.2)',
+              background: 'rgba(201,183,135,0.08)',
+              color: '#c9b787',
+              border: '1px solid rgba(201,183,135,0.2)',
             }}
           >
             <RefreshCw className="w-3 h-3" />
@@ -177,12 +177,12 @@ export default function IncidentProofChain() {
       {denied ? (
         <AccessDeniedNotice
           status={(error as HttpError).status}
-          accent="#3b82f6"
+          accent="#c9b787"
           resourceLabel="this incident proof chain"
         />
       ) : isLoading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="w-6 h-6 border-2 border-blue-500/40 border-t-blue-400 rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-[#c9b787]/40 border-t-blue-400 rounded-full animate-spin" />
         </div>
       ) : !incident ? (
         <div
@@ -223,8 +223,8 @@ export default function IncidentProofChain() {
                     className={cn(
                       'text-[9px]',
                       incident.status === 'closed'
-                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                        : 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+                        ? 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20'
+                        : 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
                     )}
                   >
                     {incident.status}
@@ -251,7 +251,7 @@ export default function IncidentProofChain() {
                   },
                 ].map(({ label, value }) => (
                   <div key={label}>
-                    <p className="text-base font-bold text-blue-400">{value ?? '—'}</p>
+                    <p className="text-base font-bold text-[#c9b787]">{value ?? '—'}</p>
                     <p className="text-[10px]" style={{ color: DS.text.muted }}>
                       {label}
                     </p>
@@ -263,9 +263,9 @@ export default function IncidentProofChain() {
               <div
                 className="flex items-center gap-2 text-[11px] px-3 py-2 rounded-lg"
                 style={{
-                  background: 'rgba(16,185,129,0.06)',
-                  border: '1px solid rgba(16,185,129,0.15)',
-                  color: '#10b981',
+                  background: 'rgba(201,183,135,0.06)',
+                  border: '1px solid rgba(201,183,135,0.15)',
+                  color: '#c9b787',
                 }}
               >
                 <CheckCircle className="w-3.5 h-3.5 shrink-0" />
@@ -324,7 +324,7 @@ export default function IncidentProofChain() {
                             {event.mitreTag && (
                               <span
                                 className="text-[10px] font-mono px-1.5 py-0.5 rounded"
-                                style={{ background: 'rgba(239,68,68,0.08)', color: '#ef4444' }}
+                                style={{ background: 'rgba(245,245,245,0.08)', color: '#f5f5f5' }}
                               >
                                 {event.mitreTag}
                               </span>
@@ -365,7 +365,7 @@ export default function IncidentProofChain() {
                       <div
                         className="mx-0 mt-2 p-4 rounded-xl space-y-3"
                         style={{
-                          background: 'rgba(59,130,246,0.03)',
+                          background: 'rgba(201,183,135,0.03)',
                           border: `1px solid ${color}20`,
                         }}
                       >

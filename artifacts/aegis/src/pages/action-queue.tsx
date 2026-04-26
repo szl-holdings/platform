@@ -76,7 +76,7 @@ function isDue(iso?: string) {
 }
 
 const PRIORITY_STYLE: Record<string, { color: string; bg: string; border: string }> = {
-  critical: { color: '#f87171', bg: '#9b1c1c10', border: '#9b1c1c40' },
+  critical: { color: '#f5f5f5', bg: '#5e5e5e10', border: '#5e5e5e40' },
   high: { color: '#c04a2a', bg: '#c04a2a08', border: '#c04a2a25' },
   medium: { color: '#c08a2c', bg: '#c08a2c08', border: '#c08a2c20' },
   low: {
@@ -89,7 +89,7 @@ const PRIORITY_STYLE: Record<string, { color: string; bg: string; border: string
 const STATUS_STYLE: Record<string, { color: string; bg: string }> = {
   open: { color: '#c04a2a', bg: '#c04a2a20' },
   in_progress: { color: '#c08a2c', bg: '#c08a2c20' },
-  blocked: { color: '#f87171', bg: '#9b1c1c20' },
+  blocked: { color: '#f5f5f5', bg: '#5e5e5e20' },
   completed: { color: '#40856a', bg: '#40856a20' },
 };
 
@@ -161,10 +161,10 @@ function ActionCard({
       {item.blocker && (
         <div
           className="flex items-center gap-1.5 text-xs mb-3 px-3 py-2 rounded-lg"
-          style={{ background: '#9b1c1c10', border: '1px solid #9b1c1c30' }}
+          style={{ background: '#5e5e5e10', border: '1px solid #5e5e5e30' }}
         >
-          <AlertTriangle size={12} style={{ color: '#f87171' }} />
-          <span style={{ color: '#f87171' }}>Blocked: {item.blocker}</span>
+          <AlertTriangle size={12} style={{ color: '#f5f5f5' }} />
+          <span style={{ color: '#f5f5f5' }}>Blocked: {item.blocker}</span>
         </div>
       )}
 
@@ -387,7 +387,7 @@ export default function ActionQueue() {
           {blockedCount > 0 && (
             <span
               className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full"
-              style={{ background: '#9b1c1c20', color: '#f87171', border: '1px solid #9b1c1c40' }}
+              style={{ background: '#5e5e5e20', color: '#f5f5f5', border: '1px solid #5e5e5e40' }}
             >
               <AlertTriangle size={12} /> {blockedCount} blocked
             </span>
@@ -405,17 +405,17 @@ export default function ActionQueue() {
         <div
           className="mb-4 rounded-xl border p-4 flex items-start gap-3"
           style={{
-            background: liveAlert.priority === 'critical' ? '#9b1c1c12' : '#c08a2c12',
-            borderColor: liveAlert.priority === 'critical' ? '#9b1c1c50' : '#c08a2c50',
+            background: liveAlert.priority === 'critical' ? '#5e5e5e12' : '#c08a2c12',
+            borderColor: liveAlert.priority === 'critical' ? '#5e5e5e50' : '#c08a2c50',
           }}
         >
           <div
             className="p-2 rounded-lg flex-shrink-0"
-            style={{ background: liveAlert.priority === 'critical' ? '#9b1c1c25' : '#c08a2c25' }}
+            style={{ background: liveAlert.priority === 'critical' ? '#5e5e5e25' : '#c08a2c25' }}
           >
             <AlertTriangle
               size={16}
-              style={{ color: liveAlert.priority === 'critical' ? '#f87171' : '#fbbf24' }}
+              style={{ color: liveAlert.priority === 'critical' ? '#f5f5f5' : '#c9b787' }}
               className="animate-pulse"
             />
           </div>
@@ -424,8 +424,8 @@ export default function ActionQueue() {
               <span
                 className="text-[10px] uppercase tracking-wide font-semibold px-2 py-0.5 rounded"
                 style={{
-                  background: liveAlert.priority === 'critical' ? '#9b1c1c30' : '#c08a2c30',
-                  color: liveAlert.priority === 'critical' ? '#f87171' : '#fbbf24',
+                  background: liveAlert.priority === 'critical' ? '#5e5e5e30' : '#c08a2c30',
+                  color: liveAlert.priority === 'critical' ? '#f5f5f5' : '#c9b787',
                 }}
               >
                 {liveAlert.priority === 'critical' ? 'Critical' : 'Blocked'} · New
@@ -468,7 +468,7 @@ export default function ActionQueue() {
       <div className="grid grid-cols-4 gap-4 mb-6">
         {[
           { label: 'Open', value: openCount, color: '#c04a2a' },
-          { label: 'Blocked', value: blockedCount, color: '#f87171' },
+          { label: 'Blocked', value: blockedCount, color: '#f5f5f5' },
           { label: 'Overdue', value: overdueCount, color: '#c08a2c' },
           { label: 'Completed', value: completedCount, color: '#40856a' },
         ].map((m) => (

@@ -82,7 +82,7 @@ const COMMAND_ONBOARDING_CONFIG: OnboardingConfig = {
       id: 'prism',
       title: 'The PRISM Framework',
       description:
-        "PRISM is Command's intelligence spine: LUMINA (health), Risk (exposure), Intelligence (analysis), Signals (events), and Motion (action). Each dimension gives you a different lens on your business.",
+        "PRISM is Command's intelligence spine: Pulse (health), Risk (exposure), Intelligence (analysis), Signals (events), and Motion (action). Each dimension gives you a different lens on your business.",
       placement: 'center',
       icon: Activity,
     },
@@ -158,7 +158,7 @@ const TEXT = {
 };
 
 const PRISM_ITEMS = [
-  { key: 'P', label: 'LUMINA', color: '#d4a054', icon: Heart, href: '/operations/prism/pulse' },
+  { key: 'P', label: 'Pulse', color: '#c9b787', icon: Heart, href: '/operations/prism/pulse' },
   {
     key: 'R',
     label: 'Risk',
@@ -201,7 +201,7 @@ const NAV_GROUPS = [
   {
     label: 'Intelligence',
     items: [
-      { href: '/operations/prism/pulse', label: 'LUMINA', icon: Heart },
+      { href: '/operations/prism/pulse', label: 'Pulse', icon: Heart },
       { href: '/operations/prism/risk', label: 'Risk', icon: AlertTriangle },
       { href: '/operations/prism/intelligence', label: 'Intelligence', icon: Brain },
       { href: '/operations/prism/signals', label: 'Signals Feed', icon: Radio },
@@ -596,7 +596,7 @@ export function CommandLayout({ children }: { children: ReactNode }) {
               className="text-[7px] uppercase tracking-widest font-mono mb-1.5"
               style={{ color: TEXT.muted }}
             >
-              System LUMINA
+              System Pulse
             </div>
             <div className="space-y-1">
               {[

@@ -33,10 +33,10 @@ type PipelineStageResult = {
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  completed: 'text-emerald-400',
-  'dry-run-complete': 'text-sky-400',
-  failed: 'text-red-400',
-  'pending-approval': 'text-amber-400',
+  completed: 'text-[#c9b787]',
+  'dry-run-complete': 'text-[#8a8a8a]',
+  failed: 'text-[#f5f5f5]',
+  'pending-approval': 'text-[#c9b787]',
 };
 
 type RetrieverSource = 'adapter' | 'synthetic' | 'inline' | 'dry-run';
@@ -49,22 +49,22 @@ const RETRIEVER_SOURCE_STYLE: Record<RetrieverSource, { label: string; cls: stri
   {
     adapter: {
       label: 'LIVE INDEX',
-      cls: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
+      cls: 'border-[#c9b787]/40 bg-[#c9b787]/10 text-[#c9b787]',
       tip: 'Backed by the configured live retriever adapter.',
     },
     synthetic: {
       label: 'SYNTHETIC',
-      cls: 'border-amber-400/50 bg-amber-400/10 text-amber-200',
+      cls: 'border-[#c9b787]/50 bg-[#c9b787]/10 text-[#c9b787]',
       tip: 'Demo-only synthetic corpus — not real evidence.',
     },
     inline: {
       label: 'INLINE CORPUS',
-      cls: 'border-sky-500/40 bg-sky-500/10 text-sky-300',
+      cls: 'border-sky-500/40 bg-[#8a8a8a]/10 text-[#8a8a8a]',
       tip: 'Caller supplied an inline corpus instead of querying an index.',
     },
     'dry-run': {
       label: 'DRY-RUN',
-      cls: 'border-sky-500/40 bg-sky-500/10 text-sky-300',
+      cls: 'border-sky-500/40 bg-[#8a8a8a]/10 text-[#8a8a8a]',
       tip: 'Dry-run — no retrieval was performed.',
     },
   };
@@ -136,10 +136,10 @@ export function SubstrateWorkflowPanel() {
   }
 
   return (
-    <div className="rounded-lg border border-cyan-500/20 bg-slate-900/60 p-4 space-y-3">
+    <div className="rounded-lg border border-[#8a8a8a]/20 bg-slate-900/60 p-4 space-y-3">
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 rounded bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
-          <Cpu className="w-4 h-4 text-cyan-400" />
+        <div className="w-8 h-8 rounded bg-[#8a8a8a]/10 border border-[#8a8a8a]/20 flex items-center justify-center shrink-0">
+          <Cpu className="w-4 h-4 text-[#8a8a8a]" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
@@ -147,7 +147,7 @@ export function SubstrateWorkflowPanel() {
               <p className="text-xs font-semibold text-slate-100">
                 Threat Triage and Escalation Routing
               </p>
-              <p className="text-[10px] text-cyan-400/50 mt-0.5 font-mono">
+              <p className="text-[10px] text-[#8a8a8a]/50 mt-0.5 font-mono">
                 Substrate · aegis-threat-triage · Phase 2
               </p>
             </div>
@@ -156,7 +156,7 @@ export function SubstrateWorkflowPanel() {
                 value={mode}
                 onChange={(e) => setMode(e.target.value as RunMode)}
                 disabled={status === 'running'}
-                className="text-[10px] font-mono bg-slate-800 border border-cyan-500/20 text-cyan-300 rounded px-1.5 py-0.5 focus:outline-none"
+                className="text-[10px] font-mono bg-slate-800 border border-[#8a8a8a]/20 text-[#8a8a8a] rounded px-1.5 py-0.5 focus:outline-none"
               >
                 <option value="dry-run">dry-run</option>
                 <option value="live">live</option>
@@ -164,7 +164,7 @@ export function SubstrateWorkflowPanel() {
               <button
                 onClick={handleRun}
                 disabled={status === 'running'}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[10px] font-mono hover:bg-cyan-500/25 transition-colors disabled:opacity-40"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#8a8a8a]/15 border border-[#8a8a8a]/30 text-[#8a8a8a] text-[10px] font-mono hover:bg-[#8a8a8a]/25 transition-colors disabled:opacity-40"
               >
                 {status === 'running' ? (
                   <>
@@ -189,16 +189,16 @@ export function SubstrateWorkflowPanel() {
           {status !== 'idle' && (
             <div className="mt-2 flex items-center gap-2">
               {status === 'running' && (
-                <span className="text-[9px] font-mono text-cyan-400 animate-pulse">● RUNNING</span>
+                <span className="text-[9px] font-mono text-[#8a8a8a] animate-pulse">● RUNNING</span>
               )}
               {status === 'completed' && (
-                <span className="text-[9px] font-mono text-emerald-400">✓ COMPLETED</span>
+                <span className="text-[9px] font-mono text-[#c9b787]">✓ COMPLETED</span>
               )}
               {status === 'pending-approval' && (
-                <span className="text-[9px] font-mono text-amber-400">⏳ PENDING APPROVAL</span>
+                <span className="text-[9px] font-mono text-[#c9b787]">⏳ PENDING APPROVAL</span>
               )}
               {status === 'failed' && (
-                <span className="text-[9px] font-mono text-red-400">✗ FAILED</span>
+                <span className="text-[9px] font-mono text-[#f5f5f5]">✗ FAILED</span>
               )}
               {result && (
                 <span className="text-[9px] font-mono text-slate-500">{result.runId}</span>
@@ -221,8 +221,8 @@ export function SubstrateWorkflowPanel() {
       </div>
 
       {expanded && error && (
-        <div className="border-t border-red-500/20 pt-2">
-          <div className="flex items-center gap-2 text-[9px] font-mono text-red-400">
+        <div className="border-t border-[#f5f5f5]/20 pt-2">
+          <div className="flex items-center gap-2 text-[9px] font-mono text-[#f5f5f5]">
             <AlertTriangle className="w-3 h-3 shrink-0" />
             {error}
           </div>
@@ -230,7 +230,7 @@ export function SubstrateWorkflowPanel() {
       )}
 
       {expanded && result && (
-        <div className="border-t border-cyan-500/10 pt-3 space-y-3">
+        <div className="border-t border-[#8a8a8a]/10 pt-3 space-y-3">
           <div className="grid grid-cols-3 gap-3">
             {[
               { label: 'Stages', value: result.stageCount },
@@ -240,7 +240,7 @@ export function SubstrateWorkflowPanel() {
               <div key={m.label} className="rounded border border-slate-700 bg-slate-800/60 p-2">
                 <p className="text-[9px] font-mono text-slate-500 uppercase mb-0.5">{m.label}</p>
                 <p
-                  className={`text-sm font-mono font-bold truncate ${STATUS_COLOR[String(m.value)] ?? 'text-cyan-300'}`}
+                  className={`text-sm font-mono font-bold truncate ${STATUS_COLOR[String(m.value)] ?? 'text-[#8a8a8a]'}`}
                 >
                   {m.value}
                 </p>
@@ -266,7 +266,7 @@ export function SubstrateWorkflowPanel() {
                       {s.status}
                     </p>
                     {s.confidence !== undefined && (
-                      <p className="text-[9px] font-mono text-cyan-400/60">
+                      <p className="text-[9px] font-mono text-[#8a8a8a]/60">
                         {(s.confidence * 100).toFixed(0)}%
                       </p>
                     )}
@@ -294,21 +294,21 @@ export function SubstrateWorkflowPanel() {
             <span className="text-[9px] font-mono text-slate-600">
               mode:{result.mode} · inbox:aegis-threat-triage · policy:aegis-threat-triage-policy
             </span>
-            <span className="flex items-center gap-1 text-[9px] font-mono text-emerald-400/60">
+            <span className="flex items-center gap-1 text-[9px] font-mono text-[#c9b787]/60">
               <Shield className="w-2.5 h-2.5" />
               evidence-signed
             </span>
           </div>
           {mode === 'dry-run' && (
-            <div className="rounded border border-sky-500/15 bg-sky-500/5 p-2">
-              <p className="text-[9px] font-mono text-sky-400">
+            <div className="rounded border border-sky-500/15 bg-[#8a8a8a]/5 p-2">
+              <p className="text-[9px] font-mono text-[#8a8a8a]">
                 DRY-RUN — escalation and notification side effects suppressed.
               </p>
             </div>
           )}
           {status === 'pending-approval' && (
-            <div className="rounded border border-amber-500/20 bg-amber-500/5 p-2">
-              <p className="text-[9px] font-mono text-amber-400">
+            <div className="rounded border border-[#c9b787]/20 bg-[#c9b787]/5 p-2">
+              <p className="text-[9px] font-mono text-[#c9b787]">
                 PENDING APPROVAL — paused at approval gate. Review the approvals inbox to resume.
               </p>
             </div>

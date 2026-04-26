@@ -189,7 +189,7 @@ export default function LLMEvaluation() {
                   <p className="text-[10px] text-muted-foreground">{model.provider}</p>
                 </div>
                 <p
-                  className={`text-xl font-bold ${model.overall >= 93 ? 'text-emerald-400' : model.overall >= 88 ? 'text-sky-400' : 'text-amber-400'}`}
+                  className={`text-xl font-bold ${model.overall >= 93 ? 'text-[#c9b787]' : model.overall >= 88 ? 'text-[#8a8a8a]' : 'text-[#c9b787]'}`}
                 >
                   {model.overall}
                 </p>
@@ -200,10 +200,10 @@ export default function LLMEvaluation() {
                   <span
                     className={
                       model.hallucination <= 2
-                        ? 'text-emerald-400'
+                        ? 'text-[#c9b787]'
                         : model.hallucination <= 4
-                          ? 'text-amber-400'
-                          : 'text-red-400'
+                          ? 'text-[#c9b787]'
+                          : 'text-[#f5f5f5]'
                     }
                   >
                     {model.hallucination}%
@@ -229,7 +229,7 @@ export default function LLMEvaluation() {
             <Sparkles className="w-4 h-4 text-primary" /> Live Prompt Tester
             <Badge
               variant="outline"
-              className="text-[10px] text-emerald-400 border-emerald-400/30 bg-emerald-400/10 ml-auto"
+              className="text-[10px] text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10 ml-auto"
             >
               LIVE
             </Badge>
@@ -277,13 +277,13 @@ export default function LLMEvaluation() {
                   </span>
                 )}
                 {liveTest.latencyMs && (
-                  <span className="text-emerald-400">
+                  <span className="text-[#c9b787]">
                     {(liveTest.latencyMs / 1000).toFixed(2)}s
                   </span>
                 )}
                 <span className="ml-auto text-[9px]">via AI research agent</span>
               </div>
-              {liveTest.error && <p className="text-xs text-red-400">{liveTest.error}</p>}
+              {liveTest.error && <p className="text-xs text-[#f5f5f5]">{liveTest.error}</p>}
               {liveTest.response && (
                 <p className="text-xs text-foreground leading-relaxed whitespace-pre-wrap max-h-48 overflow-y-auto">
                   {liveTest.response}
@@ -325,9 +325,9 @@ export default function LLMEvaluation() {
                       fontSize: 12,
                     }}
                   />
-                  <Bar dataKey="accuracy" name="Accuracy" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="coherence" name="Coherence" fill="#06b6d4" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="overall" name="Overall" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="accuracy" name="Accuracy" fill="#c9b787" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="coherence" name="Coherence" fill="#8a8a8a" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="overall" name="Overall" fill="#8a8a8a" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -351,7 +351,7 @@ export default function LLMEvaluation() {
                         <span>{test.tokens} tokens</span>
                         <span>{test.time}</span>
                         {test.hallucination && (
-                          <span className="text-red-400 flex items-center gap-0.5">
+                          <span className="text-[#f5f5f5] flex items-center gap-0.5">
                             <AlertTriangle className="w-3 h-3" />
                             Hallucination detected
                           </span>
@@ -360,12 +360,12 @@ export default function LLMEvaluation() {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {test.hallucination ? (
-                        <AlertTriangle className="w-4 h-4 text-red-400" />
+                        <AlertTriangle className="w-4 h-4 text-[#f5f5f5]" />
                       ) : (
-                        <CheckCircle className="w-4 h-4 text-emerald-400" />
+                        <CheckCircle className="w-4 h-4 text-[#c9b787]" />
                       )}
                       <span
-                        className={`text-sm font-bold ${test.score >= 90 ? 'text-emerald-400' : test.score >= 80 ? 'text-sky-400' : 'text-amber-400'}`}
+                        className={`text-sm font-bold ${test.score >= 90 ? 'text-[#c9b787]' : test.score >= 80 ? 'text-[#8a8a8a]' : 'text-[#c9b787]'}`}
                       >
                         {test.score}
                       </span>
@@ -384,12 +384,12 @@ export default function LLMEvaluation() {
             </CardHeader>
             <CardContent className="space-y-3">
               {[
-                { label: 'Accuracy', value: selectedModel.accuracy, color: 'bg-emerald-500' },
-                { label: 'Coherence', value: selectedModel.coherence, color: 'bg-cyan-500' },
+                { label: 'Accuracy', value: selectedModel.accuracy, color: 'bg-[#c9b787]' },
+                { label: 'Coherence', value: selectedModel.coherence, color: 'bg-[#8a8a8a]' },
                 {
                   label: 'Safety / Anti-Hallucination',
                   value: Math.round((1 - selectedModel.hallucination / 10) * 100),
-                  color: 'bg-purple-500',
+                  color: 'bg-[#8a8a8a]',
                 },
               ].map(({ label, value, color }) => (
                 <div key={label}>
@@ -411,8 +411,8 @@ export default function LLMEvaluation() {
                   <span
                     className={
                       selectedModel.hallucination <= 2
-                        ? 'text-emerald-400 font-bold'
-                        : 'text-amber-400 font-bold'
+                        ? 'text-[#c9b787] font-bold'
+                        : 'text-[#c9b787] font-bold'
                     }
                   >
                     {selectedModel.hallucination}%

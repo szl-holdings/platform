@@ -94,11 +94,11 @@ const StatusIcon = {
   canceled: XCircle,
 };
 const StatusColor = {
-  pending: 'text-orange-400/40',
-  in_progress: 'text-orange-400',
-  completed: 'text-emerald-400',
-  overdue: 'text-red-400',
-  canceled: 'text-orange-400/20',
+  pending: 'text-[#c9b787]/40',
+  in_progress: 'text-[#c9b787]',
+  completed: 'text-[#c9b787]',
+  overdue: 'text-[#f5f5f5]',
+  canceled: 'text-[#c9b787]/20',
 };
 const StatusBorder = {
   pending: 'border-l-orange-500/30',
@@ -112,29 +112,29 @@ export default function MilestonesTrends() {
   return (
     <div className="space-y-5">
       <header>
-        <h1 className="font-display text-lg font-bold text-orange-50">Milestones & Trends</h1>
-        <p className="text-xs text-orange-400/50 mt-0.5">
+        <h1 className="font-display text-lg font-bold text-[#c9b787]">Milestones & Trends</h1>
+        <p className="text-xs text-[#c9b787]/50 mt-0.5">
           Program delivery timeline and historical readiness trajectory.
         </p>
       </header>
 
-      <div className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-orange-50 mb-4 flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-orange-400" /> Readiness Score Trajectory
+      <div className="bg-[#c9b787]/5 border border-[#c9b787]/10 rounded-xl p-5">
+        <h3 className="text-sm font-semibold text-[#c9b787] mb-4 flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-[#c9b787]" /> Readiness Score Trajectory
         </h3>
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={trendData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(249,115,22,0.1)" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(201,183,135,0.1)" vertical={false} />
               <XAxis
                 dataKey="month"
-                stroke="rgba(249,115,22,0.3)"
+                stroke="rgba(201,183,135,0.3)"
                 tick={{ fill: 'rgba(251,146,60,0.5)', fontSize: 10 }}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
-                stroke="rgba(249,115,22,0.3)"
+                stroke="rgba(201,183,135,0.3)"
                 tick={{ fill: 'rgba(251,146,60,0.5)', fontSize: 10 }}
                 tickLine={false}
                 axisLine={false}
@@ -143,7 +143,7 @@ export default function MilestonesTrends() {
               <Tooltip
                 contentStyle={{
                   backgroundColor: '#09080f',
-                  border: '1px solid rgba(249,115,22,0.2)',
+                  border: '1px solid rgba(201,183,135,0.2)',
                   borderRadius: '8px',
                   fontSize: '11px',
                 }}
@@ -153,9 +153,9 @@ export default function MilestonesTrends() {
                 type="monotone"
                 dataKey="readiness"
                 name="Actual"
-                stroke="#ef4444"
+                stroke="#f5f5f5"
                 strokeWidth={2.5}
-                dot={{ fill: '#ef4444', r: 3 }}
+                dot={{ fill: '#f5f5f5', r: 3 }}
                 connectNulls={false}
               />
               <Line
@@ -173,9 +173,9 @@ export default function MilestonesTrends() {
         </div>
       </div>
 
-      <div className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-5 relative overflow-hidden">
-        <div className="absolute top-0 bottom-0 left-[31px] w-[2px] bg-orange-500/10 z-0" />
-        <h3 className="text-sm font-semibold text-orange-50 mb-4 relative z-10">
+      <div className="bg-[#c9b787]/5 border border-[#c9b787]/10 rounded-xl p-5 relative overflow-hidden">
+        <div className="absolute top-0 bottom-0 left-[31px] w-[2px] bg-[#c9b787]/10 z-0" />
+        <h3 className="text-sm font-semibold text-[#c9b787] mb-4 relative z-10">
           Program Milestones
         </h3>
         <div className="space-y-4 relative z-10">
@@ -192,44 +192,44 @@ export default function MilestonesTrends() {
                 className="flex gap-4 relative group"
               >
                 <div className="mt-1 flex-shrink-0 relative">
-                  <div className="w-10 h-10 rounded-full bg-[#09080f] border border-orange-500/20 flex items-center justify-center shadow-lg group-hover:border-orange-500/40 transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-[#09080f] border border-[#c9b787]/20 flex items-center justify-center shadow-lg group-hover:border-[#c9b787]/40 transition-colors">
                     <Icon className={`w-4 h-4 ${StatusColor[milestone.status]}`} />
                   </div>
                 </div>
                 <div
-                  className={`flex-1 bg-orange-500/5 hover:bg-orange-500/10 border border-orange-500/10 border-l-4 ${StatusBorder[milestone.status]} p-4 rounded-xl transition-all duration-300`}
+                  className={`flex-1 bg-[#c9b787]/5 hover:bg-[#c9b787]/10 border border-[#c9b787]/10 border-l-4 ${StatusBorder[milestone.status]} p-4 rounded-xl transition-all duration-300`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-2">
                     <div>
-                      <h3 className="text-xs font-bold text-orange-50 font-display mb-0.5">
+                      <h3 className="text-xs font-bold text-[#c9b787] font-display mb-0.5">
                         {milestone.title}
                       </h3>
-                      <p className="text-[10px] text-orange-400/40 leading-relaxed">
+                      <p className="text-[10px] text-[#c9b787]/40 leading-relaxed">
                         {milestone.description}
                       </p>
                     </div>
                     <span
                       className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md whitespace-nowrap ${
                         milestone.status === 'completed'
-                          ? 'bg-emerald-500/10 text-emerald-400'
+                          ? 'bg-[#c9b787]/10 text-[#c9b787]'
                           : milestone.status === 'in_progress'
-                            ? 'bg-orange-500/10 text-orange-400'
-                            : 'bg-orange-500/5 text-orange-400/40'
+                            ? 'bg-[#c9b787]/10 text-[#c9b787]'
+                            : 'bg-[#c9b787]/5 text-[#c9b787]/40'
                       }`}
                     >
                       {milestone.status.replace('_', ' ')}
                     </span>
                   </div>
-                  <div className="flex items-center gap-5 pt-2.5 border-t border-orange-500/10 text-[10px]">
-                    <span className="text-orange-400/40">{milestone.owner}</span>
-                    <span className={isLate ? 'text-red-400' : 'text-orange-400/40'}>
+                  <div className="flex items-center gap-5 pt-2.5 border-t border-[#c9b787]/10 text-[10px]">
+                    <span className="text-[#c9b787]/40">{milestone.owner}</span>
+                    <span className={isLate ? 'text-[#f5f5f5]' : 'text-[#c9b787]/40'}>
                       <Calendar className="w-3 h-3 inline mr-1" />
                       {new Date(milestone.dueDate).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric',
                       })}
-                      {isLate && <span className="ml-1 text-red-400">LATE</span>}
+                      {isLate && <span className="ml-1 text-[#f5f5f5]">LATE</span>}
                     </span>
                   </div>
                 </div>

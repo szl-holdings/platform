@@ -123,7 +123,7 @@ export default function S09Competitive() {
                 marginBottom: '2vh',
               }}
             >
-              SZL Holdings
+              Aegis
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.8vh' }}>
               {szl.map((item, i) => (

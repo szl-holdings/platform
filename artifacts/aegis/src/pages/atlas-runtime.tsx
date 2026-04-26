@@ -254,17 +254,17 @@ const HEALTH_CONFIG: Record<
   { color: string; label: string; bg: string; border: string; dot?: boolean }
 > = {
   stable: {
-    color: '#10b981',
+    color: '#c9b787',
     label: 'Stable',
-    bg: 'rgba(16,185,129,0.08)',
-    border: 'rgba(16,185,129,0.2)',
+    bg: 'rgba(201,183,135,0.08)',
+    border: 'rgba(201,183,135,0.2)',
     dot: false,
   },
   degraded: {
-    color: '#f59e0b',
+    color: '#c9b787',
     label: 'Degraded',
-    bg: 'rgba(245,158,11,0.08)',
-    border: 'rgba(245,158,11,0.2)',
+    bg: 'rgba(201,183,135,0.08)',
+    border: 'rgba(201,183,135,0.2)',
     dot: true,
   },
   awaiting_approval: {
@@ -275,17 +275,17 @@ const HEALTH_CONFIG: Record<
     dot: true,
   },
   offline: {
-    color: '#ef4444',
+    color: '#f5f5f5',
     label: 'Offline',
-    bg: 'rgba(239,68,68,0.08)',
-    border: 'rgba(239,68,68,0.2)',
+    bg: 'rgba(245,245,245,0.08)',
+    border: 'rgba(245,245,245,0.2)',
     dot: true,
   },
 };
 
 const SEV_COLOR: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f59e0b',
+  critical: '#f5f5f5',
+  high: '#c9b787',
   medium: '#6b7280',
 };
 const TYPE_ICON: Record<string, typeof Server> = {
@@ -299,13 +299,13 @@ const TYPE_ICON: Record<string, typeof Server> = {
 };
 
 const PROOF_CONFIG: Record<string, { color: string; label: string }> = {
-  verified: { color: '#10b981', label: 'Proof Verified' },
-  pending: { color: '#f59e0b', label: 'Proof Pending' },
-  unverified: { color: '#ef4444', label: 'Unverified' },
+  verified: { color: '#c9b787', label: 'Proof Verified' },
+  pending: { color: '#c9b787', label: 'Proof Pending' },
+  unverified: { color: '#f5f5f5', label: 'Unverified' },
 };
 
 function DriftBadge({ score }: { score: number }) {
-  const color = score <= 5 ? '#10b981' : score <= 15 ? '#f59e0b' : '#ef4444';
+  const color = score <= 5 ? '#c9b787' : score <= 15 ? '#c9b787' : '#f5f5f5';
   return (
     <span
       className="text-[8px] font-bold font-mono px-1.5 py-0.5 rounded"
@@ -398,7 +398,7 @@ function EvidenceOverlay({ twin, onClose }: { twin: DigitalTwin; onClose: () => 
               className="flex items-start gap-2 text-[10px]"
               style={{ color: 'rgba(255,255,255,0.65)' }}
             >
-              <CheckCircle className="w-2.5 h-2.5 mt-0.5 shrink-0" style={{ color: '#10b981' }} />
+              <CheckCircle className="w-2.5 h-2.5 mt-0.5 shrink-0" style={{ color: '#c9b787' }} />
               {ev}
             </div>
           ))}
@@ -539,11 +539,11 @@ function AegisAtlasRuntimeContent() {
       <div className="grid grid-cols-4 gap-3">
         {[
           { label: 'Twins Online', value: TWINS.length, color: '#8b7ac8' },
-          { label: 'Stable', value: stable.length, color: '#10b981' },
+          { label: 'Stable', value: stable.length, color: '#c9b787' },
           {
             label: 'Degraded',
             value: degraded.length,
-            color: '#f59e0b',
+            color: '#c9b787',
             pulse: degraded.length > 0,
           },
           {
@@ -582,11 +582,11 @@ function AegisAtlasRuntimeContent() {
       {liveIncidents.length > 0 && !safeMode && (
         <div
           className="rounded-xl border px-4 py-2.5 flex items-center gap-3"
-          style={{ borderColor: 'rgba(239,68,68,0.12)', background: 'rgba(239,68,68,0.02)' }}
+          style={{ borderColor: 'rgba(245,245,245,0.12)', background: 'rgba(245,245,245,0.02)' }}
         >
-          <Activity className="w-3 h-3 shrink-0" style={{ color: '#ef4444' }} />
+          <Activity className="w-3 h-3 shrink-0" style={{ color: '#f5f5f5' }} />
           <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            <span className="font-bold font-mono" style={{ color: '#ef4444' }}>
+            <span className="font-bold font-mono" style={{ color: '#f5f5f5' }}>
               {liveIncidents.filter((i) => i.status !== 'resolved').length}
             </span>{' '}
             live incident
@@ -709,7 +709,7 @@ function AegisAtlasRuntimeContent() {
                       {tw.incidents > 0 && (
                         <span
                           className="text-[9px] font-bold px-1.5 py-0.5 rounded"
-                          style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)' }}
+                          style={{ color: '#f5f5f5', background: 'rgba(245,245,245,0.1)' }}
                         >
                           {tw.incidents}i
                         </span>
@@ -734,11 +734,11 @@ function AegisAtlasRuntimeContent() {
             className="p-4 border-b flex items-center gap-2"
             style={{ borderColor: 'rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.01)' }}
           >
-            <Activity className="w-3.5 h-3.5" style={{ color: '#ef4444' }} />
+            <Activity className="w-3.5 h-3.5" style={{ color: '#f5f5f5' }} />
             <span className="text-[11px] font-semibold text-white">Incident Theater</span>
             <span
               className="ml-auto text-[9px] font-bold uppercase tracking-widest"
-              style={{ color: liveEvents.length > 0 ? '#ef4444' : 'rgba(255,255,255,0.3)' }}
+              style={{ color: liveEvents.length > 0 ? '#f5f5f5' : 'rgba(255,255,255,0.3)' }}
             >
               {liveEvents.length > 0 ? 'LIVE' : 'SEED'}
             </span>
@@ -847,9 +847,9 @@ function AegisAtlasRuntimeContent() {
             const wlTwins = TWINS.filter((t) => t.worldline === wl);
             const allStable = wlTwins.every((t) => t.health === 'stable');
             const color = allStable
-              ? '#10b981'
+              ? '#c9b787'
               : wlTwins.some((t) => t.health === 'degraded')
-                ? '#f59e0b'
+                ? '#c9b787'
                 : '#8b7ac8';
             return (
               <a

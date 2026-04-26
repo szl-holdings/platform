@@ -22,28 +22,28 @@ const threatFeed = [
     title: 'Lateral movement detected — domain controller pivot attempt',
     source: 'XDR · Endpoint',
     time: '2 min ago',
-    color: 'text-red-400 bg-red-500/10 border-red-500/20',
+    color: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20',
   },
   {
     type: 'High',
     title: 'Anomalous credential dumping via LSASS process injection',
     source: 'Identity Threat · AD',
     time: '8 min ago',
-    color: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
+    color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
   },
   {
     type: 'Medium',
     title: 'Suspicious outbound C2 beacon pattern on port 443',
     source: 'NDR · Network',
     time: '23 min ago',
-    color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+    color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
   },
   {
     type: 'High',
     title: 'Privilege escalation via service account misuse',
     source: 'Identity Threat · Entra ID',
     time: '41 min ago',
-    color: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
+    color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
   },
 ];
 
@@ -145,7 +145,7 @@ function ThreatParticles() {
             d = Math.sqrt(dx * dx + dy * dy);
           if (d < 120) {
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(239,68,68,${0.06 * (1 - d / 120)})`;
+            ctx.strokeStyle = `rgba(245,245,245,${0.06 * (1 - d / 120)})`;
             ctx.lineWidth = 0.5;
             ctx.moveTo(pts[i].x, pts[i].y);
             ctx.lineTo(pts[j].x, pts[j].y);
@@ -154,7 +154,7 @@ function ThreatParticles() {
         }
         ctx.beginPath();
         ctx.arc(pts[i].x, pts[i].y, pts[i].r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(239,68,68,${pts[i].o})`;
+        ctx.fillStyle = `rgba(245,245,245,${pts[i].o})`;
         ctx.fill();
       }
       animFrame = requestAnimationFrame(draw);
@@ -191,7 +191,7 @@ function _LiveCounter({ end, duration = 2000 }: { end: number; duration?: number
 export default function AegisMarketingHome() {
   return (
     <div className="min-h-screen bg-[#0a0608] text-gray-100 overflow-x-hidden">
-      <nav className="fixed top-0 inset-x-0 z-50 border-b border-red-500/10 bg-[#0a0608]/80 backdrop-blur-xl">
+      <nav className="fixed top-0 inset-x-0 z-50 border-b border-[#f5f5f5]/10 bg-[#0a0608]/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center">
@@ -233,7 +233,7 @@ export default function AegisMarketingHome() {
       >
         <ThreatParticles />
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] bg-[radial-gradient(ellipse,rgba(239,68,68,0.08)_0%,transparent_70%)]" />
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] bg-[radial-gradient(ellipse,rgba(245,245,245,0.08)_0%,transparent_70%)]" />
           <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-red-500/20 to-transparent" />
         </div>
 
@@ -242,13 +242,13 @@ export default function AegisMarketingHome() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-red-500/20 bg-red-500/5 mb-8"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#f5f5f5]/20 bg-[#f5f5f5]/5 mb-8"
           >
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#f5f5f5] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#f5f5f5]" />
             </span>
-            <span className="text-[11px] font-semibold text-red-400/80 tracking-[0.1em] uppercase">
+            <span className="text-[11px] font-semibold text-[#f5f5f5]/80 tracking-[0.1em] uppercase">
               Cyber Defense Platform
             </span>
           </m.div>
@@ -294,7 +294,7 @@ export default function AegisMarketingHome() {
         </div>
       </section>
 
-      <section className="border-y border-red-500/10 bg-[#0c0a0a]/60">
+      <section className="border-y border-[#f5f5f5]/10 bg-[#0c0a0a]/60">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           {stats.map((s, i) => (
             <m.div
@@ -316,7 +316,7 @@ export default function AegisMarketingHome() {
       <section id="platform" className="py-16 sm:py-24 border-b border-white/5">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-8">
-            <p className="text-[11px] font-semibold text-red-400/60 tracking-[0.15em] uppercase mb-3">
+            <p className="text-[11px] font-semibold text-[#f5f5f5]/60 tracking-[0.15em] uppercase mb-3">
               Live Threat Feed
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
@@ -354,7 +354,7 @@ export default function AegisMarketingHome() {
       <section id="capabilities" className="py-16 sm:py-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16">
-            <p className="text-[11px] font-semibold text-red-400/60 tracking-[0.15em] uppercase mb-3">
+            <p className="text-[11px] font-semibold text-[#f5f5f5]/60 tracking-[0.15em] uppercase mb-3">
               Capabilities
             </p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
@@ -372,10 +372,10 @@ export default function AegisMarketingHome() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08 }}
-                className="group bg-[#110e0e]/60 border border-white/5 hover:border-red-500/20 rounded-xl p-5 sm:p-6 transition-all duration-300"
+                className="group bg-[#110e0e]/60 border border-white/5 hover:border-[#f5f5f5]/20 rounded-xl p-5 sm:p-6 transition-all duration-300"
               >
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-red-500/10 to-orange-500/10 border border-red-500/10 flex items-center justify-center mb-4">
-                  <c.icon className="w-5 h-5 text-red-400" />
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-red-500/10 to-orange-500/10 border border-[#f5f5f5]/10 flex items-center justify-center mb-4">
+                  <c.icon className="w-5 h-5 text-[#f5f5f5]" />
                 </div>
                 <h3 className="text-[15px] font-semibold text-white mb-2">{c.title}</h3>
                 <p className="text-gray-500 text-[13px] leading-relaxed">{c.desc}</p>
@@ -388,7 +388,7 @@ export default function AegisMarketingHome() {
       <section id="use-cases" className="py-16 sm:py-24 border-t border-white/5 bg-[#0c0a0a]/40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
-            <p className="text-[11px] font-semibold text-red-400/60 tracking-[0.15em] uppercase mb-3">
+            <p className="text-[11px] font-semibold text-[#f5f5f5]/60 tracking-[0.15em] uppercase mb-3">
               Built For
             </p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
@@ -403,9 +403,9 @@ export default function AegisMarketingHome() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="border border-white/5 hover:border-red-500/15 rounded-xl p-6 sm:p-7 transition-all duration-300 bg-[#110e0e]/40"
+                className="border border-white/5 hover:border-[#f5f5f5]/15 rounded-xl p-6 sm:p-7 transition-all duration-300 bg-[#110e0e]/40"
               >
-                <p className="text-[10px] font-bold text-red-400/70 uppercase tracking-[0.15em] mb-3">
+                <p className="text-[10px] font-bold text-[#f5f5f5]/70 uppercase tracking-[0.15em] mb-3">
                   {u.role}
                 </p>
                 <h3 className="text-[17px] font-bold text-white mb-3 leading-snug">{u.headline}</h3>
@@ -419,7 +419,7 @@ export default function AegisMarketingHome() {
       <section className="py-16 sm:py-24 border-t border-white/5">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
-            <p className="text-[11px] font-semibold text-red-400/60 tracking-[0.15em] uppercase mb-3">
+            <p className="text-[11px] font-semibold text-[#f5f5f5]/60 tracking-[0.15em] uppercase mb-3">
               Coverage
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
@@ -428,7 +428,7 @@ export default function AegisMarketingHome() {
             <p className="text-gray-500 text-[14px] max-w-2xl mx-auto">
               Every detection rule mapped to ATT&CK techniques. Real-time coverage visibility.
             </p>
-            <p className="text-[12px] text-red-400/70 font-mono mt-3">
+            <p className="text-[12px] text-[#f5f5f5]/70 font-mono mt-3">
               {metricDisplay(AEGIS_MITRE_COVERAGE)}
             </p>
           </div>
@@ -455,9 +455,9 @@ export default function AegisMarketingHome() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.04 }}
-                className="bg-gradient-to-b from-red-500/8 to-transparent border border-red-500/10 rounded-lg p-3 text-center"
+                className="bg-gradient-to-b from-red-500/8 to-transparent border border-[#f5f5f5]/10 rounded-lg p-3 text-center"
               >
-                <p className="text-[10px] font-semibold text-red-400/80 leading-tight">{tactic}</p>
+                <p className="text-[10px] font-semibold text-[#f5f5f5]/80 leading-tight">{tactic}</p>
                 <p className="text-[18px] font-bold text-white mt-1">
                   {Math.floor(85 + Math.random() * 14)}%
                 </p>
@@ -471,7 +471,7 @@ export default function AegisMarketingHome() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <p className="text-[11px] font-semibold text-red-400/60 tracking-[0.15em] uppercase mb-4">
+              <p className="text-[11px] font-semibold text-[#f5f5f5]/60 tracking-[0.15em] uppercase mb-4">
                 Enterprise Grade
               </p>
               <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6">
@@ -497,8 +497,8 @@ export default function AegisMarketingHome() {
                   },
                 ].map((item) => (
                   <div key={item.label} className="flex gap-3">
-                    <div className="mt-1 w-5 h-5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
-                      <Shield className="w-2.5 h-2.5 text-red-400" />
+                    <div className="mt-1 w-5 h-5 rounded-full bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 flex items-center justify-center shrink-0">
+                      <Shield className="w-2.5 h-2.5 text-[#f5f5f5]" />
                     </div>
                     <div>
                       <p className="text-[14px] font-semibold text-white">{item.label}</p>
@@ -620,7 +620,7 @@ export default function AegisMarketingHome() {
               </p>
               <div className="space-y-2.5">
                 {[
-                  { name: 'SZL Holdings', href: '/szl-holdings/' },
+                  { name: 'Aegis', href: '/szl-holdings/' },
                   { name: 'Vessels', href: '/vessels/' },
                   { name: 'Lyte', href: '/command/operations/' },
                   { name: 'Terra', href: '/terra/' },

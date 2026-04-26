@@ -38,7 +38,7 @@ function MarketPulseCard() {
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.cardHeader}>
-        <Text style={[styles.cardTitle, { color: colors.goldSubtle }]}>NYC MARKET LUMINA</Text>
+        <Text style={[styles.cardTitle, { color: colors.goldSubtle }]}>NYC MARKET Pulse</Text>
         <View
           style={[
             styles.liveBadge,

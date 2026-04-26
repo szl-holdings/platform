@@ -14,7 +14,7 @@ export type SentraRansomwareNarrative = typeof SENTRA_RANSOMWARE_NARRATIVE;
 
 export const SENTRA_RANSOMWARE_NARRATIVE = {
   id: 'sentra-ransomware',
-  title: 'TENAX — Ransomware-Adjacent OT Event + Recovery Posture Gap',
+  title: 'Aegis — Ransomware-Adjacent OT Event + Recovery Posture Gap',
   domain: 'security' as const,
   org: 'Global Industrial Corp',
   personas: ['ciso', 'soc-manager', 'incident-commander'],

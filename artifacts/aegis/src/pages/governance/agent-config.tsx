@@ -37,7 +37,7 @@ const DEFAULT_AGENTS: AgentDef[] = [
     preferredModel: 'gpt-5.2',
     preferredProvider: 'openai',
     systemPrompt:
-      "You are Counsel, the central orchestration intelligence of the Counsel — SZL Holdings' unified multi-agent AI system. You coordinate specialized domain agents, aggregate their insights, and provide unified intelligence across the entire SZL platform.",
+      "You are Counsel, the central orchestration intelligence of the Counsel — Aegis' unified multi-agent AI system. You coordinate specialized domain agents, aggregate their insights, and provide unified intelligence across the entire SZL platform.",
     tools: ['system_health', 'admin_overview'],
     highStakesDomains: [],
     confidenceThreshold: 0.7,
@@ -149,12 +149,12 @@ const ALL_TOOLS = [
 
 const DOMAIN_COLORS: Record<string, string> = {
   orchestration: '#c9a84c',
-  security: '#ef4444',
-  maritime: '#0ea5e9',
-  research: '#8b5cf6',
-  analytics: '#22c55e',
-  infrastructure: '#6366f1',
-  creative: '#d946ef',
+  security: '#f5f5f5',
+  maritime: '#8a8a8a',
+  research: '#8a8a8a',
+  analytics: '#c9b787',
+  infrastructure: '#8a8a8a',
+  creative: '#8a8a8a',
 };
 
 function AgentEditor({
@@ -269,7 +269,7 @@ function AgentEditor({
               </label>
               <button
                 onClick={() => setShowPrompt((p) => !p)}
-                className="text-xs text-amber-400 flex items-center gap-1"
+                className="text-xs text-[#c9b787] flex items-center gap-1"
               >
                 {showPrompt ? <EyeOff size={12} /> : <Eye size={12} />}
                 {showPrompt ? 'Hide' : 'Show'}
@@ -294,7 +294,7 @@ function AgentEditor({
                 <button
                   key={tool}
                   onClick={() => toggleTool(tool)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-colors ${agent.tools.includes(tool) ? 'bg-amber-400/15 text-amber-300 border border-amber-400/30' : 'bg-[#1e2a3a] text-[#8b9ab0] border border-[#2e3a4a] hover:border-[#3e4a5a]'}`}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-colors ${agent.tools.includes(tool) ? 'bg-[#c9b787]/15 text-[#c9b787] border border-[#c9b787]/30' : 'bg-[#1e2a3a] text-[#8b9ab0] border border-[#2e3a4a] hover:border-[#3e4a5a]'}`}
                 >
                   {tool}
                 </button>
@@ -322,7 +322,7 @@ function AgentEditor({
                 <button
                   key={d}
                   onClick={() => toggleHighStakes(d)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-colors ${agent.highStakesDomains.includes(d) ? 'bg-red-500/15 text-red-300 border border-red-500/30' : 'bg-[#1e2a3a] text-[#8b9ab0] border border-[#2e3a4a] hover:border-[#3e4a5a]'}`}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-colors ${agent.highStakesDomains.includes(d) ? 'bg-[#f5f5f5]/15 text-[#f5f5f5] border border-[#f5f5f5]/30' : 'bg-[#1e2a3a] text-[#8b9ab0] border border-[#2e3a4a] hover:border-[#3e4a5a]'}`}
                 >
                   {d}
                 </button>
@@ -334,7 +334,7 @@ function AgentEditor({
             <span className="text-sm text-white flex-1">Agent Status</span>
             <button
               onClick={() => set('active', !agent.active)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${agent.active ? 'bg-green-500/15 text-green-400 border border-green-500/30' : 'bg-[#2e3a4a] text-[#8b9ab0] border border-[#3e4a5a]'}`}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${agent.active ? 'bg-[#c9b787]/15 text-[#c9b787] border border-[#c9b787]/30' : 'bg-[#2e3a4a] text-[#8b9ab0] border border-[#3e4a5a]'}`}
             >
               {agent.active ? (
                 <>
@@ -362,7 +362,7 @@ function AgentEditor({
               onSave(agent);
               onClose();
             }}
-            className="flex-1 py-2 rounded-lg bg-amber-400 text-black text-sm font-semibold hover:bg-amber-300 transition-colors flex items-center justify-center gap-2"
+            className="flex-1 py-2 rounded-lg bg-[#c9b787] text-black text-sm font-semibold hover:bg-[#c9b787] transition-colors flex items-center justify-center gap-2"
           >
             <Save size={14} />
             Save Changes
@@ -418,7 +418,7 @@ export default function AgentConfigPage() {
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <Brain size={22} className="text-amber-400" />
+              <Brain size={22} className="text-[#c9b787]" />
               <h1 className="text-xl font-bold text-white font-mono tracking-tight">
                 Agent Configuration
               </h1>
@@ -430,7 +430,7 @@ export default function AgentConfigPage() {
           </div>
           <div className="flex items-center gap-3">
             <div
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono ${isLoading ? 'bg-amber-400/10 text-amber-400' : 'bg-green-500/10 text-green-400'} border ${isLoading ? 'border-amber-400/20' : 'border-green-500/20'}`}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono ${isLoading ? 'bg-[#c9b787]/10 text-[#c9b787]' : 'bg-[#c9b787]/10 text-[#c9b787]'} border ${isLoading ? 'border-[#c9b787]/20' : 'border-[#c9b787]/20'}`}
             >
               <Cpu size={12} />
               {isLoading ? 'Connecting…' : 'Counsel Connected'}
@@ -438,9 +438,9 @@ export default function AgentConfigPage() {
           </div>
         </div>
 
-        <div className="bg-amber-400/10 border border-amber-400/30 rounded-xl p-4 flex items-start gap-3">
-          <Lock size={14} className="text-amber-400 mt-0.5 shrink-0" />
-          <p className="text-xs text-amber-200/80 font-mono leading-relaxed">
+        <div className="bg-[#c9b787]/10 border border-[#c9b787]/30 rounded-xl p-4 flex items-start gap-3">
+          <Lock size={14} className="text-[#c9b787] mt-0.5 shrink-0" />
+          <p className="text-xs text-[#c9b787]/80 font-mono leading-relaxed">
             Changes to agent configuration take effect immediately. System prompt edits affect all
             future conversations. Disabling an agent prevents it from receiving new delegations.
             High-stakes domain changes affect the maker-checker validation pipeline.
@@ -453,17 +453,17 @@ export default function AgentConfigPage() {
             {
               label: 'Active',
               value: agents.filter((a) => a.active !== false).length,
-              color: '#22c55e',
+              color: '#c9b787',
             },
             {
               label: 'High-Stakes Domains',
               value: agents.reduce((sum, a) => sum + a.highStakesDomains.length, 0),
-              color: '#ef4444',
+              color: '#f5f5f5',
             },
             {
               label: 'Tool Permissions',
               value: new Set(agents.flatMap((a) => a.tools)).size,
-              color: '#8b5cf6',
+              color: '#8a8a8a',
             },
           ].map((m) => (
             <div key={m.label} className="bg-[#0d1117] border border-[#1e2a3a] rounded-xl p-4">
@@ -500,7 +500,7 @@ export default function AgentConfigPage() {
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold text-white">{agent.name}</span>
                         {isSaving && (
-                          <RefreshCw size={12} className="text-amber-400 animate-spin" />
+                          <RefreshCw size={12} className="text-[#c9b787] animate-spin" />
                         )}
                       </div>
                       <p className="text-xs text-[#8b9ab0] capitalize">
@@ -511,7 +511,7 @@ export default function AgentConfigPage() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => toggleActive(agent.id)}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-colors ${isActive ? 'bg-green-500/15 text-green-400 border border-green-500/25' : 'bg-[#1e2a3a] text-[#8b9ab0] border border-[#2e3a4a]'}`}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-colors ${isActive ? 'bg-[#c9b787]/15 text-[#c9b787] border border-[#c9b787]/25' : 'bg-[#1e2a3a] text-[#8b9ab0] border border-[#2e3a4a]'}`}
                     >
                       {isActive ? <CheckCircle2 size={11} /> : <Pause size={11} />}
                       {isActive ? 'Active' : 'Inactive'}
@@ -538,7 +538,7 @@ export default function AgentConfigPage() {
                     <div className="flex items-center gap-2">
                       <div className="w-20 h-1.5 bg-[#1e2a3a] rounded-full overflow-hidden">
                         <div
-                          className="h-full rounded-full bg-amber-400"
+                          className="h-full rounded-full bg-[#c9b787]"
                           style={{ width: `${(agent.confidenceThreshold ?? 0.7) * 100}%` }}
                         />
                       </div>
@@ -576,7 +576,7 @@ export default function AgentConfigPage() {
                         {agent.highStakesDomains.slice(0, 3).map((d) => (
                           <span
                             key={d}
-                            className="text-[9px] bg-red-500/15 text-red-400 px-1.5 py-0.5 rounded font-mono"
+                            className="text-[9px] bg-[#f5f5f5]/15 text-[#f5f5f5] px-1.5 py-0.5 rounded font-mono"
                           >
                             {d}
                           </span>

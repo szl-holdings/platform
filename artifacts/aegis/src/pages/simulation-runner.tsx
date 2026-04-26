@@ -42,24 +42,24 @@ import { api } from '@/lib/api';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
-  running: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  completed: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  failed: 'bg-red-500/10 text-red-400 border-red-500/20',
+  running: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  completed: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  failed: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
   aborted: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
 };
 
 function getScoreColor(score: number) {
-  if (score < 30) return 'text-emerald-400';
-  if (score < 50) return 'text-amber-400';
-  if (score < 70) return 'text-orange-400';
-  return 'text-red-400';
+  if (score < 30) return 'text-[#c9b787]';
+  if (score < 50) return 'text-[#c9b787]';
+  if (score < 70) return 'text-[#c9b787]';
+  return 'text-[#f5f5f5]';
 }
 
 function getScoreBg(score: number) {
-  if (score < 30) return 'bg-emerald-500/10';
-  if (score < 50) return 'bg-amber-500/10';
-  if (score < 70) return 'bg-orange-500/10';
-  return 'bg-red-500/10';
+  if (score < 30) return 'bg-[#c9b787]/10';
+  if (score < 50) return 'bg-[#c9b787]/10';
+  if (score < 70) return 'bg-[#c9b787]/10';
+  return 'bg-[#f5f5f5]/10';
 }
 
 function AnimatedProgress({ value, className }: { value: number; className?: string }) {
@@ -117,7 +117,7 @@ function RunningExerciseDisplay() {
     };
   }, []);
   return (
-    <div className="bg-amber-500/5 rounded-lg p-4 border border-amber-500/10 relative overflow-hidden">
+    <div className="bg-[#c9b787]/5 rounded-lg p-4 border border-[#c9b787]/10 relative overflow-hidden">
       <div className="absolute inset-0 opacity-5">
         <div
           className="absolute inset-0"
@@ -129,7 +129,7 @@ function RunningExerciseDisplay() {
       </div>
       <div className="relative">
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2 text-sm text-amber-400">
+          <div className="flex items-center gap-2 text-sm text-[#c9b787]">
             <Loader2 className="w-4 h-4 animate-spin" />
             <span className="font-medium">Exercise in progress</span>
           </div>
@@ -137,13 +137,13 @@ function RunningExerciseDisplay() {
             {exercisePhases.map((_, idx) => (
               <div
                 key={idx}
-                className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${idx <= phase ? 'bg-amber-400' : 'bg-amber-400/20'}`}
+                className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${idx <= phase ? 'bg-[#c9b787]' : 'bg-[#c9b787]/20'}`}
               />
             ))}
           </div>
         </div>
         <AnimatedProgress value={progress} className="h-2" />
-        <div className="flex items-center justify-between mt-2 text-xs text-amber-400/60">
+        <div className="flex items-center justify-between mt-2 text-xs text-[#c9b787]/60">
           <span className="flex items-center gap-1">
             <Zap className="w-3 h-3" />
             {exercisePhases[phase]}...
@@ -235,8 +235,8 @@ export default function AdversaryEmulation() {
   if (accessDenied) {
     return (
       <div className="p-6 flex flex-col items-center justify-center min-h-[400px] gap-4 text-center">
-        <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-          <Lock className="w-5 h-5 text-red-400" />
+        <div className="w-12 h-12 rounded-full bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 flex items-center justify-center">
+          <Lock className="w-5 h-5 text-[#f5f5f5]" />
         </div>
         <div>
           <h2 className="text-lg font-semibold text-foreground mb-1">Security Access Required</h2>
@@ -429,11 +429,11 @@ export default function AdversaryEmulation() {
                         className={`w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mt-0.5 ${isRunning ? 'ring-1 ring-amber-500/20' : ''}`}
                       >
                         {isRunning ? (
-                          <Loader2 className="w-5 h-5 text-amber-400 animate-spin" />
+                          <Loader2 className="w-5 h-5 text-[#c9b787] animate-spin" />
                         ) : sim.status === 'completed' ? (
-                          <CheckCircle className="w-5 h-5 text-emerald-400" />
+                          <CheckCircle className="w-5 h-5 text-[#c9b787]" />
                         ) : sim.status === 'failed' ? (
-                          <XCircle className="w-5 h-5 text-red-400" />
+                          <XCircle className="w-5 h-5 text-[#f5f5f5]" />
                         ) : (
                           <Activity className="w-5 h-5 text-primary" />
                         )}
@@ -459,7 +459,7 @@ export default function AdversaryEmulation() {
                       className={`${statusColors[sim.status] || ''} ${isRunning ? 'animate-pulse' : ''}`}
                     >
                       {isRunning && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 animate-pulse-dot" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787] mr-1.5 animate-pulse-dot" />
                       )}
                       {sim.status}
                     </Badge>

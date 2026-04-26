@@ -27,8 +27,8 @@ export default function AegisDocumentEngine() {
         className="flex-shrink-0"
       >
         <div className="flex items-center gap-3 px-6 pt-6 pb-0">
-          <div className="w-8 h-8 rounded-xl bg-red-500/20 flex items-center justify-center">
-            <BookOpen className="w-4 h-4 text-red-400" />
+          <div className="w-8 h-8 rounded-xl bg-[#f5f5f5]/20 flex items-center justify-center">
+            <BookOpen className="w-4 h-4 text-[#f5f5f5]" />
           </div>
           <div>
             <h1 className="text-xl font-display font-bold text-white">Document Engine</h1>
@@ -48,7 +48,7 @@ export default function AegisDocumentEngine() {
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-lg border-b-2 transition-colors',
                   isActive
-                    ? 'border-red-400 text-red-400 bg-red-500/5'
+                    ? 'border-[#f5f5f5] text-[#f5f5f5] bg-[#f5f5f5]/5'
                     : 'border-transparent text-white/50 hover:text-white',
                 )}
               >
@@ -62,13 +62,13 @@ export default function AegisDocumentEngine() {
 
       <div className="flex-1 overflow-hidden">
         {activeTab === 'documents' && (
-          <DocumentEnginePanel appSource="aegis" accentColor="#ef4444" className="h-full" />
+          <DocumentEnginePanel appSource="aegis" accentColor="#f5f5f5" className="h-full" />
         )}
         {activeTab === 'signing' && (
-          <SigningDashboard appSource="aegis" accentColor="#ef4444" className="h-full" />
+          <SigningDashboard appSource="aegis" accentColor="#f5f5f5" className="h-full" />
         )}
         {activeTab === 'pdf-batch' && (
-          <BatchPdfPanel appSource="aegis" accentColor="#ef4444" className="h-full" />
+          <BatchPdfPanel appSource="aegis" accentColor="#f5f5f5" className="h-full" />
         )}
       </div>
     </div>

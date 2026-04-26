@@ -63,7 +63,7 @@ export const ENV_CONTRACT: EnvVarSpec[] = [
     classification: 'recommended',
     description: 'OpenAI API key via Replit AI Integrations proxy.',
     risksIfMissing:
-      'LUMINA briefings fall back to synthetic drift mode. AI triage/plan/retrieve endpoints degrade.',
+      'Pulse briefings fall back to synthetic drift mode. AI triage/plan/retrieve endpoints degrade.',
   },
   {
     key: 'AI_INTEGRATIONS_ANTHROPIC_API_KEY',

@@ -57,19 +57,19 @@
   --color-alloy-muted:  rgba(77, 143, 204, 0.09);
   --color-alloy-border: rgba(77, 143, 204, 0.16);
 
-  /* Domain pack accents */
-  --color-aegis:         var(--gi-accent-violet);
-  --color-aegis-muted:   rgba(155, 124, 200, 0.08);
-  --color-vessels:       var(--gi-accent-blue);
-  --color-vessels-muted: rgba(77, 143, 204, 0.08);
-  --color-terra:         var(--gi-accent-green);
-  --color-terra-muted:   rgba(91, 170, 138, 0.08);
-  --color-carlota:       var(--gi-accent-violet);
-  --color-carlota-muted: rgba(155, 124, 200, 0.08);
-  --color-sentra:        var(--gi-accent-red);
-  --color-sentra-muted:  rgba(201, 96, 112, 0.08);
-  --color-counsel:       var(--gi-accent-violet);
-  --color-counsel-muted: rgba(155, 124, 200, 0.08);
+  /* Domain pack accents — publication palette */
+  --color-aegis:         #c9b787;
+  --color-aegis-muted:   rgba(201, 183, 135, 0.08);
+  --color-vessels:       #c9b787;
+  --color-vessels-muted: rgba(201, 183, 135, 0.08);
+  --color-terra:         #c9b787;
+  --color-terra-muted:   rgba(201, 183, 135, 0.08);
+  --color-carlota:       #c9b787;
+  --color-carlota-muted: rgba(201, 183, 135, 0.08);
+  --color-sentra:        #c9b787;
+  --color-sentra-muted:  rgba(201, 183, 135, 0.08);
+  --color-counsel:       #c9b787;
+  --color-counsel-muted: rgba(201, 183, 135, 0.08);
 
   --color-szl-primary:       var(--gi-accent-blue);
   --color-szl-primary-light: #6ea8d8;

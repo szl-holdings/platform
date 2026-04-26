@@ -170,7 +170,7 @@ const BOARD_KPIS = [
     label: 'Security Risk Score',
     value: '74',
     sub: '↑ 12 pts (APT29 campaign)',
-    color: 'text-red-400',
+    color: 'text-[#f5f5f5]',
     icon: Shield,
     delta: 'up-bad',
   },
@@ -178,7 +178,7 @@ const BOARD_KPIS = [
     label: 'Critical Vulnerabilities',
     value: '8',
     sub: '↓ 10 from Q4 baseline',
-    color: 'text-amber-400',
+    color: 'text-[#c9b787]',
     icon: AlertTriangle,
     delta: 'down-good',
   },
@@ -186,7 +186,7 @@ const BOARD_KPIS = [
     label: 'MTTD (Detect)',
     value: '5.1 min',
     sub: 'Target: <5 min (Near-target)',
-    color: 'text-amber-400',
+    color: 'text-[#c9b787]',
     icon: Clock,
     delta: 'stable',
   },
@@ -194,7 +194,7 @@ const BOARD_KPIS = [
     label: 'MTTR (Respond)',
     value: '24 min',
     sub: 'Target: <60 min — Achieved',
-    color: 'text-emerald-400',
+    color: 'text-[#c9b787]',
     icon: Target,
     delta: 'down-good',
   },
@@ -202,7 +202,7 @@ const BOARD_KPIS = [
     label: 'SOC Coverage',
     value: '99.4%',
     sub: '24×7×365 — Near SLA',
-    color: 'text-emerald-400',
+    color: 'text-[#c9b787]',
     icon: Radio,
     delta: 'stable',
   },
@@ -210,7 +210,7 @@ const BOARD_KPIS = [
     label: 'Compliance Score',
     value: '77.5%',
     sub: 'Avg across 6 frameworks',
-    color: 'text-amber-400',
+    color: 'text-[#c9b787]',
     icon: Lock,
     delta: 'stable',
   },
@@ -218,7 +218,7 @@ const BOARD_KPIS = [
     label: 'Open Incidents',
     value: '3',
     sub: '1 critical (APT29)',
-    color: 'text-red-400',
+    color: 'text-[#f5f5f5]',
     icon: Layers,
     delta: 'up-bad',
   },
@@ -226,7 +226,7 @@ const BOARD_KPIS = [
     label: 'Board Risk Appetite',
     value: 'Elevated',
     sub: 'Active nation-state threat',
-    color: 'text-red-400',
+    color: 'text-[#f5f5f5]',
     icon: BarChart3,
     delta: 'up-bad',
   },
@@ -248,7 +248,7 @@ export default function ExecutiveRisk() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-[10px] text-red-400 bg-red-500/10 px-2.5 py-1 rounded-lg border border-red-500/20">
+          <div className="flex items-center gap-1.5 text-[10px] text-[#f5f5f5] bg-[#f5f5f5]/10 px-2.5 py-1 rounded-lg border border-[#f5f5f5]/20">
             <Radio className="w-3 h-3 animate-pulse" /> ACTIVE INCIDENT
           </div>
           <button className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-muted hover:bg-muted/80 transition-colors text-muted-foreground">
@@ -258,17 +258,17 @@ export default function ExecutiveRisk() {
       </div>
 
       {/* APT Campaign Risk Banner */}
-      <div className="p-3 rounded-xl border border-red-500/20 bg-red-500/5 flex items-center gap-3 flex-wrap">
-        <Radio className="w-3.5 h-3.5 text-red-400 animate-pulse shrink-0" />
+      <div className="p-3 rounded-xl border border-[#f5f5f5]/20 bg-[#f5f5f5]/5 flex items-center gap-3 flex-wrap">
+        <Radio className="w-3.5 h-3.5 text-[#f5f5f5] animate-pulse shrink-0" />
         <div className="flex-1 min-w-0">
-          <span className="text-xs font-bold text-red-300">
+          <span className="text-xs font-bold text-[#f5f5f5]">
             RR-001 ACTIVE — Operation Darkwing (APT29)
           </span>
           <span className="text-[10px] text-muted-foreground ml-2">
             Phase 3: Lateral Movement · CISO notified · CISA coordination initiated
           </span>
         </div>
-        <span className="text-[10px] font-mono text-red-400 font-bold shrink-0">
+        <span className="text-[10px] font-mono text-[#f5f5f5] font-bold shrink-0">
           Inherent Risk: 98 / Residual: 61
         </span>
       </div>
@@ -345,14 +345,14 @@ export default function ExecutiveRisk() {
                     <Area
                       type="monotone"
                       dataKey="score"
-                      stroke="#ef4444"
-                      fill="#ef4444"
+                      stroke="#f5f5f5"
+                      fill="#f5f5f5"
                       fillOpacity={0.1}
                       name="Risk Score"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
-                <p className="text-[9px] text-center text-red-400/60 mt-1">
+                <p className="text-[9px] text-center text-[#f5f5f5]/60 mt-1">
                   Mar spike due to APT29 active campaign detection
                 </p>
               </CardContent>
@@ -379,7 +379,7 @@ export default function ExecutiveRisk() {
                     <Line
                       type="monotone"
                       dataKey="mttd"
-                      stroke="#3b82f6"
+                      stroke="#c9b787"
                       strokeWidth={2}
                       dot={false}
                       name="MTTD (min)"
@@ -387,7 +387,7 @@ export default function ExecutiveRisk() {
                     <Line
                       type="monotone"
                       dataKey="mttr"
-                      stroke="#22c55e"
+                      stroke="#c9b787"
                       strokeWidth={2}
                       dot={false}
                       name="MTTR (min)"
@@ -415,8 +415,8 @@ export default function ExecutiveRisk() {
                         fontSize: 12,
                       }}
                     />
-                    <Bar dataKey="critical" fill="#ef4444" radius={[2, 2, 0, 0]} name="Critical" />
-                    <Bar dataKey="high" fill="#f97316" radius={[2, 2, 0, 0]} name="High" />
+                    <Bar dataKey="critical" fill="#f5f5f5" radius={[2, 2, 0, 0]} name="Critical" />
+                    <Bar dataKey="high" fill="#c9b787" radius={[2, 2, 0, 0]} name="High" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -437,7 +437,7 @@ export default function ExecutiveRisk() {
                         <span className="text-xs font-bold">{f.score}%</span>
                         <Badge
                           variant="outline"
-                          className={`text-[9px] ${f.status === 'Compliant' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : f.status === 'Remediation' ? 'text-red-400 bg-red-500/10 border-red-500/20' : 'text-amber-400 bg-amber-500/10 border-amber-500/20'}`}
+                          className={`text-[9px] ${f.status === 'Compliant' ? 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20' : f.status === 'Remediation' ? 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20' : 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20'}`}
                         >
                           {f.status}
                         </Badge>
@@ -445,7 +445,7 @@ export default function ExecutiveRisk() {
                     </div>
                     <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                       <div
-                        className={`h-full rounded-full ${f.score >= 85 ? 'bg-emerald-500' : f.score >= 70 ? 'bg-amber-500' : 'bg-red-500'}`}
+                        className={`h-full rounded-full ${f.score >= 85 ? 'bg-[#c9b787]' : f.score >= 70 ? 'bg-[#c9b787]' : 'bg-[#f5f5f5]'}`}
                         style={{ width: `${f.score}%` }}
                       />
                     </div>
@@ -469,7 +469,7 @@ export default function ExecutiveRisk() {
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-xs font-bold">{v.cve}</span>
                           <span
-                            className={`text-[10px] font-bold ${v.score >= 9.5 ? 'text-red-400' : 'text-orange-400'}`}
+                            className={`text-[10px] font-bold ${v.score >= 9.5 ? 'text-[#f5f5f5]' : 'text-[#c9b787]'}`}
                           >
                             CVSS {v.score}
                           </span>
@@ -479,10 +479,10 @@ export default function ExecutiveRisk() {
                           <span
                             className={
                               v.status === 'Patched' || v.status === 'Mitigated'
-                                ? 'text-emerald-400'
+                                ? 'text-[#c9b787]'
                                 : v.status === 'Patch Scheduled'
-                                  ? 'text-sky-400'
-                                  : 'text-amber-400'
+                                  ? 'text-[#8a8a8a]'
+                                  : 'text-[#c9b787]'
                             }
                           >
                             {v.status}
@@ -493,9 +493,9 @@ export default function ExecutiveRisk() {
                         </p>
                       </div>
                       {v.status === 'Patched' || v.status === 'Mitigated' ? (
-                        <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <CheckCircle className="w-4 h-4 text-[#c9b787] shrink-0" />
                       ) : (
-                        <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+                        <AlertTriangle className="w-4 h-4 text-[#f5f5f5] shrink-0" />
                       )}
                     </div>
                   </CardContent>
@@ -511,7 +511,7 @@ export default function ExecutiveRisk() {
           {RISK_REGISTER.map((risk) => (
             <div
               key={risk.id}
-              className={`p-4 rounded-xl border bg-card ${risk.inherentRisk >= 90 ? 'border-red-500/20' : risk.inherentRisk >= 65 ? 'border-amber-500/15' : 'border-border'}`}
+              className={`p-4 rounded-xl border bg-card ${risk.inherentRisk >= 90 ? 'border-[#f5f5f5]/20' : risk.inherentRisk >= 65 ? 'border-[#c9b787]/15' : 'border-border'}`}
             >
               <div className="flex items-start justify-between gap-3 flex-wrap">
                 <div className="flex-1 min-w-0">
@@ -520,7 +520,7 @@ export default function ExecutiveRisk() {
                     <span className="text-sm font-bold">{risk.title}</span>
                     <Badge
                       variant="outline"
-                      className={`text-[9px] ${risk.status === 'Active Incident' ? 'text-red-400 bg-red-500/10 border-red-500/20' : risk.status === 'Mitigated' || risk.status === 'Controlled' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-amber-400 bg-amber-500/10 border-amber-500/20'}`}
+                      className={`text-[9px] ${risk.status === 'Active Incident' ? 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20' : risk.status === 'Mitigated' || risk.status === 'Controlled' ? 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20' : 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20'}`}
                     >
                       {risk.status}
                     </Badge>
@@ -538,7 +538,7 @@ export default function ExecutiveRisk() {
                         key={m}
                         className="text-[9px] bg-muted px-2 py-0.5 rounded flex items-center gap-1"
                       >
-                        <CheckCircle className="w-2.5 h-2.5 text-emerald-400" /> {m}
+                        <CheckCircle className="w-2.5 h-2.5 text-[#c9b787]" /> {m}
                       </span>
                     ))}
                   </div>
@@ -548,7 +548,7 @@ export default function ExecutiveRisk() {
                   <div className="flex items-center gap-2">
                     <div>
                       <div
-                        className={`text-lg font-bold font-mono ${risk.inherentRisk >= 90 ? 'text-red-400' : risk.inherentRisk >= 65 ? 'text-amber-400' : 'text-orange-400'}`}
+                        className={`text-lg font-bold font-mono ${risk.inherentRisk >= 90 ? 'text-[#f5f5f5]' : risk.inherentRisk >= 65 ? 'text-[#c9b787]' : 'text-[#c9b787]'}`}
                       >
                         {risk.inherentRisk}
                       </div>
@@ -557,7 +557,7 @@ export default function ExecutiveRisk() {
                     <ChevronRight className="w-3 h-3 text-muted-foreground" />
                     <div>
                       <div
-                        className={`text-lg font-bold font-mono ${risk.residualRisk >= 60 ? 'text-orange-400' : risk.residualRisk >= 40 ? 'text-amber-400' : 'text-emerald-400'}`}
+                        className={`text-lg font-bold font-mono ${risk.residualRisk >= 60 ? 'text-[#c9b787]' : risk.residualRisk >= 40 ? 'text-[#c9b787]' : 'text-[#c9b787]'}`}
                       >
                         {risk.residualRisk}
                       </div>
@@ -648,7 +648,7 @@ export default function ExecutiveRisk() {
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xs font-bold">{report.title}</span>
                     <span
-                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${report.status === 'Ready' ? 'bg-emerald-500/10 text-emerald-400' : report.status === 'Draft' ? 'bg-amber-500/10 text-amber-400' : report.status === 'Pending' ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'}`}
+                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${report.status === 'Ready' ? 'bg-[#c9b787]/10 text-[#c9b787]' : report.status === 'Draft' ? 'bg-[#c9b787]/10 text-[#c9b787]' : report.status === 'Pending' ? 'bg-[#f5f5f5]/10 text-[#f5f5f5]' : 'bg-[#c9b787]/10 text-[#c9b787]'}`}
                     >
                       {report.status}
                     </span>

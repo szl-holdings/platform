@@ -37,8 +37,8 @@ interface TopologyNode {
 }
 
 const SYNC_COLORS: Record<string, string> = {
-  synced: '#22c55e',
-  drifted: '#f59e0b',
+  synced: '#c9b787',
+  drifted: '#c9b787',
   offline: '#64748b',
 };
 
@@ -72,18 +72,18 @@ export default function ThreatTwinView() {
     <div className="p-6 space-y-6 bg-[#080510] min-h-full">
       <div className="flex items-center justify-between mb-2">
         <div>
-          <h1 className="text-2xl font-bold text-red-500 flex items-center gap-2 tracking-tight">
+          <h1 className="text-2xl font-bold text-[#f5f5f5] flex items-center gap-2 tracking-tight">
             <Shield className="w-6 h-6" />
             Threat Digital Twin
           </h1>
-          <p className="text-red-400/50 text-sm mt-1">
+          <p className="text-[#f5f5f5]/50 text-sm mt-1">
             Real-time synchronization with active adversary profiles and indicator meshes.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <span
             className="flex items-center gap-1 text-[9px] px-2 py-1 rounded font-mono uppercase border"
-            style={{ background: 'rgba(34,197,94,0.08)', borderColor: 'rgba(34,197,94,0.25)', color: '#22c55e' }}
+            style={{ background: 'rgba(201,183,135,0.08)', borderColor: 'rgba(201,183,135,0.25)', color: '#c9b787' }}
           >
             <Database className="w-2.5 h-2.5" />
             {isLoading ? 'Loading…' : isError ? 'API Error' : `Live · ${nodes.length} assets`}
@@ -91,14 +91,14 @@ export default function ThreatTwinView() {
           <button
             type="button"
             onClick={() => refetch()}
-            className="p-1.5 rounded text-red-400/40 hover:text-red-400 transition-colors"
+            className="p-1.5 rounded text-[#f5f5f5]/40 hover:text-[#f5f5f5] transition-colors"
             aria-label="Refresh topology"
           >
             <RefreshCw className={cn('w-3.5 h-3.5', isLoading && 'animate-spin')} />
           </button>
-          <div className="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">
+          <div className="px-3 py-1 rounded-full bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#f5f5f5] animate-pulse" />
+            <span className="text-[10px] font-bold text-[#f5f5f5] uppercase tracking-wider">
               Active Monitoring
             </span>
           </div>
@@ -109,11 +109,11 @@ export default function ThreatTwinView() {
       {(nodes.length > 0 || isLoading) && (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {[
-            { label: 'Assets Monitored', value: nodes.length, color: '#3b82f6', sub: 'digital twin nodes' },
-            { label: 'Twin Fidelity', value: fidelity, color: '#22c55e', sub: 'assets in sync' },
-            { label: 'Synced', value: syncedCount, color: '#22c55e', sub: 'up to date' },
-            { label: 'Drifted', value: driftedCount, color: '#f59e0b', sub: 'need resync' },
-            { label: 'Total Vulns', value: totalVulns, color: '#ef4444', sub: 'open findings' },
+            { label: 'Assets Monitored', value: nodes.length, color: '#c9b787', sub: 'digital twin nodes' },
+            { label: 'Twin Fidelity', value: fidelity, color: '#c9b787', sub: 'assets in sync' },
+            { label: 'Synced', value: syncedCount, color: '#c9b787', sub: 'up to date' },
+            { label: 'Drifted', value: driftedCount, color: '#c9b787', sub: 'need resync' },
+            { label: 'Total Vulns', value: totalVulns, color: '#f5f5f5', sub: 'open findings' },
           ].map((m) => (
             <div
               key={m.label}
@@ -134,15 +134,15 @@ export default function ThreatTwinView() {
 
       {/* Live asset nodes from digital twin */}
       {displayNodes.length > 0 && (
-        <div className="bg-[#09060e] border border-red-500/10 rounded-xl overflow-hidden">
-          <div className="px-5 py-3 border-b border-red-500/10 flex items-center justify-between bg-red-500/5">
+        <div className="bg-[#09060e] border border-[#f5f5f5]/10 rounded-xl overflow-hidden">
+          <div className="px-5 py-3 border-b border-[#f5f5f5]/10 flex items-center justify-between bg-[#f5f5f5]/5">
             <div className="flex items-center gap-2">
-              <Server className="w-4 h-4 text-red-400" />
-              <h3 className="text-sm font-bold text-red-100 uppercase tracking-wider">
+              <Server className="w-4 h-4 text-[#f5f5f5]" />
+              <h3 className="text-sm font-bold text-[#f5f5f5] uppercase tracking-wider">
                 Asset Twin Sync State
               </h3>
             </div>
-            <span className="text-[10px] text-red-400/60 font-mono">
+            <span className="text-[10px] text-[#f5f5f5]/60 font-mono">
               Source: Firestorm Asset Inventory
             </span>
           </div>
@@ -153,10 +153,10 @@ export default function ThreatTwinView() {
                 className="rounded-lg p-3 border"
                 style={{
                   background: node.hasActiveIncident
-                    ? 'rgba(239,68,68,0.04)'
+                    ? 'rgba(245,245,245,0.04)'
                     : 'rgba(255,255,255,0.02)',
                   borderColor: node.hasActiveIncident
-                    ? 'rgba(239,68,68,0.2)'
+                    ? 'rgba(245,245,245,0.2)'
                     : 'rgba(255,255,255,0.06)',
                 }}
               >
@@ -179,7 +179,7 @@ export default function ThreatTwinView() {
                   </span>
                   <span className="text-zinc-600">{node.zone}</span>
                   {node.criticalVulnerabilities > 0 && (
-                    <span className="text-red-400 font-mono">
+                    <span className="text-[#f5f5f5] font-mono">
                       {node.criticalVulnerabilities} critical
                     </span>
                   )}
@@ -194,7 +194,7 @@ export default function ThreatTwinView() {
       )}
 
       {isError && (
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-amber-400 flex items-center gap-2">
+        <div className="rounded-xl border border-[#c9b787]/20 bg-[#c9b787]/5 px-4 py-3 text-xs text-[#c9b787] flex items-center gap-2">
           <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
           Digital Twin API unavailable — showing threat actor profile from scenario library
         </div>
@@ -203,29 +203,29 @@ export default function ThreatTwinView() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Threat Actor Profile */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-[#09060e] border border-red-500/10 rounded-xl p-5 relative overflow-hidden">
+          <div className="bg-[#09060e] border border-[#f5f5f5]/10 rounded-xl p-5 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-5">
-              <Target className="w-24 h-24 text-red-500" />
+              <Target className="w-24 h-24 text-[#f5f5f5]" />
             </div>
 
             <div className="flex items-start justify-between mb-6">
               <div>
                 <div className="flex items-center gap-3 mb-1">
-                  <h2 className="text-xl font-bold text-red-100">{actor.alias}</h2>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30 uppercase">
+                  <h2 className="text-xl font-bold text-[#f5f5f5]">{actor.alias}</h2>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#f5f5f5]/20 text-[#f5f5f5] border border-[#f5f5f5]/30 uppercase">
                     {actor.name}
                   </span>
                   <span
                     className="text-[9px] px-1.5 py-0.5 rounded font-mono uppercase border"
-                    style={{ background: 'rgba(249,115,22,0.08)', borderColor: 'rgba(249,115,22,0.25)', color: '#f97316' }}
+                    style={{ background: 'rgba(201,183,135,0.08)', borderColor: 'rgba(201,183,135,0.25)', color: '#c9b787' }}
                   >
                     Scenario Library
                   </span>
                 </div>
-                <p className="text-red-400/70 text-sm max-w-xl">{actor.description}</p>
+                <p className="text-[#f5f5f5]/70 text-sm max-w-xl">{actor.description}</p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] text-red-400/40 uppercase font-bold tracking-widest mb-1">
+                <p className="text-[10px] text-[#f5f5f5]/40 uppercase font-bold tracking-widest mb-1">
                   Confidence Score
                 </p>
                 <ConfidenceMeter value={actor.confidence} />
@@ -233,35 +233,35 @@ export default function ThreatTwinView() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/10">
-                <p className="text-[10px] text-red-400/40 uppercase font-bold mb-1">Affiliation</p>
-                <p className="text-sm font-medium text-red-200">{actor.affiliation}</p>
+              <div className="p-3 rounded-lg bg-[#f5f5f5]/5 border border-[#f5f5f5]/10">
+                <p className="text-[10px] text-[#f5f5f5]/40 uppercase font-bold mb-1">Affiliation</p>
+                <p className="text-sm font-medium text-[#f5f5f5]">{actor.affiliation}</p>
               </div>
-              <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/10">
-                <p className="text-[10px] text-red-400/40 uppercase font-bold mb-1">Motivation</p>
-                <p className="text-sm font-medium text-red-200">{actor.motivation}</p>
+              <div className="p-3 rounded-lg bg-[#f5f5f5]/5 border border-[#f5f5f5]/10">
+                <p className="text-[10px] text-[#f5f5f5]/40 uppercase font-bold mb-1">Motivation</p>
+                <p className="text-sm font-medium text-[#f5f5f5]">{actor.motivation}</p>
               </div>
-              <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/10">
-                <p className="text-[10px] text-red-400/40 uppercase font-bold mb-1">Last Active</p>
-                <p className="text-sm font-medium text-red-200">
+              <div className="p-3 rounded-lg bg-[#f5f5f5]/5 border border-[#f5f5f5]/10">
+                <p className="text-[10px] text-[#f5f5f5]/40 uppercase font-bold mb-1">Last Active</p>
+                <p className="text-sm font-medium text-[#f5f5f5]">
                   {new Date(actor.lastActivityAt).toLocaleTimeString()}
                 </p>
               </div>
-              <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/10">
-                <p className="text-[10px] text-red-400/40 uppercase font-bold mb-1">Impact Level</p>
-                <p className="text-sm font-medium text-red-200">Critical</p>
+              <div className="p-3 rounded-lg bg-[#f5f5f5]/5 border border-[#f5f5f5]/10">
+                <p className="text-[10px] text-[#f5f5f5]/40 uppercase font-bold mb-1">Impact Level</p>
+                <p className="text-sm font-medium text-[#f5f5f5]">Critical</p>
               </div>
             </div>
 
             <div>
-              <p className="text-[10px] text-red-400/40 uppercase font-bold tracking-widest mb-3">
+              <p className="text-[10px] text-[#f5f5f5]/40 uppercase font-bold tracking-widest mb-3">
                 Associated TTPs (MITRE ATT&CK)
               </p>
               <div className="flex flex-wrap gap-2">
                 {actor.ttps.map((ttp, i) => (
                   <span
                     key={i}
-                    className="px-2 py-1 rounded bg-[#1a1125] border border-red-500/10 text-[11px] text-red-300/80"
+                    className="px-2 py-1 rounded bg-[#1a1125] border border-[#f5f5f5]/10 text-[11px] text-[#f5f5f5]/80"
                   >
                     {ttp}
                   </span>
@@ -271,49 +271,49 @@ export default function ThreatTwinView() {
           </div>
 
           {/* Indicator Feed */}
-          <div className="bg-[#09060e] border border-red-500/10 rounded-xl overflow-hidden">
-            <div className="px-5 py-4 border-b border-red-500/10 flex items-center justify-between bg-red-500/5">
+          <div className="bg-[#09060e] border border-[#f5f5f5]/10 rounded-xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-[#f5f5f5]/10 flex items-center justify-between bg-[#f5f5f5]/5">
               <div className="flex items-center gap-2">
-                <Network className="w-4 h-4 text-red-400" />
-                <h3 className="text-sm font-bold text-red-100 uppercase tracking-wider">
+                <Network className="w-4 h-4 text-[#f5f5f5]" />
+                <h3 className="text-sm font-bold text-[#f5f5f5] uppercase tracking-wider">
                   Indicator Mesh Feed
                 </h3>
               </div>
-              <span className="text-[10px] text-red-400/60 font-mono">TLP: AMBER/RED</span>
+              <span className="text-[10px] text-[#f5f5f5]/60 font-mono">TLP: AMBER/RED</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-red-500/5 border-b border-red-500/10">
-                    <th className="px-5 py-3 text-[10px] font-bold text-red-400/40 uppercase tracking-widest">
+                  <tr className="bg-[#f5f5f5]/5 border-b border-[#f5f5f5]/10">
+                    <th className="px-5 py-3 text-[10px] font-bold text-[#f5f5f5]/40 uppercase tracking-widest">
                       Indicator
                     </th>
-                    <th className="px-5 py-3 text-[10px] font-bold text-red-400/40 uppercase tracking-widest">
+                    <th className="px-5 py-3 text-[10px] font-bold text-[#f5f5f5]/40 uppercase tracking-widest">
                       Type
                     </th>
-                    <th className="px-5 py-3 text-[10px] font-bold text-red-400/40 uppercase tracking-widest">
+                    <th className="px-5 py-3 text-[10px] font-bold text-[#f5f5f5]/40 uppercase tracking-widest">
                       TLP
                     </th>
-                    <th className="px-5 py-3 text-[10px] font-bold text-red-400/40 uppercase tracking-widest">
+                    <th className="px-5 py-3 text-[10px] font-bold text-[#f5f5f5]/40 uppercase tracking-widest">
                       Last Seen
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-red-500/10">
                   {phantomIndicators.map((ioc) => (
-                    <tr key={ioc.id} className="hover:bg-red-500/5 transition-colors group">
+                    <tr key={ioc.id} className="hover:bg-[#f5f5f5]/5 transition-colors group">
                       <td className="px-5 py-3">
                         <div className="flex flex-col">
-                          <span className="text-xs font-mono text-red-200 group-hover:text-red-400 transition-colors">
+                          <span className="text-xs font-mono text-[#f5f5f5] group-hover:text-[#f5f5f5] transition-colors">
                             {ioc.value}
                           </span>
-                          <span className="text-[10px] text-red-400/40 mt-0.5">
+                          <span className="text-[10px] text-[#f5f5f5]/40 mt-0.5">
                             {ioc.description}
                           </span>
                         </div>
                       </td>
                       <td className="px-5 py-3">
-                        <span className="text-[10px] font-bold text-red-400/60 uppercase">
+                        <span className="text-[10px] font-bold text-[#f5f5f5]/60 uppercase">
                           {ioc.type}
                         </span>
                       </td>
@@ -322,16 +322,16 @@ export default function ThreatTwinView() {
                           className={cn(
                             'px-2 py-0.5 rounded text-[9px] font-bold uppercase border',
                             ioc.tlp === 'red'
-                              ? 'bg-red-500/20 text-red-400 border-red-500/30'
+                              ? 'bg-[#f5f5f5]/20 text-[#f5f5f5] border-[#f5f5f5]/30'
                               : ioc.tlp === 'amber'
-                                ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-                                : 'bg-green-500/20 text-green-400 border-green-500/30',
+                                ? 'bg-[#c9b787]/20 text-[#c9b787] border-[#c9b787]/30'
+                                : 'bg-[#c9b787]/20 text-[#c9b787] border-[#c9b787]/30',
                           )}
                         >
                           TLP:{ioc.tlp}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-[11px] text-red-400/60">
+                      <td className="px-5 py-3 text-[11px] text-[#f5f5f5]/60">
                         {new Date(ioc.lastSeenAt).toLocaleTimeString()}
                       </td>
                     </tr>
@@ -345,30 +345,30 @@ export default function ThreatTwinView() {
         {/* Sidebar Controls */}
         <div className="space-y-6">
           {/* Affected Systems */}
-          <div className="bg-[#09060e] border border-red-500/10 rounded-xl p-5">
-            <h3 className="text-sm font-bold text-red-100 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-red-400" />
+          <div className="bg-[#09060e] border border-[#f5f5f5]/10 rounded-xl p-5">
+            <h3 className="text-sm font-bold text-[#f5f5f5] uppercase tracking-wider mb-4 flex items-center gap-2">
+              <Activity className="w-4 h-4 text-[#f5f5f5]" />
               Target Surface Sync
             </h3>
             <div className="space-y-3">
               {affectedSystems.map((system, i) => (
                 <div
                   key={i}
-                  className="p-3 rounded-lg bg-red-500/5 border border-red-500/10 flex items-center justify-between"
+                  className="p-3 rounded-lg bg-[#f5f5f5]/5 border border-[#f5f5f5]/10 flex items-center justify-between"
                 >
                   <div>
-                    <p className="text-xs font-bold text-red-200">{system.name}</p>
-                    <p className="text-[10px] text-red-400/50 uppercase">{system.type}</p>
+                    <p className="text-xs font-bold text-[#f5f5f5]">{system.name}</p>
+                    <p className="text-[10px] text-[#f5f5f5]/50 uppercase">{system.type}</p>
                   </div>
                   <div className="flex flex-col items-end">
                     <span
                       className={cn(
                         'text-[10px] font-bold uppercase mb-1',
                         system.status === 'compromised'
-                          ? 'text-red-500'
+                          ? 'text-[#f5f5f5]'
                           : system.status === 'at_risk'
-                            ? 'text-orange-500'
-                            : 'text-yellow-500',
+                            ? 'text-[#c9b787]'
+                            : 'text-[#c9b787]',
                       )}
                     >
                       {system.status.replace('_', ' ')}
@@ -378,10 +378,10 @@ export default function ThreatTwinView() {
                         className={cn(
                           'h-full rounded-full',
                           system.status === 'compromised'
-                            ? 'bg-red-500 w-full'
+                            ? 'bg-[#f5f5f5] w-full'
                             : system.status === 'at_risk'
-                              ? 'bg-orange-500 w-2/3'
-                              : 'bg-yellow-500 w-1/3',
+                              ? 'bg-[#c9b787] w-2/3'
+                              : 'bg-[#c9b787] w-1/3',
                         )}
                       />
                     </div>
@@ -392,9 +392,9 @@ export default function ThreatTwinView() {
           </div>
 
           {/* Containment Workflow */}
-          <div className="bg-[#09060e] border border-red-500/10 rounded-xl overflow-hidden shadow-2xl shadow-red-500/5">
-            <div className="px-5 py-4 border-b border-red-500/10 bg-red-500/5">
-              <h3 className="text-sm font-bold text-red-100 uppercase tracking-wider">
+          <div className="bg-[#09060e] border border-[#f5f5f5]/10 rounded-xl overflow-hidden shadow-2xl shadow-red-500/5">
+            <div className="px-5 py-4 border-b border-[#f5f5f5]/10 bg-[#f5f5f5]/5">
+              <h3 className="text-sm font-bold text-[#f5f5f5] uppercase tracking-wider">
                 Containment Workflow
               </h3>
             </div>
@@ -408,24 +408,24 @@ export default function ThreatTwinView() {
               >
                 <div className="mt-4 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-red-200">AI RECOMMENDED ACTIONS</h4>
-                    <span className="text-[10px] text-red-400/50 font-mono">WF-2891-B</span>
+                    <h4 className="text-xs font-bold text-[#f5f5f5]">AI RECOMMENDED ACTIONS</h4>
+                    <span className="text-[10px] text-[#f5f5f5]/50 font-mono">WF-2891-B</span>
                   </div>
                   <div className="space-y-2">
                     {containmentWorkflow.steps.map((step, i) => (
                       <div key={i} className="flex gap-3">
                         <div className="mt-1 flex flex-col items-center">
-                          <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#f5f5f5] shadow-[0_0_8px_rgba(245,245,245,0.5)]" />
                           {i < containmentWorkflow.steps.length - 1 && (
-                            <div className="w-px h-full bg-red-500/20 my-1" />
+                            <div className="w-px h-full bg-[#f5f5f5]/20 my-1" />
                           )}
                         </div>
                         <div className="flex-1">
-                          <p className="text-[11px] font-bold text-red-100">
-                            <span className="text-red-400 uppercase mr-1">{step.action}:</span>{' '}
+                          <p className="text-[11px] font-bold text-[#f5f5f5]">
+                            <span className="text-[#f5f5f5] uppercase mr-1">{step.action}:</span>{' '}
                             {step.target}
                           </p>
-                          <p className="text-[10px] text-red-400/60 leading-relaxed">
+                          <p className="text-[10px] text-[#f5f5f5]/60 leading-relaxed">
                             {step.description}
                           </p>
                         </div>
@@ -435,14 +435,14 @@ export default function ThreatTwinView() {
                   <div className="grid grid-cols-2 gap-3 pt-2">
                     <button
                       type="button"
-                      className="flex items-center justify-center gap-2 py-2 px-3 rounded-md bg-red-500 text-white text-[11px] font-bold hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20"
+                      className="flex items-center justify-center gap-2 py-2 px-3 rounded-md bg-[#f5f5f5] text-white text-[11px] font-bold hover:bg-[#f5f5f5] transition-colors shadow-lg shadow-red-500/20"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Approve All
                     </button>
                     <button
                       type="button"
-                      className="flex items-center justify-center gap-2 py-2 px-3 rounded-md bg-white/5 text-red-400 border border-red-500/20 text-[11px] font-bold hover:bg-white/10 transition-colors"
+                      className="flex items-center justify-center gap-2 py-2 px-3 rounded-md bg-white/5 text-[#f5f5f5] border border-[#f5f5f5]/20 text-[11px] font-bold hover:bg-white/10 transition-colors"
                     >
                       <XCircle className="w-3.5 h-3.5" />
                       Decline
@@ -454,26 +454,26 @@ export default function ThreatTwinView() {
           </div>
 
           {/* Audit Trail */}
-          <div className="bg-[#09060e] border border-red-500/10 rounded-xl p-5">
-            <h3 className="text-sm font-bold text-red-100 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-red-400" />
+          <div className="bg-[#09060e] border border-[#f5f5f5]/10 rounded-xl p-5">
+            <h3 className="text-sm font-bold text-[#f5f5f5] uppercase tracking-wider mb-4 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-[#f5f5f5]" />
               Containment Audit
             </h3>
             <div className="space-y-4 relative">
-              <div className="absolute left-1.5 top-1.5 bottom-1.5 w-px bg-red-500/10" />
+              <div className="absolute left-1.5 top-1.5 bottom-1.5 w-px bg-[#f5f5f5]/10" />
               {auditTrail.map((entry, i) => (
                 <div key={i} className="relative pl-6">
-                  <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full bg-[#09060e] border-2 border-red-500/30 flex items-center justify-center">
-                    <div className="w-1 h-1 rounded-full bg-red-400" />
+                  <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full bg-[#09060e] border-2 border-[#f5f5f5]/30 flex items-center justify-center">
+                    <div className="w-1 h-1 rounded-full bg-[#f5f5f5]" />
                   </div>
                   <div>
-                    <p className="text-[11px] font-bold text-red-200 leading-tight">
+                    <p className="text-[11px] font-bold text-[#f5f5f5] leading-tight">
                       {entry.action.replace(/_/g, ' ').toUpperCase()}
                     </p>
-                    <p className="text-[10px] text-red-400/50 mt-0.5">
+                    <p className="text-[10px] text-[#f5f5f5]/50 mt-0.5">
                       {entry.actor} ({entry.actorRole})
                     </p>
-                    <p className="text-[9px] text-red-500/40 mt-1 font-mono">
+                    <p className="text-[9px] text-[#f5f5f5]/40 mt-1 font-mono">
                       {new Date(entry.at).toLocaleTimeString()}
                     </p>
                   </div>

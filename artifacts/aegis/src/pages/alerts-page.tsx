@@ -29,17 +29,17 @@ import { useState } from 'react';
 import { api } from '@/lib/api';
 
 const severityColors: Record<string, string> = {
-  critical: 'bg-red-500/10 text-red-400 border-red-500/20',
-  high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  low: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  critical: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  high: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  medium: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  low: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
 };
 
 const _statusColors: Record<string, string> = {
-  new: 'bg-red-500/10 text-red-400 border-red-500/20',
-  acknowledged: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  investigating: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  resolved: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  new: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  acknowledged: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  investigating: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  resolved: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
   dismissed: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
 };
 
@@ -200,49 +200,49 @@ export default function AlertsPage() {
           </CardContent>
         </Card>
         <Card
-          className={`bg-card border-border hover:border-red-500/20 transition-all group ${newCount > 0 ? 'ring-1 ring-red-500/10' : ''}`}
+          className={`bg-card border-border hover:border-[#f5f5f5]/20 transition-all group ${newCount > 0 ? 'ring-1 ring-red-500/10' : ''}`}
         >
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">New</p>
               <p
-                className={`text-2xl font-bold font-display mt-1 ${newCount > 0 ? 'text-red-400 animate-threat-pulse' : ''}`}
+                className={`text-2xl font-bold font-display mt-1 ${newCount > 0 ? 'text-[#f5f5f5] animate-threat-pulse' : ''}`}
               >
                 <AnimatedCounter value={newCount} />
               </p>
             </div>
             <div
-              className={`w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:scale-110 transition-transform ${newCount > 0 ? 'animate-pulse' : ''}`}
+              className={`w-10 h-10 rounded-lg bg-[#f5f5f5]/10 flex items-center justify-center group-hover:scale-110 transition-transform ${newCount > 0 ? 'animate-pulse' : ''}`}
             >
-              <AlertTriangle className="w-5 h-5 text-red-400" />
+              <AlertTriangle className="w-5 h-5 text-[#f5f5f5]" />
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border hover:border-orange-500/20 transition-all group">
+        <Card className="bg-card border-border hover:border-[#c9b787]/20 transition-all group">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Critical</p>
-              <p className="text-2xl font-bold font-display mt-1 text-orange-400">
+              <p className="text-2xl font-bold font-display mt-1 text-[#c9b787]">
                 <AnimatedCounter value={criticalCount} />
               </p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <XCircle className="w-5 h-5 text-orange-400" />
+            <div className="w-10 h-10 rounded-lg bg-[#c9b787]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <XCircle className="w-5 h-5 text-[#c9b787]" />
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border hover:border-emerald-500/20 transition-all group">
+        <Card className="bg-card border-border hover:border-[#c9b787]/20 transition-all group">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Resolved</p>
-              <p className="text-2xl font-bold font-display mt-1 text-emerald-400">
+              <p className="text-2xl font-bold font-display mt-1 text-[#c9b787]">
                 <AnimatedCounter
                   value={alerts.filter((a: any) => a.status === 'resolved').length}
                 />
               </p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <CheckCircle className="w-5 h-5 text-emerald-400" />
+            <div className="w-10 h-10 rounded-lg bg-[#c9b787]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <CheckCircle className="w-5 h-5 text-[#c9b787]" />
             </div>
           </CardContent>
         </Card>
@@ -282,7 +282,7 @@ export default function AlertsPage() {
               ? 'Alert thresholds are met — the environment is clean. New correlated alerts will appear here as soon as they trigger.'
               : `No alerts currently sit in ${filter} status. Switch filter to “All” to see the full alert queue.`
           }
-          accentColor={filter === 'all' ? '#10b981' : '#8b7ac8'}
+          accentColor={filter === 'all' ? '#c9b787' : '#8b7ac8'}
           className="animate-fade-in-up stagger-3 border border-dashed border-border rounded-lg"
         />
       ) : (
@@ -305,10 +305,10 @@ export default function AlertsPage() {
               low: 60,
             };
             const accentByLevel: Record<string, string> = {
-              critical: '#ef4444',
-              high: '#f97316',
-              medium: '#eab308',
-              low: '#10b981',
+              critical: '#f5f5f5',
+              high: '#c9b787',
+              medium: '#8a8a8a',
+              low: '#c9b787',
             };
             return (
               <ProofEnvelope

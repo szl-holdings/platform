@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/pulse/"
-title = "LUMINA — AI Executive Briefing"
+title = "Pulse — AI Executive Briefing"
 version = "1.0.0"
 id = "artifacts/pulse"
 router = "path"

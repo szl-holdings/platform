@@ -35,10 +35,10 @@ const DS = {
 };
 
 const SEV: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
-  low: '#3b82f6',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#c9b787',
+  low: '#c9b787',
 };
 
 interface PlaybookStep {
@@ -92,14 +92,14 @@ interface Playbook {
 }
 
 const STEP_COLORS: Record<string, string> = {
-  action: '#3b82f6',
-  decision: '#f59e0b',
+  action: '#c9b787',
+  decision: '#c9b787',
   notify: '#22d3ee',
-  escalate: '#f97316',
-  assess: '#8b5cf6',
-  contain: '#ef4444',
-  eradicate: '#ef4444',
-  recover: '#22c55e',
+  escalate: '#c9b787',
+  assess: '#8a8a8a',
+  contain: '#f5f5f5',
+  eradicate: '#f5f5f5',
+  recover: '#c9b787',
   review: '#64748b',
 };
 
@@ -123,7 +123,7 @@ const PLAYBOOKS: Playbook[] = [
     category: 'Cyberattack',
     severity: 'critical',
     icon: Shield,
-    color: '#ef4444',
+    color: '#f5f5f5',
     description:
       'Full-spectrum response to confirmed APT intrusion — covering initial triage, forensic preservation, containment, eradication, attribution, and post-incident hardening.',
     executions: 3,
@@ -328,7 +328,7 @@ const PLAYBOOKS: Playbook[] = [
     category: 'Cyberattack',
     severity: 'critical',
     icon: Lock,
-    color: '#ef4444',
+    color: '#f5f5f5',
     description:
       'Rapid ransomware response — isolate, preserve, recover from clean backups. Includes negotiation decision framework and regulatory notification protocol.',
     executions: 7,
@@ -418,7 +418,7 @@ const PLAYBOOKS: Playbook[] = [
     category: 'Data Security',
     severity: 'critical',
     icon: AlertOctagon,
-    color: '#f97316',
+    color: '#c9b787',
     description:
       'Structured data breach response covering breach scoping, regulatory notification timelines (GDPR 72h, state laws), credit monitoring, and stakeholder communication.',
     executions: 2,
@@ -497,7 +497,7 @@ const PLAYBOOKS: Playbook[] = [
     category: 'Operational Security',
     severity: 'high',
     icon: Building2,
-    color: '#f97316',
+    color: '#c9b787',
     description:
       'Physical security incident response covering unauthorized access, theft, facility lockdown, and law enforcement coordination.',
     executions: 1,
@@ -551,7 +551,7 @@ const PLAYBOOKS: Playbook[] = [
     category: 'Compliance',
     severity: 'high',
     icon: Scale,
-    color: '#f59e0b',
+    color: '#c9b787',
     description:
       'Response framework for SEC investigations, subpoenas, regulatory examinations, and enforcement actions. Counsel integrated.',
     executions: 5,
@@ -618,7 +618,7 @@ const PLAYBOOKS: Playbook[] = [
     category: 'Financial',
     severity: 'high',
     icon: TrendingDown,
-    color: '#f59e0b',
+    color: '#c9b787',
     description:
       'Financial market shock response — portfolio re-evaluation, capital deployment pause, LP communication, and hedge activation.',
     executions: 0,
@@ -681,8 +681,8 @@ const STEP_TYPE_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  completed: '#22c55e',
-  active: '#38bdf8',
+  completed: '#c9b787',
+  active: '#8a8a8a',
   pending: '#64748b',
   skipped: '#374151',
 };
@@ -726,7 +726,7 @@ function PlaybookCard({
             {pb.active && (
               <span
                 className="text-[7px] px-1.5 py-0.5 rounded-full font-bold uppercase animate-pulse shrink-0"
-                style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e' }}
+                style={{ background: 'rgba(201,183,135,0.15)', color: '#c9b787' }}
               >
                 ACTIVE
               </span>
@@ -770,7 +770,7 @@ function PlaybookCard({
         )}
         {pb.avgContainmentMin > 0 && <span>~{pb.avgContainmentMin}m contain</span>}
         {pb.lastUsed && (
-          <span style={{ color: pb.active ? '#22c55e' : undefined }}>{pb.lastUsed}</span>
+          <span style={{ color: pb.active ? '#c9b787' : undefined }}>{pb.lastUsed}</span>
         )}
       </div>
     </button>
@@ -796,11 +796,11 @@ export default function CitadelPlaybooks() {
             <div
               className="w-7 h-7 rounded-md flex items-center justify-center"
               style={{
-                background: 'rgba(239,68,68,0.15)',
-                border: '1px solid rgba(239,68,68,0.25)',
+                background: 'rgba(245,245,245,0.15)',
+                border: '1px solid rgba(245,245,245,0.25)',
               }}
             >
-              <Zap className="w-4 h-4 text-red-400" />
+              <Zap className="w-4 h-4 text-[#f5f5f5]" />
             </div>
             <div>
               <h1 className="text-sm font-bold tracking-tight" style={{ color: DS.text.primary }}>
@@ -808,7 +808,7 @@ export default function CitadelPlaybooks() {
               </h1>
               <p
                 className="text-[9px] font-mono uppercase tracking-wider"
-                style={{ color: 'rgba(239,68,68,0.5)' }}
+                style={{ color: 'rgba(245,245,245,0.5)' }}
               >
                 CITADEL Response Engine
               </p>
@@ -832,9 +832,9 @@ export default function CitadelPlaybooks() {
           className="shrink-0 px-5 py-3 border-b"
           style={{
             borderColor: selected.active
-              ? `rgba(${selected.color === '#ef4444' ? '239,68,68' : '249,115,22'},0.2)`
+              ? `rgba(${selected.color === '#f5f5f5' ? '239,68,68' : '249,115,22'},0.2)`
               : DS.border,
-            background: selected.active ? `rgba(239,68,68,0.03)` : 'transparent',
+            background: selected.active ? `rgba(245,245,245,0.03)` : 'transparent',
           }}
         >
           <div className="flex items-center gap-3 mb-2">
@@ -855,7 +855,7 @@ export default function CitadelPlaybooks() {
                 {selected.active && (
                   <span
                     className="text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase animate-pulse"
-                    style={{ background: 'rgba(34,197,94,0.12)', color: '#22c55e' }}
+                    style={{ background: 'rgba(201,183,135,0.12)', color: '#c9b787' }}
                   >
                     ACTIVE
                   </span>
@@ -930,7 +930,7 @@ export default function CitadelPlaybooks() {
                 <p className="text-[8px] font-mono uppercase" style={{ color: DS.text.muted }}>
                   Success Rate
                 </p>
-                <p className="text-[12px] font-bold" style={{ color: '#22c55e' }}>
+                <p className="text-[12px] font-bold" style={{ color: '#c9b787' }}>
                   {selected.successRate}%
                 </p>
               </div>
@@ -1028,7 +1028,7 @@ export default function CitadelPlaybooks() {
                           style={{ background: `${color}15`, border: `1px solid ${color}25` }}
                         >
                           {step.status === 'completed' ? (
-                            <CheckCircle className="w-3.5 h-3.5" style={{ color: '#22c55e' }} />
+                            <CheckCircle className="w-3.5 h-3.5" style={{ color: '#c9b787' }} />
                           ) : step.status === 'active' ? (
                             <Icon className="w-3.5 h-3.5 animate-pulse" style={{ color }} />
                           ) : (
@@ -1081,7 +1081,7 @@ export default function CitadelPlaybooks() {
                               </span>
                             )}
                             {step.sla && (
-                              <span className="text-[9px] font-mono" style={{ color: '#f59e0b' }}>
+                              <span className="text-[9px] font-mono" style={{ color: '#c9b787' }}>
                                 SLA: {step.sla}
                               </span>
                             )}
@@ -1110,7 +1110,7 @@ export default function CitadelPlaybooks() {
                           {step.timeWindow && (
                             <div
                               className="mt-2 flex items-center gap-1.5 text-[9px]"
-                              style={{ color: '#f97316' }}
+                              style={{ color: '#c9b787' }}
                             >
                               <Clock className="w-3 h-3" />
                               Time window: {step.timeWindow}
@@ -1137,18 +1137,18 @@ export default function CitadelPlaybooks() {
                   key={i}
                   className="rounded-xl p-4"
                   style={{
-                    background: 'rgba(249,115,22,0.05)',
-                    border: '1px solid rgba(249,115,22,0.15)',
+                    background: 'rgba(201,183,135,0.05)',
+                    border: '1px solid rgba(201,183,135,0.15)',
                   }}
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="w-3.5 h-3.5 text-orange-400" />
+                    <AlertTriangle className="w-3.5 h-3.5 text-[#c9b787]" />
                     <span className="text-[11px] font-bold" style={{ color: DS.text.primary }}>
                       Trigger: {rule.trigger}
                     </span>
                     <span
                       className="ml-auto text-[9px] px-1.5 py-0.5 rounded font-mono font-bold"
-                      style={{ background: 'rgba(249,115,22,0.15)', color: '#f97316' }}
+                      style={{ background: 'rgba(201,183,135,0.15)', color: '#c9b787' }}
                     >
                       {rule.level}
                     </span>

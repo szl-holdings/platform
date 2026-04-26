@@ -14,17 +14,17 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 
 function getScoreColor(score: number) {
-  if (score < 30) return 'text-emerald-400';
-  if (score < 50) return 'text-amber-400';
-  if (score < 70) return 'text-orange-400';
-  return 'text-red-400';
+  if (score < 30) return 'text-[#c9b787]';
+  if (score < 50) return 'text-[#c9b787]';
+  if (score < 70) return 'text-[#c9b787]';
+  return 'text-[#f5f5f5]';
 }
 
 function getScoreBg(score: number) {
-  if (score < 30) return 'bg-emerald-500';
-  if (score < 50) return 'bg-amber-500';
-  if (score < 70) return 'bg-orange-500';
-  return 'bg-red-500';
+  if (score < 30) return 'bg-[#c9b787]';
+  if (score < 50) return 'bg-[#c9b787]';
+  if (score < 70) return 'bg-[#c9b787]';
+  return 'bg-[#f5f5f5]';
 }
 
 function getScoreLabel(score: number) {
@@ -48,9 +48,9 @@ const trendIcons: Record<string, any> = {
 };
 
 const trendColors: Record<string, string> = {
-  improving: 'text-emerald-400',
-  stable: 'text-amber-400',
-  degrading: 'text-red-400',
+  improving: 'text-[#c9b787]',
+  stable: 'text-[#c9b787]',
+  degrading: 'text-[#f5f5f5]',
 };
 
 const categoryLabels: Record<string, string> = {

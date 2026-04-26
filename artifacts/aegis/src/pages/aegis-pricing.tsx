@@ -3,7 +3,7 @@ import { ArrowRight, Building2, CheckCircle, Layers, Shield, X } from 'lucide-re
 import { useState } from 'react';
 import { AEGIS_MITRE_COVERAGE, metricDisplay } from '../lib/claims';
 
-const ACCENT = '#ef4444';
+const ACCENT = '#f5f5f5';
 const BG = '#080a10';
 
 const tiers = [
@@ -103,7 +103,7 @@ export default function AegisPricingPage() {
           <a href="/aegis/" className="flex items-center gap-2.5">
             <div
               className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.3)' }}
+              style={{ background: 'rgba(245,245,245,0.2)', border: '1px solid rgba(245,245,245,0.3)' }}
             >
               <Shield className="w-3.5 h-3.5" style={{ color: ACCENT }} />
             </div>
@@ -175,7 +175,7 @@ export default function AegisPricingPage() {
                 className="relative rounded-2xl p-8 text-left flex flex-col"
                 style={{
                   background: tier.highlight
-                    ? `linear-gradient(135deg, rgba(239,68,68,0.10), rgba(239,68,68,0.05))`
+                    ? `linear-gradient(135deg, rgba(245,245,245,0.10), rgba(245,245,245,0.05))`
                     : 'rgba(255,255,255,0.03)',
                   border: tier.highlight
                     ? `1px solid ${ACCENT}35`

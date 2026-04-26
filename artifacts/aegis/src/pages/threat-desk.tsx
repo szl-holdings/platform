@@ -25,7 +25,7 @@ function relTime(iso: string) {
 }
 
 const SEVERITY_STYLE: Record<string, { color: string; bg: string; border: string }> = {
-  critical: { color: '#f87171', bg: '#9b1c1c10', border: '#9b1c1c40' },
+  critical: { color: '#f5f5f5', bg: '#5e5e5e10', border: '#5e5e5e40' },
   high: { color: '#c04a2a', bg: '#c04a2a08', border: '#c04a2a25' },
   medium: { color: '#c08a2c', bg: '#c08a2c08', border: '#c08a2c20' },
   low: {
@@ -176,7 +176,7 @@ export default function ThreatDesk() {
             icon={CheckCircle}
             headline="No active threat twins"
             description="No threats are tracked right now — new detections will surface here."
-            accentColor="#10b981"
+            accentColor="#c9b787"
             compact
           />
         ) : (
@@ -418,7 +418,7 @@ export default function ThreatDesk() {
                               </span>{' '}
                               {c.body}
                               {c.internal && (
-                                <span className="ml-1 text-purple-400">(internal)</span>
+                                <span className="ml-1 text-[#8a8a8a]">(internal)</span>
                               )}
                             </div>
                           ))}

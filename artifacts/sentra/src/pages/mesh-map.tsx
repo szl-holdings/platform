@@ -16,29 +16,29 @@ import { MESH_AGENT_DISPLAY_NAMES, useAgentMesh } from '@/data/agent-mesh';
 type FilterChip = 'all' | 'critical' | 'secrets' | 'outbound' | 'cross-agent';
 
 const GRADE_COLOR: Record<string, string> = {
-  A: 'text-emerald-400',
-  B: 'text-sky-400',
-  C: 'text-amber-400',
-  D: 'text-orange-400',
-  F: 'text-red-400',
+  A: 'text-[#c9b787]',
+  B: 'text-[#8a8a8a]',
+  C: 'text-[#c9b787]',
+  D: 'text-[#c9b787]',
+  F: 'text-[#f5f5f5]',
 };
 
 const GRADE_BG: Record<string, string> = {
-  A: 'border-emerald-500/40 bg-emerald-500/10',
-  B: 'border-sky-500/40 bg-sky-500/10',
-  C: 'border-amber-500/40 bg-amber-500/10',
-  D: 'border-orange-500/40 bg-orange-500/10',
-  F: 'border-red-500/40 bg-red-500/10',
+  A: 'border-[#c9b787]/40 bg-[#c9b787]/10',
+  B: 'border-sky-500/40 bg-[#8a8a8a]/10',
+  C: 'border-[#c9b787]/40 bg-[#c9b787]/10',
+  D: 'border-[#c9b787]/40 bg-[#c9b787]/10',
+  F: 'border-[#f5f5f5]/40 bg-[#f5f5f5]/10',
 };
 
 const TRUST_COLORS: Record<string, string> = {
-  trusted: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
-  unverified: 'text-amber-400 border-amber-500/30 bg-amber-500/10',
-  quarantined: 'text-red-400 border-red-500/30 bg-red-500/10',
+  trusted: 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
+  unverified: 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
+  quarantined: 'text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10',
 };
 
 function SubIndexBar({ label, value }: { label: string; value: number }) {
-  const color = value >= 70 ? 'bg-emerald-500' : value >= 45 ? 'bg-amber-500' : 'bg-red-500';
+  const color = value >= 70 ? 'bg-[#c9b787]' : value >= 45 ? 'bg-[#c9b787]' : 'bg-[#f5f5f5]';
   return (
     <div className="flex items-center gap-3">
       <div className="w-32 text-[10px] text-slate-500 font-mono uppercase truncate">{label}</div>
@@ -120,7 +120,7 @@ export default function MeshMap() {
               'flex items-center gap-2 px-3 py-2 rounded border text-[11px] font-mono uppercase font-bold transition-colors',
               loading
                 ? 'border-slate-700 bg-slate-800 text-slate-500 cursor-wait'
-                : 'border-slate-700 bg-slate-800/60 text-slate-300 hover:border-red-500/40 hover:text-red-300',
+                : 'border-slate-700 bg-slate-800/60 text-slate-300 hover:border-[#f5f5f5]/40 hover:text-[#f5f5f5]',
             )}
             title="Re-run telemetry scan against configured MCP config files"
           >
@@ -140,7 +140,7 @@ export default function MeshMap() {
                   className={cn(
                     'text-[8px] px-1 py-0.5 rounded border font-mono',
                     source === 'live'
-                      ? 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10'
+                      ? 'border-[#c9b787]/40 text-[#c9b787] bg-[#c9b787]/10'
                       : 'border-slate-600 text-slate-400 bg-slate-800/40',
                   )}
                 >
@@ -163,7 +163,7 @@ export default function MeshMap() {
                 {exposures.filter((e) => e.status === 'open').length} open exposures
               </div>
               {source === 'live' && scannedFiles.length > 0 && (
-                <div className="mt-1 text-emerald-400/80">
+                <div className="mt-1 text-[#c9b787]/80">
                   {scannedFiles.length} file{scannedFiles.length === 1 ? '' : 's'} scanned
                 </div>
               )}
@@ -194,7 +194,7 @@ export default function MeshMap() {
             className={cn(
               'px-3 py-1 rounded text-[11px] font-mono font-bold border transition-colors',
               activeFilter === f.id
-                ? 'bg-red-500/15 border-red-500/40 text-red-400'
+                ? 'bg-[#f5f5f5]/15 border-[#f5f5f5]/40 text-[#f5f5f5]'
                 : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600',
             )}
           >
@@ -220,9 +220,9 @@ export default function MeshMap() {
                   className={cn(
                     'w-full text-left p-3 rounded border transition-all',
                     selectedNodeId === agentId
-                      ? 'border-red-500/50 bg-red-500/10'
+                      ? 'border-[#f5f5f5]/50 bg-[#f5f5f5]/10'
                       : hasCritical
-                        ? 'border-red-500/20 bg-red-500/5 hover:border-red-500/30'
+                        ? 'border-[#f5f5f5]/20 bg-[#f5f5f5]/5 hover:border-[#f5f5f5]/30'
                         : 'border-slate-700 bg-slate-800/30 hover:border-slate-600',
                   )}
                 >
@@ -231,7 +231,7 @@ export default function MeshMap() {
                       <div
                         className={cn(
                           'w-1.5 h-1.5 rounded-full',
-                          hasCritical ? 'bg-red-500 animate-pulse' : 'bg-emerald-500',
+                          hasCritical ? 'bg-[#f5f5f5] animate-pulse' : 'bg-[#c9b787]',
                         )}
                       />
                       <span className="text-xs font-bold text-slate-200">{rt.name}</span>
@@ -270,15 +270,15 @@ export default function MeshMap() {
                   className={cn(
                     'w-full text-left p-3 rounded border transition-all',
                     selectedNodeId === sec.id
-                      ? 'border-red-500/50 bg-red-500/10'
-                      : 'border-red-500/20 bg-red-500/5 hover:border-red-500/30',
+                      ? 'border-[#f5f5f5]/50 bg-[#f5f5f5]/10'
+                      : 'border-[#f5f5f5]/20 bg-[#f5f5f5]/5 hover:border-[#f5f5f5]/30',
                   )}
                 >
                   <div className="flex items-center gap-2">
                     <AlertTriangle
-                      className={cn('w-3 h-3', hasCritical ? 'text-red-400' : 'text-amber-400')}
+                      className={cn('w-3 h-3', hasCritical ? 'text-[#f5f5f5]' : 'text-[#c9b787]')}
                     />
-                    <span className="text-xs font-bold text-red-300 font-mono">{sec.label}</span>
+                    <span className="text-xs font-bold text-[#f5f5f5] font-mono">{sec.label}</span>
                   </div>
                   <div className="text-[10px] text-slate-500 mt-1 font-mono">
                     {sec.format.toUpperCase()}
@@ -348,11 +348,11 @@ export default function MeshMap() {
                   className={cn(
                     'w-full text-left p-3 rounded border transition-all',
                     selectedNodeId === mcp.id
-                      ? 'border-red-500/50 bg-red-500/10'
+                      ? 'border-[#f5f5f5]/50 bg-[#f5f5f5]/10'
                       : mcp.trustState === 'quarantined'
-                        ? 'border-red-500/30 bg-red-500/8'
+                        ? 'border-[#f5f5f5]/30 bg-[#f5f5f5]/8'
                         : hasOutboundViolation
-                          ? 'border-amber-500/20 bg-amber-500/5'
+                          ? 'border-[#c9b787]/20 bg-[#c9b787]/5'
                           : 'border-slate-700 bg-slate-800/30 hover:border-slate-600',
                   )}
                 >
@@ -362,10 +362,10 @@ export default function MeshMap() {
                         className={cn(
                           'w-1.5 h-1.5 rounded-full',
                           mcp.trustState === 'quarantined'
-                            ? 'bg-red-500'
+                            ? 'bg-[#f5f5f5]'
                             : mcp.trustState === 'unverified'
-                              ? 'bg-amber-500'
-                              : 'bg-emerald-500',
+                              ? 'bg-[#c9b787]'
+                              : 'bg-[#c9b787]',
                         )}
                       />
                       <span className="text-xs font-bold text-slate-200 font-mono">{mcp.name}</span>
@@ -381,10 +381,10 @@ export default function MeshMap() {
                   </div>
                   <div className="text-[10px] text-slate-500 font-mono mt-1">v{mcp.version}</div>
                   {!mcp.pinned && (
-                    <div className="text-[10px] text-amber-500/70 mt-0.5">Unpinned</div>
+                    <div className="text-[10px] text-[#c9b787]/70 mt-0.5">Unpinned</div>
                   )}
                   {hasOutboundViolation && (
-                    <div className="text-[10px] text-red-400/80 mt-0.5">
+                    <div className="text-[10px] text-[#f5f5f5]/80 mt-0.5">
                       Unallowed egress:{' '}
                       {mcp.detectedEgressDomains
                         .filter((d) => !mcp.allowedEgressDomains.includes(d))
@@ -402,10 +402,10 @@ export default function MeshMap() {
       </div>
 
       {selectedNodeId && selectedExposures.length > 0 && (
-        <div className="sentra-panel p-6 border-red-500/20">
+        <div className="sentra-panel p-6 border-[#f5f5f5]/20">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-display font-bold text-slate-200 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-red-400" />
+              <AlertTriangle className="w-4 h-4 text-[#f5f5f5]" />
               {selectedExposures.length} Exposure{selectedExposures.length > 1 ? 's' : ''} on
               Selected Node
             </h3>
@@ -428,8 +428,8 @@ export default function MeshMap() {
                       className={cn(
                         'text-[10px] px-1.5 py-0.5 rounded border font-mono uppercase font-bold',
                         exp.severity === 'critical'
-                          ? 'text-red-400 border-red-500/30 bg-red-500/10'
-                          : 'text-amber-400 border-amber-500/30 bg-amber-500/10',
+                          ? 'text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10'
+                          : 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
                       )}
                     >
                       {exp.severity}
@@ -457,7 +457,7 @@ export default function MeshMap() {
           {[38, 42, 35, 38, 40, 36, 38].map((v, i) => (
             <div key={i} className="flex-1 flex flex-col justify-end">
               <div
-                className={cn('rounded-t', i === 6 ? 'bg-red-500' : 'bg-red-500/30')}
+                className={cn('rounded-t', i === 6 ? 'bg-[#f5f5f5]' : 'bg-[#f5f5f5]/30')}
                 style={{ height: `${(v / 60) * 100}%` }}
               />
             </div>

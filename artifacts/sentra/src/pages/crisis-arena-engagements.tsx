@@ -70,19 +70,19 @@ interface Engagement {
 }
 
 const ARCHETYPE_COLORS: Record<ThreatArchetype, string> = {
-  ransomware: 'text-red-300',
-  cascade: 'text-orange-300',
-  supply_chain: 'text-amber-300',
-  regulatory: 'text-violet-300',
-  insider: 'text-rose-300',
-  black_swan: 'text-red-400',
+  ransomware: 'text-[#f5f5f5]',
+  cascade: 'text-[#c9b787]',
+  supply_chain: 'text-[#c9b787]',
+  regulatory: 'text-[#8a8a8a]',
+  insider: 'text-[#f5f5f5]',
+  black_swan: 'text-[#f5f5f5]',
 };
 
 const STATUS_STYLE: Record<SubmissionStatus, string> = {
-  pending: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
-  accepted: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
-  graduated: 'bg-sky-500/10 text-sky-300 border-sky-500/30',
-  rejected: 'bg-red-500/10 text-red-300 border-red-500/30',
+  pending: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/30',
+  accepted: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/30',
+  graduated: 'bg-[#8a8a8a]/10 text-[#8a8a8a] border-sky-500/30',
+  rejected: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/30',
   duplicate: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
   out_of_scope: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
 };
@@ -207,10 +207,10 @@ function CreateEngagementModal({ onClose, onCreate }: CreateEngagementModalProps
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-xl border border-red-500/20 bg-[#0f0808] shadow-2xl">
-        <div className="flex items-center justify-between p-5 border-b border-red-500/10">
-          <h2 className="text-sm font-bold text-red-100">Create Engagement</h2>
-          <button onClick={onClose} className="text-red-400/50 hover:text-red-400">
+      <div className="w-full max-w-lg rounded-xl border border-[#f5f5f5]/20 bg-[#0f0808] shadow-2xl">
+        <div className="flex items-center justify-between p-5 border-b border-[#f5f5f5]/10">
+          <h2 className="text-sm font-bold text-[#f5f5f5]">Create Engagement</h2>
+          <button onClick={onClose} className="text-[#f5f5f5]/50 hover:text-[#f5f5f5]">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -221,7 +221,7 @@ function CreateEngagementModal({ onClose, onCreate }: CreateEngagementModalProps
           className="p-5 space-y-4"
         >
           <div>
-            <label className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider block mb-1">
+            <label className="text-[10px] text-[#f5f5f5]/50 font-mono uppercase tracking-wider block mb-1">
               Title *
             </label>
             <input
@@ -229,11 +229,11 @@ function CreateEngagementModal({ onClose, onCreate }: CreateEngagementModalProps
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               placeholder="e.g. Q4 Billing Cluster Resilience"
-              className="w-full bg-[#1a0d0d] border border-red-500/20 rounded-lg px-3 py-2 text-xs text-red-200 placeholder:text-red-400/30 outline-none focus:border-red-500/40"
+              className="w-full bg-[#1a0d0d] border border-[#f5f5f5]/20 rounded-lg px-3 py-2 text-xs text-[#f5f5f5] placeholder:text-[#f5f5f5]/30 outline-none focus:border-[#f5f5f5]/40"
             />
           </div>
           <div>
-            <label className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider block mb-1">
+            <label className="text-[10px] text-[#f5f5f5]/50 font-mono uppercase tracking-wider block mb-1">
               Description *
             </label>
             <textarea
@@ -241,12 +241,12 @@ function CreateEngagementModal({ onClose, onCreate }: CreateEngagementModalProps
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               rows={3}
               placeholder="Describe the scenario scope and what crisis architects should model..."
-              className="w-full bg-[#1a0d0d] border border-red-500/20 rounded-lg px-3 py-2 text-xs text-red-200 placeholder:text-red-400/30 outline-none focus:border-red-500/40 resize-none"
+              className="w-full bg-[#1a0d0d] border border-[#f5f5f5]/20 rounded-lg px-3 py-2 text-xs text-[#f5f5f5] placeholder:text-[#f5f5f5]/30 outline-none focus:border-[#f5f5f5]/40 resize-none"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider block mb-1">
+              <label className="text-[10px] text-[#f5f5f5]/50 font-mono uppercase tracking-wider block mb-1">
                 Scoped Assets (comma-separated)
               </label>
               <input
@@ -254,23 +254,23 @@ function CreateEngagementModal({ onClose, onCreate }: CreateEngagementModalProps
                 value={form.scopedAssets}
                 onChange={(e) => setForm({ ...form, scopedAssets: e.target.value })}
                 placeholder="billing-cluster, erp-system"
-                className="w-full bg-[#1a0d0d] border border-red-500/20 rounded-lg px-3 py-2 text-xs text-red-200 placeholder:text-red-400/30 outline-none focus:border-red-500/40"
+                className="w-full bg-[#1a0d0d] border border-[#f5f5f5]/20 rounded-lg px-3 py-2 text-xs text-[#f5f5f5] placeholder:text-[#f5f5f5]/30 outline-none focus:border-[#f5f5f5]/40"
               />
             </div>
             <div>
-              <label className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider block mb-1">
+              <label className="text-[10px] text-[#f5f5f5]/50 font-mono uppercase tracking-wider block mb-1">
                 Payout Pool ($)
               </label>
               <input
                 type="number"
                 value={form.payoutPool}
                 onChange={(e) => setForm({ ...form, payoutPool: Number(e.target.value) })}
-                className="w-full bg-[#1a0d0d] border border-red-500/20 rounded-lg px-3 py-2 text-xs text-red-200 outline-none focus:border-red-500/40"
+                className="w-full bg-[#1a0d0d] border border-[#f5f5f5]/20 rounded-lg px-3 py-2 text-xs text-[#f5f5f5] outline-none focus:border-[#f5f5f5]/40"
               />
             </div>
           </div>
           <div>
-            <label className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider block mb-1">
+            <label className="text-[10px] text-[#f5f5f5]/50 font-mono uppercase tracking-wider block mb-1">
               Archetype Filter
             </label>
             <div className="flex flex-wrap gap-2">
@@ -282,8 +282,8 @@ function CreateEngagementModal({ onClose, onCreate }: CreateEngagementModalProps
                   className={cn(
                     'px-2 py-1 rounded text-[10px] font-mono border transition-colors',
                     form.archetypeFilter.includes(a)
-                      ? 'bg-red-500/20 border-red-500/40 text-red-300'
-                      : 'bg-transparent border-red-500/10 text-red-400/40 hover:border-red-500/20',
+                      ? 'bg-[#f5f5f5]/20 border-[#f5f5f5]/40 text-[#f5f5f5]'
+                      : 'bg-transparent border-[#f5f5f5]/10 text-[#f5f5f5]/40 hover:border-[#f5f5f5]/20',
                   )}
                 >
                   {a.replace('_', ' ')}
@@ -292,18 +292,18 @@ function CreateEngagementModal({ onClose, onCreate }: CreateEngagementModalProps
             </div>
           </div>
           <div>
-            <label className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider block mb-1">
+            <label className="text-[10px] text-[#f5f5f5]/50 font-mono uppercase tracking-wider block mb-1">
               Deadline
             </label>
             <input
               type="date"
               value={form.deadline}
               onChange={(e) => setForm({ ...form, deadline: e.target.value })}
-              className="w-full bg-[#1a0d0d] border border-red-500/20 rounded-lg px-3 py-2 text-xs text-red-200 outline-none focus:border-red-500/40"
+              className="w-full bg-[#1a0d0d] border border-[#f5f5f5]/20 rounded-lg px-3 py-2 text-xs text-[#f5f5f5] outline-none focus:border-[#f5f5f5]/40"
             />
           </div>
           {error && (
-            <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">
+            <div className="text-xs text-[#f5f5f5] bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 rounded px-3 py-2">
               {error}
             </div>
           )}
@@ -311,14 +311,14 @@ function CreateEngagementModal({ onClose, onCreate }: CreateEngagementModalProps
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-xs text-red-400/60 hover:bg-red-500/5 border border-red-500/10 transition-colors"
+              className="px-4 py-2 rounded-lg text-xs text-[#f5f5f5]/60 hover:bg-[#f5f5f5]/5 border border-[#f5f5f5]/10 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-[#f5f5f5] hover:bg-[#f5f5f5] text-white text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-2"
             >
               {saving && <Loader2 className="w-3 h-3 animate-spin" />}
               Create Engagement
@@ -365,17 +365,17 @@ function TriageModal({ submission, onClose, onTriage }: TriageModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-xl border border-red-500/20 bg-[#0f0808] shadow-2xl">
-        <div className="flex items-center justify-between p-5 border-b border-red-500/10">
-          <h2 className="text-sm font-bold text-red-100">Triage Submission</h2>
-          <button onClick={onClose} className="text-red-400/50 hover:text-red-400">
+      <div className="w-full max-w-lg rounded-xl border border-[#f5f5f5]/20 bg-[#0f0808] shadow-2xl">
+        <div className="flex items-center justify-between p-5 border-b border-[#f5f5f5]/10">
+          <h2 className="text-sm font-bold text-[#f5f5f5]">Triage Submission</h2>
+          <button onClick={onClose} className="text-[#f5f5f5]/50 hover:text-[#f5f5f5]">
             <X className="w-4 h-4" />
           </button>
         </div>
         <div className="p-5 space-y-4">
-          <div className="bg-red-500/5 rounded-lg p-4 border border-red-500/10">
-            <div className="text-xs font-bold text-red-100 mb-1">{submission.title}</div>
-            <div className="flex items-center gap-3 text-[10px] text-red-400/50">
+          <div className="bg-[#f5f5f5]/5 rounded-lg p-4 border border-[#f5f5f5]/10">
+            <div className="text-xs font-bold text-[#f5f5f5] mb-1">{submission.title}</div>
+            <div className="flex items-center gap-3 text-[10px] text-[#f5f5f5]/50">
               <span>BIS: {submission.businessImpactScore}</span>
               <span>{submission.archetype.replace('_', ' ')}</span>
               <span>Rev at risk: {formatUsd(submission.impactEstimate.revenueAtRiskUsd)}</span>
@@ -384,14 +384,14 @@ function TriageModal({ submission, onClose, onTriage }: TriageModalProps) {
 
           {submission.status === 'accepted' && (
             <div className="space-y-2">
-              <div className="text-[11px] text-emerald-400 flex items-center gap-2">
+              <div className="text-[11px] text-[#c9b787] flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Already accepted. You can graduate it to a
                 tabletop exercise.
               </div>
               <button
                 onClick={() => void handleGraduate()}
                 disabled={graduating}
-                className="w-full px-4 py-2.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-2"
+                className="w-full px-4 py-2.5 rounded-lg bg-[#8a8a8a] hover:bg-[#8a8a8a] text-white text-xs font-bold transition-colors flex items-center justify-center gap-2"
               >
                 {graduating && <Loader2 className="w-3 h-3 animate-spin" />}
                 Graduate to Incident Commander
@@ -402,16 +402,16 @@ function TriageModal({ submission, onClose, onTriage }: TriageModalProps) {
           {submission.status === 'pending' && (
             <>
               <div>
-                <label className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider block mb-2">
+                <label className="text-[10px] text-[#f5f5f5]/50 font-mono uppercase tracking-wider block mb-2">
                   Action
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {(
                     [
-                      { v: 'accept', label: 'Accept', color: 'hover:border-emerald-500/40 hover:text-emerald-300' },
-                      { v: 'reject', label: 'Reject', color: 'hover:border-red-500/40 hover:text-red-300' },
+                      { v: 'accept', label: 'Accept', color: 'hover:border-[#c9b787]/40 hover:text-[#c9b787]' },
+                      { v: 'reject', label: 'Reject', color: 'hover:border-[#f5f5f5]/40 hover:text-[#f5f5f5]' },
                       { v: 'duplicate', label: 'Duplicate', color: 'hover:border-slate-500/40' },
-                      { v: 'out_of_scope', label: 'Out of Scope', color: 'hover:border-amber-500/40' },
+                      { v: 'out_of_scope', label: 'Out of Scope', color: 'hover:border-[#c9b787]/40' },
                     ] as const
                   ).map((opt) => (
                     <button
@@ -421,8 +421,8 @@ function TriageModal({ submission, onClose, onTriage }: TriageModalProps) {
                       className={cn(
                         'px-3 py-2 rounded-lg text-xs border transition-colors',
                         action === opt.v
-                          ? 'bg-red-500/15 border-red-500/40 text-red-200'
-                          : `bg-transparent border-red-500/10 text-red-400/50 ${opt.color}`,
+                          ? 'bg-[#f5f5f5]/15 border-[#f5f5f5]/40 text-[#f5f5f5]'
+                          : `bg-transparent border-[#f5f5f5]/10 text-[#f5f5f5]/50 ${opt.color}`,
                       )}
                     >
                       {opt.label}
@@ -431,7 +431,7 @@ function TriageModal({ submission, onClose, onTriage }: TriageModalProps) {
                 </div>
               </div>
               <div>
-                <label className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider block mb-1">
+                <label className="text-[10px] text-[#f5f5f5]/50 font-mono uppercase tracking-wider block mb-1">
                   Justification *
                 </label>
                 <textarea
@@ -439,21 +439,21 @@ function TriageModal({ submission, onClose, onTriage }: TriageModalProps) {
                   onChange={(e) => setJustification(e.target.value)}
                   rows={3}
                   placeholder="Explain the triage decision..."
-                  className="w-full bg-[#1a0d0d] border border-red-500/20 rounded-lg px-3 py-2 text-xs text-red-200 placeholder:text-red-400/30 outline-none focus:border-red-500/40 resize-none"
+                  className="w-full bg-[#1a0d0d] border border-[#f5f5f5]/20 rounded-lg px-3 py-2 text-xs text-[#f5f5f5] placeholder:text-[#f5f5f5]/30 outline-none focus:border-[#f5f5f5]/40 resize-none"
                 />
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-lg text-xs text-red-400/60 hover:bg-red-500/5 border border-red-500/10"
+                  className="px-4 py-2 rounded-lg text-xs text-[#f5f5f5]/60 hover:bg-[#f5f5f5]/5 border border-[#f5f5f5]/10"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => void handleTriage()}
                   disabled={saving || !justification.trim()}
-                  className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-2"
+                  className="px-4 py-2 rounded-lg bg-[#f5f5f5] hover:bg-[#f5f5f5] text-white text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-2"
                 >
                   {saving && <Loader2 className="w-3 h-3 animate-spin" />}
                   Submit Triage
@@ -501,32 +501,32 @@ function AwardPayoutModal({ submission, payoutPool, onClose, onAwarded }: AwardP
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-xl border border-emerald-500/20 bg-[#080f0a] shadow-2xl">
-        <div className="flex items-center justify-between p-5 border-b border-emerald-500/10">
+      <div className="w-full max-w-md rounded-xl border border-[#c9b787]/20 bg-[#080f0a] shadow-2xl">
+        <div className="flex items-center justify-between p-5 border-b border-[#c9b787]/10">
           <div className="flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-emerald-400" />
-            <h2 className="text-sm font-bold text-emerald-100">Award Payout</h2>
+            <DollarSign className="w-4 h-4 text-[#c9b787]" />
+            <h2 className="text-sm font-bold text-[#c9b787]">Award Payout</h2>
           </div>
-          <button onClick={onClose} className="text-emerald-400/50 hover:text-emerald-400">
+          <button onClick={onClose} className="text-[#c9b787]/50 hover:text-[#c9b787]">
             <X className="w-4 h-4" />
           </button>
         </div>
         <div className="p-5 space-y-4">
-          <div className="bg-emerald-500/5 rounded-lg p-4 border border-emerald-500/10">
-            <div className="text-xs font-bold text-emerald-100 mb-1">{submission.title}</div>
-            <div className="flex items-center gap-3 text-[10px] text-emerald-400/50">
+          <div className="bg-[#c9b787]/5 rounded-lg p-4 border border-[#c9b787]/10">
+            <div className="text-xs font-bold text-[#c9b787] mb-1">{submission.title}</div>
+            <div className="flex items-center gap-3 text-[10px] text-[#c9b787]/50">
               <span>BIS: {submission.businessImpactScore}</span>
               <span className="capitalize">{submission.archetype.replace('_', ' ')}</span>
               <span>Pool: {formatUsd(payoutPool)}</span>
             </div>
           </div>
           {submission.payoutAwarded > 0 && (
-            <div className="text-[11px] text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded px-3 py-2">
+            <div className="text-[11px] text-[#c9b787] bg-[#c9b787]/10 border border-[#c9b787]/20 rounded px-3 py-2">
               Existing payout: {formatUsd(submission.payoutAwarded)} — submitting will overwrite.
             </div>
           )}
           <div>
-            <label className="text-[10px] text-emerald-400/50 font-mono uppercase tracking-wider block mb-1">
+            <label className="text-[10px] text-[#c9b787]/50 font-mono uppercase tracking-wider block mb-1">
               Payout Amount ($)
             </label>
             <input
@@ -535,11 +535,11 @@ function AwardPayoutModal({ submission, payoutPool, onClose, onAwarded }: AwardP
               max={payoutPool}
               value={amount}
               onChange={(e) => setAmount(Number(e.target.value))}
-              className="w-full bg-[#0d1a10] border border-emerald-500/20 rounded-lg px-3 py-2 text-xs text-emerald-200 outline-none focus:border-emerald-500/40"
+              className="w-full bg-[#0d1a10] border border-[#c9b787]/20 rounded-lg px-3 py-2 text-xs text-[#c9b787] outline-none focus:border-[#c9b787]/40"
             />
           </div>
           <div>
-            <label className="text-[10px] text-emerald-400/50 font-mono uppercase tracking-wider block mb-1">
+            <label className="text-[10px] text-[#c9b787]/50 font-mono uppercase tracking-wider block mb-1">
               Note (optional)
             </label>
             <input
@@ -547,11 +547,11 @@ function AwardPayoutModal({ submission, payoutPool, onClose, onAwarded }: AwardP
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="e.g. Outstanding kill chain analysis"
-              className="w-full bg-[#0d1a10] border border-emerald-500/20 rounded-lg px-3 py-2 text-xs text-emerald-200 placeholder:text-emerald-400/30 outline-none focus:border-emerald-500/40"
+              className="w-full bg-[#0d1a10] border border-[#c9b787]/20 rounded-lg px-3 py-2 text-xs text-[#c9b787] placeholder:text-[#c9b787]/30 outline-none focus:border-[#c9b787]/40"
             />
           </div>
           {error && (
-            <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">
+            <div className="text-xs text-[#f5f5f5] bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 rounded px-3 py-2">
               {error}
             </div>
           )}
@@ -559,14 +559,14 @@ function AwardPayoutModal({ submission, payoutPool, onClose, onAwarded }: AwardP
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-xs text-emerald-400/60 hover:bg-emerald-500/5 border border-emerald-500/10 transition-colors"
+              className="px-4 py-2 rounded-lg text-xs text-[#c9b787]/60 hover:bg-[#c9b787]/5 border border-[#c9b787]/10 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={() => void handleAward()}
               disabled={saving}
-              className="px-4 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-[#c9b787] hover:bg-[#c9b787] text-white text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-2"
             >
               {saving && <Loader2 className="w-3 h-3 animate-spin" />}
               <DollarSign className="w-3 h-3" /> Record Payout
@@ -628,8 +628,8 @@ export default function CrisisArenaEngagements() {
   };
 
   const statusColors: Record<EngagementStatus, string> = {
-    accepting: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
-    open: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
+    accepting: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/30',
+    open: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/30',
     closed: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
     archived: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
   };
@@ -684,7 +684,7 @@ export default function CrisisArenaEngagements() {
           </Link>
           <button
             onClick={() => setCreateOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#f5f5f5] hover:bg-[#f5f5f5] text-white rounded-xl text-xs font-bold transition-colors"
           >
             <Plus className="w-3.5 h-3.5" /> New Engagement
           </button>
@@ -693,17 +693,17 @@ export default function CrisisArenaEngagements() {
 
       {loading && (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-6 h-6 text-red-400 animate-spin" />
+          <Loader2 className="w-6 h-6 text-[#f5f5f5] animate-spin" />
         </div>
       )}
 
       {!loading && requiresAuth && (
         <div className="flex flex-col items-center justify-center py-24 gap-5">
-          <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-            <Shield className="w-7 h-7 text-red-400/60" />
+          <div className="w-14 h-14 rounded-2xl bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 flex items-center justify-center">
+            <Shield className="w-7 h-7 text-[#f5f5f5]/60" />
           </div>
           <div className="text-center">
-            <p className="text-sm font-semibold text-red-100 mb-1">Sign in to access client engagements</p>
+            <p className="text-sm font-semibold text-[#f5f5f5] mb-1">Sign in to access client engagements</p>
             <p className="text-xs max-w-xs" style={{ color: 'var(--gi-text-muted)' }}>
               The engagements board is a private workspace for authenticated clients. The analyst performance registry is available without sign-in.
             </p>
@@ -723,11 +723,11 @@ export default function CrisisArenaEngagements() {
               key={eng.id}
               className={cn(
                 'bg-[#0f0808]/80 border rounded-xl overflow-hidden',
-                selected === eng.id ? 'border-red-500/30' : 'border-red-500/10',
+                selected === eng.id ? 'border-[#f5f5f5]/30' : 'border-[#f5f5f5]/10',
               )}
             >
               <button
-                className="w-full text-left p-5 hover:bg-red-500/5 transition-colors"
+                className="w-full text-left p-5 hover:bg-[#f5f5f5]/5 transition-colors"
                 onClick={() => void selectEngagement(eng.id)}
               >
                 <div className="flex items-start justify-between gap-4">
@@ -752,29 +752,29 @@ export default function CrisisArenaEngagements() {
                           {a.replace('_', ' ')}
                         </span>
                       ))}
-                      <span className="text-[9px] font-mono text-red-400/30 ml-auto flex items-center gap-1">
+                      <span className="text-[9px] font-mono text-[#f5f5f5]/30 ml-auto flex items-center gap-1">
                         <Clock className="w-2.5 h-2.5" /> {daysUntil(eng.deadline)}
                       </span>
                     </div>
-                    <h3 className="text-sm font-bold text-red-100 mb-1">{eng.title}</h3>
-                    <p className="text-[11px] text-red-300/50 line-clamp-2">{eng.description}</p>
+                    <h3 className="text-sm font-bold text-[#f5f5f5] mb-1">{eng.title}</h3>
+                    <p className="text-[11px] text-[#f5f5f5]/50 line-clamp-2">{eng.description}</p>
                   </div>
                   <div className="flex items-center gap-6 shrink-0">
                     <div className="text-center">
-                      <div className="text-lg font-bold text-red-300 font-mono">
+                      <div className="text-lg font-bold text-[#f5f5f5] font-mono">
                         {formatUsd(eng.payoutPool)}
                       </div>
-                      <div className="text-[9px] text-red-400/40 uppercase">Payout Pool</div>
+                      <div className="text-[9px] text-[#f5f5f5]/40 uppercase">Payout Pool</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-bold text-amber-300 font-mono">
+                      <div className="text-lg font-bold text-[#c9b787] font-mono">
                         {eng.submissionCount}
                       </div>
-                      <div className="text-[9px] text-red-400/40 uppercase">Submissions</div>
+                      <div className="text-[9px] text-[#f5f5f5]/40 uppercase">Submissions</div>
                     </div>
                     <ChevronRight
                       className={cn(
-                        'w-4 h-4 text-red-400/40 transition-transform',
+                        'w-4 h-4 text-[#f5f5f5]/40 transition-transform',
                         selected === eng.id && 'rotate-90',
                       )}
                     />
@@ -783,10 +783,10 @@ export default function CrisisArenaEngagements() {
               </button>
 
               {selected === eng.id && (
-                <div className="border-t border-red-500/10">
+                <div className="border-t border-[#f5f5f5]/10">
                   {loadingDetail && (
                     <div className="flex justify-center py-8">
-                      <Loader2 className="w-5 h-5 text-red-400 animate-spin" />
+                      <Loader2 className="w-5 h-5 text-[#f5f5f5] animate-spin" />
                     </div>
                   )}
                   {!loadingDetail && selectedDetail && (
@@ -798,23 +798,23 @@ export default function CrisisArenaEngagements() {
                           { label: 'Accepted', value: String(eng.acceptedCount), extra: '' },
                           { label: 'Deadline', value: new Date(eng.deadline).toLocaleDateString(), extra: '' },
                         ].map((info) => (
-                          <div key={info.label} className="bg-red-500/5 rounded-lg p-3">
-                            <div className="text-[9px] text-red-400/40 uppercase tracking-wider mb-1">
+                          <div key={info.label} className="bg-[#f5f5f5]/5 rounded-lg p-3">
+                            <div className="text-[9px] text-[#f5f5f5]/40 uppercase tracking-wider mb-1">
                               {info.label}
                             </div>
-                            <div className="text-[11px] text-red-200 font-mono">
+                            <div className="text-[11px] text-[#f5f5f5] font-mono">
                               {info.value}{info.extra}
                             </div>
                           </div>
                         ))}
                       </div>
 
-                      <h4 className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider mb-3">
+                      <h4 className="text-[10px] text-[#f5f5f5]/50 font-mono uppercase tracking-wider mb-3">
                         Submission Inbox ({(selectedDetail.submissions ?? []).length})
                       </h4>
 
                       {(selectedDetail.submissions ?? []).length === 0 && (
-                        <div className="text-center py-8 text-red-400/30 text-xs">
+                        <div className="text-center py-8 text-[#f5f5f5]/30 text-xs">
                           No submissions yet. Share the engagement with crisis architects.
                         </div>
                       )}
@@ -825,7 +825,7 @@ export default function CrisisArenaEngagements() {
                           .map((sub) => (
                             <div
                               key={sub.id}
-                              className="bg-[#1a0d0d]/60 border border-red-500/10 rounded-lg p-4"
+                              className="bg-[#1a0d0d]/60 border border-[#f5f5f5]/10 rounded-lg p-4"
                             >
                               <div className="flex items-start justify-between gap-3">
                                 <div className="flex-1 min-w-0">
@@ -846,14 +846,14 @@ export default function CrisisArenaEngagements() {
                                     >
                                       {sub.archetype.replace('_', ' ')}
                                     </span>
-                                    <span className="text-[9px] text-red-400/30 ml-auto">
+                                    <span className="text-[9px] text-[#f5f5f5]/30 ml-auto">
                                       {relativeTime(sub.submittedAt)}
                                     </span>
                                   </div>
-                                  <div className="text-xs font-bold text-red-100 mb-1">
+                                  <div className="text-xs font-bold text-[#f5f5f5] mb-1">
                                     {sub.title}
                                   </div>
-                                  <div className="flex items-center gap-4 text-[10px] text-red-400/40 font-mono">
+                                  <div className="flex items-center gap-4 text-[10px] text-[#f5f5f5]/40 font-mono">
                                     <span>BIS: {sub.businessImpactScore}</span>
                                     <span>Rev: {formatUsd(sub.impactEstimate.revenueAtRiskUsd)}</span>
                                     <span>
@@ -862,12 +862,12 @@ export default function CrisisArenaEngagements() {
                                     </span>
                                   </div>
                                   {sub.triageJustification && (
-                                    <p className="text-[10px] text-red-300/40 mt-1 italic">
+                                    <p className="text-[10px] text-[#f5f5f5]/40 mt-1 italic">
                                       {sub.triageJustification}
                                     </p>
                                   )}
                                   {sub.graduatedIncidentId && (
-                                    <div className="flex items-center gap-1 text-[10px] text-sky-400 mt-1">
+                                    <div className="flex items-center gap-1 text-[10px] text-[#8a8a8a] mt-1">
                                       <Shield className="w-2.5 h-2.5" /> Graduated →{' '}
                                       <Link href="/incident">
                                         <span className="underline cursor-pointer">
@@ -883,20 +883,20 @@ export default function CrisisArenaEngagements() {
                                       className={cn(
                                         'text-base font-bold font-mono',
                                         sub.businessImpactScore >= 80
-                                          ? 'text-red-400'
+                                          ? 'text-[#f5f5f5]'
                                           : sub.businessImpactScore >= 60
-                                            ? 'text-amber-400'
+                                            ? 'text-[#c9b787]'
                                             : 'text-slate-400',
                                       )}
                                     >
                                       {sub.businessImpactScore}
                                     </div>
-                                    <div className="text-[8px] text-red-400/30 uppercase">BIS</div>
+                                    <div className="text-[8px] text-[#f5f5f5]/30 uppercase">BIS</div>
                                   </div>
                                   {['accepted', 'graduated'].includes(sub.status) && (
                                     <button
                                       onClick={() => setAwardSub({ sub, pool: eng.payoutPool })}
-                                      className="px-3 py-1.5 rounded bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 text-[10px] font-mono border border-emerald-500/20 transition-colors flex items-center gap-1"
+                                      className="px-3 py-1.5 rounded bg-[#c9b787]/15 hover:bg-[#c9b787]/25 text-[#c9b787] text-[10px] font-mono border border-[#c9b787]/20 transition-colors flex items-center gap-1"
                                       title={sub.payoutAwarded > 0 ? `Current: ${formatUsd(sub.payoutAwarded)}` : 'Award payout'}
                                     >
                                       <DollarSign className="w-2.5 h-2.5" />
@@ -905,7 +905,7 @@ export default function CrisisArenaEngagements() {
                                   )}
                                   <button
                                     onClick={() => setTriageSub(sub)}
-                                    className="px-3 py-1.5 rounded bg-red-500/15 hover:bg-red-500/25 text-red-300 text-[10px] font-mono border border-red-500/20 transition-colors"
+                                    className="px-3 py-1.5 rounded bg-[#f5f5f5]/15 hover:bg-[#f5f5f5]/25 text-[#f5f5f5] text-[10px] font-mono border border-[#f5f5f5]/20 transition-colors"
                                   >
                                     Triage
                                   </button>

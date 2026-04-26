@@ -1,7 +1,7 @@
 import { ContactModal, useContactModal } from '@szl-holdings/shared-ui/contact-modal';
 import { PricingPage, type PricingTier } from '@szl-holdings/shared-ui/billing';
 
-const ACCENT = '#ef4444';
+const ACCENT = '#f5f5f5';
 
 const tiers: PricingTier[] = [
   {
@@ -42,7 +42,7 @@ const tiers: PricingTier[] = [
     highlight: true,
     features: [
       'Unlimited team members',
-      'Full TENAX surface — all modules',
+      'Full Aegis surface — all modules',
       'Mesh map, exposures, containment & drift',
       'Trust provenance & evidence chain',
       'Unlimited signal history',
@@ -72,7 +72,7 @@ export default function SentraPricingPage() {
       />
       <PricingPage
         productKey="sentra"
-        productName="TENAX"
+        productName="Aegis"
         accentColor={ACCENT}
         tiers={tiers}
         headline="Cyber Resilience at Enterprise Scale"

@@ -3,10 +3,10 @@ import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ActionButton, TraceStep, VerdictBadge, VerticalBadge } from '../components/ui';
 import { SEED_DEMO_SCENARIOS, SEED_WORKCELLS, SEED_SIGNALS } from '@workspace/a11oy-fabric';
 
-const SCENARIO_COLORS = ['#06b6d4', '#3b82f6', '#8b5cf6', '#ef4444', '#10b981'];
+const SCENARIO_COLORS = ['#8a8a8a', '#c9b787', '#8a8a8a', '#f5f5f5', '#c9b787'];
 const VERTICAL_COLORS: Record<string, string> = {
-  'lyte-revenue': '#3b82f6', 'vessels-maritime': '#06b6d4', 'terra-real-estate': '#10b981',
-  'aegis-defense': '#ef4444', 'prism-counsel': '#8b5cf6', 'carlota-jo': '#f59e0b', 'alloy-core': '#6366f1',
+  'lyte-revenue': '#c9b787', 'vessels-maritime': '#8a8a8a', 'terra-real-estate': '#c9b787',
+  'aegis-defense': '#f5f5f5', 'prism-counsel': '#8a8a8a', 'carlota-jo': '#c9b787', 'alloy-core': '#8a8a8a',
 };
 const VERTICAL_LABELS: Record<string, string> = {
   'lyte-revenue': 'Lyte Revenue', 'vessels-maritime': 'Vessels Maritime', 'terra-real-estate': 'Terra Real Estate',
@@ -56,10 +56,10 @@ export function Demo() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <KpiCard label="SCENARIOS" value={SEED_DEMO_SCENARIOS.length} sub="curated" accent="#3b82f6" />
-        <KpiCard label="TOTAL WORKCELLS" value={SEED_WORKCELLS.length} sub="in fabric" accent="#10b981" />
-        <KpiCard label="TOTAL SIGNALS" value={SEED_SIGNALS.length} sub="in mesh" accent="#f59e0b" />
-        <KpiCard label="DEMO MODE" value="LIVE" sub="no real integrations" accent="#10b981" />
+        <KpiCard label="SCENARIOS" value={SEED_DEMO_SCENARIOS.length} sub="curated" accent="#c9b787" />
+        <KpiCard label="TOTAL WORKCELLS" value={SEED_WORKCELLS.length} sub="in fabric" accent="#c9b787" />
+        <KpiCard label="TOTAL SIGNALS" value={SEED_SIGNALS.length} sub="in mesh" accent="#c9b787" />
+        <KpiCard label="DEMO MODE" value="LIVE" sub="no real integrations" accent="#c9b787" />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -152,15 +152,15 @@ export function Demo() {
                     className="h-full rounded-full transition-all"
                     style={{
                       width: `${stepIdx < 0 ? 0 : ((stepIdx + 1) / steps.length) * 100}%`,
-                      backgroundColor: stepIdx >= steps.length - 1 ? '#10b981' : '#3b82f6',
+                      backgroundColor: stepIdx >= steps.length - 1 ? '#c9b787' : '#c9b787',
                     }}
                   />
                 </div>
               </Card>
 
               {stepIdx >= steps.length - 1 && (
-                <div className="mb-4 p-4 rounded-lg" style={{ backgroundColor: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
-                  <div className="text-sm font-semibold mb-1" style={{ color: '#10b981' }}>Scenario Complete</div>
+                <div className="mb-4 p-4 rounded-lg" style={{ backgroundColor: 'rgba(201,183,135,0.08)', border: '1px solid rgba(201,183,135,0.2)' }}>
+                  <div className="text-sm font-semibold mb-1" style={{ color: '#c9b787' }}>Scenario Complete</div>
                   <div className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>
                     All stages complete. No real integrations called. All outputs are demo data.
                   </div>
@@ -177,7 +177,7 @@ export function Demo() {
                       <VerdictBadge verdict={wc.mirrorEvalResult.verdict} />
                     </div>
                     <div className="truncate mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{wc.objective}</div>
-                    <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: wc.status === 'completed' ? 'rgba(16,185,129,0.12)' : wc.status === 'running' ? 'rgba(245,158,11,0.12)' : 'rgba(155,172,196,0.1)', color: wc.status === 'completed' ? '#10b981' : wc.status === 'running' ? '#f59e0b' : '#9bacc4' }}>
+                    <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: wc.status === 'completed' ? 'rgba(201,183,135,0.12)' : wc.status === 'running' ? 'rgba(201,183,135,0.12)' : 'rgba(155,172,196,0.1)', color: wc.status === 'completed' ? '#c9b787' : wc.status === 'running' ? '#c9b787' : '#5e5e5e' }}>
                       {wc.status}
                     </span>
                   </Card>

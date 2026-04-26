@@ -61,7 +61,7 @@ function StatCard({
 }) {
   const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
   const trendColor =
-    trend === 'up' ? 'text-emerald-400' : trend === 'down' ? 'text-red-400' : 'text-zinc-400';
+    trend === 'up' ? 'text-[#c9b787]' : trend === 'down' ? 'text-[#f5f5f5]' : 'text-zinc-400';
   return (
     <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 flex flex-col gap-2">
       <div className="flex items-center gap-2">
@@ -100,14 +100,14 @@ function EmptyState({
 function TrendBadge({ trend }: { trend: string }) {
   if (trend === 'improving')
     return (
-      <span className="text-xs text-emerald-400 flex items-center gap-1">
+      <span className="text-xs text-[#c9b787] flex items-center gap-1">
         <TrendingUp className="w-3 h-3" />
         Improving
       </span>
     );
   if (trend === 'declining')
     return (
-      <span className="text-xs text-red-400 flex items-center gap-1">
+      <span className="text-xs text-[#f5f5f5] flex items-center gap-1">
         <TrendingDown className="w-3 h-3" />
         Declining
       </span>
@@ -122,9 +122,9 @@ function TrendBadge({ trend }: { trend: string }) {
 
 function AgentStatusBadge({ availability }: { availability: string }) {
   const map: Record<string, { label: string; color: string }> = {
-    online: { label: 'Online', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
-    degraded: { label: 'Degraded', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
-    offline: { label: 'Offline', color: 'bg-red-500/20 text-red-400 border-red-500/30' },
+    online: { label: 'Online', color: 'bg-[#c9b787]/20 text-[#c9b787] border-[#c9b787]/30' },
+    degraded: { label: 'Degraded', color: 'bg-[#c9b787]/20 text-[#c9b787] border-[#c9b787]/30' },
+    offline: { label: 'Offline', color: 'bg-[#f5f5f5]/20 text-[#f5f5f5] border-[#f5f5f5]/30' },
   };
   const style = map[availability] ?? map.offline!;
   return (
@@ -138,10 +138,10 @@ function AgentStatusBadge({ availability }: { availability: string }) {
         className={cn(
           'w-1.5 h-1.5 rounded-full',
           availability === 'online'
-            ? 'bg-emerald-400 animate-pulse'
+            ? 'bg-[#c9b787] animate-pulse'
             : availability === 'degraded'
-              ? 'bg-yellow-400'
-              : 'bg-red-400',
+              ? 'bg-[#c9b787]'
+              : 'bg-[#f5f5f5]',
         )}
       />
       {style.label}
@@ -151,7 +151,7 @@ function AgentStatusBadge({ availability }: { availability: string }) {
 
 function Sparkline({
   values,
-  color = '#6366f1',
+  color = '#8a8a8a',
   height = 32,
 }: {
   values: number[];
@@ -205,15 +205,15 @@ function AgentCard({ agent }: { agent: Record<string, unknown> }) {
   return (
     <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl overflow-hidden">
       <div className="p-4 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
-          <Bot className="w-5 h-5 text-indigo-400" />
+        <div className="w-10 h-10 rounded-lg bg-[#8a8a8a]/20 flex items-center justify-center border border-indigo-500/30">
+          <Bot className="w-5 h-5 text-[#8a8a8a]" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-white">{agent.agentName as string}</span>
             <AgentStatusBadge availability={agent.availability as string} />
             {Boolean(perf?.flaggedForReview) && (
-              <span className="text-xs bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-2 py-0.5 rounded-full">
+              <span className="text-xs bg-[#c9b787]/20 text-[#c9b787] border border-[#c9b787]/30 px-2 py-0.5 rounded-full">
                 ⚠ Flagged
               </span>
             )}
@@ -234,7 +234,7 @@ function AgentCard({ agent }: { agent: Record<string, unknown> }) {
                 <div className="text-xs text-zinc-500">accuracy</div>
               </div>
               {accHistory.length >= 2 && (
-                <Sparkline values={accHistory.map((v) => v * 100)} color="#10b981" height={28} />
+                <Sparkline values={accHistory.map((v) => v * 100)} color="#c9b787" height={28} />
               )}
             </div>
           )}
@@ -247,7 +247,7 @@ function AgentCard({ agent }: { agent: Record<string, unknown> }) {
                 <div className="text-xs text-zinc-500">confidence</div>
               </div>
               {confHistory.length >= 2 && (
-                <Sparkline values={confHistory.map((v) => v * 100)} color="#6366f1" height={28} />
+                <Sparkline values={confHistory.map((v) => v * 100)} color="#8a8a8a" height={28} />
               )}
             </div>
           )}
@@ -292,7 +292,7 @@ function AgentCard({ agent }: { agent: Record<string, unknown> }) {
                 </span>
               </div>
               {Boolean(perf.reviewReason) && (
-                <div className="mt-2 text-xs text-yellow-400 bg-yellow-500/10 rounded px-2 py-1 border border-yellow-500/20">
+                <div className="mt-2 text-xs text-[#c9b787] bg-[#c9b787]/10 rounded px-2 py-1 border border-[#c9b787]/20">
                   ⚠ {perf.reviewReason as string}
                 </div>
               )}
@@ -307,17 +307,17 @@ function AgentCard({ agent }: { agent: Record<string, unknown> }) {
               <div className="space-y-1">
                 {capabilities.map((cap) => (
                   <div key={cap.name} className="flex items-center gap-2 text-xs">
-                    <Zap className="w-3 h-3 text-indigo-400 flex-shrink-0" />
+                    <Zap className="w-3 h-3 text-[#8a8a8a] flex-shrink-0" />
                     <span className="text-zinc-300 font-medium">{cap.name.replace(/_/g, ' ')}</span>
                     <span className="text-zinc-500">— {cap.description}</span>
                     <span
                       className={cn(
                         'ml-auto px-1.5 py-0.5 rounded',
                         cap.costEstimate === 'high'
-                          ? 'bg-red-500/20 text-red-400'
+                          ? 'bg-[#f5f5f5]/20 text-[#f5f5f5]'
                           : cap.costEstimate === 'medium'
-                            ? 'bg-yellow-500/20 text-yellow-400'
-                            : 'bg-emerald-500/20 text-emerald-400',
+                            ? 'bg-[#c9b787]/20 text-[#c9b787]'
+                            : 'bg-[#c9b787]/20 text-[#c9b787]',
                       )}
                     >
                       {cap.costEstimate}
@@ -337,7 +337,7 @@ function AgentCard({ agent }: { agent: Record<string, unknown> }) {
                 {skills.skills.map((s: string) => (
                   <span
                     key={s}
-                    className="text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full"
+                    className="text-xs bg-[#8a8a8a]/20 text-[#8a8a8a] border border-indigo-500/30 px-2 py-0.5 rounded-full"
                   >
                     {s.replace(/_/g, ' ')}
                   </span>
@@ -400,9 +400,9 @@ function A2AGraph({
   byAgent: Record<string, Record<string, number>>;
 }) {
   const statusColor = {
-    running: '#f59e0b',
-    completed: '#10b981',
-    failed: '#ef4444',
+    running: '#c9b787',
+    completed: '#c9b787',
+    failed: '#f5f5f5',
     pending: '#6b7280',
   };
 
@@ -451,7 +451,7 @@ function A2AGraph({
     <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Network className="w-4 h-4 text-indigo-400" />
+          <Network className="w-4 h-4 text-[#8a8a8a]" />
           <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">
             A2A Communication Graph
           </span>
@@ -541,11 +541,11 @@ function A2AGraph({
                 cx={node.x}
                 cy={node.y}
                 r={20}
-                fill="rgba(99,102,241,0.08)"
-                stroke="rgba(99,102,241,0.4)"
+                fill="rgba(138,138,138,0.08)"
+                stroke="rgba(138,138,138,0.4)"
                 strokeWidth={1.5}
               />
-              <circle cx={node.x} cy={node.y} r={4} fill="#6366f1" opacity={0.8} />
+              <circle cx={node.x} cy={node.y} r={4} fill="#8a8a8a" opacity={0.8} />
               <text
                 x={node.x}
                 y={node.y + 32}
@@ -571,15 +571,15 @@ function A2AGraph({
               .map((e) => (
                 <div
                   key={`${e.from}-${e.to}`}
-                  className="flex items-center gap-2 text-xs bg-yellow-500/5 border border-yellow-500/15 rounded-lg px-3 py-1.5"
+                  className="flex items-center gap-2 text-xs bg-[#c9b787]/5 border border-[#c9b787]/15 rounded-lg px-3 py-1.5"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse flex-shrink-0" />
                   <span className="text-zinc-400">{e.from}</span>
                   <ArrowRight className="w-3 h-3 text-zinc-600" />
                   <span className="text-zinc-200 font-medium">{e.to}</span>
                   <span className="ml-auto text-zinc-500 truncate max-w-[120px]">{e.task}</span>
                   {e.latencyMs != null && (
-                    <span className="text-yellow-400 font-mono flex-shrink-0">{e.latencyMs}ms</span>
+                    <span className="text-[#c9b787] font-mono flex-shrink-0">{e.latencyMs}ms</span>
                   )}
                 </div>
               ))}
@@ -617,13 +617,13 @@ function RagActivityMonitor({ ragData }: { ragData: Record<string, unknown> | nu
             <div className="text-xs text-zinc-500 mt-1">Cache Hit Rate</div>
           </div>
           <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-indigo-400">
+            <div className="text-2xl font-bold text-[#8a8a8a]">
               {queryStats.avgRelevanceScore ?? '—'}%
             </div>
             <div className="text-xs text-zinc-500 mt-1">Avg Relevance Score</div>
           </div>
           <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-cyan-400">
+            <div className="text-2xl font-bold text-[#8a8a8a]">
               {queryStats.avgLatencyMs ?? '—'}ms
             </div>
             <div className="text-xs text-zinc-500 mt-1">Avg Query Latency</div>
@@ -635,7 +635,7 @@ function RagActivityMonitor({ ragData }: { ragData: Record<string, unknown> | nu
         <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl overflow-hidden">
           <div className="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-cyan-400" />
+              <BookOpen className="w-4 h-4 text-[#8a8a8a]" />
               <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">
                 Recent Retrieval Queries
               </span>
@@ -651,13 +651,13 @@ function RagActivityMonitor({ ragData }: { ragData: Record<string, unknown> | nu
                 <div
                   className={cn(
                     'w-6 h-6 rounded flex items-center justify-center flex-shrink-0',
-                    q.cacheHit ? 'bg-emerald-500/15' : 'bg-indigo-500/15',
+                    q.cacheHit ? 'bg-[#c9b787]/15' : 'bg-[#8a8a8a]/15',
                   )}
                 >
                   {q.cacheHit ? (
-                    <Star className="w-3 h-3 text-emerald-400" />
+                    <Star className="w-3 h-3 text-[#c9b787]" />
                   ) : (
-                    <Database className="w-3 h-3 text-indigo-400" />
+                    <Database className="w-3 h-3 text-[#8a8a8a]" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -670,10 +670,10 @@ function RagActivityMonitor({ ragData }: { ragData: Record<string, unknown> | nu
                       className={cn(
                         'font-bold',
                         q.relevanceScore > 0.85
-                          ? 'text-emerald-400'
+                          ? 'text-[#c9b787]'
                           : q.relevanceScore > 0.75
-                            ? 'text-yellow-400'
-                            : 'text-orange-400',
+                            ? 'text-[#c9b787]'
+                            : 'text-[#c9b787]',
                       )}
                     >
                       {(q.relevanceScore * 100).toFixed(0)}%
@@ -682,7 +682,7 @@ function RagActivityMonitor({ ragData }: { ragData: Record<string, unknown> | nu
                   </div>
                   <div className="text-right">
                     <div
-                      className={cn('font-mono', q.cacheHit ? 'text-emerald-400' : 'text-zinc-300')}
+                      className={cn('font-mono', q.cacheHit ? 'text-[#c9b787]' : 'text-zinc-300')}
                     >
                       {q.latencyMs}ms
                     </div>
@@ -724,7 +724,7 @@ function RagActivityMonitor({ ragData }: { ragData: Record<string, unknown> | nu
             <div className="space-y-2">
               {Object.entries(byDomain).map(([domain, count]) => (
                 <div key={domain} className="flex items-center gap-2">
-                  <Globe className="w-3 h-3 text-cyan-400" />
+                  <Globe className="w-3 h-3 text-[#8a8a8a]" />
                   <span className="text-sm text-zinc-300 flex-1 capitalize">{domain}</span>
                   <span className="text-sm font-bold text-white">{count}</span>
                 </div>
@@ -742,7 +742,7 @@ function RagActivityMonitor({ ragData }: { ragData: Record<string, unknown> | nu
             <div className="space-y-2">
               {Object.entries(bySourceType).map(([type, count]) => (
                 <div key={type} className="flex items-center gap-2">
-                  <BookOpen className="w-3 h-3 text-indigo-400" />
+                  <BookOpen className="w-3 h-3 text-[#8a8a8a]" />
                   <span className="text-sm text-zinc-300 flex-1 capitalize">
                     {type.replace(/_/g, ' ')}
                   </span>
@@ -790,16 +790,16 @@ const EVENT_TYPE_CONFIG: Record<
   SelfEventType,
   { label: string; icon: React.ElementType; color: string }
 > = {
-  strategy_adjusted: { label: 'Strategy Adjusted', icon: GitBranch, color: 'text-indigo-400' },
+  strategy_adjusted: { label: 'Strategy Adjusted', icon: GitBranch, color: 'text-[#8a8a8a]' },
   performance_flagged: {
     label: 'Performance Flagged',
     icon: AlertTriangle,
-    color: 'text-yellow-400',
+    color: 'text-[#c9b787]',
   },
-  human_review_requested: { label: 'Human Review Requested', icon: Eye, color: 'text-red-400' },
-  confidence_recalibrated: { label: 'Confidence Recalibrated', icon: Cpu, color: 'text-cyan-400' },
-  skill_adopted: { label: 'Skill Adopted', icon: Zap, color: 'text-emerald-400' },
-  fallback_triggered: { label: 'Fallback Triggered', icon: AlertCircle, color: 'text-orange-400' },
+  human_review_requested: { label: 'Human Review Requested', icon: Eye, color: 'text-[#f5f5f5]' },
+  confidence_recalibrated: { label: 'Confidence Recalibrated', icon: Cpu, color: 'text-[#8a8a8a]' },
+  skill_adopted: { label: 'Skill Adopted', icon: Zap, color: 'text-[#c9b787]' },
+  fallback_triggered: { label: 'Fallback Triggered', icon: AlertCircle, color: 'text-[#c9b787]' },
 };
 
 function timeAgoStr(ts: string | Date): string {
@@ -828,18 +828,18 @@ function SelfImprovementFeed({
           <div className="text-xs text-zinc-500 mt-1">Self-Reflection Events</div>
         </div>
         <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-red-400">{criticalCount}</div>
+          <div className="text-2xl font-bold text-[#f5f5f5]">{criticalCount}</div>
           <div className="text-xs text-zinc-500 mt-1">Human Review Required</div>
         </div>
         <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-yellow-400">{warningCount}</div>
+          <div className="text-2xl font-bold text-[#c9b787]">{warningCount}</div>
           <div className="text-xs text-zinc-500 mt-1">Flagged for Review</div>
         </div>
       </div>
 
       <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl overflow-hidden">
         <div className="px-4 py-3 border-b border-zinc-800 flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-violet-400" />
+          <Sparkles className="w-4 h-4 text-[#8a8a8a]" />
           <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">
             Self-Reflection Event Stream
           </span>
@@ -859,9 +859,9 @@ function SelfImprovementFeed({
               const Icon = cfg.icon;
               const sevBg =
                 event.severity === 'critical'
-                  ? 'bg-red-400/5'
+                  ? 'bg-[#f5f5f5]/5'
                   : event.severity === 'warning'
-                    ? 'bg-yellow-400/5'
+                    ? 'bg-[#c9b787]/5'
                     : '';
               return (
                 <div
@@ -872,9 +872,9 @@ function SelfImprovementFeed({
                     className={cn(
                       'w-6 h-6 rounded flex items-center justify-center flex-shrink-0 mt-0.5',
                       event.severity === 'critical'
-                        ? 'bg-red-500/15'
+                        ? 'bg-[#f5f5f5]/15'
                         : event.severity === 'warning'
-                          ? 'bg-yellow-500/15'
+                          ? 'bg-[#c9b787]/15'
                           : 'bg-zinc-800',
                     )}
                   >
@@ -887,9 +887,9 @@ function SelfImprovementFeed({
                         className={cn(
                           'text-[9px] font-mono uppercase px-1.5 py-0.5 rounded border',
                           event.severity === 'critical'
-                            ? 'text-red-400 border-red-500/30 bg-red-500/10'
+                            ? 'text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10'
                             : event.severity === 'warning'
-                              ? 'text-yellow-400 border-yellow-500/30 bg-yellow-500/10'
+                              ? 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10'
                               : 'text-zinc-500 border-zinc-700 bg-zinc-800/50',
                         )}
                       >
@@ -905,7 +905,7 @@ function SelfImprovementFeed({
                         {event.before && event.after && (
                           <ArrowRight className="w-3 h-3 text-zinc-600" />
                         )}
-                        {event.after && <span className="text-emerald-400">{event.after}</span>}
+                        {event.after && <span className="text-[#c9b787]">{event.after}</span>}
                       </div>
                     )}
                     <div className="text-[10px] text-zinc-600 mt-1">
@@ -936,7 +936,7 @@ function SelfImprovementFeed({
                   className="flex items-center gap-4 py-2 border-b border-zinc-800 last:border-0"
                 >
                   <div className="flex items-center gap-2 w-36 flex-shrink-0">
-                    <Bot className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
+                    <Bot className="w-3.5 h-3.5 text-[#8a8a8a] flex-shrink-0" />
                     <span className="text-xs text-zinc-300 font-medium capitalize truncate">
                       {snap.agentId as string}
                     </span>
@@ -946,13 +946,13 @@ function SelfImprovementFeed({
                     {confHistory.length >= 2 ? (
                       <Sparkline
                         values={confHistory.map((v) => v * 100)}
-                        color="#6366f1"
+                        color="#8a8a8a"
                         height={24}
                       />
                     ) : (
                       <span className="text-zinc-700 text-xs">—</span>
                     )}
-                    <span className="text-xs text-indigo-400 font-mono">
+                    <span className="text-xs text-[#8a8a8a] font-mono">
                       {Math.round(conf * 100)}%
                     </span>
                   </div>
@@ -961,13 +961,13 @@ function SelfImprovementFeed({
                     {accHistory.length >= 2 ? (
                       <Sparkline
                         values={accHistory.map((v) => v * 100)}
-                        color="#10b981"
+                        color="#c9b787"
                         height={24}
                       />
                     ) : (
                       <span className="text-zinc-700 text-xs">—</span>
                     )}
-                    <span className="text-xs text-emerald-400 font-mono">
+                    <span className="text-xs text-[#c9b787] font-mono">
                       {Math.round(acc * 100)}%
                     </span>
                   </div>
@@ -1026,17 +1026,17 @@ function ConnectorHealthPanel({ connectors }: { connectors: ConnectorRecord[] })
     const st = resolveConnectorStatus(c);
     if (st === 'degraded')
       return {
-        dot: 'bg-yellow-400 animate-pulse',
-        text: 'text-yellow-400',
+        dot: 'bg-[#c9b787] animate-pulse',
+        text: 'text-[#c9b787]',
         label: 'Degraded',
-        badge: 'bg-yellow-500/10 border-yellow-500/20',
+        badge: 'bg-[#c9b787]/10 border-[#c9b787]/20',
       };
     if (st === 'up')
       return {
-        dot: 'bg-emerald-400',
-        text: 'text-emerald-400',
+        dot: 'bg-[#c9b787]',
+        text: 'text-[#c9b787]',
         label: 'Operational',
-        badge: 'bg-emerald-500/10 border-emerald-500/20',
+        badge: 'bg-[#c9b787]/10 border-[#c9b787]/20',
       };
     return {
       dot: 'bg-zinc-600',
@@ -1049,12 +1049,12 @@ function ConnectorHealthPanel({ connectors }: { connectors: ConnectorRecord[] })
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-emerald-400">{upCount}</div>
+        <div className="bg-[#c9b787]/5 border border-[#c9b787]/20 rounded-xl p-4 text-center">
+          <div className="text-2xl font-bold text-[#c9b787]">{upCount}</div>
           <div className="text-xs text-zinc-500 mt-1">Operational</div>
         </div>
-        <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-yellow-400">{degradedCount}</div>
+        <div className="bg-[#c9b787]/5 border border-[#c9b787]/20 rounded-xl p-4 text-center">
+          <div className="text-2xl font-bold text-[#c9b787]">{degradedCount}</div>
           <div className="text-xs text-zinc-500 mt-1">Degraded</div>
         </div>
         <div className="bg-zinc-800/50 border border-zinc-700 rounded-xl p-4 text-center">
@@ -1075,7 +1075,7 @@ function ConnectorHealthPanel({ connectors }: { connectors: ConnectorRecord[] })
         <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl overflow-hidden">
           <div className="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Plug className="w-4 h-4 text-purple-400" />
+              <Plug className="w-4 h-4 text-[#8a8a8a]" />
               <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">
                 Connector Status Board
               </span>
@@ -1118,10 +1118,10 @@ function ConnectorHealthPanel({ connectors }: { connectors: ConnectorRecord[] })
                         <div
                           className={
                             conn.errorRate > 5
-                              ? 'text-red-400'
+                              ? 'text-[#f5f5f5]'
                               : conn.errorRate > 1
-                                ? 'text-yellow-400'
-                                : 'text-emerald-400'
+                                ? 'text-[#c9b787]'
+                                : 'text-[#c9b787]'
                           }
                         >
                           {conn.errorRate.toFixed(1)}%
@@ -1153,14 +1153,14 @@ function ConnectorHealthPanel({ connectors }: { connectors: ConnectorRecord[] })
 
 function SkillRow({ skill }: { skill: Record<string, unknown> }) {
   const categoryColors: Record<string, string> = {
-    analysis: 'bg-blue-500/20 text-blue-400',
-    synthesis: 'bg-purple-500/20 text-purple-400',
-    generation: 'bg-emerald-500/20 text-emerald-400',
-    research: 'bg-yellow-500/20 text-yellow-400',
-    monitoring: 'bg-red-500/20 text-red-400',
-    validation: 'bg-indigo-500/20 text-indigo-400',
-    orchestration: 'bg-pink-500/20 text-pink-400',
-    extraction: 'bg-cyan-500/20 text-cyan-400',
+    analysis: 'bg-[#c9b787]/20 text-[#c9b787]',
+    synthesis: 'bg-[#8a8a8a]/20 text-[#8a8a8a]',
+    generation: 'bg-[#c9b787]/20 text-[#c9b787]',
+    research: 'bg-[#c9b787]/20 text-[#c9b787]',
+    monitoring: 'bg-[#f5f5f5]/20 text-[#f5f5f5]',
+    validation: 'bg-[#8a8a8a]/20 text-[#8a8a8a]',
+    orchestration: 'bg-[#c9b787]/20 text-[#c9b787]',
+    extraction: 'bg-[#8a8a8a]/20 text-[#8a8a8a]',
   };
   return (
     <div className="flex items-center gap-3 py-2">
@@ -1179,7 +1179,7 @@ function SkillRow({ skill }: { skill: Record<string, unknown> }) {
         <div className="text-xs text-zinc-500 mt-0.5">{skill.description as string}</div>
       </div>
       {Boolean(skill.chainable) && (
-        <span className="text-xs text-indigo-400 flex items-center gap-1">
+        <span className="text-xs text-[#8a8a8a] flex items-center gap-1">
           <Link2 className="w-3 h-3" />
           chainable
         </span>
@@ -1293,8 +1293,8 @@ export default function AgentAutonomyDashboard() {
       <div className="border-b border-zinc-800 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-indigo-500/20 border border-indigo-500/30">
-              <Brain className="w-5 h-5 text-indigo-400" />
+            <div className="p-2 rounded-lg bg-[#8a8a8a]/20 border border-indigo-500/30">
+              <Brain className="w-5 h-5 text-[#8a8a8a]" />
             </div>
             <div>
               <h1 className="text-lg font-bold text-white">Agent Autonomy Dashboard</h1>
@@ -1320,7 +1320,7 @@ export default function AgentAutonomyDashboard() {
               className={cn(
                 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap',
                 tab === t.id
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-[#8a8a8a] text-white'
                   : 'text-zinc-400 hover:text-white hover:bg-zinc-800',
               )}
             >
@@ -1348,7 +1348,7 @@ export default function AgentAutonomyDashboard() {
                       value={health.activeAgents ?? 0}
                       sub={`of ${health.totalAgents ?? 0} total`}
                       icon={Bot}
-                      color="bg-emerald-500/20"
+                      color="bg-[#c9b787]/20"
                       trend="stable"
                     />
                     <StatCard
@@ -1356,35 +1356,35 @@ export default function AgentAutonomyDashboard() {
                       value={delStats.totalHistorical ?? 0}
                       sub={`${delStats.completedCount ?? 0} completed`}
                       icon={Network}
-                      color="bg-indigo-500/20"
+                      color="bg-[#8a8a8a]/20"
                     />
                     <StatCard
                       label="Skill Invocations"
                       value={skillStats.totalInvocations ?? 0}
                       sub={`${skillStats.totalSkills ?? 0} skills registered`}
                       icon={Zap}
-                      color="bg-yellow-500/20"
+                      color="bg-[#c9b787]/20"
                     />
                     <StatCard
                       label="Tool Connectors"
                       value={connStats.configuredConnectors ?? 0}
                       sub={`of ${connStats.totalConnectors ?? 0} registered`}
                       icon={Plug}
-                      color="bg-purple-500/20"
+                      color="bg-[#8a8a8a]/20"
                     />
                     <StatCard
                       label="RAG Documents"
                       value={ragStats.totalDocuments ?? 0}
                       sub="knowledge base entries"
                       icon={BookOpen}
-                      color="bg-cyan-500/20"
+                      color="bg-[#8a8a8a]/20"
                     />
                     <StatCard
                       label="Avg Accuracy"
                       value={perfSummary.avgAccuracy != null ? `${perfSummary.avgAccuracy}%` : '—'}
                       sub={`${perfSummary.flaggedCount ?? 0} agents flagged`}
                       icon={TrendingUp}
-                      color="bg-rose-500/20"
+                      color="bg-[#f5f5f5]/20"
                     />
                   </div>
                 </div>
@@ -1400,19 +1400,19 @@ export default function AgentAutonomyDashboard() {
                           label: 'Active Delegations',
                           value: delStats.active ?? 0,
                           icon: Activity,
-                          color: 'text-yellow-400',
+                          color: 'text-[#c9b787]',
                         },
                         {
                           label: 'Completed',
                           value: delStats.completedCount ?? 0,
                           icon: CheckCircle,
-                          color: 'text-emerald-400',
+                          color: 'text-[#c9b787]',
                         },
                         {
                           label: 'Failed',
                           value: delStats.failedCount ?? 0,
                           icon: XCircle,
-                          color: 'text-red-400',
+                          color: 'text-[#f5f5f5]',
                         },
                         {
                           label: 'Avg Latency',
@@ -1450,7 +1450,7 @@ export default function AgentAutonomyDashboard() {
                               <span className="text-sm text-white flex-1">
                                 {(s.skillId as string).replace(/_/g, ' ')}
                               </span>
-                              <span className="text-xs text-indigo-400">
+                              <span className="text-xs text-[#8a8a8a]">
                                 {s.invocations as number} runs
                               </span>
                             </div>
@@ -1475,7 +1475,7 @@ export default function AgentAutonomyDashboard() {
                               <div
                                 className={cn(
                                   'w-2 h-2 rounded-full flex-shrink-0',
-                                  c.configured ? 'bg-emerald-400' : 'bg-zinc-600',
+                                  c.configured ? 'bg-[#c9b787]' : 'bg-zinc-600',
                                 )}
                               />
                               <span className="text-sm text-zinc-300 flex-1">
@@ -1500,7 +1500,7 @@ export default function AgentAutonomyDashboard() {
                     </div>
                     {Object.entries(ragStats.byDomain ?? {}).map(([domain, count]) => (
                       <div key={domain} className="flex items-center gap-2">
-                        <Globe className="w-3 h-3 text-cyan-400" />
+                        <Globe className="w-3 h-3 text-[#8a8a8a]" />
                         <span className="text-xs text-zinc-400 flex-1">{domain}</span>
                         <span className="text-xs text-white">{count as number}</span>
                       </div>
@@ -1565,11 +1565,11 @@ export default function AgentAutonomyDashboard() {
                           <span
                             className={cn(
                               d.status === 'completed'
-                                ? 'text-emerald-400'
+                                ? 'text-[#c9b787]'
                                 : d.status === 'failed'
-                                  ? 'text-red-400'
+                                  ? 'text-[#f5f5f5]'
                                   : d.status === 'running'
-                                    ? 'text-yellow-400'
+                                    ? 'text-[#c9b787]'
                                     : 'text-zinc-400',
                             )}
                           >
@@ -1604,11 +1604,11 @@ export default function AgentAutonomyDashboard() {
                           <div className="text-xs text-zinc-500 mt-1">
                             {data.delegations ?? 0} delegations
                           </div>
-                          <div className="text-xs text-emerald-400">
+                          <div className="text-xs text-[#c9b787]">
                             {data.successes ?? 0} success
                           </div>
                           {(data.failures ?? 0) > 0 && (
-                            <div className="text-xs text-red-400">{data.failures} failed</div>
+                            <div className="text-xs text-[#f5f5f5]">{data.failures} failed</div>
                           )}
                         </div>
                       ))}
@@ -1649,7 +1649,7 @@ export default function AgentAutonomyDashboard() {
                                 <span className="text-sm text-white flex-1">
                                   {skillId.replace(/_/g, ' ')}
                                 </span>
-                                <span className="text-xs text-indigo-400">
+                                <span className="text-xs text-[#8a8a8a]">
                                   {d.invocations as number} invocations
                                 </span>
                                 <span className="text-xs text-zinc-500">
@@ -1725,14 +1725,14 @@ export default function AgentAutonomyDashboard() {
               <button
                 onClick={() => ingestMutation.mutate()}
                 disabled={ingestMutation.isPending}
-                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 bg-[#8a8a8a] hover:bg-[#8a8a8a] text-white text-xs px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
               >
                 <Database className="w-4 h-4" />
                 {ingestMutation.isPending ? 'Ingesting...' : 'Ingest Decisions'}
               </button>
             </div>
             {ingestMutation.data && (
-              <div className="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
+              <div className="text-xs text-[#c9b787] bg-[#c9b787]/10 border border-[#c9b787]/20 rounded-lg px-3 py-2">
                 ✓ {ingestMutation.data.data?.message ?? 'Ingest complete'}
               </div>
             )}

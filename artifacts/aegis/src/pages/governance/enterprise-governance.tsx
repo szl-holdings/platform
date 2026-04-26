@@ -267,7 +267,7 @@ function Section({
         className="w-full flex items-center justify-between p-5 hover:bg-[#0a0f16] transition-colors"
       >
         <div className="flex items-center gap-2.5">
-          <Icon size={16} className="text-amber-400" />
+          <Icon size={16} className="text-[#c9b787]" />
           <span className="text-sm font-semibold text-white font-mono">{title}</span>
         </div>
         {open ? (
@@ -287,7 +287,7 @@ export default function EnterpriseGovernancePage() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <Building2 size={22} className="text-amber-400" />
+            <Building2 size={22} className="text-[#c9b787]" />
             <h1 className="text-xl font-bold text-white font-mono tracking-tight">
               Enterprise Governance
             </h1>
@@ -298,9 +298,9 @@ export default function EnterpriseGovernancePage() {
           </p>
         </div>
 
-        <div className="bg-amber-400/10 border border-amber-400/30 rounded-xl p-4 flex items-start gap-3">
-          <Info size={16} className="text-amber-400 mt-0.5 shrink-0" />
-          <p className="text-xs text-amber-200/80 font-mono leading-relaxed">
+        <div className="bg-[#c9b787]/10 border border-[#c9b787]/30 rounded-xl p-4 flex items-start gap-3">
+          <Info size={16} className="text-[#c9b787] mt-0.5 shrink-0" />
+          <p className="text-xs text-[#c9b787]/80 font-mono leading-relaxed">
             SSO and SCIM show <strong>hook-ready</strong> status. Full provider integration requires
             per-customer deployment configuration. This page shows current posture honestly — no
             capabilities are overstated.
@@ -309,10 +309,10 @@ export default function EnterpriseGovernancePage() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'SSO', value: 'Hook Ready', color: '#f59e0b', icon: Key },
-            { label: 'SCIM Provisioning', value: 'Hook Ready', color: '#f59e0b', icon: Users },
-            { label: 'Server-side RBAC', value: 'Active', color: '#22c55e', icon: Lock },
-            { label: 'Tenant Isolation', value: 'Enforced', color: '#22c55e', icon: Shield },
+            { label: 'SSO', value: 'Hook Ready', color: '#c9b787', icon: Key },
+            { label: 'SCIM Provisioning', value: 'Hook Ready', color: '#c9b787', icon: Users },
+            { label: 'Server-side RBAC', value: 'Active', color: '#c9b787', icon: Lock },
+            { label: 'Tenant Isolation', value: 'Enforced', color: '#c9b787', icon: Shield },
           ].map((m) => (
             <div
               key={m.label}
@@ -339,14 +339,14 @@ export default function EnterpriseGovernancePage() {
                 {SSO_HOOK.protocols.map((p) => (
                   <span
                     key={p}
-                    className="text-xs bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded font-mono"
+                    className="text-xs bg-[#c9b787]/10 text-[#c9b787] px-2 py-0.5 rounded font-mono"
                   >
                     {p}
                   </span>
                 ))}
               </div>
             </div>
-            <div className="p-3 bg-[#0a0f16] border border-amber-400/20 rounded-lg">
+            <div className="p-3 bg-[#0a0f16] border border-[#c9b787]/20 rounded-lg">
               <p className="text-xs text-[#8b9ab0] font-mono">{SSO_HOOK.note}</p>
             </div>
           </div>
@@ -360,7 +360,7 @@ export default function EnterpriseGovernancePage() {
                   key={op}
                   className="flex items-center gap-2 p-2 bg-[#0a0f16] rounded border border-[#1e2a3a]"
                 >
-                  <CheckCircle2 size={12} className="text-green-400" />
+                  <CheckCircle2 size={12} className="text-[#c9b787]" />
                   <span className="text-xs text-white font-mono">{op}</span>
                 </div>
               ))}
@@ -391,14 +391,14 @@ export default function EnterpriseGovernancePage() {
                     <td className="py-2.5 pr-4 text-[#8b9ab0]">{r.scope}</td>
                     <td className="py-2.5 pr-4">
                       {r.tenantIsolated ? (
-                        <CheckCircle2 size={12} className="text-green-400" />
+                        <CheckCircle2 size={12} className="text-[#c9b787]" />
                       ) : (
-                        <span className="text-amber-400 text-xs">Global</span>
+                        <span className="text-[#c9b787] text-xs">Global</span>
                       )}
                     </td>
                     <td className="py-2.5 text-[#8b9ab0] max-w-xs truncate">
                       {r.permissions[0] === '*' ? (
-                        <span className="text-amber-400">All permissions</span>
+                        <span className="text-[#c9b787]">All permissions</span>
                       ) : (
                         r.permissions.slice(0, 3).join(', ')
                       )}
@@ -424,11 +424,11 @@ export default function EnterpriseGovernancePage() {
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-mono text-[#8b9ab0]">{e.id}</span>
                     <span
-                      className={`text-xs px-1.5 py-0.5 rounded font-mono font-bold uppercase ${e.risk === 'critical' ? 'bg-red-500/20 text-red-400' : e.risk === 'high' ? 'bg-orange-500/20 text-orange-400' : 'bg-green-500/20 text-green-400'}`}
+                      className={`text-xs px-1.5 py-0.5 rounded font-mono font-bold uppercase ${e.risk === 'critical' ? 'bg-[#f5f5f5]/20 text-[#f5f5f5]' : e.risk === 'high' ? 'bg-[#c9b787]/20 text-[#c9b787]' : 'bg-[#c9b787]/20 text-[#c9b787]'}`}
                     >
                       {e.risk}
                     </span>
-                    <span className="text-xs text-amber-400 font-mono">{e.action}</span>
+                    <span className="text-xs text-[#c9b787] font-mono">{e.action}</span>
                   </div>
                   <p className="text-xs text-white truncate">{e.target}</p>
                   <p className="text-xs text-[#8b9ab0] font-mono">
@@ -462,10 +462,10 @@ export default function EnterpriseGovernancePage() {
                 {RETENTION_POLICIES.map((r) => (
                   <tr key={r.type} className="hover:bg-[#0a0f16] transition-colors">
                     <td className="py-2.5 pr-4 text-white">{r.type}</td>
-                    <td className="py-2.5 pr-4 text-amber-400">{r.retention}</td>
+                    <td className="py-2.5 pr-4 text-[#c9b787]">{r.retention}</td>
                     <td className="py-2.5 pr-4 text-[#8b9ab0]">{r.enforcement}</td>
                     <td className="py-2.5 pr-4">
-                      <span className="text-green-400">Active</span>
+                      <span className="text-[#c9b787]">Active</span>
                     </td>
                   </tr>
                 ))}
@@ -490,7 +490,7 @@ export default function EnterpriseGovernancePage() {
                     <span className="text-xs bg-[#1e2a3a] text-[#8b9ab0] px-2 py-0.5 rounded font-mono">
                       {p.type}
                     </span>
-                    <span className="text-xs bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded font-mono">
+                    <span className="text-xs bg-[#c9b787]/10 text-[#c9b787] px-2 py-0.5 rounded font-mono">
                       {p.scope}
                     </span>
                   </div>
@@ -529,11 +529,11 @@ export default function EnterpriseGovernancePage() {
                     <td className="py-2.5 pr-4 text-[#8b9ab0]">{i.permission}</td>
                     <td className="py-2.5 pr-4 text-[#8b9ab0]">{i.tenant}</td>
                     <td className="py-2.5 pr-4">
-                      <CheckCircle2 size={12} className="text-green-400" />
+                      <CheckCircle2 size={12} className="text-[#c9b787]" />
                     </td>
                     <td className="py-2.5 pr-4">
                       <span
-                        className={`px-2 py-0.5 rounded text-xs font-bold ${i.status === 'connected' ? 'bg-green-500/20 text-green-400' : 'bg-amber-500/20 text-amber-400'}`}
+                        className={`px-2 py-0.5 rounded text-xs font-bold ${i.status === 'connected' ? 'bg-[#c9b787]/20 text-[#c9b787]' : 'bg-[#c9b787]/20 text-[#c9b787]'}`}
                       >
                         {i.status === 'connected' ? 'Connected' : 'Hook Ready'}
                       </span>

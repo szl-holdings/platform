@@ -86,16 +86,16 @@ const statusConfig: Record<string, { color: string; label: string; icon: Element
     icon: Clock,
   },
   running: {
-    color: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    color: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
     label: 'Running',
     icon: Activity,
   },
   completed: {
-    color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    color: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
     label: 'Completed',
     icon: CheckCircle,
   },
-  failed: { color: 'bg-red-500/10 text-red-400 border-red-500/20', label: 'Failed', icon: XCircle },
+  failed: { color: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20', label: 'Failed', icon: XCircle },
   aborted: {
     color: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
     label: 'Aborted',
@@ -104,9 +104,9 @@ const statusConfig: Record<string, { color: string; label: string; icon: Element
 };
 
 const outcomeConfig: Record<string, { color: string; label: string }> = {
-  pass: { color: 'text-emerald-400', label: 'Pass' },
-  partial_pass: { color: 'text-amber-400', label: 'Partial Pass' },
-  fail: { color: 'text-red-400', label: 'Fail' },
+  pass: { color: 'text-[#c9b787]', label: 'Pass' },
+  partial_pass: { color: 'text-[#c9b787]', label: 'Partial Pass' },
+  fail: { color: 'text-[#f5f5f5]', label: 'Fail' },
 };
 
 export default function SimulationPanelPage() {
@@ -174,16 +174,16 @@ export default function SimulationPanelPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <Shield className="w-5 h-5 text-orange-400" />
+            <Shield className="w-5 h-5 text-[#c9b787]" />
             Simulation Panel
           </h1>
           <p className="text-sm text-zinc-400 mt-0.5">
             Authorized defensive validation simulations — scenario, status, outcome, and control
             gaps
           </p>
-          <div className="flex items-center gap-1.5 mt-2 text-[11px] text-zinc-500 bg-blue-500/5 border border-blue-500/15 rounded-lg px-3 py-1.5 w-fit">
-            <Info className="w-3 h-3 text-blue-400" />
-            <span className="text-blue-300/80">
+          <div className="flex items-center gap-1.5 mt-2 text-[11px] text-zinc-500 bg-[#c9b787]/5 border border-[#c9b787]/15 rounded-lg px-3 py-1.5 w-fit">
+            <Info className="w-3 h-3 text-[#c9b787]" />
+            <span className="text-[#c9b787]/80">
               Defensive validation only — all simulations are authorized, controlled, and logged. No
               offensive exploit tooling.
             </span>
@@ -201,8 +201,8 @@ export default function SimulationPanelPage() {
               <DialogTitle className="text-white">New Defensive Validation Simulation</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-2">
-              <div className="bg-blue-500/5 border border-blue-500/15 rounded-lg px-3 py-2 text-[11px] text-blue-300/80 flex items-start gap-1.5">
-                <Shield className="w-3 h-3 mt-0.5 text-blue-400 flex-shrink-0" />
+              <div className="bg-[#c9b787]/5 border border-[#c9b787]/15 rounded-lg px-3 py-2 text-[11px] text-[#c9b787]/80 flex items-start gap-1.5">
+                <Shield className="w-3 h-3 mt-0.5 text-[#c9b787] flex-shrink-0" />
                 All simulations require prior authorization. Controlled, internal, and defensive
                 scope only.
               </div>
@@ -282,10 +282,10 @@ export default function SimulationPanelPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-emerald-500/5 border-emerald-500/20">
+        <Card className="bg-[#c9b787]/5 border-[#c9b787]/20">
           <CardContent className="p-4">
-            <div className="text-xs text-emerald-400 font-medium mb-1">Completed</div>
-            <div className="text-3xl font-bold text-emerald-400">{completed}</div>
+            <div className="text-xs text-[#c9b787] font-medium mb-1">Completed</div>
+            <div className="text-3xl font-bold text-[#c9b787]">{completed}</div>
             <div className="text-[10px] text-zinc-500 mt-1">This quarter</div>
           </CardContent>
         </Card>
@@ -297,26 +297,26 @@ export default function SimulationPanelPage() {
           </CardContent>
         </Card>
         <Card
-          className={`${totalGaps > 0 ? 'bg-red-500/5 border-red-500/20' : 'bg-zinc-900/50 border-zinc-700'}`}
+          className={`${totalGaps > 0 ? 'bg-[#f5f5f5]/5 border-[#f5f5f5]/20' : 'bg-zinc-900/50 border-zinc-700'}`}
         >
           <CardContent className="p-4">
             <div
-              className={`text-xs font-medium mb-1 ${totalGaps > 0 ? 'text-red-400' : 'text-zinc-400'}`}
+              className={`text-xs font-medium mb-1 ${totalGaps > 0 ? 'text-[#f5f5f5]' : 'text-zinc-400'}`}
             >
               Control Gaps Found
             </div>
             <div
-              className={`text-3xl font-bold ${totalGaps > 0 ? 'text-red-400' : 'text-zinc-500'}`}
+              className={`text-3xl font-bold ${totalGaps > 0 ? 'text-[#f5f5f5]' : 'text-zinc-500'}`}
             >
               {totalGaps}
             </div>
             <div className="text-[10px] text-zinc-500 mt-1">Require remediation</div>
           </CardContent>
         </Card>
-        <Card className="bg-blue-500/5 border-blue-500/20">
+        <Card className="bg-[#c9b787]/5 border-[#c9b787]/20">
           <CardContent className="p-4">
-            <div className="text-xs text-blue-400 font-medium mb-1">Avg Detection Rate</div>
-            <div className="text-3xl font-bold text-blue-400">
+            <div className="text-xs text-[#c9b787] font-medium mb-1">Avg Detection Rate</div>
+            <div className="text-3xl font-bold text-[#c9b787]">
               {avgDetection !== null ? `${avgDetection}%` : '—'}
             </div>
             <div className="text-[10px] text-zinc-500 mt-1">Across completed sims</div>
@@ -346,17 +346,17 @@ export default function SimulationPanelPage() {
             return (
               <div
                 key={sim.id}
-                className={`border rounded-xl overflow-hidden transition-all ${sim.outcome === 'fail' ? 'border-red-500/30' : sim.outcome === 'partial_pass' ? 'border-amber-500/20' : 'border-zinc-800'} bg-zinc-900/20`}
+                className={`border rounded-xl overflow-hidden transition-all ${sim.outcome === 'fail' ? 'border-[#f5f5f5]/30' : sim.outcome === 'partial_pass' ? 'border-[#c9b787]/20' : 'border-zinc-800'} bg-zinc-900/20`}
               >
                 <div
                   className="flex items-start gap-3 p-4 cursor-pointer hover:bg-zinc-800/20 transition-colors"
                   onClick={() => setExpandedId(isExpanded ? null : sim.id)}
                 >
                   <div
-                    className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${sim.outcome === 'fail' ? 'bg-red-500/10' : sim.outcome === 'pass' ? 'bg-emerald-500/10' : sim.outcome === 'partial_pass' ? 'bg-amber-500/10' : 'bg-zinc-800'}`}
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${sim.outcome === 'fail' ? 'bg-[#f5f5f5]/10' : sim.outcome === 'pass' ? 'bg-[#c9b787]/10' : sim.outcome === 'partial_pass' ? 'bg-[#c9b787]/10' : 'bg-zinc-800'}`}
                   >
                     <StatusIcon
-                      className={`w-4 h-4 ${sim.status === 'completed' && sim.outcome === 'fail' ? 'text-red-400' : sim.status === 'completed' && sim.outcome === 'pass' ? 'text-emerald-400' : sim.status === 'completed' ? 'text-amber-400' : 'text-zinc-400'}`}
+                      className={`w-4 h-4 ${sim.status === 'completed' && sim.outcome === 'fail' ? 'text-[#f5f5f5]' : sim.status === 'completed' && sim.outcome === 'pass' ? 'text-[#c9b787]' : sim.status === 'completed' ? 'text-[#c9b787]' : 'text-zinc-400'}`}
                     />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -382,14 +382,14 @@ export default function SimulationPanelPage() {
                             </span>
                           )}
                           {gapCount > 0 && (
-                            <span className="text-[10px] text-red-400 flex items-center gap-1">
+                            <span className="text-[10px] text-[#f5f5f5] flex items-center gap-1">
                               <AlertTriangle className="w-3 h-3" />
                               {gapCount} gap{gapCount > 1 ? 's' : ''}
                             </span>
                           )}
                           {sim.detectionRate !== null && sim.detectionRate !== undefined && (
                             <span
-                              className={`text-[10px] font-medium ${sim.detectionRate >= 80 ? 'text-emerald-400' : sim.detectionRate >= 60 ? 'text-amber-400' : 'text-red-400'}`}
+                              className={`text-[10px] font-medium ${sim.detectionRate >= 80 ? 'text-[#c9b787]' : sim.detectionRate >= 60 ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}
                             >
                               {sim.detectionRate}% detection
                             </span>
@@ -422,7 +422,7 @@ export default function SimulationPanelPage() {
                         <div className="bg-zinc-800/50 rounded-lg p-3 text-center">
                           <div className="text-[10px] text-zinc-500 mb-1">Detection Rate</div>
                           <div
-                            className={`text-2xl font-bold ${sim.detectionRate >= 80 ? 'text-emerald-400' : sim.detectionRate >= 60 ? 'text-amber-400' : 'text-red-400'}`}
+                            className={`text-2xl font-bold ${sim.detectionRate >= 80 ? 'text-[#c9b787]' : sim.detectionRate >= 60 ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}
                           >
                             {sim.detectionRate}%
                           </div>
@@ -433,7 +433,7 @@ export default function SimulationPanelPage() {
                             <div className="text-[10px] text-zinc-500 mb-1">
                               Mean Time to Detect
                             </div>
-                            <div className="text-2xl font-bold text-blue-400">
+                            <div className="text-2xl font-bold text-[#c9b787]">
                               {sim.meanTimeToDetect}m
                             </div>
                             <div className="text-[10px] text-zinc-600 mt-1">minutes</div>
@@ -453,16 +453,16 @@ export default function SimulationPanelPage() {
 
                     {gapCount > 0 && (
                       <div>
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-red-400 mb-2 flex items-center gap-1">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-[#f5f5f5] mb-2 flex items-center gap-1">
                           <AlertTriangle className="w-3 h-3" /> Control Gaps Found
                         </div>
                         <div className="space-y-1.5">
                           {(sim.gapsFound ?? []).map((gap, idx) => (
                             <div
                               key={idx}
-                              className="flex items-start gap-2 text-sm text-red-200/80 bg-red-500/5 border border-red-500/10 rounded-lg px-3 py-2"
+                              className="flex items-start gap-2 text-sm text-[#f5f5f5]/80 bg-[#f5f5f5]/5 border border-[#f5f5f5]/10 rounded-lg px-3 py-2"
                             >
-                              <XCircle className="w-3.5 h-3.5 text-red-400 mt-0.5 flex-shrink-0" />
+                              <XCircle className="w-3.5 h-3.5 text-[#f5f5f5] mt-0.5 flex-shrink-0" />
                               {gap}
                             </div>
                           ))}
@@ -472,16 +472,16 @@ export default function SimulationPanelPage() {
 
                     {sim.recommendedActions && sim.recommendedActions.length > 0 && (
                       <div>
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400 mb-2 flex items-center gap-1">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-[#c9b787] mb-2 flex items-center gap-1">
                           <CheckCircle className="w-3 h-3" /> Recommended Actions
                         </div>
                         <div className="space-y-1.5">
                           {sim.recommendedActions.map((action: string, idx: number) => (
                             <div
                               key={idx}
-                              className="flex items-start gap-2 text-sm text-emerald-200/80 bg-emerald-500/5 border border-emerald-500/10 rounded-lg px-3 py-2"
+                              className="flex items-start gap-2 text-sm text-[#c9b787]/80 bg-[#c9b787]/5 border border-[#c9b787]/10 rounded-lg px-3 py-2"
                             >
-                              <Target className="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0" />
+                              <Target className="w-3.5 h-3.5 text-[#c9b787] mt-0.5 flex-shrink-0" />
                               {action}
                             </div>
                           ))}
@@ -531,7 +531,7 @@ export default function SimulationPanelPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-7 px-3 text-[11px] border-red-500/30 text-red-400 hover:bg-red-500/10"
+                          className="h-7 px-3 text-[11px] border-[#f5f5f5]/30 text-[#f5f5f5] hover:bg-[#f5f5f5]/10"
                           onClick={() =>
                             workflowMutation.mutate({
                               entityId: sim.id,
@@ -548,7 +548,7 @@ export default function SimulationPanelPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 px-3 text-[11px] border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
+                        className="h-7 px-3 text-[11px] border-[#c9b787]/30 text-[#c9b787] hover:bg-[#c9b787]/10"
                         onClick={() =>
                           workflowMutation.mutate({
                             entityId: sim.id,

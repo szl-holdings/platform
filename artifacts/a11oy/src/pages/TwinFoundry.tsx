@@ -16,13 +16,13 @@ interface TwinsData {
   summary: { total: number; byRisk: Record<string, number>; byType: Record<string, number>; avgDriftScore: number; avgProofCoverage: number };
 }
 
-const RISK_COLORS: Record<string, string> = { critical: '#ef4444', high: '#f59e0b', medium: '#3b82f6', low: '#10b981' };
+const RISK_COLORS: Record<string, string> = { critical: '#f5f5f5', high: '#c9b787', medium: '#c9b787', low: '#c9b787' };
 
 function DriftBar({ score }: { score: number }) {
   return (
     <div className="flex items-center gap-2">
       <div className="h-1.5 rounded-full flex-1" style={{ backgroundColor: 'var(--color-a11oy-muted)' }}>
-        <div className="h-1.5 rounded-full" style={{ width: `${score}%`, backgroundColor: score > 40 ? '#ef4444' : score > 20 ? '#f59e0b' : '#10b981' }} />
+        <div className="h-1.5 rounded-full" style={{ width: `${score}%`, backgroundColor: score > 40 ? '#f5f5f5' : score > 20 ? '#c9b787' : '#c9b787' }} />
       </div>
       <span className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{score}</span>
     </div>
@@ -76,22 +76,22 @@ export function TwinFoundry() {
       ) : data ? (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            <KpiCard label="BUSINESS TWINS" value={String(data.summary.total)} sub="All tenants" accent="#8b5cf6" />
-            <KpiCard label="HIGH / CRITICAL" value={String((data.summary.byRisk.high ?? 0) + (data.summary.byRisk.critical ?? 0))} sub="Risk exposure" accent="#ef4444" />
-            <KpiCard label="AVG DRIFT SCORE" value={String(data.summary.avgDriftScore)} sub="0=stable · 100=severe" accent="#f59e0b" />
-            <KpiCard label="AVG PROOF COVERAGE" value={`${data.summary.avgProofCoverage}%`} sub="Across all twins" accent="#10b981" />
+            <KpiCard label="BUSINESS TWINS" value={String(data.summary.total)} sub="All tenants" accent="#8a8a8a" />
+            <KpiCard label="HIGH / CRITICAL" value={String((data.summary.byRisk.high ?? 0) + (data.summary.byRisk.critical ?? 0))} sub="Risk exposure" accent="#f5f5f5" />
+            <KpiCard label="AVG DRIFT SCORE" value={String(data.summary.avgDriftScore)} sub="0=stable · 100=severe" accent="#c9b787" />
+            <KpiCard label="AVG PROOF COVERAGE" value={`${data.summary.avgProofCoverage}%`} sub="Across all twins" accent="#c9b787" />
           </div>
 
           <div className="flex items-center gap-2 mb-4 flex-wrap">
             <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Risk:</span>
             {['all', 'critical', 'high', 'medium', 'low'].map(r => (
-              <button key={r} onClick={() => setFilterRisk(r)} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: filterRisk === r ? 'rgba(59,130,246,0.2)' : 'var(--color-a11oy-muted)', color: filterRisk === r ? '#3b82f6' : 'var(--color-a11oy-text-ghost)', border: `1px solid ${filterRisk === r ? 'rgba(59,130,246,0.4)' : 'var(--color-a11oy-border)'}` }}>
+              <button key={r} onClick={() => setFilterRisk(r)} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: filterRisk === r ? 'rgba(201,183,135,0.2)' : 'var(--color-a11oy-muted)', color: filterRisk === r ? '#c9b787' : 'var(--color-a11oy-text-ghost)', border: `1px solid ${filterRisk === r ? 'rgba(201,183,135,0.4)' : 'var(--color-a11oy-border)'}` }}>
                 {r}
               </button>
             ))}
             <span className="text-xs ml-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Type:</span>
             {['all', ...twinTypes.slice(0, 5)].map(t => (
-              <button key={t} onClick={() => setFilterType(t)} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: filterType === t ? 'rgba(139,92,246,0.2)' : 'var(--color-a11oy-muted)', color: filterType === t ? '#8b5cf6' : 'var(--color-a11oy-text-ghost)', border: `1px solid ${filterType === t ? 'rgba(139,92,246,0.4)' : 'var(--color-a11oy-border)'}` }}>
+              <button key={t} onClick={() => setFilterType(t)} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: filterType === t ? 'rgba(138,138,138,0.2)' : 'var(--color-a11oy-muted)', color: filterType === t ? '#8a8a8a' : 'var(--color-a11oy-text-ghost)', border: `1px solid ${filterType === t ? 'rgba(138,138,138,0.4)' : 'var(--color-a11oy-border)'}` }}>
                 {t === 'all' ? 'all' : t}
               </button>
             ))}
@@ -113,13 +113,13 @@ export function TwinFoundry() {
                       </span>
                     </div>
                     <div className="grid grid-cols-4 gap-2 text-xs mb-2">
-                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>fidelity</div><div style={{ color: '#10b981' }}>{twin.fidelity}%</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>fidelity</div><div style={{ color: '#c9b787' }}>{twin.fidelity}%</div></div>
                       <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>drift</div><DriftBar score={twin.driftScore} /></div>
                       <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>signals</div><div style={{ color: 'var(--color-a11oy-text-sub)' }}>{twin.signals}</div></div>
-                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>proof</div><div style={{ color: twin.proofCoverage >= 80 ? '#10b981' : '#f59e0b' }}>{twin.proofCoverage}%</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>proof</div><div style={{ color: twin.proofCoverage >= 80 ? '#c9b787' : '#c9b787' }}>{twin.proofCoverage}%</div></div>
                     </div>
                     {twin.activeWorkcells > 0 && (
-                      <div className="text-xs" style={{ color: '#8b5cf6' }}>⬡ {twin.activeWorkcells} active workcell{twin.activeWorkcells > 1 ? 's' : ''}</div>
+                      <div className="text-xs" style={{ color: '#8a8a8a' }}>⬡ {twin.activeWorkcells} active workcell{twin.activeWorkcells > 1 ? 's' : ''}</div>
                     )}
                     <div className="text-xs mt-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>→ {twin.recommendedAction}</div>
                   </Card>
@@ -144,7 +144,7 @@ export function TwinFoundry() {
                       ))}
                     </div>
 
-                    <div className="text-xs p-2 rounded mb-4" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: '#f59e0b' }}>
+                    <div className="text-xs p-2 rounded mb-4" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: '#c9b787' }}>
                       → {selected.recommendedAction}
                     </div>
 
@@ -152,19 +152,19 @@ export function TwinFoundry() {
                       onClick={() => simulate(selected)}
                       disabled={simLoading}
                       className="w-full text-xs py-2 rounded font-medium"
-                      style={{ backgroundColor: 'rgba(139,92,246,0.15)', color: '#8b5cf6', border: '1px solid rgba(139,92,246,0.3)', opacity: simLoading ? 0.6 : 1 }}
+                      style={{ backgroundColor: 'rgba(138,138,138,0.15)', color: '#8a8a8a', border: '1px solid rgba(138,138,138,0.3)', opacity: simLoading ? 0.6 : 1 }}
                     >
                       {simLoading ? 'Simulating…' : 'Run No-Action vs. Approved-Action'}
                     </button>
 
                     {simResult && (
                       <div className="mt-3 space-y-2 text-xs">
-                        <div className="p-2 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
-                          <div className="font-medium mb-1" style={{ color: '#ef4444' }}>No Action</div>
+                        <div className="p-2 rounded" style={{ backgroundColor: 'rgba(245,245,245,0.08)', border: '1px solid rgba(245,245,245,0.2)' }}>
+                          <div className="font-medium mb-1" style={{ color: '#f5f5f5' }}>No Action</div>
                           <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{(simResult.noAction as Record<string, unknown>)?.projectedImpact as string}</div>
                         </div>
-                        <div className="p-2 rounded" style={{ backgroundColor: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
-                          <div className="font-medium mb-1" style={{ color: '#10b981' }}>Approved Action</div>
+                        <div className="p-2 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.08)', border: '1px solid rgba(201,183,135,0.2)' }}>
+                          <div className="font-medium mb-1" style={{ color: '#c9b787' }}>Approved Action</div>
                           <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{(simResult.approvedAction as Record<string, unknown>)?.projectedImpact as string}</div>
                           <div className="mt-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Est. resolution: {(simResult.approvedAction as Record<string, unknown>)?.estimatedResolution as string}</div>
                         </div>
@@ -205,7 +205,7 @@ export function TwinFoundry() {
         <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Twin registry unavailable.</div>
       )}
 
-      <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
+      <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
         <DemoBadge /> Demo mode — twins are seeded. Simulations are deterministic. No workcell created until human approved.
       </div>
     </Layout>

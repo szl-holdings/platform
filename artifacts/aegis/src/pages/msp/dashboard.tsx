@@ -101,49 +101,49 @@ interface RevenueData {
 
 const sevColors: Record<string, { dot: string; badge: string; label: string }> = {
   critical: {
-    dot: 'bg-red-500',
-    badge: 'bg-red-500/10 text-red-500 border border-red-500/20',
+    dot: 'bg-[#f5f5f5]',
+    badge: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border border-[#f5f5f5]/20',
     label: 'Critical',
   },
   warning: {
-    dot: 'bg-amber-500',
-    badge: 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
+    dot: 'bg-[#c9b787]',
+    badge: 'bg-[#c9b787]/10 text-[#c9b787] border border-[#c9b787]/20',
     label: 'Warning',
   },
   info: {
-    dot: 'bg-blue-500',
-    badge: 'bg-blue-500/10 text-blue-500 border border-blue-500/20',
+    dot: 'bg-[#c9b787]',
+    badge: 'bg-[#c9b787]/10 text-[#c9b787] border border-[#c9b787]/20',
     label: 'Info',
   },
 };
 
 const prioColors: Record<string, string> = {
-  critical: 'bg-red-500/10 text-red-500',
-  high: 'bg-orange-500/10 text-orange-500',
-  medium: 'bg-amber-500/10 text-amber-600',
-  low: 'bg-emerald-500/10 text-emerald-600',
+  critical: 'bg-[#f5f5f5]/10 text-[#f5f5f5]',
+  high: 'bg-[#c9b787]/10 text-[#c9b787]',
+  medium: 'bg-[#c9b787]/10 text-[#c9b787]',
+  low: 'bg-[#c9b787]/10 text-[#c9b787]',
 };
 
 const statusColors: Record<string, string> = {
-  'in-progress': 'bg-blue-500/10 text-blue-500',
-  open: 'bg-violet-500/10 text-violet-500',
-  waiting: 'bg-amber-500/10 text-amber-500',
-  resolved: 'bg-emerald-500/10 text-emerald-500',
+  'in-progress': 'bg-[#c9b787]/10 text-[#c9b787]',
+  open: 'bg-[#8a8a8a]/10 text-[#8a8a8a]',
+  waiting: 'bg-[#c9b787]/10 text-[#c9b787]',
+  resolved: 'bg-[#c9b787]/10 text-[#c9b787]',
 };
 
 function HealthBar({ value, status }: { value: number; status: string }) {
   const color =
     status === 'healthy' || status === 'active'
-      ? 'bg-emerald-500'
+      ? 'bg-[#c9b787]'
       : status === 'warning'
-        ? 'bg-amber-500'
-        : 'bg-red-500';
+        ? 'bg-[#c9b787]'
+        : 'bg-[#f5f5f5]';
   const textColor =
     status === 'healthy' || status === 'active'
-      ? 'text-emerald-500'
+      ? 'text-[#c9b787]'
       : status === 'warning'
-        ? 'text-amber-500'
-        : 'text-red-500';
+        ? 'text-[#c9b787]'
+        : 'text-[#f5f5f5]';
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
@@ -192,7 +192,7 @@ function ClientProfitabilityPanel({ byClient }: { byClient: RevenueData['byClien
     <div className="rounded-xl border border-border bg-card">
       <div className="p-4 border-b border-border flex items-center justify-between">
         <h2 className="font-display font-semibold flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-emerald-500" />
+          <DollarSign className="w-4 h-4 text-[#c9b787]" />
           Client Profitability
         </h2>
         <div className="flex items-center gap-1">
@@ -223,11 +223,11 @@ function ClientProfitabilityPanel({ byClient }: { byClient: RevenueData['byClien
               </p>
             </div>
             <div className="text-right shrink-0 w-32">
-              <p className="text-sm font-bold text-emerald-500">${c.mrr.toLocaleString()}/mo</p>
+              <p className="text-sm font-bold text-[#c9b787]">${c.mrr.toLocaleString()}/mo</p>
               <div className="flex items-center justify-end gap-1 mt-1">
                 <span className="text-[10px] text-muted-foreground">Churn:</span>
                 <span
-                  className={`text-[10px] font-bold ${c.churnRisk === 'high' ? 'text-red-500' : c.churnRisk === 'medium' ? 'text-amber-500' : 'text-emerald-500'}`}
+                  className={`text-[10px] font-bold ${c.churnRisk === 'high' ? 'text-[#f5f5f5]' : c.churnRisk === 'medium' ? 'text-[#c9b787]' : 'text-[#c9b787]'}`}
                 >
                   {c.churnRisk}
                 </span>
@@ -240,7 +240,7 @@ function ClientProfitabilityPanel({ byClient }: { byClient: RevenueData['byClien
         <span className="text-xs text-muted-foreground font-mono">
           Total MRR: ${totalMrr.toLocaleString()}
         </span>
-        <span className="text-xs font-bold text-emerald-500">{byClient.length} clients</span>
+        <span className="text-xs font-bold text-[#c9b787]">{byClient.length} clients</span>
       </div>
     </div>
   );
@@ -251,7 +251,7 @@ function DispatchBoard({ technicians }: { technicians: TechItem[] }) {
     <div className="rounded-xl border border-border bg-card">
       <div className="p-4 border-b border-border flex items-center justify-between">
         <h2 className="font-display font-semibold flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-blue-500" />
+          <MapPin className="w-4 h-4 text-[#c9b787]" />
           Technician Dispatch Board
         </h2>
         <span className="text-[10px] text-muted-foreground">Skill-matched · Proximity-routed</span>
@@ -265,7 +265,7 @@ function DispatchBoard({ technicians }: { technicians: TechItem[] }) {
               className="px-4 py-3 flex items-center gap-4 hover:bg-muted/20 transition-colors"
             >
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${available ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-muted text-muted-foreground border border-border'}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${available ? 'bg-[#c9b787]/10 text-[#c9b787] border border-[#c9b787]/20' : 'bg-muted text-muted-foreground border border-border'}`}
               >
                 {t.name
                   .split(' ')
@@ -276,7 +276,7 @@ function DispatchBoard({ technicians }: { technicians: TechItem[] }) {
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-medium">{t.name}</p>
                   {t.specialties?.[0] && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 font-mono">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#c9b787]/10 text-[#c9b787] font-mono">
                       {t.specialties[0]}
                     </span>
                   )}
@@ -286,7 +286,7 @@ function DispatchBoard({ technicians }: { technicians: TechItem[] }) {
                 </p>
               </div>
               <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${available ? 'bg-emerald-500/10 text-emerald-500' : 'bg-muted text-muted-foreground'}`}
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${available ? 'bg-[#c9b787]/10 text-[#c9b787]' : 'bg-muted text-muted-foreground'}`}
               >
                 {available ? 'Available' : t.status.replace('-', ' ')}
               </span>
@@ -306,16 +306,16 @@ function SLABreachPrediction({ tickets }: { tickets: TicketItem[] }) {
     <div className="rounded-xl border border-border bg-card">
       <div className="p-4 border-b border-border flex items-center justify-between">
         <h2 className="font-display font-semibold flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-red-500 animate-pulse" />
+          <AlertCircle className="w-4 h-4 text-[#f5f5f5] animate-pulse" />
           SLA Breach Prediction
         </h2>
-        <span className="text-[10px] font-mono text-red-500">{atRisk.length} at risk</span>
+        <span className="text-[10px] font-mono text-[#f5f5f5]">{atRisk.length} at risk</span>
       </div>
       <div className="divide-y divide-border">
         {atRisk.slice(0, 4).map((s) => (
           <div
             key={s.id}
-            className={`px-4 py-3 hover:bg-muted/20 transition-colors ${s.slaStatus === 'breached' ? 'bg-red-500/5' : ''}`}
+            className={`px-4 py-3 hover:bg-muted/20 transition-colors ${s.slaStatus === 'breached' ? 'bg-[#f5f5f5]/5' : ''}`}
           >
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
@@ -327,7 +327,7 @@ function SLABreachPrediction({ tickets }: { tickets: TicketItem[] }) {
                 </span>
               </div>
               <span
-                className={`text-[10px] font-bold ${s.slaStatus === 'breached' ? 'text-red-500 animate-pulse' : 'text-amber-500'}`}
+                className={`text-[10px] font-bold ${s.slaStatus === 'breached' ? 'text-[#f5f5f5] animate-pulse' : 'text-[#c9b787]'}`}
               >
                 {s.slaStatus === 'breached' ? '⚠ BREACHED' : '● At Risk'}
               </span>
@@ -337,7 +337,7 @@ function SLABreachPrediction({ tickets }: { tickets: TicketItem[] }) {
               <p className="text-xs text-muted-foreground">{s.clientName}</p>
               {s.slaDeadline && (
                 <p
-                  className={`text-xs font-mono font-bold flex items-center gap-1 ${s.slaStatus === 'breached' ? 'text-red-500' : 'text-amber-500'}`}
+                  className={`text-xs font-mono font-bold flex items-center gap-1 ${s.slaStatus === 'breached' ? 'text-[#f5f5f5]' : 'text-[#c9b787]'}`}
                 >
                   <Clock className="w-3 h-3" />
                   {formatSlaRemaining(s.slaDeadline)}
@@ -348,7 +348,7 @@ function SLABreachPrediction({ tickets }: { tickets: TicketItem[] }) {
         ))}
         {atRisk.length === 0 && (
           <div className="px-4 py-6 text-center text-xs text-muted-foreground">
-            <CheckCircle className="w-5 h-5 text-emerald-500 mx-auto mb-2" />
+            <CheckCircle className="w-5 h-5 text-[#c9b787] mx-auto mb-2" />
             All tickets within SLA
           </div>
         )}
@@ -367,7 +367,7 @@ function AlertSuppressionPanel() {
     <div className="rounded-xl border border-border bg-card">
       <div className="p-4 border-b border-border flex items-center justify-between">
         <h2 className="font-display font-semibold flex items-center gap-2">
-          <Bell className="w-4 h-4 text-violet-500" />
+          <Bell className="w-4 h-4 text-[#8a8a8a]" />
           Intelligent Alert Suppression
         </h2>
         <span className="text-[10px] text-muted-foreground font-mono">Active rules</span>
@@ -378,8 +378,8 @@ function AlertSuppressionPanel() {
             key={a.condition}
             className="px-4 py-3 flex items-center gap-4 hover:bg-muted/20 transition-colors"
           >
-            <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+            <div className="w-6 h-6 rounded-full bg-[#c9b787]/10 flex items-center justify-center shrink-0">
+              <CheckCircle className="w-3.5 h-3.5 text-[#c9b787]" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{a.condition}</p>
@@ -401,14 +401,14 @@ function ClientChurnHeatmap({ byClient }: { byClient: RevenueData['byClient'] })
   return (
     <div className="rounded-xl border border-border bg-card p-4">
       <h2 className="font-display font-semibold flex items-center gap-2 mb-4">
-        <Star className="w-4 h-4 text-amber-500" />
+        <Star className="w-4 h-4 text-[#c9b787]" />
         Client Health Scoring — Churn Risk
       </h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {byClient.slice(0, 12).map((c) => (
           <div
             key={c.clientName}
-            className={`rounded-lg p-3 border ${c.churnRisk === 'high' ? 'border-red-500/20 bg-red-500/5' : c.churnRisk === 'medium' ? 'border-amber-500/20 bg-amber-500/5' : 'border-emerald-500/20 bg-emerald-500/5'}`}
+            className={`rounded-lg p-3 border ${c.churnRisk === 'high' ? 'border-[#f5f5f5]/20 bg-[#f5f5f5]/5' : c.churnRisk === 'medium' ? 'border-[#c9b787]/20 bg-[#c9b787]/5' : 'border-[#c9b787]/20 bg-[#c9b787]/5'}`}
           >
             <p className="text-xs font-semibold truncate">{c.clientName}</p>
             <div className="flex items-end justify-between mt-2">
@@ -419,7 +419,7 @@ function ClientChurnHeatmap({ byClient }: { byClient: RevenueData['byClient'] })
               <div className="text-right">
                 <p className="text-[10px] text-muted-foreground">Churn Risk</p>
                 <p
-                  className={`text-sm font-bold capitalize ${c.churnRisk === 'high' ? 'text-red-500' : c.churnRisk === 'medium' ? 'text-amber-500' : 'text-emerald-500'}`}
+                  className={`text-sm font-bold capitalize ${c.churnRisk === 'high' ? 'text-[#f5f5f5]' : c.churnRisk === 'medium' ? 'text-[#c9b787]' : 'text-[#c9b787]'}`}
                 >
                   {c.churnRisk}
                 </p>
@@ -427,7 +427,7 @@ function ClientChurnHeatmap({ byClient }: { byClient: RevenueData['byClient'] })
             </div>
             <div className="h-1 bg-border rounded-full mt-2 overflow-hidden">
               <div
-                className={`h-full rounded-full ${c.churnRisk === 'high' ? 'bg-red-500' : c.churnRisk === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                className={`h-full rounded-full ${c.churnRisk === 'high' ? 'bg-[#f5f5f5]' : c.churnRisk === 'medium' ? 'bg-[#c9b787]' : 'bg-[#c9b787]'}`}
                 style={{
                   width: c.churnRisk === 'high' ? '85%' : c.churnRisk === 'medium' ? '50%' : '15%',
                 }}
@@ -641,7 +641,7 @@ export default function Dashboard() {
                   ${mrr.toLocaleString()}
                 </div>
                 <div className="flex items-center gap-2 mt-2">
-                  <span className="flex items-center gap-1 text-sm font-semibold text-emerald-300">
+                  <span className="flex items-center gap-1 text-sm font-semibold text-[#c9b787]">
                     {growth >= 0 ? (
                       <ArrowUp className="w-4 h-4" />
                     ) : (
@@ -698,7 +698,7 @@ export default function Dashboard() {
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">{m.label}</p>
                   <p className="text-xl font-display font-bold">{m.value}</p>
-                  <p className={`text-xs mt-1 ${m.up ? 'text-emerald-600' : 'text-red-500'}`}>
+                  <p className={`text-xs mt-1 ${m.up ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}>
                     {m.trend}
                   </p>
                 </div>
@@ -770,9 +770,9 @@ export default function Dashboard() {
                     <span
                       className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0 ${
                         client.status === 'active'
-                          ? 'bg-emerald-500/10 text-emerald-600'
+                          ? 'bg-[#c9b787]/10 text-[#c9b787]'
                           : client.status === 'at-risk'
-                            ? 'bg-red-500/10 text-red-500'
+                            ? 'bg-[#f5f5f5]/10 text-[#f5f5f5]'
                             : 'bg-muted text-muted-foreground'
                       }`}
                     >
@@ -788,17 +788,17 @@ export default function Dashboard() {
         <div className="xl:col-span-2 rounded-xl border border-border bg-card">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <h2 className="font-display font-semibold flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-500" />
+              <AlertTriangle className="w-4 h-4 text-[#c9b787]" />
               NOC Alerts
             </h2>
-            <span className="text-[10px] font-bold uppercase bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-bold uppercase bg-[#f5f5f5]/10 text-[#f5f5f5] px-2 py-0.5 rounded-full">
               {nocAlerts.filter((a) => a.severity === 'critical').length} Critical
             </span>
           </div>
           <div className="divide-y divide-border">
             {nocAlerts.length === 0 ? (
               <div className="px-4 py-6 flex items-center gap-2 text-muted-foreground">
-                <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                <CheckCircle className="w-4 h-4 text-[#c9b787] shrink-0" />
                 <span className="text-xs">All systems nominal — no active alerts</span>
               </div>
             ) : (
@@ -903,7 +903,7 @@ export default function Dashboard() {
                       <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">
                         {t.slaDeadline ? (
                           <span
-                            className={`flex items-center gap-1 font-mono ${t.slaStatus === 'breached' ? 'text-red-500' : t.slaStatus === 'at-risk' ? 'text-amber-500' : ''}`}
+                            className={`flex items-center gap-1 font-mono ${t.slaStatus === 'breached' ? 'text-[#f5f5f5]' : t.slaStatus === 'at-risk' ? 'text-[#c9b787]' : ''}`}
                           >
                             <Clock className="w-3 h-3" />
                             {formatSlaRemaining(t.slaDeadline)}
@@ -926,8 +926,8 @@ export default function Dashboard() {
               label: 'System Uptime',
               value: uptime > 0 ? `${uptime.toFixed(1)}%` : '99.97%',
               sub: 'Across managed infrastructure',
-              color: 'text-emerald-500',
-              bg: 'bg-emerald-500',
+              color: 'text-[#c9b787]',
+              bg: 'bg-[#c9b787]',
               pct: uptime || 99.97,
               icon: Activity,
             },
@@ -935,8 +935,8 @@ export default function Dashboard() {
               label: 'SLA Compliance',
               value: metrics?.avgSlaCompliance ? `${metrics.avgSlaCompliance}%` : '—',
               sub: 'Avg SLA attainment this month',
-              color: 'text-blue-500',
-              bg: 'bg-blue-500',
+              color: 'text-[#c9b787]',
+              bg: 'bg-[#c9b787]',
               pct: metrics?.avgSlaCompliance || 96,
               icon: Shield,
             },
@@ -944,8 +944,8 @@ export default function Dashboard() {
               label: 'Avg Resolution',
               value: metrics?.avgResolutionTime || '—',
               sub: 'Closed tickets this month',
-              color: 'text-violet-500',
-              bg: 'bg-violet-500',
+              color: 'text-[#8a8a8a]',
+              bg: 'bg-[#8a8a8a]',
               pct: 78,
               icon: Wifi,
             },

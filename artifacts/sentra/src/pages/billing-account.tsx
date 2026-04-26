@@ -1,6 +1,6 @@
 import { BillingAccount } from '@szl-holdings/shared-ui/billing';
 
-const ACCENT = '#ef4444';
+const ACCENT = '#f5f5f5';
 
 export default function SentraBillingPage() {
   return (
@@ -8,13 +8,13 @@ export default function SentraBillingPage() {
       <div className="mb-6">
         <h1 className="text-xl font-bold text-white">Billing & Subscription</h1>
         <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
-          Manage your TENAX subscription and payment details.
+          Manage your Aegis subscription and payment details.
         </p>
       </div>
       <BillingAccount
         accentColor={ACCENT}
         pricingUrl="/pricing"
-        productName="TENAX"
+        productName="Aegis"
       />
     </div>
   );

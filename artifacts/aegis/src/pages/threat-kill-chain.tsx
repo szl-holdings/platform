@@ -35,7 +35,7 @@ const KILL_CHAIN_STAGES = [
     label: 'Reconnaissance',
     shortLabel: 'Recon',
     mitre: 'TA0043',
-    color: '#6366f1',
+    color: '#8a8a8a',
     techniques: [
       'T1595 — Active Scanning',
       'T1592 — Gather Host Info',
@@ -52,7 +52,7 @@ const KILL_CHAIN_STAGES = [
     label: 'Weaponization',
     shortLabel: 'Weaponize',
     mitre: 'TA0001',
-    color: '#8b5cf6',
+    color: '#8a8a8a',
     techniques: [
       'T1566.002 — Spearphishing Link',
       'T1204.002 — Malicious File',
@@ -69,7 +69,7 @@ const KILL_CHAIN_STAGES = [
     label: 'Delivery',
     shortLabel: 'Delivery',
     mitre: 'TA0001',
-    color: '#a855f7',
+    color: '#8a8a8a',
     techniques: ['T1566.001 — Spearphishing Attachment', 'T1071.001 — Application Layer Protocol'],
     icon: Download,
     status: 'completed',
@@ -82,7 +82,7 @@ const KILL_CHAIN_STAGES = [
     label: 'Exploitation',
     shortLabel: 'Exploit',
     mitre: 'TA0002',
-    color: '#ef4444',
+    color: '#f5f5f5',
     techniques: [
       'T1203 — Exploitation for Client Execution',
       'T1059.001 — PowerShell',
@@ -99,7 +99,7 @@ const KILL_CHAIN_STAGES = [
     label: 'Installation',
     shortLabel: 'Install',
     mitre: 'TA0003',
-    color: '#f97316',
+    color: '#c9b787',
     techniques: [
       'T1547.001 — Registry Run Keys',
       'T1055.012 — Process Hollowing',
@@ -116,7 +116,7 @@ const KILL_CHAIN_STAGES = [
     label: 'C2',
     shortLabel: 'C2',
     mitre: 'TA0011',
-    color: '#f59e0b',
+    color: '#c9b787',
     techniques: [
       'T1071.001 — Web Protocols (HTTPS)',
       'T1132.001 — Standard Encoding',
@@ -133,7 +133,7 @@ const KILL_CHAIN_STAGES = [
     label: 'Lateral Movement',
     shortLabel: 'Lateral',
     mitre: 'TA0008',
-    color: '#dc2626',
+    color: '#f5f5f5',
     techniques: [
       'T1021.002 — SMB/Windows Admin Shares',
       'T1075 — Pass-the-Hash',
@@ -310,9 +310,9 @@ const ENDPOINTS_HIT = [
 ];
 
 const stageColors: Record<string, string> = {
-  completed: '#22c55e',
-  active: '#f59e0b',
-  blocked: '#ef4444',
+  completed: '#c9b787',
+  active: '#c9b787',
+  blocked: '#f5f5f5',
   pending: 'rgba(255,255,255,0.15)',
 };
 
@@ -393,11 +393,11 @@ export default function ThreatKillChain() {
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center"
               style={{
-                background: 'rgba(239,68,68,0.12)',
-                border: '1px solid rgba(239,68,68,0.2)',
+                background: 'rgba(245,245,245,0.12)',
+                border: '1px solid rgba(245,245,245,0.2)',
               }}
             >
-              <Crosshair className="w-4 h-4 text-red-400" />
+              <Crosshair className="w-4 h-4 text-[#f5f5f5]" />
             </div>
             <div>
               <h1 className="text-sm font-bold text-white">Threat Kill Chain Analysis</h1>
@@ -408,15 +408,15 @@ export default function ThreatKillChain() {
           </div>
           <div className="h-4 w-px" style={{ background: BORDER }} />
           <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-            <span className="text-[10px] font-mono text-red-400">ACTIVE INCIDENT · P1</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#f5f5f5] animate-pulse" />
+            <span className="text-[10px] font-mono text-[#f5f5f5]">ACTIVE INCIDENT · P1</span>
           </div>
           {liveSummary && (
             <>
               <div className="h-4 w-px" style={{ background: BORDER }} />
               <div className="flex items-center gap-3 text-[10px] font-mono">
-                <span style={{ color: '#ef4444' }}>{liveSummary.activeCritical ?? 0} CRIT</span>
-                <span style={{ color: '#f59e0b' }}>{liveSummary.activeHigh ?? 0} HIGH</span>
+                <span style={{ color: '#f5f5f5' }}>{liveSummary.activeCritical ?? 0} CRIT</span>
+                <span style={{ color: '#c9b787' }}>{liveSummary.activeHigh ?? 0} HIGH</span>
                 <span style={{ color: 'rgba(255,255,255,0.3)' }}>
                   {liveSummary.totalIncidents} incidents total
                 </span>
@@ -427,13 +427,13 @@ export default function ThreatKillChain() {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
             {isLive ? (
-              <Wifi className="w-3 h-3 text-green-400" />
+              <Wifi className="w-3 h-3 text-[#c9b787]" />
             ) : (
               <WifiOff className="w-3 h-3" style={{ color: 'rgba(255,255,255,0.2)' }} />
             )}
             <span
               className="text-[9px] font-mono"
-              style={{ color: isLive ? '#22c55e' : 'rgba(255,255,255,0.2)' }}
+              style={{ color: isLive ? '#c9b787' : 'rgba(255,255,255,0.2)' }}
             >
               {isLive ? `LIVE · ${liveIncidents.length} incidents` : 'SIMULATION MODE'}
             </span>
@@ -442,9 +442,9 @@ export default function ThreatKillChain() {
             onClick={() => setPlayMode((p) => !p)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-medium transition-colors"
             style={{
-              background: playMode ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.06)',
-              color: playMode ? '#ef4444' : 'rgba(255,255,255,0.6)',
-              border: `1px solid ${playMode ? 'rgba(239,68,68,0.25)' : BORDER}`,
+              background: playMode ? 'rgba(245,245,245,0.15)' : 'rgba(255,255,255,0.06)',
+              color: playMode ? '#f5f5f5' : 'rgba(255,255,255,0.6)',
+              border: `1px solid ${playMode ? 'rgba(245,245,245,0.25)' : BORDER}`,
             }}
           >
             {playMode ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
@@ -641,7 +641,7 @@ export default function ThreatKillChain() {
                 className="px-3 py-2 border-b flex items-center gap-2"
                 style={{ borderColor: BORDER }}
               >
-                <Server className="w-3.5 h-3.5 text-red-400" />
+                <Server className="w-3.5 h-3.5 text-[#f5f5f5]" />
                 <span className="text-[11px] font-semibold text-white">Impacted Endpoints</span>
               </div>
               <div className="divide-y" style={{ borderColor: BORDER }}>
@@ -656,9 +656,9 @@ export default function ThreatKillChain() {
                           <span
                             className="text-[8px] px-1.5 py-0.5 rounded font-medium"
                             style={{
-                              color: '#22c55e',
-                              background: 'rgba(34,197,94,0.1)',
-                              border: '1px solid rgba(34,197,94,0.2)',
+                              color: '#c9b787',
+                              background: 'rgba(201,183,135,0.1)',
+                              border: '1px solid rgba(201,183,135,0.2)',
                             }}
                           >
                             CONTAINED
@@ -668,7 +668,7 @@ export default function ThreatKillChain() {
                       <span
                         className="text-xs font-bold font-mono"
                         style={{
-                          color: ep.risk >= 90 ? '#ef4444' : ep.risk >= 70 ? '#f59e0b' : '#22c55e',
+                          color: ep.risk >= 90 ? '#f5f5f5' : ep.risk >= 70 ? '#c9b787' : '#c9b787',
                         }}
                       >
                         {ep.risk}
@@ -691,7 +691,7 @@ export default function ThreatKillChain() {
                         style={{
                           width: `${ep.risk}%`,
                           background:
-                            ep.risk >= 90 ? '#ef4444' : ep.risk >= 70 ? '#f59e0b' : '#22c55e',
+                            ep.risk >= 90 ? '#f5f5f5' : ep.risk >= 70 ? '#c9b787' : '#c9b787',
                         }}
                       />
                     </div>
@@ -711,7 +711,7 @@ export default function ThreatKillChain() {
               style={{ borderColor: BORDER }}
             >
               <div className="flex items-center gap-2">
-                <Terminal className="w-3.5 h-3.5 text-orange-400" />
+                <Terminal className="w-3.5 h-3.5 text-[#c9b787]" />
                 <span className="text-[11px] font-semibold text-white">Process Execution Tree</span>
               </div>
               <span className="text-[9px] font-mono" style={{ color: 'rgba(255,255,255,0.3)' }}>
@@ -740,9 +740,9 @@ export default function ThreatKillChain() {
                         style={{
                           color:
                             proc.status === 'critical'
-                              ? '#ef4444'
+                              ? '#f5f5f5'
                               : proc.status === 'malicious'
-                                ? '#f97316'
+                                ? '#c9b787'
                                 : 'rgba(255,255,255,0.6)',
                         }}
                       >
@@ -756,11 +756,11 @@ export default function ThreatKillChain() {
                       <div className="flex items-center gap-1 mt-0.5">
                         <AlertTriangle
                           className="w-2.5 h-2.5 shrink-0"
-                          style={{ color: proc.status === 'critical' ? '#ef4444' : '#f97316' }}
+                          style={{ color: proc.status === 'critical' ? '#f5f5f5' : '#c9b787' }}
                         />
                         <span
                           className="text-[9px]"
-                          style={{ color: proc.status === 'critical' ? '#ef4444' : '#f97316' }}
+                          style={{ color: proc.status === 'critical' ? '#f5f5f5' : '#c9b787' }}
                         >
                           {proc.alert}
                         </span>
@@ -781,7 +781,7 @@ export default function ThreatKillChain() {
               className="px-3 py-2 border-b flex items-center gap-2"
               style={{ borderColor: BORDER }}
             >
-              <Shield className="w-3.5 h-3.5 text-blue-400" />
+              <Shield className="w-3.5 h-3.5 text-[#c9b787]" />
               <span className="text-[11px] font-semibold text-white">
                 Defender Response Timeline
               </span>
@@ -789,10 +789,10 @@ export default function ThreatKillChain() {
             <div className="divide-y" style={{ borderColor: BORDER }}>
               {DEFENDER_TIMELINE.map((event, i) => {
                 const typeStyle = {
-                  detect: { color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', icon: Eye },
-                  alert: { color: '#ef4444', bg: 'rgba(239,68,68,0.1)', icon: AlertTriangle },
-                  block: { color: '#22c55e', bg: 'rgba(34,197,94,0.1)', icon: Shield },
-                  action: { color: '#3b82f6', bg: 'rgba(59,130,246,0.1)', icon: Zap },
+                  detect: { color: '#c9b787', bg: 'rgba(201,183,135,0.1)', icon: Eye },
+                  alert: { color: '#f5f5f5', bg: 'rgba(245,245,245,0.1)', icon: AlertTriangle },
+                  block: { color: '#c9b787', bg: 'rgba(201,183,135,0.1)', icon: Shield },
+                  action: { color: '#c9b787', bg: 'rgba(201,183,135,0.1)', icon: Zap },
                 }[event.type] ?? {
                   color: 'rgba(255,255,255,0.4)',
                   bg: 'rgba(255,255,255,0.04)',
@@ -843,7 +843,7 @@ export default function ThreatKillChain() {
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Network className="w-3.5 h-3.5 text-red-400" />
+              <Network className="w-3.5 h-3.5 text-[#f5f5f5]" />
               <span className="text-[11px] font-semibold text-white">
                 Lateral Movement Graph — Internal Network
               </span>
@@ -872,7 +872,7 @@ export default function ThreatKillChain() {
                   <ArrowRight
                     key={i}
                     className="w-4 h-4"
-                    style={{ color: 'rgba(239,68,68,0.5)' }}
+                    style={{ color: 'rgba(245,245,245,0.5)' }}
                   />
                 );
               }
@@ -881,15 +881,15 @@ export default function ThreatKillChain() {
                   <X
                     key={i}
                     className="w-5 h-5 rounded-full p-0.5"
-                    style={{ color: '#22c55e', background: 'rgba(34,197,94,0.12)' }}
+                    style={{ color: '#c9b787', background: 'rgba(201,183,135,0.12)' }}
                   />
                 );
               }
               const colors: Record<string, string> = {
-                initial: '#ef4444',
-                contained: '#f59e0b',
-                discovery: '#f97316',
-                blocked: '#22c55e',
+                initial: '#f5f5f5',
+                contained: '#c9b787',
+                discovery: '#c9b787',
+                blocked: '#c9b787',
               };
               const c = colors[item.status] ?? '#94a3b8';
               return (
@@ -900,7 +900,7 @@ export default function ThreatKillChain() {
                   >
                     <Server className="w-5 h-5" style={{ color: c }} />
                     {item.status === 'contained' && (
-                      <Lock className="w-2.5 h-2.5 mt-0.5" style={{ color: '#f59e0b' }} />
+                      <Lock className="w-2.5 h-2.5 mt-0.5" style={{ color: '#c9b787' }} />
                     )}
                   </div>
                   <p
@@ -932,7 +932,7 @@ export default function ThreatKillChain() {
           style={{ background: SURFACE, border: `1px solid ${BORDER}` }}
         >
           <div className="flex items-center gap-2 mb-3">
-            <Target className="w-3.5 h-3.5 text-purple-400" />
+            <Target className="w-3.5 h-3.5 text-[#8a8a8a]" />
             <span className="text-[11px] font-semibold text-white">
               MITRE ATT&CK Coverage — Observed in This Incident
             </span>
@@ -956,9 +956,9 @@ export default function ThreatKillChain() {
                 key={item.t}
                 className="flex flex-col items-start px-2.5 py-1.5 rounded text-[9px] font-mono"
                 style={{
-                  background: item.hot ? 'rgba(239,68,68,0.12)' : 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${item.hot ? 'rgba(239,68,68,0.25)' : 'rgba(255,255,255,0.06)'}`,
-                  color: item.hot ? '#ef4444' : 'rgba(255,255,255,0.35)',
+                  background: item.hot ? 'rgba(245,245,245,0.12)' : 'rgba(255,255,255,0.03)',
+                  border: `1px solid ${item.hot ? 'rgba(245,245,245,0.25)' : 'rgba(255,255,255,0.06)'}`,
+                  color: item.hot ? '#f5f5f5' : 'rgba(255,255,255,0.35)',
                 }}
               >
                 <span className="font-bold">{item.t}</span>

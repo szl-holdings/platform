@@ -16,7 +16,7 @@ export default function S12GoToMarket() {
       phase: 'Phase 02',
       label: 'Domain Licensing',
       timing: '2026 — 2027',
-      color: '#8b5cf6',
+      color: '#8a8a8a',
       items: [
         'SaaS licensing per domain pack',
         'Outcome Graph as the value metric',
@@ -52,7 +52,7 @@ export default function S12GoToMarket() {
           left: 0,
           right: 0,
           height: '0.15vh',
-          background: 'linear-gradient(90deg, transparent, #8b5cf6, transparent)',
+          background: 'linear-gradient(90deg, transparent, #8a8a8a, transparent)',
         }}
       />
       <div style={{ position: 'absolute', inset: 0, padding: '5vh 7vw' }}>

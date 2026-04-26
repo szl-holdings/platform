@@ -24,7 +24,7 @@ interface ReplayReport {
 }
 
 const OUTCOME_COLORS: Record<string, string> = {
-  success: '#10b981', blocked: '#ef4444', failed: '#f59e0b', skipped: '#9bacc4',
+  success: '#c9b787', blocked: '#f5f5f5', failed: '#c9b787', skipped: '#5e5e5e',
 };
 
 function fmt(ms: number) {
@@ -123,8 +123,8 @@ export function SovereignReplayDetail() {
                     onClick={() => setSpeed(s)}
                     className="px-2 py-0.5 rounded font-mono"
                     style={{
-                      backgroundColor: speed === s ? 'rgba(59,130,246,0.15)' : 'transparent',
-                      color: speed === s ? '#3b82f6' : 'var(--color-a11oy-text-ghost)',
+                      backgroundColor: speed === s ? 'rgba(201,183,135,0.15)' : 'transparent',
+                      color: speed === s ? '#c9b787' : 'var(--color-a11oy-text-ghost)',
                       border: 'none', cursor: 'pointer', fontSize: 11,
                     }}
                   >
@@ -141,7 +141,7 @@ export function SovereignReplayDetail() {
                 className="h-full rounded-full transition-all"
                 style={{
                   width: steps.length > 0 ? `${Math.max(0, ((stepIdx + 1) / steps.length) * 100)}%` : '0%',
-                  backgroundColor: replayState === 'done' ? '#10b981' : '#3b82f6',
+                  backgroundColor: replayState === 'done' ? '#c9b787' : '#c9b787',
                 }}
               />
             </div>
@@ -156,7 +156,7 @@ export function SovereignReplayDetail() {
                 {steps.map((step, i) => {
                   const visible = i <= stepIdx || replayState === 'idle';
                   const isCurrent = i === stepIdx && replayState === 'playing';
-                  const outColor = OUTCOME_COLORS[step.outcome] ?? '#9bacc4';
+                  const outColor = OUTCOME_COLORS[step.outcome] ?? '#5e5e5e';
                   const statusDot = step.outcome === 'success' ? '✓' : step.outcome === 'blocked' ? '⊗' : '⚠';
                   return (
                     <div
@@ -170,8 +170,8 @@ export function SovereignReplayDetail() {
                       <div
                         className="px-3 py-2 rounded text-xs"
                         style={{
-                          backgroundColor: isCurrent ? 'rgba(59,130,246,0.06)' : 'transparent',
-                          border: isCurrent ? '1px solid rgba(59,130,246,0.2)' : '1px solid transparent',
+                          backgroundColor: isCurrent ? 'rgba(201,183,135,0.06)' : 'transparent',
+                          border: isCurrent ? '1px solid rgba(201,183,135,0.2)' : '1px solid transparent',
                         }}
                       >
                         <div className="flex items-center gap-2 mb-0.5">
@@ -192,8 +192,8 @@ export function SovereignReplayDetail() {
           </Card>
 
           {replayState === 'done' && (
-            <div className="mt-4 p-4 rounded-lg text-center" style={{ backgroundColor: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
-              <div className="text-sm font-semibold mb-1" style={{ color: '#10b981' }}>Replay Complete</div>
+            <div className="mt-4 p-4 rounded-lg text-center" style={{ backgroundColor: 'rgba(201,183,135,0.08)', border: '1px solid rgba(201,183,135,0.2)' }}>
+              <div className="text-sm font-semibold mb-1" style={{ color: '#c9b787' }}>Replay Complete</div>
               <div className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>
                 All {steps.length} steps replayed. Outcome: {data.outcome.toUpperCase()}
               </div>
@@ -208,7 +208,7 @@ export function SovereignReplayDetail() {
               <div className="flex flex-col gap-2">
                 <div>
                   <div className="font-mono mb-0.5" style={{ color: 'var(--color-a11oy-text-ghost)' }}>OUTCOME</div>
-                  <div style={{ color: OUTCOME_COLORS[data.outcome] ?? '#9bacc4' }}>{data.outcome.toUpperCase()}</div>
+                  <div style={{ color: OUTCOME_COLORS[data.outcome] ?? '#5e5e5e' }}>{data.outcome.toUpperCase()}</div>
                 </div>
                 <div>
                   <div className="font-mono mb-0.5" style={{ color: 'var(--color-a11oy-text-ghost)' }}>TENANT · DOMAIN</div>
@@ -250,8 +250,8 @@ export function SovereignReplayDetail() {
                   <span
                     className="px-1.5 py-0.5 rounded font-mono"
                     style={{
-                      color: data.evalDisposition === 'pass' ? '#10b981' : data.evalDisposition === 'blocked' ? '#ef4444' : '#f59e0b',
-                      backgroundColor: data.evalDisposition === 'pass' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
+                      color: data.evalDisposition === 'pass' ? '#c9b787' : data.evalDisposition === 'blocked' ? '#f5f5f5' : '#c9b787',
+                      backgroundColor: data.evalDisposition === 'pass' ? 'rgba(201,183,135,0.12)' : 'rgba(245,245,245,0.12)',
                     }}
                   >
                     {data.evalDisposition.replace(/_/g, ' ')}
@@ -270,7 +270,7 @@ export function SovereignReplayDetail() {
             <div>
               <SectionTitle>Failure Analysis</SectionTitle>
               <Card className="text-xs">
-                <div className="mb-1 px-1.5 py-0.5 rounded inline-block" style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444' }}>
+                <div className="mb-1 px-1.5 py-0.5 rounded inline-block" style={{ backgroundColor: 'rgba(245,245,245,0.08)', color: '#f5f5f5' }}>
                   {data.failureClass.replace(/_/g, ' ')}
                 </div>
                 {data.failureExplanation && (
@@ -295,7 +295,7 @@ export function SovereignReplayDetail() {
         </div>
       </div>
 
-      <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
+      <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
         <DemoBadge /> Sovereign replay data is fetched from the A11oy Proof Ledger. Demo replays are seeded from the sovereign API.
       </div>
     </Layout>

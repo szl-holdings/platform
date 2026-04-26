@@ -70,30 +70,30 @@ interface FusionInsight {
 }
 
 const SCORE_COLOR = (score: number) => {
-  if (score >= 80) return '#22c55e';
-  if (score >= 60) return '#f59e0b';
-  return '#ef4444';
+  if (score >= 80) return '#c9b787';
+  if (score >= 60) return '#c9b787';
+  return '#f5f5f5';
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  critical: 'bg-red-500/10 text-red-400 border-red-500/20',
-  high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  low: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  critical: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  high: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  medium: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  low: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
 };
 
 const STATUS_COLORS: Record<string, string> = {
   open: 'bg-slate-500/10 text-slate-400',
-  in_review: 'bg-blue-500/10 text-blue-400',
-  escalated: 'bg-red-500/10 text-red-400',
-  resolved: 'bg-green-500/10 text-green-400',
+  in_review: 'bg-[#c9b787]/10 text-[#c9b787]',
+  escalated: 'bg-[#f5f5f5]/10 text-[#f5f5f5]',
+  resolved: 'bg-[#c9b787]/10 text-[#c9b787]',
   closed: 'bg-gray-500/10 text-gray-400',
 };
 
 const SEVERITY_COLORS: Record<string, string> = {
-  high: 'border-l-red-500 bg-red-950/20',
-  medium: 'border-l-amber-500 bg-amber-950/20',
-  info: 'border-l-blue-500 bg-blue-950/20',
+  high: 'border-l-red-500 bg-[#f5f5f5]/20',
+  medium: 'border-l-amber-500 bg-[#c9b787]/20',
+  info: 'border-l-blue-500 bg-[#c9b787]/20',
 };
 
 function ScoreGauge({ score, label }: { score: number; label: string }) {
@@ -225,8 +225,8 @@ export default function FinancialCompliancePage() {
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Scale className="w-5 h-5 text-amber-400" />
-              <span className="text-xs font-mono text-amber-400 uppercase tracking-widest">
+              <Scale className="w-5 h-5 text-[#c9b787]" />
+              <span className="text-xs font-mono text-[#c9b787] uppercase tracking-widest">
                 SEC/FINRA Compliance Command
               </span>
             </div>
@@ -252,7 +252,7 @@ export default function FinancialCompliancePage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.id ? 'bg-amber-500/20 text-amber-300 shadow' : 'text-slate-400 hover:text-white'}`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.id ? 'bg-[#c9b787]/20 text-[#c9b787] shadow' : 'text-slate-400 hover:text-white'}`}
             >
               <tab.icon className="w-4 h-4" />
               {tab.label}
@@ -335,16 +335,16 @@ export default function FinancialCompliancePage() {
                   ].map((item) => (
                     <div
                       key={item.label}
-                      className={`rounded-xl border p-4 ${item.urgent ? 'bg-red-950/20 border-red-500/20' : 'bg-white/5 border-white/10'}`}
+                      className={`rounded-xl border p-4 ${item.urgent ? 'bg-[#f5f5f5]/20 border-[#f5f5f5]/20' : 'bg-white/5 border-white/10'}`}
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <item.icon
-                          className={`w-4 h-4 ${item.urgent ? 'text-red-400' : 'text-slate-400'}`}
+                          className={`w-4 h-4 ${item.urgent ? 'text-[#f5f5f5]' : 'text-slate-400'}`}
                         />
                         <span className="text-xs text-slate-400">{item.label}</span>
                       </div>
                       <div
-                        className={`text-2xl font-bold ${item.urgent ? 'text-red-400' : 'text-white'}`}
+                        className={`text-2xl font-bold ${item.urgent ? 'text-[#f5f5f5]' : 'text-white'}`}
                       >
                         {item.value}
                       </div>
@@ -356,8 +356,8 @@ export default function FinancialCompliancePage() {
                   supervision.items.filter(
                     (i) => i.priority === 'critical' || i.priority === 'high',
                   ).length > 0 && (
-                    <div className="bg-red-950/20 border border-red-500/20 rounded-xl p-4">
-                      <h3 className="text-sm font-semibold text-red-400 mb-3 flex items-center gap-2">
+                    <div className="bg-[#f5f5f5]/20 border border-[#f5f5f5]/20 rounded-xl p-4">
+                      <h3 className="text-sm font-semibold text-[#f5f5f5] mb-3 flex items-center gap-2">
                         <AlertCircle className="w-4 h-4" /> Critical Supervision Items Requiring
                         Immediate Action
                       </h3>
@@ -383,7 +383,7 @@ export default function FinancialCompliancePage() {
                               </div>
                               <button
                                 onClick={() => setActiveTab('supervision')}
-                                className="text-xs text-amber-400 hover:text-amber-300 flex items-center gap-1"
+                                className="text-xs text-[#c9b787] hover:text-[#c9b787] flex items-center gap-1"
                               >
                                 Review <ChevronRight className="w-3 h-3" />
                               </button>
@@ -399,8 +399,8 @@ export default function FinancialCompliancePage() {
                       e.status === 'overdue' ||
                       new Date(e.dueAt) < new Date(Date.now() + 7 * 86400000),
                   ).length > 0 && (
-                    <div className="bg-amber-950/20 border border-amber-500/20 rounded-xl p-4">
-                      <h3 className="text-sm font-semibold text-amber-400 mb-3 flex items-center gap-2">
+                    <div className="bg-[#c9b787]/20 border border-[#c9b787]/20 rounded-xl p-4">
+                      <h3 className="text-sm font-semibold text-[#c9b787] mb-3 flex items-center gap-2">
                         <Calendar className="w-4 h-4" /> Upcoming Regulatory Deadlines
                       </h3>
                       <div className="space-y-2">
@@ -417,7 +417,7 @@ export default function FinancialCompliancePage() {
                               </p>
                             </div>
                             <span
-                              className={`text-xs font-medium ${event.status === 'overdue' ? 'text-red-400' : 'text-amber-400'}`}
+                              className={`text-xs font-medium ${event.status === 'overdue' ? 'text-[#f5f5f5]' : 'text-[#c9b787]'}`}
                             >
                               {formatDue(event.dueAt)}
                             </span>
@@ -470,7 +470,7 @@ export default function FinancialCompliancePage() {
                               Risk:{' '}
                               <span
                                 className={
-                                  item.riskScore >= 80 ? 'text-red-400 font-bold' : 'text-white'
+                                  item.riskScore >= 80 ? 'text-[#f5f5f5] font-bold' : 'text-white'
                                 }
                               >
                                 {item.riskScore}
@@ -485,7 +485,7 @@ export default function FinancialCompliancePage() {
                           {item.assignedToName && <span>Assigned: {item.assignedToName}</span>}
                           {item.dueAt && (
                             <span
-                              className={new Date(item.dueAt) < new Date() ? 'text-red-400' : ''}
+                              className={new Date(item.dueAt) < new Date() ? 'text-[#f5f5f5]' : ''}
                             >
                               {formatDue(item.dueAt)}
                             </span>
@@ -499,7 +499,7 @@ export default function FinancialCompliancePage() {
                               onClick={() =>
                                 actionMutation.mutate({ itemId: item.id, action: 'assign' })
                               }
-                              className="px-3 py-1.5 text-xs bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
+                              className="px-3 py-1.5 text-xs bg-[#c9b787]/20 text-[#c9b787] rounded-lg hover:bg-[#c9b787]/30 transition-colors"
                             >
                               Take Review
                             </button>
@@ -511,7 +511,7 @@ export default function FinancialCompliancePage() {
                                   notes: 'Escalated via compliance dashboard',
                                 })
                               }
-                              className="px-3 py-1.5 text-xs bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                              className="px-3 py-1.5 text-xs bg-[#f5f5f5]/20 text-[#f5f5f5] rounded-lg hover:bg-[#f5f5f5]/30 transition-colors"
                             >
                               Escalate
                             </button>
@@ -526,7 +526,7 @@ export default function FinancialCompliancePage() {
                                 notes: 'Resolved after review',
                               })
                             }
-                            className="px-3 py-1.5 text-xs bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
+                            className="px-3 py-1.5 text-xs bg-[#c9b787]/20 text-[#c9b787] rounded-lg hover:bg-[#c9b787]/30 transition-colors"
                           >
                             Mark Resolved
                           </button>
@@ -537,7 +537,7 @@ export default function FinancialCompliancePage() {
                 ))}
                 {(!supervision?.items || supervision.items.length === 0) && (
                   <div className="flex items-center justify-center h-48 text-slate-400 border border-white/10 rounded-xl">
-                    <CheckCircle2 className="w-5 h-5 text-green-400 mr-2" /> No open supervision
+                    <CheckCircle2 className="w-5 h-5 text-[#c9b787] mr-2" /> No open supervision
                     items
                   </div>
                 )}
@@ -563,7 +563,7 @@ export default function FinancialCompliancePage() {
                 {(calendar?.events ?? []).map((event) => (
                   <div
                     key={event.id}
-                    className={`border-l-4 rounded-r-xl p-4 bg-white/5 border border-white/10 ${event.status === 'overdue' ? 'border-l-red-500 bg-red-950/10' : event.status === 'in_progress' ? 'border-l-amber-500 bg-amber-950/10' : 'border-l-blue-500'}`}
+                    className={`border-l-4 rounded-r-xl p-4 bg-white/5 border border-white/10 ${event.status === 'overdue' ? 'border-l-red-500 bg-[#f5f5f5]/10' : event.status === 'in_progress' ? 'border-l-amber-500 bg-[#c9b787]/10' : 'border-l-blue-500'}`}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
@@ -572,7 +572,7 @@ export default function FinancialCompliancePage() {
                             {EVENT_TYPE_LABELS[event.eventType] ?? event.eventType}
                           </span>
                           {event.regulatoryBody && (
-                            <span className="text-xs text-amber-400">· {event.regulatoryBody}</span>
+                            <span className="text-xs text-[#c9b787]">· {event.regulatoryBody}</span>
                           )}
                         </div>
                         <h3 className="text-sm font-semibold text-white">{event.title}</h3>
@@ -587,7 +587,7 @@ export default function FinancialCompliancePage() {
                       </div>
                       <div className="text-right shrink-0">
                         <div
-                          className={`text-sm font-semibold ${event.status === 'overdue' ? 'text-red-400' : event.status === 'in_progress' ? 'text-amber-400' : 'text-slate-300'}`}
+                          className={`text-sm font-semibold ${event.status === 'overdue' ? 'text-[#f5f5f5]' : event.status === 'in_progress' ? 'text-[#c9b787]' : 'text-slate-300'}`}
                         >
                           {formatDue(event.dueAt)}
                         </div>
@@ -595,7 +595,7 @@ export default function FinancialCompliancePage() {
                           {new Date(event.dueAt).toLocaleDateString()}
                         </div>
                         <span
-                          className={`mt-1 inline-block px-2 py-0.5 rounded text-xs ${event.status === 'overdue' ? 'bg-red-500/20 text-red-400' : event.status === 'in_progress' ? 'bg-amber-500/20 text-amber-400' : event.status === 'completed' ? 'bg-green-500/20 text-green-400' : 'bg-blue-500/20 text-blue-400'}`}
+                          className={`mt-1 inline-block px-2 py-0.5 rounded text-xs ${event.status === 'overdue' ? 'bg-[#f5f5f5]/20 text-[#f5f5f5]' : event.status === 'in_progress' ? 'bg-[#c9b787]/20 text-[#c9b787]' : event.status === 'completed' ? 'bg-[#c9b787]/20 text-[#c9b787]' : 'bg-[#c9b787]/20 text-[#c9b787]'}`}
                         >
                           {event.status.replace('_', ' ')}
                         </span>
@@ -615,10 +615,10 @@ export default function FinancialCompliancePage() {
                 SEC Rule 17a-4 Communication Archival
               </h2>
             </div>
-            <div className="bg-amber-950/20 border border-amber-500/20 rounded-xl p-4 text-sm">
+            <div className="bg-[#c9b787]/20 border border-[#c9b787]/20 rounded-xl p-4 text-sm">
               <div className="flex items-center gap-2 mb-2">
-                <Archive className="w-4 h-4 text-amber-400" />
-                <span className="font-semibold text-amber-400">Immutable Write-Once Archive</span>
+                <Archive className="w-4 h-4 text-[#c9b787]" />
+                <span className="font-semibold text-[#c9b787]">Immutable Write-Once Archive</span>
               </div>
               <p className="text-slate-400">
                 All communications are stored with SHA-256 hash chains per SEC Rule 17a-4(f).
@@ -655,7 +655,7 @@ export default function FinancialCompliancePage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <span
-                            className={`text-xs font-mono uppercase ${insight.severity === 'high' ? 'text-red-400' : insight.severity === 'medium' ? 'text-amber-400' : 'text-blue-400'}`}
+                            className={`text-xs font-mono uppercase ${insight.severity === 'high' ? 'text-[#f5f5f5]' : insight.severity === 'medium' ? 'text-[#c9b787]' : 'text-[#c9b787]'}`}
                           >
                             {insight.type.replace('_', ' ')}
                           </span>
@@ -680,8 +680,8 @@ export default function FinancialCompliancePage() {
                           </div>
                         )}
                         <div className="mt-2 flex items-center gap-2">
-                          <Zap className="w-3 h-3 text-amber-400" />
-                          <span className="text-xs text-amber-400">{insight.action}</span>
+                          <Zap className="w-3 h-3 text-[#c9b787]" />
+                          <span className="text-xs text-[#c9b787]">{insight.action}</span>
                         </div>
                       </div>
                     </div>
@@ -731,7 +731,7 @@ function ArchivalPanel() {
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-mono text-purple-400 uppercase">
+                <span className="text-xs font-mono text-[#8a8a8a] uppercase">
                   {item.communicationType.replace('_', ' ')}
                 </span>
                 <span className="text-xs text-slate-500">
@@ -749,9 +749,9 @@ function ArchivalPanel() {
                 Retention expires: {new Date(item.retentionExpiresAt).toLocaleDateString()}
               </p>
             </div>
-            <div className="flex items-center gap-1 bg-green-500/10 px-2 py-1 rounded-lg">
-              <CheckCircle2 className="w-3 h-3 text-green-400" />
-              <span className="text-xs text-green-400">Immutable</span>
+            <div className="flex items-center gap-1 bg-[#c9b787]/10 px-2 py-1 rounded-lg">
+              <CheckCircle2 className="w-3 h-3 text-[#c9b787]" />
+              <span className="text-xs text-[#c9b787]">Immutable</span>
             </div>
           </div>
         </div>

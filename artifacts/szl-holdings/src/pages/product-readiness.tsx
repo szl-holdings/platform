@@ -204,7 +204,7 @@ const FOCUSED_PRODUCTS = [
   "Carlota Jo (Private Advisory)",
   "API Server",
   "SZL Holdings Corporate",
-  "TENAX (Cyber Resilience)",
+  "Aegis (Cyber Resilience)",
   "Command (Unified Command Portal)",
   "SZL Holdings Mobile",
   "Packages (Marketplace)",

@@ -605,7 +605,7 @@ export default function LegalWorkspacePage() {
               {[
                 { label: 'Reviewed', count: 1842, color: '#4a90b8' },
                 { label: 'Flagged', count: 14, color: '#d4a054' },
-                { label: 'Cleared', count: 1828, color: '#4ade80' },
+                { label: 'Cleared', count: 1828, color: '#c9b787' },
                 { label: 'Withheld', count: 12, color: '#c45a4a' },
               ].map((item) => (
                 <div

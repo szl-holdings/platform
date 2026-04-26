@@ -604,7 +604,7 @@ export default function CortexIntelligenceScreen() {
             <View style={styles.pulseCardInner}>
               <View>
                 <Text style={styles.pulseCardLabel}>AI EXECUTIVE BRIEFING</Text>
-                <Text style={styles.pulseCardTitle}>LUMINA Intelligence Brief</Text>
+                <Text style={styles.pulseCardTitle}>Pulse Intelligence Brief</Text>
                 <Text style={[styles.pulseCardSub, { color: '#9ca3af' }]}>
                   Today's strategic summary · Agent-attributed · Confidence-scored
                 </Text>

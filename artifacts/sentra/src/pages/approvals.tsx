@@ -12,9 +12,9 @@ import {
 import { decideFix, type FixRequest, useMeshState } from '@/lib/mesh-store';
 
 const TIER_STYLES: Record<string, string> = {
-  critical: 'text-red-400 border-red-500/30 bg-red-500/10',
-  elevated: 'text-amber-400 border-amber-500/30 bg-amber-500/10',
-  standard: 'text-sky-400 border-sky-500/30 bg-sky-500/10',
+  critical: 'text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10',
+  elevated: 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
+  standard: 'text-[#8a8a8a] border-sky-500/30 bg-[#8a8a8a]/10',
 };
 
 const DOMAIN_ICON: Record<string, typeof Bot> = {
@@ -41,11 +41,11 @@ export default function Approvals() {
         <div className="flex gap-3">
           <div className="sentra-panel px-4 py-2 text-center">
             <div className="text-[10px] text-slate-500 font-mono uppercase">Pending</div>
-            <div className="text-2xl font-display font-bold text-amber-400">{pending.length}</div>
+            <div className="text-2xl font-display font-bold text-[#c9b787]">{pending.length}</div>
           </div>
           <div className="sentra-panel px-4 py-2 text-center">
             <div className="text-[10px] text-slate-500 font-mono uppercase">Mesh Index</div>
-            <div className="text-2xl font-display font-bold text-emerald-400">
+            <div className="text-2xl font-display font-bold text-[#c9b787]">
               {meshState.resilienceOverall}
             </div>
           </div>
@@ -55,7 +55,7 @@ export default function Approvals() {
       {pending.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-sm font-display font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-            <Clock className="w-4 h-4 text-amber-400 animate-pulse" />
+            <Clock className="w-4 h-4 text-[#c9b787] animate-pulse" />
             Awaiting Decision
           </h2>
           {pending.map((item) => (
@@ -81,10 +81,10 @@ export default function Approvals() {
 function PendingCard({ item }: { item: FixRequest }) {
   const Icon = DOMAIN_ICON[item.domain] ?? Shield;
   return (
-    <div className="sentra-panel p-6 border-amber-500/10">
+    <div className="sentra-panel p-6 border-[#c9b787]/10">
       <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
-          <Icon className="w-5 h-5 text-amber-400" />
+        <div className="w-10 h-10 rounded bg-[#c9b787]/10 border border-[#c9b787]/20 flex items-center justify-center shrink-0">
+          <Icon className="w-5 h-5 text-[#c9b787]" />
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -97,7 +97,7 @@ function PendingCard({ item }: { item: FixRequest }) {
             >
               {item.tier}
             </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono border text-sky-400 border-sky-500/20 bg-sky-500/10">
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono border text-[#8a8a8a] border-sky-500/20 bg-[#8a8a8a]/10">
               {item.domain}
             </span>
             <span className="px-2 py-0.5 rounded text-[10px] font-mono border text-slate-400 border-slate-700 bg-slate-800">
@@ -115,7 +115,7 @@ function PendingCard({ item }: { item: FixRequest }) {
           <div className="flex gap-3 mt-5 pt-4 border-t border-slate-800">
             <button
               onClick={() => decideFix(item.id, 'approved')}
-              className="flex items-center gap-2 px-5 py-2 rounded bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-400 text-sm font-bold transition-colors"
+              className="flex items-center gap-2 px-5 py-2 rounded bg-[#c9b787]/20 hover:bg-[#c9b787]/30 border border-[#c9b787]/30 text-[#c9b787] text-sm font-bold transition-colors"
             >
               <CheckCircle2 className="w-4 h-4" />
               Approve & Execute
@@ -141,7 +141,7 @@ function ResolvedCard({ item }: { item: FixRequest }) {
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3 flex-1">
           {approved ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5" />
+            <CheckCircle2 className="w-4 h-4 text-[#c9b787] mt-0.5" />
           ) : (
             <XCircle className="w-4 h-4 text-slate-500 mt-0.5" />
           )}
@@ -152,15 +152,15 @@ function ResolvedCard({ item }: { item: FixRequest }) {
               {item.resolvedAt ? new Date(item.resolvedAt).toLocaleTimeString() : ''}
             </div>
             {approved && item.executionLog && item.executionLog.length > 0 && (
-              <div className="mt-3 rounded border border-emerald-500/15 bg-emerald-500/5 p-3">
-                <div className="flex items-center gap-2 text-[10px] text-emerald-400 font-mono uppercase mb-2">
+              <div className="mt-3 rounded border border-[#c9b787]/15 bg-[#c9b787]/5 p-3">
+                <div className="flex items-center gap-2 text-[10px] text-[#c9b787] font-mono uppercase mb-2">
                   <Terminal className="w-3 h-3" />
                   Executor Log
                 </div>
-                <ul className="space-y-1 text-[11px] text-emerald-200/80 font-mono">
+                <ul className="space-y-1 text-[11px] text-[#c9b787]/80 font-mono">
                   {item.executionLog.map((line, idx) => (
                     <li key={idx} className="flex gap-2">
-                      <span className="text-emerald-500/60">›</span>
+                      <span className="text-[#c9b787]/60">›</span>
                       <span>{line}</span>
                     </li>
                   ))}
@@ -170,12 +170,12 @@ function ResolvedCard({ item }: { item: FixRequest }) {
           </div>
         </div>
         <div className="flex flex-col items-end gap-2">
-          <span className="text-[10px] font-mono text-sky-500/60">{item.domain}</span>
+          <span className="text-[10px] font-mono text-[#8a8a8a]/60">{item.domain}</span>
           <span
             className={cn(
               'px-2 py-0.5 rounded border text-[10px] font-mono font-bold',
               approved
-                ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10'
+                ? 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10'
                 : 'text-slate-500 border-slate-700 bg-slate-800',
             )}
           >

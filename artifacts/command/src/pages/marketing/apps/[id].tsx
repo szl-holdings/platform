@@ -436,7 +436,7 @@ const appData = {
         desc: 'Single pane of glass across all 9 platforms. Surface correlated signals, drill into any domain, and execute actions without switching context.',
       },
       {
-        title: 'Real-time Ecosystem LUMINA',
+        title: 'Real-time Ecosystem Pulse',
         desc: "Live health, activity streams, and key metrics from every platform flow into the Command Portal's situational awareness layer, updated in sub-second intervals.",
       },
       {

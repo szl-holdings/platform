@@ -2,16 +2,16 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import { AlertTriangle, BarChart3, } from 'lucide-react';
 
 const histogramData = [
-  { range: '0-10%', count: 2, color: 'bg-red-500' },
-  { range: '10-20%', count: 5, color: 'bg-red-400' },
-  { range: '20-30%', count: 8, color: 'bg-orange-500' },
-  { range: '30-40%', count: 12, color: 'bg-orange-400' },
-  { range: '40-50%', count: 18, color: 'bg-amber-500' },
-  { range: '50-60%', count: 32, color: 'bg-amber-400' },
-  { range: '60-70%', count: 48, color: 'bg-yellow-400' },
-  { range: '70-80%', count: 85, color: 'bg-cyan-400' },
-  { range: '80-90%', count: 124, color: 'bg-emerald-400' },
-  { range: '90-100%', count: 167, color: 'bg-emerald-500' },
+  { range: '0-10%', count: 2, color: 'bg-[#f5f5f5]' },
+  { range: '10-20%', count: 5, color: 'bg-[#f5f5f5]' },
+  { range: '20-30%', count: 8, color: 'bg-[#c9b787]' },
+  { range: '30-40%', count: 12, color: 'bg-[#c9b787]' },
+  { range: '40-50%', count: 18, color: 'bg-[#c9b787]' },
+  { range: '50-60%', count: 32, color: 'bg-[#c9b787]' },
+  { range: '60-70%', count: 48, color: 'bg-[#c9b787]' },
+  { range: '70-80%', count: 85, color: 'bg-[#8a8a8a]' },
+  { range: '80-90%', count: 124, color: 'bg-[#c9b787]' },
+  { range: '90-100%', count: 167, color: 'bg-[#c9b787]' },
 ];
 
 const modelBreakdown = [
@@ -52,7 +52,7 @@ export default function ConfidenceHistogram() {
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
             High Confidence (70%+)
           </p>
-          <p className="text-2xl font-bold text-emerald-400">{highConfidence}</p>
+          <p className="text-2xl font-bold text-[#c9b787]">{highConfidence}</p>
         </div>
         <div className="bg-card/60 border border-border rounded-xl p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
@@ -64,7 +64,7 @@ export default function ConfidenceHistogram() {
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
             Low Confidence (&lt;50%)
           </p>
-          <p className="text-2xl font-bold text-amber-400">
+          <p className="text-2xl font-bold text-[#c9b787]">
             {histogramData.slice(0, 5).reduce((s, d) => s + d.count, 0)}
           </p>
         </div>
@@ -105,10 +105,10 @@ export default function ConfidenceHistogram() {
                     className={cn(
                       'h-full rounded-full transition-all',
                       m.avgConfidence >= 90
-                        ? 'bg-emerald-400'
+                        ? 'bg-[#c9b787]'
                         : m.avgConfidence >= 80
-                          ? 'bg-cyan-400'
-                          : 'bg-amber-400',
+                          ? 'bg-[#8a8a8a]'
+                          : 'bg-[#c9b787]',
                     )}
                     style={{ width: `${m.avgConfidence}%` }}
                   />
@@ -118,7 +118,7 @@ export default function ConfidenceHistogram() {
                 {m.avgConfidence}%
               </span>
               {m.lowConfidence > 10 && (
-                <span className="text-xs text-amber-400 flex items-center gap-1">
+                <span className="text-xs text-[#c9b787] flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3" /> {m.lowConfidence} low
                 </span>
               )}

@@ -267,9 +267,9 @@ const TACTIC_ORDER = [
 ];
 
 const RESULT_COLORS: Record<PathResult, string> = {
-  success: '#ef4444',
-  partial: '#f97316',
-  blocked: '#22c55e',
+  success: '#f5f5f5',
+  partial: '#c9b787',
+  blocked: '#c9b787',
 };
 const RESULT_LABELS: Record<PathResult, string> = {
   success: 'SUCCEEDED',
@@ -341,10 +341,10 @@ function SimProgress({ running, progress }: { running: boolean; progress: number
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {running && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />}
+          {running && <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse" />}
           <span
             className="text-[10px] font-mono uppercase tracking-wider"
-            style={{ color: running ? '#f97316' : DS.text.tertiary }}
+            style={{ color: running ? '#c9b787' : DS.text.tertiary }}
           >
             {running
               ? 'Simulation Running — testing attack paths against defense posture...'
@@ -366,10 +366,10 @@ function SimProgress({ running, progress }: { running: boolean; progress: number
           style={{
             width: `${progress}%`,
             background: running
-              ? 'linear-gradient(90deg, #f97316, #ef4444)'
+              ? 'linear-gradient(90deg, #c9b787, #f5f5f5)'
               : progress === 100
-                ? '#8b5cf6'
-                : '#3b82f6',
+                ? '#8a8a8a'
+                : '#c9b787',
           }}
         />
       </div>
@@ -455,9 +455,9 @@ export default function PurpleTeam() {
           <div className="flex items-center gap-2 mb-1">
             <div
               className="w-7 h-7 rounded-md flex items-center justify-center"
-              style={{ background: 'rgba(139,92,246,0.15)' }}
+              style={{ background: 'rgba(138,138,138,0.15)' }}
             >
-              <Crosshair className="w-4 h-4 text-violet-400" />
+              <Crosshair className="w-4 h-4 text-[#8a8a8a]" />
             </div>
             <h1 className="text-lg font-bold tracking-tight">Autonomous Purple Team</h1>
           </div>
@@ -471,9 +471,9 @@ export default function PurpleTeam() {
           disabled={status === 'running'}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
           style={{
-            background: status === 'running' ? 'rgba(139,92,246,0.08)' : 'rgba(139,92,246,0.15)',
-            border: '1px solid rgba(139,92,246,0.3)',
-            color: status === 'running' ? '#7c3aed' : '#c4b5fd',
+            background: status === 'running' ? 'rgba(138,138,138,0.08)' : 'rgba(138,138,138,0.15)',
+            border: '1px solid rgba(138,138,138,0.3)',
+            color: status === 'running' ? '#8a8a8a' : '#c4b5fd',
             cursor: status === 'running' ? 'not-allowed' : 'pointer',
           }}
         >
@@ -499,7 +499,7 @@ export default function PurpleTeam() {
         <div className="col-span-2 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <SlidersHorizontal className="w-3.5 h-3.5" style={{ color: '#8b5cf6' }} />
+              <SlidersHorizontal className="w-3.5 h-3.5" style={{ color: '#8a8a8a' }} />
               <h2
                 className="text-xs font-semibold uppercase tracking-wider"
                 style={{ color: DS.text.tertiary }}
@@ -512,7 +512,7 @@ export default function PurpleTeam() {
                 className="text-[10px] font-mono"
                 style={{
                   color:
-                    postureScore >= 70 ? '#22c55e' : postureScore >= 40 ? '#f97316' : '#ef4444',
+                    postureScore >= 70 ? '#c9b787' : postureScore >= 40 ? '#c9b787' : '#f5f5f5',
                 }}
               >
                 {postureScore}%
@@ -544,9 +544,9 @@ export default function PurpleTeam() {
                       className="w-full text-left rounded-lg p-3 transition-all"
                       style={{
                         background: ctrl.enabled
-                          ? 'rgba(34,197,94,0.06)'
+                          ? 'rgba(201,183,135,0.06)'
                           : 'rgba(255,255,255,0.02)',
-                        border: `1px solid ${ctrl.enabled ? 'rgba(34,197,94,0.2)' : DS.border}`,
+                        border: `1px solid ${ctrl.enabled ? 'rgba(201,183,135,0.2)' : DS.border}`,
                       }}
                     >
                       <div className="flex items-center gap-2">
@@ -554,12 +554,12 @@ export default function PurpleTeam() {
                           className="w-4 h-4 rounded shrink-0 flex items-center justify-center"
                           style={{
                             background: ctrl.enabled
-                              ? 'rgba(34,197,94,0.2)'
+                              ? 'rgba(201,183,135,0.2)'
                               : 'rgba(255,255,255,0.06)',
-                            border: `1px solid ${ctrl.enabled ? 'rgba(34,197,94,0.4)' : DS.border}`,
+                            border: `1px solid ${ctrl.enabled ? 'rgba(201,183,135,0.4)' : DS.border}`,
                           }}
                         >
-                          {ctrl.enabled && <CheckCircle className="w-3 h-3 text-emerald-400" />}
+                          {ctrl.enabled && <CheckCircle className="w-3 h-3 text-[#c9b787]" />}
                         </div>
                         <span
                           className="text-[11px] font-medium flex-1"
@@ -573,12 +573,12 @@ export default function PurpleTeam() {
                       </p>
                       {ctrl.blocks.length > 0 && (
                         <div className="flex gap-1 mt-1.5 ml-6">
-                          <span className="text-[8px] text-emerald-400/60">Blocks:</span>
+                          <span className="text-[8px] text-[#c9b787]/60">Blocks:</span>
                           {ctrl.blocks.map((b) => (
                             <span
                               key={b}
-                              className="text-[8px] font-mono text-emerald-400/80 px-1 rounded"
-                              style={{ background: 'rgba(34,197,94,0.08)' }}
+                              className="text-[8px] font-mono text-[#c9b787]/80 px-1 rounded"
+                              style={{ background: 'rgba(201,183,135,0.08)' }}
                             >
                               {b}
                             </span>
@@ -587,12 +587,12 @@ export default function PurpleTeam() {
                       )}
                       {ctrl.partialBlocks && ctrl.partialBlocks.length > 0 && (
                         <div className="flex gap-1 mt-1 ml-6">
-                          <span className="text-[8px] text-orange-400/60">Degrades:</span>
+                          <span className="text-[8px] text-[#c9b787]/60">Degrades:</span>
                           {ctrl.partialBlocks.map((b) => (
                             <span
                               key={b}
-                              className="text-[8px] font-mono text-orange-400/80 px-1 rounded"
-                              style={{ background: 'rgba(249,115,22,0.08)' }}
+                              className="text-[8px] font-mono text-[#c9b787]/80 px-1 rounded"
+                              style={{ background: 'rgba(201,183,135,0.08)' }}
                             >
                               {b}
                             </span>
@@ -612,10 +612,10 @@ export default function PurpleTeam() {
           {status !== 'idle' && (
             <div className="grid grid-cols-4 gap-3">
               {[
-                { label: 'Paths Tested', value: ATTACK_PATHS.length, color: '#8b5cf6' },
-                { label: 'Succeeded', value: successCount, color: '#ef4444' },
-                { label: 'Partial', value: partialCount, color: '#f97316' },
-                { label: 'Blocked', value: blockedCount, color: '#22c55e' },
+                { label: 'Paths Tested', value: ATTACK_PATHS.length, color: '#8a8a8a' },
+                { label: 'Succeeded', value: successCount, color: '#f5f5f5' },
+                { label: 'Partial', value: partialCount, color: '#c9b787' },
+                { label: 'Blocked', value: blockedCount, color: '#c9b787' },
               ].map(({ label, value, color }) => (
                 <div
                   key={label}
@@ -637,15 +637,15 @@ export default function PurpleTeam() {
             <div
               className="rounded-xl p-3"
               style={{
-                background: 'rgba(239,68,68,0.04)',
-                border: '1px solid rgba(239,68,68,0.12)',
+                background: 'rgba(245,245,245,0.04)',
+                border: '1px solid rgba(245,245,245,0.12)',
               }}
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs" style={{ color: DS.text.secondary }}>
                   Remaining breach exposure with current posture
                 </span>
-                <span className="text-lg font-bold font-mono text-red-400">
+                <span className="text-lg font-bold font-mono text-[#f5f5f5]">
                   {fmt(totalExposure)}
                 </span>
               </div>
@@ -672,8 +672,8 @@ export default function PurpleTeam() {
                   }
                   className="w-full text-left rounded-xl p-4 transition-all"
                   style={{
-                    background: isSelected ? 'rgba(139,92,246,0.06)' : DS.surface,
-                    border: `1px solid ${isSelected ? 'rgba(139,92,246,0.25)' : DS.border}`,
+                    background: isSelected ? 'rgba(138,138,138,0.06)' : DS.surface,
+                    border: `1px solid ${isSelected ? 'rgba(138,138,138,0.25)' : DS.border}`,
                     opacity: status === 'running' ? 0.5 : 1,
                   }}
                 >
@@ -682,11 +682,11 @@ export default function PurpleTeam() {
                       {!isRevealed ? (
                         <Clock className="w-4 h-4" style={{ color: DS.text.muted }} />
                       ) : result?.result === 'success' ? (
-                        <XCircle className="w-4 h-4 text-red-400" />
+                        <XCircle className="w-4 h-4 text-[#f5f5f5]" />
                       ) : result?.result === 'partial' ? (
-                        <AlertTriangle className="w-4 h-4 text-orange-400" />
+                        <AlertTriangle className="w-4 h-4 text-[#c9b787]" />
                       ) : (
-                        <CheckCircle className="w-4 h-4 text-emerald-400" />
+                        <CheckCircle className="w-4 h-4 text-[#c9b787]" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -706,7 +706,7 @@ export default function PurpleTeam() {
                         {path.target}
                       </p>
                       {isRevealed && result?.blockedBy && (
-                        <p className="text-[10px] mt-1" style={{ color: '#22c55e' }}>
+                        <p className="text-[10px] mt-1" style={{ color: '#c9b787' }}>
                           {result?.result === 'partial' ? 'Degraded by' : 'Blocked by'}:{' '}
                           {result?.blockedBy} · {result?.detectionTime}s detection
                         </p>
@@ -729,7 +729,7 @@ export default function PurpleTeam() {
                         <span
                           className="text-[9px] font-mono"
                           style={{
-                            color: result?.result === 'success' ? '#ef4444' : DS.text.muted,
+                            color: result?.result === 'success' ? '#f5f5f5' : DS.text.muted,
                           }}
                         >
                           {fmt(result?.remainingCost)}
@@ -772,12 +772,12 @@ export default function PurpleTeam() {
                         tickLine={false}
                         width={70}
                       />
-                      <Bar dataKey="success" stackId="a" fill="#ef4444" fillOpacity={0.8} />
-                      <Bar dataKey="partial" stackId="a" fill="#f97316" fillOpacity={0.8} />
+                      <Bar dataKey="success" stackId="a" fill="#f5f5f5" fillOpacity={0.8} />
+                      <Bar dataKey="partial" stackId="a" fill="#c9b787" fillOpacity={0.8} />
                       <Bar
                         dataKey="blocked"
                         stackId="a"
-                        fill="#22c55e"
+                        fill="#c9b787"
                         fillOpacity={0.8}
                         radius={[0, 3, 3, 0]}
                       />
@@ -789,11 +789,11 @@ export default function PurpleTeam() {
               {selected && PLAYBOOKS[selected.path.id] ? (
                 <div
                   className="rounded-xl p-4"
-                  style={{ background: DS.surface, border: '1px solid rgba(139,92,246,0.2)' }}
+                  style={{ background: DS.surface, border: '1px solid rgba(138,138,138,0.2)' }}
                 >
                   <div className="flex items-center gap-2 mb-3">
-                    <FileText className="w-4 h-4 text-violet-400" />
-                    <h3 className="text-[10px] font-semibold text-violet-400">
+                    <FileText className="w-4 h-4 text-[#8a8a8a]" />
+                    <h3 className="text-[10px] font-semibold text-[#8a8a8a]">
                       {PLAYBOOKS[selected.path.id].title}
                     </h3>
                   </div>
@@ -802,7 +802,7 @@ export default function PurpleTeam() {
                       <div key={i} className="flex items-start gap-2">
                         <span
                           className="text-[9px] font-mono mt-0.5 w-4 shrink-0"
-                          style={{ color: '#8b5cf6' }}
+                          style={{ color: '#8a8a8a' }}
                         >
                           {i + 1}.
                         </span>
@@ -823,7 +823,7 @@ export default function PurpleTeam() {
                       <span className="text-[10px]" style={{ color: DS.text.muted }}>
                         Remediation cost
                       </span>
-                      <span className="text-xs font-mono font-bold text-emerald-400">
+                      <span className="text-xs font-mono font-bold text-[#c9b787]">
                         {fmt(selected.path.costToRemediate)}
                       </span>
                     </div>
@@ -831,7 +831,7 @@ export default function PurpleTeam() {
                       <span className="text-[10px]" style={{ color: DS.text.muted }}>
                         Cost if breached
                       </span>
-                      <span className="text-xs font-mono font-bold text-red-400">
+                      <span className="text-xs font-mono font-bold text-[#f5f5f5]">
                         {fmt(selected.path.costIfBreached)}
                       </span>
                     </div>

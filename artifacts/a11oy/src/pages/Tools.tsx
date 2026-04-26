@@ -4,32 +4,32 @@ import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import { SEED_TOOLS } from '@workspace/a11oy-fabric';
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'api-caller': '#06b6d4',
-  'document-reader': '#3b82f6',
-  'crm-query': '#f59e0b',
+  'api-caller': '#8a8a8a',
+  'document-reader': '#c9b787',
+  'crm-query': '#c9b787',
   'policy-checker': '#b08d52',
-  'email-sender': '#8b5cf6',
-  'slack-notify': '#6366f1',
-  'pdf-generator': '#ec4899',
-  'data-analyzer': '#10b981',
-  'risk-scorer': '#ef4444',
-  'approval-gateway': '#8b5cf6',
+  'email-sender': '#8a8a8a',
+  'slack-notify': '#8a8a8a',
+  'pdf-generator': '#c9b787',
+  'data-analyzer': '#c9b787',
+  'risk-scorer': '#f5f5f5',
+  'approval-gateway': '#8a8a8a',
   'evidence-packager': '#b08d52',
-  'twin-updater': '#06b6d4',
+  'twin-updater': '#8a8a8a',
   'proof-issuer': '#b08d52',
-  'mirror-eval-runner': '#6366f1',
-  'knowledge-retriever': '#3b82f6',
+  'mirror-eval-runner': '#8a8a8a',
+  'knowledge-retriever': '#c9b787',
 };
 
 const GOVERNANCE_COLORS: Record<string, string> = {
-  'external-network': '#ef4444',
-  'secret-access': '#f59e0b',
-  'data-privacy-sensitive': '#8b5cf6',
-  'pii-access': '#ef4444',
-  'write-access': '#f59e0b',
-  'approval-required': '#8b5cf6',
-  'audit-logged': '#10b981',
-  'rate-limited': '#9bacc4',
+  'external-network': '#f5f5f5',
+  'secret-access': '#c9b787',
+  'data-privacy-sensitive': '#8a8a8a',
+  'pii-access': '#f5f5f5',
+  'write-access': '#c9b787',
+  'approval-required': '#8a8a8a',
+  'audit-logged': '#c9b787',
+  'rate-limited': '#5e5e5e',
 };
 
 const VERTICAL_LABELS: Record<string, string> = {
@@ -66,9 +66,9 @@ export function Tools() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="TOTAL TOOLS" value={SEED_TOOLS.length} sub="registered" accent="#10b981" />
-        <KpiCard label="GLOBAL TOOLS" value={globalTools.length} sub="all verticals" accent="#3b82f6" />
-        <KpiCard label="APPROVAL REQUIRED" value={hasApprovalRequired.length} sub="governance gated" accent="#8b5cf6" />
+        <KpiCard label="TOTAL TOOLS" value={SEED_TOOLS.length} sub="registered" accent="#c9b787" />
+        <KpiCard label="GLOBAL TOOLS" value={globalTools.length} sub="all verticals" accent="#c9b787" />
+        <KpiCard label="APPROVAL REQUIRED" value={hasApprovalRequired.length} sub="governance gated" accent="#8a8a8a" />
         <KpiCard label="CATEGORIES" value={CATEGORIES.length} sub="distinct types" accent="#b08d52" />
       </div>
 
@@ -78,7 +78,7 @@ export function Tools() {
           <button
             onClick={() => setFilterCat('all')}
             className="text-xs px-2.5 py-1 rounded font-mono"
-            style={{ backgroundColor: filterCat === 'all' ? 'rgba(59,130,246,0.15)' : 'var(--color-a11oy-muted)', color: filterCat === 'all' ? '#3b82f6' : 'var(--color-a11oy-text-ghost)', border: filterCat === 'all' ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent', cursor: 'pointer' }}
+            style={{ backgroundColor: filterCat === 'all' ? 'rgba(201,183,135,0.15)' : 'var(--color-a11oy-muted)', color: filterCat === 'all' ? '#c9b787' : 'var(--color-a11oy-text-ghost)', border: filterCat === 'all' ? '1px solid rgba(201,183,135,0.3)' : '1px solid transparent', cursor: 'pointer' }}
           >
             All categories
           </button>
@@ -87,7 +87,7 @@ export function Tools() {
               key={c}
               onClick={() => setFilterCat(c)}
               className="text-xs px-2.5 py-1 rounded font-mono"
-              style={{ backgroundColor: filterCat === c ? `${CATEGORY_COLORS[c] ?? '#3b82f6'}20` : 'var(--color-a11oy-muted)', color: filterCat === c ? CATEGORY_COLORS[c] ?? '#3b82f6' : 'var(--color-a11oy-text-ghost)', border: 'none', cursor: 'pointer' }}
+              style={{ backgroundColor: filterCat === c ? `${CATEGORY_COLORS[c] ?? '#c9b787'}20` : 'var(--color-a11oy-muted)', color: filterCat === c ? CATEGORY_COLORS[c] ?? '#c9b787' : 'var(--color-a11oy-text-ghost)', border: 'none', cursor: 'pointer' }}
             >
               {c}
             </button>
@@ -109,14 +109,14 @@ export function Tools() {
         {/* Tool grid */}
         <div className="lg:col-span-2 grid sm:grid-cols-2 gap-3 content-start">
           {filtered.map(t => {
-            const catColor = CATEGORY_COLORS[t.category] ?? '#9bacc4';
+            const catColor = CATEGORY_COLORS[t.category] ?? '#5e5e5e';
             const isSelected = t.id === selected;
             return (
               <Card
                 key={t.id}
                 className="cursor-pointer transition-all"
                 onClick={() => setSelected(isSelected ? null : t.id)}
-                style={{ borderColor: isSelected ? '#3b82f6' : 'var(--color-a11oy-border)', backgroundColor: isSelected ? 'rgba(59,130,246,0.04)' : undefined } as React.CSSProperties}
+                style={{ borderColor: isSelected ? '#c9b787' : 'var(--color-a11oy-border)', backgroundColor: isSelected ? 'rgba(201,183,135,0.04)' : undefined } as React.CSSProperties}
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div>
@@ -130,7 +130,7 @@ export function Tools() {
                 <p className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-sub)' }}>{t.description}</p>
                 <div className="flex flex-wrap gap-1">
                   {t.governanceFlags.slice(0, 3).map(flag => (
-                    <span key={flag} className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: `${GOVERNANCE_COLORS[flag] ?? '#9bacc4'}18`, color: GOVERNANCE_COLORS[flag] ?? '#9bacc4' }}>
+                    <span key={flag} className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: `${GOVERNANCE_COLORS[flag] ?? '#5e5e5e'}18`, color: GOVERNANCE_COLORS[flag] ?? '#5e5e5e' }}>
                       {flag}
                     </span>
                   ))}
@@ -154,7 +154,7 @@ export function Tools() {
               <div className="grid grid-cols-2 gap-3 text-xs mb-3">
                 <div>
                   <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>CATEGORY</div>
-                  <div style={{ color: CATEGORY_COLORS[selectedTool.category] ?? '#9bacc4' }}>{selectedTool.category}</div>
+                  <div style={{ color: CATEGORY_COLORS[selectedTool.category] ?? '#5e5e5e' }}>{selectedTool.category}</div>
                 </div>
                 <div>
                   <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>VERTICAL</div>
@@ -176,7 +176,7 @@ export function Tools() {
                   <div className="font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>GOVERNANCE FLAGS</div>
                   <div className="flex flex-wrap gap-1">
                     {selectedTool.governanceFlags.map(flag => (
-                      <span key={flag} className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: `${GOVERNANCE_COLORS[flag] ?? '#9bacc4'}18`, color: GOVERNANCE_COLORS[flag] ?? '#9bacc4', border: `1px solid ${GOVERNANCE_COLORS[flag] ?? '#9bacc4'}30` }}>
+                      <span key={flag} className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: `${GOVERNANCE_COLORS[flag] ?? '#5e5e5e'}18`, color: GOVERNANCE_COLORS[flag] ?? '#5e5e5e', border: `1px solid ${GOVERNANCE_COLORS[flag] ?? '#5e5e5e'}30` }}>
                         {flag}
                       </span>
                     ))}
@@ -190,7 +190,7 @@ export function Tools() {
               <div className="flex flex-col gap-2">
                 {CATEGORIES.map(cat => {
                   const count = SEED_TOOLS.filter(t => t.category === cat).length;
-                  const color = CATEGORY_COLORS[cat] ?? '#9bacc4';
+                  const color = CATEGORY_COLORS[cat] ?? '#5e5e5e';
                   return (
                     <div key={cat} className="flex items-center justify-between text-xs">
                       <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{cat}</span>
@@ -214,7 +214,7 @@ export function Tools() {
                     <div className="flex items-center justify-between">
                       <span className="font-medium" style={{ color: 'var(--color-a11oy-text)' }}>{VERTICAL_LABELS[vertical] ?? vertical}</span>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono" style={{ color: '#8b5cf6' }}>{flagged} gated</span>
+                        <span className="font-mono" style={{ color: '#8a8a8a' }}>{flagged} gated</span>
                         <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{tools.length} total</span>
                       </div>
                     </div>

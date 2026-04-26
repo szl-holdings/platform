@@ -36,7 +36,7 @@ export default function S07SeriesDomains() {
       color: '#f5a623',
     },
     {
-      name: 'SZL Holdings',
+      name: 'Aegis',
       subtitle: 'Corporate Platform',
       score: '9/10',
       desc: 'Portfolio command, investor relations, trust center, data room — the corporate presence built on its own governance infrastructure',

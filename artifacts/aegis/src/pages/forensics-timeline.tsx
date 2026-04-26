@@ -126,19 +126,19 @@ const categoryIcons: Record<string, typeof Globe> = {
 };
 
 const sevColors: Record<string, string> = {
-  critical: 'border-red-500 bg-red-500/10',
-  high: 'border-orange-500 bg-orange-500/10',
-  medium: 'border-amber-500 bg-amber-500/10',
-  low: 'border-emerald-500 bg-emerald-500/10',
-  info: 'border-blue-500 bg-blue-500/10',
+  critical: 'border-[#f5f5f5] bg-[#f5f5f5]/10',
+  high: 'border-[#c9b787] bg-[#c9b787]/10',
+  medium: 'border-[#c9b787] bg-[#c9b787]/10',
+  low: 'border-[#c9b787] bg-[#c9b787]/10',
+  info: 'border-[#c9b787] bg-[#c9b787]/10',
 };
 
 const sevDots: Record<string, string> = {
-  critical: 'bg-red-400',
-  high: 'bg-orange-400',
-  medium: 'bg-amber-400',
-  low: 'bg-emerald-400',
-  info: 'bg-blue-400',
+  critical: 'bg-[#f5f5f5]',
+  high: 'bg-[#c9b787]',
+  medium: 'bg-[#c9b787]',
+  low: 'bg-[#c9b787]',
+  info: 'bg-[#c9b787]',
 };
 
 export default function ForensicsTimeline() {
@@ -159,16 +159,16 @@ export default function ForensicsTimeline() {
         </div>
         <Link
           href="/ot-ics"
-          className="text-xs px-3 py-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 text-emerald-300 hover:bg-emerald-500/10 transition flex items-center gap-2"
+          className="text-xs px-3 py-2 rounded-lg border border-[#c9b787]/30 bg-[#c9b787]/5 text-[#c9b787] hover:bg-[#c9b787]/10 transition flex items-center gap-2"
         >
           <Factory className="w-3.5 h-3.5" /> OT / ICS Protocol Decoder
         </Link>
       </div>
 
-      <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 flex items-center gap-3">
-        <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+      <div className="rounded-xl border border-[#c9b787]/30 bg-[#c9b787]/5 p-4 flex items-center gap-3">
+        <AlertTriangle className="w-5 h-5 text-[#c9b787] shrink-0" />
         <div>
-          <p className="text-sm font-medium text-amber-400">Active Investigation: INC-2024-0329</p>
+          <p className="text-sm font-medium text-[#c9b787]">Active Investigation: INC-2024-0329</p>
           <p className="text-xs text-muted-foreground">
             Suspected APT intrusion via weaponized document — Endpoint WS-042 compromised
           </p>

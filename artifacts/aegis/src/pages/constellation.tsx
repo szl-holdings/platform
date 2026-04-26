@@ -1,6 +1,6 @@
 import { ConstellationGraph } from '@szl-holdings/shared-ui/constellation-graph';
 
-const ACCENT = '#ef4444';
+const ACCENT = '#f5f5f5';
 
 export default function ConstellationPage() {
   return (

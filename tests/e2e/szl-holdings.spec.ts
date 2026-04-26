@@ -421,7 +421,7 @@ test.describe('SZL Holdings — Portfolio Dashboard', () => {
     await page.goto(`${BASE_PATH}portfolio`.replace('//', '/'));
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
 
-    const modules = ['Lyte', 'Terra', 'Vessels', 'TENAX', 'Counsel', 'Carlota Jo'];
+    const modules = ['Lyte', 'Terra', 'Vessels', 'Aegis', 'Counsel', 'Carlota Jo'];
     for (const name of modules) {
       const tile = page.locator(`:text("${name}")`).first();
       await expect(tile).toBeVisible({ timeout: 15000 });

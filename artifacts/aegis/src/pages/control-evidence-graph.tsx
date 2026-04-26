@@ -27,22 +27,22 @@ const DS = {
 };
 
 const FRESHNESS_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
-  fresh: { color: '#10b981', bg: 'rgba(16,185,129,0.08)', label: 'Fresh' },
-  aging: { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', label: 'Aging' },
-  'stale-90d': { color: '#ef4444', bg: 'rgba(239,68,68,0.08)', label: 'Stale' },
+  fresh: { color: '#c9b787', bg: 'rgba(201,183,135,0.08)', label: 'Fresh' },
+  aging: { color: '#c9b787', bg: 'rgba(201,183,135,0.08)', label: 'Aging' },
+  'stale-90d': { color: '#f5f5f5', bg: 'rgba(245,245,245,0.08)', label: 'Stale' },
 };
 
 const EVIDENCE_TYPE_COLORS: Record<string, string> = {
-  'log-collection': '#3b82f6',
-  'config-scan': '#8b5cf6',
-  'penetration-test': '#ef4444',
-  attestation: '#10b981',
-  'automated-check': '#06b6d4',
-  'audit-report': '#f59e0b',
+  'log-collection': '#c9b787',
+  'config-scan': '#8a8a8a',
+  'penetration-test': '#f5f5f5',
+  attestation: '#c9b787',
+  'automated-check': '#8a8a8a',
+  'audit-report': '#c9b787',
 };
 
 function FreshnessBar({ score }: { score: number }) {
-  const color = score > 70 ? '#10b981' : score > 40 ? '#f59e0b' : '#ef4444';
+  const color = score > 70 ? '#c9b787' : score > 40 ? '#c9b787' : '#f5f5f5';
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
@@ -113,7 +113,7 @@ export default function ControlEvidenceGraph() {
             className="text-xl font-bold flex items-center gap-2"
             style={{ color: DS.text.primary }}
           >
-            <Shield className="w-5 h-5 text-emerald-400" />
+            <Shield className="w-5 h-5 text-[#c9b787]" />
             Control Evidence Graph
           </h1>
           <p className="text-sm mt-1" style={{ color: DS.text.secondary }}>
@@ -125,9 +125,9 @@ export default function ControlEvidenceGraph() {
           onClick={() => refetch()}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors"
           style={{
-            background: 'rgba(16,185,129,0.08)',
-            color: '#10b981',
-            border: '1px solid rgba(16,185,129,0.2)',
+            background: 'rgba(201,183,135,0.08)',
+            color: '#c9b787',
+            border: '1px solid rgba(201,183,135,0.2)',
           }}
         >
           <RefreshCw className="w-3 h-3" />
@@ -137,13 +137,13 @@ export default function ControlEvidenceGraph() {
 
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: 'Total Controls', value: summary.totalControls, color: 'text-blue-400' },
-          { label: 'Effective', value: summary.effectiveControls, color: 'text-emerald-400' },
-          { label: 'Gaps', value: summary.gapControls, color: 'text-red-400' },
+          { label: 'Total Controls', value: summary.totalControls, color: 'text-[#c9b787]' },
+          { label: 'Effective', value: summary.effectiveControls, color: 'text-[#c9b787]' },
+          { label: 'Gaps', value: summary.gapControls, color: 'text-[#f5f5f5]' },
           {
             label: 'Avg Freshness',
             value: summary.avgFreshnessScore != null ? `${summary.avgFreshnessScore}%` : '—',
-            color: 'text-yellow-400',
+            color: 'text-[#c9b787]',
           },
         ].map(({ label, value, color }) => (
           <div
@@ -172,9 +172,9 @@ export default function ControlEvidenceGraph() {
             style={
               filterStatus === f
                 ? {
-                    background: 'rgba(16,185,129,0.1)',
-                    color: '#10b981',
-                    border: '1px solid rgba(16,185,129,0.25)',
+                    background: 'rgba(201,183,135,0.1)',
+                    color: '#c9b787',
+                    border: '1px solid rgba(201,183,135,0.25)',
                   }
                 : { background: DS.surface, color: DS.text.muted, border: `1px solid ${DS.border}` }
             }
@@ -196,7 +196,7 @@ export default function ControlEvidenceGraph() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="w-6 h-6 border-2 border-emerald-500/40 border-t-emerald-400 rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-[#c9b787]/40 border-t-emerald-400 rounded-full animate-spin" />
         </div>
       ) : (
         <div className="space-y-2">
@@ -211,7 +211,7 @@ export default function ControlEvidenceGraph() {
                 className="rounded-xl overflow-hidden transition-all"
                 style={{
                   background: DS.surface,
-                  border: `1px solid ${ctrl.status === 'gap' ? 'rgba(239,68,68,0.2)' : DS.border}`,
+                  border: `1px solid ${ctrl.status === 'gap' ? 'rgba(245,245,245,0.2)' : DS.border}`,
                 }}
               >
                 <button
@@ -220,9 +220,9 @@ export default function ControlEvidenceGraph() {
                 >
                   <div className="shrink-0">
                     {ctrl.status === 'effective' ? (
-                      <CheckCircle className="w-4 h-4 text-emerald-400" />
+                      <CheckCircle className="w-4 h-4 text-[#c9b787]" />
                     ) : (
-                      <AlertTriangle className="w-4 h-4 text-red-400" />
+                      <AlertTriangle className="w-4 h-4 text-[#f5f5f5]" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -237,14 +237,14 @@ export default function ControlEvidenceGraph() {
                         className={cn(
                           'text-[9px] shrink-0',
                           ctrl.status === 'effective'
-                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                            : 'bg-red-500/10 text-red-400 border-red-500/20',
+                            ? 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20'
+                            : 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
                         )}
                       >
                         {ctrl.status}
                       </Badge>
                       {staleCount > 0 && (
-                        <Badge className="text-[9px] shrink-0 bg-red-500/10 text-red-400 border-red-500/20">
+                        <Badge className="text-[9px] shrink-0 bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20">
                           {staleCount} stale
                         </Badge>
                       )}

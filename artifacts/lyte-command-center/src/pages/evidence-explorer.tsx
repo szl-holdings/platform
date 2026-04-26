@@ -49,9 +49,9 @@ const TYPE_CONFIG: Record<
   document: {
     label: 'Document',
     icon: <FileText className="w-3.5 h-3.5" />,
-    color: 'text-teal-400',
-    bg: 'bg-teal-500/8',
-    border: 'border-teal-500/20',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/8',
+    border: 'border-[#c9b787]/15',
   },
   audit_log: {
     label: 'Audit Log',

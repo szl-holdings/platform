@@ -210,13 +210,13 @@ const TIMELINE_SUMMARY = [
 ];
 
 const EVENT_COLORS: Record<string, string> = {
-  detect: '#ef4444',
-  escalate: '#f97316',
-  intel: '#8b5cf6',
+  detect: '#f5f5f5',
+  escalate: '#c9b787',
+  intel: '#8a8a8a',
   notify: '#22d3ee',
-  action: '#3b82f6',
-  decision: '#f59e0b',
-  complete: '#22c55e',
+  action: '#c9b787',
+  decision: '#c9b787',
+  complete: '#c9b787',
 };
 
 const WHAT_WENT_WELL = [
@@ -289,9 +289,9 @@ const AI_RECOMMENDATIONS = [
 ];
 
 const PRIORITY_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#c9b787',
 };
 
 type AARSection = 'executive' | 'metrics' | 'timeline' | 'analysis' | 'recommendations';
@@ -314,11 +314,11 @@ export default function CitadelAfterAction() {
             <div
               className="w-6 h-6 rounded flex items-center justify-center"
               style={{
-                background: 'rgba(239,68,68,0.15)',
-                border: '1px solid rgba(239,68,68,0.25)',
+                background: 'rgba(245,245,245,0.15)',
+                border: '1px solid rgba(245,245,245,0.25)',
               }}
             >
-              <FileText className="w-3.5 h-3.5 text-red-400" />
+              <FileText className="w-3.5 h-3.5 text-[#f5f5f5]" />
             </div>
             <div>
               <p className="text-[11px] font-bold" style={{ color: DS.text.primary }}>
@@ -345,8 +345,8 @@ export default function CitadelAfterAction() {
               onClick={() => setActiveSection(id)}
               className="w-full text-left px-3 py-2 rounded-lg text-[10px] font-medium transition-all"
               style={{
-                background: activeSection === id ? 'rgba(239,68,68,0.12)' : 'transparent',
-                color: activeSection === id ? '#ef4444' : DS.text.muted,
+                background: activeSection === id ? 'rgba(245,245,245,0.12)' : 'transparent',
+                color: activeSection === id ? '#f5f5f5' : DS.text.muted,
               }}
             >
               {label}
@@ -387,7 +387,7 @@ export default function CitadelAfterAction() {
                 <div className="flex items-center gap-2 mb-1">
                   <span
                     className="text-[9px] px-1.5 py-0.5 rounded uppercase font-bold"
-                    style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444' }}
+                    style={{ background: 'rgba(245,245,245,0.15)', color: '#f5f5f5' }}
                   >
                     AFTER-ACTION REPORT
                   </span>
@@ -427,10 +427,10 @@ export default function CitadelAfterAction() {
 
               <div className="grid grid-cols-4 gap-3">
                 {[
-                  { label: 'Total Duration', value: `${AAR.durationH}h`, color: '#f59e0b' },
-                  { label: 'Containment', value: '47m', color: '#22c55e' },
-                  { label: 'Exfil Confirmed', value: 'None', color: '#22c55e' },
-                  { label: 'Breach Exposure', value: '$17.4M\nMitigated', color: '#22c55e' },
+                  { label: 'Total Duration', value: `${AAR.durationH}h`, color: '#c9b787' },
+                  { label: 'Containment', value: '47m', color: '#c9b787' },
+                  { label: 'Exfil Confirmed', value: 'None', color: '#c9b787' },
+                  { label: 'Breach Exposure', value: '$17.4M\nMitigated', color: '#c9b787' },
                 ].map((item) => (
                   <div
                     key={item.label}
@@ -456,13 +456,13 @@ export default function CitadelAfterAction() {
               <div
                 className="rounded-xl p-4"
                 style={{
-                  background: 'rgba(34,197,94,0.04)',
-                  border: '1px solid rgba(34,197,94,0.15)',
+                  background: 'rgba(201,183,135,0.04)',
+                  border: '1px solid rgba(201,183,135,0.15)',
                 }}
               >
                 <p
                   className="text-[10px] font-bold uppercase tracking-wider mb-2"
-                  style={{ color: 'rgba(34,197,94,0.6)' }}
+                  style={{ color: 'rgba(201,183,135,0.6)' }}
                 >
                   Outcome: Successful Containment
                 </p>
@@ -492,7 +492,7 @@ export default function CitadelAfterAction() {
                 {METRICS.map((m, i) => {
                   const Icon = m.icon;
                   const trendColor =
-                    m.trend === 'good' ? '#22c55e' : m.trend === 'bad' ? '#ef4444' : DS.text.muted;
+                    m.trend === 'good' ? '#c9b787' : m.trend === 'bad' ? '#f5f5f5' : DS.text.muted;
                   return (
                     <div
                       key={i}
@@ -508,7 +508,7 @@ export default function CitadelAfterAction() {
                           {m.label}
                         </span>
                         {m.trend === 'good' && (
-                          <CheckCircle className="w-3 h-3 ml-auto" style={{ color: '#22c55e' }} />
+                          <CheckCircle className="w-3 h-3 ml-auto" style={{ color: '#c9b787' }} />
                         )}
                       </div>
                       <p className="text-[16px] font-bold" style={{ color: trendColor }}>
@@ -597,31 +597,31 @@ export default function CitadelAfterAction() {
 
               <div
                 className="rounded-xl overflow-hidden"
-                style={{ border: '1px solid rgba(34,197,94,0.2)' }}
+                style={{ border: '1px solid rgba(201,183,135,0.2)' }}
               >
                 <div
                   className="px-4 py-2 border-b"
                   style={{
-                    background: 'rgba(34,197,94,0.05)',
-                    borderColor: 'rgba(34,197,94,0.12)',
+                    background: 'rgba(201,183,135,0.05)',
+                    borderColor: 'rgba(201,183,135,0.12)',
                   }}
                 >
                   <div className="flex items-center gap-1.5">
-                    <CheckCircle className="w-3.5 h-3.5 text-green-400" />
+                    <CheckCircle className="w-3.5 h-3.5 text-[#c9b787]" />
                     <span
                       className="text-[10px] font-bold uppercase tracking-wider"
-                      style={{ color: 'rgba(34,197,94,0.7)' }}
+                      style={{ color: 'rgba(201,183,135,0.7)' }}
                     >
                       What Went Well — {WHAT_WENT_WELL.length} items
                     </span>
                   </div>
                 </div>
-                <div className="divide-y" style={{ borderColor: 'rgba(34,197,94,0.08)' }}>
+                <div className="divide-y" style={{ borderColor: 'rgba(201,183,135,0.08)' }}>
                   {WHAT_WENT_WELL.map((item, i) => (
                     <div key={i} className="flex gap-3 px-4 py-3">
                       <span
                         className="text-[9px] font-bold font-mono mt-0.5 shrink-0"
-                        style={{ color: 'rgba(34,197,94,0.5)' }}
+                        style={{ color: 'rgba(201,183,135,0.5)' }}
                       >
                         W{i + 1}
                       </span>
@@ -638,31 +638,31 @@ export default function CitadelAfterAction() {
 
               <div
                 className="rounded-xl overflow-hidden"
-                style={{ border: '1px solid rgba(249,115,22,0.2)' }}
+                style={{ border: '1px solid rgba(201,183,135,0.2)' }}
               >
                 <div
                   className="px-4 py-2 border-b"
                   style={{
-                    background: 'rgba(249,115,22,0.05)',
-                    borderColor: 'rgba(249,115,22,0.12)',
+                    background: 'rgba(201,183,135,0.05)',
+                    borderColor: 'rgba(201,183,135,0.12)',
                   }}
                 >
                   <div className="flex items-center gap-1.5">
-                    <AlertTriangle className="w-3.5 h-3.5 text-orange-400" />
+                    <AlertTriangle className="w-3.5 h-3.5 text-[#c9b787]" />
                     <span
                       className="text-[10px] font-bold uppercase tracking-wider"
-                      style={{ color: 'rgba(249,115,22,0.7)' }}
+                      style={{ color: 'rgba(201,183,135,0.7)' }}
                     >
                       Areas for Improvement — {IMPROVEMENT_AREAS.length} items
                     </span>
                   </div>
                 </div>
-                <div className="divide-y" style={{ borderColor: 'rgba(249,115,22,0.08)' }}>
+                <div className="divide-y" style={{ borderColor: 'rgba(201,183,135,0.08)' }}>
                   {IMPROVEMENT_AREAS.map((item, i) => (
                     <div key={i} className="flex gap-3 px-4 py-3">
                       <span
                         className="text-[9px] font-bold font-mono mt-0.5 shrink-0"
-                        style={{ color: 'rgba(249,115,22,0.5)' }}
+                        style={{ color: 'rgba(201,183,135,0.5)' }}
                       >
                         I{i + 1}
                       </span>
@@ -683,14 +683,14 @@ export default function CitadelAfterAction() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-1">
                 <div className="flex items-center gap-1.5">
-                  <Brain className="w-4 h-4 text-violet-400" />
+                  <Brain className="w-4 h-4 text-[#8a8a8a]" />
                   <h2 className="text-[13px] font-bold" style={{ color: DS.text.primary }}>
                     AI-Generated Recommendations
                   </h2>
                 </div>
                 <span
                   className="text-[8px] px-1.5 py-0.5 rounded uppercase font-bold"
-                  style={{ background: 'rgba(139,92,246,0.15)', color: '#a78bfa' }}
+                  style={{ background: 'rgba(138,138,138,0.15)', color: '#c9b787' }}
                 >
                   Counsel INTELLIGENCE
                 </span>
@@ -770,13 +770,13 @@ export default function CitadelAfterAction() {
               <div
                 className="rounded-xl p-4 mt-4"
                 style={{
-                  background: 'rgba(139,92,246,0.05)',
-                  border: '1px solid rgba(139,92,246,0.15)',
+                  background: 'rgba(138,138,138,0.05)',
+                  border: '1px solid rgba(138,138,138,0.15)',
                 }}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <Brain className="w-3.5 h-3.5 text-violet-400" />
-                  <span className="text-[10px] font-bold" style={{ color: '#a78bfa' }}>
+                  <Brain className="w-3.5 h-3.5 text-[#8a8a8a]" />
+                  <span className="text-[10px] font-bold" style={{ color: '#c9b787' }}>
                     Counsel Analysis Methodology
                   </span>
                 </div>

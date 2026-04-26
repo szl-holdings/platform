@@ -46,11 +46,11 @@ export default function S05Architecture() {
           <div
             style={{
               flex: '1',
-              border: '1px solid rgba(99,102,241,0.3)',
-              borderLeft: '0.4vw solid #6366f1',
+              border: '1px solid rgba(138,138,138,0.3)',
+              borderLeft: '0.4vw solid #8a8a8a',
               borderRadius: '0.6vw',
               padding: '2.2vh 2.5vw',
-              background: 'rgba(99,102,241,0.04)',
+              background: 'rgba(138,138,138,0.04)',
               display: 'flex',
               alignItems: 'center',
               gap: '3vw',
@@ -64,7 +64,7 @@ export default function S05Architecture() {
                   fontWeight: 600,
                   letterSpacing: '0.15em',
                   textTransform: 'uppercase',
-                  color: '#6366f1',
+                  color: '#8a8a8a',
                   marginBottom: '0.5vh',
                 }}
               >
@@ -99,8 +99,8 @@ export default function S05Architecture() {
                     fontFamily: "'Inter', sans-serif",
                     fontSize: '1.15vw',
                     color: 'rgba(240,236,230,0.55)',
-                    background: 'rgba(99,102,241,0.08)',
-                    border: '1px solid rgba(99,102,241,0.2)',
+                    background: 'rgba(138,138,138,0.08)',
+                    border: '1px solid rgba(138,138,138,0.2)',
                     borderRadius: '0.3vw',
                     padding: '0.4vh 1vw',
                   }}

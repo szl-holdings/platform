@@ -4,11 +4,11 @@ import {
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
-const ACCENT = '#f59e0b';
-const RED = '#ef4444';
-const GREEN = '#22c55e';
-const BLUE = '#3b82f6';
-const PURPLE = '#8b5cf6';
+const ACCENT = '#c9b787';
+const RED = '#f5f5f5';
+const GREEN = '#c9b787';
+const BLUE = '#c9b787';
+const PURPLE = '#8a8a8a';
 
 const DS = {
   surface: 'rgba(255,255,255,0.025)',
@@ -149,7 +149,7 @@ const catColor = (c: string) =>
           ? BLUE
           : c === 'climate'
             ? GREEN
-            : '#06b6d4';
+            : '#8a8a8a';
 const sevColor = (s: string) =>
   s === 'critical' ? RED : s === 'high' ? ACCENT : s === 'medium' ? BLUE : GREEN;
 const statColor = (s: string) =>

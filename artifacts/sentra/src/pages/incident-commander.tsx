@@ -30,7 +30,7 @@ import {
 } from '@/lib/sentra-api';
 import { sentraTwin } from '@/data/sentra-twin';
 
-const ACCENT = '#ef4444';
+const ACCENT = '#f5f5f5';
 
 const ISOLATION_EVIDENCE: EvidenceSource[] = [
   {
@@ -151,7 +151,7 @@ function CreateIncidentModal({ onClose, onCreate }: CreateModalProps) {
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               placeholder="e.g. Suspicious lateral movement from web-01"
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 placeholder:text-slate-600 outline-none focus:border-red-500/40"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 placeholder:text-slate-600 outline-none focus:border-[#f5f5f5]/40"
             />
           </div>
           <div>
@@ -163,7 +163,7 @@ function CreateIncidentModal({ onClose, onCreate }: CreateModalProps) {
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="Describe the incident, affected systems, and initial indicators…"
               rows={3}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 placeholder:text-slate-600 outline-none focus:border-red-500/40 resize-none"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 placeholder:text-slate-600 outline-none focus:border-[#f5f5f5]/40 resize-none"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -193,7 +193,7 @@ function CreateIncidentModal({ onClose, onCreate }: CreateModalProps) {
                 value={form.mitreStage}
                 onChange={(e) => setForm({ ...form, mitreStage: e.target.value })}
                 placeholder="e.g. Lateral Movement"
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 placeholder:text-slate-600 outline-none focus:border-red-500/40"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 placeholder:text-slate-600 outline-none focus:border-[#f5f5f5]/40"
               />
             </div>
           </div>
@@ -206,11 +206,11 @@ function CreateIncidentModal({ onClose, onCreate }: CreateModalProps) {
               value={form.assignedTo}
               onChange={(e) => setForm({ ...form, assignedTo: e.target.value })}
               placeholder="e.g. IR Analyst, SOC Lead"
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 placeholder:text-slate-600 outline-none focus:border-red-500/40"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 placeholder:text-slate-600 outline-none focus:border-[#f5f5f5]/40"
             />
           </div>
           {error && (
-            <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">
+            <div className="text-xs text-[#f5f5f5] bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 rounded px-3 py-2">
               {error}
             </div>
           )}
@@ -225,7 +225,7 @@ function CreateIncidentModal({ onClose, onCreate }: CreateModalProps) {
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-[#f5f5f5] hover:bg-[#f5f5f5] text-white text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-2"
             >
               {saving && <Loader2 className="w-3 h-3 animate-spin" />}
               Create Incident
@@ -308,7 +308,7 @@ function IncidentDetailPanel({ incident, onUpdate }: IncidentDetailProps) {
                 void advance();
               }}
               disabled={advancing}
-              className="px-4 py-2 rounded-lg bg-red-600/90 hover:bg-red-600 text-white text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-2 shrink-0"
+              className="px-4 py-2 rounded-lg bg-[#f5f5f5]/90 hover:bg-[#f5f5f5] text-white text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-2 shrink-0"
             >
               {advancing && <Loader2 className="w-3 h-3 animate-spin" />}
               {STATUS_LABELS[incident.status]}
@@ -333,11 +333,11 @@ function IncidentDetailPanel({ incident, onUpdate }: IncidentDetailProps) {
             autonomyMode={isolationMode}
             onAutonomyChange={setIsolationMode}
           >
-            <div className="p-4 bg-red-500/5 rounded border border-red-500/10">
+            <div className="p-4 bg-[#f5f5f5]/5 rounded border border-[#f5f5f5]/10">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded bg-red-500/20 flex items-center justify-center">
-                    <Zap className="w-4 h-4 text-red-400" />
+                  <div className="w-8 h-8 rounded bg-[#f5f5f5]/20 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-[#f5f5f5]" />
                   </div>
                   <div>
                     <div className="text-sm font-bold text-slate-200">Isolate PLC Segment (VLAN 42)</div>
@@ -346,7 +346,7 @@ function IncidentDetailPanel({ incident, onUpdate }: IncidentDetailProps) {
                     </p>
                   </div>
                 </div>
-                <button className="px-4 py-1.5 rounded bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-colors ml-4 shrink-0">
+                <button className="px-4 py-1.5 rounded bg-[#f5f5f5] hover:bg-[#f5f5f5] text-white text-xs font-bold transition-colors ml-4 shrink-0">
                   Execute Isolation
                 </button>
               </div>
@@ -355,7 +355,7 @@ function IncidentDetailPanel({ incident, onUpdate }: IncidentDetailProps) {
 
           <ProofEnvelope
             title="Force Password Reset — OT-Admin Accounts"
-            accentColor="#f59e0b"
+            accentColor="#c9b787"
             evidence={RESET_EVIDENCE}
             timestamp={RESET_EVIDENCE[0].timestamp}
             confidence={88}
@@ -363,11 +363,11 @@ function IncidentDetailPanel({ incident, onUpdate }: IncidentDetailProps) {
             autonomyMode={resetMode}
             onAutonomyChange={setResetMode}
           >
-            <div className="p-4 bg-amber-500/5 rounded border border-amber-500/10">
+            <div className="p-4 bg-[#c9b787]/5 rounded border border-[#c9b787]/10">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded bg-amber-500/20 flex items-center justify-center">
-                    <ShieldAlert className="w-4 h-4 text-amber-400" />
+                  <div className="w-8 h-8 rounded bg-[#c9b787]/20 flex items-center justify-center">
+                    <ShieldAlert className="w-4 h-4 text-[#c9b787]" />
                   </div>
                   <div>
                     <div className="text-sm font-bold text-slate-200">
@@ -378,7 +378,7 @@ function IncidentDetailPanel({ incident, onUpdate }: IncidentDetailProps) {
                     </p>
                   </div>
                 </div>
-                <button className="px-4 py-1.5 rounded bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-colors ml-4 shrink-0">
+                <button className="px-4 py-1.5 rounded bg-[#c9b787] hover:bg-[#c9b787] text-white text-xs font-bold transition-colors ml-4 shrink-0">
                   Trigger Reset
                 </button>
               </div>
@@ -399,7 +399,7 @@ function IncidentDetailPanel({ incident, onUpdate }: IncidentDetailProps) {
                   className="flex items-center justify-between p-3 rounded bg-slate-800/50 border border-slate-700"
                 >
                   <div className="flex items-center gap-3">
-                    <Cpu className="w-4 h-4 text-red-400" />
+                    <Cpu className="w-4 h-4 text-[#f5f5f5]" />
                     <div>
                       <div className="text-xs font-bold text-slate-200">
                         {asset?.name ?? assetId}
@@ -407,7 +407,7 @@ function IncidentDetailPanel({ incident, onUpdate }: IncidentDetailProps) {
                       <div className="text-[10px] text-slate-500 font-mono">{assetId}</div>
                     </div>
                   </div>
-                  <span className="px-2 py-0.5 rounded-full bg-red-500/10 text-[9px] text-red-400 border border-red-500/20 font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-[#f5f5f5]/10 text-[9px] text-[#f5f5f5] border border-[#f5f5f5]/20 font-bold">
                     COMPROMISED
                   </span>
                 </div>
@@ -433,9 +433,9 @@ function IncidentDetailPanel({ incident, onUpdate }: IncidentDetailProps) {
                   className={cn(
                     'text-xs',
                     entry.type === 'detection' || entry.type === 'escalation'
-                      ? 'text-red-400'
+                      ? 'text-[#f5f5f5]'
                       : entry.type === 'resolution'
-                        ? 'text-emerald-400'
+                        ? 'text-[#c9b787]'
                         : 'text-slate-300',
                   )}
                 >
@@ -457,7 +457,7 @@ function IncidentDetailPanel({ incident, onUpdate }: IncidentDetailProps) {
               }
             }}
             placeholder="Add a note to the timeline…"
-            className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 placeholder:text-slate-600 outline-none focus:border-red-500/40"
+            className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 placeholder:text-slate-600 outline-none focus:border-[#f5f5f5]/40"
           />
           <button
             onClick={() => {
@@ -499,9 +499,9 @@ function IncidentDetailPanel({ incident, onUpdate }: IncidentDetailProps) {
                 className={cn(
                   'flex items-center gap-3 text-xs',
                   item.done
-                    ? 'text-emerald-400'
+                    ? 'text-[#c9b787]'
                     : item.active
-                      ? 'text-amber-400'
+                      ? 'text-[#c9b787]'
                       : 'text-slate-500',
                 )}
               >
@@ -551,14 +551,14 @@ export default function IncidentCommander() {
         actions={
           <div className="flex items-center gap-3">
             {activeCount > 0 && (
-              <div className="px-3 py-1.5 rounded border border-red-500/40 bg-red-500/10 flex items-center gap-2">
-                <Activity className="w-4 h-4 text-red-500 animate-pulse" />
-                <span className="text-xs font-mono text-red-400">{activeCount} active</span>
+              <div className="px-3 py-1.5 rounded border border-[#f5f5f5]/40 bg-[#f5f5f5]/10 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-[#f5f5f5] animate-pulse" />
+                <span className="text-xs font-mono text-[#f5f5f5]">{activeCount} active</span>
               </div>
             )}
             <button
               onClick={() => setShowCreate(true)}
-              className="px-3 py-1.5 rounded-lg bg-red-600/80 hover:bg-red-600 text-white text-xs font-bold transition-colors flex items-center gap-2"
+              className="px-3 py-1.5 rounded-lg bg-[#f5f5f5]/80 hover:bg-[#f5f5f5] text-white text-xs font-bold transition-colors flex items-center gap-2"
             >
               <Plus className="w-3.5 h-3.5" />
               New Incident
@@ -594,7 +594,7 @@ export default function IncidentCommander() {
                 className={cn(
                   'w-full text-left sentra-panel p-4 transition-colors',
                   (selectedId === inc.id || (!selectedId && inc === incidents[0]))
-                    ? 'border-red-500/30 bg-red-500/5'
+                    ? 'border-[#f5f5f5]/30 bg-[#f5f5f5]/5'
                     : 'hover:bg-slate-800/30',
                 )}
               >

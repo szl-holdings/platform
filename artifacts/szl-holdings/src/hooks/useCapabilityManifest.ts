@@ -125,8 +125,8 @@ export const PRODUCT_DISPLAY: Record<
   },
   'API Server': { label: 'API Server', color: '#6aaa72', href: '/developers', appStatus: 'GA' },
   'SZL Holdings Corporate': { label: 'Corporate', color: '#8b7ac8', href: '/', appStatus: 'Beta' },
-  'TENAX (Cyber Resilience)': {
-    label: 'TENAX',
+  'Aegis (Cyber Resilience)': {
+    label: 'Aegis',
     color: '#ef8c3a',
     href: '/solutions/aegis',
     appStatus: 'Beta',
@@ -137,8 +137,8 @@ export const PRODUCT_DISPLAY: Record<
     href: '/command',
     appStatus: 'Partial',
   },
-  'LUMINA (AI Executive Briefing)': {
-    label: 'LUMINA',
+  'Pulse (AI Executive Briefing)': {
+    label: 'Pulse',
     color: '#e0709a',
     href: '/pulse',
     appStatus: 'Partial',

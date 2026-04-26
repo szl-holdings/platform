@@ -13,9 +13,9 @@ const frameworkLabels: Record<string, string> = {
 };
 
 const statusColors: Record<string, string> = {
-  implemented: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  partial: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  not_implemented: 'bg-red-500/10 text-red-400 border-red-500/20',
+  implemented: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  partial: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  not_implemented: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
   not_applicable: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
 };
 
@@ -84,38 +84,38 @@ export default function CompliancePage() {
             <AnimatedProgress value={score} className="h-2 mt-2" />
           </CardContent>
         </Card>
-        <Card className="bg-card border-border hover:border-emerald-500/20 transition-all group">
+        <Card className="bg-card border-border hover:border-[#c9b787]/20 transition-all group">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Implemented</p>
-              <p className="text-2xl font-bold font-display mt-1 text-emerald-400">{implemented}</p>
+              <p className="text-2xl font-bold font-display mt-1 text-[#c9b787]">{implemented}</p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <CheckCircle className="w-5 h-5 text-emerald-400" />
+            <div className="w-10 h-10 rounded-lg bg-[#c9b787]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <CheckCircle className="w-5 h-5 text-[#c9b787]" />
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border hover:border-amber-500/20 transition-all group">
+        <Card className="bg-card border-border hover:border-[#c9b787]/20 transition-all group">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Partial</p>
-              <p className="text-2xl font-bold font-display mt-1 text-amber-400">{partial}</p>
+              <p className="text-2xl font-bold font-display mt-1 text-[#c9b787]">{partial}</p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <AlertTriangle className="w-5 h-5 text-amber-400" />
+            <div className="w-10 h-10 rounded-lg bg-[#c9b787]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <AlertTriangle className="w-5 h-5 text-[#c9b787]" />
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border hover:border-red-500/20 transition-all group">
+        <Card className="bg-card border-border hover:border-[#f5f5f5]/20 transition-all group">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">
                 Not Implemented
               </p>
-              <p className="text-2xl font-bold font-display mt-1 text-red-400">{notImplemented}</p>
+              <p className="text-2xl font-bold font-display mt-1 text-[#f5f5f5]">{notImplemented}</p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <XCircle className="w-5 h-5 text-red-400" />
+            <div className="w-10 h-10 rounded-lg bg-[#f5f5f5]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <XCircle className="w-5 h-5 text-[#f5f5f5]" />
             </div>
           </CardContent>
         </Card>
@@ -160,10 +160,10 @@ export default function CompliancePage() {
                       variant="outline"
                       className={
                         catScore >= 80
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                          ? 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20'
                           : catScore >= 50
-                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                            : 'bg-red-500/10 text-red-400 border-red-500/20'
+                            ? 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20'
+                            : 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20'
                       }
                     >
                       {catScore}%
@@ -183,7 +183,7 @@ export default function CompliancePage() {
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
                                 <StatusIcon
-                                  className={`w-4 h-4 ${control.status === 'implemented' ? 'text-emerald-400' : control.status === 'partial' ? 'text-amber-400' : 'text-red-400'}`}
+                                  className={`w-4 h-4 ${control.status === 'implemented' ? 'text-[#c9b787]' : control.status === 'partial' ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}
                                 />
                                 <span className="font-mono text-xs text-muted-foreground">
                                   {control.controlId}
@@ -196,7 +196,7 @@ export default function CompliancePage() {
                                 </p>
                               )}
                               {control.evidenceNotes && (
-                                <p className="text-xs text-emerald-400/80 ml-6 mt-1">
+                                <p className="text-xs text-[#c9b787]/80 ml-6 mt-1">
                                   {control.evidenceNotes}
                                 </p>
                               )}

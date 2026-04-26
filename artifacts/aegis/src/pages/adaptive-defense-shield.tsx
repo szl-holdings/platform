@@ -67,7 +67,7 @@ const SEED_DECISIONS: PolicyDecision[] = [
     id: 'pd3',
     timestamp: new Date(Date.now() - 35000),
     agent: 'Portfolio Analyst',
-    domain: 'SZL Holdings',
+    domain: 'Aegis',
     action: 'Read cross-app financial metrics (all 12 apps)',
     actionType: 'cross_domain',
     decision: 'permitted',
@@ -141,7 +141,7 @@ const SEED_DECISIONS: PolicyDecision[] = [
     id: 'pd9',
     timestamp: new Date(Date.now() - 210000),
     agent: 'Portfolio Analyst',
-    domain: 'SZL Holdings',
+    domain: 'Aegis',
     action: 'Initiate ACH transfer to portfolio company account',
     actionType: 'financial_transaction',
     decision: 'blocked',
@@ -179,7 +179,7 @@ function generateDecision(): PolicyDecision {
     'Aegis Operations',
     'Terra',
     'Counsel',
-    'SZL Holdings',
+    'Aegis',
     'Stephen',
     'Carlota Jo',
   ];
@@ -234,10 +234,10 @@ function generateDecision(): PolicyDecision {
 
 const POLICY_STATS = [
   { label: 'Actions Today', value: '7,234', color: 'text-foreground' },
-  { label: 'Permitted', value: '7,188', sub: '99.4%', color: 'text-emerald-400' },
-  { label: 'Escalated', value: '38', sub: '0.5%', color: 'text-amber-400' },
-  { label: 'Blocked', value: '8', sub: '0.1%', color: 'text-red-400' },
-  { label: 'Agents Monitored', value: '9', color: 'text-orange-400' },
+  { label: 'Permitted', value: '7,188', sub: '99.4%', color: 'text-[#c9b787]' },
+  { label: 'Escalated', value: '38', sub: '0.5%', color: 'text-[#c9b787]' },
+  { label: 'Blocked', value: '8', sub: '0.1%', color: 'text-[#f5f5f5]' },
+  { label: 'Agents Monitored', value: '9', color: 'text-[#c9b787]' },
   { label: 'Policy Rules Active', value: '247', color: 'text-foreground' },
 ];
 
@@ -276,22 +276,22 @@ const POLICY_CATEGORIES = [
 
 const DECISION_COLORS = {
   permitted: {
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-400/10',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
     icon: CheckCircle2,
-    dot: 'bg-emerald-400',
+    dot: 'bg-[#c9b787]',
   },
   blocked: {
-    color: 'text-red-400',
-    bg: 'bg-red-400/10',
+    color: 'text-[#f5f5f5]',
+    bg: 'bg-[#f5f5f5]/10',
     icon: XCircle,
-    dot: 'bg-red-400 animate-pulse',
+    dot: 'bg-[#f5f5f5] animate-pulse',
   },
   escalated: {
-    color: 'text-amber-400',
-    bg: 'bg-amber-400/10',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
     icon: AlertTriangle,
-    dot: 'bg-amber-400 animate-pulse',
+    dot: 'bg-[#c9b787] animate-pulse',
   },
 };
 
@@ -319,18 +319,18 @@ export default function AdaptiveDefenseShield() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-1">
-          <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center">
-            <Shield className="w-5 h-5 text-orange-400" />
+          <div className="w-9 h-9 rounded-xl bg-[#c9b787]/10 flex items-center justify-center">
+            <Shield className="w-5 h-5 text-[#c9b787]" />
           </div>
           <div>
-            <h1 className="text-xl font-display font-bold text-orange-50 tracking-tight">
+            <h1 className="text-xl font-display font-bold text-[#c9b787] tracking-tight">
               Adaptive Defense
             </h1>
-            <p className="text-xs text-orange-400/50 font-mono uppercase tracking-wider">
+            <p className="text-xs text-[#c9b787]/50 font-mono uppercase tracking-wider">
               Agent Security Guardrails
             </p>
           </div>
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-orange-500/10 text-orange-400 border border-orange-500/20 animate-pulse">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-[#c9b787]/10 text-[#c9b787] border border-[#c9b787]/20 animate-pulse">
             ENFORCING
           </span>
         </div>
@@ -344,7 +344,7 @@ export default function AdaptiveDefenseShield() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {POLICY_STATS.map((s) => (
-          <div key={s.label} className="bg-orange-500/5 border border-orange-500/15 rounded-xl p-4">
+          <div key={s.label} className="bg-[#c9b787]/5 border border-[#c9b787]/15 rounded-xl p-4">
             <p className={cn('text-2xl font-display font-bold', s.color)}>{s.value}</p>
             {s.sub && <p className={cn('text-[10px] font-mono', s.color)}>{s.sub}</p>}
             <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">{s.label}</p>
@@ -353,10 +353,10 @@ export default function AdaptiveDefenseShield() {
       </div>
 
       {/* Policy categories */}
-      <div className="bg-card/60 border border-orange-500/15 rounded-xl overflow-hidden">
-        <div className="px-5 py-3 border-b border-orange-500/10">
-          <h3 className="text-sm font-display font-semibold text-orange-100 flex items-center gap-2">
-            <Lock className="w-3.5 h-3.5 text-orange-400" />
+      <div className="bg-card/60 border border-[#c9b787]/15 rounded-xl overflow-hidden">
+        <div className="px-5 py-3 border-b border-[#c9b787]/10">
+          <h3 className="text-sm font-display font-semibold text-[#c9b787] flex items-center gap-2">
+            <Lock className="w-3.5 h-3.5 text-[#c9b787]" />
             Active Policy Frameworks
           </h3>
         </div>
@@ -365,9 +365,9 @@ export default function AdaptiveDefenseShield() {
             <button
               key={cat.name}
               onClick={() => setExpandedPolicy(expandedPolicy === cat.name ? null : cat.name)}
-              className="w-full flex items-center gap-4 px-5 py-3 hover:bg-orange-500/3 transition-colors text-left"
+              className="w-full flex items-center gap-4 px-5 py-3 hover:bg-[#c9b787]/3 transition-colors text-left"
             >
-              <Shield className="w-4 h-4 text-orange-400 shrink-0" />
+              <Shield className="w-4 h-4 text-[#c9b787] shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-foreground">{cat.name}</p>
                 {expandedPolicy === cat.name && (
@@ -382,8 +382,8 @@ export default function AdaptiveDefenseShield() {
                   className={cn(
                     'text-[10px] font-mono px-2 py-0.5 rounded',
                     cat.status === 'strict'
-                      ? 'bg-red-400/10 text-red-400'
-                      : 'bg-orange-400/10 text-orange-400',
+                      ? 'bg-[#f5f5f5]/10 text-[#f5f5f5]'
+                      : 'bg-[#c9b787]/10 text-[#c9b787]',
                   )}
                 >
                   {cat.status}
@@ -400,15 +400,15 @@ export default function AdaptiveDefenseShield() {
       </div>
 
       {/* Decision stream */}
-      <div className="bg-card/60 border border-orange-500/15 rounded-xl overflow-hidden">
-        <div className="px-5 py-3 border-b border-orange-500/10 flex items-center justify-between flex-wrap gap-2">
-          <h3 className="text-sm font-display font-semibold text-orange-100 flex items-center gap-2">
-            <Eye className="w-3.5 h-3.5 text-orange-400" />
+      <div className="bg-card/60 border border-[#c9b787]/15 rounded-xl overflow-hidden">
+        <div className="px-5 py-3 border-b border-[#c9b787]/10 flex items-center justify-between flex-wrap gap-2">
+          <h3 className="text-sm font-display font-semibold text-[#c9b787] flex items-center gap-2">
+            <Eye className="w-3.5 h-3.5 text-[#c9b787]" />
             Policy Decision Stream
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-[#c9b787] animate-pulse" />
           </h3>
           <div className="flex items-center gap-2">
-            <div className="flex bg-orange-500/5 border border-orange-500/10 p-0.5 rounded-lg">
+            <div className="flex bg-[#c9b787]/5 border border-[#c9b787]/10 p-0.5 rounded-lg">
               {(['all', 'permitted', 'blocked', 'escalated'] as const).map((f) => (
                 <button
                   key={f}
@@ -416,8 +416,8 @@ export default function AdaptiveDefenseShield() {
                   className={cn(
                     'px-2.5 py-1 rounded text-[10px] font-medium capitalize transition-colors',
                     filter === f
-                      ? 'bg-orange-500/20 text-orange-300'
-                      : 'text-orange-400/40 hover:text-orange-300',
+                      ? 'bg-[#c9b787]/20 text-[#c9b787]'
+                      : 'text-[#c9b787]/40 hover:text-[#c9b787]',
                   )}
                 >
                   {f === 'all'
@@ -435,8 +435,8 @@ export default function AdaptiveDefenseShield() {
               className={cn(
                 'text-[10px] font-mono px-2 py-1 rounded border transition-colors',
                 paused
-                  ? 'border-emerald-400/30 text-emerald-400'
-                  : 'border-orange-400/20 text-orange-400/60',
+                  ? 'border-[#c9b787]/30 text-[#c9b787]'
+                  : 'border-[#c9b787]/20 text-[#c9b787]/60',
               )}
             >
               {paused ? '▶' : '⏸'}
@@ -451,8 +451,8 @@ export default function AdaptiveDefenseShield() {
               <div
                 key={d.id}
                 className={cn(
-                  'px-5 py-3 hover:bg-orange-500/3 transition-colors',
-                  i === 0 && !paused && 'bg-orange-500/5',
+                  'px-5 py-3 hover:bg-[#c9b787]/3 transition-colors',
+                  i === 0 && !paused && 'bg-[#c9b787]/5',
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -471,7 +471,7 @@ export default function AdaptiveDefenseShield() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                      <span className="text-orange-400/60">{d.agent}</span>
+                      <span className="text-[#c9b787]/60">{d.agent}</span>
                       <span className="text-border">·</span>
                       <span>{d.domain}</span>
                       <span className="text-border">·</span>
@@ -481,10 +481,10 @@ export default function AdaptiveDefenseShield() {
                         className={cn(
                           'font-mono',
                           d.riskScore >= 80
-                            ? 'text-red-400'
+                            ? 'text-[#f5f5f5]'
                             : d.riskScore >= 50
-                              ? 'text-amber-400'
-                              : 'text-emerald-400',
+                              ? 'text-[#c9b787]'
+                              : 'text-[#c9b787]',
                         )}
                       >
                         risk: {d.riskScore}
@@ -498,7 +498,7 @@ export default function AdaptiveDefenseShield() {
                     <p className="text-[10px] font-mono text-muted-foreground/50">
                       {Math.round((Date.now() - d.timestamp.getTime()) / 1000)}s ago
                     </p>
-                    <p className="text-[9px] font-mono text-orange-400/30">{d.policyRule}</p>
+                    <p className="text-[9px] font-mono text-[#c9b787]/30">{d.policyRule}</p>
                   </div>
                 </div>
               </div>
@@ -508,9 +508,9 @@ export default function AdaptiveDefenseShield() {
       </div>
 
       {/* Risk distribution */}
-      <div className="bg-card/60 border border-orange-500/15 rounded-xl p-5">
-        <h3 className="text-sm font-display font-semibold text-orange-100 mb-4 flex items-center gap-2">
-          <Activity className="w-3.5 h-3.5 text-orange-400" />
+      <div className="bg-card/60 border border-[#c9b787]/15 rounded-xl p-5">
+        <h3 className="text-sm font-display font-semibold text-[#c9b787] mb-4 flex items-center gap-2">
+          <Activity className="w-3.5 h-3.5 text-[#c9b787]" />
           Risk Score Distribution (Live Window)
         </h3>
         <div className="flex items-end gap-1 h-24">
@@ -518,7 +518,7 @@ export default function AdaptiveDefenseShield() {
             const maxVal = 18;
             const pct = (val / maxVal) * 100;
             const riskZone =
-              i <= 4 ? 'bg-emerald-400/50' : i <= 7 ? 'bg-amber-400/50' : 'bg-red-400/50';
+              i <= 4 ? 'bg-[#c9b787]/50' : i <= 7 ? 'bg-[#c9b787]/50' : 'bg-[#f5f5f5]/50';
             return (
               <div key={i} className="flex-1 flex flex-col items-center gap-1">
                 <div
@@ -532,15 +532,15 @@ export default function AdaptiveDefenseShield() {
         </div>
         <div className="flex items-center gap-6 mt-2 text-[10px] text-muted-foreground">
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-emerald-400/50 inline-block" />
+            <span className="w-2 h-2 rounded bg-[#c9b787]/50 inline-block" />
             Low risk (0–40)
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-amber-400/50 inline-block" />
+            <span className="w-2 h-2 rounded bg-[#c9b787]/50 inline-block" />
             Medium risk (50–70)
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-red-400/50 inline-block" />
+            <span className="w-2 h-2 rounded bg-[#f5f5f5]/50 inline-block" />
             High risk (80–100)
           </span>
         </div>

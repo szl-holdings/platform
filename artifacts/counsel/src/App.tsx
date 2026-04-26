@@ -507,11 +507,11 @@ function AppShell() {
   const sentientCrossLinks: SentientCrossLink[] = [
     {
       id: 'cl1',
-      surface: 'TENAX',
+      surface: 'Aegis',
       surfaceAccent: '#ef4444',
-      label: 'TENAX: data breach incident linked to Greenfield',
+      label: 'Aegis: data breach incident linked to Greenfield',
       description:
-        "TENAX's IC-2409 incident is the source event for the Greenfield data breach matter.",
+        "Aegis's IC-2409 incident is the source event for the Greenfield data breach matter.",
       href: '/sentra/incident',
       preservedContext: { surface: 'counsel', matter: 'greenfield' },
     },
@@ -519,7 +519,7 @@ function AppShell() {
       id: 'cl2',
       surface: 'Vessels',
       surfaceAccent: '#0ea5e9',
-      label: 'SEXTANT: MV Atlantic Falcon sanctions linkage',
+      label: 'Vessels: MV Atlantic Falcon sanctions linkage',
       description:
         'Vessels flagged Apex Group as beneficiary of a sanctioned vessel voyage — linked to 2024-SEC-441.',
       href: '/vessels/sanctions',
@@ -529,7 +529,7 @@ function AppShell() {
       id: 'cl3',
       surface: 'Lyte',
       surfaceAccent: '#0ea5e9',
-      label: 'KORA: 2 legal decisions pending executive approval',
+      label: 'Lyte: 2 legal decisions pending executive approval',
       description:
         "Lyte's Decision Center has 2 Counsel-sourced recommendations queued for executive sign-off.",
       href: '/lyte/decision-center',

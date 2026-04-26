@@ -28,14 +28,14 @@ import {
 import { useEffect, useRef, useState } from 'react';
 
 const severityColors: Record<string, string> = {
-  critical: 'bg-red-500/10 text-red-400 border-red-500/20',
-  high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  low: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  CRITICAL: 'bg-red-500/10 text-red-400 border-red-500/20',
-  HIGH: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  MEDIUM: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  LOW: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  critical: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  high: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  medium: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  low: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  CRITICAL: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  HIGH: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  MEDIUM: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  LOW: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
 };
 
 const threatTypeIcons: Record<string, string> = {
@@ -191,7 +191,7 @@ export default function ThreatIntelligence() {
         <div className="flex items-center gap-2">
           <Badge
             variant="outline"
-            className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 animate-pulse"
+            className="bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20 animate-pulse"
           >
             <Radio className="w-3 h-3 mr-1" /> Live Feed
           </Badge>
@@ -199,41 +199,41 @@ export default function ThreatIntelligence() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in-up stagger-1">
-        <Card className="bg-card border-border hover:border-red-500/20 transition-all group">
+        <Card className="bg-card border-border hover:border-[#f5f5f5]/20 transition-all group">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">
                   Active Threats
                 </p>
-                <p className="text-2xl font-bold font-display mt-1 text-red-400">
+                <p className="text-2xl font-bold font-display mt-1 text-[#f5f5f5]">
                   <AnimatedCounter value={threats.length} />
                 </p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <AlertTriangle className="w-5 h-5 text-red-400" />
+              <div className="w-10 h-10 rounded-lg bg-[#f5f5f5]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <AlertTriangle className="w-5 h-5 text-[#f5f5f5]" />
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border hover:border-orange-500/20 transition-all group">
+        <Card className="bg-card border-border hover:border-[#c9b787]/20 transition-all group">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">Critical</p>
-                <p className="text-2xl font-bold font-display mt-1 text-orange-400">
+                <p className="text-2xl font-bold font-display mt-1 text-[#c9b787]">
                   <AnimatedCounter value={criticalThreats} />
                 </p>
               </div>
               <div
-                className={`w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center group-hover:scale-110 transition-transform ${criticalThreats > 0 ? 'animate-pulse' : ''}`}
+                className={`w-10 h-10 rounded-lg bg-[#c9b787]/10 flex items-center justify-center group-hover:scale-110 transition-transform ${criticalThreats > 0 ? 'animate-pulse' : ''}`}
               >
-                <Crosshair className="w-5 h-5 text-orange-400" />
+                <Crosshair className="w-5 h-5 text-[#c9b787]" />
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border hover:border-amber-500/20 transition-all group">
+        <Card className="bg-card border-border hover:border-[#c9b787]/20 transition-all group">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -244,8 +244,8 @@ export default function ThreatIntelligence() {
                   <AnimatedCounter value={cves.length} />
                 </p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Shield className="w-5 h-5 text-amber-400" />
+              <div className="w-10 h-10 rounded-lg bg-[#c9b787]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Shield className="w-5 h-5 text-[#c9b787]" />
               </div>
             </div>
           </CardContent>
@@ -280,13 +280,13 @@ export default function ThreatIntelligence() {
               <div className="absolute bottom-3 left-3 bg-background/80 backdrop-blur-sm rounded-lg p-2 border border-border">
                 <div className="flex items-center gap-3 text-xs">
                   <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-red-500" /> Critical
+                    <span className="w-2 h-2 rounded-full bg-[#f5f5f5]" /> Critical
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-orange-500" /> High
+                    <span className="w-2 h-2 rounded-full bg-[#c9b787]" /> High
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-yellow-500" /> Medium
+                    <span className="w-2 h-2 rounded-full bg-[#c9b787]" /> Medium
                   </span>
                 </div>
               </div>
@@ -297,14 +297,14 @@ export default function ThreatIntelligence() {
         <Card className="bg-card border-border animate-fade-in-up stagger-3">
           <CardHeader className="pb-2">
             <CardTitle className="font-display flex items-center gap-2 text-base">
-              <Brain className="w-5 h-5 text-purple-400" /> AI Threat Briefing
+              <Brain className="w-5 h-5 text-[#8a8a8a]" /> AI Threat Briefing
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {briefing ? (
               <>
-                <div className="bg-purple-500/5 rounded-lg p-3 border border-purple-500/10">
-                  <p className="text-xs text-purple-400 font-medium mb-1">Executive Summary</p>
+                <div className="bg-[#8a8a8a]/5 rounded-lg p-3 border border-[#8a8a8a]/10">
+                  <p className="text-xs text-[#8a8a8a] font-medium mb-1">Executive Summary</p>
                   <p className="text-sm text-muted-foreground">
                     {briefing.analysis?.summary?.summary || 'Generating analysis...'}
                   </p>
@@ -315,8 +315,8 @@ export default function ThreatIntelligence() {
                     variant="outline"
                     className={
                       briefing.analysis?.sentiment?.label === 'NEGATIVE'
-                        ? 'bg-red-500/10 text-red-400'
-                        : 'bg-emerald-500/10 text-emerald-400'
+                        ? 'bg-[#f5f5f5]/10 text-[#f5f5f5]'
+                        : 'bg-[#c9b787]/10 text-[#c9b787]'
                     }
                   >
                     {briefing.analysis?.sentiment?.label} (
@@ -341,7 +341,7 @@ export default function ThreatIntelligence() {
               </>
             ) : (
               <div className="flex items-center justify-center h-32">
-                <div className="w-6 h-6 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
+                <div className="w-6 h-6 border-2 border-[#8a8a8a]/30 border-t-purple-500 rounded-full animate-spin" />
               </div>
             )}
           </CardContent>
@@ -353,7 +353,7 @@ export default function ThreatIntelligence() {
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="font-display flex items-center gap-2 text-base">
-                <Shield className="w-5 h-5 text-amber-400" /> Live CVE Feed
+                <Shield className="w-5 h-5 text-[#c9b787]" /> Live CVE Feed
               </CardTitle>
               <Badge variant="outline" className="text-xs">
                 NVD
@@ -400,7 +400,7 @@ export default function ThreatIntelligence() {
                       >
                         {cve.severity}
                       </Badge>
-                      <span className="text-xs font-bold text-red-400">{cve.score}</span>
+                      <span className="text-xs font-bold text-[#f5f5f5]">{cve.score}</span>
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground line-clamp-2">{cve.description}</p>
@@ -421,7 +421,7 @@ export default function ThreatIntelligence() {
         <Card className="bg-card border-border animate-fade-in-up stagger-5">
           <CardHeader className="pb-2">
             <CardTitle className="font-display flex items-center gap-2 text-base">
-              <Activity className="w-5 h-5 text-blue-400" /> Geopolitical Threat Ticker
+              <Activity className="w-5 h-5 text-[#c9b787]" /> Geopolitical Threat Ticker
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -460,7 +460,7 @@ export default function ThreatIntelligence() {
       <Card className="bg-card border-border animate-fade-in-up stagger-6">
         <CardHeader className="pb-2">
           <CardTitle className="font-display flex items-center gap-2 text-base">
-            <Zap className="w-5 h-5 text-amber-400" /> Active Threat Feed
+            <Zap className="w-5 h-5 text-[#c9b787]" /> Active Threat Feed
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -468,11 +468,11 @@ export default function ThreatIntelligence() {
             {threats.map((threat: any) => (
               <div
                 key={threat.id}
-                className={`p-3 rounded-lg border transition-all hover:-translate-y-0.5 hover:shadow-lg cursor-pointer ${threat.severity === 'critical' ? 'border-red-500/20 bg-red-500/5 hover:shadow-red-500/5' : 'border-border bg-background/50 hover:shadow-primary/5'}`}
+                className={`p-3 rounded-lg border transition-all hover:-translate-y-0.5 hover:shadow-lg cursor-pointer ${threat.severity === 'critical' ? 'border-[#f5f5f5]/20 bg-[#f5f5f5]/5 hover:shadow-red-500/5' : 'border-border bg-background/50 hover:shadow-primary/5'}`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${threat.severity === 'critical' ? 'bg-red-500/20 text-red-400' : 'bg-orange-500/20 text-orange-400'}`}
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${threat.severity === 'critical' ? 'bg-[#f5f5f5]/20 text-[#f5f5f5]' : 'bg-[#c9b787]/20 text-[#c9b787]'}`}
                   >
                     {threatTypeIcons[threat.type] || '?'}
                   </div>
@@ -481,7 +481,7 @@ export default function ThreatIntelligence() {
                     className={`text-xs ${severityColors[threat.severity] || ''}`}
                   >
                     {threat.severity === 'critical' && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-400 mr-1 animate-pulse" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#f5f5f5] mr-1 animate-pulse" />
                     )}
                     {threat.severity}
                   </Badge>

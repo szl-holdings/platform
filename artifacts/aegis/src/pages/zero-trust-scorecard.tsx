@@ -39,12 +39,12 @@ const DS = {
     tertiary: 'rgba(255,255,255,0.28)',
   },
   accent: {
-    red: '#ef4444',
-    orange: '#f97316',
-    amber: '#f59e0b',
-    green: '#22c55e',
-    blue: '#3b82f6',
-    purple: '#a78bfa',
+    red: '#f5f5f5',
+    orange: '#c9b787',
+    amber: '#c9b787',
+    green: '#c9b787',
+    blue: '#c9b787',
+    purple: '#c9b787',
     cyan: '#22d3ee',
   },
 };
@@ -79,7 +79,7 @@ const MATURITY_LABELS: Record<MaturityLevel, { label: string; color: string }> =
   0: { label: 'Not Started', color: DS.accent.red },
   1: { label: 'Initial', color: DS.accent.orange },
   2: { label: 'Advanced', color: DS.accent.amber },
-  3: { label: 'Optimized', color: '#84cc16' },
+  3: { label: 'Optimized', color: '#c9b787' },
   4: { label: 'Leading', color: DS.accent.green },
   5: { label: 'Exemplary', color: DS.accent.cyan },
 };
@@ -428,7 +428,7 @@ const INITIAL_PILLARS: ZTPillar[] = [
     id: 'visibility',
     name: 'Visibility & Analytics',
     icon: Eye,
-    color: '#34d399',
+    color: '#c9b787',
     maturity: 3,
     maxActivities: 18,
     implementedActivities: 12,
@@ -488,7 +488,7 @@ const INITIAL_PILLARS: ZTPillar[] = [
     id: 'automation',
     name: 'Automation & Orchestration',
     icon: Zap,
-    color: '#f472b6',
+    color: '#c9b787',
     maturity: 2,
     maxActivities: 24,
     implementedActivities: 11,
@@ -637,7 +637,7 @@ export default function ZeroTrustScorecard() {
               width: 32,
               height: 32,
               borderRadius: '8px',
-              background: 'rgba(59,130,246,0.15)',
+              background: 'rgba(201,183,135,0.15)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -650,9 +650,9 @@ export default function ZeroTrustScorecard() {
           </h1>
           <Badge
             style={{
-              background: 'rgba(59,130,246,0.15)',
+              background: 'rgba(201,183,135,0.15)',
               color: DS.accent.blue,
-              border: '1px solid rgba(59,130,246,0.3)',
+              border: '1px solid rgba(201,183,135,0.3)',
               fontSize: '10px',
             }}
           >
@@ -660,9 +660,9 @@ export default function ZeroTrustScorecard() {
           </Badge>
           <Badge
             style={{
-              background: 'rgba(34,197,94,0.1)',
+              background: 'rgba(201,183,135,0.1)',
               color: DS.accent.green,
-              border: '1px solid rgba(34,197,94,0.3)',
+              border: '1px solid rgba(201,183,135,0.3)',
               fontSize: '10px',
             }}
           >
@@ -1126,7 +1126,7 @@ export default function ZeroTrustScorecard() {
                         style={{
                           background:
                             activity.priority === 'P1'
-                              ? 'rgba(239,68,68,0.12)'
+                              ? 'rgba(245,245,245,0.12)'
                               : 'rgba(255,255,255,0.04)',
                           color: activity.priority === 'P1' ? DS.accent.red : DS.text.tertiary,
                           border: 'none',
@@ -1163,8 +1163,8 @@ export default function ZeroTrustScorecard() {
 
           <div
             style={{
-              background: 'rgba(59,130,246,0.08)',
-              border: `1px solid rgba(59,130,246,0.2)`,
+              background: 'rgba(201,183,135,0.08)',
+              border: `1px solid rgba(201,183,135,0.2)`,
               borderRadius: '12px',
               padding: '16px',
             }}

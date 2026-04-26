@@ -4,15 +4,15 @@ import { PageHeader, Card, SectionTitle, KpiCard, VerticalBadge } from '../compo
 import { SEED_OUTCOMES, SEED_SIGNALS, SEED_WORKCELLS } from '@workspace/a11oy-fabric';
 
 const VERTICAL_COLORS: Record<string, string> = {
-  'lyte-revenue': '#3b82f6', 'vessels-maritime': '#06b6d4', 'terra-real-estate': '#10b981',
-  'aegis-defense': '#ef4444', 'prism-counsel': '#8b5cf6', 'carlota-jo': '#f59e0b', 'alloy-core': '#6366f1',
+  'lyte-revenue': '#c9b787', 'vessels-maritime': '#8a8a8a', 'terra-real-estate': '#c9b787',
+  'aegis-defense': '#f5f5f5', 'prism-counsel': '#8a8a8a', 'carlota-jo': '#c9b787', 'alloy-core': '#8a8a8a',
 };
 const VERTICAL_LABELS: Record<string, string> = {
   'lyte-revenue': 'Lyte Revenue', 'vessels-maritime': 'Vessels Maritime', 'terra-real-estate': 'Terra Real Estate',
   'aegis-defense': 'Aegis Defense', 'prism-counsel': 'Counsel', 'carlota-jo': 'Carlota Jo', 'alloy-core': 'Alloy Core',
 };
 const STATUS_COLORS: Record<string, string> = {
-  achieved: '#10b981', missed: '#ef4444', blocked: '#f59e0b', in_progress: '#3b82f6', at_risk: '#f59e0b',
+  achieved: '#c9b787', missed: '#f5f5f5', blocked: '#c9b787', in_progress: '#c9b787', at_risk: '#c9b787',
 };
 
 const STATUSES = ['all', 'achieved', 'in_progress', 'at_risk', 'blocked', 'missed'];
@@ -43,10 +43,10 @@ export function Outcomes() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="TOTAL OUTCOMES" value={SEED_OUTCOMES.length} sub="in registry" accent="#3b82f6" />
-        <KpiCard label="ACHIEVED" value={achieved.length} sub="on track" accent="#10b981" />
-        <KpiCard label="AT RISK" value={atRisk.length} sub="blocked or missed" accent="#ef4444" />
-        <KpiCard label="IN PROGRESS" value={inProgress.length} sub="active" accent="#f59e0b" />
+        <KpiCard label="TOTAL OUTCOMES" value={SEED_OUTCOMES.length} sub="in registry" accent="#c9b787" />
+        <KpiCard label="ACHIEVED" value={achieved.length} sub="on track" accent="#c9b787" />
+        <KpiCard label="AT RISK" value={atRisk.length} sub="blocked or missed" accent="#f5f5f5" />
+        <KpiCard label="IN PROGRESS" value={inProgress.length} sub="active" accent="#c9b787" />
       </div>
 
       {/* Filters */}
@@ -58,9 +58,9 @@ export function Outcomes() {
               onClick={() => setFilterStatus(s)}
               className="text-xs px-2.5 py-1 rounded font-mono transition-colors"
               style={{
-                backgroundColor: filterStatus === s ? 'rgba(59,130,246,0.15)' : 'var(--color-a11oy-muted)',
-                color: filterStatus === s ? '#3b82f6' : 'var(--color-a11oy-text-ghost)',
-                border: filterStatus === s ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent', cursor: 'pointer',
+                backgroundColor: filterStatus === s ? 'rgba(201,183,135,0.15)' : 'var(--color-a11oy-muted)',
+                color: filterStatus === s ? '#c9b787' : 'var(--color-a11oy-text-ghost)',
+                border: filterStatus === s ? '1px solid rgba(201,183,135,0.3)' : '1px solid transparent', cursor: 'pointer',
               }}
             >
               {s}
@@ -84,8 +84,8 @@ export function Outcomes() {
         <div className="lg:col-span-2">
           <div className="flex flex-col gap-2">
             {filtered.map(o => {
-              const statusColor = STATUS_COLORS[o.status] ?? '#9bacc4';
-              const color = VERTICAL_COLORS[o.vertical] ?? '#9bacc4';
+              const statusColor = STATUS_COLORS[o.status] ?? '#5e5e5e';
+              const color = VERTICAL_COLORS[o.vertical] ?? '#5e5e5e';
               const isSelected = o.id === selected;
               const signals = SEED_SIGNALS.filter(s => o.linkedSignalIds.includes(s.id));
               const workcell = SEED_WORKCELLS.find(w => w.signals.some(sid => o.linkedSignalIds.includes(sid)));
@@ -95,8 +95,8 @@ export function Outcomes() {
                   className="rounded-lg border cursor-pointer transition-all p-4"
                   onClick={() => setSelected(isSelected ? null : o.id)}
                   style={{
-                    backgroundColor: isSelected ? 'rgba(59,130,246,0.04)' : 'var(--color-a11oy-card)',
-                    borderColor: isSelected ? '#3b82f6' : 'var(--color-a11oy-border)',
+                    backgroundColor: isSelected ? 'rgba(201,183,135,0.04)' : 'var(--color-a11oy-card)',
+                    borderColor: isSelected ? '#c9b787' : 'var(--color-a11oy-border)',
                   }}
                 >
                   <div className="flex items-start justify-between gap-3 mb-2">
@@ -159,7 +159,7 @@ export function Outcomes() {
               {STATUSES.filter(s => s !== 'all').map(s => {
                 const count = SEED_OUTCOMES.filter(o => o.status === s).length;
                 const pct = SEED_OUTCOMES.length > 0 ? (count / SEED_OUTCOMES.length) * 100 : 0;
-                const color = STATUS_COLORS[s] ?? '#9bacc4';
+                const color = STATUS_COLORS[s] ?? '#5e5e5e';
                 return (
                   <div key={s} className="text-xs">
                     <div className="flex items-center justify-between mb-1">
@@ -181,7 +181,7 @@ export function Outcomes() {
             <div className="flex flex-col gap-2">
               {atRisk.slice(0, 5).map(o => (
                 <Card key={o.id} className="text-xs">
-                  <div className="font-medium mb-0.5" style={{ color: '#f59e0b' }}>{o.title}</div>
+                  <div className="font-medium mb-0.5" style={{ color: '#c9b787' }}>{o.title}</div>
                   <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>{o.status.replace(/_/g, ' ')} · {o.owner}</div>
                 </Card>
               ))}
@@ -194,7 +194,7 @@ export function Outcomes() {
             <div className="flex flex-col gap-2">
               {Object.entries(VERTICAL_LABELS).map(([id, label]) => {
                 const count = SEED_OUTCOMES.filter(o => o.vertical === id).length;
-                const color = VERTICAL_COLORS[id] ?? '#9bacc4';
+                const color = VERTICAL_COLORS[id] ?? '#5e5e5e';
                 return (
                   <div key={id} className="flex items-center justify-between text-xs">
                     <VerticalBadge vertical={label} color={color} />

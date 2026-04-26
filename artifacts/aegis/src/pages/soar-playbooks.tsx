@@ -29,7 +29,7 @@ const PLAYBOOK_TEMPLATES = [
     category: 'Email Security',
     severity: 'high',
     icon: Mail,
-    color: '#f97316',
+    color: '#c9b787',
     description:
       'Automated response to confirmed phishing attempts — sandbox analysis, user notification, and domain blocking',
     lastRun: '2h ago',
@@ -53,7 +53,7 @@ const PLAYBOOK_TEMPLATES = [
     category: 'Endpoint',
     severity: 'critical',
     icon: Shield,
-    color: '#ef4444',
+    color: '#f5f5f5',
     description:
       'Immediate endpoint isolation, memory acquisition, and lateral movement prevention upon malware detection',
     lastRun: '47m ago',
@@ -76,7 +76,7 @@ const PLAYBOOK_TEMPLATES = [
     category: 'Identity',
     severity: 'critical',
     icon: Users,
-    color: '#8b5cf6',
+    color: '#8a8a8a',
     description:
       'Credential compromise response — account lockout, session invalidation, MFA enforcement, and forensic trail',
     lastRun: '3h ago',
@@ -99,7 +99,7 @@ const PLAYBOOK_TEMPLATES = [
     category: 'Incident Response',
     severity: 'critical',
     icon: Lock,
-    color: '#ef4444',
+    color: '#f5f5f5',
     description:
       'Full ransomware incident response — network segmentation, backup verification, IR team assembly, and executive notification',
     lastRun: 'Never',
@@ -129,7 +129,7 @@ const PLAYBOOK_TEMPLATES = [
     category: 'Network',
     severity: 'high',
     icon: Globe,
-    color: '#06b6d4',
+    color: '#8a8a8a',
     description:
       'Automated DDoS detection, upstream scrubbing activation, rate limiting, and CDN failover coordination',
     lastRun: '1d ago',
@@ -151,7 +151,7 @@ const PLAYBOOK_TEMPLATES = [
     category: 'Data Loss Prevention',
     severity: 'critical',
     icon: Server,
-    color: '#f97316',
+    color: '#c9b787',
     description:
       'Detect, block, and investigate unauthorized data transfers — DLP enforcement, forensic preservation, and regulatory notification',
     lastRun: '5d ago',
@@ -243,26 +243,26 @@ const ANALYTICS = {
 };
 
 const stepColors: Record<string, string> = {
-  action: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  enrich: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
-  condition: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  forensic: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-  escalate: 'bg-red-500/10 text-red-400 border-red-500/20',
-  notify: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  review: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+  action: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  enrich: 'bg-[#8a8a8a]/10 text-[#8a8a8a] border-[#8a8a8a]/20',
+  condition: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  forensic: 'bg-[#8a8a8a]/10 text-[#8a8a8a] border-[#8a8a8a]/20',
+  escalate: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  notify: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  review: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
 };
 
 const stepStatusIcons: Record<string, React.ReactNode> = {
-  completed: <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />,
-  running: <Activity className="w-3.5 h-3.5 text-blue-400 animate-pulse" />,
+  completed: <CheckCircle className="w-3.5 h-3.5 text-[#c9b787]" />,
+  running: <Activity className="w-3.5 h-3.5 text-[#c9b787] animate-pulse" />,
   pending: <Clock className="w-3.5 h-3.5 text-white/30" />,
-  failed: <XCircle className="w-3.5 h-3.5 text-red-400" />,
+  failed: <XCircle className="w-3.5 h-3.5 text-[#f5f5f5]" />,
 };
 
 const execStatusColors: Record<string, string> = {
-  success: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-  partial: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-  failed: 'text-red-400 bg-red-500/10 border-red-500/20',
+  success: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+  partial: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+  failed: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20',
 };
 
 export default function SOARPlaybooks() {
@@ -302,7 +302,7 @@ export default function SOARPlaybooks() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <Zap className="w-5 h-5 text-amber-400" />
+            <Zap className="w-5 h-5 text-[#c9b787]" />
             SOAR Playbook Automation
           </h1>
           <p className="text-xs text-white/40 mt-0.5">
@@ -311,7 +311,7 @@ export default function SOARPlaybooks() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-colors">
+          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#c9b787]/10 text-[#c9b787] border border-[#c9b787]/20 hover:bg-[#c9b787]/20 transition-colors">
             <Plus className="w-3.5 h-3.5" /> New Playbook
           </button>
         </div>
@@ -323,25 +323,25 @@ export default function SOARPlaybooks() {
           {
             label: 'Total Executions',
             value: displayAnalytics.totalExecutions.toString(),
-            color: '#3b82f6',
+            color: '#c9b787',
             sub: 'last 30d',
           },
           {
             label: 'Automation Rate',
             value: `${displayAnalytics.automationRate}%`,
-            color: '#10b981',
+            color: '#c9b787',
             sub: 'of actions auto',
           },
           {
             label: 'Avg MTTR',
             value: displayAnalytics.avgMttr,
-            color: '#f59e0b',
+            color: '#c9b787',
             sub: 'mean time respond',
           },
           {
             label: 'Success Rate',
             value: `${displayAnalytics.successRate}%`,
-            color: '#10b981',
+            color: '#c9b787',
             sub: 'executions',
           },
           {
@@ -353,7 +353,7 @@ export default function SOARPlaybooks() {
           {
             label: 'Active Playbooks',
             value: displayAnalytics.playbooksActive.toString(),
-            color: '#8b5cf6',
+            color: '#8a8a8a',
             sub: 'running',
           },
         ].map((stat) => (
@@ -376,7 +376,7 @@ export default function SOARPlaybooks() {
             className={cn(
               'px-4 py-2 text-xs font-semibold capitalize transition-colors border-b-2 -mb-px',
               activeTab === tab
-                ? 'border-amber-400 text-amber-300'
+                ? 'border-[#c9b787] text-[#c9b787]'
                 : 'border-transparent text-white/40 hover:text-white/70',
             )}
           >
@@ -402,7 +402,7 @@ export default function SOARPlaybooks() {
                   className={cn(
                     'rounded-xl border p-3.5 cursor-pointer transition-all',
                     selectedPlaybook.id === pb.id
-                      ? 'border-amber-500/30 bg-amber-500/5'
+                      ? 'border-[#c9b787]/30 bg-[#c9b787]/5'
                       : 'border-white/6 bg-white/[0.015] hover:border-white/10',
                   )}
                 >
@@ -420,8 +420,8 @@ export default function SOARPlaybooks() {
                           className={cn(
                             'text-[9px] font-bold px-1.5 py-0.5 rounded uppercase',
                             pb.severity === 'critical'
-                              ? 'bg-red-500/10 text-red-400'
-                              : 'bg-orange-500/10 text-orange-400',
+                              ? 'bg-[#f5f5f5]/10 text-[#f5f5f5]'
+                              : 'bg-[#c9b787]/10 text-[#c9b787]',
                           )}
                         >
                           {pb.severity}
@@ -463,7 +463,7 @@ export default function SOARPlaybooks() {
                 <button
                   onClick={() => executeMutation.mutate(selectedPlaybook.id)}
                   disabled={executeMutation.isPending}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#c9b787]/10 text-[#c9b787] border border-[#c9b787]/20 hover:bg-[#c9b787]/20 transition-colors disabled:opacity-50"
                 >
                   <Play className="w-3 h-3" />{' '}
                   {executeMutation.isPending ? 'Running...' : 'Run Now'}
@@ -541,9 +541,9 @@ export default function SOARPlaybooks() {
                           <span
                             className={cn(
                               step.status === 'completed'
-                                ? 'text-emerald-400'
+                                ? 'text-[#c9b787]'
                                 : step.status === 'running'
-                                  ? 'text-blue-400'
+                                  ? 'text-[#c9b787]'
                                   : 'text-white/30',
                             )}
                           >
@@ -558,20 +558,20 @@ export default function SOARPlaybooks() {
             </div>
 
             {/* Conditional Logic */}
-            <div className="rounded-lg border border-amber-500/15 bg-amber-500/5 p-3">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-amber-400/60 mb-1.5">
+            <div className="rounded-lg border border-[#c9b787]/15 bg-[#c9b787]/5 p-3">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-[#c9b787]/60 mb-1.5">
                 Conditional Logic
               </div>
               <div className="text-[11px] text-white/50 font-mono">
-                IF severity &gt;= <span className="text-amber-300">HIGH</span> AND confidence &gt;={' '}
-                <span className="text-amber-300">80%</span>
+                IF severity &gt;= <span className="text-[#c9b787]">HIGH</span> AND confidence &gt;={' '}
+                <span className="text-[#c9b787]">80%</span>
                 <br />
-                &nbsp;&nbsp;→ <span className="text-emerald-400">AUTO-CONTAIN</span> (no analyst
+                &nbsp;&nbsp;→ <span className="text-[#c9b787]">AUTO-CONTAIN</span> (no analyst
                 approval required)
                 <br />
                 ELSE
                 <br />
-                &nbsp;&nbsp;→ <span className="text-amber-400">QUEUE FOR ANALYST REVIEW</span>
+                &nbsp;&nbsp;→ <span className="text-[#c9b787]">QUEUE FOR ANALYST REVIEW</span>
               </div>
             </div>
           </div>
@@ -657,10 +657,10 @@ export default function SOARPlaybooks() {
             </div>
             <div className="space-y-3">
               {[
-                { phase: 'Detection → Triage', time: '45s', pct: 15, color: '#3b82f6' },
-                { phase: 'Triage → Containment', time: '1m 12s', pct: 25, color: '#f97316' },
-                { phase: 'Containment → Investigation', time: '2m 30s', pct: 50, color: '#8b5cf6' },
-                { phase: 'Investigation → Closure', time: '1m 05s', pct: 22, color: '#10b981' },
+                { phase: 'Detection → Triage', time: '45s', pct: 15, color: '#c9b787' },
+                { phase: 'Triage → Containment', time: '1m 12s', pct: 25, color: '#c9b787' },
+                { phase: 'Containment → Investigation', time: '2m 30s', pct: 50, color: '#8a8a8a' },
+                { phase: 'Investigation → Closure', time: '1m 05s', pct: 22, color: '#c9b787' },
               ].map((r) => (
                 <div key={r.phase}>
                   <div className="flex items-center justify-between mb-1">
@@ -683,7 +683,7 @@ export default function SOARPlaybooks() {
                   label: 'Automation Rate',
                   value: '78%',
                   desc: 'Actions executed without analyst',
-                  color: '#10b981',
+                  color: '#c9b787',
                 },
                 {
                   label: 'False Positives',
@@ -695,13 +695,13 @@ export default function SOARPlaybooks() {
                   label: 'Escalation Rate',
                   value: '22%',
                   desc: 'Needed analyst intervention',
-                  color: '#f97316',
+                  color: '#c9b787',
                 },
                 {
                   label: 'SLA Compliance',
                   value: '96%',
                   desc: 'Responses within SLA window',
-                  color: '#3b82f6',
+                  color: '#c9b787',
                 },
               ].map((stat) => (
                 <div

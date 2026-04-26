@@ -384,7 +384,7 @@ export default function MarketingHomePage() {
               className="text-[2.5rem] sm:text-5xl md:text-6xl lg:text-[4.2rem] font-bold leading-[1.08] tracking-tight mb-5"
             >
               Fleet operations.{' '}
-              <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-teal-400 bg-clip-text text-transparent">
+              <span className="text-[#c9b787]">
                 Decided faster.
               </span>
             </m.h1>
@@ -511,7 +511,7 @@ export default function MarketingHomePage() {
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#f5f5f5] tracking-tight">
-              Who runs on SEXTANT.
+              Who runs on Vessels.
             </h2>
           </m.div>
 
@@ -737,7 +737,7 @@ export default function MarketingHomePage() {
           >
             <h2 className="text-3xl sm:text-4xl font-bold text-[#f5f5f5] mb-4 tracking-tight">
               See Vessels{' '}
-              <span className="bg-gradient-to-r from-cyan-300 to-teal-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r text-[#c9b787]">
                 in action.
               </span>
             </h2>
@@ -775,6 +775,20 @@ export default function MarketingHomePage() {
               subheading="Insights on governed AI, maritime intelligence, and operational decision-making — straight from the founding team."
             />
           </m.div>
+        </div>
+      </section>
+
+      <section style={{ padding: '80px 24px', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
+          <p style={{ fontSize: 10, fontFamily: 'var(--font-mono, monospace)', letterSpacing: '0.25em', color: '#5e5e5e', marginBottom: 20, textTransform: 'uppercase' as const }}>
+            Part of the SZL Holdings ecosystem
+          </p>
+          <p style={{ fontSize: 22, fontWeight: 600, color: '#f5f5f5', marginBottom: 14, fontFamily: 'var(--font-display, system-ui)' }}>
+            Orchestrated by <span style={{ color: '#c9b787' }}>a11oy</span>
+          </p>
+          <p style={{ fontSize: 13, color: '#8a8a8a', lineHeight: 1.8, maxWidth: 520, margin: '0 auto' }}>
+            Every decision in Vessels follows the same governed path — Signal, Context, Recommendation, Simulation, Policy, Execution, Proof, Outcome. The same proof chain. The same attribution. The same governance.
+          </p>
         </div>
       </section>
 

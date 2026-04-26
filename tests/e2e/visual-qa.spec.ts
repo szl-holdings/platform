@@ -45,16 +45,16 @@ interface ArtifactTarget {
 
 const TARGETS: ArtifactTarget[] = [
   { slug: 'szl-holdings',        path: '/',                    brand: /SZL Holdings|Governed Autonomy/i,        shotFile: '01-szl-home.jpg',              required: true  },
-  { slug: 'pulse',               path: '/pulse/',              brand: /LUMINA|Executive Briefing|AI Briefing/i, shotFile: '02-pulse.jpg',                 required: false },
-  { slug: 'aegis',               path: '/aegis/',              brand: /PARAGON|Defense|Intelligence/i,          shotFile: '03-aegis.jpg',                 required: false },
-  { slug: 'vessels',             path: '/vessels/',            brand: /SEXTANT|Maritime|Fleet/i,                shotFile: '04-vessels.jpg',               required: false },
-  { slug: 'terra',               path: '/terra/',              brand: /DOMAINE|Real Estate|Property/i,          shotFile: '05-terra.jpg',                 required: false },
+  { slug: 'pulse',               path: '/pulse/',              brand: /Pulse|Executive Briefing|AI Briefing/i, shotFile: '02-pulse.jpg',                 required: false },
+  { slug: 'aegis',               path: '/aegis/',              brand: /Aegis|Defense|Intelligence/i,          shotFile: '03-aegis.jpg',                 required: false },
+  { slug: 'vessels',             path: '/vessels/',            brand: /Vessels|Maritime|Fleet/i,                shotFile: '04-vessels.jpg',               required: false },
+  { slug: 'terra',               path: '/terra/',              brand: /Terra|Real Estate|Property/i,          shotFile: '05-terra.jpg',                 required: false },
   { slug: 'carlota-jo',          path: '/carlota-jo/',         brand: /Carlota Jo|Consulting/i,                 shotFile: '06-carlota-jo.jpg',            required: false },
   { slug: 'command',             path: '/command/',            brand: /Unified Command|Command Center/i,         shotFile: '07-command.jpg',               required: false },
   { slug: 'sentra',              path: '/sentra/',             brand: /Sentra|Cyber Resilience/i,               shotFile: '08-sentra.jpg',                required: true  },
   { slug: 'counsel',             path: '/counsel/',            brand: /Counsel|Legal Matter|Legal Command/i,    shotFile: '09-counsel.jpg',               required: false },
   { slug: 'a11oy',               path: '/a11oy/',              brand: /A11oy|Enterprise Execution/i,            shotFile: '10-a11oy.jpg',                 required: false },
-  { slug: 'lyte-command-center', path: '/lyte-command-center/', brand: /KORA|Decision Intelligence|Lyte/i,    shotFile: '11-lyte-command-center.jpg',   required: false },
+  { slug: 'lyte-command-center', path: '/lyte-command-center/', brand: /Lyte|Decision Intelligence|Lyte/i,    shotFile: '11-lyte-command-center.jpg',   required: false },
 ];
 
 const SENTRA_INNER_PAGES: Array<{

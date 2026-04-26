@@ -62,9 +62,9 @@ const layerVisualization = [
 ];
 
 const statusColors: Record<string, string> = {
-  production: 'bg-emerald-500/10 text-emerald-400',
-  staging: 'bg-amber-500/10 text-amber-400',
-  research: 'bg-blue-500/10 text-blue-400',
+  production: 'bg-[#c9b787]/10 text-[#c9b787]',
+  staging: 'bg-[#c9b787]/10 text-[#c9b787]',
+  research: 'bg-[#c9b787]/10 text-[#c9b787]',
 };
 
 export default function NeuralExplorer() {
@@ -108,7 +108,7 @@ export default function NeuralExplorer() {
               </div>
               <div>
                 <span className="text-muted-foreground">Accuracy:</span>{' '}
-                <span className="font-medium text-emerald-400">{arch.accuracy}%</span>
+                <span className="font-medium text-[#c9b787]">{arch.accuracy}%</span>
               </div>
               <div>
                 <span className="text-muted-foreground">Latency:</span>{' '}
@@ -121,7 +121,7 @@ export default function NeuralExplorer() {
 
       <div className="rounded-xl border border-border bg-card p-5">
         <h2 className="font-display font-semibold mb-4 flex items-center gap-2">
-          <Layers className="w-4 h-4 text-violet-400" /> Model APEX Visualization — SZL-LLM-7B
+          <Layers className="w-4 h-4 text-[#8a8a8a]" /> Model APEX Visualization — SZL-LLM-7B
         </h2>
         <div className="flex items-center gap-2 overflow-x-auto pb-4">
           {layerVisualization.map((layer, i) => (
@@ -148,7 +148,7 @@ export default function NeuralExplorer() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-display font-semibold mb-4 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-emerald-400" /> Compute Utilization
+            <Activity className="w-4 h-4 text-[#c9b787]" /> Compute Utilization
           </h2>
           <div className="space-y-4">
             {[
@@ -166,7 +166,7 @@ export default function NeuralExplorer() {
                   <span className="text-[10px] text-muted-foreground w-8">GPU</span>
                   <div className="flex-1 bg-muted rounded-full h-1.5">
                     <div
-                      className={`h-1.5 rounded-full ${g.util > 80 ? 'bg-amber-400' : 'bg-emerald-400'}`}
+                      className={`h-1.5 rounded-full ${g.util > 80 ? 'bg-[#c9b787]' : 'bg-[#c9b787]'}`}
                       style={{ width: `${g.util}%` }}
                     />
                   </div>
@@ -176,7 +176,7 @@ export default function NeuralExplorer() {
                   <span className="text-[10px] text-muted-foreground w-8">MEM</span>
                   <div className="flex-1 bg-muted rounded-full h-1.5">
                     <div
-                      className={`h-1.5 rounded-full ${g.mem > 80 ? 'bg-red-400' : 'bg-blue-400'}`}
+                      className={`h-1.5 rounded-full ${g.mem > 80 ? 'bg-[#f5f5f5]' : 'bg-[#c9b787]'}`}
                       style={{ width: `${g.mem}%` }}
                     />
                   </div>
@@ -189,7 +189,7 @@ export default function NeuralExplorer() {
 
         <div className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-display font-semibold mb-4 flex items-center gap-2">
-            <GitBranch className="w-4 h-4 text-blue-400" /> Research Pipelines
+            <GitBranch className="w-4 h-4 text-[#c9b787]" /> Research Pipelines
           </h2>
           <div className="space-y-3">
             {[
@@ -217,7 +217,7 @@ export default function NeuralExplorer() {
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-medium">{p.name}</span>
                   <span
-                    className={`text-xs ${p.status === 'running' ? 'text-emerald-400' : 'text-muted-foreground'}`}
+                    className={`text-xs ${p.status === 'running' ? 'text-[#c9b787]' : 'text-muted-foreground'}`}
                   >
                     {p.status}
                   </span>

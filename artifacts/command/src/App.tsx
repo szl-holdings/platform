@@ -387,7 +387,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/decisions', label: 'Decision Center', group: 'Strategy' },
   { href: '/intelligence/evidence', label: 'Evidence Explorer', group: 'Strategy' },
   { href: '/operations', label: 'Executive Command', group: 'Operations' },
-  { href: '/operations/pulse', label: 'LUMINA', group: 'Operations' },
+  { href: '/operations/pulse', label: 'Pulse', group: 'Operations' },
   { href: '/operations/prism', label: 'PRISM Dashboard', group: 'Operations' },
   { href: '/operations/prism/signals', label: 'Signals Feed', group: 'Operations' },
   { href: '/operations/prism/motion', label: 'Motion / Action Queue', group: 'Operations' },

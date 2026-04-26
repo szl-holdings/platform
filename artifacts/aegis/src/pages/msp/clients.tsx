@@ -40,10 +40,10 @@ interface ApiClient {
 function HealthBadge({ score }: { score: number }) {
   const color =
     score >= 90
-      ? 'text-emerald-400 bg-emerald-500/10'
+      ? 'text-[#c9b787] bg-[#c9b787]/10'
       : score >= 75
-        ? 'text-amber-400 bg-amber-500/10'
-        : 'text-red-400 bg-red-500/10';
+        ? 'text-[#c9b787] bg-[#c9b787]/10'
+        : 'text-[#f5f5f5] bg-[#f5f5f5]/10';
   return (
     <span
       className={cn(
@@ -65,10 +65,10 @@ type ContractStatus = 'active' | 'expiring' | 'expired' | 'pending';
 
 function ContractBadge({ status }: { status: ContractStatus | null | undefined }) {
   const styles: Record<ContractStatus, string> = {
-    active: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-    expiring: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-    expired: 'text-red-400 bg-red-500/10 border-red-500/20',
-    pending: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+    active: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+    expiring: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+    expired: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20',
+    pending: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
   };
   const s = status ?? 'pending';
   return (
@@ -119,7 +119,7 @@ function ApiClientRow({ client, index }: { client: ApiClient; index: number }) {
       </div>
       <div className="col-span-1 text-center">
         {(client.criticalAlerts ?? 0) > 0 ? (
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-400">
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#f5f5f5]">
             <AlertTriangle className="w-3.5 h-3.5" /> {client.criticalAlerts}
           </span>
         ) : (
@@ -138,7 +138,7 @@ function ApiClientRow({ client, index }: { client: ApiClient; index: number }) {
             <div
               className={cn(
                 'h-full rounded-full',
-                sla >= 99 ? 'bg-emerald-400' : sla >= 95 ? 'bg-amber-400' : 'bg-red-400',
+                sla >= 99 ? 'bg-[#c9b787]' : sla >= 95 ? 'bg-[#c9b787]' : 'bg-[#f5f5f5]',
               )}
               style={{ width: `${sla}%` }}
             />
@@ -190,7 +190,7 @@ function FallbackClientRow({ client, index }: { client: Client; index: number })
       </div>
       <div className="col-span-1 text-center">
         {client.criticalAlerts > 0 ? (
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-400">
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#f5f5f5]">
             <AlertTriangle className="w-3.5 h-3.5" /> {client.criticalAlerts}
           </span>
         ) : (
@@ -210,10 +210,10 @@ function FallbackClientRow({ client, index }: { client: Client; index: number })
               className={cn(
                 'h-full rounded-full',
                 client.slaCompliance >= 99
-                  ? 'bg-emerald-400'
+                  ? 'bg-[#c9b787]'
                   : client.slaCompliance >= 95
-                    ? 'bg-amber-400'
-                    : 'bg-red-400',
+                    ? 'bg-[#c9b787]'
+                    : 'bg-[#f5f5f5]',
               )}
               style={{ width: `${client.slaCompliance}%` }}
             />
@@ -309,7 +309,7 @@ export default function ClientsPage() {
             options={{
               filename: 'msp-clients',
               title: 'Client Management Report',
-              accentColor: '#3b82f6',
+              accentColor: '#c9b787',
             }}
           />
           <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors">
@@ -331,21 +331,21 @@ export default function ClientsPage() {
             label: 'Avg Health Score',
             value: avgHealth.toString(),
             sub: avgHealth >= 85 ? 'Good' : 'Needs Attention',
-            color: avgHealth >= 85 ? 'text-emerald-400' : 'text-amber-400',
+            color: avgHealth >= 85 ? 'text-[#c9b787]' : 'text-[#c9b787]',
             icon: Activity,
           },
           {
             label: 'Total Devices',
             value: totalDevices.toLocaleString(),
             sub: `${displayClients.length} organizations`,
-            color: 'text-cyan-400',
+            color: 'text-[#8a8a8a]',
             icon: Monitor,
           },
           {
             label: 'Monthly Revenue',
             value: `$${(totalMRR / 1000).toFixed(1)}K`,
             sub: `${totalTickets} open tickets`,
-            color: 'text-violet-400',
+            color: 'text-[#8a8a8a]',
             icon: Building2,
           },
         ].map((stat, i) => (

@@ -182,7 +182,7 @@ export default function CyberInsuranceIntel() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <DollarSign className="w-5 h-5 text-emerald-400" />
+            <DollarSign className="w-5 h-5 text-[#c9b787]" />
             <h1 className="text-lg font-semibold text-white">Cyber Insurance Intelligence</h1>
           </div>
           <p className="text-xs text-zinc-500">
@@ -194,7 +194,7 @@ export default function CyberInsuranceIntel() {
           <button
             onClick={handleGenerateClaims}
             disabled={generating}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-medium hover:bg-emerald-500/25 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c9b787]/15 border border-[#c9b787]/30 text-[#c9b787] text-xs font-medium hover:bg-[#c9b787]/25 transition-colors"
           >
             {generating ? (
               <>
@@ -216,28 +216,28 @@ export default function CyberInsuranceIntel() {
             label: 'Current Annual Premium',
             value: `$${(CURRENT_PREMIUM / 1000).toFixed(0)}K`,
             sub: 'Renewal: Jun 2026',
-            color: '#3b82f6',
+            color: '#c9b787',
             icon: DollarSign,
           },
           {
             label: 'Estimated Optimized',
             value: `$${(ESTIMATED_PREMIUM / 1000).toFixed(0)}K`,
             sub: `Save $${(TOTAL_SAVINGS / 1000).toFixed(0)}K/yr`,
-            color: '#10b981',
+            color: '#c9b787',
             icon: TrendingDown,
           },
           {
             label: 'Risk Posture Score',
             value: `${avgRiskScore}/100`,
             sub: `${improvingFactors} factors improving`,
-            color: '#8b5cf6',
+            color: '#8a8a8a',
             icon: Shield,
           },
           {
             label: 'Unclaimed Credits',
             value: `$${(totalCredits / 1000).toFixed(0)}K`,
             sub: 'available immediately',
-            color: '#f59e0b',
+            color: '#c9b787',
             icon: AlertTriangle,
           },
         ].map((m) => {
@@ -262,7 +262,7 @@ export default function CyberInsuranceIntel() {
         <div className="text-xs font-semibold text-zinc-300 mb-3">Premium Impact Waterfall</div>
         <div className="flex items-end gap-2 h-24">
           <div className="flex-1 flex flex-col items-center gap-1">
-            <div className="w-full rounded-t bg-blue-500/40" style={{ height: '100%' }} />
+            <div className="w-full rounded-t bg-[#c9b787]/40" style={{ height: '100%' }} />
             <span className="text-[10px] text-zinc-500">Current</span>
             <span className="text-[10px] text-white font-medium">$284K</span>
           </div>
@@ -274,8 +274,8 @@ export default function CyberInsuranceIntel() {
                   className="w-full rounded-t"
                   style={{
                     height: `${Math.abs(r.premiumImpact) * 6}%`,
-                    background: r.premiumImpact < 0 ? '#10b98140' : '#ef444440',
-                    border: `1px solid ${r.premiumImpact < 0 ? '#10b98160' : '#ef444460'}`,
+                    background: r.premiumImpact < 0 ? '#c9b78740' : '#f5f5f540',
+                    border: `1px solid ${r.premiumImpact < 0 ? '#c9b78760' : '#f5f5f560'}`,
                     minHeight: 8,
                   }}
                 />
@@ -285,7 +285,7 @@ export default function CyberInsuranceIntel() {
                 <span
                   className={cn(
                     'text-[9px] font-medium',
-                    r.premiumImpact < 0 ? 'text-emerald-400' : 'text-red-400',
+                    r.premiumImpact < 0 ? 'text-[#c9b787]' : 'text-[#f5f5f5]',
                   )}
                 >
                   {r.premiumImpact > 0 ? '+' : ''}
@@ -295,11 +295,11 @@ export default function CyberInsuranceIntel() {
             ))}
           <div className="flex-1 flex flex-col items-center gap-1">
             <div
-              className="w-full rounded-t bg-emerald-500/40"
+              className="w-full rounded-t bg-[#c9b787]/40"
               style={{ height: `${(ESTIMATED_PREMIUM / CURRENT_PREMIUM) * 100}%` }}
             />
             <span className="text-[10px] text-zinc-500">Optimized</span>
-            <span className="text-[10px] text-emerald-400 font-medium">$248K</span>
+            <span className="text-[10px] text-[#c9b787] font-medium">$248K</span>
           </div>
         </div>
       </div>
@@ -316,9 +316,9 @@ export default function CyberInsuranceIntel() {
                 <div className="flex items-center justify-between gap-2 mb-1.5">
                   <div className="flex items-center gap-2">
                     {factor.trend === 'improving' ? (
-                      <TrendingDown className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <TrendingDown className="w-3.5 h-3.5 text-[#c9b787] shrink-0" />
                     ) : factor.trend === 'worsening' ? (
-                      <TrendingUp className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                      <TrendingUp className="w-3.5 h-3.5 text-[#f5f5f5] shrink-0" />
                     ) : (
                       <Activity className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
                     )}
@@ -328,7 +328,7 @@ export default function CyberInsuranceIntel() {
                     <span
                       className={cn(
                         'text-[10px]',
-                        factor.premiumImpact < 0 ? 'text-emerald-400' : 'text-red-400',
+                        factor.premiumImpact < 0 ? 'text-[#c9b787]' : 'text-[#f5f5f5]',
                       )}
                     >
                       {factor.premiumImpact > 0 ? '+' : ''}
@@ -343,7 +343,7 @@ export default function CyberInsuranceIntel() {
                     style={{
                       width: `${factor.score}%`,
                       background:
-                        factor.score >= 85 ? '#10b981' : factor.score >= 70 ? '#f59e0b' : '#ef4444',
+                        factor.score >= 85 ? '#c9b787' : factor.score >= 70 ? '#c9b787' : '#f5f5f5',
                     }}
                   />
                 </div>
@@ -367,9 +367,9 @@ export default function CyberInsuranceIntel() {
                 className={cn(
                   'rounded-xl border p-3',
                   rec.priority === 'critical'
-                    ? 'border-red-500/20 bg-red-500/5'
+                    ? 'border-[#f5f5f5]/20 bg-[#f5f5f5]/5'
                     : rec.priority === 'high'
-                      ? 'border-orange-500/20 bg-orange-500/5'
+                      ? 'border-[#c9b787]/20 bg-[#c9b787]/5'
                       : 'border-white/8 bg-white/3',
                 )}
               >
@@ -379,9 +379,9 @@ export default function CyberInsuranceIntel() {
                     className={cn(
                       'text-[10px] px-1.5 py-0.5 rounded border shrink-0 capitalize',
                       rec.priority === 'critical'
-                        ? 'text-red-400 bg-red-500/10 border-red-500/30'
+                        ? 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/30'
                         : rec.priority === 'high'
-                          ? 'text-orange-400 bg-orange-500/10 border-orange-500/30'
+                          ? 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30'
                           : 'text-zinc-400 bg-zinc-500/10 border-zinc-500/30',
                     )}
                   >
@@ -391,15 +391,15 @@ export default function CyberInsuranceIntel() {
                 <div className="grid grid-cols-2 gap-2 text-[10px] mb-2">
                   <div>
                     <div className="text-zinc-500 mb-0.5">Current</div>
-                    <div className="text-red-400">{rec.currentValue}</div>
+                    <div className="text-[#f5f5f5]">{rec.currentValue}</div>
                   </div>
                   <div>
                     <div className="text-zinc-500 mb-0.5">Recommended</div>
-                    <div className="text-emerald-400">{rec.recommendedValue}</div>
+                    <div className="text-[#c9b787]">{rec.recommendedValue}</div>
                   </div>
                 </div>
                 {rec.annualSaving > 0 && (
-                  <div className="text-[10px] text-emerald-400 font-medium mb-1">
+                  <div className="text-[10px] text-[#c9b787] font-medium mb-1">
                     💰 Save ${rec.annualSaving.toLocaleString()}/year
                   </div>
                 )}
@@ -408,7 +408,7 @@ export default function CyberInsuranceIntel() {
                   onClick={() =>
                     toast.success(`Recommendation flagged for renewal discussion with broker`)
                   }
-                  className="mt-2 text-[10px] text-blue-400 hover:text-blue-300"
+                  className="mt-2 text-[10px] text-[#c9b787] hover:text-[#c9b787]"
                 >
                   Flag for broker →
                 </button>
@@ -417,8 +417,8 @@ export default function CyberInsuranceIntel() {
           </div>
 
           {/* Risk Quantification */}
-          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 mt-3">
-            <div className="text-xs font-semibold text-emerald-300 mb-3">
+          <div className="rounded-xl border border-[#c9b787]/20 bg-[#c9b787]/5 p-4 mt-3">
+            <div className="text-xs font-semibold text-[#c9b787] mb-3">
               Annual Loss Expectancy (ALE) Estimate
             </div>
             <div className="space-y-2">
@@ -439,7 +439,7 @@ export default function CyberInsuranceIntel() {
               ))}
               <div className="border-t border-white/8 pt-2 flex items-center justify-between text-xs">
                 <span className="text-zinc-300 font-medium">Total ALE</span>
-                <span className="text-red-400 font-bold">$5.16M</span>
+                <span className="text-[#f5f5f5] font-bold">$5.16M</span>
               </div>
             </div>
           </div>

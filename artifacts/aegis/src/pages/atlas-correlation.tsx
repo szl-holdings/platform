@@ -69,16 +69,16 @@ const DOMAIN_META: Record<
   aegis: {
     label: 'Aegis · Cybersecurity',
     short: 'AEG',
-    color: '#ef4444',
-    bg: 'rgba(239,68,68,0.08)',
-    border: 'rgba(239,68,68,0.25)',
+    color: '#f5f5f5',
+    bg: 'rgba(245,245,245,0.08)',
+    border: 'rgba(245,245,245,0.25)',
     icon: Shield,
     twinCategory: 'endpoint',
   },
   vessels: {
     label: 'Vessels · Maritime',
     short: 'VSL',
-    color: '#38bdf8',
+    color: '#8a8a8a',
     bg: 'rgba(56,189,248,0.08)',
     border: 'rgba(56,189,248,0.25)',
     icon: Anchor,
@@ -87,17 +87,17 @@ const DOMAIN_META: Record<
   terra: {
     label: 'Terra · Real Estate',
     short: 'TER',
-    color: '#10b981',
-    bg: 'rgba(16,185,129,0.08)',
-    border: 'rgba(16,185,129,0.25)',
+    color: '#c9b787',
+    bg: 'rgba(201,183,135,0.08)',
+    border: 'rgba(201,183,135,0.25)',
     icon: Building2,
     twinCategory: 'property',
   },
 };
 
 const SEV_COLOR: Record<CorrelationEvent['severity'], string> = {
-  critical: '#ef4444',
-  warning: '#f59e0b',
+  critical: '#f5f5f5',
+  warning: '#c9b787',
   info: '#6b7280',
 };
 
@@ -429,14 +429,14 @@ export default function AegisAtlasCorrelation() {
           {
             label: 'Correlated Clusters',
             value: clusters.length,
-            color: clusters.length > 0 ? '#ef4444' : '#6b7280',
+            color: clusters.length > 0 ? '#f5f5f5' : '#6b7280',
             pulse: clusters.length > 0,
           },
-          { label: 'Cross-Domain Events', value: correlatedCount, color: '#f59e0b' },
+          { label: 'Cross-Domain Events', value: correlatedCount, color: '#c9b787' },
           {
             label: 'Source',
             value: usingLive ? 'LIVE' : 'DEMO',
-            color: usingLive ? '#10b981' : '#8b7ac8',
+            color: usingLive ? '#c9b787' : '#8b7ac8',
           },
         ].map((c) => (
           <div
@@ -468,9 +468,9 @@ export default function AegisAtlasCorrelation() {
       {isError && !usingLive && (
         <div
           className="rounded-xl border px-4 py-2.5 flex items-center gap-3"
-          style={{ borderColor: 'rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.04)' }}
+          style={{ borderColor: 'rgba(201,183,135,0.2)', background: 'rgba(201,183,135,0.04)' }}
         >
-          <AlertTriangle className="w-3 h-3 shrink-0" style={{ color: '#f59e0b' }} />
+          <AlertTriangle className="w-3 h-3 shrink-0" style={{ color: '#c9b787' }} />
           <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.55)' }}>
             Live worldline overlay API unavailable — showing seeded demo correlation set.
           </span>
@@ -594,8 +594,8 @@ export default function AegisAtlasCorrelation() {
                           style={{
                             left: `${left}%`,
                             width: `${width}%`,
-                            background: 'rgba(239,68,68,0.08)',
-                            border: '1px dashed rgba(239,68,68,0.4)',
+                            background: 'rgba(245,245,245,0.08)',
+                            border: '1px dashed rgba(245,245,245,0.4)',
                           }}
                         />
                       );
@@ -638,7 +638,7 @@ export default function AegisAtlasCorrelation() {
             <span className="flex items-center gap-1 ml-auto">
               <span
                 className="w-3 h-2 rounded border-dashed border"
-                style={{ borderColor: 'rgba(239,68,68,0.6)', background: 'rgba(239,68,68,0.08)' }}
+                style={{ borderColor: 'rgba(245,245,245,0.6)', background: 'rgba(245,245,245,0.08)' }}
               />
               cross-domain cluster
             </span>
@@ -649,13 +649,13 @@ export default function AegisAtlasCorrelation() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div
           className="rounded-xl border overflow-hidden"
-          style={{ borderColor: 'rgba(239,68,68,0.18)' }}
+          style={{ borderColor: 'rgba(245,245,245,0.18)' }}
         >
           <div
             className="p-4 border-b flex items-center gap-2"
-            style={{ borderColor: 'rgba(255,255,255,0.05)', background: 'rgba(239,68,68,0.04)' }}
+            style={{ borderColor: 'rgba(255,255,255,0.05)', background: 'rgba(245,245,245,0.04)' }}
           >
-            <Sparkles className="w-3.5 h-3.5" style={{ color: '#ef4444' }} />
+            <Sparkles className="w-3.5 h-3.5" style={{ color: '#f5f5f5' }} />
             <span className="text-[11px] font-semibold text-white">Correlated Clusters</span>
             <span
               className="ml-auto text-[9px] font-mono"
@@ -678,7 +678,7 @@ export default function AegisAtlasCorrelation() {
                 <div className="flex items-center gap-2 flex-wrap mb-2">
                   <span
                     className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded"
-                    style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)' }}
+                    style={{ color: '#f5f5f5', background: 'rgba(245,245,245,0.1)' }}
                   >
                     Cluster · {cl.events.length} events
                   </span>

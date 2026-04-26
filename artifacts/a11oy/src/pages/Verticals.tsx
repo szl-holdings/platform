@@ -4,13 +4,13 @@ import { PageHeader, Card, SectionTitle, KpiCard, SeverityBadge } from '../compo
 import { SEED_SIGNALS, SEED_WORKCELLS, SEED_OUTCOMES } from '@workspace/a11oy-fabric';
 
 const VERTICALS = [
-  { id: 'vessels-maritime', label: 'Vessels Maritime', color: '#06b6d4', icon: '⚓', description: 'Fleet operations, port scheduling, ETA monitoring, demurrage risk and maritime signal mesh.' },
-  { id: 'lyte-revenue', label: 'Lyte Revenue', color: '#3b82f6', icon: '◆', description: 'Enterprise pipeline velocity, deal health, forecast modeling, and revenue signal patterns.' },
-  { id: 'prism-counsel', label: 'Counsel', color: '#8b5cf6', icon: '⚖', description: 'Legal matter tracking, discovery deadlines, document status, and litigation risk scoring.' },
-  { id: 'terra-real-estate', label: 'Terra Real Estate', color: '#10b981', icon: '▣', description: 'Portfolio cap rate monitoring, valuation modeling, and real estate market signal analysis.' },
-  { id: 'aegis-defense', label: 'Aegis Defense', color: '#ef4444', icon: '⬡', description: 'Threat intelligence, posture assessment, SIGINT correlation, and defense operational monitoring.' },
-  { id: 'carlota-jo', label: 'Carlota Jo', color: '#f59e0b', icon: '◎', description: 'Consulting matter management, client follow-ups, advisory brief generation, and engagement signals.' },
-  { id: 'alloy-core', label: 'Alloy Core', color: '#6366f1', icon: '⬟', description: 'Internal fabric health — signal mesh, proof ledger integrity, layer latency, and operator performance.' },
+  { id: 'vessels-maritime', label: 'Vessels Maritime', color: '#8a8a8a', icon: '⚓', description: 'Fleet operations, port scheduling, ETA monitoring, demurrage risk and maritime signal mesh.' },
+  { id: 'lyte-revenue', label: 'Lyte Revenue', color: '#c9b787', icon: '◆', description: 'Enterprise pipeline velocity, deal health, forecast modeling, and revenue signal patterns.' },
+  { id: 'prism-counsel', label: 'Counsel', color: '#8a8a8a', icon: '⚖', description: 'Legal matter tracking, discovery deadlines, document status, and litigation risk scoring.' },
+  { id: 'terra-real-estate', label: 'Terra Real Estate', color: '#c9b787', icon: '▣', description: 'Portfolio cap rate monitoring, valuation modeling, and real estate market signal analysis.' },
+  { id: 'aegis-defense', label: 'Aegis Defense', color: '#f5f5f5', icon: '⬡', description: 'Threat intelligence, posture assessment, SIGINT correlation, and defense operational monitoring.' },
+  { id: 'carlota-jo', label: 'Carlota Jo', color: '#c9b787', icon: '◎', description: 'Consulting matter management, client follow-ups, advisory brief generation, and engagement signals.' },
+  { id: 'alloy-core', label: 'Alloy Core', color: '#8a8a8a', icon: '⬟', description: 'Internal fabric health — signal mesh, proof ledger integrity, layer latency, and operator performance.' },
 ];
 
 export function Verticals() {
@@ -26,10 +26,10 @@ export function Verticals() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <KpiCard label="VERTICALS" value={7} sub="fully configured" accent="#10b981" />
-        <KpiCard label="TOTAL SIGNALS" value={SEED_SIGNALS.length} sub="in registry" accent="#3b82f6" />
-        <KpiCard label="ACTIVE WORKCELLS" value={SEED_WORKCELLS.filter(w => w.status === 'running').length} sub="across verticals" accent="#f59e0b" />
-        <KpiCard label="OUTCOMES TRACKED" value={SEED_OUTCOMES.length} sub="in board" accent="#10b981" />
+        <KpiCard label="VERTICALS" value={7} sub="fully configured" accent="#c9b787" />
+        <KpiCard label="TOTAL SIGNALS" value={SEED_SIGNALS.length} sub="in registry" accent="#c9b787" />
+        <KpiCard label="ACTIVE WORKCELLS" value={SEED_WORKCELLS.filter(w => w.status === 'running').length} sub="across verticals" accent="#c9b787" />
+        <KpiCard label="OUTCOMES TRACKED" value={SEED_OUTCOMES.length} sub="in board" accent="#c9b787" />
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
@@ -71,7 +71,7 @@ export function Verticals() {
                 </div>
                 <div>
                   <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Critical</div>
-                  <div className="font-mono" style={{ color: critical > 0 ? '#ef4444' : '#10b981' }}>{critical}</div>
+                  <div className="font-mono" style={{ color: critical > 0 ? '#f5f5f5' : '#c9b787' }}>{critical}</div>
                 </div>
               </div>
             </div>
@@ -115,7 +115,7 @@ export function Verticals() {
                     <Card key={w.id} className="text-xs">
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <span className="font-medium" style={{ color: 'var(--color-a11oy-text)' }}>{w.name}</span>
-                        <span className="font-mono" style={{ color: { running: '#f59e0b', completed: '#10b981', error: '#ef4444', paused: '#9bacc4', idle: '#9bacc4' }[w.status] }}>{w.status}</span>
+                        <span className="font-mono" style={{ color: { running: '#c9b787', completed: '#c9b787', error: '#f5f5f5', paused: '#5e5e5e', idle: '#5e5e5e' }[w.status] }}>{w.status}</span>
                       </div>
                       <div className="truncate" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{w.objective}</div>
                     </Card>
@@ -128,7 +128,7 @@ export function Verticals() {
                 </div>
                 <div className="flex flex-col gap-2">
                   {ocs.map(o => {
-                    const statusColor = o.status === 'achieved' ? '#10b981' : o.status === 'missed' ? '#ef4444' : o.status === 'blocked' ? '#f59e0b' : '#9bacc4';
+                    const statusColor = o.status === 'achieved' ? '#c9b787' : o.status === 'missed' ? '#f5f5f5' : o.status === 'blocked' ? '#c9b787' : '#5e5e5e';
                     return (
                       <Card key={o.id} className="text-xs">
                         <div className="flex items-start justify-between gap-2 mb-1">

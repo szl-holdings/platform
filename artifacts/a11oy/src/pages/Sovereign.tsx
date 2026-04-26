@@ -40,7 +40,7 @@ const NAV_LINKS = [
   { href: '/investor-demo', label: 'Investor Demo', icon: '▸', description: '12-step guided product story' },
 ];
 
-const ST_COLOR: Record<string, string> = { passed: '#10b981', warning: '#f59e0b', failed: '#ef4444' };
+const ST_COLOR: Record<string, string> = { passed: '#c9b787', warning: '#c9b787', failed: '#f5f5f5' };
 const ST_ICON: Record<string, string> = { passed: '✓', warning: '⚠', failed: '✗' };
 
 export function Sovereign() {
@@ -91,14 +91,14 @@ export function Sovereign() {
         <button
           onClick={regenerate} disabled={regenLoading}
           className="text-xs px-3 py-1.5 rounded font-medium"
-          style={{ backgroundColor: 'rgba(139,92,246,0.15)', color: '#8b5cf6', border: '1px solid rgba(139,92,246,0.3)', opacity: regenLoading ? 0.6 : 1 }}
+          style={{ backgroundColor: 'rgba(138,138,138,0.15)', color: '#8a8a8a', border: '1px solid rgba(138,138,138,0.3)', opacity: regenLoading ? 0.6 : 1 }}
         >
           {regenLoading ? 'Regenerating…' : regenDone ? '✓ Regenerated' : 'Regenerate Demo Enterprise'}
         </button>
         <button
           onClick={runSelfTest} disabled={selfTestLoading}
           className="text-xs px-3 py-1.5 rounded font-medium"
-          style={{ backgroundColor: 'rgba(59,130,246,0.12)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.25)', opacity: selfTestLoading ? 0.6 : 1 }}
+          style={{ backgroundColor: 'rgba(201,183,135,0.12)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.25)', opacity: selfTestLoading ? 0.6 : 1 }}
         >
           {selfTestLoading ? 'Running tests…' : 'Run Sovereign Self-Test'}
         </button>
@@ -110,9 +110,9 @@ export function Sovereign() {
       </div>
 
       {selfTest && (
-        <div className="mb-8 p-4 rounded-lg border" style={{ backgroundColor: 'rgba(16,185,129,0.04)', borderColor: 'rgba(16,185,129,0.2)' }}>
+        <div className="mb-8 p-4 rounded-lg border" style={{ backgroundColor: 'rgba(201,183,135,0.04)', borderColor: 'rgba(201,183,135,0.2)' }}>
           <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-semibold" style={{ color: ST_COLOR[selfTest.overallStatus] ?? '#10b981' }}>
+            <div className="text-sm font-semibold" style={{ color: ST_COLOR[selfTest.overallStatus] ?? '#c9b787' }}>
               Sovereign Self-Test — {selfTest.overallStatus.toUpperCase()} · {selfTest.passed}/{selfTest.total}
             </div>
             <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{selfTest.warned} warned · {selfTest.failed} failed</div>
@@ -120,7 +120,7 @@ export function Sovereign() {
           <div className="grid md:grid-cols-2 gap-1 max-h-52 overflow-y-auto">
             {selfTest.tests.map((t, i) => (
               <div key={i} className="flex items-start gap-2 text-xs">
-                <span style={{ color: ST_COLOR[t.status] ?? '#9bacc4', flexShrink: 0 }}>{ST_ICON[t.status] ?? '?'}</span>
+                <span style={{ color: ST_COLOR[t.status] ?? '#5e5e5e', flexShrink: 0 }}>{ST_ICON[t.status] ?? '?'}</span>
                 <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{t.name}</span>
               </div>
             ))}
@@ -134,16 +134,16 @@ export function Sovereign() {
         <>
           <SectionTitle>Telemetry Rollup — Phase 3</SectionTitle>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
-            <KpiCard label="DEMO TENANTS" value={String(summary.tenants)} sub="Synthetic enterprise" accent="#8b5cf6" />
-            <KpiCard label="MODELS ACTIVE" value={String(summary.models.active)} sub={`${summary.models.registered} registered`} accent="#3b82f6" />
-            <KpiCard label="EVAL RESULTS" value={String(summary.evals.total)} sub={`${summary.evals.passed} pass · ${summary.evals.blocked} blocked`} accent="#10b981" />
-            <KpiCard label="REPLAYS" value={String(summary.replays.total)} sub={`${summary.replays.successful} success · ${summary.replays.failed} failed`} accent="#f59e0b" />
-            <KpiCard label="CONNECTORS" value={String(summary.connectors.total)} sub={`${summary.connectors.blocked} blocked`} accent="#ef4444" />
+            <KpiCard label="DEMO TENANTS" value={String(summary.tenants)} sub="Synthetic enterprise" accent="#8a8a8a" />
+            <KpiCard label="MODELS ACTIVE" value={String(summary.models.active)} sub={`${summary.models.registered} registered`} accent="#c9b787" />
+            <KpiCard label="EVAL RESULTS" value={String(summary.evals.total)} sub={`${summary.evals.passed} pass · ${summary.evals.blocked} blocked`} accent="#c9b787" />
+            <KpiCard label="REPLAYS" value={String(summary.replays.total)} sub={`${summary.replays.successful} success · ${summary.replays.failed} failed`} accent="#c9b787" />
+            <KpiCard label="CONNECTORS" value={String(summary.connectors.total)} sub={`${summary.connectors.blocked} blocked`} accent="#f5f5f5" />
             <KpiCard label="BUSINESS TWINS" value={String(summary.twins.total)} sub={`${summary.twins.highRisk} high risk`} accent="#b08d52" />
-            <KpiCard label="SKILLS" value={String(summary.skills.total)} sub={`${summary.skills.live} live`} accent="#6366f1" />
-            <KpiCard label="BOARD PACKETS" value={String(summary.boardPackets)} sub="5 tenants" accent="#ec4899" />
-            <KpiCard label="TRACE SPANS" value={String(summary.telemetry.spans)} sub={`${summary.telemetry.blockedSpans} blocked`} accent="#9bacc4" />
-            <KpiCard label="SELF-TEST" value={summary.selfTestStatus.toUpperCase()} sub="All gates" accent="#10b981" />
+            <KpiCard label="SKILLS" value={String(summary.skills.total)} sub={`${summary.skills.live} live`} accent="#8a8a8a" />
+            <KpiCard label="BOARD PACKETS" value={String(summary.boardPackets)} sub="5 tenants" accent="#c9b787" />
+            <KpiCard label="TRACE SPANS" value={String(summary.telemetry.spans)} sub={`${summary.telemetry.blockedSpans} blocked`} accent="#5e5e5e" />
+            <KpiCard label="SELF-TEST" value={summary.selfTestStatus.toUpperCase()} sub="All gates" accent="#c9b787" />
           </div>
         </>
       ) : null}
@@ -182,7 +182,7 @@ export function Sovereign() {
         ))}
       </div>
 
-      <div className="p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
+      <div className="p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
         <DemoBadge /> Phase 3 — Sovereign Execution Lab. All data is seeded and deterministic. No real connector calls, LLM API calls, or destructive actions are made.
       </div>
     </Layout>

@@ -97,11 +97,11 @@ const alerts = [
 ];
 
 const severityConfig: Record<string, { color: string; icon: any }> = {
-  critical: { color: 'text-red-400 bg-red-400/10 border-red-400/20', icon: XCircle },
-  high: { color: 'text-orange-400 bg-orange-400/10 border-orange-400/20', icon: AlertTriangle },
-  medium: { color: 'text-amber-400 bg-amber-400/10 border-amber-400/20', icon: Bell },
-  low: { color: 'text-blue-400 bg-blue-400/10 border-blue-400/20', icon: Shield },
-  info: { color: 'text-cyan-400 bg-cyan-400/10 border-cyan-400/20', icon: CheckCircle2 },
+  critical: { color: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20', icon: XCircle },
+  high: { color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20', icon: AlertTriangle },
+  medium: { color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20', icon: Bell },
+  low: { color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20', icon: Shield },
+  info: { color: 'text-[#8a8a8a] bg-[#8a8a8a]/10 border-[#8a8a8a]/20', icon: CheckCircle2 },
 };
 
 export default function AlertsManagement() {
@@ -172,7 +172,7 @@ export default function AlertsManagement() {
         </div>
         <div className="flex items-center gap-3">
           {criticalCount > 0 && (
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-400/10 text-red-400 text-xs font-medium animate-pulse">
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f5f5f5]/10 text-[#f5f5f5] text-xs font-medium animate-pulse">
               <XCircle className="w-3 h-3" /> {criticalCount} Critical
             </span>
           )}
@@ -266,12 +266,12 @@ export default function AlertsManagement() {
                       className={cn(
                         'px-2 py-0.5 rounded-full text-[10px] font-medium capitalize',
                         alert.status === 'open'
-                          ? 'bg-cyan-400/10 text-cyan-400'
+                          ? 'bg-[#8a8a8a]/10 text-[#8a8a8a]'
                           : alert.status === 'escalated'
-                            ? 'bg-red-400/10 text-red-400'
+                            ? 'bg-[#f5f5f5]/10 text-[#f5f5f5]'
                             : alert.status === 'acknowledged'
-                              ? 'bg-amber-400/10 text-amber-400'
-                              : 'bg-emerald-400/10 text-emerald-400',
+                              ? 'bg-[#c9b787]/10 text-[#c9b787]'
+                              : 'bg-[#c9b787]/10 text-[#c9b787]',
                       )}
                     >
                       {alert.status === 'open'

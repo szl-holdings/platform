@@ -58,7 +58,7 @@ function useAnimatedCounter(target: number, duration = 1200, decimals = 0) {
   return count;
 }
 
-const cohesivePalette = ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16'];
+const cohesivePalette = ['#f5f5f5', '#c9b787', '#c9b787', '#8a8a8a', '#c9b787'];
 
 function DimensionBar({
   name,
@@ -77,7 +77,7 @@ function DimensionBar({
   const color = cohesivePalette[Math.min(index, cohesivePalette.length - 1)];
   const statusText = gap <= 0 ? 'On Target' : gap <= 15 ? 'Near Target' : 'Below Target';
   const statusColor =
-    gap <= 0 ? 'text-emerald-400' : gap <= 15 ? 'text-orange-400' : 'text-orange-500/60';
+    gap <= 0 ? 'text-[#c9b787]' : gap <= 15 ? 'text-[#c9b787]' : 'text-[#c9b787]/60';
   return (
     <motion.div
       initial={{ opacity: 0, x: -10 }}
@@ -86,13 +86,13 @@ function DimensionBar({
       className="space-y-1.5"
     >
       <div className="flex items-center justify-between text-sm">
-        <span className="text-orange-50/80 font-medium text-xs">{name}</span>
+        <span className="text-[#c9b787]/80 font-medium text-xs">{name}</span>
         <div className="flex items-center gap-3">
           <span className={`text-[10px] ${statusColor}`}>{statusText}</span>
-          <span className="font-bold text-orange-50 w-8 text-right text-xs">{animatedScore}</span>
+          <span className="font-bold text-[#c9b787] w-8 text-right text-xs">{animatedScore}</span>
         </div>
       </div>
-      <div className="relative h-1.5 bg-orange-500/10 rounded-full overflow-hidden">
+      <div className="relative h-1.5 bg-[#c9b787]/10 rounded-full overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
@@ -100,7 +100,7 @@ function DimensionBar({
           className="absolute inset-y-0 left-0 rounded-full"
           style={{ backgroundColor: color }}
         />
-        <div className="absolute inset-y-0 w-0.5 bg-orange-50/20" style={{ left: `${target}%` }} />
+        <div className="absolute inset-y-0 w-0.5 bg-[#c9b787]/20" style={{ left: `${target}%` }} />
       </div>
     </motion.div>
   );
@@ -139,13 +139,13 @@ export default function ReadinessDashboard() {
     return (
       <div className="space-y-6">
         <header>
-          <h1 className="font-display text-lg font-bold text-orange-50">Readiness Posture</h1>
-          <p className="text-orange-400/50 text-xs mt-0.5">
+          <h1 className="font-display text-lg font-bold text-[#c9b787]">Readiness Posture</h1>
+          <p className="text-[#c9b787]/50 text-xs mt-0.5">
             NIST CSF · ISO 27001 · CMMC frameworks
           </p>
         </header>
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-6 h-6 text-orange-400/50 animate-spin" />
+          <Loader2 className="w-6 h-6 text-[#c9b787]/50 animate-spin" />
         </div>
       </div>
     );
@@ -155,15 +155,15 @@ export default function ReadinessDashboard() {
     return (
       <div className="space-y-6">
         <header>
-          <h1 className="font-display text-lg font-bold text-orange-50">Readiness Posture</h1>
-          <p className="text-orange-400/50 text-xs mt-0.5">
+          <h1 className="font-display text-lg font-bold text-[#c9b787]">Readiness Posture</h1>
+          <p className="text-[#c9b787]/50 text-xs mt-0.5">
             NIST CSF · ISO 27001 · CMMC frameworks
           </p>
         </header>
-        <div className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-10 flex flex-col items-center justify-center text-center gap-3">
-          <Target className="w-8 h-8 text-orange-400/40" />
-          <p className="text-orange-50/70 text-sm font-medium">No readiness program configured</p>
-          <p className="text-orange-400/40 text-xs max-w-sm">
+        <div className="bg-[#c9b787]/5 border border-[#c9b787]/10 rounded-xl p-10 flex flex-col items-center justify-center text-center gap-3">
+          <Target className="w-8 h-8 text-[#c9b787]/40" />
+          <p className="text-[#c9b787]/70 text-sm font-medium">No readiness program configured</p>
+          <p className="text-[#c9b787]/40 text-xs max-w-sm">
             Create a readiness program and add dimensions to start tracking your compliance posture
             across NIST CSF, ISO 27001, and CMMC frameworks.
           </p>
@@ -176,14 +176,14 @@ export default function ReadinessDashboard() {
     <div className="space-y-6">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <h1 className="font-display text-lg font-bold text-orange-50">Readiness Posture</h1>
-          <p className="text-orange-400/50 text-xs mt-0.5">
+          <h1 className="font-display text-lg font-bold text-[#c9b787]">Readiness Posture</h1>
+          <p className="text-[#c9b787]/50 text-xs mt-0.5">
             NIST CSF · ISO 27001 · CMMC frameworks
           </p>
         </motion.div>
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-          <div className="bg-orange-500/10 border border-orange-500/20 px-4 py-2 rounded-xl text-orange-50 font-medium flex items-center gap-2 text-xs">
-            <Activity className="w-3.5 h-3.5 text-orange-400" />
+          <div className="bg-[#c9b787]/10 border border-[#c9b787]/20 px-4 py-2 rounded-xl text-[#c9b787] font-medium flex items-center gap-2 text-xs">
+            <Activity className="w-3.5 h-3.5 text-[#c9b787]" />
             <span>{activeProgram.name}</span>
           </div>
         </motion.div>
@@ -194,21 +194,21 @@ export default function ReadinessDashboard() {
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="lg:col-span-4 bg-orange-500/5 border border-orange-500/10 rounded-xl p-6 flex flex-col items-center justify-center"
+          className="lg:col-span-4 bg-[#c9b787]/5 border border-[#c9b787]/10 rounded-xl p-6 flex flex-col items-center justify-center"
         >
-          <div className="text-xs font-medium text-orange-400/50 flex items-center gap-2 mb-4 self-start">
+          <div className="text-xs font-medium text-[#c9b787]/50 flex items-center gap-2 mb-4 self-start">
             <Target className="w-3.5 h-3.5" /> Overall Readiness Score
           </div>
-          <div className="text-7xl font-display font-bold text-orange-50 my-4">{overallScore}</div>
-          <p className="text-xs text-orange-400/50">out of {activeProgram.targetScore} target</p>
-          <div className="w-full grid grid-cols-2 gap-4 mt-6 pt-5 border-t border-orange-500/10">
+          <div className="text-7xl font-display font-bold text-[#c9b787] my-4">{overallScore}</div>
+          <p className="text-xs text-[#c9b787]/50">out of {activeProgram.targetScore} target</p>
+          <div className="w-full grid grid-cols-2 gap-4 mt-6 pt-5 border-t border-[#c9b787]/10">
             <div>
-              <div className="text-xs text-orange-400/40 mb-1">Target</div>
-              <div className="text-xl font-bold text-orange-50">{activeProgram.targetScore}</div>
+              <div className="text-xs text-[#c9b787]/40 mb-1">Target</div>
+              <div className="text-xl font-bold text-[#c9b787]">{activeProgram.targetScore}</div>
             </div>
             <div>
-              <div className="text-xs text-orange-400/40 mb-1">Status</div>
-              <div className="text-xs font-bold flex items-center gap-1 bg-emerald-500/10 text-emerald-400 w-max px-2.5 py-1 rounded-lg">
+              <div className="text-xs text-[#c9b787]/40 mb-1">Status</div>
+              <div className="text-xs font-bold flex items-center gap-1 bg-[#c9b787]/10 text-[#c9b787] w-max px-2.5 py-1 rounded-lg">
                 <ArrowUpRight className="w-3.5 h-3.5" />{' '}
                 {activeProgram.status === 'active' ? 'On Track' : activeProgram.status}
               </div>
@@ -220,23 +220,23 @@ export default function ReadinessDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="lg:col-span-8 bg-orange-500/5 border border-orange-500/10 rounded-xl p-6"
+          className="lg:col-span-8 bg-[#c9b787]/5 border border-[#c9b787]/10 rounded-xl p-6"
         >
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-sm font-semibold text-orange-50 font-display">
+            <h3 className="text-sm font-semibold text-[#c9b787] font-display">
               Dimension Performance
             </h3>
-            <div className="flex items-center gap-4 text-[10px] text-orange-400/40">
+            <div className="flex items-center gap-4 text-[10px] text-[#c9b787]/40">
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-1.5 rounded-full bg-red-400 inline-block" /> Score
+                <span className="w-3 h-1.5 rounded-full bg-[#f5f5f5] inline-block" /> Score
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-0.5 h-3 bg-orange-50/20 inline-block" /> Target
+                <span className="w-0.5 h-3 bg-[#c9b787]/20 inline-block" /> Target
               </span>
             </div>
           </div>
           {sortedDimensions.length === 0 ? (
-            <div className="flex items-center justify-center py-10 text-orange-400/40 text-xs">
+            <div className="flex items-center justify-center py-10 text-[#c9b787]/40 text-xs">
               No dimensions configured for this program
             </div>
           ) : (
@@ -262,24 +262,24 @@ export default function ReadinessDashboard() {
             value: rollup?.dimensionCount ?? 0,
             label: 'Assessed Dimensions',
             icon: Target,
-            color: 'text-orange-400',
-            bg: 'bg-orange-500/10',
+            color: 'text-[#c9b787]',
+            bg: 'bg-[#c9b787]/10',
           },
           {
             delay: 0.35,
             value: rollup?.criticalRiskCount ?? 0,
             label: 'Critical Open Risks',
             icon: ShieldAlert,
-            color: 'text-red-400',
-            bg: 'bg-red-500/10',
+            color: 'text-[#f5f5f5]',
+            bg: 'bg-[#f5f5f5]/10',
           },
           {
             delay: 0.45,
             value: rollup?.unreadAlertCount ?? 0,
             label: 'Unread Alerts',
             icon: BellRing,
-            color: 'text-amber-400',
-            bg: 'bg-amber-500/10',
+            color: 'text-[#c9b787]',
+            bg: 'bg-[#c9b787]/10',
           },
         ].map(({ delay, value, label, icon: Icon, color, bg }) => (
           <motion.div
@@ -287,13 +287,13 @@ export default function ReadinessDashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay }}
-            className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-5"
+            className="bg-[#c9b787]/5 border border-[#c9b787]/10 rounded-xl p-5"
           >
             <div className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center mb-4`}>
               <Icon className={`w-4.5 h-4.5 ${color}`} />
             </div>
-            <div className="text-3xl font-display font-bold text-orange-50">{value}</div>
-            <p className="text-xs text-orange-400/50 mt-1">{label}</p>
+            <div className="text-3xl font-display font-bold text-[#c9b787]">{value}</div>
+            <p className="text-xs text-[#c9b787]/50 mt-1">{label}</p>
           </motion.div>
         ))}
       </div>
@@ -303,9 +303,9 @@ export default function ReadinessDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-5"
+          className="bg-[#c9b787]/5 border border-[#c9b787]/10 rounded-xl p-5"
         >
-          <h3 className="text-sm font-semibold text-orange-50 mb-4">
+          <h3 className="text-sm font-semibold text-[#c9b787] mb-4">
             Score Distribution by Control Domain
           </h3>
           <div className="h-48">
@@ -313,14 +313,14 @@ export default function ReadinessDashboard() {
               <BarChart data={chartData} barGap={4}>
                 <XAxis
                   dataKey="name"
-                  stroke="#f97316"
+                  stroke="#c9b787"
                   fontSize={9}
                   tick={{ fill: 'rgba(251,146,60,0.5)' }}
                   tickLine={false}
                   axisLine={false}
                 />
                 <YAxis
-                  stroke="#f97316"
+                  stroke="#c9b787"
                   fontSize={9}
                   tick={{ fill: 'rgba(251,146,60,0.5)' }}
                   tickLine={false}
@@ -330,20 +330,20 @@ export default function ReadinessDashboard() {
                 <Tooltip
                   contentStyle={{
                     backgroundColor: '#09080f',
-                    border: '1px solid rgba(249,115,22,0.2)',
+                    border: '1px solid rgba(201,183,135,0.2)',
                     borderRadius: '8px',
                     fontSize: '11px',
                   }}
                 />
                 <Bar
                   dataKey="score"
-                  fill="rgba(239,68,68,0.7)"
+                  fill="rgba(245,245,245,0.7)"
                   radius={[3, 3, 0, 0]}
                   name="Score"
                 />
                 <Bar
                   dataKey="target"
-                  fill="rgba(249,115,22,0.2)"
+                  fill="rgba(201,183,135,0.2)"
                   radius={[3, 3, 0, 0]}
                   name="Target"
                 />

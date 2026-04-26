@@ -110,10 +110,10 @@ export default function ScenarioBuilder() {
                 className={cn(
                   'w-2 h-2 rounded-full',
                   s.impact === 'positive'
-                    ? 'bg-emerald-400'
+                    ? 'bg-[#c9b787]'
                     : s.impact === 'negative'
-                      ? 'bg-red-400'
-                      : 'bg-amber-400',
+                      ? 'bg-[#f5f5f5]'
+                      : 'bg-[#c9b787]',
                 )}
               />
             </div>
@@ -133,10 +133,10 @@ export default function ScenarioBuilder() {
             className={cn(
               'inline-flex items-center gap-1 mt-2 text-sm font-medium',
               active.impact === 'positive'
-                ? 'text-emerald-400'
+                ? 'text-[#c9b787]'
                 : active.impact === 'negative'
-                  ? 'text-red-400'
-                  : 'text-amber-400',
+                  ? 'text-[#f5f5f5]'
+                  : 'text-[#c9b787]',
             )}
           >
             {active.impact === 'positive' ? (
@@ -159,10 +159,10 @@ export default function ScenarioBuilder() {
               className={cn(
                 'h-full rounded-full',
                 active.confidence >= 0.85
-                  ? 'bg-emerald-400'
+                  ? 'bg-[#c9b787]'
                   : active.confidence >= 0.75
-                    ? 'bg-cyan-400'
-                    : 'bg-amber-400',
+                    ? 'bg-[#8a8a8a]'
+                    : 'bg-[#c9b787]',
               )}
               style={{ width: `${active.confidence * 100}%` }}
             />
@@ -204,8 +204,8 @@ export default function ScenarioBuilder() {
                       className={cn(
                         'px-3 py-1 rounded-full text-xs font-mono mx-2',
                         isIncrease
-                          ? 'bg-emerald-400/10 text-emerald-400'
-                          : 'bg-red-400/10 text-red-400',
+                          ? 'bg-[#c9b787]/10 text-[#c9b787]'
+                          : 'bg-[#f5f5f5]/10 text-[#f5f5f5]',
                       )}
                     >
                       {isIncrease ? '+' : ''}

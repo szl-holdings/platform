@@ -24,7 +24,7 @@ if ('serviceWorker' in navigator && !import.meta.env.DEV) {
 }
 
 createRoot(document.getElementById('root')!).render(
-  <ErrorBoundary appName="TENAX Cyber Resilience Command" accentColor="#ef4444">
+  <ErrorBoundary appName="Aegis Cyber Resilience Command" accentColor="#f5f5f5">
     <GraphQLProvider>
       <App />
     </GraphQLProvider>

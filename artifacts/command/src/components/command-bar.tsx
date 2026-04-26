@@ -83,7 +83,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   },
   {
     href: '/pulse/',
-    label: 'LUMINA — Executive Briefing',
+    label: 'Pulse — Executive Briefing',
     description: 'AI executive briefing and morning digest',
     icon: Heart,
     color: '#d4a054',
@@ -92,7 +92,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   },
   {
     href: '/sentra/',
-    label: 'TENAX — Cyber Resilience',
+    label: 'Aegis — Cyber Resilience',
     description: 'Cyber resilience command and incident orchestration',
     icon: ShieldCheck,
     color: '#22c55e',
@@ -271,7 +271,7 @@ const QUICK_NAV: QuickNavItem[] = [
   },
   {
     href: '/operations/prism/pulse',
-    label: 'LUMINA',
+    label: 'Pulse',
     section: 'Intelligence',
     icon: Heart,
     color: '#d4a054',

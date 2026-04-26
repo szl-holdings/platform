@@ -170,7 +170,7 @@ export default function LPSentimentPulse() {
     <div className="min-h-screen bg-[#060810] text-white p-6 space-y-6">
       <AmbientBar signals={ambientSignals} appDomain="szl-holdings" accentColor="#6366f1" compact />
       <div>
-        <h1 className="text-2xl font-bold text-white/90">LP Sentiment LUMINA</h1>
+        <h1 className="text-2xl font-bold text-white/90">LP Sentiment Pulse</h1>
         <p className="text-sm text-white/40 mt-1">
           Track investor engagement signals and generate proactive communications before LPs ask
         </p>

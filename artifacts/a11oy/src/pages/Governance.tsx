@@ -40,10 +40,10 @@ const PENDING = [
 ];
 
 const ENFORCEMENT_STYLES: Record<string, { color: string }> = {
-  block_until_approved: { color: '#ef4444' },
-  require_acknowledgment: { color: '#f59e0b' },
-  auto_escalate: { color: '#8b5cf6' },
-  require_approval: { color: '#f59e0b' },
+  block_until_approved: { color: '#f5f5f5' },
+  require_acknowledgment: { color: '#c9b787' },
+  auto_escalate: { color: '#8a8a8a' },
+  require_approval: { color: '#c9b787' },
   constitutional: { color: '#b08d52' },
 };
 
@@ -65,9 +65,9 @@ export function Governance() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <KpiCard label="ACTIVE POLICIES" value="5" sub="+1 constitutional" accent="#10b981" />
-        <KpiCard label="GATES PENDING" value="2" sub="Awaiting human approval" accent="#f59e0b" />
-        <KpiCard label="GATES TODAY" value="12" sub="All passed or approved" accent="#10b981" />
+        <KpiCard label="ACTIVE POLICIES" value="5" sub="+1 constitutional" accent="#c9b787" />
+        <KpiCard label="GATES PENDING" value="2" sub="Awaiting human approval" accent="#c9b787" />
+        <KpiCard label="GATES TODAY" value="12" sub="All passed or approved" accent="#c9b787" />
         <KpiCard label="BYPASS ATTEMPTS" value="0" sub="Zero-tolerance enforced" accent="#b08d52" />
       </div>
 
@@ -95,7 +95,7 @@ export function Governance() {
           <SectionTitle>Policy Registry</SectionTitle>
           <div className="flex flex-col gap-2">
             {POLICIES.map(p => {
-              const style = ENFORCEMENT_STYLES[p.enforcement] ?? { color: '#9bacc4' };
+              const style = ENFORCEMENT_STYLES[p.enforcement] ?? { color: '#5e5e5e' };
               return (
                 <Card key={p.id}>
                   <div className="flex items-start justify-between gap-3">
@@ -109,7 +109,7 @@ export function Governance() {
                     </div>
                     <span
                       className="text-xs font-mono px-1.5 py-0.5 rounded flex-shrink-0"
-                      style={{ backgroundColor: p.status === 'constitutional' ? 'rgba(176,141,82,0.1)' : 'rgba(16,185,129,0.1)', color: p.status === 'constitutional' ? '#b08d52' : '#10b981' }}
+                      style={{ backgroundColor: p.status === 'constitutional' ? 'rgba(176,141,82,0.1)' : 'rgba(201,183,135,0.1)', color: p.status === 'constitutional' ? '#b08d52' : '#c9b787' }}
                     >
                       {p.status}
                     </span>
@@ -139,8 +139,8 @@ export function Governance() {
                   Authorize port standby — $14,200/day
                 </div>
               </div>
-              <div className="p-3 rounded" style={{ backgroundColor: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)' }}>
-                <div className="text-xs font-mono mb-1" style={{ color: '#10b981' }}>SIMULATION RESULT</div>
+              <div className="p-3 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.2)' }}>
+                <div className="text-xs font-mono mb-1" style={{ color: '#c9b787' }}>SIMULATION RESULT</div>
                 <div className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>
                   Policy pol-maritime-002 triggered · Enforcement: block_until_approved · Required: VP Operations
                 </div>

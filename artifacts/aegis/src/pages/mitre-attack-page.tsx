@@ -156,14 +156,14 @@ function getHeatStyle(count: number, maxCount: number): { bg: string; text: stri
     return { bg: 'rgba(255,255,255,0.04)', text: 'text-muted-foreground/30', ring: '' };
   const ratio = count / maxCount;
   if (ratio >= 0.8)
-    return { bg: 'rgba(239,68,68,0.85)', text: 'text-white', ring: 'ring-1 ring-red-400/50' };
+    return { bg: 'rgba(245,245,245,0.85)', text: 'text-white', ring: 'ring-1 ring-red-400/50' };
   if (ratio >= 0.6)
-    return { bg: 'rgba(239,68,68,0.60)', text: 'text-white', ring: 'ring-1 ring-red-400/30' };
+    return { bg: 'rgba(245,245,245,0.60)', text: 'text-white', ring: 'ring-1 ring-red-400/30' };
   if (ratio >= 0.4)
-    return { bg: 'rgba(249,115,22,0.55)', text: 'text-white', ring: 'ring-1 ring-orange-400/30' };
+    return { bg: 'rgba(201,183,135,0.55)', text: 'text-white', ring: 'ring-1 ring-orange-400/30' };
   if (ratio >= 0.2)
-    return { bg: 'rgba(234,179,8,0.45)', text: 'text-white', ring: 'ring-1 ring-yellow-400/30' };
-  return { bg: 'rgba(234,179,8,0.18)', text: 'text-amber-300', ring: '' };
+    return { bg: 'rgba(138,138,138,0.45)', text: 'text-white', ring: 'ring-1 ring-yellow-400/30' };
+  return { bg: 'rgba(138,138,138,0.18)', text: 'text-[#c9b787]', ring: '' };
 }
 
 interface DrillDownProps {
@@ -193,10 +193,10 @@ function DrillDownPanel({
         <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-mono text-red-400/60 uppercase tracking-widest">
+              <span className="text-[10px] font-mono text-[#f5f5f5]/60 uppercase tracking-widest">
                 {tactic}
               </span>
-              <span className="text-red-500/20">·</span>
+              <span className="text-[#f5f5f5]/20">·</span>
               <span className="text-[10px] font-mono text-muted-foreground/50">{techniqueId}</span>
             </div>
             <h2 className="font-display text-base font-bold text-foreground">{techniqueName}</h2>
@@ -210,30 +210,30 @@ function DrillDownPanel({
         </div>
         <div className="p-6 space-y-4">
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-red-500/5 border border-red-500/15 rounded-lg p-3">
+            <div className="bg-[#f5f5f5]/5 border border-[#f5f5f5]/15 rounded-lg p-3">
               <div className="text-[10px] text-muted-foreground font-mono mb-1">DETECTIONS</div>
-              <div className="text-2xl font-bold text-red-400 font-display">
+              <div className="text-2xl font-bold text-[#f5f5f5] font-display">
                 {detection?.detectionCount ?? 0}
               </div>
               <div className="text-[9px] text-muted-foreground">total events</div>
             </div>
-            <div className="bg-orange-500/5 border border-orange-500/15 rounded-lg p-3">
+            <div className="bg-[#c9b787]/5 border border-[#c9b787]/15 rounded-lg p-3">
               <div className="text-[10px] text-muted-foreground font-mono mb-1">INCIDENTS</div>
-              <div className="text-2xl font-bold text-orange-400 font-display">
+              <div className="text-2xl font-bold text-[#c9b787] font-display">
                 {detection?.incidentCount ?? 0}
               </div>
               <div className="text-[9px] text-muted-foreground">linked incidents</div>
             </div>
-            <div className="bg-blue-500/5 border border-blue-500/15 rounded-lg p-3">
+            <div className="bg-[#c9b787]/5 border border-[#c9b787]/15 rounded-lg p-3">
               <div className="text-[10px] text-muted-foreground font-mono mb-1">COVERAGE</div>
               <div
                 className={cn(
                   'text-xl font-bold font-display',
                   detection?.coverageStatus === 'detected'
-                    ? 'text-emerald-400'
+                    ? 'text-[#c9b787]'
                     : detection?.coverageStatus === 'partial'
-                      ? 'text-amber-400'
-                      : 'text-red-400/50',
+                      ? 'text-[#c9b787]'
+                      : 'text-[#f5f5f5]/50',
                 )}
               >
                 {detection?.coverageStatus === 'detected'
@@ -247,7 +247,7 @@ function DrillDownPanel({
           </div>
           {detection?.lastDetectedAt && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Activity className="w-3.5 h-3.5 text-red-400" />
+              <Activity className="w-3.5 h-3.5 text-[#f5f5f5]" />
               Last detected: {new Date(detection.lastDetectedAt).toLocaleString()}
             </div>
           )}
@@ -259,13 +259,13 @@ function DrillDownPanel({
               href={`https://attack.mitre.org/techniques/${techniqueId.replace('.', '/')}/`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-[#c9b787] hover:text-[#c9b787] transition-colors"
             >
               attack.mitre.org/techniques/{techniqueId} <ChevronRight className="w-3 h-3" />
             </a>
           </div>
           {!detection && (
-            <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-red-500/5 border border-red-500/10 text-xs text-red-400/70">
+            <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-[#f5f5f5]/5 border border-[#f5f5f5]/10 text-xs text-[#f5f5f5]/70">
               <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
               No active detection rule for this technique — coverage gap identified
             </div>
@@ -333,16 +333,16 @@ export default function MitreAttackPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[9px] font-mono text-red-400/50 uppercase tracking-widest">
+            <span className="text-[9px] font-mono text-[#f5f5f5]/50 uppercase tracking-widest">
               Aegis / MITRE
             </span>
-            <span className="text-red-500/20">·</span>
+            <span className="text-[#f5f5f5]/20">·</span>
             <span className="text-[9px] font-mono text-muted-foreground/40 uppercase tracking-widest">
               Detection Coverage
             </span>
           </div>
           <h1 className="font-display text-xl font-bold flex items-center gap-2.5">
-            <Grid3X3 className="w-5 h-5 text-red-400" /> MITRE ATT&CK Matrix
+            <Grid3X3 className="w-5 h-5 text-[#f5f5f5]" /> MITRE ATT&CK Matrix
           </h1>
           <p className="text-[11px] text-muted-foreground mt-1">
             Real detection counts mapped to ATT&CK techniques — click any cell to drill down
@@ -351,19 +351,19 @@ export default function MitreAttackPage() {
         <div className="flex items-center gap-2 shrink-0">
           <Badge
             variant="outline"
-            className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px] font-mono"
+            className="bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20 text-[10px] font-mono"
           >
             {fullyCovered} Full Coverage
           </Badge>
           <Badge
             variant="outline"
-            className="bg-amber-500/10 text-amber-400 border-amber-500/20 text-[10px] font-mono"
+            className="bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20 text-[10px] font-mono"
           >
             {covered - fullyCovered} Partial
           </Badge>
           <Badge
             variant="outline"
-            className="bg-red-500/10 text-red-400 border-red-500/20 text-[10px] font-mono"
+            className="bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20 text-[10px] font-mono"
           >
             {totalTechniques - covered} Gaps
           </Badge>
@@ -376,28 +376,28 @@ export default function MitreAttackPage() {
             label: 'ATT&CK Coverage',
             value: `${coverage}%`,
             sub: `${covered} of ${totalTechniques} techniques`,
-            color: 'text-emerald-400',
+            color: 'text-[#c9b787]',
             icon: Shield,
           },
           {
             label: 'Total Detections',
             value: isLoading ? '—' : totalDetections.toLocaleString(),
             sub: 'across all techniques',
-            color: 'text-red-400',
+            color: 'text-[#f5f5f5]',
             icon: Activity,
           },
           {
             label: 'Unique Techniques',
             value: isLoading ? '—' : String(fullyCovered),
             sub: 'with active detection rules',
-            color: 'text-blue-400',
+            color: 'text-[#c9b787]',
             icon: Eye,
           },
           {
             label: 'Coverage Gaps',
             value: isLoading ? '—' : String(totalTechniques - covered),
             sub: 'techniques without detections',
-            color: 'text-orange-400',
+            color: 'text-[#c9b787]',
             icon: AlertTriangle,
           },
         ].map(({ label, value, sub, color, icon: Icon }) => (
@@ -417,13 +417,13 @@ export default function MitreAttackPage() {
       <div className="bg-card border border-border rounded-xl overflow-hidden">
         <div className="px-5 py-3.5 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <Target className="w-4 h-4 text-red-400" />
+            <Target className="w-4 h-4 text-[#f5f5f5]" />
             <span className="font-display font-semibold text-sm text-foreground">
               ATT&CK Heatmap
             </span>
             <Badge
               variant="outline"
-              className="text-[10px] bg-red-500/10 text-red-400 border-red-500/20 ml-1"
+              className="text-[10px] bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20 ml-1"
             >
               {isLoading ? 'Loading...' : `${totalDetections} detections · 30-day window`}
             </Badge>
@@ -432,14 +432,14 @@ export default function MitreAttackPage() {
             <span className="flex items-center gap-1.5">
               <span
                 className="w-3 h-2 rounded-sm inline-block"
-                style={{ backgroundColor: 'rgba(239,68,68,0.85)' }}
+                style={{ backgroundColor: 'rgba(245,245,245,0.85)' }}
               />
               High Volume
             </span>
             <span className="flex items-center gap-1.5">
               <span
                 className="w-3 h-2 rounded-sm inline-block"
-                style={{ backgroundColor: 'rgba(234,179,8,0.30)' }}
+                style={{ backgroundColor: 'rgba(138,138,138,0.30)' }}
               />
               Low Activity
             </span>
@@ -455,7 +455,7 @@ export default function MitreAttackPage() {
         <div className="p-4 overflow-x-auto">
           {isLoading ? (
             <div className="flex items-center justify-center h-40">
-              <div className="w-6 h-6 border-2 border-red-500/40 border-t-red-400 rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-[#f5f5f5]/40 border-t-red-400 rounded-full animate-spin" />
             </div>
           ) : (
             <div
@@ -465,7 +465,7 @@ export default function MitreAttackPage() {
               {tactics.map((tactic) => (
                 <div key={tactic.id} className="space-y-1">
                   <div
-                    className="text-[9px] font-mono text-red-400/70 uppercase tracking-wide text-center py-1 px-1 truncate"
+                    className="text-[9px] font-mono text-[#f5f5f5]/70 uppercase tracking-wide text-center py-1 px-1 truncate"
                     title={tactic.name}
                   >
                     {tactic.shortName}
@@ -523,7 +523,7 @@ export default function MitreAttackPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="px-5 py-3 border-b border-border flex items-center gap-2">
-            <Activity className="w-4 h-4 text-red-400" />
+            <Activity className="w-4 h-4 text-[#f5f5f5]" />
             <span className="font-display font-semibold text-sm">Top Active Techniques</span>
           </div>
           <div className="divide-y divide-border/40">
@@ -555,11 +555,11 @@ export default function MitreAttackPage() {
                   <div className="flex items-center gap-2 shrink-0">
                     <div className="h-1.5 w-16 bg-border rounded-full overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-red-400"
+                        className="h-full rounded-full bg-[#f5f5f5]"
                         style={{ width: `${Math.min((d.detectionCount / maxCount) * 100, 100)}%` }}
                       />
                     </div>
-                    <span className="text-xs font-bold font-mono text-red-400 w-6 text-right">
+                    <span className="text-xs font-bold font-mono text-[#f5f5f5] w-6 text-right">
                       {d.detectionCount}
                     </span>
                   </div>
@@ -570,11 +570,11 @@ export default function MitreAttackPage() {
 
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="px-5 py-3 border-b border-border flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-orange-400" />
+            <AlertTriangle className="w-4 h-4 text-[#c9b787]" />
             <span className="font-display font-semibold text-sm">Coverage Gaps</span>
             <Badge
               variant="outline"
-              className="text-[10px] bg-orange-500/10 text-orange-400 border-orange-500/20 ml-auto"
+              className="text-[10px] bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20 ml-auto"
             >
               {totalTechniques - covered} techniques uncovered
             </Badge>
@@ -615,7 +615,7 @@ export default function MitreAttackPage() {
                   </div>
                   <Badge
                     variant="outline"
-                    className="text-[9px] bg-red-500/10 text-red-400/70 border-red-500/20 shrink-0"
+                    className="text-[9px] bg-[#f5f5f5]/10 text-[#f5f5f5]/70 border-[#f5f5f5]/20 shrink-0"
                   >
                     Gap
                   </Badge>

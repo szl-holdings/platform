@@ -47,32 +47,32 @@ const assetTypeIcons: Record<string, any> = {
 };
 
 const exposureColors: Record<string, string> = {
-  public: 'bg-red-500/15 text-red-400 border-red-500/30',
-  internal: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-  restricted: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-  critical: 'bg-rose-500/15 text-rose-400 border-rose-500/30',
+  public: 'bg-[#f5f5f5]/15 text-[#f5f5f5] border-[#f5f5f5]/30',
+  internal: 'bg-[#c9b787]/15 text-[#c9b787] border-[#c9b787]/30',
+  restricted: 'bg-[#c9b787]/15 text-[#c9b787] border-[#c9b787]/30',
+  critical: 'bg-[#f5f5f5]/15 text-[#f5f5f5] border-rose-500/30',
 };
 
 const environmentColors: Record<string, string> = {
-  production: 'bg-red-500/10 text-red-400',
-  staging: 'bg-amber-500/10 text-amber-400',
-  development: 'bg-emerald-500/10 text-emerald-400',
-  dmz: 'bg-orange-500/10 text-orange-400',
-  internal: 'bg-blue-500/10 text-blue-400',
+  production: 'bg-[#f5f5f5]/10 text-[#f5f5f5]',
+  staging: 'bg-[#c9b787]/10 text-[#c9b787]',
+  development: 'bg-[#c9b787]/10 text-[#c9b787]',
+  dmz: 'bg-[#c9b787]/10 text-[#c9b787]',
+  internal: 'bg-[#c9b787]/10 text-[#c9b787]',
 };
 
 function getRiskColor(score: number): string {
-  if (score >= 8) return 'text-red-400';
-  if (score >= 6) return 'text-orange-400';
-  if (score >= 4) return 'text-amber-400';
-  return 'text-emerald-400';
+  if (score >= 8) return 'text-[#f5f5f5]';
+  if (score >= 6) return 'text-[#c9b787]';
+  if (score >= 4) return 'text-[#c9b787]';
+  return 'text-[#c9b787]';
 }
 
 function getRiskBg(score: number): string {
-  if (score >= 8) return 'bg-red-500/10 border-red-500/20';
-  if (score >= 6) return 'bg-orange-500/10 border-orange-500/20';
-  if (score >= 4) return 'bg-amber-500/10 border-amber-500/20';
-  return 'bg-emerald-500/10 border-emerald-500/20';
+  if (score >= 8) return 'bg-[#f5f5f5]/10 border-[#f5f5f5]/20';
+  if (score >= 6) return 'bg-[#c9b787]/10 border-[#c9b787]/20';
+  if (score >= 4) return 'bg-[#c9b787]/10 border-[#c9b787]/20';
+  return 'bg-[#c9b787]/10 border-[#c9b787]/20';
 }
 
 function formatTimeSince(isoDate: string | null | undefined): string {
@@ -149,7 +149,7 @@ export default function AssetInventoryPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <Shield className="w-5 h-5 text-orange-400" />
+            <Shield className="w-5 h-5 text-[#c9b787]" />
             Asset Inventory
           </h1>
           <p className="text-sm text-zinc-400 mt-0.5">
@@ -170,31 +170,31 @@ export default function AssetInventoryPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-red-500/5 border-red-500/20">
+        <Card className="bg-[#f5f5f5]/5 border-[#f5f5f5]/20">
           <CardContent className="p-4">
-            <div className="text-xs text-red-400 font-medium mb-1">Critical Risk Assets</div>
-            <div className="text-3xl font-bold text-red-400">{criticalCount}</div>
+            <div className="text-xs text-[#f5f5f5] font-medium mb-1">Critical Risk Assets</div>
+            <div className="text-3xl font-bold text-[#f5f5f5]">{criticalCount}</div>
             <div className="text-[10px] text-zinc-500 mt-1">Risk Score ≥ 8.0</div>
           </CardContent>
         </Card>
-        <Card className="bg-orange-500/5 border-orange-500/20">
+        <Card className="bg-[#c9b787]/5 border-[#c9b787]/20">
           <CardContent className="p-4">
-            <div className="text-xs text-orange-400 font-medium mb-1">High Risk Assets</div>
-            <div className="text-3xl font-bold text-orange-400">{highCount}</div>
+            <div className="text-xs text-[#c9b787] font-medium mb-1">High Risk Assets</div>
+            <div className="text-3xl font-bold text-[#c9b787]">{highCount}</div>
             <div className="text-[10px] text-zinc-500 mt-1">Risk Score 6.0–7.9</div>
           </CardContent>
         </Card>
-        <Card className="bg-rose-500/5 border-rose-500/20">
+        <Card className="bg-[#f5f5f5]/5 border-rose-500/20">
           <CardContent className="p-4">
-            <div className="text-xs text-rose-400 font-medium mb-1">Critical Findings</div>
-            <div className="text-3xl font-bold text-rose-400">{totalCriticalFindings}</div>
+            <div className="text-xs text-[#f5f5f5] font-medium mb-1">Critical Findings</div>
+            <div className="text-3xl font-bold text-[#f5f5f5]">{totalCriticalFindings}</div>
             <div className="text-[10px] text-zinc-500 mt-1">Across all assets</div>
           </CardContent>
         </Card>
-        <Card className="bg-amber-500/5 border-amber-500/20">
+        <Card className="bg-[#c9b787]/5 border-[#c9b787]/20">
           <CardContent className="p-4">
-            <div className="text-xs text-amber-400 font-medium mb-1">High Findings</div>
-            <div className="text-3xl font-bold text-amber-400">{totalHighFindings}</div>
+            <div className="text-xs text-[#c9b787] font-medium mb-1">High Findings</div>
+            <div className="text-3xl font-bold text-[#c9b787]">{totalHighFindings}</div>
             <div className="text-[10px] text-zinc-500 mt-1">Requires remediation</div>
           </CardContent>
         </Card>
@@ -313,15 +313,15 @@ export default function AssetInventoryPage() {
                   <div className="text-sm font-medium text-white font-mono">{asset.name}</div>
                   <div className="text-[10px] text-zinc-500 flex items-center gap-1.5 mt-0.5">
                     {asset.criticalFindings > 0 && (
-                      <span className="text-red-400 font-medium">
+                      <span className="text-[#f5f5f5] font-medium">
                         {asset.criticalFindings} critical
                       </span>
                     )}
                     {asset.highFindings > 0 && (
-                      <span className="text-orange-400">{asset.highFindings} high</span>
+                      <span className="text-[#c9b787]">{asset.highFindings} high</span>
                     )}
                     {asset.criticalFindings === 0 && asset.highFindings === 0 && (
-                      <span className="text-emerald-400">Clean</span>
+                      <span className="text-[#c9b787]">Clean</span>
                     )}
                     <span className="text-zinc-600">
                       · Scanned {formatTimeSince(asset.lastScannedAt)}
@@ -364,7 +364,7 @@ export default function AssetInventoryPage() {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-6 px-2 text-[10px] border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
+                  className="h-6 px-2 text-[10px] border-[#c9b787]/30 text-[#c9b787] hover:bg-[#c9b787]/10"
                   onClick={() =>
                     triggerWorkflow.mutate({
                       entityId: asset.id,
@@ -380,7 +380,7 @@ export default function AssetInventoryPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-6 px-2 text-[10px] border-red-500/30 text-red-400 hover:bg-red-500/10"
+                    className="h-6 px-2 text-[10px] border-[#f5f5f5]/30 text-[#f5f5f5] hover:bg-[#f5f5f5]/10"
                     onClick={() =>
                       triggerWorkflow.mutate({ entityId: asset.id, actionType: 'escalate' })
                     }

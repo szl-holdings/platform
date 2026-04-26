@@ -30,10 +30,10 @@ const DS = {
 };
 
 const SEV: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
-  low: '#3b82f6',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#c9b787',
+  low: '#c9b787',
   info: '#64748b',
 };
 
@@ -285,26 +285,26 @@ const INIT_COMMS: CommEntry[] = [
   { id: 'C006', time: '14:41', from: 'J. Chen', role: 'Incident Commander', message: 'Decision logged: Holding EDR isolation for 15 min evidence window. M. Rodriguez — begin memory dump NOW. S. Park — continue live monitoring. A. Thompson — block all SMB to DC-PROD-03 adjacent hosts.', type: 'action', priority: 'urgent' },
   { id: 'C007', time: '14:52', from: 'J. Chen', role: 'Incident Commander', message: 'EDR isolation approved and executed on DC-PROD-03 at 14:52. Memory dump complete. 3 adjacent hosts flagged. C2 beacon severed by A. Thompson 14:50. Moving to eradication phase prep.', type: 'action' },
   { id: 'C008', time: '15:02', from: 'P. Santos', role: 'Executive Liaison', message: 'CISO brief delivered. Board notification draft ready — holding pending legal review. PR statement drafted. No external disclosure. Legal hold on all logs confirmed by K. Wilson.', type: 'update' },
-  { id: 'C009', time: '15:05', from: 'INCIDENT SYSTEM', role: 'Automated Broadcast', message: 'BROADCAST: Crisis status update distributed to all connected verticals. Vessels, Terra, PRISM, SZL Holdings — crisis banner active. Cross-domain impact assessment underway.', type: 'broadcast' },
+  { id: 'C009', time: '15:05', from: 'INCIDENT SYSTEM', role: 'Automated Broadcast', message: 'BROADCAST: Crisis status update distributed to all connected verticals. Vessels, Terra, PRISM, Aegis — crisis banner active. Cross-domain impact assessment underway.', type: 'broadcast' },
 ];
 
 const COMM_COLORS: Record<string, string> = {
-  intel: '#8b5cf6',
-  action: '#ef4444',
-  escalation: '#f97316',
-  update: '#3b82f6',
+  intel: '#8a8a8a',
+  action: '#f5f5f5',
+  escalation: '#c9b787',
+  update: '#c9b787',
   broadcast: '#22d3ee',
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  active: '#22c55e',
-  standby: '#f59e0b',
+  active: '#c9b787',
+  standby: '#c9b787',
   unavailable: '#64748b',
 };
 
 const DECISION_COLORS: Record<string, string> = {
-  enacted: '#22c55e',
-  pending: '#f59e0b',
+  enacted: '#c9b787',
+  pending: '#c9b787',
   superseded: '#64748b',
 };
 
@@ -358,11 +358,11 @@ function mapDrillScenario(s: Record<string, unknown>): DrillScenario {
 }
 
 const DRILL_STATUS_COLOR: Record<string, string> = {
-  running: '#f59e0b',
-  paused: '#3b82f6',
+  running: '#c9b787',
+  paused: '#c9b787',
   pending: '#64748b',
-  completed: '#22c55e',
-  failed: '#ef4444',
+  completed: '#c9b787',
+  failed: '#f5f5f5',
 };
 
 export default function CitadelWarRoom() {
@@ -510,26 +510,26 @@ export default function CitadelWarRoom() {
     >
       <div
         className="shrink-0 px-4 py-2.5 border-b flex items-center gap-3"
-        style={{ borderColor: 'rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.04)' }}
+        style={{ borderColor: 'rgba(245,245,245,0.2)', background: 'rgba(245,245,245,0.04)' }}
       >
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          <span className="text-sm font-bold tracking-tight text-red-400">
+          <div className="w-2 h-2 rounded-full bg-[#f5f5f5] animate-pulse" />
+          <span className="text-sm font-bold tracking-tight text-[#f5f5f5]">
             CRISIS RESPONSE CENTER
           </span>
           <span
             className="text-[9px] px-2 py-0.5 rounded font-mono uppercase font-bold"
             style={{
-              background: 'rgba(239,68,68,0.2)',
+              background: 'rgba(245,245,245,0.2)',
               color: '#fca5a5',
-              border: '1px solid rgba(239,68,68,0.3)',
+              border: '1px solid rgba(245,245,245,0.3)',
             }}
           >
             ICS L3 ACTIVE
           </span>
           <span
             className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-mono uppercase border"
-            style={{ background: 'rgba(34,197,94,0.08)', borderColor: 'rgba(34,197,94,0.25)', color: '#22c55e' }}
+            style={{ background: 'rgba(201,183,135,0.08)', borderColor: 'rgba(201,183,135,0.25)', color: '#c9b787' }}
           >
             <Database className="w-2.5 h-2.5" />
             {incidentsLoading ? 'Loading…' : activeIncident ? `Live · ${incidentId}` : 'Scenario'}
@@ -543,13 +543,13 @@ export default function CitadelWarRoom() {
             </span>
             <span
               className="text-[9px] px-1.5 py-0.5 rounded uppercase font-bold shrink-0"
-              style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444' }}
+              style={{ background: 'rgba(245,245,245,0.15)', color: '#f5f5f5' }}
             >
               CYBERATTACK
             </span>
             <span
               className="text-[9px] px-1.5 py-0.5 rounded uppercase font-bold shrink-0"
-              style={{ background: 'rgba(249,115,22,0.15)', color: '#f97316' }}
+              style={{ background: 'rgba(201,183,135,0.15)', color: '#c9b787' }}
             >
               CONTAINMENT
             </span>
@@ -564,7 +564,7 @@ export default function CitadelWarRoom() {
             <div className="text-[9px] font-mono" style={{ color: DS.text.muted }}>
               ELAPSED
             </div>
-            <div className="text-[11px] text-red-400">
+            <div className="text-[11px] text-[#f5f5f5]">
               <ElapsedTimer startMin={elapsedMin} />
             </div>
           </div>
@@ -605,9 +605,9 @@ export default function CitadelWarRoom() {
             onClick={() => setActiveTab(id)}
             className="flex items-center gap-1.5 px-4 py-2.5 text-[11px] font-semibold transition-all border-b-2"
             style={{
-              borderColor: activeTab === id ? '#ef4444' : 'transparent',
-              color: activeTab === id ? '#ef4444' : DS.text.muted,
-              background: activeTab === id ? 'rgba(239,68,68,0.04)' : 'transparent',
+              borderColor: activeTab === id ? '#f5f5f5' : 'transparent',
+              color: activeTab === id ? '#f5f5f5' : DS.text.muted,
+              background: activeTab === id ? 'rgba(245,245,245,0.04)' : 'transparent',
             }}
           >
             <Icon className="w-3 h-3" />
@@ -615,7 +615,7 @@ export default function CitadelWarRoom() {
             {id === 'comms' && (
               <span
                 className="text-[8px] px-1 py-0.5 rounded-full font-bold"
-                style={{ background: 'rgba(239,68,68,0.2)', color: '#ef4444' }}
+                style={{ background: 'rgba(245,245,245,0.2)', color: '#f5f5f5' }}
               >
                 {localComms.length}
               </span>
@@ -628,9 +628,9 @@ export default function CitadelWarRoom() {
             href="/citadel-playbooks"
             className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-semibold transition-all"
             style={{
-              background: 'rgba(239,68,68,0.08)',
-              color: '#ef4444',
-              border: '1px solid rgba(239,68,68,0.2)',
+              background: 'rgba(245,245,245,0.08)',
+              color: '#f5f5f5',
+              border: '1px solid rgba(245,245,245,0.2)',
             }}
           >
             <Zap className="w-3 h-3" />
@@ -665,7 +665,7 @@ export default function CitadelWarRoom() {
                   </span>
                   <span
                     className="text-[9px] font-mono px-1.5 py-0.5 rounded"
-                    style={{ background: 'rgba(34,197,94,0.1)', color: '#22c55e' }}
+                    style={{ background: 'rgba(201,183,135,0.1)', color: '#c9b787' }}
                   >
                     LIVE · {STATIC_TIMELINE.length} events
                   </span>
@@ -722,7 +722,7 @@ export default function CitadelWarRoom() {
                         {!event.confirmed && (
                           <span
                             className="text-[8px] px-1 py-0.5 rounded font-bold"
-                            style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}
+                            style={{ background: 'rgba(201,183,135,0.1)', color: '#c9b787' }}
                           >
                             UNCONFIRMED
                           </span>
@@ -754,7 +754,7 @@ export default function CitadelWarRoom() {
                         {event.actor && (
                           <span
                             className="text-[9px] font-mono"
-                            style={{ color: 'rgba(139,92,246,0.8)' }}
+                            style={{ color: 'rgba(138,138,138,0.8)' }}
                           >
                             {event.actor}
                           </span>
@@ -879,7 +879,7 @@ export default function CitadelWarRoom() {
                     <span className="text-[9px]" style={{ color: DS.text.muted }}>{comm.role}</span>
                     <span className="text-[9px] font-mono ml-auto" style={{ color: DS.text.muted }}>{comm.time}</span>
                     {comm.priority === 'urgent' && (
-                      <span className="text-[8px] px-1 py-0.5 rounded font-bold" style={{ background: 'rgba(239,68,68,0.2)', color: '#ef4444' }}>
+                      <span className="text-[8px] px-1 py-0.5 rounded font-bold" style={{ background: 'rgba(245,245,245,0.2)', color: '#f5f5f5' }}>
                         URGENT
                       </span>
                     )}
@@ -915,9 +915,9 @@ export default function CitadelWarRoom() {
                   onClick={sendComm}
                   className="px-3 py-2 rounded-lg text-[11px] font-semibold transition-colors"
                   style={{
-                    background: 'rgba(239,68,68,0.15)',
-                    color: '#ef4444',
-                    border: '1px solid rgba(239,68,68,0.25)',
+                    background: 'rgba(245,245,245,0.15)',
+                    color: '#f5f5f5',
+                    border: '1px solid rgba(245,245,245,0.25)',
                   }}
                 >
                   Send
@@ -944,7 +944,7 @@ export default function CitadelWarRoom() {
                 </div>
                 <span
                   className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-mono uppercase border"
-                  style={{ background: 'rgba(34,197,94,0.08)', borderColor: 'rgba(34,197,94,0.25)', color: '#22c55e' }}
+                  style={{ background: 'rgba(201,183,135,0.08)', borderColor: 'rgba(201,183,135,0.25)', color: '#c9b787' }}
                 >
                   <Database className="w-2.5 h-2.5" />
                   {drillsLoading ? 'Loading…' : `${(drillScenarios ?? []).length} scenarios`}
@@ -953,7 +953,7 @@ export default function CitadelWarRoom() {
 
               {drillsLoading && (
                 <div className="flex items-center gap-2 text-xs py-4" style={{ color: DS.text.muted }}>
-                  <div className="w-3.5 h-3.5 border-2 border-red-500/40 border-t-red-400 rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-[#f5f5f5]/40 border-t-red-400 rounded-full animate-spin" />
                   Loading drill scenarios from Firestorm…
                 </div>
               )}
@@ -979,11 +979,11 @@ export default function CitadelWarRoom() {
                     style={{
                       background:
                         scenario.status === 'running'
-                          ? 'rgba(245,158,11,0.04)'
+                          ? 'rgba(201,183,135,0.04)'
                           : scenario.status === 'paused'
-                            ? 'rgba(59,130,246,0.04)'
+                            ? 'rgba(201,183,135,0.04)'
                             : DS.surface,
-                      border: `1px solid ${scenario.status === 'running' ? 'rgba(245,158,11,0.2)' : scenario.status === 'paused' ? 'rgba(59,130,246,0.2)' : DS.border}`,
+                      border: `1px solid ${scenario.status === 'running' ? 'rgba(201,183,135,0.2)' : scenario.status === 'paused' ? 'rgba(201,183,135,0.2)' : DS.border}`,
                     }}
                   >
                     <div className="flex items-start justify-between gap-3 mb-2">
@@ -1046,9 +1046,9 @@ export default function CitadelWarRoom() {
                           disabled={busy || drillBusy}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-semibold transition-colors disabled:opacity-50"
                           style={{
-                            background: 'rgba(34,197,94,0.1)',
-                            color: '#22c55e',
-                            border: '1px solid rgba(34,197,94,0.25)',
+                            background: 'rgba(201,183,135,0.1)',
+                            color: '#c9b787',
+                            border: '1px solid rgba(201,183,135,0.25)',
                           }}
                           aria-label={`Start drill ${scenario.id}`}
                         >
@@ -1063,9 +1063,9 @@ export default function CitadelWarRoom() {
                           disabled={busy || drillBusy}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-semibold transition-colors disabled:opacity-50"
                           style={{
-                            background: 'rgba(245,158,11,0.1)',
-                            color: '#f59e0b',
-                            border: '1px solid rgba(245,158,11,0.25)',
+                            background: 'rgba(201,183,135,0.1)',
+                            color: '#c9b787',
+                            border: '1px solid rgba(201,183,135,0.25)',
                           }}
                           aria-label={`Pause drill ${scenario.id}`}
                         >
@@ -1080,9 +1080,9 @@ export default function CitadelWarRoom() {
                           disabled={busy || drillBusy}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-semibold transition-colors disabled:opacity-50"
                           style={{
-                            background: 'rgba(59,130,246,0.1)',
-                            color: '#3b82f6',
-                            border: '1px solid rgba(59,130,246,0.25)',
+                            background: 'rgba(201,183,135,0.1)',
+                            color: '#c9b787',
+                            border: '1px solid rgba(201,183,135,0.25)',
                           }}
                           aria-label={`Resume drill ${scenario.id}`}
                         >
@@ -1091,12 +1091,12 @@ export default function CitadelWarRoom() {
                         </button>
                       )}
                       {scenario.status === 'completed' && (
-                        <span className="text-[10px]" style={{ color: '#22c55e' }}>
+                        <span className="text-[10px]" style={{ color: '#c9b787' }}>
                           ✓ Exercise complete — review after-action report
                         </span>
                       )}
                       {scenario.status === 'failed' && (
-                        <span className="text-[10px]" style={{ color: '#ef4444' }}>
+                        <span className="text-[10px]" style={{ color: '#f5f5f5' }}>
                           Exercise ended with errors — check scenario log
                         </span>
                       )}

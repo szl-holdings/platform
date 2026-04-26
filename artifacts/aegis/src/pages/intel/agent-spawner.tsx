@@ -20,8 +20,8 @@ const DOMAIN_TEMPLATES = [
     id: 'maritime',
     name: 'Maritime Analyst',
     icon: Globe,
-    color: 'text-cyan-400',
-    bg: 'bg-cyan-400/10',
+    color: 'text-[#8a8a8a]',
+    bg: 'bg-[#8a8a8a]/10',
     description:
       'Tracks fleet anomalies, vessel behavior patterns, and predicts maritime disruptions.',
     defaultInstruction:
@@ -39,8 +39,8 @@ const DOMAIN_TEMPLATES = [
     id: 'it-ops',
     name: 'IT Sentinel',
     icon: Cpu,
-    color: 'text-blue-400',
-    bg: 'bg-blue-400/10',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
     description:
       'Auto-triages IT tickets, predicts outages, and orchestrates remediation playbooks.',
     defaultInstruction:
@@ -58,8 +58,8 @@ const DOMAIN_TEMPLATES = [
     id: 'deal-scout',
     name: 'Deal Scout',
     icon: TrendingUp,
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-400/10',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
     description:
       'Surfaces investment opportunities, predicts market shifts, and scores properties.',
     defaultInstruction:
@@ -77,8 +77,8 @@ const DOMAIN_TEMPLATES = [
     id: 'creative-dir',
     name: 'Counsel Engine',
     icon: Zap,
-    color: 'text-violet-400',
-    bg: 'bg-violet-400/10',
+    color: 'text-[#8a8a8a]',
+    bg: 'bg-[#8a8a8a]/10',
     description:
       "Surfaces prediction scenarios, models confidence distributions, and generates forecast briefs via Counsel's predictive intelligence engine.",
     defaultInstruction:
@@ -96,8 +96,8 @@ const DOMAIN_TEMPLATES = [
     id: 'advisory',
     name: 'Advisory Intelligence',
     icon: Brain,
-    color: 'text-pink-400',
-    bg: 'bg-pink-400/10',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
     description:
       'Prepares client briefings, monitors competitive landscape, and surfaces advisory insights.',
     defaultInstruction:
@@ -115,8 +115,8 @@ const DOMAIN_TEMPLATES = [
     id: 'brand-monitor',
     name: 'Brand Monitor',
     icon: Radio,
-    color: 'text-rose-400',
-    bg: 'bg-rose-400/10',
+    color: 'text-[#f5f5f5]',
+    bg: 'bg-[#f5f5f5]/10',
     description:
       'Tracks brand reputation, surfaces PR opportunities, and monitors thought leadership impact.',
     defaultInstruction:
@@ -134,8 +134,8 @@ const DOMAIN_TEMPLATES = [
     id: 'security-sentinel',
     name: 'Security Sentinel',
     icon: Shield,
-    color: 'text-orange-400',
-    bg: 'bg-orange-400/10',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
     description:
       'Enforces agent security policies, detects threats, and orchestrates immune response.',
     defaultInstruction:
@@ -148,13 +148,13 @@ const DOMAIN_TEMPLATES = [
     id: 'portfolio',
     name: 'Portfolio Analyst',
     icon: Activity,
-    color: 'text-indigo-400',
-    bg: 'bg-indigo-400/10',
+    color: 'text-[#8a8a8a]',
+    bg: 'bg-[#8a8a8a]/10',
     description:
       'Monitors ecosystem health across all 12 apps, surfaces investor insights, and tracks portfolio KPIs.',
     defaultInstruction:
       'Aggregate 6 Lenses scores across portfolio, detect cross-app anomalies, and generate investor-ready health summaries.',
-    domain: 'SZL Holdings',
+    domain: 'Aegis',
     systemType: 'deep' as const,
     capabilities: [
       'Cross-app aggregation',
@@ -224,7 +224,7 @@ const LIVE_AGENTS = [
   },
   {
     name: 'Portfolio Analyst',
-    domain: 'SZL Holdings',
+    domain: 'Aegis',
     status: 'monitoring',
     uptime: '14d 12h',
     actions: 2143,
@@ -342,8 +342,8 @@ export default function AgentSpawner() {
                     className={cn(
                       'px-2 py-0.5 rounded-full text-[10px] font-mono',
                       selectedTemplate.systemType === 'fast'
-                        ? 'bg-yellow-400/10 text-yellow-400'
-                        : 'bg-indigo-400/10 text-indigo-400',
+                        ? 'bg-[#c9b787]/10 text-[#c9b787]'
+                        : 'bg-[#8a8a8a]/10 text-[#8a8a8a]',
                     )}
                   >
                     {selectedTemplate.systemType === 'fast'
@@ -399,8 +399,8 @@ export default function AgentSpawner() {
                         className={cn(
                           'border rounded-lg px-3 py-2 text-xs font-mono',
                           selectedTemplate.systemType === 'fast'
-                            ? 'bg-yellow-400/10 border-yellow-400/20 text-yellow-400'
-                            : 'bg-indigo-400/10 border-indigo-400/20 text-indigo-400',
+                            ? 'bg-[#c9b787]/10 border-[#c9b787]/20 text-[#c9b787]'
+                            : 'bg-[#8a8a8a]/10 border-indigo-400/20 text-[#8a8a8a]',
                         )}
                       >
                         {selectedTemplate.systemType === 'fast'
@@ -411,8 +411,8 @@ export default function AgentSpawner() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="flex-1 p-3 rounded-lg bg-amber-400/5 border border-amber-400/15">
-                      <p className="text-[10px] text-amber-400/80 font-mono flex items-center gap-1.5">
+                    <div className="flex-1 p-3 rounded-lg bg-[#c9b787]/5 border border-[#c9b787]/15">
+                      <p className="text-[10px] text-[#c9b787]/80 font-mono flex items-center gap-1.5">
                         <Shield className="w-3 h-3" />
                         All agent actions will pass through Policy Shield enforcement before
                         execution.
@@ -426,7 +426,7 @@ export default function AgentSpawner() {
                     className={cn(
                       'w-full py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2',
                       spawned
-                        ? 'bg-emerald-400/10 text-emerald-400 border border-emerald-400/20'
+                        ? 'bg-[#c9b787]/10 text-[#c9b787] border border-[#c9b787]/20'
                         : spawning
                           ? 'bg-primary/10 text-primary border border-primary/20 cursor-wait'
                           : 'bg-primary text-primary-foreground hover:bg-primary/90',
@@ -505,13 +505,13 @@ export default function AgentSpawner() {
                   <span
                     className={cn(
                       'flex items-center gap-1.5 text-[10px] font-mono',
-                      agent.status === 'active' ? 'text-emerald-400' : 'text-amber-400',
+                      agent.status === 'active' ? 'text-[#c9b787]' : 'text-[#c9b787]',
                     )}
                   >
                     <span
                       className={cn(
                         'w-1.5 h-1.5 rounded-full',
-                        agent.status === 'active' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400',
+                        agent.status === 'active' ? 'bg-[#c9b787] animate-pulse' : 'bg-[#c9b787]',
                       )}
                     />
                     {agent.status}

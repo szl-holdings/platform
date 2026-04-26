@@ -66,21 +66,21 @@ const lossHistory = trainingNode
 
 function stateColor(state: GpuNode['state']) {
   return state === 'error'
-    ? 'text-red-400'
+    ? 'text-[#f5f5f5]'
     : state === 'throttle'
-      ? 'text-orange-400'
+      ? 'text-[#c9b787]'
       : state === 'plateau'
-        ? 'text-emerald-400'
+        ? 'text-[#c9b787]'
         : state === 'ramping'
-          ? 'text-cyan-400'
+          ? 'text-[#8a8a8a]'
           : 'text-slate-400';
 }
 
 function stateBg(state: GpuNode['state']) {
   return state === 'error'
-    ? 'border-red-500/30'
+    ? 'border-[#f5f5f5]/30'
     : state === 'throttle'
-      ? 'border-orange-500/30'
+      ? 'border-[#c9b787]/30'
       : state === 'plateau'
         ? ''
         : '';
@@ -112,7 +112,7 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
                 {node.state}
               </Badge>
               {node.eccErrorCount > 0 && (
-                <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-500/20">
+                <Badge variant="outline" className="text-[10px] text-[#c9b787] border-[#c9b787]/20">
                   {node.eccErrorCount} ECC errors
                 </Badge>
               )}
@@ -121,12 +121,12 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
             {node.activeJob ? (
               <p className="text-xs text-muted-foreground mb-2">
                 Job: <span className="text-foreground">{node.activeJob.name}</span>
-                <span className="text-sky-400 ml-2">
+                <span className="text-[#8a8a8a] ml-2">
                   {node.activeJob.progress.toFixed(0)}% — ETA{' '}
                   {Math.round(node.activeJob.estimatedEtaMs / 60000)}m
                 </span>
                 {node.activeJob.preemptible && (
-                  <span className="text-amber-400 ml-2 text-[10px]">preemptible</span>
+                  <span className="text-[#c9b787] ml-2 text-[10px]">preemptible</span>
                 )}
               </p>
             ) : (
@@ -140,9 +140,9 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
                   <span
                     className={
                       node.utilizationPct >= 90
-                        ? 'text-emerald-400'
+                        ? 'text-[#c9b787]'
                         : node.utilizationPct >= 60
-                          ? 'text-amber-400'
+                          ? 'text-[#c9b787]'
                           : 'text-slate-400'
                     }
                   >
@@ -151,7 +151,7 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
                 </div>
                 <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all ${node.utilizationPct >= 90 ? 'bg-emerald-500' : node.utilizationPct >= 60 ? 'bg-amber-500' : 'bg-slate-500'}`}
+                    className={`h-full rounded-full transition-all ${node.utilizationPct >= 90 ? 'bg-[#c9b787]' : node.utilizationPct >= 60 ? 'bg-[#c9b787]' : 'bg-slate-500'}`}
                     style={{ width: `${node.utilizationPct}%` }}
                   />
                 </div>
@@ -168,7 +168,7 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
                 </div>
                 <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-purple-500"
+                    className="h-full rounded-full bg-[#8a8a8a]"
                     style={{ width: `${Math.min(100, vramPct)}%` }}
                   />
                 </div>
@@ -176,14 +176,14 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
               <div>
                 <div className="flex justify-between text-[10px] mb-0.5">
                   <span className="text-muted-foreground">Power</span>
-                  <span className={powerPct >= 95 ? 'text-orange-400' : 'text-sky-400'}>
+                  <span className={powerPct >= 95 ? 'text-[#c9b787]' : 'text-[#8a8a8a]'}>
                     {(node.powerWatts / 1000).toFixed(1)}kW /{' '}
                     {(node.powerLimitWatts / 1000).toFixed(1)}kW
                   </span>
                 </div>
                 <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full ${powerPct >= 95 ? 'bg-orange-500' : 'bg-sky-500'}`}
+                    className={`h-full rounded-full ${powerPct >= 95 ? 'bg-[#c9b787]' : 'bg-[#8a8a8a]'}`}
                     style={{ width: `${powerPct}%` }}
                   />
                 </div>
@@ -191,13 +191,13 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
               <div>
                 <div className="flex justify-between text-[10px] mb-0.5">
                   <span className="text-muted-foreground">NVLink BW</span>
-                  <span className="text-violet-400">
+                  <span className="text-[#8a8a8a]">
                     {node.nvlinkBandwidthGbps.toFixed(0)} / {node.nvlinkBandwidthMaxGbps} GB/s
                   </span>
                 </div>
                 <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-violet-500"
+                    className="h-full rounded-full bg-[#8a8a8a]"
                     style={{ width: `${nvlinkPct}%` }}
                   />
                 </div>
@@ -208,27 +208,27 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
           <div className="grid grid-cols-2 gap-2 text-center shrink-0">
             <div>
               <p
-                className={`text-sm font-bold ${node.tempCelsius >= 85 ? 'text-red-400' : node.tempCelsius >= 75 ? 'text-orange-400' : node.tempCelsius >= 65 ? 'text-amber-400' : 'text-emerald-400'}`}
+                className={`text-sm font-bold ${node.tempCelsius >= 85 ? 'text-[#f5f5f5]' : node.tempCelsius >= 75 ? 'text-[#c9b787]' : node.tempCelsius >= 65 ? 'text-[#c9b787]' : 'text-[#c9b787]'}`}
               >
                 {node.tempCelsius}°C
               </p>
               <p className="text-[10px] text-muted-foreground">Temp</p>
             </div>
             <div>
-              <p className="text-sm font-bold text-cyan-400">
+              <p className="text-sm font-bold text-[#8a8a8a]">
                 {node.tokenThroughput > 0 ? `${(node.tokenThroughput / 1000).toFixed(0)}K` : '—'}
               </p>
               <p className="text-[10px] text-muted-foreground">tok/s</p>
             </div>
             {node.trainingLoss !== undefined && (
               <div>
-                <p className="text-sm font-bold text-violet-400">{node.trainingLoss.toFixed(4)}</p>
+                <p className="text-sm font-bold text-[#8a8a8a]">{node.trainingLoss.toFixed(4)}</p>
                 <p className="text-[10px] text-muted-foreground">Loss</p>
               </div>
             )}
             {node.gradientNorm !== undefined && (
               <div>
-                <p className="text-sm font-bold text-pink-400">{node.gradientNorm.toFixed(2)}</p>
+                <p className="text-sm font-bold text-[#c9b787]">{node.gradientNorm.toFixed(2)}</p>
                 <p className="text-[10px] text-muted-foreground">∇ Norm</p>
               </div>
             )}
@@ -238,15 +238,15 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
         {node.xidEvents.length > 0 && (
           <div className="mt-3 pt-3 border-t border-border">
             <div className="flex items-center gap-1 mb-1.5">
-              <AlertTriangle className="w-3 h-3 text-amber-400" />
-              <span className="text-[10px] font-medium text-amber-400">
+              <AlertTriangle className="w-3 h-3 text-[#c9b787]" />
+              <span className="text-[10px] font-medium text-[#c9b787]">
                 Xid Events ({node.xidEvents.length})
               </span>
             </div>
             <div className="space-y-1">
               {node.xidEvents.slice(0, 2).map((xid) => (
                 <div key={xid.xidCode} className="flex items-center gap-2 text-[10px]">
-                  <span className="font-mono text-amber-400">Xid {xid.xidCode}</span>
+                  <span className="font-mono text-[#c9b787]">Xid {xid.xidCode}</span>
                   <span className="text-muted-foreground">{xid.description}</span>
                   <span className="text-muted-foreground ml-auto">
                     {Math.floor((NOW - xid.occurredAt) / 60000)}m ago
@@ -268,8 +268,8 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
                 <Area
                   type="monotone"
                   dataKey="celsius"
-                  stroke={node.tempCelsius >= 80 ? '#f97316' : '#6366f1'}
-                  fill={node.tempCelsius >= 80 ? '#f97316' : '#6366f1'}
+                  stroke={node.tempCelsius >= 80 ? '#c9b787' : '#8a8a8a'}
+                  fill={node.tempCelsius >= 80 ? '#c9b787' : '#8a8a8a'}
                   fillOpacity={0.15}
                   strokeWidth={1.5}
                   dot={false}
@@ -286,9 +286,9 @@ function GpuNodeCard({ node }: { node: GpuNode }) {
 
 function QueuedJobRow({ job, rank }: { job: QueuedJob; rank: number }) {
   const priorityColors: Record<string, string> = {
-    critical: 'text-red-400 bg-red-400/10 border-red-400/20',
-    high: 'text-orange-400 bg-orange-400/10 border-orange-400/20',
-    medium: 'text-amber-400 bg-amber-400/10 border-amber-400/20',
+    critical: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20',
+    high: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+    medium: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
     low: 'text-slate-400 bg-slate-400/10 border-slate-400/20',
   };
   const waitMin = Math.round(job.estimatedWaitMs / 60_000);
@@ -312,7 +312,7 @@ function QueuedJobRow({ job, rank }: { job: QueuedJob; rank: number }) {
         </p>
       </div>
       <div className="text-right shrink-0">
-        <p className="text-xs text-amber-400">
+        <p className="text-xs text-[#c9b787]">
           {waitMin < 60 ? `${waitMin}m` : `${(waitMin / 60).toFixed(1)}h`}
         </p>
         <p className="text-[10px] text-muted-foreground">est. wait</p>
@@ -431,10 +431,10 @@ export default function GPUMonitoring() {
 
   const healthColor =
     clusterHealth === 'critical'
-      ? 'text-red-400'
+      ? 'text-[#f5f5f5]'
       : clusterHealth === 'degraded'
-        ? 'text-orange-400'
-        : 'text-emerald-400';
+        ? 'text-[#c9b787]'
+        : 'text-[#c9b787]';
 
   return (
     <div className="p-6 space-y-6">
@@ -452,7 +452,7 @@ export default function GPUMonitoring() {
         <div className="flex items-center gap-2">
           <Badge
             variant="outline"
-            className={`text-xs ${isLive ? 'text-cyan-400 border-cyan-500/30' : 'text-slate-400 border-slate-500/30'}`}
+            className={`text-xs ${isLive ? 'text-[#8a8a8a] border-[#8a8a8a]/30' : 'text-slate-400 border-slate-500/30'}`}
           >
             {isLive ? (
               <Cpu className="w-3 h-3 mr-1 inline" />
@@ -506,7 +506,7 @@ export default function GPUMonitoring() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
-              <Activity className="w-4 h-4 text-purple-400" />
+              <Activity className="w-4 h-4 text-[#8a8a8a]" />
               Token Throughput — 24h (tok/s)
             </CardTitle>
           </CardHeader>
@@ -531,8 +531,8 @@ export default function GPUMonitoring() {
                 <Area
                   type="monotone"
                   dataKey="tokens"
-                  stroke="#8b5cf6"
-                  fill="#8b5cf6"
+                  stroke="#8a8a8a"
+                  fill="#8a8a8a"
                   fillOpacity={0.2}
                   dot={false}
                 />
@@ -545,7 +545,7 @@ export default function GPUMonitoring() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-violet-400" />
+                <TrendingUp className="w-4 h-4 text-[#8a8a8a]" />
                 Training Loss Curve — {trainingNode?.activeJob?.model ?? 'Active Model'}
               </CardTitle>
             </CardHeader>
@@ -569,7 +569,7 @@ export default function GPUMonitoring() {
                   <Line
                     type="monotone"
                     dataKey="loss"
-                    stroke="#a78bfa"
+                    stroke="#c9b787"
                     dot={false}
                     strokeWidth={2}
                     name="Train Loss"
@@ -604,7 +604,7 @@ export default function GPUMonitoring() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
-                <Clock className="w-4 h-4 text-amber-400" />
+                <Clock className="w-4 h-4 text-[#c9b787]" />
                 Job Queue ({queuedJobs.length})
               </CardTitle>
             </CardHeader>
@@ -623,7 +623,7 @@ export default function GPUMonitoring() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
-                <Network className="w-4 h-4 text-violet-400" />
+                <Network className="w-4 h-4 text-[#8a8a8a]" />
                 NVLink Mesh Health
               </CardTitle>
             </CardHeader>
@@ -636,7 +636,7 @@ export default function GPUMonitoring() {
                   >
                     <div className="flex items-center gap-1 mb-1">
                       <div
-                        className={`w-1.5 h-1.5 rounded-full ${link.healthy ? 'bg-emerald-400' : 'bg-red-400'}`}
+                        className={`w-1.5 h-1.5 rounded-full ${link.healthy ? 'bg-[#c9b787]' : 'bg-[#f5f5f5]'}`}
                       />
                       <span className="text-[10px] text-muted-foreground font-mono">
                         {link.from} ↔ {link.to}
@@ -646,7 +646,7 @@ export default function GPUMonitoring() {
                       <span className="text-foreground">{link.bandwidthGbps.toFixed(0)} GB/s</span>
                       <span
                         className={
-                          link.utilizationPct > 80 ? 'text-amber-400' : 'text-muted-foreground'
+                          link.utilizationPct > 80 ? 'text-[#c9b787]' : 'text-muted-foreground'
                         }
                       >
                         {link.utilizationPct.toFixed(0)}%
@@ -654,7 +654,7 @@ export default function GPUMonitoring() {
                     </div>
                     <div className="h-1 bg-muted rounded-full mt-1 overflow-hidden">
                       <div
-                        className={`h-full rounded-full ${link.utilizationPct > 80 ? 'bg-amber-500' : 'bg-violet-500'}`}
+                        className={`h-full rounded-full ${link.utilizationPct > 80 ? 'bg-[#c9b787]' : 'bg-[#8a8a8a]'}`}
                         style={{ width: `${link.utilizationPct}%` }}
                       />
                     </div>
@@ -678,7 +678,7 @@ export default function GPUMonitoring() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
-                <Thermometer className="w-4 h-4 text-orange-400" />
+                <Thermometer className="w-4 h-4 text-[#c9b787]" />
                 Cluster Thermal Overview
               </CardTitle>
             </CardHeader>
@@ -690,12 +690,12 @@ export default function GPUMonitoring() {
                   </span>
                   <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all ${node.tempCelsius >= 85 ? 'bg-red-500' : node.tempCelsius >= 75 ? 'bg-orange-500' : node.tempCelsius >= 65 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                      className={`h-full rounded-full transition-all ${node.tempCelsius >= 85 ? 'bg-[#f5f5f5]' : node.tempCelsius >= 75 ? 'bg-[#c9b787]' : node.tempCelsius >= 65 ? 'bg-[#c9b787]' : 'bg-[#c9b787]'}`}
                       style={{ width: `${(node.tempCelsius / 95) * 100}%` }}
                     />
                   </div>
                   <span
-                    className={`text-xs font-mono w-12 text-right ${node.tempCelsius >= 85 ? 'text-red-400' : node.tempCelsius >= 75 ? 'text-orange-400' : node.tempCelsius >= 65 ? 'text-amber-400' : 'text-emerald-400'}`}
+                    className={`text-xs font-mono w-12 text-right ${node.tempCelsius >= 85 ? 'text-[#f5f5f5]' : node.tempCelsius >= 75 ? 'text-[#c9b787]' : node.tempCelsius >= 65 ? 'text-[#c9b787]' : 'text-[#c9b787]'}`}
                   >
                     {node.tempCelsius}°C
                   </span>

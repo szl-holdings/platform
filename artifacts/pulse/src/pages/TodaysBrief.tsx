@@ -384,7 +384,7 @@ function SectionCard({ section, onFileDissent }: { section: BriefingSection; onF
               >
                 Sources
               </span>
-              {['TENAX', 'Vessels', 'Terra', 'Lyte']
+              {['Aegis', 'Vessels', 'Terra', 'Lyte']
                 .slice(0, 2 + (section.agentId.charCodeAt(0) % 3))
                 .map((src) => (
                   <span

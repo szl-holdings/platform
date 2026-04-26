@@ -20,14 +20,14 @@ const SURFACE = 'hsla(0,0%,100%,0.035)';
 const BORDER = 'hsla(0,0%,100%,0.07)';
 const TEXT = 'hsl(38,8%,92%)';
 const TEXT_SEC = 'hsl(214,7%,55%)';
-const ACCENT = '#ef4444';
+const ACCENT = '#f5f5f5';
 
 const CONTROL_CATEGORIES = [
   {
     id: 'detection',
     label: 'Threat Detection',
     icon: Eye,
-    color: '#ef4444',
+    color: '#f5f5f5',
     controls: [
       'Endpoint EDR coverage',
       'Network NDR baseline',
@@ -39,7 +39,7 @@ const CONTROL_CATEGORIES = [
     id: 'response',
     label: 'Incident Response',
     icon: Zap,
-    color: '#f97316',
+    color: '#c9b787',
     controls: [
       'Playbook activation time',
       'Escalation chain clarity',
@@ -51,7 +51,7 @@ const CONTROL_CATEGORIES = [
     id: 'identity',
     label: 'Identity & Access',
     icon: Lock,
-    color: '#f59e0b',
+    color: '#c9b787',
     controls: [
       'Privileged access monitoring',
       'MFA enforcement rate',
@@ -63,7 +63,7 @@ const CONTROL_CATEGORIES = [
     id: 'governance',
     label: 'Governance & Audit',
     icon: FileCheck,
-    color: '#10b981',
+    color: '#c9b787',
     controls: [
       'SOC 2 control evidence',
       'Audit trail completeness',
@@ -77,14 +77,14 @@ const DRIFT_SCENARIOS = [
   {
     id: 'mfa_drift',
     label: 'MFA Policy Drift',
-    color: '#ef4444',
+    color: '#f5f5f5',
     severity: 'Critical',
     control: 'Identity · MFA Enforcement',
     detected: 'MFA bypass exceptions: 23 accounts · Policy drift from 98.1% → 84.3% enforcement',
     loop: [
       {
         step: 'Signal',
-        text: 'TENAX control-drift monitor detects MFA enforcement rate drop from 98.1% to 84.3% over 14 days — 23 accounts with active bypass exceptions.',
+        text: 'Aegis control-drift monitor detects MFA enforcement rate drop from 98.1% to 84.3% over 14 days — 23 accounts with active bypass exceptions.',
       },
       {
         step: 'Context',
@@ -107,14 +107,14 @@ const DRIFT_SCENARIOS = [
   {
     id: 'log_gap',
     label: 'Log Ingestion Gap',
-    color: '#f59e0b',
+    color: '#c9b787',
     severity: 'High',
     control: 'Detection · Log Coverage',
     detected: '3 production subnets not ingesting to SIEM — 11-day blind spot identified',
     loop: [
       {
         step: 'Signal',
-        text: 'TENAX coverage map detects 3 production subnets (172.16.24.0/24, 172.16.25.0/24, 172.16.30.0/24) not reporting to SIEM — 11-day gap confirmed.',
+        text: 'Aegis coverage map detects 3 production subnets (172.16.24.0/24, 172.16.25.0/24, 172.16.30.0/24) not reporting to SIEM — 11-day gap confirmed.',
       },
       {
         step: 'Context',
@@ -260,7 +260,7 @@ const RESULTS = [
     label: 'Governance Gaps',
     severity: 'moderate' as const,
     desc: 'You have security tooling but significant governance gaps remain — control drift is detected reactively, incident trails are incomplete, and resilience posture requires manual compilation. A governed resilience infrastructure would close these gaps.',
-    cta: 'See a TENAX Demo',
+    cta: 'See a Aegis Demo',
   },
   {
     min: 10,
@@ -268,7 +268,7 @@ const RESULTS = [
     label: 'Security-Mature',
     severity: 'ready' as const,
     desc: 'Your security operations have good coverage but rely on manual integration for governance, audit trails, and posture reporting. The opportunity is systematic control governance and Proof Chain-backed incident records.',
-    cta: 'Explore TENAX Features',
+    cta: 'Explore Aegis Features',
   },
   {
     min: 14,
@@ -328,7 +328,7 @@ function ControlDriftDiagnostic() {
             Security control drift detected. Governed response initiated.
           </h2>
           <p className="text-base max-w-2xl mx-auto" style={{ color: TEXT_SEC }}>
-            TENAX monitors your security control baseline continuously — detecting drift before it
+            Aegis monitors your security control baseline continuously — detecting drift before it
             becomes an incident, and routing remediation through a governed approval workflow.
           </p>
         </div>
@@ -740,7 +740,7 @@ export default function ResilienceScorecardPage() {
       >
         <Link href="/dashboard">
           <span className="text-sm font-bold" style={{ color: TEXT }}>
-            TENAX
+            Aegis
           </span>
         </Link>
         <div className="flex items-center gap-4">
@@ -771,7 +771,7 @@ export default function ResilienceScorecardPage() {
               className="w-1.5 h-1.5 rounded-full animate-pulse"
               style={{ background: ACCENT }}
             />
-            Cyber Resilience · TENAX
+            Cyber Resilience · Aegis
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -789,7 +789,7 @@ export default function ResilienceScorecardPage() {
             className="text-lg mb-8"
             style={{ color: TEXT_SEC }}
           >
-            TENAX monitors your security control baseline, detects drift before it becomes an
+            Aegis monitors your security control baseline, detects drift before it becomes an
             incident, and routes every remediation through a governed approval workflow with an
             immutable Proof Chain.
           </motion.p>
@@ -826,10 +826,10 @@ export default function ResilienceScorecardPage() {
 
       <footer className="py-12 px-4 text-center border-t" style={{ borderColor: BORDER }}>
         <p className="text-sm" style={{ color: TEXT_SEC }}>
-          TENAX — Cyber Resilience Command · SZL Holdings Platform
+          Aegis — Cyber Resilience Command · Aegis Platform
         </p>
         <p className="text-xs mt-2" style={{ color: TEXT_SEC }}>
-          © 2026 SZL Holdings. All rights reserved.
+          © 2026 Aegis. All rights reserved.
         </p>
       </footer>
     </div>

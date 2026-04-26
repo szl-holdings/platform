@@ -43,10 +43,10 @@ export default function RecoveryReadiness() {
                 className={cn(
                   'transition-all duration-1000',
                   posture < 50
-                    ? 'text-red-500'
+                    ? 'text-[#f5f5f5]'
                     : posture < 80
-                      ? 'text-amber-500'
-                      : 'text-emerald-500',
+                      ? 'text-[#c9b787]'
+                      : 'text-[#c9b787]',
                 )}
               />
             </svg>
@@ -66,7 +66,7 @@ export default function RecoveryReadiness() {
         <div className="lg:col-span-2 space-y-6">
           <div className="sentra-panel p-6">
             <h2 className="text-lg font-display font-bold mb-6 flex items-center gap-2">
-              <RotateCcw className="w-5 h-5 text-red-500" />
+              <RotateCcw className="w-5 h-5 text-[#f5f5f5]" />
               Backup Staleness Indicators
             </h2>
             <div className="space-y-4">
@@ -87,7 +87,7 @@ export default function RecoveryReadiness() {
                       <div
                         className={cn(
                           'text-xs font-bold font-mono',
-                          asset.backupStatus === 'stale' ? 'text-amber-500' : 'text-red-500',
+                          asset.backupStatus === 'stale' ? 'text-[#c9b787]' : 'text-[#f5f5f5]',
                         )}
                       >
                         {asset.backupStatus.toUpperCase()}
@@ -108,12 +108,12 @@ export default function RecoveryReadiness() {
             <div className="sentra-panel p-6">
               <div className="text-xs text-slate-500 font-mono uppercase mb-2">Avg RTO Target</div>
               <div className="text-3xl font-display font-bold">4.2h</div>
-              <div className="text-[10px] text-emerald-400 mt-1 font-mono">ON TARGET</div>
+              <div className="text-[10px] text-[#c9b787] mt-1 font-mono">ON TARGET</div>
             </div>
             <div className="sentra-panel p-6">
               <div className="text-xs text-slate-500 font-mono uppercase mb-2">Avg RPO Actual</div>
               <div className="text-3xl font-display font-bold">18.5h</div>
-              <div className="text-[10px] text-red-400 mt-1 font-mono">+14.5H VARIANCE</div>
+              <div className="text-[10px] text-[#f5f5f5] mt-1 font-mono">+14.5H VARIANCE</div>
             </div>
           </div>
         </div>

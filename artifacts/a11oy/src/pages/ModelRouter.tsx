@@ -24,7 +24,7 @@ const STATUS_MAP: Record<string, 'LIVE' | 'DEMO' | 'ROADMAP'> = {
 };
 
 const PROVIDER_COLORS: Record<string, string> = {
-  openai: '#10b981', deepseek: '#3b82f6', nvidia: '#f59e0b', mock: '#8b5cf6', local: '#9bacc4',
+  openai: '#c9b787', deepseek: '#c9b787', nvidia: '#c9b787', mock: '#8a8a8a', local: '#5e5e5e',
 };
 
 const MODE_LABELS: Record<string, string> = {
@@ -74,10 +74,10 @@ export function ModelRouter() {
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-            <KpiCard label="MODELS REGISTERED" value={String(models?.models.length ?? 0)} sub={`${activeModels.length} active, ${(models?.models.length ?? 0) - activeModels.length} roadmap`} accent="#3b82f6" />
-            <KpiCard label="INFERENCES TODAY" value={totalCallsToday.toLocaleString()} sub="Demo estimate" accent="#10b981" />
+            <KpiCard label="MODELS REGISTERED" value={String(models?.models.length ?? 0)} sub={`${activeModels.length} active, ${(models?.models.length ?? 0) - activeModels.length} roadmap`} accent="#c9b787" />
+            <KpiCard label="INFERENCES TODAY" value={totalCallsToday.toLocaleString()} sub="Demo estimate" accent="#c9b787" />
             <KpiCard label="AVG LATENCY" value={`${avgLatency}ms`} sub="Active models" accent="#b08d52" />
-            <KpiCard label="COST TODAY" value="$0" sub="Demo mode — no real calls" accent="#f59e0b" />
+            <KpiCard label="COST TODAY" value="$0" sub="Demo mode — no real calls" accent="#c9b787" />
           </div>
 
           <div className="grid lg:grid-cols-2 gap-6 mb-8">
@@ -89,7 +89,7 @@ export function ModelRouter() {
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <div className="font-medium text-sm" style={{ color: 'var(--color-a11oy-text)' }}>{m.name}</div>
-                        <div className="text-xs" style={{ color: PROVIDER_COLORS[m.provider] ?? '#9bacc4' }}>{m.providerLabel}</div>
+                        <div className="text-xs" style={{ color: PROVIDER_COLORS[m.provider] ?? '#5e5e5e' }}>{m.providerLabel}</div>
                       </div>
                       <StatusPill status={STATUS_MAP[m.status] ?? 'DEMO'} />
                     </div>
@@ -97,8 +97,8 @@ export function ModelRouter() {
                     <div className="grid grid-cols-4 gap-2 text-xs mb-2">
                       <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>latency</div><div style={{ color: 'var(--color-a11oy-text-sub)' }}>{m.avgLatencyMs}ms</div></div>
                       <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>today</div><div style={{ color: 'var(--color-a11oy-text-sub)' }}>{m.callsToday}</div></div>
-                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>fail rate</div><div style={{ color: m.failureRate > 0.02 ? '#f59e0b' : '#10b981' }}>{(m.failureRate * 100).toFixed(1)}%</div></div>
-                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>health</div><div style={{ color: m.healthScore >= 95 ? '#10b981' : m.healthScore >= 80 ? '#f59e0b' : '#9bacc4' }}>{m.healthScore}</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>fail rate</div><div style={{ color: m.failureRate > 0.02 ? '#c9b787' : '#c9b787' }}>{(m.failureRate * 100).toFixed(1)}%</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>health</div><div style={{ color: m.healthScore >= 95 ? '#c9b787' : m.healthScore >= 80 ? '#c9b787' : '#5e5e5e' }}>{m.healthScore}</div></div>
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {m.routingModes.map(mode => (
@@ -108,7 +108,7 @@ export function ModelRouter() {
                       ))}
                     </div>
                     {m.fallbackEvents > 0 && (
-                      <div className="mt-1.5 text-xs" style={{ color: '#f59e0b' }}>⚠ {m.fallbackEvents} fallback event{m.fallbackEvents > 1 ? 's' : ''}</div>
+                      <div className="mt-1.5 text-xs" style={{ color: '#c9b787' }}>⚠ {m.fallbackEvents} fallback event{m.fallbackEvents > 1 ? 's' : ''}</div>
                     )}
                   </Card>
                 ))}
@@ -124,7 +124,7 @@ export function ModelRouter() {
                       MODE: {MODE_LABELS[rule.mode] ?? rule.mode}
                     </div>
                     <div className="text-xs mb-0.5" style={{ color: 'var(--color-a11oy-text-sub)' }}>
-                      → <span style={{ color: '#3b82f6' }}>{rule.model}</span>
+                      → <span style={{ color: '#c9b787' }}>{rule.model}</span>
                     </div>
                     <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{rule.reason}</div>
                   </Card>
@@ -137,13 +137,13 @@ export function ModelRouter() {
                   <Card>
                     <div className="text-xs mb-3 flex items-center gap-2">
                       <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Active provider:</span>
-                      <span className="font-mono" style={{ color: PROVIDER_COLORS[health.activeProvider] ?? '#9bacc4' }}>{health.activeProvider}</span>
-                      <span className="text-xs px-1 rounded" style={{ backgroundColor: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}>demo mode</span>
+                      <span className="font-mono" style={{ color: PROVIDER_COLORS[health.activeProvider] ?? '#5e5e5e' }}>{health.activeProvider}</span>
+                      <span className="text-xs px-1 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.1)', color: '#c9b787' }}>demo mode</span>
                     </div>
                     <div className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
                       Fallback chain: {health.fallbackChain.map((p, i) => (
                         <span key={p}>
-                          <span style={{ color: PROVIDER_COLORS[p] ?? '#9bacc4' }}>{p}</span>
+                          <span style={{ color: PROVIDER_COLORS[p] ?? '#5e5e5e' }}>{p}</span>
                           {i < health.fallbackChain.length - 1 && <span style={{ color: 'var(--color-a11oy-text-ghost)' }}> → </span>}
                         </span>
                       ))}
@@ -151,9 +151,9 @@ export function ModelRouter() {
                     <div className="space-y-2 mt-3">
                       {health.providers.map(p => (
                         <div key={p.id} className="flex items-center justify-between text-xs">
-                          <span style={{ color: PROVIDER_COLORS[p.provider] ?? '#9bacc4' }}>{p.name}</span>
+                          <span style={{ color: PROVIDER_COLORS[p.provider] ?? '#5e5e5e' }}>{p.name}</span>
                           <div className="flex items-center gap-2">
-                            <span style={{ color: p.healthScore >= 90 ? '#10b981' : p.healthScore >= 70 ? '#f59e0b' : '#9bacc4' }}>{p.healthScore > 0 ? `${p.healthScore}%` : 'unavailable'}</span>
+                            <span style={{ color: p.healthScore >= 90 ? '#c9b787' : p.healthScore >= 70 ? '#c9b787' : '#5e5e5e' }}>{p.healthScore > 0 ? `${p.healthScore}%` : 'unavailable'}</span>
                             <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.latencyMs}ms</span>
                           </div>
                         </div>
@@ -168,7 +168,7 @@ export function ModelRouter() {
             </div>
           </div>
 
-          <div className="p-3 rounded-lg text-xs" style={{ backgroundColor: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
+          <div className="p-3 rounded-lg text-xs" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
             <DemoBadge /> Demo mode — all inference routing is illustrative. Provider keys are read from environment variables; missing keys fall back to mock provider. No real model API calls.
           </div>
         </>

@@ -39,7 +39,7 @@ const TEXT = {
   tertiary: 'rgba(255,255,255,0.28)',
   muted: 'rgba(255,255,255,0.14)',
 };
-const ACCENT = '#ef4444';
+const ACCENT = '#f5f5f5';
 
 const _sim = new MetricTimeSeriesSimulator(0xc0ffee42);
 const _now = Date.now();
@@ -59,10 +59,10 @@ const DEPLOY_MARKERS: DeploymentMarker[] = _sim.generateDeploymentMarkers('aegis
 const TRACES: ServiceApmTrace[] = _sim.generateManyTraces('aegis-soc', 6, _now);
 
 const STATUS_COLORS: Record<string, string> = {
-  healthy: '#22c55e',
-  at_risk: '#f59e0b',
-  burning: '#f97316',
-  exhausted: '#ef4444',
+  healthy: '#c9b787',
+  at_risk: '#c9b787',
+  burning: '#c9b787',
+  exhausted: '#f5f5f5',
 };
 
 function Panel({
@@ -113,7 +113,7 @@ function PanelHead({
 }
 
 function ApdexGauge({ score, label }: { score: number; label: string }) {
-  const color = score >= 0.9 ? '#22c55e' : score >= 0.7 ? '#f59e0b' : '#ef4444';
+  const color = score >= 0.9 ? '#c9b787' : score >= 0.7 ? '#c9b787' : '#f5f5f5';
   const rating = score >= 0.9 ? 'Satisfied' : score >= 0.7 ? 'Tolerating' : 'Frustrated';
   return (
     <div className="flex flex-col items-center gap-1">
@@ -205,14 +205,14 @@ export default function ObservabilityPage() {
       <div className="grid grid-cols-3 gap-3">
         {/* Throughput */}
         <Panel>
-          <PanelHead icon={Zap} title="Throughput (req/s)" accent="#3b82f6" />
+          <PanelHead icon={Zap} title="Throughput (req/s)" accent="#c9b787" />
           <div className="p-3 h-28">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={goldenSignals}>
                 <defs>
                   <linearGradient id="tpGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#c9b787" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#c9b787" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={BORDER.subtle} />
@@ -228,7 +228,7 @@ export default function ObservabilityPage() {
                 <Area
                   type="monotone"
                   dataKey="throughput"
-                  stroke="#3b82f6"
+                  stroke="#c9b787"
                   fill="url(#tpGrad)"
                   strokeWidth={1.5}
                   dot={false}
@@ -240,14 +240,14 @@ export default function ObservabilityPage() {
 
         {/* Error Rate */}
         <Panel>
-          <PanelHead icon={AlertTriangle} title="Error Rate (%)" accent="#ef4444" />
+          <PanelHead icon={AlertTriangle} title="Error Rate (%)" accent="#f5f5f5" />
           <div className="p-3 h-28">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={goldenSignals}>
                 <defs>
                   <linearGradient id="errGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#f5f5f5" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#f5f5f5" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={BORDER.subtle} />
@@ -263,16 +263,16 @@ export default function ObservabilityPage() {
                 <Area
                   type="monotone"
                   dataKey="errorRate"
-                  stroke="#ef4444"
+                  stroke="#f5f5f5"
                   fill="url(#errGrad)"
                   strokeWidth={1.5}
                   dot={false}
                 />
                 <ReferenceLine
                   y={5}
-                  stroke="#f59e0b"
+                  stroke="#c9b787"
                   strokeDasharray="4 2"
-                  label={{ value: 'SLO', fill: '#f59e0b', fontSize: 8 }}
+                  label={{ value: 'SLO', fill: '#c9b787', fontSize: 8 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -281,7 +281,7 @@ export default function ObservabilityPage() {
 
         {/* p99 Latency */}
         <Panel>
-          <PanelHead icon={Clock} title="Latency P99 (ms)" accent="#a78bfa" />
+          <PanelHead icon={Clock} title="Latency P99 (ms)" accent="#c9b787" />
           <div className="p-3 h-28">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={goldenSignals}>
@@ -298,15 +298,15 @@ export default function ObservabilityPage() {
                 <Line
                   type="monotone"
                   dataKey="latencyP99"
-                  stroke="#a78bfa"
+                  stroke="#c9b787"
                   strokeWidth={1.5}
                   dot={false}
                 />
                 <ReferenceLine
                   y={400}
-                  stroke="#f97316"
+                  stroke="#c9b787"
                   strokeDasharray="4 2"
-                  label={{ value: 'SLO', fill: '#f97316', fontSize: 8 }}
+                  label={{ value: 'SLO', fill: '#c9b787', fontSize: 8 }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -318,7 +318,7 @@ export default function ObservabilityPage() {
       <div className="grid grid-cols-2 gap-3">
         {/* SLO Burn Rates */}
         <Panel>
-          <PanelHead icon={Shield} title="SLO Error Budget Burn" accent="#f59e0b" />
+          <PanelHead icon={Shield} title="SLO Error Budget Burn" accent="#c9b787" />
           <div className="p-2 space-y-2">
             {burnRates.map((b) => (
               <div key={b.service} className="space-y-0.5">
@@ -356,7 +356,7 @@ export default function ObservabilityPage() {
                     <span
                       key={label}
                       className="text-[9px] tabular-nums"
-                      style={{ color: v > 1 ? '#f97316' : TEXT.tertiary }}
+                      style={{ color: v > 1 ? '#c9b787' : TEXT.tertiary }}
                     >
                       {label}: {v.toFixed(1)}x
                     </span>
@@ -369,13 +369,13 @@ export default function ObservabilityPage() {
 
         {/* Transaction Traces */}
         <Panel>
-          <PanelHead icon={TrendingDown} title="Transaction Traces — aegis-soc" accent="#38bdf8" />
+          <PanelHead icon={TrendingDown} title="Transaction Traces — aegis-soc" accent="#8a8a8a" />
           <div className="p-2 space-y-1.5">
             {traces.map((tr, i) => {
               const maxDur = Math.max(...traces.map((t) => t.totalMs));
               const widthPct = (tr.totalMs / maxDur) * 100;
               const statusColor =
-                tr.statusCode >= 500 ? '#ef4444' : tr.statusCode >= 400 ? '#f59e0b' : '#22c55e';
+                tr.statusCode >= 500 ? '#f5f5f5' : tr.statusCode >= 400 ? '#c9b787' : '#c9b787';
               return (
                 <div key={i} className="space-y-0.5">
                   <div className="flex items-center justify-between">
@@ -417,29 +417,29 @@ export default function ObservabilityPage() {
       <div className="grid grid-cols-2 gap-3">
         {/* Recent Deployments */}
         <Panel>
-          <PanelHead icon={TrendingUp} title="Recent Deployments" accent="#8b5cf6" />
+          <PanelHead icon={TrendingUp} title="Recent Deployments" accent="#8a8a8a" />
           <div className="p-2 space-y-2">
             {deployMarkers.map((m, i) => (
               <div key={i} className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#8b5cf6' }} />
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#8a8a8a' }} />
                 <span className="text-[10px] font-mono" style={{ color: TEXT.tertiary }}>
                   {new Date(m.timestamp).toISOString().slice(0, 16).replace('T', ' ')}
                 </span>
                 <span className="text-[10px] font-semibold" style={{ color: TEXT.primary }}>
                   {m.service}
                 </span>
-                <span className="text-[10px] font-mono" style={{ color: '#8b5cf6' }}>
+                <span className="text-[10px] font-mono" style={{ color: '#8a8a8a' }}>
                   {m.version}
                 </span>
                 <span
                   className="text-[9px] px-1 rounded ml-auto"
-                  style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6' }}
+                  style={{ background: 'rgba(138,138,138,0.1)', color: '#8a8a8a' }}
                 >
                   {m.environment.toUpperCase()}
                 </span>
                 <span
                   className="text-[9px]"
-                  style={{ color: m.metricShift.errorRateDelta > 0 ? '#ef4444' : '#22c55e' }}
+                  style={{ color: m.metricShift.errorRateDelta > 0 ? '#f5f5f5' : '#c9b787' }}
                 >
                   err {m.metricShift.errorRateDelta > 0 ? '+' : ''}
                   {m.metricShift.errorRateDelta.toFixed(2)}%
@@ -454,7 +454,7 @@ export default function ObservabilityPage() {
           <PanelHead
             icon={AlertTriangle}
             title="Error Rate — Service Comparison"
-            accent="#f97316"
+            accent="#c9b787"
           />
           <div className="p-3 h-36">
             <ResponsiveContainer width="100%" height="100%">

@@ -1,9 +1,9 @@
 /**
- * LUMINA — HMR / WebSocket Proxy Unit Tests
+ * Pulse — HMR / WebSocket Proxy Unit Tests
  *
- * Verifies that the LUMINA app is correctly registered in the shared proxy
+ * Verifies that the Pulse app is correctly registered in the shared proxy
  * route table and that the upgrade-routing logic used by sharedProxyPlugin
- * resolves HMR/WebSocket frames for all /pulse/* paths to the LUMINA dev-server
+ * resolves HMR/WebSocket frames for all /pulse/* paths to the Pulse dev-server
  * port (5201).  This ensures hot-module-replacement works end-to-end without
  * WebSocket errors in the preview pane.
  *
@@ -13,20 +13,20 @@
 import { describe, expect, it } from 'vitest';
 import { PROXY_ROUTES, SHARED_PROXY_PORT, sharedProxyPlugin } from '../../packages/proxy-routes.js';
 
-const LUMINA_PORT = 5201;
-const LUMINA_PREFIX = '/pulse/';
+const Pulse_PORT = 5201;
+const Pulse_PREFIX = '/pulse/';
 
 // ─── Route registration ───────────────────────────────────────────────────────
 
-describe('PROXY_ROUTES — LUMINA registration', () => {
+describe('PROXY_ROUTES — Pulse registration', () => {
   it('includes a /pulse/ entry', () => {
-    const entry = PROXY_ROUTES.find((r) => r.prefix === LUMINA_PREFIX);
+    const entry = PROXY_ROUTES.find((r) => r.prefix === Pulse_PREFIX);
     expect(entry).toBeDefined();
   });
 
   it('maps /pulse/ to port 5201', () => {
-    const entry = PROXY_ROUTES.find((r) => r.prefix === LUMINA_PREFIX);
-    expect(entry?.port).toBe(LUMINA_PORT);
+    const entry = PROXY_ROUTES.find((r) => r.prefix === Pulse_PREFIX);
+    expect(entry?.port).toBe(Pulse_PORT);
   });
 
   it('exposes SHARED_PROXY_PORT as a number', () => {
@@ -61,26 +61,26 @@ function resolveUpgradePort(url: string): number {
   return route ? route.port : -1;
 }
 
-describe('HMR upgrade routing — LUMINA paths', () => {
-  it('routes /pulse/ to the LUMINA port', () => {
-    expect(resolveUpgradePort('/pulse/')).toBe(LUMINA_PORT);
+describe('HMR upgrade routing — Pulse paths', () => {
+  it('routes /pulse/ to the Pulse port', () => {
+    expect(resolveUpgradePort('/pulse/')).toBe(Pulse_PORT);
   });
 
-  it('routes /pulse (no trailing slash) to the LUMINA port', () => {
-    expect(resolveUpgradePort('/pulse')).toBe(LUMINA_PORT);
+  it('routes /pulse (no trailing slash) to the Pulse port', () => {
+    expect(resolveUpgradePort('/pulse')).toBe(Pulse_PORT);
   });
 
-  it('routes a deep LUMINA HMR path to the LUMINA port', () => {
-    expect(resolveUpgradePort('/pulse/@vite/client')).toBe(LUMINA_PORT);
+  it('routes a deep Pulse HMR path to the Pulse port', () => {
+    expect(resolveUpgradePort('/pulse/@vite/client')).toBe(Pulse_PORT);
   });
 
-  it('routes the Vite WS handshake path under /pulse/ to the LUMINA port', () => {
-    expect(resolveUpgradePort('/pulse/__vite_hmr')).toBe(LUMINA_PORT);
+  it('routes the Vite WS handshake path under /pulse/ to the Pulse port', () => {
+    expect(resolveUpgradePort('/pulse/__vite_hmr')).toBe(Pulse_PORT);
   });
 
-  it('does NOT route an unrelated path to the LUMINA port', () => {
-    expect(resolveUpgradePort('/api/health')).not.toBe(LUMINA_PORT);
-    expect(resolveUpgradePort('/vessels/')).not.toBe(LUMINA_PORT);
+  it('does NOT route an unrelated path to the Pulse port', () => {
+    expect(resolveUpgradePort('/api/health')).not.toBe(Pulse_PORT);
+    expect(resolveUpgradePort('/vessels/')).not.toBe(Pulse_PORT);
   });
 });
 

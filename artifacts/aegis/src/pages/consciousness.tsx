@@ -346,11 +346,11 @@ function Card({
   accent?: string;
 }) {
   const accentMap: Record<string, { bg: string; text: string; border: string }> = {
-    red: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/10' },
-    blue: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/10' },
-    purple: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/10' },
-    amber: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/10' },
-    cyan: { bg: 'bg-cyan-500/10', text: 'text-cyan-400', border: 'border-cyan-500/10' },
+    red: { bg: 'bg-[#f5f5f5]/10', text: 'text-[#f5f5f5]', border: 'border-[#f5f5f5]/10' },
+    blue: { bg: 'bg-[#c9b787]/10', text: 'text-[#c9b787]', border: 'border-[#c9b787]/10' },
+    purple: { bg: 'bg-[#8a8a8a]/10', text: 'text-[#8a8a8a]', border: 'border-[#8a8a8a]/10' },
+    amber: { bg: 'bg-[#c9b787]/10', text: 'text-[#c9b787]', border: 'border-[#c9b787]/10' },
+    cyan: { bg: 'bg-[#8a8a8a]/10', text: 'text-[#8a8a8a]', border: 'border-[#8a8a8a]/10' },
   };
   const a = accentMap[accent] ?? accentMap.red!;
   return (
@@ -364,7 +364,7 @@ function Card({
         <div className={`w-7 h-7 rounded-lg ${a.bg} flex items-center justify-center`}>
           <Icon className={`w-4 h-4 ${a.text}`} />
         </div>
-        <h3 className="text-sm font-semibold text-red-50">{title}</h3>
+        <h3 className="text-sm font-semibold text-[#f5f5f5]">{title}</h3>
       </div>
       {children}
     </m.div>
@@ -373,11 +373,11 @@ function Card({
 
 function CertaintyBadge({ level }: { level: string }) {
   const colors: Record<string, string> = {
-    very_high: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    high: 'bg-green-500/20 text-green-400 border-green-500/30',
-    moderate: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-    low: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-    very_low: 'bg-red-500/20 text-red-400 border-red-500/30',
+    very_high: 'bg-[#c9b787]/20 text-[#c9b787] border-[#c9b787]/30',
+    high: 'bg-[#c9b787]/20 text-[#c9b787] border-[#c9b787]/30',
+    moderate: 'bg-[#c9b787]/20 text-[#c9b787] border-[#c9b787]/30',
+    low: 'bg-[#c9b787]/20 text-[#c9b787] border-[#c9b787]/30',
+    very_low: 'bg-[#f5f5f5]/20 text-[#f5f5f5] border-[#f5f5f5]/30',
   };
   return (
     <span
@@ -389,15 +389,15 @@ function CertaintyBadge({ level }: { level: string }) {
 }
 
 function TrendIcon({ trend }: { trend: string }) {
-  if (trend === 'improving') return <TrendingUp className="w-3 h-3 text-emerald-400" />;
-  if (trend === 'declining') return <TrendingDown className="w-3 h-3 text-red-400" />;
+  if (trend === 'improving') return <TrendingUp className="w-3 h-3 text-[#c9b787]" />;
+  if (trend === 'declining') return <TrendingDown className="w-3 h-3 text-[#f5f5f5]" />;
   return <Minus className="w-3 h-3 text-gray-500" />;
 }
 
 function MiniBar({
   value,
   max = 1,
-  color = 'bg-red-500/60',
+  color = 'bg-[#f5f5f5]/60',
 }: {
   value: number;
   max?: number;
@@ -438,22 +438,22 @@ function MetacognitionPanel({ data }: { data: SnapshotData['metacognition'] }) {
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
               <span className="text-gray-500">Rolling certainty:</span>
-              <span className="text-red-50 ml-1">{(data.rollingCertainty * 100).toFixed(0)}%</span>
+              <span className="text-[#f5f5f5] ml-1">{(data.rollingCertainty * 100).toFixed(0)}%</span>
             </div>
             <div>
               <span className="text-gray-500">Calibration drift:</span>
-              <span className="text-red-50 ml-1">{(a.calibrationDrift * 100).toFixed(1)}%</span>
+              <span className="text-[#f5f5f5] ml-1">{(a.calibrationDrift * 100).toFixed(1)}%</span>
             </div>
             <div>
               <span className="text-gray-500">Conf-in-conf:</span>
-              <span className="text-red-50 ml-1">
+              <span className="text-[#f5f5f5] ml-1">
                 {(a.confidenceInConfidence * 100).toFixed(0)}%
               </span>
             </div>
             <div>
               <span className="text-gray-500">Confusion streak:</span>
               <span
-                className={`ml-1 ${data.confusionStreak > 0 ? 'text-amber-400' : 'text-red-50'}`}
+                className={`ml-1 ${data.confusionStreak > 0 ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}
               >
                 {data.confusionStreak}
               </span>
@@ -462,7 +462,7 @@ function MetacognitionPanel({ data }: { data: SnapshotData['metacognition'] }) {
 
           {a.confusionSignals.length > 0 && (
             <div className="space-y-1">
-              <div className="text-[10px] text-amber-400 font-medium flex items-center gap-1">
+              <div className="text-[10px] text-[#c9b787] font-medium flex items-center gap-1">
                 <AlertTriangle className="w-3 h-3" /> Confusion Signals
               </div>
               {a.confusionSignals.map((s, i) => (
@@ -474,19 +474,19 @@ function MetacognitionPanel({ data }: { data: SnapshotData['metacognition'] }) {
           )}
 
           {a.introspectionNotes && (
-            <div className="text-[11px] text-gray-400 italic border-l-2 border-red-500/20 pl-3">
+            <div className="text-[11px] text-gray-400 italic border-l-2 border-[#f5f5f5]/20 pl-3">
               {a.introspectionNotes}
             </div>
           )}
 
           <div className="flex gap-2">
             {a.shouldSeekClarification && (
-              <span className="px-2 py-0.5 text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full">
+              <span className="px-2 py-0.5 text-[9px] bg-[#c9b787]/20 text-[#c9b787] border border-[#c9b787]/30 rounded-full">
                 SEEK CLARIFICATION
               </span>
             )}
             {a.shouldDeferToHuman && (
-              <span className="px-2 py-0.5 text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 rounded-full">
+              <span className="px-2 py-0.5 text-[9px] bg-[#f5f5f5]/20 text-[#f5f5f5] border border-[#f5f5f5]/30 rounded-full">
                 DEFER TO HUMAN
               </span>
             )}
@@ -501,10 +501,10 @@ function MetacognitionPanel({ data }: { data: SnapshotData['metacognition'] }) {
 
 function SelfModelPanel({ data }: { data: SnapshotData['selfModel'] }) {
   const healthColors: Record<string, string> = {
-    optimal: 'text-emerald-400',
-    good: 'text-green-400',
-    degraded: 'text-amber-400',
-    impaired: 'text-red-400',
+    optimal: 'text-[#c9b787]',
+    good: 'text-[#c9b787]',
+    degraded: 'text-[#c9b787]',
+    impaired: 'text-[#f5f5f5]',
   };
   return (
     <Card title="Self-Model & Theory of Mind" icon={Eye}>
@@ -519,7 +519,7 @@ function SelfModelPanel({ data }: { data: SnapshotData['selfModel'] }) {
         </div>
         <div className="flex items-center justify-between">
           <div className="text-xs text-gray-500">Learning Velocity</div>
-          <span className="text-sm font-bold text-red-50">
+          <span className="text-sm font-bold text-[#f5f5f5]">
             {(data.learningVelocity * 100).toFixed(0)}%
           </span>
         </div>
@@ -537,7 +537,7 @@ function SelfModelPanel({ data }: { data: SnapshotData['selfModel'] }) {
                 >
                   <div className="flex items-center gap-1">
                     <TrendIcon trend={cap.recentTrend} />
-                    <span className="text-red-50 font-medium">{cap.agentId}</span>
+                    <span className="text-[#f5f5f5] font-medium">{cap.agentId}</span>
                     <span className="text-gray-600">({cap.domain})</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -552,7 +552,7 @@ function SelfModelPanel({ data }: { data: SnapshotData['selfModel'] }) {
 
         {data.theoryOfMind && data.theoryOfMind.length > 0 && (
           <div className="space-y-1">
-            <div className="text-[10px] text-blue-400 font-medium flex items-center gap-1">
+            <div className="text-[10px] text-[#c9b787] font-medium flex items-center gap-1">
               <Users className="w-3 h-3" /> Theory of Mind ({data.theoryOfMind.length})
             </div>
             <div className="max-h-24 overflow-y-auto space-y-1">
@@ -562,9 +562,9 @@ function SelfModelPanel({ data }: { data: SnapshotData['selfModel'] }) {
                   className="text-[10px] px-2 py-1 bg-white/[0.02] rounded"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-red-50 font-medium">{belief.agentId}</span>
+                    <span className="text-[#f5f5f5] font-medium">{belief.agentId}</span>
                     <span
-                      className={`${belief.divergenceFromConsensus > 0.3 ? 'text-amber-400' : 'text-gray-500'}`}
+                      className={`${belief.divergenceFromConsensus > 0.3 ? 'text-[#c9b787]' : 'text-gray-500'}`}
                     >
                       {(belief.beliefConfidence * 100).toFixed(0)}% conf
                     </span>
@@ -573,7 +573,7 @@ function SelfModelPanel({ data }: { data: SnapshotData['selfModel'] }) {
                     {belief.queryInterpretation.slice(0, 60)}
                   </div>
                   {belief.divergenceFromConsensus > 0.3 && (
-                    <div className="text-amber-400/70 text-[9px]">
+                    <div className="text-[#c9b787]/70 text-[9px]">
                       Divergence: {(belief.divergenceFromConsensus * 100).toFixed(0)}%
                     </div>
                   )}
@@ -585,13 +585,13 @@ function SelfModelPanel({ data }: { data: SnapshotData['selfModel'] }) {
 
         {data.recentCounterfactuals && data.recentCounterfactuals.length > 0 && (
           <div className="space-y-1">
-            <div className="text-[10px] text-purple-400 font-medium flex items-center gap-1">
+            <div className="text-[10px] text-[#8a8a8a] font-medium flex items-center gap-1">
               <Scale className="w-3 h-3" /> Counterfactuals
             </div>
             {data.recentCounterfactuals.slice(0, 2).map((cf) => (
               <div key={cf.scenarioId} className="text-[10px] px-2 py-0.5 bg-white/[0.02] rounded">
                 <span
-                  className={`${cf.predictedOutcomeDelta > 0 ? 'text-emerald-400' : cf.predictedOutcomeDelta < -5 ? 'text-red-400' : 'text-gray-400'}`}
+                  className={`${cf.predictedOutcomeDelta > 0 ? 'text-[#c9b787]' : cf.predictedOutcomeDelta < -5 ? 'text-[#f5f5f5]' : 'text-gray-400'}`}
                 >
                   {cf.predictedOutcomeDelta > 0 ? '+' : ''}
                   {cf.predictedOutcomeDelta.toFixed(1)}%
@@ -605,7 +605,7 @@ function SelfModelPanel({ data }: { data: SnapshotData['selfModel'] }) {
         {data.knownLimitations.length > 0 && (
           <div className="space-y-1">
             <div className="text-[10px] text-gray-500 font-medium flex items-center gap-1">
-              <Shield className="w-3 h-3 text-amber-400/60" /> Known Limitations
+              <Shield className="w-3 h-3 text-[#c9b787]/60" /> Known Limitations
             </div>
             {data.knownLimitations.slice(0, 3).map((l, i) => (
               <div key={i} className="text-[10px] text-gray-500 pl-4">
@@ -623,10 +623,10 @@ function SelfModelPanel({ data }: { data: SnapshotData['selfModel'] }) {
 
 function MonologuePanel({ data }: { data: SnapshotData['monologue'] }) {
   const toneColors: Record<string, string> = {
-    positive: 'text-emerald-400',
+    positive: 'text-[#c9b787]',
     neutral: 'text-gray-400',
-    negative: 'text-red-400',
-    mixed: 'text-amber-400',
+    negative: 'text-[#f5f5f5]',
+    mixed: 'text-[#c9b787]',
   };
   const typeIcons: Record<string, string> = {
     pre_routing: '\u2192',
@@ -655,11 +655,11 @@ function MonologuePanel({ data }: { data: SnapshotData['monologue'] }) {
           </div>
           <div>
             <span className="text-gray-500">Thoughts:</span>
-            <span className="text-red-50 ml-1">{data.totalEntries}</span>
+            <span className="text-[#f5f5f5] ml-1">{data.totalEntries}</span>
           </div>
           <div>
             <span className="text-gray-500">Reflections:</span>
-            <span className="text-red-50 ml-1">{data.reflectionDepth}</span>
+            <span className="text-[#f5f5f5] ml-1">{data.reflectionDepth}</span>
           </div>
         </div>
 
@@ -672,7 +672,7 @@ function MonologuePanel({ data }: { data: SnapshotData['monologue'] }) {
                 animate={{ opacity: 1, x: 0 }}
                 className="flex gap-2 text-[11px]"
               >
-                <span className="text-red-500/40 shrink-0 w-4 text-center">
+                <span className="text-[#f5f5f5]/40 shrink-0 w-4 text-center">
                   {typeIcons[t.type] ?? '\u25cb'}
                 </span>
                 <div className="flex-1">
@@ -690,7 +690,7 @@ function MonologuePanel({ data }: { data: SnapshotData['monologue'] }) {
 
         {data.dialecticalTriples && data.dialecticalTriples.length > 0 && (
           <div className="space-y-1 mt-2">
-            <div className="text-[10px] text-purple-400 font-medium flex items-center gap-1">
+            <div className="text-[10px] text-[#8a8a8a] font-medium flex items-center gap-1">
               <Layers className="w-3 h-3" /> Dialectical Reasoning ({data.dialecticalTriples.length}
               )
             </div>
@@ -701,13 +701,13 @@ function MonologuePanel({ data }: { data: SnapshotData['monologue'] }) {
                   className="text-[10px] px-2 py-1 bg-white/[0.02] rounded space-y-0.5"
                 >
                   <div className="text-gray-400">
-                    <span className="text-blue-400">T:</span> {dt.thesis.slice(0, 60)}
+                    <span className="text-[#c9b787]">T:</span> {dt.thesis.slice(0, 60)}
                   </div>
                   <div className="text-gray-400">
-                    <span className="text-red-400/80">A:</span> {dt.antithesis.slice(0, 60)}
+                    <span className="text-[#f5f5f5]/80">A:</span> {dt.antithesis.slice(0, 60)}
                   </div>
                   <div className="text-gray-400">
-                    <span className="text-purple-400">S:</span> {dt.synthesis.slice(0, 60)}
+                    <span className="text-[#8a8a8a]">S:</span> {dt.synthesis.slice(0, 60)}
                   </div>
                   <div className="text-gray-600 text-[9px]">
                     {(dt.confidence * 100).toFixed(0)}% conf
@@ -720,17 +720,17 @@ function MonologuePanel({ data }: { data: SnapshotData['monologue'] }) {
 
         {data.socraticChains && data.socraticChains.length > 0 && (
           <div className="space-y-1 mt-1">
-            <div className="text-[10px] text-cyan-400 font-medium flex items-center gap-1">
+            <div className="text-[10px] text-[#8a8a8a] font-medium flex items-center gap-1">
               <Crosshair className="w-3 h-3" /> Socratic Inquiry ({data.socraticChains.length})
             </div>
             {data.socraticChains.slice(0, 2).map((sc) => (
               <div key={sc.chainId} className="text-[10px] px-2 py-1 bg-white/[0.02] rounded">
                 <div className="text-gray-400 truncate">Claim: {sc.originalClaim.slice(0, 60)}</div>
-                <div className="text-cyan-400/70">
+                <div className="text-[#8a8a8a]/70">
                   {sc.questions.length} questions → {sc.conclusion.slice(0, 60)}
                 </div>
                 {sc.assumptionsExposed.length > 0 && (
-                  <div className="text-amber-400/60 text-[9px]">
+                  <div className="text-[#c9b787]/60 text-[9px]">
                     Assumptions: {sc.assumptionsExposed.slice(0, 2).join('; ').slice(0, 80)}
                   </div>
                 )}
@@ -741,7 +741,7 @@ function MonologuePanel({ data }: { data: SnapshotData['monologue'] }) {
 
         {data.perspectiveSimulations && data.perspectiveSimulations.length > 0 && (
           <div className="space-y-1 mt-1">
-            <div className="text-[10px] text-blue-400 font-medium flex items-center gap-1">
+            <div className="text-[10px] text-[#c9b787] font-medium flex items-center gap-1">
               <Users className="w-3 h-3" /> Perspective Simulations (
               {data.perspectiveSimulations.length})
             </div>
@@ -754,7 +754,7 @@ function MonologuePanel({ data }: { data: SnapshotData['monologue'] }) {
                   {ps.perspectives.map((p, i) => (
                     <span
                       key={i}
-                      className="px-1 py-0.5 text-[9px] bg-blue-500/10 text-blue-400/70 rounded"
+                      className="px-1 py-0.5 text-[9px] bg-[#c9b787]/10 text-[#c9b787]/70 rounded"
                     >
                       {p.viewpoint}
                     </span>
@@ -774,9 +774,9 @@ function EmotionalPanel({ data }: { data: SnapshotData['emotions'] }) {
   const v = data.valence;
   const trajectoryIcon =
     data.moodTrajectory === 'improving' ? (
-      <TrendingUp className="w-3 h-3 text-emerald-400" />
+      <TrendingUp className="w-3 h-3 text-[#c9b787]" />
     ) : data.moodTrajectory === 'declining' ? (
-      <TrendingDown className="w-3 h-3 text-red-400" />
+      <TrendingDown className="w-3 h-3 text-[#f5f5f5]" />
     ) : (
       <Minus className="w-3 h-3 text-gray-500" />
     );
@@ -787,38 +787,38 @@ function EmotionalPanel({ data }: { data: SnapshotData['emotions'] }) {
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div>
             <span className="text-gray-500">Dominant:</span>
-            <span className="text-red-50 ml-1 font-medium">{v.dominantEmotion}</span>
+            <span className="text-[#f5f5f5] ml-1 font-medium">{v.dominantEmotion}</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="text-gray-500">Mood:</span>
             {trajectoryIcon}
-            <span className="text-red-50">{data.moodTrajectory}</span>
+            <span className="text-[#f5f5f5]">{data.moodTrajectory}</span>
           </div>
         </div>
 
         <div className="space-y-1">
           <div className="flex justify-between text-[10px]">
-            <span className="text-emerald-400">Positive</span>
+            <span className="text-[#c9b787]">Positive</span>
             <span className="text-gray-500">{(v.positive * 100).toFixed(0)}%</span>
           </div>
-          <MiniBar value={v.positive} color="bg-emerald-500/60" />
+          <MiniBar value={v.positive} color="bg-[#c9b787]/60" />
 
           <div className="flex justify-between text-[10px]">
-            <span className="text-red-400">Negative</span>
+            <span className="text-[#f5f5f5]">Negative</span>
             <span className="text-gray-500">{(v.negative * 100).toFixed(0)}%</span>
           </div>
-          <MiniBar value={v.negative} color="bg-red-500/60" />
+          <MiniBar value={v.negative} color="bg-[#f5f5f5]/60" />
 
           <div className="flex justify-between text-[10px]">
-            <span className="text-blue-400">Arousal</span>
+            <span className="text-[#c9b787]">Arousal</span>
             <span className="text-gray-500">{(v.arousal * 100).toFixed(0)}%</span>
           </div>
-          <MiniBar value={v.arousal} color="bg-blue-500/60" />
+          <MiniBar value={v.arousal} color="bg-[#c9b787]/60" />
         </div>
 
         <div className="flex items-center justify-between text-[10px]">
           <span className="text-gray-500">Stability</span>
-          <span className="text-red-50">{(v.emotionalStability * 100).toFixed(0)}%</span>
+          <span className="text-[#f5f5f5]">{(v.emotionalStability * 100).toFixed(0)}%</span>
         </div>
 
         {data.activeSignals.length > 0 && (
@@ -829,7 +829,7 @@ function EmotionalPanel({ data }: { data: SnapshotData['emotions'] }) {
                 key={s.signalId}
                 className="flex items-center justify-between text-[10px] px-2 py-0.5 bg-white/[0.02] rounded"
               >
-                <span className="text-red-50">{s.emotion}</span>
+                <span className="text-[#f5f5f5]">{s.emotion}</span>
                 <span className="text-gray-500">{(s.effectiveIntensity * 100).toFixed(0)}%</span>
               </div>
             ))}
@@ -838,14 +838,14 @@ function EmotionalPanel({ data }: { data: SnapshotData['emotions'] }) {
 
         {data.recentAppraisals && data.recentAppraisals.length > 0 && (
           <div className="space-y-1">
-            <div className="text-[10px] text-amber-400 font-medium flex items-center gap-1">
+            <div className="text-[10px] text-[#c9b787] font-medium flex items-center gap-1">
               <Gauge className="w-3 h-3" /> Scherer Appraisals ({data.recentAppraisals.length})
             </div>
             <div className="max-h-24 overflow-y-auto space-y-1">
               {data.recentAppraisals.slice(0, 3).map((ap) => (
                 <div key={ap.appraisalId} className="text-[10px] px-2 py-1 bg-white/[0.02] rounded">
                   <div className="flex items-center justify-between mb-0.5">
-                    <span className="text-red-50 font-medium">{ap.resultingEmotion}</span>
+                    <span className="text-[#f5f5f5] font-medium">{ap.resultingEmotion}</span>
                     <span className="text-gray-500">
                       {(ap.resultingIntensity * 100).toFixed(0)}%
                     </span>
@@ -853,23 +853,23 @@ function EmotionalPanel({ data }: { data: SnapshotData['emotions'] }) {
                   <div className="grid grid-cols-5 gap-1">
                     <div className="text-center">
                       <div className="text-[8px] text-gray-600">NOV</div>
-                      <MiniBar value={ap.novelty} color="bg-blue-500/50" />
+                      <MiniBar value={ap.novelty} color="bg-[#c9b787]/50" />
                     </div>
                     <div className="text-center">
                       <div className="text-[8px] text-gray-600">PLS</div>
-                      <MiniBar value={ap.intrinsicPleasantness} color="bg-emerald-500/50" />
+                      <MiniBar value={ap.intrinsicPleasantness} color="bg-[#c9b787]/50" />
                     </div>
                     <div className="text-center">
                       <div className="text-[8px] text-gray-600">GOL</div>
-                      <MiniBar value={ap.goalRelevance} color="bg-amber-500/50" />
+                      <MiniBar value={ap.goalRelevance} color="bg-[#c9b787]/50" />
                     </div>
                     <div className="text-center">
                       <div className="text-[8px] text-gray-600">COP</div>
-                      <MiniBar value={ap.copingPotential} color="bg-cyan-500/50" />
+                      <MiniBar value={ap.copingPotential} color="bg-[#8a8a8a]/50" />
                     </div>
                     <div className="text-center">
                       <div className="text-[8px] text-gray-600">NRM</div>
-                      <MiniBar value={ap.normCompatibility} color="bg-purple-500/50" />
+                      <MiniBar value={ap.normCompatibility} color="bg-[#8a8a8a]/50" />
                     </div>
                   </div>
                 </div>
@@ -886,7 +886,7 @@ function EmotionalPanel({ data }: { data: SnapshotData['emotions'] }) {
                 key={reg.strategyId}
                 className="text-[10px] px-2 py-0.5 bg-white/[0.02] rounded flex items-center justify-between"
               >
-                <span className="text-red-50">
+                <span className="text-[#f5f5f5]">
                   {reg.type}: {reg.action.slice(0, 40)}
                 </span>
                 <span className="text-gray-500">
@@ -903,11 +903,11 @@ function EmotionalPanel({ data }: { data: SnapshotData['emotions'] }) {
 
 function GoalPanel({ data }: { data: SnapshotData['goals'] }) {
   const prioColors: Record<string, string> = {
-    critical: 'text-red-400',
-    high: 'text-orange-400',
-    medium: 'text-amber-400',
+    critical: 'text-[#f5f5f5]',
+    high: 'text-[#c9b787]',
+    medium: 'text-[#c9b787]',
     low: 'text-gray-400',
-    exploratory: 'text-purple-400',
+    exploratory: 'text-[#8a8a8a]',
   };
 
   return (
@@ -915,15 +915,15 @@ function GoalPanel({ data }: { data: SnapshotData['goals'] }) {
       <div className="space-y-3">
         <div className="grid grid-cols-3 gap-2 text-xs text-center">
           <div>
-            <div className="text-lg font-bold text-red-50">{data.activeGoals.length}</div>
+            <div className="text-lg font-bold text-[#f5f5f5]">{data.activeGoals.length}</div>
             <div className="text-[10px] text-gray-500">Active</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-emerald-400">{data.completedGoals}</div>
+            <div className="text-lg font-bold text-[#c9b787]">{data.completedGoals}</div>
             <div className="text-[10px] text-gray-500">Completed</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-amber-400">{data.blockedGoals.length}</div>
+            <div className="text-lg font-bold text-[#c9b787]">{data.blockedGoals.length}</div>
             <div className="text-[10px] text-gray-500">Blocked</div>
           </div>
         </div>
@@ -932,9 +932,9 @@ function GoalPanel({ data }: { data: SnapshotData['goals'] }) {
           <div>
             <div className="flex justify-between text-[10px] mb-1">
               <span className="text-gray-500">Overall Progress</span>
-              <span className="text-red-50">{data.overallProgress}%</span>
+              <span className="text-[#f5f5f5]">{data.overallProgress}%</span>
             </div>
-            <MiniBar value={data.overallProgress} max={100} color="bg-red-500/60" />
+            <MiniBar value={data.overallProgress} max={100} color="bg-[#f5f5f5]/60" />
           </div>
         )}
 
@@ -947,7 +947,7 @@ function GoalPanel({ data }: { data: SnapshotData['goals'] }) {
               >
                 <div className="flex items-center gap-1">
                   <span className={prioColors[g.priority] ?? 'text-gray-400'}>{'\u25cf'}</span>
-                  <span className="text-red-50">{g.title.slice(0, 40)}</span>
+                  <span className="text-[#f5f5f5]">{g.title.slice(0, 40)}</span>
                 </div>
                 <span className="text-gray-500">{g.progress}%</span>
               </div>
@@ -957,42 +957,42 @@ function GoalPanel({ data }: { data: SnapshotData['goals'] }) {
 
         {data.intrinsicMotivation && (
           <div className="space-y-1">
-            <div className="text-[10px] text-blue-400 font-medium flex items-center gap-1">
+            <div className="text-[10px] text-[#c9b787] font-medium flex items-center gap-1">
               <Gauge className="w-3 h-3" /> Intrinsic Motivation
             </div>
             <div className="grid grid-cols-4 gap-1">
               <div className="text-center">
                 <div className="text-[8px] text-gray-600">INFO</div>
-                <div className="text-[10px] text-red-50">
+                <div className="text-[10px] text-[#f5f5f5]">
                   {(data.intrinsicMotivation.informationGain * 100).toFixed(0)}%
                 </div>
               </div>
               <div className="text-center">
                 <div className="text-[8px] text-gray-600">COMP</div>
-                <div className="text-[10px] text-red-50">
+                <div className="text-[10px] text-[#f5f5f5]">
                   {(data.intrinsicMotivation.competenceGrowth * 100).toFixed(0)}%
                 </div>
               </div>
               <div className="text-center">
                 <div className="text-[8px] text-gray-600">NOV</div>
-                <div className="text-[10px] text-red-50">
+                <div className="text-[10px] text-[#f5f5f5]">
                   {(data.intrinsicMotivation.noveltySeeking * 100).toFixed(0)}%
                 </div>
               </div>
               <div className="text-center">
                 <div className="text-[8px] text-gray-600">DRIVE</div>
-                <div className="text-[10px] font-bold text-blue-400">
+                <div className="text-[10px] font-bold text-[#c9b787]">
                   {(data.intrinsicMotivation.overallDrive * 100).toFixed(0)}%
                 </div>
               </div>
             </div>
-            <MiniBar value={data.intrinsicMotivation.overallDrive} color="bg-blue-500/60" />
+            <MiniBar value={data.intrinsicMotivation.overallDrive} color="bg-[#c9b787]/60" />
           </div>
         )}
 
         {data.metaGoals && data.metaGoals.length > 0 && (
           <div className="space-y-1">
-            <div className="text-[10px] text-cyan-400 font-medium">
+            <div className="text-[10px] text-[#8a8a8a] font-medium">
               Meta-Goals ({data.metaGoals.length})
             </div>
             <div className="max-h-20 overflow-y-auto space-y-1">
@@ -1003,7 +1003,7 @@ function GoalPanel({ data }: { data: SnapshotData['goals'] }) {
                 >
                   <div className="flex items-center gap-1">
                     <TrendIcon trend={mg.trend} />
-                    <span className="text-red-50">{mg.title.slice(0, 30)}</span>
+                    <span className="text-[#f5f5f5]">{mg.title.slice(0, 30)}</span>
                   </div>
                   <span className="text-gray-500">
                     {mg.currentValue.toFixed(0)}/{mg.targetValue.toFixed(0)}
@@ -1016,7 +1016,7 @@ function GoalPanel({ data }: { data: SnapshotData['goals'] }) {
 
         {data.curiosityQueue.length > 0 && (
           <div>
-            <div className="text-[10px] text-purple-400 font-medium flex items-center gap-1 mb-1">
+            <div className="text-[10px] text-[#8a8a8a] font-medium flex items-center gap-1 mb-1">
               <Lightbulb className="w-3 h-3" /> Curiosity Queue ({data.curiosityQueue.length})
             </div>
             {data.curiosityQueue.slice(0, 3).map((c) => (
@@ -1044,28 +1044,28 @@ function TemporalPanel({ data }: { data: SnapshotData['temporal'] }) {
         <div className="grid grid-cols-2 gap-2">
           <div>
             <span className="text-gray-500">Time:</span>
-            <span className="text-red-50 ml-1">
+            <span className="text-[#f5f5f5] ml-1">
               {data.dayOfWeek} {data.timeOfDay}
             </span>
           </div>
           <div>
             <span className="text-gray-500">Business hrs:</span>
-            <span className={`ml-1 ${data.isBusinessHours ? 'text-emerald-400' : 'text-gray-500'}`}>
+            <span className={`ml-1 ${data.isBusinessHours ? 'text-[#c9b787]' : 'text-gray-500'}`}>
               {data.isBusinessHours ? 'Yes' : 'No'}
             </span>
           </div>
           <div>
             <span className="text-gray-500">Uptime:</span>
-            <span className="text-red-50 ml-1">{uptimeHrs}h</span>
+            <span className="text-[#f5f5f5] ml-1">{uptimeHrs}h</span>
           </div>
           <div>
             <span className="text-gray-500">Orchestrations:</span>
-            <span className="text-red-50 ml-1">{data.orchestrationCount}</span>
+            <span className="text-[#f5f5f5] ml-1">{data.orchestrationCount}</span>
           </div>
         </div>
         <div>
           <span className="text-gray-500">Avg interval:</span>
-          <span className="text-red-50 ml-1">{avgIntervalMin} min</span>
+          <span className="text-[#f5f5f5] ml-1">{avgIntervalMin} min</span>
         </div>
       </div>
     </Card>
@@ -1079,11 +1079,11 @@ function WorkspacePanel({ data }: { data: SnapshotData['workspace'] }) {
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div>
             <span className="text-gray-500">Session depth:</span>
-            <span className="text-red-50 ml-1">{data.sessionDepth}</span>
+            <span className="text-[#f5f5f5] ml-1">{data.sessionDepth}</span>
           </div>
           <div>
             <span className="text-gray-500">Context usage:</span>
-            <span className="text-red-50 ml-1">
+            <span className="text-[#f5f5f5] ml-1">
               {(data.contextBudget.utilization * 100).toFixed(0)}%
             </span>
           </div>
@@ -1092,22 +1092,22 @@ function WorkspacePanel({ data }: { data: SnapshotData['workspace'] }) {
         <div>
           <div className="flex justify-between text-[10px] mb-1">
             <span className="text-gray-500">Context Budget</span>
-            <span className="text-cyan-400">
+            <span className="text-[#8a8a8a]">
               {data.contextBudget.used}/{data.contextBudget.total}
             </span>
           </div>
-          <MiniBar value={data.contextBudget.utilization} color="bg-cyan-500/60" />
+          <MiniBar value={data.contextBudget.utilization} color="bg-[#8a8a8a]/60" />
         </div>
 
         <div>
           <div className="text-[10px] text-gray-500 mb-1">Attention Focus</div>
-          <div className="text-[11px] text-red-50">Primary: {data.attentionFocus.primaryTopic}</div>
+          <div className="text-[11px] text-[#f5f5f5]">Primary: {data.attentionFocus.primaryTopic}</div>
           {data.attentionFocus.activeDomains.length > 0 && (
             <div className="flex gap-1 mt-1 flex-wrap">
               {data.attentionFocus.activeDomains.slice(0, 5).map((d) => (
                 <span
                   key={d}
-                  className="px-1.5 py-0.5 text-[9px] bg-cyan-500/10 text-cyan-400/70 rounded"
+                  className="px-1.5 py-0.5 text-[9px] bg-[#8a8a8a]/10 text-[#8a8a8a]/70 rounded"
                 >
                   {d}
                 </span>
@@ -1147,10 +1147,10 @@ function PredictivePanel({ data }: { data: PredictiveState }) {
     .slice(0, 6);
 
   const surpriseLevelColors: Record<string, string> = {
-    expected: 'text-emerald-400',
-    mild_surprise: 'text-amber-400',
-    strong_surprise: 'text-orange-400',
-    anomalous: 'text-red-400',
+    expected: 'text-[#c9b787]',
+    mild_surprise: 'text-[#c9b787]',
+    strong_surprise: 'text-[#c9b787]',
+    anomalous: 'text-[#f5f5f5]',
   };
 
   return (
@@ -1158,15 +1158,15 @@ function PredictivePanel({ data }: { data: PredictiveState }) {
       <div className="space-y-3">
         <div className="grid grid-cols-3 gap-2 text-xs text-center">
           <div>
-            <div className="text-lg font-bold text-blue-400">{accuracy}%</div>
+            <div className="text-lg font-bold text-[#c9b787]">{accuracy}%</div>
             <div className="text-[10px] text-gray-500">Accuracy</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-red-50">{data.model.totalPredictions}</div>
+            <div className="text-lg font-bold text-[#f5f5f5]">{data.model.totalPredictions}</div>
             <div className="text-[10px] text-gray-500">Predictions</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-amber-400">
+            <div className="text-lg font-bold text-[#c9b787]">
               {fe.currentFreeEnergy.toFixed(2)}
             </div>
             <div className="text-[10px] text-gray-500">Free Energy</div>
@@ -1176,9 +1176,9 @@ function PredictivePanel({ data }: { data: PredictiveState }) {
         <div>
           <div className="flex justify-between text-[10px] mb-1">
             <span className="text-gray-500">Model Complexity</span>
-            <span className="text-blue-400">{fe.modelComplexity} params</span>
+            <span className="text-[#c9b787]">{fe.modelComplexity} params</span>
           </div>
-          <MiniBar value={fe.predictionAccuracy} color="bg-blue-500/60" />
+          <MiniBar value={fe.predictionAccuracy} color="bg-[#c9b787]/60" />
         </div>
 
         {topDomains.length > 0 && (
@@ -1187,9 +1187,9 @@ function PredictivePanel({ data }: { data: PredictiveState }) {
             <div className="space-y-1">
               {topDomains.map(([domain, prior]) => (
                 <div key={domain} className="flex items-center gap-2 text-[10px]">
-                  <span className="text-red-50 w-20 truncate">{domain}</span>
+                  <span className="text-[#f5f5f5] w-20 truncate">{domain}</span>
                   <div className="flex-1">
-                    <MiniBar value={prior} color="bg-blue-500/40" />
+                    <MiniBar value={prior} color="bg-[#c9b787]/40" />
                   </div>
                   <span className="text-gray-500 w-8 text-right">{(prior * 100).toFixed(0)}%</span>
                 </div>
@@ -1225,8 +1225,8 @@ function PredictivePanel({ data }: { data: PredictiveState }) {
 
 function DreamPanel({ data }: { data: DreamState }) {
   const outcomeColors: Record<string, string> = {
-    positive: 'text-emerald-400',
-    negative: 'text-red-400',
+    positive: 'text-[#c9b787]',
+    negative: 'text-[#f5f5f5]',
     neutral: 'text-gray-400',
   };
 
@@ -1235,15 +1235,15 @@ function DreamPanel({ data }: { data: DreamState }) {
       <div className="space-y-3">
         <div className="grid grid-cols-3 gap-2 text-xs text-center">
           <div>
-            <div className="text-lg font-bold text-purple-400">{data.totalCycles}</div>
+            <div className="text-lg font-bold text-[#8a8a8a]">{data.totalCycles}</div>
             <div className="text-[10px] text-gray-500">Cycles</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-red-50">{data.replayBuffer.length}</div>
+            <div className="text-lg font-bold text-[#f5f5f5]">{data.replayBuffer.length}</div>
             <div className="text-[10px] text-gray-500">Replays</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-amber-400">{data.discoveredPatterns.length}</div>
+            <div className="text-lg font-bold text-[#c9b787]">{data.discoveredPatterns.length}</div>
             <div className="text-[10px] text-gray-500">Patterns</div>
           </div>
         </div>
@@ -1251,7 +1251,7 @@ function DreamPanel({ data }: { data: DreamState }) {
         <div className="flex items-center justify-between text-xs">
           <span className="text-gray-500">Status</span>
           <span
-            className={`px-2 py-0.5 rounded-full text-[9px] font-medium border ${data.isRunning ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}
+            className={`px-2 py-0.5 rounded-full text-[9px] font-medium border ${data.isRunning ? 'bg-[#8a8a8a]/20 text-[#8a8a8a] border-[#8a8a8a]/30' : 'bg-gray-500/20 text-gray-400 border-gray-500/30'}`}
           >
             {data.isRunning ? 'DREAMING' : 'AWAKE'}
           </span>
@@ -1265,20 +1265,20 @@ function DreamPanel({ data }: { data: DreamState }) {
 
         {data.discoveredPatterns.length > 0 && (
           <div>
-            <div className="text-[10px] text-purple-400 font-medium flex items-center gap-1 mb-1">
+            <div className="text-[10px] text-[#8a8a8a] font-medium flex items-center gap-1 mb-1">
               <GitBranch className="w-3 h-3" /> Discovered Patterns
             </div>
             <div className="max-h-24 overflow-y-auto space-y-1">
               {data.discoveredPatterns.slice(0, 5).map((p) => {
                 const sigColors: Record<string, string> = {
-                  high: 'text-red-400',
-                  medium: 'text-amber-400',
+                  high: 'text-[#f5f5f5]',
+                  medium: 'text-[#c9b787]',
                   low: 'text-gray-400',
                 };
                 return (
                   <div key={p.patternId} className="text-[10px] px-2 py-1 bg-white/[0.02] rounded">
                     <div className="flex items-center justify-between">
-                      <span className="text-red-50 truncate max-w-[120px]">
+                      <span className="text-[#f5f5f5] truncate max-w-[120px]">
                         {p.description.slice(0, 50)}
                       </span>
                       <span className={sigColors[p.significance] ?? 'text-gray-400'}>
@@ -1308,7 +1308,7 @@ function DreamPanel({ data }: { data: DreamState }) {
                     </span>
                   </div>
                   {r.insightsGenerated.slice(0, 2).map((insight, i) => (
-                    <div key={i} className="text-purple-400/70 truncate">
+                    <div key={i} className="text-[#8a8a8a]/70 truncate">
                       {'\u2022'} {insight}
                     </div>
                   ))}
@@ -1350,34 +1350,34 @@ function GWTBroadcastPanel({ data }: { data: SnapshotData['workspace'] }) {
       <div className="space-y-2 text-xs">
         <div>
           <span className="text-gray-500">Context Window:</span>
-          <span className="text-red-50 ml-1">
+          <span className="text-[#f5f5f5] ml-1">
             {(data.attentionFocus.contextWindowUsage * 100).toFixed(0)}% used
           </span>
         </div>
-        <MiniBar value={data.attentionFocus.contextWindowUsage} color="bg-cyan-500/60" />
+        <MiniBar value={data.attentionFocus.contextWindowUsage} color="bg-[#8a8a8a]/60" />
 
         {data.attentionSchema && (
           <div className="space-y-1">
-            <div className="text-[10px] text-cyan-400 font-medium">Attention Schema</div>
+            <div className="text-[10px] text-[#8a8a8a] font-medium">Attention Schema</div>
             {Object.entries(data.attentionSchema.allocationSummary)
               .slice(0, 5)
               .map(([key, val]) => (
                 <div key={key} className="flex items-center gap-2 text-[10px]">
-                  <span className="text-red-50 w-16 truncate">{key}</span>
+                  <span className="text-[#f5f5f5] w-16 truncate">{key}</span>
                   <div className="flex-1">
-                    <MiniBar value={val} color="bg-cyan-500/40" />
+                    <MiniBar value={val} color="bg-[#8a8a8a]/40" />
                   </div>
                   <span className="text-gray-500 w-8 text-right">{(val * 100).toFixed(0)}%</span>
                 </div>
               ))}
             {data.attentionSchema.driftDetected && (
-              <div className="text-[9px] text-amber-400 flex items-center gap-1">
+              <div className="text-[9px] text-[#c9b787] flex items-center gap-1">
                 <AlertTriangle className="w-3 h-3" />{' '}
                 {data.attentionSchema.driftDescription ?? 'Drift detected'}
               </div>
             )}
             {data.attentionSchema.rebalanceRecommendation && (
-              <div className="text-[9px] text-cyan-400/70">
+              <div className="text-[9px] text-[#8a8a8a]/70">
                 {data.attentionSchema.rebalanceRecommendation.slice(0, 80)}
               </div>
             )}
@@ -1396,7 +1396,7 @@ function GWTBroadcastPanel({ data }: { data: SnapshotData['workspace'] }) {
                     {b.winners.slice(0, 2).map((w) => (
                       <span
                         key={w.itemId}
-                        className="px-1 py-0.5 text-[9px] bg-emerald-500/10 text-emerald-400/80 rounded truncate max-w-[100px]"
+                        className="px-1 py-0.5 text-[9px] bg-[#c9b787]/10 text-[#c9b787]/80 rounded truncate max-w-[100px]"
                       >
                         {w.content.slice(0, 30)}
                       </span>
@@ -1420,7 +1420,7 @@ function GWTBroadcastPanel({ data }: { data: SnapshotData['workspace'] }) {
               {data.attentionFocus.activeDomains.map((d) => (
                 <span
                   key={d}
-                  className="px-1.5 py-0.5 text-[9px] bg-cyan-500/15 text-cyan-400 border border-cyan-500/20 rounded"
+                  className="px-1.5 py-0.5 text-[9px] bg-[#8a8a8a]/15 text-[#8a8a8a] border border-[#8a8a8a]/20 rounded"
                 >
                   {d}
                 </span>
@@ -1444,11 +1444,11 @@ export default function ConsciousnessPage() {
         className="flex items-center justify-between"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/20 to-purple-500/20 flex items-center justify-center border border-red-500/20">
-            <Sparkles className="w-5 h-5 text-red-400" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/20 to-purple-500/20 flex items-center justify-center border border-[#f5f5f5]/20">
+            <Sparkles className="w-5 h-5 text-[#f5f5f5]" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-red-50">Consciousness Layer v2</h1>
+            <h1 className="text-xl font-bold text-[#f5f5f5]">Consciousness Layer v2</h1>
             <p className="text-xs text-gray-500">
               GWT, Predictive Processing, Dialectical Reasoning, Appraisal Theory, Dream
               Consolidation
@@ -1464,12 +1464,12 @@ export default function ConsciousnessPage() {
 
       {isLoading && (
         <div className="flex items-center justify-center py-20">
-          <Activity className="w-6 h-6 text-red-500/40 animate-pulse" />
+          <Activity className="w-6 h-6 text-[#f5f5f5]/40 animate-pulse" />
         </div>
       )}
 
       {error && (
-        <div className="text-center py-10 text-red-400/60 text-sm">
+        <div className="text-center py-10 text-[#f5f5f5]/60 text-sm">
           Unable to connect to consciousness layer
         </div>
       )}

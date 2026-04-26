@@ -415,7 +415,7 @@ const PRODUCTS = [
   },
   {
     id: 'pulse',
-    label: 'LUMINA',
+    label: 'Pulse',
     color: '#8b7ac8',
     icon: '◆',
     status: 'healthy',

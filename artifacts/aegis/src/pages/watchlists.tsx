@@ -113,10 +113,10 @@ const typeIcons: Record<string, typeof Globe> = {
   url: Globe,
 };
 const sevColors: Record<string, string> = {
-  critical: 'bg-red-500/10 text-red-400',
-  high: 'bg-orange-500/10 text-orange-400',
-  medium: 'bg-amber-500/10 text-amber-400',
-  low: 'bg-emerald-500/10 text-emerald-400',
+  critical: 'bg-[#f5f5f5]/10 text-[#f5f5f5]',
+  high: 'bg-[#c9b787]/10 text-[#c9b787]',
+  medium: 'bg-[#c9b787]/10 text-[#c9b787]',
+  low: 'bg-[#c9b787]/10 text-[#c9b787]',
 };
 
 export default function Watchlists() {
@@ -144,25 +144,25 @@ export default function Watchlists() {
             label: 'Total Indicators',
             value: watchlistItems.length,
             icon: Eye,
-            color: 'text-blue-400',
+            color: 'text-[#c9b787]',
           },
           {
             label: 'Active Hits Today',
             value: watchlistItems.reduce((a, w) => a + w.hits, 0),
             icon: Target,
-            color: 'text-red-400',
+            color: 'text-[#f5f5f5]',
           },
           {
             label: 'Critical',
             value: watchlistItems.filter((w) => w.severity === 'critical').length,
             icon: AlertTriangle,
-            color: 'text-red-400',
+            color: 'text-[#f5f5f5]',
           },
           {
             label: 'Investigating',
             value: watchlistItems.filter((w) => w.status === 'investigating').length,
             icon: Shield,
-            color: 'text-amber-400',
+            color: 'text-[#c9b787]',
           },
         ].map((s) => (
           <div
@@ -198,7 +198,7 @@ export default function Watchlists() {
                 icon={CheckCircle}
                 headline="No indicators on watch"
                 description="Threat intel feeds are quiet — no IOCs are being monitored right now."
-                accentColor="#10b981"
+                accentColor="#c9b787"
                 compact
               />
             ) : (

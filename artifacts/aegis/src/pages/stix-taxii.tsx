@@ -211,32 +211,32 @@ const typeIcons: Record<StixType, typeof Shield> = {
 };
 
 const typeColors: Record<StixType, string> = {
-  indicator: '#ef4444',
-  malware: '#f97316',
-  'attack-pattern': '#8b5cf6',
-  'threat-actor': '#3b82f6',
-  campaign: '#ec4899',
-  vulnerability: '#f59e0b',
-  'course-of-action': '#10b981',
+  indicator: '#f5f5f5',
+  malware: '#c9b787',
+  'attack-pattern': '#8a8a8a',
+  'threat-actor': '#c9b787',
+  campaign: '#c9b787',
+  vulnerability: '#c9b787',
+  'course-of-action': '#c9b787',
 };
 
 const tlpColors: Record<string, string> = {
   WHITE: 'text-white/60 bg-white/5 border-white/10',
-  GREEN: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-  AMBER: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-  RED: 'text-red-400 bg-red-500/10 border-red-500/20',
+  GREEN: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+  AMBER: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+  RED: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20',
 };
 
 const feedStatusColors: Record<string, string> = {
-  active: 'text-emerald-400',
-  syncing: 'text-blue-400',
-  error: 'text-red-400',
+  active: 'text-[#c9b787]',
+  syncing: 'text-[#c9b787]',
+  error: 'text-[#f5f5f5]',
 };
 
 const feedTypeColors: Record<string, string> = {
-  government: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
-  isac: 'text-violet-400 bg-violet-500/10 border-violet-500/20',
-  commercial: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+  government: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+  isac: 'text-[#8a8a8a] bg-[#8a8a8a]/10 border-[#8a8a8a]/20',
+  commercial: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
   community: 'text-white/50 bg-white/5 border-white/10',
 };
 
@@ -282,7 +282,7 @@ export default function StixTaxii() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <Link2 className="w-5 h-5 text-cyan-400" />
+            <Link2 className="w-5 h-5 text-[#8a8a8a]" />
             STIX/TAXII Protocol Layer
           </h1>
           <p className="text-xs text-white/40 mt-0.5">
@@ -291,10 +291,10 @@ export default function StixTaxii() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+          <div className="flex items-center gap-1.5 text-[10px] text-[#c9b787] bg-[#c9b787]/10 px-2.5 py-1 rounded-lg border border-[#c9b787]/20">
             <Radio className="w-3 h-3 animate-pulse" /> TAXII Server Active
           </div>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-colors">
+          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#8a8a8a]/10 text-[#8a8a8a] border border-[#8a8a8a]/20 hover:bg-[#8a8a8a]/20 transition-colors">
             <Upload className="w-3.5 h-3.5" /> Ingest Feed
           </button>
         </div>
@@ -303,19 +303,19 @@ export default function StixTaxii() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
-          { label: 'STIX Objects', value: totalObjects.toString(), color: '#06b6d4' },
-          { label: 'TAXII Feeds', value: displayFeedCount.toString(), color: '#3b82f6' },
+          { label: 'STIX Objects', value: totalObjects.toString(), color: '#8a8a8a' },
+          { label: 'TAXII Feeds', value: displayFeedCount.toString(), color: '#c9b787' },
           {
             label: 'Objects Ingested',
             value: taxiiData?.data?.totalObjects?.toLocaleString() ?? '13,657',
-            color: '#8b5cf6',
+            color: '#8a8a8a',
           },
           {
             label: 'Sharing Partners',
             value: taxiiData?.data?.sharingPartners?.toString() ?? '6',
-            color: '#10b981',
+            color: '#c9b787',
           },
-          { label: 'Last Bundle Export', value: '2h ago', color: '#f59e0b' },
+          { label: 'Last Bundle Export', value: '2h ago', color: '#c9b787' },
         ].map((s) => (
           <div key={s.label} className="rounded-xl border border-white/6 bg-white/[0.015] p-3">
             <div className="text-lg font-bold font-mono" style={{ color: s.color }}>
@@ -343,7 +343,7 @@ export default function StixTaxii() {
             className={cn(
               'px-4 py-2 text-xs font-semibold transition-colors border-b-2 -mb-px',
               activeTab === tab
-                ? 'border-cyan-400 text-cyan-300'
+                ? 'border-[#8a8a8a] text-[#8a8a8a]'
                 : 'border-transparent text-white/40 hover:text-white/70',
             )}
           >
@@ -399,7 +399,7 @@ export default function StixTaxii() {
                   className={cn(
                     'rounded-xl border p-3 cursor-pointer transition-all',
                     selectedObject?.id === obj.id
-                      ? 'border-cyan-500/30 bg-cyan-500/5'
+                      ? 'border-[#8a8a8a]/30 bg-[#8a8a8a]/5'
                       : 'border-white/6 bg-white/[0.015] hover:border-white/10',
                   )}
                 >
@@ -508,7 +508,7 @@ export default function StixTaxii() {
                   <div className="text-[9px] uppercase tracking-wider text-white/25 mb-2">
                     Detection Pattern (STIX 2.1)
                   </div>
-                  <div className="rounded-lg bg-black/30 border border-white/8 p-3 font-mono text-[11px] text-cyan-300">
+                  <div className="rounded-lg bg-black/30 border border-white/8 p-3 font-mono text-[11px] text-[#8a8a8a]">
                     {selectedObject.pattern}
                   </div>
                 </div>
@@ -527,7 +527,7 @@ export default function StixTaxii() {
                 <button
                   onClick={() => selectedObject && exportMutation.mutate([selectedObject.stixId])}
                   disabled={exportMutation.isPending || !selectedObject}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#8a8a8a]/10 text-[#8a8a8a] border border-[#8a8a8a]/20 hover:bg-[#8a8a8a]/20 transition-colors disabled:opacity-50"
                 >
                   <Download className="w-3.5 h-3.5" />{' '}
                   {exportMutation.isPending ? 'Exporting...' : 'Export as STIX Bundle'}
@@ -553,10 +553,10 @@ export default function StixTaxii() {
                         className={cn(
                           'w-2 h-2 rounded-full shrink-0',
                           feed.status === 'active'
-                            ? 'bg-emerald-400 animate-pulse'
+                            ? 'bg-[#c9b787] animate-pulse'
                             : feed.status === 'syncing'
-                              ? 'bg-blue-400 animate-pulse'
-                              : 'bg-red-400',
+                              ? 'bg-[#c9b787] animate-pulse'
+                              : 'bg-[#f5f5f5]',
                         )}
                       />
                       <Globe className="w-4 h-4 text-white/30" />
@@ -603,8 +603,8 @@ export default function StixTaxii() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-cyan-500/15 bg-cyan-500/5 p-4">
-            <div className="text-[10px] font-bold text-cyan-400/70 uppercase tracking-wider mb-2">
+          <div className="rounded-xl border border-[#8a8a8a]/15 bg-[#8a8a8a]/5 p-4">
+            <div className="text-[10px] font-bold text-[#8a8a8a]/70 uppercase tracking-wider mb-2">
               TAXII 2.1 Server Configuration
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-[10px]">
@@ -642,7 +642,7 @@ export default function StixTaxii() {
                     {f.label}
                   </label>
                   <input
-                    className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/8 text-xs text-white/70 placeholder-white/20 focus:outline-none focus:border-cyan-500/40"
+                    className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/8 text-xs text-white/70 placeholder-white/20 focus:outline-none focus:border-[#8a8a8a]/40"
                     placeholder={f.placeholder}
                     defaultValue={f.placeholder}
                   />
@@ -688,7 +688,7 @@ export default function StixTaxii() {
                   <option>TLP:RED (restricted)</option>
                 </select>
               </div>
-              <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-cyan-500/15 text-cyan-400 border border-cyan-500/25 hover:bg-cyan-500/25 transition-colors text-xs font-semibold">
+              <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#8a8a8a]/15 text-[#8a8a8a] border border-[#8a8a8a]/25 hover:bg-[#8a8a8a]/25 transition-colors text-xs font-semibold">
                 <Download className="w-4 h-4" /> Export STIX 2.1 Bundle (JSON)
               </button>
             </div>
@@ -733,7 +733,7 @@ export default function StixTaxii() {
                   key={exp.name}
                   className="flex items-center gap-3 p-3 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.03] transition-colors group"
                 >
-                  <FileText className="w-4 h-4 text-cyan-400/50 shrink-0" />
+                  <FileText className="w-4 h-4 text-[#8a8a8a]/50 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="text-[11px] font-medium text-white/70">{exp.name}</div>
                     <div className="text-[9px] text-white/30 mt-0.5">
@@ -742,7 +742,7 @@ export default function StixTaxii() {
                   </div>
                   <div className="text-[9px] text-white/25 shrink-0">{exp.exported}</div>
                   <button className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                    <Download className="w-3.5 h-3.5 text-cyan-400" />
+                    <Download className="w-3.5 h-3.5 text-[#8a8a8a]" />
                   </button>
                 </div>
               ))}
@@ -752,7 +752,7 @@ export default function StixTaxii() {
               <div className="text-[9px] uppercase tracking-wider text-white/25 mb-2">
                 Sample STIX 2.1 Bundle Format
               </div>
-              <pre className="text-[9px] text-cyan-300/70 font-mono leading-relaxed overflow-x-auto">{`{
+              <pre className="text-[9px] text-[#8a8a8a]/70 font-mono leading-relaxed overflow-x-auto">{`{
   "type": "bundle",
   "id": "bundle--ae47a22c-...",
   "spec_version": "2.1",

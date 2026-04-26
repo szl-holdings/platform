@@ -34,7 +34,7 @@ function resetStore(seed: Partial<DeploymentRow>[] = []): void {
     store.rows.push({
       id: store.nextId++,
       appId: r.appId ?? 'pulse',
-      appName: r.appName ?? 'LUMINA',
+      appName: r.appName ?? 'Pulse',
       version: r.version ?? 'v1.0.0',
       environment: r.environment ?? 'production',
       status: r.status ?? 'active',
@@ -305,8 +305,8 @@ const VIEWER = { id: 73, email: 'viewer@example.com', displayName: 'Viewer', rol
 describe('Deployments routes — authenticated reads return 200 JSON (#1164)', () => {
   it('GET /api/deployments returns 200 with the active rows for an authenticated user', async () => {
     resetStore([
-      { appId: 'pulse', appName: 'LUMINA', version: 'v1.1.0', status: 'active' },
-      { appId: 'pulse', appName: 'LUMINA', version: 'v1.0.0', status: 'inactive' },
+      { appId: 'pulse', appName: 'Pulse', version: 'v1.1.0', status: 'active' },
+      { appId: 'pulse', appName: 'Pulse', version: 'v1.0.0', status: 'inactive' },
       { appId: 'command', appName: 'Command', version: 'v2.0.0', status: 'active' },
     ]);
     authUser = ADMIN;
@@ -321,7 +321,7 @@ describe('Deployments routes — authenticated reads return 200 JSON (#1164)', (
   });
 
   it('GET /api/deployments/:appId returns 200 when an active row exists', async () => {
-    resetStore([{ appId: 'pulse', appName: 'LUMINA', version: 'v1.1.0', status: 'active' }]);
+    resetStore([{ appId: 'pulse', appName: 'Pulse', version: 'v1.1.0', status: 'active' }]);
     authUser = ADMIN;
     const res = await request(app).get('/api/deployments/pulse');
     expect(res.status).toBe(200);
@@ -341,14 +341,14 @@ describe('Deployments routes — authenticated reads return 200 JSON (#1164)', (
     resetStore([
       {
         appId: 'pulse',
-        appName: 'LUMINA',
+        appName: 'Pulse',
         version: 'v1.0.0',
         status: 'inactive',
         deployedAt: new Date('2026-04-18T00:00:00Z'),
       },
       {
         appId: 'pulse',
-        appName: 'LUMINA',
+        appName: 'Pulse',
         version: 'v1.1.0',
         status: 'active',
         deployedAt: new Date('2026-04-19T00:00:00Z'),
@@ -387,14 +387,14 @@ describe('Deployments rollback — authorization + happy path (#1164)', () => {
     resetStore([
       {
         appId: 'pulse',
-        appName: 'LUMINA',
+        appName: 'Pulse',
         version: 'v1.0.0',
         status: 'inactive',
         deployedAt: new Date('2026-04-18T00:00:00Z'),
       },
       {
         appId: 'pulse',
-        appName: 'LUMINA',
+        appName: 'Pulse',
         version: 'v1.1.0',
         status: 'active',
         deployedAt: new Date('2026-04-19T00:00:00Z'),
@@ -411,14 +411,14 @@ describe('Deployments rollback — authorization + happy path (#1164)', () => {
     resetStore([
       {
         appId: 'pulse',
-        appName: 'LUMINA',
+        appName: 'Pulse',
         version: 'v1.0.0',
         status: 'inactive',
         deployedAt: new Date('2026-04-18T00:00:00Z'),
       },
       {
         appId: 'pulse',
-        appName: 'LUMINA',
+        appName: 'Pulse',
         version: 'v1.1.0',
         status: 'active',
         deployedAt: new Date('2026-04-19T00:00:00Z'),

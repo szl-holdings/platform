@@ -21,7 +21,7 @@ interface FirewallData {
 }
 
 const RISK_COLORS: Record<string, string> = {
-  low: '#10b981', medium: '#f59e0b', high: '#ef4444', critical: '#ef4444',
+  low: '#c9b787', medium: '#c9b787', high: '#f5f5f5', critical: '#f5f5f5',
 };
 const STATUS_MAP: Record<string, 'LIVE' | 'DEMO' | 'ROADMAP'> = {
   approved: 'LIVE', pending_review: 'DEMO', blocked: 'ROADMAP',
@@ -29,7 +29,7 @@ const STATUS_MAP: Record<string, 'LIVE' | 'DEMO' | 'ROADMAP'> = {
 
 function RiskBadge({ level }: { level: string }) {
   return (
-    <span className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ color: RISK_COLORS[level] ?? '#9bacc4', backgroundColor: `${RISK_COLORS[level] ?? '#9bacc4'}18`, border: `1px solid ${RISK_COLORS[level] ?? '#9bacc4'}40` }}>
+    <span className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ color: RISK_COLORS[level] ?? '#5e5e5e', backgroundColor: `${RISK_COLORS[level] ?? '#5e5e5e'}18`, border: `1px solid ${RISK_COLORS[level] ?? '#5e5e5e'}40` }}>
       {level.toUpperCase()}
     </span>
   );
@@ -78,18 +78,18 @@ export function ConnectorFirewall() {
       ) : data ? (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
-            <KpiCard label="CONNECTORS" value={String(data.summary.total)} sub="Registered" accent="#3b82f6" />
-            <KpiCard label="APPROVED" value={String(data.summary.approved)} sub="Active" accent="#10b981" />
-            <KpiCard label="PENDING REVIEW" value={String(data.summary.pendingReview)} sub="No tools approved" accent="#f59e0b" />
-            <KpiCard label="BLOCKED" value={String(data.summary.blocked)} sub="Zero access" accent="#ef4444" />
+            <KpiCard label="CONNECTORS" value={String(data.summary.total)} sub="Registered" accent="#c9b787" />
+            <KpiCard label="APPROVED" value={String(data.summary.approved)} sub="Active" accent="#c9b787" />
+            <KpiCard label="PENDING REVIEW" value={String(data.summary.pendingReview)} sub="No tools approved" accent="#c9b787" />
+            <KpiCard label="BLOCKED" value={String(data.summary.blocked)} sub="Zero access" accent="#f5f5f5" />
             <KpiCard label="FIREWALL EVENTS" value={String(data.summary.totalFirewallEvents)} sub="Intercepted" accent="#b08d52" />
-            <KpiCard label="INJECTION BLOCKED" value={String(data.summary.injectionAttemptsBlocked)} sub="Prompt injection" accent="#ef4444" />
+            <KpiCard label="INJECTION BLOCKED" value={String(data.summary.injectionAttemptsBlocked)} sub="Prompt injection" accent="#f5f5f5" />
           </div>
 
           <div className="flex items-center gap-2 mb-4">
             <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Risk filter:</span>
             {['all', 'low', 'medium', 'high', 'critical'].map(r => (
-              <button key={r} onClick={() => setFilterRisk(r)} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: filterRisk === r ? 'rgba(59,130,246,0.2)' : 'var(--color-a11oy-muted)', color: filterRisk === r ? '#3b82f6' : 'var(--color-a11oy-text-ghost)', border: `1px solid ${filterRisk === r ? 'rgba(59,130,246,0.4)' : 'var(--color-a11oy-border)'}` }}>
+              <button key={r} onClick={() => setFilterRisk(r)} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: filterRisk === r ? 'rgba(201,183,135,0.2)' : 'var(--color-a11oy-muted)', color: filterRisk === r ? '#c9b787' : 'var(--color-a11oy-text-ghost)', border: `1px solid ${filterRisk === r ? 'rgba(201,183,135,0.4)' : 'var(--color-a11oy-border)'}` }}>
                 {r}
               </button>
             ))}
@@ -114,7 +114,7 @@ export function ConnectorFirewall() {
                     <div className="grid grid-cols-4 gap-2 text-xs">
                       <div>
                         <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>trust</div>
-                        <div style={{ color: c.trustScore >= 80 ? '#10b981' : c.trustScore >= 60 ? '#f59e0b' : '#ef4444' }}>{c.trustScore}</div>
+                        <div style={{ color: c.trustScore >= 80 ? '#c9b787' : c.trustScore >= 60 ? '#c9b787' : '#f5f5f5' }}>{c.trustScore}</div>
                       </div>
                       <div>
                         <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>calls</div>
@@ -122,15 +122,15 @@ export function ConnectorFirewall() {
                       </div>
                       <div>
                         <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>blocked</div>
-                        <div style={{ color: c.promptInjectionBlocked > 0 ? '#ef4444' : 'var(--color-a11oy-text-sub)' }}>{c.promptInjectionBlocked}</div>
+                        <div style={{ color: c.promptInjectionBlocked > 0 ? '#f5f5f5' : 'var(--color-a11oy-text-sub)' }}>{c.promptInjectionBlocked}</div>
                       </div>
                       <div>
                         <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>sanitized</div>
-                        <div style={{ color: c.outputSanitized ? '#10b981' : '#ef4444' }}>{c.outputSanitized ? 'yes' : 'no'}</div>
+                        <div style={{ color: c.outputSanitized ? '#c9b787' : '#f5f5f5' }}>{c.outputSanitized ? 'yes' : 'no'}</div>
                       </div>
                     </div>
                     {c.promptInjectionBlocked > 0 && (
-                      <div className="mt-2 text-xs px-2 py-1 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444' }}>
+                      <div className="mt-2 text-xs px-2 py-1 rounded" style={{ backgroundColor: 'rgba(245,245,245,0.08)', color: '#f5f5f5' }}>
                         ⚠ {c.promptInjectionBlocked} injection attempt{c.promptInjectionBlocked > 1 ? 's' : ''} blocked
                       </div>
                     )}
@@ -155,7 +155,7 @@ export function ConnectorFirewall() {
                           onClick={() => testConnector(selected)}
                           disabled={testLoading || selected.status === 'blocked'}
                           className="text-xs px-2 py-1 rounded"
-                          style={{ backgroundColor: 'rgba(59,130,246,0.12)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.25)', opacity: selected.status === 'blocked' ? 0.4 : 1 }}
+                          style={{ backgroundColor: 'rgba(201,183,135,0.12)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.25)', opacity: selected.status === 'blocked' ? 0.4 : 1 }}
                         >
                           {testLoading ? 'Testing…' : 'Test Connection'}
                         </button>
@@ -163,19 +163,19 @@ export function ConnectorFirewall() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 mb-4 text-xs">
-                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Trust Score</div><div className="font-mono" style={{ color: selected.trustScore >= 80 ? '#10b981' : '#f59e0b' }}>{selected.trustScore} / 100</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Trust Score</div><div className="font-mono" style={{ color: selected.trustScore >= 80 ? '#c9b787' : '#c9b787' }}>{selected.trustScore} / 100</div></div>
                       <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Risk Score</div><div className="font-mono" style={{ color: RISK_COLORS[selected.riskLevel] }}>{selected.riskScore} / 100</div></div>
-                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Approval Required</div><div style={{ color: selected.approvalRequired ? '#f59e0b' : '#10b981' }}>{selected.approvalRequired ? 'Yes' : 'No'}</div></div>
-                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Schema Validated</div><div style={{ color: selected.schemaValidated ? '#10b981' : '#ef4444' }}>{selected.schemaValidated ? 'Yes' : 'No'}</div></div>
-                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Consent Granted</div><div style={{ color: selected.consentGranted ? '#10b981' : '#ef4444' }}>{selected.consentGranted ? 'Yes' : 'No'}</div></div>
-                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Output Sanitized</div><div style={{ color: selected.outputSanitized ? '#10b981' : '#ef4444' }}>{selected.outputSanitized ? 'Yes' : 'No'}</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Approval Required</div><div style={{ color: selected.approvalRequired ? '#c9b787' : '#c9b787' }}>{selected.approvalRequired ? 'Yes' : 'No'}</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Schema Validated</div><div style={{ color: selected.schemaValidated ? '#c9b787' : '#f5f5f5' }}>{selected.schemaValidated ? 'Yes' : 'No'}</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Consent Granted</div><div style={{ color: selected.consentGranted ? '#c9b787' : '#f5f5f5' }}>{selected.consentGranted ? 'Yes' : 'No'}</div></div>
+                      <div><div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Output Sanitized</div><div style={{ color: selected.outputSanitized ? '#c9b787' : '#f5f5f5' }}>{selected.outputSanitized ? 'Yes' : 'No'}</div></div>
                     </div>
 
                     <div className="mb-3">
                       <div className="text-xs font-medium mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Allowed Tools</div>
                       <div className="flex flex-wrap gap-1">
                         {selected.allowedTools.length > 0 ? selected.allowedTools.map(t => (
-                          <span key={t} className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(16,185,129,0.08)', color: '#10b981' }}>{t}</span>
+                          <span key={t} className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(201,183,135,0.08)', color: '#c9b787' }}>{t}</span>
                         )) : <span className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>None approved</span>}
                       </div>
                     </div>
@@ -183,7 +183,7 @@ export function ConnectorFirewall() {
                       <div className="text-xs font-medium mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Blocked Tools</div>
                       <div className="flex flex-wrap gap-1">
                         {selected.blockedTools.map(t => (
-                          <span key={t} className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444' }}>{t}</span>
+                          <span key={t} className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(245,245,245,0.08)', color: '#f5f5f5' }}>{t}</span>
                         ))}
                       </div>
                     </div>
@@ -198,7 +198,7 @@ export function ConnectorFirewall() {
                     <div className="text-xs p-2 rounded" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: 'var(--color-a11oy-text-sub)' }}>{selected.note}</div>
 
                     {testResult && (
-                      <div className="mt-3 p-2 rounded text-xs" style={{ backgroundColor: (testResult as Record<string, unknown>).ok ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', color: (testResult as Record<string, unknown>).ok ? '#10b981' : '#ef4444', border: `1px solid ${(testResult as Record<string, unknown>).ok ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}` }}>
+                      <div className="mt-3 p-2 rounded text-xs" style={{ backgroundColor: (testResult as Record<string, unknown>).ok ? 'rgba(201,183,135,0.08)' : 'rgba(245,245,245,0.08)', color: (testResult as Record<string, unknown>).ok ? '#c9b787' : '#f5f5f5', border: `1px solid ${(testResult as Record<string, unknown>).ok ? 'rgba(201,183,135,0.2)' : 'rgba(245,245,245,0.2)'}` }}>
                         {(testResult as Record<string, unknown>).ok
                           ? `✓ Connection test passed (demo mode) — latency: ${(testResult.data as Record<string, unknown>)?.latencyMs}ms`
                           : `✗ ${((testResult.error as Record<string, unknown>)?.message as string) ?? 'Blocked'}`
@@ -211,7 +211,7 @@ export function ConnectorFirewall() {
                 <>
                   <SectionTitle>Firewall Policy</SectionTitle>
                   <Card>
-                    <div className="text-xs font-semibold mb-3" style={{ color: '#ef4444' }}>DEFAULT DENY — All connectors untrusted until registered</div>
+                    <div className="text-xs font-semibold mb-3" style={{ color: '#f5f5f5' }}>DEFAULT DENY — All connectors untrusted until registered</div>
                     <div className="space-y-2 mb-4">
                       {[
                         { label: 'Schema validation required', value: 'enforced' },
@@ -222,7 +222,7 @@ export function ConnectorFirewall() {
                       ].map(p => (
                         <div key={p.label} className="flex items-center justify-between text-xs">
                           <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{p.label}</span>
-                          <span style={{ color: '#10b981' }}>{p.value}</span>
+                          <span style={{ color: '#c9b787' }}>{p.value}</span>
                         </div>
                       ))}
                     </div>
@@ -230,7 +230,7 @@ export function ConnectorFirewall() {
                     <div className="space-y-1">
                       {data.firewallPolicy.promptInjectionPatterns.map(p => (
                         <div key={p} className="text-xs flex items-center gap-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                          <span style={{ color: '#f59e0b' }}>⚠</span> {p}
+                          <span style={{ color: '#c9b787' }}>⚠</span> {p}
                         </div>
                       ))}
                     </div>
@@ -245,7 +245,7 @@ export function ConnectorFirewall() {
         <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Connector registry unavailable.</div>
       )}
 
-      <div className="p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
+      <div className="p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
         <DemoBadge /> Demo mode — no real connector calls. All trust scores and firewall events are seeded. Destructive tools are always blocked.
       </div>
     </Layout>

@@ -25,25 +25,25 @@ const CORE_VIEWS = [
     icon: ShieldAlert,
     title: 'Threat Overview',
     desc: 'Live threat posture across endpoints, identities, and infrastructure — every signal mapped to the asset, owner, and recovery path it touches.',
-    color: 'text-red-400',
+    color: 'text-[#f5f5f5]',
   },
   {
     icon: Cpu,
     title: 'Asset Risk Graph',
     desc: 'Every system, identity, and data store rendered as a graph — exposure, blast radius, and downstream dependencies for a single pane of glass.',
-    color: 'text-orange-400',
+    color: 'text-[#c9b787]',
   },
   {
     icon: RotateCcw,
     title: 'Recovery Readiness',
     desc: 'Recovery posture by tier — RTO, RPO, last-tested restore, and the gap between what was promised and what is actually rehearsed.',
-    color: 'text-amber-400',
+    color: 'text-[#c9b787]',
   },
   {
     icon: Activity,
     title: 'Incident Commander',
     desc: 'Focused incident view with attacker timeline, containment options, recommended actions, and the audit trail every regulator will eventually ask for.',
-    color: 'text-violet-400',
+    color: 'text-[#8a8a8a]',
   },
 ];
 
@@ -75,10 +75,10 @@ const SIGNAL_DEMO = [
 ];
 
 const SEVERITY_STYLE: Record<string, string> = {
-  critical: 'text-red-300 bg-red-500/15 border-red-500/30',
-  high: 'text-orange-300 bg-orange-500/10 border-orange-500/25',
-  medium: 'text-amber-300 bg-amber-500/10 border-amber-500/25',
-  info: 'text-emerald-300 bg-emerald-500/10 border-emerald-500/25',
+  critical: 'text-[#f5f5f5] bg-[#f5f5f5]/15 border-[#f5f5f5]/30',
+  high: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/25',
+  medium: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/25',
+  info: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/25',
 };
 
 const WHAT_IT_SOLVES = [
@@ -96,11 +96,11 @@ export default function SentraLandingPage() {
   const [demoOpen, setDemoOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0a0606] text-red-50 overflow-x-hidden">
+    <div className="min-h-screen bg-[#0a0606] text-[#f5f5f5] overflow-x-hidden">
       <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[820px] h-[420px] bg-red-500/10 rounded-full blur-3xl" />
-          <div className="absolute top-2/3 right-1/4 w-64 h-64 bg-orange-500/5 rounded-full blur-2xl" />
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[820px] h-[420px] bg-[#f5f5f5]/10 rounded-full blur-3xl" />
+          <div className="absolute top-2/3 right-1/4 w-64 h-64 bg-[#c9b787]/5 rounded-full blur-2xl" />
           <svg
             className="absolute inset-0 w-full h-full opacity-[0.07]"
             viewBox="0 0 1200 600"
@@ -133,22 +133,22 @@ export default function SentraLandingPage() {
 
         <div className="relative z-10 max-w-4xl text-center">
           <div className="flex items-center justify-center gap-2 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-              <Shield className="w-5 h-5 text-red-400" />
+            <div className="w-10 h-10 rounded-xl bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 flex items-center justify-center">
+              <Shield className="w-5 h-5 text-[#f5f5f5]" />
             </div>
-            <span className="text-sm font-medium text-red-400/60">
-              TENAX Cyber Resilience Command · Powered by Counsel
+            <span className="text-sm font-medium text-[#f5f5f5]/60">
+              Aegis Cyber Resilience Command · Powered by Counsel
             </span>
           </div>
 
-          <h1 className="font-display text-5xl md:text-6xl font-bold text-red-50 leading-tight mb-6">
+          <h1 className="font-display text-5xl md:text-6xl font-bold text-[#f5f5f5] leading-tight mb-6">
             Turn cyber posture, recovery readiness,
             <br />
-            <span className="text-red-400">and live incidents into command.</span>
+            <span className="text-[#f5f5f5]">and live incidents into command.</span>
           </h1>
 
-          <p className="text-lg text-red-200/60 max-w-2xl mx-auto mb-10 leading-relaxed">
-            TENAX is the cyber resilience command platform for security leaders who need more than
+          <p className="text-lg text-[#f5f5f5]/60 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Aegis is the cyber resilience command platform for security leaders who need more than
             a SIEM dashboard. See the exposures that map to real assets, prove the recovery you
             promised, and run incidents from a single command surface.
           </p>
@@ -156,12 +156,12 @@ export default function SentraLandingPage() {
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <button
               onClick={() => setDemoOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-400 text-[#0a0606] font-semibold rounded-xl transition-all text-sm"
+              className="flex items-center gap-2 px-6 py-3 bg-[#f5f5f5] hover:bg-[#f5f5f5] text-[#0a0606] font-semibold rounded-xl transition-all text-sm"
             >
               Request a Pilot <ChevronRight className="w-4 h-4" />
             </button>
             <Link href="/dashboard">
-              <button className="flex items-center gap-2 px-6 py-3 bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 text-red-200 font-medium rounded-xl transition-all text-sm">
+              <button className="flex items-center gap-2 px-6 py-3 bg-[#f5f5f5]/10 hover:bg-[#f5f5f5]/15 border border-[#f5f5f5]/20 text-[#f5f5f5] font-medium rounded-xl transition-all text-sm">
                 Open Command Center <Activity className="w-4 h-4" />
               </button>
             </Link>
@@ -174,7 +174,7 @@ export default function SentraLandingPage() {
               { icon: RotateCcw, label: 'RTO 42% critical tier' },
               { icon: Lock, label: '3 control gaps tracked' },
             ].map((s) => (
-              <div key={s.label} className="flex items-center gap-2 text-xs text-red-400/80">
+              <div key={s.label} className="flex items-center gap-2 text-xs text-[#f5f5f5]/80">
                 <s.icon className="w-3.5 h-3.5" />
                 {s.label}
               </div>
@@ -183,17 +183,17 @@ export default function SentraLandingPage() {
         </div>
       </section>
 
-      <section className="px-6 py-20 bg-[#070404] border-y border-red-500/5">
+      <section className="px-6 py-20 bg-[#070404] border-y border-[#f5f5f5]/5">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-[10px] font-mono text-red-400/80 uppercase tracking-widest mb-3">
-              What TENAX Does
+            <p className="text-[10px] font-mono text-[#f5f5f5]/80 uppercase tracking-widest mb-3">
+              What Aegis Does
             </p>
-            <h2 className="font-display text-3xl font-bold text-red-50 mb-3">
+            <h2 className="font-display text-3xl font-bold text-[#f5f5f5] mb-3">
               Cyber resilience command. Not another SIEM.
             </h2>
-            <p className="text-red-300/80 mt-3 max-w-xl mx-auto text-sm">
-              Most security tools stop at alert. TENAX carries every signal through to the asset it
+            <p className="text-[#f5f5f5]/80 mt-3 max-w-xl mx-auto text-sm">
+              Most security tools stop at alert. Aegis carries every signal through to the asset it
               threatens, the recovery it endangers, and the decision someone has to make in the next
               ten minutes.
             </p>
@@ -205,46 +205,46 @@ export default function SentraLandingPage() {
                 icon: ShieldAlert,
                 title: 'Threat Overview',
                 desc: 'Live posture by asset tier, with severity, owner, and the recovery path each signal touches.',
-                color: 'text-red-400',
+                color: 'text-[#f5f5f5]',
               },
               {
                 icon: Cpu,
                 title: 'Asset Risk Graph',
                 desc: 'Every system rendered with exposure, blast radius, and downstream dependencies in one graph.',
-                color: 'text-orange-400',
+                color: 'text-[#c9b787]',
               },
               {
                 icon: RotateCcw,
                 title: 'Recovery Readiness',
                 desc: 'RTO, RPO, last-tested restore, and the gap between what was promised and what is rehearsed.',
-                color: 'text-amber-400',
+                color: 'text-[#c9b787]',
               },
               {
                 icon: Activity,
                 title: 'Incident Commander',
                 desc: 'Live incident view with attacker timeline, containment options, and the audit trail regulators expect.',
-                color: 'text-violet-400',
+                color: 'text-[#8a8a8a]',
               },
               {
                 icon: BarChart3,
                 title: 'Exposure Board',
                 desc: 'Quantified exposure by business unit — dollarized, prioritized, and tied to mitigation owners.',
-                color: 'text-red-400',
+                color: 'text-[#f5f5f5]',
               },
               {
                 icon: ShieldCheck,
                 title: 'Control Drift',
                 desc: 'Continuous diff between attested controls and live production state, with evidence on every change.',
-                color: 'text-emerald-400',
+                color: 'text-[#c9b787]',
               },
             ].map((feature) => (
               <div
                 key={feature.title}
-                className="bg-[#120a0a]/80 border border-red-500/10 rounded-xl p-5 hover:border-red-500/25 transition-all"
+                className="bg-[#120a0a]/80 border border-[#f5f5f5]/10 rounded-xl p-5 hover:border-[#f5f5f5]/25 transition-all"
               >
                 <feature.icon className={cn('w-5 h-5 mb-3', feature.color)} />
-                <h3 className="text-sm font-bold text-red-100 mb-2">{feature.title}</h3>
-                <p className="text-[11px] text-red-300/80 leading-relaxed">{feature.desc}</p>
+                <h3 className="text-sm font-bold text-[#f5f5f5] mb-2">{feature.title}</h3>
+                <p className="text-[11px] text-[#f5f5f5]/80 leading-relaxed">{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -253,13 +253,13 @@ export default function SentraLandingPage() {
 
       <section className="px-6 py-20 max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <p className="text-[10px] font-mono text-red-400/80 uppercase tracking-widest mb-3">
+          <p className="text-[10px] font-mono text-[#f5f5f5]/80 uppercase tracking-widest mb-3">
             Core Views
           </p>
-          <h2 className="font-display text-3xl font-bold text-red-50">
+          <h2 className="font-display text-3xl font-bold text-[#f5f5f5]">
             Four command surfaces. One resilience platform.
           </h2>
-          <p className="text-red-300/80 mt-3 max-w-xl mx-auto text-sm">
+          <p className="text-[#f5f5f5]/80 mt-3 max-w-xl mx-auto text-sm">
             Each view is purpose-built for a specific decision security leaders actually have to
             make.
           </p>
@@ -269,47 +269,47 @@ export default function SentraLandingPage() {
           {CORE_VIEWS.map((view) => (
             <div
               key={view.title}
-              className="bg-[#120a0a]/80 border border-red-500/10 rounded-xl p-6"
+              className="bg-[#120a0a]/80 border border-[#f5f5f5]/10 rounded-xl p-6"
             >
               <view.icon className={cn('w-5 h-5 mb-3', view.color)} />
-              <h3 className="text-sm font-bold text-red-100 mb-2">{view.title}</h3>
-              <p className="text-[12px] text-red-300/85 leading-relaxed">{view.desc}</p>
+              <h3 className="text-sm font-bold text-[#f5f5f5] mb-2">{view.title}</h3>
+              <p className="text-[12px] text-[#f5f5f5]/85 leading-relaxed">{view.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="px-6 py-20 bg-[#070404] border-y border-red-500/5">
+      <section className="px-6 py-20 bg-[#070404] border-y border-[#f5f5f5]/5">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
-            <p className="text-[10px] font-mono text-red-400/80 uppercase tracking-widest mb-3">
+            <p className="text-[10px] font-mono text-[#f5f5f5]/80 uppercase tracking-widest mb-3">
               Live Signal Demo
             </p>
-            <h2 className="font-display text-3xl font-bold text-red-50 mb-3">
+            <h2 className="font-display text-3xl font-bold text-[#f5f5f5] mb-3">
               Every signal is a decision in waiting.
             </h2>
-            <p className="text-red-300/80 max-w-xl mx-auto text-sm">
-              A snapshot from the TENAX command stream — every event already mapped to severity,
+            <p className="text-[#f5f5f5]/80 max-w-xl mx-auto text-sm">
+              A snapshot from the Aegis command stream — every event already mapped to severity,
               asset, and the next action.
             </p>
           </div>
 
-          <div className="bg-[#120a0a]/90 border border-red-500/15 rounded-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-red-500/10 bg-[#1a0d0d]/60">
+          <div className="bg-[#120a0a]/90 border border-[#f5f5f5]/15 rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-[#f5f5f5]/10 bg-[#1a0d0d]/60">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
-                <span className="text-[11px] font-mono uppercase tracking-widest text-red-300/70">
+                <span className="w-2 h-2 rounded-full bg-[#f5f5f5] animate-pulse" />
+                <span className="text-[11px] font-mono uppercase tracking-widest text-[#f5f5f5]/70">
                   Live · Decision Stream
                 </span>
               </div>
-              <span className="text-[10px] font-mono text-red-400/80">
+              <span className="text-[10px] font-mono text-[#f5f5f5]/80">
                 prod-finance-vpc · region us-east-1
               </span>
             </div>
             <div className="divide-y divide-red-500/5">
               {SIGNAL_DEMO.map((row) => (
                 <div key={row.time} className="grid grid-cols-12 gap-3 items-center px-5 py-3.5">
-                  <div className="col-span-2 text-[10px] font-mono text-red-400/85">{row.time}</div>
+                  <div className="col-span-2 text-[10px] font-mono text-[#f5f5f5]/85">{row.time}</div>
                   <div className="col-span-2">
                     <span
                       className={cn(
@@ -320,10 +320,10 @@ export default function SentraLandingPage() {
                       {row.severity}
                     </span>
                   </div>
-                  <div className="col-span-5 text-[12px] text-red-100/80 leading-snug">
+                  <div className="col-span-5 text-[12px] text-[#f5f5f5]/80 leading-snug">
                     {row.label}
                   </div>
-                  <div className="col-span-3 text-[11px] text-red-300/85 leading-snug text-right">
+                  <div className="col-span-3 text-[11px] text-[#f5f5f5]/85 leading-snug text-right">
                     {row.action}
                   </div>
                 </div>
@@ -335,36 +335,36 @@ export default function SentraLandingPage() {
 
       <section className="px-6 py-20 max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <p className="text-[10px] font-mono text-red-400/80 uppercase tracking-widest mb-3">
+          <p className="text-[10px] font-mono text-[#f5f5f5]/80 uppercase tracking-widest mb-3">
             What It Solves
           </p>
-          <h2 className="font-display text-3xl font-bold text-red-50 mb-3">
+          <h2 className="font-display text-3xl font-bold text-[#f5f5f5] mb-3">
             Eight problems. One resilience command.
           </h2>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {WHAT_IT_SOLVES.map((tile) => (
-            <div key={tile} className="bg-[#120a0a]/80 border border-red-500/10 rounded-xl p-4">
-              <div className="w-3 h-3 rounded-full border-2 border-red-400/30 mb-3" />
-              <p className="text-[12px] text-red-200/65 leading-snug">{tile}</p>
+            <div key={tile} className="bg-[#120a0a]/80 border border-[#f5f5f5]/10 rounded-xl p-4">
+              <div className="w-3 h-3 rounded-full border-2 border-[#f5f5f5]/30 mb-3" />
+              <p className="text-[12px] text-[#f5f5f5]/65 leading-snug">{tile}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="px-6 py-20 bg-[#070404] border-y border-red-500/5">
+      <section className="px-6 py-20 bg-[#070404] border-y border-[#f5f5f5]/5">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-[10px] font-mono text-red-400/80 uppercase tracking-widest mb-3">
+            <p className="text-[10px] font-mono text-[#f5f5f5]/80 uppercase tracking-widest mb-3">
               Why It Matters
             </p>
-            <h2 className="font-display text-3xl font-bold text-red-50 mb-4">
+            <h2 className="font-display text-3xl font-bold text-[#f5f5f5] mb-4">
               From alert noise to resilience command.
             </h2>
-            <p className="text-red-300/80 text-sm max-w-2xl mx-auto leading-relaxed">
+            <p className="text-[#f5f5f5]/80 text-sm max-w-2xl mx-auto leading-relaxed">
               Every CISO already has alerts. Very few can prove that the controls they attested to
               are still in place, that the recovery they promised is actually rehearsed, or that the
-              next incident has an owner before it happens. That is the gap TENAX closes.
+              next incident has an owner before it happens. That is the gap Aegis closes.
             </p>
           </div>
 
@@ -392,58 +392,58 @@ export default function SentraLandingPage() {
               },
             ].map((o) => (
               <div key={o.metric} className="text-center">
-                <p className="text-3xl font-bold font-display text-red-300 mb-1">{o.metric}</p>
-                <p className="text-[11px] text-red-300/85 leading-relaxed mb-1">{o.label}</p>
-                <p className="text-[9px] font-mono text-red-400/80">{o.trend}</p>
+                <p className="text-3xl font-bold font-display text-[#f5f5f5] mb-1">{o.metric}</p>
+                <p className="text-[11px] text-[#f5f5f5]/85 leading-relaxed mb-1">{o.label}</p>
+                <p className="text-[9px] font-mono text-[#f5f5f5]/80">{o.trend}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="px-6 py-16 bg-[#0a0606] border-t border-red-500/5">
+      <section className="px-6 py-16 bg-[#0a0606] border-t border-[#f5f5f5]/5">
         <div className="max-w-[560px] mx-auto">
           <NewsletterSubscribe
             utmSource="sentra"
             variant="banner"
             heading="Cyber resilience essays, straight to your inbox"
-            subheading="SZL Command essays on incident command, recovery readiness, and the decision infrastructure behind TENAX — delivered weekly."
+            subheading="SZL Command essays on incident command, recovery readiness, and the decision infrastructure behind Aegis — delivered weekly."
           />
         </div>
       </section>
 
-      <section className="px-6 py-20 border-t border-red-500/5 bg-[#0a0606] relative overflow-hidden">
+      <section className="px-6 py-20 border-t border-[#f5f5f5]/5 bg-[#0a0606] relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[600px] h-[400px] bg-red-500/5 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[600px] h-[400px] bg-[#f5f5f5]/5 rounded-full blur-3xl" />
         </div>
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-              <Flame className="w-4 h-4 text-red-400" />
+            <div className="w-8 h-8 rounded-lg bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 flex items-center justify-center">
+              <Flame className="w-4 h-4 text-[#f5f5f5]" />
             </div>
-            <span className="text-[10px] font-mono uppercase tracking-widest text-red-400/60">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#f5f5f5]/60">
               NEW · Crisis Arena
             </span>
           </div>
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-red-50 mb-4 leading-tight">
+              <h2 className="text-3xl font-bold text-[#f5f5f5] mb-4 leading-tight">
                 Crowdsource your crisis scenarios.<br />
-                <span className="text-red-400">Stress-test before impact.</span>
+                <span className="text-[#f5f5f5]">Stress-test before impact.</span>
               </h2>
-              <p className="text-sm text-red-300/60 leading-relaxed mb-6">
+              <p className="text-sm text-[#f5f5f5]/60 leading-relaxed mb-6">
                 Post scoped resilience briefs. Crisis architects compete to model your worst-case
                 scenarios — quantified by Business Impact Score and graduated into live tabletop
                 exercises. Every scenario, every verdict, on-chain.
               </p>
               <div className="flex items-center gap-3 flex-wrap">
                 <Link href="/crisis-arena/leaderboard">
-                  <button className="flex items-center gap-2 px-5 py-2.5 bg-red-500 hover:bg-red-400 text-[#0a0606] font-semibold rounded-xl transition-all text-sm">
+                  <button className="flex items-center gap-2 px-5 py-2.5 bg-[#f5f5f5] hover:bg-[#f5f5f5] text-[#0a0606] font-semibold rounded-xl transition-all text-sm">
                     View Hall of Fame <Trophy className="w-4 h-4" />
                   </button>
                 </Link>
                 <Link href="/crisis-arena/engagements">
-                  <button className="flex items-center gap-2 px-5 py-2.5 bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 text-red-200 font-medium rounded-xl transition-all text-sm">
+                  <button className="flex items-center gap-2 px-5 py-2.5 bg-[#f5f5f5]/10 hover:bg-[#f5f5f5]/15 border border-[#f5f5f5]/20 text-[#f5f5f5] font-medium rounded-xl transition-all text-sm">
                     Post an Engagement <ChevronRight className="w-4 h-4" />
                   </button>
                 </Link>
@@ -455,35 +455,35 @@ export default function SentraLandingPage() {
                   icon: Flame,
                   label: 'Business Impact Scoring',
                   desc: 'Every scenario is machine-scored on revenue at risk, RTO/RPO breach, regulatory exposure, and blast radius.',
-                  color: 'text-red-400',
+                  color: 'text-[#f5f5f5]',
                 },
                 {
                   icon: Trophy,
                   label: 'Global Architect Leaderboard',
                   desc: 'Top crisis architects compete for reputation and payout pools across public and private engagements.',
-                  color: 'text-amber-400',
+                  color: 'text-[#c9b787]',
                 },
                 {
                   icon: Shield,
                   label: 'Graduate to Tabletop',
                   desc: 'Accepted scenarios launch directly into Incident Commander as live exercises — no manual handoff.',
-                  color: 'text-emerald-400',
+                  color: 'text-[#c9b787]',
                 },
                 {
                   icon: Users,
                   label: 'Proof Chain Audit Trail',
                   desc: 'Every submission, triage decision, and payout is logged on-chain. Fully auditable resilience record.',
-                  color: 'text-violet-400',
+                  color: 'text-[#8a8a8a]',
                 },
               ].map((feature) => (
                 <div
                   key={feature.label}
-                  className="flex items-start gap-3 bg-[#120808]/80 border border-red-500/10 rounded-xl p-4"
+                  className="flex items-start gap-3 bg-[#120808]/80 border border-[#f5f5f5]/10 rounded-xl p-4"
                 >
                   <feature.icon className={cn('w-4 h-4 mt-0.5 shrink-0', feature.color)} />
                   <div>
-                    <div className="text-xs font-bold text-red-100 mb-0.5">{feature.label}</div>
-                    <div className="text-[11px] text-red-300/50 leading-relaxed">{feature.desc}</div>
+                    <div className="text-xs font-bold text-[#f5f5f5] mb-0.5">{feature.label}</div>
+                    <div className="text-[11px] text-[#f5f5f5]/50 leading-relaxed">{feature.desc}</div>
                   </div>
                 </div>
               ))}
@@ -492,26 +492,26 @@ export default function SentraLandingPage() {
         </div>
       </section>
 
-      <section className="px-6 py-20 bg-[#070404] border-t border-red-500/5">
+      <section className="px-6 py-20 bg-[#070404] border-t border-[#f5f5f5]/5">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-[10px] font-mono text-red-400/80 uppercase tracking-widest mb-3">
-            Powered by Counsel · SZL Holdings
+          <p className="text-[10px] font-mono text-[#f5f5f5]/80 uppercase tracking-widest mb-3">
+            Powered by Counsel · Aegis
           </p>
-          <h2 className="font-display text-3xl font-bold text-red-50 mb-4">Request a Pilot</h2>
-          <p className="text-red-300/85 mb-8 text-sm leading-relaxed max-w-xl mx-auto">
-            TENAX is built for security leaders who need to command resilience, not just monitor
+          <h2 className="font-display text-3xl font-bold text-[#f5f5f5] mb-4">Request a Pilot</h2>
+          <p className="text-[#f5f5f5]/85 mb-8 text-sm leading-relaxed max-w-xl mx-auto">
+            Aegis is built for security leaders who need to command resilience, not just monitor
             it. Request a pilot — we will walk through the full command center against your
             environment.
           </p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <button
               onClick={() => setDemoOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-400 text-[#0a0606] font-semibold rounded-xl transition-all text-sm"
+              className="flex items-center gap-2 px-6 py-3 bg-[#f5f5f5] hover:bg-[#f5f5f5] text-[#0a0606] font-semibold rounded-xl transition-all text-sm"
             >
               Request a Pilot <Shield className="w-4 h-4" />
             </button>
             <Link href="/dashboard">
-              <button className="flex items-center gap-2 px-6 py-3 border border-red-500/20 hover:border-red-500/40 text-red-200 font-medium rounded-xl transition-all text-sm">
+              <button className="flex items-center gap-2 px-6 py-3 border border-[#f5f5f5]/20 hover:border-[#f5f5f5]/40 text-[#f5f5f5] font-medium rounded-xl transition-all text-sm">
                 Open Command Center <Zap className="w-4 h-4" />
               </button>
             </Link>
@@ -524,7 +524,7 @@ export default function SentraLandingPage() {
         onClose={() => setDemoOpen(false)}
         type="demo"
         app="sentra"
-        subtitle="TENAX Cyber Resilience Command"
+        subtitle="Aegis Cyber Resilience Command"
       />
     </div>
   );

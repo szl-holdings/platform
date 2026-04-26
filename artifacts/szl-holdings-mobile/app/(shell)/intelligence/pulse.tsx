@@ -39,7 +39,7 @@ async function ensureDailyBriefNotification(): Promise<void> {
     if (status !== 'granted') return;
     const id = await Notifications.scheduleNotificationAsync({
       content: {
-        title: "LUMINA — today's brief is ready",
+        title: "Pulse — today's brief is ready",
         body: 'Your 06:00 executive briefing from Counsel is available to read.',
         data: { route: '/intelligence/pulse' },
         sound: true,
@@ -433,7 +433,7 @@ export default function PulseScreen() {
         <View>
           <View style={styles.headerRow}>
             <View style={styles.activeDot} />
-            <Text style={styles.headerTitle}>LUMINA</Text>
+            <Text style={styles.headerTitle}>Pulse</Text>
             <View style={styles.classifBadge}>
               <Feather name="shield" size={9} color="rgba(200,168,75,0.5)" />
               <Text style={styles.classifText}>EXEC-RESTRICTED</Text>

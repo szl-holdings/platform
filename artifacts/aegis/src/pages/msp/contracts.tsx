@@ -47,10 +47,10 @@ const typeLabels: Record<string, string> = {
 };
 
 const statusConfig = {
-  active: { color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', icon: CheckCircle2 },
-  expiring: { color: 'text-amber-400 bg-amber-500/10 border-amber-500/20', icon: Clock },
-  expired: { color: 'text-red-400 bg-red-500/10 border-red-500/20', icon: AlertTriangle },
-  'pending-renewal': { color: 'text-blue-400 bg-blue-500/10 border-blue-500/20', icon: FileText },
+  active: { color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20', icon: CheckCircle2 },
+  expiring: { color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20', icon: Clock },
+  expired: { color: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20', icon: AlertTriangle },
+  'pending-renewal': { color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20', icon: FileText },
 };
 
 function SLAGauge({ target, actual }: { target: number; actual: number }) {
@@ -60,11 +60,11 @@ function SLAGauge({ target, actual }: { target: number; actual: number }) {
     <div className="flex items-center gap-2">
       <div className="w-20 h-2 rounded-full bg-muted overflow-hidden">
         <div
-          className={cn('h-full rounded-full', met ? 'bg-emerald-400' : 'bg-red-400')}
+          className={cn('h-full rounded-full', met ? 'bg-[#c9b787]' : 'bg-[#f5f5f5]')}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className={cn('text-xs font-mono', met ? 'text-emerald-400' : 'text-red-400')}>
+      <span className={cn('text-xs font-mono', met ? 'text-[#c9b787]' : 'text-[#f5f5f5]')}>
         {actual}%
       </span>
       <span className="text-xs text-muted-foreground">/ {target}%</span>
@@ -127,10 +127,10 @@ function ContractCard({ contract, index }: { contract: Contract; index: number }
                 className={cn(
                   'h-full rounded-full',
                   contract.renewalProbability >= 80
-                    ? 'bg-emerald-400'
+                    ? 'bg-[#c9b787]'
                     : contract.renewalProbability >= 50
-                      ? 'bg-amber-400'
-                      : 'bg-red-400',
+                      ? 'bg-[#c9b787]'
+                      : 'bg-[#f5f5f5]',
                 )}
                 style={{ width: `${contract.renewalProbability}%` }}
               />
@@ -154,7 +154,7 @@ function ContractCard({ contract, index }: { contract: Contract; index: number }
       {contract.mrr > 0 && (
         <div className="mb-3">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">MRR</p>
-          <p className="text-sm font-semibold text-emerald-400">
+          <p className="text-sm font-semibold text-[#c9b787]">
             ${contract.mrr.toLocaleString()}/mo
           </p>
         </div>
@@ -168,11 +168,11 @@ function ContractCard({ contract, index }: { contract: Contract; index: number }
         </div>
         <div className="text-xs">
           {daysUntilEnd > 0 ? (
-            <span className={cn(daysUntilEnd <= 90 ? 'text-amber-400' : 'text-muted-foreground')}>
+            <span className={cn(daysUntilEnd <= 90 ? 'text-[#c9b787]' : 'text-muted-foreground')}>
               {daysUntilEnd} days remaining
             </span>
           ) : (
-            <span className="text-red-400">Expired</span>
+            <span className="text-[#f5f5f5]">Expired</span>
           )}
         </div>
       </div>
@@ -243,7 +243,7 @@ export default function ContractsPage() {
               {
                 label: 'Active Contracts',
                 value: allContracts.filter((c) => c.status === 'active').length.toString(),
-                color: 'text-emerald-400',
+                color: 'text-[#c9b787]',
                 icon: FileText,
               },
               {
@@ -255,13 +255,13 @@ export default function ContractsPage() {
               {
                 label: 'Expiring Soon',
                 value: expiringCount.toString(),
-                color: 'text-amber-400',
+                color: 'text-[#c9b787]',
                 icon: Clock,
               },
               {
                 label: 'Avg SLA Compliance',
                 value: `${avgCompliance}%`,
-                color: avgCompliance >= 97 ? 'text-emerald-400' : 'text-amber-400',
+                color: avgCompliance >= 97 ? 'text-[#c9b787]' : 'text-[#c9b787]',
                 icon: Shield,
               },
             ].map((stat, i) => (

@@ -212,15 +212,15 @@ const EXPOSURE_HISTORY = [
 ];
 
 const SEV_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#eab308',
-  low: '#22c55e',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#8a8a8a',
+  low: '#c9b787',
 };
 
 function ExposureMeter({ value, max = 50_000_000 }: { value: number; max?: number }) {
   const pct = Math.min(100, (value / max) * 100);
-  const color = pct > 70 ? '#ef4444' : pct > 40 ? '#f97316' : '#eab308';
+  const color = pct > 70 ? '#f5f5f5' : pct > 40 ? '#c9b787' : '#8a8a8a';
   return (
     <div className="relative">
       <div className="flex items-center justify-between mb-1.5">
@@ -242,7 +242,7 @@ function ExposureMeter({ value, max = 50_000_000 }: { value: number; max?: numbe
           className="h-full rounded-full transition-all duration-1000"
           style={{
             width: `${pct}%`,
-            background: `linear-gradient(90deg, #f97316, ${color})`,
+            background: `linear-gradient(90deg, #c9b787, ${color})`,
             boxShadow: `0 0 12px ${color}60`,
           }}
         />
@@ -301,11 +301,11 @@ export default function BreachCostPredictor() {
   const selectedTotal = Object.values(selected.components).reduce((a, b) => a + b, 0);
 
   const _compData = [
-    { name: 'Regulatory', value: selected.components.regulatory, color: '#ef4444' },
-    { name: 'Business Int.', value: selected.components.interruption, color: '#f97316' },
-    { name: 'Data Liability', value: selected.components.dataLoss, color: '#eab308' },
-    { name: 'IR Expense', value: selected.components.ir, color: '#3b82f6' },
-    { name: 'Reputational', value: selected.components.reputational, color: '#8b5cf6' },
+    { name: 'Regulatory', value: selected.components.regulatory, color: '#f5f5f5' },
+    { name: 'Business Int.', value: selected.components.interruption, color: '#c9b787' },
+    { name: 'Data Liability', value: selected.components.dataLoss, color: '#8a8a8a' },
+    { name: 'IR Expense', value: selected.components.ir, color: '#c9b787' },
+    { name: 'Reputational', value: selected.components.reputational, color: '#8a8a8a' },
   ];
 
   return (
@@ -319,9 +319,9 @@ export default function BreachCostPredictor() {
           <div className="flex items-center gap-2 mb-1">
             <div
               className="w-7 h-7 rounded-md flex items-center justify-center"
-              style={{ background: 'rgba(239,68,68,0.15)' }}
+              style={{ background: 'rgba(245,245,245,0.15)' }}
             >
-              <DollarSign className="w-4 h-4 text-red-400" />
+              <DollarSign className="w-4 h-4 text-[#f5f5f5]" />
             </div>
             <h1 className="text-lg font-bold tracking-tight">Breach Cost Predictor</h1>
           </div>
@@ -333,10 +333,10 @@ export default function BreachCostPredictor() {
         <div className="flex items-center gap-2">
           <div
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-md"
-            style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)' }}
+            style={{ background: 'rgba(245,245,245,0.08)', border: '1px solid rgba(245,245,245,0.15)' }}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-            <span className="text-[10px] font-mono text-red-400 uppercase tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#f5f5f5] animate-pulse" />
+            <span className="text-[10px] font-mono text-[#f5f5f5] uppercase tracking-wider">
               Live Modeling
             </span>
           </div>
@@ -350,28 +350,28 @@ export default function BreachCostPredictor() {
             label: 'Total Breach Exposure',
             value: totalExposure,
             icon: DollarSign,
-            color: '#ef4444',
+            color: '#f5f5f5',
             sub: 'across 4 active threats',
           },
           {
             label: 'Regulatory Fines at Risk',
             value: THREATS.reduce((s, t) => s + t.components.regulatory, 0),
             icon: Building2,
-            color: '#f97316',
+            color: '#c9b787',
             sub: 'GDPR, HIPAA, SEC, PCI',
           },
           {
             label: 'Business Interruption',
             value: THREATS.reduce((s, t) => s + t.components.interruption, 0),
             icon: Clock,
-            color: '#eab308',
+            color: '#8a8a8a',
             sub: 'revenue loss projection',
           },
           {
             label: 'Reputational Damage',
             value: THREATS.reduce((s, t) => s + t.components.reputational, 0),
             icon: Users,
-            color: '#8b5cf6',
+            color: '#8a8a8a',
             sub: 'brand & market impact',
           },
         ].map(({ label, value, icon: Icon, color, sub }) => (
@@ -427,8 +427,8 @@ export default function BreachCostPredictor() {
                 onClick={() => setSelected(t)}
                 className="w-full text-left rounded-xl p-4 transition-all"
                 style={{
-                  background: isSelected ? 'rgba(239,68,68,0.06)' : DS.surface,
-                  border: `1px solid ${isSelected ? 'rgba(239,68,68,0.25)' : DS.border}`,
+                  background: isSelected ? 'rgba(245,245,245,0.06)' : DS.surface,
+                  border: `1px solid ${isSelected ? 'rgba(245,245,245,0.25)' : DS.border}`,
                 }}
               >
                 <div className="flex items-start justify-between mb-2">
@@ -512,31 +512,31 @@ export default function BreachCostPredictor() {
                 label="Regulatory Fines"
                 value={selected.components.regulatory}
                 total={selectedTotal}
-                color="#ef4444"
+                color="#f5f5f5"
               />
               <ComponentBar
                 label="Business Interrupt."
                 value={selected.components.interruption}
                 total={selectedTotal}
-                color="#f97316"
+                color="#c9b787"
               />
               <ComponentBar
                 label="Data Liability"
                 value={selected.components.dataLoss}
                 total={selectedTotal}
-                color="#eab308"
+                color="#8a8a8a"
               />
               <ComponentBar
                 label="IR Expense"
                 value={selected.components.ir}
                 total={selectedTotal}
-                color="#3b82f6"
+                color="#c9b787"
               />
               <ComponentBar
                 label="Reputational"
                 value={selected.components.reputational}
                 total={selectedTotal}
-                color="#8b5cf6"
+                color="#8a8a8a"
               />
             </div>
 
@@ -614,7 +614,7 @@ export default function BreachCostPredictor() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-0.5">
                       <span className="text-xs font-medium">{r.reg}</span>
-                      <span className="text-xs font-mono font-bold" style={{ color: '#ef4444' }}>
+                      <span className="text-xs font-mono font-bold" style={{ color: '#f5f5f5' }}>
                         {fmt(r.exposure)}
                       </span>
                     </div>
@@ -668,7 +668,7 @@ export default function BreachCostPredictor() {
                 {EXPOSURE_HISTORY.map((e, idx) => (
                   <Cell
                     key={e.month}
-                    fill={idx === EXPOSURE_HISTORY.length - 1 ? '#ef4444' : '#3b82f6'}
+                    fill={idx === EXPOSURE_HISTORY.length - 1 ? '#f5f5f5' : '#c9b787'}
                     fillOpacity={idx === EXPOSURE_HISTORY.length - 1 ? 0.8 : 0.4}
                   />
                 ))}

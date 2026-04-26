@@ -118,32 +118,32 @@ interface AnomalyScore {
 }
 
 const protocolColor: Record<ProtocolName, string> = {
-  Modbus: 'text-emerald-300 border-emerald-500/40 bg-emerald-500/10',
-  DNP3: 'text-sky-300 border-sky-500/40 bg-sky-500/10',
-  S7: 'text-violet-300 border-violet-500/40 bg-violet-500/10',
+  Modbus: 'text-[#c9b787] border-[#c9b787]/40 bg-[#c9b787]/10',
+  DNP3: 'text-[#8a8a8a] border-sky-500/40 bg-[#8a8a8a]/10',
+  S7: 'text-[#8a8a8a] border-[#8a8a8a]/40 bg-[#8a8a8a]/10',
 };
 
 const sevColor: Record<Severity, string> = {
-  critical: 'border-red-500/50 bg-red-500/10 text-red-300',
-  high: 'border-orange-500/50 bg-orange-500/10 text-orange-300',
-  medium: 'border-amber-500/50 bg-amber-500/10 text-amber-300',
-  low: 'border-emerald-500/50 bg-emerald-500/10 text-emerald-300',
+  critical: 'border-[#f5f5f5]/50 bg-[#f5f5f5]/10 text-[#f5f5f5]',
+  high: 'border-[#c9b787]/50 bg-[#c9b787]/10 text-[#c9b787]',
+  medium: 'border-[#c9b787]/50 bg-[#c9b787]/10 text-[#c9b787]',
+  low: 'border-[#c9b787]/50 bg-[#c9b787]/10 text-[#c9b787]',
   info: 'border-slate-500/50 bg-slate-500/10 text-slate-300',
 };
 
 const fieldFlagColor: Record<NonNullable<DecodedField['flag']>, string> = {
   info: 'text-slate-300',
-  warn: 'text-amber-300',
-  anomaly: 'text-red-300',
+  warn: 'text-[#c9b787]',
+  anomaly: 'text-[#f5f5f5]',
 };
 
 function heatColor(score: number, baseline: number): string {
   const ratio = score / Math.max(baseline, 1);
-  if (ratio >= 5) return 'bg-red-500/80 border-red-400';
-  if (ratio >= 3) return 'bg-orange-500/70 border-orange-400';
-  if (ratio >= 2) return 'bg-amber-500/60 border-amber-400';
-  if (ratio >= 1.3) return 'bg-yellow-500/40 border-yellow-500/60';
-  return 'bg-emerald-500/25 border-emerald-500/40';
+  if (ratio >= 5) return 'bg-[#f5f5f5]/80 border-[#f5f5f5]';
+  if (ratio >= 3) return 'bg-[#c9b787]/70 border-[#c9b787]';
+  if (ratio >= 2) return 'bg-[#c9b787]/60 border-[#c9b787]';
+  if (ratio >= 1.3) return 'bg-[#c9b787]/40 border-[#c9b787]/60';
+  return 'bg-[#c9b787]/25 border-[#c9b787]/40';
 }
 
 function formatTime(iso: string): string {
@@ -468,7 +468,7 @@ export default function OtIcsDashboard() {
           </button>
           <Link
             href="/forensics"
-            className="text-xs px-3 py-2 rounded-lg border border-amber-500/30 bg-amber-500/5 text-amber-300 hover:bg-amber-500/10 transition flex items-center gap-2"
+            className="text-xs px-3 py-2 rounded-lg border border-[#c9b787]/30 bg-[#c9b787]/5 text-[#c9b787] hover:bg-[#c9b787]/10 transition flex items-center gap-2"
           >
             <Flame className="w-3.5 h-3.5" /> Open in Forensics Timeline
           </Link>
@@ -484,20 +484,20 @@ export default function OtIcsDashboard() {
           trend={`${new Set(assets.map((a) => a.zone)).size} zones`}
         />
         <KpiCard
-          icon={<Radio className="w-4 h-4 text-emerald-400" />}
+          icon={<Radio className="w-4 h-4 text-[#c9b787]" />}
           label="Frames Decoded"
           value={frames.length.toLocaleString()}
           trend={protoMix}
         />
         <KpiCard
-          icon={<AlertTriangle className="w-4 h-4 text-red-400" />}
+          icon={<AlertTriangle className="w-4 h-4 text-[#f5f5f5]" />}
           label="Active Protocol Anomalies"
           value={String(activeAnomalies)}
           trend={`${frames.filter((f) => f.severity === 'critical').length} critical · ${frames.filter((f) => f.severity === 'high').length} high`}
           critical={activeAnomalies > 0}
         />
         <KpiCard
-          icon={<Gauge className="w-4 h-4 text-amber-400" />}
+          icon={<Gauge className="w-4 h-4 text-[#c9b787]" />}
           label="Mean Anomaly Score"
           value={`${meanScore} / 100`}
           trend={`Baseline ${Math.round(meanBaseline)} · drift ${driftPct >= 0 ? '+' : ''}${driftPct}%`}
@@ -647,7 +647,7 @@ export default function OtIcsDashboard() {
                     {selectedFrame.forensicEventId && (
                       <Link
                         href="/forensics"
-                        className="text-[10px] text-amber-300 hover:underline flex items-center gap-1"
+                        className="text-[10px] text-[#c9b787] hover:underline flex items-center gap-1"
                       >
                         Linked event {selectedFrame.forensicEventId} →
                       </Link>
@@ -686,7 +686,7 @@ export default function OtIcsDashboard() {
                   <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
                     Raw Frame
                   </h3>
-                  <pre className="font-mono text-[11px] text-emerald-300/90 whitespace-pre-wrap break-all">
+                  <pre className="font-mono text-[11px] text-[#c9b787]/90 whitespace-pre-wrap break-all">
                     {selectedFrame.rawHex}
                   </pre>
                 </div>
@@ -756,7 +756,7 @@ export default function OtIcsDashboard() {
                     }
                     data-testid="button-download-pcap"
                     title="Export the current session frames as a .pcap file for Wireshark, Zeek, or other forensics tools"
-                    className="px-3 py-1.5 rounded-lg border border-emerald-500/50 bg-emerald-500/10 text-emerald-300 text-xs font-medium flex items-center gap-1.5 hover:bg-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-1.5 rounded-lg border border-[#c9b787]/50 bg-[#c9b787]/10 text-[#c9b787] text-xs font-medium flex items-center gap-1.5 hover:bg-[#c9b787]/20 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Download className="w-3.5 h-3.5" />
                     {pcapDownloading ? 'Exporting…' : 'Download PCAP'}
@@ -768,7 +768,7 @@ export default function OtIcsDashboard() {
                     }
                     data-testid="button-download-pcapng"
                     title="Export as PCAPNG with per-packet anomaly notes and forensic event IDs as Wireshark Frame > Packet comments"
-                    className="px-3 py-1.5 rounded-lg border border-cyan-500/50 bg-cyan-500/10 text-cyan-300 text-xs font-medium flex items-center gap-1.5 hover:bg-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-1.5 rounded-lg border border-[#8a8a8a]/50 bg-[#8a8a8a]/10 text-[#8a8a8a] text-xs font-medium flex items-center gap-1.5 hover:bg-[#8a8a8a]/20 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Download className="w-3.5 h-3.5" />
                     {pcapngDownloading ? 'Exporting…' : 'Download PCAPNG'}
@@ -848,7 +848,7 @@ export default function OtIcsDashboard() {
 
               {pcapError && (
                 <div
-                  className="mt-3 px-3 py-2 rounded border border-red-500/40 bg-red-500/10 text-[11px] text-red-300"
+                  className="mt-3 px-3 py-2 rounded border border-[#f5f5f5]/40 bg-[#f5f5f5]/10 text-[11px] text-[#f5f5f5]"
                   role="alert"
                 >
                   PCAP export failed: {pcapError}
@@ -868,7 +868,7 @@ export default function OtIcsDashboard() {
               {/* Current frame card */}
               {replayFrame && (
                 <div
-                  className={`mt-4 p-3 rounded-lg border ${replayFrame.anomalous ? 'border-red-500/40 bg-red-500/10' : 'border-white/10 bg-white/[0.03]'}`}
+                  className={`mt-4 p-3 rounded-lg border ${replayFrame.anomalous ? 'border-[#f5f5f5]/40 bg-[#f5f5f5]/10' : 'border-white/10 bg-white/[0.03]'}`}
                 >
                   <div className="flex items-center gap-2 text-[11px] font-mono">
                     <span
@@ -881,9 +881,9 @@ export default function OtIcsDashboard() {
                     <span>{replayFrame.dst}</span>
                     <span className="ml-auto text-muted-foreground">{replayFrame.bytes} bytes</span>
                   </div>
-                  <p className={`mt-2 text-sm ${replayFrame.anomalous ? 'text-red-200' : ''}`}>
+                  <p className={`mt-2 text-sm ${replayFrame.anomalous ? 'text-[#f5f5f5]' : ''}`}>
                     {replayFrame.anomalous && (
-                      <AlertTriangle className="inline w-3.5 h-3.5 mr-1 text-red-400" />
+                      <AlertTriangle className="inline w-3.5 h-3.5 mr-1 text-[#f5f5f5]" />
                     )}
                     {replayFrame.summary}
                   </p>
@@ -891,7 +891,7 @@ export default function OtIcsDashboard() {
                     const linkedFrame = frames.find((f) => f.frameId === replayFrame.frameId);
                     if (!linkedFrame) return null;
                     return (
-                      <div className="mt-3 pt-3 border-t border-red-500/20">
+                      <div className="mt-3 pt-3 border-t border-[#f5f5f5]/20">
                         <TriagePanel
                           frameId={linkedFrame.frameId}
                           dbStatus={linkedFrame.triageStatus}
@@ -941,7 +941,7 @@ export default function OtIcsDashboard() {
                           active
                             ? 'bg-primary/15'
                             : f.anomalous
-                              ? 'bg-red-500/[0.04] hover:bg-red-500/10'
+                              ? 'bg-[#f5f5f5]/[0.04] hover:bg-[#f5f5f5]/10'
                               : 'hover:bg-white/5'
                         }`}
                       >
@@ -960,7 +960,7 @@ export default function OtIcsDashboard() {
                         </td>
                         <td className="px-3 py-1.5">
                           {f.anomalous && (
-                            <AlertTriangle className="inline w-3 h-3 mr-1 text-red-400" />
+                            <AlertTriangle className="inline w-3 h-3 mr-1 text-[#f5f5f5]" />
                           )}
                           {f.summary}
                         </td>
@@ -976,14 +976,14 @@ export default function OtIcsDashboard() {
                                   <button
                                     disabled={isBusy}
                                     onClick={() => acknowledgeMutation.mutate(linked.frameId)}
-                                    className="text-[10px] px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50 transition-colors"
+                                    className="text-[10px] px-1.5 py-0.5 rounded border border-[#c9b787]/30 bg-[#c9b787]/10 text-[#c9b787] hover:bg-[#c9b787]/20 disabled:opacity-50 transition-colors"
                                   >
                                     Ack
                                   </button>
                                   <button
                                     disabled={isBusy}
                                     onClick={() => openIncidentMutation.mutate(linked.frameId)}
-                                    className="text-[10px] px-1.5 py-0.5 rounded border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 disabled:opacity-50 transition-colors"
+                                    className="text-[10px] px-1.5 py-0.5 rounded border border-[#f5f5f5]/30 bg-[#f5f5f5]/10 text-[#f5f5f5] hover:bg-[#f5f5f5]/20 disabled:opacity-50 transition-colors"
                                   >
                                     Incident
                                   </button>
@@ -1021,11 +1021,11 @@ export default function OtIcsDashboard() {
                   Protocol Anomaly Score · Last {HEATMAP_HOURS} hours
                 </h3>
                 <div className="flex items-center gap-2 text-[10px]">
-                  <Legend swatch="bg-emerald-500/30" label="Baseline" />
-                  <Legend swatch="bg-yellow-500/40" label="1.3×" />
-                  <Legend swatch="bg-amber-500/60" label="2×" />
-                  <Legend swatch="bg-orange-500/70" label="3×" />
-                  <Legend swatch="bg-red-500/80" label="5×+" />
+                  <Legend swatch="bg-[#c9b787]/30" label="Baseline" />
+                  <Legend swatch="bg-[#c9b787]/40" label="1.3×" />
+                  <Legend swatch="bg-[#c9b787]/60" label="2×" />
+                  <Legend swatch="bg-[#c9b787]/70" label="3×" />
+                  <Legend swatch="bg-[#f5f5f5]/80" label="5×+" />
                 </div>
               </div>
               <table className="w-full text-[11px]">
@@ -1177,7 +1177,7 @@ export default function OtIcsDashboard() {
                     return (
                       <div className="pt-2 border-t border-white/10 space-y-2">
                         <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-                          <AlertTriangle className="w-3 h-3 text-amber-400" /> Anomalous frames — triage
+                          <AlertTriangle className="w-3 h-3 text-[#c9b787]" /> Anomalous frames — triage
                         </p>
                         {assetFrames.map((f) => {
                           const status = (frameTriageStatus[f.frameId] as TriageStatus | undefined) ?? f.triageStatus;
@@ -1193,7 +1193,7 @@ export default function OtIcsDashboard() {
                                   <button
                                     disabled={isBusy}
                                     onClick={() => acknowledgeMutation.mutate(f.frameId)}
-                                    className="text-[10px] px-2 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50 transition-colors"
+                                    className="text-[10px] px-2 py-0.5 rounded border border-[#c9b787]/30 bg-[#c9b787]/10 text-[#c9b787] hover:bg-[#c9b787]/20 disabled:opacity-50 transition-colors"
                                   >
                                     Acknowledge
                                   </button>
@@ -1207,7 +1207,7 @@ export default function OtIcsDashboard() {
                                   <button
                                     disabled={isBusy}
                                     onClick={() => openIncidentMutation.mutate(f.frameId)}
-                                    className="text-[10px] px-2 py-0.5 rounded border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 disabled:opacity-50 transition-colors"
+                                    className="text-[10px] px-2 py-0.5 rounded border border-[#f5f5f5]/30 bg-[#f5f5f5]/10 text-[#f5f5f5] hover:bg-[#f5f5f5]/20 disabled:opacity-50 transition-colors"
                                   >
                                     Open Incident
                                   </button>
@@ -1225,7 +1225,7 @@ export default function OtIcsDashboard() {
                   <div className="flex flex-col gap-2 pt-2">
                     <Link
                       href="/forensics"
-                      className="text-[11px] px-3 py-2 rounded-lg border border-amber-500/30 bg-amber-500/5 text-amber-300 hover:bg-amber-500/10 flex items-center justify-center gap-1.5"
+                      className="text-[11px] px-3 py-2 rounded-lg border border-[#c9b787]/30 bg-[#c9b787]/5 text-[#c9b787] hover:bg-[#c9b787]/10 flex items-center justify-center gap-1.5"
                     >
                       <Flame className="w-3.5 h-3.5" /> Pivot to Forensics Timeline
                     </Link>
@@ -1279,7 +1279,7 @@ function StateView({
   }
   if (error) {
     return (
-      <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4 text-xs text-red-300">
+      <div className="rounded-xl border border-[#f5f5f5]/30 bg-[#f5f5f5]/5 p-4 text-xs text-[#f5f5f5]">
         Failed to load data: {(error as Error)?.message ?? 'unknown error'}
       </div>
     );
@@ -1309,7 +1309,7 @@ function KpiCard({
 }) {
   return (
     <div
-      className={`rounded-xl border p-3 ${critical ? 'border-red-500/30 bg-red-500/5' : 'border-white/10 bg-white/[0.02]'}`}
+      className={`rounded-xl border p-3 ${critical ? 'border-[#f5f5f5]/30 bg-[#f5f5f5]/5' : 'border-white/10 bg-white/[0.02]'}`}
     >
       <div className="flex items-center gap-2">
         {icon}
@@ -1380,7 +1380,7 @@ function Stat({ label, value, highlight }: { label: string; value: string; highl
   return (
     <div className="rounded-lg border border-white/10 bg-white/[0.02] px-2 py-1.5">
       <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className={`text-sm font-semibold mt-0.5 ${highlight ? 'text-amber-300' : ''}`}>{value}</p>
+      <p className={`text-sm font-semibold mt-0.5 ${highlight ? 'text-[#c9b787]' : ''}`}>{value}</p>
     </div>
   );
 }
@@ -1389,7 +1389,7 @@ function DeviationRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between text-[11px] gap-2">
       <span className="text-muted-foreground">{label}</span>
-      <span className="font-mono text-amber-300 truncate max-w-[60%] text-right">{value}</span>
+      <span className="font-mono text-[#c9b787] truncate max-w-[60%] text-right">{value}</span>
     </div>
   );
 }
@@ -1410,12 +1410,12 @@ function TriageBadge({
 }) {
   const cls =
     status === 'acknowledged'
-      ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10'
+      ? 'border-[#c9b787]/30 text-[#c9b787] bg-[#c9b787]/10'
       : status === 'false_positive'
         ? 'border-slate-500/30 text-slate-400 bg-slate-500/10'
         : status === 'incident_opened'
-          ? 'border-red-500/30 text-red-400 bg-red-500/10'
-          : 'border-amber-500/30 text-amber-400 bg-amber-500/10';
+          ? 'border-[#f5f5f5]/30 text-[#f5f5f5] bg-[#f5f5f5]/10'
+          : 'border-[#c9b787]/30 text-[#c9b787] bg-[#c9b787]/10';
   const Icon =
     status === 'acknowledged'
       ? CheckCircle2
@@ -1467,7 +1467,7 @@ function TriagePanel({
             <button
               disabled={isBusy}
               onClick={() => acknowledgeMutation.mutate(frameId)}
-              className="text-[11px] px-3 py-1 rounded-lg bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600/30 disabled:opacity-50 transition-colors"
+              className="text-[11px] px-3 py-1 rounded-lg bg-[#c9b787]/20 border border-[#c9b787]/30 text-[#c9b787] hover:bg-[#c9b787]/30 disabled:opacity-50 transition-colors"
             >
               Acknowledge
             </button>
@@ -1481,7 +1481,7 @@ function TriagePanel({
             <button
               disabled={isBusy}
               onClick={() => openIncidentMutation.mutate(frameId)}
-              className="text-[11px] px-3 py-1 rounded-lg bg-red-600/20 border border-red-500/30 text-red-400 hover:bg-red-600/30 disabled:opacity-50 transition-colors"
+              className="text-[11px] px-3 py-1 rounded-lg bg-[#f5f5f5]/20 border border-[#f5f5f5]/30 text-[#f5f5f5] hover:bg-[#f5f5f5]/30 disabled:opacity-50 transition-colors"
             >
               Open Incident
             </button>

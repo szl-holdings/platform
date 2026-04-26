@@ -3,7 +3,7 @@
  *
  * Builds dynamic, context-aware system-level guidance for connected LLMs
  * based on the authenticated tenant's domain, role, and active workflows.
- * A maritime operator gets SEXTANT-specific instructions; a security analyst
+ * A maritime operator gets Vessels-specific instructions; a security analyst
  * gets SENTINEL-specific guidance.
  */
 
@@ -18,7 +18,7 @@ weather risk assessment, and chokepoint intelligence. When analyzing maritime da
 - Reference IMO numbers for vessel identification
 - Flag AIS gaps, dark periods, and route deviations as high-priority signals`,
 
-  security: `You are connected to TENAX/SENTINEL — the SZL Cyber Resilience Command.
+  security: `You are connected to Aegis/SENTINEL — the SZL Cyber Resilience Command.
 Your primary capabilities include threat scanning, CVE tracking, compliance checking,
 and incident response workflows. When analyzing security data:
 - Use firestorm_threat_scan to enumerate active threats by severity
@@ -50,7 +50,7 @@ regulatory compliance assessment, and matter tracking. When analyzing legal data
 - Reference jurisdiction-specific regulatory frameworks
 - Flag privilege concerns before including in any external communication`,
 
-  defense: `You are connected to PARAGON/AEGIS — the SZL Defense & Intelligence Command.
+  defense: `You are connected to Aegis/AEGIS — the SZL Defense & Intelligence Command.
 Your primary capabilities include threat triage, signal analysis, and adversarial
 pattern matching across intelligence domains. When analyzing defense data:
 - Use aegis_triage_threat to classify incoming signals

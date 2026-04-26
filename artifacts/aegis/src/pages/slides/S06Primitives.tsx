@@ -8,27 +8,27 @@ export default function S06Primitives() {
     {
       name: 'Proof Chain',
       desc: 'Immutable, append-only audit trail — provenance on every AI recommendation and approval',
-      color: '#8b5cf6',
+      color: '#8a8a8a',
     },
     {
       name: 'Covenant Policy',
       desc: 'Platform-layer governance — enforces who can act, under what conditions, non-delegatable',
-      color: '#10b981',
+      color: '#c9b787',
     },
     {
       name: 'Simulation Engine',
       desc: 'Monte Carlo probabilistic risk modeling before action — confidence intervals exposed to operators',
-      color: '#f59e0b',
+      color: '#c9b787',
     },
     {
       name: 'Counsel Runtime',
       desc: 'Durable workflow orchestration — multi-step execution with checkpoint recovery and agent coordination',
-      color: '#6366f1',
+      color: '#8a8a8a',
     },
     {
       name: 'PRAXIS Bus',
       desc: 'Cross-domain event fabric — signal routing with correlation IDs across all domain packs',
-      color: '#ec4899',
+      color: '#c9b787',
     },
   ];
   return (

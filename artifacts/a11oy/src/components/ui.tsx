@@ -3,13 +3,13 @@ import type { ReactNode } from 'react';
 
 export function StatusPill({ status }: { status: 'LIVE' | 'DEMO' | 'GATED' | 'APPROVED' | 'ROADMAP' | 'WARN' | 'ERROR' }) {
   const styles: Record<string, { bg: string; color: string }> = {
-    LIVE:    { bg: 'rgba(16,185,129,0.15)', color: '#10b981' },
-    DEMO:    { bg: 'rgba(245,158,11,0.15)',  color: '#f59e0b' },
-    GATED:   { bg: 'rgba(139,92,246,0.15)', color: '#8b5cf6' },
-    APPROVED:{ bg: 'rgba(59,130,246,0.15)', color: '#3b82f6' },
-    ROADMAP: { bg: 'rgba(77,96,122,0.2)',   color: '#9bacc4' },
-    WARN:    { bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' },
-    ERROR:   { bg: 'rgba(239,68,68,0.15)',  color: '#ef4444' },
+    LIVE:    { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
+    DEMO:    { bg: 'rgba(138,138,138,0.15)',  color: '#8a8a8a' },
+    GATED:   { bg: 'rgba(94,94,94,0.15)', color: '#5e5e5e' },
+    APPROVED:{ bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
+    ROADMAP: { bg: 'rgba(94,94,94,0.15)',   color: '#5e5e5e' },
+    WARN:    { bg: 'rgba(201,183,135,0.15)', color: '#c9b787' },
+    ERROR:   { bg: 'rgba(245,245,245,0.12)',  color: '#f5f5f5' },
   };
   const s = styles[status] ?? styles.DEMO;
   return (
@@ -27,7 +27,7 @@ export function DemoBadge() {
   return (
     <span
       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-mono"
-      style={{ backgroundColor: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.25)' }}
+      style={{ backgroundColor: 'rgba(138,138,138,0.12)', color: '#8a8a8a', border: '1px solid rgba(138,138,138,0.25)' }}
     >
       Demo data
     </span>
@@ -46,9 +46,9 @@ export function ApprovalGate({
   return (
     <div
       className="px-3 py-2 rounded text-xs"
-      style={{ backgroundColor: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.25)' }}
+      style={{ backgroundColor: 'rgba(201,183,135,0.1)', border: '1px solid rgba(201,183,135,0.25)' }}
     >
-      <div className="flex items-center gap-2 font-medium" style={{ color: '#a78bfa' }}>
+      <div className="flex items-center gap-2 font-medium" style={{ color: '#c9b787' }}>
         <svg width="12" height="12" fill="none" viewBox="0 0 16 16">
           <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 6.5a1 1 0 011 1v2a1 1 0 01-2 0v-2a1 1 0 011-1zm0-2.5a1 1 0 100-2 1 1 0 000 2z" fill="currentColor"/>
         </svg>
@@ -60,7 +60,7 @@ export function ApprovalGate({
             <button
               onClick={onApprove}
               className="px-3 py-1 rounded text-xs font-medium"
-              style={{ backgroundColor: 'rgba(16,185,129,0.15)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', cursor: 'pointer' }}
+              style={{ backgroundColor: 'rgba(201,183,135,0.15)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.3)', cursor: 'pointer' }}
             >
               ✓ Approve
             </button>
@@ -69,7 +69,7 @@ export function ApprovalGate({
             <button
               onClick={onReject}
               className="px-3 py-1 rounded text-xs font-medium"
-              style={{ backgroundColor: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.25)', cursor: 'pointer' }}
+              style={{ backgroundColor: 'rgba(245,245,245,0.08)', color: '#f5f5f5', border: '1px solid rgba(245,245,245,0.15)', cursor: 'pointer' }}
             >
               ✕ Reject
             </button>
@@ -118,7 +118,7 @@ export function PageHeader({
 export function Card({ children, className = '', onClick, style }: { children: ReactNode; className?: string; onClick?: () => void; style?: React.CSSProperties }) {
   return (
     <div
-      className={`rounded-lg border p-4 ${className} ${onClick ? 'cursor-pointer transition-colors hover:border-blue-600/30' : ''}`}
+      className={`rounded-lg border p-4 ${className} ${onClick ? 'cursor-pointer transition-colors hover:border-[#c9b787]/30' : ''}`}
       style={{ backgroundColor: 'var(--color-a11oy-card)', borderColor: 'var(--color-a11oy-border)', ...style }}
       onClick={onClick}
     >
@@ -147,7 +147,7 @@ export function KpiCard({ label, value, sub, accent, trend }: { label: string; v
           {value}
         </div>
         {trend && (
-          <span className="text-xs mb-0.5 font-mono" style={{ color: trend === 'up' ? '#10b981' : trend === 'down' ? '#ef4444' : '#9bacc4' }}>
+          <span className="text-xs mb-0.5 font-mono" style={{ color: trend === 'up' ? '#c9b787' : trend === 'down' ? '#f5f5f5' : '#5e5e5e' }}>
             {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'}
           </span>
         )}
@@ -159,27 +159,32 @@ export function KpiCard({ label, value, sub, accent, trend }: { label: string; v
 
 export function SeverityDot({ severity }: { severity: 'critical' | 'high' | 'medium' | 'low' | 'info' }) {
   const colors: Record<string, string> = {
-    critical: '#ef4444',
-    high: '#f59e0b',
-    medium: '#eab308',
-    low: '#10b981',
-    info: '#3b82f6',
+    critical: '#f5f5f5',
+    high: '#c9b787',
+    medium: '#8a8a8a',
+    low: '#5e5e5e',
+    info: '#5e5e5e',
   };
   return (
     <span
       className="inline-block w-2 h-2 rounded-full flex-shrink-0"
-      style={{ backgroundColor: colors[severity] ?? '#9bacc4' }}
+      style={{ backgroundColor: colors[severity] ?? '#5e5e5e' }}
     />
   );
 }
 
 export function SeverityBadge({ severity }: { severity: string }) {
   const styles: Record<string, { bg: string; color: string }> = {
-    critical: { bg: 'rgba(239,68,68,0.12)', color: '#ef4444' },
-    high:     { bg: 'rgba(245,158,11,0.12)', color: '#f59e0b' },
-    medium:   { bg: 'rgba(234,179,8,0.12)', color: '#eab308' },
-    low:      { bg: 'rgba(16,185,129,0.12)', color: '#10b981' },
-    info:     { bg: 'rgba(59,130,246,0.12)', color: '#3b82f6' },
+    critical:     { bg: 'rgba(245,245,245,0.10)', color: '#f5f5f5' },
+    high:         { bg: 'rgba(201,183,135,0.12)', color: '#c9b787' },
+    medium:       { bg: 'rgba(138,138,138,0.10)', color: '#8a8a8a' },
+    low:          { bg: 'rgba(94,94,94,0.10)', color: '#5e5e5e' },
+    info:         { bg: 'rgba(94,94,94,0.10)', color: '#5e5e5e' },
+    active:       { bg: 'rgba(201,183,135,0.12)', color: '#c9b787' },
+    escalated:    { bg: 'rgba(245,245,245,0.10)', color: '#f5f5f5' },
+    acknowledged: { bg: 'rgba(138,138,138,0.10)', color: '#8a8a8a' },
+    resolved:     { bg: 'rgba(94,94,94,0.10)', color: '#5e5e5e' },
+    suppressed:   { bg: 'rgba(94,94,94,0.08)', color: '#5e5e5e' },
   };
   const s = styles[severity] ?? styles.info;
   return (
@@ -191,10 +196,10 @@ export function SeverityBadge({ severity }: { severity: string }) {
 
 export function VerdictBadge({ verdict }: { verdict: 'pass' | 'fail' | 'warn' | 'abstain' }) {
   const styles: Record<string, { bg: string; color: string; icon: string }> = {
-    pass:    { bg: 'rgba(16,185,129,0.12)', color: '#10b981', icon: '✓' },
-    fail:    { bg: 'rgba(239,68,68,0.12)',  color: '#ef4444', icon: '✗' },
-    warn:    { bg: 'rgba(245,158,11,0.12)', color: '#f59e0b', icon: '⚠' },
-    abstain: { bg: 'rgba(77,96,122,0.2)',   color: '#9bacc4', icon: '—' },
+    pass:    { bg: 'rgba(201,183,135,0.12)', color: '#c9b787', icon: '✓' },
+    fail:    { bg: 'rgba(245,245,245,0.10)',  color: '#f5f5f5', icon: '✗' },
+    warn:    { bg: 'rgba(138,138,138,0.12)', color: '#8a8a8a', icon: '⚠' },
+    abstain: { bg: 'rgba(94,94,94,0.12)',   color: '#5e5e5e', icon: '—' },
   };
   const s = styles[verdict] ?? styles.abstain;
   return (
@@ -226,10 +231,10 @@ export function ActionButton({
   size?: 'sm' | 'md';
 }) {
   const styles: Record<string, { bg: string; color: string; border: string }> = {
-    primary: { bg: 'var(--color-a11oy-blue)', color: 'white', border: 'transparent' },
+    primary: { bg: '#c9b787', color: '#0a0a0a', border: 'transparent' },
     ghost:   { bg: 'transparent', color: 'var(--color-a11oy-text-sub)', border: 'var(--color-a11oy-border)' },
-    danger:  { bg: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'rgba(239,68,68,0.25)' },
-    warn:    { bg: 'rgba(245,158,11,0.1)', color: '#f59e0b', border: 'rgba(245,158,11,0.25)' },
+    danger:  { bg: 'rgba(245,245,245,0.08)', color: '#f5f5f5', border: 'rgba(245,245,245,0.15)' },
+    warn:    { bg: 'rgba(201,183,135,0.1)', color: '#c9b787', border: 'rgba(201,183,135,0.25)' },
   };
   const s = styles[variant];
   const pad = size === 'sm' ? 'px-2 py-1' : 'px-3 py-1.5';
@@ -265,10 +270,10 @@ export function VerticalBadge({ vertical, color }: { vertical: string; color: st
 
 export function StatusBadge({ status, label }: { status: 'ok' | 'warn' | 'error' | 'info'; label: string }) {
   const colors = {
-    ok:    '#10b981',
-    warn:  '#f59e0b',
-    error: '#ef4444',
-    info:  '#3b82f6',
+    ok:    '#c9b787',
+    warn:  '#8a8a8a',
+    error: '#f5f5f5',
+    info:  '#5e5e5e',
   };
   const color = colors[status];
   return (
@@ -298,12 +303,12 @@ export function CodeBlock({ children, language = 'json' }: { children: string; l
         <button
           onClick={copy}
           className="text-xs font-mono transition-colors"
-          style={{ color: copied ? '#10b981' : 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}
+          style={{ color: copied ? '#c9b787' : 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}
         >
           {copied ? 'copied' : 'copy'}
         </button>
       </div>
-      <pre className="p-3 text-xs overflow-x-auto" style={{ color: '#a5d6ff', margin: 0 }}>
+      <pre className="p-3 text-xs overflow-x-auto" style={{ color: '#c9b787', margin: 0 }}>
         <code>{children}</code>
       </pre>
     </div>
@@ -319,11 +324,11 @@ export function TraceStep({
   status: 'completed' | 'running' | 'pending' | 'failed' | 'skipped' | string;
   note?: string;
 }) {
-  const statusColor = status === 'completed' || status === 'ok' ? '#10b981'
-    : status === 'running' ? '#3b82f6'
-    : status === 'failed' || status === 'error' ? '#ef4444'
-    : status === 'skipped' ? '#9bacc4'
-    : '#9bacc4';
+  const statusColor = status === 'completed' || status === 'ok' ? '#c9b787'
+    : status === 'running' ? '#c9b787'
+    : status === 'failed' || status === 'error' ? '#f5f5f5'
+    : status === 'skipped' ? '#5e5e5e'
+    : '#5e5e5e';
   const statusIcon = status === 'completed' || status === 'ok' ? '✓'
     : status === 'running' ? '⟳'
     : status === 'failed' || status === 'error' ? '✗'
@@ -350,7 +355,7 @@ export function TraceStep({
   );
 }
 
-export function ProgressBar({ value, max = 100, color = '#3b82f6' }: { value: number; max?: number; color?: string }) {
+export function ProgressBar({ value, max = 100, color = '#c9b787' }: { value: number; max?: number; color?: string }) {
   const pct = Math.min(100, Math.round((value / max) * 100));
   return (
     <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--color-a11oy-muted)' }}>

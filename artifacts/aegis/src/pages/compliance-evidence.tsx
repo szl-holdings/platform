@@ -50,7 +50,7 @@ const FRAMEWORKS: Framework[] = [
     gaps: 6,
     evidenceItems: 342,
     lastAudit: 'Q1 2026',
-    color: '#3b82f6',
+    color: '#c9b787',
   },
   {
     id: 'iso27001',
@@ -62,7 +62,7 @@ const FRAMEWORKS: Framework[] = [
     gaps: 12,
     evidenceItems: 289,
     lastAudit: 'Q4 2025',
-    color: '#8b5cf6',
+    color: '#8a8a8a',
   },
   {
     id: 'nist',
@@ -74,7 +74,7 @@ const FRAMEWORKS: Framework[] = [
     gaps: 17,
     evidenceItems: 412,
     lastAudit: 'Q1 2026',
-    color: '#10b981',
+    color: '#c9b787',
   },
   {
     id: 'hipaa',
@@ -86,7 +86,7 @@ const FRAMEWORKS: Framework[] = [
     gaps: 2,
     evidenceItems: 187,
     lastAudit: 'Q2 2025',
-    color: '#f97316',
+    color: '#c9b787',
   },
   {
     id: 'pci',
@@ -98,7 +98,7 @@ const FRAMEWORKS: Framework[] = [
     gaps: 9,
     evidenceItems: 256,
     lastAudit: 'Q1 2026',
-    color: '#ef4444',
+    color: '#f5f5f5',
   },
 ];
 
@@ -195,17 +195,17 @@ const typeIcon: Record<string, typeof FileText> = {
   attestation: ClipboardCheck,
 };
 const typeColor: Record<string, string> = {
-  log: '#3b82f6',
-  screenshot: '#8b5cf6',
-  config: '#10b981',
-  report: '#f97316',
-  attestation: '#06b6d4',
+  log: '#c9b787',
+  screenshot: '#8a8a8a',
+  config: '#c9b787',
+  report: '#c9b787',
+  attestation: '#8a8a8a',
 };
 
 const statusConfig: Record<string, string> = {
-  collected: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
-  pending: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-  expired: 'text-red-400 bg-red-500/10 border-red-500/30',
+  collected: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  pending: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  expired: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/30',
   gap: 'text-zinc-400 bg-zinc-500/10 border-zinc-500/30',
 };
 
@@ -242,7 +242,7 @@ export default function ComplianceEvidence() {
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <ClipboardCheck className="w-5 h-5 text-green-400" />
+            <ClipboardCheck className="w-5 h-5 text-[#c9b787]" />
             <h1 className="text-lg font-semibold text-white">Compliance Evidence Engine</h1>
           </div>
           <p className="text-xs text-zinc-500">
@@ -262,7 +262,7 @@ export default function ComplianceEvidence() {
           <button
             onClick={handleGeneratePackage}
             disabled={generating}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/15 border border-green-500/30 text-green-400 text-xs font-medium hover:bg-green-500/25 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c9b787]/15 border border-[#c9b787]/30 text-[#c9b787] text-xs font-medium hover:bg-[#c9b787]/25 transition-colors"
           >
             {generating ? (
               <>
@@ -284,28 +284,28 @@ export default function ComplianceEvidence() {
             label: 'Frameworks Monitored',
             value: FRAMEWORKS.length,
             sub: 'continuous compliance',
-            color: '#10b981',
+            color: '#c9b787',
             icon: Shield,
           },
           {
             label: 'Total Evidence Items',
             value: totalEvidence.toLocaleString(),
             sub: 'auto-collected',
-            color: '#3b82f6',
+            color: '#c9b787',
             icon: Package,
           },
           {
             label: 'Compliance Gaps',
             value: totalGaps,
             sub: 'requiring remediation',
-            color: '#ef4444',
+            color: '#f5f5f5',
             icon: AlertTriangle,
           },
           {
             label: 'Avg Readiness',
             value: `${Math.round(FRAMEWORKS.reduce((s, f) => s + f.overallScore, 0) / FRAMEWORKS.length)}%`,
             sub: 'across all frameworks',
-            color: '#8b5cf6',
+            color: '#8a8a8a',
             icon: TrendingUp,
           },
         ].map((m) => {
@@ -337,7 +337,7 @@ export default function ComplianceEvidence() {
                 className={cn(
                   'w-full rounded-xl border p-3 text-left transition-all',
                   selectedFramework.id === fw.id
-                    ? 'border-green-500/30 bg-green-500/5'
+                    ? 'border-[#c9b787]/30 bg-[#c9b787]/5'
                     : 'border-white/8 bg-white/3 hover:bg-white/5',
                 )}
               >
@@ -359,8 +359,8 @@ export default function ComplianceEvidence() {
                   />
                 </div>
                 <div className="flex items-center gap-4 text-[10px] text-zinc-500">
-                  <span className="text-emerald-400">{fw.passing} passing</span>
-                  <span className="text-red-400">{fw.gaps} gaps</span>
+                  <span className="text-[#c9b787]">{fw.passing} passing</span>
+                  <span className="text-[#f5f5f5]">{fw.gaps} gaps</span>
                   <span className="ml-auto">{fw.evidenceItems} items</span>
                 </div>
               </button>
@@ -375,9 +375,9 @@ export default function ComplianceEvidence() {
               Evidence Library
             </h2>
             <div className="flex items-center gap-2 text-[10px] text-zinc-500">
-              <span className="text-emerald-400">●</span> Collected
-              <span className="text-red-400">●</span> Gap
-              <span className="text-amber-400">●</span> Expired
+              <span className="text-[#c9b787]">●</span> Collected
+              <span className="text-[#f5f5f5]">●</span> Gap
+              <span className="text-[#c9b787]">●</span> Expired
             </div>
           </div>
           <div className="space-y-2">
@@ -389,9 +389,9 @@ export default function ComplianceEvidence() {
                   className={cn(
                     'rounded-xl border p-3',
                     item.status === 'gap'
-                      ? 'border-red-500/20 bg-red-500/5'
+                      ? 'border-[#f5f5f5]/20 bg-[#f5f5f5]/5'
                       : item.status === 'expired'
-                        ? 'border-amber-500/20 bg-amber-500/5'
+                        ? 'border-[#c9b787]/20 bg-[#c9b787]/5'
                         : 'border-white/8 bg-white/3',
                   )}
                 >
@@ -428,7 +428,7 @@ export default function ComplianceEvidence() {
                         <div
                           className={cn(
                             'text-[10px] mt-1',
-                            item.status === 'expired' ? 'text-red-400' : 'text-zinc-500',
+                            item.status === 'expired' ? 'text-[#f5f5f5]' : 'text-zinc-500',
                           )}
                         >
                           Expires: {item.expiresIn}
@@ -439,7 +439,7 @@ export default function ComplianceEvidence() {
                           onClick={() =>
                             toast.success('Evidence collection task created and assigned')
                           }
-                          className="mt-1.5 text-[10px] text-red-400 hover:text-red-300"
+                          className="mt-1.5 text-[10px] text-[#f5f5f5] hover:text-[#f5f5f5]"
                         >
                           + Assign collection task →
                         </button>
@@ -452,8 +452,8 @@ export default function ComplianceEvidence() {
           </div>
 
           {/* Collection Coverage */}
-          <div className="rounded-xl border border-green-500/20 bg-green-500/5 p-4 mt-3">
-            <div className="text-xs font-semibold text-green-300 mb-3 flex items-center gap-2">
+          <div className="rounded-xl border border-[#c9b787]/20 bg-[#c9b787]/5 p-4 mt-3">
+            <div className="text-xs font-semibold text-[#c9b787] mb-3 flex items-center gap-2">
               <Zap className="w-3.5 h-3.5" />
               Automated Collection Sources ({12} active)
             </div>
@@ -473,7 +473,7 @@ export default function ComplianceEvidence() {
                 'Encryption Key Audits',
               ].map((src) => (
                 <div key={src} className="flex items-center gap-1.5 text-[10px] text-zinc-400">
-                  <CheckCircle className="w-3 h-3 text-emerald-400 shrink-0" />
+                  <CheckCircle className="w-3 h-3 text-[#c9b787] shrink-0" />
                   {src}
                 </div>
               ))}

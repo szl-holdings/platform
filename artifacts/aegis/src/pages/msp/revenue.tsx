@@ -63,16 +63,16 @@ interface RevenueData {
 }
 
 const churnRiskColors: Record<string, string> = {
-  low: 'text-emerald-400 bg-emerald-500/10',
-  medium: 'text-amber-400 bg-amber-500/10',
-  high: 'text-red-400 bg-red-500/10',
+  low: 'text-[#c9b787] bg-[#c9b787]/10',
+  medium: 'text-[#c9b787] bg-[#c9b787]/10',
+  high: 'text-[#f5f5f5] bg-[#f5f5f5]/10',
 };
 
 const tierColors: Record<string, string> = {
-  platinum: 'text-violet-400 bg-violet-500/10',
-  gold: 'text-amber-400 bg-amber-500/10',
+  platinum: 'text-[#8a8a8a] bg-[#8a8a8a]/10',
+  gold: 'text-[#c9b787] bg-[#c9b787]/10',
   silver: 'text-zinc-400 bg-zinc-500/10',
-  bronze: 'text-orange-400 bg-orange-500/10',
+  bronze: 'text-[#c9b787] bg-[#c9b787]/10',
 };
 
 export default function RevenuePage() {
@@ -111,7 +111,7 @@ export default function RevenuePage() {
             options={{
               filename: 'msp-revenue',
               title: 'MSP Revenue Analytics',
-              accentColor: '#8b5cf6',
+              accentColor: '#8a8a8a',
             }}
           />
           <button
@@ -141,21 +141,21 @@ export default function RevenuePage() {
                   label: 'MoM Growth',
                   value: `${summary.growth >= 0 ? '+' : ''}${summary.growth}%`,
                   sub: `NRR: ${summary.nrr}%`,
-                  color: summary.growth >= 0 ? 'text-emerald-400' : 'text-red-400',
+                  color: summary.growth >= 0 ? 'text-[#c9b787]' : 'text-[#f5f5f5]',
                   icon: summary.growth >= 0 ? TrendingUp : TrendingDown,
                 },
                 {
                   label: 'Avg Contract',
                   value: `$${(summary.avgContractValue / 1000).toFixed(1)}K`,
                   sub: `${summary.activeClients}/${summary.totalClients} clients active`,
-                  color: 'text-violet-400',
+                  color: 'text-[#8a8a8a]',
                   icon: Target,
                 },
                 {
                   label: 'Gross Margin',
                   value: `${summary.grossMargin}%`,
                   sub: `LTV: $${(summary.ltv / 1000).toFixed(0)}K`,
-                  color: 'text-amber-400',
+                  color: 'text-[#c9b787]',
                   icon: Award,
                 },
               ].map((stat, i) => (
@@ -206,9 +206,9 @@ export default function RevenuePage() {
                     fontSize: 11,
                   }}
                 />
-                <Bar dataKey="mrr" name="MRR" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="newBusiness" name="New" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="churned" name="Churned" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="mrr" name="MRR" fill="#c9b787" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="newBusiness" name="New" fill="#c9b787" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="churned" name="Churned" fill="#f5f5f5" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -216,7 +216,7 @@ export default function RevenuePage() {
 
         <div className="glass-card rounded-xl p-5">
           <h2 className="text-sm font-semibold mb-4 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-emerald-400" /> Revenue Forecast (6 months)
+            <TrendingUp className="w-4 h-4 text-[#c9b787]" /> Revenue Forecast (6 months)
           </h2>
           {isLoading ? (
             <Skeleton className="h-48 w-full" />
@@ -241,14 +241,14 @@ export default function RevenuePage() {
                 <Line
                   dataKey="projected"
                   name="Projected"
-                  stroke="#3b82f6"
+                  stroke="#c9b787"
                   strokeWidth={2}
                   dot={false}
                 />
                 <Line
                   dataKey="optimistic"
                   name="Optimistic"
-                  stroke="#22c55e"
+                  stroke="#c9b787"
                   strokeWidth={1.5}
                   strokeDasharray="5 5"
                   dot={false}
@@ -256,7 +256,7 @@ export default function RevenuePage() {
                 <Line
                   dataKey="conservative"
                   name="Conservative"
-                  stroke="#f59e0b"
+                  stroke="#c9b787"
                   strokeWidth={1.5}
                   strokeDasharray="5 5"
                   dot={false}
@@ -270,7 +270,7 @@ export default function RevenuePage() {
       <div className="glass-card rounded-xl overflow-hidden">
         <div className="px-5 py-4 border-b border-border/40 flex items-center justify-between">
           <h2 className="text-sm font-semibold flex items-center gap-2">
-            <Users className="w-4 h-4 text-violet-400" /> Revenue by Client
+            <Users className="w-4 h-4 text-[#8a8a8a]" /> Revenue by Client
           </h2>
           <span className="text-xs text-muted-foreground">{byClient.length} clients</span>
         </div>

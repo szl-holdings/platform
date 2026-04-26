@@ -77,7 +77,7 @@ const BASE = import.meta.env.BASE_URL ?? '/lyte/';
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[300px]">
-      <div className="w-5 h-5 border-2 border-amber-500/40 border-t-amber-400 rounded-full animate-spin" />
+      <div className="w-5 h-5 border-2 border-amber-500/40 border-t-[#c9b787] rounded-full animate-spin" />
     </div>
   );
 }
@@ -195,31 +195,31 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
 
   const BADGE_COLOR_MAP = {
     red: 'text-red-400 bg-red-500/8 border-red-500/20',
-    amber: 'text-amber-400 bg-amber-500/8 border-amber-500/20',
-    default: 'text-amber-400/60 bg-amber-500/8 border-amber-500/15',
+    amber: 'text-[#c9b787] bg-white/[0.03] border-white/[0.08]',
+    default: 'text-[#5e5e5e] bg-white/[0.03] border-white/[0.06]',
   };
 
   return (
     <aside
-      className="flex flex-col h-full border-r border-amber-500/10 bg-[hsl(220_30%_4%)] transition-all duration-300"
+      className="flex flex-col h-full border-r border-white/[0.06] bg-[#0a0a0a] transition-all duration-300"
       style={{ width: expanded ? 220 : 56 }}
     >
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-3 h-14 border-b border-amber-500/10 shrink-0">
-        <div className="w-7 h-7 rounded-md bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
-          <Zap className="w-3.5 h-3.5 text-amber-400" />
+      <div className="flex items-center gap-2.5 px-3 h-14 border-b border-white/[0.06] shrink-0">
+        <div className="w-7 h-7 rounded-md bg-white/[0.04] border border-white/[0.08] flex items-center justify-center shrink-0">
+          <Zap className="w-3.5 h-3.5 text-[#c9b787]" />
         </div>
         {expanded && (
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold text-amber-100 font-display tracking-tight">
+            <p className="text-[13px] font-semibold text-[#f5f5f5] font-display tracking-tight">
               Lyte
             </p>
-            <p className="text-[10px] text-amber-400/75 font-mono">Decision Intelligence</p>
+            <p className="text-[10px] text-[#8a8a8a] font-mono">Decision Intelligence</p>
           </div>
         )}
         <button
           onClick={onToggle}
-          className="ml-auto p-1 rounded hover:bg-amber-500/5 text-amber-400/65 hover:text-amber-300 transition-colors shrink-0"
+          className="ml-auto p-1 rounded hover:bg-white/[0.03] text-[#5e5e5e] hover:text-[#c9b787] transition-colors shrink-0"
           aria-label="Toggle sidebar"
         >
           {expanded ? (
@@ -235,7 +235,7 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
         {NAV_GROUPS.map((group) => (
           <div key={group.label}>
             {expanded && (
-              <p className="text-[9px] font-mono text-amber-400/65 uppercase tracking-widest px-2 py-1.5">
+              <p className="text-[9px] font-mono text-[#5e5e5e] uppercase tracking-widest px-2 py-1.5">
                 {group.label}
               </p>
             )}
@@ -249,13 +249,13 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
                   href={item.href}
                   className={`flex items-center gap-2.5 px-2 py-2 rounded-md text-xs transition-all group relative ${
                     active
-                      ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20'
-                      : 'text-amber-400/75 hover:text-amber-200 hover:bg-amber-500/5 border border-transparent'
+                      ? 'bg-white/[0.04] text-[#c9b787] border border-white/[0.08]'
+                      : 'text-[#8a8a8a] hover:text-[#e0e0e0] hover:bg-white/[0.03] border border-transparent'
                   }`}
                 >
                   <span
                     className={
-                      active ? 'text-amber-400' : 'text-amber-400/65 group-hover:text-amber-400'
+                      active ? 'text-[#c9b787]' : 'text-[#5e5e5e] group-hover:text-[#c9b787]'
                     }
                   >
                     {item.icon}
@@ -284,14 +284,14 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
 
       {/* Footer */}
       {expanded && (
-        <div className="px-3 py-3 border-t border-amber-500/10 shrink-0">
+        <div className="px-3 py-3 border-t border-white/[0.06] shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-              <Users className="w-3 h-3 text-amber-400" />
+            <div className="w-6 h-6 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
+              <Users className="w-3 h-3 text-[#c9b787]" />
             </div>
             <div>
-              <p className="text-[10px] text-amber-200/70">Demo Mode</p>
-              <p className="text-[9px] text-amber-400/65 font-mono">LYTE-SEED-v2</p>
+              <p className="text-[10px] text-[#8a8a8a]">Demo Mode</p>
+              <p className="text-[9px] text-[#5e5e5e] font-mono">LYTE-SEED-v2</p>
             </div>
           </div>
         </div>
@@ -300,7 +300,7 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
   );
 }
 
-const LYTE_ACCENT = '#fbbf24';
+const LYTE_ACCENT = '#c9b787';
 
 const SENTIENT_UPDATES: SentientUpdate[] = [
   {
@@ -394,7 +394,7 @@ const SENTIENT_CROSS_LINKS: SentientCrossLink[] = [
   {
     id: 'lcl2',
     surface: 'Vessels',
-    surfaceAccent: '#0ea5e9',
+    surfaceAccent: '#c9b787',
     label: 'MV Atlantic Falcon voyage tied to Vantex acquisition',
     description:
       'Vessels has an active voyage whose financing is contingent on the Vantex deal closing in Q2.',
@@ -403,11 +403,11 @@ const SENTIENT_CROSS_LINKS: SentientCrossLink[] = [
   },
   {
     id: 'lcl3',
-    surface: 'TENAX',
+    surface: 'Aegis',
     surfaceAccent: '#ef4444',
     label: 'Vantex endpoints flagged in CVE-2024-21412 sweep',
     description:
-      'TENAX has 3 Vantex-linked assets in active threat scope — coordinate before re-engaging buyer.',
+      'Aegis has 3 Vantex-linked assets in active threat scope — coordinate before re-engaging buyer.',
     href: '/tenax/threats',
     preservedContext: { surface: 'lyte', entity: 'lyte-opp-vantex-001' },
   },
@@ -472,24 +472,24 @@ function AppShell({ children }: { children: React.ReactNode }) {
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="h-14 border-b border-amber-500/10 flex items-center gap-3 px-4 shrink-0">
+        <header className="h-14 border-b border-white/[0.06] flex items-center gap-3 px-4 shrink-0">
           <button
-            className="md:hidden p-1.5 rounded text-amber-400/75 hover:text-amber-300 hover:bg-amber-500/5 transition-colors"
+            className="md:hidden p-1.5 rounded text-[#8a8a8a] hover:text-[#c9b787] hover:bg-white/[0.03] transition-colors"
             onClick={() => setMobileOpen(true)}
             aria-label="Open navigation menu"
           >
             <Menu className="w-4 h-4" />
           </button>
-          <div className="flex items-center gap-2 text-xs text-amber-400/70 font-mono">
+          <div className="flex items-center gap-2 text-xs text-[#8a8a8a] font-mono">
             <span>Lyte</span>
             {currentPage && (
               <>
                 <ChevronRight className="w-3 h-3" />
-                <span className="text-amber-300/70">{currentPage.label}</span>
+                <span className="text-[#c9b787]">{currentPage.label}</span>
               </>
             )}
             {!currentPage && location === '/' && (
-              <span className="text-amber-300/70">Platform</span>
+              <span className="text-[#c9b787]">Platform</span>
             )}
           </div>
           <div className="ml-auto flex items-center gap-3">
@@ -497,9 +497,9 @@ function AppShell({ children }: { children: React.ReactNode }) {
               <Shield className="w-2.5 h-2.5" />
               Lyte-PROOF
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-amber-500/15 bg-amber-500/5">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-              <span className="text-[10px] text-amber-400/70 font-mono">LIVE</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-white/[0.06] bg-white/[0.03]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse" />
+              <span className="text-[10px] text-[#8a8a8a] font-mono">LIVE</span>
             </div>
           </div>
         </header>

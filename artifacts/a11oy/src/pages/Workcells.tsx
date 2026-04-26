@@ -6,15 +6,15 @@ import { SEED_WORKCELLS } from '@workspace/a11oy-fabric';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 const VERTICAL_COLORS: Record<string, string> = {
-  'lyte-revenue': '#3b82f6', 'vessels-maritime': '#06b6d4', 'terra-real-estate': '#10b981',
-  'aegis-defense': '#ef4444', 'prism-counsel': '#8b5cf6', 'carlota-jo': '#f59e0b', 'alloy-core': '#6366f1',
+  'lyte-revenue': '#c9b787', 'vessels-maritime': '#8a8a8a', 'terra-real-estate': '#c9b787',
+  'aegis-defense': '#f5f5f5', 'prism-counsel': '#8a8a8a', 'carlota-jo': '#c9b787', 'alloy-core': '#8a8a8a',
 };
 const VERTICAL_LABELS: Record<string, string> = {
   'lyte-revenue': 'Lyte Revenue', 'vessels-maritime': 'Vessels Maritime', 'terra-real-estate': 'Terra Real Estate',
   'aegis-defense': 'Aegis Defense', 'prism-counsel': 'Counsel', 'carlota-jo': 'Carlota Jo', 'alloy-core': 'Alloy Core',
 };
 const STATUS_COLORS: Record<string, string> = {
-  running: '#f59e0b', completed: '#10b981', paused: '#9bacc4', error: '#ef4444', idle: '#9bacc4',
+  running: '#c9b787', completed: '#c9b787', paused: '#5e5e5e', error: '#f5f5f5', idle: '#5e5e5e',
 };
 
 export function Workcells() {
@@ -40,10 +40,10 @@ export function Workcells() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="RUNNING" value={running.length} sub="active cells" accent="#f59e0b" />
-        <KpiCard label="COMPLETED" value={completed.length} sub="with proof" accent="#10b981" />
-        <KpiCard label="APPROVAL GATES" value={pendingApproval.length} sub="awaiting human" accent="#8b5cf6" />
-        <KpiCard label="TOTAL CELLS" value={SEED_WORKCELLS.length} sub="in registry" accent="#3b82f6" />
+        <KpiCard label="RUNNING" value={running.length} sub="active cells" accent="#c9b787" />
+        <KpiCard label="COMPLETED" value={completed.length} sub="with proof" accent="#c9b787" />
+        <KpiCard label="APPROVAL GATES" value={pendingApproval.length} sub="awaiting human" accent="#8a8a8a" />
+        <KpiCard label="TOTAL CELLS" value={SEED_WORKCELLS.length} sub="in registry" accent="#c9b787" />
       </div>
 
       {/* Filters */}
@@ -56,9 +56,9 @@ export function Workcells() {
               onClick={() => setFilterStatus(s)}
               className="text-xs px-2.5 py-1 rounded font-mono transition-colors"
               style={{
-                backgroundColor: filterStatus === s ? 'rgba(59,130,246,0.15)' : 'var(--color-a11oy-muted)',
-                color: filterStatus === s ? '#3b82f6' : 'var(--color-a11oy-text-ghost)',
-                border: filterStatus === s ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
+                backgroundColor: filterStatus === s ? 'rgba(201,183,135,0.15)' : 'var(--color-a11oy-muted)',
+                color: filterStatus === s ? '#c9b787' : 'var(--color-a11oy-text-ghost)',
+                border: filterStatus === s ? '1px solid rgba(201,183,135,0.3)' : '1px solid transparent',
                 cursor: 'pointer',
               }}
             >
@@ -82,8 +82,8 @@ export function Workcells() {
 
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filtered.map(wc => {
-          const color = VERTICAL_COLORS[wc.vertical] ?? '#9bacc4';
-          const statusColor = STATUS_COLORS[wc.status] ?? '#9bacc4';
+          const color = VERTICAL_COLORS[wc.vertical] ?? '#5e5e5e';
+          const statusColor = STATUS_COLORS[wc.status] ?? '#5e5e5e';
           return (
             <Card key={wc.id} className="flex flex-col gap-3">
               <div className="flex items-start justify-between gap-2">
@@ -110,7 +110,7 @@ export function Workcells() {
               <div className="flex items-center justify-between gap-2 text-xs">
                 <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{wc.id}</span>
                 <div className="flex items-center gap-2">
-                  {wc.requiresApproval && <span className="font-mono" style={{ color: '#8b5cf6' }}>⚬ approval</span>}
+                  {wc.requiresApproval && <span className="font-mono" style={{ color: '#8a8a8a' }}>⚬ approval</span>}
                 </div>
               </div>
 

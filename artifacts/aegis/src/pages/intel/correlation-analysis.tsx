@@ -75,11 +75,11 @@ const features = [
 function getCorrelationColor(value: number): string {
   const abs = Math.abs(value);
   if (abs >= 0.8)
-    return value > 0 ? 'bg-emerald-500/40 text-emerald-300' : 'bg-red-500/40 text-red-300';
+    return value > 0 ? 'bg-[#c9b787]/40 text-[#c9b787]' : 'bg-[#f5f5f5]/40 text-[#f5f5f5]';
   if (abs >= 0.6)
-    return value > 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400';
+    return value > 0 ? 'bg-[#c9b787]/20 text-[#c9b787]' : 'bg-[#f5f5f5]/20 text-[#f5f5f5]';
   if (abs >= 0.4)
-    return value > 0 ? 'bg-emerald-500/10 text-emerald-400/70' : 'bg-red-500/10 text-red-400/70';
+    return value > 0 ? 'bg-[#c9b787]/10 text-[#c9b787]/70' : 'bg-[#f5f5f5]/10 text-[#f5f5f5]/70';
   return 'bg-muted/30 text-muted-foreground';
 }
 
@@ -112,14 +112,14 @@ export default function CorrelationAnalysis() {
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
             Strong Positive
           </p>
-          <p className="text-2xl font-bold text-emerald-400">{strongPositive}</p>
+          <p className="text-2xl font-bold text-[#c9b787]">{strongPositive}</p>
           <p className="text-xs text-muted-foreground">correlations ≥ 0.80</p>
         </div>
         <div className="bg-card/60 border border-border rounded-xl p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
             Strong Negative
           </p>
-          <p className="text-2xl font-bold text-red-400">{strongNegative}</p>
+          <p className="text-2xl font-bold text-[#f5f5f5]">{strongNegative}</p>
           <p className="text-xs text-muted-foreground">correlations ≤ -0.70</p>
         </div>
         <div className="bg-card/60 border border-border rounded-xl p-4">
@@ -205,7 +205,7 @@ export default function CorrelationAnalysis() {
                     <div
                       className={cn(
                         'h-full rounded-full',
-                        c.correlation > 0 ? 'bg-emerald-400' : 'bg-red-400',
+                        c.correlation > 0 ? 'bg-[#c9b787]' : 'bg-[#f5f5f5]',
                       )}
                       style={{ width: `${Math.abs(c.correlation) * 100}%` }}
                     />
@@ -214,7 +214,7 @@ export default function CorrelationAnalysis() {
                 <span
                   className={cn(
                     'text-sm font-mono w-16 text-right',
-                    c.correlation > 0 ? 'text-emerald-400' : 'text-red-400',
+                    c.correlation > 0 ? 'text-[#c9b787]' : 'text-[#f5f5f5]',
                   )}
                 >
                   {c.correlation > 0 ? '+' : ''}
@@ -224,9 +224,9 @@ export default function CorrelationAnalysis() {
                   className={cn(
                     'text-xs capitalize px-2 py-0.5 rounded-full',
                     c.trend === 'rising'
-                      ? 'bg-emerald-400/10 text-emerald-400'
+                      ? 'bg-[#c9b787]/10 text-[#c9b787]'
                       : c.trend === 'declining'
-                        ? 'bg-red-400/10 text-red-400'
+                        ? 'bg-[#f5f5f5]/10 text-[#f5f5f5]'
                         : 'bg-muted text-muted-foreground',
                   )}
                 >

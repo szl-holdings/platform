@@ -27,7 +27,7 @@ import {
 import { useState } from 'react';
 import ProviderSettings from '@/pages/msp/provider-settings';
 
-const AEGIS_ACCENT = '#6366f1';
+const AEGIS_ACCENT = '#8a8a8a';
 
 interface ResolvedSetting {
   value: unknown;
@@ -65,7 +65,7 @@ function AccountPanel() {
             {(user?.roles ?? []).map((r) => (
               <span
                 key={r}
-                className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 capitalize"
+                className="text-[10px] px-2 py-0.5 rounded-full bg-[#8a8a8a]/10 border border-indigo-500/20 text-[#8a8a8a] capitalize"
               >
                 {r}
               </span>
@@ -152,7 +152,7 @@ function NotificationsPanel() {
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors',
                   enabled
-                    ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
+                    ? 'bg-[#8a8a8a]/10 border-indigo-500/20 text-[#8a8a8a]'
                     : 'bg-muted border-border text-muted-foreground hover:text-foreground',
                 )}
               >
@@ -182,9 +182,9 @@ function SecurityPanel() {
       <SettingsCard title="Authentication">
         <SettingsRow label="Auth Method" description="Current sign-in provider">
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-indigo-400" />
+            <Shield className="w-4 h-4 text-[#8a8a8a]" />
             <span className="text-sm">Platform SSO</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787]">
               Active
             </span>
           </div>
@@ -204,7 +204,7 @@ function SecurityPanel() {
 
       <SettingsCard title="API Access" className="mt-4">
         <SettingsRow label="API Keys" description="Programmatic access credentials">
-          <button className="flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
+          <button className="flex items-center gap-1.5 text-xs text-[#8a8a8a] hover:text-[#8a8a8a] transition-colors">
             <Key className="w-3 h-3" /> Manage API Keys
           </button>
         </SettingsRow>
@@ -277,19 +277,19 @@ function BillingPanel() {
       <SettingsCard title="Current Plan">
         <SettingsRow label="Plan">
           <div className="flex items-center gap-2">
-            <Building className="w-4 h-4 text-indigo-400" />
-            <span className="text-sm">Managed via the SZL Holdings platform portal</span>
+            <Building className="w-4 h-4 text-[#8a8a8a]" />
+            <span className="text-sm">Managed via the Aegis platform portal</span>
           </div>
         </SettingsRow>
         <SettingsRow label="Billing Portal">
-          <button className="flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
+          <button className="flex items-center gap-1.5 text-xs text-[#8a8a8a] hover:text-[#8a8a8a] transition-colors">
             <CreditCard className="w-3 h-3" /> Open Billing Portal
           </button>
         </SettingsRow>
       </SettingsCard>
-      <div className="mt-4 p-3 rounded-lg bg-indigo-500/5 border border-indigo-500/15">
-        <p className="text-xs text-indigo-400/70">
-          Billing changes and invoices are managed through the SZL Holdings platform admin panel.
+      <div className="mt-4 p-3 rounded-lg bg-[#8a8a8a]/5 border border-indigo-500/15">
+        <p className="text-xs text-[#8a8a8a]/70">
+          Billing changes and invoices are managed through the Aegis platform admin panel.
           Contact your platform administrator for billing assistance.
         </p>
       </div>
@@ -384,7 +384,7 @@ function AuditPanel() {
         <div className="flex gap-2">
           <button
             onClick={applyFilters}
-            className="flex items-center gap-1.5 h-7 px-3 text-xs font-medium rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20 transition-colors"
+            className="flex items-center gap-1.5 h-7 px-3 text-xs font-medium rounded bg-[#8a8a8a]/10 border border-indigo-500/20 text-[#8a8a8a] hover:bg-[#8a8a8a]/20 transition-colors"
           >
             <Filter className="w-3 h-3" /> Apply
           </button>
@@ -423,10 +423,10 @@ function AuditPanel() {
                   className={cn(
                     'text-[10px] font-bold uppercase px-1.5 py-0.5 rounded',
                     e.action === 'create'
-                      ? 'bg-emerald-500/10 text-emerald-400'
+                      ? 'bg-[#c9b787]/10 text-[#c9b787]'
                       : e.action === 'update'
-                        ? 'bg-sky-500/10 text-sky-400'
-                        : 'bg-red-500/10 text-red-400',
+                        ? 'bg-[#8a8a8a]/10 text-[#8a8a8a]'
+                        : 'bg-[#f5f5f5]/10 text-[#f5f5f5]',
                   )}
                 >
                   {e.action}
@@ -456,7 +456,7 @@ function AuditPanel() {
                 {(e.oldValue != null || e.newValue != null) && (
                   <span className="flex items-center gap-1 font-mono text-[10px]">
                     {e.oldValue != null && (
-                      <span className="px-1.5 py-0.5 rounded bg-red-500/5 border border-red-500/20 text-red-400/80 line-through">
+                      <span className="px-1.5 py-0.5 rounded bg-[#f5f5f5]/5 border border-[#f5f5f5]/20 text-[#f5f5f5]/80 line-through">
                         {JSON.stringify(e.oldValue)}
                       </span>
                     )}
@@ -464,7 +464,7 @@ function AuditPanel() {
                       <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
                     )}
                     {e.newValue != null && (
-                      <span className="px-1.5 py-0.5 rounded bg-emerald-500/5 border border-emerald-500/20 text-emerald-400/80">
+                      <span className="px-1.5 py-0.5 rounded bg-[#c9b787]/5 border border-[#c9b787]/20 text-[#c9b787]/80">
                         {JSON.stringify(e.newValue)}
                       </span>
                     )}

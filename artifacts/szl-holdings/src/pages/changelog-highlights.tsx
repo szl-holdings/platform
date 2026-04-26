@@ -123,18 +123,18 @@ const COMMITS: CommitGroup[] = [
   {
     date: "2026-04-12",
     sha: "f46cf44",
-    title: "TENAX and Counsel marketing landing pages",
-    body: "Public marketing pages launched for TENAX (Cyber Resilience Command) and Counsel (Legal Matter Command). Both include live demo narrative flows and product positioning.",
+    title: "Aegis and Counsel marketing landing pages",
+    body: "Public marketing pages launched for Aegis (Cyber Resilience Command) and Counsel (Legal Matter Command). Both include live demo narrative flows and product positioning.",
     type: "feature",
-    products: ["TENAX", "Counsel"],
+    products: ["Aegis", "Counsel"],
   },
   {
     date: "2026-04-11",
     sha: "ab00755",
-    title: "TENAX/Counsel demo narratives wired to live signal mesh",
-    body: "TENAX and Counsel demo flows now pull from the live signal mesh via WebSocket. Incident and matter timelines update in real time during demos.",
+    title: "Aegis/Counsel demo narratives wired to live signal mesh",
+    body: "Aegis and Counsel demo flows now pull from the live signal mesh via WebSocket. Incident and matter timelines update in real time during demos.",
     type: "feature",
-    products: ["TENAX", "Counsel"],
+    products: ["Aegis", "Counsel"],
     taskRef: "#1935",
   },
   {
@@ -197,7 +197,7 @@ function TypeBadge({ type }: { type: ChangeType }) {
 
 const PRODUCT_COLORS: Record<string, string> = {
   Lyte: "#d4a054", Counsel: "#8b7ac8", Command: "#5b8dd4", Vessels: "#4a90b8",
-  Terra: "#c8953c", Aegis: "#c45a4a", TENAX: "#ef8c3a", Counsel: "#70b890",
+  Terra: "#c8953c", Aegis: "#c45a4a", Aegis: "#ef8c3a", Counsel: "#70b890",
   "Carlota Jo": "#a0a0c0", "API Server": "#6aaa72",
   Infrastructure: "#808090", "Design System": "#7090a8", "SZL Holdings Mobile": "#7ecfc0",
   "All Products": "#d4a054",

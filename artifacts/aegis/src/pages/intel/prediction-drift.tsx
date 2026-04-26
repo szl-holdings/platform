@@ -84,7 +84,7 @@ function MiniSparkline({ data, status }: { data: number[]; status: string }) {
   const points = data
     .map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * h}`)
     .join(' ');
-  const color = status === 'critical' ? '#f87171' : status === 'warning' ? '#fbbf24' : '#34d399';
+  const color = status === 'critical' ? '#f5f5f5' : status === 'warning' ? '#c9b787' : '#c9b787';
 
   return (
     <svg width={w} height={h} className="overflow-visible">
@@ -119,8 +119,8 @@ export default function PredictionDrift() {
 
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-card/60 border border-border rounded-xl p-4 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-emerald-400/10 flex items-center justify-center">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+          <div className="w-10 h-10 rounded-lg bg-[#c9b787]/10 flex items-center justify-center">
+            <CheckCircle2 className="w-5 h-5 text-[#c9b787]" />
           </div>
           <div>
             <p className="text-2xl font-bold text-foreground">{stableCount}</p>
@@ -128,8 +128,8 @@ export default function PredictionDrift() {
           </div>
         </div>
         <div className="bg-card/60 border border-border rounded-xl p-4 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-amber-400/10 flex items-center justify-center">
-            <AlertTriangle className="w-5 h-5 text-amber-400" />
+          <div className="w-10 h-10 rounded-lg bg-[#c9b787]/10 flex items-center justify-center">
+            <AlertTriangle className="w-5 h-5 text-[#c9b787]" />
           </div>
           <div>
             <p className="text-2xl font-bold text-foreground">{warningCount}</p>
@@ -137,8 +137,8 @@ export default function PredictionDrift() {
           </div>
         </div>
         <div className="bg-card/60 border border-border rounded-xl p-4 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-red-400/10 flex items-center justify-center">
-            <AlertTriangle className="w-5 h-5 text-red-400" />
+          <div className="w-10 h-10 rounded-lg bg-[#f5f5f5]/10 flex items-center justify-center">
+            <AlertTriangle className="w-5 h-5 text-[#f5f5f5]" />
           </div>
           <div>
             <p className="text-2xl font-bold text-foreground">{criticalCount}</p>
@@ -186,10 +186,10 @@ export default function PredictionDrift() {
                     className={cn(
                       'flex items-center gap-1 text-sm font-mono',
                       Math.abs(d.drift) <= 3
-                        ? 'text-emerald-400'
+                        ? 'text-[#c9b787]'
                         : Math.abs(d.drift) <= 10
-                          ? 'text-amber-400'
-                          : 'text-red-400',
+                          ? 'text-[#c9b787]'
+                          : 'text-[#f5f5f5]',
                     )}
                   >
                     {d.drift > 0 ? (
@@ -209,10 +209,10 @@ export default function PredictionDrift() {
                     className={cn(
                       'px-2 py-1 rounded-full text-xs font-medium capitalize',
                       d.status === 'stable'
-                        ? 'bg-emerald-400/10 text-emerald-400'
+                        ? 'bg-[#c9b787]/10 text-[#c9b787]'
                         : d.status === 'warning'
-                          ? 'bg-amber-400/10 text-amber-400'
-                          : 'bg-red-400/10 text-red-400',
+                          ? 'bg-[#c9b787]/10 text-[#c9b787]'
+                          : 'bg-[#f5f5f5]/10 text-[#f5f5f5]',
                     )}
                   >
                     {d.status}

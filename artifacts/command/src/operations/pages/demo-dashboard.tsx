@@ -692,7 +692,7 @@ export default function DemoDashboard() {
           <PanelHead icon={Eye} title="PRISM Score" accent="#d4a054" />
           <div className="px-3 py-2.5 grid grid-cols-5 gap-1">
             {[
-              { key: 'P', label: 'LUMINA', score: 72, color: '#d4a054' },
+              { key: 'P', label: 'Pulse', score: 72, color: '#c9b787' },
               { key: 'R', label: 'Risk', score: 41, color: '#c45a4a' },
               { key: 'I', label: 'Intel', score: 68, color: '#8b7ac8' },
               { key: 'S', label: 'Signals', score: 55, color: '#c8953c' },

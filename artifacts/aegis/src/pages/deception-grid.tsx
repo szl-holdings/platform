@@ -59,19 +59,19 @@ const typeIcon: Record<string, typeof Server> = {
 };
 
 const typeColor: Record<string, string> = {
-  server: '#3b82f6',
-  database: '#8b5cf6',
-  credential: '#f59e0b',
-  fileshare: '#10b981',
-  api: '#06b6d4',
-  email: '#f97316',
+  server: '#c9b787',
+  database: '#8a8a8a',
+  credential: '#c9b787',
+  fileshare: '#c9b787',
+  api: '#8a8a8a',
+  email: '#c9b787',
 };
 
 const statusConfig: Record<string, { color: string; label: string }> = {
-  active: { color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30', label: 'Active' },
-  engaged: { color: 'text-amber-400 bg-amber-500/10 border-amber-500/30', label: 'Engaged' },
-  triggered: { color: 'text-red-400 bg-red-500/10 border-red-500/30', label: '🔴 Triggered' },
-  adapting: { color: 'text-blue-400 bg-blue-500/10 border-blue-500/30', label: 'Adapting' },
+  active: { color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30', label: 'Active' },
+  engaged: { color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30', label: 'Engaged' },
+  triggered: { color: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/30', label: '🔴 Triggered' },
+  adapting: { color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30', label: 'Adapting' },
 };
 
 function relTime(iso: string) {
@@ -156,7 +156,7 @@ export default function DeceptionGrid() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Eye className="w-5 h-5 text-purple-400" />
+            <Eye className="w-5 h-5 text-[#8a8a8a]" />
             <h1 className="text-lg font-semibold text-white">Threat Decoys</h1>
           </div>
           <p className="text-xs text-zinc-500">
@@ -167,7 +167,7 @@ export default function DeceptionGrid() {
         <button
           onClick={() => deployMutation.mutate()}
           disabled={deployMutation.isPending}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-400 text-xs font-medium hover:bg-purple-500/25 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#8a8a8a]/15 border border-[#8a8a8a]/30 text-[#8a8a8a] text-xs font-medium hover:bg-[#8a8a8a]/25 transition-colors disabled:opacity-50"
         >
           {deployMutation.isPending ? (
             <>
@@ -188,28 +188,28 @@ export default function DeceptionGrid() {
             label: 'Active Honeypots',
             value: honeypots.length || '—',
             sub: 'across 4 network segments',
-            color: '#8b5cf6',
+            color: '#8a8a8a',
             icon: Eye,
           },
           {
             label: 'Total Interactions',
             value: totalInteractions || '—',
             sub: 'attacker engagements captured',
-            color: '#ef4444',
+            color: '#f5f5f5',
             icon: Activity,
           },
           {
             label: 'Threat Intel Items',
             value: intelItems || '—',
             sub: 'extracted from attacker behavior',
-            color: '#f97316',
+            color: '#c9b787',
             icon: TrendingUp,
           },
           {
             label: 'Avg Deception Score',
             value: avgDeception ? `${avgDeception}%` : '—',
             sub: 'realism rating',
-            color: '#10b981',
+            color: '#c9b787',
             icon: Shield,
           },
         ].map((m) => {
@@ -252,7 +252,7 @@ export default function DeceptionGrid() {
                     className={cn(
                       'rounded-xl border p-3 transition-all',
                       hp.status === 'triggered'
-                        ? 'border-red-500/30 bg-red-500/5'
+                        ? 'border-[#f5f5f5]/30 bg-[#f5f5f5]/5'
                         : 'border-white/8 bg-white/3',
                     )}
                   >
@@ -293,17 +293,17 @@ export default function DeceptionGrid() {
                           <div className="ml-auto flex items-center gap-1">
                             <div className="w-12 h-1 rounded-full bg-white/5">
                               <div
-                                className="h-full rounded-full bg-purple-500/60"
+                                className="h-full rounded-full bg-[#8a8a8a]/60"
                                 style={{ width: `${hp.deceptionScore}%` }}
                               />
                             </div>
-                            <span className="text-[10px] text-purple-400">
+                            <span className="text-[10px] text-[#8a8a8a]">
                               {hp.deceptionScore}%
                             </span>
                           </div>
                         </div>
                         {hp.attackerProfile && (
-                          <div className="mt-1.5 text-[10px] text-amber-400 bg-amber-500/10 rounded px-1.5 py-0.5">
+                          <div className="mt-1.5 text-[10px] text-[#c9b787] bg-[#c9b787]/10 rounded px-1.5 py-0.5">
                             {hp.attackerProfile}
                           </div>
                         )}
@@ -333,7 +333,7 @@ export default function DeceptionGrid() {
                     className={cn(
                       'w-full rounded-xl border p-3 text-left transition-all',
                       selectedEvent?.id === evt.id
-                        ? 'border-purple-500/40 bg-purple-500/5'
+                        ? 'border-[#8a8a8a]/40 bg-[#8a8a8a]/5'
                         : 'border-white/8 bg-white/3 hover:bg-white/5',
                     )}
                   >
@@ -345,8 +345,8 @@ export default function DeceptionGrid() {
                         className={cn(
                           'text-[10px] px-1.5 py-0.5 rounded border shrink-0',
                           evt.severity === 'critical'
-                            ? 'text-red-400 border-red-500/30 bg-red-500/10'
-                            : 'text-orange-400 border-orange-500/30 bg-orange-500/10',
+                            ? 'text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10'
+                            : 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
                         )}
                       >
                         {evt.severity}
@@ -359,7 +359,7 @@ export default function DeceptionGrid() {
                       <span>·</span>
                       <span>{evt.attackerIp}</span>
                       {evt.pushedToFeed && (
-                        <span className="text-emerald-400 ml-1">✓ IOC pushed</span>
+                        <span className="text-[#c9b787] ml-1">✓ IOC pushed</span>
                       )}
                     </div>
                   </button>
@@ -367,10 +367,10 @@ export default function DeceptionGrid() {
               </div>
 
               {selectedEvent && (
-                <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 p-4">
+                <div className="rounded-xl border border-[#8a8a8a]/20 bg-[#8a8a8a]/5 p-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <Network className="w-3.5 h-3.5 text-purple-400" />
-                    <span className="text-xs font-semibold text-purple-300">
+                    <Network className="w-3.5 h-3.5 text-[#8a8a8a]" />
+                    <span className="text-xs font-semibold text-[#8a8a8a]">
                       Threat Intelligence Extracted
                     </span>
                   </div>
@@ -399,12 +399,12 @@ export default function DeceptionGrid() {
                       <button
                         onClick={() => pushIocMutation.mutate(selectedEvent.id)}
                         disabled={pushIocMutation.isPending}
-                        className="w-full mt-2 py-1.5 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-400 text-xs font-medium hover:bg-purple-500/25 transition-colors disabled:opacity-50"
+                        className="w-full mt-2 py-1.5 rounded-lg bg-[#8a8a8a]/15 border border-[#8a8a8a]/30 text-[#8a8a8a] text-xs font-medium hover:bg-[#8a8a8a]/25 transition-colors disabled:opacity-50"
                       >
                         {pushIocMutation.isPending ? 'Pushing...' : 'Push IOC to Threat Intel'}
                       </button>
                     ) : (
-                      <div className="w-full mt-2 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium text-center">
+                      <div className="w-full mt-2 py-1.5 rounded-lg bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787] text-xs font-medium text-center">
                         ✓ IOC pushed to threat intel feeds
                       </div>
                     )}

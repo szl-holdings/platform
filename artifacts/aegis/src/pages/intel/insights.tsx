@@ -16,36 +16,36 @@ const categoryConfig: Record<
   success: {
     label: 'Success',
     icon: CheckCircle,
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-400/8',
-    border: 'border-emerald-400/20',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/8',
+    border: 'border-[#c9b787]/20',
   },
   warning: {
     label: 'Warning',
     icon: AlertTriangle,
-    color: 'text-amber-400',
-    bg: 'bg-amber-400/8',
-    border: 'border-amber-400/20',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/8',
+    border: 'border-[#c9b787]/20',
   },
   trend: {
     label: 'Trend',
     icon: TrendingUp,
-    color: 'text-blue-400',
-    bg: 'bg-blue-400/8',
-    border: 'border-blue-400/20',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/8',
+    border: 'border-[#c9b787]/20',
   },
   discovery: {
     label: 'Discovery',
     icon: Sparkles,
-    color: 'text-violet-400',
-    bg: 'bg-violet-400/8',
-    border: 'border-violet-400/20',
+    color: 'text-[#8a8a8a]',
+    bg: 'bg-[#8a8a8a]/8',
+    border: 'border-[#8a8a8a]/20',
   },
 };
 
 const impactColors: Record<string, string> = {
-  high: 'text-red-400 bg-red-400/10',
-  medium: 'text-amber-400 bg-amber-400/10',
+  high: 'text-[#f5f5f5] bg-[#f5f5f5]/10',
+  medium: 'text-[#c9b787] bg-[#c9b787]/10',
   low: 'text-muted-foreground bg-muted',
 };
 

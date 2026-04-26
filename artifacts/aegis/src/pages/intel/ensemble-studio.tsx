@@ -131,8 +131,8 @@ export default function EnsembleStudio() {
                 className={cn(
                   'px-2 py-0.5 rounded-full text-[10px] font-medium capitalize',
                   e.status === 'active'
-                    ? 'bg-emerald-400/10 text-emerald-400'
-                    : 'bg-amber-400/10 text-amber-400',
+                    ? 'bg-[#c9b787]/10 text-[#c9b787]'
+                    : 'bg-[#c9b787]/10 text-[#c9b787]',
                 )}
               >
                 {e.status}
@@ -158,7 +158,7 @@ export default function EnsembleStudio() {
         </div>
         <div className="bg-card/60 border border-border rounded-xl p-5">
           <div className="flex items-center gap-2 mb-2">
-            <GitBranch className="w-4 h-4 text-cyan-400" />
+            <GitBranch className="w-4 h-4 text-[#8a8a8a]" />
             <span className="text-xs text-muted-foreground uppercase tracking-wider">
               Model Agreement
             </span>
@@ -167,7 +167,7 @@ export default function EnsembleStudio() {
         </div>
         <div className="bg-card/60 border border-border rounded-xl p-5">
           <div className="flex items-center gap-2 mb-2">
-            <Brain className="w-4 h-4 text-amber-400" />
+            <Brain className="w-4 h-4 text-[#c9b787]" />
             <span className="text-xs text-muted-foreground uppercase tracking-wider">Models</span>
           </div>
           <p className="text-3xl font-bold text-foreground">{activeEnsemble.models.length}</p>

@@ -68,7 +68,7 @@ function formatApp(app: string) {
     "vessels": "Vessels",
     "terra": "Terra",
     "aegis": "Aegis",
-    "sentra": "TENAX",
+    "sentra": "Aegis",
     "carlota-jo": "Carlota Jo",
     "szl-holdings": "SZL Holdings",
     "counsel": "Counsel",

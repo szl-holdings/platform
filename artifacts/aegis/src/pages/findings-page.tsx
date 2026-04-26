@@ -28,18 +28,18 @@ import { useState } from 'react';
 import { api } from '@/lib/api';
 
 const severityColors: Record<string, string> = {
-  info: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  low: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  critical: 'bg-red-500/10 text-red-400 border-red-500/20',
+  info: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  low: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  medium: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  high: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  critical: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
 };
 
 const _statusColors: Record<string, string> = {
-  open: 'bg-red-500/10 text-red-400 border-red-500/20',
-  confirmed: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  mitigated: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  accepted: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  open: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  confirmed: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  mitigated: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  accepted: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
   false_positive: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
 };
 
@@ -226,34 +226,34 @@ export default function FindingsPage() {
           </CardContent>
         </Card>
         <Card
-          className={`bg-card border-border animate-fade-in-up stagger-2 hover:border-red-500/20 transition-all duration-300 group ${criticalCount > 0 ? 'ring-1 ring-red-500/10' : ''}`}
+          className={`bg-card border-border animate-fade-in-up stagger-2 hover:border-[#f5f5f5]/20 transition-all duration-300 group ${criticalCount > 0 ? 'ring-1 ring-red-500/10' : ''}`}
         >
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Critical</p>
               <p
-                className={`text-2xl font-bold font-display mt-1 text-red-400 ${criticalCount > 0 ? 'animate-threat-pulse' : ''}`}
+                className={`text-2xl font-bold font-display mt-1 text-[#f5f5f5] ${criticalCount > 0 ? 'animate-threat-pulse' : ''}`}
               >
                 <AnimatedCounter value={criticalCount} />
               </p>
             </div>
             <div
-              className={`w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:scale-110 transition-transform ${criticalCount > 0 ? 'animate-pulse' : ''}`}
+              className={`w-10 h-10 rounded-lg bg-[#f5f5f5]/10 flex items-center justify-center group-hover:scale-110 transition-transform ${criticalCount > 0 ? 'animate-pulse' : ''}`}
             >
-              <AlertTriangle className="w-5 h-5 text-red-400" />
+              <AlertTriangle className="w-5 h-5 text-[#f5f5f5]" />
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border animate-fade-in-up stagger-3 hover:border-orange-500/20 transition-all duration-300 group">
+        <Card className="bg-card border-border animate-fade-in-up stagger-3 hover:border-[#c9b787]/20 transition-all duration-300 group">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">High</p>
-              <p className="text-2xl font-bold font-display mt-1 text-orange-400">
+              <p className="text-2xl font-bold font-display mt-1 text-[#c9b787]">
                 <AnimatedCounter value={highCount} />
               </p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Shield className="w-5 h-5 text-orange-400" />
+            <div className="w-10 h-10 rounded-lg bg-[#c9b787]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Shield className="w-5 h-5 text-[#c9b787]" />
             </div>
           </CardContent>
         </Card>
@@ -302,7 +302,7 @@ export default function FindingsPage() {
               ? 'Recent assessments produced no findings — the surface area is clean. New issues will appear here as scans, hunts, and assessments complete.'
               : `No findings match severity “${filter}.” Switch to “All” to review every finding from recent assessments.`
           }
-          accentColor={filter === 'all' ? '#10b981' : '#8b7ac8'}
+          accentColor={filter === 'all' ? '#c9b787' : '#8b7ac8'}
           className="animate-fade-in-up stagger-6 border border-dashed border-border rounded-lg"
         />
       ) : (
@@ -342,7 +342,7 @@ export default function FindingsPage() {
                         {finding.cveId && <span className="font-mono">{finding.cveId}</span>}
                       </div>
                       {finding.recommendation && (
-                        <p className="text-xs text-emerald-400/80 mt-2 flex items-center gap-1">
+                        <p className="text-xs text-[#c9b787]/80 mt-2 flex items-center gap-1">
                           <CheckCircle className="w-3 h-3" /> {finding.recommendation}
                         </p>
                       )}
@@ -353,7 +353,7 @@ export default function FindingsPage() {
                         className={`${severityColors[finding.severity] || ''} ${isCritical && isOpen ? 'animate-threat-pulse' : ''}`}
                       >
                         {isCritical && isOpen && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-400 mr-1.5 animate-pulse-dot" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#f5f5f5] mr-1.5 animate-pulse-dot" />
                         )}
                         {finding.severity}
                       </Badge>

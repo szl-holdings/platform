@@ -16,14 +16,14 @@ import { ProofDrawer, SAMPLE_PROOF_RECORD, type ProofRecord } from '@/components
 import { apiRequest } from "@/lib/api";
 import { toast } from "@szl-holdings/shared-ui/ui/sonner";
 
-const BG = "hsl(214,16%,4%)";
+const BG = "#0a0a0a";
 const BORDER = "hsla(0,0%,100%,0.07)";
 const SURFACE = "hsla(0,0%,100%,0.035)";
 const SURFACE_HOVER = "hsla(0,0%,100%,0.055)";
 const TEXT = "hsl(38,8%,94%)";
-const TEXT_SEC = "hsl(214,7%,60%)";
-const TEXT_FAINT = "hsl(214,7%,40%)";
-const LYTE = "hsl(192,72%,48%)";
+const TEXT_SEC = "#8a8a8a";
+const TEXT_FAINT = "#5e5e5e";
+const LYTE = "#c9b787";
 const MONO = "var(--font-mono)";
 
 type SignalSeverity = "critical" | "high" | "medium" | "info";
@@ -41,36 +41,34 @@ const THRESHOLD_LABEL: Record<ToastThreshold, string> = {
 };
 
 const SEV_COLOR: Record<SignalSeverity, string> = {
-  critical: "hsl(0,72%,54%)",
-  high: "hsl(30,90%,52%)",
-  medium: "hsl(48,90%,52%)",
-  info: "hsl(192,72%,48%)",
+  critical: "#c9b787",
+  high: "#c9b787",
+  medium: "#8a8a8a",
+  info: "#8a8a8a",
 };
 
 const SEV_BG: Record<SignalSeverity, string> = {
-  critical: "hsla(0,72%,54%,0.12)",
-  high: "hsla(30,90%,52%,0.12)",
-  medium: "hsla(48,90%,52%,0.1)",
-  info: "hsla(192,72%,48%,0.1)",
+  critical: "rgba(201,183,135,0.12)",
+  high: "rgba(201,183,135,0.12)",
+  medium: "rgba(138,138,138,0.1)",
+  info: "rgba(138,138,138,0.1)",
 };
 
 const DOMAIN_COLOR: Record<string, string> = {
-  Aegis: "hsl(222,60%,60%)",
-  Vessels: "hsl(206,72%,54%)",
-  Terra: "hsl(142,52%,48%)",
-  "Counsel": "hsl(260,60%,65%)",
-  "Carlota Jo": "hsl(340,52%,60%)",
-  Counsel: "hsl(192,72%,48%)",
-  IMPERIUM: "hsl(25,72%,54%)",
+  Aegis: "#c9b787",
+  Vessels: "#8a8a8a",
+  Terra: "#c9b787",
+  Counsel: "#8a8a8a",
+  "Carlota Jo": "#c9b787",
+  IMPERIUM: "#c9b787",
 };
 
 const DOMAIN_ICON: Record<string, typeof Shield> = {
   Aegis: Shield,
   Vessels: Ship,
   Terra: Building2,
-  "Counsel": Briefcase,
+  Counsel: Briefcase,
   "Carlota Jo": Users,
-  Counsel: Zap,
   IMPERIUM: Layers,
 };
 
@@ -211,21 +209,21 @@ const SITUATION_BOARD: SituationItem[] = [
 ];
 
 const STAGE_FLOW = [
-  { id: "Signal", color: "#0ea5e9" },
-  { id: "Context", color: "#8b5cf6" },
-  { id: "Recommendation", color: "#ec4899" },
-  { id: "Simulation", color: "#f59e0b" },
-  { id: "Policy", color: "#10b981" },
-  { id: "Execution", color: "#6366f1" },
-  { id: "Proof", color: "#14b8a6" },
-  { id: "Outcome", color: "#ef4444" },
+  { id: "Signal", color: "#c9b787" },
+  { id: "Context", color: "#8a8a8a" },
+  { id: "Recommendation", color: "#8a8a8a" },
+  { id: "Simulation", color: "#c9b787" },
+  { id: "Policy", color: "#8a8a8a" },
+  { id: "Execution", color: "#8a8a8a" },
+  { id: "Proof", color: "#c9b787" },
+  { id: "Outcome", color: "#c9b787" },
 ];
 
 const GOV_STATS = [
-  { label: "Pending approvals", value: "14", delta: "+3 since 08:00", color: "hsl(30,90%,52%)" },
-  { label: "SLA breaches (24h)", value: "3", delta: "–1 from yesterday", color: "hsl(0,72%,54%)" },
-  { label: "Override rate (7d)", value: "8.2%", delta: "↑ 1.4pp", color: "hsl(48,90%,52%)" },
-  { label: "Proof coverage", value: "97.4%", delta: "↑ from 96.1%", color: "hsl(142,60%,48%)" },
+  { label: "Pending approvals", value: "14", delta: "+3 since 08:00", color: "#c9b787" },
+  { label: "SLA breaches (24h)", value: "3", delta: "–1 from yesterday", color: "#c9b787" },
+  { label: "Override rate (7d)", value: "8.2%", delta: "↑ 1.4pp", color: "#8a8a8a" },
+  { label: "Proof coverage", value: "97.4%", delta: "↑ from 96.1%", color: "#c9b787" },
 ];
 
 function SeverityDot({ sev }: { sev: SignalSeverity }) {
@@ -758,11 +756,11 @@ export default function LytePage() {
   );
 
   const liveGovStats = govData ? [
-    { label: "Pending approvals", value: String(govData.pendingApprovals), delta: `of ${govData.totalSignals} total signals`, color: "hsl(30,90%,52%)" },
-    { label: "SLA breaches (24h)", value: String(govData.slaBreach24h), delta: "escalated signals", color: "hsl(0,72%,54%)" },
-    { label: "Override rate (7d)", value: `${govData.overrideRate7d}%`, delta: "of governed actions", color: "hsl(48,90%,52%)" },
+    { label: "Pending approvals", value: String(govData.pendingApprovals), delta: `of ${govData.totalSignals} total signals`, color: "#c9b787" },
+    { label: "SLA breaches (24h)", value: String(govData.slaBreach24h), delta: "escalated signals", color: "#c9b787" },
+    { label: "Override rate (7d)", value: `${govData.overrideRate7d}%`, delta: "of governed actions", color: "#8a8a8a" },
     {
-      label: "Proof coverage", color: "hsl(142,60%,48%)",
+      label: "Proof coverage", color: "#c9b787",
       value: govData.proofCoverage !== null ? `${govData.proofCoverage}%` : "—",
       delta: govData.proofCoverage !== null ? `${govData.openIncidents} open incidents` : "No incident data yet",
     },
@@ -1032,7 +1030,7 @@ export default function LytePage() {
 
                 <div style={{ padding: "0.75rem", borderTop: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ fontSize: "0.6rem", fontFamily: MONO, color: TEXT_FAINT }}>{filteredSignals.length} signals</span>
-                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, color: "hsl(0,72%,54%)" }}>{unacknowledgedCount} unacknowledged</span>
+                  <span style={{ fontSize: "0.6rem", fontFamily: MONO, color: "#c9b787" }}>{unacknowledgedCount} unacknowledged</span>
                 </div>
               </div>
 
@@ -1175,8 +1173,8 @@ export default function LytePage() {
                     ].map((check, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                         {check.allowed
-                          ? <CheckCircle2 size={11} style={{ color: "hsl(142,60%,48%)", flexShrink: 0 }} />
-                          : <AlertTriangle size={11} style={{ color: "hsl(30,90%,52%)", flexShrink: 0 }} />
+                          ? <CheckCircle2 size={11} style={{ color: "#c9b787", flexShrink: 0 }} />
+                          : <AlertTriangle size={11} style={{ color: "#c9b787", flexShrink: 0 }} />
                         }
                         <span style={{ fontSize: "0.6875rem", color: check.allowed ? TEXT_SEC : "hsl(30,90%,52%)" }}>{check.label}</span>
                       </div>
@@ -1273,10 +1271,10 @@ export default function LytePage() {
               {[
                 { icon: Radio, color: "hsl(192,72%,48%)", title: "Persistent Signal Stream", body: "Live ingestion from all domain packs — Aegis, Vessels, Terra, Counsel, Carlota Jo, IMPERIUM. Severity-ranked, correlation-tagged, continuously updated. No manual aggregation." },
                 { icon: Target, color: "hsl(260,60%,65%)", title: "Active Situation Board", body: "Cross-domain decision objects tracked from signal intake to outcome measurement. Every situation shows stage, owner, pending gate, and progress against the governed decision loop." },
-                { icon: Brain, color: "hsl(340,52%,60%)", title: "Decision Theater", body: "The flagship governed decision flow: signal → AI recommendation with proof → Monte Carlo simulation → policy check → governed execution → immutable proof chain → outcome measurement." },
-                { icon: Lock, color: "hsl(142,60%,48%)", title: "Covenant Policy Enforcement", body: "Every action checked against policy at the platform layer, not the UI layer. Role-based gates, domain scope enforcement, high-risk action guards. Human-in-the-loop is an architectural primitive." },
+                { icon: Brain, color: "#c9b787", title: "Decision Theater", body: "The flagship governed decision flow: signal → AI recommendation with proof → Monte Carlo simulation → policy check → governed execution → immutable proof chain → outcome measurement." },
+                { icon: Lock, color: "#c9b787", title: "Covenant Policy Enforcement", body: "Every action checked against policy at the platform layer, not the UI layer. Role-based gates, domain scope enforcement, high-risk action guards. Human-in-the-loop is an architectural primitive." },
                 { icon: FileCheck, color: "hsl(14,72%,52%)", title: "Proof & Provenance Drawer", body: "Every recommendation, approval, and execution gets a Proof Drawer — source lineage, model attribution, confidence, policy state, export safety, and full audit trail. Visible and expandable everywhere." },
-                { icon: BarChart3, color: "hsl(48,90%,52%)", title: "Governance Posture Dashboard", body: "CISO-grade view: policy coverage, approval throughput, override rates, trust health per domain pack. Continuously updated. Not assembled on demand." },
+                { icon: BarChart3, color: "#8a8a8a", title: "Governance Posture Dashboard", body: "CISO-grade view: policy coverage, approval throughput, override rates, trust health per domain pack. Continuously updated. Not assembled on demand." },
               ].map((item, i) => {
                 const Icon = item.icon;
                 return (
@@ -1440,7 +1438,7 @@ export default function LytePage() {
                 { href: "/lyte/decision-theater", label: "Decision Theater", note: "Flagship governed decision flow", color: LYTE, icon: Play },
                 { href: "/lyte/signal-fusion", label: "Signal Fusion Panel", note: "Cross-domain signal aggregation", color: "hsl(206,72%,54%)", icon: Radio },
                 { href: "/lyte/decision-schemas", label: "Decision Schema Library", note: "Reusable decision templates", color: "hsl(260,60%,65%)", icon: BookOpen },
-                { href: "/lyte/governance-posture", label: "Governance Posture", note: "CISO-grade policy dashboard", color: "hsl(142,60%,48%)", icon: ShieldCheck },
+                { href: "/lyte/governance-posture", label: "Governance Posture", note: "CISO-grade policy dashboard", color: "#c9b787", icon: ShieldCheck },
               ].map(link => {
                 const Icon = link.icon;
                 return (

@@ -7,7 +7,7 @@ const READINESS_COLOR: Record<string, string> = {
   ready: '#40856a',
   partial: '#c08a2c',
   degraded: '#c04a2a',
-  not_ready: '#9b1c1c',
+  not_ready: '#5e5e5e',
 };
 
 const READINESS_LABEL: Record<string, string> = {
@@ -80,7 +80,7 @@ function ReadinessCard({ area }: { area: (typeof incidentReadiness)[0] }) {
           area.status === 'degraded'
             ? '#c04a2a25'
             : area.status === 'not_ready'
-              ? '#9b1c1c35'
+              ? '#5e5e5e35'
               : 'rgba(255,255,255,0.06)',
       }}
     >
@@ -173,12 +173,12 @@ export default function IncidentReadinessView() {
         </div>
         <div
           className="rounded-xl border p-4"
-          style={{ background: '#9b1c1c08', borderColor: '#9b1c1c30' }}
+          style={{ background: '#5e5e5e08', borderColor: '#5e5e5e30' }}
         >
-          <div className="text-xs mb-1" style={{ color: '#f87171' }}>
+          <div className="text-xs mb-1" style={{ color: '#f5f5f5' }}>
             Active Critical Threats
           </div>
-          <div className="text-2xl font-bold" style={{ color: '#f87171' }}>
+          <div className="text-2xl font-bold" style={{ color: '#f5f5f5' }}>
             {criticalThreats}
           </div>
           <div className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>

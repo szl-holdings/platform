@@ -28,7 +28,7 @@ const ACTIONS = [
   },
 ];
 
-const PRIORITY_COLORS: Record<string, string> = { urgent: '#ef4444', high: '#f59e0b', medium: '#f59e0b', low: '#10b981' };
+const PRIORITY_COLORS: Record<string, string> = { urgent: '#f5f5f5', high: '#c9b787', medium: '#c9b787', low: '#c9b787' };
 
 export function ActionRail() {
   return (
@@ -41,10 +41,10 @@ export function ActionRail() {
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <KpiCard label="QUEUED ACTIONS" value="4" sub="Across 4 domains" accent="#f59e0b" />
-        <KpiCard label="APPROVED TODAY" value="8" sub="Execution complete" accent="#10b981" />
-        <KpiCard label="AVG CONFIDENCE" value="86%" sub="Recommendation score" accent="#3b82f6" />
-        <KpiCard label="AUTO-RESOLVED" value="0" sub="Human approval required for all" accent="#8b5cf6" />
+        <KpiCard label="QUEUED ACTIONS" value="4" sub="Across 4 domains" accent="#c9b787" />
+        <KpiCard label="APPROVED TODAY" value="8" sub="Execution complete" accent="#c9b787" />
+        <KpiCard label="AVG CONFIDENCE" value="86%" sub="Recommendation score" accent="#c9b787" />
+        <KpiCard label="AUTO-RESOLVED" value="0" sub="Human approval required for all" accent="#8a8a8a" />
       </div>
 
       <div className="flex flex-col gap-4">
@@ -65,7 +65,7 @@ export function ActionRail() {
                 <h3 className="text-sm font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{a.title}</h3>
               </div>
               <div className="text-right flex-shrink-0">
-                <div className="text-xs font-mono" style={{ color: '#10b981' }}>{a.confidence}% confidence</div>
+                <div className="text-xs font-mono" style={{ color: '#c9b787' }}>{a.confidence}% confidence</div>
                 <div className="text-xs mt-0.5" style={{ color: 'var(--color-a11oy-text-ghost)' }}>via Signal {a.signal}</div>
               </div>
             </div>
@@ -75,8 +75,8 @@ export function ActionRail() {
                 <div className="text-xs font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>RATIONALE</div>
                 <div className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>{a.rationale}</div>
               </div>
-              <div className="p-3 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.15)' }}>
-                <div className="text-xs font-mono mb-1" style={{ color: '#ef4444' }}>COUNTERFACTUAL</div>
+              <div className="p-3 rounded" style={{ backgroundColor: 'rgba(245,245,245,0.04)', border: '1px solid rgba(245,245,245,0.15)' }}>
+                <div className="text-xs font-mono mb-1" style={{ color: '#f5f5f5' }}>COUNTERFACTUAL</div>
                 <div className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>{a.counterfactual}</div>
               </div>
             </div>
@@ -94,7 +94,7 @@ export function ActionRail() {
         ))}
       </div>
 
-      <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
+      <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
         <DemoBadge /> All recommended actions, rationale, and counterfactuals are illustrative demo content.
       </div>
     </Layout>

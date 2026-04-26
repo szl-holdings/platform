@@ -284,7 +284,7 @@ const ARTICLES_FALLBACK: Article[] = [
     title: 'What Maritime Intelligence Taught Me About Enterprise Data Architecture',
     slug: 'maritime-intelligence-data',
     excerpt:
-      "Tracking 50,000 vessels in real time across global shipping lanes is a data architecture problem before it's anything else. Here's what I learned building SEXTANT.",
+      "Tracking 50,000 vessels in real time across global shipping lanes is a data architecture problem before it's anything else. Here's what I learned building Vessels.",
     summary:
       "Tracking 50,000 vessels in real time across global shipping lanes is a data architecture problem before it's anything else.",
     publishedAt: '2024-11-10T00:00:00Z',

@@ -18,6 +18,13 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'INTELLIGENCE',
+    items: [
+      { href: '/recommendations', label: 'Recommendations' },
+      { href: '/brief',           label: 'Executive Brief' },
+    ],
+  },
+  {
     label: 'FABRIC',
     items: [
       { href: '/fabric',     label: 'Fabric' },
@@ -37,6 +44,16 @@ const NAV_GROUPS = [
       { href: '/evals',     label: 'MirrorEval' },
       { href: '/memory',    label: 'Memory' },
       { href: '/pce',       label: 'PCE' },
+    ],
+  },
+  {
+    label: 'AGENTIC',
+    items: [
+      { href: '/orchestration', label: 'Orchestration' },
+      { href: '/agent-mesh',    label: 'Agent Mesh' },
+      { href: '/agent-viz',     label: 'Visualization' },
+      { href: '/sdk',           label: 'a11oy SDK' },
+      { href: '/a11oy-code',    label: 'a11oy Code' },
     ],
   },
   {

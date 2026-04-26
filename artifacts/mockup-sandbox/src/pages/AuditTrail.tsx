@@ -35,7 +35,7 @@ function generateAuditEntries(): AuditEntry[] {
     { slug: 'aegis', name: 'Aegis Intel Agent', actions: ['fetch_threat_feed', 'score_vulnerability', 'correlate_incidents'] },
     { slug: 'vessels', name: 'Vessels Route Agent', actions: ['query_fleet_positions', 'assess_port_risk', 'compute_voyage_economics'] },
     { slug: 'terra', name: 'Terra Distress Agent', actions: ['scan_distress_signals', 'score_property_risk', 'generate_acquisition_brief'] },
-    { slug: 'pulse', name: 'LUMINA Briefing Agent', actions: ['compile_executive_brief', 'rank_insights', 'schedule_delivery'] },
+    { slug: 'pulse', name: 'Pulse Briefing Agent', actions: ['compile_executive_brief', 'rank_insights', 'schedule_delivery'] },
     { slug: 'command', name: 'Command Correlation Agent', actions: ['cross_domain_correlate', 'surface_anomalies', 'prioritize_actions'] },
     { slug: 'nexus', name: 'PRAXIS Orchestrator', actions: ['plan_agent_sequence', 'stitch_outputs', 'verify_completeness'] },
   ];
@@ -58,7 +58,7 @@ function generateAuditEntries(): AuditEntry[] {
     prioritize_actions: ['Ranked by (severity × asset_value × time_sensitivity). Normalized across domains so Aegis and Terra actions are comparable.', "Deprioritized actions requiring > 2 approval hops — they won't close today regardless of urgency."],
     plan_agent_sequence: ['Analyzed intent graph to identify parallelizable steps. Aegis and Vessels runs have no data dependency — scheduled concurrently.', 'Rejected sequential execution — would add 4.2s median latency per dependent step. Parallel saves ~12s on this plan.'],
     stitch_outputs: ['Applied semantic deduplication across agent outputs. 3 overlapping risk items merged into one with combined evidence.', 'Structured stitched output as BLUF + supporting detail per domain. Rejected flat list — execs skip to domain they own.'],
-    verify_completeness: ['Checked all required fields in output schema. 2 optional fields missing (vessel_flag, property_ownership_depth) — noted in metadata.', 'Re-ran LUMINA step because initial output confidence < 0.72 threshold. Second pass scored 0.84 — accepted.'],
+    verify_completeness: ['Checked all required fields in output schema. 2 optional fields missing (vessel_flag, property_ownership_depth) — noted in metadata.', 'Re-ran Pulse step because initial output confidence < 0.72 threshold. Second pass scored 0.84 — accepted.'],
   };
 
   const now = Date.now();
@@ -107,7 +107,7 @@ function generateAuditEntries(): AuditEntry[] {
 }
 
 const EXAMPLE_INTENTS = [
-  "Summarize today's threat risk across Aegis and Vessels, then draft an executive brief in LUMINA format.",
+  "Summarize today's threat risk across Aegis and Vessels, then draft an executive brief in Pulse format.",
   'Pull the latest KPIs from SZL Holdings, Terra, and Vessels, and compile a cross-portfolio snapshot.',
   'Cross-reference Prism Counsel open matters against Aegis threat intel and flag any intersecting risk vectors.',
 ];

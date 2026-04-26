@@ -157,7 +157,7 @@ const DEMO_TRACES: ApiTrace[] = [
   },
   {
     traceId: 'trc-2c49',
-    agent: 'DOMAINE-Intel',
+    agent: 'Terra-Intel',
     domain: 'terra',
     status: 'complete',
     startedAt: '13:25',

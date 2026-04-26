@@ -30,9 +30,9 @@ import {
 } from '@/data/agent-mesh';
 
 const TIER_STYLES: Record<string, string> = {
-  critical: 'text-red-400 border-red-500/30 bg-red-500/10',
-  elevated: 'text-amber-400 border-amber-500/30 bg-amber-500/10',
-  standard: 'text-sky-400 border-sky-500/30 bg-sky-500/10',
+  critical: 'text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10',
+  elevated: 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
+  standard: 'text-[#8a8a8a] border-sky-500/30 bg-[#8a8a8a]/10',
 };
 
 const MODE_META: Record<
@@ -49,28 +49,28 @@ const MODE_META: Record<
   block: {
     label: 'Block',
     icon: Ban,
-    color: 'text-amber-300',
-    ring: 'border-amber-500/30 bg-amber-500/10',
+    color: 'text-[#c9b787]',
+    ring: 'border-[#c9b787]/30 bg-[#c9b787]/10',
     desc: 'Reject offending calls at the gateway. Other calls pass through normally.',
   },
   quarantine: {
     label: 'Quarantine',
     icon: ShieldOff,
-    color: 'text-red-300',
-    ring: 'border-red-500/30 bg-red-500/10',
+    color: 'text-[#f5f5f5]',
+    ring: 'border-[#f5f5f5]/30 bg-[#f5f5f5]/10',
     desc: 'Reject all calls from this agent class until the rule is cleared.',
   },
 };
 
 const DECISION_STYLES: Record<string, { dot: string; chip: string; label: string }> = {
   allowed: {
-    dot: 'bg-emerald-400',
-    chip: 'text-emerald-400 border-emerald-500/20',
+    dot: 'bg-[#c9b787]',
+    chip: 'text-[#c9b787] border-[#c9b787]/20',
     label: 'ALLOWED',
   },
-  logged: { dot: 'bg-sky-400', chip: 'text-sky-400 border-sky-500/20', label: 'LOGGED' },
-  blocked: { dot: 'bg-amber-400', chip: 'text-amber-400 border-amber-500/20', label: 'BLOCKED' },
-  quarantined: { dot: 'bg-red-400', chip: 'text-red-400 border-red-500/20', label: 'QUARANTINED' },
+  logged: { dot: 'bg-[#8a8a8a]', chip: 'text-[#8a8a8a] border-sky-500/20', label: 'LOGGED' },
+  blocked: { dot: 'bg-[#c9b787]', chip: 'text-[#c9b787] border-[#c9b787]/20', label: 'BLOCKED' },
+  quarantined: { dot: 'bg-[#f5f5f5]', chip: 'text-[#f5f5f5] border-[#f5f5f5]/20', label: 'QUARANTINED' },
 };
 
 function formatUptime(s: number) {
@@ -98,12 +98,12 @@ const DECISION_FILTER_OPTIONS: GatewayDecisionFilter[] = [
 
 function latencyTone(p95: number): { row: string; p95: string } {
   if (p95 >= 1500) {
-    return { row: 'border-red-500/30 bg-red-500/10', p95: 'text-red-300' };
+    return { row: 'border-[#f5f5f5]/30 bg-[#f5f5f5]/10', p95: 'text-[#f5f5f5]' };
   }
   if (p95 >= 600) {
-    return { row: 'border-amber-500/30 bg-amber-500/10', p95: 'text-amber-300' };
+    return { row: 'border-[#c9b787]/30 bg-[#c9b787]/10', p95: 'text-[#c9b787]' };
   }
-  return { row: 'border-slate-800/60 bg-slate-900/40', p95: 'text-emerald-300' };
+  return { row: 'border-slate-800/60 bg-slate-900/40', p95: 'text-[#c9b787]' };
 }
 
 interface LatencyBreakdownPanelProps {
@@ -140,15 +140,15 @@ function LatencyBreakdownPanel({ breakdown, source, getMcpName }: LatencyBreakdo
         <div
           className={cn(
             'flex items-center gap-2 text-[10px] font-mono',
-            source === 'live' && perServer.length > 0 ? 'text-emerald-400' : 'text-amber-400',
+            source === 'live' && perServer.length > 0 ? 'text-[#c9b787]' : 'text-[#c9b787]',
           )}
         >
           <span
             className={cn(
               'w-1.5 h-1.5 rounded-full',
               source === 'live' && perServer.length > 0
-                ? 'bg-emerald-400 animate-pulse'
-                : 'bg-amber-400',
+                ? 'bg-[#c9b787] animate-pulse'
+                : 'bg-[#c9b787]',
             )}
           />
           {source === 'live' && perServer.length > 0 ? 'STREAMING' : 'AWAITING TIMED CALLS'}
@@ -381,41 +381,41 @@ export default function ContainmentRules() {
             enforcement at the MCP gateway.
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 rounded bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 text-red-400 text-sm font-bold transition-colors">
+        <button className="flex items-center gap-2 px-4 py-2 rounded bg-[#f5f5f5]/20 hover:bg-[#f5f5f5]/30 border border-[#f5f5f5]/30 text-[#f5f5f5] text-sm font-bold transition-colors">
           <Plus className="w-4 h-4" />
           New Rule
         </button>
       </header>
 
-      <section className="sentra-panel p-5 border-emerald-500/20">
+      <section className="sentra-panel p-5 border-[#c9b787]/20">
         <div className="flex items-start justify-between gap-6">
           <div className="flex items-start gap-4">
             <div
               className={cn(
                 'w-12 h-12 rounded flex items-center justify-center border shrink-0',
                 gateway.status === 'online'
-                  ? 'bg-emerald-500/10 border-emerald-500/30'
-                  : 'bg-amber-500/10 border-amber-500/30',
+                  ? 'bg-[#c9b787]/10 border-[#c9b787]/30'
+                  : 'bg-[#c9b787]/10 border-[#c9b787]/30',
               )}
             >
               <Activity
                 className={cn(
                   'w-5 h-5',
-                  gateway.status === 'online' ? 'text-emerald-400' : 'text-amber-400',
+                  gateway.status === 'online' ? 'text-[#c9b787]' : 'text-[#c9b787]',
                 )}
               />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono uppercase text-emerald-400">
+                <span className="text-[10px] font-mono uppercase text-[#c9b787]">
                   MCP Traffic Gateway
                 </span>
                 <span
                   className={cn(
                     'px-1.5 py-0.5 rounded text-[9px] font-mono uppercase border',
                     gateway.status === 'online'
-                      ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10'
-                      : 'text-amber-400 border-amber-500/30 bg-amber-500/10',
+                      ? 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10'
+                      : 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
                   )}
                 >
                   ● {gateway.status}
@@ -453,13 +453,13 @@ export default function ContainmentRules() {
             </div>
             <div>
               <div className="text-[9px] text-slate-500 font-mono uppercase">Blocked</div>
-              <div className="text-xl font-display font-bold text-amber-400">
+              <div className="text-xl font-display font-bold text-[#c9b787]">
                 {gateway.blockedLast24h}
               </div>
             </div>
             <div>
               <div className="text-[9px] text-slate-500 font-mono uppercase">Quarantined</div>
-              <div className="text-xl font-display font-bold text-red-400">
+              <div className="text-xl font-display font-bold text-[#f5f5f5]">
                 {gateway.quarantinedLast24h}
               </div>
             </div>
@@ -486,11 +486,11 @@ export default function ContainmentRules() {
           <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">
             Total Violations
           </div>
-          <div className="text-3xl font-display font-bold text-red-400">{totals.violations}</div>
+          <div className="text-3xl font-display font-bold text-[#f5f5f5]">{totals.violations}</div>
         </div>
         <div className="sentra-panel p-4 text-center">
           <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">Enforcing</div>
-          <div className="text-3xl font-display font-bold text-amber-400">
+          <div className="text-3xl font-display font-bold text-[#c9b787]">
             {totals.blocking}
             <span className="text-base text-slate-500">/{totals.rules}</span>
           </div>
@@ -499,7 +499,7 @@ export default function ContainmentRules() {
           <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">
             Pending Guardian
           </div>
-          <div className="text-3xl font-display font-bold text-sky-400">
+          <div className="text-3xl font-display font-bold text-[#8a8a8a]">
             {totals.pendingApproval}
           </div>
         </div>
@@ -520,14 +520,14 @@ export default function ContainmentRules() {
                     className={cn(
                       'w-10 h-10 rounded flex items-center justify-center border shrink-0',
                       rule.violationCount > 0
-                        ? 'bg-red-500/10 border-red-500/20'
-                        : 'bg-emerald-500/10 border-emerald-500/20',
+                        ? 'bg-[#f5f5f5]/10 border-[#f5f5f5]/20'
+                        : 'bg-[#c9b787]/10 border-[#c9b787]/20',
                     )}
                   >
                     <Shield
                       className={cn(
                         'w-5 h-5',
-                        rule.violationCount > 0 ? 'text-red-400' : 'text-emerald-400',
+                        rule.violationCount > 0 ? 'text-[#f5f5f5]' : 'text-[#c9b787]',
                       )}
                     />
                   </div>
@@ -561,12 +561,12 @@ export default function ContainmentRules() {
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
                   {rule.violationCount > 0 ? (
-                    <div className="flex items-center gap-1.5 px-3 py-1 rounded bg-red-500/10 border border-red-500/20 text-xs text-red-400 font-bold">
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 text-xs text-[#f5f5f5] font-bold">
                       <AlertTriangle className="w-3 h-3" />
                       {rule.violationCount} violation{rule.violationCount > 1 ? 's' : ''}
                     </div>
                   ) : (
-                    <div className="flex items-center gap-1.5 text-xs text-emerald-400">
+                    <div className="flex items-center gap-1.5 text-xs text-[#c9b787]">
                       <CheckCircle2 className="w-4 h-4" />
                       Compliant
                     </div>
@@ -582,7 +582,7 @@ export default function ContainmentRules() {
                       <Activity className="w-3 h-3" />
                       Gateway Enforcement Mode
                       {rule.tier === 'critical' && (
-                        <span className="flex items-center gap-1 text-[10px] font-mono uppercase text-red-300">
+                        <span className="flex items-center gap-1 text-[10px] font-mono uppercase text-[#f5f5f5]">
                           <Lock className="w-3 h-3" /> Guardian-gated
                         </span>
                       )}
@@ -614,12 +614,12 @@ export default function ContainmentRules() {
                                 {meta.label}
                               </span>
                               {isActive && (
-                                <span className="ml-auto text-[9px] font-mono text-emerald-400">
+                                <span className="ml-auto text-[9px] font-mono text-[#c9b787]">
                                   ACTIVE
                                 </span>
                               )}
                               {isPending && (
-                                <span className="ml-auto text-[9px] font-mono text-sky-400">
+                                <span className="ml-auto text-[9px] font-mono text-[#8a8a8a]">
                                   PENDING
                                 </span>
                               )}
@@ -631,14 +631,14 @@ export default function ContainmentRules() {
                     </div>
 
                     {rule.pendingModeChange && (
-                      <div className="mt-3 flex items-start gap-3 rounded border border-sky-500/30 bg-sky-500/10 p-3">
-                        <Lock className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
+                      <div className="mt-3 flex items-start gap-3 rounded border border-sky-500/30 bg-[#8a8a8a]/10 p-3">
+                        <Lock className="w-4 h-4 text-[#8a8a8a] shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
-                          <div className="text-xs font-bold text-sky-300">
+                          <div className="text-xs font-bold text-[#8a8a8a]">
                             Awaiting Guardian approval to switch to{' '}
                             {MODE_META[rule.pendingModeChange.requestedMode].label}
                           </div>
-                          <div className="text-[11px] font-mono text-sky-400/70 mt-0.5">
+                          <div className="text-[11px] font-mono text-[#8a8a8a]/70 mt-0.5">
                             Requested by {rule.pendingModeChange.requestedBy} ·{' '}
                             {timeAgo(rule.pendingModeChange.requestedAt)} ·{' '}
                             {rule.pendingModeChange.guardianApprovalId}
@@ -649,7 +649,7 @@ export default function ContainmentRules() {
                             e.stopPropagation();
                             cancelPending(rule.id);
                           }}
-                          className="text-[11px] font-mono text-sky-300 hover:text-sky-200 underline shrink-0"
+                          className="text-[11px] font-mono text-[#8a8a8a] hover:text-[#8a8a8a] underline shrink-0"
                         >
                           Cancel
                         </button>
@@ -667,7 +667,7 @@ export default function ContainmentRules() {
                         {rule.allowedMcpServers.map((id) => (
                           <div
                             key={id}
-                            className="flex items-center gap-2 text-[11px] font-mono text-emerald-400"
+                            className="flex items-center gap-2 text-[11px] font-mono text-[#c9b787]"
                           >
                             <CheckCircle2 className="w-3 h-3" />
                             {getMcpName(id)}
@@ -730,7 +730,7 @@ export default function ContainmentRules() {
                           ))}
                         </div>
                       ) : (
-                        <div className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
+                        <div className="text-[11px] font-mono text-[#c9b787] flex items-center gap-1.5">
                           <CheckCircle2 className="w-3 h-3" />
                           Egress blocked
                         </div>
@@ -743,7 +743,7 @@ export default function ContainmentRules() {
                       <div className="text-[10px] text-slate-500 font-mono uppercase mb-2">
                         Violation Details
                       </div>
-                      <p className="text-xs text-red-400/80">
+                      <p className="text-xs text-[#f5f5f5]/80">
                         {rule.agentClass === 'codex-cli'
                           ? 'Codex CLI connected to quarantined mcp-ext-scraper server — not in allowlist. 3 tool calls blocked at the MCP gateway.'
                           : 'Agent accessed filesystem paths outside the allowed read scope. Gateway logged the call and emitted an Exposure.'}
@@ -804,15 +804,15 @@ export default function ContainmentRules() {
             }
             const text =
               tone === 'emerald'
-                ? 'text-emerald-400'
+                ? 'text-[#c9b787]'
                 : tone === 'amber'
-                  ? 'text-amber-400'
+                  ? 'text-[#c9b787]'
                   : 'text-slate-400';
             const dot =
               tone === 'emerald'
-                ? 'bg-emerald-400'
+                ? 'bg-[#c9b787]'
                 : tone === 'amber'
-                  ? 'bg-amber-400'
+                  ? 'bg-[#c9b787]'
                   : 'bg-slate-400';
             return (
               <div
@@ -873,7 +873,7 @@ export default function ContainmentRules() {
                     className={cn(
                       'px-2 py-0.5 rounded text-[10px] font-mono border transition-colors',
                       active
-                        ? 'border-sky-500/40 bg-sky-500/10 text-sky-300'
+                        ? 'border-sky-500/40 bg-[#8a8a8a]/10 text-[#8a8a8a]'
                         : 'border-slate-800 text-slate-500 hover:border-slate-700 hover:text-slate-300',
                     )}
                   >
@@ -895,7 +895,7 @@ export default function ContainmentRules() {
                     className={cn(
                       'px-2 py-0.5 rounded text-[10px] font-mono border transition-colors',
                       active
-                        ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
+                        ? 'border-[#c9b787]/40 bg-[#c9b787]/10 text-[#c9b787]'
                         : 'border-slate-800 text-slate-500 hover:border-slate-700 hover:text-slate-300',
                     )}
                   >
@@ -986,24 +986,24 @@ export default function ContainmentRules() {
       </section>
 
       <div className="sentra-panel p-5 border-sky-500/20">
-        <div className="text-[10px] text-sky-400 font-mono uppercase mb-3">Tier-Policy Mapping</div>
+        <div className="text-[10px] text-[#8a8a8a] font-mono uppercase mb-3">Tier-Policy Mapping</div>
         <div className="grid grid-cols-3 gap-4 text-xs">
           <div className="p-3 rounded bg-slate-800/50">
-            <div className="font-bold text-red-400 mb-1">Critical Tier</div>
+            <div className="font-bold text-[#f5f5f5] mb-1">Critical Tier</div>
             <p className="text-slate-500">
               Enforcement mode changes require Guardian approval. Blocked calls create P0 Exposures
               immediately.
             </p>
           </div>
           <div className="p-3 rounded bg-slate-800/50">
-            <div className="font-bold text-amber-400 mb-1">Elevated Tier</div>
+            <div className="font-bold text-[#c9b787] mb-1">Elevated Tier</div>
             <p className="text-slate-500">
               Operators can switch between log-only and block. Quarantine still requires Guardian
               sign-off.
             </p>
           </div>
           <div className="p-3 rounded bg-slate-800/50">
-            <div className="font-bold text-sky-400 mb-1">Standard Tier</div>
+            <div className="font-bold text-[#8a8a8a] mb-1">Standard Tier</div>
             <p className="text-slate-500">
               Operators may freely toggle enforcement modes. All blocked calls are logged as
               Exposures.

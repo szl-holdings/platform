@@ -1719,7 +1719,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "ParticleField": {
-    category: "LUMINA",
+    category: "Pulse",
     status: "experimental",
     source: "lib/shared-ui/src/pulse/particle-field.tsx",
     props: [
@@ -1908,7 +1908,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "PulseEventFeed": {
-    category: "LUMINA",
+    category: "Pulse",
     status: "stable",
     source: "lib/shared-ui/src/pulse/event-feed.tsx",
     props: [
@@ -1918,14 +1918,14 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "PulseFlowDiagram": {
-    category: "LUMINA",
+    category: "Pulse",
     status: "stable",
     source: "lib/shared-ui/src/pulse/flow-diagram.tsx",
     props: [
     ],
   },
   "PulseHeader": {
-    category: "LUMINA",
+    category: "Pulse",
     status: "stable",
     source: "lib/shared-ui/src/pulse/pulse-header.tsx",
     props: [
@@ -1935,14 +1935,14 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "PulseHealthGrid": {
-    category: "LUMINA",
+    category: "Pulse",
     status: "stable",
     source: "lib/shared-ui/src/pulse/health-grid.tsx",
     props: [
     ],
   },
   "PulseMetricCard": {
-    category: "LUMINA",
+    category: "Pulse",
     status: "stable",
     source: "lib/shared-ui/src/pulse/metric-card.tsx",
     props: [
@@ -1956,7 +1956,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "PulseTechStack": {
-    category: "LUMINA",
+    category: "Pulse",
     status: "stable",
     source: "lib/shared-ui/src/pulse/tech-stack.tsx",
     props: [
@@ -1965,7 +1965,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
     ],
   },
   "PulseThroughputChart": {
-    category: "LUMINA",
+    category: "Pulse",
     status: "stable",
     source: "lib/shared-ui/src/pulse/throughput-chart.tsx",
     props: [

@@ -53,44 +53,42 @@
 }
 
 :root {
-  /* Lyte product — accent.amber (#c9a85c ≈ hsl(38 50% 57%)) */
-  --background: 220 28% 5%;
-  --foreground: 38 12% 90%;
-  --border: 218 20% 11%;
-  --input: 218 20% 13%;
-  --ring: 38 50% 57%;
-  --card: 220 24% 7%;
-  --card-foreground: 38 12% 90%;
-  --popover: 220 24% 8%;
-  --popover-foreground: 38 12% 90%;
-  --primary: 38 50% 57%;
-  --primary-foreground: 220 28% 5%;
-  --secondary: 218 20% 12%;
-  --secondary-foreground: 38 8% 72%;
-  --muted: 218 20% 9%;
-  --muted-foreground: 218 10% 60%;
-  --accent: 32 46% 44%;
-  --accent-foreground: 38 12% 90%;
-  --destructive: 352 44% 45%;
-  --destructive-foreground: 0 0% 100%;
-  --sidebar: 220 30% 4%;
-  --sidebar-foreground: 38 8% 65%;
-  --sidebar-border: 218 20% 10%;
-  --sidebar-primary: 38 50% 57%;
-  --sidebar-primary-foreground: 220 28% 5%;
-  --sidebar-accent: 218 20% 9%;
-  --sidebar-accent-foreground: 38 12% 90%;
-  --sidebar-ring: 38 50% 57%;
+  --background: 0 0% 4%;
+  --foreground: 0 0% 96%;
+  --border: 0 0% 12%;
+  --input: 0 0% 14%;
+  --ring: 43 36% 66%;
+  --card: 0 0% 6%;
+  --card-foreground: 0 0% 96%;
+  --popover: 0 0% 7%;
+  --popover-foreground: 0 0% 96%;
+  --primary: 43 36% 66%;
+  --primary-foreground: 0 0% 4%;
+  --secondary: 0 0% 11%;
+  --secondary-foreground: 0 0% 62%;
+  --muted: 0 0% 9%;
+  --muted-foreground: 0 0% 54%;
+  --accent: 43 30% 50%;
+  --accent-foreground: 0 0% 96%;
+  --destructive: 0 0% 54%;
+  --destructive-foreground: 0 0% 96%;
+  --sidebar: 0 0% 3%;
+  --sidebar-foreground: 0 0% 54%;
+  --sidebar-border: 0 0% 10%;
+  --sidebar-primary: 43 36% 66%;
+  --sidebar-primary-foreground: 0 0% 4%;
+  --sidebar-accent: 0 0% 9%;
+  --sidebar-accent-foreground: 0 0% 96%;
+  --sidebar-ring: 43 36% 66%;
 
-  /* Lyte product tokens */
-  --lyte-amber:        var(--gi-accent-amber);
-  --lyte-amber-dim:    rgba(201, 168, 92, 0.08);
-  --lyte-amber-border: rgba(201, 168, 92, 0.18);
-  --lyte-gold:         #9a7840;
-  --lyte-critical:     var(--gi-accent-red);
-  --lyte-warn:         var(--gi-accent-amber);
-  --lyte-ok:           var(--gi-accent-green);
-  --lyte-info:         var(--gi-accent-blue);
+  --lyte-amber:        #c9b787;
+  --lyte-amber-dim:    rgba(201, 183, 135, 0.08);
+  --lyte-amber-border: rgba(201, 183, 135, 0.18);
+  --lyte-gold:         #c9b787;
+  --lyte-critical:     #8a8a8a;
+  --lyte-warn:         #c9b787;
+  --lyte-ok:           #8a8a8a;
+  --lyte-info:         #5e5e5e;
 }
 
 @layer base {
@@ -103,7 +101,7 @@
     font-family: 'Space Grotesk', system-ui, sans-serif;
     @apply tracking-tight font-semibold;
   }
-  ::selection { background: rgba(201, 168, 92, 0.2); color: hsl(38 12% 90%); }
+  ::selection { background: rgba(201, 183, 135, 0.2); color: #f5f5f5; }
 
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -112,7 +110,7 @@
 }
 
 :focus-visible {
-  outline: 2px solid var(--gi-accent-amber);
+  outline: 2px solid #c9b787;
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -127,9 +125,9 @@
   font-family: 'JetBrains Mono', monospace;
   font-weight: 500;
   letter-spacing: 0.04em;
-  border: 1px solid rgba(201, 168, 92, 0.2);
-  background: rgba(201, 168, 92, 0.06);
-  color: var(--gi-accent-amber);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.025);
+  color: #8a8a8a;
 }
 
 .cockpit-panel {
@@ -140,11 +138,11 @@
   overflow: hidden;
 }
 
-.status-critical { @apply text-red-400 bg-red-500/8 border border-red-500/20; }
-.status-warn     { @apply text-amber-400 bg-amber-500/8 border border-amber-500/20; }
-.status-ok       { @apply text-emerald-400 bg-emerald-500/8 border border-emerald-500/20; }
-.status-info     { @apply text-sky-400 bg-sky-500/8 border border-sky-500/20; }
-.status-muted    { @apply text-slate-400 bg-slate-500/8 border border-slate-500/20; }
+.status-critical { @apply text-[#8a8a8a] bg-white/[0.03] border border-white/[0.08]; }
+.status-warn     { @apply text-[#c9b787] bg-white/[0.03] border border-white/[0.08]; }
+.status-ok       { @apply text-[#8a8a8a] bg-white/[0.03] border border-white/[0.08]; }
+.status-info     { @apply text-[#5e5e5e] bg-white/[0.03] border border-white/[0.08]; }
+.status-muted    { @apply text-[#5e5e5e] bg-white/[0.03] border border-white/[0.08]; }
 
 .heat-cell {
   border-radius: var(--radius-sm);

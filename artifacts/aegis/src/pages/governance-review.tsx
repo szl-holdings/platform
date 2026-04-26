@@ -34,7 +34,7 @@ const STATUS_STYLE: Record<string, { color: string; bg: string; label: string }>
   pending: { color: '#c08a2c', bg: '#c08a2c20', label: 'Pending' },
   approved: { color: '#40856a', bg: '#40856a20', label: 'Approved' },
   rejected: { color: '#c04a2a', bg: '#c04a2a20', label: 'Rejected' },
-  escalated: { color: '#a855f7', bg: '#a855f720', label: 'Escalated' },
+  escalated: { color: '#8a8a8a', bg: '#8a8a8a20', label: 'Escalated' },
   withdrawn: { color: 'rgba(255,255,255,0.25)', bg: 'rgba(255,255,255,0.04)', label: 'Withdrawn' },
 };
 
@@ -69,7 +69,7 @@ function ApprovalCard({
           approval.status === 'pending' ? 'hsl(220 72% 56% / 0.04)' : 'rgba(255,255,255,0.02)',
         borderColor:
           approval.priority === 'critical' && approval.status === 'pending'
-            ? '#9b1c1c30'
+            ? '#5e5e5e30'
             : approval.status === 'pending'
               ? '#c08a2c20'
               : 'rgba(255,255,255,0.06)',
@@ -96,13 +96,13 @@ function ApprovalCard({
                 style={{
                   background:
                     approval.priority === 'critical'
-                      ? '#9b1c1c20'
+                      ? '#5e5e5e20'
                       : approval.priority === 'high'
                         ? '#c04a2a20'
                         : '#c08a2c20',
                   color:
                     approval.priority === 'critical'
-                      ? '#f87171'
+                      ? '#f5f5f5'
                       : approval.priority === 'high'
                         ? '#c04a2a'
                         : '#c08a2c',
@@ -150,7 +150,7 @@ function ApprovalCard({
                       {c.author}
                     </span>
                     <span style={{ color: 'rgba(255,255,255,0.25)' }}> · {relTime(c.at)}</span>
-                    {c.internal && <span className="ml-1 text-purple-400">(internal)</span>}
+                    {c.internal && <span className="ml-1 text-[#8a8a8a]">(internal)</span>}
                     <p className="mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
                       {c.body}
                     </p>

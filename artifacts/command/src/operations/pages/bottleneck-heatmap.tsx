@@ -317,10 +317,10 @@ const OWNER_CONFIDENCE_COLORS: Record<string, string> = {
 
 const PACKS = ['All', 'Vessels', 'PRAXIS', 'Terra', 'Aegis'];
 const PACK_COLORS: Record<string, string> = {
-  SEXTANT: '#38bdf8',
+  Vessels: '#38bdf8',
   PRISM: '#d4a054',
-  DOMAINE: '#a07848',
-  PARAGON: '#4f6ef7',
+  Terra: '#a07848',
+  Aegis: '#4f6ef7',
 };
 
 function HeatCell({ cell }: { cell: HeatCell }) {

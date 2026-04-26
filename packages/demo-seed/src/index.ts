@@ -114,7 +114,7 @@ export const SIGNAL_MESH_NARRATIVES = [
   },
   {
     id: 'sentra-ransomware',
-    label: 'TENAX — Ransomware-Adjacent OT Event + Recovery Posture Gap',
+    label: 'Aegis — Ransomware-Adjacent OT Event + Recovery Posture Gap',
     domain: 'security',
   },
 ] as const;

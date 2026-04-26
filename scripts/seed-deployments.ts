@@ -22,11 +22,11 @@ const APPS: AppSeed[] = [
   { appId: 'command', appName: 'Unified Command', versions: ['v1.0.0', 'v1.1.0'] },
   { appId: 'szl-holdings', appName: 'SZL Holdings Dashboard', versions: ['v1.0.0', 'v1.1.0'] },
   { appId: 'szl-holdings-mobile', appName: 'APEX — Mobile Command', versions: ['v1.0.0'] },
-  { appId: 'pulse', appName: 'LUMINA — AI Executive Briefing', versions: ['v1.0.0', 'v1.1.0'] },
+  { appId: 'pulse', appName: 'Pulse — AI Executive Briefing', versions: ['v1.0.0', 'v1.1.0'] },
   { appId: 'aegis', appName: 'Aegis — Defense & Intelligence', versions: ['v1.0.0', 'v1.0.1'] },
   { appId: 'vessels', appName: 'Vessels Maritime Intelligence', versions: ['v1.0.0', 'v1.1.0'] },
   { appId: 'terra', appName: 'Terra — Real Estate Intelligence', versions: ['v1.0.0', 'v1.1.0'] },
-  { appId: 'sentra', appName: 'TENAX — Cyber Resilience', versions: ['v1.0.0'] },
+  { appId: 'sentra', appName: 'Aegis — Cyber Resilience', versions: ['v1.0.0'] },
   {
     appId: 'prism-counsel',
     appName: 'Counsel — Legal Command',

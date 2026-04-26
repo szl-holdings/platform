@@ -40,27 +40,27 @@ interface GraphEdge {
 type LucideIcon = ComponentType<SVGProps<SVGSVGElement> & { size?: number; className?: string }>;
 
 const NODE_CONFIG: Record<NodeType, { icon: LucideIcon; color: string; bg: string }> = {
-  endpoint: { icon: Server, color: '#a78bfa', bg: 'rgba(167,139,250,0.12)' },
-  identity: { icon: User, color: '#60a5fa', bg: 'rgba(96,165,250,0.12)' },
-  cloud: { icon: Globe, color: '#34d399', bg: 'rgba(52,211,153,0.12)' },
-  network: { icon: Network, color: '#38bdf8', bg: 'rgba(56,189,248,0.12)' },
-  malware: { icon: AlertTriangle, color: '#ef4444', bg: 'rgba(239,68,68,0.15)' },
-  c2: { icon: Globe, color: '#f97316', bg: 'rgba(249,115,22,0.12)' },
+  endpoint: { icon: Server, color: '#c9b787', bg: 'rgba(167,139,250,0.12)' },
+  identity: { icon: User, color: '#c9b787', bg: 'rgba(96,165,250,0.12)' },
+  cloud: { icon: Globe, color: '#c9b787', bg: 'rgba(52,211,153,0.12)' },
+  network: { icon: Network, color: '#8a8a8a', bg: 'rgba(56,189,248,0.12)' },
+  malware: { icon: AlertTriangle, color: '#f5f5f5', bg: 'rgba(245,245,245,0.15)' },
+  c2: { icon: Globe, color: '#c9b787', bg: 'rgba(201,183,135,0.12)' },
 };
 
 const RISK_COLORS = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#eab308',
-  low: '#22c55e',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#8a8a8a',
+  low: '#c9b787',
 };
 
 const EDGE_COLORS: Record<EdgeType, string> = {
-  lateral: '#a78bfa',
-  c2: '#ef4444',
-  exploit: '#f97316',
-  credential: '#60a5fa',
-  persistence: '#eab308',
+  lateral: '#c9b787',
+  c2: '#f5f5f5',
+  exploit: '#c9b787',
+  credential: '#c9b787',
+  persistence: '#8a8a8a',
 };
 
 const GRAPH_NODES: GraphNode[] = [
@@ -236,14 +236,14 @@ export default function ThreatGraph() {
       {/* Header */}
       <div
         className="px-6 py-4 border-b flex items-center justify-between shrink-0"
-        style={{ borderColor: 'rgba(239,68,68,0.1)' }}
+        style={{ borderColor: 'rgba(245,245,245,0.1)' }}
       >
         <div className="flex items-center gap-3">
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center"
             style={{ background: 'rgba(167,139,250,0.1)' }}
           >
-            <Network className="w-4 h-4 text-purple-400" />
+            <Network className="w-4 h-4 text-[#8a8a8a]" />
           </div>
           <div>
             <h1 className="text-sm font-bold text-white">Threat Graph</h1>
@@ -256,12 +256,12 @@ export default function ThreatGraph() {
           <div
             className="flex items-center gap-1 px-2 py-1 rounded border text-[9px]"
             style={{
-              borderColor: 'rgba(239,68,68,0.2)',
-              color: '#ef4444',
-              background: 'rgba(239,68,68,0.06)',
+              borderColor: 'rgba(245,245,245,0.2)',
+              color: '#f5f5f5',
+              background: 'rgba(245,245,245,0.06)',
             }}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#f5f5f5] animate-pulse" />
             INC-2041 — APT41 Active
           </div>
           <button
@@ -486,7 +486,7 @@ export default function ThreatGraph() {
                   onMouseEnter={() => setHoveredNode(node.id)}
                   onMouseLeave={() => setHoveredNode(null)}
                 >
-                  {/* LUMINA ring for compromised nodes */}
+                  {/* status ring for compromised nodes */}
                   {node.compromised && animate && (
                     <circle
                       cx={node.x}
@@ -620,7 +620,7 @@ export default function ThreatGraph() {
                   {selectedNode.risk.toUpperCase()}
                 </span>
                 {selectedNode.compromised && (
-                  <span className="px-2 py-0.5 rounded text-[9px] font-bold border text-red-400 border-red-500/30 bg-red-500/10">
+                  <span className="px-2 py-0.5 rounded text-[9px] font-bold border text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10">
                     COMPROMISED
                   </span>
                 )}
@@ -634,8 +634,8 @@ export default function ThreatGraph() {
                     background: 'rgba(167,139,250,0.06)',
                   }}
                 >
-                  <p className="text-[9px] text-purple-300/50 mb-1">ATT&CK Technique</p>
-                  <p className="text-[11px] text-purple-300 font-mono font-bold">
+                  <p className="text-[9px] text-[#8a8a8a]/50 mb-1">ATT&CK Technique</p>
+                  <p className="text-[11px] text-[#8a8a8a] font-mono font-bold">
                     {selectedNode.technique}
                   </p>
                 </div>
@@ -687,9 +687,9 @@ export default function ThreatGraph() {
                   <button
                     className="w-full flex items-center gap-2 p-2.5 rounded-lg border text-[11px] font-medium transition-all"
                     style={{
-                      borderColor: 'rgba(239,68,68,0.3)',
-                      color: '#ef4444',
-                      background: 'rgba(239,68,68,0.07)',
+                      borderColor: 'rgba(245,245,245,0.3)',
+                      color: '#f5f5f5',
+                      background: 'rgba(245,245,245,0.07)',
                     }}
                   >
                     <Shield className="w-3.5 h-3.5" /> Isolate Host
@@ -699,9 +699,9 @@ export default function ThreatGraph() {
                   <button
                     className="w-full flex items-center gap-2 p-2.5 rounded-lg border text-[11px] font-medium transition-all"
                     style={{
-                      borderColor: 'rgba(234,179,8,0.3)',
-                      color: '#eab308',
-                      background: 'rgba(234,179,8,0.07)',
+                      borderColor: 'rgba(138,138,138,0.3)',
+                      color: '#8a8a8a',
+                      background: 'rgba(138,138,138,0.07)',
                     }}
                   >
                     <User className="w-3.5 h-3.5" /> Disable Account
@@ -711,7 +711,7 @@ export default function ThreatGraph() {
                   className="w-full flex items-center gap-2 p-2.5 rounded-lg border text-[11px] font-medium transition-all"
                   style={{
                     borderColor: 'rgba(96,165,250,0.2)',
-                    color: '#60a5fa',
+                    color: '#c9b787',
                     background: 'rgba(96,165,250,0.05)',
                   }}
                 >

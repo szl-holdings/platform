@@ -60,11 +60,11 @@ function PatternOfLifePanel() {
     <div className="sentra-panel p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-display font-bold flex items-center gap-2">
-          <Brain className="w-4 h-4 text-red-500" />
+          <Brain className="w-4 h-4 text-[#f5f5f5]" />
           Behavioral Baseline
         </h2>
         <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse" />
           <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider">
             Pattern of Life · Live
           </span>
@@ -74,16 +74,16 @@ function PatternOfLifePanel() {
         {BASELINE_ENTITIES.map((e) => {
           const devColor =
             e.status === 'anomaly'
-              ? 'text-red-400'
+              ? 'text-[#f5f5f5]'
               : e.status === 'watch'
-                ? 'text-amber-400'
-                : 'text-emerald-400';
+                ? 'text-[#c9b787]'
+                : 'text-[#c9b787]';
           const barColor =
             e.status === 'anomaly'
-              ? 'bg-red-500'
+              ? 'bg-[#f5f5f5]'
               : e.status === 'watch'
-                ? 'bg-amber-500'
-                : 'bg-emerald-500';
+                ? 'bg-[#c9b787]'
+                : 'bg-[#c9b787]';
           const barWidth =
             e.status === 'anomaly'
               ? '100%'
@@ -107,10 +107,10 @@ function PatternOfLifePanel() {
                 style={{
                   color:
                     e.status === 'anomaly'
-                      ? '#f87171'
+                      ? '#f5f5f5'
                       : e.status === 'watch'
-                        ? '#fbbf24'
-                        : '#34d399',
+                        ? '#c9b787'
+                        : '#c9b787',
                 }}
               >
                 {e.current}
@@ -143,16 +143,16 @@ function NLThreatQueryBar() {
   return (
     <div className="sentra-panel p-4 space-y-3">
       <div className="flex items-center gap-2">
-        <Search className="w-4 h-4 text-red-400/60" />
+        <Search className="w-4 h-4 text-[#f5f5f5]/60" />
         <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">
           Threat Intelligence Query
         </span>
         <span
           className="text-[9px] font-mono px-1.5 py-0.5 rounded"
           style={{
-            background: 'rgba(239,68,68,0.08)',
-            border: '1px solid rgba(239,68,68,0.15)',
-            color: '#f87171',
+            background: 'rgba(201,183,135,0.08)',
+            border: '1px solid rgba(201,183,135,0.12)',
+            color: '#f5f5f5',
           }}
         >
           NL-powered
@@ -168,8 +168,8 @@ function NLThreatQueryBar() {
           placeholder="Ask in plain English — e.g. 'show assets with unusual outbound activity this week'"
           className="flex-1 bg-transparent text-xs text-slate-300 placeholder:text-slate-600 outline-none"
           style={{
-            background: 'rgba(239,68,68,0.03)',
-            border: `1px solid ${active ? 'rgba(239,68,68,0.35)' : 'rgba(239,68,68,0.1)'}`,
+            background: 'rgba(201,183,135,0.03)',
+            border: `1px solid ${active ? 'rgba(201,183,135,0.25)' : 'rgba(201,183,135,0.08)'}`,
             borderRadius: 8,
             padding: '8px 12px',
             transition: 'border-color 0.15s',
@@ -178,9 +178,9 @@ function NLThreatQueryBar() {
         <button
           className="px-3 py-2 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider transition-colors"
           style={{
-            background: 'rgba(239,68,68,0.12)',
-            border: '1px solid rgba(239,68,68,0.25)',
-            color: '#f87171',
+            background: 'rgba(201,183,135,0.08)',
+            border: '1px solid rgba(201,183,135,0.15)',
+            color: '#f5f5f5',
           }}
         >
           Run
@@ -218,48 +218,48 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="stat-panel p-6">
-          <div className="flex items-center gap-3 text-red-400 mb-2">
+          <div className="flex items-center gap-3 text-[#f5f5f5] mb-2">
             <ShieldAlert className="w-5 h-5" />
             <span className="text-sm font-medium">Active Incidents</span>
           </div>
           <div className="text-4xl font-display font-bold">{sentraTwin.incidents.length}</div>
-          <div className="text-xs text-red-400/60 mt-2 font-mono">CRITICAL STATUS</div>
+          <div className="text-xs text-[#f5f5f5]/60 mt-2 font-mono">CRITICAL STATUS</div>
         </div>
 
         <div className="stat-panel p-6">
-          <div className="flex items-center gap-3 text-amber-400 mb-2">
+          <div className="flex items-center gap-3 text-[#c9b787] mb-2">
             <Cpu className="w-5 h-5" />
             <span className="text-sm font-medium">Assets at Risk</span>
           </div>
           <div className="text-4xl font-display font-bold">
             {sentraTwin.assets.filter((a) => a.exposureScore > 70).length}
           </div>
-          <div className="text-xs text-amber-400/60 mt-2 font-mono">EXPOSURE &gt; 70</div>
+          <div className="text-xs text-[#c9b787]/60 mt-2 font-mono">EXPOSURE &gt; 70</div>
         </div>
 
         <div className="stat-panel p-6">
-          <div className="flex items-center gap-3 text-sky-400 mb-2">
+          <div className="flex items-center gap-3 text-[#8a8a8a] mb-2">
             <RotateCcw className="w-5 h-5" />
             <span className="text-sm font-medium">Recovery Posture</span>
           </div>
           <div className="text-4xl font-display font-bold">{sentraTwin.recoveryPosture}%</div>
           <div className="w-full bg-slate-800 h-1 mt-3 rounded-full overflow-hidden">
             <div
-              className="bg-sky-500 h-full transition-all duration-1000"
+              className="bg-[#8a8a8a] h-full transition-all duration-1000"
               style={{ width: `${sentraTwin.recoveryPosture}%` }}
             />
           </div>
         </div>
 
         <div className="stat-panel p-6">
-          <div className="flex items-center gap-3 text-purple-400 mb-2">
+          <div className="flex items-center gap-3 text-[#8a8a8a] mb-2">
             <ShieldCheck className="w-5 h-5" />
             <span className="text-sm font-medium">Control Drift</span>
           </div>
           <div className="text-4xl font-display font-bold">
             {sentraTwin.controlDrifts.filter((d) => d.status === 'drift_detected').length}
           </div>
-          <div className="text-xs text-purple-400/60 mt-2 font-mono">RESPOND / RECOVER FAMILY</div>
+          <div className="text-xs text-[#8a8a8a]/60 mt-2 font-mono">RESPOND / RECOVER FAMILY</div>
         </div>
       </div>
 
@@ -269,21 +269,21 @@ export default function Dashboard() {
         <PatternOfLifePanel />
         <div className="sentra-panel p-5 space-y-3">
           <h2 className="text-sm font-display font-bold flex items-center gap-2">
-            <RotateCcw className="w-4 h-4 text-sky-400" />
+            <RotateCcw className="w-4 h-4 text-[#8a8a8a]" />
             Time to Recover Estimate
           </h2>
           <div className="flex items-end gap-3">
-            <div className="text-4xl font-display font-bold text-sky-300">4.2h</div>
+            <div className="text-4xl font-display font-bold text-[#8a8a8a]">4.2h</div>
             <div className="text-xs text-slate-500 mb-1.5">
               estimated mean time to recover (MTTR)
             </div>
           </div>
           <div className="space-y-2">
             {[
-              { label: 'Containment', estimate: '45 min', progress: 90, color: '#ef4444' },
-              { label: 'Eradication', estimate: '1.5h', progress: 45, color: '#f97316' },
-              { label: 'Recovery', estimate: '2h', progress: 20, color: '#0ea5e9' },
-              { label: 'Validation', estimate: '30 min', progress: 0, color: '#8b5cf6' },
+              { label: 'Containment', estimate: '45 min', progress: 90, color: '#f5f5f5' },
+              { label: 'Eradication', estimate: '1.5h', progress: 45, color: '#c9b787' },
+              { label: 'Recovery', estimate: '2h', progress: 20, color: '#8a8a8a' },
+              { label: 'Validation', estimate: '30 min', progress: 0, color: '#8a8a8a' },
             ].map((s) => (
               <div key={s.label} className="space-y-1">
                 <div className="flex justify-between text-[10px]">
@@ -308,15 +308,15 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 sentra-panel p-6">
           <h2 className="text-lg font-display font-bold mb-6 flex items-center gap-2">
-            <Activity className="w-5 h-5 text-red-500" />
+            <Activity className="w-5 h-5 text-[#f5f5f5]" />
             Critical Incident Timeline
           </h2>
           <div className="space-y-6">
             {sentraTwin.incidents.map((incident) => (
               <div key={incident.id} className="sentra-card p-4">
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-bold text-red-400">{incident.title}</h3>
-                  <span className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-[10px] text-red-400 font-mono">
+                  <h3 className="font-bold text-[#f5f5f5]">{incident.title}</h3>
+                  <span className="px-2 py-0.5 rounded bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 text-[10px] text-[#f5f5f5] font-mono">
                     {incident.severity.toUpperCase()}
                   </span>
                 </div>
@@ -338,7 +338,7 @@ export default function Dashboard() {
 
         <div className="sentra-panel p-6">
           <h2 className="text-lg font-display font-bold mb-6 flex items-center gap-2">
-            <BarChart3 className="text-red-500 w-5 h-5" />
+            <BarChart3 className="text-[#f5f5f5] w-5 h-5" />
             Financial Exposure
           </h2>
           <div className="space-y-6">

@@ -38,7 +38,7 @@ const DS = {
   surface: 'rgba(255,255,255,0.025)',
   border: 'rgba(255,255,255,0.05)',
   borderMuted: 'rgba(255,255,255,0.03)',
-  accent: { gold: '#b8943c', blue: '#3a7ad4', green: '#40856a', red: '#c0503a' },
+  accent: { gold: '#b8943c', blue: '#8a8a8a', green: '#c9b787', red: '#8a8a8a' },
   text: {
     primary: 'rgba(255,255,255,0.85)',
     secondary: 'rgba(255,255,255,0.5)',

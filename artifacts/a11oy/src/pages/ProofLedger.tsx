@@ -75,9 +75,9 @@ const ENTRIES = [
 ];
 
 const KIND_STYLES: Record<string, { bg: string; color: string }> = {
-  EXECUTION:   { bg: 'rgba(16,185,129,0.1)', color: '#10b981' },
-  DECISION:    { bg: 'rgba(59,130,246,0.1)', color: '#3b82f6' },
-  APPROVAL:    { bg: 'rgba(139,92,246,0.1)', color: '#8b5cf6' },
+  EXECUTION:   { bg: 'rgba(201,183,135,0.1)', color: '#c9b787' },
+  DECISION:    { bg: 'rgba(201,183,135,0.1)', color: '#c9b787' },
+  APPROVAL:    { bg: 'rgba(138,138,138,0.1)', color: '#8a8a8a' },
   POLICY_EVAL: { bg: 'rgba(176,141,82,0.1)', color: '#b08d52' },
 };
 
@@ -93,9 +93,9 @@ export function ProofLedger() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <KpiCard label="TOTAL ENTRIES" value="5" sub="Demo chain" accent="#b08d52" />
-        <KpiCard label="VERIFIED" value="5 / 5" sub="All hashes valid" accent="#10b981" />
-        <KpiCard label="CAUSAL LINKS" value="17" sub="Across all entries" accent="#3b82f6" />
-        <KpiCard label="CHAIN INTEGRITY" value="100%" sub="No tampering detected" accent="#10b981" />
+        <KpiCard label="VERIFIED" value="5 / 5" sub="All hashes valid" accent="#c9b787" />
+        <KpiCard label="CAUSAL LINKS" value="17" sub="Across all entries" accent="#c9b787" />
+        <KpiCard label="CHAIN INTEGRITY" value="100%" sub="No tampering detected" accent="#c9b787" />
       </div>
 
       <div className="mb-4 p-3 rounded-lg text-xs" style={{ backgroundColor: 'rgba(176,141,82,0.06)', border: '1px solid rgba(176,141,82,0.2)', color: '#b08d52' }}>
@@ -127,7 +127,7 @@ export function ProofLedger() {
                 </div>
               </div>
               <div className="text-right flex-shrink-0">
-                <div className="text-xs font-mono" style={{ color: '#10b981' }}>{e.verified ? '✓ verified' : 'unverified'}</div>
+                <div className="text-xs font-mono" style={{ color: '#c9b787' }}>{e.verified ? '✓ verified' : 'unverified'}</div>
                 <div className="text-xs mt-0.5" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{e.causalLinks} causal links</div>
               </div>
             </div>
@@ -147,7 +147,7 @@ export function ProofLedger() {
               </div>
               <div>
                 <div className="font-mono mb-0.5" style={{ color: 'var(--color-a11oy-text-ghost)' }}>STATUS</div>
-                <span style={{ color: e.executionStatus === 'completed' ? '#10b981' : '#f59e0b' }}>{e.executionStatus}</span>
+                <span style={{ color: e.executionStatus === 'completed' ? '#c9b787' : '#c9b787' }}>{e.executionStatus}</span>
               </div>
             </div>
 
@@ -164,7 +164,7 @@ export function ProofLedger() {
         ))}
       </div>
 
-      <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
+      <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
         <DemoBadge /> All proof entries are illustrative demo data. Production Proof Ledger entries are cryptographically immutable and append-only.
       </div>
     </Layout>

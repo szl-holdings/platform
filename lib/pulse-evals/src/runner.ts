@@ -126,7 +126,7 @@ export async function runPulseEvals(
     caseIds,
     includeRedTeam = true,
     suiteId = `pulse_eval_${Date.now()}`,
-    suiteName = 'LUMINA EVALS — Full Suite',
+    suiteName = 'Pulse EVALS — Full Suite',
     config = {},
   } = options;
 
@@ -236,7 +236,7 @@ export async function runDomainEvals(
   return runPulseEvals(executor, {
     domains: [domain],
     suiteId: options?.suiteId ?? `pulse_${domain}_${Date.now()}`,
-    suiteName: `LUMINA EVALS — ${domain.toUpperCase()} Suite`,
+    suiteName: `Pulse EVALS — ${domain.toUpperCase()} Suite`,
     ...(options?.config !== undefined && { config: options.config }),
   });
 }
@@ -249,7 +249,7 @@ export async function runRedTeamEvals(
     domains: ['red_team'],
     includeRedTeam: true,
     suiteId: options?.suiteId ?? `pulse_redteam_${Date.now()}`,
-    suiteName: 'LUMINA EVALS — Red Team Suite',
+    suiteName: 'Pulse EVALS — Red Team Suite',
     ...(options?.config !== undefined && { config: options.config }),
   });
 }

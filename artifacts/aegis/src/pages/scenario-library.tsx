@@ -38,19 +38,19 @@ import { useState } from 'react';
 import { api } from '@/lib/api';
 
 const categoryColors: Record<string, string> = {
-  network: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  application: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  social_engineering: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-  physical: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  insider_threat: 'bg-red-500/10 text-red-400 border-red-500/20',
-  supply_chain: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+  network: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  application: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  social_engineering: 'bg-[#8a8a8a]/10 text-[#8a8a8a] border-[#8a8a8a]/20',
+  physical: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  insider_threat: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  supply_chain: 'bg-[#8a8a8a]/10 text-[#8a8a8a] border-[#8a8a8a]/20',
 };
 
 const severityColors: Record<string, string> = {
-  low: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  critical: 'bg-red-500/10 text-red-400 border-red-500/20',
+  low: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  medium: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  high: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  critical: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
 };
 
 const categoryLabels: Record<string, string> = {
@@ -316,7 +316,7 @@ export default function ScenarioLibrary() {
                       className={`${severityColors[scenario.severity] || ''} ${isCritical ? 'animate-threat-pulse' : ''}`}
                     >
                       {isCritical && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-400 mr-1.5 animate-pulse-dot" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#f5f5f5] mr-1.5 animate-pulse-dot" />
                       )}
                       {scenario.severity}
                     </Badge>

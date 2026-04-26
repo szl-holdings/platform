@@ -18,7 +18,7 @@ const AGENT_COLORS: Record<string, string> = {
   Terra:   '#34d399',
   Vessels: '#60a5fa',
   Aegis:   '#fb923c',
-  KORA:    '#2dd4bf',
+  Lyte:    '#2dd4bf',
   'A11oy': '#f59e0b',
 };
 

@@ -86,12 +86,12 @@ function ScoreCell({ value, max }: { value: number; max: number }) {
   const pct = (value / max) * 100;
   const color =
     pct >= 90
-      ? 'text-emerald-400'
+      ? 'text-[#c9b787]'
       : pct >= 75
-        ? 'text-blue-400'
+        ? 'text-[#c9b787]'
         : pct >= 60
-          ? 'text-amber-400'
-          : 'text-red-400';
+          ? 'text-[#c9b787]'
+          : 'text-[#f5f5f5]';
   return <span className={`font-mono text-sm ${color}`}>{value.toFixed(1)}</span>;
 }
 
@@ -102,7 +102,7 @@ export default function Benchmarking() {
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-display font-bold flex items-center gap-2">
-          <Trophy className="w-6 h-6 text-amber-400" /> AI Model Benchmarking
+          <Trophy className="w-6 h-6 text-[#c9b787]" /> AI Model Benchmarking
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
           Head-to-head model evaluation — accuracy, latency, and throughput benchmarks
@@ -116,7 +116,7 @@ export default function Benchmarking() {
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
           <div className="text-xs text-muted-foreground">Best Average Score</div>
-          <div className="text-2xl font-display font-bold text-emerald-400 mt-1">
+          <div className="text-2xl font-display font-bold text-[#c9b787] mt-1">
             {bestAvg.toFixed(1)}
           </div>
         </div>
@@ -126,7 +126,7 @@ export default function Benchmarking() {
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
           <div className="text-xs text-muted-foreground">Cost Efficiency Leader</div>
-          <div className="text-2xl font-display font-bold text-violet-400 mt-1">SZL-7B</div>
+          <div className="text-2xl font-display font-bold text-[#8a8a8a] mt-1">SZL-7B</div>
         </div>
       </div>
 
@@ -176,7 +176,7 @@ export default function Benchmarking() {
                 </td>
                 <td className="p-4 text-center">
                   <span
-                    className={`font-mono text-sm font-bold ${r.avgScore === bestAvg ? 'text-emerald-400' : ''}`}
+                    className={`font-mono text-sm font-bold ${r.avgScore === bestAvg ? 'text-[#c9b787]' : ''}`}
                   >
                     {r.avgScore.toFixed(1)}
                   </span>

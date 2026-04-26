@@ -463,7 +463,7 @@ const CATEGORIES = [
   { id: 'Visualization', label: 'Visualization', icon: Network },
   { id: 'Monitoring', label: 'Monitoring', icon: Eye },
   { id: 'Identity', label: 'Identity', icon: Layers },
-  { id: 'LUMINA', label: 'LUMINA', icon: Zap },
+  { id: 'Pulse', label: 'Pulse', icon: Zap },
   { id: 'Document Engine', label: 'Document Engine', icon: BookOpen },
   { id: 'Onboarding', label: 'Onboarding', icon: Workflow },
   { id: 'Receipt Graph', label: 'Receipt Graph', icon: Database },
@@ -550,7 +550,7 @@ function defaultValueForType(type: string): string {
 
 function descriptionFor(name: string, category: string): string {
   const map: Record<string, string> = {
-    'LUMINA': `${name} — LUMINA module surface from lib/shared-ui/src/pulse. See source for full behavior.`,
+    'Pulse': `${name} — Pulse module surface from lib/shared-ui/src/pulse. See source for full behavior.`,
     'Document Engine': `${name} — Document engine surface (templates, signing, batch PDF) from lib/shared-ui/src/document-engine.`,
     'Onboarding': `${name} — Onboarding flow primitive from lib/shared-ui/src/onboarding.`,
     'Receipt Graph': `${name} — Provenance / receipt-graph component used to surface evidence and trust signals.`,

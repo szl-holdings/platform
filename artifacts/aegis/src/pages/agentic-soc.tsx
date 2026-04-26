@@ -73,7 +73,7 @@ const AGENTS: Agent[] = [
     alertsHandled: 342,
     successRate: 96,
     avgTriage: '47s',
-    color: '#ef4444',
+    color: '#f5f5f5',
   },
   {
     id: 'TRIAGE-2',
@@ -84,7 +84,7 @@ const AGENTS: Agent[] = [
     alertsHandled: 287,
     successRate: 94,
     avgTriage: '1m 12s',
-    color: '#f97316',
+    color: '#c9b787',
   },
   {
     id: 'RESP-1',
@@ -95,7 +95,7 @@ const AGENTS: Agent[] = [
     alertsHandled: 156,
     successRate: 99,
     avgTriage: '23s',
-    color: '#8b5cf6',
+    color: '#8a8a8a',
   },
   {
     id: 'HUNT-1',
@@ -105,7 +105,7 @@ const AGENTS: Agent[] = [
     alertsHandled: 89,
     successRate: 91,
     avgTriage: '3m 44s',
-    color: '#3b82f6',
+    color: '#c9b787',
   },
   {
     id: 'COMPL-1',
@@ -116,7 +116,7 @@ const AGENTS: Agent[] = [
     alertsHandled: 203,
     successRate: 100,
     avgTriage: '2m 08s',
-    color: '#10b981',
+    color: '#c9b787',
   },
 ];
 
@@ -280,27 +280,27 @@ const REASONING_TRACE: ReasoningStep[] = [
 ];
 
 const severityColor: Record<string, string> = {
-  critical: 'text-red-400 bg-red-500/10 border-red-500/30',
-  high: 'text-orange-400 bg-orange-500/10 border-orange-500/30',
-  medium: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-  low: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
+  critical: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/30',
+  high: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  medium: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  low: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
 };
 
 const statusColor: Record<string, string> = {
   new: 'text-zinc-400 bg-zinc-500/10 border-zinc-500/30',
-  triaging: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-  contained: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
-  resolved: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
-  escalated: 'text-purple-400 bg-purple-500/10 border-purple-500/30',
+  triaging: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  contained: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  resolved: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  escalated: 'text-[#8a8a8a] bg-[#8a8a8a]/10 border-[#8a8a8a]/30',
 };
 
 const agentStatusColor: Record<AgentStatus, string> = {
   idle: 'text-zinc-400',
-  investigating: 'text-amber-400',
-  correlating: 'text-blue-400',
-  executing: 'text-purple-400',
-  'waiting-approval': 'text-orange-400',
-  completed: 'text-emerald-400',
+  investigating: 'text-[#c9b787]',
+  correlating: 'text-[#c9b787]',
+  executing: 'text-[#8a8a8a]',
+  'waiting-approval': 'text-[#c9b787]',
+  completed: 'text-[#c9b787]',
 };
 
 const stepTypeIcon: Record<string, typeof Terminal> = {
@@ -350,16 +350,16 @@ export default function AgenticSOC() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Brain className="w-5 h-5 text-red-400" />
+            <Brain className="w-5 h-5 text-[#f5f5f5]" />
             <h1 className="text-lg font-semibold text-white">
               Agentic SOC — Autonomous Triage & Response
             </h1>
             <span
               className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-mono uppercase border"
               style={{
-                background: liveAlerts ? 'rgba(34,197,94,0.08)' : 'rgba(245,158,11,0.08)',
-                borderColor: liveAlerts ? 'rgba(34,197,94,0.25)' : 'rgba(245,158,11,0.25)',
-                color: liveAlerts ? '#22c55e' : '#f59e0b',
+                background: liveAlerts ? 'rgba(201,183,135,0.08)' : 'rgba(201,183,135,0.08)',
+                borderColor: liveAlerts ? 'rgba(201,183,135,0.25)' : 'rgba(201,183,135,0.25)',
+                color: liveAlerts ? '#c9b787' : '#c9b787',
               }}
             >
               <Database className="w-2.5 h-2.5" />
@@ -388,7 +388,7 @@ export default function AgenticSOC() {
             className={cn(
               'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
               autoMode
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                ? 'bg-[#c9b787]/10 border-[#c9b787]/30 text-[#c9b787]'
                 : 'bg-zinc-800 border-zinc-700 text-zinc-400',
             )}
           >
@@ -411,28 +411,28 @@ export default function AgenticSOC() {
             label: 'Autonomous Rate',
             value: `${autonomousRate}%`,
             sub: 'of alerts handled autonomously',
-            color: '#10b981',
+            color: '#c9b787',
             icon: Brain,
           },
           {
             label: 'Active Agents',
             value: AGENTS.filter((a) => a.status !== 'idle').length,
             sub: `${AGENTS.length} total deployed`,
-            color: '#8b5cf6',
+            color: '#8a8a8a',
             icon: Cpu,
           },
           {
             label: 'Alerts Queue',
             value: alerts.length,
             sub: `${alerts.filter((a) => a.status === 'new').length} unassigned`,
-            color: '#ef4444',
+            color: '#f5f5f5',
             icon: AlertTriangle,
           },
           {
             label: 'Avg Triage Time',
             value: '1m 12s',
             sub: 'vs 45m manual baseline',
-            color: '#3b82f6',
+            color: '#c9b787',
             icon: Clock,
           },
         ].map((m) => {
@@ -451,7 +451,7 @@ export default function AgenticSOC() {
       </div>
 
       {isError && (
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-amber-400 flex items-center gap-2">
+        <div className="rounded-xl border border-[#c9b787]/20 bg-[#c9b787]/5 px-4 py-3 text-xs text-[#c9b787] flex items-center gap-2">
           <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
           Live alert feed unavailable — showing scenario data for demo purposes
         </div>
@@ -492,7 +492,7 @@ export default function AgenticSOC() {
                     )}
                     <div className="flex items-center gap-3 text-[10px] text-zinc-500">
                       <span>{agent.alertsHandled} handled</span>
-                      <span className="text-emerald-400">{agent.successRate}% success</span>
+                      <span className="text-[#c9b787]">{agent.successRate}% success</span>
                       <span>avg {agent.avgTriage}</span>
                     </div>
                   </div>
@@ -509,7 +509,7 @@ export default function AgenticSOC() {
           <div className="space-y-1.5">
             {isLoading ? (
               <div className="flex items-center gap-2 text-xs text-zinc-500 py-4">
-                <div className="w-3.5 h-3.5 border-2 border-red-500/40 border-t-red-400 rounded-full animate-spin" />
+                <div className="w-3.5 h-3.5 border-2 border-[#f5f5f5]/40 border-t-red-400 rounded-full animate-spin" />
                 Loading alerts from Firestorm…
               </div>
             ) : (
@@ -520,7 +520,7 @@ export default function AgenticSOC() {
                   className={cn(
                     'w-full rounded-xl border p-3 text-left transition-all',
                     activeAlert?.id === alert.id
-                      ? 'border-red-500/30 bg-red-500/5'
+                      ? 'border-[#f5f5f5]/30 bg-[#f5f5f5]/5'
                       : 'border-white/8 bg-white/3 hover:bg-white/5',
                   )}
                 >
@@ -600,7 +600,7 @@ export default function AgenticSOC() {
                         <span>{step.timestamp}</span>
                         <span
                           className={cn(
-                            step.confidence >= 90 ? 'text-emerald-400' : 'text-amber-400',
+                            step.confidence >= 90 ? 'text-[#c9b787]' : 'text-[#c9b787]',
                           )}
                         >
                           {step.confidence}%
@@ -620,8 +620,8 @@ export default function AgenticSOC() {
             })}
           </div>
 
-          <div className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-3">
-            <div className="text-[11px] font-semibold text-orange-300 mb-2 flex items-center gap-1.5">
+          <div className="rounded-xl border border-[#c9b787]/20 bg-[#c9b787]/5 p-3">
+            <div className="text-[11px] font-semibold text-[#c9b787] mb-2 flex items-center gap-1.5">
               <AlertTriangle className="w-3 h-3" /> Human Approval Required
             </div>
             <div className="text-[10px] text-zinc-400 mb-3 leading-relaxed">
@@ -636,13 +636,13 @@ export default function AgenticSOC() {
             <div className="flex gap-2">
               <button
                 onClick={handleApprove}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold hover:bg-emerald-500/25 transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#c9b787]/15 border border-[#c9b787]/30 text-[#c9b787] text-[11px] font-semibold hover:bg-[#c9b787]/25 transition-colors"
               >
                 <CheckCircle className="w-3 h-3" /> Approve
               </button>
               <button
                 onClick={handleReject}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[11px] font-semibold hover:bg-red-500/20 transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 text-[#f5f5f5] text-[11px] font-semibold hover:bg-[#f5f5f5]/20 transition-colors"
               >
                 <XCircle className="w-3 h-3" /> Reject
               </button>

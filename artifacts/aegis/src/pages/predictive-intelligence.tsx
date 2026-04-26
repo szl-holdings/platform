@@ -4,8 +4,8 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-const ACCENT = '#ef4444';
-const PURPLE = '#8b5cf6';
+const ACCENT = '#f5f5f5';
+const PURPLE = '#8a8a8a';
 const DS = {
   surface: 'rgba(255,255,255,0.025)',
   border: 'rgba(255,255,255,0.06)',
@@ -210,7 +210,7 @@ export default function PredictiveIntelligence() {
           </span>
           <span
             className="px-1.5 py-0.5 rounded text-[8px] font-bold animate-pulse"
-            style={{ background: 'rgba(139,92,246,0.15)', color: PURPLE }}
+            style={{ background: 'rgba(138,138,138,0.15)', color: PURPLE }}
           >
             FORECASTING ACTIVE
           </span>
@@ -234,7 +234,7 @@ export default function PredictiveIntelligence() {
           {
             label: 'Min Mitigation Window',
             value: `${minMitigationWindow.toFixed(0)}min`,
-            color: minMitigationWindow < 120 ? ACCENT : '#f59e0b',
+            color: minMitigationWindow < 120 ? ACCENT : '#c9b787',
           },
           {
             label: 'Projected Impact',
@@ -291,7 +291,7 @@ export default function PredictiveIntelligence() {
         <div className="space-y-4">
           {predictions.map((p) => {
             const sc =
-              p.severity === 'critical' ? ACCENT : p.severity === 'high' ? '#f97316' : '#f59e0b';
+              p.severity === 'critical' ? ACCENT : p.severity === 'high' ? '#c9b787' : '#c9b787';
             return (
               <div
                 key={p.id}
@@ -310,7 +310,7 @@ export default function PredictiveIntelligence() {
                       {p.adversaryGroup && (
                         <span
                           className="text-[9px] px-1.5 py-0.5 rounded"
-                          style={{ background: 'rgba(139,92,246,0.12)', color: PURPLE }}
+                          style={{ background: 'rgba(138,138,138,0.12)', color: PURPLE }}
                         >
                           {p.adversaryGroup}
                         </span>
@@ -335,7 +335,7 @@ export default function PredictiveIntelligence() {
                     </div>
                     <div
                       className="mt-1 text-[10px] font-mono"
-                      style={{ color: p.timeToNextStageHours < 2 ? sc : '#f59e0b' }}
+                      style={{ color: p.timeToNextStageHours < 2 ? sc : '#c9b787' }}
                     >
                       ⏱ {p.timeToNextStageHours.toFixed(1)}h
                     </div>
@@ -359,7 +359,7 @@ export default function PredictiveIntelligence() {
                       {
                         label: 'Mitigation Window',
                         value: `${p.mitigationWindow.toFixed(0)}min`,
-                        color: p.mitigationWindow < 120 ? ACCENT : '#f59e0b',
+                        color: p.mitigationWindow < 120 ? ACCENT : '#c9b787',
                       },
                     ].map((m) => (
                       <div
@@ -410,12 +410,12 @@ export default function PredictiveIntelligence() {
       {tab === 'capacity' && (
         <div className="space-y-4">
           {capacityRisks.map((r) => {
-            const riskColor = r.riskScore > 75 ? ACCENT : r.riskScore > 55 ? '#f59e0b' : '#6b8f71';
+            const riskColor = r.riskScore > 75 ? ACCENT : r.riskScore > 55 ? '#c9b787' : '#6b8f71';
             const typeColors = {
-              endpoint: '#3b82f6',
-              network: '#8b5cf6',
+              endpoint: '#c9b787',
+              network: '#8a8a8a',
               identity: ACCENT,
-              cloud: '#14b8a6',
+              cloud: '#c9b787',
             };
             const tc = typeColors[r.assetType];
             return (
@@ -486,7 +486,7 @@ export default function PredictiveIntelligence() {
                 {
                   label: 'Base (current trajectory, 4-6h resolution)',
                   impact: 420000,
-                  color: '#f59e0b',
+                  color: '#c9b787',
                   probability: 49,
                 },
                 {

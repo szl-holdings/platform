@@ -33,35 +33,35 @@ import { type MitreStageCoverage, NARRATIVE_INCIDENTS } from './adversary-narrat
 const SEVERITY_CONFIG = {
   critical: {
     label: 'Critical',
-    color: '#ef4444',
-    bg: 'rgba(239,68,68,0.1)',
-    border: 'rgba(239,68,68,0.25)',
+    color: '#f5f5f5',
+    bg: 'rgba(245,245,245,0.1)',
+    border: 'rgba(245,245,245,0.25)',
   },
   high: {
     label: 'High',
-    color: '#f97316',
-    bg: 'rgba(249,115,22,0.1)',
-    border: 'rgba(249,115,22,0.25)',
+    color: '#c9b787',
+    bg: 'rgba(201,183,135,0.1)',
+    border: 'rgba(201,183,135,0.25)',
   },
   medium: {
     label: 'Medium',
-    color: '#eab308',
-    bg: 'rgba(234,179,8,0.1)',
-    border: 'rgba(234,179,8,0.25)',
+    color: '#8a8a8a',
+    bg: 'rgba(138,138,138,0.1)',
+    border: 'rgba(138,138,138,0.25)',
   },
   low: {
     label: 'Low',
-    color: '#22c55e',
-    bg: 'rgba(34,197,94,0.1)',
-    border: 'rgba(34,197,94,0.25)',
+    color: '#c9b787',
+    bg: 'rgba(201,183,135,0.1)',
+    border: 'rgba(201,183,135,0.25)',
   },
 };
 
 const STATUS_CONFIG = {
-  open: { label: 'Open', color: '#ef4444' },
-  in_progress: { label: 'In Progress', color: '#f97316' },
-  contained: { label: 'Contained', color: '#eab308' },
-  resolved: { label: 'Resolved', color: '#22c55e' },
+  open: { label: 'Open', color: '#f5f5f5' },
+  in_progress: { label: 'In Progress', color: '#c9b787' },
+  contained: { label: 'Contained', color: '#8a8a8a' },
+  resolved: { label: 'Resolved', color: '#c9b787' },
   closed: { label: 'Closed', color: '#64748b' },
 };
 
@@ -241,23 +241,23 @@ const ENTITY_ICONS = {
 };
 
 const ENTITY_COLORS = {
-  endpoint: '#a78bfa',
-  identity: '#60a5fa',
-  cloud: '#34d399',
-  storage: '#fbbf24',
-  email: '#f87171',
-  network: '#38bdf8',
+  endpoint: '#c9b787',
+  identity: '#c9b787',
+  cloud: '#c9b787',
+  storage: '#c9b787',
+  email: '#f5f5f5',
+  network: '#8a8a8a',
 };
 
 const ACTION_BADGES: Record<string, { label: string; color: string }> = {
-  isolated: { label: 'Isolated', color: '#ef4444' },
-  monitoring: { label: 'Monitoring', color: '#f97316' },
-  disabled: { label: 'Disabled', color: '#ef4444' },
-  mfa_reset: { label: 'MFA Reset', color: '#eab308' },
-  auditing: { label: 'Auditing', color: '#60a5fa' },
-  rotated: { label: 'Rotated', color: '#22c55e' },
-  read_only: { label: 'Read Only', color: '#a78bfa' },
-  remediated: { label: 'Remediated', color: '#22c55e' },
+  isolated: { label: 'Isolated', color: '#f5f5f5' },
+  monitoring: { label: 'Monitoring', color: '#c9b787' },
+  disabled: { label: 'Disabled', color: '#f5f5f5' },
+  mfa_reset: { label: 'MFA Reset', color: '#8a8a8a' },
+  auditing: { label: 'Auditing', color: '#c9b787' },
+  rotated: { label: 'Rotated', color: '#c9b787' },
+  read_only: { label: 'Read Only', color: '#c9b787' },
+  remediated: { label: 'Remediated', color: '#c9b787' },
 };
 
 const TIMELINE_ICONS = {
@@ -269,11 +269,11 @@ const TIMELINE_ICONS = {
 };
 
 const TIMELINE_COLORS = {
-  detection: '#ef4444',
-  activity: '#f97316',
-  response: '#22c55e',
-  intel: '#a78bfa',
-  system: '#60a5fa',
+  detection: '#f5f5f5',
+  activity: '#c9b787',
+  response: '#c9b787',
+  intel: '#c9b787',
+  system: '#c9b787',
 };
 
 const DOMAIN_LABELS: Record<string, string> = {
@@ -290,16 +290,16 @@ const NARRATIVE_COVERAGE_CONFIG: Record<
   { color: string; bg: string; border: string; label: string; icon: typeof CheckCircle }
 > = {
   evidenced: {
-    color: '#10b981',
-    bg: 'rgba(16,185,129,0.08)',
-    border: 'rgba(16,185,129,0.25)',
+    color: '#c9b787',
+    bg: 'rgba(201,183,135,0.08)',
+    border: 'rgba(201,183,135,0.25)',
     label: 'Evidenced',
     icon: CheckCircle,
   },
   inferred: {
-    color: '#f59e0b',
-    bg: 'rgba(245,158,11,0.08)',
-    border: 'rgba(245,158,11,0.25)',
+    color: '#c9b787',
+    bg: 'rgba(201,183,135,0.08)',
+    border: 'rgba(201,183,135,0.25)',
     label: 'Inferred',
     icon: Brain,
   },
@@ -313,12 +313,12 @@ const NARRATIVE_COVERAGE_CONFIG: Record<
 };
 
 const NARRATIVE_OBS_CONFIG: Record<string, string> = {
-  log: '#60a5fa',
-  alert: '#f87171',
-  network: '#34d399',
-  file: '#fbbf24',
-  process: '#a78bfa',
-  identity: '#38bdf8',
+  log: '#c9b787',
+  alert: '#f5f5f5',
+  network: '#c9b787',
+  file: '#c9b787',
+  process: '#c9b787',
+  identity: '#8a8a8a',
 };
 
 export default function XDRIncidentWorkbench() {
@@ -353,14 +353,14 @@ export default function XDRIncidentWorkbench() {
       {/* Header */}
       <div
         className="px-6 py-4 border-b flex items-center justify-between shrink-0"
-        style={{ borderColor: 'rgba(239,68,68,0.1)' }}
+        style={{ borderColor: 'rgba(245,245,245,0.1)' }}
       >
         <div className="flex items-center gap-3">
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: 'rgba(239,68,68,0.1)' }}
+            style={{ background: 'rgba(245,245,245,0.1)' }}
           >
-            <AlertTriangle className="w-4 h-4 text-red-400" />
+            <AlertTriangle className="w-4 h-4 text-[#f5f5f5]" />
           </div>
           <div>
             <h1 className="text-sm font-bold text-white">XDR Incident Workbench</h1>
@@ -373,20 +373,20 @@ export default function XDRIncidentWorkbench() {
           <div
             className="flex items-center gap-1.5 px-2 py-1 rounded border text-[10px]"
             style={{
-              borderColor: 'rgba(239,68,68,0.2)',
-              color: '#ef4444',
-              background: 'rgba(239,68,68,0.06)',
+              borderColor: 'rgba(245,245,245,0.2)',
+              color: '#f5f5f5',
+              background: 'rgba(245,245,245,0.06)',
             }}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />2 Critical Active
+            <span className="w-1.5 h-1.5 rounded-full bg-[#f5f5f5] animate-pulse" />2 Critical Active
           </div>
           <Button
             size="sm"
             className="h-7 text-[11px] gap-1.5"
             style={{
-              background: 'rgba(239,68,68,0.15)',
-              border: '1px solid rgba(239,68,68,0.3)',
-              color: '#ef4444',
+              background: 'rgba(245,245,245,0.15)',
+              border: '1px solid rgba(245,245,245,0.3)',
+              color: '#f5f5f5',
             }}
           >
             <Plus className="w-3 h-3" /> Create Incident
@@ -398,12 +398,12 @@ export default function XDRIncidentWorkbench() {
         {/* Left Panel — Incident List */}
         <div
           className="w-[300px] shrink-0 border-r flex flex-col overflow-hidden"
-          style={{ borderColor: 'rgba(239,68,68,0.08)' }}
+          style={{ borderColor: 'rgba(245,245,245,0.08)' }}
         >
           {/* Filters */}
           <div
             className="p-3 space-y-2 border-b shrink-0"
-            style={{ borderColor: 'rgba(239,68,68,0.08)' }}
+            style={{ borderColor: 'rgba(245,245,245,0.08)' }}
           >
             <div
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border"
@@ -535,9 +535,9 @@ export default function XDRIncidentWorkbench() {
                   size="sm"
                   className="h-7 text-[11px] gap-1.5"
                   style={{
-                    background: 'rgba(239,68,68,0.15)',
-                    border: '1px solid rgba(239,68,68,0.3)',
-                    color: '#ef4444',
+                    background: 'rgba(245,245,245,0.15)',
+                    border: '1px solid rgba(245,245,245,0.3)',
+                    color: '#f5f5f5',
                   }}
                 >
                   <Lock className="w-3 h-3" /> Contain
@@ -546,9 +546,9 @@ export default function XDRIncidentWorkbench() {
                   size="sm"
                   className="h-7 text-[11px] gap-1.5"
                   style={{
-                    background: 'rgba(34,197,94,0.1)',
-                    border: '1px solid rgba(34,197,94,0.2)',
-                    color: '#22c55e',
+                    background: 'rgba(201,183,135,0.1)',
+                    border: '1px solid rgba(201,183,135,0.2)',
+                    color: '#c9b787',
                   }}
                 >
                   <CheckCircle className="w-3 h-3" /> Resolve
@@ -563,21 +563,21 @@ export default function XDRIncidentWorkbench() {
                   label: 'Linked Alerts',
                   value: selected.alertCount,
                   icon: Bell,
-                  color: '#f97316',
+                  color: '#c9b787',
                 },
                 {
                   label: 'Affected Assets',
                   value: selected.affectedAssets,
                   icon: Server,
-                  color: '#a78bfa',
+                  color: '#c9b787',
                 },
                 {
                   label: 'Domains',
                   value: selected.domains.length,
                   icon: Network,
-                  color: '#60a5fa',
+                  color: '#c9b787',
                 },
-                { label: 'Assigned To', value: selected.assignee, icon: User, color: '#34d399' },
+                { label: 'Assigned To', value: selected.assignee, icon: User, color: '#c9b787' },
                 { label: 'Created', value: selected.createdAt, icon: Clock, color: '#94a3b8' },
               ].map(({ label, value, icon: Icon, color }) => (
                 <div
@@ -617,14 +617,14 @@ export default function XDRIncidentWorkbench() {
                     className={cn(
                       'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium border transition-all',
                       isActive
-                        ? 'text-violet-300'
+                        ? 'text-[#8a8a8a]'
                         : 'text-white/35 hover:text-white/55 border-transparent',
                     )}
                     style={
                       isActive
                         ? {
-                            background: 'rgba(139,92,246,0.1)',
-                            borderColor: 'rgba(139,92,246,0.25)',
+                            background: 'rgba(138,138,138,0.1)',
+                            borderColor: 'rgba(138,138,138,0.25)',
                           }
                         : {}
                     }
@@ -638,7 +638,7 @@ export default function XDRIncidentWorkbench() {
                         return (
                           <span
                             className="px-1 py-0.5 rounded text-[9px] font-bold"
-                            style={{ background: 'rgba(139,92,246,0.15)', color: '#a78bfa' }}
+                            style={{ background: 'rgba(138,138,138,0.15)', color: '#c9b787' }}
                           >
                             {narInc.steps.length}
                           </span>
@@ -661,7 +661,7 @@ export default function XDRIncidentWorkbench() {
                           key={t}
                           className="px-2 py-0.5 rounded text-[9px] font-medium border"
                           style={{
-                            color: '#a78bfa',
+                            color: '#c9b787',
                             borderColor: 'rgba(167,139,250,0.2)',
                             background: 'rgba(167,139,250,0.08)',
                           }}
@@ -679,7 +679,7 @@ export default function XDRIncidentWorkbench() {
                           key={d}
                           className="px-2 py-0.5 rounded text-[9px] font-medium border"
                           style={{
-                            color: '#60a5fa',
+                            color: '#c9b787',
                             borderColor: 'rgba(96,165,250,0.2)',
                             background: 'rgba(96,165,250,0.08)',
                           }}
@@ -702,7 +702,7 @@ export default function XDRIncidentWorkbench() {
                   >
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-xs font-bold text-white flex items-center gap-2">
-                        <Network className="w-3.5 h-3.5 text-blue-400" /> Entity Graph — Linked
+                        <Network className="w-3.5 h-3.5 text-[#c9b787]" /> Entity Graph — Linked
                         Assets
                       </h3>
                       <span className="text-[9px] text-white/30">
@@ -766,7 +766,7 @@ export default function XDRIncidentWorkbench() {
                       }}
                     >
                       <h3 className="text-xs font-bold text-white mb-3 flex items-center gap-2">
-                        <Clock className="w-3.5 h-3.5 text-amber-400" /> Attack Timeline
+                        <Clock className="w-3.5 h-3.5 text-[#c9b787]" /> Attack Timeline
                       </h3>
                       <div className="space-y-3">
                         {selected.timeline.map((event, idx) => {
@@ -814,7 +814,7 @@ export default function XDRIncidentWorkbench() {
                     }}
                   >
                     <h3 className="text-xs font-bold text-white mb-3 flex items-center gap-2">
-                      <MessageSquare className="w-3.5 h-3.5 text-blue-400" /> Analyst Notes
+                      <MessageSquare className="w-3.5 h-3.5 text-[#c9b787]" /> Analyst Notes
                     </h3>
                     <div className="space-y-3 mb-3">
                       {selected.notes.length === 0 && (
@@ -832,8 +832,8 @@ export default function XDRIncidentWorkbench() {
                           }}
                         >
                           <div className="flex items-center gap-2 mb-1">
-                            <div className="w-4 h-4 rounded-full bg-blue-500/20 flex items-center justify-center">
-                              <span className="text-[7px] text-blue-400 font-bold">
+                            <div className="w-4 h-4 rounded-full bg-[#c9b787]/20 flex items-center justify-center">
+                              <span className="text-[7px] text-[#c9b787] font-bold">
                                 {note.author[0]}
                               </span>
                             </div>
@@ -853,7 +853,7 @@ export default function XDRIncidentWorkbench() {
                         value={newNote}
                         onChange={(e) => setNewNote(e.target.value)}
                         placeholder="Add investigation note…"
-                        className="flex-1 bg-white/5 border border-white/08 rounded-lg px-3 py-1.5 text-[11px] text-white/70 placeholder:text-white/20 outline-none focus:border-blue-500/30"
+                        className="flex-1 bg-white/5 border border-white/08 rounded-lg px-3 py-1.5 text-[11px] text-white/70 placeholder:text-white/20 outline-none focus:border-[#c9b787]/30"
                       />
                       <button
                         onClick={() => setNewNote('')}
@@ -861,7 +861,7 @@ export default function XDRIncidentWorkbench() {
                         style={{
                           background: 'rgba(96,165,250,0.15)',
                           border: '1px solid rgba(96,165,250,0.25)',
-                          color: '#60a5fa',
+                          color: '#c9b787',
                         }}
                       >
                         Add
@@ -879,17 +879,17 @@ export default function XDRIncidentWorkbench() {
                   }}
                 >
                   <h3 className="text-xs font-bold text-white mb-3 flex items-center gap-2">
-                    <Zap className="w-3.5 h-3.5 text-amber-400" /> Unified Response Console —
+                    <Zap className="w-3.5 h-3.5 text-[#c9b787]" /> Unified Response Console —
                     One-Click Actions
                   </h3>
                   <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                     {[
-                      { label: 'Isolate Host', icon: Lock, color: '#ef4444' },
-                      { label: 'Block Hash', icon: Shield, color: '#f97316' },
-                      { label: 'Kill Process', icon: X, color: '#ef4444' },
-                      { label: 'Reset Creds', icon: User, color: '#eab308' },
-                      { label: 'Capture Memory', icon: Database, color: '#a78bfa' },
-                      { label: 'Run Playbook', icon: Play, color: '#22c55e' },
+                      { label: 'Isolate Host', icon: Lock, color: '#f5f5f5' },
+                      { label: 'Block Hash', icon: Shield, color: '#c9b787' },
+                      { label: 'Kill Process', icon: X, color: '#f5f5f5' },
+                      { label: 'Reset Creds', icon: User, color: '#8a8a8a' },
+                      { label: 'Capture Memory', icon: Database, color: '#c9b787' },
+                      { label: 'Run Playbook', icon: Play, color: '#c9b787' },
                     ].map(({ label, icon: Icon, color }) => (
                       <button
                         key={label}
@@ -947,13 +947,13 @@ export default function XDRIncidentWorkbench() {
                     <div
                       className="rounded-xl border p-3 flex items-center gap-4 flex-wrap"
                       style={{
-                        borderColor: 'rgba(139,92,246,0.15)',
-                        background: 'rgba(139,92,246,0.04)',
+                        borderColor: 'rgba(138,138,138,0.15)',
+                        background: 'rgba(138,138,138,0.04)',
                       }}
                     >
                       <div className="flex items-center gap-2">
-                        <Brain className="w-3.5 h-3.5 text-violet-400" />
-                        <span className="text-[10px] font-bold text-violet-300">
+                        <Brain className="w-3.5 h-3.5 text-[#8a8a8a]" />
+                        <span className="text-[10px] font-bold text-[#8a8a8a]">
                           {narInc.actor}
                         </span>
                       </div>
@@ -971,9 +971,9 @@ export default function XDRIncidentWorkbench() {
                         <span
                           className="text-[9px] px-1.5 py-0.5 rounded border"
                           style={{
-                            color: '#10b981',
-                            borderColor: 'rgba(16,185,129,0.25)',
-                            background: 'rgba(16,185,129,0.08)',
+                            color: '#c9b787',
+                            borderColor: 'rgba(201,183,135,0.25)',
+                            background: 'rgba(201,183,135,0.08)',
                           }}
                         >
                           {evidencedCount} evidenced
@@ -981,9 +981,9 @@ export default function XDRIncidentWorkbench() {
                         <span
                           className="text-[9px] px-1.5 py-0.5 rounded border"
                           style={{
-                            color: '#f59e0b',
-                            borderColor: 'rgba(245,158,11,0.25)',
-                            background: 'rgba(245,158,11,0.08)',
+                            color: '#c9b787',
+                            borderColor: 'rgba(201,183,135,0.25)',
+                            background: 'rgba(201,183,135,0.08)',
                           }}
                         >
                           {inferredCount} inferred
@@ -1004,9 +1004,9 @@ export default function XDRIncidentWorkbench() {
                           href={`/adversary-narrative?incident=${narInc.id}`}
                           className="flex items-center gap-1.5 text-[10px] font-medium px-2.5 py-1 rounded-lg border transition-all hover:brightness-110"
                           style={{
-                            color: '#a78bfa',
-                            borderColor: 'rgba(139,92,246,0.25)',
-                            background: 'rgba(139,92,246,0.1)',
+                            color: '#c9b787',
+                            borderColor: 'rgba(138,138,138,0.25)',
+                            background: 'rgba(138,138,138,0.1)',
                           }}
                         >
                           <BookOpen className="w-3 h-3" />
@@ -1061,7 +1061,7 @@ export default function XDRIncidentWorkbench() {
                         style={{ borderColor: 'rgba(255,255,255,0.05)' }}
                       >
                         <h3 className="text-xs font-bold text-white flex items-center gap-2">
-                          <BookOpen className="w-3.5 h-3.5 text-violet-400" /> Attack Narrative —
+                          <BookOpen className="w-3.5 h-3.5 text-[#8a8a8a]" /> Attack Narrative —
                           Chronological Steps
                         </h3>
                       </div>
@@ -1070,10 +1070,10 @@ export default function XDRIncidentWorkbench() {
                           const isExpanded = expandedNarrativeStep === idx;
                           const confidenceColor =
                             step.confidence >= 85
-                              ? '#10b981'
+                              ? '#c9b787'
                               : step.confidence >= 65
-                                ? '#f59e0b'
-                                : '#ef4444';
+                                ? '#c9b787'
+                                : '#f5f5f5';
                           return (
                             <div
                               key={step.seq}
@@ -1087,9 +1087,9 @@ export default function XDRIncidentWorkbench() {
                                 <div
                                   className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[9px] font-bold"
                                   style={{
-                                    background: 'rgba(139,92,246,0.15)',
-                                    color: '#a78bfa',
-                                    border: '1px solid rgba(139,92,246,0.25)',
+                                    background: 'rgba(138,138,138,0.15)',
+                                    color: '#c9b787',
+                                    border: '1px solid rgba(138,138,138,0.25)',
                                   }}
                                 >
                                   {step.seq}
@@ -1116,7 +1116,7 @@ export default function XDRIncidentWorkbench() {
                                         className="text-[8px] font-mono px-1.5 py-0.5 rounded"
                                         style={{
                                           background: 'rgba(167,139,250,0.1)',
-                                          color: '#a78bfa',
+                                          color: '#c9b787',
                                         }}
                                       >
                                         {step.mitreTechniqueId}
@@ -1193,7 +1193,7 @@ export default function XDRIncidentWorkbench() {
                                             key={ii}
                                             className="text-[8px] font-mono px-2 py-0.5 rounded border"
                                             style={{
-                                              color: '#fbbf24',
+                                              color: '#c9b787',
                                               borderColor: 'rgba(251,191,36,0.2)',
                                               background: 'rgba(251,191,36,0.06)',
                                             }}

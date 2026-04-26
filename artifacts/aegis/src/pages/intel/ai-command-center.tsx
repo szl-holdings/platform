@@ -21,9 +21,9 @@ const ECOSYSTEM_APPS = [
     role: 'Maritime Intelligence',
     agent: 'Maritime Analyst',
     icon: Globe,
-    color: 'text-cyan-400',
-    bg: 'bg-cyan-400/10',
-    borderColor: 'border-cyan-400/20',
+    color: 'text-[#8a8a8a]',
+    bg: 'bg-[#8a8a8a]/10',
+    borderColor: 'border-[#8a8a8a]/20',
   },
   {
     id: 'msp',
@@ -31,9 +31,9 @@ const ECOSYSTEM_APPS = [
     role: 'Managed Services Command',
     agent: 'IT Sentinel',
     icon: Cpu,
-    color: 'text-red-400',
-    bg: 'bg-red-400/10',
-    borderColor: 'border-red-400/20',
+    color: 'text-[#f5f5f5]',
+    bg: 'bg-[#f5f5f5]/10',
+    borderColor: 'border-[#f5f5f5]/20',
   },
   {
     id: 'terra',
@@ -41,9 +41,9 @@ const ECOSYSTEM_APPS = [
     role: 'Business Telemetry Intel',
     agent: 'Deal Scout',
     icon: TrendingUp,
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-400/10',
-    borderColor: 'border-emerald-400/20',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
+    borderColor: 'border-[#c9b787]/20',
   },
   {
     id: 'dreamscape',
@@ -51,9 +51,9 @@ const ECOSYSTEM_APPS = [
     role: 'Predictive Intelligence',
     agent: 'Counsel Engine',
     icon: Zap,
-    color: 'text-violet-400',
-    bg: 'bg-violet-400/10',
-    borderColor: 'border-violet-400/20',
+    color: 'text-[#8a8a8a]',
+    bg: 'bg-[#8a8a8a]/10',
+    borderColor: 'border-[#8a8a8a]/20',
   },
   {
     id: 'carlota-jo',
@@ -61,8 +61,8 @@ const ECOSYSTEM_APPS = [
     role: 'Advisory Intelligence',
     agent: 'Advisory Agent',
     icon: Brain,
-    color: 'text-pink-400',
-    bg: 'bg-pink-400/10',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
     borderColor: 'border-pink-400/20',
   },
   {
@@ -71,9 +71,9 @@ const ECOSYSTEM_APPS = [
     role: 'Security Operations',
     agent: 'Adaptive Defense',
     icon: Shield,
-    color: 'text-orange-400',
-    bg: 'bg-orange-400/10',
-    borderColor: 'border-orange-400/20',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
+    borderColor: 'border-[#c9b787]/20',
   },
   {
     id: 'lyte',
@@ -81,18 +81,18 @@ const ECOSYSTEM_APPS = [
     role: 'Observability Layer',
     agent: 'Signal Router',
     icon: Activity,
-    color: 'text-amber-400',
-    bg: 'bg-amber-400/10',
-    borderColor: 'border-amber-400/20',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
+    borderColor: 'border-[#c9b787]/20',
   },
   {
     id: 'szl-holdings',
-    name: 'SZL Holdings',
+    name: 'Aegis',
     role: 'Portfolio Intelligence',
     agent: 'Portfolio Analyst',
     icon: TrendingUp,
-    color: 'text-indigo-400',
-    bg: 'bg-indigo-400/10',
+    color: 'text-[#8a8a8a]',
+    bg: 'bg-[#8a8a8a]/10',
     borderColor: 'border-indigo-400/20',
   },
   {
@@ -101,8 +101,8 @@ const ECOSYSTEM_APPS = [
     role: 'Brand Intelligence',
     agent: 'Brand Monitor',
     icon: Radio,
-    color: 'text-rose-400',
-    bg: 'bg-rose-400/10',
+    color: 'text-[#f5f5f5]',
+    bg: 'bg-[#f5f5f5]/10',
     borderColor: 'border-rose-400/20',
   },
 ];
@@ -172,43 +172,43 @@ const GLOBAL_STATS = [
     label: 'Active Agents',
     value: '9',
     sub: 'across ecosystem',
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-400/10',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
   },
   {
     label: 'Actions Today',
     value: '1,847',
     sub: 'total executions',
-    color: 'text-amber-400',
-    bg: 'bg-amber-400/10',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
   },
   {
     label: 'Avg Confidence',
     value: '88%',
     sub: 'decision quality',
-    color: 'text-cyan-400',
-    bg: 'bg-cyan-400/10',
+    color: 'text-[#8a8a8a]',
+    bg: 'bg-[#8a8a8a]/10',
   },
   {
     label: 'Fast Analysis (S1)',
     value: '6',
     sub: 'reflexive agents',
-    color: 'text-yellow-400',
-    bg: 'bg-yellow-400/10',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
   },
   {
     label: 'Deep Reasoning (S2)',
     value: '3',
     sub: 'deliberate analysis',
-    color: 'text-indigo-400',
-    bg: 'bg-indigo-400/10',
+    color: 'text-[#8a8a8a]',
+    bg: 'bg-[#8a8a8a]/10',
   },
   {
     label: 'Policy Checks',
     value: '0 blocked',
     sub: 'all cleared today',
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-400/10',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
   },
 ];
 
@@ -229,7 +229,7 @@ function AgentNetworkDiagram({ agents }: { agents: AgentNode[] }) {
         <defs>
           <linearGradient id="stringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#d97706" stopOpacity="0.2" />
-            <stop offset="50%" stopColor="#f59e0b" stopOpacity="0.5" />
+            <stop offset="50%" stopColor="#c9b787" stopOpacity="0.5" />
             <stop offset="100%" stopColor="#d97706" stopOpacity="0.2" />
           </linearGradient>
           <filter id="glow">
@@ -264,7 +264,7 @@ function AgentNetworkDiagram({ agents }: { agents: AgentNode[] }) {
                 y1={knotY + 8}
                 x2={x}
                 y2={threadY}
-                stroke={isActive ? '#f59e0b' : '#475569'}
+                stroke={isActive ? '#c9b787' : '#475569'}
                 strokeWidth="1.5"
                 strokeDasharray={agent.status === 'standby' ? '4 3' : 'none'}
               />
@@ -279,14 +279,14 @@ function AgentNetworkDiagram({ agents }: { agents: AgentNode[] }) {
                 filter={isActive ? 'url(#glow)' : 'none'}
               />
 
-              {/* LUMINA ring for active */}
+              {/* status ring for active */}
               {isActive && (
                 <circle
                   cx={x}
                   cy={knotY}
                   r="14"
                   fill="none"
-                  stroke="#f59e0b"
+                  stroke="#c9b787"
                   strokeWidth="1"
                   opacity="0.3"
                 >
@@ -306,7 +306,7 @@ function AgentNetworkDiagram({ agents }: { agents: AgentNode[] }) {
                 y={threadY + 16}
                 textAnchor="middle"
                 fontSize="9"
-                fill={isActive ? '#fbbf24' : '#64748b'}
+                fill={isActive ? '#c9b787' : '#64748b'}
                 fontFamily="monospace"
               >
                 {agent.id.toUpperCase()}
@@ -342,11 +342,11 @@ function AgentCard({ agent }: { agent: AgentNode }) {
 
   const statusDot =
     agent.status === 'active'
-      ? 'bg-emerald-400 animate-pulse'
+      ? 'bg-[#c9b787] animate-pulse'
       : agent.status === 'monitoring'
-        ? 'bg-amber-400'
+        ? 'bg-[#c9b787]'
         : agent.status === 'processing'
-          ? 'bg-blue-400 animate-pulse'
+          ? 'bg-[#c9b787] animate-pulse'
           : 'bg-slate-500';
 
   return (
@@ -372,9 +372,9 @@ function AgentCard({ agent }: { agent: AgentNode }) {
             <span className={cn('w-2 h-2 rounded-full', statusDot)} />
             <span
               className={cn('text-[10px] font-mono capitalize', {
-                'text-emerald-400': agent.status === 'active',
-                'text-amber-400': agent.status === 'monitoring',
-                'text-blue-400': agent.status === 'processing',
+                'text-[#c9b787]': agent.status === 'active',
+                'text-[#c9b787]': agent.status === 'monitoring',
+                'text-[#c9b787]': agent.status === 'processing',
                 'text-slate-400': agent.status === 'standby',
               })}
             >
@@ -385,8 +385,8 @@ function AgentCard({ agent }: { agent: AgentNode }) {
             className={cn(
               'text-[9px] px-1.5 py-0.5 rounded-full font-mono',
               agent.systemState === 'fast'
-                ? 'bg-yellow-400/10 text-yellow-400'
-                : 'bg-indigo-400/10 text-indigo-400',
+                ? 'bg-[#c9b787]/10 text-[#c9b787]'
+                : 'bg-[#8a8a8a]/10 text-[#8a8a8a]',
             )}
           >
             {agent.systemState === 'fast' ? '☀ Fast' : '◑ Deep'}
@@ -420,8 +420,8 @@ function AgentCard({ agent }: { agent: AgentNode }) {
 function LiveClock() {
   return (
     <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
-      <span className="text-emerald-400 font-semibold text-[10px] uppercase tracking-wider">
+      <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse inline-block" />
+      <span className="text-[#c9b787] font-semibold text-[10px] uppercase tracking-wider">
         Orchestration Engine Active
       </span>
       <span className="text-border">·</span>
@@ -437,20 +437,20 @@ export default function AiCommandCenter() {
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-8 h-8 rounded-lg bg-amber-400/15 flex items-center justify-center">
-              <span className="text-amber-400 text-lg">𝕼</span>
+            <div className="w-8 h-8 rounded-lg bg-[#c9b787]/15 flex items-center justify-center">
+              <span className="text-[#c9b787] text-lg">𝕼</span>
             </div>
             <h1 className="text-xl font-display font-bold text-foreground tracking-tight">
               Agent Orchestration
             </h1>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-amber-400/10 text-amber-400 border border-amber-400/20">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#c9b787]/10 text-[#c9b787] border border-[#c9b787]/20">
               9 agents active
             </span>
           </div>
           <p className="text-xs text-muted-foreground">
             The agentic core — each node is an agent with a domain mission, connected to the apps
             they serve.
-            <span className="text-amber-400/60 ml-2 font-mono">Orchestration Engine v2.1</span>
+            <span className="text-[#c9b787]/60 ml-2 font-mono">Orchestration Engine v2.1</span>
           </p>
         </div>
         <LiveClock />
@@ -471,15 +471,15 @@ export default function AiCommandCenter() {
       </div>
 
       {/* Agent Network Topology */}
-      <div className="bg-card/60 backdrop-blur-sm border border-amber-400/15 rounded-xl p-6">
+      <div className="bg-card/60 backdrop-blur-sm border border-[#c9b787]/15 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
-            <span className="text-amber-400">⌇</span>
+            <span className="text-[#c9b787]">⌇</span>
             Agent Network Topology
           </h3>
           <div className="flex items-center gap-4 text-[10px] text-muted-foreground font-mono">
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#c9b787] inline-block" />
               Active node
             </span>
             <span className="flex items-center gap-1.5">
@@ -487,11 +487,11 @@ export default function AiCommandCenter() {
               Standby
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="text-yellow-400">☀</span>
+              <span className="text-[#c9b787]">☀</span>
               Fast (System 1)
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="text-indigo-400">◑</span>
+              <span className="text-[#8a8a8a]">◑</span>
               Deep (System 2)
             </span>
           </div>
@@ -518,8 +518,8 @@ export default function AiCommandCenter() {
 
       {/* System 1 / System 2 summary */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-gradient-to-br from-yellow-500/5 to-orange-500/5 border border-yellow-400/20 rounded-xl p-5">
-          <h4 className="text-sm font-display font-semibold text-yellow-400 flex items-center gap-2 mb-3">
+        <div className="bg-gradient-to-br from-yellow-500/5 to-orange-500/5 border border-[#c9b787]/20 rounded-xl p-5">
+          <h4 className="text-sm font-display font-semibold text-[#c9b787] flex items-center gap-2 mb-3">
             <span className="text-xl">☀</span>
             Fast Analysis — System 1 (Reflexive)
           </h4>
@@ -534,7 +534,7 @@ export default function AiCommandCenter() {
                   <span
                     className={cn(
                       'w-1.5 h-1.5 rounded-full shrink-0',
-                      a.status === 'active' ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500',
+                      a.status === 'active' ? 'bg-[#c9b787] animate-pulse' : 'bg-slate-500',
                     )}
                   />
                   <span className="text-foreground font-medium">{a.agent}</span>
@@ -544,7 +544,7 @@ export default function AiCommandCenter() {
           </div>
         </div>
         <div className="bg-gradient-to-br from-indigo-500/5 to-violet-500/5 border border-indigo-400/20 rounded-xl p-5">
-          <h4 className="text-sm font-display font-semibold text-indigo-400 flex items-center gap-2 mb-3">
+          <h4 className="text-sm font-display font-semibold text-[#8a8a8a] flex items-center gap-2 mb-3">
             <span className="text-xl">◑</span>
             Deep Reasoning — System 2 (Deliberate)
           </h4>
@@ -559,7 +559,7 @@ export default function AiCommandCenter() {
                   <span
                     className={cn(
                       'w-1.5 h-1.5 rounded-full shrink-0',
-                      a.status === 'active' ? 'bg-indigo-400 animate-pulse' : 'bg-slate-500',
+                      a.status === 'active' ? 'bg-[#8a8a8a] animate-pulse' : 'bg-slate-500',
                     )}
                   />
                   <span className="text-foreground font-medium">{a.agent}</span>

@@ -111,7 +111,7 @@ const DEMO_ENTRIES: AuditEntry[] = [
     actionType: 'agent_action',
     actor: 'Counsel Workflow Engine',
     actorType: 'agent',
-    domain: 'SZL Holdings',
+    domain: 'Aegis',
     action: 'Executed portfolio rebalancing workflow',
     entityId: 'workflow-portfolio-rebal-012',
     entityType: 'workflow',
@@ -189,11 +189,11 @@ const DEMO_ENTRIES: AuditEntry[] = [
 ];
 
 const RISK_COLORS: Record<RiskLevel, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
-  low: '#22c55e',
-  info: '#0ea5e9',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#c9b787',
+  low: '#c9b787',
+  info: '#8a8a8a',
 };
 
 const ACTION_ICONS: Record<ActionType, React.ReactNode> = {
@@ -207,10 +207,10 @@ const ACTION_ICONS: Record<ActionType, React.ReactNode> = {
 
 const COMPLIANCE_COLORS: Record<ComplianceTag, string> = {
   SOC2: '#8b7ac8',
-  ISO27001: '#0ea5e9',
-  GDPR: '#22c55e',
-  HIPAA: '#f59e0b',
-  'PCI-DSS': '#ec4899',
+  ISO27001: '#8a8a8a',
+  GDPR: '#c9b787',
+  HIPAA: '#c9b787',
+  'PCI-DSS': '#c9b787',
 };
 
 function formatAgo(ts: number): string {
@@ -291,7 +291,7 @@ function AuditEntryRow({
                 entry.actorType === 'ai_model'
                   ? ACCENT
                   : entry.actorType === 'agent'
-                    ? '#06b6d4'
+                    ? '#8a8a8a'
                     : 'rgba(255,255,255,0.7)',
               fontWeight: 600,
               display: 'flex',
@@ -455,10 +455,10 @@ function AuditEntryRow({
                         width: `${entry.confidence * 100}%`,
                         background:
                           entry.confidence > 0.85
-                            ? '#22c55e'
+                            ? '#c9b787'
                             : entry.confidence > 0.7
-                              ? '#f59e0b'
-                              : '#ef4444',
+                              ? '#c9b787'
+                              : '#f5f5f5',
                         borderRadius: '2px',
                       }}
                     />
@@ -484,7 +484,7 @@ function AuditEntryRow({
                 >
                   Approved By
                 </div>
-                <div style={{ fontSize: '12px', color: '#22c55e', fontWeight: 600 }}>
+                <div style={{ fontSize: '12px', color: '#c9b787', fontWeight: 600 }}>
                   ✓ {entry.approvedBy}
                 </div>
               </div>
@@ -682,21 +682,21 @@ export default function AuditChainPage() {
             {
               label: 'Critical Events',
               value: DEMO_ENTRIES.filter((e) => e.riskLevel === 'critical').length.toString(),
-              color: '#ef4444',
+              color: '#f5f5f5',
             },
             {
               label: 'Human Approvals',
               value: DEMO_ENTRIES.filter(
                 (e) => e.actionType === 'human_approval',
               ).length.toString(),
-              color: '#22c55e',
+              color: '#c9b787',
             },
             {
               label: 'SOC2 Tagged',
               value: DEMO_ENTRIES.filter((e) =>
                 e.complianceTags.includes('SOC2'),
               ).length.toString(),
-              color: '#a855f7',
+              color: '#8a8a8a',
             },
           ].map((stat) => (
             <div
@@ -923,14 +923,14 @@ export default function AuditChainPage() {
             alignItems: 'center',
             gap: '10px',
             padding: '12px 16px',
-            background: '#22c55e08',
-            border: '1px solid #22c55e25',
+            background: '#c9b78708',
+            border: '1px solid #c9b78725',
             borderRadius: '10px',
           }}
         >
-          <Lock size={14} style={{ color: '#22c55e', flexShrink: 0 }} />
+          <Lock size={14} style={{ color: '#c9b787', flexShrink: 0 }} />
           <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>
-            <strong style={{ color: '#22c55e' }}>Chain integrity verified.</strong> All{' '}
+            <strong style={{ color: '#c9b787' }}>Chain integrity verified.</strong> All{' '}
             {DEMO_ENTRIES.length} entries are immutably hashed and cryptographically linked. Last
             verification: {new Date().toLocaleTimeString()}. SOC2 Type II ready · ISO27001 compliant
             · GDPR Article 30 aligned.

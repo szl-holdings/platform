@@ -17,12 +17,12 @@ import { useState } from 'react';
 import { agentMesh, MESH_AGENT_DISPLAY_NAMES } from '@/data/agent-mesh';
 import { queueFix, useMeshState } from '@/lib/mesh-store';
 
-const ACCENT = '#ef4444';
+const ACCENT = '#f5f5f5';
 
 const SEVERITY_STYLES: Record<string, string> = {
-  critical: 'text-red-400 border-red-500/30 bg-red-500/10',
-  high: 'text-orange-400 border-orange-500/30 bg-orange-500/10',
-  medium: 'text-amber-400 border-amber-500/30 bg-amber-500/10',
+  critical: 'text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10',
+  high: 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
+  medium: 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
   low: 'text-slate-400 border-slate-500/30 bg-slate-500/10',
 };
 
@@ -58,15 +58,15 @@ export default function MeshExposures() {
         <div className="flex gap-3">
           <div className="sentra-panel px-4 py-2 text-center">
             <div className="text-[10px] text-slate-500 font-mono uppercase">Open</div>
-            <div className="text-2xl font-display font-bold text-red-400">{openCount}</div>
+            <div className="text-2xl font-display font-bold text-[#f5f5f5]">{openCount}</div>
           </div>
           <div className="sentra-panel px-4 py-2 text-center">
             <div className="text-[10px] text-slate-500 font-mono uppercase">Critical</div>
-            <div className="text-2xl font-display font-bold text-red-500">{criticalCount}</div>
+            <div className="text-2xl font-display font-bold text-[#f5f5f5]">{criticalCount}</div>
           </div>
           <div className="sentra-panel px-4 py-2 text-center">
             <div className="text-[10px] text-slate-500 font-mono uppercase">Resolved</div>
-            <div className="text-2xl font-display font-bold text-emerald-400">{resolvedCount}</div>
+            <div className="text-2xl font-display font-bold text-[#c9b787]">{resolvedCount}</div>
           </div>
         </div>
       </header>
@@ -130,19 +130,19 @@ export default function MeshExposures() {
                       className={cn(
                         'w-10 h-10 rounded flex items-center justify-center shrink-0 border',
                         isResolved
-                          ? 'bg-emerald-500/10 border-emerald-500/20'
+                          ? 'bg-[#c9b787]/10 border-[#c9b787]/20'
                           : exp.severity === 'critical'
-                            ? 'bg-red-500/10 border-red-500/20'
-                            : 'bg-orange-500/10 border-orange-500/20',
+                            ? 'bg-[#f5f5f5]/10 border-[#f5f5f5]/20'
+                            : 'bg-[#c9b787]/10 border-[#c9b787]/20',
                       )}
                     >
                       {isResolved ? (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                        <CheckCircle2 className="w-5 h-5 text-[#c9b787]" />
                       ) : (
                         <ShieldAlert
                           className={cn(
                             'w-5 h-5',
-                            exp.severity === 'critical' ? 'text-red-500' : 'text-orange-400',
+                            exp.severity === 'critical' ? 'text-[#f5f5f5]' : 'text-[#c9b787]',
                           )}
                         />
                       )}
@@ -161,7 +161,7 @@ export default function MeshExposures() {
                         {exp.cveRefs.map((cve) => (
                           <span
                             key={cve}
-                            className="flex items-center gap-1 px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] text-sky-400 font-mono"
+                            className="flex items-center gap-1 px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] text-[#8a8a8a] font-mono"
                           >
                             <ExternalLink className="w-2.5 h-2.5" />
                             {cve}
@@ -214,19 +214,19 @@ export default function MeshExposures() {
                         className={cn(
                           'p-4 rounded border flex items-center justify-between',
                           isResolved
-                            ? 'bg-emerald-500/10 border-emerald-500/20'
+                            ? 'bg-[#c9b787]/10 border-[#c9b787]/20'
                             : isFixPending
-                              ? 'bg-amber-500/5 border-amber-500/20'
-                              : 'bg-emerald-500/5 border-emerald-500/10',
+                              ? 'bg-[#c9b787]/5 border-[#c9b787]/20'
+                              : 'bg-[#c9b787]/5 border-[#c9b787]/10',
                         )}
                       >
                         <div className="flex items-center gap-3">
                           {isResolved ? (
-                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                            <CheckCircle2 className="w-4 h-4 text-[#c9b787]" />
                           ) : isFixPending ? (
-                            <Clock className="w-4 h-4 text-amber-400 animate-pulse" />
+                            <Clock className="w-4 h-4 text-[#c9b787] animate-pulse" />
                           ) : (
-                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                            <CheckCircle2 className="w-4 h-4 text-[#c9b787]" />
                           )}
                           <div>
                             <div className="text-xs font-bold text-slate-200">
@@ -238,7 +238,7 @@ export default function MeshExposures() {
                             </div>
                             <p className="text-[10px] text-slate-500 mt-0.5">{exp.fixLabel}</p>
                             {isResolved && fixReq?.executionLog && (
-                              <ul className="mt-2 space-y-0.5 text-[10px] text-emerald-300/80 font-mono list-disc list-inside">
+                              <ul className="mt-2 space-y-0.5 text-[10px] text-[#c9b787]/80 font-mono list-disc list-inside">
                                 {fixReq.executionLog.slice(0, 2).map((line, idx) => (
                                   <li key={idx}>{line}</li>
                                 ))}
@@ -247,17 +247,17 @@ export default function MeshExposures() {
                           </div>
                         </div>
                         {isResolved ? (
-                          <div className="px-3 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-300 font-mono font-bold">
+                          <div className="px-3 py-1 rounded bg-[#c9b787]/10 border border-[#c9b787]/20 text-[10px] text-[#c9b787] font-mono font-bold">
                             RESOLVED
                           </div>
                         ) : isFixPending ? (
-                          <div className="px-3 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-400 font-mono font-bold">
+                          <div className="px-3 py-1 rounded bg-[#c9b787]/10 border border-[#c9b787]/20 text-[10px] text-[#c9b787] font-mono font-bold">
                             AWAITING APPROVAL
                           </div>
                         ) : (
                           <button
                             onClick={() => queueFix(exp.id)}
-                            className="px-4 py-1.5 rounded bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold transition-colors flex items-center gap-1.5"
+                            className="px-4 py-1.5 rounded bg-[#f5f5f5] hover:bg-[#f5f5f5] text-white text-[11px] font-bold transition-colors flex items-center gap-1.5"
                           >
                             Run Fix
                             <AlertTriangle className="w-3 h-3" />
@@ -277,10 +277,10 @@ export default function MeshExposures() {
                         className={cn(
                           'px-2 py-0.5 rounded text-[10px] font-mono font-bold border',
                           status === 'open'
-                            ? 'text-red-400 border-red-500/30 bg-red-500/5'
+                            ? 'text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/5'
                             : status === 'fix-pending'
-                              ? 'text-amber-400 border-amber-500/30 bg-amber-500/5'
-                              : 'text-emerald-400 border-emerald-500/30 bg-emerald-500/5',
+                              ? 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/5'
+                              : 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/5',
                         )}
                       >
                         {status.toUpperCase()}

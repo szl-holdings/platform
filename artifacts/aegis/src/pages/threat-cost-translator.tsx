@@ -92,10 +92,10 @@ const DEMO_INCIDENTS: ThreatCostEstimate[] = [
 ];
 
 const SEV_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
-  low: '#3b82f6',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#c9b787',
+  low: '#c9b787',
 };
 
 function formatDollars(n: number): string {
@@ -169,7 +169,7 @@ export default function ThreatCostTranslator() {
 
   return (
     <div className="min-h-screen bg-[#060810] text-white p-6 space-y-6">
-      <AmbientBar signals={ambientSignals} appDomain="aegis" accentColor="#ef4444" compact />
+      <AmbientBar signals={ambientSignals} appDomain="aegis" accentColor="#f5f5f5" compact />
       <div>
         <h1 className="text-2xl font-bold text-white/90">Threat Cost Translator</h1>
         <p className="text-sm text-white/40 mt-1">
@@ -182,14 +182,14 @@ export default function ThreatCostTranslator() {
           {
             label: 'Total Financial Exposure',
             value: formatDollars(totalExposure),
-            color: '#ef4444',
+            color: '#f5f5f5',
           },
-          { label: 'Active Incidents', value: DEMO_INCIDENTS.length.toString(), color: '#f59e0b' },
-          { label: 'Avg Reputation Damage', value: `${avgReputationDamage}/100`, color: '#8b5cf6' },
+          { label: 'Active Incidents', value: DEMO_INCIDENTS.length.toString(), color: '#c9b787' },
+          { label: 'Avg Reputation Damage', value: `${avgReputationDamage}/100`, color: '#8a8a8a' },
           {
             label: 'Insurance Premium Impact',
             value: formatDollars(DEMO_INCIDENTS.reduce((s, i) => s + i.insurancePremiumImpact, 0)),
-            color: '#3b82f6',
+            color: '#c9b787',
           },
         ].map((kpi) => (
           <div key={kpi.label} className="rounded-xl bg-white/[0.03] border border-white/5 p-4">
@@ -233,7 +233,7 @@ export default function ThreatCostTranslator() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-red-400">
+                  <div className="text-lg font-bold text-[#f5f5f5]">
                     {formatDollars(incident.totalExposure)}
                   </div>
                   <div className="text-[10px] text-white/30">Total Exposure</div>
@@ -299,7 +299,7 @@ export default function ThreatCostTranslator() {
                     </div>
                     <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-red-500/60"
+                        className="h-full rounded-full bg-[#f5f5f5]/60"
                         style={{ width: `${item.pct * 100}%` }}
                       />
                     </div>
@@ -321,13 +321,13 @@ export default function ThreatCostTranslator() {
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-white/50">Probability of Penalty</span>
-                    <span className="text-amber-400 font-mono">
+                    <span className="text-[#c9b787] font-mono">
                       {Math.round(selectedIncident.regulatoryPenaltyProbability * 100)}%
                     </span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-white/50">Expected Penalty</span>
-                    <span className="text-red-400 font-mono font-semibold">
+                    <span className="text-[#f5f5f5] font-mono font-semibold">
                       {formatDollars(
                         ((selectedIncident.regulatoryPenaltyRange[0] +
                           selectedIncident.regulatoryPenaltyRange[1]) /
@@ -353,14 +353,14 @@ export default function ThreatCostTranslator() {
           <CorrelationFeed
             correlations={correlations}
             currentDomain="aegis"
-            accentColor="#ef4444"
+            accentColor="#f5f5f5"
           />
         </div>
         <div className="flex items-start justify-center">
           <EnergyPulse
             metrics={energyMetrics}
             utilization={energyMetrics.usedBudget / energyMetrics.totalBudget}
-            accentColor="#ef4444"
+            accentColor="#f5f5f5"
           />
         </div>
       </div>

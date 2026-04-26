@@ -21,7 +21,7 @@ const EXAMPLE_INTENTS = [
   {
     label: 'Risk Brief',
     intent:
-      "Summarize today's threat risk across Aegis and Vessels, then draft an executive brief in LUMINA format.",
+      "Summarize today's threat risk across Aegis and Vessels, then draft an executive brief in Pulse format.",
   },
   {
     label: 'Portfolio Snapshot',
@@ -71,7 +71,7 @@ const STEP_EXPLANATIONS: Record<
   }
 > = {
   aegis: {
-    why: 'Aegis was selected first because the intent mentions threat risk — Aegis owns the threat-intelligence domain and its output is required by the LUMINA stitching step.',
+    why: 'Aegis was selected first because the intent mentions threat risk — Aegis owns the threat-intelligence domain and its output is required by the Pulse stitching step.',
     how: 'Dispatched `GET /api/aegis/threat-summary` with tenant-scoped auth. Response includes CVSS-weighted top threats, active incident count, and MITRE technique coverage.',
     alternatives: [
       'Pull from Vessels first (rejected — no threat context dependency)',
@@ -81,7 +81,7 @@ const STEP_EXPLANATIONS: Record<
   },
   vessels: {
     why: 'Vessels was included because maritime risk is part of the SZL cross-portfolio surface area and the Fleet Command module has recent high-severity alerts.',
-    how: 'Called `GET /api/vessels/fleet-risk` returning per-vessel risk scores and one port-call flag. Result fed into LUMINA stitching alongside Aegis output.',
+    how: 'Called `GET /api/vessels/fleet-risk` returning per-vessel risk scores and one port-call flag. Result fed into Pulse stitching alongside Aegis output.',
     alternatives: [
       "Skip Vessels (rejected — user's portfolio includes maritime exposure)",
       'Use AIS snapshot (rejected — live position data available within rate limit)',
@@ -98,11 +98,11 @@ const STEP_EXPLANATIONS: Record<
     confidence: 0.91,
   },
   pulse: {
-    why: 'LUMINA is the final stitching step — it takes structured outputs from all domain agents and compiles the executive brief format.',
-    how: "Called `POST /api/pulse/compile` with the structured domain outputs. LUMINA applies BLUF ranking, deduplication, and the user's preferred brief format.",
+    why: 'Pulse is the final stitching step — it takes structured outputs from all domain agents and compiles the executive brief format.',
+    how: "Called `POST /api/pulse/compile` with the structured domain outputs. Pulse applies BLUF ranking, deduplication, and the user's preferred brief format.",
     alternatives: [
-      'Stitch inline in orchestrator (rejected — LUMINA has the briefing schema and user preference model)',
-      'Skip LUMINA and return raw domain outputs (rejected — not exec-readable)',
+      'Stitch inline in orchestrator (rejected — Pulse has the briefing schema and user preference model)',
+      'Skip Pulse and return raw domain outputs (rejected — not exec-readable)',
     ],
     confidence: 0.96,
   },

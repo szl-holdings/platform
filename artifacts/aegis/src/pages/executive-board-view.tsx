@@ -34,39 +34,39 @@ const FALLBACK_TREND_DATA = [
 
 const SEV_COLORS: Record<string, { text: string; bg: string; border: string; dot: string }> = {
   critical: {
-    text: 'text-red-300',
-    bg: 'bg-red-500/10',
-    border: 'border-red-500/25',
-    dot: '#ef4444',
+    text: 'text-[#f5f5f5]',
+    bg: 'bg-[#f5f5f5]/10',
+    border: 'border-[#f5f5f5]/25',
+    dot: '#f5f5f5',
   },
   high: {
-    text: 'text-orange-300',
-    bg: 'bg-orange-500/10',
-    border: 'border-orange-500/25',
-    dot: '#f97316',
+    text: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
+    border: 'border-[#c9b787]/25',
+    dot: '#c9b787',
   },
   medium: {
-    text: 'text-yellow-300',
-    bg: 'bg-yellow-500/10',
-    border: 'border-yellow-500/25',
-    dot: '#eab308',
+    text: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
+    border: 'border-[#c9b787]/25',
+    dot: '#8a8a8a',
   },
   low: {
-    text: 'text-blue-300',
-    bg: 'bg-blue-500/10',
-    border: 'border-blue-500/25',
-    dot: '#3b82f6',
+    text: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
+    border: 'border-[#c9b787]/25',
+    dot: '#c9b787',
   },
 };
 
 const SLA_STATUS_STYLES: Record<string, string> = {
-  breached: 'bg-red-500/10 text-red-400 border-red-500/20',
-  at_risk: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  on_track: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  breached: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  at_risk: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  on_track: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
 };
 
 function PostureGauge({ score }: { score: number }) {
-  const color = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#ef4444';
+  const color = score >= 80 ? '#c9b787' : score >= 60 ? '#c9b787' : '#f5f5f5';
   const r = 52;
   const c = 2 * Math.PI * r;
   const filled = (score / 100) * c;
@@ -127,7 +127,7 @@ function MiniTrend({
       return `${x},${y}`;
     })
     .join(' ');
-  const color = metric === 'incidents' || metric === 'mttr' ? '#10b981' : '#3b82f6';
+  const color = metric === 'incidents' || metric === 'mttr' ? '#c9b787' : '#c9b787';
   return (
     <svg width={w} height={h} className="overflow-visible">
       <polyline
@@ -149,7 +149,7 @@ function MiniTrend({
 }
 
 function SlaBar({ value, label }: { value: number; label: string }) {
-  const color = value >= 95 ? '#10b981' : value >= 85 ? '#f59e0b' : '#ef4444';
+  const color = value >= 95 ? '#c9b787' : value >= 85 ? '#c9b787' : '#f5f5f5';
   return (
     <div>
       <div className="flex justify-between text-[10px] mb-1">
@@ -405,17 +405,17 @@ export default function ExecutiveBoardView() {
       <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <BarChart3 className="w-4 h-4 text-blue-400" />
+            <BarChart3 className="w-4 h-4 text-[#c9b787]" />
             <h1 className="text-sm font-bold text-white">Executive / Board View</h1>
-            <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/5 text-emerald-400/70">
+            <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/30 bg-[#c9b787]/5 text-[#c9b787]/70">
               {envLabel}
             </span>
-            <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-red-500/20 bg-red-500/5 text-red-400/70 flex items-center gap-0.5">
+            <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#f5f5f5]/20 bg-[#f5f5f5]/5 text-[#f5f5f5]/70 flex items-center gap-0.5">
               <Lock className="w-2 h-2" />
               {sensitivityLabel}
             </span>
             {usingLiveIncidents && (
-              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-blue-500/20 bg-blue-500/5 text-blue-400/70">
+              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/20 bg-[#c9b787]/5 text-[#c9b787]/70">
                 LIVE
               </span>
             )}
@@ -433,7 +433,7 @@ export default function ExecutiveBoardView() {
                 className={cn(
                   'px-2.5 py-1 rounded text-[10px] font-mono transition-all',
                   period === p
-                    ? 'bg-blue-500/15 text-blue-300 border border-blue-500/20'
+                    ? 'bg-[#c9b787]/15 text-[#c9b787] border border-[#c9b787]/20'
                     : 'text-white/40 hover:text-white/70',
                 )}
               >
@@ -453,7 +453,7 @@ export default function ExecutiveBoardView() {
             <div className="absolute right-6 top-16 z-50 bg-[#0F1420] border border-white/10 rounded-lg p-3 text-[10px] text-white/50 w-64">
               Board export generates a sensitivity-labeled PDF summary.
               <br />
-              <span className="text-amber-400">
+              <span className="text-[#c9b787]">
                 EXPORT-RESTRICTED · BOARD-CONFIDENTIAL · retain: 90D
               </span>
             </div>
@@ -469,7 +469,7 @@ export default function ExecutiveBoardView() {
             </div>
             <PostureGauge score={livePostureScore} />
             <div className="mt-3 flex items-center gap-2 text-xs">
-              <Minus className="w-4 h-4 text-blue-400" />
+              <Minus className="w-4 h-4 text-[#c9b787]" />
               <span style={{ color: 'rgba(255,255,255,0.4)' }}>{period} trend: stable</span>
             </div>
           </div>
@@ -498,7 +498,7 @@ export default function ExecutiveBoardView() {
               <div className="space-y-3">
                 <div>
                   <div className="text-[10px] text-white/40 mb-0.5">Mean Time to Detect</div>
-                  <div className="text-xl font-bold font-mono text-blue-300">{slaMetrics.mttd}</div>
+                  <div className="text-xl font-bold font-mono text-[#c9b787]">{slaMetrics.mttd}</div>
                   <MiniTrend data={FALLBACK_TREND_DATA} metric="incidents" />
                 </div>
               </div>
@@ -508,11 +508,11 @@ export default function ExecutiveBoardView() {
               <div className="text-[9px] font-mono uppercase tracking-[0.15em] mb-3 text-white/40">
                 Mean Time to Resolve
               </div>
-              <div className="text-xl font-bold font-mono text-violet-300">{slaMetrics.mttr}</div>
+              <div className="text-xl font-bold font-mono text-[#8a8a8a]">{slaMetrics.mttr}</div>
               <MiniTrend data={FALLBACK_TREND_DATA} metric="mttr" />
               <div className="mt-3 text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
                 Escalation rate:{' '}
-                <span className={slaMetrics.escalationRate > 15 ? 'text-red-400' : 'text-white/60'}>
+                <span className={slaMetrics.escalationRate > 15 ? 'text-[#f5f5f5]' : 'text-white/60'}>
                   {slaMetrics.escalationRate}%
                 </span>
               </div>
@@ -578,7 +578,7 @@ export default function ExecutiveBoardView() {
           <div className="col-span-12 lg:col-span-7 bg-white/[0.025] border border-white/5 rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                <AlertTriangle className="w-3.5 h-3.5 text-[#c9b787]" />
                 <span className="text-xs font-semibold text-white">Top Risks by Impact</span>
               </div>
               <span className="text-[9px] font-mono text-white/30">
@@ -606,7 +606,7 @@ export default function ExecutiveBoardView() {
                             {risk.owner ? (
                               <span className="text-[10px] text-white/40">→ {risk.owner}</span>
                             ) : (
-                              <span className="text-[9px] text-amber-400/70">unowned</span>
+                              <span className="text-[9px] text-[#c9b787]/70">unowned</span>
                             )}
                           </div>
                         </div>
@@ -616,10 +616,10 @@ export default function ExecutiveBoardView() {
                             style={{
                               color:
                                 risk.residual >= 8
-                                  ? '#ef4444'
+                                  ? '#f5f5f5'
                                   : risk.residual >= 6
-                                    ? '#f97316'
-                                    : '#f59e0b',
+                                    ? '#c9b787'
+                                    : '#c9b787',
                             }}
                           >
                             {risk.residual}
@@ -641,11 +641,11 @@ export default function ExecutiveBoardView() {
           <div className="col-span-12 lg:col-span-5 bg-white/[0.025] border border-white/5 rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <ShieldCheck className="w-3.5 h-3.5 text-[#c9b787]" />
                 <span className="text-xs font-semibold text-white">Control Status</span>
               </div>
               {controlGroups && (
-                <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-blue-500/20 bg-blue-500/5 text-blue-400/70">
+                <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/20 bg-[#c9b787]/5 text-[#c9b787]/70">
                   LIVE
                 </span>
               )}
@@ -660,7 +660,7 @@ export default function ExecutiveBoardView() {
                         className="text-[10px] font-mono tabular-nums"
                         style={{
                           color:
-                            cg.score >= 80 ? '#10b981' : cg.score >= 65 ? '#f59e0b' : '#ef4444',
+                            cg.score >= 80 ? '#c9b787' : cg.score >= 65 ? '#c9b787' : '#f5f5f5',
                         }}
                       >
                         {cg.score}%
@@ -673,7 +673,7 @@ export default function ExecutiveBoardView() {
                       style={{
                         width: `${(cg.implemented / cg.total) * 100}%`,
                         backgroundColor:
-                          cg.score >= 80 ? '#10b981' : cg.score >= 65 ? '#f59e0b' : '#ef4444',
+                          cg.score >= 80 ? '#c9b787' : cg.score >= 65 ? '#c9b787' : '#f5f5f5',
                       }}
                     />
                   </div>
@@ -682,10 +682,10 @@ export default function ExecutiveBoardView() {
                     style={{ color: 'rgba(255,255,255,0.35)' }}
                   >
                     <span>
-                      <span className="text-emerald-400">{cg.implemented}</span> implemented
+                      <span className="text-[#c9b787]">{cg.implemented}</span> implemented
                     </span>
                     <span>
-                      <span className="text-yellow-400">{cg.partial}</span> partial
+                      <span className="text-[#c9b787]">{cg.partial}</span> partial
                     </span>
                     <span>
                       <span className="text-white/40">
@@ -713,7 +713,7 @@ export default function ExecutiveBoardView() {
                 <div
                   className="text-lg font-bold font-mono tabular-nums"
                   style={{
-                    color: d.posture >= 72 ? '#10b981' : d.posture >= 68 ? '#f59e0b' : '#ef4444',
+                    color: d.posture >= 72 ? '#c9b787' : d.posture >= 68 ? '#c9b787' : '#f5f5f5',
                   }}
                 >
                   {d.posture}
@@ -724,7 +724,7 @@ export default function ExecutiveBoardView() {
                   style={{
                     backgroundColor:
                       i === FALLBACK_TREND_DATA.length - 1
-                        ? 'rgba(59,130,246,0.3)'
+                        ? 'rgba(201,183,135,0.3)'
                         : 'rgba(255,255,255,0.05)',
                   }}
                 />
@@ -739,7 +739,7 @@ export default function ExecutiveBoardView() {
             ))}
           </div>
           <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-2">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#c9b787]" />
             <p className="text-[11px] text-white/50">
               Posture improved 9.1% over 6 months. Incident count trending down. MTTR improving.
               Controls gap remains on FedRAMP Moderate.

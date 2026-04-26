@@ -31,7 +31,7 @@ const FRAMEWORKS = [
     id: 'nist-800-53',
     name: 'NIST 800-53 Rev 5',
     shortName: 'NIST 800-53',
-    color: '#3b82f6',
+    color: '#c9b787',
     score: 79,
     controls: 1000,
     implemented: 790,
@@ -61,7 +61,7 @@ const FRAMEWORKS = [
     id: 'nist-csf',
     name: 'NIST CSF 2.0',
     shortName: 'NIST CSF',
-    color: '#10b981',
+    color: '#c9b787',
     score: 76,
     controls: 106,
     implemented: 81,
@@ -79,7 +79,7 @@ const FRAMEWORKS = [
     id: 'soc2',
     name: 'SOC 2 Type II',
     shortName: 'SOC 2',
-    color: '#8b5cf6',
+    color: '#8a8a8a',
     score: 91,
     controls: 65,
     implemented: 60,
@@ -96,7 +96,7 @@ const FRAMEWORKS = [
     id: 'cmmc',
     name: 'CMMC 2.0',
     shortName: 'CMMC',
-    color: '#f97316',
+    color: '#c9b787',
     score: 71,
     controls: 110,
     implemented: 78,
@@ -119,7 +119,7 @@ const FRAMEWORKS = [
     id: 'fedramp',
     name: 'FedRAMP Moderate',
     shortName: 'FedRAMP',
-    color: '#06b6d4',
+    color: '#8a8a8a',
     score: 74,
     controls: 323,
     implemented: 239,
@@ -137,7 +137,7 @@ const FRAMEWORKS = [
     id: 'iso27001',
     name: 'ISO 27001:2022',
     shortName: 'ISO 27001',
-    color: '#f59e0b',
+    color: '#c9b787',
     score: 82,
     controls: 93,
     implemented: 76,
@@ -153,7 +153,7 @@ const FRAMEWORKS = [
     id: 'nis2',
     name: 'NIS2 / BSI Act',
     shortName: 'NIS2/BSI',
-    color: '#ec4899',
+    color: '#c9b787',
     score: 68,
     controls: 42,
     implemented: 29,
@@ -217,23 +217,23 @@ export default function FrameworkScorecards() {
     <div className="space-y-5 p-1">
       <header className="flex items-end justify-between">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <h1 className="font-display text-lg font-bold text-orange-50 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-orange-400" /> Framework Scorecards
+          <h1 className="font-display text-lg font-bold text-[#c9b787] flex items-center gap-2">
+            <Shield className="w-5 h-5 text-[#c9b787]" /> Framework Scorecards
           </h1>
-          <p className="text-orange-400/50 text-xs mt-0.5">
+          <p className="text-[#c9b787]/50 text-xs mt-0.5">
             Government-grade compliance across NIST 800-53, CSF 2.0, SOC 2, CMMC, FedRAMP, ISO
             27001, NIS2/BSI
           </p>
         </motion.div>
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-orange-500/10 text-orange-400 border border-orange-500/20 hover:bg-orange-500/20 transition-colors">
+          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#c9b787]/10 text-[#c9b787] border border-[#c9b787]/20 hover:bg-[#c9b787]/20 transition-colors">
             <Download className="w-3.5 h-3.5" /> Export SSP/POA&M
           </button>
         </div>
       </header>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-orange-500/10">
+      <div className="flex gap-1 border-b border-[#c9b787]/10">
         {(
           [
             ['overview', 'Framework Overview'],
@@ -247,8 +247,8 @@ export default function FrameworkScorecards() {
             className={cn(
               'px-4 py-2 text-xs font-semibold transition-colors border-b-2 -mb-px',
               activeTab === tab
-                ? 'border-orange-400 text-orange-300'
-                : 'border-transparent text-orange-400/40 hover:text-orange-300/70',
+                ? 'border-[#c9b787] text-[#c9b787]'
+                : 'border-transparent text-[#c9b787]/40 hover:text-[#c9b787]/70',
             )}
           >
             {label}
@@ -261,13 +261,13 @@ export default function FrameworkScorecards() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-5 flex flex-col items-center justify-center"
+            className="bg-[#c9b787]/5 border border-[#c9b787]/10 rounded-xl p-5 flex flex-col items-center justify-center"
           >
-            <h3 className="text-xs font-semibold text-orange-50 mb-3 w-full">Coverage Radar</h3>
+            <h3 className="text-xs font-semibold text-[#c9b787] mb-3 w-full">Coverage Radar</h3>
             <div className="w-full h-[220px]">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
-                  <PolarGrid stroke="rgba(249,115,22,0.15)" />
+                  <PolarGrid stroke="rgba(201,183,135,0.15)" />
                   <PolarAngleAxis
                     dataKey="subject"
                     tick={{ fill: 'rgba(251,146,60,0.6)', fontSize: 10 }}
@@ -276,15 +276,15 @@ export default function FrameworkScorecards() {
                   <Tooltip
                     contentStyle={{
                       backgroundColor: '#09080f',
-                      border: '1px solid rgba(249,115,22,0.2)',
+                      border: '1px solid rgba(201,183,135,0.2)',
                       borderRadius: 8,
                     }}
                   />
                   <Radar
                     name="Score"
                     dataKey="score"
-                    stroke="rgba(239,68,68,0.8)"
-                    fill="rgba(239,68,68,0.2)"
+                    stroke="rgba(245,245,245,0.8)"
+                    fill="rgba(245,245,245,0.2)"
                     animationDuration={1500}
                   />
                 </RadarChart>
@@ -305,7 +305,7 @@ export default function FrameworkScorecards() {
                     setSelectedFramework(fw);
                     setActiveTab('controls');
                   }}
-                  className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-4 hover:-translate-y-0.5 transition-transform duration-300 cursor-pointer relative overflow-hidden"
+                  className="bg-[#c9b787]/5 border border-[#c9b787]/10 rounded-xl p-4 hover:-translate-y-0.5 transition-transform duration-300 cursor-pointer relative overflow-hidden"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div>
@@ -315,19 +315,19 @@ export default function FrameworkScorecards() {
                       >
                         {fw.status}
                       </div>
-                      <h3 className="text-sm font-bold text-orange-50">{fw.name}</h3>
+                      <h3 className="text-sm font-bold text-[#c9b787]">{fw.name}</h3>
                     </div>
                     <div className="text-right">
                       <div
                         className="text-xl font-bold font-mono"
                         style={{
                           color:
-                            fw.score >= 85 ? '#22c55e' : fw.score >= 70 ? '#f59e0b' : '#ef4444',
+                            fw.score >= 85 ? '#c9b787' : fw.score >= 70 ? '#c9b787' : '#f5f5f5',
                         }}
                       >
                         {fw.score}%
                       </div>
-                      <div className="text-[9px] text-orange-400/40">
+                      <div className="text-[9px] text-[#c9b787]/40">
                         {fw.implemented}/{fw.controls} controls
                       </div>
                     </div>
@@ -371,7 +371,7 @@ export default function FrameworkScorecards() {
                   'w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium transition-all',
                   selectedFramework.id === fw.id
                     ? 'text-white'
-                    : 'text-orange-400/50 hover:text-orange-300',
+                    : 'text-[#c9b787]/50 hover:text-[#c9b787]',
                 )}
                 style={
                   selectedFramework.id === fw.id
@@ -387,9 +387,9 @@ export default function FrameworkScorecards() {
             ))}
           </div>
 
-          <div className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-4 space-y-3">
+          <div className="bg-[#c9b787]/5 border border-[#c9b787]/10 rounded-xl p-4 space-y-3">
             <div className="flex items-center justify-between mb-1">
-              <h3 className="text-sm font-bold text-orange-50">
+              <h3 className="text-sm font-bold text-[#c9b787]">
                 {selectedFramework.name} — Control Families
               </h3>
               <span className="text-xs font-mono" style={{ color: selectedFramework.color }}>
@@ -409,7 +409,7 @@ export default function FrameworkScorecards() {
                   <Tooltip
                     contentStyle={{
                       background: '#0a0d14',
-                      border: '1px solid rgba(249,115,22,0.2)',
+                      border: '1px solid rgba(201,183,135,0.2)',
                       borderRadius: 8,
                       fontSize: 11,
                     }}
@@ -438,7 +438,7 @@ export default function FrameworkScorecards() {
                   >
                     {fam.id}
                   </span>
-                  <span className="text-[11px] text-orange-200/60 flex-1 min-w-0 truncate">
+                  <span className="text-[11px] text-[#c9b787]/60 flex-1 min-w-0 truncate">
                     {fam.name}
                   </span>
                   <div className="flex items-center gap-2 shrink-0">
@@ -451,7 +451,7 @@ export default function FrameworkScorecards() {
                         style={{
                           width: `${fam.score}%`,
                           background:
-                            fam.score >= 80 ? '#22c55e' : fam.score >= 65 ? '#f59e0b' : '#ef4444',
+                            fam.score >= 80 ? '#c9b787' : fam.score >= 65 ? '#c9b787' : '#f5f5f5',
                         }}
                       />
                     </div>
@@ -459,7 +459,7 @@ export default function FrameworkScorecards() {
                       className="text-[10px] font-mono w-8 text-right"
                       style={{
                         color:
-                          fam.score >= 80 ? '#22c55e' : fam.score >= 65 ? '#f59e0b' : '#ef4444',
+                          fam.score >= 80 ? '#c9b787' : fam.score >= 65 ? '#c9b787' : '#f5f5f5',
                       }}
                     >
                       {fam.score}%
@@ -477,8 +477,8 @@ export default function FrameworkScorecards() {
 
       {activeTab === 'crossmap' && (
         <div className="space-y-3">
-          <div className="rounded-xl border border-orange-500/10 bg-orange-500/5 p-4">
-            <div className="text-[10px] uppercase tracking-wider font-bold text-orange-400/60 mb-3 flex items-center gap-2">
+          <div className="rounded-xl border border-[#c9b787]/10 bg-[#c9b787]/5 p-4">
+            <div className="text-[10px] uppercase tracking-wider font-bold text-[#c9b787]/60 mb-3 flex items-center gap-2">
               <Link2 className="w-3.5 h-3.5" /> Cross-Framework Control Mapping
             </div>
             <div className="space-y-2">
@@ -490,9 +490,9 @@ export default function FrameworkScorecards() {
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex items-center gap-2">
                       {item.status === 'implemented' ? (
-                        <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        <CheckCircle className="w-3.5 h-3.5 text-[#c9b787] shrink-0" />
                       ) : (
-                        <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#c9b787] shrink-0" />
                       )}
                       <span className="text-xs font-semibold text-white/80">{item.control}</span>
                     </div>
@@ -507,7 +507,7 @@ export default function FrameworkScorecards() {
                     {item.frameworks.map((fw) => (
                       <span
                         key={fw}
-                        className="text-[9px] font-mono px-2 py-0.5 rounded border border-orange-500/15 bg-orange-500/5 text-orange-300/60"
+                        className="text-[9px] font-mono px-2 py-0.5 rounded border border-[#c9b787]/15 bg-[#c9b787]/5 text-[#c9b787]/60"
                       >
                         {fw}
                       </span>
@@ -519,8 +519,8 @@ export default function FrameworkScorecards() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="rounded-xl border border-orange-500/10 bg-orange-500/5 p-4">
-              <div className="text-[10px] uppercase tracking-wider font-bold text-orange-400/60 mb-3 flex items-center gap-2">
+            <div className="rounded-xl border border-[#c9b787]/10 bg-[#c9b787]/5 p-4">
+              <div className="text-[10px] uppercase tracking-wider font-bold text-[#c9b787]/60 mb-3 flex items-center gap-2">
                 <FileText className="w-3.5 h-3.5" /> SSP/POA&M Generation
               </div>
               <div className="space-y-2">
@@ -555,18 +555,18 @@ export default function FrameworkScorecards() {
                     key={doc.name}
                     className="flex items-center gap-3 p-2.5 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.03] transition-colors cursor-pointer group"
                   >
-                    <FileText className="w-3.5 h-3.5 text-orange-400/50 shrink-0" />
+                    <FileText className="w-3.5 h-3.5 text-[#c9b787]/50 shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="text-[11px] font-medium text-orange-100/70">{doc.name}</div>
-                      <div className="text-[9px] text-orange-400/30">{doc.desc}</div>
+                      <div className="text-[11px] font-medium text-[#c9b787]/70">{doc.name}</div>
+                      <div className="text-[9px] text-[#c9b787]/30">{doc.desc}</div>
                     </div>
                     <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Download className="w-3.5 h-3.5 text-orange-400" />
+                      <Download className="w-3.5 h-3.5 text-[#c9b787]" />
                     </div>
                     <span
                       className={cn(
                         'text-[9px] font-bold shrink-0',
-                        doc.status === 'Ready' ? 'text-emerald-400' : 'text-amber-400',
+                        doc.status === 'Ready' ? 'text-[#c9b787]' : 'text-[#c9b787]',
                       )}
                     >
                       {doc.status}
@@ -576,8 +576,8 @@ export default function FrameworkScorecards() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-orange-500/10 bg-orange-500/5 p-4">
-              <div className="text-[10px] uppercase tracking-wider font-bold text-orange-400/60 mb-3">
+            <div className="rounded-xl border border-[#c9b787]/10 bg-[#c9b787]/5 p-4">
+              <div className="text-[10px] uppercase tracking-wider font-bold text-[#c9b787]/60 mb-3">
                 Compliance Readiness Summary
               </div>
               <div className="space-y-2">
@@ -601,7 +601,7 @@ export default function FrameworkScorecards() {
                     <div
                       className="text-[10px] font-mono w-8 text-right shrink-0"
                       style={{
-                        color: fw.score >= 85 ? '#22c55e' : fw.score >= 70 ? '#f59e0b' : '#ef4444',
+                        color: fw.score >= 85 ? '#c9b787' : fw.score >= 70 ? '#c9b787' : '#f5f5f5',
                       }}
                     >
                       {fw.score}%
@@ -610,10 +610,10 @@ export default function FrameworkScorecards() {
                       className={cn(
                         'text-[8px] font-bold uppercase w-16 text-right shrink-0',
                         fw.status === 'Compliant'
-                          ? 'text-emerald-400'
+                          ? 'text-[#c9b787]'
                           : fw.status === 'Remediation'
-                            ? 'text-red-400'
-                            : 'text-amber-400',
+                            ? 'text-[#f5f5f5]'
+                            : 'text-[#c9b787]',
                       )}
                     >
                       {fw.status}

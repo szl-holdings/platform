@@ -7,11 +7,11 @@ import {
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
-const ACCENT = '#f59e0b';
-const RED = '#ef4444';
-const GREEN = '#22c55e';
-const BLUE = '#3b82f6';
-const _PURPLE = '#8b5cf6';
+const ACCENT = '#c9b787';
+const RED = '#f5f5f5';
+const GREEN = '#c9b787';
+const BLUE = '#c9b787';
+const _PURPLE = '#8a8a8a';
 
 const DS = {
   surface: 'rgba(255,255,255,0.025)',

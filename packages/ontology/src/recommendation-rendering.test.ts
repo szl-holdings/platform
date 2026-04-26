@@ -165,7 +165,7 @@ describe('recommendation rendering — legal (Counsel / PRISM)', () => {
 // security — Sentra Cyber Resilience Command
 // ---------------------------------------------------------------------------
 
-describe('recommendation rendering — security (TENAX)', () => {
+describe('recommendation rendering — security (Aegis)', () => {
   it('renders a complete ransomware-isolation recommendation with all 8 proof-chain fields', () => {
     const rec = createRecommendation({
       domain: 'security',
@@ -202,7 +202,7 @@ describe('recommendation rendering — security (TENAX)', () => {
 // finance — SZL Holdings Treasury / Pulse
 // ---------------------------------------------------------------------------
 
-describe('recommendation rendering — finance (SZL Treasury / LUMINA)', () => {
+describe('recommendation rendering — finance (SZL Treasury / Pulse)', () => {
   it('renders a treasury hedge recommendation with all 8 proof-chain fields', () => {
     const rec = createRecommendation({
       domain: 'finance',

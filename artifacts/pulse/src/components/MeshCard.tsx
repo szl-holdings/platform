@@ -146,7 +146,7 @@ export default function MeshCard() {
               color: 'var(--pulse-text-muted)',
             }}
           >
-            TENAX · Agent Mesh Status
+            Aegis · Agent Mesh Status
           </span>
           <span
             style={{
@@ -343,7 +343,7 @@ export default function MeshCard() {
             hour: '2-digit',
             minute: '2-digit',
           })}{' '}
-          UTC · TENAX Agent Mesh Engine
+          UTC · Aegis Agent Mesh Engine
         </div>
         <a
           href={sentraHref}
@@ -357,7 +357,7 @@ export default function MeshCard() {
             gap: 4,
           }}
         >
-          Review in TENAX →
+          Review in Aegis →
         </a>
       </div>
     </div>

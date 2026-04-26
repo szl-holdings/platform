@@ -204,50 +204,50 @@ const CONTAINMENT_ACTIONS = [
 
 const GATE_STYLES: Record<string, { bg: string; text: string; border: string; label: string }> = {
   approval_required: {
-    bg: 'bg-amber-500/10',
-    text: 'text-amber-300',
-    border: 'border-amber-500/20',
+    bg: 'bg-[#c9b787]/10',
+    text: 'text-[#c9b787]',
+    border: 'border-[#c9b787]/20',
     label: 'Approval Required',
   },
   approved_execute: {
-    bg: 'bg-emerald-500/10',
-    text: 'text-emerald-300',
-    border: 'border-emerald-500/20',
+    bg: 'bg-[#c9b787]/10',
+    text: 'text-[#c9b787]',
+    border: 'border-[#c9b787]/20',
     label: 'Approved Execute',
   },
   propose_only: {
-    bg: 'bg-blue-500/10',
-    text: 'text-blue-300',
-    border: 'border-blue-500/20',
+    bg: 'bg-[#c9b787]/10',
+    text: 'text-[#c9b787]',
+    border: 'border-[#c9b787]/20',
     label: 'Propose Only',
   },
   blocked_by_policy: {
-    bg: 'bg-red-500/10',
-    text: 'text-red-300',
-    border: 'border-red-500/20',
+    bg: 'bg-[#f5f5f5]/10',
+    text: 'text-[#f5f5f5]',
+    border: 'border-[#f5f5f5]/20',
     label: 'Blocked by Policy',
   },
 };
 
 const STEP_STATUS_STYLES: Record<string, { icon: typeof CheckCircle2; color: string; bg: string }> =
   {
-    executed: { icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-    completed: { icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+    executed: { icon: CheckCircle2, color: 'text-[#c9b787]', bg: 'bg-[#c9b787]/10' },
+    completed: { icon: CheckCircle2, color: 'text-[#c9b787]', bg: 'bg-[#c9b787]/10' },
     pending: { icon: Clock, color: 'text-white/40', bg: 'bg-white/5' },
-    blocked: { icon: AlertOctagon, color: 'text-red-400', bg: 'bg-red-500/10' },
-    failed: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10' },
-    'human-review': { icon: Users, color: 'text-amber-400', bg: 'bg-amber-500/10' },
-    executing: { icon: Activity, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-    in_progress: { icon: Activity, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+    blocked: { icon: AlertOctagon, color: 'text-[#f5f5f5]', bg: 'bg-[#f5f5f5]/10' },
+    failed: { icon: XCircle, color: 'text-[#f5f5f5]', bg: 'bg-[#f5f5f5]/10' },
+    'human-review': { icon: Users, color: 'text-[#c9b787]', bg: 'bg-[#c9b787]/10' },
+    executing: { icon: Activity, color: 'text-[#c9b787]', bg: 'bg-[#c9b787]/10' },
+    in_progress: { icon: Activity, color: 'text-[#c9b787]', bg: 'bg-[#c9b787]/10' },
   };
 
 const PB_STATUS_STYLES: Record<string, string> = {
-  executing: 'bg-blue-500/10 text-blue-300 border-blue-500/20',
-  in_progress: 'bg-blue-500/10 text-blue-300 border-blue-500/20',
-  completed: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
-  blocked: 'bg-red-500/10 text-red-300 border-red-500/20',
-  failed: 'bg-red-500/10 text-red-300 border-red-500/20',
-  paused: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20',
+  executing: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  in_progress: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  completed: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  blocked: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  failed: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  paused: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
   pending: 'bg-white/5 text-white/40 border-white/10',
 };
 
@@ -303,16 +303,16 @@ function StepRow({ step }: { step: StepShape }) {
       </div>
       {step.status === 'pending' && step.gate === 'approval_required' && (
         <div className="flex gap-1.5 shrink-0">
-          <button className="px-2 py-1 rounded text-[9px] font-semibold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20">
+          <button className="px-2 py-1 rounded text-[9px] font-semibold bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787] hover:bg-[#c9b787]/20">
             Approve
           </button>
-          <button className="px-2 py-1 rounded text-[9px] font-semibold bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20">
+          <button className="px-2 py-1 rounded text-[9px] font-semibold bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 text-[#f5f5f5] hover:bg-[#f5f5f5]/20">
             Block
           </button>
         </div>
       )}
       {step.status === 'pending' && step.gate === 'propose_only' && (
-        <button className="px-2 py-1 rounded text-[9px] font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 shrink-0">
+        <button className="px-2 py-1 rounded text-[9px] font-semibold bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787] hover:bg-[#c9b787]/20 shrink-0">
           Initiate
         </button>
       )}
@@ -489,11 +489,11 @@ export default function ResponseOrchestration() {
         <div className="px-4 py-3 border-b border-white/5">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-blue-400" />
+              <Zap className="w-4 h-4 text-[#c9b787]" />
               <span className="text-xs font-semibold text-white">Response Orchestration</span>
             </div>
             {envLabel && (
-              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/5 text-emerald-400/70">
+              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/30 bg-[#c9b787]/5 text-[#c9b787]/70">
                 {envLabel}
               </span>
             )}
@@ -506,7 +506,7 @@ export default function ResponseOrchestration() {
               </>
             )}
             Playbook execution board
-            {usingLive && <span className="text-blue-400 ml-1">· {liveGroups.length} live</span>}
+            {usingLive && <span className="text-[#c9b787] ml-1">· {liveGroups.length} live</span>}
           </p>
         </div>
         <div className="flex-1 overflow-y-auto divide-y divide-white/[0.04]">
@@ -517,7 +517,7 @@ export default function ResponseOrchestration() {
               className={cn(
                 'w-full text-left px-4 py-3 transition-all border-l-2',
                 selectedId === pb2.id
-                  ? 'bg-blue-500/10 border-blue-400'
+                  ? 'bg-[#c9b787]/10 border-[#c9b787]'
                   : 'hover:bg-white/[0.02] border-transparent',
               )}
             >
@@ -540,7 +540,7 @@ export default function ResponseOrchestration() {
           ))}
         </div>
         <div className="p-3 border-t border-white/5">
-          <button className="w-full py-2 rounded-lg text-xs font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-300 hover:bg-blue-500/20 transition-colors">
+          <button className="w-full py-2 rounded-lg text-xs font-semibold bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787] hover:bg-[#c9b787]/20 transition-colors">
             + New Playbook
           </button>
         </div>
@@ -580,7 +580,7 @@ export default function ResponseOrchestration() {
                       </span>
                     )}
                     {usingLive && (
-                      <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-blue-500/20 bg-blue-500/5 text-blue-400/70">
+                      <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/20 bg-[#c9b787]/5 text-[#c9b787]/70">
                         LIVE
                       </span>
                     )}
@@ -599,11 +599,11 @@ export default function ResponseOrchestration() {
                 </div>
                 <div className="flex gap-2 shrink-0">
                   {(pb.status === 'executing' || pb.status === 'in_progress') && (
-                    <button className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 border border-amber-500/20 text-amber-300 hover:bg-amber-500/20 transition-colors flex items-center gap-1.5">
+                    <button className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787] hover:bg-[#c9b787]/20 transition-colors flex items-center gap-1.5">
                       <Pause className="w-3 h-3" /> Pause
                     </button>
                   )}
-                  <button className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500/10 border border-red-500/20 text-red-300 hover:bg-red-500/20 transition-colors flex items-center gap-1.5">
+                  <button className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 text-[#f5f5f5] hover:bg-[#f5f5f5]/20 transition-colors flex items-center gap-1.5">
                     <ShieldOff className="w-3 h-3" /> Abort
                   </button>
                 </div>
@@ -618,14 +618,14 @@ export default function ResponseOrchestration() {
                     {executed}/{pb.steps.length} steps
                   </span>
                   <div className="flex gap-3">
-                    <span className="text-emerald-400">{executed} executed</span>
+                    <span className="text-[#c9b787]">{executed} executed</span>
                     <span className="text-white/40">{pending} pending</span>
-                    {blocked > 0 && <span className="text-red-400">{blocked} blocked</span>}
+                    {blocked > 0 && <span className="text-[#f5f5f5]">{blocked} blocked</span>}
                   </div>
                 </div>
                 <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-blue-500 transition-all"
+                    className="h-full rounded-full bg-[#c9b787] transition-all"
                     style={{
                       width: `${pb.steps.length > 0 ? (executed / pb.steps.length) * 100 : 0}%`,
                     }}
@@ -642,7 +642,7 @@ export default function ResponseOrchestration() {
                   className={cn(
                     'px-3 py-1.5 rounded-lg text-[11px] font-medium capitalize transition-all',
                     activeTab === tab
-                      ? 'bg-blue-500/15 text-blue-300 border border-blue-500/20'
+                      ? 'bg-[#c9b787]/15 text-[#c9b787] border border-[#c9b787]/20'
                       : 'text-white/50 hover:text-white/80 hover:bg-white/5',
                   )}
                 >
@@ -676,11 +676,11 @@ export default function ResponseOrchestration() {
 
               {activeTab === 'rollback' && (
                 <div className="space-y-3">
-                  <div className="bg-amber-500/[0.06] border border-amber-500/15 rounded-xl p-4 flex gap-3">
-                    <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div className="bg-[#c9b787]/[0.06] border border-[#c9b787]/15 rounded-xl p-4 flex gap-3">
+                    <AlertTriangle className="w-4 h-4 text-[#c9b787] shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs font-semibold text-amber-300 mb-1">Rollback Actions</p>
-                      <p className="text-[11px] text-amber-200/60">
+                      <p className="text-xs font-semibold text-[#c9b787] mb-1">Rollback Actions</p>
+                      <p className="text-[11px] text-[#c9b787]/60">
                         Rollback actions reverse executed playbook steps. All rollbacks require
                         approval_required gate minimum. Actions are irreversible once confirmed.
                       </p>
@@ -693,11 +693,11 @@ export default function ResponseOrchestration() {
                     >
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+                          <RotateCcw className="w-3.5 h-3.5 text-[#c9b787]" />
                           <span className="text-[11px] font-medium text-white/85">{rb.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-amber-500/20 bg-amber-500/10 text-amber-400">
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/20 bg-[#c9b787]/10 text-[#c9b787]">
                             approval_required
                           </span>
                           <span className="text-[10px] text-white/35">
@@ -705,7 +705,7 @@ export default function ResponseOrchestration() {
                           </span>
                         </div>
                       </div>
-                      <button className="px-3 py-1.5 rounded text-[10px] font-semibold bg-amber-500/10 border border-amber-500/20 text-amber-300 hover:bg-amber-500/20 shrink-0">
+                      <button className="px-3 py-1.5 rounded text-[10px] font-semibold bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787] hover:bg-[#c9b787]/20 shrink-0">
                         Request Rollback
                       </button>
                     </div>
@@ -715,13 +715,13 @@ export default function ResponseOrchestration() {
 
               {activeTab === 'containment' && (
                 <div className="space-y-3">
-                  <div className="bg-red-500/[0.06] border border-red-500/15 rounded-xl p-4 flex gap-3">
-                    <AlertOctagon className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                  <div className="bg-[#f5f5f5]/[0.06] border border-[#f5f5f5]/15 rounded-xl p-4 flex gap-3">
+                    <AlertOctagon className="w-4 h-4 text-[#f5f5f5] shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs font-semibold text-red-300 mb-1">
+                      <p className="text-xs font-semibold text-[#f5f5f5] mb-1">
                         Emergency Containment
                       </p>
-                      <p className="text-[11px] text-red-200/60">
+                      <p className="text-[11px] text-[#f5f5f5]/60">
                         Containment actions have broad impact. All require explicit approval.
                         Automated blocking is gated at approval_required minimum — no containment
                         action executes without named authorization.
@@ -735,7 +735,7 @@ export default function ResponseOrchestration() {
                     >
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <ShieldOff className="w-3.5 h-3.5 text-red-400" />
+                          <ShieldOff className="w-3.5 h-3.5 text-[#f5f5f5]" />
                           <span className="text-[11px] font-medium text-white/85">{ct.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -753,8 +753,8 @@ export default function ResponseOrchestration() {
                             className={cn(
                               'text-[8px] font-mono px-1.5 py-0.5 rounded border uppercase',
                               ct.severity === 'critical'
-                                ? 'bg-red-500/10 text-red-400 border-red-500/20'
-                                : 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+                                ? 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20'
+                                : 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
                             )}
                           >
                             {ct.severity}
@@ -770,7 +770,7 @@ export default function ResponseOrchestration() {
                           })
                         }
                         disabled={containMutation.isPending}
-                        className="px-3 py-1.5 rounded text-[10px] font-semibold bg-red-500/10 border border-red-500/20 text-red-300 hover:bg-red-500/20 shrink-0 disabled:opacity-40"
+                        className="px-3 py-1.5 rounded text-[10px] font-semibold bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 text-[#f5f5f5] hover:bg-[#f5f5f5]/20 shrink-0 disabled:opacity-40"
                       >
                         {containMutation.isPending ? 'Requesting...' : 'Request Action'}
                       </button>

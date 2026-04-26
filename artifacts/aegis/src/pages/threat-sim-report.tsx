@@ -12,9 +12,9 @@ import {
 } from 'lucide-react';
 import { useRef, useState } from 'react';
 
-const PHANTOM_ACCENT = '#a855f7';
-const SENTINEL_ACCENT = '#8b5cf6';
-const _ACCENT = '#ef4444';
+const PHANTOM_ACCENT = '#8a8a8a';
+const SENTINEL_ACCENT = '#8a8a8a';
+const _ACCENT = '#f5f5f5';
 const DS = {
   surface: 'rgba(255,255,255,0.025)',
   border: 'rgba(255,255,255,0.06)',
@@ -48,14 +48,14 @@ const REPORT_CONFIGS: Record<
   'purple-team': {
     label: 'Purple Team Exercise Report',
     code: 'PTE-2025-0411',
-    color: '#3b82f6',
+    color: '#c9b787',
     icon: Shield,
     classification: 'CONFIDENTIAL // SEC CLEARANCE',
   },
   'executive-summary': {
     label: 'Executive Intelligence Summary',
     code: 'EIS-2025-Q2',
-    color: '#f59e0b',
+    color: '#c9b787',
     icon: Building2,
     classification: 'CONFIDENTIAL // BOARD ONLY',
   },
@@ -92,11 +92,11 @@ const REPORT_CONTENT: Record<
       'PHANTOM adversary simulation engine conducted a full-spectrum APT29-profile attack campaign against the production environment of [TARGET ORGANIZATION]. This classified assessment documents all simulated attack stages, MITRE ATT&CK mappings, detection coverage gaps identified, and recommended hardening actions to close material security control deficiencies.',
     stats: [
       { label: 'Campaign Duration', value: '127 days (simulated)', color: PHANTOM_ACCENT },
-      { label: 'Attack Steps', value: '8 stages executed', color: '#f97316' },
-      { label: 'Detection Rate', value: '37.5% (3 of 8)', color: '#ef4444' },
-      { label: 'Blast Radius', value: '94% predicted', color: '#ef4444' },
-      { label: 'Adversary Profile', value: 'APT29 / Cozy Bear', color: '#f59e0b' },
-      { label: 'Financial Exposure', value: '$47.2M projected', color: '#ef4444' },
+      { label: 'Attack Steps', value: '8 stages executed', color: '#c9b787' },
+      { label: 'Detection Rate', value: '37.5% (3 of 8)', color: '#f5f5f5' },
+      { label: 'Blast Radius', value: '94% predicted', color: '#f5f5f5' },
+      { label: 'Adversary Profile', value: 'APT29 / Cozy Bear', color: '#c9b787' },
+      { label: 'Financial Exposure', value: '$47.2M projected', color: '#f5f5f5' },
     ],
     sections: [
       {
@@ -172,10 +172,10 @@ const REPORT_CONTENT: Record<
       'This SENTINEL behavioral analytics assessment documents anomalous identity activity detected across monitored user populations during the Q2 FY2025 assessment period. Two users have been classified as active insider threat investigations based on behavioral deviation patterns, data access anomalies, and exfiltration indicators.',
     stats: [
       { label: 'Monitored Users', value: '5 active identities', color: SENTINEL_ACCENT },
-      { label: 'Critical Risk Users', value: '1 (M. Rodriguez)', color: '#ef4444' },
-      { label: 'High Risk Users', value: '1 (K. Tanaka)', color: '#f97316' },
-      { label: 'Anomalies Detected', value: '6 behavioral events', color: '#f59e0b' },
-      { label: 'Data Exfiltration Risk', value: '12.4GB confirmed', color: '#ef4444' },
+      { label: 'Critical Risk Users', value: '1 (M. Rodriguez)', color: '#f5f5f5' },
+      { label: 'High Risk Users', value: '1 (K. Tanaka)', color: '#c9b787' },
+      { label: 'Anomalies Detected', value: '6 behavioral events', color: '#c9b787' },
+      { label: 'Data Exfiltration Risk', value: '12.4GB confirmed', color: '#f5f5f5' },
       { label: 'Assessment Period', value: 'April 1–15, 2025', color: SENTINEL_ACCENT },
     ],
     sections: [
@@ -235,12 +235,12 @@ const REPORT_CONTENT: Record<
     summary:
       'This Purple Team Exercise After Action Report documents the results of a coordinated red team / blue team exercise conducted against production-representative infrastructure. The exercise simulated a full APT29-profile intrusion campaign across 7 attack stages, with simultaneous blue team response and real-time gap analysis.',
     stats: [
-      { label: 'Exercise Duration', value: '7 attack phases', color: '#3b82f6' },
-      { label: 'Red Team Successes', value: '5 of 7 stages', color: '#ef4444' },
-      { label: 'Blue Team Defenses', value: '2 full blocks', color: '#3b82f6' },
-      { label: 'Partial Detections', value: '4 events', color: '#f59e0b' },
-      { label: 'Coverage Gaps Found', value: '5 critical findings', color: '#ef4444' },
-      { label: 'Detection Rate', value: '28.5% (baseline)', color: '#ef4444' },
+      { label: 'Exercise Duration', value: '7 attack phases', color: '#c9b787' },
+      { label: 'Red Team Successes', value: '5 of 7 stages', color: '#f5f5f5' },
+      { label: 'Blue Team Defenses', value: '2 full blocks', color: '#c9b787' },
+      { label: 'Partial Detections', value: '4 events', color: '#c9b787' },
+      { label: 'Coverage Gaps Found', value: '5 critical findings', color: '#f5f5f5' },
+      { label: 'Detection Rate', value: '28.5% (baseline)', color: '#f5f5f5' },
     ],
     sections: [
       {
@@ -312,14 +312,14 @@ const REPORT_CONTENT: Record<
     summary:
       'This Executive Intelligence Summary consolidates findings from PHANTOM adversary simulation exercises, SENTINEL insider threat behavioral analytics, and purple team exercises conducted in Q2 FY2025. The assessment is prepared for Board of Directors and C-suite review and represents the most current picture of organizational security posture against advanced threats.',
     stats: [
-      { label: 'Overall Risk Rating', value: 'ELEVATED', color: '#f97316' },
-      { label: 'Critical Findings', value: '6 unresolved', color: '#ef4444' },
-      { label: 'Financial Exposure', value: '$47.2M (APT sim)', color: '#ef4444' },
-      { label: 'Insider Threat Cases', value: '2 active investigations', color: '#f59e0b' },
+      { label: 'Overall Risk Rating', value: 'ELEVATED', color: '#c9b787' },
+      { label: 'Critical Findings', value: '6 unresolved', color: '#f5f5f5' },
+      { label: 'Financial Exposure', value: '$47.2M (APT sim)', color: '#f5f5f5' },
+      { label: 'Insider Threat Cases', value: '2 active investigations', color: '#c9b787' },
       {
         label: 'Detection Rate (Nation-State)',
         value: '37.5% — below 85% target',
-        color: '#ef4444',
+        color: '#f5f5f5',
       },
       { label: 'Simulation Exercises', value: '3 completed Q2', color: PHANTOM_ACCENT },
     ],
@@ -386,9 +386,9 @@ function ClassificationBanner({ text, color }: { text: string; color: string }) 
 }
 
 const SEV_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#c9b787',
 };
 
 export default function ThreatSimReport() {
@@ -408,7 +408,7 @@ export default function ThreatSimReport() {
     const win = window.open('', '_blank', 'width=900,height=720');
     if (!win) return;
 
-    const SEV: Record<string, string> = { critical: '#ef4444', high: '#f97316', medium: '#f59e0b' };
+    const SEV: Record<string, string> = { critical: '#f5f5f5', high: '#c9b787', medium: '#c9b787' };
     const accent = config.color;
     const reportDate = new Date().toISOString().slice(0, 10);
 

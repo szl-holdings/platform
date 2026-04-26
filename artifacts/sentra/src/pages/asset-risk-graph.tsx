@@ -16,7 +16,7 @@ const TYPE_ICON: Record<string, typeof Cpu> = {
 
 function ExposureBar({ score }: { score: number }) {
   const color =
-    score > 80 ? '#ef4444' : score > 50 ? '#f97316' : score > 30 ? '#fbbf24' : '#34d399';
+    score > 80 ? '#f5f5f5' : score > 50 ? '#c9b787' : score > 30 ? '#c9b787' : '#c9b787';
   return (
     <div className="flex items-center gap-2">
       <div className="w-20 h-1.5 bg-slate-800 rounded-full overflow-hidden">
@@ -61,10 +61,10 @@ function AssetRow({ asset }: { asset: CyberAsset }) {
             className={cn(
               'px-2 py-0.5 rounded text-[10px] font-mono font-bold border flex items-center gap-1 w-fit',
               asset.type === 'OT'
-                ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                ? 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20'
                 : asset.type === 'IT'
-                  ? 'bg-sky-500/10 text-sky-400 border-sky-500/20'
-                  : 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+                  ? 'bg-[#8a8a8a]/10 text-[#8a8a8a] border-sky-500/20'
+                  : 'bg-[#8a8a8a]/10 text-[#8a8a8a] border-[#8a8a8a]/20',
             )}
           >
             <Icon className="w-2.5 h-2.5" />
@@ -82,10 +82,10 @@ function AssetRow({ asset }: { asset: CyberAsset }) {
             className={cn(
               'flex items-center gap-2 text-xs font-mono',
               asset.backupStatus === 'current'
-                ? 'text-emerald-400'
+                ? 'text-[#c9b787]'
                 : asset.backupStatus === 'stale'
-                  ? 'text-amber-400'
-                  : 'text-red-400',
+                  ? 'text-[#c9b787]'
+                  : 'text-[#f5f5f5]',
             )}
           >
             <RefreshCcw className="w-3 h-3" />
@@ -97,7 +97,7 @@ function AssetRow({ asset }: { asset: CyberAsset }) {
             </div>
           )}
         </td>
-        <td className="px-5 py-4 text-xs text-red-400/70 font-mono">
+        <td className="px-5 py-4 text-xs text-[#f5f5f5]/70 font-mono">
           {asset.controlGaps.length > 0 ? `${asset.controlGaps.length} gap${asset.controlGaps.length > 1 ? 's' : ''}` : '—'}
         </td>
         <td className="px-5 py-4">
@@ -105,10 +105,10 @@ function AssetRow({ asset }: { asset: CyberAsset }) {
             className={cn(
               'px-2 py-1 rounded-full text-[10px] font-bold border',
               asset.status === 'compromised'
-                ? 'bg-red-500/10 text-red-400 border-red-500/30'
+                ? 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/30'
                 : asset.status === 'isolated'
-                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                  : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+                  ? 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/30'
+                  : 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/30',
             )}
           >
             {asset.status.toUpperCase()}
@@ -124,7 +124,7 @@ function AssetRow({ asset }: { asset: CyberAsset }) {
                 {asset.controlGaps.length > 0 ? (
                   <ul className="space-y-1">
                     {asset.controlGaps.map((gap, i) => (
-                      <li key={i} className="flex items-center gap-2 text-xs text-red-400">
+                      <li key={i} className="flex items-center gap-2 text-xs text-[#f5f5f5]">
                         <ShieldAlert className="w-3 h-3 shrink-0" />
                         {gap}
                       </li>
@@ -152,10 +152,10 @@ function AssetRow({ asset }: { asset: CyberAsset }) {
                       style={{
                         color:
                           asset.exposureScore > 80
-                            ? '#ef4444'
+                            ? '#f5f5f5'
                             : asset.exposureScore > 50
-                              ? '#f97316'
-                              : '#34d399',
+                              ? '#c9b787'
+                              : '#c9b787',
                       }}
                     >
                       {asset.exposureScore}/100
@@ -216,17 +216,17 @@ export default function AssetRiskGraph() {
         </div>
         <div className="sentra-panel p-4 text-center">
           <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">At Risk</div>
-          <div className="text-2xl font-display font-bold text-red-400">{atRisk}</div>
+          <div className="text-2xl font-display font-bold text-[#f5f5f5]">{atRisk}</div>
         </div>
         <div className="sentra-panel p-4 text-center">
           <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">Compromised</div>
-          <div className="text-2xl font-display font-bold text-red-400">
+          <div className="text-2xl font-display font-bold text-[#f5f5f5]">
             {sentraTwin.assets.filter((a) => a.status === 'compromised').length}
           </div>
         </div>
         <div className="sentra-panel p-4 text-center">
           <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">Control Gaps</div>
-          <div className="text-2xl font-display font-bold text-amber-400">
+          <div className="text-2xl font-display font-bold text-[#c9b787]">
             {sentraTwin.assets.reduce((acc, a) => acc + a.controlGaps.length, 0)}
           </div>
         </div>
@@ -240,7 +240,7 @@ export default function AssetRiskGraph() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search assets…"
-            className="w-full bg-slate-900 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-300 placeholder:text-slate-600 outline-none focus:border-red-500/40"
+            className="w-full bg-slate-900 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-300 placeholder:text-slate-600 outline-none focus:border-[#f5f5f5]/40"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -289,7 +289,7 @@ export default function AssetRiskGraph() {
         <div className="sentra-panel overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-800/50 border-b border-red-500/10 text-[11px] uppercase tracking-wider text-slate-400 font-mono">
+              <tr className="bg-slate-800/50 border-b border-[#f5f5f5]/10 text-[11px] uppercase tracking-wider text-slate-400 font-mono">
                 <th className="px-5 py-4 font-medium">Asset Name</th>
                 <th className="px-5 py-4 font-medium">Type</th>
                 <th className="px-5 py-4 font-medium">Criticality</th>

@@ -159,7 +159,7 @@ function generateReflexiveAction(): ReflexiveAction {
     },
     {
       agent: 'Portfolio Analyst',
-      action: 'Health score recalculated — SEXTANT: 84 → 87',
+      action: 'Health score recalculated — Vessels: 84 → 87',
       trigger: 'Metric refresh cycle',
     },
   ];
@@ -182,35 +182,35 @@ function generateReflexiveAction(): ReflexiveAction {
 
 const STAGE_CONFIG = {
   gathering: {
-    color: 'text-blue-400',
-    bg: 'bg-blue-400/10',
-    bar: 'bg-blue-400',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
+    bar: 'bg-[#c9b787]',
     label: 'Gathering data',
   },
   analyzing: {
-    color: 'text-amber-400',
-    bg: 'bg-amber-400/10',
-    bar: 'bg-amber-400',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
+    bar: 'bg-[#c9b787]',
     label: 'Analyzing',
   },
   synthesizing: {
-    color: 'text-violet-400',
-    bg: 'bg-violet-400/10',
-    bar: 'bg-violet-400',
+    color: 'text-[#8a8a8a]',
+    bg: 'bg-[#8a8a8a]/10',
+    bar: 'bg-[#8a8a8a]',
     label: 'Synthesizing',
   },
   delivering: {
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-400/10',
-    bar: 'bg-emerald-400',
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
+    bar: 'bg-[#c9b787]',
     label: 'Delivering',
   },
 };
 
 const DEPTH_CONFIG = {
-  shallow: { label: 'Shallow', color: 'text-sky-400' },
-  medium: { label: 'Medium', color: 'text-amber-400' },
-  deep: { label: 'Deep', color: 'text-violet-400' },
+  shallow: { label: 'Shallow', color: 'text-[#8a8a8a]' },
+  medium: { label: 'Medium', color: 'text-[#c9b787]' },
+  deep: { label: 'Deep', color: 'text-[#8a8a8a]' },
 };
 
 export default function DualMindMonitor() {
@@ -249,9 +249,9 @@ export default function DualMindMonitor() {
 
   const outcomeStyle = (outcome: ReflexiveAction['outcome']) =>
     ({
-      completed: { icon: CheckCircle2, color: 'text-emerald-400' },
-      escalated: { icon: AlertCircle, color: 'text-amber-400' },
-      blocked: { icon: AlertCircle, color: 'text-red-400' },
+      completed: { icon: CheckCircle2, color: 'text-[#c9b787]' },
+      escalated: { icon: AlertCircle, color: 'text-[#c9b787]' },
+      blocked: { icon: AlertCircle, color: 'text-[#f5f5f5]' },
     })[outcome];
 
   return (
@@ -260,11 +260,11 @@ export default function DualMindMonitor() {
       <div>
         <div className="flex items-center gap-3 mb-1">
           <div className="flex items-center gap-1">
-            <div className="w-8 h-8 rounded-lg bg-yellow-400/15 flex items-center justify-center">
-              <Sun className="w-4 h-4 text-yellow-400" />
+            <div className="w-8 h-8 rounded-lg bg-[#c9b787]/15 flex items-center justify-center">
+              <Sun className="w-4 h-4 text-[#c9b787]" />
             </div>
-            <div className="w-8 h-8 rounded-lg bg-indigo-400/15 flex items-center justify-center">
-              <Moon className="w-4 h-4 text-indigo-400" />
+            <div className="w-8 h-8 rounded-lg bg-[#8a8a8a]/15 flex items-center justify-center">
+              <Moon className="w-4 h-4 text-[#8a8a8a]" />
             </div>
           </div>
           <h1 className="text-xl font-display font-bold text-foreground tracking-tight">
@@ -272,9 +272,9 @@ export default function DualMindMonitor() {
           </h1>
         </div>
         <p className="text-xs text-muted-foreground">
-          <span className="text-yellow-400">Reflexive Reasoning</span> (System 1) — fast reflexive
+          <span className="text-[#c9b787]">Reflexive Reasoning</span> (System 1) — fast reflexive
           responses happening right now. &nbsp;
-          <span className="text-indigo-400">Deliberate Reasoning</span> (System 2) — deep analytical
+          <span className="text-[#8a8a8a]">Deliberate Reasoning</span> (System 2) — deep analytical
           tasks in progress.
         </p>
       </div>
@@ -282,32 +282,32 @@ export default function DualMindMonitor() {
       {/* Split view */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Reflexive Reasoning — System 1 */}
-        <div className="bg-gradient-to-br from-yellow-500/5 via-orange-500/3 to-transparent border border-yellow-400/20 rounded-xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-yellow-400/15">
+        <div className="bg-gradient-to-br from-yellow-500/5 via-orange-500/3 to-transparent border border-[#c9b787]/20 rounded-xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-[#c9b787]/15">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2.5">
-                <Sun className="w-5 h-5 text-yellow-400" />
+                <Sun className="w-5 h-5 text-[#c9b787]" />
                 <div>
-                  <h2 className="text-sm font-display font-bold text-yellow-400">
+                  <h2 className="text-sm font-display font-bold text-[#c9b787]">
                     Reflexive Reasoning — System 1
                   </h2>
                   <p className="text-[10px] text-muted-foreground">Reflexive real-time actions</p>
                 </div>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
-                <span className="text-[10px] font-mono text-yellow-400">ACTIVE</span>
+                <span className="w-2 h-2 rounded-full bg-[#c9b787] animate-pulse" />
+                <span className="text-[10px] font-mono text-[#c9b787]">ACTIVE</span>
               </div>
             </div>
             <div className="grid grid-cols-4 gap-2">
               {[
                 { label: 'Actions', value: reflexiveStats.total, color: 'text-foreground' },
-                { label: 'Completed', value: reflexiveStats.completed, color: 'text-emerald-400' },
-                { label: 'Escalated', value: reflexiveStats.escalated, color: 'text-amber-400' },
+                { label: 'Completed', value: reflexiveStats.completed, color: 'text-[#c9b787]' },
+                { label: 'Escalated', value: reflexiveStats.escalated, color: 'text-[#c9b787]' },
                 {
                   label: 'Avg Latency',
                   value: `${reflexiveStats.avgLatency}ms`,
-                  color: 'text-cyan-400',
+                  color: 'text-[#8a8a8a]',
                 },
               ].map((s) => (
                 <div key={s.label} className="text-center">
@@ -325,8 +325,8 @@ export default function DualMindMonitor() {
                 <div
                   key={action.id}
                   className={cn(
-                    'px-4 py-3 hover:bg-yellow-400/3 transition-all',
-                    i === 0 ? 'bg-yellow-400/5' : '',
+                    'px-4 py-3 hover:bg-[#c9b787]/3 transition-all',
+                    i === 0 ? 'bg-[#c9b787]/5' : '',
                   )}
                 >
                   <div className="flex items-start gap-2.5">
@@ -365,9 +365,9 @@ export default function DualMindMonitor() {
           <div className="px-5 py-4 border-b border-indigo-400/15">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2.5">
-                <Moon className="w-5 h-5 text-indigo-400" />
+                <Moon className="w-5 h-5 text-[#8a8a8a]" />
                 <div>
-                  <h2 className="text-sm font-display font-bold text-indigo-400">
+                  <h2 className="text-sm font-display font-bold text-[#8a8a8a]">
                     Deliberate Reasoning — System 2
                   </h2>
                   <p className="text-[10px] text-muted-foreground">
@@ -376,18 +376,18 @@ export default function DualMindMonitor() {
                 </div>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
-                <span className="text-[10px] font-mono text-indigo-400">THINKING</span>
+                <span className="w-2 h-2 rounded-full bg-[#8a8a8a] animate-pulse" />
+                <span className="text-[10px] font-mono text-[#8a8a8a]">THINKING</span>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-2">
               {[
                 { label: 'Tasks', value: deliberativeStats.total, color: 'text-foreground' },
-                { label: 'In Progress', value: deliberativeStats.inProgress, color: 'text-indigo-400' },
+                { label: 'In Progress', value: deliberativeStats.inProgress, color: 'text-[#8a8a8a]' },
                 {
                   label: 'Avg Progress',
                   value: `${deliberativeStats.avgProgress}%`,
-                  color: 'text-violet-400',
+                  color: 'text-[#8a8a8a]',
                 },
               ].map((s) => (
                 <div key={s.label} className="text-center">
@@ -404,7 +404,7 @@ export default function DualMindMonitor() {
               return (
                 <div
                   key={task.id}
-                  className="bg-indigo-400/5 rounded-xl border border-indigo-400/10 p-4"
+                  className="bg-[#8a8a8a]/5 rounded-xl border border-indigo-400/10 p-4"
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex-1 min-w-0">
@@ -462,10 +462,10 @@ export default function DualMindMonitor() {
           Dual-Mind Architecture — Design Philosophy
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-yellow-400/5 border border-yellow-400/15 rounded-xl p-4">
+          <div className="bg-[#c9b787]/5 border border-[#c9b787]/15 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">
-              <Sun className="w-4 h-4 text-yellow-400" />
-              <h4 className="text-xs font-bold text-yellow-400">Reflexive Reasoning · System 1</h4>
+              <Sun className="w-4 h-4 text-[#c9b787]" />
+              <h4 className="text-xs font-bold text-[#c9b787]">Reflexive Reasoning · System 1</h4>
             </div>
             <div className="space-y-1.5 text-[11px] text-muted-foreground">
               {[
@@ -476,16 +476,16 @@ export default function DualMindMonitor() {
                 'Operates instinctively — like a reflex arc',
               ].map((item) => (
                 <div key={item} className="flex items-start gap-1.5">
-                  <span className="text-yellow-400/60 mt-0.5">→</span>
+                  <span className="text-[#c9b787]/60 mt-0.5">→</span>
                   <span>{item}</span>
                 </div>
               ))}
             </div>
           </div>
-          <div className="bg-indigo-400/5 border border-indigo-400/15 rounded-xl p-4">
+          <div className="bg-[#8a8a8a]/5 border border-indigo-400/15 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">
-              <Moon className="w-4 h-4 text-indigo-400" />
-              <h4 className="text-xs font-bold text-indigo-400">
+              <Moon className="w-4 h-4 text-[#8a8a8a]" />
+              <h4 className="text-xs font-bold text-[#8a8a8a]">
                 Deliberate Reasoning · System 2
               </h4>
             </div>
@@ -498,7 +498,7 @@ export default function DualMindMonitor() {
                 'Operates analytically — like deep strategic planning',
               ].map((item) => (
                 <div key={item} className="flex items-start gap-1.5">
-                  <span className="text-indigo-400/60 mt-0.5">→</span>
+                  <span className="text-[#8a8a8a]/60 mt-0.5">→</span>
                   <span>{item}</span>
                 </div>
               ))}

@@ -46,7 +46,7 @@ export const SIGNALS: Signal[] = [
       'Targeted at multi-agent inference workloads with long context windows.',
       'Vera Rubin sampling begins late 2025 for hyperscalers.',
     ],
-    affectedAgents: ['Aegis', 'A11oy', 'KORA'],
+    affectedAgents: ['Aegis', 'A11oy', 'Lyte'],
     createdAt: daysAgo(0),
   },
   {
@@ -64,7 +64,7 @@ export const SIGNALS: Signal[] = [
       'Agentic AI segment growing at 45% CAGR vs. 28% for overall AI.',
       '73% of surveyed enterprises plan multi-agent deployments by 2026.',
     ],
-    affectedAgents: ['Sentra', 'Counsel', 'Terra', 'Vessels', 'Aegis', 'KORA', 'A11oy'],
+    affectedAgents: ['Sentra', 'Counsel', 'Terra', 'Vessels', 'Aegis', 'Lyte', 'A11oy'],
     createdAt: daysAgo(1),
   },
   {
@@ -82,7 +82,7 @@ export const SIGNALS: Signal[] = [
       'Compatible with Mixtral and DBRX-style architectures out of the box.',
       'Open-weights reference implementation released under Apache 2.0.',
     ],
-    affectedAgents: ['Aegis', 'KORA'],
+    affectedAgents: ['Aegis', 'Lyte'],
     createdAt: daysAgo(1),
   },
   {
@@ -100,7 +100,7 @@ export const SIGNALS: Signal[] = [
       'Seha Virtual Hospital processes 2.2M consultations/year as reference architecture.',
       'Non-compliant deployments subject to AED 5M penalty per incident.',
     ],
-    affectedAgents: ['Counsel', 'KORA'],
+    affectedAgents: ['Counsel', 'Lyte'],
     createdAt: daysAgo(2),
   },
   {
@@ -136,7 +136,7 @@ export const SIGNALS: Signal[] = [
       'Benchmarks show 78% task completion on OSWorld vs. 71% for Claude Computer Use.',
       'Apache 2.0 license; commercial use explicitly permitted.',
     ],
-    affectedAgents: ['A11oy', 'KORA'],
+    affectedAgents: ['A11oy', 'Lyte'],
     createdAt: daysAgo(3),
   },
   {
@@ -154,19 +154,19 @@ export const SIGNALS: Signal[] = [
       'Extended thinking mode adds 15pp on math olympiad benchmarks.',
       'Priced at $3/$15 per million input/output tokens — 40% cheaper than GPT-4o.',
     ],
-    affectedAgents: ['Sentra', 'Counsel', 'Aegis', 'KORA'],
+    affectedAgents: ['Sentra', 'Counsel', 'Aegis', 'Lyte'],
     createdAt: daysAgo(3),
   },
   {
     id: 'sig-009', kind: 'market', scanner: 'market',
     title: 'McKinsey: Maritime AI Adoption Rate Tripling — Autonomous Vessels Regulatory Framework Due 2026',
     summary: 'McKinsey Global Institute report cites 3× acceleration in maritime AI adoption driven by IMO autonomous vessel regulations expected in 2026.',
-    soWhat: 'Vessels/SEXTANT faces a major expansion opportunity; the upcoming IMO framework will create compliance mandates that Vessels is uniquely positioned to address.',
+    soWhat: 'Vessels/Vessels faces a major expansion opportunity; the upcoming IMO framework will create compliance mandates that Vessels is uniquely positioned to address.',
     sourceUrl: 'https://mckinsey.com/industries/travel-logistics-and-infrastructure/maritime-ai-2025',
     sourceName: 'McKinsey Global Institute',
     confidence: 0.88,
     impactScore: 0.89,
-    entities: ['McKinsey', 'Maritime AI', 'IMO', 'Autonomous Vessels', 'SEXTANT'],
+    entities: ['McKinsey', 'Maritime AI', 'IMO', 'Autonomous Vessels', 'Vessels'],
     claims: [
       'Maritime AI market to reach $15B by 2028, growing from $4.8B in 2024.',
       'IMO MSC.1/Circ regulatory framework expected Q3 2026.',
@@ -190,7 +190,7 @@ export const SIGNALS: Signal[] = [
       'Best agent achieves 67% on Level 1, 41% on Level 2, 18% on Level 3.',
       'Dataset publicly available; evaluations run via standardized API.',
     ],
-    affectedAgents: ['Counsel', 'KORA'],
+    affectedAgents: ['Counsel', 'Lyte'],
     createdAt: daysAgo(5),
   },
   {
@@ -226,7 +226,7 @@ export const SIGNALS: Signal[] = [
       'Requires audit trail retention for 7 years per automated decision.',
       'Third-party certification required for high-risk AI systems.',
     ],
-    affectedAgents: ['Counsel', 'KORA', 'A11oy'],
+    affectedAgents: ['Counsel', 'Lyte', 'A11oy'],
     createdAt: daysAgo(6),
   },
 ];
@@ -296,8 +296,8 @@ export const PROPOSALS: CapabilityProposal[] = [
   {
     id: 'prop-004', status: 'accepted', priority: 'P1',
     title: 'Evaluate Claude 3.7 as Cost-Saving Model Alternative for Reasoning Agents',
-    description: 'Run A/B model evaluation comparing Claude 3.7 Sonnet vs. GPT-4o across Sentra, Counsel, Aegis, and KORA reasoning workflows to determine switchover viability.',
-    rationale: 'Claude 3.7 scores within 3pp of GPT-4o on SWE-bench at 40% lower cost. For high-volume reasoning tasks (Counsel matter analysis, KORA decision synthesis), switching to Claude 3.7 could reduce inference spend by 35–40% with negligible quality impact.',
+    description: 'Run A/B model evaluation comparing Claude 3.7 Sonnet vs. GPT-4o across Sentra, Counsel, Aegis, and Lyte reasoning workflows to determine switchover viability.',
+    rationale: 'Claude 3.7 scores within 3pp of GPT-4o on SWE-bench at 40% lower cost. For high-volume reasoning tasks (Counsel matter analysis, Lyte decision synthesis), switching to Claude 3.7 could reduce inference spend by 35–40% with negligible quality impact.',
     targetAgent: 'Counsel', impactArea: 'LLM Cost · Model Routing',
     signalIds: ['sig-008'], estimatedEffort: '2–4 days',
     createdAt: daysAgo(2), updatedAt: daysAgo(0),
@@ -313,9 +313,9 @@ export const PROPOSALS: CapabilityProposal[] = [
   },
   {
     id: 'prop-006', status: 'deferred', priority: 'P2',
-    title: 'Add IMO Autonomous Vessel Compliance Module to Vessels/SEXTANT',
-    description: 'Pre-build an IMO MSC.1/Circ compliance assessment module for SEXTANT so it\'s production-ready when the 2026 regulatory framework is finalized.',
-    rationale: 'McKinsey projects maritime AI market at $15B by 2028. The IMO framework (expected Q3 2026) will create mandatory compliance requirements for autonomous vessel operators. Building ahead of the regulation positions SEXTANT as the compliance-ready choice at launch.',
+    title: 'Add IMO Autonomous Vessel Compliance Module to Vessels/Vessels',
+    description: 'Pre-build an IMO MSC.1/Circ compliance assessment module for Vessels so it\'s production-ready when the 2026 regulatory framework is finalized.',
+    rationale: 'McKinsey projects maritime AI market at $15B by 2028. The IMO framework (expected Q3 2026) will create mandatory compliance requirements for autonomous vessel operators. Building ahead of the regulation positions Vessels as the compliance-ready choice at launch.',
     targetAgent: 'Vessels', impactArea: 'Regulatory Compliance · Maritime',
     signalIds: ['sig-009'], estimatedEffort: '2–3 weeks',
     createdAt: daysAgo(3), updatedAt: daysAgo(1),
@@ -395,7 +395,7 @@ Success metrics: Counsel MENA template coverage ≥95%, Aegis cost-model error <
     audit: `Key findings from last week's frontier scan:
 
 • Gemini 2.0 Pro multimodal capability significantly ahead of portfolio's current vision pipeline
-• McKinsey maritime AI report confirms SEXTANT is ahead of market curve; IMO framework will accelerate demand
+• McKinsey maritime AI report confirms Vessels is ahead of market curve; IMO framework will accelerate demand
 • SWE-bench v2 long-horizon tasks reveal context-window ceiling for A11oy's code agents
 • NeurIPS AgentBench v2 launch — need to run portfolio against updated benchmark immediately
 
@@ -435,24 +435,24 @@ export const BENCHMARK_SCORES: BenchmarkScore[] = [
   { agentId: 'sentra',  agentName: 'Sentra',  benchmark: 'swe-bench-lite', score: 0.58, sotaScore: 0.72, delta: 0.03, recordedAt: daysAgo(0) },
   { agentId: 'counsel', agentName: 'Counsel', benchmark: 'swe-bench-lite', score: 0.63, sotaScore: 0.72, delta: 0.05, recordedAt: daysAgo(0) },
   { agentId: 'aegis',   agentName: 'Aegis',   benchmark: 'swe-bench-lite', score: 0.49, sotaScore: 0.72, delta: -0.02, recordedAt: daysAgo(0) },
-  { agentId: 'kora',    agentName: 'KORA',    benchmark: 'swe-bench-lite', score: 0.61, sotaScore: 0.72, delta: 0.04, recordedAt: daysAgo(0) },
+  { agentId: 'kora',    agentName: 'Lyte',    benchmark: 'swe-bench-lite', score: 0.61, sotaScore: 0.72, delta: 0.04, recordedAt: daysAgo(0) },
   // AgentBench
   { agentId: 'sentra',  agentName: 'Sentra',  benchmark: 'agentbench', score: 0.54, sotaScore: 0.62, delta: 0.02, recordedAt: daysAgo(0) },
   { agentId: 'counsel', agentName: 'Counsel', benchmark: 'agentbench', score: 0.59, sotaScore: 0.62, delta: 0.06, recordedAt: daysAgo(0) },
   { agentId: 'a11oy',   agentName: 'A11oy',  benchmark: 'agentbench', score: 0.62, sotaScore: 0.62, delta: 0.03, recordedAt: daysAgo(0) },
   // GAIA
   { agentId: 'counsel', agentName: 'Counsel', benchmark: 'gaia', score: 0.61, sotaScore: 0.67, delta: 0.04, recordedAt: daysAgo(0) },
-  { agentId: 'kora',    agentName: 'KORA',   benchmark: 'gaia', score: 0.57, sotaScore: 0.67, delta: 0.01, recordedAt: daysAgo(0) },
+  { agentId: 'kora',    agentName: 'Lyte',   benchmark: 'gaia', score: 0.57, sotaScore: 0.67, delta: 0.01, recordedAt: daysAgo(0) },
   { agentId: 'a11oy',   agentName: 'A11oy',  benchmark: 'gaia', score: 0.55, sotaScore: 0.67, delta: 0.02, recordedAt: daysAgo(0) },
 ];
 
 export const BENCHMARK_TIME_SERIES: BenchmarkTimeSeries[] = [
   { agentId: 'sentra',  agentName: 'Sentra',  benchmark: 'swe-bench-lite', history: makeHistory(0.58, 8, 0.008, 0.72) },
   { agentId: 'counsel', agentName: 'Counsel', benchmark: 'swe-bench-lite', history: makeHistory(0.63, 8, 0.010, 0.72) },
-  { agentId: 'kora',    agentName: 'KORA',    benchmark: 'swe-bench-lite', history: makeHistory(0.61, 8, 0.009, 0.72) },
+  { agentId: 'kora',    agentName: 'Lyte',    benchmark: 'swe-bench-lite', history: makeHistory(0.61, 8, 0.009, 0.72) },
   { agentId: 'sentra',  agentName: 'Sentra',  benchmark: 'agentbench', history: makeHistory(0.54, 8, 0.007, 0.62) },
   { agentId: 'counsel', agentName: 'Counsel', benchmark: 'agentbench', history: makeHistory(0.59, 8, 0.011, 0.62) },
   { agentId: 'a11oy',   agentName: 'A11oy',  benchmark: 'agentbench', history: makeHistory(0.62, 8, 0.012, 0.62) },
   { agentId: 'counsel', agentName: 'Counsel', benchmark: 'gaia', history: makeHistory(0.61, 8, 0.009, 0.67) },
-  { agentId: 'kora',    agentName: 'KORA',   benchmark: 'gaia', history: makeHistory(0.57, 8, 0.006, 0.67) },
+  { agentId: 'kora',    agentName: 'Lyte',   benchmark: 'gaia', history: makeHistory(0.57, 8, 0.006, 0.67) },
 ];

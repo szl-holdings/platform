@@ -41,7 +41,7 @@ const SYSTEMS = [
   { name: "Counsel RUNTIME", desc: "Governed execution engine", status: "active" },
   { name: "COVENANT", desc: "Policy enforcement layer", status: "active" },
   { name: "RECEIPT GRAPH", desc: "Trust & audit provenance", status: "active" },
-  { name: "LUMINA EVALS", desc: "Platform quality metrics", status: "active" },
+  { name: "Pulse EVALS", desc: "Platform quality metrics", status: "active" },
   { name: "OUTCOME GRAPH", desc: "Shared memory & identity", status: "active" },
   { name: "ATLAS ARTIFACTS", desc: "Asset & document engine", status: "active" },
   { name: "HELM CONSOLE", desc: "Family-level command view", status: "active" },

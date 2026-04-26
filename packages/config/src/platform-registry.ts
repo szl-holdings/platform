@@ -57,7 +57,7 @@ export const PLATFORM_PRODUCTS: Record<string, PlatformProduct> = {
   },
   pulse: {
     id: 'pulse',
-    name: 'LUMINA',
+    name: 'Pulse',
     tagline: 'AI executive briefing, intelligence-community standard',
     description:
       'Multi-agent AI briefing system synthesizing cross-domain operational signals into executive intelligence reports.',

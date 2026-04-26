@@ -169,13 +169,13 @@ function ThreatRadar() {
           cy="100"
           r={r}
           fill="none"
-          stroke="rgba(59,130,246,0.08)"
+          stroke="rgba(201,183,135,0.08)"
           strokeWidth="1"
         />
       ))}
-      <line x1="100" y1="10" x2="100" y2="190" stroke="rgba(59,130,246,0.06)" strokeWidth="0.5" />
-      <line x1="10" y1="100" x2="190" y2="100" stroke="rgba(59,130,246,0.06)" strokeWidth="0.5" />
-      <line x1="100" y1="100" x2="190" y2="100" stroke="#3b82f6" strokeWidth="1.5" opacity="0.4">
+      <line x1="100" y1="10" x2="100" y2="190" stroke="rgba(201,183,135,0.06)" strokeWidth="0.5" />
+      <line x1="10" y1="100" x2="190" y2="100" stroke="rgba(201,183,135,0.06)" strokeWidth="0.5" />
+      <line x1="100" y1="100" x2="190" y2="100" stroke="#c9b787" strokeWidth="1.5" opacity="0.4">
         <animateTransform
           attributeName="transform"
           type="rotate"
@@ -190,7 +190,7 @@ function ThreatRadar() {
         const x = 100 + Math.cos(rad) * t.dist * 90;
         const y = 100 + Math.sin(rad) * t.dist * 90;
         const color =
-          t.severity === 'high' ? '#ef4444' : t.severity === 'medium' ? '#f59e0b' : '#3b82f6';
+          t.severity === 'high' ? '#f5f5f5' : t.severity === 'medium' ? '#c9b787' : '#c9b787';
         return (
           <g key={t.id}>
             <circle cx={x} cy={y} r="3" fill={color} opacity="0.8">
@@ -203,8 +203,8 @@ function ThreatRadar() {
         cx="100"
         cy="100"
         r="6"
-        fill="rgba(59,130,246,0.2)"
-        stroke="#3b82f6"
+        fill="rgba(201,183,135,0.2)"
+        stroke="#c9b787"
         strokeWidth="1"
       />
     </svg>
@@ -220,12 +220,12 @@ export default function AegisPulse() {
 
   return (
     <div className="min-h-screen relative" style={{ background: '#070a10' }}>
-      <ParticleField accentColor="#3b82f6" />
+      <ParticleField accentColor="#c9b787" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <PulseHeader
-          title="Aegis Threat LUMINA"
+          title="Aegis Threat Intelligence"
           subtitle={`SOC operations — ${totalThreats.toLocaleString()} threats processed · 6 defense agents active`}
-          accentColor="#3b82f6"
+          accentColor="#c9b787"
         />
         <div style={{ marginBottom: 20 }}>
           <PulseBriefingPanel domain="security" />
@@ -243,7 +243,7 @@ export default function AegisPulse() {
         >
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <BarChart3 className="w-3.5 h-3.5" style={{ color: '#3b82f6' }} />
+              <BarChart3 className="w-3.5 h-3.5" style={{ color: '#c9b787' }} />
               <span
                 className="text-[10px] font-medium uppercase tracking-wider"
                 style={{ color: 'rgba(255,255,255,0.3)' }}
@@ -251,11 +251,11 @@ export default function AegisPulse() {
                 Threat Ingestion Rate
               </span>
             </div>
-            <span className="text-[10px] tabular-nums font-medium" style={{ color: '#3b82f6' }}>
+            <span className="text-[10px] tabular-nums font-medium" style={{ color: '#c9b787' }}>
               {totalThreats.toLocaleString()} / hr
             </span>
           </div>
-          <PulseThroughputChart color="#3b82f6" />
+          <PulseThroughputChart color="#c9b787" />
         </m.div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
@@ -263,7 +263,7 @@ export default function AegisPulse() {
             label="Active Threats"
             value={23}
             icon={Skull}
-            color="#ef4444"
+            color="#f5f5f5"
             trend="−3 from baseline"
             delay={0}
           />
@@ -271,7 +271,7 @@ export default function AegisPulse() {
             label="Incidents Open"
             value={7}
             icon={AlertTriangle}
-            color="#f97316"
+            color="#c9b787"
             trend="2 P1, 5 P2"
             delay={80}
           />
@@ -279,7 +279,7 @@ export default function AegisPulse() {
             label="IOCs Tracked"
             value={14892}
             icon={Fingerprint}
-            color="#3b82f6"
+            color="#c9b787"
             trend="+127 today"
             delay={160}
           />
@@ -288,7 +288,7 @@ export default function AegisPulse() {
             value={91}
             suffix="%"
             icon={Target}
-            color="#10b981"
+            color="#c9b787"
             trend="+2% this month"
             delay={240}
           />
@@ -297,7 +297,7 @@ export default function AegisPulse() {
             value={14}
             suffix="min"
             icon={Activity}
-            color="#06b6d4"
+            color="#8a8a8a"
             trend="−4 min improvement"
             delay={320}
           />
@@ -305,7 +305,7 @@ export default function AegisPulse() {
             label="Assets Protected"
             value={3847}
             icon={Shield}
-            color="#8b5cf6"
+            color="#8a8a8a"
             trend="All monitored"
             delay={400}
           />
@@ -326,7 +326,7 @@ export default function AegisPulse() {
               className="text-[13px] font-semibold mb-3 flex items-center gap-2"
               style={{ color: 'rgba(255,255,255,0.65)' }}
             >
-              <Radar className="w-4 h-4" style={{ color: '#3b82f6' }} /> Threat Radar
+              <Radar className="w-4 h-4" style={{ color: '#c9b787' }} /> Threat Radar
             </h2>
             <ThreatRadar />
             <p className="text-[9px] text-center mt-2" style={{ color: 'rgba(255,255,255,0.2)' }}>
@@ -348,10 +348,10 @@ export default function AegisPulse() {
               className="text-[13px] font-semibold mb-3 flex items-center gap-2"
               style={{ color: 'rgba(255,255,255,0.65)' }}
             >
-              <Eye className="w-4 h-4" style={{ color: '#ef4444' }} /> SOC Event Stream
+              <Eye className="w-4 h-4" style={{ color: '#f5f5f5' }} /> SOC Event Stream
               <span
                 className="ml-auto text-[9px] px-2 py-0.5 rounded-full"
-                style={{ background: 'rgba(59,130,246,0.1)', color: '#3b82f6' }}
+                style={{ background: 'rgba(201,183,135,0.1)', color: '#c9b787' }}
               >
                 6 agents
               </span>
@@ -375,7 +375,7 @@ export default function AegisPulse() {
               className="text-[13px] font-semibold mb-3 flex items-center gap-2"
               style={{ color: 'rgba(255,255,255,0.65)' }}
             >
-              <Target className="w-4 h-4" style={{ color: '#10b981' }} /> MITRE ATT&CK Coverage
+              <Target className="w-4 h-4" style={{ color: '#c9b787' }} /> MITRE ATT&CK Coverage
             </h2>
             <MitreHeatmap />
           </m.div>
@@ -394,31 +394,31 @@ export default function AegisPulse() {
               className="text-[13px] font-semibold mb-3 flex items-center gap-2"
               style={{ color: 'rgba(255,255,255,0.65)' }}
             >
-              <Shield className="w-4 h-4" style={{ color: '#3b82f6' }} /> Defense Intel Flow
+              <Shield className="w-4 h-4" style={{ color: '#c9b787' }} /> Defense Intel Flow
             </h2>
             <PulseFlowDiagram
               flows={[
-                { from: 'SIEM', to: 'SOC', type: 'Alert Triage', color: '#3b82f6', intensity: 4 },
+                { from: 'SIEM', to: 'SOC', type: 'Alert Triage', color: '#c9b787', intensity: 4 },
                 {
                   from: 'Threat',
                   to: 'Hunt',
                   type: 'IOC Enrichment',
-                  color: '#ef4444',
+                  color: '#f5f5f5',
                   intensity: 3,
                 },
                 {
                   from: 'Vuln',
                   to: 'Patch',
                   type: 'Remediation Queue',
-                  color: '#f59e0b',
+                  color: '#c9b787',
                   intensity: 2,
                 },
-                { from: 'GRC', to: 'Exec', type: 'Risk Reporting', color: '#10b981', intensity: 5 },
+                { from: 'GRC', to: 'Exec', type: 'Risk Reporting', color: '#c9b787', intensity: 5 },
                 {
                   from: 'MSP',
                   to: 'NOC',
                   type: 'Client Monitoring',
-                  color: '#8b5cf6',
+                  color: '#8a8a8a',
                   intensity: 3,
                 },
               ]}
@@ -428,13 +428,13 @@ export default function AegisPulse() {
 
         <PulseHealthGrid
           items={[
-            { name: 'SIEM Pipeline', load: 67, color: '#3b82f6' },
-            { name: 'EDR Coverage', load: 94, color: '#10b981' },
-            { name: 'Firewall Rules', load: 45, color: '#f59e0b' },
-            { name: 'DNS Filtering', load: 38, color: '#06b6d4' },
-            { name: 'Email Security', load: 52, color: '#8b5cf6' },
-            { name: 'SOAR Playbooks', load: 73, color: '#ec4899' },
-            { name: 'Threat Intel', load: 61, color: '#ef4444' },
+            { name: 'SIEM Pipeline', load: 67, color: '#c9b787' },
+            { name: 'EDR Coverage', load: 94, color: '#c9b787' },
+            { name: 'Firewall Rules', load: 45, color: '#c9b787' },
+            { name: 'DNS Filtering', load: 38, color: '#8a8a8a' },
+            { name: 'Email Security', load: 52, color: '#8a8a8a' },
+            { name: 'SOAR Playbooks', load: 73, color: '#c9b787' },
+            { name: 'Threat Intel', load: 61, color: '#f5f5f5' },
             { name: 'Audit Logs', load: 29, color: '#d4a054' },
           ]}
         />
@@ -442,14 +442,14 @@ export default function AegisPulse() {
         <div className="mt-5">
           <PulseTechStack
             items={[
-              { label: 'SIEM', value: 'Elastic', color: '#3b82f6' },
-              { label: 'EDR', value: 'Active', color: '#10b981' },
+              { label: 'SIEM', value: 'Elastic', color: '#c9b787' },
+              { label: 'EDR', value: 'Active', color: '#c9b787' },
               { label: 'SOAR', value: 'Counsel', color: '#d4a054' },
-              { label: 'Threat Intel', value: 'MISP', color: '#ef4444' },
-              { label: 'GRC', value: 'Aegis', color: '#8b5cf6' },
+              { label: 'Threat Intel', value: 'MISP', color: '#f5f5f5' },
+              { label: 'GRC', value: 'Aegis', color: '#8a8a8a' },
               { label: 'MSP', value: 'Multi', color: '#64748b' },
-              { label: 'Zero Trust', value: 'Active', color: '#06b6d4' },
-              { label: 'Detection', value: 'ML', color: '#f59e0b' },
+              { label: 'Zero Trust', value: 'Active', color: '#8a8a8a' },
+              { label: 'Detection', value: 'ML', color: '#c9b787' },
             ]}
             title="Security Stack"
           />
@@ -460,7 +460,7 @@ export default function AegisPulse() {
             className="text-[9px] uppercase tracking-[0.25em]"
             style={{ color: 'rgba(255,255,255,0.08)' }}
           >
-            Aegis — Unified Defense & Intelligence Command — Threat LUMINA
+            Aegis — Unified Defense & Intelligence Command — Threat Intelligence
           </p>
         </div>
       </div>

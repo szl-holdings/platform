@@ -340,7 +340,7 @@ const THREAT_EVIDENCE: EvidenceSource[] = [
     label: 'Cross-Domain Signal Aggregation',
     type: 'model',
     timestamp: FRESH_3M,
-    excerpt: 'PARAGON: 3 critical threats. SEXTANT: 6 alerts. Correlation: 0.71.',
+    excerpt: 'Aegis: 3 critical threats. Vessels: 6 alerts. Correlation: 0.71.',
   },
   {
     id: 'e5',
@@ -451,7 +451,7 @@ export default function ProofEnvelopeScreen() {
 
         <ProofCard
           title="Cross-Domain Alert: 3 Critical Signals Correlated"
-          summary="Counsel has identified correlated exposure across Aegis (APT-29 threat), Vessels (counterparty sanctions), and LUMINA (rate regime shift). 3 approval items pending — all within SLA."
+          summary="Counsel has identified correlated exposure across Aegis (APT-29 threat), Vessels (counterparty sanctions), and Pulse (rate regime shift). 3 approval items pending — all within SLA."
           confidence={85}
           policyState="requires-approval"
           policyReason="Multi-domain action requires CRO approval"

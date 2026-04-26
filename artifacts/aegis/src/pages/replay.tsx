@@ -56,21 +56,21 @@ interface FirestormIncident {
 }
 
 const SEV_COLOR: Record<EventSeverity, string> = {
-  critical: '#ef4444',
-  high: '#f59e0b',
+  critical: '#f5f5f5',
+  high: '#c9b787',
   medium: '#8b7ac8',
   low: '#6b7280',
 };
 
 const TYPE_COLOR: Record<string, string> = {
-  initial_access: '#ef4444',
-  execution: '#f97316',
-  persistence: '#f59e0b',
+  initial_access: '#f5f5f5',
+  execution: '#c9b787',
+  persistence: '#c9b787',
   lateral_move: '#8b7ac8',
-  exfil: '#ec4899',
-  c2: '#06b6d4',
+  exfil: '#c9b787',
+  c2: '#8a8a8a',
   discovery: '#6b7280',
-  defense_evasion: '#84cc16',
+  defense_evasion: '#c9b787',
 };
 
 const TYPE_LABEL: Record<string, string> = {
@@ -394,9 +394,9 @@ function AegisReplayContent() {
           {
             label: latestIncident ? 'Severity' : 'Adversary',
             value: incidentSeverityLabel,
-            color: '#ef4444',
+            color: '#f5f5f5',
           },
-          { label: 'Dwell Time', value: dwellTime, color: '#f59e0b' },
+          { label: 'Dwell Time', value: dwellTime, color: '#c9b787' },
         ].map((c) => (
           <div
             key={c.label}
@@ -455,7 +455,7 @@ function AegisReplayContent() {
             className="absolute left-0 h-1 rounded-full transition-all"
             style={{
               width: `${(playhead / TOTAL_DURATION) * 100}%`,
-              background: 'linear-gradient(to right, #8b7ac8, #ef4444)',
+              background: 'linear-gradient(to right, #8b7ac8, #f5f5f5)',
             }}
           />
           {REPLAY_EVENTS.map((ev) => (
@@ -524,7 +524,7 @@ function AegisReplayContent() {
             className="p-4 border-b flex items-center gap-2"
             style={{ borderColor: 'rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.01)' }}
           >
-            <Target className="w-3.5 h-3.5" style={{ color: '#ef4444' }} />
+            <Target className="w-3.5 h-3.5" style={{ color: '#f5f5f5' }} />
             <span className="text-[11px] font-semibold text-white">Event Log</span>
             <span
               className="ml-auto text-[9px] font-mono"
@@ -655,13 +655,13 @@ function AegisReplayContent() {
               <div
                 className="rounded-lg p-3"
                 style={{
-                  background: 'rgba(16,185,129,0.05)',
-                  border: '1px solid rgba(16,185,129,0.15)',
+                  background: 'rgba(201,183,135,0.05)',
+                  border: '1px solid rgba(201,183,135,0.15)',
                 }}
               >
                 <div
                   className="text-[9px] font-bold uppercase tracking-widest mb-1"
-                  style={{ color: '#10b981' }}
+                  style={{ color: '#c9b787' }}
                 >
                   Evidence
                 </div>

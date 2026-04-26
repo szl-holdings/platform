@@ -356,7 +356,7 @@ export const DEMO_WORKCELLS: Workcell[] = [
     approvalStatus: 'approved',
     executionResult: {
       success: true,
-      summary: 'Rerouting instruction sent. Vessel track updated in SEXTANT.',
+      summary: 'Rerouting instruction sent. Vessel track updated in Vessels.',
       toolResults: [
         { toolId: 'email_drafter', result: 'Draft sent to ops team', success: true },
         { toolId: 'workflow_trigger', result: 'Rerouting workflow active', success: true },

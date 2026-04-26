@@ -150,7 +150,7 @@ export default function CommandPulse() {
       <ParticleField accentColor="#f59e0b" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <PulseHeader
-          title="AIOps LUMINA"
+          title="AIOps Pulse"
           subtitle={`Observability command — ${signalCount.toLocaleString()} signals processed · 6 ops agents`}
           accentColor="#f59e0b"
         />
@@ -378,7 +378,7 @@ export default function CommandPulse() {
             className="text-[9px] uppercase tracking-[0.25em]"
             style={{ color: 'rgba(255,255,255,0.08)' }}
           >
-            Command — AIOps LUMINA
+            Command — AIOps Pulse
           </p>
         </div>
       </div>

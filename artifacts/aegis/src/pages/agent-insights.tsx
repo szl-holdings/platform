@@ -4,7 +4,7 @@ import { MicroFeedbackWidget } from '@szl-holdings/shared-ui/micro-feedback-widg
 import { Brain, Radio, ShieldAlert, Zap } from 'lucide-react';
 import { AlloyKernelPanel } from '@/components/AlloyKernelPanel';
 
-const ACCENT = '#ef4444';
+const ACCENT = '#f5f5f5';
 
 function GlobalFeedStats() {
   const { data } = useStandardQuery<{
@@ -33,36 +33,36 @@ function GlobalFeedStats() {
           label: 'Security Findings',
           value: knowledge?.byDomain?.aegis ?? 0,
           icon: ShieldAlert,
-          color: 'text-orange-400',
-          bg: 'bg-orange-500/10',
+          color: 'text-[#c9b787]',
+          bg: 'bg-[#c9b787]/10',
         },
         {
           label: 'Cross-Domain Signals',
           value: globalFeed?.correlations?.length ?? 0,
           icon: Zap,
-          color: 'text-purple-400',
-          bg: 'bg-purple-500/10',
+          color: 'text-[#8a8a8a]',
+          bg: 'bg-[#8a8a8a]/10',
         },
         {
           label: 'Events Published',
           value: eventBus?.totalPublished ?? 0,
           icon: Radio,
-          color: 'text-amber-400',
-          bg: 'bg-amber-500/10',
+          color: 'text-[#c9b787]',
+          bg: 'bg-[#c9b787]/10',
         },
       ].map(({ label, value, icon: Icon, color, bg }) => (
         <div
           key={label}
-          className="bg-[#09080f]/80 border border-orange-500/10 rounded-xl p-4 flex items-center gap-3"
+          className="bg-[#09080f]/80 border border-[#c9b787]/10 rounded-xl p-4 flex items-center gap-3"
         >
           <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center shrink-0`}>
             <Icon className={`w-4 h-4 ${color}`} />
           </div>
           <div>
-            <div className="text-lg font-bold text-orange-50">
+            <div className="text-lg font-bold text-[#c9b787]">
               {typeof value === 'number' ? value.toLocaleString() : value}
             </div>
-            <div className="text-[10px] text-orange-400/50">{label}</div>
+            <div className="text-[10px] text-[#c9b787]/50">{label}</div>
           </div>
         </div>
       ))}
@@ -74,12 +74,12 @@ export default function AgentInsightsPage() {
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-6">
       <div className="flex items-center gap-3 mb-2">
-        <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
-          <Brain className="w-5 h-5 text-orange-400" />
+        <div className="w-10 h-10 rounded-xl bg-[#c9b787]/10 flex items-center justify-center">
+          <Brain className="w-5 h-5 text-[#c9b787]" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-orange-50">Autonomous Threat Intelligence</h1>
-          <p className="text-xs text-orange-400/50">
+          <h1 className="text-xl font-bold text-[#c9b787]">Autonomous Threat Intelligence</h1>
+          <p className="text-xs text-[#c9b787]/50">
             Security insights gathered autonomously while you were away
           </p>
         </div>
@@ -92,15 +92,15 @@ export default function AgentInsightsPage() {
         apiBase="/api"
         accentColor={ACCENT}
         compact={false}
-        className="border-orange-500/20 bg-[#09080f]/60"
+        className="border-[#c9b787]/20 bg-[#09080f]/60"
       />
 
       <AgentInsightsWidget
         domain="vessels"
         apiBase="/api"
-        accentColor="#3b82f6"
+        accentColor="#c9b787"
         compact={false}
-        className="border-orange-500/10 bg-[#09080f]/60"
+        className="border-[#c9b787]/10 bg-[#09080f]/60"
       />
 
       <div className="flex justify-end pt-1">
@@ -113,7 +113,7 @@ export default function AgentInsightsPage() {
         />
       </div>
 
-      <div className="text-[10px] text-orange-400/30 text-center pt-2">
+      <div className="text-[10px] text-[#c9b787]/30 text-center pt-2">
         Powered by SZL Agent OS — autonomous security intelligence running 24/7
       </div>
 

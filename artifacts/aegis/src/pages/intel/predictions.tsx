@@ -140,7 +140,7 @@ export default function Predictions() {
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse" />
           <span>{predictions.length} models active</span>
         </div>
       </div>
@@ -157,14 +157,14 @@ export default function Predictions() {
         </div>
         <div className="bg-card/60 border border-border rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Activity className="w-4 h-4 text-cyan-400" />
+            <Activity className="w-4 h-4 text-[#8a8a8a]" />
             <span className="text-xs text-muted-foreground uppercase tracking-wider">Active</span>
           </div>
           <p className="text-2xl font-bold text-foreground">{activeCount}</p>
         </div>
         <div className="bg-card/60 border border-border rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <CheckCircle2 className="w-4 h-4 text-[#c9b787]" />
             <span className="text-xs text-muted-foreground uppercase tracking-wider">
               Validated
             </span>
@@ -173,7 +173,7 @@ export default function Predictions() {
         </div>
         <div className="bg-card/60 border border-border rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Target className="w-4 h-4 text-amber-400" />
+            <Target className="w-4 h-4 text-[#c9b787]" />
             <span className="text-xs text-muted-foreground uppercase tracking-wider">
               Avg Drift
             </span>
@@ -248,10 +248,10 @@ export default function Predictions() {
                       className={cn(
                         'h-full rounded-full transition-all',
                         p.confidence >= 0.9
-                          ? 'bg-emerald-400'
+                          ? 'bg-[#c9b787]'
                           : p.confidence >= 0.8
-                            ? 'bg-cyan-400'
-                            : 'bg-amber-400',
+                            ? 'bg-[#8a8a8a]'
+                            : 'bg-[#c9b787]',
                       )}
                       style={{ width: `${p.confidence * 100}%` }}
                     />
@@ -261,10 +261,10 @@ export default function Predictions() {
                   className={cn(
                     'flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium',
                     p.drift <= 0.03
-                      ? 'text-emerald-400 bg-emerald-400/10'
+                      ? 'text-[#c9b787] bg-[#c9b787]/10'
                       : p.drift <= 0.06
-                        ? 'text-amber-400 bg-amber-400/10'
-                        : 'text-red-400 bg-red-400/10',
+                        ? 'text-[#c9b787] bg-[#c9b787]/10'
+                        : 'text-[#f5f5f5] bg-[#f5f5f5]/10',
                   )}
                 >
                   {p.drift <= 0.03 ? (
@@ -278,10 +278,10 @@ export default function Predictions() {
                   className={cn(
                     'px-2 py-1 rounded-full text-xs font-medium capitalize',
                     p.status === 'active'
-                      ? 'bg-cyan-400/10 text-cyan-400'
+                      ? 'bg-[#8a8a8a]/10 text-[#8a8a8a]'
                       : p.status === 'validated'
-                        ? 'bg-emerald-400/10 text-emerald-400'
-                        : 'bg-amber-400/10 text-amber-400',
+                        ? 'bg-[#c9b787]/10 text-[#c9b787]'
+                        : 'bg-[#c9b787]/10 text-[#c9b787]',
                   )}
                 >
                   {p.status}

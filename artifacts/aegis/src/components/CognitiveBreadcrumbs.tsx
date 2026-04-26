@@ -6,7 +6,7 @@ const DS = {
   text: { primary: 'rgba(255,255,255,0.85)', muted: 'rgba(255,255,255,0.4)' },
 };
 
-export function CognitiveBreadcrumbs({ accent = '#ef4444' }: { accent?: string }) {
+export function CognitiveBreadcrumbs({ accent = '#f5f5f5' }: { accent?: string }) {
   const crumbs = useCrumbs();
   const [location, navigate] = useLocation();
   if (crumbs.length === 0) return null;

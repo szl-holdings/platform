@@ -11,7 +11,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { type AccessEvent, buildBaseline, computeRiskAssessment } from '@/lib/sentinel-analytics';
 
-const SENTINEL_ACCENT = '#8b5cf6';
+const SENTINEL_ACCENT = '#8a8a8a';
 const DS = {
   surface: 'rgba(255,255,255,0.025)',
   border: 'rgba(255,255,255,0.06)',
@@ -73,10 +73,10 @@ interface ActivityEvent {
 }
 
 const RISK_COLORS: Record<RiskLevel, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
-  low: '#eab308',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#c9b787',
+  low: '#8a8a8a',
   normal: '#6b7280',
 };
 
@@ -421,14 +421,14 @@ const ANOMALY_TIMELINE = [
 ];
 
 const SEV_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#c9b787',
 };
 
 function RiskBar({ score }: { score: number }) {
   const color =
-    score >= 80 ? '#ef4444' : score >= 60 ? '#f97316' : score >= 35 ? '#f59e0b' : '#6b7280';
+    score >= 80 ? '#f5f5f5' : score >= 60 ? '#c9b787' : score >= 35 ? '#c9b787' : '#6b7280';
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
@@ -577,7 +577,7 @@ export default function SentinelBehavioral() {
             </span>
             <span
               className="px-1.5 py-0.5 rounded text-[8px] font-bold animate-pulse"
-              style={{ background: 'rgba(139,92,246,0.15)', color: SENTINEL_ACCENT }}
+              style={{ background: 'rgba(138,138,138,0.15)', color: SENTINEL_ACCENT }}
             >
               LIVE
             </span>
@@ -618,20 +618,20 @@ export default function SentinelBehavioral() {
             {
               label: 'Critical Risk',
               value: criticalCount,
-              color: '#ef4444',
+              color: '#f5f5f5',
               sub: 'immediate investigation',
               pulse: criticalCount > 0,
             },
             {
               label: 'Elevated Risk',
               value: highCount,
-              color: '#f97316',
+              color: '#c9b787',
               sub: 'enhanced monitoring',
             },
             {
               label: 'Anomalies Today',
               value: ANOMALY_TIMELINE.length,
-              color: '#f59e0b',
+              color: '#c9b787',
               sub: 'behavioral deviations',
             },
           ] as StatCard[]
@@ -702,7 +702,7 @@ export default function SentinelBehavioral() {
                   onClick={() => setSelectedUser(u)}
                   className="w-full text-left px-4 py-3 transition-colors hover:bg-white/[0.02]"
                   style={{
-                    background: selectedUser.id === u.id ? 'rgba(139,92,246,0.06)' : 'transparent',
+                    background: selectedUser.id === u.id ? 'rgba(138,138,138,0.06)' : 'transparent',
                   }}
                 >
                   <div className="flex items-start justify-between gap-2 mb-1.5">
@@ -775,7 +775,7 @@ export default function SentinelBehavioral() {
                         {cr && (
                           <span
                             className="text-[8px] px-1.5 py-0.5 rounded"
-                            style={{ background: 'rgba(139,92,246,0.12)', color: SENTINEL_ACCENT }}
+                            style={{ background: 'rgba(138,138,138,0.12)', color: SENTINEL_ACCENT }}
                           >
                             Engine scored
                           </span>
@@ -799,7 +799,7 @@ export default function SentinelBehavioral() {
                               :{' '}
                               <span
                                 style={{
-                                  color: v > 60 ? '#ef4444' : v > 35 ? '#f59e0b' : '#6b7280',
+                                  color: v > 60 ? '#f5f5f5' : v > 35 ? '#c9b787' : '#6b7280',
                                 }}
                               >
                                 {Math.round(v)}
@@ -860,7 +860,7 @@ export default function SentinelBehavioral() {
                       </span>
                       <span
                         className="text-[8px] px-1.5 py-0.5 rounded font-bold ml-auto"
-                        style={{ background: 'rgba(139,92,246,0.15)', color: SENTINEL_ACCENT }}
+                        style={{ background: 'rgba(138,138,138,0.15)', color: SENTINEL_ACCENT }}
                       >
                         {totalAnomalyCount} findings
                       </span>
@@ -879,7 +879,7 @@ export default function SentinelBehavioral() {
                                 <span
                                   className="text-[7px] px-1 py-0.5 rounded font-bold"
                                   style={{
-                                    background: 'rgba(139,92,246,0.12)',
+                                    background: 'rgba(138,138,138,0.12)',
                                     color: SENTINEL_ACCENT,
                                   }}
                                 >
@@ -921,7 +921,7 @@ export default function SentinelBehavioral() {
                               <div
                                 className="text-[10px] p-2 rounded-lg"
                                 style={{
-                                  background: 'rgba(139,92,246,0.06)',
+                                  background: 'rgba(138,138,138,0.06)',
                                   color: DS.text.secondary,
                                   fontFamily: 'monospace',
                                 }}
@@ -1041,7 +1041,7 @@ export default function SentinelBehavioral() {
                   </div>
                   <div
                     className={`w-1.5 h-1.5 rounded-full shrink-0 ${event.anomalous ? 'animate-pulse' : ''}`}
-                    style={{ background: event.anomalous ? '#ef4444' : '#6b7280' }}
+                    style={{ background: event.anomalous ? '#f5f5f5' : '#6b7280' }}
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -1058,7 +1058,7 @@ export default function SentinelBehavioral() {
                       {event.anomalous && (
                         <span
                           className="text-[8px] px-1 py-0.5 rounded"
-                          style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}
+                          style={{ background: 'rgba(245,245,245,0.12)', color: '#f5f5f5' }}
                         >
                           ANOMALOUS
                         </span>

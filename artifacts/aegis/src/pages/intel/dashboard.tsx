@@ -38,8 +38,8 @@ function LiveClock() {
   return (
     <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
       <div className="flex items-center gap-1.5">
-        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-        <span className="uppercase tracking-wider text-emerald-400 text-[10px] font-semibold">
+        <div className="w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse" />
+        <span className="uppercase tracking-wider text-[#c9b787] text-[10px] font-semibold">
           Systems Nominal
         </span>
       </div>
@@ -50,9 +50,9 @@ function LiveClock() {
 }
 
 function HealthBar({ score }: { score: number }) {
-  const color = score >= 80 ? 'bg-emerald-400' : score >= 60 ? 'bg-amber-400' : 'bg-red-400';
+  const color = score >= 80 ? 'bg-[#c9b787]' : score >= 60 ? 'bg-[#c9b787]' : 'bg-[#f5f5f5]';
   const textColor =
-    score >= 80 ? 'text-emerald-400' : score >= 60 ? 'text-amber-400' : 'text-red-400';
+    score >= 80 ? 'text-[#c9b787]' : score >= 60 ? 'text-[#c9b787]' : 'text-[#f5f5f5]';
   const label = score >= 80 ? 'Healthy' : score >= 60 ? 'Degraded' : 'Critical';
   return (
     <div className="flex flex-col gap-2">
@@ -110,32 +110,32 @@ function ExperimentComparisonTable() {
   const SortIcon = ({ col }: { col: SortKey }) => {
     if (sortKey !== col) return <ArrowUpDown className="w-2.5 h-2.5 text-muted-foreground/30" />;
     return sortDir === 'asc' ? (
-      <ChevronUp className="w-2.5 h-2.5 text-emerald-400" />
+      <ChevronUp className="w-2.5 h-2.5 text-[#c9b787]" />
     ) : (
-      <ChevronDown className="w-2.5 h-2.5 text-emerald-400" />
+      <ChevronDown className="w-2.5 h-2.5 text-[#c9b787]" />
     );
   };
 
   const statusConfig: Record<string, { text: string; dot: string; label: string }> = {
     research: {
-      text: 'text-violet-400',
-      dot: 'bg-violet-400',
-      label: 'bg-violet-400/10 text-violet-400',
+      text: 'text-[#8a8a8a]',
+      dot: 'bg-[#8a8a8a]',
+      label: 'bg-[#8a8a8a]/10 text-[#8a8a8a]',
     },
     development: {
-      text: 'text-blue-400',
-      dot: 'bg-blue-400',
-      label: 'bg-blue-400/10 text-blue-400',
+      text: 'text-[#c9b787]',
+      dot: 'bg-[#c9b787]',
+      label: 'bg-[#c9b787]/10 text-[#c9b787]',
     },
     testing: {
-      text: 'text-amber-400',
-      dot: 'bg-amber-400',
-      label: 'bg-amber-400/10 text-amber-400',
+      text: 'text-[#c9b787]',
+      dot: 'bg-[#c9b787]',
+      label: 'bg-[#c9b787]/10 text-[#c9b787]',
     },
     deployed: {
-      text: 'text-emerald-400',
-      dot: 'bg-emerald-400',
-      label: 'bg-emerald-400/10 text-emerald-400',
+      text: 'text-[#c9b787]',
+      dot: 'bg-[#c9b787]',
+      label: 'bg-[#c9b787]/10 text-[#c9b787]',
     },
   };
 
@@ -206,10 +206,10 @@ function ExperimentComparisonTable() {
                         className={cn(
                           'font-mono font-bold text-sm',
                           p.accuracy >= 90
-                            ? 'text-emerald-400'
+                            ? 'text-[#c9b787]'
                             : p.accuracy >= 70
-                              ? 'text-amber-400'
-                              : 'text-red-400',
+                              ? 'text-[#c9b787]'
+                              : 'text-[#f5f5f5]',
                         )}
                       >
                         {p.accuracy.toFixed(1)}%
@@ -219,10 +219,10 @@ function ExperimentComparisonTable() {
                           className={cn(
                             'h-full rounded-full',
                             p.accuracy >= 90
-                              ? 'bg-emerald-400'
+                              ? 'bg-[#c9b787]'
                               : p.accuracy >= 70
-                                ? 'bg-amber-400'
-                                : 'bg-red-400',
+                                ? 'bg-[#c9b787]'
+                                : 'bg-[#f5f5f5]',
                           )}
                           style={{ width: `${p.accuracy}%` }}
                         />
@@ -251,7 +251,7 @@ function ExperimentComparisonTable() {
                   </td>
                   <td className="px-4 py-3 text-muted-foreground font-mono text-[11px]">
                     {completed}
-                    {running > 0 && <span className="text-amber-400 ml-1">+{running} ▶</span>}
+                    {running > 0 && <span className="text-[#c9b787] ml-1">+{running} ▶</span>}
                   </td>
                   <td className="px-4 py-3 font-mono text-muted-foreground text-[11px]">
                     {p.inferenceTime}ms
@@ -317,9 +317,9 @@ const modelLineageNodes = [
 
 function ModelLineage() {
   const colorMap: Record<string, string> = {
-    model: '#6366f1',
-    experiment: '#f59e0b',
-    deploy: '#22c55e',
+    model: '#8a8a8a',
+    experiment: '#c9b787',
+    deploy: '#c9b787',
     archived: '#64748b',
   };
   return (
@@ -343,13 +343,13 @@ function ModelLineage() {
               y1={y1}
               x2={x2}
               y2={y2}
-              stroke="rgba(99,102,241,0.3)"
+              stroke="rgba(138,138,138,0.3)"
               strokeWidth="0.8"
               markerEnd="url(#arrow)"
             />
           ))}
           {modelLineageNodes.map((node) => {
-            const color = node.status === 'archived' ? '#64748b' : colorMap[node.type] || '#6366f1';
+            const color = node.status === 'archived' ? '#64748b' : colorMap[node.type] || '#8a8a8a';
             return (
               <g key={node.id}>
                 <circle cx={node.x} cy={node.y} r="4" fill={color} opacity="0.2" />
@@ -371,15 +371,15 @@ function ModelLineage() {
       </div>
       <div className="flex items-center gap-4 mt-3 text-[10px] text-muted-foreground">
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-indigo-400 inline-block" />
+          <span className="w-2 h-2 rounded-full bg-[#8a8a8a] inline-block" />
           Model
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />
+          <span className="w-2 h-2 rounded-full bg-[#c9b787] inline-block" />
           Experiment
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
+          <span className="w-2 h-2 rounded-full bg-[#c9b787] inline-block" />
           Deploy
         </span>
       </div>
@@ -415,7 +415,7 @@ function GPUOptimization() {
   return (
     <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
       <h3 className="text-sm font-display font-semibold text-foreground mb-4 flex items-center gap-2">
-        <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+        <DollarSign className="w-3.5 h-3.5 text-[#c9b787]" />
         GPU Cost-Per-FLOP Optimization
       </h3>
       <div className="space-y-3">
@@ -427,14 +427,14 @@ function GPUOptimization() {
                 <span className="text-[10px] font-mono text-muted-foreground">
                   {g.costPerFlop}/FLOP
                 </span>
-                <span className="text-[10px] font-bold text-emerald-400">Save {g.savings}</span>
+                <span className="text-[10px] font-bold text-[#c9b787]">Save {g.savings}</span>
               </div>
             </div>
             <div className="h-1.5 bg-border rounded-full overflow-hidden mb-2">
               <div
                 className={cn(
                   'h-full rounded-full',
-                  g.usage > 90 ? 'bg-red-400' : g.usage > 75 ? 'bg-amber-400' : 'bg-emerald-400',
+                  g.usage > 90 ? 'bg-[#f5f5f5]' : g.usage > 75 ? 'bg-[#c9b787]' : 'bg-[#c9b787]',
                 )}
                 style={{ width: `${g.usage}%` }}
               />
@@ -495,8 +495,8 @@ function ModelPerformanceCharts() {
                     className={cn(
                       'text-[10px] font-mono px-2 py-0.5 rounded-full',
                       model.status === 'production'
-                        ? 'text-emerald-400 bg-emerald-400/10'
-                        : 'text-amber-400 bg-amber-400/10',
+                        ? 'text-[#c9b787] bg-[#c9b787]/10'
+                        : 'text-[#c9b787] bg-[#c9b787]/10',
                     )}
                   >
                     {model.status}
@@ -504,7 +504,7 @@ function ModelPerformanceCharts() {
                   <p
                     className={cn(
                       'text-xl font-display font-bold mt-0.5',
-                      model.accuracy >= 90 ? 'text-emerald-400' : 'text-amber-400',
+                      model.accuracy >= 90 ? 'text-[#c9b787]' : 'text-[#c9b787]',
                     )}
                   >
                     {model.accuracy.toFixed(1)}%
@@ -539,7 +539,7 @@ function ModelPerformanceCharts() {
                     <Line
                       type="monotone"
                       dataKey="accuracy"
-                      stroke="#22c55e"
+                      stroke="#c9b787"
                       strokeWidth={2}
                       dot={false}
                       name="Accuracy %"
@@ -571,36 +571,36 @@ export default function Dashboard() {
   const topInsights = insights.filter((i) => i.impact === 'high').slice(0, 4);
 
   const categoryColors: Record<string, string> = {
-    success: 'text-emerald-400',
-    warning: 'text-amber-400',
-    trend: 'text-blue-400',
-    discovery: 'text-violet-400',
+    success: 'text-[#c9b787]',
+    warning: 'text-[#c9b787]',
+    trend: 'text-[#c9b787]',
+    discovery: 'text-[#8a8a8a]',
   };
 
   const pipelineStages = [
     {
       label: 'Research',
       count: projects.filter((p) => p.status === 'research').length,
-      color: 'bg-violet-500',
-      textColor: 'text-violet-400',
+      color: 'bg-[#8a8a8a]',
+      textColor: 'text-[#8a8a8a]',
     },
     {
       label: 'Dev',
       count: projects.filter((p) => p.status === 'development').length,
-      color: 'bg-blue-500',
-      textColor: 'text-blue-400',
+      color: 'bg-[#c9b787]',
+      textColor: 'text-[#c9b787]',
     },
     {
       label: 'Testing',
       count: projects.filter((p) => p.status === 'testing').length,
-      color: 'bg-amber-500',
-      textColor: 'text-amber-400',
+      color: 'bg-[#c9b787]',
+      textColor: 'text-[#c9b787]',
     },
     {
       label: 'Deployed',
       count: projects.filter((p) => p.status === 'deployed').length,
-      color: 'bg-emerald-500',
-      textColor: 'text-emerald-400',
+      color: 'bg-[#c9b787]',
+      textColor: 'text-[#c9b787]',
     },
   ];
 
@@ -612,7 +612,7 @@ export default function Dashboard() {
             <h1 className="text-xl font-display font-bold text-foreground tracking-tight">
               Agentic Intelligence APEX
             </h1>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-amber-400/10 text-amber-400/80 border border-amber-400/15">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#c9b787]/10 text-[#c9b787]/80 border border-[#c9b787]/15">
               AI Engine v2.1
             </span>
           </div>
@@ -628,12 +628,12 @@ export default function Dashboard() {
       </div>
 
       {/* AI APEX Summary Banner */}
-      <div className="relative bg-gradient-to-r from-amber-500/8 via-yellow-500/5 to-emerald-500/5 border border-amber-400/15 rounded-xl p-5 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-amber-500/8 via-yellow-500/5 to-emerald-500/5 border border-[#c9b787]/15 rounded-xl p-5 overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage:
-              'repeating-linear-gradient(60deg, #f59e0b 0px, #f59e0b 1px, transparent 1px, transparent 20px), repeating-linear-gradient(-60deg, #f59e0b 0px, #f59e0b 1px, transparent 1px, transparent 20px)',
+              'repeating-linear-gradient(60deg, #c9b787 0px, #c9b787 1px, transparent 1px, transparent 20px), repeating-linear-gradient(-60deg, #c9b787 0px, #c9b787 1px, transparent 1px, transparent 20px)',
           }}
         />
         <div className="relative grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -643,42 +643,42 @@ export default function Dashboard() {
               role: 'Agentic Core',
               desc: '9 nodes active',
               icon: '⌇',
-              color: 'text-amber-400',
+              color: 'text-[#c9b787]',
             },
             {
               name: 'Policy Shield',
               role: 'Immune System',
               desc: 'Shield: nominal',
               icon: '◈',
-              color: 'text-orange-400',
+              color: 'text-[#c9b787]',
             },
             {
               name: 'Intelligence Mesh',
               role: 'Signal Network',
               desc: '12 nodes online',
               icon: '⬡',
-              color: 'text-cyan-400',
+              color: 'text-[#8a8a8a]',
             },
             {
               name: 'AI Advisor',
               role: 'Model Oracle',
               desc: '6 models online',
               icon: '◎',
-              color: 'text-violet-400',
+              color: 'text-[#8a8a8a]',
             },
             {
               name: 'Signal Router',
               role: 'Privacy Router',
               desc: '1.2K req/min',
               icon: '▶',
-              color: 'text-emerald-400',
+              color: 'text-[#c9b787]',
             },
             {
               name: 'Dual-Mode Engine',
               role: 'Reflex + Deep',
               desc: '6 reflex · 3 deep',
               icon: '☀◑',
-              color: 'text-yellow-400',
+              color: 'text-[#c9b787]',
             },
           ].map((layer) => (
             <div key={layer.name} className="text-center">
@@ -704,48 +704,48 @@ export default function Dashboard() {
             label: 'Programs',
             value: activeProjects,
             icon: Brain,
-            color: 'text-emerald-400',
-            bg: 'bg-emerald-400/10',
+            color: 'text-[#c9b787]',
+            bg: 'bg-[#c9b787]/10',
             trend: '+2 Q1',
           },
           {
             label: 'Running',
             value: runningExperiments,
             icon: FlaskConical,
-            color: 'text-amber-400',
-            bg: 'bg-amber-400/10',
+            color: 'text-[#c9b787]',
+            bg: 'bg-[#c9b787]/10',
             trend: 'active now',
           },
           {
             label: 'Deployed',
             value: deployedModels,
             icon: Cpu,
-            color: 'text-emerald-400',
-            bg: 'bg-emerald-400/10',
+            color: 'text-[#c9b787]',
+            bg: 'bg-[#c9b787]/10',
             trend: '+1 this month',
           },
           {
             label: 'High-Impact',
             value: highImpactInsights,
             icon: Lightbulb,
-            color: 'text-violet-400',
-            bg: 'bg-violet-400/10',
+            color: 'text-[#8a8a8a]',
+            bg: 'bg-[#8a8a8a]/10',
             trend: 'insights',
           },
           {
             label: 'Avg Accuracy',
             value: `${meanAcc}%`,
             icon: Activity,
-            color: 'text-cyan-400',
-            bg: 'bg-cyan-400/10',
+            color: 'text-[#8a8a8a]',
+            bg: 'bg-[#8a8a8a]/10',
             trend: '+2.1% vs Q4',
           },
           {
             label: 'Health',
             value: healthScore,
             icon: Shield,
-            color: healthScore >= 80 ? 'text-emerald-400' : 'text-amber-400',
-            bg: healthScore >= 80 ? 'bg-emerald-400/10' : 'bg-amber-400/10',
+            color: healthScore >= 80 ? 'text-[#c9b787]' : 'text-[#c9b787]',
+            bg: healthScore >= 80 ? 'bg-[#c9b787]/10' : 'bg-[#c9b787]/10',
             trend: 'score',
           },
         ].map((stat) => (
@@ -786,8 +786,8 @@ export default function Dashboard() {
             <Users className="w-3.5 h-3.5 text-primary" />
             Collaborative Report Builder
           </h3>
-          <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-[10px] text-[#c9b787] font-mono flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse" />
             Live · 3 contributors
           </span>
         </div>
@@ -795,14 +795,14 @@ export default function Dashboard() {
           <div className="lg:col-span-2 bg-muted/10 rounded-lg border border-border/50 p-4">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs font-bold text-foreground">{collaborativeReport.title}</span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-400/10 text-emerald-400 font-mono">
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#c9b787]/10 text-[#c9b787] font-mono">
                 Draft
               </span>
             </div>
             <div className="space-y-2">
               {collaborativeReport.highlights.map((h) => (
                 <div key={h} className="flex items-start gap-2 text-[11px] text-muted-foreground">
-                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircle className="w-3.5 h-3.5 text-[#c9b787] shrink-0 mt-0.5" />
                   <span>{h}</span>
                 </div>
               ))}
@@ -821,7 +821,7 @@ export default function Dashboard() {
                   {a.split(' ').pop()?.[0]}
                 </div>
                 <span className="text-xs text-foreground">{a}</span>
-                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse" />
               </div>
             ))}
           </div>
@@ -889,7 +889,7 @@ export default function Dashboard() {
                   <div
                     className={cn(
                       'w-1.5 h-1.5 rounded-full shrink-0',
-                      exp.status === 'running' ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400',
+                      exp.status === 'running' ? 'bg-[#c9b787] animate-pulse' : 'bg-[#c9b787]',
                     )}
                   />
                   <div className="flex-1 min-w-0">
@@ -900,8 +900,8 @@ export default function Dashboard() {
                     className={cn(
                       'text-[10px] font-mono px-1.5 py-0.5 rounded shrink-0',
                       exp.status === 'running'
-                        ? 'text-amber-400 bg-amber-400/10'
-                        : 'text-emerald-400 bg-emerald-400/10',
+                        ? 'text-[#c9b787] bg-[#c9b787]/10'
+                        : 'text-[#c9b787] bg-[#c9b787]/10',
                     )}
                   >
                     {exp.status}

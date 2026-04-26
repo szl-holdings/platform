@@ -41,9 +41,9 @@ import { api } from '@/lib/api';
 
 const statusColors: Record<string, string> = {
   draft: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
-  in_progress: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  completed: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  archived: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  in_progress: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  completed: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  archived: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
 };
 
 function AnimatedProgress({ value, className }: { value: number; className?: string }) {
@@ -387,7 +387,7 @@ export default function AssessmentDashboard() {
                         className={`${statusColors[assessment.status] || ''} ${isInProgress ? 'animate-pulse' : ''}`}
                       >
                         {isInProgress && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 animate-pulse-dot" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787] mr-1.5 animate-pulse-dot" />
                         )}
                         {assessment.status?.replace('_', ' ')}
                       </Badge>
@@ -452,7 +452,7 @@ export default function AssessmentDashboard() {
                       <Target className="w-3 h-3" /> {aFindings.length} findings
                     </span>
                     <span
-                      className={`flex items-center gap-1 ${hasCritical ? 'text-red-400 animate-threat-pulse' : ''}`}
+                      className={`flex items-center gap-1 ${hasCritical ? 'text-[#f5f5f5] animate-threat-pulse' : ''}`}
                     >
                       <AlertTriangle className="w-3 h-3" /> {critCount} critical, {highCount} high
                     </span>

@@ -323,9 +323,9 @@ const STATIC_HEADLINE_KPIS = [
 
 function statusBadge(status: Module['status']) {
   const map = {
-    Healthy: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-    Watch: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-    Action: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
+    Healthy: 'bg-[#c9b787]/15 text-[#c9b787] border-[#c9b787]/30',
+    Watch: 'bg-[#c9b787]/15 text-[#c9b787] border-[#c9b787]/30',
+    Action: 'bg-[#f5f5f5]/15 text-[#f5f5f5] border-rose-500/30',
   } as const;
   return (
     <Badge variant="outline" className={map[status]}>
@@ -442,7 +442,7 @@ export default function CisoDashboard() {
         {/* Header */}
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-cyan-300/80">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#8a8a8a]/80">
               <Shield className="h-3.5 w-3.5" /> CISO Executive Dashboard
             </div>
             <h1
@@ -458,7 +458,7 @@ export default function CisoDashboard() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="border-cyan-500/30 bg-cyan-500/10 text-cyan-200">
+            <Badge variant="outline" className="border-[#8a8a8a]/30 bg-[#8a8a8a]/10 text-[#8a8a8a]">
               Reporting period: Apr 2026
             </Badge>
             <Button size="sm" variant="outline" data-testid="button-export-board-pack">
@@ -478,14 +478,14 @@ export default function CisoDashboard() {
                     <span className="text-xs uppercase tracking-wider text-slate-400">
                       {k.label}
                     </span>
-                    <Icon className="h-4 w-4 text-cyan-300" />
+                    <Icon className="h-4 w-4 text-[#8a8a8a]" />
                   </div>
                   <div className="mt-2 flex items-baseline gap-1">
                     <span className="text-3xl font-semibold text-white">{k.value}</span>
                     <span className="text-sm text-slate-400">{k.suffix}</span>
                   </div>
                   <div
-                    className={`mt-2 flex items-center gap-1 text-xs ${k.good ? 'text-emerald-300' : 'text-rose-300'}`}
+                    className={`mt-2 flex items-center gap-1 text-xs ${k.good ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}
                   >
                     {k.good ? (
                       <TrendingDown className="h-3 w-3" />
@@ -512,13 +512,13 @@ export default function CisoDashboard() {
               return (
                 <Link key={m.key} href={m.route}>
                   <Card
-                    className="cursor-pointer border-slate-800 bg-slate-900/60 transition hover:border-cyan-500/40 hover:bg-slate-900"
+                    className="cursor-pointer border-slate-800 bg-slate-900/60 transition hover:border-[#8a8a8a]/40 hover:bg-slate-900"
                     data-testid={`module-card-${m.key}`}
                   >
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="rounded-md bg-cyan-500/10 p-1.5 text-cyan-300">
+                          <span className="rounded-md bg-[#8a8a8a]/10 p-1.5 text-[#8a8a8a]">
                             <Icon className="h-4 w-4" />
                           </span>
                           <span className="text-xs uppercase tracking-wider text-slate-400">
@@ -537,7 +537,7 @@ export default function CisoDashboard() {
                         </div>
                         <div
                           className={`flex items-center gap-1 text-xs ${
-                            m.deltaIsGood ? 'text-emerald-300' : 'text-rose-300'
+                            m.deltaIsGood ? 'text-[#c9b787]' : 'text-[#f5f5f5]'
                           }`}
                         >
                           {m.deltaTrend === 'down' ? (
@@ -553,7 +553,7 @@ export default function CisoDashboard() {
                         <span>
                           {m.caseCount} open case{m.caseCount === 1 ? '' : 's'}
                         </span>
-                        <span className="flex items-center gap-1 text-cyan-300">
+                        <span className="flex items-center gap-1 text-[#8a8a8a]">
                           Open module <ArrowUpRight className="h-3 w-3" />
                         </span>
                       </div>
@@ -699,17 +699,17 @@ export default function CisoDashboard() {
               {compliance.map((c) => (
                 <Link key={c.framework} href={c.route}>
                   <div
-                    className="cursor-pointer rounded-lg border border-slate-800 bg-slate-950/40 p-3 transition hover:border-cyan-500/40"
+                    className="cursor-pointer rounded-lg border border-slate-800 bg-slate-950/40 p-3 transition hover:border-[#8a8a8a]/40"
                     data-testid={`compliance-${c.framework.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-white">{c.framework}</span>
                       {c.score >= 85 ? (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                        <CheckCircle2 className="h-4 w-4 text-[#c9b787]" />
                       ) : c.score >= 75 ? (
-                        <Target className="h-4 w-4 text-amber-300" />
+                        <Target className="h-4 w-4 text-[#c9b787]" />
                       ) : (
-                        <AlertTriangle className="h-4 w-4 text-rose-300" />
+                        <AlertTriangle className="h-4 w-4 text-[#f5f5f5]" />
                       )}
                     </div>
                     <div className="mt-2 flex items-end justify-between">
@@ -720,10 +720,10 @@ export default function CisoDashboard() {
                       <div
                         className={`h-full ${
                           c.score >= 85
-                            ? 'bg-emerald-400'
+                            ? 'bg-[#c9b787]'
                             : c.score >= 75
-                              ? 'bg-amber-300'
-                              : 'bg-rose-400'
+                              ? 'bg-[#c9b787]'
+                              : 'bg-[#f5f5f5]'
                         }`}
                         style={{ width: `${c.score}%` }}
                       />
@@ -747,7 +747,7 @@ export default function CisoDashboard() {
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
-                <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-emerald-200">
+                <div className="rounded-md border border-[#c9b787]/30 bg-[#c9b787]/10 px-3 py-1.5 text-[#c9b787]">
                   <div className="text-[10px] uppercase tracking-wider">Avoided</div>
                   <div className="text-lg font-semibold">${totalAvoided.toFixed(1)}M</div>
                 </div>
@@ -755,7 +755,7 @@ export default function CisoDashboard() {
                   <div className="text-[10px] uppercase tracking-wider">Program spend</div>
                   <div className="text-lg font-semibold">${programSpend}M</div>
                 </div>
-                <div className="rounded-md border border-cyan-500/30 bg-cyan-500/10 px-3 py-1.5 text-cyan-200">
+                <div className="rounded-md border border-[#8a8a8a]/30 bg-[#8a8a8a]/10 px-3 py-1.5 text-[#8a8a8a]">
                   <div className="text-[10px] uppercase tracking-wider">Net ROI</div>
                   <div className="text-lg font-semibold">{roiMultiple}×</div>
                 </div>
@@ -783,12 +783,12 @@ export default function CisoDashboard() {
                       >
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
-                            <Icon className="h-4 w-4 text-cyan-300" />
+                            <Icon className="h-4 w-4 text-[#8a8a8a]" />
                             <span className="font-medium text-white">{r.module}</span>
                           </div>
                         </td>
                         <td className="px-4 py-3 text-slate-300">{r.intervention}</td>
-                        <td className="px-4 py-3 text-right font-mono text-emerald-300">
+                        <td className="px-4 py-3 text-right font-mono text-[#c9b787]">
                           ${r.avoided.toFixed(1)}M
                         </td>
                         <td className="px-4 py-3 text-right">
@@ -796,7 +796,7 @@ export default function CisoDashboard() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="text-cyan-300 hover:text-cyan-200"
+                              className="text-[#8a8a8a] hover:text-[#8a8a8a]"
                             >
                               Drill in <ArrowUpRight className="ml-1 h-3 w-3" />
                             </Button>

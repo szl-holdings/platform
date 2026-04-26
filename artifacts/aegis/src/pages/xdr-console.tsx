@@ -29,7 +29,7 @@ const telemetryStreams = [
     events24h: 1247841,
     alerts: 34,
     critical: 5,
-    color: '#3b82f6',
+    color: '#c9b787',
     trend: '+12%',
   },
   {
@@ -38,7 +38,7 @@ const telemetryStreams = [
     events24h: 3892341,
     alerts: 18,
     critical: 2,
-    color: '#06b6d4',
+    color: '#8a8a8a',
     trend: '+8%',
   },
   {
@@ -47,7 +47,7 @@ const telemetryStreams = [
     events24h: 247890,
     alerts: 12,
     critical: 3,
-    color: '#8b5cf6',
+    color: '#8a8a8a',
     trend: '+31%',
   },
   {
@@ -56,7 +56,7 @@ const telemetryStreams = [
     events24h: 892134,
     alerts: 9,
     critical: 1,
-    color: '#22c55e',
+    color: '#c9b787',
     trend: '+5%',
   },
 ];
@@ -150,9 +150,9 @@ const timelineData = [
 ];
 
 const sevColor: Record<string, string> = {
-  Critical: 'bg-red-500/10 text-red-400 border-red-500/20',
-  High: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  Medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  Critical: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  High: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  Medium: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
 };
 
 const APT_CAMPAIGN_PHASES = [
@@ -162,7 +162,7 @@ const APT_CAMPAIGN_PHASES = [
     status: 'completed',
     technique: 'T1566.001 Spearphishing',
     time: 'Mar 12, 14:23',
-    color: '#ef4444',
+    color: '#f5f5f5',
   },
   {
     phase: 2,
@@ -170,7 +170,7 @@ const APT_CAMPAIGN_PHASES = [
     status: 'completed',
     technique: 'T1003.001 LSASS Dump',
     time: 'Mar 15, 09:41',
-    color: '#ef4444',
+    color: '#f5f5f5',
   },
   {
     phase: 3,
@@ -178,7 +178,7 @@ const APT_CAMPAIGN_PHASES = [
     status: 'active',
     technique: 'T1021.002 SMB Admin Shares',
     time: 'Mar 29, NOW',
-    color: '#f97316',
+    color: '#c9b787',
   },
   {
     phase: 4,
@@ -186,7 +186,7 @@ const APT_CAMPAIGN_PHASES = [
     status: 'detected',
     technique: 'T1074 Data Staged',
     time: 'Mar 29, 11h ago',
-    color: '#f59e0b',
+    color: '#c9b787',
   },
   {
     phase: 5,
@@ -194,7 +194,7 @@ const APT_CAMPAIGN_PHASES = [
     status: 'prevented',
     technique: 'T1567.002 Exfil to Cloud',
     time: 'Blocked',
-    color: '#10b981',
+    color: '#c9b787',
   },
 ];
 
@@ -206,7 +206,7 @@ export default function XDRConsole() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <Layers className="w-5 h-5 text-blue-400" />
+            <Layers className="w-5 h-5 text-[#c9b787]" />
             Unified XDR Console
           </h1>
           <p className="text-xs text-white/40 mt-0.5">
@@ -214,7 +214,7 @@ export default function XDRConsole() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-[10px] text-red-400 bg-red-500/10 px-2.5 py-1 rounded-lg border border-red-500/20">
+          <div className="flex items-center gap-1.5 text-[10px] text-[#f5f5f5] bg-[#f5f5f5]/10 px-2.5 py-1 rounded-lg border border-[#f5f5f5]/20">
             <Radio className="w-3 h-3 animate-pulse" /> ACTIVE APT CAMPAIGN
           </div>
           <div className="text-[10px] text-white/30 font-mono">Operation Darkwing · APT29</div>
@@ -222,8 +222,8 @@ export default function XDRConsole() {
       </div>
 
       {/* APT Campaign Timeline Banner */}
-      <div className="rounded-xl border border-red-500/15 bg-red-500/5 p-3">
-        <div className="text-[9px] uppercase tracking-wider font-bold text-red-400/60 mb-2">
+      <div className="rounded-xl border border-[#f5f5f5]/15 bg-[#f5f5f5]/5 p-3">
+        <div className="text-[9px] uppercase tracking-wider font-bold text-[#f5f5f5]/60 mb-2">
           Active Campaign — Operation Darkwing (APT29 / Cozy Bear)
         </div>
         <div className="flex items-center gap-0 overflow-x-auto pb-1">
@@ -250,7 +250,7 @@ export default function XDRConsole() {
               {i < APT_CAMPAIGN_PHASES.length - 1 && (
                 <div
                   className="w-8 h-px mx-1 shrink-0"
-                  style={{ background: 'rgba(239,68,68,0.2)' }}
+                  style={{ background: 'rgba(245,245,245,0.2)' }}
                 />
               )}
             </div>
@@ -269,12 +269,12 @@ export default function XDRConsole() {
                     <Icon className="w-4 h-4" style={{ color: stream.color }} />
                     <span className="text-sm font-semibold">{stream.name}</span>
                   </div>
-                  <span className="text-xs text-red-400 font-bold">{stream.critical} critical</span>
+                  <span className="text-xs text-[#f5f5f5] font-bold">{stream.critical} critical</span>
                 </div>
                 <p className="text-xl font-bold font-mono">{stream.events24h.toLocaleString()}</p>
                 <div className="flex items-center justify-between mt-0.5">
                   <p className="text-xs text-muted-foreground">{stream.alerts} alerts</p>
-                  <span className="text-[10px] text-emerald-400">{stream.trend}</span>
+                  <span className="text-[10px] text-[#c9b787]">{stream.trend}</span>
                 </div>
               </CardContent>
             </Card>
@@ -287,7 +287,7 @@ export default function XDRConsole() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
-                <Activity className="w-3.5 h-3.5 text-blue-400" /> Cross-Source Alert Timeline (24h)
+                <Activity className="w-3.5 h-3.5 text-[#c9b787]" /> Cross-Source Alert Timeline (24h)
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -307,8 +307,8 @@ export default function XDRConsole() {
                   <Area
                     type="monotone"
                     dataKey="endpoint"
-                    stroke="#3b82f6"
-                    fill="#3b82f6"
+                    stroke="#c9b787"
+                    fill="#c9b787"
                     fillOpacity={0.15}
                     stackId="a"
                     name="Endpoint"
@@ -316,8 +316,8 @@ export default function XDRConsole() {
                   <Area
                     type="monotone"
                     dataKey="network"
-                    stroke="#06b6d4"
-                    fill="#06b6d4"
+                    stroke="#8a8a8a"
+                    fill="#8a8a8a"
                     fillOpacity={0.15}
                     stackId="a"
                     name="Network"
@@ -325,8 +325,8 @@ export default function XDRConsole() {
                   <Area
                     type="monotone"
                     dataKey="identity"
-                    stroke="#8b5cf6"
-                    fill="#8b5cf6"
+                    stroke="#8a8a8a"
+                    fill="#8a8a8a"
                     fillOpacity={0.15}
                     stackId="a"
                     name="Identity"
@@ -334,15 +334,15 @@ export default function XDRConsole() {
                   <Area
                     type="monotone"
                     dataKey="cloud"
-                    stroke="#22c55e"
-                    fill="#22c55e"
+                    stroke="#c9b787"
+                    fill="#c9b787"
                     fillOpacity={0.15}
                     stackId="a"
                     name="Cloud"
                   />
                 </AreaChart>
               </ResponsiveContainer>
-              <div className="text-[9px] text-center text-amber-400/70 mt-1">
+              <div className="text-[9px] text-center text-[#c9b787]/70 mt-1">
                 ↑ Spike at 11:47 UTC correlates with Phase 3 lateral movement activity
               </div>
             </CardContent>
@@ -351,7 +351,7 @@ export default function XDRConsole() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
-                <Crosshair className="w-3.5 h-3.5 text-red-400" /> Correlated Alerts — Multi-Source
+                <Crosshair className="w-3.5 h-3.5 text-[#f5f5f5]" /> Correlated Alerts — Multi-Source
                 (Operation Darkwing)
               </CardTitle>
             </CardHeader>
@@ -382,7 +382,7 @@ export default function XDRConsole() {
                         {alert.mitre.slice(0, 2).map((m) => (
                           <span
                             key={m}
-                            className="text-[9px] font-mono bg-violet-500/10 text-violet-400 px-1.5 py-0.5 rounded"
+                            className="text-[9px] font-mono bg-[#8a8a8a]/10 text-[#8a8a8a] px-1.5 py-0.5 rounded"
                           >
                             {m}
                           </span>
@@ -418,12 +418,12 @@ export default function XDRConsole() {
                     </div>
                     <div className="text-right">
                       <p
-                        className={`text-sm font-bold ${e.risk >= 90 ? 'text-red-400' : e.risk >= 75 ? 'text-orange-400' : 'text-amber-400'}`}
+                        className={`text-sm font-bold ${e.risk >= 90 ? 'text-[#f5f5f5]' : e.risk >= 75 ? 'text-[#c9b787]' : 'text-[#c9b787]'}`}
                       >
                         {e.risk}
                       </p>
                       <p
-                        className={`text-[10px] ${e.status === 'Compromised' ? 'text-red-400' : e.status === 'Anomalous' ? 'text-amber-400' : 'text-sky-400'}`}
+                        className={`text-[10px] ${e.status === 'Compromised' ? 'text-[#f5f5f5]' : e.status === 'Anomalous' ? 'text-[#c9b787]' : 'text-[#8a8a8a]'}`}
                       >
                         {e.status}
                       </p>
@@ -431,7 +431,7 @@ export default function XDRConsole() {
                   </div>
                   <div className="mt-1.5 h-1 bg-background rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full ${e.risk >= 90 ? 'bg-red-500' : e.risk >= 75 ? 'bg-orange-500' : 'bg-amber-500'}`}
+                      className={`h-full rounded-full ${e.risk >= 90 ? 'bg-[#f5f5f5]' : e.risk >= 75 ? 'bg-[#c9b787]' : 'bg-[#c9b787]'}`}
                       style={{ width: `${e.risk}%` }}
                     />
                   </div>
@@ -448,7 +448,7 @@ export default function XDRConsole() {
               <p className="text-xs font-semibold">{selected.title}</p>
               <div>
                 <p className="text-[10px] text-muted-foreground mb-1">Campaign</p>
-                <span className="text-[10px] font-mono text-red-400">{selected.campaign}</span>
+                <span className="text-[10px] font-mono text-[#f5f5f5]">{selected.campaign}</span>
               </div>
               <div>
                 <p className="text-[10px] text-muted-foreground mb-1">Affected Entities</p>
@@ -465,7 +465,7 @@ export default function XDRConsole() {
                   {selected.mitre.map((m) => (
                     <span
                       key={m}
-                      className="text-[9px] font-mono bg-violet-500/10 text-violet-400 border border-violet-500/20 px-1.5 py-0.5 rounded"
+                      className="text-[9px] font-mono bg-[#8a8a8a]/10 text-[#8a8a8a] border border-[#8a8a8a]/20 px-1.5 py-0.5 rounded"
                     >
                       {m}
                     </span>
@@ -474,7 +474,7 @@ export default function XDRConsole() {
               </div>
               <div className="flex items-center gap-2">
                 <span
-                  className={`text-[10px] px-2 py-1 rounded border ${selected.status === 'Active' ? 'bg-red-500/10 text-red-400 border-red-500/20' : selected.status === 'Contained' || selected.status === 'Remediated' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}
+                  className={`text-[10px] px-2 py-1 rounded border ${selected.status === 'Active' ? 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20' : selected.status === 'Contained' || selected.status === 'Remediated' ? 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20' : 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20'}`}
                 >
                   {selected.status}
                 </span>

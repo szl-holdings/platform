@@ -52,7 +52,7 @@ export const BUSINESS_REVOPS_NARRATIVE = {
         { dimension: 'Motion', signal: 'Deal velocity: 0 actions in 47 days (baseline: 3/week)' },
         { dimension: 'Risk', signal: 'Q2 close probability dropped from 84% to 31%' },
         { dimension: 'Intelligence', signal: 'No active approval owner assigned since 2026-02-28' },
-        { dimension: 'LUMINA', signal: '3 of 14 portfolio companies showing similar approval gaps' },
+        { dimension: 'Pulse', signal: '3 of 14 portfolio companies showing similar approval gaps' },
         { dimension: 'Signals', signal: 'Buyer contact last seen opening proposal on 2026-03-31' },
         { dimension: 'Risk', signal: 'Revenue at risk vs. Q2 target: $4.2M of $18M (23%)' },
       ],
@@ -114,7 +114,7 @@ export const BUSINESS_REVOPS_NARRATIVE = {
       step: 'Context Assembly',
       duration: '2 min',
       narrative:
-        'The PRISM framework has assembled context across 6 signals — Motion, Risk, Intelligence, LUMINA, Signals, Risk. Marcus sees the full picture: deal velocity collapsed, close probability dropped to 31%, the approval owner left 47 days ago without a handoff.',
+        'The PRISM framework has assembled context across 6 signals — Motion, Risk, Intelligence, Pulse, Signals, Risk. Marcus sees the full picture: deal velocity collapsed, close probability dropped to 31%, the approval owner left 47 days ago without a handoff.',
       showIn: ['lyte/prism', 'lyte/intelligence'],
     },
     {

@@ -60,25 +60,25 @@ const typeIcon: Record<string, typeof Server> = {
   firewall: Shield,
 };
 const typeColor: Record<string, string> = {
-  server: '#3b82f6',
-  workstation: '#10b981',
-  network: '#06b6d4',
-  cloud: '#8b5cf6',
-  database: '#f97316',
-  firewall: '#ef4444',
+  server: '#c9b787',
+  workstation: '#c9b787',
+  network: '#8a8a8a',
+  cloud: '#8a8a8a',
+  database: '#c9b787',
+  firewall: '#f5f5f5',
 };
 
 const syncColor: Record<string, string> = {
-  synced: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
-  drifted: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-  offline: 'text-red-400 bg-red-500/10 border-red-500/30',
+  synced: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  drifted: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  offline: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/30',
 };
 
 const scenarioStatusColor: Record<string, string> = {
   queued: 'text-zinc-400',
-  running: 'text-amber-400',
-  completed: 'text-emerald-400',
-  failed: 'text-red-400',
+  running: 'text-[#c9b787]',
+  completed: 'text-[#c9b787]',
+  failed: 'text-[#f5f5f5]',
 };
 
 export default function DigitalTwin() {
@@ -139,7 +139,7 @@ export default function DigitalTwin() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Layers className="w-5 h-5 text-cyan-400" />
+            <Layers className="w-5 h-5 text-[#8a8a8a]" />
             <h1 className="text-lg font-semibold text-white">Cyber Digital Twin</h1>
           </div>
           <p className="text-xs text-zinc-500">
@@ -151,7 +151,7 @@ export default function DigitalTwin() {
           <div
             className={cn(
               'flex items-center gap-1.5 text-xs px-2 py-1 rounded-lg',
-              'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400',
+              'bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787]',
             )}
           >
             <Activity className="w-3 h-3 animate-pulse" />
@@ -160,7 +160,7 @@ export default function DigitalTwin() {
           <button
             onClick={() => syncMutation.mutate()}
             disabled={syncMutation.isPending}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 text-xs font-medium hover:bg-cyan-500/25 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#8a8a8a]/15 border border-[#8a8a8a]/30 text-[#8a8a8a] text-xs font-medium hover:bg-[#8a8a8a]/25 transition-colors"
           >
             <RefreshCw className={cn('w-3.5 h-3.5', syncMutation.isPending && 'animate-spin')} />
             {syncMutation.isPending ? 'Syncing...' : 'Sync Twin'}
@@ -175,28 +175,28 @@ export default function DigitalTwin() {
             label: 'Assets Modeled',
             value: nodes.length || '—',
             sub: `${syncedCount} synced, ${nodes.length - syncedCount} drifted`,
-            color: '#06b6d4',
+            color: '#8a8a8a',
             icon: Layers,
           },
           {
             label: 'Twin Fidelity',
             value: topology?.fidelity ?? '99.1%',
             sub: 'config accuracy vs live',
-            color: '#10b981',
+            color: '#c9b787',
             icon: CheckCircle,
           },
           {
             label: 'Total Vulns Found',
             value: totalVulns || '—',
             sub: 'across all twin nodes',
-            color: '#ef4444',
+            color: '#f5f5f5',
             icon: AlertTriangle,
           },
           {
             label: 'Scenarios Run Today',
             value: scenarios.filter((s) => s.status !== 'queued').length || '—',
             sub: `${scenarios.filter((s) => s.criticalFindings > 0).length} with critical findings`,
-            color: '#8b5cf6',
+            color: '#8a8a8a',
             icon: Target,
           },
         ].map((m) => {
@@ -262,7 +262,7 @@ export default function DigitalTwin() {
                             Sync: {node.lastSyncLabel ?? node.lastSync}
                           </span>
                           {node.vulnerabilities > 0 && (
-                            <span className="text-red-400">{node.vulnerabilities} vulns</span>
+                            <span className="text-[#f5f5f5]">{node.vulnerabilities} vulns</span>
                           )}
                         </div>
                       </div>
@@ -292,7 +292,7 @@ export default function DigitalTwin() {
               onClick={() =>
                 toast.success(`Scenario library opened — ${metricDisplay(AEGIS_MITRE_COVERAGE)}`)
               }
-              className="text-[10px] text-cyan-400 hover:text-cyan-300"
+              className="text-[10px] text-[#8a8a8a] hover:text-[#8a8a8a]"
             >
               Browse Library →
             </button>
@@ -307,7 +307,7 @@ export default function DigitalTwin() {
                   className={cn(
                     'rounded-xl border p-3',
                     scenario.status === 'running'
-                      ? 'border-amber-500/30 bg-amber-500/5'
+                      ? 'border-[#c9b787]/30 bg-[#c9b787]/5'
                       : 'border-white/8 bg-white/3',
                   )}
                 >
@@ -331,7 +331,7 @@ export default function DigitalTwin() {
                         <button
                           onClick={() => runScenarioMutation.mutate(scenario.id)}
                           disabled={runScenarioMutation.isPending}
-                          className="flex items-center gap-1 px-2 py-0.5 rounded bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 text-[10px] hover:bg-cyan-500/25"
+                          className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#8a8a8a]/15 border border-[#8a8a8a]/30 text-[#8a8a8a] text-[10px] hover:bg-[#8a8a8a]/25"
                         >
                           <Play className="w-2.5 h-2.5" /> Run
                         </button>
@@ -342,7 +342,7 @@ export default function DigitalTwin() {
                     <div className="mb-2">
                       <div className="h-1.5 rounded-full bg-white/8">
                         <div
-                          className="h-full rounded-full bg-amber-400/60 transition-all"
+                          className="h-full rounded-full bg-[#c9b787]/60 transition-all"
                           style={{ width: `${scenario.progress}%` }}
                         />
                       </div>
@@ -355,7 +355,7 @@ export default function DigitalTwin() {
                     <span>{scenario.duration}</span>
                     {scenario.findings > 0 && <span>{scenario.findings} findings</span>}
                     {scenario.criticalFindings > 0 && (
-                      <span className="text-red-400">{scenario.criticalFindings} critical</span>
+                      <span className="text-[#f5f5f5]">{scenario.criticalFindings} critical</span>
                     )}
                   </div>
                 </div>
@@ -365,14 +365,14 @@ export default function DigitalTwin() {
 
           {/* Attack Surface Heatmap Summary */}
           {attackSurface.length > 0 && (
-            <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4 mt-3">
-              <div className="text-xs font-semibold text-cyan-300 mb-3">
+            <div className="rounded-xl border border-[#8a8a8a]/20 bg-[#8a8a8a]/5 p-4 mt-3">
+              <div className="text-xs font-semibold text-[#8a8a8a] mb-3">
                 Attack Surface Heatmap (Twin Analysis)
               </div>
               <div className="space-y-2">
                 {attackSurface.map((item: AttackSurfaceItem) => {
                   const color =
-                    item.risk >= 70 ? '#ef4444' : item.risk >= 55 ? '#f97316' : '#f59e0b';
+                    item.risk >= 70 ? '#f5f5f5' : item.risk >= 55 ? '#c9b787' : '#c9b787';
                   return (
                     <div key={item.area}>
                       <div className="flex items-center justify-between text-[10px] mb-1">

@@ -79,7 +79,7 @@ test.describe('Portfolio Dashboard — /portfolio', () => {
 
     // Tile names rendered in the dashboard. Note: the Aegis vertical is
     // surfaced as the "Sentra" product tile in the portfolio UI.
-    const tiles = ['Lyte', 'Terra', 'Vessels', 'TENAX', 'Counsel', 'Carlota Jo'];
+    const tiles = ['Lyte', 'Terra', 'Vessels', 'Aegis', 'Counsel', 'Carlota Jo'];
     for (const name of tiles) {
       await expect(page.locator(`:text("${name}")`).first()).toBeVisible({ timeout: 15_000 });
     }

@@ -169,8 +169,8 @@ const INTEGRATIONS: Integration[] = [
 ];
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
-  connected: { label: 'Connected', color: '#22c55e', bg: 'bg-green-500/20 text-green-400' },
-  hook_ready: { label: 'Hook Ready', color: '#f59e0b', bg: 'bg-amber-500/20 text-amber-400' },
+  connected: { label: 'Connected', color: '#c9b787', bg: 'bg-[#c9b787]/20 text-[#c9b787]' },
+  hook_ready: { label: 'Hook Ready', color: '#c9b787', bg: 'bg-[#c9b787]/20 text-[#c9b787]' },
   not_configured: { label: 'Not Configured', color: '#6b7280', bg: 'bg-gray-500/20 text-gray-400' },
 };
 
@@ -199,7 +199,7 @@ export default function IntegrationHubPage() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <Globe size={22} className="text-amber-400" />
+            <Globe size={22} className="text-[#c9b787]" />
             <h1 className="text-xl font-bold text-white font-mono tracking-tight">
               Integration Hub
             </h1>
@@ -210,9 +210,9 @@ export default function IntegrationHubPage() {
           </p>
         </div>
 
-        <div className="bg-amber-400/10 border border-amber-400/30 rounded-xl p-4 flex items-start gap-3">
-          <Lock size={14} className="text-amber-400 mt-0.5 shrink-0" />
-          <p className="text-xs text-amber-200/80 font-mono leading-relaxed">
+        <div className="bg-[#c9b787]/10 border border-[#c9b787]/30 rounded-xl p-4 flex items-start gap-3">
+          <Lock size={14} className="text-[#c9b787] mt-0.5 shrink-0" />
+          <p className="text-xs text-[#c9b787]/80 font-mono leading-relaxed">
             All integrations are <strong>tenant-owned</strong>: credentials belong to and are
             controlled by each customer tenant. Aegis never shares credentials across tenants. Hook
             Ready means the adapter is built but requires per-customer configuration. Failure
@@ -225,7 +225,7 @@ export default function IntegrationHubPage() {
             <button
               key={c}
               onClick={() => setSelectedCategory(c)}
-              className={`px-3 py-1.5 rounded text-xs font-mono transition-colors ${selectedCategory === c ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40' : 'text-[#8b9ab0] border border-[#1e2a3a] hover:text-white'}`}
+              className={`px-3 py-1.5 rounded text-xs font-mono transition-colors ${selectedCategory === c ? 'bg-[#c9b787]/20 text-[#c9b787] border border-[#c9b787]/40' : 'text-[#8b9ab0] border border-[#1e2a3a] hover:text-white'}`}
             >
               {c}
             </button>
@@ -240,12 +240,12 @@ export default function IntegrationHubPage() {
               <div key={integration.id}>
                 <button
                   onClick={() => setSelectedIntegration(isSelected ? null : integration)}
-                  className={`w-full text-left p-4 rounded-xl border transition-all ${isSelected ? 'bg-amber-400/10 border-amber-400/40' : 'bg-[#0d1117] border-[#1e2a3a] hover:border-[#2e3a4a]'}`}
+                  className={`w-full text-left p-4 rounded-xl border transition-all ${isSelected ? 'bg-[#c9b787]/10 border-[#c9b787]/40' : 'bg-[#0d1117] border-[#1e2a3a] hover:border-[#2e3a4a]'}`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="space-y-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <integration.icon size={14} className="text-amber-400 shrink-0" />
+                        <integration.icon size={14} className="text-[#c9b787] shrink-0" />
                         <span className="text-sm font-semibold text-white">{integration.name}</span>
                         <span
                           className={`text-xs px-1.5 py-0.5 rounded font-mono font-bold ${statusStyle.bg}`}
@@ -262,7 +262,7 @@ export default function IntegrationHubPage() {
                     </div>
                     <div className="flex items-center gap-1.5 ml-2 shrink-0">
                       {integration.auditLog && (
-                        <span className="text-xs text-green-400 font-mono">Audited</span>
+                        <span className="text-xs text-[#c9b787] font-mono">Audited</span>
                       )}
                       <ChevronRight
                         size={14}
@@ -273,7 +273,7 @@ export default function IntegrationHubPage() {
                 </button>
 
                 {isSelected && (
-                  <div className="mt-1 p-4 bg-[#0a0f16] border border-amber-400/20 border-t-0 rounded-b-xl space-y-4">
+                  <div className="mt-1 p-4 bg-[#0a0f16] border border-[#c9b787]/20 border-t-0 rounded-b-xl space-y-4">
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <p className="text-xs text-[#8b9ab0] font-mono mb-1">Tenant Model</p>
@@ -282,8 +282,8 @@ export default function IntegrationHubPage() {
                       <div>
                         <p className="text-xs text-[#8b9ab0] font-mono mb-1">Audit Logged</p>
                         <div className="flex items-center gap-1">
-                          <CheckCircle2 size={12} className="text-green-400" />
-                          <p className="text-xs text-green-400">Every action</p>
+                          <CheckCircle2 size={12} className="text-[#c9b787]" />
+                          <p className="text-xs text-[#c9b787]">Every action</p>
                         </div>
                       </div>
                     </div>
@@ -308,9 +308,9 @@ export default function IntegrationHubPage() {
                     </div>
 
                     {integration.configNote && (
-                      <div className="p-2 bg-amber-400/10 border border-amber-400/20 rounded flex items-start gap-2">
-                        <Info size={11} className="text-amber-400 mt-0.5 shrink-0" />
-                        <p className="text-xs text-amber-200/80 font-mono">
+                      <div className="p-2 bg-[#c9b787]/10 border border-[#c9b787]/20 rounded flex items-start gap-2">
+                        <Info size={11} className="text-[#c9b787] mt-0.5 shrink-0" />
+                        <p className="text-xs text-[#c9b787]/80 font-mono">
                           {integration.configNote}
                         </p>
                       </div>
@@ -327,17 +327,17 @@ export default function IntegrationHubPage() {
             {
               label: 'Connected',
               value: INTEGRATIONS.filter((i) => i.status === 'connected').length,
-              color: '#22c55e',
+              color: '#c9b787',
             },
             {
               label: 'Hook Ready',
               value: INTEGRATIONS.filter((i) => i.status === 'hook_ready').length,
-              color: '#f59e0b',
+              color: '#c9b787',
             },
             {
               label: 'All Audited',
               value: INTEGRATIONS.filter((i) => i.auditLog).length,
-              color: '#3b82f6',
+              color: '#c9b787',
             },
           ].map((m) => (
             <div

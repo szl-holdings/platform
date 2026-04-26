@@ -95,9 +95,9 @@ const assessmentQueue = [
 ];
 
 const riskColor: Record<string, string> = {
-  Low: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-  Medium: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-  High: 'text-red-400 bg-red-500/10 border-red-500/20',
+  Low: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+  Medium: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+  High: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20',
 };
 
 export default function VendorRisk() {
@@ -111,10 +111,10 @@ export default function VendorRisk() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="font-display text-lg font-bold text-orange-50 flex items-center gap-2">
-          <Shield className="w-5 h-5 text-orange-400" /> Vendor Risk Management
+        <h1 className="font-display text-lg font-bold text-[#c9b787] flex items-center gap-2">
+          <Shield className="w-5 h-5 text-[#c9b787]" /> Vendor Risk Management
         </h1>
-        <p className="text-xs text-orange-400/50 mt-0.5">
+        <p className="text-xs text-[#c9b787]/50 mt-0.5">
           Third-party security assessments, vendor risk scoring, and supply chain monitoring
         </p>
       </div>
@@ -124,26 +124,26 @@ export default function VendorRisk() {
           {
             label: 'High Risk Vendors',
             value: vendors.filter((v) => v.risk === 'High').length,
-            color: 'text-red-400',
+            color: 'text-[#f5f5f5]',
           },
           {
             label: 'Assessments Due (30d)',
             value: assessmentQueue.length,
-            color: 'text-amber-400',
+            color: 'text-[#c9b787]',
           },
           {
             label: 'Compliant Vendors',
             value: vendors.filter((v) => v.risk === 'Low').length,
-            color: 'text-emerald-400',
+            color: 'text-[#c9b787]',
           },
           {
             label: 'Open Issues',
             value: vendors.reduce((a, v) => a + v.issues, 0),
-            color: 'text-orange-400',
+            color: 'text-[#c9b787]',
           },
         ].map(({ label, value, color }) => (
-          <div key={label} className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-4">
-            <p className="text-[10px] text-orange-400/40">{label}</p>
+          <div key={label} className="bg-[#c9b787]/5 border border-[#c9b787]/10 rounded-xl p-4">
+            <p className="text-[10px] text-[#c9b787]/40">{label}</p>
             <p className={`text-2xl font-bold font-display ${color}`}>{value}</p>
           </div>
         ))}
@@ -152,25 +152,25 @@ export default function VendorRisk() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 space-y-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-orange-400/40" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#c9b787]/40" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search vendors..."
-              className="w-full pl-9 pr-4 py-2 text-xs bg-orange-500/5 rounded-lg border border-orange-500/10 text-orange-50 placeholder:text-orange-400/30 focus:outline-none focus:ring-1 focus:ring-orange-500/30"
+              className="w-full pl-9 pr-4 py-2 text-xs bg-[#c9b787]/5 rounded-lg border border-[#c9b787]/10 text-[#c9b787] placeholder:text-[#c9b787]/30 focus:outline-none focus:ring-1 focus:ring-orange-500/30"
             />
           </div>
           <div className="space-y-2">
             {filtered.map((v) => (
               <div
                 key={v.id}
-                className={`bg-orange-500/5 border rounded-xl p-4 ${v.risk === 'High' ? 'border-red-500/20' : 'border-orange-500/10'}`}
+                className={`bg-[#c9b787]/5 border rounded-xl p-4 ${v.risk === 'High' ? 'border-[#f5f5f5]/20' : 'border-[#c9b787]/10'}`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-xs text-orange-50">{v.name}</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded border border-orange-500/20 text-orange-400/60">
+                      <span className="font-semibold text-xs text-[#c9b787]">{v.name}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded border border-[#c9b787]/20 text-[#c9b787]/60">
                         {v.category}
                       </span>
                       <span
@@ -178,13 +178,13 @@ export default function VendorRisk() {
                       >
                         {v.risk} Risk
                       </span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded border border-orange-500/10 text-orange-400/40">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded border border-[#c9b787]/10 text-[#c9b787]/40">
                         Tier: {v.tier}
                       </span>
                     </div>
                     <div className="flex items-center gap-3 mt-1.5 text-[10px]">
                       <span
-                        className={`flex items-center gap-1 ${v.soc2 ? 'text-emerald-400' : 'text-red-400'}`}
+                        className={`flex items-center gap-1 ${v.soc2 ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}
                       >
                         {v.soc2 ? (
                           <CheckCircle className="w-2.5 h-2.5" />
@@ -194,7 +194,7 @@ export default function VendorRisk() {
                         SOC 2
                       </span>
                       <span
-                        className={`flex items-center gap-1 ${v.iso27001 ? 'text-emerald-400' : 'text-orange-400/40'}`}
+                        className={`flex items-center gap-1 ${v.iso27001 ? 'text-[#c9b787]' : 'text-[#c9b787]/40'}`}
                       >
                         {v.iso27001 ? (
                           <CheckCircle className="w-2.5 h-2.5" />
@@ -203,17 +203,17 @@ export default function VendorRisk() {
                         )}
                         ISO 27001
                       </span>
-                      <span className="text-orange-400/40 flex items-center gap-1">
+                      <span className="text-[#c9b787]/40 flex items-center gap-1">
                         <Clock className="w-2.5 h-2.5" />
                         Assessed: {v.lastAssessed}
                       </span>
-                      {v.issues > 0 && <span className="text-red-400">{v.issues} open issues</span>}
+                      {v.issues > 0 && <span className="text-[#f5f5f5]">{v.issues} open issues</span>}
                     </div>
                     <div className="flex flex-wrap gap-1 mt-1.5">
                       {v.dataTypes.map((d) => (
                         <span
                           key={d}
-                          className="text-[10px] bg-orange-500/5 px-1.5 py-0.5 rounded text-orange-400/40 border border-orange-500/10"
+                          className="text-[10px] bg-[#c9b787]/5 px-1.5 py-0.5 rounded text-[#c9b787]/40 border border-[#c9b787]/10"
                         >
                           {d}
                         </span>
@@ -222,11 +222,11 @@ export default function VendorRisk() {
                   </div>
                   <div className="text-right shrink-0">
                     <p
-                      className={`text-xl font-bold font-display ${v.securityScore >= 85 ? 'text-emerald-400' : v.securityScore >= 70 ? 'text-amber-400' : 'text-red-400'}`}
+                      className={`text-xl font-bold font-display ${v.securityScore >= 85 ? 'text-[#c9b787]' : v.securityScore >= 70 ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}
                     >
                       {v.securityScore}
                     </p>
-                    <p className="text-[10px] text-orange-400/40">Security Score</p>
+                    <p className="text-[10px] text-[#c9b787]/40">Security Score</p>
                   </div>
                 </div>
               </div>
@@ -235,24 +235,24 @@ export default function VendorRisk() {
         </div>
 
         <div className="space-y-3">
-          <div className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-4">
-            <h3 className="text-xs font-semibold text-orange-50 mb-3">Assessment Queue</h3>
+          <div className="bg-[#c9b787]/5 border border-[#c9b787]/10 rounded-xl p-4">
+            <h3 className="text-xs font-semibold text-[#c9b787] mb-3">Assessment Queue</h3>
             <div className="space-y-2.5">
               {assessmentQueue.map((a) => (
                 <div
                   key={a.vendor}
-                  className="p-3 rounded-lg bg-orange-500/5 border border-orange-500/10"
+                  className="p-3 rounded-lg bg-[#c9b787]/5 border border-[#c9b787]/10"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-orange-50">{a.vendor}</span>
+                    <span className="text-xs font-semibold text-[#c9b787]">{a.vendor}</span>
                     <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded border ${a.priority === 'High' ? 'text-red-400 bg-red-500/10 border-red-500/20' : 'text-amber-400 bg-amber-500/10 border-amber-500/20'}`}
+                      className={`text-[10px] px-1.5 py-0.5 rounded border ${a.priority === 'High' ? 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20' : 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20'}`}
                     >
                       {a.priority}
                     </span>
                   </div>
-                  <p className="text-[10px] text-orange-400/40 mt-1">{a.reason}</p>
-                  <p className="text-[10px] text-sky-400 mt-0.5 flex items-center gap-1">
+                  <p className="text-[10px] text-[#c9b787]/40 mt-1">{a.reason}</p>
+                  <p className="text-[10px] text-[#8a8a8a] mt-0.5 flex items-center gap-1">
                     <Clock className="w-2.5 h-2.5" />
                     Due: {a.due}
                   </p>

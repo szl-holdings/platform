@@ -48,7 +48,7 @@ const AGENTS: HuntAgent[] = [
     novelPatterns: 23,
     learningScore: 94,
     currentHunt: 'HUNT-0041: Unusual WMI subscription activity in Finance VLAN',
-    color: '#ef4444',
+    color: '#f5f5f5',
   },
   {
     id: 'HA-002',
@@ -59,7 +59,7 @@ const AGENTS: HuntAgent[] = [
     novelPatterns: 17,
     learningScore: 91,
     currentHunt: 'HUNT-0040: DNS beacon analysis across 3 suspect hosts',
-    color: '#8b5cf6',
+    color: '#8a8a8a',
   },
   {
     id: 'HA-003',
@@ -70,7 +70,7 @@ const AGENTS: HuntAgent[] = [
     novelPatterns: 11,
     learningScore: 87,
     currentHunt: 'HUNT-0039: Generating hypotheses from Kerberoasting indicators',
-    color: '#3b82f6',
+    color: '#c9b787',
   },
   {
     id: 'HA-004',
@@ -80,7 +80,7 @@ const AGENTS: HuntAgent[] = [
     huntsCompleted: 45,
     novelPatterns: 8,
     learningScore: 83,
-    color: '#10b981',
+    color: '#c9b787',
   },
   {
     id: 'HA-005',
@@ -91,7 +91,7 @@ const AGENTS: HuntAgent[] = [
     novelPatterns: 5,
     learningScore: 79,
     currentHunt: 'HUNT-0038: Generating report on NPM dependency anomalies',
-    color: '#f97316',
+    color: '#c9b787',
   },
 ];
 
@@ -180,23 +180,23 @@ const HUNTS: HuntReport[] = [
 
 const statusConfig: Record<string, string> = {
   idle: 'text-zinc-400',
-  hypothesizing: 'text-blue-400',
-  querying: 'text-amber-400',
-  analyzing: 'text-purple-400',
-  reporting: 'text-emerald-400',
+  hypothesizing: 'text-[#c9b787]',
+  querying: 'text-[#c9b787]',
+  analyzing: 'text-[#8a8a8a]',
+  reporting: 'text-[#c9b787]',
 };
 
 const huntStatusColor: Record<string, string> = {
-  active: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-  completed: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
-  escalated: 'text-red-400 bg-red-500/10 border-red-500/30',
+  active: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  completed: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  escalated: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/30',
 };
 
 const severityColor: Record<string, string> = {
-  critical: 'text-red-400',
-  high: 'text-orange-400',
-  medium: 'text-amber-400',
-  low: 'text-blue-400',
+  critical: 'text-[#f5f5f5]',
+  high: 'text-[#c9b787]',
+  medium: 'text-[#c9b787]',
+  low: 'text-[#c9b787]',
 };
 
 export default function HuntAgents() {
@@ -218,7 +218,7 @@ export default function HuntAgents() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Search className="w-5 h-5 text-emerald-400" />
+            <Search className="w-5 h-5 text-[#c9b787]" />
             <h1 className="text-lg font-semibold text-white">Threat Hunters</h1>
           </div>
           <p className="text-xs text-zinc-500">
@@ -229,7 +229,7 @@ export default function HuntAgents() {
         <button
           onClick={handleLaunchHunt}
           disabled={launching}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-medium hover:bg-emerald-500/25 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#c9b787]/15 border border-[#c9b787]/30 text-[#c9b787] text-xs font-medium hover:bg-[#c9b787]/25 transition-colors disabled:opacity-50"
         >
           {launching ? (
             <>
@@ -250,28 +250,28 @@ export default function HuntAgents() {
             label: 'Active Hunts',
             value: HUNTS.filter((h) => h.status === 'active').length,
             sub: 'running in parallel',
-            color: '#f59e0b',
+            color: '#c9b787',
             icon: Search,
           },
           {
             label: 'Hunts Completed',
             value: HUNTS.filter((h) => h.status !== 'active').length,
             sub: 'this month',
-            color: '#10b981',
+            color: '#c9b787',
             icon: CheckCircle,
           },
           {
             label: 'Novel Patterns',
             value: AGENTS.reduce((s, a) => s + a.novelPatterns, 0),
             sub: 'unique TTPs identified',
-            color: '#8b5cf6',
+            color: '#8a8a8a',
             icon: Brain,
           },
           {
             label: 'Avg Detection Time',
             value: '3h 42m',
             sub: 'vs 11 days industry avg',
-            color: '#3b82f6',
+            color: '#c9b787',
             icon: Clock,
           },
         ].map((m) => {
@@ -322,7 +322,7 @@ export default function HuntAgents() {
                 )}
                 <div className="flex items-center gap-4 text-[10px] text-zinc-500">
                   <span>{agent.huntsCompleted} hunts</span>
-                  <span className="text-purple-400">{agent.novelPatterns} novel patterns</span>
+                  <span className="text-[#8a8a8a]">{agent.novelPatterns} novel patterns</span>
                 </div>
                 <div className="mt-1.5">
                   <div className="flex items-center justify-between text-[10px] mb-0.5">
@@ -352,7 +352,7 @@ export default function HuntAgents() {
                 icon={CheckCircle}
                 headline="No hunts in flight"
                 description="Hunt agents are idle — launch a new hunt to formulate fresh hypotheses."
-                accentColor="#10b981"
+                accentColor="#c9b787"
                 compact
               />
             )}
@@ -363,7 +363,7 @@ export default function HuntAgents() {
                 className={cn(
                   'w-full rounded-xl border p-3 text-left transition-all',
                   selectedHunt?.id === hunt.id
-                    ? 'border-emerald-500/30 bg-emerald-500/5'
+                    ? 'border-[#c9b787]/30 bg-[#c9b787]/5'
                     : 'border-white/8 bg-white/3 hover:bg-white/5',
                 )}
               >
@@ -455,7 +455,7 @@ export default function HuntAgents() {
                   <div className="text-[10px] text-zinc-500 uppercase tracking-wide mb-1">
                     IOCs Found
                   </div>
-                  <div className="text-xs text-red-400 font-medium">{selectedHunt.iocCount}</div>
+                  <div className="text-xs text-[#f5f5f5] font-medium">{selectedHunt.iocCount}</div>
                 </div>
                 <div>
                   <div className="text-[10px] text-zinc-500 uppercase tracking-wide mb-1">
@@ -490,7 +490,7 @@ export default function HuntAgents() {
               <div className="flex gap-2">
                 <button
                   onClick={() => toast.success('Hunt escalated to Incident Response team')}
-                  className="flex-1 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs hover:bg-red-500/20 transition-colors"
+                  className="flex-1 py-1.5 rounded-lg bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 text-[#f5f5f5] text-xs hover:bg-[#f5f5f5]/20 transition-colors"
                 >
                   Escalate
                 </button>

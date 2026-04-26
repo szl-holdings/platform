@@ -54,7 +54,7 @@ const SEV_STYLE = {
     badgeText: 'rgba(255,255,255,0.4)',
   },
   warning: { bg: '#c08a2c06', border: '#c08a2c25', badge: '#c08a2c20', badgeText: '#c08a2c' },
-  critical: { bg: '#9b1c1c10', border: '#9b1c1c40', badge: '#9b1c1c25', badgeText: '#f87171' },
+  critical: { bg: '#5e5e5e10', border: '#5e5e5e40', badge: '#5e5e5e25', badgeText: '#f5f5f5' },
 };
 
 function EventCard({ event }: { event: AegisWhatChangedEvent }) {
@@ -91,7 +91,7 @@ function EventCard({ event }: { event: AegisWhatChangedEvent }) {
             style={{
               color:
                 event.severity === 'critical'
-                  ? '#f87171'
+                  ? '#f5f5f5'
                   : event.severity === 'warning'
                     ? '#c08a2c'
                     : 'rgba(255,255,255,0.75)',
@@ -165,12 +165,12 @@ export default function AegisWhatChanged() {
         </div>
         <div
           className="rounded-xl border p-4"
-          style={{ background: '#9b1c1c08', borderColor: '#9b1c1c30' }}
+          style={{ background: '#5e5e5e08', borderColor: '#5e5e5e30' }}
         >
-          <div className="text-xs mb-1" style={{ color: '#f87171' }}>
+          <div className="text-xs mb-1" style={{ color: '#f5f5f5' }}>
             Critical
           </div>
-          <div className="text-2xl font-bold" style={{ color: '#f87171' }}>
+          <div className="text-2xl font-bold" style={{ color: '#f5f5f5' }}>
             {counts.critical}
           </div>
         </div>

@@ -104,7 +104,7 @@ export async function ingestCounselFiling(
 }
 
 /**
- * Reference integration: SEXTANT Vessels — insurance exception document ingestion.
+ * Reference integration: Vessels Vessels — insurance exception document ingestion.
  * Used by the Vessels lane for marine insurance claim and exception processing.
  */
 export async function ingestVesselsInsuranceException(
@@ -147,7 +147,7 @@ export async function ingestVesselsInsuranceException(
 }
 
 /**
- * Reference integration: DOMAINE Terra — distress filing ingestion.
+ * Reference integration: Terra Terra — distress filing ingestion.
  * Used by the Terra lane for distressed asset or legal filing processing.
  */
 export async function ingestTerraDistressFiling(

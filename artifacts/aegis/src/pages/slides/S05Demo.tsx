@@ -273,7 +273,7 @@ export default function S05Demo() {
                       padding: '0.3vh 0.7vw',
                       fontFamily: "'Inter', sans-serif",
                       fontSize: '0.75vw',
-                      color: '#4ade80',
+                      color: '#c9b787',
                       fontWeight: 600,
                     }}
                   >
@@ -408,7 +408,7 @@ export default function S05Demo() {
                     style={{
                       fontFamily: "'Inter', sans-serif",
                       fontSize: '0.85vw',
-                      color: '#4ade80',
+                      color: '#c9b787',
                       fontWeight: 600,
                     }}
                   >
@@ -549,7 +549,7 @@ export default function S05Demo() {
                   fontWeight: 600,
                 }}
               >
-                Governed Autonomy — SZL Holdings
+                Governed Autonomy — Aegis
               </div>
             </div>
           </div>

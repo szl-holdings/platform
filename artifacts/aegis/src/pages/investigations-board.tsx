@@ -203,33 +203,33 @@ const TYPE_ICONS: Record<string, typeof Search> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  alert: '#f97316',
-  action: '#3b82f6',
-  evidence: '#8b5cf6',
-  signal: '#ef4444',
-  hypothesis: '#f59e0b',
-  note: '#10b981',
+  alert: '#c9b787',
+  action: '#c9b787',
+  evidence: '#8a8a8a',
+  signal: '#f5f5f5',
+  hypothesis: '#c9b787',
+  note: '#c9b787',
 };
 
 const ENTITY_COLORS: Record<string, string> = {
-  host: '#3b82f6',
-  identity: '#f59e0b',
-  network: '#ef4444',
-  threat: '#8b5cf6',
-  incident: '#ef4444',
+  host: '#c9b787',
+  identity: '#c9b787',
+  network: '#f5f5f5',
+  threat: '#8a8a8a',
+  incident: '#f5f5f5',
 };
 
 const SEV_COLORS: Record<string, string> = {
-  critical: 'text-red-400 border-red-500/25 bg-red-500/10',
-  high: 'text-orange-400 border-orange-500/25 bg-orange-500/10',
-  medium: 'text-yellow-400 border-yellow-500/25 bg-yellow-500/10',
-  low: 'text-blue-400 border-blue-500/25 bg-blue-500/10',
+  critical: 'text-[#f5f5f5] border-[#f5f5f5]/25 bg-[#f5f5f5]/10',
+  high: 'text-[#c9b787] border-[#c9b787]/25 bg-[#c9b787]/10',
+  medium: 'text-[#c9b787] border-[#c9b787]/25 bg-[#c9b787]/10',
+  low: 'text-[#c9b787] border-[#c9b787]/25 bg-[#c9b787]/10',
 };
 
 const GATE_STYLES: Record<string, string> = {
-  approval_required: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
-  propose_only: 'bg-blue-500/10 border-blue-500/20 text-blue-400',
-  approved_execute: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+  approval_required: 'bg-[#c9b787]/10 border-[#c9b787]/20 text-[#c9b787]',
+  propose_only: 'bg-[#c9b787]/10 border-[#c9b787]/20 text-[#c9b787]',
+  approved_execute: 'bg-[#c9b787]/10 border-[#c9b787]/20 text-[#c9b787]',
 };
 
 interface LinkedIncident {
@@ -458,24 +458,24 @@ export default function InvestigationsBoard() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[9px] font-mono text-white/40">{displayCase.id}</span>
-              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-red-500/30 bg-red-500/10 text-red-400 uppercase">
+              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#f5f5f5]/30 bg-[#f5f5f5]/10 text-[#f5f5f5] uppercase">
                 {displayCase.status}
               </span>
-              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-amber-500/30 bg-amber-500/10 text-amber-400 uppercase">
+              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/30 bg-[#c9b787]/10 text-[#c9b787] uppercase">
                 {(displayCase.priority ?? 'p1_critical').replace('_', ' ')}
               </span>
-              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/5 text-emerald-400/70">
+              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/30 bg-[#c9b787]/5 text-[#c9b787]/70">
                 {displayCase.envLabel}
               </span>
-              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-blue-500/30 bg-blue-500/5 text-blue-400/70">
+              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/30 bg-[#c9b787]/5 text-[#c9b787]/70">
                 {displayCase.tenantLabel}
               </span>
-              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-red-500/30 bg-red-500/5 text-red-400/70 flex items-center gap-0.5">
+              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#f5f5f5]/30 bg-[#f5f5f5]/5 text-[#f5f5f5]/70 flex items-center gap-0.5">
                 <Lock className="w-2 h-2" />
                 {displayCase.sensitivityLabel}
               </span>
               {usingLive && (
-                <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-blue-500/20 bg-blue-500/5 text-blue-400/70">
+                <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/20 bg-[#c9b787]/5 text-[#c9b787]/70">
                   LIVE
                 </span>
               )}
@@ -491,7 +491,7 @@ export default function InvestigationsBoard() {
               {liveCases.length > 1 && (
                 <>
                   <span>·</span>
-                  <span className="text-blue-400">{liveCases.length} open cases</span>
+                  <span className="text-[#c9b787]">{liveCases.length} open cases</span>
                 </>
               )}
             </div>
@@ -510,7 +510,7 @@ export default function InvestigationsBoard() {
                 ))}
               </select>
             )}
-            <button className="px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-300 hover:bg-blue-500/20 transition-colors">
+            <button className="px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787] hover:bg-[#c9b787]/20 transition-colors">
               Decision Console
             </button>
             <button className="px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 transition-colors">
@@ -528,7 +528,7 @@ export default function InvestigationsBoard() {
             className={cn(
               'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all',
               activeSection === id
-                ? 'bg-blue-500/15 text-blue-300 border border-blue-500/20'
+                ? 'bg-[#c9b787]/15 text-[#c9b787] border border-[#c9b787]/20'
                 : 'text-white/50 hover:text-white/80 hover:bg-white/5',
             )}
           >
@@ -546,7 +546,7 @@ export default function InvestigationsBoard() {
                 icon={CheckCircle2}
                 headline="No timeline activity yet"
                 description="No events, evidence, or analyst notes have been recorded for this case."
-                accentColor="#10b981"
+                accentColor="#c9b787"
                 compact
               />
             )}
@@ -610,7 +610,7 @@ export default function InvestigationsBoard() {
                 <button
                   onClick={handleAddNote}
                   disabled={addNoteMutation.isPending}
-                  className="px-3 py-1 rounded text-[10px] font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-300 hover:bg-blue-500/20 transition-colors disabled:opacity-40"
+                  className="px-3 py-1 rounded text-[10px] font-semibold bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787] hover:bg-[#c9b787]/20 transition-colors disabled:opacity-40"
                 >
                   {addNoteMutation.isPending ? 'Saving...' : 'Add Note'}
                 </button>
@@ -626,7 +626,7 @@ export default function InvestigationsBoard() {
                 icon={CheckCircle2}
                 headline="No entities linked yet"
                 description="Hosts, identities, and network indicators will appear here as evidence is collected."
-                accentColor="#10b981"
+                accentColor="#c9b787"
                 compact
               />
             )}
@@ -637,11 +637,11 @@ export default function InvestigationsBoard() {
               >
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: `${ENTITY_COLORS[ent.type] ?? '#3b82f6'}18` }}
+                  style={{ backgroundColor: `${ENTITY_COLORS[ent.type] ?? '#c9b787'}18` }}
                 >
                   <Network
                     className="w-4 h-4"
-                    style={{ color: ENTITY_COLORS[ent.type] ?? '#3b82f6' }}
+                    style={{ color: ENTITY_COLORS[ent.type] ?? '#c9b787' }}
                   />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -673,7 +673,7 @@ export default function InvestigationsBoard() {
                 icon={CheckCircle2}
                 headline="No correlated signals"
                 description="Detection-engine signals tied to this case will appear here as they fire."
-                accentColor="#10b981"
+                accentColor="#c9b787"
                 compact
               />
             )}
@@ -685,7 +685,7 @@ export default function InvestigationsBoard() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-violet-500/10 border border-violet-500/20 text-violet-300">
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#8a8a8a]/10 border border-[#8a8a8a]/20 text-[#8a8a8a]">
                         {sig.type}
                       </span>
                       <span className="text-[9px] font-mono text-white/40">{sig.source}</span>
@@ -714,7 +714,7 @@ export default function InvestigationsBoard() {
                 icon={CheckCircle2}
                 headline="No evidence collected yet"
                 description="Captures, log artifacts, and exhibits added to this case will be listed here."
-                accentColor="#10b981"
+                accentColor="#c9b787"
                 compact
               />
             )}
@@ -726,21 +726,21 @@ export default function InvestigationsBoard() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1.5">
-                      <FileText className="w-3.5 h-3.5 text-violet-400" />
+                      <FileText className="w-3.5 h-3.5 text-[#8a8a8a]" />
                       <span className="text-xs font-mono text-white/90">{ev.name}</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-white/10 text-white/40">
                         {ev.type}
                       </span>
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-emerald-500/20 bg-emerald-500/5 text-emerald-400/70">
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/20 bg-[#c9b787]/5 text-[#c9b787]/70">
                         trust: {ev.trustLevel}
                       </span>
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-red-500/20 bg-red-500/5 text-red-400/70 flex items-center gap-0.5">
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#f5f5f5]/20 bg-[#f5f5f5]/5 text-[#f5f5f5]/70 flex items-center gap-0.5">
                         <Lock className="w-2 h-2" />
                         {ev.sensitivity}
                       </span>
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-blue-500/20 bg-blue-500/5 text-blue-400/70">
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/20 bg-[#c9b787]/5 text-[#c9b787]/70">
                         retain: {ev.retentionClass}
                       </span>
                     </div>
@@ -771,7 +771,7 @@ export default function InvestigationsBoard() {
                     <Lightbulb
                       className={cn(
                         'w-4 h-4 mt-0.5 shrink-0',
-                        hyp.status === 'active' ? 'text-yellow-400' : 'text-white/25',
+                        hyp.status === 'active' ? 'text-[#c9b787]' : 'text-white/25',
                       )}
                     />
                     <div>
@@ -784,11 +784,11 @@ export default function InvestigationsBoard() {
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 rounded-full bg-white/10 w-20 overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-emerald-500"
+                        className="h-full rounded-full bg-[#c9b787]"
                         style={{ width: `${hyp.confidence}%` }}
                       />
                     </div>
-                    <span className="text-xs font-mono text-emerald-400 tabular-nums">
+                    <span className="text-xs font-mono text-[#c9b787] tabular-nums">
                       {hyp.confidence}%
                     </span>
                   </div>
@@ -826,7 +826,7 @@ export default function InvestigationsBoard() {
                       </span>
                     </div>
                   </div>
-                  <button className="px-3 py-1 rounded text-[10px] font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-300 hover:bg-blue-500/20 transition-colors shrink-0">
+                  <button className="px-3 py-1 rounded text-[10px] font-semibold bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787] hover:bg-[#c9b787]/20 transition-colors shrink-0">
                     Submit
                   </button>
                 </div>

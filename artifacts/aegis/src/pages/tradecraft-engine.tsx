@@ -109,49 +109,49 @@ const DECISION_TYPE_CONFIG: Record<
   TriageDecision: {
     label: 'Triage Decision',
     icon: Zap,
-    color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+    color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
     policyClass: 'triage_decision',
   },
   IncidentAssessment: {
     label: 'Incident Assessment',
     icon: AlertTriangle,
-    color: 'text-red-400 bg-red-500/10 border-red-500/20',
+    color: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20',
     policyClass: 'case_hypothesis',
   },
   RiskDecision: {
     label: 'Risk Decision',
     icon: Shield,
-    color: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
+    color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
     policyClass: 'risk_assessment',
   },
   EscalationDecision: {
     label: 'Escalation Decision',
     icon: TrendingUp,
-    color: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+    color: 'text-[#8a8a8a] bg-[#8a8a8a]/10 border-[#8a8a8a]/20',
     policyClass: 'escalation_recommendation',
   },
   ApprovalRecommendation: {
     label: 'Approval Rec.',
     icon: CheckCircle,
-    color: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+    color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
     policyClass: 'approval_recommendation',
   },
   ResponsePlan: {
     label: 'Response Plan',
     icon: Target,
-    color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+    color: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
     policyClass: 'response_plan',
   },
   ExecutiveBrief: {
     label: 'Executive Brief',
     icon: BookOpen,
-    color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
+    color: 'text-[#8a8a8a] bg-[#8a8a8a]/10 border-[#8a8a8a]/20',
     policyClass: 'executive_brief',
   },
   ControlGapFinding: {
     label: 'Control Gap',
     icon: Lock,
-    color: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+    color: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-rose-500/20',
     policyClass: 'control_gap_summary',
   },
 };
@@ -201,24 +201,24 @@ const _ANALYTIC_MODES: Array<{
 ];
 
 const CONFIDENCE_COLORS: Record<string, string> = {
-  high: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-  moderate: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-  low: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
-  insufficient: 'text-red-400 bg-red-500/10 border-red-500/20',
+  high: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+  moderate: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+  low: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+  insufficient: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20',
 };
 
 const IMPACT_COLORS: Record<string, string> = {
-  critical: 'text-red-400',
-  high: 'text-orange-400',
-  medium: 'text-amber-400',
-  low: 'text-blue-400',
+  critical: 'text-[#f5f5f5]',
+  high: 'text-[#c9b787]',
+  medium: 'text-[#c9b787]',
+  low: 'text-[#c9b787]',
   negligible: 'text-zinc-400',
 };
 
 const FRESHNESS_ICONS: Record<string, { icon: LucideIcon; color: string }> = {
-  current: { icon: CheckCircle, color: 'text-emerald-400' },
-  recent: { icon: Clock, color: 'text-amber-400' },
-  stale: { icon: TrendingDown, color: 'text-orange-400' },
+  current: { icon: CheckCircle, color: 'text-[#c9b787]' },
+  recent: { icon: Clock, color: 'text-[#c9b787]' },
+  stale: { icon: TrendingDown, color: 'text-[#c9b787]' },
   unknown: { icon: Minus, color: 'text-zinc-500' },
 };
 
@@ -241,12 +241,12 @@ function ConfidenceMeter({ score, label }: { score: number; label: string }) {
   const pct = Math.round(score * 100);
   const color =
     label === 'high'
-      ? 'bg-emerald-500'
+      ? 'bg-[#c9b787]'
       : label === 'moderate'
-        ? 'bg-amber-500'
+        ? 'bg-[#c9b787]'
         : label === 'low'
-          ? 'bg-orange-500'
-          : 'bg-red-500';
+          ? 'bg-[#c9b787]'
+          : 'bg-[#f5f5f5]';
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
@@ -317,17 +317,17 @@ function EvidenceDrawer({
           <p className="text-[10px] text-muted-foreground italic">{decision.confidenceStatement}</p>
         )}
         {decision.approvalRequired && (
-          <div className="flex items-center gap-2 px-2 py-1.5 rounded bg-amber-500/10 border border-amber-500/20">
-            <CheckCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-            <span className="text-[10px] text-amber-300">
+          <div className="flex items-center gap-2 px-2 py-1.5 rounded bg-[#c9b787]/10 border border-[#c9b787]/20">
+            <CheckCircle className="w-3.5 h-3.5 text-[#c9b787] shrink-0" />
+            <span className="text-[10px] text-[#c9b787]">
               {decision.approvalReason || 'Approval required before action'}
             </span>
           </div>
         )}
         {decision.humanReviewRequired && (
-          <div className="flex items-center gap-2 px-2 py-1.5 rounded bg-blue-500/10 border border-blue-500/20">
-            <Eye className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-            <span className="text-[10px] text-blue-300">
+          <div className="flex items-center gap-2 px-2 py-1.5 rounded bg-[#c9b787]/10 border border-[#c9b787]/20">
+            <Eye className="w-3.5 h-3.5 text-[#c9b787] shrink-0" />
+            <span className="text-[10px] text-[#c9b787]">
               {decision.humanReviewReason || 'Human analyst review required'}
             </span>
           </div>
@@ -342,7 +342,7 @@ function EvidenceDrawer({
             className={cn(
               'flex-1 px-2 py-2 text-[10px] font-mono uppercase tracking-wider transition-colors',
               activeTab === tab.id
-                ? 'text-zinc-100 border-b-2 border-blue-500'
+                ? 'text-zinc-100 border-b-2 border-[#c9b787]'
                 : 'text-muted-foreground hover:text-zinc-300',
             )}
           >
@@ -430,9 +430,9 @@ function EvidenceDrawer({
                 className={cn(
                   'p-3 rounded-lg border space-y-1.5',
                   a.vulnerability === 'critical'
-                    ? 'bg-red-500/5 border-red-500/20'
+                    ? 'bg-[#f5f5f5]/5 border-[#f5f5f5]/20'
                     : a.vulnerability === 'high'
-                      ? 'bg-orange-500/5 border-orange-500/20'
+                      ? 'bg-[#c9b787]/5 border-[#c9b787]/20'
                       : 'bg-zinc-900 border-zinc-800',
                 )}
               >
@@ -445,9 +445,9 @@ function EvidenceDrawer({
                     className={cn(
                       'text-[8px] px-1.5 py-0 shrink-0',
                       a.vulnerability === 'critical'
-                        ? 'text-red-400 border-red-500/30'
+                        ? 'text-[#f5f5f5] border-[#f5f5f5]/30'
                         : a.vulnerability === 'high'
-                          ? 'text-orange-400 border-orange-500/30'
+                          ? 'text-[#c9b787] border-[#c9b787]/30'
                           : '',
                     )}
                   >
@@ -484,9 +484,9 @@ function EvidenceDrawer({
                     className={cn(
                       'text-[8px] px-1.5 py-0 shrink-0',
                       alt.likelihood === 'high'
-                        ? 'text-red-400 border-red-500/30'
+                        ? 'text-[#f5f5f5] border-[#f5f5f5]/30'
                         : alt.likelihood === 'medium'
-                          ? 'text-amber-400 border-amber-500/30'
+                          ? 'text-[#c9b787] border-[#c9b787]/30'
                           : 'text-zinc-400 border-zinc-700',
                     )}
                   >
@@ -499,7 +499,7 @@ function EvidenceDrawer({
                 )}
                 {Array.isArray(alt.evidenceFor) && alt.evidenceFor.length > 0 && (
                   <div>
-                    <span className="text-[9px] font-mono text-emerald-400/70 uppercase">For:</span>
+                    <span className="text-[9px] font-mono text-[#c9b787]/70 uppercase">For:</span>
                     <ul className="mt-0.5 space-y-0.5">
                       {alt.evidenceFor.map((e: string, i: number) => (
                         <li key={i} className="text-[9px] text-muted-foreground">
@@ -511,7 +511,7 @@ function EvidenceDrawer({
                 )}
                 {Array.isArray(alt.evidenceAgainst) && alt.evidenceAgainst.length > 0 && (
                   <div>
-                    <span className="text-[9px] font-mono text-red-400/70 uppercase">Against:</span>
+                    <span className="text-[9px] font-mono text-[#f5f5f5]/70 uppercase">Against:</span>
                     <ul className="mt-0.5 space-y-0.5">
                       {alt.evidenceAgainst.map((e: string, i: number) => (
                         <li key={i} className="text-[9px] text-muted-foreground">
@@ -538,7 +538,7 @@ function EvidenceDrawer({
                   key={idx}
                   className="flex items-start gap-2 p-2.5 rounded bg-zinc-900 border border-zinc-800"
                 >
-                  <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-3 h-3 text-[#c9b787] shrink-0 mt-0.5" />
                   <span className="text-[10px] text-zinc-300">{gap}</span>
                 </div>
               ))}
@@ -606,7 +606,7 @@ function DecisionCard({
           <div className="flex items-center gap-1.5 shrink-0">
             {decision.approvalRequired && (
               <div
-                className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"
+                className="w-2 h-2 rounded-full bg-[#c9b787] animate-pulse"
                 title="Approval Required"
               />
             )}
@@ -635,12 +635,12 @@ function DecisionCard({
             className={cn(
               'h-full rounded-full',
               decision.confidenceLabel === 'high'
-                ? 'bg-emerald-500'
+                ? 'bg-[#c9b787]'
                 : decision.confidenceLabel === 'moderate'
-                  ? 'bg-amber-500'
+                  ? 'bg-[#c9b787]'
                   : decision.confidenceLabel === 'low'
-                    ? 'bg-orange-500'
-                    : 'bg-red-500',
+                    ? 'bg-[#c9b787]'
+                    : 'bg-[#f5f5f5]',
             )}
             style={{ width: `${Math.round(confScore * 100)}%` }}
           />
@@ -699,7 +699,7 @@ function DecisionCard({
         <div className="w-px h-4 bg-zinc-800" />
         <button
           onClick={onViewEvidence}
-          className="flex-1 flex items-center justify-center gap-1 py-2 text-[10px] text-blue-400 hover:text-blue-300 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1 py-2 text-[10px] text-[#c9b787] hover:text-[#c9b787] transition-colors"
         >
           <Eye className="w-3 h-3" /> Evidence Drawer
         </button>
@@ -794,13 +794,13 @@ function NotebookPanel({ caseId, incidentId }: { caseId?: string; incidentId?: s
   });
 
   const NOTE_TYPE_COLORS: Record<string, string> = {
-    observation: 'text-blue-400',
-    hypothesis: 'text-purple-400',
-    assumption: 'text-amber-400',
-    gap: 'text-orange-400',
-    dissent: 'text-red-400',
-    key_judgment: 'text-emerald-400',
-    evidence_note: 'text-cyan-400',
+    observation: 'text-[#c9b787]',
+    hypothesis: 'text-[#8a8a8a]',
+    assumption: 'text-[#c9b787]',
+    gap: 'text-[#c9b787]',
+    dissent: 'text-[#f5f5f5]',
+    key_judgment: 'text-[#c9b787]',
+    evidence_note: 'text-[#8a8a8a]',
     general: 'text-zinc-400',
   };
 
@@ -818,13 +818,13 @@ function NotebookPanel({ caseId, incidentId }: { caseId?: string; incidentId?: s
               className={cn(
                 'p-3 rounded-lg border',
                 note.isKey
-                  ? 'bg-emerald-500/5 border-emerald-500/20'
+                  ? 'bg-[#c9b787]/5 border-[#c9b787]/20'
                   : 'bg-zinc-900 border-zinc-800',
               )}
             >
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-1.5">
-                  {note.isKey && <Star className="w-3 h-3 text-emerald-400" />}
+                  {note.isKey && <Star className="w-3 h-3 text-[#c9b787]" />}
                   <span
                     className={cn(
                       'text-[9px] font-mono uppercase tracking-wider font-bold',
@@ -976,28 +976,28 @@ export default function TradecraftEnginePage() {
       label: 'Triage Analysis',
       description: 'Rapid classification and priority routing with explicit confidence bounds',
       icon: Zap,
-      color: 'text-amber-400',
+      color: 'text-[#c9b787]',
     },
     {
       mode: 'incident_hypothesis',
       label: 'Incident Hypothesis (ACH)',
       description: 'Analysis of Competing Hypotheses with evidence-for/against for each',
       icon: FlaskConical,
-      color: 'text-purple-400',
+      color: 'text-[#8a8a8a]',
     },
     {
       mode: 'adversary_threat_pattern',
       label: 'Adversary Threat Pattern',
       description: 'Diamond model, TTP mapping, attribution confidence with explicit uncertainty',
       icon: Network,
-      color: 'text-red-400',
+      color: 'text-[#f5f5f5]',
     },
     {
       mode: 'executive_summary',
       label: 'Executive Brief',
       description: 'Decision-ready brief with key findings, sourced recommendations, risk summary',
       icon: BookOpen,
-      color: 'text-cyan-400',
+      color: 'text-[#8a8a8a]',
     },
     {
       mode: 'alternative_analysis',
@@ -1005,7 +1005,7 @@ export default function TradecraftEnginePage() {
       description:
         "Devil's advocacy: stress-test assumptions, surface mindset biases, rate assessment resilience",
       icon: Brain,
-      color: 'text-blue-400',
+      color: 'text-[#c9b787]',
     },
     {
       mode: 'confidence_challenge',
@@ -1013,7 +1013,7 @@ export default function TradecraftEnginePage() {
       description:
         'Independent confidence audit: score evidence quality, source diversity, logical coherence',
       icon: BarChart3,
-      color: 'text-emerald-400',
+      color: 'text-[#c9b787]',
     },
   ];
 
@@ -1030,8 +1030,8 @@ export default function TradecraftEnginePage() {
       <div className="px-6 py-5 border-b border-zinc-800">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-500/15 border border-blue-500/30">
-              <Brain className="w-4.5 h-4.5 text-blue-400" />
+            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#c9b787]/15 border border-[#c9b787]/30">
+              <Brain className="w-4.5 h-4.5 text-[#c9b787]" />
             </div>
             <div>
               <h1 className="text-lg font-bold text-zinc-100">Tradecraft Engine</h1>
@@ -1059,10 +1059,10 @@ export default function TradecraftEnginePage() {
         <div className="grid grid-cols-5 gap-3">
           {[
             { label: 'Total Decisions', value: stats.total, color: 'text-zinc-100' },
-            { label: 'High Confidence', value: stats.highConfidence, color: 'text-emerald-400' },
-            { label: 'Critical Impact', value: stats.critical, color: 'text-red-400' },
-            { label: 'Approval Required', value: stats.approvalRequired, color: 'text-amber-400' },
-            { label: 'Human Review', value: stats.humanReview, color: 'text-blue-400' },
+            { label: 'High Confidence', value: stats.highConfidence, color: 'text-[#c9b787]' },
+            { label: 'Critical Impact', value: stats.critical, color: 'text-[#f5f5f5]' },
+            { label: 'Approval Required', value: stats.approvalRequired, color: 'text-[#c9b787]' },
+            { label: 'Human Review', value: stats.humanReview, color: 'text-[#c9b787]' },
           ].map((stat) => (
             <div
               key={stat.label}
@@ -1209,25 +1209,25 @@ export default function TradecraftEnginePage() {
                   {
                     label: 'High Confidence',
                     range: '75–100%',
-                    color: 'bg-emerald-500',
+                    color: 'bg-[#c9b787]',
                     desc: 'Strong, diverse, consistent evidence. Well-grounded assumptions. Alternatives considered and found less compelling.',
                   },
                   {
                     label: 'Moderate Confidence',
                     range: '50–74%',
-                    color: 'bg-amber-500',
+                    color: 'bg-[#c9b787]',
                     desc: 'Adequate but not exhaustive evidence. Some uncertain assumptions. Notable gaps. Alternatives possible but less likely.',
                   },
                   {
                     label: 'Low Confidence',
                     range: '25–49%',
-                    color: 'bg-orange-500',
+                    color: 'bg-[#c9b787]',
                     desc: 'Limited or fragmented evidence. Key assumptions questionable. Significant gaps. Multiple alternatives remain plausible.',
                   },
                   {
                     label: 'Insufficient Evidence',
                     range: '0–24%',
-                    color: 'bg-red-500',
+                    color: 'bg-[#f5f5f5]',
                     desc: 'Too sparse or poor quality. Assessment largely speculative. Should not drive consequential decisions.',
                   },
                 ].map((lvl) => (
@@ -1272,7 +1272,7 @@ export default function TradecraftEnginePage() {
                     key={field}
                     className="flex items-center gap-1.5 text-[9px] font-mono text-muted-foreground"
                   >
-                    <div className="w-1 h-1 rounded-full bg-blue-400 shrink-0" />
+                    <div className="w-1 h-1 rounded-full bg-[#c9b787] shrink-0" />
                     {field}
                   </div>
                 ))}

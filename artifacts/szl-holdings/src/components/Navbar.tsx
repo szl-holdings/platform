@@ -11,7 +11,7 @@ const navLinks = [
   { label: 'Lyte', href: '/lyte', external: '/command/operations/' },
   { label: 'Vessels', href: '/vessels', external: '/vessels/' },
   { label: 'Trust', href: '/trust' },
-  { label: 'LUMINA', href: '/pulse' },
+  { label: 'Pulse', href: '/pulse' },
   { label: 'Leadership', href: '/leadership' },
   { label: 'Founder', href: '/founder' },
   { label: 'Contact', href: '/contact' },

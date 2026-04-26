@@ -35,19 +35,19 @@ const SEVERITIES = ['info', 'low', 'medium', 'high', 'critical'] as const;
 type Severity = (typeof SEVERITIES)[number];
 
 const SEV_COLOR: Record<Severity, string> = {
-  critical: '#ef4444',
-  high: '#f59e0b',
-  medium: '#f97316',
-  low: '#3b82f6',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#c9b787',
+  low: '#c9b787',
   info: '#6b7280',
 };
 const STATUS_COLOR: Record<string, string> = {
-  pending: '#f59e0b',
-  running: '#3b82f6',
-  completed: '#10b981',
-  failed: '#ef4444',
+  pending: '#c9b787',
+  running: '#c9b787',
+  completed: '#c9b787',
+  failed: '#f5f5f5',
   pending_approval: '#8b7ac8',
-  paused: '#f97316',
+  paused: '#c9b787',
   cancelled: '#6b7280',
 };
 
@@ -355,7 +355,7 @@ export default function AegisAtlasExecute() {
               </div>
             )}
             {approvalError && (
-              <div className="text-[10px] mt-1" style={{ color: '#f87171' }}>
+              <div className="text-[10px] mt-1" style={{ color: '#f5f5f5' }}>
                 {approvalError}
               </div>
             )}
@@ -397,9 +397,9 @@ export default function AegisAtlasExecute() {
               }}
               className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg border transition-colors"
               style={{
-                color: '#ef4444',
-                borderColor: 'rgba(239,68,68,0.3)',
-                background: 'rgba(239,68,68,0.08)',
+                color: '#f5f5f5',
+                borderColor: 'rgba(245,245,245,0.3)',
+                background: 'rgba(245,245,245,0.08)',
               }}
             >
               <XCircle className="w-3 h-3" /> Reject
@@ -411,10 +411,10 @@ export default function AegisAtlasExecute() {
       {error && (
         <div
           className="rounded-xl border p-3 flex items-center gap-3"
-          style={{ borderColor: 'rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)' }}
+          style={{ borderColor: 'rgba(245,245,245,0.3)', background: 'rgba(245,245,245,0.08)' }}
         >
-          <AlertTriangle className="w-4 h-4 shrink-0" style={{ color: '#ef4444' }} />
-          <span className="text-[11px]" style={{ color: '#ef4444' }}>
+          <AlertTriangle className="w-4 h-4 shrink-0" style={{ color: '#f5f5f5' }} />
+          <span className="text-[11px]" style={{ color: '#f5f5f5' }}>
             {error}
           </span>
           <button
@@ -789,7 +789,7 @@ export default function AegisAtlasExecute() {
                   <div className="flex items-start gap-2">
                     <CheckCircle
                       className="w-2.5 h-2.5 mt-0.5 shrink-0"
-                      style={{ color: '#10b981' }}
+                      style={{ color: '#c9b787' }}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="text-[10px] font-medium text-white">{ev.label}</div>

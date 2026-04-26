@@ -20,7 +20,7 @@ export const findings: Finding[] = [
     element: '<span class="text-gray-400">Low</span>',
     currentValue: '3.2:1',
     requiredValue: '4.5:1',
-    scriptedRecommendation: 'Update the text color to --color-a11oy-text-sub (#9bacc4) to meet WCAG AA requirements.'
+    scriptedRecommendation: 'Update the text color to --color-a11oy-text-sub (#5e5e5e) to meet WCAG AA requirements.'
   },
   {
     id: 'f-2',

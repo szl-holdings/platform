@@ -79,16 +79,16 @@ const pendingJobs = [
 ];
 
 const statusStyles: Record<string, { bg: string; text: string; dot: string }> = {
-  available: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', dot: 'bg-emerald-400' },
-  'on-site': { bg: 'bg-blue-500/10', text: 'text-blue-400', dot: 'bg-blue-400' },
-  traveling: { bg: 'bg-amber-500/10', text: 'text-amber-400', dot: 'bg-amber-400' },
+  available: { bg: 'bg-[#c9b787]/10', text: 'text-[#c9b787]', dot: 'bg-[#c9b787]' },
+  'on-site': { bg: 'bg-[#c9b787]/10', text: 'text-[#c9b787]', dot: 'bg-[#c9b787]' },
+  traveling: { bg: 'bg-[#c9b787]/10', text: 'text-[#c9b787]', dot: 'bg-[#c9b787]' },
   'off-duty': { bg: 'bg-zinc-500/10', text: 'text-zinc-400', dot: 'bg-zinc-400' },
 };
 
 const prioColors: Record<string, string> = {
-  high: 'bg-red-500/10 text-red-400',
-  medium: 'bg-amber-500/10 text-amber-400',
-  low: 'bg-emerald-500/10 text-emerald-400',
+  high: 'bg-[#f5f5f5]/10 text-[#f5f5f5]',
+  medium: 'bg-[#c9b787]/10 text-[#c9b787]',
+  low: 'bg-[#c9b787]/10 text-[#c9b787]',
 };
 
 export default function Dispatch() {
@@ -127,28 +127,28 @@ export default function Dispatch() {
         ) : (
           <>
             <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-              <User className="w-5 h-5 text-emerald-400" />
+              <User className="w-5 h-5 text-[#c9b787]" />
               <div>
                 <div className="text-xl font-bold">{available}</div>
                 <div className="text-xs text-muted-foreground">Available</div>
               </div>
             </div>
             <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-              <Wrench className="w-5 h-5 text-blue-400" />
+              <Wrench className="w-5 h-5 text-[#c9b787]" />
               <div>
                 <div className="text-xl font-bold">{onSite}</div>
                 <div className="text-xs text-muted-foreground">On Site</div>
               </div>
             </div>
             <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-400" />
+              <AlertTriangle className="w-5 h-5 text-[#c9b787]" />
               <div>
                 <div className="text-xl font-bold">{pendingJobs.length}</div>
                 <div className="text-xs text-muted-foreground">Pending Jobs</div>
               </div>
             </div>
             <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-              <CheckCircle className="w-5 h-5 text-violet-400" />
+              <CheckCircle className="w-5 h-5 text-[#8a8a8a]" />
               <div>
                 <div className="text-xl font-bold">{completedToday}</div>
                 <div className="text-xs text-muted-foreground">Completed Today</div>
@@ -162,7 +162,7 @@ export default function Dispatch() {
         <div className="rounded-xl border border-border bg-card">
           <div className="p-4 border-b border-border">
             <h2 className="font-display font-semibold flex items-center gap-2">
-              <User className="w-4 h-4 text-blue-400" /> Technician Status
+              <User className="w-4 h-4 text-[#c9b787]" /> Technician Status
             </h2>
           </div>
           <div className="divide-y divide-border">
@@ -244,7 +244,7 @@ export default function Dispatch() {
         <div className="rounded-xl border border-border bg-card">
           <div className="p-4 border-b border-border">
             <h2 className="font-display font-semibold flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-amber-400" /> Pending Jobs
+              <Calendar className="w-4 h-4 text-[#c9b787]" /> Pending Jobs
             </h2>
           </div>
           <div className="divide-y divide-border">

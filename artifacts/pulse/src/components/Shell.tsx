@@ -106,7 +106,7 @@ export default function Shell({ children }: { children: ReactNode }) {
                   letterSpacing: '-0.01em',
                 }}
               >
-                LUMINA
+                Pulse
               </div>
               <div
                 style={{

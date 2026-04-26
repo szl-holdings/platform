@@ -387,7 +387,7 @@ export default function PortfolioPage() {
 
             <ModuleTile
               icon={ShieldCheck}
-              name="TENAX"
+              name="Aegis"
               tagline="Cyber Resilience Command"
               accentColor="hsl(0,72%,56%)"
               href="/sentra/dashboard"

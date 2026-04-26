@@ -29,7 +29,7 @@ export function isAccessDenied(err: unknown): boolean {
 
 export function AccessDeniedNotice({
   status,
-  accent = '#ef4444',
+  accent = '#f5f5f5',
   resourceLabel = 'this view',
 }: {
   status: 401 | 403 | number;

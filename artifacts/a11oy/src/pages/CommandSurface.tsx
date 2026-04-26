@@ -4,8 +4,8 @@ import { PageHeader, Card, SectionTitle, ApprovalGate, ActionButton, SeverityDot
 import { SEED_SIGNALS, SEED_WORKCELLS } from '@workspace/a11oy-fabric';
 
 const VERTICAL_COLORS: Record<string, string> = {
-  'lyte-revenue': '#3b82f6', 'vessels-maritime': '#06b6d4', 'terra-real-estate': '#10b981',
-  'aegis-defense': '#ef4444', 'prism-counsel': '#8b5cf6', 'carlota-jo': '#f59e0b', 'alloy-core': '#6366f1',
+  'lyte-revenue': '#c9b787', 'vessels-maritime': '#8a8a8a', 'terra-real-estate': '#c9b787',
+  'aegis-defense': '#f5f5f5', 'prism-counsel': '#8a8a8a', 'carlota-jo': '#c9b787', 'alloy-core': '#8a8a8a',
 };
 const VERTICAL_LABELS: Record<string, string> = {
   'lyte-revenue': 'Lyte Revenue', 'vessels-maritime': 'Vessels Maritime', 'terra-real-estate': 'Terra Real Estate',
@@ -77,8 +77,8 @@ export function CommandSurface() {
                   onClick={() => setFilterSeverity(s)}
                   className="text-left text-xs px-2 py-1 rounded transition-colors"
                   style={{
-                    backgroundColor: filterSeverity === s ? 'rgba(59,130,246,0.12)' : 'transparent',
-                    color: filterSeverity === s ? '#3b82f6' : 'var(--color-a11oy-text-ghost)',
+                    backgroundColor: filterSeverity === s ? 'rgba(201,183,135,0.12)' : 'transparent',
+                    color: filterSeverity === s ? '#c9b787' : 'var(--color-a11oy-text-ghost)',
                     border: 'none', cursor: 'pointer',
                   }}
                 >
@@ -96,8 +96,8 @@ export function CommandSurface() {
                   onClick={() => setFilterStatus(s)}
                   className="text-left text-xs px-2 py-1 rounded transition-colors"
                   style={{
-                    backgroundColor: filterStatus === s ? 'rgba(59,130,246,0.12)' : 'transparent',
-                    color: filterStatus === s ? '#3b82f6' : 'var(--color-a11oy-text-ghost)',
+                    backgroundColor: filterStatus === s ? 'rgba(201,183,135,0.12)' : 'transparent',
+                    color: filterStatus === s ? '#c9b787' : 'var(--color-a11oy-text-ghost)',
                     border: 'none', cursor: 'pointer',
                   }}
                 >
@@ -121,7 +121,7 @@ export function CommandSurface() {
             {filtered.length === 0 ? (
               <div className="p-8 text-center text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>No signals match the current filters.</div>
             ) : filtered.map(s => {
-              const color = VERTICAL_COLORS[s.vertical] ?? '#9bacc4';
+              const color = VERTICAL_COLORS[s.vertical] ?? '#5e5e5e';
               const isSelected = s.id === selectedId;
               return (
                 <div
@@ -129,8 +129,8 @@ export function CommandSurface() {
                   className="p-3 cursor-pointer transition-colors"
                   onClick={() => setSelectedId(isSelected ? null : s.id)}
                   style={{
-                    backgroundColor: isSelected ? 'rgba(59,130,246,0.06)' : 'var(--color-a11oy-card)',
-                    borderLeft: isSelected ? '2px solid #3b82f6' : '2px solid transparent',
+                    backgroundColor: isSelected ? 'rgba(201,183,135,0.06)' : 'var(--color-a11oy-card)',
+                    borderLeft: isSelected ? '2px solid #c9b787' : '2px solid transparent',
                   }}
                 >
                   <div className="flex items-start gap-2">
@@ -158,8 +158,8 @@ export function CommandSurface() {
                     <div className="text-xs font-mono flex-shrink-0" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{fmt(s.detectedAt)}</div>
                   </div>
                   {isSelected && selectedWC && (
-                    <div className="mt-2 px-2 py-1.5 rounded text-xs" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)' }}>
-                      <span style={{ color: '#3b82f6' }}>↗ Linked workcell: </span>
+                    <div className="mt-2 px-2 py-1.5 rounded text-xs" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)' }}>
+                      <span style={{ color: '#c9b787' }}>↗ Linked workcell: </span>
                       <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{selectedWC.name}</span>
                     </div>
                   )}
@@ -185,10 +185,10 @@ export function CommandSurface() {
                 <HashId id={selected.id} />
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   <SeverityBadge severity={selected.severity} />
-                  <VerticalBadge vertical={VERTICAL_LABELS[selected.vertical] ?? selected.vertical} color={VERTICAL_COLORS[selected.vertical] ?? '#9bacc4'} />
+                  <VerticalBadge vertical={VERTICAL_LABELS[selected.vertical] ?? selected.vertical} color={VERTICAL_COLORS[selected.vertical] ?? '#5e5e5e'} />
                 </div>
                 <p className="mt-2 text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>{selected.description}</p>
-                <div className="mt-2 text-xs p-2 rounded" style={{ backgroundColor: 'rgba(245,158,11,0.08)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.2)' }}>
+                <div className="mt-2 text-xs p-2 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.08)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.2)' }}>
                   {selected.businessImpact}
                 </div>
               </div>
@@ -200,10 +200,10 @@ export function CommandSurface() {
                   <div className="text-xs font-medium mb-1" style={{ color: 'var(--color-a11oy-text)' }}>{selectedWC.actionBrief.title}</div>
                   <div className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-sub)' }}>{selectedWC.actionBrief.description}</div>
                   <div className="flex items-center gap-2 text-xs flex-wrap">
-                    <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(245,158,11,0.12)', color: '#f59e0b' }}>
+                    <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.12)', color: '#c9b787' }}>
                       {selectedWC.actionBrief.priority} priority
                     </span>
-                    <span className="font-mono" style={{ color: '#10b981' }}>{selectedWC.actionBrief.estimatedImpact}</span>
+                    <span className="font-mono" style={{ color: '#c9b787' }}>{selectedWC.actionBrief.estimatedImpact}</span>
                   </div>
                 </div>
               )}
@@ -221,7 +221,7 @@ export function CommandSurface() {
                   {selectedWC.mirrorEvalResult.dimensions.map(d => (
                     <div key={d.name} className="text-xs mb-1">
                       <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{d.name}: </span>
-                      <span style={{ color: '#10b981' }}>{Math.round(d.score * 100)}%</span>
+                      <span style={{ color: '#c9b787' }}>{Math.round(d.score * 100)}%</span>
                     </div>
                   ))}
                 </div>
@@ -235,7 +235,7 @@ export function CommandSurface() {
                   <div className="mt-1 text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
                     Mode: demo · Approval tier: {selectedWC.actionBrief.approvalTier}
                   </div>
-                  <div className="mt-2 text-xs font-mono px-2 py-1.5 rounded" style={{ backgroundColor: 'rgba(16,185,129,0.08)', color: '#10b981', border: '1px solid rgba(16,185,129,0.2)' }}>
+                  <div className="mt-2 text-xs font-mono px-2 py-1.5 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.08)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.2)' }}>
                     {selectedWC.verificationResult.status === 'passed' ? '✓ Contract verified' : '✗ Contract failed'}
                   </div>
                 </div>

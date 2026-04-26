@@ -23,14 +23,14 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'wouter';
 import { AEGIS_MITRE_COVERAGE, metricDisplay } from '../lib/claims';
 
-const BG = '#080a10';
+const BG = '#0a0a0a';
 
 const workspaces = [
   {
     id: 'defense',
     name: 'Defense',
     subtitle: 'Security Operations',
-    color: '#ef4444',
+    color: '#c9b787',
     icon: Shield,
     href: '/soc',
     capabilities: [
@@ -46,7 +46,7 @@ const workspaces = [
     id: 'command',
     name: 'Command',
     subtitle: 'Managed Operations',
-    color: '#3b82f6',
+    color: '#8a8a8a',
     icon: Server,
     href: '/ops/dashboard',
     capabilities: [
@@ -62,7 +62,7 @@ const workspaces = [
     id: 'labs',
     name: 'Labs',
     subtitle: 'Intelligence Engine',
-    color: '#8b5cf6',
+    color: '#5e5e5e',
     icon: Brain,
     href: '/intel/dashboard',
     capabilities: [
@@ -78,7 +78,7 @@ const workspaces = [
     id: 'legal',
     name: 'Legal',
     subtitle: 'Matter Intelligence',
-    color: '#d4a054',
+    color: '#c9b787',
     icon: FileSearch,
     href: '/legal',
     capabilities: [
@@ -99,8 +99,8 @@ const convergences = [
     toHref: '/ops/dashboard',
     icon: AlertTriangle,
     desc: 'Incident INC-2847 impacts managed client Northgate. Lateral movement on DC-PROD-03 triggers automatic SLA escalation, client notification, and containment protocol — before the client knows.',
-    color: '#ef4444',
-    toColor: '#3b82f6',
+    color: '#c9b787',
+    toColor: '#8a8a8a',
   },
   {
     from: 'Labs',
@@ -108,8 +108,8 @@ const convergences = [
     toHref: '/soc',
     icon: Brain,
     desc: 'Neural explorer detects anomalous pattern matching APT29 TTPs. Intelligence model confidence: 94%. MITRE mapping and hunting queries generated automatically. Defense SOC receives enriched alert in < 60 seconds.',
-    color: '#8b5cf6',
-    toColor: '#ef4444',
+    color: '#5e5e5e',
+    toColor: '#c9b787',
   },
   {
     from: 'Command',
@@ -117,8 +117,8 @@ const convergences = [
     toHref: '/intel/dashboard',
     icon: Radio,
     desc: 'Service desk ticket volume anomaly across 3 managed clients. Labs ingests the signal, generates churn risk model, and surfaces preventive actions to Command — within the same operating session.',
-    color: '#3b82f6',
-    toColor: '#8b5cf6',
+    color: '#8a8a8a',
+    toColor: '#5e5e5e',
   },
   {
     from: 'Defense',
@@ -126,8 +126,8 @@ const convergences = [
     toHref: '/legal',
     icon: AlertTriangle,
     desc: 'Ransomware containment on client Harfield Group triggers automatic legal intake. Matter opened, breach notification deadlines calculated across 7 jurisdictions, and privilege log initiated — all within the incident response window.',
-    color: '#ef4444',
-    toColor: '#d4a054',
+    color: '#c9b787',
+    toColor: '#c9b787',
   },
   {
     from: 'Legal',
@@ -135,16 +135,16 @@ const convergences = [
     toHref: '/ops/dashboard',
     icon: FileSearch,
     desc: 'Regulatory filing deadline for client Meridian Capital is 11 days out. Legal surfaces the hard constraint to Command, which auto-adjusts SLA priorities, reassigns support bandwidth, and flags any at-risk delivery commitments.',
-    color: '#d4a054',
-    toColor: '#3b82f6',
+    color: '#c9b787',
+    toColor: '#8a8a8a',
   },
   {
     from: 'Labs',
     to: 'Legal',
     icon: Brain,
     desc: 'Contract risk model flags non-standard indemnification language in a managed client agreement with Vantage Partners — liability exposure estimated $2.4M above policy limits. Labs routes the signal to Legal automatically: matter opened, partner attorney assigned, and negotiation brief generated before the contract execution date.',
-    color: '#8b5cf6',
-    toColor: '#d4a054',
+    color: '#5e5e5e',
+    toColor: '#c9b787',
   },
 ];
 
@@ -235,18 +235,18 @@ export default function AegisHomePage() {
       style={{ background: BG, fontFamily: "'Inter', system-ui, sans-serif" }}
     >
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-500 ${scrolled ? 'bg-[#080a10]/90 backdrop-blur-2xl border-b border-red-500/[0.06]' : 'bg-transparent'}`}
+        className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-500 ${scrolled ? 'bg-[#0a0a0a]/90 backdrop-blur-2xl border-b border-white/[0.04]' : 'bg-transparent'}`}
       >
         <div className="max-w-[1200px] mx-auto px-6 w-full flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div
               className="w-7 h-7 rounded-lg flex items-center justify-center"
               style={{
-                background: 'rgba(239,68,68,0.08)',
-                border: '1px solid rgba(239,68,68,0.15)',
+                background: 'rgba(245,245,245,0.08)',
+                border: '1px solid rgba(245,245,245,0.15)',
               }}
             >
-              <Shield size={13} className="text-red-400" />
+              <Shield size={13} className="text-[#c9b787]" />
             </div>
             <span className="font-bold text-[15px] tracking-tight text-white">Aegis</span>
             <span aria-hidden="true" className="hidden sm:inline text-[9px] tracking-[0.15em] uppercase text-white/60 font-mono ml-1">
@@ -285,7 +285,7 @@ export default function AegisHomePage() {
       </nav>
 
       {mobileNav && (
-        <div className="fixed inset-0 z-40 bg-[#080a10]/98 backdrop-blur-xl flex flex-col items-center justify-center gap-8 md:hidden">
+        <div className="fixed inset-0 z-40 bg-[#0a0a0a]/98 backdrop-blur-xl flex flex-col items-center justify-center gap-8 md:hidden">
           {[
             { label: 'Architecture', href: '#architecture' },
             { label: 'Convergence', href: '#convergence' },
@@ -315,13 +315,13 @@ export default function AegisHomePage() {
         <div
           className="absolute top-[100px] left-[20%] w-[600px] h-[400px] rounded-full"
           style={{
-            background: 'radial-gradient(ellipse, rgba(239,68,68,0.03) 0%, transparent 70%)',
+            background: 'radial-gradient(ellipse, rgba(245,245,245,0.03) 0%, transparent 70%)',
           }}
         />
         <div
           className="absolute top-[200px] right-[15%] w-[500px] h-[400px] rounded-full"
           style={{
-            background: 'radial-gradient(ellipse, rgba(139,92,246,0.02) 0%, transparent 70%)',
+            background: 'radial-gradient(ellipse, rgba(138,138,138,0.02) 0%, transparent 70%)',
           }}
         />
       </div>
@@ -329,7 +329,7 @@ export default function AegisHomePage() {
       <section className="relative pt-32 sm:pt-40 pb-20 sm:pb-28 max-w-[1200px] mx-auto px-6">
         <Reveal>
           <p aria-hidden="true" className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/60 mb-8 font-mono">
-            SZL Holdings &middot; Unified Defense & Intelligence
+            Aegis &middot; Unified Defense & Intelligence
           </p>
         </Reveal>
 
@@ -379,7 +379,7 @@ export default function AegisHomePage() {
               { value: '94%', label: 'AI model confidence' },
               { value: '12.8K', label: 'Endpoints managed' },
             ].map((s) => (
-              <div key={s.label} className="bg-[#080a10] py-5 px-5">
+              <div key={s.label} className="bg-[#0a0a0a] py-5 px-5">
                 <span className="text-[22px] font-extrabold font-mono text-white block">
                   {s.value}
                 </span>
@@ -563,7 +563,7 @@ export default function AegisHomePage() {
               style={{ background: 'rgba(255,255,255,0.04)' }}
             >
               {operatingModel.map((step, i) => (
-                <div key={step.phase} className="bg-[#080a10] p-8">
+                <div key={step.phase} className="bg-[#0a0a0a] p-8">
                   <div className="flex items-center gap-3 mb-5">
                     <span aria-hidden="true" className="text-[36px] font-extrabold text-white/[0.55] font-mono leading-none">
                       {String(i + 1).padStart(2, '0')}
@@ -613,7 +613,7 @@ export default function AegisHomePage() {
                   desc: "OBSERVE \u2192 UNDERSTAND \u2192 DECIDE \u2192 EXECUTE. The same decision framework applies whether you're triaging a breach or validating a model.",
                 },
               ].map((item) => (
-                <div key={item.title} className="bg-[#080a10] p-8">
+                <div key={item.title} className="bg-[#0a0a0a] p-8">
                   <item.icon size={20} className="text-white/60 mb-5" />
                   <h3 className="text-[14px] font-bold text-white mb-3">{item.title}</h3>
                   <p className="text-[12px] leading-[1.85] text-white/65">{item.desc}</p>
@@ -628,7 +628,7 @@ export default function AegisHomePage() {
       <Reveal>
         <section className="py-24 sm:py-32 px-6 max-w-[1140px] mx-auto">
           <div className="text-center mb-16">
-            <p className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3 text-red-400/85">
+            <p className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3 text-[#c9b787]">
               Platform Walkthrough
             </p>
             <h2 className="text-[clamp(1.6rem,3vw,2.1rem)] font-bold text-white mb-3 tracking-tight">
@@ -676,14 +676,14 @@ export default function AegisHomePage() {
               ].map((item) => (
                 <div key={item.step} className="flex items-start gap-8 md:gap-10">
                   <div className="flex-shrink-0 w-20 text-right">
-                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-full text-[11px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">
+                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-full text-[11px] font-bold bg-[#c9b787]/10 text-[#c9b787] border border-[#c9b787]/20">
                       {item.step}
                     </div>
                   </div>
                   <div className="flex-1 pb-10 border-b border-white/[0.03]">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-[16px] font-semibold text-white">{item.title}</h3>
-                      <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-red-500/8 text-red-400/90 border border-red-500/10">
+                      <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-[#c9b787]/8 text-[#c9b787] border border-[#c9b787]/10">
                         {item.tag}
                       </span>
                     </div>
@@ -722,13 +722,27 @@ export default function AegisHomePage() {
         </section>
       </Reveal>
 
+      <section style={{ padding: '80px 24px', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
+          <p style={{ fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.25em', color: '#5e5e5e', marginBottom: 20, textTransform: 'uppercase' as const }}>
+            Orchestrated by a11oy
+          </p>
+          <p style={{ fontSize: 22, fontWeight: 600, color: '#f5f5f5', marginBottom: 14 }}>
+            Orchestrated by <span style={{ color: '#c9b787' }}>a11oy</span>
+          </p>
+          <p style={{ fontSize: 13, color: '#8a8a8a', lineHeight: 1.8, maxWidth: 520, margin: '0 auto' }}>
+            Every decision in Aegis follows the same governed path — Signal, Context, Recommendation, Simulation, Policy, Execution, Proof, Outcome. The same proof chain. The same attribution. The same governance.
+          </p>
+        </div>
+      </section>
+
       <section className="py-16 px-6 border-t border-white/[0.04]">
         <div className="max-w-[560px] mx-auto">
           <NewsletterSubscribe
             utmSource="aegis"
             variant="banner"
             heading="Intelligence from the front line"
-            subheading="SZL Command essays on governed AI, defense operations, and the decision infrastructure behind Aegis — delivered weekly."
+            subheading="Essays on governed AI, defense operations, and the decision infrastructure behind Aegis — delivered weekly."
           />
         </div>
       </section>
@@ -738,7 +752,7 @@ export default function AegisHomePage() {
           <div className="flex items-center gap-2.5">
             <Shield size={12} className="text-white/60" />
             <span className="text-[12px] font-semibold text-white/85">Aegis</span>
-            <span aria-hidden="true" className="text-[10px] text-white/60 font-mono">by SZL Holdings</span>
+            <span aria-hidden="true" className="text-[10px] text-white/60 font-mono">by a11oy</span>
           </div>
           <p className="text-[10px] text-white/60">{copyrightLine()}</p>
         </div>

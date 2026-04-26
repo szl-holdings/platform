@@ -31,7 +31,7 @@ export const FEATURE_FLAGS: Record<string, FeatureFlag> = {
   PULSE_FALLBACK_LABEL: {
     id: 'PULSE_FALLBACK_LABEL',
     description:
-      "Show 'Synthesized (no AI provider)' label on LUMINA briefings generated via fallback drift path.",
+      "Show 'Synthesized (no AI provider)' label on Pulse briefings generated via fallback drift path.",
     enabledFor: ['demo', 'internal-preview', 'local-dev'],
     notes: 'Required to prevent silent fallback impersonating live AI briefings.',
   },
@@ -55,7 +55,7 @@ export const FEATURE_FLAGS: Record<string, FeatureFlag> = {
   },
   PDF_EXPORT_PULSE: {
     id: 'PDF_EXPORT_PULSE',
-    description: 'Enable PDF export button in LUMINA briefing reader.',
+    description: 'Enable PDF export button in Pulse briefing reader.',
     enabledFor: [],
     notes: 'Not implemented. Flag gates the button until implementation is complete.',
   },

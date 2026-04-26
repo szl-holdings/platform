@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-const ACCENT = '#ef4444';
+const ACCENT = '#f5f5f5';
 const DS = {
   surface: 'rgba(255,255,255,0.025)',
   border: 'rgba(255,255,255,0.06)',
@@ -133,15 +133,15 @@ function formatUSD(v: number): string {
 
 function ImpactCard({ impact }: { impact: SecurityBusinessImpact }) {
   const typeColors: Record<SecurityBusinessImpact['incidentType'], string> = {
-    breach: '#ef4444',
-    ransomware: '#dc2626',
-    data_exfil: '#f97316',
-    compliance: '#f59e0b',
-    availability: '#3b82f6',
+    breach: '#f5f5f5',
+    ransomware: '#f5f5f5',
+    data_exfil: '#c9b787',
+    compliance: '#c9b787',
+    availability: '#c9b787',
   };
   const tc = typeColors[impact.incidentType];
   const statusColor =
-    impact.status === 'active' ? '#ef4444' : impact.status === 'contained' ? '#f59e0b' : '#6b8f71';
+    impact.status === 'active' ? '#f5f5f5' : impact.status === 'contained' ? '#c9b787' : '#6b8f71';
 
   return (
     <div
@@ -188,7 +188,7 @@ function ImpactCard({ impact }: { impact: SecurityBusinessImpact }) {
           {
             label: 'Compliance Fine',
             value: formatUSD(impact.complianceFineExposure),
-            color: '#f59e0b',
+            color: '#c9b787',
           },
           { label: 'SLA Contracts at Risk', value: impact.slaAtRisk.toString(), color: tc },
           { label: 'Ops Cost', value: formatUSD(impact.operationalCost), color: '#d4a054' },
@@ -218,7 +218,7 @@ function ImpactCard({ impact }: { impact: SecurityBusinessImpact }) {
           <span
             key={f}
             className="text-[8px] px-1.5 py-0.5 rounded"
-            style={{ background: '#f59e0b12', color: '#f59e0b', border: '1px solid #f59e0b20' }}
+            style={{ background: '#c9b78712', color: '#c9b787', border: '1px solid #c9b78720' }}
           >
             {f}
           </span>
@@ -282,13 +282,13 @@ export default function BusinessSignalIntelligence() {
           {
             label: 'Compliance Fine Risk',
             value: formatUSD(totalFineExposure),
-            color: '#f59e0b',
+            color: '#c9b787',
             icon: FileText,
           },
           {
             label: 'At-Risk Client Accounts',
             value: atRiskClients.toString(),
-            color: '#f97316',
+            color: '#c9b787',
             icon: Users,
           },
           {
@@ -350,7 +350,7 @@ export default function BusinessSignalIntelligence() {
                   c.status === 'compliant'
                     ? '#6b8f71'
                     : c.status === 'at_risk'
-                      ? '#f59e0b'
+                      ? '#c9b787'
                       : ACCENT;
                 const potentialFine =
                   c.maxFineUsd > 0 ? formatUSD((c.maxFineUsd * c.currentExposurePct) / 100) : 'N/A';
@@ -375,7 +375,7 @@ export default function BusinessSignalIntelligence() {
                     >
                       <span>{c.dueDate}</span>
                       {c.maxFineUsd > 0 && (
-                        <span className="font-mono" style={{ color: '#f59e0b' }}>
+                        <span className="font-mono" style={{ color: '#c9b787' }}>
                           Max: {formatUSD(c.maxFineUsd)}
                         </span>
                       )}

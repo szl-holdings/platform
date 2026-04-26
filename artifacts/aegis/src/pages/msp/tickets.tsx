@@ -44,24 +44,24 @@ interface TicketsResponse {
 }
 
 const prioColors: Record<string, string> = {
-  critical: 'bg-red-500/10 text-red-400 border-red-500/20',
-  high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  low: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  critical: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  high: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  medium: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  low: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
 };
 
 const statusColors: Record<string, string> = {
-  open: 'bg-blue-500/10 text-blue-400',
-  'in-progress': 'bg-violet-500/10 text-violet-400',
-  waiting: 'bg-amber-500/10 text-amber-400',
-  resolved: 'bg-emerald-500/10 text-emerald-400',
+  open: 'bg-[#c9b787]/10 text-[#c9b787]',
+  'in-progress': 'bg-[#8a8a8a]/10 text-[#8a8a8a]',
+  waiting: 'bg-[#c9b787]/10 text-[#c9b787]',
+  resolved: 'bg-[#c9b787]/10 text-[#c9b787]',
   closed: 'bg-muted text-muted-foreground',
 };
 
 const slaColors: Record<string, string> = {
-  'on-track': 'text-emerald-400',
-  'at-risk': 'text-amber-400',
-  breached: 'text-red-400',
+  'on-track': 'text-[#c9b787]',
+  'at-risk': 'text-[#c9b787]',
+  breached: 'text-[#f5f5f5]',
 };
 
 function formatSlaDeadline(deadline: string | null): string {
@@ -339,7 +339,7 @@ export default function Tickets() {
             options={{
               filename: 'service-desk-tickets',
               title: 'Service Desk Tickets',
-              accentColor: '#3b82f6',
+              accentColor: '#c9b787',
             }}
           />
           <button
@@ -363,24 +363,24 @@ export default function Tickets() {
               <Skeleton key={i} className="h-20 rounded-xl" />
             ))
           : [
-              { label: 'Open', count: openCount, icon: AlertTriangle, color: 'text-blue-400' },
+              { label: 'Open', count: openCount, icon: AlertTriangle, color: 'text-[#c9b787]' },
               {
                 label: 'In Progress',
                 count: inProgressCount,
                 icon: Clock,
-                color: 'text-violet-400',
+                color: 'text-[#8a8a8a]',
               },
               {
                 label: 'SLA Breached',
                 count: breachedCount,
                 icon: AlertTriangle,
-                color: 'text-red-400',
+                color: 'text-[#f5f5f5]',
               },
               {
                 label: 'Resolved',
                 count: resolvedToday,
                 icon: CheckCircle,
-                color: 'text-emerald-400',
+                color: 'text-[#c9b787]',
               },
             ].map((s) => (
               <div
@@ -527,7 +527,7 @@ export default function Tickets() {
             {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' && (
               <button
                 onClick={() => closeTicket(selectedTicket)}
-                className="text-xs px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
+                className="text-xs px-3 py-1.5 rounded-lg bg-[#c9b787]/10 text-[#c9b787] border border-[#c9b787]/20 hover:bg-[#c9b787]/20 transition-colors"
               >
                 Mark Resolved
               </button>
@@ -573,8 +573,8 @@ export default function Tickets() {
               )}
 
               {triageResults[selectedTicket.id]?.error && (
-                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                  <p className="text-xs text-red-400">{triageResults[selectedTicket.id].error}</p>
+                <div className="p-3 rounded-lg bg-[#f5f5f5]/10 border border-[#f5f5f5]/20">
+                  <p className="text-xs text-[#f5f5f5]">{triageResults[selectedTicket.id].error}</p>
                 </div>
               )}
 

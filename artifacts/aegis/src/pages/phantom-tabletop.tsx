@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-const PHANTOM_ACCENT = '#a855f7';
+const PHANTOM_ACCENT = '#8a8a8a';
 const DS = {
   surface: 'rgba(255,255,255,0.025)',
   border: 'rgba(255,255,255,0.06)',
@@ -950,15 +950,15 @@ export default function PhantomTabletop() {
     avgScore >= 85
       ? '#6b8f71'
       : avgScore >= 65
-        ? '#f59e0b'
+        ? '#c9b787'
         : avgScore >= 40
-          ? '#f97316'
-          : '#ef4444';
+          ? '#c9b787'
+          : '#f5f5f5';
 
   const sevColors: Record<string, string> = {
-    catastrophic: '#ef4444',
-    critical: '#f97316',
-    major: '#f59e0b',
+    catastrophic: '#f5f5f5',
+    critical: '#c9b787',
+    major: '#c9b787',
   };
 
   return (
@@ -1073,7 +1073,7 @@ export default function PhantomTabletop() {
                   className="rounded-lg p-3 text-center"
                   style={{ background: 'rgba(255,255,255,0.04)' }}
                 >
-                  <div className="text-lg font-bold font-mono" style={{ color: '#f59e0b' }}>
+                  <div className="text-lg font-bold font-mono" style={{ color: '#c9b787' }}>
                     {scenario.injects.length}
                   </div>
                   <div className="text-[9px] mt-0.5" style={{ color: DS.text.muted }}>
@@ -1084,7 +1084,7 @@ export default function PhantomTabletop() {
                   className="rounded-lg p-3 text-center"
                   style={{ background: 'rgba(255,255,255,0.04)' }}
                 >
-                  <Users className="w-4 h-4 mx-auto mb-1" style={{ color: '#3b82f6' }} />
+                  <Users className="w-4 h-4 mx-auto mb-1" style={{ color: '#c9b787' }} />
                   <div className="text-[9px]" style={{ color: DS.text.muted }}>
                     {scenario.roleRequired}
                   </div>
@@ -1147,7 +1147,7 @@ export default function PhantomTabletop() {
               Loading Scenario…
             </span>
           </div>
-          <div className="font-mono text-[11px] leading-relaxed whitespace-pre-line text-green-400/80">
+          <div className="font-mono text-[11px] leading-relaxed whitespace-pre-line text-[#c9b787]/80">
             {scenario.context}
           </div>
         </div>
@@ -1162,9 +1162,9 @@ export default function PhantomTabletop() {
             <div
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg border font-mono text-sm"
               style={{
-                borderColor: timeRemaining < 30 ? 'rgba(239,68,68,0.4)' : 'rgba(168,85,247,0.3)',
-                background: timeRemaining < 30 ? 'rgba(239,68,68,0.08)' : 'rgba(168,85,247,0.08)',
-                color: timeRemaining < 30 ? '#ef4444' : PHANTOM_ACCENT,
+                borderColor: timeRemaining < 30 ? 'rgba(245,245,245,0.4)' : 'rgba(168,85,247,0.3)',
+                background: timeRemaining < 30 ? 'rgba(245,245,245,0.08)' : 'rgba(168,85,247,0.08)',
+                color: timeRemaining < 30 ? '#f5f5f5' : PHANTOM_ACCENT,
               }}
             >
               <Clock className="w-3.5 h-3.5" />
@@ -1180,12 +1180,12 @@ export default function PhantomTabletop() {
               style={{
                 borderColor:
                   consequenceLog[consequenceLog.length - 1].severity === 'critical'
-                    ? 'rgba(239,68,68,0.4)'
-                    : 'rgba(245,158,11,0.3)',
+                    ? 'rgba(245,245,245,0.4)'
+                    : 'rgba(201,183,135,0.3)',
                 background:
                   consequenceLog[consequenceLog.length - 1].severity === 'critical'
-                    ? 'rgba(239,68,68,0.06)'
-                    : 'rgba(245,158,11,0.05)',
+                    ? 'rgba(245,245,245,0.06)'
+                    : 'rgba(201,183,135,0.05)',
               }}
             >
               <AlertTriangle
@@ -1193,8 +1193,8 @@ export default function PhantomTabletop() {
                 style={{
                   color:
                     consequenceLog[consequenceLog.length - 1].severity === 'critical'
-                      ? '#ef4444'
-                      : '#f59e0b',
+                      ? '#f5f5f5'
+                      : '#c9b787',
                 }}
               />
               <div>
@@ -1203,8 +1203,8 @@ export default function PhantomTabletop() {
                   style={{
                     color:
                       consequenceLog[consequenceLog.length - 1].severity === 'critical'
-                        ? '#ef4444'
-                        : '#f59e0b',
+                        ? '#f5f5f5'
+                        : '#c9b787',
                   }}
                 >
                   Consequence of Previous Decision
@@ -1300,9 +1300,9 @@ export default function PhantomTabletop() {
                   key={i}
                   className="w-5 h-5"
                   style={{
-                    color: i < Math.ceil(avgScore / 20) ? '#f59e0b' : 'rgba(255,255,255,0.1)',
+                    color: i < Math.ceil(avgScore / 20) ? '#c9b787' : 'rgba(255,255,255,0.1)',
                   }}
-                  fill={i < Math.ceil(avgScore / 20) ? '#f59e0b' : 'none'}
+                  fill={i < Math.ceil(avgScore / 20) ? '#c9b787' : 'none'}
                 />
               ))}
             </div>
@@ -1349,13 +1349,13 @@ export default function PhantomTabletop() {
                       <span
                         className="text-[9px] px-1.5 py-0.5 rounded font-bold ml-auto"
                         style={{
-                          background: `${option.score >= 80 ? '#6b8f71' : option.score >= 60 ? '#f59e0b' : '#ef4444'}15`,
+                          background: `${option.score >= 80 ? '#6b8f71' : option.score >= 60 ? '#c9b787' : '#f5f5f5'}15`,
                           color:
                             option.score >= 80
                               ? '#6b8f71'
                               : option.score >= 60
-                                ? '#f59e0b'
-                                : '#ef4444',
+                                ? '#c9b787'
+                                : '#f5f5f5',
                         }}
                       >
                         {option.score}/100
@@ -1395,7 +1395,7 @@ export default function PhantomTabletop() {
                         border: '1px solid rgba(107,143,113,0.2)',
                       }}
                     >
-                      <div className="text-[9px] uppercase tracking-wider mb-1 text-green-400">
+                      <div className="text-[9px] uppercase tracking-wider mb-1 text-[#c9b787]">
                         Optimal Answer ({best.id.toUpperCase()}) — {best.score}/100
                       </div>
                       <div className="text-[10px]" style={{ color: DS.text.muted }}>

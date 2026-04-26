@@ -2,10 +2,10 @@ import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ProgressBar } from '../components/ui';
 
 const MEMORY_STORES = [
-  { id: 'stm', name: 'Short-Term Memory', description: 'Active workcell context. Cleared after workcell completion or timeout (4h).', capacity: 512, used: 84, unit: 'KB', retention: '4 hours', operators: ['Cascade Navigator', 'Pipeline Oracle'], color: '#3b82f6' },
-  { id: 'ltm', name: 'Long-Term Memory', description: 'Persisted operator memory across workcell sessions. Stored in vector DB.', capacity: 10240, used: 1200, unit: 'KB', retention: 'indefinite', operators: ['All operators'], color: '#10b981' },
-  { id: 'cache', name: 'Proof Cache', description: 'Cached proof hashes for fast verification. Periodically synced with Proof Ledger.', capacity: 1024, used: 342, unit: 'KB', retention: '7 days', operators: ['Fabric Watchdog'], color: '#8b5cf6' },
-  { id: 'context', name: 'Context Packs', description: 'Enriched context bundles assembled by Context Engine for active workcells.', capacity: 5120, used: 890, unit: 'KB', retention: 'per-workcell', operators: ['Context Engine'], color: '#f59e0b' },
+  { id: 'stm', name: 'Short-Term Memory', description: 'Active workcell context. Cleared after workcell completion or timeout (4h).', capacity: 512, used: 84, unit: 'KB', retention: '4 hours', operators: ['Cascade Navigator', 'Pipeline Oracle'], color: '#c9b787' },
+  { id: 'ltm', name: 'Long-Term Memory', description: 'Persisted operator memory across workcell sessions. Stored in vector DB.', capacity: 10240, used: 1200, unit: 'KB', retention: 'indefinite', operators: ['All operators'], color: '#c9b787' },
+  { id: 'cache', name: 'Proof Cache', description: 'Cached proof hashes for fast verification. Periodically synced with Proof Ledger.', capacity: 1024, used: 342, unit: 'KB', retention: '7 days', operators: ['Fabric Watchdog'], color: '#8a8a8a' },
+  { id: 'context', name: 'Context Packs', description: 'Enriched context bundles assembled by Context Engine for active workcells.', capacity: 5120, used: 890, unit: 'KB', retention: 'per-workcell', operators: ['Context Engine'], color: '#c9b787' },
 ];
 
 const MEMORY_ENTRIES = [
@@ -20,7 +20,7 @@ const MEMORY_ENTRIES = [
 ];
 
 const KIND_COLORS: Record<string, string> = {
-  operational: '#3b82f6', domain: '#10b981', threat: '#ef4444', system: '#8b5cf6',
+  operational: '#c9b787', domain: '#c9b787', threat: '#f5f5f5', system: '#8a8a8a',
 };
 
 function fmt(ts: string) {
@@ -47,10 +47,10 @@ export function Memory() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <KpiCard label="TOTAL CAPACITY" value={`${(totalCap / 1024).toFixed(1)} MB`} sub="across all stores" accent="#3b82f6" />
-        <KpiCard label="USED" value={`${(totalUsed / 1024).toFixed(1)} MB`} sub={`${Math.round((totalUsed / totalCap) * 100)}% utilization`} accent="#10b981" />
-        <KpiCard label="MEMORY ENTRIES" value={MEMORY_ENTRIES.length} sub="in demo session" accent="#f59e0b" />
-        <KpiCard label="ACTIVE OPERATORS" value={6} sub="with memory context" accent="#8b5cf6" />
+        <KpiCard label="TOTAL CAPACITY" value={`${(totalCap / 1024).toFixed(1)} MB`} sub="across all stores" accent="#c9b787" />
+        <KpiCard label="USED" value={`${(totalUsed / 1024).toFixed(1)} MB`} sub={`${Math.round((totalUsed / totalCap) * 100)}% utilization`} accent="#c9b787" />
+        <KpiCard label="MEMORY ENTRIES" value={MEMORY_ENTRIES.length} sub="in demo session" accent="#c9b787" />
+        <KpiCard label="ACTIVE OPERATORS" value={6} sub="with memory context" accent="#8a8a8a" />
       </div>
 
       {/* Memory Stores */}
@@ -95,7 +95,7 @@ export function Memory() {
             {MEMORY_ENTRIES.map((e, i) => (
               <tr key={e.id} style={{ backgroundColor: i % 2 === 0 ? 'var(--color-a11oy-card)' : 'var(--color-a11oy-deep)', borderBottom: '1px solid var(--color-a11oy-border)' }}>
                 <td className="px-3 py-2">
-                  <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: `${KIND_COLORS[e.kind] ?? '#9bacc4'}18`, color: KIND_COLORS[e.kind] ?? '#9bacc4' }}>{e.kind}</span>
+                  <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: `${KIND_COLORS[e.kind] ?? '#5e5e5e'}18`, color: KIND_COLORS[e.kind] ?? '#5e5e5e' }}>{e.kind}</span>
                 </td>
                 <td className="px-3 py-2 font-mono" style={{ color: '#b08d52', maxWidth: 120 }}><div className="truncate">{e.key}</div></td>
                 <td className="px-3 py-2" style={{ color: 'var(--color-a11oy-text-sub)', maxWidth: 280 }}><div className="truncate">{e.value}</div></td>
@@ -108,7 +108,7 @@ export function Memory() {
         </table>
       </div>
 
-      <div className="mt-4 text-xs p-3 rounded" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
+      <div className="mt-4 text-xs p-3 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
         Memory entries are scoped per operator and workcell. No cross-operator memory sharing without explicit Covenant Layer permission. All memory access is logged to the Proof Ledger.
       </div>
     </Layout>

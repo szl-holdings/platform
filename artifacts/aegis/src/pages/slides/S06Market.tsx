@@ -272,7 +272,7 @@ export default function S06Market() {
                       fontSize: '1.1vw',
                       color:
                         cell === '✓'
-                          ? '#4ade80'
+                          ? '#c9b787'
                           : cell === '~'
                             ? '#f5a623'
                             : 'rgba(240,236,230,0.2)',

@@ -18,15 +18,15 @@ export default function TrustProvenance() {
 
       <div className="flex gap-3 text-[10px] font-mono text-slate-500">
         <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-emerald-500" />
+          <div className="w-2 h-2 rounded-full bg-[#c9b787]" />
           VERIFIED
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-amber-500" />
+          <div className="w-2 h-2 rounded-full bg-[#c9b787]" />
           PENDING
         </div>
         <div className="flex items-center gap-1.5">
-          <Bot className="w-3 h-3 text-sky-400" />
+          <Bot className="w-3 h-3 text-[#8a8a8a]" />
           AGENT MESH
         </div>
       </div>
@@ -43,12 +43,12 @@ export default function TrustProvenance() {
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div
-                    className={`w-10 h-10 rounded flex items-center justify-center ${highlight ? 'bg-sky-500/10' : 'bg-emerald-500/10'}`}
+                    className={`w-10 h-10 rounded flex items-center justify-center ${highlight ? 'bg-[#8a8a8a]/10' : 'bg-[#c9b787]/10'}`}
                   >
                     {highlight ? (
-                      <Bot className="w-5 h-5 text-sky-400" />
+                      <Bot className="w-5 h-5 text-[#8a8a8a]" />
                     ) : (
-                      <Lock className="w-5 h-5 text-emerald-500" />
+                      <Lock className="w-5 h-5 text-[#c9b787]" />
                     )}
                   </div>
                   <div>
@@ -56,7 +56,7 @@ export default function TrustProvenance() {
                     <div className="text-xs text-slate-500 font-mono">
                       ACTOR: {item.actor} · {new Date(item.completedAt).toLocaleTimeString()}
                       {highlight && (
-                        <span className="ml-2 px-1.5 py-0.5 rounded bg-sky-500/10 border border-sky-500/20 text-sky-400 text-[9px] uppercase">
+                        <span className="ml-2 px-1.5 py-0.5 rounded bg-[#8a8a8a]/10 border border-sky-500/20 text-[#8a8a8a] text-[9px] uppercase">
                           {item.tag}
                         </span>
                       )}
@@ -69,22 +69,22 @@ export default function TrustProvenance() {
                     PROOF-HASH: {item.proofHash}
                   </div>
                   <span
-                    className={`px-2 py-0.5 rounded border text-[10px] font-bold ${verified ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-amber-500/10 border-amber-500/20 text-amber-400'}`}
+                    className={`px-2 py-0.5 rounded border text-[10px] font-bold ${verified ? 'bg-[#c9b787]/10 border-[#c9b787]/20 text-[#c9b787]' : 'bg-[#c9b787]/10 border-[#c9b787]/20 text-[#c9b787]'}`}
                   >
                     {item.status}
                   </span>
                 </div>
               </div>
               {item.details && item.details.length > 0 && (
-                <div className="mt-3 ml-14 rounded border border-emerald-500/10 bg-slate-900/40 p-3">
-                  <div className="flex items-center gap-2 text-[10px] text-emerald-400 font-mono uppercase mb-1.5">
+                <div className="mt-3 ml-14 rounded border border-[#c9b787]/10 bg-slate-900/40 p-3">
+                  <div className="flex items-center gap-2 text-[10px] text-[#c9b787] font-mono uppercase mb-1.5">
                     <Terminal className="w-3 h-3" />
                     Executor Trace
                   </div>
                   <ul className="space-y-1 text-[11px] text-slate-300/80 font-mono">
                     {item.details.map((line, idx) => (
                       <li key={idx} className="flex gap-2">
-                        <span className="text-emerald-500/60">›</span>
+                        <span className="text-[#c9b787]/60">›</span>
                         <span>{line}</span>
                       </li>
                     ))}

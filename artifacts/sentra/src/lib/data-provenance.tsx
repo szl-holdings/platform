@@ -28,7 +28,7 @@ export function DataProvenance({ source, label, className }: DataProvenanceProps
       <span
         className={cn(
           'inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-mono text-[9px] uppercase tracking-wider',
-          'bg-red-900/40 border border-red-700/40 text-red-400',
+          'bg-[#f5f5f5]/40 border border-[#f5f5f5]/40 text-[#f5f5f5]',
           className,
         )}
       >
@@ -43,7 +43,7 @@ export function DataProvenance({ source, label, className }: DataProvenanceProps
       <span
         className={cn(
           'inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-mono text-[9px] uppercase tracking-wider',
-          'bg-amber-900/30 border border-amber-600/30 text-amber-400',
+          'bg-[#c9b787]/30 border border-[#c9b787]/30 text-[#c9b787]',
           className,
         )}
       >
@@ -57,11 +57,11 @@ export function DataProvenance({ source, label, className }: DataProvenanceProps
     <span
       className={cn(
         'inline-flex items-center gap-1.5 px-2 py-0.5 rounded font-mono text-[9px] uppercase tracking-wider',
-        'bg-emerald-900/30 border border-emerald-600/30 text-emerald-400',
+        'bg-[#c9b787]/30 border border-[#c9b787]/30 text-[#c9b787]',
         className,
       )}
     >
-      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+      <span className="w-1.5 h-1.5 rounded-full bg-[#c9b787] animate-pulse" />
       {label ?? 'Live API'}
     </span>
   );
@@ -100,9 +100,9 @@ export function SeverityChip({
   className?: string;
 }) {
   const styles = {
-    critical: 'bg-red-500/10 text-red-400 border-red-500/30',
-    high: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
-    medium: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+    critical: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/30',
+    high: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/30',
+    medium: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/30',
     low: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
   };
   return (
@@ -126,12 +126,12 @@ export function StatusChip({
   className?: string;
 }) {
   const styles: Record<string, string> = {
-    open: 'bg-red-500/10 text-red-400 border-red-500/20',
-    triaging: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    escalated: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-    contained: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
-    resolved: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    acknowledged: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
+    open: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+    triaging: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+    escalated: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+    contained: 'bg-[#8a8a8a]/10 text-[#8a8a8a] border-sky-500/20',
+    resolved: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+    acknowledged: 'bg-[#8a8a8a]/10 text-[#8a8a8a] border-sky-500/20',
     suppressed: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
   };
   return (

@@ -15,9 +15,9 @@ import {
 import { type Experiment, experiments, projects } from '@/data/seed-data';
 
 const statusColors: Record<string, string> = {
-  running: 'text-amber-400 bg-amber-400/10',
-  completed: 'text-emerald-400 bg-emerald-400/10',
-  failed: 'text-red-400 bg-red-400/10',
+  running: 'text-[#c9b787] bg-[#c9b787]/10',
+  completed: 'text-[#c9b787] bg-[#c9b787]/10',
+  failed: 'text-[#f5f5f5] bg-[#f5f5f5]/10',
   queued: 'text-muted-foreground bg-muted',
 };
 
@@ -53,11 +53,11 @@ function ExperimentRow({
           className={cn(
             'w-2 h-2 rounded-full flex-shrink-0',
             experiment.status === 'running'
-              ? 'bg-amber-400 animate-pulse'
+              ? 'bg-[#c9b787] animate-pulse'
               : experiment.status === 'completed'
-                ? 'bg-emerald-400'
+                ? 'bg-[#c9b787]'
                 : experiment.status === 'failed'
-                  ? 'bg-red-400'
+                  ? 'bg-[#f5f5f5]'
                   : 'bg-muted-foreground',
           )}
         />
@@ -281,7 +281,7 @@ export default function Experiments() {
               Duration: e.duration || '',
             };
           })}
-          options={{ filename: 'experiments', title: 'ML Experiments', accentColor: '#8b5cf6' }}
+          options={{ filename: 'experiments', title: 'ML Experiments', accentColor: '#8a8a8a' }}
         />
       </div>
 

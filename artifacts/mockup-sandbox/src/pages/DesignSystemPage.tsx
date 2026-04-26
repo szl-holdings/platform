@@ -60,7 +60,7 @@ const SAMPLE_EVENTS: TimelineEvent[] = [
     label: 'Alert Threshold Breached',
     description: 'Action Debt score exceeded 85 — three compounding delays detected',
     severity: 'critical',
-    actor: 'LUMINA',
+    actor: 'Pulse',
   },
   {
     id: 't5',
@@ -83,7 +83,7 @@ const SAMPLE_NODES: GraphNode[] = [
     ringColor: 'var(--gi-accent-blue)',
   },
   { id: 'guardian', label: 'Guardian', x: 0.2, y: 0.45, radius: 10, color: 'var(--gi-accent-violet)' },
-  { id: 'pulse', label: 'LUMINA', x: 0.8, y: 0.45, radius: 10, color: 'var(--gi-accent-amber)' },
+  { id: 'pulse', label: 'Pulse', x: 0.8, y: 0.45, radius: 10, color: 'var(--gi-accent-amber)' },
   { id: 'lyte', label: 'Lyte', x: 0.35, y: 0.75, radius: 10, color: 'var(--gi-accent-green)' },
   { id: 'vessels', label: 'Vessels', x: 0.65, y: 0.75, radius: 10, color: '#14b8a6' },
 ];

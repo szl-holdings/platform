@@ -167,7 +167,7 @@ function DisruptionGlobe({
 
           return (
             <g key={zone.id} style={{ cursor: 'pointer' }} onClick={() => onSelect(zone.id)}>
-              {/* LUMINA ring */}
+              {/* status ring */}
               <circle
                 cx={cx}
                 cy={cy}

@@ -3,8 +3,8 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-const ACCENT = '#ef4444';
-const PURPLE = '#8b5cf6';
+const ACCENT = '#f5f5f5';
+const PURPLE = '#8a8a8a';
 const DS = {
   surface: 'rgba(255,255,255,0.025)',
   border: 'rgba(255,255,255,0.06)',
@@ -73,7 +73,7 @@ const INTEL_SOURCES: IntelSource[] = [
     lastFeed: Date.now() - 90000,
     alertCount: 3,
     confidence: 72,
-    color: '#8b5cf6',
+    color: '#8a8a8a',
   },
   {
     id: 'dw2',
@@ -83,7 +83,7 @@ const INTEL_SOURCES: IntelSource[] = [
     lastFeed: Date.now() - 45000,
     alertCount: 1,
     confidence: 61,
-    color: '#7c3aed',
+    color: '#8a8a8a',
   },
   {
     id: 'osint1',
@@ -93,7 +93,7 @@ const INTEL_SOURCES: IntelSource[] = [
     lastFeed: Date.now() - 12000,
     alertCount: 7,
     confidence: 83,
-    color: '#3b82f6',
+    color: '#c9b787',
   },
   {
     id: 'geo1',
@@ -103,7 +103,7 @@ const INTEL_SOURCES: IntelSource[] = [
     lastFeed: Date.now() - 300000,
     alertCount: 2,
     confidence: 77,
-    color: '#f59e0b',
+    color: '#c9b787',
   },
   {
     id: 'cti1',
@@ -113,7 +113,7 @@ const INTEL_SOURCES: IntelSource[] = [
     lastFeed: Date.now() - 5000,
     alertCount: 12,
     confidence: 96,
-    color: '#10b981',
+    color: '#c9b787',
   },
   {
     id: 'cti2',
@@ -123,7 +123,7 @@ const INTEL_SOURCES: IntelSource[] = [
     lastFeed: Date.now() - 1800000,
     alertCount: 4,
     confidence: 88,
-    color: '#14b8a6',
+    color: '#c9b787',
   },
   {
     id: 'int1',
@@ -133,7 +133,7 @@ const INTEL_SOURCES: IntelSource[] = [
     lastFeed: Date.now() - 2000,
     alertCount: 9,
     confidence: 95,
-    color: '#ef4444',
+    color: '#f5f5f5',
   },
   {
     id: 'isp1',
@@ -143,7 +143,7 @@ const INTEL_SOURCES: IntelSource[] = [
     lastFeed: Date.now() - 60000,
     alertCount: 5,
     confidence: 79,
-    color: '#f97316',
+    color: '#c9b787',
   },
 ];
 
@@ -305,15 +305,15 @@ function SourceBadge({ source }: { source: IntelSource }) {
 
 function SignalCard({ signal }: { signal: FusedSignal }) {
   const typeColors: Record<FusedSignal['type'], string> = {
-    ttp_match: '#ef4444',
-    dark_web_mention: '#8b5cf6',
-    geo_risk: '#f59e0b',
-    cross_domain_pattern: '#3b82f6',
-    adversary_movement: '#ef4444',
+    ttp_match: '#f5f5f5',
+    dark_web_mention: '#8a8a8a',
+    geo_risk: '#c9b787',
+    cross_domain_pattern: '#c9b787',
+    adversary_movement: '#f5f5f5',
   };
   const typeColor = typeColors[signal.type];
   const severityColor =
-    signal.severity === 'critical' ? ACCENT : signal.severity === 'high' ? '#f97316' : '#f59e0b';
+    signal.severity === 'critical' ? ACCENT : signal.severity === 'high' ? '#c9b787' : '#c9b787';
   const sourcedFrom = INTEL_SOURCES.filter((s) => signal.sources.includes(s.id));
 
   return (
@@ -363,7 +363,7 @@ function SignalCard({ signal }: { signal: FusedSignal }) {
         {signal.geographicRisk && (
           <span
             className="px-1.5 py-0.5 rounded text-[8px]"
-            style={{ background: '#f59e0b15', color: '#f59e0b' }}
+            style={{ background: '#c9b78715', color: '#c9b787' }}
           >
             🌐 {signal.geographicRisk}
           </span>
@@ -389,8 +389,8 @@ function SignalCard({ signal }: { signal: FusedSignal }) {
 }
 
 function GeoRiskRow({ risk }: { risk: GeopoliticalRisk }) {
-  const riskColors = { critical: ACCENT, high: '#f97316', medium: '#f59e0b', low: '#6b8f71' };
-  const trendColors = { escalating: ACCENT, stable: '#f59e0b', 'de-escalating': '#6b8f71' };
+  const riskColors = { critical: ACCENT, high: '#c9b787', medium: '#c9b787', low: '#6b8f71' };
+  const trendColors = { escalating: ACCENT, stable: '#c9b787', 'de-escalating': '#6b8f71' };
   const rc = riskColors[risk.riskLevel];
   const tc = trendColors[risk.trend];
 
@@ -455,7 +455,7 @@ export default function IntelligenceFusionGrid() {
             </span>
             <span
               className="px-1.5 py-0.5 rounded text-[8px] font-bold"
-              style={{ background: 'rgba(139,92,246,0.15)', color: PURPLE }}
+              style={{ background: 'rgba(138,138,138,0.15)', color: PURPLE }}
             >
               MULTI-SOURCE
             </span>
@@ -482,7 +482,7 @@ export default function IntelligenceFusionGrid() {
             color: ACCENT,
             pulse: criticalSignals > 0,
           },
-          { label: 'Total Alerts (24h)', value: totalAlerts.toString(), color: '#f59e0b' },
+          { label: 'Total Alerts (24h)', value: totalAlerts.toString(), color: '#c9b787' },
         ].map((c) => (
           <div
             key={c.label}

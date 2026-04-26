@@ -12,24 +12,24 @@ const statusLabels: Record<ProjectStatus, string> = {
 };
 
 const statusColors: Record<ProjectStatus, string> = {
-  research: 'text-violet-400 bg-violet-400/10 border-violet-400/20',
-  development: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
-  testing: 'text-amber-400 bg-amber-400/10 border-amber-400/20',
-  deployed: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20',
+  research: 'text-[#8a8a8a] bg-[#8a8a8a]/10 border-[#8a8a8a]/20',
+  development: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+  testing: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
+  deployed: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
 };
 
 const kanbanColors: Record<ProjectStatus, string> = {
-  research: 'border-violet-500/30',
-  development: 'border-blue-500/30',
-  testing: 'border-amber-500/30',
-  deployed: 'border-emerald-500/30',
+  research: 'border-[#8a8a8a]/30',
+  development: 'border-[#c9b787]/30',
+  testing: 'border-[#c9b787]/30',
+  deployed: 'border-[#c9b787]/30',
 };
 
 const kanbanDotColors: Record<ProjectStatus, string> = {
-  research: 'bg-violet-400',
-  development: 'bg-blue-400',
-  testing: 'bg-amber-400',
-  deployed: 'bg-emerald-400',
+  research: 'bg-[#8a8a8a]',
+  development: 'bg-[#c9b787]',
+  testing: 'bg-[#c9b787]',
+  deployed: 'bg-[#c9b787]',
 };
 
 function ProjectCard({ project }: { project: Project }) {

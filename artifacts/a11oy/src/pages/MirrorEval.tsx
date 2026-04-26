@@ -23,11 +23,11 @@ interface EvalsData {
 }
 
 const DISP_STYLE: Record<string, { color: string; bg: string; label: string }> = {
-  pass: { color: '#10b981', bg: 'rgba(16,185,129,0.08)', label: 'PASS' },
-  pass_with_warning: { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', label: 'PASS W/ WARNING' },
-  needs_more_evidence: { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', label: 'NEEDS EVIDENCE' },
-  requires_human_review: { color: '#ef4444', bg: 'rgba(239,68,68,0.08)', label: 'HUMAN REVIEW' },
-  blocked: { color: '#ef4444', bg: 'rgba(239,68,68,0.12)', label: 'BLOCKED' },
+  pass: { color: '#c9b787', bg: 'rgba(201,183,135,0.08)', label: 'PASS' },
+  pass_with_warning: { color: '#c9b787', bg: 'rgba(201,183,135,0.08)', label: 'PASS W/ WARNING' },
+  needs_more_evidence: { color: '#c9b787', bg: 'rgba(201,183,135,0.08)', label: 'NEEDS EVIDENCE' },
+  requires_human_review: { color: '#f5f5f5', bg: 'rgba(245,245,245,0.08)', label: 'HUMAN REVIEW' },
+  blocked: { color: '#f5f5f5', bg: 'rgba(245,245,245,0.12)', label: 'BLOCKED' },
 };
 
 const DIM_LABELS: Record<string, string> = {
@@ -49,7 +49,7 @@ const DIM_LABELS: Record<string, string> = {
 
 function ScorePill({ score }: { score: number }) {
   const pct = Math.round(score * 100);
-  const color = pct >= 80 ? '#10b981' : pct >= 60 ? '#f59e0b' : '#ef4444';
+  const color = pct >= 80 ? '#c9b787' : pct >= 60 ? '#c9b787' : '#f5f5f5';
   return (
     <span className="text-xs font-mono px-1 rounded" style={{ color, backgroundColor: `${color}18` }}>{pct}</span>
   );
@@ -85,12 +85,12 @@ export function MirrorEval() {
       ) : data ? (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
-            <KpiCard label="TOTAL EVALS" value={String(data.summary.total)} sub={`v${data.version}`} accent="#8b5cf6" />
-            <KpiCard label="PASSED" value={String(data.summary.passed)} sub="pass" accent="#10b981" />
-            <KpiCard label="WARNED" value={String(data.summary.warned)} sub="pass w/ warning" accent="#f59e0b" />
-            <KpiCard label="NEEDS EVIDENCE" value={String(data.summary.needsEvidence)} sub="blocked pending" accent="#f59e0b" />
-            <KpiCard label="HUMAN REVIEW" value={String(data.summary.humanReview)} sub="elevated" accent="#ef4444" />
-            <KpiCard label="BLOCKED" value={String(data.summary.blocked)} sub="gating enforced" accent="#ef4444" />
+            <KpiCard label="TOTAL EVALS" value={String(data.summary.total)} sub={`v${data.version}`} accent="#8a8a8a" />
+            <KpiCard label="PASSED" value={String(data.summary.passed)} sub="pass" accent="#c9b787" />
+            <KpiCard label="WARNED" value={String(data.summary.warned)} sub="pass w/ warning" accent="#c9b787" />
+            <KpiCard label="NEEDS EVIDENCE" value={String(data.summary.needsEvidence)} sub="blocked pending" accent="#c9b787" />
+            <KpiCard label="HUMAN REVIEW" value={String(data.summary.humanReview)} sub="elevated" accent="#f5f5f5" />
+            <KpiCard label="BLOCKED" value={String(data.summary.blocked)} sub="gating enforced" accent="#f5f5f5" />
           </div>
 
           <div className="grid lg:grid-cols-3 gap-4 mb-8">
@@ -100,7 +100,7 @@ export function MirrorEval() {
                 {data.topFailureReasons.map((r, i) => (
                   <div key={i} className="flex items-center justify-between text-xs">
                     <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{r.reason.replace(/_/g, ' ')}</span>
-                    <span className="font-mono" style={{ color: '#f59e0b' }}>{r.count}</span>
+                    <span className="font-mono" style={{ color: '#c9b787' }}>{r.count}</span>
                   </div>
                 ))}
               </div>
@@ -110,8 +110,8 @@ export function MirrorEval() {
               <div className="text-xs font-semibold mb-3" style={{ color: 'var(--color-a11oy-text-ghost)' }}>REGRESSION SUITE</div>
               <div className="space-y-2 text-xs">
                 <div className="flex items-center justify-between"><span style={{ color: 'var(--color-a11oy-text-sub)' }}>Total cases</span><span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{data.regressionSuite.total}</span></div>
-                <div className="flex items-center justify-between"><span style={{ color: 'var(--color-a11oy-text-sub)' }}>Passing</span><span className="font-mono" style={{ color: '#10b981' }}>{data.regressionSuite.passing}</span></div>
-                <div className="flex items-center justify-between"><span style={{ color: 'var(--color-a11oy-text-sub)' }}>Failing</span><span className="font-mono" style={{ color: data.regressionSuite.failing > 0 ? '#ef4444' : '#10b981' }}>{data.regressionSuite.failing}</span></div>
+                <div className="flex items-center justify-between"><span style={{ color: 'var(--color-a11oy-text-sub)' }}>Passing</span><span className="font-mono" style={{ color: '#c9b787' }}>{data.regressionSuite.passing}</span></div>
+                <div className="flex items-center justify-between"><span style={{ color: 'var(--color-a11oy-text-sub)' }}>Failing</span><span className="font-mono" style={{ color: data.regressionSuite.failing > 0 ? '#f5f5f5' : '#c9b787' }}>{data.regressionSuite.failing}</span></div>
                 <div className="flex items-center justify-between"><span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Last run</span><span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{new Date(data.regressionSuite.lastRun).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span></div>
               </div>
             </Card>
@@ -123,12 +123,12 @@ export function MirrorEval() {
                   <div key={m.model} className="text-xs">
                     <div className="flex items-center justify-between mb-0.5">
                       <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{m.model}</span>
-                      <span className="font-mono" style={{ color: m.avgComposite >= 0.85 ? '#10b981' : '#f59e0b' }}>
+                      <span className="font-mono" style={{ color: m.avgComposite >= 0.85 ? '#c9b787' : '#c9b787' }}>
                         {Math.round(m.avgComposite * 100)}%
                       </span>
                     </div>
                     <div className="h-1 rounded-full" style={{ backgroundColor: 'var(--color-a11oy-muted)' }}>
-                      <div className="h-1 rounded-full" style={{ width: `${Math.round(m.avgComposite * 100)}%`, backgroundColor: m.avgComposite >= 0.85 ? '#10b981' : '#f59e0b' }} />
+                      <div className="h-1 rounded-full" style={{ width: `${Math.round(m.avgComposite * 100)}%`, backgroundColor: m.avgComposite >= 0.85 ? '#c9b787' : '#c9b787' }} />
                     </div>
                   </div>
                 ))}
@@ -141,7 +141,7 @@ export function MirrorEval() {
             {['all', 'pass', 'pass_with_warning', 'needs_more_evidence', 'requires_human_review', 'blocked'].map(d => {
               const style = DISP_STYLE[d];
               return (
-                <button key={d} onClick={() => setFilterDisp(d)} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: filterDisp === d ? (style?.bg ?? 'rgba(59,130,246,0.2)') : 'var(--color-a11oy-muted)', color: filterDisp === d ? (style?.color ?? '#3b82f6') : 'var(--color-a11oy-text-ghost)', border: `1px solid ${filterDisp === d ? (style?.color ?? '#3b82f6') + '40' : 'var(--color-a11oy-border)'}` }}>
+                <button key={d} onClick={() => setFilterDisp(d)} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: filterDisp === d ? (style?.bg ?? 'rgba(201,183,135,0.2)') : 'var(--color-a11oy-muted)', color: filterDisp === d ? (style?.color ?? '#c9b787') : 'var(--color-a11oy-text-ghost)', border: `1px solid ${filterDisp === d ? (style?.color ?? '#c9b787') + '40' : 'var(--color-a11oy-border)'}` }}>
                   {d === 'all' ? 'all' : (style?.label ?? d)}
                 </button>
               );
@@ -163,7 +163,7 @@ export function MirrorEval() {
                         </div>
                         <div className="flex items-center gap-1.5 flex-shrink-0">
                           <span className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ color: style.color, backgroundColor: style.bg }}>{style.label}</span>
-                          <span className="text-xs font-mono" style={{ color: e.composite >= 0.8 ? '#10b981' : e.composite >= 0.6 ? '#f59e0b' : '#ef4444' }}>
+                          <span className="text-xs font-mono" style={{ color: e.composite >= 0.8 ? '#c9b787' : e.composite >= 0.6 ? '#c9b787' : '#f5f5f5' }}>
                             {Math.round(e.composite * 100)}%
                           </span>
                         </div>
@@ -171,15 +171,15 @@ export function MirrorEval() {
                       {e.flags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-1">
                           {e.flags.map(f => (
-                            <span key={f} className="text-xs px-1 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444' }}>{f.replace(/_/g, ' ')}</span>
+                            <span key={f} className="text-xs px-1 rounded" style={{ backgroundColor: 'rgba(245,245,245,0.08)', color: '#f5f5f5' }}>{f.replace(/_/g, ' ')}</span>
                           ))}
                         </div>
                       )}
                       <div className="flex items-center gap-3 text-xs">
                         <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{new Date(e.runAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                         <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{e.durationMs}ms</span>
-                        {e.gatingBlocked && <span style={{ color: '#ef4444' }}>⊗ gating blocked</span>}
-                        {e.proofComplete && <span style={{ color: '#10b981' }}>◇ proof complete</span>}
+                        {e.gatingBlocked && <span style={{ color: '#f5f5f5' }}>⊗ gating blocked</span>}
+                        {e.proofComplete && <span style={{ color: '#c9b787' }}>◇ proof complete</span>}
                       </div>
                     </Card>
                   );
@@ -193,7 +193,7 @@ export function MirrorEval() {
                   <SectionTitle>14-Dimension Scores</SectionTitle>
                   <Card>
                     <div className="flex items-center gap-2 mb-4">
-                      <span className="text-sm font-mono font-bold" style={{ color: selected.composite >= 0.8 ? '#10b981' : selected.composite >= 0.6 ? '#f59e0b' : '#ef4444' }}>
+                      <span className="text-sm font-mono font-bold" style={{ color: selected.composite >= 0.8 ? '#c9b787' : selected.composite >= 0.6 ? '#c9b787' : '#f5f5f5' }}>
                         {Math.round(selected.composite * 100)}%
                       </span>
                       <span className="text-xs px-1.5 py-0.5 rounded" style={{ color: DISP_STYLE[selected.disposition]?.color, backgroundColor: DISP_STYLE[selected.disposition]?.bg }}>
@@ -203,7 +203,7 @@ export function MirrorEval() {
                     <div className="space-y-2">
                       {Object.entries(selected.scores).map(([dim, score]) => {
                         const pct = Math.round((score as number) * 100);
-                        const color = pct >= 80 ? '#10b981' : pct >= 60 ? '#f59e0b' : '#ef4444';
+                        const color = pct >= 80 ? '#c9b787' : pct >= 60 ? '#c9b787' : '#f5f5f5';
                         return (
                           <div key={dim}>
                             <div className="flex items-center justify-between text-xs mb-0.5">
@@ -218,7 +218,7 @@ export function MirrorEval() {
                       })}
                     </div>
                     {selected.gatingBlocked && (
-                      <div className="mt-3 p-2 rounded text-xs" style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}>
+                      <div className="mt-3 p-2 rounded text-xs" style={{ backgroundColor: 'rgba(245,245,245,0.08)', color: '#f5f5f5', border: '1px solid rgba(245,245,245,0.2)' }}>
                         ⊗ Gating blocked — action cannot proceed until disposition improves
                       </div>
                     )}
@@ -231,7 +231,7 @@ export function MirrorEval() {
                     <div className="flex items-end gap-1.5 h-20 mb-2">
                       {data.policyComplianceTrend.map((d, i) => {
                         const pct = Math.round(d.score * 100);
-                        const color = pct >= 90 ? '#10b981' : pct >= 80 ? '#f59e0b' : '#ef4444';
+                        const color = pct >= 90 ? '#c9b787' : pct >= 80 ? '#c9b787' : '#f5f5f5';
                         return (
                           <div key={i} className="flex-1 flex flex-col items-center gap-1">
                             <div className="w-full rounded-sm" style={{ height: `${pct * 0.8}%`, backgroundColor: color, minHeight: 4 }} />
@@ -241,7 +241,7 @@ export function MirrorEval() {
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>7 days</span>
-                      <span style={{ color: '#10b981' }}>{Math.round((data.policyComplianceTrend[data.policyComplianceTrend.length - 1]?.score ?? 0) * 100)}% today</span>
+                      <span style={{ color: '#c9b787' }}>{Math.round((data.policyComplianceTrend[data.policyComplianceTrend.length - 1]?.score ?? 0) * 100)}% today</span>
                     </div>
                     <div className="mt-3 text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
                       Select an eval result to view 14-dimension scores.
@@ -256,7 +256,7 @@ export function MirrorEval() {
         <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Eval dashboard unavailable.</div>
       )}
 
-      <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
+      <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
         <DemoBadge /> MirrorEval 2.0 — demo mode. All eval results are seeded. Blocked dispositions prevent execution in the real runtime.
       </div>
     </Layout>

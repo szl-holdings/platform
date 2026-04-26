@@ -59,7 +59,7 @@ function AegisNewsletterWidget() {
         <div
           style={{
             fontSize: '0.85vw',
-            color: '#4ade80',
+            color: '#c9b787',
             padding: '0.5vh 1vw',
             background: 'rgba(74,222,128,0.08)',
             border: '1px solid rgba(74,222,128,0.2)',
@@ -187,7 +187,7 @@ export default function S15Closing() {
               color: '#0cc8d9',
             }}
           >
-            SZL Holdings
+            Aegis
           </span>
         </div>
         <h2

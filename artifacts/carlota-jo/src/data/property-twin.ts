@@ -92,7 +92,7 @@ export const CASTELLANO_ESTATE_TWIN: PropertyTwin = {
     },
     {
       id: 'vend-security',
-      name: 'TENAX Home Defense',
+      name: 'Aegis Home Defense',
       specialty: 'Physical Security',
       status: 'online',
       lastActive: '1m ago',

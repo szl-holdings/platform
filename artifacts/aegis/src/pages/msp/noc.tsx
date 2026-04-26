@@ -52,9 +52,9 @@ interface UptimeEntry {
 const POLL_INTERVAL = 30_000;
 
 function UptimeBar({ service, uptime, incidents }: UptimeEntry) {
-  const color = uptime >= 99.9 ? 'bg-emerald-400' : uptime >= 99 ? 'bg-amber-400' : 'bg-red-400';
+  const color = uptime >= 99.9 ? 'bg-[#c9b787]' : uptime >= 99 ? 'bg-[#c9b787]' : 'bg-[#f5f5f5]';
   const textColor =
-    uptime >= 99.9 ? 'text-emerald-400' : uptime >= 99 ? 'text-amber-400' : 'text-red-400';
+    uptime >= 99.9 ? 'text-[#c9b787]' : uptime >= 99 ? 'text-[#c9b787]' : 'text-[#f5f5f5]';
   return (
     <div className="flex items-center gap-4 py-2">
       <div className="w-40 text-sm text-foreground truncate">{service}</div>
@@ -76,9 +76,9 @@ function UptimeBar({ service, uptime, incidents }: UptimeEntry) {
 
 function AlertRow({ alert, index }: { alert: Alert; index: number }) {
   const severityConfig = {
-    critical: { color: 'text-red-400 bg-red-500/10', icon: XCircle },
-    warning: { color: 'text-amber-400 bg-amber-500/10', icon: AlertTriangle },
-    info: { color: 'text-blue-400 bg-blue-500/10', icon: Activity },
+    critical: { color: 'text-[#f5f5f5] bg-[#f5f5f5]/10', icon: XCircle },
+    warning: { color: 'text-[#c9b787] bg-[#c9b787]/10', icon: AlertTriangle },
+    info: { color: 'text-[#c9b787] bg-[#c9b787]/10', icon: Activity },
   };
   const config = severityConfig[alert.severity] || severityConfig.info;
   const Icon = config.icon;
@@ -90,7 +90,7 @@ function AlertRow({ alert, index }: { alert: Alert; index: number }) {
       transition={{ duration: 0.2, delay: index * 0.03 }}
       className={cn(
         'flex items-center gap-3 px-4 py-3 border-b border-border/30 hover:bg-muted/20 transition-colors',
-        alert.severity === 'critical' && !alert.acknowledged && 'bg-red-500/5',
+        alert.severity === 'critical' && !alert.acknowledged && 'bg-[#f5f5f5]/5',
       )}
     >
       <div
@@ -108,7 +108,7 @@ function AlertRow({ alert, index }: { alert: Alert; index: number }) {
       </div>
       <div className="flex items-center gap-3 shrink-0">
         {alert.acknowledged && (
-          <span className="text-xs text-emerald-400 flex items-center gap-1">
+          <span className="text-xs text-[#c9b787] flex items-center gap-1">
             <CheckCircle2 className="w-3 h-3" /> ACK
           </span>
         )}
@@ -128,11 +128,11 @@ function SystemMetricsPanel({ metrics }: { metrics: SystemMetrics | null; loadin
     <div className="glass-card rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
-          <Server className="w-4 h-4 text-blue-400" /> API Server — Live Metrics
+          <Server className="w-4 h-4 text-[#c9b787]" /> API Server — Live Metrics
         </h2>
         <div className="flex items-center gap-2">
           <span
-            className={`w-2 h-2 rounded-full ${metrics.device.status === 'online' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400 animate-pulse'}`}
+            className={`w-2 h-2 rounded-full ${metrics.device.status === 'online' ? 'bg-[#c9b787] animate-pulse' : 'bg-[#c9b787] animate-pulse'}`}
           />
           <span className="text-xs text-muted-foreground font-mono">{metrics.device.hostname}</span>
         </div>
@@ -141,7 +141,7 @@ function SystemMetricsPanel({ metrics }: { metrics: SystemMetrics | null; loadin
         <div className="rounded-lg bg-muted/40 p-3">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">CPU</p>
           <p
-            className={`text-2xl font-bold ${m.cpu.percent > 80 ? 'text-red-400' : m.cpu.percent > 60 ? 'text-amber-400' : 'text-emerald-400'}`}
+            className={`text-2xl font-bold ${m.cpu.percent > 80 ? 'text-[#f5f5f5]' : m.cpu.percent > 60 ? 'text-[#c9b787]' : 'text-[#c9b787]'}`}
           >
             {m.cpu.percent}%
           </p>
@@ -150,7 +150,7 @@ function SystemMetricsPanel({ metrics }: { metrics: SystemMetrics | null; loadin
           </p>
           <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full ${m.cpu.percent > 80 ? 'bg-red-400' : m.cpu.percent > 60 ? 'bg-amber-400' : 'bg-emerald-400'}`}
+              className={`h-full rounded-full ${m.cpu.percent > 80 ? 'bg-[#f5f5f5]' : m.cpu.percent > 60 ? 'bg-[#c9b787]' : 'bg-[#c9b787]'}`}
               style={{ width: `${m.cpu.percent}%` }}
             />
           </div>
@@ -158,7 +158,7 @@ function SystemMetricsPanel({ metrics }: { metrics: SystemMetrics | null; loadin
         <div className="rounded-lg bg-muted/40 p-3">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Memory</p>
           <p
-            className={`text-2xl font-bold ${m.memory.percent > 85 ? 'text-red-400' : m.memory.percent > 70 ? 'text-amber-400' : 'text-emerald-400'}`}
+            className={`text-2xl font-bold ${m.memory.percent > 85 ? 'text-[#f5f5f5]' : m.memory.percent > 70 ? 'text-[#c9b787]' : 'text-[#c9b787]'}`}
           >
             {m.memory.percent}%
           </p>
@@ -167,27 +167,27 @@ function SystemMetricsPanel({ metrics }: { metrics: SystemMetrics | null; loadin
           </p>
           <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full ${m.memory.percent > 85 ? 'bg-red-400' : m.memory.percent > 70 ? 'bg-amber-400' : 'bg-emerald-400'}`}
+              className={`h-full rounded-full ${m.memory.percent > 85 ? 'bg-[#f5f5f5]' : m.memory.percent > 70 ? 'bg-[#c9b787]' : 'bg-[#c9b787]'}`}
               style={{ width: `${m.memory.percent}%` }}
             />
           </div>
         </div>
         <div className="rounded-lg bg-muted/40 p-3">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Uptime</p>
-          <p className="text-2xl font-bold text-emerald-400">{m.uptime.days}d</p>
+          <p className="text-2xl font-bold text-[#c9b787]">{m.uptime.days}d</p>
           <p className="text-[10px] text-muted-foreground mt-1">{m.uptime.formatted}</p>
           <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-emerald-400" style={{ width: '100%' }} />
+            <div className="h-full rounded-full bg-[#c9b787]" style={{ width: '100%' }} />
           </div>
         </div>
         <div className="rounded-lg bg-muted/40 p-3">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Process</p>
-          <p className="text-2xl font-bold text-blue-400">PID {m.process.pid}</p>
+          <p className="text-2xl font-bold text-[#c9b787]">PID {m.process.pid}</p>
           <p className="text-[10px] text-muted-foreground mt-1">
             {m.process.nodeVersion} · {Math.round(m.process.uptime / 60)}m
           </p>
           <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-blue-400" style={{ width: '100%' }} />
+            <div className="h-full rounded-full bg-[#c9b787]" style={{ width: '100%' }} />
           </div>
         </div>
       </div>
@@ -447,8 +447,8 @@ export default function NOCPage() {
             })}
           </span>
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-sm text-emerald-400 font-medium">Live</span>
+            <span className="w-2 h-2 rounded-full bg-[#c9b787] animate-pulse" />
+            <span className="text-sm text-[#c9b787] font-medium">Live</span>
           </div>
         </div>
       </div>
@@ -458,25 +458,25 @@ export default function NOCPage() {
           {
             label: 'Critical Alerts',
             value: criticalCount.toString(),
-            color: 'text-red-400',
+            color: 'text-[#f5f5f5]',
             icon: XCircle,
           },
           {
             label: 'Warnings',
             value: warningCount.toString(),
-            color: 'text-amber-400',
+            color: 'text-[#c9b787]',
             icon: AlertTriangle,
           },
           {
             label: 'Unacknowledged',
             value: unacknowledged.toString(),
-            color: 'text-orange-400',
+            color: 'text-[#c9b787]',
             icon: Bell,
           },
           {
             label: 'Avg Uptime',
             value: `${avgUptime}%`,
-            color: 'text-emerald-400',
+            color: 'text-[#c9b787]',
             icon: Activity,
           },
         ].map((stat, i) => (
@@ -522,17 +522,17 @@ export default function NOCPage() {
 
         <div className="glass-card rounded-xl overflow-hidden">
           <div className="px-5 py-4 border-b border-border/40 flex items-center gap-2">
-            <Eye className="w-4 h-4 text-blue-400" />
+            <Eye className="w-4 h-4 text-[#c9b787]" />
             <h2 className="text-sm font-semibold text-foreground">Incident Timeline</h2>
           </div>
           <div className="p-4 space-y-0 max-h-[500px] overflow-y-auto">
             {incidentTimeline.map((event, i) => {
               const color =
                 event.severity === 'critical'
-                  ? 'bg-red-400'
+                  ? 'bg-[#f5f5f5]'
                   : event.severity === 'warning'
-                    ? 'bg-amber-400'
-                    : 'bg-blue-400';
+                    ? 'bg-[#c9b787]'
+                    : 'bg-[#c9b787]';
               return (
                 <motion.div
                   key={i}
@@ -564,7 +564,7 @@ export default function NOCPage() {
           <span
             className={cn(
               'text-sm font-mono',
-              avgUptime >= 99.5 ? 'text-emerald-400' : 'text-amber-400',
+              avgUptime >= 99.5 ? 'text-[#c9b787]' : 'text-[#c9b787]',
             )}
           >
             Avg: {avgUptime.toFixed(2)}%

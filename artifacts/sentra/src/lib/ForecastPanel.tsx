@@ -78,7 +78,7 @@ function IntervalBar({ iv, threshold }: { iv: ForecastInterval; threshold?: numb
     <div className="space-y-1">
       <div className="flex items-center justify-between text-[10px] font-mono">
         <span className="text-muted-foreground">{iv.horizon}</span>
-        <span className={breached ? 'text-red-400' : 'text-foreground'}>
+        <span className={breached ? 'text-[#f5f5f5]' : 'text-foreground'}>
           {(iv.point * 100).toFixed(1)}%{' '}
           <span className="text-muted-foreground">
             [{(iv.lower * 100).toFixed(0)}–{(iv.upper * 100).toFixed(0)}]
@@ -91,12 +91,12 @@ function IntervalBar({ iv, threshold }: { iv: ForecastInterval; threshold?: numb
           style={{ left: `${iv.lower * 100}%`, width: `${(iv.upper - iv.lower) * 100}%` }}
         />
         <div
-          className={`absolute h-full w-0.5 rounded-full ${breached ? 'bg-red-400' : 'bg-primary'}`}
+          className={`absolute h-full w-0.5 rounded-full ${breached ? 'bg-[#f5f5f5]' : 'bg-primary'}`}
           style={{ left: `${iv.point * 100}%` }}
         />
         {threshold !== undefined && (
           <div
-            className="absolute h-full w-px bg-amber-400/60"
+            className="absolute h-full w-px bg-[#c9b787]/60"
             style={{ left: `${threshold * 100}%` }}
           />
         )}
@@ -113,7 +113,7 @@ function HeadCard({ head }: { head: ForecastHead }) {
   const latest = head.intervals[head.intervals.length - 1];
   return (
     <div
-      className={`rounded-lg border p-4 space-y-3 cursor-pointer transition-all ${head.thresholdBreached ? 'border-red-500/40 bg-red-500/5' : 'border-border bg-card hover:bg-accent/30'}`}
+      className={`rounded-lg border p-4 space-y-3 cursor-pointer transition-all ${head.thresholdBreached ? 'border-[#f5f5f5]/40 bg-[#f5f5f5]/5' : 'border-border bg-card hover:bg-accent/30'}`}
       onClick={() => setExpanded((v) => !v)}
     >
       <div className="flex items-start justify-between gap-2">
@@ -124,9 +124,9 @@ function HeadCard({ head }: { head: ForecastHead }) {
           <p className="text-sm font-medium text-foreground leading-tight">{head.label}</p>
         </div>
         {head.thresholdBreached ? (
-          <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+          <AlertTriangle className="w-4 h-4 text-[#f5f5f5] shrink-0 mt-0.5" />
         ) : (
-          <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+          <CheckCircle className="w-4 h-4 text-[#c9b787] shrink-0 mt-0.5" />
         )}
       </div>
       {latest && <IntervalBar iv={latest} threshold={head.alertThreshold} />}
@@ -155,7 +155,7 @@ export function ForecastPanel() {
         </div>
         <div className="flex items-center gap-2">
           {breachedCount > 0 && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-mono bg-red-500/10 text-red-400 border border-red-500/30 rounded px-2 py-0.5">
+            <span className="inline-flex items-center gap-1 text-[10px] font-mono bg-[#f5f5f5]/10 text-[#f5f5f5] border border-[#f5f5f5]/30 rounded px-2 py-0.5">
               <Activity className="w-3 h-3" />
               {breachedCount} threshold{breachedCount > 1 ? 's' : ''} breached
             </span>

@@ -32,10 +32,10 @@ import { Link } from 'wouter';
 import { api } from '@/lib/api';
 
 const _COLORS = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
-  low: '#3b82f6',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#c9b787',
+  low: '#c9b787',
   info: '#6b7280',
 };
 
@@ -72,7 +72,7 @@ function MetricCard({
   sub,
   trend,
   icon: Icon,
-  color = '#f59e0b',
+  color = '#c9b787',
 }: {
   label: string;
   value: string | number;
@@ -82,7 +82,7 @@ function MetricCard({
   color?: string;
 }) {
   const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
-  const trendColor = trend === 'up' ? '#22c55e' : trend === 'down' ? '#ef4444' : '#6b7280';
+  const trendColor = trend === 'up' ? '#c9b787' : trend === 'down' ? '#f5f5f5' : '#6b7280';
   return (
     <div className="bg-[#0d1117] border border-[#1e2a3a] rounded-xl p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between">
@@ -152,7 +152,7 @@ const RETRIEVAL_QUALITY = [
 
 function DemoDataBanner({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-amber-400/10 border border-amber-400/20 text-xs text-amber-400 font-mono">
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-[#c9b787]/10 border border-[#c9b787]/20 text-xs text-[#c9b787] font-mono">
       <Info size={12} />
       <span>{label} — seeded pilot data, not yet wired to live pipeline</span>
     </div>
@@ -190,7 +190,7 @@ export default function OperatorAnalyticsPage() {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <BarChart3 size={22} className="text-amber-400" />
+              <BarChart3 size={22} className="text-[#c9b787]" />
               <h1 className="text-xl font-bold text-white font-mono tracking-tight">
                 Operator Analytics
               </h1>
@@ -204,7 +204,7 @@ export default function OperatorAnalyticsPage() {
               <button
                 key={r}
                 onClick={() => setTimeRange(r)}
-                className={`px-3 py-1.5 rounded text-xs font-mono transition-colors ${timeRange === r ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40' : 'text-[#8b9ab0] border border-[#1e2a3a] hover:text-white'}`}
+                className={`px-3 py-1.5 rounded text-xs font-mono transition-colors ${timeRange === r ? 'bg-[#c9b787]/20 text-[#c9b787] border border-[#c9b787]/40' : 'text-[#8b9ab0] border border-[#1e2a3a] hover:text-white'}`}
               >
                 {r}
               </button>
@@ -226,7 +226,7 @@ export default function OperatorAnalyticsPage() {
             sub={`${pendingApprovals} awaiting action`}
             trend={pendingApprovals > 3 ? 'down' : 'flat'}
             icon={Clock}
-            color="#f97316"
+            color="#c9b787"
           />
           <MetricCard
             label="Policy Blocks (7d)"
@@ -234,7 +234,7 @@ export default function OperatorAnalyticsPage() {
             sub="3 cross-tenant blocked"
             trend="down"
             icon={Lock}
-            color="#ef4444"
+            color="#f5f5f5"
           />
           <MetricCard
             label="Active Incidents"
@@ -242,7 +242,7 @@ export default function OperatorAnalyticsPage() {
             sub={`${totalIncidents} total`}
             trend="flat"
             icon={AlertTriangle}
-            color="#ef4444"
+            color="#f5f5f5"
           />
         </div>
 
@@ -268,15 +268,15 @@ export default function OperatorAnalyticsPage() {
                 <Area
                   type="monotone"
                   dataKey="runs"
-                  stroke="#f59e0b"
-                  fill="#f59e0b22"
+                  stroke="#c9b787"
+                  fill="#c9b78722"
                   strokeWidth={2}
                 />
                 <Area
                   type="monotone"
                   dataKey="failures"
-                  stroke="#ef4444"
-                  fill="#ef444422"
+                  stroke="#f5f5f5"
+                  fill="#f5f5f522"
                   strokeWidth={2}
                 />
               </AreaChart>
@@ -299,16 +299,16 @@ export default function OperatorAnalyticsPage() {
                     borderRadius: 8,
                   }}
                 />
-                <Line type="monotone" dataKey="p50" stroke="#22c55e" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="p95" stroke="#f59e0b" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="p99" stroke="#ef4444" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="p50" stroke="#c9b787" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="p95" stroke="#c9b787" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="p99" stroke="#f5f5f5" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
             <div className="flex gap-4 mt-2">
               {[
-                { label: 'p50', color: '#22c55e' },
-                { label: 'p95', color: '#f59e0b' },
-                { label: 'p99', color: '#ef4444' },
+                { label: 'p50', color: '#c9b787' },
+                { label: 'p95', color: '#c9b787' },
+                { label: 'p99', color: '#f5f5f5' },
               ].map((l) => (
                 <div key={l.label} className="flex items-center gap-1">
                   <div className="w-3 h-0.5" style={{ backgroundColor: l.color }} />
@@ -334,9 +334,9 @@ export default function OperatorAnalyticsPage() {
                     borderRadius: 8,
                   }}
                 />
-                <Bar dataKey="hitRate" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="missRate" fill="#ef4444" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="lowConfidence" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="hitRate" fill="#c9b787" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="missRate" fill="#f5f5f5" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="lowConfidence" fill="#c9b787" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -357,7 +357,7 @@ export default function OperatorAnalyticsPage() {
                     borderRadius: 8,
                   }}
                 />
-                <Bar dataKey="blocks" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="blocks" fill="#f5f5f5" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -375,12 +375,12 @@ export default function OperatorAnalyticsPage() {
                     <span className="text-xs text-white font-mono">{m.name}</span>
                     <div className="flex gap-3 text-xs text-[#8b9ab0] font-mono">
                       <span>{m.calls.toLocaleString()} calls</span>
-                      <span className="text-amber-400">${m.cost.toFixed(2)}</span>
+                      <span className="text-[#c9b787]">${m.cost.toFixed(2)}</span>
                     </div>
                   </div>
                   <div className="h-1.5 bg-[#1e2a3a] rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-amber-400 rounded-full"
+                      className="h-full bg-[#c9b787] rounded-full"
                       style={{ width: `${m.pct}%` }}
                     />
                   </div>
@@ -419,7 +419,7 @@ export default function OperatorAnalyticsPage() {
                         <div className="space-y-0.5 min-w-0">
                           <div className="flex items-center gap-2">
                             <span
-                              className={`text-xs px-1.5 py-0.5 rounded font-mono font-bold ${impact === 'critical' ? 'bg-red-500/20 text-red-400' : impact === 'high' ? 'bg-orange-500/20 text-orange-400' : 'bg-blue-500/20 text-blue-400'}`}
+                              className={`text-xs px-1.5 py-0.5 rounded font-mono font-bold ${impact === 'critical' ? 'bg-[#f5f5f5]/20 text-[#f5f5f5]' : impact === 'high' ? 'bg-[#c9b787]/20 text-[#c9b787]' : 'bg-[#c9b787]/20 text-[#c9b787]'}`}
                             >
                               {String(impact).toUpperCase()}
                             </span>
@@ -438,7 +438,7 @@ export default function OperatorAnalyticsPage() {
                           </p>
                         </div>
                         <Link href="/response-orchestration">
-                          <button className="ml-3 px-3 py-1.5 bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs rounded font-mono hover:bg-amber-400/30 transition-colors whitespace-nowrap">
+                          <button className="ml-3 px-3 py-1.5 bg-[#c9b787]/20 border border-[#c9b787]/40 text-[#c9b787] text-xs rounded font-mono hover:bg-[#c9b787]/30 transition-colors whitespace-nowrap">
                             Review
                           </button>
                         </Link>
@@ -456,7 +456,7 @@ export default function OperatorAnalyticsPage() {
             sub="-12ms vs yesterday"
             trend="up"
             icon={Zap}
-            color="#22c55e"
+            color="#c9b787"
           />
           <MetricCard
             label="Model Cost (7d)"
@@ -464,7 +464,7 @@ export default function OperatorAnalyticsPage() {
             sub="+6% vs prior week"
             trend="down"
             icon={Database}
-            color="#f59e0b"
+            color="#c9b787"
           />
           <MetricCard
             label="Retrieval Hit Rate"
@@ -472,7 +472,7 @@ export default function OperatorAnalyticsPage() {
             sub="+1.2% vs 7d avg"
             trend="up"
             icon={Eye}
-            color="#22c55e"
+            color="#c9b787"
           />
           <MetricCard
             label="Failure Rate"
@@ -480,7 +480,7 @@ export default function OperatorAnalyticsPage() {
             sub="-0.3% vs yesterday"
             trend="up"
             icon={AlertOctagon}
-            color="#ef4444"
+            color="#f5f5f5"
           />
         </div>
       </div>

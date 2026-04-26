@@ -82,21 +82,21 @@ interface ScoreResult {
 }
 
 const STATUS_STYLE: Record<SubmissionStatus, string> = {
-  pending: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
-  accepted: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
-  graduated: 'bg-sky-500/10 text-sky-300 border-sky-500/30',
-  rejected: 'bg-red-500/10 text-red-300 border-red-500/30',
+  pending: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/30',
+  accepted: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/30',
+  graduated: 'bg-[#8a8a8a]/10 text-[#8a8a8a] border-sky-500/30',
+  rejected: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/30',
   duplicate: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
   out_of_scope: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
 };
 
 const ARCHETYPE_COLORS: Record<ThreatArchetype, string> = {
-  ransomware: 'text-red-300',
-  cascade: 'text-orange-300',
-  supply_chain: 'text-amber-300',
-  regulatory: 'text-violet-300',
-  insider: 'text-rose-300',
-  black_swan: 'text-red-400',
+  ransomware: 'text-[#f5f5f5]',
+  cascade: 'text-[#c9b787]',
+  supply_chain: 'text-[#c9b787]',
+  regulatory: 'text-[#8a8a8a]',
+  insider: 'text-[#f5f5f5]',
+  black_swan: 'text-[#f5f5f5]',
 };
 
 function formatUsd(v: number): string {
@@ -244,13 +244,13 @@ function SubmitModal({ engagement, onClose, onSubmit }: SubmitModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 backdrop-blur-sm overflow-y-auto py-8">
-      <div className="w-full max-w-2xl rounded-xl border border-red-500/20 bg-[#0f0808] shadow-2xl mx-4">
-        <div className="flex items-center justify-between p-5 border-b border-red-500/10">
+      <div className="w-full max-w-2xl rounded-xl border border-[#f5f5f5]/20 bg-[#0f0808] shadow-2xl mx-4">
+        <div className="flex items-center justify-between p-5 border-b border-[#f5f5f5]/10">
           <div>
-            <h2 className="text-sm font-bold text-red-100">Submit Scenario</h2>
-            <p className="text-[10px] text-red-400/40 mt-0.5">{engagement.title}</p>
+            <h2 className="text-sm font-bold text-[#f5f5f5]">Submit Scenario</h2>
+            <p className="text-[10px] text-[#f5f5f5]/40 mt-0.5">{engagement.title}</p>
           </div>
-          <button onClick={onClose} className="text-red-400/50 hover:text-red-400">
+          <button onClick={onClose} className="text-[#f5f5f5]/50 hover:text-[#f5f5f5]">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -262,7 +262,7 @@ function SubmitModal({ engagement, onClose, onSubmit }: SubmitModalProps) {
         >
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <label className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider block mb-1">
+              <label className="text-[10px] text-[#f5f5f5]/50 font-mono uppercase tracking-wider block mb-1">
                 Scenario Title *
               </label>
               <input
@@ -270,17 +270,17 @@ function SubmitModal({ engagement, onClose, onSubmit }: SubmitModalProps) {
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 placeholder="e.g. Ransomware on Billing Cluster — Q4 Close Friday 17:00"
-                className="w-full bg-[#1a0d0d] border border-red-500/20 rounded-lg px-3 py-2 text-xs text-red-200 placeholder:text-red-400/30 outline-none focus:border-red-500/40"
+                className="w-full bg-[#1a0d0d] border border-[#f5f5f5]/20 rounded-lg px-3 py-2 text-xs text-[#f5f5f5] placeholder:text-[#f5f5f5]/30 outline-none focus:border-[#f5f5f5]/40"
               />
             </div>
             <div>
-              <label className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider block mb-1">
+              <label className="text-[10px] text-[#f5f5f5]/50 font-mono uppercase tracking-wider block mb-1">
                 Archetype
               </label>
               <select
                 value={form.archetype}
                 onChange={(e) => setForm({ ...form, archetype: e.target.value as ThreatArchetype })}
-                className="w-full bg-[#1a0d0d] border border-red-500/20 rounded-lg px-3 py-2 text-xs text-red-200 outline-none"
+                className="w-full bg-[#1a0d0d] border border-[#f5f5f5]/20 rounded-lg px-3 py-2 text-xs text-[#f5f5f5] outline-none"
               >
                 {(
                   [
@@ -301,7 +301,7 @@ function SubmitModal({ engagement, onClose, onSubmit }: SubmitModalProps) {
           </div>
 
           <div>
-            <label className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider block mb-1">
+            <label className="text-[10px] text-[#f5f5f5]/50 font-mono uppercase tracking-wider block mb-1">
               Crisis Narrative *
             </label>
             <textarea
@@ -309,40 +309,40 @@ function SubmitModal({ engagement, onClose, onSubmit }: SubmitModalProps) {
               onChange={(e) => setForm({ ...form, narrative: e.target.value })}
               rows={4}
               placeholder="Describe the attack scenario, conditions, and business context in detail. What triggers this? What is the 72-hour blast radius?"
-              className="w-full bg-[#1a0d0d] border border-red-500/20 rounded-lg px-3 py-2 text-xs text-red-200 placeholder:text-red-400/30 outline-none focus:border-red-500/40 resize-none"
+              className="w-full bg-[#1a0d0d] border border-[#f5f5f5]/20 rounded-lg px-3 py-2 text-xs text-[#f5f5f5] placeholder:text-[#f5f5f5]/30 outline-none focus:border-[#f5f5f5]/40 resize-none"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider">
+              <label className="text-[10px] text-[#f5f5f5]/50 font-mono uppercase tracking-wider">
                 Kill Chain *
               </label>
               <button
                 type="button"
                 onClick={addStep}
-                className="text-[10px] text-red-400/50 hover:text-red-400 flex items-center gap-1"
+                className="text-[10px] text-[#f5f5f5]/50 hover:text-[#f5f5f5] flex items-center gap-1"
               >
                 <Plus className="w-3 h-3" /> Add Step
               </button>
             </div>
             <div className="space-y-3">
               {form.killChain.map((step, i) => (
-                <div key={i} className="bg-red-500/5 rounded-lg p-3 border border-red-500/10">
+                <div key={i} className="bg-[#f5f5f5]/5 rounded-lg p-3 border border-[#f5f5f5]/10">
                   <div className="grid grid-cols-2 gap-2 mb-2">
                     <input
                       type="text"
                       value={step.phase}
                       onChange={(e) => updateStep(i, 'phase', e.target.value)}
                       placeholder="Phase (e.g. Initial Access)"
-                      className="bg-[#1a0d0d] border border-red-500/15 rounded px-2 py-1.5 text-[11px] text-red-200 placeholder:text-red-400/25 outline-none"
+                      className="bg-[#1a0d0d] border border-[#f5f5f5]/15 rounded px-2 py-1.5 text-[11px] text-[#f5f5f5] placeholder:text-[#f5f5f5]/25 outline-none"
                     />
                     <input
                       type="text"
                       value={step.technique}
                       onChange={(e) => updateStep(i, 'technique', e.target.value)}
                       placeholder="Technique (e.g. T1566.001)"
-                      className="bg-[#1a0d0d] border border-red-500/15 rounded px-2 py-1.5 text-[11px] text-red-200 placeholder:text-red-400/25 outline-none"
+                      className="bg-[#1a0d0d] border border-[#f5f5f5]/15 rounded px-2 py-1.5 text-[11px] text-[#f5f5f5] placeholder:text-[#f5f5f5]/25 outline-none"
                     />
                   </div>
                   <div className="flex gap-2">
@@ -351,13 +351,13 @@ function SubmitModal({ engagement, onClose, onSubmit }: SubmitModalProps) {
                       value={step.description}
                       onChange={(e) => updateStep(i, 'description', e.target.value)}
                       placeholder="Brief description of this step..."
-                      className="flex-1 bg-[#1a0d0d] border border-red-500/15 rounded px-2 py-1.5 text-[11px] text-red-200 placeholder:text-red-400/25 outline-none"
+                      className="flex-1 bg-[#1a0d0d] border border-[#f5f5f5]/15 rounded px-2 py-1.5 text-[11px] text-[#f5f5f5] placeholder:text-[#f5f5f5]/25 outline-none"
                     />
                     {form.killChain.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeStep(i)}
-                        className="text-red-400/40 hover:text-red-400"
+                        className="text-[#f5f5f5]/40 hover:text-[#f5f5f5]"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -369,7 +369,7 @@ function SubmitModal({ engagement, onClose, onSubmit }: SubmitModalProps) {
           </div>
 
           <div>
-            <label className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider block mb-2">
+            <label className="text-[10px] text-[#f5f5f5]/50 font-mono uppercase tracking-wider block mb-2">
               Business Impact Estimate
             </label>
             <div className="grid grid-cols-2 gap-3">
@@ -380,7 +380,7 @@ function SubmitModal({ engagement, onClose, onSubmit }: SubmitModalProps) {
                 { key: 'regulatoryExposureUsd', label: 'Regulatory Exposure ($)', placeholder: '1000000' },
               ].map((field) => (
                 <div key={field.key}>
-                  <label className="text-[9px] text-red-400/40 font-mono uppercase block mb-1">
+                  <label className="text-[9px] text-[#f5f5f5]/40 font-mono uppercase block mb-1">
                     {field.label}
                   </label>
                   <input
@@ -390,19 +390,19 @@ function SubmitModal({ engagement, onClose, onSubmit }: SubmitModalProps) {
                       setForm({ ...form, [field.key]: Number(e.target.value) })
                     }
                     placeholder={field.placeholder}
-                    className="w-full bg-[#1a0d0d] border border-red-500/15 rounded px-2 py-1.5 text-[11px] text-red-200 outline-none"
+                    className="w-full bg-[#1a0d0d] border border-[#f5f5f5]/15 rounded px-2 py-1.5 text-[11px] text-[#f5f5f5] outline-none"
                   />
                 </div>
               ))}
               <div className="col-span-2">
-                <label className="text-[9px] text-red-400/40 font-mono uppercase block mb-1">
+                <label className="text-[9px] text-[#f5f5f5]/40 font-mono uppercase block mb-1">
                   Blast Radius Domains (comma-separated)
                 </label>
                 <input
                   type="text"
                   value={form.blastRadiusDomains}
                   onChange={(e) => setForm({ ...form, blastRadiusDomains: e.target.value })}
-                  className="w-full bg-[#1a0d0d] border border-red-500/15 rounded px-2 py-1.5 text-[11px] text-red-200 outline-none"
+                  className="w-full bg-[#1a0d0d] border border-[#f5f5f5]/15 rounded px-2 py-1.5 text-[11px] text-[#f5f5f5] outline-none"
                 />
               </div>
             </div>
@@ -411,7 +411,7 @@ function SubmitModal({ engagement, onClose, onSubmit }: SubmitModalProps) {
               type="button"
               onClick={() => void computeScore()}
               disabled={scoring}
-              className="mt-3 flex items-center gap-2 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 rounded text-[10px] text-red-300 font-mono transition-colors"
+              className="mt-3 flex items-center gap-2 px-3 py-1.5 bg-[#f5f5f5]/10 hover:bg-[#f5f5f5]/15 border border-[#f5f5f5]/20 rounded text-[10px] text-[#f5f5f5] font-mono transition-colors"
             >
               {scoring ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
@@ -422,16 +422,16 @@ function SubmitModal({ engagement, onClose, onSubmit }: SubmitModalProps) {
             </button>
 
             {score && (
-              <div className="mt-3 bg-red-500/5 border border-red-500/15 rounded-lg p-3">
+              <div className="mt-3 bg-[#f5f5f5]/5 border border-[#f5f5f5]/15 rounded-lg p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] text-red-400/50 font-mono uppercase">BIS Preview</span>
+                  <span className="text-[10px] text-[#f5f5f5]/50 font-mono uppercase">BIS Preview</span>
                   <span
                     className={cn(
                       'text-base font-bold font-mono',
                       score.businessImpactScore >= 80
-                        ? 'text-red-400'
+                        ? 'text-[#f5f5f5]'
                         : score.businessImpactScore >= 60
-                          ? 'text-amber-400'
+                          ? 'text-[#c9b787]'
                           : 'text-slate-400',
                     )}
                   >
@@ -441,16 +441,16 @@ function SubmitModal({ engagement, onClose, onSubmit }: SubmitModalProps) {
                 <div className="grid grid-cols-5 gap-1">
                   {Object.entries(score.breakdown).map(([k, v]) => (
                     <div key={k} className="text-center">
-                      <div className="text-[10px] font-bold text-red-300">
+                      <div className="text-[10px] font-bold text-[#f5f5f5]">
                         {(v as number).toFixed(1)}
                       </div>
-                      <div className="text-[8px] text-red-400/30 leading-tight">
+                      <div className="text-[8px] text-[#f5f5f5]/30 leading-tight">
                         {k.replace('Component', '')}
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="mt-2 text-[9px] text-red-400/40 font-mono">
+                <div className="mt-2 text-[9px] text-[#f5f5f5]/40 font-mono">
                   Estimated reputation: +{score.estimatedReputation} · Tier: {score.tier}
                 </div>
               </div>
@@ -458,7 +458,7 @@ function SubmitModal({ engagement, onClose, onSubmit }: SubmitModalProps) {
           </div>
 
           <div>
-            <label className="text-[10px] text-red-400/50 font-mono uppercase tracking-wider block mb-1">
+            <label className="text-[10px] text-[#f5f5f5]/50 font-mono uppercase tracking-wider block mb-1">
               Evidence Notes
             </label>
             <textarea
@@ -466,12 +466,12 @@ function SubmitModal({ engagement, onClose, onSubmit }: SubmitModalProps) {
               onChange={(e) => setForm({ ...form, evidenceNotes: e.target.value })}
               rows={2}
               placeholder="References, precedents, or data sources supporting your impact estimate..."
-              className="w-full bg-[#1a0d0d] border border-red-500/20 rounded-lg px-3 py-2 text-xs text-red-200 placeholder:text-red-400/30 outline-none focus:border-red-500/40 resize-none"
+              className="w-full bg-[#1a0d0d] border border-[#f5f5f5]/20 rounded-lg px-3 py-2 text-xs text-[#f5f5f5] placeholder:text-[#f5f5f5]/30 outline-none focus:border-[#f5f5f5]/40 resize-none"
             />
           </div>
 
           {error && (
-            <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2">
+            <div className="text-xs text-[#f5f5f5] bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 rounded px-3 py-2">
               {error}
             </div>
           )}
@@ -480,14 +480,14 @@ function SubmitModal({ engagement, onClose, onSubmit }: SubmitModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-xs text-red-400/60 hover:bg-red-500/5 border border-red-500/10"
+              className="px-4 py-2 rounded-lg text-xs text-[#f5f5f5]/60 hover:bg-[#f5f5f5]/5 border border-[#f5f5f5]/10"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-[#f5f5f5] hover:bg-[#f5f5f5] text-white text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-2"
             >
               {saving && <Loader2 className="w-3 h-3 animate-spin" />}
               Submit Scenario
@@ -578,7 +578,7 @@ export default function CrisisArenaArchitect() {
         ))}
       </div>
 
-      <div className="flex gap-3 border-b border-red-500/10 pb-1">
+      <div className="flex gap-3 border-b border-[#f5f5f5]/10 pb-1">
         {([
           { id: 'engagements', label: `Open Engagements (${engagements.length})` },
           { id: 'submissions', label: `My Submissions (${mySubmissions.length})` },
@@ -589,8 +589,8 @@ export default function CrisisArenaArchitect() {
             className={cn(
               'text-xs font-medium pb-2 border-b-2 transition-colors',
               activeTab === tab.id
-                ? 'border-red-500 text-red-300'
-                : 'border-transparent text-red-400/40 hover:text-red-400/70',
+                ? 'border-[#f5f5f5] text-[#f5f5f5]'
+                : 'border-transparent text-[#f5f5f5]/40 hover:text-[#f5f5f5]/70',
             )}
           >
             {tab.label}
@@ -600,26 +600,26 @@ export default function CrisisArenaArchitect() {
 
       {loading && (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-6 h-6 text-red-400 animate-spin" />
+          <Loader2 className="w-6 h-6 text-[#f5f5f5] animate-spin" />
         </div>
       )}
 
       {!loading && activeTab === 'engagements' && (
         <div className="space-y-4">
           {engagements.length === 0 && (
-            <div className="text-center py-12 text-red-400/30 text-xs">
+            <div className="text-center py-12 text-[#f5f5f5]/30 text-xs">
               No open engagements at this time. Check back soon.
             </div>
           )}
           {engagements.map((eng) => (
             <div
               key={eng.id}
-              className="bg-[#0f0808]/80 border border-red-500/10 hover:border-red-500/20 rounded-xl p-5 transition-all"
+              className="bg-[#0f0808]/80 border border-[#f5f5f5]/10 hover:border-[#f5f5f5]/20 rounded-xl p-5 transition-all"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-2">
-                    <span className="px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border bg-emerald-500/10 text-emerald-300 border-emerald-500/30">
+                    <span className="px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/30">
                       {eng.status}
                     </span>
                     {eng.archetypeFilter.slice(0, 3).map((a) => (
@@ -631,9 +631,9 @@ export default function CrisisArenaArchitect() {
                       </span>
                     ))}
                   </div>
-                  <h3 className="text-sm font-bold text-red-100 mb-1">{eng.title}</h3>
-                  <p className="text-[11px] text-red-300/50 mb-3 line-clamp-2">{eng.description}</p>
-                  <div className="flex items-center gap-4 text-[10px] text-red-400/40 font-mono">
+                  <h3 className="text-sm font-bold text-[#f5f5f5] mb-1">{eng.title}</h3>
+                  <p className="text-[11px] text-[#f5f5f5]/50 mb-3 line-clamp-2">{eng.description}</p>
+                  <div className="flex items-center gap-4 text-[10px] text-[#f5f5f5]/40 font-mono">
                     <span className="flex items-center gap-1">
                       <Clock className="w-2.5 h-2.5" /> {daysUntil(eng.deadline)} left
                     </span>
@@ -644,7 +644,7 @@ export default function CrisisArenaArchitect() {
                 </div>
                 <button
                   onClick={() => setSubmitFor(eng)}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-colors shrink-0"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#f5f5f5] hover:bg-[#f5f5f5] text-white rounded-xl text-xs font-bold transition-colors shrink-0"
                 >
                   <Plus className="w-3.5 h-3.5" /> Submit
                 </button>
@@ -657,14 +657,14 @@ export default function CrisisArenaArchitect() {
       {!loading && activeTab === 'submissions' && (
         <div className="space-y-4">
           {mySubmissions.length === 0 && (
-            <div className="text-center py-12 text-red-400/30 text-xs">
+            <div className="text-center py-12 text-[#f5f5f5]/30 text-xs">
               No submissions yet. Browse open engagements and submit your first scenario.
             </div>
           )}
           {mySubmissions.map((sub) => (
             <div
               key={sub.id}
-              className="bg-[#0f0808]/80 border border-red-500/10 rounded-xl p-5"
+              className="bg-[#0f0808]/80 border border-[#f5f5f5]/10 rounded-xl p-5"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
@@ -682,23 +682,23 @@ export default function CrisisArenaArchitect() {
                     >
                       {sub.archetype.replace('_', ' ')}
                     </span>
-                    <span className="text-[9px] text-red-400/30 ml-auto">
+                    <span className="text-[9px] text-[#f5f5f5]/30 ml-auto">
                       {relativeTime(sub.submittedAt)}
                     </span>
                   </div>
-                  <div className="text-xs font-bold text-red-100 mb-1">{sub.title}</div>
-                  <div className="flex items-center gap-4 text-[10px] text-red-400/40 font-mono">
+                  <div className="text-xs font-bold text-[#f5f5f5] mb-1">{sub.title}</div>
+                  <div className="flex items-center gap-4 text-[10px] text-[#f5f5f5]/40 font-mono">
                     <span>BIS: {sub.businessImpactScore}</span>
                     <span>Rev: {formatUsd(sub.impactEstimate.revenueAtRiskUsd)}</span>
                     <span>Blast: {sub.impactEstimate.blastRadiusDomains.join(', ')}</span>
                   </div>
                   {sub.triageJustification && (
-                    <p className="text-[10px] text-red-300/40 mt-2 italic">
+                    <p className="text-[10px] text-[#f5f5f5]/40 mt-2 italic">
                       Triage note: {sub.triageJustification}
                     </p>
                   )}
                   {sub.graduatedIncidentId && (
-                    <div className="flex items-center gap-1 text-[10px] text-sky-400 mt-1">
+                    <div className="flex items-center gap-1 text-[10px] text-[#8a8a8a] mt-1">
                       <Shield className="w-2.5 h-2.5" /> Graduated →{' '}
                       <Link href="/incident">
                         <span className="underline cursor-pointer">{sub.graduatedIncidentId}</span>
@@ -712,12 +712,12 @@ export default function CrisisArenaArchitect() {
                       <div
                         className={cn(
                           'text-base font-bold font-mono',
-                          sub.reputationAwarded > 0 ? 'text-emerald-400' : 'text-red-400',
+                          sub.reputationAwarded > 0 ? 'text-[#c9b787]' : 'text-[#f5f5f5]',
                         )}
                       >
                         {sub.reputationAwarded > 0 ? '+' : ''}{sub.reputationAwarded}
                       </div>
-                      <div className="text-[8px] text-red-400/30 uppercase">Rep</div>
+                      <div className="text-[8px] text-[#f5f5f5]/30 uppercase">Rep</div>
                     </div>
                   )}
                   <div className="text-center">
@@ -725,15 +725,15 @@ export default function CrisisArenaArchitect() {
                       className={cn(
                         'text-base font-bold font-mono',
                         sub.businessImpactScore >= 80
-                          ? 'text-red-400'
+                          ? 'text-[#f5f5f5]'
                           : sub.businessImpactScore >= 60
-                            ? 'text-amber-400'
+                            ? 'text-[#c9b787]'
                             : 'text-slate-400',
                       )}
                     >
                       {sub.businessImpactScore}
                     </div>
-                    <div className="text-[8px] text-red-400/30 uppercase">BIS</div>
+                    <div className="text-[8px] text-[#f5f5f5]/30 uppercase">BIS</div>
                   </div>
                 </div>
               </div>

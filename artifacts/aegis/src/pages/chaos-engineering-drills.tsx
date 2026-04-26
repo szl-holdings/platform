@@ -138,17 +138,17 @@ function generateObservations(scenario: FaultScenario, score: number): string[] 
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
-  low: '#4ade80',
-  medium: '#f59e0b',
-  high: '#f97316',
-  critical: '#ef4444',
+  low: '#c9b787',
+  medium: '#c9b787',
+  high: '#c9b787',
+  critical: '#f5f5f5',
 };
 
 const PHASE_COLORS: Record<string, string> = {
-  detect: '#38bdf8',
-  contain: '#f59e0b',
-  recover: '#a78bfa',
-  validate: '#4ade80',
+  detect: '#8a8a8a',
+  contain: '#c9b787',
+  recover: '#c9b787',
+  validate: '#c9b787',
 };
 
 export default function ChaosEngineeringDrills() {
@@ -230,30 +230,30 @@ export default function ChaosEngineeringDrills() {
   };
 
   return (
-    <div className="h-full overflow-auto bg-[#080510] text-red-50" style={{ fontFamily: 'ui-monospace, monospace' }}>
+    <div className="h-full overflow-auto bg-[#080510] text-[#f5f5f5]" style={{ fontFamily: 'ui-monospace, monospace' }}>
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
-              <Shield className="w-5 h-5 text-red-400" />
+            <div className="p-2 rounded-lg bg-[#f5f5f5]/10 border border-[#f5f5f5]/20">
+              <Shield className="w-5 h-5 text-[#f5f5f5]" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-red-100">Chaos Engineering Drills</h1>
-              <p className="text-xs text-red-400/60 mt-0.5">Automated fault injection · Recovery scoring · Playbook generation</p>
+              <h1 className="text-xl font-bold text-[#f5f5f5]">Chaos Engineering Drills</h1>
+              <p className="text-xs text-[#f5f5f5]/60 mt-0.5">Automated fault injection · Recovery scoring · Playbook generation</p>
             </div>
           </div>
           <div className="flex items-center gap-2 mt-3">
-            <div className="h-px flex-1 bg-red-500/10" />
-            <span className="text-[10px] text-red-400/40 font-mono uppercase tracking-wider">Aegis Resilience Suite</span>
-            <div className="h-px flex-1 bg-red-500/10" />
+            <div className="h-px flex-1 bg-[#f5f5f5]/10" />
+            <span className="text-[10px] text-[#f5f5f5]/40 font-mono uppercase tracking-wider">Aegis Resilience Suite</span>
+            <div className="h-px flex-1 bg-[#f5f5f5]/10" />
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Scenario Selector */}
           <div className="lg:col-span-1 space-y-3">
-            <h2 className="text-xs font-mono uppercase tracking-wider text-red-400/60 mb-3">Fault Scenarios</h2>
+            <h2 className="text-xs font-mono uppercase tracking-wider text-[#f5f5f5]/60 mb-3">Fault Scenarios</h2>
             {FAULT_SCENARIOS.map((scenario) => {
               const Icon = scenario.icon;
               const isActive = selected?.id === scenario.id;
@@ -266,16 +266,16 @@ export default function ChaosEngineeringDrills() {
                   disabled={isRunning}
                   className={`w-full text-left p-3 rounded-lg border transition-all ${
                     isActive
-                      ? 'bg-red-500/10 border-red-500/40'
-                      : 'bg-white/[0.02] border-white/[0.06] hover:border-red-500/20 hover:bg-white/[0.04]'
+                      ? 'bg-[#f5f5f5]/10 border-[#f5f5f5]/40'
+                      : 'bg-white/[0.02] border-white/[0.06] hover:border-[#f5f5f5]/20 hover:bg-white/[0.04]'
                   } ${isRunning ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <Icon className="w-3.5 h-3.5 text-red-400/70 flex-shrink-0 mt-0.5" />
+                      <Icon className="w-3.5 h-3.5 text-[#f5f5f5]/70 flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="text-xs font-semibold text-red-100">{scenario.name}</p>
-                        <p className="text-[10px] text-red-400/50 mt-0.5 leading-relaxed">{scenario.description.slice(0, 60)}…</p>
+                        <p className="text-xs font-semibold text-[#f5f5f5]">{scenario.name}</p>
+                        <p className="text-[10px] text-[#f5f5f5]/50 mt-0.5 leading-relaxed">{scenario.description.slice(0, 60)}…</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1">
@@ -286,7 +286,7 @@ export default function ChaosEngineeringDrills() {
                         {scenario.severity}
                       </span>
                       {lastScore !== undefined && (
-                        <span className="text-[9px] font-mono text-red-400/50">{lastScore}/100</span>
+                        <span className="text-[9px] font-mono text-[#f5f5f5]/50">{lastScore}/100</span>
                       )}
                     </div>
                   </div>
@@ -299,8 +299,8 @@ export default function ChaosEngineeringDrills() {
           <div className="lg:col-span-2 space-y-5">
             {!selected ? (
               <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-8 text-center">
-                <Shield className="w-8 h-8 text-red-400/20 mx-auto mb-3" />
-                <p className="text-sm text-red-400/40">Select a fault scenario to begin</p>
+                <Shield className="w-8 h-8 text-[#f5f5f5]/20 mx-auto mb-3" />
+                <p className="text-sm text-[#f5f5f5]/40">Select a fault scenario to begin</p>
               </div>
             ) : (
               <>
@@ -308,15 +308,15 @@ export default function ChaosEngineeringDrills() {
                 <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <div>
-                      <h3 className="text-sm font-bold text-red-100">{selected.name}</h3>
-                      <p className="text-xs text-red-400/60 mt-1 leading-relaxed">{selected.description}</p>
+                      <h3 className="text-sm font-bold text-[#f5f5f5]">{selected.name}</h3>
+                      <p className="text-xs text-[#f5f5f5]/60 mt-1 leading-relaxed">{selected.description}</p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <div className="flex items-center gap-1 text-[10px] text-red-400/50 mb-1">
+                      <div className="flex items-center gap-1 text-[10px] text-[#f5f5f5]/50 mb-1">
                         <Timer className="w-3 h-3" />
                         {selected.durationSec}s injection
                       </div>
-                      <div className="flex items-center gap-1 text-[10px] text-red-400/50">
+                      <div className="flex items-center gap-1 text-[10px] text-[#f5f5f5]/50">
                         <RefreshCw className="w-3 h-3" />
                         {selected.expectedRecoverySec}s recovery SLO
                       </div>
@@ -324,11 +324,11 @@ export default function ChaosEngineeringDrills() {
                   </div>
 
                   <div className="mb-4">
-                    <p className="text-[10px] font-mono text-red-400/40 uppercase tracking-wider mb-2">Expected Mitigations</p>
+                    <p className="text-[10px] font-mono text-[#f5f5f5]/40 uppercase tracking-wider mb-2">Expected Mitigations</p>
                     <div className="space-y-1">
                       {selected.mitigations.map((m, i) => (
-                        <div key={i} className="flex items-start gap-2 text-[11px] text-red-300/70">
-                          <CheckCircle className="w-3 h-3 text-green-400/50 flex-shrink-0 mt-0.5" />
+                        <div key={i} className="flex items-start gap-2 text-[11px] text-[#f5f5f5]/70">
+                          <CheckCircle className="w-3 h-3 text-[#c9b787]/50 flex-shrink-0 mt-0.5" />
                           {m}
                         </div>
                       ))}
@@ -340,8 +340,8 @@ export default function ChaosEngineeringDrills() {
                     disabled={isRunning}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
                       isRunning
-                        ? 'bg-red-500/10 text-red-400/40 cursor-not-allowed'
-                        : 'bg-red-500 hover:bg-red-600 text-white'
+                        ? 'bg-[#f5f5f5]/10 text-[#f5f5f5]/40 cursor-not-allowed'
+                        : 'bg-[#f5f5f5] hover:bg-[#f5f5f5] text-white'
                     }`}
                   >
                     {isRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
@@ -360,24 +360,24 @@ export default function ChaosEngineeringDrills() {
                     >
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-                          <span className="text-xs font-semibold text-red-300">{statusLabel[drillStatus]}</span>
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#f5f5f5] animate-pulse" />
+                          <span className="text-xs font-semibold text-[#f5f5f5]">{statusLabel[drillStatus]}</span>
                         </div>
-                        <span className="text-xs font-mono text-red-400/50">{Math.round(progress)}%</span>
+                        <span className="text-xs font-mono text-[#f5f5f5]/50">{Math.round(progress)}%</span>
                       </div>
                       <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                         <motion.div
                           className="h-full rounded-full"
                           style={{
-                            background: drillStatus === 'injecting' ? '#ef4444' :
-                              drillStatus === 'monitoring' ? '#f97316' :
-                              drillStatus === 'recovering' ? '#a78bfa' : '#4ade80',
+                            background: drillStatus === 'injecting' ? '#f5f5f5' :
+                              drillStatus === 'monitoring' ? '#c9b787' :
+                              drillStatus === 'recovering' ? '#c9b787' : '#c9b787',
                           }}
                           animate={{ width: `${progress}%` }}
                           transition={{ duration: 0.2 }}
                         />
                       </div>
-                      <div className="flex justify-between mt-2 text-[9px] font-mono text-red-400/30">
+                      <div className="flex justify-between mt-2 text-[9px] font-mono text-[#f5f5f5]/30">
                         <span>INJECT</span>
                         <span>MONITOR</span>
                         <span>RECOVER</span>
@@ -398,11 +398,11 @@ export default function ChaosEngineeringDrills() {
                       {/* Score Card */}
                       <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
                         <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-xs font-mono uppercase tracking-wider text-red-400/60">Resilience Score</h3>
+                          <h3 className="text-xs font-mono uppercase tracking-wider text-[#f5f5f5]/60">Resilience Score</h3>
                           <div className={`flex items-center gap-1.5 text-xs font-bold px-2 py-1 rounded-lg ${
-                            result.status === 'pass' ? 'bg-green-500/10 text-green-400' :
-                            result.status === 'partial' ? 'bg-amber-500/10 text-amber-400' :
-                            'bg-red-500/10 text-red-400'
+                            result.status === 'pass' ? 'bg-[#c9b787]/10 text-[#c9b787]' :
+                            result.status === 'partial' ? 'bg-[#c9b787]/10 text-[#c9b787]' :
+                            'bg-[#f5f5f5]/10 text-[#f5f5f5]'
                           }`}>
                             {result.status === 'pass' ? <CheckCircle className="w-3 h-3" /> :
                              result.status === 'partial' ? <AlertTriangle className="w-3 h-3" /> :
@@ -412,18 +412,18 @@ export default function ChaosEngineeringDrills() {
                         </div>
                         <div className="grid grid-cols-3 gap-4 mb-4">
                           <div>
-                            <p className="text-3xl font-bold" style={{ color: result.recoveryScore >= 85 ? '#4ade80' : result.recoveryScore >= 65 ? '#f59e0b' : '#ef4444' }}>
+                            <p className="text-3xl font-bold" style={{ color: result.recoveryScore >= 85 ? '#c9b787' : result.recoveryScore >= 65 ? '#c9b787' : '#f5f5f5' }}>
                               {result.recoveryScore}
                             </p>
-                            <p className="text-[10px] text-red-400/40">/ 100 score</p>
+                            <p className="text-[10px] text-[#f5f5f5]/40">/ 100 score</p>
                           </div>
                           <div>
-                            <p className="text-xl font-bold text-red-100">{result.mttr}s</p>
-                            <p className="text-[10px] text-red-400/40">MTTR achieved</p>
+                            <p className="text-xl font-bold text-[#f5f5f5]">{result.mttr}s</p>
+                            <p className="text-[10px] text-[#f5f5f5]/40">MTTR achieved</p>
                           </div>
                           <div>
-                            <p className="text-xl font-bold text-red-100">{selected.expectedRecoverySec}s</p>
-                            <p className="text-[10px] text-red-400/40">SLO target</p>
+                            <p className="text-xl font-bold text-[#f5f5f5]">{selected.expectedRecoverySec}s</p>
+                            <p className="text-[10px] text-[#f5f5f5]/40">SLO target</p>
                           </div>
                         </div>
                         <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden">
@@ -431,7 +431,7 @@ export default function ChaosEngineeringDrills() {
                             className="h-full rounded-full transition-all"
                             style={{
                               width: `${result.recoveryScore}%`,
-                              background: result.recoveryScore >= 85 ? '#4ade80' : result.recoveryScore >= 65 ? '#f59e0b' : '#ef4444',
+                              background: result.recoveryScore >= 85 ? '#c9b787' : result.recoveryScore >= 65 ? '#c9b787' : '#f5f5f5',
                             }}
                           />
                         </div>
@@ -443,11 +443,11 @@ export default function ChaosEngineeringDrills() {
                           onClick={() => setExpandedObs((v) => !v)}
                           className="flex items-center justify-between w-full text-left"
                         >
-                          <h3 className="text-xs font-mono uppercase tracking-wider text-red-400/60 flex items-center gap-2">
+                          <h3 className="text-xs font-mono uppercase tracking-wider text-[#f5f5f5]/60 flex items-center gap-2">
                             <Activity className="w-3 h-3" />
                             Observations
                           </h3>
-                          <ChevronDown className={`w-3.5 h-3.5 text-red-400/40 transition-transform ${expandedObs ? 'rotate-180' : ''}`} />
+                          <ChevronDown className={`w-3.5 h-3.5 text-[#f5f5f5]/40 transition-transform ${expandedObs ? 'rotate-180' : ''}`} />
                         </button>
                         <AnimatePresence>
                           {expandedObs && (
@@ -459,8 +459,8 @@ export default function ChaosEngineeringDrills() {
                             >
                               <div className="mt-3 space-y-2">
                                 {result.observations.map((obs, i) => (
-                                  <div key={i} className="flex items-start gap-2 text-[11px] text-red-300/70 leading-relaxed">
-                                    <div className="w-1 h-1 rounded-full bg-red-400/40 flex-shrink-0 mt-1.5" />
+                                  <div key={i} className="flex items-start gap-2 text-[11px] text-[#f5f5f5]/70 leading-relaxed">
+                                    <div className="w-1 h-1 rounded-full bg-[#f5f5f5]/40 flex-shrink-0 mt-1.5" />
                                     {obs}
                                   </div>
                                 ))}
@@ -469,18 +469,18 @@ export default function ChaosEngineeringDrills() {
                           )}
                         </AnimatePresence>
                         {!expandedObs && (
-                          <p className="text-[11px] text-red-400/40 mt-2">{result.observations.length} observations generated</p>
+                          <p className="text-[11px] text-[#f5f5f5]/40 mt-2">{result.observations.length} observations generated</p>
                         )}
                       </div>
 
                       {/* Generated Playbook */}
                       <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
                         <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-xs font-mono uppercase tracking-wider text-red-400/60 flex items-center gap-2">
+                          <h3 className="text-xs font-mono uppercase tracking-wider text-[#f5f5f5]/60 flex items-center gap-2">
                             <FileText className="w-3 h-3" />
                             Generated Playbook
                           </h3>
-                          <span className="text-[10px] text-red-400/40">{result.playbook.length} steps</span>
+                          <span className="text-[10px] text-[#f5f5f5]/40">{result.playbook.length} steps</span>
                         </div>
                         <div className="space-y-2">
                           {result.playbook.map((step) => (
@@ -494,9 +494,9 @@ export default function ChaosEngineeringDrills() {
                               />
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <p className="text-[11px] text-red-100">{step.action}</p>
+                                  <p className="text-[11px] text-[#f5f5f5]">{step.action}</p>
                                   {step.automated && (
-                                    <span className="text-[9px] px-1 py-0.5 rounded bg-blue-500/10 text-blue-400">AUTO</span>
+                                    <span className="text-[9px] px-1 py-0.5 rounded bg-[#c9b787]/10 text-[#c9b787]">AUTO</span>
                                   )}
                                 </div>
                                 <div className="flex items-center gap-3 mt-0.5">
@@ -506,16 +506,16 @@ export default function ChaosEngineeringDrills() {
                                   >
                                     {step.phase}
                                   </span>
-                                  <span className="text-[9px] text-red-400/40">{step.owner}</span>
-                                  <span className="text-[9px] text-red-400/30 flex items-center gap-1">
+                                  <span className="text-[9px] text-[#f5f5f5]/40">{step.owner}</span>
+                                  <span className="text-[9px] text-[#f5f5f5]/30 flex items-center gap-1">
                                     <Clock className="w-2.5 h-2.5" />
                                     T+{step.timeOffset}s
                                   </span>
                                 </div>
                               </div>
                               {step.completed
-                                ? <CheckCircle className="w-3 h-3 text-green-400/60 flex-shrink-0" />
-                                : <div className="w-3 h-3 rounded-full border border-red-400/20 flex-shrink-0" />
+                                ? <CheckCircle className="w-3 h-3 text-[#c9b787]/60 flex-shrink-0" />
+                                : <div className="w-3 h-3 rounded-full border border-[#f5f5f5]/20 flex-shrink-0" />
                               }
                             </div>
                           ))}
@@ -530,7 +530,7 @@ export default function ChaosEngineeringDrills() {
             {/* Drill History */}
             {history.length > 0 && (
               <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
-                <h3 className="text-xs font-mono uppercase tracking-wider text-red-400/60 mb-3 flex items-center gap-2">
+                <h3 className="text-xs font-mono uppercase tracking-wider text-[#f5f5f5]/60 mb-3 flex items-center gap-2">
                   <Network className="w-3 h-3" />
                   Drill History
                 </h3>
@@ -540,14 +540,14 @@ export default function ChaosEngineeringDrills() {
                     return (
                       <div key={i} className="flex items-center justify-between text-[11px]">
                         <div className="flex items-center gap-2">
-                          {h.status === 'pass' ? <CheckCircle className="w-3 h-3 text-green-400" /> :
-                           h.status === 'partial' ? <AlertTriangle className="w-3 h-3 text-amber-400" /> :
-                           <XCircle className="w-3 h-3 text-red-400" />}
-                          <span className="text-red-300/80">{sc?.name ?? h.scenarioId}</span>
+                          {h.status === 'pass' ? <CheckCircle className="w-3 h-3 text-[#c9b787]" /> :
+                           h.status === 'partial' ? <AlertTriangle className="w-3 h-3 text-[#c9b787]" /> :
+                           <XCircle className="w-3 h-3 text-[#f5f5f5]" />}
+                          <span className="text-[#f5f5f5]/80">{sc?.name ?? h.scenarioId}</span>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="text-red-400/50 font-mono">MTTR {h.mttr}s</span>
-                          <span className={`font-bold ${h.recoveryScore >= 85 ? 'text-green-400' : h.recoveryScore >= 65 ? 'text-amber-400' : 'text-red-400'}`}>
+                          <span className="text-[#f5f5f5]/50 font-mono">MTTR {h.mttr}s</span>
+                          <span className={`font-bold ${h.recoveryScore >= 85 ? 'text-[#c9b787]' : h.recoveryScore >= 65 ? 'text-[#c9b787]' : 'text-[#f5f5f5]'}`}>
                             {h.recoveryScore}/100
                           </span>
                         </div>

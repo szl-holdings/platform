@@ -342,9 +342,9 @@ function CommandInboxAlerts() {
 
 const PRISM_CARDS = [
   {
-    key: 'LUMINA',
+    key: 'Pulse',
     icon: Heart,
-    color: '#6b8f71',
+    color: '#c9b787',
     score: 72,
     label: 'Business Health',
     trend: 'stable',

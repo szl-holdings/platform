@@ -174,7 +174,7 @@ const OPERATIONS_NAV: NavGroup[] = [
     section: 'Governed Decision Loop',
     items: [
       { href: '/operations', label: 'Executive Command', icon: LayoutDashboard },
-      { href: '/operations/prism/pulse', label: 'LUMINA', icon: Heart },
+      { href: '/operations/prism/pulse', label: 'Pulse', icon: Heart },
       { href: '/operations/prism/signals', label: 'Signal Feed', icon: Radio },
       { href: '/operations/prism/atlas-execute', label: 'ATLAS Execute', icon: Play },
       { href: '/operations/rules-studio', label: 'Rules Studio', icon: GitBranch },

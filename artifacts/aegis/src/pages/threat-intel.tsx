@@ -56,14 +56,14 @@ export default function ThreatIntelAI() {
   const criticalCves = cves.filter((c: any) => c.severity === 'CRITICAL');
   const highCves = cves.filter((c: any) => c.severity === 'HIGH');
 
-  if (isLoading) return <PageDataSkeleton rows={6} accentColor="#ef4444" />;
+  if (isLoading) return <PageDataSkeleton rows={6} accentColor="#f5f5f5" />;
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-            <Crosshair className="w-7 h-7 text-red-400" /> AI Threat Command Wall
+            <Crosshair className="w-7 h-7 text-[#f5f5f5]" /> AI Threat Command Wall
           </h1>
           <p className="text-sm text-slate-400 mt-1">
             Streaming intelligence briefings, CVE auto-classification, and attack surface analysis
@@ -71,7 +71,7 @@ export default function ThreatIntelAI() {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-slate-500">{threats.length} active threats</span>
-          <span className="inline-flex items-center gap-2 text-xs text-red-400 bg-red-400/10 px-3 py-1.5 rounded-full border border-red-400/20">
+          <span className="inline-flex items-center gap-2 text-xs text-[#f5f5f5] bg-[#f5f5f5]/10 px-3 py-1.5 rounded-full border border-[#f5f5f5]/20">
             <Radio className="w-3 h-3 animate-pulse" /> DEFCON Active
           </span>
         </div>
@@ -81,11 +81,11 @@ export default function ThreatIntelAI() {
         <div className="lg:col-span-2 bg-white/[0.03] rounded-2xl border border-white/5 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-              <Brain className="w-5 h-5 text-violet-400" /> AI Threat Briefing
+              <Brain className="w-5 h-5 text-[#8a8a8a]" /> AI Threat Briefing
             </h3>
             <button
               onClick={generateBriefing}
-              className="text-xs px-4 py-2 rounded-lg bg-violet-500/10 text-violet-400 border border-violet-500/20 hover:bg-violet-500/20 transition-all flex items-center gap-2"
+              className="text-xs px-4 py-2 rounded-lg bg-[#8a8a8a]/10 text-[#8a8a8a] border border-[#8a8a8a]/20 hover:bg-[#8a8a8a]/20 transition-all flex items-center gap-2"
             >
               <Zap className="w-3 h-3" /> Generate Briefing
             </button>
@@ -116,7 +116,7 @@ export default function ThreatIntelAI() {
 
         <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-6">
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Activity className="w-5 h-5 text-cyan-400" /> Anomaly Detection
+            <Activity className="w-5 h-5 text-[#8a8a8a]" /> Anomaly Detection
           </h3>
           <div className="space-y-4">
             {anomalies.slice(0, 5).map((a: any, i: number) => (
@@ -128,10 +128,10 @@ export default function ThreatIntelAI() {
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full ${
                       a.severity === 'critical'
-                        ? 'bg-red-500/10 text-red-400'
+                        ? 'bg-[#f5f5f5]/10 text-[#f5f5f5]'
                         : a.severity === 'high'
-                          ? 'bg-orange-500/10 text-orange-400'
-                          : 'bg-amber-500/10 text-amber-400'
+                          ? 'bg-[#c9b787]/10 text-[#c9b787]'
+                          : 'bg-[#c9b787]/10 text-[#c9b787]'
                     }`}
                   >
                     {a.severity}
@@ -142,7 +142,7 @@ export default function ThreatIntelAI() {
                   anomalyIndices={[Math.floor(Math.random() * 10) + 10]}
                   width={200}
                   height={30}
-                  color={a.severity === 'critical' ? '#ef4444' : '#f97316'}
+                  color={a.severity === 'critical' ? '#f5f5f5' : '#c9b787'}
                 />
               </div>
             ))}
@@ -152,25 +152,25 @@ export default function ThreatIntelAI() {
 
       <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-6">
         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-          <Shield className="w-5 h-5 text-orange-400" /> CVE Auto-Classification
+          <Shield className="w-5 h-5 text-[#c9b787]" /> CVE Auto-Classification
         </h3>
         <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="text-center p-3 rounded-xl bg-red-500/5 border border-red-500/10">
-            <div className="text-2xl font-bold text-red-400">{criticalCves.length}</div>
+          <div className="text-center p-3 rounded-xl bg-[#f5f5f5]/5 border border-[#f5f5f5]/10">
+            <div className="text-2xl font-bold text-[#f5f5f5]">{criticalCves.length}</div>
             <div className="text-xs text-slate-500">Critical</div>
           </div>
-          <div className="text-center p-3 rounded-xl bg-orange-500/5 border border-orange-500/10">
-            <div className="text-2xl font-bold text-orange-400">{highCves.length}</div>
+          <div className="text-center p-3 rounded-xl bg-[#c9b787]/5 border border-[#c9b787]/10">
+            <div className="text-2xl font-bold text-[#c9b787]">{highCves.length}</div>
             <div className="text-xs text-slate-500">High</div>
           </div>
-          <div className="text-center p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
-            <div className="text-2xl font-bold text-amber-400">
+          <div className="text-center p-3 rounded-xl bg-[#c9b787]/5 border border-[#c9b787]/10">
+            <div className="text-2xl font-bold text-[#c9b787]">
               {cves.filter((c: any) => c.severity === 'MEDIUM').length}
             </div>
             <div className="text-xs text-slate-500">Medium</div>
           </div>
-          <div className="text-center p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
-            <div className="text-2xl font-bold text-blue-400">
+          <div className="text-center p-3 rounded-xl bg-[#c9b787]/5 border border-[#c9b787]/10">
+            <div className="text-2xl font-bold text-[#c9b787]">
               {cves.filter((c: any) => c.severity === 'LOW').length}
             </div>
             <div className="text-xs text-slate-500">Low</div>
@@ -200,7 +200,7 @@ export default function ThreatIntelAI() {
 
       <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-6">
         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-          <AlertTriangle className="w-5 h-5 text-amber-400" /> Attack Surface Summary
+          <AlertTriangle className="w-5 h-5 text-[#c9b787]" /> Attack Surface Summary
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
@@ -212,7 +212,7 @@ export default function ThreatIntelAI() {
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-white">{surface.name}</span>
                 <span
-                  className={`text-xs font-mono font-bold ${surface.score >= 60 ? 'text-orange-400' : surface.score >= 40 ? 'text-amber-400' : 'text-emerald-400'}`}
+                  className={`text-xs font-mono font-bold ${surface.score >= 60 ? 'text-[#c9b787]' : surface.score >= 40 ? 'text-[#c9b787]' : 'text-[#c9b787]'}`}
                 >
                   {surface.score}/100
                 </span>

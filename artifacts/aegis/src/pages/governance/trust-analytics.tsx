@@ -29,7 +29,7 @@ function MetricCard({
   sub,
   trend,
   icon: Icon,
-  color = '#f59e0b',
+  color = '#c9b787',
   tooltip,
 }: {
   label: string;
@@ -42,7 +42,7 @@ function MetricCard({
   tooltip?: string;
 }) {
   const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
-  const trendColor = trend === 'up' ? '#22c55e' : trend === 'down' ? '#ef4444' : '#6b7280';
+  const trendColor = trend === 'up' ? '#c9b787' : trend === 'down' ? '#f5f5f5' : '#6b7280';
   return (
     <div className="bg-[#0d1117] border border-[#1e2a3a] rounded-xl p-5 flex flex-col gap-3 group relative">
       <div className="flex items-center justify-between">
@@ -189,7 +189,7 @@ export default function TrustAnalyticsPage() {
       <div className="max-w-7xl mx-auto space-y-8">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <Shield size={22} className="text-amber-400" />
+            <Shield size={22} className="text-[#c9b787]" />
             <h1 className="text-xl font-bold text-white font-mono tracking-tight">
               Trust Analytics
             </h1>
@@ -200,23 +200,23 @@ export default function TrustAnalyticsPage() {
           </p>
         </div>
 
-        <div className="bg-amber-400/10 border border-amber-400/30 rounded-xl p-4 flex items-start gap-3">
-          <Info size={16} className="text-amber-400 mt-0.5 shrink-0" />
+        <div className="bg-[#c9b787]/10 border border-[#c9b787]/30 rounded-xl p-4 flex items-start gap-3">
+          <Info size={16} className="text-[#c9b787] mt-0.5 shrink-0" />
           <div className="space-y-1">
-            <p className="text-xs text-amber-200/80 font-mono leading-relaxed">
+            <p className="text-xs text-[#c9b787]/80 font-mono leading-relaxed">
               The trust posture checklist below reflects actual system capabilities. Trend charts
               use <strong>seeded pilot data</strong> — a live trust metrics pipeline (collecting
               schema validity, retrieval miss rate, and override rate from production API call logs)
               is on the Phase 4 roadmap.
             </p>
-            <p className="text-xs text-amber-200/60 font-mono">
+            <p className="text-xs text-[#c9b787]/60 font-mono">
               No certifications are claimed that have not been achieved. SOC 2 and ISO 27001 are
               planned.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-amber-400/10 border border-amber-400/20 text-xs text-amber-400 font-mono">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-[#c9b787]/10 border border-[#c9b787]/20 text-xs text-[#c9b787] font-mono">
           <Info size={12} />
           <span>
             Trend metrics below use seeded pilot data — live instrumentation is a Phase 4 roadmap
@@ -230,7 +230,7 @@ export default function TrustAnalyticsPage() {
             sub="Pilot trend data"
             trend="up"
             icon={AlertTriangle}
-            color="#f59e0b"
+            color="#c9b787"
             tooltip="% of tool call outputs failing schema validation"
           />
           <MetricCard
@@ -239,7 +239,7 @@ export default function TrustAnalyticsPage() {
             sub="Pilot trend data"
             trend="up"
             icon={Eye}
-            color="#f59e0b"
+            color="#c9b787"
             tooltip="% of AI assertions with no retrieval support"
           />
           <MetricCard
@@ -248,7 +248,7 @@ export default function TrustAnalyticsPage() {
             sub="Pilot trend data"
             trend="up"
             icon={Database}
-            color="#f59e0b"
+            color="#c9b787"
             tooltip="% of RAG queries returning no relevant chunks"
           />
           <MetricCard
@@ -257,7 +257,7 @@ export default function TrustAnalyticsPage() {
             sub="Pilot trend data"
             trend="flat"
             icon={Lock}
-            color="#ef4444"
+            color="#f5f5f5"
             tooltip="% of policy blocks subsequently overridden by a human"
           />
         </div>
@@ -285,8 +285,8 @@ export default function TrustAnalyticsPage() {
                 <Area
                   type="monotone"
                   dataKey="invalid"
-                  stroke="#ef4444"
-                  fill="#ef444422"
+                  stroke="#f5f5f5"
+                  fill="#f5f5f522"
                   strokeWidth={2}
                   name="Invalid %"
                 />
@@ -316,8 +316,8 @@ export default function TrustAnalyticsPage() {
                 <Area
                   type="monotone"
                   dataKey="unsupported"
-                  stroke="#f97316"
-                  fill="#f9731622"
+                  stroke="#c9b787"
+                  fill="#c9b78722"
                   strokeWidth={2}
                   name="Unsupported %"
                 />
@@ -347,8 +347,8 @@ export default function TrustAnalyticsPage() {
                 <Area
                   type="monotone"
                   dataKey="miss"
-                  stroke="#f59e0b"
-                  fill="#f59e0b22"
+                  stroke="#c9b787"
+                  fill="#c9b78722"
                   strokeWidth={2}
                   name="Miss %"
                 />
@@ -377,14 +377,14 @@ export default function TrustAnalyticsPage() {
                 />
                 <Bar
                   dataKey="honored"
-                  fill="#22c55e"
+                  fill="#c9b787"
                   stackId="a"
                   radius={[0, 0, 0, 0]}
                   name="Honored"
                 />
                 <Bar
                   dataKey="overridden"
-                  fill="#ef4444"
+                  fill="#f5f5f5"
                   stackId="a"
                   radius={[4, 4, 0, 0]}
                   name="Overridden"
@@ -408,7 +408,7 @@ export default function TrustAnalyticsPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-mono text-[#8b9ab0]">{o.id}</span>
                     <span
-                      className={`text-xs px-1.5 py-0.5 rounded font-mono font-bold ${o.riskRating === 'critical' ? 'bg-red-500/20 text-red-400' : o.riskRating === 'high' ? 'bg-orange-500/20 text-orange-400' : 'bg-amber-500/20 text-amber-400'}`}
+                      className={`text-xs px-1.5 py-0.5 rounded font-mono font-bold ${o.riskRating === 'critical' ? 'bg-[#f5f5f5]/20 text-[#f5f5f5]' : o.riskRating === 'high' ? 'bg-[#c9b787]/20 text-[#c9b787]' : 'bg-[#c9b787]/20 text-[#c9b787]'}`}
                     >
                       {o.riskRating.toUpperCase()}
                     </span>
@@ -418,7 +418,7 @@ export default function TrustAnalyticsPage() {
                 <p className="text-xs text-white">{o.action}</p>
                 <div className="flex items-center gap-4 text-xs text-[#8b9ab0] font-mono">
                   <span>
-                    blocked by: <span className="text-amber-400">{o.blockedBy}</span>
+                    blocked by: <span className="text-[#c9b787]">{o.blockedBy}</span>
                   </span>
                   <span>
                     overridden by: <span className="text-white">{o.overriddenBy}</span>
@@ -442,15 +442,15 @@ export default function TrustAnalyticsPage() {
               >
                 <div className="flex items-center gap-2.5">
                   {item.status === 'active' ? (
-                    <CheckCircle2 size={14} className="text-green-400 shrink-0" />
+                    <CheckCircle2 size={14} className="text-[#c9b787] shrink-0" />
                   ) : (
-                    <Info size={14} className="text-amber-400 shrink-0" />
+                    <Info size={14} className="text-[#c9b787] shrink-0" />
                   )}
                   <span className="text-xs text-white">{item.label}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`text-xs px-2 py-0.5 rounded font-mono ${item.status === 'active' ? 'bg-green-500/10 text-green-400' : 'bg-amber-500/10 text-amber-400'}`}
+                    className={`text-xs px-2 py-0.5 rounded font-mono ${item.status === 'active' ? 'bg-[#c9b787]/10 text-[#c9b787]' : 'bg-[#c9b787]/10 text-[#c9b787]'}`}
                   >
                     {item.status === 'active' ? 'Active' : 'Planned'}
                   </span>

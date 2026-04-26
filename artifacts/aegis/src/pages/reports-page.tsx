@@ -22,18 +22,18 @@ import { useState } from 'react';
 import { api } from '@/lib/api';
 
 const severityColors: Record<string, string> = {
-  info: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  low: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  critical: 'bg-red-500/10 text-red-400 border-red-500/20',
+  info: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  low: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  medium: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  high: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  critical: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
 };
 
 function getScoreColor(score: number) {
-  if (score < 30) return 'text-emerald-400';
-  if (score < 50) return 'text-amber-400';
-  if (score < 70) return 'text-orange-400';
-  return 'text-red-400';
+  if (score < 30) return 'text-[#c9b787]';
+  if (score < 50) return 'text-[#c9b787]';
+  if (score < 70) return 'text-[#c9b787]';
+  return 'text-[#f5f5f5]';
 }
 
 export default function ReportsPage() {
@@ -157,29 +157,29 @@ export default function ReportsPage() {
               </CardContent>
             </Card>
             <Card
-              className={`bg-card border-border animate-fade-in-up stagger-2 hover:border-red-500/20 transition-all duration-300 group ${(report.summary?.criticalCount || 0) > 0 ? 'ring-1 ring-red-500/10' : ''}`}
+              className={`bg-card border-border animate-fade-in-up stagger-2 hover:border-[#f5f5f5]/20 transition-all duration-300 group ${(report.summary?.criticalCount || 0) > 0 ? 'ring-1 ring-red-500/10' : ''}`}
             >
               <CardContent className="p-4 text-center">
                 <div
-                  className={`w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform ${(report.summary?.criticalCount || 0) > 0 ? 'animate-pulse' : ''}`}
+                  className={`w-10 h-10 rounded-lg bg-[#f5f5f5]/10 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform ${(report.summary?.criticalCount || 0) > 0 ? 'animate-pulse' : ''}`}
                 >
-                  <AlertTriangle className="w-5 h-5 text-red-400" />
+                  <AlertTriangle className="w-5 h-5 text-[#f5f5f5]" />
                 </div>
                 <p className="text-xs text-muted-foreground">Critical</p>
                 <p
-                  className={`text-2xl font-bold font-display text-red-400 ${(report.summary?.criticalCount || 0) > 0 ? 'animate-threat-pulse' : ''}`}
+                  className={`text-2xl font-bold font-display text-[#f5f5f5] ${(report.summary?.criticalCount || 0) > 0 ? 'animate-threat-pulse' : ''}`}
                 >
                   <AnimatedCounter value={report.summary?.criticalCount || 0} />
                 </p>
               </CardContent>
             </Card>
-            <Card className="bg-card border-border animate-fade-in-up stagger-3 hover:border-orange-500/20 transition-all duration-300 group">
+            <Card className="bg-card border-border animate-fade-in-up stagger-3 hover:border-[#c9b787]/20 transition-all duration-300 group">
               <CardContent className="p-4 text-center">
-                <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
-                  <Shield className="w-5 h-5 text-orange-400" />
+                <div className="w-10 h-10 rounded-lg bg-[#c9b787]/10 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
+                  <Shield className="w-5 h-5 text-[#c9b787]" />
                 </div>
                 <p className="text-xs text-muted-foreground">High</p>
-                <p className="text-2xl font-bold font-display text-orange-400">
+                <p className="text-2xl font-bold font-display text-[#c9b787]">
                   <AnimatedCounter value={report.summary?.highCount || 0} />
                 </p>
               </CardContent>
@@ -254,7 +254,7 @@ export default function ReportsPage() {
                           {finding.cveId && <span className="font-mono">{finding.cveId}</span>}
                         </div>
                         {finding.recommendation && (
-                          <p className="text-xs text-emerald-400/80 mt-2 flex items-center gap-1">
+                          <p className="text-xs text-[#c9b787]/80 mt-2 flex items-center gap-1">
                             <CheckCircle className="w-3 h-3" /> {finding.recommendation}
                           </p>
                         )}

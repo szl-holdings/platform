@@ -86,9 +86,9 @@ const OUTCOME_CONFIG: Record<
   BranchOutcome,
   { color: string; label: string; icon: typeof CheckCircle }
 > = {
-  contained: { color: '#10b981', label: 'Contained', icon: CheckCircle },
-  escalated: { color: '#f59e0b', label: 'Escalated', icon: AlertTriangle },
-  catastrophic: { color: '#ef4444', label: 'Catastrophic', icon: XCircle },
+  contained: { color: '#c9b787', label: 'Contained', icon: CheckCircle },
+  escalated: { color: '#c9b787', label: 'Escalated', icon: AlertTriangle },
+  catastrophic: { color: '#f5f5f5', label: 'Catastrophic', icon: XCircle },
   recovering: { color: '#8b7ac8', label: 'Recovering', icon: Zap },
 };
 
@@ -231,7 +231,7 @@ function apiBranchToScenario(b: ApiBranch, idx: number): ScenarioBranch {
 }
 
 function BlastRadiusBar({ value }: { value: number }) {
-  const color = value <= 15 ? '#10b981' : value <= 50 ? '#f59e0b' : '#ef4444';
+  const color = value <= 15 ? '#c9b787' : value <= 50 ? '#c9b787' : '#f5f5f5';
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
@@ -311,7 +311,7 @@ function BranchCard({
           <div className="text-right shrink-0">
             <div
               className="text-lg font-bold font-mono"
-              style={{ color: branch.probability >= 40 ? '#f59e0b' : 'rgba(255,255,255,0.6)' }}
+              style={{ color: branch.probability >= 40 ? '#c9b787' : 'rgba(255,255,255,0.6)' }}
             >
               {branch.probability}%
             </div>
@@ -340,7 +340,7 @@ function BranchCard({
               {
                 label: 'Cost',
                 value: branch.costImpact,
-                color: branch.outcome === 'catastrophic' ? '#ef4444' : 'rgba(255,255,255,0.6)',
+                color: branch.outcome === 'catastrophic' ? '#f5f5f5' : 'rgba(255,255,255,0.6)',
               },
             ].map((s) => (
               <div
@@ -453,13 +453,13 @@ function ComparisonDrawer({
                 className="col-span-2 rounded-lg p-2 text-center"
                 style={{
                   background:
-                    row.better === 'a' ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${row.better === 'a' ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                    row.better === 'a' ? 'rgba(201,183,135,0.08)' : 'rgba(255,255,255,0.03)',
+                  border: `1px solid ${row.better === 'a' ? 'rgba(201,183,135,0.2)' : 'rgba(255,255,255,0.06)'}`,
                 }}
               >
                 <div
                   className="text-[10px] font-bold font-mono"
-                  style={{ color: row.better === 'a' ? '#10b981' : 'rgba(255,255,255,0.6)' }}
+                  style={{ color: row.better === 'a' ? '#c9b787' : 'rgba(255,255,255,0.6)' }}
                 >
                   {row.valA}
                 </div>
@@ -471,13 +471,13 @@ function ComparisonDrawer({
                 className="col-span-2 rounded-lg p-2 text-center"
                 style={{
                   background:
-                    row.better === 'b' ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${row.better === 'b' ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                    row.better === 'b' ? 'rgba(201,183,135,0.08)' : 'rgba(255,255,255,0.03)',
+                  border: `1px solid ${row.better === 'b' ? 'rgba(201,183,135,0.2)' : 'rgba(255,255,255,0.06)'}`,
                 }}
               >
                 <div
                   className="text-[10px] font-bold font-mono"
-                  style={{ color: row.better === 'b' ? '#10b981' : 'rgba(255,255,255,0.6)' }}
+                  style={{ color: row.better === 'b' ? '#c9b787' : 'rgba(255,255,255,0.6)' }}
                 >
                   {row.valB}
                 </div>
@@ -503,10 +503,10 @@ function ComparisonDrawer({
                   Branch A gaps
                 </div>
                 {a.controlGaps.length === 0 ? (
-                  <div className="text-[9px] text-emerald-400">No gaps</div>
+                  <div className="text-[9px] text-[#c9b787]">No gaps</div>
                 ) : (
                   a.controlGaps.map((g, i) => (
-                    <div key={i} className="text-[9px] text-amber-400 mb-0.5">
+                    <div key={i} className="text-[9px] text-[#c9b787] mb-0.5">
                       · {g}
                     </div>
                   ))
@@ -517,10 +517,10 @@ function ComparisonDrawer({
                   Branch B gaps
                 </div>
                 {b.controlGaps.length === 0 ? (
-                  <div className="text-[9px] text-emerald-400">No gaps</div>
+                  <div className="text-[9px] text-[#c9b787]">No gaps</div>
                 ) : (
                   b.controlGaps.map((g, i) => (
-                    <div key={i} className="text-[9px] text-amber-400 mb-0.5">
+                    <div key={i} className="text-[9px] text-[#c9b787] mb-0.5">
                       · {g}
                     </div>
                   ))
@@ -624,9 +624,9 @@ function AegisScenarioBranchesContent() {
 
       <div
         className="rounded-xl border p-4 flex items-center gap-4"
-        style={{ borderColor: 'rgba(245,158,11,0.15)', background: 'rgba(245,158,11,0.03)' }}
+        style={{ borderColor: 'rgba(201,183,135,0.15)', background: 'rgba(201,183,135,0.03)' }}
       >
-        <AlertTriangle className="w-4 h-4 shrink-0" style={{ color: '#f59e0b' }} />
+        <AlertTriangle className="w-4 h-4 shrink-0" style={{ color: '#c9b787' }} />
         <div className="flex-1">
           <div className="text-[11px] font-semibold text-white mb-0.5">
             Scenario: APT29 Ransomware Campaign — INC-2024-0847
@@ -640,9 +640,9 @@ function AegisScenarioBranchesContent() {
         <div
           className="text-[10px] font-mono px-3 py-1.5 rounded-lg shrink-0"
           style={{
-            color: isLiveData ? '#10b981' : '#f59e0b',
-            background: isLiveData ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
-            border: `1px solid ${isLiveData ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)'}`,
+            color: isLiveData ? '#c9b787' : '#c9b787',
+            background: isLiveData ? 'rgba(201,183,135,0.1)' : 'rgba(201,183,135,0.1)',
+            border: `1px solid ${isLiveData ? 'rgba(201,183,135,0.2)' : 'rgba(201,183,135,0.2)'}`,
           }}
         >
           {isLiveData ? (
@@ -714,7 +714,7 @@ function AegisScenarioBranchesContent() {
             <div className="mt-3 pt-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
               <div
                 className="text-[9px] font-bold uppercase tracking-widest mb-2"
-                style={{ color: '#f59e0b' }}
+                style={{ color: '#c9b787' }}
               >
                 Control Gaps to Address
               </div>
@@ -722,7 +722,7 @@ function AegisScenarioBranchesContent() {
                 <div
                   key={i}
                   className="flex items-start gap-2 text-[10px] mb-1"
-                  style={{ color: '#f59e0b' }}
+                  style={{ color: '#c9b787' }}
                 >
                   <AlertTriangle className="w-2.5 h-2.5 mt-0.5 shrink-0" />
                   {gap}

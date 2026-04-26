@@ -64,17 +64,17 @@ const PROVIDER_OPTIONS = [
 const statusBadge: Record<string, { label: string; className: string; icon: React.ReactNode }> = {
   active: {
     label: 'Connected',
-    className: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+    className: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
     icon: <CheckCircle className="w-3 h-3" />,
   },
   error: {
     label: 'Error',
-    className: 'text-red-400 bg-red-500/10 border-red-500/20',
+    className: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/20',
     icon: <XCircle className="w-3 h-3" />,
   },
   pending: {
     label: 'Pending',
-    className: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+    className: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/20',
     icon: <Clock className="w-3 h-3" />,
   },
   inactive: {
@@ -172,7 +172,7 @@ function validateProviderForm(
 function FieldError({ msg }: { msg?: string }) {
   if (!msg) return null;
   return (
-    <p className="flex items-center gap-1 mt-1 text-[11px] text-red-400">
+    <p className="flex items-center gap-1 mt-1 text-[11px] text-[#f5f5f5]">
       <AlertTriangle className="w-3 h-3 shrink-0" /> {msg}
     </p>
   );
@@ -278,7 +278,7 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
   const inputClass = (k: string) =>
     `w-full px-3 py-2 text-sm rounded-lg border focus:outline-none transition-colors ${
       showError(k)
-        ? 'bg-red-500/5 border-red-500/50 focus:border-red-500/70'
+        ? 'bg-[#f5f5f5]/5 border-[#f5f5f5]/50 focus:border-[#f5f5f5]/70'
         : 'bg-muted border-border focus:border-primary/50'
     }`;
 
@@ -300,7 +300,7 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
         </div>
         <div className="p-4 space-y-4">
           {submitAttempted && hasErrors && (
-            <div className="flex items-center gap-2 text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-lg">
+            <div className="flex items-center gap-2 text-xs text-[#c9b787] bg-[#c9b787]/10 border border-[#c9b787]/20 px-3 py-2 rounded-lg">
               <AlertTriangle className="w-3.5 h-3.5 shrink-0" /> Please fix the highlighted errors
               before saving.
             </div>
@@ -309,7 +309,7 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
               <label className="text-xs text-muted-foreground block mb-1">
-                Display Name <span className="text-red-400">*</span>
+                Display Name <span className="text-[#f5f5f5]">*</span>
               </label>
               <input
                 value={form.name}
@@ -385,7 +385,7 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
                 return (
                   <div key={f.key}>
                     <label className="text-xs text-muted-foreground block mb-1">
-                      {f.label} <span className="text-red-400">*</span>
+                      {f.label} <span className="text-[#f5f5f5]">*</span>
                     </label>
                     <div className="relative">
                       <input
@@ -395,17 +395,17 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
                         placeholder={f.placeholder}
                         type={f.type}
                         className={`${inputClass(f.key)} font-mono ${
-                          baseHasProbeError ? 'bg-red-500/5 border-red-500/50' : ''
+                          baseHasProbeError ? 'bg-[#f5f5f5]/5 border-[#f5f5f5]/50' : ''
                         } ${isBaseUrl ? 'pr-9' : ''}`}
                       />
                       {isBaseUrl && probeForThisUrl?.status === 'checking' && (
                         <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />
                       )}
                       {isBaseUrl && probeOk && (
-                        <CheckCircle className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400" />
+                        <CheckCircle className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#c9b787]" />
                       )}
                       {isBaseUrl && probeError && (
-                        <XCircle className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-red-400" />
+                        <XCircle className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#f5f5f5]" />
                       )}
                     </div>
                     <FieldError msg={showError(f.key)} />
@@ -416,7 +416,7 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
                       </p>
                     )}
                     {isBaseUrl && probeOk && (
-                      <p className="flex items-center gap-1 mt-1 text-[11px] text-emerald-400">
+                      <p className="flex items-center gap-1 mt-1 text-[11px] text-[#c9b787]">
                         <CheckCircle className="w-3 h-3 shrink-0" /> Host reachable (
                         {probeOk.latencyMs}ms
                         {probeOk.status ? `, HTTP ${probeOk.status}` : ''})
@@ -432,7 +432,7 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs text-muted-foreground block mb-1">
-                Sync Interval (minutes) <span className="text-red-400">*</span>
+                Sync Interval (minutes) <span className="text-[#f5f5f5]">*</span>
               </label>
               <input
                 value={form.syncIntervalMinutes}
@@ -456,8 +456,8 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
             </div>
           </div>
 
-          <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
-            <p className="text-[10px] text-blue-400">
+          <div className="p-3 rounded-lg bg-[#c9b787]/5 border border-[#c9b787]/20">
+            <p className="text-[10px] text-[#c9b787]">
               Credentials are stored encrypted in the database. Use the Test Connection button after
               saving to verify access.
             </p>
@@ -471,7 +471,7 @@ function AddProviderForm({ onClose, onSave, loading }: AddProviderFormProps) {
               size="sm"
               onClick={handleSave}
               disabled={loading}
-              className={`flex-1 ${submitAttempted && hasErrors && !loading ? 'bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20' : ''}`}
+              className={`flex-1 ${submitAttempted && hasErrors && !loading ? 'bg-[#f5f5f5]/10 text-[#f5f5f5] border border-[#f5f5f5]/30 hover:bg-[#f5f5f5]/20' : ''}`}
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -591,16 +591,16 @@ export default function ProviderSettings() {
 
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'Total Providers', value: providers.length, color: 'text-sky-400' },
+          { label: 'Total Providers', value: providers.length, color: 'text-[#8a8a8a]' },
           {
             label: 'Connected',
             value: providers.filter((p) => p.status === 'active').length,
-            color: 'text-emerald-400',
+            color: 'text-[#c9b787]',
           },
           {
             label: 'Errors',
             value: providers.filter((p) => p.status === 'error').length,
-            color: 'text-red-400',
+            color: 'text-[#f5f5f5]',
           },
         ].map(({ label, value, color }) => (
           <Card key={label}>
@@ -648,9 +648,9 @@ export default function ProviderSettings() {
                 key={provider.id}
                 className={
                   provider.status === 'error'
-                    ? 'border-red-500/20'
+                    ? 'border-[#f5f5f5]/20'
                     : provider.status === 'active'
-                      ? 'border-emerald-500/10'
+                      ? 'border-[#c9b787]/10'
                       : ''
                 }
               >
@@ -688,14 +688,14 @@ export default function ProviderSettings() {
                         )}
                       </div>
                       {provider.status === 'error' && provider.lastError && (
-                        <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1">
+                        <p className="text-[10px] text-[#f5f5f5] mt-1 flex items-center gap-1">
                           <AlertTriangle className="w-3 h-3" />
                           {provider.lastError}
                         </p>
                       )}
                       {testResult && (
                         <div
-                          className={`mt-2 text-[10px] px-2 py-1 rounded flex items-center gap-1.5 ${testResult.ok ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}
+                          className={`mt-2 text-[10px] px-2 py-1 rounded flex items-center gap-1.5 ${testResult.ok ? 'bg-[#c9b787]/10 text-[#c9b787]' : 'bg-[#f5f5f5]/10 text-[#f5f5f5]'}`}
                         >
                           {testResult.ok ? (
                             <CheckCircle className="w-3 h-3" />
@@ -708,7 +708,7 @@ export default function ProviderSettings() {
                         </div>
                       )}
                       {syncResult && (
-                        <div className="mt-2 text-[10px] px-2 py-1 rounded flex items-center gap-1.5 bg-blue-500/10 text-blue-400">
+                        <div className="mt-2 text-[10px] px-2 py-1 rounded flex items-center gap-1.5 bg-[#c9b787]/10 text-[#c9b787]">
                           <RefreshCw className="w-3 h-3" /> Synced {syncResult.devicesFound} devices
                           at {new Date(syncResult.syncedAt).toLocaleTimeString()}
                         </div>
@@ -753,7 +753,7 @@ export default function ProviderSettings() {
                       <button
                         onClick={() => deleteMutation.mutate(provider.id)}
                         disabled={deleteMutation.isPending}
-                        className="text-[10px] px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded hover:bg-red-500/20 flex items-center gap-1 transition-colors"
+                        className="text-[10px] px-2 py-1 bg-[#f5f5f5]/10 text-[#f5f5f5] border border-[#f5f5f5]/20 rounded hover:bg-[#f5f5f5]/20 flex items-center gap-1 transition-colors"
                       >
                         <Trash2 className="w-3 h-3" /> Remove
                       </button>

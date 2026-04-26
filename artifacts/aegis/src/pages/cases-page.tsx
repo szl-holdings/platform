@@ -127,7 +127,7 @@ function TraceMiniGraph({ bundle }: { bundle: TraceBundle }) {
 
   if (!layout) return null;
 
-  const ringColors = ['#fbbf24', '#22d3ee', '#a855f7', '#f59e0b', '#ef4444'];
+  const ringColors = ['#c9b787', '#22d3ee', '#8a8a8a', '#c9b787', '#f5f5f5'];
 
   return (
     <svg
@@ -167,7 +167,7 @@ function TraceMiniGraph({ bundle }: { bundle: TraceBundle }) {
       })}
       {Array.from(layout.positions.entries()).map(([id, pos]) => {
         const isOrigin = id === layout.originId;
-        const color = ringColors[Math.min(pos.hop, ringColors.length - 1)] ?? '#fbbf24';
+        const color = ringColors[Math.min(pos.hop, ringColors.length - 1)] ?? '#c9b787';
         return (
           <circle
             key={id}
@@ -219,45 +219,45 @@ interface Case {
 const priorityConfig: Record<string, { label: string; color: string; dot: string }> = {
   p1_critical: {
     label: 'P1 Critical',
-    color: 'bg-red-500/15 text-red-400 border-red-500/30',
-    dot: 'bg-red-400 animate-pulse',
+    color: 'bg-[#f5f5f5]/15 text-[#f5f5f5] border-[#f5f5f5]/30',
+    dot: 'bg-[#f5f5f5] animate-pulse',
   },
   p2_high: {
     label: 'P2 High',
-    color: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
-    dot: 'bg-orange-400',
+    color: 'bg-[#c9b787]/15 text-[#c9b787] border-[#c9b787]/30',
+    dot: 'bg-[#c9b787]',
   },
   p3_medium: {
     label: 'P3 Medium',
-    color: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-    dot: 'bg-amber-400',
+    color: 'bg-[#c9b787]/15 text-[#c9b787] border-[#c9b787]/30',
+    dot: 'bg-[#c9b787]',
   },
   p4_low: {
     label: 'P4 Low',
-    color: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-    dot: 'bg-blue-400',
+    color: 'bg-[#c9b787]/15 text-[#c9b787] border-[#c9b787]/30',
+    dot: 'bg-[#c9b787]',
   },
 };
 
 const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
   open: {
     label: 'Open',
-    color: 'bg-red-500/10 text-red-400 border-red-500/20',
+    color: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
     icon: AlertTriangle,
   },
   in_progress: {
     label: 'In Progress',
-    color: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    color: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
     icon: Activity,
   },
   pending_review: {
     label: 'Pending Review',
-    color: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    color: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
     icon: Clock,
   },
   resolved: {
     label: 'Resolved',
-    color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    color: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
     icon: CheckCircle,
   },
   closed: {
@@ -290,7 +290,7 @@ function SLAIndicator({ case: c }: { case: Case }) {
           <span
             className={cn(
               'text-[9px] font-mono',
-              c.triagedAt ? 'text-emerald-400' : triageBreached ? 'text-red-400' : 'text-amber-400',
+              c.triagedAt ? 'text-[#c9b787]' : triageBreached ? 'text-[#f5f5f5]' : 'text-[#c9b787]',
             )}
           >
             {c.triagedAt
@@ -304,7 +304,7 @@ function SLAIndicator({ case: c }: { case: Case }) {
           <div
             className={cn(
               'h-full rounded-full transition-all',
-              c.triagedAt ? 'bg-emerald-400' : triageBreached ? 'bg-red-400' : 'bg-amber-400',
+              c.triagedAt ? 'bg-[#c9b787]' : triageBreached ? 'bg-[#f5f5f5]' : 'bg-[#c9b787]',
             )}
             style={{ width: `${triagePct}%` }}
           />
@@ -319,10 +319,10 @@ function SLAIndicator({ case: c }: { case: Case }) {
             className={cn(
               'text-[9px] font-mono',
               c.resolvedAt || c.status === 'closed'
-                ? 'text-emerald-400'
+                ? 'text-[#c9b787]'
                 : resolveBreached
-                  ? 'text-red-400'
-                  : 'text-amber-400',
+                  ? 'text-[#f5f5f5]'
+                  : 'text-[#c9b787]',
             )}
           >
             {c.resolvedAt || c.status === 'closed'
@@ -337,10 +337,10 @@ function SLAIndicator({ case: c }: { case: Case }) {
             className={cn(
               'h-full rounded-full transition-all',
               c.resolvedAt || c.status === 'closed'
-                ? 'bg-emerald-400'
+                ? 'bg-[#c9b787]'
                 : resolveBreached
-                  ? 'bg-red-400'
-                  : 'bg-amber-400',
+                  ? 'bg-[#f5f5f5]'
+                  : 'bg-[#c9b787]',
             )}
             style={{ width: `${resolvePct}%` }}
           />
@@ -473,7 +473,7 @@ function CaseDetailPanel({
                   <Badge
                     key={id}
                     variant="outline"
-                    className="text-[9px] bg-red-500/5 text-red-400/70 border-red-500/20"
+                    className="text-[9px] bg-[#f5f5f5]/5 text-[#f5f5f5]/70 border-[#f5f5f5]/20"
                   >
                     INC-{id}
                   </Badge>
@@ -587,10 +587,10 @@ function CaseDetailPanel({
                       <div
                         key={i}
                         data-testid="case-evidence-constellation-trace"
-                        className="px-3 py-2.5 bg-amber-500/5 border border-amber-500/20 rounded-lg"
+                        className="px-3 py-2.5 bg-[#c9b787]/5 border border-[#c9b787]/20 rounded-lg"
                       >
                         <div className="flex items-start gap-2">
-                          <Activity className="w-3 h-3 text-amber-400 shrink-0 mt-0.5" />
+                          <Activity className="w-3 h-3 text-[#c9b787] shrink-0 mt-0.5" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="text-xs font-medium text-foreground/90 truncate">
@@ -598,7 +598,7 @@ function CaseDetailPanel({
                               </span>
                               <Badge
                                 variant="outline"
-                                className="text-[9px] bg-amber-500/10 text-amber-400 border-amber-500/30 shrink-0"
+                                className="text-[9px] bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/30 shrink-0"
                               >
                                 Constellation trace
                               </Badge>
@@ -627,7 +627,7 @@ function CaseDetailPanel({
                                 <span>{item.nodeCount ?? 0} nodes</span>
                                 <span>{item.edgeCount ?? 0} edges</span>
                                 {item.truncated && (
-                                  <span className="text-amber-400">truncated</span>
+                                  <span className="text-[#c9b787]">truncated</span>
                                 )}
                               </div>
                               <div className="text-muted-foreground/50 mt-0.5">
@@ -642,7 +642,7 @@ function CaseDetailPanel({
                                 variant="outline"
                                 onClick={downloadBundle}
                                 data-testid="case-evidence-trace-download"
-                                className="h-6 px-2 text-[10px] border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                                className="h-6 px-2 text-[10px] border-[#c9b787]/30 text-[#c9b787] hover:bg-[#c9b787]/10"
                               >
                                 JSON
                               </Button>
@@ -653,7 +653,7 @@ function CaseDetailPanel({
                                 target="_blank"
                                 rel="noreferrer"
                                 data-testid="case-evidence-trace-open-constellation"
-                                className="inline-flex items-center gap-1 h-6 px-2 rounded-md border border-amber-500/30 bg-amber-500/5 text-amber-400 text-[10px] font-medium hover:bg-amber-500/10 transition-colors"
+                                className="inline-flex items-center gap-1 h-6 px-2 rounded-md border border-[#c9b787]/30 bg-[#c9b787]/5 text-[#c9b787] text-[10px] font-medium hover:bg-[#c9b787]/10 transition-colors"
                               >
                                 <ExternalLink className="w-2.5 h-2.5" />
                                 Open in Constellation
@@ -662,7 +662,7 @@ function CaseDetailPanel({
                           </div>
                         </div>
                         {hasGraph && bundle && (
-                          <div className="mt-2 rounded-md border border-amber-500/15 bg-black/30 px-2 py-1.5">
+                          <div className="mt-2 rounded-md border border-[#c9b787]/15 bg-black/30 px-2 py-1.5">
                             <TraceMiniGraph bundle={bundle} />
                           </div>
                         )}
@@ -680,7 +680,7 @@ function CaseDetailPanel({
                       </span>
                       <Badge
                         variant="outline"
-                        className="text-[9px] bg-blue-500/5 text-blue-400/70 border-blue-500/20 shrink-0"
+                        className="text-[9px] bg-[#c9b787]/5 text-[#c9b787]/70 border-[#c9b787]/20 shrink-0"
                       >
                         {item.type}
                       </Badge>
@@ -810,16 +810,16 @@ export default function CasesPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[9px] font-mono text-red-400/50 uppercase tracking-widest">
+            <span className="text-[9px] font-mono text-[#f5f5f5]/50 uppercase tracking-widest">
               Aegis / Cases
             </span>
-            <span className="text-red-500/20">·</span>
+            <span className="text-[#f5f5f5]/20">·</span>
             <span className="text-[9px] font-mono text-muted-foreground/40 uppercase tracking-widest">
               Case Management
             </span>
           </div>
           <h1 className="font-display text-xl font-bold flex items-center gap-2.5">
-            <Briefcase className="w-5 h-5 text-red-400" />
+            <Briefcase className="w-5 h-5 text-[#f5f5f5]" />
             Case Management
           </h1>
           <p className="text-[11px] text-muted-foreground mt-1">
@@ -829,7 +829,7 @@ export default function CasesPage() {
         <Button
           size="sm"
           variant="outline"
-          className="border-red-500/20 text-red-400 hover:bg-red-500/10 hover:text-red-300 shrink-0"
+          className="border-[#f5f5f5]/20 text-[#f5f5f5] hover:bg-[#f5f5f5]/10 hover:text-[#f5f5f5] shrink-0"
         >
           <Plus className="w-3.5 h-3.5 mr-1.5" />
           New Case
@@ -839,14 +839,14 @@ export default function CasesPage() {
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {[
           { label: 'Total Cases', value: stats.total, color: 'text-foreground' },
-          { label: 'Active', value: stats.open, color: 'text-red-400' },
-          { label: 'P1 Critical', value: stats.p1, color: 'text-red-400' },
+          { label: 'Active', value: stats.open, color: 'text-[#f5f5f5]' },
+          { label: 'P1 Critical', value: stats.p1, color: 'text-[#f5f5f5]' },
           {
             label: 'SLA Breached',
             value: stats.slaBreached,
-            color: stats.slaBreached > 0 ? 'text-red-400' : 'text-emerald-400',
+            color: stats.slaBreached > 0 ? 'text-[#f5f5f5]' : 'text-[#c9b787]',
           },
-          { label: 'Resolved/Closed', value: stats.resolved, color: 'text-emerald-400' },
+          { label: 'Resolved/Closed', value: stats.resolved, color: 'text-[#c9b787]' },
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-card border border-border rounded-xl p-4">
             <div className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">
@@ -905,7 +905,7 @@ export default function CasesPage() {
         <div className="divide-y divide-border/50">
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
-              <div className="w-6 h-6 border-2 border-red-500/40 border-t-red-400 rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-[#f5f5f5]/40 border-t-red-400 rounded-full animate-spin" />
             </div>
           ) : filtered.length === 0 ? (
             cases.length === 0 ? (
@@ -913,7 +913,7 @@ export default function CasesPage() {
                 icon={CheckCircle}
                 headline="No open cases"
                 description="The case queue is clear — every reported issue has been triaged or resolved."
-                accentColor="#10b981"
+                accentColor="#c9b787"
                 compact
               />
             ) : (
@@ -946,7 +946,7 @@ export default function CasesPage() {
               return (
                 <div
                   key={c.id}
-                  className={cn('transition-colors', slaBreached && 'border-l-2 border-red-500')}
+                  className={cn('transition-colors', slaBreached && 'border-l-2 border-[#f5f5f5]')}
                 >
                   <div
                     className="px-5 py-3.5 hover:bg-muted/5 cursor-pointer"
@@ -969,7 +969,7 @@ export default function CasesPage() {
                           {slaBreached && (
                             <Badge
                               variant="outline"
-                              className="text-[9px] bg-red-500/15 text-red-400 border-red-500/30 animate-pulse"
+                              className="text-[9px] bg-[#f5f5f5]/15 text-[#f5f5f5] border-[#f5f5f5]/30 animate-pulse"
                             >
                               SLA Breached
                             </Badge>

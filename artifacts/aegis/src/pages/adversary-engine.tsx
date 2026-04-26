@@ -196,22 +196,22 @@ const outcomeConfig: Record<
   string,
   { color: string; bg: string; label: string; icon: typeof CheckCircle }
 > = {
-  detected: { color: '#f59e0b', bg: 'bg-amber-500/10', label: 'Detected', icon: Eye },
-  blocked: { color: '#10b981', bg: 'bg-emerald-500/10', label: 'Blocked', icon: Shield },
-  succeeded: { color: '#ef4444', bg: 'bg-red-500/10', label: 'Succeeded ⚠', icon: AlertTriangle },
-  partial: { color: '#f97316', bg: 'bg-orange-500/10', label: 'Partial', icon: Activity },
+  detected: { color: '#c9b787', bg: 'bg-[#c9b787]/10', label: 'Detected', icon: Eye },
+  blocked: { color: '#c9b787', bg: 'bg-[#c9b787]/10', label: 'Blocked', icon: Shield },
+  succeeded: { color: '#f5f5f5', bg: 'bg-[#f5f5f5]/10', label: 'Succeeded ⚠', icon: AlertTriangle },
+  partial: { color: '#c9b787', bg: 'bg-[#c9b787]/10', label: 'Partial', icon: Activity },
 };
 
 const statusConfig: Record<
   AttackChainStatus,
   { cls: string; label: string; pulse?: boolean }
 > = {
-  completed: { cls: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30', label: 'Completed' },
-  running: { cls: 'text-amber-400 bg-amber-500/10 border-amber-500/30', label: 'Running', pulse: true },
-  paused: { cls: 'text-blue-400 bg-blue-500/10 border-blue-500/30', label: 'Paused' },
+  completed: { cls: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30', label: 'Completed' },
+  running: { cls: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30', label: 'Running', pulse: true },
+  paused: { cls: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30', label: 'Paused' },
   queued: { cls: 'text-zinc-400 bg-zinc-500/10 border-zinc-500/30', label: 'Queued' },
   pending: { cls: 'text-zinc-400 bg-zinc-500/10 border-zinc-500/30', label: 'Queued' },
-  failed: { cls: 'text-red-400 bg-red-500/10 border-red-500/30', label: 'Failed' },
+  failed: { cls: 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/30', label: 'Failed' },
 };
 
 const MITRE_COVERAGE = [
@@ -251,7 +251,7 @@ function LifecycleControls({
         type="button"
         onClick={(e) => { e.stopPropagation(); onRun(chain.id); }}
         disabled={busy}
-        className="mt-1.5 flex items-center gap-1 text-[10px] text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
+        className="mt-1.5 flex items-center gap-1 text-[10px] text-[#c9b787] hover:text-[#c9b787] disabled:opacity-50"
         aria-label={`Start scenario ${chain.id}`}
       >
         {busy ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
@@ -266,7 +266,7 @@ function LifecycleControls({
         type="button"
         onClick={(e) => { e.stopPropagation(); onPause(chain.id); }}
         disabled={busy}
-        className="mt-1.5 flex items-center gap-1 text-[10px] text-amber-400 hover:text-amber-300 disabled:opacity-50"
+        className="mt-1.5 flex items-center gap-1 text-[10px] text-[#c9b787] hover:text-[#c9b787] disabled:opacity-50"
         aria-label={`Pause scenario ${chain.id}`}
       >
         {busy ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Pause className="w-3 h-3" />}
@@ -282,7 +282,7 @@ function LifecycleControls({
           type="button"
           onClick={(e) => { e.stopPropagation(); onResume(chain.id); }}
           disabled={busy}
-          className="flex items-center gap-1 text-[10px] text-blue-400 hover:text-blue-300 disabled:opacity-50"
+          className="flex items-center gap-1 text-[10px] text-[#c9b787] hover:text-[#c9b787] disabled:opacity-50"
           aria-label={`Resume scenario ${chain.id}`}
         >
           {busy ? <RefreshCw className="w-3 h-3 animate-spin" /> : <RotateCcw className="w-3 h-3" />}
@@ -371,11 +371,11 @@ export default function AdversaryEngine() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Target className="w-5 h-5 text-red-400" />
+            <Target className="w-5 h-5 text-[#f5f5f5]" />
             <h1 className="text-lg font-semibold text-white">Adversary Emulation Engine</h1>
             <span
               className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-mono uppercase border"
-              style={{ background: 'rgba(34,197,94,0.08)', borderColor: 'rgba(34,197,94,0.25)', color: '#22c55e' }}
+              style={{ background: 'rgba(201,183,135,0.08)', borderColor: 'rgba(201,183,135,0.25)', color: '#c9b787' }}
             >
               <Database className="w-2.5 h-2.5" />
               Live DB · Firestorm
@@ -393,7 +393,7 @@ export default function AdversaryEngine() {
                 'AI synthesized new attack chain — 14 steps, 4 tactics based on current threat landscape',
               );
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-400 text-xs font-medium hover:bg-purple-500/25 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#8a8a8a]/15 border border-[#8a8a8a]/30 text-[#8a8a8a] text-xs font-medium hover:bg-[#8a8a8a]/25 transition-colors"
           >
             <Brain className="w-3.5 h-3.5" /> AI Generate Chain
           </button>
@@ -401,7 +401,7 @@ export default function AdversaryEngine() {
       </div>
 
       {isError && (
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-amber-400 flex items-center gap-2">
+        <div className="rounded-xl border border-[#c9b787]/20 bg-[#c9b787]/5 px-4 py-3 text-xs text-[#c9b787] flex items-center gap-2">
           <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
           Could not reach Firestorm API — showing scenario library data. Lifecycle controls will retry the API when triggered.
         </div>
@@ -409,17 +409,17 @@ export default function AdversaryEngine() {
 
       {isLoading && (
         <div className="flex items-center gap-2 text-xs text-zinc-500">
-          <div className="w-3.5 h-3.5 border-2 border-red-500/40 border-t-red-400 rounded-full animate-spin" />
+          <div className="w-3.5 h-3.5 border-2 border-[#f5f5f5]/40 border-t-red-400 rounded-full animate-spin" />
           Loading simulations from Firestorm…
         </div>
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Avg Detection Rate', value: `${avgDetectionRate}%`, sub: 'across completed simulations', color: '#10b981', icon: Eye },
-          { label: 'MITRE Coverage', value: `${avgCoverage}%`, sub: 'across 11 tactics', color: '#3b82f6', icon: Target },
-          { label: 'Simulations Run', value: chains.filter((c) => c.status !== 'pending').length, sub: 'this month', color: '#8b5cf6', icon: Activity },
-          { label: 'Running / Paused', value: `${chains.filter((c) => c.status === 'running').length} / ${chains.filter((c) => c.status === 'paused').length}`, sub: 'active scenarios', color: '#f59e0b', icon: TrendingUp },
+          { label: 'Avg Detection Rate', value: `${avgDetectionRate}%`, sub: 'across completed simulations', color: '#c9b787', icon: Eye },
+          { label: 'MITRE Coverage', value: `${avgCoverage}%`, sub: 'across 11 tactics', color: '#c9b787', icon: Target },
+          { label: 'Simulations Run', value: chains.filter((c) => c.status !== 'pending').length, sub: 'this month', color: '#8a8a8a', icon: Activity },
+          { label: 'Running / Paused', value: `${chains.filter((c) => c.status === 'running').length} / ${chains.filter((c) => c.status === 'paused').length}`, sub: 'active scenarios', color: '#c9b787', icon: TrendingUp },
         ].map((m) => {
           const Icon = m.icon;
           return (
@@ -451,7 +451,7 @@ export default function AdversaryEngine() {
                   className={cn(
                     'w-full rounded-xl border p-3 text-left transition-all',
                     displayChain?.id === chain.id
-                      ? 'border-red-500/30 bg-red-500/5'
+                      ? 'border-[#f5f5f5]/30 bg-[#f5f5f5]/5'
                       : 'border-white/8 bg-white/3 hover:bg-white/5',
                   )}
                 >
@@ -475,7 +475,7 @@ export default function AdversaryEngine() {
                     <span className="font-mono">{chain.id}</span>
                     <span>·</span>
                     <span>{chain.actor}</span>
-                    {chain.aiGenerated && <span className="text-purple-400">✨ AI</span>}
+                    {chain.aiGenerated && <span className="text-[#8a8a8a]">✨ AI</span>}
                   </div>
                   <div className="flex flex-wrap gap-1 mb-1.5">
                     {chain.tactics.slice(0, 3).map((t) => (
@@ -492,7 +492,7 @@ export default function AdversaryEngine() {
                   </div>
                   {chain.status === 'completed' && (
                     <div className="flex items-center gap-3 text-[10px]">
-                      <span className={cn(chain.detectionRate >= 80 ? 'text-emerald-400' : 'text-orange-400')}>
+                      <span className={cn(chain.detectionRate >= 80 ? 'text-[#c9b787]' : 'text-[#c9b787]')}>
                         {chain.detectionRate}% detected
                       </span>
                       <span className="text-zinc-500">
@@ -505,13 +505,13 @@ export default function AdversaryEngine() {
                     <div className="flex items-center gap-2 text-[10px] mb-1">
                       <div className="w-full h-1 rounded-full bg-white/8">
                         <div
-                          className="h-full rounded-full bg-amber-400/60 animate-pulse"
+                          className="h-full rounded-full bg-[#c9b787]/60 animate-pulse"
                           style={{
                             width: `${Math.max(10, (chain.blockedSteps / Math.max(chain.totalSteps, 1)) * 100)}%`,
                           }}
                         />
                       </div>
-                      <span className="text-amber-400 shrink-0">
+                      <span className="text-[#c9b787] shrink-0">
                         {chain.blockedSteps}/{chain.totalSteps}
                       </span>
                     </div>
@@ -520,13 +520,13 @@ export default function AdversaryEngine() {
                     <div className="flex items-center gap-2 text-[10px] mb-1">
                       <div className="w-full h-1 rounded-full bg-white/8">
                         <div
-                          className="h-full rounded-full bg-blue-400/60"
+                          className="h-full rounded-full bg-[#c9b787]/60"
                           style={{
                             width: `${Math.max(10, (chain.blockedSteps / Math.max(chain.totalSteps, 1)) * 100)}%`,
                           }}
                         />
                       </div>
-                      <span className="text-blue-400 shrink-0 font-mono">PAUSED</span>
+                      <span className="text-[#c9b787] shrink-0 font-mono">PAUSED</span>
                     </div>
                   )}
                   <LifecycleControls
@@ -558,7 +558,7 @@ export default function AdversaryEngine() {
                   className={cn(
                     'rounded-xl border p-3',
                     step.outcome === 'succeeded'
-                      ? 'border-red-500/20 bg-red-500/5'
+                      ? 'border-[#f5f5f5]/20 bg-[#f5f5f5]/5'
                       : 'border-white/8 bg-white/3',
                   )}
                 >
@@ -617,10 +617,10 @@ export default function AdversaryEngine() {
                       className={cn(
                         'font-medium',
                         tactic.coverage >= 85
-                          ? 'text-emerald-400'
+                          ? 'text-[#c9b787]'
                           : tactic.coverage >= 70
-                            ? 'text-amber-400'
-                            : 'text-red-400',
+                            ? 'text-[#c9b787]'
+                            : 'text-[#f5f5f5]',
                       )}
                     >
                       {tactic.coverage}%
@@ -633,10 +633,10 @@ export default function AdversaryEngine() {
                         width: `${tactic.coverage}%`,
                         background:
                           tactic.coverage >= 85
-                            ? '#10b981'
+                            ? '#c9b787'
                             : tactic.coverage >= 70
-                              ? '#f59e0b'
-                              : '#ef4444',
+                              ? '#c9b787'
+                              : '#f5f5f5',
                         opacity: 0.7,
                       }}
                     />
@@ -646,12 +646,12 @@ export default function AdversaryEngine() {
             </div>
             <div className="mt-3 pt-3 border-t border-white/8 flex items-center justify-between text-xs">
               <span className="text-zinc-400">Overall Coverage</span>
-              <span className="text-emerald-400 font-bold">{avgCoverage}%</span>
+              <span className="text-[#c9b787] font-bold">{avgCoverage}%</span>
             </div>
           </div>
 
-          <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3">
-            <div className="text-[11px] font-semibold text-red-300 mb-2 flex items-center gap-1.5">
+          <div className="rounded-xl border border-[#f5f5f5]/20 bg-[#f5f5f5]/5 p-3">
+            <div className="text-[11px] font-semibold text-[#f5f5f5] mb-2 flex items-center gap-1.5">
               <AlertTriangle className="w-3 h-3" /> Coverage Gaps
             </div>
             <div className="space-y-2">
@@ -664,7 +664,7 @@ export default function AdversaryEngine() {
                   <div
                     className={cn(
                       'w-1.5 h-1.5 rounded-full shrink-0 mt-1.5',
-                      item.priority === 'critical' ? 'bg-red-400' : 'bg-orange-400',
+                      item.priority === 'critical' ? 'bg-[#f5f5f5]' : 'bg-[#c9b787]',
                     )}
                   />
                   <span className="text-zinc-400 leading-relaxed">{item.gap}</span>
@@ -673,7 +673,7 @@ export default function AdversaryEngine() {
             </div>
             <button
               onClick={() => toast.success('Remediation plan generated for coverage gaps')}
-              className="mt-2 text-[10px] text-red-400 hover:text-red-300"
+              className="mt-2 text-[10px] text-[#f5f5f5] hover:text-[#f5f5f5]"
             >
               Generate remediation plan →
             </button>

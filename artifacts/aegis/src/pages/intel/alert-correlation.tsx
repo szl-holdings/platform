@@ -105,10 +105,10 @@ export default function AlertCorrelation() {
                     className={cn(
                       'px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider',
                       group.severity === 'critical'
-                        ? 'bg-red-400/10 text-red-400'
+                        ? 'bg-[#f5f5f5]/10 text-[#f5f5f5]'
                         : group.severity === 'high'
-                          ? 'bg-orange-400/10 text-orange-400'
-                          : 'bg-amber-400/10 text-amber-400',
+                          ? 'bg-[#c9b787]/10 text-[#c9b787]'
+                          : 'bg-[#c9b787]/10 text-[#c9b787]',
                     )}
                   >
                     {group.severity}
@@ -126,7 +126,7 @@ export default function AlertCorrelation() {
                 Root Cause
               </p>
               <p className="text-sm font-medium text-foreground flex items-center gap-2">
-                <Zap className="w-4 h-4 text-amber-400" /> {group.rootCause}
+                <Zap className="w-4 h-4 text-[#c9b787]" /> {group.rootCause}
               </p>
             </div>
 
@@ -152,14 +152,14 @@ export default function AlertCorrelation() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-red-400/5 border border-red-400/10 rounded-lg p-3">
-                <p className="text-xs text-red-400 font-medium mb-1 flex items-center gap-1">
+              <div className="bg-[#f5f5f5]/5 border border-[#f5f5f5]/10 rounded-lg p-3">
+                <p className="text-xs text-[#f5f5f5] font-medium mb-1 flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3" /> Impact
                 </p>
                 <p className="text-xs text-muted-foreground">{group.impact}</p>
               </div>
-              <div className="bg-emerald-400/5 border border-emerald-400/10 rounded-lg p-3">
-                <p className="text-xs text-emerald-400 font-medium mb-1 flex items-center gap-1">
+              <div className="bg-[#c9b787]/5 border border-[#c9b787]/10 rounded-lg p-3">
+                <p className="text-xs text-[#c9b787] font-medium mb-1 flex items-center gap-1">
                   <Brain className="w-3 h-3" /> Recommendation
                 </p>
                 <p className="text-xs text-muted-foreground">{group.recommendation}</p>

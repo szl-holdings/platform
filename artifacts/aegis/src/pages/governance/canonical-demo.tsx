@@ -243,11 +243,11 @@ export default function CanonicalDemoPage() {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <Play size={22} className="text-amber-400" />
+              <Play size={22} className="text-[#c9b787]" />
               <h1 className="text-xl font-bold text-white font-mono tracking-tight">
                 Aegis Canonical Demo
               </h1>
-              <span className="text-xs bg-amber-400/20 text-amber-400 border border-amber-400/40 px-2 py-0.5 rounded font-mono font-bold">
+              <span className="text-xs bg-[#c9b787]/20 text-[#c9b787] border border-[#c9b787]/40 px-2 py-0.5 rounded font-mono font-bold">
                 DEMO / PILOT
               </span>
             </div>
@@ -263,14 +263,14 @@ export default function CanonicalDemoPage() {
             {running ? (
               <button
                 onClick={() => setRunning(false)}
-                className="flex items-center gap-2 px-4 py-2 bg-amber-400/20 border border-amber-400/40 text-amber-300 text-sm rounded-lg font-mono hover:bg-amber-400/30 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-[#c9b787]/20 border border-[#c9b787]/40 text-[#c9b787] text-sm rounded-lg font-mono hover:bg-[#c9b787]/30 transition-colors"
               >
                 <Pause size={14} /> Pause
               </button>
             ) : (
               <button
                 onClick={startDemo}
-                className="flex items-center gap-2 px-4 py-2 bg-amber-400 text-black text-sm rounded-lg font-mono font-bold hover:bg-amber-300 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-[#c9b787] text-black text-sm rounded-lg font-mono font-bold hover:bg-[#c9b787] transition-colors"
               >
                 <Play size={14} /> {completedSteps.length > 0 ? 'Restart Demo' : 'Start Demo'}
               </button>
@@ -284,17 +284,17 @@ export default function CanonicalDemoPage() {
           </div>
         </div>
 
-        <div className="bg-amber-400/10 border border-amber-400/30 rounded-xl p-4 flex items-start gap-3">
-          <Info size={14} className="text-amber-400 mt-0.5 shrink-0" />
+        <div className="bg-[#c9b787]/10 border border-[#c9b787]/30 rounded-xl p-4 flex items-start gap-3">
+          <Info size={14} className="text-[#c9b787] mt-0.5 shrink-0" />
           <div className="space-y-1.5">
-            <p className="text-xs text-amber-200/80 font-mono leading-relaxed">
+            <p className="text-xs text-[#c9b787]/80 font-mono leading-relaxed">
               <strong>PILOT ENVIRONMENT.</strong> This walkthrough uses seeded representative data
               (4 incidents, 12 alerts, 8 assets, 3 playbooks). The steps, API call patterns, and
               governance controls shown reflect real platform behavior — not fabricated. However,
               the specific incident scenario is pre-seeded for demonstration purposes, not a live
               production event.
             </p>
-            <p className="text-xs text-amber-200/60 font-mono">
+            <p className="text-xs text-[#c9b787]/60 font-mono">
               Production deployment requires per-customer SSO, SIEM, and identity integration
               config. SIEM ingestion, Slack notification, and mobile push are hook-ready but require
               customer credentials to activate.
@@ -308,11 +308,11 @@ export default function CanonicalDemoPage() {
               <span className="text-[#8b9ab0]">
                 Progress: {completedSteps.length} / {DEMO_STEPS.length} steps
               </span>
-              <span className="text-amber-400">Elapsed: {formatTime(elapsed)}</span>
+              <span className="text-[#c9b787]">Elapsed: {formatTime(elapsed)}</span>
             </div>
             <div className="h-2 bg-[#1e2a3a] rounded-full overflow-hidden">
               <div
-                className="h-full bg-amber-400 rounded-full transition-all duration-1000"
+                className="h-full bg-[#c9b787] rounded-full transition-all duration-1000"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -327,27 +327,27 @@ export default function CanonicalDemoPage() {
             return (
               <div
                 key={step.id}
-                className={`border rounded-xl p-4 transition-all ${isCompleted ? 'bg-green-500/5 border-green-500/30' : isActive ? 'bg-amber-400/10 border-amber-400/40' : 'bg-[#0d1117] border-[#1e2a3a]'}`}
+                className={`border rounded-xl p-4 transition-all ${isCompleted ? 'bg-[#c9b787]/5 border-[#c9b787]/30' : isActive ? 'bg-[#c9b787]/10 border-[#c9b787]/40' : 'bg-[#0d1117] border-[#1e2a3a]'}`}
               >
                 <div className="flex items-start gap-4">
                   <div
-                    className={`flex items-center justify-center w-8 h-8 rounded-full border-2 shrink-0 ${isCompleted ? 'bg-green-500/20 border-green-500/50' : isActive ? 'bg-amber-400/20 border-amber-400/50' : 'bg-[#0a0f16] border-[#1e2a3a]'}`}
+                    className={`flex items-center justify-center w-8 h-8 rounded-full border-2 shrink-0 ${isCompleted ? 'bg-[#c9b787]/20 border-[#c9b787]/50' : isActive ? 'bg-[#c9b787]/20 border-[#c9b787]/50' : 'bg-[#0a0f16] border-[#1e2a3a]'}`}
                   >
                     {isCompleted ? (
-                      <CheckCircle2 size={14} className="text-green-400" />
+                      <CheckCircle2 size={14} className="text-[#c9b787]" />
                     ) : isActive ? (
-                      <div className="w-3 h-3 border border-amber-400 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-3 h-3 border border-[#c9b787] border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <span className="text-xs text-[#8b9ab0] font-mono">{step.id}</span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs text-amber-400 font-mono font-bold">
+                      <span className="text-xs text-[#c9b787] font-mono font-bold">
                         {step.phase}
                       </span>
                       {isActive && (
-                        <span className="text-xs bg-amber-400/20 text-amber-400 px-1.5 py-0.5 rounded font-mono animate-pulse">
+                        <span className="text-xs bg-[#c9b787]/20 text-[#c9b787] px-1.5 py-0.5 rounded font-mono animate-pulse">
                           Running
                         </span>
                       )}
@@ -356,15 +356,15 @@ export default function CanonicalDemoPage() {
                     <p className="text-xs text-[#8b9ab0] leading-relaxed">{step.description}</p>
                     {(isCompleted || isActive) && (
                       <div className="mt-3 space-y-2">
-                        <div className="p-2 bg-[#0a0f16] rounded border border-[#1e2a3a] font-mono text-xs text-green-400">
+                        <div className="p-2 bg-[#0a0f16] rounded border border-[#1e2a3a] font-mono text-xs text-[#c9b787]">
                           → {step.output}
                         </div>
                         <div className="p-2 bg-[#0a0f16] rounded border border-[#1e2a3a] font-mono text-xs text-[#8b9ab0]">
                           {step.technicalDetail}
                         </div>
-                        <div className="flex items-start gap-1.5 p-2 bg-blue-500/10 rounded border border-blue-500/20">
-                          <Info size={11} className="text-blue-400 mt-0.5 shrink-0" />
-                          <p className="text-xs text-blue-300 font-mono">{step.highlight}</p>
+                        <div className="flex items-start gap-1.5 p-2 bg-[#c9b787]/10 rounded border border-[#c9b787]/20">
+                          <Info size={11} className="text-[#c9b787] mt-0.5 shrink-0" />
+                          <p className="text-xs text-[#c9b787] font-mono">{step.highlight}</p>
                         </div>
                       </div>
                     )}
@@ -385,7 +385,7 @@ export default function CanonicalDemoPage() {
           <div className="grid grid-cols-4 gap-4">
             {Object.entries(SEED_DATASET_SUMMARY).map(([key, value]) => (
               <div key={key} className="text-center">
-                <div className="text-2xl font-bold text-amber-400 font-mono">{value}</div>
+                <div className="text-2xl font-bold text-[#c9b787] font-mono">{value}</div>
                 <div className="text-xs text-[#8b9ab0] font-mono capitalize">
                   {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
                 </div>

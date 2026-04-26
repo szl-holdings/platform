@@ -1060,16 +1060,16 @@ const COVERAGE_CONFIG: Record<
 > = {
   evidenced: {
     label: 'Evidenced',
-    color: '#10b981',
-    bg: 'rgba(16,185,129,0.08)',
-    border: 'rgba(16,185,129,0.25)',
+    color: '#c9b787',
+    bg: 'rgba(201,183,135,0.08)',
+    border: 'rgba(201,183,135,0.25)',
     icon: CheckCircle,
   },
   inferred: {
     label: 'Inferred',
-    color: '#f59e0b',
-    bg: 'rgba(245,158,11,0.08)',
-    border: 'rgba(245,158,11,0.25)',
+    color: '#c9b787',
+    bg: 'rgba(201,183,135,0.08)',
+    border: 'rgba(201,183,135,0.25)',
     icon: Brain,
   },
   missing: {
@@ -1082,26 +1082,26 @@ const COVERAGE_CONFIG: Record<
 };
 
 const SEV_CONFIG: Record<string, { color: string; bg: string; border: string }> = {
-  critical: { color: '#ef4444', bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.25)' },
-  high: { color: '#f97316', bg: 'rgba(249,115,22,0.08)', border: 'rgba(249,115,22,0.25)' },
-  medium: { color: '#eab308', bg: 'rgba(234,179,8,0.08)', border: 'rgba(234,179,8,0.25)' },
-  low: { color: '#22c55e', bg: 'rgba(34,197,94,0.08)', border: 'rgba(34,197,94,0.25)' },
+  critical: { color: '#f5f5f5', bg: 'rgba(245,245,245,0.08)', border: 'rgba(245,245,245,0.25)' },
+  high: { color: '#c9b787', bg: 'rgba(201,183,135,0.08)', border: 'rgba(201,183,135,0.25)' },
+  medium: { color: '#8a8a8a', bg: 'rgba(138,138,138,0.08)', border: 'rgba(138,138,138,0.25)' },
+  low: { color: '#c9b787', bg: 'rgba(201,183,135,0.08)', border: 'rgba(201,183,135,0.25)' },
 };
 
 const OBSERVABLE_TYPE_CONFIG: Record<string, { color: string; icon: typeof FileText }> = {
-  log: { color: '#60a5fa', icon: FileText },
-  alert: { color: '#f87171', icon: AlertTriangle },
-  network: { color: '#34d399', icon: Network },
-  file: { color: '#fbbf24', icon: Database },
-  process: { color: '#a78bfa', icon: Terminal },
-  identity: { color: '#38bdf8', icon: User },
+  log: { color: '#c9b787', icon: FileText },
+  alert: { color: '#f5f5f5', icon: AlertTriangle },
+  network: { color: '#c9b787', icon: Network },
+  file: { color: '#c9b787', icon: Database },
+  process: { color: '#c9b787', icon: Terminal },
+  identity: { color: '#8a8a8a', icon: User },
 };
 
 const RISK_CONFIG: Record<string, { color: string; label: string }> = {
-  low: { color: '#10b981', label: 'Low Risk' },
-  medium: { color: '#f59e0b', label: 'Medium Risk' },
-  high: { color: '#f97316', label: 'High Risk' },
-  critical: { color: '#ef4444', label: 'Critical Risk' },
+  low: { color: '#c9b787', label: 'Low Risk' },
+  medium: { color: '#c9b787', label: 'Medium Risk' },
+  high: { color: '#c9b787', label: 'High Risk' },
+  critical: { color: '#f5f5f5', label: 'Critical Risk' },
 };
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
@@ -1111,9 +1111,9 @@ function DemoLabel() {
     <span
       className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase border"
       style={{
-        color: '#f59e0b',
-        borderColor: 'rgba(245,158,11,0.3)',
-        background: 'rgba(245,158,11,0.08)',
+        color: '#c9b787',
+        borderColor: 'rgba(201,183,135,0.3)',
+        background: 'rgba(201,183,135,0.08)',
       }}
     >
       <Flag className="w-2.5 h-2.5" /> DEMO DATA
@@ -1123,7 +1123,7 @@ function DemoLabel() {
 
 function ConfidenceBadge({ value, size = 'sm' }: { value: number; size?: 'sm' | 'xs' }) {
   const color =
-    value >= 90 ? '#10b981' : value >= 75 ? '#f59e0b' : value >= 50 ? '#f97316' : '#64748b';
+    value >= 90 ? '#c9b787' : value >= 75 ? '#c9b787' : value >= 50 ? '#c9b787' : '#64748b';
   return (
     <span
       className={cn('font-bold font-mono', size === 'xs' ? 'text-[9px]' : 'text-[11px]')}
@@ -1221,12 +1221,12 @@ function ApprovalModal({
     >
       <div
         className="w-full max-w-lg rounded-2xl border p-6 space-y-5"
-        style={{ background: '#070f1c', borderColor: 'rgba(239,68,68,0.2)' }}
+        style={{ background: '#070f1c', borderColor: 'rgba(245,245,245,0.2)' }}
       >
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Shield className="w-4 h-4 text-red-400" />
+              <Shield className="w-4 h-4 text-[#f5f5f5]" />
               <h3 className="text-sm font-bold text-white">Policy Approval Required</h3>
             </div>
             <p className="text-[11px] text-white/40">
@@ -1297,9 +1297,9 @@ function ApprovalModal({
             disabled={isLoading}
             className="flex-1 py-2 rounded-xl text-xs font-bold border transition-all disabled:opacity-40"
             style={{
-              background: 'rgba(16,185,129,0.12)',
-              borderColor: 'rgba(16,185,129,0.3)',
-              color: '#10b981',
+              background: 'rgba(201,183,135,0.12)',
+              borderColor: 'rgba(201,183,135,0.3)',
+              color: '#c9b787',
             }}
           >
             {isLoading ? 'Submitting to policy engine…' : 'Approve & Execute'}
@@ -1395,11 +1395,11 @@ export default function AdversaryNarrativeEngine() {
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
             style={{
-              background: 'rgba(139,92,246,0.12)',
-              border: '1px solid rgba(139,92,246,0.25)',
+              background: 'rgba(138,138,138,0.12)',
+              border: '1px solid rgba(138,138,138,0.25)',
             }}
           >
-            <BookOpen className="w-4 h-4 text-violet-400" />
+            <BookOpen className="w-4 h-4 text-[#8a8a8a]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -1422,13 +1422,13 @@ export default function AdversaryNarrativeEngine() {
               onClick={() => setMode('analyst')}
               className={cn(
                 'flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all',
-                mode === 'analyst' ? 'text-violet-300' : 'text-white/30 hover:text-white/50',
+                mode === 'analyst' ? 'text-[#8a8a8a]' : 'text-white/30 hover:text-white/50',
               )}
               style={
                 mode === 'analyst'
                   ? {
-                      background: 'rgba(139,92,246,0.15)',
-                      border: '1px solid rgba(139,92,246,0.25)',
+                      background: 'rgba(138,138,138,0.15)',
+                      border: '1px solid rgba(138,138,138,0.25)',
                     }
                   : {}
               }
@@ -1439,13 +1439,13 @@ export default function AdversaryNarrativeEngine() {
               onClick={() => setMode('executive')}
               className={cn(
                 'flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all',
-                mode === 'executive' ? 'text-blue-300' : 'text-white/30 hover:text-white/50',
+                mode === 'executive' ? 'text-[#c9b787]' : 'text-white/30 hover:text-white/50',
               )}
               style={
                 mode === 'executive'
                   ? {
-                      background: 'rgba(59,130,246,0.15)',
-                      border: '1px solid rgba(59,130,246,0.25)',
+                      background: 'rgba(201,183,135,0.15)',
+                      border: '1px solid rgba(201,183,135,0.25)',
                     }
                   : {}
               }
@@ -1510,10 +1510,10 @@ export default function AdversaryNarrativeEngine() {
                   </p>
                   <div className="flex items-center gap-2 text-[9px] text-white/30">
                     <span className="flex items-center gap-0.5">
-                      <CheckCircle className="w-2.5 h-2.5 text-emerald-500" /> {inc.stepsEvidenced}
+                      <CheckCircle className="w-2.5 h-2.5 text-[#c9b787]" /> {inc.stepsEvidenced}
                     </span>
                     <span className="flex items-center gap-0.5">
-                      <Brain className="w-2.5 h-2.5 text-amber-500" /> {inc.stepsInferred}
+                      <Brain className="w-2.5 h-2.5 text-[#c9b787]" /> {inc.stepsInferred}
                     </span>
                     <span className="flex items-center gap-0.5">
                       <Info className="w-2.5 h-2.5 text-slate-500" /> {inc.stepsMissing}
@@ -1556,11 +1556,11 @@ export default function AdversaryNarrativeEngine() {
                 <div
                   className="rounded-xl p-4 border"
                   style={{
-                    borderColor: 'rgba(59,130,246,0.15)',
-                    background: 'rgba(59,130,246,0.04)',
+                    borderColor: 'rgba(201,183,135,0.15)',
+                    background: 'rgba(201,183,135,0.04)',
                   }}
                 >
-                  <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2">
+                  <p className="text-[10px] font-bold text-[#c9b787] uppercase tracking-widest mb-2">
                     Executive Summary
                   </p>
                   <p className="text-[12px] text-white/70 leading-relaxed">
@@ -1602,10 +1602,10 @@ export default function AdversaryNarrativeEngine() {
                 </div>
                 <div className="grid grid-cols-4 gap-3 shrink-0 text-center">
                   {[
-                    { label: 'Confidence', value: `${incident.confidence}%`, color: '#10b981' },
-                    { label: 'Evidenced', value: incident.stepsEvidenced, color: '#10b981' },
-                    { label: 'Inferred', value: incident.stepsInferred, color: '#f59e0b' },
-                    { label: 'IOCs', value: incident.iocCount, color: '#f87171' },
+                    { label: 'Confidence', value: `${incident.confidence}%`, color: '#c9b787' },
+                    { label: 'Evidenced', value: incident.stepsEvidenced, color: '#c9b787' },
+                    { label: 'Inferred', value: incident.stepsInferred, color: '#c9b787' },
+                    { label: 'IOCs', value: incident.iocCount, color: '#f5f5f5' },
                   ].map(({ label, value, color }) => (
                     <div
                       key={label}
@@ -1641,14 +1641,14 @@ export default function AdversaryNarrativeEngine() {
                     className={cn(
                       'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all border',
                       activeTab === tab.id
-                        ? 'text-violet-300'
+                        ? 'text-[#8a8a8a]'
                         : 'text-white/35 hover:text-white/55 border-transparent',
                     )}
                     style={
                       activeTab === tab.id
                         ? {
-                            background: 'rgba(139,92,246,0.1)',
-                            borderColor: 'rgba(139,92,246,0.25)',
+                            background: 'rgba(138,138,138,0.1)',
+                            borderColor: 'rgba(138,138,138,0.25)',
                           }
                         : {}
                     }
@@ -1748,9 +1748,9 @@ export default function AdversaryNarrativeEngine() {
                                 style={
                                   approvedActions.has(step.recommendedAction.id)
                                     ? {
-                                        color: '#10b981',
-                                        borderColor: 'rgba(16,185,129,0.3)',
-                                        background: 'rgba(16,185,129,0.1)',
+                                        color: '#c9b787',
+                                        borderColor: 'rgba(201,183,135,0.3)',
+                                        background: 'rgba(201,183,135,0.1)',
                                       }
                                     : deniedActions.has(step.recommendedAction.id)
                                       ? {
@@ -1759,9 +1759,9 @@ export default function AdversaryNarrativeEngine() {
                                           background: 'rgba(100,116,139,0.06)',
                                         }
                                       : {
-                                          color: '#f59e0b',
-                                          borderColor: 'rgba(245,158,11,0.3)',
-                                          background: 'rgba(245,158,11,0.08)',
+                                          color: '#c9b787',
+                                          borderColor: 'rgba(201,183,135,0.3)',
+                                          background: 'rgba(201,183,135,0.08)',
                                         }
                                 }
                               >
@@ -1834,7 +1834,7 @@ export default function AdversaryNarrativeEngine() {
                                 </span>
                                 <span
                                   className="text-[10px] font-mono px-1.5 py-0.5 rounded"
-                                  style={{ color: '#a78bfa', background: 'rgba(139,92,246,0.1)' }}
+                                  style={{ color: '#c9b787', background: 'rgba(138,138,138,0.1)' }}
                                 >
                                   {step.mitreTechniqueId}
                                 </span>
@@ -1861,7 +1861,7 @@ export default function AdversaryNarrativeEngine() {
                                 <span
                                   className="text-[9px] px-1.5 py-0.5 rounded border"
                                   style={{
-                                    color: '#60a5fa',
+                                    color: '#c9b787',
                                     borderColor: 'rgba(96,165,250,0.2)',
                                     background: 'rgba(96,165,250,0.06)',
                                   }}
@@ -1895,7 +1895,7 @@ export default function AdversaryNarrativeEngine() {
                               </p>
                               <p className="text-[12px] text-white/70">
                                 {step.mitreTechnique}{' '}
-                                <span className="font-mono text-violet-400 text-[10px]">
+                                <span className="font-mono text-[#8a8a8a] text-[10px]">
                                   ({step.mitreTechniqueId})
                                 </span>
                               </p>
@@ -1913,12 +1913,12 @@ export default function AdversaryNarrativeEngine() {
                                       key={i}
                                       className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[10px] font-mono"
                                       style={{
-                                        background: 'rgba(239,68,68,0.05)',
-                                        border: '1px solid rgba(239,68,68,0.12)',
+                                        background: 'rgba(245,245,245,0.05)',
+                                        border: '1px solid rgba(245,245,245,0.12)',
                                       }}
                                     >
-                                      <AlertTriangle className="w-3 h-3 text-red-400/60 shrink-0" />
-                                      <span className="text-red-300/70 break-all">{ioc}</span>
+                                      <AlertTriangle className="w-3 h-3 text-[#f5f5f5]/60 shrink-0" />
+                                      <span className="text-[#f5f5f5]/70 break-all">{ioc}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -2009,12 +2009,12 @@ export default function AdversaryNarrativeEngine() {
                               <div
                                 className="flex items-start gap-2.5 rounded-lg p-3 border"
                                 style={{
-                                  borderColor: 'rgba(245,158,11,0.2)',
-                                  background: 'rgba(245,158,11,0.05)',
+                                  borderColor: 'rgba(201,183,135,0.2)',
+                                  background: 'rgba(201,183,135,0.05)',
                                 }}
                               >
-                                <Brain className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                                <p className="text-[11px] text-amber-300/70 leading-relaxed">
+                                <Brain className="w-4 h-4 text-[#c9b787] shrink-0 mt-0.5" />
+                                <p className="text-[11px] text-[#c9b787]/70 leading-relaxed">
                                   This step is <strong>inferred</strong> from behavioral patterns
                                   and correlated signals — not yet confirmed by direct observable
                                   evidence. Confidence is lower and should be treated as a working
@@ -2053,9 +2053,9 @@ export default function AdversaryNarrativeEngine() {
                                           <span
                                             className="text-[9px] px-1.5 py-0.5 rounded border"
                                             style={{
-                                              color: '#a78bfa',
-                                              borderColor: 'rgba(139,92,246,0.25)',
-                                              background: 'rgba(139,92,246,0.08)',
+                                              color: '#c9b787',
+                                              borderColor: 'rgba(138,138,138,0.25)',
+                                              background: 'rgba(138,138,138,0.08)',
                                             }}
                                           >
                                             Requires Approval
@@ -2095,9 +2095,9 @@ export default function AdversaryNarrativeEngine() {
                                       style={
                                         approvedActions.has(action.id)
                                           ? {
-                                              color: '#10b981',
-                                              borderColor: 'rgba(16,185,129,0.3)',
-                                              background: 'rgba(16,185,129,0.1)',
+                                              color: '#c9b787',
+                                              borderColor: 'rgba(201,183,135,0.3)',
+                                              background: 'rgba(201,183,135,0.1)',
                                             }
                                           : deniedActions.has(action.id)
                                             ? {
@@ -2106,9 +2106,9 @@ export default function AdversaryNarrativeEngine() {
                                                 background: 'rgba(100,116,139,0.06)',
                                               }
                                             : {
-                                                color: '#f59e0b',
-                                                borderColor: 'rgba(245,158,11,0.3)',
-                                                background: 'rgba(245,158,11,0.08)',
+                                                color: '#c9b787',
+                                                borderColor: 'rgba(201,183,135,0.3)',
+                                                background: 'rgba(201,183,135,0.08)',
                                               }
                                       }
                                     >
@@ -2231,7 +2231,7 @@ export default function AdversaryNarrativeEngine() {
                               {incidentStep.mitreTechnique}
                             </p>
                             <div className="flex items-center justify-between">
-                              <span className="text-[9px] font-mono text-violet-400/70">
+                              <span className="text-[9px] font-mono text-[#8a8a8a]/70">
                                 {incidentStep.mitreTechniqueId}
                               </span>
                               <ConfidenceBadge value={incidentStep.confidence} size="xs" />
@@ -2309,7 +2309,7 @@ export default function AdversaryNarrativeEngine() {
                         <span className="text-[10px] font-bold text-white/50">
                           Step {step.seq}: {step.title}
                         </span>
-                        <span className="text-[9px] font-mono text-violet-400/60">
+                        <span className="text-[9px] font-mono text-[#8a8a8a]/60">
                           {step.mitreTechniqueId}
                         </span>
                       </div>
@@ -2361,7 +2361,7 @@ export default function AdversaryNarrativeEngine() {
                                 <span
                                   className="text-[8px] px-1.5 py-0.5 rounded border"
                                   style={{
-                                    color: '#60a5fa',
+                                    color: '#c9b787',
                                     borderColor: 'rgba(96,165,250,0.2)',
                                     background: 'rgba(96,165,250,0.06)',
                                   }}

@@ -312,7 +312,7 @@ export const SAMPLE_RECOMMENDATIONS: Recommendation[] = [
       {
         label: 'AIS dark events',
         value: '3 vessels dark >6h in Bohai Strait',
-        source: 'SEXTANT/AIS',
+        source: 'Vessels/AIS',
         freshness: '4m ago',
         weight: 0.42,
         contribution: 'supporting',
@@ -328,7 +328,7 @@ export const SAMPLE_RECOMMENDATIONS: Recommendation[] = [
       {
         label: 'Cargo manifest',
         value: 'Dual-use goods flagged',
-        source: 'DOMAINE/Trade',
+        source: 'Terra/Trade',
         freshness: '18m ago',
         weight: 0.18,
         contribution: 'supporting',
@@ -357,7 +357,7 @@ export const SAMPLE_RECOMMENDATIONS: Recommendation[] = [
       {
         label: 'Fed forward guidance',
         value: '+25bps priced at 78%',
-        source: 'KORA/Macro',
+        source: 'Lyte/Macro',
         freshness: '2h ago',
         weight: 0.35,
         contribution: 'supporting',
@@ -365,7 +365,7 @@ export const SAMPLE_RECOMMENDATIONS: Recommendation[] = [
       {
         label: 'Floating-rate LTV',
         value: '4 assets >65% LTV',
-        source: 'DOMAINE/Portfolio',
+        source: 'Terra/Portfolio',
         freshness: '1d ago',
         weight: 0.38,
         contribution: 'supporting',

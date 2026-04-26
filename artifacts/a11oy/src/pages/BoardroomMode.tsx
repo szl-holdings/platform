@@ -29,15 +29,15 @@ interface BoardroomData {
 }
 
 const TREND_STYLE: Record<string, { color: string; symbol: string }> = {
-  up: { color: '#10b981', symbol: '▲' },
-  down: { color: '#ef4444', symbol: '▼' },
-  stable: { color: '#9bacc4', symbol: '→' },
-  mixed: { color: '#f59e0b', symbol: '⟷' },
+  up: { color: '#c9b787', symbol: '▲' },
+  down: { color: '#f5f5f5', symbol: '▼' },
+  stable: { color: '#5e5e5e', symbol: '→' },
+  mixed: { color: '#c9b787', symbol: '⟷' },
 };
 
 const DISP_STYLE: Record<string, string> = {
-  pass: '#10b981', pass_with_warning: '#f59e0b', needs_more_evidence: '#f59e0b',
-  requires_human_review: '#ef4444', blocked: '#ef4444',
+  pass: '#c9b787', pass_with_warning: '#c9b787', needs_more_evidence: '#c9b787',
+  requires_human_review: '#f5f5f5', blocked: '#f5f5f5',
 };
 
 export function BoardroomMode() {
@@ -83,9 +83,9 @@ export function BoardroomMode() {
       ) : data ? (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            <KpiCard label="BOARD PACKETS" value={String(data.summary.totalPackets)} sub="Generated" accent="#ec4899" />
-            <KpiCard label="TENANTS SERVED" value={String(data.summary.tenantsServed)} sub="Demo enterprises" accent="#8b5cf6" />
-            <KpiCard label="AVG EVAL SCORE" value={`${Math.round(data.summary.avgEvalComposite * 100)}%`} sub="MirrorEval 2.0" accent="#10b981" />
+            <KpiCard label="BOARD PACKETS" value={String(data.summary.totalPackets)} sub="Generated" accent="#c9b787" />
+            <KpiCard label="TENANTS SERVED" value={String(data.summary.tenantsServed)} sub="Demo enterprises" accent="#8a8a8a" />
+            <KpiCard label="AVG EVAL SCORE" value={`${Math.round(data.summary.avgEvalComposite * 100)}%`} sub="MirrorEval 2.0" accent="#c9b787" />
             <KpiCard label="GEN LATENCY" value={`${data.generationLatencyMs}ms`} sub="Estimated" accent="#b08d52" />
           </div>
 
@@ -94,12 +94,12 @@ export function BoardroomMode() {
               onClick={generatePacket}
               disabled={generating}
               className="text-xs px-4 py-2 rounded font-medium"
-              style={{ backgroundColor: 'rgba(236,72,153,0.15)', color: '#ec4899', border: '1px solid rgba(236,72,153,0.3)', opacity: generating ? 0.6 : 1 }}
+              style={{ backgroundColor: 'rgba(201,183,135,0.15)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.3)', opacity: generating ? 0.6 : 1 }}
             >
               {generating ? 'Generating board packet…' : '+ Generate New Board Packet'}
             </button>
             {genResult && (
-              <span className="text-xs" style={{ color: '#10b981' }}>✓ Generated for {genResult.tenantName}</span>
+              <span className="text-xs" style={{ color: '#c9b787' }}>✓ Generated for {genResult.tenantName}</span>
             )}
           </div>
 
@@ -112,7 +112,7 @@ export function BoardroomMode() {
                     <div className="font-medium text-sm mb-0.5" style={{ color: 'var(--color-a11oy-text)' }}>{p.tenantName}</div>
                     <div className="text-xs mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.domain} · {p.period}</div>
                     <div className="flex items-center gap-2 text-xs">
-                      <span style={{ color: DISP_STYLE[p.evalDisposition] ?? '#9bacc4' }}>{Math.round(p.evalComposite * 100)}% eval</span>
+                      <span style={{ color: DISP_STYLE[p.evalDisposition] ?? '#5e5e5e' }}>{Math.round(p.evalComposite * 100)}% eval</span>
                       <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{p.approvedBy}</span>
                     </div>
                   </Card>
@@ -124,7 +124,7 @@ export function BoardroomMode() {
                 <div className="space-y-1">
                   {data.capabilities.map(c => (
                     <div key={c} className="flex items-start gap-2 text-xs">
-                      <span style={{ color: '#10b981', flexShrink: 0 }}>✓</span>
+                      <span style={{ color: '#c9b787', flexShrink: 0 }}>✓</span>
                       <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{c}</span>
                     </div>
                   ))}
@@ -144,7 +144,7 @@ export function BoardroomMode() {
                           <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{selected.domain} · {selected.period}</div>
                         </div>
                         <div className="text-right text-xs">
-                          <div style={{ color: DISP_STYLE[selected.evalDisposition] ?? '#9bacc4' }}>
+                          <div style={{ color: DISP_STYLE[selected.evalDisposition] ?? '#5e5e5e' }}>
                             Eval: {Math.round(selected.evalComposite * 100)}%
                           </div>
                           <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>{selected.approvedBy}</div>
@@ -210,7 +210,7 @@ export function BoardroomMode() {
         <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Boardroom data unavailable.</div>
       )}
 
-      <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(236,72,153,0.06)', border: '1px solid rgba(236,72,153,0.2)', color: 'var(--color-a11oy-text-ghost)' }}>
+      <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.2)', color: 'var(--color-a11oy-text-ghost)' }}>
         <DemoBadge /> Board packets are seeded and deterministic. Generation uses real prompt synthesis in production — demo mode uses scripted output.
       </div>
     </Layout>

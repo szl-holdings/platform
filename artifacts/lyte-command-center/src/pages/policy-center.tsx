@@ -58,7 +58,7 @@ const SCOPE_CONFIG: Record<string, string> = {
   domain: 'text-amber-400/60',
   action: 'text-sky-400/60',
   tenant: 'text-purple-400/60',
-  platform: 'text-teal-400/60',
+  platform: 'text-[#c9b787]/60',
 };
 
 function PolicyCard({ rule }: { rule: PolicyRule }) {

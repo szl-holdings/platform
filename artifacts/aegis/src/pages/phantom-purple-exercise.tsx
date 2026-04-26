@@ -8,10 +8,10 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-const _ACCENT = '#ef4444';
-const RED_COLOR = '#ef4444';
-const BLUE_COLOR = '#3b82f6';
-const PHANTOM_ACCENT = '#a855f7';
+const _ACCENT = '#f5f5f5';
+const RED_COLOR = '#f5f5f5';
+const BLUE_COLOR = '#c9b787';
+const PHANTOM_ACCENT = '#8a8a8a';
 
 const DS = {
   surface: 'rgba(255,255,255,0.025)',
@@ -231,9 +231,9 @@ const GAP_FINDINGS: GapFinding[] = [
 ];
 
 const SEV_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#c9b787',
 };
 
 function MoveCard({ move, pair, isActive }: { move: Move; pair?: Move; isActive: boolean }) {
@@ -242,8 +242,8 @@ function MoveCard({ move, pair, isActive }: { move: Move; pair?: Move; isActive:
   const resultConfig: Record<string, { label: string; color: string }> = {
     success: { label: isRed ? 'SUCCESS' : 'DEFENDED', color: isRed ? RED_COLOR : BLUE_COLOR },
     blocked: { label: isRed ? 'BLOCKED' : 'BLOCKED', color: BLUE_COLOR },
-    partial: { label: 'PARTIAL', color: '#f59e0b' },
-    detected: { label: 'DETECTED', color: '#f59e0b' },
+    partial: { label: 'PARTIAL', color: '#c9b787' },
+    detected: { label: 'DETECTED', color: '#c9b787' },
   };
   const rc = resultConfig[move.result];
 
@@ -401,7 +401,7 @@ export default function PhantomPurpleExercise() {
           {
             label: 'Partial / Gaps',
             value: partial,
-            color: '#f59e0b',
+            color: '#c9b787',
             sub: 'partial detections / coverage gaps',
           },
         ].map((c) => (
@@ -424,17 +424,17 @@ export default function PhantomPurpleExercise() {
       <div className="grid grid-cols-2 gap-4">
         <div
           className="rounded-xl border"
-          style={{ borderColor: 'rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.03)' }}
+          style={{ borderColor: 'rgba(245,245,245,0.2)', background: 'rgba(245,245,245,0.03)' }}
         >
           <div
             className="flex items-center gap-2 px-4 py-3 border-b"
-            style={{ borderColor: 'rgba(239,68,68,0.12)' }}
+            style={{ borderColor: 'rgba(245,245,245,0.12)' }}
           >
-            <Crosshair className="w-3.5 h-3.5 text-red-400" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-red-400">
+            <Crosshair className="w-3.5 h-3.5 text-[#f5f5f5]" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#f5f5f5]">
               Red Team Moves
             </span>
-            <span className="text-[8px] font-mono ml-auto text-red-400/60">APT29 Campaign</span>
+            <span className="text-[8px] font-mono ml-auto text-[#f5f5f5]/60">APT29 Campaign</span>
           </div>
           <div className="p-3 space-y-2.5 max-h-96 overflow-y-auto">
             {currentTick === 0 && (
@@ -450,17 +450,17 @@ export default function PhantomPurpleExercise() {
 
         <div
           className="rounded-xl border"
-          style={{ borderColor: 'rgba(59,130,246,0.2)', background: 'rgba(59,130,246,0.03)' }}
+          style={{ borderColor: 'rgba(201,183,135,0.2)', background: 'rgba(201,183,135,0.03)' }}
         >
           <div
             className="flex items-center gap-2 px-4 py-3 border-b"
-            style={{ borderColor: 'rgba(59,130,246,0.12)' }}
+            style={{ borderColor: 'rgba(201,183,135,0.12)' }}
           >
-            <Shield className="w-3.5 h-3.5 text-blue-400" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400">
+            <Shield className="w-3.5 h-3.5 text-[#c9b787]" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#c9b787]">
               Blue Team Response
             </span>
-            <span className="text-[8px] font-mono ml-auto text-blue-400/60">SOC Defense Layer</span>
+            <span className="text-[8px] font-mono ml-auto text-[#c9b787]/60">SOC Defense Layer</span>
           </div>
           <div className="p-3 space-y-2.5 max-h-96 overflow-y-auto">
             {currentTick === 0 && (
@@ -478,19 +478,19 @@ export default function PhantomPurpleExercise() {
       {(complete || (GAP_FINDINGS.length > 0 && currentTick > 2)) && (
         <div
           className="rounded-xl border"
-          style={{ borderColor: 'rgba(239,68,68,0.2)', background: DS.surface }}
+          style={{ borderColor: 'rgba(245,245,245,0.2)', background: DS.surface }}
         >
           <div
             className="flex items-center gap-2 px-4 py-3 border-b"
             style={{ borderColor: DS.border }}
           >
-            <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
+            <AlertTriangle className="w-3.5 h-3.5 text-[#f5f5f5]" />
             <span className="text-[10px] font-bold uppercase tracking-wider text-white">
               Coverage Gap Analysis
             </span>
             <span
               className="text-[8px] px-1.5 py-0.5 rounded font-bold ml-auto"
-              style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444' }}
+              style={{ background: 'rgba(245,245,245,0.15)', color: '#f5f5f5' }}
             >
               {GAP_FINDINGS.length} gaps identified
             </span>
@@ -503,7 +503,7 @@ export default function PhantomPurpleExercise() {
                   onClick={() => setSelectedGap(g.id === selectedGap ? null : g.id)}
                   className="w-full text-left px-4 py-3 transition-colors hover:bg-white/[0.02]"
                   style={{
-                    background: selectedGap === g.id ? 'rgba(239,68,68,0.05)' : 'transparent',
+                    background: selectedGap === g.id ? 'rgba(245,245,245,0.05)' : 'transparent',
                   }}
                 >
                   <div className="flex items-center gap-2 mb-1">
@@ -564,17 +564,17 @@ export default function PhantomPurpleExercise() {
                   <div
                     className="p-3 rounded-xl"
                     style={{
-                      background: 'rgba(59,130,246,0.08)',
-                      border: '1px solid rgba(59,130,246,0.2)',
+                      background: 'rgba(201,183,135,0.08)',
+                      border: '1px solid rgba(201,183,135,0.2)',
                     }}
                   >
                     <div className="flex items-center gap-2 mb-1.5">
-                      <Shield className="w-3 h-3 text-blue-400" />
-                      <span className="text-[9px] uppercase tracking-wider text-blue-400 font-bold">
+                      <Shield className="w-3 h-3 text-[#c9b787]" />
+                      <span className="text-[9px] uppercase tracking-wider text-[#c9b787] font-bold">
                         Recommended Control
                       </span>
                     </div>
-                    <p className="text-[11px] leading-relaxed text-blue-200">
+                    <p className="text-[11px] leading-relaxed text-[#c9b787]">
                       {selectedGapData.recommendation}
                     </p>
                   </div>

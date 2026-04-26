@@ -11,15 +11,15 @@ import { useState } from 'react';
 import { type TrustState, agentMesh } from '@/data/agent-mesh';
 
 const TRUST_STYLES: Record<TrustState, string> = {
-  trusted: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
-  unverified: 'text-amber-400 border-amber-500/30 bg-amber-500/10',
-  quarantined: 'text-red-400 border-red-500/30 bg-red-500/10',
+  trusted: 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
+  unverified: 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
+  quarantined: 'text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10',
 };
 
 const TRUST_DOT: Record<TrustState, string> = {
-  trusted: 'bg-emerald-500',
-  unverified: 'bg-amber-500',
-  quarantined: 'bg-red-500 animate-pulse',
+  trusted: 'bg-[#c9b787]',
+  unverified: 'bg-[#c9b787]',
+  quarantined: 'bg-[#f5f5f5] animate-pulse',
 };
 
 function TrustStateBadge({ state }: { state: TrustState }) {
@@ -57,15 +57,15 @@ export default function MeshConnectors() {
       <div className="grid grid-cols-3 gap-4">
         <div className="sentra-panel p-4 text-center">
           <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">Trusted</div>
-          <div className="text-3xl font-display font-bold text-emerald-400">{trustedCount}</div>
+          <div className="text-3xl font-display font-bold text-[#c9b787]">{trustedCount}</div>
         </div>
         <div className="sentra-panel p-4 text-center">
           <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">Unverified</div>
-          <div className="text-3xl font-display font-bold text-amber-400">{unverifiedCount}</div>
+          <div className="text-3xl font-display font-bold text-[#c9b787]">{unverifiedCount}</div>
         </div>
         <div className="sentra-panel p-4 text-center">
           <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">Quarantined</div>
-          <div className="text-3xl font-display font-bold text-red-400">{quarantinedCount}</div>
+          <div className="text-3xl font-display font-bold text-[#f5f5f5]">{quarantinedCount}</div>
         </div>
       </div>
 
@@ -77,7 +77,7 @@ export default function MeshConnectors() {
         <div className="sentra-panel overflow-hidden">
           <table className="w-full border-collapse text-left">
             <thead>
-              <tr className="bg-slate-800/50 border-b border-red-500/10 text-[11px] uppercase tracking-wider text-slate-400 font-mono">
+              <tr className="bg-slate-800/50 border-b border-[#f5f5f5]/10 text-[11px] uppercase tracking-wider text-slate-400 font-mono">
                 <th className="px-5 py-3 font-medium">Runtime</th>
                 <th className="px-5 py-3 font-medium">Version</th>
                 <th className="px-5 py-3 font-medium">Source</th>
@@ -127,7 +127,7 @@ export default function MeshConnectors() {
           <div className="lg:col-span-2 sentra-panel overflow-hidden">
             <table className="w-full border-collapse text-left">
               <thead>
-                <tr className="bg-slate-800/50 border-b border-red-500/10 text-[11px] uppercase tracking-wider text-slate-400 font-mono">
+                <tr className="bg-slate-800/50 border-b border-[#f5f5f5]/10 text-[11px] uppercase tracking-wider text-slate-400 font-mono">
                   <th className="px-5 py-3 font-medium">Server</th>
                   <th className="px-5 py-3 font-medium">Package</th>
                   <th className="px-5 py-3 font-medium">Version</th>
@@ -162,12 +162,12 @@ export default function MeshConnectors() {
                     <td className="px-5 py-4 text-xs font-mono text-slate-400">v{mcp.version}</td>
                     <td className="px-5 py-4">
                       {mcp.pinned ? (
-                        <div className="flex items-center gap-1 text-emerald-400 text-[11px]">
+                        <div className="flex items-center gap-1 text-[#c9b787] text-[11px]">
                           <Pin className="w-3 h-3" />
                           Pinned
                         </div>
                       ) : (
-                        <div className="flex items-center gap-1 text-amber-400/80 text-[11px]">
+                        <div className="flex items-center gap-1 text-[#c9b787]/80 text-[11px]">
                           <AlertTriangle className="w-3 h-3" />
                           Floating
                         </div>
@@ -223,7 +223,7 @@ export default function MeshConnectors() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Pinned</span>
-                    <span className={selectedServer.pinned ? 'text-emerald-400' : 'text-amber-400'}>
+                    <span className={selectedServer.pinned ? 'text-[#c9b787]' : 'text-[#c9b787]'}>
                       {selectedServer.pinned ? 'Yes' : 'No'}
                     </span>
                   </div>
@@ -237,14 +237,14 @@ export default function MeshConnectors() {
                     selectedServer.allowedEgressDomains.map((d) => (
                       <div
                         key={d}
-                        className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5"
+                        className="text-[11px] font-mono text-[#c9b787] flex items-center gap-1.5"
                       >
                         <CheckCircle2 className="w-3 h-3" />
                         {d}
                       </div>
                     ))
                   ) : (
-                    <div className="text-[11px] font-mono text-emerald-400">
+                    <div className="text-[11px] font-mono text-[#c9b787]">
                       None (fully contained)
                     </div>
                   )}
@@ -253,8 +253,8 @@ export default function MeshConnectors() {
                 {selectedServer.detectedEgressDomains.some(
                   (d) => !selectedServer.allowedEgressDomains.includes(d),
                 ) && (
-                  <div className="pt-3 border-t border-red-500/20">
-                    <div className="text-[10px] text-red-400 font-mono uppercase mb-2">
+                  <div className="pt-3 border-t border-[#f5f5f5]/20">
+                    <div className="text-[10px] text-[#f5f5f5] font-mono uppercase mb-2">
                       Unexpected Egress
                     </div>
                     {selectedServer.detectedEgressDomains
@@ -262,7 +262,7 @@ export default function MeshConnectors() {
                       .map((d) => (
                         <div
                           key={d}
-                          className="text-[11px] font-mono text-red-400 flex items-center gap-1.5"
+                          className="text-[11px] font-mono text-[#f5f5f5] flex items-center gap-1.5"
                         >
                           <AlertTriangle className="w-3 h-3" />
                           {d}
@@ -283,9 +283,9 @@ export default function MeshConnectors() {
                 </div>
 
                 {selectedServer.trustState === 'quarantined' && (
-                  <div className="pt-3 border-t border-red-500/20">
+                  <div className="pt-3 border-t border-[#f5f5f5]/20">
                     <div className="flex gap-2">
-                      <button className="flex-1 px-3 py-2 rounded bg-red-600/20 border border-red-500/30 text-xs text-red-400 font-bold hover:bg-red-600/30 transition-colors">
+                      <button className="flex-1 px-3 py-2 rounded bg-[#f5f5f5]/20 border border-[#f5f5f5]/30 text-xs text-[#f5f5f5] font-bold hover:bg-[#f5f5f5]/30 transition-colors">
                         Revoke & Remove
                       </button>
                       <button className="flex-1 px-3 py-2 rounded bg-slate-800 border border-slate-700 text-xs text-slate-400 hover:border-slate-600 transition-colors">

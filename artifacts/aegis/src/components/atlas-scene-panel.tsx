@@ -44,18 +44,18 @@ const DEMO_TIMELINE = [
 ];
 
 const DEMO_METRICS = [
-  { label: 'Affected assets', value: '4', accent: '#ef4444' },
-  { label: 'Attack vector', value: 'SMB', accent: '#f59e0b' },
-  { label: 'MITRE stage', value: 'Lateral Movement', accent: '#8b5cf6' },
-  { label: 'Containment', value: 'Partial', accent: '#f59e0b' },
-  { label: 'Blast radius', value: 'Low', accent: '#22c55e' },
-  { label: 'Conf. score', value: '94%', accent: '#60a5fa' },
+  { label: 'Affected assets', value: '4', accent: '#f5f5f5' },
+  { label: 'Attack vector', value: 'SMB', accent: '#c9b787' },
+  { label: 'MITRE stage', value: 'Lateral Movement', accent: '#8a8a8a' },
+  { label: 'Containment', value: 'Partial', accent: '#c9b787' },
+  { label: 'Blast radius', value: 'Low', accent: '#c9b787' },
+  { label: 'Conf. score', value: '94%', accent: '#c9b787' },
 ];
 
 const TYPE_CONFIG = {
-  critical: { icon: XCircle, color: '#ef4444', bg: 'rgba(239,68,68,0.08)' },
-  warning: { icon: AlertTriangle, color: '#f59e0b', bg: 'rgba(245,158,11,0.08)' },
-  info: { icon: Info, color: '#3b82f6', bg: 'rgba(59,130,246,0.08)' },
+  critical: { icon: XCircle, color: '#f5f5f5', bg: 'rgba(245,245,245,0.08)' },
+  warning: { icon: AlertTriangle, color: '#c9b787', bg: 'rgba(201,183,135,0.08)' },
+  info: { icon: Info, color: '#c9b787', bg: 'rgba(201,183,135,0.08)' },
 } as const;
 
 export function AtlasScenePanel({ incidentId, isDemo }: AtlasScenePanelProps) {
@@ -84,12 +84,12 @@ export function AtlasScenePanel({ incidentId, isDemo }: AtlasScenePanelProps) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <ShieldAlert size={14} style={{ color: '#60a5fa' }} />
+          <ShieldAlert size={14} style={{ color: '#c9b787' }} />
           <span
             style={{
               fontSize: '0.75rem',
               fontWeight: 600,
-              color: '#60a5fa',
+              color: '#c9b787',
               letterSpacing: '0.04em',
             }}
           >
@@ -104,7 +104,7 @@ export function AtlasScenePanel({ incidentId, isDemo }: AtlasScenePanelProps) {
                 padding: '0.1rem 0.4rem',
                 borderRadius: '2rem',
                 background: 'rgba(96,165,250,0.12)',
-                color: '#60a5fa',
+                color: '#c9b787',
                 border: '1px solid rgba(96,165,250,0.25)',
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
@@ -115,12 +115,12 @@ export function AtlasScenePanel({ incidentId, isDemo }: AtlasScenePanelProps) {
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-          <Activity size={11} style={{ color: '#ef4444' }} />
+          <Activity size={11} style={{ color: '#f5f5f5' }} />
           <span
             style={{
               fontSize: '0.625rem',
               fontFamily: 'monospace',
-              color: '#ef4444',
+              color: '#f5f5f5',
               letterSpacing: '0.08em',
             }}
           >
@@ -149,10 +149,10 @@ export function AtlasScenePanel({ incidentId, isDemo }: AtlasScenePanelProps) {
               fontWeight: 600,
               letterSpacing: '0.04em',
               textTransform: 'capitalize',
-              color: activeTab === tab ? '#60a5fa' : 'rgba(255,255,255,0.35)',
+              color: activeTab === tab ? '#c9b787' : 'rgba(255,255,255,0.35)',
               background: 'transparent',
               border: 'none',
-              borderBottom: activeTab === tab ? '2px solid #60a5fa' : '2px solid transparent',
+              borderBottom: activeTab === tab ? '2px solid #c9b787' : '2px solid transparent',
               cursor: 'pointer',
               transition: 'color 0.15s',
               marginBottom: '-1px',

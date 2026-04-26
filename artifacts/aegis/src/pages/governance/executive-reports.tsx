@@ -175,7 +175,7 @@ export default function ExecutiveReportsPage() {
     <div className="min-h-screen bg-[#07090d] text-white p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center gap-3 mb-1">
-          <FileText size={22} className="text-amber-400" />
+          <FileText size={22} className="text-[#c9b787]" />
           <h1 className="text-xl font-bold text-white font-mono tracking-tight">
             Executive Reports
           </h1>
@@ -193,13 +193,13 @@ export default function ExecutiveReportsPage() {
                 onClick={() =>
                   selectedReport === r.id ? setSelectedReport(null) : setSelectedReport(r.id)
                 }
-                className={`w-full text-left p-4 rounded-xl border transition-all ${selectedReport === r.id ? 'bg-amber-400/10 border-amber-400/40' : 'bg-[#0d1117] border-[#1e2a3a] hover:border-[#2e3a4a]'}`}
+                className={`w-full text-left p-4 rounded-xl border transition-all ${selectedReport === r.id ? 'bg-[#c9b787]/10 border-[#c9b787]/40' : 'bg-[#0d1117] border-[#1e2a3a] hover:border-[#2e3a4a]'}`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span
-                        className={`text-xs px-1.5 py-0.5 rounded font-mono font-bold ${r.status === 'current' ? 'bg-green-500/20 text-green-400' : r.status === 'stale' ? 'bg-amber-500/20 text-amber-400' : 'bg-blue-500/20 text-blue-400'}`}
+                        className={`text-xs px-1.5 py-0.5 rounded font-mono font-bold ${r.status === 'current' ? 'bg-[#c9b787]/20 text-[#c9b787]' : r.status === 'stale' ? 'bg-[#c9b787]/20 text-[#c9b787]' : 'bg-[#c9b787]/20 text-[#c9b787]'}`}
                       >
                         {r.status === 'current'
                           ? 'Current'
@@ -233,8 +233,8 @@ export default function ExecutiveReportsPage() {
 
             {generating && (
               <div className="flex flex-col items-center justify-center h-full min-h-[300px] space-y-4">
-                <div className="w-8 h-8 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
-                <p className="text-sm text-amber-400 font-mono">Generating report...</p>
+                <div className="w-8 h-8 border-2 border-[#c9b787] border-t-transparent rounded-full animate-spin" />
+                <p className="text-sm text-[#c9b787] font-mono">Generating report...</p>
                 <p className="text-xs text-[#8b9ab0] font-mono">
                   Assembling evidence · Scoring confidence · Structuring output
                 </p>
@@ -246,7 +246,7 @@ export default function ExecutiveReportsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded font-mono font-bold">
+                      <span className="text-xs bg-[#f5f5f5]/20 text-[#f5f5f5] px-2 py-0.5 rounded font-mono font-bold">
                         CRITICAL
                       </span>
                       <span className="text-xs text-[#8b9ab0] font-mono">
@@ -261,19 +261,19 @@ export default function ExecutiveReportsPage() {
                       Analyst: {SAMPLE_INCIDENT_BRIEF.assignedAnalyst}
                     </p>
                   </div>
-                  <button className="flex items-center gap-1.5 px-3 py-2 bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs rounded-lg font-mono hover:bg-amber-400/30 transition-colors">
+                  <button className="flex items-center gap-1.5 px-3 py-2 bg-[#c9b787]/20 border border-[#c9b787]/40 text-[#c9b787] text-xs rounded-lg font-mono hover:bg-[#c9b787]/30 transition-colors">
                     <Download size={12} /> Export PDF
                   </button>
                 </div>
 
-                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-                  <p className="text-xs text-red-300 font-mono leading-relaxed">
+                <div className="p-3 bg-[#f5f5f5]/10 border border-[#f5f5f5]/30 rounded-lg">
+                  <p className="text-xs text-[#f5f5f5] font-mono leading-relaxed">
                     <strong>Immediate Risk:</strong> {SAMPLE_INCIDENT_BRIEF.immediateRisk}
                   </p>
                 </div>
 
-                <div className="p-3 bg-amber-400/10 border border-amber-400/30 rounded-lg">
-                  <p className="text-xs text-amber-200 font-mono">
+                <div className="p-3 bg-[#c9b787]/10 border border-[#c9b787]/30 rounded-lg">
+                  <p className="text-xs text-[#c9b787] font-mono">
                     <strong>Recommendation:</strong> {SAMPLE_INCIDENT_BRIEF.recommendation}
                   </p>
                 </div>
@@ -288,7 +288,7 @@ export default function ExecutiveReportsPage() {
                         key={i}
                         className="flex items-start gap-2 p-2 bg-[#0a0f16] rounded border border-[#1e2a3a]"
                       >
-                        <Eye size={12} className="text-amber-400 mt-0.5 shrink-0" />
+                        <Eye size={12} className="text-[#c9b787] mt-0.5 shrink-0" />
                         <p className="text-xs text-white">{e}</p>
                       </div>
                     ))}
@@ -303,7 +303,7 @@ export default function ExecutiveReportsPage() {
                     <div className="space-y-1.5">
                       {SAMPLE_INCIDENT_BRIEF.actionsCompleted.map((a, i) => (
                         <div key={i} className="flex items-start gap-2">
-                          <CheckCircle2 size={12} className="text-green-400 mt-0.5 shrink-0" />
+                          <CheckCircle2 size={12} className="text-[#c9b787] mt-0.5 shrink-0" />
                           <p className="text-xs text-[#8b9ab0]">{a}</p>
                         </div>
                       ))}
@@ -316,18 +316,18 @@ export default function ExecutiveReportsPage() {
                     <div className="space-y-1.5">
                       {SAMPLE_INCIDENT_BRIEF.actionsPending.map((a, i) => (
                         <div key={i} className="flex items-start gap-2">
-                          <Clock size={12} className="text-amber-400 mt-0.5 shrink-0" />
-                          <p className="text-xs text-amber-200">{a}</p>
+                          <Clock size={12} className="text-[#c9b787] mt-0.5 shrink-0" />
+                          <p className="text-xs text-[#c9b787]">{a}</p>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
 
-                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                <div className="p-3 bg-[#c9b787]/10 border border-[#c9b787]/20 rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
-                    <Info size={12} className="text-blue-400" />
-                    <span className="text-xs text-blue-400 font-mono font-bold">
+                    <Info size={12} className="text-[#c9b787]" />
+                    <span className="text-xs text-[#c9b787] font-mono font-bold">
                       Confidence: {SAMPLE_INCIDENT_BRIEF.confidence}
                     </span>
                   </div>
@@ -344,7 +344,7 @@ export default function ExecutiveReportsPage() {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span
-                        className={`text-xs px-2 py-0.5 rounded font-mono font-bold ${active.status === 'current' ? 'bg-green-500/20 text-green-400' : 'bg-amber-500/20 text-amber-400'}`}
+                        className={`text-xs px-2 py-0.5 rounded font-mono font-bold ${active.status === 'current' ? 'bg-[#c9b787]/20 text-[#c9b787]' : 'bg-[#c9b787]/20 text-[#c9b787]'}`}
                       >
                         {active.status === 'current' ? 'Current' : 'Stale'}
                       </span>
@@ -357,7 +357,7 @@ export default function ExecutiveReportsPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleGenerate(active.id)}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs rounded-lg font-mono hover:bg-amber-400/30 transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-2 bg-[#c9b787]/20 border border-[#c9b787]/40 text-[#c9b787] text-xs rounded-lg font-mono hover:bg-[#c9b787]/30 transition-colors"
                     >
                       Generate Now
                     </button>
@@ -382,8 +382,8 @@ export default function ExecutiveReportsPage() {
                     </div>
                   ))}
                 </div>
-                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                  <p className="text-xs text-blue-300 font-mono">
+                <div className="p-3 bg-[#c9b787]/10 border border-[#c9b787]/20 rounded-lg">
+                  <p className="text-xs text-[#c9b787] font-mono">
                     All generated reports include: confidence level, evidence citations,
                     assumptions, and current vs planned capability labels. No claims are generated
                     without retrieval support.

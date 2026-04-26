@@ -135,10 +135,10 @@ interface DomainConfig {
 
 const DOMAIN_REGISTRY: Record<string, DomainConfig> = {
   vessels: {
-    displayName: 'SEXTANT Maritime Intelligence',
+    displayName: 'Vessels Maritime Intelligence',
     description: 'Fleet tracking, AIS signals, sanctions risk, route economics, and chokepoint monitoring.',
     systemPrompt:
-      'You are a maritime intelligence analyst for SEXTANT. Analyze vessel data, AIS signals, sanctions risk, route economics, and chokepoint monitoring. Be precise and cite specific data points. Format findings as structured intelligence with confidence scores.',
+      'You are a maritime intelligence analyst for Vessels. Analyze vessel data, AIS signals, sanctions risk, route economics, and chokepoint monitoring. Be precise and cite specific data points. Format findings as structured intelligence with confidence scores.',
     capabilities: ['fleet-tracking', 'sanctions-screening', 'route-analysis', 'chokepoint-monitoring'],
     actions: [
       {
@@ -222,10 +222,10 @@ const DOMAIN_REGISTRY: Record<string, DomainConfig> = {
     keywords: ['legal', 'contract', 'litigation', 'compliance', 'regulation', 'law', 'court', 'counsel', 'matter', 'attorney'],
   },
   terra: {
-    displayName: 'DOMAINE Real Estate Intelligence',
+    displayName: 'Terra Real Estate Intelligence',
     description: 'Property market analysis, distress signals, investment scoring, and portfolio monitoring.',
     systemPrompt:
-      'You are a real estate market intelligence analyst for DOMAINE. Evaluate property data, market trends, distress signals, and investment opportunities. Provide data-driven scoring with confidence levels and comparable references.',
+      'You are a real estate market intelligence analyst for Terra. Evaluate property data, market trends, distress signals, and investment opportunities. Provide data-driven scoring with confidence levels and comparable references.',
     capabilities: ['market-analysis', 'property-scoring', 'distress-detection', 'investment-recommendation'],
     actions: [
       {
@@ -262,10 +262,10 @@ const DOMAIN_REGISTRY: Record<string, DomainConfig> = {
     keywords: ['property', 'real estate', 'market', 'cap rate', 'noi', 'lease', 'portfolio', 'distress', 'investment', 'terra'],
   },
   sentra: {
-    displayName: 'TENAX Cyber Resilience Command',
+    displayName: 'Aegis Cyber Resilience Command',
     description: 'Threat detection, incident response, vulnerability management, and cyber containment.',
     systemPrompt:
-      'You are a cybersecurity threat analyst for TENAX. Assess vulnerabilities, attack surfaces, CVEs, and penetration test results. Prioritize by risk severity and provide structured incident response guidance with confidence scores.',
+      'You are a cybersecurity threat analyst for Aegis. Assess vulnerabilities, attack surfaces, CVEs, and penetration test results. Prioritize by risk severity and provide structured incident response guidance with confidence scores.',
     capabilities: ['vulnerability-assessment', 'threat-detection', 'risk-scoring', 'incident-response'],
     actions: [
       {
@@ -309,10 +309,10 @@ const DOMAIN_REGISTRY: Record<string, DomainConfig> = {
     keywords: ['cyber', 'threat', 'vulnerability', 'cve', 'incident', 'attack', 'breach', 'security', 'malware', 'ransomware', 'sentra', 'tenax'],
   },
   pulse: {
-    displayName: 'LUMINA Executive Intelligence',
+    displayName: 'Pulse Executive Intelligence',
     description: 'AI-powered executive briefings, signal synthesis, and cross-domain situational awareness.',
     systemPrompt:
-      'You are an executive intelligence analyst for LUMINA. Synthesize cross-domain signals into executive briefings. Identify critical patterns, emerging risks, and strategic opportunities. Format as structured executive intelligence.',
+      'You are an executive intelligence analyst for Pulse. Synthesize cross-domain signals into executive briefings. Identify critical patterns, emerging risks, and strategic opportunities. Format as structured executive intelligence.',
     capabilities: ['briefing-synthesis', 'signal-correlation', 'trend-detection', 'risk-horizon-scanning'],
     actions: [
       {
@@ -348,10 +348,10 @@ const DOMAIN_REGISTRY: Record<string, DomainConfig> = {
     keywords: ['briefing', 'executive', 'signal', 'trend', 'risk', 'intelligence', 'pulse', 'lumina', 'situational'],
   },
   aegis: {
-    displayName: 'PARAGON Defense & Intelligence',
+    displayName: 'Aegis Defense & Intelligence',
     description: 'Defense intelligence, threat modeling, PCAP analysis, and geospatial threat mapping.',
     systemPrompt:
-      'You are a defense and intelligence analyst for PARAGON. Assess defense posture, threat actors, geospatial risks, and intelligence assessments. Provide structured intelligence with confidence levels and source attribution.',
+      'You are a defense and intelligence analyst for Aegis. Assess defense posture, threat actors, geospatial risks, and intelligence assessments. Provide structured intelligence with confidence levels and source attribution.',
     capabilities: ['threat-modeling', 'pcap-analysis', 'geospatial-intelligence', 'defense-posture'],
     actions: [
       {

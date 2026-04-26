@@ -27,7 +27,7 @@ interface SimulationData {
 
 function LoadingPanel({ label }: { label: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 gap-3 text-orange-400/50">
+    <div className="flex flex-col items-center justify-center py-16 gap-3 text-[#c9b787]/50">
       <Loader2 className="w-6 h-6 animate-spin" />
       <span className="text-xs">Loading {label}…</span>
     </div>
@@ -36,12 +36,12 @@ function LoadingPanel({ label }: { label: string }) {
 
 function ErrorPanel({ label, onRetry }: { label: string; onRetry: () => void }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 gap-3 text-orange-400/40">
+    <div className="flex flex-col items-center justify-center py-16 gap-3 text-[#c9b787]/40">
       <AlertCircle className="w-6 h-6" />
       <span className="text-xs">Failed to load {label}</span>
       <button
         onClick={onRetry}
-        className="text-xs text-orange-400/60 hover:text-orange-400 border border-orange-500/20 rounded px-3 py-1 transition-colors"
+        className="text-xs text-[#c9b787]/60 hover:text-[#c9b787] border border-[#c9b787]/20 rounded px-3 py-1 transition-colors"
       >
         Retry
       </button>
@@ -123,12 +123,12 @@ export default function TrustProvenancePage() {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center gap-3 mb-2">
-        <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
-          <Shield className="w-5 h-5 text-orange-400" />
+        <div className="w-10 h-10 rounded-xl bg-[#c9b787]/10 flex items-center justify-center">
+          <Shield className="w-5 h-5 text-[#c9b787]" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-orange-50">Trust & Provenance Center</h1>
-          <p className="text-xs text-orange-400/50">
+          <h1 className="text-xl font-bold text-[#c9b787]">Trust & Provenance Center</h1>
+          <p className="text-xs text-[#c9b787]/50">
             Proof chain visibility · Policy governance · Decision audit · Simulation cockpit
           </p>
         </div>
@@ -141,15 +141,15 @@ export default function TrustProvenancePage() {
             label: 'Proof Records',
             value: proofResult.loading ? '…' : proofs.length,
             icon: FileSearch,
-            color: 'text-orange-400',
-            bg: 'bg-orange-500/10',
+            color: 'text-[#c9b787]',
+            bg: 'bg-[#c9b787]/10',
           },
           {
             label: 'Policies Active',
             value: policyResult.loading ? '…' : policyDecisions.length,
             icon: Shield,
-            color: 'text-purple-400',
-            bg: 'bg-purple-500/10',
+            color: 'text-[#8a8a8a]',
+            bg: 'bg-[#8a8a8a]/10',
           },
           {
             label: 'Pending Reviews',
@@ -157,42 +157,42 @@ export default function TrustProvenancePage() {
               ? '…'
               : proofs.filter((p) => p.reviewState === 'unreviewed').length,
             icon: Clock,
-            color: 'text-amber-400',
-            bg: 'bg-amber-500/10',
+            color: 'text-[#c9b787]',
+            bg: 'bg-[#c9b787]/10',
           },
           {
             label: 'Audit Events',
             value: auditResult.loading ? '…' : auditEntries.length,
             icon: CheckCircle,
-            color: 'text-green-400',
-            bg: 'bg-green-500/10',
+            color: 'text-[#c9b787]',
+            bg: 'bg-[#c9b787]/10',
           },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <div
             key={label}
-            className="bg-[#09080f]/80 border border-orange-500/10 rounded-xl p-4 flex items-center gap-3"
+            className="bg-[#09080f]/80 border border-[#c9b787]/10 rounded-xl p-4 flex items-center gap-3"
           >
             <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center shrink-0`}>
               <Icon className={`w-4 h-4 ${color}`} />
             </div>
             <div>
-              <div className="text-lg font-bold text-orange-50">{value}</div>
-              <div className="text-[10px] text-orange-400/50">{label}</div>
+              <div className="text-lg font-bold text-[#c9b787]">{value}</div>
+              <div className="text-[10px] text-[#c9b787]/50">{label}</div>
             </div>
           </div>
         ))}
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-1 p-1 bg-[#09080f]/60 border border-orange-500/10 rounded-xl">
+      <div className="flex gap-1 p-1 bg-[#09080f]/60 border border-[#c9b787]/10 rounded-xl">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveView(tab.id)}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
               activeView === tab.id
-                ? 'bg-orange-500/15 text-orange-300 border border-orange-500/30'
-                : 'text-orange-400/50 hover:text-orange-400/80'
+                ? 'bg-[#c9b787]/15 text-[#c9b787] border border-[#c9b787]/30'
+                : 'text-[#c9b787]/50 hover:text-[#c9b787]/80'
             }`}
           >
             {tab.icon}
@@ -210,7 +210,7 @@ export default function TrustProvenancePage() {
             <ErrorPanel label="proof records" onRetry={proofResult.refetch} />
           ) : (
             <>
-              <div className="text-xs text-orange-400/50 px-1">
+              <div className="text-xs text-[#c9b787]/50 px-1">
                 {proofs.length} proof records · Showing AI-generated content provenance, review
                 states, and export safety indicators
               </div>
@@ -235,7 +235,7 @@ export default function TrustProvenancePage() {
                   </div>
                 </div>
               ))}
-              <div className="flex items-center gap-2 text-xs text-orange-400/40 pt-2">
+              <div className="flex items-center gap-2 text-xs text-[#c9b787]/40 pt-2">
                 <span>📌</span>
                 <span>
                   Proof panels can be embedded inline in any AI output panel. Click a proof to
@@ -256,7 +256,7 @@ export default function TrustProvenancePage() {
             <ErrorPanel label="policy decisions" onRetry={policyResult.refetch} />
           ) : (
             <>
-              <div className="text-xs text-orange-400/50 px-1">
+              <div className="text-xs text-[#c9b787]/50 px-1">
                 Recent policy evaluations — approval history, denial reasons, escalation paths, and
                 remediation guidance
               </div>
@@ -311,7 +311,7 @@ export default function TrustProvenancePage() {
             <ErrorPanel label="simulation results" onRetry={simulationResult.refetch} />
           ) : simulation ? (
             <>
-              <div className="text-xs text-orange-400/50 px-1">
+              <div className="text-xs text-[#c9b787]/50 px-1">
                 Incident response scenario analysis — Monte Carlo simulation with best/base/worst
                 ranges and sensitivity drivers
               </div>

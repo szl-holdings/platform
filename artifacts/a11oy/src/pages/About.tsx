@@ -12,13 +12,13 @@ const FABRIC_LAYERS = [
 ];
 
 const VERTICALS = [
-  { label: 'Vessels Maritime', color: '#06b6d4', ops: 'Fleet ops, port scheduling, demurrage risk' },
-  { label: 'Lyte Revenue', color: '#3b82f6', ops: 'Pipeline velocity, deal health, CRM signals' },
-  { label: 'Counsel', color: '#8b5cf6', ops: 'Matter tracking, discovery deadlines, litigation risk' },
-  { label: 'Terra Real Estate', color: '#10b981', ops: 'Cap rate monitoring, portfolio valuation' },
-  { label: 'Aegis Defense', color: '#ef4444', ops: 'Threat intel, posture assessment, SIGINT' },
-  { label: 'Carlota Jo', color: '#f59e0b', ops: 'Advisory matters, client signals, brief generation' },
-  { label: 'Alloy Core', color: '#6366f1', ops: 'Fabric health, proof integrity, operator performance' },
+  { label: 'Vessels Maritime', color: '#8a8a8a', ops: 'Fleet ops, port scheduling, demurrage risk' },
+  { label: 'Lyte Revenue', color: '#c9b787', ops: 'Pipeline velocity, deal health, CRM signals' },
+  { label: 'Counsel', color: '#8a8a8a', ops: 'Matter tracking, discovery deadlines, litigation risk' },
+  { label: 'Terra Real Estate', color: '#c9b787', ops: 'Cap rate monitoring, portfolio valuation' },
+  { label: 'Aegis Defense', color: '#f5f5f5', ops: 'Threat intel, posture assessment, SIGINT' },
+  { label: 'Carlota Jo', color: '#c9b787', ops: 'Advisory matters, client signals, brief generation' },
+  { label: 'Alloy Core', color: '#8a8a8a', ops: 'Fabric health, proof integrity, operator performance' },
 ];
 
 const PRINCIPLES = [
@@ -60,7 +60,7 @@ export function About() {
               A11oy is not a chatbot. It is not a workflow automation tool. It is not another dashboard. It is the operational intelligence layer that transforms your enterprise signals into governed, provable actions — at machine speed, with human authority.
             </p>
             <div className="text-sm font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>
-              The pipeline: Sense → Structure → Correlate → Explain → Recommend → <span style={{ color: '#8b5cf6' }}>Approve</span> → Execute → Verify → Prove
+              The pipeline: Sense → Structure → Correlate → Explain → Recommend → <span style={{ color: '#8a8a8a' }}>Approve</span> → Execute → Verify → Prove
             </div>
           </Card>
         </div>
@@ -71,7 +71,7 @@ export function About() {
           <div className="flex flex-col gap-2">
             {FABRIC_LAYERS.map(layer => (
               <div key={layer.n} className="flex items-start gap-3 p-3 rounded border" style={{ backgroundColor: 'var(--color-a11oy-card)', borderColor: 'var(--color-a11oy-border)' }}>
-                <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 font-mono text-xs font-bold" style={{ backgroundColor: 'rgba(99,102,241,0.15)', color: '#6366f1' }}>
+                <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 font-mono text-xs font-bold" style={{ backgroundColor: 'rgba(138,138,138,0.15)', color: '#8a8a8a' }}>
                   {layer.n}
                 </div>
                 <div>
@@ -118,8 +118,8 @@ export function About() {
       </div>
 
       {/* Demo Disclosure */}
-      <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)' }}>
-        <div className="text-sm font-semibold mb-1" style={{ color: '#3b82f6' }}>Demo Mode Disclosure</div>
+      <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)' }}>
+        <div className="text-sm font-semibold mb-1" style={{ color: '#c9b787' }}>Demo Mode Disclosure</div>
         <p className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)', lineHeight: '1.7' }}>
           This is A11oy Phase 2 demo. All signal data, workcell executions, proof packets, PCE contracts, and agent outputs are seeded demo content. No real enterprise integrations are connected. No real model API calls are made. No real actions are executed. The approval gates in the demo are illustrative — in production, they gate real execution with real accountability.
         </p>

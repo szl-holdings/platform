@@ -90,7 +90,7 @@ export function WorkcellReplayDetail() {
                     key={s}
                     onClick={() => setSpeed(s)}
                     className="px-2 py-0.5 rounded font-mono"
-                    style={{ backgroundColor: speed === s ? 'rgba(59,130,246,0.15)' : 'transparent', color: speed === s ? '#3b82f6' : 'var(--color-a11oy-text-ghost)', border: 'none', cursor: 'pointer', fontSize: 11 }}
+                    style={{ backgroundColor: speed === s ? 'rgba(201,183,135,0.15)' : 'transparent', color: speed === s ? '#c9b787' : 'var(--color-a11oy-text-ghost)', border: 'none', cursor: 'pointer', fontSize: 11 }}
                   >
                     {s === 2000 ? '0.5×' : s === 1000 ? '1×' : s === 600 ? '1.5×' : '2×'}
                   </button>
@@ -106,7 +106,7 @@ export function WorkcellReplayDetail() {
                 className="h-full rounded-full transition-all"
                 style={{
                   width: steps.length > 0 ? `${Math.max(0, ((stepIdx + 1) / steps.length) * 100)}%` : '0%',
-                  backgroundColor: replayState === 'done' ? '#10b981' : '#3b82f6',
+                  backgroundColor: replayState === 'done' ? '#c9b787' : '#c9b787',
                 }}
               />
             </div>
@@ -145,8 +145,8 @@ export function WorkcellReplayDetail() {
 
           {/* Done banner */}
           {replayState === 'done' && (
-            <div className="mt-4 p-4 rounded-lg text-center" style={{ backgroundColor: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
-              <div className="text-sm font-semibold mb-1" style={{ color: '#10b981' }}>Replay Complete</div>
+            <div className="mt-4 p-4 rounded-lg text-center" style={{ backgroundColor: 'rgba(201,183,135,0.08)', border: '1px solid rgba(201,183,135,0.2)' }}>
+              <div className="text-sm font-semibold mb-1" style={{ color: '#c9b787' }}>Replay Complete</div>
               <div className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>
                 All {steps.length} steps replayed. MirrorEval verdict: {wc.mirrorEvalResult.verdict}
               </div>
@@ -162,7 +162,7 @@ export function WorkcellReplayDetail() {
               <div className="flex flex-col gap-2">
                 <div>
                   <div className="font-mono mb-0.5" style={{ color: 'var(--color-a11oy-text-ghost)' }}>STATUS</div>
-                  <div style={{ color: { running: '#f59e0b', completed: '#10b981', error: '#ef4444', paused: '#9bacc4', idle: '#9bacc4' }[wc.status] }}>{wc.status}</div>
+                  <div style={{ color: { running: '#c9b787', completed: '#c9b787', error: '#f5f5f5', paused: '#5e5e5e', idle: '#5e5e5e' }[wc.status] }}>{wc.status}</div>
                 </div>
                 <div>
                   <div className="font-mono mb-0.5" style={{ color: 'var(--color-a11oy-text-ghost)' }}>OBJECTIVE</div>

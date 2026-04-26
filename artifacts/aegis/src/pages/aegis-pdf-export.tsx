@@ -79,9 +79,9 @@ export default function AegisPdfExport() {
   }, []);
 
   const STATUS_COLORS: Record<ReportMetric['status'], string> = {
-    good: '#4ade80',
-    warn: '#f59e0b',
-    critical: '#ef4444',
+    good: '#c9b787',
+    warn: '#c9b787',
+    critical: '#f5f5f5',
   };
 
   return (
@@ -113,17 +113,17 @@ export default function AegisPdfExport() {
         }
       `}</style>
 
-      <div className="h-full overflow-auto bg-[#080510] text-red-50" style={{ fontFamily: 'ui-monospace, monospace' }}>
+      <div className="h-full overflow-auto bg-[#080510] text-[#f5f5f5]" style={{ fontFamily: 'ui-monospace, monospace' }}>
         <div className="max-w-6xl mx-auto px-6 py-8">
           {/* Header */}
           <div className="mb-8 no-print">
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
-                <FileText className="w-5 h-5 text-red-400" />
+              <div className="p-2 rounded-lg bg-[#f5f5f5]/10 border border-[#f5f5f5]/20">
+                <FileText className="w-5 h-5 text-[#f5f5f5]" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-red-100">PDF Export</h1>
-                <p className="text-xs text-red-400/60 mt-0.5">Pixel-perfect investor & board reports · Print-ready layout matches web exactly</p>
+                <h1 className="text-xl font-bold text-[#f5f5f5]">PDF Export</h1>
+                <p className="text-xs text-[#f5f5f5]/60 mt-0.5">Pixel-perfect investor & board reports · Print-ready layout matches web exactly</p>
               </div>
             </div>
           </div>
@@ -132,35 +132,35 @@ export default function AegisPdfExport() {
             {/* Config Panel */}
             <div className="space-y-4">
               <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                <h3 className="text-xs font-mono uppercase tracking-wider text-red-400/60 mb-3">Report Format</h3>
+                <h3 className="text-xs font-mono uppercase tracking-wider text-[#f5f5f5]/60 mb-3">Report Format</h3>
                 <div className="space-y-2">
                   {([['pdf', 'Full Board Report', 'Complete security posture package (all sections, ~12 pages)'], ['executive-brief', 'Executive Brief', 'Condensed 2-page summary for C-suite distribution']] as const).map(([v, label, desc]) => (
                     <button
                       key={v}
                       onClick={() => setFormat(v)}
-                      className={`w-full text-left p-3 rounded-lg border transition-all ${format === v ? 'border-red-500/40 bg-red-500/10' : 'border-white/[0.06] bg-white/[0.02] hover:border-red-500/20'}`}
+                      className={`w-full text-left p-3 rounded-lg border transition-all ${format === v ? 'border-[#f5f5f5]/40 bg-[#f5f5f5]/10' : 'border-white/[0.06] bg-white/[0.02] hover:border-[#f5f5f5]/20'}`}
                     >
-                      <p className="text-xs font-semibold text-red-100">{label}</p>
-                      <p className="text-[10px] text-red-400/50 mt-0.5">{desc}</p>
+                      <p className="text-xs font-semibold text-[#f5f5f5]">{label}</p>
+                      <p className="text-[10px] text-[#f5f5f5]/50 mt-0.5">{desc}</p>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                <h3 className="text-xs font-mono uppercase tracking-wider text-red-400/60 mb-3">Sections</h3>
+                <h3 className="text-xs font-mono uppercase tracking-wider text-[#f5f5f5]/60 mb-3">Sections</h3>
                 <div className="space-y-2">
                   {sections.map((section) => (
                     <label key={section.id} className="flex items-center gap-2 cursor-pointer group">
                       <div
                         onClick={() => toggleSection(section.id)}
                         className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-all ${
-                          section.included ? 'bg-red-500/80 border-red-500' : 'border-white/[0.2] bg-white/[0.04]'
+                          section.included ? 'bg-[#f5f5f5]/80 border-[#f5f5f5]' : 'border-white/[0.2] bg-white/[0.04]'
                         }`}
                       >
                         {section.included && <CheckCircle className="w-2.5 h-2.5 text-white" />}
                       </div>
-                      <span className="text-[11px] text-red-300/70 group-hover:text-red-300/90 transition-colors">{section.label}</span>
+                      <span className="text-[11px] text-[#f5f5f5]/70 group-hover:text-[#f5f5f5]/90 transition-colors">{section.label}</span>
                     </label>
                   ))}
                 </div>
@@ -169,7 +169,7 @@ export default function AegisPdfExport() {
               <button
                 onClick={handlePrint}
                 disabled={isGenerating}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#f5f5f5] hover:bg-[#f5f5f5] text-white text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isGenerating ? (
                   <>
@@ -189,8 +189,8 @@ export default function AegisPdfExport() {
             <div className="lg:col-span-2">
               <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xs font-mono uppercase tracking-wider text-red-400/60">Preview</h3>
-                  <span className="text-[10px] text-red-400/40">{sections.filter((s) => s.included).length} sections included</span>
+                  <h3 className="text-xs font-mono uppercase tracking-wider text-[#f5f5f5]/60">Preview</h3>
+                  <span className="text-[10px] text-[#f5f5f5]/40">{sections.filter((s) => s.included).length} sections included</span>
                 </div>
 
                 {/* Print Preview area */}
@@ -211,7 +211,7 @@ export default function AegisPdfExport() {
                   {/* Cover Page */}
                   <div style={{ padding: '40px 48px 32px', background: '#080510', color: 'white' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Shield style={{ width: '20px', height: '20px', color: 'white' }} />
                       </div>
                       <div>
@@ -237,7 +237,7 @@ export default function AegisPdfExport() {
                         {REPORT_METRICS.slice(0, 4).map((m) => (
                           <div key={m.label} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 14px' }}>
                             <div style={{ fontSize: '9px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{m.label}</div>
-                            <div style={{ fontSize: '18px', fontWeight: 700, marginTop: '4px', color: m.status === 'good' ? '#16a34a' : m.status === 'warn' ? '#d97706' : '#dc2626' }}>
+                            <div style={{ fontSize: '18px', fontWeight: 700, marginTop: '4px', color: m.status === 'good' ? '#c9b787' : m.status === 'warn' ? '#d97706' : '#f5f5f5' }}>
                               {m.value}
                             </div>
                             {m.change && <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '2px' }}>{m.change}</div>}
@@ -257,7 +257,7 @@ export default function AegisPdfExport() {
                         {REPORT_METRICS.slice(4).map((m) => (
                           <div key={m.label} style={{ border: '1px solid #e2e8f0', borderRadius: '6px', padding: '10px 12px' }}>
                             <div style={{ fontSize: '9px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{m.label}</div>
-                            <div style={{ fontSize: '15px', fontWeight: 700, marginTop: '4px', color: m.status === 'good' ? '#16a34a' : m.status === 'warn' ? '#d97706' : '#dc2626' }}>
+                            <div style={{ fontSize: '15px', fontWeight: 700, marginTop: '4px', color: m.status === 'good' ? '#c9b787' : m.status === 'warn' ? '#d97706' : '#f5f5f5' }}>
                               {m.value}
                             </div>
                           </div>
@@ -285,8 +285,8 @@ export default function AegisPdfExport() {
                             <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
                               <td style={{ padding: '8px 12px', fontWeight: 600 }}>{row.date}</td>
                               <td style={{ padding: '8px 12px', color: '#374151' }}>{row.count}</td>
-                              <td style={{ padding: '8px 12px', color: row.critical > 0 ? '#dc2626' : '#16a34a', fontWeight: row.critical > 0 ? 700 : 400 }}>{row.critical}</td>
-                              <td style={{ padding: '8px 12px', color: row.resolved === row.count ? '#16a34a' : '#d97706' }}>{row.resolved}</td>
+                              <td style={{ padding: '8px 12px', color: row.critical > 0 ? '#f5f5f5' : '#c9b787', fontWeight: row.critical > 0 ? 700 : 400 }}>{row.critical}</td>
+                              <td style={{ padding: '8px 12px', color: row.resolved === row.count ? '#c9b787' : '#d97706' }}>{row.resolved}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -297,7 +297,7 @@ export default function AegisPdfExport() {
                   {/* Footer */}
                   <div style={{ padding: '16px 48px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span style={{ fontSize: '9px', color: '#94a3b8' }}>Aegis — Defense & Intelligence Command · CONFIDENTIAL · Q2 2026</span>
-                    <span style={{ fontSize: '9px', color: '#94a3b8' }}>Generated by SZL Holdings Governed AI Platform</span>
+                    <span style={{ fontSize: '9px', color: '#94a3b8' }}>Generated by Aegis Governed AI Platform</span>
                   </div>
                 </div>
               </div>

@@ -33,11 +33,11 @@ const DS = {
 };
 
 const NODE_COLORS: Record<string, string> = {
-  asset: '#3b82f6',
-  identity: '#8b5cf6',
-  control: '#10b981',
-  incident: '#ef4444',
-  actor: '#f97316',
+  asset: '#c9b787',
+  identity: '#8a8a8a',
+  control: '#c9b787',
+  incident: '#f5f5f5',
+  actor: '#c9b787',
 };
 
 const NODE_ICONS: Record<string, typeof Network> = {
@@ -110,13 +110,13 @@ function AttackGraphCanvas({
             </feMerge>
           </filter>
           <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L8,3 z" fill="#ef4444" opacity="0.7" />
+            <path d="M0,0 L0,6 L8,3 z" fill="#f5f5f5" opacity="0.7" />
           </marker>
           <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L8,3 z" fill="#10b981" opacity="0.7" />
+            <path d="M0,0 L0,6 L8,3 z" fill="#c9b787" opacity="0.7" />
           </marker>
           <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6" opacity="0.5" />
+            <path d="M0,0 L0,6 L8,3 z" fill="#c9b787" opacity="0.5" />
           </marker>
         </defs>
 
@@ -128,7 +128,7 @@ function AttackGraphCanvas({
           const sy = src.y * scale.y;
           const dx = dst.x * scale.x;
           const dy = dst.y * scale.y;
-          const color = e.blocked ? '#10b981' : e.weight > 0.8 ? '#ef4444' : '#3b82f6';
+          const color = e.blocked ? '#c9b787' : e.weight > 0.8 ? '#f5f5f5' : '#c9b787';
           const marker = e.blocked
             ? 'url(#arrow-green)'
             : e.weight > 0.8
@@ -186,7 +186,7 @@ function AttackGraphCanvas({
                   cy={cy}
                   r={r + 6}
                   fill="none"
-                  stroke="#ef4444"
+                  stroke="#f5f5f5"
                   strokeWidth="1"
                   opacity="0.25"
                 >
@@ -220,7 +220,7 @@ function AttackGraphCanvas({
                   cy={cy}
                   r={r}
                   fill="none"
-                  stroke="#10b981"
+                  stroke="#c9b787"
                   strokeWidth="1"
                   strokeDasharray="3 2"
                   opacity="0.4"
@@ -323,14 +323,14 @@ export default function CognitiveAttackPath() {
 
   return (
     <div className="p-6 space-y-6" style={{ maxWidth: 1280, margin: '0 auto' }}>
-      <CognitiveBreadcrumbs accent="#ef4444" />
+      <CognitiveBreadcrumbs accent="#f5f5f5" />
       <div className="flex items-start justify-between">
         <div>
           <h1
             className="text-xl font-bold flex items-center gap-2"
             style={{ color: DS.text.primary }}
           >
-            <Network className="w-5 h-5 text-red-400" />
+            <Network className="w-5 h-5 text-[#f5f5f5]" />
             Cognitive Attack Path Graph
           </h1>
           <p className="text-sm mt-1" style={{ color: DS.text.secondary }}>
@@ -343,22 +343,22 @@ export default function CognitiveAttackPath() {
             <span
               className="text-[10px] font-mono px-2 py-1 rounded"
               style={{
-                background: 'rgba(239,68,68,0.08)',
-                color: '#ef4444',
-                border: '1px solid rgba(239,68,68,0.2)',
+                background: 'rgba(245,245,245,0.08)',
+                color: '#f5f5f5',
+                border: '1px solid rgba(245,245,245,0.2)',
               }}
             >
               TRACE: {provenance.traceId.slice(-10)}
             </span>
           )}
-          <CopyLinkButton accent="#ef4444" />
+          <CopyLinkButton accent="#f5f5f5" />
           <button
             onClick={() => refetch()}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors"
             style={{
-              background: 'rgba(239,68,68,0.08)',
-              color: '#ef4444',
-              border: '1px solid rgba(239,68,68,0.2)',
+              background: 'rgba(245,245,245,0.08)',
+              color: '#f5f5f5',
+              border: '1px solid rgba(245,245,245,0.2)',
             }}
           >
             <RefreshCw className="w-3 h-3" />
@@ -372,25 +372,25 @@ export default function CognitiveAttackPath() {
           {
             label: 'Total Nodes',
             value: summary.totalNodes ?? nodes.length,
-            color: 'text-blue-400',
+            color: 'text-[#c9b787]',
             icon: Network,
           },
           {
             label: 'Compromised',
             value: summary.compromisedNodes ?? nodes.filter((n) => n.compromised).length,
-            color: 'text-red-400',
+            color: 'text-[#f5f5f5]',
             icon: AlertTriangle,
           },
           {
             label: 'Critical Paths',
             value: summary.criticalPaths ?? 0,
-            color: 'text-orange-400',
+            color: 'text-[#c9b787]',
             icon: ChevronRight,
           },
           {
             label: 'Blocked Paths',
             value: summary.blockedPaths ?? 0,
-            color: 'text-emerald-400',
+            color: 'text-[#c9b787]',
             icon: CheckCircle,
           },
         ].map(({ label, value, color, icon: Icon }) => (
@@ -417,7 +417,7 @@ export default function CognitiveAttackPath() {
       {denied ? (
         <AccessDeniedNotice
           status={(error as HttpError).status}
-          accent="#ef4444"
+          accent="#f5f5f5"
           resourceLabel="the attack path graph"
         />
       ) : isLoading ? (
@@ -430,7 +430,7 @@ export default function CognitiveAttackPath() {
             border: `1px solid ${DS.border}`,
           }}
         >
-          <div className="w-6 h-6 border-2 border-red-500/40 border-t-red-400 rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-[#f5f5f5]/40 border-t-red-400 rounded-full animate-spin" />
         </div>
       ) : (
         <AttackGraphCanvas nodes={nodes} edges={edges} onNodeClick={drillNode} />
@@ -459,8 +459,8 @@ export default function CognitiveAttackPath() {
                     key={node.id}
                     className="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors"
                     style={{
-                      background: 'rgba(239,68,68,0.05)',
-                      border: '1px solid rgba(239,68,68,0.12)',
+                      background: 'rgba(245,245,245,0.05)',
+                      border: '1px solid rgba(245,245,245,0.12)',
                     }}
                     onClick={() => drillNode(node)}
                   >
@@ -481,7 +481,7 @@ export default function CognitiveAttackPath() {
                         {node.type} · {node.techniqueId ?? 'unknown'}
                       </p>
                     </div>
-                    <Badge className="text-[9px] bg-red-500/10 text-red-400 border-red-500/20 shrink-0">
+                    <Badge className="text-[9px] bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20 shrink-0">
                       COMPROMISED
                     </Badge>
                   </div>
@@ -512,11 +512,11 @@ export default function CognitiveAttackPath() {
                     key={i}
                     className="flex items-center gap-2 p-2.5 rounded-lg"
                     style={{
-                      background: 'rgba(239,68,68,0.04)',
-                      border: '1px solid rgba(239,68,68,0.1)',
+                      background: 'rgba(245,245,245,0.04)',
+                      border: '1px solid rgba(245,245,245,0.1)',
                     }}
                   >
-                    <AlertTriangle className="w-3 h-3 text-red-400 shrink-0" />
+                    <AlertTriangle className="w-3 h-3 text-[#f5f5f5] shrink-0" />
                     <span
                       className="text-[10px] flex-1 truncate"
                       style={{ color: DS.text.secondary }}
@@ -524,7 +524,7 @@ export default function CognitiveAttackPath() {
                       {src?.label?.slice(0, 16) ?? edge.from} →{' '}
                       {dst?.label?.slice(0, 16) ?? edge.to}
                     </span>
-                    <span className="text-[10px] font-mono" style={{ color: '#f97316' }}>
+                    <span className="text-[10px] font-mono" style={{ color: '#c9b787' }}>
                       {(edge.weight * 100).toFixed(0)}%
                     </span>
                   </div>
@@ -541,16 +541,16 @@ export default function CognitiveAttackPath() {
                     key={`blocked-${i}`}
                     className="flex items-center gap-2 p-2.5 rounded-lg"
                     style={{
-                      background: 'rgba(16,185,129,0.04)',
-                      border: '1px solid rgba(16,185,129,0.1)',
+                      background: 'rgba(201,183,135,0.04)',
+                      border: '1px solid rgba(201,183,135,0.1)',
                     }}
                   >
-                    <CheckCircle className="w-3 h-3 text-emerald-400 shrink-0" />
+                    <CheckCircle className="w-3 h-3 text-[#c9b787] shrink-0" />
                     <span className="text-[10px] flex-1 truncate" style={{ color: DS.text.muted }}>
                       {src?.label?.slice(0, 16) ?? edge.from} →{' '}
                       {dst?.label?.slice(0, 16) ?? edge.to}
                     </span>
-                    <span className="text-[10px] font-mono text-emerald-400">BLOCKED</span>
+                    <span className="text-[10px] font-mono text-[#c9b787]">BLOCKED</span>
                   </div>
                 );
               })}
@@ -576,9 +576,9 @@ export default function CognitiveAttackPath() {
                   onClick={() => drillNode(selectedNode)}
                   className="flex items-center gap-1 text-[10px] px-2 py-1 rounded transition-colors"
                   style={{
-                    background: 'rgba(239,68,68,0.1)',
-                    color: '#ef4444',
-                    border: '1px solid rgba(239,68,68,0.25)',
+                    background: 'rgba(245,245,245,0.1)',
+                    color: '#f5f5f5',
+                    border: '1px solid rgba(245,245,245,0.25)',
                   }}
                 >
                   Open {selectedNode.type === 'identity' ? 'Blast Radius' : 'Proof Chain'}
@@ -601,7 +601,7 @@ export default function CognitiveAttackPath() {
             </div>
             <div>
               <span style={{ color: DS.text.muted }}>Severity: </span>
-              <span style={{ color: '#ef4444' }}>{selectedNode.severity}</span>
+              <span style={{ color: '#f5f5f5' }}>{selectedNode.severity}</span>
             </div>
             <div>
               <span style={{ color: DS.text.muted }}>Technique: </span>
@@ -622,9 +622,9 @@ export default function CognitiveAttackPath() {
                     key={i}
                     className="text-[10px] px-2 py-0.5 rounded font-mono"
                     style={{
-                      background: 'rgba(59,130,246,0.08)',
-                      color: '#3b82f6',
-                      border: '1px solid rgba(59,130,246,0.2)',
+                      background: 'rgba(201,183,135,0.08)',
+                      color: '#c9b787',
+                      border: '1px solid rgba(201,183,135,0.2)',
                     }}
                   >
                     {ev}

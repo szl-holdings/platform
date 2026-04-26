@@ -33,20 +33,20 @@ const feedHealth = feedSim.generateFeedHealthPanel(NOW);
 
 const TLP_COLORS: Record<string, string> = {
   WHITE: 'bg-white/10 text-white border-white/20',
-  GREEN: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  AMBER: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  RED: 'bg-red-500/10 text-red-400 border-red-500/20',
+  GREEN: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  AMBER: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  RED: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
 };
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: 'bg-red-500/10 text-red-400 border-red-500/20',
-  high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  low: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  CRITICAL: 'bg-red-500/10 text-red-400 border-red-500/20',
-  HIGH: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  MEDIUM: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  LOW: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  critical: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  high: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  medium: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  low: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  CRITICAL: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  HIGH: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  MEDIUM: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  LOW: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
   UNKNOWN: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
 };
 
@@ -61,13 +61,13 @@ const KILL_CHAIN_STEP: Record<string, number> = {
 };
 
 const KILL_CHAIN_COLORS: Record<string, string> = {
-  reconnaissance: 'bg-blue-500/20 text-blue-400',
-  weaponization: 'bg-indigo-500/20 text-indigo-400',
-  delivery: 'bg-amber-500/20 text-amber-400',
-  exploitation: 'bg-orange-500/20 text-orange-400',
-  installation: 'bg-red-500/20 text-red-400',
-  'command-and-control': 'bg-red-600/25 text-red-300',
-  'actions-on-objectives': 'bg-red-700/30 text-red-200',
+  reconnaissance: 'bg-[#c9b787]/20 text-[#c9b787]',
+  weaponization: 'bg-[#8a8a8a]/20 text-[#8a8a8a]',
+  delivery: 'bg-[#c9b787]/20 text-[#c9b787]',
+  exploitation: 'bg-[#c9b787]/20 text-[#c9b787]',
+  installation: 'bg-[#f5f5f5]/20 text-[#f5f5f5]',
+  'command-and-control': 'bg-[#f5f5f5]/25 text-[#f5f5f5]',
+  'actions-on-objectives': 'bg-[#f5f5f5]/30 text-[#f5f5f5]',
 };
 
 function timeAgo(ms: number) {
@@ -79,16 +79,16 @@ function timeAgo(ms: number) {
 }
 
 function SourceStatusIcon({ status }: { status: FeedSource['status'] }) {
-  if (status === 'active') return <Wifi className="w-3 h-3 text-emerald-400" />;
-  if (status === 'degraded') return <Activity className="w-3 h-3 text-amber-400" />;
-  return <WifiOff className="w-3 h-3 text-red-400" />;
+  if (status === 'active') return <Wifi className="w-3 h-3 text-[#c9b787]" />;
+  if (status === 'degraded') return <Activity className="w-3 h-3 text-[#c9b787]" />;
+  return <WifiOff className="w-3 h-3 text-[#f5f5f5]" />;
 }
 
 function FeedHealthPanelView({ panel }: { panel: FeedHealthPanel }) {
   return (
     <div className="bg-card border border-border rounded-xl p-5">
       <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-        <Database className="w-4 h-4 text-cyan-400" />
+        <Database className="w-4 h-4 text-[#8a8a8a]" />
         Feed Health — Ingestion Status
       </h3>
       <div className="grid grid-cols-4 gap-3 mb-4">
@@ -98,8 +98,8 @@ function FeedHealthPanelView({ panel }: { panel: FeedHealthPanel }) {
             value: panel.totalIocs.toLocaleString(),
             color: 'text-foreground',
           },
-          { label: 'Fresh (24h)', value: panel.freshIocs, color: 'text-emerald-400' },
-          { label: 'Avg Confidence', value: `${panel.avgConfidence}%`, color: 'text-cyan-400' },
+          { label: 'Fresh (24h)', value: panel.freshIocs, color: 'text-[#c9b787]' },
+          { label: 'Avg Confidence', value: `${panel.avgConfidence}%`, color: 'text-[#8a8a8a]' },
           {
             label: 'Sources',
             value:
@@ -126,10 +126,10 @@ function FeedHealthPanelView({ panel }: { panel: FeedHealthPanel }) {
                   className={cn(
                     'text-[9px] px-1.5 py-0.5 rounded-full border capitalize',
                     src.status === 'active'
-                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                      ? 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20'
                       : src.status === 'degraded'
-                        ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                        : 'bg-red-500/10 text-red-400 border-red-500/20',
+                        ? 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20'
+                        : 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
                   )}
                 >
                   {src.status}
@@ -138,12 +138,12 @@ function FeedHealthPanelView({ panel }: { panel: FeedHealthPanel }) {
                   className={cn(
                     'text-[9px] px-1.5 py-0.5 rounded-full border capitalize',
                     src.staleness === 'fresh'
-                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                      ? 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20'
                       : src.staleness === 'recent'
-                        ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                        ? 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20'
                         : src.staleness === 'stale'
-                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                          : 'bg-red-500/10 text-red-400 border-red-500/20',
+                          ? 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20'
+                          : 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
                   )}
                 >
                   {src.staleness}
@@ -159,11 +159,11 @@ function FeedHealthPanelView({ panel }: { panel: FeedHealthPanel }) {
               <div className="flex items-center gap-1 justify-end">
                 <div className="h-1.5 w-16 bg-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-cyan-500 rounded-full"
+                    className="h-full bg-[#8a8a8a] rounded-full"
                     style={{ width: `${src.confidence}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-cyan-400">{src.confidence}%</span>
+                <span className="text-[10px] text-[#8a8a8a]">{src.confidence}%</span>
               </div>
             </div>
           </div>
@@ -179,7 +179,7 @@ function AptCampaignCard({ campaign }: { campaign: AptCampaign }) {
     <div
       className={cn(
         'bg-card border border-border rounded-xl p-4 hover:border-primary/20 transition-all',
-        campaign.tlp === 'RED' && 'border-red-500/20',
+        campaign.tlp === 'RED' && 'border-[#f5f5f5]/20',
       )}
     >
       <div className="flex items-start justify-between gap-4">
@@ -233,7 +233,7 @@ function AptCampaignCard({ campaign }: { campaign: AptCampaign }) {
             {campaign.mitreAttack.slice(0, 6).map((t) => (
               <span
                 key={t}
-                className="text-[9px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20 font-mono"
+                className="text-[9px] px-1.5 py-0.5 rounded bg-[#8a8a8a]/10 text-[#8a8a8a] border border-[#8a8a8a]/20 font-mono"
               >
                 {t}
               </span>
@@ -252,7 +252,7 @@ function AptCampaignCard({ campaign }: { campaign: AptCampaign }) {
               key={i}
               className={cn(
                 'flex-1 h-1.5 rounded-full transition-all',
-                i < step ? 'bg-red-500' : 'bg-muted',
+                i < step ? 'bg-[#f5f5f5]' : 'bg-muted',
               )}
               title={Object.keys(KILL_CHAIN_STEP)[i]}
             />
@@ -293,7 +293,7 @@ function IocCard({ ioc }: { ioc: StixIoc }) {
               {ioc.type.replace('file:hashes.', '').replace('-addr', '')}
             </span>
             {ioc.aptCampaign && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20">
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#8a8a8a]/10 text-[#8a8a8a] border border-[#8a8a8a]/20">
                 {ioc.aptCampaign}
               </span>
             )}
@@ -313,7 +313,7 @@ function IocCard({ ioc }: { ioc: StixIoc }) {
               First seen {timeAgo(ioc.firstSeen)}
             </span>
             {ioc.expiresAt && ioc.expiresAt > Date.now() && (
-              <span className="text-amber-400">
+              <span className="text-[#c9b787]">
                 Expires in {Math.ceil((ioc.expiresAt - Date.now()) / 86_400_000)}d
               </span>
             )}
@@ -322,7 +322,7 @@ function IocCard({ ioc }: { ioc: StixIoc }) {
             {ioc.mitreAttack.map((t) => (
               <span
                 key={t}
-                className="text-[9px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20 font-mono"
+                className="text-[9px] px-1.5 py-0.5 rounded bg-[#8a8a8a]/10 text-[#8a8a8a] border border-[#8a8a8a]/20 font-mono"
               >
                 {t}
               </span>
@@ -337,7 +337,7 @@ function IocCard({ ioc }: { ioc: StixIoc }) {
                 <div key={src.name} className="flex items-center gap-2">
                   <SourceStatusIcon status={src.status} />
                   <span className="text-xs text-foreground">{src.name}</span>
-                  <span className="text-[10px] text-cyan-400 ml-auto">{src.confidence}%</span>
+                  <span className="text-[10px] text-[#8a8a8a] ml-auto">{src.confidence}%</span>
                   <span className="text-[10px] text-muted-foreground">
                     {timeAgo(src.lastIngested)}
                   </span>
@@ -583,7 +583,7 @@ export default function ThreatIntelFeed() {
     return (
       <div className="mt-3 pt-3 border-t border-border">
         {a.error ? (
-          <p className="text-xs text-red-400">{a.error}</p>
+          <p className="text-xs text-[#f5f5f5]">{a.error}</p>
         ) : (
           <div className="bg-muted/30 rounded-lg p-3">
             <div className="flex items-center gap-1 mb-2 text-[10px] text-muted-foreground">
@@ -640,11 +640,11 @@ export default function ThreatIntelFeed() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-red-500/25 bg-red-500/5 p-4 flex items-start gap-4">
-        <Radio className="w-4 h-4 text-red-400 animate-pulse shrink-0 mt-0.5" />
+      <div className="rounded-xl border border-[#f5f5f5]/25 bg-[#f5f5f5]/5 p-4 flex items-start gap-4">
+        <Radio className="w-4 h-4 text-[#f5f5f5] animate-pulse shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className="text-xs font-bold text-red-300">
+            <span className="text-xs font-bold text-[#f5f5f5]">
               ACTIVE CAMPAIGN — {simCampaigns[0]?.name ?? 'Operation Darkwing'} (
               {simCampaigns[0]?.alias ?? 'APT29 / Cozy Bear'})
             </span>
@@ -656,7 +656,7 @@ export default function ThreatIntelFeed() {
             >
               TLP:{simCampaigns[0]?.tlp ?? 'RED'}
             </span>
-            <span className="text-[9px] font-mono bg-violet-500/10 text-violet-400 border border-violet-500/20 px-1.5 py-0.5 rounded">
+            <span className="text-[9px] font-mono bg-[#8a8a8a]/10 text-[#8a8a8a] border border-[#8a8a8a]/20 px-1.5 py-0.5 rounded">
               STIX {simCampaigns[0]?.id ?? 'campaign--0001'}
             </span>
           </div>
@@ -669,7 +669,7 @@ export default function ThreatIntelFeed() {
               (t) => (
                 <span
                   key={t}
-                  className="text-[9px] font-mono bg-violet-500/10 text-violet-400 border border-violet-500/20 px-1.5 py-0.5 rounded"
+                  className="text-[9px] font-mono bg-[#8a8a8a]/10 text-[#8a8a8a] border border-[#8a8a8a]/20 px-1.5 py-0.5 rounded"
                 >
                   {t}
                 </span>
@@ -678,7 +678,7 @@ export default function ThreatIntelFeed() {
           </div>
         </div>
         <div className="text-right shrink-0">
-          <div className="text-lg font-bold font-mono text-red-400">
+          <div className="text-lg font-bold font-mono text-[#f5f5f5]">
             {simCampaigns[0]?.confidence ?? 97}%
           </div>
           <div className="text-[9px] text-muted-foreground">confidence</div>
@@ -690,13 +690,13 @@ export default function ThreatIntelFeed() {
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
             Active Campaigns
           </p>
-          <p className="text-2xl font-bold text-red-400">{simCampaigns.length}</p>
+          <p className="text-2xl font-bold text-[#f5f5f5]">{simCampaigns.length}</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
             Total IOCs (all feeds)
           </p>
-          <p className="text-2xl font-bold text-orange-400">
+          <p className="text-2xl font-bold text-[#c9b787]">
             {feedHealth.totalIocs.toLocaleString()}
           </p>
         </div>
@@ -704,7 +704,7 @@ export default function ThreatIntelFeed() {
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
             Active Feed Sources
           </p>
-          <p className="text-2xl font-bold text-cyan-400">
+          <p className="text-2xl font-bold text-[#8a8a8a]">
             {feedHealth.sources.filter((s) => s.status === 'active').length}/
             {feedHealth.sources.length}
           </p>
@@ -713,7 +713,7 @@ export default function ThreatIntelFeed() {
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
             NVD Critical CVEs
           </p>
-          <p className="text-2xl font-bold text-red-400">
+          <p className="text-2xl font-bold text-[#f5f5f5]">
             {cveLoading ? '—' : cves.filter((c: any) => c.severity === 'CRITICAL').length}
           </p>
         </div>
@@ -783,7 +783,7 @@ export default function ThreatIntelFeed() {
               icon={Database}
               headline="No CVE data available"
               description="CVE data from the NVD feed will appear here. Check your feed connection or try refreshing."
-              accentColor="#6366f1"
+              accentColor="#8a8a8a"
             />
           ) : (
             cves.map((cve: any) => (
@@ -809,7 +809,7 @@ export default function ThreatIntelFeed() {
                         </span>
                       )}
                       {cve.cisaExploited && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-500/10 text-red-400 border border-red-500/20">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#f5f5f5]/10 text-[#f5f5f5] border border-[#f5f5f5]/20">
                           CISA Exploited
                         </span>
                       )}
@@ -879,20 +879,20 @@ export default function ThreatIntelFeed() {
               icon={Shield}
               headline="No KEV entries available"
               description="CISA Known Exploited Vulnerabilities will appear here. Check your feed connection or try refreshing."
-              accentColor="#6366f1"
+              accentColor="#8a8a8a"
             />
           ) : (
             kevVulns.map((v: any) => (
               <div
                 key={v.cveID}
-                className="bg-card border border-border rounded-xl p-4 hover:border-orange-500/20 transition-all"
+                className="bg-card border border-border rounded-xl p-4 hover:border-[#c9b787]/20 transition-all"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <span className="font-mono text-xs text-orange-400">{v.cveID}</span>
+                      <span className="font-mono text-xs text-[#c9b787]">{v.cveID}</span>
                       {v.knownRansomwareCampaignUse === 'Known' && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-500/10 text-red-400 border border-red-500/20">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#f5f5f5]/10 text-[#f5f5f5] border border-[#f5f5f5]/20">
                           Ransomware
                         </span>
                       )}
@@ -936,7 +936,7 @@ export default function ThreatIntelFeed() {
                     href={`https://nvd.nist.gov/vuln/detail/${v.cveID}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-orange-400 transition-colors shrink-0"
+                    className="text-muted-foreground hover:text-[#c9b787] transition-colors shrink-0"
                   >
                     <ExternalLink className="w-4 h-4" />
                   </a>
@@ -958,7 +958,7 @@ export default function ThreatIntelFeed() {
               icon={Rss}
               headline="No threat news available"
               description="Curated threat intelligence news will appear here when the news feed is connected."
-              accentColor="#6366f1"
+              accentColor="#8a8a8a"
             />
           ) : (
             newsItems.map((item: any) => (
@@ -1046,7 +1046,7 @@ export default function ThreatIntelFeed() {
               icon={Globe}
               headline="No CERT advisories available"
               description="Government CERT advisories from CISA, NCSC, BSI, and ACSC will appear here when feeds are connected."
-              accentColor="#6366f1"
+              accentColor="#8a8a8a"
             />
           ) : (
             certFeeds
@@ -1057,7 +1057,7 @@ export default function ThreatIntelFeed() {
                     <div
                       className={cn(
                         'w-2 h-2 rounded-full',
-                        feed.liveData ? 'bg-emerald-400 animate-pulse' : 'bg-red-400',
+                        feed.liveData ? 'bg-[#c9b787] animate-pulse' : 'bg-[#f5f5f5]',
                       )}
                     />
                     <h3 className="text-sm font-semibold text-foreground">{feed.feedName}</h3>

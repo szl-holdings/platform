@@ -167,22 +167,22 @@ const EVENTS: RotationEvent[] = [
 ];
 
 const triggerColor: Record<string, string> = {
-  scheduled: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
-  'threat-triggered': 'text-red-400 bg-red-500/10 border-red-500/30',
+  scheduled: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  'threat-triggered': 'text-[#f5f5f5] bg-[#f5f5f5]/10 border-[#f5f5f5]/30',
   manual: 'text-zinc-400 bg-zinc-500/10 border-zinc-500/30',
 };
 
 const resultColor: Record<string, string> = {
-  success: 'text-emerald-400',
-  partial: 'text-amber-400',
-  failed: 'text-red-400',
+  success: 'text-[#c9b787]',
+  partial: 'text-[#c9b787]',
+  failed: 'text-[#f5f5f5]',
 };
 
 const statusConfig: Record<string, string> = {
-  active: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
+  active: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
   standby: 'text-zinc-400 bg-zinc-500/10 border-zinc-500/30',
-  executing: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
-  scheduled: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
+  executing: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
+  scheduled: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/30',
 };
 
 export default function MTDEngine() {
@@ -204,7 +204,7 @@ export default function MTDEngine() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Shuffle className="w-5 h-5 text-blue-400" />
+            <Shuffle className="w-5 h-5 text-[#c9b787]" />
             <h1 className="text-lg font-semibold text-white">Moving Target Defense Engine</h1>
           </div>
           <p className="text-xs text-zinc-500">
@@ -218,8 +218,8 @@ export default function MTDEngine() {
           className={cn(
             'flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors',
             emergencyMode
-              ? 'bg-red-500/20 border-red-500/40 text-red-400'
-              : 'bg-orange-500/15 border-orange-500/30 text-orange-400 hover:bg-orange-500/25',
+              ? 'bg-[#f5f5f5]/20 border-[#f5f5f5]/40 text-[#f5f5f5]'
+              : 'bg-[#c9b787]/15 border-[#c9b787]/30 text-[#c9b787] hover:bg-[#c9b787]/25',
           )}
         >
           {activating ? (
@@ -239,20 +239,20 @@ export default function MTDEngine() {
       </div>
 
       {/* Threat Level Bar */}
-      <div className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-4">
+      <div className="rounded-xl border border-[#c9b787]/20 bg-[#c9b787]/5 p-4">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-orange-400" />
+            <AlertTriangle className="w-4 h-4 text-[#c9b787]" />
             <span className="text-sm font-medium text-white">Current Threat Level</span>
           </div>
-          <span className="text-sm font-bold text-orange-400">{THREAT_LEVEL}/100 — ELEVATED</span>
+          <span className="text-sm font-bold text-[#c9b787]">{THREAT_LEVEL}/100 — ELEVATED</span>
         </div>
         <div className="h-2 rounded-full bg-white/8">
           <div
             className="h-full rounded-full transition-all"
             style={{
               width: `${THREAT_LEVEL}%`,
-              background: 'linear-gradient(90deg, #10b981, #f97316, #ef4444)',
+              background: 'linear-gradient(90deg, #c9b787, #c9b787, #f5f5f5)',
             }}
           />
         </div>
@@ -269,28 +269,28 @@ export default function MTDEngine() {
             label: 'Active Policies',
             value: POLICIES.filter((p) => p.status === 'active').length,
             sub: `${POLICIES.length} total configured`,
-            color: '#3b82f6',
+            color: '#c9b787',
             icon: Shield,
           },
           {
             label: 'Rotations Today',
             value: rotationsToday,
             sub: 'attack surface changes',
-            color: '#10b981',
+            color: '#c9b787',
             icon: Shuffle,
           },
           {
             label: 'Surface Entropy',
             value: '94.2%',
             sub: 'unpredictability score',
-            color: '#8b5cf6',
+            color: '#8a8a8a',
             icon: TrendingDown,
           },
           {
             label: 'Attack Surface',
             value: '-67%',
             sub: 'vs static baseline',
-            color: '#ef4444',
+            color: '#f5f5f5',
             icon: Network,
           },
         ].map((m) => {
@@ -321,7 +321,7 @@ export default function MTDEngine() {
                 className={cn(
                   'rounded-xl border p-3',
                   policy.status === 'executing'
-                    ? 'border-amber-500/30 bg-amber-500/5'
+                    ? 'border-[#c9b787]/30 bg-[#c9b787]/5'
                     : 'border-white/8 bg-white/3',
                 )}
               >
@@ -343,11 +343,11 @@ export default function MTDEngine() {
                 <div className="flex items-center gap-4 text-[10px] text-zinc-500">
                   <span>Every {policy.interval}</span>
                   <span>{policy.rotationsToday} today</span>
-                  <span className="text-emerald-400">{policy.successRate}% success</span>
+                  <span className="text-[#c9b787]">{policy.successRate}% success</span>
                 </div>
                 <div className="flex items-center justify-between mt-1.5 text-[10px]">
                   <span className="text-zinc-500">Last: {policy.lastRotation}</span>
-                  <span className="text-blue-400">Next: {policy.nextRotation}</span>
+                  <span className="text-[#c9b787]">Next: {policy.nextRotation}</span>
                 </div>
               </div>
             ))}
@@ -396,8 +396,8 @@ export default function MTDEngine() {
           </div>
 
           {/* MTD Config Panel */}
-          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 mt-4">
-            <div className="text-xs font-semibold text-blue-300 mb-3">
+          <div className="rounded-xl border border-[#c9b787]/20 bg-[#c9b787]/5 p-4 mt-4">
+            <div className="text-xs font-semibold text-[#c9b787] mb-3">
               Auto-Trigger Configuration
             </div>
             <div className="space-y-2">
@@ -418,7 +418,7 @@ export default function MTDEngine() {
               ].map((rule) => (
                 <div key={rule.label} className="flex items-center justify-between text-[11px]">
                   <span className="text-zinc-400">{rule.label}</span>
-                  <span className={rule.active ? 'text-emerald-400' : 'text-zinc-500'}>
+                  <span className={rule.active ? 'text-[#c9b787]' : 'text-zinc-500'}>
                     {rule.value}
                   </span>
                 </div>

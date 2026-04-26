@@ -84,16 +84,16 @@ export default function MeshDrift() {
           </div>
           <div className="sentra-panel px-4 py-2 text-center">
             <div className="text-[10px] text-slate-500 font-mono uppercase">Unapproved</div>
-            <div className="text-2xl font-display font-bold text-red-400">{unapproved.length}</div>
+            <div className="text-2xl font-display font-bold text-[#f5f5f5]">{unapproved.length}</div>
           </div>
         </div>
       </header>
 
       {unapproved.length > 0 && (
-        <div className="p-4 rounded border border-red-500/30 bg-red-500/5 flex items-start gap-3">
-          <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
+        <div className="p-4 rounded border border-[#f5f5f5]/30 bg-[#f5f5f5]/5 flex items-start gap-3">
+          <AlertTriangle className="w-4 h-4 text-[#f5f5f5] mt-0.5 shrink-0" />
           <div>
-            <div className="text-xs font-bold text-red-300">
+            <div className="text-xs font-bold text-[#f5f5f5]">
               {unapproved.length} config change{unapproved.length > 1 ? 's' : ''} made without
               Guardian policy approval
             </div>
@@ -122,8 +122,8 @@ export default function MeshDrift() {
                         snap.rolledBackBy
                           ? 'bg-slate-500/10 border-slate-500/30'
                           : !snap.policyApproved
-                            ? 'bg-red-500/10 border-red-500/20'
-                            : 'bg-emerald-500/10 border-emerald-500/20',
+                            ? 'bg-[#f5f5f5]/10 border-[#f5f5f5]/20'
+                            : 'bg-[#c9b787]/10 border-[#c9b787]/20',
                       )}
                     >
                       <GitBranch
@@ -132,8 +132,8 @@ export default function MeshDrift() {
                           snap.rolledBackBy
                             ? 'text-slate-400'
                             : !snap.policyApproved
-                              ? 'text-red-400'
-                              : 'text-emerald-400',
+                              ? 'text-[#f5f5f5]'
+                              : 'text-[#c9b787]',
                         )}
                       />
                     </div>
@@ -147,16 +147,16 @@ export default function MeshDrift() {
                             ROLLED BACK
                           </span>
                         ) : !snap.policyApproved ? (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold border text-red-400 border-red-500/30 bg-red-500/10">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold border text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10">
                             UNAPPROVED
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold border text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold border text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10">
                             APPROVED
                           </span>
                         )}
                         {linked.length > 0 && (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-mono border text-amber-400 border-amber-500/30 bg-amber-500/10">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono border text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10">
                             {linked.length} Linked Exposure{linked.length > 1 ? 's' : ''}
                           </span>
                         )}
@@ -188,13 +188,13 @@ export default function MeshDrift() {
                     </div>
                     <div className="rounded bg-slate-950 border border-slate-800 p-4 font-mono text-xs space-y-1 overflow-x-auto">
                       {snap.diff.removed.map((line, i) => (
-                        <div key={`rm-${i}`} className="text-red-400/80 flex gap-3">
+                        <div key={`rm-${i}`} className="text-[#f5f5f5]/80 flex gap-3">
                           <span className="text-slate-600 select-none">-</span>
                           <span>{line}</span>
                         </div>
                       ))}
                       {snap.diff.added.map((line, i) => (
-                        <div key={`add-${i}`} className="text-emerald-400/80 flex gap-3">
+                        <div key={`add-${i}`} className="text-[#c9b787]/80 flex gap-3">
                           <span className="text-slate-600 select-none">+</span>
                           <span>{line}</span>
                         </div>
@@ -214,7 +214,7 @@ export default function MeshDrift() {
                             exp && (
                               <div
                                 key={exp.id}
-                                className="p-3 rounded bg-red-500/5 border border-red-500/20 flex items-center justify-between"
+                                className="p-3 rounded bg-[#f5f5f5]/5 border border-[#f5f5f5]/20 flex items-center justify-between"
                               >
                                 <div>
                                   <div className="text-xs font-bold text-slate-200">
@@ -224,7 +224,7 @@ export default function MeshDrift() {
                                     {exp.owaspRef}
                                   </div>
                                 </div>
-                                <span className="text-[10px] px-2 py-0.5 rounded border text-red-400 border-red-500/30 bg-red-500/10 font-mono font-bold uppercase">
+                                <span className="text-[10px] px-2 py-0.5 rounded border text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10 font-mono font-bold uppercase">
                                   {exp.severity}
                                 </span>
                               </div>
@@ -237,13 +237,13 @@ export default function MeshDrift() {
                   {!snap.policyApproved && !snap.rolledBackBy && (
                     <div className="flex items-center justify-between pt-3 border-t border-slate-800">
                       <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                        <Shield className="w-3 h-3 text-amber-400" />
+                        <Shield className="w-3 h-3 text-[#c9b787]" />
                         This change bypassed the Guardian approval gate
                         {approveError && inFlightId === null && (
-                          <span className="ml-3 text-red-400">{approveError}</span>
+                          <span className="ml-3 text-[#f5f5f5]">{approveError}</span>
                         )}
                         {rollbackError && inFlightId === null && (
-                          <span className="ml-3 text-red-400">{rollbackError}</span>
+                          <span className="ml-3 text-[#f5f5f5]">{rollbackError}</span>
                         )}
                       </div>
                       <div className="flex gap-2">
@@ -265,7 +265,7 @@ export default function MeshDrift() {
                             e.stopPropagation();
                             void handleApprove(snap.id);
                           }}
-                          className="px-3 py-1.5 rounded bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-[11px] text-amber-400 font-bold transition-colors disabled:opacity-50 inline-flex items-center gap-1.5"
+                          className="px-3 py-1.5 rounded bg-[#c9b787]/20 hover:bg-[#c9b787]/30 border border-[#c9b787]/30 text-[11px] text-[#c9b787] font-bold transition-colors disabled:opacity-50 inline-flex items-center gap-1.5"
                           disabled={inFlightId !== null}
                         >
                           {approvingId === snap.id && <Loader2 className="w-3 h-3 animate-spin" />}
@@ -286,7 +286,7 @@ export default function MeshDrift() {
                   )}
 
                   {snap.policyApproved && !snap.rolledBackBy && (
-                    <div className="flex items-center gap-2 text-[11px] text-emerald-400">
+                    <div className="flex items-center gap-2 text-[11px] text-[#c9b787]">
                       <CheckCircle2 className="w-4 h-4" />
                       Approved by {snap.approvedBy} — proof recorded in Trust Provenance
                     </div>

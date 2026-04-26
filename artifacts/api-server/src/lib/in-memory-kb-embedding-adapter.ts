@@ -14,7 +14,7 @@ export const kbEmbeddingAdapter = new InMemoryEmbeddingAdapter(
       chunkId: 'kb-getting-started-lyte',
       sourceId: 'kb/getting-started-lyte',
       content:
-        'Getting started with KORA Decision Intelligence. Lyte connects to existing approval queues task systems workflow tools. First integration signal configuration. Operational signals data source onboarding.',
+        'Getting started with Lyte Decision Intelligence. Lyte connects to existing approval queues task systems workflow tools. First integration signal configuration. Operational signals data source onboarding.',
       metadata: { title: 'Getting started with Decision Intelligence', category: 'Getting Started' },
     },
     {
@@ -77,8 +77,8 @@ export const kbEmbeddingAdapter = new InMemoryEmbeddingAdapter(
       chunkId: 'kb-paragon-defense',
       sourceId: 'kb/paragon-defense',
       content:
-        'PARAGON defense and intelligence command. Threat intelligence fusion. Anomaly detection. Real-time threat monitoring. Security incident response. Classification confidential restricted.',
-      metadata: { title: 'PARAGON Defense Intelligence', category: 'Defense' },
+        'Aegis defense and intelligence command. Threat intelligence fusion. Anomaly detection. Real-time threat monitoring. Security incident response. Classification confidential restricted.',
+      metadata: { title: 'Aegis Defense Intelligence', category: 'Defense' },
     },
   ],
   'szl-kb-tfidf-v1',

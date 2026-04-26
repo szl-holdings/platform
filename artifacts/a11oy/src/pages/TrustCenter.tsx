@@ -31,11 +31,11 @@ const SECTION_LABELS: Record<string, string> = {
 };
 
 const STATUS_STYLE: Record<string, { color: string; bg: string; label: string }> = {
-  enforced: { color: '#10b981', bg: 'rgba(16,185,129,0.08)', label: 'ENFORCED' },
-  active: { color: '#3b82f6', bg: 'rgba(59,130,246,0.08)', label: 'ACTIVE' },
-  demo: { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', label: 'DEMO' },
-  roadmap: { color: '#9bacc4', bg: 'rgba(155,172,196,0.08)', label: 'ROADMAP' },
-  demo_operational: { color: '#10b981', bg: 'rgba(16,185,129,0.08)', label: 'DEMO OPERATIONAL' },
+  enforced: { color: '#c9b787', bg: 'rgba(201,183,135,0.08)', label: 'ENFORCED' },
+  active: { color: '#c9b787', bg: 'rgba(201,183,135,0.08)', label: 'ACTIVE' },
+  demo: { color: '#c9b787', bg: 'rgba(201,183,135,0.08)', label: 'DEMO' },
+  roadmap: { color: '#5e5e5e', bg: 'rgba(155,172,196,0.08)', label: 'ROADMAP' },
+  demo_operational: { color: '#c9b787', bg: 'rgba(201,183,135,0.08)', label: 'DEMO OPERATIONAL' },
 };
 
 export function TrustCenter() {
@@ -74,8 +74,8 @@ export function TrustCenter() {
         <>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
             {securityItems.map(item => (
-              <div key={item.label} className="p-3 rounded-lg border text-center" style={{ backgroundColor: item.pass ? 'rgba(16,185,129,0.04)' : 'rgba(239,68,68,0.04)', borderColor: item.pass ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)' }}>
-                <div className="text-lg mb-1" style={{ color: item.pass ? '#10b981' : '#ef4444' }}>{item.pass ? '✓' : '✗'}</div>
+              <div key={item.label} className="p-3 rounded-lg border text-center" style={{ backgroundColor: item.pass ? 'rgba(201,183,135,0.04)' : 'rgba(245,245,245,0.04)', borderColor: item.pass ? 'rgba(201,183,135,0.2)' : 'rgba(245,245,245,0.2)' }}>
+                <div className="text-lg mb-1" style={{ color: item.pass ? '#c9b787' : '#f5f5f5' }}>{item.pass ? '✓' : '✗'}</div>
                 <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{item.label}</div>
               </div>
             ))}
@@ -116,7 +116,7 @@ export function TrustCenter() {
                         <div className="space-y-1.5">
                           {section.milestones.map((m, i) => (
                             <div key={i} className="flex items-start gap-2 text-xs">
-                              <span style={{ color: '#9bacc4', flexShrink: 0 }}>→</span>
+                              <span style={{ color: '#5e5e5e', flexShrink: 0 }}>→</span>
                               <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{m}</span>
                             </div>
                           ))}
@@ -144,7 +144,7 @@ export function TrustCenter() {
                 <div className="space-y-1.5">
                   {col.items.map(item => (
                     <div key={item} className="flex items-start gap-2 text-xs">
-                      <span style={{ color: col.status === 'LIVE' ? '#10b981' : col.status === 'DEMO' ? '#f59e0b' : '#9bacc4', flexShrink: 0 }}>
+                      <span style={{ color: col.status === 'LIVE' ? '#c9b787' : col.status === 'DEMO' ? '#c9b787' : '#5e5e5e', flexShrink: 0 }}>
                         {col.status === 'LIVE' ? '✓' : col.status === 'DEMO' ? '◎' : '→'}
                       </span>
                       <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{item}</span>
@@ -159,7 +159,7 @@ export function TrustCenter() {
         <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Trust posture unavailable.</div>
       )}
 
-      <div className="p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
+      <div className="p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
         <DemoBadge /> All trust claims are explicitly labeled. Demo mode boundaries are enforced. No real data is processed.
       </div>
     </Layout>

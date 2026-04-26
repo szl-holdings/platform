@@ -80,12 +80,12 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
 });
 
-const SENTRA_BRAND_ACCENT = '#ef4444';
+const SENTRA_BRAND_ACCENT = '#f5f5f5';
 
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[200px]">
-      <div className="w-6 h-6 border-2 border-red-500/40 border-t-red-400 rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-[#f5f5f5]/40 border-t-red-400 rounded-full animate-spin" />
     </div>
   );
 }
@@ -265,12 +265,12 @@ function SentraSidebarContent({
             className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
             style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.12)' }}
           >
-            <Shield className="w-4 h-4 text-red-400" />
+            <Shield className="w-4 h-4 text-[#f5f5f5]" />
           </div>
           {expanded && (
             <div className="flex-1 min-w-0">
-              <h1 className="text-sm font-semibold text-red-50 truncate tracking-tight">TENAX</h1>
-              <p className="text-[10px] truncate font-mono uppercase tracking-wider text-red-400/40">
+              <h1 className="text-sm font-semibold text-[#f5f5f5] truncate tracking-tight">Aegis</h1>
+              <p className="text-[10px] truncate font-mono uppercase tracking-wider text-[#f5f5f5]/40">
                 Cyber Resilience
               </p>
             </div>
@@ -287,30 +287,30 @@ function SentraSidebarContent({
                 border: '1px solid rgba(239,68,68,0.08)',
               }}
             >
-              <div className="text-[9px] uppercase tracking-widest font-medium mb-2 text-red-400/50">
+              <div className="text-[9px] uppercase tracking-widest font-medium mb-2 text-[#f5f5f5]/50">
                 Posture Status
               </div>
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] text-white/35">Recovery posture</span>
-                  <span className="text-[9px] font-mono text-red-400">42% critical</span>
+                  <span className="text-[9px] font-mono text-[#f5f5f5]">42% critical</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] text-white/35">Active incidents</span>
                   <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-                    <span className="text-[9px] font-mono text-red-400">1 open</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#f5f5f5] animate-pulse" />
+                    <span className="text-[9px] font-mono text-[#f5f5f5]">1 open</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] text-white/35">Control drift</span>
-                  <span className="text-[9px] font-mono text-amber-400">3 gaps</span>
+                  <span className="text-[9px] font-mono text-[#c9b787]">3 gaps</span>
                 </div>
               </div>
             </div>
             <button
               onClick={onToggleCollapse}
-              className="flex items-center justify-center w-full py-1 text-[10px] rounded transition-colors hover:bg-white/5 text-red-400/40"
+              className="flex items-center justify-center w-full py-1 text-[10px] rounded transition-colors hover:bg-white/5 text-[#f5f5f5]/40"
               aria-label="Collapse sidebar"
             >
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -327,7 +327,7 @@ function SentraSidebarContent({
         ) : (
           <button
             onClick={onToggleCollapse}
-            className="flex items-center justify-center w-7 h-7 mx-auto rounded transition-colors hover:bg-white/5 text-red-400/40"
+            className="flex items-center justify-center w-7 h-7 mx-auto rounded transition-colors hover:bg-white/5 text-[#f5f5f5]/40"
             aria-label="Expand sidebar"
           >
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -377,7 +377,7 @@ function DashboardRouter() {
         <Route path="/" component={SentraLandingPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
-            <p className="text-red-400/40">Page not found</p>
+            <p className="text-[#f5f5f5]/40">Page not found</p>
           </div>
         </Route>
       </Switch>
@@ -494,7 +494,7 @@ function AppShell({
     {
       id: 'u1',
       headline: 'CVE-2024-21412: Critical NTLM bypass — 3 assets exposed',
-      surface: 'TENAX',
+      surface: 'Aegis',
       severity: 'critical',
       timestamp: new Date(Date.now() - 12 * 60000).toISOString(),
       href: '/threats',
@@ -502,7 +502,7 @@ function AppShell({
     {
       id: 'u2',
       headline: 'Control drift detected — MFA policy deviation on 4 endpoints',
-      surface: 'TENAX',
+      surface: 'Aegis',
       severity: 'warning',
       timestamp: new Date(Date.now() - 38 * 60000).toISOString(),
       href: '/controls',
@@ -510,7 +510,7 @@ function AppShell({
     {
       id: 'u3',
       headline: 'Resilience score improved: 73 → 81 after patch cycle',
-      surface: 'TENAX',
+      surface: 'Aegis',
       severity: 'info',
       timestamp: new Date(Date.now() - 2 * 3600000).toISOString(),
       href: '/dashboard',
@@ -518,7 +518,7 @@ function AppShell({
     {
       id: 'u4',
       headline: 'Incident IC-2409 escalated to P1 — awaiting CISO approval',
-      surface: 'TENAX',
+      surface: 'Aegis',
       severity: 'critical',
       timestamp: new Date(Date.now() - 55 * 60000).toISOString(),
       href: '/incident',
@@ -559,7 +559,7 @@ function AppShell({
     {
       id: 'cl1',
       surface: 'Counsel',
-      surfaceAccent: '#8b5cf6',
+      surfaceAccent: '#8a8a8a',
       label: 'Active legal matter: data breach disclosure',
       description:
         'Counsel has a linked data-breach matter with a 72h regulatory disclosure deadline.',
@@ -569,17 +569,17 @@ function AppShell({
     {
       id: 'cl2',
       surface: 'Lyte',
-      surfaceAccent: '#0ea5e9',
+      surfaceAccent: '#8a8a8a',
       label: '3 pending decisions in Decision Center',
       description:
-        "Lyte's Decision Center has 3 TENAX-sourced recommendations queued for approval.",
+        "Lyte's Decision Center has 3 Aegis-sourced recommendations queued for approval.",
       href: '/lyte/decision-center',
       preservedContext: { surface: 'sentra' },
     },
     {
       id: 'cl3',
       surface: 'Vessels',
-      surfaceAccent: '#0ea5e9',
+      surfaceAccent: '#8a8a8a',
       label: 'Fleet asset under active threat — MV Atlantic Falcon',
       description:
         "Vessels flagged MV Atlantic Falcon's onboard systems for a related CVE exposure.",
@@ -601,7 +601,7 @@ function AppShell({
       <>
         <EcosystemNav
           currentAppId="sentra"
-          currentAppName="TENAX Cyber Resilience"
+          currentAppName="Aegis Cyber Resilience"
           accentColor={accent}
         />
         <Suspense fallback={<div style={{ height: '100vh', background: '#0a0606' }} />}>
@@ -616,7 +616,7 @@ function AppShell({
     <div className="flex flex-col h-screen" style={{ background: '#060e1a' }}>
       <EcosystemNav
         currentAppId="sentra"
-        currentAppName="TENAX Cyber Resilience"
+        currentAppName="Aegis Cyber Resilience"
         accentColor={accent}
       />
       <SharedDashboardShell
@@ -640,13 +640,13 @@ function AppShell({
           <div className="flex items-center gap-3 w-full md:hidden">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1.5 rounded transition-colors text-red-400/50"
+              className="p-1.5 rounded transition-colors text-[#f5f5f5]/50"
               aria-label="Toggle navigation"
             >
               <Menu className="w-4 h-4" />
             </button>
-            <span className="text-[10px] font-mono uppercase tracking-wider text-red-400/80">
-              TENAX Cyber Resilience
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#f5f5f5]/80">
+              Aegis Cyber Resilience
             </span>
           </div>
         }
@@ -659,16 +659,16 @@ function AppShell({
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
         commands={paletteCommands}
-        appName="TENAX"
+        appName="Aegis"
         accentColor={accent}
-        placeholder="Search TENAX — pages, entities, actions..."
+        placeholder="Search Aegis — pages, entities, actions..."
       />
       <SentientLayer
         open={sentientOpen}
         onClose={sentientHide}
         onOpen={sentientShow}
         surfaceId="sentra"
-        surfaceName="TENAX Cyber Resilience"
+        surfaceName="Aegis Cyber Resilience"
         accentColor={accent}
         updates={sentientUpdates}
         actions={sentientActions}

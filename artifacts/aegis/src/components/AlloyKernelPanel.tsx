@@ -8,11 +8,11 @@ export function AlloyKernelPanel() {
   const example = kernel.codex.examples[0];
 
   return (
-    <div className="rounded-xl border border-red-500/15 bg-slate-900/60 p-5 mt-6">
+    <div className="rounded-xl border border-[#f5f5f5]/15 bg-slate-900/60 p-5 mt-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-            <Brain className="w-4 h-4 text-red-400" />
+          <div className="w-8 h-8 rounded-lg bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 flex items-center justify-center">
+            <Brain className="w-4 h-4 text-[#f5f5f5]" />
           </div>
           <div>
             <div className="text-sm font-bold text-white">Intelligence Research Engine</div>
@@ -21,7 +21,7 @@ export function AlloyKernelPanel() {
             </div>
           </div>
         </div>
-        <span className="px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-[10px] text-red-400 font-mono uppercase tracking-wider">
+        <span className="px-2 py-0.5 rounded-full bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 text-[10px] text-[#f5f5f5] font-mono uppercase tracking-wider">
           {kernel.pattern}
         </span>
       </div>
@@ -56,7 +56,7 @@ export function AlloyKernelPanel() {
         {example && (
           <button
             onClick={() => setShowExample((v) => !v)}
-            className="flex items-center gap-1 text-[10px] text-red-400 hover:text-red-300 transition-colors font-mono"
+            className="flex items-center gap-1 text-[10px] text-[#f5f5f5] hover:text-[#f5f5f5] transition-colors font-mono"
           >
             <BookOpen className="w-3 h-3" />
             {showExample ? 'Hide' : 'View'} example
@@ -65,7 +65,7 @@ export function AlloyKernelPanel() {
       </div>
 
       {showExample && example && (
-        <div className="mt-3 rounded-lg bg-slate-950/80 border border-red-500/10 p-3">
+        <div className="mt-3 rounded-lg bg-slate-950/80 border border-[#f5f5f5]/10 p-3">
           <div className="text-[10px] text-slate-500 font-mono uppercase tracking-wider mb-2">
             Example: {example.description}
           </div>

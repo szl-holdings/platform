@@ -9,10 +9,10 @@ const base = stripTrailingSlash((import.meta.env.BASE_URL ?? '/a11oy/').replace(
 
 function Loader() {
   return (
-    <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--color-a11oy-navy)' }}>
+    <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: '#0a0a0a' }}>
       <div
         className="w-6 h-6 border-2 rounded-full animate-spin"
-        style={{ borderColor: 'rgba(59,130,246,0.2)', borderTopColor: '#3b82f6' }}
+        style={{ borderColor: 'rgba(255,255,255,0.08)', borderTopColor: '#c9b787' }}
       />
     </div>
   );
@@ -49,6 +49,13 @@ const Tools = lazy(() => import('./pages/Tools').then(m => ({ default: m.Tools }
 const Pce = lazy(() => import('./pages/Pce').then(m => ({ default: m.Pce })));
 const Demo = lazy(() => import('./pages/Demo').then(m => ({ default: m.Demo })));
 const About = lazy(() => import('./pages/About').then(m => ({ default: m.About })));
+const Recommendations = lazy(() => import('./pages/Recommendations').then(m => ({ default: m.Recommendations })));
+const ExecutiveBrief = lazy(() => import('./pages/ExecutiveBrief').then(m => ({ default: m.ExecutiveBrief })));
+const AgentOrchestration = lazy(() => import('./pages/AgentOrchestration').then(m => ({ default: m.AgentOrchestration })));
+const AgentViz = lazy(() => import('./pages/AgentViz').then(m => ({ default: m.AgentViz })));
+const DevPlatform = lazy(() => import('./pages/DevPlatform').then(m => ({ default: m.DevPlatform })));
+const A11oyCode = lazy(() => import('./pages/A11oyCode').then(m => ({ default: m.A11oyCode })));
+const AgentMesh = lazy(() => import('./pages/AgentMesh').then(m => ({ default: m.AgentMesh })));
 
 export default function App() {
   return (
@@ -57,6 +64,8 @@ export default function App() {
         <Route path={`${base}/`} component={HomePage} />
         <Route path={`${base}`} component={HomePage} />
         <Route path={`${base}/now`} component={NowBoard} />
+        <Route path={`${base}/recommendations`} component={Recommendations} />
+        <Route path={`${base}/brief`} component={ExecutiveBrief} />
         <Route path={`${base}/command`} component={CommandSurface} />
         <Route path={`${base}/signals`} component={SignalMesh} />
         <Route path={`${base}/actions`} component={ActionRail} />
@@ -85,13 +94,18 @@ export default function App() {
         <Route path={`${base}/tools`} component={Tools} />
         <Route path={`${base}/pce`} component={Pce} />
         <Route path={`${base}/demo`} component={Demo} />
+        <Route path={`${base}/orchestration`} component={AgentOrchestration} />
+        <Route path={`${base}/agent-viz`} component={AgentViz} />
+        <Route path={`${base}/sdk`} component={DevPlatform} />
+        <Route path={`${base}/a11oy-code`} component={A11oyCode} />
+        <Route path={`${base}/agent-mesh`} component={AgentMesh} />
         <Route path={`${base}/about`} component={About} />
         <Route>
           <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--color-a11oy-navy)', color: 'var(--color-a11oy-text)' }}>
             <div className="text-center">
               <div className="text-6xl font-display font-bold mb-4" style={{ color: 'var(--color-a11oy-border)' }}>404</div>
               <div className="text-sm" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Page not found</div>
-              <a href={`${base}/`} className="mt-4 inline-block text-sm" style={{ color: '#3b82f6' }}>← Back to A11oy</a>
+              <a href={`${base}/`} className="mt-4 inline-block text-sm" style={{ color: '#c9b787' }}>← Back to A11oy</a>
             </div>
           </div>
         </Route>

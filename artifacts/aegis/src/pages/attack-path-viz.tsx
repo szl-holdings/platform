@@ -193,12 +193,12 @@ const NODE_ICONS: Record<string, React.ElementType> = {
 };
 
 const NODE_COLORS: Record<string, string> = {
-  internet: '#ef4444',
-  perimeter: '#3b82f6',
-  workstation: '#f97316',
-  server: '#8b5cf6',
-  dc: '#ec4899',
-  crown: '#fbbf24',
+  internet: '#f5f5f5',
+  perimeter: '#c9b787',
+  workstation: '#c9b787',
+  server: '#8a8a8a',
+  dc: '#c9b787',
+  crown: '#c9b787',
 };
 
 function GraphNode({
@@ -227,7 +227,7 @@ function GraphNode({
         cy={node.y}
         r={22}
         fill={selected ? `${color}25` : `${color}12`}
-        stroke={isBlocked ? '#22c55e' : isCompromised ? color : 'rgba(255,255,255,0.12)'}
+        stroke={isBlocked ? '#c9b787' : isCompromised ? color : 'rgba(255,255,255,0.12)'}
         strokeWidth={selected ? 2 : 1.5}
       />
       {/* Compromise indicator */}
@@ -236,7 +236,7 @@ function GraphNode({
           cx={node.x + 14}
           cy={node.y - 14}
           r={5}
-          fill="#ef4444"
+          fill="#f5f5f5"
           stroke="#080B12"
           strokeWidth={1.5}
         />
@@ -246,7 +246,7 @@ function GraphNode({
           cx={node.x + 14}
           cy={node.y - 14}
           r={5}
-          fill="#22c55e"
+          fill="#c9b787"
           stroke="#080B12"
           strokeWidth={1.5}
         />
@@ -274,7 +274,7 @@ function GraphEdge({ edge, nodes }: { edge: PathEdge; nodes: PathNode[] }) {
   const to = nodes.find((n) => n.id === edge.to)!;
   const mx = (from.x + to.x) / 2;
   const my = (from.y + to.y) / 2 - 18;
-  const color = edge.succeeded ? '#ef4444' : '#22c55e';
+  const color = edge.succeeded ? '#f5f5f5' : '#c9b787';
 
   return (
     <g>
@@ -327,9 +327,9 @@ export default function AttackPathViz() {
           <div className="flex items-center gap-2 mb-1">
             <div
               className="w-7 h-7 rounded-md flex items-center justify-center"
-              style={{ background: 'rgba(234,179,8,0.15)' }}
+              style={{ background: 'rgba(138,138,138,0.15)' }}
             >
-              <Network className="w-4 h-4 text-amber-400" />
+              <Network className="w-4 h-4 text-[#c9b787]" />
             </div>
             <h1 className="text-lg font-bold tracking-tight">Attack Path Visualization</h1>
           </div>
@@ -345,9 +345,9 @@ export default function AttackPathViz() {
               onClick={() => setFilter(f)}
               className="px-3 py-1.5 rounded-lg text-[10px] font-medium transition-all capitalize"
               style={{
-                background: filter === f ? 'rgba(234,179,8,0.12)' : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${filter === f ? 'rgba(234,179,8,0.3)' : DS.border}`,
-                color: filter === f ? '#fbbf24' : DS.text.secondary,
+                background: filter === f ? 'rgba(138,138,138,0.12)' : 'rgba(255,255,255,0.04)',
+                border: `1px solid ${filter === f ? 'rgba(138,138,138,0.3)' : DS.border}`,
+                color: filter === f ? '#c9b787' : DS.text.secondary,
               }}
             >
               {f === 'all' ? 'All Paths' : f === 'compromised' ? '⚠ Compromised' : '✓ Blocked'}
@@ -362,25 +362,25 @@ export default function AttackPathViz() {
           {
             label: 'Total Remediation Cost',
             value: fmt(totalRemediateCost),
-            color: '#22c55e',
+            color: '#c9b787',
             sub: 'to close all attack paths',
           },
           {
             label: 'Breach Cost Exposure',
             value: fmt(totalBreachCost),
-            color: '#ef4444',
+            color: '#f5f5f5',
             sub: 'from compromised nodes',
           },
           {
             label: 'Nodes Compromised',
             value: `${compromisedCount}`,
-            color: '#ef4444',
+            color: '#f5f5f5',
             sub: 'across attack chain',
           },
           {
             label: 'Attack Paths Blocked',
             value: `${blockedCount}`,
-            color: '#22c55e',
+            color: '#c9b787',
             sub: 'defensive controls active',
           },
         ].map(({ label, value, color, sub }) => (
@@ -411,22 +411,22 @@ export default function AttackPathViz() {
           <div className="px-4 pt-4 pb-2">
             <div className="flex items-center gap-4 text-[10px]">
               <div className="flex items-center gap-1.5">
-                <span className="w-4 h-0.5 bg-red-400/70 inline-block rounded" />
+                <span className="w-4 h-0.5 bg-[#f5f5f5]/70 inline-block rounded" />
                 Attack path succeeded
               </div>
               <div className="flex items-center gap-1.5">
                 <span
-                  className="w-4 h-0.5 bg-emerald-400/40 inline-block rounded border-t border-dashed border-emerald-400/40"
-                  style={{ borderTop: '2px dashed #22c55e66' }}
+                  className="w-4 h-0.5 bg-[#c9b787]/40 inline-block rounded border-t border-dashed border-[#c9b787]/40"
+                  style={{ borderTop: '2px dashed #c9b78766' }}
                 />
                 Blocked attempt
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#f5f5f5] inline-block" />
                 Compromised
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#c9b787] inline-block" />
                 Blocked
               </div>
             </div>
@@ -483,7 +483,7 @@ export default function AttackPathViz() {
                 className="rounded-xl p-5"
                 style={{
                   background: DS.surface,
-                  border: `1px solid ${selected.blocked ? 'rgba(34,197,94,0.2)' : selected.compromised ? 'rgba(239,68,68,0.2)' : DS.border}`,
+                  border: `1px solid ${selected.blocked ? 'rgba(201,183,135,0.2)' : selected.compromised ? 'rgba(245,245,245,0.2)' : DS.border}`,
                 }}
               >
                 <div className="flex items-center gap-2 mb-3">
@@ -510,9 +510,9 @@ export default function AttackPathViz() {
                     <Badge
                       className="text-[9px] px-1.5 py-0"
                       style={{
-                        background: 'rgba(34,197,94,0.1)',
-                        color: '#22c55e',
-                        border: '1px solid rgba(34,197,94,0.2)',
+                        background: 'rgba(201,183,135,0.1)',
+                        color: '#c9b787',
+                        border: '1px solid rgba(201,183,135,0.2)',
                       }}
                     >
                       BLOCKED
@@ -521,9 +521,9 @@ export default function AttackPathViz() {
                     <Badge
                       className="text-[9px] px-1.5 py-0"
                       style={{
-                        background: 'rgba(239,68,68,0.1)',
-                        color: '#ef4444',
-                        border: '1px solid rgba(239,68,68,0.2)',
+                        background: 'rgba(245,245,245,0.1)',
+                        color: '#f5f5f5',
+                        border: '1px solid rgba(245,245,245,0.2)',
                       }}
                     >
                       COMPROMISED
@@ -532,9 +532,9 @@ export default function AttackPathViz() {
                     <Badge
                       className="text-[9px] px-1.5 py-0"
                       style={{
-                        background: 'rgba(34,197,94,0.1)',
-                        color: '#22c55e',
-                        border: '1px solid rgba(34,197,94,0.2)',
+                        background: 'rgba(201,183,135,0.1)',
+                        color: '#c9b787',
+                        border: '1px solid rgba(201,183,135,0.2)',
                       }}
                     >
                       SECURE
@@ -557,7 +557,7 @@ export default function AttackPathViz() {
                       <span className="text-[10px]" style={{ color: DS.text.muted }}>
                         Remediation cost
                       </span>
-                      <span className="text-sm font-mono font-bold text-emerald-400">
+                      <span className="text-sm font-mono font-bold text-[#c9b787]">
                         {fmt(selected.remediateCost)}
                       </span>
                     </div>
@@ -568,7 +568,7 @@ export default function AttackPathViz() {
                       <span className="text-[10px]" style={{ color: DS.text.muted }}>
                         Cost if breached
                       </span>
-                      <span className="text-sm font-mono font-bold text-red-400">
+                      <span className="text-sm font-mono font-bold text-[#f5f5f5]">
                         {fmt(selected.breachCost)}
                       </span>
                     </div>
@@ -579,7 +579,7 @@ export default function AttackPathViz() {
                       <span className="text-[10px]" style={{ color: DS.text.muted }}>
                         ROI on remediation
                       </span>
-                      <span className="text-sm font-mono font-bold text-amber-400">
+                      <span className="text-sm font-mono font-bold text-[#c9b787]">
                         {Math.round(selected.breachCost / selected.remediateCost)}x
                       </span>
                     </div>
@@ -604,7 +604,7 @@ export default function AttackPathViz() {
                       <span className="text-[9px] font-mono w-4" style={{ color: DS.text.muted }}>
                         {i + 1}
                       </span>
-                      <ChevronRight className="w-3 h-3 text-red-400/60 shrink-0" />
+                      <ChevronRight className="w-3 h-3 text-[#f5f5f5]/60 shrink-0" />
                       <span
                         className="text-[10px]"
                         style={{
@@ -646,7 +646,7 @@ export default function AttackPathViz() {
                 <span className="text-[10px]" style={{ color: DS.text.secondary }}>
                   Total remediate all hops
                 </span>
-                <span className="text-xs font-mono font-bold text-emerald-400">
+                <span className="text-xs font-mono font-bold text-[#c9b787]">
                   {fmt(totalRemediateCost)}
                 </span>
               </div>
@@ -654,7 +654,7 @@ export default function AttackPathViz() {
                 <span className="text-[10px]" style={{ color: DS.text.secondary }}>
                   Total breach exposure
                 </span>
-                <span className="text-xs font-mono font-bold text-red-400">
+                <span className="text-xs font-mono font-bold text-[#f5f5f5]">
                   {fmt(totalBreachCost)}
                 </span>
               </div>
@@ -663,7 +663,7 @@ export default function AttackPathViz() {
                 style={{ borderTop: `1px solid ${DS.border}` }}
               >
                 <span className="text-[10px] font-semibold">Security ROI</span>
-                <span className="text-sm font-mono font-bold text-amber-400">
+                <span className="text-sm font-mono font-bold text-[#c9b787]">
                   {Math.round(totalBreachCost / totalRemediateCost)}x
                 </span>
               </div>

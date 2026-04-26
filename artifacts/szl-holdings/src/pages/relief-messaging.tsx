@@ -64,9 +64,9 @@ const RELIEFS = [
     icon: Zap,
     symptom: "You've built observability for your systems. You still don't have observability for your decisions.",
     relief: "Stop guessing at what's working.",
-    body: "OUTCOME GRAPH tracks what actions were taken, what outcomes followed, and what the platform predicted versus what happened. LUMINA EVALS measures model and process quality continuously. You see the ROI — not inferred, but traced.",
+    body: "OUTCOME GRAPH tracks what actions were taken, what outcomes followed, and what the platform predicted versus what happened. Pulse EVALS measures model and process quality continuously. You see the ROI — not inferred, but traced.",
     color: "hsl(48,90%,52%)",
-    product: "OUTCOME GRAPH + LUMINA EVALS",
+    product: "OUTCOME GRAPH + Pulse EVALS",
     cta: "/roi",
   },
 ];

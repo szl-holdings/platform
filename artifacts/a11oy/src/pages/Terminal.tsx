@@ -224,32 +224,32 @@ export function Terminal() {
           >
             {/* Title bar */}
             <div className="flex items-center gap-2 px-4 py-2 border-b" style={{ backgroundColor: '#0a1020', borderColor: 'var(--color-a11oy-border)' }}>
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ef4444' }} />
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#f59e0b' }} />
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#10b981' }} />
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#f5f5f5' }} />
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#c9b787' }} />
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#c9b787' }} />
               <span className="text-xs font-mono ml-3" style={{ color: '#4d607a' }}>a11oy-terminal — DEMO</span>
             </div>
             {/* Output */}
             <div ref={termRef} className="p-4 overflow-y-auto font-mono text-xs" style={{ height: 480, whiteSpace: 'pre' }}>
               {lines.map((l, i) => (
-                <div key={i} style={{ color: l.kind === 'input' ? '#3b82f6' : l.kind === 'error' ? '#ef4444' : l.kind === 'system' ? '#4d607a' : '#9bacc4', lineHeight: '1.6' }}>
+                <div key={i} style={{ color: l.kind === 'input' ? '#c9b787' : l.kind === 'error' ? '#f5f5f5' : l.kind === 'system' ? '#4d607a' : '#5e5e5e', lineHeight: '1.6' }}>
                   {l.text}
                 </div>
               ))}
               {/* Input line */}
               <div className="flex items-center gap-1 mt-1">
-                <span style={{ color: '#3b82f6' }}>a11oy&gt;</span>
+                <span style={{ color: '#c9b787' }}>a11oy&gt;</span>
                 <input
                   ref={inputRef}
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   className="flex-1 bg-transparent outline-none font-mono text-xs"
-                  style={{ color: '#3b82f6', caretColor: '#3b82f6' }}
+                  style={{ color: '#c9b787', caretColor: '#c9b787' }}
                   spellCheck={false}
                   autoComplete="off"
                 />
-                <span className="animate-pulse" style={{ color: '#3b82f6' }}>█</span>
+                <span className="animate-pulse" style={{ color: '#c9b787' }}>█</span>
               </div>
             </div>
           </div>
@@ -285,7 +285,7 @@ export function Terminal() {
           </Card>
           <Card className="text-xs">
             <div className="font-mono mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>INSTALL CLI</div>
-            <div className="font-mono p-2 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)', color: '#10b981', border: '1px solid var(--color-a11oy-border)' }}>
+            <div className="font-mono p-2 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)', color: '#c9b787', border: '1px solid var(--color-a11oy-border)' }}>
               npx @a11oy/cli@latest
             </div>
             <div className="mt-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>npm · packages/a11oy-cli</div>

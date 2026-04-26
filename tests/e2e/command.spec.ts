@@ -65,7 +65,7 @@ test.describe('Ecosystem Command Portal — Dashboard Content', () => {
 
     const pulseContent = page
       .locator(
-        ":text('Ecosystem'), :text('LUMINA'), :text('Score'), :text('Command'), :text('Health'), :text('Domain')",
+        ":text('Ecosystem'), :text('Pulse'), :text('Score'), :text('Command'), :text('Health'), :text('Domain')",
       )
       .first();
     await expect(pulseContent).toBeVisible({ timeout: 15000 });

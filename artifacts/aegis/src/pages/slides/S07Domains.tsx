@@ -3,37 +3,37 @@ export default function S07Domains() {
     {
       name: 'Aegis',
       cat: 'Security & Defense',
-      color: '#3b82f6',
+      color: '#c9b787',
       desc: 'SOC command, threat intel, MITRE ATT&CK, governed incident response',
     },
     {
       name: 'Vessels',
       cat: 'Maritime Intelligence',
-      color: '#0ea5e9',
+      color: '#8a8a8a',
       desc: 'AIS telemetry, fleet command, sanctions screening, voyage economics',
     },
     {
       name: 'Terra',
       cat: 'Real Estate Intelligence',
-      color: '#22c55e',
+      color: '#c9b787',
       desc: 'Distress pipeline, ownership graph, deal flow, governed underwriting',
     },
     {
       name: 'Counsel',
       cat: 'Legal Intelligence',
-      color: '#a78bfa',
+      color: '#c9b787',
       desc: 'Matter twins, deadline tracking, governed demand workflows',
     },
     {
       name: 'Carlota Jo',
       cat: 'Premium Advisory',
-      color: '#f472b6',
+      color: '#c9b787',
       desc: 'UHNW client intake, managed delivery, audit-grade document handling',
     },
     {
       name: 'IMPERIUM',
       cat: 'Cloud Sovereignty',
-      color: '#fb923c',
+      color: '#c9b787',
       desc: 'Multi-cloud governance, policy enforcement, infrastructure audit trail',
     },
   ];

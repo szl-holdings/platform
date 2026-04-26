@@ -132,28 +132,28 @@ const DECISIONS = [
 const APPROVAL_COLORS: Record<string, { bg: string; text: string; border: string; label: string }> =
   {
     pending: {
-      bg: 'bg-amber-500/10',
-      text: 'text-amber-300',
-      border: 'border-amber-500/25',
+      bg: 'bg-[#c9b787]/10',
+      text: 'text-[#c9b787]',
+      border: 'border-[#c9b787]/25',
       label: 'Awaiting Approval',
     },
     approved: {
-      bg: 'bg-emerald-500/10',
-      text: 'text-emerald-300',
-      border: 'border-emerald-500/25',
+      bg: 'bg-[#c9b787]/10',
+      text: 'text-[#c9b787]',
+      border: 'border-[#c9b787]/25',
       label: 'Approved',
     },
     rejected: {
-      bg: 'bg-red-500/10',
-      text: 'text-red-300',
-      border: 'border-red-500/25',
+      bg: 'bg-[#f5f5f5]/10',
+      text: 'text-[#f5f5f5]',
+      border: 'border-[#f5f5f5]/25',
       label: 'Rejected',
     },
     draft: { bg: 'bg-white/5', text: 'text-white/50', border: 'border-white/10', label: 'Draft' },
   };
 
 function ConfidenceBar({ value }: { value: number }) {
-  const color = value >= 80 ? '#10b981' : value >= 60 ? '#f59e0b' : '#ef4444';
+  const color = value >= 80 ? '#c9b787' : value >= 60 ? '#c9b787' : '#f5f5f5';
   return (
     <div className="flex items-center gap-3">
       <div className="flex-1 h-2 rounded-full bg-white/5 overflow-hidden">
@@ -241,11 +241,11 @@ export default function DecisionConsole() {
         <div className="px-4 py-3 border-b border-white/5">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-blue-400" />
+              <BookOpen className="w-4 h-4 text-[#c9b787]" />
               <span className="text-xs font-semibold text-white">Decision Console</span>
             </div>
             {envLabel && (
-              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/5 text-emerald-400/70">
+              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/30 bg-[#c9b787]/5 text-[#c9b787]/70">
                 {envLabel}
               </span>
             )}
@@ -259,7 +259,7 @@ export default function DecisionConsole() {
             ) : null}
             Structured analytical decisions
             {liveDecisions.length > 0 && (
-              <span className="text-blue-400 ml-1">· {liveDecisions.length} live</span>
+              <span className="text-[#c9b787] ml-1">· {liveDecisions.length} live</span>
             )}
           </p>
         </div>
@@ -275,7 +275,7 @@ export default function DecisionConsole() {
                     className={cn(
                       'w-full text-left px-4 py-3 transition-all',
                       isActive
-                        ? 'bg-blue-500/10 border-l-2 border-blue-400'
+                        ? 'bg-[#c9b787]/10 border-l-2 border-[#c9b787]'
                         : 'hover:bg-white/[0.02] border-l-2 border-transparent',
                     )}
                   >
@@ -317,7 +317,7 @@ export default function DecisionConsole() {
                     className={cn(
                       'w-full text-left px-4 py-3 transition-all',
                       selectedMockId === dec.id
-                        ? 'bg-blue-500/10 border-l-2 border-blue-400'
+                        ? 'bg-[#c9b787]/10 border-l-2 border-[#c9b787]'
                         : 'hover:bg-white/[0.02] border-l-2 border-transparent',
                     )}
                   >
@@ -350,7 +350,7 @@ export default function DecisionConsole() {
               })}
         </div>
         <div className="p-3 border-t border-white/5">
-          <button className="w-full py-2 rounded-lg text-xs font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-300 hover:bg-blue-500/20 transition-colors">
+          <button className="w-full py-2 rounded-lg text-xs font-semibold bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787] hover:bg-[#c9b787]/20 transition-colors">
             + New Decision
           </button>
         </div>
@@ -379,15 +379,15 @@ export default function DecisionConsole() {
                     ? (selectedLive.affectedAsset ?? '—')
                     : selectedMock.caseRef}
                 </span>
-                <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/5 text-emerald-400/70">
+                <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/30 bg-[#c9b787]/5 text-[#c9b787]/70">
                   {envLabel ?? (usingLive ? 'PRODUCTION' : selectedMock.envLabel)}
                 </span>
                 {!usingLive && (
-                  <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-blue-500/30 bg-blue-500/5 text-blue-400/70">
+                  <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/30 bg-[#c9b787]/5 text-[#c9b787]/70">
                     {selectedMock.tenantLabel}
                   </span>
                 )}
-                <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-red-500/20 bg-red-500/5 text-red-400/70 flex items-center gap-0.5">
+                <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#f5f5f5]/20 bg-[#f5f5f5]/5 text-[#f5f5f5]/70 flex items-center gap-0.5">
                   <Lock className="w-2 h-2" />
                   {sensitivityLabel ?? (usingLive ? 'RESTRICTED' : selectedMock.sensitivityLabel)}
                 </span>
@@ -440,11 +440,11 @@ export default function DecisionConsole() {
                 <button
                   onClick={() => selectedLive && approveMutation.mutate(String(selectedLive.id))}
                   disabled={approveMutation.isPending || !selectedLive}
-                  className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 hover:bg-emerald-500/20 transition-colors disabled:opacity-40"
+                  className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787] hover:bg-[#c9b787]/20 transition-colors disabled:opacity-40"
                 >
                   {approveMutation.isPending ? 'Queuing...' : 'Approve'}
                 </button>
-                <button className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-red-500/10 border border-red-500/20 text-red-300 hover:bg-red-500/20 transition-colors">
+                <button className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 text-[#f5f5f5] hover:bg-[#f5f5f5]/20 transition-colors">
                   Reject
                 </button>
               </div>
@@ -510,10 +510,10 @@ export default function DecisionConsole() {
           )}
 
           {/* Recommended Outcome / Description */}
-          <div className="bg-blue-500/[0.05] border border-blue-500/15 rounded-xl p-5">
+          <div className="bg-[#c9b787]/[0.05] border border-[#c9b787]/15 rounded-xl p-5">
             <div className="flex items-center gap-2 mb-2">
-              <ArrowRight className="w-3.5 h-3.5 text-blue-400" />
-              <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-blue-400/60">
+              <ArrowRight className="w-3.5 h-3.5 text-[#c9b787]" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#c9b787]/60">
                 {usingLive && selectedLive ? 'Finding Description' : 'Recommended Outcome'}
               </span>
             </div>
@@ -557,9 +557,9 @@ export default function DecisionConsole() {
                       key={ev.id}
                       className="flex items-center gap-3 bg-white/[0.025] rounded-lg px-3 py-2"
                     >
-                      <FileText className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+                      <FileText className="w-3.5 h-3.5 text-[#8a8a8a] shrink-0" />
                       <span className="text-[11px] font-mono text-white/80 flex-1">{ev.name}</span>
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-emerald-500/20 bg-emerald-500/5 text-emerald-400/70">
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/20 bg-[#c9b787]/5 text-[#c9b787]/70">
                         trust: {ev.trustLevel}
                       </span>
                     </div>
@@ -602,10 +602,10 @@ export default function DecisionConsole() {
                             className={cn(
                               'text-[8px] font-mono px-1.5 py-0.5 rounded border uppercase',
                               alt.ruling === 'unlikely'
-                                ? 'border-emerald-500/20 bg-emerald-500/5 text-emerald-400/70'
+                                ? 'border-[#c9b787]/20 bg-[#c9b787]/5 text-[#c9b787]/70'
                                 : alt.ruling === 'possible'
-                                  ? 'border-yellow-500/20 bg-yellow-500/5 text-yellow-400/70'
-                                  : 'border-red-500/20 bg-red-500/5 text-red-400/70',
+                                  ? 'border-[#c9b787]/20 bg-[#c9b787]/5 text-[#c9b787]/70'
+                                  : 'border-[#f5f5f5]/20 bg-[#f5f5f5]/5 text-[#f5f5f5]/70',
                             )}
                           >
                             {alt.ruling}
@@ -666,7 +666,7 @@ export default function DecisionConsole() {
                     onClick={() => setExpandedAudit(!expandedAudit)}
                   >
                     <div className="flex items-center gap-2">
-                      <Shield className="w-3.5 h-3.5 text-blue-400" />
+                      <Shield className="w-3.5 h-3.5 text-[#c9b787]" />
                       <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/40">
                         Audit Chain ({auditEntries.length} entries)
                       </span>

@@ -24,7 +24,7 @@ import { api } from '@/lib/api';
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? '';
 
 const DS = {
-  page: '#070A10',
+  page: '#0a0a0a',
   surface: 'rgba(255,255,255,0.025)',
   elevated: 'rgba(255,255,255,0.035)',
   border: 'rgba(255,255,255,0.05)',
@@ -77,7 +77,7 @@ interface LiveFinding {
   createdAt: string;
 }
 
-function PulsingDot({ color = '#ef4444' }: { color?: string }) {
+function PulsingDot({ color = '#f5f5f5' }: { color?: string }) {
   return (
     <span className="relative flex w-2 h-2 shrink-0">
       <span
@@ -97,45 +97,45 @@ const SEV_COLORS: Record<
   { bg: string; text: string; border: string; dot: string; accent: string }
 > = {
   critical: {
-    bg: 'bg-red-500/10',
-    text: 'text-red-300',
-    border: 'border-red-500/25',
-    dot: '#ef4444',
-    accent: '#ef4444',
+    bg: 'bg-[#f5f5f5]/10',
+    text: 'text-[#f5f5f5]',
+    border: 'border-[#f5f5f5]/25',
+    dot: '#f5f5f5',
+    accent: '#f5f5f5',
   },
   high: {
-    bg: 'bg-orange-500/10',
-    text: 'text-orange-300',
-    border: 'border-orange-500/25',
-    dot: '#f97316',
-    accent: '#f97316',
+    bg: 'bg-[#c9b787]/10',
+    text: 'text-[#c9b787]',
+    border: 'border-[#c9b787]/25',
+    dot: '#c9b787',
+    accent: '#c9b787',
   },
   medium: {
-    bg: 'bg-yellow-500/10',
-    text: 'text-yellow-300',
-    border: 'border-yellow-500/25',
-    dot: '#eab308',
-    accent: '#eab308',
+    bg: 'bg-[#c9b787]/10',
+    text: 'text-[#c9b787]',
+    border: 'border-[#c9b787]/25',
+    dot: '#8a8a8a',
+    accent: '#8a8a8a',
   },
   low: {
-    bg: 'bg-blue-500/10',
-    text: 'text-blue-300',
-    border: 'border-blue-500/25',
-    dot: '#3b82f6',
-    accent: '#3b82f6',
+    bg: 'bg-[#c9b787]/10',
+    text: 'text-[#c9b787]',
+    border: 'border-[#c9b787]/25',
+    dot: '#c9b787',
+    accent: '#c9b787',
   },
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  detection: 'bg-red-500/10 text-red-300 border-red-500/20',
-  triage: 'bg-orange-500/10 text-orange-300 border-orange-500/20',
-  investigation: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20',
-  containment: 'bg-blue-500/10 text-blue-300 border-blue-500/20',
-  remediation: 'bg-violet-500/10 text-violet-300 border-violet-500/20',
-  closed: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
-  open: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20',
-  in_progress: 'bg-blue-500/10 text-blue-300 border-blue-500/20',
-  resolved: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
+  detection: 'bg-[#f5f5f5]/10 text-[#f5f5f5] border-[#f5f5f5]/20',
+  triage: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  investigation: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  containment: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  remediation: 'bg-[#8a8a8a]/10 text-[#8a8a8a] border-[#8a8a8a]/20',
+  closed: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  open: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  in_progress: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
+  resolved: 'bg-[#c9b787]/10 text-[#c9b787] border-[#c9b787]/20',
 };
 
 const FALLBACK_POSTURE = {
@@ -227,7 +227,7 @@ function MetricCard({
   value,
   sub,
   trend,
-  color = '#3b82f6',
+  color = '#c9b787',
 }: {
   label: string;
   value: string;
@@ -272,9 +272,9 @@ function MetricCard({
       )}
       {trend && (
         <div className="mt-2 flex items-center gap-1">
-          {trend === 'up' && <TrendingUp className="w-3 h-3 text-red-400" />}
-          {trend === 'down' && <TrendingDown className="w-3 h-3 text-emerald-400" />}
-          {trend === 'stable' && <Minus className="w-3 h-3 text-blue-400" />}
+          {trend === 'up' && <TrendingUp className="w-3 h-3 text-[#f5f5f5]" />}
+          {trend === 'down' && <TrendingDown className="w-3 h-3 text-[#c9b787]" />}
+          {trend === 'stable' && <Minus className="w-3 h-3 text-[#c9b787]" />}
           <span className="text-[10px]" style={{ color: DS.text.muted }}>
             30d trend
           </span>
@@ -288,7 +288,7 @@ function PostureRing({ score }: { score: number }) {
   const r = 36;
   const c = 2 * Math.PI * r;
   const filled = (score / 100) * c;
-  const color = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#ef4444';
+  const color = score >= 80 ? '#c9b787' : score >= 60 ? '#c9b787' : '#f5f5f5';
   return (
     <div className="relative w-24 h-24 flex items-center justify-center">
       <svg width="96" height="96" className="rotate-[-90deg]">
@@ -519,18 +519,18 @@ export default function CommandHome() {
             left: 0,
             right: 0,
             height: '1px',
-            background: `linear-gradient(90deg, ${postureScore >= 80 ? '#10b981' : postureScore >= 60 ? '#f59e0b' : '#ef4444'}40, transparent 60%)`,
+            background: `linear-gradient(90deg, ${postureScore >= 80 ? '#c9b787' : postureScore >= 60 ? '#c9b787' : '#f5f5f5'}40, transparent 60%)`,
           }}
         />
         <div className="flex items-center gap-3">
           <div
             className="w-7 h-7 rounded-lg flex items-center justify-center"
             style={{
-              background: 'linear-gradient(135deg,rgba(59,130,246,0.25),rgba(139,92,246,0.18))',
-              border: '1px solid rgba(59,130,246,0.2)',
+              background: 'linear-gradient(135deg,rgba(201,183,135,0.25),rgba(138,138,138,0.18))',
+              border: '1px solid rgba(201,183,135,0.2)',
             }}
           >
-            <Hexagon className="w-3.5 h-3.5 text-blue-400" />
+            <Hexagon className="w-3.5 h-3.5 text-[#c9b787]" />
           </div>
           <div>
             <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
@@ -540,7 +540,7 @@ export default function CommandHome() {
                 platform="aegis"
                 title="Command Home"
                 content="Single-pane operational view of cyber posture: live risk score, open incidents, critical alerts, and the approval queue. Every tile links to a deeper drill-down with the underlying evidence."
-                accentColor="#3b82f6"
+                accentColor="#c9b787"
                 iconSize={11}
               />
             </h1>
@@ -554,18 +554,18 @@ export default function CommandHome() {
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-emerald-500/30 text-emerald-400/80 bg-emerald-500/5">
+            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/30 text-[#c9b787]/80 bg-[#c9b787]/5">
               {envLabel}
             </span>
-            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-blue-500/30 text-blue-400/80 bg-blue-500/5">
+            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/30 text-[#c9b787]/80 bg-[#c9b787]/5">
               {tenantLabel}
             </span>
-            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-violet-500/30 text-violet-400/80 bg-violet-500/5">
+            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-[#8a8a8a]/30 text-[#8a8a8a]/80 bg-[#8a8a8a]/5">
               <Lock className="w-2.5 h-2.5 inline mr-0.5" />
               {sessionClass}
             </span>
             {usingLive && (
-              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-blue-500/20 bg-blue-500/5 text-blue-400/70">
+              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/20 bg-[#c9b787]/5 text-[#c9b787]/70">
                 LIVE
               </span>
             )}
@@ -588,7 +588,7 @@ export default function CommandHome() {
                 trackChecklistItemCompleted(s.id);
               },
             }))}
-            accentColor="#3b82f6"
+            accentColor="#c9b787"
             storageKey="aegis_activation_banner"
             variant="banner"
             onNavigate={handleNavigate}
@@ -610,7 +610,7 @@ export default function CommandHome() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-          <Radio className="w-3 h-3 text-red-400 animate-pulse" />
+          <Radio className="w-3 h-3 text-[#f5f5f5] animate-pulse" />
           <span
             className="text-[9px] font-mono uppercase tracking-[0.15em]"
             style={{ color: DS.text.tertiary }}
@@ -631,27 +631,27 @@ export default function CommandHome() {
               {
                 tag: 'CRITICAL',
                 msg: 'APT29 lateral movement — DC-PROD-03 quarantine pending',
-                color: '#ef4444',
+                color: '#f5f5f5',
               },
               {
                 tag: 'HIGH',
                 msg: 'Outbound C2 beacon detected — blocked at perimeter',
-                color: '#f97316',
+                color: '#c9b787',
               },
               {
                 tag: 'HIGH',
                 msg: 'S3 exfil pattern — 3 buckets flagged for review',
-                color: '#f97316',
+                color: '#c9b787',
               },
               {
                 tag: 'MEDIUM',
                 msg: 'Brute force campaign — 847 attempts in 2h window',
-                color: '#eab308',
+                color: '#8a8a8a',
               },
               {
                 tag: 'INFO',
                 msg: 'Threat intel updated — 14 new IOCs added to block list',
-                color: '#3b82f6',
+                color: '#c9b787',
               },
             ].map((item, i) => (
               <span key={i} style={{ fontSize: '10px', color: DS.text.secondary, flexShrink: 0 }}>
@@ -689,7 +689,7 @@ export default function CommandHome() {
             <div
               style={{
                 height: 2,
-                background: `linear-gradient(90deg, ${postureScore >= 80 ? '#10b981' : postureScore >= 60 ? '#f59e0b' : '#ef4444'}, transparent)`,
+                background: `linear-gradient(90deg, ${postureScore >= 80 ? '#c9b787' : postureScore >= 60 ? '#c9b787' : '#f5f5f5'}, transparent)`,
                 margin: '-1.25rem -1.25rem 1rem',
                 borderRadius: '12px 12px 0 0',
               }}
@@ -717,14 +717,14 @@ export default function CommandHome() {
                     {
                       label: 'Controls Active',
                       value: `${ctrlImpl}/${ctrlTotal}`,
-                      color: '#10b981',
+                      color: '#c9b787',
                     },
-                    { label: 'MTTD', value: mttd, color: '#3b82f6' },
-                    { label: 'MTTR', value: mttr, color: '#3b82f6' },
+                    { label: 'MTTD', value: mttd, color: '#c9b787' },
+                    { label: 'MTTR', value: mttr, color: '#c9b787' },
                     {
                       label: 'SLA Breaches',
                       value: String(slaB),
-                      color: slaB > 0 ? '#ef4444' : '#10b981',
+                      color: slaB > 0 ? '#f5f5f5' : '#c9b787',
                     },
                   ];
                 })().map((row) => (
@@ -753,28 +753,28 @@ export default function CommandHome() {
               value={String(liveOpenIncidents || activeIncidents.length)}
               sub={`${liveCriticalAlerts || criticalIncidents.length} critical`}
               trend="down"
-              color="#ef4444"
+              color="#f5f5f5"
             />
             <MetricCard
               label="Priority Alerts"
               value={String(posture?.totalAlerts ?? newAlerts.length)}
               sub={`${liveCriticalAlerts} critical`}
               trend="up"
-              color="#f97316"
+              color="#c9b787"
             />
             <MetricCard
               label="Pending Approvals"
               value={String(approvalQueue.length)}
               sub="require action"
               trend="stable"
-              color="#f59e0b"
+              color="#c9b787"
             />
             <MetricCard
               label="Unresolved Findings"
               value={String(unresolvedFindings || 0)}
               sub={unresolvedFindings > 0 ? 'open/confirmed' : '—'}
               trend="stable"
-              color="#8b5cf6"
+              color="#8a8a8a"
             />
           </div>
         </div>
@@ -792,21 +792,21 @@ export default function CommandHome() {
             }}
           >
             <div
-              style={{ height: 2, background: 'linear-gradient(90deg, #ef4444, transparent)' }}
+              style={{ height: 2, background: 'linear-gradient(90deg, #f5f5f5, transparent)' }}
             />
             <div
               className="px-4 py-3 border-b flex items-center justify-between"
               style={{ borderColor: DS.borderMuted }}
             >
               <div className="flex items-center gap-2">
-                <Shield className="w-3.5 h-3.5 text-red-400" />
+                <Shield className="w-3.5 h-3.5 text-[#f5f5f5]" />
                 <span className="text-xs font-semibold text-white">Active Incidents</span>
                 {(activeIncidents.length > 0 || liveOpenIncidents > 0) && (
-                  <PulsingDot color="#ef4444" />
+                  <PulsingDot color="#f5f5f5" />
                 )}
               </div>
               <Link href="/incidents">
-                <span className="text-[10px] text-blue-400/60 hover:text-blue-300 cursor-pointer flex items-center gap-1">
+                <span className="text-[10px] text-[#c9b787]/60 hover:text-[#c9b787] cursor-pointer flex items-center gap-1">
                   All <ChevronRight className="w-3 h-3" />
                 </span>
               </Link>
@@ -906,7 +906,7 @@ export default function CommandHome() {
                                 → {inc.assignedAnalyst}
                               </span>
                             ) : (
-                              <span className="text-[10px] text-amber-400/70">unassigned</span>
+                              <span className="text-[10px] text-[#c9b787]/70">unassigned</span>
                             )}
                           </div>
                         </div>
@@ -939,26 +939,26 @@ export default function CommandHome() {
             }}
           >
             <div
-              style={{ height: 2, background: 'linear-gradient(90deg, #f59e0b, transparent)' }}
+              style={{ height: 2, background: 'linear-gradient(90deg, #c9b787, transparent)' }}
             />
             <div
               className="px-4 py-3 border-b flex items-center justify-between"
               style={{ borderColor: DS.borderMuted }}
             >
               <div className="flex items-center gap-2">
-                <ClipboardCheck className="w-3.5 h-3.5 text-amber-400" />
+                <ClipboardCheck className="w-3.5 h-3.5 text-[#c9b787]" />
                 <span className="text-xs font-semibold text-white">Approval Queue</span>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/20">
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[#c9b787]/15 text-[#c9b787] border border-[#c9b787]/20">
                   {approvalQueue.length}
                 </span>
                 {pendingActions && (
-                  <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-blue-500/20 bg-blue-500/5 text-blue-400/70">
+                  <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/20 bg-[#c9b787]/5 text-[#c9b787]/70">
                     LIVE
                   </span>
                 )}
               </div>
               <Link href="/response-orchestration">
-                <span className="text-[10px] text-blue-400/60 hover:text-blue-300 cursor-pointer flex items-center gap-1">
+                <span className="text-[10px] text-[#c9b787]/60 hover:text-[#c9b787] cursor-pointer flex items-center gap-1">
                   All <ChevronRight className="w-3 h-3" />
                 </span>
               </Link>
@@ -993,7 +993,7 @@ export default function CommandHome() {
                       </span>
                     </div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400/80 uppercase tracking-wider">
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787]/80 uppercase tracking-wider">
                         approval_required
                       </span>
                       <span className="text-[10px]" style={{ color: DS.text.muted }}>
@@ -1001,10 +1001,10 @@ export default function CommandHome() {
                       </span>
                     </div>
                     <div className="flex gap-2">
-                      <button className="flex-1 py-1.5 rounded text-[10px] font-semibold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-colors">
+                      <button className="flex-1 py-1.5 rounded text-[10px] font-semibold bg-[#c9b787]/10 border border-[#c9b787]/20 text-[#c9b787] hover:bg-[#c9b787]/20 transition-colors">
                         Approve
                       </button>
-                      <button className="flex-1 py-1.5 rounded text-[10px] font-semibold bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors">
+                      <button className="flex-1 py-1.5 rounded text-[10px] font-semibold bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 text-[#f5f5f5] hover:bg-[#f5f5f5]/20 transition-colors">
                         Reject
                       </button>
                     </div>
@@ -1030,14 +1030,14 @@ export default function CommandHome() {
             }}
           >
             <div
-              style={{ height: 2, background: 'linear-gradient(90deg, #8b5cf6, transparent)' }}
+              style={{ height: 2, background: 'linear-gradient(90deg, #8a8a8a, transparent)' }}
             />
             <div
               className="px-4 py-3 border-b flex items-center justify-between"
               style={{ borderColor: DS.borderMuted }}
             >
               <div className="flex items-center gap-2">
-                <AlertOctagon className="w-3.5 h-3.5 text-violet-400" />
+                <AlertOctagon className="w-3.5 h-3.5 text-[#8a8a8a]" />
                 <span className="text-xs font-semibold text-white">Unresolved Findings</span>
               </div>
               <span className="text-[9px] font-mono" style={{ color: DS.text.muted }}>
@@ -1051,10 +1051,10 @@ export default function CommandHome() {
                   style={{
                     color:
                       unresolvedFindings > 5
-                        ? '#ef4444'
+                        ? '#f5f5f5'
                         : unresolvedFindings > 0
-                          ? '#f59e0b'
-                          : '#10b981',
+                          ? '#c9b787'
+                          : '#c9b787',
                   }}
                 >
                   {unresolvedFindings}
@@ -1076,13 +1076,13 @@ export default function CommandHome() {
                     style={{
                       height: '100%',
                       width: `${Math.min(unresolvedFindings * 10, 100)}%`,
-                      background: unresolvedFindings > 5 ? '#ef4444' : '#f59e0b',
+                      background: unresolvedFindings > 5 ? '#f5f5f5' : '#c9b787',
                       borderRadius: 2,
                     }}
                   />
                 </div>
                 <Link href="/decision-console">
-                  <span className="text-[10px] text-blue-400/60 hover:text-blue-300 cursor-pointer flex items-center gap-1 mt-3">
+                  <span className="text-[10px] text-[#c9b787]/60 hover:text-[#c9b787] cursor-pointer flex items-center gap-1 mt-3">
                     Decision Console <ChevronRight className="w-3 h-3" />
                   </span>
                 </Link>
@@ -1104,23 +1104,23 @@ export default function CommandHome() {
             }}
           >
             <div
-              style={{ height: 2, background: 'linear-gradient(90deg, #3b82f6, transparent)' }}
+              style={{ height: 2, background: 'linear-gradient(90deg, #c9b787, transparent)' }}
             />
             <div
               className="px-4 py-3 border-b flex items-center justify-between"
               style={{ borderColor: DS.borderMuted }}
             >
               <div className="flex items-center gap-2">
-                <UserCheck className="w-3.5 h-3.5 text-blue-400" />
+                <UserCheck className="w-3.5 h-3.5 text-[#c9b787]" />
                 <span className="text-xs font-semibold text-white">Recent Decisions</span>
                 {recentDecisions && (
-                  <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-blue-500/20 bg-blue-500/5 text-blue-400/70">
+                  <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border border-[#c9b787]/20 bg-[#c9b787]/5 text-[#c9b787]/70">
                     LIVE
                   </span>
                 )}
               </div>
               <Link href="/decision-console">
-                <span className="text-[10px] text-blue-400/60 hover:text-blue-300 cursor-pointer flex items-center gap-1">
+                <span className="text-[10px] text-[#c9b787]/60 hover:text-[#c9b787] cursor-pointer flex items-center gap-1">
                   Decision Console <ChevronRight className="w-3 h-3" />
                 </span>
               </Link>
@@ -1149,16 +1149,16 @@ export default function CommandHome() {
                       <div className="flex items-center gap-1">
                         <div className="h-1 rounded-full bg-white/10 w-16 overflow-hidden">
                           <div
-                            className="h-full rounded-full bg-emerald-500"
+                            className="h-full rounded-full bg-[#c9b787]"
                             style={{ width: `${dec.confidence}%` }}
                           />
                         </div>
-                        <span className="text-[10px] font-mono text-emerald-400 tabular-nums">
+                        <span className="text-[10px] font-mono text-[#c9b787] tabular-nums">
                           {dec.confidence}%
                         </span>
                       </div>
                     )}
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wider border border-blue-500/20 bg-blue-500/10 text-blue-300">
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wider border border-[#c9b787]/20 bg-[#c9b787]/10 text-[#c9b787]">
                       {dec.outcome}
                     </span>
                   </div>
@@ -1178,13 +1178,13 @@ export default function CommandHome() {
             }}
           >
             <div
-              style={{ height: 2, background: 'linear-gradient(90deg, #3b82f6, transparent)' }}
+              style={{ height: 2, background: 'linear-gradient(90deg, #c9b787, transparent)' }}
             />
             <div
               className="px-4 py-3 border-b flex items-center gap-2"
               style={{ borderColor: DS.borderMuted }}
             >
-              <BarChart3 className="w-3.5 h-3.5 text-blue-400" />
+              <BarChart3 className="w-3.5 h-3.5 text-[#c9b787]" />
               <span className="text-xs font-semibold text-white">Quick Stats</span>
             </div>
             <div className="divide-y" style={{ borderColor: DS.borderMuted }}>
@@ -1194,10 +1194,10 @@ export default function CommandHome() {
                   value: posture?.totalAlerts ?? alerts.length,
                   color: DS.text.primary,
                 },
-                { label: 'Open Incidents', value: liveOpenIncidents, color: '#ef4444' },
-                { label: 'Critical Alerts', value: liveCriticalAlerts, color: '#ef4444' },
-                { label: 'Unresolved Findings', value: unresolvedFindings, color: '#f59e0b' },
-                { label: 'Pending Actions', value: approvalQueue.length, color: '#f59e0b' },
+                { label: 'Open Incidents', value: liveOpenIncidents, color: '#f5f5f5' },
+                { label: 'Critical Alerts', value: liveCriticalAlerts, color: '#f5f5f5' },
+                { label: 'Unresolved Findings', value: unresolvedFindings, color: '#c9b787' },
+                { label: 'Pending Actions', value: approvalQueue.length, color: '#c9b787' },
               ].map((row) => (
                 <div key={row.label} className="px-4 py-3 flex items-center justify-between">
                   <span className="text-[11px]" style={{ color: DS.text.secondary }}>

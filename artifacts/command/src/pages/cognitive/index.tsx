@@ -114,7 +114,7 @@ const DEMO_STATE: RuntimeState = {
     {
       id: 'run-003',
       name: 'LP Q1 Portfolio Rollup',
-      agent: 'DOMAINE-Intel',
+      agent: 'Terra-Intel',
       status: 'waiting',
       objective: 'Aggregate Q1 portfolio performance; flag drift vs benchmarks for CFO packet',
       startedAt: '12:30',
@@ -170,7 +170,7 @@ const DEMO_STATE: RuntimeState = {
     {
       id: 'obj-3',
       title: 'Complete LP Q1 portfolio rollup for CFO',
-      agent: 'DOMAINE-Intel',
+      agent: 'Terra-Intel',
       priority: 3,
       status: 'blocked',
       autonomyTier: 'TIER-1',
@@ -239,7 +239,7 @@ const DEMO_STATE: RuntimeState = {
     {
       id: 'vd-5',
       runId: 'run-003',
-      agent: 'DOMAINE-Intel',
+      agent: 'Terra-Intel',
       action: 'Finalize Q1 benchmark comparison',
       verdict: 'modified',
       rationale: 'Action approved but scope narrowed: draft mode only until CFO approval received.',
@@ -291,7 +291,7 @@ const DEMO_STATE: RuntimeState = {
     },
     {
       id: 'ref-4',
-      agent: 'DOMAINE-Intel',
+      agent: 'Terra-Intel',
       type: 'objective-update',
       summary:
         'Reprioritized LP rollup behind Carlota recovery after risk model update showed LP data accuracy depends on Carlota sync.',

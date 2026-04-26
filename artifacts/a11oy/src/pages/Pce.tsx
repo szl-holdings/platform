@@ -4,7 +4,7 @@ import { PageHeader, Card, SectionTitle, KpiCard, HashId, VerdictBadge } from '.
 import { SEED_PCE_CONTRACTS, SEED_WORKCELLS, SEED_PROOF_PACKETS } from '@workspace/a11oy-fabric';
 
 const MODE_COLORS: Record<string, string> = {
-  governed: '#10b981', autonomous: '#f59e0b', supervised: '#3b82f6',
+  governed: '#c9b787', autonomous: '#c9b787', supervised: '#c9b787',
 };
 
 export function Pce() {
@@ -28,9 +28,9 @@ export function Pce() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <KpiCard label="PCE CONTRACTS" value={SEED_PCE_CONTRACTS.length} sub="in registry" accent="#b08d52" />
-        <KpiCard label="VERIFIED" value={verified} sub="isVerified=true" accent="#10b981" />
-        <KpiCard label="VERIFICATION RATE" value={`${Math.round((verified / SEED_PCE_CONTRACTS.length) * 100)}%`} sub="of all contracts" accent="#10b981" />
-        <KpiCard label="MODES" value={modes.length} sub="execution modes" accent="#8b5cf6" />
+        <KpiCard label="VERIFIED" value={verified} sub="isVerified=true" accent="#c9b787" />
+        <KpiCard label="VERIFICATION RATE" value={`${Math.round((verified / SEED_PCE_CONTRACTS.length) * 100)}%`} sub="of all contracts" accent="#c9b787" />
+        <KpiCard label="MODES" value={modes.length} sub="execution modes" accent="#8a8a8a" />
       </div>
 
       {/* Concept callout */}
@@ -47,7 +47,7 @@ export function Pce() {
           <SectionTitle>PCE Contracts ({SEED_PCE_CONTRACTS.length})</SectionTitle>
           <div className="flex flex-col gap-2">
             {SEED_PCE_CONTRACTS.map(c => {
-              const modeColor = MODE_COLORS[c.mode] ?? '#9bacc4';
+              const modeColor = MODE_COLORS[c.mode] ?? '#5e5e5e';
               const isSelected = c.id === selected;
               const wc = SEED_WORKCELLS.find(w => w.pceContractId === c.id);
 
@@ -57,8 +57,8 @@ export function Pce() {
                   className="rounded-lg border cursor-pointer transition-all p-3"
                   onClick={() => setSelected(isSelected ? null : c.id)}
                   style={{
-                    backgroundColor: isSelected ? 'rgba(59,130,246,0.04)' : 'var(--color-a11oy-card)',
-                    borderColor: isSelected ? '#3b82f6' : 'var(--color-a11oy-border)',
+                    backgroundColor: isSelected ? 'rgba(201,183,135,0.04)' : 'var(--color-a11oy-card)',
+                    borderColor: isSelected ? '#c9b787' : 'var(--color-a11oy-border)',
                   }}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -69,7 +69,7 @@ export function Pce() {
                           {c.mode}
                         </span>
                         {c.isVerified && (
-                          <span className="text-xs font-mono" style={{ color: '#10b981' }}>✓ verified</span>
+                          <span className="text-xs font-mono" style={{ color: '#c9b787' }}>✓ verified</span>
                         )}
                       </div>
                       <div className="grid sm:grid-cols-2 gap-x-4 gap-y-0.5 text-xs">
@@ -127,11 +127,11 @@ export function Pce() {
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   <div>
                     <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>MODE</div>
-                    <div style={{ color: MODE_COLORS[selectedContract.mode] ?? '#9bacc4' }}>{selectedContract.mode}</div>
+                    <div style={{ color: MODE_COLORS[selectedContract.mode] ?? '#5e5e5e' }}>{selectedContract.mode}</div>
                   </div>
                   <div>
                     <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>VERIFIED</div>
-                    <div style={{ color: selectedContract.isVerified ? '#10b981' : '#ef4444' }}>
+                    <div style={{ color: selectedContract.isVerified ? '#c9b787' : '#f5f5f5' }}>
                       {selectedContract.isVerified ? '✓ YES' : '✗ NO'}
                     </div>
                   </div>
@@ -169,7 +169,7 @@ export function Pce() {
             <div className="flex flex-col gap-2">
               {modes.map(mode => {
                 const count = SEED_PCE_CONTRACTS.filter(c => c.mode === mode).length;
-                const color = MODE_COLORS[mode] ?? '#9bacc4';
+                const color = MODE_COLORS[mode] ?? '#5e5e5e';
                 return (
                   <Card key={mode} className="text-xs">
                     <div className="flex items-center justify-between">
@@ -193,11 +193,11 @@ export function Pce() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Verified</span>
-                  <span className="font-mono" style={{ color: '#10b981' }}>{verified}</span>
+                  <span className="font-mono" style={{ color: '#c9b787' }}>{verified}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>With approval record</span>
-                  <span className="font-mono" style={{ color: '#8b5cf6' }}>{SEED_PCE_CONTRACTS.filter(c => c.approvalRecordId).length}</span>
+                  <span className="font-mono" style={{ color: '#8a8a8a' }}>{SEED_PCE_CONTRACTS.filter(c => c.approvalRecordId).length}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Proof packets linked</span>

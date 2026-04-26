@@ -6,8 +6,8 @@ import { SEED_WORKCELLS, SEED_SIGNALS, SEED_PCE_CONTRACTS, SEED_PROOF_PACKETS } 
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 const VERTICAL_COLORS: Record<string, string> = {
-  'lyte-revenue': '#3b82f6', 'vessels-maritime': '#06b6d4', 'terra-real-estate': '#10b981',
-  'aegis-defense': '#ef4444', 'prism-counsel': '#8b5cf6', 'carlota-jo': '#f59e0b', 'alloy-core': '#6366f1',
+  'lyte-revenue': '#c9b787', 'vessels-maritime': '#8a8a8a', 'terra-real-estate': '#c9b787',
+  'aegis-defense': '#f5f5f5', 'prism-counsel': '#8a8a8a', 'carlota-jo': '#c9b787', 'alloy-core': '#8a8a8a',
 };
 const VERTICAL_LABELS: Record<string, string> = {
   'lyte-revenue': 'Lyte Revenue', 'vessels-maritime': 'Vessels Maritime', 'terra-real-estate': 'Terra Real Estate',
@@ -40,8 +40,8 @@ export function WorkcellDetail() {
   const signals = SEED_SIGNALS.filter(s => wc.signals.includes(s.id));
   const pceContract = SEED_PCE_CONTRACTS.find(p => p.id === wc.pceContractId);
   const proofPacket = SEED_PROOF_PACKETS.find(p => p.id === wc.proofPacketId);
-  const color = VERTICAL_COLORS[wc.vertical] ?? '#9bacc4';
-  const statusColor = { running: '#f59e0b', completed: '#10b981', error: '#ef4444', paused: '#9bacc4', idle: '#9bacc4' }[wc.status] ?? '#9bacc4';
+  const color = VERTICAL_COLORS[wc.vertical] ?? '#5e5e5e';
+  const statusColor = { running: '#c9b787', completed: '#c9b787', error: '#f5f5f5', paused: '#5e5e5e', idle: '#5e5e5e' }[wc.status] ?? '#5e5e5e';
   const execResult = wc.mockExecutionResult as WorkcellExecutionResult;
 
   return (
@@ -101,13 +101,13 @@ export function WorkcellDetail() {
                       <div className="flex items-center gap-2 mb-0.5">
                         <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>#{i + 1}</span>
                         <span className="font-medium" style={{ color: 'var(--color-a11oy-text)' }}>{a.role}</span>
-                        <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(59,130,246,0.1)', color: '#3b82f6' }}>
+                        <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.1)', color: '#c9b787' }}>
                           {a.agentId}
                         </span>
                       </div>
                       <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Action: {a.action}</div>
                     </div>
-                    <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: wc.status === 'completed' ? 'rgba(16,185,129,0.12)' : wc.status === 'running' ? 'rgba(245,158,11,0.12)' : 'rgba(155,172,196,0.1)', color: wc.status === 'completed' ? '#10b981' : wc.status === 'running' ? '#f59e0b' : '#9bacc4' }}>
+                    <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: wc.status === 'completed' ? 'rgba(201,183,135,0.12)' : wc.status === 'running' ? 'rgba(201,183,135,0.12)' : 'rgba(155,172,196,0.1)', color: wc.status === 'completed' ? '#c9b787' : wc.status === 'running' ? '#c9b787' : '#5e5e5e' }}>
                       {wc.status}
                     </span>
                   </div>
@@ -130,14 +130,14 @@ export function WorkcellDetail() {
                 {wc.mirrorEvalResult.dimensions.map(d => (
                   <div key={d.name} className="p-2 rounded text-xs" style={{ backgroundColor: 'var(--color-a11oy-deep)', border: '1px solid var(--color-a11oy-border)' }}>
                     <div className="font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{d.name}</div>
-                    <div className="font-semibold" style={{ color: '#10b981' }}>{Math.round(d.score * 100)}%</div>
+                    <div className="font-semibold" style={{ color: '#c9b787' }}>{Math.round(d.score * 100)}%</div>
                   </div>
                 ))}
               </div>
               {wc.mirrorEvalResult.flags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {wc.mirrorEvalResult.flags.map(f => (
-                    <span key={f} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: 'rgba(245,158,11,0.1)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.2)' }}>{f}</span>
+                    <span key={f} className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.1)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.2)' }}>{f}</span>
                   ))}
                 </div>
               )}
@@ -156,7 +156,7 @@ export function WorkcellDetail() {
                       <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>{sig.description.slice(0, 100)}</div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <div className="font-mono" style={{ color: sig.severity === 'critical' ? '#ef4444' : sig.severity === 'high' ? '#f59e0b' : '#10b981' }}>{sig.severity}</div>
+                      <div className="font-mono" style={{ color: sig.severity === 'critical' ? '#f5f5f5' : sig.severity === 'high' ? '#c9b787' : '#c9b787' }}>{sig.severity}</div>
                     </div>
                   </div>
                 </Card>
@@ -176,15 +176,15 @@ export function WorkcellDetail() {
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <div>
                   <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Priority</div>
-                  <div style={{ color: '#f59e0b' }}>{wc.actionBrief.priority}</div>
+                  <div style={{ color: '#c9b787' }}>{wc.actionBrief.priority}</div>
                 </div>
                 <div>
                   <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Approval tier</div>
-                  <div style={{ color: '#8b5cf6' }}>{wc.actionBrief.approvalTier}</div>
+                  <div style={{ color: '#8a8a8a' }}>{wc.actionBrief.approvalTier}</div>
                 </div>
                 <div className="col-span-2">
                   <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Estimated impact</div>
-                  <div style={{ color: '#10b981' }}>{wc.actionBrief.estimatedImpact}</div>
+                  <div style={{ color: '#c9b787' }}>{wc.actionBrief.estimatedImpact}</div>
                 </div>
               </div>
               {wc.requiresApproval && (
@@ -205,7 +205,7 @@ export function WorkcellDetail() {
             <SectionTitle>Mock Execution Result</SectionTitle>
             <Card className="text-xs">
               <div className="flex items-center gap-2 mb-2">
-                <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: execResult.status === 'success' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)', color: execResult.status === 'success' ? '#10b981' : '#ef4444' }}>
+                <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: execResult.status === 'success' ? 'rgba(201,183,135,0.12)' : 'rgba(245,245,245,0.12)', color: execResult.status === 'success' ? '#c9b787' : '#f5f5f5' }}>
                   {execResult.status ?? 'unknown'}
                 </span>
                 <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>
@@ -216,7 +216,7 @@ export function WorkcellDetail() {
                 {execResult.outputSummary}
               </div>
               {execResult.errorMessage && (
-                <div className="text-xs p-2 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}>
+                <div className="text-xs p-2 rounded" style={{ backgroundColor: 'rgba(245,245,245,0.08)', color: '#f5f5f5', border: '1px solid rgba(245,245,245,0.2)' }}>
                   Error: {execResult.errorMessage}
                 </div>
               )}
@@ -232,11 +232,11 @@ export function WorkcellDetail() {
                 <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Mode</div>
-                    <div style={{ color: pceContract.mode === 'governed' ? '#10b981' : '#f59e0b' }}>{pceContract.mode}</div>
+                    <div style={{ color: pceContract.mode === 'governed' ? '#c9b787' : '#c9b787' }}>{pceContract.mode}</div>
                   </div>
                   <div>
                     <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Verified</div>
-                    <div style={{ color: pceContract.isVerified ? '#10b981' : '#ef4444' }}>{pceContract.isVerified ? '✓ YES' : '✗ NO'}</div>
+                    <div style={{ color: pceContract.isVerified ? '#c9b787' : '#f5f5f5' }}>{pceContract.isVerified ? '✓ YES' : '✗ NO'}</div>
                   </div>
                   <div className="col-span-2">
                     <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Origin signal</div>
@@ -249,7 +249,7 @@ export function WorkcellDetail() {
                     ))}
                   </div>
                 </div>
-                <div className="mt-2 font-mono p-2 rounded" style={{ backgroundColor: wc.verificationResult.status === 'passed' ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', color: wc.verificationResult.status === 'passed' ? '#10b981' : '#ef4444', border: `1px solid ${wc.verificationResult.status === 'passed' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}` }}>
+                <div className="mt-2 font-mono p-2 rounded" style={{ backgroundColor: wc.verificationResult.status === 'passed' ? 'rgba(201,183,135,0.08)' : 'rgba(245,245,245,0.08)', color: wc.verificationResult.status === 'passed' ? '#c9b787' : '#f5f5f5', border: `1px solid ${wc.verificationResult.status === 'passed' ? 'rgba(201,183,135,0.2)' : 'rgba(245,245,245,0.2)'}` }}>
                   {wc.verificationResult.status === 'passed' ? '✓ Contract verified' : '✗ Verification failed'}
                 </div>
               </Card>
@@ -272,7 +272,7 @@ export function WorkcellDetail() {
                   </div>
                   <div>
                     <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Witnesses</div>
-                    <div style={{ color: proofPacket.witnessedBy.length > 0 ? '#10b981' : '#ef4444' }}>{proofPacket.witnessedBy.length > 0 ? `${proofPacket.witnessedBy.length} recorded` : 'NONE'}</div>
+                    <div style={{ color: proofPacket.witnessedBy.length > 0 ? '#c9b787' : '#f5f5f5' }}>{proofPacket.witnessedBy.length > 0 ? `${proofPacket.witnessedBy.length} recorded` : 'NONE'}</div>
                   </div>
                 </div>
               </Card>

@@ -52,21 +52,21 @@ const WORKSPACES = [
     id: 'command' as const,
     label: 'Command',
     icon: Server,
-    color: '#3b82f6',
+    color: '#c9b787',
     desc: 'Managed Operations',
   },
   {
     id: 'defense' as const,
     label: 'Defense',
     icon: Shield,
-    color: '#ef4444',
+    color: '#f5f5f5',
     desc: 'Security Operations',
   },
   {
     id: 'labs' as const,
     label: 'Labs',
     icon: Brain,
-    color: '#8b5cf6',
+    color: '#8a8a8a',
     desc: 'Intelligence Engine',
   },
 ];
@@ -143,15 +143,15 @@ const CROSS_MODULE_FEED = [
 });
 
 const MODULE_COLORS: Record<string, string> = {
-  defense: '#ef4444',
-  command: '#3b82f6',
-  labs: '#8b5cf6',
+  defense: '#f5f5f5',
+  command: '#c9b787',
+  labs: '#8a8a8a',
 };
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#c9b787',
   low: DS.text.tertiary,
 };
 
@@ -322,14 +322,14 @@ const TOTAL_BREACH_EXPOSURE = ACTIVE_THREAT_EXPOSURE.reduce((s, t) => s + t.tota
 const BREACH_EXPOSURE_MAX = 50_000_000;
 
 const EXPOSURE_SEV_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#f59e0b',
+  critical: '#f5f5f5',
+  high: '#c9b787',
+  medium: '#c9b787',
 };
 
 function BreachExposureMeter() {
   const pct = Math.min(100, (TOTAL_BREACH_EXPOSURE / BREACH_EXPOSURE_MAX) * 100);
-  const meterColor = pct > 60 ? '#ef4444' : pct > 35 ? '#f97316' : '#eab308';
+  const meterColor = pct > 60 ? '#f5f5f5' : pct > 35 ? '#c9b787' : '#8a8a8a';
 
   function fmtM(n: number) {
     if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -339,33 +339,33 @@ function BreachExposureMeter() {
   return (
     <div
       className="rounded-xl border overflow-hidden"
-      style={{ borderColor: 'rgba(239,68,68,0.18)', background: 'rgba(239,68,68,0.03)' }}
+      style={{ borderColor: 'rgba(245,245,245,0.18)', background: 'rgba(245,245,245,0.03)' }}
     >
       <div
         style={{
           height: 2,
-          background: `linear-gradient(90deg, ${meterColor}, #f97316, transparent)`,
+          background: `linear-gradient(90deg, ${meterColor}, #c9b787, transparent)`,
         }}
       />
       <div
         className="px-4 py-3 border-b flex items-center gap-3"
-        style={{ borderColor: 'rgba(239,68,68,0.08)' }}
+        style={{ borderColor: 'rgba(245,245,245,0.08)' }}
       >
         <div
           className="w-6 h-6 rounded flex items-center justify-center shrink-0"
-          style={{ background: 'rgba(239,68,68,0.12)' }}
+          style={{ background: 'rgba(245,245,245,0.12)' }}
         >
-          <DollarSign className="w-3.5 h-3.5 text-red-400" />
+          <DollarSign className="w-3.5 h-3.5 text-[#f5f5f5]" />
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-wider text-red-400">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-[#f5f5f5]">
           Breach Exposure Meter
         </span>
-        <span className="text-[9px] font-mono text-red-400/50 ml-auto">
+        <span className="text-[9px] font-mono text-[#f5f5f5]/50 ml-auto">
           Live · {ACTIVE_THREAT_EXPOSURE.length} active threats
         </span>
         <Link
           href="/breach-cost"
-          className="flex items-center gap-1 text-[9px] text-red-400/70 hover:text-red-400 transition-colors"
+          className="flex items-center gap-1 text-[9px] text-[#f5f5f5]/70 hover:text-[#f5f5f5] transition-colors"
         >
           Full analysis <ArrowUpRight className="w-3 h-3" />
         </Link>
@@ -437,20 +437,20 @@ function BreachExposureMeter() {
 
 /* MITRE ATT&CK heat map — simplified tactic/technique grid */
 const MITRE_TACTICS = [
-  { id: 'TA0001', label: 'Recon', color: '#f59e0b', hits: 1 },
-  { id: 'TA0002', label: 'Resource Dev', color: '#f59e0b', hits: 0 },
-  { id: 'TA0003', label: 'Initial Access', color: '#f97316', hits: 2 },
-  { id: 'TA0004', label: 'Execution', color: '#ef4444', hits: 3 },
-  { id: 'TA0005', label: 'Persistence', color: '#ef4444', hits: 2 },
-  { id: 'TA0006', label: 'Priv Esc', color: '#f97316', hits: 1 },
-  { id: 'TA0007', label: 'Defense Ev', color: '#f97316', hits: 2 },
-  { id: 'TA0008', label: 'Cred Access', color: '#ef4444', hits: 3 },
-  { id: 'TA0009', label: 'Discovery', color: '#f59e0b', hits: 1 },
-  { id: 'TA0010', label: 'Lateral Mv', color: '#ef4444', hits: 4 },
-  { id: 'TA0011', label: 'Collection', color: '#f97316', hits: 2 },
-  { id: 'TA0040', label: 'Impact', color: '#f59e0b', hits: 1 },
-  { id: 'TA0042', label: 'C2', color: '#ef4444', hits: 3 },
-  { id: 'TA0010b', label: 'Exfiltration', color: '#f97316', hits: 2 },
+  { id: 'TA0001', label: 'Recon', color: '#c9b787', hits: 1 },
+  { id: 'TA0002', label: 'Resource Dev', color: '#c9b787', hits: 0 },
+  { id: 'TA0003', label: 'Initial Access', color: '#c9b787', hits: 2 },
+  { id: 'TA0004', label: 'Execution', color: '#f5f5f5', hits: 3 },
+  { id: 'TA0005', label: 'Persistence', color: '#f5f5f5', hits: 2 },
+  { id: 'TA0006', label: 'Priv Esc', color: '#c9b787', hits: 1 },
+  { id: 'TA0007', label: 'Defense Ev', color: '#c9b787', hits: 2 },
+  { id: 'TA0008', label: 'Cred Access', color: '#f5f5f5', hits: 3 },
+  { id: 'TA0009', label: 'Discovery', color: '#c9b787', hits: 1 },
+  { id: 'TA0010', label: 'Lateral Mv', color: '#f5f5f5', hits: 4 },
+  { id: 'TA0011', label: 'Collection', color: '#c9b787', hits: 2 },
+  { id: 'TA0040', label: 'Impact', color: '#c9b787', hits: 1 },
+  { id: 'TA0042', label: 'C2', color: '#f5f5f5', hits: 3 },
+  { id: 'TA0010b', label: 'Exfiltration', color: '#c9b787', hits: 2 },
 ];
 
 function MitreHeatMap() {
@@ -463,17 +463,17 @@ function MitreHeatMap() {
       <div
         style={{
           height: 2,
-          background: 'linear-gradient(90deg, #ef4444, #f97316, #f59e0b, transparent)',
+          background: 'linear-gradient(90deg, #f5f5f5, #c9b787, #c9b787, transparent)',
         }}
       />
       <div
         className="flex items-center gap-2 px-4 py-2.5 border-b"
         style={{ borderColor: DS.borderMuted }}
       >
-        <Grid className="w-3.5 h-3.5" style={{ color: '#ef4444' }} />
+        <Grid className="w-3.5 h-3.5" style={{ color: '#f5f5f5' }} />
         <span
           className="text-[10px] font-bold uppercase tracking-wider"
-          style={{ color: 'rgba(239,68,68,0.7)' }}
+          style={{ color: 'rgba(245,245,245,0.7)' }}
         >
           MITRE ATT&CK Tactic Heat Map
         </span>
@@ -527,8 +527,8 @@ function MitreHeatMap() {
                   height: 10,
                   borderRadius: 2,
                   background:
-                    n === 0 ? 'rgba(255,255,255,0.02)' : `rgba(239,68,68,${n * 0.18 + 0.07})`,
-                  border: `1px solid ${n === 0 ? DS.borderMuted : 'rgba(239,68,68,0.2)'}`,
+                    n === 0 ? 'rgba(255,255,255,0.02)' : `rgba(245,245,245,${n * 0.18 + 0.07})`,
+                  border: `1px solid ${n === 0 ? DS.borderMuted : 'rgba(245,245,245,0.2)'}`,
                 }}
               />
               <span className="text-[7px] font-mono" style={{ color: DS.text.muted }}>
@@ -552,12 +552,12 @@ function ThreatTimeline({ feed }: { feed: typeof CROSS_MODULE_FEED }) {
       className="rounded-xl border overflow-hidden"
       style={{ borderColor: DS.border, background: DS.surface }}
     >
-      <div style={{ height: 2, background: 'linear-gradient(90deg, #ef4444, transparent)' }} />
+      <div style={{ height: 2, background: 'linear-gradient(90deg, #f5f5f5, transparent)' }} />
       <div
         className="flex items-center gap-2 px-4 py-2.5 border-b"
         style={{ borderColor: DS.borderMuted }}
       >
-        <Activity className="w-3.5 h-3.5" style={{ color: '#3b82f6' }} />
+        <Activity className="w-3.5 h-3.5" style={{ color: '#c9b787' }} />
         <span
           className="text-[10px] font-bold uppercase tracking-wider"
           style={{ color: DS.text.secondary }}
@@ -695,7 +695,7 @@ const INVESTIGATION_STEPS = [
     id: 'detection',
     label: 'Threat Detected & Triaged',
     icon: AlertTriangle,
-    color: '#ef4444',
+    color: '#f5f5f5',
     status: 'complete' as const,
     detail:
       'SIEM alert fired at 14:22 UTC. Labs neural explorer pre-detected pattern 8min prior. Confidence: 96/100.',
@@ -704,7 +704,7 @@ const INVESTIGATION_STEPS = [
     id: 'context',
     label: 'Context Enriched',
     icon: Search,
-    color: '#f97316',
+    color: '#c9b787',
     status: 'complete' as const,
     detail:
       'APT29 TTP overlap confirmed. Asset DC-PROD-03 maps to managed client Northgate. Correlated with INC-2846 (C2 beacon).',
@@ -713,7 +713,7 @@ const INVESTIGATION_STEPS = [
     id: 'containment',
     label: 'Containment Pending HITL Approval',
     icon: Lock,
-    color: '#3b82f6',
+    color: '#c9b787',
     status: 'active' as const,
     detail:
       'Recommended action: isolate DC-PROD-03 via EDR. Playbook PB-22 ready. Requires analyst approval before execution.',
@@ -722,7 +722,7 @@ const INVESTIGATION_STEPS = [
     id: 'response',
     label: 'Policy & Response Routing',
     icon: GitBranch,
-    color: '#10b981',
+    color: '#c9b787',
     status: 'pending' as const,
     detail:
       'Post-approval: trigger SOAR playbook PB-22, update case INC-2847, notify Northgate CISO.',
@@ -749,7 +749,7 @@ function GuidedInvestigationWorkflow() {
         className="flex items-center gap-2 px-4 py-2.5 border-b"
         style={{ borderColor: DS.borderMuted, background: 'rgba(255,255,255,0.02)' }}
       >
-        <ListChecks className="w-3.5 h-3.5" style={{ color: '#3b82f6' }} />
+        <ListChecks className="w-3.5 h-3.5" style={{ color: '#c9b787' }} />
         <span
           className="text-[10px] font-bold uppercase tracking-wider"
           style={{ color: DS.text.secondary }}
@@ -759,9 +759,9 @@ function GuidedInvestigationWorkflow() {
         <span
           className="text-[8px] font-mono px-1.5 py-0.5 rounded uppercase"
           style={{
-            color: 'rgba(245,158,11,0.6)',
-            background: 'rgba(245,158,11,0.06)',
-            border: '1px solid rgba(245,158,11,0.12)',
+            color: 'rgba(201,183,135,0.6)',
+            background: 'rgba(201,183,135,0.06)',
+            border: '1px solid rgba(201,183,135,0.12)',
           }}
         >
           Demo Scenario
@@ -769,9 +769,9 @@ function GuidedInvestigationWorkflow() {
         <span
           className="ml-auto text-[8px] px-2 py-0.5 rounded font-mono uppercase font-semibold"
           style={{
-            background: 'rgba(239,68,68,0.1)',
-            color: '#ef4444',
-            border: '1px solid rgba(239,68,68,0.15)',
+            background: 'rgba(245,245,245,0.1)',
+            color: '#f5f5f5',
+            border: '1px solid rgba(245,245,245,0.15)',
           }}
         >
           P1 · Awaiting HITL
@@ -901,9 +901,9 @@ export default function AegisUnifiedOverview() {
             </h1>
             <span
               className="w-1.5 h-1.5 rounded-full animate-pulse"
-              style={{ background: '#ef4444' }}
+              style={{ background: '#f5f5f5' }}
             />
-            <span className="text-[9px] font-mono" style={{ color: 'rgba(239,68,68,0.7)' }}>
+            <span className="text-[9px] font-mono" style={{ color: 'rgba(245,245,245,0.7)' }}>
               2 active incidents
             </span>
           </div>
@@ -963,11 +963,11 @@ export default function AegisUnifiedOverview() {
       {activeRole === 'executive' && (
         <div
           className="rounded-xl border p-4"
-          style={{ borderColor: 'rgba(239,68,68,0.15)', background: 'rgba(239,68,68,0.04)' }}
+          style={{ borderColor: 'rgba(245,245,245,0.15)', background: 'rgba(245,245,245,0.04)' }}
         >
           <div
             className="text-[10px] uppercase tracking-wider font-semibold mb-2"
-            style={{ color: 'rgba(239,68,68,0.5)' }}
+            style={{ color: 'rgba(245,245,245,0.5)' }}
           >
             Executive Briefing
           </div>
@@ -982,11 +982,11 @@ export default function AegisUnifiedOverview() {
       {activeRole === 'analyst' && (
         <div
           className="rounded-xl border p-4"
-          style={{ borderColor: 'rgba(139,92,246,0.15)', background: 'rgba(139,92,246,0.04)' }}
+          style={{ borderColor: 'rgba(138,138,138,0.15)', background: 'rgba(138,138,138,0.04)' }}
         >
           <div
             className="text-[10px] uppercase tracking-wider font-semibold mb-2"
-            style={{ color: 'rgba(139,92,246,0.5)' }}
+            style={{ color: 'rgba(138,138,138,0.5)' }}
           >
             Threat Hunting Focus
           </div>
@@ -1001,11 +1001,11 @@ export default function AegisUnifiedOverview() {
       {activeRole === 'buyer' && (
         <div
           className="rounded-xl border p-4"
-          style={{ borderColor: 'rgba(59,130,246,0.15)', background: 'rgba(59,130,246,0.04)' }}
+          style={{ borderColor: 'rgba(201,183,135,0.15)', background: 'rgba(201,183,135,0.04)' }}
         >
           <div
             className="text-[10px] uppercase tracking-wider font-semibold mb-2"
-            style={{ color: 'rgba(59,130,246,0.5)' }}
+            style={{ color: 'rgba(201,183,135,0.5)' }}
           >
             Product Demo View
           </div>
@@ -1026,17 +1026,17 @@ export default function AegisUnifiedOverview() {
         <div
           style={{
             height: 2,
-            background: 'linear-gradient(90deg, #ef4444, #f97316, #3b82f6, transparent)',
+            background: 'linear-gradient(90deg, #f5f5f5, #c9b787, #c9b787, transparent)',
           }}
         />
         <div className="grid grid-cols-3 md:grid-cols-6">
           {[
-            { label: 'Open Incidents', value: '7', color: '#ef4444', pulse: true },
-            { label: 'Critical Alerts', value: '8', color: '#f97316' },
-            { label: 'SLA Risks', value: '3', color: '#f59e0b' },
-            { label: 'Managed Endpoints', value: '2.4K', color: '#3b82f6' },
-            { label: 'Active Investigations', value: '4', color: '#8b5cf6' },
-            { label: 'MTTD', value: '4.2m', color: '#10b981', sub: '↓ 18% this week' },
+            { label: 'Open Incidents', value: '7', color: '#f5f5f5', pulse: true },
+            { label: 'Critical Alerts', value: '8', color: '#c9b787' },
+            { label: 'SLA Risks', value: '3', color: '#c9b787' },
+            { label: 'Managed Endpoints', value: '2.4K', color: '#c9b787' },
+            { label: 'Active Investigations', value: '4', color: '#8a8a8a' },
+            { label: 'MTTD', value: '4.2m', color: '#c9b787', sub: '↓ 18% this week' },
           ].map((c, i) => (
             <div
               key={c.label}
@@ -1064,7 +1064,7 @@ export default function AegisUnifiedOverview() {
                 {c.label}
               </div>
               {c.sub && (
-                <div className="text-[7px] mt-0.5" style={{ color: '#10b981' }}>
+                <div className="text-[7px] mt-0.5" style={{ color: '#c9b787' }}>
                   {c.sub}
                 </div>
               )}
@@ -1120,7 +1120,7 @@ export default function AegisUnifiedOverview() {
           {/* Priority Work */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5" style={{ color: '#ef4444' }} />
+              <Zap className="w-3.5 h-3.5" style={{ color: '#f5f5f5' }} />
               <span
                 className="text-[10px] font-bold uppercase tracking-wider"
                 style={{ color: DS.text.secondary }}
@@ -1134,9 +1134,9 @@ export default function AegisUnifiedOverview() {
                 <span
                   className="text-[8px] font-mono px-1.5 py-0.5 rounded"
                   style={{
-                    color: '#ef4444',
-                    background: 'rgba(239,68,68,0.08)',
-                    border: '1px solid rgba(239,68,68,0.15)',
+                    color: '#f5f5f5',
+                    background: 'rgba(245,245,245,0.08)',
+                    border: '1px solid rgba(245,245,245,0.15)',
                   }}
                 >
                   {criticalCount} critical
@@ -1144,9 +1144,9 @@ export default function AegisUnifiedOverview() {
                 <span
                   className="text-[8px] font-mono px-1.5 py-0.5 rounded"
                   style={{
-                    color: '#f97316',
-                    background: 'rgba(249,115,22,0.08)',
-                    border: '1px solid rgba(249,115,22,0.15)',
+                    color: '#c9b787',
+                    background: 'rgba(201,183,135,0.08)',
+                    border: '1px solid rgba(201,183,135,0.15)',
                   }}
                 >
                   {highCount} high
@@ -1214,7 +1214,7 @@ export default function AegisUnifiedOverview() {
                                 {item.assignee}
                               </span>
                             ) : (
-                              <span className="text-[9px] text-red-400/60">Unassigned</span>
+                              <span className="text-[9px] text-[#f5f5f5]/60">Unassigned</span>
                             )}
                             {item.technique && (
                               <span
@@ -1233,12 +1233,12 @@ export default function AegisUnifiedOverview() {
                           className={cn(
                             'text-[9px] font-bold px-1.5 py-0.5 rounded uppercase',
                             item.severity === 'P1'
-                              ? 'text-red-400 bg-red-500/10'
+                              ? 'text-[#f5f5f5] bg-[#f5f5f5]/10'
                               : item.severity === 'P2'
-                                ? 'text-orange-400 bg-orange-500/10'
+                                ? 'text-[#c9b787] bg-[#c9b787]/10'
                                 : item.severity === 'P3'
-                                  ? 'text-amber-400 bg-amber-500/10'
-                                  : 'text-violet-400 bg-violet-500/10',
+                                  ? 'text-[#c9b787] bg-[#c9b787]/10'
+                                  : 'text-[#8a8a8a] bg-[#8a8a8a]/10',
                           )}
                         >
                           {item.severity}
@@ -1246,7 +1246,7 @@ export default function AegisUnifiedOverview() {
                         {item.score > 0 && (
                           <span
                             className="text-sm font-bold font-mono"
-                            style={{ color: item.score >= 90 ? '#ef4444' : '#f97316' }}
+                            style={{ color: item.score >= 90 ? '#f5f5f5' : '#c9b787' }}
                           >
                             {item.score}
                           </span>
@@ -1258,11 +1258,11 @@ export default function AegisUnifiedOverview() {
                               item.status === 'In Progress' ||
                               item.status === 'Running' ||
                               item.status === 'Executing'
-                              ? 'text-blue-400 bg-blue-500/10'
+                              ? 'text-[#c9b787] bg-[#c9b787]/10'
                               : item.status === 'SLA Breach'
-                                ? 'text-red-400 bg-red-500/10'
+                                ? 'text-[#f5f5f5] bg-[#f5f5f5]/10'
                                 : item.status === 'Awaiting Review'
-                                  ? 'text-amber-400 bg-amber-500/10'
+                                  ? 'text-[#c9b787] bg-[#c9b787]/10'
                                   : 'text-white/30 bg-white/5',
                           )}
                         >
@@ -1328,10 +1328,10 @@ export default function AegisUnifiedOverview() {
             style={{ borderColor: DS.border, background: DS.surface }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <Network className="w-3.5 h-3.5" style={{ color: '#8b5cf6' }} />
+              <Network className="w-3.5 h-3.5" style={{ color: '#8a8a8a' }} />
               <span
                 className="text-[10px] font-bold uppercase tracking-wider"
-                style={{ color: '#8b5cf6' }}
+                style={{ color: '#8a8a8a' }}
               >
                 Cross-Module Correlations
               </span>
@@ -1376,7 +1376,7 @@ export default function AegisUnifiedOverview() {
             style={{ borderColor: DS.border, background: DS.surface }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <BarChart3 className="w-3.5 h-3.5" style={{ color: '#10b981' }} />
+              <BarChart3 className="w-3.5 h-3.5" style={{ color: '#c9b787' }} />
               <span
                 className="text-[10px] font-bold uppercase tracking-wider"
                 style={{ color: DS.text.secondary }}
@@ -1392,7 +1392,7 @@ export default function AegisUnifiedOverview() {
                     ? { score: 91, label: 'Nominal' }
                     : { score: 85, label: 'Active' };
               const healthColor =
-                health.score >= 90 ? '#10b981' : health.score >= 70 ? '#f59e0b' : '#ef4444';
+                health.score >= 90 ? '#c9b787' : health.score >= 70 ? '#c9b787' : '#f5f5f5';
               return (
                 <div
                   key={ws.id}

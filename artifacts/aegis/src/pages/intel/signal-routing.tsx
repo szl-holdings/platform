@@ -117,16 +117,16 @@ function generateEvent(): RelayEvent {
 }
 
 const PRIVACY_STYLES = {
-  public: { color: 'text-emerald-400', bg: 'bg-emerald-400/10', label: 'Public' },
-  internal: { color: 'text-blue-400', bg: 'bg-blue-400/10', label: 'Internal' },
-  confidential: { color: 'text-amber-400', bg: 'bg-amber-400/10', label: 'Confidential' },
-  restricted: { color: 'text-red-400', bg: 'bg-red-400/10', label: 'Restricted' },
+  public: { color: 'text-[#c9b787]', bg: 'bg-[#c9b787]/10', label: 'Public' },
+  internal: { color: 'text-[#c9b787]', bg: 'bg-[#c9b787]/10', label: 'Internal' },
+  confidential: { color: 'text-[#c9b787]', bg: 'bg-[#c9b787]/10', label: 'Confidential' },
+  restricted: { color: 'text-[#f5f5f5]', bg: 'bg-[#f5f5f5]/10', label: 'Restricted' },
 };
 
 const STATUS_STYLES = {
-  routed: { color: 'text-emerald-400', dot: 'bg-emerald-400' },
-  cached: { color: 'text-cyan-400', dot: 'bg-cyan-400' },
-  blocked: { color: 'text-red-400', dot: 'bg-red-400 animate-pulse' },
+  routed: { color: 'text-[#c9b787]', dot: 'bg-[#c9b787]' },
+  cached: { color: 'text-[#8a8a8a]', dot: 'bg-[#8a8a8a]' },
+  blocked: { color: 'text-[#f5f5f5]', dot: 'bg-[#f5f5f5] animate-pulse' },
 };
 
 const ROUTING_RULES = [
@@ -192,13 +192,13 @@ export default function SignalRouting() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-1">
-          <div className="w-8 h-8 rounded-lg bg-cyan-400/15 flex items-center justify-center">
-            <Radio className="w-4 h-4 text-cyan-400" />
+          <div className="w-8 h-8 rounded-lg bg-[#8a8a8a]/15 flex items-center justify-center">
+            <Radio className="w-4 h-4 text-[#8a8a8a]" />
           </div>
           <h1 className="text-xl font-display font-bold text-foreground tracking-tight">
             Signal Routing Console
           </h1>
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-cyan-400/10 text-cyan-400 border border-cyan-400/20 animate-pulse">
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#8a8a8a]/10 text-[#8a8a8a] border border-[#8a8a8a]/20 animate-pulse">
             live
           </span>
         </div>
@@ -217,12 +217,12 @@ export default function SignalRouting() {
             color: 'text-foreground',
             bg: '',
           },
-          { label: 'Avg Latency', value: `${avgLatency}ms`, color: 'text-cyan-400', bg: '' },
-          { label: 'Cached (cost saved)', value: cached, color: 'text-emerald-400', bg: '' },
+          { label: 'Avg Latency', value: `${avgLatency}ms`, color: 'text-[#8a8a8a]', bg: '' },
+          { label: 'Cached (cost saved)', value: cached, color: 'text-[#c9b787]', bg: '' },
           {
             label: 'Blocked (policy)',
             value: blocked,
-            color: blocked > 0 ? 'text-red-400' : 'text-emerald-400',
+            color: blocked > 0 ? 'text-[#f5f5f5]' : 'text-[#c9b787]',
             bg: '',
           },
         ].map((s) => (
@@ -238,7 +238,7 @@ export default function SignalRouting() {
       {/* Model routing map */}
       <div className="bg-card/60 border border-border rounded-xl p-5">
         <h3 className="text-sm font-display font-semibold text-foreground mb-4 flex items-center gap-2">
-          <Globe className="w-3.5 h-3.5 text-cyan-400" />
+          <Globe className="w-3.5 h-3.5 text-[#8a8a8a]" />
           Oracle Fleet — Model Registry
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -247,7 +247,7 @@ export default function SignalRouting() {
               key={model.id}
               className={cn(
                 'bg-muted/10 rounded-lg border p-4',
-                model.status === 'optimal' ? 'border-border/50' : 'border-amber-400/20',
+                model.status === 'optimal' ? 'border-border/50' : 'border-[#c9b787]/20',
               )}
             >
               <div className="flex items-center justify-between mb-2">
@@ -256,8 +256,8 @@ export default function SignalRouting() {
                   className={cn(
                     'text-[10px] font-mono px-1.5 py-0.5 rounded',
                     model.status === 'optimal'
-                      ? 'text-emerald-400 bg-emerald-400/10'
-                      : 'text-amber-400 bg-amber-400/10',
+                      ? 'text-[#c9b787] bg-[#c9b787]/10'
+                      : 'text-[#c9b787] bg-[#c9b787]/10',
                   )}
                 >
                   {model.status}
@@ -275,17 +275,17 @@ export default function SignalRouting() {
                 </div>
                 <div>
                   <span className="text-muted-foreground">Requests: </span>
-                  <span className="font-mono text-cyan-400">{model.requests.toLocaleString()}</span>
+                  <span className="font-mono text-[#8a8a8a]">{model.requests.toLocaleString()}</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Accuracy: </span>
-                  <span className="font-mono text-emerald-400">{model.accuracy}%</span>
+                  <span className="font-mono text-[#c9b787]">{model.accuracy}%</span>
                 </div>
               </div>
               <div className="mt-2">
                 <div className="h-1 bg-border rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-cyan-400/60 rounded-full"
+                    className="h-full bg-[#8a8a8a]/60 rounded-full"
                     style={{ width: `${(model.requests / 5000) * 100}%` }}
                   />
                 </div>
@@ -299,7 +299,7 @@ export default function SignalRouting() {
       <div className="bg-card/60 border border-border rounded-xl overflow-hidden">
         <div className="px-5 py-3 border-b border-border">
           <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
-            <Lock className="w-3.5 h-3.5 text-amber-400" />
+            <Lock className="w-3.5 h-3.5 text-[#c9b787]" />
             Privacy-Aware Routing Rules
           </h3>
           <p className="text-[10px] text-muted-foreground/70 mt-0.5">
@@ -320,7 +320,7 @@ export default function SignalRouting() {
                   <p className="text-[10px] text-muted-foreground/60">{rule.reason}</p>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/30 shrink-0" />
-                <div className="text-xs font-mono text-cyan-400 min-w-[160px]">{rule.target}</div>
+                <div className="text-xs font-mono text-[#8a8a8a] min-w-[160px]">{rule.target}</div>
                 <span
                   className={cn(
                     'text-[10px] font-mono px-2 py-0.5 rounded-full',
@@ -340,17 +340,17 @@ export default function SignalRouting() {
       <div className="bg-card/60 border border-border rounded-xl overflow-hidden">
         <div className="px-5 py-3 border-b border-border flex items-center justify-between">
           <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
-            <Activity className="w-3.5 h-3.5 text-emerald-400" />
+            <Activity className="w-3.5 h-3.5 text-[#c9b787]" />
             Live Relay Stream
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-[#c9b787] animate-pulse" />
           </h3>
           <button
             onClick={() => setPaused((p) => !p)}
             className={cn(
               'text-[10px] font-mono px-3 py-1 rounded border transition-colors',
               paused
-                ? 'border-emerald-400/30 text-emerald-400 bg-emerald-400/10'
-                : 'border-amber-400/30 text-amber-400 bg-amber-400/10',
+                ? 'border-[#c9b787]/30 text-[#c9b787] bg-[#c9b787]/10'
+                : 'border-[#c9b787]/30 text-[#c9b787] bg-[#c9b787]/10',
             )}
           >
             {paused ? '▶ Resume' : '⏸ Pause'}
@@ -395,7 +395,7 @@ export default function SignalRouting() {
                       {event.timestamp.toLocaleTimeString('en-US', { hour12: false })}
                     </td>
                     <td className="px-3 py-1.5 font-medium text-foreground">{event.source}</td>
-                    <td className="px-3 py-1.5 text-cyan-400 font-mono text-[10px]">
+                    <td className="px-3 py-1.5 text-[#8a8a8a] font-mono text-[10px]">
                       {event.targetModel}
                     </td>
                     <td className="px-3 py-1.5 text-muted-foreground">{event.requestType}</td>

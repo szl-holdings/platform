@@ -218,7 +218,7 @@ export default function PresenterMode() {
               marginBottom: 4,
             }}
           >
-            Presenter Mode · SZL Holdings Investor Deck
+            Presenter Mode · Aegis Investor Deck
           </div>
           <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)' }}>
             Slide {current} of {TOTAL} · arrow keys / space to advance · syncs with audience window
@@ -242,7 +242,7 @@ export default function PresenterMode() {
           <button
             type="button"
             onClick={() => setRunning((r) => !r)}
-            style={btnStyle(running ? 'rgba(255,255,255,0.08)' : 'rgba(34,197,94,0.18)')}
+            style={btnStyle(running ? 'rgba(255,255,255,0.08)' : 'rgba(201,183,135,0.18)')}
           >
             {running ? 'Pause' : 'Resume'}
           </button>

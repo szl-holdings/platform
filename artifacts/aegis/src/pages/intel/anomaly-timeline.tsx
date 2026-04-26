@@ -128,24 +128,24 @@ export default function AnomalyTimeline() {
                   className={cn(
                     'absolute left-6 w-5 h-5 rounded-full border-2 flex items-center justify-center -translate-x-1/2',
                     a.severity === 'critical'
-                      ? 'bg-red-400/20 border-red-400'
+                      ? 'bg-[#f5f5f5]/20 border-[#f5f5f5]'
                       : a.severity === 'high'
-                        ? 'bg-orange-400/20 border-orange-400'
+                        ? 'bg-[#c9b787]/20 border-[#c9b787]'
                         : a.severity === 'medium'
-                          ? 'bg-amber-400/20 border-amber-400'
-                          : 'bg-blue-400/20 border-blue-400',
+                          ? 'bg-[#c9b787]/20 border-[#c9b787]'
+                          : 'bg-[#c9b787]/20 border-[#c9b787]',
                   )}
                 >
                   <div
                     className={cn(
                       'w-2 h-2 rounded-full',
                       a.severity === 'critical'
-                        ? 'bg-red-400'
+                        ? 'bg-[#f5f5f5]'
                         : a.severity === 'high'
-                          ? 'bg-orange-400'
+                          ? 'bg-[#c9b787]'
                           : a.severity === 'medium'
-                            ? 'bg-amber-400'
-                            : 'bg-blue-400',
+                            ? 'bg-[#c9b787]'
+                            : 'bg-[#c9b787]',
                     )}
                   />
                 </div>
@@ -165,12 +165,12 @@ export default function AnomalyTimeline() {
                       className={cn(
                         'px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider',
                         a.severity === 'critical'
-                          ? 'bg-red-400/10 text-red-400'
+                          ? 'bg-[#f5f5f5]/10 text-[#f5f5f5]'
                           : a.severity === 'high'
-                            ? 'bg-orange-400/10 text-orange-400'
+                            ? 'bg-[#c9b787]/10 text-[#c9b787]'
                             : a.severity === 'medium'
-                              ? 'bg-amber-400/10 text-amber-400'
-                              : 'bg-blue-400/10 text-blue-400',
+                              ? 'bg-[#c9b787]/10 text-[#c9b787]'
+                              : 'bg-[#c9b787]/10 text-[#c9b787]',
                       )}
                     >
                       {a.severity}
@@ -179,10 +179,10 @@ export default function AnomalyTimeline() {
                       className={cn(
                         'px-2 py-0.5 rounded-full text-[10px] font-medium capitalize',
                         a.status === 'resolved'
-                          ? 'bg-emerald-400/10 text-emerald-400'
+                          ? 'bg-[#c9b787]/10 text-[#c9b787]'
                           : a.status === 'investigating'
-                            ? 'bg-amber-400/10 text-amber-400'
-                            : 'bg-cyan-400/10 text-cyan-400',
+                            ? 'bg-[#c9b787]/10 text-[#c9b787]'
+                            : 'bg-[#8a8a8a]/10 text-[#8a8a8a]',
                       )}
                     >
                       {a.status}
@@ -195,7 +195,7 @@ export default function AnomalyTimeline() {
                   <h3 className="text-sm font-semibold text-foreground">{a.title}</h3>
                   <p className="text-xs text-muted-foreground mt-1">{a.impact}</p>
                   {a.resolution && (
-                    <p className="text-xs text-emerald-400/80 mt-2 flex items-center gap-1">
+                    <p className="text-xs text-[#c9b787]/80 mt-2 flex items-center gap-1">
                       <Shield className="w-3 h-3" /> {a.resolution}
                     </p>
                   )}

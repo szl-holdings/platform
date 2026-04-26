@@ -183,9 +183,9 @@ function PanelHead({
 const PRISM_DATA = [
   {
     key: 'P',
-    name: 'LUMINA',
+    name: 'Pulse',
     icon: Heart,
-    color: '#d4a054',
+    color: '#c9b787',
     href: '/operations/prism/pulse',
     score: 72,
   },

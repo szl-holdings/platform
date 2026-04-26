@@ -1,13 +1,4 @@
 {
-  "artifacts/aegis/src/pages/intel/ai-command-center.tsx": {
-    "LUMINA": 1
-  },
-  "artifacts/aegis/src/pages/pulse.tsx": {
-    "LUMINA": 2
-  },
-  "artifacts/aegis/src/pages/threat-graph.tsx": {
-    "LUMINA": 1
-  },
   "artifacts/carlota-jo/src/data/property-twin.ts": {
     "TENAX": 1
   },
@@ -64,12 +55,6 @@
   "artifacts/command/src/pages/marketing/leads.tsx": {
     "TENAX": 1
   },
-  "artifacts/counsel/src/App.tsx": {
-    "TENAX": 2
-  },
-  "artifacts/lyte-command-center/src/App.tsx": {
-    "TENAX": 2
-  },
   "artifacts/mockup-sandbox/src/pages/AuditTrail.tsx": {
     "LUMINA": 3
   },
@@ -90,9 +75,6 @@
   },
   "artifacts/pulse/src/App.tsx": {
     "LUMINA": 4
-  },
-  "artifacts/pulse/src/components/MeshCard.tsx": {
-    "TENAX": 3
   },
   "artifacts/pulse/src/components/Shell.tsx": {
     "LUMINA": 1
@@ -163,10 +145,6 @@
   "artifacts/szl-holdings/src/pages/helm-console.tsx": {
     "LUMINA": 1
   },
-  "artifacts/szl-holdings/src/pages/landing.tsx": {
-    "TENAX": 2,
-    "LUMINA": 1
-  },
   "artifacts/szl-holdings/src/pages/lp-sentiment-pulse.tsx": {
     "LUMINA": 1
   },
@@ -197,30 +175,6 @@
   "artifacts/szl-holdings/src/pages/updates.tsx": {
     "Cortex": 1
   },
-  "artifacts/szl-holdings-mobile/app/(shell)/advisory/(tabs)/agent-chat.tsx": {
-    "FORGE": 1
-  },
-  "artifacts/szl-holdings-mobile/app/(shell)/advisory/(tabs)/profile.tsx": {
-    "DOMAINE": 1,
-    "KORA": 1
-  },
-  "artifacts/szl-holdings-mobile/app/(shell)/defense/(tabs)/agent-chat.tsx": {
-    "FORGE": 1
-  },
-  "artifacts/szl-holdings-mobile/app/(shell)/defense/(tabs)/mcp-tools.tsx": {
-    "PARAGON": 1
-  },
-  "artifacts/szl-holdings-mobile/app/(shell)/defense/(tabs)/profile.tsx": {
-    "KORA": 1,
-    "SEXTANT": 1
-  },
-  "artifacts/szl-holdings-mobile/app/(shell)/fleet/(tabs)/agent-chat.tsx": {
-    "FORGE": 1
-  },
-  "artifacts/szl-holdings-mobile/app/(shell)/fleet/(tabs)/profile.tsx": {
-    "PARAGON": 1,
-    "KORA": 1
-  },
   "artifacts/szl-holdings-mobile/app/(shell)/intelligence/index.tsx": {
     "LUMINA": 1
   },
@@ -235,20 +189,6 @@
   },
   "artifacts/szl-holdings-mobile/app/(shell)/properties/(tabs)/profile.tsx": {
     "LUMINA": 1
-  },
-  "artifacts/szl-holdings-mobile/app/(shell)/quick-actions.tsx": {
-    "DOMAINE": 3,
-    "KORA": 1,
-    "PARAGON": 2
-  },
-  "artifacts/terra/src/pages/pulse.tsx": {
-    "LUMINA": 2
-  },
-  "artifacts/vessels/src/pages/disruption-forecast.tsx": {
-    "LUMINA": 1
-  },
-  "artifacts/vessels/src/pages/pulse.tsx": {
-    "LUMINA": 2
   },
   "lib/pulse-evals/src/runner.ts": {
     "LUMINA": 3

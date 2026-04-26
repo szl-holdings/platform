@@ -7,12 +7,12 @@ export function Scene2() {
 
   useEffect(() => {
     const timers = [
-      setTimeout(() => setActiveSurface(0), 0), // LUMINA
+      setTimeout(() => setActiveSurface(0), 0), // Pulse
       setTimeout(() => setActiveSurface(1), 2500), // Vessels
       setTimeout(() => setActiveSurface(2), 5000), // Terra
       setTimeout(() => setActiveSurface(3), 7500), // Aegis
       setTimeout(() => setActiveSurface(4), 10000), // Carlota Jo
-      setTimeout(() => setActiveSurface(5), 12500), // TENAX
+      setTimeout(() => setActiveSurface(5), 12500), // Aegis
       setTimeout(() => setActiveSurface(6), 15000), // Lyte
       setTimeout(() => setActiveSurface(7), 17500), // Counsel
       setTimeout(() => setActiveSurface(8), 20000), // Counsel
@@ -23,7 +23,7 @@ export function Scene2() {
 
   const surfaces = [
     {
-      name: 'LUMINA',
+      name: 'Pulse',
       desc: 'EXECUTIVE BRIEFING',
       color: 'var(--color-text-primary)',
       mock: (
@@ -213,7 +213,7 @@ export function Scene2() {
       ),
     },
     {
-      name: 'TENAX',
+      name: 'Aegis',
       desc: 'CYBER POSTURE',
       color: 'var(--color-critical)',
       mock: (

@@ -2,13 +2,13 @@ import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, ProgressBar } from '../components/ui';
 
 const LAYERS = [
-  { id: 1, name: 'Signal Mesh', description: 'Ingests, normalizes, deduplicates, and routes business signals from all connected sources.', status: 'operational', latency: '12ms', throughput: '2,400 events/hr', health: 99, color: '#06b6d4' },
-  { id: 2, name: 'Causal Core', description: 'Traces signal causality, builds evidence graphs, and surfaces correlated events for operator review.', status: 'operational', latency: '28ms', throughput: '840 graphs/hr', health: 98, color: '#3b82f6' },
-  { id: 3, name: 'Context Engine', description: 'Assembles context packs for workcells — enriches signals with historical data, domain schemas, and operator instructions.', status: 'operational', latency: '45ms', throughput: '420 packs/hr', health: 97, color: '#8b5cf6' },
-  { id: 4, name: 'Workcell Engine', description: 'Provisions, executes, and monitors governed workcells. Binds agents, tools, policies, and proof trails.', status: 'operational', latency: '820ms avg', throughput: '48 cells/hr', health: 96, color: '#6366f1' },
+  { id: 1, name: 'Signal Mesh', description: 'Ingests, normalizes, deduplicates, and routes business signals from all connected sources.', status: 'operational', latency: '12ms', throughput: '2,400 events/hr', health: 99, color: '#8a8a8a' },
+  { id: 2, name: 'Causal Core', description: 'Traces signal causality, builds evidence graphs, and surfaces correlated events for operator review.', status: 'operational', latency: '28ms', throughput: '840 graphs/hr', health: 98, color: '#c9b787' },
+  { id: 3, name: 'Context Engine', description: 'Assembles context packs for workcells — enriches signals with historical data, domain schemas, and operator instructions.', status: 'operational', latency: '45ms', throughput: '420 packs/hr', health: 97, color: '#8a8a8a' },
+  { id: 4, name: 'Workcell Engine', description: 'Provisions, executes, and monitors governed workcells. Binds agents, tools, policies, and proof trails.', status: 'operational', latency: '820ms avg', throughput: '48 cells/hr', health: 96, color: '#8a8a8a' },
   { id: 5, name: 'Covenant Layer', description: 'Policy gate enforcement — every action passes through the Covenant Layer before execution. Non-bypassable.', status: 'operational', latency: '8ms', throughput: 'all actions', health: 100, color: '#b08d52' },
-  { id: 6, name: 'MirrorEval', description: 'Evaluates recommendations against counterfactuals, computes confidence delta, and generates reasoning chains.', status: 'operational', latency: '1.2s avg', throughput: '240 evals/hr', health: 95, color: '#10b981' },
-  { id: 7, name: 'Proof Ledger', description: 'Appends immutable proof entries for every governed execution. SHA-256 hash chain — no tampering, no silent deletions.', status: 'operational', latency: '4ms', throughput: 'all executions', health: 100, color: '#f59e0b' },
+  { id: 6, name: 'MirrorEval', description: 'Evaluates recommendations against counterfactuals, computes confidence delta, and generates reasoning chains.', status: 'operational', latency: '1.2s avg', throughput: '240 evals/hr', health: 95, color: '#c9b787' },
+  { id: 7, name: 'Proof Ledger', description: 'Appends immutable proof entries for every governed execution. SHA-256 hash chain — no tampering, no silent deletions.', status: 'operational', latency: '4ms', throughput: 'all executions', health: 100, color: '#c9b787' },
 ];
 
 const CONNECTOR_TARGETS = [
@@ -39,9 +39,9 @@ export function Fabric() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <KpiCard label="FABRIC LAYERS" value={7} sub="all operational" accent="#10b981" />
-        <KpiCard label="AVG HEALTH" value="98%" sub="across all layers" accent="#10b981" />
-        <KpiCard label="AVG LATENCY" value="302ms" sub="end-to-end" accent="#3b82f6" />
+        <KpiCard label="FABRIC LAYERS" value={7} sub="all operational" accent="#c9b787" />
+        <KpiCard label="AVG HEALTH" value="98%" sub="across all layers" accent="#c9b787" />
+        <KpiCard label="AVG LATENCY" value="302ms" sub="end-to-end" accent="#c9b787" />
         <KpiCard label="PROOF INTEGRITY" value="100%" sub="chain intact" accent="#b08d52" />
       </div>
 
@@ -58,7 +58,7 @@ export function Fabric() {
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="font-semibold text-sm" style={{ color: 'var(--color-a11oy-text)' }}>{layer.name}</span>
-                    <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(16,185,129,0.12)', color: '#10b981' }}>{layer.status}</span>
+                    <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.12)', color: '#c9b787' }}>{layer.status}</span>
                   </div>
                   <p className="text-xs" style={{ color: 'var(--color-a11oy-text-sub)' }}>{layer.description}</p>
                 </div>
@@ -89,7 +89,7 @@ export function Fabric() {
                     <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>{c.note}</div>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: c.status === 'demo' ? 'rgba(245,158,11,0.12)' : 'rgba(155,172,196,0.1)', color: c.status === 'demo' ? '#f59e0b' : '#9bacc4' }}>
+                    <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: c.status === 'demo' ? 'rgba(201,183,135,0.12)' : 'rgba(155,172,196,0.1)', color: c.status === 'demo' ? '#c9b787' : '#5e5e5e' }}>
                       {c.status}
                     </span>
                     <div className="mt-0.5" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{c.domain}</div>
@@ -98,7 +98,7 @@ export function Fabric() {
               </Card>
             ))}
           </div>
-          <div className="mt-3 text-xs p-3 rounded" style={{ backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
+          <div className="mt-3 text-xs p-3 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
             All connectors are integration targets. No live data in demo mode. Real connectors require credentials and partner agreements.
           </div>
         </div>
@@ -128,7 +128,7 @@ export function Fabric() {
             <div className="flex flex-col gap-1.5">
               {['Signal reference', 'Policy clause evaluation', 'Approval actor and timestamp', 'Execution output hash', 'Verification result'].map(item => (
                 <div key={item} className="flex items-center gap-2">
-                  <span style={{ color: '#10b981' }}>✓</span>
+                  <span style={{ color: '#c9b787' }}>✓</span>
                   <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{item}</span>
                 </div>
               ))}

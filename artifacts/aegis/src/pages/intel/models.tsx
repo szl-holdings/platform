@@ -73,7 +73,7 @@ function fmt(ts: string) {
 function ConfidenceBadge({ value }: { value: number | null }) {
   if (value === null) return <span className="text-muted-foreground text-xs">—</span>;
   const pct = Math.round(value * 100);
-  const color = pct >= 90 ? 'text-emerald-400' : pct >= 80 ? 'text-amber-400' : 'text-red-400';
+  const color = pct >= 90 ? 'text-[#c9b787]' : pct >= 80 ? 'text-[#c9b787]' : 'text-[#f5f5f5]';
   return <span className={cn('font-mono text-xs font-semibold', color)}>{pct}%</span>;
 }
 
@@ -83,7 +83,7 @@ function StatusPill({ status }: { status: string }) {
     <span
       className={cn(
         'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium capitalize',
-        active ? 'bg-emerald-400/10 text-emerald-400' : 'bg-muted text-muted-foreground',
+        active ? 'bg-[#c9b787]/10 text-[#c9b787]' : 'bg-muted text-muted-foreground',
       )}
     >
       {active ? (
@@ -98,9 +98,9 @@ function StatusPill({ status }: { status: string }) {
 
 function PlatformBadge({ platform }: { platform: string }) {
   const colors: Record<string, string> = {
-    Web: 'bg-blue-400/10 text-blue-400',
-    Mobile: 'bg-violet-400/10 text-violet-400',
-    API: 'bg-cyan-400/10 text-cyan-400',
+    Web: 'bg-[#c9b787]/10 text-[#c9b787]',
+    Mobile: 'bg-[#8a8a8a]/10 text-[#8a8a8a]',
+    API: 'bg-[#8a8a8a]/10 text-[#8a8a8a]',
     Internal: 'bg-muted text-muted-foreground',
   };
   return (
@@ -135,7 +135,7 @@ function EmptyState({
 
 function ApiErrorBanner({ message }: { message: string }) {
   return (
-    <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-400">
+    <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 text-xs text-[#f5f5f5]">
       <AlertTriangle className="w-4 h-4 flex-shrink-0" />
       <span>{message}</span>
     </div>
@@ -179,7 +179,7 @@ function ModelRegistryTable({
         </div>
         <div className="bg-card/60 border border-border rounded-xl p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Active</p>
-          <p className="text-2xl font-bold text-emerald-400">{activeCount}</p>
+          <p className="text-2xl font-bold text-[#c9b787]">{activeCount}</p>
         </div>
         <div className="bg-card/60 border border-border rounded-xl p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Deprecated</p>
@@ -189,7 +189,7 @@ function ModelRegistryTable({
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
             Avg Confidence
           </p>
-          <p className="text-2xl font-bold text-cyan-400">
+          <p className="text-2xl font-bold text-[#8a8a8a]">
             {avgConfidence != null ? `${Math.round(avgConfidence * 100)}%` : '—'}
           </p>
         </div>

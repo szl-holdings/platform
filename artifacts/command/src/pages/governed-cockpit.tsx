@@ -25,7 +25,7 @@ const PORTFOLIO_EVIDENCE: EvidenceSource[] = [
     type: 'model',
     timestamp: FRESH_2M,
     excerpt:
-      'PARAGON: 3 critical threat signals. SEXTANT: 6 fleet alerts. DOMAINE: 2 covenant triggers. LUMINA: 1 executive dissent. Correlation matrix: 0.71 between PARAGON/SEXTANT threat clusters.',
+      'Aegis: 3 critical threat signals. Vessels: 6 fleet alerts. Terra: 2 covenant triggers. Pulse: 1 executive dissent. Correlation matrix: 0.71 between Aegis/Vessels threat clusters.',
   },
   {
     id: 'ev-cmd2',
@@ -33,7 +33,7 @@ const PORTFOLIO_EVIDENCE: EvidenceSource[] = [
     type: 'api',
     timestamp: FRESH_9M,
     excerpt:
-      'Composite health score: 7.2/10. PRISM: 8.4 (strong). KORA: 7.1. SEXTANT: 6.8 (declining). DOMAINE: 7.4. PARAGON: 6.9.',
+      'Composite health score: 7.2/10. PRISM: 8.4 (strong). Lyte: 7.1. Vessels: 6.8 (declining). Terra: 7.4. Aegis: 6.9.',
   },
   {
     id: 'ev-cmd3',
@@ -72,7 +72,7 @@ const CORRELATION_EVIDENCE: EvidenceSource[] = [
   },
   {
     id: 'ev-cor3',
-    label: 'LUMINA Rate Signal',
+    label: 'Pulse Rate Signal',
     type: 'signal',
     timestamp: FRESH_2M,
     excerpt:
@@ -87,7 +87,7 @@ const APPROVAL_EVIDENCE: EvidenceSource[] = [
     type: 'api',
     timestamp: FRESH_2M,
     excerpt:
-      '1. PARAGON: APT-29 containment (CISO needed). 2. SEXTANT: Horizon Star emergency port call (Ops). 3. DOMAINE: Meridian acquisition financing (IC). Aggregate exposure: $4.7M decisions.',
+      '1. Aegis: APT-29 containment (CISO needed). 2. Vessels: Horizon Star emergency port call (Ops). 3. Terra: Meridian acquisition financing (IC). Aggregate exposure: $4.7M decisions.',
   },
   {
     id: 'ev-appr2',
@@ -305,7 +305,7 @@ export default function GovernedCockpit() {
         >
           <div className="space-y-2">
             <p className="text-sm" style={{ color: '#c8d8e8' }}>
-              47 signals ingested across Aegis, Vessels, Terra, and LUMINA in the last 2 minutes.
+              47 signals ingested across Aegis, Vessels, Terra, and Pulse in the last 2 minutes.
               Composite portfolio health: 7.2/10. Counsel has correlated signals across domains —
               notable overlap between Aegis threat activity and Vessels counterparty exposure.
               Market regime classified as 'Late cycle / Rate stress' with 18% base rate for
@@ -352,7 +352,7 @@ export default function GovernedCockpit() {
             <p className="text-sm" style={{ color: '#c8d8e8' }}>
               Counsel has detected a correlated exposure across three domains: the APT-29
               infrastructure provider identified in the Aegis incident shares hosting with two
-              active Vessels counterparties. Separately, the LUMINA rate signal is compressing
+              active Vessels counterparties. Separately, the Pulse rate signal is compressing
               Terra's LTV covenant headroom — creating a potential cross-domain contagion vector.
               This correlation is flagged for multi-domain approval chain.
             </p>
@@ -366,7 +366,7 @@ export default function GovernedCockpit() {
               <span style={{ color: '#7a99b8' }}>
                 {' '}
                 Aegis (threat infrastructure) → Vessels (counterparty hosting) → Terra (credit
-                spread impact via LUMINA rate signal). Recommend unified response brief for CRO
+                spread impact via Pulse rate signal). Recommend unified response brief for CRO
                 review.
               </span>
             </div>

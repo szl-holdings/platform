@@ -124,7 +124,7 @@ export default function CarlotaJoPulse() {
       <ParticleField accentColor="#c4a265" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <PulseHeader
-          title="Advisory LUMINA"
+          title="Advisory Pulse"
           subtitle={`Client intelligence — ${engagements} active engagements · 5 advisory agents`}
           accentColor="#c4a265"
         />
@@ -352,7 +352,7 @@ export default function CarlotaJoPulse() {
             className="text-[9px] uppercase tracking-[0.25em]"
             style={{ color: 'rgba(255,255,255,0.08)' }}
           >
-            Carlota Jo Consulting — Advisory LUMINA
+            Carlota Jo Consulting — Advisory Pulse
           </p>
         </div>
       </div>

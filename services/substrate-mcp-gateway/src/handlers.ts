@@ -314,7 +314,7 @@ serverRegistry.register({
 serverRegistry.register({
   serverId: 'szl-terra-portfolio',
   name: 'Terra Portfolio MCP',
-  description: 'Real estate portfolio analytics, anomaly detection, and property intelligence tools for DOMAINE.',
+  description: 'Real estate portfolio analytics, anomaly detection, and property intelligence tools for Terra.',
   capabilitiesSummary: 'finance, analytics, real-estate, portfolio, data',
   endpoint: 'internal://terra-portfolio',
 });

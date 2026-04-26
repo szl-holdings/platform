@@ -179,7 +179,7 @@ export default function VesselsPulse() {
       <ParticleField accentColor="#06b6d4" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <PulseHeader
-          title="Fleet Command LUMINA"
+          title="Fleet Intelligence"
           subtitle={`Maritime operations — ${cargoVolume.toLocaleString()} TEU in transit · 8 vessels tracked`}
           accentColor="#06b6d4"
         />
@@ -408,7 +408,7 @@ export default function VesselsPulse() {
             className="text-[9px] uppercase tracking-[0.25em]"
             style={{ color: 'rgba(255,255,255,0.08)' }}
           >
-            Vessels — Fleet Command Intelligence — Maritime LUMINA
+            Vessels — Fleet Command Intelligence — Maritime Intelligence
           </p>
         </div>
       </div>
