@@ -575,3 +575,9 @@ id = "IuGMLV3b16FvTCyu-HUxE"
 uri = "file://content-package/substack-banner-minimal-1100x220.png"
 type = "image"
 title = "a11oy Substack Banner — Minimal (wordmark only)"
+
+[[outputs]]
+id = "Bl73Sh-e-lfudnPGW5KkX"
+uri = "file://content-package/posts/medium-a11oy-definition.md"
+type = "text"
+title = "A11oy — Medium Post (Ready to Publish)"
