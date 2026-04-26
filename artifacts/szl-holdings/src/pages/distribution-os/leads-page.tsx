@@ -1240,6 +1240,31 @@ function ManualLeadModal({
   );
 }
 
+function SkeletonLeadRow() {
+  return (
+    <div
+      className="animate-pulse"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '2fr 1.5fr 1fr 1fr 80px',
+        gap: '0.5rem',
+        alignItems: 'center',
+        padding: '0.75rem 1rem',
+        borderBottom: '1px solid hsla(0,0%,100%,0.04)',
+      }}
+    >
+      <div>
+        <div style={{ height: 13, width: '65%', borderRadius: '4px', background: 'rgba(255,255,255,0.06)', marginBottom: '0.25rem' }} />
+        <div style={{ height: 11, width: '80%', borderRadius: '4px', background: 'rgba(255,255,255,0.04)' }} />
+      </div>
+      <div style={{ height: 12, width: '55%', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }} />
+      <div style={{ height: 20, width: 52, borderRadius: '10px', background: 'rgba(255,255,255,0.04)' }} />
+      <div style={{ height: 12, width: '30%', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }} />
+      <div style={{ height: 11, width: '70%', borderRadius: '4px', background: 'rgba(255,255,255,0.04)' }} />
+    </div>
+  );
+}
+
 export default function LeadsPage() {
   const [location] = useLocation();
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -1526,13 +1551,40 @@ export default function LeadsPage() {
         {loading ? (
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '4rem',
+              background: 'hsla(0,0%,100%,0.02)',
+              border: '1px solid hsla(0,0%,100%,0.06)',
+              borderRadius: '10px',
+              overflow: 'hidden',
             }}
           >
-            <Loader2 size={24} style={{ color: '#d4a054' }} className="animate-spin" />
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '2fr 1.5fr 1fr 1fr 80px',
+                gap: '0.5rem',
+                padding: '0.625rem 1rem',
+                borderBottom: '1px solid hsla(0,0%,100%,0.06)',
+                background: 'hsla(0,0%,100%,0.02)',
+              }}
+            >
+              {['Lead', 'Company / Source', 'Stage', 'Score', 'Date'].map((label) => (
+                <div
+                  key={label}
+                  style={{
+                    fontSize: '0.6875rem',
+                    fontWeight: 700,
+                    color: '#4a4540',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  {label}
+                </div>
+              ))}
+            </div>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonLeadRow key={i} />
+            ))}
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '4rem', color: '#4a4540' }}>

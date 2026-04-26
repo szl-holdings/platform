@@ -417,6 +417,55 @@ function QuickAction({
   );
 }
 
+function SkeletonHeroKpi({ borderLeft }: { borderLeft?: boolean }) {
+  return (
+    <div
+      className="animate-pulse"
+      style={{
+        padding: '1rem 1.25rem',
+        borderLeft: borderLeft ? `1px solid ${DS.border}` : 'none',
+      }}
+    >
+      <div style={{ height: 10, width: '50%', borderRadius: '3px', background: 'rgba(255,255,255,0.06)', marginBottom: '0.5rem' }} />
+      <div style={{ height: 24, width: '40%', borderRadius: '4px', background: 'rgba(255,255,255,0.08)', marginBottom: '0.375rem' }} />
+      <div style={{ height: 10, width: '35%', borderRadius: '3px', background: 'rgba(255,255,255,0.04)' }} />
+    </div>
+  );
+}
+
+function SkeletonKpiCard() {
+  return (
+    <div
+      className="animate-pulse"
+      style={{
+        padding: '1.125rem 1.25rem',
+        background: DS.surface,
+        border: `1px solid ${DS.border}`,
+        borderRadius: '10px',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '2px',
+          background: 'rgba(255,255,255,0.04)',
+        }}
+      />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.625rem' }}>
+        <div style={{ width: 14, height: 14, borderRadius: '4px', background: 'rgba(255,255,255,0.06)' }} />
+        <div style={{ width: 14, height: 14, borderRadius: '4px', background: 'rgba(255,255,255,0.04)' }} />
+      </div>
+      <div style={{ height: 26, width: '45%', borderRadius: '4px', background: 'rgba(255,255,255,0.07)', marginBottom: '0.375rem' }} />
+      <div style={{ height: 11, width: '60%', borderRadius: '3px', background: 'rgba(255,255,255,0.04)' }} />
+    </div>
+  );
+}
+
 export default function DistributionOsDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -650,78 +699,82 @@ export default function DistributionOsDashboard() {
             }}
           />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
-            {[
-              { label: 'Visits', value: s.visitsThisWeek, color: '#4a90b8', sub: 'this week' },
-              {
-                label: 'Leads',
-                value: s.leadsThisWeek,
-                color: '#5a9c5a',
-                sub: 'this week',
-                pulse: (s.leadsNeedingFollowup ?? 0) > 0,
-              },
-              {
-                label: 'Conversion',
-                value: conversionRate,
-                color: DS.accent,
-                sub: 'visits → leads',
-              },
-              {
-                label: 'Needs Follow-up',
-                value: s.leadsNeedingFollowup ?? 0,
-                color: s.leadsNeedingFollowup ? '#c45a4a' : '#5a9c5a',
-                sub: 'awaiting action',
-              },
-            ].map((item, i) => (
-              <div
-                key={item.label}
-                style={{
-                  padding: '1rem 1.25rem',
-                  borderLeft: i > 0 ? `1px solid ${DS.border}` : 'none',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: '0.625rem',
-                    fontWeight: 600,
-                    color: DS.text.muted,
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                    marginBottom: '0.375rem',
-                  }}
-                >
-                  {item.label}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.375rem' }}>
-                  <span
+            {loading
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <SkeletonHeroKpi key={i} borderLeft={i > 0} />
+                ))
+              : [
+                  { label: 'Visits', value: s.visitsThisWeek, color: '#4a90b8', sub: 'this week' },
+                  {
+                    label: 'Leads',
+                    value: s.leadsThisWeek,
+                    color: '#5a9c5a',
+                    sub: 'this week',
+                    pulse: (s.leadsNeedingFollowup ?? 0) > 0,
+                  },
+                  {
+                    label: 'Conversion',
+                    value: conversionRate,
+                    color: DS.accent,
+                    sub: 'visits → leads',
+                  },
+                  {
+                    label: 'Needs Follow-up',
+                    value: s.leadsNeedingFollowup ?? 0,
+                    color: s.leadsNeedingFollowup ? '#c45a4a' : '#5a9c5a',
+                    sub: 'awaiting action',
+                  },
+                ].map((item, i) => (
+                  <div
+                    key={item.label}
                     style={{
-                      fontSize: '1.5rem',
-                      fontWeight: 700,
-                      color: item.color,
-                      letterSpacing: '-0.025em',
-                      fontVariantNumeric: 'tabular-nums',
+                      padding: '1rem 1.25rem',
+                      borderLeft: i > 0 ? `1px solid ${DS.border}` : 'none',
                     }}
                   >
-                    {item.value}
-                  </span>
-                  {item.pulse && (
-                    <span
+                    <div
                       style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: '50%',
-                        background: '#c45a4a',
-                        display: 'inline-block',
-                        marginBottom: 3,
-                        animation: 'pulse 2s infinite',
+                        fontSize: '0.625rem',
+                        fontWeight: 600,
+                        color: DS.text.muted,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        marginBottom: '0.375rem',
                       }}
-                    />
-                  )}
-                </div>
-                <div style={{ fontSize: '0.625rem', color: DS.text.muted, marginTop: '0.25rem' }}>
-                  {item.sub}
-                </div>
-              </div>
-            ))}
+                    >
+                      {item.label}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.375rem' }}>
+                      <span
+                        style={{
+                          fontSize: '1.5rem',
+                          fontWeight: 700,
+                          color: item.color,
+                          letterSpacing: '-0.025em',
+                          fontVariantNumeric: 'tabular-nums',
+                        }}
+                      >
+                        {item.value}
+                      </span>
+                      {item.pulse && (
+                        <span
+                          style={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: '50%',
+                            background: '#c45a4a',
+                            display: 'inline-block',
+                            marginBottom: 3,
+                            animation: 'pulse 2s infinite',
+                          }}
+                        />
+                      )}
+                    </div>
+                    <div style={{ fontSize: '0.625rem', color: DS.text.muted, marginTop: '0.25rem' }}>
+                      {item.sub}
+                    </div>
+                  </div>
+                ))}
           </div>
         </div>
 
@@ -734,39 +787,45 @@ export default function DistributionOsDashboard() {
             marginBottom: '1.5rem',
           }}
         >
-          <KpiCard
-            icon={Globe}
-            label="Top Landing Page"
-            value={s.topPage || '—'}
-            color="#4a90b8"
-            trend="up"
-          />
-          <KpiCard
-            icon={Megaphone}
-            label="Top Campaign"
-            value={s.topCampaign || '—'}
-            color="#8b7ac8"
-          />
-          <KpiCard
-            icon={FileText}
-            label="Published Articles"
-            value={s.publishedArticles}
-            color="#c8953c"
-            trend="up"
-          />
-          <KpiCard
-            icon={Activity}
-            label="Automations Health"
-            value={s.automationsHealth || 'OK'}
-            color={s.xFailed > 0 ? '#c45a4a' : '#5a9c5a'}
-          />
-          <KpiCard
-            icon={Clock}
-            label="Automations (7d)"
-            value={s.automationsCompletedThisWeek}
-            color="#4a90b8"
-            trend="flat"
-          />
+          {loading ? (
+            Array.from({ length: 5 }).map((_, i) => <SkeletonKpiCard key={i} />)
+          ) : (
+            <>
+              <KpiCard
+                icon={Globe}
+                label="Top Landing Page"
+                value={s.topPage || '—'}
+                color="#4a90b8"
+                trend="up"
+              />
+              <KpiCard
+                icon={Megaphone}
+                label="Top Campaign"
+                value={s.topCampaign || '—'}
+                color="#8b7ac8"
+              />
+              <KpiCard
+                icon={FileText}
+                label="Published Articles"
+                value={s.publishedArticles}
+                color="#c8953c"
+                trend="up"
+              />
+              <KpiCard
+                icon={Activity}
+                label="Automations Health"
+                value={s.automationsHealth || 'OK'}
+                color={s.xFailed > 0 ? '#c45a4a' : '#5a9c5a'}
+              />
+              <KpiCard
+                icon={Clock}
+                label="Automations (7d)"
+                value={s.automationsCompletedThisWeek}
+                color="#4a90b8"
+                trend="flat"
+              />
+            </>
+          )}
         </div>
 
         {/* Two-column: Actions + Pipeline */}

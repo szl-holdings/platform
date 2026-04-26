@@ -164,6 +164,53 @@ function exportCsv(links: CampaignLink[]) {
   URL.revokeObjectURL(url);
 }
 
+function SkeletonCampaignRow() {
+  return (
+    <div
+      className="animate-pulse"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.625rem',
+        padding: '0.75rem',
+        background: 'hsla(0,0%,100%,0.02)',
+        border: '1px solid hsla(0,0%,100%,0.05)',
+        borderRadius: '8px',
+      }}
+    >
+      <div style={{ width: 14, height: 14, borderRadius: '4px', background: 'rgba(255,255,255,0.06)', flexShrink: 0 }} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ height: 13, width: '60%', borderRadius: '4px', background: 'rgba(255,255,255,0.06)', marginBottom: '0.375rem' }} />
+        <div style={{ height: 11, width: '40%', borderRadius: '4px', background: 'rgba(255,255,255,0.04)' }} />
+      </div>
+      <div style={{ width: 48, height: 20, borderRadius: '10px', background: 'rgba(255,255,255,0.04)' }} />
+    </div>
+  );
+}
+
+function SkeletonLinkRow() {
+  return (
+    <div
+      className="animate-pulse"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '2fr 1fr 1fr 60px 60px 80px',
+        gap: '0.5rem',
+        alignItems: 'center',
+        padding: '0.75rem 1rem',
+        borderBottom: '1px solid hsla(0,0%,100%,0.04)',
+      }}
+    >
+      <div style={{ height: 12, width: '70%', borderRadius: '4px', background: 'rgba(255,255,255,0.06)' }} />
+      <div style={{ height: 12, width: '50%', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }} />
+      <div style={{ height: 12, width: '50%', borderRadius: '4px', background: 'rgba(255,255,255,0.04)' }} />
+      <div style={{ height: 12, width: '60%', borderRadius: '4px', background: 'rgba(255,255,255,0.04)' }} />
+      <div style={{ height: 12, width: '60%', borderRadius: '4px', background: 'rgba(255,255,255,0.04)' }} />
+      <div style={{ height: 12, width: '50%', borderRadius: '4px', background: 'rgba(255,255,255,0.04)' }} />
+    </div>
+  );
+}
+
 export default function CampaignsPage() {
   const [location] = useLocation();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -598,8 +645,10 @@ export default function CampaignsPage() {
               Campaigns
             </h2>
             {loading ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
-                <Loader2 size={20} style={{ color: '#d4a054' }} className="animate-spin" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <SkeletonCampaignRow key={i} />
+                ))}
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
@@ -1101,8 +1150,17 @@ export default function CampaignsPage() {
                 </div>
 
                 {linksLoading ? (
-                  <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
-                    <Loader2 size={20} style={{ color: '#d4a054' }} className="animate-spin" />
+                  <div
+                    style={{
+                      background: 'hsla(0,0%,100%,0.02)',
+                      border: '1px solid hsla(0,0%,100%,0.06)',
+                      borderRadius: '10px',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <SkeletonLinkRow key={i} />
+                    ))}
                   </div>
                 ) : filteredLinks.length === 0 ? (
                   <div
