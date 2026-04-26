@@ -46,7 +46,7 @@ const DEFAULT_DISCOVERY_CONFIG: ProgressiveDiscoveryConfig = {
   avgTokensPerToolSchema: 150,
 };
 
-const MCP_PROTOCOL_VERSION = '2024-11-05';
+const MCP_PROTOCOL_VERSION = '2025-11-25';
 
 const META_TOOL_SEARCH: McpToolDefinition = {
   name: 'search_tools',

@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@szl/substrate": "workspace:*",
+    "@szl/substrate-client": "workspace:*",
     "@szl-holdings/policy-engine": "workspace:*",
     "@szl-holdings/evidence-graph": "workspace:*",
     "@workspace/approvals-inbox": "workspace:*",

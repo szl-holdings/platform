@@ -158,23 +158,20 @@ export function McpStoreProvider({
 
   const testConnection = useCallback(async (config: McpServerConfig): Promise<boolean> => {
     try {
-      const resp = await fetch(`${config.url}/health`, {
-        method: 'GET',
+      const resp = await fetch(config.url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'ping', params: {} }),
         signal: AbortSignal.timeout(8000),
       });
-      return resp.ok;
+      if (!resp.ok) return false;
+      const body = await resp.json() as { result?: unknown; error?: unknown };
+      return !body.error;
     } catch {
-      try {
-        const resp = await fetch(`${config.url}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} }),
-          signal: AbortSignal.timeout(8000),
-        });
-        return resp.ok;
-      } catch {
-        return false;
-      }
+      return false;
     }
   }, []);
 
@@ -199,27 +196,53 @@ export function McpStoreProvider({
         return { toolName, success: false, output: null, error: 'No MCP server available' };
       }
       try {
-        const resp = await fetch(`${server.url}/tools/call`, {
+        const rpcBody = {
+          jsonrpc: '2.0',
+          id: Date.now(),
+          method: 'tools/call',
+          params: { name: toolName, arguments: args },
+        };
+        const resp = await fetch(server.url, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ toolName, arguments: args }),
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json, text/event-stream',
+          },
+          body: JSON.stringify(rpcBody),
           signal: AbortSignal.timeout(30000),
         });
         if (!resp.ok) {
           const errText = await resp.text().catch(() => 'Request failed');
           return { toolName, success: false, output: null, error: errText };
         }
-        const data = await resp.json();
-        if (data.pendingApproval) {
+        const rpc = await resp.json() as {
+          jsonrpc: string;
+          result?: { content?: Array<{ type: string; text: string }>; isError?: boolean; pendingApproval?: boolean; approvalId?: string; output?: unknown };
+          error?: { code: number; message: string };
+        };
+        if (rpc.error) {
+          return { toolName, success: false, output: null, error: rpc.error.message };
+        }
+        const result = rpc.result ?? {};
+        if (result.pendingApproval) {
           return {
             toolName,
             success: true,
-            output: data.output,
+            output: result.output ?? null,
             pendingApproval: true,
-            approvalId: data.approvalId,
+            approvalId: result.approvalId,
           };
         }
-        return { toolName, success: true, output: data.output ?? data };
+        if (result.isError) {
+          const text = result.content?.[0]?.text ?? 'Tool error';
+          return { toolName, success: false, output: null, error: text };
+        }
+        const contentText = result.content?.[0]?.text;
+        let output: unknown = result.output ?? result;
+        if (contentText) {
+          try { output = JSON.parse(contentText); } catch { output = contentText; }
+        }
+        return { toolName, success: true, output };
       } catch (err) {
         return {
           toolName,

@@ -14,7 +14,7 @@ export const SERVER_INFO = {
     'Sovereign Execution Substrate — MCP transport layer. ' +
     'Policy-shaped graphs, evidence-chained transitions, approval gating, and ' +
     'counterfactual replay for all SZL workflows.',
-  protocolVersion: '2024-11-05',
+  protocolVersion: '2025-11-25',
 } as const;
 
 export const CAPABILITIES = {
@@ -22,6 +22,10 @@ export const CAPABILITIES = {
   resources: { subscribe: false, listChanged: false },
   prompts: { listChanged: false },
   logging: {},
+  extensions: {
+    'szl/governed-autonomy': { version: '1.0', description: 'Policy-gated approval gates and evidence-chain enforcement' },
+    'szl/counterfactual-replay': { version: '1.0', description: 'Counterfactual run replay for governance audit' },
+  },
 } as const;
 
 // ─── Tool Definitions ─────────────────────────────────────────────────────────

@@ -29,7 +29,7 @@ import {
 } from '@szl/substrate';
 import express from 'express';
 import { SERVER_INFO } from './descriptor.js';
-import { createHttpTransport } from './transport/http.js';
+import { createDiscoveryHandler, createHttpTransport } from './transport/http.js';
 import { startStdioTransport } from './transport/stdio.js';
 
 const IS_STDIO = process.argv.includes('--stdio');
@@ -91,6 +91,9 @@ if (IS_STDIO) {
   // MCP gateway mounted at /mcp
   app.use('/mcp', createHttpTransport());
 
+  // MCP discovery endpoint (2025-11-25 spec)
+  app.get('/.well-known/mcp', createDiscoveryHandler());
+
   // Root redirect for discoverability
   app.get('/', (_req, res) => {
     res.json({
@@ -103,7 +106,11 @@ if (IS_STDIO) {
         resources: 'GET /mcp/resources',
         prompts: 'GET /mcp/prompts',
         jsonrpc: 'POST /mcp',
-        sse: 'GET /mcp/sse',
+        sse: 'GET /mcp (Accept: text/event-stream) or GET /mcp/sse',
+        discovery: 'GET /.well-known/mcp',
+        authorize: 'POST /mcp/authorize',
+        token: 'POST /mcp/token',
+        register: 'POST /mcp/register',
       },
     });
   });

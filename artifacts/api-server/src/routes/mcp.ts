@@ -20,7 +20,7 @@ import { AGENT_CONFIGS } from './domain-agents/configs';
 
 const router = Router();
 
-const MCP_PROTOCOL_VERSION = '2024-11-05';
+const MCP_PROTOCOL_VERSION = '2025-11-25';
 const SERVER_NAME = 'alloy-mcp-server';
 const SERVER_VERSION = '1.0.0';
 
@@ -1434,13 +1434,23 @@ async function handleMcpMethod(
           name: SERVER_NAME,
           version: SERVER_VERSION,
         },
+        extensions: {},
         instructions:
           'Alloy MCP Server — exposes the full SZL Holdings AI capability stack as MCP tools. Use alloy_skill_list to discover available skills, alloy_launch_workflow to start workflows, and domain-specific tools (vessels_*, firestorm_*, terra_*, lyte_*, inca_*) for domain intelligence.',
       };
     }
 
+    case 'notifications/initialized':
+    case 'notifications/cancelled':
+    case 'notifications/roots/list_changed':
+      return null;
+
     case 'tools/list': {
-      return { tools: ALL_TOOLS };
+      const deduped = new Map<string, McpTool>();
+      for (const t of ALL_TOOLS) {
+        if (!deduped.has(t.name)) deduped.set(t.name, t);
+      }
+      return { tools: Array.from(deduped.values()) };
     }
 
     case 'tools/call': {
@@ -1620,7 +1630,19 @@ router.post(
         return;
       }
 
-      const response = await processMcpRequest(body as McpRequest, req.user);
+      const mcpReq = body as McpRequest;
+      const isNotification =
+        typeof mcpReq.method === 'string' &&
+        mcpReq.method.startsWith('notifications/') &&
+        mcpReq.id === undefined;
+
+      if (isNotification) {
+        await handleMcpMethod(mcpReq.method, mcpReq.params ?? {}, req.user).catch(() => {});
+        res.status(202).end();
+        return;
+      }
+
+      const response = await processMcpRequest(mcpReq, req.user);
       res.json(response);
     } catch (err) {
       logger.error({ err }, 'MCP handler error');

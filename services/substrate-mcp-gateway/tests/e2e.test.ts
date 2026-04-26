@@ -33,7 +33,7 @@ import {
 import { clearApprovalInbox } from '@workspace/approvals-inbox';
 import express from 'express';
 import { handleToolCall } from '../src/handlers.js';
-import { createHttpTransport } from '../src/transport/http.js';
+import { createDiscoveryHandler, createHttpTransport } from '../src/transport/http.js';
 
 // ─── Test Server Setup ────────────────────────────────────────────────────────
 
@@ -47,6 +47,7 @@ process.env.NODE_ENV = 'test';
 before(async () => {
   const app = express();
   app.use('/mcp', createHttpTransport());
+  app.get('/.well-known/mcp', createDiscoveryHandler());
   await new Promise<void>((resolve) => {
     server = app.listen(0, () => {
       const addr = server.address();
@@ -147,12 +148,13 @@ function parseResult<T>(result: {
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-test('1. initialize and ping respond correctly', async () => {
+test('1. initialize and ping respond correctly (2025-11-25)', async () => {
   const init = (await rpc('initialize')) as {
-    result?: { protocolVersion: string; serverInfo: { name: string } };
+    result?: { protocolVersion: string; serverInfo: { name: string }; extensions?: unknown };
+    headers?: Record<string, string>;
   };
   assert.ok(init.result, 'initialize must return a result');
-  assert.equal(init.result.protocolVersion, '2024-11-05');
+  assert.equal(init.result.protocolVersion, '2025-11-25');
   assert.ok(init.result.serverInfo.name.includes('substrate'));
 
   const ping = (await rpc('ping')) as { result?: unknown };
@@ -809,4 +811,342 @@ test('16. SubstrateStreaming client surfaces live stage events via onEvent callb
     matching.some((e) => e.type === 'run:complete'),
     'Client must surface run:complete',
   );
+});
+
+// ─── New 2025-11-25 Protocol Compliance Tests ──────────────────────────────────
+
+test('17. Session lifecycle: create → use → terminate → 404', async () => {
+  const initRes = await fetch(`${baseUrl}/mcp`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${TEST_API_KEY}`,
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {} }),
+  });
+  assert.equal(initRes.status, 200, 'initialize must return 200');
+  const sessionId = initRes.headers.get('mcp-session-id');
+  assert.ok(sessionId, 'initialize response must include MCP-Session-Id header');
+
+  const pingRes = await fetch(`${baseUrl}/mcp`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${TEST_API_KEY}`,
+      'MCP-Session-Id': sessionId,
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'ping', params: {} }),
+  });
+  assert.equal(pingRes.status, 200, 'ping with valid session must return 200');
+  const pingBody = (await pingRes.json()) as { result?: unknown };
+  assert.deepEqual(pingBody.result, {}, 'ping must return empty result');
+
+  const deleteRes = await fetch(`${baseUrl}/mcp`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${TEST_API_KEY}`,
+      'MCP-Session-Id': sessionId,
+    },
+  });
+  assert.equal(deleteRes.status, 200, 'DELETE must terminate the session');
+  const deleteBody = (await deleteRes.json()) as { terminated: boolean };
+  assert.equal(deleteBody.terminated, true, 'DELETE must confirm termination');
+
+  const expiredRes = await fetch(`${baseUrl}/mcp`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${TEST_API_KEY}`,
+      'MCP-Session-Id': sessionId,
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 3, method: 'ping', params: {} }),
+  });
+  assert.equal(expiredRes.status, 404, 'Request with terminated session must return 404');
+});
+
+test('18. Extension negotiation round-trip returns server extensions', async () => {
+  const initRes = await fetch(`${baseUrl}/mcp`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${TEST_API_KEY}`,
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        capabilities: {},
+        clientInfo: { name: 'test-client', version: '1.0' },
+        extensions: {
+          'szl/governed-autonomy': {},
+          'szl/unknown-extension': {},
+        },
+      },
+    }),
+  });
+  assert.equal(initRes.status, 200);
+  const body = (await initRes.json()) as {
+    result?: {
+      protocolVersion: string;
+      extensions?: Record<string, unknown>;
+    };
+  };
+  assert.ok(body.result, 'initialize must return result');
+  assert.equal(body.result.protocolVersion, '2025-11-25');
+  assert.ok(body.result.extensions, 'Server must return negotiated extensions');
+  assert.ok('szl/governed-autonomy' in body.result.extensions, 'Known extension must be accepted');
+  assert.ok(!('szl/unknown-extension' in body.result.extensions), 'Unknown extension must not be accepted');
+});
+
+test('19. Origin validation rejects requests with disallowed Origin', async () => {
+  const savedEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  try {
+    const res = await fetch(`${baseUrl}/mcp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${TEST_API_KEY}`,
+        Origin: 'https://evil-attacker.example.com',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'ping', params: {} }),
+    });
+    assert.equal(res.status, 403, 'Disallowed Origin must receive 403 Forbidden');
+  } finally {
+    process.env.NODE_ENV = savedEnv;
+  }
+});
+
+test('20. CORS preflight returns correct headers', async () => {
+  const res = await fetch(`${baseUrl}/mcp`, {
+    method: 'OPTIONS',
+    headers: {
+      Origin: 'http://localhost:3000',
+      'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'Content-Type, Authorization',
+    },
+  });
+  assert.ok(res.status === 200 || res.status === 204, 'OPTIONS must return 200 or 204');
+  const allowMethods = res.headers.get('access-control-allow-methods') ?? '';
+  assert.ok(allowMethods.includes('POST'), 'CORS must allow POST');
+  assert.ok(allowMethods.includes('DELETE'), 'CORS must allow DELETE');
+});
+
+test('21. MCP discovery endpoint returns server manifest', async () => {
+  const res = await fetch(`${baseUrl}/.well-known/mcp`);
+  assert.equal(res.status, 200, 'Discovery endpoint must return 200');
+  const manifest = (await res.json()) as {
+    name: string;
+    protocolVersion: string;
+    toolCount: number;
+    authMethods: string[];
+    extensions: unknown;
+    capabilities: unknown;
+  };
+  assert.equal(manifest.name, 'szl-substrate-mcp-gateway');
+  assert.equal(manifest.protocolVersion, '2025-11-25');
+  assert.ok(manifest.toolCount >= 8, 'Manifest must list tool count');
+  assert.ok(Array.isArray(manifest.authMethods), 'authMethods must be an array');
+  assert.ok(manifest.authMethods.includes('bearer_token'), 'bearer_token auth must be listed');
+  assert.ok(manifest.authMethods.includes('oauth2_pkce'), 'oauth2_pkce must be listed');
+  assert.ok(manifest.extensions, 'extensions must be present in manifest');
+  assert.ok(manifest.capabilities, 'capabilities must be present in manifest');
+});
+
+test('22. Notifications 202 Accepted — initialized, cancelled, roots/list_changed', async () => {
+  for (const method of [
+    'notifications/initialized',
+    'notifications/cancelled',
+    'notifications/roots/list_changed',
+  ]) {
+    const params = method === 'notifications/cancelled' ? { requestId: 'req-123' } : undefined;
+    const res = await fetch(`${baseUrl}/mcp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${TEST_API_KEY}`,
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', method, ...(params ? { params } : {}) }),
+    });
+    assert.equal(res.status, 202, `${method} notification must return 202 Accepted`);
+    assert.equal(
+      (await res.text()).trim(),
+      '',
+      `${method} notification must return empty body`,
+    );
+  }
+});
+
+test('23. Streamable HTTP GET establishes SSE stream with session', async () => {
+  const initRes = await fetch(`${baseUrl}/mcp`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${TEST_API_KEY}`,
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {} }),
+  });
+  const sessionId = initRes.headers.get('mcp-session-id');
+  assert.ok(sessionId, 'Session ID must be present');
+
+  const events: Array<{ type: string; data: unknown }> = [];
+  let resolved = false;
+
+  const ssePromise = new Promise<void>((resolve, reject) => {
+    const sseReq = http.request(
+      {
+        hostname: new URL(baseUrl).hostname,
+        port: Number(new URL(baseUrl).port),
+        path: '/mcp',
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${TEST_API_KEY}`,
+          'MCP-Session-Id': sessionId,
+          Accept: 'text/event-stream',
+        },
+      },
+      (sseRes) => {
+        let buf = '';
+        sseRes.on('data', (chunk: Buffer) => {
+          buf += chunk.toString();
+          const lines = buf.split('\n');
+          buf = lines.pop() ?? '';
+          let currentType = '';
+          for (const line of lines) {
+            if (line.startsWith('event: ')) currentType = line.slice(7).trim();
+            else if (line.startsWith('data: ')) {
+              try {
+                events.push({ type: currentType, data: JSON.parse(line.slice(6)) });
+              } catch {}
+            }
+          }
+          const hasReady = events.some((e) => e.type === '$/ready');
+          if (hasReady && !resolved) {
+            resolved = true;
+            sseReq.destroy();
+            resolve();
+          }
+        });
+        sseRes.on('error', reject);
+      },
+    );
+    sseReq.on('error', (e) => { if (!resolved) reject(e); });
+    sseReq.end();
+  });
+
+  const timeout = new Promise<void>((_, reject) =>
+    setTimeout(() => reject(new Error('GET /mcp SSE timeout')), 3_000),
+  );
+
+  await Promise.race([ssePromise, timeout]);
+
+  const readyEvent = events.find((e) => e.type === '$/ready');
+  assert.ok(readyEvent, '$/ready event must be emitted on GET /mcp with session');
+  const readyData = readyEvent.data as Record<string, unknown>;
+  assert.equal(readyData.sessionId, sessionId, 'Ready event must echo the sessionId');
+});
+
+test('24. OAuth 2.1 — dynamic registration + authorization code + token exchange', async () => {
+  const regRes = await fetch(`${baseUrl}/mcp/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TEST_API_KEY}` },
+    body: JSON.stringify({
+      client_name: 'e2e-test-client',
+      redirect_uris: ['http://localhost:9999/callback'],
+      grant_types: ['authorization_code'],
+      response_types: ['code'],
+      scope: 'mcp',
+    }),
+  });
+  assert.equal(regRes.status, 201, 'Client registration must return 201');
+  const client = (await regRes.json()) as {
+    client_id: string;
+    client_secret: string;
+    redirect_uris: string[];
+  };
+  assert.ok(client.client_id, 'client_id must be returned');
+  assert.ok(client.client_secret, 'client_secret must be returned');
+  assert.deepEqual(client.redirect_uris, ['http://localhost:9999/callback']);
+
+  const codeVerifier = 'e2e-code-verifier-abcdefghijklmnopqrstuvwxyz01234567890-test';
+  const { createHash } = await import('node:crypto');
+  const codeChallenge = createHash('sha256').update(codeVerifier).digest('base64url');
+
+  const authRes = await fetch(`${baseUrl}/mcp/authorize`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TEST_API_KEY}` },
+    body: JSON.stringify({
+      client_id: client.client_id,
+      redirect_uri: 'http://localhost:9999/callback',
+      response_type: 'code',
+      scope: 'mcp',
+      code_challenge: codeChallenge,
+      code_challenge_method: 'S256',
+      state: 'test-state-123',
+    }),
+    redirect: 'manual',
+  });
+  assert.equal(authRes.status, 302, 'Authorize must redirect');
+  const location = authRes.headers.get('location') ?? '';
+  assert.ok(location.includes('code='), 'Redirect must include authorization code');
+  assert.ok(location.includes('state=test-state-123'), 'Redirect must echo state');
+
+  const codeUrl = new URL(location);
+  const code = codeUrl.searchParams.get('code');
+  assert.ok(code, 'Authorization code must be present in redirect');
+
+  const tokenRes = await fetch(`${baseUrl}/mcp/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TEST_API_KEY}` },
+    body: JSON.stringify({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: 'http://localhost:9999/callback',
+      client_id: client.client_id,
+      code_verifier: codeVerifier,
+    }),
+  });
+  assert.equal(tokenRes.status, 200, 'Token exchange must return 200');
+  const token = (await tokenRes.json()) as {
+    access_token: string;
+    token_type: string;
+    expires_in: number;
+    scope: string;
+  };
+  assert.ok(token.access_token, 'access_token must be present');
+  assert.equal(token.token_type, 'Bearer');
+  assert.ok(token.expires_in > 0, 'expires_in must be positive');
+
+  const replayRes = await fetch(`${baseUrl}/mcp/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TEST_API_KEY}` },
+    body: JSON.stringify({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: 'http://localhost:9999/callback',
+      client_id: client.client_id,
+      code_verifier: codeVerifier,
+    }),
+  });
+  assert.equal(replayRes.status, 400, 'Replaying used code must return 400');
+  const replayBody = (await replayRes.json()) as { error: string };
+  assert.equal(replayBody.error, 'invalid_grant', 'Replayed code must give invalid_grant error');
+});
+
+test('25. Security headers are present on responses', async () => {
+  const res = await fetch(`${baseUrl}/mcp/health`);
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get('x-content-type-options'), 'nosniff');
+  assert.equal(res.headers.get('x-frame-options'), 'DENY');
+  const csp = res.headers.get('content-security-policy');
+  assert.ok(csp, 'Content-Security-Policy header must be present');
+  assert.ok(csp?.includes("frame-ancestors 'none'"), 'CSP must include frame-ancestors');
 });

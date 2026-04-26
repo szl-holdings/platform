@@ -5241,6 +5241,9 @@ importers:
       '@szl/substrate':
         specifier: workspace:*
         version: link:../../packages/substrate
+      '@szl/substrate-client':
+        specifier: workspace:*
+        version: link:../../packages/substrate-client
       '@workspace/approvals-inbox':
         specifier: workspace:*
         version: link:../../packages/approvals-inbox

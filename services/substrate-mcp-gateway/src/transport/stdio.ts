@@ -54,13 +54,23 @@ async function handle(req: JsonRpcRequest): Promise<void> {
 
   try {
     switch (method) {
-      case 'initialize':
+      case 'initialize': {
+        const clientExtensions = (params as Record<string, unknown>).extensions;
+        const accepted: Record<string, unknown> = {};
+        const serverExts = (CAPABILITIES as unknown as Record<string, unknown>).extensions as Record<string, unknown>;
+        if (clientExtensions && typeof clientExtensions === 'object') {
+          for (const key of Object.keys(clientExtensions as object)) {
+            if (key in serverExts) accepted[key] = serverExts[key];
+          }
+        }
         ok(id, {
           protocolVersion: SERVER_INFO.protocolVersion,
           capabilities: CAPABILITIES,
           serverInfo: { name: SERVER_INFO.name, version: SERVER_INFO.version },
+          extensions: accepted,
         });
         break;
+      }
 
       case 'ping':
         ok(id, {});
@@ -135,6 +145,12 @@ async function handle(req: JsonRpcRequest): Promise<void> {
         ok(id, result);
         break;
       }
+
+      case 'notifications/initialized':
+      case 'notifications/cancelled':
+      case 'notifications/roots/list_changed':
+        // Notifications have no id and require no response; just acknowledge.
+        return;
 
       default:
         err(id, -32601, 'METHOD_NOT_FOUND', { method });
