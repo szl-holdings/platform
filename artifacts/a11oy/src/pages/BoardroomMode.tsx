@@ -50,6 +50,7 @@ const INITIAL_DATA: BoardroomData = {
     'Narrative generation from structured evidence',
     'Boardroom-ready PDF export (production posture)',
     'Mythos Doctrine L8 — per-agent system cards, behavioral audit, alignment review',
+    'Glasswing distinction layer — CAVD coordinated disclosure, 90-day transparency reports, adversarial robustness wall, constitution-as-code DSL, welfare playbooks',
   ],
   packets: [
     {

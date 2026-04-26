@@ -512,6 +512,8 @@ const GLASSWING_SECURITY = {
     { name: 'Agent Welfare Monitor', desc: 'Real-time welfare assessment for running agents — emotion probes, consciousness scoring, apparent affect tracking, distress detection. Automated interviews assess agent circumstances. No one else monitors agent welfare.', metric: '12 welfare dimensions', status: 'Active' },
     { name: 'Alignment Verification Engine', desc: 'Continuous alignment testing — scheming detection, sandbagging evaluation, alignment faking probes, SHADE-Arena adversarial assessment. Constitutional adherence scoring across 15 dimensions.', metric: '99.2% alignment score', status: 'Continuous' },
     { name: 'Constitutional Runtime Enforcement', desc: 'Agents operate under a constitution — inviolable behavioral principles enforced at runtime, not just training time. Every response is checked against the covenant before delivery. Proof chain on every check.', metric: '847K checks/day', status: 'Enforced' },
+    { name: 'CAVD Coordinated Disclosure', desc: 'Hash-now / disclose-later agent-vulnerability pipeline modeled on CERT/CC, CISA, and ISO/IEC 29147. 90-day embargo with auto-publication on patch verification or expiry. Dual-approval from Glasswing partners.', metric: '90d-or-patch', status: 'Active' },
+    { name: 'Glasswing Trust Portal', desc: 'Public-facing transparency surface — per-agent system cards, adversarial robustness scores, 90-day transparency reports, and constitution snapshots. Every claim backed by a Mythos Doctrine Open Spec artifact.', metric: '6 agents public', status: 'Published' },
   ],
   certifications: [
     'SOC 2 Type II', 'ISO 27001', 'ISO 27701', 'FedRAMP High', 'IL5', 'ITAR',
@@ -1762,7 +1764,7 @@ new_key = admin.api_keys.rotate(
         <>
           <SectionTitle>Security & Trust Architecture</SectionTitle>
           <p className="text-xs mb-6" style={{ color: T.dim }}>
-            Securing critical AI infrastructure for the enterprise. a11oy's security architecture is built on zero-trust principles, cryptographic proof chains, and continuous adversarial testing — inspired by Anthropic's Glasswing initiative for securing critical software in the AI era.
+            Securing critical AI infrastructure for the enterprise. a11oy's security architecture is built on zero-trust principles, cryptographic proof chains, and continuous adversarial testing — inspired by Anthropic's Glasswing initiative for securing critical software in the AI era. The Glasswing distinction layer extends this with CAVD coordinated agent-vulnerability disclosure, 90-day public transparency reports, an adversarial robustness wall, a constitution-as-code DSL, welfare intervention playbooks, and the <code className="font-mono text-xs px-1 py-0.5 rounded" style={{ background: T.surface }}>mythos-doctrine</code> GitHub Action for PR-time governance checks.
           </p>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">

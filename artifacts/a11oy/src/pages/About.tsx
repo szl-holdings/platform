@@ -9,7 +9,7 @@ const FABRIC_LAYERS = [
   { n: 5, name: 'Covenant Layer', desc: 'Enforces policy gates — no material action without approval.' },
   { n: 6, name: 'MirrorEval', desc: 'Compares recommendations against counterfactuals with citations.' },
   { n: 7, name: 'Proof Ledger', desc: 'Appends immutable, cryptographic proof for every governed execution.' },
-  { n: 8, name: 'Doctrine Layer (Mythos)', desc: 'Frontier-grade alignment governance — constitutions, behavioral audit, reward-hacking watchdog, red-team probes, agent welfare telemetry, and per-agent system cards.' },
+  { n: 8, name: 'Doctrine Layer (Mythos)', desc: 'Frontier-grade alignment governance — constitutions, behavioral audit, reward-hacking watchdog, red-team probes, agent welfare telemetry, per-agent system cards, and Glasswing transparency. Open Spec published under CC-BY-4.0.' },
 ];
 
 const VERTICALS = [
@@ -29,6 +29,7 @@ const PRINCIPLES = [
   { title: 'No Single-Model Dependency', body: 'A11oy routes inference tasks to the optimal model based on task type, domain, token budget, and latency requirements. No lock-in to any single provider. Sovereign inference (air-gapped) is on the roadmap for defense use.' },
   { title: 'Domain-Specialized Operators', body: 'Each vertical has dedicated agent operators with domain-specific skills, tool access, and policy constraints. Operators cannot exceed their provisioned scope. Every skill call is logged.' },
   { title: 'Governed Autonomy', body: 'A11oy is not autonomous by default. It is governed-autonomous — it can sense, reason, and recommend at machine speed, but execution authority remains with human operators. Autonomy expands incrementally as trust is earned and proven.' },
+  { title: 'Glasswing Transparency', body: 'The Glasswing distinction layer makes governance verifiable from the outside. Public trust portal, CAVD coordinated agent-vulnerability disclosure, 90-day transparency reports, adversarial robustness wall, and constitution-as-code DSL — all published under the Mythos Doctrine Open Spec (CC-BY-4.0). Every claim backed by an artifact.' },
 ];
 
 const TEAM_CREDITS = [

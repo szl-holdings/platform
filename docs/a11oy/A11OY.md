@@ -83,10 +83,21 @@ A11oy closes that gap structurally — not with policy documents, not with manua
 | **Covenant Governance** | Policy constraints that travel with every recommendation — what is permitted, what is prohibited, under what conditions |
 | **Executive Briefing** | Board-ready decision surfaces with complete attribution chains from raw signal to final outcome |
 | **Mythos Doctrine** | Layer 8 frontier-grade alignment governance — versioned constitutions, behavioral audit, reward-hacking watchdog, red-team probes, agent welfare telemetry, Glasswing transparency mode, and per-agent system cards |
+| **Mythos Doctrine Open Spec** | Open standard (CC-BY-4.0) for the artifacts above — JSON Schema 2020-12 + TypeScript types. A11oy authors and operates the spec; other implementations are invited |
+| **Glasswing Distinction Layer** | Glasswing partner program (4-stage cyber verification with dual approval), Coordinated Agent-Vulnerability Disclosure (CAVD), 90-Day Transparency Reports, Public Trust Portal, Adversarial Robustness Wall, Constitution-as-Code DSL + simulator, Welfare Intervention Playbooks, Defender Credit Pool, and the `mythos-doctrine` GitHub Action |
 
 ### 19 Operator Surfaces
 
 A11oy is not a single screen. It exposes 19 purpose-built operator surfaces across the execution lifecycle — from signal ingestion to proof ledger review. Each surface is governed by the same policy constraints and proof requirements as the fabric itself.
+
+### Doctrine references
+
+| Document | Purpose |
+|:---------|:--------|
+| [`A11OY_DOCTRINE.md`](./A11OY_DOCTRINE.md) | A11oy's internal operating doctrine for the Open Spec, Glasswing partners, CAVD, transparency reports, the Public Trust Portal, the Adversarial Robustness Wall, the Constitution-as-Code DSL, the Welfare Intervention Playbooks, the Defender Credit Pool, and the `mythos-doctrine` GitHub Action |
+| [`A11OY_PUBLIC_CLAIMS_DOCTRINE.md`](./A11OY_PUBLIC_CLAIMS_DOCTRINE.md) | Every public claim → its backing artifact in the Open Spec |
+| [`MYTHOS_RESEARCH_SWEEP.md`](./MYTHOS_RESEARCH_SWEEP.md) | Catalogued prior art that grounds the Mythos Doctrine work |
+| [`spec/mythos-doctrine-spec/`](./spec/mythos-doctrine-spec/) | The Mythos Doctrine Open Spec — JSON Schemas + TypeScript types, CC-BY-4.0 |
 
 ---
 

@@ -129,9 +129,23 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'GLASSWING',
+    items: [
+      { href: '/mythos-spec',          label: 'Open Spec' },
+      { href: '/glasswing-partners',   label: 'Partners' },
+      { href: '/cavd',                 label: 'CAVD' },
+      { href: '/robustness-wall',      label: 'Robustness Wall' },
+      { href: '/constitution-dsl',     label: 'Constitution DSL' },
+      { href: '/welfare-playbooks',    label: 'Welfare Playbooks' },
+      { href: '/defender-credits',     label: 'Defender Credits' },
+      { href: '/transparency-report',  label: '90-Day Report' },
+    ],
+  },
+  {
     label: 'TRUST',
     items: [
       { href: '/trust',         label: 'Trust Center' },
+      { href: '/trust-portal',  label: 'Public Trust Portal' },
       { href: '/sovereign',     label: 'Sovereign' },
       { href: '/boardroom',     label: 'Boardroom' },
       { href: '/investor-demo', label: 'Investor Demo' },

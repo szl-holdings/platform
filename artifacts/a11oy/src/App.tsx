@@ -112,6 +112,15 @@ const RedTeam = lazy(() => import('./pages/RedTeam').then(m => ({ default: m.Red
 const GlasswingPage = lazy(() => import('./pages/Glasswing').then(m => ({ default: m.Glasswing })));
 const SystemCard = lazy(() => import('./pages/SystemCard').then(m => ({ default: m.SystemCard })));
 const CapabilityTrajectory = lazy(() => import('./pages/CapabilityTrajectory').then(m => ({ default: m.CapabilityTrajectory })));
+const MythosSpec = lazy(() => import('./pages/MythosSpec').then(m => ({ default: m.MythosSpec })));
+const GlasswingPartners = lazy(() => import('./pages/GlasswingPartners').then(m => ({ default: m.GlasswingPartners })));
+const CAVDPage = lazy(() => import('./pages/CAVD').then(m => ({ default: m.CAVD })));
+const TransparencyReport = lazy(() => import('./pages/TransparencyReport').then(m => ({ default: m.TransparencyReport })));
+const PublicTrustPortal = lazy(() => import('./pages/PublicTrustPortal').then(m => ({ default: m.PublicTrustPortal })));
+const RobustnessWall = lazy(() => import('./pages/RobustnessWall').then(m => ({ default: m.RobustnessWall })));
+const ConstitutionDSL = lazy(() => import('./pages/ConstitutionDSL').then(m => ({ default: m.ConstitutionDSL })));
+const WelfarePlaybooks = lazy(() => import('./pages/WelfarePlaybooks').then(m => ({ default: m.WelfarePlaybooks })));
+const DefenderCredits = lazy(() => import('./pages/DefenderCredits').then(m => ({ default: m.DefenderCredits })));
 
 export default function App() {
   return (
@@ -200,6 +209,15 @@ export default function App() {
         <Route path={`${base}/compartments`} component={CapabilityCompartments} />
         <Route path={`${base}/cyber-resilience`} component={CyberResilience} />
         <Route path={`${base}/sim-governance`} component={SimGovernance} />
+        <Route path={`${base}/mythos-spec`} component={MythosSpec} />
+        <Route path={`${base}/glasswing-partners`} component={GlasswingPartners} />
+        <Route path={`${base}/cavd`} component={CAVDPage} />
+        <Route path={`${base}/transparency-report`} component={TransparencyReport} />
+        <Route path={`${base}/trust-portal`} component={PublicTrustPortal} />
+        <Route path={`${base}/robustness-wall`} component={RobustnessWall} />
+        <Route path={`${base}/constitution-dsl`} component={ConstitutionDSL} />
+        <Route path={`${base}/welfare-playbooks`} component={WelfarePlaybooks} />
+        <Route path={`${base}/defender-credits`} component={DefenderCredits} />
         <Route path={`${base}/atlas`}>
           <WithShell><AtlasSection /></WithShell>
         </Route>

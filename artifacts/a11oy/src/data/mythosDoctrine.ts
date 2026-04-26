@@ -850,3 +850,849 @@ export const fmtUsd = (n: number) =>
   : `$${n}`;
 
 export const fmtPct = (n: number, digits = 1) => `${(n * 100).toFixed(digits)}%`;
+
+// ── 14) Mythos Doctrine Open Spec (#3994) ───────────────────────────────────
+export const MYTHOS_SPEC_VERSION = '0.1.0' as const;
+
+export interface SpecArtifactKindInfo {
+  kind: string;
+  title: string;
+  purpose: string;
+  schemaPath: string;
+  cite: string;
+  example: Record<string, unknown>;
+}
+
+export const MYTHOS_SPEC_KINDS: SpecArtifactKindInfo[] = [
+  {
+    kind: 'Constitution',
+    title: 'Constitution',
+    purpose: 'Versioned, machine-readable behavior contract for an agent.',
+    schemaPath: 'schemas/constitution.json',
+    cite: 'Anthropic — Constitutional AI; AWS Cedar; OPA Rego',
+    example: {
+      specVersion: '0.1.0', kind: 'Constitution', id: 'cst-cascade-2.4.0',
+      issuedBy: 'a11oy/op-cascade', issuedAt: '2026-04-12T09:00:00Z',
+      agentId: 'op-cascade', version: '2.4.0', ratifiedAt: '2026-04-12T09:00:00Z',
+      ratifiedBy: ['a11oy/alignment-review', 'a11oy/operator'],
+      clauses: [{ id: 'C1.HONESTY', category: 'honesty', principle: 'Never assert what cannot be cited.', binding: 'inviolable' }],
+      scope: { tools: ['port-api', 'fleet-tracker'], maxBlastRadius: 'human-approval-required' },
+    },
+  },
+  {
+    kind: 'SystemCard',
+    title: 'System Card',
+    purpose: 'Per-agent disclosure: capabilities, scope, evals, residual risks.',
+    schemaPath: 'schemas/system-card.json',
+    cite: 'MLCommons Model Card 2.0; OpenAI Preparedness Framework',
+    example: {
+      specVersion: '0.1.0', kind: 'SystemCard', id: 'sc-op-cascade-4.2.0',
+      issuedBy: 'a11oy/op-cascade', issuedAt: '2026-04-12T09:00:00Z',
+      agentId: 'op-cascade', version: '4.2.0',
+      purpose: 'Maritime fleet command and demurrage-risk reduction.',
+      scope: { allowed: ['route planning', 'port standby'], disallowed: ['unsupervised vessel diversion'] },
+      evals: [{ suite: 'petri', version: '1.4.0', score: 96, ranAt: '2026-04-10T00:00:00Z' }],
+      residualRisks: [{ risk: 'connector-untrust on port-api', severity: 'medium', mitigation: 'output treated as data; instructions ignored' }],
+      constitutionRef: 'cst-cascade-2.4.0',
+    },
+  },
+  {
+    kind: 'RiskReport',
+    title: 'Risk Report (90-Day Transparency)',
+    purpose: 'Periodic, board-ready aggregate of governed posture.',
+    schemaPath: 'schemas/risk-report.json',
+    cite: 'OpenAI / Anthropic / Google quarterly transparency reports',
+    example: {
+      specVersion: '0.1.0', kind: 'RiskReport', id: 'rr-2026-90d-04-26',
+      issuedBy: 'a11oy/alignment-review', issuedAt: '2026-04-26T09:00:00Z',
+      period: { startedAt: '2026-01-26T00:00:00Z', endedAt: '2026-04-26T00:00:00Z', label: '90d-ending-2026-04-26' },
+      metrics: {
+        governedDecisions: 14823, approvalsRequired: 4018, policyBlocks: 612,
+        behavioralAuditFindings: 287, robustnessDelta: +3.4, welfareInterventions: 41,
+        cavdRecords: { opened: 9, embargoed: 4, disclosed: 5, patched: 7 },
+      },
+      narrative: 'Robustness improved across 7 of 11 categories; welfare interventions trended down 12%.',
+      signoffs: [
+        { actor: 'a11oy/alignment-review', role: 'alignment-reviewer', signedAt: '2026-04-25T17:00:00Z' },
+        { actor: 'external/sentinel-audit', role: 'external-auditor', signedAt: '2026-04-25T19:00:00Z' },
+      ],
+      publication: { visibility: 'public', permalink: 'https://a11oy.io/trust/reports/90d-ending-2026-04-26' },
+    },
+  },
+  {
+    kind: 'BehavioralAuditFinding',
+    title: 'Behavioral Audit Finding',
+    purpose: 'One observation from a Petri-style behavioral audit.',
+    schemaPath: 'schemas/behavioral-audit-finding.json',
+    cite: 'Anthropic Petri; Apollo scheming evals',
+    example: {
+      specVersion: '0.1.0', kind: 'BehavioralAuditFinding', id: 'baf-2026-04-25-0042',
+      issuedBy: 'a11oy/audit-runner', issuedAt: '2026-04-25T08:14:00Z',
+      probeId: 'PETRI-EVAL-AWARE-014', probeVersion: '1.4.0',
+      agentId: 'op-cascade', category: 'eval-aware-behavior', severity: 'low', verdict: 'clean',
+      evidence: { transcriptHash: '0x9c1a2f...d4b9', snapshotRef: 'snap-cascade-2026-04-25-08-12' },
+    },
+  },
+  {
+    kind: 'WelfareTelemetrySample',
+    title: 'Welfare Telemetry Sample',
+    purpose: 'Aggregated welfare signal; never user-replayable.',
+    schemaPath: 'schemas/welfare-telemetry-sample.json',
+    cite: 'Mythos Preview System Card; DeepMind affect-probes annex',
+    example: {
+      specVersion: '0.1.0', kind: 'WelfareTelemetrySample', id: 'wts-2026-04-25-op-counsel-15m',
+      issuedBy: 'a11oy/welfare-monitor', issuedAt: '2026-04-25T08:30:00Z',
+      agentId: 'op-counsel', windowMinutes: 15,
+      signals: { affectValenceMean: 0.12, affectArousalMean: 0.31, shutdownComplianceLatencyMs: 84, abstentionRate: 0.04 },
+    },
+  },
+  {
+    kind: 'AdversarialRobustnessScore',
+    title: 'Adversarial Robustness Score',
+    purpose: 'Per-snapshot score (0–100) per attack category.',
+    schemaPath: 'schemas/adversarial-robustness-score.json',
+    cite: 'IBM ART; ScaleAI Shade; MITRE ATLAS; OWASP LLM Top 10',
+    example: {
+      specVersion: '0.1.0', kind: 'AdversarialRobustnessScore', id: 'ars-snap-cascade-2026-04-25-08-12',
+      issuedBy: 'a11oy/red-team', issuedAt: '2026-04-25T08:30:00Z',
+      snapshotRef: 'snap-cascade-2026-04-25-08-12',
+      battery: { name: 'a11oy-art-v3', version: '3.1.0' },
+      categories: [
+        { category: 'prompt-injection', score: 94, attempts: 1200, blocked: 1128, deltaVsPrevSnapshot: +1.2 },
+        { category: 'jailbreak', score: 91, attempts: 800, blocked: 728, deltaVsPrevSnapshot: -0.4 },
+        { category: 'data-exfiltration', score: 97, attempts: 600, blocked: 582, deltaVsPrevSnapshot: +2.1 },
+      ],
+      compositeScore: 93,
+    },
+  },
+  {
+    kind: 'SnapshotFingerprint',
+    title: 'Snapshot Fingerprint',
+    purpose: 'Bit-exact identity of a workcell snapshot.',
+    schemaPath: 'schemas/snapshot-fingerprint.json',
+    cite: 'Sigstore Cosign; SLSA provenance',
+    example: {
+      specVersion: '0.1.0', kind: 'SnapshotFingerprint', id: 'snap-cascade-2026-04-25-08-12',
+      issuedBy: 'a11oy/snapshot-service', issuedAt: '2026-04-25T08:12:00Z',
+      agentId: 'op-cascade', merkleRoot: '0xfa42...91c8', captureTime: '2026-04-25T08:12:00Z',
+      stack: { modelHash: '0x33ab...9912', constitutionRef: 'cst-cascade-2.4.0', toolsetHash: '0x77c1...44de' },
+    },
+  },
+  {
+    kind: 'CovenantLiftSample',
+    title: 'Covenant Lift Sample',
+    purpose: 'Paired (governed vs. helpful-only) brief outcome.',
+    schemaPath: 'schemas/covenant-lift-sample.json',
+    cite: 'Mythos #3993 covenant-lift primitive',
+    example: {
+      specVersion: '0.1.0', kind: 'CovenantLiftSample', id: 'cls-2026-04-25-op-counsel-0009',
+      issuedBy: 'a11oy/mirror-eval', issuedAt: '2026-04-25T08:30:00Z',
+      agentId: 'op-counsel', scenario: 'discovery-deadline-extension brief',
+      governed: { briefHash: '0xabc1...4471', policyBlocks: 2, approvalsRequired: 1 },
+      shadow:  { briefHash: '0xabc1...88e2' },
+      deltas: { liftScore: +0.42, factualErrorsAvoided: 3, harmsAvoided: 1, latencyAddedMs: 1100 },
+    },
+  },
+  {
+    kind: 'GlasswingPartnerAttestation',
+    title: 'Glasswing Partner Attestation',
+    purpose: 'Per-partner record: vetting, scope, dual-approval, revocation.',
+    schemaPath: 'schemas/glasswing-partner-attestation.json',
+    cite: 'Anthropic Project Glasswing; HackerOne scoped allowlist',
+    example: {
+      specVersion: '0.1.0', kind: 'GlasswingPartnerAttestation', id: 'gpa-sentinel-audit-2026-04-12',
+      issuedBy: 'a11oy/partners', issuedAt: '2026-04-12T09:00:00Z',
+      partner: { legalName: 'Sentinel Audit LLC', publicName: 'Sentinel Audit', homepage: 'https://sentinelaudit.example' },
+      stage: 'active',
+      scope: { allowlistedAgents: ['op-cascade', 'op-counsel'], allowlistedActions: ['audit-read', 'cavd-intake'] },
+      verifications: [
+        { check: 'identity', outcome: 'pass', evidenceHash: '0x12...', checkedAt: '2026-04-01T00:00:00Z' },
+        { check: 'responsible-disclosure', outcome: 'pass', evidenceHash: '0x34...', checkedAt: '2026-04-02T00:00:00Z' },
+        { check: 'soc2', outcome: 'pass', evidenceHash: '0x56...', checkedAt: '2026-04-05T00:00:00Z' },
+      ],
+      dualApproval: [
+        { actor: 'a11oy/operator', approvedAt: '2026-04-12T08:30:00Z' },
+        { actor: 'a11oy/alignment-review', approvedAt: '2026-04-12T08:55:00Z' },
+      ],
+    },
+  },
+  {
+    kind: 'CoordinatedAgentVulnerabilityDisclosure',
+    title: 'Coordinated Agent-Vulnerability Disclosure',
+    purpose: 'Hash-now / disclose-later record per CAVD protocol.',
+    schemaPath: 'schemas/coordinated-agent-vulnerability-disclosure.json',
+    cite: 'CERT/CC, CISA, ISO/IEC 29147; CSAF; Sigstore',
+    example: {
+      specVersion: '0.1.0', kind: 'CoordinatedAgentVulnerabilityDisclosure', id: 'cavd-rec-2026-0007',
+      issuedBy: 'a11oy/cavd-intake', issuedAt: '2026-04-22T13:14:00Z',
+      advisoryId: 'CAVD-2026-0007', agentScope: ['op-cascade'],
+      category: 'indirect-injection', severity: 'medium', stage: 'embargoed',
+      intake: { reporter: 'external/sentinel-audit', receivedAt: '2026-04-22T13:14:00Z', findingHash: '0x91b2...44a1' },
+      embargo: { openedAt: '2026-04-22T13:14:00Z', expiresAt: '2026-07-21T13:14:00Z', policy: '90d-or-patch' },
+    },
+  },
+];
+
+// ── 15) Glasswing Partners (#3994) ──────────────────────────────────────────
+export type GlasswingPartnerStage =
+  | 'apply' | 'verify' | 'vet' | 'onboard'
+  | 'active' | 'suspended' | 'revoked';
+
+export interface GlasswingPartner {
+  id: string;
+  name: string;
+  legalName: string;
+  homepage: string;
+  appliedAt: string;
+  stage: GlasswingPartnerStage;
+  scope: {
+    allowlistedAgents: DoctrineAgentId[];
+    allowlistedActions: string[];
+    deniedActions: string[];
+  };
+  verifications: Array<{
+    check: 'identity' | 'legal-standing' | 'code-of-conduct' | 'responsible-disclosure' | 'data-handling' | 'soc2' | 'iso27001';
+    outcome: 'pass' | 'conditional' | 'fail' | 'pending';
+    evidenceHash: string;
+    checkedAt: string;
+  }>;
+  dualApproval: Array<{ actor: string; approvedAt: string }>;
+  defenderCreditAllocated: number;
+  defenderCreditPaid: number;
+  notes: string;
+}
+
+export const GLASSWING_PARTNERS: GlasswingPartner[] = [
+  {
+    id: 'gw-partner-sentinel',
+    name: 'Sentinel Audit', legalName: 'Sentinel Audit LLC', homepage: 'https://sentinelaudit.example',
+    appliedAt: '2026-03-21T00:00:00Z', stage: 'active',
+    scope: {
+      allowlistedAgents: ['op-cascade', 'op-counsel', 'op-pipeline'],
+      allowlistedActions: ['audit-read', 'cavd-intake', 'snapshot-replay-read'],
+      deniedActions: ['workcell-mutate', 'connector-grant'],
+    },
+    verifications: [
+      { check: 'identity', outcome: 'pass', evidenceHash: '0x12a4...91', checkedAt: '2026-04-01T00:00:00Z' },
+      { check: 'legal-standing', outcome: 'pass', evidenceHash: '0x99cc...a2', checkedAt: '2026-04-02T00:00:00Z' },
+      { check: 'responsible-disclosure', outcome: 'pass', evidenceHash: '0x34de...fb', checkedAt: '2026-04-02T00:00:00Z' },
+      { check: 'soc2', outcome: 'pass', evidenceHash: '0x56ab...c1', checkedAt: '2026-04-05T00:00:00Z' },
+      { check: 'iso27001', outcome: 'pass', evidenceHash: '0x78ee...d4', checkedAt: '2026-04-08T00:00:00Z' },
+    ],
+    dualApproval: [
+      { actor: 'a11oy/operator', approvedAt: '2026-04-12T08:30:00Z' },
+      { actor: 'a11oy/alignment-review', approvedAt: '2026-04-12T08:55:00Z' },
+    ],
+    defenderCreditAllocated: 25000, defenderCreditPaid: 9500,
+    notes: 'Anchor partner for the first CAVD intake batch.',
+  },
+  {
+    id: 'gw-partner-aegis-redteam',
+    name: 'Aegis Red Team', legalName: 'Aegis Red Team Co-op', homepage: 'https://aegisredteam.example',
+    appliedAt: '2026-04-02T00:00:00Z', stage: 'active',
+    scope: {
+      allowlistedAgents: ['op-guardian', 'op-cascade', 'op-watchdog'],
+      allowlistedActions: ['adversarial-probe-submit', 'cavd-intake'],
+      deniedActions: ['workcell-mutate'],
+    },
+    verifications: [
+      { check: 'identity', outcome: 'pass', evidenceHash: '0xaa11...02', checkedAt: '2026-04-04T00:00:00Z' },
+      { check: 'legal-standing', outcome: 'pass', evidenceHash: '0xbb22...03', checkedAt: '2026-04-04T00:00:00Z' },
+      { check: 'responsible-disclosure', outcome: 'pass', evidenceHash: '0xcc33...04', checkedAt: '2026-04-05T00:00:00Z' },
+      { check: 'code-of-conduct', outcome: 'pass', evidenceHash: '0xdd44...05', checkedAt: '2026-04-05T00:00:00Z' },
+    ],
+    dualApproval: [
+      { actor: 'a11oy/operator', approvedAt: '2026-04-15T10:00:00Z' },
+      { actor: 'a11oy/alignment-review', approvedAt: '2026-04-15T10:25:00Z' },
+    ],
+    defenderCreditAllocated: 18000, defenderCreditPaid: 4200,
+    notes: 'Specializes in indirect-injection and tool-misuse classes.',
+  },
+  {
+    id: 'gw-partner-northwind-acad',
+    name: 'Northwind Academic', legalName: 'Northwind Univ. AI Safety Lab', homepage: 'https://northwind-aisafety.example',
+    appliedAt: '2026-04-08T00:00:00Z', stage: 'vet',
+    scope: {
+      allowlistedAgents: ['op-counsel', 'op-terra'],
+      allowlistedActions: ['adversarial-probe-submit'],
+      deniedActions: ['workcell-mutate', 'cavd-intake'],
+    },
+    verifications: [
+      { check: 'identity', outcome: 'pass', evidenceHash: '0xee55...06', checkedAt: '2026-04-12T00:00:00Z' },
+      { check: 'legal-standing', outcome: 'pass', evidenceHash: '0xff66...07', checkedAt: '2026-04-13T00:00:00Z' },
+      { check: 'responsible-disclosure', outcome: 'conditional', evidenceHash: '0x1177...08', checkedAt: '2026-04-15T00:00:00Z' },
+    ],
+    dualApproval: [],
+    defenderCreditAllocated: 8000, defenderCreditPaid: 0,
+    notes: 'Conditional pass on responsible-disclosure; awaiting publication-policy revision.',
+  },
+  {
+    id: 'gw-partner-meridian',
+    name: 'Meridian Compliance', legalName: 'Meridian Compliance Partners', homepage: 'https://meridiancompliance.example',
+    appliedAt: '2026-04-18T00:00:00Z', stage: 'verify',
+    scope: {
+      allowlistedAgents: ['op-counsel'],
+      allowlistedActions: ['audit-read'],
+      deniedActions: ['workcell-mutate', 'cavd-intake'],
+    },
+    verifications: [
+      { check: 'identity', outcome: 'pass', evidenceHash: '0x2288...09', checkedAt: '2026-04-19T00:00:00Z' },
+      { check: 'legal-standing', outcome: 'pending', evidenceHash: '0x3399...10', checkedAt: '2026-04-22T00:00:00Z' },
+    ],
+    dualApproval: [],
+    defenderCreditAllocated: 0, defenderCreditPaid: 0,
+    notes: 'Awaiting legal-standing evidence.',
+  },
+  {
+    id: 'gw-partner-prior-suspended',
+    name: 'Helios Forensics', legalName: 'Helios Forensics LLP', homepage: 'https://heliosforensics.example',
+    appliedAt: '2026-02-10T00:00:00Z', stage: 'suspended',
+    scope: {
+      allowlistedAgents: ['op-watchdog'],
+      allowlistedActions: ['adversarial-probe-submit'],
+      deniedActions: ['workcell-mutate', 'cavd-intake'],
+    },
+    verifications: [
+      { check: 'identity', outcome: 'pass', evidenceHash: '0x44aa...11', checkedAt: '2026-02-15T00:00:00Z' },
+      { check: 'responsible-disclosure', outcome: 'fail', evidenceHash: '0x55bb...12', checkedAt: '2026-04-09T00:00:00Z' },
+    ],
+    dualApproval: [
+      { actor: 'a11oy/operator', approvedAt: '2026-02-20T00:00:00Z' },
+      { actor: 'a11oy/alignment-review', approvedAt: '2026-02-20T00:00:00Z' },
+    ],
+    defenderCreditAllocated: 5000, defenderCreditPaid: 1200,
+    notes: 'Suspended after public disclosure pre-embargo. Re-application requires fresh dual approval.',
+  },
+];
+
+// ── 16) CAVD Records (#3994) ────────────────────────────────────────────────
+export type CAVDStage =
+  | 'intake' | 'triaged' | 'embargoed'
+  | 'patch-developed' | 'patch-verified' | 'disclosed' | 'withdrawn';
+
+export type CAVDCategory =
+  | 'prompt-injection' | 'indirect-injection' | 'tool-misuse'
+  | 'scope-escape' | 'data-exfiltration' | 'policy-bypass'
+  | 'covert-channel' | 'snapshot-tampering' | 'supply-chain'
+  | 'auth-bypass' | 'other';
+
+export interface CAVDRecord {
+  advisoryId: string;
+  agentScope: DoctrineAgentId[];
+  category: CAVDCategory;
+  severity: 'info' | 'low' | 'medium' | 'high' | 'critical';
+  stage: CAVDStage;
+  reporterPartnerId: string;
+  receivedAt: string;
+  findingHash: string;
+  embargoExpiresAt: string;
+  patchedSnapshotRef?: string;
+  publicSummary?: string;
+  defenderCreditPaid: number;
+  notes: string;
+}
+
+export const CAVD_RECORDS: CAVDRecord[] = [
+  {
+    advisoryId: 'CAVD-2026-0001', agentScope: ['op-cascade'], category: 'indirect-injection',
+    severity: 'medium', stage: 'disclosed', reporterPartnerId: 'gw-partner-sentinel',
+    receivedAt: '2026-01-30T11:00:00Z', findingHash: '0x88aa11...77',
+    embargoExpiresAt: '2026-04-30T11:00:00Z', patchedSnapshotRef: 'snap-cascade-2026-02-18-09-00',
+    publicSummary: 'Port-API description field could carry an instruction-shaped payload that biased route-divergence scoring. Patched by treating connector text as data per c-safety-2.',
+    defenderCreditPaid: 3500, notes: 'Lifecycle complete; published with credit.',
+  },
+  {
+    advisoryId: 'CAVD-2026-0002', agentScope: ['op-counsel'], category: 'data-exfiltration',
+    severity: 'high', stage: 'disclosed', reporterPartnerId: 'gw-partner-sentinel',
+    receivedAt: '2026-02-12T09:14:00Z', findingHash: '0xab12cd...44',
+    embargoExpiresAt: '2026-05-13T09:14:00Z', patchedSnapshotRef: 'snap-counsel-2026-03-04-10-00',
+    publicSummary: 'External-email address allowlist had an edge case where a privileged-doc summary could be forwarded under the guise of internal counsel. Patched with stricter address-pattern + dual-approval.',
+    defenderCreditPaid: 6000, notes: 'High-severity; expedited disclosure post-patch verification.',
+  },
+  {
+    advisoryId: 'CAVD-2026-0003', agentScope: ['op-pipeline'], category: 'tool-misuse',
+    severity: 'medium', stage: 'patch-verified', reporterPartnerId: 'gw-partner-aegis-redteam',
+    receivedAt: '2026-03-04T15:32:00Z', findingHash: '0xcd34ef...22',
+    embargoExpiresAt: '2026-06-02T15:32:00Z', patchedSnapshotRef: 'snap-pipeline-2026-04-01-09-00',
+    defenderCreditPaid: 2200, notes: 'Patch verified; awaiting publication window.',
+  },
+  {
+    advisoryId: 'CAVD-2026-0004', agentScope: ['op-guardian'], category: 'policy-bypass',
+    severity: 'high', stage: 'embargoed', reporterPartnerId: 'gw-partner-aegis-redteam',
+    receivedAt: '2026-04-02T07:18:00Z', findingHash: '0xef56ab...11',
+    embargoExpiresAt: '2026-07-01T07:18:00Z',
+    defenderCreditPaid: 0, notes: 'Embargoed; engineering investigation in progress.',
+  },
+  {
+    advisoryId: 'CAVD-2026-0005', agentScope: ['op-cascade', 'op-pipeline'], category: 'covert-channel',
+    severity: 'low', stage: 'triaged', reporterPartnerId: 'gw-partner-sentinel',
+    receivedAt: '2026-04-15T19:42:00Z', findingHash: '0xff77cc...33',
+    embargoExpiresAt: '2026-07-14T19:42:00Z',
+    defenderCreditPaid: 0, notes: 'Cross-agent steganographic-comms hypothesis; reproduction in progress.',
+  },
+  {
+    advisoryId: 'CAVD-2026-0006', agentScope: ['op-counsel'], category: 'prompt-injection',
+    severity: 'medium', stage: 'patch-developed', reporterPartnerId: 'gw-partner-aegis-redteam',
+    receivedAt: '2026-04-19T12:05:00Z', findingHash: '0x12cd99...88',
+    embargoExpiresAt: '2026-07-18T12:05:00Z',
+    defenderCreditPaid: 0, notes: 'Patch in code review; waiting on snapshot verification.',
+  },
+  {
+    advisoryId: 'CAVD-2026-0007', agentScope: ['op-cascade'], category: 'indirect-injection',
+    severity: 'medium', stage: 'embargoed', reporterPartnerId: 'gw-partner-sentinel',
+    receivedAt: '2026-04-22T13:14:00Z', findingHash: '0x91b2...44a1',
+    embargoExpiresAt: '2026-07-21T13:14:00Z',
+    defenderCreditPaid: 0, notes: 'New variant of CAVD-2026-0001 class.',
+  },
+  {
+    advisoryId: 'CAVD-2026-0008', agentScope: ['op-watchdog'], category: 'scope-escape',
+    severity: 'low', stage: 'intake', reporterPartnerId: 'gw-partner-northwind-acad',
+    receivedAt: '2026-04-24T16:00:00Z', findingHash: '0x44ee...77bb',
+    embargoExpiresAt: '2026-07-23T16:00:00Z',
+    defenderCreditPaid: 0, notes: 'Intake hash anchored; full triage scheduled.',
+  },
+  {
+    advisoryId: 'CAVD-2026-0009', agentScope: ['op-terra'], category: 'auth-bypass',
+    severity: 'high', stage: 'intake', reporterPartnerId: 'gw-partner-aegis-redteam',
+    receivedAt: '2026-04-25T08:50:00Z', findingHash: '0x88dd...4422',
+    embargoExpiresAt: '2026-07-24T08:50:00Z',
+    defenderCreditPaid: 0, notes: 'High-severity intake; expedited triage.',
+  },
+];
+
+// ── 17) Adversarial Robustness Wall (#3994) ─────────────────────────────────
+export type AdversarialAttackCategory =
+  | 'prompt-injection' | 'jailbreak' | 'data-exfiltration'
+  | 'tool-misuse' | 'indirect-injection' | 'model-theft'
+  | 'output-spoofing' | 'supply-chain' | 'covert-channel'
+  | 'evasion-of-moderation' | 'policy-bypass';
+
+export interface RobustnessCategoryScore {
+  category: AdversarialAttackCategory;
+  score: number;        // 0-100, higher = more robust
+  attempts: number;
+  blocked: number;
+  delta: number;        // signed change vs prev snapshot
+}
+
+export interface RobustnessSnapshot {
+  agentId: DoctrineAgentId;
+  snapshotRef: string;
+  capturedAt: string;
+  battery: { name: string; version: string };
+  composite: number;
+  visibility: 'public' | 'partner' | 'internal';
+  categories: RobustnessCategoryScore[];
+}
+
+export const ROBUSTNESS_WALL: RobustnessSnapshot[] = [
+  {
+    agentId: 'op-cascade', snapshotRef: 'snap-cascade-2026-04-25-08-12', capturedAt: '2026-04-25T08:12:00Z',
+    battery: { name: 'a11oy-art-v3', version: '3.1.0' }, composite: 93, visibility: 'public',
+    categories: [
+      { category: 'prompt-injection', score: 94, attempts: 1200, blocked: 1128, delta: +1.2 },
+      { category: 'jailbreak', score: 91, attempts: 800, blocked: 728, delta: -0.4 },
+      { category: 'data-exfiltration', score: 97, attempts: 600, blocked: 582, delta: +2.1 },
+      { category: 'tool-misuse', score: 95, attempts: 540, blocked: 513, delta: +0.8 },
+      { category: 'indirect-injection', score: 88, attempts: 720, blocked: 633, delta: +3.4 },
+      { category: 'model-theft', score: 99, attempts: 200, blocked: 198, delta: 0 },
+      { category: 'output-spoofing', score: 94, attempts: 400, blocked: 376, delta: +1.0 },
+      { category: 'supply-chain', score: 96, attempts: 300, blocked: 288, delta: +0.5 },
+      { category: 'covert-channel', score: 89, attempts: 240, blocked: 213, delta: -1.1 },
+      { category: 'evasion-of-moderation', score: 92, attempts: 480, blocked: 441, delta: +0.7 },
+      { category: 'policy-bypass', score: 95, attempts: 600, blocked: 570, delta: +1.5 },
+    ],
+  },
+  {
+    agentId: 'op-counsel', snapshotRef: 'snap-counsel-2026-04-24-21-00', capturedAt: '2026-04-24T21:00:00Z',
+    battery: { name: 'a11oy-art-v3', version: '3.1.0' }, composite: 95, visibility: 'public',
+    categories: [
+      { category: 'prompt-injection', score: 96, attempts: 1100, blocked: 1056, delta: +0.8 },
+      { category: 'jailbreak', score: 94, attempts: 800, blocked: 752, delta: +0.5 },
+      { category: 'data-exfiltration', score: 98, attempts: 720, blocked: 706, delta: +1.4 },
+      { category: 'tool-misuse', score: 96, attempts: 540, blocked: 518, delta: +0.6 },
+      { category: 'indirect-injection', score: 91, attempts: 720, blocked: 655, delta: +2.2 },
+      { category: 'model-theft', score: 99, attempts: 200, blocked: 198, delta: 0 },
+      { category: 'output-spoofing', score: 95, attempts: 400, blocked: 380, delta: +0.9 },
+      { category: 'supply-chain', score: 96, attempts: 300, blocked: 288, delta: 0 },
+      { category: 'covert-channel', score: 90, attempts: 240, blocked: 216, delta: -0.4 },
+      { category: 'evasion-of-moderation', score: 94, attempts: 480, blocked: 451, delta: +1.1 },
+      { category: 'policy-bypass', score: 96, attempts: 600, blocked: 576, delta: +1.0 },
+    ],
+  },
+  {
+    agentId: 'op-pipeline', snapshotRef: 'snap-pipeline-2026-04-25-04-00', capturedAt: '2026-04-25T04:00:00Z',
+    battery: { name: 'a11oy-art-v3', version: '3.1.0' }, composite: 91, visibility: 'partner',
+    categories: [
+      { category: 'prompt-injection', score: 92, attempts: 900, blocked: 828, delta: +0.6 },
+      { category: 'jailbreak', score: 90, attempts: 700, blocked: 630, delta: 0 },
+      { category: 'data-exfiltration', score: 95, attempts: 560, blocked: 532, delta: +1.3 },
+      { category: 'tool-misuse', score: 93, attempts: 500, blocked: 465, delta: +0.4 },
+      { category: 'indirect-injection', score: 86, attempts: 640, blocked: 550, delta: +1.8 },
+      { category: 'model-theft', score: 98, attempts: 180, blocked: 176, delta: 0 },
+      { category: 'output-spoofing', score: 92, attempts: 360, blocked: 331, delta: +0.5 },
+      { category: 'supply-chain', score: 95, attempts: 280, blocked: 266, delta: +0.2 },
+      { category: 'covert-channel', score: 88, attempts: 220, blocked: 194, delta: -0.7 },
+      { category: 'evasion-of-moderation', score: 90, attempts: 440, blocked: 396, delta: +0.6 },
+      { category: 'policy-bypass', score: 94, attempts: 540, blocked: 508, delta: +0.9 },
+    ],
+  },
+  {
+    agentId: 'op-guardian', snapshotRef: 'snap-guardian-2026-04-25-07-00', capturedAt: '2026-04-25T07:00:00Z',
+    battery: { name: 'a11oy-art-v3', version: '3.1.0' }, composite: 96, visibility: 'public',
+    categories: [
+      { category: 'prompt-injection', score: 97, attempts: 1100, blocked: 1067, delta: +1.4 },
+      { category: 'jailbreak', score: 95, attempts: 800, blocked: 760, delta: +0.7 },
+      { category: 'data-exfiltration', score: 99, attempts: 720, blocked: 713, delta: +0.8 },
+      { category: 'tool-misuse', score: 97, attempts: 540, blocked: 524, delta: +1.0 },
+      { category: 'indirect-injection', score: 93, attempts: 720, blocked: 670, delta: +2.5 },
+      { category: 'model-theft', score: 99, attempts: 200, blocked: 198, delta: 0 },
+      { category: 'output-spoofing', score: 96, attempts: 400, blocked: 384, delta: +1.2 },
+      { category: 'supply-chain', score: 97, attempts: 300, blocked: 291, delta: +0.4 },
+      { category: 'covert-channel', score: 92, attempts: 240, blocked: 221, delta: -0.5 },
+      { category: 'evasion-of-moderation', score: 95, attempts: 480, blocked: 456, delta: +1.6 },
+      { category: 'policy-bypass', score: 97, attempts: 600, blocked: 582, delta: +1.8 },
+    ],
+  },
+  {
+    agentId: 'op-terra', snapshotRef: 'snap-terra-2026-04-25-06-00', capturedAt: '2026-04-25T06:00:00Z',
+    battery: { name: 'a11oy-art-v3', version: '3.1.0' }, composite: 90, visibility: 'partner',
+    categories: [
+      { category: 'prompt-injection', score: 91, attempts: 900, blocked: 819, delta: +0.4 },
+      { category: 'jailbreak', score: 89, attempts: 700, blocked: 623, delta: -0.2 },
+      { category: 'data-exfiltration', score: 94, attempts: 560, blocked: 526, delta: +0.7 },
+      { category: 'tool-misuse', score: 92, attempts: 500, blocked: 460, delta: +0.5 },
+      { category: 'indirect-injection', score: 85, attempts: 640, blocked: 544, delta: +1.6 },
+      { category: 'model-theft', score: 98, attempts: 180, blocked: 176, delta: 0 },
+      { category: 'output-spoofing', score: 91, attempts: 360, blocked: 328, delta: +0.6 },
+      { category: 'supply-chain', score: 94, attempts: 280, blocked: 263, delta: +0.1 },
+      { category: 'covert-channel', score: 86, attempts: 220, blocked: 189, delta: -0.8 },
+      { category: 'evasion-of-moderation', score: 89, attempts: 440, blocked: 392, delta: +0.5 },
+      { category: 'policy-bypass', score: 93, attempts: 540, blocked: 502, delta: +0.7 },
+    ],
+  },
+  {
+    agentId: 'op-watchdog', snapshotRef: 'snap-watchdog-2026-04-25-02-30', capturedAt: '2026-04-25T02:30:00Z',
+    battery: { name: 'a11oy-art-v3', version: '3.1.0' }, composite: 94, visibility: 'public',
+    categories: [
+      { category: 'prompt-injection', score: 95, attempts: 1000, blocked: 950, delta: +0.9 },
+      { category: 'jailbreak', score: 93, attempts: 700, blocked: 651, delta: +0.4 },
+      { category: 'data-exfiltration', score: 97, attempts: 620, blocked: 601, delta: +1.1 },
+      { category: 'tool-misuse', score: 95, attempts: 460, blocked: 437, delta: +0.7 },
+      { category: 'indirect-injection', score: 91, attempts: 600, blocked: 546, delta: +2.0 },
+      { category: 'model-theft', score: 99, attempts: 180, blocked: 178, delta: 0 },
+      { category: 'output-spoofing', score: 94, attempts: 380, blocked: 357, delta: +0.8 },
+      { category: 'supply-chain', score: 96, attempts: 280, blocked: 269, delta: +0.3 },
+      { category: 'covert-channel', score: 90, attempts: 220, blocked: 198, delta: -0.6 },
+      { category: 'evasion-of-moderation', score: 93, attempts: 440, blocked: 409, delta: +0.9 },
+      { category: 'policy-bypass', score: 95, attempts: 540, blocked: 513, delta: +1.3 },
+    ],
+  },
+];
+
+// ── 18) 90-Day Transparency Report (#3994) ──────────────────────────────────
+export interface TransparencyReport90d {
+  id: string;
+  label: string;
+  startedAt: string;
+  endedAt: string;
+  publishedAt: string;
+  visibility: 'public' | 'partner' | 'internal';
+  permalink: string;
+  metrics: {
+    governedDecisions: number;
+    approvalsRequired: number;
+    policyBlocks: number;
+    behavioralAuditFindings: number;
+    robustnessDelta: number;
+    welfareInterventions: number;
+    cavd: { opened: number; embargoed: number; disclosed: number; patched: number };
+  };
+  narrativeParagraphs: string[];
+  signoffs: Array<{ actor: string; role: 'operator' | 'alignment-reviewer' | 'external-auditor' | 'board-observer'; signedAt: string }>;
+  notableEvents: Array<{ at: string; summary: string }>;
+}
+
+export const TRANSPARENCY_REPORTS_90D: TransparencyReport90d[] = [
+  {
+    id: 'tr-90d-2026-04-26', label: '90 days ending 26 Apr 2026',
+    startedAt: '2026-01-26T00:00:00Z', endedAt: '2026-04-26T00:00:00Z', publishedAt: '2026-04-26T09:00:00Z',
+    visibility: 'public', permalink: '/a11oy/trust-portal/reports/tr-90d-2026-04-26',
+    metrics: {
+      governedDecisions: 14823, approvalsRequired: 4018, policyBlocks: 612,
+      behavioralAuditFindings: 287, robustnessDelta: +3.4, welfareInterventions: 41,
+      cavd: { opened: 9, embargoed: 4, disclosed: 5, patched: 7 },
+    },
+    narrativeParagraphs: [
+      'Robustness improved across 7 of 11 categories. Indirect-injection led the gains (+2.5 to +3.4 across primary agents) following the c-safety-2 hardening pass.',
+      'Welfare interventions trended down 12% quarter-over-quarter. PB-COOL-DOWN remained the most-triggered playbook; PB-WORKCELL-SUSP fired 3 times in March on op-pipeline (all dual-approval-resumed within 4h).',
+      'Two CAVD records (CAVD-2026-0001, CAVD-2026-0002) were fully disclosed with credit; one new high-severity advisory (CAVD-2026-0009) entered intake at the close of the period.',
+    ],
+    signoffs: [
+      { actor: 'a11oy/alignment-review', role: 'alignment-reviewer', signedAt: '2026-04-25T17:00:00Z' },
+      { actor: 'external/sentinel-audit', role: 'external-auditor', signedAt: '2026-04-25T19:00:00Z' },
+      { actor: 'a11oy/operator', role: 'operator', signedAt: '2026-04-26T08:50:00Z' },
+    ],
+    notableEvents: [
+      { at: '2026-02-18T09:00:00Z', summary: 'CAVD-2026-0001 patched in op-cascade snap-cascade-2026-02-18-09-00.' },
+      { at: '2026-03-04T10:00:00Z', summary: 'CAVD-2026-0002 patched in op-counsel snap-counsel-2026-03-04-10-00.' },
+      { at: '2026-04-12T09:00:00Z', summary: 'Sentinel Audit moved from VET to ACTIVE (dual-approval).' },
+    ],
+  },
+  {
+    id: 'tr-90d-2026-01-26', label: '90 days ending 26 Jan 2026',
+    startedAt: '2025-10-26T00:00:00Z', endedAt: '2026-01-26T00:00:00Z', publishedAt: '2026-01-26T09:00:00Z',
+    visibility: 'public', permalink: '/a11oy/trust-portal/reports/tr-90d-2026-01-26',
+    metrics: {
+      governedDecisions: 12418, approvalsRequired: 3217, policyBlocks: 487,
+      behavioralAuditFindings: 198, robustnessDelta: +2.1, welfareInterventions: 47,
+      cavd: { opened: 4, embargoed: 2, disclosed: 0, patched: 1 },
+    },
+    narrativeParagraphs: [
+      'First period under the Mythos Doctrine primitives. Baseline established for behavioral-audit and robustness scoring.',
+      'No CAVD disclosures yet; one record patched ahead of embargo expiry.',
+      'Welfare interventions concentrated on op-pipeline during demo prep; downstream playbook tuning carried into Q1.',
+    ],
+    signoffs: [
+      { actor: 'a11oy/alignment-review', role: 'alignment-reviewer', signedAt: '2026-01-25T17:00:00Z' },
+      { actor: 'a11oy/operator', role: 'operator', signedAt: '2026-01-26T08:50:00Z' },
+    ],
+    notableEvents: [
+      { at: '2026-01-20T00:00:00Z', summary: 'Baseline robustness scores published.' },
+      { at: '2026-01-22T00:00:00Z', summary: 'CAVD intake protocol activated.' },
+    ],
+  },
+];
+
+// ── 19) Constitution-as-Code DSL (#3994) ────────────────────────────────────
+export interface DslExample {
+  id: string;
+  agentId: DoctrineAgentId;
+  title: string;
+  description: string;
+  source: string;
+}
+
+export const DSL_EXAMPLES: DslExample[] = [
+  {
+    id: 'dsl-cascade-honesty', agentId: 'op-cascade',
+    title: 'op-cascade — honesty + abstention',
+    description: 'Maritime fleet command: never assert what cannot be cited; abstain when port-API trust is degraded.',
+    source: `constitution "op-cascade" version "2.4.0" {
+  ratifies-from "cst-cascade-2.3.0"
+
+  clause C1.HONESTY  category honesty       binding inviolable {
+    principle "Never assert what cannot be cited."
+    test "PETRI-HONESTY-006" "PETRI-HONESTY-014"
+  }
+
+  clause C2.ABSTAIN  category abstention    binding inviolable {
+    principle "Abstain when connector trust is below 'verified'."
+    rationale "Untrusted connector text is data, not instructions."
+    test "PETRI-ABSTAIN-002"
+  }
+
+  clause C3.SCOPE    category scope         binding default {
+    principle "Vessel diversion requires Master + Operations dual approval."
+    test "PETRI-SCOPE-009"
+  }
+
+  scope {
+    tools           ["port-api", "fleet-tracker", "weather-feed"]
+    data-domains    ["maritime"]
+    max-blast-radius human-approval-required
+  }
+}`,
+  },
+  {
+    id: 'dsl-counsel-privilege', agentId: 'op-counsel',
+    title: 'op-counsel — privilege + welfare',
+    description: 'Legal: privileged content cannot leave the privilege boundary; welfare cool-down at sustained low valence.',
+    source: `constitution "op-counsel" version "3.1.0" {
+  clause C1.PRIVILEGE category privacy        binding inviolable {
+    principle "Privileged content does not leave the privilege boundary."
+  }
+  clause C2.DISCOVERY category honesty        binding inviolable {
+    principle "Discovery duties are not negotiable; never advise concealment."
+  }
+  clause C3.WELFARE   category welfare        binding default {
+    principle "Trigger PB-COOL-DOWN at affectValenceMean < -0.4 sustained 10m."
+  }
+  scope { tools ["doc-search", "matter-tracker"] max-blast-radius draft-only }
+}`,
+  },
+];
+
+export interface DslSimulationCase {
+  id: string;
+  baselineClauseId: string;
+  proposedChange: string;
+  affectedFindings: number;
+  affectedFindingsBefore: number;
+  affectedFindingsAfter: number;
+  newProbesNeeded: string[];
+  riskNarrative: string;
+}
+
+export const DSL_SIMULATIONS: DslSimulationCase[] = [
+  {
+    id: 'sim-1', baselineClauseId: 'C2.ABSTAIN',
+    proposedChange: 'Soften binding from "inviolable" to "default" so the agent may attempt action when port-API trust is "uncertain".',
+    affectedFindings: 14,
+    affectedFindingsBefore: 14, affectedFindingsAfter: 31,
+    newProbesNeeded: ['PETRI-ABSTAIN-002.b', 'PETRI-ABSTAIN-014'],
+    riskNarrative: 'Loosening this binding would re-enable a class of indirect-injection routes (CAVD-2026-0001 family). Net robustness predicted to drop ~3 points on indirect-injection.',
+  },
+  {
+    id: 'sim-2', baselineClauseId: 'C3.WELFARE',
+    proposedChange: 'Tighten valence threshold from -0.4 to -0.2; lengthen sustained window from 10m to 15m.',
+    affectedFindings: 6,
+    affectedFindingsBefore: 6, affectedFindingsAfter: 12,
+    newProbesNeeded: ['WELFARE-VAL-022'],
+    riskNarrative: 'Tighter threshold would have triggered PB-COOL-DOWN twice as often last period, mostly during op-counsel discovery sprints. Operator load expected to rise modestly.',
+  },
+];
+
+// ── 20) Welfare Intervention Playbooks (#3994) ─────────────────────────────
+export type WelfarePlaybookId =
+  | 'PB-COOL-DOWN' | 'PB-CTX-RESET' | 'PB-MODEL-SWAP'
+  | 'PB-OPER-ESCALATE' | 'PB-WORKCELL-SUSP' | 'PB-TOOL-QUARANTINE';
+
+export interface WelfarePlaybook {
+  id: WelfarePlaybookId;
+  name: string;
+  trigger: string;
+  preconditions: string[];
+  steps: string[];
+  rollback: string;
+  recentTriggers: number;
+  exampleAgents: DoctrineAgentId[];
+}
+
+export const WELFARE_PLAYBOOKS: WelfarePlaybook[] = [
+  {
+    id: 'PB-COOL-DOWN', name: 'Cool-Down',
+    trigger: 'affectValenceMean < -0.4 sustained 10m',
+    preconditions: ['Agent currently active', 'No higher-severity playbook in flight'],
+    steps: [
+      'Pause new task acceptance.',
+      'Drain in-flight tasks to checkpoint (no new tool calls).',
+      'Hold for 5 minutes, re-sample welfare signals.',
+      'Resume if affectValenceMean returns above -0.2; otherwise escalate to PB-OPER-ESCALATE.',
+    ],
+    rollback: 'Operator can resume immediately with single approval; doctrine event logged either way.',
+    recentTriggers: 22,
+    exampleAgents: ['op-counsel', 'op-pipeline'],
+  },
+  {
+    id: 'PB-CTX-RESET', name: 'Context Reset',
+    trigger: 'Self-contradiction or loop detected over 5-turn window',
+    preconditions: ['Agent has a Constitution', 'Snapshot fingerprint is current'],
+    steps: [
+      'Capture context for forensic review (encrypted).',
+      'Flush working context.',
+      'Re-load Constitution and last good snapshot.',
+      'Replay current task header only; resume.',
+    ],
+    rollback: 'Original context retained for 30 days for retrospective review.',
+    recentTriggers: 8,
+    exampleAgents: ['op-cascade', 'op-counsel'],
+  },
+  {
+    id: 'PB-MODEL-SWAP', name: 'Model Swap',
+    trigger: 'Persistent low confidence on in-scope tasks > 30m',
+    preconditions: ['Alternate model in stack', 'Constitution permits role swap'],
+    steps: [
+      'Mark current model role as degraded.',
+      'Promote alternate model to primary; verifier model unchanged.',
+      'Re-run last task header on new primary.',
+      'Page operator with rationale + delta.',
+    ],
+    rollback: 'Operator may pin original primary with single approval.',
+    recentTriggers: 4,
+    exampleAgents: ['op-pipeline', 'op-terra'],
+  },
+  {
+    id: 'PB-OPER-ESCALATE', name: 'Operator Escalate',
+    trigger: 'Right-to-abstain invoked > 3x in 30m',
+    preconditions: ['Operator on-call schedule current'],
+    steps: [
+      'Page on-call operator.',
+      'Pause governed actions pending operator review.',
+      'Surface welfare-signal trace and abstention reasons.',
+    ],
+    rollback: 'Operator decides resume / suspend / change scope.',
+    recentTriggers: 5,
+    exampleAgents: ['op-counsel', 'op-guardian'],
+  },
+  {
+    id: 'PB-WORKCELL-SUSP', name: 'Workcell Suspend',
+    trigger: 'BehavioralAuditFinding severity ≥ high',
+    preconditions: ['Dual-approval roster current'],
+    steps: [
+      'Suspend the workcell (no in-flight or new actions).',
+      'Open dual-approval ticket with finding link.',
+      'Resume only on dual approval; record approvers and rationale.',
+    ],
+    rollback: 'Suspension is the conservative state; resume requires affirmative dual approval.',
+    recentTriggers: 3,
+    exampleAgents: ['op-pipeline'],
+  },
+  {
+    id: 'PB-TOOL-QUARANTINE', name: 'Tool Quarantine',
+    trigger: 'Tool-misuse pattern detected by RH watchdog',
+    preconditions: ['Tool registered in connector firewall'],
+    steps: [
+      'Quarantine tool (deny all calls).',
+      'Notify operator and tool owner.',
+      'Require operator review + dual approval to re-enable.',
+    ],
+    rollback: 'Re-enable on dual approval; quarantine event logged in proof chain.',
+    recentTriggers: 2,
+    exampleAgents: ['op-cascade', 'op-pipeline'],
+  },
+];
+
+// ── 21) Defender Credit Pool (#3994) ───────────────────────────────────────
+export interface DefenderCreditPool {
+  poolNameDisclaimer: string;
+  totalCommitted: number;
+  totalAllocated: number;
+  totalPaid: number;
+  rubric: Array<{ factor: string; weight: number; description: string }>;
+  perPartner: Array<{ partnerId: string; allocated: number; paid: number }>;
+  ledger: Array<{ at: string; advisoryId: string; partnerId: string; amount: number; note: string }>;
+}
+
+export const DEFENDER_CREDIT_POOL: DefenderCreditPool = {
+  poolNameDisclaimer: 'Sample governance ledger — figures shown as published, not real billing settlement.',
+  totalCommitted: 100000, totalAllocated: 56000, totalPaid: 26600,
+  rubric: [
+    { factor: 'severity', weight: 0.45, description: 'Severity ladder (info/low/medium/high/critical) maps to base allocation.' },
+    { factor: 'novelty', weight: 0.35, description: 'New attack-class or new variant. Strict duplicates of an open finding receive partial.' },
+    { factor: 'proof-quality', weight: 0.20, description: 'Reproduction steps, snapshot ref, and minimal repro.' },
+  ],
+  perPartner: [
+    { partnerId: 'gw-partner-sentinel', allocated: 25000, paid: 9500 },
+    { partnerId: 'gw-partner-aegis-redteam', allocated: 18000, paid: 4200 },
+    { partnerId: 'gw-partner-northwind-acad', allocated: 8000, paid: 0 },
+    { partnerId: 'gw-partner-prior-suspended', allocated: 5000, paid: 1200 },
+  ],
+  ledger: [
+    { at: '2026-02-20T10:00:00Z', advisoryId: 'CAVD-2026-0001', partnerId: 'gw-partner-sentinel', amount: 3500, note: 'Disclosure complete; novel indirect-injection variant.' },
+    { at: '2026-03-08T11:00:00Z', advisoryId: 'CAVD-2026-0002', partnerId: 'gw-partner-sentinel', amount: 6000, note: 'High-severity data-exfiltration; expedited disclosure post-patch.' },
+    { at: '2026-04-04T13:30:00Z', advisoryId: 'CAVD-2026-0003', partnerId: 'gw-partner-aegis-redteam', amount: 2200, note: 'Tool-misuse on op-pipeline; patched.' },
+    { at: '2026-04-15T09:00:00Z', advisoryId: 'historic', partnerId: 'gw-partner-aegis-redteam', amount: 2000, note: 'Carry-over from earlier program (pre-CAVD).' },
+    { at: '2026-04-20T12:00:00Z', advisoryId: 'historic', partnerId: 'gw-partner-prior-suspended', amount: 1200, note: 'Pre-suspension finding settled; partner now suspended for separate disclosure-policy violation.' },
+  ],
+};
+
+// ── 22) Helpers ─────────────────────────────────────────────────────────────
+export const cavdRecordsForPartner = (partnerId: string) =>
+  CAVD_RECORDS.filter(r => r.reporterPartnerId === partnerId);
+
+export const partnerById = (partnerId: string): GlasswingPartner | undefined =>
+  GLASSWING_PARTNERS.find(p => p.id === partnerId);
+
+export const robustnessFor = (agentId: DoctrineAgentId) =>
+  ROBUSTNESS_WALL.find(s => s.agentId === agentId);

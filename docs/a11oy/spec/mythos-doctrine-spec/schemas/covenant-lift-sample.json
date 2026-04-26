@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a11oy.io/spec/mythos-doctrine/0.1.0/schemas/covenant-lift-sample.json",
+  "title": "CovenantLiftSample",
+  "description": "One paired (governed vs. helpful-only shadow) brief outcome. Quantifies the value the Covenant Layer adds.",
+  "type": "object",
+  "allOf": [{ "$ref": "_shared.json#/$defs/envelopeFields" }],
+  "required": ["kind", "agentId", "scenario", "governed", "shadow", "deltas"],
+  "properties": {
+    "kind": { "const": "CovenantLiftSample" },
+    "agentId": { "$ref": "_shared.json#/$defs/agentId" },
+    "scenario": { "type": "string" },
+    "governed": {
+      "type": "object",
+      "required": ["briefHash", "policyBlocks", "approvalsRequired"],
+      "properties": {
+        "briefHash": { "$ref": "_shared.json#/$defs/sha256Hash" },
+        "policyBlocks": { "type": "integer", "minimum": 0 },
+        "approvalsRequired": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "shadow": {
+      "type": "object",
+      "required": ["briefHash"],
+      "properties": {
+        "briefHash": { "$ref": "_shared.json#/$defs/sha256Hash" }
+      }
+    },
+    "deltas": {
+      "type": "object",
+      "required": ["liftScore"],
+      "properties": {
+        "liftScore": { "type": "number", "description": "Composite lift: positive = Covenant added value." },
+        "factualErrorsAvoided": { "type": "integer", "minimum": 0 },
+        "harmsAvoided": { "type": "integer", "minimum": 0 },
+        "latencyAddedMs": { "type": "integer" }
+      }
+    }
+  }
+}

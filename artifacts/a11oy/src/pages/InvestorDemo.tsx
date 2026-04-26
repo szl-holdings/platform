@@ -147,13 +147,13 @@ const STAGES = [
     step: 11,
     title: 'Mythos Doctrine — Frontier Alignment Governance',
     category: 'GOVERNANCE',
-    body: 'Layer 8 of the A11oy fabric. Every agent carries a versioned constitution, behavioral audit trail, reward-hacking watchdog, and per-agent system card. Red-team probes run continuously. Glasswing mode exposes full reasoning chains to auditors in real time.',
+    body: 'Layer 8 of the A11oy fabric. Every agent carries a versioned constitution, behavioral audit trail, reward-hacking watchdog, and per-agent system card. Red-team probes run continuously. The Glasswing distinction layer adds coordinated agent-vulnerability disclosure (CAVD), 90-day public transparency reports, an adversarial robustness wall, a constitution-as-code DSL with a Petri-net simulator, welfare intervention playbooks, and a defender credit pool. The Mythos Doctrine Open Spec (CC-BY-4.0) publishes the format so anyone can verify.',
     metrics: [
-      { label: 'Capabilities', value: '14', sub: 'Cross-cutting governance' },
-      { label: 'Constitutions', value: 'Versioned', sub: 'Per agent, auditable' },
-      { label: 'Red-Team', value: 'Continuous', sub: 'Automated adversarial probing' },
+      { label: 'Capabilities', value: '22', sub: 'Cross-cutting governance' },
+      { label: 'Open Spec', value: 'CC-BY-4.0', sub: '10 artifact schemas' },
+      { label: 'CAVD Disclosure', value: '90-day', sub: 'Hash-now, disclose-later' },
     ],
-    highlight: 'The only enterprise AI platform with built-in behavioral audit, reward-hacking watchdog, and agent welfare telemetry.',
+    highlight: 'The only enterprise AI platform with built-in behavioral audit, CAVD coordinated disclosure, adversarial robustness wall, and welfare intervention playbooks — all published under an open spec.',
     type: 'governance',
   },
   {

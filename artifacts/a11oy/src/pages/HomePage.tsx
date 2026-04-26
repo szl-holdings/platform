@@ -71,7 +71,8 @@ const PRIMITIVES = [
   { name: 'Proof Chain', num: '02', desc: 'Immutable append-only ledger of every consequential action. Cryptographically verifiable. Queryable by actor or decision.' },
   { name: 'Covenant Policy', num: '03', desc: 'Policy-as-code engine that gates every action. Who can approve, when, under what conditions — enforced at the platform layer.' },
   { name: 'Outcome Graph', num: '04', desc: 'Closes the loop. Records the real-world consequence of each decision and feeds the result back to calibrate future confidence.' },
-  { name: 'Mythos Doctrine', num: '05', desc: 'Frontier-grade alignment governance — versioned constitutions, behavioral audit, reward-hacking watchdog, red-team probes, agent welfare telemetry, and per-agent system cards.' },
+  { name: 'Mythos Doctrine', num: '05', desc: 'Frontier-grade alignment governance — versioned constitutions, behavioral audit, reward-hacking watchdog, red-team probes, agent welfare telemetry, and per-agent system cards. Open Spec (CC-BY-4.0).' },
+  { name: 'Glasswing Layer', num: '06', desc: 'Transparency-first partner program — 4-stage cyber verification, CAVD coordinated disclosure, 90-day public transparency reports, Constitution-as-Code DSL, adversarial robustness wall, and welfare intervention playbooks.' },
 ];
 
 const VERTICALS = [
@@ -1033,6 +1034,7 @@ export function HomePage() {
               { title: 'Outcomes Close the Loop', desc: 'The Outcome Graph records what actually happened and compares it to the recommendation. Models recalibrate. The system evolves.' },
               { title: 'Durable Execution', desc: 'Checkpoint recovery, agent coordination, human-in-the-loop handoffs. Not a stateless API call — a governed, durable workflow.' },
               { title: '7 Industry Verticals', desc: 'Finance, Science, Engineering, Legal, Maritime, Real Estate, Defense. Same canonical loop. Domain-specific intelligence.' },
+              { title: 'Glasswing Transparency', desc: 'Public trust portal, CAVD coordinated disclosure, 90-day transparency reports, adversarial robustness wall. Every governance claim backed by a verifiable open-spec artifact.' },
             ].map((item, i) => (
               <FadeIn key={item.title} delay={i * 0.05}>
                 <div style={{ padding: '2.25rem', background: T.bg, height: '100%' }}>
@@ -1179,7 +1181,7 @@ export function HomePage() {
               {
                 name: 'a11oy',
                 category: 'Governed Execution',
-                has: 'Full stack: signal ingestion, causal reasoning, governed orchestration, cryptographic proof, alignment monitoring, 7 enterprise verticals',
+                has: 'Full stack: signal ingestion, causal reasoning, governed orchestration, cryptographic proof, alignment monitoring, 7 enterprise verticals. Glasswing distinction layer — CAVD coordinated disclosure, public trust portal, 90-day transparency, adversarial robustness wall, constitution-as-code DSL.',
                 gap: '',
               },
             ].map((comp, i) => (
