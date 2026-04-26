@@ -119,6 +119,8 @@ const defaultStageExecutor: StageExecutorFn = async (stage, input, ctx) => {
             stageId: stage.id,
             stageType: stage.type,
             stageConfig: {
+              stageKind: stage.otelTags.stageKind ?? stage.type,
+              stageCategory: stage.otelTags.stage_category,
               retrieverAdapterId: stage.retrieverAdapterId,
               topK: stage.topK,
               minRelevanceScore: stage.minRelevanceScore,

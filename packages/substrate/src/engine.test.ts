@@ -8,6 +8,7 @@
 import { SubstrateRuntime } from './engine.js';
 import { defineWorkflow } from './index.js';
 import { SubstrateJournal } from './journal.js';
+import { defaultPythonWorkerChannel } from './python-worker.js';
 import {
   ApprovalGate as ApprovalGateFactory,
   Decide,
@@ -141,10 +142,7 @@ async function testJournalHashStability(): Promise<void> {
         `inputHash unstable for stage '${b1.stageId}': ${b1.inputHash} vs ${b2.inputHash}`,
       );
     }
-    if (
-      (b1 as Record<string, unknown>).outputHash !==
-      (b2 as Record<string, unknown>).outputHash
-    ) {
+    if ((b1 as Record<string, unknown>).outputHash !== (b2 as Record<string, unknown>).outputHash) {
       throw new Error(`outputHash unstable for stage '${b1.stageId}'`);
     }
   }
@@ -154,7 +152,6 @@ async function testCompilerRejectsMissingGate(): Promise<void> {
   let threw = false;
   try {
     const { compile } = await import('./compiler.js');
-    const { SubstrateCompilerError } = await import('./compiler.js');
 
     compile({
       id: 'bad-workflow',
@@ -248,16 +245,52 @@ async function testOpportunityAuditDryRun(): Promise<void> {
   }
 }
 
+async function testPythonWorkerLiveModeFailsClosedWithoutUrl(): Promise<void> {
+  const previousUrl = process.env.SUBSTRATE_PYTHON_WORKER_URL;
+  delete process.env.SUBSTRATE_PYTHON_WORKER_URL;
+
+  try {
+    await defaultPythonWorkerChannel.dispatch(
+      {
+        runId: 'run-live-fail-closed',
+        workflowId: 'wf-live-fail-closed',
+        stageId: 'retrieve-live-fail-closed',
+        stageType: 'Retrieve',
+        stageConfig: { stageKind: 'retrieval' },
+        input: { query: 'must not simulate in live mode' },
+        budgetConfig: { escalateAt: 0.9, requireHumanBelow: 0.3 },
+        traceId: 'trace-live-fail-closed',
+        mode: 'live',
+      },
+      50,
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (!message.includes('Live mode requires SUBSTRATE_PYTHON_WORKER_URL')) {
+      throw new Error(`Expected live-mode fail-closed error, got: ${message}`);
+    }
+    return;
+  } finally {
+    if (previousUrl === undefined) {
+      delete process.env.SUBSTRATE_PYTHON_WORKER_URL;
+    } else {
+      process.env.SUBSTRATE_PYTHON_WORKER_URL = previousUrl;
+    }
+  }
+
+  throw new Error('Python worker live mode must fail closed when worker URL is missing');
+}
+
 // ─── Test Runner ──────────────────────────────────────────────────────────────
 
 export async function runEngineTests(): Promise<void> {
-
   await testDryRunMode();
   await testLiveMode();
   await testJournalHashStability();
   await testCompilerRejectsMissingGate();
   await testHookFiring();
   await testOpportunityAuditDryRun();
+  await testPythonWorkerLiveModeFailsClosedWithoutUrl();
 }
 
 if (typeof process !== 'undefined' && process.argv[1]?.endsWith('engine.test.ts')) {

@@ -12,14 +12,13 @@
  *
  * ── Phase 1 boundary ────────────────────────────────────────────────────────
  * The retrieve-lyte-data stage uses retrieverAdapterId: "lyte-retriever".
- * In Phase 1, no real Lyte retriever is registered; the workflow must be
- * started in dry-run or replay mode, OR a real LyteRetrieverAdapter must be
- * registered via `registerLyteRetrieverAdapter()` before running in live mode.
+ * Live mode requires a configured Python worker plus a real Lyte retriever.
+ * Missing workers, retriever credentials, or unreachable adapters fail closed
+ * instead of producing synthetic evidence.
  *
- * Phase 2 will provide a concrete LyteRetrieverAdapter backed by the Lyte
- * metrics store, trace index, and alert corpus (pgvector + Elasticsearch).
- * Until then, the retriever falls back to the no-op adapter registered as
- * "default" — which produces clearly-marked synthetic documents.
+ * Dry-run, replay, and counterfactual runs may use deterministic development
+ * paths so operators can validate orchestration without mutating production
+ * systems or signing fabricated live evidence chains.
  *
  * To run against real Lyte data today:
  *   import { registerLyteRetrieverAdapter } from "@szl/substrate";
@@ -100,18 +99,17 @@ export const opportunityAuditWorkflow: WorkflowDefinition = {
   stages: [
     // Stage 1: Heavy retrieval — tagged for optional Python worker
     // retrieverAdapterId: "lyte-retriever" — registers the Lyte-domain retriever.
-    // In Phase 1, the Python channel passes this ID to the FastAPI worker via stageConfig.
-    // For TypeScript-runtime fallback, the registry resolves "lyte-retriever" or falls
-    // back to "default" (no-op). Register a real adapter via registerLyteRetrieverAdapter()
-    // before running in live mode.
+    // The Python channel passes this ID to the FastAPI worker via stageConfig.
+    // Live mode fails closed unless that worker can reach a real retriever.
+    // Register a real adapter via registerLyteRetrieverAdapter() before live runs.
     {
       id: 'retrieve-lyte-data',
       type: 'Retrieve',
       name: 'Retrieve Lyte Service Data',
       description:
         'Retrieves service performance metrics, SLO compliance data, and anomaly signals from Lyte. ' +
-        'Tagged runtime:python for heavy-retrieval execution via the Python worker channel (Phase 1 pilot). ' +
-        'Phase 2: backed by pgvector + Elasticsearch via LyteRetrieverAdapter.',
+        'Tagged runtime:python for heavy-retrieval execution via the Python worker channel. ' +
+        'Live mode requires a real retriever adapter and fails closed when unavailable.',
       runtime: 'python',
       retrieverAdapterId: 'lyte-retriever',
       topK: 25,

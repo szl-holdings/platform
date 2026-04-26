@@ -397,7 +397,8 @@ export const ENV_SPECS: EnvVarSpec[] = [
   {
     key: 'OAUTH_STATE_SECRET',
     required: false,
-    description: 'Secret used to sign OAuth state parameters (CSRF protection) — auto-generated if not set',
+    description:
+      'Secret used to sign OAuth state parameters (CSRF protection) — auto-generated if not set',
     sensitive: true,
     group: 'auth',
   },
@@ -1259,6 +1260,13 @@ export const ENV_SPECS: EnvVarSpec[] = [
     group: 'integrations',
   },
   {
+    key: 'SUBSTRATE_EMBEDDINGS_ALLOW_DEV_MODEL',
+    required: false,
+    description: 'Local/dev opt-in for deterministic Python embedding/rerank models in live mode',
+    defaultValue: '0',
+    group: 'integrations',
+  },
+  {
     key: 'MCP_GATEWAY_ENDPOINT',
     required: false,
     description: 'MCP (Model Context Protocol) gateway endpoint URL',
@@ -1283,7 +1291,8 @@ export const ENV_SPECS: EnvVarSpec[] = [
   {
     key: 'SESSION_MIN_CREATED_AT',
     required: false,
-    description: 'ISO timestamp — sessions created before this date are invalidated (forced re-login after key rotation)',
+    description:
+      'ISO timestamp — sessions created before this date are invalidated (forced re-login after key rotation)',
     group: 'auth',
   },
   {
@@ -1296,7 +1305,8 @@ export const ENV_SPECS: EnvVarSpec[] = [
   {
     key: 'INTERNAL_TOKENS_ALLOW_LEGACY_ONLY',
     required: false,
-    description: "Set to 'true' to restrict internal tokens to the legacy single-token format (migration aid)",
+    description:
+      "Set to 'true' to restrict internal tokens to the legacy single-token format (migration aid)",
     defaultValue: 'false',
     group: 'security',
   },
@@ -1310,7 +1320,8 @@ export const ENV_SPECS: EnvVarSpec[] = [
   {
     key: 'USAGE_EVENT_SERVICE_TOKEN',
     required: false,
-    description: 'Bearer token for server-to-server usage event ingestion (POST /api/orgs/:slug/usage/events)',
+    description:
+      'Bearer token for server-to-server usage event ingestion (POST /api/orgs/:slug/usage/events)',
     sensitive: true,
     group: 'security',
   },
@@ -1389,7 +1400,8 @@ export const ENV_SPECS: EnvVarSpec[] = [
   {
     key: 'WEBHOOK_DELIVERY_ALLOWLIST',
     required: false,
-    description: 'Comma-separated hostname allowlist for outbound webhook delivery (empty = allow all)',
+    description:
+      'Comma-separated hostname allowlist for outbound webhook delivery (empty = allow all)',
     group: 'integrations',
   },
 
@@ -1675,7 +1687,8 @@ export const ENV_SPECS: EnvVarSpec[] = [
   {
     key: 'VESSELS_BOL_HMAC_SECRET',
     required: false,
-    description: 'HMAC secret for verifying bill-of-lading webhook payloads from the shipping carrier',
+    description:
+      'HMAC secret for verifying bill-of-lading webhook payloads from the shipping carrier',
     sensitive: true,
     group: 'integrations',
   },
@@ -1866,7 +1879,9 @@ export function validateStartupConfig(): ValidationResult {
           'Generate a secure 64-char random value and set it in Replit Secrets.',
       );
     } else {
-      warnings.push('SESSION_SECRET not set — sessions will use an insecure default (not safe for production)');
+      warnings.push(
+        'SESSION_SECRET not set — sessions will use an insecure default (not safe for production)',
+      );
     }
   } else if (sessionSecret.length < 32) {
     if (isProduction) {
@@ -1959,7 +1974,8 @@ export function validateStartupConfig(): ValidationResult {
   // These values appear in the .replit [userenv] block for convenience during
   // local development. In production they MUST be superseded by Replit Secrets.
   const KNOWN_DEV_ALLOY_TOKEN = 'dev-3e8122992689a527adcf8ba067ccabfae77b81f3e52aa713';
-  const KNOWN_DEV_SUBSTRATE_KEY = '5228884b12bc50c3be1c0f8345d5f5475baf5bc2ccb265d5e9bc02674c04258a';
+  const KNOWN_DEV_SUBSTRATE_KEY =
+    '5228884b12bc50c3be1c0f8345d5f5475baf5bc2ccb265d5e9bc02674c04258a';
   const KNOWN_DEV_SUBSTRATE_GW_KEY = 'szl_dev_9b77bf02c5939ec060f07d87ad02542a2561330d0c9ae5fc';
 
   if (process.env.ALLOY_INTERNAL_TOKEN === KNOWN_DEV_ALLOY_TOKEN) {

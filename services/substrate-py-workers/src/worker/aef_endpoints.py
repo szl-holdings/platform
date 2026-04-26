@@ -4,15 +4,9 @@ AEF CPU dev embed/rerank endpoints for substrate-py-workers.
 These endpoints provide deterministic, model-free embedding and reranking
 suitable for local development and smoke tests. No model downloads are required.
 
-Swap the dev embedder for a real model by replacing `_hash_embed` with a call
-to sentence-transformers or any other inference library, and update the
-`aef_embed_model` function to call the real model.
-
-To use a real local model (e.g. all-MiniLM-L6-v2):
-    1. pip install sentence-transformers
-    2. Replace _hash_embed with:
-           model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-           return model.encode(texts, normalize_embeddings=normalize).tolist()
+Production model activation must happen through the governed Python stage
+model registry with license metadata and explicit environment gates. Do not
+replace this endpoint with an ad hoc third-party model call.
 """
 
 from __future__ import annotations
@@ -158,8 +152,8 @@ async def aef_rerank(req: AefRerankRequest, request: Request) -> Any:
     AEF CPU-dev rerank endpoint.
 
     Returns deterministic TF-based rerank scores. No cross-encoder model required.
-    To swap in a real cross-encoder, replace `_tf_rerank_score` with a call to
-    cross-encoder/ms-marco-MiniLM-L-6-v2 via sentence-transformers.
+    Production cross-encoder use must be wired through the governed model
+    registry with license metadata and an explicit environment gate.
     """
     if not req.candidates:
         raise HTTPException(status_code=400, detail="candidates must contain at least one item")

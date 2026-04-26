@@ -51,7 +51,7 @@ This directory contains all artifacts produced by the Zero-Gap Track 1 audit. Do
 | API route files | 385 | `find artifacts/api-server/src/routes -name '*.ts' ! -name '*.test.ts' ! -name '*.spec.ts' \| wc -l` |
 | API route groups (top-level, excl. __tests__) | 13 | `find artifacts/api-server/src/routes -mindepth 1 -maxdepth 1 -type d \| grep -v '__tests__' \| wc -l` |
 | CI workflows | 24 | `ls .github/workflows/ \| wc -l` |
-| Environment variables (in .env.example) | 275 | `grep -cE '^[A-Z_]+=' .env.example` |
+| Environment variables (in .env.example) | 276 | `grep -cE '^[A-Z_]+=' .env.example` |
 
 ---
 

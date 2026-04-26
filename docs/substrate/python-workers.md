@@ -123,6 +123,25 @@ calls from `127.0.0.1` so dev runs work without a key.
 | `ocr`, `doc-chunking`, `clause-extraction` | `stages/ocr.py`  | PRISM Counsel (incl. scanned PDFs via pdfminer / tesseract) |
 | `geospatial`, `geo`, `intersection`, `anomaly-detection` | `stages/geospatial.py` | Vessels, Terra |
 | `eval_grading`, `eval-grading`, `grading`, `scoring` | `stages/eval_grading.py` | Eval Console |
+| `embedding`, `embeddings`, `embed`, `rerank`, `model-scoring` | `stages/embeddings.py` | AEF semantic scoring, replay-safe rerank |
+
+---
+
+### Embeddings and rerank model policy
+
+The embedding/rerank stage is model-free by default. It uses deterministic
+CPU-only scoring for `dry-run`, `replay`, and `counterfactual` runs so the
+worker protocol can be tested without downloading a model or activating a
+third-party provider.
+
+Live use of those deterministic dev models fails closed unless an operator
+sets `SUBSTRATE_EMBEDDINGS_ALLOW_DEV_MODEL=1` for a local/dev run. Do not set
+that gate for production evidence chains.
+
+Hugging Face or any other external model provider must be added through a
+model registry record with provider id, model id, capability, license metadata,
+environment variables, and failure-path tests. No external model is activated
+by default.
 
 ---
 

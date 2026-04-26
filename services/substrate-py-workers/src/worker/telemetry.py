@@ -3,7 +3,8 @@ OpenTelemetry context propagation for Python stages.
 
 Extracts the W3C traceparent header from the StageClaimMessage and creates
 a child span so Python stage execution joins the same trace as the TypeScript
-parent. All spans are exported to the configured OTEL_EXPORTER_OTLP_ENDPOINT.
+parent. Spans are exported when OTEL_EXPORTER_OTLP_ENDPOINT is configured.
+Local console export is opt-in via OTEL_CONSOLE_EXPORT=1.
 """
 
 from __future__ import annotations
@@ -28,14 +29,16 @@ def _build_provider() -> TracerProvider:
     provider = TracerProvider(resource=resource)
 
     otlp_endpoint = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT")
+    console_export = os.environ.get("OTEL_CONSOLE_EXPORT", "").lower() in {"1", "true", "yes"}
     if otlp_endpoint:
         try:
             from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
             exporter = OTLPSpanExporter(endpoint=otlp_endpoint)
             provider.add_span_processor(BatchSpanProcessor(exporter))
         except Exception:
-            provider.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
-    else:
+            if console_export:
+                provider.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
+    elif console_export:
         provider.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
 
     return provider

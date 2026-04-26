@@ -83,6 +83,15 @@ def _resolve_stage_handler(stage_type: str, stage_config: dict) -> Any:
         ocr_aliases = {"ocr", "document-ocr", "doc-chunking", "clause-extraction"}
         geo_aliases = {"geospatial", "geo", "spatial", "intersection", "anomaly-detection"}
         eval_aliases = {"eval_grading", "eval-grading", "grading", "scoring", "eval"}
+        embedding_aliases = {
+            "embedding",
+            "embeddings",
+            "embed",
+            "rerank",
+            "model_scoring",
+            "model-scoring",
+            "semantic-scoring",
+        }
 
         if stage_kind in retrieve_aliases or stage_type.lower() in retrieve_aliases:
             return STAGE_REGISTRY["retrieval"]
@@ -92,6 +101,8 @@ def _resolve_stage_handler(stage_type: str, stage_config: dict) -> Any:
             return STAGE_REGISTRY["geospatial"]
         if stage_kind in eval_aliases or stage_type.lower() in eval_aliases:
             return STAGE_REGISTRY["eval_grading"]
+        if stage_kind in embedding_aliases or stage_type.lower() in embedding_aliases:
+            return STAGE_REGISTRY["embedding"]
 
     return handler
 
@@ -155,6 +166,7 @@ async def claim_stage(claim: StageClaimMessage) -> JSONResponse:
             confidence=confidence,
             durationMs=duration_ms,
             otelSpanId=span_id,
+            evidenceIds=list(output.get("evidenceIds", [])) if isinstance(output, dict) else [],
             metadata={"stageType": claim.stageType, "mode": claim.mode},
         )
         log.info(

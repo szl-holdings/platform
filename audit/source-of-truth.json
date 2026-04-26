@@ -168,7 +168,7 @@
   },
   "env": {
     "declared_vars": {
-      "count": 275,
+      "count": 276,
       "command": "grep -cE '^[A-Z_]+=' .env.example",
       "computed": "2026-04-26"
     }

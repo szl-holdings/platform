@@ -182,11 +182,12 @@ export interface RegisteredWorker {
 //
 // When SUBSTRATE_PYTHON_WORKER_URL is set, dispatch() makes a real HTTP POST
 // to the configured FastAPI worker endpoint, proving end-to-end federation.
-// If the URL is not configured or the worker is unreachable, the call falls
-// back to the in-process simulation so development environments remain functional.
+// If the URL is not configured or the worker is unreachable, non-live calls
+// fall back to in-process simulation so development environments remain
+// functional. Live calls fail closed.
 //
 // The HTTP protocol matches the FastAPI reference worker contract:
-//   POST <SUBSTRATE_PYTHON_WORKER_URL>/execute
+//   POST <SUBSTRATE_PYTHON_WORKER_URL>/claim
 //   Content-Type: application/json
 //   Body: StageClaimMessage
 //   Response: StageResultMessage | StageErrorMessage
@@ -259,9 +260,9 @@ class SubstratePythonWorkerChannel implements PythonWorkerChannel {
 
     // ── Real HTTP dispatch (when FastAPI worker is configured) ──────────────
     // The FastAPI reference worker exposes POST /claim per the wire protocol.
-    // In live mode, HTTP failures propagate (fail closed). In non-live modes
-    // (dry-run, replay, counterfactual), the channel falls back to in-process
-    // simulation so development environments remain functional.
+    // In live mode, HTTP failures propagate. In non-live modes (dry-run,
+    // replay, counterfactual), the channel falls back to in-process simulation
+    // so development environments remain functional.
     if (workerUrl) {
       const claimMessage = makeClaimMessage({ ...opts, workerId: 'substrate-ts-engine' });
       const controller = new AbortController();

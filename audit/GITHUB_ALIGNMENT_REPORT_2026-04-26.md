@@ -72,7 +72,7 @@ From `audit/source-of-truth.json`:
 - Schema files: 182
 - Provisioned PostgreSQL tables: 730
 - GitHub Actions workflows: 24
-- Declared environment variables: 275
+- Declared environment variables: 276
 - Active domain packs: 7
 
 ## Security Notes
