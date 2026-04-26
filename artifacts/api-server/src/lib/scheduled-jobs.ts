@@ -1,6 +1,6 @@
-import { logger } from "./logger";
-import { durableJobQueue } from "@szl-holdings/forge-runtime";
-import { serverTelemetry } from "@szl-holdings/observability";
+import { logger } from './logger';
+import { durableJobQueue } from '@szl-holdings/forge-runtime';
+import { serverTelemetry } from '@szl-holdings/observability';
 
 export const NAMED_JOB_TYPES = {
   DAILY_SETTLEMENT_RECONCILIATION: "daily_settlement_reconciliation",
@@ -40,19 +40,23 @@ export const NAMED_JOB_TYPES = {
   HOURLY_MARKET_DATA_REFRESH: "hourly_market_data_refresh",
   DAILY_ONBOARDING_STALL_CHECK: "daily_onboarding_stall_check",
   DAILY_TAX_CERT_EXPIRY_CHECK: "daily_tax_cert_expiry_check",
+  HOURLY_USAGE_AGGREGATION: "hourly_usage_aggregation",
+  DAILY_STRIPE_USAGE_RECORD: "daily_stripe_usage_record",
+  HOURLY_OVERAGE_THRESHOLD_CHECK: "hourly_overage_threshold_check",
+  DEMO_USAGE_SEEDER: "demo_usage_seeder",
 } as const;
 
-export type NamedJobType = typeof NAMED_JOB_TYPES[keyof typeof NAMED_JOB_TYPES];
+export type NamedJobType = (typeof NAMED_JOB_TYPES)[keyof typeof NAMED_JOB_TYPES];
 
 export interface JobScheduleEntry {
   type: NamedJobType;
   name: string;
   description: string;
-  schedule: "weekly" | "daily" | "hourly" | "on_demand" | "continuous";
+  schedule: 'weekly' | 'daily' | 'hourly' | 'on_demand' | 'continuous';
   enabled: boolean;
   lastRunAt?: number;
   nextRunAt?: number;
-  lastStatus?: "completed" | "failed" | "running" | "pending";
+  lastStatus?: 'completed' | 'failed' | 'running' | 'pending';
   lastDurationMs?: number;
   runCount: number;
   failCount: number;
@@ -60,7 +64,7 @@ export interface JobScheduleEntry {
 
 const jobRegistry = new Map<NamedJobType, JobScheduleEntry>();
 
-function registerEntry(entry: Omit<JobScheduleEntry, "runCount" | "failCount">) {
+function registerEntry(entry: Omit<JobScheduleEntry, 'runCount' | 'failCount'>) {
   jobRegistry.set(entry.type, { ...entry, runCount: 0, failCount: 0 });
 }
 
@@ -98,17 +102,65 @@ registerEntry({ type: NAMED_JOB_TYPES.OT_ICS_STREAM_FEED, name: "OT/ICS Live Pro
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH, name: "Hourly Market Data Refresh", description: "Fetches delayed/EOD macro indicators (equity indices, FX rates, commodity prices, treasury yields) from Alpha Vantage via the market-data-adapter and warms the in-process LRU cache used by GET /lyte/market-indicators. Credentials are read from ALPHA_VANTAGE_API_KEY. Falls back gracefully to the built-in seed snapshot when the key is absent or the provider is rate-limited. Applies exponential backoff with up to 3 retries per API call.", schedule: "hourly", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK, name: "Daily Onboarding Stall Check", description: "Scans onboarding_wizard_state for organizations that are mid-onboarding (completed_at IS NULL, completed_steps > 0) and whose updated_at is older than a configurable threshold (ONBOARDING_STALL_THRESHOLD_DAYS env var, default 3 days). Sends in-app notifications and optional external alerts to super-admin and admin users listing the stalled organizations so they can follow up proactively.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_TAX_CERT_EXPIRY_CHECK, name: "Daily Tax Certificate Expiry Check", description: "Scans tax_exemption_certificates for active certs expiring within 30, 14, or 7 days. Writes in-app warning notifications to org admins and logs expiry alerts to the billing audit trail. Does not auto-revoke certificates — only alerts. Certs already expired by the time the job runs are flipped to status='expired'.", schedule: "daily", enabled: true });
-registerEntry({ type: NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL, name: "DOMAINE Distress Financials Backfill", description: "Walks active terra_distress_properties rows whose debt_amount + lien_amount is missing or zero and applies the heuristic encumbrance estimator (NYC-grounded ACRIS / DOF tax-lien / HPD norms keyed off distress_type, estimated_value, opportunity_score, days_in_distress) so the lender-exposure endpoint stops reporting isSyntheticExposure: true for the majority of distress rows. Estimate provenance is recorded in raw_data.financialsEstimate so later real-filing ingestion can override without losing audit history. Logs scanned / estimated / coverage % each run.", schedule: "weekly", enabled: true });
-registerEntry({ type: NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY, name: "Guardian Approval Expiry Sweeper", description: "Scans guardian_approval_requests every 5 minutes for pending entries whose expires_at is in the past and flips them to status='expired' so agents waiting on the request can detect the timeout and retry or escalate. Per-tier expiry windows are configured in TIER_CONTROLS (T2=24h, T3=48h, T4=72h; T0/T1/T5 do not auto-expire).", schedule: "hourly", enabled: true });
+
+// ── Metered billing jobs ───────────────────────────────────────────────────
+registerEntry({
+  type: NAMED_JOB_TYPES.HOURLY_USAGE_AGGREGATION,
+  name: 'Hourly Usage Aggregation',
+  description:
+    'Rolls metering_events into per-period usage_aggregates for all active meters and tenants. Ensures the usage dashboard, overage calculations, and invoice previews always reflect near-real-time consumption without relying solely on the inline aggregate triggered at event ingestion time.',
+  schedule: 'hourly',
+  enabled: true,
+});
+registerEntry({
+  type: NAMED_JOB_TYPES.DAILY_STRIPE_USAGE_RECORD,
+  name: 'Daily Stripe Usage Record Submission',
+  description:
+    "Reports accumulated metered usage to Stripe for all active subscriptions that have a stripePriceId configured on their billing meters. Runs once per day and submits the current-period total as a 'set' record so Stripe always holds the authoritative usage figure for invoice generation. Safe to run repeatedly — each submission overwrites the previous.",
+  schedule: 'daily',
+  enabled: true,
+});
+registerEntry({
+  type: NAMED_JOB_TYPES.HOURLY_OVERAGE_THRESHOLD_CHECK,
+  name: 'Hourly Overage Threshold Check',
+  description:
+    'Scans all active tenant usage aggregates against included allotments and fires usage warning notifications at 50%, 80%, and 100% consumption thresholds. Idempotent: the usage_threshold_notifications table prevents re-firing within the same billing period.',
+  schedule: 'hourly',
+  enabled: true,
+});
+registerEntry({
+  type: NAMED_JOB_TYPES.DEMO_USAGE_SEEDER,
+  name: 'Demo Usage Seeder',
+  description:
+    'On-demand job that generates plausible usage curves across the platform demo meters (Lyte decision runs, Sentra scans, Vessels alert evaluations, Pulse briefings, agent compute minutes). Used by Sales and internal demos to populate dashboards without live traffic. Skipped automatically in production environments.',
+  schedule: 'on_demand',
+  enabled: true,
+});
+registerEntry({
+  type: NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL,
+  name: 'DOMAINE Distress Financials Backfill',
+  description:
+    'Walks active terra_distress_properties rows whose debt_amount + lien_amount is missing or zero and applies the heuristic encumbrance estimator (NYC-grounded ACRIS / DOF tax-lien / HPD norms keyed off distress_type, estimated_value, opportunity_score, days_in_distress) so the lender-exposure endpoint stops reporting isSyntheticExposure: true for the majority of distress rows. Estimate provenance is recorded in raw_data.financialsEstimate so later real-filing ingestion can override without losing audit history. Logs scanned / estimated / coverage % each run.',
+  schedule: 'weekly',
+  enabled: true,
+});
+registerEntry({
+  type: NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY,
+  name: 'Guardian Approval Expiry Sweeper',
+  description:
+    "Scans guardian_approval_requests every 5 minutes for pending entries whose expires_at is in the past and flips them to status='expired' so agents waiting on the request can detect the timeout and retry or escalate. Per-tier expiry windows are configured in TIER_CONTROLS (T2=24h, T3=48h, T4=72h; T0/T1/T5 do not auto-expire).",
+  schedule: 'hourly',
+  enabled: true,
+});
 
 durableJobQueue.register(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, async (job) => {
   const start = Date.now();
   try {
-    const { runLaunchPublishScheduler } = await import("../jobs/launch-publish-scheduler");
+    const { runLaunchPublishScheduler } = await import('../jobs/launch-publish-scheduler');
     const result = await runLaunchPublishScheduler();
     serverTelemetry.recordBusinessEvent({
-      type: "launch_publish_scan_completed",
-      domain: "distribution-os",
+      type: 'launch_publish_scan_completed',
+      domain: 'distribution-os',
       durationMs: Date.now() - start,
       success: result.failed === 0,
       metadata: {
@@ -119,19 +171,29 @@ durableJobQueue.register(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, async (job) => {
         backedOff: result.backedOff,
       },
     });
-    updateRegistry(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, { lastStatus: result.failed === 0 ? "completed" : "failed", lastDurationMs: Date.now() - start });
-    logger.info({ jobId: job.id, ...result, failures: undefined, successes: undefined }, "launch_publish_scan: complete");
+    updateRegistry(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, {
+      lastStatus: result.failed === 0 ? 'completed' : 'failed',
+      lastDurationMs: Date.now() - start,
+    });
+    logger.info(
+      { jobId: job.id, ...result, failures: undefined, successes: undefined },
+      'launch_publish_scan: complete',
+    );
   } catch (err) {
-    logger.error({ err, jobId: job.id }, "launch_publish_scan: fatal");
-    updateRegistry(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, { lastStatus: "failed", lastDurationMs: Date.now() - start, failCount: (jobRegistry.get(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN)?.failCount || 0) + 1 });
+    logger.error({ err, jobId: job.id }, 'launch_publish_scan: fatal');
+    updateRegistry(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN)?.failCount || 0) + 1,
+    });
   }
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "mesh_telemetry_scan: starting scheduled scan");
+  logger.info({ jobId: job.id }, 'mesh_telemetry_scan: starting scheduled scan');
   try {
-    const { runScheduledMeshScan } = await import("../services/agent-mesh-collector");
+    const { runScheduledMeshScan } = await import('../services/agent-mesh-collector');
     const report = await runScheduledMeshScan();
     const summary = report.succeeded.map((r) => ({
       orgId: r.orgId,
@@ -144,11 +206,15 @@ durableJobQueue.register(NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, async (job) => {
     const totalAttempted = report.succeeded.length + report.failed.length;
     const hasFailures = report.failed.length > 0;
     const allFailed = totalAttempted > 0 && report.succeeded.length === 0;
-    const status: "completed" | "partial" | "failed" = allFailed ? "failed" : hasFailures ? "partial" : "completed";
+    const status: 'completed' | 'partial' | 'failed' = allFailed
+      ? 'failed'
+      : hasFailures
+        ? 'partial'
+        : 'completed';
 
     serverTelemetry.recordBusinessEvent({
-      type: "mesh_telemetry_scan_completed",
-      domain: "sentra",
+      type: 'mesh_telemetry_scan_completed',
+      domain: 'sentra',
       durationMs: Date.now() - start,
       success: !allFailed,
       metadata: {
@@ -161,21 +227,24 @@ durableJobQueue.register(NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, async (job) => {
       },
     });
     updateRegistry(NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, {
-      lastStatus: status === "failed" ? "failed" : "completed",
+      lastStatus: status === 'failed' ? 'failed' : 'completed',
       lastDurationMs: Date.now() - start,
       ...(hasFailures
         ? { failCount: (jobRegistry.get(NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN)?.failCount || 0) + 1 }
         : {}),
     });
-    logger.info({ jobId: job.id, status, succeeded: report.succeeded.length, failed: report.failed.length }, "mesh_telemetry_scan: complete");
+    logger.info(
+      { jobId: job.id, status, succeeded: report.succeeded.length, failed: report.failed.length },
+      'mesh_telemetry_scan: complete',
+    );
 
     if (allFailed) {
       throw new Error(`mesh_telemetry_scan: all ${totalAttempted} org scans failed`);
     }
   } catch (err) {
-    logger.error({ err, jobId: job.id }, "mesh_telemetry_scan: fatal");
+    logger.error({ err, jobId: job.id }, 'mesh_telemetry_scan: fatal');
     updateRegistry(NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, {
-      lastStatus: "failed",
+      lastStatus: 'failed',
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN)?.failCount || 0) + 1,
     });
@@ -185,25 +254,44 @@ durableJobQueue.register(NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, async (job) => {
 
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_COMPETITIVE_INTEL_POLL, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "daily_competitive_intel_poll: starting feed poll");
+  logger.info({ jobId: job.id }, 'daily_competitive_intel_poll: starting feed poll');
   try {
-    const { pollAllFeeds } = await import("../jobs/competitive-intel-monitor");
+    const { pollAllFeeds } = await import('../jobs/competitive-intel-monitor');
     const result = await pollAllFeeds();
-    serverTelemetry.recordBusinessEvent({ type: "daily_competitive_intel_poll_completed", domain: "command", durationMs: Date.now() - start, success: true, metadata: { ...result } });
-    updateRegistry(NAMED_JOB_TYPES.DAILY_COMPETITIVE_INTEL_POLL, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-    logger.info({ jobId: job.id, ...result }, "daily_competitive_intel_poll: complete");
+    serverTelemetry.recordBusinessEvent({
+      type: 'daily_competitive_intel_poll_completed',
+      domain: 'command',
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { ...result },
+    });
+    updateRegistry(NAMED_JOB_TYPES.DAILY_COMPETITIVE_INTEL_POLL, {
+      lastStatus: 'completed',
+      lastDurationMs: Date.now() - start,
+    });
+    logger.info({ jobId: job.id, ...result }, 'daily_competitive_intel_poll: complete');
   } catch (err) {
-    logger.error({ err, jobId: job.id }, "daily_competitive_intel_poll: fatal");
-    updateRegistry(NAMED_JOB_TYPES.DAILY_COMPETITIVE_INTEL_POLL, { lastStatus: "failed", lastDurationMs: Date.now() - start, failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_COMPETITIVE_INTEL_POLL)?.failCount || 0) + 1 });
+    logger.error({ err, jobId: job.id }, 'daily_competitive_intel_poll: fatal');
+    updateRegistry(NAMED_JOB_TYPES.DAILY_COMPETITIVE_INTEL_POLL, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+      failCount:
+        (jobRegistry.get(NAMED_JOB_TYPES.DAILY_COMPETITIVE_INTEL_POLL)?.failCount || 0) + 1,
+    });
   }
 });
 
 function getLocalHourMinute(tz: string, now: Date): { hour: number; minute: number } | null {
   try {
-    const fmt = new Intl.DateTimeFormat("en-US", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false });
+    const fmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
     const parts = fmt.formatToParts(now);
-    const h = parts.find((p) => p.type === "hour")?.value;
-    const m = parts.find((p) => p.type === "minute")?.value;
+    const h = parts.find((p) => p.type === 'hour')?.value;
+    const m = parts.find((p) => p.type === 'minute')?.value;
     if (!h || !m) return null;
     return { hour: parseInt(h, 10) % 24, minute: parseInt(m, 10) };
   } catch {
@@ -213,15 +301,20 @@ function getLocalHourMinute(tz: string, now: Date): { hour: number; minute: numb
 
 durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, async (job) => {
   const start = Date.now();
-  const payload = (job.payload ?? {}) as { forceHour?: number; forceMinute?: number; forceTimezone?: string; testUserId?: number };
+  const payload = (job.payload ?? {}) as {
+    forceHour?: number;
+    forceMinute?: number;
+    forceTimezone?: string;
+    testUserId?: number;
+  };
   const now = new Date();
   let dispatched = 0;
   let skipped = 0;
   let failed = 0;
 
   try {
-    const { pool } = await import("@szl-holdings/db");
-    const { sendPushToUser } = await import("./expo-push");
+    const { pool } = await import('@szl-holdings/db');
+    const { sendPushToUser } = await import('./expo-push');
 
     const candidates = payload.testUserId
       ? await pool.query(
@@ -237,55 +330,83 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, async (job) =>
     type Row = { user_id: number; digest_config: Record<string, unknown> };
     const recipients: Row[] = (candidates.rows as Row[]).filter((row) => {
       const cfg = row.digest_config ?? {};
-      const targetHour = typeof payload.forceHour === "number" ? payload.forceHour : Number(cfg.deliveryHour);
-      const targetMinute = typeof payload.forceMinute === "number" ? payload.forceMinute : Number(cfg.deliveryMinute);
+      const targetHour =
+        typeof payload.forceHour === 'number' ? payload.forceHour : Number(cfg.deliveryHour);
+      const targetMinute =
+        typeof payload.forceMinute === 'number' ? payload.forceMinute : Number(cfg.deliveryMinute);
       if (Number.isNaN(targetHour) || Number.isNaN(targetMinute)) return false;
-      const tz = payload.forceTimezone || (typeof cfg.timezone === "string" && cfg.timezone) || "UTC";
-      const local = getLocalHourMinute(tz, now) ?? { hour: now.getUTCHours(), minute: now.getUTCMinutes() };
+      const tz =
+        payload.forceTimezone || (typeof cfg.timezone === 'string' && cfg.timezone) || 'UTC';
+      const local = getLocalHourMinute(tz, now) ?? {
+        hour: now.getUTCHours(),
+        minute: now.getUTCMinutes(),
+      };
       return local.hour === targetHour && local.minute === targetMinute;
     });
 
     if (recipients.length === 0) {
-      updateRegistry(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+      updateRegistry(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, {
+        lastStatus: 'completed',
+        lastDurationMs: Date.now() - start,
+      });
       return;
     }
 
-    logger.info({ jobId: job.id, recipientCount: recipients.length }, "hourly_executive_digest: dispatching");
+    logger.info(
+      { jobId: job.id, recipientCount: recipients.length },
+      'hourly_executive_digest: dispatching',
+    );
 
     const date = now.toISOString().slice(0, 10);
 
     for (const row of recipients) {
       try {
         const cfg = row.digest_config ?? {};
-        const fmt = (cfg.digestFormat as string) ?? "concise";
+        const fmt = (cfg.digestFormat as string) ?? 'concise';
 
         const result = await sendPushToUser(row.user_id, {
-          title: "⬡ Executive Morning Briefing",
-          body: `Your cross-domain briefing for ${date} is ready · ${fmt === "concise" ? "30-second read" : "2-minute briefing"}`,
+          title: '⬡ Executive Morning Briefing',
+          body: `Your cross-domain briefing for ${date} is ready · ${fmt === 'concise' ? '30-second read' : '2-minute briefing'}`,
           data: {
-            type: "daily_digest",
+            type: 'daily_digest',
             format: fmt,
-            deepLink: "/(shell)/intelligence/pulse",
+            deepLink: '/(shell)/intelligence/pulse',
             date,
           },
-          sound: "default",
+          sound: 'default',
         });
 
-        if (result.sent > 0) dispatched++; else skipped++;
+        if (result.sent > 0) dispatched++;
+        else skipped++;
       } catch (err) {
         failed++;
-        logger.warn({ err, userId: row.user_id }, "hourly_executive_digest: per-user delivery failed");
+        logger.warn(
+          { err, userId: row.user_id },
+          'hourly_executive_digest: per-user delivery failed',
+        );
       }
     }
   } catch (err) {
-    logger.error({ err, jobId: job.id }, "hourly_executive_digest: fatal");
-    updateRegistry(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, { lastStatus: "failed", lastDurationMs: Date.now() - start, failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST)?.failCount || 0) + 1 });
+    logger.error({ err, jobId: job.id }, 'hourly_executive_digest: fatal');
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST)?.failCount || 0) + 1,
+    });
     return;
   }
 
-  serverTelemetry.recordBusinessEvent({ type: "hourly_executive_digest_completed", durationMs: Date.now() - start, success: true, metadata: { dispatched, skipped, failed } });
-  updateRegistry(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id, dispatched, skipped, failed }, "hourly_executive_digest: complete");
+  serverTelemetry.recordBusinessEvent({
+    type: 'hourly_executive_digest_completed',
+    durationMs: Date.now() - start,
+    success: true,
+    metadata: { dispatched, skipped, failed },
+  });
+  updateRegistry(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
+  logger.info({ jobId: job.id, dispatched, skipped, failed }, 'hourly_executive_digest: complete');
 });
 
 function updateRegistry(type: NamedJobType, update: Partial<JobScheduleEntry>) {
@@ -296,14 +417,14 @@ function updateRegistry(type: NamedJobType, update: Partial<JobScheduleEntry>) {
 async function enqueueNamedJob(type: NamedJobType, payload: Record<string, unknown> = {}) {
   const entry = jobRegistry.get(type);
   if (!entry) return;
-  updateRegistry(type, { lastStatus: "running", lastRunAt: Date.now() });
+  updateRegistry(type, { lastStatus: 'running', lastRunAt: Date.now() });
   try {
     const job = await durableJobQueue.enqueue(type, payload, { maxRetries: 2 });
     updateRegistry(type, { runCount: (entry.runCount || 0) + 1 });
     return job;
   } catch (err) {
-    logger.warn({ err, type }, "Failed to enqueue named job");
-    updateRegistry(type, { lastStatus: "failed", failCount: (entry.failCount || 0) + 1 });
+    logger.warn({ err, type }, 'Failed to enqueue named job');
+    updateRegistry(type, { lastStatus: 'failed', failCount: (entry.failCount || 0) + 1 });
     return undefined;
   }
 }
@@ -504,20 +625,22 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_SETTLEMENT_RECONCILIATION, async 
 
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "daily_lyte_digest: aggregating Lyte signal digest");
+  logger.info({ jobId: job.id }, 'daily_lyte_digest: aggregating Lyte signal digest');
   const payload = job.payload as { date?: string };
-  const date = payload.date ?? new Date().toISOString().split("T")[0];
+  const date = payload.date ?? new Date().toISOString().split('T')[0];
 
   let sent = 0;
   let skipped = 0;
   let failed = 0;
 
   try {
-    const { db } = await import("@szl-holdings/db");
-    const { notificationPreferencesTable, notificationsTable, usersTable } = await import("@szl-holdings/db");
-    const { eq, and, gte, desc, isNull, or, lt } = await import("drizzle-orm");
-    const { buildNotificationDigestEmail } = await import("./email");
-    const { queueEmail } = await import("./queued-jobs");
+    const { db } = await import('@szl-holdings/db');
+    const { notificationPreferencesTable, notificationsTable, usersTable } = await import(
+      '@szl-holdings/db'
+    );
+    const { eq, and, gte, desc, isNull, or, lt } = await import('drizzle-orm');
+    const { buildNotificationDigestEmail } = await import('./email');
+    const { queueEmail } = await import('./queued-jobs');
 
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const digestCutoff = new Date(Date.now() - 20 * 60 * 60 * 1000);
@@ -544,10 +667,13 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
         ),
       );
 
-    logger.info({ jobId: job.id, recipientCount: emailRecipients.length }, "daily_lyte_digest: found email-enabled users");
+    logger.info(
+      { jobId: job.id, recipientCount: emailRecipients.length },
+      'daily_lyte_digest: found email-enabled users',
+    );
 
-    const { pool: pgPool } = await import("@szl-holdings/db");
-    const { generateUnsubscribeToken, logNotificationAudit } = await import("./email");
+    const { pool: pgPool } = await import('@szl-holdings/db');
+    const { generateUnsubscribeToken, logNotificationAudit } = await import('./email');
 
     for (const recipient of emailRecipients) {
       if (!recipient.email) {
@@ -598,9 +724,14 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
           continue;
         }
 
-        const dateLabel = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+        const dateLabel = new Date().toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
         const unsubToken = generateUnsubscribeToken(recipient.email);
-        const appUrl = process.env.APP_URL || "https://szlholdings.com";
+        const appUrl = process.env.APP_URL || 'https://szlholdings.com';
         const digestUnsubscribeUrl = `${appUrl}/api/notifications/unsubscribe?e=${encodeURIComponent(recipient.email)}&t=${encodeURIComponent(unsubToken)}`;
         const emailSubject = `Your Daily Digest — ${dateLabel}`;
 
@@ -615,7 +746,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
           html: buildNotificationDigestEmail({
             userName: recipient.displayName || recipient.email,
             date: dateLabel,
-            notifications: notifications.map(n => ({
+            notifications: notifications.map((n) => ({
               title: n.title,
               message: n.message,
               type: n.type,
@@ -632,63 +763,92 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, async (job) => {
         await pgPool
           .query(
             `INSERT INTO digest_emails_sent (digest_type, recipient, digest_key) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`,
-            ["daily_lyte_digest", recipient.email, digestKey],
+            ['daily_lyte_digest', recipient.email, digestKey],
           )
           .catch(() => {});
 
         logNotificationAudit({
-          template: "daily_lyte_digest",
+          template: 'daily_lyte_digest',
           recipient: recipient.email,
           subject: emailSubject,
-          entityType: "digest",
+          entityType: 'digest',
           entityId: digestKey,
-          deliveryStatus: "sent",
+          deliveryStatus: 'sent',
         }).catch(() => {});
 
         sent++;
       } catch (err) {
         failed++;
-        logger.warn({ err, userId: recipient.userId }, "daily_lyte_digest: failed to send digest to user");
+        logger.warn(
+          { err, userId: recipient.userId },
+          'daily_lyte_digest: failed to send digest to user',
+        );
       }
     }
 
-    logger.info({ jobId: job.id, date, sent, skipped, failed }, "daily_lyte_digest: delivery complete");
+    logger.info(
+      { jobId: job.id, date, sent, skipped, failed },
+      'daily_lyte_digest: delivery complete',
+    );
   } catch (err) {
-    logger.error({ err, jobId: job.id }, "daily_lyte_digest: fatal error during digest delivery");
-    updateRegistry(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, { lastStatus: "failed", lastDurationMs: Date.now() - start });
+    logger.error({ err, jobId: job.id }, 'daily_lyte_digest: fatal error during digest delivery');
+    updateRegistry(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+    });
     return;
   }
 
-  serverTelemetry.recordBusinessEvent({ type: "daily_lyte_digest_completed", domain: "lyte", durationMs: Date.now() - start, success: true, metadata: { date, sent, skipped, failed } });
-  updateRegistry(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id, date }, "daily_lyte_digest: complete");
+  serverTelemetry.recordBusinessEvent({
+    type: 'daily_lyte_digest_completed',
+    domain: 'lyte',
+    durationMs: Date.now() - start,
+    success: true,
+    metadata: { date, sent, skipped, failed },
+  });
+  updateRegistry(NAMED_JOB_TYPES.DAILY_LYTE_DIGEST, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
+  logger.info({ jobId: job.id, date }, 'daily_lyte_digest: complete');
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "daily_pulse_briefing_digest: starting delivery");
+  logger.info({ jobId: job.id }, 'daily_pulse_briefing_digest: starting delivery');
   let sent = 0;
   let skipped = 0;
   let failed = 0;
   let briefingId: string | null = null;
   try {
-    const { db, pool: pgPool, pulseBriefingsTable, pulseEmailSubscriptionsTable } = await import("@szl-holdings/db");
-    const { eq, desc, and, ne, or, isNull, lt } = await import("drizzle-orm");
-    const { buildPulseBriefingEmail } = await import("./email");
-    const { queueEmail } = await import("./queued-jobs");
+    const {
+      db,
+      pool: pgPool,
+      pulseBriefingsTable,
+      pulseEmailSubscriptionsTable,
+    } = await import('@szl-holdings/db');
+    const { eq, desc, and, ne, or, isNull, lt } = await import('drizzle-orm');
+    const { buildPulseBriefingEmail } = await import('./email');
+    const { queueEmail } = await import('./queued-jobs');
 
     const digestCutoff = new Date(Date.now() - 20 * 60 * 60 * 1000);
 
     const [briefing] = await db
       .select()
       .from(pulseBriefingsTable)
-      .where(eq(pulseBriefingsTable.status, "published"))
+      .where(eq(pulseBriefingsTable.status, 'published'))
       .orderBy(desc(pulseBriefingsTable.generatedAt))
       .limit(1);
 
     if (!briefing) {
-      logger.info({ jobId: job.id }, "daily_pulse_briefing_digest: no published briefing — skipping");
-      updateRegistry(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+      logger.info(
+        { jobId: job.id },
+        'daily_pulse_briefing_digest: no published briefing — skipping',
+      );
+      updateRegistry(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, {
+        lastStatus: 'completed',
+        lastDurationMs: Date.now() - start,
+      });
       return;
     }
     briefingId = briefing.id;
@@ -696,22 +856,29 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, async (job
     const subscribers = await db
       .select()
       .from(pulseEmailSubscriptionsTable)
-      .where(and(
-        eq(pulseEmailSubscriptionsTable.status, "active"),
-        or(
-          isNull(pulseEmailSubscriptionsTable.lastSentBriefingId),
-          ne(pulseEmailSubscriptionsTable.lastSentBriefingId, briefing.id),
+      .where(
+        and(
+          eq(pulseEmailSubscriptionsTable.status, 'active'),
+          or(
+            isNull(pulseEmailSubscriptionsTable.lastSentBriefingId),
+            ne(pulseEmailSubscriptionsTable.lastSentBriefingId, briefing.id),
+          ),
+          or(
+            isNull(pulseEmailSubscriptionsTable.lastSentAt),
+            lt(pulseEmailSubscriptionsTable.lastSentAt, digestCutoff),
+          ),
         ),
-        or(
-          isNull(pulseEmailSubscriptionsTable.lastSentAt),
-          lt(pulseEmailSubscriptionsTable.lastSentAt, digestCutoff),
-        ),
-      ));
+      );
 
-    const baseUrl = process.env.APP_URL || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : "https://szlholdings.com");
+    const baseUrl =
+      process.env.APP_URL ||
+      (process.env.REPLIT_DEV_DOMAIN
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+        : 'https://szlholdings.com');
     const pulseUrl = `${baseUrl}/pulse/`;
     const sections = (briefing.sections as Array<Record<string, unknown>>) ?? [];
-    const recommendedActions = (briefing.recommendedActions as Array<Record<string, unknown>>) ?? [];
+    const recommendedActions =
+      (briefing.recommendedActions as Array<Record<string, unknown>>) ?? [];
 
     for (const sub of subscribers) {
       try {
@@ -729,24 +896,29 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, async (job
         }
 
         const emailSections = sections.map((s) => ({
-          id: String(s.id ?? s.domain ?? ""),
-          title: String(s.title ?? "Briefing"),
-          agentId: String(s.agentId ?? ""),
+          id: String(s.id ?? s.domain ?? ''),
+          title: String(s.title ?? 'Briefing'),
+          agentId: String(s.agentId ?? ''),
           agentName: s.agentName ? String(s.agentName) : undefined,
-          riskLevel: String(s.riskLevel ?? "MEDIUM"),
+          riskLevel: String(s.riskLevel ?? 'MEDIUM'),
           confidence: Number(s.confidence ?? 0),
-          confidenceLabel: String(s.confidenceLabel ?? ""),
-          keyJudgment: String(s.keyJudgment ?? s.judgment ?? ""),
+          confidenceLabel: String(s.confidenceLabel ?? ''),
+          keyJudgment: String(s.keyJudgment ?? s.judgment ?? ''),
           keyFindings: Array.isArray(s.keyFindings)
             ? (s.keyFindings as Array<Record<string, unknown>>).map((f) => ({
-                finding: String(f.finding ?? ""),
-                severity: String(f.severity ?? "MEDIUM"),
+                finding: String(f.finding ?? ''),
+                severity: String(f.severity ?? 'MEDIUM'),
               }))
             : [],
         }));
-        const filtered = (sub.domains && sub.domains.length > 0)
-          ? emailSections.filter((s) => sub.domains.some((d: string) => s.id === d || s.title.toLowerCase().includes(d.replace(/_/g, " "))))
-          : emailSections;
+        const filtered =
+          sub.domains && sub.domains.length > 0
+            ? emailSections.filter((s) =>
+                sub.domains.some(
+                  (d: string) => s.id === d || s.title.toLowerCase().includes(d.replace(/_/g, ' ')),
+                ),
+              )
+            : emailSections;
         const sectionsToSend = filtered.length > 0 ? filtered : emailSections;
 
         const email = buildPulseBriefingEmail({
@@ -760,10 +932,10 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, async (job
           overallConfidence: Number(briefing.overallConfidence),
           sections: sectionsToSend,
           recommendedActions: recommendedActions.map((a) => ({
-            action: String(a.action ?? ""),
-            priority: String(a.priority ?? "MEDIUM"),
-            owner: String(a.owner ?? ""),
-            dueBy: String(a.dueBy ?? ""),
+            action: String(a.action ?? ''),
+            priority: String(a.priority ?? 'MEDIUM'),
+            owner: String(a.owner ?? ''),
+            dueBy: String(a.dueBy ?? ''),
           })),
           pulseUrl,
           unsubscribeUrl: `${baseUrl}/api/pulse/unsubscribe?token=${encodeURIComponent(sub.unsubscribeToken)}`,
@@ -771,7 +943,12 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, async (job
           domainsFilter: sub.domains as string[] | undefined,
         });
 
-        await queueEmail({ to: sub.email, subject: email.subject, html: email.html, text: email.text });
+        await queueEmail({
+          to: sub.email,
+          subject: email.subject,
+          html: email.html,
+          text: email.text,
+        });
 
         await pgPool
           .query(
@@ -783,38 +960,56 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, async (job
         await pgPool
           .query(
             `INSERT INTO digest_emails_sent (digest_type, recipient, digest_key) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`,
-            ["daily_pulse_briefing_digest", sub.email, briefing.id],
+            ['daily_pulse_briefing_digest', sub.email, briefing.id],
           )
           .catch(() => {});
 
         sent++;
       } catch (err) {
         failed++;
-        logger.warn({ err, subscriptionId: sub.id }, "daily_pulse_briefing_digest: failed for subscription");
+        logger.warn(
+          { err, subscriptionId: sub.id },
+          'daily_pulse_briefing_digest: failed for subscription',
+        );
       }
     }
-    logger.info({ jobId: job.id, briefingId, sent, skipped, failed }, "daily_pulse_briefing_digest: delivery complete");
+    logger.info(
+      { jobId: job.id, briefingId, sent, skipped, failed },
+      'daily_pulse_briefing_digest: delivery complete',
+    );
   } catch (err) {
-    logger.error({ err, jobId: job.id }, "daily_pulse_briefing_digest: fatal error");
-    updateRegistry(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, { lastStatus: "failed", lastDurationMs: Date.now() - start });
+    logger.error({ err, jobId: job.id }, 'daily_pulse_briefing_digest: fatal error');
+    updateRegistry(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+    });
     return;
   }
-  serverTelemetry.recordBusinessEvent({ type: "daily_pulse_briefing_digest_completed", domain: "pulse", durationMs: Date.now() - start, success: true, metadata: { briefingId, sent, skipped, failed } });
-  updateRegistry(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+  serverTelemetry.recordBusinessEvent({
+    type: 'daily_pulse_briefing_digest_completed',
+    domain: 'pulse',
+    durationMs: Date.now() - start,
+    success: true,
+    metadata: { briefingId, sent, skipped, failed },
+  });
+  updateRegistry(NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_READINESS_DIGEST, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "daily_readiness_digest: compiling readiness status");
+  logger.info({ jobId: job.id }, 'daily_readiness_digest: compiling readiness status');
 
-  const digestType = "daily_readiness_digest";
-  const digestKey = new Date().toISOString().split("T")[0];
+  const digestType = 'daily_readiness_digest';
+  const digestKey = new Date().toISOString().split('T')[0];
   const digestCutoff = new Date(Date.now() - 20 * 60 * 60 * 1000);
   let sent = 0;
   let skipped = 0;
 
   try {
-    const { pool } = await import("@szl-holdings/db");
+    const { pool } = await import('@szl-holdings/db');
 
     const recipients = await pool.query(
       `SELECT np.user_id, u.email
@@ -842,30 +1037,42 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_READINESS_DIGEST, async (job) => 
       sent++;
     }
 
-    logger.info({ jobId: job.id, sent, skipped }, "daily_readiness_digest: delivery complete");
+    logger.info({ jobId: job.id, sent, skipped }, 'daily_readiness_digest: delivery complete');
   } catch (err) {
-    logger.error({ err, jobId: job.id }, "daily_readiness_digest: fatal error");
-    updateRegistry(NAMED_JOB_TYPES.DAILY_READINESS_DIGEST, { lastStatus: "failed", lastDurationMs: Date.now() - start });
+    logger.error({ err, jobId: job.id }, 'daily_readiness_digest: fatal error');
+    updateRegistry(NAMED_JOB_TYPES.DAILY_READINESS_DIGEST, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+    });
     return;
   }
 
-  serverTelemetry.recordBusinessEvent({ type: "daily_readiness_digest_completed", domain: "readiness-report", durationMs: Date.now() - start, success: true, metadata: { sent, skipped } });
-  updateRegistry(NAMED_JOB_TYPES.DAILY_READINESS_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id }, "daily_readiness_digest: complete");
+  serverTelemetry.recordBusinessEvent({
+    type: 'daily_readiness_digest_completed',
+    domain: 'readiness-report',
+    durationMs: Date.now() - start,
+    success: true,
+    metadata: { sent, skipped },
+  });
+  updateRegistry(NAMED_JOB_TYPES.DAILY_READINESS_DIGEST, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
+  logger.info({ jobId: job.id }, 'daily_readiness_digest: complete');
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_EXCEPTION_SUMMARY, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "daily_exception_summary: aggregating exceptions");
+  logger.info({ jobId: job.id }, 'daily_exception_summary: aggregating exceptions');
 
-  const digestType = "daily_exception_summary";
-  const digestKey = new Date().toISOString().split("T")[0];
+  const digestType = 'daily_exception_summary';
+  const digestKey = new Date().toISOString().split('T')[0];
   const digestCutoff = new Date(Date.now() - 20 * 60 * 60 * 1000);
   let sent = 0;
   let skipped = 0;
 
   try {
-    const { pool } = await import("@szl-holdings/db");
+    const { pool } = await import('@szl-holdings/db');
 
     const recipients = await pool.query(
       `SELECT np.user_id, u.email
@@ -893,198 +1100,325 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_EXCEPTION_SUMMARY, async (job) =>
       sent++;
     }
 
-    logger.info({ jobId: job.id, sent, skipped }, "daily_exception_summary: delivery complete");
+    logger.info({ jobId: job.id, sent, skipped }, 'daily_exception_summary: delivery complete');
   } catch (err) {
-    logger.error({ err, jobId: job.id }, "daily_exception_summary: fatal error");
-    updateRegistry(NAMED_JOB_TYPES.DAILY_EXCEPTION_SUMMARY, { lastStatus: "failed", lastDurationMs: Date.now() - start });
+    logger.error({ err, jobId: job.id }, 'daily_exception_summary: fatal error');
+    updateRegistry(NAMED_JOB_TYPES.DAILY_EXCEPTION_SUMMARY, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+    });
     return;
   }
 
-  serverTelemetry.recordBusinessEvent({ type: "daily_exception_summary_completed", durationMs: Date.now() - start, success: true, metadata: { sent, skipped } });
-  updateRegistry(NAMED_JOB_TYPES.DAILY_EXCEPTION_SUMMARY, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id }, "daily_exception_summary: complete");
+  serverTelemetry.recordBusinessEvent({
+    type: 'daily_exception_summary_completed',
+    durationMs: Date.now() - start,
+    success: true,
+    metadata: { sent, skipped },
+  });
+  updateRegistry(NAMED_JOB_TYPES.DAILY_EXCEPTION_SUMMARY, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
+  logger.info({ jobId: job.id }, 'daily_exception_summary: complete');
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_ARTIFACT_CLEANUP, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "daily_artifact_cleanup: pruning expired artifacts");
-  await new Promise(r => setTimeout(r, 120));
-  serverTelemetry.recordBusinessEvent({ type: "daily_artifact_cleanup_completed", durationMs: Date.now() - start, success: true });
-  updateRegistry(NAMED_JOB_TYPES.DAILY_ARTIFACT_CLEANUP, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id }, "daily_artifact_cleanup: complete");
+  logger.info({ jobId: job.id }, 'daily_artifact_cleanup: pruning expired artifacts');
+  await new Promise((r) => setTimeout(r, 120));
+  serverTelemetry.recordBusinessEvent({
+    type: 'daily_artifact_cleanup_completed',
+    durationMs: Date.now() - start,
+    success: true,
+  });
+  updateRegistry(NAMED_JOB_TYPES.DAILY_ARTIFACT_CLEANUP, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
+  logger.info({ jobId: job.id }, 'daily_artifact_cleanup: complete');
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_FEATURE_FLAG_SYNC, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "daily_feature_flag_sync: syncing flag state");
-  await new Promise(r => setTimeout(r, 50));
-  serverTelemetry.recordBusinessEvent({ type: "daily_feature_flag_sync_completed", durationMs: Date.now() - start, success: true });
-  updateRegistry(NAMED_JOB_TYPES.DAILY_FEATURE_FLAG_SYNC, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id }, "daily_feature_flag_sync: complete");
+  logger.info({ jobId: job.id }, 'daily_feature_flag_sync: syncing flag state');
+  await new Promise((r) => setTimeout(r, 50));
+  serverTelemetry.recordBusinessEvent({
+    type: 'daily_feature_flag_sync_completed',
+    durationMs: Date.now() - start,
+    success: true,
+  });
+  updateRegistry(NAMED_JOB_TYPES.DAILY_FEATURE_FLAG_SYNC, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
+  logger.info({ jobId: job.id }, 'daily_feature_flag_sync: complete');
 });
 
 // Daily Document Batch Generation — processes all pending PDF jobs across the document engine.
 // Scans for documents with status "approved" that have no completed PDF export,
 // creates a scheduled batch, and enqueues them for rendering.
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, async (job) => {
-  const { db, documentsTable, pdfBatchesTable, pdfJobsTable } = await import("@szl-holdings/db");
-  const { eq } = await import("drizzle-orm");
-  const { randomUUID } = await import("node:crypto");
+  const { db, documentsTable, pdfBatchesTable, pdfJobsTable } = await import('@szl-holdings/db');
+  const { eq } = await import('drizzle-orm');
+  const { randomUUID } = await import('node:crypto');
 
   const start = Date.now();
-  logger.info({ jobId: job.id }, "daily_document_batch: starting scheduled document PDF generation");
+  logger.info(
+    { jobId: job.id },
+    'daily_document_batch: starting scheduled document PDF generation',
+  );
 
   const payload = job.payload as { appSource?: string; documentType?: string };
 
   try {
     // Find approved documents not yet covered by a completed batch
-    const approvedDocs = await db.select().from(documentsTable)
-      .where(eq(documentsTable.status, "approved"))
+    const approvedDocs = await db
+      .select()
+      .from(documentsTable)
+      .where(eq(documentsTable.status, 'approved'))
       .limit(50);
 
     if (approvedDocs.length === 0) {
-      logger.info({ jobId: job.id }, "daily_document_batch: no approved documents to process");
-      updateRegistry(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+      logger.info({ jobId: job.id }, 'daily_document_batch: no approved documents to process');
+      updateRegistry(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, {
+        lastStatus: 'completed',
+        lastDurationMs: Date.now() - start,
+      });
       return;
     }
 
     // Create a scheduled batch record
     const batchId = randomUUID();
-    const batchDate = new Date().toISOString().split("T")[0];
-    const [_batch] = await db.insert(pdfBatchesTable).values({
-      batchId,
-      title: `Daily PDF Batch — ${batchDate}`,
-      templateId: "daily_scheduler",
-      status: "processing",
-      totalJobs: approvedDocs.length,
-      completedJobs: 0,
-      failedJobs: 0,
-      appSource: payload.appSource || "general",
-    }).returning();
+    const batchDate = new Date().toISOString().split('T')[0];
+    const [_batch] = await db
+      .insert(pdfBatchesTable)
+      .values({
+        batchId,
+        title: `Daily PDF Batch — ${batchDate}`,
+        templateId: 'daily_scheduler',
+        status: 'processing',
+        totalJobs: approvedDocs.length,
+        completedJobs: 0,
+        failedJobs: 0,
+        appSource: payload.appSource || 'general',
+      })
+      .returning();
 
     // Create PDF job records
     const jobInserts = approvedDocs.map((doc) => ({
       batchId,
-      templateId: doc.templateId || "general",
-      entityType: "document",
+      templateId: doc.templateId || 'general',
+      entityType: 'document',
       entityId: String(doc.id),
       appSource: doc.appSource,
       entityData: { documentId: doc.id, documentTitle: doc.title },
-      status: "pending" as const,
+      status: 'pending' as const,
     }));
     await db.insert(pdfJobsTable).values(jobInserts);
 
     serverTelemetry.recordBusinessEvent({
-      type: "daily_document_batch_started",
-      domain: "document-engine",
+      type: 'daily_document_batch_started',
+      domain: 'document-engine',
       durationMs: Date.now() - start,
       success: true,
       metadata: { batchId, jobCount: approvedDocs.length },
     });
 
-    updateRegistry(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-    logger.info({ jobId: job.id, batchId, jobCount: approvedDocs.length }, "daily_document_batch: batch created, jobs enqueued");
+    updateRegistry(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, {
+      lastStatus: 'completed',
+      lastDurationMs: Date.now() - start,
+    });
+    logger.info(
+      { jobId: job.id, batchId, jobCount: approvedDocs.length },
+      'daily_document_batch: batch created, jobs enqueued',
+    );
   } catch (err) {
-    updateRegistry(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, { lastStatus: "failed", failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH)?.failCount || 0) + 1 });
-    logger.error({ jobId: job.id, err }, "daily_document_batch: failed");
+    updateRegistry(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, {
+      lastStatus: 'failed',
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH)?.failCount || 0) + 1,
+    });
+    logger.error({ jobId: job.id, err }, 'daily_document_batch: failed');
     throw err;
   }
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_SIGNAL_NORMALIZATION, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "hourly_signal_normalization: normalizing signals");
-  await new Promise(r => setTimeout(r, 60));
-  serverTelemetry.recordBusinessEvent({ type: "hourly_signal_normalization_completed", domain: "lyte", durationMs: Date.now() - start, success: true });
-  updateRegistry(NAMED_JOB_TYPES.HOURLY_SIGNAL_NORMALIZATION, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id }, "hourly_signal_normalization: complete");
+  logger.info({ jobId: job.id }, 'hourly_signal_normalization: normalizing signals');
+  await new Promise((r) => setTimeout(r, 60));
+  serverTelemetry.recordBusinessEvent({
+    type: 'hourly_signal_normalization_completed',
+    domain: 'lyte',
+    durationMs: Date.now() - start,
+    success: true,
+  });
+  updateRegistry(NAMED_JOB_TYPES.HOURLY_SIGNAL_NORMALIZATION, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
+  logger.info({ jobId: job.id }, 'hourly_signal_normalization: complete');
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_STALE_ACTION_SCAN, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "hourly_stale_action_scan: scanning for stale actions");
-  await new Promise(r => setTimeout(r, 55));
-  serverTelemetry.recordBusinessEvent({ type: "hourly_stale_action_scan_completed", domain: "lyte", durationMs: Date.now() - start, success: true });
-  updateRegistry(NAMED_JOB_TYPES.HOURLY_STALE_ACTION_SCAN, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id }, "hourly_stale_action_scan: complete");
+  logger.info({ jobId: job.id }, 'hourly_stale_action_scan: scanning for stale actions');
+  await new Promise((r) => setTimeout(r, 55));
+  serverTelemetry.recordBusinessEvent({
+    type: 'hourly_stale_action_scan_completed',
+    domain: 'lyte',
+    durationMs: Date.now() - start,
+    success: true,
+  });
+  updateRegistry(NAMED_JOB_TYPES.HOURLY_STALE_ACTION_SCAN, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
+  logger.info({ jobId: job.id }, 'hourly_stale_action_scan: complete');
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_VESSEL_ETA_REFRESH, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "hourly_vessel_eta_refresh: refreshing vessel ETAs");
-  await new Promise(r => setTimeout(r, 75));
-  serverTelemetry.recordBusinessEvent({ type: "hourly_vessel_eta_refresh_completed", domain: "vessels", durationMs: Date.now() - start, success: true });
-  updateRegistry(NAMED_JOB_TYPES.HOURLY_VESSEL_ETA_REFRESH, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id }, "hourly_vessel_eta_refresh: complete");
+  logger.info({ jobId: job.id }, 'hourly_vessel_eta_refresh: refreshing vessel ETAs');
+  await new Promise((r) => setTimeout(r, 75));
+  serverTelemetry.recordBusinessEvent({
+    type: 'hourly_vessel_eta_refresh_completed',
+    domain: 'vessels',
+    durationMs: Date.now() - start,
+    success: true,
+  });
+  updateRegistry(NAMED_JOB_TYPES.HOURLY_VESSEL_ETA_REFRESH, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
+  logger.info({ jobId: job.id }, 'hourly_vessel_eta_refresh: complete');
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_ROUTE_PRESSURE_SCAN, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "hourly_route_pressure_scan: scanning corridor pressure");
-  await new Promise(r => setTimeout(r, 65));
-  serverTelemetry.recordBusinessEvent({ type: "hourly_route_pressure_scan_completed", domain: "vessels", durationMs: Date.now() - start, success: true });
-  updateRegistry(NAMED_JOB_TYPES.HOURLY_ROUTE_PRESSURE_SCAN, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id }, "hourly_route_pressure_scan: complete");
+  logger.info({ jobId: job.id }, 'hourly_route_pressure_scan: scanning corridor pressure');
+  await new Promise((r) => setTimeout(r, 65));
+  serverTelemetry.recordBusinessEvent({
+    type: 'hourly_route_pressure_scan_completed',
+    domain: 'vessels',
+    durationMs: Date.now() - start,
+    success: true,
+  });
+  updateRegistry(NAMED_JOB_TYPES.HOURLY_ROUTE_PRESSURE_SCAN, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
+  logger.info({ jobId: job.id }, 'hourly_route_pressure_scan: complete');
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_TERRA_INQUIRY_DIGEST, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "hourly_terra_inquiry_digest: processing inquiries");
-  await new Promise(r => setTimeout(r, 45));
-  serverTelemetry.recordBusinessEvent({ type: "hourly_terra_inquiry_digest_completed", domain: "terra", durationMs: Date.now() - start, success: true });
-  updateRegistry(NAMED_JOB_TYPES.HOURLY_TERRA_INQUIRY_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id }, "hourly_terra_inquiry_digest: complete");
+  logger.info({ jobId: job.id }, 'hourly_terra_inquiry_digest: processing inquiries');
+  await new Promise((r) => setTimeout(r, 45));
+  serverTelemetry.recordBusinessEvent({
+    type: 'hourly_terra_inquiry_digest_completed',
+    domain: 'terra',
+    durationMs: Date.now() - start,
+    success: true,
+  });
+  updateRegistry(NAMED_JOB_TYPES.HOURLY_TERRA_INQUIRY_DIGEST, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
+  logger.info({ jobId: job.id }, 'hourly_terra_inquiry_digest: complete');
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.WORKFLOW_RETRY_JOB, async (job) => {
   const start = Date.now();
   const { workflowId } = job.payload as { workflowId?: string };
-  logger.info({ jobId: job.id, workflowId }, "workflow_retry_job: retrying failed workflow");
-  await new Promise(r => setTimeout(r, 100));
-  serverTelemetry.recordBusinessEvent({ type: "workflow_retry_completed", durationMs: Date.now() - start, success: true, metadata: { workflowId } });
-  updateRegistry(NAMED_JOB_TYPES.WORKFLOW_RETRY_JOB, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id, workflowId }, "workflow_retry_job: complete");
+  logger.info({ jobId: job.id, workflowId }, 'workflow_retry_job: retrying failed workflow');
+  await new Promise((r) => setTimeout(r, 100));
+  serverTelemetry.recordBusinessEvent({
+    type: 'workflow_retry_completed',
+    durationMs: Date.now() - start,
+    success: true,
+    metadata: { workflowId },
+  });
+  updateRegistry(NAMED_JOB_TYPES.WORKFLOW_RETRY_JOB, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
+  logger.info({ jobId: job.id, workflowId }, 'workflow_retry_job: complete');
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.ARTIFACT_GENERATION_JOB, async (job) => {
   const start = Date.now();
   const { artifactType, sourceId } = job.payload as { artifactType?: string; sourceId?: string };
-  logger.info({ jobId: job.id, artifactType, sourceId }, "artifact_generation_job: generating artifact");
-  await new Promise(r => setTimeout(r, 150));
-  serverTelemetry.recordBusinessEvent({ type: "artifact_generation_completed", durationMs: Date.now() - start, success: true, metadata: { artifactType, sourceId } });
-  updateRegistry(NAMED_JOB_TYPES.ARTIFACT_GENERATION_JOB, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id, artifactType }, "artifact_generation_job: complete");
+  logger.info(
+    { jobId: job.id, artifactType, sourceId },
+    'artifact_generation_job: generating artifact',
+  );
+  await new Promise((r) => setTimeout(r, 150));
+  serverTelemetry.recordBusinessEvent({
+    type: 'artifact_generation_completed',
+    durationMs: Date.now() - start,
+    success: true,
+    metadata: { artifactType, sourceId },
+  });
+  updateRegistry(NAMED_JOB_TYPES.ARTIFACT_GENERATION_JOB, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
+  logger.info({ jobId: job.id, artifactType }, 'artifact_generation_job: complete');
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.ROUTE_ECONOMICS_RECOMPUTE_JOB, async (job) => {
   const start = Date.now();
   const { voyageId, vesselId } = job.payload as { voyageId?: string; vesselId?: string };
-  logger.info({ jobId: job.id, voyageId, vesselId }, "route_economics_recompute_job: recomputing route economics");
-  await new Promise(r => setTimeout(r, 110));
-  serverTelemetry.recordBusinessEvent({ type: "route_economics_recomputed", domain: "vessels", durationMs: Date.now() - start, success: true, metadata: { voyageId, vesselId } });
-  updateRegistry(NAMED_JOB_TYPES.ROUTE_ECONOMICS_RECOMPUTE_JOB, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id, voyageId }, "route_economics_recompute_job: complete");
+  logger.info(
+    { jobId: job.id, voyageId, vesselId },
+    'route_economics_recompute_job: recomputing route economics',
+  );
+  await new Promise((r) => setTimeout(r, 110));
+  serverTelemetry.recordBusinessEvent({
+    type: 'route_economics_recomputed',
+    domain: 'vessels',
+    durationMs: Date.now() - start,
+    success: true,
+    metadata: { voyageId, vesselId },
+  });
+  updateRegistry(NAMED_JOB_TYPES.ROUTE_ECONOMICS_RECOMPUTE_JOB, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
+  logger.info({ jobId: job.id, voyageId }, 'route_economics_recompute_job: complete');
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.READINESS_SCORE_RECOMPUTE_JOB, async (job) => {
   const start = Date.now();
   const { programId } = job.payload as { programId?: string };
-  logger.info({ jobId: job.id, programId }, "readiness_score_recompute_job: recomputing readiness scores");
-  await new Promise(r => setTimeout(r, 130));
-  serverTelemetry.recordBusinessEvent({ type: "readiness_score_recomputed", domain: "readiness-report", durationMs: Date.now() - start, success: true, metadata: { programId } });
-  updateRegistry(NAMED_JOB_TYPES.READINESS_SCORE_RECOMPUTE_JOB, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id, programId }, "readiness_score_recompute_job: complete");
+  logger.info(
+    { jobId: job.id, programId },
+    'readiness_score_recompute_job: recomputing readiness scores',
+  );
+  await new Promise((r) => setTimeout(r, 130));
+  serverTelemetry.recordBusinessEvent({
+    type: 'readiness_score_recomputed',
+    domain: 'readiness-report',
+    durationMs: Date.now() - start,
+    success: true,
+    metadata: { programId },
+  });
+  updateRegistry(NAMED_JOB_TYPES.READINESS_SCORE_RECOMPUTE_JOB, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
+  logger.info({ jobId: job.id, programId }, 'readiness_score_recompute_job: complete');
 });
-
 
 durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "hourly_scheduled_reports: running due report schedules");
+  logger.info({ jobId: job.id }, 'hourly_scheduled_reports: running due report schedules');
   try {
-    const { db } = await import("@szl-holdings/db");
-    const { reportSchedulesTable, reportTemplatesTable } = await import("@szl-holdings/db");
-    const { eq, and, lte, isNull, or } = await import("drizzle-orm");
-    const { reportStore } = await import("./report-store");
+    const { db } = await import('@szl-holdings/db');
+    const { reportSchedulesTable, reportTemplatesTable } = await import('@szl-holdings/db');
+    const { eq, and, lte, isNull, or } = await import('drizzle-orm');
+    const { reportStore } = await import('./report-store');
 
     const now = new Date();
     const dueSchedules = await db
@@ -1093,15 +1427,15 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, async (job) =
       .where(
         and(
           eq(reportSchedulesTable.isActive, true),
-          or(
-            isNull(reportSchedulesTable.nextRunAt),
-            lte(reportSchedulesTable.nextRunAt, now)
-          )
-        )
+          or(isNull(reportSchedulesTable.nextRunAt), lte(reportSchedulesTable.nextRunAt, now)),
+        ),
       )
       .limit(20);
 
-    logger.info({ jobId: job.id, dueCount: dueSchedules.length }, "hourly_scheduled_reports: processing due schedules");
+    logger.info(
+      { jobId: job.id, dueCount: dueSchedules.length },
+      'hourly_scheduled_reports: processing due schedules',
+    );
 
     let generated = 0;
     let failed = 0;
@@ -1115,23 +1449,30 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, async (job) =
           .limit(1);
 
         const template = templates[0];
-        if (!template) { failed++; continue; }
+        if (!template) {
+          failed++;
+          continue;
+        }
 
         const dataConfig = (schedule.dataConfig as Record<string, unknown>) || {};
         await reportStore.createReportGeneration({
           templateId: schedule.templateId,
-          title: `${schedule.name} — ${now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
+          title: `${schedule.name} — ${now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
           domain: schedule.domain as never,
           reportType: template.reportType,
-          brandTheme: (template.brandTheme as never) || "szl",
-          dataSnapshot: { ...dataConfig, scheduledRunId: schedule.scheduleId, generatedAt: now.toISOString() },
+          brandTheme: (template.brandTheme as never) || 'szl',
+          dataSnapshot: {
+            ...dataConfig,
+            scheduledRunId: schedule.scheduleId,
+            generatedAt: now.toISOString(),
+          },
         });
 
         const nextRun = new Date(now);
-        if (schedule.frequency === "daily") nextRun.setDate(nextRun.getDate() + 1);
-        else if (schedule.frequency === "weekly") nextRun.setDate(nextRun.getDate() + 7);
-        else if (schedule.frequency === "monthly") nextRun.setMonth(nextRun.getMonth() + 1);
-        else if (schedule.frequency === "quarterly") nextRun.setMonth(nextRun.getMonth() + 3);
+        if (schedule.frequency === 'daily') nextRun.setDate(nextRun.getDate() + 1);
+        else if (schedule.frequency === 'weekly') nextRun.setDate(nextRun.getDate() + 7);
+        else if (schedule.frequency === 'monthly') nextRun.setMonth(nextRun.getMonth() + 1);
+        else if (schedule.frequency === 'quarterly') nextRun.setMonth(nextRun.getMonth() + 3);
         else nextRun.setDate(nextRun.getDate() + 365);
 
         await db
@@ -1139,7 +1480,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, async (job) =
           .set({
             lastRunAt: now,
             nextRunAt: nextRun,
-            lastStatus: "completed",
+            lastStatus: 'completed',
             runCount: (schedule.runCount || 0) + 1,
             updatedAt: now,
           })
@@ -1147,77 +1488,92 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, async (job) =
 
         generated++;
       } catch (err) {
-        logger.warn({ err, scheduleId: schedule.scheduleId }, "hourly_scheduled_reports: schedule run failed");
+        logger.warn(
+          { err, scheduleId: schedule.scheduleId },
+          'hourly_scheduled_reports: schedule run failed',
+        );
         await db
           .update(reportSchedulesTable)
-          .set({ lastStatus: "failed", failCount: (schedule.failCount || 0) + 1, updatedAt: new Date() })
+          .set({
+            lastStatus: 'failed',
+            failCount: (schedule.failCount || 0) + 1,
+            updatedAt: new Date(),
+          })
           .where(eq(reportSchedulesTable.scheduleId, schedule.scheduleId));
         failed++;
       }
     }
 
     serverTelemetry.recordBusinessEvent({
-      type: "hourly_scheduled_reports_completed",
-      domain: "szl-reports",
+      type: 'hourly_scheduled_reports_completed',
+      domain: 'szl-reports',
       durationMs: Date.now() - start,
       success: true,
       metadata: { generated, failed, total: dueSchedules.length },
     });
-    updateRegistry(NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-    logger.info({ jobId: job.id, generated, failed }, "hourly_scheduled_reports: complete");
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, {
+      lastStatus: 'completed',
+      lastDurationMs: Date.now() - start,
+    });
+    logger.info({ jobId: job.id, generated, failed }, 'hourly_scheduled_reports: complete');
   } catch (err) {
-    logger.error({ err, jobId: job.id }, "hourly_scheduled_reports: fatal error");
-    updateRegistry(NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, { lastStatus: "failed", lastDurationMs: Date.now() - start });
+    logger.error({ err, jobId: job.id }, 'hourly_scheduled_reports: fatal error');
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_SCHEDULED_REPORTS, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+    });
   }
 });
 
-
 durableJobQueue.register(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "weekly_ecosystem_health_briefing: generating briefing");
+  logger.info({ jobId: job.id }, 'weekly_ecosystem_health_briefing: generating briefing');
 
   const payload = job.payload as { weekOf?: string; force?: boolean };
 
   // Enforce weekly cadence: only run on Mondays unless force=true
   const now = new Date();
   if (!payload.force && now.getDay() !== 1) {
-    logger.info({ jobId: job.id, dayOfWeek: now.getDay() }, "weekly_ecosystem_health_briefing: skipping — not Monday");
+    logger.info(
+      { jobId: job.id, dayOfWeek: now.getDay() },
+      'weekly_ecosystem_health_briefing: skipping — not Monday',
+    );
     return;
   }
 
-  const weekOf = payload.weekOf ?? now.toISOString().split("T")[0];
+  const weekOf = payload.weekOf ?? now.toISOString().split('T')[0];
 
   try {
-    const { queueExternalAlert } = await import("./queued-jobs");
+    const { queueExternalAlert } = await import('./queued-jobs');
 
     // ── Fetch live metrics from autopilot data sources ──────────────────────
 
     // Job registry signals
     const registry = getJobRegistry();
-    const activeJobs = registry.filter(j => j.enabled).length;
-    const failedJobs = registry.filter(j => j.lastStatus === "failed").length;
+    const activeJobs = registry.filter((j) => j.enabled).length;
+    const failedJobs = registry.filter((j) => j.lastStatus === 'failed').length;
 
     // Telemetry summary
-    let apmSummary = "";
+    let apmSummary = '';
     try {
       const apmStats = (serverTelemetry as any).getApmStats?.() ?? [];
       const slowRoutes = (apmStats as Array<{ route: string; p95Ms: number }>)
-        .filter(s => s.p95Ms > 2000)
-        .map(s => `${s.route} (${Math.round(s.p95Ms)}ms)`);
+        .filter((s) => s.p95Ms > 2000)
+        .map((s) => `${s.route} (${Math.round(s.p95Ms)}ms)`);
       if (slowRoutes.length > 0) {
-        apmSummary = `  Slow routes: ${slowRoutes.slice(0, 3).join(", ")}.`;
+        apmSummary = `  Slow routes: ${slowRoutes.slice(0, 3).join(', ')}.`;
       }
     } catch {}
 
     // Feedback signals
-    let feedbackSummary = "456 signals collected. 89% positive rate.";
+    let feedbackSummary = '456 signals collected. 89% positive rate.';
     try {
-      const { db, feedbackTable } = await import("@szl-holdings/db");
-      const { sql } = await import("drizzle-orm");
+      const { db, feedbackTable } = await import('@szl-holdings/db');
+      const { sql } = await import('drizzle-orm');
       const [stats] = await db
         .select({
-          total: sql<number>`count(*)`.as("total"),
-          positive: sql<number>`count(*) filter (where score >= 4)`.as("positive"),
+          total: sql<number>`count(*)`.as('total'),
+          positive: sql<number>`count(*) filter (where score >= 4)`.as('positive'),
         })
         .from(feedbackTable);
       if (stats && Number(stats.total) > 0) {
@@ -1229,37 +1585,37 @@ durableJobQueue.register(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, async
     // ── Build briefing from live data ────────────────────────────────────────
 
     const briefingSections = [
-      `Scheduled Jobs: ${activeJobs} active, ${failedJobs} failed. ${failedJobs > 0 ? "⚠ Review failed jobs in the Autopilot Jobs tab." : "All jobs healthy."}`,
+      `Scheduled Jobs: ${activeJobs} active, ${failedJobs} failed. ${failedJobs > 0 ? '⚠ Review failed jobs in the Autopilot Jobs tab.' : 'All jobs healthy.'}`,
       `Capability Genome: Ecosystem maturity score computed from ${Object.keys({ aegis: 1, terra: 1, vessels: 1, lyte: 1, carlota: 1, prism: 1 }).length} apps × 12 dimensions.`,
-      "Drift Alerts: 1 critical (Carlota Jo data freshness), 2 warnings (Terra latency, PRISM webhooks).",
+      'Drift Alerts: 1 critical (Carlota Jo data freshness), 2 warnings (Terra latency, PRISM webhooks).',
       `Feature Usage: Lyte AI Summarizer +34%, Terra Distress Engine +21%, Aegis Adversary Wizard -61%.`,
       `User Feedback: ${feedbackSummary} Top concern: Aegis Adversary Wizard UX complexity.`,
       `Performance: Aegis bundle 49% over budget (1.34MB / 900KB budget). Terra API P95 21% over budget.${apmSummary}`,
-      "Next Best Action #1: Fix Carlota Jo real-time data pipeline (Critical drift, Low effort, High impact).",
-      "Next Best Action #2: Code-split Aegis bundle — MITRE ATT&CK module 280KB loaded eagerly.",
+      'Next Best Action #1: Fix Carlota Jo real-time data pipeline (Critical drift, Low effort, High impact).',
+      'Next Best Action #2: Code-split Aegis bundle — MITRE ATT&CK module 280KB loaded eagerly.',
     ];
 
     const briefingText = [
       `*SZL Holdings — Weekly Ecosystem Health Briefing* (Week of ${weekOf})`,
-      "",
+      '',
       ...briefingSections.map((s, i) => `${i + 1}. ${s}`),
-      "",
+      '',
       `View full Autopilot dashboard: /szl-holdings/autopilot`,
-    ].join("\n");
+    ].join('\n');
 
     // GAP-017: enqueue durably so a server restart between briefing
     // generation and Slack/Teams/email fanout does not lose the briefing.
     await queueExternalAlert({
-      appName: "Ecosystem Autopilot",
+      appName: 'Ecosystem Autopilot',
       title: `Weekly Health Briefing — ${weekOf}`,
       message: briefingText,
-      severity: "info",
-      actionUrl: "/autopilot",
+      severity: 'info',
+      actionUrl: '/autopilot',
     });
 
     serverTelemetry.recordBusinessEvent({
-      type: "weekly_ecosystem_health_briefing_sent",
-      domain: "autopilot",
+      type: 'weekly_ecosystem_health_briefing_sent',
+      domain: 'autopilot',
       durationMs: Date.now() - start,
       success: true,
       metadata: { weekOf, sections: briefingSections.length, activeJobs, failedJobs },
@@ -1270,79 +1626,120 @@ durableJobQueue.register(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, async
     // AI queue so a server restart does not lose it and so it is retried
     // with backoff on transient provider failure.
     try {
-      const { queueAiInference } = await import("./queued-jobs");
+      const { queueAiInference } = await import('./queued-jobs');
       await queueAiInference({
-        agentId: "ecosystem-autopilot-weekly-predictions",
-        domain: "autopilot",
-        strategy: "fastest",
+        agentId: 'ecosystem-autopilot-weekly-predictions',
+        domain: 'autopilot',
+        strategy: 'fastest',
         maxTokens: 600,
         messages: [
-          { role: "system", content: "You are the SZL Holdings ecosystem autopilot. Given a weekly health briefing, produce 3 short bullet predictions for the coming week." },
-          { role: "user", content: briefingText },
+          {
+            role: 'system',
+            content:
+              'You are the SZL Holdings ecosystem autopilot. Given a weekly health briefing, produce 3 short bullet predictions for the coming week.',
+          },
+          { role: 'user', content: briefingText },
         ],
       });
     } catch (predictErr) {
-      logger.warn({ err: predictErr, weekOf }, "weekly_ecosystem_health_briefing: queueAiInference for predictions failed (non-fatal)");
+      logger.warn(
+        { err: predictErr, weekOf },
+        'weekly_ecosystem_health_briefing: queueAiInference for predictions failed (non-fatal)',
+      );
     }
 
-    updateRegistry(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-    logger.info({ jobId: job.id, weekOf }, "weekly_ecosystem_health_briefing: complete");
+    updateRegistry(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, {
+      lastStatus: 'completed',
+      lastDurationMs: Date.now() - start,
+    });
+    logger.info({ jobId: job.id, weekOf }, 'weekly_ecosystem_health_briefing: complete');
   } catch (err) {
-    updateRegistry(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, { lastStatus: "failed", failCount: (jobRegistry.get(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING)?.failCount || 0) + 1 });
-    logger.error({ err, jobId: job.id }, "weekly_ecosystem_health_briefing: failed");
+    updateRegistry(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, {
+      lastStatus: 'failed',
+      failCount:
+        (jobRegistry.get(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING)?.failCount || 0) + 1,
+    });
+    logger.error({ err, jobId: job.id }, 'weekly_ecosystem_health_briefing: failed');
     throw err;
   }
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, async (job) => {
   const start = Date.now();
-  updateRegistry(NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, { lastStatus: "running" });
+  updateRegistry(NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, { lastStatus: 'running' });
   try {
-    const { retainDays = 7, domains = ["vessels", "terra", "aegis", "prism"] } = (job.payload ?? {}) as { retainDays?: number; domains?: string[] };
+    const { retainDays = 7, domains = ['vessels', 'terra', 'aegis', 'prism'] } = (job.payload ??
+      {}) as { retainDays?: number; domains?: string[] };
     const cutoff = new Date(Date.now() - retainDays * 24 * 60 * 60 * 1000);
-    logger.info({ jobId: job.id, cutoff: cutoff.toISOString(), domains }, "atlas_snapshot_compaction: starting");
+    logger.info(
+      { jobId: job.id, cutoff: cutoff.toISOString(), domains },
+      'atlas_snapshot_compaction: starting',
+    );
     let compactedCount = 0;
     try {
-      const { db } = await import("@szl-holdings/db");
+      const { db } = await import('@szl-holdings/db');
       const result = await db.execute(
         `UPDATE atlas_spatial_snapshots SET is_compacted = true, compacted_at = NOW()
          WHERE created_at < $1 AND is_compacted = false
          AND twin_category = ANY($2::text[])`,
-        [cutoff, domains]
+        [cutoff, domains],
       );
       compactedCount = result.rowCount ?? 0;
     } catch (_dbErr) {
-      logger.warn({ jobId: job.id }, "atlas_snapshot_compaction: db not available, skipping compaction");
+      logger.warn(
+        { jobId: job.id },
+        'atlas_snapshot_compaction: db not available, skipping compaction',
+      );
     }
-    updateRegistry(NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-    logger.info({ jobId: job.id, compactedCount, durationMs: Date.now() - start }, "atlas_snapshot_compaction: complete");
+    updateRegistry(NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, {
+      lastStatus: 'completed',
+      lastDurationMs: Date.now() - start,
+    });
+    logger.info(
+      { jobId: job.id, compactedCount, durationMs: Date.now() - start },
+      'atlas_snapshot_compaction: complete',
+    );
   } catch (err) {
-    updateRegistry(NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, { lastStatus: "failed", failCount: (jobRegistry.get(NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION)?.failCount || 0) + 1 });
-    logger.error({ err, jobId: job.id }, "atlas_snapshot_compaction: failed");
+    updateRegistry(NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION, {
+      lastStatus: 'failed',
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.ATLAS_SNAPSHOT_COMPACTION)?.failCount || 0) + 1,
+    });
+    logger.error({ err, jobId: job.id }, 'atlas_snapshot_compaction: failed');
     throw err;
   }
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, async (job) => {
   const start = Date.now();
-  updateRegistry(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, { lastStatus: "running", lastRunAt: Date.now() });
+  updateRegistry(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, {
+    lastStatus: 'running',
+    lastRunAt: Date.now(),
+  });
 
-  const payload = (job.payload ?? {}) as { retainDays?: number; dryRun?: boolean; batchSize?: number };
+  const payload = (job.payload ?? {}) as {
+    retainDays?: number;
+    dryRun?: boolean;
+    batchSize?: number;
+  };
   const envDays = Number(process.env.ATLAS_RETENTION_DAYS);
-  const retainDays = Number.isFinite(payload.retainDays) && (payload.retainDays as number) > 0
-    ? Math.floor(payload.retainDays as number)
-    : (Number.isFinite(envDays) && envDays > 0 ? Math.floor(envDays) : 90);
+  const retainDays =
+    Number.isFinite(payload.retainDays) && (payload.retainDays as number) > 0
+      ? Math.floor(payload.retainDays as number)
+      : Number.isFinite(envDays) && envDays > 0
+        ? Math.floor(envDays)
+        : 90;
   const dryRun = payload.dryRun === true;
-  const batchSize = Number.isFinite(payload.batchSize) && (payload.batchSize as number) > 0
-    ? Math.min(Math.floor(payload.batchSize as number), 50_000)
-    : 5_000;
+  const batchSize =
+    Number.isFinite(payload.batchSize) && (payload.batchSize as number) > 0
+      ? Math.min(Math.floor(payload.batchSize as number), 50_000)
+      : 5_000;
   const cutoff = new Date(Date.now() - retainDays * 24 * 60 * 60 * 1000);
 
   const tableTargets: Array<{ table: string; column: string }> = [
-    { table: "atlas_signals", column: "created_at" },
-    { table: "atlas_evidence", column: "captured_at" },
-    { table: "atlas_outcomes", column: "recorded_at" },
-    { table: "atlas_runs", column: "snapshot_at" },
+    { table: 'atlas_signals', column: 'created_at' },
+    { table: 'atlas_evidence', column: 'captured_at' },
+    { table: 'atlas_outcomes', column: 'recorded_at' },
+    { table: 'atlas_runs', column: 'snapshot_at' },
   ];
 
   const counts: Record<string, number> = {};
@@ -1350,7 +1747,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, async (job) => {
   let failed = 0;
 
   try {
-    const { pool } = await import("@szl-holdings/db");
+    const { pool } = await import('@szl-holdings/db');
     const MAX_BATCHES_PER_TABLE = 1_000;
     for (const target of tableTargets) {
       try {
@@ -1383,13 +1780,13 @@ durableJobQueue.register(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, async (job) => {
         }
       } catch (err) {
         failed++;
-        logger.warn({ err, table: target.table }, "atlas_retention_prune: table prune failed");
+        logger.warn({ err, table: target.table }, 'atlas_retention_prune: table prune failed');
       }
     }
   } catch (err) {
-    logger.error({ err, jobId: job.id }, "atlas_retention_prune: fatal — db not available");
+    logger.error({ err, jobId: job.id }, 'atlas_retention_prune: fatal — db not available');
     updateRegistry(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, {
-      lastStatus: "failed",
+      lastStatus: 'failed',
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE)?.failCount || 0) + 1,
     });
@@ -1397,18 +1794,31 @@ durableJobQueue.register(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, async (job) => {
   }
 
   serverTelemetry.recordBusinessEvent({
-    type: "atlas_retention_prune_completed",
-    domain: "atlas",
+    type: 'atlas_retention_prune_completed',
+    domain: 'atlas',
     durationMs: Date.now() - start,
     success: failed === 0,
     metadata: { retainDays, cutoff: cutoff.toISOString(), dryRun, counts, totalDeleted, failed },
   });
   updateRegistry(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE, {
-    lastStatus: failed === 0 ? "completed" : "failed",
+    lastStatus: failed === 0 ? 'completed' : 'failed',
     lastDurationMs: Date.now() - start,
-    ...(failed > 0 ? { failCount: (jobRegistry.get(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE)?.failCount || 0) + 1 } : {}),
+    ...(failed > 0
+      ? { failCount: (jobRegistry.get(NAMED_JOB_TYPES.ATLAS_RETENTION_PRUNE)?.failCount || 0) + 1 }
+      : {}),
   });
-  logger.info({ jobId: job.id, retainDays, cutoff: cutoff.toISOString(), dryRun, counts, totalDeleted, failed }, "atlas_retention_prune: complete");
+  logger.info(
+    {
+      jobId: job.id,
+      retainDays,
+      cutoff: cutoff.toISOString(),
+      dryRun,
+      counts,
+      totalDeleted,
+      failed,
+    },
+    'atlas_retention_prune: complete',
+  );
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, async (job) => {
@@ -1417,34 +1827,49 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, async (job) =
     roleScope?: string;
     emailRecipients?: string[];
     slackChannel?: string;
-    channels?: Array<"email" | "slack">;
+    channels?: Array<'email' | 'slack'>;
   };
 
-  const roleScope = payload.roleScope ?? "executive";
+  const roleScope = payload.roleScope ?? 'executive';
   const date = new Date().toISOString().slice(0, 10);
 
-  const envEmails = (process.env.PROOF_CHAIN_DIGEST_EMAIL_RECIPIENTS ?? "")
-    .split(",").map((s) => s.trim()).filter(Boolean);
-  const emailRecipients = (payload.emailRecipients && payload.emailRecipients.length > 0)
-    ? payload.emailRecipients
-    : envEmails;
+  const envEmails = (process.env.PROOF_CHAIN_DIGEST_EMAIL_RECIPIENTS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const emailRecipients =
+    payload.emailRecipients && payload.emailRecipients.length > 0
+      ? payload.emailRecipients
+      : envEmails;
 
-  const slackChannel = payload.slackChannel
-    ?? process.env.PROOF_CHAIN_DIGEST_SLACK_CHANNEL
-    ?? process.env.ALLOY_DIGEST_SLACK_CHANNEL
-    ?? "";
+  const slackChannel =
+    payload.slackChannel ??
+    process.env.PROOF_CHAIN_DIGEST_SLACK_CHANNEL ??
+    process.env.ALLOY_DIGEST_SLACK_CHANNEL ??
+    '';
 
-  const channels: Array<"email" | "slack"> = payload.channels && payload.channels.length > 0
-    ? payload.channels
-    : ([
-        emailRecipients.length > 0 ? "email" : null,
-        slackChannel ? "slack" : null,
-      ].filter(Boolean) as Array<"email" | "slack">);
+  const channels: Array<'email' | 'slack'> =
+    payload.channels && payload.channels.length > 0
+      ? payload.channels
+      : ([emailRecipients.length > 0 ? 'email' : null, slackChannel ? 'slack' : null].filter(
+          Boolean,
+        ) as Array<'email' | 'slack'>);
 
   if (channels.length === 0) {
-    logger.warn({ jobId: job.id }, "daily_proof_chain_digest: no delivery channels configured (set PROOF_CHAIN_DIGEST_EMAIL_RECIPIENTS and/or PROOF_CHAIN_DIGEST_SLACK_CHANNEL)");
-    updateRegistry(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-    serverTelemetry.recordBusinessEvent({ type: "daily_proof_chain_digest_skipped", durationMs: Date.now() - start, success: true, metadata: { reason: "no_channels" } });
+    logger.warn(
+      { jobId: job.id },
+      'daily_proof_chain_digest: no delivery channels configured (set PROOF_CHAIN_DIGEST_EMAIL_RECIPIENTS and/or PROOF_CHAIN_DIGEST_SLACK_CHANNEL)',
+    );
+    updateRegistry(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, {
+      lastStatus: 'completed',
+      lastDurationMs: Date.now() - start,
+    });
+    serverTelemetry.recordBusinessEvent({
+      type: 'daily_proof_chain_digest_skipped',
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { reason: 'no_channels' },
+    });
     return;
   }
 
@@ -1454,39 +1879,53 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, async (job) =
   let slackFailed = 0;
   const errors: string[] = [];
 
-  let markdown = "";
+  let markdown = '';
   try {
-    const { gatherDigestData, generateDigestMarkdown } = await import("../routes/alloy-digest");
+    const { gatherDigestData, generateDigestMarkdown } = await import('../routes/alloy-digest');
     const data = await gatherDigestData(roleScope);
     markdown = await generateDigestMarkdown(data, roleScope, date);
   } catch (err) {
-    logger.error({ err, jobId: job.id }, "daily_proof_chain_digest: failed to generate digest");
+    logger.error({ err, jobId: job.id }, 'daily_proof_chain_digest: failed to generate digest');
     updateRegistry(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, {
-      lastStatus: "failed",
+      lastStatus: 'failed',
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST)?.failCount || 0) + 1,
     });
     throw err;
   }
 
-  const dateLabel = new Date(date).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const dateLabel = new Date(date).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
-  if (channels.includes("email")) {
+  if (channels.includes('email')) {
     if (emailRecipients.length === 0) {
       emailFailed++;
-      errors.push("email: channel requested but no recipients configured (set PROOF_CHAIN_DIGEST_EMAIL_RECIPIENTS)");
-      logger.warn({ jobId: job.id }, "daily_proof_chain_digest: email channel requested but no recipients");
+      errors.push(
+        'email: channel requested but no recipients configured (set PROOF_CHAIN_DIGEST_EMAIL_RECIPIENTS)',
+      );
+      logger.warn(
+        { jobId: job.id },
+        'daily_proof_chain_digest: email channel requested but no recipients',
+      );
     } else {
-    try {
-      const { hasEmailProviderConfigured } = await import("./email");
-      const { queueEmail } = await import("./queued-jobs");
-      if (!hasEmailProviderConfigured()) {
-        emailFailed += emailRecipients.length;
-        errors.push("email: no provider configured");
-        logger.warn({ jobId: job.id }, "daily_proof_chain_digest: email channel requested but no provider configured");
-      } else {
-        const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Proof Chain Digest — ${dateLabel}</title>
+      try {
+        const { hasEmailProviderConfigured } = await import('./email');
+        const { queueEmail } = await import('./queued-jobs');
+        if (!hasEmailProviderConfigured()) {
+          emailFailed += emailRecipients.length;
+          errors.push('email: no provider configured');
+          logger.warn(
+            { jobId: job.id },
+            'daily_proof_chain_digest: email channel requested but no provider configured',
+          );
+        } else {
+          const escapeHtml = (s: string) =>
+            s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Proof Chain Digest — ${dateLabel}</title>
 <style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;margin:0;padding:24px;color:#111827}
 .wrap{max-width:760px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:32px}
 h1{font-size:18px;margin:0 0 4px}.sub{color:#6b7280;font-size:13px;margin:0 0 24px}
@@ -1499,66 +1938,75 @@ pre{white-space:pre-wrap;word-wrap:break-word;font-family:ui-monospace,SFMono-Re
 <p class="foot">Automated daily digest from SZL Holdings governance. Recipients managed via PROOF_CHAIN_DIGEST_EMAIL_RECIPIENTS.</p>
 </div></body></html>`;
 
-        for (const to of emailRecipients) {
-          try {
-            // GAP-017: enqueue durably so digest emails to compliance
-            // recipients survive an API restart and get retries.
-            await queueEmail({
-              to,
-              subject: `Proof Chain Digest — ${dateLabel}`,
-              html,
-              text: markdown,
-            });
-            emailSent++;
-          } catch (err) {
-            emailFailed++;
-            errors.push(`email[${to}]: ${String(err)}`);
-            logger.warn({ err, jobId: job.id, to }, "daily_proof_chain_digest: queueEmail threw");
+          for (const to of emailRecipients) {
+            try {
+              // GAP-017: enqueue durably so digest emails to compliance
+              // recipients survive an API restart and get retries.
+              await queueEmail({
+                to,
+                subject: `Proof Chain Digest — ${dateLabel}`,
+                html,
+                text: markdown,
+              });
+              emailSent++;
+            } catch (err) {
+              emailFailed++;
+              errors.push(`email[${to}]: ${String(err)}`);
+              logger.warn({ err, jobId: job.id, to }, 'daily_proof_chain_digest: queueEmail threw');
+            }
           }
         }
+      } catch (err) {
+        emailFailed += emailRecipients.length;
+        errors.push(`email: ${String(err)}`);
+        logger.error({ err, jobId: job.id }, 'daily_proof_chain_digest: email channel fatal');
       }
-    } catch (err) {
-      emailFailed += emailRecipients.length;
-      errors.push(`email: ${String(err)}`);
-      logger.error({ err, jobId: job.id }, "daily_proof_chain_digest: email channel fatal");
-    }
     }
   }
 
-  if (channels.includes("slack")) {
+  if (channels.includes('slack')) {
     if (!slackChannel) {
       slackFailed++;
-      errors.push("slack: channel requested but PROOF_CHAIN_DIGEST_SLACK_CHANNEL not configured");
-      logger.warn({ jobId: job.id }, "daily_proof_chain_digest: slack channel requested but no channel configured");
+      errors.push('slack: channel requested but PROOF_CHAIN_DIGEST_SLACK_CHANNEL not configured');
+      logger.warn(
+        { jobId: job.id },
+        'daily_proof_chain_digest: slack channel requested but no channel configured',
+      );
     } else {
-    const slackToken = process.env.SLACK_BOT_TOKEN;
-    if (!slackToken) {
-      slackFailed++;
-      errors.push("slack: SLACK_BOT_TOKEN not configured");
-      logger.warn({ jobId: job.id }, "daily_proof_chain_digest: SLACK_BOT_TOKEN not configured");
-    } else {
-      try {
-        const slackText = `*Proof Chain Digest — ${dateLabel}*\n*Role: ${roleScope}*\n\n${markdown.slice(0, 2800)}${markdown.length > 2800 ? "\n\n_[digest truncated — view full version in app]_" : ""}`;
-        const slackRes = await fetch("https://slack.com/api/chat.postMessage", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${slackToken}` },
-          body: JSON.stringify({ channel: slackChannel, text: slackText, mrkdwn: true }),
-        });
-        const body = await slackRes.json().catch(() => ({} as Record<string, unknown>)) as { ok?: boolean; error?: string };
-        if (slackRes.ok && body.ok !== false) {
-          slackSent++;
-        } else {
-          slackFailed++;
-          const reason = body.error ?? `HTTP ${slackRes.status}`;
-          errors.push(`slack: ${reason}`);
-          logger.warn({ jobId: job.id, status: slackRes.status, error: reason }, "daily_proof_chain_digest: Slack API rejected");
-        }
-      } catch (err) {
+      const slackToken = process.env.SLACK_BOT_TOKEN;
+      if (!slackToken) {
         slackFailed++;
-        errors.push(`slack: ${String(err)}`);
-        logger.warn({ err, jobId: job.id }, "daily_proof_chain_digest: Slack delivery threw");
+        errors.push('slack: SLACK_BOT_TOKEN not configured');
+        logger.warn({ jobId: job.id }, 'daily_proof_chain_digest: SLACK_BOT_TOKEN not configured');
+      } else {
+        try {
+          const slackText = `*Proof Chain Digest — ${dateLabel}*\n*Role: ${roleScope}*\n\n${markdown.slice(0, 2800)}${markdown.length > 2800 ? '\n\n_[digest truncated — view full version in app]_' : ''}`;
+          const slackRes = await fetch('https://slack.com/api/chat.postMessage', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${slackToken}` },
+            body: JSON.stringify({ channel: slackChannel, text: slackText, mrkdwn: true }),
+          });
+          const body = (await slackRes.json().catch(() => ({}) as Record<string, unknown>)) as {
+            ok?: boolean;
+            error?: string;
+          };
+          if (slackRes.ok && body.ok !== false) {
+            slackSent++;
+          } else {
+            slackFailed++;
+            const reason = body.error ?? `HTTP ${slackRes.status}`;
+            errors.push(`slack: ${reason}`);
+            logger.warn(
+              { jobId: job.id, status: slackRes.status, error: reason },
+              'daily_proof_chain_digest: Slack API rejected',
+            );
+          }
+        } catch (err) {
+          slackFailed++;
+          errors.push(`slack: ${String(err)}`);
+          logger.warn({ err, jobId: job.id }, 'daily_proof_chain_digest: Slack delivery threw');
+        }
       }
-    }
     }
   }
 
@@ -1567,43 +2015,64 @@ pre{white-space:pre-wrap;word-wrap:break-word;font-family:ui-monospace,SFMono-Re
   const anyFailed = totalFailed > 0;
 
   serverTelemetry.recordBusinessEvent({
-    type: "daily_proof_chain_digest_completed",
+    type: 'daily_proof_chain_digest_completed',
     durationMs: Date.now() - start,
     success: !anyFailed,
-    metadata: { date, roleScope, channels, emailSent, emailFailed, slackSent, slackFailed, totalSent, errors },
+    metadata: {
+      date,
+      roleScope,
+      channels,
+      emailSent,
+      emailFailed,
+      slackSent,
+      slackFailed,
+      totalSent,
+      errors,
+    },
   });
 
   if (anyFailed) {
     updateRegistry(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, {
-      lastStatus: "failed",
+      lastStatus: 'failed',
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST)?.failCount || 0) + 1,
     });
     logger.error(
       { jobId: job.id, emailSent, emailFailed, slackSent, slackFailed, errors },
-      "daily_proof_chain_digest: one or more deliveries failed — throwing to trigger retry",
+      'daily_proof_chain_digest: one or more deliveries failed — throwing to trigger retry',
     );
-    throw new Error(`daily_proof_chain_digest: ${totalFailed} delivery failure(s) of ${totalFailed + totalSent} attempted — ${errors.join("; ")}`);
+    throw new Error(
+      `daily_proof_chain_digest: ${totalFailed} delivery failure(s) of ${totalFailed + totalSent} attempted — ${errors.join('; ')}`,
+    );
   }
 
-  updateRegistry(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-  logger.info({ jobId: job.id, date, emailSent, emailFailed, slackSent, slackFailed }, "daily_proof_chain_digest: complete");
+  updateRegistry(NAMED_JOB_TYPES.DAILY_PROOF_CHAIN_DIGEST, {
+    lastStatus: 'completed',
+    lastDurationMs: Date.now() - start,
+  });
+  logger.info(
+    { jobId: job.id, date, emailSent, emailFailed, slackSent, slackFailed },
+    'daily_proof_chain_digest: complete',
+  );
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "hourly_guardian_approval_expiry: scanning for expired pending approvals");
+  logger.info(
+    { jobId: job.id },
+    'hourly_guardian_approval_expiry: scanning for expired pending approvals',
+  );
   let expired = 0;
   try {
-    const { db, guardianApprovalRequestsTable } = await import("@szl-holdings/db");
-    const { and, eq, isNotNull, lte } = await import("drizzle-orm");
+    const { db, guardianApprovalRequestsTable } = await import('@szl-holdings/db');
+    const { and, eq, isNotNull, lte } = await import('drizzle-orm');
     const now = new Date();
     const updated = await db
       .update(guardianApprovalRequestsTable)
-      .set({ status: "expired", updatedAt: now })
+      .set({ status: 'expired', updatedAt: now })
       .where(
         and(
-          eq(guardianApprovalRequestsTable.status, "pending"),
+          eq(guardianApprovalRequestsTable.status, 'pending'),
           isNotNull(guardianApprovalRequestsTable.expiresAt),
           lte(guardianApprovalRequestsTable.expiresAt, now),
         ),
@@ -1616,27 +2085,34 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY, async 
     expired = updated.length;
 
     serverTelemetry.recordBusinessEvent({
-      type: "guardian_approval_expiry_completed",
-      domain: "guardian",
+      type: 'guardian_approval_expiry_completed',
+      domain: 'guardian',
       durationMs: Date.now() - start,
       success: true,
       metadata: { expired, scannedAt: now.toISOString() },
     });
     updateRegistry(NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY, {
-      lastStatus: "completed",
+      lastStatus: 'completed',
       lastDurationMs: Date.now() - start,
     });
     if (expired > 0) {
-      logger.info({ jobId: job.id, expired, sample: updated.slice(0, 5) }, "hourly_guardian_approval_expiry: marked approvals expired");
+      logger.info(
+        { jobId: job.id, expired, sample: updated.slice(0, 5) },
+        'hourly_guardian_approval_expiry: marked approvals expired',
+      );
     } else {
-      logger.info({ jobId: job.id }, "hourly_guardian_approval_expiry: no expired approvals to sweep");
+      logger.info(
+        { jobId: job.id },
+        'hourly_guardian_approval_expiry: no expired approvals to sweep',
+      );
     }
   } catch (err) {
-    logger.error({ err, jobId: job.id }, "hourly_guardian_approval_expiry: fatal");
+    logger.error({ err, jobId: job.id }, 'hourly_guardian_approval_expiry: fatal');
     updateRegistry(NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY, {
-      lastStatus: "failed",
+      lastStatus: 'failed',
       lastDurationMs: Date.now() - start,
-      failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY)?.failCount || 0) + 1,
+      failCount:
+        (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_GUARDIAN_APPROVAL_EXPIRY)?.failCount || 0) + 1,
     });
     throw err;
   }
@@ -1664,9 +2140,11 @@ durableJobQueue.register(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, async (job) => {
   let autoCanceled = 0;
   let autoRetried = 0;
   try {
-    const { db, alloyWorkflowRunsTable, alloyWorkflowsTable, alloyAuditLogTable } = await import("@szl-holdings/db");
-    const { and, eq, lt, isNotNull } = await import("drizzle-orm");
-    const { notifyRunFailure } = await import("./alloy-run-failure-notifications");
+    const { db, alloyWorkflowRunsTable, alloyWorkflowsTable, alloyAuditLogTable } = await import(
+      '@szl-holdings/db'
+    );
+    const { and, eq, lt, isNotNull } = await import('drizzle-orm');
+    const { notifyRunFailure } = await import('./alloy-run-failure-notifications');
 
     const notifyCutoff = new Date(Date.now() - STUCK_THRESHOLD_MS);
     const stuckRuns = await db
@@ -1674,7 +2152,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, async (job) => {
       .from(alloyWorkflowRunsTable)
       .where(
         and(
-          eq(alloyWorkflowRunsTable.state, "running"),
+          eq(alloyWorkflowRunsTable.state, 'running'),
           isNotNull(alloyWorkflowRunsTable.startedAt),
           lt(alloyWorkflowRunsTable.startedAt, notifyCutoff),
         ),
@@ -1682,7 +2160,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, async (job) => {
 
     candidates = stuckRuns.length;
     for (const r of stuckRuns) {
-      const result = await notifyRunFailure(r.id, "stuck");
+      const result = await notifyRunFailure(r.id, 'stuck');
       if (result.notified) notified += 1;
     }
 
@@ -1696,7 +2174,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, async (job) => {
       .from(alloyWorkflowRunsTable)
       .where(
         and(
-          eq(alloyWorkflowRunsTable.state, "running"),
+          eq(alloyWorkflowRunsTable.state, 'running'),
           isNotNull(alloyWorkflowRunsTable.startedAt),
           lt(alloyWorkflowRunsTable.startedAt, hardCutoff),
         ),
@@ -1709,27 +2187,24 @@ durableJobQueue.register(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, async (job) => {
         const newHistory = [
           ...prevHistory,
           {
-            state: "failed",
+            state: 'failed',
             at: failedAt.toISOString(),
-            by: "system",
-            reason: "stuck_timeout",
+            by: 'system',
+            reason: 'stuck_timeout',
           },
         ];
         const startedMs = run.startedAt ? run.startedAt.getTime() : failedAt.getTime();
         const [updated] = await db
           .update(alloyWorkflowRunsTable)
           .set({
-            state: "failed",
-            errorMessage: "stuck timeout",
+            state: 'failed',
+            errorMessage: 'stuck timeout',
             completedAt: failedAt,
             durationMs: failedAt.getTime() - startedMs,
             stateHistory: newHistory,
           })
           .where(
-            and(
-              eq(alloyWorkflowRunsTable.id, run.id),
-              eq(alloyWorkflowRunsTable.state, "running"),
-            ),
+            and(eq(alloyWorkflowRunsTable.id, run.id), eq(alloyWorkflowRunsTable.state, 'running')),
           )
           .returning();
 
@@ -1746,37 +2221,43 @@ durableJobQueue.register(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, async (job) => {
           await db.insert(alloyAuditLogTable).values({
             orgId: workflow?.orgId ?? null,
             userId: run.triggeredBy ?? null,
-            action: "auto_cancel_stuck_run",
-            resourceType: "alloy_workflow_run",
+            action: 'auto_cancel_stuck_run',
+            resourceType: 'alloy_workflow_run',
             resourceId: String(run.id),
-            before: { state: "running", startedAt: run.startedAt, errorMessage: run.errorMessage },
-            after: { state: "failed", errorMessage: "stuck timeout", completedAt: failedAt },
+            before: { state: 'running', startedAt: run.startedAt, errorMessage: run.errorMessage },
+            after: { state: 'failed', errorMessage: 'stuck timeout', completedAt: failedAt },
             metadata: {
-              reason: "stuck_timeout",
+              reason: 'stuck_timeout',
               hardTimeoutMs: HARD_TIMEOUT_MS,
               workflowId: run.workflowId,
             },
           });
         } catch (auditErr) {
-          logger.warn({ err: auditErr, runId: run.id }, "stuck_run_notify: audit log insert failed");
+          logger.warn(
+            { err: auditErr, runId: run.id },
+            'stuck_run_notify: audit log insert failed',
+          );
         }
 
         try {
-          const { broadcastWs } = await import("./pubsub-bridge.js");
-          broadcastWs("workflow-runs", "run-updated", {
+          const { broadcastWs } = await import('./pubsub-bridge.js');
+          broadcastWs('workflow-runs', 'run-updated', {
             id: run.id,
             workflowId: run.workflowId,
-            state: "failed",
+            state: 'failed',
           });
         } catch (broadcastErr) {
-          logger.debug({ err: broadcastErr, runId: run.id }, "stuck_run_notify: ws broadcast skipped");
+          logger.debug(
+            { err: broadcastErr, runId: run.id },
+            'stuck_run_notify: ws broadcast skipped',
+          );
         }
 
         // Notify the run owner of the auto-cancellation as a regular
         // failure — notifyRunFailure is idempotent, so the prior "stuck"
         // notification doesn't block a subsequent "failed" notification.
-        void notifyRunFailure(run.id, "failed").catch((notifyErr) =>
-          logger.warn({ err: notifyErr, runId: run.id }, "stuck_run_notify: failure notify threw"),
+        void notifyRunFailure(run.id, 'failed').catch((notifyErr) =>
+          logger.warn({ err: notifyErr, runId: run.id }, 'stuck_run_notify: failure notify threw'),
         );
 
         // Optional auto-retry for idempotent workflows.
@@ -1792,16 +2273,16 @@ durableJobQueue.register(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, async (job) => {
                 workflowId: run.workflowId,
                 signalId: run.signalId,
                 triggeredBy: run.triggeredBy,
-                state: "queued",
+                state: 'queued',
                 input: run.input ?? {},
                 retryCount: nextRetry,
                 maxRetries: run.maxRetries ?? 3,
                 stateHistory: [
                   {
-                    state: "queued",
+                    state: 'queued',
                     at: queuedAt.toISOString(),
-                    by: "system",
-                    reason: "auto_retry_after_stuck_timeout",
+                    by: 'system',
+                    reason: 'auto_retry_after_stuck_timeout',
                     parentRunId: run.id,
                   },
                 ],
@@ -1810,22 +2291,33 @@ durableJobQueue.register(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, async (job) => {
             if (retryRun) {
               autoRetried += 1;
               logger.info(
-                { originalRunId: run.id, retryRunId: retryRun.id, workflowId: run.workflowId, retryCount: nextRetry },
-                "stuck_run_notify: auto-retry enqueued for idempotent workflow",
+                {
+                  originalRunId: run.id,
+                  retryRunId: retryRun.id,
+                  workflowId: run.workflowId,
+                  retryCount: nextRetry,
+                },
+                'stuck_run_notify: auto-retry enqueued for idempotent workflow',
               );
             }
           } catch (retryErr) {
-            logger.warn({ err: retryErr, runId: run.id }, "stuck_run_notify: auto-retry enqueue failed");
+            logger.warn(
+              { err: retryErr, runId: run.id },
+              'stuck_run_notify: auto-retry enqueue failed',
+            );
           }
         }
       } catch (cancelErr) {
-        logger.warn({ err: cancelErr, runId: run.id }, "stuck_run_notify: hard-timeout cancel failed");
+        logger.warn(
+          { err: cancelErr, runId: run.id },
+          'stuck_run_notify: hard-timeout cancel failed',
+        );
       }
     }
 
     serverTelemetry.recordBusinessEvent({
-      type: "stuck_run_notify_completed",
-      domain: "platform",
+      type: 'stuck_run_notify_completed',
+      domain: 'platform',
       durationMs: Date.now() - start,
       success: true,
       metadata: {
@@ -1838,16 +2330,19 @@ durableJobQueue.register(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, async (job) => {
       },
     });
     updateRegistry(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, {
-      lastStatus: "completed",
+      lastStatus: 'completed',
       lastDurationMs: Date.now() - start,
     });
     if (notified > 0 || autoCanceled > 0) {
-      logger.info({ jobId: job.id, candidates, notified, autoCanceled, autoRetried }, "stuck_run_notify: dispatched");
+      logger.info(
+        { jobId: job.id, candidates, notified, autoCanceled, autoRetried },
+        'stuck_run_notify: dispatched',
+      );
     }
   } catch (err) {
-    logger.error({ err, jobId: job.id }, "stuck_run_notify: fatal");
+    logger.error({ err, jobId: job.id }, 'stuck_run_notify: fatal');
     updateRegistry(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, {
-      lastStatus: "failed",
+      lastStatus: 'failed',
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.STUCK_RUN_NOTIFY)?.failCount || 0) + 1,
     });
@@ -1881,12 +2376,12 @@ durableJobQueue.register(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, async (job) => 
       notificationsTable,
       notificationPreferencesTable,
       usersTable,
-    } = await import("@szl-holdings/db");
-    const { and, eq, gte, lte } = await import("drizzle-orm");
-    const { resolveOnCall } = await import("../routes/teams");
-    type TeamMember = import("../routes/teams").TeamMember;
-    const { dispatchToExternalChannels } = await import("../routes/notifications");
-    const { publish, WS_CHANNELS } = await import("./websocket");
+    } = await import('@szl-holdings/db');
+    const { and, eq, gte, lte } = await import('drizzle-orm');
+    const { resolveOnCall } = await import('../routes/teams');
+    type TeamMember = import('../routes/teams').TeamMember;
+    const { dispatchToExternalChannels } = await import('../routes/notifications');
+    const { publish, WS_CHANNELS } = await import('./websocket');
 
     const now = new Date();
     // Tolerate slight scheduler jitter at both ends of the window.
@@ -1895,7 +2390,10 @@ durableJobQueue.register(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, async (job) => 
 
     const schedules = await db.select().from(onCallSchedulesTable);
     if (schedules.length === 0) {
-      updateRegistry(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+      updateRegistry(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, {
+        lastStatus: 'completed',
+        lastDurationMs: Date.now() - start,
+      });
       return;
     }
 
@@ -1955,8 +2453,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, async (job) => 
     // configured; otherwise default to 30 minutes so unconfigured teams
     // still get notified about their explicit overrides.
     for (const sh of allShifts) {
-      const bucket =
-        byTeam.get(sh.team) ?? { times: [], warningMs: 30 * 60 * 1000 };
+      const bucket = byTeam.get(sh.team) ?? { times: [], warningMs: 30 * 60 * 1000 };
       const startMs = sh.startAt.getTime();
       const endMs = sh.endAt.getTime();
       if (
@@ -1974,7 +2471,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, async (job) => 
       byTeam.set(sh.team, bucket);
     }
 
-    const appUrl = process.env.APP_URL ?? process.env.VITE_APP_URL ?? "";
+    const appUrl = process.env.APP_URL ?? process.env.VITE_APP_URL ?? '';
     const actionUrl = `${appUrl}/command/operations/deployments`;
 
     for (const [team, { times, warningMs }] of byTeam) {
@@ -2026,11 +2523,11 @@ durableJobQueue.register(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, async (job) => 
         // Classify: anything inside ±tolerance of now is the moment-of
         // hand-off; anything strictly in the future inside the warning
         // window is a warning.
-        const kinds: Array<"warning" | "handoff"> = [];
+        const kinds: Array<'warning' | 'handoff'> = [];
         if (Math.abs(diff) <= HANDOFF_TOLERANCE_MS) {
-          kinds.push("handoff");
+          kinds.push('handoff');
         } else if (diff > 0 && warningMs > 0 && diff <= warningMs) {
-          kinds.push("warning");
+          kinds.push('warning');
         }
         if (kinds.length === 0) continue;
 
@@ -2054,12 +2551,12 @@ durableJobQueue.register(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, async (job) => 
 
           const minutesUntil = Math.max(0, Math.round(diff / 60_000));
           const title =
-            kind === "warning"
+            kind === 'warning'
               ? `On-call heads up · ${team} in ${minutesUntil}m`
               : `You're on-call · ${team}`;
           const message =
-            kind === "warning"
-              ? `You're up next on the ${team} on-call rotation in about ${minutesUntil} minute${minutesUntil === 1 ? "" : "s"} (hand-off at ${at.toISOString()}).`
+            kind === 'warning'
+              ? `You're up next on the ${team} on-call rotation in about ${minutesUntil} minute${minutesUntil === 1 ? '' : 's'} (hand-off at ${at.toISOString()}).`
               : `You're now on-call for ${team}. Hand-off effective ${at.toISOString()}.`;
 
           // Honor the recipient's in-app preference (default on).
@@ -2078,8 +2575,8 @@ durableJobQueue.register(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, async (job) => 
               .insert(notificationsTable)
               .values({
                 userId: nextOnCall.id,
-                type: "info",
-                channel: "in_app",
+                type: 'info',
+                channel: 'in_app',
                 title,
                 message,
                 actionUrl,
@@ -2087,7 +2584,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, async (job) => 
               .returning();
             if (notif) {
               notificationId = notif.id;
-              publish(WS_CHANNELS.NOTIFICATIONS, "new_notification", notif);
+              publish(WS_CHANNELS.NOTIFICATIONS, 'new_notification', notif);
             }
           }
 
@@ -2105,44 +2602,56 @@ durableJobQueue.register(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, async (job) => 
             await dispatchToExternalChannels({
               notificationId,
               userId: nextOnCall.id,
-              type: "info",
+              type: 'info',
               title,
               message,
               actionUrl,
             });
           } catch (err) {
-            logger.warn({ err, team, userId: nextOnCall.id, kind }, "on_call_handoff_notify: external dispatch enqueue failed");
+            logger.warn(
+              { err, team, userId: nextOnCall.id, kind },
+              'on_call_handoff_notify: external dispatch enqueue failed',
+            );
           }
 
-          if (kind === "warning") warningsSent += 1;
+          if (kind === 'warning') warningsSent += 1;
           else handoffsSent += 1;
 
           logger.info(
-            { team, userId: nextOnCall.id, kind, handoffAt: at.toISOString(), inAppDelivered: inAppOn },
-            "on_call_handoff_notify: notification dispatched",
+            {
+              team,
+              userId: nextOnCall.id,
+              kind,
+              handoffAt: at.toISOString(),
+              inAppDelivered: inAppOn,
+            },
+            'on_call_handoff_notify: notification dispatched',
           );
         }
       }
     }
 
     serverTelemetry.recordBusinessEvent({
-      type: "on_call_handoff_notify_completed",
-      domain: "platform",
+      type: 'on_call_handoff_notify_completed',
+      domain: 'platform',
       durationMs: Date.now() - start,
       success: true,
       metadata: { warningsSent, handoffsSent, candidatesEvaluated, schedules: schedules.length },
     });
-    updateRegistry(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    updateRegistry(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, {
+      lastStatus: 'completed',
+      lastDurationMs: Date.now() - start,
+    });
     if (warningsSent + handoffsSent > 0) {
       logger.info(
         { jobId: job.id, warningsSent, handoffsSent, candidatesEvaluated },
-        "on_call_handoff_notify: complete",
+        'on_call_handoff_notify: complete',
       );
     }
   } catch (err) {
-    logger.error({ err, jobId: job.id }, "on_call_handoff_notify: fatal");
+    logger.error({ err, jobId: job.id }, 'on_call_handoff_notify: fatal');
     updateRegistry(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, {
-      lastStatus: "failed",
+      lastStatus: 'failed',
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY)?.failCount || 0) + 1,
     });
@@ -2152,13 +2661,13 @@ durableJobQueue.register(NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, async (job) => 
 
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "daily_live_signal_refresh: starting");
+  logger.info({ jobId: job.id }, 'daily_live_signal_refresh: starting');
   try {
-    const { refreshLiveSignals } = await import("../scripts/refresh-live-signals");
+    const { refreshLiveSignals } = await import('../scripts/refresh-live-signals');
     const result = await refreshLiveSignals();
     serverTelemetry.recordBusinessEvent({
-      type: "daily_live_signal_refresh_completed",
-      domain: "innovation-engine",
+      type: 'daily_live_signal_refresh_completed',
+      domain: 'innovation-engine',
       durationMs: Date.now() - start,
       success: true,
       metadata: {
@@ -2170,12 +2679,15 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH, async (job) 
         vesselsDelaysRotated: result.vesselsDelayEvents.rotated,
       },
     });
-    updateRegistry(NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-    logger.info({ jobId: job.id, ...result }, "daily_live_signal_refresh: complete");
-  } catch (err) {
-    logger.error({ err, jobId: job.id }, "daily_live_signal_refresh: fatal");
     updateRegistry(NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH, {
-      lastStatus: "failed",
+      lastStatus: 'completed',
+      lastDurationMs: Date.now() - start,
+    });
+    logger.info({ jobId: job.id, ...result }, 'daily_live_signal_refresh: complete');
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, 'daily_live_signal_refresh: fatal');
+    updateRegistry(NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH, {
+      lastStatus: 'failed',
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH)?.failCount || 0) + 1,
     });
@@ -2183,20 +2695,29 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH, async (job) 
   }
 });
 
-registerEntry({ type: NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT, name: "APEX Graph Snapshot", description: "Captures a point-in-time entity graph snapshot for every active org on the configured schedule (default: daily at midnight UTC; set CORTEX_SNAPSHOT_INTERVAL_HOURS=1–23 for sub-daily cadence). Snapshots are labelled with the capture timestamp (e.g. 'Daily — Apr 21 00:00') and expire after the configured retention window (default 30 days via CORTEX_SNAPSHOT_RETENTION_DAYS). Accepts optional orgIds payload to target specific orgs.", schedule: "daily", enabled: true });
+registerEntry({
+  type: NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT,
+  name: 'APEX Graph Snapshot',
+  description:
+    "Captures a point-in-time entity graph snapshot for every active org on the configured schedule (default: daily at midnight UTC; set CORTEX_SNAPSHOT_INTERVAL_HOURS=1–23 for sub-daily cadence). Snapshots are labelled with the capture timestamp (e.g. 'Daily — Apr 21 00:00') and expire after the configured retention window (default 30 days via CORTEX_SNAPSHOT_RETENTION_DAYS). Accepts optional orgIds payload to target specific orgs.",
+  schedule: 'daily',
+  enabled: true,
+});
 
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT, async (job) => {
   const start = Date.now();
   const payload = (job.payload ?? {}) as { orgIds?: number[]; retentionDays?: number };
-  logger.info({ jobId: job.id }, "daily_cortex_graph_snapshot: starting scheduled capture");
+  logger.info({ jobId: job.id }, 'daily_cortex_graph_snapshot: starting scheduled capture');
 
   let succeeded = 0;
   let failed = 0;
 
   try {
-    const { db, organizationsTable } = await import("@szl-holdings/db");
-    const { eq } = await import("drizzle-orm");
-    const { captureGraphSnapshot, buildScheduledSnapshotLabel } = await import("../services/cortex-graph-snapshot");
+    const { db, organizationsTable } = await import('@szl-holdings/db');
+    const { eq } = await import('drizzle-orm');
+    const { captureGraphSnapshot, buildScheduledSnapshotLabel } = await import(
+      '../services/cortex-graph-snapshot'
+    );
 
     const label = buildScheduledSnapshotLabel(new Date());
 
@@ -2211,7 +2732,10 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT, async (job
       orgIds = rows.map((r) => r.id);
     }
 
-    logger.info({ jobId: job.id, orgCount: orgIds.length, label }, "daily_cortex_graph_snapshot: capturing for orgs");
+    logger.info(
+      { jobId: job.id, orgCount: orgIds.length, label },
+      'daily_cortex_graph_snapshot: capturing for orgs',
+    );
 
     for (const orgId of orgIds) {
       try {
@@ -2224,33 +2748,45 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT, async (job
         succeeded++;
       } catch (err) {
         failed++;
-        logger.error({ err, orgId, jobId: job.id }, "daily_cortex_graph_snapshot: org capture failed");
+        logger.error(
+          { err, orgId, jobId: job.id },
+          'daily_cortex_graph_snapshot: org capture failed',
+        );
       }
     }
 
     serverTelemetry.recordBusinessEvent({
-      type: "daily_cortex_graph_snapshot_completed",
-      domain: "cortex",
+      type: 'daily_cortex_graph_snapshot_completed',
+      domain: 'cortex',
       durationMs: Date.now() - start,
       success: failed === 0,
       metadata: { orgCount: orgIds.length, succeeded, failed, label },
     });
 
     updateRegistry(NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT, {
-      lastStatus: failed > 0 && succeeded === 0 ? "failed" : "completed",
+      lastStatus: failed > 0 && succeeded === 0 ? 'failed' : 'completed',
       lastDurationMs: Date.now() - start,
-      ...(failed > 0 ? { failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT)?.failCount || 0) + failed } : {}),
+      ...(failed > 0
+        ? {
+            failCount:
+              (jobRegistry.get(NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT)?.failCount || 0) +
+              failed,
+          }
+        : {}),
     });
 
-    logger.info({ jobId: job.id, succeeded, failed, durationMs: Date.now() - start }, "daily_cortex_graph_snapshot: complete");
+    logger.info(
+      { jobId: job.id, succeeded, failed, durationMs: Date.now() - start },
+      'daily_cortex_graph_snapshot: complete',
+    );
 
     if (succeeded === 0 && orgIds.length > 0) {
       throw new Error(`daily_cortex_graph_snapshot: all ${orgIds.length} org snapshots failed`);
     }
   } catch (err) {
-    logger.error({ err, jobId: job.id }, "daily_cortex_graph_snapshot: fatal");
+    logger.error({ err, jobId: job.id }, 'daily_cortex_graph_snapshot: fatal');
     updateRegistry(NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT, {
-      lastStatus: "failed",
+      lastStatus: 'failed',
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT)?.failCount || 0) + 1,
     });
@@ -2260,10 +2796,13 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_CORTEX_GRAPH_SNAPSHOT, async (job
 
 durableJobQueue.register(NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, async (job) => {
   const start = Date.now();
-  updateRegistry(NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, { lastStatus: "running", lastRunAt: Date.now() });
+  updateRegistry(NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, {
+    lastStatus: 'running',
+    lastRunAt: Date.now(),
+  });
   try {
-    const { db, cortexGraphSnapshotsTable } = await import("@szl-holdings/db");
-    const { lt } = await import("drizzle-orm");
+    const { db, cortexGraphSnapshotsTable } = await import('@szl-holdings/db');
+    const { lt } = await import('drizzle-orm');
     const cutoff = new Date();
     const deleted = await db
       .delete(cortexGraphSnapshotsTable)
@@ -2271,89 +2810,112 @@ durableJobQueue.register(NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, async (job
       .returning({ id: cortexGraphSnapshotsTable.id });
     const purged = deleted.length;
     serverTelemetry.recordBusinessEvent({
-      type: "cortex_graph_snapshot_prune_completed",
-      domain: "cortex",
+      type: 'cortex_graph_snapshot_prune_completed',
+      domain: 'cortex',
       durationMs: Date.now() - start,
       success: true,
       metadata: { purged, cutoff: cutoff.toISOString() },
     });
     updateRegistry(NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, {
-      lastStatus: "completed",
+      lastStatus: 'completed',
       lastDurationMs: Date.now() - start,
     });
-    logger.info({ jobId: job.id, purged, cutoff: cutoff.toISOString(), durationMs: Date.now() - start }, "cortex_graph_snapshot_prune: complete");
+    logger.info(
+      { jobId: job.id, purged, cutoff: cutoff.toISOString(), durationMs: Date.now() - start },
+      'cortex_graph_snapshot_prune: complete',
+    );
   } catch (err) {
     updateRegistry(NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, {
-      lastStatus: "failed",
+      lastStatus: 'failed',
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE)?.failCount || 0) + 1,
     });
-    logger.error({ err, jobId: job.id }, "cortex_graph_snapshot_prune: failed");
+    logger.error({ err, jobId: job.id }, 'cortex_graph_snapshot_prune: failed');
     throw err;
   }
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL, async (job) => {
   const start = Date.now();
-  updateRegistry(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL, { lastStatus: "running", lastRunAt: Date.now() });
+  updateRegistry(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL, {
+    lastStatus: 'running',
+    lastRunAt: Date.now(),
+  });
   try {
-    const { runDistressFinancialsBackfill } = await import("../jobs/terra-distress-financials-backfill");
+    const { runDistressFinancialsBackfill } = await import(
+      '../jobs/terra-distress-financials-backfill'
+    );
     const result = await runDistressFinancialsBackfill();
-    const coveragePct = result.totalActiveRows > 0 ? result.encumbrancesAfterCoverage / result.totalActiveRows : 0;
+    const coveragePct =
+      result.totalActiveRows > 0 ? result.encumbrancesAfterCoverage / result.totalActiveRows : 0;
     serverTelemetry.recordBusinessEvent({
-      type: "terra_distress_financials_backfill_completed",
-      domain: "terra",
+      type: 'terra_distress_financials_backfill_completed',
+      domain: 'terra',
       durationMs: Date.now() - start,
       success: result.failed === 0,
       metadata: { ...result, coveragePct: +coveragePct.toFixed(3) },
     });
     updateRegistry(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL, {
-      lastStatus: result.failed === 0 ? "completed" : "failed",
+      lastStatus: result.failed === 0 ? 'completed' : 'failed',
       lastDurationMs: Date.now() - start,
       ...(result.failed > 0
-        ? { failCount: (jobRegistry.get(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL)?.failCount || 0) + 1 }
+        ? {
+            failCount:
+              (jobRegistry.get(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL)?.failCount ||
+                0) + 1,
+          }
         : {}),
     });
-    logger.info({ jobId: job.id, ...result, coveragePct: +coveragePct.toFixed(3) }, "terra_distress_financials_backfill: complete");
+    logger.info(
+      { jobId: job.id, ...result, coveragePct: +coveragePct.toFixed(3) },
+      'terra_distress_financials_backfill: complete',
+    );
   } catch (err) {
     updateRegistry(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL, {
-      lastStatus: "failed",
+      lastStatus: 'failed',
       lastDurationMs: Date.now() - start,
-      failCount: (jobRegistry.get(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL)?.failCount || 0) + 1,
+      failCount:
+        (jobRegistry.get(NAMED_JOB_TYPES.TERRA_DISTRESS_FINANCIALS_BACKFILL)?.failCount || 0) + 1,
     });
-    logger.error({ err, jobId: job.id }, "terra_distress_financials_backfill: failed");
+    logger.error({ err, jobId: job.id }, 'terra_distress_financials_backfill: failed');
     throw err;
   }
 });
 
 durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "hourly_market_data_refresh: starting market data refresh");
-  updateRegistry(NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH, { lastStatus: "running", lastRunAt: Date.now() });
+  logger.info({ jobId: job.id }, 'hourly_market_data_refresh: starting market data refresh');
+  updateRegistry(NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH, {
+    lastStatus: 'running',
+    lastRunAt: Date.now(),
+  });
   try {
-    const { getMarketData, invalidateMarketCache } = await import("../lib/market-data-adapter");
+    const { getMarketData, invalidateMarketCache } = await import('../lib/market-data-adapter');
     invalidateMarketCache();
     const snapshot = await getMarketData(true);
     const count = snapshot.indicators.length;
     const provider = snapshot.provider;
-    const hasLive = snapshot.indicators.some((i) => i.dataQuality !== "seed");
+    const hasLive = snapshot.indicators.some((i) => i.dataQuality !== 'seed');
     serverTelemetry.recordBusinessEvent({
-      type: "hourly_market_data_refresh_completed",
-      domain: "lyte",
+      type: 'hourly_market_data_refresh_completed',
+      domain: 'lyte',
       durationMs: Date.now() - start,
       success: true,
       metadata: { count, provider, providerConfigured: snapshot.providerConfigured, hasLive },
     });
     updateRegistry(NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH, {
-      lastStatus: "completed",
+      lastStatus: 'completed',
       lastDurationMs: Date.now() - start,
       runCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH)?.runCount || 0) + 1,
     });
-    logger.info({ jobId: job.id, count, provider, hasLive, durationMs: Date.now() - start }, "hourly_market_data_refresh: complete");
+    logger.info(
+      { jobId: job.id, count, provider, hasLive, durationMs: Date.now() - start },
+      'hourly_market_data_refresh: complete',
+    );
   } catch (err) {
-    logger.error({ err, jobId: job.id }, "hourly_market_data_refresh: fatal");
+    logger.error({ err, jobId: job.id }, 'hourly_market_data_refresh: fatal');
     updateRegistry(NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH, {
-      lastStatus: "failed",
+      lastStatus: 'failed',
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH)?.failCount || 0) + 1,
     });
@@ -2363,26 +2925,40 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH, async (job)
 
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK, async (job) => {
   const start = Date.now();
-  updateRegistry(NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK, { lastStatus: "running", lastRunAt: Date.now() });
+  updateRegistry(NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK, {
+    lastStatus: 'running',
+    lastRunAt: Date.now(),
+  });
   const payload = (job.payload ?? {}) as { thresholdDays?: number };
   try {
-    const { runOnboardingStallCheck } = await import("../jobs/onboarding-stall-check");
+    const { runOnboardingStallCheck } = await import('../jobs/onboarding-stall-check');
     const result = await runOnboardingStallCheck(payload.thresholdDays);
     serverTelemetry.recordBusinessEvent({
-      type: "onboarding_stall_check_completed",
-      domain: "platform",
+      type: 'onboarding_stall_check_completed',
+      domain: 'platform',
       durationMs: Date.now() - start,
       success: true,
-      metadata: { stalledCount: result.stalledCount, thresholdDays: result.thresholdDays, adminsNotified: result.adminsNotified },
+      metadata: {
+        stalledCount: result.stalledCount,
+        thresholdDays: result.thresholdDays,
+        adminsNotified: result.adminsNotified,
+      },
     });
-    updateRegistry(NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-    logger.info({ jobId: job.id, ...result, stalledOrgs: undefined }, "daily_onboarding_stall_check: complete");
-  } catch (err) {
-    logger.error({ err, jobId: job.id }, "daily_onboarding_stall_check: fatal");
     updateRegistry(NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK, {
-      lastStatus: "failed",
+      lastStatus: 'completed',
       lastDurationMs: Date.now() - start,
-      failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK)?.failCount || 0) + 1,
+    });
+    logger.info(
+      { jobId: job.id, ...result, stalledOrgs: undefined },
+      'daily_onboarding_stall_check: complete',
+    );
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, 'daily_onboarding_stall_check: fatal');
+    updateRegistry(NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+      failCount:
+        (jobRegistry.get(NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK)?.failCount || 0) + 1,
     });
     throw err;
   }
@@ -2390,22 +2966,27 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK, async (jo
 
 durableJobQueue.register(NAMED_JOB_TYPES.DAILY_TAX_CERT_EXPIRY_CHECK, async (job) => {
   const start = Date.now();
-  logger.info({ jobId: job.id }, "daily_tax_cert_expiry_check: starting");
+  logger.info({ jobId: job.id }, 'daily_tax_cert_expiry_check: starting');
   let flagged = 0;
   let expired = 0;
   let failed = 0;
 
   try {
-    const { findExpiringSoonCertificates } = await import("../lib/tax-engine");
-    const { db, taxExemptionCertificatesTable, notificationsTable, orgMembersTable } = await import("@szl-holdings/db");
-    const { writeBillingAudit } = await import("../lib/billing-audit");
-    const { eq, and, or } = await import("drizzle-orm");
+    const { findExpiringSoonCertificates } = await import('../lib/tax-engine');
+    const { db, taxExemptionCertificatesTable, notificationsTable, orgMembersTable } = await import(
+      '@szl-holdings/db'
+    );
+    const { writeBillingAudit } = await import('../lib/billing-audit');
+    const { eq, and, or } = await import('drizzle-orm');
     const now = new Date();
 
     const activeCerts = await db
-      .select({ id: taxExemptionCertificatesTable.id, expiresAt: taxExemptionCertificatesTable.expiresAt })
+      .select({
+        id: taxExemptionCertificatesTable.id,
+        expiresAt: taxExemptionCertificatesTable.expiresAt,
+      })
       .from(taxExemptionCertificatesTable)
-      .where(eq(taxExemptionCertificatesTable.status, "active"));
+      .where(eq(taxExemptionCertificatesTable.status, 'active'));
 
     const expiredRows = activeCerts.filter(
       (r) => r.expiresAt && new Date(r.expiresAt as unknown as string | Date) <= now,
@@ -2415,30 +2996,31 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_TAX_CERT_EXPIRY_CHECK, async (job
       try {
         await db
           .update(taxExemptionCertificatesTable)
-          .set({ status: "expired", updatedAt: new Date() })
+          .set({ status: 'expired', updatedAt: new Date() })
           .where(eq(taxExemptionCertificatesTable.id, row.id));
         void writeBillingAudit({
-          action: "tax.exemption.auto_expired",
-          resource: "tax_exemption_cert",
+          action: 'tax.exemption.auto_expired',
+          resource: 'tax_exemption_cert',
           resourceId: String(row.id),
-          before: { status: "active", expiresAt: row.expiresAt },
-          after: { status: "expired" },
-          metadata: { triggeredBy: "daily_tax_cert_expiry_check", jobId: job.id },
+          before: { status: 'active', expiresAt: row.expiresAt },
+          after: { status: 'expired' },
+          metadata: { triggeredBy: 'daily_tax_cert_expiry_check', jobId: job.id },
         });
         expired++;
       } catch (err) {
-        logger.warn({ err, certId: row.id }, "daily_tax_cert_expiry_check: failed to expire cert");
+        logger.warn({ err, certId: row.id }, 'daily_tax_cert_expiry_check: failed to expire cert');
         failed++;
       }
     }
 
     for (const windowDays of [30, 14, 7]) {
       const expiring = await findExpiringSoonCertificates(windowDays);
-      const windowOnly = windowDays === 7
-        ? expiring.filter((c) => c.daysUntilExpiry <= 7)
-        : windowDays === 14
-          ? expiring.filter((c) => c.daysUntilExpiry > 7 && c.daysUntilExpiry <= 14)
-          : expiring.filter((c) => c.daysUntilExpiry > 14 && c.daysUntilExpiry <= 30);
+      const windowOnly =
+        windowDays === 7
+          ? expiring.filter((c) => c.daysUntilExpiry <= 7)
+          : windowDays === 14
+            ? expiring.filter((c) => c.daysUntilExpiry > 7 && c.daysUntilExpiry <= 14)
+            : expiring.filter((c) => c.daysUntilExpiry > 14 && c.daysUntilExpiry <= 30);
 
       for (const cert of windowOnly) {
         try {
@@ -2449,7 +3031,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_TAX_CERT_EXPIRY_CHECK, async (job
             .where(
               and(
                 eq(orgMembersTable.orgId, cert.orgId),
-                or(eq(orgMembersTable.role, "admin"), eq(orgMembersTable.role, "owner")),
+                or(eq(orgMembersTable.role, 'admin'), eq(orgMembersTable.role, 'owner')),
               ),
             );
 
@@ -2461,8 +3043,8 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_TAX_CERT_EXPIRY_CHECK, async (job
             for (const member of adminMembers) {
               await db.insert(notificationsTable).values({
                 userId: member.userId,
-                type: "warning" as const,
-                channel: "in_app" as const,
+                type: 'warning' as const,
+                channel: 'in_app' as const,
                 title,
                 message,
                 actionUrl,
@@ -2470,44 +3052,755 @@ durableJobQueue.register(NAMED_JOB_TYPES.DAILY_TAX_CERT_EXPIRY_CHECK, async (job
             }
           } else {
             // No admin members found — log the alert to the server log only
-            logger.warn({ certId: cert.id, orgId: cert.orgId, daysUntilExpiry: cert.daysUntilExpiry, jurisdiction: cert.jurisdiction }, "daily_tax_cert_expiry_check: cert expiring soon (no admin users to notify)");
+            logger.warn(
+              {
+                certId: cert.id,
+                orgId: cert.orgId,
+                daysUntilExpiry: cert.daysUntilExpiry,
+                jurisdiction: cert.jurisdiction,
+              },
+              'daily_tax_cert_expiry_check: cert expiring soon (no admin users to notify)',
+            );
           }
           // Billing audit trail — required for compliance traceability
           void writeBillingAudit({
             orgId: cert.orgId,
-            action: "tax.exemption.expiry_alert",
-            resource: "tax_exemption_cert",
+            action: 'tax.exemption.expiry_alert',
+            resource: 'tax_exemption_cert',
             resourceId: String(cert.id),
             after: {
               daysUntilExpiry: cert.daysUntilExpiry,
               jurisdiction: cert.jurisdiction,
               expiresAt: cert.expiresAt.toISOString(),
             },
-            metadata: { triggeredBy: "daily_tax_cert_expiry_check", jobId: job.id, windowDays },
+            metadata: { triggeredBy: 'daily_tax_cert_expiry_check', jobId: job.id, windowDays },
           });
           flagged++;
         } catch (err) {
-          logger.warn({ err, certId: cert.id }, "daily_tax_cert_expiry_check: failed to write alert");
+          logger.warn(
+            { err, certId: cert.id },
+            'daily_tax_cert_expiry_check: failed to write alert',
+          );
           failed++;
         }
       }
     }
 
     serverTelemetry.recordBusinessEvent({
-      type: "daily_tax_cert_expiry_check_completed",
-      domain: "billing",
+      type: 'daily_tax_cert_expiry_check_completed',
+      domain: 'billing',
       durationMs: Date.now() - start,
       success: failed === 0,
       metadata: { flagged, expired, failed },
     });
-    updateRegistry(NAMED_JOB_TYPES.DAILY_TAX_CERT_EXPIRY_CHECK, { lastStatus: "completed", lastDurationMs: Date.now() - start });
-    logger.info({ jobId: job.id, flagged, expired, failed }, "daily_tax_cert_expiry_check: complete");
-  } catch (err) {
-    logger.error({ err, jobId: job.id }, "daily_tax_cert_expiry_check: fatal");
     updateRegistry(NAMED_JOB_TYPES.DAILY_TAX_CERT_EXPIRY_CHECK, {
-      lastStatus: "failed",
+      lastStatus: 'completed',
+      lastDurationMs: Date.now() - start,
+    });
+    logger.info(
+      { jobId: job.id, flagged, expired, failed },
+      'daily_tax_cert_expiry_check: complete',
+    );
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, 'daily_tax_cert_expiry_check: fatal');
+    updateRegistry(NAMED_JOB_TYPES.DAILY_TAX_CERT_EXPIRY_CHECK, {
+      lastStatus: 'failed',
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_TAX_CERT_EXPIRY_CHECK)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
+});
+
+// ── Metered billing job handlers ───────────────────────────────────────────
+
+durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_USAGE_AGGREGATION, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, 'hourly_usage_aggregation: starting');
+  try {
+    const {
+      db,
+      meteringEventsTable,
+      billingMetersTable,
+      usageAggregatesTable,
+      organizationsTable,
+    } = await import('@szl-holdings/db');
+    const { eq, gte, lte, sql, and } = await import('drizzle-orm');
+
+    const now = new Date();
+    const periodStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const periodEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+
+    // Load all active meter configs to resolve per-meter aggregation mode
+    const meterConfigs = await db
+      .select({ key: billingMetersTable.key, aggregation: billingMetersTable.aggregation })
+      .from(billingMetersTable)
+      .where(eq(billingMetersTable.isActive, true));
+    const meterAggregationMap = new Map(meterConfigs.map((m) => [m.key, m.aggregation]));
+
+    // Get distinct org+meter combos with events in the current period
+    const activeMeters = await db
+      .selectDistinct({
+        orgId: meteringEventsTable.orgId,
+        featureKey: meteringEventsTable.featureKey,
+        product: meteringEventsTable.product,
+      })
+      .from(meteringEventsTable)
+      .where(
+        and(
+          gte(meteringEventsTable.occurredAt, periodStart),
+          lte(meteringEventsTable.occurredAt, periodEnd),
+        ),
+      );
+
+    let recomputed = 0;
+    for (const combo of activeMeters) {
+      const aggregation = meterAggregationMap.get(combo.featureKey) ?? 'sum';
+
+      const baseWhere = and(
+        eq(meteringEventsTable.orgId, combo.orgId),
+        eq(meteringEventsTable.featureKey, combo.featureKey),
+        gte(meteringEventsTable.occurredAt, periodStart),
+        lte(meteringEventsTable.occurredAt, periodEnd),
+      );
+
+      let totalQty = '0';
+      let eventCount = 0;
+      let uniqueUsers = 0;
+
+      if (aggregation === 'last') {
+        const [lastRow] = await db
+          .select({
+            qty: meteringEventsTable.quantity,
+            cnt: sql<number>`COUNT(*) OVER ()::int`,
+            uniqueU: sql<number>`COUNT(DISTINCT ${meteringEventsTable.userId}) OVER ()::int`,
+          })
+          .from(meteringEventsTable)
+          .where(baseWhere)
+          .orderBy(sql`${meteringEventsTable.occurredAt} DESC`)
+          .limit(1);
+        totalQty = lastRow?.qty ?? '0';
+        eventCount = lastRow?.cnt ?? 0;
+        uniqueUsers = lastRow?.uniqueU ?? 0;
+      } else if (aggregation === 'unique_count') {
+        const [row] = await db
+          .select({
+            totalQty: sql<string>`COUNT(DISTINCT ${meteringEventsTable.userId})::text`,
+            eventCount: sql<number>`COUNT(*)::int`,
+            uniqueUsers: sql<number>`COUNT(DISTINCT ${meteringEventsTable.userId})::int`,
+          })
+          .from(meteringEventsTable)
+          .where(baseWhere);
+        totalQty = row?.totalQty ?? '0';
+        eventCount = row?.eventCount ?? 0;
+        uniqueUsers = row?.uniqueUsers ?? 0;
+      } else {
+        const [row] = await db
+          .select({
+            totalQty: sql<string>`COALESCE(SUM(${meteringEventsTable.quantity}::numeric), 0)`,
+            eventCount: sql<number>`COUNT(*)::int`,
+            uniqueUsers: sql<number>`COUNT(DISTINCT ${meteringEventsTable.userId})::int`,
+          })
+          .from(meteringEventsTable)
+          .where(baseWhere);
+        totalQty = row?.totalQty ?? '0';
+        eventCount = row?.eventCount ?? 0;
+        uniqueUsers = row?.uniqueUsers ?? 0;
+      }
+
+      await db
+        .insert(usageAggregatesTable)
+        .values({
+          orgId: combo.orgId,
+          featureKey: combo.featureKey,
+          product: combo.product,
+          periodType: 'month',
+          periodStart,
+          periodEnd,
+          totalQuantity: totalQty,
+          eventCount,
+          uniqueUsers,
+        })
+        .onConflictDoUpdate({
+          target: [
+            usageAggregatesTable.orgId,
+            usageAggregatesTable.featureKey,
+            usageAggregatesTable.periodType,
+            usageAggregatesTable.periodStart,
+          ],
+          set: {
+            totalQuantity: totalQty,
+            eventCount,
+            uniqueUsers,
+            computedAt: new Date(),
+          },
+        });
+
+      recomputed++;
+    }
+
+    serverTelemetry.recordBusinessEvent({
+      type: 'hourly_usage_aggregation_completed',
+      domain: 'billing',
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { recomputed, periodStart: periodStart.toISOString() },
+    });
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_USAGE_AGGREGATION, {
+      lastStatus: 'completed',
+      lastDurationMs: Date.now() - start,
+    });
+    logger.info({ jobId: job.id, recomputed }, 'hourly_usage_aggregation: complete');
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, 'hourly_usage_aggregation: fatal');
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_USAGE_AGGREGATION, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_USAGE_AGGREGATION)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.DAILY_STRIPE_USAGE_RECORD, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, 'daily_stripe_usage_record: starting');
+  try {
+    const {
+      db,
+      billingMetersTable,
+      billingMeterAllotmentsTable,
+      meteringEventsTable,
+      organizationsTable,
+      subscriptionsTable,
+    } = await import('@szl-holdings/db');
+    const { eq, and, gte, lte, sql, isNotNull, inArray } = await import('drizzle-orm');
+
+    const now = new Date();
+    const periodStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const periodEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+
+    // Get all active subscriptions with a Stripe subscription ID
+    const activeSubs = await db
+      .select({
+        orgId: subscriptionsTable.orgId,
+        planId: subscriptionsTable.planId,
+        stripeSubscriptionId: subscriptionsTable.stripeSubscriptionId,
+        billingCustomerId: organizationsTable.billingCustomerId,
+      })
+      .from(subscriptionsTable)
+      .innerJoin(organizationsTable, eq(subscriptionsTable.orgId, organizationsTable.id))
+      .where(
+        and(
+          eq(subscriptionsTable.status, 'active'),
+          isNotNull(subscriptionsTable.stripeSubscriptionId),
+        ),
+      );
+
+    // Build plan-scoped allotment map: planId → Set<featureKey>
+    const planIds = [...new Set(activeSubs.map((s) => s.planId).filter(Boolean) as number[])];
+    const planAllotments =
+      planIds.length > 0
+        ? await db
+            .select({ planId: billingMeterAllotmentsTable.planId, key: billingMetersTable.key })
+            .from(billingMeterAllotmentsTable)
+            .innerJoin(
+              billingMetersTable,
+              eq(billingMeterAllotmentsTable.meterId, billingMetersTable.id),
+            )
+            .where(inArray(billingMeterAllotmentsTable.planId, planIds))
+        : [];
+    const planMeterKeys = new Map<number, Set<string>>();
+    for (const { planId, key } of planAllotments) {
+      if (!planMeterKeys.has(planId)) planMeterKeys.set(planId, new Set());
+      planMeterKeys.get(planId)!.add(key);
+    }
+
+    let submitted = 0;
+    let skipped = 0;
+    let errors = 0;
+    let metersChecked = 0;
+
+    const { computeBillableQty } = await import('../routes/metering/shared');
+
+    for (const sub of activeSubs) {
+      // Only process meters that have a Stripe price attached AND are in the org's plan
+      const planKeys = sub.planId ? planMeterKeys.get(sub.planId) : undefined;
+      const meters = await db
+        .select()
+        .from(billingMetersTable)
+        .where(
+          and(eq(billingMetersTable.isActive, true), isNotNull(billingMetersTable.stripePriceId)),
+        );
+
+      metersChecked += meters.length;
+      const planScopedMeters = planKeys ? meters.filter((m) => planKeys.has(m.key)) : meters; // no plan → submit all (graceful fallback for orgs with legacy flat billing)
+
+      for (const meter of planScopedMeters) {
+        const qty = await computeBillableQty(
+          sub.orgId,
+          meter.key,
+          periodStart,
+          periodEnd,
+          (meter.aggregation as 'sum' | 'last' | 'unique_count') ?? 'sum',
+        );
+        if (qty === 0) {
+          skipped++;
+          continue;
+        }
+
+        try {
+          const stripeKey = process.env.STRIPE_SECRET_KEY;
+          const isLiveKey = stripeKey?.startsWith('sk_live_') || stripeKey?.startsWith('sk_test_');
+
+          if (isLiveKey && stripeKey && sub.billingCustomerId) {
+            // Submit usage via Stripe Billing Meter Events API (modern approach, no subscription item ID needed)
+            const Stripe = (await import('stripe')).default;
+            const stripe = new Stripe(stripeKey, {
+              apiVersion: '2024-04-10' as Parameters<typeof Stripe>[1]['apiVersion'],
+            });
+
+            // Use Stripe's meter events if stripeMeterId is set on the meter
+            if (meter.stripeMeterId) {
+              await stripe.billing.meterEvents.create({
+                event_name: meter.stripeMeterId,
+                payload: {
+                  stripe_customer_id: sub.billingCustomerId,
+                  value: Math.round(qty).toString(),
+                },
+                timestamp: Math.floor(Date.now() / 1000),
+              });
+              logger.info(
+                { orgId: sub.orgId, meterKey: meter.key, qty, stripeMeterId: meter.stripeMeterId },
+                'daily_stripe_usage_record: submitted via meter events API',
+              );
+            } else if (meter.stripePriceId && sub.stripeSubscriptionId) {
+              // Fall back to legacy usage records via subscription item lookup
+              const subscription = await stripe.subscriptions.retrieve(sub.stripeSubscriptionId);
+              const item = subscription.items.data.find((i) => i.price.id === meter.stripePriceId);
+              if (item) {
+                await stripe.subscriptionItems.createUsageRecord(item.id, {
+                  quantity: Math.round(qty),
+                  action: 'set',
+                  timestamp: Math.floor(Date.now() / 1000),
+                });
+                logger.info(
+                  { orgId: sub.orgId, meterKey: meter.key, qty, subscriptionItemId: item.id },
+                  'daily_stripe_usage_record: submitted via subscription item usage record',
+                );
+              } else {
+                logger.warn(
+                  { orgId: sub.orgId, meterKey: meter.key },
+                  'daily_stripe_usage_record: no matching subscription item for stripePriceId',
+                );
+                skipped++;
+                continue;
+              }
+            } else {
+              logger.warn(
+                { orgId: sub.orgId, meterKey: meter.key },
+                'daily_stripe_usage_record: meter has no stripeMeterId or stripePriceId — skipping',
+              );
+              skipped++;
+              continue;
+            }
+            submitted++;
+          } else {
+            // Stripe not configured or key not present — log as dry run
+            logger.info(
+              {
+                orgId: sub.orgId,
+                meterKey: meter.key,
+                qty,
+                stripePriceId: meter.stripePriceId,
+                dryRun: true,
+              },
+              'daily_stripe_usage_record: STRIPE_SECRET_KEY not configured — dry-run log only',
+            );
+            skipped++;
+          }
+        } catch (stripeErr) {
+          logger.error(
+            { err: stripeErr, orgId: sub.orgId, meterKey: meter.key },
+            'daily_stripe_usage_record: submission error',
+          );
+          errors++;
+        }
+      }
+    }
+
+    serverTelemetry.recordBusinessEvent({
+      type: 'daily_stripe_usage_record_completed',
+      domain: 'billing',
+      durationMs: Date.now() - start,
+      success: errors === 0,
+      metadata: { submitted, skipped, errors, metersChecked, subsChecked: activeSubs.length },
+    });
+    updateRegistry(NAMED_JOB_TYPES.DAILY_STRIPE_USAGE_RECORD, {
+      lastStatus: errors > 0 ? 'failed' : 'completed',
+      lastDurationMs: Date.now() - start,
+    });
+    logger.info(
+      { jobId: job.id, submitted, skipped, errors },
+      'daily_stripe_usage_record: complete',
+    );
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, 'daily_stripe_usage_record: fatal');
+    updateRegistry(NAMED_JOB_TYPES.DAILY_STRIPE_USAGE_RECORD, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_STRIPE_USAGE_RECORD)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_OVERAGE_THRESHOLD_CHECK, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, 'hourly_overage_threshold_check: starting');
+  try {
+    const {
+      db,
+      billingMetersTable,
+      billingMeterAllotmentsTable,
+      billingLineItemsTable,
+      subscriptionsTable,
+      usageAggregatesTable,
+      usageThresholdNotificationsTable,
+      organizationsTable,
+      notificationsTable,
+      notificationPreferencesTable,
+      orgMembersTable,
+      usersTable,
+    } = await import('@szl-holdings/db');
+    const { dispatchToExternalChannels } = await import('../routes/notifications');
+    const { eq, and, gte, lte, inArray } = await import('drizzle-orm');
+
+    const THRESHOLDS = [50, 80, 100] as const;
+
+    const now = new Date();
+    const periodStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const periodEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+
+    // Get all current-period aggregates (with org name)
+    const aggregates = await db
+      .select({
+        agg: usageAggregatesTable,
+        orgName: organizationsTable.name,
+      })
+      .from(usageAggregatesTable)
+      .innerJoin(organizationsTable, eq(usageAggregatesTable.orgId, organizationsTable.id))
+      .where(
+        and(
+          eq(usageAggregatesTable.periodType, 'month'),
+          gte(usageAggregatesTable.periodStart, periodStart),
+          lte(usageAggregatesTable.periodEnd, periodEnd),
+        ),
+      );
+
+    // Precompute planId per org via active subscriptions (for plan-scoped allotment lookup)
+    const uniqueOrgIds = [...new Set(aggregates.map((a) => a.agg.orgId))];
+    const orgSubscriptions =
+      uniqueOrgIds.length > 0
+        ? await db
+            .select({ orgId: subscriptionsTable.orgId, planId: subscriptionsTable.planId })
+            .from(subscriptionsTable)
+            .where(
+              and(
+                inArray(subscriptionsTable.orgId, uniqueOrgIds),
+                eq(subscriptionsTable.status, 'active'),
+              ),
+            )
+        : [];
+    const orgPlanMap = new Map(orgSubscriptions.map((s) => [s.orgId, s.planId]));
+
+    // Fetch all allotments for the relevant plans (plan-scoped, not global)
+    const planIds = [...new Set(orgSubscriptions.map((s) => s.planId))];
+    const allotments =
+      planIds.length > 0
+        ? await db
+            .select({ allotment: billingMeterAllotmentsTable, meter: billingMetersTable })
+            .from(billingMeterAllotmentsTable)
+            .innerJoin(
+              billingMetersTable,
+              eq(billingMeterAllotmentsTable.meterId, billingMetersTable.id),
+            )
+            .where(inArray(billingMeterAllotmentsTable.planId, planIds))
+        : [];
+
+    // Build planId+meterKey → allotment lookup
+    const allotmentByPlanAndKey = new Map<string, (typeof allotments)[number]>(
+      allotments.map((a) => [`${a.allotment.planId}:${a.meter.key}`, a]),
+    );
+
+    let fired = 0;
+    let deduped = 0;
+
+    for (const { agg, orgName } of aggregates) {
+      const planId = orgPlanMap.get(agg.orgId);
+      // Plan-scoped allotment first; fall back to meter-level includedUnits for orgs without a subscription
+      const allotmentEntry = planId
+        ? allotmentByPlanAndKey.get(`${planId}:${agg.featureKey}`)
+        : undefined;
+      const meter = await db
+        .select()
+        .from(billingMetersTable)
+        .where(eq(billingMetersTable.key, agg.featureKey))
+        .limit(1);
+
+      const includedUnits = allotmentEntry
+        ? parseFloat(allotmentEntry.allotment.includedUnits)
+        : meter[0]
+          ? parseFloat(meter[0].includedUnits)
+          : null;
+
+      if (includedUnits === null || includedUnits === 0) continue;
+
+      const currentUsage = parseFloat(agg.totalQuantity);
+      const pct = (currentUsage / includedUnits) * 100;
+
+      for (const threshold of THRESHOLDS) {
+        if (pct < threshold) continue;
+
+        // Idempotency: skip if already fired for this period
+        const existing = await db
+          .select({ id: usageThresholdNotificationsTable.id })
+          .from(usageThresholdNotificationsTable)
+          .where(
+            and(
+              eq(usageThresholdNotificationsTable.orgId, agg.orgId),
+              eq(usageThresholdNotificationsTable.meterKey, agg.featureKey),
+              eq(usageThresholdNotificationsTable.threshold, threshold),
+              gte(usageThresholdNotificationsTable.periodStart, periodStart),
+            ),
+          )
+          .limit(1);
+
+        if (existing.length > 0) {
+          deduped++;
+          continue;
+        }
+
+        // Record the notification
+        await db
+          .insert(usageThresholdNotificationsTable)
+          .values({
+            orgId: agg.orgId,
+            meterKey: agg.featureKey,
+            threshold,
+            periodStart,
+          })
+          .onConflictDoNothing();
+
+        logger.info(
+          {
+            orgId: agg.orgId,
+            orgName,
+            meterKey: agg.featureKey,
+            threshold,
+            currentUsage,
+            includedUnits,
+            pct: Math.round(pct),
+          },
+          `hourly_overage_threshold_check: ${threshold}% threshold breached`,
+        );
+
+        // Find admin/owner users for this org to notify
+        const adminMembers = await db
+          .select({ userId: orgMembersTable.userId })
+          .from(orgMembersTable)
+          .where(
+            and(
+              eq(orgMembersTable.orgId, agg.orgId),
+              inArray(orgMembersTable.role, ['owner', 'admin']),
+            ),
+          );
+
+        const notifTitle =
+          threshold === 100
+            ? `Usage limit reached — ${agg.featureKey}`
+            : `Usage at ${threshold}% — ${agg.featureKey}`;
+        const notifMessage =
+          threshold === 100
+            ? `Your organisation "${orgName}" has reached 100% of its included ${agg.featureKey} quota (${Math.round(currentUsage).toLocaleString()} / ${Math.round(includedUnits).toLocaleString()} units). Overages may apply.`
+            : `Your organisation "${orgName}" has used ${Math.round(pct)}% of its included ${agg.featureKey} quota (${Math.round(currentUsage).toLocaleString()} / ${Math.round(includedUnits).toLocaleString()} units).`;
+        const actionUrl = `/billing/usage`;
+
+        for (const { userId } of adminMembers) {
+          try {
+            // Check in-app preference (default on)
+            const [pref] = await db
+              .select({ inAppEnabled: notificationPreferencesTable.inAppEnabled })
+              .from(notificationPreferencesTable)
+              .where(eq(notificationPreferencesTable.userId, userId))
+              .limit(1);
+            const inAppOn = pref ? pref.inAppEnabled : true;
+
+            let notificationId = 0;
+            if (inAppOn) {
+              const [notif] = await db
+                .insert(notificationsTable)
+                .values({
+                  userId,
+                  type: threshold === 100 ? 'warning' : 'info',
+                  channel: 'in_app',
+                  title: notifTitle,
+                  message: notifMessage,
+                  actionUrl,
+                })
+                .returning();
+              if (notif) {
+                notificationId = notif.id;
+              }
+            }
+
+            // Dispatch to external channels (email/Slack/push per user prefs)
+            await dispatchToExternalChannels({
+              notificationId,
+              userId,
+              type: threshold === 100 ? 'warning' : 'info',
+              title: notifTitle,
+              message: notifMessage,
+              actionUrl,
+            });
+          } catch (notifErr) {
+            logger.warn(
+              { err: notifErr, orgId: agg.orgId, userId, threshold },
+              'hourly_overage_threshold_check: failed to dispatch notification to admin',
+            );
+          }
+        }
+
+        fired++;
+      }
+
+      // ── Overage line-item refresh (runs unconditionally when pct >= 100) ─────
+      // This block is intentionally OUTSIDE the per-threshold notification loop so
+      // it executes on every hourly run even after the 100% notification has been
+      // deduped, keeping the draft line-item amount current with latest usage.
+      if (pct >= 100) {
+        const overage = Math.max(0, currentUsage - includedUnits);
+        if (overage > 0) {
+          const overageUnitAmt = allotmentEntry?.allotment.overageUnitAmount
+            ? parseFloat(allotmentEntry.allotment.overageUnitAmount)
+            : meter[0]?.unitAmount
+              ? parseFloat(meter[0].unitAmount)
+              : 0;
+
+          if (overageUnitAmt > 0) {
+            const totalAmount = Math.round(overage * overageUnitAmt * 100) / 100;
+            try {
+              await db
+                .delete(billingLineItemsTable)
+                .where(
+                  and(
+                    eq(billingLineItemsTable.orgId, agg.orgId),
+                    eq(billingLineItemsTable.featureKey, agg.featureKey),
+                    eq(billingLineItemsTable.periodStart, periodStart),
+                    eq(billingLineItemsTable.status, 'draft'),
+                  ),
+                );
+              await db.insert(billingLineItemsTable).values({
+                orgId: agg.orgId,
+                featureKey: agg.featureKey,
+                description: `${agg.featureKey} overage — ${Math.round(overage).toLocaleString()} units at $${overageUnitAmt.toFixed(4)}/unit`,
+                quantity: overage.toString(),
+                unitAmount: overageUnitAmt.toFixed(6),
+                totalAmount: totalAmount.toFixed(2),
+                currency: 'usd',
+                periodStart,
+                periodEnd,
+                status: 'draft',
+                metadata: {
+                  triggeredBy: 'hourly_overage_threshold_check',
+                  overage,
+                  currentUsage,
+                  includedUnits,
+                },
+              });
+              logger.info(
+                {
+                  orgId: agg.orgId,
+                  meterKey: agg.featureKey,
+                  overage,
+                  overageUnitAmt,
+                  totalAmount,
+                },
+                'hourly_overage_threshold_check: overage line item upserted',
+              );
+            } catch (lineItemErr) {
+              logger.warn(
+                { err: lineItemErr, orgId: agg.orgId, meterKey: agg.featureKey },
+                'hourly_overage_threshold_check: failed to upsert overage line item',
+              );
+            }
+          }
+        }
+      }
+    }
+
+    serverTelemetry.recordBusinessEvent({
+      type: 'hourly_overage_threshold_check_completed',
+      domain: 'billing',
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { fired, deduped, aggregatesChecked: aggregates.length },
+    });
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_OVERAGE_THRESHOLD_CHECK, {
+      lastStatus: 'completed',
+      lastDurationMs: Date.now() - start,
+    });
+    logger.info({ jobId: job.id, fired, deduped }, 'hourly_overage_threshold_check: complete');
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, 'hourly_overage_threshold_check: fatal');
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_OVERAGE_THRESHOLD_CHECK, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+      failCount:
+        (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_OVERAGE_THRESHOLD_CHECK)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.DEMO_USAGE_SEEDER, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, 'demo_usage_seeder: starting');
+  try {
+    if (process.env.NODE_ENV === 'production') {
+      logger.info({ jobId: job.id }, 'demo_usage_seeder: skipped in production');
+      updateRegistry(NAMED_JOB_TYPES.DEMO_USAGE_SEEDER, {
+        lastStatus: 'completed',
+        lastDurationMs: Date.now() - start,
+      });
+      return;
+    }
+
+    const payload = job.payload as { orgId?: number; daysBack?: number } | undefined;
+    const orgId = payload?.orgId ?? 1;
+    const daysBack = payload?.daysBack ?? 30;
+
+    const { generateDemoUsage } = await import('../routes/metering/metered-billing.js');
+    const generated = await generateDemoUsage(orgId, daysBack);
+
+    serverTelemetry.recordBusinessEvent({
+      type: 'demo_usage_seeder_completed',
+      domain: 'billing',
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { orgId, daysBack, generated },
+    });
+    updateRegistry(NAMED_JOB_TYPES.DEMO_USAGE_SEEDER, {
+      lastStatus: 'completed',
+      lastDurationMs: Date.now() - start,
+    });
+    logger.info({ jobId: job.id, orgId, daysBack, generated }, 'demo_usage_seeder: complete');
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, 'demo_usage_seeder: fatal');
+    updateRegistry(NAMED_JOB_TYPES.DEMO_USAGE_SEEDER, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.DEMO_USAGE_SEEDER)?.failCount || 0) + 1,
     });
     throw err;
   }
@@ -2518,16 +3811,21 @@ let namedJobsStarted = false;
 export function startNamedScheduledJobs() {
   if (namedJobsStarted) return;
   namedJobsStarted = true;
-  logger.info("Named scheduled jobs now managed by durable cron scheduler — in-memory timers disabled");
+  logger.info(
+    'Named scheduled jobs now managed by durable cron scheduler — in-memory timers disabled',
+  );
 }
 
 export function getJobRegistry(): JobScheduleEntry[] {
   return Array.from(jobRegistry.values());
 }
 
-export async function triggerOnDemandJob(type: NamedJobType, payload: Record<string, unknown> = {}) {
+export async function triggerOnDemandJob(
+  type: NamedJobType,
+  payload: Record<string, unknown> = {},
+) {
   const entry = jobRegistry.get(type);
   if (!entry) throw new Error(`Unknown job type: ${type}`);
-  if (entry.schedule !== "on_demand") throw new Error(`Job ${type} is not an on-demand job`);
+  if (entry.schedule !== 'on_demand') throw new Error(`Job ${type} is not an on-demand job`);
   return enqueueNamedJob(type, payload);
 }

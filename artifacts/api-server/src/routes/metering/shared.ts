@@ -131,25 +131,112 @@ export function computeCharge(
   }
 }
 
-export async function recomputeAggregate(orgId: number, featureKey: string, product: string) {
+/**
+ * Compute billable quantity for a single org+meter in a period using the meter's
+ * configured aggregation mode (sum | last | unique_count). Read-only — no writes.
+ */
+export async function computeBillableQty(
+  orgId: number,
+  featureKey: string,
+  periodStart: Date,
+  periodEnd: Date,
+  aggregation: 'sum' | 'last' | 'unique_count' = 'sum',
+): Promise<number> {
+  const baseWhere = and(
+    eq(meteringEventsTable.orgId, orgId),
+    eq(meteringEventsTable.featureKey, featureKey),
+    gte(meteringEventsTable.occurredAt, periodStart),
+    lte(meteringEventsTable.occurredAt, periodEnd),
+  );
+
+  if (aggregation === 'last') {
+    const [lastRow] = await db
+      .select({ qty: meteringEventsTable.quantity })
+      .from(meteringEventsTable)
+      .where(baseWhere)
+      .orderBy(sql`${meteringEventsTable.occurredAt} DESC`)
+      .limit(1);
+    return parseFloat(lastRow?.qty ?? '0');
+  }
+
+  if (aggregation === 'unique_count') {
+    const [row] = await db
+      .select({ qty: sql<string>`COUNT(DISTINCT ${meteringEventsTable.userId})::text` })
+      .from(meteringEventsTable)
+      .where(baseWhere);
+    return parseFloat(row?.qty ?? '0');
+  }
+
+  // Default: sum
+  const [row] = await db
+    .select({ qty: sql<string>`COALESCE(SUM(${meteringEventsTable.quantity}::numeric), 0)` })
+    .from(meteringEventsTable)
+    .where(baseWhere);
+  return parseFloat(row?.qty ?? '0');
+}
+
+export async function recomputeAggregate(
+  orgId: number,
+  featureKey: string,
+  product: string,
+  aggregation: 'sum' | 'last' | 'unique_count' = 'sum',
+) {
   const now = new Date();
   const { start, end } = periodBounds('month', now);
 
-  const [row] = await db
-    .select({
-      totalQty: sql<string>`COALESCE(SUM(${meteringEventsTable.quantity}::numeric), 0)`,
-      eventCount: sql<number>`COUNT(*)::int`,
-      uniqueUsers: sql<number>`COUNT(DISTINCT ${meteringEventsTable.userId})::int`,
-    })
-    .from(meteringEventsTable)
-    .where(
-      and(
-        eq(meteringEventsTable.orgId, orgId),
-        eq(meteringEventsTable.featureKey, featureKey),
-        gte(meteringEventsTable.occurredAt, start),
-        lte(meteringEventsTable.occurredAt, end),
-      ),
-    );
+  const baseWhere = and(
+    eq(meteringEventsTable.orgId, orgId),
+    eq(meteringEventsTable.featureKey, featureKey),
+    gte(meteringEventsTable.occurredAt, start),
+    lte(meteringEventsTable.occurredAt, end),
+  );
+
+  let totalQty = '0';
+  let eventCount = 0;
+  let uniqueUsers = 0;
+
+  if (aggregation === 'last') {
+    // Last-value-wins: quantity of the most recently recorded event in the period
+    const [lastRow] = await db
+      .select({
+        qty: meteringEventsTable.quantity,
+        cnt: sql<number>`COUNT(*) OVER ()::int`,
+        uniqueU: sql<number>`COUNT(DISTINCT ${meteringEventsTable.userId}) OVER ()::int`,
+      })
+      .from(meteringEventsTable)
+      .where(baseWhere)
+      .orderBy(sql`${meteringEventsTable.occurredAt} DESC`)
+      .limit(1);
+    totalQty = lastRow?.qty ?? '0';
+    eventCount = lastRow?.cnt ?? 0;
+    uniqueUsers = lastRow?.uniqueU ?? 0;
+  } else if (aggregation === 'unique_count') {
+    // Count of distinct users who generated at least one event in the period
+    const [row] = await db
+      .select({
+        totalQty: sql<string>`COUNT(DISTINCT ${meteringEventsTable.userId})::text`,
+        eventCount: sql<number>`COUNT(*)::int`,
+        uniqueUsers: sql<number>`COUNT(DISTINCT ${meteringEventsTable.userId})::int`,
+      })
+      .from(meteringEventsTable)
+      .where(baseWhere);
+    totalQty = row?.totalQty ?? '0';
+    eventCount = row?.eventCount ?? 0;
+    uniqueUsers = row?.uniqueUsers ?? 0;
+  } else {
+    // Default: sum of all event quantities (also handles null aggregation → sum)
+    const [row] = await db
+      .select({
+        totalQty: sql<string>`COALESCE(SUM(${meteringEventsTable.quantity}::numeric), 0)`,
+        eventCount: sql<number>`COUNT(*)::int`,
+        uniqueUsers: sql<number>`COUNT(DISTINCT ${meteringEventsTable.userId})::int`,
+      })
+      .from(meteringEventsTable)
+      .where(baseWhere);
+    totalQty = row?.totalQty ?? '0';
+    eventCount = row?.eventCount ?? 0;
+    uniqueUsers = row?.uniqueUsers ?? 0;
+  }
 
   await db
     .insert(usageAggregatesTable)
@@ -160,9 +247,9 @@ export async function recomputeAggregate(orgId: number, featureKey: string, prod
       periodType: 'month',
       periodStart: start,
       periodEnd: end,
-      totalQuantity: row?.totalQty ?? '0',
-      eventCount: row?.eventCount ?? 0,
-      uniqueUsers: row?.uniqueUsers ?? 0,
+      totalQuantity: totalQty,
+      eventCount,
+      uniqueUsers,
     })
     .onConflictDoUpdate({
       target: [
@@ -172,9 +259,9 @@ export async function recomputeAggregate(orgId: number, featureKey: string, prod
         usageAggregatesTable.periodStart,
       ],
       set: {
-        totalQuantity: row?.totalQty ?? '0',
-        eventCount: row?.eventCount ?? 0,
-        uniqueUsers: row?.uniqueUsers ?? 0,
+        totalQuantity: totalQty,
+        eventCount,
+        uniqueUsers,
         computedAt: new Date(),
       },
     });

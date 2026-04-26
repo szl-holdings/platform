@@ -266,6 +266,7 @@ export const billingLineItemsTable = pgTable(
   (t) => [
     index('billing_line_items_org_idx').on(t.orgId),
     index('billing_line_items_period_idx').on(t.orgId, t.periodStart),
+    unique('billing_line_items_overage_uq').on(t.orgId, t.featureKey, t.periodStart, t.status),
   ],
 );
 
@@ -330,3 +331,150 @@ export const insertBillingLineItemSchema = createInsertSchema(billingLineItemsTa
 });
 export type InsertBillingLineItem = z.infer<typeof insertBillingLineItemSchema>;
 export type BillingLineItem = typeof billingLineItemsTable.$inferSelect;
+
+/**
+ * billing_meters — first-class meter definitions.
+ * Each meter has a unique key that matches the featureKey used in metering_events.
+ * Aggregation modes: sum (default), last (last-value-wins), unique_count (unique user count).
+ */
+export const billingMetersTable = pgTable(
+  'billing_meters',
+  {
+    id: serial('id').primaryKey(),
+    key: text('key').notNull().unique(),
+    displayName: text('display_name').notNull(),
+    unit: text('unit').notNull().default('unit'),
+    aggregation: text('aggregation', { enum: ['sum', 'last', 'unique_count'] })
+      .notNull()
+      .default('sum'),
+    billingWindow: text('billing_window', { enum: ['day', 'month', 'billing_cycle'] })
+      .notNull()
+      .default('month'),
+    stripePriceId: text('stripe_price_id'),
+    stripeMeterId: text('stripe_meter_id'),
+    pricingModel: text('pricing_model', { enum: ['per_unit', 'graduated', 'volume', 'package'] })
+      .notNull()
+      .default('per_unit'),
+    includedUnits: numeric('included_units', { precision: 18, scale: 6 })
+      .notNull()
+      .default('0'),
+    unitAmount: numeric('unit_amount', { precision: 12, scale: 6 }),
+    product: text('product').notNull().default('platform'),
+    isActive: boolean('is_active').notNull().default(true),
+    description: text('description'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('billing_meters_key_idx').on(t.key),
+    index('billing_meters_product_idx').on(t.product),
+  ],
+);
+
+/**
+ * billing_meter_allotments — per-plan included allotments for each meter.
+ * When a subscription is created the system auto-registers the metered prices
+ * and tracks how many units are included before overages apply.
+ */
+export const billingMeterAllotmentsTable = pgTable(
+  'billing_meter_allotments',
+  {
+    id: serial('id').primaryKey(),
+    planId: integer('plan_id').notNull(),
+    meterId: integer('meter_id')
+      .notNull()
+      .references(() => billingMetersTable.id, { onDelete: 'cascade' }),
+    includedUnits: numeric('included_units', { precision: 18, scale: 6 }).notNull().default('0'),
+    stripePriceId: text('stripe_price_id'),
+    overageUnitAmount: numeric('overage_unit_amount', { precision: 12, scale: 6 }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique('billing_meter_allotments_plan_meter_uq').on(t.planId, t.meterId),
+    index('billing_meter_allotments_plan_idx').on(t.planId),
+    index('billing_meter_allotments_meter_idx').on(t.meterId),
+  ],
+);
+
+/**
+ * metering_corrections — admin adjustment records (+/- quantity) applied to usage.
+ * Corrections are audited and reflected on the next invoice.
+ */
+export const meteringCorrectionsTable = pgTable(
+  'metering_corrections',
+  {
+    id: serial('id').primaryKey(),
+    orgId: integer('org_id')
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: 'cascade' }),
+    meterKey: text('meter_key').notNull(),
+    quantity: numeric('quantity', { precision: 18, scale: 6 }).notNull(),
+    reasonCode: text('reason_code', {
+      enum: ['data_correction', 'customer_request', 'system_error', 'promotional', 'other'],
+    })
+      .notNull()
+      .default('other'),
+    reason: text('reason'),
+    appliedToPeriodStart: timestamp('applied_to_period_start', { withTimezone: true }),
+    appliedToPeriodEnd: timestamp('applied_to_period_end', { withTimezone: true }),
+    createdBy: integer('created_by').references(() => usersTable.id, { onDelete: 'set null' }),
+    appliedAt: timestamp('applied_at', { withTimezone: true }).notNull().defaultNow(),
+    metadata: jsonb('metadata'),
+  },
+  (t) => [
+    index('metering_corrections_org_idx').on(t.orgId),
+    index('metering_corrections_meter_idx').on(t.orgId, t.meterKey),
+    index('metering_corrections_applied_idx').on(t.appliedAt),
+  ],
+);
+
+/**
+ * usage_threshold_notifications — dedup table preventing re-firing of 50/80/100% alerts
+ * within the same billing period per org/meter.
+ */
+export const usageThresholdNotificationsTable = pgTable(
+  'usage_threshold_notifications',
+  {
+    id: serial('id').primaryKey(),
+    orgId: integer('org_id')
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: 'cascade' }),
+    meterKey: text('meter_key').notNull(),
+    threshold: integer('threshold').notNull(),
+    periodStart: timestamp('period_start', { withTimezone: true }).notNull(),
+    notifiedAt: timestamp('notified_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique('usage_threshold_notif_uq').on(t.orgId, t.meterKey, t.threshold, t.periodStart),
+    index('usage_threshold_notif_org_idx').on(t.orgId),
+  ],
+);
+
+export const insertBillingMeterSchema = createInsertSchema(billingMetersTable).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertBillingMeter = z.infer<typeof insertBillingMeterSchema>;
+export type BillingMeter = typeof billingMetersTable.$inferSelect;
+
+export const insertBillingMeterAllotmentSchema = createInsertSchema(billingMeterAllotmentsTable).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertBillingMeterAllotment = z.infer<typeof insertBillingMeterAllotmentSchema>;
+export type BillingMeterAllotment = typeof billingMeterAllotmentsTable.$inferSelect;
+
+export const insertMeteringCorrectionSchema = createInsertSchema(meteringCorrectionsTable).omit({
+  id: true,
+  appliedAt: true,
+});
+export type InsertMeteringCorrection = z.infer<typeof insertMeteringCorrectionSchema>;
+export type MeteringCorrection = typeof meteringCorrectionsTable.$inferSelect;
+
+export const insertUsageThresholdNotificationSchema = createInsertSchema(usageThresholdNotificationsTable).omit({
+  id: true,
+  notifiedAt: true,
+});
+export type InsertUsageThresholdNotification = z.infer<typeof insertUsageThresholdNotificationSchema>;
+export type UsageThresholdNotification = typeof usageThresholdNotificationsTable.$inferSelect;

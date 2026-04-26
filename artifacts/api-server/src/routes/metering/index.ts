@@ -2,6 +2,7 @@ import type { IRouter } from 'express';
 import { register as registerAnalytics } from './analytics.js';
 import { register as registerBilling } from './billing.js';
 import { register as registerEvents } from './events.js';
+import { register as registerMeteredBilling } from './metered-billing.js';
 import { register as registerRateCards } from './rate-cards.js';
 
 export function register(router: IRouter): void {
@@ -9,4 +10,5 @@ export function register(router: IRouter): void {
   registerRateCards(router);
   registerBilling(router);
   registerAnalytics(router);
+  registerMeteredBilling(router);
 }
