@@ -319,5 +319,7 @@ router.use(oauthRouter);
 // Mesh observability — call topology and principal registry (ops/admin only)
 router.use(meshObservabilityRouter);
 
+// MCP Ecosystem Command Center — topology, sessions, tool catalog, governed execution
+router.use(lazyMatch("/ecosystem", () => import("./ecosystem-command"), "ecosystem-command"));
 
 export default router;

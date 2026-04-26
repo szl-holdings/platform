@@ -258,6 +258,9 @@ const CognitiveReflection = lazy(() => import('./pages/cognitive/reflection'));
 const SubstrateCommandCenter = lazy(() =>
   import('./pages/substrate').then((m) => ({ default: m.SubstrateCommandCenter })),
 );
+const EcosystemCommandCenter = lazy(() =>
+  import('./pages/ecosystem').then((m) => ({ default: m.EcosystemCommandCenter })),
+);
 const CognitiveConsolesOverview = lazy(() => import('./pages/cognitive/overview'));
 const CognitiveTraces = lazy(() => import('./pages/cognitive/traces'));
 const CognitiveEvals = lazy(() => import('./pages/cognitive/evals'));
@@ -338,7 +341,7 @@ const AdminKbArticles = lazy(() => import('./operations/pages/admin/kb-articles'
 
 function getMode(location: string): WorkspaceMode {
   if (location.startsWith('/operations') || location.startsWith('/cognitive')) return 'operations';
-  if (location.startsWith('/infrastructure')) return 'infrastructure';
+  if (location.startsWith('/infrastructure') || location.startsWith('/ecosystem')) return 'infrastructure';
   return 'strategy';
 }
 
@@ -493,6 +496,10 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/infrastructure/coalition', label: 'Coalition', group: 'Infrastructure' },
   { href: '/infrastructure/reserves', label: 'Strategic Reserves', group: 'Infrastructure' },
   { href: '/infrastructure/data-fabric', label: 'Data Fabric', group: 'Infrastructure' },
+  { href: '/ecosystem', label: 'MCP Ecosystem — Topology Map', group: 'MCP Ecosystem' },
+  { href: '/ecosystem/observatory', label: 'MCP Ecosystem — Agent Observatory', group: 'MCP Ecosystem' },
+  { href: '/ecosystem/inspector', label: 'MCP Ecosystem — Tool Inspector', group: 'MCP Ecosystem' },
+  { href: '/ecosystem/counterfactual', label: 'MCP Ecosystem — Counterfactual Studio', group: 'MCP Ecosystem' },
 ];
 
 function AppShell() {
@@ -843,6 +850,12 @@ function AppShell() {
                 path="/infrastructure/imperium/atlas-execute"
                 component={() => <ImperiumAtlasExecute />}
               />
+
+              {/* MCP Ecosystem Command Center */}
+              <Route path="/ecosystem" component={() => <EcosystemCommandCenter />} />
+              <Route path="/ecosystem/observatory" component={() => <EcosystemCommandCenter />} />
+              <Route path="/ecosystem/inspector" component={() => <EcosystemCommandCenter />} />
+              <Route path="/ecosystem/counterfactual" component={() => <EcosystemCommandCenter />} />
 
               <Route path="/operations/admin/ops" component={() => <AdminOpsConsole />} />
               <Route path="/operations/admin/overview" component={() => <AdminOverview />} />
