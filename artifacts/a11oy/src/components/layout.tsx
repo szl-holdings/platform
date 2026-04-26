@@ -83,6 +83,21 @@ const NAV_GROUPS = [
       { href: '/about',         label: 'About' },
     ],
   },
+  {
+    label: 'EXPLORE',
+    items: [
+      { href: '/applications',  label: 'Applications' },
+      { href: '/constellation', label: 'Constellation' },
+      { href: '/architecture',  label: 'Architecture' },
+      { href: '/resources',     label: 'Resources' },
+    ],
+  },
+  {
+    label: 'OPERATIONS',
+    items: [
+      { href: '/control-tower', label: 'Control Tower' },
+    ],
+  },
 ];
 
 const TOKENS = {

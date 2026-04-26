@@ -42,3 +42,20 @@ artifacts/prism-counsel/
 archive/social/
 archive/media/
 archive/scripts/
+
+# High-churn media, test artifacts, and screenshots — exclude from deploy image
+screenshots/
+launch-assets/
+media/test/
+attached_assets/screenshots/
+artifacts/*/screenshots/
+
+# Transient report output directories
+reports/*/output/
+reports/*/__pycache__/
+reports/*/artifacts/
+
+# Python bytecode and caches — never deploy
+**/__pycache__/
+**/*.pyc
+**/*.pyo

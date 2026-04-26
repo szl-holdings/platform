@@ -5,7 +5,12 @@ export type Vertical =
   | 'aegis-defense'
   | 'prism-counsel'
   | 'carlota-jo'
-  | 'alloy-core';
+  | 'alloy-core'
+  | 'sentra-cyber'
+  | 'firestorm-ops'
+  | 'nuro-forge'
+  | 'meridian-infra'
+  | 'constellation-graph';
 
 export type SignalSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
 export type SignalStatus = 'active' | 'acknowledged' | 'resolved' | 'escalated' | 'suppressed';

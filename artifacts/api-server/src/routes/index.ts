@@ -28,6 +28,8 @@ import decisionsRuntimeRouter from "./decisions-runtime";
 import a11oyFabricRouter from "./a11oy-fabric-api";
 import a11oyRuntimeRouter from "./a11oy-runtime-api.js";
 import a11oySovereignRouter from "./a11oy-sovereign-api.js";
+import publicA11oyRouter from "./public-a11oy-api";
+import internalA11oyRouter from "./internal-a11oy-api";
 import apiKeysRouter from "./api-keys";
 import oauthRouter from "./oauth";
 import meshObservabilityRouter from "./mesh-observability";
@@ -141,6 +143,14 @@ router.use(lazyMatch("/crisis-arena", () => import("./crisis-arena"), "crisis-ar
 // Exact paths are whitelisted in global-auth-enforcer.ts.
 router.use(lazyMatch("/lyte", () => import("./lyte-surfaces"), "lyte-surfaces"));
 router.use(lazyMatch("/lyte", () => import("./lyte-intel"), "lyte-intel"));
+
+// A11oy Public API — unauthenticated read-only routes for public system story.
+// GET /api/public/a11oy/constellation, /applications, /architecture, /resources.
+router.use(publicA11oyRouter);
+
+// A11oy Internal API — authenticated operational routes for readiness, health, and storage.
+// GET /api/internal/a11oy/readiness, /verticals/health, /proof/summary, /mcp/readiness, /storage/status.
+router.use(internalA11oyRouter);
 
 // A11oy Sovereign API (Phase 3) — Sovereign Execution Lab endpoints.
 // model-router, MirrorEval 2.0, replay, connector firewall, twin foundry, skills, boardroom, trust center.

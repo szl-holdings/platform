@@ -24,6 +24,7 @@ class VerticalSpec:
     purpose: str
     module: str  # importable Python module path
     research_seams: tuple[str, ...]
+    pack_status: str = "live"  # 'live' | 'stub' | 'roadmap'
 
 
 REGISTRY: tuple[VerticalSpec, ...] = (
@@ -32,6 +33,7 @@ REGISTRY: tuple[VerticalSpec, ...] = (
         title="Pulse",
         purpose="Founder Operating Channel",
         module="services.verticals.pulse",
+        pack_status="live",
         research_seams=(
             "OpenTelemetry / GenAI tracing",
             "Langfuse",
@@ -43,6 +45,7 @@ REGISTRY: tuple[VerticalSpec, ...] = (
         title="Finance / Fincept",
         purpose="Capital Weather",
         module="services.verticals.finance_fincept",
+        pack_status="live",
         research_seams=(
             "Fincept",
             "FinGPT",
@@ -56,6 +59,7 @@ REGISTRY: tuple[VerticalSpec, ...] = (
         title="Lyte / KORA",
         purpose="Decision Debt Ledger",
         module="services.verticals.lyte_kora",
+        pack_status="live",
         research_seams=(
             "NetworkX",
             "PydanticAI",
@@ -67,6 +71,7 @@ REGISTRY: tuple[VerticalSpec, ...] = (
         title="Terra",
         purpose="Acquisition Time Machine",
         module="services.verticals.terra",
+        pack_status="live",
         research_seams=(
             "GeoPandas",
             "Darts",
@@ -78,6 +83,7 @@ REGISTRY: tuple[VerticalSpec, ...] = (
         title="Vessels",
         purpose="Voyage Risk Exchange",
         module="services.verticals.vessels",
+        pack_status="live",
         research_seams=(
             "Graph routing libraries",
             "AIS providers",
@@ -89,6 +95,7 @@ REGISTRY: tuple[VerticalSpec, ...] = (
         title="PRISM Counsel",
         purpose="Matter Flight Recorder",
         module="services.verticals.prism_counsel",
+        pack_status="live",
         research_seams=(
             "OpenContracts",
             "Haystack",
@@ -100,11 +107,77 @@ REGISTRY: tuple[VerticalSpec, ...] = (
         title="Marketing / Growth",
         purpose="Proof-To-Pipeline Engine",
         module="services.verticals.marketing_growth",
+        pack_status="live",
         research_seams=(
             "HyperFrames",
             "Wistia",
             "Sanity",
             "Figma",
+        ),
+    ),
+    VerticalSpec(
+        id="sentra_cyber",
+        title="Sentra Cyber",
+        purpose="Cyber Resilience Command",
+        module="services.verticals.sentra_cyber",
+        pack_status="stub",
+        research_seams=(
+            "MITRE ATT&CK navigator",
+            "OpenCTI",
+            "Elastic SIEM",
+            "OTEL security signals",
+        ),
+    ),
+    VerticalSpec(
+        id="firestorm_ops",
+        title="Firestorm Ops",
+        purpose="Crisis Operations Command",
+        module="services.verticals.firestorm_ops",
+        pack_status="stub",
+        research_seams=(
+            "PagerDuty Events API",
+            "Jira Service Management",
+            "Grafana Incident",
+            "Crisis simulation engines",
+        ),
+    ),
+    VerticalSpec(
+        id="nuro_forge",
+        title="NuroForge",
+        purpose="AI Agent Forge",
+        module="services.verticals.nuro_forge",
+        pack_status="stub",
+        research_seams=(
+            "LangSmith / Langfuse eval harness",
+            "OpenAI fine-tuning API",
+            "Hugging Face PEFT",
+            "LoRA adapter registries",
+        ),
+    ),
+    VerticalSpec(
+        id="meridian_infra",
+        title="Meridian Infra",
+        purpose="Infrastructure Intelligence",
+        module="services.verticals.meridian_infra",
+        pack_status="stub",
+        research_seams=(
+            "AWS Cost Explorer / Azure Cost Management",
+            "Prometheus / Thanos",
+            "Datadog infra metrics",
+            "FinOps Foundation standards",
+        ),
+    ),
+    VerticalSpec(
+        id="constellation_graph",
+        title="Constellation Graph",
+        purpose="Cross-Domain Intelligence Graph",
+        module="services.verticals.constellation_graph",
+        pack_status="stub",
+        research_seams=(
+            "NetworkX / PyG",
+            "Neo4j",
+            "Causal inference libraries (DoWhy, EconML)",
+            "Knowledge graph embedding models",
         ),
     ),
 )
@@ -121,4 +194,12 @@ def ids() -> tuple[str, ...]:
     return tuple(spec.id for spec in REGISTRY)
 
 
-__all__ = ["VerticalSpec", "REGISTRY", "by_id", "ids"]
+def live() -> tuple[VerticalSpec, ...]:
+    return tuple(spec for spec in REGISTRY if spec.pack_status == "live")
+
+
+def stubs() -> tuple[VerticalSpec, ...]:
+    return tuple(spec for spec in REGISTRY if spec.pack_status == "stub")
+
+
+__all__ = ["VerticalSpec", "REGISTRY", "by_id", "ids", "live", "stubs"]

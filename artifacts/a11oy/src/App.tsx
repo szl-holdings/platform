@@ -62,7 +62,11 @@ const CiAction = lazy(() => import('./pages/CiAction').then(m => ({ default: m.C
 const AgiConvergence = lazy(() => import('./pages/AgiConvergence').then(m => ({ default: m.AgiConvergence })));
 const OmniaAdoptionPage = lazy(() => import('./pages/OmniaAdoption').then(m => ({ default: m.OmniaAdoption })));
 const Solutions = lazy(() => import('./pages/Solutions').then(m => ({ default: m.Solutions })));
-
+const ApplicationsCatalog = lazy(() => import('./pages/ApplicationsCatalog').then(m => ({ default: m.ApplicationsCatalog })));
+const ConstellationGraph = lazy(() => import('./pages/ConstellationGraph').then(m => ({ default: m.ConstellationGraph })));
+const ArchitectureOverview = lazy(() => import('./pages/ArchitectureOverview').then(m => ({ default: m.ArchitectureOverview })));
+const ResourcesHub = lazy(() => import('./pages/ResourcesHub').then(m => ({ default: m.ResourcesHub })));
+const ControlTower = lazy(() => import('./pages/ControlTower').then(m => ({ default: m.ControlTower })));
 
 export default function App() {
   return (
@@ -113,6 +117,11 @@ export default function App() {
         <Route path={`${base}/solutions`} component={Solutions} />
         <Route path={`${base}/about`} component={About} />
         <Route path={`${base}/omnia-adoption`} component={OmniaAdoptionPage} />
+        <Route path={`${base}/applications`} component={ApplicationsCatalog} />
+        <Route path={`${base}/constellation`} component={ConstellationGraph} />
+        <Route path={`${base}/architecture`} component={ArchitectureOverview} />
+        <Route path={`${base}/resources`} component={ResourcesHub} />
+        <Route path={`${base}/control-tower`} component={ControlTower} />
         <Route>
           <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--color-a11oy-navy)', color: 'var(--color-a11oy-text)' }}>
             <div className="text-center">
