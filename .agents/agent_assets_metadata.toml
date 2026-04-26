@@ -581,3 +581,9 @@ id = "Bl73Sh-e-lfudnPGW5KkX"
 uri = "file://content-package/posts/medium-a11oy-definition.md"
 type = "text"
 title = "A11oy — Medium Post (Ready to Publish)"
+
+[[outputs]]
+id = "erC_IsD3Vu3I9_h_SIb_l"
+uri = "file://content-package/a11oy-content-package.zip"
+type = "unspecified"
+title = "A11oy Content Package (screenshots + posts + Medium HTML)"
