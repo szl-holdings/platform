@@ -25,7 +25,7 @@ import {
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import multer from 'multer';
-import { openai } from '@workspace/integrations-openai-ai-server';
+import { createResponse } from '@szl-holdings/ai-engine/providers/openai';
 import { handleRouteError, sendBadRequest, sendNotFound, sendSuccess } from '../lib/api-response';
 
 const router: IRouter = Router();
@@ -230,12 +230,11 @@ Focus on legally significant entities and relationships (obligations, claims, pa
 Return ONLY valid JSON, no markdown.`;
 
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-5-mini',
-      max_completion_tokens: 2000,
-      messages: [{ role: 'user', content: prompt }],
-    });
-    const raw = response.choices[0]?.message?.content ?? '{}';
+    const response = await createResponse(
+      [{ role: 'user', content: prompt }],
+      { model: 'gpt-5-mini', maxOutputTokens: 2000 },
+    );
+    const raw = response.content ?? '{}';
     const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     const parsed = JSON.parse(cleaned);
     return {
@@ -274,13 +273,12 @@ ${chunkContext}
 
 Provide a comprehensive, accurate answer. Cite every claim with [Source N]. If information spans multiple documents, synthesize it clearly. If the answer cannot be fully determined from the provided context, say so explicitly.`;
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-5.1',
-    max_completion_tokens: 2000,
-    messages: [{ role: 'user', content: prompt }],
-  });
+  const response = await createResponse(
+    [{ role: 'user', content: prompt }],
+    { model: 'gpt-5.1', maxOutputTokens: 2000 },
+  );
 
-  return { answer: response.choices[0]?.message?.content ?? 'Unable to generate an answer.' };
+  return { answer: response.content ?? 'Unable to generate an answer.' };
 }
 
 // --- Routes ---

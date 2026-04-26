@@ -6,7 +6,7 @@
  * by similarity, ranks by evidence strength and cross-agent agreement, and
  * presents the top hypotheses with supporting and contradicting evidence.
  */
-import { openai } from '../providers/openai/index.js';
+import { createResponse } from '../providers/openai/responses.js';
 import type { AgentCallResult } from '../types.js';
 
 export interface Hypothesis {
@@ -95,14 +95,12 @@ Respond ONLY with valid JSON array:
   }
 ]`;
 
-    const result = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      max_completion_tokens: 1024,
-      messages: [{ role: 'user', content: extractionPrompt }],
-      response_format: { type: 'json_object' },
-    });
+    const result = await createResponse(
+      [{ role: 'user', content: extractionPrompt }],
+      { model: 'gpt-4o-mini', maxOutputTokens: 1024 },
+    );
 
-    const raw = result.choices[0]?.message?.content ?? '{}';
+    const raw = result.content ?? '{}';
     let parsed: unknown;
     try {
       parsed = JSON.parse(raw);

@@ -46,6 +46,7 @@ import { ontologyEngine } from './ontology/ontology-engine.js';
 import { anthropic } from './providers/anthropic/index.js';
 import { ai as geminiAi } from './providers/gemini/index.js';
 import { openai } from './providers/openai/index.js';
+import { createResponse } from './providers/openai/responses.js';
 import type {
   AgentCallResult,
   AgentConsultationRequest,
@@ -70,12 +71,11 @@ import { runShadowCouncil, shouldRunShadowCouncil } from './shadow-council.js';
 
 setLlmIntrospector(async (prompt: string): Promise<string> => {
   try {
-    const result = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      max_completion_tokens: 150,
-      messages: [{ role: 'user', content: prompt }],
-    });
-    return result.choices[0]?.message?.content ?? 'Proceeding with standard routing.';
+    const result = await createResponse(
+      [{ role: 'user', content: prompt }],
+      { model: 'gpt-4o-mini', maxOutputTokens: 150 },
+    );
+    return result.content ?? 'Proceeding with standard routing.';
   } catch {
     return 'Introspection unavailable — proceeding with standard routing.';
   }
@@ -759,18 +759,17 @@ Provide a focused, expert response specifically addressing the consultation ques
       });
       response = result.content[0]?.type === 'text' ? result.content[0].text : '';
     } else if (targetAgent.preferredProvider === 'openai') {
-      const result = await openai.chat.completions.create({
-        model: targetAgent.preferredModel,
-        max_completion_tokens: 1024,
-        messages: [
+      const result = await createResponse(
+        [
           { role: 'system', content: targetAgent.systemPrompt },
           {
             role: 'user',
             content: `[Consultation from ${request.requestingAgentId}] ${request.question}\n\nContext: ${context.slice(0, 500)}`,
           },
         ],
-      });
-      response = result.choices[0]?.message?.content ?? '';
+        { model: targetAgent.preferredModel, maxOutputTokens: 1024 },
+      );
+      response = result.content ?? '';
     } else {
       try {
         const result = await geminiAi.models.generateContent({
@@ -780,15 +779,14 @@ Provide a focused, expert response specifically addressing the consultation ques
         });
         response = result.text ?? '';
       } catch {
-        const fallback = await openai.chat.completions.create({
-          model: 'gpt-5.2',
-          max_completion_tokens: 1024,
-          messages: [
+        const fallback = await createResponse(
+          [
             { role: 'system', content: targetAgent.systemPrompt },
             { role: 'user', content: consultationPrompt },
           ],
-        });
-        response = fallback.choices[0]?.message?.content ?? '';
+          { model: 'gpt-5.2', maxOutputTokens: 1024 },
+        );
+        response = fallback.content ?? '';
       }
     }
 
@@ -1038,19 +1036,18 @@ export async function callAgent(
       setCachedResponse(agent.systemPrompt, _cacheContextPrefix, actualModel, response);
     } else if (agent.preferredProvider === 'openai') {
       const systemWithLearning = `${agent.systemPrompt}${learningSection}${consciousnessDirective}${graphContextSection}`;
-      const result = await openai.chat.completions.create({
-        model: actualModel,
-        max_completion_tokens: 2048,
-        messages: [
+      const result = await createResponse(
+        [
           { role: 'system', content: systemWithLearning },
           {
             role: 'user',
             content: `${focusedContext}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with: CONFIDENCE: [0-100]`,
           },
         ],
-      });
-      response = result.choices[0]?.message?.content ?? '';
-      tokensUsed = result.usage?.total_tokens ?? 0;
+        { model: actualModel, maxOutputTokens: 2048 },
+      );
+      response = result.content ?? '';
+      tokensUsed = result.usage.promptTokens + result.usage.completionTokens;
       success = true;
       setCachedResponse(agent.systemPrompt, _cacheContextPrefix, actualModel, response);
     } else if (agent.preferredProvider === 'gemini') {
@@ -1069,16 +1066,15 @@ export async function callAgent(
           options?.workflowId ?? 'default',
           options?.orgId,
         ).model;
-        const fallback = await openai.chat.completions.create({
-          model: fallbackModel,
-          max_completion_tokens: 2048,
-          messages: [
+        const fallback = await createResponse(
+          [
             { role: 'system', content: agent.systemPrompt },
             { role: 'user', content: fullPrompt },
           ],
-        });
-        response = fallback.choices[0]?.message?.content ?? '';
-        tokensUsed = fallback.usage?.total_tokens ?? 0;
+          { model: fallbackModel, maxOutputTokens: 2048 },
+        );
+        response = fallback.content ?? '';
+        tokensUsed = fallback.usage.promptTokens + fallback.usage.completionTokens;
         success = true;
       }
     }
@@ -2884,13 +2880,12 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
         workflowId,
         options.orgId,
       ).model;
-      const synthResult = await openai.chat.completions.create({
-        model: alloyModel,
-        max_completion_tokens: 4096,
-        messages: [{ role: 'user', content: aggregationPrompt }],
-      });
-      synthesis = synthResult.choices[0]?.message?.content ?? '';
-      synthesisTokens = synthResult.usage?.total_tokens ?? 0;
+      const synthResult = await createResponse(
+        [{ role: 'user', content: aggregationPrompt }],
+        { model: alloyModel, maxOutputTokens: 4096 },
+      );
+      synthesis = synthResult.content ?? '';
+      synthesisTokens = synthResult.usage.promptTokens + synthResult.usage.completionTokens;
       budgetManager.recordSpend(workflowId, 'alloy', alloyModel, synthesisTokens, options.orgId);
     } catch {
       synthesis = agentResponses.map((r) => `${r.agentName}: ${r.response}`).join('\n\n');

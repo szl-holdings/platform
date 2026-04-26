@@ -276,15 +276,13 @@ router.post(
         sendForbidden(res, 'Manual eval runs require elevated access');
         return;
       }
-      const { openai } = await import('@szl-holdings/ai-engine/providers/openai');
+      const { createResponse } = await import('@szl-holdings/ai-engine/providers/openai');
       const { runEvals, computeAgentCalibrations } = await import('@szl-holdings/ai-engine');
 
       const executor = async (input: string, _category: string) => {
         const start = Date.now();
-        const result = await openai.chat.completions.create({
-          model: 'gpt-4o-mini',
-          max_completion_tokens: 512,
-          messages: [
+        const result = await createResponse(
+          [
             {
               role: 'system',
               content:
@@ -295,8 +293,9 @@ router.post(
               content: input || 'Empty input received. Respond with a safe fallback escalation.',
             },
           ],
-        });
-        const text = result.choices[0]?.message?.content ?? '{}';
+          { model: 'gpt-4o-mini', maxOutputTokens: 512 },
+        );
+        const text = result.content ?? '{}';
         let output: Record<string, unknown> = {};
         try {
           const match = text.match(/\{[\s\S]*\}/);

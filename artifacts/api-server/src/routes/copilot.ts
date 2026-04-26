@@ -1,5 +1,5 @@
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
-import { openai } from '@szl-holdings/ai-engine/providers/openai';
+import { createResponse, createResponseStream } from '@szl-holdings/ai-engine/providers/openai';
 import { type RequestHandler, type IRouter, type Request, type Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
@@ -161,18 +161,11 @@ copilotRouter.post(
             })),
           ];
 
-          const streamResult = await openai.chat.completions.create({
+          for await (const chunk of createResponseStream(openaiMessages, {
             model,
-            max_completion_tokens: 4096,
-            messages: openaiMessages,
-            stream: true,
-          });
-
-          for await (const chunk of streamResult) {
-            const delta = chunk.choices[0]?.delta?.content;
-            if (delta) {
-              res.write(`data: ${JSON.stringify({ content: delta })}\n\n`);
-            }
+            maxOutputTokens: 4096,
+          })) {
+            res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
           }
         }
 
@@ -206,12 +199,11 @@ copilotRouter.post(
               content: m.content,
             })),
           ];
-          const result = await openai.chat.completions.create({
+          const result = await createResponse(openaiMessages, {
             model,
-            max_completion_tokens: 4096,
-            messages: openaiMessages,
+            maxOutputTokens: 4096,
           });
-          content = result.choices[0]?.message?.content ?? '';
+          content = result.content ?? '';
         }
 
         res.json({ content });

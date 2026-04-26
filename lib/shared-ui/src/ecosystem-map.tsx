@@ -340,7 +340,7 @@ export function EcosystemMap({
           <g>
             <text
               x={cx}
-              y={cy - 10}
+              y={cy - 14}
               textAnchor="middle"
               fill="rgba(255,255,255,0.55)"
               fontSize="10"
@@ -352,13 +352,36 @@ export function EcosystemMap({
             </text>
             <text
               x={cx}
-              y={cy + 8}
+              y={cy + 4}
               textAnchor="middle"
               fill="rgba(255,255,255,0.3)"
               fontSize="8"
               fontFamily="Inter, system-ui, sans-serif"
             >
               ECOSYSTEM
+            </text>
+            <rect
+              x={cx - 44}
+              y={cy + 14}
+              width={88}
+              height={14}
+              rx={4}
+              fill="#a78bfa18"
+              stroke="#a78bfa50"
+              strokeWidth={0.8}
+            />
+            <text
+              x={cx}
+              y={cy + 22}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="#a78bfa"
+              fontSize="7"
+              fontFamily="Inter, system-ui, sans-serif"
+              fontWeight="600"
+              letterSpacing="0.5"
+            >
+              FORGE · RESPONSES API
             </text>
           </g>
         )}

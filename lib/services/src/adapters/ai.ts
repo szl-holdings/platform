@@ -171,14 +171,18 @@ export class AIAdapter extends ServiceAdapter {
       return this.mockChatCompletion(messages);
     }
 
-    // Try Replit proxy first (always available in Replit environments), then
-    // fall back to direct OpenAI/Anthropic keys if configured.
+    // Try Responses API first (preferred) for OpenAI-compatible providers, then
+    // fall back to Chat Completions, then Anthropic if configured.
     const providers: Array<() => Promise<ChatCompletionResult>> = [];
 
     if (this.hasReplitProxy) {
+      const responsesOpts = { model: options?.model, maxOutputTokens: options?.maxTokens };
+      providers.push(() => this.replitProxyResponse(messages, responsesOpts));
       providers.push(() => this.replitProxyCompletion(messages, options));
     }
     if (this.openaiKey) {
+      const responsesOpts = { model: options?.model, maxOutputTokens: options?.maxTokens };
+      providers.push(() => this.openaiResponse(messages, responsesOpts));
       providers.push(() => this.openaiCompletion(messages, options));
     }
     if (this.anthropicKey) {
@@ -311,6 +315,141 @@ export class AIAdapter extends ServiceAdapter {
         completionTokens: data.usage?.completion_tokens ?? 0,
       },
     };
+  }
+
+  private async replitProxyResponse(
+    messages: ChatMessage[],
+    options?: { model?: string; maxOutputTokens?: number },
+    signal?: AbortSignal,
+  ): Promise<ChatCompletionResult> {
+    const model = options?.model ?? "gpt-5.2";
+    const systemParts = messages.filter((m) => m.role === "system").map((m) => m.content);
+    const instructions = systemParts.length > 0 ? systemParts.join("\n\n") : undefined;
+    const input = messages
+      .filter((m) => m.role !== "system")
+      .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
+
+    const body: Record<string, unknown> = {
+      model,
+      input: input.length === 1 && input[0]?.role === "user" ? input[0].content : input,
+      max_output_tokens: options?.maxOutputTokens ?? 1024,
+    };
+    if (instructions) body.instructions = instructions;
+
+    const response = await fetch(
+      `${this.replitProxyUrl}/responses`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.replitProxyKey}`,
+        },
+        body: JSON.stringify(body),
+        signal: signal ?? null,
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Replit OpenAI proxy (Responses API) error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json() as {
+      output_text?: string;
+      output?: Array<{ type: string; content?: Array<{ text?: string }> }>;
+      usage?: { input_tokens?: number; output_tokens?: number };
+    };
+
+    const content =
+      data.output_text ??
+      data.output?.find((o) => o.type === "message")?.content?.find((c) => c.text !== undefined)?.text ??
+      "";
+
+    return {
+      content,
+      model,
+      provider: "replit-proxy",
+      usage: {
+        promptTokens: data.usage?.input_tokens ?? 0,
+        completionTokens: data.usage?.output_tokens ?? 0,
+      },
+    };
+  }
+
+  private async openaiResponse(
+    messages: ChatMessage[],
+    options?: { model?: string; maxOutputTokens?: number },
+    signal?: AbortSignal,
+  ): Promise<ChatCompletionResult> {
+    const model = options?.model ?? "gpt-5.2";
+    const systemParts = messages.filter((m) => m.role === "system").map((m) => m.content);
+    const instructions = systemParts.length > 0 ? systemParts.join("\n\n") : undefined;
+    const input = messages
+      .filter((m) => m.role !== "system")
+      .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
+
+    const body: Record<string, unknown> = {
+      model,
+      input: input.length === 1 && input[0]?.role === "user" ? input[0].content : input,
+      max_output_tokens: options?.maxOutputTokens ?? 1024,
+    };
+    if (instructions) body.instructions = instructions;
+
+    const response = await fetch(
+      "https://api.openai.com/v1/responses",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.openaiKey}`,
+        },
+        body: JSON.stringify(body),
+        signal: signal ?? null,
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`OpenAI Responses API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json() as {
+      output_text?: string;
+      output?: Array<{ type: string; content?: Array<{ text?: string }> }>;
+      usage?: { input_tokens?: number; output_tokens?: number };
+    };
+
+    const content =
+      data.output_text ??
+      data.output?.find((o) => o.type === "message")?.content?.find((c) => c.text !== undefined)?.text ??
+      "";
+
+    return {
+      content,
+      model,
+      provider: "openai",
+      usage: {
+        promptTokens: data.usage?.input_tokens ?? 0,
+        completionTokens: data.usage?.output_tokens ?? 0,
+      },
+    };
+  }
+
+  async responsesForProvider(
+    provider: "replit-proxy" | "openai" | "anthropic" | "gemini" | "huggingface",
+    messages: ChatMessage[],
+    options?: { model?: string; maxOutputTokens?: number; signal?: AbortSignal },
+  ): Promise<ChatCompletionResult> {
+    const { signal, ...completionOptions } = options ?? {};
+    if (provider === "replit-proxy" && this.hasReplitProxy) {
+      return this.replitProxyResponse(messages, completionOptions, signal);
+    }
+    if (provider === "openai" && this.openaiKey) {
+      return this.openaiResponse(messages, completionOptions, signal);
+    }
+    return this.chatCompletionForProvider(provider, messages, {
+      model: completionOptions.model,
+      maxTokens: completionOptions.maxOutputTokens,
+      signal,
+    });
   }
 
   private async anthropicCompletion(

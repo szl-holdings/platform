@@ -206,32 +206,17 @@ export async function generateReportNarrative(request: NarrativeRequest): Promis
 
     if (!responseText) {
       try {
-        const openai = aiModule as {
-          default?: {
-            chat?: {
-              completions?: {
-                create: (...args: unknown[]) => Promise<{
-                  choices: Array<{ message: { content: string } }>;
-                  usage?: { total_tokens: number };
-                  model: string;
-                }>;
-              };
-            };
-          };
-        };
-        if (openai.default?.chat?.completions?.create) {
-          const response = await openai.default.chat.completions.create({
-            model: 'gpt-4o-mini',
-            max_tokens: 1024,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: userPrompt },
-            ],
-          });
-          responseText = response.choices[0]?.message?.content || null;
-          tokensUsed = response.usage?.total_tokens;
-          modelName = response.model;
-        }
+        const { createResponse } = await import('@szl-holdings/ai-engine/providers/openai');
+        const response = await createResponse(
+          [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          { model: 'gpt-4o-mini', maxOutputTokens: 1024 },
+        );
+        responseText = response.content || null;
+        tokensUsed = response.usage.promptTokens + response.usage.completionTokens;
+        modelName = response.model;
       } catch (openaiErr) {
         logger.warn({ err: openaiErr }, 'OpenAI narrative generation failed, using fallback');
       }

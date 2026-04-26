@@ -10,7 +10,7 @@
  *   GET  /cross-domain-query/suggestions — pre-built query suggestions
  */
 
-import { openai } from '@szl-holdings/ai-engine/providers/openai';
+import { createResponse, createResponseStream } from '@szl-holdings/ai-engine/providers/openai';
 import { buildEnvelope, storeProvenance } from '@szl-holdings/ai-engine/provenance';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import {
@@ -825,14 +825,13 @@ async function generateAIFusedAnswer(
 ): Promise<string> {
   const { system, user } = buildAIPrompt(query, domains, results, live);
   const completion = await Promise.race([
-    openai.chat.completions.create({
-      model: AI_FUSED_ANSWER_MODEL,
-      max_completion_tokens: 600,
-      messages: [
+    createResponse(
+      [
         { role: 'system', content: system },
         { role: 'user', content: user },
       ],
-    }),
+      { model: AI_FUSED_ANSWER_MODEL, maxOutputTokens: 600 },
+    ),
     new Promise<never>((_, reject) =>
       setTimeout(
         () => reject(new Error(`LLM timed out after ${AI_FUSED_ANSWER_TIMEOUT_MS}ms`)),
@@ -840,7 +839,7 @@ async function generateAIFusedAnswer(
       ),
     ),
   ]);
-  const text = completion.choices?.[0]?.message?.content?.trim();
+  const text = completion.content?.trim();
   if (!text) {
     throw new Error('LLM returned empty content');
   }
@@ -854,18 +853,14 @@ async function* streamAIFusedAnswer(
   live: LiveDomainData,
 ): AsyncGenerator<string> {
   const { system, user } = buildAIPrompt(query, domains, results, live);
-  const stream = await openai.chat.completions.create({
-    model: AI_FUSED_ANSWER_MODEL,
-    max_completion_tokens: 600,
-    stream: true,
-    messages: [
+  for await (const chunk of createResponseStream(
+    [
       { role: 'system', content: system },
       { role: 'user', content: user },
     ],
-  });
-  for await (const chunk of stream) {
-    const delta = chunk.choices?.[0]?.delta?.content;
-    if (delta) yield delta;
+    { model: AI_FUSED_ANSWER_MODEL, maxOutputTokens: 600 },
+  )) {
+    yield chunk;
   }
 }
 

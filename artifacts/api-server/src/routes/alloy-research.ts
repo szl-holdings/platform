@@ -1,4 +1,4 @@
-import { openai } from '@szl-holdings/ai-engine/providers/openai';
+import { createResponse } from '@szl-holdings/ai-engine/providers/openai';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { pool } from '@szl-holdings/db';
 import { type IRouter, type Request, type Response, Router } from 'express';
@@ -157,13 +157,12 @@ Format as JSON array:
 
 Return ONLY valid JSON.`;
 
-        const result = await openai.chat.completions.create({
-          model: 'gpt-5.2',
-          max_completion_tokens: 2048,
-          messages: [{ role: 'user', content: researchPrompt }],
-        });
+        const result = await createResponse(
+          [{ role: 'user', content: researchPrompt }],
+          { model: 'gpt-5.2', maxOutputTokens: 2048 },
+        );
 
-        const content = result.choices[0]?.message?.content ?? '';
+        const content = result.content ?? '';
         const jsonMatch = content.match(/\[[\s\S]*\]/);
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]) as Array<{

@@ -65,6 +65,8 @@
     { "file": "artifacts/a11oy/src/data/brands.ts", "line": 45, "term": "PARAGON", "reason": "Seed data: tagline string mirrors the registered artifact title 'PARAGON — Defense & Intelligence Command'; internal-codename use is intentional here for demo fidelity." },
     { "file": "artifacts/a11oy/src/data/brands.ts", "line": 52, "term": "Nexus", "reason": "Seed data: third-party demo brand entry named 'Acme Nexus'; not a SZL Holdings product name." },
     { "file": "artifacts/a11oy/src/data/tokens.ts", "line": 22, "term": "DOMAINE", "reason": "Seed data: driftSurfaces label 'Terra (DOMAINE)' uses codename parenthetically; pre-existing demo fidelity reference." },
-    { "file": "artifacts/a11oy/src/data/tokens.ts", "line": 29, "term": "DOMAINE", "reason": "Seed data: driftSurfaces label 'Terra (DOMAINE)' uses codename parenthetically; pre-existing demo fidelity reference." }
+    { "file": "artifacts/a11oy/src/data/tokens.ts", "line": 29, "term": "DOMAINE", "reason": "Seed data: driftSurfaces label 'Terra (DOMAINE)' uses codename parenthetically; pre-existing demo fidelity reference." },
+    { "file": "artifacts/command/src/pages/demo-launchpad.tsx", "line": 1076, "term": "FORGE", "reason": "7th Signature Innovation domain label — intentional reference to FORGE as the Responses API backbone per task spec; display label for the agentic loop innovation entry." },
+    { "file": "lib/shared-ui/src/ecosystem-map.tsx", "line": 384, "term": "FORGE", "reason": "Ecosystem-map center badge — intentional reference to FORGE as the Responses API backbone per task spec; shows FORGE · RESPONSES API to indicate the AI backbone." }
   ]
 }

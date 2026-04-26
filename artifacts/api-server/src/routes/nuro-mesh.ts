@@ -1,6 +1,6 @@
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { ai as geminiAi } from '@szl-holdings/ai-engine/providers/gemini';
-import { openai } from '@szl-holdings/ai-engine/providers/openai';
+import { createResponse, createResponseStream, openai } from '@szl-holdings/ai-engine/providers/openai';
 import { buildEnvelope, storeProvenance } from '@szl-holdings/ai-engine/provenance';
 import {
   advisoryFindings,
@@ -623,19 +623,18 @@ async function callAgent(
       tokensUsed = result.usage.input_tokens + result.usage.output_tokens;
       success = true;
     } else if (agent.preferredProvider === 'openai') {
-      const result = await openai.chat.completions.create({
-        model: agent.preferredModel,
-        max_completion_tokens: 2048,
-        messages: [
+      const result = await createResponse(
+        [
           { role: 'system', content: agent.systemPrompt },
           {
             role: 'user',
             content: `## Shared Context\n${context}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with: CONFIDENCE: [0-100]`,
           },
         ],
-      });
-      response = result.choices[0]?.message?.content ?? '';
-      tokensUsed = result.usage?.total_tokens ?? 0;
+        { model: agent.preferredModel, maxOutputTokens: 2048 },
+      );
+      response = result.content ?? '';
+      tokensUsed = result.usage.promptTokens + result.usage.completionTokens;
       success = true;
     } else if (agent.preferredProvider === 'gemini') {
       try {
@@ -647,16 +646,15 @@ async function callAgent(
         response = result.text ?? '';
         success = true;
       } catch {
-        const fallback = await openai.chat.completions.create({
-          model: 'gpt-5.2',
-          max_completion_tokens: 2048,
-          messages: [
+        const fallback = await createResponse(
+          [
             { role: 'system', content: agent.systemPrompt },
             { role: 'user', content: fullPrompt },
           ],
-        });
-        response = fallback.choices[0]?.message?.content ?? '';
-        tokensUsed = fallback.usage?.total_tokens ?? 0;
+          { model: 'gpt-5.2', maxOutputTokens: 2048 },
+        );
+        response = fallback.content ?? '';
+        tokensUsed = fallback.usage.promptTokens + fallback.usage.completionTokens;
         success = true;
       }
     }
@@ -900,34 +898,14 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
 
       const synthStartTime = Date.now();
       let synthesisContent = '';
-      let synthStream;
-      try {
-        synthStream = await openai.chat.completions.create({
-          model: alloyAgent.preferredModel,
-          max_completion_tokens: 4096,
-          messages: [{ role: 'user', content: aggregationPrompt }],
-          stream: true,
-        });
-      } catch (streamInitErr) {
-        const initErrMsg =
-          streamInitErr instanceof Error
-            ? streamInitErr.message
-            : 'Failed to initialize synthesis stream';
-        res.write(
-          `data: ${JSON.stringify({ type: 'error', error: `Synthesis unavailable: ${initErrMsg}. Domain agent responses were collected successfully.`, partial: true, agentResponses: agentResponses.map((r) => ({ agentId: r.agentId, agentName: r.agentName, domain: r.domain, confidence: r.confidence })) })}\n\n`,
-        );
-        res.end();
-        return;
-      }
-
       let streamError: string | null = null;
       try {
-        for await (const chunk of synthStream) {
-          const delta = chunk.choices[0]?.delta?.content;
-          if (delta) {
-            synthesisContent += delta;
-            res.write(`data: ${JSON.stringify({ type: 'synthesis_chunk', content: delta })}\n\n`);
-          }
+        for await (const chunk of createResponseStream(
+          [{ role: 'user', content: aggregationPrompt }],
+          { model: alloyAgent.preferredModel, maxOutputTokens: 4096 },
+        )) {
+          synthesisContent += chunk;
+          res.write(`data: ${JSON.stringify({ type: 'synthesis_chunk', content: chunk })}\n\n`);
         }
       } catch (streamChunkErr) {
         streamError =

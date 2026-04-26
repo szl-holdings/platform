@@ -9,7 +9,7 @@
  */
 
 import { anthropic } from '../providers/anthropic/index.js';
-import { openai } from '../providers/openai/index.js';
+import { createResponse } from '../providers/openai/responses.js';
 import type { AgentCallResult } from '../types.js';
 
 export interface RedTeamFinding {
@@ -100,13 +100,11 @@ Respond with JSON:
       });
       raw = result.content[0]?.type === 'text' ? result.content[0].text : '{}';
     } else {
-      const result = await openai.chat.completions.create({
-        model: challengerModel,
-        max_completion_tokens: 1024,
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' },
-      });
-      raw = result.choices[0]?.message?.content ?? '{}';
+      const result = await createResponse(
+        [{ role: 'user', content: prompt }],
+        { model: challengerModel, maxOutputTokens: 1024 },
+      );
+      raw = result.content ?? '{}';
     }
   } catch {
     raw = '{}';

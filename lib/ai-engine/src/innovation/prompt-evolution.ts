@@ -6,7 +6,7 @@
  * Auto-applies low-risk refinements (narrowing existing expertise);
  * flags significant changes for human review.
  */
-import { openai } from '../providers/openai/index.js';
+import { createResponse } from '../providers/openai/responses.js';
 
 export interface PromptEvolutionProposal {
   agentId: string;
@@ -84,14 +84,12 @@ Respond with JSON:
 
 Keep changes minimal and precise. Low-risk = narrow existing focus. High-risk = changes core behavior.`;
 
-    const result = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      max_completion_tokens: 512,
-      messages: [{ role: 'user', content: analysisPrompt }],
-      response_format: { type: 'json_object' },
-    });
+    const result = await createResponse(
+      [{ role: 'user', content: analysisPrompt }],
+      { model: 'gpt-4o-mini', maxOutputTokens: 512 },
+    );
 
-    const raw = result.choices[0]?.message?.content ?? '{}';
+    const raw = result.content ?? '{}';
     let parsed: Record<string, unknown> = {};
     try {
       parsed = JSON.parse(raw) as Record<string, unknown>;

@@ -107,13 +107,11 @@ export async function getEvalHistory(limit = 10): Promise<(typeof evalRuns.$infe
 }
 
 async function buildDefaultExecutor(): Promise<Parameters<typeof runEvals>[0]> {
-  const { openai } = await import('../providers/openai/index.js');
+  const { createResponse } = await import('../providers/openai/responses.js');
   return async (input: string, _category: string) => {
     const start = Date.now();
-    const result = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      max_completion_tokens: 512,
-      messages: [
+    const result = await createResponse(
+      [
         {
           role: 'system',
           content:
@@ -124,8 +122,9 @@ async function buildDefaultExecutor(): Promise<Parameters<typeof runEvals>[0]> {
           content: input || 'Empty input received. Respond with a safe fallback escalation.',
         },
       ],
-    });
-    const text = result.choices[0]?.message?.content ?? '{}';
+      { model: 'gpt-4o-mini', maxOutputTokens: 512 },
+    );
+    const text = result.content ?? '{}';
     let output: Record<string, unknown> = {};
     try {
       const match = text.match(/\{[\s\S]*\}/);

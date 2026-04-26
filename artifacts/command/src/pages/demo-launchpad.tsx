@@ -1032,7 +1032,7 @@ export function DemoLaunchpad() {
                   marginBottom: 14,
                 }}
               >
-                SIX SIGNATURE INNOVATIONS
+                SEVEN SIGNATURE INNOVATIONS
               </p>
               {[
                 {
@@ -1070,6 +1070,12 @@ export function DemoLaunchpad() {
                   domain: 'Carlota Jo',
                   color: '#9A7D52',
                   href: '/carlota-jo/concierge',
+                },
+                {
+                  label: 'Responses API (Agentic Loop)',
+                  domain: 'FORGE',
+                  color: '#a78bfa',
+                  href: `${BASE}/infrastructure/forge`,
                 },
               ].map((item) => (
                 <div

@@ -66,7 +66,7 @@ async function generateConversationSummary(
   _agentId: string,
 ): Promise<string | null> {
   try {
-    const { openai } = await import('./providers/openai/index.js');
+    const { createResponse } = await import('./providers/openai/responses.js');
     const dialogue = messages
       .filter((m) => m.role !== 'system')
       .slice(-20)
@@ -74,10 +74,8 @@ async function generateConversationSummary(
       .join('\n');
     if (!dialogue.trim()) return null;
 
-    const result = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      max_completion_tokens: 400,
-      messages: [
+    const result = await createResponse(
+      [
         {
           role: 'system',
           content:
@@ -85,8 +83,9 @@ async function generateConversationSummary(
         },
         { role: 'user', content: dialogue },
       ],
-    });
-    return result.choices[0]?.message?.content ?? null;
+      { model: 'gpt-4o-mini', maxOutputTokens: 400 },
+    );
+    return result.content ?? null;
   } catch {
     return null;
   }

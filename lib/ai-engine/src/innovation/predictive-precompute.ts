@@ -7,7 +7,7 @@
  * Caches results with a short TTL. When a matching query arrives,
  * serves the pre-computed result instantly and marks it as "pre-computed".
  */
-import { openai } from '../providers/openai/index.js';
+import { createResponse } from '../providers/openai/responses.js';
 import type { AgentCallResult } from '../types.js';
 
 const CACHE_TTL_MS = 15 * 60 * 1000;
@@ -77,14 +77,12 @@ Respond with JSON:
   ]
 }`;
 
-    const result = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      max_completion_tokens: 512,
-      messages: [{ role: 'user', content: predictionPrompt }],
-      response_format: { type: 'json_object' },
-    });
+    const result = await createResponse(
+      [{ role: 'user', content: predictionPrompt }],
+      { model: 'gpt-4o-mini', maxOutputTokens: 512 },
+    );
 
-    const raw = result.choices[0]?.message?.content ?? '{}';
+    const raw = result.content ?? '{}';
     let parsed: Record<string, unknown> = {};
     try {
       parsed = JSON.parse(raw) as Record<string, unknown>;

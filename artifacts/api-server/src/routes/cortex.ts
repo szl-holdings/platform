@@ -877,7 +877,7 @@ async function callWhatIfLLM(
   }
 
   try {
-    const { openai } = await import('@szl-holdings/ai-engine/providers/openai');
+    const { createResponse } = await import('@szl-holdings/ai-engine/providers/openai');
 
     const orgContext = await buildOrgScopedContext(orgId);
 
@@ -888,16 +888,15 @@ async function callWhatIfLLM(
       '[CORTEX] LLM what-if context assembled',
     );
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-5.2',
-      max_completion_tokens: 2048,
-      messages: [
+    const completion = await createResponse(
+      [
         { role: 'system', content: buildWhatIfSystemPrompt(orgContext) },
         { role: 'user', content: `Scenario: ${query}` },
       ],
-    });
+      { model: 'gpt-5.2', maxOutputTokens: 2048 },
+    );
 
-    const raw = completion.choices[0]?.message?.content ?? '';
+    const raw = completion.content ?? '';
   const res = parseWhatIfJSON(raw, query);
   if (res) {
     return {
@@ -940,7 +939,7 @@ async function callWhatIfLLMStream(
   let tokensEmitted = false;
 
   try {
-    const { openai } = await import('@szl-holdings/ai-engine/providers/openai');
+    const { createResponseStream } = await import('@szl-holdings/ai-engine/providers/openai');
 
     const orgContext = await buildOrgScopedContext(orgId);
 
@@ -951,22 +950,15 @@ async function callWhatIfLLMStream(
       '[CORTEX] LLM what-if stream context assembled',
     );
 
-    const stream = await openai.chat.completions.create({
-      model: 'gpt-5.2',
-      max_completion_tokens: 2048,
-      stream: true,
-      messages: [
+    for await (const chunk of createResponseStream(
+      [
         { role: 'system', content: buildWhatIfSystemPrompt(orgContext) },
         { role: 'user', content: `Scenario: ${query}` },
       ],
-    });
-
-    for await (const chunk of stream) {
-      const token = chunk.choices[0]?.delta?.content ?? '';
-      if (token) {
-        tokensEmitted = true;
-        res.write(`data: ${JSON.stringify({ type: 'token', content: token })}\n\n`);
-      }
+      { model: 'gpt-5.2', maxOutputTokens: 2048 },
+    )) {
+      tokensEmitted = true;
+      res.write(`data: ${JSON.stringify({ type: 'token', content: chunk })}\n\n`);
     }
 
     logger.info(

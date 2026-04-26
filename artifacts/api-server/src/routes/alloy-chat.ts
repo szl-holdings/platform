@@ -1,5 +1,5 @@
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
-import { openai } from '@szl-holdings/ai-engine/providers/openai';
+import { createResponse, createResponseStream } from '@szl-holdings/ai-engine/providers/openai';
 import { conversations, db, messages, pool } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
 import crypto from 'node:crypto';
@@ -11,6 +11,26 @@ import { assertExternalUrl } from '../lib/ssrf-guard';
 import { authMiddleware } from '../middlewares/auth';
 
 const alloyChatRouter: IRouter = Router();
+
+/**
+ * In-memory cache of Responses API response IDs per conversation.
+ * Enables `previous_response_id` on follow-up turns — avoids re-sending
+ * the full token history and activates Responses API multi-turn statefulness.
+ * TTL: 60 minutes of inactivity per conversation (auto-purged).
+ */
+const conversationResponseIdCache = new Map<string, { responseId: string; ts: number }>();
+const RESPONSE_ID_TTL_MS = 60 * 60 * 1000;
+function setConversationResponseId(convId: string, responseId: string): void {
+  conversationResponseIdCache.set(convId, { responseId, ts: Date.now() });
+  for (const [id, entry] of conversationResponseIdCache) {
+    if (Date.now() - entry.ts > RESPONSE_ID_TTL_MS) conversationResponseIdCache.delete(id);
+  }
+}
+function getConversationResponseId(convId: string): string | undefined {
+  const entry = conversationResponseIdCache.get(convId);
+  if (!entry || Date.now() - entry.ts > RESPONSE_ID_TTL_MS) return undefined;
+  return entry.responseId;
+}
 
 function internalAdminFetch(url: string, options: RequestInit = {}): Promise<globalThis.Response> {
   const internalToken = process.env.ALLOY_INTERNAL_TOKEN;
@@ -471,19 +491,18 @@ alloyChatRouter.post(
           }
         }
       } else {
-        const stream = await openai.chat.completions.create({
-          model,
-          max_completion_tokens: 8192,
-          messages: [{ role: 'system', content: systemPrompt }, ...chatMessages],
-          stream: true,
-        });
-
-        for await (const chunk of stream) {
-          const delta = chunk.choices[0]?.delta?.content;
-          if (delta) {
-            fullResponse += delta;
-            res.write(`data: ${JSON.stringify({ content: delta })}\n\n`);
-          }
+        const prevResponseId = getConversationResponseId(id);
+        for await (const chunk of createResponseStream(
+          [{ role: 'system', content: systemPrompt }, ...chatMessages],
+          { model, maxOutputTokens: 8192, ...(prevResponseId ? { previousResponseId: prevResponseId } : {}) },
+          {
+            onComplete: ({ responseId }) => {
+              if (responseId) setConversationResponseId(id, responseId);
+            },
+          },
+        )) {
+          fullResponse += chunk;
+          res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
         }
       }
 

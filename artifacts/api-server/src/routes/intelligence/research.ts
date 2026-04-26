@@ -1,5 +1,5 @@
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
-import { openai } from '@szl-holdings/ai-engine/providers/openai';
+import { createResponse, createResponseStream } from '@szl-holdings/ai-engine/providers/openai';
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { services } from '@szl-holdings/services';
 import { type IRouter, Router } from 'express';
@@ -1058,22 +1058,16 @@ router.post(
               }
             }
           } else {
-            const streamResp = await openai.chat.completions.create({
-              model: agent.model,
-              max_completion_tokens: maxTokens,
-              messages: [
+            for await (const chunk of createResponseStream(
+              [
                 { role: 'system' as const, content: agent.systemPrompt },
                 ...messages,
-              ] as Parameters<typeof openai.chat.completions.create>[0]['messages'],
-              stream: true,
-            });
-            for await (const chunk of streamResp) {
-              const delta = chunk.choices[0]?.delta?.content;
-              if (delta) {
-                res.write(
-                  `data: ${JSON.stringify({ content: delta, agent: agentId, agentName: agent.name })}\n\n`,
-                );
-              }
+              ],
+              { model: agent.model, maxOutputTokens: maxTokens },
+            )) {
+              res.write(
+                `data: ${JSON.stringify({ content: chunk, agent: agentId, agentName: agent.name })}\n\n`,
+              );
             }
           }
           res.write(
@@ -1099,15 +1093,14 @@ router.post(
         });
         content = result.content[0]?.type === 'text' ? result.content[0].text : '';
       } else {
-        const result = await openai.chat.completions.create({
-          model: agent.model,
-          max_completion_tokens: maxTokens,
-          messages: [
+        const result = await createResponse(
+          [
             { role: 'system' as const, content: agent.systemPrompt },
             ...messages,
-          ] as Parameters<typeof openai.chat.completions.create>[0]['messages'],
-        });
-        content = result.choices[0]?.message?.content ?? '';
+          ],
+          { model: agent.model, maxOutputTokens: maxTokens },
+        );
+        content = result.content ?? '';
       }
 
       sendSuccess(res, {
@@ -1185,19 +1178,14 @@ Format as structured sections with clear headers.`;
       res.setHeader('X-Accel-Buffering', 'no');
       res.flushHeaders();
 
-      const stream = await openai.chat.completions.create({
-        model: 'gpt-5.2',
-        max_completion_tokens: 2048,
-        messages: [
+      for await (const chunk of createResponseStream(
+        [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
         ],
-        stream: true,
-      });
-
-      for await (const chunk of stream) {
-        const delta = chunk.choices[0]?.delta?.content;
-        if (delta) res.write(`data: ${JSON.stringify({ content: delta })}\n\n`);
+        { model: 'gpt-5.2', maxOutputTokens: 2048 },
+      )) {
+        res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
       }
       res.write(
         `data: ${JSON.stringify({ done: true, model: 'gpt-5.2', provider: 'openai' })}\n\n`,
@@ -1373,16 +1361,15 @@ Provide:
 Be concise and action-oriented.`;
 
       const startTime = Date.now();
-      const result = await openai.chat.completions.create({
-        model: 'gpt-5.2',
-        max_completion_tokens: 800,
-        messages: [
+      const result = await createResponse(
+        [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
         ],
-      });
+        { model: 'gpt-5.2', maxOutputTokens: 800 },
+      );
 
-      const content = result.choices[0]?.message?.content ?? '';
+      const content = result.content ?? '';
       sendSuccess(res, {
         triage: content,
         subject,

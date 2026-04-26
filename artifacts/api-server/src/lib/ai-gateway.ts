@@ -352,6 +352,21 @@ async function executeProviderInference(
   }, timeoutMs);
 
   try {
+    if (provider === 'openai' || provider === 'replit-proxy') {
+      try {
+        return await services.ai.responsesForProvider(provider, messages, {
+          model,
+          maxOutputTokens: maxTokens,
+          signal: controller.signal,
+        });
+      } catch {
+        return await services.ai.chatCompletionForProvider(provider, messages, {
+          model,
+          maxTokens,
+          signal: controller.signal,
+        });
+      }
+    }
     return await services.ai.chatCompletionForProvider(provider, messages, {
       model,
       maxTokens,
