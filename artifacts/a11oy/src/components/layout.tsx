@@ -10,9 +10,18 @@ function b(path: string) {
 
 const NAV_GROUPS = [
   {
+    label: 'SYSTEM',
+    items: [
+      { href: '/',              label: 'Home' },
+      { href: '/architecture',  label: 'Architecture' },
+      { href: '/applications',  label: 'Applications' },
+      { href: '/resources',     label: 'Resources' },
+      { href: '/constellation', label: 'Constellation' },
+    ],
+  },
+  {
     label: 'NOW',
     items: [
-      { href: '/',        label: 'Home' },
       { href: '/now',     label: 'Now Board' },
       { href: '/command', label: 'Command' },
     ],
@@ -96,15 +105,6 @@ const NAV_GROUPS = [
       { href: '/boardroom',     label: 'Boardroom' },
       { href: '/investor-demo', label: 'Investor Demo' },
       { href: '/about',         label: 'About' },
-    ],
-  },
-  {
-    label: 'EXPLORE',
-    items: [
-      { href: '/applications',  label: 'Applications' },
-      { href: '/constellation', label: 'Constellation' },
-      { href: '/architecture',  label: 'Architecture' },
-      { href: '/resources',     label: 'Resources' },
     ],
   },
   {

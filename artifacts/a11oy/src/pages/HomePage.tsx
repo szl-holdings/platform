@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { INDUSTRY_SOLUTIONS, CANONICAL_STEPS } from '../data/solutionsData';
+import { SEVEN_PRINCIPLES } from '../data/blueprint';
 import { useAlloyDashboard } from '../graphql';
 
 const T = {
@@ -272,10 +273,10 @@ export function HomePage() {
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '2.25rem' }}>
           {[
+            { label: 'Architecture', href: b('/architecture') },
+            { label: 'Applications', href: b('/applications') },
+            { label: 'Resources', href: b('/resources') },
             { label: 'Platform', href: b('/fabric') },
-            { label: 'Solutions', href: b('/solutions') },
-            { label: 'Proof Chain', href: b('/proof') },
-            { label: 'Governance', href: b('/governance') },
             { label: 'Now Board', href: b('/now') },
           ].map(link => (
             <Link key={link.label} href={link.href} style={{
@@ -355,10 +356,10 @@ export function HomePage() {
                 maxWidth: '48ch', margin: '0 0 2.5rem',
               }}
             >
-              a11oy unifies 8 frontier AI providers into one governed decision loop.
-              Every action is policy-gated. Every outcome carries proof.
-              Not a copilot — a governed operating system for the enterprise
-              that can't afford to guess.
+              A governed agentic OS that perceives business events, reasons across domains,
+              calls tools, executes workflows, verifies outcomes, and leaves a proof trail.
+              Every action policy-gated. Every outcome proven. Built for the enterprise
+              that can't afford to guess — and can't afford to not know.
             </motion.p>
 
             <motion.div
@@ -376,7 +377,7 @@ export function HomePage() {
               transition={{ duration: 0.6, delay: 0.45 }}
               style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
             >
-              {['Signal', 'Govern', 'Execute', 'Prove'].map((chip) => (
+              {['Ingest', 'Understand', 'Plan', 'Act', 'Verify', 'Audit', 'Learn'].map((chip) => (
                 <span key={chip} style={{
                   padding: '0.4rem 0.875rem', borderRadius: 8,
                   fontSize: '0.8125rem', fontWeight: 500,
@@ -445,6 +446,46 @@ export function HomePage() {
               executes them with human approval, and proves it did so correctly.
             </p>
           </FadeIn>
+        </div>
+      </section>
+
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+        <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
+          <FadeIn>
+            <div style={{ marginBottom: '3rem' }}>
+              <SectionLabel>Seven Governing Principles</SectionLabel>
+              <h2 style={{
+                fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: T.serif,
+                fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
+                lineHeight: 1.1, margin: '0 0 1rem',
+              }}>
+                From signal to outcome.{' '}
+                <span style={{ color: T.accent }}>Seven steps. One proof.</span>
+              </h2>
+              <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, maxWidth: '60ch', margin: 0 }}>
+                Every action in a11oy flows through the same seven governing principles —
+                the canonical lifecycle of a governed agentic intelligence layer.
+              </p>
+            </div>
+          </FadeIn>
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+            gap: '1px', background: T.border, borderRadius: 12, overflow: 'hidden',
+            border: `1px solid ${T.border}`,
+          }}>
+            {SEVEN_PRINCIPLES.map((p, i) => (
+              <FadeIn key={p.label} delay={i * 0.05}>
+                <div style={{ padding: '2rem 1.5rem', background: T.bg, height: '100%', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                    <span style={{ fontSize: '1.25rem', color: T.accent, lineHeight: 1, fontFamily: T.mono }}>{p.glyph}</span>
+                    <span style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.16em', color: T.textMuted }}>{p.step}</span>
+                  </div>
+                  <h3 style={{ fontSize: '1.0625rem', fontWeight: 600, letterSpacing: '-0.015em', color: T.text, margin: 0 }}>{p.label}</h3>
+                  <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.textDim, margin: 0 }}>{p.desc}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -684,12 +725,13 @@ export function HomePage() {
                 fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
                 lineHeight: 1.1, margin: '0 0 1rem',
               }}>
-                One orchestration layer.{' '}
-                <span style={{ color: T.accent }}>Four governed verticals.</span>
+                One agentic layer.{' '}
+                <span style={{ color: T.accent }}>Every governed domain.</span>
               </h2>
               <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
-                Each vertical runs on the same a11oy decision loop — Signal to Outcome — with
-                domain-specific intelligence applied at the context layer.
+                Each vertical runs on the same seven governing principles — from Ingest to Learn —
+                with domain-specific intelligence applied at the context layer.
+                Twelve applications across maritime, legal, real estate, defense, and more.
               </p>
             </div>
           </FadeIn>

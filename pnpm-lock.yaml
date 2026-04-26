@@ -370,6 +370,9 @@ importers:
       '@szl-holdings/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
+      '@szl-holdings/domain-profiles':
+        specifier: workspace:*
+        version: link:../../packages/domain-profiles
       '@szl-holdings/omnia-shell':
         specifier: workspace:*
         version: link:../../packages/omnia-shell

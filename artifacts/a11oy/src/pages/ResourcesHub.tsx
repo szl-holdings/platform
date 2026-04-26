@@ -1,130 +1,332 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
-import { PageHeader, KpiCard, Card, SectionTitle } from '../components/ui';
+import { motion } from 'framer-motion';
 
-const RESOURCES = [
-  { id: 'sdk-ts', title: 'TypeScript SDK', category: 'SDK', description: '@workspace/a11oy-fabric — shared types, seed data, schema contracts, and Zod validators for the A11oy execution fabric.', status: 'available', version: '4.2.0' },
-  { id: 'sdk-py', title: 'Python Vertical Pack SDK', category: 'SDK', description: 'services/verticals/contracts.py — substrate recommendation contracts for all 12 verticals. Signal, forecast, recommendation, and brief modules.', status: 'available', version: '1.0.0' },
-  { id: 'api-fabric', title: 'Fabric API Reference', category: 'API', description: 'Phase 1 Foundation — GET /a11oy/signals, /outcomes, /actions, /proof, /governance, /verticals, /fabric, /workcells.', status: 'available', version: '1.0' },
-  { id: 'api-runtime', title: 'Runtime API Reference', category: 'API', description: 'Phase 2 Runtime — POST /a11oy/signals, /actions/:id/approve, /workcells, /tools/:id/run, /evals/run, PCE gate.', status: 'available', version: '2.0' },
-  { id: 'api-sovereign', title: 'Sovereign API Reference', category: 'API', description: 'Phase 3 Sovereign — multi-tenant orchestration, model routing, eval lab, connector firewall, boardroom mode.', status: 'available', version: '3.0' },
-  { id: 'api-public', title: 'Public API Reference', category: 'API', description: 'Unauthenticated read-only — GET /api/public/a11oy/constellation, /applications, /architecture, /resources.', status: 'available', version: '1.0' },
-  { id: 'api-internal', title: 'Internal API Reference', category: 'API', description: 'Authenticated operational — GET /api/internal/a11oy/readiness, /mcp/readiness, /verticals/health, /storage/status.', status: 'available', version: '1.0' },
-  { id: 'guide-pce', title: 'Proof-Carrying Execution Guide', category: 'Guide', description: 'How PCE contracts bind every workcell to its evidence chain, approval record, and cryptographic output hash.', status: 'available', version: null },
-  { id: 'guide-covenant', title: 'Covenant Policy Authoring', category: 'Guide', description: 'Writing and deploying policy-as-code gates for governed execution. Approval tiers, policy clauses, enforcement modes.', status: 'available', version: null },
-  { id: 'guide-mcp', title: 'MCP Gateway Integration', category: 'Guide', description: 'Connecting external MCP servers through the A11oy containment firewall. Allowlists, egress rules, injection scanning.', status: 'available', version: null },
-  { id: 'guide-vertical', title: 'Vertical Pack Development', category: 'Guide', description: 'Building a new vertical pack — signals.py, forecast.py, recommendations.py, brief.py structure and contracts.', status: 'available', version: null },
-  { id: 'guide-storage', title: 'Storage Provider Registry', category: 'Guide', description: 'Configuring retention policies, storage modes (database, object-store, local-cache, disabled), and TTL categories.', status: 'available', version: null },
-  { id: 'pub-whitepaper', title: 'Governed AI Operating System', category: 'Publication', description: 'Architecture overview, competitive differentiation, and proof-chain design rationale. Board-ready format.', status: 'draft', version: 'v0.9-draft' },
-  { id: 'pub-pce-spec', title: 'PCE Specification v1.0', category: 'Publication', description: 'Formal specification of the Proof-Carrying Execution contract format, hash algorithm, and verification protocol.', status: 'available', version: '1.0' },
-  { id: 'pub-mcp-readiness', title: 'MCP Readiness Assessment Framework', category: 'Publication', description: 'Methodology for evaluating MCP gateway readiness: auth mode, write gate, approval depth, evidence chain.', status: 'draft', version: 'v0.7-draft' },
+const T = {
+  bg: '#0a0a0a',
+  border: 'rgba(255,255,255,0.08)',
+  text: '#f5f5f5',
+  textDim: '#8a8a8a',
+  textMuted: '#5e5e5e',
+  accent: '#c9b787',
+  mono: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace",
+  serif: "Georgia, 'Times New Roman', Times, serif",
+};
+
+type Availability = 'public' | 'internal' | 'draft';
+
+interface Resource {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  availability: Availability;
+  version: string | null;
+  href: string | null;
+  hrefLabel: string | null;
+}
+
+const RESOURCES: Resource[] = [
+  {
+    id: 'arch-overview',
+    title: 'Architecture Overview',
+    category: 'Document',
+    description: 'The eleven blueprint components, seven governing principles, and eight implementation priorities that define the A11oy governed agentic layer.',
+    availability: 'public',
+    version: 'v1.0',
+    href: '/a11oy/architecture',
+    hrefLabel: 'Open Architecture page',
+  },
+  {
+    id: 'platform-definition',
+    title: 'Platform Definition',
+    category: 'Document',
+    description: 'What A11oy is, what it is not, how it differs from copilots and automation platforms, and the north star that governs its design decisions.',
+    availability: 'public',
+    version: 'v1.0',
+    href: '/a11oy/about',
+    hrefLabel: 'Open Platform Definition',
+  },
+  {
+    id: 'applications-catalog',
+    title: 'Applications Catalog',
+    category: 'Document',
+    description: 'All 12 governed applications with honest operational status, seven-principle tags, domain grouping, and registry profile IDs for the six AEEP-registered domains.',
+    availability: 'public',
+    version: null,
+    href: '/a11oy/applications',
+    hrefLabel: 'Open Applications Catalog',
+  },
+  {
+    id: 'agentic-blueprint',
+    title: 'Agentic AI Blueprint',
+    category: 'Document',
+    description: 'The canonical blueprint defining governed agentic OS design — seven principles, eleven components, eight implementation priorities, and positioning guidance.',
+    availability: 'internal',
+    version: 'v1.0',
+    href: null,
+    hrefLabel: null,
+  },
+  {
+    id: 'mcp-readiness',
+    title: 'MCP Readiness Assessment Framework',
+    category: 'Document',
+    description: 'Methodology for evaluating MCP gateway readiness: auth mode, write gate, approval depth, evidence chain, and connector trust scoring.',
+    availability: 'draft',
+    version: 'v0.7-draft',
+    href: null,
+    hrefLabel: null,
+  },
+  {
+    id: 'pce-spec',
+    title: 'Proof-Carrying Execution',
+    category: 'Specification',
+    description: 'Formal specification of the PCE contract format — hash algorithm, approval chain structure, verification protocol, and ledger append semantics.',
+    availability: 'public',
+    version: 'v1.0',
+    href: '/a11oy/pce',
+    hrefLabel: 'Open Proof Chain viewer',
+  },
+  {
+    id: 'governance-spec',
+    title: 'Governance Framework',
+    category: 'Specification',
+    description: 'Approval tier definitions, policy clause structure, covenant enforcement modes, override audit trails, and human-in-the-loop approval contracts.',
+    availability: 'public',
+    version: 'v1.0',
+    href: '/a11oy/governance',
+    hrefLabel: 'Open Governance page',
+  },
+  {
+    id: 'covenant-policy',
+    title: 'Covenant Policy Authoring Guide',
+    category: 'Guide',
+    description: 'Writing and deploying policy-as-code gates for governed execution. Approval tiers, policy clauses, enforcement modes, and override audit trails.',
+    availability: 'internal',
+    version: null,
+    href: null,
+    hrefLabel: null,
+  },
+  {
+    id: 'guide-mcp',
+    title: 'MCP Gateway Integration',
+    category: 'Guide',
+    description: 'Connecting external MCP servers through the A11oy containment firewall. Allowlists, egress rules, injection scanning, and consent gating.',
+    availability: 'internal',
+    version: null,
+    href: null,
+    hrefLabel: null,
+  },
+  {
+    id: 'guide-vertical',
+    title: 'Vertical Pack Development',
+    category: 'Guide',
+    description: 'Building a new vertical pack — signal schemas, forecast modules, recommendation contracts, and brief structure with proof-chain wiring.',
+    availability: 'internal',
+    version: null,
+    href: null,
+    hrefLabel: null,
+  },
+  {
+    id: 'fabric-layer',
+    title: 'Fabric Layer',
+    category: 'SDK',
+    description: 'The A11oy execution fabric — shared types, tool connectors, schema contracts, and Zod validators in @workspace/a11oy-fabric.',
+    availability: 'public',
+    version: '4.2.0',
+    href: '/a11oy/fabric',
+    hrefLabel: 'Open Fabric viewer',
+  },
+  {
+    id: 'sdk-py',
+    title: 'Python Vertical Pack SDK',
+    category: 'SDK',
+    description: 'Substrate recommendation contracts for all 12 verticals. Signal, forecast, recommendation, and brief modules with consistent proof-chain wiring.',
+    availability: 'internal',
+    version: '1.0.0',
+    href: null,
+    hrefLabel: null,
+  },
+  {
+    id: 'api-fabric',
+    title: 'Fabric API Reference',
+    category: 'API',
+    description: 'GET endpoints for signals, outcomes, actions, proof, governance, verticals, fabric, and workcells. Phase 1 Foundation.',
+    availability: 'internal',
+    version: 'v1',
+    href: null,
+    hrefLabel: null,
+  },
+  {
+    id: 'api-runtime',
+    title: 'Runtime API Reference',
+    category: 'API',
+    description: 'POST endpoints for signals, approvals, workcells, tool execution, eval runs, and PCE gate. Phase 2 Runtime.',
+    availability: 'internal',
+    version: 'v2',
+    href: null,
+    hrefLabel: null,
+  },
 ];
 
-const CATEGORIES = ['All', 'SDK', 'API', 'Guide', 'Publication'];
+const CATEGORIES = ['All', 'Document', 'Specification', 'Guide', 'SDK', 'API'];
 
-const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
-  available: { bg: 'rgba(201,183,135,0.12)', color: '#c9b787' },
-  draft:     { bg: 'rgba(138,138,138,0.12)', color: '#8a8a8a' },
+const AVAILABILITY_META: Record<Availability, { color: string; label: string }> = {
+  public:   { color: '#c9b787', label: 'Public' },
+  internal: { color: '#5e5e5e', label: 'Internal' },
+  draft:    { color: '#8a8a8a', label: 'Draft' },
 };
 
 const CAT_ICONS: Record<string, string> = {
-  SDK: '⬟', API: '◆', Guide: '◉', Publication: '▣',
+  Document: '▣', Specification: '◆', Guide: '◉', SDK: '⬟', API: '⬡',
 };
+
+const ease = [0.22, 1, 0.36, 1] as [number, number, number, number];
 
 export function ResourcesHub() {
   const [category, setCategory] = useState('All');
-  const [statusFilter, setStatusFilter] = useState('all');
 
-  const filtered = RESOURCES.filter(r =>
-    (category === 'All' || r.category === category) &&
-    (statusFilter === 'all' || r.status === statusFilter)
-  );
+  const filtered = category === 'All' ? RESOURCES : RESOURCES.filter(r => r.category === category);
+
+  const grouped = CATEGORIES
+    .filter(c => c !== 'All')
+    .map(cat => ({
+      cat,
+      items: filtered.filter(r => r.category === cat),
+    }))
+    .filter(g => g.items.length > 0);
+
+  const publicCount = RESOURCES.filter(r => r.availability === 'public').length;
 
   return (
     <Layout>
-      <PageHeader
-        label="RESOURCES"
-        title="Documentation & SDK References"
-        subtitle="Everything you need to build on, integrate with, and extend the A11oy governed execution fabric — from TypeScript types to formal specifications."
-        status="LIVE"
-      />
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <KpiCard label="TOTAL RESOURCES" value={RESOURCES.length} sub="available" accent="#c9b787" />
-        <KpiCard label="SDKS" value={RESOURCES.filter(r => r.category === 'SDK').length} sub="packages" accent="#c9b787" />
-        <KpiCard label="API REFS" value={RESOURCES.filter(r => r.category === 'API').length} sub="endpoints documented" accent="#c9b787" />
-        <KpiCard label="GUIDES" value={RESOURCES.filter(r => r.category === 'Guide').length} sub="integration guides" accent="#8a8a8a" />
-      </div>
-
-      <div className="flex items-center gap-2 mb-6 flex-wrap">
-        <div className="flex gap-1">
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setCategory(cat)}
-              className="px-3 py-1 rounded text-xs font-mono transition-all flex items-center gap-1"
-              style={{
-                background: category === cat ? 'rgba(201,183,135,0.15)' : 'rgba(255,255,255,0.04)',
-                color: category === cat ? '#c9b787' : 'var(--color-a11oy-text-ghost)',
-                border: `1px solid ${category === cat ? 'rgba(201,183,135,0.3)' : 'rgba(255,255,255,0.08)'}`,
-              }}
-            >
-              {cat !== 'All' && <span>{CAT_ICONS[cat]}</span>}
-              {cat}
-            </button>
-          ))}
+      <div style={{ paddingBottom: '4rem' }}>
+        <div style={{ padding: '3rem 0 2.5rem', borderBottom: `1px solid ${T.border}`, marginBottom: '2.5rem' }}>
+          <p style={{ fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase', color: T.textMuted, margin: '0 0 1.25rem' }}>Resources</p>
+          <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: T.serif, fontWeight: 400, letterSpacing: '-0.03em', color: T.text, lineHeight: 1.1, margin: '0 0 1rem' }}>
+            Architecture, Guides & References
+          </h1>
+          <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, maxWidth: '64ch', margin: 0 }}>
+            {publicCount} public resources link directly — no email gates, no forms.
+            Internal and draft resources are labeled honestly.
+          </p>
         </div>
-        <div className="w-px h-4 bg-white/10 mx-1" />
-        <div className="flex gap-1">
-          {['all', 'available', 'draft'].map(s => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              className="px-3 py-1 rounded text-xs font-mono transition-all"
-              style={{
-                background: statusFilter === s ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
-                color: statusFilter === s ? 'var(--color-a11oy-text)' : 'var(--color-a11oy-text-ghost)',
-                border: `1px solid ${statusFilter === s ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.06)'}`,
-              }}
-            >{s.toUpperCase()}</button>
-          ))}
-        </div>
-      </div>
 
-      {CATEGORIES.filter(cat => cat !== 'All').map(cat => {
-        const items = filtered.filter(r => r.category === cat);
-        if (items.length === 0) return null;
-        return (
-          <div key={cat} className="mb-8">
-            <SectionTitle>{CAT_ICONS[cat]} {cat}s</SectionTitle>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {items.map(resource => {
-                const ss = STATUS_STYLES[resource.status] ?? STATUS_STYLES.draft;
+        <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
+          {CATEGORIES.map(cat => {
+            const isActive = category === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => setCategory(cat)}
+                style={{
+                  padding: '0.4rem 0.875rem', borderRadius: 6,
+                  fontSize: '0.75rem', fontFamily: T.mono, fontWeight: 500,
+                  border: `1px solid ${isActive ? 'rgba(201,183,135,0.3)' : T.border}`,
+                  background: isActive ? 'rgba(201,183,135,0.1)' : 'rgba(255,255,255,0.03)',
+                  color: isActive ? T.accent : T.textDim,
+                  cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '0.375rem',
+                }}
+              >
+                {cat !== 'All' && CAT_ICONS[cat] && <span>{CAT_ICONS[cat]}</span>}
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+
+        {grouped.map(({ cat, items }) => (
+          <div key={cat} style={{ marginBottom: '2.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '1rem' }}>
+              <span style={{ color: T.accent, fontSize: '0.875rem' }}>{CAT_ICONS[cat]}</span>
+              <span style={{ fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', color: T.textMuted }}>
+                {cat}s
+              </span>
+            </div>
+
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '1px', background: T.border, borderRadius: 12, overflow: 'hidden',
+              border: `1px solid ${T.border}`,
+            }}>
+              {items.map((resource, i) => {
+                const am = AVAILABILITY_META[resource.availability];
                 return (
-                  <Card key={resource.id} className="flex flex-col gap-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="font-semibold text-sm" style={{ color: 'var(--color-a11oy-text)' }}>{resource.title}</span>
-                      <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                        <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ background: ss.bg, color: ss.color }}>{resource.status}</span>
+                  <motion.div
+                    key={resource.id}
+                    initial={{ opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.1 }}
+                    transition={{ duration: 0.45, delay: i * 0.04, ease }}
+                    style={{
+                      padding: '1.5rem', background: T.bg,
+                      display: 'flex', flexDirection: 'column', gap: '0.75rem',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '0.9375rem', fontWeight: 600, color: T.text, letterSpacing: '-0.015em' }}>
+                        {resource.title}
+                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem', flexShrink: 0 }}>
+                        <span style={{
+                          fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 600,
+                          letterSpacing: '0.12em', textTransform: 'uppercase',
+                          padding: '0.2rem 0.5rem', borderRadius: 4,
+                          color: am.color, background: `${am.color}18`,
+                        }}>{am.label}</span>
                         {resource.version && (
-                          <span className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{resource.version}</span>
+                          <span style={{ fontSize: '0.5625rem', fontFamily: T.mono, color: T.textMuted }}>{resource.version}</span>
                         )}
                       </div>
                     </div>
-                    <p className="text-xs leading-relaxed" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{resource.description}</p>
-                    <button
-                      className="mt-auto text-xs font-mono text-left transition-colors"
-                      style={{ color: 'rgba(201,183,135,0.5)', cursor: 'default' }}
-                    >
-                      {resource.status === 'draft' ? '○ Draft — coming soon' : '→ View reference'}
-                    </button>
-                  </Card>
+
+                    <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.textDim, margin: 0 }}>
+                      {resource.description}
+                    </p>
+
+                    <div style={{ marginTop: 'auto', paddingTop: '0.5rem', borderTop: `1px solid ${T.border}` }}>
+                      {resource.availability === 'public' && resource.href ? (
+                        <a
+                          href={resource.href}
+                          style={{
+                            fontSize: '0.75rem', fontFamily: T.mono,
+                            color: T.accent, textDecoration: 'none',
+                            display: 'inline-flex', alignItems: 'center', gap: '0.375rem',
+                          }}
+                        >
+                          → {resource.hrefLabel}
+                        </a>
+                      ) : resource.availability === 'draft' ? (
+                        <span style={{ fontSize: '0.75rem', fontFamily: T.mono, color: T.textDim }}>
+                          ○ In preparation
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: '0.75rem', fontFamily: T.mono, color: T.textMuted }}>
+                          ⊙ Internal reference
+                        </span>
+                      )}
+                    </div>
+                  </motion.div>
                 );
               })}
             </div>
           </div>
-        );
-      })}
+        ))}
+
+        <div style={{
+          padding: '1.5rem', borderRadius: 10,
+          background: 'rgba(201,183,135,0.04)',
+          border: '1px solid rgba(201,183,135,0.12)',
+          marginTop: '1rem',
+        }}>
+          <p style={{ fontSize: '0.8125rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
+            Resources marked <strong style={{ color: T.accent }}>Public</strong> open directly in the platform — no email gates, no forms.{' '}
+            <strong style={{ color: T.textDim }}>Internal</strong> resources are operational references not yet available for external distribution.{' '}
+            <strong style={{ color: T.textDim }}>Draft</strong> resources are in preparation and will be published when ready.
+          </p>
+        </div>
+      </div>
     </Layout>
   );
 }
