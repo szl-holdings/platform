@@ -74,6 +74,9 @@ const OntologyGraph = lazy(() => import('./pages/OntologyGraph').then(m => ({ de
 const LearningLoop = lazy(() => import('./pages/LearningLoop').then(m => ({ default: m.LearningLoop })));
 const Counterfactuals = lazy(() => import('./pages/Counterfactuals').then(m => ({ default: m.Counterfactuals })));
 const AdversarialResilience = lazy(() => import('./pages/AdversarialResilience').then(m => ({ default: m.AdversarialResilience })));
+const FrontierIntelligence = lazy(() => import('./pages/FrontierIntelligence').then(m => ({ default: m.FrontierIntelligence })));
+const ApprovalQueue = lazy(() => import('./pages/ApprovalQueue').then(m => ({ default: m.ApprovalQueue })));
+const VerifierAgent = lazy(() => import('./pages/VerifierAgent').then(m => ({ default: m.VerifierAgent })));
 
 export default function App() {
   return (
@@ -136,6 +139,9 @@ export default function App() {
         <Route path={`${base}/learning`} component={LearningLoop} />
         <Route path={`${base}/counterfactuals`} component={Counterfactuals} />
         <Route path={`${base}/adversarial`} component={AdversarialResilience} />
+        <Route path={`${base}/frontier`} component={FrontierIntelligence} />
+        <Route path={`${base}/approval-queue`} component={ApprovalQueue} />
+        <Route path={`${base}/verifier`} component={VerifierAgent} />
         <Route>
           <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--color-a11oy-navy)', color: 'var(--color-a11oy-text)' }}>
             <div className="text-center">

@@ -22,6 +22,7 @@ const NAV_GROUPS = [
     items: [
       { href: '/recommendations', label: 'Recommendations' },
       { href: '/brief',           label: 'Executive Brief' },
+      { href: '/frontier',        label: 'Frontier Intel' },
     ],
   },
   {
@@ -51,11 +52,13 @@ const NAV_GROUPS = [
   {
     label: 'RUNTIME',
     items: [
-      { href: '/agents',    label: 'Operators' },
-      { href: '/workcells', label: 'Workcells' },
-      { href: '/evals',     label: 'MirrorEval' },
-      { href: '/memory',    label: 'Memory' },
-      { href: '/pce',       label: 'PCE' },
+      { href: '/agents',         label: 'Operators' },
+      { href: '/workcells',      label: 'Workcells' },
+      { href: '/evals',          label: 'MirrorEval' },
+      { href: '/approval-queue', label: 'Approval Queue' },
+      { href: '/verifier',       label: 'Verifier Agent' },
+      { href: '/memory',         label: 'Memory' },
+      { href: '/pce',            label: 'PCE' },
     ],
   },
   {
