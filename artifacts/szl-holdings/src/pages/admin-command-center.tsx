@@ -150,6 +150,13 @@ interface AuditEntry {
   entityId?: string;
   orgId?: number;
 }
+interface RoleHistoryEntry {
+  id: number;
+  action: 'assigned' | 'removed';
+  roleName: string;
+  actorEmail: string;
+  timestamp: string;
+}
 interface FeatureFlag {
   key: string;
   name: string;
@@ -1034,6 +1041,18 @@ function UserDetailModal({ userId, onClose }: { userId: number | null; onClose: 
     enabled: userId != null,
   });
 
+  const { data: roleHistoryData, isLoading: roleHistoryLoading } = useStandardQuery<{
+    entries: RoleHistoryEntry[];
+    total: number;
+  }>({
+    queryKey: ['admin-user-role-history', userId],
+    queryFn: () =>
+      adminFetch<{ entries: RoleHistoryEntry[]; total: number }>(
+        `/admin/users/${userId}/role-history`,
+      ),
+    enabled: userId != null,
+  });
+
   const roleMutation = useStandardMutation({
     mutationFn: ({ roleId, action }: { roleId: number; action: 'add' | 'remove' }) =>
       adminFetch(`/admin/users/${userId}/role`, {
@@ -1043,6 +1062,7 @@ function UserDetailModal({ userId, onClose }: { userId: number | null; onClose: 
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-user-detail', userId] });
       qc.invalidateQueries({ queryKey: ['admin-users'] });
+      qc.invalidateQueries({ queryKey: ['admin-user-role-history', userId] });
     },
   });
 
@@ -1153,6 +1173,47 @@ function UserDetailModal({ userId, onClose }: { userId: number | null; onClose: 
               </div>
             </div>
           )}
+
+          <div>
+            <h4 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
+              <Shield className="w-3 h-3" /> Role History
+            </h4>
+            {roleHistoryLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+              </div>
+            ) : !roleHistoryData?.entries?.length ? (
+              <div className="text-[11px] text-muted-foreground bg-muted/30 rounded-xl px-3 py-3 text-center">
+                No role changes recorded
+              </div>
+            ) : (
+              <div className="bg-card border border-border rounded-xl divide-y divide-border/50">
+                {roleHistoryData.entries.map((entry) => (
+                  <div key={entry.id} className="px-3 py-2.5 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={cn(
+                          'inline-block w-1.5 h-1.5 rounded-full shrink-0',
+                          entry.action === 'assigned' ? 'bg-emerald-500' : 'bg-red-500',
+                        )}
+                      />
+                      <span className="font-medium text-foreground capitalize">
+                        {entry.roleName}
+                      </span>
+                      <Badge
+                        label={entry.action}
+                        variant={entry.action === 'assigned' ? 'green' : 'red'}
+                      />
+                    </div>
+                    <div className="mt-1 flex items-center justify-between text-[10px] text-muted-foreground pl-3.5">
+                      <span>by {entry.actorEmail}</span>
+                      <span>{new Date(entry.timestamp).toLocaleString()}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </Modal>

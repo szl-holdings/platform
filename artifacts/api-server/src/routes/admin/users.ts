@@ -106,6 +106,57 @@ export function register(router: IRouter): void {
     }
   });
 
+  router.get('/admin/users/:id/role-history', async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(userId) || userId < 1) {
+        sendBadRequest(res, 'Invalid user ID');
+        return;
+      }
+      const [targetUser] = await db
+        .select({ id: usersTable.id })
+        .from(usersTable)
+        .where(eq(usersTable.id, userId));
+      if (!targetUser) {
+        sendNotFound(res, 'User not found');
+        return;
+      }
+      const rows = await db
+        .select({
+          id: auditEventsTable.id,
+          action: auditEventsTable.action,
+          newValues: auditEventsTable.newValues,
+          actorEmail: usersTable.email,
+          actorName: usersTable.displayName,
+          createdAt: auditEventsTable.createdAt,
+        })
+        .from(auditEventsTable)
+        .leftJoin(usersTable, eq(auditEventsTable.userId, usersTable.id))
+        .where(
+          and(
+            eq(auditEventsTable.entityType, 'user'),
+            eq(auditEventsTable.entityId, String(userId)),
+            inArray(auditEventsTable.action, ['user.role.assigned', 'user.role.removed']),
+          ),
+        )
+        .orderBy(desc(auditEventsTable.createdAt))
+        .limit(50);
+      const entries = rows.map((r) => {
+        const vals = (r.newValues ?? {}) as Record<string, unknown>;
+        return {
+          id: r.id,
+          action: r.action === 'user.role.assigned' ? 'assigned' : 'removed',
+          roleName: (vals.roleName as string) ?? 'unknown',
+          actorEmail: r.actorEmail ?? r.actorName ?? 'system',
+          timestamp: r.createdAt.toISOString(),
+        };
+      });
+      res.json({ entries, total: entries.length });
+    } catch {
+      sendError(res, 'Failed to fetch role history', 500, 'INTERNAL_ERROR');
+    }
+  });
+
   router.patch('/admin/users/:id/deactivate', validateBody(deactivateSchema), async (req, res) => {
     try {
       const userId = parseInt(req.params.id as string, 10);
