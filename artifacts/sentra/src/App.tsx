@@ -75,6 +75,8 @@ const CrisisArenaEngagementsPage = lazy(() => import('@/pages/crisis-arena-engag
 const CrisisArenaArchitectPage = lazy(() => import('@/pages/crisis-arena-architect'));
 const CrisisArenaArchitectProfilePage = lazy(() => import('@/pages/crisis-arena-architect-profile'));
 const ForecastPage = lazy(() => import('@/pages/forecast'));
+const EndpointMeshPage = lazy(() => import('@/pages/endpoint-mesh'));
+const SiemConnectionsPage = lazy(() => import('@/pages/siem-connections'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -196,6 +198,24 @@ function SentraSidebarContent({
           label: 'Connectors',
           href: '/mesh/connectors',
           icon: <Plug className="w-3.5 h-3.5" />,
+        },
+      ],
+    },
+    {
+      id: 'edr-siem',
+      label: 'EDR & SIEM',
+      items: [
+        {
+          id: '/edr/agents',
+          label: 'Endpoint Mesh',
+          href: '/edr/agents',
+          icon: <Cpu className="w-3.5 h-3.5" />,
+        },
+        {
+          id: '/siem/connections',
+          label: 'SIEM Connections',
+          href: '/siem/connections',
+          icon: <Zap className="w-3.5 h-3.5" />,
         },
       ],
     },
@@ -372,6 +392,8 @@ function DashboardRouter() {
         <Route path="/crisis-arena/architect/:id" component={CrisisArenaArchitectProfilePage} />
         <Route path="/crisis-arena/architect" component={CrisisArenaArchitectPage} />
         <Route path="/forecast" component={ForecastPage} />
+        <Route path="/edr/agents" component={EndpointMeshPage} />
+        <Route path="/siem/connections" component={SiemConnectionsPage} />
         <Route path="/pricing" component={SentraPricingPage} />
         <Route path="/account/billing" component={SentraBillingPage} />
         <Route path="/" component={SentraLandingPage} />

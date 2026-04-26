@@ -123,6 +123,14 @@ function isExempt(path: string): boolean {
   // execution is further gated by the PCE gate + MirrorEval block checks.
   if (path.startsWith('/api/a11oy/demo/')) return true;
   if (path.match(/^\/api\/distribution-os\/linktree\/\d+\/click$/)) return true;
+  // Sentra EDR agent heartbeat — machine-to-machine POST from enrolled endpoint
+  // agents. Agents authenticate via enrollment token header (x-enrollment-token),
+  // not browser cookies; CSRF double-submit is not applicable.
+  if (path === '/api/sentra/agents/heartbeat') return true;
+  // Sentra SIEM webhook ingest — external SIEM platforms push events to this
+  // endpoint. HMAC-SHA256 signature in x-signature-sha256 header authenticates
+  // the push; no browser session or cookie involved, CSRF not applicable.
+  if (path.startsWith('/api/sentra/siem/ingest/')) return true;
   // Non-production demo PIN verification — stateless read-only PIN check;
   // no session or user state is modified on the server side.
   if (process.env.NODE_ENV !== 'production' && path === '/api/pulse/demo/verify') return true;

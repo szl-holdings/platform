@@ -132,6 +132,13 @@ router.use(lazyMatch("/rf-intel", () => import("./rf-intel"), "rf-intel"));
 // via the global csrfMiddleware mounted in server.ts.
 router.use(lazyMatch("/sentra", () => import("./sentra"), "sentra"));
 
+// Sentra EDR agent deployment — enrollment tokens, heartbeat, lifecycle actions.
+router.use(lazyMatch("/sentra", () => import("./sentra-agents"), "sentra-agents"));
+
+// Sentra SIEM adapter layer — pluggable connections, webhook ingest.
+// The /sentra/siem/ingest/:id endpoint is public (webhook push from external SIEM).
+router.use(lazyMatch("/sentra", () => import("./sentra-siem"), "sentra-siem"));
+
 // Crisis Arena — crowdsourced business crisis simulation. Public leaderboard
 // endpoints are unauthenticated and rate-limited; all client/architect
 // endpoints enforce auth. Every state change is written to Proof Chain.

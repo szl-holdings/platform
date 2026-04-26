@@ -27,6 +27,9 @@ async function csrfHeaders(): Promise<HeadersInit> {
 export type IncidentSeverity = 'critical' | 'high' | 'medium' | 'low';
 export type IncidentStatus = 'open' | 'triaging' | 'escalated' | 'contained' | 'resolved';
 export type AlertStatus = 'open' | 'acknowledged' | 'suppressed';
+export type AgentStatus = 'healthy' | 'stale' | 'isolated' | 'uninstalled';
+export type AgentOS = 'linux' | 'windows' | 'macos';
+export type AgentAction = 'isolate' | 'release' | 'uninstall' | 'rotate-token';
 
 export interface TimelineEntry {
   id: string;
@@ -72,9 +75,64 @@ export interface SentraSummary {
   lastUpdated: string;
 }
 
+export interface AgentAuditEntry {
+  id: string;
+  action: string;
+  actor: string;
+  timestamp: string;
+  detail?: string;
+}
+
+export interface Agent {
+  id: string;
+  hostname: string;
+  os: AgentOS;
+  version: string;
+  enrollmentToken: string;
+  tenantId: string;
+  tags: string[];
+  status: AgentStatus;
+  lastHeartbeatAt: string | null;
+  enrolledAt: string;
+  updatedAt: string;
+  auditTrail: AgentAuditEntry[];
+}
+
+export interface EnrollmentToken {
+  token: string;
+  tenantId: string;
+  tags: string[];
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface InstallSnippets {
+  linux: string;
+  windows: string;
+  macos: string;
+}
+
+export interface SiemConnection {
+  id: string;
+  name: string;
+  adapterId: string;
+  config: Record<string, unknown>;
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastTestedAt?: string;
+  lastTestResult?: { ok: boolean; message: string };
+  alertsIngested: number;
+}
+
+export interface SiemAdapterMeta {
+  id: string;
+  displayName: string;
+  description: string;
+  configFields: Array<{ key: string; description: string; optional: boolean }>;
+}
+
 // ── Incidents ──────────────────────────────────────────────────────────────
-// Backend uses sendSuccess(res, payload) without meta → response body IS the
-// payload directly (no { data } wrapper). Client reads the body as-is.
 
 export async function listIncidents(): Promise<{ incidents: Incident[]; source: 'live' | 'seed' }> {
   try {
@@ -175,5 +233,191 @@ export async function getSentraSummary(): Promise<SentraSummary | null> {
     return body;
   } catch {
     return null;
+  }
+}
+
+// ── Agents ─────────────────────────────────────────────────────────────────
+
+export async function listAgents(): Promise<{ agents: Agent[]; source: 'live' | 'seed' }> {
+  try {
+    const res = await fetch(`${BASE}/sentra/agents`, { credentials: 'include' });
+    if (!res.ok) throw new Error(`${res.status}`);
+    const body = (await res.json()) as { agents: Agent[]; source: 'live' | 'seed' };
+    return body;
+  } catch {
+    return { agents: [], source: 'seed' };
+  }
+}
+
+export async function enrollAgent(payload: {
+  tenantId?: string;
+  tags?: string[];
+}): Promise<
+  | { ok: true; token: EnrollmentToken; installSnippets: InstallSnippets }
+  | { ok: false; error: string }
+> {
+  try {
+    const res = await fetch(`${BASE}/sentra/agents/enroll`, {
+      method: 'POST',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) return { ok: false, error: `Request failed (${res.status})` };
+    const body = (await res.json()) as { token: EnrollmentToken; installSnippets: InstallSnippets };
+    return { ok: true, ...body };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+export async function agentAction(
+  id: string,
+  action: AgentAction,
+  options?: { actor?: string; reason?: string },
+): Promise<{ ok: true; agent: Agent } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BASE}/sentra/agents/${encodeURIComponent(id)}/action`, {
+      method: 'POST',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+      body: JSON.stringify({ action, ...options }),
+    });
+    if (!res.ok) return { ok: false, error: `Request failed (${res.status})` };
+    const body = (await res.json()) as Agent;
+    return { ok: true, agent: body };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+export async function deleteAgent(id: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BASE}/sentra/agents/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+    });
+    if (!res.ok) return { ok: false, error: `Request failed (${res.status})` };
+    return { ok: true };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+// ── SIEM Connections ────────────────────────────────────────────────────────
+
+export async function listSiemAdapters(): Promise<SiemAdapterMeta[]> {
+  try {
+    const res = await fetch(`${BASE}/sentra/siem/adapters`, { credentials: 'include' });
+    if (!res.ok) return [];
+    const body = (await res.json()) as { adapters: SiemAdapterMeta[] };
+    return body.adapters;
+  } catch {
+    return [];
+  }
+}
+
+export async function listSiemConnections(): Promise<SiemConnection[]> {
+  try {
+    const res = await fetch(`${BASE}/sentra/siem/connections`, { credentials: 'include' });
+    if (!res.ok) return [];
+    const body = (await res.json()) as { connections: SiemConnection[] };
+    return body.connections;
+  } catch {
+    return [];
+  }
+}
+
+export async function createSiemConnection(payload: {
+  name: string;
+  adapterId: string;
+  config: Record<string, unknown>;
+}): Promise<{ ok: true; connection: SiemConnection } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BASE}/sentra/siem/connections`, {
+      method: 'POST',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = (await res.json().catch(() => ({}))) as { error?: string };
+      return { ok: false, error: err.error ?? `Request failed (${res.status})` };
+    }
+    const body = (await res.json()) as SiemConnection;
+    return { ok: true, connection: body };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+export async function updateSiemConnection(
+  id: string,
+  patch: { name?: string; config?: Record<string, unknown> },
+): Promise<{ ok: true; connection: SiemConnection } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BASE}/sentra/siem/connections/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+      body: JSON.stringify(patch),
+    });
+    if (!res.ok) return { ok: false, error: `Request failed (${res.status})` };
+    const body = (await res.json()) as SiemConnection;
+    return { ok: true, connection: body };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+export async function deleteSiemConnection(id: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BASE}/sentra/siem/connections/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+    });
+    if (!res.ok) return { ok: false, error: `Request failed (${res.status})` };
+    return { ok: true };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+export async function testSiemConnection(
+  id: string,
+): Promise<{ ok: true; sample: unknown[] } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BASE}/sentra/siem/connections/${encodeURIComponent(id)}/test`, {
+      method: 'POST',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+    });
+    if (!res.ok) return { ok: false, error: `Request failed (${res.status})` };
+    const body = (await res.json()) as { ok: boolean; sample?: unknown[]; error?: string };
+    if (!body.ok) return { ok: false, error: body.error ?? 'Test failed' };
+    return { ok: true, sample: body.sample ?? [] };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+export async function toggleSiemConnection(
+  id: string,
+  enabled: boolean,
+): Promise<{ ok: true; connection: SiemConnection } | { ok: false; error: string }> {
+  try {
+    const action = enabled ? 'enable' : 'disable';
+    const res = await fetch(`${BASE}/sentra/siem/connections/${encodeURIComponent(id)}/${action}`, {
+      method: 'POST',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+    });
+    if (!res.ok) return { ok: false, error: `Request failed (${res.status})` };
+    const body = (await res.json()) as SiemConnection;
+    return { ok: true, connection: body };
+  } catch {
+    return { ok: false, error: 'Network error' };
   }
 }
