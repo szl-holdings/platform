@@ -19,6 +19,7 @@ import { logger } from '../lib/logger';
 import { requireStripeLive } from '../lib/stripe-gate';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
+import { webhookSignatureMiddleware } from '../middlewares/webhook-signature';
 
 const router: IRouter = Router();
 
@@ -348,6 +349,12 @@ router.get(
 
 router.post(
   '/lyte/billing/webhooks/failed-payment',
+  webhookSignatureMiddleware({
+    scheme: 'hmac-sha256',
+    secretEnvVar: 'LYTE_BILLING_WEBHOOK_SECRET',
+    headerName: 'x-lyte-signature',
+    allowWhenUnconfigured: false,
+  }),
   authMiddleware({ required: false }),
   validateBody(
     bodyShape({

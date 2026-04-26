@@ -325,7 +325,7 @@ describe('writeBillingAudit', () => {
 // ─── 4. Billing route — demo mode short-circuit ───────────────────────────────
 
 describe('/billing/webhooks route', () => {
-  it('returns 400 when stripe-signature is invalid', async () => {
+  it('returns 401 when stripe-signature is invalid', async () => {
     vi.resetModules();
 
     vi.doMock('@szl-holdings/db', () => ({
@@ -375,7 +375,7 @@ describe('/billing/webhooks route', () => {
       .set('stripe-signature', 'invalid')
       .send({ id: 'evt_bad', type: 'test', data: { object: {} } });
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(401);
   });
 
   it('returns { received: true, duplicate: false } for a valid new event', async () => {

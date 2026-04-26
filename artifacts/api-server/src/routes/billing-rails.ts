@@ -328,7 +328,7 @@ router.post('/webhooks/plaid', async (req: Request, res: Response) => {
 
     if (!verifyPlaidWebhookSignature(rawBody, signatureHeader)) {
       logger.warn('[billing-rails] Plaid webhook signature verification failed');
-      res.status(400).json({ error: 'Invalid webhook signature' });
+      res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
@@ -366,7 +366,7 @@ router.post('/webhooks/coinbase', async (req: Request, res: Response) => {
       verifyCoinbaseWebhookSignature(rawBody, signatureHeader);
     } catch (sigErr) {
       logger.warn({ err: sigErr }, '[billing-rails] Coinbase webhook signature verification failed');
-      res.status(400).json({ error: 'Invalid webhook signature' });
+      res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 

@@ -525,7 +525,7 @@ router.post(
 
       if (!verified || !event) {
         logger.warn('Webhook signature verification failed');
-        sendBadRequest(res, 'Invalid webhook signature');
+        res.status(401).json({ error: 'Unauthorized' });
         return;
       }
 
