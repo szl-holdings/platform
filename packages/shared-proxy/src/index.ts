@@ -26,6 +26,7 @@ export const TERRA_PORT = 6000;
 export const VESSELS_PORT = 8099;
 export const PULSE_PORT = 5201;
 export const SZL_DEMO_VIDEO_PORT = 8765;
+export const PLUGINMESH_PORT = 8190;
 
 export const PROXY_ROUTES: ProxyRoute[] = [
   { prefix: '/a11oy/', port: A11OY_PORT },
@@ -43,6 +44,7 @@ export const PROXY_ROUTES: ProxyRoute[] = [
   { prefix: '/vessels/', port: VESSELS_PORT },
   { prefix: '/pulse/', port: PULSE_PORT },
   { prefix: '/szl-demo-video/', port: SZL_DEMO_VIDEO_PORT },
+  { prefix: '/pluginmesh/', port: PLUGINMESH_PORT },
 ];
 
 // ─── Diagnostics state ────────────────────────────────────────────────────────

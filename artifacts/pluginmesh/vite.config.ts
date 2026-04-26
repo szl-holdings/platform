@@ -1,13 +1,15 @@
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import http from 'node:http';
+import net from 'node:net';
 import path from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
-import { sharedProxyPlugin } from '@szl-holdings/shared-proxy';
+import { PLUGINMESH_PORT, sharedProxyPlugin } from '@szl-holdings/shared-proxy';
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
 
-const vitePort = Number(process.env.VITE_PORT) || 6000;
+const vitePort = Number(process.env.VITE_PORT) || 8190;
 const basePath = process.env.BASE_PATH || '/pluginmesh/';
 
 function healthCheckPlugin(): Plugin {
@@ -27,10 +29,67 @@ function healthCheckPlugin(): Plugin {
   };
 }
 
+function portBridgePlugin(bridgePort: number, targetPort: number): Plugin {
+  return {
+    name: 'port-bridge',
+    apply: 'serve' as const,
+    configureServer(server) {
+      if (bridgePort === targetPort) return;
+      server.httpServer?.once('listening', () => {
+        const bridge = http.createServer((req, res) => {
+          const opts = {
+            hostname: '127.0.0.1',
+            port: targetPort,
+            path: req.url,
+            method: req.method,
+            headers: { ...req.headers, host: `localhost:${targetPort}` },
+          };
+          const proxy = http.request(opts, (upstream) => {
+            res.writeHead(upstream.statusCode ?? 502, upstream.headers);
+            upstream.pipe(res, { end: true });
+          });
+          proxy.on('error', () => {
+            if (!res.headersSent) {
+              res.writeHead(502);
+              res.end('upstream unavailable');
+            }
+          });
+          req.pipe(proxy, { end: true });
+        });
+
+        bridge.on('upgrade', (req, clientSocket, head) => {
+          const upstream = net.connect(targetPort, '127.0.0.1', () => {
+            upstream.write(
+              `${req.method} ${req.url} HTTP/1.1\r\n` +
+                `Host: localhost:${targetPort}\r\n` +
+                Object.entries(req.headers)
+                  .map(([k, v]) => `${k}: ${v}`)
+                  .join('\r\n') +
+                '\r\n\r\n',
+            );
+            upstream.write(head);
+            clientSocket.pipe(upstream);
+            upstream.pipe(clientSocket);
+          });
+          upstream.on('error', () => clientSocket.destroy());
+          clientSocket.on('error', () => upstream.destroy());
+        });
+
+        bridge.listen(bridgePort, '::', () => {
+          console.log(
+            `  ➜  Bridge:  http://localhost:${bridgePort}/ → http://localhost:${targetPort}/`,
+          );
+        });
+      });
+    },
+  };
+}
+
 export default defineConfig({
   base: basePath,
   plugins: [
     healthCheckPlugin(),
+    portBridgePlugin(PLUGINMESH_PORT, vitePort),
     sharedProxyPlugin(),
     react(),
     tailwindcss(),

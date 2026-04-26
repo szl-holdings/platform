@@ -12,7 +12,7 @@ version = "1.0.0"
 [[services]]
 name = "web"
 paths = [ "/pluginmesh/" ]
-localPort = 9090
+localPort = 8190
 autoStart = true
 
 [services.development]

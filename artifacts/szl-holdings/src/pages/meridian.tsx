@@ -852,6 +852,29 @@ export default function MeridianPage() {
             <ChevronRight className="w-3 h-3" style={{ transform: 'rotate(180deg)' }} />
             SZL Holdings
           </Link>
+          <a
+            href="/pluginmesh/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontSize: '10px',
+              fontWeight: 600,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              color: DS.text.muted,
+              textDecoration: 'none',
+              marginBottom: '10px',
+              transition: 'color 0.15s',
+            }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = DS.text.secondary)}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = DS.text.muted)}
+          >
+            <ChevronRight className="w-3 h-3" />
+            PluginMesh
+          </a>
           <div className="flex items-center gap-2.5 mb-1">
             <div
               className="w-7 h-7 rounded-md flex items-center justify-center"
