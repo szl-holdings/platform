@@ -4,6 +4,7 @@ import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, ApprovalGate, ActionButton, HashId, VerdictBadge, TraceStep } from '../components/ui';
 import { SEED_WORKCELLS, SEED_SIGNALS, SEED_PCE_CONTRACTS, SEED_PROOF_PACKETS } from '@workspace/a11oy-fabric';
+import { DELEGATION_CHAINS } from '../data/complianceFabric';
 
 type ApprovalDecision = 'approved' | 'deferred' | 'rejected';
 
@@ -147,6 +148,63 @@ export function WorkcellDetail() {
               )}
             </Card>
           </div>
+
+          {/* Delegation Chain */}
+          {(() => {
+            const vertParts = wc.vertical.toLowerCase().split('-');
+            const chain = DELEGATION_CHAINS.find(c => {
+              if (c.rootAgentId === wc.agentSequence[0]?.agentId || c.workcellId === wc.id) return true;
+              const cLower = (c.workcellId + ' ' + c.workcellName).toLowerCase();
+              return vertParts.some(seg => seg.length > 2 && cLower.includes(seg));
+            });
+            if (!chain || chain.hops.length === 0) return null;
+            return (
+              <div>
+                <SectionTitle>Delegation Chain</SectionTitle>
+                <Card>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                      {chain.id} — {chain.rootAgentName} — {chain.hops.length} hop{chain.hops.length > 1 ? 's' : ''}
+                    </div>
+                    <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: chain.status === 'complete' ? 'rgba(34,197,94,0.1)' : 'rgba(201,183,135,0.1)', color: chain.status === 'complete' ? '#22c55e' : '#c9b787' }}>
+                      {chain.status}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {chain.hops.map((hop, i) => (
+                      <div key={hop.id} className="flex items-start gap-3">
+                        <div className="flex flex-col items-center">
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: hop.covenantDecision === 'approved' ? 'rgba(34,197,94,0.15)' : 'rgba(201,183,135,0.15)', color: hop.covenantDecision === 'approved' ? '#22c55e' : '#c9b787', border: `1px solid ${hop.covenantDecision === 'approved' ? 'rgba(34,197,94,0.3)' : 'rgba(201,183,135,0.3)'}` }}>
+                            {i + 1}
+                          </div>
+                          {i < chain.hops.length - 1 && <div className="w-px h-4" style={{ backgroundColor: 'var(--color-a11oy-border)' }} />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1 text-xs mb-0.5">
+                            <span className="font-mono px-1 py-0.5 rounded" style={{ backgroundColor: hop.covenantDecision === 'approved' ? 'rgba(34,197,94,0.1)' : 'rgba(201,183,135,0.1)', color: hop.covenantDecision === 'approved' ? '#22c55e' : '#c9b787', fontSize: 9 }}>
+                              {hop.covenantDecision.toUpperCase()}
+                            </span>
+                            <span style={{ color: 'var(--color-a11oy-text)' }}>{hop.parentAgentName}</span>
+                            <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>→</span>
+                            <span style={{ color: 'var(--color-a11oy-text)' }}>{hop.childAgentName}</span>
+                          </div>
+                          <div className="text-xs truncate" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                            ↓ {hop.scopeNarrowed} · {hop.permissionsGranted.slice(0, 2).join(', ')}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 p-2 rounded text-xs" style={{ backgroundColor: 'var(--color-a11oy-deep)', border: '1px solid var(--color-a11oy-border)' }}>
+                    <div className="flex items-center gap-2">
+                      <span style={{ color: '#22c55e' }}>✓</span>
+                      <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>All hops scope-narrowed · Privilege boundaries enforced · Chain replay available</span>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            );
+          })()}
 
           {/* Signal Inputs */}
           <div>

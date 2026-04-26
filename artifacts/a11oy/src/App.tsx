@@ -121,6 +121,11 @@ const RobustnessWall = lazy(() => import('./pages/RobustnessWall').then(m => ({ 
 const ConstitutionDSL = lazy(() => import('./pages/ConstitutionDSL').then(m => ({ default: m.ConstitutionDSL })));
 const WelfarePlaybooks = lazy(() => import('./pages/WelfarePlaybooks').then(m => ({ default: m.WelfarePlaybooks })));
 const DefenderCredits = lazy(() => import('./pages/DefenderCredits').then(m => ({ default: m.DefenderCredits })));
+const Compass = lazy(() => import('./pages/Compass').then(m => ({ default: m.Compass })));
+const AgentBom = lazy(() => import('./pages/AgentBom').then(m => ({ default: m.AgentBom })));
+const DelegationChainPage = lazy(() => import('./pages/DelegationChain').then(m => ({ default: m.DelegationChain })));
+const TrustExchange = lazy(() => import('./pages/TrustExchange').then(m => ({ default: m.TrustExchange })));
+const CareEngine = lazy(() => import('./pages/CareEngine').then(m => ({ default: m.CareEngine })));
 
 export default function App() {
   return (
@@ -218,6 +223,11 @@ export default function App() {
         <Route path={`${base}/constitution-dsl`} component={ConstitutionDSL} />
         <Route path={`${base}/welfare-playbooks`} component={WelfarePlaybooks} />
         <Route path={`${base}/defender-credits`} component={DefenderCredits} />
+        <Route path={`${base}/compass`} component={Compass} />
+        <Route path={`${base}/agent-bom`} component={AgentBom} />
+        <Route path={`${base}/delegation-chain`} component={DelegationChainPage} />
+        <Route path={`${base}/trust-exchange`} component={TrustExchange} />
+        <Route path={`${base}/care`} component={CareEngine} />
         <Route path={`${base}/atlas`}>
           <WithShell><AtlasSection /></WithShell>
         </Route>

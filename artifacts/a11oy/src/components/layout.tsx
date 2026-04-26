@@ -142,6 +142,16 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'COMPLIANCE',
+    items: [
+      { href: '/compass',          label: 'Compass' },
+      { href: '/agent-bom',        label: 'Agent-BOM' },
+      { href: '/delegation-chain', label: 'Delegation Chain' },
+      { href: '/trust-exchange',   label: 'Trust Exchange' },
+      { href: '/care',             label: 'CARE Engine' },
+    ],
+  },
+  {
     label: 'TRUST',
     items: [
       { href: '/trust',         label: 'Trust Center' },

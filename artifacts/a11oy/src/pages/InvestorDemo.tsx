@@ -158,6 +158,19 @@ const STAGES = [
   },
   {
     step: 12,
+    title: 'Compliance Fabric — Compliance-as-Runtime',
+    category: 'COMPLIANCE',
+    body: 'Layer 9 of the A11oy fabric. Every governance primitive is mapped to EU AI Act (Articles 9-72, Annex IV), NIST AI RMF (GOVERN/MAP/MEASURE/MANAGE), ISO 42001 (Annex A), and CSA Agentic Profile controls. The Compass dashboard visualizes real-time compliance posture. Agent-BOM provides CycloneDX ML-BOM for supply chain transparency. Delegation Chain tracks multi-agent scope narrowing. Federated Trust Exchange enables cross-org attestation. CARE (Continuous Audit Readiness Engine) monitors evidence freshness and generates FRIA templates.',
+    metrics: [
+      { label: 'Frameworks', value: '4', sub: 'Actively mapped' },
+      { label: 'Controls Mapped', value: '46', sub: 'With live evidence' },
+      { label: 'Audit Package', value: 'One-click', sub: 'Signed via Proof Ledger' },
+    ],
+    highlight: 'Compliance is not a checkbox exercise — it is a byproduct of operating A11oy. Every governed action automatically produces the evidence regulators need.',
+    type: 'compliance',
+  },
+  {
+    step: 13,
     title: 'Go-to-Market — Land & Expand',
     category: 'BUSINESS',
     body: 'A11oy sells to enterprise operational leaders — COOs, General Counsels, CFOs, and CTOs. Land with a single domain (e.g., maritime or legal), prove ROI in 90 days, expand to 3–5 domains. ACVs range from $200K to $2M.',
@@ -170,7 +183,7 @@ const STAGES = [
     type: 'business',
   },
   {
-    step: 13,
+    step: 14,
     title: 'The Ask — Seed Round',
     category: 'INVESTMENT',
     body: 'We are raising a $4M seed round to fund 18 months of product development, 3 pilot enterprise customers, and a team of 6. The capital funds: SOC 2 certification, production deployment layer, and enterprise connector library expansion.',

@@ -22,6 +22,11 @@ A11oy will not publish a claim on the Public Trust Portal, on a Glasswing-Mode p
 | "Partner P is a verified Glasswing partner." | `GlasswingPartnerAttestation` | `stage = active`, `dualApproval[≥2]` |
 | "CAVD-2026-0007 has been disclosed." | `CoordinatedAgentVulnerabilityDisclosure` | `stage = disclosed`, `publication.permalink` |
 | "We published a 90-day report." | `RiskReport` | `period`, `signoffs[]`, `publication.visibility = public` |
+| "We map to EU AI Act Article X." | `ControlMapping` (Compass) | `framework = eu-ai-act`, `controlRef`, `evidenceStatus = fresh`, `lastEvidenceAt` |
+| "Agent X has a CycloneDX BOM." | `AgentBomEntry` | `agentId`, `bomVersion`, `proofLedgerSignature` |
+| "Delegation chain was scope-narrowed." | `DelegationHop` | `scopeNarrowed`, `permissionsGranted[]`, `covenantDecision`, `proofHash` |
+| "Partner P has strong compliance posture." | `TrustAttestation` | `adversarialRobustnessBracket`, `constitutionAdherenceBracket`, `status = active` |
+| "All controls are audit-ready." | `ControlFreshness` (CARE) | `status = fresh` for all controls, `LOG_RETENTION_STATUS.compliant = true` |
 
 If a claim cannot be mapped to a row above, it must be either rephrased or held back until an artifact exists to back it.
 
@@ -46,6 +51,11 @@ Each claim category has a designated signoff role. A claim cannot be published w
 | CAVD records | Alignment Reviewer | indefinite (intake hash); disclosed content indefinite |
 | Partner attestations | Two A11oy approvers (dual approval) | indefinite |
 | Defender Credit Pool ledger | Operator | rolling 24 months public, indefinite internal |
+| Compliance control mapping | Compliance Reviewer + Alignment Reviewer | indefinite |
+| Agent-BOM export | Compliance Reviewer | rolling 12 months public, indefinite internal |
+| Delegation chain records | Compliance Reviewer + Operator | indefinite |
+| Trust Exchange attestations | Two A11oy approvers (dual approval) | indefinite |
+| CARE freshness reports | Compliance Reviewer | rolling 12 months public, indefinite internal |
 
 ## 4. Retraction protocol
 

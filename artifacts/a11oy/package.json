@@ -15,15 +15,16 @@
   "dependencies": {
     "@szl-holdings/brand-registry": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",
+    "@szl-holdings/domain-profiles": "workspace:*",
+    "@szl-holdings/omnia-shell": "workspace:*",
     "@szl-holdings/shared-proxy": "workspace:*",
     "@urql/exchange-graphcache": "^9.0.0",
-    "@szl-holdings/domain-profiles": "workspace:*",
     "@workspace/a11oy-fabric": "workspace:*",
     "graphql": "^16.13.2",
     "graphql-ws": "^6.0.8",
     "jspdf": "^4.2.1",
-    "urql": "^5.0.1",
-    "@szl-holdings/omnia-shell": "workspace:*"
+    "jszip": "^3.10.1",
+    "urql": "^5.0.1"
   },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "catalog:",

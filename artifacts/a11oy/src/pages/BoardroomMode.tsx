@@ -51,6 +51,7 @@ const INITIAL_DATA: BoardroomData = {
     'Boardroom-ready PDF export (production posture)',
     'Mythos Doctrine L8 — per-agent system cards, behavioral audit, alignment review',
     'Glasswing distinction layer — CAVD coordinated disclosure, 90-day transparency reports, adversarial robustness wall, constitution-as-code DSL, welfare playbooks',
+    'Compliance Fabric L9 — EU AI Act, NIST AI RMF, ISO 42001, CSA Agentic mapped. Compass dashboard, Agent-BOM (CycloneDX), Delegation Chain governance, Trust Exchange, CARE engine',
   ],
   packets: [
     {

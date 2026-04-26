@@ -4,6 +4,7 @@ import { PageHeader, Card, SectionTitle, KpiCard, ProgressBar, VerdictBadge } fr
 import { SEED_WORKCELLS } from '@workspace/a11oy-fabric';
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from 'recharts';
 import { useAlloyWorkflows, useAlloyDashboard, useAlloyAuditLog } from '../graphql';
+import { AGENT_BOMS } from '../data/complianceFabric';
 
 const GOLD = '#c9b787';
 
@@ -561,6 +562,58 @@ export function Agents() {
               <div className="text-xs p-2.5 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
                 All material actions from this agent require human approval by <span style={{ color: GOLD }}>{selected.humanOwner.name}</span>
               </div>
+
+              {(() => {
+                const bom = AGENT_BOMS.find(b => b.agentId === selected.id || b.agentName.toLowerCase().replace(/\s+/g, '-') === selected.id || b.agentName === selected.name);
+                if (!bom) return null;
+                return (
+                  <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--color-a11oy-border)' }}>
+                    <div className="text-xs font-mono uppercase tracking-widest mb-3" style={{ color: 'var(--color-a11oy-text-ghost)' }}>AGENT-BOM</div>
+                    <div className="grid grid-cols-2 gap-2 mb-3">
+                      <div className="p-2 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)', border: '1px solid var(--color-a11oy-border)' }}>
+                        <div className="font-mono text-xs" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: 9 }}>MODEL</div>
+                        <div className="text-xs font-medium" style={{ color: GOLD }}>{bom.modelProvider}</div>
+                        <div className="text-xs font-mono truncate" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: 9 }}>{bom.modelSnapshot}</div>
+                      </div>
+                      <div className="p-2 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)', border: '1px solid var(--color-a11oy-border)' }}>
+                        <div className="font-mono text-xs" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: 9 }}>CONSTITUTION</div>
+                        <div className="text-xs font-medium" style={{ color: GOLD }}>{bom.constitutionVersion}</div>
+                        <div className="text-xs font-mono truncate" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: 9 }}>{bom.constitutionHash}</div>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="font-mono text-xs mb-1" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: 9 }}>TOOLS ({bom.toolManifest.length})</div>
+                      {bom.toolManifest.slice(0, 4).map(t => (
+                        <div key={t.name} className="flex justify-between text-xs py-0.5" style={{ borderBottom: '1px solid var(--color-a11oy-border)' }}>
+                          <span style={{ color: 'var(--color-a11oy-text-sub)' }}>{t.name}</span>
+                          <span className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: 9 }}>{t.version}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between text-xs mb-2">
+                      <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>BOM v{bom.bomVersion}</span>
+                      <span className="font-mono" style={{ color: GOLD, fontSize: 9 }}>CycloneDX ML-BOM v1.7</span>
+                    </div>
+                    <button
+                      className="w-full text-xs font-medium py-1.5 rounded transition-all"
+                      style={{ backgroundColor: 'rgba(201,183,135,0.08)', color: GOLD, border: '1px solid rgba(201,183,135,0.2)', cursor: 'pointer' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const bomExport = { bomFormat: 'CycloneDX', specVersion: '1.7', serialNumber: `urn:uuid:${bom.agentId}`, version: parseInt(bom.bomVersion), metadata: { timestamp: new Date().toISOString(), component: { type: 'machine-learning-model', name: bom.agentName, version: bom.constitutionVersion } }, components: [{ type: 'machine-learning-model', name: bom.modelSnapshot, publisher: bom.modelProvider, hashes: [{ alg: 'SHA-256', content: bom.modelHash }] }, ...bom.toolManifest.map(t => ({ type: 'library', name: t.name, version: t.version, hashes: [{ alg: 'SHA-256', content: t.hash }] }))] };
+                        const blob = new Blob([JSON.stringify(bomExport, null, 2)], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `agent-bom-${bom.agentId}-${new Date().toISOString().split('T')[0]}.json`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                      }}
+                    >
+                      Export CycloneDX BOM
+                    </button>
+                  </div>
+                );
+              })()}
             </Card>
           ) : (
             <Card>

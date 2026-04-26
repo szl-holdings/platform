@@ -141,7 +141,21 @@ A first-party GitHub Action lives at `tools/github-actions/mythos-doctrine/`. Dr
 
 It never auto-merges or auto-blocks; doctrine remains a human decision.
 
-## 13. Relationship to A11oy's other doctrines
+## 13. Compliance Fabric (Layer 9) — Compliance-as-Runtime
+
+The Compliance Fabric is Layer 9 of the A11oy execution fabric. It maps every A11oy governance primitive to external regulatory frameworks: EU AI Act (Articles 9-72, Annex IV), NIST AI RMF 1.0 (GOVERN/MAP/MEASURE/MANAGE + CSA Agentic Overlay), ISO/IEC 42001:2023 (Annex A), and CSA Agentic AI NIST RMF Profile v1.0.
+
+Five pillars:
+
+1. **Compass** — Real-time compliance posture dashboard. Framework heat map, drill-down to individual control evidence, and one-click audit package export (signed via Proof Ledger).
+2. **Agent-BOM** — Per-agent, continuously-updated AI Bill of Materials. CycloneDX ML-BOM v1.7 JSON export. Covers model snapshot fingerprints, tool manifest hashes, constitution version, prompt hashes, evaluation history, dependency graph, and welfare posture.
+3. **Delegation Chain** — When agents delegate to sub-agents, the full delegation tree is governed with correlation IDs, scope narrowing at each hop, privilege boundary enforcement, and full chain replay from any node. Addresses the NIST gap: "no concept of delegation boundary."
+4. **Federated Trust Exchange** — When A11oy agents interact with partner agents across organizational boundaries, verifiable attestations of compliance posture are exchanged without exposing proprietary internals. Attestations carry posture brackets (exceptional/strong/moderate/developing) and extend A2A v1.0 Agent Card format.
+5. **CARE (Continuous Audit Readiness Engine)** — Always-on monitoring that tracks evidence freshness for every mapped regulatory control. Auto-flags stale evidence, verifies 6-month log retention per EU AI Act Article 12, and generates on-demand FRIA (Fundamental Rights Impact Assessment) templates pre-populated from System Cards, Risk Reports, and constitution data.
+
+**Key principle:** Compliance is a byproduct of operating A11oy. Every governed action automatically produces the evidence regulators need. An auditor never asks "show me your compliance" — they browse the Compass dashboard.
+
+## 14. Relationship to A11oy's other doctrines
 
 - This doctrine extends `A11OY.md` (the live primitives doctrine).
 - It is constrained by `A11OY_PUBLIC_CLAIMS_DOCTRINE.md` — every claim made on the Public Trust Portal must be representable as a published artifact.

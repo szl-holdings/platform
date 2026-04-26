@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, StatusPill } from '../components/ui';
+import { TRUST_ATTESTATIONS, CONTROL_MAPPINGS, type ControlMapping } from '../data/complianceFabric';
 
 interface TrustSection {
   status: string;
@@ -284,6 +286,76 @@ export function TrustCenter() {
             </div>
           </Card>
         ))}
+      </div>
+
+      <SectionTitle>Compliance Fabric — Regulatory Posture</SectionTitle>
+      <div className="grid md:grid-cols-2 gap-4 mb-8">
+        <Card>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="font-semibold text-sm" style={{ color: 'var(--color-a11oy-text)' }}>Framework Coverage</div>
+            <span className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ color: '#c9b787', backgroundColor: 'rgba(201,183,135,0.08)' }}>LIVE</span>
+          </div>
+          {(() => {
+            const frameworks = [
+              { id: 'eu-ai-act', name: 'EU AI Act', desc: 'Articles 9-72, Annex IV' },
+              { id: 'nist-ai-rmf', name: 'NIST AI RMF', desc: '1.0 + CSA Agentic' },
+              { id: 'iso-42001', name: 'ISO 42001', desc: 'Annex A Controls' },
+              { id: 'csa-agentic', name: 'CSA Agentic', desc: 'v1.0 Profile' },
+            ];
+            return (
+              <div className="space-y-2">
+                {frameworks.map(fw => {
+                  const controls = CONTROL_MAPPINGS.filter((c: ControlMapping) => c.framework === fw.id);
+                  const satisfied = controls.filter((c: ControlMapping) => c.evidenceStatus === 'fresh').length;
+                  const pct = controls.length > 0 ? Math.round((satisfied / controls.length) * 100) : 0;
+                  return (
+                    <div key={fw.id} className="flex items-center justify-between text-xs p-2 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)', border: '1px solid var(--color-a11oy-border)' }}>
+                      <div>
+                        <div style={{ color: 'var(--color-a11oy-text)' }}>{fw.name}</div>
+                        <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: 9 }}>{fw.desc}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-mono font-bold" style={{ color: pct === 100 ? '#22c55e' : '#c9b787' }}>{pct}%</div>
+                        <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: 9 }}>{satisfied}/{controls.length}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
+          <Link href={`${(import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '')}/compass`} className="block w-full text-center text-xs mt-3 py-2 rounded font-medium" style={{ color: '#c9b787', backgroundColor: 'rgba(201,183,135,0.08)', border: '1px solid rgba(201,183,135,0.15)', textDecoration: 'none' }}>
+            Open Compass Dashboard →
+          </Link>
+        </Card>
+
+        <Card>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="font-semibold text-sm" style={{ color: 'var(--color-a11oy-text)' }}>Federated Trust Exchange</div>
+            <span className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ color: '#c9b787', backgroundColor: 'rgba(201,183,135,0.08)' }}>ACTIVE</span>
+          </div>
+          <p className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-sub)' }}>
+            Cross-organizational compliance attestation — posture brackets exchanged without exposing proprietary governance internals.
+          </p>
+          <div className="space-y-2 mb-3">
+            {TRUST_ATTESTATIONS.filter(a => a.status === 'active').map(att => (
+              <div key={att.id} className="flex items-center justify-between text-xs p-2 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)', border: '1px solid var(--color-a11oy-border)' }}>
+                <div>
+                  <div style={{ color: 'var(--color-a11oy-text)' }}>{att.partnerName}</div>
+                  <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: 9 }}>{att.direction} · {att.partnerOrgId}</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-mono" style={{ color: att.adversarialRobustnessBracket === 'exceptional' ? '#22c55e' : '#c9b787', fontSize: 10 }}>
+                    {att.adversarialRobustnessBracket}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <Link href={`${(import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '')}/trust-exchange`} className="block w-full text-center text-xs py-2 rounded font-medium" style={{ color: '#c9b787', backgroundColor: 'rgba(201,183,135,0.08)', border: '1px solid rgba(201,183,135,0.15)', textDecoration: 'none' }}>
+            Open Trust Exchange →
+          </Link>
+        </Card>
       </div>
 
       <div className="p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>

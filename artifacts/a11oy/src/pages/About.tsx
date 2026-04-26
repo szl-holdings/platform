@@ -10,6 +10,7 @@ const FABRIC_LAYERS = [
   { n: 6, name: 'MirrorEval', desc: 'Compares recommendations against counterfactuals with citations.' },
   { n: 7, name: 'Proof Ledger', desc: 'Appends immutable, cryptographic proof for every governed execution.' },
   { n: 8, name: 'Doctrine Layer (Mythos)', desc: 'Frontier-grade alignment governance — constitutions, behavioral audit, reward-hacking watchdog, red-team probes, agent welfare telemetry, per-agent system cards, and Glasswing transparency. Open Spec published under CC-BY-4.0.' },
+  { n: 9, name: 'Compliance Fabric', desc: 'Compliance-as-Runtime — maps every A11oy primitive to EU AI Act, NIST AI RMF, ISO 42001, and CSA Agentic Profile controls. Compass dashboard, Agent-BOM (CycloneDX), Delegation Chain governance, Federated Trust Exchange, and CARE (Continuous Audit Readiness Engine).' },
 ];
 
 const VERTICALS = [
@@ -69,7 +70,7 @@ export function About() {
 
         {/* Fabric Layers */}
         <div>
-          <SectionTitle>The Eight Fabric Layers</SectionTitle>
+          <SectionTitle>The Nine Fabric Layers</SectionTitle>
           <div className="flex flex-col gap-2">
             {FABRIC_LAYERS.map(layer => (
               <div key={layer.n} className="flex items-start gap-3 p-3 rounded border" style={{ backgroundColor: 'var(--color-a11oy-card)', borderColor: 'var(--color-a11oy-border)' }}>

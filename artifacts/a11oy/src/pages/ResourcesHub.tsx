@@ -31,7 +31,7 @@ const RESOURCES: Resource[] = [
     id: 'arch-overview',
     title: 'Architecture Overview',
     category: 'Document',
-    description: 'The eleven blueprint components, seven governing principles, and eight implementation priorities that define the A11oy governed agentic layer.',
+    description: 'The eleven blueprint components, seven governing principles, and nine implementation priorities that define the A11oy governed agentic layer.',
     availability: 'public',
     version: 'v1.0',
     href: '/a11oy/architecture',
