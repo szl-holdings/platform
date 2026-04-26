@@ -1715,6 +1715,8 @@ function SupportPanel() {
     null,
   );
   const [recentlyNotified, setRecentlyNotified] = useState<Set<number>>(new Set());
+  const [exporting, setExporting] = useState(false);
+  const [exportSuccess, setExportSuccess] = useState(false);
 
   const [notifEmail, setNotifEmail] = useState('');
   const [notifSaving, setNotifSaving] = useState(false);
@@ -1897,6 +1899,9 @@ function SupportPanel() {
   };
 
   const exportCsv = async () => {
+    if (exporting) return;
+    setExporting(true);
+    setExportSuccess(false);
     const csvParams = new URLSearchParams();
     if (showResolved) csvParams.set('includeResolved', 'true');
     if (search) csvParams.set('search', search);
@@ -1914,6 +1919,8 @@ function SupportPanel() {
       a.download = 'support-queue.csv';
       a.click();
       URL.revokeObjectURL(url);
+      setExportSuccess(true);
+      setTimeout(() => setExportSuccess(false), 3000);
     } catch {
       const rows = [['ID', 'Name', 'Email', 'Form', 'Company', 'Status', 'Message', 'Date']];
       tickets.forEach((t) => {
@@ -1938,6 +1945,10 @@ function SupportPanel() {
       a.download = 'support-queue.csv';
       a.click();
       URL.revokeObjectURL(url);
+      setExportSuccess(true);
+      setTimeout(() => setExportSuccess(false), 3000);
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -2076,12 +2087,28 @@ function SupportPanel() {
           <CheckCircle2 className="w-3.5 h-3.5" />{' '}
           {showResolved ? 'Hiding resolved' : 'Show resolved'}
         </button>
-        <button
-          onClick={exportCsv}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-        >
-          <Download className="w-3.5 h-3.5" /> Export CSV
-        </button>
+        <div className="flex items-center gap-2">
+          {exportSuccess && (
+            <span className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Downloaded
+            </span>
+          )}
+          <button
+            onClick={exportCsv}
+            disabled={exporting}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {exporting ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Exporting…
+              </>
+            ) : (
+              <>
+                <Download className="w-3.5 h-3.5" /> Export CSV
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       <div className="flex gap-2 flex-wrap">
@@ -2453,6 +2480,8 @@ function AuditPanel() {
   const [dateTo, setDateTo] = useState('');
   const [tenantFilter, setTenantFilter] = useState('');
   const [selectedEntry, setSelectedEntry] = useState<AuditEntry | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [exportSuccess, setExportSuccess] = useState(false);
 
   const params = new URLSearchParams();
   if (search) params.set('search', search);
@@ -2473,6 +2502,9 @@ function AuditPanel() {
   });
 
   const exportCsv = async () => {
+    if (exporting) return;
+    setExporting(true);
+    setExportSuccess(false);
     const csvParams = new URLSearchParams(params);
     csvParams.delete('limit');
     csvParams.set('format', 'csv');
@@ -2486,6 +2518,8 @@ function AuditPanel() {
       a.download = 'audit-log.csv';
       a.click();
       URL.revokeObjectURL(url);
+      setExportSuccess(true);
+      setTimeout(() => setExportSuccess(false), 3000);
     } catch {
       const rows = [['ID', 'Action', 'Actor', 'Target', 'Result', 'IP', 'Timestamp', 'Details']];
       (data?.logs ?? []).forEach((l) => {
@@ -2510,6 +2544,10 @@ function AuditPanel() {
       a.download = 'audit-log.csv';
       a.click();
       URL.revokeObjectURL(url);
+      setExportSuccess(true);
+      setTimeout(() => setExportSuccess(false), 3000);
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -2593,12 +2631,26 @@ function AuditPanel() {
         </div>
       )}
 
-      <div className="flex justify-end">
+      <div className="flex justify-end items-center gap-2">
+        {exportSuccess && (
+          <span className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
+            <CheckCircle2 className="w-3.5 h-3.5" /> Downloaded
+          </span>
+        )}
         <button
           onClick={exportCsv}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          disabled={exporting}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Download className="w-3.5 h-3.5" /> Export CSV
+          {exporting ? (
+            <>
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Exporting…
+            </>
+          ) : (
+            <>
+              <Download className="w-3.5 h-3.5" /> Export CSV
+            </>
+          )}
         </button>
       </div>
 

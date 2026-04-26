@@ -54,6 +54,21 @@ export default defineConfig({
         find: '@szl-holdings/monte-carlo',
         replacement: resolve(__dirname, 'lib/monte-carlo/src/index.ts'),
       },
+      {
+        find: '@/lib/utils',
+        replacement: resolve(__dirname, 'artifacts/szl-holdings/src/lib/utils.ts'),
+      },
+      {
+        find: '@szl-holdings/replit-auth-web',
+        replacement: resolve(__dirname, 'lib/replit-auth-web/src/index.ts'),
+      },
+      {
+        find: '@tanstack/react-query',
+        replacement: resolve(
+          __dirname,
+          'node_modules/.pnpm/@tanstack+react-query@5.99.0_react@19.1.0/node_modules/@tanstack/react-query',
+        ),
+      },
     ],
   },
   test: {
