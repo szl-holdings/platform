@@ -85,7 +85,7 @@ const AGENTS = [
   {
     id: 'op-pipeline',
     name: 'Pipeline Oracle',
-    role: 'Domain Specialist — KORA Revenue',
+    role: 'Domain Specialist — Lyte Revenue',
     vertical: 'lyte-revenue',
     type: 'domain-specialist',
     status: 'active',
@@ -150,7 +150,7 @@ const AGENTS = [
   },
   {
     id: 'op-terra',
-    name: 'DOMAINE Analyst',
+    name: 'Terra Analyst',
     role: 'Domain Specialist — Terra Real Estate',
     vertical: 'terra-real-estate',
     type: 'domain-specialist',
@@ -228,7 +228,7 @@ const EVAL_LABELS: Record<string, string> = {
 
 const HANDOFFS = [
   { from: 'Pipeline Oracle', to: 'Counsel Sentinel', reason: 'At-risk contract review', vertical: 'prism-counsel' },
-  { from: 'Cascade Navigator', to: 'DOMAINE Analyst', reason: 'Port-adjacent asset impact', vertical: 'terra-real-estate' },
+  { from: 'Cascade Navigator', to: 'Terra Analyst', reason: 'Port-adjacent asset impact', vertical: 'terra-real-estate' },
   { from: 'Guardian', to: 'Fabric Watchdog', reason: 'Perimeter change verification', vertical: 'alloy-core' },
 ];
 

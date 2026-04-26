@@ -3,7 +3,7 @@ import { type NexusIngestJobRow, type NexusIngestStatus, type NexusMemoryRow, ty
 import { forgeEvidenceStore, forgeRuntime, forgeTimeline, runCodeHandler } from '@szl-holdings/forge-runtime';
 import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
-import { defaultCatalogSearch, defaultToolRegistry, registerNexusHandlers } from '@workspace/tool-mesh';
+import { defaultCatalogSearch, defaultToolRegistry, registerPRAXISHandlers as registerNexusHandlers } from '@workspace/tool-mesh';
 import { type NextFunction, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { gatewayInfer } from '../lib/ai-gateway';

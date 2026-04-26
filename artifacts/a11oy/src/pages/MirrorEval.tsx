@@ -87,7 +87,7 @@ const AGENT_SPARKLINES: Record<string, number[]> = {
   'Counsel Sentinel':  [96, 97, 98, 97, 99, 98, 99],
   'Pipeline Oracle':   [82, 85, 88, 86, 90, 89, 91],
   'Guardian':          [95, 97, 98, 97, 99, 98, 99],
-  'DOMAINE Analyst':   [80, 83, 85, 84, 87, 86, 88],
+  'Terra Analyst':   [80, 83, 85, 84, 87, 86, 88],
 };
 
 const REGRESSION_30D = Array.from({ length: 30 }, (_, i) => ({

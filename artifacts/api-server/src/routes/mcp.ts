@@ -14,7 +14,7 @@ import { and, desc, eq } from 'drizzle-orm';
 import { type Request, type Response, Router } from 'express';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { NexusMcpServer, buildTenantInstructions, createDomainApps } from '@workspace/nexus-mcp';
+import { PRAXISMcpServer as NexusMcpServer, buildTenantInstructions, createDomainApps } from '@workspace/nexus-mcp';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { logger } from '../lib/logger';

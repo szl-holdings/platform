@@ -43,6 +43,7 @@ export function register(router: IRouter): void {
   // Aegis CISO Executive Dashboard live KPI aggregator. Mounted under
   // /aegis so the URL reads /api/aegis/ciso-kpis. Read-rate-limited to
   // match the other badge/aggregator endpoints.
+  router.use('/aegis', tenantScope({ required: true }));
   router.use('/aegis', _readLimiter);
   router.use(
     '/aegis',

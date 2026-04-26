@@ -309,12 +309,12 @@ describe('backfillGap (server-down gap detection)', () => {
   });
 
   it('backfill slots are spaced exactly 5 minutes apart', async () => {
-    // 20 min gap → slots at lastChecked+5min and lastChecked+10min.
-    // The slot at lastChecked+15min equals `now - INTERVAL_MS` exactly and is
-    // excluded by the strict `t < now - INTERVAL_MS` guard in the production
-    // code, so only 2 distinct timestamps are expected.
+    // 17 min gap → slots at lastChecked+5min and lastChecked+10min.
+    // lastChecked+15min = now-2min is clearly NOT < now-5min, so only 2 slots.
+    // (Previously used a 20-min gap which put the third slot right at the
+    // now-5min boundary, causing flaky results due to sub-millisecond timing.)
     const now = Date.now();
-    const lastChecked = new Date(now - 20 * 60 * 1000);
+    const lastChecked = new Date(now - 17 * 60 * 1000);
     const insertedTimestamps: Date[] = [];
 
     poolQueryMock.mockImplementation(async (sql: string, params?: unknown[]) => {
@@ -343,7 +343,7 @@ describe('backfillGap (server-down gap detection)', () => {
       (a, b) => a - b,
     );
 
-    // Expect 2 distinct slots for a 20-minute gap
+    // Expect 2 distinct slots for the 17-minute gap
     expect(uniqueMs).toHaveLength(2);
 
     // The single gap between the two slots must be exactly 5 minutes

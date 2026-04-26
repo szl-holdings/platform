@@ -82,7 +82,7 @@ const VERIFICATION_RUNS = [
   {
     id: 'vr-005',
     task: 'Cap rate compression alert — Westfield portfolio valuation model updated',
-    agent: 'DOMAINE Analyst',
+    agent: 'Terra Analyst',
     domain: 'Real Estate',
     executedAt: '2026-04-23T16:40:00Z',
     verifiedAt: '2026-04-23T16:42:18Z',
