@@ -334,6 +334,7 @@ const VesselsScenarioBranchesPage = lazy(() => import('@/pages/scenario-branches
 const OwnerCargoGraphPage = lazy(() => import('@/pages/owner-cargo-graph'));
 const RouteAnomalyEnginePage = lazy(() => import('@/pages/route-anomaly-engine'));
 const SanctionsChainExplorerPage = lazy(() => import('@/pages/sanctions-chain-explorer'));
+const SanctionsHeatPage = lazy(() => import('@/pages/sanctions-heat'));
 const CounterpartyRiskMapPage = lazy(() => import('@/pages/counterparty-risk-map'));
 const VoyageTwinPage = lazy(() => import('@/pages/voyage-twin'));
 const VoyageRiskTwinPage = lazy(() => import('@/pages/voyage-risk-twin'));
@@ -746,6 +747,12 @@ function VesselsSidebarContent({
           icon: <Calculator className="w-3.5 h-3.5" />,
         },
         {
+          id: 'sanctions-heat',
+          label: 'Sanctions Heat',
+          href: '/sanctions-heat',
+          icon: <ShieldAlert className="w-3.5 h-3.5" />,
+        },
+        {
           id: 'voyage-pnl-pred',
           label: 'Voyage P&L Predictor',
           href: '/voyage-pnl',
@@ -1091,6 +1098,7 @@ function DashboardRouter() {
         <Route path="/forecast" component={ForecastPage} />
         <Route path="/disruption-forecast" component={DisruptionForecastPage} />
         <Route path="/dark-fleet-economics" component={DarkFleetEconomicsPage} />
+        <Route path="/sanctions-heat" component={SanctionsHeatPage} />
         <Route path="/voyage-pnl" component={VoyagePnLPage} />
         <Route path="/trade-flow-heatmap" component={TradeFlowHeatmapPage} />
         <Route path="/intelligence-briefs" component={IntelligenceBriefsPage} />
@@ -1425,6 +1433,7 @@ function AppContent({
     location.startsWith('/approval-review') ||
     location.startsWith('/disruption-forecast') ||
     location.startsWith('/dark-fleet-economics') ||
+    location.startsWith('/sanctions-heat') ||
     location.startsWith('/voyage-pnl') ||
     location.startsWith('/trade-flow-heatmap') ||
     location.startsWith('/intelligence-briefs') ||

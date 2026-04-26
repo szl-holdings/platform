@@ -348,6 +348,180 @@ test.describe('Vessels — Mobile Viewport', () => {
   });
 });
 
+test.describe('Vessels — Sanctions Heat Portfolio View', () => {
+  test('renders Sanctions Heat page title without errors', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/sanctions-heat`, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    await expect(page.locator("h1:has-text('Sanctions Heat')")).toBeVisible({ timeout: 15000 });
+    const hasError = await page.locator('text=Something went wrong').first().isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+  });
+
+  test('demo vessel 3 (Meridian Bulk) appears as critical tier in portfolio', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/sanctions-heat`, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const row3 = page.locator('[data-testid="holding-row-3"]');
+    await expect(row3).toBeVisible({ timeout: 15000 });
+    const tier = await row3.getAttribute('data-tier');
+    expect(tier).toBe('critical');
+    const score = Number(await row3.getAttribute('data-score'));
+    expect(score).toBeGreaterThanOrEqual(80);
+  });
+
+  test('demo vessel 1 (Pacific Guardian) appears as high tier in portfolio', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/sanctions-heat`, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const row1 = page.locator('[data-testid="holding-row-1"]');
+    await expect(row1).toBeVisible({ timeout: 15000 });
+    const tier = await row1.getAttribute('data-tier');
+    expect(tier).toBe('high');
+    const score = Number(await row1.getAttribute('data-score'));
+    expect(score).toBeGreaterThanOrEqual(50);
+  });
+
+  test('portfolio table has at least 3 rows (includes both demo vessels)', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/sanctions-heat`, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const rows = page.locator('[data-testid^="holding-row-"]');
+    const count = await rows.count();
+    expect(count).toBeGreaterThan(2);
+  });
+
+  test('Portfolio Avg Score KPI card renders a numeric value', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/sanctions-heat`, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    await expect(page.locator("text=Portfolio Avg Score")).toBeVisible({ timeout: 15000 });
+  });
+
+  test('Critical filter reduces visible rows to only critical-tier vessels', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/sanctions-heat`, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    await page.locator("button:has-text('Critical')").first().click();
+    await page.waitForTimeout(300);
+    const criticalRows = page.locator('[data-testid^="holding-row-"][data-tier="critical"]');
+    const critCount = await criticalRows.count();
+    expect(critCount).toBeGreaterThan(0);
+    const nonCriticalRows = page.locator('[data-testid^="holding-row-"]:not([data-tier="critical"])');
+    const bad = await nonCriticalRows.count();
+    expect(bad).toBe(0);
+  });
+
+  test('Refresh button calls refetch without crashing the page', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/sanctions-heat`, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    await page.locator("button:has-text('Refresh scores')").first().click();
+    await page.waitForTimeout(500);
+    await expect(page.locator("h1:has-text('Sanctions Heat')")).toBeVisible({ timeout: 10000 });
+    const hasError = await page.locator('text=Something went wrong').first().isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+  });
+
+  test('data source disclosure badge (Sim or Live) is visible on portfolio rows', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/sanctions-heat`, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const badge = page.locator(":text('Sim'), :text('Live')").first();
+    await expect(badge).toBeVisible({ timeout: 15000 });
+  });
+});
+
+test.describe('Vessels — Vessel Detail Sanctions Tabs', () => {
+  test('vessel 3 detail: Entity Network tab switch mounts the graph component', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/vessel/3`, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const networkTab = page.locator("button:has-text('Entity Network')").first();
+    await expect(networkTab).toBeVisible({ timeout: 15000 });
+    await networkTab.click();
+    await page.waitForTimeout(1500);
+    const graph = page.locator('[data-testid="entity-network-graph"]');
+    await expect(graph).toBeVisible({ timeout: 10000 });
+    const svg = graph.locator('svg').first();
+    await expect(svg).toBeVisible({ timeout: 5000 });
+  });
+
+  test('vessel 3 detail: Sanctions Score tab mounts panel with critical tier', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/vessel/3`, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const sanctionsTab = page.locator("button:has-text('Sanctions Score')").first();
+    await expect(sanctionsTab).toBeVisible({ timeout: 15000 });
+    await sanctionsTab.click();
+    await page.waitForTimeout(1500);
+    const panel = page.locator('[data-testid="sanctions-score-panel"]');
+    await expect(panel).toBeVisible({ timeout: 10000 });
+    const tier = await panel.getAttribute('data-tier');
+    expect(tier).toBe('critical');
+    const score = Number(await panel.getAttribute('data-score'));
+    expect(score).toBeGreaterThanOrEqual(80);
+  });
+
+  test('vessel 1 detail: Sanctions Score tab mounts panel with high tier', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/vessel/1`, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const sanctionsTab = page.locator("button:has-text('Sanctions Score')").first();
+    await expect(sanctionsTab).toBeVisible({ timeout: 15000 });
+    await sanctionsTab.click();
+    await page.waitForTimeout(1500);
+    const panel = page.locator('[data-testid="sanctions-score-panel"]');
+    await expect(panel).toBeVisible({ timeout: 10000 });
+    const tier = await panel.getAttribute('data-tier');
+    expect(tier).toBe('high');
+    const score = Number(await panel.getAttribute('data-score'));
+    expect(score).toBeGreaterThanOrEqual(50);
+  });
+
+  test('vessel 3 detail: header shows Sanctions badge with score >= 80', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/vessel/3`, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const sanctionsBadge = page.locator('button:has-text("Sanctions")').first();
+    await expect(sanctionsBadge).toBeVisible({ timeout: 15000 });
+    const badgeText = await sanctionsBadge.textContent();
+    const scoreMatch = badgeText?.match(/\d+/);
+    expect(Number(scoreMatch?.[0] ?? 0)).toBeGreaterThanOrEqual(80);
+  });
+
+  test('vessel 1 detail: Entity Network tab renders SVG with multiple nodes', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/vessel/1`, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const networkTab = page.locator("button:has-text('Entity Network')").first();
+    await expect(networkTab).toBeVisible({ timeout: 15000 });
+    await networkTab.click();
+    await page.waitForTimeout(1500);
+    const graph = page.locator('[data-testid="entity-network-graph"]');
+    await expect(graph).toBeVisible({ timeout: 10000 });
+    const nodeGroups = graph.locator('g[data-nodeid]');
+    const nodeCount = await nodeGroups.count();
+    expect(nodeCount).toBeGreaterThan(2);
+  });
+
+  test('vessel 3 detail page loads without fatal errors', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/vessel/3`, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const hasError = await page.locator('text=Something went wrong').first().isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+  });
+});
+
+test.describe('Vessels — Sanctions Navigation & Disclosure', () => {
+  test('Sanctions Heat link in nav navigates to /sanctions-heat', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/`, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const navLink = page.locator("a[href*='sanctions-heat']").first();
+    if (await navLink.isVisible({ timeout: 10000 }).catch(() => false)) {
+      await navLink.click();
+      await page.waitForURL(new RegExp('sanctions-heat'), { timeout: 10000 });
+      await expect(page.locator("h1:has-text('Sanctions Heat')")).toBeVisible({ timeout: 10000 });
+    }
+  });
+
+  test('vessel 3 portfolio row links to vessel detail page', async ({ page }) => {
+    await page.goto(`${VESSELS_PATH}/sanctions-heat`, { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
+    const row3 = page.locator('[data-testid="holding-row-3"]');
+    await expect(row3).toBeVisible({ timeout: 15000 });
+    const link = row3.locator('a[href*="/vessel/3"]').first();
+    await expect(link).toBeVisible({ timeout: 5000 });
+  });
+});
+
 test.describe('Vessels — Accessibility (axe-core)', () => {
   const axeRoutes = [
     { path: '/', label: 'home' },

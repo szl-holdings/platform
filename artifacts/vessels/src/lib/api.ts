@@ -364,6 +364,13 @@ export const api = {
     exceptions: (id: number) => apiFetch<FleetException[]>(`/vessels/${id}/exceptions`),
     sanctions: (id: number) => apiFetch<SanctionsScreening>(`/vessels/${id}/sanctions`),
   },
+  sanctionsNetwork: {
+    score: (vesselId: number) => apiFetch<Record<string, unknown>>(`/vessels/sanctions/score/${vesselId}`),
+    portfolio: () => apiFetch<Record<string, unknown>>('/vessels/sanctions/portfolio'),
+    network: (vesselId: number) => apiFetch<Record<string, unknown>>(`/vessels/sanctions/network/${vesselId}`),
+    publishHits: (payload: { vesselId: string | number; vesselName?: string; score: number; tier: string; triggeredRules?: string[] }) =>
+      apiFetch<Record<string, unknown>>('/vessels/sanctions/publish-hits', { method: 'POST', body: JSON.stringify(payload) }),
+  },
   routes: {
     list: () => apiFetch<Record<string, unknown>[]>('/vessels/routes/all'),
     create: (data: MutationInput) =>

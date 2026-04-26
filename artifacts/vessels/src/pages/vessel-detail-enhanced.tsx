@@ -19,17 +19,25 @@ import {
   History,
   MapPin,
   Navigation,
+  Network,
   Package,
   Radio,
   RefreshCw,
   Shield,
+  ShieldAlert,
   Ship,
   Wrench,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useRoute } from 'wouter';
 import { AtlasScenePanel } from '@/components/atlas-scene-panel';
-import { useVesselDetail } from '@/hooks/use-vessels-data';
+import {
+  DarkFleetNetworkGraph,
+  NetworkLegend,
+} from '@/components/dark-fleet-network-graph';
+import { SanctionsScorePanel } from '@/components/sanctions-score-panel';
+import { TIER_CONFIG, type EntityNode } from '@/data/sanctions-network-data';
+import { useVesselDetail, useSanctionsScore } from '@/hooks/use-vessels-data';
 
 const statusConfig: Record<string, { label: string; color: string; dotColor: string }> = {
   at_sea: {
@@ -109,10 +117,20 @@ export default function VesselDetailEnhancedPage() {
   const params = paramsShort ?? paramsLong;
   const vesselId = Number(params?.id);
   const [tab, setTab] = useState<
-    'overview' | 'voyage' | 'maintenance' | 'portcalls' | 'history' | 'audit' | 'atlas'
+    | 'overview'
+    | 'voyage'
+    | 'maintenance'
+    | 'portcalls'
+    | 'history'
+    | 'audit'
+    | 'atlas'
+    | 'network'
+    | 'sanctions'
   >('overview');
+  const [selectedNetworkNode, setSelectedNetworkNode] = useState<EntityNode | null>(null);
 
   const { detail, isLoading, refetch } = useVesselDetail(vesselId);
+  const { sanctionsData } = useSanctionsScore(vesselId);
 
   if (isLoading) {
     return (
@@ -153,6 +171,8 @@ export default function VesselDetailEnhancedPage() {
     dotColor: '#0ea5e9',
   };
 
+  const sanctionsTierCfg = sanctionsData ? (TIER_CONFIG[sanctionsData.tier] ?? TIER_CONFIG.clear!) : null;
+
   const tabs = [
     { id: 'overview' as const, label: 'Overview' },
     { id: 'voyage' as const, label: 'Voyage Economics' },
@@ -160,6 +180,8 @@ export default function VesselDetailEnhancedPage() {
     { id: 'portcalls' as const, label: 'Port Calls' },
     { id: 'history' as const, label: 'Voyage History' },
     { id: 'audit' as const, label: 'Event History' },
+    { id: 'network' as const, label: 'Entity Network' },
+    { id: 'sanctions' as const, label: 'Sanctions Score' },
     { id: 'atlas' as const, label: 'ATLAS Scene' },
   ];
 
@@ -257,6 +279,20 @@ export default function VesselDetailEnhancedPage() {
                 <AlertTriangle className="w-2.5 h-2.5 mr-1" />
                 {exceptions.length} active exception{exceptions.length > 1 ? 's' : ''}
               </Badge>
+            )}
+            {sanctionsData && sanctionsTierCfg && sanctionsData.tier !== 'clear' && (
+              <button
+                onClick={() => setTab('sanctions')}
+                className={cn(
+                  'flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border transition-colors',
+                  sanctionsTierCfg.color,
+                  sanctionsTierCfg.bg,
+                  sanctionsTierCfg.border,
+                )}
+              >
+                <ShieldAlert className="w-2.5 h-2.5" />
+                Sanctions {sanctionsData.score}
+              </button>
             )}
           </div>
           <p className="text-xs text-sky-400/50 mt-1 font-mono">
@@ -1120,6 +1156,134 @@ export default function VesselDetailEnhancedPage() {
                 </div>
               </div>
             ))
+          )}
+        </div>
+      )}
+
+      {tab === 'network' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                <Network className="w-4 h-4 text-sky-400" />
+                Dark Fleet Entity Network
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Ownership chain, managers, flag state, and counterparty relationships with
+                confidence weights. Sanctioned entities are highlighted in red.
+              </p>
+            </div>
+            {selectedNetworkNode && (
+              <button
+                onClick={() => setSelectedNetworkNode(null)}
+                className="text-xs text-slate-400 hover:text-slate-300 transition-colors"
+              >
+                Clear selection
+              </button>
+            )}
+          </div>
+
+          {sanctionsData ? (
+            <>
+              <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl overflow-hidden">
+                <DarkFleetNetworkGraph
+                  nodes={sanctionsData.networkNodes}
+                  edges={sanctionsData.networkEdges}
+                  selectedId={selectedNetworkNode?.id ?? null}
+                  onSelect={setSelectedNetworkNode}
+                  height={480}
+                />
+              </div>
+              <NetworkLegend nodes={sanctionsData.networkNodes} />
+            </>
+          ) : (
+            <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-12 text-center">
+              <Network className="w-10 h-10 text-slate-600 mx-auto mb-3" />
+              <p className="text-slate-500 text-sm">
+                No network data available for this vessel
+              </p>
+            </div>
+          )}
+
+          {selectedNetworkNode && (
+            <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  Entity Details
+                </h3>
+                {selectedNetworkNode.sanctioned && (
+                  <Badge className="text-[10px] bg-red-500/10 text-red-400 border-red-500/20">
+                    ⚠ SANCTIONED
+                  </Badge>
+                )}
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div>
+                  <p className="text-[9px] text-slate-500 uppercase tracking-wider">Name</p>
+                  <p className="text-xs text-slate-200 font-medium mt-0.5">
+                    {selectedNetworkNode.label}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[9px] text-slate-500 uppercase tracking-wider">Country</p>
+                  <p className="text-xs text-slate-200 font-medium mt-0.5">
+                    {selectedNetworkNode.country}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[9px] text-slate-500 uppercase tracking-wider">Risk Tier</p>
+                  <p
+                    className={cn(
+                      'text-xs font-semibold mt-0.5',
+                      TIER_CONFIG[selectedNetworkNode.riskTier]?.color ?? 'text-slate-300',
+                    )}
+                  >
+                    {TIER_CONFIG[selectedNetworkNode.riskTier]?.label}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[9px] text-slate-500 uppercase tracking-wider">Confidence</p>
+                  <p className="text-xs text-slate-200 font-medium mt-0.5">
+                    {Math.round(selectedNetworkNode.confidence * 100)}%
+                  </p>
+                </div>
+              </div>
+              {selectedNetworkNode.details && (
+                <p className="text-xs text-slate-400 italic">{selectedNetworkNode.details}</p>
+              )}
+              {selectedNetworkNode.sanctionLists && selectedNetworkNode.sanctionLists.length > 0 && (
+                <div className="flex gap-1.5 flex-wrap">
+                  {selectedNetworkNode.sanctionLists.map((l) => (
+                    <Badge key={l} className="text-[10px] bg-red-500/10 text-red-400 border-red-500/20">
+                      {l.replace(/_/g, ' ')}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === 'sanctions' && (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
+              <Shield className="w-4 h-4 text-sky-400" />
+              Sanctions Exposure Score
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Rules-based sanctions exposure score with contributing factors. Every score
+              shows whether it is based on live or simulated data.
+            </p>
+          </div>
+          {sanctionsData ? (
+            <SanctionsScorePanel data={sanctionsData} />
+          ) : (
+            <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-12 text-center">
+              <Shield className="w-10 h-10 text-slate-600 mx-auto mb-3" />
+              <p className="text-slate-500 text-sm">No sanctions data available for this vessel</p>
+            </div>
           )}
         </div>
       )}

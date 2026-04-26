@@ -25,6 +25,7 @@ export const CARLOTA_EVENTS = {
 
 export const VESSELS_EVENTS = {
   POSITION_UPDATED: 'VESSELS_POSITION_UPDATED',
+  SANCTIONS_HIT: 'VESSELS_SANCTIONS_HIT',
 } as const;
 
 export const LYTE_EVENTS = {

@@ -1,6 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import type { VesselProfile } from '@/data/types';
 import {
+  getSanctionsScore,
+  PORTFOLIO_SANCTIONS_HOLDINGS,
+  type SanctionsExposureScore,
+  type PortfolioSanctionsHolding,
+} from '@/data/sanctions-network-data';
+import {
   api,
   type PortCall,
   type RosterVessel,
@@ -426,4 +432,74 @@ export function useVesselDetail(id: number) {
   });
 
   return { detail: (data ?? null) as VesselDetail | null, isLoading, error, refetch };
+}
+
+function mapApiToSanctionsScore(raw: Record<string, unknown>): SanctionsExposureScore {
+  return {
+    vesselId: raw.vesselId as string | number,
+    score: (raw.score as number) ?? 0,
+    tier: (raw.tier as SanctionsExposureScore['tier']) ?? 'clear',
+    dataSource: (raw.dataSource as 'live' | 'simulated') ?? 'simulated',
+    computedAt: (raw.computedAt as string) ?? new Date().toISOString(),
+    rules: (raw.rules as SanctionsExposureScore['rules']) ?? [],
+    networkNodes: (raw.networkNodes as SanctionsExposureScore['networkNodes']) ?? [],
+    networkEdges: (raw.networkEdges as SanctionsExposureScore['networkEdges']) ?? [],
+    summary: (raw.summary as string) ?? '',
+  };
+}
+
+export function useSanctionsScore(vesselId: string | number) {
+  const numId = typeof vesselId === 'string' ? parseInt(vesselId, 10) : vesselId;
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['sanctions-score', vesselId],
+    queryFn: () => api.sanctionsNetwork.score(numId),
+    enabled: !!vesselId && !Number.isNaN(numId),
+    staleTime: 30_000,
+    retry: 1,
+  });
+
+  const apiScore = data ? mapApiToSanctionsScore(data) : null;
+  const fallback = getSanctionsScore(vesselId);
+  const sanctionsData = apiScore ?? fallback;
+
+  return { sanctionsData, isLoading, error, isLive: !!apiScore };
+}
+
+function mapApiToPortfolioHolding(raw: Record<string, unknown>): PortfolioSanctionsHolding {
+  return {
+    vesselId: raw.vesselId as string | number,
+    vesselName: (raw.vesselName as string) ?? `Vessel #${raw.vesselId}`,
+    imo: (raw.imo as string) ?? '—',
+    flag: (raw.flag as string) ?? 'UN',
+    vesselType: (raw.vesselType as string) ?? 'Cargo',
+    score: (raw.score as number) ?? 0,
+    tier: (raw.tier as PortfolioSanctionsHolding['tier']) ?? 'clear',
+    dataSource: (raw.dataSource as 'live' | 'simulated') ?? 'simulated',
+    topRules: (raw.topRules as PortfolioSanctionsHolding['topRules']) ?? [],
+    owner: (raw.owner as string) ?? '—',
+    hullValue: (raw.hullValue as number) ?? 0,
+    sanctionedNetworkNodes: (raw.sanctionedNetworkNodes as number) ?? 0,
+    lastUpdated: (raw.lastUpdated as string) ?? new Date().toISOString(),
+  };
+}
+
+export function useSanctionsPortfolio() {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['sanctions-portfolio'],
+    queryFn: () => api.sanctionsNetwork.portfolio(),
+    staleTime: 30_000,
+    retry: 1,
+  });
+
+  let holdings: PortfolioSanctionsHolding[] = PORTFOLIO_SANCTIONS_HOLDINGS;
+  let isLive = false;
+  if (data && typeof data === 'object' && 'holdings' in data && Array.isArray((data as Record<string, unknown>).holdings)) {
+    const apiHoldings = ((data as Record<string, unknown>).holdings as Record<string, unknown>[]).map(mapApiToPortfolioHolding);
+    if (apiHoldings.length > 0) {
+      holdings = apiHoldings;
+      isLive = true;
+    }
+  }
+
+  return { holdings, isLoading, error, isLive, refetch };
 }
