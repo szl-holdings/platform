@@ -76,6 +76,7 @@ const CourtFilingsPage = lazy(() => import('./pages/court-filings'));
 const ClauseGenomePage = lazy(() => import('./pages/clause-genome'));
 const DraftingAgentPage = lazy(() => import('./pages/drafting-agent'));
 const RiskDiffPage = lazy(() => import('./pages/risk-diff'));
+const LegalNlpPage = lazy(() => import('./pages/legal-nlp'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -207,6 +208,12 @@ function CounselSidebarContent({
           label: 'Risk Diff',
           href: '/risk-diff',
           icon: <Shield className="w-3.5 h-3.5" />,
+        },
+        {
+          id: '/legal-nlp',
+          label: 'Legal NLP (HF)',
+          href: '/legal-nlp',
+          icon: <Brain className="w-3.5 h-3.5" />,
         },
       ],
     },
@@ -363,6 +370,7 @@ function DashboardRouter() {
         <Route path="/clause-genome" component={ClauseGenomePage} />
         <Route path="/drafting-agent" component={DraftingAgentPage} />
         <Route path="/risk-diff" component={RiskDiffPage} />
+        <Route path="/legal-nlp" component={LegalNlpPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-violet-400/40">Page not found</p>

@@ -330,6 +330,11 @@ router.use(lazyMatch("/tool-mesh", () => import("./tool-mesh"), "tool-mesh"));
 router.use(lazyMatch("/hf-mcp", () => import("./hf-mcp-proxy"), "hf-mcp-proxy"));
 router.use(lazyMatch("/hf", () => import("./hf-status"), "hf-status"));
 
+// HuggingFace ML Intelligence — legal NLP, threat correlation, AIS decode, property valuation,
+// summarization (bart-large-cnn), and improved RAG embeddings (bge-large-en-v1.5).
+// Public endpoints — no auth required for demo surfaces.
+router.use(lazyMatch("/hf-intelligence", () => import("./hf-intelligence"), "hf-intelligence"));
+
 core.register(router);
 vessels.register(router);
 security.register(router);

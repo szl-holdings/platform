@@ -280,6 +280,7 @@ const PortAnalyticsPage = lazy(() => import('@/pages/port-analytics'));
 const CO2EmissionsPage = lazy(() => import('@/pages/co2-emissions'));
 const RiskScoringPage = lazy(() => import('@/pages/risk-scoring'));
 const DarkVesselDetection = lazy(() => import('@/pages/dark-vessel-detection'));
+const AisDecodePage = lazy(() => import('@/pages/ais-decode'));
 const SatelliteRfIntelligence = lazy(() => import('@/pages/satellite-rf-intelligence'));
 const SanctionsScreening = lazy(() => import('@/pages/sanctions-screening'));
 const PortCongestion = lazy(() => import('@/pages/port-congestion'));
@@ -778,6 +779,12 @@ function VesselsSidebarContent({
           icon: <Radio className="w-3.5 h-3.5" />,
         },
         {
+          id: 'ais-decode',
+          label: 'AIS Decode & ML',
+          href: '/ais-decode',
+          icon: <Brain className="w-3.5 h-3.5" />,
+        },
+        {
           id: 'aef-search',
           label: 'AEF Knowledge Search',
           href: '/aef-search',
@@ -1081,6 +1088,7 @@ function DashboardRouter() {
         <Route path="/co2-emissions" component={CO2EmissionsPage} />
         <Route path="/risk-scoring" component={RiskScoringPage} />
         <Route path="/dark-vessel-detection" component={DarkVesselDetection} />
+        <Route path="/ais-decode" component={AisDecodePage} />
         <Route path="/satellite-rf-intelligence" component={SatelliteRfIntelligence} />
         <Route path="/sanctions-screening" component={SanctionsScreening} />
         <Route path="/port-congestion" component={PortCongestion} />

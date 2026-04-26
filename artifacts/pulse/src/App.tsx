@@ -33,6 +33,7 @@ import Watchlist from './pages/Watchlist';
 
 const DecisionCenterPage = lazy(() => import('@/pages/decision-center'));
 const GovernedCockpitPage = lazy(() => import('@/pages/governed-cockpit'));
+const AiSummarizePage = lazy(() => import('@/pages/AiSummarize'));
 const PulsePricingPage = lazy(() => import('@/pages/pricing'));
 const PulseBillingPage = lazy(() => import('@/pages/billing-account'));
 
@@ -443,6 +444,12 @@ function PulsePalette() {
       action: () => navigate(`${BASE}/decisions`),
     },
     {
+      id: 'nav-summarize',
+      label: 'AI Summarization',
+      group: 'Navigate',
+      action: () => navigate(`${BASE}/summarize`),
+    },
+    {
       id: 'nav-system',
       label: 'System Health',
       group: 'Navigate',
@@ -492,6 +499,13 @@ export default function App() {
               <Route path={`${BASE}/constellation`} component={Constellation} />
               <Route path={`${BASE}/constellation/entities/:id`} component={Constellation} />
               <Route path={`${BASE}/engine`} component={BriefingEngine} />
+              <Route path={`${BASE}/summarize`}>
+                {() => (
+                  <Suspense fallback={null}>
+                    <AiSummarizePage />
+                  </Suspense>
+                )}
+              </Route>
               <Route path={`${BASE}/decisions`}>
                 {() => (
                   <Suspense fallback={null}>

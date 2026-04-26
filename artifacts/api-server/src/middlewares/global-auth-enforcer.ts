@@ -192,6 +192,10 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/helios/frontier-briefing",
   "/api/hf-mcp/health",
   "/api/mcp/health",
+  // HuggingFace ML Intelligence — legal NLP, threat correlation, AIS decode, property
+  // valuation, summarization, and embeddings. All POST endpoints are public demo surfaces
+  // with no destructive side-effects. Model catalog GET is also public.
+  "/api/hf-intelligence/models",
   // Terra AI Deal Sourcing — public read-only GET routes. The candidates list and
   // adapters list are accessible without a session so the Terra demo works.
   // GET /candidates/:propertyId is covered by the prefix entry in PUBLIC_PREFIXES.
@@ -238,6 +242,8 @@ const PUBLIC_PREFIXES = [
   // /contact/submissions GETs (those enforce adminGuard internally, so it is
   // safe to bypass the global enforcer here). Bare /api/contact above is
   // retained for the legacy fetch in szl-holdings/trust-center.
+  // HuggingFace ML Intelligence — POST inference endpoints. All are public demo surfaces.
+  "/api/hf-intelligence/",
   "/api/contact/",
   // Carlota Jo time tracking & invoice persistence — publicly accessible from the
   // time-tracking page (which is unauthenticated like the rest of the marketing

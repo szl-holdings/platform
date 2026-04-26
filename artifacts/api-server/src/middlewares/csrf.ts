@@ -147,6 +147,10 @@ function isExempt(path: string): boolean {
   // header (PIN), which an attacker cannot forge cross-origin without the PIN.
   // No server state mutated; the route only renders a PDF response.
   if (process.env.NODE_ENV !== 'production' && path === '/api/pulse/demo/export/pdf') return true;
+  // HuggingFace ML Intelligence — POST inference endpoints are public demo surfaces.
+  // No browser session, cookie, or user-state mutations involved; all inference is
+  // stateless. CSRF double-submit is not applicable.
+  if (path.startsWith('/api/hf-intelligence/')) return true;
   return false;
 }
 

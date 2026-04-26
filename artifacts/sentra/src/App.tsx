@@ -196,6 +196,7 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/predictive', label: 'Predictive Intelligence', icon: TrendingUp, comp: L(() => import('@/pages/predictive-intelligence')) },
       { path: '/breach-cost', label: 'Breach Cost', icon: BarChart3, comp: L(() => import('@/pages/breach-cost-predictor')) },
       { path: '/stix-taxii', label: 'STIX / TAXII', icon: Database, comp: L(() => import('@/pages/stix-taxii')) },
+      { path: '/threat-nlp', label: 'ML Threat Correlation', icon: Brain, comp: L(() => import('@/pages/threat-nlp')) },
       { path: '/aef-search', label: 'AEF Knowledge Search', icon: Search, comp: L(() => import('@/pages/aef-knowledge-search')) },
     ],
   },

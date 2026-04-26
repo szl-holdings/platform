@@ -117,6 +117,7 @@ const ClimateRiskEnhanced = lazy(() => import('@/pages/climate-risk-enhanced'));
 const ComputerVision = lazy(() => import('@/pages/computer-vision'));
 const ZoningIntelligence = lazy(() => import('@/pages/zoning-intelligence'));
 const AvmEngine = lazy(() => import('@/pages/avm-engine'));
+const PropertyValuationAi = lazy(() => import('@/pages/property-valuation-ai'));
 const RentRoll = lazy(() => import('@/pages/rent-roll'));
 const TitleIntelligence = lazy(() => import('@/pages/title-intelligence'));
 const ConstructionCost = lazy(() => import('@/pages/construction-cost'));
@@ -230,6 +231,7 @@ function PrivateRouter() {
         <Route path="/zoning-intelligence/:propertyId" component={ZoningIntelligence} />
         <Route path="/zoning-intelligence" component={ZoningIntelligence} />
         <Route path="/avm-engine" component={AvmEngine} />
+        <Route path="/property-valuation-ai" component={PropertyValuationAi} />
         <Route path="/rent-roll" component={RentRoll} />
         <Route path="/title-intelligence" component={TitleIntelligence} />
         <Route path="/construction-cost" component={ConstructionCost} />
@@ -364,6 +366,15 @@ const terraCommands: CommandItem[] = [
     group: 'Navigation',
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/cap-rate-model');
+    },
+  },
+  {
+    id: 'nav-property-valuation-ai',
+    label: 'AI Property Valuation (HF)',
+    icon: '◈',
+    group: 'Navigation',
+    action: () => {
+      window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/property-valuation-ai');
     },
   },
   ...createBaselineWebActions(
