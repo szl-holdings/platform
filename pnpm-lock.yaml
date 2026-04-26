@@ -4177,6 +4177,15 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
+  packages/billing-client:
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   packages/brand-registry:
     devDependencies:
       typescript:
