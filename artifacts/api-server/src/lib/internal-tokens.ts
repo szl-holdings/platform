@@ -99,6 +99,11 @@ const LEGACY_DEFAULT_PATH_PREFIXES: string[] = [
   '/api/health',
   '/health',
   '/api/env-registry',
+  // Enterprise MCP internal service-to-service routes:
+  // The MCP gateway calls these endpoints to sync IdP configs, persist revocations,
+  // emit audit events, and link/provision enterprise identities. These routes are
+  // gateway-initiated only and gated behind global-auth-enforcer's path allowlist.
+  '/api/enterprise-mcp/',
 ];
 
 const HMAC_KEY = Buffer.from('szl-internal-token-comparison-key-v2', 'utf8');

@@ -65,6 +65,7 @@ export * from './dreamscape';
 export * from './drift_snapshots';
 export * from './email_suppressions';
 export * from './entities';
+export * from './enterprise_idp';
 export * from './eval_forge';
 export * from './eval_os';
 export * from './export_jobs';

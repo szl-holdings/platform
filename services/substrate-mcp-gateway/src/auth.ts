@@ -2,8 +2,9 @@
  * Substrate MCP Gateway — Authentication
  *
  * Auth model:
- *   1. Bearer token  — Authorization: Bearer <SUBSTRATE_GATEWAY_API_KEY>
- *   2. No auth       — only for /health and tools/list (schema discovery)
+ *   1. Enterprise Bearer token — token issued via /mcp/token (ID-JAG JWT-bearer exchange)
+ *   2. API key Bearer token   — Authorization: Bearer <SUBSTRATE_GATEWAY_API_KEY>
+ *   3. No auth               — only for /health, tools/list, ping, and /token exchange
  *
  * SUBSTRATE_GATEWAY_API_KEY env var. In development, if the key is not set,
  * the gateway logs a prominent warning and accepts all requests (unauthenticated
@@ -11,6 +12,7 @@
  */
 
 import type { NextFunction, Request, Response } from 'express';
+import { resolveEnterpriseAuthContext } from './enterprise-auth.js';
 
 /**
  * MCP calls that are allowed without authentication (public read-only subset).
@@ -37,10 +39,22 @@ const PUBLIC_GET_PATHS = new Set(['/', '/health']);
  */
 const PUBLIC_GET_PATH_PREFIXES: string[] = ['/nexus/verify/'];
 
+/**
+ * HTTP POST paths that are allowed without a Bearer token.
+ * /token  — enterprise JWT-bearer exchange; callers present a corporate IdP JWT
+ *           and do not have a gateway API key.
+ * /revoke — revocation webhook called by IdPs or api-server using x-revocation-secret;
+ *           no Bearer token is issued to the webhook caller.
+ */
+const PUBLIC_POST_PATHS = new Set(['/token', '/revoke']);
+
 export function resolveAuthContext(req: Request): {
   authenticated: boolean;
   actorId: string;
   apiKey: string | null;
+  enterprise?: boolean;
+  enterpriseRole?: string;
+  enterpriseScope?: string;
 } {
   const apiKey = process.env.SUBSTRATE_GATEWAY_API_KEY;
   const isDev = process.env.NODE_ENV !== 'production';
@@ -54,6 +68,21 @@ export function resolveAuthContext(req: Request): {
       actorId: token ? `api-key:${token.slice(0, 8)}...` : 'anonymous:dev',
       apiKey: token,
     };
+  }
+
+  // Check enterprise bearer token first (tokens issued by /mcp/token via ID-JAG)
+  if (token) {
+    const enterpriseCtx = resolveEnterpriseAuthContext(token);
+    if (enterpriseCtx) {
+      return {
+        authenticated: true,
+        actorId: enterpriseCtx.actorId,
+        apiKey: null,
+        enterprise: true,
+        enterpriseRole: enterpriseCtx.role,
+        enterpriseScope: enterpriseCtx.scope,
+      };
+    }
   }
 
   if (token && token === apiKey) {
@@ -89,6 +118,11 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
     return;
   }
 
+  if (req.method === 'POST' && PUBLIC_POST_PATHS.has(req.path)) {
+    next();
+    return;
+  }
+
   const body = req.body as { method?: string } | undefined;
   const method = body?.method ?? '';
   if (PUBLIC_METHODS.has(method)) {
@@ -105,7 +139,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
       data: {
         reason:
           'Missing or invalid Bearer token. ' +
-          'Set Authorization: Bearer <SUBSTRATE_GATEWAY_API_KEY>',
+          'Set Authorization: Bearer <SUBSTRATE_GATEWAY_API_KEY> or use the enterprise JWT-bearer token exchange at POST /mcp/token',
       },
     },
   });

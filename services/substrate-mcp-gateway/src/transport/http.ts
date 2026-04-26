@@ -28,6 +28,20 @@ import {
   SUBSTRATE_RESOURCES,
   SUBSTRATE_TOOLS,
 } from '../descriptor.js';
+import {
+  getEnterpriseToken,
+  getEnterpriseIdpByIssuer,
+  handleRevocationWebhook,
+  issueEnterpriseToken,
+  linkOrProvisionUser,
+  listEnterpriseIdps,
+  registerEnterpriseIdp,
+  unregisterEnterpriseIdp,
+  resolveEnterpriseAuthContext,
+  validateIdJag,
+  type EnterpriseIdpConfig,
+  type RevocationWebhookPayload,
+} from '../enterprise-auth.js';
 import { getAvailableTools } from '../handlers.js';
 import { lookupProof, getRecentProofs } from '../nexus-fabric.js';
 import { actorIdToTenantId, runWithRequestContext } from '../request-context.js';
@@ -255,6 +269,9 @@ export function createHttpTransport(): express.Router {
         authorize: 'POST /mcp/authorize',
         token: 'POST /mcp/token',
         register: 'POST /mcp/register',
+        revoke: 'POST /mcp/revoke (Enterprise revocation webhook)',
+        enterpriseIdps: 'GET /mcp/enterprise/idps',
+        metadata: 'GET /.well-known/oauth-authorization-server',
       },
     });
   });
@@ -368,6 +385,45 @@ export function createHttpTransport(): express.Router {
     const reqCtx = { actorId: postActorId, tenantId: actorIdToTenantId(postActorId) };
 
     const sessionId = req.headers['mcp-session-id'] as string | undefined;
+
+    // Enforce enterprise token scope on tool calls
+    // Enterprise tokens carry a scope string (e.g. "mcp:read", "mcp:read mcp:write").
+    // Require at minimum mcp:read for tool/resource access; return 403 if scope is empty.
+    const mcpBody = req.body as { method?: string; params?: Record<string, unknown> } | undefined;
+    const requestedMethod = mcpBody?.method;
+    if (requestedMethod) {
+      const authCtx = resolveAuthContext(req);
+      if (authCtx.enterprise) {
+        const scope = authCtx.enterpriseScope ?? '';
+        const hasRead = scope.includes('mcp:read') || scope.includes('mcp:admin');
+        if (!hasRead) {
+          res.status(403).json({
+            jsonrpc: '2.0',
+            id: null,
+            error: { code: -32000, message: 'FORBIDDEN', data: { reason: 'Enterprise token scope does not permit MCP access. Minimum scope required: mcp:read' } },
+          });
+          return;
+        }
+        // Write operations require mcp:write or mcp:admin
+        const isWriteMethod = requestedMethod === 'tools/call' &&
+          typeof mcpBody?.params === 'object' && mcpBody.params !== null &&
+          typeof (mcpBody.params as Record<string, unknown>).name === 'string' &&
+          /^(alloy_|lyte_|alloy_launch|alloy_decision|alloy_approve|alloy_veto)/.test(
+            (mcpBody.params as Record<string, unknown>).name as string,
+          );
+        if (isWriteMethod) {
+          const hasWrite = scope.includes('mcp:write') || scope.includes('mcp:approve') || scope.includes('mcp:admin');
+          if (!hasWrite) {
+            res.status(403).json({
+              jsonrpc: '2.0',
+              id: null,
+              error: { code: -32000, message: 'FORBIDDEN', data: { reason: 'Enterprise token scope does not permit write/mutate operations. Minimum scope required: mcp:write' } },
+            });
+            return;
+          }
+        }
+      }
+    }
 
     if (sessionId && streamableSessions.has(sessionId)) {
       const transport = streamableSessions.get(sessionId)!;
@@ -483,10 +539,75 @@ export function createHttpTransport(): express.Router {
     res.status(302).setHeader('Location', redirectUrl.toString()).end();
   });
 
-  // POST /mcp/token — exchange code for access token
-  router.post('/token', (req: Request, res: Response) => {
+  // POST /mcp/token — exchange code or ID-JAG assertion for access token
+  router.post('/token', async (req: Request, res: Response) => {
     const body = req.body as Record<string, unknown>;
-    const { grant_type, code, redirect_uri, code_verifier, client_id } = body;
+    const { grant_type } = body;
+
+    // ── ID-JAG grant: urn:ietf:params:oauth:grant-type:jwt-bearer ────────────
+    if (grant_type === 'urn:ietf:params:oauth:grant-type:jwt-bearer') {
+      const assertion = body.assertion as string | undefined;
+      if (!assertion || typeof assertion !== 'string') {
+        res.status(400).json({
+          error: 'invalid_request',
+          error_description: 'assertion parameter is required for jwt-bearer grant type',
+        });
+        return;
+      }
+
+      const validation = await validateIdJag(assertion, req.ip ?? undefined);
+      if (!validation.valid) {
+        const statusCode = validation.errorCode === 'server_error' ? 500 : 400;
+        res.status(statusCode).json({
+          error: validation.errorCode ?? 'invalid_grant',
+          error_description: validation.error ?? 'ID-JAG assertion validation failed',
+        });
+        return;
+      }
+
+      // Account linking / auto-provisioning — AUTHORITATIVE for token issuance.
+      // A resolved platform user identity is required before an enterprise token is issued.
+      // If no linked user exists and autoProvisionUsers is disabled, the request is denied
+      // with an OAuth-compliant access_denied error so the IdP can surface a clear message.
+      if (validation.issuer && validation.subject) {
+        const idp = getEnterpriseIdpByIssuer(validation.issuer);
+        if (idp) {
+          const platformUserId = await linkOrProvisionUser(
+            idp,
+            validation.subject,
+            validation.email,
+            validation.mappedRole ?? idp.defaultRole,
+            req.ip ?? undefined,
+          ).catch(() => null);
+
+          if (platformUserId === null) {
+            res.status(400).json({
+              error: 'access_denied',
+              error_description: idp.autoProvisionUsers
+                ? 'Enterprise user provisioning failed. Please retry or contact your administrator.'
+                : 'No platform account is linked to this enterprise identity. Contact your administrator to have your account linked before accessing MCP.',
+            });
+            return;
+          }
+        }
+      }
+
+      const token = await issueEnterpriseToken(validation, req.ip ?? undefined);
+      res.json({
+        access_token: token.accessToken,
+        token_type: token.tokenType,
+        expires_in: token.expiresIn,
+        scope: token.scope,
+        issued_at: Math.floor(token.issuedAt / 1000),
+        enterprise: true,
+        mapped_role: token.mappedRole,
+        subject: token.subject,
+      });
+      return;
+    }
+
+    // ── Standard authorization_code grant ────────────────────────────────────
+    const { code, redirect_uri, code_verifier, client_id } = body;
 
     if (grant_type !== 'authorization_code') {
       res.status(400).json({ error: 'unsupported_grant_type' });
@@ -535,6 +656,135 @@ export function createHttpTransport(): express.Router {
       expires_in: token.expiresIn,
       scope: token.scope,
     });
+  });
+
+  // POST /mcp/revoke — Enterprise revocation webhook
+  // Enterprise IdPs call this endpoint to immediately invalidate all MCP access
+  // tokens for a given subject (employee who was deprovisioned / had access revoked).
+  // Protected by a shared secret (MCP_REVOCATION_WEBHOOK_SECRET env var).
+  router.post('/revoke', async (req: Request, res: Response) => {
+    const secret = process.env.MCP_REVOCATION_WEBHOOK_SECRET;
+    if (!secret) {
+      res.status(503).json({
+        error: 'revocation_disabled',
+        error_description: 'MCP_REVOCATION_WEBHOOK_SECRET is not configured — revocation webhook is disabled',
+      });
+      return;
+    }
+    const providedSecret = req.headers['x-revocation-secret'] as string | undefined;
+    if (!providedSecret) {
+      res.status(401).json({ error: 'unauthorized', error_description: 'x-revocation-secret header required' });
+      return;
+    }
+    const { timingSafeEqual, createHash: ch } = await import('node:crypto');
+    const expected = ch('sha256').update(secret).digest();
+    const provided = ch('sha256').update(providedSecret).digest();
+    if (expected.length !== provided.length || !timingSafeEqual(expected, provided)) {
+      res.status(401).json({ error: 'unauthorized', error_description: 'Invalid revocation secret' });
+      return;
+    }
+
+    const body = req.body as Partial<RevocationWebhookPayload>;
+    if (!body.issuer || !body.subject) {
+      res.status(400).json({
+        error: 'invalid_request',
+        error_description: 'issuer and subject are required',
+      });
+      return;
+    }
+
+    const result = await handleRevocationWebhook(
+      { issuer: body.issuer, subject: body.subject, reason: body.reason, revokedBy: body.revokedBy },
+      req.ip ?? undefined,
+    );
+
+    res.json({ ok: true, tokensRevoked: result.revoked, issuer: body.issuer, subject: body.subject });
+  });
+
+  // GET /mcp/enterprise/idps — List registered enterprise IdP configurations
+  // Admin endpoint — requires a gateway API key. Enterprise bearer tokens are rejected
+  // to prevent privilege escalation (regular enterprise users must not access IdP config).
+  router.get('/enterprise/idps', (req: Request, res: Response) => {
+    const ctx = resolveAuthContext(req);
+    if (!ctx.authenticated || ctx.enterprise) {
+      res.status(401).json({ error: 'unauthorized', error_description: 'Gateway API key required for admin IdP management' });
+      return;
+    }
+
+    const idps = listEnterpriseIdps().map((idp) => ({
+      id: idp.id,
+      tenantId: idp.tenantId,
+      name: idp.name,
+      issuerUrl: idp.issuerUrl,
+      jwksUri: idp.jwksUri,
+      expectedAudience: idp.expectedAudience,
+      autoProvisionUsers: idp.autoProvisionUsers,
+      defaultRole: idp.defaultRole,
+      enabled: idp.enabled,
+      jwksCacheTtlSeconds: idp.jwksCacheTtlSeconds,
+      requireEmailVerified: idp.requireEmailVerified,
+    }));
+
+    res.json({ idps, count: idps.length });
+  });
+
+  // POST /mcp/enterprise/idps — Register an enterprise IdP at runtime
+  // Admin endpoint — requires a gateway API key. Enterprise bearer tokens are rejected.
+  router.post('/enterprise/idps', (req: Request, res: Response) => {
+    const ctx = resolveAuthContext(req);
+    if (!ctx.authenticated || ctx.enterprise) {
+      res.status(401).json({ error: 'unauthorized', error_description: 'Gateway API key required for admin IdP management' });
+      return;
+    }
+
+    const body = req.body as Partial<EnterpriseIdpConfig>;
+    const { issuerUrl, jwksUri, expectedAudience, name } = body;
+    if (!issuerUrl || !jwksUri || !expectedAudience || !name) {
+      res.status(400).json({
+        error: 'invalid_request',
+        error_description: 'name, issuerUrl, jwksUri, and expectedAudience are required',
+      });
+      return;
+    }
+
+    const idpConfig: EnterpriseIdpConfig = {
+      id: body.id ?? randomUUID(),
+      tenantId: body.tenantId ?? 'unknown',
+      name,
+      issuerUrl,
+      jwksUri,
+      expectedAudience,
+      claimsToRoleMapping: body.claimsToRoleMapping ?? {},
+      autoProvisionUsers: body.autoProvisionUsers ?? false,
+      defaultRole: body.defaultRole ?? 'viewer',
+      enabled: body.enabled !== false,
+      jwksCacheTtlSeconds: body.jwksCacheTtlSeconds ?? 3600,
+      requireEmailVerified: body.requireEmailVerified !== false,
+      notes: body.notes,
+    };
+
+    registerEnterpriseIdp(idpConfig);
+    res.status(201).json({ ok: true, idp: { id: idpConfig.id, name: idpConfig.name, issuerUrl: idpConfig.issuerUrl } });
+  });
+
+  // DELETE /mcp/enterprise/idps — Unregister an enterprise IdP from the gateway in-memory registry.
+  // Called by the api-server when an IdP is deleted from DB so the gateway stops
+  // trusting tokens from that issuer without requiring a full restart.
+  // Admin endpoint — requires gateway API key.
+  router.delete('/enterprise/idps', (req: Request, res: Response) => {
+    const ctx = resolveAuthContext(req);
+    if (!ctx.authenticated || ctx.enterprise) {
+      res.status(401).json({ error: 'unauthorized', error_description: 'Gateway API key required' });
+      return;
+    }
+    const body = req.body as Record<string, unknown>;
+    const issuerUrl = body.issuerUrl as string | undefined;
+    if (!issuerUrl) {
+      res.status(400).json({ error: 'invalid_request', error_description: 'issuerUrl is required' });
+      return;
+    }
+    unregisterEnterpriseIdp(issuerUrl);
+    res.json({ ok: true, issuerUrl, unregistered: true });
   });
 
   // POST /mcp/register — RFC 7591 dynamic client registration
@@ -664,6 +914,16 @@ export function createDiscoveryHandler(): express.RequestHandler {
         register: '/mcp/register',
         nexusVerify: '/mcp/nexus/verify/:hash',
         nexusProofs: '/mcp/nexus/proofs',
+        revoke: '/mcp/revoke',
+        enterpriseIdps: '/mcp/enterprise/idps',
+        metadata: '/.well-known/oauth-authorization-server',
+        nexusVerify: '/mcp/nexus/verify',
+        nexusProofs: '/mcp/nexus/proofs',
+      },
+      nexus: {
+        version: '1.0',
+        discovery: 'enabled',
+        consciousness: 'active',
       },
       nexus: {
         description: 'PRAXIS Intelligence Fabric — every tool response includes x-nexus-consciousness and x-nexus-proof envelopes',
@@ -674,11 +934,55 @@ export function createDiscoveryHandler(): express.RequestHandler {
           'prism_bus_bridge',
           'nuromesh_federation',
           'evidence_graph',
+          'id_jag_enterprise_auth',
         ],
         resourcePrefixes: ['nexus://convergence/', 'nexus://signals/', 'nexus://agents/', 'nexus://evidence/', 'nexus://proof/'],
       },
-      authMethods: ['bearer_token', 'oauth2_pkce'],
+      authMethods: ['bearer_token', 'oauth2_pkce', 'enterprise_idjag'],
       extensions: SERVER_EXTENSIONS,
+    });
+  };
+}
+
+// ─── OAuth Authorization Server Metadata (RFC 8414) ──────────────────────────
+//
+// Advertises the enterprise-managed-authorization extension and ID-JAG support.
+// Mounted at `/.well-known/oauth-authorization-server` at the root Express app.
+
+export function createAuthorizationServerMetadata(): express.RequestHandler {
+  return (req, res) => {
+    const host = req.headers['x-forwarded-host'] ?? req.headers.host ?? 'localhost';
+    const proto = req.headers['x-forwarded-proto'] ?? (req.secure ? 'https' : 'http');
+    const issuer = `${proto}://${host}`;
+
+    res.json({
+      issuer,
+      authorization_endpoint: `${issuer}/mcp/authorize`,
+      token_endpoint: `${issuer}/mcp/token`,
+      registration_endpoint: `${issuer}/mcp/register`,
+      revocation_endpoint: `${issuer}/mcp/revoke`,
+      token_endpoint_auth_methods_supported: ['none', 'client_secret_basic', 'private_key_jwt'],
+      grant_types_supported: [
+        'authorization_code',
+        'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      ],
+      response_types_supported: ['code'],
+      code_challenge_methods_supported: ['S256'],
+      scopes_supported: ['mcp', 'mcp:read', 'mcp:write', 'mcp:approve', 'mcp:admin'],
+      enterprise_managed_authorization: {
+        version: '1.0',
+        extension: 'io.modelcontextprotocol/enterprise-managed-authorization',
+        idjag_grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        registered_idps: listEnterpriseIdps().filter((idp) => idp.enabled).map((idp) => ({
+          id: idp.id,
+          name: idp.name,
+          issuer: idp.issuerUrl,
+          audience: idp.expectedAudience,
+        })),
+        revocation_endpoint: `${issuer}/mcp/revoke`,
+        revocation_webhook_secret_header: 'x-revocation-secret',
+      },
+      mcp_protocol_version: SERVER_INFO.protocolVersion,
     });
   };
 }

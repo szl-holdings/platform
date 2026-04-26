@@ -83,6 +83,14 @@ const PUBLIC_EXACT_PATHS = new Set([
   // for an access token before they have a session. The endpoint validates
   // client_id + hashed client_secret internally.
   "/api/oauth/token",
+  // Enterprise MCP internal endpoints — called by the substrate-mcp-gateway
+  // service. Uses x-internal-token (ALLOY_INTERNAL_TOKEN) verified inside
+  // each handler; no user session is present during inter-service calls.
+  "/api/enterprise-mcp/audit",
+  "/api/enterprise-mcp/link-user",
+  "/api/enterprise-mcp/internal-revoke",
+  "/api/enterprise-mcp/revoked-subjects",
+  "/api/enterprise-mcp/idp-configs",
   // Self-healing orchestrator — read-only GET endpoints.
   // Exact-path matches ensure the mutating PATCH /policies/:id/toggle
   // (which requires auth) is NOT covered by these allowlist entries.

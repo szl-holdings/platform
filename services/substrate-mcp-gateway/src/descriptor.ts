@@ -29,6 +29,15 @@ export const CAPABILITIES = {
     'szl/praxis-convergence': { version: '1.0', description: 'Cross-domain intelligence convergence engine available as MCP Resources' },
     'szl/praxis-federation': { version: '1.0', description: 'NuroMesh domain agents discoverable and delegatable via MCP' },
     'mcp/apps': { version: '1.0', description: 'Interactive HTML micro-dashboards served as ui:// resources with postMessage JSON-RPC' },
+    'io.modelcontextprotocol/enterprise-managed-authorization': {
+      version: '1.0',
+      description: 'Enterprise IdP-governed MCP access via ID-JAG (urn:ietf:params:oauth:grant-type:jwt-bearer). ' +
+        'Employees authenticate once with corporate SSO; IdP-issued JWTs are exchanged for scoped MCP access tokens. ' +
+        'Supports centralized revocation, claims-to-RBAC mapping, and full audit trail.',
+      tokenEndpoint: '/mcp/token',
+      grantTypesSupported: ['urn:ietf:params:oauth:grant-type:jwt-bearer', 'authorization_code'],
+      metadataEndpoint: '/.well-known/oauth-authorization-server',
+    },
   },
 } as const;
 

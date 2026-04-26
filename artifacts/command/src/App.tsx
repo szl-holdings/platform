@@ -43,6 +43,7 @@ const SignalChainsPage = lazy(() =>
   import('./pages/signal-chains').then((m) => ({ default: m.SignalChainsPage })),
 );
 const EnterpriseStatePage = lazy(() => import('./pages/enterprise-state'));
+const EnterpriseMcpAdminPage = lazy(() => import('./pages/enterprise-mcp-admin'));
 const Entity360Page = lazy(() =>
   import('./pages/entity-360').then((m) => ({ default: m.Entity360Page })),
 );
@@ -379,6 +380,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/strategy/correlation-map', label: 'Correlation Map', group: 'Strategy' },
   { href: '/strategy/signal-chains', label: 'Signal Chains', group: 'Strategy' },
   { href: '/strategy/enterprise-state', label: 'Enterprise State', group: 'Strategy' },
+  { href: '/admin/enterprise-mcp', label: 'Enterprise MCP Auth', group: 'Admin' },
   { href: '/strategy/atlas-runtime', label: 'Atlas Runtime', group: 'Strategy' },
   { href: '/strategy/worldline-registry', label: 'Worldline Registry', group: 'Strategy' },
   { href: '/strategy/cross-platform/hub', label: 'Cross-Platform Hub', group: 'Strategy' },
@@ -622,6 +624,7 @@ function AppShell() {
               <Route path="/strategy/correlation-map" component={() => <CorrelationMapPage />} />
               <Route path="/strategy/signal-chains" component={() => <SignalChainsPage />} />
               <Route path="/strategy/enterprise-state" component={() => <EnterpriseStatePage />} />
+              <Route path="/admin/enterprise-mcp" component={() => <EnterpriseMcpAdminPage />} />
               <Route path="/strategy/atlas-runtime" component={() => <AtlasRuntimePage />} />
               <Route path="/strategy/digital-twins" component={() => <DigitalTwinsManagementPage />} />
               <Route path="/strategy/entity-360" component={() => <Entity360Page />} />

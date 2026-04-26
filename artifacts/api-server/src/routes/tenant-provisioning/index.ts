@@ -1,4 +1,5 @@
 import type { IRouter } from 'express';
+import { register as registerEnterpriseMcp } from './enterprise-mcp.js';
 import { register as registerIdentity } from './identity.js';
 import { register as registerPowerbi } from './powerbi.js';
 import { register as registerScim } from './scim.js';
@@ -9,4 +10,5 @@ export function register(router: IRouter): void {
   registerScim(router);
   registerPowerbi(router);
   registerIdentity(router);
+  registerEnterpriseMcp(router);
 }

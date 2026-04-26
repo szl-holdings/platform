@@ -29,7 +29,8 @@ import {
 } from '@szl/substrate';
 import express from 'express';
 import { SERVER_INFO } from './descriptor.js';
-import { createDiscoveryHandler, createHttpTransport } from './transport/http.js';
+import { syncIdpConfigsFromDb, syncRevokedSubjectsFromDb } from './enterprise-auth.js';
+import { createAuthorizationServerMetadata, createDiscoveryHandler, createHttpTransport } from './transport/http.js';
 import { startStdioTransport } from './transport/stdio.js';
 
 const IS_STDIO = process.argv.includes('--stdio');
@@ -94,6 +95,10 @@ if (IS_STDIO) {
   // MCP discovery endpoint (2025-11-25 spec)
   app.get('/.well-known/mcp', createDiscoveryHandler());
 
+  // OAuth Authorization Server Metadata (RFC 8414)
+  // Advertises enterprise-managed-authorization extension and ID-JAG grant type support.
+  app.get('/.well-known/oauth-authorization-server', createAuthorizationServerMetadata());
+
   // Root redirect for discoverability
   app.get('/', (_req, res) => {
     res.json({
@@ -122,6 +127,13 @@ if (IS_STDIO) {
   });
 
   const server = app.listen(PORT, '0.0.0.0', () => {
+    // Pre-load enterprise IdP configs from DB so the gateway never starts with
+    // an empty IdP registry after a restart. Without this, every enterprise token
+    // exchange would fail until each IdP was manually re-pushed via the admin API.
+    void syncIdpConfigsFromDb();
+    // Pre-load revoked subjects from DB so revocations are enforced immediately
+    // even for subjects revoked while this gateway instance was offline.
+    void syncRevokedSubjectsFromDb();
   });
 
   // Graceful shutdown
