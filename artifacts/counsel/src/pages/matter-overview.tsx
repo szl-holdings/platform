@@ -3,6 +3,7 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
+  BookOpen,
   Briefcase,
   Clock,
   Database,
@@ -69,7 +70,7 @@ const STATUS_COLORS: Record<string, string> = {
 function SkeletonRow() {
   return (
     <tr>
-      <td colSpan={6} className="px-4 py-3">
+      <td colSpan={8} className="px-4 py-3">
         <div className="h-10 bg-violet-500/5 rounded animate-pulse" />
       </td>
     </tr>
@@ -395,6 +396,9 @@ export default function MatterOverview() {
                     Exposure
                   </th>
                   <th className="px-4 py-3 text-[10px] font-semibold text-violet-300/50 uppercase tracking-wider text-right">
+                    Clauses
+                  </th>
+                  <th className="px-4 py-3 text-[10px] font-semibold text-violet-300/50 uppercase tracking-wider text-right">
                     Evidence
                   </th>
                 </tr>
@@ -408,7 +412,7 @@ export default function MatterOverview() {
                   </>
                 ) : matters.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-violet-400/40 text-sm">
+                    <td colSpan={8} className="px-4 py-12 text-center text-violet-400/40 text-sm">
                       <Briefcase className="w-6 h-6 mx-auto mb-3 opacity-30" />
                       No matters found. Create your first matter to get started.
                     </td>
@@ -447,6 +451,17 @@ export default function MatterOverview() {
                         {m.estimatedExposure
                           ? `$${(m.estimatedExposure / 1_000_000).toFixed(1)}M`
                           : '—'}
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <Link href={`/clause-genome?matterId=${encodeURIComponent(m.id)}`}>
+                          <button
+                            data-testid={`link-view-clauses-${m.id}`}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold text-violet-300 bg-violet-500/8 border border-violet-500/15 hover:bg-violet-500/18 transition-colors"
+                          >
+                            <BookOpen className="w-3 h-3" />
+                            Clauses
+                          </button>
+                        </Link>
                       </td>
                       <td className="px-4 py-4 text-right">
                         <Link href={`/evidence?entity=${encodeURIComponent(`matter-${m.id}`)}`}>

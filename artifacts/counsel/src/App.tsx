@@ -26,6 +26,7 @@ import { useUserPreferences } from '@szl-holdings/shared-ui/use-user-preferences
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   Bell,
+  BookOpen,
   Brain,
   Briefcase,
   CheckCircle2,
@@ -40,6 +41,7 @@ import {
   Search,
   Shield,
   ShieldAlert,
+  Sparkles,
   Zap,
 } from 'lucide-react';
 import { LegalDisclaimerBanner } from './components/LegalDisclaimerBanner';
@@ -71,6 +73,9 @@ const EvidenceExplorerPage = lazy(() =>
 );
 const EsignaturePage = lazy(() => import('./pages/esignature'));
 const CourtFilingsPage = lazy(() => import('./pages/court-filings'));
+const ClauseGenomePage = lazy(() => import('./pages/clause-genome'));
+const DraftingAgentPage = lazy(() => import('./pages/drafting-agent'));
+const RiskDiffPage = lazy(() => import('./pages/risk-diff'));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -178,6 +183,30 @@ function CounselSidebarContent({
           label: 'Court Filings',
           href: '/court-filings',
           icon: <FileText className="w-3.5 h-3.5" />,
+        },
+      ],
+    },
+    {
+      id: 'clause-intelligence',
+      label: 'Clause Intelligence',
+      items: [
+        {
+          id: '/clause-genome',
+          label: 'Clause Genome',
+          href: '/clause-genome',
+          icon: <BookOpen className="w-3.5 h-3.5" />,
+        },
+        {
+          id: '/drafting-agent',
+          label: 'Drafting Agent',
+          href: '/drafting-agent',
+          icon: <Sparkles className="w-3.5 h-3.5" />,
+        },
+        {
+          id: '/risk-diff',
+          label: 'Risk Diff',
+          href: '/risk-diff',
+          icon: <Shield className="w-3.5 h-3.5" />,
         },
       ],
     },
@@ -331,6 +360,9 @@ function DashboardRouter() {
         <Route path="/evidence" component={EvidenceExplorerPage} />
         <Route path="/esignature" component={EsignaturePage} />
         <Route path="/court-filings" component={CourtFilingsPage} />
+        <Route path="/clause-genome" component={ClauseGenomePage} />
+        <Route path="/drafting-agent" component={DraftingAgentPage} />
+        <Route path="/risk-diff" component={RiskDiffPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-violet-400/40">Page not found</p>
@@ -436,6 +468,24 @@ function AppShell() {
       group: 'Navigate',
       action: () => navigate('/aef-search'),
     },
+    {
+      id: 'nav-clause-genome',
+      label: 'Clause Genome',
+      group: 'Navigate',
+      action: () => navigate('/clause-genome'),
+    },
+    {
+      id: 'nav-drafting-agent',
+      label: 'Drafting Agent',
+      group: 'Navigate',
+      action: () => navigate('/drafting-agent'),
+    },
+    {
+      id: 'nav-risk-diff',
+      label: 'Risk Diff',
+      group: 'Navigate',
+      action: () => navigate('/risk-diff'),
+    },
   ];
   const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(paletteCommands);
   const { open: sentientOpen, show: sentientShow, hide: sentientHide } = useSentientLayer();
@@ -502,6 +552,15 @@ function AppShell() {
       confidence: 0.87,
       policyVerdict: 'requires_approval',
       href: '/approvals',
+    },
+    {
+      id: 'a4',
+      label: 'Draft indemnification clause — Apex Acquisition',
+      description:
+        '7 precedent clauses found in corpus. Recommend mutual broad-form with 2x cap per firm playbook.',
+      confidence: 0.91,
+      policyVerdict: 'allowed',
+      href: '/drafting-agent',
     },
   ];
 

@@ -186,3 +186,4 @@ export * from './billing_disputes';
 export * from './treasury';
 export * from './court_filings';
 export * from './rf_intel';
+export * from './counsel_clauses';

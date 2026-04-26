@@ -85,6 +85,10 @@ router.use(lazyMatch(["/status", "/uptime-history", "/incidents"], () => import(
 // Counsel — public matters CRUD.
 router.use(lazyMatch("/counsel", () => import("./counsel"), "counsel"));
 
+// Counsel Clause Genome — clause library, drafting agent, risk diff, and
+// matter-scoped clause links (/counsel/matters/:id/clauses).
+router.use(lazyMatch(["/counsel/clauses", "/counsel/matters"], () => import("./counsel-clauses"), "counsel-clauses"));
+
 // Counsel Knowledge Index — graph+vector RAG over matter documents.
 router.use(lazyMatch("/counsel-knowledge", () => import("./counsel-knowledge"), "counsel-knowledge"));
 
