@@ -116,6 +116,19 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'RESILIENCE',
+    items: [
+      { href: '/resilience',          label: 'DARPA Hub' },
+      { href: '/gard-robustness',     label: 'GARD Robustness' },
+      { href: '/formal-verification', label: 'Formal Verification' },
+      { href: '/supply-chain',        label: 'Supply Chain' },
+      { href: '/explainability',      label: 'Explainability' },
+      { href: '/compartments',        label: 'Compartments' },
+      { href: '/cyber-resilience',    label: 'Cyber Resilience' },
+      { href: '/sim-governance',      label: 'Sim Governance' },
+    ],
+  },
+  {
     label: 'TRUST',
     items: [
       { href: '/trust',         label: 'Trust Center' },

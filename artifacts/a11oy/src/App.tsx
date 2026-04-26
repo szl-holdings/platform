@@ -82,6 +82,14 @@ const LearningLoop = lazy(() => import('./pages/LearningLoop').then(m => ({ defa
 const Counterfactuals = lazy(() => import('./pages/Counterfactuals').then(m => ({ default: m.Counterfactuals })));
 const AdversarialResilience = lazy(() => import('./pages/AdversarialResilience').then(m => ({ default: m.AdversarialResilience })));
 const FrontierIntelligence = lazy(() => import('./pages/FrontierIntelligence').then(m => ({ default: m.FrontierIntelligence })));
+const DarpaResilienceHub = lazy(() => import('./pages/DarpaResilienceHub').then(m => ({ default: m.DarpaResilienceHub })));
+const GardRobustness = lazy(() => import('./pages/GardRobustness').then(m => ({ default: m.GardRobustness })));
+const FormalVerification = lazy(() => import('./pages/FormalVerification').then(m => ({ default: m.FormalVerification })));
+const SupplyChainAttestation = lazy(() => import('./pages/SupplyChainAttestation').then(m => ({ default: m.SupplyChainAttestation })));
+const ExplainabilityEngine = lazy(() => import('./pages/ExplainabilityEngine').then(m => ({ default: m.ExplainabilityEngine })));
+const CapabilityCompartments = lazy(() => import('./pages/CapabilityCompartments').then(m => ({ default: m.CapabilityCompartments })));
+const CyberResilience = lazy(() => import('./pages/CyberResilience').then(m => ({ default: m.CyberResilience })));
+const SimGovernance = lazy(() => import('./pages/SimGovernance').then(m => ({ default: m.SimGovernance })));
 const ApprovalQueue = lazy(() => import('./pages/ApprovalQueue').then(m => ({ default: m.ApprovalQueue })));
 const VerifierAgent = lazy(() => import('./pages/VerifierAgent').then(m => ({ default: m.VerifierAgent })));
 const AtlasSection = lazy(() => import('./pages/AtlasSection').then(m => ({ default: m.AtlasSection })));
@@ -184,6 +192,14 @@ export default function App() {
         <Route path={`${base}/glasswing`} component={GlasswingPage} />
         <Route path={`${base}/system-card/:id`} component={SystemCard} />
         <Route path={`${base}/capability-trajectory`} component={CapabilityTrajectory} />
+        <Route path={`${base}/resilience`} component={DarpaResilienceHub} />
+        <Route path={`${base}/gard-robustness`} component={GardRobustness} />
+        <Route path={`${base}/formal-verification`} component={FormalVerification} />
+        <Route path={`${base}/supply-chain`} component={SupplyChainAttestation} />
+        <Route path={`${base}/explainability`} component={ExplainabilityEngine} />
+        <Route path={`${base}/compartments`} component={CapabilityCompartments} />
+        <Route path={`${base}/cyber-resilience`} component={CyberResilience} />
+        <Route path={`${base}/sim-governance`} component={SimGovernance} />
         <Route path={`${base}/atlas`}>
           <WithShell><AtlasSection /></WithShell>
         </Route>
