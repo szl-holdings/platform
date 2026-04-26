@@ -586,7 +586,7 @@ title = "A11oy — Medium Post (Ready to Publish)"
 id = "erC_IsD3Vu3I9_h_SIb_l"
 uri = "file://content-package/a11oy-content-package.zip"
 type = "unspecified"
-title = "A11oy Full Content Package (Video + Screenshots + Posts)"
+title = "Complete Content Package (28MB — includes Word doc)"
 
 [[outputs]]
 id = "08E_0gsxqBX8cZ0585g3n"
@@ -605,3 +605,21 @@ id = "xlwOfG4KADfQsQobIZJoK"
 uri = "file://content-package/video/a11oy-demo-square.mp4"
 type = "video"
 title = "A11oy Demo Video (1:1 Square)"
+
+[[outputs]]
+id = "wJy4lsuR4qUdMymgoLc7z"
+uri = "file://content-package/a11oy-product-demo-1920x1080.mp4"
+type = "video"
+title = "A11oy Product Demo — 1920x1080 (Widescreen)"
+
+[[outputs]]
+id = "XCNKorAH8SpDoqHOABg2s"
+uri = "file://content-package/a11oy-product-demo-1080x1080.mp4"
+type = "video"
+title = "A11oy Product Demo — 1080x1080 (Square)"
+
+[[outputs]]
+id = "CdYTYIlsVqX-L_RcgLsX7"
+uri = "file://content-package/a11oy-thought-leadership-posts.docx"
+type = "word_document"
+title = "A11oy Thought Leadership Posts — Word Document"

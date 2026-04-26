@@ -14,25 +14,25 @@ import { Scene7 } from './video_scenes/Scene7';
 import { Scene8 } from './video_scenes/Scene8';
 
 const FULL_SCENE_DURATIONS = {
-  shot1: 6000,
-  shot2: 6000,
-  shot3: 8000,
-  shot4: 8000,
-  shot5: 8000,
-  shot6: 8000,
-  shot7: 10000,
-  shot8: 6000,
+  shot1: 11000,
+  shot2: 11000,
+  shot3: 11000,
+  shot4: 11000,
+  shot5: 11000,
+  shot6: 11000,
+  shot7: 11000,
+  shot8: 11000,
 };
 
 const CHAPTER_META: Record<string, { title: string; subtitle: string }> = {
-  shot1: { title: 'Hero Reveal', subtitle: 'Governed orchestration' },
-  shot2: { title: 'Ecosystem', subtitle: 'One backbone, many surfaces' },
-  shot3: { title: 'Signal Flow', subtitle: 'Signal to proof' },
-  shot4: { title: 'Metrics', subtitle: 'Built for proof' },
-  shot5: { title: 'Trust Surfaces', subtitle: 'Structural governance' },
-  shot6: { title: 'Domain Packs', subtitle: 'Seven verticals' },
-  shot7: { title: 'The Platform', subtitle: 'Seven-layer fabric' },
-  shot8: { title: 'End Card', subtitle: 'Governed intelligence' },
+  shot1: { title: 'Hero Reveal', subtitle: 'Governed intelligence' },
+  shot2: { title: 'Command Surface', subtitle: 'Unified Operator Command' },
+  shot3: { title: 'Signal Mesh', subtitle: 'Ingestion & Routing' },
+  shot4: { title: 'Agents & Workcells', subtitle: 'Execution Workcell Engine' },
+  shot5: { title: 'Proof Ledger', subtitle: 'Immutable Proof Chain' },
+  shot6: { title: 'Pipeline Routing', subtitle: 'Live Orchestration Pipeline' },
+  shot7: { title: 'Executive Intelligence', subtitle: 'Competitive Positioning Matrix' },
+  shot8: { title: 'End Card', subtitle: 'SZL Holdings' },
 };
 
 function VideoPlayer({
@@ -74,7 +74,7 @@ function VideoPlayer({
 
   return (
     <div className="absolute inset-0">
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence mode="wait">
         {fullSceneIndex === 0 && <Scene1 key="shot1" />}
         {fullSceneIndex === 1 && <Scene2 key="shot2" />}
         {fullSceneIndex === 2 && <Scene3 key="shot3" />}
@@ -144,23 +144,23 @@ export default function VideoTemplate() {
 
       <motion.div
         className="absolute w-[80vw] h-[80vw] rounded-full blur-[120px] opacity-20 pointer-events-none z-0"
-        style={{ background: 'radial-gradient(circle, var(--color-lyte-cyan), transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, #c9b787, transparent 70%)' }}
         animate={{
           x: ['-20vw', '40vw', '-10vw', '20vw', '30vw', '-15vw', '10vw', '-20vw'],
           y: ['-10vh', '30vh', '60vh', '-20vh', '40vh', '10vh', '-30vh', '-10vh'],
           scale: [1, 1.2, 0.8, 1.1, 0.9, 1.3, 1.0, 1],
-          opacity: [0.15, 0.25, 0.15, 0.3, 0.2, 0.25, 0.15, 0.15],
+          opacity: [0.05, 0.15, 0.05, 0.1, 0.05, 0.15, 0.05, 0.05],
         }}
         transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
       />
 
       <motion.div
-        className="absolute h-[1px] bg-gradient-to-r from-transparent via-[var(--color-hero-accent)] to-transparent z-10"
+        className="absolute h-[1px] bg-gradient-to-r from-transparent via-[#c9b787] to-transparent z-10"
         animate={{
           left: ['-10%', '0%', '10%', '5%', '20%', '-5%', '15%', '0%'][currentScene] ?? '-10%',
           width: ['120%', '100%', '80%', '90%', '60%', '110%', '70%', '100%'][currentScene] ?? '120%',
           top: ['50%', '20%', '80%', '30%', '50%', '40%', '60%', '50%'][currentScene] ?? '50%',
-          opacity: [0.3, 0.6, 0.4, 0.7, 0.2, 0.5, 0.3, 0.1][currentScene] ?? 0.3,
+          opacity: [0.1, 0.3, 0.2, 0.4, 0.1, 0.2, 0.1, 0.05][currentScene] ?? 0.1,
         }}
         transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
       />

@@ -391,47 +391,51 @@ async function encodeVerticalSocialCuts(rawPath) {
 //   open: 0–12s, reel: 12–37s, fabric: 37–55s, cortex: 55–65s, close: 65–77s
 
 const SCENE_OFFSETS_MS = {
-  open: 0,
-  reel: 12_000,
-  fabric: 37_000,
-  cortex: 55_000,
-  close: 65_000,
+  shot1: 0,
+  shot2: 11_000,
+  shot3: 22_000,
+  shot4: 33_000,
+  shot5: 44_000,
+  shot6: 55_000,
+  shot7: 66_000,
+  shot8: 77_000,
 };
 
 const SCENE_CAPTIONS = {
-  open: [
-    { startMs: 1000,  endMs: 4500,  text: 'The era of AI without receipts is ending.' },
-    { startMs: 4500,  endMs: 9000,  text: 'Every action carries a trace ID, source, freshness, and citation.' },
-    { startMs: 9000,  endMs: 12000, text: 'Provenance is not optional.' },
+  shot1: [
+    { startMs: 1000, endMs: 9500, text: 'A11oy. The governed agentic execution layer for high-consequence enterprise operations.' },
   ],
-  reel: [
-    { startMs: 0,     endMs: 2500,  text: 'Pulse — executive briefing, principal eyes only.' },
-    { startMs: 2500,  endMs: 5000,  text: 'Vessels — maritime intelligence with human approval.' },
-    { startMs: 5000,  endMs: 7500,  text: 'Terra — real estate intelligence across $4.2B+ AUM.' },
-    { startMs: 7500,  endMs: 10000, text: 'Aegis — defense and intel, blocked by policy until cleared.' },
-    { startMs: 10000, endMs: 12500, text: 'Carlota Jo — private advisory, judgment-led.' },
-    { startMs: 12500, endMs: 15000, text: 'Sentra — cyber posture under guardian approval.' },
-    { startMs: 15000, endMs: 17500, text: 'Lyte — decision intelligence with confidence scores.' },
-    { startMs: 17500, endMs: 20000, text: 'Counsel — legal exposure surfaced before crisis.' },
-    { startMs: 20000, endMs: 22500, text: 'Counsel — every obligation tracked, every deadline locked.' },
-    { startMs: 22500, endMs: 25000, text: 'Unified Command — ten surfaces, one governed fabric.' },
+  shot2: [
+    { startMs: 500, endMs: 4000, text: 'One unified command surface.' },
+    { startMs: 4000, endMs: 7000, text: '63 active signals. 7 running workcells. 91% proof coverage.' },
+    { startMs: 7000, endMs: 10500, text: 'Every action traceable.' },
   ],
-  fabric: [
-    { startMs: 500,   endMs: 4000,  text: 'The Decision Fabric — a governed substrate beneath every surface.' },
-    { startMs: 4000,  endMs: 10000, text: 'Constellation, Trace, Guardian, Eval, Memory, Tools.' },
-    { startMs: 10000, endMs: 18000, text: 'Six systems. One explainable runtime.' },
+  shot3: [
+    { startMs: 500, endMs: 5000, text: '153 business signals ingested across 7 verticals.' },
+    { startMs: 5000, endMs: 10500, text: 'Processed through a seven-layer execution fabric — every layer operational.' },
   ],
-  cortex: [
-    { startMs: 500,   endMs: 2000,  text: 'APEX Mobile — the pocket-cockpit.' },
-    { startMs: 2000,  endMs: 3500,  text: 'Maritime risk surfaces in real time.' },
-    { startMs: 3500,  endMs: 5000,  text: 'Cross-domain correlation links exposure across the portfolio.' },
-    { startMs: 5000,  endMs: 10000, text: 'Human approval mandatory before consequential action.' },
+  shot4: [
+    { startMs: 500, endMs: 4000, text: '6 governed agents. 20 workcells.' },
+    { startMs: 4000, endMs: 7000, text: 'Trust scores tracked in real time.' },
+    { startMs: 7000, endMs: 10500, text: 'Every execution context carries proof.' },
   ],
-  close: [
-    { startMs: 1000,  endMs: 3000,  text: 'SZL Holdings — the Governed Decision Operating System.' },
-    { startMs: 3000,  endMs: 5000,  text: '"The era of AI-without-receipts is ending."' },
-    { startMs: 5000,  endMs: 6500,  text: 'Ten surfaces. One governed fabric.' },
-    { startMs: 6500,  endMs: 12000, text: 'Stephen Lutar, Founder & CEO — szl.com', speaker: 'SZL Holdings' },
+  shot5: [
+    { startMs: 500, endMs: 3500, text: 'Cryptographic proof chain.' },
+    { startMs: 3500, endMs: 6500, text: '100% chain integrity. Zero bypass attempts.' },
+    { startMs: 6500, endMs: 10500, text: 'Human approval mandatory before any consequential action.' },
+  ],
+  shot6: [
+    { startMs: 500, endMs: 4000, text: '11-layer orchestration pipeline.' },
+    { startMs: 4000, endMs: 10500, text: 'Multi-provider AI routing — Anthropic, OpenAI, Gemini — governed by policy, not convention.' },
+  ],
+  shot7: [
+    { startMs: 500, endMs: 3500, text: 'Board-ready intelligence.' },
+    { startMs: 3500, endMs: 6500, text: 'Competitive positioning across 8 dimensions.' },
+    { startMs: 6500, endMs: 10500, text: '7 enterprise verticals from a single fabric.' },
+  ],
+  shot8: [
+    { startMs: 500, endMs: 5000, text: 'A11oy. One fabric. Governed autonomy.' },
+    { startMs: 5000, endMs: 10500, text: 'SZL Holdings.', speaker: 'SZL Holdings' },
   ],
 };
 

@@ -1,65 +1,46 @@
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
-import { sceneTransitions } from '@/lib/video';
 
 export function Scene1() {
-  const [phase, setPhase] = useState(0);
-
-  useEffect(() => {
-    const timers = [
-      setTimeout(() => setPhase(1), 500), // Zoom out starts
-      setTimeout(() => setPhase(2), 2000), // Subtitle appears
-      setTimeout(() => setPhase(3), 3000), // VO subtitle appears
-    ];
-    return () => timers.forEach(t => clearTimeout(t));
-  }, []);
-
   return (
     <motion.div
-      className="absolute inset-0 flex flex-col items-center justify-center z-20 overflow-hidden"
-      {...sceneTransitions.clipPolygon}
+      className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden bg-[#0a0a0a]"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 1.05 }}
+      transition={{ duration: 0.8 }}
     >
-      {/* Background layer */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-b from-black to-zinc-900/50"
-        initial={{ scale: 1.1, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 6, ease: 'easeOut' }}
-      />
-
-      {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full w-full">
-        {/* Wordmark */}
+      <div className="absolute top-12 left-12 z-20 flex items-center gap-4">
         <motion.div
-          className="font-display text-[15vw] text-white tracking-tighter leading-none flex"
-          initial={{ scale: 3, opacity: 0, y: 100 }}
-          animate={phase >= 1 ? { scale: 1, opacity: 1, y: -20 } : { scale: 3, opacity: 0, y: 100 }}
-          transition={{ duration: 2.5, ease: [0.16, 1, 0.3, 1] }}
+          className="h-px w-8 bg-[#c9b787]"
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        />
+        <motion.span
+          className="font-mono text-[1.2vw] tracking-[0.2em] text-[#c9b787] uppercase"
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
         >
-          <span>a</span>
-          <span className="text-accent">11</span>
-          <span>oy</span>
-        </motion.div>
-
-        {/* Subtitle */}
-        <motion.div
-          className="font-mono text-[1.5vw] text-text-muted mt-[2vh] tracking-widest uppercase overflow-hidden"
-          initial={{ clipPath: 'inset(0 50% 0 50%)' }}
-          animate={phase >= 2 ? { clipPath: 'inset(0 0% 0 0%)' } : { clipPath: 'inset(0 50% 0 50%)' }}
-          transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-        >
-          Governed orchestration for consequence-bearing AI
-        </motion.div>
+          HERO OPEN
+        </motion.span>
       </div>
 
-      {/* Voiceover Subtitle */}
       <motion.div
-        className="absolute bottom-[10vh] w-[60vw] text-center font-display italic text-[2.5vw] text-white/90"
-        initial={{ opacity: 0, y: 20 }}
-        animate={phase >= 3 ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-        transition={{ duration: 1, ease: 'easeOut' }}
+        className="relative w-[85vw] aspect-video rounded-xl overflow-hidden border border-white/10 shadow-[0_0_60px_rgba(201,183,135,0.1)]"
+        initial={{ opacity: 0, y: 40, rotateX: 10 }}
+        animate={{ opacity: 1, y: 0, rotateX: 0 }}
+        transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+        style={{ perspective: 1000 }}
       >
-        "Most AI systems stop at recommendation."
+        <motion.img
+          src={`${import.meta.env.BASE_URL}screens/01-landing.jpg`}
+          alt="Landing"
+          className="w-full h-full object-cover"
+          initial={{ scale: 1.1, x: '-2%' }}
+          animate={{ scale: 1.0, x: '0%' }}
+          transition={{ duration: 11, ease: 'linear' }}
+        />
       </motion.div>
     </motion.div>
   );

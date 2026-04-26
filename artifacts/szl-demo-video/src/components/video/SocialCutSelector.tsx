@@ -14,31 +14,31 @@ export const SOCIAL_CUT_CONFIGS: Record<
 > = {
   full: {
     label: 'Full Demo',
-    duration: '60s',
+    duration: '88s',
     description: 'Complete a11oy walkthrough',
     sceneRange: [0, 7],
-    durations: { shot1: 6000, shot2: 6000, shot3: 8000, shot4: 8000, shot5: 8000, shot6: 8000, shot7: 10000, shot8: 6000 },
+    durations: { shot1: 11000, shot2: 11000, shot3: 11000, shot4: 11000, shot5: 11000, shot6: 11000, shot7: 11000, shot8: 11000 },
   },
   '60s': {
     label: '60s Cut',
     duration: '60s',
-    description: 'Full launch video',
+    description: 'Faster pacing',
     sceneRange: [0, 7],
-    durations: { shot1: 6000, shot2: 6000, shot3: 8000, shot4: 8000, shot5: 8000, shot6: 8000, shot7: 10000, shot8: 6000 },
+    durations: { shot1: 7500, shot2: 7500, shot3: 7500, shot4: 7500, shot5: 7500, shot6: 7500, shot7: 7500, shot8: 7500 },
   },
   '30s': {
     label: '30s Cut',
     duration: '30s',
     description: 'Hero + metrics + close',
     sceneRange: [0, 3],
-    durations: { shot1: 6000, shot3: 8000, shot4: 8000, shot8: 8000 },
+    durations: { shot1: 7500, shot2: 7500, shot3: 7500, shot8: 7500 },
   },
   '15s': {
     label: '15s Cut',
     duration: '15s',
     description: 'Hook + brand',
     sceneRange: [0, 1],
-    durations: { shot1: 8000, shot8: 7000 },
+    durations: { shot1: 7500, shot8: 7500 },
   },
 };
 
@@ -63,9 +63,9 @@ export function SocialCutSelector({ activeCut, onSelect }: SocialCutSelectorProp
             whileTap={{ scale: 0.95 }}
             className="relative text-[10px] font-mono px-2.5 py-1 rounded-lg transition-colors"
             style={{
-              backgroundColor: isActive ? 'rgba(0, 212, 255, 0.15)' : 'transparent',
-              color: isActive ? 'rgba(0, 212, 255, 0.9)' : 'rgba(255,255,255,0.4)',
-              border: isActive ? '1px solid rgba(0,212,255,0.3)' : '1px solid transparent',
+              backgroundColor: isActive ? 'rgba(201, 183, 135, 0.15)' : 'transparent',
+              color: isActive ? 'rgba(201, 183, 135, 0.9)' : 'rgba(255,255,255,0.4)',
+              border: isActive ? '1px solid rgba(201,183,135,0.3)' : '1px solid transparent',
             }}
             title={config.description}
           >
@@ -83,7 +83,7 @@ export function CaptionToggle({ visible, onToggle }: { visible: boolean; onToggl
       <button
         onClick={onToggle}
         className="flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/10 text-[10px] font-mono transition-colors"
-        style={{ color: visible ? 'rgba(0, 212, 255, 0.9)' : 'rgba(255,255,255,0.3)' }}
+        style={{ color: visible ? 'rgba(201, 183, 135, 0.9)' : 'rgba(255,255,255,0.3)' }}
         title="Toggle captions"
       >
         <span className="text-[8px] uppercase tracking-widest">CC</span>

@@ -29,7 +29,7 @@ export function CaptionTrack({
 
   return (
     <div className="absolute bottom-16 left-0 right-0 z-30 flex justify-center px-8 pointer-events-none">
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence mode="wait">
         {current && (
           <motion.div
             key={`${currentSceneKey}-${current.startMs}`}
@@ -40,22 +40,21 @@ export function CaptionTrack({
             className="max-w-3xl text-center"
           >
             {current.speaker && (
-              <div className="text-[9px] font-mono text-white/40 mb-1 uppercase tracking-widest">
+              <div className="text-[9px] font-mono text-[#c9b787]/80 mb-1 uppercase tracking-widest">
                 {current.speaker}
               </div>
             )}
             <div
-              className="text-base font-medium leading-relaxed px-5 py-2.5 rounded-lg inline-block"
+              className="text-[1.2vw] font-display italic leading-relaxed px-6 py-3 rounded-lg inline-block"
               style={{
-                background: 'rgba(0,0,0,0.78)',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
-                color: 'rgba(255,255,255,0.95)',
-                textShadow: '0 1px 6px rgba(0,0,0,0.9)',
-                border: '1px solid rgba(255,255,255,0.06)',
+                background: 'rgba(10,10,10,0.85)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                color: 'rgba(245,245,245,0.95)',
+                border: '1px solid rgba(201,183,135,0.15)',
               }}
             >
-              {current.text}
+              "{current.text}"
             </div>
           </motion.div>
         )}
@@ -64,44 +63,41 @@ export function CaptionTrack({
   );
 }
 
-// Captions are scene-relative (ms from scene start) so they stay aligned
-// across the full demo and every social cut.
 export const SCENE_CAPTIONS: SceneCaptions = {
   shot1: [
-    { startMs: 800, endMs: 3500, text: 'Every consequential AI action should carry a receipt.' },
-    { startMs: 3500, endMs: 5800, text: 'Governed orchestration for consequence-bearing AI.' },
+    { startMs: 1000, endMs: 9500, text: 'A11oy. The governed agentic execution layer for high-consequence enterprise operations.' },
   ],
   shot2: [
-    { startMs: 500, endMs: 3000, text: 'One backbone. Seven surfaces. One governed fabric.' },
-    { startMs: 3000, endMs: 5800, text: 'Every domain speaks the same language of trust.' },
+    { startMs: 500, endMs: 4000, text: 'One unified command surface.' },
+    { startMs: 4000, endMs: 7000, text: '63 active signals. 7 running workcells. 91% proof coverage.' },
+    { startMs: 7000, endMs: 10500, text: 'Every action traceable.' },
   ],
   shot3: [
-    { startMs: 500, endMs: 3000, text: 'From raw signal to auditable proof — in milliseconds.' },
-    { startMs: 3500, endMs: 6000, text: 'Signal. Decision. Approval. Execute. Audit.' },
-    { startMs: 6000, endMs: 7800, text: 'Nothing executes without a receipt.' },
+    { startMs: 500, endMs: 5000, text: '153 business signals ingested across 7 verticals.' },
+    { startMs: 5000, endMs: 10500, text: 'Processed through a seven-layer execution fabric — every layer operational.' },
   ],
   shot4: [
-    { startMs: 500, endMs: 3000, text: 'Built for proof, not just demos.' },
-    { startMs: 3500, endMs: 6000, text: '59 SDK primitives. 133 API endpoints. 7 fabric layers.' },
-    { startMs: 6000, endMs: 7800, text: 'Every metric is verifiable.' },
+    { startMs: 500, endMs: 4000, text: '6 governed agents. 20 workcells.' },
+    { startMs: 4000, endMs: 7000, text: 'Trust scores tracked in real time.' },
+    { startMs: 7000, endMs: 10500, text: 'Every execution context carries proof.' },
   ],
   shot5: [
-    { startMs: 500, endMs: 3000, text: 'Governance is structural, not optional.' },
-    { startMs: 3500, endMs: 6000, text: 'Proof chain. Constitutional enforcement. Agent welfare.' },
-    { startMs: 6000, endMs: 7800, text: 'Trust is architected in, not bolted on.' },
+    { startMs: 500, endMs: 3500, text: 'Cryptographic proof chain.' },
+    { startMs: 3500, endMs: 6500, text: '100% chain integrity. Zero bypass attempts.' },
+    { startMs: 6500, endMs: 10500, text: 'Human approval mandatory before any consequential action.' },
   ],
   shot6: [
-    { startMs: 500, endMs: 3000, text: 'Seven verticals. One orchestration layer.' },
-    { startMs: 3500, endMs: 6500, text: 'Defense. Maritime. Real estate. Legal. Advisory. Intelligence. Decision.' },
+    { startMs: 500, endMs: 4000, text: '11-layer orchestration pipeline.' },
+    { startMs: 4000, endMs: 10500, text: 'Multi-provider AI routing — Anthropic, OpenAI, Gemini — governed by policy, not convention.' },
   ],
   shot7: [
-    { startMs: 500, endMs: 3500, text: 'The orchestration layer is taking shape.' },
-    { startMs: 3500, endMs: 7000, text: 'Signal Mesh. Causal Core. Context Engine. Workcell Engine.' },
-    { startMs: 7000, endMs: 9800, text: 'Proof Chain. Covenant Layer. Replay.' },
+    { startMs: 500, endMs: 3500, text: 'Board-ready intelligence.' },
+    { startMs: 3500, endMs: 6500, text: 'Competitive positioning across 8 dimensions.' },
+    { startMs: 6500, endMs: 10500, text: '7 enterprise verticals from a single fabric.' },
   ],
   shot8: [
-    { startMs: 500, endMs: 2500, text: 'SZL Holdings — Governed Operational Intelligence.' },
-    { startMs: 2500, endMs: 5500, text: 'The era of AI without receipts is ending.', speaker: 'SZL Holdings' },
+    { startMs: 500, endMs: 5000, text: 'A11oy. One fabric. Governed autonomy.' },
+    { startMs: 5000, endMs: 10500, text: 'SZL Holdings.', speaker: 'SZL Holdings' },
   ],
 };
 
