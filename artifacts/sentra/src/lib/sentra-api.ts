@@ -421,3 +421,89 @@ export async function toggleSiemConnection(
     return { ok: false, error: 'Network error' };
   }
 }
+
+// ── Threat Hunt ─────────────────────────────────────────────────────────────
+
+export interface HuntApprovalResult {
+  huntId: string;
+  approvedAt: string;
+  approvedBy: string;
+  signalPublished: boolean;
+}
+
+export interface RemediationApprovalResult {
+  planId: string;
+  approvedAt: string;
+  approvedBy: string;
+  signalsBroadcast: string[];
+  signalPublished: boolean;
+}
+
+export async function approveHunt(
+  huntId: string,
+  payload: {
+    huntTitle: string;
+    severity: string;
+    blastRadiusCost: number;
+    affectedBusinessEntities: string[];
+    approvedBy?: string;
+  },
+): Promise<{ ok: true; result: HuntApprovalResult } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BASE}/sentra/hunts/${encodeURIComponent(huntId)}/approve`, {
+      method: 'POST',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) return { ok: false, error: `Request failed (${res.status})` };
+    const body = (await res.json()) as HuntApprovalResult;
+    return { ok: true, result: body };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+export async function dismissHunt(
+  huntId: string,
+  payload: { reason?: string; dismissedBy?: string },
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BASE}/sentra/hunts/${encodeURIComponent(huntId)}/dismiss`, {
+      method: 'POST',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) return { ok: false, error: `Request failed (${res.status})` };
+    return { ok: true };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+export async function approveRemediation(
+  planId: string,
+  payload: {
+    huntId: string;
+    huntTitle: string;
+    blastRadiusCost: number;
+    stepCount: number;
+    approvedBy?: string;
+    signalsBroadcast?: string[];
+  },
+): Promise<{ ok: true; result: RemediationApprovalResult } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${BASE}/sentra/remediation/${encodeURIComponent(planId)}/approve`, {
+      method: 'POST',
+      headers: await csrfHeaders(),
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) return { ok: false, error: `Request failed (${res.status})` };
+    const body = (await res.json()) as RemediationApprovalResult;
+    return { ok: true, result: body };
+  } catch {
+    return { ok: false, error: 'Network error' };
+  }
+}

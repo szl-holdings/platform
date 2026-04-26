@@ -310,6 +310,15 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    id: 'threat-hunter',
+    label: 'Threat Hunter',
+    items: [
+      { path: '/hunt', label: 'Hunt Proposer', icon: Brain, comp: L(() => import('@/pages/hunt')) },
+      { path: '/remediation', label: 'Remediation Plans', icon: ShieldCheck, comp: L(() => import('@/pages/remediation-plans')) },
+      { path: '/red-team', label: 'Red-Team Library', icon: Crosshair, comp: L(() => import('@/pages/red-team')) },
+    ],
+  },
+  {
     id: 'crisis-arena',
     label: 'Adversarial Simulation',
     items: [
@@ -350,6 +359,7 @@ const SentraLandingPage = lazy(() => import('@/pages/sentra-landing'));
 const SentraPricingPage = lazy(() => import('@/pages/pricing'));
 const SentraBillingPage = lazy(() => import('@/pages/billing-account'));
 const CrisisArenaArchitectProfilePage = lazy(() => import('@/pages/crisis-arena-architect-profile'));
+const HuntDetailPage = lazy(() => import('@/pages/hunt-detail'));
 
 function PageLoader() {
   return (
@@ -396,6 +406,11 @@ function DashboardRoutes() {
           </Suspense>
         </Route>
       ))}
+      <Route path="/hunt/:id">
+        <Suspense fallback={<PageLoader />}>
+          <HuntDetailPage />
+        </Suspense>
+      </Route>
       <Route path="/crisis-arena/architect/:id">
         <Suspense fallback={<PageLoader />}>
           <CrisisArenaArchitectProfilePage />
@@ -745,6 +760,9 @@ function AppShell({
     { id: 'nav-home', label: 'Home', group: 'Navigate', action: () => navigate('/') },
     { id: 'nav-slides', label: 'Investor Deck', group: 'Navigate', action: () => navigate('/slides') },
     ...navCommands,
+    { id: 'nav-hunt', label: 'Threat Hunt — Hunt Proposer', group: 'Threat Hunter', action: () => navigate('/hunt') },
+    { id: 'nav-remediation', label: 'Threat Hunt — Remediation Plans', group: 'Threat Hunter', action: () => navigate('/remediation') },
+    { id: 'nav-red-team', label: 'Threat Hunt — Red-Team Library', group: 'Threat Hunter', action: () => navigate('/red-team') },
   ];
   const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(paletteCommands);
   const { open: sentientOpen, show: sentientShow, hide: sentientHide } = useSentientLayer();

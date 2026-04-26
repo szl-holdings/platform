@@ -139,6 +139,10 @@ router.use(lazyMatch("/sentra", () => import("./sentra-agents"), "sentra-agents"
 // The /sentra/siem/ingest/:id endpoint is public (webhook push from external SIEM).
 router.use(lazyMatch("/sentra", () => import("./sentra-siem"), "sentra-siem"));
 
+// Sentra Threat Hunter — hunt approval and remediation plan approval endpoints.
+// Publishes typed domain events to the signal mesh when analyst approves a hunt or plan.
+router.use(lazyMatch("/sentra", () => import("./sentra-hunt"), "sentra-hunt"));
+
 // Crisis Arena — crowdsourced business crisis simulation. Public leaderboard
 // endpoints are unauthenticated and rate-limited; all client/architect
 // endpoints enforce auth. Every state change is written to Proof Chain.

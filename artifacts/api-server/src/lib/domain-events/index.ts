@@ -141,6 +141,31 @@ export interface AlloyWorkflowRunUpdatedEvent {
   payload: { runId: number; workflowId: number; state: string };
 }
 
+export interface SentraHuntApprovedEvent {
+  type: 'sentra.hunt-approved';
+  payload: {
+    huntId: string;
+    huntTitle: string;
+    severity: string;
+    blastRadiusCost: number;
+    affectedBusinessEntities: string[];
+    approvedBy: string;
+  };
+}
+
+export interface SentraRemediationApprovedEvent {
+  type: 'sentra.remediation-approved';
+  payload: {
+    planId: string;
+    huntId: string;
+    huntTitle: string;
+    blastRadiusCost: number;
+    stepCount: number;
+    approvedBy: string;
+    signalsBroadcast: string[];
+  };
+}
+
 // ─── Union of All Domain Events ────────────────────────────────────────────────
 
 export type DomainEvent =
@@ -163,7 +188,9 @@ export type DomainEvent =
   | CarlotaInquiryCreatedEvent
   | AlloySignalIngestedEvent
   | AlloyWorkflowCreatedEvent
-  | AlloyWorkflowRunUpdatedEvent;
+  | AlloyWorkflowRunUpdatedEvent
+  | SentraHuntApprovedEvent
+  | SentraRemediationApprovedEvent;
 
 export type DomainEventType = DomainEvent['type'];
 

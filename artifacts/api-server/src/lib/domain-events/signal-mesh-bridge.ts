@@ -318,5 +318,27 @@ export function initSignalMeshBridge(): void {
     rawPayload: { ...p },
   }));
 
+  // ───────── Sentra (threat hunter) ─────────
+  bridge('sentra.hunt-approved', (p) => ({
+    type: 'escalation',
+    domain: 'security',
+    severity: clampSeverity(p.severity),
+    title: `Sentra hunt approved: ${p.huntTitle}`,
+    entityId: `sentra-hunt-${p.huntId}`,
+    entityType: 'threat-hunt',
+    rawPayload: { ...p },
+    tags: ['hunt', 'sentra', 'threat-hunter'],
+  }));
+  bridge('sentra.remediation-approved', (p) => ({
+    type: 'execution',
+    domain: 'security',
+    severity: 'high',
+    title: `Sentra remediation approved: ${p.huntTitle}`,
+    entityId: `sentra-remediation-${p.planId}`,
+    entityType: 'remediation-plan',
+    rawPayload: { ...p },
+    tags: ['remediation', 'sentra', 'threat-hunter'],
+  }));
+
   logger.info('[signal-mesh-bridge] Domain events are now flowing into the signal mesh');
 }
