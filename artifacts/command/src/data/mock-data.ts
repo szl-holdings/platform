@@ -3,7 +3,7 @@ import type { CommandAction, DomainData, IntelligenceCard, TimelineEvent } from 
 export const baseDomainData: DomainData[] = [
   {
     id: 'aegis',
-    name: 'Aegis',
+    name: 'PARAGON',
     icon: 'ShieldAlert',
     color: 'var(--color-aegis)',
     score: 61,
@@ -22,7 +22,7 @@ export const baseDomainData: DomainData[] = [
   },
   {
     id: 'vessels',
-    name: 'Vessels',
+    name: 'SEXTANT',
     icon: 'Ship',
     color: 'var(--color-vessels)',
     score: 82,
@@ -60,7 +60,7 @@ export const baseDomainData: DomainData[] = [
   },
   {
     id: 'lyte',
-    name: 'Lyte',
+    name: 'KORA',
     icon: 'Activity',
     color: 'var(--color-lyte)',
     score: 88,
@@ -98,7 +98,7 @@ export const baseDomainData: DomainData[] = [
   },
   {
     id: 'terra',
-    name: 'Terra',
+    name: 'DOMAINE',
     icon: 'Building2',
     color: 'var(--color-terra)',
     score: 69,
@@ -267,7 +267,7 @@ export const baseTimelineEvents: TimelineEvent[] = [
     severity: 'high',
     title: 'Litigation hold notice issued',
     detail:
-      'New preservation order for Titan Infrastructure matter — IT and Lyte notified to retain logs.',
+      'New preservation order for Titan Infrastructure matter — IT and KORA notified to retain logs.',
   },
   {
     id: 14,
@@ -302,7 +302,7 @@ export const baseIntelligenceCards: IntelligenceCard[] = [
     severity: 'high',
     description:
       'MV Kestrel Meridian delay at Singapore directly impacts Horizon Logistics, an SZL Holdings portfolio company representing 12% of fund NAV. Three PRISM clients have Horizon as a material contract counterparty. Recommend flagging Horizon Logistics for force majeure clause review and alerting PRISM counsel.',
-    entities: ['Vessels', 'SZL Holdings', 'PRAXIS'],
+    entities: ['SEXTANT', 'SZL Holdings', 'PRAXIS'],
     action: 'Initiate force majeure review',
   },
   {
@@ -310,8 +310,8 @@ export const baseIntelligenceCards: IntelligenceCard[] = [
     title: 'Threat Actor Campaign — Infrastructure Blast Radius',
     severity: 'critical',
     description:
-      'Aegis is tracking APT-29 lateral movement toward Active Directory. Lyte has flagged 2 microservices running on CORP-SRV-08 that are within the blast radius. Isolation of the affected K8s namespace would temporarily reduce Lyte monitoring coverage for Terra and Vessels.',
-    entities: ['Aegis', 'Lyte', 'Terra', 'Vessels'],
+      'PARAGON is tracking APT-29 lateral movement toward Active Directory. KORA has flagged 2 microservices running on CORP-SRV-08 that are within the blast radius. Isolation of the affected K8s namespace would temporarily reduce KORA monitoring coverage for DOMAINE and SEXTANT.',
+    entities: ['PARAGON', 'KORA', 'DOMAINE', 'SEXTANT'],
     action: 'Isolate K8s namespace after backup',
   },
   {
@@ -320,7 +320,7 @@ export const baseIntelligenceCards: IntelligenceCard[] = [
     severity: 'high',
     description:
       'Five PRISM matters reach simultaneous discovery deadlines in the next 7 days. Combined potential exposure of $94M requires SZL Holdings to confirm reserve adequacy before the April board meeting. Phoenix market decline compounds risk on two matters with real-estate-collateralized claims.',
-    entities: ['PRAXIS', 'SZL Holdings', 'Terra'],
+    entities: ['PRAXIS', 'SZL Holdings', 'DOMAINE'],
     action: 'Schedule CFO reserve review',
   },
   {
@@ -328,8 +328,8 @@ export const baseIntelligenceCards: IntelligenceCard[] = [
     title: 'Real Estate Downturn — Portfolio Sensitivity',
     severity: 'medium',
     description:
-      "Terra's Phoenix MSA data shows a 3.2% comp decline over 30 days. Two SZL Holdings portfolio companies — Sunstate Realty Partners and Meridian Development — have Phoenix-heavy balance sheets totaling $340M. Recommend running sensitivity analysis before next capital allocation meeting.",
-    entities: ['Terra', 'SZL Holdings'],
+      "DOMAINE's Phoenix MSA data shows a 3.2% comp decline over 30 days. Two SZL Holdings portfolio companies — Sunstate Realty Partners and Meridian Development — have Phoenix-heavy balance sheets totaling $340M. Recommend running sensitivity analysis before next capital allocation meeting.",
+    entities: ['DOMAINE', 'SZL Holdings'],
     action: 'Run sensitivity analysis',
   },
 ];

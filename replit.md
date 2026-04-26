@@ -10,7 +10,7 @@ Key capabilities include:
 - **A11oy Agentic Layer (Phase 4):** Agent Orchestration, Agent Mesh (17 external agents governed by proof chain), Agent Visualization, a11oy SDK (developer platform with **59 primitives** including Anthropic SDK integration, multiagent orchestration [ManagedAgent, MultiAgentSession, SwarmProtocol, AgentGenome, DecisionMarket, TemporalReplay, CausalGraph], and alignment/welfare governance [ResponsibleScalingPolicy, AgentWelfareAssessment, AlignmentVerifier, ConstitutionalEnforcer, EmotionProbe, InterpretabilityEngine, SchemingDetector, SandbagMonitor, FrontierComplianceGate, WelfareInterview], **16 tabs** [Primitives, SDKs, Multi-Agent, Alignment, Tools, Evals, Fine-Tune, Skills, MCP, Cloud, Admin, Security, Observe, Guides, Cookbook, API], **10 language Client SDKs** [Python, TypeScript, Java, Go, Ruby, C#, PHP, Rust, Swift, Kotlin], **4 cloud platforms** [Azure AI Foundry, Amazon Bedrock, Google Vertex AI, Sovereign Cloud], **Administration API** [roles, workspaces, API keys, data residency], **Security & Trust Architecture** [Glasswing-inspired, 12 certifications, zero-trust, AI red team, Agent Welfare Monitor, Alignment Verification Engine, Constitutional Runtime Enforcement, Responsible Scaling Engine], **Alignment & Risk Governance** [6 risk pathways from Claude Mythos Alignment Risk Update, 8 alignment capabilities, 4 code samples, misalignment taxonomy, monitoring architecture, ASL-1 through ASL-5 levels], **Observability** [traces, metrics, alerts, OTLP export], 8 tool types, evals framework, fine-tuning pipeline, 20 skills, 20 MCP servers, 80 guides, **133 API endpoints**, 102 cookbook recipes). Navigation section: AGENTIC (5 pages).
 - **A11oy Substrate Engine:** Python CLI for generating vertical artifact JSON files.
 - **Publication Palette (2026 rebrand):** Pure dark theme with a single warm accent.
-- **Multimodal Experience & Trust Proof (Task #3561):** Includes multilingual voice, wake-word detection, offline-first sync banner for mobile, CRDT live collaboration, digital twin simulator, NEXUS graph hop traversal, chaos engineering drills, federated learning config, multi-fund tenancy views, and PDF export for Aegis.
+- **Multimodal Experience & Trust Proof (Task #3561):** Includes multilingual voice, wake-word detection, offline-first sync banner for mobile, CRDT live collaboration, digital twin simulator, PRAXIS graph hop traversal, chaos engineering drills, federated learning config, multi-fund tenancy views, and PDF export for PARAGON.
 
 ## User Preferences
 I prefer detailed explanations.
@@ -49,7 +49,18 @@ The platform is a pnpm monorepo built with TypeScript 5.9, React 19, Vite, and N
 
 **PRAXIS – Unified Agentic AI Layer:** Internal tooling sandbox for AI agent research, memory management, skill registry, and AI Control Plane features.
 
-**Lyte – Decision Intelligence:** Flagship application for executive narratives, signal feeds, and decision centers, using the publication palette.
+**KORA – Decision Intelligence:** Flagship application for executive narratives, signal feeds, and decision centers, using the publication palette.
+
+**Brand Mapping (Task #3842 — legacy codenames → canonical brand names):**
+- `aegis` artifact dir → **PARAGON** (Defense & Intelligence Command)
+- `sentra` artifact dir → **TENAX** (Cyber Resilience Command)
+- `terra` artifact dir → **DOMAINE** (Real Estate Intelligence)
+- `lyte-command-center` artifact dir → **KORA** (Decision Intelligence)
+- `vessels` artifact dir → **SEXTANT** (Maritime Intelligence)
+- `mockup-sandbox` / `nexus` (legacy) → **PRAXIS** (Unified Agentic AI Layer)
+- `pulse` artifact dir → **LUMINA** (AI Executive Briefing)
+
+_Intentionally unchanged (out of scope):_ artifact root directory names (`artifacts/aegis/`, `artifacts/terra/`, etc.), API URL path segments (`/api/lyte/`, `/api/nexus/`, `/aegis/`), database table identifiers (`firestormIncidentsTable`, `lyte_signals`, `terra_distress_properties`, etc.), the `seed-aegis.ts` shim (which re-exports from `seed-paragon.ts`), and historical changelog/archive entries.
 
 **AI Provenance & Explainability Contract:** Every AI-generated output carries a `ProvenanceEnvelope` with essential metadata.
 

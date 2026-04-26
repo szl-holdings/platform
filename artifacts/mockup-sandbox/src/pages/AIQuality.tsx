@@ -76,13 +76,13 @@ interface OpsSummary {
 
 function StateChip({ state }: { state: string }) {
   const cfg = {
-    closed: { color: 'text-nexus-green border-nexus-green/30 bg-nexus-green/10', label: 'CLOSED' },
-    open: { color: 'text-nexus-red border-red-500/30 bg-red-500/10', label: 'OPEN' },
+    closed: { color: 'text-praxis-green border-praxis-green/30 bg-praxis-green/10', label: 'CLOSED' },
+    open: { color: 'text-praxis-red border-red-500/30 bg-red-500/10', label: 'OPEN' },
     'half-open': {
-      color: 'text-nexus-amber border-nexus-amber/30 bg-nexus-amber/10',
+      color: 'text-praxis-amber border-praxis-amber/30 bg-praxis-amber/10',
       label: 'HALF-OPEN',
     },
-  }[state] ?? { color: 'text-muted-foreground border-nexus', label: state.toUpperCase() };
+  }[state] ?? { color: 'text-muted-foreground border-praxis', label: state.toUpperCase() };
   return (
     <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${cfg.color}`}>
       {cfg.label}
@@ -112,7 +112,7 @@ function FeedbackWidget({ traceId }: { traceId: string }) {
   if (sent) {
     return (
       <span
-        className={`text-[10px] font-mono ${sent === 'up' ? 'text-nexus-green' : 'text-nexus-red'}`}
+        className={`text-[10px] font-mono ${sent === 'up' ? 'text-praxis-green' : 'text-praxis-red'}`}
       >
         {sent === 'up' ? '👍 rated' : '👎 flagged'}
       </span>
@@ -124,7 +124,7 @@ function FeedbackWidget({ traceId }: { traceId: string }) {
       <button
         onClick={() => sendFeedback('up')}
         disabled={loading}
-        className="p-1 rounded hover:bg-nexus-green/10 text-muted-foreground hover:text-nexus-green transition-colors"
+        className="p-1 rounded hover:bg-praxis-green/10 text-muted-foreground hover:text-praxis-green transition-colors"
         title="Thumbs up"
       >
         <ThumbsUp className="w-3 h-3" />
@@ -132,7 +132,7 @@ function FeedbackWidget({ traceId }: { traceId: string }) {
       <button
         onClick={() => sendFeedback('down')}
         disabled={loading}
-        className="p-1 rounded hover:bg-red-500/10 text-muted-foreground hover:text-nexus-red transition-colors"
+        className="p-1 rounded hover:bg-red-500/10 text-muted-foreground hover:text-praxis-red transition-colors"
         title="Thumbs down — flags for review"
       >
         <ThumbsDown className="w-3 h-3" />
@@ -155,14 +155,14 @@ function MetricCard({
   color?: 'cyan' | 'green' | 'amber' | 'red' | 'default';
 }) {
   const colorClass = {
-    cyan: 'text-nexus-cyan',
-    green: 'text-nexus-green',
-    amber: 'text-nexus-amber',
-    red: 'text-nexus-red',
+    cyan: 'text-praxis-cyan',
+    green: 'text-praxis-green',
+    amber: 'text-praxis-amber',
+    red: 'text-praxis-red',
     default: 'text-foreground',
   }[color];
   return (
-    <div className="rounded-lg bg-nexus-surface border border-nexus p-4 flex flex-col gap-2">
+    <div className="rounded-lg bg-praxis-surface border border-praxis p-4 flex flex-col gap-2">
       <div className="flex items-center gap-2 text-muted-foreground text-xs">
         {icon}
         <span>{label}</span>
@@ -215,7 +215,7 @@ export default function AIQuality() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-nexus-cyan font-mono tracking-wide">
+          <h1 className="text-lg font-semibold text-praxis-cyan font-mono tracking-wide">
             AI QUALITY DASHBOARD
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -225,7 +225,7 @@ export default function AIQuality() {
         <button
           onClick={load}
           disabled={loading}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-nexus-surface border border-nexus text-xs text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-praxis-surface border border-praxis text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
           <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
           Refresh
@@ -233,7 +233,7 @@ export default function AIQuality() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs text-nexus-red flex items-center gap-2">
+        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs text-praxis-red flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
           {error} — some data may be unavailable without authentication
         </div>
@@ -280,17 +280,17 @@ export default function AIQuality() {
         </div>
       )}
 
-      <div className="rounded-lg bg-nexus-surface border border-nexus p-4 space-y-3">
+      <div className="rounded-lg bg-praxis-surface border border-praxis p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-nexus-cyan" />
-          <h2 className="text-sm font-semibold text-nexus-cyan font-mono">CIRCUIT BREAKERS</h2>
+          <Zap className="w-4 h-4 text-praxis-cyan" />
+          <h2 className="text-sm font-semibold text-praxis-cyan font-mono">CIRCUIT BREAKERS</h2>
           {openCount > 0 && (
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-red-500/40 bg-red-500/10 text-nexus-red">
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-red-500/40 bg-red-500/10 text-praxis-red">
               {openCount} OPEN
             </span>
           )}
           {halfOpenCount > 0 && (
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-nexus-amber/40 bg-nexus-amber/10 text-nexus-amber">
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-praxis-amber/40 bg-praxis-amber/10 text-praxis-amber">
               {halfOpenCount} HALF-OPEN
             </span>
           )}
@@ -306,7 +306,7 @@ export default function AIQuality() {
             {circuits.map((cb) => (
               <div
                 key={cb.provider}
-                className="rounded border border-nexus bg-nexus-bg px-3 py-2 flex items-center justify-between gap-3"
+                className="rounded border border-praxis bg-praxis-bg px-3 py-2 flex items-center justify-between gap-3"
               >
                 <div>
                   <div className="text-xs font-mono font-semibold">{cb.provider}</div>
@@ -317,11 +317,11 @@ export default function AIQuality() {
                 <div className="flex flex-col items-end gap-1">
                   <StateChip state={cb.state} />
                   {cb.state === 'closed' ? (
-                    <CheckCircle className="w-3 h-3 text-nexus-green" />
+                    <CheckCircle className="w-3 h-3 text-praxis-green" />
                   ) : cb.state === 'open' ? (
-                    <XCircle className="w-3 h-3 text-nexus-red" />
+                    <XCircle className="w-3 h-3 text-praxis-red" />
                   ) : (
-                    <AlertCircle className="w-3 h-3 text-nexus-amber" />
+                    <AlertCircle className="w-3 h-3 text-praxis-amber" />
                   )}
                 </div>
               </div>
@@ -331,25 +331,25 @@ export default function AIQuality() {
       </div>
 
       {summary && (
-        <div className="rounded-lg bg-nexus-surface border border-nexus p-4 space-y-3">
+        <div className="rounded-lg bg-praxis-surface border border-praxis p-4 space-y-3">
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-nexus-amber" />
-            <h2 className="text-sm font-semibold text-nexus-amber font-mono">REVIEW QUEUE</h2>
+            <Shield className="w-4 h-4 text-praxis-amber" />
+            <h2 className="text-sm font-semibold text-praxis-amber font-mono">REVIEW QUEUE</h2>
           </div>
           <div className="grid grid-cols-3 md:grid-cols-6 gap-3 text-center">
             {[
               { label: 'Total', value: summary.reviewQueue.total, color: 'text-foreground' },
-              { label: 'Pending', value: summary.reviewQueue.pending, color: 'text-nexus-amber' },
-              { label: 'In Review', value: summary.reviewQueue.inReview, color: 'text-nexus-cyan' },
-              { label: 'Escalated', value: summary.reviewQueue.escalated, color: 'text-nexus-red' },
+              { label: 'Pending', value: summary.reviewQueue.pending, color: 'text-praxis-amber' },
+              { label: 'In Review', value: summary.reviewQueue.inReview, color: 'text-praxis-cyan' },
+              { label: 'Escalated', value: summary.reviewQueue.escalated, color: 'text-praxis-red' },
               {
                 label: 'Critical',
                 value: summary.reviewQueue.criticalPending,
-                color: 'text-nexus-red',
+                color: 'text-praxis-red',
               },
-              { label: 'High', value: summary.reviewQueue.highPending, color: 'text-nexus-amber' },
+              { label: 'High', value: summary.reviewQueue.highPending, color: 'text-praxis-amber' },
             ].map((item) => (
-              <div key={item.label} className="rounded border border-nexus bg-nexus-bg py-2 px-1">
+              <div key={item.label} className="rounded border border-praxis bg-praxis-bg py-2 px-1">
                 <div className={`text-xl font-mono font-bold ${item.color}`}>{item.value}</div>
                 <div className="text-[9px] text-muted-foreground/60 uppercase tracking-wide">
                   {item.label}
@@ -360,10 +360,10 @@ export default function AIQuality() {
         </div>
       )}
 
-      <div className="rounded-lg bg-nexus-surface border border-nexus p-4 space-y-3">
+      <div className="rounded-lg bg-praxis-surface border border-praxis p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <Activity className="w-4 h-4 text-nexus-cyan" />
-          <h2 className="text-sm font-semibold text-nexus-cyan font-mono">RECENT TRACES</h2>
+          <Activity className="w-4 h-4 text-praxis-cyan" />
+          <h2 className="text-sm font-semibold text-praxis-cyan font-mono">RECENT TRACES</h2>
           <span className="text-[10px] text-muted-foreground/60 ml-auto">
             thumbs-up/down sends feedback to review queue
           </span>
@@ -381,18 +381,18 @@ export default function AIQuality() {
             {traces.map((t) => (
               <div
                 key={t.traceId}
-                className="rounded border border-nexus bg-nexus-bg px-3 py-2 flex items-center gap-3 hover:border-nexus-cyan/30 transition-colors cursor-pointer"
+                className="rounded border border-praxis bg-praxis-bg px-3 py-2 flex items-center gap-3 hover:border-praxis-cyan/30 transition-colors cursor-pointer"
                 onClick={() => setSelectedTrace(selectedTrace?.traceId === t.traceId ? null : t)}
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-nexus-cyan truncate">{t.domain}</span>
+                    <span className="text-xs font-mono text-praxis-cyan truncate">{t.domain}</span>
                     <span className="text-[10px] text-muted-foreground/50">·</span>
                     <span className="text-[10px] font-mono text-muted-foreground/70 truncate">
                       {t.model}
                     </span>
                     {t.requiresReview && (
-                      <span className="text-[9px] font-mono px-1 py-0.5 rounded border border-nexus-amber/30 bg-nexus-amber/10 text-nexus-amber">
+                      <span className="text-[9px] font-mono px-1 py-0.5 rounded border border-praxis-amber/30 bg-praxis-amber/10 text-praxis-amber">
                         REVIEW
                       </span>
                     )}
@@ -416,7 +416,7 @@ export default function AIQuality() {
           </div>
         )}
         {selectedTrace && (
-          <div className="rounded border border-nexus-cyan/20 bg-nexus-bg p-3 space-y-2">
+          <div className="rounded border border-praxis-cyan/20 bg-praxis-bg p-3 space-y-2">
             <div className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-mono">
               Trace detail
             </div>
@@ -425,13 +425,13 @@ export default function AIQuality() {
             </div>
             {selectedTrace.inputSummary && (
               <div className="text-xs text-muted-foreground/70">
-                <span className="text-nexus-cyan/60">input: </span>
+                <span className="text-praxis-cyan/60">input: </span>
                 {selectedTrace.inputSummary}
               </div>
             )}
             {selectedTrace.outputSummary && (
               <div className="text-xs text-muted-foreground/70">
-                <span className="text-nexus-cyan/60">output: </span>
+                <span className="text-praxis-cyan/60">output: </span>
                 {selectedTrace.outputSummary}
               </div>
             )}

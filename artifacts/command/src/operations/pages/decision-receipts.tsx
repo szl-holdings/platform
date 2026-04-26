@@ -54,7 +54,7 @@ const RECEIPTS: DecisionReceipt[] = [
     rank: 1,
     finalScore: 96,
     rankedAt: '2m ago',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     summary:
       'Ranked #1 because the owner is clear (Finance VP), the action is unambiguous (approve or delegate), and SLA breach activates in 4h with $2.1M penalty exposure. Evidence from 3 correlated signals and a historical pattern of approval delays.',

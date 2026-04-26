@@ -67,7 +67,7 @@ import { Link, useLocation } from 'wouter';
 
 const COMMAND_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: 'command',
-  appName: 'Lyte',
+  appName: 'KORA',
   accentColor: '#d4a054',
   steps: [
     {
@@ -642,9 +642,9 @@ export function CommandLayout({ children }: { children: ReactNode }) {
           </div>
           <div className="flex gap-1">
             {[
-              { label: 'Terra', href: '/terra/', color: '#a07848' },
+              { label: 'DOMAINE', href: '/terra/', color: '#a07848' },
               { label: 'Counsel', href: '/alloy', color: '#4B8BDB' },
-              { label: 'Vessels', href: '/vessels/', color: '#38bdf8' },
+              { label: 'SEXTANT', href: '/vessels/', color: '#38bdf8' },
             ].map((p) => (
               <a
                 key={p.label}
@@ -783,7 +783,7 @@ export function CommandLayout({ children }: { children: ReactNode }) {
           className="flex-1 overflow-auto"
           style={{ background: BG.main }}
         >
-          <SectionErrorBoundary sectionName="Lyte">{children}</SectionErrorBoundary>
+          <SectionErrorBoundary sectionName="KORA">{children}</SectionErrorBoundary>
         </main>
         <ServiceStatusRail />
       </div>

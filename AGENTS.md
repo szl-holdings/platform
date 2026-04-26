@@ -230,10 +230,10 @@ The following sections describe the A11oy product runtime as built in Phase 1. T
 
 | Vertical ID | Label | Domain |
 |-------------|-------|--------|
-| `lyte-revenue` | Lyte Revenue | SaaS revenue operations |
-| `vessels-maritime` | Vessels Maritime | Fleet and voyage management |
-| `terra-real-estate` | Terra Real Estate | Portfolio and asset management |
-| `aegis-defense` | Aegis Defense | Defense and intelligence operations |
+| `lyte-revenue` | KORA Revenue | SaaS revenue operations |
+| `vessels-maritime` | SEXTANT Maritime | Fleet and voyage management |
+| `terra-real-estate` | DOMAINE Real Estate | Portfolio and asset management |
+| `aegis-defense` | PARAGON Defense | Defense and intelligence operations |
 | `prism-counsel` | PRISM Counsel | Legal matter and contract management |
 | `carlota-jo` | Carlota Jo | Professional services consulting |
 | `alloy-core` | Alloy Core | Platform health and fabric operations |

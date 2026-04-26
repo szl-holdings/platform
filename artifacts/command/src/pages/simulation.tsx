@@ -94,7 +94,7 @@ function computeImpact(vars: Record<string, number>): DomainImpact[] {
 
   return [
     {
-      domain: 'Vessels',
+      domain: 'SEXTANT',
       icon: '⚓',
       color: '#0ea5e9',
       impactLabel: 'Fuel Cost Delta',
@@ -110,7 +110,7 @@ function computeImpact(vars: Record<string, number>): DomainImpact[] {
       affectedEntities: oil !== 0 ? ['MV Poseidon', 'MV Argo', 'MV Triton'] : [],
     },
     {
-      domain: 'Terra',
+      domain: 'DOMAINE',
       icon: '⬢',
       color: '#22c55e',
       impactLabel: 'Portfolio Valuation',
@@ -185,7 +185,7 @@ function computeImpact(vars: Record<string, number>): DomainImpact[] {
         Math.abs(market) > 15 ? ['Emerging Markets Client', 'PE Strategy Engagement'] : [],
     },
     {
-      domain: 'Aegis',
+      domain: 'PARAGON',
       icon: '🛡',
       color: '#ef4444',
       impactLabel: 'Threat Surface',

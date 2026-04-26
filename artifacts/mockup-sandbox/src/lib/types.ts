@@ -14,7 +14,7 @@ export type Page =
   | 'eval-console'
   | 'audit';
 
-export interface NexusStatus {
+export interface PraxisStatus {
   activeSwarms: number;
   memoryItems: number;
   enabledSkills: number;
@@ -83,7 +83,7 @@ export interface Skill {
   primitiveType: 'Skill' | 'Hook' | 'Command' | 'Agent' | 'MemorySchema' | 'RAGStrategy' | 'Tool';
   enabled: boolean;
   usageCount: number;
-  nexusAdaptation: string;
+  praxisAdaptation: string;
   originalSummary: string;
   tags: string[];
   isCustom: boolean;
@@ -97,7 +97,7 @@ export interface PatternFamily {
   description: string;
   icon: string;
   repos: string[];
-  nexusCapability: string;
+  praxisCapability: string;
   skills: number;
 }
 

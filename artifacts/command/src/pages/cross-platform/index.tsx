@@ -54,8 +54,8 @@ export function CrossPlatformHubPage() {
           <h1 className="text-base font-bold tracking-tight">Cross-Platform Intelligence</h1>
         </div>
         <p className="text-xs leading-relaxed max-w-2xl" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          Patterns no individual product can see. Correlate signals across Lyte, Vessels, Aegis,
-          Terra, PRISM, and Carlota into one portfolio intelligence layer with a shared evidence
+          Patterns no individual product can see. Correlate signals across KORA, SEXTANT, PARAGON,
+          DOMAINE, PRISM, and Carlota into one portfolio intelligence layer with a shared evidence
           registry, run health dashboard, and pilot pipeline view.
         </p>
       </div>

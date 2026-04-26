@@ -24,10 +24,10 @@ interface TeamMember {
 }
 
 const APPS = [
-  'Aegis',
-  'Vessels',
-  'Terra',
-  'Lyte',
+  'PARAGON',
+  'SEXTANT',
+  'DOMAINE',
+  'KORA',
   'PRAXIS',
   'Carlota Jo',
   'SZL Holdings',
@@ -54,7 +54,7 @@ const FALLBACK_MEMBERS: TeamMember[] = [
     team: 'Maritime Ops',
     status: 'active',
     lastSeen: '5m ago',
-    apps: ['Vessels', 'Command', 'SZL Holdings'],
+    apps: ['SEXTANT', 'Command', 'SZL Holdings'],
     avatar: 'MC',
   },
   {
@@ -65,7 +65,7 @@ const FALLBACK_MEMBERS: TeamMember[] = [
     team: 'Legal',
     status: 'active',
     lastSeen: '1h ago',
-    apps: ['PRAXIS', 'Command', 'Aegis'],
+    apps: ['PRAXIS', 'Command', 'PARAGON'],
     avatar: 'PN',
   },
   {
@@ -73,10 +73,10 @@ const FALLBACK_MEMBERS: TeamMember[] = [
     name: 'James Okafor',
     email: 'j.okafor@szlholdings.com',
     role: 'Security Analyst',
-    team: 'Aegis SOC',
+    team: 'PARAGON SOC',
     status: 'active',
     lastSeen: '2h ago',
-    apps: ['Aegis', 'Command'],
+    apps: ['PARAGON', 'Command'],
     avatar: 'JO',
   },
   {
@@ -84,10 +84,10 @@ const FALLBACK_MEMBERS: TeamMember[] = [
     name: 'Sofia Reyes',
     email: 's.reyes@szlholdings.com',
     role: 'Real Estate Analyst',
-    team: 'Terra',
+    team: 'DOMAINE',
     status: 'active',
     lastSeen: 'Yesterday',
-    apps: ['Terra', 'Command'],
+    apps: ['DOMAINE', 'Command'],
     avatar: 'SR',
   },
   {
@@ -98,7 +98,7 @@ const FALLBACK_MEMBERS: TeamMember[] = [
     team: 'Maritime Ops',
     status: 'active',
     lastSeen: '3h ago',
-    apps: ['Vessels', 'Aegis'],
+    apps: ['SEXTANT', 'PARAGON'],
     avatar: 'TH',
   },
   {
@@ -109,7 +109,7 @@ const FALLBACK_MEMBERS: TeamMember[] = [
     team: 'Finance',
     status: 'active',
     lastSeen: 'Today',
-    apps: ['SZL Holdings', 'Command', 'Terra'],
+    apps: ['SZL Holdings', 'Command', 'DOMAINE'],
     avatar: 'AK',
   },
   {
@@ -131,7 +131,7 @@ const FALLBACK_MEMBERS: TeamMember[] = [
     team: 'External',
     status: 'suspended',
     lastSeen: '3 months ago',
-    apps: ['Vessels'],
+    apps: ['SEXTANT'],
     avatar: 'LU',
   },
 ];
@@ -139,9 +139,9 @@ const FALLBACK_MEMBERS: TeamMember[] = [
 const FALLBACK_TEAMS = [
   { name: 'Executive', count: 1, color: '#f59e0b' },
   { name: 'Maritime Ops', count: 2, color: '#0ea5e9' },
-  { name: 'Aegis SOC', count: 1, color: '#ef4444' },
+  { name: 'PARAGON SOC', count: 1, color: '#ef4444' },
   { name: 'Legal', count: 1, color: '#a855f7' },
-  { name: 'Terra', count: 1, color: '#22c55e' },
+  { name: 'DOMAINE', count: 1, color: '#22c55e' },
   { name: 'Finance', count: 1, color: '#f97316' },
   { name: 'External', count: 1, color: '#6b7280' },
 ];
@@ -150,7 +150,7 @@ const ROLES = [
   { name: 'Super Admin', description: 'Full access to all apps and settings', count: 1 },
   { name: 'Operations Lead', description: 'Manage domain operations, no billing access', count: 2 },
   { name: 'Legal Counsel', description: 'PRISM full access, read-only on others', count: 1 },
-  { name: 'Security Analyst', description: 'Aegis full access, read-only on others', count: 1 },
+  { name: 'Security Analyst', description: 'PARAGON full access, read-only on others', count: 1 },
   { name: 'Analyst', description: 'Read-only access to assigned domains', count: 3 },
   { name: 'Read Only', description: 'View-only, no actions', count: 1 },
 ];

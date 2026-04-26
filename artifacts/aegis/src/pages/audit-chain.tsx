@@ -158,7 +158,7 @@ const DEMO_ENTRIES: AuditEntry[] = [
     id: 'aud-007',
     timestamp: Date.now() - 21600000,
     actionType: 'system_event',
-    actor: 'Aegis Platform',
+    actor: 'PARAGON Platform',
     actorType: 'system',
     domain: 'Aegis',
     action: 'Automated MITRE ATT&CK pattern detection — T1190',

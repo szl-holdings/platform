@@ -89,10 +89,10 @@ const client = new SZLClient({
             code: `// ROSIE threat detection
 const threats = await client.security.getAegisThreats();
 
-// Aegis compliance
+// PARAGON compliance
 const compliance = await client.security.getAegisCompliance();
 
-// Aegis simulations
+// PARAGON simulations
 const scenarios = await client.security.getScenarios();`,
           },
           {

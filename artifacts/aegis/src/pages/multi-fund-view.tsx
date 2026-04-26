@@ -59,7 +59,7 @@ interface FundPosition {
 const FUNDS: FundView[] = [
   {
     id: 'fund-alpha',
-    name: 'Aegis Alpha Fund I',
+    name: 'PARAGON Alpha Fund I',
     strategy: 'Cyber Resilience Equity',
     vintage: 2022,
     aum: 480000000,
@@ -86,7 +86,7 @@ const FUNDS: FundView[] = [
   },
   {
     id: 'fund-beta',
-    name: 'Aegis Beta Fund II',
+    name: 'PARAGON Beta Fund II',
     strategy: 'Defense Technology Growth',
     vintage: 2024,
     aum: 280000000,
@@ -113,7 +113,7 @@ const FUNDS: FundView[] = [
   },
   {
     id: 'fund-gamma',
-    name: 'Aegis Infrastructure SPV',
+    name: 'PARAGON Infrastructure SPV',
     strategy: 'Critical Infrastructure Credit',
     vintage: 2023,
     aum: 175000000,
@@ -175,7 +175,7 @@ export default function MultiFundView() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-[#f5f5f5]">Multi-Fund View</h1>
-                <p className="text-xs text-[#f5f5f5]/60 mt-0.5">Aegis GP · {FUNDS.length} funds · Separate fund access controls + consolidated GP roll-up</p>
+                <p className="text-xs text-[#f5f5f5]/60 mt-0.5">PARAGON GP · {FUNDS.length} funds · Separate fund access controls + consolidated GP roll-up</p>
               </div>
             </div>
             <div className="flex items-center gap-1 p-1 bg-white/[0.03] rounded-lg">

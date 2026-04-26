@@ -137,7 +137,7 @@ const GITHUB_TOOLS: DemoTool[] = [
       deletions: 42,
       changed_files: 12,
       body: 'Adds scripted demo adapters for Figma, GitHub, Linear, and Design-Token CDN to the PRAXIS Protocol Bridge.',
-      labels: ['enhancement', 'nexus'],
+      labels: ['enhancement', 'praxis'],
     }),
   },
   {
@@ -154,9 +154,9 @@ const GITHUB_TOOLS: DemoTool[] = [
     ],
     mockResponse: () => ({
       issues: [
-        { number: 203, title: 'TokensGovernance: add per-artifact sparklines', state: 'open', labels: ['nexus', 'enhancement'], created_at: '2026-04-25T10:00:00Z' },
-        { number: 197, title: 'PatternAtlas: add "where used" section per pattern', state: 'open', labels: ['nexus'], created_at: '2026-04-24T08:30:00Z' },
-        { number: 191, title: 'Bridge: Figma adapter missing token export tool', state: 'closed', labels: ['nexus', 'bug'], created_at: '2026-04-22T14:00:00Z' },
+        { number: 203, title: 'TokensGovernance: add per-artifact sparklines', state: 'open', labels: ['praxis', 'enhancement'], created_at: '2026-04-25T10:00:00Z' },
+        { number: 197, title: 'PatternAtlas: add "where used" section per pattern', state: 'open', labels: ['praxis'], created_at: '2026-04-24T08:30:00Z' },
+        { number: 191, title: 'Bridge: Figma adapter missing token export tool', state: 'closed', labels: ['praxis', 'bug'], created_at: '2026-04-22T14:00:00Z' },
       ],
       total: 3,
     }),
@@ -201,7 +201,7 @@ const LINEAR_TOOLS: DemoTool[] = [
       priority: 'urgent',
       state: 'in_progress',
       assignee: 'praxis-agent',
-      labels: ['nexus', 'enhancement'],
+      labels: ['praxis', 'enhancement'],
       estimate: 3,
       created_at: '2026-04-25T09:00:00Z',
       updated_at: '2026-04-25T11:30:00Z',
@@ -486,10 +486,10 @@ export default function Bridge() {
   const totalDemo = ALL_TOOLS.filter((t) => ADAPTER_META[t.adapter]?.isDemo).length;
 
   return (
-    <div className="min-h-full bg-nexus-bg p-6">
+    <div className="min-h-full bg-praxis-bg p-6">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
-          <Network className="w-5 h-5 text-nexus-green" />
+          <Network className="w-5 h-5 text-praxis-green" />
           <div>
             <h1 className="text-lg font-semibold">Universal Protocol Bridge</h1>
             <p className="text-xs text-muted-foreground">
@@ -530,8 +530,8 @@ export default function Bridge() {
               onClick={() => setAdapterFilter(a)}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] font-mono transition-colors ${
                 adapterFilter === a
-                  ? 'border-nexus-cyan/40 bg-nexus-cyan/10 text-nexus-cyan'
-                  : 'border-nexus bg-nexus-bg text-muted-foreground/60 hover:text-foreground'
+                  ? 'border-praxis-cyan/40 bg-praxis-cyan/10 text-praxis-cyan'
+                  : 'border-praxis bg-praxis-bg text-muted-foreground/60 hover:text-foreground'
               }`}
             >
               {a === 'Figma' && <Figma className="w-3 h-3" />}
@@ -540,7 +540,7 @@ export default function Bridge() {
               {a === 'Design-Token CDN' && <Cpu className="w-3 h-3" />}
               {a}
               {a !== 'all' && ADAPTER_META[a]?.isDemo && (
-                <span className="text-[8px] px-1 py-0.5 rounded bg-nexus-amber/10 text-nexus-amber border border-nexus-amber/20">DEMO</span>
+                <span className="text-[8px] px-1 py-0.5 rounded bg-praxis-amber/10 text-praxis-amber border border-praxis-amber/20">DEMO</span>
               )}
             </button>
           ))}
@@ -611,7 +611,7 @@ function ToolCard({
   const isDemo = adapterMeta?.isDemo;
 
   return (
-    <div className="rounded-lg border overflow-hidden bg-nexus-surface transition-all" style={{ borderColor: expanded ? `${color}30` : '#1a2535' }}>
+    <div className="rounded-lg border overflow-hidden bg-praxis-surface transition-all" style={{ borderColor: expanded ? `${color}30` : '#1a2535' }}>
       <div className="flex items-center gap-3 px-4 py-3">
         <button onClick={onExpand} className="flex items-center gap-3 flex-1 min-w-0 text-left">
           {expanded ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />}
@@ -620,7 +620,7 @@ function ToolCard({
               <span className="text-sm font-semibold font-mono">{tool.name}</span>
               <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color, backgroundColor: `${color}15`, border: `1px solid ${color}30` }}>{tool.protocol}</span>
               {isDemo && (
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1 text-nexus-amber bg-nexus-amber/10 border border-nexus-amber/30">
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1 text-praxis-amber bg-praxis-amber/10 border border-praxis-amber/30">
                   <Sparkles className="w-2.5 h-2.5" />
                   {tool.adapter} · DEMO
                 </span>
@@ -631,7 +631,7 @@ function ToolCard({
           </div>
         </button>
         <div className="flex items-center gap-2 shrink-0">
-          {result && (result.status === 'success' ? <CheckCircle className="w-3.5 h-3.5 text-nexus-green" /> : <XCircle className="w-3.5 h-3.5 text-nexus-red" />)}
+          {result && (result.status === 'success' ? <CheckCircle className="w-3.5 h-3.5 text-praxis-green" /> : <XCircle className="w-3.5 h-3.5 text-praxis-red" />)}
           <button onClick={onCall} disabled={calling} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-40" style={{ color, backgroundColor: `${color}10`, border: `1px solid ${color}30` }}>
             {calling ? <Loader className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
             Call
@@ -640,17 +640,17 @@ function ToolCard({
       </div>
 
       {expanded && (
-        <div className="px-4 pb-4 border-t border-nexus pt-3 space-y-3">
+        <div className="px-4 pb-4 border-t border-praxis pt-3 space-y-3">
           {tool.params.length > 0 && (
             <div>
               <label className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest mb-1.5 block">Parameters</label>
-              <div className="bg-nexus-bg rounded-lg p-3 space-y-1">
+              <div className="bg-praxis-bg rounded-lg p-3 space-y-1">
                 {tool.params.map((p) => (
                   <div key={p.name} className="flex items-start gap-2 text-[10px] font-mono">
-                    <span className="text-nexus-cyan shrink-0">{p.name}</span>
+                    <span className="text-praxis-cyan shrink-0">{p.name}</span>
                     <span className="text-muted-foreground/40">·</span>
                     <span className="text-muted-foreground/60">{p.type}</span>
-                    {p.required && <span className="text-nexus-amber/70 shrink-0">required</span>}
+                    {p.required && <span className="text-praxis-amber/70 shrink-0">required</span>}
                     <span className="text-muted-foreground/40 ml-1">{p.description}</span>
                   </div>
                 ))}
@@ -663,7 +663,7 @@ function ToolCard({
               value={args}
               onChange={(e) => onArgsChange(e.target.value)}
               rows={3}
-              className="w-full bg-nexus-bg border border-nexus rounded-lg px-3 py-2 text-xs font-mono resize-none focus:outline-none text-foreground"
+              className="w-full bg-praxis-bg border border-praxis rounded-lg px-3 py-2 text-xs font-mono resize-none focus:outline-none text-foreground"
               placeholder="{}"
             />
           </div>
@@ -672,9 +672,9 @@ function ToolCard({
               <div className="flex items-center gap-2 mb-1.5">
                 <label className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest">Response</label>
                 <span className="text-[9px] font-mono text-muted-foreground/40">{result.durationMs}ms · {result.traceId}</span>
-                {isDemo && <span className="text-[9px] font-mono text-nexus-amber/60 ml-auto">scripted / loopback</span>}
+                {isDemo && <span className="text-[9px] font-mono text-praxis-amber/60 ml-auto">scripted / loopback</span>}
               </div>
-              <div className="bg-nexus-bg rounded-lg p-3 text-xs font-mono text-muted-foreground overflow-auto max-h-40">
+              <div className="bg-praxis-bg rounded-lg p-3 text-xs font-mono text-muted-foreground overflow-auto max-h-40">
                 {JSON.stringify(result.output, null, 2)}
               </div>
             </div>

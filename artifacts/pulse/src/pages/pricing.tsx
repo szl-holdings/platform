@@ -69,7 +69,7 @@ export default function PulsePricingPage() {
       />
       <PricingPage
         productKey="pulse"
-        productName="Pulse"
+        productName="LUMINA"
         accentColor={ACCENT}
         tiers={tiers}
         headline="Executive Intelligence, Delivered Daily"

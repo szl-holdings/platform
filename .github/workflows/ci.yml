@@ -116,9 +116,9 @@ jobs:
       # than getting buried in the recursive build output.
       - name: Build @workspace/command (Ecosystem Command Portal)
         run: pnpm --filter @workspace/command run build
-      - name: Build @workspace/aegis (Aegis Defense & Intelligence)
+      - name: Build @workspace/aegis (PARAGON Defense & Intelligence)
         run: pnpm --filter @workspace/aegis run build
-      - name: Build @workspace/pulse (Pulse Executive Briefing)
+      - name: Build @workspace/pulse (LUMINA Executive Briefing)
         run: pnpm --filter @workspace/pulse run build
 
   integration-test:

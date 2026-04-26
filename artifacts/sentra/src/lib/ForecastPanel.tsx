@@ -151,7 +151,7 @@ export function ForecastPanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-primary" />
-          <h2 className="text-sm font-semibold text-foreground">Forecast Fabric — Sentra Heads</h2>
+          <h2 className="text-sm font-semibold text-foreground">Forecast Fabric — TENAX Heads</h2>
         </div>
         <div className="flex items-center gap-2">
           {breachedCount > 0 && (
@@ -166,7 +166,7 @@ export function ForecastPanel() {
         </div>
       </div>
       <p className="text-xs text-muted-foreground">
-        Calibrated forecast intervals for all Sentra cyber-resilience heads. Click any card to expand all horizons and view provenance.
+        Calibrated forecast intervals for all TENAX cyber-resilience heads. Click any card to expand all horizons and view provenance.
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {AEGIS_FORECAST_DATA.map((head) => (

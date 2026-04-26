@@ -152,7 +152,7 @@ export default function S08BusinessModel() {
                   color: 'rgba(240,236,230,0.4)',
                 }}
               >
-                Annual per domain. Aegis security modules, Vessels commercial intel, Terra property
+                Annual per domain. PARAGON security modules, Vessels commercial intel, Terra property
                 analysis
               </div>
             </div>

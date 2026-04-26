@@ -87,7 +87,7 @@ const RUNS: ReplayRun[] = [
   {
     runId: 'RUN-3038',
     workflowName: 'Security Posture Audit',
-    pack: 'Aegis',
+    pack: 'PARAGON',
     packColor: '#4f6ef7',
     status: 'completed',
     startedAt: '2026-04-01 06:14:22Z',
@@ -201,7 +201,7 @@ const RUNS: ReplayRun[] = [
         offsetMs: 112,
         event: 'tool_call',
         title: 'aggregate_portfolio_kpis()',
-        detail: 'Fetching KPIs from PRISM, Terra, Vessels, Aegis',
+        detail: 'Fetching KPIs from PRISM, DOMAINE, SEXTANT, PARAGON',
         tool: 'data_aggregator',
         evidence: ['Q1 revenue: $14.2M', 'Asset NAV: $127M', 'Fleet utilization: 87%'],
       },
@@ -256,7 +256,7 @@ const RUNS: ReplayRun[] = [
   {
     runId: 'RUN-3039',
     workflowName: 'Fuel Surcharge Rate Calculator',
-    pack: 'Vessels',
+    pack: 'SEXTANT',
     packColor: '#38bdf8',
     status: 'failed',
     startedAt: '2026-03-31 06:44:18Z',
@@ -315,7 +315,7 @@ const RUNS: ReplayRun[] = [
   {
     runId: 'RUN-3037',
     workflowName: 'Asset Valuation Batch',
-    pack: 'Terra',
+    pack: 'DOMAINE',
     packColor: '#a07848',
     status: 'completed',
     startedAt: '2026-03-31 20:00:00Z',

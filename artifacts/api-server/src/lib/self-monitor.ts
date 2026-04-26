@@ -105,7 +105,7 @@ async function fetchHealth(): Promise<HealthDetailedResponse | null> {
       const res = await fetch(HEALTH_URL, {
         signal: controller.signal,
         headers: {
-          "User-Agent": "Lyte-SelfMonitor/1.0",
+          "User-Agent": "KORA-SelfMonitor/1.0",
           ...(internalToken ? { "x-internal-token": internalToken } : {}),
         },
       });
@@ -176,7 +176,7 @@ async function createSignal(params: {
 
   try {
     const [signal] = await db.insert(lyteSignalsTable).values({
-      source: "Lyte Self-Monitor",
+      source: "KORA Self-Monitor",
       sourceType: "monitoring",
       severity: params.severity,
       title: params.title,
@@ -388,13 +388,13 @@ async function runMonitoringCycle(): Promise<void> {
       await createSignal({
         severity: "critical",
         title: "API health endpoint unreachable — self-monitoring loop interrupted",
-        body: "The Lyte self-monitoring loop could not reach /api/health/detailed. The API server may be overloaded or experiencing a startup issue.",
+        body: "The KORA self-monitoring loop could not reach /api/health/detailed. The API server may be overloaded or experiencing a startup issue.",
         metadata: {
           affectedFunction: "API Infrastructure",
           owner: "Platform Team",
           ownerTeam: "SRE",
           recommendedAction: "Check API server logs. Verify process is running. Restart if unresponsive for > 2 minutes.",
-          sourceData: "Lyte self-monitoring — health endpoint",
+          sourceData: "KORA self-monitoring — health endpoint",
         },
       });
     }

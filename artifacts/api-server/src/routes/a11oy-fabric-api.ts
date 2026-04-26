@@ -33,7 +33,7 @@ const FABRIC_LAYERS = [
 const VERTICALS = [
   { id: 'lyte-revenue',      label: 'Lyte Revenue',      signalCount: SEED_SIGNALS.filter(s => s.vertical === 'lyte-revenue').length },
   { id: 'vessels-maritime',  label: 'Vessels Maritime',  signalCount: SEED_SIGNALS.filter(s => s.vertical === 'vessels-maritime').length },
-  { id: 'terra-real-estate', label: 'Terra Real Estate', signalCount: SEED_SIGNALS.filter(s => s.vertical === 'terra-real-estate').length },
+  { id: 'terra-real-estate', label: 'DOMAINE Real Estate', signalCount: SEED_SIGNALS.filter(s => s.vertical === 'terra-real-estate').length },
   { id: 'aegis-defense',     label: 'Aegis Defense',     signalCount: SEED_SIGNALS.filter(s => s.vertical === 'aegis-defense').length },
   { id: 'prism-counsel',     label: 'Counsel',           signalCount: SEED_SIGNALS.filter(s => s.vertical === 'prism-counsel').length },
   { id: 'carlota-jo',        label: 'Carlota Jo',        signalCount: SEED_SIGNALS.filter(s => s.vertical === 'carlota-jo').length },

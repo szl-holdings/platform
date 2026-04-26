@@ -16,7 +16,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { nexusApi } from '../lib/api';
+import { praxisApi } from '../lib/api';
 import type { Skill } from '../lib/types';
 
 function formatRelative(iso?: string): string {
@@ -56,7 +56,7 @@ export default function Skills() {
 
   const fetchSkills = useCallback(async () => {
     try {
-      const data = await nexusApi.listSkills({
+      const data = await praxisApi.listSkills({
         search: search || undefined,
         enabled:
           enabledFilter === 'enabled' ? true : enabledFilter === 'disabled' ? false : undefined,
@@ -76,7 +76,7 @@ export default function Skills() {
 
   async function handleToggle(skill: Skill) {
     try {
-      const updated = await nexusApi.toggleSkill(skill.id, !skill.enabled);
+      const updated = await praxisApi.toggleSkill(skill.id, !skill.enabled);
       setSkills((prev) => prev.map((s) => (s.id === skill.id ? updated : s)));
     } catch {}
   }
@@ -100,7 +100,7 @@ export default function Skills() {
     setError(null);
     setResetSummary(null);
     try {
-      const result = await nexusApi.resetCustomizations();
+      const result = await praxisApi.resetCustomizations();
       setResetSummary(
         `Removed ${result.removedSkills} custom skill${result.removedSkills === 1 ? '' : 's'}, ` +
           `cleared modification history on ${result.resetSkills} seeded skill${result.resetSkills === 1 ? '' : 's'}, ` +
@@ -116,10 +116,10 @@ export default function Skills() {
   }
 
   return (
-    <div className="min-h-full bg-nexus-bg p-6">
+    <div className="min-h-full bg-praxis-bg p-6">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
-          <Layers className="w-5 h-5 text-nexus-cyan" />
+          <Layers className="w-5 h-5 text-praxis-cyan" />
           <div className="flex-1">
             <h1 className="text-lg font-semibold">Skills Library</h1>
             <p className="text-xs text-muted-foreground">
@@ -132,7 +132,7 @@ export default function Skills() {
             onClick={handleReset}
             disabled={resetting || (customCount === 0 && modifiedCount === 0)}
             title="Remove your custom skills and clear toggle history on seeded skills"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-nexus text-muted-foreground hover:text-foreground hover:border-nexus-red/40 hover:text-nexus-red disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-praxis text-muted-foreground hover:text-foreground hover:border-praxis-red/40 hover:text-praxis-red disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             {resetting ? (
               <Loader className="w-3 h-3 animate-spin" />
@@ -143,9 +143,9 @@ export default function Skills() {
           </button>
         </div>
 
-        <div className="mb-5 flex items-center gap-2 rounded-lg border border-nexus-amber/20 bg-nexus-amber/5 px-3 py-2">
-          <FlaskConical className="w-3.5 h-3.5 text-nexus-amber shrink-0" />
-          <span className="text-[11px] text-nexus-amber font-mono uppercase tracking-wide">
+        <div className="mb-5 flex items-center gap-2 rounded-lg border border-praxis-amber/20 bg-praxis-amber/5 px-3 py-2">
+          <FlaskConical className="w-3.5 h-3.5 text-praxis-amber shrink-0" />
+          <span className="text-[11px] text-praxis-amber font-mono uppercase tracking-wide">
             Internal Tooling — Not Production
           </span>
           <span className="text-[10px] text-muted-foreground/60 ml-1">
@@ -155,8 +155,8 @@ export default function Skills() {
         </div>
 
         {resetSummary && (
-          <div className="mb-4 flex items-center gap-2 bg-nexus-cyan/5 border border-nexus-cyan/20 rounded-lg px-4 py-2">
-            <Sparkles className="w-3.5 h-3.5 text-nexus-cyan shrink-0" />
+          <div className="mb-4 flex items-center gap-2 bg-praxis-cyan/5 border border-praxis-cyan/20 rounded-lg px-4 py-2">
+            <Sparkles className="w-3.5 h-3.5 text-praxis-cyan shrink-0" />
             <p className="text-xs text-muted-foreground">{resetSummary}</p>
           </div>
         )}
@@ -169,17 +169,17 @@ export default function Skills() {
               placeholder="Search skills…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-nexus-surface border border-nexus rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-nexus-cyan/30 placeholder:text-muted-foreground/30"
+              className="w-full bg-praxis-surface border border-praxis rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-praxis-cyan/30 placeholder:text-muted-foreground/30"
             />
           </div>
-          <div className="flex rounded-lg border border-nexus overflow-hidden text-xs">
+          <div className="flex rounded-lg border border-praxis overflow-hidden text-xs">
             {(['all', 'enabled', 'disabled'] as const).map((f) => (
               <button
                 key={f}
                 onClick={() => setEnabledFilter(f)}
                 className={`px-3 py-2 transition-colors capitalize ${
                   enabledFilter === f
-                    ? 'bg-nexus-cyan/10 text-nexus-cyan'
+                    ? 'bg-praxis-cyan/10 text-praxis-cyan'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -187,14 +187,14 @@ export default function Skills() {
               </button>
             ))}
           </div>
-          <div className="flex rounded-lg border border-nexus overflow-hidden text-xs">
+          <div className="flex rounded-lg border border-praxis overflow-hidden text-xs">
             {(['all', 'custom'] as const).map((f) => (
               <button
                 key={f}
                 onClick={() => setCustomFilter(f)}
                 className={`px-3 py-2 transition-colors capitalize ${
                   customFilter === f
-                    ? 'bg-nexus-purple/10 text-nexus-purple'
+                    ? 'bg-praxis-purple/10 text-praxis-purple'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -205,9 +205,9 @@ export default function Skills() {
         </div>
 
         {error && (
-          <div className="mb-4 flex items-center gap-2 bg-nexus-red/10 border border-nexus-red/30 rounded-lg px-4 py-3">
-            <AlertCircle className="w-4 h-4 text-nexus-red shrink-0" />
-            <p className="text-xs text-nexus-red">{error}</p>
+          <div className="mb-4 flex items-center gap-2 bg-praxis-red/10 border border-praxis-red/30 rounded-lg px-4 py-3">
+            <AlertCircle className="w-4 h-4 text-praxis-red shrink-0" />
+            <p className="text-xs text-praxis-red">{error}</p>
           </div>
         )}
 
@@ -263,12 +263,12 @@ function SkillCard({
 
   return (
     <div
-      className={`bg-nexus-surface border rounded-lg overflow-hidden transition-all ${
+      className={`bg-praxis-surface border rounded-lg overflow-hidden transition-all ${
         skill.isCustom
-          ? 'border-nexus-purple/30'
+          ? 'border-praxis-purple/30'
           : skill.enabled
-            ? 'border-nexus-cyan/20'
-            : 'border-nexus'
+            ? 'border-praxis-cyan/20'
+            : 'border-praxis'
       }`}
     >
       <div className="flex items-center gap-3 px-4 py-3">
@@ -291,7 +291,7 @@ function SkillCard({
               >
                 {skill.primitiveType}
               </span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-nexus-bg border border-nexus text-muted-foreground/50 font-mono">
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-praxis-bg border border-praxis text-muted-foreground/50 font-mono">
                 {skill.license}
               </span>
               {skill.isCustom && (
@@ -310,7 +310,7 @@ function SkillCard({
               )}
               {!skill.isCustom && skill.lastModifiedAt && (
                 <span
-                  className="text-[9px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1 text-nexus-amber bg-nexus-amber/10 border border-nexus-amber/30"
+                  className="text-[9px] font-mono px-1.5 py-0.5 rounded flex items-center gap-1 text-praxis-amber bg-praxis-amber/10 border border-praxis-amber/30"
                   title={modifiedTitle}
                 >
                   modified
@@ -348,7 +348,7 @@ function SkillCard({
             onClick={() => onToggle(skill)}
             className={`flex items-center gap-1.5 text-xs transition-colors ${
               skill.enabled
-                ? 'text-nexus-cyan'
+                ? 'text-praxis-cyan'
                 : 'text-muted-foreground/40 hover:text-muted-foreground'
             }`}
           >
@@ -362,25 +362,25 @@ function SkillCard({
       </div>
 
       {expanded && (
-        <div className="px-4 pb-4 border-t border-nexus space-y-4 pt-3">
+        <div className="px-4 pb-4 border-t border-praxis space-y-4 pt-3">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <h4 className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest mb-1.5">
                 Original ({skill.sourceRepo})
               </h4>
-              <div className="bg-nexus-bg rounded-lg p-3 text-xs text-muted-foreground leading-relaxed">
+              <div className="bg-praxis-bg rounded-lg p-3 text-xs text-muted-foreground leading-relaxed">
                 {skill.originalSummary}
               </div>
             </div>
             <div>
-              <h4 className="text-[10px] font-mono text-nexus-cyan/70 uppercase tracking-widest mb-1.5">
+              <h4 className="text-[10px] font-mono text-praxis-cyan/70 uppercase tracking-widest mb-1.5">
                 PRAXIS Adaptation
               </h4>
               <div
-                className="bg-nexus-bg rounded-lg p-3 text-xs leading-relaxed"
+                className="bg-praxis-bg rounded-lg p-3 text-xs leading-relaxed"
                 style={{ color: '#c8d8e8' }}
               >
-                {skill.nexusAdaptation}
+                {skill.praxisAdaptation}
               </div>
             </div>
           </div>
@@ -390,7 +390,7 @@ function SkillCard({
               {skill.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-[9px] px-1.5 py-0.5 rounded bg-nexus-bg border border-nexus text-muted-foreground/50"
+                  className="text-[9px] px-1.5 py-0.5 rounded bg-praxis-bg border border-praxis text-muted-foreground/50"
                 >
                   {tag}
                 </span>
@@ -404,7 +404,7 @@ function SkillCard({
                 href={skill.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-[10px] text-nexus-cyan hover:underline"
+                className="flex items-center gap-1 text-[10px] text-praxis-cyan hover:underline"
               >
                 <ExternalLink className="w-3 h-3" />
                 Source

@@ -15,9 +15,9 @@ const VERTICAL_COLORS: Record<string, string> = {
 };
 
 const VERTICAL_LABELS: Record<string, string> = {
-  'lyte-revenue': 'Lyte Revenue',
+  'lyte-revenue': 'KORA Revenue',
   'vessels-maritime': 'Vessels Maritime',
-  'terra-real-estate': 'Terra Real Estate',
+  'terra-real-estate': 'DOMAINE Real Estate',
   'aegis-defense': 'Aegis Defense',
   'prism-counsel': 'Counsel',
   'carlota-jo': 'Carlota Jo',

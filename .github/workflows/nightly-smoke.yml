@@ -1,4 +1,4 @@
-name: Nightly Smoke — Terra Diligence Lifecycle
+name: Nightly Smoke — DOMAINE Diligence Lifecycle
 
 on:
   schedule:
@@ -9,12 +9,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: nightly-smoke-terra
+  group: nightly-smoke-domaine
   cancel-in-progress: true
 
 jobs:
-  terra-diligence-lifecycle:
-    name: Terra Diligence Lifecycle Smoke
+  domaine-diligence-lifecycle:
+    name: DOMAINE Diligence Lifecycle Smoke
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -89,11 +89,11 @@ jobs:
           echo "API server did not become healthy within 30s"
           exit 1
 
-      - name: Run Terra diligence lifecycle smoke test
+      - name: Run DOMAINE diligence lifecycle smoke test
         id: smoke
         run: |
           set +e
-          OUTPUT=$(pnpm --filter @workspace/api-server run smoke:terra-diligence-lifecycle 2>&1)
+          OUTPUT=$(pnpm --filter @workspace/api-server run smoke:domaine-diligence-lifecycle 2>&1)
           EXIT_CODE=$?
           echo "$OUTPUT"
           TAIL=$(echo "$OUTPUT" | tail -n 30)
@@ -134,14 +134,14 @@ jobs:
   notify-failure:
     name: Notify on failure
     runs-on: ubuntu-latest
-    needs: terra-diligence-lifecycle
+    needs: domaine-diligence-lifecycle
     if: failure()
     steps:
       - name: Post Slack alert with script output
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          SMOKE_OUTPUT: ${{ needs.terra-diligence-lifecycle.outputs.smoke_output || 'No output captured — check the Actions run for details.' }}
+          SMOKE_OUTPUT: ${{ needs.domaine-diligence-lifecycle.outputs.smoke_output || 'No output captured — check the Actions run for details.' }}
         run: |
           if [ -z "$SLACK_WEBHOOK_URL" ]; then
             echo "⚠️  SLACK_WEBHOOK_URL not set — Slack alerts inactive"
@@ -157,12 +157,12 @@ jobs:
 
           PAYLOAD=$(cat <<EOF
           {
-            "text": "🔴 *Nightly Smoke Failed — Terra Diligence Lifecycle*",
+            "text": "🔴 *Nightly Smoke Failed — DOMAINE Diligence Lifecycle*",
             "attachments": [
               {
                 "color": "danger",
                 "fields": [
-                  { "title": "Workflow", "value": "Terra Diligence Lifecycle Smoke", "short": true },
+                  { "title": "Workflow", "value": "DOMAINE Diligence Lifecycle Smoke", "short": true },
                   { "title": "Branch", "value": "${{ github.ref_name }}", "short": true },
                   { "title": "Script Output (last 20 lines)", "value": "\\u0060\\u0060\\u0060\n${ESCAPED_OUTPUT}\n\\u0060\\u0060\\u0060", "short": false },
                   { "title": "Action", "value": "Review smoke output and fix regressions", "short": false }

@@ -83,7 +83,7 @@ const DEMO_SELF_MODEL: SelfModel = {
   autonomyTier: 'TIER-2',
   identity: {
     purpose:
-      'Synthesize cross-domain signals into actionable intelligence for executive decision-making. Maintain situational awareness across Vessels, Terra, Aegis, PRISM, Carlota, and Lyte.',
+      'Synthesize cross-domain signals into actionable intelligence for executive decision-making. Maintain situational awareness across SEXTANT, DOMAINE, PARAGON, PRISM, Carlota, and KORA.',
     operatingContext:
       'SZL Holdings — unified executive command layer. Operates under TIER-2 supervised autonomy. Actions above 0.85 confidence auto-approve within policy envelope; below requires human review.',
     boundaryConstraints: [
@@ -163,7 +163,7 @@ const DEMO_SELF_MODEL: SelfModel = {
   ],
   confidenceProfiles: [
     {
-      domain: 'Vessels',
+      domain: 'SEXTANT',
       calibrationAccuracy: 0.71,
       overconfidenceRate: 0.18,
       underconfidenceRate: 0.04,
@@ -171,7 +171,7 @@ const DEMO_SELF_MODEL: SelfModel = {
       lastUpdated: '2026-04-17',
     },
     {
-      domain: 'Terra',
+      domain: 'DOMAINE',
       calibrationAccuracy: 0.86,
       overconfidenceRate: 0.07,
       underconfidenceRate: 0.09,
@@ -179,7 +179,7 @@ const DEMO_SELF_MODEL: SelfModel = {
       lastUpdated: '2026-04-16',
     },
     {
-      domain: 'Aegis',
+      domain: 'PARAGON',
       calibrationAccuracy: 0.83,
       overconfidenceRate: 0.11,
       underconfidenceRate: 0.06,
@@ -203,7 +203,7 @@ const DEMO_SELF_MODEL: SelfModel = {
       lastUpdated: '2026-04-16',
     },
     {
-      domain: 'Lyte',
+      domain: 'KORA',
       calibrationAccuracy: 0.85,
       overconfidenceRate: 0.09,
       underconfidenceRate: 0.06,

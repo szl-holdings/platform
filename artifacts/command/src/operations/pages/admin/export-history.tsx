@@ -77,7 +77,7 @@ function FormatBadge({ format }: { format: 'csv' | 'pdf' }) {
 
 const DATA_SOURCE_LABELS: Record<string, string> = {
   audit_events: 'Audit Log',
-  firestorm_findings: 'Aegis Incidents',
+  firestorm_findings: 'PARAGON Incidents',
   vessels: 'Vessels Fleet',
   terra_deals: 'Terra Deals',
   lyte_signals: 'Command Signals',

@@ -73,7 +73,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
   {
     key: 'aegis',
     name: 'Security Incident',
-    domainLabel: 'Aegis — Defense & Security',
+    domainLabel: 'PARAGON — Defense & Security',
     color: '#c45a4a',
     icon: '🛡️',
     description: 'Unauthorized credential access attempt detected across 3 admin accounts',
@@ -87,7 +87,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
         summary:
           'Behavioral analytics detected a structured credential sweep across admin accounts at 02:14 UTC. 847 failed attempts over 4 minutes from rotating IPs. Pattern consistent with credential-stuffing attack.',
         severity: 'critical',
-        source: 'Aegis Threat Intelligence',
+        source: 'PARAGON Threat Intelligence',
         sourceType: 'security_monitoring',
         classifiedAs: 'credential_attack',
         confidence: 0.94,
@@ -100,15 +100,15 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
         summary:
           'Post-authentication, internal API calls show a 340% spike from one compromised service account, querying unauthorized data endpoints.',
         severity: 'high',
-        source: 'Aegis Network Fabric',
+        source: 'PARAGON Network Fabric',
         sourceType: 'network_monitoring',
         classifiedAs: 'lateral_movement',
         confidence: 0.87,
       },
     ],
-    workflowName: 'Aegis Threat Containment — SEC-CRIT-2026',
+    workflowName: 'PARAGON Threat Containment — SEC-CRIT-2026',
     workflowSteps: [
-      { id: 's1', label: 'Detect: Ingest threat signal from Aegis Intelligence fabric' },
+      { id: 's1', label: 'Detect: Ingest threat signal from PARAGON Intelligence fabric' },
       { id: 's2', label: 'Interpret: Classify threat vector and map blast radius' },
       { id: 's3', label: 'Decide: Generate containment recommendation with evidence trail' },
       { id: 's4', label: 'Execute: Isolate compromised accounts, rotate credentials' },

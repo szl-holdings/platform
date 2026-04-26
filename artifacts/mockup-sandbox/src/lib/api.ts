@@ -13,8 +13,8 @@ async function req<T>(path: string, options?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export const nexusApi = {
-  getStatus: () => req<import('./types').NexusStatus>('/status'),
+export const praxisApi = {
+  getStatus: () => req<import('./types').PraxisStatus>('/status'),
 
   startResearch: (query: string) =>
     req<{ id: string }>('/research', {

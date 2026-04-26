@@ -6,7 +6,7 @@ export default function ForecastPage() {
       <div>
         <h1 className="text-xl font-semibold text-foreground">Forecast Fabric</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Multi-horizon interval forecasts with calibrated confidence bounds across all Sentra cyber-resilience heads.
+          Multi-horizon interval forecasts with calibrated confidence bounds across all TENAX cyber-resilience heads.
         </p>
       </div>
       <ForecastPanel />

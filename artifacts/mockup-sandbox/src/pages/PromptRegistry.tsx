@@ -197,7 +197,7 @@ const DEMO_PROMPTS: PromptEntry[] = [
     id: 'p-orchestrator-plan',
     name: 'PRAXIS Orchestration Planner',
     description: 'Generates a parallelized agent execution plan from a high-level intent string.',
-    domain: 'nexus',
+    domain: 'praxis',
     routeClass: 'planning',
     activeVersionId: 'p-orchestrator-plan@v2',
     activeVersion: 2,
@@ -205,7 +205,7 @@ const DEMO_PROMPTS: PromptEntry[] = [
     status: 'active',
     lastEvalScore: 93.1,
     lastEvalPassRate: 0.96,
-    tags: ['orchestration', 'planning', 'nexus'],
+    tags: ['orchestration', 'planning', 'praxis'],
     updatedAt: '2026-04-18T11:00:00Z',
     versions: [
       {
@@ -261,16 +261,16 @@ const DEMO_PROMPTS: PromptEntry[] = [
 
 function ScoreBadge({ score }: { score: number | null }) {
   if (score == null) return <span className="text-muted-foreground/40 text-[10px]">no eval</span>;
-  const color = score >= 90 ? 'text-nexus-green' : score >= 75 ? 'text-nexus-amber' : 'text-nexus-red';
+  const color = score >= 90 ? 'text-praxis-green' : score >= 75 ? 'text-praxis-amber' : 'text-praxis-red';
   return <span className={`font-mono text-xs font-bold ${color}`}>{score.toFixed(1)}</span>;
 }
 
 function StatusChip({ status }: { status: string }) {
   const cfg = {
-    active: 'border-nexus-green/30 bg-nexus-green/10 text-nexus-green',
-    draft: 'border-nexus/60 bg-nexus-bg text-muted-foreground',
-    deprecated: 'border-red-500/30 bg-red-500/10 text-nexus-red',
-  }[status] ?? 'border-nexus/60 bg-nexus-bg text-muted-foreground';
+    active: 'border-praxis-green/30 bg-praxis-green/10 text-praxis-green',
+    draft: 'border-praxis/60 bg-praxis-bg text-muted-foreground',
+    deprecated: 'border-red-500/30 bg-red-500/10 text-praxis-red',
+  }[status] ?? 'border-praxis/60 bg-praxis-bg text-muted-foreground';
   return <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border uppercase ${cfg}`}>{status}</span>;
 }
 
@@ -289,9 +289,9 @@ function DiffView({ v1, v2 }: { v1: PromptVersion; v2: PromptVersion }) {
     }
   }
   return (
-    <div className="bg-nexus-bg rounded-lg p-3 max-h-48 overflow-y-auto">
+    <div className="bg-praxis-bg rounded-lg p-3 max-h-48 overflow-y-auto">
       {rows.map((r, i) => (
-        <div key={i} className={`text-[10px] font-mono px-1 rounded ${r.type === 'added' ? 'bg-nexus-green/10 text-nexus-green' : r.type === 'removed' ? 'bg-nexus-red/10 text-nexus-red line-through opacity-60' : 'text-muted-foreground/50'}`}>
+        <div key={i} className={`text-[10px] font-mono px-1 rounded ${r.type === 'added' ? 'bg-praxis-green/10 text-praxis-green' : r.type === 'removed' ? 'bg-praxis-red/10 text-praxis-red line-through opacity-60' : 'text-muted-foreground/50'}`}>
           {r.type === 'added' ? '+' : r.type === 'removed' ? '-' : ' '} {r.content || ' '}
         </div>
       ))}
@@ -312,24 +312,24 @@ function ProposeChangeForm({ prompt, onClose, onPropose }: { prompt: PromptEntry
   }
 
   return (
-    <div className="border border-nexus-cyan/30 bg-nexus-cyan/5 rounded-lg p-4 space-y-3">
+    <div className="border border-praxis-cyan/30 bg-praxis-cyan/5 rounded-lg p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <Edit3 className="w-3.5 h-3.5 text-nexus-cyan" />
-          <span className="text-xs font-semibold text-nexus-cyan font-mono">PROPOSE CHANGE</span>
+          <Edit3 className="w-3.5 h-3.5 text-praxis-cyan" />
+          <span className="text-xs font-semibold text-praxis-cyan font-mono">PROPOSE CHANGE</span>
           <span className="text-[9px] text-muted-foreground/40 font-mono">local only · not persisted</span>
         </div>
         <button onClick={onClose} className="text-muted-foreground/40 hover:text-foreground transition-colors"><X className="w-4 h-4" /></button>
       </div>
       <div>
         <label className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest mb-1 block">Template</label>
-        <textarea value={template} onChange={(e) => setTemplate(e.target.value)} rows={8} className="w-full bg-nexus-bg border border-nexus rounded-lg px-3 py-2 text-xs font-mono resize-y focus:outline-none text-foreground" />
+        <textarea value={template} onChange={(e) => setTemplate(e.target.value)} rows={8} className="w-full bg-praxis-bg border border-praxis rounded-lg px-3 py-2 text-xs font-mono resize-y focus:outline-none text-foreground" />
       </div>
       <div>
         <label className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest mb-1 block">Changelog note</label>
-        <input value={changelog} onChange={(e) => setChangelog(e.target.value)} className="w-full bg-nexus-bg border border-nexus rounded-lg px-3 py-2 text-xs focus:outline-none text-foreground" placeholder="What changed and why?" />
+        <input value={changelog} onChange={(e) => setChangelog(e.target.value)} className="w-full bg-praxis-bg border border-praxis rounded-lg px-3 py-2 text-xs focus:outline-none text-foreground" placeholder="What changed and why?" />
       </div>
-      <button onClick={handleSubmit} disabled={submitted || !changelog} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-nexus-cyan/40 bg-nexus-cyan/10 text-nexus-cyan text-xs font-mono hover:bg-nexus-cyan/20 transition-colors disabled:opacity-50">
+      <button onClick={handleSubmit} disabled={submitted || !changelog} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-praxis-cyan/40 bg-praxis-cyan/10 text-praxis-cyan text-xs font-mono hover:bg-praxis-cyan/20 transition-colors disabled:opacity-50">
         {submitted ? <Loader className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
         {submitted ? 'Adding…' : 'Add pending version'}
       </button>
@@ -342,14 +342,14 @@ function VersionCard({ version, isActive, onPromote, onEval, showDiff, prevVersi
   const em = version.evalMetadata;
 
   return (
-    <div className={`rounded border ${isActive ? 'border-nexus-cyan/30 bg-nexus-cyan/5' : 'border-nexus bg-nexus-bg'}`}>
+    <div className={`rounded border ${isActive ? 'border-praxis-cyan/30 bg-praxis-cyan/5' : 'border-praxis bg-praxis-bg'}`}>
       <button className="w-full flex items-center gap-3 px-3 py-2 text-left" onClick={() => setOpen((o) => !o)}>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono font-semibold">v{version.version}</span>
-            {isActive && <span className="text-[9px] font-mono px-1 py-0.5 rounded border border-nexus-cyan/30 bg-nexus-cyan/10 text-nexus-cyan">ACTIVE</span>}
-            {em?.improvement != null && em.improvement > 0 && <span className="text-[9px] font-mono text-nexus-green">+{em.improvement.toFixed(1)}%</span>}
-            {version.tags.map((t) => <span key={t} className="text-[8px] font-mono px-1 py-0.5 rounded bg-nexus-bg border border-nexus text-muted-foreground/50">{t}</span>)}
+            {isActive && <span className="text-[9px] font-mono px-1 py-0.5 rounded border border-praxis-cyan/30 bg-praxis-cyan/10 text-praxis-cyan">ACTIVE</span>}
+            {em?.improvement != null && em.improvement > 0 && <span className="text-[9px] font-mono text-praxis-green">+{em.improvement.toFixed(1)}%</span>}
+            {version.tags.map((t) => <span key={t} className="text-[8px] font-mono px-1 py-0.5 rounded bg-praxis-bg border border-praxis text-muted-foreground/50">{t}</span>)}
           </div>
           <div className="flex items-center gap-3 mt-0.5 text-[10px] text-muted-foreground/60">
             {em?.score != null && <span>score {em.score.toFixed(1)}</span>}
@@ -360,11 +360,11 @@ function VersionCard({ version, isActive, onPromote, onEval, showDiff, prevVersi
           </div>
         </div>
         <div className="flex items-center gap-1.5">
-          <button onClick={(e) => { e.stopPropagation(); onEval(version); }} className="flex items-center gap-1 px-2 py-1 rounded border border-nexus-amber/30 bg-nexus-amber/10 text-nexus-amber text-[10px] hover:bg-nexus-amber/20 transition-colors">
+          <button onClick={(e) => { e.stopPropagation(); onEval(version); }} className="flex items-center gap-1 px-2 py-1 rounded border border-praxis-amber/30 bg-praxis-amber/10 text-praxis-amber text-[10px] hover:bg-praxis-amber/20 transition-colors">
             <FlaskConical className="w-3 h-3" />Eval
           </button>
           {!isActive && (
-            <button onClick={(e) => { e.stopPropagation(); onPromote(version); }} className="flex items-center gap-1 px-2 py-1 rounded border border-nexus-cyan/30 bg-nexus-cyan/10 text-nexus-cyan text-[10px] hover:bg-nexus-cyan/20 transition-colors">
+            <button onClick={(e) => { e.stopPropagation(); onPromote(version); }} className="flex items-center gap-1 px-2 py-1 rounded border border-praxis-cyan/30 bg-praxis-cyan/10 text-praxis-cyan text-[10px] hover:bg-praxis-cyan/20 transition-colors">
               <ArrowUp className="w-3 h-3" />Promote
             </button>
           )}
@@ -372,7 +372,7 @@ function VersionCard({ version, isActive, onPromote, onEval, showDiff, prevVersi
         </div>
       </button>
       {open && (
-        <div className="px-3 pb-3 space-y-2 border-t border-nexus/50">
+        <div className="px-3 pb-3 space-y-2 border-t border-praxis/50">
           {version.changelog && <p className="text-xs text-muted-foreground/70 pt-2">{version.changelog}</p>}
           {showDiff && prevVersion ? (
             <div>
@@ -380,7 +380,7 @@ function VersionCard({ version, isActive, onPromote, onEval, showDiff, prevVersi
               <DiffView v1={prevVersion} v2={version} />
             </div>
           ) : (
-            <pre className="text-[10px] font-mono text-muted-foreground/60 bg-nexus-bg rounded p-2 overflow-x-auto whitespace-pre-wrap max-h-32">
+            <pre className="text-[10px] font-mono text-muted-foreground/60 bg-praxis-bg rounded p-2 overflow-x-auto whitespace-pre-wrap max-h-32">
               {version.template.slice(0, 400)}{version.template.length > 400 ? '…' : ''}
             </pre>
           )}
@@ -474,7 +474,7 @@ function PromptCard({ prompt: initialPrompt }: { prompt: PromptEntry }) {
   const sortedVersions = [...prompt.versions].sort((a, b) => b.version - a.version);
 
   return (
-    <div className="rounded-lg bg-nexus-surface border border-nexus">
+    <div className="rounded-lg bg-praxis-surface border border-praxis">
       <button className="w-full flex items-center gap-3 px-4 py-3 text-left" onClick={() => setOpen((o) => !o)}>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -494,18 +494,18 @@ function PromptCard({ prompt: initialPrompt }: { prompt: PromptEntry }) {
       </button>
 
       {open && (
-        <div className="border-t border-nexus px-4 pb-4 pt-3 space-y-3">
+        <div className="border-t border-praxis px-4 pb-4 pt-3 space-y-3">
           {toast && (
-            <div className="rounded border border-nexus-cyan/30 bg-nexus-cyan/10 text-nexus-cyan text-xs px-3 py-1.5 flex items-center gap-2">
+            <div className="rounded border border-praxis-cyan/30 bg-praxis-cyan/10 text-praxis-cyan text-xs px-3 py-1.5 flex items-center gap-2">
               <Check className="w-3 h-3" />{toast}
             </div>
           )}
 
           <div className="flex items-center gap-2 flex-wrap">
-            <button onClick={() => setShowDiff((d) => !d)} className={`flex items-center gap-1.5 px-2.5 py-1 rounded border text-[10px] font-mono transition-colors ${showDiff ? 'border-nexus-cyan/40 bg-nexus-cyan/10 text-nexus-cyan' : 'border-nexus bg-nexus-bg text-muted-foreground/60 hover:text-foreground'}`}>
+            <button onClick={() => setShowDiff((d) => !d)} className={`flex items-center gap-1.5 px-2.5 py-1 rounded border text-[10px] font-mono transition-colors ${showDiff ? 'border-praxis-cyan/40 bg-praxis-cyan/10 text-praxis-cyan' : 'border-praxis bg-praxis-bg text-muted-foreground/60 hover:text-foreground'}`}>
               <Diff className="w-3 h-3" />{showDiff ? 'Hide diff' : 'Show diff'}
             </button>
-            <button onClick={() => setShowPropose(!showPropose)} className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-nexus-green/30 bg-nexus-green/10 text-nexus-green text-[10px] font-mono hover:bg-nexus-green/20 transition-colors">
+            <button onClick={() => setShowPropose(!showPropose)} className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-praxis-green/30 bg-praxis-green/10 text-praxis-green text-[10px] font-mono hover:bg-praxis-green/20 transition-colors">
               <Edit3 className="w-3 h-3" />Propose change
             </button>
           </div>
@@ -533,7 +533,7 @@ function PromptCard({ prompt: initialPrompt }: { prompt: PromptEntry }) {
             <div className="flex items-center gap-1.5 flex-wrap pt-1">
               <Tag className="w-3 h-3 text-muted-foreground/40" />
               {prompt.tags.map((t) => (
-                <span key={t} className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-nexus bg-nexus-bg text-muted-foreground/60">{t}</span>
+                <span key={t} className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-praxis bg-praxis-bg text-muted-foreground/60">{t}</span>
               ))}
             </div>
           )}
@@ -588,23 +588,23 @@ export default function PromptRegistry() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-nexus-cyan font-mono tracking-wide">PROMPT REGISTRY</h1>
+          <h1 className="text-lg font-semibold text-praxis-cyan font-mono tracking-wide">PROMPT REGISTRY</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Versioned prompt management · promote · diff · propose change</p>
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-lg bg-nexus-surface border border-nexus p-4 flex flex-col gap-1">
+        <div className="rounded-lg bg-praxis-surface border border-praxis p-4 flex flex-col gap-1">
           <div className="flex items-center gap-2 text-muted-foreground text-xs"><BookOpen className="w-3 h-3" />Prompts</div>
-          <div className="text-2xl font-mono font-bold text-nexus-cyan">{prompts.length}</div>
+          <div className="text-2xl font-mono font-bold text-praxis-cyan">{prompts.length}</div>
           <div className="text-[10px] text-muted-foreground/60">{activeCount} active</div>
         </div>
-        <div className="rounded-lg bg-nexus-surface border border-nexus p-4 flex flex-col gap-1">
+        <div className="rounded-lg bg-praxis-surface border border-praxis p-4 flex flex-col gap-1">
           <div className="flex items-center gap-2 text-muted-foreground text-xs"><BarChart2 className="w-3 h-3" />Avg Eval Score</div>
-          <div className={`text-2xl font-mono font-bold ${avgScore >= 85 ? 'text-nexus-green' : avgScore >= 70 ? 'text-nexus-amber' : 'text-nexus-red'}`}>{avgScore.toFixed(1)}</div>
+          <div className={`text-2xl font-mono font-bold ${avgScore >= 85 ? 'text-praxis-green' : avgScore >= 70 ? 'text-praxis-amber' : 'text-praxis-red'}`}>{avgScore.toFixed(1)}</div>
           <div className="text-[10px] text-muted-foreground/60">across evalled versions</div>
         </div>
-        <div className="rounded-lg bg-nexus-surface border border-nexus p-4 flex flex-col gap-1">
+        <div className="rounded-lg bg-praxis-surface border border-praxis p-4 flex flex-col gap-1">
           <div className="flex items-center gap-2 text-muted-foreground text-xs"><Clock className="w-3 h-3" />Total Versions</div>
           <div className="text-2xl font-mono font-bold text-foreground">{prompts.reduce((s, p) => s + p.versionCount, 0)}</div>
           <div className="text-[10px] text-muted-foreground/60">across all prompts</div>
@@ -612,10 +612,10 @@ export default function PromptRegistry() {
       </div>
 
       <div className="flex items-center gap-3">
-        <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Search prompts…" className="flex-1 bg-nexus-surface border border-nexus rounded px-3 py-1.5 text-xs text-foreground placeholder-muted-foreground/40 focus:outline-none focus:border-nexus-cyan/40" />
+        <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Search prompts…" className="flex-1 bg-praxis-surface border border-praxis rounded px-3 py-1.5 text-xs text-foreground placeholder-muted-foreground/40 focus:outline-none focus:border-praxis-cyan/40" />
         <div className="flex gap-1">
           {domains.map((d) => (
-            <button key={d} onClick={() => setDomainFilter(d)} className={`px-2 py-1 rounded text-[10px] font-mono border transition-colors ${domainFilter === d ? 'border-nexus-cyan/40 bg-nexus-cyan/10 text-nexus-cyan' : 'border-nexus bg-nexus-bg text-muted-foreground/60 hover:text-foreground'}`}>
+            <button key={d} onClick={() => setDomainFilter(d)} className={`px-2 py-1 rounded text-[10px] font-mono border transition-colors ${domainFilter === d ? 'border-praxis-cyan/40 bg-praxis-cyan/10 text-praxis-cyan' : 'border-praxis bg-praxis-bg text-muted-foreground/60 hover:text-foreground'}`}>
               {d}
             </button>
           ))}

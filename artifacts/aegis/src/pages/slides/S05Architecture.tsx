@@ -86,7 +86,7 @@ export default function S05Architecture() {
             </div>
             <div style={{ flex: 1, display: 'flex', gap: '1.5vw', flexWrap: 'wrap' }}>
               {[
-                'Aegis — Security',
+                'PARAGON — Security',
                 'Vessels — Maritime',
                 'Terra — Real Estate',
                 'Counsel — Legal',

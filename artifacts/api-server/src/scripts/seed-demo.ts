@@ -14,7 +14,7 @@
  *   tsx src/scripts/seed-demo.ts        # from api-server dir
  *
  * Seed order (dependency-aware):
- *   Phase 1: Core security — Aegis (Firestorm findings, assets, incidents)
+ *   Phase 1: Core security — PARAGON (Firestorm findings, assets, incidents)
  *   Phase 2: Domain data — Vessels, Holdings, Governance, Carlota Jo
  *   Phase 3: Platform infra — Agent OS, Forge, MSP, Observability, etc.
  *   Phase 4: Briefings — 30-day Pulse briefing and daily briefing history
@@ -127,8 +127,8 @@ async function main() {
   const totalStart = Date.now();
   const results: SeedResult[] = [];
   results.push(runSeedScript('Ecosystem Baseline', 'seed-ecosystem.ts'));
-  results.push(await runSeed('Aegis (Security)', seedAegis));
-  results.push(await runSeed('Alloy Runtime Agents (Aegis Registry)', seedAlloyRuntimeAgents));
+  results.push(await runSeed('PARAGON (Security)', seedAegis));
+  results.push(await runSeed('Alloy Runtime Agents (PARAGON Registry)', seedAlloyRuntimeAgents));
   results.push(await runSeed('Marine Extended (Vessels)', seedMarineExtended));
   results.push(await runSeed('Holdings & Fund Ops', seedHoldingsFundops));
   results.push(await runSeed('Governance & Compliance', seedGovernance));

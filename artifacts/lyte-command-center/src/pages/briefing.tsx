@@ -352,7 +352,7 @@ export default function BriefingPage() {
                 <GitBranch className="w-3.5 h-3.5 text-amber-700" />
               </div>
               <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-slate-500">
-                Lyte · Decision Twin Briefing
+                KORA · Decision Twin Briefing
               </p>
             </div>
             <h1 className="text-2xl font-semibold leading-tight text-slate-900 mb-2">

@@ -34,7 +34,7 @@ const LIVE_REFRESH_SLOW_MS = 30_000;
 
 export function useOwnershipDrift() {
   return useQuery({
-    queryKey: ['lyte', 'ownership-drift'],
+    queryKey: ['kora', 'ownership-drift'],
     queryFn: () =>
       getJson<{ items: DriftItem[]; history: DriftHistoryPoint[] }>('/api/lyte/ownership-drift'),
     refetchInterval: LIVE_REFRESH_STANDARD_MS,
@@ -44,7 +44,7 @@ export function useOwnershipDrift() {
 
 export function usePressureMap() {
   return useQuery({
-    queryKey: ['lyte', 'pressure-map'],
+    queryKey: ['kora', 'pressure-map'],
     queryFn: () => getJson<{ cells: PressureCell[] }>('/api/lyte/pressure-map'),
     refetchInterval: LIVE_REFRESH_CRITICAL_MS,
     refetchOnWindowFocus: true,
@@ -53,7 +53,7 @@ export function usePressureMap() {
 
 export function useActionDebt() {
   return useQuery({
-    queryKey: ['lyte', 'action-debt'],
+    queryKey: ['kora', 'action-debt'],
     queryFn: () =>
       getJson<{ items: DebtItem[]; history: DebtHistoryPoint[] }>('/api/lyte/action-debt'),
     refetchInterval: LIVE_REFRESH_CRITICAL_MS,
@@ -63,7 +63,7 @@ export function useActionDebt() {
 
 export function useDecisionReplay() {
   return useQuery({
-    queryKey: ['lyte', 'decision-replay'],
+    queryKey: ['kora', 'decision-replay'],
     queryFn: () => getJson<{ scenarios: ReplayScenario[] }>('/api/lyte/decision-replay'),
     refetchInterval: LIVE_REFRESH_SLOW_MS,
     refetchOnWindowFocus: true,
@@ -72,7 +72,7 @@ export function useDecisionReplay() {
 
 export function useBoardView() {
   return useQuery({
-    queryKey: ['lyte', 'board-view'],
+    queryKey: ['kora', 'board-view'],
     queryFn: () => getJson<{ metrics: BoardMetric[]; risks: BoardRisk[] }>('/api/lyte/board-view'),
     refetchInterval: LIVE_REFRESH_STANDARD_MS,
     refetchOnWindowFocus: true,
@@ -113,7 +113,7 @@ export interface WorkflowHealthSummary {
 
 export function useWorkflowHealth() {
   return useQuery({
-    queryKey: ['lyte', 'workflow-health'],
+    queryKey: ['kora', 'workflow-health'],
     queryFn: () =>
       getJson<{ workflows: WorkflowHealthItem[]; summary: WorkflowHealthSummary }>(
         '/api/lyte/workflow-health',
@@ -155,7 +155,7 @@ export interface EntityGraphProvenance {
 
 export function useEntityGraph() {
   return useQuery({
-    queryKey: ['lyte', 'entity-graph'],
+    queryKey: ['kora', 'entity-graph'],
     queryFn: () =>
       getJson<{
         nodes: EntityGraphNode[];

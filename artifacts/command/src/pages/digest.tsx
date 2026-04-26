@@ -87,10 +87,10 @@ function buildDigest(role: Role, compositeScore: number): DigestSection[] {
       color: 'var(--color-critical)',
       headline: '2 critical, 3 high-priority alerts require action today',
       detail:
-        'AIS transponder breach attempt on Vessels OT systems (Aegis SOC responding). Force majeure clause triggered on Q3 Cargo Agreement. Miami Beach deal deadline 48h out.',
+        'AIS transponder breach attempt on Vessels OT systems (PARAGON SOC responding). Force majeure clause triggered on Q3 Cargo Agreement. Miami Beach deal deadline 48h out.',
       actions: [
         { label: 'Alert Inbox', href: '/alerts' },
-        { label: 'Aegis SOC', href: '/' },
+        { label: "PARAGON"SOC', href: '/' },
       ],
       relevantFor: ['executive', 'security', 'operations', 'legal'],
     },
@@ -102,9 +102,9 @@ function buildDigest(role: Role, compositeScore: number): DigestSection[] {
       color: '#ef4444',
       headline: 'SOC posture elevated — nation-state credential attempt logged',
       detail:
-        '7 failed auth attempts from Tor exit node targeting Vessels SCADA. IP blocked, Aegis playbook activated. MTTR tracking at 11 min (target: 15 min). 3 open CVEs pending patch.',
+        '7 failed auth attempts from Tor exit node targeting Vessels SCADA. IP blocked, PARAGON playbook activated. MTTR tracking at 11 min (target: 15 min). 3 open CVEs pending patch.',
       actions: [
-        { label: 'View Aegis', href: '/' },
+        { label: 'View PARAGON', href: '/' },
         { label: 'SOC Dashboard', href: '/' },
       ],
       relevantFor: ['executive', 'security'],

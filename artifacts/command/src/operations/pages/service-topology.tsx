@@ -43,7 +43,7 @@ const PLATFORM_NODES = [
     label: 'Command Core',
     icon: Zap,
     connects: ['signal-bus', 'action-router', 'prism-engine'],
-    platform: 'Lyte',
+    platform: 'KORA',
   },
   {
     id: 'alloy-engine',
@@ -57,21 +57,21 @@ const PLATFORM_NODES = [
     label: 'Terra Command',
     icon: Globe,
     connects: ['signal-bus', 'geo-index', 'crm-sync'],
-    platform: 'Terra',
+    platform: 'DOMAINE',
   },
   {
     id: 'vessels-intel',
     label: 'Vessels Intel',
     icon: Activity,
     connects: ['signal-bus', 'ais-stream', 'port-api'],
-    platform: 'Vessels',
+    platform: 'SEXTANT',
   },
   {
     id: 'firestorm-soc',
-    label: 'Aegis SOC',
+    label: "PARAGON"SOC',
     icon: Shield,
     connects: ['signal-bus', 'threat-db', 'vuln-scan'],
-    platform: 'Aegis',
+    platform: 'PARAGON',
   },
   {
     id: 'signal-bus',
@@ -85,7 +85,7 @@ const PLATFORM_NODES = [
     label: 'PRISM Engine',
     icon: Database,
     connects: ['metrics-store'],
-    platform: 'Lyte',
+    platform: 'KORA',
   },
   {
     id: 'alert-engine',
@@ -102,7 +102,7 @@ const PLATFORM_NODES = [
     platform: 'Core',
   },
   { id: 'metrics-store', label: 'Metrics Store', icon: Database, connects: [], platform: 'Core' },
-  { id: 'action-router', label: 'Action Router', icon: Server, connects: [], platform: 'Lyte' },
+  { id: 'action-router', label: 'Action Router', icon: Server, connects: [], platform: 'KORA' },
   {
     id: 'notification-svc',
     label: 'Notification Svc',
@@ -132,7 +132,7 @@ const PLATFORM_COLORS: Record<string, string> = {
   FORGE: '#4B8BDB',
   Terra: '#4a90b8',
   Vessels: '#38bdf8',
-  Aegis: '#c45a4a',
+  PARAGON: '#c45a4a',
 };
 
 const HEALTH_STYLES = {

@@ -473,7 +473,7 @@ export async function seedLyteActions(): Promise<void> {
       .from(lyteActionsTable);
 
     if (count > 0) {
-      logger.info({ count }, '[seed-lyte-actions] Lyte actions already seeded, skipping');
+      logger.info({ count }, '[seed-kora-actions] KORA actions already seeded, skipping');
       return;
     }
 
@@ -485,7 +485,7 @@ export async function seedLyteActions(): Promise<void> {
 
     logger.info(
       { count: rows.length },
-      '[seed-lyte-actions] Lyte action queue seeded successfully',
+      '[seed-kora-actions] KORA action queue seeded successfully',
     );
   } catch (err) {
     logger.warn({ err }, '[seed-lyte-actions] Failed to seed lyte actions (non-fatal)');

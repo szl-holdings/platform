@@ -9,7 +9,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { nexusApi } from '../lib/api';
+import { praxisApi } from '../lib/api';
 import type { MemoryItem } from '../lib/types';
 
 const TYPE_COLORS: Record<string, string> = {
@@ -42,7 +42,7 @@ export default function Memory() {
 
   const fetchItems = useCallback(async () => {
     try {
-      const data = await nexusApi.listMemory({
+      const data = await praxisApi.listMemory({
         search: search || undefined,
         type: typeFilter || undefined,
         pinned: pinnedOnly || undefined,
@@ -62,7 +62,7 @@ export default function Memory() {
 
   async function handlePin(item: MemoryItem) {
     try {
-      const updated = await nexusApi.updateMemory(item.id, { pinned: !item.pinned });
+      const updated = await praxisApi.updateMemory(item.id, { pinned: !item.pinned });
       setItems((prev) => prev.map((i) => (i.id === item.id ? updated : i)));
     } catch {}
   }
@@ -70,7 +70,7 @@ export default function Memory() {
   async function handleForget(id: string) {
     if (!confirm('Forget this memory item?')) return;
     try {
-      await nexusApi.forgetMemory(id);
+      await praxisApi.forgetMemory(id);
       setItems((prev) => prev.filter((i) => i.id !== id));
     } catch {}
   }
@@ -79,7 +79,7 @@ export default function Memory() {
     if (!newKey.trim() || !newValue.trim()) return;
     setSubmitting(true);
     try {
-      const item = await nexusApi.addMemory({
+      const item = await praxisApi.addMemory({
         key: newKey,
         value: newValue,
         type: newType,
@@ -101,10 +101,10 @@ export default function Memory() {
   };
 
   return (
-    <div className="min-h-full bg-nexus-bg p-6">
+    <div className="min-h-full bg-praxis-bg p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
-          <Brain className="w-5 h-5 text-nexus-purple" />
+          <Brain className="w-5 h-5 text-praxis-purple" />
           <div>
             <h1 className="text-lg font-semibold">Persistent Memory</h1>
             <p className="text-xs text-muted-foreground">
@@ -114,7 +114,7 @@ export default function Memory() {
           <div className="ml-auto flex items-center gap-2">
             <button
               onClick={() => setAdding((a) => !a)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-nexus-purple/10 border border-nexus-purple/30 text-nexus-purple text-xs font-medium hover:bg-nexus-purple/20 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-praxis-purple/10 border border-praxis-purple/30 text-praxis-purple text-xs font-medium hover:bg-praxis-purple/20 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Memory
@@ -122,9 +122,9 @@ export default function Memory() {
           </div>
         </div>
 
-        <div className="mb-5 flex items-center gap-2 rounded-lg border border-nexus-amber/20 bg-nexus-amber/5 px-3 py-2">
-          <FlaskConical className="w-3.5 h-3.5 text-nexus-amber shrink-0" />
-          <span className="text-[11px] text-nexus-amber font-mono uppercase tracking-wide">
+        <div className="mb-5 flex items-center gap-2 rounded-lg border border-praxis-amber/20 bg-praxis-amber/5 px-3 py-2">
+          <FlaskConical className="w-3.5 h-3.5 text-praxis-amber shrink-0" />
+          <span className="text-[11px] text-praxis-amber font-mono uppercase tracking-wide">
             Internal Tooling — Not Production
           </span>
           <span className="text-[10px] text-muted-foreground/60 ml-1">
@@ -133,8 +133,8 @@ export default function Memory() {
         </div>
 
         {adding && (
-          <div className="bg-nexus-surface border border-nexus-purple/20 rounded-xl p-4 mb-5 space-y-3">
-            <h3 className="text-sm font-semibold text-nexus-purple">New Memory Item</h3>
+          <div className="bg-praxis-surface border border-praxis-purple/20 rounded-xl p-4 mb-5 space-y-3">
+            <h3 className="text-sm font-semibold text-praxis-purple">New Memory Item</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[10px] text-muted-foreground/60 uppercase tracking-widest mb-1 block">
@@ -145,7 +145,7 @@ export default function Memory() {
                   placeholder="e.g. preferred_output_format"
                   value={newKey}
                   onChange={(e) => setNewKey(e.target.value)}
-                  className="w-full bg-nexus-bg border border-nexus rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-nexus-purple/50 placeholder:text-muted-foreground/30"
+                  className="w-full bg-praxis-bg border border-praxis rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-praxis-purple/50 placeholder:text-muted-foreground/30"
                 />
               </div>
               <div>
@@ -155,7 +155,7 @@ export default function Memory() {
                 <select
                   value={newType}
                   onChange={(e) => setNewType(e.target.value as MemoryItem['type'])}
-                  className="w-full bg-nexus-bg border border-nexus rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-nexus-purple/50"
+                  className="w-full bg-praxis-bg border border-praxis rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-praxis-purple/50"
                 >
                   {Object.keys(TYPE_COLORS).map((t) => (
                     <option key={t} value={t}>
@@ -174,20 +174,20 @@ export default function Memory() {
                 value={newValue}
                 onChange={(e) => setNewValue(e.target.value)}
                 rows={2}
-                className="w-full bg-nexus-bg border border-nexus rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-nexus-purple/50 placeholder:text-muted-foreground/30"
+                className="w-full bg-praxis-bg border border-praxis rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-praxis-purple/50 placeholder:text-muted-foreground/30"
               />
             </div>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setAdding(false)}
-                className="px-3 py-1.5 text-xs rounded-lg border border-nexus text-muted-foreground hover:text-foreground transition-colors"
+                className="px-3 py-1.5 text-xs rounded-lg border border-praxis text-muted-foreground hover:text-foreground transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleAdd}
                 disabled={submitting || !newKey.trim() || !newValue.trim()}
-                className="px-4 py-1.5 text-xs rounded-lg bg-nexus-purple/10 border border-nexus-purple/30 text-nexus-purple hover:bg-nexus-purple/20 disabled:opacity-40 transition-colors"
+                className="px-4 py-1.5 text-xs rounded-lg bg-praxis-purple/10 border border-praxis-purple/30 text-praxis-purple hover:bg-praxis-purple/20 disabled:opacity-40 transition-colors"
               >
                 {submitting ? 'Saving…' : 'Save'}
               </button>
@@ -203,13 +203,13 @@ export default function Memory() {
               placeholder="Search memory…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-nexus-surface border border-nexus rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-nexus-purple/30 placeholder:text-muted-foreground/30"
+              className="w-full bg-praxis-surface border border-praxis rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-praxis-purple/30 placeholder:text-muted-foreground/30"
             />
           </div>
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="bg-nexus-surface border border-nexus rounded-lg px-3 py-2 text-xs focus:outline-none text-muted-foreground"
+            className="bg-praxis-surface border border-praxis rounded-lg px-3 py-2 text-xs focus:outline-none text-muted-foreground"
           >
             <option value="">All types</option>
             {Object.keys(TYPE_COLORS).map((t) => (
@@ -222,8 +222,8 @@ export default function Memory() {
             onClick={() => setPinnedOnly((p) => !p)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs transition-colors ${
               pinnedOnly
-                ? 'bg-nexus-amber/10 border-nexus-amber/30 text-nexus-amber'
-                : 'border-nexus text-muted-foreground hover:text-foreground'
+                ? 'bg-praxis-amber/10 border-praxis-amber/30 text-praxis-amber'
+                : 'border-praxis text-muted-foreground hover:text-foreground'
             }`}
           >
             <Pin className="w-3.5 h-3.5" />
@@ -232,9 +232,9 @@ export default function Memory() {
         </div>
 
         {error && (
-          <div className="mb-4 flex items-center gap-2 bg-nexus-red/10 border border-nexus-red/30 rounded-lg px-4 py-3">
-            <AlertCircle className="w-4 h-4 text-nexus-red shrink-0" />
-            <p className="text-xs text-nexus-red">{error}</p>
+          <div className="mb-4 flex items-center gap-2 bg-praxis-red/10 border border-praxis-red/30 rounded-lg px-4 py-3">
+            <AlertCircle className="w-4 h-4 text-praxis-red shrink-0" />
+            <p className="text-xs text-praxis-red">{error}</p>
           </div>
         )}
 
@@ -246,7 +246,7 @@ export default function Memory() {
           <>
             {grouped.pinned.length > 0 && (
               <section className="mb-6">
-                <h2 className="text-[10px] font-mono text-nexus-amber uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                <h2 className="text-[10px] font-mono text-praxis-amber uppercase tracking-widest mb-3 flex items-center gap-1.5">
                   <Pin className="w-3 h-3" /> Pinned
                 </h2>
                 <div className="space-y-2">
@@ -310,7 +310,7 @@ function MemoryCard({
   const typeColor = TYPE_COLORS[item.type] ?? '#8896aa';
 
   return (
-    <div className="bg-nexus-surface border border-nexus rounded-lg px-4 py-3 flex items-start gap-3 group hover:border-[#1a2535]/80 transition-colors">
+    <div className="bg-praxis-surface border border-praxis rounded-lg px-4 py-3 flex items-start gap-3 group hover:border-[#1a2535]/80 transition-colors">
       <div className="mt-0.5">
         <div
           className="w-2 h-2 rounded-full"
@@ -323,7 +323,7 @@ function MemoryCard({
           <span className="text-[10px] font-mono font-medium" style={{ color: typeColor }}>
             {item.type}
           </span>
-          <span className="text-[9px] font-mono bg-nexus-bg px-1.5 py-0.5 rounded text-muted-foreground/50">
+          <span className="text-[9px] font-mono bg-praxis-bg px-1.5 py-0.5 rounded text-muted-foreground/50">
             {TIER_LABELS[item.tier] ?? item.tier}
           </span>
           <span className="text-[9px] font-mono text-muted-foreground/30">
@@ -334,7 +334,7 @@ function MemoryCard({
               {item.tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
-                  className="text-[9px] px-1 py-0.5 rounded bg-nexus-bg text-muted-foreground/40 border border-nexus"
+                  className="text-[9px] px-1 py-0.5 rounded bg-praxis-bg text-muted-foreground/40 border border-praxis"
                 >
                   {tag}
                 </span>
@@ -355,8 +355,8 @@ function MemoryCard({
           onClick={() => onPin(item)}
           className={`p-1.5 rounded-md transition-colors ${
             item.pinned
-              ? 'text-nexus-amber bg-nexus-amber/10'
-              : 'text-muted-foreground/40 hover:text-nexus-amber hover:bg-nexus-amber/10'
+              ? 'text-praxis-amber bg-praxis-amber/10'
+              : 'text-muted-foreground/40 hover:text-praxis-amber hover:bg-praxis-amber/10'
           }`}
           title={item.pinned ? 'Unpin' : 'Pin'}
         >
@@ -364,7 +364,7 @@ function MemoryCard({
         </button>
         <button
           onClick={() => onForget(item.id)}
-          className="p-1.5 rounded-md text-muted-foreground/40 hover:text-nexus-red hover:bg-nexus-red/10 transition-colors"
+          className="p-1.5 rounded-md text-muted-foreground/40 hover:text-praxis-red hover:bg-praxis-red/10 transition-colors"
           title="Forget"
         >
           <Trash2 className="w-3 h-3" />

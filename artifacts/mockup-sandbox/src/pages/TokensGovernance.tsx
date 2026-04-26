@@ -372,7 +372,7 @@ export default function TokensGovernance() {
             textTransform: 'uppercase',
           }}
         >
-          NEXUS · Governance
+          PRAXIS · Governance
         </div>
         <h1 style={{ fontSize: 22, fontWeight: 600, margin: '4px 0 6px' }}>
           TOKENS-AS-CODE COMPLIANCE
@@ -571,7 +571,7 @@ export default function TokensGovernance() {
         from the repo root. Use <code style={{ color: 'var(--gi-text-link)' }}>--check --threshold=70</code>{' '}
         in CI to fail on regression. Report sources are{' '}
         <code style={{ color: 'var(--gi-text-link)' }}>scripts/design-tokens-drift.report.json</code>{' '}
-        and the published copy here in the NEXUS bundle.
+        and the published copy here in the PRAXIS bundle.
       </div>
     </div>
   );

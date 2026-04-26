@@ -248,7 +248,7 @@ export default function AegisHomePage() {
             >
               <Shield size={13} className="text-[#c9b787]" />
             </div>
-            <span className="font-bold text-[15px] tracking-tight text-white">Aegis</span>
+            <span className="font-bold text-[15px] tracking-tight text-white">PARAGON</span>
             <span aria-hidden="true" className="hidden sm:inline text-[9px] tracking-[0.15em] uppercase text-white/60 font-mono ml-1">
               Defense & Intelligence
             </span>
@@ -751,7 +751,7 @@ export default function AegisHomePage() {
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2.5">
             <Shield size={12} className="text-white/60" />
-            <span className="text-[12px] font-semibold text-white/85">Aegis</span>
+            <span className="text-[12px] font-semibold text-white/85">PARAGON</span>
             <span aria-hidden="true" className="text-[10px] text-white/60 font-mono">by a11oy</span>
           </div>
           <p className="text-[10px] text-white/60">{copyrightLine()}</p>
@@ -763,7 +763,7 @@ export default function AegisHomePage() {
         onClose={() => setDemoOpen(false)}
         type="demo"
         app="aegis"
-        subtitle="Aegis — Unified Defense & Intelligence Command"
+        subtitle="PARAGON — Unified Defense & Intelligence Command"
       />
     </div>
   );

@@ -1,8 +1,8 @@
 /**
  * Domain Event → Signal Mesh Bridge
  *
- * Subscribes to all per-product `domainEventBus` events (Vessels, Terra,
- * Lyte, Counsel, Firestorm, Alloy, Carlota Jo) and republishes them
+ * Subscribes to all per-product `domainEventBus` events (SEXTANT, DOMAINE,
+ * KORA, PRISM Counsel, Firestorm, Alloy, Carlota Jo) and republishes them
  * as `Signal` objects onto the global `defaultSignalBus`.
  *
  * This is the single piece of plumbing that makes the Global Operations
@@ -136,7 +136,7 @@ export function initSignalMeshBridge(): void {
     type: 'state-change',
     domain: 'real-estate',
     severity: 'info',
-    title: `Terra deal #${p.dealId} → ${p.stage ?? 'stage-unknown'}`,
+    title: `DOMAINE deal #${p.dealId} → ${p.stage ?? 'stage-unknown'}`,
     entityId: `terra-deal-${p.dealId}`,
     entityType: 'deal',
     rawPayload: { ...p },
@@ -145,7 +145,7 @@ export function initSignalMeshBridge(): void {
     type: 'opportunity',
     domain: 'real-estate',
     severity: 'low',
-    title: `Terra ${p.type} lead — ${p.firstName} ${p.lastName}`,
+    title: `DOMAINE ${p.type} lead — ${p.firstName} ${p.lastName}`,
     entityId: `terra-lead-${p.leadId}`,
     entityType: 'lead',
     rawPayload: { ...p },
@@ -154,7 +154,7 @@ export function initSignalMeshBridge(): void {
     type: 'state-change',
     domain: 'real-estate',
     severity: 'info',
-    title: `Terra action item — ${p.previousStatus} → ${p.status}`,
+    title: `DOMAINE action item — ${p.previousStatus} → ${p.status}`,
     entityId: p.propertyId,
     entityType: 'property',
     rawPayload: { ...p },
@@ -235,7 +235,7 @@ export function initSignalMeshBridge(): void {
     type: 'state-change',
     domain: 'ai',
     severity: clampSeverity(p.severity),
-    title: `Lyte signal #${p.signalId} triaged → ${p.status}`,
+    title: `KORA signal #${p.signalId} triaged → ${p.status}`,
     entityId: `lyte-signal-${p.signalId}`,
     entityType: 'signal',
     rawPayload: { ...p },
@@ -245,7 +245,7 @@ export function initSignalMeshBridge(): void {
     type: 'escalation',
     domain: 'ai',
     severity: clampSeverity(p.severity),
-    title: `Lyte incident #${p.incidentId} escalated → ${p.targetRole}`,
+    title: `KORA incident #${p.incidentId} escalated → ${p.targetRole}`,
     entityId: `lyte-incident-${p.incidentId}`,
     entityType: 'incident',
     rawPayload: { ...p },
@@ -254,7 +254,7 @@ export function initSignalMeshBridge(): void {
     type: 'outcome',
     domain: 'ai',
     severity: 'info',
-    title: `Lyte incident #${p.incidentId} resolved`,
+    title: `KORA incident #${p.incidentId} resolved`,
     entityId: `lyte-incident-${p.incidentId}`,
     entityType: 'incident',
     rawPayload: { ...p },

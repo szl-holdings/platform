@@ -29,10 +29,10 @@
 |-----|---------|--------|
 | API Server | v{VERSION} | |
 | SZL Holdings | v{VERSION} | |
-| Lyte Command Center | v{VERSION} | |
-| Aegis (Firestorm) | v{VERSION} | |
-| Terra | v{VERSION} | |
-| Vessels | v{VERSION} | |
+| KORA Command Center | v{VERSION} | |
+| PARAGON | v{VERSION} | |
+| DOMAINE | v{VERSION} | |
+| SEXTANT | v{VERSION} | |
 | PRISM Counsel | v{VERSION} | |
 | Carlota Jo | v{VERSION} | |
 | IMPERIUM | v{VERSION} | |

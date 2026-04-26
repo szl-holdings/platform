@@ -29,16 +29,16 @@
   --color-ring: hsl(var(--ring));
 
   /* Enterprise accent family — aliased to gi-tokens so legacy
-     `nexus-*` Tailwind utilities resolve to the design-system palette. */
-  --color-nexus-cyan: var(--gi-accent-blue);
-  --color-nexus-green: var(--gi-accent-green);
-  --color-nexus-amber: var(--gi-accent-amber);
-  --color-nexus-red: var(--gi-accent-red);
-  --color-nexus-purple: var(--gi-accent-violet);
-  --color-nexus-bg: var(--gi-bg-base);
-  --color-nexus-surface: var(--gi-bg-surface);
-  --color-nexus-border: var(--gi-border-subtle);
-  --color-nexus-text: var(--gi-text-primary);
+     `praxis-*` Tailwind utilities resolve to the design-system palette. */
+  --color-praxis-cyan: var(--gi-accent-blue);
+  --color-praxis-green: var(--gi-accent-green);
+  --color-praxis-amber: var(--gi-accent-amber);
+  --color-praxis-red: var(--gi-accent-red);
+  --color-praxis-purple: var(--gi-accent-violet);
+  --color-praxis-bg: var(--gi-bg-base);
+  --color-praxis-surface: var(--gi-bg-surface);
+  --color-praxis-border: var(--gi-border-subtle);
+  --color-praxis-text: var(--gi-text-primary);
 }
 
 :root {
@@ -98,43 +98,43 @@
 }
 
 @layer utilities {
-  .nexus-glow {
+  .praxis-glow {
     box-shadow: var(--gi-shadow-2);
   }
 
-  .nexus-glow-green {
+  .praxis-glow-green {
     box-shadow: var(--gi-shadow-2);
   }
 
-  .text-nexus-cyan {
+  .text-praxis-cyan {
     color: var(--gi-accent-blue);
   }
 
-  .text-nexus-green {
+  .text-praxis-green {
     color: var(--gi-accent-green);
   }
 
-  .text-nexus-amber {
+  .text-praxis-amber {
     color: var(--gi-accent-amber);
   }
 
-  .text-nexus-red {
+  .text-praxis-red {
     color: var(--gi-accent-red);
   }
 
-  .text-nexus-purple {
+  .text-praxis-purple {
     color: var(--gi-accent-violet);
   }
 
-  .bg-nexus-surface {
+  .bg-praxis-surface {
     background-color: var(--gi-bg-surface);
   }
 
-  .bg-nexus-bg {
+  .bg-praxis-bg {
     background-color: var(--gi-bg-base);
   }
 
-  .border-nexus {
+  .border-praxis {
     border-color: var(--gi-border-subtle);
   }
 

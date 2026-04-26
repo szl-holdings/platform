@@ -12,7 +12,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { nexusApi } from '../lib/api';
+import { praxisApi } from '../lib/api';
 import type { AgentLane, Citation, ResearchRun } from '../lib/types';
 
 const LANE_META: Record<string, { color: string; role: string; icon: string }> = {
@@ -43,7 +43,7 @@ function LaneCard({ lane }: { lane: AgentLane }) {
 
   return (
     <div
-      className={`rounded-lg bg-nexus-surface border border-nexus ${statusClass} transition-all`}
+      className={`rounded-lg bg-praxis-surface border border-praxis ${statusClass} transition-all`}
     >
       <button
         className="w-full flex items-center gap-3 px-4 py-3 text-left"
@@ -58,8 +58,8 @@ function LaneCard({ lane }: { lane: AgentLane }) {
             {lane.status === 'running' && (
               <Loader className="w-3 h-3 animate-spin" style={{ color: meta.color }} />
             )}
-            {lane.status === 'done' && <CheckCircle className="w-3 h-3 text-nexus-green" />}
-            {lane.status === 'error' && <XCircle className="w-3 h-3 text-nexus-red" />}
+            {lane.status === 'done' && <CheckCircle className="w-3 h-3 text-praxis-green" />}
+            {lane.status === 'error' && <XCircle className="w-3 h-3 text-praxis-red" />}
           </div>
           <div className="text-[10px] text-muted-foreground font-mono">{meta.role}</div>
         </div>
@@ -72,10 +72,10 @@ function LaneCard({ lane }: { lane: AgentLane }) {
               <span
                 className={
                   lane.confidence >= 0.7
-                    ? 'text-nexus-green'
+                    ? 'text-praxis-green'
                     : lane.confidence >= 0.4
-                      ? 'text-nexus-amber'
-                      : 'text-nexus-red'
+                      ? 'text-praxis-amber'
+                      : 'text-praxis-red'
                 }
                 title="Confidence score"
               >
@@ -83,10 +83,10 @@ function LaneCard({ lane }: { lane: AgentLane }) {
               </span>
             )}
             {lane.citationsVerified !== undefined && lane.citationsVerified > 0 && (
-              <span className="text-nexus-green">✓{lane.citationsVerified}</span>
+              <span className="text-praxis-green">✓{lane.citationsVerified}</span>
             )}
             {lane.citationsKilled !== undefined && lane.citationsKilled > 0 && (
-              <span className="text-nexus-red">✗{lane.citationsKilled}</span>
+              <span className="text-praxis-red">✗{lane.citationsKilled}</span>
             )}
           </div>
         )}
@@ -122,7 +122,7 @@ function LaneCard({ lane }: { lane: AgentLane }) {
                   href={src}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-nexus-cyan/10 text-nexus-cyan hover:bg-nexus-cyan/20 transition-colors"
+                  className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-praxis-cyan/10 text-praxis-cyan hover:bg-praxis-cyan/20 transition-colors"
                 >
                   <Link className="w-2.5 h-2.5" />
                   {new URL(src).hostname.replace('www.', '')}
@@ -131,7 +131,7 @@ function LaneCard({ lane }: { lane: AgentLane }) {
             </div>
           )}
           {lane.output && (
-            <div className="text-[11px] text-muted-foreground leading-relaxed border-t border-nexus pt-2">
+            <div className="text-[11px] text-muted-foreground leading-relaxed border-t border-praxis pt-2">
               {lane.output}
             </div>
           )}
@@ -146,9 +146,9 @@ function LaneCard({ lane }: { lane: AgentLane }) {
 
 function CitationTable({ citations }: { citations: Citation[] }) {
   return (
-    <div className="bg-nexus-surface border border-nexus rounded-lg overflow-hidden">
-      <div className="px-4 py-2.5 border-b border-nexus flex items-center gap-2">
-        <Link className="w-3.5 h-3.5 text-nexus-cyan" />
+    <div className="bg-praxis-surface border border-praxis rounded-lg overflow-hidden">
+      <div className="px-4 py-2.5 border-b border-praxis flex items-center gap-2">
+        <Link className="w-3.5 h-3.5 text-praxis-cyan" />
         <span className="text-xs font-semibold">Citation Verification</span>
         <span className="ml-auto text-[10px] font-mono text-muted-foreground">
           {citations.filter((c) => c.status === 'verified').length} verified ·{' '}
@@ -159,20 +159,20 @@ function CitationTable({ citations }: { citations: Citation[] }) {
         {citations.map((c, i) => (
           <div key={i} className="flex items-center gap-3 px-4 py-2">
             {c.status === 'verified' ? (
-              <CheckCircle className="w-3.5 h-3.5 text-nexus-green shrink-0" />
+              <CheckCircle className="w-3.5 h-3.5 text-praxis-green shrink-0" />
             ) : c.status === 'killed' ? (
-              <XCircle className="w-3.5 h-3.5 text-nexus-red shrink-0" />
+              <XCircle className="w-3.5 h-3.5 text-praxis-red shrink-0" />
             ) : (
               <Clock className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
             )}
             <div className="flex-1 min-w-0">
               <div className="text-[11px] font-medium truncate">{c.title || c.url}</div>
               <div className="text-[9px] font-mono text-muted-foreground/60 truncate">{c.url}</div>
-              {c.reason && <div className="text-[9px] text-nexus-red/80">{c.reason}</div>}
+              {c.reason && <div className="text-[9px] text-praxis-red/80">{c.reason}</div>}
             </div>
             {c.status === 'verified' && (
               <a href={c.url} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="w-3 h-3 text-muted-foreground/40 hover:text-nexus-cyan" />
+                <ExternalLink className="w-3 h-3 text-muted-foreground/40 hover:text-praxis-cyan" />
               </a>
             )}
           </div>
@@ -192,7 +192,7 @@ export default function Research() {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    nexusApi
+    praxisApi
       .listResearch()
       .then(setHistory)
       .catch(() => {});
@@ -203,7 +203,7 @@ export default function Research() {
   }, []);
 
   function connectSSE(runId: string) {
-    const url = nexusApi.researchStreamUrl(runId);
+    const url = praxisApi.researchStreamUrl(runId);
     const es = new EventSource(url);
     eventSourceRef.current = es;
 
@@ -214,7 +214,7 @@ export default function Research() {
         if (data.status === 'completed' || data.status === 'failed') {
           es.close();
           setLoading(false);
-          nexusApi
+          praxisApi
             .listResearch()
             .then(setHistory)
             .catch(() => {});
@@ -234,12 +234,12 @@ export default function Research() {
     if (pollRef.current) clearInterval(pollRef.current);
     pollRef.current = setInterval(async () => {
       try {
-        const run = await nexusApi.getResearch(runId);
+        const run = await praxisApi.getResearch(runId);
         setCurrentRun(run);
         if (run.status === 'completed' || run.status === 'failed') {
           if (pollRef.current) clearInterval(pollRef.current);
           setLoading(false);
-          nexusApi
+          praxisApi
             .listResearch()
             .then(setHistory)
             .catch(() => {});
@@ -261,8 +261,8 @@ export default function Research() {
     if (pollRef.current) clearInterval(pollRef.current);
 
     try {
-      const { id } = await nexusApi.startResearch(finalQuery.trim());
-      const run = await nexusApi.getResearch(id);
+      const { id } = await praxisApi.startResearch(finalQuery.trim());
+      const run = await praxisApi.getResearch(id);
       setCurrentRun(run);
       connectSSE(id);
     } catch (err) {
@@ -272,10 +272,10 @@ export default function Research() {
   }
 
   return (
-    <div className="min-h-full bg-nexus-bg p-6">
+    <div className="min-h-full bg-praxis-bg p-6">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
-          <FlaskConical className="w-5 h-5 text-nexus-cyan" />
+          <FlaskConical className="w-5 h-5 text-praxis-cyan" />
           <div>
             <h1 className="text-lg font-semibold">Parallel Research Swarm</h1>
             <p className="text-xs text-muted-foreground">
@@ -284,10 +284,10 @@ export default function Research() {
           </div>
         </div>
 
-        <div className="bg-nexus-surface border border-nexus-cyan/20 rounded-xl p-4 mb-6">
+        <div className="bg-praxis-surface border border-praxis-cyan/20 rounded-xl p-4 mb-6">
           <div className="flex gap-3">
             <textarea
-              className="flex-1 bg-nexus-bg border border-nexus rounded-lg px-3 py-2.5 text-sm font-mono resize-none focus:outline-none focus:border-nexus-cyan/50 text-foreground placeholder:text-muted-foreground/40"
+              className="flex-1 bg-praxis-bg border border-praxis rounded-lg px-3 py-2.5 text-sm font-mono resize-none focus:outline-none focus:border-praxis-cyan/50 text-foreground placeholder:text-muted-foreground/40"
               rows={2}
               placeholder="Enter your research query…"
               value={query}
@@ -299,7 +299,7 @@ export default function Research() {
             <button
               onClick={() => handleSubmit()}
               disabled={loading || !query.trim()}
-              className="px-4 py-2 rounded-lg bg-nexus-cyan/10 border border-nexus-cyan/30 text-nexus-cyan text-sm font-medium hover:bg-nexus-cyan/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-praxis-cyan/10 border border-praxis-cyan/30 text-praxis-cyan text-sm font-medium hover:bg-praxis-cyan/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
               {loading ? <Loader className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               Run
@@ -315,7 +315,7 @@ export default function Research() {
                   setQuery(ex);
                   handleSubmit(ex);
                 }}
-                className="text-[10px] px-2 py-1 rounded bg-nexus-bg border border-nexus text-muted-foreground/60 hover:text-muted-foreground hover:border-nexus-cyan/20 transition-colors text-left max-w-xs truncate"
+                className="text-[10px] px-2 py-1 rounded bg-praxis-bg border border-praxis text-muted-foreground/60 hover:text-muted-foreground hover:border-praxis-cyan/20 transition-colors text-left max-w-xs truncate"
               >
                 {ex}
               </button>
@@ -324,9 +324,9 @@ export default function Research() {
         </div>
 
         {error && (
-          <div className="mb-4 flex items-center gap-2 bg-nexus-red/10 border border-nexus-red/30 rounded-lg px-4 py-3">
-            <AlertCircle className="w-4 h-4 text-nexus-red shrink-0" />
-            <p className="text-xs text-nexus-red">{error}</p>
+          <div className="mb-4 flex items-center gap-2 bg-praxis-red/10 border border-praxis-red/30 rounded-lg px-4 py-3">
+            <AlertCircle className="w-4 h-4 text-praxis-red shrink-0" />
+            <p className="text-xs text-praxis-red">{error}</p>
           </div>
         )}
 
@@ -341,12 +341,12 @@ export default function Research() {
                 <span
                   className={`text-[10px] font-mono px-2 py-0.5 rounded ${
                     currentRun.status === 'completed'
-                      ? 'bg-nexus-green/10 text-nexus-green'
+                      ? 'bg-praxis-green/10 text-praxis-green'
                       : currentRun.status === 'running'
-                        ? 'bg-nexus-cyan/10 text-nexus-cyan'
+                        ? 'bg-praxis-cyan/10 text-praxis-cyan'
                         : currentRun.status === 'failed'
-                          ? 'bg-nexus-red/10 text-nexus-red'
-                          : 'bg-nexus-surface text-muted-foreground'
+                          ? 'bg-praxis-red/10 text-praxis-red'
+                          : 'bg-praxis-surface text-muted-foreground'
                   }`}
                 >
                   {currentRun.status.toUpperCase()}
@@ -354,7 +354,7 @@ export default function Research() {
               </div>
             </div>
 
-            <div className="bg-nexus-surface border border-nexus rounded-lg px-4 py-2 text-sm font-mono text-nexus-cyan">
+            <div className="bg-praxis-surface border border-praxis rounded-lg px-4 py-2 text-sm font-mono text-praxis-cyan">
               {currentRun.query}
             </div>
 
@@ -369,10 +369,10 @@ export default function Research() {
             )}
 
             {currentRun.finalBrief && (
-              <div className="bg-nexus-surface border border-nexus-green/20 rounded-xl p-5">
+              <div className="bg-praxis-surface border border-praxis-green/20 rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-3">
-                  <CheckCircle className="w-4 h-4 text-nexus-green" />
-                  <h3 className="text-sm font-semibold text-nexus-green">
+                  <CheckCircle className="w-4 h-4 text-praxis-green" />
+                  <h3 className="text-sm font-semibold text-praxis-green">
                     Verified Research Brief
                   </h3>
                 </div>
@@ -393,9 +393,9 @@ export default function Research() {
               {history.slice(0, 5).map((run) => (
                 <button
                   key={run.id}
-                  className="w-full text-left bg-nexus-surface border border-nexus rounded-lg px-4 py-3 hover:border-nexus-cyan/20 transition-colors"
+                  className="w-full text-left bg-praxis-surface border border-praxis rounded-lg px-4 py-3 hover:border-praxis-cyan/20 transition-colors"
                   onClick={async () => {
-                    const r = await nexusApi.getResearch(run.id);
+                    const r = await praxisApi.getResearch(run.id);
                     setCurrentRun(r);
                   }}
                 >
@@ -404,10 +404,10 @@ export default function Research() {
                     <span
                       className={`text-[10px] font-mono ${
                         run.status === 'completed'
-                          ? 'text-nexus-green'
+                          ? 'text-praxis-green'
                           : run.status === 'failed'
-                            ? 'text-nexus-red'
-                            : 'text-nexus-cyan'
+                            ? 'text-praxis-red'
+                            : 'text-praxis-cyan'
                       }`}
                     >
                       {run.status}
@@ -416,10 +416,10 @@ export default function Research() {
                   <p className="text-sm text-muted-foreground truncate">{run.query}</p>
                   {run.citations && (
                     <div className="flex gap-3 mt-1 text-[10px] font-mono text-muted-foreground/50">
-                      <span className="text-nexus-green">
+                      <span className="text-praxis-green">
                         ✓{run.citations.filter((c) => c.status === 'verified').length} verified
                       </span>
-                      <span className="text-nexus-red">
+                      <span className="text-praxis-red">
                         ✗{run.citations.filter((c) => c.status === 'killed').length} killed
                       </span>
                     </div>

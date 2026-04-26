@@ -17,10 +17,10 @@ This is the **SZL Holdings Platform** — a pnpm monorepo hosted on Replit.
 | App | Package |
 |-----|---------|
 | SZL Holdings Dashboard | `@workspace/szl-holdings` |
-| Lyte Command Center | `@workspace/lyte-command-center` |
-| Aegis (Firestorm) | `@workspace/firestorm` |
+| KORA Command Center | `@workspace/lyte-command-center` |
+| PARAGON Defense & Intelligence | `@workspace/firestorm` |
 | Vessels Maritime Intelligence | `@workspace/vessels` |
-| Terra Real Estate Intelligence | `@workspace/terra` |
+| DOMAINE Real Estate Intelligence | `@workspace/terra` |
 | PRISM Counsel Legal Command | `@workspace/prism-counsel` |
 | Carlota Jo Advisory | `@workspace/carlota-jo` |
 | IMPERIUM Cloud Sovereignty | `@workspace/imperium` |

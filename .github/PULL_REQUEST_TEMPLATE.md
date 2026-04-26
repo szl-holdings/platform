@@ -35,9 +35,9 @@ _Which applications or libraries are affected?_
 - [ ] `api-server`
 - [ ] `szl-holdings` (Corporate / Marketing)
 - [ ] `command` (Command Portal)
-- [ ] `aegis` (Aegis — Defense & Intelligence)
-- [ ] `vessels` (Vessels — Maritime Intelligence)
-- [ ] `terra` (Terra — Real Estate Intelligence)
+- [ ] `aegis` (PARAGON — Defense & Intelligence)
+- [ ] `vessels` (SEXTANT — Maritime Intelligence)
+- [ ] `terra` (DOMAINE — Real Estate Intelligence)
 - [ ] `carlota-jo` (Carlota Jo — Advisory)
 - [ ] `szl-holdings-mobile` (CORTEX — Mobile Command)
 - [ ] Shared library (`lib/`)

@@ -36,10 +36,10 @@ export const SZL_APPS = [
   { id: "admin-panel", name: "Admin Control Plane", description: "System administration dashboard", status: "active", url: "/admin/" },
   { id: "api-server", name: "API Server", description: "REST API backend", status: "active", url: "/api/healthz" },
   { id: "vessel-tracker", name: "Vessel Tracker", description: "Maritime fleet tracking", status: "active", url: "/vessels/" },
-  { id: "firestorm", name: "Aegis Security", description: "Cyber resilience command platform", status: "active", url: "/firestorm/" },
+  { id: "firestorm", name: "PARAGON Security", description: "Cyber resilience command platform", status: "active", url: "/firestorm/" },
   { id: "stephen-site", name: "Stephen Lutar", description: "Personal portfolio site", status: "active", url: "/stephen/" },
   { id: "mockup-sandbox", name: "Component Preview", description: "Design system preview", status: "active", url: "/__mockup/" },
-  { id: "terra", name: "Terra Real Estate Intelligence", description: "Real estate portfolio observability platform", status: "active", url: "/terra/" },
+  { id: "terra", name: "DOMAINE Real Estate Intelligence", description: "Real estate portfolio observability platform", status: "active", url: "/terra/" },
 ];
 
 export async function getBillingConfig() {
@@ -123,7 +123,7 @@ export const SEED_TABLE_EXPECTATIONS = [
   { table: "stephen_site_case_studies", minRows: 2, description: "Case studies" },
   { table: "stephen_site_contacts", minRows: 2, description: "Site contacts" },
   { table: "vessels_fleets", minRows: 3, description: "Vessel fleets" },
-  { table: "vessels", minRows: 5, description: "Vessels" },
+  { table: "vessels", minRows: 5, description: "SEXTANT" },
   { table: "vessels_positions", minRows: 6, description: "Vessel positions" },
   { table: "vessels_cargo", minRows: 4, description: "Vessel cargo" },
   { table: "vessels_routes", minRows: 4, description: "Vessel routes" },
@@ -136,15 +136,15 @@ export const SEED_TABLE_EXPECTATIONS = [
   { table: "firestorm_simulation_runs", minRows: 4, description: "Simulation runs" },
   { table: "firestorm_findings", minRows: 8, description: "Security findings" },
   { table: "firestorm_risk_scores", minRows: 8, description: "Risk scores" },
-  { table: "firestorm_campaigns", minRows: 2, description: "Aegis campaigns" },
-  { table: "firestorm_leads", minRows: 3, description: "Aegis leads" },
-  { table: "firestorm_analytics", minRows: 4, description: "Aegis analytics" },
-  { table: "lyte_workspaces", minRows: 1, description: "Lyte workspaces" },
-  { table: "lyte_signals", minRows: 5, description: "Lyte signals" },
-  { table: "lyte_command_cards", minRows: 3, description: "Lyte command cards" },
-  { table: "lyte_incidents", minRows: 2, description: "Lyte incidents" },
-  { table: "lyte_playbooks", minRows: 2, description: "Lyte playbooks" },
-  { table: "lyte_recommendations", minRows: 2, description: "Lyte recommendations" },
+  { table: "firestorm_campaigns", minRows: 2, description: "PARAGON campaigns" },
+  { table: "firestorm_leads", minRows: 3, description: "PARAGON leads" },
+  { table: "firestorm_analytics", minRows: 4, description: "PARAGON analytics" },
+  { table: "lyte_workspaces", minRows: 1, description: "KORA workspaces" },
+  { table: "lyte_signals", minRows: 5, description: "KORA signals" },
+  { table: "lyte_command_cards", minRows: 3, description: "KORA command cards" },
+  { table: "lyte_incidents", minRows: 2, description: "KORA incidents" },
+  { table: "lyte_playbooks", minRows: 2, description: "KORA playbooks" },
+  { table: "lyte_recommendations", minRows: 2, description: "KORA recommendations" },
   { table: "dreamscape_campaigns", minRows: 4, description: "Dreamscape campaigns" },
   { table: "dreamscape_scripts", minRows: 3, description: "Dreamscape scripts" },
   { table: "dreamscape_storyboards", minRows: 3, description: "Dreamscape storyboards" },
@@ -330,7 +330,7 @@ export function register(router: IRouter): void {
         .from(lyteSignalsTable)
         .where(
           and(
-            eq(lyteSignalsTable.source, "Lyte Self-Monitor"),
+            eq(lyteSignalsTable.source, "KORA Self-Monitor"),
             sql`${lyteSignalsTable.metadata}->>'obsRef' IN ('OBS-005','OBS-006')`,
           ),
         )

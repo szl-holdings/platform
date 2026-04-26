@@ -215,7 +215,7 @@ export default function AegisPdfExport() {
                         <Shield style={{ width: '20px', height: '20px', color: 'white' }} />
                       </div>
                       <div>
-                        <div style={{ fontSize: '20px', fontWeight: 700, color: '#fef2f2' }}>Aegis</div>
+                        <div style={{ fontSize: '20px', fontWeight: 700, color: '#fef2f2' }}>PARAGON</div>
                         <div style={{ fontSize: '11px', color: '#fca5a5', opacity: 0.7 }}>Defense & Intelligence Command</div>
                       </div>
                     </div>

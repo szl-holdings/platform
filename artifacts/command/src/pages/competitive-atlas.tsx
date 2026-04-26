@@ -60,7 +60,7 @@ const LANES: Lane[] = [
   {
     id: "cyber",
     name: "Cyber Resilience",
-    artifact: "Aegis",
+    artifact: "PARAGON",
     artifactPath: "/sentra/",
     accentColor: "#ef4444",
     icon: Shield,
@@ -103,14 +103,14 @@ const LANES: Lane[] = [
       {
         idea: "Pattern of Life Behavioral Baseline",
         source: "Darktrace Enterprise Immune System",
-        ourVersion: "Behavioral Baseline panel on the Aegis dashboard showing current vs. normal activity profiles for assets and users, with deviation score and autonomous response status",
+        ourVersion: "Behavioral Baseline panel on the PARAGON dashboard showing current vs. normal activity profiles for assets and users, with deviation score and autonomous response status",
         status: "adopted",
         location: "sentra/src/pages/dashboard.tsx",
       },
       {
         idea: "Natural Language Threat Query",
         source: "CrowdStrike Charlotte AI",
-        ourVersion: "NL threat query bar on the Aegis dashboard — operators type plain English (e.g. 'show assets with unusual outbound connections in the last 6h') to surface filtered risk views",
+        ourVersion: "NL threat query bar on the PARAGON dashboard — operators type plain English (e.g. 'show assets with unusual outbound connections in the last 6h') to surface filtered risk views",
         status: "adopted",
         location: "sentra/src/pages/dashboard.tsx",
       },
@@ -122,7 +122,7 @@ const LANES: Lane[] = [
         location: "sentra/src/pages/incident-commander.tsx",
       },
     ],
-    oneOfOneThesis: "Aegis is the only cyber platform that wraps every detection and response decision in a Governed Autonomy proof envelope — showing not just what was detected, but which agent acted, with what confidence, approved by whom, and the full reversibility chain. Competitors show you threats. Aegis shows you the decision.",
+    oneOfOneThesis: "PARAGON is the only cyber platform that wraps every detection and response decision in a Governed Autonomy proof envelope — showing not just what was detected, but which agent acted, with what confidence, approved by whom, and the full reversibility chain. Competitors show you threats. PARAGON shows you the decision.",
     oneOfOneEvidence: [
       "Every incident has a reversible action log with named approver and policy tier",
       "Recovery Readiness score is calculated from agent-verified control states, not surveys",
@@ -204,7 +204,7 @@ const LANES: Lane[] = [
   {
     id: "real-estate",
     name: "Real Estate Intelligence",
-    artifact: "Terra",
+    artifact: "DOMAINE",
     artifactPath: "/terra/",
     accentColor: "#5baa8a",
     icon: Building2,
@@ -276,7 +276,7 @@ const LANES: Lane[] = [
   {
     id: "maritime",
     name: "Maritime Intelligence",
-    artifact: "Vessels",
+    artifact: "SEXTANT",
     artifactPath: "/vessels/",
     accentColor: "#3b82f6",
     icon: Ship,
@@ -348,7 +348,7 @@ const LANES: Lane[] = [
   {
     id: "executive-briefing",
     name: "AI Executive Briefing",
-    artifact: "Pulse",
+    artifact: "LUMINA",
     artifactPath: "/pulse/",
     accentColor: "#c8a84b",
     icon: Brain,
@@ -380,14 +380,14 @@ const LANES: Lane[] = [
       {
         idea: "Source Provenance per Briefing Item",
         source: "Govini Ark source-cited evidence",
-        ourVersion: "Each section card in Pulse Today's Brief shows a provenance strip — which agents contributed, which products fed data, and the data freshness — so principals know the intelligence pedigree before acting",
+        ourVersion: "Each section card in LUMINA Today's Brief shows a provenance strip — which agents contributed, which products fed data, and the data freshness — so principals know the intelligence pedigree before acting",
         status: "adopted",
         location: "pulse/src/pages/TodaysBrief.tsx",
       },
       {
         idea: "Context-Aware AI Sidebar",
         source: "Palantir AIP Assist",
-        ourVersion: "Pulse Constellation page provides a cross-product intelligence assistant that surfaces connections between briefing items across Aegis, Vessels, Terra, and Lyte — one query spans the whole platform",
+        ourVersion: "LUMINA Constellation page provides a cross-product intelligence assistant that surfaces connections between briefing items across PARAGON, SEXTANT, DOMAINE, and KORA — one query spans the whole platform",
         status: "adopted",
         location: "pulse/src/pages/Constellation.tsx",
       },
@@ -399,7 +399,7 @@ const LANES: Lane[] = [
         location: "pulse/src/pages/TodaysBrief.tsx",
       },
     ],
-    oneOfOneThesis: "Pulse is the only executive briefing platform that synthesizes intelligence across cyber, legal, real estate, maritime, and operations into a single daily brief with a Governed Autonomy proof envelope on every insight. Govini briefs defense programs. Pulse briefs the whole enterprise — and shows its work.",
+    oneOfOneThesis: "LUMINA is the only executive briefing platform that synthesizes intelligence across cyber, legal, real estate, maritime, and operations into a single daily brief with a Governed Autonomy proof envelope on every insight. Govini briefs defense programs. LUMINA briefs the whole enterprise — and shows its work.",
     oneOfOneEvidence: [
       "Today's Brief pulls from every SZL product via agent consensus — not a single-domain digest",
       "Dissent Channel lets any agent surface a minority view on a briefing conclusion before it reaches the principal",
@@ -409,7 +409,7 @@ const LANES: Lane[] = [
   {
     id: "decision-intelligence",
     name: "Decision Intelligence",
-    artifact: "Lyte",
+    artifact: "KORA",
     artifactPath: "/lyte/",
     accentColor: "#c9a85c",
     icon: BarChart3,
@@ -531,7 +531,7 @@ const LANES: Lane[] = [
       {
         idea: "Investor Update Automation",
         source: "Visible.vc automated KPI pulls",
-        ourVersion: "SZL Holdings Investors Hub auto-compiles portfolio KPIs from Aegis, Vessels, Terra, and Lyte into an investor-ready view with last-updated timestamps per metric — no manual reporting",
+        ourVersion: "SZL Holdings Investors Hub auto-compiles portfolio KPIs from PARAGON, SEXTANT, DOMAINE, and KORA into an investor-ready view with last-updated timestamps per metric — no manual reporting",
         status: "adopted",
         location: "szl-holdings/src/pages/",
       },

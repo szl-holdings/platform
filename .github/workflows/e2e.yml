@@ -310,8 +310,8 @@ jobs:
           path: test-results/
           retention-days: 7
 
-  nexus-smoke:
-    name: NEXUS Smoke (mocked APIs)
+  praxis-smoke:
+    name: PRAXIS Smoke (mocked APIs)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -330,11 +330,11 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
 
-      # The NEXUS sandbox spec hardcodes the path "/nexus/" (matching its
+      # The PRAXIS sandbox spec hardcodes the path "/nexus/" (matching its
       # production base path). Build with the default BASE_PATH=/nexus/ so
       # asset URLs resolve, then stage the dist under a /nexus/ directory
       # so `serve` exposes the app at http://localhost:3010/nexus/.
-      - name: Build mockup-sandbox (NEXUS) with /nexus/ base
+      - name: Build mockup-sandbox (PRAXIS) with /nexus/ base
         run: pnpm --filter @workspace/mockup-sandbox run build
         env:
           BASE_PATH: /nexus/
@@ -348,7 +348,7 @@ jobs:
           sleep 3
         shell: bash
 
-      - name: Run NEXUS smoke tests (mocked API routes)
+      - name: Run PRAXIS smoke tests (mocked API routes)
         run: pnpm exec playwright test tests/e2e/nexus-smoke.spec.ts --project=chromium
         env:
           CI: true
@@ -358,7 +358,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
-          name: playwright-report-nexus-smoke
+          name: playwright-report-praxis-smoke
           path: playwright-report/
           retention-days: 14
 
@@ -366,13 +366,13 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: failure()
         with:
-          name: playwright-traces-nexus-smoke
+          name: playwright-traces-praxis-smoke
           path: test-results/
           retention-days: 7
 
   e2e:
     name: E2E Gate
-    needs: [e2e-app, a11y, nexus-smoke]
+    needs: [e2e-app, a11y, praxis-smoke]
     runs-on: ubuntu-latest
     if: always()
     permissions:
@@ -388,8 +388,8 @@ jobs:
             echo "Accessibility checks failed"
             exit 1
           fi
-          if [[ "${{ needs.nexus-smoke.result }}" != "success" ]]; then
-            echo "NEXUS smoke tests failed"
+          if [[ "${{ needs.praxis-smoke.result }}" != "success" ]]; then
+            echo "PRAXIS smoke tests failed"
             exit 1
           fi
           echo "All E2E checks passed"

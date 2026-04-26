@@ -37,7 +37,7 @@ function generateAuditEntries(): AuditEntry[] {
     { slug: 'terra', name: 'Terra Distress Agent', actions: ['scan_distress_signals', 'score_property_risk', 'generate_acquisition_brief'] },
     { slug: 'pulse', name: 'Pulse Briefing Agent', actions: ['compile_executive_brief', 'rank_insights', 'schedule_delivery'] },
     { slug: 'command', name: 'Command Correlation Agent', actions: ['cross_domain_correlate', 'surface_anomalies', 'prioritize_actions'] },
-    { slug: 'nexus', name: 'PRAXIS Orchestrator', actions: ['plan_agent_sequence', 'stitch_outputs', 'verify_completeness'] },
+    { slug: 'praxis', name: 'PRAXIS Orchestrator', actions: ['plan_agent_sequence', 'stitch_outputs', 'verify_completeness'] },
   ];
 
   const reasonings: Record<string, string[]> = {
@@ -171,7 +171,7 @@ function RateLimitBar({ used, total, label }: { used: number; total: number; lab
         <span className="text-[9px] font-mono text-muted-foreground/50">{label}</span>
         <span className="text-[9px] font-mono" style={{ color }}>{used.toLocaleString()} / {total.toLocaleString()}</span>
       </div>
-      <div className="h-1 rounded-full bg-nexus-bg overflow-hidden">
+      <div className="h-1 rounded-full bg-praxis-bg overflow-hidden">
         <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
       </div>
     </div>
@@ -198,7 +198,7 @@ function EntryRow({ entry }: { entry: AuditEntry }) {
   }
 
   return (
-    <div className={`border rounded-lg overflow-hidden transition-colors ${open ? 'border-[#a3e635]/30 bg-nexus-surface' : 'border-nexus bg-nexus-surface hover:border-nexus-cyan/20'}`}>
+    <div className={`border rounded-lg overflow-hidden transition-colors ${open ? 'border-[#a3e635]/30 bg-praxis-surface' : 'border-praxis bg-praxis-surface hover:border-praxis-cyan/20'}`}>
       <button className="w-full text-left flex items-center gap-3 px-4 py-3" onClick={() => setOpen((o) => !o)}>
         <div className="w-7 h-7 rounded flex items-center justify-center text-[9px] font-mono font-bold shrink-0" style={{ backgroundColor: `${color}15`, color }}>
           {entry.agentSlug.slice(0, 3).toUpperCase()}
@@ -220,18 +220,18 @@ function EntryRow({ entry }: { entry: AuditEntry }) {
       </button>
 
       {open && (
-        <div className="px-4 pb-4 pt-1 space-y-3 border-t border-nexus">
+        <div className="px-4 pb-4 pt-1 space-y-3 border-t border-praxis">
           {replayed && (
-            <div className="rounded-lg border border-nexus-amber/30 bg-nexus-amber/5 px-3 py-2 flex items-center gap-2 text-[10px]">
-              <RefreshCw className="w-3 h-3 text-nexus-amber shrink-0" />
-              <span className="text-nexus-amber font-mono">REPLAY ACTIVE:</span>
+            <div className="rounded-lg border border-praxis-amber/30 bg-praxis-amber/5 px-3 py-2 flex items-center gap-2 text-[10px]">
+              <RefreshCw className="w-3 h-3 text-praxis-amber shrink-0" />
+              <span className="text-praxis-amber font-mono">REPLAY ACTIVE:</span>
               <span className="text-muted-foreground/70">{replayData?.label}</span>
               <button onClick={() => setReplayed(false)} className="ml-auto text-muted-foreground/50 hover:text-foreground transition-colors">Restore original</button>
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-3 mt-2">
-            <div className="bg-nexus-bg rounded-lg p-3">
+            <div className="bg-praxis-bg rounded-lg p-3">
               <div className="flex items-center gap-1.5 mb-2">
                 <Shield className="w-3 h-3 text-[#a3e635]" />
                 <span className="text-[10px] font-semibold text-[#a3e635]">Reasoning</span>
@@ -243,7 +243,7 @@ function EntryRow({ entry }: { entry: AuditEntry }) {
                   <ul className="space-y-0.5">
                     {entry.alternativesConsidered.map((alt, i) => (
                       <li key={i} className="text-[9px] text-muted-foreground/50 flex items-start gap-1">
-                        <XCircle className="w-2.5 h-2.5 text-nexus-red/50 mt-0.5 shrink-0" />
+                        <XCircle className="w-2.5 h-2.5 text-praxis-red/50 mt-0.5 shrink-0" />
                         {alt}
                       </li>
                     ))}
@@ -252,10 +252,10 @@ function EntryRow({ entry }: { entry: AuditEntry }) {
               )}
             </div>
 
-            <div className="bg-nexus-bg rounded-lg p-3">
+            <div className="bg-praxis-bg rounded-lg p-3">
               <div className="flex items-center gap-1.5 mb-2">
-                <Activity className="w-3 h-3 text-nexus-cyan" />
-                <span className="text-[10px] font-semibold text-nexus-cyan">Result</span>
+                <Activity className="w-3 h-3 text-praxis-cyan" />
+                <span className="text-[10px] font-semibold text-praxis-cyan">Result</span>
               </div>
               <p className="text-[10px] text-muted-foreground leading-relaxed">{displayOutput}</p>
               <div className="mt-3 text-[9px] font-mono text-muted-foreground/40 space-y-0.5">
@@ -267,10 +267,10 @@ function EntryRow({ entry }: { entry: AuditEntry }) {
             </div>
           </div>
 
-          <div className="bg-nexus-bg rounded-lg p-3">
+          <div className="bg-praxis-bg rounded-lg p-3">
             <div className="flex items-center gap-1.5 mb-2">
-              <Gauge className="w-3 h-3 text-nexus-amber" />
-              <span className="text-[10px] font-semibold text-nexus-amber">Agent Rate Limits at Execution</span>
+              <Gauge className="w-3 h-3 text-praxis-amber" />
+              <span className="text-[10px] font-semibold text-praxis-amber">Agent Rate Limits at Execution</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <RateLimitBar used={entry.rateLimit.requestsUsedThisMinute} total={entry.rateLimit.requestsPerMinute} label="Requests / min" />
@@ -283,7 +283,7 @@ function EntryRow({ entry }: { entry: AuditEntry }) {
               <button
                 onClick={handleReplay}
                 disabled={replaying}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-nexus-amber/30 bg-nexus-amber/10 text-nexus-amber text-[10px] font-mono hover:bg-nexus-amber/20 transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-praxis-amber/30 bg-praxis-amber/10 text-praxis-amber text-[10px] font-mono hover:bg-praxis-amber/20 transition-colors disabled:opacity-50"
               >
                 {replaying ? <RefreshCw className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
                 {replaying ? 'Replaying…' : `Replay: ${replayData.label}`}
@@ -307,7 +307,7 @@ function AgentRateLimitPanel({ entries }: { entries: AuditEntry[] }) {
   const agents = Array.from(latest.values());
 
   return (
-    <div className="bg-nexus-surface border border-[#a3e635]/20 rounded-xl p-4">
+    <div className="bg-praxis-surface border border-[#a3e635]/20 rounded-xl p-4">
       <div className="flex items-center gap-2 mb-3">
         <Cpu className="w-4 h-4 text-[#a3e635]" />
         <span className="text-xs font-semibold">Live Agent Rate Limits</span>
@@ -319,7 +319,7 @@ function AgentRateLimitPanel({ entries }: { entries: AuditEntry[] }) {
           const pct = Math.round((e.rateLimit.requestsUsedThisMinute / e.rateLimit.requestsPerMinute) * 100);
           const statusColor = pct >= 95 ? 'var(--gi-accent-red)' : pct >= 80 ? 'var(--gi-accent-amber)' : 'var(--gi-accent-green)';
           return (
-            <div key={e.agentSlug} className="bg-nexus-bg rounded-lg p-3">
+            <div key={e.agentSlug} className="bg-praxis-bg rounded-lg p-3">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-5 h-5 rounded text-[8px] font-mono font-bold flex items-center justify-center shrink-0" style={{ backgroundColor: `${color}20`, color }}>
                   {e.agentSlug.slice(0, 3).toUpperCase()}
@@ -369,7 +369,7 @@ export default function AuditTrail() {
   const replayCount = Object.keys(REPLAY_TRACES).length;
 
   return (
-    <div className="min-h-full bg-nexus-bg p-6">
+    <div className="min-h-full bg-praxis-bg p-6">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <Shield className="w-5 h-5 text-[#a3e635]" />
@@ -388,7 +388,7 @@ export default function AuditTrail() {
             { label: 'Errors', value: errorCount, color: 'var(--gi-accent-red)' },
             { label: 'Avg Duration', value: `${avgDuration}ms`, color: 'var(--gi-accent-amber)' },
           ].map((stat) => (
-            <div key={stat.label} className="bg-nexus-surface border border-nexus rounded-xl p-4">
+            <div key={stat.label} className="bg-praxis-surface border border-praxis rounded-xl p-4">
               <div className="text-[10px] font-mono text-muted-foreground/50 mb-1">{stat.label}</div>
               <div className="text-2xl font-semibold" style={{ color: stat.color }}>{stat.value}</div>
             </div>
@@ -401,17 +401,17 @@ export default function AuditTrail() {
 
         <div className="flex items-center gap-3 mb-4 flex-wrap">
           <span className="text-[10px] font-mono text-muted-foreground/50">Filter:</span>
-          <select className="text-xs bg-nexus-surface border border-nexus rounded-lg px-2 py-1.5 text-muted-foreground focus:outline-none" value={filterSlug} onChange={(e) => setFilterSlug(e.target.value)}>
+          <select className="text-xs bg-praxis-surface border border-praxis rounded-lg px-2 py-1.5 text-muted-foreground focus:outline-none" value={filterSlug} onChange={(e) => setFilterSlug(e.target.value)}>
             <option value="all">All agents</option>
             {slugs.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
-          <select className="text-xs bg-nexus-surface border border-nexus rounded-lg px-2 py-1.5 text-muted-foreground focus:outline-none" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+          <select className="text-xs bg-praxis-surface border border-praxis rounded-lg px-2 py-1.5 text-muted-foreground focus:outline-none" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
             <option value="all">All statuses</option>
             <option value="success">Success</option>
             <option value="error">Error</option>
             <option value="skipped">Skipped</option>
           </select>
-          <select className="text-xs bg-nexus-surface border border-nexus rounded-lg px-2 py-1.5 text-muted-foreground focus:outline-none" value={timeWindow} onChange={(e) => setTimeWindow(e.target.value)}>
+          <select className="text-xs bg-praxis-surface border border-praxis rounded-lg px-2 py-1.5 text-muted-foreground focus:outline-none" value={timeWindow} onChange={(e) => setTimeWindow(e.target.value)}>
             <option value="all">All time</option>
             <option value="1h">Last 1h</option>
             <option value="6h">Last 6h</option>

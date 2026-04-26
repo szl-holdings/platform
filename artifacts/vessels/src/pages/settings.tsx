@@ -698,7 +698,7 @@ export default function VesselsSettings() {
             'audit',
           ]}
           accentColor={VESSELS_ACCENT}
-          appName="Vessels"
+          appName="SEXTANT"
         >
           {panels[activeSection]}
         </SettingsShell>

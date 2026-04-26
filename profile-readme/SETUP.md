@@ -16,7 +16,7 @@ mkdir -p assets
 cp /path/to/workspace/profile-readme/assets/* ./assets/
 
 git add -A
-git commit -m "Premium profile README — Lyte + Alloy focused"
+git commit -m "Premium profile README — KORA + A11oy focused"
 git push origin main
 ```
 

@@ -27,7 +27,7 @@ const ECOSYSTEM_APPS = [
   },
   {
     id: 'msp',
-    name: 'Aegis Operations',
+    name: 'PARAGON Operations',
     role: 'Managed Services Command',
     agent: 'IT Sentinel',
     icon: Cpu,

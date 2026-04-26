@@ -250,7 +250,7 @@ const REPLAY_SCENARIOS = [
       {
         id: 're-01',
         timestamp: '2026-04-14T08:22:00Z',
-        actor: 'Lyte Signal Scanner',
+        actor: 'KORA Signal Scanner',
         role: 'System',
         action: 'Signal detected',
         signal: 'approval_chain_stall',
@@ -262,7 +262,7 @@ const REPLAY_SCENARIOS = [
       {
         id: 're-02',
         timestamp: '2026-04-14T08:24:00Z',
-        actor: 'Lyte Decision Engine',
+        actor: 'KORA Decision Engine',
         role: 'AI Agent',
         action: 'Recommendation generated',
         detail:
@@ -273,7 +273,7 @@ const REPLAY_SCENARIOS = [
       {
         id: 're-03',
         timestamp: '2026-04-14T08:30:00Z',
-        actor: 'Lyte Simulation Engine',
+        actor: 'KORA Simulation Engine',
         role: 'AI Agent',
         action: 'Simulation run',
         detail:
@@ -306,7 +306,7 @@ const REPLAY_SCENARIOS = [
       {
         id: 're-06',
         timestamp: '2026-04-14T09:14:00Z',
-        actor: 'Lyte Alloy',
+        actor: 'KORA Alloy',
         role: 'System',
         action: 'Approval chain updated',
         detail:
@@ -317,7 +317,7 @@ const REPLAY_SCENARIOS = [
       {
         id: 're-07',
         timestamp: '2026-04-14T09:58:00Z',
-        actor: 'Lyte Alloy',
+        actor: 'KORA Alloy',
         role: 'System',
         action: 'Downstream actions executed',
         detail:

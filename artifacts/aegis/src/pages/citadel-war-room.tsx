@@ -113,7 +113,7 @@ const STATIC_TIMELINE: CrisisEvent[] = [
     detail:
       'Neural explorer had flagged pattern 8 minutes before SIEM alert. APT29 C2 beacon on INC-2846 linked.',
     severity: 'high',
-    source: 'Aegis Labs · AI',
+    source: 'PARAGON Labs · AI',
     confirmed: true,
   },
   {

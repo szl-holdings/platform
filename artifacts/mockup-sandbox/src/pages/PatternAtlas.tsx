@@ -170,7 +170,7 @@ const [mode, setMode] = useState<AutonomyMode>('approve_each');
           decimals={Number(vals.decimals) || 0}
           prefix={vals.prefix || ''}
           suffix={vals.suffix || ''}
-          className="text-4xl font-mono font-bold text-nexus-cyan"
+          className="text-4xl font-mono font-bold text-praxis-cyan"
         />
       </div>
     ),
@@ -341,7 +341,7 @@ const [mode, setMode] = useState<AutonomyMode>('approve_each');
     status: 'stable',
     source: 'lib/shared-ui/src/PrivateAppGuard.tsx',
     props: [
-      { name: 'appId', type: 'string', required: true, description: 'Identifier of the protected app', control: 'text', defaultValue: 'nexus' },
+      { name: 'appId', type: 'string', required: true, description: 'Identifier of the protected app', control: 'text', defaultValue: 'praxis' },
       { name: 'permissions', type: 'string[]', required: true, description: 'Required permission strings (AND logic)' },
       { name: 'children', type: 'React.ReactNode', required: true, description: 'Protected content' },
     ],
@@ -380,7 +380,7 @@ const [mode, setMode] = useState<AutonomyMode>('approve_each');
     status: 'stable',
     source: 'lib/shared-ui/src/doctrine-layer-badge.tsx',
     props: [
-      { name: 'appId', type: 'string', required: true, description: 'App identifier resolved to a doctrine layer', control: 'text', defaultValue: 'nexus' },
+      { name: 'appId', type: 'string', required: true, description: 'App identifier resolved to a doctrine layer', control: 'text', defaultValue: 'praxis' },
       { name: 'variant', type: '"compact" | "full" | "inline"', required: false, defaultValue: '"compact"', description: 'Visual variant', control: 'select', options: ['compact', 'full', 'inline'] },
       { name: 'showTooltip', type: 'boolean', required: false, defaultValue: 'false', description: 'Show tooltip with description', control: 'boolean' },
     ],
@@ -390,7 +390,7 @@ const [mode, setMode] = useState<AutonomyMode>('approve_each');
     livePreview: (vals) => (
       <div className="p-6 flex justify-center">
         <DoctrineLayerBadge
-          appId={vals.appId || 'nexus'}
+          appId={vals.appId || 'praxis'}
           variant={(vals.variant as 'compact' | 'full' | 'inline') || 'compact'}
           showTooltip={vals.showTooltip === 'true'}
         />
@@ -476,9 +476,9 @@ const CATEGORIES = [
 ];
 
 const STATUS_CFG = {
-  stable: { label: 'Stable', color: 'text-nexus-green border-nexus-green/30 bg-nexus-green/10' },
-  beta: { label: 'Beta', color: 'text-nexus-amber border-nexus-amber/30 bg-nexus-amber/10' },
-  experimental: { label: 'Experimental', color: 'text-nexus-red border-red-500/30 bg-red-500/10' },
+  stable: { label: 'Stable', color: 'text-praxis-green border-praxis-green/30 bg-praxis-green/10' },
+  beta: { label: 'Beta', color: 'text-praxis-amber border-praxis-amber/30 bg-praxis-amber/10' },
+  experimental: { label: 'Experimental', color: 'text-praxis-red border-red-500/30 bg-red-500/10' },
 };
 
 interface CatalogEntry {
@@ -613,7 +613,7 @@ function PropControl({
           type="checkbox"
           checked={value === 'true'}
           onChange={(e) => onChange(e.target.checked ? 'true' : 'false')}
-          className="w-3 h-3 rounded border-nexus accent-nexus-cyan"
+          className="w-3 h-3 rounded border-praxis accent-praxis-cyan"
         />
         <span className="text-[11px] text-muted-foreground">{value === 'true' ? 'true' : 'false'}</span>
       </label>
@@ -624,7 +624,7 @@ function PropControl({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="bg-nexus-bg border border-nexus rounded px-2 py-1 text-[11px] text-foreground focus:outline-none focus:border-nexus-cyan/40"
+        className="bg-praxis-bg border border-praxis rounded px-2 py-1 text-[11px] text-foreground focus:outline-none focus:border-praxis-cyan/40"
       >
         {prop.options.map((o) => (
           <option key={o} value={o}>{o}</option>
@@ -638,7 +638,7 @@ function PropControl({
         type="number"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-20 bg-nexus-bg border border-nexus rounded px-2 py-1 text-[11px] text-foreground focus:outline-none focus:border-nexus-cyan/40"
+        className="w-20 bg-praxis-bg border border-praxis rounded px-2 py-1 text-[11px] text-foreground focus:outline-none focus:border-praxis-cyan/40"
       />
     );
   }
@@ -647,7 +647,7 @@ function PropControl({
       type="text"
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="flex-1 min-w-0 bg-nexus-bg border border-nexus rounded px-2 py-1 text-[11px] text-foreground placeholder-muted-foreground/40 focus:outline-none focus:border-nexus-cyan/40"
+      className="flex-1 min-w-0 bg-praxis-bg border border-praxis rounded px-2 py-1 text-[11px] text-foreground placeholder-muted-foreground/40 focus:outline-none focus:border-praxis-cyan/40"
     />
   );
 }
@@ -773,19 +773,19 @@ function ComponentDetail({ entry }: { entry: CatalogEntry }) {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="p-5 border-b border-nexus bg-nexus-surface shrink-0">
+      <div className="p-5 border-b border-praxis bg-praxis-surface shrink-0">
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2.5 mb-1">
-              <h2 className="text-base font-semibold font-mono text-nexus-cyan">{name}</h2>
+              <h2 className="text-base font-semibold font-mono text-praxis-cyan">{name}</h2>
               <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border uppercase tracking-wider ${statusCfg.color}`}>
                 {statusCfg.label}
               </span>
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-nexus bg-nexus-bg text-muted-foreground/60 uppercase">
+              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-praxis bg-praxis-bg text-muted-foreground/60 uppercase">
                 {meta.category}
               </span>
               {hasLivePreview && (
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-nexus-green/30 bg-nexus-green/10 text-nexus-green uppercase tracking-wider">
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-praxis-green/30 bg-praxis-green/10 text-praxis-green uppercase tracking-wider">
                   Live Preview
                 </span>
               )}
@@ -805,13 +805,13 @@ function ComponentDetail({ entry }: { entry: CatalogEntry }) {
             <div>
               <div className="flex items-center justify-between mb-2.5">
                 <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/50 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-nexus-green inline-block" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-praxis-green inline-block" />
                   Live Preview
                 </div>
                 <div
                   role="group"
                   aria-label="Preview theme"
-                  className="flex items-center gap-0.5 bg-nexus-bg border border-nexus rounded p-0.5"
+                  className="flex items-center gap-0.5 bg-praxis-bg border border-praxis rounded p-0.5"
                 >
                   {(Object.keys(PREVIEW_THEMES) as PreviewTheme[]).map((t) => {
                     const Icon = t === 'dark' ? Moon : Sun;
@@ -825,7 +825,7 @@ function ComponentDetail({ entry }: { entry: CatalogEntry }) {
                         title={`${PREVIEW_THEMES[t].label} preview`}
                         className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono uppercase tracking-wider transition-colors ${
                           active
-                            ? 'bg-nexus-cyan/15 text-nexus-cyan'
+                            ? 'bg-praxis-cyan/15 text-praxis-cyan'
                             : 'text-muted-foreground/60 hover:text-foreground'
                         }`}
                       >
@@ -836,10 +836,10 @@ function ComponentDetail({ entry }: { entry: CatalogEntry }) {
                   })}
                 </div>
               </div>
-              <div className="rounded-lg border border-nexus-green/20 overflow-hidden">
+              <div className="rounded-lg border border-praxis-green/20 overflow-hidden">
                 <PreviewErrorBoundary
                   fallback={
-                    <div className="flex items-center gap-2 p-4 text-muted-foreground/50 text-xs bg-nexus-bg">
+                    <div className="flex items-center gap-2 p-4 text-muted-foreground/50 text-xs bg-praxis-bg">
                       <Info className="w-3.5 h-3.5 shrink-0" />
                       Live preview unavailable — component requires runtime context.
                     </div>
@@ -851,7 +851,7 @@ function ComponentDetail({ entry }: { entry: CatalogEntry }) {
                 </PreviewErrorBoundary>
               </div>
               <div className="mt-1.5 text-[9px] font-mono text-muted-foreground/40 flex items-center gap-1.5">
-                <span className="w-1 h-1 rounded-full bg-nexus-green/60 inline-block" />
+                <span className="w-1 h-1 rounded-full bg-praxis-green/60 inline-block" />
                 Sandboxed preview · design tokens scoped · {PREVIEW_THEMES[previewTheme].label.toLowerCase()} theme
               </div>
             </div>
@@ -861,7 +861,7 @@ function ComponentDetail({ entry }: { entry: CatalogEntry }) {
             <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/50 mb-2.5">
               {hasLivePreview ? 'Generated Code' : 'Usage'}
             </div>
-            <pre className="bg-nexus-bg border border-nexus rounded-lg p-4 text-[11px] font-mono text-nexus-cyan/90 overflow-x-auto whitespace-pre leading-relaxed">
+            <pre className="bg-praxis-bg border border-praxis rounded-lg p-4 text-[11px] font-mono text-praxis-cyan/90 overflow-x-auto whitespace-pre leading-relaxed">
               {buildLiveCode()}
             </pre>
           </div>
@@ -870,14 +870,14 @@ function ComponentDetail({ entry }: { entry: CatalogEntry }) {
             <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/50 mb-2.5">
               Full Example
             </div>
-            <pre className="bg-nexus-bg border border-nexus rounded-lg p-4 text-[11px] font-mono text-muted-foreground/70 overflow-x-auto whitespace-pre leading-relaxed">
+            <pre className="bg-praxis-bg border border-praxis rounded-lg p-4 text-[11px] font-mono text-muted-foreground/70 overflow-x-auto whitespace-pre leading-relaxed">
               {meta.usageExample}
             </pre>
           </div>
         </div>
 
-        <div className="w-72 border-l border-nexus bg-nexus-surface overflow-y-auto shrink-0">
-          <div className="p-4 border-b border-nexus">
+        <div className="w-72 border-l border-praxis bg-praxis-surface overflow-y-auto shrink-0">
+          <div className="p-4 border-b border-praxis">
             <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/50">
               Props ({meta.props.length})
             </div>
@@ -892,10 +892,10 @@ function ComponentDetail({ entry }: { entry: CatalogEntry }) {
                 <div key={prop.name} className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[11px] font-mono font-semibold text-nexus-cyan">{prop.name}</span>
-                      {prop.required && <span className="text-[8px] text-nexus-red font-mono uppercase">*</span>}
+                      <span className="text-[11px] font-mono font-semibold text-praxis-cyan">{prop.name}</span>
+                      {prop.required && <span className="text-[8px] text-praxis-red font-mono uppercase">*</span>}
                     </div>
-                    <span className="text-[9px] font-mono text-muted-foreground/50 bg-nexus-bg border border-nexus px-1 py-0.5 rounded">
+                    <span className="text-[9px] font-mono text-muted-foreground/50 bg-praxis-bg border border-praxis px-1 py-0.5 rounded">
                       {prop.type.length > 20 ? `${prop.type.slice(0, 20)}…` : prop.type}
                     </span>
                   </div>
@@ -943,11 +943,11 @@ export default function PatternAtlas() {
   const activeCats = new Set(CATALOG.map((c) => c.meta.category));
 
   return (
-    <div className="flex h-full overflow-hidden bg-nexus-bg">
-      <div className="w-56 border-r border-nexus bg-nexus-surface flex flex-col shrink-0 overflow-hidden">
-        <div className="p-3 border-b border-nexus shrink-0">
+    <div className="flex h-full overflow-hidden bg-praxis-bg">
+      <div className="w-56 border-r border-praxis bg-praxis-surface flex flex-col shrink-0 overflow-hidden">
+        <div className="p-3 border-b border-praxis shrink-0">
           <div className="flex items-center gap-2 mb-3">
-            <GitBranch className="w-4 h-4 text-nexus-cyan" />
+            <GitBranch className="w-4 h-4 text-praxis-cyan" />
             <div>
               <div className="text-xs font-semibold font-mono">Pattern Atlas</div>
               <div className="text-[9px] text-muted-foreground/50">
@@ -961,19 +961,19 @@ export default function PatternAtlas() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search components…"
-              className="w-full bg-nexus-bg border border-nexus rounded pl-6 pr-2 py-1.5 text-[11px] text-foreground placeholder-muted-foreground/40 focus:outline-none focus:border-nexus-cyan/40"
+              className="w-full bg-praxis-bg border border-praxis rounded pl-6 pr-2 py-1.5 text-[11px] text-foreground placeholder-muted-foreground/40 focus:outline-none focus:border-praxis-cyan/40"
             />
           </div>
           <div className="flex gap-2 mt-2.5 text-[9px] font-mono">
-            <span className="text-nexus-green">{counts.stable} stable</span>
+            <span className="text-praxis-green">{counts.stable} stable</span>
             <span className="text-muted-foreground/40">·</span>
-            <span className="text-nexus-amber">{counts.beta} beta</span>
+            <span className="text-praxis-amber">{counts.beta} beta</span>
             <span className="text-muted-foreground/40">·</span>
-            <span className="text-nexus-red">{counts.experimental} exp</span>
+            <span className="text-praxis-red">{counts.experimental} exp</span>
           </div>
         </div>
 
-        <div className="flex flex-col gap-0.5 p-1.5 border-b border-nexus shrink-0">
+        <div className="flex flex-col gap-0.5 p-1.5 border-b border-praxis shrink-0">
           {CATEGORIES.filter((cat) => cat.id === 'all' || activeCats.has(cat.id)).map((cat) => {
             const Icon = cat.icon;
             const count = cat.id === 'all' ? CATALOG.length : CATALOG.filter((c) => c.meta.category === cat.id).length;
@@ -983,8 +983,8 @@ export default function PatternAtlas() {
                 onClick={() => setCategory(cat.id)}
                 className={`flex items-center gap-2 px-2 py-1.5 rounded text-left transition-colors ${
                   category === cat.id
-                    ? 'bg-nexus-cyan/10 text-nexus-cyan border border-nexus-cyan/20'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-nexus-bg border border-transparent'
+                    ? 'bg-praxis-cyan/10 text-praxis-cyan border border-praxis-cyan/20'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-praxis-bg border border-transparent'
                 }`}
               >
                 <Icon className="w-3 h-3 shrink-0" />
@@ -1005,8 +1005,8 @@ export default function PatternAtlas() {
                 onClick={() => setSelected(c)}
                 className={`w-full flex items-center gap-2 px-2.5 py-2 rounded text-left transition-colors ${
                   isSelected
-                    ? 'bg-nexus-cyan/10 border border-nexus-cyan/20 text-nexus-cyan'
-                    : 'text-muted-foreground/80 hover:text-foreground hover:bg-nexus-bg border border-transparent'
+                    ? 'bg-praxis-cyan/10 border border-praxis-cyan/20 text-praxis-cyan'
+                    : 'text-muted-foreground/80 hover:text-foreground hover:bg-praxis-bg border border-transparent'
                 }`}
               >
                 <div className="flex-1 min-w-0">
@@ -1014,7 +1014,7 @@ export default function PatternAtlas() {
                   <div className="text-[9px] text-muted-foreground/50 truncate">{c.meta.category}</div>
                 </div>
                 {c.meta.livePreview && (
-                  <span className="text-[8px] text-nexus-green font-mono shrink-0">▶</span>
+                  <span className="text-[8px] text-praxis-green font-mono shrink-0">▶</span>
                 )}
                 <span className={`text-[8px] font-mono ${statusCfg.color} px-1 py-0.5 rounded border shrink-0`}>
                   {c.meta.status === 'stable' ? '●' : c.meta.status === 'beta' ? '◐' : '○'}

@@ -62,17 +62,17 @@ const router: IRouter = Router();
 
 const DOMAIN_CONFIG: Record<string, { label: string; workflowKey: string; signalTypes: string[] }> = {
   aegis: {
-    label: "Aegis — Security Intelligence",
+    label: "PARAGON — Security Intelligence",
     workflowKey: "aegis-incident-response",
     signalTypes: ["security-incident", "threat-detection", "vulnerability", "anomaly", "policy-violation", "intrusion-attempt"],
   },
   vessels: {
-    label: "Vessels — Maritime Intelligence",
+    label: "SEXTANT — Maritime Intelligence",
     workflowKey: "vessels-voyage-risk",
     signalTypes: ["voyage-anomaly", "sanctions-match", "ais-gap", "cargo-risk", "port-risk", "weather-hazard", "dark-vessel"],
   },
   terra: {
-    label: "Terra — Real Estate Intelligence",
+    label: "DOMAINE — Real Estate Intelligence",
     workflowKey: "terra-deal-underwriting",
     signalTypes: ["distress-signal", "ownership-change", "price-anomaly", "market-shift", "zoning-change", "tax-delinquency", "lien-detected"],
   },

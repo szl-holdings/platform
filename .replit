@@ -32,10 +32,6 @@ args = "artifacts/counsel: web"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "nexus-smoke-e2e"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "security-tests"
 
 [[workflows.workflow.tasks]]
@@ -45,6 +41,10 @@ args = "brand-strings"
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "artifacts/pluginmesh: web"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "praxis-smoke-e2e"
 
 [[workflows.workflow]]
 name = "artifacts/lyte-command-center: web"
@@ -68,17 +68,6 @@ args = "bash -c 'cd /home/runner/workspace/artifacts/counsel && exec node_module
 
 [workflows.workflow.metadata]
 outputType = "webview"
-
-[[workflows.workflow]]
-name = "nexus-smoke-e2e"
-author = "agent"
-
-[workflows.workflow.metadata]
-isValidation = true
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "set -e; pnpm --filter @workspace/mockup-sandbox run build && rm -rf /tmp/served-nexus && mkdir -p /tmp/served-nexus/nexus && cp -r artifacts/mockup-sandbox/dist/public/. /tmp/served-nexus/nexus/ && (cd /tmp/served-nexus && python3 -m http.server 3010 >/tmp/nexus-serve.log 2>&1 &) && sleep 3 && PLAYWRIGHT_BASE_URL=http://localhost:3010 pnpm exec playwright test tests/e2e/nexus-smoke.spec.ts --project=chromium; rc=$?; pkill -f 'http.server 3010' || true; exit $rc"
 
 [[workflows.workflow]]
 name = "security-tests"
@@ -113,6 +102,17 @@ outputType = "webview"
 task = "shell.exec"
 args = "bash -c 'cd /home/runner/workspace/artifacts/pluginmesh && VITE_PORT=8099 BASE_PATH=/pluginmesh/ exec node_modules/.bin/vite --config vite.config.ts --host ::'"
 waitForPort = 8099
+
+[[workflows.workflow]]
+name = "praxis-smoke-e2e"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "set -e; pnpm --filter @workspace/mockup-sandbox run build && rm -rf /tmp/served-praxis && mkdir -p /tmp/served-praxis/nexus && cp -r artifacts/mockup-sandbox/dist/public/. /tmp/served-praxis/nexus/ && (cd /tmp/served-praxis && python3 -m http.server 3010 >/tmp/praxis-serve.log 2>&1 &) && sleep 3 && PLAYWRIGHT_BASE_URL=http://localhost:3010 pnpm exec playwright test tests/e2e/nexus-smoke.spec.ts --project=chromium; rc=$?; pkill -f 'http.server 3010' || true; exit $rc"
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [agent]
 stack = "PNPM_WORKSPACE"

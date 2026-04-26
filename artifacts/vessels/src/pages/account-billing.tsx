@@ -14,7 +14,7 @@ export default function VesselsBillingAccountPage() {
       <BillingAccount
         accentColor={ACCENT}
         pricingUrl="/pricing"
-        productName="Vessels"
+        productName="SEXTANT"
       />
     </div>
   );

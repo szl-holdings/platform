@@ -5,10 +5,10 @@ import { logger } from './logger';
 const DEFAULT_KB_ARTICLES = [
   {
     slug: 'getting-started-lyte',
-    title: 'Getting started with Lyte',
+    title: 'Getting started with KORA',
     category: 'Getting Started',
-    summary: 'Learn how to connect your first data source and surface operational signals in Lyte.',
-    body: 'Lyte connects to your existing approval queues, task systems, and workflow tools. This guide walks through your first integration and signal configuration.',
+    summary: 'Learn how to connect your first data source and surface operational signals in KORA.',
+    body: 'KORA connects to your existing approval queues, task systems, and workflow tools. This guide walks through your first integration and signal configuration.',
     tags: ['lyte', 'onboarding', 'integrations'],
     viewCount: 142,
     isPublished: true,

@@ -1275,7 +1275,7 @@ function VesselsDashboard({
     getConflictCount: () => _vesselsConflictResolver.getConflictCount('vessels'),
   });
   return (
-    <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor={accent}>
+    <PowerUserProvider shortcuts={vesselsShortcuts} appName="SEXTANT" accentColor={accent}>
       <div className="flex flex-col h-screen" style={{ background: '#060e1a' }}>
         <a
           href="#main-content"
@@ -1359,7 +1359,7 @@ function VesselsDashboard({
         open={cmdOpen}
         onClose={() => setCmdOpen(false)}
         commands={vesselsCommands}
-        appName="Vessels"
+        appName="SEXTANT"
         accentColor={accent}
       />
       <OnboardingWizard
@@ -1452,7 +1452,7 @@ function AppContent({
 
   if (isDashboard) {
     return (
-      <PrivateAppGuard appName="Vessels" accentColor={VESSELS_BRAND_ACCENT}>
+      <PrivateAppGuard appName="SEXTANT" accentColor={VESSELS_BRAND_ACCENT}>
         <VesselsDashboard cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
       </PrivateAppGuard>
     );

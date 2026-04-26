@@ -50,7 +50,7 @@ export interface DebtIntervention {
 }
 
 export const DEMO_OPERATOR_FALLBACK = 'Demo Operator';
-const STORAGE_KEY = 'lyte:interventions:v2';
+const STORAGE_KEY = 'kora:interventions:v2';
 const isBrowser = typeof window !== 'undefined';
 
 interface State {

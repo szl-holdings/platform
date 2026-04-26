@@ -24,7 +24,7 @@ const CONNECTOR_FRESHNESS = [
     latency: 310,
     records: 14302,
     staleWindow: '5m',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
   },
   {
     id: 'alloy-kb',
@@ -46,7 +46,7 @@ const CONNECTOR_FRESHNESS = [
     latency: 142,
     records: 871,
     staleWindow: '10m',
-    domain: 'Lyte',
+    domain: 'KORA',
   },
   {
     id: 'terra-propertydata',
@@ -57,7 +57,7 @@ const CONNECTOR_FRESHNESS = [
     latency: 1800,
     records: 92440,
     staleWindow: '60m',
-    domain: 'Terra',
+    domain: 'DOMAINE',
   },
   {
     id: 'ofac',
@@ -79,7 +79,7 @@ const CONNECTOR_FRESHNESS = [
     latency: 14000,
     records: 290,
     staleWindow: '30m',
-    domain: 'Vessels',
+    domain: 'SEXTANT',
   },
   {
     id: 'eu-sanctions',

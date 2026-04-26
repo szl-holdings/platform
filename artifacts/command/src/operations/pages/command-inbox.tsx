@@ -451,7 +451,7 @@ const ACTION_QUEUE: QueueItem[] = [
     type: 'ownership',
     evidence: 'Workflow graph gap detected automatically',
     next_action: 'Assign compliance owner and unblock pipeline',
-    linked_product: 'Terra',
+    linked_product: 'DOMAINE',
     linked_href: '/terra/',
   },
   {

@@ -476,13 +476,13 @@ export default function Dashboard() {
       ).length,
     },
     {
-      label: 'Vessels',
+      label: 'SEXTANT',
       count: signals.filter(
         (s) => s.source.toLowerCase().includes('vessel') && s.status !== 'resolved',
       ).length,
     },
     {
-      label: 'Aegis SOC',
+      label: "PARAGON"SOC',
       count: signals.filter(
         (s) =>
           (s.source.toLowerCase().includes('firestorm') ||
@@ -491,7 +491,7 @@ export default function Dashboard() {
       ).length,
     },
     {
-      label: 'Terra',
+      label: 'DOMAINE',
       count: signals.filter(
         (s) =>
           (s.source.toLowerCase().includes('terra') || s.source.toLowerCase().includes('beacon')) &&

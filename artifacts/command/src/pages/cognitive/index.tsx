@@ -124,7 +124,7 @@ const DEMO_STATE: RuntimeState = {
     },
     {
       id: 'run-004',
-      name: 'Aegis Threat Correlation',
+      name: 'PARAGON Threat Correlation',
       agent: 'AEGIS-Watch',
       status: 'running',
       objective:
@@ -159,7 +159,7 @@ const DEMO_STATE: RuntimeState = {
     },
     {
       id: 'obj-2',
-      title: 'Prepare CISO briefing on Aegis bundle exposure',
+      title: 'Prepare CISO briefing on PARAGON bundle exposure',
       agent: 'AEGIS-Watch',
       priority: 2,
       status: 'active',

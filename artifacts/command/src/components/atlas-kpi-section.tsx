@@ -45,10 +45,10 @@ const DOMAIN_CONFIG: Omit<
   | 'pendingActions'
   | 'worldline'
 >[] = [
-  { domain: 'aegis', label: 'Aegis — Defense', color: '#ef4444', appPath: '/aegis', icon: Shield },
+  { domain: 'aegis', label: "PARAGON"— Defense', color: '#ef4444', appPath: '/aegis', icon: Shield },
   {
     domain: 'terra',
-    label: 'Terra — Real Estate',
+    label: "DOMAINE — Real Estate",
     color: '#10b981',
     appPath: '/terra',
     atlasRuntimePath: '/terra/atlas-runtime',
@@ -78,7 +78,7 @@ const DOMAIN_CONFIG: Omit<
   },
   {
     domain: 'lyte',
-    label: 'Lyte — AIOps',
+    label: "KORA — AIOps",
     color: '#d4a054',
     appPath: `${BASE}/operations`,
     icon: Activity,
@@ -301,7 +301,7 @@ function useAtlasBranches(twinCategory: 'vessel' | 'property') {
 function branchToEvent(b: ApiAtlasBranch): AtlasBranchEvent {
   const isVessel = b.twinCategory === 'vessel';
   const domain: AtlasBranchEvent['domain'] = isVessel ? 'vessels' : 'terra';
-  const domainLabel = isVessel ? 'Vessels' : 'Terra';
+  const domainLabel = isVessel ? 'SEXTANT' : 'DOMAINE';
   const domainColor = isVessel ? '#06b6d4' : '#10b981';
   const atlasPath = isVessel ? '/vessels/atlas-runtime' : '/terra/atlas-runtime';
 
@@ -667,7 +667,7 @@ export function AtlasKpiSection() {
                 background: 'rgba(16,185,129,0.04)',
               }}
             >
-              <Globe className="w-2.5 h-2.5" /> Terra ATLAS
+              <Globe className="w-2.5 h-2.5" /> DOMAINE ATLAS
             </a>
           </div>
         </div>
@@ -681,7 +681,7 @@ export function AtlasKpiSection() {
               color: '#f59e0b',
             }}
           >
-            {vesselsError ? 'Vessels' : 'Terra'} ATLAS branch feed temporarily unavailable — showing
+            {vesselsError ? 'SEXTANT' : 'DOMAINE'} ATLAS branch feed temporarily unavailable — showing
             partial results.
           </div>
         )}

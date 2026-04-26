@@ -163,10 +163,10 @@ const TABLE_COLS: ColumnDef<TableRow>[] = [
     align: 'center',
     accessor: (r) => {
       const map: Record<string, string> = {
-        critical: 'bg-nexus-red/15 text-nexus-red border-nexus-red/30',
-        warning: 'bg-nexus-amber/15 text-nexus-amber border-nexus-amber/30',
-        info: 'bg-nexus-cyan/15 text-nexus-cyan border-nexus-cyan/30',
-        success: 'bg-nexus-green/15 text-nexus-green border-nexus-green/30',
+        critical: 'bg-praxis-red/15 text-praxis-red border-praxis-red/30',
+        warning: 'bg-praxis-amber/15 text-praxis-amber border-praxis-amber/30',
+        info: 'bg-praxis-cyan/15 text-praxis-cyan border-praxis-cyan/30',
+        success: 'bg-praxis-green/15 text-praxis-green border-praxis-green/30',
       };
       return (
         <span
@@ -238,11 +238,11 @@ export default function DesignSystemPage() {
       <div className="mx-auto max-w-5xl">
         <div className="mb-8">
           <div className="mb-1 flex items-center gap-2">
-            <div className="h-px flex-1 bg-gradient-to-r from-nexus-cyan/40 to-transparent" />
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-nexus-cyan">
+            <div className="h-px flex-1 bg-gradient-to-r from-praxis-cyan/40 to-transparent" />
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-praxis-cyan">
               @szl-holdings/design-system
             </span>
-            <div className="h-px flex-1 bg-gradient-to-l from-nexus-cyan/40 to-transparent" />
+            <div className="h-px flex-1 bg-gradient-to-l from-praxis-cyan/40 to-transparent" />
           </div>
           <h1 className="text-center text-2xl font-bold tracking-tight text-[#c8d8e8]">
             Governed-Intelligence Design Language
@@ -374,8 +374,8 @@ export default function DesignSystemPage() {
             <p className="text-sm text-[#7a99b8] leading-relaxed">
               Reroute the <span className="text-[#c8d8e8] font-medium">7 vessels</span> currently
               queued at Tanjong Pagar to the Pasir Panjang terminal. Expected clearing time
-              reduction: <span className="text-nexus-green font-semibold">−9.4 days</span>. Recovery
-              value estimate: <span className="text-nexus-green font-semibold">$2.1M</span>. Two
+              reduction: <span className="text-praxis-green font-semibold">−9.4 days</span>. Recovery
+              value estimate: <span className="text-praxis-green font-semibold">$2.1M</span>. Two
               approvers required.
             </p>
           </ProofEnvelope>
@@ -415,7 +415,7 @@ export default function DesignSystemPage() {
                 <p className="mb-2 text-[11px] text-[#4a6070]">
                   <span className="font-mono text-[#7a99b8]">&lt;GraphCanvas /&gt;</span>
                   {selectedNode && (
-                    <span className="ml-2 text-nexus-cyan">Selected: {selectedNode.label}</span>
+                    <span className="ml-2 text-praxis-cyan">Selected: {selectedNode.label}</span>
                   )}
                 </p>
                 <GraphCanvas
@@ -432,7 +432,7 @@ export default function DesignSystemPage() {
               <p className="mb-2 text-[11px] text-[#4a6070]">
                 <span className="font-mono text-[#7a99b8]">&lt;MapSurface /&gt;</span>
                 {selectedMarker && (
-                  <span className="ml-2 text-nexus-cyan">{selectedMarker.tooltip}</span>
+                  <span className="ml-2 text-praxis-cyan">{selectedMarker.tooltip}</span>
                 )}
               </p>
               <MapSurface
@@ -465,8 +465,8 @@ export default function DesignSystemPage() {
           subtitle="Governed-intelligence vocabulary — enforced by scripts/lint-copy.sh"
         >
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-nexus-red/20 bg-nexus-red/5 p-4">
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-nexus-red">
+            <div className="rounded-lg border border-praxis-red/20 bg-praxis-red/5 p-4">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-praxis-red">
                 Forbidden
               </p>
               <ul className="space-y-1">
@@ -481,13 +481,13 @@ export default function DesignSystemPage() {
                   'fully autonomous AI',
                 ].map((t) => (
                   <li key={t} className="flex items-center gap-2 text-[11px] text-[#7a99b8]">
-                    <span className="text-nexus-red">✕</span> {t}
+                    <span className="text-praxis-red">✕</span> {t}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="rounded-lg border border-nexus-green/20 bg-nexus-green/5 p-4">
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-nexus-green">
+            <div className="rounded-lg border border-praxis-green/20 bg-praxis-green/5 p-4">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-praxis-green">
                 Preferred
               </p>
               <ul className="space-y-1">
@@ -502,7 +502,7 @@ export default function DesignSystemPage() {
                   'audit trail',
                 ].map((t) => (
                   <li key={t} className="flex items-center gap-2 text-[11px] text-[#7a99b8]">
-                    <span className="text-nexus-green">✓</span> {t}
+                    <span className="text-praxis-green">✓</span> {t}
                   </li>
                 ))}
               </ul>

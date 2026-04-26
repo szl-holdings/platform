@@ -25,7 +25,7 @@ const PORTFOLIO_EVIDENCE: EvidenceSource[] = [
     type: 'model',
     timestamp: FRESH_2M,
     excerpt:
-      'Aegis: 3 critical threat signals. Vessels: 6 fleet alerts. Terra: 2 covenant triggers. Pulse: 1 executive dissent. Correlation matrix: 0.71 between Aegis/Vessels threat clusters.',
+      'PARAGON: 3 critical threat signals. SEXTANT: 6 fleet alerts. DOMAINE: 2 covenant triggers. LUMINA: 1 executive dissent. Correlation matrix: 0.71 between PARAGON/SEXTANT threat clusters.',
   },
   {
     id: 'ev-cmd2',
@@ -33,7 +33,7 @@ const PORTFOLIO_EVIDENCE: EvidenceSource[] = [
     type: 'api',
     timestamp: FRESH_9M,
     excerpt:
-      'Composite health score: 7.2/10. PRISM: 8.4 (strong). Lyte: 7.1. Vessels: 6.8 (declining). Terra: 7.4. Aegis: 6.9.',
+      'Composite health score: 7.2/10. PRISM: 8.4 (strong). KORA: 7.1. SEXTANT: 6.8 (declining). DOMAINE: 7.4. PARAGON: 6.9.',
   },
   {
     id: 'ev-cmd3',
@@ -56,7 +56,7 @@ const PORTFOLIO_EVIDENCE: EvidenceSource[] = [
 const CORRELATION_EVIDENCE: EvidenceSource[] = [
   {
     id: 'ev-cor1',
-    label: 'Aegis Threat Signal — APT-29 Activity',
+    label: "PARAGON"Threat Signal — APT-29 Activity',
     type: 'signal',
     timestamp: FRESH_2M,
     excerpt:
@@ -87,7 +87,7 @@ const APPROVAL_EVIDENCE: EvidenceSource[] = [
     type: 'api',
     timestamp: FRESH_2M,
     excerpt:
-      '1. Aegis: APT-29 containment (CISO needed). 2. Vessels: Horizon Star emergency port call (Ops). 3. Terra: Meridian acquisition financing (IC). Aggregate exposure: $4.7M decisions.',
+      '1. PARAGON: APT-29 containment (CISO needed). 2. Vessels: Horizon Star emergency port call (Ops). 3. Terra: Meridian acquisition financing (IC). Aggregate exposure: $4.7M decisions.',
   },
   {
     id: 'ev-appr2',
@@ -95,7 +95,7 @@ const APPROVAL_EVIDENCE: EvidenceSource[] = [
     type: 'signal',
     timestamp: FRESH_9M,
     excerpt:
-      'Aegis item: 2h in queue (SLA: 4h). Vessels item: 47min in queue (SLA: 2h). Terra item: 14min in queue (SLA: 48h). All within SLA.',
+      'PARAGON item: 2h in queue (SLA: 4h). Vessels item: 47min in queue (SLA: 2h). Terra item: 14min in queue (SLA: 48h). All within SLA.',
   },
   {
     id: 'ev-appr3',
@@ -305,9 +305,9 @@ export default function GovernedCockpit() {
         >
           <div className="space-y-2">
             <p className="text-sm" style={{ color: '#c8d8e8' }}>
-              47 signals ingested across Aegis, Vessels, Terra, and Pulse in the last 2 minutes.
+              47 signals ingested across PARAGON, SEXTANT, DOMAINE, and LUMINA in the last 2 minutes.
               Composite portfolio health: 7.2/10. Counsel has correlated signals across domains —
-              notable overlap between Aegis threat activity and Vessels counterparty exposure.
+              notable overlap between PARAGON threat activity and SEXTANT counterparty exposure.
               Market regime classified as 'Late cycle / Rate stress' with 18% base rate for
               drawdown.
             </p>
@@ -318,10 +318,10 @@ export default function GovernedCockpit() {
               <div className="grid grid-cols-5 gap-2">
                 {[
                   { label: 'PRAXIS', value: '8.4', color: '#00e878' },
-                  { label: 'Lyte', value: '7.1', color: '#7a99b8' },
-                  { label: 'Vessels', value: '6.8', color: '#ffb700' },
-                  { label: 'Terra', value: '7.4', color: ACCENT },
-                  { label: 'Aegis', value: '6.9', color: '#ffb700' },
+                  { label: 'KORA', value: '7.1', color: '#7a99b8' },
+                  { label: 'SEXTANT', value: '6.8', color: '#ffb700' },
+                  { label: 'DOMAINE', value: '7.4', color: ACCENT },
+                  { label: "PARAGON", value: '6.9', color: '#ffb700' },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="text-center">
                     <div className="text-xs" style={{ color: '#4a6070' }}>
@@ -338,20 +338,20 @@ export default function GovernedCockpit() {
         </ProofEnvelope>
 
         <ProofEnvelope
-          title="Cross-Domain Correlation: Aegis Threat ↔ Vessels Counterparty Exposure"
+          title="Cross-Domain Correlation: PARAGON Threat ↔ Vessels Counterparty Exposure"
           accentColor={color.accent.amber}
           evidence={CORRELATION_EVIDENCE}
           timestamp={FRESH_2M}
           confidence={71}
           policyState={'requires-approval' as PolicyState}
-          policyReason="Cross-domain action (Aegis + Vessels + Terra) requires multi-domain approval chain"
+          policyReason="Cross-domain action (PARAGON + SEXTANT + DOMAINE) requires multi-domain approval chain"
           autonomyMode={autonomyMode}
           onAutonomyChange={setAutonomyMode}
         >
           <div className="space-y-2">
             <p className="text-sm" style={{ color: '#c8d8e8' }}>
               Counsel has detected a correlated exposure across three domains: the APT-29
-              infrastructure provider identified in the Aegis incident shares hosting with two
+              infrastructure provider identified in the PARAGON incident shares hosting with two
               active Vessels counterparties. Separately, the Pulse rate signal is compressing
               Terra's LTV covenant headroom — creating a potential cross-domain contagion vector.
               This correlation is flagged for multi-domain approval chain.
@@ -365,7 +365,7 @@ export default function GovernedCockpit() {
               </span>
               <span style={{ color: '#7a99b8' }}>
                 {' '}
-                Aegis (threat infrastructure) → Vessels (counterparty hosting) → Terra (credit
+                PARAGON (threat infrastructure) → Vessels (counterparty hosting) → Terra (credit
                 spread impact via Pulse rate signal). Recommend unified response brief for CRO
                 review.
               </span>
@@ -393,7 +393,7 @@ export default function GovernedCockpit() {
             <div className="mt-3 space-y-2">
               {[
                 {
-                  domain: 'Aegis',
+                  domain: 'PARAGON',
                   item: 'APT-29 containment',
                   approver: 'CISO',
                   elapsed: '2h',
@@ -401,7 +401,7 @@ export default function GovernedCockpit() {
                   color: color.accent.red,
                 },
                 {
-                  domain: 'Vessels',
+                  domain: 'SEXTANT',
                   item: 'Horizon Star emergency port call',
                   approver: 'Ops Director',
                   elapsed: '47m',
@@ -409,7 +409,7 @@ export default function GovernedCockpit() {
                   color: color.accent.amber,
                 },
                 {
-                  domain: 'Terra',
+                  domain: 'DOMAINE',
                   item: 'Meridian acquisition financing',
                   approver: 'Investment Committee',
                   elapsed: '14m',

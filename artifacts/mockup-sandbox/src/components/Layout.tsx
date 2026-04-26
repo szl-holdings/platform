@@ -88,22 +88,22 @@ export default function Layout({
   const [org, setOrg] = useState<MockOrg>(MOCK_ORGS[0]);
 
   return (
-    <div className="flex h-screen bg-nexus-bg overflow-hidden">
+    <div className="flex h-screen bg-praxis-bg overflow-hidden">
       <nav
-        className={`flex flex-col border-r border-nexus transition-all duration-200 ${
+        className={`flex flex-col border-r border-praxis transition-all duration-200 ${
           expanded ? 'w-52' : 'w-14'
-        } bg-nexus-surface shrink-0`}
+        } bg-praxis-surface shrink-0`}
         onMouseEnter={() => setExpanded(true)}
         onMouseLeave={() => setExpanded(false)}
       >
-        <div className="flex items-center h-14 px-2 border-b border-nexus gap-2">
+        <div className="flex items-center h-14 px-2 border-b border-praxis gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <div className="w-8 h-8 rounded bg-nexus-cyan/10 border border-nexus-cyan/30 flex items-center justify-center shrink-0">
-              <span className="text-nexus-cyan font-mono font-bold text-sm">N</span>
+            <div className="w-8 h-8 rounded bg-praxis-cyan/10 border border-praxis-cyan/30 flex items-center justify-center shrink-0">
+              <span className="text-praxis-cyan font-mono font-bold text-sm">N</span>
             </div>
             {expanded && (
               <div className="min-w-0 overflow-hidden">
-                <div className="text-nexus-cyan font-mono font-bold text-sm tracking-widest">
+                <div className="text-praxis-cyan font-mono font-bold text-sm tracking-widest">
                   PRAXIS
                 </div>
                 <div className="text-[10px] text-muted-foreground/70 tracking-wide">ONE OF ONE</div>
@@ -112,7 +112,7 @@ export default function Layout({
           </div>
         </div>
 
-        <div className="px-1.5 py-2 border-b border-nexus">
+        <div className="px-1.5 py-2 border-b border-praxis">
           <OrgSwitcher org={org} onChange={setOrg} expanded={expanded} />
         </div>
 
@@ -126,7 +126,7 @@ export default function Layout({
               <div key={item.id}>
                 {showDivider && (
                   <div className={`mt-2 mb-1 ${expanded ? 'px-2' : 'px-1'}`}>
-                    <div className="border-t border-nexus/60" />
+                    <div className="border-t border-praxis/60" />
                     {expanded && (
                       <div className="text-[9px] text-muted-foreground/40 uppercase tracking-widest mt-1.5 px-1 font-mono">
                         Control Plane
@@ -139,18 +139,18 @@ export default function Layout({
                   title={expanded ? undefined : item.description}
                   className={`flex items-center gap-2.5 px-2 py-2 rounded-md text-left transition-all w-full group ${
                     active
-                      ? 'bg-nexus-cyan/10 text-nexus-cyan'
+                      ? 'bg-praxis-cyan/10 text-praxis-cyan'
                       : 'text-muted-foreground hover:text-foreground hover:bg-[#1a2535]/60'
                   }`}
                 >
                   <Icon
                     className={`w-4 h-4 shrink-0 transition-colors ${
-                      active ? 'text-nexus-cyan' : 'group-hover:text-foreground'
+                      active ? 'text-praxis-cyan' : 'group-hover:text-foreground'
                     }`}
                   />
                   {expanded && <span className="text-xs font-medium truncate">{item.label}</span>}
                   {active && !expanded && (
-                    <div className="absolute left-0 w-0.5 h-6 bg-nexus-cyan rounded-r" />
+                    <div className="absolute left-0 w-0.5 h-6 bg-praxis-cyan rounded-r" />
                   )}
                 </button>
               </div>
@@ -158,7 +158,7 @@ export default function Layout({
           })}
         </div>
 
-        <div className="p-1.5 border-t border-nexus">
+        <div className="p-1.5 border-t border-praxis">
           {expanded ? (
             <div className="px-2 py-2 space-y-1">
               <div className="text-[9px] text-muted-foreground/60 uppercase tracking-widest mb-1">
@@ -167,7 +167,7 @@ export default function Layout({
               <div className="flex items-center justify-between text-[10px]">
                 <span className="text-muted-foreground">Swarms</span>
                 <span
-                  className={`font-mono ${org.swarms > 0 ? 'text-nexus-cyan' : 'text-muted-foreground/50'}`}
+                  className={`font-mono ${org.swarms > 0 ? 'text-praxis-cyan' : 'text-muted-foreground/50'}`}
                 >
                   {org.swarms}
                 </span>
@@ -178,14 +178,14 @@ export default function Layout({
               </div>
               <div className="flex items-center justify-between text-[10px]">
                 <span className="text-muted-foreground">Skills</span>
-                <span className="font-mono text-nexus-green">{org.skills}</span>
+                <span className="font-mono text-praxis-green">{org.skills}</span>
               </div>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-1 py-1">
               <div
                 className={`w-1.5 h-1.5 rounded-full pulse-dot ${
-                  org.swarms > 0 ? 'bg-nexus-cyan' : 'bg-muted-foreground/30'
+                  org.swarms > 0 ? 'bg-praxis-cyan' : 'bg-muted-foreground/30'
                 }`}
                 title={`${org.swarms} active swarms`}
               />
@@ -204,7 +204,7 @@ export default function Layout({
 
 function StatusStrip({ org }: { org: MockOrg }) {
   return (
-    <div className="h-7 bg-nexus-surface border-t border-nexus flex items-center px-4 gap-6 shrink-0">
+    <div className="h-7 bg-praxis-surface border-t border-praxis flex items-center px-4 gap-6 shrink-0">
       <StatusItem
         icon={<Activity className="w-3 h-3" />}
         label="Swarms"
@@ -245,7 +245,7 @@ function StatusStrip({ org }: { org: MockOrg }) {
           {org.name}
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-nexus-green pulse-dot" />
+          <div className="w-1.5 h-1.5 rounded-full bg-praxis-green pulse-dot" />
           <span className="text-[10px] text-muted-foreground/60 font-mono">PRAXIS ONLINE</span>
         </div>
       </div>
@@ -269,12 +269,12 @@ function StatusItem({
   const colorClass =
     color === 'cyan'
       ? active
-        ? 'text-nexus-cyan'
+        ? 'text-praxis-cyan'
         : 'text-muted-foreground/40'
       : color === 'green'
-        ? 'text-nexus-green/80'
+        ? 'text-praxis-green/80'
         : color === 'amber'
-          ? 'text-nexus-amber/80'
+          ? 'text-praxis-amber/80'
           : 'text-muted-foreground/60';
 
   return (

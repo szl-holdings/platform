@@ -74,7 +74,7 @@ const EVAL_SUITES: EvalSuite[] = [
   {
     id: 'orchestrator-plan-v2',
     name: 'PRAXIS Orchestration Planner v2',
-    domain: 'nexus',
+    domain: 'praxis',
     description: 'Tests parallelization correctness, dependency graph validity, and contingency path generation.',
     model: 'claude-3-5-sonnet-20241022',
     baselinePassRate: 0.89,
@@ -186,7 +186,7 @@ function simulateRun(suite: EvalSuite): RunResult {
 
 function ProgressBar({ value, max, color }: { value: number; max: number; color: string }) {
   return (
-    <div className="h-1.5 rounded-full bg-nexus-bg overflow-hidden">
+    <div className="h-1.5 rounded-full bg-praxis-bg overflow-hidden">
       <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(value / max) * 100}%`, backgroundColor: color }} />
     </div>
   );
@@ -195,29 +195,29 @@ function ProgressBar({ value, max, color }: { value: number; max: number; color:
 function CaseRow({ c }: { c: EvalCase & { passed: boolean; score: number; latencyMs: number; actual: string; rationale: string } }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className={`rounded border ${c.passed ? 'border-nexus-green/20' : 'border-nexus-red/20'} bg-nexus-bg`}>
+    <div className={`rounded border ${c.passed ? 'border-praxis-green/20' : 'border-praxis-red/20'} bg-praxis-bg`}>
       <button className="w-full flex items-center gap-3 px-3 py-2 text-left" onClick={() => setOpen((o) => !o)}>
-        {c.passed ? <CheckCircle className="w-3.5 h-3.5 text-nexus-green shrink-0" /> : <XCircle className="w-3.5 h-3.5 text-nexus-red shrink-0" />}
+        {c.passed ? <CheckCircle className="w-3.5 h-3.5 text-praxis-green shrink-0" /> : <XCircle className="w-3.5 h-3.5 text-praxis-red shrink-0" />}
         <div className="flex-1 min-w-0">
           <div className="text-[10px] font-mono text-muted-foreground/70 truncate">{c.id}</div>
           <div className="text-[10px] text-muted-foreground/50 truncate">{c.input}</div>
         </div>
         <div className="flex items-center gap-3 shrink-0 text-[10px] font-mono">
-          <span className={c.passed ? 'text-nexus-green' : 'text-nexus-red'}>{c.score}</span>
+          <span className={c.passed ? 'text-praxis-green' : 'text-praxis-red'}>{c.score}</span>
           <span className="text-muted-foreground/40">{c.latencyMs}ms</span>
           {open ? <ChevronDown className="w-3 h-3 text-muted-foreground/40" /> : <ChevronRight className="w-3 h-3 text-muted-foreground/40" />}
         </div>
       </button>
       {open && (
-        <div className="px-3 pb-3 space-y-2 border-t border-nexus/30">
+        <div className="px-3 pb-3 space-y-2 border-t border-praxis/30">
           <div className="grid grid-cols-2 gap-2 pt-2">
             <div>
               <div className="text-[9px] font-mono text-muted-foreground/40 uppercase mb-1">Expected</div>
-              <div className="bg-nexus-surface rounded p-2 text-[10px] font-mono text-muted-foreground/70 whitespace-pre-wrap">{c.expected}</div>
+              <div className="bg-praxis-surface rounded p-2 text-[10px] font-mono text-muted-foreground/70 whitespace-pre-wrap">{c.expected}</div>
             </div>
             <div>
               <div className="text-[9px] font-mono text-muted-foreground/40 uppercase mb-1">Actual</div>
-              <div className="bg-nexus-surface rounded p-2 text-[10px] font-mono text-muted-foreground/70 whitespace-pre-wrap max-h-24 overflow-y-auto">{c.actual}</div>
+              <div className="bg-praxis-surface rounded p-2 text-[10px] font-mono text-muted-foreground/70 whitespace-pre-wrap max-h-24 overflow-y-auto">{c.actual}</div>
             </div>
           </div>
           <div>
@@ -235,25 +235,25 @@ function RunResultCard({ result }: { result: DisplayResult }) {
   const trend = result.passRate > (result.baselinePassRate ?? 0) ? 'improved' : result.passRate < (result.baselinePassRate ?? 0) ? 'regressed' : 'ok';
 
   return (
-    <div className="rounded-lg bg-nexus-surface border border-nexus p-4 space-y-3">
+    <div className="rounded-lg bg-praxis-surface border border-praxis p-4 space-y-3">
       <div className="flex items-center gap-2 justify-between">
         <div>
           <div className="text-sm font-semibold">{result.name}</div>
           <div className="text-[10px] text-muted-foreground/60 font-mono mt-0.5">{result.totalCases} total cases · {new Date(result.completedAt).toLocaleTimeString()}</div>
         </div>
         <div className="text-right">
-          <div className={`text-lg font-mono font-bold ${result.passRate >= 0.85 ? 'text-nexus-green' : result.passRate >= 0.7 ? 'text-nexus-amber' : 'text-nexus-red'}`}>{(result.passRate * 100).toFixed(1)}%</div>
+          <div className={`text-lg font-mono font-bold ${result.passRate >= 0.85 ? 'text-praxis-green' : result.passRate >= 0.7 ? 'text-praxis-amber' : 'text-praxis-red'}`}>{(result.passRate * 100).toFixed(1)}%</div>
           <div className="text-[10px] text-muted-foreground/50">pass rate</div>
         </div>
       </div>
       <div className="grid grid-cols-4 gap-2 text-center">
         {[
           { label: 'cases', value: result.totalCases, color: 'text-foreground' },
-          { label: 'passed', value: result.passedCases, color: 'text-nexus-green' },
-          { label: 'failed', value: result.failedCases, color: 'text-nexus-red' },
+          { label: 'passed', value: result.passedCases, color: 'text-praxis-green' },
+          { label: 'failed', value: result.failedCases, color: 'text-praxis-red' },
           { label: 'avg ms', value: Math.round(result.avgLatencyMs), color: 'text-muted-foreground/80' },
         ].map((s) => (
-          <div key={s.label} className="rounded border border-nexus bg-nexus-bg py-2">
+          <div key={s.label} className="rounded border border-praxis bg-praxis-bg py-2">
             <div className={`text-lg font-mono font-bold ${s.color}`}>{s.value}</div>
             <div className="text-[9px] text-muted-foreground/60">{s.label}</div>
           </div>
@@ -263,10 +263,10 @@ function RunResultCard({ result }: { result: DisplayResult }) {
         <BarChart2 className="w-3 h-3" />avg score: {result.avgScore.toFixed(1)} · cost: ${result.totalCostUsd.toFixed(5)}
         {result.baselinePassRate != null && (
           <div className="flex items-center gap-1 ml-auto">
-            {trend === 'improved' && <TrendingUp className="w-3 h-3 text-nexus-green" />}
-            {trend === 'regressed' && <TrendingDown className="w-3 h-3 text-nexus-red" />}
-            {trend === 'ok' && <Minus className="w-3 h-3 text-nexus-amber" />}
-            <span className={trend === 'improved' ? 'text-nexus-green' : trend === 'regressed' ? 'text-nexus-red' : 'text-nexus-amber'}>
+            {trend === 'improved' && <TrendingUp className="w-3 h-3 text-praxis-green" />}
+            {trend === 'regressed' && <TrendingDown className="w-3 h-3 text-praxis-red" />}
+            {trend === 'ok' && <Minus className="w-3 h-3 text-praxis-amber" />}
+            <span className={trend === 'improved' ? 'text-praxis-green' : trend === 'regressed' ? 'text-praxis-red' : 'text-praxis-amber'}>
               vs baseline {(result.baselinePassRate * 100).toFixed(1)}%
             </span>
           </div>
@@ -279,7 +279,7 @@ function RunResultCard({ result }: { result: DisplayResult }) {
             {open ? 'Hide' : 'Show'} {result.cases.length} case breakdown
           </button>
           {open && (
-            <div className="space-y-1.5 border-t border-nexus pt-3">
+            <div className="space-y-1.5 border-t border-praxis pt-3">
               {result.cases.map((c) => <CaseRow key={c.id} c={c} />)}
             </div>
           )}
@@ -392,15 +392,15 @@ export default function EvalConsole() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-nexus-cyan font-mono tracking-wide">EVAL CONSOLE</h1>
+          <h1 className="text-lg font-semibold text-praxis-cyan font-mono tracking-wide">EVAL CONSOLE</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Run eval suites · per-case breakdown · regression tracking</p>
         </div>
       </div>
 
-      <div className="rounded-lg bg-nexus-surface border border-nexus p-4 space-y-4">
+      <div className="rounded-lg bg-praxis-surface border border-praxis p-4 space-y-4">
         <div className="flex items-center gap-2">
-          <FlaskConical className="w-4 h-4 text-nexus-cyan" />
-          <h2 className="text-sm font-semibold text-nexus-cyan font-mono">RUN EVALS</h2>
+          <FlaskConical className="w-4 h-4 text-praxis-cyan" />
+          <h2 className="text-sm font-semibold text-praxis-cyan font-mono">RUN EVALS</h2>
           <span className="text-[10px] text-muted-foreground/60 ml-auto">{totalCount} cases · {domains.length} domains</span>
         </div>
 
@@ -411,24 +411,24 @@ export default function EvalConsole() {
               <button
                 key={d.domain}
                 onClick={() => toggleDomain(d.domain)}
-                className={`flex items-center gap-1.5 px-2 py-1 rounded border text-[10px] font-mono transition-colors ${selectedDomains.includes(d.domain) ? 'border-nexus-cyan/40 bg-nexus-cyan/10 text-nexus-cyan' : 'border-nexus bg-nexus-bg text-muted-foreground/60 hover:text-foreground'}`}
+                className={`flex items-center gap-1.5 px-2 py-1 rounded border text-[10px] font-mono transition-colors ${selectedDomains.includes(d.domain) ? 'border-praxis-cyan/40 bg-praxis-cyan/10 text-praxis-cyan' : 'border-praxis bg-praxis-bg text-muted-foreground/60 hover:text-foreground'}`}
               >
                 {d.domain} ({d.count})
-                {d.redTeam && <Shield className="w-2.5 h-2.5 text-nexus-amber" />}
+                {d.redTeam && <Shield className="w-2.5 h-2.5 text-praxis-amber" />}
               </button>
             ))}
           </div>
         </div>
 
         <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
-          <input type="checkbox" checked={includeRedTeam} onChange={(e) => setIncludeRedTeam(e.target.checked)} className="w-3 h-3 rounded border-nexus" />
+          <input type="checkbox" checked={includeRedTeam} onChange={(e) => setIncludeRedTeam(e.target.checked)} className="w-3 h-3 rounded border-praxis" />
           Include red-team cases
         </label>
 
         {runState === 'running' && progress && (
           <div className="space-y-2">
             <div className="text-[10px] font-mono text-muted-foreground/60">
-              Running: <span className="text-nexus-cyan">{progress.suiteId}</span> · case {progress.completedCases + 1}/{progress.totalCases}
+              Running: <span className="text-praxis-cyan">{progress.suiteId}</span> · case {progress.completedCases + 1}/{progress.totalCases}
               {progress.currentCase && <span className="text-muted-foreground/40"> · {progress.currentCase}</span>}
             </div>
             <ProgressBar value={progress.completedCases} max={progress.totalCases} color="var(--gi-accent-blue)" />
@@ -436,14 +436,14 @@ export default function EvalConsole() {
         )}
 
         <div className="flex gap-2">
-          <button onClick={runEvals} disabled={runState === 'running'} className="flex items-center gap-2 px-4 py-2 rounded border border-nexus-cyan/40 bg-nexus-cyan/10 text-nexus-cyan text-xs hover:bg-nexus-cyan/20 transition-colors disabled:opacity-50">
+          <button onClick={runEvals} disabled={runState === 'running'} className="flex items-center gap-2 px-4 py-2 rounded border border-praxis-cyan/40 bg-praxis-cyan/10 text-praxis-cyan text-xs hover:bg-praxis-cyan/20 transition-colors disabled:opacity-50">
             {runState === 'running' ? <Loader className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
             {runState === 'running' ? 'Running…' : runState === 'done' ? 'Done ✓' : 'Run Evals'}
           </button>
           <button
             onClick={() => { setIncludeRedTeam(true); setTimeout(runEvals, 100); }}
             disabled={runState === 'running'}
-            className="flex items-center gap-2 px-4 py-2 rounded border border-nexus-amber/40 bg-nexus-amber/10 text-nexus-amber text-xs hover:bg-nexus-amber/20 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 rounded border border-praxis-amber/40 bg-praxis-amber/10 text-praxis-amber text-xs hover:bg-praxis-amber/20 transition-colors disabled:opacity-50"
           >
             {runState === 'running' ? <Loader className="w-3 h-3 animate-spin" /> : <Shield className="w-3 h-3" />}
             Red Team Run
@@ -459,14 +459,14 @@ export default function EvalConsole() {
       )}
 
       {results.length === 0 && runState === 'idle' && (
-        <div className="rounded-lg bg-nexus-surface border border-nexus p-4">
+        <div className="rounded-lg bg-praxis-surface border border-praxis p-4">
           <div className="flex items-center gap-2 mb-3">
-            <BarChart2 className="w-4 h-4 text-nexus-amber" />
-            <h2 className="text-sm font-semibold text-nexus-amber font-mono">REGRESSION BASELINES</h2>
+            <BarChart2 className="w-4 h-4 text-praxis-amber" />
+            <h2 className="text-sm font-semibold text-praxis-amber font-mono">REGRESSION BASELINES</h2>
           </div>
           <div className="space-y-1.5">
             {EVAL_SUITES.filter((s) => s.baselinePassRate != null).map((s) => (
-              <div key={s.id} className="rounded border border-nexus bg-nexus-bg px-3 py-2 flex items-center gap-3">
+              <div key={s.id} className="rounded border border-praxis bg-praxis-bg px-3 py-2 flex items-center gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-mono">{s.name}</div>
                   <div className="text-[10px] text-muted-foreground/60">{s.model} · {s.cases.length} cases</div>
@@ -474,7 +474,7 @@ export default function EvalConsole() {
                 <div className="flex items-center gap-3 text-[10px] font-mono">
                   <span className="text-muted-foreground/60">baseline: {((s.baselinePassRate ?? 0) * 100).toFixed(1)}%</span>
                   <span className="text-muted-foreground/60">score: {s.baselineScore?.toFixed(1)}</span>
-                  {s.isRedTeam && <Shield className="w-3.5 h-3.5 text-nexus-amber" />}
+                  {s.isRedTeam && <Shield className="w-3.5 h-3.5 text-praxis-amber" />}
                 </div>
               </div>
             ))}

@@ -74,7 +74,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   },
   {
     href: '/aegis/',
-    label: 'Aegis — Investor Pitch Deck',
+    label: "PARAGON"— Investor Pitch Deck',
     description: 'Investor-facing deck and Series A narrative',
     icon: Presentation,
     color: '#c45a4a',
@@ -83,7 +83,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   },
   {
     href: '/pulse/',
-    label: 'Pulse — Executive Briefing',
+    label: 'LUMINA — Executive Briefing',
     description: 'AI executive briefing and morning digest',
     icon: Heart,
     color: '#d4a054',
@@ -92,7 +92,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   },
   {
     href: '/sentra/',
-    label: 'Aegis — Cyber Resilience',
+    label: "PARAGON"— Cyber Resilience',
     description: 'Cyber resilience command and incident orchestration',
     icon: ShieldCheck,
     color: '#22c55e',
@@ -111,7 +111,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   // Domain verticals
   {
     href: '/vessels/',
-    label: 'Vessels',
+    label: 'SEXTANT',
     description: 'Maritime intelligence, sanctions, and vessel risk',
     icon: Ship,
     color: '#4a90b8',
@@ -120,7 +120,7 @@ const PLATFORM_APPS: PlatformApp[] = [
   },
   {
     href: '/terra/',
-    label: 'Terra',
+    label: 'DOMAINE',
     description: 'Real estate intelligence — pro-forma, waterfall, leases',
     icon: HomeIcon,
     color: '#c8953c',

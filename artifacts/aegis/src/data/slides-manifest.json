@@ -4,8 +4,8 @@
     "position": 1,
     "filepath": "src/pages/slides/S01Cover.tsx",
     "title": "Governed Decision Infrastructure",
-    "description": "Series A pitch deck cover — Aegis, 2026",
-    "speakerNotes": "Open with the thesis in one line: Aegis builds the governance layer that makes AI decisions accountable.\n\nBeat: pause for two seconds. Let the cover land.\n\nThen: 'For the next twelve minutes I'm going to show you a category, a product, and a market — and a real platform you can click on today.'"
+    "description": "Series A pitch deck cover — PARAGON, 2026",
+    "speakerNotes": "Open with the thesis in one line: PARAGON builds the governance layer that makes AI decisions accountable.\n\nBeat: pause for two seconds. Let the cover land.\n\nThen: 'For the next twelve minutes I'm going to show you a category, a product, and a market — and a real platform you can click on today.'"
   },
   {
     "id": "sa-0002-4000-8000-000000000002",
@@ -60,8 +60,8 @@
     "position": 8,
     "filepath": "src/pages/slides/S07SeriesDomains.tsx",
     "title": "Domain Breadth: Six Verticals, One Loop",
-    "description": "Aegis, Vessels, Terra, Carlota Jo, Command, Aegis — all governed by the same nine-step loop",
-    "speakerNotes": "The defensibility is the loop, not the vertical. We've already shipped six verticals on the same primitives:\n  • Aegis — cyber resilience\n  • Vessels — maritime risk and trading\n  • Terra — real estate intelligence\n  • Carlota Jo — private advisory\n  • Command — unified ops\n  • Aegis — portfolio decisions\n\nMessage: 'Adding a seventh vertical is a configuration job, not a rebuild.'"
+    "description": "PARAGON, SEXTANT, DOMAINE, Carlota Jo, Command, PARAGON — all governed by the same nine-step loop",
+    "speakerNotes": "The defensibility is the loop, not the vertical. We've already shipped six verticals on the same primitives:\n  • PARAGON — cyber resilience\n  • SEXTANT — maritime risk and trading\n  • DOMAINE — real estate intelligence\n  • Carlota Jo — private advisory\n  • Command — unified ops\n  • PARAGON — portfolio decisions\n\nMessage: 'Adding a seventh vertical is a configuration job, not a rebuild.'"
   },
   {
     "id": "sa-0009-4000-8000-000000000009",

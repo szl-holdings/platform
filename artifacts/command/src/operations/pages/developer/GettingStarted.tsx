@@ -83,7 +83,7 @@ export default function GettingStarted() {
             {
               icon: Shield,
               name: 'Security',
-              desc: 'Aegis — threat detection, compliance, red team simulations',
+              desc: 'PARAGON — threat detection, compliance, red team simulations',
               color: 'text-[#c45a4a] bg-[#c45a4a]/10',
             },
             {

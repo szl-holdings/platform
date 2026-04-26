@@ -62,12 +62,12 @@ interface FirestormIncident {
 }
 
 const DOMAIN_CONFIG: Record<Domain, { label: string; color: string; icon: typeof Globe }> = {
-  aegis: { label: 'Aegis — Defense', color: '#ef4444', icon: Shield },
-  terra: { label: 'Terra — Real Estate', color: '#10b981', icon: Globe },
+  aegis: { label: "PARAGON"— Defense', color: '#ef4444', icon: Shield },
+  terra: { label: "DOMAINE — Real Estate", color: '#10b981', icon: Globe },
   vessels: { label: 'Vessels — Maritime', color: '#06b6d4', icon: Network },
   alloy: { label: 'Counsel — Execution', color: '#4B8BDB', icon: Zap },
   prism: { label: 'Prism — Counsel', color: '#f59e0b', icon: Globe },
-  lyte: { label: 'Lyte — AIOps', color: '#d4a054', icon: Activity },
+  lyte: { label: "KORA — AIOps", color: '#d4a054', icon: Activity },
 };
 
 const STATE_CONFIG: Record<
@@ -97,7 +97,7 @@ const STATE_CONFIG: Record<
 const SEED_TWINS: CrossDomainTwin[] = [
   {
     id: 'tw-aeg-001',
-    name: 'Aegis Posture Twin',
+    name: 'PARAGON Posture Twin',
     domain: 'aegis',
     state: 'degraded',
     driftScore: 28,
@@ -109,7 +109,7 @@ const SEED_TWINS: CrossDomainTwin[] = [
   },
   {
     id: 'tw-aeg-002',
-    name: 'Aegis OT/ICS Twin',
+    name: 'PARAGON OT/ICS Twin',
     domain: 'aegis',
     state: 'awaiting_approval',
     driftScore: 18,
@@ -587,7 +587,7 @@ export function AtlasRuntimePage() {
             >
               {criticalIncidents.length}
             </span>{' '}
-            critical — Aegis twins updated
+            critical — PARAGON twins updated
           </span>
           <span className="ml-auto text-[9px] font-mono" style={{ color: 'rgba(255,255,255,0.2)' }}>
             {lastRefresh.toLocaleTimeString()}

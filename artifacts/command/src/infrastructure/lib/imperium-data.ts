@@ -794,7 +794,7 @@ export const SENATE_PROPOSALS = [
     id: 'senate-003',
     title: 'Enable WAF Rate-Limit: 500 req/min',
     description:
-      'Reduce WAF rate limit threshold from 1000 to 500 req/min following reconnaissance patterns in Aegis threat feed.',
+      'Reduce WAF rate limit threshold from 1000 to 500 req/min following reconnaissance patterns in PARAGON threat feed.',
     type: 'SECURITY',
     classification: 'SOVEREIGN' as Classification,
     status: 'PENDING_VOTE' as const,
@@ -1033,7 +1033,7 @@ export const GEO_PINS: GeoPin[] = [
     detail: {
       summary:
         'Distributed credential stuffing campaign originating from 14 IPs in Moscow ASN. WAF rate-limiting engaged. 412 blocked requests in last hour.',
-      source: 'WAF Threat Feed / Aegis SIEM',
+      source: 'WAF Threat Feed / PARAGON SIEM',
       timestamp: 'T-00:22',
       confidence: 87,
       tags: ['BRUTEFORCE', 'CREDENTIAL-STUFFING', 'WAF-BLOCKED'],
@@ -1140,8 +1140,8 @@ export const GEO_PINS: GeoPin[] = [
     threat: 'NOMINAL',
     detail: {
       summary:
-        'SOC analyst reviewing threat telemetry. Reader role on Aegis SIEM workspace. Session started 14 min ago. No anomalies.',
-      source: 'Entra ID / Aegis Access Log',
+        'SOC analyst reviewing threat telemetry. Reader role on PARAGON SIEM workspace. Session started 14 min ago. No anomalies.',
+      source: 'Entra ID / PARAGON Access Log',
       timestamp: 'T-00:14',
       confidence: 100,
       tags: ['SOC', 'READER', 'NOMINAL'],
@@ -1287,7 +1287,7 @@ export const INITIAL_COALITION: CoalitionPartner[] = [
   },
   {
     id: 'cp-002',
-    name: 'Aegis SIEM',
+    name: 'PARAGON SIEM',
     role: 'Security Information & Event Management',
     domain: 'Security',
     trustScore: 95,
@@ -1299,7 +1299,7 @@ export const INITIAL_COALITION: CoalitionPartner[] = [
   },
   {
     id: 'cp-003',
-    name: 'Aegis — Risk Engine',
+    name: 'PARAGON — Risk Engine',
     role: 'Real-Time Risk Scoring',
     domain: 'Finance',
     trustScore: 87,

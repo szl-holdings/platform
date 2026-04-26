@@ -1,265 +1,138 @@
 {
   "artifacts/a11oy/src/pages/About.tsx": {
     "Vessels": 1,
-    "Lyte": 1,
-    "Terra": 1,
     "Aegis": 1,
     "Alloy": 2
   },
-  "artifacts/a11oy/src/pages/AgentOrchestration.tsx": {
-    "Terra": 2
-  },
-  "artifacts/a11oy/src/pages/AgentViz.tsx": {
-    "Terra": 1
-  },
-  "artifacts/a11oy/src/pages/Agents.tsx": {
-    "Terra": 1
-  },
   "artifacts/a11oy/src/pages/CommandSurface.tsx": {
-    "Terra": 1,
-    "Lyte": 1,
     "Vessels": 1,
     "Aegis": 1,
     "Alloy": 1
   },
   "artifacts/a11oy/src/pages/Demo.tsx": {
-    "Terra": 1,
-    "Lyte": 1,
     "Vessels": 1,
     "Aegis": 1,
     "Alloy": 1
   },
   "artifacts/a11oy/src/pages/ExecutiveBrief.tsx": {
     "Aegis": 1,
-    "Terra": 2,
     "Vessels": 1
   },
   "artifacts/a11oy/src/pages/HomePage.tsx": {
     "Vessels": 1,
-    "Terra": 1,
     "Aegis": 1
   },
-  "artifacts/a11oy/src/pages/Memory.tsx": {
-    "Terra": 1
-  },
   "artifacts/a11oy/src/pages/NowBoard.tsx": {
-    "Lyte": 1,
     "Vessels": 1,
-    "Terra": 1,
     "Aegis": 1,
     "Alloy": 1
   },
   "artifacts/a11oy/src/pages/Outcomes.tsx": {
-    "Terra": 1,
-    "Lyte": 1,
     "Vessels": 1,
     "Aegis": 1,
     "Alloy": 1
   },
   "artifacts/a11oy/src/pages/SignalMesh.tsx": {
-    "Terra": 1,
-    "Lyte": 1,
     "Vessels": 1,
     "Aegis": 1,
     "Alloy": 1
   },
-  "artifacts/a11oy/src/pages/Terminal.tsx": {
-    "Terra": 1
-  },
   "artifacts/a11oy/src/pages/Tools.tsx": {
-    "Terra": 1,
-    "Lyte": 1,
     "Vessels": 1,
     "Aegis": 1,
     "Alloy": 1
   },
   "artifacts/a11oy/src/pages/Verticals.tsx": {
     "Vessels": 1,
-    "Lyte": 1,
-    "Terra": 1,
     "Aegis": 1,
     "Alloy": 1
   },
   "artifacts/a11oy/src/pages/WorkcellDetail.tsx": {
-    "Terra": 1,
-    "Lyte": 1,
     "Vessels": 1,
     "Aegis": 1,
     "Alloy": 1
   },
   "artifacts/a11oy/src/pages/Workcells.tsx": {
-    "Terra": 1,
-    "Lyte": 1,
     "Vessels": 1,
     "Aegis": 1,
     "Alloy": 1
-  },
-  "artifacts/aegis/src/App.tsx": {
-    "Aegis": 11
   },
   "artifacts/aegis/src/components/AlloyKernelPanel.tsx": {
     "Alloy": 1
   },
   "artifacts/aegis/src/pages/adaptive-defense-shield.tsx": {
     "Vessels": 2,
-    "Aegis": 8,
+    "Aegis": 5,
     "Terra": 5
   },
-  "artifacts/aegis/src/pages/aef-knowledge-search.tsx": {
-    "Aegis": 1
-  },
   "artifacts/aegis/src/pages/aegis-home.tsx": {
-    "Aegis": 10
+    "Aegis": 7
   },
   "artifacts/aegis/src/pages/aegis-pdf-export.tsx": {
-    "Aegis": 3
-  },
-  "artifacts/aegis/src/pages/aegis-pricing.tsx": {
     "Aegis": 2
   },
-  "artifacts/aegis/src/pages/agent-insights.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/alerts-page.tsx": {
-    "Aegis": 1
-  },
   "artifacts/aegis/src/pages/atlas-correlation.tsx": {
-    "Aegis": 2,
     "Vessels": 2,
     "Terra": 2
   },
-  "artifacts/aegis/src/pages/atlas-execute.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/atlas-runtime.tsx": {
-    "Aegis": 1
-  },
   "artifacts/aegis/src/pages/audit-chain.tsx": {
-    "Aegis": 5,
+    "Aegis": 4,
     "Terra": 1
   },
-  "artifacts/aegis/src/pages/autonomous-threat-engine.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/business-signal-intelligence.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/cases-page.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/chaos-engineering-drills.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/citadel-after-action.tsx": {
-    "Aegis": 2
-  },
   "artifacts/aegis/src/pages/citadel-war-room.tsx": {
-    "Aegis": 2,
+    "Aegis": 1,
     "Terra": 1,
     "Vessels": 1
   },
   "artifacts/aegis/src/pages/command-home.tsx": {
-    "Aegis": 2
-  },
-  "artifacts/aegis/src/pages/compliance/readiness-ai-insights.tsx": {
     "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/constellation.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/decision-center.tsx": {
-    "Aegis": 2
-  },
-  "artifacts/aegis/src/pages/enterprise-demo.tsx": {
-    "Aegis": 4
   },
   "artifacts/aegis/src/pages/governance/agent-config.tsx": {
     "Aegis": 1,
     "Terra": 2
   },
-  "artifacts/aegis/src/pages/governance/canonical-demo.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/governance/integration-hub.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/governance/trust-positioning.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/governed-cockpit.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/incidents-page.tsx": {
-    "Aegis": 1
-  },
   "artifacts/aegis/src/pages/intel/agent-spawner.tsx": {
     "Vessels": 2,
-    "Aegis": 6,
     "Terra": 2,
+    "Aegis": 4,
     "Lyte": 1
   },
   "artifacts/aegis/src/pages/intel/ai-advisor.tsx": {
-    "Aegis": 2,
     "Terra": 2,
     "Vessels": 2
   },
   "artifacts/aegis/src/pages/intel/ai-command-center.tsx": {
     "Vessels": 1,
-    "Aegis": 3,
     "Terra": 1,
+    "Aegis": 2,
     "Lyte": 1
-  },
-  "artifacts/aegis/src/pages/intel/dashboard.tsx": {
-    "Aegis": 1
   },
   "artifacts/aegis/src/pages/intel/signal-routing.tsx": {
     "Vessels": 1
   },
-  "artifacts/aegis/src/pages/intelligence-fusion-grid.tsx": {
-    "Aegis": 1
-  },
   "artifacts/aegis/src/pages/marketing-home.tsx": {
-    "Aegis": 4,
+    "Aegis": 2,
     "Vessels": 1,
     "Lyte": 1,
     "Terra": 1
   },
-  "artifacts/aegis/src/pages/mitre-attack-page.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/multi-fund-view.tsx": {
-    "Aegis": 4
-  },
   "artifacts/aegis/src/pages/nexus/cross-domain-correlation.tsx": {
     "Vessels": 2,
-    "Aegis": 3,
+    "Aegis": 1,
     "Terra": 2,
     "Lyte": 1
   },
   "artifacts/aegis/src/pages/nexus/executive-briefing.tsx": {
     "Vessels": 2,
-    "Aegis": 2,
     "Terra": 2
   },
-  "artifacts/aegis/src/pages/predictive-intelligence.tsx": {
-    "Aegis": 1
-  },
   "artifacts/aegis/src/pages/pulse.tsx": {
-    "Aegis": 3
-  },
-  "artifacts/aegis/src/pages/replay.tsx": {
-    "Aegis": 2
-  },
-  "artifacts/aegis/src/pages/scenario-branches.tsx": {
     "Aegis": 1
   },
   "artifacts/aegis/src/pages/settings/unified-settings.tsx": {
-    "Aegis": 6
-  },
-  "artifacts/aegis/src/pages/simulation-runner.tsx": {
     "Aegis": 1
   },
-  "artifacts/aegis/src/pages/slides/PresenterMode.tsx": {
+  "artifacts/aegis/src/pages/simulation-runner.tsx": {
     "Aegis": 1
   },
   "artifacts/aegis/src/pages/slides/S01Cover.tsx": {
@@ -269,7 +142,6 @@
     "Aegis": 1
   },
   "artifacts/aegis/src/pages/slides/S05Architecture.tsx": {
-    "Aegis": 1,
     "Vessels": 1,
     "Terra": 1,
     "Lyte": 1
@@ -288,7 +160,6 @@
     "Terra": 1
   },
   "artifacts/aegis/src/pages/slides/S08BusinessModel.tsx": {
-    "Aegis": 1,
     "Terra": 1,
     "Vessels": 1
   },
@@ -296,27 +167,6 @@
     "Aegis": 1
   },
   "artifacts/aegis/src/pages/slides/S15Closing.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/soc-dashboard.tsx": {
-    "Aegis": 3
-  },
-  "artifacts/aegis/src/pages/stix-taxii.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/threat-kill-chain.tsx": {
-    "Aegis": 4
-  },
-  "artifacts/aegis/src/pages/threat-sim-report.tsx": {
-    "Aegis": 4
-  },
-  "artifacts/aegis/src/pages/trust-provenance.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/worldline-registry.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/aegis/src/pages/xdr-incident-workbench.tsx": {
     "Aegis": 1
   },
   "artifacts/carlota-jo/src/components/AlloyKernelPanel.tsx": {
@@ -343,198 +193,89 @@
   "artifacts/command/src/components/AlloyKernelPanel.tsx": {
     "Alloy": 1
   },
-  "artifacts/command/src/components/ambient-signal-ranker.tsx": {
-    "Aegis": 2,
-    "Vessels": 2,
-    "Terra": 3,
-    "Lyte": 2
-  },
   "artifacts/command/src/components/atlas-kpi-section.tsx": {
-    "Aegis": 1,
-    "Terra": 4,
-    "Vessels": 4,
-    "Lyte": 1
+    "Vessels": 2
   },
   "artifacts/command/src/components/command-bar.tsx": {
-    "Aegis": 2,
-    "Pulse": 2,
-    "Vessels": 1,
-    "Terra": 1,
-    "Lyte": 1
+    "Lyte": 1,
+    "Pulse": 1
   },
   "artifacts/command/src/components/correlation-map-viz.tsx": {
-    "Vessels": 1,
-    "Aegis": 3,
-    "Terra": 2,
-    "Lyte": 1
+    "Terra": 1
   },
   "artifacts/command/src/components/ecosystem-apps-grid.tsx": {
     "Lyte": 1
   },
-  "artifacts/command/src/components/marketing/MarketingFooter.tsx": {
-    "Aegis": 1,
-    "Vessels": 1,
-    "Terra": 1,
-    "Lyte": 1
-  },
-  "artifacts/command/src/components/marketing/MarketingNav.tsx": {
-    "Terra": 1,
-    "Vessels": 1,
-    "Lyte": 1,
-    "Aegis": 2
-  },
   "artifacts/command/src/components/signal-chains-panel.tsx": {
-    "Terra": 2,
-    "Aegis": 1,
+    "Terra": 1,
     "Vessels": 1,
     "Lyte": 1
   },
   "artifacts/command/src/components/unified-layout.tsx": {
     "Lyte": 1,
-    "Vessels": 2,
-    "Terra": 2,
-    "Pulse": 1,
-    "Aegis": 1
+    "Vessels": 1,
+    "Pulse": 1
   },
   "artifacts/command/src/data/mock-data.ts": {
-    "Aegis": 3,
-    "Vessels": 4,
-    "Lyte": 5,
-    "Terra": 6
-  },
-  "artifacts/command/src/hooks/use-ecosystem-data.ts": {
-    "Aegis": 2,
-    "Vessels": 2,
-    "Terra": 2,
-    "Lyte": 1
-  },
-  "artifacts/command/src/infrastructure/lib/imperium-data.ts": {
-    "Aegis": 6,
     "Vessels": 1
   },
-  "artifacts/command/src/infrastructure/pages/praetorian-guard.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/command/src/operations/App.tsx": {
-    "Lyte": 2
-  },
-  "artifacts/command/src/operations/components/governed-decision/decision-summary-card.tsx": {
-    "Vessels": 1,
-    "Aegis": 1
-  },
-  "artifacts/command/src/operations/components/layout.tsx": {
-    "Lyte": 1
-  },
-  "artifacts/command/src/operations/components/lyte-layout.tsx": {
-    "Lyte": 2,
-    "Pulse": 4,
+  "artifacts/command/src/hooks/use-ecosystem-data.ts": {
     "Terra": 1,
     "Vessels": 1
   },
+  "artifacts/command/src/infrastructure/lib/imperium-data.ts": {
+    "Vessels": 1
+  },
+  "artifacts/command/src/operations/components/lyte-layout.tsx": {
+    "Pulse": 4
+  },
   "artifacts/command/src/operations/lib/demo-mode.tsx": {
-    "Aegis": 5,
     "Vessels": 5,
     "Terra": 5
   },
-  "artifacts/command/src/operations/main.tsx": {
-    "Lyte": 1
-  },
   "artifacts/command/src/operations/pages/admin/export-history.tsx": {
-    "Aegis": 1,
     "Vessels": 1,
     "Terra": 1
   },
   "artifacts/command/src/operations/pages/admin/ops-console.tsx": {
-    "Terra": 1,
-    "Aegis": 3
-  },
-  "artifacts/command/src/operations/pages/admin/workflows.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/command/src/operations/pages/alloy-action-console.tsx": {
-    "Vessels": 3,
-    "Aegis": 1,
     "Terra": 1
   },
   "artifacts/command/src/operations/pages/alloy-agent-handoffs.tsx": {
-    "Vessels": 4,
-    "Terra": 2,
-    "Aegis": 2
+    "Vessels": 1,
+    "Terra": 1
   },
   "artifacts/command/src/operations/pages/alloy-graph-compiler.tsx": {
     "Terra": 1,
     "Vessels": 3
   },
-  "artifacts/command/src/operations/pages/alloy-policy-sim.tsx": {
-    "Vessels": 1,
-    "Terra": 1,
-    "Aegis": 1
-  },
-  "artifacts/command/src/operations/pages/alloy-replay-timeline.tsx": {
-    "Aegis": 2,
-    "Terra": 2,
-    "Vessels": 2
-  },
-  "artifacts/command/src/operations/pages/alloy-trust-receipts.tsx": {
-    "Aegis": 2,
-    "Terra": 2,
-    "Vessels": 2
-  },
-  "artifacts/command/src/operations/pages/alloy-workflow-templates.tsx": {
-    "Vessels": 2,
-    "Aegis": 1,
-    "Terra": 1
-  },
-  "artifacts/command/src/operations/pages/alloy-write-back.tsx": {
-    "Vessels": 1,
-    "Terra": 2,
-    "Aegis": 2
-  },
-  "artifacts/command/src/operations/pages/blocker-board.tsx": {
-    "Vessels": 2,
-    "Terra": 2,
-    "Aegis": 1
-  },
   "artifacts/command/src/operations/pages/board-mode.tsx": {
-    "Vessels": 3,
-    "Terra": 4
+    "Terra": 2
   },
   "artifacts/command/src/operations/pages/bottleneck-heatmap.tsx": {
-    "Vessels": 8,
-    "Terra": 7,
-    "Aegis": 5
+    "Vessels": 1,
+    "Terra": 1
   },
   "artifacts/command/src/operations/pages/command-inbox.tsx": {
     "Pulse": 1,
-    "Terra": 2
-  },
-  "artifacts/command/src/operations/pages/dashboard-builder.tsx": {
-    "Lyte": 1,
-    "Vessels": 1
-  },
-  "artifacts/command/src/operations/pages/dashboard.tsx": {
-    "Pulse": 1,
-    "Vessels": 1,
-    "Aegis": 1,
     "Terra": 1
   },
+  "artifacts/command/src/operations/pages/dashboard.tsx": {
+    "Pulse": 1
+  },
   "artifacts/command/src/operations/pages/decision-receipts.tsx": {
-    "Vessels": 3
+    "Vessels": 2
   },
   "artifacts/command/src/operations/pages/defer-lane.tsx": {
-    "Aegis": 2,
-    "Terra": 2,
-    "Vessels": 2
+    "Terra": 1,
+    "Vessels": 1
   },
   "artifacts/command/src/operations/pages/demo-dashboard.tsx": {
     "Pulse": 1
   },
   "artifacts/command/src/operations/pages/developer/ApiExplorer.tsx": {
-    "Aegis": 1,
     "Vessels": 1
   },
   "artifacts/command/src/operations/pages/developer/GettingStarted.tsx": {
-    "Aegis": 1,
     "Vessels": 1,
     "Terra": 1
   },
@@ -542,147 +283,81 @@
     "Vessels": 1
   },
   "artifacts/command/src/operations/pages/digest-center.tsx": {
-    "Aegis": 5,
-    "Terra": 6,
-    "Vessels": 7
+    "Terra": 2,
+    "Vessels": 3
   },
   "artifacts/command/src/operations/pages/executive-command.tsx": {
-    "Terra": 6,
-    "Vessels": 6,
-    "Aegis": 6
+    "Vessels": 2,
+    "Terra": 3
   },
   "artifacts/command/src/operations/pages/governed-decision-loop.tsx": {
-    "Vessels": 5,
-    "Aegis": 7,
-    "Terra": 6
-  },
-  "artifacts/command/src/operations/pages/intelligence-mesh.tsx": {
-    "Aegis": 4,
-    "Lyte": 1,
     "Vessels": 2,
-    "Terra": 2
+    "Terra": 3
   },
   "artifacts/command/src/operations/pages/living-topology.tsx": {
-    "Lyte": 3,
-    "Aegis": 4,
-    "Terra": 4
+    "Terra": 2
   },
   "artifacts/command/src/operations/pages/marketing-landing.tsx": {
-    "Pulse": 5,
-    "Lyte": 1,
-    "Terra": 1,
-    "Vessels": 1,
-    "Aegis": 1
-  },
-  "artifacts/command/src/operations/pages/outcome-loop.tsx": {
-    "Vessels": 2,
-    "Aegis": 1,
-    "Terra": 1
+    "Pulse": 5
   },
   "artifacts/command/src/operations/pages/pricing.tsx": {
     "Pulse": 1
   },
   "artifacts/command/src/operations/pages/pulse.tsx": {
-    "Aegis": 1,
     "Pulse": 2
   },
   "artifacts/command/src/operations/pages/service-topology.tsx": {
-    "Lyte": 3,
-    "Terra": 2,
-    "Vessels": 2,
-    "Aegis": 2
+    "Terra": 1,
+    "Vessels": 1
   },
   "artifacts/command/src/operations/pages/shadow-mode.tsx": {
-    "Vessels": 2,
-    "Terra": 2,
-    "Aegis": 2
+    "Terra": 1
   },
   "artifacts/command/src/operations/pages/what-changed.tsx": {
     "Vessels": 3,
-    "Terra": 2,
-    "Aegis": 1
-  },
-  "artifacts/command/src/pages/alerts.tsx": {
-    "Vessels": 2,
-    "Aegis": 2,
-    "Lyte": 1,
     "Terra": 2
   },
   "artifacts/command/src/pages/atlas-runtime.tsx": {
-    "Aegis": 4,
-    "Terra": 2,
     "Vessels": 3,
-    "Lyte": 2
+    "Terra": 1,
+    "Lyte": 1
   },
   "artifacts/command/src/pages/changelog.tsx": {
-    "Vessels": 3,
-    "Aegis": 6,
-    "Lyte": 4,
-    "Terra": 4
+    "Lyte": 2,
+    "Terra": 2
   },
   "artifacts/command/src/pages/cognitive/index.tsx": {
-    "Aegis": 2,
     "Vessels": 2,
     "Lyte": 2
   },
   "artifacts/command/src/pages/cognitive/overview.tsx": {
-    "Aegis": 2,
     "Vessels": 1,
     "Terra": 2
   },
   "artifacts/command/src/pages/cognitive/policy-sim.tsx": {
-    "Aegis": 4,
     "Vessels": 4,
     "Terra": 3
   },
   "artifacts/command/src/pages/cognitive/self-model.tsx": {
-    "Aegis": 2,
-    "Terra": 3,
-    "Vessels": 6,
-    "Lyte": 1
+    "Vessels": 4,
+    "Terra": 1
   },
   "artifacts/command/src/pages/cognitive/traces.tsx": {
-    "Aegis": 1,
     "Vessels": 1,
     "Terra": 1
-  },
-  "artifacts/command/src/pages/cognitive/verifier.tsx": {
-    "Aegis": 1
-  },
-  "artifacts/command/src/pages/cognitive/world-model.tsx": {
-    "Vessels": 1,
-    "Terra": 1,
-    "Aegis": 1,
-    "Lyte": 1
   },
   "artifacts/command/src/pages/competitive-atlas.tsx": {
-    "Aegis": 7,
-    "Terra": 6,
-    "Vessels": 5,
-    "Pulse": 5,
-    "Lyte": 5
-  },
-  "artifacts/command/src/pages/costs.tsx": {
-    "Aegis": 1,
-    "Vessels": 1,
-    "Terra": 1,
-    "Lyte": 1
-  },
-  "artifacts/command/src/pages/cross-platform/index.tsx": {
-    "Aegis": 1,
-    "Lyte": 1,
-    "Vessels": 1,
-    "Terra": 1
+    "Terra": 3,
+    "Vessels": 2,
+    "Lyte": 2
   },
   "artifacts/command/src/pages/demo-launchpad.tsx": {
-    "Lyte": 5,
-    "Terra": 6,
-    "Aegis": 4,
-    "Vessels": 3
+    "Terra": 2,
+    "Lyte": 2,
+    "Vessels": 1
   },
   "artifacts/command/src/pages/digest.tsx": {
     "Lyte": 7,
-    "Aegis": 4,
     "Vessels": 5
   },
   "artifacts/command/src/pages/ecosystem/data.ts": {
@@ -691,111 +366,46 @@
     "Vessels": 2
   },
   "artifacts/command/src/pages/enterprise-state.tsx": {
-    "Aegis": 5,
-    "Terra": 6,
-    "Vessels": 4,
-    "Lyte": 12
-  },
-  "artifacts/command/src/pages/entity-360.tsx": {
-    "Terra": 1,
-    "Vessels": 1
-  },
-  "artifacts/command/src/pages/governance.tsx": {
-    "Aegis": 3,
-    "Terra": 3,
-    "Lyte": 1,
-    "Vessels": 2
+    "Lyte": 11,
+    "Terra": 5,
+    "Vessels": 3
   },
   "artifacts/command/src/pages/governed-cockpit.tsx": {
-    "Aegis": 10,
-    "Vessels": 12,
-    "Pulse": 4,
-    "Terra": 8,
-    "Lyte": 1
+    "Vessels": 7,
+    "Pulse": 3,
+    "Terra": 4
   },
   "artifacts/command/src/pages/health.tsx": {
-    "Vessels": 2,
-    "Lyte": 3,
-    "Terra": 2
+    "Lyte": 2,
+    "Terra": 1
   },
   "artifacts/command/src/pages/marketing/apps/[id].tsx": {
-    "Terra": 2,
-    "Vessels": 4,
-    "Lyte": 2,
-    "Aegis": 2,
+    "Vessels": 1,
     "Pulse": 1
   },
-  "artifacts/command/src/pages/marketing/index.tsx": {
-    "Aegis": 1,
-    "Vessels": 1,
-    "Terra": 1,
-    "Lyte": 1
-  },
-  "artifacts/command/src/pages/marketing/leads.tsx": {
-    "Vessels": 1,
-    "Terra": 1,
-    "Aegis": 2
-  },
-  "artifacts/command/src/pages/marketing/onboarding.tsx": {
-    "Aegis": 1,
-    "Vessels": 1,
-    "Terra": 1,
-    "Lyte": 1
-  },
   "artifacts/command/src/pages/marketing/ops/data.ts": {
-    "Aegis": 2,
-    "Lyte": 2,
-    "Vessels": 1
+    "Lyte": 1
   },
   "artifacts/command/src/pages/marketing/status.tsx": {
-    "Aegis": 2,
     "Vessels": 2,
     "Terra": 2,
     "Lyte": 2
   },
-  "artifacts/command/src/pages/simulation.tsx": {
-    "Vessels": 1,
-    "Terra": 1,
-    "Aegis": 1
-  },
   "artifacts/command/src/pages/sla.tsx": {
-    "Aegis": 2,
-    "Vessels": 1,
-    "Lyte": 3,
-    "Terra": 1
-  },
-  "artifacts/command/src/pages/substrate/approval-queue.tsx": {
-    "Aegis": 1,
-    "Vessels": 1,
-    "Terra": 1,
     "Lyte": 1
   },
   "artifacts/command/src/pages/substrate/mock-data.ts": {
     "Terra": 1,
     "Vessels": 2
   },
-  "artifacts/command/src/pages/substrate/trajectory-map.tsx": {
-    "Aegis": 1,
-    "Vessels": 1,
-    "Terra": 1,
-    "Lyte": 1
-  },
-  "artifacts/command/src/pages/team.tsx": {
-    "Aegis": 7,
-    "Vessels": 4,
-    "Terra": 5,
-    "Lyte": 1
-  },
   "artifacts/command/src/pages/trust-console.tsx": {
-    "Aegis": 1,
     "Vessels": 1,
     "Terra": 1
   },
   "artifacts/command/src/pages/worldline-registry.tsx": {
-    "Aegis": 3,
-    "Terra": 4,
     "Vessels": 3,
-    "Lyte": 2
+    "Terra": 3,
+    "Lyte": 1
   },
   "artifacts/counsel/src/App.tsx": {
     "Vessels": 3,
@@ -813,7 +423,7 @@
     "Pulse": 1
   },
   "artifacts/lyte-command-center/src/App.tsx": {
-    "Lyte": 11,
+    "Lyte": 8,
     "Vessels": 2,
     "Aegis": 2
   },
@@ -824,13 +434,10 @@
     "Lyte": 2
   },
   "artifacts/lyte-command-center/src/data/seed.ts": {
-    "Lyte": 32
-  },
-  "artifacts/lyte-command-center/src/pages/aef-knowledge-search.tsx": {
-    "Lyte": 1
+    "Lyte": 31
   },
   "artifacts/lyte-command-center/src/pages/billing-account.tsx": {
-    "Lyte": 2
+    "Lyte": 1
   },
   "artifacts/lyte-command-center/src/pages/board-view.tsx": {
     "Lyte": 4
@@ -839,7 +446,7 @@
     "Lyte": 8
   },
   "artifacts/lyte-command-center/src/pages/briefing.tsx": {
-    "Lyte": 2
+    "Lyte": 1
   },
   "artifacts/lyte-command-center/src/pages/decision-center.tsx": {
     "Lyte": 2,
@@ -848,16 +455,13 @@
     "Terra": 1
   },
   "artifacts/lyte-command-center/src/pages/decision-twin.tsx": {
-    "Lyte": 2
+    "Lyte": 1
   },
   "artifacts/lyte-command-center/src/pages/forecast.tsx": {
     "Lyte": 1
   },
   "artifacts/lyte-command-center/src/pages/landing.tsx": {
     "Lyte": 6
-  },
-  "artifacts/lyte-command-center/src/pages/onboarding.tsx": {
-    "Lyte": 1
   },
   "artifacts/lyte-command-center/src/pages/overview.tsx": {
     "Lyte": 1
@@ -929,9 +533,6 @@
   "artifacts/pluginmesh/src/catalog.ts": {
     "Alloy": 1
   },
-  "artifacts/pulse/src/App.tsx": {
-    "Pulse": 4
-  },
   "artifacts/pulse/src/components/AlloyKernelPanel.tsx": {
     "Alloy": 1
   },
@@ -958,7 +559,6 @@
     "Lyte": 1
   },
   "artifacts/pulse/src/pages/Settings.tsx": {
-    "Pulse": 3,
     "Aegis": 1,
     "Terra": 1,
     "Lyte": 1
@@ -969,17 +569,8 @@
     "Lyte": 1,
     "Vessels": 1
   },
-  "artifacts/pulse/src/pages/billing-account.tsx": {
-    "Pulse": 2
-  },
-  "artifacts/pulse/src/pages/decision-center.tsx": {
-    "Pulse": 2
-  },
-  "artifacts/pulse/src/pages/governed-cockpit.tsx": {
-    "Pulse": 1
-  },
   "artifacts/pulse/src/pages/pricing.tsx": {
-    "Pulse": 2
+    "Pulse": 1
   },
   "artifacts/sentra/src/App.tsx": {
     "Aegis": 11,
@@ -989,9 +580,6 @@
   "artifacts/sentra/src/components/AlloyKernelPanel.tsx": {
     "Alloy": 1
   },
-  "artifacts/sentra/src/lib/ForecastPanel.tsx": {
-    "Sentra": 2
-  },
   "artifacts/sentra/src/main.tsx": {
     "Aegis": 1
   },
@@ -999,12 +587,6 @@
     "Aegis": 2
   },
   "artifacts/sentra/src/pages/crisis-arena-engagements.tsx": {
-    "Sentra": 1
-  },
-  "artifacts/sentra/src/pages/crisis-arena-leaderboard.tsx": {
-    "Sentra": 1
-  },
-  "artifacts/sentra/src/pages/forecast.tsx": {
     "Sentra": 1
   },
   "artifacts/sentra/src/pages/pricing.tsx": {
@@ -2385,28 +1967,16 @@
     "Lyte": 4
   },
   "artifacts/terra/src/App.tsx": {
-    "Terra": 4
+    "Terra": 1
   },
   "artifacts/terra/src/components/AlloyKernelPanel.tsx": {
     "Alloy": 1
-  },
-  "artifacts/terra/src/components/ForecastPanel.tsx": {
-    "Terra": 2
   },
   "artifacts/terra/src/components/beacon-layout.tsx": {
     "Lyte": 1
   },
   "artifacts/terra/src/components/terra-layout.tsx": {
     "Terra": 6
-  },
-  "artifacts/terra/src/data/demo-narrative.ts": {
-    "Terra": 3
-  },
-  "artifacts/terra/src/main.tsx": {
-    "Terra": 1
-  },
-  "artifacts/terra/src/pages/aef-knowledge-search.tsx": {
-    "Terra": 1
   },
   "artifacts/terra/src/pages/agent-insights.tsx": {
     "Terra": 1
@@ -2421,7 +1991,7 @@
     "Terra": 1
   },
   "artifacts/terra/src/pages/billing-account.tsx": {
-    "Terra": 2
+    "Terra": 1
   },
   "artifacts/terra/src/pages/broker-overview.tsx": {
     "Terra": 1
@@ -2438,9 +2008,6 @@
   "artifacts/terra/src/pages/dashboard.tsx": {
     "Terra": 5
   },
-  "artifacts/terra/src/pages/decision-center.tsx": {
-    "Terra": 2
-  },
   "artifacts/terra/src/pages/drift-detection.tsx": {
     "Lyte": 3
   },
@@ -2449,9 +2016,6 @@
   },
   "artifacts/terra/src/pages/executive-overview.tsx": {
     "Lyte": 8
-  },
-  "artifacts/terra/src/pages/forecast.tsx": {
-    "Terra": 1
   },
   "artifacts/terra/src/pages/governed-cockpit.tsx": {
     "Terra": 1
@@ -2510,7 +2074,7 @@
     "Lyte": 2
   },
   "artifacts/vessels/src/App.tsx": {
-    "Vessels": 11
+    "Vessels": 8
   },
   "artifacts/vessels/src/components/AlloyKernelPanel.tsx": {
     "Alloy": 1
@@ -2524,14 +2088,8 @@
   "artifacts/vessels/src/components/MarketingNav.tsx": {
     "Vessels": 1
   },
-  "artifacts/vessels/src/lib/voyage-export.ts": {
-    "Vessels": 1
-  },
-  "artifacts/vessels/src/main.tsx": {
-    "Vessels": 1
-  },
   "artifacts/vessels/src/pages/account-billing.tsx": {
-    "Vessels": 2
+    "Vessels": 1
   },
   "artifacts/vessels/src/pages/aef-knowledge-search.tsx": {
     "Vessels": 1
@@ -2583,9 +2141,6 @@
     "Vessels": 1
   },
   "artifacts/vessels/src/pages/dark-vessel-detection.tsx": {
-    "Vessels": 2
-  },
-  "artifacts/vessels/src/pages/decision-center.tsx": {
     "Vessels": 2
   },
   "artifacts/vessels/src/pages/disruption-forecast.tsx": {
@@ -2685,7 +2240,7 @@
     "Vessels": 1
   },
   "artifacts/vessels/src/pages/settings.tsx": {
-    "Vessels": 6
+    "Vessels": 5
   },
   "artifacts/vessels/src/pages/sts-detection.tsx": {
     "Aegis": 3
@@ -2979,12 +2534,6 @@
     "Lyte": 4,
     "Aegis": 1
   },
-  "packages/nexus-mcp/src/capabilities/instructions.ts": {
-    "Vessels": 1,
-    "Sentra": 1,
-    "Terra": 1,
-    "Lyte": 1
-  },
   "packages/ontology/src/domains.ts": {
     "Aegis": 1
   },
@@ -3052,21 +2601,10 @@
   "packages/szl-alloy/src/prompts/kernels/video-storyboard.ts": {
     "Terra": 8
   },
-  "services/substrate-mcp-gateway/src/descriptor.ts": {
-    "Sentra": 1,
-    "Terra": 1,
-    "Vessels": 1
-  },
   "services/substrate-mcp-gateway/src/handlers.ts": {
     "Terra": 1,
     "AEGIS": 1,
     "Vessels": 1
-  },
-  "services/substrate-mcp-gateway/src/nexus-fabric.ts": {
-    "Vessels": 2,
-    "Sentra": 1,
-    "Terra": 1,
-    "Lyte": 1
   },
   "tests/api/cortex-inca-smoke.test.ts": {
     "Aegis": 1

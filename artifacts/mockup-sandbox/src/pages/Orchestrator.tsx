@@ -14,7 +14,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { nexusApi } from '../lib/api';
+import { praxisApi } from '../lib/api';
 import type { OrchestrationPlan, OrchestrationStep } from '../lib/types';
 
 const EXAMPLE_INTENTS = [
@@ -149,7 +149,7 @@ function RateLimitMiniBar({ used, total }: { used: number; total: number }) {
   const color = pct >= 95 ? 'var(--gi-accent-red)' : pct >= 80 ? 'var(--gi-accent-amber)' : 'var(--gi-accent-green)';
   return (
     <div className="flex items-center gap-1.5">
-      <div className="h-1 w-12 rounded-full bg-nexus-bg overflow-hidden">
+      <div className="h-1 w-12 rounded-full bg-praxis-bg overflow-hidden">
         <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
       </div>
       <span className="text-[9px] font-mono" style={{ color }}>
@@ -165,15 +165,15 @@ function ExplainPanel({ step, onClose }: { step: OrchestrationStep; onClose: () 
   const color = APP_COLORS[step.appSlug] ?? '#8896aa';
 
   return (
-    <div className="fixed inset-y-0 right-0 w-96 bg-nexus-surface border-l border-[#a3e635]/20 z-50 flex flex-col shadow-2xl overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-nexus">
+    <div className="fixed inset-y-0 right-0 w-96 bg-praxis-surface border-l border-[#a3e635]/20 z-50 flex flex-col shadow-2xl overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-praxis">
         <div className="flex items-center gap-2">
           <Lightbulb className="w-4 h-4 text-[#a3e635]" />
           <span className="text-sm font-semibold">Explain this Decision</span>
         </div>
         <button
           onClick={onClose}
-          className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground/40 hover:text-muted-foreground hover:bg-nexus-bg transition-colors"
+          className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground/40 hover:text-muted-foreground hover:bg-praxis-bg transition-colors"
         >
           <X className="w-3.5 h-3.5" />
         </button>
@@ -197,28 +197,28 @@ function ExplainPanel({ step, onClose }: { step: OrchestrationStep; onClose: () 
 
         {explanation ? (
           <>
-            <div className="bg-nexus-bg rounded-lg p-3">
+            <div className="bg-praxis-bg rounded-lg p-3">
               <div className="text-[10px] font-mono text-[#a3e635] mb-1.5 uppercase tracking-widest">
                 Why chosen
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">{explanation.why}</p>
             </div>
 
-            <div className="bg-nexus-bg rounded-lg p-3">
-              <div className="text-[10px] font-mono text-nexus-cyan mb-1.5 uppercase tracking-widest">
+            <div className="bg-praxis-bg rounded-lg p-3">
+              <div className="text-[10px] font-mono text-praxis-cyan mb-1.5 uppercase tracking-widest">
                 How it ran
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">{explanation.how}</p>
             </div>
 
-            <div className="bg-nexus-bg rounded-lg p-3">
+            <div className="bg-praxis-bg rounded-lg p-3">
               <div className="text-[10px] font-mono text-muted-foreground/40 mb-1.5 uppercase tracking-widest">
                 Alternatives rejected
               </div>
               <ul className="space-y-1.5">
                 {explanation.alternatives.map((alt, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <XCircle className="w-3 h-3 text-nexus-red/50 mt-0.5 shrink-0" />
+                    <XCircle className="w-3 h-3 text-praxis-red/50 mt-0.5 shrink-0" />
                     <span className="text-[10px] text-muted-foreground/60 leading-relaxed">
                       {alt}
                     </span>
@@ -227,25 +227,25 @@ function ExplainPanel({ step, onClose }: { step: OrchestrationStep; onClose: () 
               </ul>
             </div>
 
-            <div className="bg-nexus-bg rounded-lg p-3">
-              <div className="text-[10px] font-mono text-nexus-amber mb-1.5 uppercase tracking-widest">
+            <div className="bg-praxis-bg rounded-lg p-3">
+              <div className="text-[10px] font-mono text-praxis-amber mb-1.5 uppercase tracking-widest">
                 Confidence
               </div>
               <div className="flex items-center gap-3">
-                <div className="flex-1 h-2 bg-nexus-surface rounded-full overflow-hidden">
+                <div className="flex-1 h-2 bg-praxis-surface rounded-full overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-nexus-green"
+                    className="h-full rounded-full bg-praxis-green"
                     style={{ width: `${explanation.confidence * 100}%` }}
                   />
                 </div>
-                <span className="text-xs font-mono text-nexus-green">
+                <span className="text-xs font-mono text-praxis-green">
                   {(explanation.confidence * 100).toFixed(0)}%
                 </span>
               </div>
             </div>
           </>
         ) : (
-          <div className="bg-nexus-bg rounded-lg p-3">
+          <div className="bg-praxis-bg rounded-lg p-3">
             <p className="text-xs text-muted-foreground/50">
               No reasoning trace available for this step.
             </p>
@@ -253,10 +253,10 @@ function ExplainPanel({ step, onClose }: { step: OrchestrationStep; onClose: () 
         )}
 
         {rl && (
-          <div className="bg-nexus-bg rounded-lg p-3">
+          <div className="bg-praxis-bg rounded-lg p-3">
             <div className="flex items-center gap-1.5 mb-2">
-              <Gauge className="w-3 h-3 text-nexus-amber" />
-              <span className="text-[10px] font-mono text-nexus-amber uppercase tracking-widest">
+              <Gauge className="w-3 h-3 text-praxis-amber" />
+              <span className="text-[10px] font-mono text-praxis-amber uppercase tracking-widest">
                 Rate Limits
               </span>
             </div>
@@ -288,8 +288,8 @@ function ExplainPanel({ step, onClose }: { step: OrchestrationStep; onClose: () 
         )}
 
         {step.output && (
-          <div className="bg-nexus-bg rounded-lg p-3">
-            <div className="text-[10px] font-mono text-nexus-green mb-1.5 uppercase tracking-widest">
+          <div className="bg-praxis-bg rounded-lg p-3">
+            <div className="text-[10px] font-mono text-praxis-green mb-1.5 uppercase tracking-widest">
               Summary
             </div>
             <p className="text-[10px] text-muted-foreground leading-relaxed">{step.output}</p>
@@ -302,10 +302,10 @@ function ExplainPanel({ step, onClose }: { step: OrchestrationStep; onClose: () 
                 <span
                   className={
                     step.confidence >= 0.7
-                      ? 'text-nexus-green'
+                      ? 'text-praxis-green'
                       : step.confidence >= 0.4
-                        ? 'text-nexus-amber'
-                        : 'text-nexus-red'
+                        ? 'text-praxis-amber'
+                        : 'text-praxis-red'
                   }
                 >
                   conf {(step.confidence * 100).toFixed(0)}%
@@ -316,11 +316,11 @@ function ExplainPanel({ step, onClose }: { step: OrchestrationStep; onClose: () 
         )}
 
         {step.rawPayload && (
-          <div className="bg-nexus-bg rounded-lg p-3">
-            <div className="text-[10px] font-mono text-nexus-cyan mb-1.5 uppercase tracking-widest">
+          <div className="bg-praxis-bg rounded-lg p-3">
+            <div className="text-[10px] font-mono text-praxis-cyan mb-1.5 uppercase tracking-widest">
               Raw API Payload
             </div>
-            <pre className="text-[9px] font-mono text-muted-foreground/80 leading-snug whitespace-pre-wrap break-words max-h-64 overflow-y-auto bg-[#060b12] rounded p-2 border border-nexus">
+            <pre className="text-[9px] font-mono text-muted-foreground/80 leading-snug whitespace-pre-wrap break-words max-h-64 overflow-y-auto bg-[#060b12] rounded p-2 border border-praxis">
               {step.rawPayload}
             </pre>
           </div>
@@ -348,13 +348,13 @@ function StepCard({
     <div
       className={`rounded-lg border p-3 ${
         step.status === 'running'
-          ? 'border-nexus-cyan/40 bg-nexus-cyan/05'
+          ? 'border-praxis-cyan/40 bg-praxis-cyan/05'
           : step.status === 'done'
-            ? 'border-nexus-green/30 bg-nexus-green/04'
+            ? 'border-praxis-green/30 bg-praxis-green/04'
             : step.status === 'error'
-              ? 'border-nexus-red/30'
-              : 'border-nexus'
-      } bg-nexus-surface`}
+              ? 'border-praxis-red/30'
+              : 'border-praxis'
+      } bg-praxis-surface`}
     >
       <div className="flex items-center gap-3 mb-2">
         <div
@@ -373,11 +373,11 @@ function StepCard({
         </div>
         <div className="shrink-0">
           {step.status === 'running' ? (
-            <Loader className="w-3.5 h-3.5 animate-spin text-nexus-cyan" />
+            <Loader className="w-3.5 h-3.5 animate-spin text-praxis-cyan" />
           ) : step.status === 'done' ? (
-            <CheckCircle className="w-3.5 h-3.5 text-nexus-green" />
+            <CheckCircle className="w-3.5 h-3.5 text-praxis-green" />
           ) : step.status === 'error' ? (
-            <XCircle className="w-3.5 h-3.5 text-nexus-red" />
+            <XCircle className="w-3.5 h-3.5 text-praxis-red" />
           ) : (
             <Clock className="w-3.5 h-3.5 text-muted-foreground/40" />
           )}
@@ -385,7 +385,7 @@ function StepCard({
       </div>
       <div className="text-[9px] font-mono text-muted-foreground/40 mb-1">{step.endpoint}</div>
       {step.output && (
-        <div className="text-[10px] text-muted-foreground bg-nexus-bg rounded px-2 py-1.5 leading-relaxed mt-1">
+        <div className="text-[10px] text-muted-foreground bg-praxis-bg rounded px-2 py-1.5 leading-relaxed mt-1">
           {step.output}
         </div>
       )}
@@ -402,10 +402,10 @@ function StepCard({
               <span
                 className={
                   step.confidence >= 0.7
-                    ? 'text-nexus-green'
+                    ? 'text-praxis-green'
                     : step.confidence >= 0.4
-                      ? 'text-nexus-amber'
-                      : 'text-nexus-red'
+                      ? 'text-praxis-amber'
+                      : 'text-praxis-red'
                 }
               >
                 conf {(step.confidence * 100).toFixed(0)}%
@@ -415,7 +415,7 @@ function StepCard({
         )}
 
       {rl && (
-        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-nexus">
+        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-praxis">
           <Gauge className="w-2.5 h-2.5 text-muted-foreground/30" />
           <RateLimitMiniBar used={rl.used} total={rl.rpm} />
         </div>
@@ -444,7 +444,7 @@ export default function Orchestrator() {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    nexusApi
+    praxisApi
       .listOrchestrations()
       .then(setHistory)
       .catch(() => {});
@@ -457,12 +457,12 @@ export default function Orchestrator() {
     if (pollRef.current) clearInterval(pollRef.current);
     pollRef.current = setInterval(async () => {
       try {
-        const updated = await nexusApi.getOrchestration(id);
+        const updated = await praxisApi.getOrchestration(id);
         setPlan(updated);
         if (updated.status === 'completed' || updated.status === 'failed') {
           if (pollRef.current) clearInterval(pollRef.current);
           setLoading(false);
-          nexusApi
+          praxisApi
             .listOrchestrations()
             .then(setHistory)
             .catch(() => {});
@@ -484,8 +484,8 @@ export default function Orchestrator() {
     if (pollRef.current) clearInterval(pollRef.current);
 
     try {
-      const { id } = await nexusApi.orchestrate(finalIntent.trim());
-      const initial = await nexusApi.getOrchestration(id);
+      const { id } = await praxisApi.orchestrate(finalIntent.trim());
+      const initial = await praxisApi.getOrchestration(id);
       setPlan(initial);
       startPolling(id);
     } catch (err) {
@@ -500,8 +500,8 @@ export default function Orchestrator() {
     setLoading(true);
     if (pollRef.current) clearInterval(pollRef.current);
     try {
-      await nexusApi.retryOrchestration(id);
-      const refreshed = await nexusApi.getOrchestration(id);
+      await praxisApi.retryOrchestration(id);
+      const refreshed = await praxisApi.getOrchestration(id);
       setPlan(refreshed);
       startPolling(id);
     } catch (err) {
@@ -513,12 +513,12 @@ export default function Orchestrator() {
   }
 
   return (
-    <div className="min-h-full bg-nexus-bg p-6">
+    <div className="min-h-full bg-praxis-bg p-6">
       <div
         className={`max-w-5xl mx-auto transition-all duration-200 ${explainStep ? 'mr-[24rem]' : ''}`}
       >
         <div className="flex items-center gap-3 mb-6">
-          <Workflow className="w-5 h-5 text-nexus-amber" />
+          <Workflow className="w-5 h-5 text-praxis-amber" />
           <div>
             <h1 className="text-lg font-semibold">Cross-App Orchestrator</h1>
             <p className="text-xs text-muted-foreground">
@@ -528,10 +528,10 @@ export default function Orchestrator() {
           </div>
         </div>
 
-        <div className="bg-nexus-surface border border-nexus-amber/20 rounded-xl p-4 mb-6">
+        <div className="bg-praxis-surface border border-praxis-amber/20 rounded-xl p-4 mb-6">
           <div className="flex gap-3 mb-3">
             <textarea
-              className="flex-1 bg-nexus-bg border border-nexus rounded-lg px-3 py-2.5 text-sm font-mono resize-none focus:outline-none focus:border-nexus-amber/50 text-foreground placeholder:text-muted-foreground/40"
+              className="flex-1 bg-praxis-bg border border-praxis rounded-lg px-3 py-2.5 text-sm font-mono resize-none focus:outline-none focus:border-praxis-amber/50 text-foreground placeholder:text-muted-foreground/40"
               rows={2}
               placeholder="Describe what you want across the SZL portfolio…"
               value={intent}
@@ -543,7 +543,7 @@ export default function Orchestrator() {
             <button
               onClick={() => handleRun()}
               disabled={loading || !intent.trim()}
-              className="px-4 py-2 rounded-lg bg-nexus-amber/10 border border-nexus-amber/30 text-nexus-amber text-sm font-medium hover:bg-nexus-amber/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-praxis-amber/10 border border-praxis-amber/30 text-praxis-amber text-sm font-medium hover:bg-praxis-amber/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
               {loading ? <Loader className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
               Run
@@ -559,9 +559,9 @@ export default function Orchestrator() {
                   setIntent(ex.intent);
                   handleRun(ex.intent);
                 }}
-                className="text-[10px] px-2.5 py-1 rounded-lg bg-nexus-bg border border-nexus text-muted-foreground/60 hover:text-muted-foreground hover:border-nexus-amber/20 transition-colors flex items-center gap-1"
+                className="text-[10px] px-2.5 py-1 rounded-lg bg-praxis-bg border border-praxis text-muted-foreground/60 hover:text-muted-foreground hover:border-praxis-amber/20 transition-colors flex items-center gap-1"
               >
-                <Zap className="w-2.5 h-2.5 text-nexus-amber/60" />
+                <Zap className="w-2.5 h-2.5 text-praxis-amber/60" />
                 {ex.label}
               </button>
             ))}
@@ -569,9 +569,9 @@ export default function Orchestrator() {
         </div>
 
         {error && (
-          <div className="mb-4 flex items-center gap-2 bg-nexus-red/10 border border-nexus-red/30 rounded-lg px-4 py-3">
-            <AlertCircle className="w-4 h-4 text-nexus-red shrink-0" />
-            <p className="text-xs text-nexus-red">{error}</p>
+          <div className="mb-4 flex items-center gap-2 bg-praxis-red/10 border border-praxis-red/30 rounded-lg px-4 py-3">
+            <AlertCircle className="w-4 h-4 text-praxis-red shrink-0" />
+            <p className="text-xs text-praxis-red">{error}</p>
           </div>
         )}
 
@@ -584,7 +584,7 @@ export default function Orchestrator() {
                   <button
                     onClick={() => handleRetry(plan.id)}
                     disabled={retrying}
-                    className="text-[10px] font-mono px-2 py-1 rounded bg-nexus-amber/10 border border-nexus-amber/30 text-nexus-amber hover:bg-nexus-amber/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
+                    className="text-[10px] font-mono px-2 py-1 rounded bg-praxis-amber/10 border border-praxis-amber/30 text-praxis-amber hover:bg-praxis-amber/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
                   >
                     {retrying ? (
                       <Loader className="w-3 h-3 animate-spin" />
@@ -597,12 +597,12 @@ export default function Orchestrator() {
                 <span
                   className={`text-[10px] font-mono px-2 py-0.5 rounded ${
                     plan.status === 'completed'
-                      ? 'bg-nexus-green/10 text-nexus-green'
+                      ? 'bg-praxis-green/10 text-praxis-green'
                       : plan.status === 'running' || plan.status === 'planning'
-                        ? 'bg-nexus-cyan/10 text-nexus-cyan'
+                        ? 'bg-praxis-cyan/10 text-praxis-cyan'
                         : plan.status === 'failed'
-                          ? 'bg-nexus-red/10 text-nexus-red'
-                          : 'bg-nexus-surface text-muted-foreground'
+                          ? 'bg-praxis-red/10 text-praxis-red'
+                          : 'bg-praxis-surface text-muted-foreground'
                   }`}
                 >
                   {plan.status.toUpperCase()}
@@ -610,7 +610,7 @@ export default function Orchestrator() {
               </div>
             </div>
 
-            <div className="bg-nexus-surface border border-nexus-amber/20 rounded-lg px-4 py-2 text-sm font-mono text-nexus-amber">
+            <div className="bg-praxis-surface border border-praxis-amber/20 rounded-lg px-4 py-2 text-sm font-mono text-praxis-amber">
               {plan.intent}
             </div>
 
@@ -621,10 +621,10 @@ export default function Orchestrator() {
             </div>
 
             {plan.stitchedOutput && (
-              <div className="bg-nexus-surface border border-nexus-green/20 rounded-xl p-5">
+              <div className="bg-praxis-surface border border-praxis-green/20 rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-3">
-                  <CheckCircle className="w-4 h-4 text-nexus-green" />
-                  <h3 className="text-sm font-semibold text-nexus-green">Stitched Output</h3>
+                  <CheckCircle className="w-4 h-4 text-praxis-green" />
+                  <h3 className="text-sm font-semibold text-praxis-green">Stitched Output</h3>
                 </div>
                 <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
                   {plan.stitchedOutput}
@@ -643,12 +643,12 @@ export default function Orchestrator() {
               {history.slice(0, 5).map((h) => (
                 <div
                   key={h.id}
-                  className="w-full bg-nexus-surface border border-nexus rounded-lg px-4 py-3 hover:border-nexus-amber/20 transition-colors"
+                  className="w-full bg-praxis-surface border border-praxis rounded-lg px-4 py-3 hover:border-praxis-amber/20 transition-colors"
                 >
                   <button
                     className="w-full text-left"
                     onClick={async () => {
-                      const p = await nexusApi.getOrchestration(h.id);
+                      const p = await praxisApi.getOrchestration(h.id);
                       setPlan(p);
                     }}
                   >
@@ -657,10 +657,10 @@ export default function Orchestrator() {
                       <span
                         className={`text-[10px] font-mono ${
                           h.status === 'completed'
-                            ? 'text-nexus-green'
+                            ? 'text-praxis-green'
                             : h.status === 'failed'
-                              ? 'text-nexus-red'
-                              : 'text-nexus-cyan'
+                              ? 'text-praxis-red'
+                              : 'text-praxis-cyan'
                         }`}
                       >
                         {h.status}
@@ -672,14 +672,14 @@ export default function Orchestrator() {
                     </div>
                   </button>
                   {h.status === 'failed' && (
-                    <div className="mt-2 pt-2 border-t border-nexus flex justify-end">
+                    <div className="mt-2 pt-2 border-t border-praxis flex justify-end">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRetry(h.id);
                         }}
                         disabled={retrying}
-                        className="text-[10px] font-mono px-2 py-1 rounded bg-nexus-amber/10 border border-nexus-amber/30 text-nexus-amber hover:bg-nexus-amber/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
+                        className="text-[10px] font-mono px-2 py-1 rounded bg-praxis-amber/10 border border-praxis-amber/30 text-praxis-amber hover:bg-praxis-amber/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
                       >
                         <RotateCw className="w-3 h-3" />
                         Retry

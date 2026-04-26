@@ -203,7 +203,7 @@ const DEFAULT_CHAINS: SignalChain[] = [
     id: 'maritime-realestate',
     name: 'Maritime Delay → Real Estate Impact',
     description:
-      'When a vessel delay is detected at a major port, automatically notify the Terra team about affected port-adjacent properties and flag potential delivery timeline risks.',
+      'When a vessel delay is detected at a major port, automatically notify the DOMAINE team about affected port-adjacent properties and flag potential delivery timeline risks.',
     triggerDomain: 'vessels',
     triggerSignal: 'port_delay_hours',
     triggerThreshold: 24,
@@ -223,7 +223,7 @@ const DEFAULT_CHAINS: SignalChain[] = [
         domain: 'terra',
         action: 'Flag port-adjacent properties for delivery timeline review',
         explainabilityTemplate:
-          'Terra identified {count} properties within 50km of {port} with active construction or delivery dependencies.',
+          'DOMAINE identified {count} properties within 50km of {port} with active construction or delivery dependencies.',
       },
       {
         domain: 'prism',
@@ -237,7 +237,7 @@ const DEFAULT_CHAINS: SignalChain[] = [
     id: 'security-legal',
     name: 'Security Incident → Legal Review',
     description:
-      'When a critical cyber incident is detected in Aegis, automatically trigger a legal hold review in Counsel and update executive risk score.',
+      'When a critical cyber incident is detected in PARAGON, automatically trigger a legal hold review in PRISM Counsel and update executive risk score.',
     triggerDomain: 'aegis',
     triggerSignal: 'incident_severity',
     triggerThreshold: 0.8,
@@ -251,7 +251,7 @@ const DEFAULT_CHAINS: SignalChain[] = [
         domain: 'aegis',
         action: 'Classify and scope the incident',
         explainabilityTemplate:
-          'Aegis detected a {severity} incident ({id}) affecting {assets} assets with a threat confidence score of {confidence}.',
+          'PARAGON detected a {severity} incident ({id}) affecting {assets} assets with a threat confidence score of {confidence}.',
       },
       {
         domain: 'prism',
@@ -271,7 +271,7 @@ const DEFAULT_CHAINS: SignalChain[] = [
     id: 'market-portfolio',
     name: 'Market Shift → Portfolio Rebalance',
     description:
-      'When a significant market shift is detected in SZL Holdings macro signals, automatically trigger portfolio review workflows across Terra, Vessels, and fund operations.',
+      'When a significant market shift is detected in SZL Holdings macro signals, automatically trigger portfolio review workflows across DOMAINE, SEXTANT, and fund operations.',
     triggerDomain: 'szl-holdings',
     triggerSignal: 'market_volatility_index',
     triggerThreshold: 0.65,
@@ -291,7 +291,7 @@ const DEFAULT_CHAINS: SignalChain[] = [
         domain: 'terra',
         action: 'Run distress scoring refresh on real estate portfolio',
         explainabilityTemplate:
-          'Terra triggered an accelerated distress scoring refresh on {count} properties in interest-rate-sensitive markets.',
+          'DOMAINE triggered an accelerated distress scoring refresh on {count} properties in interest-rate-sensitive markets.',
       },
       {
         domain: 'vessels',

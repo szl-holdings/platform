@@ -253,18 +253,18 @@ export default function Ingest() {
   const alreadyIngested = new Set(jobs.map((j) => j.repoUrl));
 
   return (
-    <div className="min-h-full bg-nexus-bg p-6">
+    <div className="min-h-full bg-praxis-bg p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
-          <Download className="w-5 h-5 text-nexus-cyan" />
+          <Download className="w-5 h-5 text-praxis-cyan" />
           <div>
             <h1 className="text-lg font-semibold">Repo Ingest</h1>
             <p className="text-xs text-muted-foreground">Fetch → Parse → Extract → Index · Skills Library powered by public repos</p>
           </div>
         </div>
 
-        <div className="bg-nexus-surface border border-nexus-cyan/20 rounded-xl p-5 mb-6">
-          <h2 className="text-xs font-mono text-nexus-cyan uppercase tracking-widest mb-3">Ingest New Repository</h2>
+        <div className="bg-praxis-surface border border-praxis-cyan/20 rounded-xl p-5 mb-6">
+          <h2 className="text-xs font-mono text-praxis-cyan uppercase tracking-widest mb-3">Ingest New Repository</h2>
           <div className="flex gap-3 mb-4">
             <div className="relative flex-1">
               <Code2 className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/40" />
@@ -274,13 +274,13 @@ export default function Ingest() {
                 value={newUrl}
                 onChange={(e) => setNewUrl(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') { setSubmitting(true); handleIngest(); } }}
-                className="w-full bg-nexus-bg border border-nexus rounded-lg pl-9 pr-3 py-2.5 text-sm font-mono focus:outline-none focus:border-nexus-cyan/50 placeholder:text-muted-foreground/30"
+                className="w-full bg-praxis-bg border border-praxis rounded-lg pl-9 pr-3 py-2.5 text-sm font-mono focus:outline-none focus:border-praxis-cyan/50 placeholder:text-muted-foreground/30"
               />
             </div>
             <button
               onClick={() => { setSubmitting(true); handleIngest(); }}
               disabled={submitting || !newUrl.trim()}
-              className="px-4 py-2 rounded-lg bg-nexus-cyan/10 border border-nexus-cyan/30 text-nexus-cyan text-sm font-medium hover:bg-nexus-cyan/20 disabled:opacity-40 transition-colors flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-praxis-cyan/10 border border-praxis-cyan/30 text-praxis-cyan text-sm font-medium hover:bg-praxis-cyan/20 disabled:opacity-40 transition-colors flex items-center gap-2"
             >
               {submitting ? <Loader className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               Ingest
@@ -297,7 +297,7 @@ export default function Ingest() {
                     key={repo.url}
                     onClick={() => { if (!ingested) { setSubmitting(true); handleIngest(repo.url); } }}
                     disabled={ingested || submitting}
-                    className={`text-[10px] font-mono px-2 py-1 rounded border transition-colors flex items-center gap-1 ${ingested ? 'border-nexus-green/30 text-nexus-green/60 cursor-default' : 'border-nexus text-muted-foreground/60 hover:text-muted-foreground hover:border-nexus-cyan/20'}`}
+                    className={`text-[10px] font-mono px-2 py-1 rounded border transition-colors flex items-center gap-1 ${ingested ? 'border-praxis-green/30 text-praxis-green/60 cursor-default' : 'border-praxis text-muted-foreground/60 hover:text-muted-foreground hover:border-praxis-cyan/20'}`}
                   >
                     {ingested && <CheckCircle className="w-2.5 h-2.5" />}
                     {repo.org}/{repo.name}
@@ -310,7 +310,7 @@ export default function Ingest() {
 
         {activeJobs.length > 0 && (
           <section className="mb-6">
-            <h2 className="text-[10px] font-mono text-nexus-cyan uppercase tracking-widest mb-3">Active Jobs</h2>
+            <h2 className="text-[10px] font-mono text-praxis-cyan uppercase tracking-widest mb-3">Active Jobs</h2>
             <div className="space-y-2">
               {activeJobs.map((job) => (
                 <JobCard key={job.id} job={job} expanded={expanded === job.id} onExpand={() => setExpanded((e) => (e === job.id ? null : job.id))} />
@@ -345,7 +345,7 @@ export default function Ingest() {
 function ProgressBar({ value }: { value: number }) {
   const color = value === 100 ? 'var(--gi-accent-green)' : 'var(--gi-accent-blue)';
   return (
-    <div className="h-1 rounded-full bg-nexus-bg overflow-hidden">
+    <div className="h-1 rounded-full bg-praxis-bg overflow-hidden">
       <div className="h-full rounded-full transition-all duration-500" style={{ width: `${value}%`, backgroundColor: color }} />
     </div>
   );
@@ -357,13 +357,13 @@ function JobCard({ job, expanded, onExpand }: { job: IngestJobLocal; expanded: b
   const isSpinning = ['cloning', 'parsing', 'extracting', 'indexing'].includes(job.status);
 
   return (
-    <div className={`rounded-lg border bg-nexus-surface overflow-hidden transition-all ${job.status === 'done' ? 'border-nexus-green/20' : job.status === 'failed' ? 'border-nexus-red/20' : 'border-nexus-cyan/20'}`}>
+    <div className={`rounded-lg border bg-praxis-surface overflow-hidden transition-all ${job.status === 'done' ? 'border-praxis-green/20' : job.status === 'failed' ? 'border-praxis-red/20' : 'border-praxis-cyan/20'}`}>
       <button onClick={onExpand} className="w-full flex items-center gap-3 px-4 py-3 text-left">
         {expanded ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />}
         {job.status === 'done' ? (
-          <CheckCircle className="w-3.5 h-3.5 shrink-0 text-nexus-green" />
+          <CheckCircle className="w-3.5 h-3.5 shrink-0 text-praxis-green" />
         ) : job.status === 'failed' ? (
-          <XCircle className="w-3.5 h-3.5 shrink-0 text-nexus-red" />
+          <XCircle className="w-3.5 h-3.5 shrink-0 text-praxis-red" />
         ) : job.status === 'queued' ? (
           <Clock className="w-3.5 h-3.5 shrink-0" style={{ color: statusColor }} />
         ) : (
@@ -379,20 +379,20 @@ function JobCard({ job, expanded, onExpand }: { job: IngestJobLocal; expanded: b
         </div>
         {job.skillsGenerated > 0 && (
           <div className="flex items-center gap-2 shrink-0">
-            <div className="text-[10px] font-mono text-nexus-green flex items-center gap-1"><Layers className="w-3 h-3" />+{job.skillsGenerated} skills</div>
-            {job.memoriesGenerated > 0 && <div className="text-[10px] font-mono text-nexus-cyan flex items-center gap-1"><Brain className="w-3 h-3" />+{job.memoriesGenerated} mem</div>}
+            <div className="text-[10px] font-mono text-praxis-green flex items-center gap-1"><Layers className="w-3 h-3" />+{job.skillsGenerated} skills</div>
+            {job.memoriesGenerated > 0 && <div className="text-[10px] font-mono text-praxis-cyan flex items-center gap-1"><Brain className="w-3 h-3" />+{job.memoriesGenerated} mem</div>}
           </div>
         )}
       </button>
 
       {expanded && (
-        <div className="px-4 pb-4 border-t border-nexus pt-3 space-y-3">
+        <div className="px-4 pb-4 border-t border-praxis pt-3 space-y-3">
           {job.patternsFound.length > 0 && (
             <div>
               <label className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest mb-1 block">Patterns Found</label>
               <div className="flex flex-wrap gap-1.5">
                 {job.patternsFound.map((p) => (
-                  <span key={p} className="text-[9px] px-1.5 py-0.5 rounded bg-nexus-bg border border-nexus text-muted-foreground/60">{p}</span>
+                  <span key={p} className="text-[9px] px-1.5 py-0.5 rounded bg-praxis-bg border border-praxis text-muted-foreground/60">{p}</span>
                 ))}
               </div>
             </div>
@@ -403,10 +403,10 @@ function JobCard({ job, expanded, onExpand }: { job: IngestJobLocal; expanded: b
               <label className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest mb-2 block">Skills Extracted</label>
               <div className="space-y-1.5">
                 {job.skills.map((s) => (
-                  <div key={s.name} className="bg-nexus-bg rounded-lg px-3 py-2 flex items-start gap-2">
-                    <Zap className="w-3 h-3 text-nexus-green mt-0.5 shrink-0" />
+                  <div key={s.name} className="bg-praxis-bg rounded-lg px-3 py-2 flex items-start gap-2">
+                    <Zap className="w-3 h-3 text-praxis-green mt-0.5 shrink-0" />
                     <div>
-                      <div className="text-[10px] font-mono font-semibold text-nexus-green">{s.name}</div>
+                      <div className="text-[10px] font-mono font-semibold text-praxis-green">{s.name}</div>
                       <div className="text-[9px] text-muted-foreground/50">{s.category} · {s.description}</div>
                     </div>
                   </div>
@@ -420,11 +420,11 @@ function JobCard({ job, expanded, onExpand }: { job: IngestJobLocal; expanded: b
               <label className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest mb-2 block">Memory Entries</label>
               <div className="space-y-1.5">
                 {job.memories.map((m) => (
-                  <div key={m.id} className="bg-nexus-bg rounded-lg px-3 py-2">
+                  <div key={m.id} className="bg-praxis-bg rounded-lg px-3 py-2">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                      <Brain className="w-3 h-3 text-nexus-cyan shrink-0" />
-                      <span className="text-[9px] font-mono text-nexus-cyan">{m.type}</span>
-                      {m.tags.map((t) => <span key={t} className="text-[8px] font-mono px-1 rounded bg-nexus-cyan/10 text-nexus-cyan/70">{t}</span>)}
+                      <Brain className="w-3 h-3 text-praxis-cyan shrink-0" />
+                      <span className="text-[9px] font-mono text-praxis-cyan">{m.type}</span>
+                      {m.tags.map((t) => <span key={t} className="text-[8px] font-mono px-1 rounded bg-praxis-cyan/10 text-praxis-cyan/70">{t}</span>)}
                     </div>
                     <p className="text-[10px] text-muted-foreground/60">{m.content}</p>
                   </div>
@@ -436,7 +436,7 @@ function JobCard({ job, expanded, onExpand }: { job: IngestJobLocal; expanded: b
           {job.log.length > 0 && (
             <div>
               <label className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest mb-1 block">Log</label>
-              <div className="bg-nexus-bg rounded-lg p-2 space-y-1 max-h-32 overflow-y-auto">
+              <div className="bg-praxis-bg rounded-lg p-2 space-y-1 max-h-32 overflow-y-auto">
                 {job.log.map((entry, i) => (
                   <div key={i} className="text-[10px] font-mono text-muted-foreground/70">
                     <span className="text-muted-foreground/30 mr-2">{String(i + 1).padStart(2, '0')}</span>

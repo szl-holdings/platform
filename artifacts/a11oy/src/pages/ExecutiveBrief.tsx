@@ -44,7 +44,7 @@ const SECTIONS = [
     ],
   },
   {
-    agent: 'Terra',
+    agent: 'DOMAINE',
     domain: 'Real Estate Intelligence',
     judgment: 'Office vacancy rate exceeds 34% threshold — above debt covenant. Residential portfolio performing within parameters.',
     risk: 'critical' as const,
@@ -58,7 +58,7 @@ const SECTIONS = [
     gaps: ['Updated appraisals needed for 2 properties with stale valuations'],
     actions: [
       { priority: 'P0', action: 'Notify lender of covenant status and present remediation plan', owner: 'CFO', due: '24h' },
-      { priority: 'P1', action: 'Commission updated property appraisals', owner: 'Terra Lead', due: '1 week' },
+      { priority: 'P1', action: 'Commission updated property appraisals', owner: 'DOMAINE Lead', due: '1 week' },
     ],
   },
   {

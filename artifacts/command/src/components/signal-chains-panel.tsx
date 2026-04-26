@@ -136,7 +136,7 @@ const DEMO_CHAINS: SignalChain[] = [
           action: 'Flag logistics-dependent properties',
           status: 'executed',
           executedAt: Date.now() - 3420000,
-          explainability: 'Identified 12 Terra properties with active port logistics dependencies',
+          explainability: 'Identified 12 DOMAINE properties with active port logistics dependencies',
           resultSummary: '12 assets flagged for delivery timeline review',
         },
         {
@@ -155,7 +155,7 @@ const DEMO_CHAINS: SignalChain[] = [
     id: 'sc-cyber-escalate',
     name: 'Perimeter Breach → Legal Hold',
     description:
-      'When Aegis detects a confirmed intrusion exceeding critical threshold, automatically trigger legal hold across affected subsidiaries and notify CISO.',
+      'When PARAGON detects a confirmed intrusion exceeding critical threshold, automatically trigger legal hold across affected subsidiaries and notify CISO.',
     triggerDomain: 'aegis',
     triggerSignal: 'intrusion_confidence_score',
     triggerThreshold: 0.85,

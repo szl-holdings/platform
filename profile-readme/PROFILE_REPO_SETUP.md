@@ -19,7 +19,7 @@ cp /path/to/workspace/profile-readme/README.md ./README.md
 mkdir -p assets
 cp /path/to/workspace/profile-readme/assets/* ./assets/ 2>/dev/null || true
 git add -A
-git commit -m "Premium profile README — Lyte + Alloy focused"
+git commit -m "Premium profile README — KORA + A11oy focused"
 git push origin main
 ```
 

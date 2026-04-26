@@ -73,7 +73,7 @@ const STATS = [
 
 export default function Home({ navigate }: { navigate: (p: Page) => void }) {
   return (
-    <div className="min-h-full bg-nexus-bg">
+    <div className="min-h-full bg-praxis-bg">
       <div className="relative overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
@@ -84,16 +84,16 @@ export default function Home({ navigate }: { navigate: (p: Page) => void }) {
         />
         <div className="relative max-w-5xl mx-auto px-8 py-16">
           <div className="mb-3 flex items-center gap-2">
-            <div className="w-8 h-8 rounded bg-nexus-cyan/10 border border-nexus-cyan/30 flex items-center justify-center">
-              <span className="text-nexus-cyan font-mono font-bold text-sm">N</span>
+            <div className="w-8 h-8 rounded bg-praxis-cyan/10 border border-praxis-cyan/30 flex items-center justify-center">
+              <span className="text-praxis-cyan font-mono font-bold text-sm">N</span>
             </div>
-            <span className="text-xs font-mono text-nexus-cyan tracking-widest uppercase">
+            <span className="text-xs font-mono text-praxis-cyan tracking-widest uppercase">
               SZL Portfolio · Agentic Layer
             </span>
           </div>
 
           <h1 className="text-5xl font-bold tracking-tight mb-3 font-mono">
-            <span className="text-nexus-cyan">PRAXIS</span>
+            <span className="text-praxis-cyan">PRAXIS</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-2 font-mono tracking-wide">One of One.</p>
           <p className="text-base text-muted-foreground/70 max-w-2xl leading-relaxed mb-10">
@@ -108,7 +108,7 @@ export default function Home({ navigate }: { navigate: (p: Page) => void }) {
               return (
                 <div
                   key={s.label}
-                  className="bg-nexus-surface border border-nexus rounded-lg p-4 text-center"
+                  className="bg-praxis-surface border border-praxis rounded-lg p-4 text-center"
                   style={{ borderColor: `${s.color}22` }}
                 >
                   <Icon className="w-5 h-5 mx-auto mb-2" style={{ color: s.color }} />
@@ -133,7 +133,7 @@ export default function Home({ navigate }: { navigate: (p: Page) => void }) {
             return (
               <div
                 key={pillar.id}
-                className="bg-nexus-surface border border-nexus rounded-xl p-6 cursor-pointer group transition-all hover:border-opacity-50 relative overflow-hidden"
+                className="bg-praxis-surface border border-praxis rounded-xl p-6 cursor-pointer group transition-all hover:border-opacity-50 relative overflow-hidden"
                 style={{
                   borderColor: `${pillar.accent}33`,
                   background: `linear-gradient(135deg, rgba(${hexToRgb(pillar.accent)},0.04) 0%, transparent 60%)`,
@@ -181,10 +181,10 @@ export default function Home({ navigate }: { navigate: (p: Page) => void }) {
           })}
         </div>
 
-        <div className="mt-8 bg-nexus-surface border border-nexus-cyan/20 rounded-xl p-6">
+        <div className="mt-8 bg-praxis-surface border border-praxis-cyan/20 rounded-xl p-6">
           <div className="flex items-center gap-2 mb-3">
-            <Shield className="w-4 h-4 text-nexus-cyan" />
-            <h3 className="text-sm font-semibold text-nexus-cyan">Why PRAXIS is One of One</h3>
+            <Shield className="w-4 h-4 text-praxis-cyan" />
+            <h3 className="text-sm font-semibold text-praxis-cyan">Why PRAXIS is One of One</h3>
           </div>
           <div className="grid grid-cols-3 gap-6 text-xs text-muted-foreground leading-relaxed">
             <div>

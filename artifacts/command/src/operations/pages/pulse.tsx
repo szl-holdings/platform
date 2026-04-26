@@ -52,7 +52,7 @@ const EVENT_TYPES = [
   {
     type: 'action_routed',
     messages: [
-      'Action dispatched to Aegis team',
+      'Action dispatched to PARAGON team',
       'Counsel workflow triggered automatically',
       'Manual approval requested',
     ],

@@ -811,7 +811,7 @@ export default function CasesPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[9px] font-mono text-[#f5f5f5]/50 uppercase tracking-widest">
-              Aegis / Cases
+              PARAGON / Cases
             </span>
             <span className="text-[#f5f5f5]/20">·</span>
             <span className="text-[9px] font-mono text-muted-foreground/40 uppercase tracking-widest">

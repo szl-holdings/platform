@@ -13,9 +13,9 @@ const FABRIC_LAYERS = [
 
 const VERTICALS = [
   { label: 'Vessels Maritime', color: '#8a8a8a', ops: 'Fleet ops, port scheduling, demurrage risk' },
-  { label: 'Lyte Revenue', color: '#c9b787', ops: 'Pipeline velocity, deal health, CRM signals' },
+  { label: 'KORA Revenue', color: '#c9b787', ops: 'Pipeline velocity, deal health, CRM signals' },
   { label: 'Counsel', color: '#8a8a8a', ops: 'Matter tracking, discovery deadlines, litigation risk' },
-  { label: 'Terra Real Estate', color: '#c9b787', ops: 'Cap rate monitoring, portfolio valuation' },
+  { label: 'DOMAINE Real Estate', color: '#c9b787', ops: 'Cap rate monitoring, portfolio valuation' },
   { label: 'Aegis Defense', color: '#f5f5f5', ops: 'Threat intel, posture assessment, SIGINT' },
   { label: 'Carlota Jo', color: '#c9b787', ops: 'Advisory matters, client signals, brief generation' },
   { label: 'Alloy Core', color: '#8a8a8a', ops: 'Fabric health, proof integrity, operator performance' },
