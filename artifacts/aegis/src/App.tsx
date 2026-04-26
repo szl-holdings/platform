@@ -34,6 +34,7 @@ import {
   Brain,
   Briefcase,
   Bug,
+  Camera,
   Cpu,
   Crosshair,
   Database,
@@ -86,6 +87,9 @@ import {
 import { Link, Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 import AllSlides from './pages/slides/AllSlides';
 import PresenterMode from './pages/slides/PresenterMode';
+import InvestorDeckViewer from './pages/investor/InvestorDeckViewer';
+import InvestorAdmin from './pages/investor/InvestorAdmin';
+import InvestorShare from './pages/investor/InvestorShare';
 import S01Cover from './pages/slides/S01Cover';
 import S02SeriesProblem from './pages/slides/S02SeriesProblem';
 import S03Category from './pages/slides/S03Category';
@@ -678,6 +682,18 @@ function buildSidebarSections(): SidebarNavSection[] {
         href: SLIDES_NAV.path,
         icon: renderIcon(SLIDES_NAV.icon),
       },
+      {
+        id: '/investor',
+        label: 'Live Investor Deck',
+        href: '/investor',
+        icon: <TrendingUp className="w-3.5 h-3.5" />,
+      },
+      {
+        id: '/investor/admin',
+        label: 'Deck Admin',
+        href: '/investor/admin',
+        icon: <Camera className="w-3.5 h-3.5" />,
+      },
     ],
   };
   const sections: SidebarNavSection[] = VISIBLE_NAV_SECTIONS.map((sec) => ({
@@ -1111,6 +1127,26 @@ function AppShell({
 
   if (isSlides) {
     return <SlideDeck />;
+  }
+
+  if (location.startsWith('/share')) {
+    return <InvestorShare />;
+  }
+
+  if (location === '/investor/admin' || location.startsWith('/investor/admin')) {
+    return (
+      <PrivateAppGuard appName="Aegis" accentColor={AEGIS_BRAND_ACCENT}>
+        <InvestorAdmin />
+      </PrivateAppGuard>
+    );
+  }
+
+  if (location === '/investor' || location.startsWith('/investor')) {
+    return (
+      <PrivateAppGuard appName="Aegis" accentColor={AEGIS_BRAND_ACCENT}>
+        <InvestorDeckViewer />
+      </PrivateAppGuard>
+    );
   }
 
   if (location === '/' || location === '') {

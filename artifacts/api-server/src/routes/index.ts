@@ -280,6 +280,7 @@ router.use(
   ),
 );
 router.use(lazyMatch("/aegis", () => import("./aegis-pcap"), "aegis-pcap"));
+router.use(lazyMatch("/aegis/investor", () => import("./aegis-investor-deck"), "aegis-investor-deck"));
 router.use(lazyMatch("/lp-portal", () => import("./lp-portal"), "lp-portal"));
 
 // Decision Runtime v1 — GET /api/decisions/cards and GET /api/decisions/cards/:id
