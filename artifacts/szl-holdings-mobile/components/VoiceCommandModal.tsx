@@ -18,13 +18,15 @@ import {
 import { WORKSPACES } from '@/context/WorkspaceContext';
 import { useColors } from '@/hooks/useColors';
 import { giProductAccent, giColors } from '@/lib/gi-bridge';
-import { useVoiceCommand, type VoiceResultCard } from '@/hooks/useVoiceCommand';
+import { useVoiceCommand, VOICE_LANGUAGES, type VoiceLanguage, type VoiceResultCard } from '@/hooks/useVoiceCommand';
 
 const ACCENT = giProductAccent.lyte;
 
 interface VoiceCommandModalProps {
   visible: boolean;
   onClose: () => void;
+  language?: VoiceLanguage;
+  onLanguageChange?: (lang: VoiceLanguage) => void;
 }
 
 function PulseRing({ active }: { active: boolean }) {
@@ -146,10 +148,10 @@ const SUGGESTED_QUERIES = [
   'Client sessions this week',
 ];
 
-export function VoiceCommandModal({ visible, onClose }: VoiceCommandModalProps) {
+export function VoiceCommandModal({ visible, onClose, language = 'en', onLanguageChange }: VoiceCommandModalProps) {
   const colors = useColors();
   const { state, transcript, result, startListening, submitQuery, stopSpeaking, reset } =
-    useVoiceCommand();
+    useVoiceCommand(language);
   const [textInput, setTextInput] = useState('');
   const inputRef = useRef<TextInput>(null);
 
@@ -239,6 +241,25 @@ export function VoiceCommandModal({ visible, onClose }: VoiceCommandModalProps) 
                         ? `Routed to ${result?.domain}`
                         : 'Type a command to get started'}
                 </Text>
+                {onLanguageChange && (
+                  <View style={styles.langPicker}>
+                    {(Object.keys(VOICE_LANGUAGES) as VoiceLanguage[]).map((lang) => (
+                      <TouchableOpacity
+                        key={lang}
+                        onPress={() => onLanguageChange(lang)}
+                        style={[
+                          styles.langBtn,
+                          lang === language && { borderColor: `${ACCENT}60`, backgroundColor: `${ACCENT}15` },
+                        ]}
+                      >
+                        <Text style={styles.langFlag}>{VOICE_LANGUAGES[lang].flag}</Text>
+                        <Text style={[styles.langLabel, { color: lang === language ? ACCENT : colors.mutedForeground }]}>
+                          {VOICE_LANGUAGES[lang].label.split(' ')[0]}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
               </View>
               <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
                 <Feather name="x" size={18} color={colors.mutedForeground} />
@@ -501,5 +522,28 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
+  },
+  langPicker: {
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: 8,
+  },
+  langBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+  },
+  langFlag: {
+    fontSize: 13,
+  },
+  langLabel: {
+    fontSize: 10,
+    fontFamily: 'Inter_500Medium',
   },
 });

@@ -1,4 +1,5 @@
 import { color } from '@szl-holdings/design-system';
+import { getCollaborationRoom, leaveCollaborationRoom, type Presence } from '@szl-holdings/crdt-sync';
 import { AnimatePresence, m } from 'framer-motion';
 import {
   AlertTriangle,
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'wouter';
+import { NexusHopQuery } from '@/components/NexusHopQuery';
 import { SiteNav } from '@/components/SiteNav';
 import { runAnomalyDetection } from '@/lib/nexus/anomaly-engine';
 import {
@@ -803,15 +805,92 @@ function EntityPanel({ entity, onClose }: { entity: EntityRecord; onClose: () =>
   );
 }
 
+// ── CRDT Live Presence + Delta Sync ───────────────────────────────────────────
+// Uses @szl-holdings/crdt-sync CollaborationRoom for real CRDT delta exchange:
+//   - Entity selection is written as an LWW CRDT field on the shared doc
+//   - CollaborationRoom broadcasts deltas over BroadcastChannel to all co-viewers
+//   - Presence (who is viewing) is tracked via the room's heartbeat mechanism
+//   - Any remote delta received (e.g. another user selecting an entity) is surfaced
+
+function makeActorId(): string {
+  return `nx-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+}
+
+function useNexusPresence(
+  selectedId: string | null,
+  onRemoteSelection?: (entityId: string | null) => void,
+) {
+  const actorIdRef = useRef<string>(makeActorId());
+  const displayNameRef = useRef<string>(`Analyst ${actorIdRef.current.slice(-4).toUpperCase()}`);
+  const [peers, setPeers] = useState<Presence[]>([]);
+  const onRemoteRef = useRef(onRemoteSelection);
+  onRemoteRef.current = onRemoteSelection;
+
+  useEffect(() => {
+    const room = getCollaborationRoom({
+      entityType: 'nexus-graph',
+      entityId: 'praxis-explorer',
+      actorId: actorIdRef.current,
+      displayName: displayNameRef.current,
+    });
+
+    room.join({
+      onPresenceChange: (presences) => {
+        setPeers(presences.filter((p) => p.actorId !== actorIdRef.current));
+      },
+      onRemoteDelta: (delta) => {
+        const selField = delta.fields['selectedId'];
+        if (selField !== undefined && onRemoteRef.current) {
+          onRemoteRef.current((selField.value as string | null) ?? null);
+        }
+      },
+    });
+
+    return () => {
+      leaveCollaborationRoom('nexus-graph', 'praxis-explorer');
+    };
+  }, []);
+
+  const broadcastSelection = useCallback((id: string | null) => {
+    const room = getCollaborationRoom({
+      entityType: 'nexus-graph',
+      entityId: 'praxis-explorer',
+      actorId: actorIdRef.current,
+      displayName: displayNameRef.current,
+    });
+    room.setField('selectedId', id);
+  }, []);
+
+  useEffect(() => {
+    broadcastSelection(selectedId);
+  }, [selectedId, broadcastSelection]);
+
+  return { peers };
+}
+// ── End CRDT Presence + Delta Sync ────────────────────────────────────────────
+
 export default function NexusExplorerPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [queryResult, setQueryResult] = useState<{ summary: string; confidence: number } | null>(
     null,
   );
-  const [activeTab, setActiveTab] = useState<'graph' | 'anomalies' | 'timeline'>('graph');
+  const [activeTab, setActiveTab] = useState<'graph' | 'anomalies' | 'timeline' | 'hop-query'>('graph');
   const [highlightIds, setHighlightIds] = useState<Set<string>>(new Set());
   const positions = useForceSimulation();
+
+  const onRemoteSelection = useCallback((remoteEntityId: string | null) => {
+    if (remoteEntityId) {
+      const connected = new Set<string>([remoteEntityId]);
+      NEXUS_EDGES.forEach((e) => {
+        if (e.sourceId === remoteEntityId) connected.add(e.targetId);
+        if (e.targetId === remoteEntityId) connected.add(e.sourceId);
+      });
+      setHighlightIds(connected);
+    }
+  }, []);
+
+  const { peers } = useNexusPresence(selectedId, onRemoteSelection);
 
   const anomalyReport = useMemo(() => runAnomalyDetection(KNOWLEDGE_GRAPH), []);
 
@@ -1222,11 +1301,11 @@ export default function NexusExplorerPage() {
               </m.div>
             )}
 
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.875rem' }}>
             <div
               style={{
                 display: 'flex',
                 gap: '0.25rem',
-                marginTop: '0.875rem',
                 padding: '2px',
                 borderRadius: '8px',
                 background: 'rgba(255,255,255,0.03)',
@@ -1234,7 +1313,7 @@ export default function NexusExplorerPage() {
                 border: '1px solid rgba(255,255,255,0.06)',
               }}
             >
-              {(['graph', 'anomalies', 'timeline'] as const).map((tab) => (
+              {(['graph', 'anomalies', 'timeline', 'hop-query'] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -1258,9 +1337,42 @@ export default function NexusExplorerPage() {
                     ? `Anomalies (${anomalyReport.totalCount})`
                     : tab === 'timeline'
                       ? 'Timeline'
-                      : 'Graph Explorer'}
+                      : tab === 'hop-query'
+                        ? 'Hop Traversal'
+                        : 'Graph Explorer'}
                 </button>
               ))}
+            </div>
+            {/* Live presence badges — who else is exploring PRAXIS right now */}
+            {peers.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '9px', color: 'hsl(210,5%,38%)', letterSpacing: '0.5px', textTransform: 'uppercase', fontWeight: 600, marginRight: 2 }}>
+                  Live
+                </span>
+                {peers.map((peer) => (
+                  <div
+                    key={peer.actorId}
+                    title={`${peer.displayName} — co-exploring PRAXIS`}
+                    style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: '50%',
+                      background: peer.color,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 8,
+                      fontWeight: 700,
+                      color: '#0a0e18',
+                      border: `2px solid ${peer.color}60`,
+                      cursor: 'default',
+                    }}
+                  >
+                    {peer.avatarInitials}
+                  </div>
+                ))}
+              </div>
+            )}
             </div>
           </m.div>
 
@@ -1745,6 +1857,24 @@ export default function NexusExplorerPage() {
                     </m.div>
                   ))}
                 </div>
+              </div>
+            </m.div>
+          )}
+          {activeTab === 'hop-query' && (
+            <m.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div
+                style={{
+                  borderRadius: '14px',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  background: 'rgba(255,255,255,0.015)',
+                  padding: '1.5rem',
+                }}
+              >
+                <NexusHopQuery initialAnchorId={selectedId ?? undefined} />
               </div>
             </m.div>
           )}

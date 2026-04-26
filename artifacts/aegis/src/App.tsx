@@ -390,6 +390,12 @@ const NAV_SECTIONS: NavSection[] = [
         icon: BookOpen,
         comp: L(() => import('./pages/scenario-library')),
       },
+      {
+        path: '/chaos-drills',
+        label: 'Chaos Engineering Drills',
+        icon: Zap,
+        comp: L(() => import('./pages/chaos-engineering-drills')),
+      },
     ],
   },
   {
@@ -540,6 +546,12 @@ const NAV_SECTIONS: NavSection[] = [
         icon: Lightbulb,
         comp: L(() => import('./pages/intel/insights')),
       },
+      {
+        path: '/intel/federated-learning',
+        label: 'Federated Learning',
+        icon: Lock,
+        comp: L(() => import('./pages/federated-learning')),
+      },
     ],
   },
   {
@@ -583,10 +595,22 @@ const NAV_SECTIONS: NavSection[] = [
         comp: L(() => import('./pages/governance/agent-config')),
       },
       {
+        path: '/multi-fund',
+        label: 'Multi-Fund View',
+        icon: Layers,
+        comp: L(() => import('./pages/multi-fund-view')),
+      },
+      {
         path: '/reports',
         label: 'Reports',
         icon: FileText,
         comp: L(() => import('./pages/reports-page')),
+      },
+      {
+        path: '/pdf-export',
+        label: 'PDF Export',
+        icon: Presentation,
+        comp: L(() => import('./pages/aegis-pdf-export')),
       },
       {
         path: '/settings',

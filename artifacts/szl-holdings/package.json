@@ -37,6 +37,7 @@
   "dependencies": {
     "@szl/alloy": "workspace:*",
     "@szl-holdings/analytics": "workspace:*",
+    "@szl-holdings/crdt-sync": "workspace:*",
     "@szl-holdings/brand-registry": "workspace:*",
     "@szl-holdings/config": "workspace:*",
     "@szl-holdings/covenant-policy": "workspace:*",

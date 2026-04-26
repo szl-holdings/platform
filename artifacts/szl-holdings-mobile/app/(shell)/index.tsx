@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { useApiStatus } from '@szl-holdings/mobile-shared';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   RefreshControl,
@@ -21,7 +21,9 @@ import { useWorkspace, WORKSPACES, type WorkspaceDomain } from '@/context/Worksp
 import { TAB_BAR_HEIGHT } from '@/constants/layout';
 import { SettingsHeaderButton } from '@/components/SettingsHeaderButton';
 import { useColors } from '@/hooks/useColors';
+import { useWakeWord } from '@/hooks/useWakeWord';
 import { giProductAccent, palette } from '@/lib/gi-bridge';
+import type { VoiceLanguage } from '@/hooks/useVoiceCommand';
 
 const ACCENT = giProductAccent.holdings;
 
@@ -195,6 +197,16 @@ export default function CommandFeedScreen() {
   const { setActiveWorkspace, setBadge } = useWorkspace();
   const _apiStatus = useApiStatus();
   const [voiceVisible, setVoiceVisible] = useState(false);
+  const [voiceLanguage, setVoiceLanguage] = useState<VoiceLanguage>('en');
+
+  const onWakeWordDetected = useCallback(() => {
+    setVoiceVisible(true);
+  }, []);
+
+  useWakeWord(
+    { phrase: 'hey command', language: voiceLanguage, enabled: true },
+    onWakeWordDetected,
+  );
 
   useEffect(() => {
     setActiveWorkspace('command');
@@ -363,7 +375,12 @@ export default function CommandFeedScreen() {
         </View>
       </View>
 
-      <VoiceCommandModal visible={voiceVisible} onClose={() => setVoiceVisible(false)} />
+      <VoiceCommandModal
+        visible={voiceVisible}
+        onClose={() => setVoiceVisible(false)}
+        language={voiceLanguage}
+        onLanguageChange={setVoiceLanguage}
+      />
 
       <ScrollView
         style={styles.scroll}

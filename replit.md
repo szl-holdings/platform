@@ -25,6 +25,26 @@ SZL Holdings offers FORGE, a governed operational intelligence platform for regu
 
 The platform is a pnpm monorepo supporting web and mobile applications, an API, and a design system. Its core purpose is Governed Workflow Orchestration (FORGE + Command + KORA) and Maritime Intelligence (SEXTANT), with specialized extensions like PARAGON, DOMAINE, Counsel, and Carlota Jo built upon its governed foundation. The business vision is to provide a comprehensive solution for decision intelligence and operational oversight in highly regulated environments, with strong market potential in sectors requiring stringent compliance and auditable AI applications.
 
+## Task #3561 — One-of-One Multimodal Experience & Trust Proof (10 features)
+
+### Mobile (szl-holdings-mobile)
+- **T001: Multilingual voice** — `hooks/useVoiceCommand.ts` extended with en/es/zh language adapters, domain keyword routing per locale, and locale-specific TTS responses. `VoiceCommandModal.tsx` accepts `language`+`onLanguageChange` props and renders an inline language picker.
+- **T002: Wake-word detection** — `hooks/useWakeWord.ts` — on-device keyword-spotting pattern with per-language wake phrases, cooldown management, and `startMonitoring`/`stopMonitoring` controls.
+- **T003: Offline-first sync banner** — `components/OfflineBanner.tsx` with animated spring entry/exit. Wired into `app/(shell)/_layout.tsx` via `@react-native-community/netinfo` + new `hooks/useOfflineQueue.ts` for queue-count display.
+
+### Web — CRDT (lib/crdt-sync)
+- **T004: CRDT live collaboration** — `lib/crdt-sync/src/collaboration.ts` — `CollaborationRoom` class with BroadcastChannel sync, Presence tracking, cursor sharing, heartbeat, and stale-presence pruning. All symbols re-exported from `index.ts`.
+
+### Web — szl-holdings
+- **T005: Digital twin simulator** — `src/pages/digital-twin-simulator.tsx` — in-browser simulation mesh for 3 domains: vessel route replay (storm diversion/chokepoint/emergency), property portfolio stress testing (vacancy/cap rate/rate shock), and security posture rehearsal (threat simulation/tabletop/breach). SVG canvas renders for each domain. Route: `/digital-twin`.
+- **T007: NEXUS graph hop traversal** — `src/components/NexusHopQuery.tsx` — entity search + max-hop selector + BFS traversal over `NEXUS_EDGES` + natural-language answer generation. Integrated as "Hop Traversal" tab in `src/pages/nexus-explorer.tsx`.
+
+### Web — Aegis (PARAGON)
+- **T006: Chaos engineering drills** — `src/pages/chaos-engineering-drills.tsx` — 5 fault scenarios, animated progress pipeline, recovery scoring (0-100), generated playbooks (8 steps per scenario), drill history. Nav entry: War Room & Exercises → Chaos Engineering Drills (`/chaos-drills`).
+- **T008: Federated learning config** — `src/pages/federated-learning.tsx` — privacy-preserving gradient aggregation, per-tenant privacy budget tracking, round history, architecture diagram, model config (ε, δ, clipping). Nav entry: Research Intelligence → Federated Learning (`/intel/federated-learning`).
+- **T009: Multi-fund tenancy views** — `src/pages/multi-fund-view.tsx` — GP roll-up with consolidated KPIs, per-fund IRR/TVPI/DPI metrics, portfolio position drill-down, LP vs GP access badges. Nav entry: Governance → Multi-Fund View (`/multi-fund`).
+- **T010: PDF export for Aegis** — `src/pages/aegis-pdf-export.tsx` — section selector, print-preview (scaled 85%), full print stylesheet via `@media print`, format picker (Full Board Report / Executive Brief). Nav entry: Governance → PDF Export (`/pdf-export`).
+
 ## User Preferences
 I prefer detailed explanations.
 I want iterative development.

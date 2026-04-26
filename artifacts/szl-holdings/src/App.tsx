@@ -66,6 +66,7 @@ const PilotVesselsPage = lazy(() => import("@/pages/pilot-vessels"));
 const PilotAegisPage = lazy(() => import("@/pages/pilot-aegis"));
 const NexusCommandPage = lazy(() => import("@/pages/nexus-command"));
 const NexusExplorerPage = lazy(() => import("@/pages/nexus-explorer"));
+const DigitalTwinSimulatorPage = lazy(() => import("@/pages/digital-twin-simulator"));
 const ControlTowerPage = lazy(() => import("@/pages/control-tower"));
 const BusinessStatePage = lazy(() => import("@/pages/business-state"));
 const IntelligenceFabricPage = lazy(() => import("@/pages/intelligence-fabric"));
@@ -1143,6 +1144,9 @@ function App() {
             {/* ── Admin routes ── */}
             <Route path="/nexus/explorer">
               <RequireAuth><Suspense fallback={<PageLoader />}><NexusExplorerPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/digital-twin">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DigitalTwinSimulatorPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/nexus/oracle">
               <RequireAuth><Suspense fallback={<PageLoader />}><OracleBriefingPage /></Suspense></RequireAuth>
