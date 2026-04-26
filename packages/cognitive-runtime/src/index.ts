@@ -16,6 +16,7 @@ export {
 export * from './checkpoint.js';
 export { type CognitiveRuntimeOptions, type RunResult, run } from './orchestrator.js';
 export {
+  createCodeStepExecutor,
   type ExecutePhaseOptions,
   type ExecutePhaseOutput,
   executePhase,

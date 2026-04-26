@@ -37,6 +37,7 @@ export const RouteDecisionSchema = z.object({
       'classification',
       'summarization',
       'generation',
+      'code',
     ])
     .default('generation'),
   toolId: z.string().optional(),

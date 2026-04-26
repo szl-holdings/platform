@@ -1,3 +1,5 @@
+export * from './catalog-search.js';
+export * from './code-sandbox.js';
 export * from './executor.js';
 export * from './gateway.js';
 export * from './manifest.js';

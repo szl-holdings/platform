@@ -83,6 +83,16 @@ export const METRIC_DEFINITIONS = {
     unit: 'USD',
     description: 'Total agent runtime cost in USD',
   },
+  code_execution_count: {
+    type: 'counter' as const,
+    unit: 'events',
+    description: 'Number of code-sandbox executions (code-mode agentic runs)',
+  },
+  code_execution_event: {
+    type: 'summary' as const,
+    unit: 'event',
+    description: 'Structured observability event for a single code-sandbox execution, keyed by executionId',
+  },
 } satisfies Record<string, { type: MetricType; unit: string; description: string }>;
 
 export type KnownMetricName = keyof typeof METRIC_DEFINITIONS;

@@ -52,12 +52,21 @@
     "./tools/operations-tools": {
       "types": "./dist/tools/operations-tools.d.ts",
       "import": "./src/tools/operations-tools.ts"
+    },
+    "./catalog-search": {
+      "types": "./dist/catalog-search.d.ts",
+      "import": "./src/catalog-search.ts"
+    },
+    "./code-sandbox": {
+      "types": "./dist/code-sandbox.d.ts",
+      "import": "./src/code-sandbox.ts"
     }
   },
   "dependencies": {
     "@workspace/aef-contracts": "workspace:*",
     "@workspace/aef-sdk": "workspace:*",
     "@szl-holdings/ai-control-plane": "workspace:*",
+    "@szl-holdings/forge-runtime": "workspace:*",
     "@szl-holdings/policy-engine": "workspace:*",
     "@workspace/cognitive-observability": "workspace:*",
     "@workspace/guardian": "workspace:*",
@@ -66,6 +75,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "typescript": "catalog:",
     "vitest": "^4.1.2"
   },
   "scripts": {

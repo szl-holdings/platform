@@ -1,5 +1,6 @@
 import { GuardianDecisionEngine } from '@workspace/guardian/decision-engine';
 import type { PlanGraph, PlanStep } from '@workspace/planner';
+import type { CodeSandbox } from '@workspace/tool-mesh';
 import { randomUUID } from 'node:crypto';
 import { extractApprovalInterrupt } from '../approval-interrupt.js';
 import { type CheckpointStore, saveCheckpoint } from '../checkpoint.js';
@@ -19,6 +20,12 @@ export interface ExecutePhaseOptions {
   ctx: ResolvedCognitiveContext;
   guardian?: GuardianDecisionEngine;
   stepExecutor?: StepExecutorFn;
+  /**
+   * Optional CodeSandbox instance. When provided and no explicit stepExecutor is
+   * set, the runtime automatically routes steps with routeClass === 'code' through
+   * this sandbox. Callers no longer need to manually wrap with createCodeStepExecutor.
+   */
+  codeSandbox?: CodeSandbox;
   checkpointStore?: CheckpointStore;
   run: CognitiveLoopRun;
   resumeFromStepIndex?: number;
@@ -61,10 +68,10 @@ async function executeStep(
   step: PlanStep,
   opts: ExecutePhaseOptions,
   traceId: string,
+  executor: StepExecutorFn,
 ): Promise<ExecuteStepResult> {
   const { ctx, run } = opts;
   const guardian = opts.guardian ?? defaultGuardian;
-  const executor = opts.stepExecutor ?? defaultStepExecutor;
 
   const stepStartedAt = Date.now();
   let retries = 0;
@@ -182,6 +189,15 @@ export async function executePhase(
     .map((id) => stepMap.get(id))
     .filter((s): s is PlanStep => s !== undefined);
 
+  // Derive the effective step executor. If the caller provided an explicit
+  // stepExecutor it takes precedence. Otherwise, wire the codeSandbox (if any)
+  // so that steps with routeClass === 'code' are dispatched automatically.
+  const effectiveExecutor: StepExecutorFn =
+    opts.stepExecutor ??
+    (opts.codeSandbox
+      ? createCodeStepExecutor(opts.codeSandbox)
+      : defaultStepExecutor);
+
   const stepResults: ExecuteStepResult[] = [];
   let blockedByGuardian = false;
   let pendingApproval = false;
@@ -190,7 +206,7 @@ export async function executePhase(
     const step = orderedSteps[i];
     if (!step) continue;
 
-    const result = await executeStep(step, opts, traceId);
+    const result = await executeStep(step, opts, traceId, effectiveExecutor);
     stepResults.push(result);
 
     if (result.status === 'blocked') {
@@ -286,3 +302,69 @@ export async function executePhase(
 }
 
 export { GuardianDecisionEngine };
+
+/**
+ * Creates a StepExecutorFn that routes steps with routeClass === 'code' to the
+ * provided CodeSandbox instance. Steps with other route classes are delegated to
+ * the provided fallback executor (or the defaultStepExecutor if omitted).
+ *
+ * The step must carry the TypeScript source in `step.inputs.sourceCode` (string)
+ * and optionally a ForgeSandboxPolicy in `step.inputs.policy`. This is the
+ * recommended extension point for wiring code-mode execution into a live loop.
+ */
+export function createCodeStepExecutor(
+  codeSandbox: CodeSandbox,
+  fallback: StepExecutorFn = defaultStepExecutor,
+): StepExecutorFn {
+  return async (step, context) => {
+    if (step.route.routeClass !== 'code') {
+      return fallback(step, context);
+    }
+
+    if (context.dryRun) {
+      return {
+        dryRun: true,
+        stepId: step.stepId,
+        stepTitle: step.title,
+        message: `Dry-run: code step '${step.title}' acknowledged without side-effects.`,
+      };
+    }
+
+    const sourceCode = step.inputs?.sourceCode;
+    if (typeof sourceCode !== 'string') {
+      throw new Error(
+        `Code step '${step.title}' (${step.stepId}) is missing required input 'sourceCode' (string).`,
+      );
+    }
+
+    const rawPolicy = step.inputs?.policy as Record<string, unknown> | undefined;
+    const policy = {
+      domain: (step.inputs?.domain ?? 'custom') as string,
+      approvalClass: (rawPolicy?.approvalClass ?? 'propose_only') as 'propose_only' | 'observe_only' | 'approval_required' | 'approved_execute',
+      allowedHosts: (rawPolicy?.allowedHosts ?? []) as string[],
+      allowedTools: (rawPolicy?.allowedTools ?? []) as string[],
+      allowedDomains: (rawPolicy?.allowedDomains ?? ['global']) as string[],
+      maxDurationMs: typeof rawPolicy?.maxDurationMs === 'number' ? rawPolicy.maxDurationMs : 30_000,
+      maxCostUsd: typeof rawPolicy?.maxCostUsd === 'number' ? rawPolicy.maxCostUsd : 1.0,
+      isDryRunDefault: false,
+      requiresEvidenceCapture: true,
+    };
+
+    const record = await codeSandbox.execute(
+      sourceCode,
+      policy as Parameters<typeof codeSandbox.execute>[1],
+      { agentId: context.agentId, workflowId: context.planId },
+    );
+
+    // Propagate sandbox failure as a thrown error so execute-phase retry and
+    // failure-counting semantics work correctly (a silent return would cause
+    // the step to appear 'completed' even when execution failed).
+    if (!record.success) {
+      throw new Error(
+        record.errors[0] ?? `Code sandbox execution failed for step '${step.title}'`,
+      );
+    }
+
+    return record;
+  };
+}

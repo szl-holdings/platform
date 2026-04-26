@@ -237,6 +237,7 @@ router.use(
   lazyMatch(["/proof-chain", "/audit-log"], () => import("./trust-provenance"), "trust-provenance"),
 );
 router.use(lazyMatch("/mcp-gateway", () => import("./mcp-gateway"), "mcp-gateway"));
+router.use(lazyMatch("/tool-mesh", () => import("./tool-mesh"), "tool-mesh"));
 
 router.use(lazyMatch("/hf-mcp", () => import("./hf-mcp-proxy"), "hf-mcp-proxy"));
 
