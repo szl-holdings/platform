@@ -120,6 +120,7 @@ const ConciergeClients = lazy(() => import('@/pages/concierge/clients'));
 const ConciergePlaybooks = lazy(() => import('@/pages/concierge/playbooks'));
 const ConciergeRequests = lazy(() => import('@/pages/concierge/requests'));
 const ConciergeComms = lazy(() => import('@/pages/concierge/communications'));
+const DripCampaigns = lazy(() => import('@/pages/drip-campaigns'));
 
 function PageLoader() {
   return (
@@ -335,6 +336,9 @@ function Router() {
         <Route path="/concierge/playbooks" component={ConciergePlaybooks} />
         <Route path="/concierge/requests" component={ConciergeRequests} />
         <Route path="/concierge/communications" component={ConciergeComms} />
+
+        {/* Lead Nurturing — drip email campaigns */}
+        <Route path="/drip-campaigns" component={DripCampaigns} />
 
         <Route component={NotFound} />
       </Switch>

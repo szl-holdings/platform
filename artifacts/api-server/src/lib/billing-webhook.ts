@@ -20,9 +20,13 @@
  *     This prevents cross-tenant data contamination.
  */
 
+import { randomUUID, randomBytes } from 'node:crypto';
 import {
   billingPlansTable,
   billingWebhookEventsTable,
+  carlotaDripEnrollmentsTable,
+  carlotaDripSequencesTable,
+  carlotaDripStepsTable,
   db,
   fulfillmentsTable,
   invoicesTable,
@@ -32,7 +36,7 @@ import {
   revenueEventsTable,
   subscriptionsTable,
 } from '@szl-holdings/db';
-import { and, eq, lt } from 'drizzle-orm';
+import { and, eq, lt, sql } from 'drizzle-orm';
 import { writeBillingAudit } from './billing-audit';
 import { logger } from './logger';
 
@@ -75,6 +79,103 @@ function resolveOrgId(
     return null;
   }
   return parsed;
+}
+
+// ─── Post-checkout drip enrollment ───────────────────────────────────────────
+
+interface PostCheckoutDripParams {
+  sessionId: string;
+  customerEmail: string;
+  customerName?: string;
+  tierId?: string;
+  product: string;
+  dripSequenceId?: string;
+}
+
+const TIER_DRIP_MAPPING: Record<string, string> = {
+  'strategy-session': 'post-strategy-session',
+  'portfolio-review': 'post-portfolio-review',
+  'advisory-retainer': 'post-advisory-retainer',
+};
+
+async function triggerPostCheckoutDripEnrollment(params: PostCheckoutDripParams): Promise<void> {
+  const sequenceSlug = params.dripSequenceId ?? TIER_DRIP_MAPPING[params.tierId ?? ''];
+  if (!sequenceSlug) {
+    logger.debug({ tierId: params.tierId }, '[webhook] no drip sequence mapped for tier');
+    return;
+  }
+
+  const [seq] = await db
+    .select()
+    .from(carlotaDripSequencesTable)
+    .where(eq(carlotaDripSequencesTable.sequenceId, sequenceSlug));
+
+  if (!seq || seq.status !== 'active') {
+    logger.debug({ sequenceSlug }, '[webhook] drip sequence not found or inactive');
+    return;
+  }
+
+  const existing = await db
+    .select()
+    .from(carlotaDripEnrollmentsTable)
+    .where(
+      and(
+        eq(carlotaDripEnrollmentsTable.sequenceId, sequenceSlug),
+        eq(carlotaDripEnrollmentsTable.contactEmail, params.customerEmail),
+        eq(carlotaDripEnrollmentsTable.status, 'active'),
+      ),
+    );
+
+  if (existing.length > 0) {
+    logger.debug({ email: params.customerEmail, sequenceSlug }, '[webhook] already enrolled in drip');
+    return;
+  }
+
+  const enrollmentId = randomUUID();
+  const unsubscribeToken = randomBytes(24).toString('hex');
+
+  const [firstStep] = await db
+    .select()
+    .from(carlotaDripStepsTable)
+    .where(
+      and(
+        eq(carlotaDripStepsTable.sequenceId, sequenceSlug),
+        eq(carlotaDripStepsTable.stepOrder, 1),
+      ),
+    );
+
+  const nextSendAt = firstStep
+    ? new Date(Date.now() + firstStep.delayDays * 86_400_000)
+    : null;
+
+  await db.insert(carlotaDripEnrollmentsTable).values({
+    enrollmentId,
+    sequenceId: sequenceSlug,
+    contactEmail: params.customerEmail,
+    contactName: params.customerName ?? null,
+    unsubscribeToken,
+    currentStepOrder: 0,
+    nextSendAt,
+    metadata: {
+      source: 'stripe_checkout',
+      stripeSessionId: params.sessionId,
+      tierId: params.tierId,
+      product: params.product,
+    },
+  });
+
+  await db
+    .update(carlotaDripSequencesTable)
+    .set({
+      totalEnrolled: sql`${carlotaDripSequencesTable.totalEnrolled} + 1`,
+      updatedAt: new Date(),
+    })
+    .where(eq(carlotaDripSequencesTable.sequenceId, sequenceSlug));
+
+  logger.info(
+    { enrollmentId, email: params.customerEmail, sequenceSlug, sessionId: params.sessionId },
+    '[webhook] post-checkout drip enrollment created',
+  );
 }
 
 // ─── Per-feature handlers ─────────────────────────────────────────────────────
@@ -122,6 +223,29 @@ async function handleCheckoutSessionCompleted(event: StripeEventPayload): Promis
         tierId: metadata?.['tierId'],
       },
     });
+
+    const customerEmail =
+      (session['customer_details'] as Record<string, string> | undefined)?.['email'] ??
+      (session['customer_email'] as string | undefined);
+    const dripSequenceId = metadata?.['dripSequenceId'];
+    const product = metadata?.['product'] ?? metadata?.['service'];
+
+    if (customerEmail && (dripSequenceId || product === 'carlota-jo')) {
+      try {
+        await triggerPostCheckoutDripEnrollment({
+          sessionId: session['id'] as string,
+          customerEmail,
+          customerName:
+            (session['customer_details'] as Record<string, string> | undefined)?.['name'] ?? undefined,
+          tierId: metadata?.['tierId'],
+          product: product ?? 'carlota-jo',
+          dripSequenceId,
+        });
+      } catch (err) {
+        logger.warn({ err, sessionId: session['id'] }, '[webhook] drip enrollment after checkout failed (non-fatal)');
+      }
+    }
+
     return;
   }
 

@@ -13,6 +13,7 @@ import { authMiddleware } from '../middlewares/auth';
 import { getUserOrgIds } from '../middlewares/tenant-scope';
 import { handleRouteError } from '../lib/api-response.js';
 import { logger } from '../lib/logger.js';
+import { submitDelivery, type OutboundChannel } from '../services/outbound-gateway';
 
 const router = Router();
 
@@ -89,6 +90,47 @@ async function executeAction(
         detail: `Threat escalated to Sentra — ${signal.rawPayload?.title ?? signal.type}`,
         entityId: signal.entityRefs[0]?.entityId,
       };
+    }
+    case 'notify_channel': {
+      const channel = (config.channel as OutboundChannel) ?? 'webhook';
+      const title = (config.titleTemplate as string) ?? signal.rawPayload?.title ?? signal.type;
+      const message = (config.messageTemplate as string) ?? `Signal from ${signal.domain}: ${signal.rawPayload?.title ?? signal.type}`;
+      const channelConfig = (config.channelConfig as Record<string, unknown>) ?? {};
+
+      try {
+        const deliveryResult = await submitDelivery({
+          channel,
+          sourceDomain: signal.domain,
+          sourceEvent: signal.type,
+          sourceSignalId: signal.signalId,
+          recipient: config.recipient as string | undefined,
+          payload: {
+            event: 'signal_bus.rule_triggered',
+            title,
+            message,
+            severity: signal.severity,
+            domain: signal.domain,
+            signalType: signal.type,
+            signalId: signal.signalId,
+            ruleName: rule.name,
+            sourceDomain: signal.domain,
+            sourceEvent: signal.type,
+            ...signal.rawPayload,
+          },
+          channelConfig,
+          orgId: rule.orgId ?? undefined,
+        });
+        return {
+          action: 'notify_channel',
+          detail: `${channel} notification ${deliveryResult.status} — ${title}`,
+          entityId: deliveryResult.deliveryId,
+        };
+      } catch (err) {
+        return {
+          action: 'notify_channel',
+          detail: `${channel} notification failed: ${err instanceof Error ? err.message : 'unknown error'}`,
+        };
+      }
     }
     case 'publish_signal': {
       const targetDomain = (config.targetDomain as string) ?? 'cross-domain';

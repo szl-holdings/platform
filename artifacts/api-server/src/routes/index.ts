@@ -178,6 +178,9 @@ router.use(lazyMatch("/sentra", () => import("./sentra-agents"), "sentra-agents"
 // The /sentra/siem/ingest/:id endpoint is public (webhook push from external SIEM).
 router.use(lazyMatch("/sentra", () => import("./sentra-siem"), "sentra-siem"));
 
+// Sentra SIEM Export — outbound export of findings to Splunk (CEF), Sentinel (ASIM), Chronicle (UDM).
+router.use(lazyMatch("/sentra/siem-export", () => import("./sentra-siem-export"), "sentra-siem-export"));
+
 // Sentra Threat Hunter — hunt approval and remediation plan approval endpoints.
 // Publishes typed domain events to the signal mesh when analyst approves a hunt or plan.
 router.use(lazyMatch("/sentra", () => import("./sentra-hunt"), "sentra-hunt"));
@@ -401,6 +404,9 @@ router.use(
 
 router.use("/signal-bus", lazyMount(() => import("./signal-bus"), "signal-bus"));
 
+// Outbound Gateway — unified external delivery with tracking, retry, and audit.
+router.use("/outbound", lazyMount(() => import("./outbound-gateway"), "outbound-gateway"));
+
 router.use(lazyMatch("/mobile-biometric", () => import("./mobile-biometric"), "mobile-biometric"));
 
 // Precision Evolution Runtime (PER) — governed AI evolution control plane.
@@ -436,6 +442,9 @@ router.use(lazyMatch("/omnia", () => import("./omnia"), "omnia"));
 // POST /openai/voice-approval                   — auditable voice-driven HITL action approval with provenance
 // GET  /openai/daily-briefing/today             — today's daily briefing audio+provenance (mobile)
 router.use("/openai", openaiConversationsRouter);
+
+// Carlota Jo drip email engine — lead nurturing sequences, engagement tracking, unsubscribe.
+router.use(lazyMatch("/booking/drip", () => import("./carlota-drip"), "carlota-drip"));
 
 // Carlota Jo Consulting — AI advisor chat, booking, portal, and CRM routes
 router.use(

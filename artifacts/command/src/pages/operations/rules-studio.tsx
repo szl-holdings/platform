@@ -65,7 +65,8 @@ type Stats = {
 const DOMAINS = ['maritime', 'real-estate', 'legal', 'security', 'finance', 'workforce', 'hospitality', 'platform', 'ai', 'cross-domain', '*'];
 const SIGNAL_TYPES = ['anomaly', 'risk', 'opportunity', 'threshold-breach', 'state-change', 'position-update', 'sanctions-match', 'deadline', 'escalation', 'market-signal', 'compliance-flag', 'recommendation', 'approval', 'execution', 'outcome', 'telemetry', 'heartbeat', 'connector-event', 'custom', '*'];
 const SEVERITIES = ['info', 'low', 'medium', 'high', 'critical'];
-const ACTION_TYPES = ['open_matter', 'create_briefing_line', 'portfolio_alert', 'raise_threat', 'publish_signal'];
+const ACTION_TYPES = ['open_matter', 'create_briefing_line', 'portfolio_alert', 'raise_threat', 'publish_signal', 'notify_channel'];
+const NOTIFICATION_CHANNELS = ['webhook', 'email', 'sms', 'slack', 'teams', 'discord'];
 const SCENARIOS = ['sanctions-hit', 'threat-detected', 'lease-renewal'];
 
 const sevColor: Record<string, string> = {
@@ -82,6 +83,7 @@ const actionLabel: Record<string, string> = {
   portfolio_alert: 'PORTFOLIO ALERT',
   raise_threat: 'RAISE THREAT',
   publish_signal: 'PUBLISH SIGNAL',
+  notify_channel: 'NOTIFY CHANNEL',
 };
 
 function formatTs(ts: string | null): string {
@@ -315,6 +317,9 @@ function CreateRuleModal({ onClose, onCreated }: { onClose: () => void; onCreate
   const [minSeverity, setMinSeverity] = useState('medium');
   const [actionType, setActionType] = useState('open_matter');
   const [targetDomain, setTargetDomain] = useState('');
+  const [notifyChannel, setNotifyChannel] = useState('webhook');
+  const [notifyRecipient, setNotifyRecipient] = useState('');
+  const [notifyWebhookUrl, setNotifyWebhookUrl] = useState('');
   const [saving, setSaving] = useState(false);
 
   const actionConfigs: Record<string, Record<string, unknown>> = {
@@ -323,6 +328,11 @@ function CreateRuleModal({ onClose, onCreated }: { onClose: () => void; onCreate
     portfolio_alert: { alertType: 'exposure_change', dashboard: 'szl-holdings' },
     raise_threat: { threatCategory: 'escalation' },
     publish_signal: { targetDomain: targetDomain || 'cross-domain', targetType: 'escalation' },
+    notify_channel: {
+      channel: notifyChannel,
+      recipient: notifyRecipient || undefined,
+      channelConfig: notifyWebhookUrl ? { url: notifyWebhookUrl, webhookUrl: notifyWebhookUrl } : {},
+    },
   };
 
   async function handleSave() {
@@ -393,6 +403,28 @@ function CreateRuleModal({ onClose, onCreated }: { onClose: () => void; onCreate
               {ACTION_TYPES.map((a) => <option key={a} value={a}>{actionLabel[a]}</option>)}
             </select>
           </div>
+          {actionType === 'notify_channel' && (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={labelStyle}>CHANNEL</label>
+                  <select value={notifyChannel} onChange={(e) => setNotifyChannel(e.target.value)} style={inputStyle}>
+                    {NOTIFICATION_CHANNELS.map((c) => <option key={c} value={c}>{c.toUpperCase()}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={labelStyle}>RECIPIENT</label>
+                  <input value={notifyRecipient} onChange={(e) => setNotifyRecipient(e.target.value)} placeholder="email, phone, or user" style={inputStyle} />
+                </div>
+              </div>
+              {(notifyChannel === 'webhook' || notifyChannel === 'slack' || notifyChannel === 'teams' || notifyChannel === 'discord') && (
+                <div>
+                  <label style={labelStyle}>WEBHOOK URL</label>
+                  <input value={notifyWebhookUrl} onChange={(e) => setNotifyWebhookUrl(e.target.value)} placeholder="https://hooks.slack.com/..." style={inputStyle} />
+                </div>
+              )}
+            </>
+          )}
         </div>
 
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 24 }}>

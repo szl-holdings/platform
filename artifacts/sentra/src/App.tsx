@@ -31,6 +31,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   Activity,
   AlertTriangle,
+  ArrowUpRight,
   BarChart3,
   BookLock,
   BookOpen,
@@ -255,6 +256,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { path: '/edr/agents', label: 'Endpoint Mesh', icon: Cpu, comp: L(() => import('@/pages/endpoint-mesh')) },
       { path: '/siem/connections', label: 'SIEM Connections', icon: Zap, comp: L(() => import('@/pages/siem-connections')) },
+      { path: '/siem/export', label: 'SIEM Export', icon: ArrowUpRight, comp: L(() => import('@/pages/siem-export')) },
     ],
   },
   {

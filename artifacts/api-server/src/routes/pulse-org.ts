@@ -26,6 +26,7 @@
 
 import {
   db,
+  notificationRecipientsTable,
   orgMembersTable,
   pulseBriefingsTable,
   pulseExecBriefsTable,
@@ -43,6 +44,7 @@ import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { handleRouteError, sendBadRequest, sendNotFound, sendSuccess, sendUnauthorized } from '../lib/api-response';
 import { deliverToChannel, getConfiguredChannels, type OrgChannel, type BriefingPayload, type ChannelConfig } from '../lib/pulse-org-channel-adapters';
+import { submitDelivery } from '../services/outbound-gateway';
 import { logger } from '../lib/logger';
 import { validateBody } from '../lib/validation';
 import { bodyShape } from '@szl-holdings/contracts/common';
@@ -786,6 +788,19 @@ async function fanOutOrgPublication(
   const allPrefs = await db.select().from(pulseOrgUserPreferencesTable).where(inArray(pulseOrgUserPreferencesTable.userId, memberUserIds.slice(0, 500)));
   const prefMap = new Map(allPrefs.map(p => [p.userId, p]));
 
+  // Load phone numbers for SMS delivery
+  const phoneRecords = await db
+    .select({ userId: notificationRecipientsTable.userId, phoneNumber: notificationRecipientsTable.phoneNumber })
+    .from(notificationRecipientsTable)
+    .where(
+      and(
+        inArray(notificationRecipientsTable.userId, memberUserIds.slice(0, 500)),
+        eq(notificationRecipientsTable.smsEnabled, true),
+        eq(notificationRecipientsTable.isActive, true),
+      ),
+    );
+  const phoneMap = new Map(phoneRecords.filter(p => p.userId !== null).map(p => [p.userId!, p.phoneNumber]));
+
   // Enqueue delivery rows (skip if retries only)
   if (!opts.onlyRetries) {
     for (const userId of memberUserIds) {
@@ -823,10 +838,11 @@ async function fanOutOrgPublication(
       const prefs = prefMap.get(delivery.userId);
       const ch = delivery.channel as OrgChannel;
 
+      const userPhone = phoneMap.get(delivery.userId) ?? null;
       const recipient = {
         userId: delivery.userId,
         email: user?.email ?? null,
-        phone: null,
+        phone: userPhone,
         displayName: user?.displayName ?? null,
         emailOptOut: prefs?.emailOptOut ?? false,
         smsOptOut: prefs?.smsOptOut ?? false,
@@ -837,7 +853,45 @@ async function fanOutOrgPublication(
       const enrichedPayload = { ...briefPayload!, unsubscribeUrl: ch === 'email' ? unsubUrl : undefined };
 
       try {
-        const result = await deliverToChannel(ch, enrichedPayload, recipient, config);
+        const gatewayChannel = (ch === 'email' ? 'email' : ch === 'sms' ? 'sms' : ch === 'slack' ? 'slack' : ch === 'teams' ? 'teams' : 'webhook') as 'email' | 'sms' | 'slack' | 'teams' | 'webhook';
+        const useGateway = ch === 'email' || ch === 'sms';
+
+        let result: { status: string; error?: string; retryable?: boolean; providerMessageId?: string; suppressReason?: string };
+
+        if (useGateway) {
+          const recipientAddress = ch === 'email'
+            ? (recipient.email ?? undefined)
+            : (recipient.phone ?? undefined);
+
+          const gatewayResult = await submitDelivery({
+            channel: gatewayChannel,
+            sourceDomain: 'pulse',
+            sourceEvent: 'briefing.delivery',
+            recipient: recipientAddress,
+            payload: {
+              event: 'pulse.briefing.delivered',
+              title: enrichedPayload.subject ?? enrichedPayload.title,
+              subject: enrichedPayload.subject ?? enrichedPayload.title,
+              message: enrichedPayload.textBody ?? enrichedPayload.body ?? '',
+              html: enrichedPayload.htmlBody ?? enrichedPayload.body ?? '',
+              body: enrichedPayload.body ?? '',
+              to: ch === 'email' ? recipient.email : undefined,
+              phone: ch === 'sms' ? recipient.phone : undefined,
+              unsubscribeUrl: enrichedPayload.unsubscribeUrl,
+              publicationId: delivery.publicationId,
+            },
+            orgId: orgId ? String(orgId) : undefined,
+          });
+          result = {
+            status: gatewayResult.status === 'delivered' ? 'delivered' : 'failed',
+            error: gatewayResult.error,
+            retryable: gatewayResult.retryable,
+            providerMessageId: gatewayResult.providerMessageId,
+          };
+        } else {
+          result = await deliverToChannel(ch, enrichedPayload, recipient, config);
+        }
+
         const statusMap: Record<string, 'delivered' | 'failed' | 'suppressed'> = {
           delivered: 'delivered',
           failed: 'failed',
