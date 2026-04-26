@@ -1,6 +1,6 @@
 import { GuardianDecisionEngine } from '@workspace/guardian/decision-engine';
 import type { PlanGraph, PlanStep } from '@workspace/planner';
-import type { CodeSandbox } from '@workspace/tool-mesh';
+import { defaultGateway, type CodeSandbox } from '@workspace/tool-mesh';
 import { randomUUID } from 'node:crypto';
 import { extractApprovalInterrupt } from '../approval-interrupt.js';
 import { type CheckpointStore, saveCheckpoint } from '../checkpoint.js';
@@ -73,6 +73,65 @@ export interface ExecutePhaseOutput {
 }
 
 const defaultGuardian = new GuardianDecisionEngine();
+
+/**
+ * Tool Mesh step executor — routes each plan step through the Tool Mesh
+ * Gateway's full guardrail chain (schema validation, PII scan, injection
+ * detection, policy tier enforcement, rate limiting, fallback chains).
+ *
+ * If the step has no `route.toolId`, falls through to the default stub so the
+ * cognitive loop continues to function for model-only steps.
+ *
+ * Pass this as `options.stepExecutor` in `CognitiveRuntimeOptions` to
+ * replace the simulation stub with real tool execution.
+ */
+export const toolMeshStepExecutor: StepExecutorFn = async (step, context) => {
+  if (context.dryRun) {
+    return {
+      dryRun: true,
+      stepId: step.stepId,
+      stepTitle: step.title,
+      message: `Dry-run: step '${step.title}' acknowledged without side-effects.`,
+    };
+  }
+
+  const toolId = step.route.toolId;
+  if (!toolId) {
+    return {
+      stepId: step.stepId,
+      stepTitle: step.title,
+      routeClass: step.route.routeClass,
+      model: step.route.model,
+      result: `Step '${step.title}' has no toolId — routed to model '${step.route.model ?? 'default'}'.`,
+      completedAt: new Date().toISOString(),
+    };
+  }
+
+  const result = await defaultGateway.invoke(toolId, step.inputs ?? {}, {
+    requestId: `${context.traceId}-step-${step.stepId}`,
+    agentId: context.agentId,
+    workflowId: context.planId,
+    dryRun: false,
+  });
+
+  if (!result.success) {
+    throw new Error(
+      `Tool Mesh step executor: tool '${toolId}' failed — ${result.error ?? 'unknown error'} (outcome: ${result.decisionOutcome ?? 'unknown'})`,
+    );
+  }
+
+  return {
+    stepId: step.stepId,
+    stepTitle: step.title,
+    toolId,
+    routeClass: step.route.routeClass,
+    output: result.output,
+    traceId: result.traceId,
+    latencyMs: result.latencyMs,
+    decisionOutcome: result.decisionOutcome,
+    completedAt: new Date().toISOString(),
+  };
+};
 
 const defaultStepExecutor: StepExecutorFn = async (step, context) => {
   if (context.dryRun) {
@@ -299,7 +358,7 @@ export async function executePhase(
     opts.stepExecutor ??
     (opts.codeSandbox
       ? createCodeStepExecutor(opts.codeSandbox)
-      : defaultStepExecutor);
+      : toolMeshStepExecutor);
 
   const stepResults: ExecuteStepResult[] = [];
   let blockedByGuardian = false;

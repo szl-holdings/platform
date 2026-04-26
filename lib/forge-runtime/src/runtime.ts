@@ -143,11 +143,14 @@ export class ForgeRuntime {
         const trustedCallerOverrides: Partial<ForgeSandboxPolicy> = task.sandboxPolicy
           ? {
               ...(task.sandboxPolicy as Partial<ForgeSandboxPolicy>),
+              // Strip all governance-critical fields — callers must not be able
+              // to weaken audit, evidence capture, or execution guardrails.
               approvalClass: undefined,
               allowedDomains: undefined,
               allowedTools: undefined,
               maxCostUsd: undefined,
               isDryRunDefault: undefined,
+              requiresEvidenceCapture: undefined,
             }
           : {};
 

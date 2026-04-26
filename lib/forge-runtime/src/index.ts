@@ -1,3 +1,4 @@
+export { runCodeHandler } from './code-handler.js';
 export type {
   AgentExecutionConfig,
   AgentRunContext,

@@ -4,6 +4,7 @@ export * from './executor.js';
 export * from './gateway.js';
 export * from './manifest.js';
 export * from './mcp-bridge.js';
+export * from './nexus-handlers.js';
 export * from './rate-limiter.js';
 export * from './registry.js';
 export * from './schema-validator.js';

@@ -3005,9 +3005,15 @@ importers:
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../services
+      '@workspace/tool-mesh':
+        specifier: workspace:*
+        version: link:../../packages/tool-mesh
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.45.2(@opentelemetry/api@1.9.1)(@types/pg@8.18.0)(pg@8.20.0)
+      esbuild:
+        specifier: ^0.25
+        version: 0.25.12
       pino:
         specifier: ^9
         version: 9.14.0

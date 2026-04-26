@@ -1,7 +1,9 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { type NexusIngestJobRow, type NexusIngestStatus, type NexusMemoryRow, type NexusMemoryTier, type NexusMemoryType, type NexusOrchestrationPlanRow, type NexusOrchestrationStatus, type NexusProtocolToolRow, type NexusSkillPrimitiveType, type NexusSkillRow, type NexusToolProtocol, db, nexusIngestJobsTable, nexusMemoryTable, nexusOrchestrationPlansTable, nexusProtocolToolsTable, nexusSkillsTable } from '@szl-holdings/db';
+import { forgeEvidenceStore, forgeRuntime, forgeTimeline, runCodeHandler } from '@szl-holdings/forge-runtime';
 import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
+import { defaultCatalogSearch, defaultToolRegistry, registerNexusHandlers } from '@workspace/tool-mesh';
 import { type NextFunction, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { gatewayInfer } from '../lib/ai-gateway';
@@ -3464,6 +3466,210 @@ router.get('/status', async (_req: Request, res: Response) => {
     });
   } catch (err) {
     handleRouteError(res, err, 'GET /api/nexus/status');
+  }
+});
+
+// ─── Bootstrap: register FORGE code handler + NEXUS tool handlers ─────────────
+// Idempotent — safe to call at module-load time.
+
+registerNexusHandlers();
+
+// Register the code handler in the FORGE runtime so `type: 'code'` tasks
+// execute TypeScript in a governed V8 sandbox with the Tool Mesh callTool bridge.
+forgeRuntime.registerHandler('code', runCodeHandler);
+
+// Seed the catalog search index with NEXUS skills from the in-memory store so
+// POST /api/nexus/catalog/search returns results immediately after seeding.
+function syncCatalogIndex() {
+  defaultCatalogSearch.indexTools(defaultToolRegistry.list());
+  const skillEntries = Array.from(skillStore.values()).map((s) => ({
+    id: s.id,
+    name: s.name,
+    description: s.description,
+    tags: s.tags,
+    domain: s.pattern,
+    primitiveType: s.primitiveType,
+    enabled: s.enabled,
+    sourceRepo: s.sourceRepo,
+    usageCount: s.usageCount,
+  }));
+  defaultCatalogSearch.indexSkills(skillEntries);
+}
+
+// ─── Catalog search route ──────────────────────────────────────────────────────
+
+const catalogSearchBodySchema = z.object({
+  query: z.string().min(1).max(500),
+  topK: z.number().int().positive().max(100).default(10),
+  kinds: z.array(z.enum(['tool', 'skill'])).optional(),
+  domain: z.string().optional(),
+  enabledOnly: z.boolean().default(false),
+});
+
+router.use(['/catalog'], authMiddleware({ required: true }));
+
+router.post('/catalog/search', async (req: Request, res: Response) => {
+  try {
+    const parsed = catalogSearchBodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      sendBadRequest(res, 'Validation failed', parsed.error.issues);
+      return;
+    }
+    // Ensure index is up to date with the current in-memory stores
+    syncCatalogIndex();
+
+    const hits = defaultCatalogSearch.search(parsed.data);
+    const counts = defaultCatalogSearch.count();
+    sendSuccess(res, {
+      query: parsed.data.query,
+      topK: parsed.data.topK,
+      totalHits: hits.length,
+      indexedTools: counts.tools,
+      indexedSkills: counts.skills,
+      hits,
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'POST /api/nexus/catalog/search');
+  }
+});
+
+// ─── Code execution routes ─────────────────────────────────────────────────────
+
+const codeExecuteBodySchema = z.object({
+  source: z.string().min(1).max(100_000),
+  label: z.string().max(200).default('code execution'),
+  domain: z.string().default('global'),
+  isDryRun: z.boolean().default(false),
+  approvalClass: z.enum(['observe_only', 'propose_only', 'approval_required', 'approved_execute']).optional(),
+  timeoutMs: z.number().int().positive().max(60_000).optional(),
+  sandboxPolicy: z.record(z.unknown()).optional(),
+});
+
+const codeExecutionsQuerySchema = z.object({
+  limit: z.coerce.number().int().positive().max(100).default(20),
+  status: z.string().optional(),
+  domain: z.string().optional(),
+});
+
+router.use(['/code'], authMiddleware({ required: true }), perUserWriteSlidingLimiter);
+
+router.post('/code/execute', async (req: Request, res: Response) => {
+  try {
+    const parsed = codeExecuteBodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      sendBadRequest(res, 'Validation failed', parsed.error.issues);
+      return;
+    }
+
+    const { source, label, domain, isDryRun, approvalClass, timeoutMs, sandboxPolicy } = parsed.data;
+
+    const execution = await forgeRuntime.submit({
+      taskId: randomUUID(),
+      type: 'code',
+      domain: domain as Parameters<typeof forgeRuntime.submit>[0]['domain'],
+      tenantId: req.user?.tenantId ?? null,
+      userId: req.user?.userId ?? null,
+      label,
+      isDryRun,
+      approvalClass: approvalClass as Parameters<typeof forgeRuntime.submit>[0]['approvalClass'],
+      payload: {
+        source,
+        ...(timeoutMs ? { timeoutMs } : {}),
+      },
+      sandboxPolicy: sandboxPolicy as Record<string, unknown> | undefined,
+      correlationId: req.headers['x-correlation-id'] as string | undefined,
+    });
+
+    sendCreated(res, {
+      executionId: execution.executionId,
+      status: execution.status,
+      taskType: 'code',
+      label,
+      domain,
+      startedAt: execution.startedAt,
+      result: execution.result,
+      error: execution.error,
+      evidenceIds: execution.evidenceIds,
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'POST /api/nexus/code/execute');
+  }
+});
+
+router.get('/code/executions', (req: Request, res: Response) => {
+  try {
+    const parsed = codeExecutionsQuerySchema.safeParse(req.query);
+    if (!parsed.success) {
+      sendBadRequest(res, 'Validation failed', parsed.error.issues);
+      return;
+    }
+    const { limit, status, domain } = parsed.data;
+    const tenantId = req.user?.tenantId;
+
+    const executions = forgeRuntime.getHistory({
+      limit,
+      status: status as Parameters<typeof forgeRuntime.getHistory>[0]['status'],
+      domain: domain as Parameters<typeof forgeRuntime.getHistory>[0]['domain'],
+      ...(tenantId ? { tenantId } : {}),
+    }).filter((e) => e.task.type === 'code');
+
+    sendSuccess(res, {
+      total: executions.length,
+      executions: executions.map((e) => ({
+        executionId: e.executionId,
+        status: e.status,
+        label: e.task.label,
+        domain: e.task.domain,
+        startedAt: e.startedAt,
+        completedAt: e.completedAt,
+        latencyMs: e.latencyMs,
+        costUsd: e.costUsd,
+        evidenceIds: e.evidenceIds,
+        error: e.error,
+      })),
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'GET /api/nexus/code/executions');
+  }
+});
+
+router.get('/code/executions/:id', (req: Request, res: Response) => {
+  try {
+    const execution = forgeRuntime.getExecution(req.params.id);
+    if (!execution) {
+      sendError(res, `Execution '${req.params.id}' not found`, 404);
+      return;
+    }
+    // Tenant isolation: only return executions belonging to the caller's tenant
+    const callerTenant = req.user?.tenantId;
+    if (callerTenant && execution.task.tenantId && execution.task.tenantId !== callerTenant) {
+      sendError(res, `Execution '${req.params.id}' not found`, 404);
+      return;
+    }
+
+    const timelineEvents = forgeTimeline.getEventsForExecution(execution.executionId, { limit: 100 });
+    const evidenceItems = forgeEvidenceStore.getForExecution(execution.executionId);
+
+    sendSuccess(res, {
+      executionId: execution.executionId,
+      status: execution.status,
+      label: execution.task.label,
+      domain: execution.task.domain,
+      taskType: execution.task.type,
+      isDryRun: execution.task.isDryRun,
+      startedAt: execution.startedAt,
+      completedAt: execution.completedAt,
+      latencyMs: execution.latencyMs,
+      costUsd: execution.costUsd,
+      result: execution.result,
+      error: execution.error,
+      evidenceIds: execution.evidenceIds,
+      approvalId: execution.approvalId,
+      timelineEvents,
+      evidence: evidenceItems,
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'GET /api/nexus/code/executions/:id');
   }
 });
 
