@@ -169,6 +169,45 @@ async function callGeminiForEval(
   return JSON.parse(jsonMatch[0]) as Record<string, unknown>;
 }
 
+async function callHuggingFaceForEval(
+  modelId: string,
+  input: string,
+): Promise<Record<string, unknown>> {
+  const hfToken = process.env.HUGGINGFACE_API_KEY || process.env.HF_TOKEN;
+  if (!hfToken) throw new Error('HUGGINGFACE_API_KEY not configured for HuggingFace eval');
+
+  const hfBase = process.env.HF_INFERENCE_BASE_URL ?? 'https://router.huggingface.co/hf-inference/v1';
+
+  const response = await fetch(`${hfBase}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${hfToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: modelId,
+      messages: [
+        { role: 'system', content: `${SYSTEM_PROMPT} Respond ONLY with valid JSON, no markdown, no explanation.` },
+        { role: 'user', content: `Analyze: ${input}\n\nRespond with JSON only.` },
+      ],
+      max_tokens: 512,
+      temperature: 0.1,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HuggingFace eval call failed: ${response.status} ${await response.text().catch(() => '')}`);
+  }
+
+  const data = (await response.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+  const content = data.choices?.[0]?.message?.content ?? '{}';
+  const jsonMatch = content.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('No JSON in HuggingFace response');
+  return JSON.parse(jsonMatch[0]) as Record<string, unknown>;
+}
+
 async function callModelForEval(
   modelId: string,
   provider: string,
@@ -194,6 +233,10 @@ async function callModelForEval(
 
   if (provider === 'gemini' || modelId.startsWith('gemini') || modelId.startsWith('tunedModels/')) {
     return callGeminiForEval(modelId, input);
+  }
+
+  if (provider === 'huggingface' || modelId.includes('/')) {
+    return callHuggingFaceForEval(modelId, input);
   }
 
   throw new Error(`Unsupported provider '${provider}' for eval — no fallback allowed`);
@@ -306,6 +349,9 @@ function estimateCostFromModel(
   }
   if (provider === 'gemini' || modelId.startsWith('gemini') || modelId.startsWith('tunedModels/')) {
     return { input: 0.00035, output: 0.00105 };
+  }
+  if (provider === 'huggingface' || modelId.includes('/')) {
+    return { input: 0.0002, output: 0.0002 };
   }
   return { input: 0.001, output: 0.002 };
 }

@@ -13,7 +13,7 @@ import { curateDatasetForAgent } from './domain-curators.js';
 import { runValidationGate, type ValidationGateResult } from './validation-gate.js';
 import { runDataQualityGate } from './data-quality-gate.js';
 
-export type FineTuningProvider = 'openai' | 'gemini';
+export type FineTuningProvider = 'openai' | 'gemini' | 'huggingface';
 
 export interface FineTuningJobRequest {
   agentId: string;
@@ -207,6 +207,182 @@ async function submitGeminiFineTuning(
   return { providerJobId: data.name };
 }
 
+async function submitHuggingFaceFineTuning(
+  samples: string,
+  baseModel: string,
+  agentId: string,
+  hyperparameters: FineTuningJobRequest['hyperparameters'],
+): Promise<{ providerJobId: string }> {
+  const hfToken = process.env.HUGGINGFACE_API_KEY || process.env.HF_TOKEN;
+  if (!hfToken) throw new Error('HUGGINGFACE_API_KEY not configured for HuggingFace fine-tuning');
+
+  const hfUsername = process.env.HF_USERNAME;
+  if (!hfUsername) throw new Error('HF_USERNAME not configured (required for AutoTrain dataset upload)');
+
+  const autotrainBase = process.env.HF_AUTOTRAIN_BASE_URL ?? 'https://huggingface.co/api/autotrain';
+  const hubApiBase = process.env.HF_HUB_API_BASE_URL ?? 'https://huggingface.co/api';
+
+  const projectName = `szl-${agentId}-ft-${Date.now()}`;
+  const datasetRepoId = `${hfUsername}/${projectName}-data`;
+
+  const authHeaders: Record<string, string> = {
+    Authorization: `Bearer ${hfToken}`,
+    'Content-Type': 'application/json',
+  };
+
+  const createRepoResp = await fetch(`${hubApiBase}/repos/create`, {
+    method: 'POST',
+    headers: authHeaders,
+    body: JSON.stringify({ type: 'dataset', name: `${projectName}-data`, private: true }),
+  });
+
+  if (!createRepoResp.ok) {
+    const err = await createRepoResp.text().catch(() => '');
+    if (!err.includes('You already created this dataset repo')) {
+      throw new Error(`HF dataset repo creation failed: ${createRepoResp.status} ${err}`);
+    }
+  }
+
+  /**
+   * AutoTrain SFT expects rows with `instruction` and `output` string columns.
+   * The incoming `samples` is openai-jsonl: each line is {"messages":[{role,content}...]}.
+   * Transform to {"instruction":"<user turn>","output":"<assistant turn>"} before upload.
+   */
+  const hfSftLines = samples
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => {
+      try {
+        const row = JSON.parse(line) as {
+          messages?: Array<{ role: string; content: string }>;
+          instruction?: string;
+          output?: string;
+        };
+        if (row.instruction !== undefined && row.output !== undefined) {
+          return JSON.stringify({ instruction: row.instruction, output: row.output });
+        }
+        const messages = row.messages ?? [];
+        const userMsg = [...messages].reverse().find((m) => m.role === 'user');
+        const assistantMsg = [...messages].reverse().find((m) => m.role === 'assistant');
+        if (!userMsg || !assistantMsg) return null;
+        return JSON.stringify({ instruction: userMsg.content, output: assistantMsg.content });
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean)
+    .join('\n');
+
+  if (!hfSftLines) {
+    throw new Error('HF fine-tuning: no valid instruction/output pairs found after converting training data');
+  }
+
+  const fileContent = Buffer.from(hfSftLines, 'utf-8').toString('base64');
+  const commitResp = await fetch(
+    `${hubApiBase}/datasets/${datasetRepoId}/commit/main`,
+    {
+      method: 'POST',
+      headers: authHeaders,
+      body: JSON.stringify({
+        commit_message: `Upload training data for ${agentId} fine-tuning`,
+        operations: [
+          {
+            operation: 'addOrUpdate',
+            path: 'train.jsonl',
+            encoding: 'base64',
+            content: fileContent,
+          },
+        ],
+      }),
+    },
+  );
+
+  if (!commitResp.ok) {
+    const err = await commitResp.text().catch(() => '');
+    throw new Error(`HF training data upload failed: ${commitResp.status} ${err}`);
+  }
+
+  const autotrainBody = {
+    proj_name: projectName,
+    username: hfUsername,
+    task: 'llm-sft',
+    config: {
+      base_model: baseModel,
+      data_path: datasetRepoId,
+      train_split: 'train',
+      col_mapping: { text_column: 'instruction', target_column: 'output' },
+      model_max_length: 2048,
+      epochs: hyperparameters?.nEpochs ?? 3,
+      batch_size: hyperparameters?.batchSize ?? 4,
+      lr: hyperparameters?.learningRateMultiplier ? hyperparameters.learningRateMultiplier * 2e-4 : 2e-4,
+      mixed_precision: 'bf16',
+      use_peft: true,
+      quantization: 'int4',
+    },
+  };
+
+  const autotrainResp = await fetch(`${autotrainBase}/projects`, {
+    method: 'POST',
+    headers: authHeaders,
+    body: JSON.stringify(autotrainBody),
+  });
+
+  if (!autotrainResp.ok) {
+    const err = await autotrainResp.text().catch(() => '');
+    throw new Error(`HF AutoTrain job submission failed: ${autotrainResp.status} ${err}`);
+  }
+
+  const autotrainData = (await autotrainResp.json()) as { id?: string; proj_name?: string };
+  const providerJobId = autotrainData.id ?? autotrainData.proj_name ?? projectName;
+
+  return { providerJobId };
+}
+
+async function pollHuggingFaceJobStatus(providerJobId: string): Promise<{
+  status: string;
+  fineTunedModelId?: string;
+  error?: string;
+}> {
+  const hfToken = process.env.HUGGINGFACE_API_KEY || process.env.HF_TOKEN;
+  if (!hfToken) throw new Error('HUGGINGFACE_API_KEY not configured');
+
+  const autotrainBase = process.env.HF_AUTOTRAIN_BASE_URL ?? 'https://huggingface.co/api/autotrain';
+
+  const response = await fetch(`${autotrainBase}/projects/${providerJobId}`, {
+    headers: { Authorization: `Bearer ${hfToken}` },
+  });
+
+  if (!response.ok) {
+    const errBody = await response.text().catch(() => '');
+    throw new Error(`HF AutoTrain job poll failed: ${response.status} ${errBody}`);
+  }
+
+  const data = (await response.json()) as {
+    status?: string;
+    model_id?: string;
+    error?: string;
+  };
+
+  const rawStatus = (data.status ?? 'running').toLowerCase();
+  const statusMap: Record<string, string> = {
+    completed: 'succeeded',
+    success: 'succeeded',
+    error: 'failed',
+    failed: 'failed',
+    running: 'running',
+    pending: 'pending',
+    queued: 'pending',
+    training: 'running',
+  };
+  const mappedStatus = statusMap[rawStatus] ?? 'running';
+
+  return {
+    status: mappedStatus,
+    ...(data.model_id ? { fineTunedModelId: data.model_id } : {}),
+    ...(data.error ? { error: data.error } : {}),
+  };
+}
+
 async function pollOpenAIJobStatus(providerJobId: string): Promise<{
   status: string;
   fineTunedModelId?: string;
@@ -391,6 +567,9 @@ export async function submitFineTuningJob(
   if (provider === 'openai') {
     const result = await submitOpenAIFineTuning(jsonlContent, baseModel, hyperparameters, suffix, isDPO);
     providerJobId = result.providerJobId;
+  } else if (provider === 'huggingface') {
+    const result = await submitHuggingFaceFineTuning(jsonlContent, baseModel, agentId, hyperparameters);
+    providerJobId = result.providerJobId;
   } else {
     const result = await submitGeminiFineTuning(jsonlContent, baseModel, agentId, hyperparameters);
     providerJobId = result.providerJobId;
@@ -503,6 +682,8 @@ export async function pollJobStatus(jobId: string): Promise<FineTuningJobStatus>
   try {
     if (job.provider === 'openai') {
       polledStatus = await pollOpenAIJobStatus(providerJobId);
+    } else if (job.provider === 'huggingface') {
+      polledStatus = await pollHuggingFaceJobStatus(providerJobId);
     } else {
       polledStatus = await pollGeminiJobStatus(providerJobId);
     }

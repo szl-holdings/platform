@@ -56,7 +56,7 @@ const fineTuningRouter: IRouter = Router();
 
 const submitJobSchema = z.object({
   agentId: z.string().min(1).max(100),
-  provider: z.enum(['openai', 'gemini']).optional(),
+  provider: z.enum(['openai', 'gemini', 'huggingface']).optional(),
   baseModel: z.string().max(200).optional(),
   format: z.enum(['openai-jsonl', 'openai-dpo']).optional(),
   hyperparameters: z
@@ -149,6 +149,7 @@ fineTuningRouter.post(
       const defaultModels: Record<string, string> = {
         openai: 'gpt-4o-mini-2024-07-18',
         gemini: 'gemini-1.5-flash-001',
+        huggingface: 'Qwen/Qwen3-8B',
       };
 
       const job = await submitFineTuningJob({
