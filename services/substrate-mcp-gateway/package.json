@@ -18,20 +18,22 @@
     "test": "tsx --test tests/e2e.test.ts"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@szl-holdings/evidence-graph": "workspace:*",
+    "@szl-holdings/policy-engine": "workspace:*",
     "@szl/substrate": "workspace:*",
     "@szl/substrate-client": "workspace:*",
-    "@szl-holdings/policy-engine": "workspace:*",
-    "@szl-holdings/evidence-graph": "workspace:*",
     "@workspace/approvals-inbox": "workspace:*",
-    "@workspace/tool-mesh": "workspace:*",
     "@workspace/cognitive-observability": "workspace:*",
+    "@workspace/nexus-mcp": "workspace:*",
+    "@workspace/tool-mesh": "workspace:*",
     "express": "^5.0.0",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "typescript": "catalog:",
-    "@types/node": "catalog:",
     "@types/express": "^5.0.0",
-    "tsx": "catalog:"
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }

@@ -20,7 +20,9 @@
     "./mobile": "./src/mobile.tsx"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@tanstack/react-query": "catalog:",
+    "@workspace/nexus-mcp": "workspace:*",
     "lucide-react": "catalog:"
   },
   "peerDependencies": {

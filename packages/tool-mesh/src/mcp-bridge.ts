@@ -1,7 +1,24 @@
+/**
+ * Tool Mesh MCP Bridge
+ *
+ * Bridges the ToolMeshGateway's progressive-discovery architecture into the
+ * official MCP SDK via a NexusMcpServer wrapper. All meta-tools
+ * (search_tools, get_tool_details, call_tool), manifest-backed tools, and
+ * external registrations are wired to the SDK's typed tool API so they can
+ * be served over any SDK transport (SSE, Streamable HTTP, stdio).
+ *
+ * The existing progressive-discovery logic, guardrail chain, PII scanning,
+ * injection detection, and approval gating are preserved — they execute
+ * transparently inside each tool handler.
+ */
+
 import { globalCollector } from '@workspace/cognitive-observability';
+import { NexusMcpServer, buildTenantInstructions } from '@workspace/nexus-mcp';
 import { type GatewayInvocationResult, defaultGateway, type ToolMeshGateway } from './gateway.js';
 import type { ToolManifest } from './manifest.js';
 import { type ToolRegistry, defaultToolRegistry } from './registry.js';
+
+// ─── Public types ──────────────────────────────────────────────────────────────
 
 export interface McpToolDefinition {
   name: string;
@@ -39,6 +56,16 @@ export interface ProgressiveDiscoveryConfig {
   avgTokensPerToolSchema: number;
 }
 
+export interface ExternalToolRegistration {
+  name: string;
+  description: string;
+  inputSchema: Record<string, unknown>;
+  requiresApproval: boolean;
+  handler: (args: Record<string, unknown>) => Promise<unknown>;
+}
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
 const DEFAULT_DISCOVERY_CONFIG: ProgressiveDiscoveryConfig = {
   enabled: true,
   contextWindowTokens: 128_000,
@@ -47,6 +74,8 @@ const DEFAULT_DISCOVERY_CONFIG: ProgressiveDiscoveryConfig = {
 };
 
 const MCP_PROTOCOL_VERSION = '2025-11-25';
+
+// ─── Meta-tool definitions ────────────────────────────────────────────────────
 
 const META_TOOL_SEARCH: McpToolDefinition = {
   name: 'search_tools',
@@ -97,6 +126,8 @@ const META_TOOL_CALL: McpToolDefinition = {
   },
 };
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function manifestToMcpTool(manifest: ToolManifest): McpToolDefinition {
   const schema = manifest.inputSchema;
   let properties: Record<string, unknown> = {};
@@ -129,13 +160,7 @@ function manifestToMcpTool(manifest: ToolManifest): McpToolDefinition {
   };
 }
 
-export interface ExternalToolRegistration {
-  name: string;
-  description: string;
-  inputSchema: Record<string, unknown>;
-  requiresApproval: boolean;
-  handler: (args: Record<string, unknown>) => Promise<unknown>;
-}
+// ─── ToolMeshMcpBridge ────────────────────────────────────────────────────────
 
 export class ToolMeshMcpBridge {
   private readonly registry: ToolRegistry;
@@ -145,6 +170,8 @@ export class ToolMeshMcpBridge {
   private readonly externalTools = new Map<string, ExternalToolRegistration>();
   private readonly discoveryConfig: ProgressiveDiscoveryConfig;
   private readonly listChangedListeners = new Set<() => void>();
+  private _nexusServer: NexusMcpServer | null = null;
+
   /**
    * Tracks tool IDs that a client has explicitly inspected via `get_tool_details`
    * during the current session. Tools in this set are included with their full
@@ -170,6 +197,7 @@ export class ToolMeshMcpBridge {
 
     if (registry.onToolsChanged) {
       registry.onToolsChanged(() => {
+        this._nexusServer = null; // invalidate cached NexusMcpServer on registry change
         for (const listener of this.listChangedListeners) {
           try {
             listener();
@@ -180,6 +208,125 @@ export class ToolMeshMcpBridge {
       });
     }
   }
+
+  // ── SDK integration ───────────────────────────────────────────────────────
+
+  /**
+   * Returns (or lazily creates) a NexusMcpServer pre-loaded with all
+   * progressive-discovery tools, manifest-backed tools, and external tool
+   * registrations. Connect the returned server to any SDK transport
+   * (SSEServerTransport, StreamableHTTPServerTransport, StdioServerTransport)
+   * to serve the full tool mesh over the official MCP protocol.
+   *
+   * The NexusMcpServer is invalidated whenever the underlying registry changes
+   * so newly registered or deregistered tools are always reflected.
+   */
+  toNexusMcpServer(): NexusMcpServer {
+    if (this._nexusServer) return this._nexusServer;
+
+    const server = new NexusMcpServer({
+      name: this.serverName,
+      version: this.serverVersion,
+      enableSampling: false,
+      enableElicitation: false,
+      enableTasks: true,
+      enableApps: false,
+      enableInstructions: true,
+      enableDiscovery: true,
+      enableRoots: false,
+      instructions: buildTenantInstructions({ tenantId: 'tool-mesh', domain: 'analytics' }),
+    });
+
+    // Meta-tools — always registered regardless of progressive mode
+    this._registerMetaTool(server, META_TOOL_SEARCH, (args) =>
+      Promise.resolve(this.handleSearchTools(args)),
+    );
+    this._registerMetaTool(server, META_TOOL_DETAILS, (args) =>
+      Promise.resolve(this.handleGetToolDetails(args)),
+    );
+    this._registerMetaTool(server, META_TOOL_CALL, async (args) => {
+      const name = typeof args.name === 'string' ? args.name : '';
+      const innerArgs =
+        args.args && typeof args.args === 'object' && !Array.isArray(args.args)
+          ? (args.args as Record<string, unknown>)
+          : {};
+      return this.call({ name, arguments: innerArgs }, { requestId: 'meta-call' });
+    });
+
+    // In non-progressive mode also register full manifest tools directly
+    if (!this.isProgressiveMode()) {
+      for (const manifest of this.registry.list({ enabled: true })) {
+        const mcpDef = manifestToMcpTool(manifest);
+        this._registerMetaTool(server, mcpDef, async (args) =>
+          this.call({ name: manifest.id, arguments: args }, { requestId: manifest.id }),
+        );
+      }
+    }
+
+    // External tools
+    for (const [, ext] of this.externalTools) {
+      this._registerMetaTool(
+        server,
+        {
+          name: ext.name,
+          description: ext.description,
+          inputSchema: this._externalInputSchema(ext),
+        },
+        async (args) => {
+          if (ext.requiresApproval) {
+            return {
+              content: [
+                {
+                  type: 'text' as const,
+                  text: `Error: External tool '${ext.name}' requires human approval before execution`,
+                },
+              ],
+              isError: true,
+            };
+          }
+          try {
+            const output = await ext.handler(args);
+            const text = typeof output === 'string' ? output : JSON.stringify(output, null, 2);
+            return { content: [{ type: 'text' as const, text }] };
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            return { content: [{ type: 'text' as const, text: `Error: ${message}` }], isError: true };
+          }
+        },
+      );
+    }
+
+    // Announce the initial tool list to any connected clients
+    void server.notifyListChanged('tools/list_changed');
+
+    this._nexusServer = server;
+    return server;
+  }
+
+  private _registerMetaTool(
+    server: NexusMcpServer,
+    def: McpToolDefinition,
+    handler: (args: Record<string, unknown>) => Promise<McpCallResult>,
+  ): void {
+    server.rawTool(def.name, def.description, def.inputSchema, handler);
+  }
+
+  private _externalInputSchema(ext: ExternalToolRegistration): McpToolDefinition['inputSchema'] {
+    const properties: Record<string, unknown> = {};
+    const required: string[] = [];
+    for (const [key, val] of Object.entries(ext.inputSchema)) {
+      if (key === 'required' && Array.isArray(val)) {
+        required.push(...(val as string[]));
+      } else {
+        properties[key] = val;
+      }
+    }
+    const inputSchema: McpToolDefinition['inputSchema'] = { type: 'object', properties };
+    if (required.length > 0) inputSchema.required = required;
+    return inputSchema;
+  }
+
+  // ── Existing API (unchanged) ──────────────────────────────────────────────
 
   onListChanged(listener: () => void): () => void {
     this.listChangedListeners.add(listener);
@@ -199,10 +346,12 @@ export class ToolMeshMcpBridge {
 
   registerExternalTool(tool: ExternalToolRegistration): void {
     this.externalTools.set(tool.name, tool);
+    this._nexusServer = null; // invalidate so new tool is included on next toNexusMcpServer() call
   }
 
   unregisterExternalTool(name: string): void {
     this.externalTools.delete(name);
+    this._nexusServer = null;
   }
 
   getServerInfo(): McpServerInfo {
@@ -210,19 +359,7 @@ export class ToolMeshMcpBridge {
 
     const externalMcpTools: McpToolDefinition[] = Array.from(this.externalTools.values()).map(
       (ext) => {
-        const rawSchema = ext.inputSchema;
-        const properties: Record<string, unknown> = {};
-        const required: string[] = [];
-        for (const [key, val] of Object.entries(rawSchema)) {
-          if (key === 'required' && Array.isArray(val)) {
-            required.push(...(val as string[]));
-          } else {
-            properties[key] = val;
-          }
-        }
-        const inputSchema: McpToolDefinition['inputSchema'] = { type: 'object', properties };
-        if (required.length > 0) inputSchema.required = required;
-        return { name: ext.name, description: ext.description, inputSchema };
+        return { name: ext.name, description: ext.description, inputSchema: this._externalInputSchema(ext) };
       },
     );
 
@@ -230,10 +367,6 @@ export class ToolMeshMcpBridge {
       const t0 = Date.now();
       const metaTools = [META_TOOL_SEARCH, META_TOOL_DETAILS, META_TOOL_CALL];
 
-      // Include full schemas for any tools the client has previously inspected
-      // via get_tool_details. This append-only injection gives the model stable
-      // direct-call access to tools it has already examined, without cycling the
-      // rest of the tools list and invalidating prompt cache for every turn.
       const injectedTools: McpToolDefinition[] = [];
       for (const toolId of this.injectedToolIds) {
         const manifest = this.registry.getToolDetails(toolId);
@@ -257,8 +390,6 @@ export class ToolMeshMcpBridge {
       };
     }
 
-    // META_TOOL_CALL is always included so prompt-cache-safe invocation works
-    // whether or not progressive discovery is active.
     const registryTools = this.registry.list({ enabled: true }).map((m) => manifestToMcpTool(m));
     return {
       name: this.serverName,
@@ -290,9 +421,6 @@ export class ToolMeshMcpBridge {
       const args = req.arguments ?? {};
       const innerName = typeof args.name === 'string' ? args.name : '';
 
-      // Reject a call_tool invocation that targets call_tool itself. Without this
-      // guard a misbehaving or adversarial caller can trigger unbounded recursion
-      // that grows the call stack until V8 throws a RangeError.
       if (!innerName || innerName === 'call_tool') {
         return {
           content: [
@@ -402,14 +530,11 @@ export class ToolMeshMcpBridge {
       };
     }
 
-    // Append-only injection: track this tool so its full schema is included in
-    // every subsequent listTools() response. If this is the first time the
-    // client inspects this tool, notify list_changed listeners so the host
-    // knows to re-fetch the tool list and surface the newly injected entry.
     const isNew = !this.injectedToolIds.has(toolId);
     this.injectedToolIds.add(toolId);
 
     if (isNew) {
+      this._nexusServer = null; // re-build will include newly injected tool
       for (const listener of this.listChangedListeners) {
         try {
           listener();

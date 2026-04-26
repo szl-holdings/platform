@@ -1,6 +1,6 @@
 # MCP Gateway Strategy — SZL Holdings Platform
 
-**Version:** 1.0 · **Date:** April 2026
+**Version:** 2.0 · **Date:** April 2026
 **Audience:** Engineers, platform architects, security reviewers, enterprise evaluators, integration teams
 
 **Related:** [AI_EVALUATION_STRATEGY.md](ai-evaluation-strategy.md) · [ACCESS-CONTROL-MATRIX.md](../security/access-control-matrix.md) · [TENANCY-MODEL.md](tenancy-model.md) · [API-SPEC.md](api-spec.md)
@@ -14,8 +14,39 @@ The SZL Holdings MCP (Model Context Protocol) gateway exposes platform capabilit
 The gateway is not a raw API proxy. It exposes **fewer, better, goal-specific tools** — each one scoped, validated, tenant-isolated, and audit-logged.
 
 **Implementation:** `artifacts/api-server/src/routes/mcp.ts`
-**Protocol:** [Model Context Protocol 2024-11-05](https://spec.modelcontextprotocol.io/)
-**Transport:** HTTP/JSON-RPC 2.0 (`POST /api/mcp`) + SSE stream (`GET /api/mcp/sse`)
+**Protocol:** [Model Context Protocol 2025-03-26](https://spec.modelcontextprotocol.io/) via `@modelcontextprotocol/sdk@1.29.0`
+**Transport:** StreamableHTTP (`POST /api/mcp`) + SSE fallback (`GET /api/mcp/sse`)
+
+---
+
+## SDK Foundation (NEXUS Evolution — v2)
+
+As of April 2026, all MCP surfaces have been migrated from a hand-rolled JSON-RPC implementation to the official `@modelcontextprotocol/sdk@1.29.0` TypeScript SDK as the protocol foundation.
+
+### What Changed
+
+| Surface | Before | After |
+|---------|--------|-------|
+| `artifacts/api-server` | Custom JSON-RPC dispatch | `NexusMcpServer` + `StreamableHTTPServerTransport` |
+| `services/substrate-mcp-gateway` | Custom HTTP/stdio parsing | SDK `StreamableHTTPServerTransport` + `StdioServerTransport` |
+| `packages/tool-mesh` | Raw JSON-RPC bridge | `NexusMcpServer` via `toNexusMcpServer()` |
+| `lib/mcp-client` | Raw fetch + JSON-RPC | `SdkMcpClientAdapter` using `StreamableHTTPClientTransport` |
+
+### NexusMcpServer Wrapper (`packages/nexus-mcp`)
+
+All SZL MCP surfaces instantiate `NexusMcpServer` instead of the raw SDK `McpServer`. The wrapper is transparent to downstream consumers while injecting governance at every interaction boundary:
+
+- **Guardian policy evaluation** — every tool call checked against `policyEvaluator` before dispatch
+- **Proof chain audit** — every tool invocation, sampling call, elicitation, resource read, and app render written to the immutable proof chain
+- **Tenant isolation** — `TenantContext` propagated into every handler; `tenantId` required
+- **Role enforcement** — `roleRequirements` checked per-tool with role hierarchy resolution
+- **Sampling** — `createSample()` wraps SDK `server.createMessage()` with policy + audit
+- **Elicitation** — `elicitInput()` wraps SDK `server.elicitInput()` with policy + audit
+- **Tasks** — `createTask()` / `updateTaskProgress()` / `finalizeTask()` with MCP progress notifications
+- **Apps** — `registerApp()` / `renderApp()` for inline HTML micro-dashboards
+- **Instructions** — `setInstructions()` / `setInstruction()` for dynamic system prompt fragments
+- **Discovery** — `notifyListChanged()` for tools/resources/prompts list-changed notifications
+- **Roots** — `addRoot()` / `getRoots()` for workspace root management
 
 ---
 

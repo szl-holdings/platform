@@ -1,36 +1,23 @@
 /**
- * Substrate MCP Gateway — Streamable HTTP Transport (2025-11-25)
+ * Substrate MCP Gateway — HTTP Transport (SDK-Based)
  *
- * Implements MCP 2025-11-25 Streamable HTTP transport on a single endpoint:
+ * Implements both:
+ *   - Streamable HTTP transport (MCP 2025 spec) — POST /mcp (stateful session)
+ *   - Legacy SSE transport (MCP 2024-11-05) — GET /mcp/sse + POST /mcp/message
  *
- *   POST /mcp   — JSON-RPC 2.0 request/notification/response bodies
- *                 Returns application/json (single) or text/event-stream (streamed)
- *   GET  /mcp   — Server-sent events for server-initiated messages
- *   DELETE /mcp — Session teardown
- *   GET  /mcp/sse — Legacy SSE alias (backward compat with 2024-11-05 clients)
+ * Both transports share the same NexusMcpServer instance (same tool surface,
+ * same governance layer). The SDK handles session isolation internally.
  *
- * Security:
- *   - Origin header validation (DNS rebinding protection)
- *   - CORS with configurable allowed origins
- *   - Helmet-equivalent security headers
- *   - Sliding-window rate limiting
+ * REST convenience endpoints (/health, /tools, /resources, /prompts) are
+ * preserved so existing monitoring infrastructure continues to work.
  *
- * OAuth 2.1 + PKCE:
- *   POST /mcp/authorize — authorization endpoint
- *   POST /mcp/token     — token endpoint
- *   POST /mcp/register  — RFC 7591 dynamic client registration
- *
- * Session management:
- *   - MCP-Session-Id issued on initialize, forwarded by client on subsequent requests
- *   - Sessions expire after SESSION_TTL_MS of inactivity
- *   - DELETE /mcp terminates a session; subsequent requests return 404
- *
- * Extension negotiation:
- *   - initialize request may include extensions; server returns accepted set
- *   - stored per session
+ * OAuth 2.1 + PKCE endpoints (/authorize, /token, /register) are preserved
+ * for MCP clients that require dynamic client registration.
  */
 
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { runtimeEventBus, type SubstrateRuntimeEvent } from '@szl/substrate';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import { authMiddleware, resolveAuthContext } from '../auth.js';
@@ -41,148 +28,9 @@ import {
   SUBSTRATE_RESOURCES,
   SUBSTRATE_TOOLS,
 } from '../descriptor.js';
-import { getAvailableTools, handlePromptGet, handleResourceRead, handleToolCall } from '../handlers.js';
+import { getAvailableTools } from '../handlers.js';
 import { type RunLifecycleEvent, runEventBus } from '../run-events.js';
-
-// ─── JSON-RPC Helpers ─────────────────────────────────────────────────────────
-
-interface JsonRpcRequest {
-  jsonrpc: '2.0';
-  id: string | number | null;
-  method: string;
-  params?: Record<string, unknown>;
-}
-
-interface JsonRpcNotification {
-  jsonrpc: '2.0';
-  method: string;
-  params?: Record<string, unknown>;
-}
-
-interface JsonRpcResponse {
-  jsonrpc: '2.0';
-  id: string | number | null;
-  result?: unknown;
-  error?: { code: number; message: string; data?: unknown };
-}
-
-function rpcOk(id: string | number | null, result: unknown): JsonRpcResponse {
-  return { jsonrpc: '2.0', id, result };
-}
-
-function rpcErr(
-  id: string | number | null,
-  code: number,
-  message: string,
-  data?: unknown,
-): JsonRpcResponse {
-  return { jsonrpc: '2.0', id, error: { code, message, ...(data ? { data } : {}) } };
-}
-
-function isNotification(body: unknown): body is JsonRpcNotification {
-  return (
-    typeof body === 'object' &&
-    body !== null &&
-    (body as Record<string, unknown>).jsonrpc === '2.0' &&
-    typeof (body as Record<string, unknown>).method === 'string' &&
-    !('id' in (body as Record<string, unknown>))
-  );
-}
-
-// ─── Session Management ────────────────────────────────────────────────────────
-
-const SESSION_TTL_MS = 30 * 60 * 1000; // 30 min
-const EVENT_BUFFER_MAX = 500; // per-session replay buffer size
-
-interface SessionState {
-  sessionId: string;
-  createdAt: number;
-  lastAccessAt: number;
-  clientCapabilities: unknown;
-  clientInfo: unknown;
-  negotiatedExtensions: Record<string, unknown>;
-  eventCounter: number;
-  eventBuffer: Array<{ id: string; eventType: string; data: unknown }>;
-  activeStreamRes: Set<Response>;
-  terminated: boolean;
-}
-
-const sessions = new Map<string, SessionState>();
-
-function createSession(params: {
-  clientCapabilities?: unknown;
-  clientInfo?: unknown;
-  extensions?: Record<string, unknown>;
-}): SessionState {
-  const sessionId = randomUUID();
-  const session: SessionState = {
-    sessionId,
-    createdAt: Date.now(),
-    lastAccessAt: Date.now(),
-    clientCapabilities: params.clientCapabilities ?? {},
-    clientInfo: params.clientInfo ?? {},
-    negotiatedExtensions: params.extensions ?? {},
-    eventCounter: 0,
-    eventBuffer: [],
-    activeStreamRes: new Set(),
-    terminated: false,
-  };
-  sessions.set(sessionId, session);
-  return session;
-}
-
-function getSession(id: string): SessionState | null {
-  const s = sessions.get(id);
-  if (!s) return null;
-  if (s.terminated) return null;
-  if (Date.now() - s.lastAccessAt > SESSION_TTL_MS) {
-    sessions.delete(id);
-    return null;
-  }
-  s.lastAccessAt = Date.now();
-  return s;
-}
-
-function terminateSession(id: string): boolean {
-  const s = sessions.get(id);
-  if (!s) return false;
-  s.terminated = true;
-  for (const res of s.activeStreamRes) {
-    try {
-      res.write('event: session_terminated\ndata: {}\n\n');
-      res.end();
-    } catch {}
-  }
-  sessions.delete(id);
-  return true;
-}
-
-// Session TTL cleanup every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [id, session] of sessions) {
-    if (session.terminated || now - session.lastAccessAt > SESSION_TTL_MS) {
-      sessions.delete(id);
-    }
-  }
-}, 5 * 60 * 1000);
-
-// ─── Event ID + Replay ────────────────────────────────────────────────────────
-
-function allocEventId(session: SessionState, eventType: string, data: unknown): string {
-  const id = `${session.sessionId.slice(0, 8)}-${++session.eventCounter}`;
-  session.eventBuffer.push({ id, eventType, data });
-  if (session.eventBuffer.length > EVENT_BUFFER_MAX) {
-    session.eventBuffer.shift();
-  }
-  return id;
-}
-
-function getEventsAfter(session: SessionState, lastEventId: string): Array<{ id: string; eventType: string; data: unknown }> {
-  const idx = session.eventBuffer.findIndex((e) => e.id === lastEventId);
-  if (idx === -1) return [];
-  return session.eventBuffer.slice(idx + 1);
-}
+import { getGatewayServer } from '../nexus-gateway-server.js';
 
 // ─── Security ─────────────────────────────────────────────────────────────────
 
@@ -220,7 +68,7 @@ function isOriginAllowed(origin: string | undefined): boolean {
   }
 }
 
-function securityHeaders(req: Request, res: Response, next: NextFunction): void {
+function securityHeaders(_req: Request, res: Response, next: NextFunction): void {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '0');
@@ -256,7 +104,7 @@ function originValidation(req: Request, res: Response, next: NextFunction): void
     return;
   }
   if (!isOriginAllowed(origin)) {
-    res.status(403).json(rpcErr(null, -32000, 'FORBIDDEN', { reason: 'Origin not allowed' }));
+    res.status(403).json({ error: 'FORBIDDEN', reason: 'Origin not allowed' });
     return;
   }
   next();
@@ -282,9 +130,7 @@ function rateLimiter(req: Request, res: Response, next: NextFunction): void {
   entry.count++;
   if (entry.count > RATE_LIMIT_MAX) {
     res.setHeader('Retry-After', '60');
-    res.status(429).json(rpcErr(null, -32000, 'RATE_LIMITED', {
-      reason: 'Too many requests. Retry after 60 seconds.',
-    }));
+    res.status(429).json({ error: 'RATE_LIMITED', reason: 'Too many requests. Retry after 60 seconds.' });
     return;
   }
   next();
@@ -303,161 +149,6 @@ function negotiateExtensions(clientExtensions: unknown): Record<string, unknown>
     }
   }
   return accepted;
-}
-
-// ─── MCP Method Router ────────────────────────────────────────────────────────
-
-async function handleMcpMethod(
-  req: JsonRpcRequest,
-  actorId: string,
-  session: SessionState | null,
-): Promise<JsonRpcResponse> {
-  const { method, params = {}, id } = req;
-
-  try {
-    switch (method) {
-      case 'initialize': {
-        const clientCaps = params.capabilities;
-        const clientInfo = params.clientInfo;
-        const clientExtensions = (params as Record<string, unknown>).extensions;
-        const accepted = negotiateExtensions(clientExtensions);
-
-        if (session) {
-          session.clientCapabilities = clientCaps;
-          session.clientInfo = clientInfo;
-          session.negotiatedExtensions = accepted;
-        }
-
-        return rpcOk(id, {
-          protocolVersion: SERVER_INFO.protocolVersion,
-          capabilities: CAPABILITIES,
-          serverInfo: {
-            name: SERVER_INFO.name,
-            version: SERVER_INFO.version,
-          },
-          extensions: accepted,
-        });
-      }
-
-      case 'ping':
-        return rpcOk(id, {});
-
-      case 'tools/list':
-        // Use the live tool set — changes when enable_server / disable_server is called.
-        return rpcOk(id, {
-          tools: getAvailableTools().map((t) => ({
-            name: t.name,
-            description: t.description,
-            inputSchema: t.inputSchema,
-          })),
-        });
-
-      case 'tools/call': {
-        const toolName = String(params.name ?? '');
-        const toolArgs = (params.arguments ?? {}) as Record<string, unknown>;
-
-        if (!toolName) {
-          return rpcErr(id, -32602, 'INVALID_PARAMS', {
-            reason: 'Missing tool name in params.name',
-          });
-        }
-
-        const liveTools = getAvailableTools();
-        const known = liveTools.find((t) => t.name === toolName);
-        if (!known) {
-          return rpcErr(id, -32601, 'METHOD_NOT_FOUND', { reason: `No tool named '${toolName}'` });
-        }
-
-        const result = await handleToolCall(toolName, toolArgs, actorId);
-        return rpcOk(id, result);
-      }
-
-      case 'resources/list':
-        return rpcOk(id, {
-          resources: SUBSTRATE_RESOURCES.map((r) => ({
-            uri: r.uri,
-            name: r.name,
-            description: r.description,
-            mimeType: r.mimeType,
-          })),
-        });
-
-      case 'resources/read': {
-        const uri = String(params.uri ?? '');
-        if (!uri) {
-          return rpcErr(id, -32602, 'INVALID_PARAMS', { reason: 'Missing resource URI in params.uri' });
-        }
-        const result = await handleResourceRead(uri);
-        if ('error' in result) {
-          return rpcErr(id, -32001, 'NOT_FOUND', { reason: result.error });
-        }
-        return rpcOk(id, result);
-      }
-
-      case 'prompts/list':
-        return rpcOk(id, {
-          prompts: SUBSTRATE_PROMPTS.map((p) => ({
-            name: p.name,
-            description: p.description,
-            arguments: p.arguments ?? [],
-          })),
-        });
-
-      case 'prompts/get': {
-        const name = String(params.name ?? '');
-        const promptArgs = (params.arguments ?? {}) as Record<string, string>;
-        if (!name) {
-          return rpcErr(id, -32602, 'INVALID_PARAMS', { reason: 'Missing prompt name in params.name' });
-        }
-        const result = handlePromptGet(name, promptArgs);
-        if ('error' in result) {
-          return rpcErr(id, -32001, 'NOT_FOUND', { reason: result.error });
-        }
-        return rpcOk(id, result);
-      }
-
-      default:
-        return rpcErr(id, -32601, 'METHOD_NOT_FOUND', { method });
-    }
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return rpcErr(id, -32603, 'INTERNAL_ERROR', { reason: msg });
-  }
-}
-
-// ─── Notification Handler ─────────────────────────────────────────────────────
-
-function handleNotification(notification: JsonRpcNotification, session: SessionState | null): void {
-  switch (notification.method) {
-    case 'notifications/initialized':
-      break;
-    case 'notifications/cancelled': {
-      const requestId = (notification.params as Record<string, unknown> | undefined)?.requestId;
-      void requestId;
-      break;
-    }
-    case 'notifications/roots/list_changed':
-      break;
-    default:
-      break;
-  }
-}
-
-// ─── SSE Session Registry (legacy GET /sse) ───────────────────────────────────
-
-const sseClients = new Map<string, Response>();
-
-function sseId(): string {
-  return `sse-${Date.now()}-${randomBytes(3).toString('hex')}`;
-}
-
-function writeSseEvent(res: Response, eventType: string, data: unknown, id?: string): void {
-  try {
-    let frame = '';
-    if (id) frame += `id: ${id}\n`;
-    frame += `event: ${eventType}\ndata: ${JSON.stringify(data)}\n\n`;
-    res.write(frame);
-  } catch {}
 }
 
 // ─── OAuth 2.1 + PKCE ─────────────────────────────────────────────────────────
@@ -500,6 +191,33 @@ function sha256Base64Url(input: string): string {
   return createHash('sha256').update(input).digest('base64url');
 }
 
+// ─── Session Registries (SDK-managed) ────────────────────────────────────────
+
+// Legacy SSE transport (MCP 2024-11-05)
+const sseSessions = new Map<string, SSEServerTransport>();
+
+// Streamable HTTP transport (MCP 2025 spec)
+const streamableSessions = new Map<string, StreamableHTTPServerTransport>();
+
+// ─── Streamable GET helper ────────────────────────────────────────────────────
+//
+// Called from the GET / index route when MCP-Session-Id is present, routing to
+// the correct Streamable transport for server-initiated SSE frames.
+
+function handleStreamableGet(req: Request, res: Response): void {
+  const sessionId = req.headers['mcp-session-id'] as string | undefined;
+  if (!sessionId) {
+    res.status(400).json({ error: 'Mcp-Session-Id header required' });
+    return;
+  }
+  const transport = streamableSessions.get(sessionId);
+  if (!transport) {
+    res.status(404).json({ error: `Session '${sessionId}' not found` });
+    return;
+  }
+  void transport.handleRequest(req, res);
+}
+
 // ─── Express Router Factory ───────────────────────────────────────────────────
 
 export function createHttpTransport(): express.Router {
@@ -512,20 +230,10 @@ export function createHttpTransport(): express.Router {
   router.use(rateLimiter);
   router.use(authMiddleware);
 
-  // ── CORS preflight pass-through ───────────────────────────────────────────
-  router.options(/.*/, (_req, res) => {
-    res.status(204).end();
-  });
-
   // ── Index (public) ────────────────────────────────────────────────────────
-  router.get('/', (req: Request, res: Response, next: NextFunction) => {
+  router.get('/', (req: Request, res: Response) => {
     const sessionId = req.headers['mcp-session-id'] as string | undefined;
     if (sessionId) {
-      handleStreamableGet(req, res);
-      return;
-    }
-    const acceptsEventStream = (req.headers.accept ?? '').includes('text/event-stream');
-    if (acceptsEventStream) {
       handleStreamableGet(req, res);
       return;
     }
@@ -533,13 +241,15 @@ export function createHttpTransport(): express.Router {
       service: SERVER_INFO.name,
       version: SERVER_INFO.version,
       protocol: SERVER_INFO.protocolVersion,
+      sdkVersion: '1.29.0',
       endpoints: {
         health: 'GET /mcp/health',
         tools: 'GET /mcp/tools',
         resources: 'GET /mcp/resources',
         prompts: 'GET /mcp/prompts',
-        jsonrpc: 'POST /mcp',
-        sse: 'GET /mcp (Accept: text/event-stream) or GET /mcp/sse',
+        jsonrpc: 'POST /mcp (Streamable HTTP — MCP 2025)',
+        sse: 'GET /mcp/sse (Legacy SSE — MCP 2024-11-05)',
+        sseMessage: 'POST /mcp/message (Legacy SSE message endpoint)',
         authorize: 'POST /mcp/authorize',
         token: 'POST /mcp/token',
         register: 'POST /mcp/register',
@@ -549,24 +259,26 @@ export function createHttpTransport(): express.Router {
 
   // ── Health ────────────────────────────────────────────────────────────────
   router.get('/health', (_req, res) => {
+    const liveTools = getAvailableTools();
     res.json({
       status: 'ok',
       service: SERVER_INFO.name,
       version: SERVER_INFO.version,
       protocol: SERVER_INFO.protocolVersion,
+      sdkVersion: '1.29.0',
       capabilities: CAPABILITIES,
-      toolCount: SUBSTRATE_TOOLS.length,
+      toolCount: liveTools.length,
       resourceCount: SUBSTRATE_RESOURCES.length,
       promptCount: SUBSTRATE_PROMPTS.length,
-      activeSessions: sessions.size,
-      activeSseConnections: sseClients.size,
+      activeSseConnections: sseSessions.size,
+      activeStreamableSessions: streamableSessions.size,
       timestamp: new Date().toISOString(),
     });
   });
 
   // ── Tool inventory ────────────────────────────────────────────────────────
   router.get('/tools', (_req, res) => {
-    res.json({ tools: SUBSTRATE_TOOLS });
+    res.json({ tools: getAvailableTools() });
   });
 
   // ── Resource inventory ────────────────────────────────────────────────────
@@ -579,234 +291,128 @@ export function createHttpTransport(): express.Router {
     res.json({ prompts: SUBSTRATE_PROMPTS });
   });
 
-  // ── Legacy SSE stream (GET /mcp/sse) ──────────────────────────────────────
-  router.get('/sse', (req: Request, res: Response) => {
-    const id = sseId();
+  // ── Legacy SSE stream (MCP 2024-11-05) ───────────────────────────────────
+  //
+  // The SSEServerTransport creates a persistent SSE connection over GET /mcp/sse.
+  // Clients send messages back via POST /mcp/message?sessionId=<id>.
+
+  router.get('/sse', async (req: Request, res: Response) => {
     const ctx = resolveAuthContext(req);
+    const sessionId = randomUUID();
 
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no');
-    res.flushHeaders();
+    const transport = new SSEServerTransport(`/mcp/message`, res);
+    sseSessions.set(sessionId, transport);
 
-    sseClients.set(id, res);
-
-    function writeEvent(eventType: string, data: unknown): void {
-      writeSseEvent(res, eventType, data);
-    }
-
-    writeEvent('$/ready', {
-      endpoint: '/mcp',
-      sessionId: id,
-      serverInfo: SERVER_INFO,
-      capabilities: CAPABILITIES,
-      actorId: ctx.actorId,
-    });
-
+    // Bridge substrate runtime events to the SDK SSE session.
     const unsubscribeRunEvents = runEventBus.subscribe((event: RunLifecycleEvent) => {
       if (event.type === 'tool_list_changed') {
-        writeEvent('notification', {
-          jsonrpc: '2.0',
-          method: 'notifications/tools/list_changed',
-          params: {},
-        });
-      } else {
-        writeEvent(event.type, event);
+        void getGatewayServer().notifyListChanged('tools/list_changed');
       }
     });
 
-    const unsubscribeRuntimeEvents = runtimeEventBus.subscribe((event: SubstrateRuntimeEvent) => {
-      writeEvent(event.type, event);
+    const unsubscribeRuntimeEvents = runtimeEventBus.subscribe((_event: SubstrateRuntimeEvent) => {
+      // Runtime events are surfaced via the SDK's notification mechanism.
+      // More granular progress is handled via the Tasks capability.
     });
-
-    const keepalive = setInterval(() => {
-      writeEvent('$/ping', { timestamp: Date.now() });
-    }, 30_000);
 
     req.on('close', () => {
-      clearInterval(keepalive);
       unsubscribeRunEvents();
       unsubscribeRuntimeEvents();
-      sseClients.delete(id);
+      sseSessions.delete(sessionId);
     });
+
+    res.setHeader('X-Session-Id', sessionId);
+    void ctx; // auth context available for future per-session tenant injection
+
+    const gatewayServer = getGatewayServer();
+    await gatewayServer.connect(transport);
   });
 
-  // ── DELETE /mcp — Session termination ─────────────────────────────────────
-  router.delete('/', (req: Request, res: Response) => {
-    const sessionId = req.headers['mcp-session-id'] as string | undefined;
-    if (!sessionId) {
-      res.status(400).json(rpcErr(null, -32600, 'INVALID_REQUEST', {
-        reason: 'MCP-Session-Id header required for DELETE',
-      }));
+  // ── Legacy SSE message endpoint ───────────────────────────────────────────
+  //
+  // Clients connected via GET /mcp/sse POST their JSON-RPC messages here.
+
+  router.post('/message', async (req: Request, res: Response) => {
+    const sessionId = String(req.query['sessionId'] ?? '');
+    const transport = sseSessions.get(sessionId);
+
+    if (!transport) {
+      res.status(404).json({
+        jsonrpc: '2.0',
+        error: { code: -32001, message: 'Session not found', data: { sessionId } },
+      });
       return;
     }
-    const terminated = terminateSession(sessionId);
-    if (!terminated) {
-      res.status(404).json(rpcErr(null, -32001, 'SESSION_NOT_FOUND', {
-        reason: `Session '${sessionId}' not found or already expired`,
-      }));
-      return;
-    }
-    res.status(200).json({ ok: true, sessionId, terminated: true });
+
+    await transport.handlePostMessage(req, res, req.body);
   });
 
   // ── POST /mcp — Streamable HTTP JSON-RPC ──────────────────────────────────
+  //
+  // A single POST endpoint handles all MCP 2025 traffic. The SDK creates a new
+  // StreamableHTTPServerTransport per session (identified by Mcp-Session-Id).
+
   router.post('/', async (req: Request, res: Response) => {
-    const ctx = (req as Request & { authCtx?: { authenticated: boolean; actorId: string } }).authCtx;
-    const actorId = ctx?.actorId ?? 'anonymous';
-
-    const body = req.body as unknown;
-
-    let session: SessionState | null = null;
-    const sessionIdHeader = req.headers['mcp-session-id'] as string | undefined;
-
-    if (sessionIdHeader) {
-      session = getSession(sessionIdHeader);
-      if (!session) {
-        res.status(404).json(rpcErr(null, -32001, 'SESSION_NOT_FOUND', {
-          reason: `Session '${sessionIdHeader}' not found or expired. Call initialize to create a new session.`,
-        }));
-        return;
-      }
-    }
-
-    // Handle notification (no id field)
-    if (isNotification(body)) {
-      handleNotification(body, session);
-      res.status(202).end();
-      return;
-    }
-
-    // Handle batch request
-    if (Array.isArray(body)) {
-      if (body.length > 20) {
-        res.status(400).json(
-          rpcErr(null, -32600, 'INVALID_REQUEST', { reason: 'Batch size limit is 20 requests' }),
-        );
-        return;
-      }
-
-      const results = await Promise.all(
-        body.map((item: unknown) => {
-          if (isNotification(item as JsonRpcNotification)) {
-            handleNotification(item as JsonRpcNotification, session);
-            return null;
-          }
-          const rpcReq = item as JsonRpcRequest;
-          if (!rpcReq.jsonrpc || !rpcReq.method) {
-            return rpcErr(rpcReq.id ?? null, -32600, 'INVALID_REQUEST');
-          }
-          return handleMcpMethod(rpcReq, actorId, session);
-        }),
-      );
-
-      const responses = results.filter((r): r is JsonRpcResponse => r !== null);
-      res.json(responses);
-      return;
-    }
-
-    const rpcReq = body as JsonRpcRequest;
-    if (!rpcReq || typeof rpcReq !== 'object' || !rpcReq.jsonrpc || !rpcReq.method) {
-      res.status(400).json(rpcErr(null, -32600, 'INVALID_REQUEST'));
-      return;
-    }
-
-    const result = await handleMcpMethod(rpcReq, actorId, session);
-
-    // On initialize: create a new session and attach session ID to response
-    if (rpcReq.method === 'initialize' && !sessionIdHeader) {
-      const clientExtensions = (rpcReq.params as Record<string, unknown> | undefined)?.extensions;
-      const newSession = createSession({
-        clientCapabilities: rpcReq.params?.capabilities,
-        clientInfo: rpcReq.params?.clientInfo,
-        extensions: negotiateExtensions(clientExtensions) as Record<string, unknown>,
-      });
-      res.setHeader('MCP-Session-Id', newSession.sessionId);
-    }
-
-    res.json(result);
-  });
-
-  // ── Streamable GET /mcp — SSE listener for active sessions ────────────────
-  function handleStreamableGet(req: Request, res: Response): void {
     const sessionId = req.headers['mcp-session-id'] as string | undefined;
 
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no');
-    res.flushHeaders();
-
-    const ctx = resolveAuthContext(req);
-    const legacyId = sseId();
-
-    let session: SessionState | null = null;
-    if (sessionId) {
-      session = getSession(sessionId);
-      if (!session) {
-        writeSseEvent(res, 'error', {
-          code: -32001,
-          message: 'SESSION_NOT_FOUND',
-          reason: `Session '${sessionId}' not found or expired`,
-        });
-        res.end();
-        return;
-      }
-      session.activeStreamRes.add(res);
-
-      // Replay missed events if Last-Event-ID is present
-      const lastEventId = req.headers['last-event-id'] as string | undefined;
-      if (lastEventId) {
-        const missed = getEventsAfter(session, lastEventId);
-        for (const ev of missed) {
-          writeSseEvent(res, ev.eventType, ev.data, ev.id);
-        }
-      }
-    } else {
-      sseClients.set(legacyId, res);
+    if (sessionId && streamableSessions.has(sessionId)) {
+      const transport = streamableSessions.get(sessionId)!;
+      await transport.handleRequest(req, res, req.body);
+      return;
     }
 
-    writeSseEvent(res, '$/ready', {
-      endpoint: '/mcp',
-      sessionId: session?.sessionId ?? legacyId,
-      serverInfo: SERVER_INFO,
-      capabilities: CAPABILITIES,
-      actorId: ctx.actorId,
+    // New session — create a fresh transport and connect the NexusMcpServer
+    const transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: () => randomUUID(),
+      onsessioninitialized: (id) => {
+        streamableSessions.set(id, transport);
+      },
     });
 
-    function broadcastEvent(eventType: string, data: unknown): void {
-      if (session) {
-        const id = allocEventId(session, eventType, data);
-        writeSseEvent(res, eventType, data, id);
-      } else {
-        writeSseEvent(res, eventType, data);
+    transport.onclose = () => {
+      if (transport.sessionId) {
+        streamableSessions.delete(transport.sessionId);
       }
+    };
+
+    const gatewayServer = getGatewayServer();
+    await gatewayServer.connect(transport);
+    await transport.handleRequest(req, res, req.body);
+  });
+
+  // ── GET /mcp/stream — SSE listener for active Streamable sessions ─────────
+
+  router.get('/stream', async (req: Request, res: Response) => {
+    const sessionId = req.headers['mcp-session-id'] as string | undefined;
+    if (!sessionId) {
+      res.status(400).json({ error: 'Mcp-Session-Id header required' });
+      return;
     }
+    const transport = streamableSessions.get(sessionId);
+    if (!transport) {
+      res.status(404).json({ error: `Session '${sessionId}' not found` });
+      return;
+    }
+    await transport.handleRequest(req, res);
+  });
 
-    const unsubscribeRunEvents = runEventBus.subscribe((event: RunLifecycleEvent) => {
-      broadcastEvent(event.type, event);
-    });
+  // ── DELETE /mcp — Streamable session termination ──────────────────────────
 
-    const unsubscribeRuntimeEvents = runtimeEventBus.subscribe((event: SubstrateRuntimeEvent) => {
-      broadcastEvent(event.type, event);
-    });
-
-    const keepalive = setInterval(() => {
-      broadcastEvent('$/ping', { timestamp: Date.now() });
-    }, 30_000);
-
-    req.on('close', () => {
-      clearInterval(keepalive);
-      unsubscribeRunEvents();
-      unsubscribeRuntimeEvents();
-      if (session) {
-        session.activeStreamRes.delete(res);
-      } else {
-        sseClients.delete(legacyId);
-      }
-    });
-  }
+  router.delete('/', (req: Request, res: Response) => {
+    const sessionId = req.headers['mcp-session-id'] as string | undefined;
+    if (!sessionId) {
+      res.status(400).json({ error: 'INVALID_REQUEST', reason: 'MCP-Session-Id header required for DELETE' });
+      return;
+    }
+    const transport = streamableSessions.get(sessionId);
+    if (!transport) {
+      res.status(404).json({ error: 'SESSION_NOT_FOUND', reason: `Session '${sessionId}' not found` });
+      return;
+    }
+    streamableSessions.delete(sessionId);
+    void transport.close();
+    res.status(200).json({ ok: true, sessionId, terminated: true });
+  });
 
   // ── OAuth 2.1 + PKCE endpoints ────────────────────────────────────────────
 
@@ -984,6 +590,7 @@ export function createDiscoveryHandler(): express.RequestHandler {
       endpoints: {
         mcp: '/mcp',
         health: '/mcp/health',
+        sse: '/mcp/sse',
         authorize: '/mcp/authorize',
         token: '/mcp/token',
         register: '/mcp/register',
@@ -994,5 +601,5 @@ export function createDiscoveryHandler(): express.RequestHandler {
   };
 }
 
-// ─── Export session helpers for testing ──────────────────────────────────────
-export { sessions, getSession, createSession, terminateSession };
+// Keep negotiateExtensions available for external callers
+export { negotiateExtensions };

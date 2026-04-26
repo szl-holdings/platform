@@ -7,6 +7,7 @@ export {
 export { useMcpTools } from './hooks';
 export { McpOverlay } from './McpOverlay';
 export { McpStoreProvider, useMcpStore } from './McpStoreProvider';
+export { SdkMcpClientAdapter, getSdkMcpAdapter, clearSdkMcpAdapterCache } from './sdk-client';
 export type {
   McpConnectionState,
   McpDomain,

@@ -80,7 +80,7 @@ if (IS_PRODUCTION && !process.env.SUBSTRATE_GATEWAY_API_KEY) {
 if (IS_STDIO) {
   // stdio transport: stderr is the only safe place for diagnostic logs
   warnIfRegistryEmpty((_msg) => {});
-  startStdioTransport();
+  void startStdioTransport();
 } else {
   warnIfRegistryEmpty((_msg) => {});
   const app = express();
@@ -105,12 +105,9 @@ if (IS_STDIO) {
         tools: 'GET /mcp/tools',
         resources: 'GET /mcp/resources',
         prompts: 'GET /mcp/prompts',
-        jsonrpc: 'POST /mcp',
-        sse: 'GET /mcp (Accept: text/event-stream) or GET /mcp/sse',
-        discovery: 'GET /.well-known/mcp',
-        authorize: 'POST /mcp/authorize',
-        token: 'POST /mcp/token',
-        register: 'POST /mcp/register',
+        streamableHttp: 'POST /mcp (MCP 2025)',
+        sse: 'GET /mcp/sse (MCP 2024-11-05)',
+        sseMessage: 'POST /mcp/message (MCP 2024-11-05)',
       },
     });
   });

@@ -10,12 +10,16 @@ import {
   db,
 } from '@szl-holdings/db';
 import { connectorHub } from '@szl-holdings/services';
-import { and, desc, eq, } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { type Request, type Response, Router } from 'express';
+import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
+import { NexusMcpServer, buildTenantInstructions, createDomainApps } from '@workspace/nexus-mcp';
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { logger } from '../lib/logger';
 import { validateBody } from '../lib/validation';
-import { type AuthenticatedUser, authMiddleware, } from '../middlewares/auth';
+import { type AuthenticatedUser, authMiddleware } from '../middlewares/auth';
 import { AGENT_CONFIGS } from './domain-agents/configs';
 
 const router = Router();
@@ -1416,190 +1420,161 @@ async function readResource(uri: string, _token?: string): Promise<unknown> {
   }
 }
 
-async function handleMcpMethod(
-  method: string,
-  params: Record<string, unknown>,
-  user: AuthenticatedUser | undefined,
-): Promise<unknown> {
-  switch (method) {
-    case 'initialize': {
-      return {
-        protocolVersion: MCP_PROTOCOL_VERSION,
-        capabilities: {
-          tools: { listChanged: false },
-          resources: { subscribe: false, listChanged: false },
-          prompts: { listChanged: false },
-        },
-        serverInfo: {
-          name: SERVER_NAME,
-          version: SERVER_VERSION,
-        },
-        extensions: {},
-        instructions:
-          'Alloy MCP Server — exposes the full SZL Holdings AI capability stack as MCP tools. Use alloy_skill_list to discover available skills, alloy_launch_workflow to start workflows, and domain-specific tools (vessels_*, firestorm_*, terra_*, lyte_*, inca_*) for domain intelligence.',
-      };
-    }
+// ─── NexusMcpServer — SDK Foundation + SZL Governance ───────────────────────
+//
+// The NexusMcpServer replaces the hand-rolled JSON-RPC dispatch. All tools,
+// resources, and prompts are registered using the official SDK's typed API.
+// Guardian policy evaluation, proof chain writes, and audit logging are injected
+// transparently via the NexusMcpServer governance middleware.
+//
+// The server is lazily created and cached. Both the SSE endpoint and the
+// Streamable HTTP endpoint share the same instance.
 
-    case 'notifications/initialized':
-    case 'notifications/cancelled':
-    case 'notifications/roots/list_changed':
-      return null;
+const SERVER_VERSION_SDK = '2.0.0';
 
-    case 'tools/list': {
-      const deduped = new Map<string, McpTool>();
-      for (const t of ALL_TOOLS) {
-        if (!deduped.has(t.name)) deduped.set(t.name, t);
-      }
-      return { tools: Array.from(deduped.values()) };
-    }
+// ── Tenant context builder ──────────────────────────────────────────────────
 
-    case 'tools/call': {
-      const toolName = params.name as string;
-      const toolArgs = (params.arguments as Record<string, unknown>) ?? {};
-      if (!toolName)
-        throw Object.assign(new Error('Tool name is required'), {
-          code: JSON_RPC_ERRORS.INVALID_PARAMS,
-        });
-      const tool = ALL_TOOLS.find((t) => t.name === toolName);
-      if (!tool)
-        throw Object.assign(new Error(`Tool '${toolName}' not found`), {
-          code: JSON_RPC_ERRORS.INVALID_PARAMS,
-        });
-      const start = Date.now();
-      try {
-        const result = await executeTool(toolName, toolArgs, user);
-        const latencyMs = Date.now() - start;
-        await writeAuditLog({
-          userId: user?.id,
-          toolName,
-          args: toolArgs,
-          result: JSON.stringify(result).slice(0, 500),
-          latencyMs,
-        });
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-          isError: false,
-        };
-      } catch (err) {
-        const latencyMs = Date.now() - start;
-        const errorMsg = err instanceof Error ? err.message : String(err);
-        await writeAuditLog({
-          userId: user?.id,
-          toolName,
-          args: toolArgs,
-          result: `ERROR: ${errorMsg}`,
-          latencyMs,
-        });
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error executing tool '${toolName}': ${errorMsg}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    }
+function buildTenantCtx(user: AuthenticatedUser | undefined) {
+  return {
+    tenantId: user?.id ? String(user.id) : 'anonymous',
+    orgId: user?.orgs[0]?.orgId,
+    userId: user?.id,
+    roles: user?.roles,
+    actorId: user?.displayName ?? user?.email ?? 'anonymous',
+  };
+}
 
-    case 'resources/list': {
-      return { resources: MCP_RESOURCES };
-    }
+// ── NexusMcpServer factory ─────────────────────────────────────────────────
 
-    case 'resources/read': {
-      const uri = params.uri as string;
-      if (!uri)
-        throw Object.assign(new Error('URI is required'), { code: JSON_RPC_ERRORS.INVALID_PARAMS });
-      const content = await readResource(uri, getInternalToken());
-      return {
-        contents: [
-          {
-            uri,
-            mimeType: 'application/json',
-            text: JSON.stringify(content, null, 2),
-          },
-        ],
-      };
-    }
+function createAlloyMcpServer(user: AuthenticatedUser | undefined): NexusMcpServer {
+  const ctx = buildTenantCtx(user);
 
-    case 'prompts/list': {
-      return { prompts: MCP_PROMPTS };
-    }
-
-    case 'prompts/get': {
-      const promptName = params.name as string;
-      if (!promptName)
-        throw Object.assign(new Error('Prompt name is required'), {
-          code: JSON_RPC_ERRORS.INVALID_PARAMS,
-        });
-      const prompt = MCP_PROMPTS.find((p) => p.name === promptName);
-      if (!prompt)
-        throw Object.assign(new Error(`Prompt '${promptName}' not found`), {
-          code: JSON_RPC_ERRORS.INVALID_PARAMS,
-        });
-      const args = (params.arguments as Record<string, string>) ?? {};
-      const messages = buildPromptMessages(promptName, args);
-      return { description: prompt.description, messages };
-    }
-
-    case 'ping': {
-      return {};
-    }
-
-    default:
-      throw Object.assign(new Error(`Method not found: ${method}`), {
-        code: JSON_RPC_ERRORS.METHOD_NOT_FOUND,
+  const server = new NexusMcpServer({
+    name: SERVER_NAME,
+    version: SERVER_VERSION_SDK,
+    tenantContext: ctx,
+    enableSampling: true,
+    enableElicitation: true,
+    enableTasks: true,
+    enableApps: true,
+    enableInstructions: true,
+    enableDiscovery: true,
+    enableRoots: true,
+    roots: [
+      { uri: `szl://tenants/${ctx.tenantId}/`, name: 'Tenant Root' },
+      ...(ctx.orgId ? [{ uri: `szl://orgs/${ctx.orgId}/artifacts/`, name: 'Org Artifacts' }] : []),
+    ],
+    instructions: buildTenantInstructions(ctx),
+    auditLogger: async (entry) => {
+      await writeAuditLog({
+        userId: typeof entry.userId === 'number' ? entry.userId : (entry.userId ?? null),
+        toolName: entry.resourceId,
+        args: (entry.metadata.args as Record<string, unknown>) ?? {},
+        result: String(entry.metadata.outcome ?? ''),
+        latencyMs: (entry.metadata.latencyMs as number) ?? 0,
       });
+    },
+  });
+
+  // Register domain Apps (fleet map, threat timeline, property comparison, case status)
+  for (const app of createDomainApps()) {
+    server.registerApp(app);
   }
+
+  // ── Register all tools ─────────────────────────────────────────────────────
+
+  for (const tool of ALL_TOOLS) {
+    const capturedTool = tool;
+    server.rawTool(
+      capturedTool.name,
+      capturedTool.description,
+      capturedTool.inputSchema,
+      async (args) => {
+        return executeTool(capturedTool.name, args, user);
+      },
+    );
+  }
+
+  // ── Register resources ─────────────────────────────────────────────────────
+
+  for (const res of MCP_RESOURCES) {
+    const capturedRes = res;
+    server.resource(
+      capturedRes.name,
+      capturedRes.uri,
+      { description: capturedRes.description, mimeType: capturedRes.mimeType },
+      async (uri) => {
+        const content = await readResource(uri, getInternalToken());
+        return {
+          contents: [
+            {
+              uri,
+              text: JSON.stringify(content, null, 2),
+              mimeType: capturedRes.mimeType ?? 'application/json',
+            },
+          ],
+        };
+      },
+    );
+  }
+
+  // ── Register prompts ───────────────────────────────────────────────────────
+
+  for (const prompt of MCP_PROMPTS) {
+    const capturedPrompt = prompt;
+    const argsShape: Record<string, import('zod').ZodTypeAny> = {};
+    for (const arg of capturedPrompt.arguments ?? []) {
+      if (arg.required) {
+        argsShape[arg.name] = z.string().describe(arg.description);
+      } else {
+        argsShape[arg.name] = z.string().optional().describe(arg.description);
+      }
+    }
+    server.prompt(
+      capturedPrompt.name,
+      capturedPrompt.description,
+      argsShape,
+      async (args) => {
+        const messages = buildPromptMessages(capturedPrompt.name, args as Record<string, string>);
+        return {
+          description: capturedPrompt.description,
+          messages: messages.map((m) => ({
+            role: m.role as 'user' | 'assistant',
+            content: { type: 'text' as const, text: m.content.text },
+          })),
+        };
+      },
+    );
+  }
+
+  return server;
 }
 
-async function processMcpRequest(
-  req: McpRequest,
-  user: AuthenticatedUser | undefined,
-): Promise<McpResponse> {
-  const id = req.id ?? null;
+// ── Session registries ────────────────────────────────────────────────────────
 
-  if (req.jsonrpc !== '2.0') {
-    return {
-      jsonrpc: '2.0',
-      id,
-      error: makeError(JSON_RPC_ERRORS.INVALID_REQUEST, 'Invalid JSON-RPC version — expected 2.0'),
-    };
-  }
+const sseSessions = new Map<string, SSEServerTransport>();
+const streamableSessions = new Map<string, StreamableHTTPServerTransport>();
 
-  if (!req.method || typeof req.method !== 'string') {
-    return {
-      jsonrpc: '2.0',
-      id,
-      error: makeError(JSON_RPC_ERRORS.INVALID_REQUEST, 'Method is required'),
-    };
-  }
-
-  try {
-    const result = await handleMcpMethod(req.method, req.params ?? {}, user);
-    return { jsonrpc: '2.0', id, result };
-  } catch (err) {
-    const code = (err as { code?: number }).code ?? JSON_RPC_ERRORS.INTERNAL_ERROR;
-    const message = err instanceof Error ? err.message : 'Internal error';
-    return { jsonrpc: '2.0', id, error: makeError(code, message) };
-  }
-}
+// ── REST helper endpoints ─────────────────────────────────────────────────────
 
 router.get('/mcp/health', (_req: Request, res: Response) => {
   res.json({
     status: 'ok',
     server: SERVER_NAME,
     version: SERVER_VERSION,
+    sdkVersion: '1.29.0',
     protocolVersion: MCP_PROTOCOL_VERSION,
     capabilities: {
       tools: ALL_TOOLS.length,
       resources: MCP_RESOURCES.length,
       prompts: MCP_PROMPTS.length,
+      sampling: true,
+      elicitation: true,
+      tasks: true,
+      apps: true,
+      instructions: true,
+      discovery: true,
+      roots: true,
     },
     toolCategories: {
       domain: DOMAIN_TOOLS.map((t) => t.name),
@@ -1607,87 +1582,6 @@ router.get('/mcp/health', (_req: Request, res: Response) => {
       data: DATA_TOOLS.map((t) => t.name),
     },
     timestamp: new Date().toISOString(),
-  });
-});
-
-router.post(
-  '/mcp',
-  authMiddleware({ required: false }),
-  validateBody(
-    bodyShape({
-      map: z.unknown().optional(),
-    }),
-  ),
-  async (req: Request, res: Response) => {
-    try {
-      const body = req.body;
-
-      if (Array.isArray(body)) {
-        const responses = await Promise.all(
-          body.map((r: McpRequest) => processMcpRequest(r, req.user)),
-        );
-        res.json(responses);
-        return;
-      }
-
-      const mcpReq = body as McpRequest;
-      const isNotification =
-        typeof mcpReq.method === 'string' &&
-        mcpReq.method.startsWith('notifications/') &&
-        mcpReq.id === undefined;
-
-      if (isNotification) {
-        await handleMcpMethod(mcpReq.method, mcpReq.params ?? {}, req.user).catch(() => {});
-        res.status(202).end();
-        return;
-      }
-
-      const response = await processMcpRequest(mcpReq, req.user);
-      res.json(response);
-    } catch (err) {
-      logger.error({ err }, 'MCP handler error');
-      res.json({
-        jsonrpc: '2.0',
-        id: null,
-        error: makeError(JSON_RPC_ERRORS.INTERNAL_ERROR, 'Internal server error'),
-      });
-    }
-  },
-);
-
-router.get('/mcp/sse', authMiddleware({ required: false }), (req: Request, res: Response) => {
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.setHeader('X-Accel-Buffering', 'no');
-  res.flushHeaders();
-
-  const devDomain = process.env.REPLIT_DEV_DOMAIN;
-  const endpoint = devDomain ? `https://${devDomain}/api/mcp` : `/api/mcp`;
-
-  const initEvent = {
-    jsonrpc: '2.0',
-    method: '$/ready',
-    params: {
-      serverInfo: { name: SERVER_NAME, version: SERVER_VERSION },
-      protocolVersion: MCP_PROTOCOL_VERSION,
-      endpoint,
-      capabilities: {
-        tools: { listChanged: false },
-        resources: { subscribe: false, listChanged: false },
-        prompts: { listChanged: false },
-      },
-    },
-  };
-
-  res.write(`data: ${JSON.stringify(initEvent)}\n\n`);
-
-  const keepAlive = setInterval(() => {
-    res.write(`data: ${JSON.stringify({ jsonrpc: '2.0', method: '$/ping' })}\n\n`);
-  }, 30000);
-
-  req.on('close', () => {
-    clearInterval(keepAlive);
   });
 });
 
@@ -1714,5 +1608,99 @@ router.get(
 router.get('/mcp/prompts', authMiddleware({ required: false }), (_req: Request, res: Response) => {
   res.json({ prompts: MCP_PROMPTS, count: MCP_PROMPTS.length });
 });
+
+// ── Legacy SSE endpoint (MCP 2024-11-05) ────────────────────────────────────
+//
+// Creates a per-session SSEServerTransport backed by a fresh NexusMcpServer
+// instance scoped to the authenticated user's tenant context.
+
+router.get('/mcp/sse', authMiddleware({ required: false }), async (req: Request, res: Response) => {
+  const sessionId = randomUUID();
+  const transport = new SSEServerTransport('/api/mcp/message', res);
+  sseSessions.set(sessionId, transport);
+
+  req.on('close', () => {
+    sseSessions.delete(sessionId);
+  });
+
+  res.setHeader('X-Session-Id', sessionId);
+
+  const mcpServer = createAlloyMcpServer(req.user);
+  await mcpServer.connect(transport);
+});
+
+// ── Legacy SSE message endpoint ───────────────────────────────────────────────
+
+router.post(
+  '/mcp/message',
+  authMiddleware({ required: false }),
+  async (req: Request, res: Response) => {
+    const sessionId = String(req.query['sessionId'] ?? '');
+    const transport = sseSessions.get(sessionId);
+    if (!transport) {
+      res.status(404).json({
+        jsonrpc: '2.0',
+        error: { code: -32001, message: 'Session not found', data: { sessionId } },
+      });
+      return;
+    }
+    await transport.handlePostMessage(req, res, req.body);
+  },
+);
+
+// ── Streamable HTTP endpoint (MCP 2025 spec) ──────────────────────────────────
+//
+// A single POST /mcp endpoint handles all protocol traffic for modern clients.
+
+router.post(
+  '/mcp',
+  authMiddleware({ required: false }),
+  async (req: Request, res: Response) => {
+    const sessionId = req.headers['mcp-session-id'] as string | undefined;
+
+    if (sessionId && streamableSessions.has(sessionId)) {
+      const transport = streamableSessions.get(sessionId)!;
+      await transport.handleRequest(req, res, req.body);
+      return;
+    }
+
+    const transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: () => randomUUID(),
+      onsessioninitialized: (id) => {
+        streamableSessions.set(id, transport);
+      },
+    });
+
+    transport.onclose = () => {
+      if (transport.sessionId) {
+        streamableSessions.delete(transport.sessionId);
+      }
+    };
+
+    const mcpServer = createAlloyMcpServer(req.user);
+    await mcpServer.connect(transport);
+    await transport.handleRequest(req, res, req.body);
+  },
+);
+
+// ── Streamable HTTP GET (server-to-client notifications) ──────────────────────
+
+router.get(
+  '/mcp/stream',
+  authMiddleware({ required: false }),
+  async (req: Request, res: Response) => {
+    const sessionId = req.headers['mcp-session-id'] as string | undefined;
+    if (!sessionId) {
+      res.status(400).json({ error: 'Mcp-Session-Id header required' });
+      return;
+    }
+    const transport = streamableSessions.get(sessionId);
+    if (!transport) {
+      res.status(404).json({ error: `Session '${sessionId}' not found` });
+      return;
+    }
+    await transport.handleRequest(req, res);
+  },
+);
 
 export default router;
