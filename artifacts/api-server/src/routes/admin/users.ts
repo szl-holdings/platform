@@ -318,6 +318,7 @@ export function register(router: IRouter): void {
       const format = req.query.format as string | undefined;
       const entityType = req.query.entityType as string | undefined;
       const entityId = req.query.entityId as string | undefined;
+      const grouped = (req.query.grouped as string | undefined) === 'true';
       const limitParam = parseInt((req.query.limit as string) ?? '50', 10);
       const limit = format === 'csv' ? 10000 : Math.min(Number.isNaN(limitParam) ? 50 : limitParam, 200);
 
@@ -460,6 +461,20 @@ export function register(router: IRouter): void {
         res.setHeader('Content-Type', 'text/csv; charset=utf-8');
         res.setHeader('Content-Disposition', 'attachment; filename="audit-log.csv"');
         res.send([header, ...body].join('\r\n'));
+        return;
+      }
+      if (grouped && !orgIdParam) {
+        const groupMap = new Map<string, typeof logs>();
+        for (const entry of logs) {
+          const key = entry.orgName ?? '(Platform / No Org)';
+          const bucket = groupMap.get(key) ?? [];
+          bucket.push(entry);
+          groupMap.set(key, bucket);
+        }
+        const groups = Array.from(groupMap.entries())
+          .map(([orgName, entries]) => ({ orgName, count: entries.length, logs: entries }))
+          .sort((a, b) => b.count - a.count);
+        res.json({ groups, total: logs.length });
         return;
       }
       res.json({ logs, total: logs.length });

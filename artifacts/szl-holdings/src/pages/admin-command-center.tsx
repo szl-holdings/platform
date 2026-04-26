@@ -2473,6 +2473,12 @@ function SupportPanel() {
 
 // ─── Audit Log Panel ──────────────────────────────────────────────────────────
 
+interface AuditGroup {
+  orgName: string;
+  count: number;
+  logs: AuditEntry[];
+}
+
 function AuditPanel() {
   const [search, setSearch] = useState('');
   const [action, setAction] = useState('');
@@ -2482,6 +2488,9 @@ function AuditPanel() {
   const [selectedEntry, setSelectedEntry] = useState<AuditEntry | null>(null);
   const [exporting, setExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+
+  const isAllTenants = !tenantFilter;
 
   const params = new URLSearchParams();
   if (search) params.set('search', search);
@@ -2495,6 +2504,29 @@ function AuditPanel() {
     queryKey: ['admin-audit', search, action, dateFrom, dateTo, tenantFilter],
     queryFn: () => adminFetch(`/admin/audit-log?${params}`),
   });
+
+  const auditGroups: AuditGroup[] = React.useMemo(() => {
+    if (!isAllTenants || !data?.logs?.length) return [];
+    const map = new Map<string, AuditEntry[]>();
+    for (const entry of data.logs) {
+      const key = entry.orgName ?? '(Platform / No Org)';
+      const bucket = map.get(key) ?? [];
+      bucket.push(entry);
+      map.set(key, bucket);
+    }
+    return Array.from(map.entries())
+      .map(([orgName, logs]) => ({ orgName, count: logs.length, logs }))
+      .sort((a, b) => b.count - a.count);
+  }, [isAllTenants, data?.logs]);
+
+  const toggleGroup = (orgName: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(orgName)) next.delete(orgName);
+      else next.add(orgName);
+      return next;
+    });
+  };
 
   const { data: tenantsData } = useStandardQuery<{ tenants: Tenant[] }>({
     queryKey: ['admin-tenants'],
@@ -2660,6 +2692,89 @@ function AuditPanel() {
         </div>
       ) : !data?.logs?.length ? (
         <EmptyState message="No audit events match your filters." />
+      ) : isAllTenants ? (
+        <div className="space-y-3">
+          {auditGroups.map((group) => {
+            const isCollapsed = collapsedGroups.has(group.orgName);
+            const isNoOrg = group.orgName === '(Platform / No Org)';
+            return (
+              <div
+                key={group.orgName}
+                className="bg-card border border-border rounded-xl overflow-hidden"
+              >
+                <button
+                  onClick={() => toggleGroup(group.orgName)}
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors text-left border-b border-border/50"
+                >
+                  <div
+                    className={cn(
+                      'w-6 h-6 rounded-md flex items-center justify-center shrink-0',
+                      isNoOrg ? 'bg-muted' : 'bg-violet-500/10',
+                    )}
+                  >
+                    <Building2
+                      className={cn('w-3.5 h-3.5', isNoOrg ? 'text-muted-foreground' : 'text-violet-500')}
+                    />
+                  </div>
+                  <span className="text-sm font-semibold text-foreground flex-1 truncate">
+                    {group.orgName}
+                  </span>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-violet-500/10 text-violet-600 border-violet-500/20 uppercase tracking-wider shrink-0">
+                    {group.count} {group.count === 1 ? 'event' : 'events'}
+                  </span>
+                  {isCollapsed ? (
+                    <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
+                  )}
+                </button>
+                {!isCollapsed && (
+                  <div className="divide-y divide-border/50">
+                    <div className="px-4 py-2 bg-muted/10 grid grid-cols-12 gap-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      <span className="col-span-3">Action</span>
+                      <span className="col-span-3">Actor</span>
+                      <span className="col-span-3">Target</span>
+                      <span className="col-span-2">IP</span>
+                      <span className="col-span-1 text-right">Time</span>
+                    </div>
+                    {group.logs.map((l) => {
+                      const actionClass =
+                        actionColors[l.action.toLowerCase()] ?? 'text-muted-foreground bg-muted';
+                      return (
+                        <button
+                          key={l.id}
+                          onClick={() => setSelectedEntry(l)}
+                          className="w-full px-4 py-2.5 grid grid-cols-12 gap-2 items-center hover:bg-muted/10 transition-colors text-left"
+                        >
+                          <span
+                            className={cn(
+                              'col-span-3 text-[10px] font-bold px-2 py-0.5 rounded-md inline-block uppercase tracking-wider w-fit',
+                              actionClass,
+                            )}
+                          >
+                            {l.action}
+                          </span>
+                          <span className="col-span-3 text-xs text-foreground truncate font-medium">
+                            {l.actor}
+                          </span>
+                          <span className="col-span-3 text-xs text-muted-foreground truncate">
+                            {l.target}
+                          </span>
+                          <span className="col-span-2 text-[10px] text-muted-foreground font-mono">
+                            {l.ipAddress ?? '—'}
+                          </span>
+                          <span className="col-span-1 text-[10px] text-muted-foreground text-right">
+                            {new Date(l.timestamp).toLocaleString()}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       ) : (
         <div className="bg-card border border-border rounded-xl divide-y divide-border/50 overflow-hidden">
           <div className="px-4 py-2 bg-muted/30 grid grid-cols-12 gap-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">

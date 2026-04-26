@@ -20,7 +20,11 @@
   },
   "artifacts/a11oy/src/pages/HomePage.tsx": {
     "Vessels": 1,
+    "Terra": 1,
     "Aegis": 1
+  },
+  "artifacts/a11oy/src/pages/Memory.tsx": {
+    "Terra": 1
   },
   "artifacts/a11oy/src/pages/NowBoard.tsx": {
     "Vessels": 1,
@@ -2534,6 +2538,12 @@
     "Lyte": 4,
     "Aegis": 1
   },
+  "packages/nexus-mcp/src/capabilities/instructions.ts": {
+    "Vessels": 1,
+    "Sentra": 1,
+    "Terra": 1,
+    "Lyte": 1
+  },
   "packages/ontology/src/domains.ts": {
     "Aegis": 1
   },
@@ -2601,10 +2611,21 @@
   "packages/szl-alloy/src/prompts/kernels/video-storyboard.ts": {
     "Terra": 8
   },
+  "services/substrate-mcp-gateway/src/descriptor.ts": {
+    "Sentra": 1,
+    "Terra": 1,
+    "Vessels": 1
+  },
   "services/substrate-mcp-gateway/src/handlers.ts": {
     "Terra": 1,
     "AEGIS": 1,
     "Vessels": 1
+  },
+  "services/substrate-mcp-gateway/src/nexus-fabric.ts": {
+    "Vessels": 2,
+    "Sentra": 1,
+    "Terra": 1,
+    "Lyte": 1
   },
   "tests/api/cortex-inca-smoke.test.ts": {
     "Aegis": 1
