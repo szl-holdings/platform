@@ -1226,22 +1226,67 @@ router.post(
   requireStripeLive,
   async (req: Request, res: Response) => {
     try {
-      const { customerId, lineItems, dueDate, notes } = req.body as {
+      const { customerId, lineItems: rawLineItems, dueDate, notes, sellerCountry, customerCountry, customerIsB2B } = req.body as {
         customerId?: string;
         lineItems?: Array<{ description: string; amount: number; currency?: string }>;
         dueDate?: number;
         notes?: string;
+        sellerCountry?: string;
+        customerCountry?: string;
+        customerIsB2B?: boolean;
       };
 
-      if (!customerId || !lineItems?.length) {
+      if (!customerId || !rawLineItems?.length) {
         sendBadRequest(res, 'customerId and lineItems are required');
         return;
+      }
+
+      // Pre-charge tax assessment — runs before invoice creation so the tax
+      // decision influences line items and invoice metadata.
+      const orgId = req.tenantOrgId ?? null;
+      const totalAmountCents = rawLineItems.reduce((sum, li) => sum + (li.amount ?? 0), 0);
+      const totalAmountMajor = totalAmountCents / 100;
+      const currency = rawLineItems[0]?.currency ?? 'usd';
+      let lineItems = [...rawLineItems];
+      let taxMeta: Record<string, unknown> = { taxSource: 'stripe_tax' };
+      try {
+        const { computeTaxDecision, persistTaxCalculation } = await import('../lib/tax-engine');
+        const taxInput = {
+          orgId: orgId ?? 0,
+          sellerCountry: sellerCountry ?? 'US',
+          customerCountry: customerCountry ?? 'US',
+          customerIsB2B: customerIsB2B ?? false,
+          amountExclusive: totalAmountMajor,
+          currency,
+        };
+        const taxDecision = await computeTaxDecision(taxInput);
+        await persistTaxCalculation(taxInput, taxDecision);
+        taxMeta = {
+          taxSource: taxDecision.source,
+          taxRate: String(taxDecision.taxRate),
+          taxAmountExclusive: String(taxDecision.taxAmountExclusive),
+          reverseCharge: String(taxDecision.reverseCharge),
+          taxJurisdiction: taxDecision.jurisdiction,
+          ...(taxDecision.exemptionApplied ? { exemptionApplied: taxDecision.exemptionApplied } : {}),
+          ...(taxDecision.overrideReason ? { overrideReason: taxDecision.overrideReason } : {}),
+        };
+        // Requirement: line items must reflect the tax decision descriptor.
+        // For reverse-charge and exempt decisions, add a descriptive zero-value
+        // line item so the invoice clearly communicates the tax treatment.
+        if (taxDecision.lineItemDescriptor && (taxDecision.source === 'reverse_charge' || taxDecision.source === 'exempt')) {
+          lineItems = [
+            ...rawLineItems,
+            { description: taxDecision.lineItemDescriptor, amount: 0, currency },
+          ];
+        }
+      } catch (taxErr) {
+        logger.warn({ taxErr, orgId }, 'Pre-charge tax assessment failed — proceeding with Stripe Tax defaults');
       }
 
       const invoice = await services.stripe.createInvoice(customerId, lineItems, {
         dueDate,
         notes,
-        metadata: { product: 'aegis' },
+        metadata: { product: 'aegis', ...taxMeta },
       });
 
       sendSuccess(res, {

@@ -1046,6 +1046,10 @@ export const billingAegisInvoiceSchema = z.object({
   }).strict()).min(1).max(100),
   dueDate: z.number().int().positive().optional(),
   notes: z.string().max(5000).optional(),
+  // Tax context — supply when known to enable reverse-charge / exemption detection
+  sellerCountry: z.string().length(2).toUpperCase().optional(),
+  customerCountry: z.string().length(2).toUpperCase().optional(),
+  customerIsB2B: z.boolean().optional(),
 }).strict();
 
 /** POST /admin/connectors/:name/(test|sync) — connector ops with no body. */
@@ -1637,6 +1641,78 @@ export const voyageRiskMemoPdfBodySchema = z.object({
   sanctionsRefresh: z.object({}).passthrough().optional(),
   provenance: z.object({}).passthrough().optional(),
 }).passthrough();
+
+// ─── Tax Automation schemas ───────────────────────────────────────────────────
+
+export const taxIdCreateSchema = z.object({
+  taxIdType: z.enum(['eu_vat', 'gb_vat', 'au_gst', 'us_ein', 'us_resale', 'ca_gst', 'ca_hst', 'other']),
+  taxIdValue: z.string().min(2).max(50).trim(),
+  jurisdiction: z.string().min(2).max(10).trim().toUpperCase(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+export const taxIdUpdateSchema = z.object({
+  validationStatus: z.enum(['pending', 'valid', 'invalid', 'unverifiable']).optional(),
+  isActive: z.boolean().optional(),
+  metadata: z.record(z.unknown()).optional(),
+}).refine((d) => Object.keys(d).length > 0, { message: 'At least one field required' });
+
+export const taxExemptionCertCreateSchema = z.object({
+  jurisdiction: z.string().min(2).max(10).trim().toUpperCase(),
+  exemptionType: z.enum(['resale', 'nonprofit', 'government', 'agriculture', 'manufacturer', 'other']),
+  certificateNumber: z.string().min(1).max(200).trim().optional(),
+  fileUrl: z.string().url().max(2048).optional(),
+  issuedAt: z.string().datetime({ offset: true }).optional(),
+  expiresAt: z.string().datetime({ offset: true }).optional(),
+  notes: z.string().max(2000).trim().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+export const taxExemptionCertUpdateSchema = z.object({
+  status: z.enum(['active', 'expired', 'revoked', 'pending_review']).optional(),
+  notes: z.string().max(2000).trim().optional(),
+  expiresAt: z.string().datetime({ offset: true }).optional(),
+}).refine((d) => Object.keys(d).length > 0, { message: 'At least one field required' });
+
+export const taxCategoryOverrideCreateSchema = z.object({
+  scope: z.enum(['product', 'invoice']),
+  scopeRef: z.string().min(1).max(300).trim(),
+  jurisdiction: z.string().min(2).max(10).trim().toUpperCase(),
+  taxBehavior: z.enum(['taxable', 'exempt', 'reverse_charge']),
+  taxCode: z.string().max(100).trim().optional(),
+  taxRate: z.number().min(0).max(1).optional(),
+  reasonCode: z.string().min(1).max(200).trim(),
+  description: z.string().max(1000).trim().optional(),
+  expiresAt: z.string().datetime({ offset: true }).optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+
+export const taxManualInvoiceOverrideSchema = z.object({
+  invoiceId: z.string().min(1).max(300).trim(),
+  taxRate: z.number().min(0).max(1),
+  reasonCode: z.string().min(1).max(200).trim(),
+  description: z.string().max(1000).trim().optional(),
+  sellerCountry: z.string().length(2).toUpperCase().default('US'),
+  customerCountry: z.string().length(2).toUpperCase().default('US'),
+  amountExclusive: z.number().min(0),
+  currency: z.string().length(3).toLowerCase().default('usd'),
+});
+
+export const taxReportQuerySchema = z.object({
+  year: z.coerce.number().int().min(2020).max(2100),
+  month: z.coerce.number().int().min(1).max(12),
+  format: z.enum(['json', 'csv']).default('json'),
+});
+
+export const taxDecisionSchema = z.object({
+  invoiceId: z.string().min(1).max(300).optional(),
+  productId: z.string().min(1).max(300).optional(),
+  sellerCountry: z.string().length(2).toUpperCase().default('US'),
+  customerCountry: z.string().length(2).toUpperCase(),
+  customerIsB2B: z.boolean().default(false),
+  amountExclusive: z.number().min(0).default(0),
+  currency: z.string().length(3).toLowerCase().default('usd'),
+});
 
 // Re-export parsePagination so route files can import it from validation
 export { parsePagination } from './api-response';

@@ -331,10 +331,142 @@ export const insertBillingRefundRequestSchema = createInsertSchema(billingRefund
 export type InsertBillingRefundRequest = z.infer<typeof insertBillingRefundRequestSchema>;
 export type BillingRefundRequest = typeof billingRefundRequestsTable.$inferSelect;
 
+// ─── Tax IDs ──────────────────────────────────────────────────────────────────
+// Stores validated tax registration numbers per org (VAT, GST/HST, US EIN,
+// resale cert numbers, etc.). Used by the reverse-charge VAT logic and the
+// exemption engine.
+
+export const taxIdsTable = pgTable(
+  'tax_ids',
+  {
+    id: serial('id').primaryKey(),
+    orgId: integer('org_id')
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: 'cascade' }),
+    taxIdType: text('tax_id_type').notNull(),
+    taxIdValue: text('tax_id_value').notNull(),
+    jurisdiction: text('jurisdiction').notNull(),
+    validatedAt: timestamp('validated_at'),
+    validationStatus: text('validation_status', {
+      enum: ['pending', 'valid', 'invalid', 'unverifiable'],
+    })
+      .notNull()
+      .default('pending'),
+    validationResponse: jsonb('validation_response'),
+    isActive: boolean('is_active').notNull().default(true),
+    metadata: jsonb('metadata'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('tax_ids_org_id_idx').on(t.orgId),
+    index('tax_ids_jurisdiction_idx').on(t.jurisdiction),
+    index('tax_ids_type_idx').on(t.taxIdType),
+  ],
+);
+
+export const insertTaxIdSchema = createInsertSchema(taxIdsTable).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTaxId = z.infer<typeof insertTaxIdSchema>;
+export type TaxId = typeof taxIdsTable.$inferSelect;
+
+// ─── Tax Exemption Certificates ───────────────────────────────────────────────
+// Stores exemption certificate metadata per org (resale certs, nonprofit
+// exemptions, government entity exemptions). File upload reference is stored
+// as fileUrl; the actual file lives in object storage.
+
+export const taxExemptionCertificatesTable = pgTable(
+  'tax_exemption_certificates',
+  {
+    id: serial('id').primaryKey(),
+    orgId: integer('org_id')
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: 'cascade' }),
+    certificateNumber: text('certificate_number'),
+    jurisdiction: text('jurisdiction').notNull(),
+    exemptionType: text('exemption_type', {
+      enum: ['resale', 'nonprofit', 'government', 'agriculture', 'manufacturer', 'other'],
+    })
+      .notNull()
+      .default('resale'),
+    fileUrl: text('file_url'),
+    issuedAt: timestamp('issued_at'),
+    expiresAt: timestamp('expires_at'),
+    status: text('status', {
+      enum: ['active', 'expired', 'revoked', 'pending_review'],
+    })
+      .notNull()
+      .default('active'),
+    reviewedBy: integer('reviewed_by'),
+    reviewedAt: timestamp('reviewed_at'),
+    notes: text('notes'),
+    metadata: jsonb('metadata'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('tax_exemption_certs_org_id_idx').on(t.orgId),
+    index('tax_exemption_certs_jurisdiction_idx').on(t.jurisdiction),
+    index('tax_exemption_certs_expires_at_idx').on(t.expiresAt),
+    index('tax_exemption_certs_status_idx').on(t.status),
+  ],
+);
+
+export const insertTaxExemptionCertificateSchema = createInsertSchema(
+  taxExemptionCertificatesTable,
+).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTaxExemptionCertificate = z.infer<typeof insertTaxExemptionCertificateSchema>;
+export type TaxExemptionCertificate = typeof taxExemptionCertificatesTable.$inferSelect;
+
+// ─── Tax Category Overrides ───────────────────────────────────────────────────
+// Per product or per invoice tax category overrides. Takes precedence over
+// Stripe Tax defaults. Every override requires a reason code and is recorded
+// in the billing audit log.
+
+export const taxCategoryOverridesTable = pgTable(
+  'tax_category_overrides',
+  {
+    id: serial('id').primaryKey(),
+    orgId: integer('org_id').references(() => organizationsTable.id, { onDelete: 'cascade' }),
+    scope: text('scope', { enum: ['product', 'invoice'] }).notNull(),
+    scopeRef: text('scope_ref').notNull(),
+    jurisdiction: text('jurisdiction').notNull(),
+    taxBehavior: text('tax_behavior', { enum: ['taxable', 'exempt', 'reverse_charge'] })
+      .notNull()
+      .default('taxable'),
+    taxCode: text('tax_code'),
+    taxRate: numeric('tax_rate', { precision: 6, scale: 4 }),
+    reasonCode: text('reason_code').notNull(),
+    description: text('description'),
+    isActive: boolean('is_active').notNull().default(true),
+    appliedBy: integer('applied_by'),
+    expiresAt: timestamp('expires_at'),
+    metadata: jsonb('metadata'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('tax_category_overrides_scope_ref_idx').on(t.scope, t.scopeRef),
+    index('tax_category_overrides_org_id_idx').on(t.orgId),
+    index('tax_category_overrides_jurisdiction_idx').on(t.jurisdiction),
+  ],
+);
+
+export const insertTaxCategoryOverrideSchema = createInsertSchema(taxCategoryOverridesTable).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTaxCategoryOverride = z.infer<typeof insertTaxCategoryOverrideSchema>;
+export type TaxCategoryOverride = typeof taxCategoryOverridesTable.$inferSelect;
+
 // ─── Billing Tax Calculations ─────────────────────────────────────────────────
-// Stores per-invoice tax calculation snapshots. Populated by the Stripe Tax
-// webhook events and eventually by the tax-automation task that layers
-// jurisdiction-level overrides on top of Stripe Tax defaults.
+// Stores per-invoice tax calculation snapshots. Extended with full audit
+// fields for the tax-automation layer: input snapshot, basis amount,
+// exemption reference, calculation source, and tamper-detection hash.
 
 export const billingTaxCalculationsTable = pgTable(
   'billing_tax_calculations',
@@ -351,6 +483,17 @@ export const billingTaxCalculationsTable = pgTable(
     jurisdiction: text('jurisdiction'),
     taxType: text('tax_type'),
     taxRate: numeric('tax_rate', { precision: 6, scale: 4 }),
+    inputSnapshot: jsonb('input_snapshot'),
+    basisAmount: numeric('basis_amount', { precision: 10, scale: 2 }),
+    exemptionApplied: text('exemption_applied'),
+    source: text('source', {
+      enum: ['stripe_tax', 'override', 'reverse_charge', 'exempt', 'demo'],
+    })
+      .notNull()
+      .default('stripe_tax'),
+    reverseCharge: boolean('reverse_charge').notNull().default(false),
+    overrideReason: text('override_reason'),
+    tamperHash: text('tamper_hash'),
     metadata: jsonb('metadata'),
     calculatedAt: timestamp('calculated_at').notNull().defaultNow(),
     createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -358,6 +501,8 @@ export const billingTaxCalculationsTable = pgTable(
   (t) => [
     index('billing_tax_calculations_org_id_idx').on(t.orgId),
     index('billing_tax_calculations_invoice_id_idx').on(t.stripeInvoiceId),
+    index('billing_tax_calculations_source_idx').on(t.source),
+    index('billing_tax_calculations_jurisdiction_idx').on(t.jurisdiction),
   ],
 );
 

@@ -31,6 +31,7 @@ export function register(router: IRouter): void {
   router.use('/billing/cancel-subscription', idempotencyMiddleware);
   router.use('/billing/update-subscription', idempotencyMiddleware);
   router.use(lazyMatch(['/billing', '/stripe'], () => import('../billing'), 'billing'));
+  router.use(lazyMatch('/billing/tax', () => import('../billing-tax'), 'billing-tax'));
 
   router.use('/metering', _readLimiter);
   router.use('/metering', _writeLimiter);

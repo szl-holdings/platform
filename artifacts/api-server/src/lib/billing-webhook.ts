@@ -298,6 +298,40 @@ async function handleInvoicePaid(event: StripeEventPayload): Promise<void> {
     stripeInvoiceId: invoice['id'] as string | null,
     after: { status: 'paid', amount: (invoice['amount_paid'] as number) / 100 },
   });
+
+  // Fire-and-forget: compute and persist the tax decision for this invoice so
+  // the tax engine is integrated into the real payment flow. Failures are logged
+  // but do NOT block the webhook response or billing record writes.
+  if (orgId) {
+    void (async () => {
+      try {
+        const { computeTaxDecision, persistTaxCalculation } = await import('./tax-engine');
+        const amountExclusive = invoice['amount_paid'] ? (invoice['amount_paid'] as number) / 100 : 0;
+        const currency = (invoice['currency'] as string) ?? 'usd';
+        const customerCountry = ((metadata?.['customerCountry'] as string | undefined) ?? 'US').toUpperCase();
+        const sellerCountry = (process.env.SELLER_COUNTRY ?? 'US').toUpperCase();
+        const customerIsB2B = metadata?.['customerIsB2B'] === 'true';
+
+        const taxInput = {
+          orgId,
+          invoiceId: invoice['id'] as string,
+          sellerCountry,
+          customerCountry,
+          customerIsB2B,
+          amountExclusive,
+          currency,
+        };
+        const decision = await computeTaxDecision(taxInput);
+        await persistTaxCalculation(taxInput, decision);
+        logger.info(
+          { invoiceId: invoice['id'], source: decision.source, taxAmountExclusive: decision.taxAmountExclusive },
+          '[webhook] invoice.paid: tax decision computed and persisted',
+        );
+      } catch (taxErr) {
+        logger.warn({ err: taxErr, invoiceId: invoice['id'] }, '[webhook] invoice.paid: tax decision computation failed (non-fatal)');
+      }
+    })();
+  }
 }
 
 async function handleInvoicePaymentFailed(event: StripeEventPayload): Promise<void> {
