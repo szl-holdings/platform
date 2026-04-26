@@ -56,7 +56,7 @@ const PORTFOLIO_EVIDENCE: EvidenceSource[] = [
 const CORRELATION_EVIDENCE: EvidenceSource[] = [
   {
     id: 'ev-cor1',
-    label: "Aegis"Threat Signal — APT-29 Activity',
+    label: 'Aegis Threat Signal — APT-29 Activity',
     type: 'signal',
     timestamp: FRESH_2M,
     excerpt:

@@ -959,13 +959,13 @@ export function DemoLaunchpad() {
                   status: 'LIVE',
                 },
                 {
-                  label: "Terra — Real Estate"Intelligence',
+                  label: 'Terra — Real Estate Intelligence',
                   color: '#4ade80',
                   href: '/terra/',
                   status: 'LIVE',
                 },
                 {
-                  label: "Aegis"— Cyber Resilience',
+                  label: 'Aegis — Cyber Resilience',
                   color: '#4ade80',
                   href: '/aegis/',
                   status: 'LIVE',

@@ -1,4 +1,3 @@
-#!/bin/bash
-set -e
+#!/bin/sh
 cd /home/runner/workspace/artifacts/mockup-sandbox
-exec node_modules/.bin/vite --config vite.config.ts --host :: --port 8008
+exec node_modules/.bin/vite --config vite.config.ts --host ::

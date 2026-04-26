@@ -62,7 +62,7 @@ interface AegisIncident {
 }
 
 const DOMAIN_CONFIG: Record<Domain, { label: string; color: string; icon: typeof Globe }> = {
-  aegis: { label: "Aegis"— Defense', color: '#ef4444', icon: Shield },
+  aegis: { label: 'Aegis — Defense', color: '#ef4444', icon: Shield },
   terra: { label: "Terra — Real Estate", color: '#10b981', icon: Globe },
   vessels: { label: 'Vessels — Maritime', color: '#06b6d4', icon: Network },
   alloy: { label: 'Counsel — Execution', color: '#4B8BDB', icon: Zap },

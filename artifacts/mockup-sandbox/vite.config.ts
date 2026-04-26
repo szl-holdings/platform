@@ -8,7 +8,7 @@ import { sharedUiManifestPlugin } from './sharedUiManifestPlugin';
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
 
-const port = Number(process.env.PORT) || 8008;
+const port = Number(process.env.VITE_PORT) || 8008;
 const basePath = process.env.BASE_PATH || '/nexus/';
 
 function healthCheckPlugin(): Plugin {
@@ -84,10 +84,11 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    holdUntilCrawlEnd: true,
+    holdUntilCrawlEnd: false,
   },
   server: {
     port,
+    strictPort: true,
     host: '::',
     allowedHosts: true,
     hmr: { clientPort: 443 },

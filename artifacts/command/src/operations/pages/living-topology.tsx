@@ -67,7 +67,7 @@ const PLATFORM_NODES = [
   },
   {
     id: 'firestorm-soc',
-    label: "Aegis"SOC',
+    label: 'Aegis SOC',
     platform: 'Aegis',
     connects: ['signal-bus', 'threat-db'],
   },

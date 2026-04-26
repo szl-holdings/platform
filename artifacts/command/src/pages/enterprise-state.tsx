@@ -2476,7 +2476,7 @@ function ValueWidgets() {
       breakdown: [
         { label: 'Carlota data pipeline', amount: '$380K', domain: 'carlota' as DomainKey },
         { label: 'Lyte SLA penalties', amount: '$420K', domain: 'lyte' as DomainKey },
-        { label: "Aegis"bundle degradation', amount: '$280K', domain: 'aegis' as DomainKey },
+        { label: 'Aegis bundle degradation', amount: '$280K', domain: 'aegis' as DomainKey },
       ],
     },
     {

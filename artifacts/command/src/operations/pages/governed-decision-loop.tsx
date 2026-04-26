@@ -858,7 +858,7 @@ const AEGIS_DATA: ScenarioPanelData = {
       reviewedAt: 'Apr 16, 02:16',
       reviewNote: 'Aligns with documented IR-PB-04 playbook',
       inputSources: [
-        { type: 'telemetry', label: "Aegis"SIEM Auth Stream' },
+        { type: 'telemetry', label: 'Aegis SIEM Auth Stream' },
         { type: 'api', label: 'MISP Threat Intel Feed' },
         { type: 'database', label: 'Identity Provider Audit Log' },
         { type: 'historical', label: '9 prior credential-stuffing incidents' },

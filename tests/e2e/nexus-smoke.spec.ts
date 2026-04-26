@@ -248,7 +248,7 @@ test.describe('PRAXIS prompt registry', () => {
     // 'Prompts' appears in the sidebar nav and on the metric card. Pin to
     // the metric label by scoping to its sibling counter.
     await expect(page.getByText('Prompts').first()).toBeVisible();
-    await expect(page.locator('.text-nexus-cyan').filter({ hasText: /^1$/ }).first()).toBeVisible();
+    await expect(page.locator('.text-praxis-cyan').filter({ hasText: /^1$/ }).first()).toBeVisible();
   });
 
   test('lists prompts with name and status', async ({ page }) => {

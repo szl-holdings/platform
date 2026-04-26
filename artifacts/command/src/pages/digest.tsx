@@ -90,7 +90,7 @@ function buildDigest(role: Role, compositeScore: number): DigestSection[] {
         'AIS transponder breach attempt on Vessels OT systems (Aegis SOC responding). Force majeure clause triggered on Q3 Cargo Agreement. Miami Beach deal deadline 48h out.',
       actions: [
         { label: 'Alert Inbox', href: '/alerts' },
-        { label: "Aegis"SOC', href: '/' },
+        { label: 'Aegis SOC', href: '/' },
       ],
       relevantFor: ['executive', 'security', 'operations', 'legal'],
     },

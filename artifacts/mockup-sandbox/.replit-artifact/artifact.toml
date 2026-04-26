@@ -5,12 +5,12 @@ version = "1.0.0"
 id = "XegfDyZt7HqfW2Bb8Ghoy"
 
 [[services]]
-localPort = 8008
+localPort = 9090
 name = "web"
 paths = ["/nexus/"]
 
 [services.env]
-PORT = "8008"
+VITE_PORT = "8008"
 BASE_PATH = "/nexus/"
 
 [services.development]

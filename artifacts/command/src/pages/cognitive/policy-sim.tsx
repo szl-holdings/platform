@@ -118,7 +118,7 @@ const POLICY_CHANGES: PolicyChange[] = [
 const SEEDED_TRACES: HistoricalTrace[] = [
   {
     id: 'trace-aegis-20250416-001',
-    label: "Aegis"— Ransomware Lateral Movement v2',
+    label: 'Aegis — Ransomware Lateral Movement v2',
     domain: 'aegis',
     route: 'aegis.containment.lateral-movement',
     startedAt: '2025-04-16T08:14:22Z',
@@ -131,7 +131,7 @@ const SEEDED_TRACES: HistoricalTrace[] = [
   },
   {
     id: 'trace-aegis-20250415-007',
-    label: "Aegis"— Phishing Cluster Containment',
+    label: 'Aegis — Phishing Cluster Containment',
     domain: 'aegis',
     route: 'aegis.containment.lateral-movement',
     startedAt: '2025-04-15T14:02:11Z',
@@ -144,7 +144,7 @@ const SEEDED_TRACES: HistoricalTrace[] = [
   },
   {
     id: 'trace-aegis-20250414-002',
-    label: "Aegis"— False-Positive Mass Isolate',
+    label: 'Aegis — False-Positive Mass Isolate',
     domain: 'aegis',
     route: 'aegis.containment.lateral-movement',
     startedAt: '2025-04-14T22:38:45Z',
