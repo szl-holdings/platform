@@ -249,6 +249,66 @@ export const worldlineSignalOverlaysTable = pgTable(
   ],
 );
 
+export const digitalTwinsTable = pgTable(
+  'digital_twins',
+  {
+    id: text('id').primaryKey(),
+    orgId: integer('org_id').references(() => organizationsTable.id, { onDelete: 'cascade' }),
+    entityId: text('entity_id').notNull(),
+    entityName: text('entity_name').notNull(),
+    twinType: text('twin_type', { enum: SPATIAL_TWIN_CATEGORIES }).notNull(),
+    status: text('status', { enum: ['active', 'degraded', 'offline', 'simulating'] })
+      .notNull()
+      .default('active'),
+    currentState: jsonb('current_state').notNull().default({}),
+    predictedStates: jsonb('predicted_states').notNull().default([]),
+    alerts: jsonb('alerts').notNull().default([]),
+    confidenceScore: real('confidence_score').notNull().default(0.5),
+    metadata: jsonb('metadata').notNull().default({}),
+    lastSyncedAt: timestamp('last_synced_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('digital_twins_entity_idx').on(table.entityId),
+    index('digital_twins_type_idx').on(table.twinType),
+    index('digital_twins_org_idx').on(table.orgId),
+    index('digital_twins_status_idx').on(table.status),
+    index('digital_twins_synced_idx').on(table.lastSyncedAt),
+  ],
+);
+
+export const twinSimulationRunsTable = pgTable(
+  'twin_simulation_runs',
+  {
+    id: serial('id').primaryKey(),
+    orgId: integer('org_id').references(() => organizationsTable.id, { onDelete: 'cascade' }),
+    twinId: text('twin_id')
+      .notNull()
+      .references(() => digitalTwinsTable.id, { onDelete: 'cascade' }),
+    scenarioName: text('scenario_name').notNull(),
+    scenarioParameters: jsonb('scenario_parameters').notNull().default({}),
+    originalState: jsonb('original_state').notNull().default({}),
+    simulatedState: jsonb('simulated_state').notNull().default({}),
+    deltaMetrics: jsonb('delta_metrics').notNull().default({}),
+    riskAssessment: text('risk_assessment'),
+    recommendedActions: jsonb('recommended_actions').notNull().default([]),
+    confidenceScore: real('confidence_score').notNull().default(0.5),
+    monteCarloResult: jsonb('monte_carlo_result'),
+    runDurationMs: integer('run_duration_ms'),
+    createdByUserId: integer('created_by_user_id').references(() => usersTable.id, {
+      onDelete: 'set null',
+    }),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [
+    index('twin_sim_runs_twin_idx').on(table.twinId),
+    index('twin_sim_runs_org_idx').on(table.orgId),
+    index('twin_sim_runs_created_idx').on(table.createdAt),
+    index('twin_sim_runs_scenario_idx').on(table.scenarioName),
+  ],
+);
+
 export const insertSpatialTwinSnapshotSchema = createInsertSchema(spatialTwinSnapshotsTable).omit({
   id: true,
   createdAt: true,
@@ -287,3 +347,17 @@ export const insertWorldlineSignalOverlaySchema = createInsertSchema(
 });
 export type InsertWorldlineSignalOverlay = z.infer<typeof insertWorldlineSignalOverlaySchema>;
 export type WorldlineSignalOverlay = typeof worldlineSignalOverlaysTable.$inferSelect;
+
+export const insertDigitalTwinSchema = createInsertSchema(digitalTwinsTable).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertDigitalTwin = z.infer<typeof insertDigitalTwinSchema>;
+export type DigitalTwin = typeof digitalTwinsTable.$inferSelect;
+
+export const insertTwinSimulationRunSchema = createInsertSchema(twinSimulationRunsTable).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertTwinSimulationRun = z.infer<typeof insertTwinSimulationRunSchema>;
+export type TwinSimulationRun = typeof twinSimulationRunsTable.$inferSelect;

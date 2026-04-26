@@ -101,6 +101,7 @@ const STRATEGY_NAV: NavGroup[] = [
     section: 'ATLAS Spatial Runtime',
     items: [
       { href: '/strategy/atlas-runtime', label: 'Cross-Domain Twin View', icon: Layers },
+      { href: '/strategy/digital-twins', label: 'Digital Twin Registry', icon: Cpu },
       { href: '/strategy/worldline-registry', label: 'Worldline Registry', icon: GitBranch },
       {
         href: '/vessels/atlas-runtime',

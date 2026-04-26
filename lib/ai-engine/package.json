@@ -51,6 +51,7 @@
     "@google/genai": "^1.44.0",
     "@szl-holdings/db": "workspace:*",
     "@szl-holdings/env": "workspace:*",
+    "@szl-holdings/monte-carlo": "workspace:*",
     "@szl-holdings/proof-chain": "workspace:*",
     "@szl-holdings/services": "workspace:*",
     "@workspace/tool-mesh": "workspace:*",

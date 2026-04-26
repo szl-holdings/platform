@@ -81,6 +81,7 @@ import { registerQueuedJobHandlers } from './lib/queued-jobs';
 import { startAtlasExportProcessor, stopAtlasExportProcessor } from './jobs/atlas-export-processor';
 import { runAlertRuleEvaluation } from './routes/ops-management';
 import { bootstrapChainState } from './routes/signal-chains';
+import { twinRegistry } from '@szl-holdings/ai-engine';
 
 failFastOnInvalidConfig();
 validateMarketDataConfig();
@@ -158,6 +159,9 @@ export async function bootstrap(
   initWebSocket(server);
   initFusionPersistence().catch((err) =>
     logger.warn({ err }, '[fusion-persistence] initFusionPersistence startup error (non-fatal)'),
+  );
+  twinRegistry.initialize().catch((err) =>
+    logger.warn({ err }, '[twin-registry] Failed to initialize twin registry from DB (non-fatal)'),
   );
   startPrismBusBridge();
   startDomainNotificationGenerators();

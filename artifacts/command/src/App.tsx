@@ -169,6 +169,9 @@ const MarketingLeads = lazy(() =>
 const AtlasRuntimePage = lazy(() =>
   import('./pages/atlas-runtime').then((m) => ({ default: m.AtlasRuntimePage })),
 );
+const DigitalTwinsManagementPage = lazy(() =>
+  import('./pages/digital-twins-management').then((m) => ({ default: m.DigitalTwinsManagementPage })),
+);
 const WorldlineRegistryPage = lazy(() => import('./pages/worldline-registry'));
 const WhatChangedPage = lazy(() => import('./operations/pages/what-changed'));
 const DeploymentsPage = lazy(() => import('./operations/pages/deployments'));
@@ -605,6 +608,7 @@ function AppShell() {
               <Route path="/strategy/signal-chains" component={() => <SignalChainsPage />} />
               <Route path="/strategy/enterprise-state" component={() => <EnterpriseStatePage />} />
               <Route path="/strategy/atlas-runtime" component={() => <AtlasRuntimePage />} />
+              <Route path="/strategy/digital-twins" component={() => <DigitalTwinsManagementPage />} />
               <Route path="/strategy/entity-360" component={() => <Entity360Page />} />
               <Route
                 path="/strategy/worldline-registry"

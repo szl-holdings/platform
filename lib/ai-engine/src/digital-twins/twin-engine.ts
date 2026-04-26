@@ -8,7 +8,17 @@
  * - VesselTwin: route, fuel, weather, ETA projections
  * - PropertyTwin: valuation model, market stress test, tenant risk
  * - PostureTwin: security posture score, attack surface map, breach simulation
+ *
+ * Persistence: TwinRegistry is backed by the `digital_twins` database table.
+ * State is loaded on startup and written through on every create/update.
+ *
+ * Monte Carlo: simulation methods produce probabilistic confidence bands
+ * using domain-specific scenario definitions from the @szl-holdings/monte-carlo library.
  */
+
+import { db, digitalTwinsTable, twinSimulationRunsTable } from '@szl-holdings/db';
+import { AEGIS_CYBER_RISK, TERRA_PROPERTY_RETURNS, VESSELS_VOYAGE_COST, runSimulation } from '@szl-holdings/monte-carlo';
+import { eq } from 'drizzle-orm';
 
 export type TwinType =
   | 'vessel'
@@ -23,6 +33,7 @@ export type TwinStatus = 'active' | 'degraded' | 'offline' | 'simulating';
 
 export interface TwinState {
   id: string;
+  orgId?: number;
   entityId: string;
   entityName: string;
   twinType: TwinType;
@@ -60,6 +71,16 @@ export interface SimulationScenario {
   impactedMetrics: string[];
 }
 
+export interface MonteCarloConfidenceBand {
+  p5: number;
+  p25: number;
+  p50: number;
+  p75: number;
+  p95: number;
+  mean: number;
+  stdDev: number;
+}
+
 export interface SimulationResult {
   scenarioName: string;
   originalState: Record<string, unknown>;
@@ -69,6 +90,12 @@ export interface SimulationResult {
   recommendedActions: string[];
   confidenceScore: number;
   runDurationMs: number;
+  monteCarlo?: {
+    iterations: number;
+    primaryMetric: string;
+    confidenceBands: Record<string, MonteCarloConfidenceBand>;
+    sensitivityDrivers: Array<{ id: string; label: string; impact: number }>;
+  };
 }
 
 export interface VesselTwinState {
@@ -125,12 +152,53 @@ export interface PostureTwinState {
   activeThreats: number;
 }
 
+function twinStateFromDb(row: typeof digitalTwinsTable.$inferSelect): TwinState {
+  return {
+    id: row.id,
+    orgId: row.orgId ?? undefined,
+    entityId: row.entityId,
+    entityName: row.entityName,
+    twinType: row.twinType as TwinType,
+    status: row.status as TwinStatus,
+    currentState: (row.currentState as Record<string, unknown>) ?? {},
+    predictedStates: (row.predictedStates as PredictedState[]) ?? [],
+    alerts: (row.alerts as TwinAlert[]) ?? [],
+    confidenceScore: row.confidenceScore,
+    metadata: (row.metadata as Record<string, unknown>) ?? {},
+    lastSyncedAt: row.lastSyncedAt.toISOString(),
+  };
+}
+
 class TwinRegistry {
   private twins = new Map<string, TwinState>();
   private updateCallbacks = new Map<string, Array<(state: TwinState) => void>>();
+  private initialized = false;
+
+  async initialize(attempt = 1): Promise<void> {
+    if (this.initialized) return;
+    try {
+      const rows = await db.select().from(digitalTwinsTable);
+      for (const row of rows) {
+        this.twins.set(row.id, twinStateFromDb(row));
+      }
+      this.initialized = true;
+      console.info(`[TwinRegistry] Initialized with ${this.twins.size} twin(s) from DB (attempt ${attempt})`);
+    } catch (err) {
+      const delayMs = Math.min(30_000, 5_000 * attempt);
+      console.error(`[TwinRegistry] Init failed (attempt ${attempt}) — retrying in ${delayMs / 1000}s:`, err);
+      setTimeout(() => {
+        this.initialize(attempt + 1).catch((e) =>
+          console.error('[TwinRegistry] Retry error:', e),
+        );
+      }, delayMs);
+    }
+  }
 
   register(twin: TwinState): void {
     this.twins.set(twin.id, twin);
+    this._persistTwin(twin).catch((err) =>
+      console.error('[TwinRegistry] Failed to persist twin:', err),
+    );
   }
 
   get(twinId: string): TwinState | null {
@@ -153,6 +221,9 @@ class TwinRegistry {
     if (!existing) return null;
     const updated = { ...existing, ...updates, lastSyncedAt: new Date().toISOString() };
     this.twins.set(twinId, updated);
+    this._persistTwin(updated).catch((err) =>
+      console.error('[TwinRegistry] Failed to persist twin update:', err),
+    );
     const callbacks = this.updateCallbacks.get(twinId) ?? [];
     callbacks.forEach((cb) => cb(updated));
     return updated;
@@ -173,17 +244,100 @@ class TwinRegistry {
   list(): TwinState[] {
     return [...this.twins.values()];
   }
+
+  isReady(): boolean {
+    return this.initialized;
+  }
+
+  private async _persistTwin(twin: TwinState): Promise<void> {
+    await db
+      .insert(digitalTwinsTable)
+      .values({
+        id: twin.id,
+        orgId: twin.orgId ?? null,
+        entityId: twin.entityId,
+        entityName: twin.entityName,
+        twinType: twin.twinType as typeof digitalTwinsTable.$inferInsert['twinType'],
+        status: twin.status,
+        currentState: twin.currentState,
+        predictedStates: twin.predictedStates,
+        alerts: twin.alerts,
+        confidenceScore: twin.confidenceScore,
+        metadata: twin.metadata,
+        lastSyncedAt: new Date(twin.lastSyncedAt),
+      })
+      .onConflictDoUpdate({
+        target: digitalTwinsTable.id,
+        set: {
+          entityName: twin.entityName,
+          status: twin.status,
+          currentState: twin.currentState,
+          predictedStates: twin.predictedStates,
+          alerts: twin.alerts,
+          confidenceScore: twin.confidenceScore,
+          metadata: twin.metadata,
+          lastSyncedAt: new Date(twin.lastSyncedAt),
+          updatedAt: new Date(),
+        },
+      });
+  }
 }
 
 export const twinRegistry = new TwinRegistry();
 
+async function persistSimulationRun(
+  twinId: string,
+  result: SimulationResult,
+  scenario: SimulationScenario,
+  createdByUserId?: number,
+  orgId?: number,
+): Promise<void> {
+  try {
+    await db.insert(twinSimulationRunsTable).values({
+      twinId,
+      orgId: orgId ?? null,
+      scenarioName: result.scenarioName,
+      scenarioParameters: scenario.parameters,
+      originalState: result.originalState,
+      simulatedState: result.simulatedState,
+      deltaMetrics: result.deltaMetrics as Record<string, unknown>,
+      riskAssessment: result.riskAssessment,
+      recommendedActions: result.recommendedActions,
+      confidenceScore: result.confidenceScore,
+      monteCarloResult: result.monteCarlo ?? null,
+      runDurationMs: result.runDurationMs,
+      createdByUserId: createdByUserId ?? null,
+    });
+  } catch (err) {
+    console.error('[TwinEngine] Failed to persist simulation run:', err);
+  }
+}
+
+function buildConfidenceBand(values: number[]): MonteCarloConfidenceBand {
+  const sorted = [...values].sort((a, b) => a - b);
+  const n = sorted.length;
+  const pct = (p: number) => sorted[Math.max(0, Math.floor((n * p) / 100) - 1)] ?? 0;
+  const mean = values.reduce((s, v) => s + v, 0) / n;
+  const variance = values.reduce((s, v) => s + (v - mean) ** 2, 0) / n;
+  return {
+    p5: pct(5),
+    p25: pct(25),
+    p50: pct(50),
+    p75: pct(75),
+    p95: pct(95),
+    mean,
+    stdDev: Math.sqrt(variance),
+  };
+}
+
 export class VesselTwin {
-  createTwin(entityId: string, initialState: VesselTwinState): TwinState {
+  createTwin(entityId: string, initialState: VesselTwinState, orgId?: number): TwinState {
     const alerts = this.computeAlerts(initialState);
     const predictedStates = this.computePredictions(initialState);
 
     const twin: TwinState = {
-      id: `vessel-twin-${entityId}`,
+      id: orgId != null ? `vessel-twin-${orgId}-${entityId}` : `vessel-twin-${entityId}`,
+      orgId,
       entityId,
       entityName: initialState.name,
       twinType: 'vessel',
@@ -200,7 +354,22 @@ export class VesselTwin {
     return twin;
   }
 
-  async simulate(twinId: string, scenario: SimulationScenario): Promise<SimulationResult> {
+  refreshTwin(twinId: string, newState: VesselTwinState): TwinState {
+    const alerts = this.computeAlerts(newState);
+    const predictedStates = this.computePredictions(newState);
+    const updated = twinRegistry.update(twinId, {
+      currentState: newState as unknown as Record<string, unknown>,
+      alerts,
+      predictedStates,
+      confidenceScore: newState.predictedArrivalConfidence,
+      status: 'active',
+      metadata: { imoNumber: newState.imoNumber, destination: newState.destination },
+    });
+    if (!updated) throw new Error(`VesselTwin ${twinId} not found for refresh`);
+    return updated;
+  }
+
+  async simulate(twinId: string, scenario: SimulationScenario, createdByUserId?: number): Promise<SimulationResult> {
     const twin = twinRegistry.get(twinId);
     if (!twin) throw new Error(`VesselTwin ${twinId} not found`);
 
@@ -232,7 +401,9 @@ export class VesselTwin {
     const newEtaMs = new Date(original.eta).getTime() + etaDeltaHours * 3600000;
     simulated.eta = new Date(newEtaMs).toISOString();
 
-    return {
+    const mcResult = await this._runMonteCarlo(original, simulated);
+
+    const result: SimulationResult = {
       scenarioName: scenario.name,
       originalState: twin.currentState,
       simulatedState: simulated as unknown as Record<string, unknown>,
@@ -254,7 +425,58 @@ export class VesselTwin {
       recommendedActions: this.buildRecommendations(original, simulated, etaDeltaHours),
       confidenceScore: 0.82,
       runDurationMs: Date.now() - start,
+      monteCarlo: mcResult,
     };
+
+    persistSimulationRun(twinId, result, scenario, createdByUserId, twin.orgId);
+    return result;
+  }
+
+  private async _runMonteCarlo(
+    original: VesselTwinState,
+    _simulated: VesselTwinState,
+  ): Promise<SimulationResult['monteCarlo']> {
+    try {
+      const scenario = {
+        ...VESSELS_VOYAGE_COST,
+        inputs: VESSELS_VOYAGE_COST.inputs.map((inp) => {
+          if (inp.id === 'fuelPricePerTon') {
+            return { ...inp, distribution: { type: 'normal' as const, mean: 620 + (original.routeRiskLevel === 'critical' ? 80 : 0), stdDev: 90 } };
+          }
+          if (inp.id === 'voyageDays') {
+            return { ...inp, distribution: { type: 'normal' as const, mean: 18, stdDev: 4 } };
+          }
+          return inp;
+        }),
+      };
+      const mcSim = await runSimulation(scenario, { iterations: 500, seed: 42 });
+      const costBand = buildConfidenceBand(
+        mcSim.results['totalVoyageCost']?.values ?? [],
+      );
+      const fuelBand = buildConfidenceBand(
+        mcSim.results['effectiveFuelCost']?.values ?? [],
+      );
+
+      const sensitivity = mcSim.correlationMatrix;
+      const drivers = Object.entries(sensitivity['totalVoyageCost'] ?? {})
+        .filter(([k]) => k !== 'totalVoyageCost')
+        .map(([id, impact]) => ({
+          id,
+          label: VESSELS_VOYAGE_COST.inputs.find((i) => i.id === id)?.label ?? id,
+          impact: Math.abs(impact as number),
+        }))
+        .sort((a, b) => b.impact - a.impact)
+        .slice(0, 5);
+
+      return {
+        iterations: mcSim.validIterations,
+        primaryMetric: 'totalVoyageCost',
+        confidenceBands: { totalVoyageCost: costBand, effectiveFuelCost: fuelBand },
+        sensitivityDrivers: drivers,
+      };
+    } catch {
+      return undefined;
+    }
   }
 
   private computeAlerts(state: VesselTwinState): TwinAlert[] {
@@ -371,12 +593,13 @@ export class VesselTwin {
 }
 
 export class PropertyTwin {
-  createTwin(entityId: string, initialState: PropertyTwinState): TwinState {
+  createTwin(entityId: string, initialState: PropertyTwinState, orgId?: number): TwinState {
     const alerts = this.computeAlerts(initialState);
     const predictedStates = this.computePredictions(initialState);
 
     const twin: TwinState = {
-      id: `property-twin-${entityId}`,
+      id: orgId != null ? `property-twin-${orgId}-${entityId}` : `property-twin-${entityId}`,
+      orgId,
       entityId,
       entityName: initialState.address,
       twinType: 'property',
@@ -397,7 +620,22 @@ export class PropertyTwin {
     return twin;
   }
 
-  async simulate(twinId: string, scenario: SimulationScenario): Promise<SimulationResult> {
+  refreshTwin(twinId: string, newState: PropertyTwinState): TwinState {
+    const alerts = this.computeAlerts(newState);
+    const predictedStates = this.computePredictions(newState);
+    const updated = twinRegistry.update(twinId, {
+      currentState: newState as unknown as Record<string, unknown>,
+      alerts,
+      predictedStates,
+      confidenceScore: 0.88,
+      status: 'active',
+      metadata: { capRate: newState.capRate, noi: newState.noi, marketTrend: newState.marketTrend },
+    });
+    if (!updated) throw new Error(`PropertyTwin ${twinId} not found for refresh`);
+    return updated;
+  }
+
+  async simulate(twinId: string, scenario: SimulationScenario, createdByUserId?: number): Promise<SimulationResult> {
     const twin = twinRegistry.get(twinId);
     if (!twin) throw new Error(`PropertyTwin ${twinId} not found`);
 
@@ -436,7 +674,9 @@ export class PropertyTwin {
               : 'stable',
     };
 
-    return {
+    const mcResult = await this._runMonteCarlo(original, simulated);
+
+    const result: SimulationResult = {
       scenarioName: scenario.name,
       originalState: twin.currentState,
       simulatedState: simulated as unknown as Record<string, unknown>,
@@ -460,7 +700,55 @@ export class PropertyTwin {
       recommendedActions: this.buildPropertyRecommendations(original, simulated),
       confidenceScore: 0.84,
       runDurationMs: Date.now() - start,
+      monteCarlo: mcResult,
     };
+
+    persistSimulationRun(twinId, result, scenario, createdByUserId, twin.orgId);
+    return result;
+  }
+
+  private async _runMonteCarlo(
+    original: PropertyTwinState,
+    _simulated: PropertyTwinState,
+  ): Promise<SimulationResult['monteCarlo']> {
+    try {
+      const annualRent = original.noi;
+      const scenario = {
+        ...TERRA_PROPERTY_RETURNS,
+        inputs: TERRA_PROPERTY_RETURNS.inputs.map((inp) => {
+          if (inp.id === 'acquisitionPrice') {
+            return { ...inp, distribution: { type: 'constant' as const, value: original.currentValuation } };
+          }
+          if (inp.id === 'annualRent') {
+            return { ...inp, distribution: { type: 'normal' as const, mean: annualRent, stdDev: annualRent * 0.08 } };
+          }
+          return inp;
+        }),
+      };
+      const mcSim = await runSimulation(scenario, { iterations: 500, seed: 42 });
+      const primaryKey = Object.keys(mcSim.results)[0] ?? '';
+      const primaryValues = mcSim.results[primaryKey]?.values ?? [];
+      const band = buildConfidenceBand(primaryValues);
+
+      const drivers = Object.entries(mcSim.correlationMatrix[primaryKey] ?? {})
+        .filter(([k]) => k !== primaryKey)
+        .map(([id, impact]) => ({
+          id,
+          label: TERRA_PROPERTY_RETURNS.inputs.find((i) => i.id === id)?.label ?? id,
+          impact: Math.abs(impact as number),
+        }))
+        .sort((a, b) => b.impact - a.impact)
+        .slice(0, 5);
+
+      return {
+        iterations: mcSim.validIterations,
+        primaryMetric: primaryKey,
+        confidenceBands: { [primaryKey]: band },
+        sensitivityDrivers: drivers,
+      };
+    } catch {
+      return undefined;
+    }
   }
 
   private computeAlerts(state: PropertyTwinState): TwinAlert[] {
@@ -567,12 +855,13 @@ export class PropertyTwin {
 }
 
 export class PostureTwin {
-  createTwin(entityId: string, initialState: PostureTwinState): TwinState {
+  createTwin(entityId: string, initialState: PostureTwinState, orgId?: number): TwinState {
     const alerts = this.computeAlerts(initialState);
     const predictedStates = this.computePredictions(initialState);
 
     const twin: TwinState = {
-      id: `posture-twin-${entityId}`,
+      id: orgId != null ? `posture-twin-${orgId}-${entityId}` : `posture-twin-${entityId}`,
+      orgId,
       entityId,
       entityName: entityId,
       twinType: 'posture',
@@ -592,7 +881,22 @@ export class PostureTwin {
     return twin;
   }
 
-  async simulate(twinId: string, scenario: SimulationScenario): Promise<SimulationResult> {
+  refreshTwin(twinId: string, newState: PostureTwinState): TwinState {
+    const alerts = this.computeAlerts(newState);
+    const predictedStates = this.computePredictions(newState);
+    const updated = twinRegistry.update(twinId, {
+      currentState: newState as unknown as Record<string, unknown>,
+      alerts,
+      predictedStates,
+      confidenceScore: 0.85,
+      status: 'active',
+      metadata: { postureScore: newState.overallPostureScore, activeThreats: newState.activeThreats },
+    });
+    if (!updated) throw new Error(`PostureTwin ${twinId} not found for refresh`);
+    return updated;
+  }
+
+  async simulate(twinId: string, scenario: SimulationScenario, createdByUserId?: number): Promise<SimulationResult> {
     const twin = twinRegistry.get(twinId);
     if (!twin) throw new Error(`PostureTwin ${twinId} not found`);
 
@@ -634,8 +938,10 @@ export class PostureTwin {
       attackSurfaceScore: Math.min(100, original.attackSurfaceScore + (lateralMovement ? 20 : 5)),
     };
 
+    const mcResult = await this._runMonteCarlo(original, simulated);
+
     const breachImpact = attackSuccess ? 'BREACH CONFIRMED' : 'CONTAINED';
-    return {
+    const result: SimulationResult = {
       scenarioName: scenario.name,
       originalState: twin.currentState,
       simulatedState: simulated as unknown as Record<string, unknown>,
@@ -663,7 +969,72 @@ export class PostureTwin {
       ),
       confidenceScore: 0.87,
       runDurationMs: Date.now() - start,
+      monteCarlo: mcResult,
     };
+
+    persistSimulationRun(twinId, result, scenario, createdByUserId, twin.orgId);
+    return result;
+  }
+
+  private async _runMonteCarlo(
+    original: PostureTwinState,
+    _simulated: PostureTwinState,
+  ): Promise<SimulationResult['monteCarlo']> {
+    try {
+      const postureNorm = original.overallPostureScore / 100;
+      const scenario = {
+        ...AEGIS_CYBER_RISK,
+        inputs: AEGIS_CYBER_RISK.inputs.map((inp) => {
+          if (inp.id === 'attackProbability') {
+            return {
+              ...inp,
+              distribution: {
+                type: 'beta' as const,
+                alpha: 2,
+                beta: Math.max(1, Math.round(postureNorm * 8)),
+                min: 0,
+                max: 1,
+              },
+            };
+          }
+          if (inp.id === 'controlEffectiveness') {
+            return {
+              ...inp,
+              distribution: {
+                type: 'triangular' as const,
+                min: Math.max(0, postureNorm - 0.15),
+                mode: postureNorm,
+                max: Math.min(1, postureNorm + 0.1),
+              },
+            };
+          }
+          return inp;
+        }),
+      };
+      const mcSim = await runSimulation(scenario, { iterations: 500, seed: 42 });
+      const primaryKey = 'expectedAnnualLoss';
+    const primaryValues = mcSim.results[primaryKey]?.values ?? Object.values(mcSim.results)[0]?.values ?? [];
+      const band = buildConfidenceBand(primaryValues);
+
+      const drivers = Object.entries(mcSim.correlationMatrix[primaryKey] ?? Object.entries(mcSim.correlationMatrix)[0]?.[1] ?? {})
+        .filter(([k]) => k !== primaryKey)
+        .map(([id, impact]) => ({
+          id,
+          label: AEGIS_CYBER_RISK.inputs.find((i) => i.id === id)?.label ?? id,
+          impact: Math.abs(impact as number),
+        }))
+        .sort((a, b) => b.impact - a.impact)
+        .slice(0, 5);
+
+      return {
+        iterations: mcSim.validIterations,
+        primaryMetric: primaryKey,
+        confidenceBands: { [primaryKey]: band },
+        sensitivityDrivers: drivers,
+      };
+    } catch {
+      return undefined;
+    }
   }
 
   private computeAlerts(state: PostureTwinState): TwinAlert[] {
