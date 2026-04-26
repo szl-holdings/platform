@@ -1,0 +1,61 @@
+{
+  "namespace": "com.szlholdings.lyte",
+  "displayName": "Lyte — Decision Intelligence",
+  "version": "3.0.1",
+  "schemaVersion": "mcp/1.0",
+  "description": "Multi-criteria decision analysis, scenario modeling, portfolio optimization and strategic planning automation.",
+  "publisher": {
+    "name": "SZL Holdings",
+    "url": "https://szlholdings.com",
+    "contact": "mcp-trust@szlholdings.com"
+  },
+  "trust": {
+    "tier": "Verified",
+    "score": 97,
+    "auditedAt": "2026-01-15T00:00:00Z",
+    "nextAuditDue": "2026-07-15T00:00:00Z",
+    "manifestDigest": "sha256:d1e5b9f3a2c8e6b4d1a9f3e7b5c2d8a4f1e9b7c3d5a2f8e6b4c1d9a7f3e5b2c8"
+  },
+  "capabilities": [
+    {
+      "name": "mcda_analysis",
+      "description": "Multi-criteria decision analysis with weighted scoring across quantitative and qualitative factors",
+      "inputSchema": { "type": "object", "properties": { "alternatives": { "type": "array" }, "criteria": { "type": "array" }, "weights": { "type": "object" } } },
+      "riskLevel": "low",
+      "dataClassification": "internal"
+    },
+    {
+      "name": "scenario_modeling",
+      "description": "Monte Carlo scenario modeling with probability distributions",
+      "inputSchema": { "type": "object", "properties": { "baseCase": { "type": "object" }, "variables": { "type": "array" }, "iterations": { "type": "integer" } } },
+      "riskLevel": "low",
+      "dataClassification": "internal"
+    },
+    {
+      "name": "portfolio_optimization",
+      "description": "Mean-variance portfolio optimization with constraint handling",
+      "inputSchema": { "type": "object", "properties": { "assets": { "type": "array" }, "targetReturn": { "type": "number" }, "constraints": { "type": "object" } } },
+      "riskLevel": "medium",
+      "dataClassification": "confidential"
+    },
+    {
+      "name": "strategic_planning",
+      "description": "OKR decomposition, resource allocation and roadmap generation",
+      "inputSchema": { "type": "object", "properties": { "objective": { "type": "string" }, "timeHorizon": { "type": "string" }, "resources": { "type": "object" } } },
+      "riskLevel": "low",
+      "dataClassification": "internal"
+    }
+  ],
+  "governance": {
+    "humanInLoop": false,
+    "maxToolCallsPerSession": 200,
+    "rateLimitPerMinute": 60,
+    "allowedCallerTiers": ["Verified", "Reviewed", "Community"],
+    "driftPolicy": "auto-quarantine-on-schema-change"
+  },
+  "endpoints": {
+    "mcp": "https://mcp.szlholdings.com/lyte/v1",
+    "health": "https://mcp.szlholdings.com/lyte/health",
+    "metrics": "https://mcp.szlholdings.com/lyte/metrics"
+  }
+}

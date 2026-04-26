@@ -12,7 +12,8 @@ export type Page =
   | 'ai-quality'
   | 'prompt-registry'
   | 'eval-console'
-  | 'audit';
+  | 'audit'
+  | 'marketplace';
 
 export interface PraxisStatus {
   activeSwarms: number;

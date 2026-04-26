@@ -1,0 +1,63 @@
+{
+  "namespace": "com.szlholdings.pulse",
+  "displayName": "Pulse — AI Executive Briefing",
+  "version": "1.8.0",
+  "schemaVersion": "mcp/1.0",
+  "description": "Executive briefing synthesis, KPI monitoring, board reporting automation and stakeholder communication intelligence.",
+  "publisher": {
+    "name": "SZL Holdings",
+    "url": "https://szlholdings.com",
+    "contact": "mcp-trust@szlholdings.com"
+  },
+  "trust": {
+    "tier": "Verified",
+    "score": 95,
+    "auditedAt": "2025-12-20T00:00:00Z",
+    "nextAuditDue": "2026-06-20T00:00:00Z",
+    "manifestDigest": "sha256:e2f6c0a4b8d3e7c1f5a9b3d7e2f6c0a4b8d3e7c1f5a9b3d7e2f6c0a4b8d3e7c1"
+  },
+  "capabilities": [
+    {
+      "name": "briefing_synthesis",
+      "description": "Synthesize multi-source intelligence into executive-ready briefings",
+      "inputSchema": { "type": "object", "properties": { "sources": { "type": "array" }, "audience": { "type": "string" }, "format": { "type": "string", "enum": ["narrative", "bullets", "slide-ready"] } } },
+      "riskLevel": "low",
+      "dataClassification": "confidential"
+    },
+    {
+      "name": "kpi_monitoring",
+      "description": "Real-time KPI tracking with anomaly detection and trend analysis",
+      "inputSchema": { "type": "object", "properties": { "metrics": { "type": "array" }, "thresholds": { "type": "object" }, "period": { "type": "string" } } },
+      "riskLevel": "low",
+      "dataClassification": "confidential"
+    },
+    {
+      "name": "board_reporting",
+      "description": "Automated board pack generation with narrative commentary",
+      "inputSchema": { "type": "object", "properties": { "quarter": { "type": "string" }, "sections": { "type": "array" }, "approvals": { "type": "object" } } },
+      "riskLevel": "medium",
+      "dataClassification": "restricted",
+      "humanApprovalRequired": true
+    },
+    {
+      "name": "stakeholder_comms",
+      "description": "Stakeholder-tailored communication drafts with tone calibration",
+      "inputSchema": { "type": "object", "properties": { "audience": { "type": "string" }, "message": { "type": "string" }, "tone": { "type": "string" } } },
+      "riskLevel": "medium",
+      "dataClassification": "confidential"
+    }
+  ],
+  "governance": {
+    "humanInLoop": true,
+    "humanInLoopActions": ["board_reporting"],
+    "maxToolCallsPerSession": 60,
+    "rateLimitPerMinute": 20,
+    "allowedCallerTiers": ["Verified"],
+    "driftPolicy": "halt-on-schema-change"
+  },
+  "endpoints": {
+    "mcp": "https://mcp.szlholdings.com/pulse/v1",
+    "health": "https://mcp.szlholdings.com/pulse/health",
+    "metrics": "https://mcp.szlholdings.com/pulse/metrics"
+  }
+}

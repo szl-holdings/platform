@@ -13,6 +13,7 @@ import {
   Network,
   Palette,
   Shield,
+  ShieldCheck,
   Workflow,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -40,6 +41,7 @@ const NAV_ITEMS: Array<{
   },
   { id: 'ingest', label: 'Ingest', icon: Download, description: 'Repo Ingest' },
   { id: 'audit', label: 'Audit', icon: Shield, description: 'Agent Run Audit Trail' },
+  { id: 'marketplace', label: 'Marketplace', icon: ShieldCheck, description: 'MCP Trust Marketplace', group: 'marketplace' },
   {
     id: 'design-system',
     label: 'Design System',
@@ -121,15 +123,20 @@ export default function Layout({
             const Icon = item.icon;
             const active = page === item.id;
             const prevItem = NAV_ITEMS[idx - 1];
-            const showDivider = item.group === 'control' && prevItem?.group !== 'control';
+            const showDivider = (item.group === 'control' && prevItem?.group !== 'control') || (item.group === 'marketplace' && prevItem?.group !== 'marketplace');
             return (
               <div key={item.id}>
                 {showDivider && (
                   <div className={`mt-2 mb-1 ${expanded ? 'px-2' : 'px-1'}`}>
                     <div className="border-t border-praxis/60" />
-                    {expanded && (
+                    {expanded && item.group === 'control' && (
                       <div className="text-[9px] text-muted-foreground/40 uppercase tracking-widest mt-1.5 px-1 font-mono">
                         Control Plane
+                      </div>
+                    )}
+                    {expanded && item.group === 'marketplace' && (
+                      <div className="text-[9px] text-nexus-cyan/40 uppercase tracking-widest mt-1.5 px-1 font-mono">
+                        Trust Marketplace
                       </div>
                     )}
                   </div>

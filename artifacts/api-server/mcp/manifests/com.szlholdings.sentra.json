@@ -1,0 +1,65 @@
+{
+  "namespace": "com.szlholdings.sentra",
+  "displayName": "Sentra — Cyber Resilience Command",
+  "version": "2.1.0",
+  "schemaVersion": "mcp/1.0",
+  "description": "Threat intelligence aggregation, vulnerability assessment, incident triage and SOC automation for enterprise cyber operations.",
+  "publisher": {
+    "name": "SZL Holdings",
+    "url": "https://szlholdings.com",
+    "contact": "mcp-trust@szlholdings.com"
+  },
+  "trust": {
+    "tier": "Verified",
+    "score": 98,
+    "auditedAt": "2025-10-22T00:00:00Z",
+    "nextAuditDue": "2026-04-22T00:00:00Z",
+    "manifestDigest": "sha256:b7e4a2c9f1d38e6b5a0c7f2e4b9d1a6c3e8f5b2a9c7f1e4b8d2a5c9f3e7b4a1"
+  },
+  "capabilities": [
+    {
+      "name": "threat_intelligence",
+      "description": "Aggregate and correlate threat feeds from MISP, VirusTotal, and proprietary sources",
+      "inputSchema": { "type": "object", "properties": { "ioc": { "type": "string" }, "iocType": { "type": "string", "enum": ["ip", "domain", "hash", "url"] } } },
+      "riskLevel": "medium",
+      "dataClassification": "confidential",
+      "humanApprovalRequired": false
+    },
+    {
+      "name": "vulnerability_assessment",
+      "description": "CVE lookup, CVSS scoring and affected asset mapping",
+      "inputSchema": { "type": "object", "properties": { "cve": { "type": "string" }, "assetGroup": { "type": "string" } } },
+      "riskLevel": "low",
+      "dataClassification": "internal"
+    },
+    {
+      "name": "incident_triage",
+      "description": "Automated incident severity scoring and escalation routing",
+      "inputSchema": { "type": "object", "properties": { "alertId": { "type": "string" }, "severity": { "type": "string" } } },
+      "riskLevel": "high",
+      "dataClassification": "confidential",
+      "humanApprovalRequired": true
+    },
+    {
+      "name": "soc_automation",
+      "description": "SOAR playbook execution and evidence collection",
+      "inputSchema": { "type": "object", "properties": { "playbookId": { "type": "string" }, "incidentId": { "type": "string" } } },
+      "riskLevel": "high",
+      "dataClassification": "restricted",
+      "humanApprovalRequired": true
+    }
+  ],
+  "governance": {
+    "humanInLoop": true,
+    "humanInLoopActions": ["incident_triage", "soc_automation"],
+    "maxToolCallsPerSession": 50,
+    "rateLimitPerMinute": 30,
+    "allowedCallerTiers": ["Verified"],
+    "driftPolicy": "halt-on-schema-change"
+  },
+  "endpoints": {
+    "mcp": "https://mcp.szlholdings.com/sentra/v1",
+    "health": "https://mcp.szlholdings.com/sentra/health",
+    "metrics": "https://mcp.szlholdings.com/sentra/metrics"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "namespace": "com.szlholdings.counsel",
+  "displayName": "Counsel — Legal Matter Command",
+  "version": "1.5.3",
+  "schemaVersion": "mcp/1.0",
+  "description": "Contract analysis, regulatory compliance screening, legal research and matter lifecycle management for enterprise legal teams.",
+  "publisher": {
+    "name": "SZL Holdings",
+    "url": "https://szlholdings.com",
+    "contact": "mcp-trust@szlholdings.com"
+  },
+  "trust": {
+    "tier": "Verified",
+    "score": 99,
+    "auditedAt": "2026-02-01T00:00:00Z",
+    "nextAuditDue": "2026-08-01T00:00:00Z",
+    "manifestDigest": "sha256:f3a7d1b5e9c2f6a0d4b8e1c5f9a3d7b1e5c9f3a7d1b5e9c2f6a0d4b8e1c5f9a3"
+  },
+  "capabilities": [
+    {
+      "name": "contract_analysis",
+      "description": "Extract clauses, obligations, risks and non-standard terms from contracts",
+      "inputSchema": { "type": "object", "properties": { "documentUrl": { "type": "string" }, "analysisScope": { "type": "array", "items": { "type": "string" } } } },
+      "riskLevel": "medium",
+      "dataClassification": "confidential"
+    },
+    {
+      "name": "compliance_screening",
+      "description": "Regulatory compliance gap analysis across jurisdictions",
+      "inputSchema": { "type": "object", "properties": { "regulation": { "type": "string" }, "jurisdiction": { "type": "string" }, "businessActivity": { "type": "string" } } },
+      "riskLevel": "medium",
+      "dataClassification": "confidential"
+    },
+    {
+      "name": "legal_research",
+      "description": "Case law research, statute interpretation and precedent analysis",
+      "inputSchema": { "type": "object", "properties": { "query": { "type": "string" }, "jurisdiction": { "type": "string" }, "practiceArea": { "type": "string" } } },
+      "riskLevel": "low",
+      "dataClassification": "internal"
+    },
+    {
+      "name": "matter_management",
+      "description": "Matter lifecycle tracking, budget monitoring and deadline management",
+      "inputSchema": { "type": "object", "properties": { "matterId": { "type": "string" }, "action": { "type": "string" } } },
+      "riskLevel": "medium",
+      "dataClassification": "restricted",
+      "humanApprovalRequired": true
+    }
+  ],
+  "governance": {
+    "humanInLoop": true,
+    "humanInLoopActions": ["matter_management"],
+    "maxToolCallsPerSession": 40,
+    "rateLimitPerMinute": 15,
+    "allowedCallerTiers": ["Verified"],
+    "driftPolicy": "halt-on-schema-change"
+  },
+  "endpoints": {
+    "mcp": "https://mcp.szlholdings.com/counsel/v1",
+    "health": "https://mcp.szlholdings.com/counsel/health",
+    "metrics": "https://mcp.szlholdings.com/counsel/metrics"
+  }
+}

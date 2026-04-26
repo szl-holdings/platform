@@ -183,6 +183,11 @@ router.use(lazyMatch("/meridian", () => import("./meridian"), "meridian"));
 // Owns /meridian-mcp/* endpoints.
 router.use(lazyMatch("/meridian-mcp", () => import("./meridian-mcp-activation"), "meridian-mcp-activation"));
 
+// MCP Public Trust Layer — marketplace, trust scores, server directory, submission queue.
+// GET endpoints are public (unauthenticated server discovery). POST /marketplace/v1/submit
+// is public for external contributors. Mounted BEFORE guardianPolicyCheck intentionally.
+router.use(lazyMatch("/marketplace", () => import("./marketplace"), "marketplace"));
+
 // Global Guardian policy check — derives category from request path.
 router.use(guardianPolicyCheck());
 

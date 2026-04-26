@@ -9,6 +9,7 @@ import DesignSystemPage from './pages/DesignSystemPage';
 import EvalConsole from './pages/EvalConsole';
 import Home from './pages/Home';
 import Ingest from './pages/Ingest';
+import Marketplace from './pages/Marketplace';
 import Memory from './pages/Memory';
 import Orchestrator from './pages/Orchestrator';
 import PatternAtlas from './pages/PatternAtlas';
@@ -32,6 +33,7 @@ const VALID_PAGES: Page[] = [
   'prompt-registry',
   'eval-console',
   'audit',
+  'marketplace',
 ];
 
 function getInitialPage(): Page {
@@ -54,6 +56,10 @@ function AppInner() {
   function navigate(p: Page) {
     window.location.hash = p;
     setPage(p);
+  }
+
+  if (page === 'marketplace') {
+    return <Marketplace onBack={() => navigate('home')} />;
   }
 
   return (
