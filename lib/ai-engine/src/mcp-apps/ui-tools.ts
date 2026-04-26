@@ -217,6 +217,103 @@ export function isUIComponentResponse(value: unknown): value is UIComponentRespo
   );
 }
 
+// ─── MCP Apps Adapter Layer ───────────────────────────────────────────────────
+//
+// These functions bridge the internal `UIComponentResponse` format (used by
+// platform UI surfaces) to the MCP Apps extension spec (used by external MCP
+// clients such as Claude Desktop, VS Code Copilot, Goose, and Postman).
+//
+// The MCP Apps spec uses:
+//   • `_meta.ui.resourceUri` — a `ui://` resource URI that the host fetches and
+//     renders in a sandboxed iframe (the "MCP App").
+//   • `_meta.ui.csp` — Content Security Policy applied to the sandbox.
+//   • `_meta.ui.permissions` — optional host capabilities granted to the app.
+//
+// The adapter adds `_meta.ui` alongside the existing `UIComponentResponse` so
+// internal platform surfaces continue to work unchanged.
+
+export interface McpAppUiMeta {
+  resourceUri: string;
+  csp?: string;
+  permissions?: string[];
+}
+
+export interface McpToolResultWithUi {
+  result: unknown;
+  _meta?: {
+    ui?: McpAppUiMeta;
+  };
+}
+
+const STRICT_CSP = [
+  "default-src 'none'",
+  "script-src 'unsafe-inline'",
+  "style-src 'unsafe-inline'",
+  "img-src data: blob:",
+  "connect-src 'none'",
+  "frame-ancestors 'none'",
+].join('; ');
+
+const UI_RESOURCE_MAP: Record<UIComponentType, string> = {
+  data_table: 'ui://szl/data-table',
+  chart: 'ui://szl/chart',
+  approval_form: 'ui://szl/approval-form',
+  metric_card: 'ui://szl/metrics',
+  timeline: 'ui://szl/timeline',
+};
+
+const APPROVAL_PERMISSIONS = ['tools/call'];
+
+/**
+ * Wrap a `UIComponentResponse` (internal platform format) with an MCP Apps
+ * `_meta.ui` block for external MCP clients.
+ *
+ * The internal `UIComponentResponse` is preserved in `result` so the platform's
+ * own rendering surfaces continue to work. The `_meta.ui` block provides the
+ * host with the `ui://` resource URI to preload and render as an interactive
+ * MCP App.
+ */
+export function toMcpAppResult(component: UIComponentResponse): McpToolResultWithUi {
+  const resourceUri = UI_RESOURCE_MAP[component.componentType];
+  if (!resourceUri) {
+    return { result: component };
+  }
+  const permissions = component.componentType === 'approval_form' ? APPROVAL_PERMISSIONS : undefined;
+  return {
+    result: component,
+    _meta: {
+      ui: {
+        resourceUri,
+        csp: STRICT_CSP,
+        ...(permissions ? { permissions } : {}),
+      },
+    },
+  };
+}
+
+/**
+ * Detect whether a tool result contains an MCP App UI reference.
+ */
+export function hasMcpAppUi(value: unknown): boolean {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    '_meta' in (value as Record<string, unknown>) &&
+    typeof (value as Record<string, unknown>)['_meta'] === 'object' &&
+    (value as Record<string, unknown>)['_meta'] !== null &&
+    'ui' in ((value as Record<string, unknown>)['_meta'] as Record<string, unknown>)
+  );
+}
+
+/**
+ * Extract the `_meta.ui` block from a tool result, if present.
+ */
+export function getMcpAppUiMeta(value: unknown): McpAppUiMeta | undefined {
+  if (!hasMcpAppUi(value)) return undefined;
+  const v = value as { _meta: { ui: McpAppUiMeta } };
+  return v._meta.ui;
+}
+
 export const MCP_APP_TOOLS = {
   data_table_viewer: {
     name: 'data_table_viewer',

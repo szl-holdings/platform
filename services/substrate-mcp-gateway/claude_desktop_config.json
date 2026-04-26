@@ -1,0 +1,74 @@
+{
+  "_comment": "SZL Substrate MCP Gateway — Claude Desktop Configuration",
+  "_instructions": [
+    "Add this configuration to your Claude Desktop mcpServers section.",
+    "Replace /path/to/szl-platform with the absolute path to this repository.",
+    "The gateway exposes Substrate workflows, approval gating, and counterfactual replay.",
+    "",
+    "MCP Apps: Claude Desktop will automatically render interactive UIs for tools that",
+    "return ui:// resource references (data tables, charts, approval forms, metrics,",
+    "and timelines) as sandboxed in-chat applications.",
+    "",
+    "Environment variables:",
+    "  SUBSTRATE_GATEWAY_API_KEY  — optional Bearer token for write operations",
+    "  SUBSTRATE_SIGNING_KEY      — optional 32-byte hex HMAC key for evidence bundles",
+    "  NODE_ENV                   — set to 'production' for strict auth enforcement"
+  ],
+  "mcpServers": {
+    "szl-substrate": {
+      "command": "npx",
+      "args": ["tsx", "/path/to/szl-platform/services/substrate-mcp-gateway/src/index.ts", "--stdio"],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    }
+  },
+  "_alternative_http_transport": {
+    "_comment": "Use HTTP+SSE transport instead of stdio for persistent connections",
+    "mcpServers": {
+      "szl-substrate-http": {
+        "url": "http://localhost:3700/mcp",
+        "transport": "streamable-http"
+      }
+    }
+  },
+  "_tool_surface": {
+    "_comment": "Tools exposed by this gateway with their MCP Apps UI references",
+    "substrate_list_workflows": {
+      "description": "Lists all registered Substrate workflows",
+      "mcpApp": "ui://szl/data-table",
+      "renders": "Interactive sortable/filterable table of workflows with CSV export"
+    },
+    "substrate_submit_run": {
+      "description": "Submit a workflow run through the policy + approval pipeline",
+      "mcpApp": "ui://szl/metrics",
+      "renders": "KPI dashboard showing run status, confidence score, and stage progress"
+    },
+    "substrate_get_run": {
+      "description": "Get current state of a workflow run including stage evidence",
+      "mcpApp": "ui://szl/timeline",
+      "renders": "Chronological timeline of stage executions with severity and metadata"
+    },
+    "substrate_list_approvals": {
+      "description": "List pending approval gates requiring human authorization",
+      "mcpApp": "ui://szl/approval-form",
+      "renders": "Governed approval form — operator can approve/reject inline in Claude Desktop"
+    },
+    "substrate_counterfactual": {
+      "description": "Run counterfactual replay with model or policy substitution",
+      "mcpApp": "ui://szl/chart",
+      "renders": "Decision diff visualization showing per-stage confidence changes"
+    }
+  },
+  "_end_to_end_approval_flow": {
+    "_comment": "Typical approval gate flow in Claude Desktop",
+    "steps": [
+      "1. Call substrate_submit_run with a workflow that has an ApprovalGate stage",
+      "2. The run pauses at the gate with status 'pending-approval'",
+      "3. Call substrate_list_approvals — Claude renders the ApprovalApp inline",
+      "4. Operator fills in rationale and clicks Approve/Reject in the in-chat UI",
+      "5. The ApprovalApp calls substrate_approve/substrate_reject via MCP tools/call bridge",
+      "6. The workflow resumes (or terminates if rejected) automatically"
+    ]
+  }
+}

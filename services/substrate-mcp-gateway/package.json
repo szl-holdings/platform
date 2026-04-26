@@ -18,6 +18,7 @@
     "test": "tsx --test tests/e2e.test.ts"
   },
   "dependencies": {
+    "@modelcontextprotocol/ext-apps": "^1.7.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@szl-holdings/evidence-graph": "workspace:*",
     "@szl-holdings/policy-engine": "workspace:*",

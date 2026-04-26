@@ -52,6 +52,7 @@ import {
   startConvergenceBridge,
   type NexusSignalDomain,
 } from './nexus-fabric.js';
+import { getMcpApp } from './mcp-apps/apps.js';
 import { emitRunEvent, emitToolListChanged } from './run-events.js';
 import { getCurrentTenantId } from './request-context.js';
 import { getAllRuns, getRun, storeRun, updateRun } from './run-store.js';
@@ -1651,6 +1652,14 @@ export async function handleResourceRead(
         };
       }
 
+      if (uri.startsWith('ui://szl/')) {
+        const app = getMcpApp(uri);
+        if (app) {
+          return {
+            contents: [{ uri, mimeType: 'text/html', text: app.html }],
+          };
+        }
+      }
       return { error: `Unknown resource URI: ${uri}` };
     }
   }

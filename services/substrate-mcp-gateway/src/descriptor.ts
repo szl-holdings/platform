@@ -5,7 +5,7 @@
  * schema. All schemas are derived from the Zod definitions in @szl/substrate.
  */
 
-export const GATEWAY_VERSION = '1.0.0' as const;
+export const GATEWAY_VERSION = '1.1.0' as const;
 
 export const SERVER_INFO = {
   name: 'szl-substrate-mcp-gateway',
@@ -28,10 +28,17 @@ export const CAPABILITIES = {
     'szl/praxis-consciousness': { version: '1.0', description: 'Every MCP response includes x-nexus-consciousness metacognitive metadata and x-nexus-proof cryptographic envelope' },
     'szl/praxis-convergence': { version: '1.0', description: 'Cross-domain intelligence convergence engine available as MCP Resources' },
     'szl/praxis-federation': { version: '1.0', description: 'NuroMesh domain agents discoverable and delegatable via MCP' },
+    'mcp/apps': { version: '1.0', description: 'Interactive HTML micro-dashboards served as ui:// resources with postMessage JSON-RPC' },
   },
 } as const;
 
 // ─── Tool Definitions ─────────────────────────────────────────────────────────
+
+export interface McpToolUiMeta {
+  resourceUri: string;
+  csp?: string;
+  permissions?: string[];
+}
 
 export interface McpToolDescriptor {
   name: string;
@@ -41,6 +48,9 @@ export interface McpToolDescriptor {
     properties: Record<string, unknown>;
     required?: string[];
     additionalProperties?: boolean;
+  };
+  _meta?: {
+    ui?: McpToolUiMeta;
   };
 }
 
@@ -79,6 +89,12 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
       required: ['workflowId', 'input'],
       additionalProperties: false,
     },
+    _meta: {
+      ui: {
+        resourceUri: 'ui://szl/metrics',
+        csp: "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; frame-ancestors 'none'",
+      },
+    },
   },
 
   {
@@ -98,6 +114,12 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
       },
       required: ['runId'],
       additionalProperties: false,
+    },
+    _meta: {
+      ui: {
+        resourceUri: 'ui://szl/timeline',
+        csp: "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; frame-ancestors 'none'",
+      },
     },
   },
 
@@ -161,6 +183,12 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
       required: ['runId', 'workflowId'],
       additionalProperties: false,
     },
+    _meta: {
+      ui: {
+        resourceUri: 'ui://szl/chart',
+        csp: "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; frame-ancestors 'none'",
+      },
+    },
   },
 
   {
@@ -184,6 +212,13 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
         },
       },
       additionalProperties: false,
+    },
+    _meta: {
+      ui: {
+        resourceUri: 'ui://szl/approval-form',
+        csp: "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; frame-ancestors 'none'",
+        permissions: ['tools/call'],
+      },
     },
   },
 
@@ -260,6 +295,12 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
       type: 'object',
       properties: {},
       additionalProperties: false,
+    },
+    _meta: {
+      ui: {
+        resourceUri: 'ui://szl/data-table',
+        csp: "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; frame-ancestors 'none'",
+      },
     },
   },
 
@@ -372,7 +413,41 @@ export interface McpResourceDescriptor {
   mimeType: string;
 }
 
+export const UI_RESOURCES: McpResourceDescriptor[] = [
+  {
+    uri: 'ui://szl/data-table',
+    name: 'SZL Data Table Explorer',
+    description: 'Interactive data table with sorting, text filtering, pagination, and CSV export. Rendered inline by MCP hosts that support the Apps extension.',
+    mimeType: 'text/html',
+  },
+  {
+    uri: 'ui://szl/chart',
+    name: 'SZL Chart Visualizer',
+    description: 'Chart renderer for line, bar, pie, area, scatter, and donut charts. Communicates via postMessage JSON-RPC.',
+    mimeType: 'text/html',
+  },
+  {
+    uri: 'ui://szl/approval-form',
+    name: 'SZL Approval Workflow Form',
+    description: 'Governed approval/rejection form. Calls substrate_approve or substrate_reject via the MCP tools/call bridge when the operator submits.',
+    mimeType: 'text/html',
+  },
+  {
+    uri: 'ui://szl/metrics',
+    name: 'SZL Metric Dashboard',
+    description: 'KPI card grid with trend indicators, severity coloring, and real-time metric display.',
+    mimeType: 'text/html',
+  },
+  {
+    uri: 'ui://szl/timeline',
+    name: 'SZL Timeline / Audit Trail',
+    description: 'Chronological event trail with severity badges, actor attribution, and expandable metadata panels.',
+    mimeType: 'text/html',
+  },
+];
+
 export const SUBSTRATE_RESOURCES: McpResourceDescriptor[] = [
+  ...UI_RESOURCES,
   {
     uri: 'substrate://schema/run',
     name: 'Substrate Run Schema',
