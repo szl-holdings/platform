@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { INDUSTRY_SOLUTIONS, CANONICAL_STEPS } from '../data/solutionsData';
+import { useAlloyDashboard } from '../graphql';
 
 const T = {
   bg: '#0a0a0a',
@@ -213,6 +214,36 @@ function CommandPrompt() {
   );
 }
 
+function LivePulseStrip() {
+  const { data: dashboard } = useAlloyDashboard();
+  if (!dashboard) return null;
+  const stats = [
+    { label: 'Workflows', value: String(dashboard.totalWorkflows) },
+    { label: 'Running', value: String(dashboard.runningRuns) },
+    { label: 'Success', value: `${Math.round(dashboard.successRate * 100)}%` },
+    { label: 'Approvals', value: String(dashboard.pendingApprovals) },
+    { label: 'Avg Duration', value: dashboard.avgDurationMs ? `${Math.round(dashboard.avgDurationMs / 1000)}s` : '—' },
+  ];
+  return (
+    <section style={{ padding: '1.25rem 0', borderTop: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}` }}>
+      <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginRight: '1rem' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#c9b787', display: 'inline-block', animation: 'pulse 2s infinite' }} />
+            <span style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: T.accent }}>LIVE</span>
+          </div>
+          {stats.map(s => (
+            <div key={s.label} style={{ display: 'flex', alignItems: 'baseline', gap: '0.375rem' }}>
+              <span style={{ fontSize: '1rem', fontWeight: 600, fontFamily: T.mono, color: T.text }}>{s.value}</span>
+              <span style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: T.textMuted }}>{s.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function HomePage() {
   const [activeIndustry, setActiveIndustry] = useState(INDUSTRY_SOLUTIONS[0].id);
   const [expandedUseCase, setExpandedUseCase] = useState<string | null>(null);
@@ -389,6 +420,8 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      <LivePulseStrip />
 
       <section style={{ padding: 'clamp(7rem, 14vw, 12rem) 0' }}>
         <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 2rem', textAlign: 'center' }}>

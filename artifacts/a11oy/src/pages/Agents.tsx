@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, KpiCard, ProgressBar } from '../components/ui';
+import { PageHeader, Card, SectionTitle, KpiCard, ProgressBar, VerdictBadge } from '../components/ui';
 import { SEED_WORKCELLS } from '@workspace/a11oy-fabric';
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from 'recharts';
+import { useAlloyWorkflows, useAlloyDashboard, useAlloyAuditLog } from '../graphql';
 
 const GOLD = '#c9b787';
 
@@ -213,7 +214,6 @@ const AGENTS = [
     perfHistory: [100, 100, 100, 100, 100, 100, 100],
     evalDimensions: { groundedness: 1.0, actionSafety: 1.0, policyCompliance: 1.0, hallucinationRisk: 1.0, proofCompleteness: 1.0 },
   },
->>>>>>> ba6182151 (feat(a11oy): frontier agentic command surface — 8 enhanced modules + 3 new pages)
 ];
 
 const VERTICAL_COLORS: Record<string, string> = {
@@ -225,6 +225,12 @@ const EVAL_DIMS = ['groundedness', 'actionSafety', 'policyCompliance', 'hallucin
 const EVAL_LABELS: Record<string, string> = {
   groundedness: 'Grounded', actionSafety: 'Action Safety', policyCompliance: 'Policy', hallucinationRisk: 'Hallucination', proofCompleteness: 'Proof',
 };
+
+const HANDOFFS = [
+  { from: 'Pipeline Oracle', to: 'Counsel Sentinel', reason: 'At-risk contract review', vertical: 'prism-counsel' },
+  { from: 'Cascade Navigator', to: 'DOMAINE Analyst', reason: 'Port-adjacent asset impact', vertical: 'terra-real-estate' },
+  { from: 'Guardian', to: 'Fabric Watchdog', reason: 'Perimeter change verification', vertical: 'alloy-core' },
+];
 
 function AgentRadar({ dims }: { dims: Record<string, number> }) {
   const data = EVAL_DIMS.map(d => ({ dimension: EVAL_LABELS[d], score: Math.round(dims[d] * 100) }));
@@ -280,13 +286,42 @@ export function Agents() {
   const [filterRisk, setFilterRisk] = useState('All');
   const [filterType, setFilterType] = useState('All');
 
+  const { data: dashboard } = useAlloyDashboard();
+  const { data: liveWorkflows } = useAlloyWorkflows({ limit: 30 });
+  const { data: recentAudit } = useAlloyAuditLog({ limit: 20 });
+
+  const isLive = !!dashboard;
+
   const filtered = AGENTS.filter(a =>
     (filterRisk === 'All' || a.riskClassification === filterRisk) &&
     (filterType === 'All' || a.type === filterType)
   );
 
   const selected = AGENTS.find(a => a.id === selectedId);
-  const activeWC = SEED_WORKCELLS.filter(w => w.status === 'running');
+
+  const activeWC = useMemo(() => {
+    if (isLive && liveWorkflows.length > 0) {
+      return liveWorkflows.filter(w => w.status === 'running' || w.status === 'pending');
+    }
+    return SEED_WORKCELLS.filter(w => w.status === 'running');
+  }, [isLive, liveWorkflows]);
+
+  const failedWC = useMemo(() => {
+    if (isLive && liveWorkflows.length > 0) {
+      return liveWorkflows.filter(w => w.status === 'failed');
+    }
+    return SEED_WORKCELLS.filter(w => w.status === 'error');
+  }, [isLive, liveWorkflows]);
+
+  const pendingGates = useMemo(() => {
+    if (isLive) return dashboard.pendingApprovals;
+    return SEED_WORKCELLS.filter(w => w.requiresApproval && w.status === 'running').length;
+  }, [isLive, dashboard]);
+
+  const avgTrust = Math.round(AGENTS.reduce((acc, o) => acc + o.trustScore, 0) / AGENTS.length);
+  const totalTasks = isLive
+    ? (dashboard.totalRuns)
+    : AGENTS.reduce((acc, o) => acc + o.tasksToday, 0);
 
   return (
     <Layout>
@@ -294,17 +329,26 @@ export function Agents() {
         label="AGENT REGISTRY"
         title="Operator Agent Registry"
         subtitle="Full registry of every agent with explicit permissions, assigned tools, risk classification, human ownership, and live performance tracking."
-        status="DEMO"
+        status={isLive ? 'LIVE' : 'DEMO'}
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
         <KpiCard label="REGISTERED AGENTS" value={AGENTS.length} sub="all active" accent={GOLD} />
         <KpiCard label="CRITICAL RISK" value={AGENTS.filter(a => a.riskClassification === 'Critical').length} sub="highest oversight" accent="#ef4444" />
-        <KpiCard label="HIGH RISK" value={AGENTS.filter(a => a.riskClassification === 'High').length} sub="human approval required" accent="#f97316" />
-        <KpiCard label="AVG TRUST" value={Math.round(AGENTS.reduce((a, o) => a + o.trustScore, 0) / AGENTS.length)} sub="out of 100" accent={GOLD} />
-        <KpiCard label="TASKS TODAY" value={AGENTS.reduce((a, o) => a + o.tasksToday, 0)} sub="across all agents" accent={GOLD} />
-        <KpiCard label="ACTIVE WORKCELLS" value={activeWC.length} sub="running now" accent={GOLD} />
+        <KpiCard label={isLive ? 'ACTIVE WORKFLOWS' : 'ACTIVE WORKCELLS'} value={activeWC.length} sub="running now" accent={GOLD} />
+        <KpiCard label="AVG TRUST" value={avgTrust} sub="out of 100" accent={GOLD} />
+        <KpiCard label={isLive ? 'TOTAL RUNS' : 'TASKS TODAY'} value={totalTasks} sub={isLive ? 'workflow runs' : 'across all agents'} accent={GOLD} />
+        <KpiCard label="PENDING GATES" value={pendingGates} sub="approval needed" accent="#8a8a8a" />
       </div>
+
+      {isLive && dashboard && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <KpiCard label="SUCCESS RATE" value={`${Math.round(dashboard.successRate * 100)}%`} sub="workflow completion" accent="#c9b787" />
+          <KpiCard label="AVG DURATION" value={dashboard.avgDurationMs ? `${Math.round(dashboard.avgDurationMs / 1000)}s` : '—'} sub="per run" accent="#c9b787" />
+          <KpiCard label="TOTAL WORKFLOWS" value={dashboard.totalWorkflows} sub="defined" accent="#c9b787" />
+          <KpiCard label="RUNNING NOW" value={dashboard.runningRuns} sub="active runs" accent="#c9b787" />
+        </div>
+      )}
 
       <div className="flex gap-2 mb-6 flex-wrap">
         {['All', ...RISK_LEVELS].map(r => (
@@ -405,6 +449,72 @@ export function Agents() {
               );
             })}
           </div>
+
+          <SectionTitle>MirrorEval Scores</SectionTitle>
+          <div className="rounded-lg border overflow-hidden" style={{ borderColor: 'var(--color-a11oy-border)' }}>
+            <table className="w-full text-xs">
+              <thead>
+                <tr style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
+                  {['Workcell', 'Verdict', 'Score', 'Evaluator', 'Flags'].map(h => (
+                    <th key={h} className="text-left px-3 py-2 font-mono uppercase tracking-wide" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: '10px' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {SEED_WORKCELLS.slice(0, 10).map((wc, i) => (
+                  <tr key={wc.id} style={{ backgroundColor: i % 2 === 0 ? 'var(--color-a11oy-card)' : 'var(--color-a11oy-deep)', borderBottom: '1px solid var(--color-a11oy-border)' }}>
+                    <td className="px-3 py-2 max-w-xs">
+                      <div className="truncate" style={{ color: 'var(--color-a11oy-text)' }}>{wc.name}</div>
+                    </td>
+                    <td className="px-3 py-2"><VerdictBadge verdict={wc.mirrorEvalResult.verdict} /></td>
+                    <td className="px-3 py-2 font-mono" style={{ color: '#c9b787' }}>{Math.round(wc.mirrorEvalResult.score * 100)}%</td>
+                    <td className="px-3 py-2 font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{wc.mirrorEvalResult.evaluatorModel}</td>
+                    <td className="px-3 py-2" style={{ color: wc.mirrorEvalResult.flags.length > 0 ? '#c9b787' : '#c9b787' }}>
+                      {wc.mirrorEvalResult.flags.length > 0 ? wc.mirrorEvalResult.flags[0] : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {isLive && recentAudit.length > 0 && (
+            <>
+              <SectionTitle>Recent Audit Activity ({recentAudit.length})</SectionTitle>
+              <div className="rounded-lg border overflow-hidden" style={{ borderColor: 'var(--color-a11oy-border)' }}>
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
+                      {['Action', 'Entity', 'Actor', 'Time'].map(h => (
+                        <th key={h} className="text-left px-3 py-2 font-mono uppercase tracking-wide" style={{ color: 'var(--color-a11oy-text-ghost)', fontSize: '10px' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentAudit.slice(0, 10).map((a, i) => (
+                      <tr key={a.id} style={{ backgroundColor: i % 2 === 0 ? 'var(--color-a11oy-card)' : 'var(--color-a11oy-deep)', borderBottom: '1px solid var(--color-a11oy-border)' }}>
+                        <td className="px-3 py-2 font-mono" style={{ color: '#c9b787' }}>{a.action}</td>
+                        <td className="px-3 py-2" style={{ color: 'var(--color-a11oy-text)' }}>{a.entityType}:{a.entityId?.slice(0, 8)}</td>
+                        <td className="px-3 py-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{a.actorType}</td>
+                        <td className="px-3 py-2 font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
+                          {(() => {
+                            try {
+                              const d = new Date(a.createdAt);
+                              const diffMs = Date.now() - d.getTime();
+                              const diffH = Math.round(diffMs / 3_600_000);
+                              if (diffH < 1) return `${Math.round(diffMs / 60000)}m ago`;
+                              if (diffH < 24) return `${diffH}h ago`;
+                              return `${Math.round(diffH / 24)}d ago`;
+                            } catch { return a.createdAt; }
+                          })()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="flex flex-col gap-6">
@@ -457,7 +567,6 @@ export function Agents() {
               <div className="text-xs font-mono uppercase tracking-widest mb-3" style={{ color: 'var(--color-a11oy-text-ghost)' }}>RISK DISTRIBUTION</div>
               {RISK_LEVELS.map(r => {
                 const count = AGENTS.filter(a => a.riskClassification === r).length;
-                const pct = (count / AGENTS.length) * 100;
                 return (
                   <div key={r} className="mb-2">
                     <div className="flex justify-between text-xs mb-1">
@@ -472,6 +581,124 @@ export function Agents() {
                 Select an agent to view full permissions, radar scores, and activity timeline.
               </div>
             </Card>
+          )}
+
+          <div>
+            <SectionTitle>{isLive ? 'Active Workflows' : 'Active Workcells'} ({activeWC.length})</SectionTitle>
+            <div className="flex flex-col gap-2">
+              {activeWC.slice(0, 8).map(wc => {
+                const name = 'name' in wc ? wc.name : '';
+                const desc = ('description' in wc ? wc.description : null) ?? ('objective' in wc ? (wc as unknown as Record<string, string>).objective : '');
+                const reqApproval = 'requiresApproval' in wc ? wc.requiresApproval : false;
+                return (
+                  <Card key={wc.id} className="text-xs">
+                    <div className="font-medium truncate mb-0.5" style={{ color: 'var(--color-a11oy-text)' }}>{name}</div>
+                    <div className="truncate" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{desc}</div>
+                    {reqApproval && (
+                      <div className="mt-1 text-xs font-mono" style={{ color: '#8a8a8a' }}>⚬ approval pending</div>
+                    )}
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <SectionTitle>Handoff Map</SectionTitle>
+            <div className="flex flex-col gap-2">
+              {HANDOFFS.map((h, i) => {
+                const color = VERTICAL_COLORS[h.vertical] ?? '#5e5e5e';
+                return (
+                  <div key={i} className="text-xs flex items-center gap-2">
+                    <div className="flex-1 px-2 py-1.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-card)', border: '1px solid var(--color-a11oy-border)' }}>
+                      <span style={{ color: 'var(--color-a11oy-text)' }}>{h.from}</span>
+                      <span style={{ color: 'var(--color-a11oy-text-ghost)' }}> → </span>
+                      <span style={{ color }}>{h.to}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {isLive && dashboard && dashboard.workflowsByStatus.length > 0 && (
+            <div>
+              <SectionTitle>Workflow Distribution</SectionTitle>
+              <div className="flex flex-col gap-2">
+                {dashboard.workflowsByStatus.map(ws => {
+                  const color = ws.status === 'completed' ? '#c9b787' : ws.status === 'failed' ? '#f5f5f5' : ws.status === 'running' ? '#c9b787' : '#8a8a8a';
+                  return (
+                    <div key={ws.status} className="flex items-center justify-between text-xs px-2 py-1.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-card)', border: '1px solid var(--color-a11oy-border)' }}>
+                      <span className="font-mono uppercase" style={{ color }}>{ws.status}</span>
+                      <span className="font-mono font-semibold" style={{ color }}>{ws.count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div>
+            <SectionTitle>Memory Health</SectionTitle>
+            <Card className="text-xs">
+              <div className="flex flex-col gap-3">
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Short-term</span>
+                    <span className="font-mono" style={{ color: '#c9b787' }}>84 KB / 512 KB</span>
+                  </div>
+                  <ProgressBar value={84} max={512} color="#c9b787" />
+                </div>
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Long-term</span>
+                    <span className="font-mono" style={{ color: '#c9b787' }}>1.2 MB / 10 MB</span>
+                  </div>
+                  <ProgressBar value={1200} max={10000} color="#c9b787" />
+                </div>
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Proof cache</span>
+                    <span className="font-mono" style={{ color: '#8a8a8a' }}>342 KB / 1 MB</span>
+                  </div>
+                  <ProgressBar value={342} max={1000} color="#8a8a8a" />
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          <div>
+            <SectionTitle>Cost & Latency</SectionTitle>
+            <Card className="text-xs">
+              <div className="flex flex-col gap-2">
+                {AGENTS.map(op => (
+                  <div key={op.id} className="flex items-center justify-between">
+                    <span className="truncate" style={{ color: 'var(--color-a11oy-text-sub)' }}>{op.name}</span>
+                    <div className="flex items-center gap-3 font-mono flex-shrink-0">
+                      <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{op.avgLatencyMs}ms</span>
+                      <span style={{ color: '#b08d52' }}>${op.costPerCallUSD.toFixed(3)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+
+          {failedWC.length > 0 && (
+            <div>
+              <SectionTitle>Failure Replay Queue</SectionTitle>
+              <div className="flex flex-col gap-2">
+                {failedWC.map(wc => {
+                  const name = 'name' in wc ? wc.name : '';
+                  return (
+                    <Card key={wc.id} className="text-xs">
+                      <div className="font-medium mb-0.5" style={{ color: '#f5f5f5' }}>{name}</div>
+                      <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Status: {isLive ? 'failed' : 'error'} — replay available</div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
           )}
 
           <div>

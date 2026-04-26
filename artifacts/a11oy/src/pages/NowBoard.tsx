@@ -164,10 +164,10 @@ export function NowBoard() {
                 {displaySignals.map((s, i) => {
                   const id = 'id' in s ? s.id : '';
                   const severity = ('severity' in s ? s.severity : null) ?? 'medium';
-                  const domain = ('domain' in s ? s.domain : null) ?? ('vertical' in s ? (s as Record<string, string>).vertical : '');
+                  const domain = ('domain' in s ? s.domain : null) ?? ('vertical' in s ? (s as unknown as Record<string, string>).vertical : '');
                   const title = ('title' in s ? s.title : '') ?? '';
                   const status = ('status' in s ? s.status : null) ?? 'active';
-                  const detected = ('createdAt' in s && s.createdAt) ? s.createdAt : ('detectedAt' in s ? (s as Record<string, string>).detectedAt : '');
+                  const detected = ('createdAt' in s && s.createdAt) ? s.createdAt : ('detectedAt' in s ? (s as unknown as Record<string, string>).detectedAt : '');
                   const vertLabel = VERTICAL_LABELS[domain] ?? domain;
                   const vertColor = VERTICAL_COLORS[domain] ?? '#5e5e5e';
 
@@ -181,7 +181,7 @@ export function NowBoard() {
                         borderBottom: '1px solid var(--color-a11oy-border)',
                       }}
                     >
-                      <td className="px-3 py-2"><SeverityDot severity={severity} /></td>
+                      <td className="px-3 py-2"><SeverityDot severity={severity as 'critical' | 'high' | 'medium' | 'low' | 'info'} /></td>
                       <td className="px-3 py-2">
                         <VerticalBadge vertical={vertLabel} color={vertColor} />
                       </td>
@@ -201,17 +201,17 @@ export function NowBoard() {
             const liveSig = liveSignals.find(s => s.id === selectedSignal);
             const sig = liveSig || seedSig;
             if (!sig) return null;
-            const domain = ('domain' in sig ? sig.domain : null) ?? ('vertical' in sig ? (sig as Record<string, string>).vertical : '');
+            const domain = ('domain' in sig ? sig.domain : null) ?? ('vertical' in sig ? (sig as unknown as Record<string, string>).vertical : '');
             const desc = sig.description ?? '';
-            const businessImpact = 'businessImpact' in sig ? (sig as Record<string, string>).businessImpact : null;
-            const owner = 'ownerUserId' in sig ? sig.ownerUserId : ('owner' in sig ? (sig as Record<string, string>).owner : null);
-            const detected = ('createdAt' in sig && sig.createdAt) ? sig.createdAt : ('detectedAt' in sig ? (sig as Record<string, string>).detectedAt : '');
+            const businessImpact = 'businessImpact' in sig ? (sig as unknown as Record<string, string>).businessImpact : null;
+            const owner = 'ownerUserId' in sig ? sig.ownerUserId : ('owner' in sig ? (sig as unknown as Record<string, string>).owner : null);
+            const detected = ('createdAt' in sig && sig.createdAt) ? sig.createdAt : ('detectedAt' in sig ? (sig as unknown as Record<string, string>).detectedAt : '');
             return (
               <Card className="mt-3">
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <SeverityDot severity={('severity' in sig ? sig.severity : null) ?? 'medium'} />
+                      <SeverityDot severity={(('severity' in sig ? sig.severity : null) ?? 'medium') as 'critical' | 'high' | 'medium' | 'low' | 'info'} />
                       <SeverityBadge severity={('severity' in sig ? sig.severity : null) ?? 'medium'} />
                       <VerticalBadge vertical={VERTICAL_LABELS[domain] ?? domain} color={VERTICAL_COLORS[domain] ?? '#5e5e5e'} />
                     </div>
@@ -241,8 +241,8 @@ export function NowBoard() {
                 const id = wc.id;
                 const name = 'name' in wc ? wc.name : '';
                 const status = 'status' in wc ? wc.status : '';
-                const objective = ('description' in wc ? wc.description : null) ?? ('objective' in wc ? (wc as Record<string, string>).objective : '');
-                const domain = ('domain' in wc ? wc.domain : null) ?? ('vertical' in wc ? (wc as Record<string, string>).vertical : '');
+                const objective = ('description' in wc ? wc.description : null) ?? ('objective' in wc ? (wc as unknown as Record<string, string>).objective : '');
+                const domain = ('domain' in wc ? wc.domain : null) ?? ('vertical' in wc ? (wc as unknown as Record<string, string>).vertical : '');
                 const reqApproval = 'requiresApproval' in wc ? wc.requiresApproval : false;
                 return (
                   <Card key={id || idx} className="text-xs">

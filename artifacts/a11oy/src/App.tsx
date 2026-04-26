@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Route, Switch } from 'wouter';
+import { GraphQLProvider } from './graphql';
 
 function stripTrailingSlash(path: string) {
   return path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
@@ -80,6 +81,7 @@ const VerifierAgent = lazy(() => import('./pages/VerifierAgent').then(m => ({ de
 
 export default function App() {
   return (
+    <GraphQLProvider>
     <Suspense fallback={<Loader />}>
       <Switch>
         <Route path={`${base}/`} component={HomePage} />
@@ -153,5 +155,6 @@ export default function App() {
         </Route>
       </Switch>
     </Suspense>
+    </GraphQLProvider>
   );
 }

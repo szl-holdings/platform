@@ -78,6 +78,8 @@ _Intentionally unchanged (out of scope):_ artifact root directory names (`artifa
 
 **A11oy Agent Runtime:** Governed, agentic execution fabric with modules for Types, Tracing, Memory, Model Router, MirrorEval, Deep Context, Tool Registry, Approved Runner, PCE Gate, Operators, and Workcells. Governance invariants ensure controlled execution.
 
+**A11oy GraphQL Client (Task #3898):** The A11oy frontend is wired to the API server's `/api/graphql` endpoint via `urql` (with `@urql/exchange-graphcache` and `graphql-ws` for subscriptions). The GraphQL module lives at `artifacts/a11oy/src/graphql/` with `provider.tsx` (urql client + WebSocket subscription exchange), `operations.ts` (queries, mutations, subscriptions), `hooks.ts` (typed React hooks), and `index.ts` (barrel exports). The `<GraphQLProvider>` wraps the app in `App.tsx`. Pages (`CommandSurface`, `Agents`, `NowBoard`, `Governance`, `HomePage`) use GraphQL hooks with graceful fallback to `SEED_SIGNALS`/`SEED_WORKCELLS` from `@workspace/a11oy-fabric` when the API is unreachable. The `StatusPill` and `PageHeader` components accept a `'CONNECTING'` status variant.
+
 **Email Deliverability:** All outbound transactional email uses a centralized library with suppression lists and admin routes.
 
 **Mobile Biometric Sign-In:** Real server-side authentication factor with cryptographic proof-of-possession.
