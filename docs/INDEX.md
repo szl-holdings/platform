@@ -211,15 +211,15 @@ Use [docs/README.md](README.md) for navigation by audience or task.
 
 | Document | Description | Last Reviewed |
 |----------|-------------|---------------|
-| [launch/executive-launch-summary.md](launch/executive-launch-summary.md) | **Canonical** — Executive launch readiness: all 13 outputs from 13-phase audit | 2026-04 |
-| [launch/launch-executive-summary.md](launch/launch-executive-summary.md) | Founder executive launch summary: GTM and green-light status | 2026-04 |
-| [launch/launch-blockers.md](launch/launch-blockers.md) | **Authoritative** — Hard and conditional blockers before public launch | 2026-04 |
-| [launch/go-no-go-checklist.md](launch/go-no-go-checklist.md) | Go/no-go launch decision gate with founder sign-off table | 2026-04 |
-| [launch/green-light-review.md](launch/green-light-review.md) | Full 6-perspective green-light diligence review | 2026-04 |
-| [launch/public-launch-readiness.md](launch/public-launch-readiness.md) | Public launch readiness bar definitions and criteria | 2026-04 |
-| [launch/operational-readiness-scorecard.md](launch/operational-readiness-scorecard.md) | Operational readiness scorecard: red/yellow/green by category | 2026-04 |
-| [launch/launch-day-runbook.md](launch/launch-day-runbook.md) | Launch day runbook: T-48h checklist, sequence, rollback | 2026-04 |
-| [launch/launch-analytics-plan.md](launch/launch-analytics-plan.md) | Launch analytics plan: Day 0 / Day 1 / Week 1 / Day 30 metrics | 2026-04 |
+| [audit/launch/executive-launch-summary.md](audit/launch/executive-launch-summary.md) | **Canonical** — Executive launch readiness: all 13 outputs from 13-phase audit | 2026-04 |
+| [audit/launch/launch-executive-summary.md](audit/launch/launch-executive-summary.md) | Founder executive launch summary: GTM and green-light status | 2026-04 |
+| [audit/launch/launch-blockers.md](audit/launch/launch-blockers.md) | **Authoritative** — Hard and conditional blockers before public launch | 2026-04 |
+| [audit/launch/go-no-go-checklist.md](audit/launch/go-no-go-checklist.md) | Go/no-go launch decision gate with founder sign-off table | 2026-04 |
+| [audit/launch/green-light-review.md](audit/launch/green-light-review.md) | Full 6-perspective green-light diligence review | 2026-04 |
+| [audit/launch/public-launch-readiness.md](audit/launch/public-launch-readiness.md) | Public launch readiness bar definitions and criteria | 2026-04 |
+| [audit/launch/operational-readiness-scorecard.md](audit/launch/operational-readiness-scorecard.md) | Operational readiness scorecard: red/yellow/green by category | 2026-04 |
+| [audit/launch/launch-day-runbook.md](audit/launch/launch-day-runbook.md) | Launch day runbook: T-48h checklist, sequence, rollback | 2026-04 |
+| [audit/launch/launch-analytics-plan.md](audit/launch/launch-analytics-plan.md) | Launch analytics plan: Day 0 / Day 1 / Week 1 / Day 30 metrics | 2026-04 |
 
 ---
 

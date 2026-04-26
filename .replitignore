@@ -59,3 +59,32 @@ reports/*/artifacts/
 **/__pycache__/
 **/*.pyc
 **/*.pyo
+
+# ── Rehaul 2/9 — deploy image hygiene (Task #2937) ────────────────────────────
+# Launch content dirs (removed from git; listed here for safety)
+/X-LAUNCH-SERIES/
+/a11oy-launch-content/
+/demo-assets/
+/launch/
+# Root-level generated / captured dirs
+/launch-shots/
+/screenshots/
+/output/
+/backups/
+/deliverables/
+/social-content/
+/spfx-webparts/
+# media root: canonical path is docs/media/; exclude stale root media/
+/media/screenshots/
+/media/brand-kit/
+# Root-level zip archives and build scripts
+/LINKEDIN-LAUNCH.zip
+/X-LAUNCH-SERIES.zip
+/01-thursday-intro.zip
+/02-sunday-deep-dive.zip
+/03-monday-operator-lens.zip
+/a11oy-launch-content.zip
+/build_carousel.py
+/build_video.sh
+# All large zip archives at root (belt-and-suspenders)
+/*.zip

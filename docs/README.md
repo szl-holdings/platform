@@ -16,7 +16,7 @@ This is the documentation root for the SZL Holdings platform. All documentation 
 | [**product/**](product/INDEX.md) | Product overview, features, surfaces, roadmap, packaging, user guides |
 | [**sales/**](sales/INDEX.md) | GTM strategy, demos, sales motion, customer success, positioning |
 | [**investor/**](investor/INDEX.md) | Series A materials, diligence packets, business model, commercial readiness |
-| [**launch/**](launch/INDEX.md) | Launch blockers, go/no-go criteria, analytics plan, operational readiness |
+| [**audit/launch/**](audit/launch/INDEX.md) | Launch blockers, go/no-go criteria, analytics plan, operational readiness |
 
 ---
 
@@ -38,7 +38,7 @@ This is the documentation root for the SZL Holdings platform. All documentation 
 |---|---|
 | Read the investment thesis | [investor/platform-thesis.md](investor/platform-thesis.md) |
 | Review technical diligence | [investor/technical-diligence-packet.md](investor/technical-diligence-packet.md) |
-| See launch readiness | [launch/executive-launch-summary.md](launch/executive-launch-summary.md) |
+| See launch readiness | [audit/launch/executive-launch-summary.md](audit/launch/executive-launch-summary.md) |
 | Understand known gaps | [operations/known-gaps.md](operations/known-gaps.md) |
 
 ### For engineers
