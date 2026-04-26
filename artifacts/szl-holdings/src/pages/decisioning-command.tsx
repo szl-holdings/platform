@@ -578,9 +578,10 @@ function RunHistoryPanel({
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-slate-500">
-          <History className="w-6 h-6 mx-auto mb-2 animate-pulse" />
-          <p className="text-sm">Loading run history…</p>
+        <div className="space-y-2">
+          {[1, 2, 3, 4].map((n) => (
+            <div key={n} className="h-14 rounded-lg animate-pulse" style={{ background: 'rgba(255,255,255,0.04)' }} />
+          ))}
         </div>
       ) : runs.length === 0 ? (
         <div className="text-center py-12 text-slate-600 border border-slate-800 rounded-lg">

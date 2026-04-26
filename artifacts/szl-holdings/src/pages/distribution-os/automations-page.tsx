@@ -772,8 +772,10 @@ export default function AutomationsPage() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: '#4a4540' }}>
-              Loading run history…
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {[1, 2, 3, 4].map((n) => (
+                <div key={n} style={{ height: 56, borderRadius: 8, background: 'rgba(255,255,255,0.03)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+              ))}
             </div>
           ) : runs.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '4rem', color: '#4a4540' }}>

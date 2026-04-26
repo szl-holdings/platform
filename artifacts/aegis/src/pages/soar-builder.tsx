@@ -407,7 +407,11 @@ export default function SOARBuilder() {
               Playbook Library
             </h2>
             {playbooksQuery.isLoading ? (
-              <div className="text-xs text-zinc-500 text-center py-4">Loading…</div>
+              <div className="space-y-2">
+                {[1, 2, 3].map((n) => (
+                  <div key={n} className="h-16 rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.04)' }} />
+                ))}
+              </div>
             ) : (
               <div className="space-y-1.5">
                 {playbooks.map((pb: PlaybookSummary) => (
@@ -676,7 +680,11 @@ export default function SOARBuilder() {
           </div>
 
           {runsQuery.isLoading ? (
-            <div className="text-xs text-zinc-500 text-center py-8">Loading run history…</div>
+            <div className="space-y-2">
+              {[1, 2, 3, 4].map((n) => (
+                <div key={n} className="h-14 rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.04)' }} />
+              ))}
+            </div>
           ) : runs.length === 0 ? (
             <div className="rounded-xl border border-white/8 bg-white/3 p-8 text-center">
               <History className="w-8 h-8 text-zinc-600 mx-auto mb-2" />

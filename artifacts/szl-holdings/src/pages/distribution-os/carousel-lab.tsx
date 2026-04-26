@@ -1943,8 +1943,10 @@ export default function CarouselLabPage() {
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '3rem', color: '#4a4540' }}>
-            Loading carousels…
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {[1, 2, 3].map((n) => (
+              <div key={n} style={{ height: 96, borderRadius: 10, background: 'rgba(255,255,255,0.03)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            ))}
           </div>
         ) : carousels.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '4rem', color: '#4a4540' }}>

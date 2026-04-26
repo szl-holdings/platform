@@ -358,7 +358,11 @@ export default function VesselsAtlasArtifactsPage() {
         )}
 
         {loading ? (
-          <div style={{ color: TEXT.secondary, textAlign: 'center', padding: 60 }}>Loading…</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {[1, 2, 3].map((n) => (
+              <div key={n} style={{ height: 80, borderRadius: 8, background: 'rgba(255,255,255,0.04)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            ))}
+          </div>
         ) : artifacts.length === 0 ? (
           <div style={{ color: TEXT.tertiary, textAlign: 'center', padding: 60 }}>
             No maritime artifacts yet. Create your first voyage report.

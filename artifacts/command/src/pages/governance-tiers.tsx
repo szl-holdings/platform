@@ -339,11 +339,30 @@ export default function GovernanceTiersPage() {
       )}
 
       {tiersQ.isLoading ? (
-        <div
-          className="text-[11px] font-mono py-8 text-center"
-          style={{ color: 'rgba(255,255,255,0.4)' }}
-        >
-          Loading tiers…
+        <div className="flex flex-col gap-3">
+          {[1, 2, 3, 4].map((n) => (
+            <div
+              key={n}
+              className="rounded border px-3 py-3"
+              style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.015)' }}
+            >
+              <div className="flex items-start gap-3">
+                <div
+                  className="w-9 h-9 rounded animate-pulse"
+                  style={{ background: 'rgba(255,255,255,0.06)', flexShrink: 0 }}
+                />
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-16 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.08)' }} />
+                    <div className="h-3 w-24 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                  </div>
+                  <div className="h-2.5 w-3/4 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                  <div className="h-2 w-40 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.04)' }} />
+                </div>
+              </div>
+              <div className="mt-3 h-20 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.04)' }} />
+            </div>
+          ))}
         </div>
       ) : tiers.length === 0 ? (
         <div

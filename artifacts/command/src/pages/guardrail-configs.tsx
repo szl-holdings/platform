@@ -55,6 +55,8 @@ interface GuardrailConfig {
   updatedAt?: string;
   createdById?: number | null;
   createdBy?: { id: number; displayName: string; email: string | null } | null;
+  updatedById?: number | null;
+  updatedBy?: { id: number; displayName: string; email: string | null } | null;
 }
 
 function formatTimestamp(iso?: string | null): string | null {
@@ -631,11 +633,30 @@ export default function GuardrailConfigsPage() {
       )}
 
       {listQ.isLoading ? (
-        <div
-          className="text-[11px] font-mono py-8 text-center"
-          style={{ color: 'rgba(255,255,255,0.4)' }}
-        >
-          Loading guardrails…
+        <div className="flex flex-col gap-2">
+          {[1, 2, 3, 5, 6].map((n) => (
+            <div
+              key={n}
+              className="rounded border px-3 py-2.5"
+              style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.015)' }}
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="h-3 w-32 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.08)' }} />
+                    <div className="h-3 w-16 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                    <div className="h-3 w-16 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                  </div>
+                  <div className="h-2.5 w-2/3 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.05)' }} />
+                  <div className="h-2 w-48 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.04)' }} />
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="h-6 w-16 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.05)' }} />
+                  <div className="h-6 w-12 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.05)' }} />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       ) : items.length === 0 ? (
         <div
@@ -730,7 +751,7 @@ export default function GuardrailConfigsPage() {
                         {item.description}
                       </div>
                     )}
-                    {(item.createdAt || item.updatedAt || item.createdBy) && (
+                    {(item.createdAt || item.updatedAt || item.createdBy || item.updatedBy) && (
                       <div
                         data-testid={`guardrail-audit-${item.id}`}
                         className="text-[10px] font-mono mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5"
@@ -752,11 +773,21 @@ export default function GuardrailConfigsPage() {
                             Created on {formatTimestamp(item.createdAt) ?? item.createdAt}
                           </span>
                         )}
-                        {item.updatedAt && (
-                          <span data-testid={`guardrail-updated-at-${item.id}`}>
-                            Updated on {formatTimestamp(item.updatedAt) ?? item.updatedAt}
+                        {item.updatedBy ? (
+                          <span data-testid={`guardrail-updated-by-${item.id}`}>
+                            Last edited by{' '}
+                            <span style={{ color: 'rgba(255,255,255,0.7)' }}>
+                              {item.updatedBy.displayName}
+                            </span>
+                            {item.updatedAt
+                              ? ` on ${formatTimestamp(item.updatedAt) ?? item.updatedAt}`
+                              : ''}
                           </span>
-                        )}
+                        ) : item.updatedAt ? (
+                          <span data-testid={`guardrail-updated-at-${item.id}`}>
+                            Last edited on {formatTimestamp(item.updatedAt) ?? item.updatedAt}
+                          </span>
+                        ) : null}
                       </div>
                     )}
                   </div>

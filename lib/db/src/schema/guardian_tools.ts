@@ -412,6 +412,7 @@ export const guardrailConfigsTable = pgTable(
       .default('enforce'),
     enabled: boolean('enabled').notNull().default(true),
     createdById: integer('created_by_id').references(() => usersTable.id, { onDelete: 'set null' }),
+    updatedById: integer('updated_by_id').references(() => usersTable.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },

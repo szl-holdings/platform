@@ -3630,7 +3630,11 @@ interface GuardrailEditor {
   email: string | null;
 }
 
-function guardrailRowToApi(row: GuardrailConfig, createdBy?: GuardrailEditor | null) {
+function guardrailRowToApi(
+  row: GuardrailConfig,
+  createdBy?: GuardrailEditor | null,
+  updatedBy?: GuardrailEditor | null,
+) {
   return {
     id: row.id,
     orgId: row.orgId,
@@ -3646,10 +3650,12 @@ function guardrailRowToApi(row: GuardrailConfig, createdBy?: GuardrailEditor | n
     updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : row.updatedAt,
     createdById: row.createdById ?? null,
     createdBy: createdBy ?? null,
+    updatedById: row.updatedById ?? null,
+    updatedBy: updatedBy ?? null,
   };
 }
 
-async function loadCreatedByForGuardrails(
+async function loadEditorsForGuardrails(
   ids: Array<number | null>,
 ): Promise<Map<number, GuardrailEditor>> {
   const uniqueIds = Array.from(new Set(ids.filter((x): x is number => typeof x === 'number')));
@@ -3664,6 +3670,9 @@ async function loadCreatedByForGuardrails(
   }
   return out;
 }
+
+/** @deprecated Use loadEditorsForGuardrails */
+const loadCreatedByForGuardrails = loadEditorsForGuardrails;
 
 router.get(
   '/guardrail-configs',
@@ -3716,11 +3725,18 @@ router.get(
           .where(where as ReturnType<typeof and>),
       ]);
 
-      const editorMap = await loadCreatedByForGuardrails(rows.map((r) => r.createdById));
+      const editorMap = await loadEditorsForGuardrails([
+        ...rows.map((r) => r.createdById),
+        ...rows.map((r) => r.updatedById),
+      ]);
       sendSuccess(
         res,
         rows.map((r) =>
-          guardrailRowToApi(r, r.createdById != null ? (editorMap.get(r.createdById) ?? null) : null),
+          guardrailRowToApi(
+            r,
+            r.createdById != null ? (editorMap.get(r.createdById) ?? null) : null,
+            r.updatedById != null ? (editorMap.get(r.updatedById) ?? null) : null,
+          ),
         ),
         200,
         {
@@ -3766,10 +3782,14 @@ router.get(
           return;
         }
       }
-      const editorMap = await loadCreatedByForGuardrails([row.createdById]);
+      const editorMap = await loadEditorsForGuardrails([row.createdById, row.updatedById]);
       sendSuccess(
         res,
-        guardrailRowToApi(row, row.createdById != null ? (editorMap.get(row.createdById) ?? null) : null),
+        guardrailRowToApi(
+          row,
+          row.createdById != null ? (editorMap.get(row.createdById) ?? null) : null,
+          row.updatedById != null ? (editorMap.get(row.updatedById) ?? null) : null,
+        ),
       );
     } catch (err) {
       handleRouteError(res, err, 'Failed to get guardrail config');
@@ -3900,7 +3920,10 @@ router.patch(
         enforcement: GuardrailConfig['enforcement'];
         enabled: boolean;
       }>;
-      const u: Record<string, unknown> = { updatedAt: new Date() };
+      const u: Record<string, unknown> = {
+        updatedAt: new Date(),
+        updatedById: req.user?.id ?? null,
+      };
       if (body.name !== undefined) u.name = body.name;
       if (body.description !== undefined) u.description = body.description;
       if (body.config !== undefined) u.config = body.config;
@@ -3916,12 +3939,13 @@ router.patch(
         sendNotFound(res, 'Guardrail config not found');
         return;
       }
-      const editorMap = await loadCreatedByForGuardrails([updated.createdById]);
+      const editorMap = await loadEditorsForGuardrails([updated.createdById, updated.updatedById]);
       sendSuccess(
         res,
         guardrailRowToApi(
           updated,
           updated.createdById != null ? (editorMap.get(updated.createdById) ?? null) : null,
+          updated.updatedById != null ? (editorMap.get(updated.updatedById) ?? null) : null,
         ),
       );
     } catch (err) {

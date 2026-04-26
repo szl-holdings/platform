@@ -79,8 +79,12 @@ router.get(
 router.get('/evidence-graph/recommendations/:id', auth, rateLimit, (req, res) => {
   try {
     const { id } = req.params;
-    if (!id) {
-      sendNotFound(res, 'Recommendation');
+    if (!id || typeof id !== 'string') {
+      sendBadRequest(res, 'Recommendation ID is required.');
+      return;
+    }
+    if (id.length > 200 || !/^[\w\-:.]+$/.test(id)) {
+      sendBadRequest(res, 'Recommendation ID contains invalid characters or is too long.');
       return;
     }
 
@@ -102,8 +106,12 @@ router.get('/evidence-graph/recommendations/:id', auth, rateLimit, (req, res) =>
 router.get('/evidence-graph/recommendations/:id/decisions', auth, rateLimit, (req, res) => {
   try {
     const { id } = req.params;
-    if (!id) {
-      sendNotFound(res, 'Recommendation');
+    if (!id || typeof id !== 'string') {
+      sendBadRequest(res, 'Recommendation ID is required.');
+      return;
+    }
+    if (id.length > 200 || !/^[\w\-:.]+$/.test(id)) {
+      sendBadRequest(res, 'Recommendation ID contains invalid characters or is too long.');
       return;
     }
     const rec = defaultRecommendationStore.get(id);
@@ -142,8 +150,12 @@ router.post(
   (req, res) => {
     try {
       const { id } = req.params;
-      if (!id) {
-        sendNotFound(res, 'Recommendation');
+      if (!id || typeof id !== 'string') {
+        sendBadRequest(res, 'Recommendation ID is required.');
+        return;
+      }
+      if (id.length > 200 || !/^[\w\-:.]+$/.test(id)) {
+        sendBadRequest(res, 'Recommendation ID contains invalid characters or is too long.');
         return;
       }
 
