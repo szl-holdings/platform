@@ -16,8 +16,10 @@
  *  - Webhooks (/api/webhooks/*) — use HMAC authentication internally
  *  - SCIM 2.0 (/api/scim/*) — uses scimTokensTable bearer token auth (RFC 7643/7644);
  *    the SCIM auth is enforced within the SCIM router via scimBearerAuth middleware
- *  - Streaming webhook ingestion endpoints (/api/stream/webhook/*, /api/stream/webhook-siem,
+ *  - Streaming webhook ingestion endpoints (/api/stream/webhook/*,
  *    /api/stream/ais-nmea) — use source token authentication (streamed-ingestion authToken)
+ *  - SIEM webhook (/api/stream/webhook-siem) — NOT public; requires Bearer token auth
+ *    (SIEM_WEBHOOK_TOKEN env var or a registered SIEM webhook data source authToken)
  *  - Streaming SSE read endpoints (/api/stream/siem-events, /api/stream/market-data,
  *    /api/stream/ais-tracking, /api/stream/status) — read-only live feeds used by dashboards
  *  - A2A Federation discovery endpoints (/api/federation/agents*, /api/federation/health)
@@ -66,7 +68,6 @@ const PUBLIC_EXACT_PATHS = new Set([
   // /api/booking/time-entries and /api/booking/services). The route handler
   // applies its own validation (400 for missing fields) and rate limiting.
   "/api/booking/invoices/email",
-  "/api/stream/webhook-siem",
   "/api/stream/ais-nmea",
   "/api/stream/siem-events",
   "/api/stream/market-data",
@@ -458,6 +459,29 @@ function isNexusOrchestratorLoopback(req: Request): boolean {
 }
 
 /**
+ * Trusted server-to-server Bearer token for POST /api/stream/webhook-siem.
+ * Allows legitimate SIEM webhook providers to push events without a user
+ * session. Scoped narrowly to that single route + method. The token must
+ * match the SIEM_WEBHOOK_TOKEN environment variable exactly (timing-safe).
+ * A missing or non-matching token is rejected here so the route handler is
+ * never reached by unauthenticated callers; the route handler performs an
+ * additional validation pass as defense-in-depth.
+ */
+function isValidSiemWebhookToken(req: Request): boolean {
+  if (req.method !== "POST") return false;
+  if (req.path !== "/api/stream/webhook-siem") return false;
+  const secret = process.env.SIEM_WEBHOOK_TOKEN;
+  if (!secret) return false;
+  const authHeader = req.headers["authorization"];
+  if (typeof authHeader !== "string" || !authHeader.startsWith("Bearer ")) return false;
+  const provided = authHeader.slice(7);
+  const a = Buffer.from(secret, "utf8");
+  const b = Buffer.from(provided, "utf8");
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
+
+/**
  * Trusted server-to-server token for POST /api/orgs/:orgSlug/usage/events.
  * Lets internal collectors / background jobs record usage events without a
  * user session. Scoped narrowly to that single route + method to avoid
@@ -518,6 +542,11 @@ export function globalAuthEnforcer(
   }
 
   if (isValidUsageEventServiceToken(req)) {
+    next();
+    return;
+  }
+
+  if (isValidSiemWebhookToken(req)) {
     next();
     return;
   }

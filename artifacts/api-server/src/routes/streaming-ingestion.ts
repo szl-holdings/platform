@@ -241,8 +241,44 @@ streamingRouter.post('/stream/webhook/:sourceToken', async (req: Request, res: R
 
 streamingRouter.post('/stream/webhook-siem', async (req: Request, res: Response) => {
   const authHeader = req.headers.authorization;
-  const body = req.body as Record<string, unknown> | Record<string, unknown>[];
 
+  // Require a Bearer token matching a registered SIEM webhook data source
+  // or the SIEM_WEBHOOK_TOKEN environment variable. An unauthenticated POST
+  // must never reach ingestEvent() because doing so allows arbitrary internet
+  // actors to inject fabricated events into production SIEM storage.
+  const bearerToken =
+    typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : null;
+
+  if (!bearerToken) {
+    sendUnauthorized(res, 'Missing Bearer token');
+    return;
+  }
+
+  // Check against SIEM_WEBHOOK_TOKEN env var (timing-safe comparison).
+  // This is the only accepted credential for this endpoint. Datasource-based
+  // webhook ingestion is handled by POST /stream/webhook/:sourceToken instead.
+  const envToken = process.env.SIEM_WEBHOOK_TOKEN;
+  let authenticated = false;
+
+  if (envToken) {
+    try {
+      const { timingSafeEqual } = await import('node:crypto');
+      const a = Buffer.from(envToken, 'utf8');
+      const b = Buffer.from(bearerToken, 'utf8');
+      if (a.length === b.length && timingSafeEqual(a, b)) {
+        authenticated = true;
+      }
+    } catch {}
+  }
+
+  if (!authenticated) {
+    sendUnauthorized(res, 'Invalid or unrecognized Bearer token');
+    return;
+  }
+
+  const body = req.body as Record<string, unknown> | Record<string, unknown>[];
   const rawEvents: Record<string, unknown>[] = Array.isArray(body) ? body : [body];
   let accepted = 0;
 
@@ -254,7 +290,7 @@ streamingRouter.post('/stream/webhook-siem', async (req: Request, res: Response)
     } catch {}
   }
 
-  logger.info({ accepted, hasAuth: !!authHeader }, '[streaming] SIEM webhook received');
+  logger.info({ accepted }, '[streaming] Authenticated SIEM webhook received');
   res.json({ status: 'accepted', accepted, timestamp: new Date().toISOString() });
 });
 
