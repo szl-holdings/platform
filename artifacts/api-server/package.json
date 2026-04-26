@@ -107,6 +107,7 @@
     "@workspace/aef-domain-profiles": "workspace:*",
     "@workspace/aef-evals": "workspace:*",
     "@workspace/agents-core": "workspace:*",
+    "@workspace/agents-sdk-bridge": "workspace:*",
     "@workspace/agents-evals": "workspace:*",
     "@workspace/agents-prompts": "workspace:*",
     "@workspace/agents-tools": "workspace:*",

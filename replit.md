@@ -100,6 +100,8 @@ The platform is a pnpm monorepo built with TypeScript 5.9, React 19, Vite, and N
 
 **Forecast & Anomaly Fabric:** Unified forecasting service (`packages/forecast-fabric`) with calibrated interval outputs, and a unified streaming and batch anomaly detection service (`packages/anomaly-fabric`). Drift detection (`packages/drift-eval`) for performance drift against baseline snapshots and champion-vs-challenger evaluations.
 
+**OpenAI Agents SDK Bridge (`packages/agents-sdk-bridge`):** Wires `@openai/agents@0.0.15` into the SZL observability stack. `SzlTracingProcessor` implements `TracingProcessor` and dual-exports SDK traces to Trace Graph + Cognitive Observability, routing `agent`, `generation`, `function`, `guardrail`, and `handoff` span types to the appropriate SZL sinks. `SzlGuardrailAdapter` wraps `evaluateFull()` from the Policy Engine as SDK-compatible input/output guardrail functions. `SzlToolAdapter` converts Tool Mesh `ToolManifest` objects into SDK `FunctionTool` instances. `SzlAgentAdapter` wraps Nuro Mesh agent configs into SDK `Agent` instances. `SdkRunner` provides a governed `run()` loop with behavioral tracing and approvals. The API server (`artifacts/api-server`) uses `useAgentsSdk` flag in agent configs to opt in to the SDK path. 35 unit/integration tests across 5 test files.
+
 ## External Dependencies
 -   **Database:** PostgreSQL 16
 -   **Authentication:** Replit Auth

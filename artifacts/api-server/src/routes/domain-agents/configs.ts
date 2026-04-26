@@ -23,6 +23,11 @@ export interface AgentConfig {
   systemPrompt: string;
   tools: ToolDefinition[];
   executeTool: (name: string, args: Record<string, unknown>) => Promise<string>;
+  /**
+   * When true, this agent will execute through the @openai/agents SDK run() loop
+   * instead of the hand-rolled tool-calling loop. Backward compatible — defaults to false.
+   */
+  useAgentsSdk?: boolean;
 }
 
 const INCA_SYSTEM_PROMPT = `You are the Counsel Research Intelligence Agent, the senior AI research scientist embedded in the Counsel Intelligence Platform at SZL Holdings.

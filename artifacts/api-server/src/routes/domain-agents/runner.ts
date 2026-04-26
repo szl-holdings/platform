@@ -17,6 +17,74 @@ import { logger } from '../../lib/logger';
 import { getModelConfig } from '../../lib/model-registry';
 import { AGENT_CONFIGS, type AgentType } from './configs';
 
+async function runAgentViaSdkIfOptIn(
+  agentType: AgentType,
+  userMessage: string,
+  conversationId: string,
+): Promise<string | null> {
+  const config = AGENT_CONFIGS[agentType];
+  if (!config.useAgentsSdk) return null;
+
+  const startMs = Date.now();
+  const domain = getAgentDomain(agentType);
+  const recType = getAgentRecType(agentType);
+  const evalCtx: DomainEvalContext = { domain };
+
+  let output: string;
+  try {
+    const { runAgentViaSdk } = await import('@workspace/agents-sdk-bridge/sdk-runner');
+    const result = await runAgentViaSdk(
+      {
+        id: agentType,
+        name: config.name,
+        domain: agentType,
+        systemPrompt: config.systemPrompt,
+        tools: config.tools.map((t) => t.name),
+        useAgentsSdk: true,
+      },
+      userMessage,
+      {
+        conversationId,
+        workflowName: `${config.name} chat`,
+        domain: agentType,
+        includeSensitiveData: false,
+      },
+    );
+    output = result.output;
+  } catch (err) {
+    logger.warn({ err, agentType }, 'SDK runner failed, falling back to hand-rolled loop');
+    return null;
+  }
+
+  // Keep the conversation store in sync so context is preserved across turns
+  // and any fallback to the hand-rolled loop sees the full history.
+  const messages = getOrCreateConversation(conversationId, agentType);
+  messages.push({ role: 'user', content: userMessage });
+  messages.push({ role: 'assistant', content: output });
+
+  // Emit the same captureTrace / autoEnqueueTrace / evaluator hooks that the
+  // hand-rolled loop emits. This preserves end-to-end SZL observability for
+  // SDK-path runs — the SDK's SzlTracingProcessor records span-level details,
+  // while this trace record holds the top-level governance audit entry.
+  const latencyMs = Date.now() - startMs;
+  const confidence = computeConfidenceProxy(output, false);
+  const trace = captureTrace({
+    domain,
+    recommendationType: recType,
+    model: 'openai-agents-sdk',
+    modelProvider: 'openai',
+    agentId: agentType,
+    promptText: userMessage.slice(0, 500),
+    latencyMs,
+    confidence,
+    outputSummary: output.slice(0, 200),
+  });
+  autoEnqueueTrace(trace);
+  void persistEvalAsync(trace, evalCtx);
+
+  return output;
+}
+
 const AGENT_DOMAIN_MAP: Record<AgentType, TraceDomain> = {
   vessels: 'vessels',
   terra: 'terra',
@@ -137,6 +205,9 @@ export async function runDomainAgentChat(
   userMessage: string,
   conversationId: string,
 ): Promise<string> {
+  const sdkResult = await runAgentViaSdkIfOptIn(agentType, userMessage, conversationId);
+  if (sdkResult !== null) return sdkResult;
+
   const config = AGENT_CONFIGS[agentType];
   const modelConfig = getModelConfig(agentType);
   const messages = getOrCreateConversation(conversationId, agentType);

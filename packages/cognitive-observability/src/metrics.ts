@@ -113,6 +113,16 @@ export const METRIC_DEFINITIONS = {
     unit: 'ratio',
     description: 'Fraction of code-mode sandbox executions that completed without error',
   },
+  run_started: {
+    type: 'counter' as const,
+    unit: 'events',
+    description: 'Number of SDK agent runs started',
+  },
+  run_completed: {
+    type: 'histogram' as const,
+    unit: 'ms',
+    description: 'SDK agent run completed; value is the run latency in milliseconds',
+  },
 } satisfies Record<string, { type: MetricType; unit: string; description: string }>;
 
 export type KnownMetricName = keyof typeof METRIC_DEFINITIONS;
