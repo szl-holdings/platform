@@ -27,9 +27,16 @@ export default defineConfig({
       : []),
   ],
   resolve: {
-    alias: {
-      '@': path.resolve(import.meta.dirname, 'src'),
-    },
+    alias: [
+      { find: '@', replacement: path.resolve(import.meta.dirname, 'src') },
+      { find: /^@szl-holdings\/omnia-shell\/provider$/, replacement: path.resolve(import.meta.dirname, '../../packages/omnia-shell/src/OmniaShellProvider.tsx') },
+      { find: /^@szl-holdings\/omnia-shell\/top-bar$/, replacement: path.resolve(import.meta.dirname, '../../packages/omnia-shell/src/OmniaTopBar.tsx') },
+      { find: /^@szl-holdings\/omnia-shell\/command-palette$/, replacement: path.resolve(import.meta.dirname, '../../packages/omnia-shell/src/OmniaCommandPalette.tsx') },
+      { find: /^@szl-holdings\/omnia-shell\/provenance$/, replacement: path.resolve(import.meta.dirname, '../../packages/omnia-shell/src/Provenance.tsx') },
+      { find: /^@szl-holdings\/omnia-shell\/hooks$/, replacement: path.resolve(import.meta.dirname, '../../packages/omnia-shell/src/hooks.ts') },
+      { find: /^@szl-holdings\/omnia-shell\/types$/, replacement: path.resolve(import.meta.dirname, '../../packages/omnia-shell/src/types.ts') },
+      { find: /^@szl-holdings\/omnia-shell$/, replacement: path.resolve(import.meta.dirname, '../../packages/omnia-shell/src/index.ts') },
+    ],
     dedupe: ['react', 'react-dom'],
   },
   root: path.resolve(import.meta.dirname),

@@ -68,6 +68,12 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'AGI',
+    items: [
+      { href: '/convergence', label: 'AGI Convergence' },
+    ],
+  },
+  {
     label: 'TRUST',
     items: [
       { href: '/trust',         label: 'Trust Center' },
