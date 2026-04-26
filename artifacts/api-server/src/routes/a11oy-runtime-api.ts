@@ -34,6 +34,17 @@ import {
 import { listTraces, getTrace, exportTrace } from '../a11oy/runtime/tracing/store.js';
 import { listSkills, getSkill, executeSkill } from '../a11oy/skills/index.js';
 import { getProviderStatuses, getActiveProvider } from '../a11oy/runtime/router/model-router.js';
+import { generatePlan } from '../a11oy/runtime/operator/planner.js';
+import {
+  createRun,
+  getRun,
+  listRuns,
+  approveStep,
+  rejectStep,
+  recordStepExecution,
+  getReplayData,
+} from '../a11oy/runtime/operator/run-store.js';
+import { executeToolMock, getTool } from '../a11oy/runtime/tools/registry.js';
 import { randomUUID } from 'node:crypto';
 
 const router = Router();
@@ -693,6 +704,190 @@ router.get('/a11oy/proofs', (_req: Request, res: Response) => {
   ok(res, packets, { total: packets.length });
 });
 
+router.post('/a11oy/operator/plan', async (req: Request, res: Response) => {
+  try {
+    const { intent } = req.body as { intent?: string };
+    if (!intent || intent.trim().length < 5) {
+      return err(res, 400, 'validation', 'intent must be at least 5 characters.');
+    }
+    const plan = await generatePlan(intent.trim(), DEMO_MODE);
+    ok(res, plan, { mode: DEMO_MODE ? 'demo' : 'live' });
+  } catch (e) {
+    logger.error({ err: e }, '[a11oy] POST /operator/plan error');
+    err(res, 500, 'execution', 'Plan generation failed.');
+  }
+});
+
+router.post('/a11oy/operator/runs', async (req: Request, res: Response) => {
+  try {
+    const { intent, requestedBy, vertical, plan: bodyPlan, planSummary, estimatedSideEffects } = req.body as {
+      intent?: string;
+      requestedBy?: string;
+      vertical?: string;
+      plan?: Array<Omit<import('../a11oy/runtime/operator/run-store.js').PlanStep, 'stepId' | 'status'>>;
+      planSummary?: string;
+      estimatedSideEffects?: string[];
+    };
+    if (!intent || intent.trim().length < 5) {
+      return err(res, 400, 'validation', 'intent is required.');
+    }
+    // Use the caller-supplied plan (already reviewed by the human) if present;
+    // otherwise fall back to generating a fresh plan so the endpoint remains usable standalone.
+    let resolvedPlan: Omit<import('../a11oy/runtime/operator/run-store.js').PlanStep, 'stepId' | 'status'>[];
+    let resolvedVertical: string;
+    let resolvedSummary: string;
+    let resolvedSideEffects: string[];
+    if (bodyPlan && bodyPlan.length > 0) {
+      // Re-derive requiresApproval server-side from the tool registry.
+      // Client-supplied requiresApproval is NEVER trusted — the tool
+      // catalogue is the authoritative source of approval requirements.
+      const toolList = listTools();
+      resolvedPlan = bodyPlan.map((step) => {
+        const toolMeta = getTool(step.toolId) ?? toolList.find((t) => t.name === step.toolName);
+        return {
+          ...step,
+          requiresApproval: toolMeta?.requiresApproval ?? true, // default to requiring approval if tool unknown
+        };
+      });
+      resolvedVertical = vertical ?? 'default';
+      resolvedSummary = planSummary ?? `Run for: ${intent.trim().slice(0, 120)}`;
+      resolvedSideEffects = estimatedSideEffects ?? [];
+    } else {
+      const generated = await generatePlan(intent.trim(), DEMO_MODE);
+      resolvedPlan = generated.steps;
+      resolvedVertical = generated.vertical;
+      resolvedSummary = generated.planSummary;
+      resolvedSideEffects = generated.estimatedSideEffects;
+    }
+    const run = createRun({
+      intent: intent.trim(),
+      vertical: resolvedVertical,
+      requestedBy: requestedBy ?? 'operator',
+      plan: resolvedPlan,
+      planSummary: resolvedSummary,
+      estimatedSideEffects: resolvedSideEffects,
+    });
+    ok(res, run, { created: true });
+  } catch (e) {
+    logger.error({ err: e }, '[a11oy] POST /operator/runs error');
+    err(res, 500, 'execution', 'Run creation failed.');
+  }
+});
+
+router.get('/a11oy/operator/runs', (_req: Request, res: Response) => {
+  const runs = listRuns(50);
+  ok(res, runs, { total: runs.length });
+});
+
+router.get('/a11oy/operator/runs/:id', (req: Request, res: Response) => {
+  const run = getRun(req.params.id);
+  if (!run) return err(res, 404, 'not_found', `Run "${req.params.id}" not found.`);
+  ok(res, run);
+});
+
+router.post('/a11oy/operator/runs/:id/steps/:stepId/approve', (req: Request, res: Response) => {
+  try {
+    const { approvedBy } = req.body as { approvedBy?: string };
+    if (!approvedBy) return err(res, 400, 'validation', 'approvedBy is required.');
+    const run = approveStep(req.params.id, req.params.stepId, approvedBy);
+    if (!run) return err(res, 404, 'not_found', 'Run or step not found, or step is not awaiting approval.');
+    ok(res, run);
+  } catch (e) {
+    logger.error({ err: e }, '[a11oy] POST /operator/runs/:id/steps/:stepId/approve error');
+    err(res, 500, 'execution', 'Step approval failed.');
+  }
+});
+
+router.post('/a11oy/operator/runs/:id/steps/:stepId/reject', (req: Request, res: Response) => {
+  try {
+    const { rejectedBy, reason } = req.body as { rejectedBy?: string; reason?: string };
+    if (!rejectedBy) return err(res, 400, 'validation', 'rejectedBy is required.');
+    const run = rejectStep(req.params.id, req.params.stepId, rejectedBy, reason ?? 'No reason provided.');
+    if (!run) return err(res, 404, 'not_found', 'Run or step not found.');
+    ok(res, run);
+  } catch (e) {
+    logger.error({ err: e }, '[a11oy] POST /operator/runs/:id/steps/:stepId/reject error');
+    err(res, 500, 'execution', 'Step rejection failed.');
+  }
+});
+
+router.post('/a11oy/operator/runs/:id/steps/:stepId/execute', async (req: Request, res: Response) => {
+  try {
+    const { executedBy } = req.body as {
+      executedBy?: string;
+    };
+    const run = getRun(req.params.id);
+    if (!run) return err(res, 404, 'not_found', `Run "${req.params.id}" not found.`);
+    const step = run.plan.find((s) => s.stepId === req.params.stepId);
+    if (!step) return err(res, 404, 'not_found', `Step "${req.params.stepId}" not found.`);
+
+    // RBAC / vertical gate: role and vertical are ALWAYS server-derived.
+    // actorRole comes from the authenticated session (req.user) in production;
+    // in dev/demo mode we use the conservative default 'operator'.
+    // actorVertical is always the run's stored vertical — never caller-supplied.
+    const toolMeta = getTool(step.toolId);
+    if (toolMeta) {
+      const userRoles: string[] = (req.user as { roles?: string[] } | undefined)?.roles ?? [];
+      const role = userRoles.length > 0 ? userRoles[0] : 'operator';
+      const vertical = run.vertical;
+      const roleAllowed =
+        toolMeta.allowedRoles.length === 0 ||
+        toolMeta.allowedRoles.includes('*') ||
+        toolMeta.allowedRoles.includes(role);
+      const verticalAllowed =
+        toolMeta.allowedVerticals.length === 0 ||
+        toolMeta.allowedVerticals.includes('*') ||
+        toolMeta.allowedVerticals.some((v) => vertical.startsWith(v.replace('-*', '')) || v === vertical);
+      if (!roleAllowed) {
+        return err(res, 403, 'rbac_denied', `Role "${role}" is not permitted to execute tool "${step.toolName}". Allowed: ${toolMeta.allowedRoles.join(', ')}.`);
+      }
+      if (!verticalAllowed) {
+        return err(res, 403, 'vertical_denied', `Vertical "${vertical}" is not permitted for tool "${step.toolName}". Allowed: ${toolMeta.allowedVerticals.join(', ')}.`);
+      }
+    }
+
+    if (step.requiresApproval && step.status !== 'approved') {
+      return err(res, 403, 'approval_required', `Step "${step.title}" requires approval before execution.`);
+    }
+    if (!['approved', 'pending'].includes(step.status)) {
+      return err(res, 409, 'conflict', `Step is in "${step.status}" state and cannot be executed.`);
+    }
+
+    step.status = 'executing';
+    step.startedAt = new Date().toISOString();
+
+    const t = Date.now();
+    const toolResult = executeToolMock(step.toolId, step.toolInput, DEMO_MODE);
+    const durationMs = Date.now() - t;
+
+    const updatedRun = recordStepExecution(
+      req.params.id,
+      req.params.stepId,
+      toolResult.ok ? (toolResult as { output: Record<string, unknown> }).output : null,
+      toolResult.ok ? null : (toolResult as { error: string }).error,
+      durationMs,
+    );
+
+    ok(res, { run: updatedRun, stepResult: toolResult });
+  } catch (e) {
+    logger.error({ err: e }, '[a11oy] POST /operator/runs/:id/steps/:stepId/execute error');
+    err(res, 500, 'execution', 'Step execution failed.');
+  }
+});
+
+router.get('/a11oy/operator/runs/:id/replay', (req: Request, res: Response) => {
+  const replay = getReplayData(req.params.id);
+  if (!replay) return err(res, 404, 'not_found', `Run "${req.params.id}" not found.`);
+  ok(res, replay, { replayable: true });
+});
+
+router.get('/a11oy/operator/runs/:id/audit', (req: Request, res: Response) => {
+  const run = getRun(req.params.id);
+  if (!run) return err(res, 404, 'not_found', `Run "${req.params.id}" not found.`);
+  ok(res, run.auditLog, { runId: run.runId, total: run.auditLog.length });
+});
+
 logger.debug('[a11oy-runtime-api] Phase 2 runtime routes registered — operators, tools, MirrorEval, PCE gate, Workcells, Skills all active');
+logger.debug('[a11oy-runtime-api] Operator Runtime routes registered — /operator/plan, /operator/runs, step approve/reject/execute, replay');
 
 export default router;

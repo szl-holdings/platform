@@ -253,6 +253,9 @@ const PERDiagnostics = lazy(() => import('./pages/evolution/diagnostics'));
 const RunConsole = lazy(() =>
   import('./pages/run-console').then((m) => ({ default: m.RunConsole })),
 );
+const OperatorPanel = lazy(() =>
+  import('./pages/operator-panel').then((m) => ({ default: m.OperatorPanel })),
+);
 const EvidenceExplorer = lazy(() => import('./pages/evidence-explorer'));
 const EvalStudio = lazy(() => import('./pages/eval-studio'));
 const EvalForge = lazy(() => import('./pages/eval-forge'));
@@ -473,6 +476,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/operations/alloy/policy-compiler', label: 'Counsel Policy Compiler', group: 'Counsel' },
   { href: '/operations/alloy/proof', label: 'Counsel Proof', group: 'Counsel' },
   { href: '/operations/retrieval/proof-chain', label: 'Retrieval Proof Chain', group: 'Counsel' },
+  { href: '/operations/operator', label: 'Operator Panel', group: 'Operations' },
   { href: '/operations/runs', label: 'Run Console', group: 'Operations' },
   { href: '/operations/evidence-explorer', label: 'Evidence Explorer', group: 'Operations' },
   { href: '/operations/eval-studio', label: 'Eval Studio', group: 'Operations' },
@@ -809,6 +813,7 @@ function AppShell() {
               />
               <Route path="/operations/alloy/replay-lab" component={() => <ReplayLab />} />
               <Route path="/operations/alloy/eval-lab" component={() => <EvalLab />} />
+              <Route path="/operations/operator" component={() => <OperatorPanel />} />
               <Route path="/operations/runs" component={() => <RunConsole />} />
               <Route path="/operations/evidence-explorer" component={() => <EvidenceExplorer />} />
               <Route path="/operations/eval-studio" component={() => <EvalStudio />} />
