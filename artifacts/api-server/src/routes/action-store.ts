@@ -9,11 +9,11 @@
  * sees the same synchronized state. localStorage is now used only as a
  * client-side cache.
  *
- * Endpoints (public, unauthenticated — same model as the rest of the
- * Business State / Enterprise State demo surfaces):
- *   GET    /api/action-store         — return the current shared store
+ * Endpoints:
+ *   GET    /api/action-store         — return the current shared store (public)
  *   PATCH  /api/action-store         — merge a partial update into the store
  *                                       and return the resulting full store
+ *                                       (requires authentication)
  *   GET    /api/action-store/stream  — Server-Sent Events stream that pushes
  *                                       the store to every open page within
  *                                       ~100ms of any change. The HTTP polling
@@ -37,8 +37,11 @@ import { bodyShape } from '@szl-holdings/contracts/common';
 import { db, platformSettingsTable } from '@szl-holdings/db';
 import { and, eq } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
+import { authMiddleware } from '../middlewares/auth';
 import { handleRouteError, sendBadRequest, sendSuccess } from '../lib/api-response';
 import { validateBody } from '../lib/validation';
+
+const requireAuth = authMiddleware({ required: true });
 
 const NAMESPACE = 'szl.actionStore';
 const KEY = 'default';
@@ -235,7 +238,7 @@ router.get('/action-store/stream', async (req: Request, res: Response) => {
   res.on('error', cleanup);
 });
 
-router.patch('/action-store', validateBody(bodyShape({})), async (req: Request, res: Response) => {
+router.patch('/action-store', requireAuth, validateBody(bodyShape({})), async (req: Request, res: Response) => {
   try {
     const body = req.body as Record<string, unknown>;
     const hasAnyKnownKey = TOP_LEVEL_KEYS.some((k) => k in body);

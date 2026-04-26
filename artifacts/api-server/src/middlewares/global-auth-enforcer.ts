@@ -89,8 +89,9 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/self-healing/stats",
   "/api/self-healing/policies",
   // Shared action store — backs the Business State / Enterprise State pages
-  // so risk owner assignments and decisions sync across team members. Public
-  // and unauthenticated like the rest of those demo surfaces.
+  // so risk owner assignments and decisions sync across team members. GET and
+  // SSE stream are public (read-only). The mutating PATCH route enforces auth
+  // via requireAuth in the route handler (action-store.ts).
   "/api/action-store",
   "/api/action-store/stream",
   // Alloy Policy Authoring Studio — read-only state endpoint for the demo

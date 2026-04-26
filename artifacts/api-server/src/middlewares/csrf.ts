@@ -61,10 +61,6 @@ const EXEMPT_PATHS = new Set([
   // Newsletter subscription — public anonymous marketing form embedded across portfolio
   // sites; no session or user state is modified, CSRF double-submit not applicable.
   '/api/newsletter/subscribe',
-  // Shared action store — public PATCH endpoint that backs the Business
-  // State / Enterprise State pages. Same exemption model as Carlota Jo time
-  // tracking: anonymous demo surface, no per-user session state.
-  '/api/action-store',
   // Demo reset — public POST endpoint called by the Demo Launchpad presenter
   // surface to clear in-memory scenario state without a browser session.
   // No per-user state modified; memory flush is safe without CSRF protection.

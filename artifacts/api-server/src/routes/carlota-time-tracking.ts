@@ -3,22 +3,24 @@ import { carlotaInvoicesTable, carlotaTimeEntriesTable, db } from '@szl-holdings
 import { desc, eq } from 'drizzle-orm';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
+import { authMiddleware } from '../middlewares/auth';
 import { handleRouteError, sendBadRequest, sendNotFound, sendSuccess } from '../lib/api-response';
 import { validateBody } from '../lib/validation';
+
+const requireAuth = authMiddleware({ required: true });
 
 /* -----------------------------------------------------------------------
  * Carlota Jo — Time tracking & invoice persistence (public, cross-device)
  *
  * These endpoints back the /time-tracking page in the Carlota Jo artifact.
- * They are intentionally unauthenticated (the marketing demo is public) and
- * are mounted at the TOP of the /api router in src/routes/index.ts — BEFORE
- * any route group that applies blanket auth/tenant-scope middleware to an
- * unprefixed sub-router. That ordering is what keeps them reachable without
- * being intercepted by another router's top-level guard.
+ * Read-only GET endpoints are public (unauthenticated). All mutating routes
+ * (POST, PATCH, DELETE on time-entries and time-invoices, and the generate
+ * endpoint) require an authenticated session via requireAuth middleware.
  *
  * The globalAuthEnforcer allowlist (see src/middlewares/global-auth-enforcer.ts
- * PUBLIC_PREFIXES) exposes these paths so the deny-by-default /api/* policy
- * lets them through.
+ * PUBLIC_PREFIXES) exposes these path prefixes so the deny-by-default /api/*
+ * policy lets GET requests through. Route-level requireAuth blocks anonymous
+ * callers from mutating persistent data.
  * -----------------------------------------------------------------------*/
 
 type TimeEntryRow = typeof carlotaTimeEntriesTable.$inferSelect;
@@ -74,6 +76,7 @@ router.get('/booking/time-entries', async (_req, res) => {
 
 router.post(
   '/booking/time-entries',
+  requireAuth,
   validateBody(
     bodyShape({
       approved: z.unknown().optional(),
@@ -134,6 +137,7 @@ router.post(
 
 router.patch(
   '/booking/time-entries/:id',
+  requireAuth,
   validateBody(
     bodyShape({
       approved: z.unknown().optional(),
@@ -182,7 +186,7 @@ router.patch(
   },
 );
 
-router.delete('/booking/time-entries/:id', validateBody(bodyShape({})), async (req, res) => {
+router.delete('/booking/time-entries/:id', requireAuth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db
       .delete(carlotaTimeEntriesTable)
@@ -212,6 +216,7 @@ router.get('/booking/time-invoices', async (_req, res) => {
 
 router.post(
   '/booking/time-invoices',
+  requireAuth,
   validateBody(
     bodyShape({
       amount: z.unknown().optional(),
@@ -262,6 +267,7 @@ router.post(
 
 router.patch(
   '/booking/time-invoices/:id',
+  requireAuth,
   validateBody(
     bodyShape({
       amount: z.unknown().optional(),
@@ -311,7 +317,7 @@ router.patch(
   },
 );
 
-router.delete('/booking/time-invoices/:id', validateBody(bodyShape({})), async (req, res) => {
+router.delete('/booking/time-invoices/:id', requireAuth, validateBody(bodyShape({})), async (req, res) => {
   try {
     const [row] = await db
       .delete(carlotaInvoicesTable)
@@ -330,6 +336,7 @@ router.delete('/booking/time-invoices/:id', validateBody(bodyShape({})), async (
 // Generate draft invoices from approved billable entries that aren't yet invoiced.
 router.post(
   '/booking/time-invoices/generate',
+  requireAuth,
   validateBody(
     bodyShape({
       dueDate: z.unknown().optional(),
