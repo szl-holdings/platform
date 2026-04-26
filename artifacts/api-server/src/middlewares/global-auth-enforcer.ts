@@ -180,6 +180,13 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/helios/frontier-briefing",
   "/api/hf-mcp/health",
   "/api/mcp/health",
+  // Terra AI Deal Sourcing — public read-only GET routes. The candidates list and
+  // adapters list are accessible without a session so the Terra demo works.
+  // GET /candidates/:propertyId is covered by the prefix entry in PUBLIC_PREFIXES.
+  // POST /save-to-portfolio, GET /saved-deals, GET /alert-bus/events are NOT here;
+  // they require a session and return 401 to unauthenticated callers.
+  "/api/terra/sourcing/candidates",
+  "/api/terra/sourcing/adapters",
 ]);
 
 const PUBLIC_PREFIXES = [
@@ -209,6 +216,11 @@ const PUBLIC_PREFIXES = [
   // financing stress, and neighborhood motion from live NYC open data. Public so the
   // demo works without a session; NYC SODA API calls are made server-side.
   "/api/terra/why-this-property/",
+  // Terra AI Deal Sourcing — per-property candidates route: GET /candidates/:propertyId.
+  // Exact list + adapters paths are in PUBLIC_EXACT_PATHS. This prefix covers only
+  // the parametric sub-path so it does not inadvertently open save-to-portfolio,
+  // saved-deals, or alert-bus/events to unauthenticated callers.
+  "/api/terra/sourcing/candidates/",
   // Public contact form sub-paths: POST /contact/submit (lead capture from
   // every marketing surface) and the admin-guarded /contact/requests +
   // /contact/submissions GETs (those enforce adminGuard internally, so it is

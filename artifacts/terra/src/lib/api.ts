@@ -693,6 +693,64 @@ export const api = {
         `/terra/properties/${id}/waterfall`,
       ),
   },
+  sourcing: {
+    candidates: () =>
+      apiFetch<{
+        candidates: Array<{
+          id: string;
+          address: string;
+          city: string;
+          type: string;
+          estimatedValue: number;
+          sqft: number;
+          ownershipYears: number;
+          motivationScore: number;
+          opportunityScore: number;
+          signals: Array<{
+            type: 'permit' | 'ownership_change' | 'lien' | 'distress' | 'vacancy';
+            source: string;
+            description: string;
+            date: string;
+            weight: number;
+          }>;
+          signalCount: number;
+          aiSummary: string;
+          savedToPortfolio: boolean;
+        }>;
+        totalScanned: number;
+        adapters: Array<{ name: string; signalTypes: ('permit' | 'ownership_change' | 'lien' | 'distress' | 'vacancy')[] }>;
+        dataMode: string;
+        generatedAt: string;
+      }>('/terra/sourcing/candidates'),
+    saveToPortfolio: (candidate: {
+      id: string;
+      address: string;
+      city: string;
+      type: string;
+      estimatedValue: number;
+      opportunityScore: number;
+      signals: Array<{ type: 'permit' | 'ownership_change' | 'lien' | 'distress' | 'vacancy'; source: string; description: string; date: string; weight: number }>;
+    }) =>
+      apiFetch<{ deal: Record<string, unknown>; entityRegistered: boolean; alertPublished: boolean; message: string }>(
+        '/terra/sourcing/save-to-portfolio',
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            candidateId: candidate.id,
+            address: candidate.address,
+            city: candidate.city,
+            type: candidate.type,
+            estimatedValue: candidate.estimatedValue,
+            opportunityScore: candidate.opportunityScore,
+            signals: candidate.signals,
+          }),
+        },
+      ),
+    adapters: () =>
+      apiFetch<{ adapters: Array<{ name: string; signalTypes: string[]; description: string; pluggable: boolean }> }>(
+        '/terra/sourcing/adapters',
+      ),
+  },
   portfolio: {
     climateRisk: () =>
       apiFetch<{ properties: PortfolioClimateProperty[]; dataMode: string; generatedAt: string }>(

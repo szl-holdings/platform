@@ -14,6 +14,8 @@ export function register(router: IRouter): void {
   // They MUST be registered before the tenantScope middleware on "/terra" so
   // unauthenticated visitors can access property-scoped intelligence data.
   router.use(lazyMatch('/terra', () => import('../terra-property-intel'), 'terra-property-intel'));
+  // AI Deal Sourcing — signal adapters and ranking engine (public, demo-friendly).
+  router.use(lazyMatch('/terra', () => import('../terra-sourcing'), 'terra-sourcing'));
   router.use(
     lazyMatch('/terra', () => import('../terra-portfolio-intel'), 'terra-portfolio-intel'),
   );

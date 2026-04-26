@@ -59,6 +59,7 @@ import {
   Scale,
   Search,
   Shield,
+  Sparkles,
   TrendingDown,
   TrendingUp,
   UserCheck,
@@ -180,6 +181,24 @@ const NAV_SECTIONS: SidebarNavSection[] = [
         href: '/market',
         label: 'Market',
         icon: <BarChart3 className="w-full h-full" />,
+      },
+    ],
+  },
+  {
+    id: 'sourcing',
+    label: 'Deal Sourcing',
+    items: [
+      {
+        id: 'sourcing-inbox',
+        href: '/sourcing-inbox',
+        label: 'AI Sourcing Inbox',
+        icon: <Sparkles className="w-full h-full" />,
+      },
+      {
+        id: 'climate-risk-enhanced',
+        href: '/climate-risk-enhanced',
+        label: 'Climate Risk',
+        icon: <Shield className="w-full h-full" />,
       },
     ],
   },

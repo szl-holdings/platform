@@ -1,16 +1,20 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { PageDataSkeleton } from '@szl-holdings/shared-ui/page-data-skeleton';
 import { useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeft,
+  CheckCircle,
   Database,
   Download,
   FolderOpen,
   Layers,
+  Loader2,
   Pencil,
   Save,
+  Thermometer,
   Trash2,
+  Zap,
 } from 'lucide-react';
 import { calcWaterfall, DEFAULT_WATERFALL_INPUTS, type WaterfallInputs } from '../lib/waterfall-math';
 import { useEffect, useMemo, useState } from 'react';
@@ -275,6 +279,51 @@ export default function WaterfallCalculatorPage() {
   const [showStructures, setShowStructures] = useState(false);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
   const [structureName, setStructureName] = useState('Waterfall Structure');
+
+  const [climatePropertyId, setClimatePropertyId] = useState('prop-sf-001');
+  const [fetchClimate, setFetchClimate] = useState(false);
+  const [climateApplied, setClimateApplied] = useState(false);
+  const [showClimatePanel, setShowClimatePanel] = useState(false);
+  const [propClimateApplied, setPropClimateApplied] = useState(false);
+  const [showPropClimatePanel, setShowPropClimatePanel] = useState(false);
+  const [fetchPropClimate, setFetchPropClimate] = useState(false);
+
+  const { data: climateData, isLoading: climateLoading } = useStandardQuery({
+    queryKey: ['waterfall-climate-risk', climatePropertyId, fetchClimate],
+    queryFn: () => api.properties.climateRisk(climatePropertyId),
+    enabled: fetchClimate && !!climatePropertyId,
+    staleTime: 300_000,
+  });
+
+  const { data: propClimateData, isLoading: propClimateLoading } = useStandardQuery({
+    queryKey: ['waterfall-prop-climate-risk', propertyId, fetchPropClimate],
+    queryFn: () => api.properties.climateRisk(propertyId!),
+    enabled: fetchPropClimate && !!propertyId,
+    staleTime: 300_000,
+  });
+
+  function applyClimateToStandalone() {
+    const d = climateData?.data;
+    if (!d) return;
+    const haircut = d.valuationHaircut / 100;
+    setInputs((prev) => ({
+      ...prev,
+      exitProceeds: parseFloat((prev.exitProceeds * (1 - haircut)).toFixed(0)),
+    }));
+    setClimateApplied(true);
+  }
+
+  function applyClimateToPropInputs() {
+    const d = propClimateData?.data;
+    if (!d || !propInputs) return;
+    const haircut = d.valuationHaircut / 100;
+    setPropInputs((prev) =>
+      prev
+        ? { ...prev, exitProceeds: parseFloat((prev.exitProceeds * (1 - haircut)).toFixed(0)) }
+        : null,
+    );
+    setPropClimateApplied(true);
+  }
 
   const set = (k: keyof WaterfallInputs) => (v: number) =>
     setInputs((prev) => ({ ...prev, [k]: v }));
@@ -596,6 +645,196 @@ export default function WaterfallCalculatorPage() {
               <p className="text-[9px]" style={{ color: DS.text.muted }}>
                 Source: {d_prop?.dataSource}
               </p>
+
+              {/* Climate Risk Auto-Pull — Property Waterfall */}
+              <div
+                className="rounded-xl border overflow-hidden mt-4"
+                style={{ borderColor: DS.border, background: DS.surface }}
+              >
+                <button
+                  onClick={() => setShowPropClimatePanel((v) => !v)}
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Thermometer className="w-3.5 h-3.5" style={{ color: '#f97316' }} />
+                    <span className="text-xs font-semibold text-white/70">Climate Risk Overlay</span>
+                    <span
+                      className="text-[9px] font-semibold px-1.5 py-0.5 rounded uppercase tracking-wider"
+                      style={{
+                        background: 'rgba(249,115,22,0.08)',
+                        color: '#f97316',
+                        border: '1px solid rgba(249,115,22,0.15)',
+                      }}
+                    >
+                      Auto-Pull
+                    </span>
+                    {propClimateApplied && (
+                      <span
+                        className="text-[9px] font-semibold px-1.5 py-0.5 rounded uppercase tracking-wider flex items-center gap-1"
+                        style={{
+                          background: 'rgba(52,211,153,0.08)',
+                          color: '#34d399',
+                          border: '1px solid rgba(52,211,153,0.15)',
+                        }}
+                      >
+                        <CheckCircle className="w-2.5 h-2.5" />
+                        Applied
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-white/30">
+                    {showPropClimatePanel ? 'Collapse ▲' : 'Adjust exit proceeds for climate risk ▼'}
+                  </span>
+                </button>
+                <AnimatePresence>
+                  {showPropClimatePanel && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-4 pb-4 border-t" style={{ borderColor: DS.border }}>
+                        <p className="text-[10px] text-white/30 mt-3 mb-3 leading-relaxed">
+                          Fetch climate hazard data for this property and automatically reduce{' '}
+                          <strong className="text-white/50">Exit Proceeds</strong> by the climate
+                          valuation haircut — reflecting elevated insurance costs and market
+                          liquidity discount on exit.
+                        </p>
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="flex-1">
+                            <label
+                              className="block text-[9px] font-semibold uppercase tracking-wider mb-1"
+                              style={{ color: DS.text.muted }}
+                            >
+                              Property ID
+                            </label>
+                            <input
+                              type="text"
+                              value={propertyId ?? ''}
+                              readOnly
+                              className="w-full px-3 py-1.5 rounded-lg text-xs text-white/50 bg-white/4 border border-white/8 outline-none cursor-not-allowed"
+                            />
+                          </div>
+                          <button
+                            onClick={() => setFetchPropClimate(true)}
+                            disabled={propClimateLoading}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all self-end"
+                            style={{
+                              background: 'rgba(249,115,22,0.1)',
+                              border: '1px solid rgba(249,115,22,0.2)',
+                              color: '#f97316',
+                            }}
+                          >
+                            {propClimateLoading ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Thermometer className="w-3.5 h-3.5" />
+                            )}
+                            Pull Climate Risk
+                          </button>
+                        </div>
+                        {propClimateData?.data && (
+                          <div className="space-y-3">
+                            <div className="grid grid-cols-4 gap-2">
+                              {[
+                                {
+                                  label: 'Risk Score',
+                                  value: propClimateData.data.overallRiskScore.toString(),
+                                  color: '#f97316',
+                                },
+                                {
+                                  label: 'Climate Grade',
+                                  value: propClimateData.data.overallGrade,
+                                  color: '#f97316',
+                                },
+                                {
+                                  label: 'Insurance Adj.',
+                                  value: `+${propClimateData.data.insuranceAdjustment}%`,
+                                  color: '#fbbf24',
+                                },
+                                {
+                                  label: 'Value Haircut',
+                                  value: `−${propClimateData.data.valuationHaircut}%`,
+                                  color: '#ef4444',
+                                },
+                              ].map((m) => (
+                                <div
+                                  key={m.label}
+                                  className="rounded-lg p-2.5"
+                                  style={{
+                                    background: 'rgba(255,255,255,0.02)',
+                                    border: `1px solid ${DS.border}`,
+                                  }}
+                                >
+                                  <p
+                                    className="text-[8px] uppercase tracking-wider mb-0.5"
+                                    style={{ color: DS.text.muted }}
+                                  >
+                                    {m.label}
+                                  </p>
+                                  <p className="text-sm font-bold" style={{ color: m.color }}>
+                                    {m.value}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                            <div
+                              className="rounded-lg p-3"
+                              style={{
+                                background: 'rgba(249,115,22,0.04)',
+                                border: '1px solid rgba(249,115,22,0.1)',
+                              }}
+                            >
+                              <p className="text-[10px] text-white/50 mb-1 font-semibold">
+                                Impact on this waterfall:
+                              </p>
+                              <div className="flex items-center gap-6 text-[10px] text-white/40">
+                                <span>
+                                  Exit Proceeds:{' '}
+                                  <span className="text-red-400">
+                                    −{propClimateData.data.valuationHaircut}%
+                                  </span>{' '}
+                                  ({propInputs ? fmt(propInputs.exitProceeds * (propClimateData.data.valuationHaircut / 100)) : '—'} reduction)
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={applyClimateToPropInputs}
+                                disabled={propClimateApplied}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                                style={{
+                                  background: propClimateApplied
+                                    ? 'rgba(52,211,153,0.08)'
+                                    : 'rgba(249,115,22,0.12)',
+                                  border: `1px solid ${propClimateApplied ? 'rgba(52,211,153,0.2)' : 'rgba(249,115,22,0.25)'}`,
+                                  color: propClimateApplied ? '#34d399' : '#f97316',
+                                }}
+                              >
+                                {propClimateApplied ? (
+                                  <>
+                                    <CheckCircle className="w-3.5 h-3.5" />
+                                    Applied to Waterfall
+                                  </>
+                                ) : (
+                                  <>
+                                    <Zap className="w-3.5 h-3.5" />
+                                    Apply to Waterfall Inputs
+                                  </>
+                                )}
+                              </button>
+                              <span className="text-[9px] text-white/20">
+                                Source: {propClimateData.data.dataSource}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </>
           )}
         </div>
@@ -843,6 +1082,201 @@ export default function WaterfallCalculatorPage() {
             step={3}
           />
         </div>
+      </div>
+
+      {/* Climate Risk Auto-Pull — Standalone Waterfall */}
+      <div
+        className="rounded-xl border overflow-hidden"
+        style={{ borderColor: DS.border, background: DS.surface }}
+      >
+        <button
+          onClick={() => setShowClimatePanel((v) => !v)}
+          className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/5 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Thermometer className="w-3.5 h-3.5" style={{ color: '#f97316' }} />
+            <span className="text-xs font-semibold text-white/70">Climate Risk Overlay</span>
+            <span
+              className="text-[9px] font-semibold px-1.5 py-0.5 rounded uppercase tracking-wider"
+              style={{
+                background: 'rgba(249,115,22,0.08)',
+                color: '#f97316',
+                border: '1px solid rgba(249,115,22,0.15)',
+              }}
+            >
+              Auto-Pull
+            </span>
+            {climateApplied && (
+              <span
+                className="text-[9px] font-semibold px-1.5 py-0.5 rounded uppercase tracking-wider flex items-center gap-1"
+                style={{
+                  background: 'rgba(52,211,153,0.08)',
+                  color: '#34d399',
+                  border: '1px solid rgba(52,211,153,0.15)',
+                }}
+              >
+                <CheckCircle className="w-2.5 h-2.5" />
+                Applied
+              </span>
+            )}
+          </div>
+          <span className="text-[10px] text-white/30">
+            {showClimatePanel ? 'Collapse ▲' : 'Adjust exit proceeds for climate risk ▼'}
+          </span>
+        </button>
+        <AnimatePresence>
+          {showClimatePanel && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="px-4 pb-4 border-t" style={{ borderColor: DS.border }}>
+                <p className="text-[10px] text-white/30 mt-3 mb-3 leading-relaxed">
+                  Fetch climate hazard data for a property and automatically reduce{' '}
+                  <strong className="text-white/50">Exit Proceeds</strong> by the climate valuation
+                  haircut — reflecting elevated insurance costs and market liquidity discount on exit.
+                </p>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-1">
+                    <label
+                      className="block text-[9px] font-semibold uppercase tracking-wider mb-1"
+                      style={{ color: DS.text.muted }}
+                    >
+                      Property ID
+                    </label>
+                    <input
+                      type="text"
+                      value={climatePropertyId}
+                      onChange={(e) => {
+                        setClimatePropertyId(e.target.value);
+                        setClimateApplied(false);
+                        setFetchClimate(false);
+                      }}
+                      placeholder="prop-sf-001"
+                      className="w-full px-3 py-1.5 rounded-lg text-xs text-white/80 bg-white/4 border border-white/8 focus:border-white/20 outline-none"
+                    />
+                  </div>
+                  <button
+                    onClick={() => setFetchClimate(true)}
+                    disabled={!climatePropertyId || climateLoading}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all self-end"
+                    style={{
+                      background: 'rgba(249,115,22,0.1)',
+                      border: '1px solid rgba(249,115,22,0.2)',
+                      color: '#f97316',
+                    }}
+                  >
+                    {climateLoading ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Thermometer className="w-3.5 h-3.5" />
+                    )}
+                    Pull Climate Risk
+                  </button>
+                </div>
+                {climateData?.data && (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-4 gap-2">
+                      {[
+                        {
+                          label: 'Risk Score',
+                          value: climateData.data.overallRiskScore.toString(),
+                          color: '#f97316',
+                        },
+                        {
+                          label: 'Climate Grade',
+                          value: climateData.data.overallGrade,
+                          color: '#f97316',
+                        },
+                        {
+                          label: 'Insurance Adj.',
+                          value: `+${climateData.data.insuranceAdjustment}%`,
+                          color: '#fbbf24',
+                        },
+                        {
+                          label: 'Value Haircut',
+                          value: `−${climateData.data.valuationHaircut}%`,
+                          color: '#ef4444',
+                        },
+                      ].map((m) => (
+                        <div
+                          key={m.label}
+                          className="rounded-lg p-2.5"
+                          style={{
+                            background: 'rgba(255,255,255,0.02)',
+                            border: `1px solid ${DS.border}`,
+                          }}
+                        >
+                          <p
+                            className="text-[8px] uppercase tracking-wider mb-0.5"
+                            style={{ color: DS.text.muted }}
+                          >
+                            {m.label}
+                          </p>
+                          <p className="text-sm font-bold" style={{ color: m.color }}>
+                            {m.value}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    <div
+                      className="rounded-lg p-3"
+                      style={{
+                        background: 'rgba(249,115,22,0.04)',
+                        border: '1px solid rgba(249,115,22,0.1)',
+                      }}
+                    >
+                      <p className="text-[10px] text-white/50 mb-1 font-semibold">
+                        Impact on current waterfall structure:
+                      </p>
+                      <div className="flex items-center gap-6 text-[10px] text-white/40">
+                        <span>
+                          Exit Proceeds:{' '}
+                          <span className="text-red-400">
+                            −{climateData.data.valuationHaircut}%
+                          </span>{' '}
+                          ({fmt(inputs.exitProceeds * (climateData.data.valuationHaircut / 100))}{' '}
+                          reduction)
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={applyClimateToStandalone}
+                        disabled={climateApplied}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                        style={{
+                          background: climateApplied
+                            ? 'rgba(52,211,153,0.08)'
+                            : 'rgba(249,115,22,0.12)',
+                          border: `1px solid ${climateApplied ? 'rgba(52,211,153,0.2)' : 'rgba(249,115,22,0.25)'}`,
+                          color: climateApplied ? '#34d399' : '#f97316',
+                        }}
+                      >
+                        {climateApplied ? (
+                          <>
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            Applied to Structure
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="w-3.5 h-3.5" />
+                            Apply to Waterfall Inputs
+                          </>
+                        )}
+                      </button>
+                      <span className="text-[9px] text-white/20">
+                        Source: {climateData.data.dataSource}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="grid grid-cols-2 gap-3">

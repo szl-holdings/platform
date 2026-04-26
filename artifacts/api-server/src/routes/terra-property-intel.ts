@@ -18,6 +18,7 @@
 import { type Request, type Response, Router } from 'express';
 import { handleRouteError, sendSuccess } from '../lib/api-response';
 import { authMiddleware } from '../middlewares/auth';
+import { publish as publishToAlertBus } from '../lib/terra-alert-bus';
 
 const router = Router();
 const authOptional = authMiddleware({ required: false });
@@ -119,6 +120,18 @@ router.get('/terra/properties/:id/climate-risk', authOptional, (req: Request, re
       dataSource: 'FIRST STREET FOUNDATION / NOAA / FEMA (seeded)',
       generatedAt: new Date().toISOString(),
     };
+    if (overallRiskScore >= 55) {
+      publishToAlertBus('terra.climate.elevated_risk', 'terra', {
+        propertyId,
+        overallRiskScore,
+        overallGrade,
+        insuranceAdjustment: data.insuranceAdjustment,
+        valuationHaircut: data.valuationHaircut,
+        regulatoryFlags: data.regulatoryFlags,
+        triggeredAt: data.generatedAt,
+      });
+    }
+
     sendSuccess(res, { data, propertyId, dataMode: 'seeded' });
   } catch (err) {
     handleRouteError(res, err, 'Failed to generate climate risk data');

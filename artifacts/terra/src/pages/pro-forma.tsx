@@ -14,10 +14,14 @@ import {
   FolderOpen,
   GitCompare,
   Grid3X3,
+  Loader2,
   Pencil,
   Plus,
   Save,
+  Shield,
+  Thermometer,
   Trash2,
+  Zap,
 } from 'lucide-react';
 import { useAuth } from '@szl-holdings/replit-auth-web';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -1164,6 +1168,41 @@ export default function ProFormaPage() {
   const [newScenarioName, setNewScenarioName] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
 
+  const [climatePropertyId, setClimatePropertyId] = useState('prop-sf-001');
+  const [climateApplied, setClimateApplied] = useState(false);
+  const [showClimatePanel, setShowClimatePanel] = useState(false);
+  const [fetchClimate, setFetchClimate] = useState(false);
+
+  const { data: climateData, isLoading: climateLoading } = useStandardQuery({
+    queryKey: ['pro-forma-climate-risk', climatePropertyId, fetchClimate],
+    queryFn: () => api.properties.climateRisk(climatePropertyId),
+    enabled: fetchClimate && !!climatePropertyId,
+    staleTime: 300_000,
+  });
+
+  function applyClimateRisk() {
+    const d = climateData?.data;
+    if (!d) return;
+    const insAdj = d.insuranceAdjustment / 100;
+    const opexIncrease = parseFloat((inputs.opexPerSF * insAdj).toFixed(2));
+    const capRateIncrease = parseFloat((d.valuationHaircut / 100).toFixed(2));
+    setScenarios((prev) =>
+      prev.map((s) =>
+        s.id === activeId
+          ? {
+              ...s,
+              inputs: {
+                ...s.inputs,
+                opexPerSF: parseFloat((s.inputs.opexPerSF + opexIncrease).toFixed(2)),
+                exitCapRate: parseFloat((s.inputs.exitCapRate + capRateIncrease).toFixed(2)),
+              },
+            }
+          : s,
+      ),
+    );
+    setClimateApplied(true);
+  }
+
   const activeScenario = scenarios.find((s) => s.id === activeId) ?? scenarios[0];
   const inputs = activeScenario.inputs;
   const r = useProForma(inputs);
@@ -1736,6 +1775,212 @@ export default function ProFormaPage() {
               </div>
             </motion.div>
           )}
+
+          {/* ── Climate Risk Overlay ─────────────────────────────────────── */}
+          <div
+            className="rounded-xl border overflow-hidden"
+            style={{ borderColor: DS.border, background: DS.surface }}
+          >
+            <button
+              onClick={() => setShowClimatePanel((v) => !v)}
+              className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/2 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-orange-400" />
+                <span className="text-xs font-semibold text-white/70">Climate Risk Overlay</span>
+                <span
+                  className="text-[9px] font-semibold px-1.5 py-0.5 rounded uppercase tracking-wider"
+                  style={{
+                    background: 'rgba(249,115,22,0.08)',
+                    color: '#f97316',
+                    border: '1px solid rgba(249,115,22,0.15)',
+                  }}
+                >
+                  Auto-Pull
+                </span>
+                {climateApplied && (
+                  <span
+                    className="text-[9px] font-semibold px-1.5 py-0.5 rounded uppercase tracking-wider flex items-center gap-1"
+                    style={{
+                      background: 'rgba(52,211,153,0.08)',
+                      color: '#34d399',
+                      border: '1px solid rgba(52,211,153,0.15)',
+                    }}
+                  >
+                    <CheckCircle className="w-2.5 h-2.5" />
+                    Applied
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] text-white/30">
+                {showClimatePanel ? 'Collapse ▲' : 'Pull climate risk into assumptions ▼'}
+              </span>
+            </button>
+
+            <AnimatePresence>
+              {showClimatePanel && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div
+                    className="px-4 pb-4 border-t"
+                    style={{ borderColor: DS.border }}
+                  >
+                    <p className="text-[10px] text-white/30 mt-3 mb-2 leading-relaxed">
+                      Pull climate hazard data for a property and automatically adjust{' '}
+                      <strong className="text-white/50">OpEx/SF</strong> (for insurance premium
+                      increase) and <strong className="text-white/50">Exit Cap Rate</strong> (for
+                      valuation haircut) in the active scenario.
+                    </p>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="flex-1">
+                        <label
+                          className="block text-[9px] font-semibold uppercase tracking-wider mb-1"
+                          style={{ color: DS.text.muted }}
+                        >
+                          Property ID
+                        </label>
+                        <input
+                          type="text"
+                          value={climatePropertyId}
+                          onChange={(e) => {
+                            setClimatePropertyId(e.target.value);
+                            setClimateApplied(false);
+                            setFetchClimate(false);
+                          }}
+                          placeholder="prop-sf-001"
+                          className="w-full px-3 py-1.5 rounded-lg text-xs text-white/80 bg-white/4 border border-white/8 focus:border-white/20 outline-none"
+                        />
+                      </div>
+                      <button
+                        onClick={() => setFetchClimate(true)}
+                        disabled={!climatePropertyId || climateLoading}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all self-end"
+                        style={{
+                          background: 'rgba(249,115,22,0.1)',
+                          border: '1px solid rgba(249,115,22,0.2)',
+                          color: '#f97316',
+                        }}
+                      >
+                        {climateLoading ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Thermometer className="w-3.5 h-3.5" />
+                        )}
+                        Pull Climate Risk
+                      </button>
+                    </div>
+
+                    {climateData?.data && (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-4 gap-2">
+                          {[
+                            {
+                              label: 'Risk Score',
+                              value: climateData.data.overallRiskScore.toString(),
+                              color: '#f97316',
+                            },
+                            {
+                              label: 'Climate Grade',
+                              value: climateData.data.overallGrade,
+                              color: '#f97316',
+                            },
+                            {
+                              label: 'Insurance Adj.',
+                              value: `+${climateData.data.insuranceAdjustment}%`,
+                              color: '#fbbf24',
+                            },
+                            {
+                              label: 'Value Haircut',
+                              value: `−${climateData.data.valuationHaircut}%`,
+                              color: '#ef4444',
+                            },
+                          ].map((m) => (
+                            <div
+                              key={m.label}
+                              className="rounded-lg p-2.5"
+                              style={{
+                                background: 'rgba(255,255,255,0.02)',
+                                border: `1px solid ${DS.border}`,
+                              }}
+                            >
+                              <p className="text-[8px] uppercase tracking-wider mb-0.5" style={{ color: DS.text.muted }}>
+                                {m.label}
+                              </p>
+                              <p className="text-sm font-bold" style={{ color: m.color }}>
+                                {m.value}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div
+                          className="rounded-lg p-3"
+                          style={{
+                            background: 'rgba(249,115,22,0.04)',
+                            border: '1px solid rgba(249,115,22,0.1)',
+                          }}
+                        >
+                          <p className="text-[10px] text-white/50 mb-1 font-semibold">
+                            Impact on this scenario:
+                          </p>
+                          <div className="flex items-center gap-6 text-[10px] text-white/40">
+                            <span>
+                              OpEx/SF:{' '}
+                              <span className="text-amber-400">
+                                +${(inputs.opexPerSF * (climateData.data.insuranceAdjustment / 100)).toFixed(2)}/SF
+                              </span>{' '}
+                              (insurance premium surcharge)
+                            </span>
+                            <span>
+                              Exit Cap:{' '}
+                              <span className="text-red-400">
+                                +{(climateData.data.valuationHaircut / 100).toFixed(2)}%
+                              </span>{' '}
+                              (climate valuation haircut)
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={applyClimateRisk}
+                            disabled={climateApplied}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                            style={{
+                              background: climateApplied
+                                ? 'rgba(52,211,153,0.08)'
+                                : 'rgba(249,115,22,0.12)',
+                              border: `1px solid ${climateApplied ? 'rgba(52,211,153,0.2)' : 'rgba(249,115,22,0.25)'}`,
+                              color: climateApplied ? '#34d399' : '#f97316',
+                            }}
+                          >
+                            {climateApplied ? (
+                              <>
+                                <CheckCircle className="w-3.5 h-3.5" />
+                                Applied to Scenario
+                              </>
+                            ) : (
+                              <>
+                                <Zap className="w-3.5 h-3.5" />
+                                Apply to Active Scenario
+                              </>
+                            )}
+                          </button>
+                          <span className="text-[9px] text-white/20">
+                            Source: {climateData.data.dataSource}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div
