@@ -17,7 +17,9 @@ import { buildScheduledReportEmail, sendEmail } from '../lib/email';
 import { logger } from '../lib/logger';
 import { ObjectStorageService } from '../lib/objectStorage';
 import { type BrandTheme, type ReportBlock, type ReportTemplate, BRAND_THEMES, DOMAIN_TEMPLATES, listAvailableTemplates, renderReportToPdf } from '../lib/report-engine';
+import { assertExportSafe, checkExportSafe, ExportBlockedError } from '../lib/export-safety';
 import { generateReportNarrative } from '../lib/report-narrative';
+import { tagAIContent } from '@szl-holdings/proof-chain';
 import {
   createApprovalRequest,
   createDistribution,
@@ -457,6 +459,7 @@ router.post(
               'outlook',
             ],
           });
+          // tag deferred until reportId is known below
         } catch (narrativeErr) {
           logger.warn({ err: narrativeErr }, 'Narrative generation failed, continuing without');
         }
@@ -483,6 +486,21 @@ router.post(
         generationDurationMs: durationMs,
         generatedByUserId: getUserId(req),
       });
+
+      if (aiNarrative) {
+        tagAIContent({
+          orgId: null,
+          contentId: `report-narrative:${reportId}`,
+          contentType: 'report:narrative',
+          sourceClass: 'llm_generated',
+          modelId: aiNarrative.model,
+          modelProvider: 'anthropic',
+          serviceAttribution: 'api-server:reports',
+          confidenceScore: 0.85,
+        }).catch((err: unknown) => {
+          logger.error({ err, reportId }, 'proof-chain: MISSED TAG — report narrative not recorded');
+        });
+      }
 
       if (returnPdf) {
         res.setHeader('Content-Type', 'application/pdf');
@@ -574,6 +592,8 @@ router.get('/reports/:reportId/pdf', authMiddleware(), async (req: Request, res:
     const { reportId } = req.params as { reportId: string };
     const report = await getReportGeneration(reportId);
     if (!report) return sendError(res, 'Report not found', 404);
+
+    if (await checkExportSafe(res, `report-narrative:${reportId}`, 'report:narrative')) return;
 
     const pdfBuffer = await getReportPdfBuffer(reportId);
     if (!pdfBuffer) {
@@ -740,6 +760,7 @@ router.post(
         return sendBadRequest(res, 'Only approved reports can be distributed');
       if (!recipients || recipients.length === 0)
         return sendBadRequest(res, 'At least one recipient is required');
+      if (await checkExportSafe(res, `report-narrative:${reportId}`, 'report:narrative')) return;
 
       const distributionIds: string[] = [];
 
@@ -1020,6 +1041,24 @@ router.post(
             scheduledRunId: schedule.scheduleId,
           });
 
+          if (narrative) {
+            tagAIContent({
+              orgId: null,
+              contentId: `report-narrative:${reportId}`,
+              contentType: 'report:narrative',
+              sourceClass: 'llm_generated',
+              modelId: narrative.model,
+              modelProvider: 'anthropic',
+              serviceAttribution: 'api-server:reports:scheduled',
+              confidenceScore: 0.85,
+            }).catch((err: unknown) => {
+              logger.error(
+                { err, reportId },
+                'proof-chain: MISSED TAG — scheduled report narrative not recorded',
+              );
+            });
+          }
+
           if (schedule.autoApprove) {
             await updateReportStatus(reportId, 'approved');
           }
@@ -1030,6 +1069,20 @@ router.post(
           const runDueDeliveryMethod =
             (runDueDataConfig.deliveryMethod as string | undefined) ?? 'email';
           const runDueEmails = (schedule.recipientEmails as string[] | null) ?? [];
+
+          // Export safety gate: block distribution if proof-chain review restricts export
+          try {
+            await assertExportSafe(`report-narrative:${reportId}`, 'report:narrative');
+          } catch (safetyErr) {
+            const reason =
+              safetyErr instanceof ExportBlockedError
+                ? safetyErr.message
+                : 'Export safety check unavailable — distribution blocked (fail-closed)';
+            logger.warn({ reportId, scheduleId: schedule.scheduleId, reason }, 'Scheduled report distribution blocked by export safety');
+            results.push({ scheduleId: schedule.scheduleId, status: 'blocked', error: reason });
+            continue;
+          }
+
           let emailSent = 0;
           let emailFailed = 0;
           if (runDueEmails.length > 0) {

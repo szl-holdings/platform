@@ -79,6 +79,7 @@ const ExecutiveCommand = lazy(() => import('@/pages/executive-command'));
 const BlockerBoard = lazy(() => import('@/pages/blocker-board'));
 const DigestCenter = lazy(() => import('@/pages/digest-center'));
 const TrustAudit = lazy(() => import('@/pages/trust-audit'));
+const ProofChainAudit = lazy(() => import('@/pages/proof-chain-audit'));
 const AlloyActionConsole = lazy(() => import('@/pages/alloy-action-console'));
 const AlloyWorkflowTemplates = lazy(() => import('@/pages/alloy-workflow-templates'));
 const AlloyWriteBack = lazy(() => import('@/pages/alloy-write-back'));
@@ -218,6 +219,7 @@ function PrivateRouter() {
         <Route path="/blocker-board" component={BlockerBoard} />
         <Route path="/digest" component={DigestCenter} />
         <Route path="/trust-audit" component={TrustAudit} />
+        <Route path="/proof-chain-audit" component={ProofChainAudit} />
         <Route path="/alloy/actions" component={AlloyActionConsole} />
         <Route path="/alloy/templates" component={AlloyWorkflowTemplates} />
         <Route path="/alloy/gates" component={AlloyWriteBack} />

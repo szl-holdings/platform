@@ -25,6 +25,7 @@ import {
   sendSuccess,
 } from '../lib/api-response';
 import { type ExportColumn, fetchExportBufferFromStorage, generateCsv, generatePdf, generateXlsx, getExportBuffer, getExportByToken, getExportJobStatus, listExportHistory, runExport, storeExportBuffer } from '../lib/export-service';
+import { checkExportSafe } from '../lib/export-safety';
 import { isFlagEnabled } from '../lib/platform-flags';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
@@ -96,6 +97,7 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     if (!(await checkExportEnabled(res))) return;
+    if (await checkExportSafe(res, 'audit-log', 'export:audit-log')) return;
     try {
       const {
         format = 'csv',
@@ -215,6 +217,7 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     if (!(await checkExportEnabled(res))) return;
+    if (await checkExportSafe(res, 'aegis-incidents', 'export:aegis-incidents')) return;
     try {
       const {
         format = 'csv',
@@ -313,6 +316,7 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     if (!(await checkExportEnabled(res))) return;
+    if (await checkExportSafe(res, 'vessels', 'export:vessels')) return;
     try {
       const {
         format = 'csv',
@@ -414,6 +418,7 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     if (!(await checkExportEnabled(res))) return;
+    if (await checkExportSafe(res, 'terra-deals', 'export:terra-deals')) return;
     try {
       const {
         format = 'csv',
@@ -516,6 +521,7 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     if (!(await checkExportEnabled(res))) return;
+    if (await checkExportSafe(res, 'lyte-signals', 'export:lyte-signals')) return;
     try {
       const {
         format = 'csv',
@@ -613,6 +619,7 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     if (!(await checkExportEnabled(res))) return;
+    if (await checkExportSafe(res, 'msp-tickets', 'export:msp-tickets')) return;
     try {
       const {
         format = 'csv',
@@ -696,6 +703,7 @@ router.post(
 
 // ─── Usage Metering Export ───────────────────────────────────────────────────
 
+
 router.post(
   '/exports/usage-metering',
   authMiddleware(),
@@ -712,6 +720,7 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     if (!(await checkExportEnabled(res))) return;
+    if (await checkExportSafe(res, 'usage-metering', 'export:usage-metering')) return;
     try {
       const {
         format = 'csv',
@@ -812,6 +821,7 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     if (!(await checkExportEnabled(res))) return;
+    if (await checkExportSafe(res, 'revenue-events', 'export:revenue-events')) return;
     try {
       const {
         format = 'csv',
@@ -1454,6 +1464,7 @@ router.get(
       if (job.expiresAt && job.expiresAt < new Date()) {
         return sendError(res, 'Export download link has expired', 410, 'EXPORT_EXPIRED');
       }
+      if (await checkExportSafe(res, exportId, `export:job`)) return;
       // Try in-memory buffer first (fast path for recent exports), then GCS fallback.
       let fileBuffer: Buffer | null = null;
       let fileFormat = job.format ?? 'csv';

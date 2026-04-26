@@ -1,6 +1,7 @@
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { createResponse, createResponseStream } from '@szl-holdings/ai-engine/providers/openai';
 import { bodyShape } from '@szl-holdings/contracts/common';
+import { tagAIContent, type ProvenanceSourceClass } from '@szl-holdings/proof-chain';
 import { services } from '@szl-holdings/services';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
@@ -10,6 +11,7 @@ import {
   getModelObservabilitySummary,
 } from '../../lib/ai-model-observability';
 import { handleRouteError, sendError, sendSuccess } from '../../lib/api-response';
+import { logger } from '../../lib/logger';
 import { getRegistrySummary } from '../../lib/model-registry';
 import { authMiddleware } from '../../middlewares/auth';
 
@@ -33,6 +35,39 @@ import {
 } from './shared';
 
 const router = Router();
+
+// ─── Proof-Chain Tagging Helper ───────────────────────────────────────────────
+// Fire-and-forget: tags AI-generated content in the proof chain without
+// blocking the response.  Errors are logged at ERROR level — a missed tag is
+// a compliance gap, not just an operational blip.
+function fireProofTag(params: {
+  contentId: string;
+  contentType: string;
+  sourceClass: ProvenanceSourceClass;
+  modelId?: string;
+  modelProvider?: string;
+  modelLane?: string;
+  promptText?: string;
+  confidenceScore?: number;
+  generatedByUserId?: string | null;
+  orgId?: string | null;
+}): void {
+  tagAIContent({
+    orgId: params.orgId ?? null,
+    contentId: params.contentId,
+    contentType: params.contentType,
+    sourceClass: params.sourceClass,
+    confidenceScore: params.confidenceScore,
+    modelId: params.modelId,
+    modelProvider: params.modelProvider,
+    modelLane: params.modelLane,
+    promptText: params.promptText,
+    generatedByUserId: params.generatedByUserId ?? null,
+    serviceAttribution: 'api-server:intelligence',
+  }).catch((err: unknown) => {
+    logger.error({ err }, 'proof-chain: MISSED TAG — AI content not recorded in provenance chain');
+  });
+}
 
 router.post(
   '/intelligence/ai/threat-briefing',
@@ -1073,6 +1108,16 @@ router.post(
           res.write(
             `data: ${JSON.stringify({ done: true, agent: agentId, agentName: agent.name, model: agent.model, provider: agent.provider })}\n\n`,
           );
+          fireProofTag({
+            contentId: `domain-agent:${agentId}:stream:${Date.now()}`,
+            contentType: 'agent:response',
+            sourceClass: 'llm_generated',
+            modelId: agent.model,
+            modelProvider: agent.provider,
+            modelLane: agentId,
+            confidenceScore: 0.85,
+            generatedByUserId: (req as { user?: { id: string } }).user?.id ?? null,
+          });
         } catch (err) {
           const msg = err instanceof Error ? err.message : 'Agent inference failed';
           res.write(`data: ${JSON.stringify({ error: msg })}\n\n`);
@@ -1102,6 +1147,16 @@ router.post(
         );
         content = result.content ?? '';
       }
+
+      fireProofTag({
+        contentId: `domain-agent:${agentId}:${Date.now()}`,
+        contentType: 'agent:response',
+        sourceClass: 'llm_generated',
+        modelId: agent.model,
+        modelProvider: agent.provider,
+        modelLane: agentId,
+        confidenceScore: 0.85,
+      });
 
       sendSuccess(res, {
         content,
@@ -1178,6 +1233,7 @@ Format as structured sections with clear headers.`;
       res.setHeader('X-Accel-Buffering', 'no');
       res.flushHeaders();
 
+      let campaignContent = '';
       for await (const chunk of createResponseStream(
         [
           { role: 'system', content: systemPrompt },
@@ -1185,8 +1241,17 @@ Format as structured sections with clear headers.`;
         ],
         { model: 'gpt-5.2', maxOutputTokens: 2048 },
       )) {
+        campaignContent += chunk;
         res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
       }
+      fireProofTag({
+        contentId: `campaign-copy:${Date.now()}`,
+        contentType: 'creative:campaign-copy',
+        sourceClass: 'llm_generated',
+        modelId: 'gpt-5.2',
+        modelProvider: 'openai',
+        confidenceScore: 0.8,
+      });
       res.write(
         `data: ${JSON.stringify({ done: true, model: 'gpt-5.2', provider: 'openai' })}\n\n`,
       );
@@ -1248,6 +1313,14 @@ Use precise language with specific control references where applicable.`;
       });
 
       const content = result.content[0]?.type === 'text' ? result.content[0].text : '';
+      fireProofTag({
+        contentId: `risk-assessment:${Date.now()}`,
+        contentType: 'intelligence:risk-assessment',
+        sourceClass: 'llm_generated',
+        modelId: 'claude-sonnet-4-6',
+        modelProvider: 'anthropic',
+        confidenceScore: 0.82,
+      });
       sendSuccess(res, {
         assessment: content,
         frameworks,
@@ -1304,6 +1377,14 @@ router.post(
           res.write(`data: ${JSON.stringify({ content: event.delta.text })}\n\n`);
         }
       }
+      fireProofTag({
+        contentId: `advisory:${Date.now()}`,
+        contentType: 'intelligence:advisory',
+        sourceClass: 'llm_generated',
+        modelId: 'claude-sonnet-4-6',
+        modelProvider: 'anthropic',
+        confidenceScore: 0.85,
+      });
       res.write(
         `data: ${JSON.stringify({ done: true, model: 'claude-sonnet-4-6', provider: 'anthropic' })}\n\n`,
       );
@@ -1370,6 +1451,14 @@ Be concise and action-oriented.`;
       );
 
       const content = result.content ?? '';
+      fireProofTag({
+        contentId: `ticket-triage:${Date.now()}`,
+        contentType: 'intelligence:ticket-triage',
+        sourceClass: 'llm_generated',
+        modelId: 'gpt-5.2',
+        modelProvider: 'openai',
+        confidenceScore: 0.8,
+      });
       sendSuccess(res, {
         triage: content,
         subject,
@@ -1438,6 +1527,14 @@ Use professional board-level language. Be specific about numbers and timelines.`
           res.write(`data: ${JSON.stringify({ content: event.delta.text })}\n\n`);
         }
       }
+      fireProofTag({
+        contentId: `readiness-summary:${Date.now()}`,
+        contentType: 'intelligence:readiness-summary',
+        sourceClass: 'llm_generated',
+        modelId: 'claude-sonnet-4-6',
+        modelProvider: 'anthropic',
+        confidenceScore: 0.82,
+      });
       res.write(
         `data: ${JSON.stringify({ done: true, model: 'claude-sonnet-4-6', provider: 'anthropic' })}\n\n`,
       );
@@ -1498,6 +1595,14 @@ Use IMCO and OFAC screening terminology.`;
       });
 
       const content = result.content[0]?.type === 'text' ? result.content[0].text : '';
+      fireProofTag({
+        contentId: `dark-vessel:${Date.now()}`,
+        contentType: 'intelligence:maritime-dark-vessel',
+        sourceClass: 'llm_generated',
+        modelId: 'claude-sonnet-4-6',
+        modelProvider: 'anthropic',
+        confidenceScore: 0.78,
+      });
       sendSuccess(res, {
         analysis: content,
         vessel,
@@ -1562,6 +1667,14 @@ Be precise, tactical, and time-sensitive.`;
       });
 
       const content = result.content[0]?.type === 'text' ? result.content[0].text : '';
+      fireProofTag({
+        contentId: `threat-triage:${Date.now()}`,
+        contentType: 'intelligence:threat-triage',
+        sourceClass: 'llm_generated',
+        modelId: 'claude-sonnet-4-6',
+        modelProvider: 'anthropic',
+        confidenceScore: 0.83,
+      });
       sendSuccess(res, {
         triage: content,
         model: 'claude-sonnet-4-6',
@@ -1614,6 +1727,14 @@ router.post(
       });
 
       const content = result.content[0]?.type === 'text' ? result.content[0].text : '';
+      fireProofTag({
+        contentId: `maritime-intel:${Date.now()}`,
+        contentType: 'intelligence:maritime',
+        sourceClass: 'llm_generated',
+        modelId: 'claude-sonnet-4-6',
+        modelProvider: 'anthropic',
+        confidenceScore: 0.85,
+      });
       sendSuccess(res, {
         response: content,
         query,

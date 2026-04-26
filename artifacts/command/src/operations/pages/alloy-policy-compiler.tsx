@@ -80,6 +80,7 @@ function fromServerVersion(v: ServerPolicyVersion): PolicyVersion {
     savedAt: savedAtMs,
     message: v.message,
     signers: Array.isArray(v.signers) ? v.signers : [],
+    isActive: !!(v.policy as Record<string, unknown>).isActive,
   };
 }
 
@@ -189,6 +190,7 @@ interface PolicyVersion {
   savedAt: number;
   message: string;
   signers: Array<{ name: string; role: string; signedAt: number }>;
+  isActive: boolean;
 }
 
 interface TestCase {
@@ -1065,6 +1067,61 @@ export default function AlloyPolicyCompilerPage() {
       } catch (err) {
         addAudit(
           `Failed to sign policy version: ${err instanceof Error ? err.message : 'unknown error'}`,
+        );
+      }
+    })();
+  }
+
+  function handleActivateVersion(versionId: string) {
+    (async () => {
+      const version = versions.find((v) => v.id === versionId);
+      if (!version) return;
+      if (version.signers.length < 1) {
+        addAudit('Activation blocked — policy must be signed by at least one approver first');
+        return;
+      }
+      try {
+        const res = await apiFetch<ApiEnvelope<ServerPolicyVersion> | ServerPolicyVersion>(
+          `/alloy/policy-compiler/versions/${encodeURIComponent(versionId)}/activate`,
+          { method: 'POST' },
+        );
+        const payload =
+          (res as ApiEnvelope<ServerPolicyVersion>).data ?? (res as ServerPolicyVersion);
+        const updated = fromServerVersion(payload);
+        setVersions((prev) =>
+          prev.map((v) => {
+            if (v.id === versionId) return updated;
+            return { ...v, isActive: false };
+          }),
+        );
+        addAudit(
+          `Policy v${version.versionNumber} activated — all other versions deactivated`,
+        );
+      } catch (err) {
+        addAudit(
+          `Failed to activate policy version: ${err instanceof Error ? err.message : 'unknown error'}`,
+        );
+      }
+    })();
+  }
+
+  function handleDeactivateVersion(versionId: string) {
+    (async () => {
+      const version = versions.find((v) => v.id === versionId);
+      if (!version) return;
+      try {
+        const res = await apiFetch<ApiEnvelope<ServerPolicyVersion> | ServerPolicyVersion>(
+          `/alloy/policy-compiler/versions/${encodeURIComponent(versionId)}/deactivate`,
+          { method: 'POST' },
+        );
+        const payload =
+          (res as ApiEnvelope<ServerPolicyVersion>).data ?? (res as ServerPolicyVersion);
+        const updated = fromServerVersion(payload);
+        setVersions((prev) => prev.map((v) => (v.id === versionId ? updated : v)));
+        addAudit(`Policy v${version.versionNumber} deactivated`);
+      } catch (err) {
+        addAudit(
+          `Failed to deactivate policy version: ${err instanceof Error ? err.message : 'unknown error'}`,
         );
       }
     })();
@@ -2263,6 +2320,22 @@ export default function AlloyPolicyCompilerPage() {
                                   Latest
                                 </span>
                               )}
+                              {v.isActive && (
+                                <span
+                                  className="text-[9px] font-mono px-1.5 py-0.5 rounded uppercase flex items-center gap-1"
+                                  style={{
+                                    color: '#22c55e',
+                                    background: 'rgba(34,197,94,0.12)',
+                                    border: '1px solid rgba(34,197,94,0.35)',
+                                  }}
+                                >
+                                  <span
+                                    className="w-1.5 h-1.5 rounded-full inline-block"
+                                    style={{ background: '#22c55e' }}
+                                  />
+                                  Active
+                                </span>
+                              )}
                             </div>
                             <div
                               className="flex items-center gap-2 text-[9px] font-mono mt-0.5"
@@ -2307,6 +2380,46 @@ export default function AlloyPolicyCompilerPage() {
                             <Lock className="w-2.5 h-2.5" />
                             {v.signers.some((s) => s.name === 'Sarah Mitchell') ? 'Signed' : 'Sign'}
                           </button>
+                          {v.isActive ? (
+                            <button
+                              onClick={() => handleDeactivateVersion(v.id)}
+                              className="flex items-center gap-1.5 px-2 py-1 rounded text-[9px] font-semibold"
+                              title="Deactivate this policy version"
+                              style={{
+                                color: '#f97316',
+                                background: 'rgba(249,115,22,0.08)',
+                                border: '1px solid rgba(249,115,22,0.25)',
+                              }}
+                            >
+                              <span
+                                className="w-1.5 h-1.5 rounded-full inline-block"
+                                style={{ background: '#f97316' }}
+                              />
+                              Deactivate
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleActivateVersion(v.id)}
+                              disabled={v.signers.length < 1}
+                              className="flex items-center gap-1.5 px-2 py-1 rounded text-[9px] font-semibold disabled:opacity-30"
+                              title={
+                                v.signers.length < 1
+                                  ? 'Policy must be signed before activation'
+                                  : 'Activate this policy version'
+                              }
+                              style={{
+                                color: '#22c55e',
+                                background: 'rgba(34,197,94,0.05)',
+                                border: '1px solid rgba(34,197,94,0.2)',
+                              }}
+                            >
+                              <span
+                                className="w-1.5 h-1.5 rounded-full inline-block"
+                                style={{ background: v.signers.length < 1 ? '#6b7280' : '#22c55e' }}
+                              />
+                              Activate
+                            </button>
+                          )}
                         </div>
                       </div>
 

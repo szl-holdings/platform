@@ -217,6 +217,111 @@ router.post(
   },
 );
 
+router.post(
+  '/alloy/policy-compiler/versions/:externalId/activate',
+  requireAuth,
+  async (req: Request, res: Response) => {
+    try {
+      const externalId = req.params.externalId;
+      if (!externalId) {
+        sendBadRequest(res, 'externalId is required');
+        return;
+      }
+
+      const [existing] = await db
+        .select()
+        .from(alloyPolicyVersions)
+        .where(eq(alloyPolicyVersions.externalId, externalId))
+        .limit(1);
+
+      if (!existing) {
+        sendNotFound(res, 'PolicyVersion');
+        return;
+      }
+
+      const currentSigners = Array.isArray(existing.signers)
+        ? (existing.signers as Array<{ name: string; role: string; signedAt: number }>)
+        : [];
+      if (currentSigners.length < 1) {
+        sendBadRequest(res, 'Policy must be signed by at least one approver before activation');
+        return;
+      }
+
+      const currentPolicy = (existing.policy ?? {}) as Record<string, unknown>;
+      const activatedPolicy = { ...currentPolicy, isActive: true };
+
+      const siblingsToDeactivate = await db
+        .select()
+        .from(alloyPolicyVersions)
+        .where(
+          and(
+            eq(alloyPolicyVersions.studioId, existing.studioId),
+          ),
+        );
+
+      await Promise.all(
+        siblingsToDeactivate
+          .filter((v) => v.externalId !== externalId)
+          .map((v) => {
+            const p = (v.policy ?? {}) as Record<string, unknown>;
+            return db
+              .update(alloyPolicyVersions)
+              .set({ policy: { ...p, isActive: false } as never })
+              .where(eq(alloyPolicyVersions.externalId, v.externalId));
+          }),
+      );
+
+      const [updated] = await db
+        .update(alloyPolicyVersions)
+        .set({ policy: activatedPolicy as never })
+        .where(eq(alloyPolicyVersions.externalId, externalId))
+        .returning();
+
+      sendSuccess(res, updated);
+    } catch (err) {
+      handleRouteError(res, err, 'alloy-policy-compiler:activate-version');
+    }
+  },
+);
+
+router.post(
+  '/alloy/policy-compiler/versions/:externalId/deactivate',
+  requireAuth,
+  async (req: Request, res: Response) => {
+    try {
+      const externalId = req.params.externalId;
+      if (!externalId) {
+        sendBadRequest(res, 'externalId is required');
+        return;
+      }
+
+      const [existing] = await db
+        .select()
+        .from(alloyPolicyVersions)
+        .where(eq(alloyPolicyVersions.externalId, externalId))
+        .limit(1);
+
+      if (!existing) {
+        sendNotFound(res, 'PolicyVersion');
+        return;
+      }
+
+      const currentPolicy = (existing.policy ?? {}) as Record<string, unknown>;
+      const deactivatedPolicy = { ...currentPolicy, isActive: false };
+
+      const [updated] = await db
+        .update(alloyPolicyVersions)
+        .set({ policy: deactivatedPolicy as never })
+        .where(eq(alloyPolicyVersions.externalId, externalId))
+        .returning();
+
+      sendSuccess(res, updated);
+    } catch (err) {
+      handleRouteError(res, err, 'alloy-policy-compiler:deactivate-version');
+    }
+  },
+);
+
 router.delete(
   '/alloy/policy-compiler/test-cases/:externalId',
   requireAuth,
