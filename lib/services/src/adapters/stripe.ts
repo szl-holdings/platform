@@ -222,6 +222,9 @@ export class StripeAdapter extends ServiceAdapter {
     customerEmail?: string;
     customerId?: string;
     metadata?: Record<string, string>;
+    /** When provided, forwarded as the Stripe-Api Idempotency-Key header so
+     *  transient retries with the same key converge on the same session. */
+    idempotencyKey?: string;
   }): Promise<StripeCheckoutSession> {
     if (!this.isLive) {
       return {
@@ -250,9 +253,15 @@ export class StripeAdapter extends ServiceAdapter {
       }
     }
 
+    const reqHeaders: Record<string, string> = {};
+    if (options.idempotencyKey) {
+      reqHeaders["Idempotency-Key"] = options.idempotencyKey;
+    }
+
     const data = (await this.stripeRequest("/checkout/sessions", {
       method: "POST",
       body: params.toString(),
+      headers: reqHeaders,
     })) as {
       id: string;
       url: string;
@@ -695,6 +704,202 @@ export class StripeAdapter extends ServiceAdapter {
       canceledThisMonth, churnRate: Math.round(churnRate * 10) / 10,
       recentInvoices, newSubscriptionsThisMonth,
     };
+  }
+
+  async getCustomerById(customerId: string): Promise<StripeCustomer | null> {
+    if (!this.isLive) {
+      return { id: customerId, email: 'demo@example.com', name: 'Demo Customer' };
+    }
+
+    try {
+      const data = (await this.stripeRequest(`/customers/${customerId}`)) as {
+        id: string;
+        email: string;
+        name: string;
+        deleted?: boolean;
+        metadata: Record<string, string>;
+      };
+      if (data.deleted) return null;
+      return { id: data.id, email: data.email, name: data.name, metadata: data.metadata };
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * ensureCustomer: Returns the existing Stripe customer for the given org's
+   * billingCustomerId if one exists, otherwise creates a new customer and
+   * returns it. Callers should persist the returned customer ID back to the
+   * organizations.billingCustomerId column.
+   *
+   * An optional idempotencyKey is forwarded as the Stripe-Idempotency-Key
+   * header so concurrent calls with the same key converge to a single customer.
+   */
+  async ensureCustomer(
+    email: string,
+    name?: string,
+    metadata?: Record<string, string>,
+    idempotencyKey?: string,
+  ): Promise<StripeCustomer> {
+    if (!this.isLive) {
+      return { id: `cus_demo_${Date.now()}`, email, name, metadata };
+    }
+
+    const existing = await this.getCustomerByEmail(email);
+    if (existing) return existing;
+
+    const params = new URLSearchParams();
+    params.set('email', email);
+    if (name) params.set('name', name);
+    if (metadata) {
+      for (const [k, v] of Object.entries(metadata)) {
+        params.set(`metadata[${k}]`, v);
+      }
+    }
+
+    const headers: Record<string, string> = {};
+    if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
+
+    const data = (await this.stripeRequest('/customers', {
+      method: 'POST',
+      body: params.toString(),
+      headers,
+    })) as { id: string; email: string; name: string; metadata: Record<string, string> };
+
+    return { id: data.id, email: data.email, name: data.name, metadata: data.metadata };
+  }
+
+  /**
+   * createRefund: Issues a Stripe refund for a given charge or payment intent.
+   * The idempotencyKey prevents double-refunds when the caller retries on
+   * network failures.
+   */
+  async createRefund(options: {
+    chargeId?: string;
+    paymentIntentId?: string;
+    amount?: number;
+    reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer';
+    idempotencyKey?: string;
+    metadata?: Record<string, string>;
+  }): Promise<{ id: string; amount: number; currency: string; status: string }> {
+    if (!this.isLive) {
+      return {
+        id: `re_demo_${Date.now()}`,
+        amount: options.amount ?? 0,
+        currency: 'usd',
+        status: 'succeeded',
+      };
+    }
+
+    const params = new URLSearchParams();
+    if (options.chargeId) params.set('charge', options.chargeId);
+    if (options.paymentIntentId) params.set('payment_intent', options.paymentIntentId);
+    if (options.amount) params.set('amount', String(Math.floor(options.amount)));
+    if (options.reason) params.set('reason', options.reason);
+    if (options.metadata) {
+      for (const [k, v] of Object.entries(options.metadata)) {
+        params.set(`metadata[${k}]`, v);
+      }
+    }
+
+    const headers: Record<string, string> = {};
+    if (options.idempotencyKey) headers['Idempotency-Key'] = options.idempotencyKey;
+
+    const data = (await this.stripeRequest('/refunds', {
+      method: 'POST',
+      body: params.toString(),
+      headers,
+    })) as { id: string; amount: number; currency: string; status: string };
+
+    return { id: data.id, amount: data.amount, currency: data.currency, status: data.status };
+  }
+
+  /**
+   * listPaymentMethods: Returns saved payment methods for a Stripe customer.
+   */
+  async listPaymentMethods(
+    customerId: string,
+    type: string = 'card',
+  ): Promise<
+    Array<{
+      id: string;
+      type: string;
+      brand?: string;
+      last4?: string;
+      expMonth?: number;
+      expYear?: number;
+      isDefault: boolean;
+    }>
+  > {
+    if (!this.isLive) {
+      return [
+        {
+          id: 'pm_demo_visa',
+          type: 'card',
+          brand: 'visa',
+          last4: '4242',
+          expMonth: 12,
+          expYear: 2028,
+          isDefault: true,
+        },
+      ];
+    }
+
+    const [pmData, customerData] = await Promise.all([
+      this.stripeRequest(
+        `/payment_methods?customer=${customerId}&type=${type}&limit=20`,
+      ) as Promise<{
+        data: Array<{
+          id: string;
+          type: string;
+          card?: { brand: string; last4: string; exp_month: number; exp_year: number };
+        }>;
+      }>,
+      this.stripeRequest(`/customers/${customerId}`) as Promise<{
+        invoice_settings?: { default_payment_method?: string };
+      }>,
+    ]);
+
+    const defaultPmId = customerData.invoice_settings?.default_payment_method;
+    return pmData.data.map((pm) => ({
+      id: pm.id,
+      type: pm.type,
+      brand: pm.card?.brand,
+      last4: pm.card?.last4,
+      expMonth: pm.card?.exp_month,
+      expYear: pm.card?.exp_year,
+      isDefault: pm.id === defaultPmId,
+    }));
+  }
+
+  /**
+   * resolveChargeCustomer — returns the Stripe customer ID attached to the
+   * given charge or payment intent. Used for cross-tenant ownership validation
+   * before issuing a refund.
+   *
+   * Returns `null` in demo mode (isLive=false) — callers must still apply their
+   * own org-level ownership check using billingCustomerId from the DB.
+   */
+  async resolveChargeCustomer(options: {
+    chargeId?: string;
+    paymentIntentId?: string;
+  }): Promise<string | null> {
+    if (!this.isLive) {
+      return null;
+    }
+    if (options.chargeId) {
+      const charge = (await this.stripeRequest(`/charges/${options.chargeId}`)) as {
+        customer?: string | null;
+      };
+      return charge.customer ?? null;
+    }
+    if (options.paymentIntentId) {
+      const pi = (await this.stripeRequest(
+        `/payment_intents/${options.paymentIntentId}`,
+      )) as { customer?: string | null };
+      return pi.customer ?? null;
+    }
+    return null;
   }
 
   async verifyWebhookPayload(

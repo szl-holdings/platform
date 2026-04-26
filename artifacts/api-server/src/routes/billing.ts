@@ -1,5 +1,8 @@
 import {
+  billingAuditLogTable,
+  billingPaymentMethodsTable,
   billingPlansTable,
+  billingRefundRequestsTable,
   db,
   entitlementOverridesTable,
   entitlementsTable,
@@ -8,6 +11,7 @@ import {
   organizationsTable,
   revenueEventsTable,
   subscriptionsTable,
+  usageEventsTable,
 } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
 import { and, desc, eq, gt, inArray, isNull, or } from 'drizzle-orm';
@@ -22,6 +26,8 @@ import {
   sendNotFound,
   sendSuccess,
 } from '../lib/api-response';
+import { actorFromReq, writeBillingAudit } from '../lib/billing-audit';
+import { dispatchWebhookEvent } from '../lib/billing-webhook';
 import { logger } from '../lib/logger';
 import { isFlagEnabled } from '../lib/platform-flags';
 import { requireStripeLive } from '../lib/stripe-gate';
@@ -148,13 +154,50 @@ router.post(
         typeof billingCheckoutSchema
       >;
 
+      const orgId = req.tenantOrgId ?? null;
+
+      // Tenant-scoped customer resolution:
+      // - Authenticated (orgId present): use the org's canonical billingCustomerId.
+      //   If no mapping exists yet, call createCustomer (ALWAYS creates a new Stripe
+      //   customer; never email-based lookup) so that each org gets its own isolated
+      //   Stripe customer even if multiple orgs share an email identity.
+      // - Unauthenticated (orgId absent): email-based lookup is an acceptable
+      //   fallback (no org context to isolate).
       let customerId: string | undefined;
-      if (customerEmail) {
-        const existing = await services.stripe.getCustomerByEmail(customerEmail);
-        if (existing) {
-          customerId = existing.id;
+      if (orgId) {
+        const [org] = await db
+          .select({ billingCustomerId: organizationsTable.billingCustomerId })
+          .from(organizationsTable)
+          .where(eq(organizationsTable.id, orgId));
+
+        if (org?.billingCustomerId) {
+          customerId = org.billingCustomerId;
+        } else if (customerEmail) {
+          // Deliberately NOT using ensureCustomer (which does getCustomerByEmail
+          // first) to prevent cross-tenant customer reuse when email identities overlap.
+          const customer = await services.stripe.createCustomer(customerEmail, undefined, {
+            orgId: String(orgId),
+          });
+          customerId = customer.id;
+          await db
+            .update(organizationsTable)
+            .set({ billingCustomerId: customerId })
+            .where(eq(organizationsTable.id, orgId));
         }
+      } else if (customerEmail) {
+        const existing = await services.stripe.getCustomerByEmail(customerEmail);
+        if (existing) customerId = existing.id;
       }
+
+      // Idempotency key strategy:
+      // - Client-provided key: scoped to org to prevent cross-tenant replay.
+      // - No client key: derive deterministically from org + priceId so server-
+      //   side retries converge on the same Stripe session rather than creating
+      //   duplicates (UUID fallback is intentionally removed here).
+      const clientKey = req.headers['x-idempotency-key'] as string | undefined;
+      const idempotencyKey = clientKey
+        ? `checkout-${orgId ?? 'anon'}-${clientKey}`
+        : `checkout-${orgId ?? 'anon'}-${priceId}`;
 
       const session = await services.stripe.createCheckoutSession({
         priceId,
@@ -163,6 +206,20 @@ router.post(
         cancelUrl,
         customerEmail: customerId ? undefined : customerEmail,
         customerId,
+        metadata: { orgId: String(orgId ?? ''), idempotencyKey },
+        idempotencyKey,
+      });
+
+      void writeBillingAudit({
+        req,
+        orgId,
+        ...actorFromReq(req),
+        action: 'checkout.initiated',
+        resource: 'checkout_session',
+        resourceId: session.id,
+        stripeCustomerId: customerId ?? null,
+        idempotencyKey,
+        after: { priceId, mode: mode ?? 'subscription', sessionId: session.id },
       });
 
       sendSuccess(res, { sessionId: session.id, url: session.url });
@@ -242,6 +299,17 @@ router.post(
 
       const { returnUrl } = req.body as z.infer<typeof billingCustomerPortalSchema>;
       const session = await services.stripe.createCustomerPortalSession(ownedCustomerId, returnUrl);
+
+      void writeBillingAudit({
+        req,
+        orgId,
+        ...actorFromReq(req),
+        action: 'portal.opened',
+        resource: 'billing_portal',
+        stripeCustomerId: ownedCustomerId,
+        after: { portalUrl: session.url },
+      });
+
       sendSuccess(res, { url: session.url });
     } catch (err) {
       logger.error({ err }, 'Failed to create customer portal session');
@@ -259,18 +327,37 @@ router.post(
     try {
       const returnUrl =
         (req.body as { returnUrl?: string }).returnUrl ?? req.headers.referer ?? '/';
-      const user = (req as unknown as { user?: { email?: string; id?: string } }).user;
-      const userEmail = user?.email;
-      if (!userEmail) {
-        sendBadRequest(res, 'Authenticated user email required for billing portal');
+
+      // Use org-scoped billingCustomerId — never resolve by user email to
+      // avoid cross-tenant customer binding if email identities overlap.
+      const orgId = req.tenantOrgId;
+      if (!orgId) {
+        sendForbidden(res, 'No organization context');
         return;
       }
-      const customer = await services.stripe.getCustomerByEmail(userEmail);
-      if (!customer) {
+
+      const [org] = await db
+        .select({ billingCustomerId: organizationsTable.billingCustomerId })
+        .from(organizationsTable)
+        .where(eq(organizationsTable.id, orgId));
+
+      const ownedCustomerId = org?.billingCustomerId;
+      if (!ownedCustomerId) {
         sendBadRequest(res, 'No Stripe customer record found — complete a checkout first');
         return;
       }
-      const session = await services.stripe.createCustomerPortalSession(customer.id, returnUrl);
+
+      const session = await services.stripe.createCustomerPortalSession(ownedCustomerId, returnUrl);
+      void writeBillingAudit({
+        req,
+        orgId,
+        ...actorFromReq(req),
+        action: 'portal.session.created',
+        resource: 'customer_portal',
+        resourceId: null,
+        stripeCustomerId: ownedCustomerId,
+        after: { url: session.url, returnUrl },
+      });
       sendSuccess(res, { url: session.url });
     } catch (err) {
       logger.error({ err }, 'Failed to create portal session');
@@ -443,234 +530,32 @@ router.post(
       }
 
       const eventType = event.type as string;
-
       if (!eventType) {
         sendBadRequest(res, 'Invalid webhook event');
         return;
       }
 
-      logger.info({ eventType, eventId: event.id }, 'Stripe webhook received');
+      logger.info({ eventType, eventId: event.id }, '[webhook] Stripe event received');
 
-      const eventData = (event.data as Record<string, unknown>)?.object as
-        | Record<string, unknown>
-        | undefined;
+      const { duplicate } = await dispatchWebhookEvent({
+        id: event.id as string,
+        type: eventType,
+        data: { object: (event.data as Record<string, unknown>)?.['object'] as Record<string, unknown> },
+      });
 
-      switch (eventType) {
-        case 'checkout.session.completed': {
-          const session = eventData;
-          if (!session) break;
-          logger.info(
-            { sessionId: session.id, customerId: session.customer, mode: session.mode },
-            'Checkout completed',
-          );
-
-          if (session.mode === 'payment') {
-            const metadata = session.metadata as Record<string, string> | undefined;
-            try {
-              await db
-                .insert(fulfillmentsTable)
-                .values({
-                  stripeSessionId: session.id as string,
-                  stripePaymentIntentId: session.payment_intent as string | undefined,
-                  product: metadata?.product ?? metadata?.service ?? 'carlota-jo',
-                  tierId: metadata?.tierId ?? 'unknown',
-                  tierName: metadata?.tierName ?? 'Unknown',
-                  customerEmail:
-                    (session.customer_details as Record<string, string> | undefined)?.email ??
-                    (session.customer_email as string | undefined) ??
-                    null,
-                  amount: session.amount_total
-                    ? String((session.amount_total as number) / 100)
-                    : null,
-                  currency: (session.currency as string) ?? 'usd',
-                  status: 'fulfilled',
-                  fulfilledAt: new Date(),
-                  metadata: { eventId: event.id, sessionMetadata: metadata },
-                })
-                .onConflictDoNothing();
-              logger.info(
-                { sessionId: session.id, tierId: metadata?.tierId },
-                'One-time fulfillment recorded',
-              );
-            } catch (dbErr) {
-              logger.warn({ dbErr }, 'Fulfillment may already exist in DB');
-            }
-            break;
-          }
-
-          if (session.subscription) {
-            const sub = await services.stripe.getSubscription(session.subscription as string);
-            if (sub) {
-              try {
-                const metadata = session.metadata as Record<string, string> | undefined;
-                let orgId = metadata?.orgId ? parseInt(metadata.orgId, 10) : undefined;
-                let planId = metadata?.planId ? parseInt(metadata.planId, 10) : undefined;
-
-                if (!orgId) {
-                  const [firstOrg] = await db.select().from(organizationsTable).limit(1);
-                  orgId = firstOrg?.id ?? 1;
-                }
-                if (!planId) {
-                  const [firstPlan] = await db.select().from(billingPlansTable).limit(1);
-                  planId = firstPlan?.id ?? 1;
-                }
-
-                await db.insert(subscriptionsTable).values({
-                  orgId,
-                  planId,
-                  status: 'active',
-                  stripeSubscriptionId: sub.id,
-                  currentPeriodStart: new Date(sub.currentPeriodStart * 1000),
-                  currentPeriodEnd: new Date(sub.currentPeriodEnd * 1000),
-                });
-              } catch (dbErr) {
-                logger.warn({ dbErr }, 'Subscription may already exist in DB');
-              }
-            }
-          }
-          break;
-        }
-
-        case 'customer.subscription.created':
-        case 'customer.subscription.updated': {
-          const sub = eventData;
-          if (!sub) break;
-          logger.info({ subscriptionId: sub.id, status: sub.status }, 'Subscription updated');
-
-          const existing = await db
-            .select()
-            .from(subscriptionsTable)
-            .where(eq(subscriptionsTable.stripeSubscriptionId, sub.id as string));
-
-          if (existing.length > 0) {
-            await db
-              .update(subscriptionsTable)
-              .set({
-                status:
-                  sub.status === 'active'
-                    ? 'active'
-                    : sub.status === 'trialing'
-                      ? 'trialing'
-                      : sub.status === 'past_due'
-                        ? 'past_due'
-                        : 'canceled',
-                currentPeriodStart: new Date((sub.current_period_start as number) * 1000),
-                currentPeriodEnd: new Date((sub.current_period_end as number) * 1000),
-                canceledAt: sub.canceled_at ? new Date((sub.canceled_at as number) * 1000) : null,
-                updatedAt: new Date(),
-              })
-              .where(eq(subscriptionsTable.stripeSubscriptionId, sub.id as string));
-          }
-          break;
-        }
-
-        case 'customer.subscription.deleted': {
-          const sub = eventData;
-          if (!sub) break;
-          logger.info({ subscriptionId: sub.id }, 'Subscription deleted');
-
-          await db
-            .update(subscriptionsTable)
-            .set({
-              status: 'canceled',
-              canceledAt: new Date(),
-              updatedAt: new Date(),
-            })
-            .where(eq(subscriptionsTable.stripeSubscriptionId, sub.id as string));
-          break;
-        }
-
-        case 'invoice.paid': {
-          const invoice = eventData;
-          if (!invoice) break;
-          logger.info({ invoiceId: invoice.id }, 'Invoice paid');
-
-          try {
-            const metadata = invoice.metadata as Record<string, string> | undefined;
-            let orgId = metadata?.orgId ? parseInt(metadata.orgId, 10) : undefined;
-            if (!orgId) {
-              const [firstOrg] = await db.select().from(organizationsTable).limit(1);
-              orgId = firstOrg?.id ?? 1;
-            }
-
-            await db
-              .insert(invoicesTable)
-              .values({
-                orgId,
-                stripeInvoiceId: invoice.id as string,
-                amount: ((invoice.amount_paid as number) / 100).toFixed(2),
-                currency: invoice.currency as string,
-                status: 'paid',
-                paidAt: new Date(),
-              })
-              .onConflictDoNothing();
-          } catch (dbErr) {
-            logger.warn({ dbErr }, 'Invoice may already exist in DB');
-          }
-
-          await db
-            .insert(revenueEventsTable)
-            .values({
-              eventType: 'invoice.paid',
-              product:
-                (invoice.metadata as Record<string, string> | undefined)?.product ?? 'platform',
-              customerId: invoice.customer as string | undefined,
-              subscriptionId: invoice.subscription as string | undefined,
-              invoiceId: invoice.id as string | undefined,
-              amount: invoice.amount_paid ? String((invoice.amount_paid as number) / 100) : null,
-              currency: (invoice.currency as string) ?? 'usd',
-              idempotencyKey: `invoice-paid-${event.id}`,
-              metadata: { eventId: event.id },
-            })
-            .onConflictDoNothing();
-          break;
-        }
-
-        case 'invoice.payment_failed': {
-          const invoice = eventData;
-          if (!invoice) break;
-          logger.info({ invoiceId: invoice.id }, 'Invoice payment failed');
-
-          if (invoice.subscription) {
-            await db
-              .update(subscriptionsTable)
-              .set({ status: 'past_due', updatedAt: new Date() })
-              .where(eq(subscriptionsTable.stripeSubscriptionId, invoice.subscription as string));
-          }
-
-          await db
-            .insert(revenueEventsTable)
-            .values({
-              eventType: 'invoice.payment_failed',
-              product: 'platform',
-              customerId: invoice.customer as string | undefined,
-              subscriptionId: invoice.subscription as string | undefined,
-              invoiceId: invoice.id as string | undefined,
-              amount: invoice.amount_due ? String((invoice.amount_due as number) / 100) : null,
-              currency: (invoice.currency as string) ?? 'usd',
-              idempotencyKey: `payment-failed-${event.id}`,
-              metadata: { eventId: event.id },
-            })
-            .onConflictDoNothing();
-          break;
-        }
-
-        case 'payment_intent.succeeded': {
-          const pi = eventData;
-          if (!pi) break;
-          logger.info({ paymentIntentId: pi.id, amount: pi.amount }, 'Payment intent succeeded');
-          break;
-        }
-
-        default:
-          logger.info({ eventType }, 'Unhandled webhook event type');
+      if (duplicate) {
+        res.json({ received: true, duplicate: true });
+        return;
       }
 
-      res.json({ received: true });
+      res.json({ received: true, duplicate: false });
+      return;
     } catch (err) {
-      logger.error({ err }, 'Webhook processing error');
+      logger.error({ err }, '[webhook] Webhook processing error');
       sendError(res, 'Webhook processing failed', 500, 'WEBHOOK_ERROR');
+      return;
     }
+
   },
 );
 
@@ -706,6 +591,17 @@ router.post(
         cancelUrl,
         customerEmail: email,
         metadata: { tierId: tierId || '', tierName: tierName || '', service: service || '' },
+      });
+
+      void writeBillingAudit({
+        req,
+        orgId: req.tenantOrgId ?? null,
+        ...actorFromReq(req),
+        action: 'checkout.initiated',
+        resource: 'checkout_session',
+        resourceId: session.id,
+        stripeCustomerId: null,
+        after: { sessionId: session.id, tierId, tierName, service, product: 'carlota-jo' },
       });
 
       res.json({
@@ -776,6 +672,17 @@ router.post(
         cancelUrl,
         customerEmail: email,
         metadata: { planId, planName: plan.name, product: 'command' },
+      });
+
+      void writeBillingAudit({
+        req,
+        orgId: req.tenantOrgId ?? null,
+        ...actorFromReq(req),
+        action: 'checkout.initiated',
+        resource: 'checkout_session',
+        resourceId: session.id,
+        stripeCustomerId: null,
+        after: { sessionId: session.id, planId, planName: plan.name, product: 'command' },
       });
 
       sendSuccess(res, { sessionId: session.id, url: session.url });
@@ -866,6 +773,17 @@ router.post(
         cancelUrl,
         customerEmail: email,
         metadata: { planId, planName: plan.name, product: 'terra' },
+      });
+
+      void writeBillingAudit({
+        req,
+        orgId: req.tenantOrgId ?? null,
+        ...actorFromReq(req),
+        action: 'checkout.initiated',
+        resource: 'checkout_session',
+        resourceId: session.id,
+        stripeCustomerId: null,
+        after: { sessionId: session.id, planId, planName: plan.name, product: 'terra' },
       });
 
       sendSuccess(res, { sessionId: session.id, url: session.url });
@@ -1130,18 +1048,30 @@ router.post(
         return;
       }
 
+      const newStatus = cancelImmediately ? 'canceled' : updated.status === 'active' ? 'active' : 'canceled';
       await db
         .update(subscriptionsTable)
         .set({
-          status: cancelImmediately
-            ? 'canceled'
-            : updated.status === 'active'
-              ? 'active'
-              : 'canceled',
+          status: newStatus,
           canceledAt: cancelImmediately ? new Date() : null,
           updatedAt: new Date(),
         })
         .where(eq(subscriptionsTable.stripeSubscriptionId, subscriptionId));
+
+      void writeBillingAudit({
+        req,
+        orgId: req.tenantOrgId ?? null,
+        ...actorFromReq(req),
+        action: cancelImmediately ? 'subscription.canceled' : 'subscription.cancel_scheduled',
+        resource: 'subscription',
+        resourceId: subscriptionId,
+        stripeSubscriptionId: subscriptionId,
+        after: {
+          status: newStatus,
+          cancelImmediately,
+          cancelAtPeriodEnd: updated.cancelAtPeriodEnd,
+        },
+      });
 
       sendSuccess(res, {
         status: updated.status,
@@ -1182,6 +1112,17 @@ router.post(
         sendNotFound(res, 'Subscription');
         return;
       }
+
+      void writeBillingAudit({
+        req,
+        orgId: req.tenantOrgId ?? null,
+        ...actorFromReq(req),
+        action: 'subscription.plan_changed',
+        resource: 'subscription',
+        resourceId: subscriptionId,
+        stripeSubscriptionId: subscriptionId,
+        after: { status: updated.status, newPriceId, currentPeriodEnd: updated.currentPeriodEnd },
+      });
 
       sendSuccess(res, {
         status: updated.status,
@@ -1365,6 +1306,16 @@ router.post(
         customerEmail: email,
         metadata: { planId, planName: plan.name, product: 'sentra' },
       });
+      void writeBillingAudit({
+        req,
+        orgId: req.tenantOrgId ?? null,
+        ...actorFromReq(req),
+        action: 'checkout.initiated',
+        resource: 'checkout_session',
+        resourceId: session.id,
+        stripeCustomerId: null,
+        after: { sessionId: session.id, planId, planName: plan.name, product: 'sentra' },
+      });
       sendSuccess(res, { sessionId: session.id, url: session.url });
     } catch (err) {
       handleRouteError(res, err, 'Failed to create Sentra subscription checkout');
@@ -1421,6 +1372,16 @@ router.post(
         cancelUrl,
         customerEmail: email,
         metadata: { planId, planName: plan.name, product: 'counsel' },
+      });
+      void writeBillingAudit({
+        req,
+        orgId: req.tenantOrgId ?? null,
+        ...actorFromReq(req),
+        action: 'checkout.initiated',
+        resource: 'checkout_session',
+        resourceId: session.id,
+        stripeCustomerId: null,
+        after: { sessionId: session.id, planId, planName: plan.name, product: 'counsel' },
       });
       sendSuccess(res, { sessionId: session.id, url: session.url });
     } catch (err) {
@@ -1479,6 +1440,16 @@ router.post(
         customerEmail: email,
         metadata: { planId, planName: plan.name, product: 'pulse' },
       });
+      void writeBillingAudit({
+        req,
+        orgId: req.tenantOrgId ?? null,
+        ...actorFromReq(req),
+        action: 'checkout.initiated',
+        resource: 'checkout_session',
+        resourceId: session.id,
+        stripeCustomerId: null,
+        after: { sessionId: session.id, planId, planName: plan.name, product: 'pulse' },
+      });
       sendSuccess(res, { sessionId: session.id, url: session.url });
     } catch (err) {
       handleRouteError(res, err, 'Failed to create Pulse subscription checkout');
@@ -1536,6 +1507,16 @@ router.post(
         customerEmail: email,
         metadata: { planId, planName: plan.name, product: 'szl' },
       });
+      void writeBillingAudit({
+        req,
+        orgId: req.tenantOrgId ?? null,
+        ...actorFromReq(req),
+        action: 'checkout.initiated',
+        resource: 'checkout_session',
+        resourceId: session.id,
+        stripeCustomerId: null,
+        after: { sessionId: session.id, planId, planName: plan.name, product: 'szl' },
+      });
       sendSuccess(res, { sessionId: session.id, url: session.url });
     } catch (err) {
       handleRouteError(res, err, 'Failed to create SZL Pro checkout');
@@ -1592,6 +1573,16 @@ router.post(
         cancelUrl,
         customerEmail: email,
         metadata: { planId, planName: plan.name, product: 'vessels' },
+      });
+      void writeBillingAudit({
+        req,
+        orgId: req.tenantOrgId ?? null,
+        ...actorFromReq(req),
+        action: 'checkout.initiated',
+        resource: 'checkout_session',
+        resourceId: session.id,
+        stripeCustomerId: null,
+        after: { sessionId: session.id, planId, planName: plan.name, product: 'vessels' },
       });
       sendSuccess(res, { sessionId: session.id, url: session.url });
     } catch (err) {
@@ -1913,6 +1904,382 @@ router.delete(
       sendSuccess(res, { deleted: true, featureKey });
     } catch (err) {
       handleRouteError(res, err, 'Failed to delete entitlement override');
+    }
+  },
+);
+
+// ─── Payment methods ──────────────────────────────────────────────────────────
+// Read-only endpoint: does NOT use requireStripeLive because the StripeAdapter
+// already returns route-appropriate demo fixtures when isLive=false. Using the
+// middleware would short-circuit with a checkout-shaped payload which breaks the
+// billing-client's usePaymentMethods hook in demo mode.
+
+router.get(
+  '/billing/payment-methods',
+  authMiddleware(),
+  async (req: Request, res: Response) => {
+    try {
+      const orgId = req.tenantOrgId;
+      if (!orgId) {
+        sendForbidden(res, 'No organization context');
+        return;
+      }
+
+      const [org] = await db
+        .select({ billingCustomerId: organizationsTable.billingCustomerId })
+        .from(organizationsTable)
+        .where(eq(organizationsTable.id, orgId));
+
+      const ownedCustomerId = org?.billingCustomerId;
+      if (!ownedCustomerId) {
+        sendSuccess(res, []);
+        return;
+      }
+
+      // In demo mode, the adapter returns a structured fixture; no special
+      // branch is needed here.
+      const methods = await services.stripe.listPaymentMethods(ownedCustomerId);
+
+      // Write-through cache: mirror Stripe payment methods to canonical DB table.
+      // Fire-and-forget; failures are non-fatal (stale cache is acceptable).
+      if (methods.length > 0 && services.stripe.isLive) {
+        void Promise.all(
+          methods.map((pm) =>
+            db
+              .insert(billingPaymentMethodsTable)
+              .values({
+                orgId,
+                stripePaymentMethodId: pm.id,
+                stripeCustomerId: ownedCustomerId,
+                type: pm.type,
+                brand: pm.brand ?? null,
+                last4: pm.last4 ?? null,
+                expMonth: pm.expMonth ?? null,
+                expYear: pm.expYear ?? null,
+                isDefault: pm.isDefault,
+                updatedAt: new Date(),
+              })
+              .onConflictDoUpdate({
+                target: billingPaymentMethodsTable.stripePaymentMethodId,
+                set: {
+                  brand: pm.brand ?? null,
+                  last4: pm.last4 ?? null,
+                  expMonth: pm.expMonth ?? null,
+                  expYear: pm.expYear ?? null,
+                  isDefault: pm.isDefault,
+                  updatedAt: new Date(),
+                },
+              })
+              .catch((err: Error) =>
+                logger.warn({ err, pmId: pm.id }, '[billing] payment_methods cache write failed (non-fatal)'),
+              ),
+          ),
+        );
+      }
+
+      sendSuccess(res, methods);
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to list payment methods');
+    }
+  },
+);
+
+// ─── Refund request ───────────────────────────────────────────────────────────
+// Does NOT use requireStripeLive so that in demo mode the adapter's createRefund
+// returns a properly shaped fixture (`{ id: 're_demo_...', status: 'succeeded'
+// }`) instead of the middleware's generic checkout payload.
+// Idempotency key is derived from tenant + charge/PI reference + client key so
+// that network retries with the same key converge on a single Stripe refund.
+
+router.post(
+  '/billing/refund-request',
+  authMiddleware(),
+  requireRole('ops'),
+  async (req: Request, res: Response) => {
+    try {
+      const { chargeId, paymentIntentId, amount, reason, notes } = req.body as {
+        chargeId?: string;
+        paymentIntentId?: string;
+        amount?: number;
+        reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer' | 'other';
+        notes?: string;
+      };
+
+      if (!chargeId && !paymentIntentId) {
+        sendBadRequest(res, 'chargeId or paymentIntentId is required');
+        return;
+      }
+
+      const orgId = req.tenantOrgId ?? null;
+
+      // ── Live-write gate ───────────────────────────────────────────────────
+      // In live Stripe mode, verify the billing feature flag is enabled before
+      // issuing any refund. Demo mode (isLive=false) uses a fixture and skips
+      // this guard so the demo shape is always returned correctly.
+      if (services.stripe.isLive) {
+        const billingEnabled = await isFlagEnabled('live_stripe_billing_enabled');
+        if (!billingEnabled) {
+          sendError(res, 'Live billing is not yet enabled for this environment', 503, 'BILLING_DISABLED');
+          return;
+        }
+      }
+
+      // ── Live-mode org context guard ───────────────────────────────────────
+      // In live mode, a bound org (tenantOrgId) is mandatory so we can enforce
+      // per-tenant ownership checks before calling Stripe. An ops user without
+      // a linked org must be rejected here — allowing the call to proceed would
+      // let them issue a refund against any charge, bypassing tenant isolation.
+      if (services.stripe.isLive && !orgId) {
+        sendBadRequest(
+          res,
+          'Organization context is required for refund requests in live mode',
+        );
+        return;
+      }
+
+      // ── Tenant ownership check ────────────────────────────────────────────
+      // Verify the charge/PI belongs to this org's Stripe customer before
+      // issuing a refund.
+      //
+      // In live mode:
+      //   - org MUST have a billingCustomerId; if missing, reject (400) —
+      //     an unmapped org could otherwise refund arbitrary charges.
+      //   - resolveChargeCustomer is called to confirm the charge's customer
+      //     matches the org's canonical customer.
+      //
+      // In demo mode (isLive=false): resolveChargeCustomer returns null so the
+      // whole block is skipped and we proceed with the fixture response.
+      if (orgId && services.stripe.isLive) {
+        const [org] = await db
+          .select({ billingCustomerId: organizationsTable.billingCustomerId })
+          .from(organizationsTable)
+          .where(eq(organizationsTable.id, orgId));
+
+        const ownedCustomerId = org?.billingCustomerId;
+
+        if (!ownedCustomerId) {
+          sendBadRequest(
+            res,
+            'Organization has no Stripe billing customer — complete a checkout first before requesting refunds',
+          );
+          return;
+        }
+
+        const chargeCustomerId = await services.stripe.resolveChargeCustomer({
+          chargeId,
+          paymentIntentId,
+        });
+        if (chargeCustomerId && chargeCustomerId !== ownedCustomerId) {
+          void writeBillingAudit({
+            req,
+            orgId,
+            ...actorFromReq(req),
+            action: 'refund.denied',
+            resource: 'refund',
+            resourceId: chargeId ?? paymentIntentId ?? 'unknown',
+            stripeCustomerId: ownedCustomerId,
+            after: {
+              reason: 'cross-tenant ownership mismatch',
+              chargeCustomerId,
+              ownedCustomerId,
+            },
+          });
+          sendForbidden(res, 'Charge does not belong to this organization');
+          return;
+        }
+      }
+
+      const clientKey = req.headers['x-idempotency-key'] as string | undefined;
+      const refundRef = chargeId ?? paymentIntentId ?? 'unknown';
+      // Idempotency key is derived from tenant + charge/PI reference so that
+      // server-side retries for the same org+charge converge on a single Stripe
+      // refund. UUID fallback is intentionally avoided — clients that need to
+      // issue multiple partial refunds on the same charge must supply distinct
+      // x-idempotency-key headers.
+      const idempotencyKey = clientKey
+        ? `refund-${orgId ?? 'anon'}-${clientKey}`
+        : `refund-${orgId ?? 'anon'}-${refundRef}`;
+
+      const refund = await services.stripe.createRefund({
+        chargeId: chargeId as string,
+        paymentIntentId,
+        amount,
+        reason: reason === 'other' ? undefined : reason,
+        idempotencyKey,
+      });
+
+      // Persist canonical refund record for this org (fire-and-forget, non-fatal).
+      // orgId is required by the DB constraint; skip insert if absent.
+      if (orgId) {
+        void (async () => {
+          try {
+            await db
+              .insert(billingRefundRequestsTable)
+              .values({
+                orgId,
+                stripeChargeId: chargeId ?? null,
+                stripeRefundId: refund.id,
+                stripePaymentIntentId: paymentIntentId ?? null,
+                amount: amount != null ? String(amount) : null,
+                currency: refund.currency ?? 'usd',
+                reason: (reason === 'other' ? 'other' : reason) ?? 'requested_by_customer',
+                status: 'completed',
+                notes: notes ?? null,
+                idempotencyKey,
+                processedAt: new Date(),
+              })
+              .onConflictDoNothing();
+          } catch (insertErr) {
+            logger.warn({ err: insertErr }, '[billing] Failed to persist billing_refund_requests row (non-fatal)');
+          }
+        })();
+      }
+
+      void writeBillingAudit({
+        req,
+        orgId,
+        ...actorFromReq(req),
+        action: 'refund.requested',
+        resource: 'refund',
+        resourceId: refund.id,
+        stripeCustomerId: null,
+        after: { refundId: refund.id, status: refund.status, notes, idempotencyKey },
+      });
+
+      sendSuccess(res, { id: refund.id, status: refund.status });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to create refund');
+    }
+  },
+);
+
+// ─── Tax breakdown (stub) ─────────────────────────────────────────────────────
+
+router.get(
+  '/billing/tax-breakdown/:invoiceId',
+  authMiddleware(),
+  async (req: Request, res: Response) => {
+    try {
+      const invoiceId = req.params.invoiceId;
+      if (!invoiceId) {
+        sendBadRequest(res, 'invoiceId is required');
+        return;
+      }
+
+      // Tax engine integration is handled by a dedicated task. Until then
+      // return a zeroed stub so the billing-client's useTaxBreakdown hook
+      // receives a well-typed response rather than a 404.
+      sendSuccess(res, {
+        taxAmountExclusive: 0,
+        taxAmountInclusive: 0,
+        currency: 'usd',
+        jurisdiction: null,
+        taxType: null,
+        taxRate: 0,
+        invoiceId,
+        stub: true,
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to get tax breakdown');
+    }
+  },
+);
+
+// ─── Usage events ─────────────────────────────────────────────────────────────
+
+router.get(
+  '/billing/usage',
+  authMiddleware(),
+  validateQuery(listQuerySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const orgId = req.tenantOrgId;
+      if (!orgId) {
+        sendForbidden(res, 'No organization context');
+        return;
+      }
+
+      const { limit, offset, page } = parsePagination(req.query as Record<string, unknown>);
+      const featureKey = (req.query['featureKey'] as string | undefined) ?? undefined;
+
+      const rows = await db
+        .select({
+          id: usageEventsTable.id,
+          featureKey: usageEventsTable.featureKey,
+          quantity: usageEventsTable.quantity,
+          recordedAt: usageEventsTable.recordedAt,
+        })
+        .from(usageEventsTable)
+        .where(
+          featureKey
+            ? and(
+                eq(usageEventsTable.orgId, orgId),
+                eq(usageEventsTable.featureKey, featureKey),
+              )
+            : eq(usageEventsTable.orgId, orgId),
+        )
+        .orderBy(desc(usageEventsTable.recordedAt))
+        .limit(limit)
+        .offset(offset);
+
+      sendSuccess(res, rows, 200, { page, limit, offset });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to list usage events');
+    }
+  },
+);
+
+// ─── Billing audit log ────────────────────────────────────────────────────────
+// Exposes the billing_audit_log table for ops/admin review. Always org-scoped
+// so a tenant can only query their own events. super_admin may omit orgId to
+// list across all orgs (useful for global support tooling).
+
+router.get(
+  '/billing/audit',
+  authMiddleware(),
+  requireRole('ops', 'admin', 'super_admin'),
+  validateQuery(listQuerySchema),
+  async (req: Request, res: Response) => {
+    try {
+      const orgId = req.tenantOrgId;
+      const isSuperAdmin = req.user?.role === 'super_admin';
+
+      if (!orgId && !isSuperAdmin) {
+        sendForbidden(res, 'No organization context');
+        return;
+      }
+
+      const { limit, offset, page } = parsePagination(req.query as Record<string, unknown>);
+      const action = (req.query['action'] as string | undefined) ?? undefined;
+
+      const whereConditions = [
+        orgId ? eq(billingAuditLogTable.orgId, orgId) : undefined,
+        action ? eq(billingAuditLogTable.action, action) : undefined,
+      ].filter(Boolean);
+
+      const rows = await db
+        .select({
+          id: billingAuditLogTable.id,
+          orgId: billingAuditLogTable.orgId,
+          actorId: billingAuditLogTable.actorId,
+          actorEmail: billingAuditLogTable.actorEmail,
+          action: billingAuditLogTable.action,
+          resource: billingAuditLogTable.resource,
+          resourceId: billingAuditLogTable.resourceId,
+          stripeCustomerId: billingAuditLogTable.stripeCustomerId,
+          after: billingAuditLogTable.after,
+          ipAddress: billingAuditLogTable.ipAddress,
+          createdAt: billingAuditLogTable.createdAt,
+        })
+        .from(billingAuditLogTable)
+        .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+        .orderBy(desc(billingAuditLogTable.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+      sendSuccess(res, rows, 200, { page, limit, offset });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to list billing audit log');
     }
   },
 );
