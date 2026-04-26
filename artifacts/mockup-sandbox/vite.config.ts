@@ -2,7 +2,8 @@ import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
+import { sharedProxyPlugin } from '@szl-holdings/shared-proxy';
 import { sharedUiManifestPlugin } from './sharedUiManifestPlugin';
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
@@ -10,9 +11,29 @@ process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
 const port = Number(process.env.PORT) || 8008;
 const basePath = process.env.BASE_PATH || '/nexus/';
 
+function healthCheckPlugin(): Plugin {
+  return {
+    name: 'health-check',
+    apply: 'serve' as const,
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = req.url ?? '';
+        if (url === '/__health' || url === `${basePath}__health` || url.endsWith('/__health')) {
+          res.writeHead(200, { 'Content-Type': 'text/plain' });
+          res.end('OK');
+          return;
+        }
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig({
   base: basePath,
   plugins: [
+    healthCheckPlugin(),
+    sharedProxyPlugin(),
     sharedUiManifestPlugin(),
     react(),
     tailwindcss(),

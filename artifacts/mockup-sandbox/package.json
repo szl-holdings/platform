@@ -74,6 +74,7 @@
     "vaul": "^1.1.2",
     "vite": "catalog:",
     "zod": "catalog:",
+    "@szl-holdings/shared-proxy": "workspace:*",
     "@szl-holdings/shared-ui": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",
     "@szl/alloy": "workspace:*",
