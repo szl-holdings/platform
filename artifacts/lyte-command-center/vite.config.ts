@@ -7,7 +7,7 @@ import { sharedProxyPlugin } from '@szl-holdings/shared-proxy';
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
 
-const vitePort = Number(process.env.VITE_PORT) || 7099;
+const vitePort = Number(process.env.VITE_PORT ?? process.env.PORT) || 7099;
 const basePath = process.env.BASE_PATH || '/lyte/';
 
 function rootRedirectPlugin(): Plugin {

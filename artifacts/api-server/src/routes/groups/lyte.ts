@@ -16,6 +16,7 @@ const _writeLimiter = perUserWriteSlidingLimiter;
 //   - /lyte/observability/*       Observability surface (lyte-observability.ts)
 //   - /lyte/cognitive/*           Cognitive surface (lyte-cognitive.ts)
 //   - /lyte/backbone/*            Alloy backbone reference integration (lyte-backbone.ts)
+//   - /lyte/causal/*              Causal inference + daily scenario suggestions (lyte-causal.ts)
 export function register(router: IRouter): void {
   router.use('/lyte', tenantScope({ required: true }));
 
@@ -41,4 +42,9 @@ export function register(router: IRouter): void {
   // Wires Lyte through the multi-agent coordinator end-to-end.
   router.use('/lyte/backbone', _writeLimiter);
   router.use(lazyMatch('/lyte', () => import('../lyte-backbone'), 'lyte-backbone'));
+
+  // Causal inference engine + daily auto-generated scenario suggestions.
+  router.use('/lyte/causal', _readLimiter);
+  router.use('/lyte/causal/promote', _writeLimiter);
+  router.use(lazyMatch('/lyte', () => import('../lyte-causal'), 'lyte-causal'));
 }
