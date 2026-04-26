@@ -39,10 +39,15 @@ A11oy closes that gap structurally — not with policy documents, not with manua
 
 ## How A11oy Works
 
-### Seven-Layer Execution Fabric
+### Eight-Layer Execution Fabric
 
 ```
 ┌─────────────────────────────────────────────────────┐
+│  Layer 8: DOCTRINE (MYTHOS)                         │
+│  Frontier alignment governance — constitutions,     │
+│  behavioral audit, reward-hacking watchdog,         │
+│  red-team probes, agent welfare, system cards       │
+├─────────────────────────────────────────────────────┤
 │  Layer 7: PROOF LEDGER                              │
 │  Cryptographic audit trail — actor, policy, outcome │
 ├─────────────────────────────────────────────────────┤
@@ -77,6 +82,7 @@ A11oy closes that gap structurally — not with policy documents, not with manua
 | **Digital Twin Simulation** | Probabilistic modeling of downstream effects before any high-stakes action is approved |
 | **Covenant Governance** | Policy constraints that travel with every recommendation — what is permitted, what is prohibited, under what conditions |
 | **Executive Briefing** | Board-ready decision surfaces with complete attribution chains from raw signal to final outcome |
+| **Mythos Doctrine** | Layer 8 frontier-grade alignment governance — versioned constitutions, behavioral audit, reward-hacking watchdog, red-team probes, agent welfare telemetry, Glasswing transparency mode, and per-agent system cards |
 
 ### 19 Operator Surfaces
 

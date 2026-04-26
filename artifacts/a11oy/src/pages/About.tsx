@@ -9,6 +9,7 @@ const FABRIC_LAYERS = [
   { n: 5, name: 'Covenant Layer', desc: 'Enforces policy gates — no material action without approval.' },
   { n: 6, name: 'MirrorEval', desc: 'Compares recommendations against counterfactuals with citations.' },
   { n: 7, name: 'Proof Ledger', desc: 'Appends immutable, cryptographic proof for every governed execution.' },
+  { n: 8, name: 'Doctrine Layer (Mythos)', desc: 'Frontier-grade alignment governance — constitutions, behavioral audit, reward-hacking watchdog, red-team probes, agent welfare telemetry, and per-agent system cards.' },
 ];
 
 const VERTICALS = [
@@ -67,7 +68,7 @@ export function About() {
 
         {/* Fabric Layers */}
         <div>
-          <SectionTitle>The Seven Fabric Layers</SectionTitle>
+          <SectionTitle>The Eight Fabric Layers</SectionTitle>
           <div className="flex flex-col gap-2">
             {FABRIC_LAYERS.map(layer => (
               <div key={layer.n} className="flex items-start gap-3 p-3 rounded border" style={{ backgroundColor: 'var(--color-a11oy-card)', borderColor: 'var(--color-a11oy-border)' }}>

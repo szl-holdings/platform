@@ -71,6 +71,7 @@ const PRIMITIVES = [
   { name: 'Proof Chain', num: '02', desc: 'Immutable append-only ledger of every consequential action. Cryptographically verifiable. Queryable by actor or decision.' },
   { name: 'Covenant Policy', num: '03', desc: 'Policy-as-code engine that gates every action. Who can approve, when, under what conditions — enforced at the platform layer.' },
   { name: 'Outcome Graph', num: '04', desc: 'Closes the loop. Records the real-world consequence of each decision and feeds the result back to calibrate future confidence.' },
+  { name: 'Mythos Doctrine', num: '05', desc: 'Frontier-grade alignment governance — versioned constitutions, behavioral audit, reward-hacking watchdog, red-team probes, agent welfare telemetry, and per-agent system cards.' },
 ];
 
 const VERTICALS = [
@@ -377,7 +378,7 @@ export function HomePage() {
               transition={{ duration: 0.6, delay: 0.45 }}
               style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
             >
-              {['Ingest', 'Understand', 'Plan', 'Act', 'Verify', 'Audit', 'Learn'].map((chip) => (
+              {['Ingest', 'Understand', 'Plan', 'Act', 'Verify', 'Audit', 'Learn', 'Doctrine'].map((chip) => (
                 <span key={chip} style={{
                   padding: '0.4rem 0.875rem', borderRadius: 8,
                   fontSize: '0.8125rem', fontWeight: 500,

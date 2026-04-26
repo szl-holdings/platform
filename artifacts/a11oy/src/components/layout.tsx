@@ -98,6 +98,24 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'DOCTRINE',
+    items: [
+      { href: '/doctrine',              label: 'Mythos Overview' },
+      { href: '/risk-reports',           label: 'Risk Reports' },
+      { href: '/behavioral-audit',       label: 'Behavioral Audit' },
+      { href: '/covenant-lift',          label: 'Covenant Lift' },
+      { href: '/code-behaviors',         label: 'Code Behaviors' },
+      { href: '/reward-hacking',         label: 'Reward Hacking' },
+      { href: '/alignment-review',       label: 'Alignment Review' },
+      { href: '/snapshot-provenance',    label: 'Snapshot Provenance' },
+      { href: '/ai-user-turn',           label: 'AI-User Turn' },
+      { href: '/welfare',                label: 'Agent Welfare' },
+      { href: '/red-team',               label: 'Red Team' },
+      { href: '/glasswing',              label: 'Glasswing Mode' },
+      { href: '/capability-trajectory',  label: 'Capability Trajectory' },
+    ],
+  },
+  {
     label: 'TRUST',
     items: [
       { href: '/trust',         label: 'Trust Center' },

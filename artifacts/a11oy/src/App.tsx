@@ -90,6 +90,20 @@ const VoiceSection = lazy(() => import('./pages/VoiceSection').then(m => ({ defa
 const LibrarySection = lazy(() => import('./pages/LibrarySection').then(m => ({ default: m.LibrarySection })));
 const ReleasesSection = lazy(() => import('./pages/ReleasesSection').then(m => ({ default: m.ReleasesSection })));
 const AuditSection = lazy(() => import('./pages/AuditSection').then(m => ({ default: m.AuditSection })));
+const DoctrineOverview = lazy(() => import('./pages/DoctrineOverview').then(m => ({ default: m.DoctrineOverview })));
+const RiskReports = lazy(() => import('./pages/RiskReports').then(m => ({ default: m.RiskReports })));
+const BehavioralAudit = lazy(() => import('./pages/BehavioralAudit').then(m => ({ default: m.BehavioralAudit })));
+const CovenantLift = lazy(() => import('./pages/CovenantLift').then(m => ({ default: m.CovenantLift })));
+const CodeBehaviors = lazy(() => import('./pages/CodeBehaviors').then(m => ({ default: m.CodeBehaviors })));
+const RewardHacking = lazy(() => import('./pages/RewardHacking').then(m => ({ default: m.RewardHacking })));
+const AlignmentReview = lazy(() => import('./pages/AlignmentReview').then(m => ({ default: m.AlignmentReview })));
+const SnapshotProvenance = lazy(() => import('./pages/SnapshotProvenance').then(m => ({ default: m.SnapshotProvenance })));
+const AIUserTurn = lazy(() => import('./pages/AIUserTurn').then(m => ({ default: m.AIUserTurn })));
+const AgentWelfare = lazy(() => import('./pages/AgentWelfare').then(m => ({ default: m.AgentWelfare })));
+const RedTeam = lazy(() => import('./pages/RedTeam').then(m => ({ default: m.RedTeam })));
+const GlasswingPage = lazy(() => import('./pages/Glasswing').then(m => ({ default: m.Glasswing })));
+const SystemCard = lazy(() => import('./pages/SystemCard').then(m => ({ default: m.SystemCard })));
+const CapabilityTrajectory = lazy(() => import('./pages/CapabilityTrajectory').then(m => ({ default: m.CapabilityTrajectory })));
 
 export default function App() {
   return (
@@ -156,6 +170,20 @@ export default function App() {
         <Route path={`${base}/frontier`} component={FrontierIntelligence} />
         <Route path={`${base}/approval-queue`} component={ApprovalQueue} />
         <Route path={`${base}/verifier`} component={VerifierAgent} />
+        <Route path={`${base}/doctrine`} component={DoctrineOverview} />
+        <Route path={`${base}/risk-reports`} component={RiskReports} />
+        <Route path={`${base}/behavioral-audit`} component={BehavioralAudit} />
+        <Route path={`${base}/covenant-lift`} component={CovenantLift} />
+        <Route path={`${base}/code-behaviors`} component={CodeBehaviors} />
+        <Route path={`${base}/reward-hacking`} component={RewardHacking} />
+        <Route path={`${base}/alignment-review`} component={AlignmentReview} />
+        <Route path={`${base}/snapshot-provenance`} component={SnapshotProvenance} />
+        <Route path={`${base}/ai-user-turn`} component={AIUserTurn} />
+        <Route path={`${base}/welfare`} component={AgentWelfare} />
+        <Route path={`${base}/red-team`} component={RedTeam} />
+        <Route path={`${base}/glasswing`} component={GlasswingPage} />
+        <Route path={`${base}/system-card/:id`} component={SystemCard} />
+        <Route path={`${base}/capability-trajectory`} component={CapabilityTrajectory} />
         <Route path={`${base}/atlas`}>
           <WithShell><AtlasSection /></WithShell>
         </Route>

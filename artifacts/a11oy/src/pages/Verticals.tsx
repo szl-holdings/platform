@@ -21,7 +21,7 @@ export function Verticals() {
       <PageHeader
         label="ENTERPRISE VERTICALS"
         title="Vertical Coverage Map"
-        subtitle="A11oy operates across 7 enterprise verticals. Each vertical has dedicated agent operators, signal schemas, governance policies, and proof coverage."
+        subtitle="A11oy operates across 7 enterprise verticals. Each vertical has dedicated agent operators, signal schemas, governance policies, proof coverage, and Mythos Doctrine alignment governance."
         status="LIVE"
       />
 

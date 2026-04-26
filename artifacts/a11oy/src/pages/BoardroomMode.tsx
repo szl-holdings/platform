@@ -49,6 +49,7 @@ const INITIAL_DATA: BoardroomData = {
     'Full proof chain — SHA-256 hash-verified',
     'Narrative generation from structured evidence',
     'Boardroom-ready PDF export (production posture)',
+    'Mythos Doctrine L8 — per-agent system cards, behavioral audit, alignment review',
   ],
   packets: [
     {

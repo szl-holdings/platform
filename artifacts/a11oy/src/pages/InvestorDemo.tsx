@@ -145,6 +145,19 @@ const STAGES = [
   },
   {
     step: 11,
+    title: 'Mythos Doctrine — Frontier Alignment Governance',
+    category: 'GOVERNANCE',
+    body: 'Layer 8 of the A11oy fabric. Every agent carries a versioned constitution, behavioral audit trail, reward-hacking watchdog, and per-agent system card. Red-team probes run continuously. Glasswing mode exposes full reasoning chains to auditors in real time.',
+    metrics: [
+      { label: 'Capabilities', value: '14', sub: 'Cross-cutting governance' },
+      { label: 'Constitutions', value: 'Versioned', sub: 'Per agent, auditable' },
+      { label: 'Red-Team', value: 'Continuous', sub: 'Automated adversarial probing' },
+    ],
+    highlight: 'The only enterprise AI platform with built-in behavioral audit, reward-hacking watchdog, and agent welfare telemetry.',
+    type: 'governance',
+  },
+  {
+    step: 12,
     title: 'Go-to-Market — Land & Expand',
     category: 'BUSINESS',
     body: 'A11oy sells to enterprise operational leaders — COOs, General Counsels, CFOs, and CTOs. Land with a single domain (e.g., maritime or legal), prove ROI in 90 days, expand to 3–5 domains. ACVs range from $200K to $2M.',
@@ -157,7 +170,7 @@ const STAGES = [
     type: 'business',
   },
   {
-    step: 12,
+    step: 13,
     title: 'The Ask — Seed Round',
     category: 'INVESTMENT',
     body: 'We are raising a $4M seed round to fund 18 months of product development, 3 pilot enterprise customers, and a team of 6. The capital funds: SOC 2 certification, production deployment layer, and enterprise connector library expansion.',
@@ -174,8 +187,8 @@ const STAGES = [
 const CAT_COLORS: Record<string, string> = {
   MARKET: '#f5f5f5', PRODUCT: '#8a8a8a', ARCHITECTURE: '#c9b787',
   GOVERNANCE: '#c9b787', SECURITY: '#c9b787', INTELLIGENCE: '#8a8a8a',
-  COMPLIANCE: '#b08d52', EXECUTIVE: '#c9b787', BUSINESS: '#8a8a8a',
-  INVESTMENT: '#c9b787',
+  COMPLIANCE: '#b08d52', EXECUTIVE: '#c9b787', DOCTRINE: '#c9b787',
+  BUSINESS: '#8a8a8a', INVESTMENT: '#c9b787',
 };
 const TYPE_BG: Record<string, string> = {
   problem: 'rgba(245,245,245,0.04)', solution: 'rgba(138,138,138,0.04)',
