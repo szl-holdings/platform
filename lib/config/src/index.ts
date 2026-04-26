@@ -60,6 +60,34 @@ export function getOptionalEnv(key: string, fallback: string = ''): string {
   return process.env[key] ?? fallback;
 }
 
+function coerceFlag(raw: unknown): boolean {
+  if (raw == null) return false;
+  const value = String(raw).trim().toLowerCase();
+  if (value === '' || value === 'false' || value === '0' || value === 'no' || value === 'off') {
+    return false;
+  }
+  return true;
+}
+
+export interface EnvFeatureFlagSnapshot {
+  vesselsCommercial: boolean;
+  aegisExtendedModules: boolean;
+}
+
+export function readEnvFeatureFlags(
+  env: Record<string, unknown> | undefined,
+): EnvFeatureFlagSnapshot {
+  const safeEnv = env ?? {};
+  return {
+    vesselsCommercial:
+      coerceFlag(safeEnv.VITE_FEATURE_VESSELS_COMMERCIAL) ||
+      coerceFlag(safeEnv.FEATURE_VESSELS_COMMERCIAL),
+    aegisExtendedModules:
+      coerceFlag(safeEnv.VITE_FEATURE_AEGIS_EXTENDED_MODULES) ||
+      coerceFlag(safeEnv.FEATURE_AEGIS_EXTENDED_MODULES),
+  };
+}
+
 export const APP_INTEGRATIONS: Record<
   string,
   { connectors: string[]; description: string; liveFeeds?: string[]; doctrineRole?: string }
