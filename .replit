@@ -46,6 +46,10 @@ args = "artifacts/pluginmesh: web"
 task = "workflow.run"
 args = "praxis-smoke-e2e"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "GI Design System Storybook"
+
 [[workflows.workflow]]
 name = "artifacts/lyte-command-center: web"
 author = "agent"
@@ -113,6 +117,18 @@ args = "set -e; pnpm --filter @workspace/mockup-sandbox run build && rm -rf /tmp
 
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow]]
+name = "GI Design System Storybook"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pnpm --filter @workspace/storybook run dev"
+waitForPort = 6800
 
 [agent]
 stack = "PNPM_WORKSPACE"
