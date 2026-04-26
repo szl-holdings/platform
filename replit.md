@@ -51,7 +51,13 @@ The platform is a pnpm monorepo built with TypeScript 5.9, React 19, Vite, and N
 
 **KORA – Decision Intelligence:** Flagship application for executive narratives, signal feeds, and decision centers.
 
-**Brand Mapping:** Legacy codenames for artifact directories are mapped to canonical brand names (e.g., `aegis` → **PARAGON**, `sentra` → **TENAX**, `terra` → **DOMAINE**, `lyte-command-center` → **KORA**, `vessels` → **SEXTANT**, `mockup-sandbox` / `nexus` → **PRAXIS**, `pulse` → **LUMINA**).
+**Brand Mapping:** Legacy codenames for artifact directories are mapped to canonical brand names (e.g., `aegis` → **PARAGON** (now merged into Sentra), `sentra` → **TENAX**, `terra` → **DOMAINE**, `lyte-command-center` → **KORA**, `vessels` → **SEXTANT**, `mockup-sandbox` / `nexus` → **PRAXIS**, `pulse` → **LUMINA**).
+
+**Aegis → Sentra Full Merge (Completed):** All 118 Aegis pages, 9 components, 3 data files, 8 lib files, and the investor slide deck have been fully merged into Sentra, creating a mega cybersecurity platform with 231 total page files. Sentra now contains: SOC Operations (13 modules), Threat Intelligence (14 modules), Response & Automation (6), War Room & Exercises (6), Digital Twin & ATLAS (4), Agent Mesh (5), EDR & SIEM (2), Compliance & Risk (13), Research Intelligence (8 — including DARPA MTO Innovation Hub and PQC Readiness), Governance (10), Adversarial Simulation (3), plus Core pages and the investor deck. The landing page has been redesigned to a minimalistic OpenAI/Anthropic-inspired style with a11oy orchestration branding throughout. Aegis artifact is now archived/superseded by Sentra.
+
+**DARPA MTO Innovation Hub (`/intel/darpa-mto`):** Maps 13 DARPA Microsystems Technology Office research domains (4 active programs, 9 under incubation) to a11oy cybersecurity applications. Covers photonic inference, post-quantum cryptography, skyrmion memory, circuits-on-demand, nanofluidic computing, optical comms, 3D heterogeneous integration, flexoelectric sensors, molecular machines, directed energy, bio-hybrid sensing, physical intelligence in materials, and lunar supply chain security. Each domain includes TRL rating, key breakthroughs, a11oy integration strategy, top GitHub repos, and publications. Data layer in `darpa-mto-research.ts`.
+
+**Post-Quantum Cryptography Readiness (`/intel/pqc-readiness`):** Tracks quantum-resistant cryptography migration across the a11oy governance ecosystem. Covers NIST FIPS 203 (ML-KEM), FIPS 204 (ML-DSA), FIPS 205 (SLH-DSA), and draft FIPS 206 (FN-DSA). Displays ecosystem migration status for 8 subsystems (Agent Mesh TLS, Proof Chain, Evidence Ledger, Covenant Attestation, Agent Identity, Archival Signing, Hash Commitments, Session Tokens), 4-phase migration roadmap, and harvest-now-decrypt-later risk assessment.
 
 **AI Provenance & Explainability Contract:** Every AI-generated output carries a `ProvenanceEnvelope` with essential metadata.
 

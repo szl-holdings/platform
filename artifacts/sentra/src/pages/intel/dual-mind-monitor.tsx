@@ -1,0 +1,511 @@
+import { cn } from '@szl-holdings/shared-ui/utils';
+import {
+  Activity,
+  AlertCircle,
+  CheckCircle2,
+  Moon,
+  Sun,
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+
+interface ReflexiveAction {
+  id: string;
+  timestamp: Date;
+  agent: string;
+  action: string;
+  trigger: string;
+  latency: number;
+  outcome: 'completed' | 'escalated' | 'blocked';
+}
+
+interface DeliberativeTask {
+  id: string;
+  agent: string;
+  task: string;
+  stage: 'gathering' | 'analyzing' | 'synthesizing' | 'delivering';
+  progress: number;
+  startedAt: Date;
+  estimatedComplete: string;
+  depth: 'shallow' | 'medium' | 'deep';
+}
+
+const REFLEXIVE_ACTIONS_SEED: ReflexiveAction[] = [
+  {
+    id: 'ia1',
+    timestamp: new Date(Date.now() - 8000),
+    agent: 'Maritime Analyst',
+    action: 'Flagged dark vessel transition — MV Adriatic Star',
+    trigger: 'AIS gap > 4h',
+    latency: 340,
+    outcome: 'completed',
+  },
+  {
+    id: 'ia2',
+    timestamp: new Date(Date.now() - 18000),
+    agent: 'IT Sentinel',
+    action: 'Auto-triaged P1 ticket #TKT-4821 to on-call engineer',
+    trigger: 'CPU spike > 94%',
+    latency: 210,
+    outcome: 'completed',
+  },
+  {
+    id: 'ia3',
+    timestamp: new Date(Date.now() - 34000),
+    agent: 'Security Sentinel',
+    action: 'Blocked agent action: external API write without policy token',
+    trigger: 'Policy violation',
+    latency: 45,
+    outcome: 'blocked',
+  },
+  {
+    id: 'ia4',
+    timestamp: new Date(Date.now() - 51000),
+    agent: 'Brand Monitor',
+    action: 'Sent reputation alert for negative Forbes mention',
+    trigger: 'Sentiment < -0.7',
+    latency: 180,
+    outcome: 'completed',
+  },
+  {
+    id: 'ia5',
+    timestamp: new Date(Date.now() - 78000),
+    agent: 'Creative Director',
+    action: 'Escalated campaign anomaly to human review',
+    trigger: 'CTR drop > 40%',
+    latency: 290,
+    outcome: 'escalated',
+  },
+];
+
+const DELIBERATIVE_TASKS: DeliberativeTask[] = [
+  {
+    id: 'mq1',
+    agent: 'Portfolio Analyst',
+    task: 'Q1 2026 ecosystem health synthesis — 12 apps, 6 Lenses across all domains',
+    stage: 'synthesizing',
+    progress: 78,
+    startedAt: new Date(Date.now() - 840000),
+    estimatedComplete: '12 min',
+    depth: 'deep',
+  },
+  {
+    id: 'mq2',
+    agent: 'Advisory Agent',
+    task: 'Competitive landscape analysis: SZL vs. emerging PE-tech firms in advisory automation',
+    stage: 'analyzing',
+    progress: 45,
+    startedAt: new Date(Date.now() - 1200000),
+    estimatedComplete: '28 min',
+    depth: 'deep',
+  },
+  {
+    id: 'mq3',
+    agent: 'IT Sentinel',
+    task: 'Predictive model: infrastructure failure probability for next 7-day window based on 90-day patterns',
+    stage: 'gathering',
+    progress: 22,
+    startedAt: new Date(Date.now() - 300000),
+    estimatedComplete: '1h 10m',
+    depth: 'medium',
+  },
+  {
+    id: 'mq4',
+    agent: 'Deal Scout',
+    task: 'Miami Beach micro-market scenario modeling: 3 economic conditions × 5 property types',
+    stage: 'analyzing',
+    progress: 61,
+    startedAt: new Date(Date.now() - 960000),
+    estimatedComplete: '18 min',
+    depth: 'deep',
+  },
+  {
+    id: 'mq5',
+    agent: 'Intelligence Router',
+    task: 'Intelligence mesh optimization: re-routing analysis to reduce avg relay latency by 15%',
+    stage: 'delivering',
+    progress: 94,
+    startedAt: new Date(Date.now() - 2400000),
+    estimatedComplete: '4 min',
+    depth: 'shallow',
+  },
+];
+
+function generateReflexiveAction(): ReflexiveAction {
+  const actions = [
+    {
+      agent: 'Maritime Analyst',
+      action: 'Real-time vessel reroute advisory issued',
+      trigger: 'Storm system approaching',
+    },
+    {
+      agent: 'IT Sentinel',
+      action: 'Auto-resolved memory leak on MSP-DB-03',
+      trigger: 'Memory > 92% for 5min',
+    },
+    {
+      agent: 'Security Sentinel',
+      action: 'Policy check passed — agent action approved',
+      trigger: 'Routine audit',
+    },
+    {
+      agent: 'Creative Director',
+      action: 'Paused underperforming ad set #AD-2847',
+      trigger: 'ROAS < 1.2x',
+    },
+    {
+      agent: 'Brand Monitor',
+      action: 'Captured and logged viral mention — Tech Crunch',
+      trigger: 'Reach threshold exceeded',
+    },
+    {
+      agent: 'Portfolio Analyst',
+      action: 'Health score recalculated — Vessels: 84 → 87',
+      trigger: 'Metric refresh cycle',
+    },
+  ];
+  const outcomes: ReflexiveAction['outcome'][] = [
+    'completed',
+    'completed',
+    'completed',
+    'escalated',
+    'blocked',
+  ];
+  const choice = actions[Math.floor(Math.random() * actions.length)];
+  return {
+    id: Math.random().toString(36).slice(2, 8),
+    timestamp: new Date(),
+    ...choice,
+    latency: 50 + Math.floor(Math.random() * 450),
+    outcome: outcomes[Math.floor(Math.random() * outcomes.length)],
+  };
+}
+
+const STAGE_CONFIG = {
+  gathering: {
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
+    bar: 'bg-[#c9b787]',
+    label: 'Gathering data',
+  },
+  analyzing: {
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
+    bar: 'bg-[#c9b787]',
+    label: 'Analyzing',
+  },
+  synthesizing: {
+    color: 'text-[#8a8a8a]',
+    bg: 'bg-[#8a8a8a]/10',
+    bar: 'bg-[#8a8a8a]',
+    label: 'Synthesizing',
+  },
+  delivering: {
+    color: 'text-[#c9b787]',
+    bg: 'bg-[#c9b787]/10',
+    bar: 'bg-[#c9b787]',
+    label: 'Delivering',
+  },
+};
+
+const DEPTH_CONFIG = {
+  shallow: { label: 'Shallow', color: 'text-[#8a8a8a]' },
+  medium: { label: 'Medium', color: 'text-[#c9b787]' },
+  deep: { label: 'Deep', color: 'text-[#8a8a8a]' },
+};
+
+export default function DualMindMonitor() {
+  const [reflexiveActions, setReflexiveActions] = useState<ReflexiveAction[]>(REFLEXIVE_ACTIONS_SEED);
+  const [deliberativeTasks] = useState<DeliberativeTask[]>(DELIBERATIVE_TASKS);
+  const [_tick, setTick] = useState(0);
+  const counterRef = useRef(0);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setTick((k) => k + 1);
+      counterRef.current++;
+      if (counterRef.current % 4 === 0) {
+        setReflexiveActions((prev) => [generateReflexiveAction(), ...prev.slice(0, 14)]);
+      }
+    }, 1500);
+    return () => clearInterval(t);
+  }, []);
+
+  const reflexiveStats = {
+    total: reflexiveActions.length,
+    completed: reflexiveActions.filter((a) => a.outcome === 'completed').length,
+    blocked: reflexiveActions.filter((a) => a.outcome === 'blocked').length,
+    escalated: reflexiveActions.filter((a) => a.outcome === 'escalated').length,
+    avgLatency: Math.round(reflexiveActions.reduce((s, a) => s + a.latency, 0) / reflexiveActions.length),
+  };
+
+  const deliberativeStats = {
+    total: deliberativeTasks.length,
+    inProgress: deliberativeTasks.filter((t) => t.stage !== 'delivering').length,
+    delivering: deliberativeTasks.filter((t) => t.stage === 'delivering').length,
+    avgProgress: Math.round(
+      deliberativeTasks.reduce((s, t) => s + t.progress, 0) / deliberativeTasks.length,
+    ),
+  };
+
+  const outcomeStyle = (outcome: ReflexiveAction['outcome']) =>
+    ({
+      completed: { icon: CheckCircle2, color: 'text-[#c9b787]' },
+      escalated: { icon: AlertCircle, color: 'text-[#c9b787]' },
+      blocked: { icon: AlertCircle, color: 'text-[#f5f5f5]' },
+    })[outcome];
+
+  return (
+    <div className="p-6 lg:p-8 space-y-6 max-w-[1600px]">
+      {/* Header */}
+      <div>
+        <div className="flex items-center gap-3 mb-1">
+          <div className="flex items-center gap-1">
+            <div className="w-8 h-8 rounded-lg bg-[#c9b787]/15 flex items-center justify-center">
+              <Sun className="w-4 h-4 text-[#c9b787]" />
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-[#8a8a8a]/15 flex items-center justify-center">
+              <Moon className="w-4 h-4 text-[#8a8a8a]" />
+            </div>
+          </div>
+          <h1 className="text-xl font-display font-bold text-foreground tracking-tight">
+            Dual-Mind Monitor
+          </h1>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          <span className="text-[#c9b787]">Reflexive Reasoning</span> (System 1) — fast reflexive
+          responses happening right now. &nbsp;
+          <span className="text-[#8a8a8a]">Deliberate Reasoning</span> (System 2) — deep analytical
+          tasks in progress.
+        </p>
+      </div>
+
+      {/* Split view */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Reflexive Reasoning — System 1 */}
+        <div className="bg-gradient-to-br from-yellow-500/5 via-orange-500/3 to-transparent border border-[#c9b787]/20 rounded-xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-[#c9b787]/15">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2.5">
+                <Sun className="w-5 h-5 text-[#c9b787]" />
+                <div>
+                  <h2 className="text-sm font-display font-bold text-[#c9b787]">
+                    Reflexive Reasoning — System 1
+                  </h2>
+                  <p className="text-[10px] text-muted-foreground">Reflexive real-time actions</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#c9b787] animate-pulse" />
+                <span className="text-[10px] font-mono text-[#c9b787]">ACTIVE</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { label: 'Actions', value: reflexiveStats.total, color: 'text-foreground' },
+                { label: 'Completed', value: reflexiveStats.completed, color: 'text-[#c9b787]' },
+                { label: 'Escalated', value: reflexiveStats.escalated, color: 'text-[#c9b787]' },
+                {
+                  label: 'Avg Latency',
+                  value: `${reflexiveStats.avgLatency}ms`,
+                  color: 'text-[#8a8a8a]',
+                },
+              ].map((s) => (
+                <div key={s.label} className="text-center">
+                  <p className={cn('text-lg font-display font-bold', s.color)}>{s.value}</p>
+                  <p className="text-[9px] text-muted-foreground font-mono">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="divide-y divide-yellow-400/5 max-h-96 overflow-y-auto">
+            {reflexiveActions.map((action, i) => {
+              const os = outcomeStyle(action.outcome);
+              const OutcomeIcon = os.icon;
+              return (
+                <div
+                  key={action.id}
+                  className={cn(
+                    'px-4 py-3 hover:bg-[#c9b787]/3 transition-all',
+                    i === 0 ? 'bg-[#c9b787]/5' : '',
+                  )}
+                >
+                  <div className="flex items-start gap-2.5">
+                    <OutcomeIcon className={cn('w-3.5 h-3.5 shrink-0 mt-0.5', os.color)} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-foreground leading-snug">
+                        {action.action}
+                      </p>
+                      <div className="flex items-center gap-3 mt-0.5">
+                        <span className="text-[10px] text-muted-foreground font-mono">
+                          {action.agent}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground/50">·</span>
+                        <span className="text-[10px] text-muted-foreground/60">
+                          {action.trigger}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-[10px] font-mono text-muted-foreground">
+                        {action.latency}ms
+                      </p>
+                      <p className="text-[9px] text-muted-foreground/50">
+                        {Math.round((Date.now() - action.timestamp.getTime()) / 1000)}s ago
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Deliberate Reasoning — System 2 */}
+        <div className="bg-gradient-to-br from-indigo-500/5 via-violet-500/3 to-transparent border border-indigo-400/20 rounded-xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-indigo-400/15">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2.5">
+                <Moon className="w-5 h-5 text-[#8a8a8a]" />
+                <div>
+                  <h2 className="text-sm font-display font-bold text-[#8a8a8a]">
+                    Deliberate Reasoning — System 2
+                  </h2>
+                  <p className="text-[10px] text-muted-foreground">
+                    Deep analytical reasoning in progress
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#8a8a8a] animate-pulse" />
+                <span className="text-[10px] font-mono text-[#8a8a8a]">THINKING</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: 'Tasks', value: deliberativeStats.total, color: 'text-foreground' },
+                { label: 'In Progress', value: deliberativeStats.inProgress, color: 'text-[#8a8a8a]' },
+                {
+                  label: 'Avg Progress',
+                  value: `${deliberativeStats.avgProgress}%`,
+                  color: 'text-[#8a8a8a]',
+                },
+              ].map((s) => (
+                <div key={s.label} className="text-center">
+                  <p className={cn('text-lg font-display font-bold', s.color)}>{s.value}</p>
+                  <p className="text-[9px] text-muted-foreground font-mono">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="p-4 space-y-4">
+            {deliberativeTasks.map((task) => {
+              const stage = STAGE_CONFIG[task.stage];
+              const depth = DEPTH_CONFIG[task.depth];
+              return (
+                <div
+                  key={task.id}
+                  className="bg-[#8a8a8a]/5 rounded-xl border border-indigo-400/10 p-4"
+                >
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-foreground mb-0.5">{task.agent}</p>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">
+                        {task.task}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0 ml-2">
+                      <span
+                        className={cn(
+                          'text-[10px] font-mono px-1.5 py-0.5 rounded',
+                          stage.bg,
+                          stage.color,
+                        )}
+                      >
+                        {stage.label}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-[10px]">
+                      <span className="text-muted-foreground font-mono">
+                        {task.progress}% complete
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={cn('font-mono', depth.color)}>depth: {depth.label}</span>
+                        <span className="text-muted-foreground/50">·</span>
+                        <span className="text-muted-foreground font-mono">
+                          ETA: {task.estimatedComplete}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="h-1.5 bg-border rounded-full overflow-hidden">
+                      <div
+                        className={cn(
+                          'h-full rounded-full transition-all duration-[2000ms]',
+                          stage.bar,
+                        )}
+                        style={{ width: `${task.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* System comparison */}
+      <div className="bg-card/60 border border-border rounded-xl p-5">
+        <h3 className="text-sm font-display font-semibold text-foreground mb-4 flex items-center gap-2">
+          <Activity className="w-3.5 h-3.5 text-primary" />
+          Dual-Mind Architecture — Design Philosophy
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-[#c9b787]/5 border border-[#c9b787]/15 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Sun className="w-4 h-4 text-[#c9b787]" />
+              <h4 className="text-xs font-bold text-[#c9b787]">Reflexive Reasoning · System 1</h4>
+            </div>
+            <div className="space-y-1.5 text-[11px] text-muted-foreground">
+              {[
+                'Responds in milliseconds — no waiting for analysis',
+                'Triggered by threshold breaches, anomalies, real-time events',
+                'Auto-remediation, alerts, routing, escalation',
+                'Low latency, high frequency, narrow scope',
+                'Operates instinctively — like a reflex arc',
+              ].map((item) => (
+                <div key={item} className="flex items-start gap-1.5">
+                  <span className="text-[#c9b787]/60 mt-0.5">→</span>
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="bg-[#8a8a8a]/5 border border-indigo-400/15 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Moon className="w-4 h-4 text-[#8a8a8a]" />
+              <h4 className="text-xs font-bold text-[#8a8a8a]">
+                Deliberate Reasoning · System 2
+              </h4>
+            </div>
+            <div className="space-y-1.5 text-[11px] text-muted-foreground">
+              {[
+                'Takes minutes to hours — deliberate, thorough analysis',
+                'Triggered by scheduled cycles, strategic questions, escalations',
+                'Trend analysis, scenario modeling, strategic recommendations',
+                'High quality, long-form outputs, broad scope',
+                'Operates analytically — like deep strategic planning',
+              ].map((item) => (
+                <div key={item} className="flex items-start gap-1.5">
+                  <span className="text-[#8a8a8a]/60 mt-0.5">→</span>
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

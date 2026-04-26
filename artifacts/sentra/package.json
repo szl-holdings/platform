@@ -52,6 +52,13 @@
     "@szl-holdings/offline-engine": "workspace:*",
     "@szl-holdings/brand-registry": "workspace:*",
     "@szl-holdings/omnia-shell": "workspace:*",
-    "@workspace/tokens": "workspace:*"
+    "@workspace/tokens": "workspace:*",
+    "@szl-holdings/config": "workspace:*",
+    "@szl-holdings/domain-claims": "workspace:*",
+    "@szl-holdings/env": "workspace:*",
+    "framer-motion": "^12.12.2",
+    "recharts": "^2.15.3",
+    "@szl-holdings/api-client-react": "workspace:*",
+    "@workspace/aef-sdk": "workspace:*"
   }
 }

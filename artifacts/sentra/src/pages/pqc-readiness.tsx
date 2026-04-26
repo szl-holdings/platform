@@ -1,0 +1,351 @@
+import { cn } from '@szl-holdings/shared-ui/utils';
+import {
+  AlertTriangle,
+  ArrowRight,
+  Check,
+  Clock,
+  ExternalLink,
+  Key,
+  Lock,
+  ShieldCheck,
+  X,
+} from 'lucide-react';
+import { useState } from 'react';
+
+type AlgorithmStatus = 'deployed' | 'in-progress' | 'planned' | 'not-started';
+
+type PqcStandard = {
+  fips: string;
+  name: string;
+  formerly: string;
+  purpose: string;
+  basis: string;
+  securityLevels: string[];
+  status: AlgorithmStatus;
+  deployedIn: string[];
+  planned: string[];
+};
+
+type MigrationPhase = {
+  phase: string;
+  status: AlgorithmStatus;
+  tasks: string[];
+};
+
+type EcoSystem = {
+  system: string;
+  current: string;
+  target: string;
+  status: AlgorithmStatus;
+};
+
+const STATUS_CONFIG: Record<AlgorithmStatus, { label: string; icon: typeof Check; color: string }> = {
+  deployed: { label: 'Deployed', icon: Check, color: 'text-emerald-400' },
+  'in-progress': { label: 'In Progress', icon: Clock, color: 'text-amber-400' },
+  planned: { label: 'Planned', icon: ArrowRight, color: 'text-blue-400' },
+  'not-started': { label: 'Not Started', icon: X, color: 'text-white/25' },
+};
+
+const PQC_STANDARDS: PqcStandard[] = [
+  {
+    fips: 'FIPS 203',
+    name: 'ML-KEM',
+    formerly: 'CRYSTALS-Kyber',
+    purpose: 'Key Encapsulation',
+    basis: 'Module-Lattice (MLWE)',
+    securityLevels: ['ML-KEM-512 (128-bit)', 'ML-KEM-768 (192-bit)', 'ML-KEM-1024 (256-bit)'],
+    status: 'in-progress',
+    deployedIn: ['Agent mesh inter-node TLS (hybrid X25519MLKEM768)', 'Proof chain key wrapping'],
+    planned: ['Evidence ledger encryption', 'Covenant attestation key exchange'],
+  },
+  {
+    fips: 'FIPS 204',
+    name: 'ML-DSA',
+    formerly: 'CRYSTALS-Dilithium',
+    purpose: 'Digital Signatures',
+    basis: 'Module-Lattice (MLWE + SelfTargetMSIS)',
+    securityLevels: ['ML-DSA-44 (128-bit)', 'ML-DSA-65 (192-bit)', 'ML-DSA-87 (256-bit)'],
+    status: 'planned',
+    deployedIn: [],
+    planned: ['Governance covenant signatures', 'Agent identity attestation', 'Audit trail signing'],
+  },
+  {
+    fips: 'FIPS 205',
+    name: 'SLH-DSA',
+    formerly: 'SPHINCS+',
+    purpose: 'Hash-Based Signatures',
+    basis: 'Stateless Hash-Based',
+    securityLevels: ['SLH-DSA-128s/f', 'SLH-DSA-192s/f', 'SLH-DSA-256s/f'],
+    status: 'planned',
+    deployedIn: [],
+    planned: ['Long-term evidence archival signatures', 'Root CA backup signatures'],
+  },
+  {
+    fips: 'FIPS 206 (draft)',
+    name: 'FN-DSA',
+    formerly: 'FALCON',
+    purpose: 'Compact Lattice Signatures',
+    basis: 'FFT NTRU-Based',
+    securityLevels: ['FN-DSA-512 (128-bit)', 'FN-DSA-1024 (256-bit)'],
+    status: 'not-started',
+    deployedIn: [],
+    planned: ['Compact agent-to-agent signatures (bandwidth-constrained channels)'],
+  },
+];
+
+const MIGRATION_PHASES: MigrationPhase[] = [
+  {
+    phase: 'Phase 1: Inventory & Assessment',
+    status: 'deployed',
+    tasks: [
+      'Catalog all cryptographic primitives across a11oy ecosystem',
+      'Identify quantum-vulnerable algorithms (RSA, ECDSA, ECDH, DH)',
+      'Map key lifetimes and data sensitivity classifications',
+      'Assess third-party integration crypto dependencies',
+    ],
+  },
+  {
+    phase: 'Phase 2: Hybrid Deployment',
+    status: 'in-progress',
+    tasks: [
+      'Deploy hybrid X25519MLKEM768 for agent mesh TLS',
+      'Dual-sign governance attestations (classical + PQC)',
+      'Upgrade Proof Chain key wrapping to ML-KEM-768',
+      'Monitor for performance regression in hybrid mode',
+    ],
+  },
+  {
+    phase: 'Phase 3: Full PQC Migration',
+    status: 'planned',
+    tasks: [
+      'Migrate all evidence ledger encryption to ML-KEM-1024',
+      'Replace ECDSA covenant signatures with ML-DSA-65',
+      'Deploy SLH-DSA for long-term archival signing',
+      'Remove classical-only code paths',
+    ],
+  },
+  {
+    phase: 'Phase 4: Validation & Certification',
+    status: 'not-started',
+    tasks: [
+      'FIPS 140-3 validation for PQC module boundary',
+      'Penetration testing against harvest-now-decrypt-later',
+      'Performance benchmarking across all security levels',
+      'Third-party cryptographic audit',
+    ],
+  },
+];
+
+const ECOSYSTEM_STATUS: EcoSystem[] = [
+  { system: 'Agent Mesh TLS', current: 'X25519 + AES-256-GCM', target: 'X25519MLKEM768 + AES-256-GCM', status: 'in-progress' },
+  { system: 'Proof Chain Signatures', current: 'Ed25519', target: 'ML-DSA-65 (hybrid)', status: 'planned' },
+  { system: 'Evidence Ledger Encryption', current: 'AES-256-GCM / X25519', target: 'ML-KEM-1024 / AES-256-GCM', status: 'planned' },
+  { system: 'Covenant Attestation', current: 'ECDSA P-256', target: 'ML-DSA-65', status: 'planned' },
+  { system: 'Agent Identity Tokens', current: 'Ed25519 keypairs', target: 'ML-DSA-44 keypairs', status: 'planned' },
+  { system: 'Archival Signing', current: 'Ed25519', target: 'SLH-DSA-256s', status: 'not-started' },
+  { system: 'MirrorEval Hash Commitments', current: 'SHA-256', target: 'SHA-256 (quantum-safe)', status: 'deployed' },
+  { system: 'Session Tokens', current: 'HS256 JWT', target: 'HS256 JWT (quantum-safe)', status: 'deployed' },
+];
+
+export default function PqcReadiness() {
+  const [expandedStandard, setExpandedStandard] = useState<string | null>(null);
+
+  const deployedCount = ECOSYSTEM_STATUS.filter((s) => s.status === 'deployed').length;
+  const inProgressCount = ECOSYSTEM_STATUS.filter((s) => s.status === 'in-progress').length;
+  const totalSystems = ECOSYSTEM_STATUS.length;
+  const readinessScore = Math.round(((deployedCount * 1 + inProgressCount * 0.5) / totalSystems) * 100);
+
+  return (
+    <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-xl font-semibold text-white">Post-Quantum Cryptography Readiness</h1>
+            <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border bg-amber-500/10 border-amber-500/20 text-amber-400">
+              NIST FIPS 203/204/205
+            </span>
+          </div>
+          <p className="text-[13px] text-white/35">
+            Quantum-resistant cryptography migration status across the a11oy governance ecosystem
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white/20">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+            <path d="M2 17l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span className="text-[10px] text-white/20">a11oy orchestrated</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 text-center">
+          <p className="text-2xl font-semibold text-white">{readinessScore}%</p>
+          <p className="text-[10px] uppercase tracking-wider text-white/25 mt-0.5">PQC Readiness</p>
+        </div>
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 text-center">
+          <p className="text-2xl font-semibold text-emerald-400">{deployedCount}</p>
+          <p className="text-[10px] uppercase tracking-wider text-white/25 mt-0.5">Systems Quantum-Safe</p>
+        </div>
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 text-center">
+          <p className="text-2xl font-semibold text-amber-400">{inProgressCount}</p>
+          <p className="text-[10px] uppercase tracking-wider text-white/25 mt-0.5">In Migration</p>
+        </div>
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 text-center">
+          <p className="text-2xl font-semibold text-white">4</p>
+          <p className="text-[10px] uppercase tracking-wider text-white/25 mt-0.5">NIST Standards</p>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-[13px] font-medium text-white mb-3 flex items-center gap-2">
+          <Key className="w-3.5 h-3.5 text-white/30" /> NIST Post-Quantum Standards
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {PQC_STANDARDS.map((std) => {
+            const statusConfig = STATUS_CONFIG[std.status];
+            const expanded = expandedStandard === std.fips;
+            return (
+              <button
+                key={std.fips}
+                onClick={() => setExpandedStandard(expanded ? null : std.fips)}
+                className={cn(
+                  'text-left bg-white/[0.02] border rounded-xl p-5 transition-all',
+                  expanded ? 'border-white/[0.12]' : 'border-white/[0.06] hover:border-white/[0.10]',
+                )}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <span className="text-[10px] font-mono text-white/25">{std.fips}</span>
+                    <h3 className="text-[15px] font-medium text-white">{std.name}</h3>
+                    <p className="text-[11px] text-white/25">formerly {std.formerly}</p>
+                  </div>
+                  <span className={cn('flex items-center gap-1 text-[10px] font-mono', statusConfig.color)}>
+                    <statusConfig.icon className="w-3 h-3" />
+                    {statusConfig.label}
+                  </span>
+                </div>
+                <p className="text-[12px] text-white/40 mb-2">{std.purpose} · {std.basis}</p>
+                {expanded && (
+                  <div className="mt-3 pt-3 border-t border-white/[0.06] space-y-3">
+                    <div>
+                      <p className="text-[10px] font-mono uppercase tracking-wider text-white/25 mb-1.5">Security Levels</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {std.securityLevels.map((level) => (
+                          <span key={level} className="text-[10px] px-2 py-0.5 rounded bg-white/[0.04] text-white/40 border border-white/[0.06]">
+                            {level}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    {std.deployedIn.length > 0 && (
+                      <div>
+                        <p className="text-[10px] font-mono uppercase tracking-wider text-emerald-400/60 mb-1.5">Deployed In</p>
+                        {std.deployedIn.map((d) => (
+                          <p key={d} className="text-[11px] text-white/40 flex items-center gap-1.5">
+                            <Check className="w-3 h-3 text-emerald-400" /> {d}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                    {std.planned.length > 0 && (
+                      <div>
+                        <p className="text-[10px] font-mono uppercase tracking-wider text-white/20 mb-1.5">Planned</p>
+                        {std.planned.map((p) => (
+                          <p key={p} className="text-[11px] text-white/30 flex items-center gap-1.5">
+                            <Clock className="w-3 h-3 text-white/15" /> {p}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-[13px] font-medium text-white mb-3 flex items-center gap-2">
+          <ShieldCheck className="w-3.5 h-3.5 text-white/30" /> Ecosystem Migration Status
+        </h2>
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+          <div className="grid grid-cols-12 gap-3 px-5 py-2.5 border-b border-white/[0.04] text-[10px] font-mono uppercase tracking-wider text-white/25">
+            <div className="col-span-3">System</div>
+            <div className="col-span-3">Current</div>
+            <div className="col-span-4">Target (PQC)</div>
+            <div className="col-span-2">Status</div>
+          </div>
+          {ECOSYSTEM_STATUS.map((sys) => {
+            const statusConfig = STATUS_CONFIG[sys.status];
+            return (
+              <div
+                key={sys.system}
+                className="grid grid-cols-12 gap-3 items-center px-5 py-3 border-b border-white/[0.03]"
+              >
+                <div className="col-span-3 text-[12px] text-white/60">{sys.system}</div>
+                <div className="col-span-3 text-[11px] font-mono text-white/30">{sys.current}</div>
+                <div className="col-span-4 text-[11px] font-mono text-white/45">{sys.target}</div>
+                <div className="col-span-2">
+                  <span className={cn('flex items-center gap-1 text-[10px] font-mono', statusConfig.color)}>
+                    <statusConfig.icon className="w-3 h-3" />
+                    {statusConfig.label}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-[13px] font-medium text-white mb-3 flex items-center gap-2">
+          <Lock className="w-3.5 h-3.5 text-white/30" /> Migration Roadmap
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          {MIGRATION_PHASES.map((phase) => {
+            const statusConfig = STATUS_CONFIG[phase.status];
+            return (
+              <div
+                key={phase.phase}
+                className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className={cn('flex items-center gap-1 text-[10px] font-mono', statusConfig.color)}>
+                    <statusConfig.icon className="w-3 h-3" />
+                    {statusConfig.label}
+                  </span>
+                </div>
+                <h3 className="text-[13px] font-medium text-white mb-3">{phase.phase}</h3>
+                <ul className="space-y-1.5">
+                  {phase.tasks.map((task) => (
+                    <li key={task} className="text-[11px] text-white/30 flex gap-1.5">
+                      <span className="text-white/15 shrink-0 mt-0.5">&#x2022;</span>
+                      {task}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <AlertTriangle className="w-4 h-4 text-amber-400" />
+          <h3 className="text-[13px] font-medium text-amber-400">Harvest-Now Decrypt-Later Risk</h3>
+        </div>
+        <p className="text-[12px] text-white/35 leading-relaxed">
+          Adversaries are already capturing encrypted traffic for future quantum decryption.
+          Every day of delay increases the volume of harvestable ciphertext. The a11oy governance
+          layer prioritizes PQC migration based on data sensitivity and key lifetime — starting
+          with long-lived keys and highly sensitive evidence chains that will remain valuable to
+          adversaries for decades.
+        </p>
+      </div>
+    </div>
+  );
+}

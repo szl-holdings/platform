@@ -1,3 +1,4 @@
+import { readEnvFeatureFlags } from '@szl-holdings/config';
 import { AnalyticsProvider } from '@szl-holdings/shared-ui/analytics-provider';
 import { AppModeBanner, AppModeProvider } from '@szl-holdings/shared-ui/app-mode-banner';
 import {
@@ -32,63 +33,395 @@ import {
   AlertTriangle,
   BarChart3,
   BookLock,
+  BookOpen,
+  Bot,
+  Brain,
+  Briefcase,
+  Bug,
   Cpu,
+  Crosshair,
+  Database,
   Eye,
+  FileText,
+  Filter,
+  Fingerprint,
+  FlaskConical,
+  Gauge,
   GitBranch,
+  GitMerge,
+  Globe,
+  KeyRound,
+  Landmark,
+  Layers,
   LayoutDashboard,
+  Lightbulb,
   Lock,
   Menu,
+  Microscope,
   Network,
   Plug,
+  Presentation,
+  Radio,
   RotateCcw,
+  Scale,
+  Search,
+  Server,
+  Settings as SettingsIcon,
   Shield,
   ShieldAlert,
   ShieldCheck,
+  Swords,
+  Target,
+  Terminal,
+  TrendingUp,
   Users,
+  Workflow,
   Zap,
 } from 'lucide-react';
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
-import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
+import {
+  type ComponentType,
+  lazy,
+  type ReactNode,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { Link, Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
+import AllSlides from '@/pages/slides/AllSlides';
+import PresenterMode from '@/pages/slides/PresenterMode';
+import S01Cover from '@/pages/slides/S01Cover';
+import S02SeriesProblem from '@/pages/slides/S02SeriesProblem';
+import S03Category from '@/pages/slides/S03Category';
+import S04Product from '@/pages/slides/S04Product';
+import S05Demo from '@/pages/slides/S05Demo';
+import S06Market from '@/pages/slides/S06Market';
+import S07SeriesDomains from '@/pages/slides/S07SeriesDomains';
+import S08BusinessModel from '@/pages/slides/S08BusinessModel';
+import S08DividerMoat from '@/pages/slides/S08DividerMoat';
+import S09Ask from '@/pages/slides/S09Ask';
+import S13DividerVerdict from '@/pages/slides/S13DividerVerdict';
 
-const DashboardPage = lazy(() => import('@/pages/dashboard'));
-const ResilienceScorecardPage = lazy(() => import('@/pages/resilience-scorecard'));
-const ThreatOverviewPage = lazy(() => import('@/pages/threat-overview'));
-const AssetRiskGraphPage = lazy(() => import('@/pages/asset-risk-graph'));
-const RecoveryReadinessPage = lazy(() => import('@/pages/recovery-readiness'));
-const IncidentCommanderPage = lazy(() => import('@/pages/incident-commander'));
-const ExposureBoardPage = lazy(() => import('@/pages/exposure-board'));
-const ControlDriftPage = lazy(() => import('@/pages/control-drift'));
-const DecisionCenterPage = lazy(() => import('@/pages/decision-center'));
-const TrustProvenancePage = lazy(() => import('@/pages/trust-provenance'));
-const AlertsPage = lazy(() => import('@/pages/alerts'));
-const ApprovalsPage = lazy(() => import('@/pages/approvals'));
+const SLIDES = [
+  S01Cover, S02SeriesProblem, S03Category, S04Product, S05Demo,
+  S08DividerMoat, S06Market, S07SeriesDomains, S13DividerVerdict,
+  S08BusinessModel, S09Ask,
+];
+const TOTAL = SLIDES.length;
+
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000, retry: 1 } },
+});
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
+const SENTRA_BRAND_ACCENT = '#f5f5f5';
+
+type LazyComp = ReturnType<typeof lazy>;
+type IconComp = ComponentType<{ className?: string }>;
+
+type NavItem = {
+  path: string;
+  label: string;
+  icon: IconComp;
+  comp: LazyComp;
+  hideFromSidebar?: boolean;
+};
+
+type NavSection = {
+  id: string;
+  label: string;
+  items: NavItem[];
+};
+
+const L = (importer: () => Promise<{ default: ComponentType<unknown> }>): LazyComp =>
+  lazy(importer);
+
+const NAV_SECTIONS: NavSection[] = [
+  {
+    id: 'os-layer',
+    label: 'OS Layer',
+    items: [
+      { path: '/decision-center', label: 'Decision Center', icon: Zap, comp: L(() => import('@/pages/decision-center')) },
+    ],
+  },
+  {
+    id: 'core',
+    label: 'Core',
+    items: [
+      { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, comp: L(() => import('@/pages/dashboard')) },
+      { path: '/threats', label: 'Threat Overview', icon: ShieldAlert, comp: L(() => import('@/pages/threat-overview')) },
+      { path: '/assets', label: 'Asset Risk Graph', icon: Cpu, comp: L(() => import('@/pages/asset-risk-graph')) },
+      { path: '/recovery', label: 'Recovery Readiness', icon: RotateCcw, comp: L(() => import('@/pages/recovery-readiness')) },
+      { path: '/incident', label: 'Incident Commander', icon: Activity, comp: L(() => import('@/pages/incident-commander')) },
+      { path: '/exposure', label: 'Exposure Board', icon: BarChart3, comp: L(() => import('@/pages/exposure-board')) },
+      { path: '/controls', label: 'Control Drift', icon: ShieldCheck, comp: L(() => import('@/pages/control-drift')) },
+      { path: '/resilience', label: 'Resilience Scorecard', icon: Shield, comp: L(() => import('@/pages/resilience-scorecard')) },
+      { path: '/forecast', label: 'Forecast', icon: TrendingUp, comp: L(() => import('@/pages/forecast')) },
+    ],
+  },
+  {
+    id: 'soc',
+    label: 'SOC Operations',
+    items: [
+      { path: '/soc', label: 'SOC Dashboard', icon: Shield, comp: L(() => import('@/pages/soc-dashboard')) },
+      { path: '/agentic-soc', label: 'Agentic SOC', icon: Bot, comp: L(() => import('@/pages/agentic-soc')) },
+      { path: '/alerts', label: 'Alerts', icon: AlertTriangle, comp: L(() => import('@/pages/alerts')) },
+      { path: '/incidents', label: 'Incidents', icon: Bug, comp: L(() => import('@/pages/incidents-page')) },
+      { path: '/investigations', label: 'Investigations', icon: Search, comp: L(() => import('@/pages/investigations-board')) },
+      { path: '/cases', label: 'Cases', icon: Briefcase, comp: L(() => import('@/pages/cases-page')) },
+      { path: '/findings', label: 'Findings', icon: Target, comp: L(() => import('@/pages/findings-page')) },
+      { path: '/action-queue', label: 'Action Queue', icon: Zap, comp: L(() => import('@/pages/action-queue')) },
+      { path: '/forensics', label: 'Forensics Timeline', icon: Microscope, comp: L(() => import('@/pages/forensics-timeline')) },
+      { path: '/deception-grid', label: 'Deception Grid', icon: Filter, comp: L(() => import('@/pages/deception-grid')) },
+      { path: '/identity-threat', label: 'Identity Threat', icon: Fingerprint, comp: L(() => import('@/pages/identity-threat')) },
+      { path: '/identity-blast-radius', label: 'Identity Blast Radius', icon: ShieldAlert, comp: L(() => import('@/pages/identity-blast-radius')) },
+      { path: '/ot-ics', label: 'OT / ICS', icon: Cpu, comp: L(() => import('@/pages/ot-ics-dashboard')) },
+    ],
+  },
+  {
+    id: 'intelligence',
+    label: 'Threat Intelligence',
+    items: [
+      { path: '/threat-intelligence', label: 'Threat Intelligence', icon: Brain, comp: L(() => import('@/pages/threat-intelligence')) },
+      { path: '/threat-intel-feed', label: 'Intel Feed', icon: Radio, comp: L(() => import('@/pages/threat-intel-feed')) },
+      { path: '/threat-graph', label: 'Threat Graph', icon: GitMerge, comp: L(() => import('@/pages/threat-graph')) },
+      { path: '/threat-actor', label: 'Threat Actor Profiling', icon: Users, comp: L(() => import('@/pages/threat-actor-profiling')) },
+      { path: '/threat-kill-chain', label: 'Kill Chain', icon: Swords, comp: L(() => import('@/pages/threat-kill-chain')) },
+      { path: '/threat-hunting', label: 'Threat Hunting', icon: Crosshair, comp: L(() => import('@/pages/threat-hunting')) },
+      { path: '/hunt-agents', label: 'Hunt Agents', icon: Bot, comp: L(() => import('@/pages/hunt-agents')) },
+      { path: '/adversary', label: 'Adversary Engine', icon: Crosshair, comp: L(() => import('@/pages/adversary-engine')) },
+      { path: '/attack-path', label: 'Attack Paths', icon: GitBranch, comp: L(() => import('@/pages/attack-path-viz')) },
+      { path: '/mitre', label: 'MITRE ATT&CK', icon: Target, comp: L(() => import('@/pages/mitre-attack-page')) },
+      { path: '/predictive', label: 'Predictive Intelligence', icon: TrendingUp, comp: L(() => import('@/pages/predictive-intelligence')) },
+      { path: '/breach-cost', label: 'Breach Cost', icon: BarChart3, comp: L(() => import('@/pages/breach-cost-predictor')) },
+      { path: '/stix-taxii', label: 'STIX / TAXII', icon: Database, comp: L(() => import('@/pages/stix-taxii')) },
+      { path: '/aef-search', label: 'AEF Knowledge Search', icon: Search, comp: L(() => import('@/pages/aef-knowledge-search')) },
+    ],
+  },
+  {
+    id: 'response',
+    label: 'Response & Automation',
+    items: [
+      { path: '/soar/playbooks', label: 'SOAR Playbooks', icon: BookOpen, comp: L(() => import('@/pages/soar-playbooks')) },
+      { path: '/soar/builder', label: 'SOAR Builder', icon: Workflow, comp: L(() => import('@/pages/soar-builder')) },
+      { path: '/response', label: 'Response Orchestration', icon: Zap, comp: L(() => import('@/pages/response-orchestration')) },
+      { path: '/watchlists', label: 'Watchlists', icon: Eye, comp: L(() => import('@/pages/watchlists')) },
+      { path: '/xdr', label: 'XDR Console', icon: Network, comp: L(() => import('@/pages/xdr-console')) },
+      { path: '/xdr-workbench', label: 'XDR Workbench', icon: Terminal, comp: L(() => import('@/pages/xdr-incident-workbench')) },
+    ],
+  },
+  {
+    id: 'war-room',
+    label: 'War Room & Exercises',
+    items: [
+      { path: '/citadel-war-room', label: 'Citadel War Room', icon: Radio, comp: L(() => import('@/pages/citadel-war-room')) },
+      { path: '/citadel-playbooks', label: 'Citadel Playbooks', icon: BookOpen, comp: L(() => import('@/pages/citadel-playbooks')) },
+      { path: '/citadel-after-action', label: 'After-Action Report', icon: FileText, comp: L(() => import('@/pages/citadel-after-action')) },
+      { path: '/purple-team', label: 'Purple Team', icon: Swords, comp: L(() => import('@/pages/purple-team')) },
+      { path: '/scenario-library', label: 'Scenario Library', icon: BookOpen, comp: L(() => import('@/pages/scenario-library')) },
+      { path: '/chaos-drills', label: 'Chaos Engineering Drills', icon: Zap, comp: L(() => import('@/pages/chaos-engineering-drills')) },
+    ],
+  },
+  {
+    id: 'digital-twin',
+    label: 'Digital Twin & ATLAS',
+    items: [
+      { path: '/threat-twin-view', label: 'Threat Twin', icon: Shield, comp: L(() => import('@/pages/threat-twin-view')) },
+      { path: '/atlas-runtime', label: 'Threat Mesh', icon: Layers, comp: L(() => import('@/pages/atlas-runtime')) },
+      { path: '/atlas-runtime/correlation', label: 'Worldline Correlation', icon: Network, comp: L(() => import('@/pages/atlas-correlation')) },
+      { path: '/replay', label: 'Incident Replay', icon: RotateCcw, comp: L(() => import('@/pages/replay')) },
+    ],
+  },
+  {
+    id: 'agent-mesh',
+    label: 'Agent Mesh',
+    items: [
+      { path: '/mesh/map', label: 'Mesh Map', icon: Network, comp: L(() => import('@/pages/mesh-map')) },
+      { path: '/mesh/exposures', label: 'Exposures', icon: Eye, comp: L(() => import('@/pages/mesh-exposures')) },
+      { path: '/mesh/containment', label: 'Containment Rules', icon: BookLock, comp: L(() => import('@/pages/containment-rules')) },
+      { path: '/mesh/drift', label: 'Mesh Drift', icon: GitBranch, comp: L(() => import('@/pages/mesh-drift')) },
+      { path: '/mesh/connectors', label: 'Connectors', icon: Plug, comp: L(() => import('@/pages/mesh-connectors')) },
+    ],
+  },
+  {
+    id: 'edr-siem',
+    label: 'EDR & SIEM',
+    items: [
+      { path: '/edr/agents', label: 'Endpoint Mesh', icon: Cpu, comp: L(() => import('@/pages/endpoint-mesh')) },
+      { path: '/siem/connections', label: 'SIEM Connections', icon: Zap, comp: L(() => import('@/pages/siem-connections')) },
+    ],
+  },
+  {
+    id: 'compliance',
+    label: 'Compliance & Risk',
+    items: [
+      { path: '/compliance', label: 'Compliance', icon: ShieldCheck, comp: L(() => import('@/pages/compliance-page')) },
+      { path: '/compliance/evidence', label: 'Evidence', icon: FileText, comp: L(() => import('@/pages/compliance-evidence')) },
+      { path: '/compliance/control-graph', label: 'Control Graph', icon: GitMerge, comp: L(() => import('@/pages/control-evidence-graph')) },
+      { path: '/compliance/audit-chain', label: 'Audit Chain', icon: Lock, comp: L(() => import('@/pages/audit-chain')) },
+      { path: '/compliance/zero-trust', label: 'Zero Trust', icon: KeyRound, comp: L(() => import('@/pages/zero-trust-scorecard')) },
+      { path: '/compliance/vulnerabilities', label: 'Vulnerabilities', icon: Bug, comp: L(() => import('@/pages/vulnerability-dashboard')) },
+      { path: '/compliance/vuln-lifecycle', label: 'Vuln Lifecycle', icon: GitBranch, comp: L(() => import('@/pages/vuln-lifecycle')) },
+      { path: '/compliance/assets', label: 'Asset Inventory', icon: Server, comp: L(() => import('@/pages/asset-inventory')) },
+      { path: '/compliance/risk-scoring', label: 'Risk Scoring', icon: Gauge, comp: L(() => import('@/pages/risk-scoring')) },
+      { path: '/compliance/executive-risk', label: 'Executive Risk', icon: TrendingUp, comp: L(() => import('@/pages/executive-risk')) },
+      { path: '/compliance/board-view', label: 'Board View', icon: Landmark, comp: L(() => import('@/pages/executive-board-view')) },
+      { path: '/compliance/hardening', label: 'Hardening Controls', icon: ShieldCheck, comp: L(() => import('@/pages/hardening-controls')) },
+      { path: '/compliance/governance-review', label: 'Governance Review', icon: Scale, comp: L(() => import('@/pages/governance-review')) },
+    ],
+  },
+  {
+    id: 'intel',
+    label: 'Research Intelligence',
+    items: [
+      { path: '/intel/dashboard', label: 'Intel Dashboard', icon: Brain, comp: L(() => import('@/pages/intel/dashboard')) },
+      { path: '/intel/experiments', label: 'Experiments', icon: FlaskConical, comp: L(() => import('@/pages/intel/experiments')) },
+      { path: '/intel/models', label: 'Models', icon: Layers, comp: L(() => import('@/pages/intel/models')) },
+      { path: '/intel/projects', label: 'Projects', icon: GitBranch, comp: L(() => import('@/pages/intel/projects')) },
+      { path: '/intel/insights', label: 'Insights', icon: Lightbulb, comp: L(() => import('@/pages/intel/insights')) },
+      { path: '/intel/federated-learning', label: 'Federated Learning', icon: Lock, comp: L(() => import('@/pages/federated-learning')) },
+      { path: '/intel/darpa-mto', label: 'DARPA MTO Innovation', icon: FlaskConical, comp: L(() => import('@/pages/darpa-mto-hub')) },
+      { path: '/intel/pqc-readiness', label: 'PQC Readiness', icon: Lock, comp: L(() => import('@/pages/pqc-readiness')) },
+    ],
+  },
+  {
+    id: 'governance',
+    label: 'Governance',
+    items: [
+      { path: '/governed-cockpit', label: 'Governed Intelligence', icon: Shield, comp: L(() => import('@/pages/governed-cockpit')) },
+      { path: '/governance/enterprise', label: 'Enterprise Governance', icon: Globe, comp: L(() => import('@/pages/governance/enterprise-governance')) },
+      { path: '/governance/executive-reports', label: 'Executive Reports', icon: FileText, comp: L(() => import('@/pages/governance/executive-reports')) },
+      { path: '/governance/trust-analytics', label: 'Trust Analytics', icon: ShieldCheck, comp: L(() => import('@/pages/governance/trust-analytics')) },
+      { path: '/governance/incident-analytics', label: 'Incident Analytics', icon: BarChart3, comp: L(() => import('@/pages/governance/incident-analytics')) },
+      { path: '/governance/agent-config', label: 'Agent Config', icon: SettingsIcon, comp: L(() => import('@/pages/governance/agent-config')) },
+      { path: '/multi-fund', label: 'Multi-Fund View', icon: Layers, comp: L(() => import('@/pages/multi-fund-view')) },
+      { path: '/reports', label: 'Reports', icon: FileText, comp: L(() => import('@/pages/reports-page')) },
+      { path: '/pdf-export', label: 'PDF Export', icon: Presentation, comp: L(() => import('@/pages/aegis-pdf-export')) },
+      { path: '/settings', label: 'Settings', icon: SettingsIcon, comp: L(() => import('@/pages/settings/unified-settings')) },
+    ],
+  },
+  {
+    id: 'operations',
+    label: 'Operations',
+    items: [
+      { path: '/approvals', label: 'Approvals', icon: Shield, comp: L(() => import('@/pages/approvals')) },
+      { path: '/trust', label: 'Trust & Provenance', icon: Lock, comp: L(() => import('@/pages/trust-provenance')) },
+    ],
+  },
+  {
+    id: 'crisis-arena',
+    label: 'Adversarial Simulation',
+    items: [
+      { path: '/crisis-arena/leaderboard', label: 'Analyst Rankings', icon: Users, comp: L(() => import('@/pages/crisis-arena-leaderboard')) },
+      { path: '/crisis-arena/engagements', label: 'Engagements', icon: Activity, comp: L(() => import('@/pages/crisis-arena-engagements')) },
+      { path: '/crisis-arena/architect', label: 'Analyst Workspace', icon: Zap, comp: L(() => import('@/pages/crisis-arena-architect')) },
+    ],
+  },
+];
+
+const { aegisExtendedModules: EXTENDED_MODULES_ENABLED } = readEnvFeatureFlags(
+  import.meta.env as unknown as Record<string, unknown>,
+);
+const EXTENDED_SECTION_IDS = new Set(['intelligence']);
+const EXTENDED_ITEM_PATHS = new Set(['/identity-blast-radius']);
+
+function filterExtendedSections(sections: NavSection[]): NavSection[] {
+  if (EXTENDED_MODULES_ENABLED) return sections;
+  return sections
+    .filter((sec) => !EXTENDED_SECTION_IDS.has(sec.id))
+    .map((sec) => ({
+      ...sec,
+      items: sec.items.filter((item) => !EXTENDED_ITEM_PATHS.has(item.path)),
+    }));
+}
+
+const VISIBLE_NAV_SECTIONS = filterExtendedSections(NAV_SECTIONS);
+const ALL_ROUTES: NavItem[] = VISIBLE_NAV_SECTIONS.flatMap((s) => s.items);
+
+const SLIDES_NAV: NavItem = {
+  path: '/slides',
+  label: 'Investor Deck',
+  icon: Presentation,
+  comp: L(() => import('@/pages/aegis-home')),
+};
+
 const SentraLandingPage = lazy(() => import('@/pages/sentra-landing'));
 const SentraPricingPage = lazy(() => import('@/pages/pricing'));
 const SentraBillingPage = lazy(() => import('@/pages/billing-account'));
-const MeshMapPage = lazy(() => import('@/pages/mesh-map'));
-const MeshExposuresPage = lazy(() => import('@/pages/mesh-exposures'));
-const ContainmentRulesPage = lazy(() => import('@/pages/containment-rules'));
-const MeshDriftPage = lazy(() => import('@/pages/mesh-drift'));
-const MeshConnectorsPage = lazy(() => import('@/pages/mesh-connectors'));
-const CrisisArenaLeaderboardPage = lazy(() => import('@/pages/crisis-arena-leaderboard'));
-const CrisisArenaEngagementsPage = lazy(() => import('@/pages/crisis-arena-engagements'));
-const CrisisArenaArchitectPage = lazy(() => import('@/pages/crisis-arena-architect'));
 const CrisisArenaArchitectProfilePage = lazy(() => import('@/pages/crisis-arena-architect-profile'));
-const ForecastPage = lazy(() => import('@/pages/forecast'));
-const EndpointMeshPage = lazy(() => import('@/pages/endpoint-mesh'));
-const SiemConnectionsPage = lazy(() => import('@/pages/siem-connections'));
-
-const queryClient = new QueryClient({
-  defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
-});
-
-const SENTRA_BRAND_ACCENT = '#f5f5f5';
 
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[200px]">
-      <div className="w-6 h-6 border-2 border-[#f5f5f5]/40 border-t-red-400 rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-[#f5f5f5]/40 border-t-white rounded-full animate-spin" />
     </div>
+  );
+}
+
+function renderIcon(Icon: IconComp): ReactNode {
+  return <Icon className="w-3.5 h-3.5" />;
+}
+
+function buildSidebarSections(): SidebarNavSection[] {
+  const intro: SidebarNavSection = {
+    id: 'intro',
+    items: [
+      { id: '/', label: 'Home', href: '/', icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
+      { id: SLIDES_NAV.path, label: SLIDES_NAV.label, href: SLIDES_NAV.path, icon: renderIcon(SLIDES_NAV.icon) },
+    ],
+  };
+  const sections: SidebarNavSection[] = VISIBLE_NAV_SECTIONS.map((sec) => ({
+    id: sec.id,
+    label: sec.label,
+    items: sec.items
+      .filter((item) => !item.hideFromSidebar)
+      .map((item) => ({
+        id: item.path,
+        label: item.label,
+        href: item.path,
+        icon: renderIcon(item.icon),
+      })),
+  }));
+  return [intro, ...sections];
+}
+
+function DashboardRoutes() {
+  return (
+    <Switch>
+      {ALL_ROUTES.map(({ path, comp: Comp }) => (
+        <Route key={path} path={path}>
+          <Suspense fallback={<PageLoader />}>
+            <Comp />
+          </Suspense>
+        </Route>
+      ))}
+      <Route path="/crisis-arena/architect/:id">
+        <Suspense fallback={<PageLoader />}>
+          <CrisisArenaArchitectProfilePage />
+        </Suspense>
+      </Route>
+      <Route path="/pricing">
+        <Suspense fallback={<PageLoader />}>
+          <SentraPricingPage />
+        </Suspense>
+      </Route>
+      <Route path="/account/billing">
+        <Suspense fallback={<PageLoader />}>
+          <SentraBillingPage />
+        </Suspense>
+      </Route>
+      <Route>
+        <div className="flex flex-col items-center justify-center h-full p-10 text-center">
+          <Shield className="w-10 h-10 text-[#f5f5f5]/50 mb-4" />
+          <h1 className="text-xl font-bold text-[#f5f5f5] mb-2">Page not found</h1>
+          <p className="text-sm text-[#f5f5f5]/60 mb-6">That route isn't wired up yet.</p>
+          <Link href="/" className="text-xs text-[#f5f5f5] hover:text-[#f5f5f5] underline">
+            Return home
+          </Link>
+        </div>
+      </Route>
+    </Switch>
   );
 }
 
@@ -103,171 +436,7 @@ function SentraSidebarContent({
 }) {
   const [location, navigate] = useLocation();
   const accent = useEffectiveAccent(SENTRA_BRAND_ACCENT);
-
-  const sections: SidebarNavSection[] = [
-    {
-      id: 'os-layer',
-      label: 'OS Layer',
-      items: [
-        {
-          id: 'decision-center',
-          label: 'Decision Center',
-          href: '/decision-center',
-          icon: <Zap className="w-3.5 h-3.5" />,
-        },
-      ],
-    },
-    {
-      id: 'core',
-      label: 'Core',
-      items: [
-        {
-          id: '/dashboard',
-          label: 'Dashboard',
-          href: '/dashboard',
-          icon: <LayoutDashboard className="w-3.5 h-3.5" />,
-        },
-        {
-          id: '/threats',
-          label: 'Threat Overview',
-          href: '/threats',
-          icon: <ShieldAlert className="w-3.5 h-3.5" />,
-        },
-        {
-          id: '/assets',
-          label: 'Asset Risk Graph',
-          href: '/assets',
-          icon: <Cpu className="w-3.5 h-3.5" />,
-        },
-        {
-          id: '/recovery',
-          label: 'Recovery Readiness',
-          href: '/recovery',
-          icon: <RotateCcw className="w-3.5 h-3.5" />,
-        },
-        {
-          id: '/incident',
-          label: 'Incident Commander',
-          href: '/incident',
-          icon: <Activity className="w-3.5 h-3.5" />,
-        },
-        {
-          id: '/exposure',
-          label: 'Exposure Board',
-          href: '/exposure',
-          icon: <BarChart3 className="w-3.5 h-3.5" />,
-        },
-        {
-          id: '/controls',
-          label: 'Control Drift',
-          href: '/controls',
-          icon: <ShieldCheck className="w-3.5 h-3.5" />,
-        },
-      ],
-    },
-    {
-      id: 'agent-mesh',
-      label: 'Agent Mesh',
-      items: [
-        {
-          id: '/mesh/map',
-          label: 'Mesh Map',
-          href: '/mesh/map',
-          icon: <Network className="w-3.5 h-3.5" />,
-        },
-        {
-          id: '/mesh/exposures',
-          label: 'Exposures',
-          href: '/mesh/exposures',
-          icon: <Eye className="w-3.5 h-3.5" />,
-        },
-        {
-          id: '/mesh/containment',
-          label: 'Containment Rules',
-          href: '/mesh/containment',
-          icon: <BookLock className="w-3.5 h-3.5" />,
-        },
-        {
-          id: '/mesh/drift',
-          label: 'Mesh Drift',
-          href: '/mesh/drift',
-          icon: <GitBranch className="w-3.5 h-3.5" />,
-        },
-        {
-          id: '/mesh/connectors',
-          label: 'Connectors',
-          href: '/mesh/connectors',
-          icon: <Plug className="w-3.5 h-3.5" />,
-        },
-      ],
-    },
-    {
-      id: 'edr-siem',
-      label: 'EDR & SIEM',
-      items: [
-        {
-          id: '/edr/agents',
-          label: 'Endpoint Mesh',
-          href: '/edr/agents',
-          icon: <Cpu className="w-3.5 h-3.5" />,
-        },
-        {
-          id: '/siem/connections',
-          label: 'SIEM Connections',
-          href: '/siem/connections',
-          icon: <Zap className="w-3.5 h-3.5" />,
-        },
-      ],
-    },
-    {
-      id: 'operations',
-      label: 'Operations',
-      items: [
-        {
-          id: '/alerts',
-          label: 'Alerts',
-          href: '/alerts',
-          icon: <AlertTriangle className="w-3.5 h-3.5" />,
-        },
-        {
-          id: '/approvals',
-          label: 'Approvals',
-          href: '/approvals',
-          icon: <Shield className="w-3.5 h-3.5" />,
-        },
-        {
-          id: '/trust',
-          label: 'Trust & Provenance',
-          href: '/trust',
-          icon: <Lock className="w-3.5 h-3.5" />,
-        },
-      ],
-    },
-    {
-      id: 'crisis-arena',
-      label: 'Adversarial Simulation',
-      items: [
-        {
-          id: '/crisis-arena/leaderboard',
-          label: 'Analyst Rankings',
-          href: '/crisis-arena/leaderboard',
-          icon: <Users className="w-3.5 h-3.5" />,
-        },
-        {
-          id: '/crisis-arena/engagements',
-          label: 'Engagements',
-          href: '/crisis-arena/engagements',
-          icon: <Activity className="w-3.5 h-3.5" />,
-        },
-        {
-          id: '/crisis-arena/architect',
-          label: 'Analyst Workspace',
-          href: '/crisis-arena/architect',
-          icon: <Zap className="w-3.5 h-3.5" />,
-        },
-      ],
-    },
-  ];
+  const sections = buildSidebarSections();
 
   return (
     <SidebarNav
@@ -280,16 +449,16 @@ function SentraSidebarContent({
         onMobileClose?.();
       }}
       header={
-        <div className="flex items-center gap-2.5 cursor-pointer">
+        <div className="flex items-center gap-2.5">
           <div
             className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
-            style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.12)' }}
+            style={{ background: 'rgba(245,245,245,0.06)', border: '1px solid rgba(245,245,245,0.10)' }}
           >
             <Shield className="w-4 h-4 text-[#f5f5f5]" />
           </div>
           {expanded && (
             <div className="flex-1 min-w-0">
-              <h1 className="text-sm font-semibold text-[#f5f5f5] truncate tracking-tight">Aegis</h1>
+              <h1 className="text-sm font-semibold text-[#f5f5f5] truncate tracking-tight">Sentra</h1>
               <p className="text-[10px] truncate font-mono uppercase tracking-wider text-[#f5f5f5]/40">
                 Cyber Resilience
               </p>
@@ -301,30 +470,26 @@ function SentraSidebarContent({
         expanded ? (
           <div className="space-y-2">
             <div
-              className="rounded-lg px-3 py-3"
+              className="rounded-lg px-3 py-2.5"
               style={{
-                background: 'rgba(239,68,68,0.04)',
-                border: '1px solid rgba(239,68,68,0.08)',
+                background: 'rgba(245,245,245,0.03)',
+                border: '1px solid rgba(245,245,245,0.06)',
               }}
             >
-              <div className="text-[9px] uppercase tracking-widest font-medium mb-2 text-[#f5f5f5]/50">
-                Posture Status
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[9px] font-mono uppercase tracking-wider text-[#f5f5f5]/50">
+                  a11oy orchestrated
+                </span>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-white/35">Recovery posture</span>
-                  <span className="text-[9px] font-mono text-[#f5f5f5]">42% critical</span>
+                  <span className="text-[10px] text-white/35">Active agents</span>
+                  <span className="text-[9px] font-mono text-emerald-400">12 online</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-white/35">Active incidents</span>
-                  <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#f5f5f5] animate-pulse" />
-                    <span className="text-[9px] font-mono text-[#f5f5f5]">1 open</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-white/35">Control drift</span>
-                  <span className="text-[9px] font-mono text-[#c9b787]">3 gaps</span>
+                  <span className="text-[10px] text-white/35">Threat posture</span>
+                  <span className="text-[9px] font-mono text-[#f5f5f5]">Guarded</span>
                 </div>
               </div>
             </div>
@@ -334,13 +499,7 @@ function SentraSidebarContent({
               aria-label="Collapse sidebar"
             >
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path
-                  d="M8 2L5 6l3 4"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+                <path d="M8 2L5 6l3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           </div>
@@ -351,13 +510,7 @@ function SentraSidebarContent({
             aria-label="Expand sidebar"
           >
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path
-                d="M4 2l3 4-3 4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+              <path d="M4 2l3 4-3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
         )
@@ -366,44 +519,197 @@ function SentraSidebarContent({
   );
 }
 
-function DashboardRouter() {
+function SlideDeck() {
+  function getInitialSlide(): number {
+    const match = window.location.pathname.match(/slide(?:s\/)?(\d+)/);
+    if (match) {
+      const n = parseInt(match[1], 10);
+      if (n >= 1 && n <= TOTAL) return n;
+    }
+    return 1;
+  }
+
+  const isEmbed =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('embed') === '1';
+
+  const [current, setCurrent] = useState(getInitialSlide);
+  const Slide = SLIDES[current - 1];
+  const channelRef = useRef<BroadcastChannel | null>(null);
+
+  const goTo = useCallback(
+    (n: number) => {
+      const clamped = Math.min(Math.max(n, 1), TOTAL);
+      setCurrent(clamped);
+      history.replaceState(null, '', `${BASE}/slides/${clamped}${isEmbed ? '?embed=1' : ''}`);
+      channelRef.current?.postMessage({ type: 'audience:current', slide: clamped });
+    },
+    [isEmbed],
+  );
+
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') return;
+    const channel = new BroadcastChannel('sentra-deck-sync');
+    channelRef.current = channel;
+    channel.onmessage = (ev) => {
+      const data = ev.data ?? {};
+      if (data.type === 'presenter:goto' && typeof data.slide === 'number') {
+        setCurrent((c) => {
+          if (c === data.slide) return c;
+          history.replaceState(null, '', `${BASE}/slides/${data.slide}${isEmbed ? '?embed=1' : ''}`);
+          return data.slide;
+        });
+      } else if (data.type === 'presenter:hello') {
+        setCurrent((c) => {
+          channel.postMessage({ type: 'audience:current', slide: c });
+          return c;
+        });
+      }
+    };
+    channel.postMessage({ type: 'audience:current', slide: current });
+    return () => {
+      channel.close();
+      channelRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEmbed]);
+
+  useEffect(() => {
+    if (isEmbed) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'p' || e.key === 'P') {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        e.preventDefault();
+        const url = `${BASE}/slides/presenter?slide=${current}`;
+        window.open(url, 'sentra-presenter', 'width=1280,height=860,noopener');
+        return;
+      }
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+        setCurrent((c) => {
+          const next = Math.min(c + 1, TOTAL);
+          history.replaceState(null, '', `${BASE}/slides/${next}`);
+          channelRef.current?.postMessage({ type: 'audience:current', slide: next });
+          return next;
+        });
+      }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        setCurrent((c) => {
+          const prev = Math.max(c - 1, 1);
+          history.replaceState(null, '', `${BASE}/slides/${prev}`);
+          channelRef.current?.postMessage({ type: 'audience:current', slide: prev });
+          return prev;
+        });
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
   return (
-    <Suspense fallback={<PageLoader />}>
-      <Switch>
-        <Route path="/dashboard" component={DashboardPage} />
-        <Route path="/resilience" component={ResilienceScorecardPage} />
-        <Route path="/threats" component={ThreatOverviewPage} />
-        <Route path="/assets" component={AssetRiskGraphPage} />
-        <Route path="/recovery" component={RecoveryReadinessPage} />
-        <Route path="/incident" component={IncidentCommanderPage} />
-        <Route path="/exposure" component={ExposureBoardPage} />
-        <Route path="/controls" component={ControlDriftPage} />
-        <Route path="/decision-center" component={DecisionCenterPage} />
-        <Route path="/trust" component={TrustProvenancePage} />
-        <Route path="/alerts" component={AlertsPage} />
-        <Route path="/approvals" component={ApprovalsPage} />
-        <Route path="/mesh/map" component={MeshMapPage} />
-        <Route path="/mesh/exposures" component={MeshExposuresPage} />
-        <Route path="/mesh/containment" component={ContainmentRulesPage} />
-        <Route path="/mesh/drift" component={MeshDriftPage} />
-        <Route path="/mesh/connectors" component={MeshConnectorsPage} />
-        <Route path="/crisis-arena/leaderboard" component={CrisisArenaLeaderboardPage} />
-        <Route path="/crisis-arena/engagements" component={CrisisArenaEngagementsPage} />
-        <Route path="/crisis-arena/architect/:id" component={CrisisArenaArchitectProfilePage} />
-        <Route path="/crisis-arena/architect" component={CrisisArenaArchitectPage} />
-        <Route path="/forecast" component={ForecastPage} />
-        <Route path="/edr/agents" component={EndpointMeshPage} />
-        <Route path="/siem/connections" component={SiemConnectionsPage} />
-        <Route path="/pricing" component={SentraPricingPage} />
-        <Route path="/account/billing" component={SentraBillingPage} />
-        <Route path="/" component={SentraLandingPage} />
-        <Route>
-          <div className="flex items-center justify-center h-full">
-            <p className="text-[#f5f5f5]/40">Page not found</p>
-          </div>
-        </Route>
-      </Switch>
-    </Suspense>
+    <div
+      style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}
+      onClick={() => { if (!isEmbed) goTo(current + 1); }}
+    >
+      {isEmbed ? (
+        <Slide />
+      ) : (
+        <div
+          key={current}
+          className="szl-slide-anim"
+          data-variant={
+            (Slide as { displayName?: string; name?: string }).displayName?.includes('Divider') ||
+            (Slide as { displayName?: string; name?: string }).name?.includes('Divider')
+              ? 'dramatic'
+              : 'default'
+          }
+        >
+          <Slide />
+        </div>
+      )}
+      {!isEmbed && (
+        <div
+          style={{
+            position: 'fixed', bottom: '2.5vh', left: '50%', transform: 'translateX(-50%)',
+            display: 'flex', gap: '0.5vw', zIndex: 100,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {SLIDES.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i + 1)}
+              aria-label={`Go to slide ${i + 1}`}
+              style={{
+                width: i + 1 === current ? '2.2vw' : '0.55vw',
+                height: '0.35vh', minHeight: '3px', borderRadius: '2px',
+                background: i + 1 === current ? '#f5f5f5' : 'rgba(255,255,255,0.18)',
+                border: 'none', cursor: 'pointer', padding: 0,
+              }}
+            />
+          ))}
+        </div>
+      )}
+      {!isEmbed && (
+        <Link
+          href="/"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            position: 'fixed', top: '2vh', left: '2vw',
+            fontFamily: 'Inter, sans-serif', fontSize: '11px', color: 'rgba(255,255,255,0.4)',
+            textDecoration: 'none', padding: '6px 10px',
+            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '6px', zIndex: 100,
+          }}
+        >
+          ← Exit deck
+        </Link>
+      )}
+      {!isEmbed && (
+        <div
+          style={{ position: 'fixed', top: '2vh', right: '2vw', display: 'flex', gap: 8, zIndex: 100 }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            onClick={() => {
+              const url = `${BASE}/slides/presenter?slide=${current}`;
+              window.open(url, 'sentra-presenter', 'width=1280,height=860,noopener');
+            }}
+            title="Open presenter mode (P)"
+            style={{
+              fontFamily: 'Inter, sans-serif', fontSize: '11px', color: 'rgba(255,255,255,0.85)',
+              padding: '6px 10px', background: 'rgba(138,138,138,0.18)',
+              border: '1px solid rgba(138,138,138,0.45)', borderRadius: '6px', cursor: 'pointer',
+            }}
+          >
+            Presenter (P)
+          </button>
+          <button
+            type="button"
+            onClick={() => { window.open(`${BASE}/slides/print?print=1`, '_blank', 'noopener'); }}
+            title="Export deck as PDF"
+            style={{
+              fontFamily: 'Inter, sans-serif', fontSize: '11px', color: 'rgba(255,255,255,0.7)',
+              padding: '6px 10px', background: 'rgba(245,245,245,0.08)',
+              border: '1px solid rgba(245,245,245,0.25)', borderRadius: '6px', cursor: 'pointer',
+            }}
+          >
+            Export PDF
+          </button>
+        </div>
+      )}
+      {!isEmbed && (
+        <div
+          style={{
+            position: 'fixed', bottom: '2.5vh', right: '2.5vw',
+            fontFamily: 'Inter, sans-serif', fontSize: 'clamp(9px, 1vw, 13px)',
+            color: 'rgba(255,255,255,0.18)', zIndex: 100,
+          }}
+        >
+          {current} / {TOTAL}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -426,88 +732,19 @@ function AppShell({
   const accent = useEffectiveAccent(SENTRA_BRAND_ACCENT);
   const sidebarExpanded = !sidebarCollapsed || sidebarHovered;
 
+  const navCommands: CommandItem[] = ALL_ROUTES.map((item) => ({
+    id: `nav-${item.path}`,
+    label: item.label,
+    group: 'Navigate',
+    action: () => navigate(item.path),
+  }));
+
   const paletteCommands: CommandItem[] = [
     ...createBaselineWebActions(navigate),
     ...getEcosystemSwitchCommands('sentra'),
-    {
-      id: 'nav-dashboard',
-      label: 'Dashboard',
-      group: 'Navigate',
-      action: () => navigate('/dashboard'),
-    },
-    {
-      id: 'nav-threats',
-      label: 'Threat Overview',
-      group: 'Navigate',
-      action: () => navigate('/threats'),
-    },
-    {
-      id: 'nav-assets',
-      label: 'Asset Risk Graph',
-      group: 'Navigate',
-      action: () => navigate('/assets'),
-    },
-    {
-      id: 'nav-recovery',
-      label: 'Recovery Readiness',
-      group: 'Navigate',
-      action: () => navigate('/recovery'),
-    },
-    {
-      id: 'nav-incident',
-      label: 'Incident Commander',
-      group: 'Navigate',
-      action: () => navigate('/incident'),
-    },
-    {
-      id: 'nav-exposure',
-      label: 'Exposure Board',
-      group: 'Navigate',
-      action: () => navigate('/exposure'),
-    },
-    {
-      id: 'nav-controls',
-      label: 'Control Drift',
-      group: 'Navigate',
-      action: () => navigate('/controls'),
-    },
-    {
-      id: 'nav-decisions',
-      label: 'Decision Center',
-      group: 'Navigate',
-      action: () => navigate('/decision-center'),
-    },
-    {
-      id: 'nav-trust',
-      label: 'Trust & Provenance',
-      group: 'Navigate',
-      action: () => navigate('/trust'),
-    },
-    { id: 'nav-alerts', label: 'Alerts', group: 'Navigate', action: () => navigate('/alerts') },
-    {
-      id: 'nav-approvals',
-      label: 'Approvals',
-      group: 'Navigate',
-      action: () => navigate('/approvals'),
-    },
-    {
-      id: 'nav-crisis-arena-leaderboard',
-      label: 'Adversarial Simulation — Analyst Rankings',
-      group: 'Adversarial Simulation',
-      action: () => navigate('/crisis-arena/leaderboard'),
-    },
-    {
-      id: 'nav-crisis-arena-engagements',
-      label: 'Adversarial Simulation — Engagements',
-      group: 'Adversarial Simulation',
-      action: () => navigate('/crisis-arena/engagements'),
-    },
-    {
-      id: 'nav-crisis-arena-architect',
-      label: 'Adversarial Simulation — Analyst Workspace',
-      group: 'Adversarial Simulation',
-      action: () => navigate('/crisis-arena/architect'),
-    },
+    { id: 'nav-home', label: 'Home', group: 'Navigate', action: () => navigate('/') },
+    { id: 'nav-slides', label: 'Investor Deck', group: 'Navigate', action: () => navigate('/slides') },
+    ...navCommands,
   ];
   const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(paletteCommands);
   const { open: sentientOpen, show: sentientShow, hide: sentientHide } = useSentientLayer();
@@ -516,7 +753,7 @@ function AppShell({
     {
       id: 'u1',
       headline: 'CVE-2024-21412: Critical NTLM bypass — 3 assets exposed',
-      surface: 'Aegis',
+      surface: 'Sentra',
       severity: 'critical',
       timestamp: new Date(Date.now() - 12 * 60000).toISOString(),
       href: '/threats',
@@ -524,7 +761,7 @@ function AppShell({
     {
       id: 'u2',
       headline: 'Control drift detected — MFA policy deviation on 4 endpoints',
-      surface: 'Aegis',
+      surface: 'Sentra',
       severity: 'warning',
       timestamp: new Date(Date.now() - 38 * 60000).toISOString(),
       href: '/controls',
@@ -532,7 +769,7 @@ function AppShell({
     {
       id: 'u3',
       headline: 'Resilience score improved: 73 → 81 after patch cycle',
-      surface: 'Aegis',
+      surface: 'Sentra',
       severity: 'info',
       timestamp: new Date(Date.now() - 2 * 3600000).toISOString(),
       href: '/dashboard',
@@ -540,7 +777,7 @@ function AppShell({
     {
       id: 'u4',
       headline: 'Incident IC-2409 escalated to P1 — awaiting CISO approval',
-      surface: 'Aegis',
+      surface: 'Sentra',
       severity: 'critical',
       timestamp: new Date(Date.now() - 55 * 60000).toISOString(),
       href: '/incident',
@@ -551,8 +788,7 @@ function AppShell({
     {
       id: 'a1',
       label: 'Isolate affected endpoints (4 hosts)',
-      description:
-        'Agent recommends network isolation for CVE-2024-21412 exposure. Confidence: 94%. Reversible within 15 min.',
+      description: 'Agent recommends network isolation for CVE-2024-21412 exposure. Confidence: 94%. Reversible within 15 min.',
       confidence: 0.94,
       policyVerdict: 'requires_approval',
       href: '/approvals',
@@ -560,8 +796,7 @@ function AppShell({
     {
       id: 'a2',
       label: 'Trigger emergency MFA re-enrollment',
-      description:
-        'Policy drift on SAML MFA — re-enrollment for 4 accounts recommended. Low blast radius.',
+      description: 'Policy drift on SAML MFA — re-enrollment for 4 accounts recommended. Low blast radius.',
       confidence: 0.88,
       policyVerdict: 'allowed',
       href: '/controls',
@@ -569,8 +804,7 @@ function AppShell({
     {
       id: 'a3',
       label: 'Escalate IC-2409 to executive stakeholders',
-      description:
-        'P1 incident open >45 min with no CISO acknowledgement — auto-escalation recommended.',
+      description: 'P1 incident open >45 min with no CISO acknowledgement — auto-escalation recommended.',
       confidence: 0.91,
       policyVerdict: 'requires_approval',
       href: '/incident',
@@ -583,8 +817,7 @@ function AppShell({
       surface: 'Counsel',
       surfaceAccent: '#8a8a8a',
       label: 'Active legal matter: data breach disclosure',
-      description:
-        'Counsel has a linked data-breach matter with a 72h regulatory disclosure deadline.',
+      description: 'Counsel has a linked data-breach matter with a 72h regulatory disclosure deadline.',
       href: '/counsel/dashboard',
       preservedContext: { surface: 'sentra', domain: 'incident' },
     },
@@ -593,8 +826,7 @@ function AppShell({
       surface: 'Lyte',
       surfaceAccent: '#8a8a8a',
       label: '3 pending decisions in Decision Center',
-      description:
-        "Lyte's Decision Center has 3 Aegis-sourced recommendations queued for approval.",
+      description: "Lyte's Decision Center has 3 Sentra-sourced recommendations queued for approval.",
       href: '/lyte/decision-center',
       preservedContext: { surface: 'sentra' },
     },
@@ -603,44 +835,51 @@ function AppShell({
       surface: 'Vessels',
       surfaceAccent: '#8a8a8a',
       label: 'Fleet asset under active threat — MV Atlantic Falcon',
-      description:
-        "Vessels flagged MV Atlantic Falcon's onboard systems for a related CVE exposure.",
+      description: "Vessels flagged MV Atlantic Falcon's onboard systems for a related CVE exposure.",
       href: '/vessels/fleet',
       preservedContext: { surface: 'sentra' },
     },
   ];
 
-  if (location.startsWith('/resilience')) {
-    return (
-      <Suspense fallback={<div style={{ height: '100vh', background: '#060e1a' }} />}>
-        <ResilienceScorecardPage />
-      </Suspense>
-    );
+  const isPrintAllSlides = location === '/slides/print' || location.startsWith('/slides/print');
+  const isPresenter = location === '/slides/presenter' || location.startsWith('/slides/presenter');
+  const isSlides = location.startsWith('/slides') || location.startsWith('/slide');
+
+  if (isPrintAllSlides) {
+    return <AllSlides />;
+  }
+
+  if (isPresenter) {
+    return <PresenterMode />;
+  }
+
+  if (isSlides) {
+    return <SlideDeck />;
   }
 
   if (location === '/' || location === '') {
     return (
       <>
-        <EcosystemNav
-          currentAppId="sentra"
-          currentAppName="Aegis Cyber Resilience"
-          accentColor={accent}
-        />
-        <Suspense fallback={<div style={{ height: '100vh', background: '#0a0606' }} />}>
+        <EcosystemNav currentAppId="sentra" currentAppName="Sentra" accentColor={accent} />
+        <Suspense fallback={<div style={{ height: '100vh', background: '#09090b' }} />}>
           <SentraLandingPage />
         </Suspense>
+        <CommandPalette
+          open={paletteOpen}
+          onClose={() => setPaletteOpen(false)}
+          commands={paletteCommands}
+          appName="Sentra"
+          accentColor={accent}
+          placeholder="Search Sentra — pages, entities, actions..."
+        />
         <Toaster position="bottom-right" theme="dark" />
       </>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: '#060e1a' }}>
-      <EcosystemNav
-        currentAppId="sentra"
-        currentAppName="Aegis Cyber Resilience"
-        accentColor={accent}
-      />
+    <div className="flex flex-col h-screen" style={{ background: '#09090b' }}>
+      <EcosystemNav currentAppId="sentra" currentAppName="Sentra" accentColor={accent} />
       <SharedDashboardShell
         sidebar={
           <SentraSidebarContent
@@ -651,12 +890,12 @@ function AppShell({
         }
         mobileOpen={sidebarOpen}
         onMobileClose={() => setSidebarOpen(false)}
-        sidebarWidth={sidebarExpanded ? '13rem' : '3.5rem'}
+        sidebarWidth={sidebarExpanded ? '14rem' : '3.5rem'}
         sidebarEvents={{
           onMouseEnter: () => setSidebarHovered(true),
           onMouseLeave: () => setSidebarHovered(false),
         }}
-        theme={{ sidebarBg: '#060e1a', pageBg: '#060e1a', headerBg: 'rgba(6,14,26,0.92)' }}
+        theme={{ sidebarBg: '#09090b', pageBg: '#09090b', headerBg: 'rgba(9,9,11,0.92)' }}
         accentColor={accent}
         topbar={
           <div className="flex items-center gap-3 w-full md:hidden">
@@ -668,29 +907,29 @@ function AppShell({
               <Menu className="w-4 h-4" />
             </button>
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#f5f5f5]/80">
-              Aegis Cyber Resilience
+              Sentra
             </span>
           </div>
         }
       >
         <main data-szl-shell-main className="flex-1 overflow-auto h-full">
-          <DashboardRouter />
+          <DashboardRoutes />
         </main>
       </SharedDashboardShell>
       <CommandPalette
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
         commands={paletteCommands}
-        appName="Aegis"
+        appName="Sentra"
         accentColor={accent}
-        placeholder="Search Aegis — pages, entities, actions..."
+        placeholder="Search Sentra — pages, entities, actions..."
       />
       <SentientLayer
         open={sentientOpen}
         onClose={sentientHide}
         onOpen={sentientShow}
         surfaceId="sentra"
-        surfaceName="Aegis Cyber Resilience"
+        surfaceName="Sentra Cyber Resilience"
         accentColor={accent}
         updates={sentientUpdates}
         actions={sentientActions}
@@ -729,7 +968,7 @@ export default function App() {
       <AppModeBanner />
       <AnalyticsProvider appName="sentra">
         <QueryClientProvider client={queryClient}>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+          <WouterRouter base={BASE}>
             <AppShell
               sidebarOpen={sidebarOpen}
               setSidebarOpen={setSidebarOpen}

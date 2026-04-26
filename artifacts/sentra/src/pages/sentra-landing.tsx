@@ -1,331 +1,220 @@
 import { ContactModal } from '@szl-holdings/shared-ui/contact-modal';
-import { NewsletterSubscribe } from '@szl-holdings/shared-ui/newsletter-subscribe';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
-  BarChart3,
-  ChevronRight,
-  Cpu,
-  Flame,
+  ArrowRight,
+  Bot,
+  Brain,
+  Crosshair,
+  Database,
+  Eye,
+  FileText,
+  GitBranch,
+  Globe,
+  Layers,
   Lock,
-  Radar,
+  Network,
   RotateCcw,
+  Scale,
   Shield,
-  ShieldAlert,
   ShieldCheck,
-  Trophy,
-  Users,
+  Swords,
+  Target,
+  Terminal,
+  Workflow,
   Zap,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'wouter';
 
-const CORE_VIEWS = [
+const PLATFORM_PILLARS = [
   {
-    icon: ShieldAlert,
-    title: 'Threat Overview',
-    desc: 'Live threat posture across endpoints, identities, and infrastructure — every signal mapped to the asset, owner, and recovery path it touches.',
-    color: 'text-[#f5f5f5]',
+    icon: Shield,
+    title: 'SOC Operations',
+    desc: 'Agentic SOC, deception grids, forensic timelines, identity threat detection — unified in a single command surface.',
+    count: '13 modules',
   },
   {
-    icon: Cpu,
-    title: 'Asset Risk Graph',
-    desc: 'Every system, identity, and data store rendered as a graph — exposure, blast radius, and downstream dependencies for a single pane of glass.',
-    color: 'text-[#c9b787]',
+    icon: Brain,
+    title: 'Threat Intelligence',
+    desc: 'MITRE ATT&CK mapping, kill chain analysis, adversary profiling, STIX/TAXII feeds, and predictive intelligence.',
+    count: '14 modules',
   },
   {
-    icon: RotateCcw,
-    title: 'Recovery Readiness',
-    desc: 'Recovery posture by tier — RTO, RPO, last-tested restore, and the gap between what was promised and what is actually rehearsed.',
-    color: 'text-[#c9b787]',
+    icon: Workflow,
+    title: 'Response & Automation',
+    desc: 'SOAR playbooks, XDR workbench, response orchestration, and watchlist-driven automated containment.',
+    count: '6 modules',
   },
   {
-    icon: Activity,
-    title: 'Incident Commander',
-    desc: 'Focused incident view with attacker timeline, containment options, recommended actions, and the audit trail every regulator will eventually ask for.',
-    color: 'text-[#8a8a8a]',
-  },
-];
-
-const SIGNAL_DEMO = [
-  {
-    time: '09:42:08',
-    severity: 'critical',
-    label: 'Lateral movement detected · prod-finance-vpc',
-    action: 'Isolate host · escalate to commander',
+    icon: Swords,
+    title: 'War Room & Exercises',
+    desc: 'Citadel war room, purple team operations, scenario library, and chaos engineering drills for live readiness.',
+    count: '6 modules',
   },
   {
-    time: '09:41:51',
-    severity: 'high',
-    label: 'MFA bypass attempt · CFO identity',
-    action: 'Force re-auth · session revoked',
+    icon: Layers,
+    title: 'Digital Twin & ATLAS',
+    desc: 'Threat twin modeling, worldline correlation, incident replay, and the ATLAS threat mesh runtime.',
+    count: '4 modules',
   },
   {
-    time: '09:39:14',
-    severity: 'medium',
-    label: 'Backup drift · 2 critical datasets > RPO',
-    action: 'Trigger snapshot · notify owner',
+    icon: ShieldCheck,
+    title: 'Compliance & Risk',
+    desc: 'Zero trust scorecards, audit chain, vulnerability lifecycle, executive risk views, and continuous governance.',
+    count: '13 modules',
   },
   {
-    time: '09:36:02',
-    severity: 'info',
-    label: 'Control gap closed · firewall ruleset 14b',
-    action: 'Evidence captured · audit trail signed',
+    icon: Network,
+    title: 'Agent Mesh',
+    desc: 'Autonomous agent topology, mesh drift detection, containment rules, and connector orchestration.',
+    count: '5 modules',
+  },
+  {
+    icon: Globe,
+    title: 'Governance & Research',
+    desc: 'Enterprise governance, federated learning, intel experiments, trust analytics, and executive reporting.',
+    count: '16 modules',
   },
 ];
 
-const SEVERITY_STYLE: Record<string, string> = {
-  critical: 'text-[#f5f5f5] bg-[#f5f5f5]/15 border-[#f5f5f5]/30',
-  high: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/25',
-  medium: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/25',
-  info: 'text-[#c9b787] bg-[#c9b787]/10 border-[#c9b787]/25',
+const SIGNAL_ITEMS = [
+  { time: '2 min ago', text: 'Lateral movement detected in prod-finance-vpc', severity: 'critical' as const },
+  { time: '4 min ago', text: 'MFA bypass attempt on CFO identity — session revoked', severity: 'high' as const },
+  { time: '8 min ago', text: 'SOAR playbook auto-contained ransomware dropper', severity: 'medium' as const },
+  { time: '12 min ago', text: 'Zero trust policy drift resolved across 4 endpoints', severity: 'resolved' as const },
+];
+
+const SEVERITY_DOT: Record<string, string> = {
+  critical: 'bg-red-500',
+  high: 'bg-amber-500',
+  medium: 'bg-yellow-500',
+  resolved: 'bg-emerald-500',
 };
 
-const WHAT_IT_SOLVES = [
-  'Threat alerts that never connect to the asset that actually matters',
-  'Recovery plans that look good on paper but have not been rehearsed',
-  'Identity exposures that surface days after the privilege was granted',
-  'Control drift between what auditors signed and what production runs',
-  'Incident response that stalls because no one owns the next decision',
-  'Tabletop exercises that produce slides but no measurable readiness',
-  'Backups whose last successful restore no one can prove',
-  'Board reporting that summarizes posture without showing exposure',
+const CAPABILITIES = [
+  { icon: Bot, label: 'Agentic SOC' },
+  { icon: Crosshair, label: 'Threat Hunting' },
+  { icon: Target, label: 'MITRE ATT&CK' },
+  { icon: Lock, label: 'Zero Trust' },
+  { icon: Terminal, label: 'XDR Workbench' },
+  { icon: RotateCcw, label: 'Incident Replay' },
+  { icon: Database, label: 'STIX / TAXII' },
+  { icon: Eye, label: 'Deception Grid' },
+  { icon: Scale, label: 'Compliance' },
+  { icon: FileText, label: 'Audit Chain' },
+  { icon: GitBranch, label: 'Attack Paths' },
+  { icon: Zap, label: 'Chaos Drills' },
 ];
 
 export default function SentraLandingPage() {
   const [demoOpen, setDemoOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0a0606] text-[#f5f5f5] overflow-x-hidden">
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16">
+    <div className="min-h-screen bg-[#09090b] text-white overflow-x-hidden antialiased">
+      <section className="relative min-h-[92vh] flex flex-col items-center justify-center px-6">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[820px] h-[420px] bg-[#f5f5f5]/10 rounded-full blur-3xl" />
-          <div className="absolute top-2/3 right-1/4 w-64 h-64 bg-[#c9b787]/5 rounded-full blur-2xl" />
-          <svg
-            className="absolute inset-0 w-full h-full opacity-[0.07]"
-            viewBox="0 0 1200 600"
-            aria-hidden="true"
-          >
-            <defs>
-              <radialGradient id="sentra-grid" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="rgba(239,68,68,0.6)" />
-                <stop offset="100%" stopColor="rgba(239,68,68,0)" />
-              </radialGradient>
-            </defs>
-            <rect width="1200" height="600" fill="url(#sentra-grid)" />
-            <g stroke="rgba(239,68,68,0.6)" strokeWidth="0.5" fill="none">
-              {Array.from({ length: 13 }, (_, i) => (
-                <line
-                  key={`h${i}`}
-                  x1={0}
-                  y1={i * 50}
-                  x2={1200}
-                  y2={i * 50}
-                  strokeDasharray="3 8"
-                />
-              ))}
-              {Array.from({ length: 25 }, (_, i) => (
-                <line key={`v${i}`} x1={i * 50} y1={0} x2={i * 50} y2={600} strokeDasharray="3 8" />
-              ))}
-            </g>
-          </svg>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-gradient-to-b from-white/[0.02] to-transparent rounded-full blur-3xl" />
         </div>
 
-        <div className="relative z-10 max-w-4xl text-center">
-          <div className="flex items-center justify-center gap-2 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 flex items-center justify-center">
-              <Shield className="w-5 h-5 text-[#f5f5f5]" />
-            </div>
-            <span className="text-sm font-medium text-[#f5f5f5]/60">
-              Aegis Cyber Resilience Command · Powered by Counsel
+        <div className="relative z-10 max-w-3xl text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] mb-10">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white/60">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+              <path d="M2 17l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="text-[11px] tracking-wide text-white/50">
+              Orchestrated by a11oy
             </span>
           </div>
 
-          <h1 className="font-display text-5xl md:text-6xl font-bold text-[#f5f5f5] leading-tight mb-6">
-            Turn cyber posture, recovery readiness,
-            <br />
-            <span className="text-[#f5f5f5]">and live incidents into command.</span>
+          <h1 className="text-[clamp(2.5rem,5.5vw,4.5rem)] font-semibold leading-[1.08] tracking-[-0.03em] text-white mb-6">
+            Cyber resilience,{' '}
+            <span className="text-white/40">unified.</span>
           </h1>
 
-          <p className="text-lg text-[#f5f5f5]/60 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Aegis is the cyber resilience command platform for security leaders who need more than
-            a SIEM dashboard. See the exposures that map to real assets, prove the recovery you
-            promised, and run incidents from a single command surface.
+          <p className="text-[17px] leading-relaxed text-white/45 max-w-xl mx-auto mb-12">
+            Sentra brings SOC operations, threat intelligence, compliance, and incident response into a single
+            command surface — 80+ modules powered by the a11oy orchestration layer.
           </p>
 
-          <div className="flex items-center justify-center gap-4 flex-wrap">
+          <div className="flex items-center justify-center gap-3">
+            <Link href="/dashboard">
+              <span className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-[#09090b] text-sm font-medium rounded-lg hover:bg-white/90 transition-colors cursor-pointer">
+                Open platform
+                <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </Link>
             <button
               onClick={() => setDemoOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-[#f5f5f5] hover:bg-[#f5f5f5] text-[#0a0606] font-semibold rounded-xl transition-all text-sm"
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white/70 border border-white/[0.1] rounded-lg hover:bg-white/[0.04] transition-colors"
             >
-              Request a Pilot <ChevronRight className="w-4 h-4" />
+              Request demo
             </button>
-            <Link href="/dashboard">
-              <button className="flex items-center gap-2 px-6 py-3 bg-[#f5f5f5]/10 hover:bg-[#f5f5f5]/15 border border-[#f5f5f5]/20 text-[#f5f5f5] font-medium rounded-xl transition-all text-sm">
-                Open Command Center <Activity className="w-4 h-4" />
-              </button>
-            </Link>
-          </div>
-
-          <div className="mt-12 flex items-center justify-center gap-8 flex-wrap">
-            {[
-              { icon: Radar, label: '247 assets monitored' },
-              { icon: ShieldAlert, label: '1 incident open' },
-              { icon: RotateCcw, label: 'RTO 42% critical tier' },
-              { icon: Lock, label: '3 control gaps tracked' },
-            ].map((s) => (
-              <div key={s.label} className="flex items-center gap-2 text-xs text-[#f5f5f5]/80">
-                <s.icon className="w-3.5 h-3.5" />
-                {s.label}
-              </div>
-            ))}
           </div>
         </div>
       </section>
 
-      <section className="px-6 py-20 bg-[#070404] border-y border-[#f5f5f5]/5">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-[10px] font-mono text-[#f5f5f5]/80 uppercase tracking-widest mb-3">
-              What Aegis Does
-            </p>
-            <h2 className="font-display text-3xl font-bold text-[#f5f5f5] mb-3">
-              Cyber resilience command. Not another SIEM.
-            </h2>
-            <p className="text-[#f5f5f5]/80 mt-3 max-w-xl mx-auto text-sm">
-              Most security tools stop at alert. Aegis carries every signal through to the asset it
-              threatens, the recovery it endangers, and the decision someone has to make in the next
-              ten minutes.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              {
-                icon: ShieldAlert,
-                title: 'Threat Overview',
-                desc: 'Live posture by asset tier, with severity, owner, and the recovery path each signal touches.',
-                color: 'text-[#f5f5f5]',
-              },
-              {
-                icon: Cpu,
-                title: 'Asset Risk Graph',
-                desc: 'Every system rendered with exposure, blast radius, and downstream dependencies in one graph.',
-                color: 'text-[#c9b787]',
-              },
-              {
-                icon: RotateCcw,
-                title: 'Recovery Readiness',
-                desc: 'RTO, RPO, last-tested restore, and the gap between what was promised and what is rehearsed.',
-                color: 'text-[#c9b787]',
-              },
-              {
-                icon: Activity,
-                title: 'Incident Commander',
-                desc: 'Live incident view with attacker timeline, containment options, and the audit trail regulators expect.',
-                color: 'text-[#8a8a8a]',
-              },
-              {
-                icon: BarChart3,
-                title: 'Exposure Board',
-                desc: 'Quantified exposure by business unit — dollarized, prioritized, and tied to mitigation owners.',
-                color: 'text-[#f5f5f5]',
-              },
-              {
-                icon: ShieldCheck,
-                title: 'Control Drift',
-                desc: 'Continuous diff between attested controls and live production state, with evidence on every change.',
-                color: 'text-[#c9b787]',
-              },
-            ].map((feature) => (
-              <div
-                key={feature.title}
-                className="bg-[#120a0a]/80 border border-[#f5f5f5]/10 rounded-xl p-5 hover:border-[#f5f5f5]/25 transition-all"
-              >
-                <feature.icon className={cn('w-5 h-5 mb-3', feature.color)} />
-                <h3 className="text-sm font-bold text-[#f5f5f5] mb-2">{feature.title}</h3>
-                <p className="text-[11px] text-[#f5f5f5]/80 leading-relaxed">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="px-6 py-20 max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <p className="text-[10px] font-mono text-[#f5f5f5]/80 uppercase tracking-widest mb-3">
-            Core Views
-          </p>
-          <h2 className="font-display text-3xl font-bold text-[#f5f5f5]">
-            Four command surfaces. One resilience platform.
-          </h2>
-          <p className="text-[#f5f5f5]/80 mt-3 max-w-xl mx-auto text-sm">
-            Each view is purpose-built for a specific decision security leaders actually have to
-            make.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {CORE_VIEWS.map((view) => (
-            <div
-              key={view.title}
-              className="bg-[#120a0a]/80 border border-[#f5f5f5]/10 rounded-xl p-6"
-            >
-              <view.icon className={cn('w-5 h-5 mb-3', view.color)} />
-              <h3 className="text-sm font-bold text-[#f5f5f5] mb-2">{view.title}</h3>
-              <p className="text-[12px] text-[#f5f5f5]/85 leading-relaxed">{view.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="px-6 py-20 bg-[#070404] border-y border-[#f5f5f5]/5">
+      <section className="px-6 py-24 border-t border-white/[0.04]">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-10">
-            <p className="text-[10px] font-mono text-[#f5f5f5]/80 uppercase tracking-widest mb-3">
-              Live Signal Demo
+          <div className="text-center mb-16">
+            <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-white/30 mb-4">
+              Platform
             </p>
-            <h2 className="font-display text-3xl font-bold text-[#f5f5f5] mb-3">
-              Every signal is a decision in waiting.
+            <h2 className="text-3xl font-semibold tracking-tight text-white mb-4">
+              Everything security teams need.
+              <br />
+              <span className="text-white/35">Nothing they don't.</span>
             </h2>
-            <p className="text-[#f5f5f5]/80 max-w-xl mx-auto text-sm">
-              A snapshot from the Aegis command stream — every event already mapped to severity,
-              asset, and the next action.
-            </p>
           </div>
 
-          <div className="bg-[#120a0a]/90 border border-[#f5f5f5]/15 rounded-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-[#f5f5f5]/10 bg-[#1a0d0d]/60">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#f5f5f5] animate-pulse" />
-                <span className="text-[11px] font-mono uppercase tracking-widest text-[#f5f5f5]/70">
-                  Live · Decision Stream
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-white/[0.04] rounded-2xl overflow-hidden">
+            {PLATFORM_PILLARS.map((pillar) => (
+              <div
+                key={pillar.title}
+                className="bg-[#09090b] p-7 hover:bg-white/[0.015] transition-colors group"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <pillar.icon className="w-5 h-5 text-white/30 group-hover:text-white/50 transition-colors" />
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-white/20">
+                    {pillar.count}
+                  </span>
+                </div>
+                <h3 className="text-[15px] font-medium text-white mb-2">{pillar.title}</h3>
+                <p className="text-[13px] leading-relaxed text-white/35">{pillar.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 py-24 border-t border-white/[0.04]">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-white/30 mb-4">
+              Live signal
+            </p>
+            <h2 className="text-3xl font-semibold tracking-tight text-white">
+              Every alert becomes a decision.
+            </h2>
+          </div>
+
+          <div className="rounded-xl border border-white/[0.06] overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.04] bg-white/[0.015]">
+              <div className="flex items-center gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[11px] font-mono tracking-wider text-white/40">
+                  DECISION STREAM
                 </span>
               </div>
-              <span className="text-[10px] font-mono text-[#f5f5f5]/80">
-                prod-finance-vpc · region us-east-1
-              </span>
+              <span className="text-[10px] font-mono text-white/20">us-east-1</span>
             </div>
-            <div className="divide-y divide-red-500/5">
-              {SIGNAL_DEMO.map((row) => (
-                <div key={row.time} className="grid grid-cols-12 gap-3 items-center px-5 py-3.5">
-                  <div className="col-span-2 text-[10px] font-mono text-[#f5f5f5]/85">{row.time}</div>
-                  <div className="col-span-2">
-                    <span
-                      className={cn(
-                        'inline-block px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider border',
-                        SEVERITY_STYLE[row.severity],
-                      )}
-                    >
-                      {row.severity}
-                    </span>
-                  </div>
-                  <div className="col-span-5 text-[12px] text-[#f5f5f5]/80 leading-snug">
-                    {row.label}
-                  </div>
-                  <div className="col-span-3 text-[11px] text-[#f5f5f5]/85 leading-snug text-right">
-                    {row.action}
-                  </div>
+            <div className="divide-y divide-white/[0.03]">
+              {SIGNAL_ITEMS.map((item) => (
+                <div key={item.text} className="flex items-center gap-4 px-5 py-3.5">
+                  <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', SEVERITY_DOT[item.severity])} />
+                  <span className="text-[13px] text-white/50 flex-1">{item.text}</span>
+                  <span className="text-[11px] text-white/20 shrink-0">{item.time}</span>
                 </div>
               ))}
             </div>
@@ -333,158 +222,64 @@ export default function SentraLandingPage() {
         </div>
       </section>
 
-      <section className="px-6 py-20 max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <p className="text-[10px] font-mono text-[#f5f5f5]/80 uppercase tracking-widest mb-3">
-            What It Solves
+      <section className="px-6 py-24 border-t border-white/[0.04]">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-white/30 mb-4">
+            Capabilities
           </p>
-          <h2 className="font-display text-3xl font-bold text-[#f5f5f5] mb-3">
-            Eight problems. One resilience command.
+          <h2 className="text-3xl font-semibold tracking-tight text-white mb-12">
+            Built for the modern SOC.
           </h2>
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {WHAT_IT_SOLVES.map((tile) => (
-            <div key={tile} className="bg-[#120a0a]/80 border border-[#f5f5f5]/10 rounded-xl p-4">
-              <div className="w-3 h-3 rounded-full border-2 border-[#f5f5f5]/30 mb-3" />
-              <p className="text-[12px] text-[#f5f5f5]/65 leading-snug">{tile}</p>
-            </div>
-          ))}
-        </div>
-      </section>
 
-      <section className="px-6 py-20 bg-[#070404] border-y border-[#f5f5f5]/5">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-[10px] font-mono text-[#f5f5f5]/80 uppercase tracking-widest mb-3">
-              Why It Matters
-            </p>
-            <h2 className="font-display text-3xl font-bold text-[#f5f5f5] mb-4">
-              From alert noise to resilience command.
-            </h2>
-            <p className="text-[#f5f5f5]/80 text-sm max-w-2xl mx-auto leading-relaxed">
-              Every CISO already has alerts. Very few can prove that the controls they attested to
-              are still in place, that the recovery they promised is actually rehearsed, or that the
-              next incident has an owner before it happens. That is the gap Aegis closes.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            {[
-              {
-                metric: '11m',
-                label: 'median containment time',
-                trend: 'vs 47m unmanaged baseline',
-              },
-              {
-                metric: '$8.4M',
-                label: 'exposure quantified & owned',
-                trend: 'across 247 monitored assets',
-              },
-              {
-                metric: '94%',
-                label: 'controls continuously attested',
-                trend: '↑ vs 71% prior quarter',
-              },
-              {
-                metric: '42%',
-                label: 'critical-tier recovery posture',
-                trend: 'tracked to RTO commitment',
-              },
-            ].map((o) => (
-              <div key={o.metric} className="text-center">
-                <p className="text-3xl font-bold font-display text-[#f5f5f5] mb-1">{o.metric}</p>
-                <p className="text-[11px] text-[#f5f5f5]/85 leading-relaxed mb-1">{o.label}</p>
-                <p className="text-[9px] font-mono text-[#f5f5f5]/80">{o.trend}</p>
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+            {CAPABILITIES.map((cap) => (
+              <div
+                key={cap.label}
+                className="flex flex-col items-center gap-2.5 py-4 px-3 rounded-lg border border-white/[0.04] hover:border-white/[0.08] hover:bg-white/[0.015] transition-all"
+              >
+                <cap.icon className="w-4 h-4 text-white/25" />
+                <span className="text-[11px] text-white/40">{cap.label}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="px-6 py-16 bg-[#0a0606] border-t border-[#f5f5f5]/5">
-        <div className="max-w-[560px] mx-auto">
-          <NewsletterSubscribe
-            utmSource="sentra"
-            variant="banner"
-            heading="Cyber resilience essays, straight to your inbox"
-            subheading="SZL Command essays on incident command, recovery readiness, and the decision infrastructure behind Aegis — delivered weekly."
-          />
-        </div>
-      </section>
-
-      <section className="px-6 py-20 border-t border-[#f5f5f5]/5 bg-[#0a0606] relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[600px] h-[400px] bg-[#f5f5f5]/5 rounded-full blur-3xl" />
-        </div>
-        <div className="max-w-5xl mx-auto relative z-10">
-          <div className="flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 rounded-lg bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 flex items-center justify-center">
-              <Flame className="w-4 h-4 text-[#f5f5f5]" />
-            </div>
-            <span className="text-[10px] font-mono uppercase tracking-widest text-[#f5f5f5]/60">
-              NEW · Crisis Arena
-            </span>
-          </div>
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl font-bold text-[#f5f5f5] mb-4 leading-tight">
-                Crowdsource your crisis scenarios.<br />
-                <span className="text-[#f5f5f5]">Stress-test before impact.</span>
-              </h2>
-              <p className="text-sm text-[#f5f5f5]/60 leading-relaxed mb-6">
-                Post scoped resilience briefs. Crisis architects compete to model your worst-case
-                scenarios — quantified by Business Impact Score and graduated into live tabletop
-                exercises. Every scenario, every verdict, on-chain.
-              </p>
-              <div className="flex items-center gap-3 flex-wrap">
-                <Link href="/crisis-arena/leaderboard">
-                  <button className="flex items-center gap-2 px-5 py-2.5 bg-[#f5f5f5] hover:bg-[#f5f5f5] text-[#0a0606] font-semibold rounded-xl transition-all text-sm">
-                    View Hall of Fame <Trophy className="w-4 h-4" />
-                  </button>
-                </Link>
-                <Link href="/crisis-arena/engagements">
-                  <button className="flex items-center gap-2 px-5 py-2.5 bg-[#f5f5f5]/10 hover:bg-[#f5f5f5]/15 border border-[#f5f5f5]/20 text-[#f5f5f5] font-medium rounded-xl transition-all text-sm">
-                    Post an Engagement <ChevronRight className="w-4 h-4" />
-                  </button>
-                </Link>
+      <section className="px-6 py-24 border-t border-white/[0.04]">
+        <div className="max-w-3xl mx-auto">
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.015] p-8 md:p-12">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-white/50">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                  <path d="M2 17l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-[13px] font-medium text-white">a11oy Orchestration Layer</p>
+                <p className="text-[11px] text-white/30">Powering every Sentra module</p>
               </div>
             </div>
-            <div className="space-y-3">
+
+            <p className="text-[14px] leading-relaxed text-white/40 mb-8">
+              Every module in Sentra is orchestrated by a11oy — the governance-aware AI layer that enforces
+              policy boundaries, routes decisions through approval chains, and ensures every autonomous action
+              has an auditable provenance trail. a11oy connects Sentra to the broader SZL Holdings ecosystem:
+              Counsel for legal matters, Vessels for maritime intelligence, Lyte for decision support, and
+              Terra for asset exposure.
+            </p>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
-                {
-                  icon: Flame,
-                  label: 'Business Impact Scoring',
-                  desc: 'Every scenario is machine-scored on revenue at risk, RTO/RPO breach, regulatory exposure, and blast radius.',
-                  color: 'text-[#f5f5f5]',
-                },
-                {
-                  icon: Trophy,
-                  label: 'Global Architect Leaderboard',
-                  desc: 'Top crisis architects compete for reputation and payout pools across public and private engagements.',
-                  color: 'text-[#c9b787]',
-                },
-                {
-                  icon: Shield,
-                  label: 'Graduate to Tabletop',
-                  desc: 'Accepted scenarios launch directly into Incident Commander as live exercises — no manual handoff.',
-                  color: 'text-[#c9b787]',
-                },
-                {
-                  icon: Users,
-                  label: 'Proof Chain Audit Trail',
-                  desc: 'Every submission, triage decision, and payout is logged on-chain. Fully auditable resilience record.',
-                  color: 'text-[#8a8a8a]',
-                },
-              ].map((feature) => (
-                <div
-                  key={feature.label}
-                  className="flex items-start gap-3 bg-[#120808]/80 border border-[#f5f5f5]/10 rounded-xl p-4"
-                >
-                  <feature.icon className={cn('w-4 h-4 mt-0.5 shrink-0', feature.color)} />
-                  <div>
-                    <div className="text-xs font-bold text-[#f5f5f5] mb-0.5">{feature.label}</div>
-                    <div className="text-[11px] text-[#f5f5f5]/50 leading-relaxed">{feature.desc}</div>
-                  </div>
+                { label: 'Modules', value: '80+' },
+                { label: 'Agents online', value: '12' },
+                { label: 'Integrations', value: '24' },
+                { label: 'Ecosystems', value: '6' },
+              ].map((stat) => (
+                <div key={stat.label} className="text-center py-3 rounded-lg bg-white/[0.03]">
+                  <p className="text-lg font-semibold text-white">{stat.value}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-white/25 mt-0.5">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -492,39 +287,55 @@ export default function SentraLandingPage() {
         </div>
       </section>
 
-      <section className="px-6 py-20 bg-[#070404] border-t border-[#f5f5f5]/5">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-[10px] font-mono text-[#f5f5f5]/80 uppercase tracking-widest mb-3">
-            Powered by Counsel · Aegis
+      <section className="px-6 py-24 border-t border-white/[0.04]">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-3xl font-semibold tracking-tight text-white mb-4">
+            Ready to unify your security operations?
+          </h2>
+          <p className="text-[15px] text-white/35 mb-8">
+            See how Sentra brings every signal, every decision, and every compliance requirement into one surface.
           </p>
-          <h2 className="font-display text-3xl font-bold text-[#f5f5f5] mb-4">Request a Pilot</h2>
-          <p className="text-[#f5f5f5]/85 mb-8 text-sm leading-relaxed max-w-xl mx-auto">
-            Aegis is built for security leaders who need to command resilience, not just monitor
-            it. Request a pilot — we will walk through the full command center against your
-            environment.
-          </p>
-          <div className="flex items-center justify-center gap-4 flex-wrap">
+          <div className="flex items-center justify-center gap-3">
+            <Link href="/dashboard">
+              <span className="inline-flex items-center gap-2 px-6 py-3 bg-white text-[#09090b] text-sm font-medium rounded-lg hover:bg-white/90 transition-colors cursor-pointer">
+                Open platform
+                <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </Link>
             <button
               onClick={() => setDemoOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-[#f5f5f5] hover:bg-[#f5f5f5] text-[#0a0606] font-semibold rounded-xl transition-all text-sm"
+              className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white/70 border border-white/[0.1] rounded-lg hover:bg-white/[0.04] transition-colors"
             >
-              Request a Pilot <Shield className="w-4 h-4" />
+              Request demo
             </button>
-            <Link href="/dashboard">
-              <button className="flex items-center gap-2 px-6 py-3 border border-[#f5f5f5]/20 hover:border-[#f5f5f5]/40 text-[#f5f5f5] font-medium rounded-xl transition-all text-sm">
-                Open Command Center <Zap className="w-4 h-4" />
-              </button>
-            </Link>
           </div>
         </div>
       </section>
 
+      <footer className="px-6 py-12 border-t border-white/[0.04]">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <Shield className="w-4 h-4 text-white/20" />
+            <span className="text-[13px] font-medium text-white/30">Sentra</span>
+            <span className="text-[11px] text-white/15 ml-1">by SZL Holdings</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-white/15">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+              <path d="M2 17l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M2 12l10 5 10-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="text-[10px] text-white/15">Orchestrated by a11oy</span>
+          </div>
+        </div>
+      </footer>
+
       <ContactModal
-        isOpen={demoOpen}
+        open={demoOpen}
         onClose={() => setDemoOpen(false)}
-        type="demo"
-        app="sentra"
-        subtitle="Aegis Cyber Resilience Command"
+        title="Request a Sentra Demo"
+        subtitle="See how Sentra unifies your security operations."
+        product="sentra"
       />
     </div>
   );
