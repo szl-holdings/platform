@@ -296,7 +296,7 @@ Rollback immediately (before investigation) if:
 
 ---
 
-## Mobile Deployment (CORTEX / Expo)
+## Mobile Deployment (APEX / Expo)
 
 Mobile apps are built via Expo Application Services (EAS).
 

@@ -234,7 +234,7 @@ describe('runtime-persistence — restart survival across all 6 subsystems', () 
     });
   });
 
-  describe('(2) Memory Fabric / NEXUS memory survives restart', () => {
+  describe('(2) Memory Fabric / PRAXIS memory survives restart', () => {
     it('a fresh MutableMemoryStore re-bound to the same backend recovers all records', () => {
       const sharedBackend = new InMemoryMemoryStore();
       const beforeCrash = new MutableMemoryStore(sharedBackend);

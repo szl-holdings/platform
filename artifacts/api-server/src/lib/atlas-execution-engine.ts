@@ -8,7 +8,7 @@
  *   Aegis (Firestorm)  — security incident response
  *   Vessels            — maritime operations
  *   Terra              — real estate intelligence
- *   PRISM Counsel      — legal matter management
+ *   Counsel      — legal matter management
  *   Carlota Jo         — concierge service operations
  *   IMPERIUM           — infrastructure governance
  *
@@ -631,7 +631,7 @@ const DOMAIN_POLICIES: Policy[] = [
   },
   {
     id: 'prism-legal-review-gate',
-    name: 'PRISM Counsel: Legal Review Gate',
+    name: 'Counsel: Legal Review Gate',
     description: 'All execution actions on active matters must pass through legal review.',
     scope: 'domain',
     domain: 'prism-counsel',
@@ -1000,7 +1000,7 @@ export const DOMAIN_WORKFLOWS: Record<string, WorkflowDefinition> = {
 
   'prism-matter-execution': {
     id: 'prism-matter-execution',
-    name: 'PRISM Counsel Legal Matter Execution',
+    name: 'Counsel Legal Matter Execution',
     description:
       'Legal matter signal → strategy recommendation → counsel review → client approval → filing → outcome.',
     domain: 'prism-counsel',

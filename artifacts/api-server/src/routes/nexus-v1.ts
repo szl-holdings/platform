@@ -1,5 +1,5 @@
 /**
- * NEXUS Unified Intelligence Protocol — v1 Routes
+ * PRAXIS Unified Intelligence Protocol — v1 Routes
  *
  * Single-endpoint API that unifies all SZL domains (maritime, legal,
  * real estate, cyber, executive intelligence, governance) behind one
@@ -262,10 +262,10 @@ const DOMAIN_REGISTRY: Record<string, DomainConfig> = {
     keywords: ['property', 'real estate', 'market', 'cap rate', 'noi', 'lease', 'portfolio', 'distress', 'investment', 'terra'],
   },
   sentra: {
-    displayName: 'Aegis Cyber Resilience Command',
+    displayName: 'Sentra Cyber Resilience Command',
     description: 'Threat detection, incident response, vulnerability management, and cyber containment.',
     systemPrompt:
-      'You are a cybersecurity threat analyst for Aegis. Assess vulnerabilities, attack surfaces, CVEs, and penetration test results. Prioritize by risk severity and provide structured incident response guidance with confidence scores.',
+      'You are a cybersecurity threat analyst for Sentra. Assess vulnerabilities, attack surfaces, CVEs, and penetration test results. Prioritize by risk severity and provide structured incident response guidance with confidence scores.',
     capabilities: ['vulnerability-assessment', 'threat-detection', 'risk-scoring', 'incident-response'],
     actions: [
       {
@@ -568,8 +568,8 @@ const ACTION_DELEGATION_MAP: Partial<Record<string, ActionDelegation>> = {
     method: 'POST',
     buildPath: () => `/api/sentra/incidents`,
     buildBody: (p) => ({
-      title: `NEXUS Containment: ${String(p['threat_id'] ?? 'unknown')}`,
-      description: `Containment initiated via NEXUS v1 for threat ${String(p['threat_id'] ?? 'unknown')} — level: ${String(p['containment_level'] ?? 'isolate')}`,
+      title: `PRAXIS Containment: ${String(p['threat_id'] ?? 'unknown')}`,
+      description: `Containment initiated via PRAXIS v1 for threat ${String(p['threat_id'] ?? 'unknown')} — level: ${String(p['containment_level'] ?? 'isolate')}`,
       severity: 'critical',
     }),
   },
@@ -705,7 +705,7 @@ function buildGovernance(
 
 // ─── Synthesis prompt ─────────────────────────────────────────────────────────
 
-const SYNTHESIS_SYSTEM_PROMPT = `You are the NEXUS Unified Intelligence Synthesizer. Given analyses from multiple SZL domain agents, produce a unified intelligence response.
+const SYNTHESIS_SYSTEM_PROMPT = `You are the PRAXIS Unified Intelligence Synthesizer. Given analyses from multiple SZL domain agents, produce a unified intelligence response.
 
 Structure your response as:
 1. **Key Finding** — The single most important insight across all domains
@@ -819,7 +819,7 @@ router.post('/nexus/v1/query', validateBody(NexusQueryRequestSchema), async (req
           });
         }
       } catch (err) {
-        logger.warn({ err, domain }, 'NEXUS v1 domain agent failed');
+        logger.warn({ err, domain }, 'PRAXIS v1 domain agent failed');
         if (stream) {
           sseWrite(res, 'domain_result', {
             domain,
@@ -917,18 +917,18 @@ router.post('/nexus/v1/query', validateBody(NexusQueryRequestSchema), async (req
               submitPendingApprovalRequest({
                 runId: queryId,
                 stepId: `step_${queryId}_act`,
-                stepName: `${topRecommendation.action} [NEXUS v1 query — act mode]`,
+                stepName: `${topRecommendation.action} [PRAXIS v1 query — act mode]`,
                 toolId: topRecommendation.action,
                 action: `Execute "${topRecommendation.action}" in response to: ${input.slice(0, 100)}`,
                 justification: topRecommendation.reason,
-                projectedImpact: `Auto-recommended from NEXUS v1 query with confidence ${(topRecommendation.confidence * 100).toFixed(0)}%`,
+                projectedImpact: `Auto-recommended from PRAXIS v1 query with confidence ${(topRecommendation.confidence * 100).toFixed(0)}%`,
                 projectedRisk: 'medium',
                 requestedBy: (req.user as { displayName?: string } | undefined)?.displayName ?? 'nexus_v1_query',
                 domain: topRecommendation.domain,
                 surface: 'nexus_v1',
               });
               actionTaken = `queued:${topRecommendation.action}`;
-              logger.info({ action: topRecommendation.action, mode }, 'NEXUS v1 query: act mode — approval-required action queued');
+              logger.info({ action: topRecommendation.action, mode }, 'PRAXIS v1 query: act mode — approval-required action queued');
             }
           } else {
             // Non-approval action in act mode: we cannot safely construct
@@ -939,7 +939,7 @@ router.post('/nexus/v1/query', validateBody(NexusQueryRequestSchema), async (req
               submitPendingApprovalRequest({
                 runId: queryId,
                 stepId: `step_${queryId}_act_nd`,
-                stepName: `${topRecommendation.action} [NEXUS v1 query — act mode]`,
+                stepName: `${topRecommendation.action} [PRAXIS v1 query — act mode]`,
                 toolId: topRecommendation.action,
                 action: `Execute "${topRecommendation.action}" in response to: ${input.slice(0, 100)}`,
                 justification: topRecommendation.reason,
@@ -950,7 +950,7 @@ router.post('/nexus/v1/query', validateBody(NexusQueryRequestSchema), async (req
                 surface: 'nexus_v1',
               });
               actionTaken = `queued:${topRecommendation.action}`;
-              logger.info({ action: topRecommendation.action, mode }, 'NEXUS v1 query: act mode — non-approval action queued (params must be supplied via /actions)');
+              logger.info({ action: topRecommendation.action, mode }, 'PRAXIS v1 query: act mode — non-approval action queued (params must be supplied via /actions)');
             }
           }
         } else if (mode === 'auto') {
@@ -964,7 +964,7 @@ router.post('/nexus/v1/query', validateBody(NexusQueryRequestSchema), async (req
             submitPendingApprovalRequest({
               runId: queryId,
               stepId: `step_${queryId}_auto`,
-              stepName: `${topRecommendation.action} [NEXUS v1 query — auto mode]`,
+              stepName: `${topRecommendation.action} [PRAXIS v1 query — auto mode]`,
               toolId: topRecommendation.action,
               action: `Execute "${topRecommendation.action}" in response to: ${input.slice(0, 100)}`,
               justification: topRecommendation.reason,
@@ -975,7 +975,7 @@ router.post('/nexus/v1/query', validateBody(NexusQueryRequestSchema), async (req
               surface: 'nexus_v1',
             });
             actionTaken = `queued:${topRecommendation.action}`;
-            logger.info({ action: topRecommendation.action, mode }, 'NEXUS v1 query: auto mode — action queued (params must be supplied via /actions)');
+            logger.info({ action: topRecommendation.action, mode }, 'PRAXIS v1 query: auto mode — action queued (params must be supplied via /actions)');
           }
         }
       }
@@ -1021,12 +1021,12 @@ router.post('/nexus/v1/query', validateBody(NexusQueryRequestSchema), async (req
       res.json(responsePayload);
     }
   } catch (err) {
-    logger.error({ err, queryId }, 'NEXUS v1 query failed');
+    logger.error({ err, queryId }, 'PRAXIS v1 query failed');
     if (res.headersSent) {
       sseWrite(res, 'error', { message: 'Query processing failed', code: 'NEXUS_QUERY_ERROR' });
       res.end();
     } else {
-      handleRouteError(res, err, 'NEXUS v1 query failed');
+      handleRouteError(res, err, 'PRAXIS v1 query failed');
     }
   }
 });
@@ -1089,10 +1089,10 @@ router.post('/nexus/v1/actions', validateBody(NexusActionRequestSchema), async (
       submitPendingApprovalRequest({
         runId: actionId,
         stepId: `step_${actionId}`,
-        stepName: `${actionDef.name} [NEXUS v1]`,
+        stepName: `${actionDef.name} [PRAXIS v1]`,
         toolId: action,
         action: `Execute "${actionDef.name}" in ${domainConfig.displayName}`,
-        justification: `NEXUS v1 action request${body.evidence_refs?.length ? ` — evidence: ${body.evidence_refs.join(', ')}` : ''}`,
+        justification: `PRAXIS v1 action request${body.evidence_refs?.length ? ` — evidence: ${body.evidence_refs.join(', ')}` : ''}`,
         projectedImpact: `Domain action ${action} with params: ${JSON.stringify(params).slice(0, 200)}`,
         projectedRisk: 'high',
         requestedBy: (req.user as { displayName?: string } | undefined)?.displayName ?? 'nexus_v1_api',
@@ -1121,7 +1121,7 @@ router.post('/nexus/v1/actions', validateBody(NexusActionRequestSchema), async (
       if (session) {
         const sessionAccess = assertSessionAccess(session, req);
         if (sessionAccess !== 'ok') {
-          logger.warn({ action, session_id }, 'NEXUS v1 action: session access denied, proceeding without session linkage');
+          logger.warn({ action, session_id }, 'PRAXIS v1 action: session access denied, proceeding without session linkage');
         } else {
           await updateSession(session_id, {
             decisionGraph: [
@@ -1145,14 +1145,14 @@ router.post('/nexus/v1/actions', validateBody(NexusActionRequestSchema), async (
     if (!delegation) {
       // No execution path exists yet — always route to approval queue as policy fallback.
       // This ensures governed actions with no direct delegation are never silently dropped.
-      logger.info({ action, domain: domainKey }, 'NEXUS v1: no delegation mapping — routing to approval queue');
+      logger.info({ action, domain: domainKey }, 'PRAXIS v1: no delegation mapping — routing to approval queue');
       submitPendingApprovalRequest({
         runId: actionId,
         stepId: `step_${actionId}`,
-        stepName: `${actionDef.name} [NEXUS v1 — Pending Implementation]`,
+        stepName: `${actionDef.name} [PRAXIS v1 — Pending Implementation]`,
         toolId: action,
         action: `Execute "${actionDef.name}" in ${domainConfig.displayName}`,
-        justification: `NEXUS v1 action requested with no server-side delegation path${body.evidence_refs?.length ? ` — evidence: ${body.evidence_refs.join(', ')}` : ''}`,
+        justification: `PRAXIS v1 action requested with no server-side delegation path${body.evidence_refs?.length ? ` — evidence: ${body.evidence_refs.join(', ')}` : ''}`,
         projectedImpact: `Domain action ${action} with params: ${JSON.stringify(params).slice(0, 200)}`,
         projectedRisk: 'high',
         requestedBy: (req.user as { displayName?: string } | undefined)?.displayName ?? 'nexus_v1_api',
@@ -1181,10 +1181,10 @@ router.post('/nexus/v1/actions', validateBody(NexusActionRequestSchema), async (
     try {
       delegationResult = await executeDomainDelegation(delegation, params, callerCookie);
       if (!delegationResult.ok) {
-        logger.warn({ action, httpStatus: delegationResult.status, domain: domainKey }, 'NEXUS v1 domain delegation returned non-2xx');
+        logger.warn({ action, httpStatus: delegationResult.status, domain: domainKey }, 'PRAXIS v1 domain delegation returned non-2xx');
       }
     } catch (delegationErr) {
-      logger.error({ action, err: delegationErr }, 'NEXUS v1 domain delegation threw');
+      logger.error({ action, err: delegationErr }, 'PRAXIS v1 domain delegation threw');
       res.status(502).json({
         error: `Domain endpoint for "${action}" is unreachable`,
         code: 'DOMAIN_DELEGATION_FAILED',
@@ -1210,8 +1210,8 @@ router.post('/nexus/v1/actions', validateBody(NexusActionRequestSchema), async (
       created_at: new Date().toISOString(),
     });
   } catch (err) {
-    logger.error({ err, actionId }, 'NEXUS v1 action failed');
-    handleRouteError(res, err, 'NEXUS v1 action failed');
+    logger.error({ err, actionId }, 'PRAXIS v1 action failed');
+    handleRouteError(res, err, 'PRAXIS v1 action failed');
   }
 });
 
@@ -1240,7 +1240,7 @@ router.post('/nexus/v1/sessions', validateBody(CreateSessionSchema), async (req,
       org_id: session.orgId,
     });
   } catch (err) {
-    logger.error({ err }, 'NEXUS v1 create session failed');
+    logger.error({ err }, 'PRAXIS v1 create session failed');
     handleRouteError(res, err, 'Failed to create session');
   }
 });
@@ -1278,7 +1278,7 @@ router.get('/nexus/v1/sessions/:id', async (req, res) => {
       org_id: session.orgId,
     });
   } catch (err) {
-    logger.error({ err }, 'NEXUS v1 get session failed');
+    logger.error({ err }, 'PRAXIS v1 get session failed');
     handleRouteError(res, err, 'Failed to retrieve session');
   }
 });
@@ -1298,7 +1298,7 @@ router.get('/nexus/v1/capabilities', (_req, res) => {
 
   res.json({
     protocol_version: '1.0.0',
-    protocol_name: 'NEXUS Unified Intelligence Protocol',
+    protocol_name: 'PRAXIS Unified Intelligence Protocol',
     description:
       'Single-endpoint API unifying all SZL business domains behind one conversational intelligence layer.',
     domains,
@@ -1324,7 +1324,7 @@ router.get('/nexus/v1/openapi.json', (_req, res) => {
   const spec = {
     openapi: '3.1.0',
     info: {
-      title: 'NEXUS Unified Intelligence Protocol',
+      title: 'PRAXIS Unified Intelligence Protocol',
       version: '1.0.0',
       description:
         'Single-endpoint API unifying maritime, legal, real estate, cyber, executive intelligence, and governance behind one developer-facing protocol. Supports SSE streaming, cross-domain sessions, autonomy modes, and governed action execution.',
@@ -1338,7 +1338,7 @@ router.get('/nexus/v1/openapi.json', (_req, res) => {
           summary: 'Cross-domain intelligence query',
           description:
             'Submit a natural language query. The protocol routes to relevant SZL domains in parallel, synthesizes evidence-backed intelligence, and returns a unified response with confidence scores and provenance. Supports SSE streaming.',
-          tags: ['NEXUS v1'],
+          tags: ['PRAXIS v1'],
           requestBody: {
             required: true,
             content: {
@@ -1389,7 +1389,7 @@ router.get('/nexus/v1/openapi.json', (_req, res) => {
           summary: 'Execute a governed business action',
           description:
             'Execute a real business operation (reroute a vessel, flag a legal matter, trigger cyber containment) through the governance policy engine. Each action flows through the proof chain.',
-          tags: ['NEXUS v1'],
+          tags: ['PRAXIS v1'],
           requestBody: {
             required: true,
             content: {
@@ -1435,7 +1435,7 @@ router.get('/nexus/v1/openapi.json', (_req, res) => {
           summary: 'Create a cross-domain session',
           description:
             'Create a new session that maintains cross-domain context across multiple queries. Sessions track which domains have been consulted, what evidence has been gathered, and what decisions have been made.',
-          tags: ['NEXUS v1'],
+          tags: ['PRAXIS v1'],
           requestBody: {
             content: {
               'application/json': {
@@ -1463,7 +1463,7 @@ router.get('/nexus/v1/openapi.json', (_req, res) => {
         get: {
           operationId: 'nexusV1GetSession',
           summary: 'Retrieve a session',
-          tags: ['NEXUS v1'],
+          tags: ['PRAXIS v1'],
           parameters: [
             { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
           ],
@@ -1483,7 +1483,7 @@ router.get('/nexus/v1/openapi.json', (_req, res) => {
           operationId: 'nexusV1Capabilities',
           summary: 'List available domains, tools, and actions',
           description: 'Self-describing capabilities manifest. Returns all available domains with their tools, actions, and supported autonomy modes.',
-          tags: ['NEXUS v1'],
+          tags: ['PRAXIS v1'],
           responses: {
             '200': { description: 'Capabilities manifest' },
           },
@@ -1603,8 +1603,8 @@ router.get('/nexus/v1/openapi.json', (_req, res) => {
     },
     tags: [
       {
-        name: 'NEXUS v1',
-        description: 'NEXUS Unified Intelligence Protocol — single-endpoint API across all SZL domains',
+        name: 'PRAXIS v1',
+        description: 'PRAXIS Unified Intelligence Protocol — single-endpoint API across all SZL domains',
       },
     ],
   };
@@ -1629,7 +1629,7 @@ router.get('/nexus/v1/playground', (_req, res) => {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NEXUS v1 — Developer Playground</title>
+  <title>PRAXIS v1 — Developer Playground</title>
   <style>
     :root {
       --bg: #0a0e1a;
@@ -1707,7 +1707,7 @@ router.get('/nexus/v1/playground', (_req, res) => {
 </head>
 <body>
 <header>
-  <span class="logo">NEXUS</span>
+  <span class="logo">PRAXIS</span>
   <span class="badge">v1</span>
   <span class="logo" style="font-size:13px;font-weight:400;color:var(--text-dim)">Unified Intelligence Protocol</span>
   <span class="subtitle"><span class="status-dot"></span>API operational · <a href="/api/nexus/v1/openapi.json" target="_blank">OpenAPI Spec</a> · <a href="/api/nexus/v1/capabilities" target="_blank">Capabilities</a></span>

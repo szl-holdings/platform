@@ -861,7 +861,7 @@ const SCHEMAS_SEED: DecisionSchemaSeed[] = [
     actionSequence: [
       {
         stage: 'Signal',
-        action: 'Deadline proximity signal from PRISM Counsel matter twin',
+        action: 'Deadline proximity signal from Counsel matter twin',
         owner: 'System',
       },
       {

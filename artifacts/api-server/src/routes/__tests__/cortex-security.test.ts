@@ -299,7 +299,7 @@ function containsValue(clause: unknown, val: string): boolean {
 // Test suites
 // ---------------------------------------------------------------------------
 
-describe('CORTEX action-drafts — multi-tenant security', () => {
+describe('APEX action-drafts — multi-tenant security', () => {
   beforeEach(() => {
     _selectQueue = [];
     _updateQueue = [];
@@ -804,7 +804,7 @@ const ORG2_SNAPSHOT = {
 // Graph snapshot security tests
 // ---------------------------------------------------------------------------
 
-describe('CORTEX entity-graph snapshots — multi-tenant security', () => {
+describe('APEX entity-graph snapshots — multi-tenant security', () => {
   beforeEach(() => {
     _selectQueue = [];
     _updateQueue = [];

@@ -319,7 +319,7 @@ export async function seedDistributionOS() {
           'Counsel',
         ],
         ctaType: 'demo',
-        ctaText: 'See PRISM Counsel in action',
+        ctaText: 'See Counsel in action',
         ctaUrl: 'https://prismcounsel.szlholdings.com',
         status: 'in-review',
         siteStatus: 'draft',
@@ -409,7 +409,7 @@ export async function seedDistributionOS() {
         introNote:
           "Welcome back to The Operator. This week I want to connect two threads: autonomous agent architecture (what we're building) and Baltic freight markets (what we're seeing in our maritime platform). The link is in how both require reading second-order signals.",
         mainStoryMarkdown:
-          "## Agent-First Is the Next Platform Shift\n\nEvery platform shift has a canonical architecture that separates winners from laggards. For mobile, it was the native app. For cloud, it was the 12-factor app. For AI, it's going to be the agent-native platform.\n\nI've spent the past 6 months watching how our customers at Vessels, PRISM Counsel, and Aegis actually use AI versus what they asked for. The pattern is consistent: the value is not in the feature. It's in the workflow change that the feature enables.\n\nMore on this in Friday's full piece.",
+          "## Agent-First Is the Next Platform Shift\n\nEvery platform shift has a canonical architecture that separates winners from laggards. For mobile, it was the native app. For cloud, it was the 12-factor app. For AI, it's going to be the agent-native platform.\n\nI've spent the past 6 months watching how our customers at Vessels, Counsel, and Aegis actually use AI versus what they asked for. The pattern is consistent: the value is not in the feature. It's in the workflow change that the feature enables.\n\nMore on this in Friday's full piece.",
         status: 'published',
         substackStatus: 'published',
         substackUrl: 'https://szlholdings.substack.com/p/the-operator-14',
@@ -669,7 +669,7 @@ export async function seedDistributionOS() {
         email: 'pwilliams@brennanlaw.com',
         company: 'Brennan & Associates LLP',
         role: 'Managing Partner',
-        interestArea: 'PRISM Counsel / Legal AI',
+        interestArea: 'Counsel / Legal AI',
         budget: 'Under $50K',
         source: 'x',
         medium: 'social',
@@ -891,9 +891,9 @@ export async function seedDistributionOS() {
         isDefault: false,
       },
       {
-        name: 'PRISM Counsel Demo CTA',
+        name: 'Counsel Demo CTA',
         type: 'demo',
-        headline: 'Try PRISM Counsel for Your Law Firm',
+        headline: 'Try Counsel for Your Law Firm',
         body: 'Demand readiness scoring, settlement forecasting, and AI-powered matter intelligence for plaintiff law.',
         buttonText: 'Schedule a Demo',
         buttonUrl: 'https://prismcounsel.szlholdings.com/demo',

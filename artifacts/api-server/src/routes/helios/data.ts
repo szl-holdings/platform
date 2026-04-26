@@ -161,7 +161,7 @@ export const SIGNALS: Signal[] = [
     id: 'sig-009', kind: 'market', scanner: 'market',
     title: 'McKinsey: Maritime AI Adoption Rate Tripling — Autonomous Vessels Regulatory Framework Due 2026',
     summary: 'McKinsey Global Institute report cites 3× acceleration in maritime AI adoption driven by IMO autonomous vessel regulations expected in 2026.',
-    soWhat: 'Vessels/Vessels faces a major expansion opportunity; the upcoming IMO framework will create compliance mandates that Vessels is uniquely positioned to address.',
+    soWhat: 'Vessels faces a major expansion opportunity; the upcoming IMO framework will create compliance mandates that Vessels is uniquely positioned to address.',
     sourceUrl: 'https://mckinsey.com/industries/travel-logistics-and-infrastructure/maritime-ai-2025',
     sourceName: 'McKinsey Global Institute',
     confidence: 0.88,
@@ -313,7 +313,7 @@ export const PROPOSALS: CapabilityProposal[] = [
   },
   {
     id: 'prop-006', status: 'deferred', priority: 'P2',
-    title: 'Add IMO Autonomous Vessel Compliance Module to Vessels/Vessels',
+    title: 'Add IMO Autonomous Vessel Compliance Module to Vessels',
     description: 'Pre-build an IMO MSC.1/Circ compliance assessment module for Vessels so it\'s production-ready when the 2026 regulatory framework is finalized.',
     rationale: 'McKinsey projects maritime AI market at $15B by 2028. The IMO framework (expected Q3 2026) will create mandatory compliance requirements for autonomous vessel operators. Building ahead of the regulation positions Vessels as the compliance-ready choice at launch.',
     targetAgent: 'Vessels', impactArea: 'Regulatory Compliance · Maritime',

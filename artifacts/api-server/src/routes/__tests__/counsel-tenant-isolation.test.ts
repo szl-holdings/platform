@@ -1,5 +1,5 @@
 /**
- * PRISM Counsel Tenant Isolation Tests
+ * Counsel Tenant Isolation Tests
  *
  * Imports the REAL counsel router and verifies that DB-level org scoping
  * prevents cross-tenant data access for matters, audit trail, and proof chain.
@@ -148,7 +148,7 @@ async function buildCounselApp(userFactory: (() => ReturnType<typeof makeOrgAUse
   return app;
 }
 
-describe('PRISM Counsel tenant isolation — real router with DB-level org scoping', () => {
+describe('Counsel tenant isolation — real router with DB-level org scoping', () => {
   beforeEach(() => {
     _selectQueue = [];
     _insertValues = [];

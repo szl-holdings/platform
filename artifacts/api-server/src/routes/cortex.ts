@@ -1,5 +1,5 @@
 /**
- * CORTEX Intelligence — Cross-Domain Fusion Engine API
+ * APEX Intelligence — Cross-Domain Fusion Engine API
  *
  * All routes require authentication. Mutation routes (generate/approve/dismiss action drafts)
  * also emit to the Alloy governance audit trail for persistent approvals tracking.
@@ -10,7 +10,7 @@
  * GET  /cortex/intelligence-feed   — Cross-domain signal timeline ranked by urgency + impact
  * GET  /cortex/entity-graph        — Entity graph data (nodes + edges) for force-directed viz
  * POST /cortex/whatif              — What-if scenario engine: traces projected impact across domains
- * GET  /cortex/briefing/today      — CORTEX executive briefing (today's cross-domain summary)
+ * GET  /cortex/briefing/today      — APEX executive briefing (today's cross-domain summary)
  * GET  /cortex/quick-actions       — Pending approval requests formatted for the mobile QuickActionDeck
  * GET  /cortex/quick-actions/history — Recently resolved (approved/rejected) approvals for the audit-trail history view
  * POST /cortex/quick-actions/:id/action — Approve or deny a quick action (delegates to approvals system)
@@ -167,7 +167,7 @@ router.post(
 
       logger.info(
         { query: query.substring(0, 100), domains, sessionId },
-        '[CORTEX] Processing query',
+        '[APEX] Processing query',
       );
 
       const result = await orchestrate({
@@ -207,7 +207,7 @@ router.post(
         durationMs: result.totalDurationMs,
       });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX query failed');
+      handleRouteError(res, err, 'APEX query failed');
     }
   },
 );
@@ -235,7 +235,7 @@ router.get(
         domain: a.affectedDomains[0] ?? 'szl',
         severity: a.severity as 'critical' | 'high' | 'medium' | 'low' | 'info',
         title: a.title,
-        source: 'CORTEX Fusion',
+        source: 'APEX Fusion',
         time: formatRelativeTime(new Date(a.generatedAt)),
       }));
 
@@ -266,7 +266,7 @@ router.get(
 
       sendSuccess(res, { signals, summaries });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX command feed failed');
+      handleRouteError(res, err, 'APEX command feed failed');
     }
   },
 );
@@ -333,7 +333,7 @@ router.get(
         },
       });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX intelligence feed failed');
+      handleRouteError(res, err, 'APEX intelligence feed failed');
     }
   },
 );
@@ -439,7 +439,7 @@ router.get(
         },
       });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX entity graph failed');
+      handleRouteError(res, err, 'APEX entity graph failed');
     }
   },
 );
@@ -505,7 +505,7 @@ router.get(
             : 'All operating domains nominal — no critical intelligence signals at this time';
 
       const executiveSummary =
-        `CORTEX Intelligence Summary for ${today}:\n\n` +
+        `APEX Intelligence Summary for ${today}:\n\n` +
         `${stats.activeAlerts} active signals (${stats.alertsBySeverity.critical} critical, ${stats.alertsBySeverity.high} high) detected across ${stats.topAffectedDomains.length} domains. ` +
         `Overall portfolio posture: ${overallHealth.toUpperCase()}. ` +
         (topSignals.length > 0
@@ -514,7 +514,7 @@ router.get(
               .slice(0, 3)
               .join('; ')}. `
           : 'No critical signals active. ') +
-        `CORTEX entity graph covers ${(await ontologyEngine.getGraphStats().catch(() => ({ totalEntities: 0 }))).totalEntities} entities across all connected domains.`;
+        `APEX entity graph covers ${(await ontologyEngine.getGraphStats().catch(() => ({ totalEntities: 0 }))).totalEntities} entities across all connected domains.`;
 
       const [created] = await db
         .insert(dailyBriefingsTable)
@@ -534,7 +534,7 @@ router.get(
 
       sendSuccess(res, { briefing: created, cached: false });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX briefing generation failed');
+      handleRouteError(res, err, 'APEX briefing generation failed');
     }
   },
 );
@@ -631,17 +631,17 @@ function whatIfCacheKey(
  * Assembles LLM grounding context exclusively from org-scoped data sources.
  *
  * Context sources (all filtered by orgId):
- *   1. Most recent CORTEX entity graph snapshot — org-scoped full entity graph (nodes + edges)
+ *   1. Most recent APEX entity graph snapshot — org-scoped full entity graph (nodes + edges)
  *      stored in cortex_graph_snapshots (orgId FK). This provides the "full entity graph context"
  *      required by the task while maintaining strict tenant isolation at the DB query layer.
- *   2. Recent CORTEX action drafts — active domain alerts, entity names, urgency, and lifecycle
+ *   2. Recent APEX action drafts — active domain alerts, entity names, urgency, and lifecycle
  *   3. Recent daily intelligence briefings — executive summaries, domain health scores, alert counts
  *
  * Global/shared sources (ontologyEngine.getDomainEntities, traverseGraph, fusionCortex.getAlerts)
  * are intentionally excluded as they are not org-partitioned at the DB layer (KNOWN-GAPS AF-007).
  */
 async function buildOrgScopedContext(orgId: number): Promise<string> {
-  let context = `CORTEX INTELLIGENCE CONTEXT — SZL Holdings Intelligence OS\n`;
+  let context = `APEX INTELLIGENCE CONTEXT — SZL Holdings Intelligence OS\n`;
   context += `Tenant: org_id=${orgId} | Generated: ${new Date().toISOString()}\n\n`;
 
   try {
@@ -726,7 +726,7 @@ async function buildOrgScopedContext(orgId: number): Promise<string> {
       .limit(20);
 
     if (recentDrafts.length > 0) {
-      context += `=== RECENT CORTEX ACTION DRAFTS (last 7 days) ===\n`;
+      context += `=== RECENT APEX ACTION DRAFTS (last 7 days) ===\n`;
       for (const d of recentDrafts) {
         context += `  • [${d.domain}/${d.draftType}] "${d.alertTitle}" → Draft: "${d.title}" [${d.priority}/${d.status}]\n`;
       }
@@ -776,7 +776,7 @@ async function buildOrgScopedContext(orgId: number): Promise<string> {
 }
 
 function buildWhatIfSystemPrompt(orgContext: string): string {
-  return `You are CORTEX, a cross-domain strategic intelligence engine for SZL Holdings — a diversified holding company operating across Maritime (Vessels), Real Estate (Terra), Legal (PRISM Counsel), Cybersecurity (Aegis/Firestorm), and Portfolio Finance (SZL Holdings).
+  return `You are APEX, a cross-domain strategic intelligence engine for SZL Holdings — a diversified holding company operating across Maritime (Vessels), Real Estate (Terra), Legal (Counsel), Cybersecurity (Aegis/Firestorm), and Portfolio Finance (SZL Holdings).
 
 Your role: Given a hypothetical scenario, trace how it cascades across connected domains using the org-scoped intelligence context provided below. Produce a structured impact analysis specific to the current portfolio positions, recent action drafts, daily intelligence briefings, and active cross-domain alerts for this tenant.
 
@@ -872,7 +872,7 @@ async function callWhatIfLLM(
   orgId: number | undefined,
 ): Promise<WhatIfResult | null> {
   if (!orgId) {
-    logger.warn('[CORTEX] LLM what-if skipped — orgId unavailable, cannot scope context query');
+    logger.warn('[APEX] LLM what-if skipped — orgId unavailable, cannot scope context query');
     return null;
   }
 
@@ -885,7 +885,7 @@ async function callWhatIfLLM(
     const contextHasSnapshot = orgContext.includes('=== ENTITY GRAPH SNAPSHOT');
     logger.info(
       { orgId, contextLengthChars: orgContext.length, contextNodeCount, contextHasSnapshot },
-      '[CORTEX] LLM what-if context assembled',
+      '[APEX] LLM what-if context assembled',
     );
 
     const completion = await createResponse(
@@ -906,7 +906,7 @@ async function callWhatIfLLM(
   }
   return null;
   } catch (err) {
-    logger.warn({ err }, '[CORTEX] LLM what-if call failed — falling back to pattern matching');
+    logger.warn({ err }, '[APEX] LLM what-if call failed — falling back to pattern matching');
     return null;
   }
 }
@@ -931,7 +931,7 @@ async function callWhatIfLLMStream(
 ): Promise<{ success: boolean; tokensEmitted: boolean }> {
   if (!orgId) {
     logger.warn(
-      '[CORTEX] LLM what-if stream skipped — orgId unavailable, cannot scope context query',
+      '[APEX] LLM what-if stream skipped — orgId unavailable, cannot scope context query',
     );
     return { success: false, tokensEmitted: false };
   }
@@ -947,7 +947,7 @@ async function callWhatIfLLMStream(
     const contextHasSnapshot = orgContext.includes('=== ENTITY GRAPH SNAPSHOT');
     logger.info(
       { orgId, contextLengthChars: orgContext.length, contextNodeCount, contextHasSnapshot },
-      '[CORTEX] LLM what-if stream context assembled',
+      '[APEX] LLM what-if stream context assembled',
     );
 
     for await (const chunk of createResponseStream(
@@ -963,13 +963,13 @@ async function callWhatIfLLMStream(
 
     logger.info(
       { query: query.substring(0, 100), source: 'llm-stream' },
-      '[CORTEX] What-if LLM token stream complete — client will assemble JSON',
+      '[APEX] What-if LLM token stream complete — client will assemble JSON',
     );
     res.write('data: [DONE]\n\n');
     res.end();
     return { success: true, tokensEmitted };
   } catch (err) {
-    logger.warn({ err }, '[CORTEX] LLM what-if stream failed');
+    logger.warn({ err }, '[APEX] LLM what-if stream failed');
     if (tokensEmitted) {
       res.write(
         `data: ${JSON.stringify({ type: 'error', message: 'Stream interrupted mid-generation' })}\n\n`,
@@ -1092,7 +1092,7 @@ const WHATIF_SCENARIOS: Record<string, (event: string) => WhatIfResult> = {
     scenarioId: crypto.randomUUID(),
     event,
     query: event,
-    summary: `CORTEX is tracing the projected impact of "${event}" across all connected domains using the entity graph and historical pattern library.`,
+    summary: `APEX is tracing the projected impact of "${event}" across all connected domains using the entity graph and historical pattern library.`,
     affectedDomains: ['vessels', 'firestorm', 'terra', 'szl'],
     cascades: [
       {
@@ -1209,7 +1209,7 @@ router.post(
         const fallbackResult = WHATIF_SCENARIOS[selectedScenario](query.trim());
         logger.info(
           { query: query.substring(0, 100), scenario: selectedScenario, source: 'pattern-fallback-stream' },
-          '[CORTEX] What-if scenario streamed via pattern matching fallback',
+          '[APEX] What-if scenario streamed via pattern matching fallback',
         );
         // Emit the fallback JSON as a single token so the client assembles it the same way
         res.write(`data: ${JSON.stringify({ type: 'token', content: JSON.stringify(fallbackResult) })}\n\n`);
@@ -1222,7 +1222,7 @@ router.post(
       if (cached) {
         logger.info(
           { query: query.substring(0, 100) },
-          '[CORTEX] What-if cache hit — returning cached result',
+          '[APEX] What-if cache hit — returning cached result',
         );
         sendSuccess(res, { ...cached.result, cached: true });
         return;
@@ -1234,7 +1234,7 @@ router.post(
         whatIfCache.set(cacheKey, { result: llmResult, expiresAt: Date.now() + WHATIF_CACHE_TTL_MS });
         logger.info(
           { query: query.substring(0, 100), source: 'llm' },
-          '[CORTEX] What-if scenario computed via LLM',
+          '[APEX] What-if scenario computed via LLM',
         );
         sendSuccess(res, llmResult);
         return;
@@ -1255,11 +1255,11 @@ router.post(
       whatIfCache.set(cacheKey, { result, expiresAt: Date.now() + WHATIF_CACHE_TTL_MS });
       logger.info(
         { query: query.substring(0, 100), scenario: selectedScenario, source: 'pattern-fallback' },
-        '[CORTEX] What-if scenario computed via pattern matching',
+        '[APEX] What-if scenario computed via pattern matching',
       );
       sendSuccess(res, result);
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX what-if scenario failed');
+      handleRouteError(res, err, 'APEX what-if scenario failed');
     }
   },
 );
@@ -1308,7 +1308,7 @@ function generateActionDrafts(
       domain: 'vessels',
       draftType: 'route_change',
       title: 'Fleet Route Advisory',
-      content: `URGENT FLEET ADVISORY\n\nRe: ${alertTitle}\n\nCORTEX Intelligence has detected a cross-domain signal requiring immediate fleet review.\n\nRecommended Action: Review current routing for vessels on affected corridors. Engage charter counterparties for force majeure assessment. Notify P&I club.\n\nPlease confirm receipt and advise on fleet status within 4 hours.`,
+      content: `URGENT FLEET ADVISORY\n\nRe: ${alertTitle}\n\nAPEX Intelligence has detected a cross-domain signal requiring immediate fleet review.\n\nRecommended Action: Review current routing for vessels on affected corridors. Engage charter counterparties for force majeure assessment. Notify P&I club.\n\nPlease confirm receipt and advise on fleet status within 4 hours.`,
       recipient: 'Fleet Operations',
       priority,
       status: 'pending',
@@ -1325,7 +1325,7 @@ function generateActionDrafts(
       domain: 'prism',
       draftType: 'legal_hold',
       title: 'Legal Hold Notice',
-      content: `LEGAL HOLD NOTICE\n\nRe: CORTEX Alert — ${alertTitle}\n\nPursuant to the cross-domain intelligence signal issued by CORTEX on ${now.toLocaleDateString()}, this notice preserves all documents, communications, and data related to the affected entities and domains.\n\nScope: All matters related to entities identified in CORTEX Alert ${alertId.slice(0, 8).toUpperCase()}.\n\nThis hold is effective immediately pending legal team review.`,
+      content: `LEGAL HOLD NOTICE\n\nRe: APEX Alert — ${alertTitle}\n\nPursuant to the cross-domain intelligence signal issued by APEX on ${now.toLocaleDateString()}, this notice preserves all documents, communications, and data related to the affected entities and domains.\n\nScope: All matters related to entities identified in APEX Alert ${alertId.slice(0, 8).toUpperCase()}.\n\nThis hold is effective immediately pending legal team review.`,
       recipient: 'General Counsel',
       priority,
       status: 'pending',
@@ -1342,7 +1342,7 @@ function generateActionDrafts(
       domain: 'szl',
       draftType: 'lp_notification',
       title: 'Limited Partner Update',
-      content: `LP NOTIFICATION DRAFT\n\nDear Limited Partners,\n\nWe are writing to inform you of a material development identified by our CORTEX intelligence platform.\n\n${alertTitle}\n\nOur team is actively monitoring the situation. Current portfolio exposure assessment indicates [exposure level]. We will provide a full update within 48 hours.\n\nPlease contact your relationship manager with any questions.\n\nSZL Holdings Investment Management`,
+      content: `LP NOTIFICATION DRAFT\n\nDear Limited Partners,\n\nWe are writing to inform you of a material development identified by our APEX intelligence platform.\n\n${alertTitle}\n\nOur team is actively monitoring the situation. Current portfolio exposure assessment indicates [exposure level]. We will provide a full update within 48 hours.\n\nPlease contact your relationship manager with any questions.\n\nSZL Holdings Investment Management`,
       recipient: 'LP Relations',
       priority,
       status: 'pending',
@@ -1359,7 +1359,7 @@ function generateActionDrafts(
       domain: 'firestorm',
       draftType: 'incident_report',
       title: 'SOC Incident Brief',
-      content: `SOC INCIDENT BRIEF\n\nTriggered by: CORTEX Fusion Alert\nAlert: ${alertTitle}\n\nCross-domain correlation detected. Security posture review initiated.\n\nRecommended Actions:\n1. Elevate monitoring on affected perimeter segments\n2. Review access logs for affected entity IDs\n3. Brief SOC team lead within 2 hours\n4. Prepare executive security update\n\nThis brief is auto-generated by CORTEX Autonomous Agent. Human review required before action.`,
+      content: `SOC INCIDENT BRIEF\n\nTriggered by: APEX Fusion Alert\nAlert: ${alertTitle}\n\nCross-domain correlation detected. Security posture review initiated.\n\nRecommended Actions:\n1. Elevate monitoring on affected perimeter segments\n2. Review access logs for affected entity IDs\n3. Brief SOC team lead within 2 hours\n4. Prepare executive security update\n\nThis brief is auto-generated by APEX Autonomous Agent. Human review required before action.`,
       recipient: 'SOC Command',
       priority,
       status: 'pending',
@@ -1376,7 +1376,7 @@ function generateActionDrafts(
       domain: 'szl',
       draftType: 'risk_brief',
       title: 'Executive Risk Brief',
-      content: `EXECUTIVE RISK BRIEF — CORTEX PRIORITY\n\nAlert: ${alertTitle}\nSeverity: ${severity.toUpperCase()}\nGenerated: ${now.toISOString()}\n\nCORTEX has identified a cross-domain correlation requiring executive awareness. Affected domains: ${affectedDomains.join(', ')}.\n\nThis brief requires acknowledgment within 2 hours. Please confirm receipt to your chief of staff.`,
+      content: `EXECUTIVE RISK BRIEF — APEX PRIORITY\n\nAlert: ${alertTitle}\nSeverity: ${severity.toUpperCase()}\nGenerated: ${now.toISOString()}\n\nAPEX has identified a cross-domain correlation requiring executive awareness. Affected domains: ${affectedDomains.join(', ')}.\n\nThis brief requires acknowledgment within 2 hours. Please confirm receipt to your chief of staff.`,
       recipient: 'Executive Suite',
       priority,
       status: 'pending',
@@ -1393,7 +1393,7 @@ function generateActionDrafts(
       domain: 'szl',
       draftType: 'compliance_memo',
       title: 'Cross-Domain Compliance Memo',
-      content: `COMPLIANCE MEMO\n\nRe: CORTEX Signal — ${alertTitle}\n\nThis memo documents a cross-domain intelligence signal for compliance recordkeeping. No immediate action required, but situation should be monitored.\n\nCORTEX will continue monitoring affected entities and escalate if severity increases.`,
+      content: `COMPLIANCE MEMO\n\nRe: APEX Signal — ${alertTitle}\n\nThis memo documents a cross-domain intelligence signal for compliance recordkeeping. No immediate action required, but situation should be monitored.\n\nAPEX will continue monitoring affected entities and escalate if severity increases.`,
       recipient: 'Compliance',
       priority: 'normal',
       status: 'pending',
@@ -1506,7 +1506,7 @@ router.get(
 
       sendSuccess(res, { items: quickActions, total: quickActions.length });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX quick-actions fetch failed');
+      handleRouteError(res, err, 'APEX quick-actions fetch failed');
     }
   },
 );
@@ -1583,7 +1583,7 @@ router.get(
 
       sendSuccess(res, { items, total: items.length });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX quick-actions history fetch failed');
+      handleRouteError(res, err, 'APEX quick-actions history fetch failed');
     }
   },
 );
@@ -1643,12 +1643,12 @@ router.post(
 
       logger.info(
         { approvalId, decision, actorId: user?.id ?? null },
-        '[CORTEX] Quick action actioned via mobile deck',
+        '[APEX] Quick action actioned via mobile deck',
       );
 
       sendSuccess(res, { id: String(approvalId), decision, updatedStatus: updated.status });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX quick-action update failed');
+      handleRouteError(res, err, 'APEX quick-action update failed');
     }
   },
 );
@@ -1722,7 +1722,7 @@ router.get(
 
       sendSuccess(res, { drafts: formatted, total: formatted.length, pendingCount });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX action drafts list failed');
+      handleRouteError(res, err, 'APEX action drafts list failed');
     }
   },
 );
@@ -1850,7 +1850,7 @@ router.get(
 
       const user = (req as unknown as { user?: { id?: number; email?: string } }).user;
       const result = await runExport({
-        name: `CORTEX Action Drafts Export — ${new Date().toISOString().slice(0, 10)}`,
+        name: `APEX Action Drafts Export — ${new Date().toISOString().slice(0, 10)}`,
         dataSource: 'cortex_action_drafts',
         format,
         columns: ACTION_DRAFT_EXPORT_COLUMNS,
@@ -1875,7 +1875,7 @@ router.get(
       res.setHeader('X-Row-Count', String(result.rowCount));
       res.status(200).send(result.buffer);
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX action drafts export failed');
+      handleRouteError(res, err, 'APEX action drafts export failed');
     }
   },
 );
@@ -1972,7 +1972,7 @@ router.post(
 
       logger.info(
         { alertId, count: inserted.length },
-        '[CORTEX] Action drafts generated and persisted',
+        '[APEX] Action drafts generated and persisted',
       );
 
       sendSuccess(res, {
@@ -1981,7 +1981,7 @@ router.post(
         generated: inserted.length,
       });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX action draft generation failed');
+      handleRouteError(res, err, 'APEX action draft generation failed');
     }
   },
 );
@@ -2035,7 +2035,7 @@ router.post(
           },
         });
       } catch {
-        logger.warn({ draftId: updated.draftUuid }, '[CORTEX] Audit log insert failed (non-fatal)');
+        logger.warn({ draftId: updated.draftUuid }, '[APEX] Audit log insert failed (non-fatal)');
       }
 
       logger.info(
@@ -2045,7 +2045,7 @@ router.post(
           domain: updated.domain,
           approvedBy: caller,
         },
-        '[CORTEX] Action draft approved',
+        '[APEX] Action draft approved',
       );
 
       sendSuccess(res, {
@@ -2053,7 +2053,7 @@ router.post(
         message: 'Action draft approved and queued for execution',
       });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX action draft approval failed');
+      handleRouteError(res, err, 'APEX action draft approval failed');
     }
   },
 );
@@ -2092,7 +2092,7 @@ router.post(
 
       logger.info(
         { draftId: updated.draftUuid, type: updated.draftType },
-        '[CORTEX] Action draft dismissed',
+        '[APEX] Action draft dismissed',
       );
 
       sendSuccess(res, {
@@ -2100,7 +2100,7 @@ router.post(
         message: 'Action draft dismissed',
       });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX action draft dismissal failed');
+      handleRouteError(res, err, 'APEX action draft dismissal failed');
     }
   },
 );
@@ -2144,7 +2144,7 @@ router.delete(
 
       logger.info(
         { count: deleted.length, retentionDays, cutoff: cutoff.toISOString(), orgIds },
-        '[CORTEX] Pruned dismissed/approved action drafts',
+        '[APEX] Pruned dismissed/approved action drafts',
       );
 
       sendSuccess(res, {
@@ -2154,7 +2154,7 @@ router.delete(
         message: `Pruned ${deleted.length} dismissed/approved action draft${deleted.length === 1 ? '' : 's'} older than ${retentionDays} day${retentionDays === 1 ? '' : 's'}`,
       });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX action draft prune failed');
+      handleRouteError(res, err, 'APEX action draft prune failed');
     }
   },
 );
@@ -2214,7 +2214,7 @@ router.post(
         message: 'Graph snapshot saved',
       });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX graph snapshot creation failed');
+      handleRouteError(res, err, 'APEX graph snapshot creation failed');
     }
   },
 );
@@ -2262,7 +2262,7 @@ router.get(
 
       sendSuccess(res, { snapshots: rows, total: countRow?.count ?? 0 });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX graph snapshots list failed');
+      handleRouteError(res, err, 'APEX graph snapshots list failed');
     }
   },
 );
@@ -2316,7 +2316,7 @@ router.get(
         },
       });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX graph snapshot fetch failed');
+      handleRouteError(res, err, 'APEX graph snapshot fetch failed');
     }
   },
 );
@@ -2362,10 +2362,10 @@ router.delete(
           ),
         );
 
-      logger.info({ snapshotUuid: uuid }, '[CORTEX] Graph snapshot deleted');
+      logger.info({ snapshotUuid: uuid }, '[APEX] Graph snapshot deleted');
       sendSuccess(res, { message: 'Snapshot deleted' });
     } catch (err) {
-      handleRouteError(res, err, 'CORTEX graph snapshot deletion failed');
+      handleRouteError(res, err, 'APEX graph snapshot deletion failed');
     }
   },
 );

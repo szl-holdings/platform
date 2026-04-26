@@ -976,7 +976,7 @@ export const ENV_SPECS: EnvVarSpec[] = [
   {
     key: 'CORTEX_SNAPSHOT_RETENTION_DAYS',
     required: false,
-    description: 'Number of days to retain Cortex snapshots',
+    description: 'Number of days to retain APEX snapshots',
     defaultValue: '30',
     group: 'platform',
   },
@@ -1113,7 +1113,7 @@ export const ENV_SPECS: EnvVarSpec[] = [
   {
     key: 'PRISM_COUNSEL_SEED_DEMO',
     required: false,
-    description: "Set to 'true' to seed PRISM Counsel demo data on startup",
+    description: "Set to 'true' to seed Counsel demo data on startup",
     defaultValue: 'false',
     group: 'platform',
   },
@@ -1463,14 +1463,14 @@ export const ENV_SPECS: EnvVarSpec[] = [
   {
     key: 'CORTEX_DRAFT_RETENTION_DAYS',
     required: false,
-    description: 'Days to keep draft Cortex snapshots before pruning',
+    description: 'Days to keep draft APEX snapshots before pruning',
     defaultValue: '7',
     group: 'platform',
   },
   {
     key: 'CORTEX_SNAPSHOT_INTERVAL_HOURS',
     required: false,
-    description: 'Hours between automatic Cortex consciousness snapshots',
+    description: 'Hours between automatic APEX consciousness snapshots',
     defaultValue: '24',
     group: 'platform',
   },

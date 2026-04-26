@@ -270,7 +270,7 @@ export async function seedGovernance() {
       },
       {
         orgId: ORG_ID,
-        name: 'PRISM Counsel AI — Monthly Budget',
+        name: 'Counsel AI — Monthly Budget',
         budgetType: 'monthly',
         limitAmount: '500.00',
         currentSpend: '218.45',

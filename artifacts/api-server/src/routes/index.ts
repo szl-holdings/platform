@@ -67,7 +67,7 @@ router.use(lazyMatch("/infrastructure", () => import("./infrastructure-status"),
 // Public platform status page — unauthenticated. Owns /status, /uptime-history, /incidents (KG031).
 router.use(lazyMatch(["/status", "/uptime-history", "/incidents"], () => import("./public-status"), "public-status"));
 
-// PRISM Counsel — public matters CRUD.
+// Counsel — public matters CRUD.
 router.use(lazyMatch("/counsel", () => import("./counsel"), "counsel"));
 
 // Counsel Knowledge Index — graph+vector RAG over matter documents.

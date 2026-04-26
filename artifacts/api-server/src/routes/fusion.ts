@@ -147,7 +147,7 @@ router.post(
   async (req, res) => {
     const intervalMs = parseInt(String(req.query.intervalMs ?? '300000'), 10);
     fusionCortex.startContinuousScan(intervalMs);
-    res.json({ success: true, message: 'Fusion Cortex continuous scan started', intervalMs });
+    res.json({ success: true, message: 'Fusion APEX continuous scan started', intervalMs });
   },
 );
 
@@ -157,7 +157,7 @@ router.post(
   authMiddleware(),
   async (_req, res) => {
     fusionCortex.stopContinuousScan();
-    res.json({ success: true, message: 'Fusion Cortex continuous scan stopped' });
+    res.json({ success: true, message: 'Fusion APEX continuous scan stopped' });
   },
 );
 

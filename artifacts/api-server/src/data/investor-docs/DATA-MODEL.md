@@ -175,7 +175,7 @@
 
 ---
 
-### PRISM Counsel — Legal Matter Command
+### Counsel — Legal Matter Command
 
 **Schema files:** `prism_counsel` (120+ tables across 10 schema modules)
 
@@ -240,7 +240,7 @@
 | `agent_training_runs` | Fine-tuning and training run records |
 | `ai_decisions` | AI decision records with confidence scores |
 | `dreamscape_entities` | Entity scoring engine results |
-| `inca_experiments` | INCA model evaluation experiments |
+| `inca_experiments` | Counsel model evaluation experiments |
 | `inca_models` | Model registry |
 
 ---
@@ -352,7 +352,7 @@ Schema source of truth: `lib/db/` — Drizzle schema files, migrations, and seed
 | Aegis / Firestorm | `aegis_*` | ~22 | Incidents, findings, playbooks, threat intel, CVEs |
 | Vessels | `vessels_*` | ~30 | Vessels, voyages, positions, port calls, sanctions, trading |
 | Terra | `terra_*` | ~17 | Properties, distress signals, ownership, deals, MLS |
-| PRISM Counsel | `prism_counsel_*` | ~120 | Matters, parties, filings, documents, recovery, no-fault |
+| Counsel | `prism_counsel_*` | ~120 | Matters, parties, filings, documents, recovery, no-fault |
 | Carlota Jo | `carlota_*` | ~10 | Clients, services, bookings, messages, reservations |
 | Platform | `platform_*` | ~10 | Products, feature flags, tenant config |
 | Audit | `audit_*` | ~5 | Immutable event log (append-only) |
@@ -549,7 +549,7 @@ Key entity groups:
 - **Deals**: id, org_id, property_id, status (lead → underwriting → loi → contract → closed/dead), assigned_to, target_price
 - 17 total tables
 
-### PRISM Counsel — Legal Domain
+### Counsel — Legal Domain
 
 Schema: `lib/db/src/schema/prism_counsel.ts` + 9 additional schema modules. Tables use `SERIAL` PKs.
 

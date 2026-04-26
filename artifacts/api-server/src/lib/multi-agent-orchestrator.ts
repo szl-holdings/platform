@@ -107,7 +107,7 @@ const firestormAgent = new Agent({
 
 const incaAgent = new Agent({
   agentId: 'inca',
-  name: 'INCA AI Research',
+  name: 'Counsel AI Research',
   description: 'AI research analyst. Experiment results, model performance, research trends.',
   instructions:
     'You are an AI research analyst. Evaluate experiment results, model performance, research trends, and publication impact.',

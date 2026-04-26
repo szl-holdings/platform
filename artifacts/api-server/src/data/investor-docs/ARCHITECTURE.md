@@ -10,7 +10,7 @@
 
 SZL Holdings is a **pnpm monorepo** hosting the governed decision infrastructure platform and its domain extensions. Every surface shares one API server, one PostgreSQL database, one design system, and one authentication model. Domain packs extend this shared governance core — they do not replace it.
 
-The platform hierarchy: SZL Holdings (platform) → Lyte (flagship command surface) → Alloy (execution fabric) → CORTEX (mobile command) → Domain packs.
+The platform hierarchy: SZL Holdings (platform) → Lyte (flagship command surface) → Alloy (execution fabric) → APEX (mobile command) → Domain packs.
 
 The defining architectural commitment: **governed decision execution as a platform primitive**. Signals surface across domains via the Event Fabric; actions route through Alloy; every consequential decision generates an immutable Proof Chain entry.
 
@@ -25,7 +25,7 @@ The defining architectural commitment: **governed decision execution as a platfo
 │  The governed decision layer for consequential operations        │
 ├──────────────────────────────────────────────────────────────────┤
 │  COMMAND SURFACES                                                │
-│  Lyte (flagship)    CORTEX (mobile)    Command Portal (hub)      │
+│  Lyte (flagship)    APEX (mobile)    Command Portal (hub)      │
 │  PRISM framework    iOS + Android      8-domain SSE dashboard    │
 │  Signal → action    All domains        Cross-domain oversight    │
 ├──────────────────────────────────────────────────────────────────┤
@@ -34,7 +34,7 @@ The defining architectural commitment: **governed decision execution as a platfo
 │  Human-in-the-loop enforcement for all consequential actions     │
 ├──────────────────────────────────────────────────────────────────┤
 │  DOMAIN PACKS                                                    │
-│  Aegis       Vessels        Terra           PRISM Counsel        │
+│  Aegis       Vessels        Terra           Counsel        │
 │  Security &  Maritime       Real Estate     Legal Matter         │
 │  Defense     Intelligence   Intelligence    Command              │
 │                                                                  │
@@ -54,7 +54,7 @@ Additional supporting surfaces: **Command Portal** (ecosystem hub), **SZL Holdin
 ┌─────────────────────────────────────────────────────────────────┐
 │  CLIENTS                                                        │
 │  Web (Vite + React 19)           Mobile (Expo + React Native)   │
-│  szl-holdings  lyte-cmd-center   CORTEX (szl-holdings-mobile)   │
+│  szl-holdings  lyte-cmd-center   APEX (szl-holdings-mobile)   │
 │  firestorm     terra             cortex-mobile (WIP)            │
 │  vessels       prism-counsel                                    │
 │  carlota-jo    command           Roadmap (not built):           │
@@ -127,7 +127,7 @@ Raw Signal (domain-specific)
     ▼
 [ANALYZE] — Pattern recognition, scoring, explainability
     │   PRISM (Lyte):       Pulse/Risk/Intelligence/Signals/Motion
-    │   INCA (Aegis Labs):  Model evaluation, confidence scoring
+    │   Counsel (Aegis Labs):  Model evaluation, confidence scoring
     │   Domain agents:      Helmsman (maritime), Sentinel (security)
     │
     ▼
@@ -163,8 +163,8 @@ Confirmed Action + Full Audit Trail
 │   ├── carlota-jo/         # Carlota Jo — Advisory
 │   ├── command/            # Command Portal — Ecosystem Hub
 │   ├── imperium/           # IMPERIUM — Cloud Sovereignty (in development)
-│   ├── szl-holdings-mobile/# CORTEX — Unified Mobile Command
-│   ├── prism-counsel/      # PRISM Counsel — Legal Command
+│   ├── szl-holdings-mobile/# APEX — Unified Mobile Command
+│   ├── prism-counsel/      # Counsel — Legal Command
 │   ├── stephen-site/       # Stephen Lutar — Founder site
 │   └── mockup-sandbox/     # Component design preview (internal)
 │

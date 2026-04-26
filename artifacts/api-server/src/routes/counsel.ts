@@ -1182,7 +1182,7 @@ function getOrgId(req: Request): string | null {
 function requireOrgId(req: Request, res: Response): string | null {
   const orgId = getOrgId(req);
   if (!orgId) {
-    sendForbidden(res, 'Organization membership required to access PRISM Counsel matters');
+    sendForbidden(res, 'Organization membership required to access Counsel matters');
     return null;
   }
   return orgId;

@@ -165,9 +165,9 @@ Routes retain the `/api/firestorm` prefix for backward compatibility; the fronte
 
 ---
 
-### PRISM Counsel — Legal (`/api/prism-counsel`) [DEPRECATED]
+### Counsel — Legal (`/api/prism-counsel`) [DEPRECATED]
 
-PRISM Counsel frontend is deprecated (task #579). API routes remain for data access but are no longer actively developed.
+Counsel frontend is deprecated (task #579). API routes remain for data access but are no longer actively developed.
 
 | Endpoint Group | Auth | Description |
 |---------------|------|-------------|

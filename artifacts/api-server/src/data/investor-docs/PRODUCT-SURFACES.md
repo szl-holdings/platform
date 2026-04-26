@@ -17,13 +17,13 @@ Understanding what each type of surface is — and is not — is essential to un
 | **Platform** | The governed decision layer itself — the brand, the thesis, the shared governance infrastructure | SZL Holdings |
 | **Flagship command surface** | The primary operator interface for signal-to-action — where governance is exercised | Lyte |
 | **Execution fabric** | The governance backbone — workflows, approvals, audit trail — shared by all surfaces | Alloy |
-| **Mobile command layer** | Unified mobile access to all domain workspaces and the governance layer | CORTEX |
+| **Mobile command layer** | Unified mobile access to all domain workspaces and the governance layer | APEX |
 | **Ecosystem hub** | Cross-domain real-time overview for platform administrators and ecosystem operators | Command Portal |
-| **Domain pack** | Domain-specific intelligence extension built on the shared governance infrastructure | Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM |
+| **Domain pack** | Domain-specific intelligence extension built on the shared governance infrastructure | Aegis, Vessels, Terra, Counsel, Carlota Jo, IMPERIUM |
 | **Corporate platform** | Investor portal, trust center, and ecosystem overview — not an operator tool | SZL Holdings (web) |
 | **Platform primitive** | A structural abstraction shared by all surfaces — not a product | Outcome Graph, Proof Chain, Covenant Policy, Decision Simulation, Workflow Engine, Event Fabric |
 
-A domain pack is not a standalone product. It contributes domain-specific signal sources, analysis models, and action vocabulary to the platform. It inherits all six primitives, Alloy governance, CORTEX mobile access, and shared RBAC automatically.
+A domain pack is not a standalone product. It contributes domain-specific signal sources, analysis models, and action vocabulary to the platform. It inherits all six primitives, Alloy governance, APEX mobile access, and shared RBAC automatically.
 
 ---
 
@@ -35,14 +35,14 @@ A domain pack is not a standalone product. It contributes domain-specific signal
 │  SZL Holdings — Governed Decision Infrastructure               │
 ├─────────────────────────────────────────────────────────────────┤
 │  COMMAND SURFACES                                               │
-│  Lyte (flagship)   Command Portal (hub)   CORTEX (mobile)      │
+│  Lyte (flagship)   Command Portal (hub)   APEX (mobile)      │
 │  PRISM framework   8-domain SSE dash      All domains, one app │
 ├─────────────────────────────────────────────────────────────────┤
 │  EXECUTION FABRIC                                               │
 │  Alloy — Workflow orchestration · Approval gates · Audit trail  │
 ├─────────────────────────────────────────────────────────────────┤
 │  DOMAIN PACKS                                                   │
-│  Aegis         Vessels       Terra        PRISM Counsel        │
+│  Aegis         Vessels       Terra        Counsel        │
 │  Security &    Maritime      Real Estate  Legal Matter         │
 │  Defense       Intelligence  Intelligence Command              │
 │  Carlota Jo — Premium Advisory   IMPERIUM — Cloud Sovereignty  │
@@ -108,7 +108,7 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](PLAT
 | **Audience** | CISOs, SOC analysts, managed security providers (MSPs), compliance officers |
 | **Problem solved** | Security and intelligence operations are fragmented across disconnected tools — threat detection, managed ops, and AI research each require separate context |
 | **Core capability** | Three unified workspaces sharing one intelligence layer: Defense (SOC operations and threat response), Command (managed services operations), Intelligence (AI research and model governance) |
-| **Key modules** | MITRE ATT&CK v14 detection, SOAR playbook engine, STIX/TAXII protocol, XDR console, Sentinel AI agent, INCA analytics, Citadel crisis war room, deception grids, vulnerability management, dark vessel detection |
+| **Key modules** | MITRE ATT&CK v14 detection, SOAR playbook engine, STIX/TAXII protocol, XDR console, Sentinel AI agent, Counsel analytics, Citadel crisis war room, deception grids, vulnerability management, dark vessel detection |
 | **Stack** | React 19, Vite, `@szl-holdings/ai-engine`, `@szl-holdings/intelligence-feeds`, `@szl-holdings/forge-runtime`, `@szl-holdings/proof-chain`, `@szl-holdings/shared-ui` |
 | **Key dependencies** | `@szl-holdings/ai-engine`, `@szl-holdings/intelligence-feeds`, `@szl-holdings/forge-runtime`, `@szl-holdings/proof-chain`, `@szl-holdings/shared-ui` |
 | **DB Tables** | 22 tables covering the full security lifecycle |
@@ -157,7 +157,7 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](PLAT
 
 ---
 
-### PRISM Counsel — Legal Matter Command
+### Counsel — Legal Matter Command
 
 | Attribute | Detail |
 |-----------|--------|
@@ -223,8 +223,8 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](PLAT
 | **Status** | Public Beta Candidate |
 | **Audience** | Investors, fund managers, venture partners, design partners, enterprise evaluators, strategic partners |
 | **Problem Solved** | The ecosystem needs a coherent corporate presence presenting the platform hierarchy, trust posture, and investor narrative |
-| **Core Capability** | Investor and venture intelligence platform — portfolio health radar, cap table management, fund operations, LP reporting, trust center, developer portal, PRISM Counsel integration, Alloy workflow surface |
-| **Key Modules** | Landing page, platform product pages, trust center, investor hub (NDA-gated data room), admin CMS, PRISM Counsel integration, Alloy workflow integration |
+| **Core Capability** | Investor and venture intelligence platform — portfolio health radar, cap table management, fund operations, LP reporting, trust center, developer portal, Counsel integration, Alloy workflow surface |
+| **Key Modules** | Landing page, platform product pages, trust center, investor hub (NDA-gated data room), admin CMS, Counsel integration, Alloy workflow integration |
 | **Stack** | React 19, Vite, Tailwind CSS, `@szl-holdings/shared-ui`, `@szl-holdings/db`, `@szl-holdings/api-zod`, `@szl-holdings/prism-bus` |
 | **Strategic Role** | Top of the brand hierarchy. Primary destination for investor and enterprise evaluation |
 
@@ -262,7 +262,7 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](PLAT
 
 ## Mobile Surfaces
 
-### CORTEX — Unified Mobile Command
+### APEX — Unified Mobile Command
 
 | Attribute | Detail |
 |-----------|--------|
@@ -272,7 +272,7 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](PLAT
 | **Platform** | iOS + Android (Expo / React Native) |
 | **Audience** | Executives, investors, SZL ecosystem operators, all platform users requiring mobile access |
 | **Core Capability** | All 8 domain workspaces in one Expo/React Native app — biometric authentication, workspace switcher with cross-domain badge counts, unified command feed, workspace-adaptive AI copilot, SpotlightFab quick actions |
-| **Domains** | Lyte, Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM, Command, SZL Holdings |
+| **Domains** | Lyte, Aegis, Vessels, Terra, Counsel, Carlota Jo, IMPERIUM, Command, SZL Holdings |
 | **Stack** | Expo, React Native, NativeWind, `@szl-holdings/mobile-shared`, `@szl-holdings/shared-ui`, `@szl-holdings/ai-engine`, `@szl-holdings/offline-engine` |
 | **Screens** | 116 mobile screens |
 | **API** | `EXPO_PUBLIC_API_URL` (points to `/api/`) |
@@ -283,11 +283,11 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](PLAT
 
 > **Status disclosure (resolves TD-006):** None of the apps in the table below are
 > registered artifacts or built code. They are planned domain-specific companions to
-> CORTEX (`artifacts/szl-holdings-mobile`), which today already exposes every domain
+> APEX (`artifacts/szl-holdings-mobile`), which today already exposes every domain
 > workspace inside one Expo/React Native app. Domain-specific mobile apps will only
-> be split out from CORTEX when a paying customer or design partner requires a
+> be split out from APEX when a paying customer or design partner requires a
 > standalone, single-domain mobile experience. Until then, mobile coverage for these
-> domains is delivered through CORTEX.
+> domains is delivered through APEX.
 
 | App | Planned Artifact | Domain | Status | Earliest Build Window |
 |-----|------------------|--------|--------|------------------------|
@@ -297,18 +297,18 @@ All surfaces share six platform primitives — see [PLATFORM_PRIMITIVES.md](PLAT
 | Lyte Mobile — AIOps Command | `artifacts/lyte-mobile` (not registered) | Business Ops | Roadmap — not yet built | 2027, after Lyte enterprise GA |
 | Carlota Jo Mobile — Client App | `artifacts/carlota-jo-mobile` (not registered) | Advisory | Roadmap — not yet built | H2 2026, contingent on Carlota Jo client demand |
 
-For the live mobile surface available today, see **CORTEX — Unified Mobile Command** above (`artifacts/szl-holdings-mobile`).
+For the live mobile surface available today, see **APEX — Unified Mobile Command** above (`artifacts/szl-holdings-mobile`).
 
 ---
 
-### CORTEX Mobile (cortex-mobile)
+### APEX Mobile (cortex-mobile)
 
 | Attribute | Detail |
 |-----------|--------|
 | **Artifact** | `artifacts/cortex-mobile` |
 | **Preview Path** | `/cortex-mobile/` |
 | **Status** | Work in progress |
-| **Purpose** | Next-generation CORTEX mobile experience (separate from szl-holdings-mobile) |
+| **Purpose** | Next-generation APEX mobile experience (separate from szl-holdings-mobile) |
 
 ---
 

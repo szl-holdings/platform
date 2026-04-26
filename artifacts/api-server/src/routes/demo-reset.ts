@@ -18,7 +18,7 @@ const NARRATIVE_LABELS: Record<NarrativeOption, string> = {
   business: 'Business / RevOps / CFO (Lyte)',
   security: 'Security / SOC / Risk (Aegis)',
   maritime: 'Maritime / Sanctions / Vessels',
-  legal: 'Legal / Compliance (PRISM Counsel)',
+  legal: 'Legal / Compliance (Counsel)',
 };
 
 function isDemoModeEnabled(): boolean {

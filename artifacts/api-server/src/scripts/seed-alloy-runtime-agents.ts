@@ -149,9 +149,9 @@ const AEGIS_AGENTS = [
   },
   {
     agentId: 'aegis-nexus',
-    name: 'Nexus',
+    name: 'Praxis',
     description:
-      'Unified agentic integration layer that bridges Aegis with all external SZL platform services (Terra, Vessels, PRISM Counsel, Pulse). Manages cross-domain context propagation and shared knowledge graphs.',
+      'Unified agentic integration layer that bridges Aegis with all external SZL platform services (Terra, Vessels, Counsel, Pulse). Manages cross-domain context propagation and shared knowledge graphs.',
     domain: 'integration',
     policyTier: 'tier-2-sensitive',
     defaultModel: 'anthropic/claude-sonnet-4-5',

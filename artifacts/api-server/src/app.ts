@@ -335,7 +335,7 @@ app.get('/api/health', async (_req: Request, res: Response) => {
     { slug: 'terra', name: 'Terra — Real Estate Intelligence', type: 'domain_pack' },
     { slug: 'vessels', name: 'Vessels — Maritime Intelligence', type: 'domain_pack' },
     { slug: 'carlota-jo', name: 'Carlota Jo Consulting', type: 'domain_pack' },
-    { slug: 'szl-holdings-mobile', name: 'CORTEX — Mobile Command', type: 'mobile' },
+    { slug: 'szl-holdings-mobile', name: 'APEX — Mobile Command', type: 'mobile' },
     { slug: 'api-server', name: 'API Server', type: 'backend' },
   ];
 

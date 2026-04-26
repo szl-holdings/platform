@@ -421,7 +421,7 @@ export async function registerDefaultSchedules(): Promise<void> {
     },
     {
       agentId: 'nexus-autonomous',
-      name: 'Nexus Cross-Domain Fusion Monitor',
+      name: 'PRAXIS Cross-Domain Fusion Monitor',
       domain: 'global' as const,
       intervalMs: 6 * 60 * 60 * 1000,
       enabled: true,

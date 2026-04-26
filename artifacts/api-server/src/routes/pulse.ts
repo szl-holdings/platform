@@ -518,7 +518,7 @@ const DEMO_BRIEFINGS: Briefing[] = [
         keyJudgment:
           'Legal pipeline is stable with three active matters in negotiation phase; the Henderson deadline requires same-day action but carries low legal risk if handled today.',
         narrative: [
-          'PRISM Counsel active matter count: 14 open (3 in active negotiation, 6 in review, 5 in monitoring). No new matters filed against SZL entities in the past 48 hours.',
+          'Counsel active matter count: 14 open (3 in active negotiation, 6 in review, 5 in monitoring). No new matters filed against SZL entities in the past 48 hours.',
           'Matter 2024-RE-047 (Henderson acquisition regulatory review): As noted in the Real Estate Pulse section, the Clark County environmental filing deadline is April 17 at 5PM PT. Lexis confirms the Arcadis report is legally adequate for submission. The only blocker is the countersignature from Partner-level counsel. Lexis has drafted the extension request letter — pending approval to file.',
           "Matter 2024-IM-012 (SZL Capital Fund III LP agreement amendment): Three LPs have returned redlined amendments. Lexis assessment: two sets of redlines are acceptable with minor modifications; one LP's redlines on Section 7.3 (clawback provisions) are non-standard and require commercial discussion. No deadline pressure on this matter; flagged for awareness.",
           "Maritime matters: No new sanctions-related legal exposure identified from overnight fleet activity. Helmsman's recommended rerouting of MV Concordia Strait, if executed, maintains full sanctions compliance.",
@@ -597,7 +597,7 @@ const DEMO_BRIEFINGS: Briefing[] = [
         keyJudgment:
           'All SZL platform services operating within normal parameters; Nuro Mesh inference latency increased 12% overnight but remains within SLA.',
         narrative: [
-          'All 8 SZL platform applications (Aegis, Vessels, Terra, Pulse, CORTEX, PRISM Counsel, Command, Holdings) are operational with zero P0/P1 incidents in the past 24 hours. API server uptime: 99.98% (30-day trailing).',
+          'All 8 SZL platform applications (Aegis, Vessels, Terra, Pulse, APEX, Counsel, Command, Holdings) are operational with zero P0/P1 incidents in the past 24 hours. API server uptime: 99.98% (30-day trailing).',
           'Nuro Mesh average inference latency increased from 1,840ms to 2,070ms overnight (↑12.5%). This is attributable to a 34% increase in concurrent agent consultation requests between 21:00 and 03:00 UTC — consistent with the maritime and security events covered in this brief. Latency remains within the 2,500ms P95 SLA.',
           'Database replication lag on the primary read replica spiked to 8.3 seconds at 23:44 UTC for approximately 4 minutes before resolving. Root cause: batch analytics job conflict. Zeus has scheduled the batch job to avoid overlap with peak write periods. No user-facing impact was recorded.',
           'Beacon notes that Pulse briefing generation latency has improved 18% since the model routing update deployed April 14 — average brief generation time is now 4.2 minutes.',
@@ -735,7 +735,7 @@ const DEMO_BRIEFINGS: Briefing[] = [
     overallRisk: 'LOW',
     overallConfidence: 0.85,
     headline:
-      'PRISM Counsel resolves two legacy matters; Fund II secondary sale closes at 1.4x book',
+      'Counsel resolves two legacy matters; Fund II secondary sale closes at 1.4x book',
     leadSentence:
       'Strong close to the week with two legal matter resolutions and a favorable secondary transaction in Fund II.',
     domains: ['legal', 'financial', 'executive'],

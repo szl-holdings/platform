@@ -495,7 +495,7 @@ function buildSeedAlerts(): Array<typeof competitiveIntelAlertsTable.$inferInser
       publishedAt: new Date(now - 2 * 24 * 3600_000),
       recommendation: 'adopt',
       recommendationReason:
-        'PRISM Counsel already mirrors Matter Stages on the desktop — extending the rail to the SZL Holdings mobile shell would close the parity gap.',
+        'Counsel already mirrors Matter Stages on the desktop — extending the rail to the SZL Holdings mobile shell would close the parity gap.',
     },
     {
       id: 'seed-costar-loan-overlay',

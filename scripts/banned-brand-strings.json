@@ -2,27 +2,111 @@
   "$comment": "Central allowlist for the brand-string validation check (scripts/check-banned-brand-strings.ts). Add new banned trademarks to `bannedStrings`. Add legitimate occurrences to `lineAllowlist` (preferred) or `fileAllowlist` (whole-file exemption). Source of truth: ORIGINALITY_REPORT.md rename map. The check direction is: BAN the OLD pre-rename names, REPLACE with the canonical post-rename names.",
   "$bannedStringsComment": "Each entry matches case-sensitively with strict boundaries (no adjacency to word chars, hyphens, underscores, slashes, colons). To catch a brand in multiple casings, add separate entries for `Pascal` and `UPPER` variants. The audit intentionally preserved lowercase URL slugs (e.g. /aegis/) so do NOT add lowercase variants.",
   "bannedStrings": [
-    { "term": "Sentra", "replacement": "TENAX", "reason": "Old internal codename — canonical product name is TENAX (Cyber Resilience Command)" },
-    { "term": "SENTRA", "replacement": "TENAX", "reason": "Old internal codename — canonical product name is TENAX (Cyber Resilience Command)" },
-    { "term": "Aegis", "replacement": "PARAGON", "reason": "Old internal codename — canonical product name is PARAGON (Defense & Intelligence Command)" },
-    { "term": "AEGIS", "replacement": "PARAGON", "reason": "Old internal codename — canonical product name is PARAGON (Defense & Intelligence Command)" },
-    { "term": "Terra", "replacement": "DOMAINE", "reason": "Old internal codename — canonical product name is DOMAINE (Real Estate Intelligence)" },
-    { "term": "TERRA", "replacement": "DOMAINE", "reason": "Old internal codename — canonical product name is DOMAINE (Real Estate Intelligence)" },
-    { "term": "Pulse", "replacement": "LUMINA", "reason": "Old internal codename — canonical product name is LUMINA (AI Executive Briefing)" },
-    { "term": "PULSE", "replacement": "LUMINA", "reason": "Old internal codename — canonical product name is LUMINA (AI Executive Briefing)" },
-    { "term": "Lyte", "replacement": "KORA", "reason": "Old internal codename — canonical product name is KORA (Decision Intelligence)" },
-    { "term": "LYTE", "replacement": "KORA", "reason": "Old internal codename — canonical product name is KORA (Decision Intelligence)" },
-    { "term": "Vessels", "replacement": "SEXTANT", "reason": "Old internal codename — canonical product name is SEXTANT (Maritime Intelligence)" },
-    { "term": "VESSELS", "replacement": "SEXTANT", "reason": "Old internal codename — canonical product name is SEXTANT (Maritime Intelligence)" },
-    { "term": "CORTEX", "replacement": "APEX", "reason": "Old internal codename — canonical product name is APEX (also avoids Palo Alto Networks trademark)" },
-    { "term": "Cortex", "replacement": "APEX", "reason": "Old internal codename — canonical product name is APEX (also avoids Palo Alto Networks trademark)" },
-    { "term": "Alloy", "replacement": "FORGE", "reason": "Old internal codename — canonical product name is FORGE per the originality rename map" },
-    { "term": "ALLOY", "replacement": "FORGE", "reason": "Old internal codename — canonical product name is FORGE per the originality rename map" },
-    { "term": "INCA", "replacement": "Counsel", "reason": "Old internal codename — canonical product name is Counsel (Legal Matter Command)" },
-    { "term": "NEXUS", "replacement": "PRAXIS", "reason": "Trademark conflict (HubSpot, Salesforce, dozens of enterprise products); canonical name is PRAXIS" },
-    { "term": "Nexus", "replacement": "PRAXIS", "reason": "Trademark conflict (HubSpot, Salesforce, dozens of enterprise products); canonical name is PRAXIS" },
-    { "term": "PRISM Counsel", "replacement": "Counsel", "reason": "PRISM has NSA program brand association; prefix removed" },
-    { "term": "PRISM-Counsel", "replacement": "Counsel", "reason": "PRISM has NSA program brand association; prefix removed" }
+    {
+      "term": "Sentra",
+      "replacement": "TENAX",
+      "reason": "Old internal codename — canonical product name is TENAX (Cyber Resilience Command)"
+    },
+    {
+      "term": "SENTRA",
+      "replacement": "TENAX",
+      "reason": "Old internal codename — canonical product name is TENAX (Cyber Resilience Command)"
+    },
+    {
+      "term": "Aegis",
+      "replacement": "PARAGON",
+      "reason": "Old internal codename — canonical product name is PARAGON (Defense & Intelligence Command)"
+    },
+    {
+      "term": "AEGIS",
+      "replacement": "PARAGON",
+      "reason": "Old internal codename — canonical product name is PARAGON (Defense & Intelligence Command)"
+    },
+    {
+      "term": "Terra",
+      "replacement": "DOMAINE",
+      "reason": "Old internal codename — canonical product name is DOMAINE (Real Estate Intelligence)"
+    },
+    {
+      "term": "TERRA",
+      "replacement": "DOMAINE",
+      "reason": "Old internal codename — canonical product name is DOMAINE (Real Estate Intelligence)"
+    },
+    {
+      "term": "Pulse",
+      "replacement": "LUMINA",
+      "reason": "Old internal codename — canonical product name is LUMINA (AI Executive Briefing)"
+    },
+    {
+      "term": "PULSE",
+      "replacement": "LUMINA",
+      "reason": "Old internal codename — canonical product name is LUMINA (AI Executive Briefing)"
+    },
+    {
+      "term": "Lyte",
+      "replacement": "KORA",
+      "reason": "Old internal codename — canonical product name is KORA (Decision Intelligence)"
+    },
+    {
+      "term": "LYTE",
+      "replacement": "KORA",
+      "reason": "Old internal codename — canonical product name is KORA (Decision Intelligence)"
+    },
+    {
+      "term": "Vessels",
+      "replacement": "SEXTANT",
+      "reason": "Old internal codename — canonical product name is SEXTANT (Maritime Intelligence)"
+    },
+    {
+      "term": "VESSELS",
+      "replacement": "SEXTANT",
+      "reason": "Old internal codename — canonical product name is SEXTANT (Maritime Intelligence)"
+    },
+    {
+      "term": "CORTEX",
+      "replacement": "APEX",
+      "reason": "Old internal codename — canonical product name is APEX (also avoids Palo Alto Networks trademark)"
+    },
+    {
+      "term": "Cortex",
+      "replacement": "APEX",
+      "reason": "Old internal codename — canonical product name is APEX (also avoids Palo Alto Networks trademark)"
+    },
+    {
+      "term": "Alloy",
+      "replacement": "FORGE",
+      "reason": "Old internal codename — canonical product name is FORGE per the originality rename map"
+    },
+    {
+      "term": "ALLOY",
+      "replacement": "FORGE",
+      "reason": "Old internal codename — canonical product name is FORGE per the originality rename map"
+    },
+    {
+      "term": "INCA",
+      "replacement": "Counsel",
+      "reason": "Old internal codename — canonical product name is Counsel (Legal Matter Command)"
+    },
+    {
+      "term": "NEXUS",
+      "replacement": "PRAXIS",
+      "reason": "Trademark conflict (HubSpot, Salesforce, dozens of enterprise products); canonical name is PRAXIS"
+    },
+    {
+      "term": "Nexus",
+      "replacement": "PRAXIS",
+      "reason": "Trademark conflict (HubSpot, Salesforce, dozens of enterprise products); canonical name is PRAXIS"
+    },
+    {
+      "term": "PRISM Counsel",
+      "replacement": "Counsel",
+      "reason": "PRISM has NSA program brand association; prefix removed"
+    },
+    {
+      "term": "PRISM-Counsel",
+      "replacement": "Counsel",
+      "reason": "PRISM has NSA program brand association; prefix removed"
+    }
   ],
   "$fileAllowlistComment": "Whole-file exemptions. Use sparingly; prefer lineAllowlist. Globs are not supported — list explicit paths relative to repo root, or directory prefixes ending with '/'.",
   "fileAllowlist": [
@@ -59,13 +143,88 @@
     "lib/policy-engine/",
     "lib/telemetry-standards/",
     "lib/nvidia-adapters/",
-    "artifacts/api-server/",
-    "artifacts/command/src/pages/operations/forge.tsx"
+    "artifacts/command/src/pages/operations/forge.tsx",
+    "artifacts/api-server/"
   ],
   "$lineAllowlistComment": "Per-line exemptions. Each entry: { file, line, term, reason }. The check matches by exact file path + line number + matched term.",
   "lineAllowlist": [
-    { "file": "artifacts/mockup-sandbox/src/pages/TokensGovernance.tsx", "line": 68, "term": "NEXUS", "reason": "Page header for the NEXUS governance dashboard; matches the legacy artifact display name. Kept for parity with the registered demo page." },
-    { "file": "artifacts/mockup-sandbox/src/pages/TokensGovernance.tsx", "line": 236, "term": "NEXUS", "reason": "Reference to the NEXUS bundle in user-facing copy; matches the legacy artifact display name." },
-    { "file": "artifacts/a11oy/src/data/brands.ts", "line": 52, "term": "Nexus", "reason": "Seed data: third-party demo brand entry named 'Acme Nexus'; not a SZL Holdings product name." }
+    {
+      "file": "artifacts/mockup-sandbox/src/pages/TokensGovernance.tsx",
+      "line": 68,
+      "term": "NEXUS",
+      "reason": "Page header for the NEXUS governance dashboard; matches the registered artifact display name (NEXUS — Unified Agentic AI Layer)."
+    },
+    {
+      "file": "artifacts/mockup-sandbox/src/pages/TokensGovernance.tsx",
+      "line": 236,
+      "term": "NEXUS",
+      "reason": "Reference to the NEXUS bundle in user-facing copy; matches the registered artifact display name."
+    },
+    {
+      "file": "artifacts/a11oy/src/data/brands.ts",
+      "line": 40,
+      "term": "TENAX",
+      "reason": "Seed data: tagline string mirrors the registered artifact title 'TENAX — Cyber Resilience Command'; internal-codename use is intentional here for demo fidelity."
+    },
+    {
+      "file": "artifacts/a11oy/src/data/brands.ts",
+      "line": 42,
+      "term": "LUMINA",
+      "reason": "Seed data: tagline string mirrors the registered artifact title 'LUMINA — AI Executive Briefing'; internal-codename use is intentional here for demo fidelity."
+    },
+    {
+      "file": "artifacts/a11oy/src/data/brands.ts",
+      "line": 43,
+      "term": "DOMAINE",
+      "reason": "Seed data: tagline string mirrors the registered artifact title 'DOMAINE — Real Estate Intelligence'; internal-codename use is intentional here for demo fidelity."
+    },
+    {
+      "file": "artifacts/a11oy/src/data/brands.ts",
+      "line": 44,
+      "term": "SEXTANT",
+      "reason": "Seed data: tagline string mirrors the registered artifact title 'SEXTANT — Maritime Intelligence'; internal-codename use is intentional here for demo fidelity."
+    },
+    {
+      "file": "artifacts/a11oy/src/data/brands.ts",
+      "line": 45,
+      "term": "PARAGON",
+      "reason": "Seed data: tagline string mirrors the registered artifact title 'PARAGON — Defense & Intelligence Command'; internal-codename use is intentional here for demo fidelity."
+    },
+    {
+      "file": "artifacts/a11oy/src/data/brands.ts",
+      "line": 52,
+      "term": "Nexus",
+      "reason": "Seed data: third-party demo brand entry named 'Acme Nexus'; not a SZL Holdings product name."
+    },
+    {
+      "file": "artifacts/a11oy/src/data/tokens.ts",
+      "line": 22,
+      "term": "DOMAINE",
+      "reason": "Seed data: driftSurfaces label 'Terra (DOMAINE)' uses codename parenthetically; pre-existing demo fidelity reference."
+    },
+    {
+      "file": "artifacts/a11oy/src/data/tokens.ts",
+      "line": 29,
+      "term": "DOMAINE",
+      "reason": "Seed data: driftSurfaces label 'Terra (DOMAINE)' uses codename parenthetically; pre-existing demo fidelity reference."
+    },
+    {
+      "file": "artifacts/command/src/pages/demo-launchpad.tsx",
+      "line": 1076,
+      "term": "FORGE",
+      "reason": "7th Signature Innovation domain label — intentional reference to FORGE as the Responses API backbone per task spec; display label for the agentic loop innovation entry."
+    },
+    {
+      "file": "lib/shared-ui/src/ecosystem-map.tsx",
+      "line": 384,
+      "term": "FORGE",
+      "reason": "Ecosystem-map center badge — intentional reference to FORGE as the Responses API backbone per task spec; shows FORGE · RESPONSES API to indicate the AI backbone."
+    },
+    {
+      "file": "artifacts/api-server/src/scripts/seed-capital-cert.ts",
+      "line": 168,
+      "term": "Nexus",
+      "reason": "Seed-data certification title 'New York State Business Nexus' references a real US state tax-law concept (Nexus = sales-tax presence threshold); not a SZL Holdings product name."
+    }
   ]
 }

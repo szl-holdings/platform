@@ -27,7 +27,7 @@ const HEADLINES = [
   'Platform health nominal — 847 assets monitored, 0 service disruptions',
   'Aegis SOC: ransomware precursor detected — playbook activated, contained',
   'Carlota Jo Q2 pipeline ahead — $480K above target, 3 new inquiries',
-  'PRISM Counsel: 8 settlements closed in 48 hours — velocity record',
+  'Counsel: 8 settlements closed in 48 hours — velocity record',
   'Lyte observability: latency spike resolved, all systems green',
   'Constellation graph: 2,341 cross-domain edges active, 3 drift alerts',
   'Vessels: IMO 9876543 AIS dark period cleared — no sanctions match',

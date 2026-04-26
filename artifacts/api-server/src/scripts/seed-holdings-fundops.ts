@@ -423,9 +423,9 @@ export async function seedHoldingsFundops() {
       name: 'Marcus Okonkwo',
       email: 'mokonkwo@atlanticpartners.com',
       company: 'Atlantic Investment Partners',
-      subject: 'Co-investment inquiry — PRISM Counsel round',
+      subject: 'Co-investment inquiry — Counsel round',
       message:
-        "We are tracking the legal tech space and PRISM Counsel's traction is impressive. Interested in discussing co-investment opportunity in the current round.",
+        "We are tracking the legal tech space and Counsel's traction is impressive. Interested in discussing co-investment opportunity in the current round.",
       status: 'read',
     },
     {
@@ -1389,7 +1389,7 @@ export async function seedFundNavLpReports() {
         tvpi: '1.8200',
         dpi: '0.4100',
         rvpi: '1.4100',
-        notes: 'Q3 2025 mark — PRISM Counsel revenue inflection',
+        notes: 'Q3 2025 mark — Counsel revenue inflection',
       },
       {
         navDate: '2025-12-31',
@@ -1488,7 +1488,7 @@ export async function seedFundNavLpReports() {
         carryRate: '0.2000',
         managementFeeRate: '0.0200',
         narrativeSummary:
-          'Year-end mark. Distributions returned $2.0M to LPs in Q4. PRISM Counsel ARR doubled YoY.',
+          'Year-end mark. Distributions returned $2.0M to LPs in Q4. Counsel ARR doubled YoY.',
         approvedBy: 'Stephen L.',
         approvedAt: new Date('2026-01-12'),
         distributedAt: new Date('2026-01-15'),
@@ -1519,7 +1519,7 @@ export async function seedFundNavLpReports() {
         carryRate: '0.2000',
         managementFeeRate: '0.0200',
         narrativeSummary:
-          'PRISM Counsel revenue inflection. $2.6M distribution to LPs from Vessels secondary.',
+          'Counsel revenue inflection. $2.6M distribution to LPs from Vessels secondary.',
         approvedBy: 'Stephen L.',
         approvedAt: new Date('2025-10-10'),
         distributedAt: new Date('2025-10-12'),

@@ -229,7 +229,7 @@ const DEFAULT_CHAINS: SignalChain[] = [
         domain: 'prism',
         action: 'Review contract clauses for force-majeure or delay penalties',
         explainabilityTemplate:
-          'PRISM Counsel flagged {count} contracts with delivery deadline clauses that may be triggered by the {port} delay.',
+          'Counsel flagged {count} contracts with delivery deadline clauses that may be triggered by the {port} delay.',
       },
     ],
   },
@@ -237,7 +237,7 @@ const DEFAULT_CHAINS: SignalChain[] = [
     id: 'security-legal',
     name: 'Security Incident → Legal Review',
     description:
-      'When a critical cyber incident is detected in Aegis, automatically trigger a legal hold review in PRISM Counsel and update executive risk score.',
+      'When a critical cyber incident is detected in Aegis, automatically trigger a legal hold review in Counsel and update executive risk score.',
     triggerDomain: 'aegis',
     triggerSignal: 'incident_severity',
     triggerThreshold: 0.8,
@@ -257,7 +257,7 @@ const DEFAULT_CHAINS: SignalChain[] = [
         domain: 'prism',
         action: 'Initiate legal hold and regulatory disclosure review',
         explainabilityTemplate:
-          'PRISM Counsel initiated legal hold on incident artifacts and is reviewing breach notification obligations under applicable jurisdiction.',
+          'Counsel initiated legal hold on incident artifacts and is reviewing breach notification obligations under applicable jurisdiction.',
       },
       {
         domain: 'szl-holdings',

@@ -476,7 +476,7 @@ export async function seedConstellationExtended() {
       domain: 'lyte',
       entityType: 'entity',
       labels: ['portfolio', 'prism', 'monitored'],
-      name: 'PRISM Counsel — Portfolio Entity',
+      name: 'Counsel — Portfolio Entity',
       description: 'SZL Holdings portfolio company. $840K ARR. 6 customers. NRR 142% TTM. Seed.',
       provenanceSourceId: 'venture-prism-counsel',
       provenanceSourceType: 'holdings_ventures',

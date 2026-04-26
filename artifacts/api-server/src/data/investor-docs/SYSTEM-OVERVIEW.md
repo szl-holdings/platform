@@ -11,7 +11,7 @@
 
 SZL Holdings builds the governed decision infrastructure layer for enterprise operators — connecting what is observable to what is executable, under governance, with full attribution.
 
-The platform is organized in a clear hierarchy: SZL Holdings (platform) → Lyte (flagship command surface) → Alloy (execution fabric) → CORTEX (mobile command) → Domain packs (Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM).
+The platform is organized in a clear hierarchy: SZL Holdings (platform) → Lyte (flagship command surface) → Alloy (execution fabric) → APEX (mobile command) → Domain packs (Aegis, Vessels, Terra, Counsel, Carlota Jo, IMPERIUM).
 
 The defining characteristic of the platform is **architectural unity**. Every domain pack shares one governance infrastructure, one design system, one authentication model, and one data layer. This is not a portfolio of separate startups — it is a compounding system where shared investment in governance multiplies in value with each new domain added.
 
@@ -49,13 +49,13 @@ The platform provides the infrastructure for this loop. Domain packs provide the
 ┌─────────────────────────────────────────────────────────────────────────┐
 │  COMMAND SURFACES                                                        │
 │                                                                          │
-│  Lyte (web)        Command Portal (web)        CORTEX (mobile)          │
+│  Lyte (web)        Command Portal (web)        APEX (mobile)          │
 │  Operator command   Ecosystem overview          All domains, one app     │
 │  surface            8-domain dashboard          Biometric auth           │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  DOMAIN PACKS                                                            │
 │                                                                          │
-│  Aegis     Vessels    Terra    PRISM Counsel  Carlota Jo   IMPERIUM     │
+│  Aegis     Vessels    Terra    Counsel  Carlota Jo   IMPERIUM     │
 │  Security &     Maritime       Real Estate   Legal Matter    Premium    │
 │  Defense        Intelligence   Intelligence  Command         Advisory   │
 │  Intelligence                                                            │
@@ -107,7 +107,7 @@ The platform provides the infrastructure for this loop. Domain packs provide the
 │                                                                              │
 │  COMMAND SURFACES                                                            │
 │  ┌──────────────────────────────┐  ┌────────────────────────────────────┐   │
-│  │  CORTEX — Unified Mobile     │  │  Command Portal — Ecosystem Hub    │   │
+│  │  APEX — Unified Mobile     │  │  Command Portal — Ecosystem Hub    │   │
 │  │  All domains · iOS/Android   │  │  8-domain real-time dashboard      │   │
 │  └──────────────────────────────┘  └────────────────────────────────────┘   │
 └──────────────────────────────────────────────────────────────────────────────┘
@@ -121,11 +121,11 @@ The platform provides the infrastructure for this loop. Domain packs provide the
 |---------|-------|-------------|-------------|
 | **Lyte** | Flagship command | PRISM framework command surface — signal timeline, action queue, approvals, AI recommendations | Operations leads, CFOs, PMOs, SREs |
 | **Alloy** | Execution fabric | Workflow orchestration, approval gates, immutable audit trail — the governance backbone | All platforms (shared infrastructure) |
-| **CORTEX** | Mobile command | Unified mobile command — all domain workspaces on iOS/Android with biometric auth | All platform users on mobile |
+| **APEX** | Mobile command | Unified mobile command — all domain workspaces on iOS/Android with biometric auth | All platform users on mobile |
 | **Aegis** | Domain pack | Unified cybersecurity command — threat detection, SOC operations, AI-assisted triage | CISOs, SOC analysts, MSPs |
 | **Vessels** | Domain pack | Real-time maritime fleet command — AIS tracking, sanctions screening, voyage economics | Fleet executives, operations, compliance |
 | **Terra** | Domain pack | NYC property intelligence — distressed asset detection, ownership mapping, deal pipeline | Brokers, investors, portfolio teams |
-| **PRISM Counsel** | Domain pack (legal module integrated into Aegis) | Agentic legal matter management — court filings, document review, recovery operations | Legal partners, case managers |
+| **Counsel** | Domain pack (legal module integrated into Aegis) | Agentic legal matter management — court filings, document review, recovery operations | Legal partners, case managers |
 | **Carlota Jo** | Domain pack | Premium advisory platform — client portal, service delivery, advisory engagement | Founders, executives, UHNW clients |
 | **IMPERIUM** | Domain pack (in dev) | Cloud sovereignty — multi-cloud governance, policy enforcement, cloud estate visibility | CIOs, infrastructure leads, cloud governance teams |
 | **Command Portal** | Ecosystem hub | Cross-domain real-time dashboard — 8-domain SSE, executive briefing, global command bar | Platform admin, ecosystem operators |
@@ -144,7 +144,7 @@ Signals arrive from external integrations, internal events, or scheduled data fe
 | Aegis | STIX/TAXII threat feeds, MITRE ATT&CK, CVE databases, CISA KEV, endpoint telemetry |
 | Vessels | AIS telemetry (MarineTraffic, AISHub, Digitraffic), port records, sanctions lists (OFAC, EU, UN) |
 | Terra | NYC public records, MLS listings, Census/BLS data, FEMA risk indices |
-| PRISM Counsel | CourtListener filings, NY court records, deadline triggers |
+| Counsel | CourtListener filings, NY court records, deadline triggers |
 | Carlota Jo | Client inquiry forms, booking events, document delivery triggers |
 | Lyte | Cross-domain operational metrics, approval queue changes, SLA breach signals |
 
@@ -152,7 +152,7 @@ Signals are normalized by the Event Fabric (`@szl-holdings/prism-bus`) into a co
 
 ### Step 2: Context and Correlation
 
-The signal is enriched with context from across domains. PRISM Bus enables cross-domain correlation — a sanctions alert from Vessels can trigger a related case check in PRISM Counsel, which can surface a risk flag in Lyte.
+The signal is enriched with context from across domains. PRISM Bus enables cross-domain correlation — a sanctions alert from Vessels can trigger a related case check in Counsel, which can surface a risk flag in Lyte.
 
 ### Step 3: AI Recommendation
 
@@ -176,7 +176,7 @@ The Covenant Policy engine (`@szl-holdings/covenant-policy`) evaluates whether t
 
 ### Step 6: Human Approval
 
-If the policy requires approval, the action enters the approval queue. The operator reviews the recommendation, the simulation results, and the evidence in Lyte (web) or CORTEX (mobile), then approves, rejects, or overrides.
+If the policy requires approval, the action enters the approval queue. The operator reviews the recommendation, the simulation results, and the evidence in Lyte (web) or APEX (mobile), then approves, rejects, or overrides.
 
 ### Step 7: Action Execution
 
@@ -212,7 +212,7 @@ Every consequential operation in the SZL ecosystem follows this path, regardless
 │  CLIENTS                                                              │
 │                                                                       │
 │  Web Apps (React + Vite)              Mobile (Expo / React Native)   │
-│  szl-holdings  lyte-command-center    szl-holdings-mobile (CORTEX)   │
+│  szl-holdings  lyte-command-center    szl-holdings-mobile (APEX)   │
 │  aegis         terra                  cortex-mobile                  │
 │  vessels       prism-counsel                                         │
 │  carlota-jo    command                                               │
@@ -263,7 +263,7 @@ Every consequential operation in the SZL ecosystem follows this path, regardless
 |---------|-----------|---------|
 | WebSocket | `ws` library with signed tickets | Aegis alerts, Vessels AIS, Lyte signals |
 | SSE | Server-Sent Events | Command Portal 8-domain dashboard |
-| Push | VAPID / Expo Push | CORTEX mobile notifications |
+| Push | VAPID / Expo Push | APEX mobile notifications |
 | PRISM Bus | Internal event bus | Cross-domain signal correlation |
 
 ---
@@ -304,7 +304,7 @@ All AI agents are **advisory only** — they surface intelligence and recommenda
 | Metric | Value |
 |--------|-------|
 | Production Web Applications | 10 |
-| Native Mobile Apps | CORTEX (unified) + 5 domain-specific |
+| Native Mobile Apps | APEX (unified) + 5 domain-specific |
 | Shared Libraries | 37 packages |
 | API Endpoints | 2,331 |
 | Database Tables | 700+ |

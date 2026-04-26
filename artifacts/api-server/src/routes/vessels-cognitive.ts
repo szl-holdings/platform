@@ -155,7 +155,7 @@ function provenance(sources: string[], confidence: number, verifierApproved = tr
     confidence,
     verifierApproved,
     freshness: { fetchedAt: new Date().toISOString(), ageSeconds: 0, ttlSeconds: 300 },
-    attestation: verifierApproved ? 'NEXUS-VERIFIER-v2.4' : 'UNVERIFIED',
+    attestation: verifierApproved ? 'PRAXIS-VERIFIER-v2.4' : 'UNVERIFIED',
   };
 }
 
@@ -722,7 +722,7 @@ router.get(
         },
         expectedRoutes: Object.entries(EXPECTED_ROUTES).map(([key, val]) => ({ key, ...val })),
         provenance: provenance(
-          ['AIS Digitraffic', 'Voyage Plan Registry', 'GMDSS', 'NEXUS Route Memory'],
+          ['AIS Digitraffic', 'Voyage Plan Registry', 'GMDSS', 'PRAXIS Route Memory'],
           0.91,
           true,
         ),
@@ -1306,7 +1306,7 @@ router.get(
         whatIfScenarios: WHAT_IF_SCENARIOS,
         knownVoyageRefs: Object.keys(VOYAGE_SNAPSHOTS),
         provenance: provenance(
-          ['Voyage Data Recorder', 'AIS Track Archive', 'Port State Control', 'NEXUS Voyage Twin'],
+          ['Voyage Data Recorder', 'AIS Track Archive', 'Port State Control', 'PRAXIS Voyage Twin'],
           0.93,
           true,
         ),

@@ -162,7 +162,7 @@ Admin routes (`/admin`) are protected by `adminGuard` (`artifacts/api-server/src
 | Playbook execution | PRIVATE | `operator` |
 | SOAR automation | PRIVATE | `operator` |
 | Deception grid management | PRIVATE | `security_analyst` |
-| INCA / Intelligence Labs | PRIVATE | `security_analyst` |
+| Counsel / Intelligence Labs | PRIVATE | `security_analyst` |
 | Managed services (Command workspace) | PRIVATE | `operator` |
 | Admin functions | PRIVATE | `admin` |
 
@@ -197,11 +197,11 @@ Admin routes (`/admin`) are protected by `adminGuard` (`artifacts/api-server/src
 
 ---
 
-### PRISM Counsel — Legal Matter Command (`/prism-counsel/`)
+### Counsel — Legal Matter Command (`/prism-counsel/`)
 
 | Route | Classification | Minimum Role |
 |-------|---------------|-------------|
-| All PRISM Counsel routes | PRIVATE | `analyst` |
+| All Counsel routes | PRIVATE | `analyst` |
 | Matter management (read) | PRIVATE | `analyst` |
 | Matter management (write) | PRIVATE | `operator` |
 | Document review | PRIVATE | `analyst` |
@@ -305,7 +305,7 @@ Authorization maps **org membership role** (the primary enforced role in route h
 | **Terra / Real Estate** |
 | Create / update deals | ✅ | ✅ | ✅ | ✅ | — |
 | View property intelligence | ✅ | ✅ | ✅ | ✅ | 👁 |
-| **PRISM Counsel / Legal** |
+| **Counsel / Legal** |
 | Create / manage matters | ✅ | ✅ | ✅ | ✅ | — |
 | Document review | ✅ | ✅ | ✅ | ✅ | — |
 | **AI Agent Tools** |

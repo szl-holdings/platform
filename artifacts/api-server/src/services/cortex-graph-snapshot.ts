@@ -156,7 +156,7 @@ export async function captureGraphSnapshot(
 
   logger.info(
     { snapshotUuid: created.snapshotUuid, orgId, nodeCount: nodes.length, edgeCount: edges.length },
-    '[CORTEX] Graph snapshot captured',
+    '[APEX] Graph snapshot captured',
   );
 
   return {

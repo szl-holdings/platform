@@ -14,7 +14,7 @@
  * For each endpoint verifies:
  *   - provenance.verifierApproved === true
  *   - provenance.freshness.fetchedAt is a valid ISO 8601 string
- *   - provenance.attestation contains "NEXUS-VERIFIER"
+ *   - provenance.attestation contains "PRAXIS-VERIFIER"
  *   - provenance.confidence is in [0, 1]
  *   - provenance.sources is a non-empty array
  *
@@ -54,8 +54,8 @@ function assertProvenance(prov: Provenance | undefined, label: string): void {
     throw new Error(
       `${label} — freshness.fetchedAt is not a valid ISO timestamp (got "${prov.freshness.fetchedAt}")`,
     );
-  if (!prov.attestation.includes('NEXUS-VERIFIER'))
-    throw new Error(`${label} — attestation missing NEXUS-VERIFIER (got "${prov.attestation}")`);
+  if (!prov.attestation.includes('PRAXIS-VERIFIER'))
+    throw new Error(`${label} — attestation missing PRAXIS-VERIFIER (got "${prov.attestation}")`);
   if (typeof prov.confidence !== 'number' || prov.confidence < 0 || prov.confidence > 1) {
     throw new Error(`${label} — confidence out of range (got ${prov.confidence})`);
   }
@@ -136,7 +136,7 @@ function provenance(sources: string[], confidence: number, verifierApproved = tr
     confidence,
     verifierApproved,
     freshness: { fetchedAt: new Date().toISOString(), ageSeconds: 0, ttlSeconds: 300 },
-    attestation: verifierApproved ? 'NEXUS-VERIFIER-v2.4' : 'UNVERIFIED',
+    attestation: verifierApproved ? 'PRAXIS-VERIFIER-v2.4' : 'UNVERIFIED',
   };
 }
 
@@ -433,7 +433,7 @@ function buildVoyageTwin(): {
     whatIfScenarios: WHAT_IF_SCENARIOS,
     timeline: { voyageDurationDays: 18.0 },
     provenance: provenance(
-      ['Voyage Data Recorder', 'AIS Track Archive', 'NEXUS Voyage Twin'],
+      ['Voyage Data Recorder', 'AIS Track Archive', 'PRAXIS Voyage Twin'],
       0.93,
       true,
     ),
@@ -482,7 +482,7 @@ async function run(): Promise<void> {
   // ── 2. Route Anomaly Engine ──────────────────────────────────────────────────
   await check('route-anomalies: provenance/verifier/freshness', () => {
     const p = provenance(
-      ['AIS Digitraffic', 'Voyage Plan Registry', 'GMDSS', 'NEXUS Route Memory'],
+      ['AIS Digitraffic', 'Voyage Plan Registry', 'GMDSS', 'PRAXIS Route Memory'],
       0.91,
       true,
     );

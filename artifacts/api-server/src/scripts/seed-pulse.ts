@@ -55,7 +55,7 @@ const HEADLINES = [
   'SZL Holdings Q1 deployment velocity up 22% — governance gates holding',
   'Vessels fleet dark-period anomaly resolved — IMO 9876543 cleared',
   'Carlota Jo Q2 client pipeline ahead of target by $480K',
-  'PRISM Counsel matter closures accelerate — 8 settlements in 48 hours',
+  'Counsel matter closures accelerate — 8 settlements in 48 hours',
   'Aegis SOC playbook triggered — ransomware precursor pattern detected',
   'Terra: Harlem auction cluster — 4 properties within acquisition window',
   'Cross-domain entity drift alert — 3 CST nodes require verification',
@@ -447,7 +447,7 @@ export async function seedPulse() {
     },
     {
       requestId: 'custom-004',
-      topic: 'PRISM Counsel — Q2 demand letter pipeline velocity',
+      topic: 'Counsel — Q2 demand letter pipeline velocity',
       entity: 'Counsel',
       scenario:
         'Is demand letter generation pace consistent with Q2 settlement targets? What are the bottlenecks?',

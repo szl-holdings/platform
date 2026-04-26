@@ -328,7 +328,7 @@ const DOMAIN_LABELS: Record<string, string> = {
   vessels: 'Vessels Maritime Intelligence',
   aegis: 'Aegis Security Operations',
   terra: 'Terra Real Estate Intelligence',
-  prism: 'PRISM Counsel Legal',
+  prism: 'Counsel Legal',
   lyte: 'Lyte Infrastructure & Ops',
   'szl-holdings': 'SZL Holdings Portfolio',
   carlota: 'Carlota Jo Consulting',
@@ -760,7 +760,7 @@ function buildAIPrompt(
 ): { system: string; user: string } {
   const system = [
     'You are the SZL Holdings cross-domain executive intelligence analyst.',
-    'You synthesize signals from cybersecurity (Aegis), maritime (Vessels), real estate (Terra), legal (PRISM Counsel), infrastructure (Lyte), portfolio (SZL Holdings), and advisory (Carlota Jo) into a single fused answer for an executive audience.',
+    'You synthesize signals from cybersecurity (Aegis), maritime (Vessels), real estate (Terra), legal (Counsel), infrastructure (Lyte), portfolio (SZL Holdings), and advisory (Carlota Jo) into a single fused answer for an executive audience.',
     'Tone: terse, board-room confident. Lead with the conclusion. Cite domain names inline.',
     'Format: 2 short paragraphs OR 3-5 dense bullet points. Maximum 180 words. Use **bold** sparingly for the most material numbers and entities only.',
     'Never invent figures. Use only the live signal counts and titles supplied in the user message. If a domain has zero live signals, treat it as nominal.',
@@ -902,16 +902,16 @@ The SZL ecosystem is facing a **convergent risk event** across three domains. ${
 
   if (q.includes('maritime') || q.includes('vessel') || q.includes('port')) {
     if (hasDelayEvents) {
-      return `Fleet is currently showing **${live.vessels.delayEvents} active delay event(s)** with ${live.vessels.activeAlerts} open alert(s) (${live.vessels.highAlerts} high/critical). Cross-domain correlation analysis shows these delays will impact Terra's construction portfolio within 48–72 hours. PRISM Counsel should be reviewing delivery milestone clauses for force-majeure provisions.`;
+      return `Fleet is currently showing **${live.vessels.delayEvents} active delay event(s)** with ${live.vessels.activeAlerts} open alert(s) (${live.vessels.highAlerts} high/critical). Cross-domain correlation analysis shows these delays will impact Terra's construction portfolio within 48–72 hours. Counsel should be reviewing delivery milestone clauses for force-majeure provisions.`;
     }
-    return `The **Shanghai port delay** affecting MV Pacific Star (32 hours, ongoing) is the primary maritime signal. Cross-domain correlation analysis shows this delay will impact **12 Terra properties** in the Pudong logistics corridor within 48–72 hours. PRISM Counsel has already flagged **8 contracts** with delivery milestone clauses that may trigger force-majeure provisions.`;
+    return `The **Shanghai port delay** affecting MV Pacific Star (32 hours, ongoing) is the primary maritime signal. Cross-domain correlation analysis shows this delay will impact **12 Terra properties** in the Pudong logistics corridor within 48–72 hours. Counsel has already flagged **8 contracts** with delivery milestone clauses that may trigger force-majeure provisions.`;
   }
 
   if (q.includes('security') || q.includes('cyber') || q.includes('threat')) {
     if (hasCriticalIncidents) {
-      return `**Aegis** has **${live.aegis.criticalIncidents} critical incident(s)** open with ${live.aegis.openIncidents} total under investigation. Cross-domain impact: (1) PRISM Counsel legal hold obligations are active; (2) SZL Holdings portfolio risk score is elevated; (3) Lyte is monitoring infrastructure with automated threat-response playbooks engaged. Total high/critical alert volume: ${live.aegis.criticalAlerts}.`;
+      return `**Aegis** has **${live.aegis.criticalIncidents} critical incident(s)** open with ${live.aegis.openIncidents} total under investigation. Cross-domain impact: (1) Counsel legal hold obligations are active; (2) SZL Holdings portfolio risk score is elevated; (3) Lyte is monitoring infrastructure with automated threat-response playbooks engaged. Total high/critical alert volume: ${live.aegis.criticalAlerts}.`;
     }
-    return `**Aegis** is managing elevated security alerts with ${live.aegis.openIncidents} open incident(s). Cross-domain impact: (1) PRISM Counsel is reviewing breach notification obligations; (2) SZL Holdings risk score is being monitored; (3) Lyte infrastructure anomaly detection is active.`;
+    return `**Aegis** is managing elevated security alerts with ${live.aegis.openIncidents} open incident(s). Cross-domain impact: (1) Counsel is reviewing breach notification obligations; (2) SZL Holdings risk score is being monitored; (3) Lyte infrastructure anomaly detection is active.`;
   }
 
   return `Query analysis across ${domains.length} domains returned ${results.length} domain results with ${critical.length} critical and ${high.length} high-severity signals. Key live signals: ${

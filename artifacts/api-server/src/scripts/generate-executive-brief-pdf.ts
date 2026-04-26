@@ -70,7 +70,7 @@ const MILESTONES: Array<{ phase: string; status: string; detail: string }> = [
     phase: "Phase 1 — Wedge verticals",
     status: "In market",
     detail:
-      "PRISM Counsel, Terra, Vessels live with design partners. Aegis and Carlota Jo in pilot.",
+      "Counsel, Terra, Vessels live with design partners. Aegis and Carlota Jo in pilot.",
   },
   {
     phase: "Phase 2 — Governance layer",

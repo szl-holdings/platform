@@ -544,7 +544,7 @@ export function globalAuthEnforcer(
     // /api/vessels/live/* which are gated by tenantScope at the group mount).
     req.user = {
       id: 0,
-      displayName: "Nexus Orchestrator (loopback)",
+      displayName: "PRAXIS Orchestrator (loopback)",
       email: null,
       roles: ["ops"],
       orgs: [],

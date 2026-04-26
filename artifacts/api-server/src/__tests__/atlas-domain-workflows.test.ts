@@ -806,7 +806,7 @@ describe("ATLAS evaluation hook store contract", () => {
     const hook = await registerEvaluationHook({
       domain,
       workflowId: fakeRun.runId,
-      workflowName: "PRISM Counsel Matter Execution",
+      workflowName: "Counsel Matter Execution",
       triggerSignalId: sig.id,
       replayable: true,
       signalSnapshot: [sig],

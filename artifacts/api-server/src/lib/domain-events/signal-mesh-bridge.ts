@@ -2,7 +2,7 @@
  * Domain Event → Signal Mesh Bridge
  *
  * Subscribes to all per-product `domainEventBus` events (Vessels, Terra,
- * Lyte, PRISM Counsel, Firestorm, Alloy, Carlota Jo) and republishes them
+ * Lyte, Counsel, Firestorm, Alloy, Carlota Jo) and republishes them
  * as `Signal` objects onto the global `defaultSignalBus`.
  *
  * This is the single piece of plumbing that makes the Global Operations
@@ -201,7 +201,7 @@ export function initSignalMeshBridge(): void {
     };
   });
 
-  // ───────── PRISM Counsel (legal) ─────────
+  // ───────── Counsel (legal) ─────────
   bridge('prism-counsel.approval-resolved', (p) => ({
     type: 'approval',
     domain: 'legal',

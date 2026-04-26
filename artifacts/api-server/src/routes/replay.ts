@@ -85,7 +85,7 @@ const SEED_SCENARIOS = [
   },
   {
     scenarioId: 'prism-compliance-breach-v1',
-    name: 'Prism Counsel — Compliance Breach Response',
+    name: 'Counsel — Compliance Breach Response',
     domain: 'prism',
     description:
       'A GDPR breach notification workflow test. Evaluates document generation, regulator routing, and remediation sequencing.',
@@ -127,7 +127,7 @@ const SEED_RUNS = [
   {
     runId: 'replay-1712649000-ff7a23',
     scenarioId: 'prism-compliance-breach-v1',
-    scenarioName: 'Prism Counsel — Compliance Breach Response',
+    scenarioName: 'Counsel — Compliance Breach Response',
     startedAt: '2025-04-10T11:30:00Z',
     completedAt: '2025-04-10T11:30:22Z',
     totalSnapshots: 5,

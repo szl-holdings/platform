@@ -47,7 +47,7 @@ const DOMAIN_CONTEXT: Record<string, string> = {
     'Vessels is a maritime intelligence platform providing fleet command capabilities including AIS vessel tracking, voyage economics, sanctions screening, route analysis, and operational command surfaces. Users are fleet operators and maritime executives.',
   lyte: 'Lyte is a business observability platform providing multi-model AI routing, cross-portfolio signal aggregation, infrastructure telemetry, and AIOps capabilities. The platform surfaces operational intelligence across the SZL Holdings ecosystem.',
   prism:
-    'PRISM Counsel is a legal matter command platform providing case management, compliance tracking, court date management, document handling, and legal intelligence capabilities for law firms and in-house legal teams.',
+    'Counsel is a legal matter command platform providing case management, compliance tracking, court date management, document handling, and legal intelligence capabilities for law firms and in-house legal teams.',
   general:
     'SZL Holdings enterprise platform providing intelligence and command capabilities across multiple business domains.',
 };

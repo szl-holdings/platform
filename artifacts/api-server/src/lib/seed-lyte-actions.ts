@@ -194,7 +194,7 @@ const LYTE_SEED_ACTIONS = [
         {
           id: 'e4a',
           label: 'Stalled Vendors',
-          value: 'Nexus Corp, Dataplex, Orion Supply',
+          value: 'Praxis Corp, Dataplex, Orion Supply',
           source: 'vendor-pipeline-tracker',
         },
         {

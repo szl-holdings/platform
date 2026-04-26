@@ -18,8 +18,8 @@ import {
 
 const router = Router();
 
-// ─── NEXUS privilege helpers ──────────────────────────────────────────────────
-// The NEXUS control plane (memory, skills, tools, ingest, customizations) is a
+// ─── PRAXIS privilege helpers ──────────────────────────────────────────────────
+// The PRAXIS control plane (memory, skills, tools, ingest, customizations) is a
 // shared, deployment-wide store. Only operators and administrators may mutate it.
 // Regular authenticated users retain read access to all GET endpoints.
 
@@ -31,7 +31,7 @@ function isNexusPrivileged(req: Request): boolean {
 }
 
 /**
- * Express middleware that gates any mutating NEXUS control-plane route.
+ * Express middleware that gates any mutating PRAXIS control-plane route.
  * Requires the caller to hold the `ops`, `admin`, or `super_admin` role.
  * Returns 403 for authenticated callers that lack the required role.
  */
@@ -43,7 +43,7 @@ function requireNexusOps(req: Request, res: Response, next: NextFunction): void 
   if (!isNexusPrivileged(req)) {
     sendError(
       res,
-      'Insufficient privileges — NEXUS control plane writes require ops or admin role',
+      'Insufficient privileges — PRAXIS control plane writes require ops or admin role',
       403,
     );
     return;
@@ -240,7 +240,7 @@ function seedData(persist = false) {
       enabled: true,
       usageCount: 47,
       nexusAdaptation:
-        'Integrated with NEXUS memory-fabric multi-tier store. Entities are classified by sensitivity level and expire according to retention policy. Automatically populated by Research Swarm Gatherer lane.',
+        'Integrated with PRAXIS memory-fabric multi-tier store. Entities are classified by sensitivity level and expire according to retention policy. Automatically populated by Research Swarm Gatherer lane.',
       originalSummary:
         'Simple JSON-based entity memory that stores structured facts about people, places, and organizations mentioned in conversations.',
       tags: ['memory', 'entity', 'graph', 'persistence'],
@@ -276,7 +276,7 @@ function seedData(persist = false) {
       enabled: true,
       usageCount: 23,
       nexusAdaptation:
-        'Backs the NEXUS skills search and memory search. Graph edges represent relationships between memory items and skills; vector similarity handles free-text recall. Falls back to lexical (pg_trgm) if pgvector unavailable.',
+        'Backs the PRAXIS skills search and memory search. Graph edges represent relationships between memory items and skills; vector similarity handles free-text recall. Falls back to lexical (pg_trgm) if pgvector unavailable.',
       originalSummary:
         'A RAG framework that builds a knowledge graph from ingested documents and uses both graph traversal and embedding similarity at query time.',
       tags: ['rag', 'vector', 'graph', 'retrieval'],
@@ -294,7 +294,7 @@ function seedData(persist = false) {
       enabled: true,
       usageCount: 89,
       nexusAdaptation:
-        'The entire NEXUS Research Swarm (Gatherer, Peer-Reviewer, Drafter, Verifier) is a NEXUS-native expression of this pattern. Added: Verifier lane with HEAD-check URL validation, SSE streaming per lane, and automatic memory write on completion.',
+        'The entire PRAXIS Research Swarm (Gatherer, Peer-Reviewer, Drafter, Verifier) is a PRAXIS-native expression of this pattern. Added: Verifier lane with HEAD-check URL validation, SSE streaming per lane, and automatic memory write on completion.',
       originalSummary:
         'A four-agent system where each agent has a distinct research role. Agents run in parallel and their outputs are merged by a synthesis agent.',
       tags: ['agents', 'parallel', 'research', 'synthesis'],
@@ -312,7 +312,7 @@ function seedData(persist = false) {
       enabled: true,
       usageCount: 12,
       nexusAdaptation:
-        'Pattern absorbed into the Protocol Bridge MCP adapter. Any workflow automation can now be registered as an MCP tool with a typed JSON schema. NEXUS adds policy tier enforcement so autonomous agents cannot invoke write-path workflows without human approval.',
+        'Pattern absorbed into the Protocol Bridge MCP adapter. Any workflow automation can now be registered as an MCP tool with a typed JSON schema. PRAXIS adds policy tier enforcement so autonomous agents cannot invoke write-path workflows without human approval.',
       originalSummary:
         'An MCP server that registers n8n webhook-triggered workflows as callable tools, enabling LLMs to trigger complex automation flows.',
       tags: ['mcp', 'workflow', 'automation', 'bridge'],
@@ -348,7 +348,7 @@ function seedData(persist = false) {
       enabled: false,
       usageCount: 3,
       nexusAdaptation:
-        'Mapped to the autonomous-reversible tool policy tier in NEXUS. Commands are sandboxed and every mutation is recorded in the audit trail before execution. Human approval required for irreversible operations.',
+        'Mapped to the autonomous-reversible tool policy tier in PRAXIS. Commands are sandboxed and every mutation is recorded in the audit trail before execution. Human approval required for irreversible operations.',
       originalSummary:
         'An agent pattern that gives Claude full shell access with a rollback mechanism based on git snapshots. Designed for autonomous code generation and refactoring tasks.',
       tags: ['autonomy', 'shell', 'local', 'code'],
@@ -366,7 +366,7 @@ function seedData(persist = false) {
       enabled: true,
       usageCount: 56,
       nexusAdaptation:
-        'Domain prompts are exposed as callable NEXUS Skills. The Cross-App Orchestrator selects the appropriate domain skill automatically based on which SZL artifact is targeted (Vessels→maritime, Terra→real-estate, Aegis→defense, Prism Counsel→legal).',
+        'Domain prompts are exposed as callable PRAXIS Skills. The Cross-App Orchestrator selects the appropriate domain skill automatically based on which SZL artifact is targeted (Vessels→maritime, Terra→real-estate, Aegis→defense, Counsel→legal).',
       originalSummary:
         'A curated collection of domain-specialized prompt templates covering finance, law, science, and engineering use cases.',
       tags: ['domain', 'prompts', 'templates', 'skills'],
@@ -384,7 +384,7 @@ function seedData(persist = false) {
       enabled: true,
       usageCount: 38,
       nexusAdaptation:
-        'Base architecture for all NEXUS swarm lanes. Retry logic, context truncation, and observability hooks from this blueprint are wired into every agent lane. Traces emit to cognitive-observability.',
+        'Base architecture for all PRAXIS swarm lanes. Retry logic, context truncation, and observability hooks from this blueprint are wired into every agent lane. Traces emit to cognitive-observability.',
       originalSummary:
         'A production-ready agent loop with tool calling, streaming output, max-retries, and token budget management.',
       tags: ['agents', 'architecture', 'blueprint', 'tool-use'],
@@ -402,7 +402,7 @@ function seedData(persist = false) {
       enabled: true,
       usageCount: 0,
       nexusAdaptation:
-        'The NEXUS visual identity (dark navy, cyan accent, monospace data, status strips, lane cards) is the native NEXUS expression of this pattern. Tokens are captured in index.css as CSS custom properties.',
+        'The PRAXIS visual identity (dark navy, cyan accent, monospace data, status strips, lane cards) is the native PRAXIS expression of this pattern. Tokens are captured in index.css as CSS custom properties.',
       originalSummary:
         'A Tailwind-based design system optimized for developer tools, monitoring dashboards, and AI copilots. Includes dark-mode-first tokens, scan-line animations, and data-dense layouts.',
       tags: ['design', 'ui', 'tokens', 'dark-mode'],
@@ -420,7 +420,7 @@ function seedData(persist = false) {
       enabled: true,
       usageCount: 29,
       nexusAdaptation:
-        'Slash commands are registered in the NEXUS skill store as Command primitives. The Research Swarm Drafter can invoke them during synthesis. Commands are also exposed through the Protocol Bridge as MCP tools.',
+        'Slash commands are registered in the PRAXIS skill store as Command primitives. The Research Swarm Drafter can invoke them during synthesis. Commands are also exposed through the Protocol Bridge as MCP tools.',
       originalSummary:
         'A curated list of useful Claude slash commands with examples and chaining patterns for common developer workflows.',
       tags: ['commands', 'slash', 'registry', 'developer'],
@@ -438,7 +438,7 @@ function seedData(persist = false) {
       enabled: true,
       usageCount: 72,
       nexusAdaptation:
-        'Runs as a pre-call Hook before each Research Swarm agent invocation. Reads from the NEXUS memory fabric to inject relevant context. Manages token budgets across all four swarm lanes to prevent context overflow.',
+        'Runs as a pre-call Hook before each Research Swarm agent invocation. Reads from the PRAXIS memory fabric to inject relevant context. Manages token budgets across all four swarm lanes to prevent context overflow.',
       originalSummary:
         'A collection of prompt engineering techniques covering system prompt optimization, context injection, tool selection hints, and few-shot example selection.',
       tags: ['prompts', 'optimization', 'context', 'hooks'],
@@ -464,7 +464,7 @@ function seedData(persist = false) {
       icon: '🧠',
       repos: ['claude-mem', 'MemGPT'],
       nexusCapability:
-        'NEXUS memory-fabric provides working, session, episodic, and semantic tiers. All Research Swarm outputs automatically write entities and claims. Memory powers context injection for every subsequent run.',
+        'PRAXIS memory-fabric provides working, session, episodic, and semantic tiers. All Research Swarm outputs automatically write entities and claims. Memory powers context injection for every subsequent run.',
       skills: 3,
     },
     {
@@ -475,7 +475,7 @@ function seedData(persist = false) {
       icon: '🔬',
       repos: ['claude-superpowers', 'Awesome Claude Code'],
       nexusCapability:
-        'NEXUS Peer-Reviewer lane uses structured decomposition to challenge Gatherer output. Every research run gets automatic chain-of-thought scaffolding before synthesis.',
+        'PRAXIS Peer-Reviewer lane uses structured decomposition to challenge Gatherer output. Every research run gets automatic chain-of-thought scaffolding before synthesis.',
       skills: 4,
     },
     {
@@ -486,7 +486,7 @@ function seedData(persist = false) {
       icon: '🕸️',
       repos: ['LightRAG', 'GraphRAG'],
       nexusCapability:
-        'NEXUS search (skills, memory, pattern atlas) uses pg_trgm for lexical fallback and pgvector for semantic similarity. Graph edges connect related memory items and skills for relationship-aware retrieval.',
+        'PRAXIS search (skills, memory, pattern atlas) uses pg_trgm for lexical fallback and pgvector for semantic similarity. Graph edges connect related memory items and skills for relationship-aware retrieval.',
       skills: 2,
     },
     {
@@ -497,7 +497,7 @@ function seedData(persist = false) {
       icon: '📦',
       repos: ['Awesome Claude Code', 'Antigravity Skills', 'Everything Claude Code'],
       nexusCapability:
-        'NEXUS Skills Library holds 50+ adapted skills as first-class typed primitives (Skill, Command, Hook). Enabled skills are callable by Research Swarm agents and the Cross-App Orchestrator.',
+        'PRAXIS Skills Library holds 50+ adapted skills as first-class typed primitives (Skill, Command, Hook). Enabled skills are callable by Research Swarm agents and the Cross-App Orchestrator.',
       skills: 12,
     },
     {
@@ -508,7 +508,7 @@ function seedData(persist = false) {
       icon: '🤖',
       repos: ['Claude Agent Blueprints', 'OpenClaw'],
       nexusCapability:
-        'Every NEXUS swarm lane is built on the blueprint pattern: retry backoff, context window management, SSE streaming, and cognitive-observability trace emission. Agents are parameterized by tier (advisory → autonomous).',
+        'Every PRAXIS swarm lane is built on the blueprint pattern: retry backoff, context window management, SSE streaming, and cognitive-observability trace emission. Agents are parameterized by tier (advisory → autonomous).',
       skills: 4,
     },
     {
@@ -519,7 +519,7 @@ function seedData(persist = false) {
       icon: '🔌',
       repos: ['n8n-MCP', 'VoiceMode MCP', 'Awesome Claude Plugins'],
       nexusCapability:
-        'NEXUS Protocol Bridge normalizes MCP tool definitions into the internal ToolDefinition shape. Any MCP server can be registered and called through the unified invokeTool() facade. Policy tier governs approval requirements.',
+        'PRAXIS Protocol Bridge normalizes MCP tool definitions into the internal ToolDefinition shape. Any MCP server can be registered and called through the unified invokeTool() facade. Policy tier governs approval requirements.',
       skills: 8,
     },
     {
@@ -530,7 +530,7 @@ function seedData(persist = false) {
       icon: '⚡',
       repos: ['Feynman', 'AdalFlow'],
       nexusCapability:
-        'The NEXUS Research Swarm IS this pattern, natively. Additions: URL HEAD-check verification by the Verifier lane, SSE real-time streaming per lane, automatic memory write on completion, and citation status table (verified/killed).',
+        'The PRAXIS Research Swarm IS this pattern, natively. Additions: URL HEAD-check verification by the Verifier lane, SSE real-time streaming per lane, automatic memory write on completion, and citation status table (verified/killed).',
       skills: 3,
     },
     {
@@ -541,7 +541,7 @@ function seedData(persist = false) {
       icon: '🖥️',
       repos: ['OpenClaw'],
       nexusCapability:
-        'Mapped to the autonomous-reversible policy tier in the AI Control Plane. NEXUS adds: full audit trail, human-approval-mandatory gate for irreversible ops, and Guardian policy enforcement before any system call.',
+        'Mapped to the autonomous-reversible policy tier in the AI Control Plane. PRAXIS adds: full audit trail, human-approval-mandatory gate for irreversible ops, and Guardian policy enforcement before any system call.',
       skills: 2,
     },
     {
@@ -552,7 +552,7 @@ function seedData(persist = false) {
       icon: '🎨',
       repos: ['UI UX Pro Max'],
       nexusCapability:
-        'The NEXUS command-deck aesthetic (dark navy, cyan accent, lane cards, scan animations, status strip, monospace data) is a native NEXUS design system. Tokens live in index.css as CSS custom properties for reuse across the SZL portfolio.',
+        'The PRAXIS command-deck aesthetic (dark navy, cyan accent, lane cards, scan animations, status strip, monospace data) is a native PRAXIS design system. Tokens live in index.css as CSS custom properties for reuse across the SZL portfolio.',
       skills: 1,
     },
     {
@@ -600,7 +600,7 @@ function seedData(persist = false) {
     {
       id: 'mcp_memory_read',
       name: 'memory_read',
-      description: 'Read items from the NEXUS memory fabric by key or semantic search.',
+      description: 'Read items from the PRAXIS memory fabric by key or semantic search.',
       protocol: 'MCP',
       domain: 'memory',
       inputSchema: {
@@ -800,13 +800,13 @@ function seedData(persist = false) {
     {
       id: 'anp_publish_capability',
       name: 'publish_capability',
-      description: 'Publish a NEXUS tool or skill as a discoverable ANP capability on the network.',
+      description: 'Publish a PRAXIS tool or skill as a discoverable ANP capability on the network.',
       protocol: 'ANP',
       domain: 'registry',
       inputSchema: {
         type: 'object',
         properties: {
-          skillId: { type: 'string', description: 'NEXUS skill ID to publish' },
+          skillId: { type: 'string', description: 'PRAXIS skill ID to publish' },
           endpoint: { type: 'string', description: 'Publicly reachable endpoint URL' },
           pricingModel: {
             type: 'string',
@@ -834,7 +834,7 @@ function seedData(persist = false) {
       id: 'mem_001',
       key: 'nexus.version',
       value:
-        'NEXUS v1.0 — Four pillars: Research Swarm, Memory Fabric, Protocol Bridge, Cross-App Orchestrator.',
+        'PRAXIS v1.0 — Four pillars: Research Swarm, Memory Fabric, Protocol Bridge, Cross-App Orchestrator.',
       type: 'fact',
       tier: 'semantic',
       pinned: true,
@@ -862,7 +862,7 @@ function seedData(persist = false) {
       id: 'mem_003',
       key: 'entity.szl_portfolio',
       value:
-        'SZL Holdings portfolio includes: Aegis (defense/intel), Vessels (maritime), Terra (real estate), Pulse (executive briefing), Command (unified HQ), Prism Counsel (legal), Lyte (platform), Imperium (enterprise), Carlota Jo (consulting).',
+        'SZL Holdings portfolio includes: Aegis (defense/intel), Vessels (maritime), Terra (real estate), Pulse (executive briefing), Command (unified HQ), Counsel (legal), Lyte (platform), Imperium (enterprise), Carlota Jo (consulting).',
       type: 'entity',
       tier: 'semantic',
       pinned: false,
@@ -997,7 +997,7 @@ async function extractSemanticKeywords(item: MemoryItem): Promise<string[]> {
   try {
     const raw = await callLLM(
       `Extract 3-7 short, lowercase, hyphen-separated semantic keywords (1-3 words each) capturing the topic of this memory item. Return ONLY a JSON array of strings, no prose.\n\nKey: ${item.key}\nType: ${item.type}\nValue:\n${item.value.slice(0, 2000)}`,
-      'You are the NEXUS Memory Fabric semantic indexer. Output a strict JSON array of keyword strings. No commentary, no markdown.',
+      'You are the PRAXIS Memory Fabric semantic indexer. Output a strict JSON array of keyword strings. No commentary, no markdown.',
       { agentId: 'nexus-memory', domain: 'memory' },
     );
     const trimmed = raw.trim().replace(/^```json\s*|\s*```$/g, '');
@@ -1099,7 +1099,7 @@ async function summarizeMemoryItem(item: MemoryItem): Promise<void> {
   try {
     const summary = await callLLM(
       `Produce a single-sentence summary (≤220 chars) of this memory item so future agents can quickly recall it.\n\nKey: ${item.key}\nType: ${item.type}\nValue:\n${item.value.slice(0, 4000)}`,
-      'You are the NEXUS Memory Fabric summarizer. Produce one tight sentence capturing the essential fact. No preamble.',
+      'You are the PRAXIS Memory Fabric summarizer. Produce one tight sentence capturing the essential fact. No preamble.',
       { agentId: 'nexus-memory', domain: 'memory' },
     );
     const trimmed = summary.trim().replace(/^"|"$/g, '').slice(0, 240);
@@ -1125,7 +1125,7 @@ async function summarizeMemoryItem(item: MemoryItem): Promise<void> {
 
 // ─── Memory DB persistence ────────────────────────────────────────────────────
 //
-// NEXUS Memory items live in the dedicated `nexus_memory` table. The
+// PRAXIS Memory items live in the dedicated `nexus_memory` table. The
 // in-memory `memoryStore` is a hot read cache hydrated from the DB on
 // startup; every write/update/delete is mirrored to Postgres.
 
@@ -1202,9 +1202,9 @@ async function loadMemoryFromDB(): Promise<void> {
       const item = rowToMemoryItem(row);
       memoryStore.set(item.id, item);
     }
-    logger.info({ count: rows.length }, 'NEXUS memory hydrated from nexus_memory');
+    logger.info({ count: rows.length }, 'PRAXIS memory hydrated from nexus_memory');
   } catch (dbErr) {
-    logger.warn({ dbErr }, 'Failed to hydrate NEXUS memory from DB (non-fatal)');
+    logger.warn({ dbErr }, 'Failed to hydrate PRAXIS memory from DB (non-fatal)');
   }
 }
 
@@ -1289,9 +1289,9 @@ async function loadSkillsFromDB(): Promise<void> {
     for (const row of rows) {
       skillStore.set(row.id, rowToSkill(row));
     }
-    logger.info({ count: rows.length }, 'NEXUS skills hydrated from nexus_skills');
+    logger.info({ count: rows.length }, 'PRAXIS skills hydrated from nexus_skills');
   } catch (dbErr) {
-    logger.warn({ dbErr }, 'Failed to hydrate NEXUS skills from DB (non-fatal)');
+    logger.warn({ dbErr }, 'Failed to hydrate PRAXIS skills from DB (non-fatal)');
   }
 }
 
@@ -1367,9 +1367,9 @@ async function loadToolsFromDB(): Promise<void> {
     for (const row of rows) {
       toolStore.set(row.id, rowToTool(row));
     }
-    logger.info({ count: rows.length }, 'NEXUS protocol tools hydrated from nexus_protocol_tools');
+    logger.info({ count: rows.length }, 'PRAXIS protocol tools hydrated from nexus_protocol_tools');
   } catch (dbErr) {
-    logger.warn({ dbErr }, 'Failed to hydrate NEXUS tools from DB (non-fatal)');
+    logger.warn({ dbErr }, 'Failed to hydrate PRAXIS tools from DB (non-fatal)');
   }
 }
 
@@ -1440,9 +1440,9 @@ async function loadOrchestrationsFromDB(): Promise<void> {
         void runOrchestration(plan.id, plan.intent);
       }
     }
-    logger.info({ count: rows.length, resumed }, 'NEXUS orchestration plans hydrated');
+    logger.info({ count: rows.length, resumed }, 'PRAXIS orchestration plans hydrated');
   } catch (dbErr) {
-    logger.warn({ dbErr }, 'Failed to hydrate NEXUS orchestrations from DB (non-fatal)');
+    logger.warn({ dbErr }, 'Failed to hydrate PRAXIS orchestrations from DB (non-fatal)');
   }
 }
 
@@ -1534,9 +1534,9 @@ async function loadIngestJobsFromDB(): Promise<void> {
         void runIngest(job.id, job.repoUrl);
       }
     }
-    logger.info({ count: rows.length, resumed }, 'NEXUS ingest jobs hydrated');
+    logger.info({ count: rows.length, resumed }, 'PRAXIS ingest jobs hydrated');
   } catch (dbErr) {
-    logger.warn({ dbErr }, 'Failed to hydrate NEXUS ingest jobs from DB (non-fatal)');
+    logger.warn({ dbErr }, 'Failed to hydrate PRAXIS ingest jobs from DB (non-fatal)');
   }
 }
 
@@ -2603,7 +2603,7 @@ const APP_CAPABILITIES: Record<string, { name: string; endpoints: string[] }> = 
     endpoints: ['/api/core/health', '/api/booking/services'],
   },
   'prism-counsel': {
-    name: 'Prism Counsel Legal',
+    name: 'Counsel Legal',
     endpoints: ['/api/narratives/counsel-deadline', '/api/core/health'],
   },
   counsel: {
@@ -2800,7 +2800,7 @@ async function runOrchestration(planId: string, intent: string) {
         try {
           summary = await callLLM(
             `Summarize this ${step.app} API response into a 2-3 sentence executive insight that addresses the intent: "${intent}".\n\nEndpoint: ${step.endpoint}\nResponse:\n${truncateForPrompt(fetchResult.body)}`,
-            `You are the NEXUS orchestration analyst for ${step.app}. Produce a concise, factual summary of the API response. Cite specific numbers when present. Do not invent data not in the response.`,
+            `You are the PRAXIS orchestration analyst for ${step.app}. Produce a concise, factual summary of the API response. Cite specific numbers when present. Do not invent data not in the response.`,
             { agentId: 'nexus-orchestrator', domain: step.appSlug },
           );
         } catch (llmErr) {
@@ -2834,7 +2834,7 @@ async function runOrchestration(planId: string, intent: string) {
     if (!plan.stitchedOutput) {
       plan.stitchedOutput = await callLLM(
         `Stitch these per-app results into a single coherent executive output for the intent: "${intent}"\n\n${outputs.join('\n\n')}`,
-        'You are the NEXUS Cross-App Orchestrator stitcher. Produce a clear, executive-grade synthesis of multi-app data. Structure: Intent → Per-App Findings → Cross-Domain Insights → Recommended Actions.',
+        'You are the PRAXIS Cross-App Orchestrator stitcher. Produce a clear, executive-grade synthesis of multi-app data. Structure: Intent → Per-App Findings → Cross-Domain Insights → Recommended Actions.',
       );
     }
     plan.status = 'completed';
@@ -2998,7 +2998,7 @@ async function runIngest(jobId: string, repoUrl: string) {
     job.patternsFound = selected;
     job.log.push(`Patterns identified: ${selected.join(', ')}`);
     await sleep(600);
-    job.log.push('Generating NEXUS-native skill definitions…');
+    job.log.push('Generating PRAXIS-native skill definitions…');
     await sleep(800);
 
     const skillCount = 2 + Math.floor(Math.random() * 5);
@@ -3029,7 +3029,7 @@ async function runIngest(jobId: string, repoUrl: string) {
         primitiveType: 'Skill',
         enabled: false,
         usageCount: 0,
-        nexusAdaptation: `Adapted from ${repoName} into NEXUS native Skill primitive. Wired into memory fabric and Protocol Bridge.`,
+        nexusAdaptation: `Adapted from ${repoName} into PRAXIS native Skill primitive. Wired into memory fabric and Protocol Bridge.`,
         originalSummary: `Source skill from ${repoUrl} — see original README for full context.`,
         tags: [repoName, 'ingested', ...selected.map((p) => p.toLowerCase().replace(/ /g, '-'))],
       };
@@ -3162,13 +3162,13 @@ router.post(
 
 // ─── Cross-Domain Entity Resolution ──────────────────────────────────────────
 //
-// Uses NEXUS memory entries of type 'entity' to resolve and deduplicate
+// Uses PRAXIS memory entries of type 'entity' to resolve and deduplicate
 // real-world entities across domains.
 //
 // GET  /nexus/entity-resolve?q=...         — match entities by name / identifier
 // GET  /nexus/entity-duplicates?minConf=70 — find cross-domain duplicate clusters
 
-/** Extract normalised searchable tokens from a NEXUS memory item's key/value/tags */
+/** Extract normalised searchable tokens from a PRAXIS memory item's key/value/tags */
 function nexusEntitySearchable(row: NexusMemoryRow): string[] {
   const tokens: string[] = [row.key ?? '', row.value ?? ''];
   if (Array.isArray(row.tags)) tokens.push(...(row.tags as string[]));
@@ -3469,7 +3469,7 @@ router.get('/status', async (_req: Request, res: Response) => {
   }
 });
 
-// ─── Bootstrap: register FORGE code handler + NEXUS tool handlers ─────────────
+// ─── Bootstrap: register FORGE code handler + PRAXIS tool handlers ─────────────
 // Idempotent — safe to call at module-load time.
 
 registerNexusHandlers();
@@ -3478,7 +3478,7 @@ registerNexusHandlers();
 // execute TypeScript in a governed V8 sandbox with the Tool Mesh callTool bridge.
 forgeRuntime.registerHandler('code', runCodeHandler);
 
-// Seed the catalog search index with NEXUS skills from the in-memory store so
+// Seed the catalog search index with PRAXIS skills from the in-memory store so
 // POST /api/nexus/catalog/search returns results immediately after seeding.
 function syncCatalogIndex() {
   defaultCatalogSearch.indexTools(defaultToolRegistry.list());

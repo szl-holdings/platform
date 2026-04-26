@@ -281,7 +281,7 @@ export async function seedForge() {
       {
         slug: 'matter-twin-analyst',
         name: 'Matter Twin — Analyst',
-        purpose: 'PRISM Counsel analysis',
+        purpose: 'Counsel analysis',
         tags: ['legal', 'regulated'],
       },
       {

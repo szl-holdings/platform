@@ -57,7 +57,7 @@ Each artifact has a dedicated Replit workflow. Workflows are managed through the
 | `artifacts/terra: web` | Terra Real Estate | `/terra/` | Shared gateway on port 9090 |
 | `artifacts/carlota-jo: web` | Carlota Jo Advisory | `/carlota-jo/` | Shared gateway on port 9090 |
 | `artifacts/command: web` | Command Portal | `/command/` | Shared gateway on port 9090 |
-| `artifacts/szl-holdings-mobile: expo` | CORTEX mobile | Expo tunnel | |
+| `artifacts/szl-holdings-mobile: expo` | APEX mobile | Expo tunnel | |
 | `artifacts/mockup-sandbox: Component Preview Server` | Design sandbox | `/__mockup` | Internal only |
 
 The `artifacts/api-server: api` workflow is registered but the API server runs as a subprocess of the Command Vite process. The standalone workflow will fail with port conflict — this is expected.

@@ -45,7 +45,7 @@ SZL Holdings (corporate surface)
 │   └── Command Portal (/command/)
 │
 ├── Mobile Application (Expo / React Native)
-│   └── CORTEX — Mobile Command (iOS + Android)
+│   └── APEX — Mobile Command (iOS + Android)
 │
 └── Shared Libraries
     ├── @workspace/shared-ui (design system)
@@ -265,7 +265,7 @@ SZL Holdings (corporate surface)
 - SCIM provisioning at scale
 - SOC 2 Type II readiness track
 - Cross-domain intelligence (signal correlation across domain packs)
-- CORTEX mobile feature parity with web
+- APEX mobile feature parity with web
 
 **Months 7–12:**
 - Terra national coverage expansion

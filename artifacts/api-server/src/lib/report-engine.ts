@@ -1666,7 +1666,7 @@ export const DOMAIN_TEMPLATES: Record<string, ReportTemplate> = {
         type: 'cover',
         data: {
           title: 'Legal Memorandum — {{matterNumber}}',
-          subtitle: 'PRISM Counsel  |  {{matterTitle}}',
+          subtitle: 'Counsel  |  {{matterTitle}}',
           classification: 'ATTORNEY-CLIENT PRIVILEGED',
         },
       },
@@ -1701,7 +1701,7 @@ export const DOMAIN_TEMPLATES: Record<string, ReportTemplate> = {
         id: 'privilege',
         type: 'body_text',
         data: {
-          text: 'This memorandum is protected by attorney-client privilege and work product doctrine. It is intended solely for the named client and authorized legal personnel. Disclosure to any third party without explicit written consent of PRISM Counsel may constitute a waiver of privilege.',
+          text: 'This memorandum is protected by attorney-client privilege and work product doctrine. It is intended solely for the named client and authorized legal personnel. Disclosure to any third party without explicit written consent of Counsel may constitute a waiver of privilege.',
         },
       },
       {

@@ -6,7 +6,7 @@
  *   1. `sendPushToOrgApprovers` fans out one push per resolved approver
  *      user (every user surfaced by the orgMembers ⨝ userRoles ⨝ roles
  *      ⨝ pushTokens query).
- *   2. The full CORTEX mobile app-id family is targeted by default
+ *   2. The full APEX mobile app-id family is targeted by default
  *      (cortex-mobile, cortex-advisory, aegis-mobile, lyte-mobile,
  *      terra-mobile, stephen-mobile) and is forwarded to the role-resolver.
  *   3. Users gated out by `isAlertCategoryAllowedForUser` (e.g. quiet
@@ -89,7 +89,7 @@ async function loadHelperWith(overrides: Partial<OrgApproverInternals>) {
 }
 
 describe('sendPushToOrgApprovers', () => {
-  it('targets the full CORTEX mobile app-id family by default', async () => {
+  it('targets the full APEX mobile app-id family by default', async () => {
     const resolveUserIds = vi
       .fn<OrgApproverInternals['resolveUserIds']>()
       .mockResolvedValue([]);

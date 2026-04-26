@@ -32,7 +32,7 @@
 | Multiple route conflicts; mock data in production paths; inconsistent nav hierarchy | 2 | All audits passing (routes, mocks, copy, design system); quality scripts in CI-ready state; navigation hierarchy documented and aligned | 4 |
 
 **Remaining gaps:**
-- Some CORTEX mobile screens not yet wired to live data (Beta-appropriate; labeled)
+- Some APEX mobile screens not yet wired to live data (Beta-appropriate; labeled)
 - Vessels commercial modules pending live DB connection
 - Prism Counsel recovery table seed broken
 
@@ -81,11 +81,11 @@
 
 | Before | Score | After | Score |
 |---|---|---|---|
-| Overlapping claims; inconsistent naming; no explicit status labels; CORTEX treated as parallel brand | 2 | Platform message architecture documented; GA/Beta/Internal/Archived register complete; navigation hierarchy standardized; CORTEX narrative aligned with platform thesis; product mode positioning docs complete | 4.5 |
+| Overlapping claims; inconsistent naming; no explicit status labels; APEX treated as parallel brand | 2 | Platform message architecture documented; GA/Beta/Internal/Archived register complete; navigation hierarchy standardized; APEX narrative aligned with platform thesis; product mode positioning docs complete | 4.5 |
 
 **Remaining gaps:**
 - Some UI surfaces still show generic placeholder copy (Beta-appropriate)
-- CORTEX splash screen and icon not finalized
+- APEX splash screen and icon not finalized
 
 **Target for GA:** 5
 
@@ -173,7 +173,7 @@ To achieve overall GA readiness (score ≥ 4.5):
 | P1 | Configure Sentry error monitoring | Security, Release | Hours |
 | P2 | Fix Prism Counsel seed script | Runtime Coherence | Hours |
 | P2 | Wire Vessels commercial modules to live DB | Runtime Coherence | Days |
-| P2 | Finalize CORTEX splash screen and icon | Product Clarity | Days |
+| P2 | Finalize APEX splash screen and icon | Product Clarity | Days |
 | P3 | SOC 2 Type II readiness track | Security | Months |
 
 ---

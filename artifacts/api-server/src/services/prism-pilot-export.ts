@@ -194,7 +194,7 @@ export class PilotExportService {
     let content = '';
     switch (exp.exportType) {
       case 'chronology':
-        content = `REVIEWED CHRONOLOGY\n\n${matterTitle}\nGenerated: ${now}\nProof Chain: ${exp.proofChainRef}\n\nThis chronology has been reviewed and approved through PRISM Counsel's governed review process. All source materials are traceable through the proof chain reference above.\n\n[Chronology entries would be populated from matter data]`;
+        content = `REVIEWED CHRONOLOGY\n\n${matterTitle}\nGenerated: ${now}\nProof Chain: ${exp.proofChainRef}\n\nThis chronology has been reviewed and approved through Counsel's governed review process. All source materials are traceable through the proof chain reference above.\n\n[Chronology entries would be populated from matter data]`;
         break;
       case 'partner_update':
         content = `PARTNER UPDATE MEMO\n\n${matterTitle}\nGenerated: ${now}\nProof Chain: ${exp.proofChainRef}\n\nThis update memo has been reviewed and approved. All statements are source-grounded.\n\n[Partner update content would be populated from matter data and review items]`;

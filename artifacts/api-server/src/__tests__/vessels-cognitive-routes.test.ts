@@ -12,7 +12,7 @@
  *   - HTTP 200 with the expected top-level response shape
  *   - `provenance.verifierApproved === true`
  *   - `provenance.freshness.fetchedAt` is a valid ISO timestamp
- *   - `provenance.attestation` contains "NEXUS-VERIFIER"
+ *   - `provenance.attestation` contains "PRAXIS-VERIFIER"
  *   - Unauthenticated requests are rejected with HTTP 401
  *
  * The 401 contract is enforced upstream by `tenantScope({ required: true })`
@@ -127,7 +127,7 @@ function expectProvenance(prov: unknown): void {
   const p = prov as ProvenanceShape;
   expect(p.verifierApproved).toBe(true);
   expect(typeof p.attestation).toBe('string');
-  expect(p.attestation).toContain('NEXUS-VERIFIER');
+  expect(p.attestation).toContain('PRAXIS-VERIFIER');
   expect(p.freshness).toBeDefined();
   expect(typeof p.freshness.fetchedAt).toBe('string');
   const t = Date.parse(p.freshness.fetchedAt);
