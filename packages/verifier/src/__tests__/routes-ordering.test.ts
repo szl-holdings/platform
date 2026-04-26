@@ -17,8 +17,8 @@ describe('verifier route ordering', () => {
   const src = readFileSync(ROUTES_PATH, 'utf8');
 
   it('registers /verifier/target/... before /verifier/:id', () => {
-    const targetIdx = src.indexOf('router.get("/verifier/target/');
-    const paramIdx = src.indexOf('router.get("/verifier/:id"');
+    const targetIdx = src.search(/router\.get\(["'"]\/verifier\/target\//);
+    const paramIdx = src.search(/router\.get\(["'"]\/verifier\/:id["'"]/);
     expect(targetIdx).toBeGreaterThan(-1);
     expect(paramIdx).toBeGreaterThan(-1);
     expect(targetIdx).toBeLessThan(paramIdx);
@@ -26,7 +26,7 @@ describe('verifier route ordering', () => {
 
   it('requires admin/super_admin for DELETE /verifier/:id', () => {
     expect(src).toMatch(
-      /router\.delete\([\s\S]*"\/verifier\/:id"[\s\S]*requireRole\("admin",\s*"super_admin"\)/,
+      /router\.delete\([\s\S]*["']\/verifier\/:id["'][\s\S]*requireRole\(["']admin["'],\s*["']super_admin["']\)/,
     );
   });
 

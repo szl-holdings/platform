@@ -27,11 +27,14 @@ export interface ClaimValue {
  *   const resolveClaim = makeClaimResolver("aegis/claims");
  */
 export function makeClaimResolver(
-  _modulePrefix: string,
+  modulePrefix: string,
 ): (claimId: string, fallback: string) => ClaimValue {
   return function resolveClaim(claimId: string, fallback: string): ClaimValue {
     const claim = getClaim(claimId);
     if (!claim) {
+      console.warn(
+        `[${modulePrefix}] Unknown claim id "${claimId}" — falling back to "${fallback}". Register this id in packages/config/src/public-claims.ts.`,
+      );
       return {
         value: fallback,
         label: '[Demo]',

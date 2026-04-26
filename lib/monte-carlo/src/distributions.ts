@@ -255,7 +255,8 @@ export function buildHistogram(values: number[], buckets = 50): HistogramBucket[
 
   for (let i = 0; i < buckets; i++) {
     const lo = min + i * width;
-    const hi = lo + width;
+    const hiRaw = lo + width;
+    const hi = i === buckets - 1 ? Math.max(hiRaw, max) : hiRaw;
     const count = values.filter((v) => v >= lo && (i === buckets - 1 ? v <= hi : v < hi)).length;
     histogram.push({ lo, hi, mid: (lo + hi) / 2, count, frequency: count / values.length });
   }

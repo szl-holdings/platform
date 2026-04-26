@@ -26,6 +26,7 @@ export const RUNTIME_MODES = [
   'internal-preview',
   'sandbox',
   'demo',
+  'pilot',
   'production',
 ] as const;
 export type RuntimeMode = (typeof RUNTIME_MODES)[number];
@@ -106,6 +107,20 @@ export const RUNTIME_MODE_PROFILES: Record<RuntimeMode, RuntimeModeProfile> = {
     verboseErrors: false,
     destructiveOpsAllowed: false,
     requireDemoLabels: true,
+  },
+  pilot: {
+    mode: 'pilot',
+    label: 'Pilot',
+    auth: 'full',
+    allowSeedData: false,
+    allowConnectorFallback: false,
+    allowAiFallback: false,
+    billingActive: true,
+    notificationsActive: true,
+    analyticsActive: true,
+    verboseErrors: false,
+    destructiveOpsAllowed: false,
+    requireDemoLabels: false,
   },
   production: {
     mode: 'production',

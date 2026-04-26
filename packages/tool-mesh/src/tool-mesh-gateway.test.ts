@@ -522,10 +522,11 @@ describe('ToolMeshMcpBridge', () => {
 
     const bridge = new ToolMeshMcpBridge(registry, gateway);
     const tools = bridge.listTools();
-    expect(tools).toHaveLength(2);
+    expect(tools).toHaveLength(3);
     const names = tools.map((t) => t.name);
     expect(names).toContain('graph-query');
     expect(names).toContain('document-retrieval');
+    expect(names).toContain('call_tool');
   });
 
   it('getServerInfo returns valid MCP server info', () => {
@@ -541,8 +542,8 @@ describe('ToolMeshMcpBridge', () => {
     const info = bridge.getServerInfo();
     expect(info.name).toBe('test-server');
     expect(info.version).toBe('1.0.0');
-    expect(info.protocolVersion).toBe('2024-11-05');
-    expect(info.tools).toHaveLength(1);
+    expect(info.protocolVersion).toBe('2025-11-25');
+    expect(info.tools).toHaveLength(2);
   });
 
   it('call returns success result for valid tool', async () => {

@@ -78,7 +78,7 @@ describe('DefaultModelRouter', () => {
 
   it('selects a model within latency budget', () => {
     const model = router.selectModel({ latencyBudgetMs: 400 });
-    expect(['gpt-4o-mini', 'claude-3-haiku']).toContain(model);
+    expect(['gpt-4o-mini', 'claude-3-haiku', 'gemini-3-flash-preview']).toContain(model);
   });
 
   it('always returns a model even with impossible constraints', () => {

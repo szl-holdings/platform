@@ -120,10 +120,10 @@ router.post('/hybrid', (req: Request, res: Response): void => {
   const docs: BM25Doc[] = runs.map((run) => {
     const parts: string[] = [
       run.runId,
-      run.status ?? '',
+      run.state ?? '',
       ...(Array.isArray(run.steps)
         ? run.steps
-            .map((s: Record<string, unknown>) => [String(s.name ?? ''), String(s.status ?? '')])
+            .map((s) => [String(s.name ?? ''), String(s.state ?? '')])
             .flat()
         : []),
     ];
@@ -134,7 +134,7 @@ router.post('/hybrid', (req: Request, res: Response): void => {
     }
     return buildDoc(run.runId, parts.filter(Boolean), {
       runId: run.runId,
-      status: run.status,
+      status: run.state,
       tenantId,
     });
   });

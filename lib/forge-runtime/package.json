@@ -25,7 +25,6 @@
     "@szl-holdings/observability": "workspace:*",
     "@szl-holdings/prism-bus": "workspace:*",
     "@szl-holdings/services": "workspace:*",
-    "@workspace/tool-mesh": "workspace:*",
     "drizzle-orm": "catalog:",
     "esbuild": "^0.25",
     "pino": "^9",
