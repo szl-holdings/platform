@@ -1615,6 +1615,7 @@ function SupportPanel() {
   const [replyResult, setReplyResult] = useState<{ success: boolean; message: string } | null>(
     null,
   );
+  const [recentlyNotified, setRecentlyNotified] = useState<Set<number>>(new Set());
 
   const [notifEmail, setNotifEmail] = useState('');
   const [notifSaving, setNotifSaving] = useState(false);
@@ -1651,42 +1652,74 @@ function SupportPanel() {
       status: string;
       ownerUserId?: number;
     }) =>
-      adminFetch(`/admin/support-queue/${id}/status`, {
+      adminFetch<{ notificationQueued?: boolean }>(`/admin/support-queue/${id}/status`, {
         method: 'POST',
         body: JSON.stringify({ status, ownerUserId }),
       }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-support'] }),
+    onSuccess: (data: { notificationQueued?: boolean } | undefined, { id }: { id: number }) => {
+      qc.invalidateQueries({ queryKey: ['admin-support'] });
+      if (data?.notificationQueued) {
+        setRecentlyNotified((prev) => new Set([...prev, id]));
+        setTimeout(() => {
+          setRecentlyNotified((prev) => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+        }, 60000);
+      }
+    },
   });
 
   const assignMutation = useStandardMutation({
     mutationFn: ({ id, ownerUserId }: { id: number; ownerUserId: number }) =>
-      adminFetch(`/admin/support-queue/${id}/status`, {
+      adminFetch<{ notificationQueued?: boolean }>(`/admin/support-queue/${id}/status`, {
         method: 'POST',
         body: JSON.stringify({ status: 'contacted', ownerUserId }),
       }),
-    onSuccess: (_, { id }) => {
+    onSuccess: (data: { notificationQueued?: boolean } | undefined, { id }: { id: number }) => {
       qc.invalidateQueries({ queryKey: ['admin-support'] });
       setAssignInputs((p) => {
         const next = { ...p };
         delete next[id];
         return next;
       });
+      if (data?.notificationQueued) {
+        setRecentlyNotified((prev) => new Set([...prev, id]));
+        setTimeout(() => {
+          setRecentlyNotified((prev) => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+        }, 60000);
+      }
     },
   });
 
   const noteMutation = useStandardMutation({
     mutationFn: ({ id, notes, status }: { id: number; notes: string; status: string }) =>
-      adminFetch(`/admin/support-queue/${id}/status`, {
+      adminFetch<{ notificationQueued?: boolean }>(`/admin/support-queue/${id}/status`, {
         method: 'POST',
         body: JSON.stringify({ status, notes }),
       }),
-    onSuccess: (_, { id }) => {
+    onSuccess: (data: { notificationQueued?: boolean } | undefined, { id }: { id: number }) => {
       qc.invalidateQueries({ queryKey: ['admin-support'] });
       setNoteInputs((p) => {
         const next = { ...p };
         delete next[id];
         return next;
       });
+      if (data?.notificationQueued) {
+        setRecentlyNotified((prev) => new Set([...prev, id]));
+        setTimeout(() => {
+          setRecentlyNotified((prev) => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+        }, 60000);
+      }
     },
   });
 
@@ -2009,12 +2042,16 @@ function SupportPanel() {
                     {t.submissionStatus === 'resolved' && (
                       <Badge label="Resolved" variant="green" />
                     )}
-                    {t.notificationSentAt && (
+                    {(t.notificationSentAt || recentlyNotified.has(t.id)) && (
                       <span
-                        title={`Notification sent ${new Date(t.notificationSentAt).toLocaleString()}`}
+                        title={
+                          t.notificationSentAt
+                            ? `Email sent ${new Date(t.notificationSentAt).toLocaleString()}`
+                            : 'Email notification queued'
+                        }
                         className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20"
                       >
-                        <Mail className="w-2.5 h-2.5" /> Notified
+                        <Mail className="w-2.5 h-2.5" /> Email sent
                       </span>
                     )}
                     {t.emailOptOut && (
@@ -2066,6 +2103,11 @@ function SupportPanel() {
                           {t.resolvedAt
                             ? ` · Resolved ${new Date(t.resolvedAt).toLocaleString()}`
                             : ''}
+                          {t.notificationSentAt
+                            ? ` · Email sent ${new Date(t.notificationSentAt).toLocaleString()}`
+                            : recentlyNotified.has(t.id)
+                              ? ' · Email notification queued'
+                              : ''}
                         </p>
 
                         <div
