@@ -37,6 +37,18 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'PIPELINE',
+    items: [
+      { href: '/pipeline',        label: 'Live Pipeline' },
+      { href: '/intent-router',   label: 'Intent Router' },
+      { href: '/planner',         label: 'Planner Canvas' },
+      { href: '/ontology',        label: 'Ontology Graph' },
+      { href: '/learning',        label: 'Learning Loop' },
+      { href: '/counterfactuals', label: 'Counterfactuals' },
+      { href: '/adversarial',     label: 'Adversarial' },
+    ],
+  },
+  {
     label: 'RUNTIME',
     items: [
       { href: '/agents',    label: 'Operators' },

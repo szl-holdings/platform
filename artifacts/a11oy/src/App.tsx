@@ -67,6 +67,13 @@ const ConstellationGraph = lazy(() => import('./pages/ConstellationGraph').then(
 const ArchitectureOverview = lazy(() => import('./pages/ArchitectureOverview').then(m => ({ default: m.ArchitectureOverview })));
 const ResourcesHub = lazy(() => import('./pages/ResourcesHub').then(m => ({ default: m.ResourcesHub })));
 const ControlTower = lazy(() => import('./pages/ControlTower').then(m => ({ default: m.ControlTower })));
+const PipelineCanvas = lazy(() => import('./pages/PipelineCanvas').then(m => ({ default: m.PipelineCanvas })));
+const IntentRouter = lazy(() => import('./pages/IntentRouter').then(m => ({ default: m.IntentRouter })));
+const PlannerCanvas = lazy(() => import('./pages/PlannerCanvas').then(m => ({ default: m.PlannerCanvas })));
+const OntologyGraph = lazy(() => import('./pages/OntologyGraph').then(m => ({ default: m.OntologyGraph })));
+const LearningLoop = lazy(() => import('./pages/LearningLoop').then(m => ({ default: m.LearningLoop })));
+const Counterfactuals = lazy(() => import('./pages/Counterfactuals').then(m => ({ default: m.Counterfactuals })));
+const AdversarialResilience = lazy(() => import('./pages/AdversarialResilience').then(m => ({ default: m.AdversarialResilience })));
 
 export default function App() {
   return (
@@ -122,6 +129,13 @@ export default function App() {
         <Route path={`${base}/architecture`} component={ArchitectureOverview} />
         <Route path={`${base}/resources`} component={ResourcesHub} />
         <Route path={`${base}/control-tower`} component={ControlTower} />
+        <Route path={`${base}/pipeline`} component={PipelineCanvas} />
+        <Route path={`${base}/intent-router`} component={IntentRouter} />
+        <Route path={`${base}/planner`} component={PlannerCanvas} />
+        <Route path={`${base}/ontology`} component={OntologyGraph} />
+        <Route path={`${base}/learning`} component={LearningLoop} />
+        <Route path={`${base}/counterfactuals`} component={Counterfactuals} />
+        <Route path={`${base}/adversarial`} component={AdversarialResilience} />
         <Route>
           <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--color-a11oy-navy)', color: 'var(--color-a11oy-text)' }}>
             <div className="text-center">
