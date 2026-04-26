@@ -9,39 +9,30 @@ import { Scene2 } from './video_scenes/Scene2';
 import { Scene3 } from './video_scenes/Scene3';
 import { Scene4 } from './video_scenes/Scene4';
 import { Scene5 } from './video_scenes/Scene5';
-
-// ── Three-act narrative structure ─────────────────────────────────────────
-//
-//  Act I  — The Problem   (open, 12s)
-//    Hook: "The era of AI without receipts is ending."
-//    Establishes the governance gap with a live trace ID reveal.
-//
-//  Act II — The Solution  (reel + fabric + cortex, 53s)
-//    reel   (25s): Tour all 10 product surfaces with animated mock UIs
-//    fabric (18s): Decision Fabric — 6 governed primitives as a live graph
-//    cortex (10s): APEX Mobile — cross-domain alert chain, human approval
-//
-//  Act III — The Brand    (close, 12s)
-//    Brand lockup + tagline + founder CTA. Silence is intentional.
-//
-// Total (full cut): 77s. Social cuts share the same source scenes.
-// Audio: none. Captions: burned in (CC toggle) + deliverables/captions.vtt.
-// ─────────────────────────────────────────────────────────────────────────
+import { Scene6 } from './video_scenes/Scene6';
+import { Scene7 } from './video_scenes/Scene7';
+import { Scene8 } from './video_scenes/Scene8';
 
 const FULL_SCENE_DURATIONS = {
-  open: 12000,
-  reel: 25000,
-  fabric: 18000,
-  cortex: 10000,
-  close: 12000,
+  shot1: 6000,
+  shot2: 6000,
+  shot3: 8000,
+  shot4: 8000,
+  shot5: 8000,
+  shot6: 8000,
+  shot7: 10000,
+  shot8: 6000,
 };
 
 const CHAPTER_META: Record<string, { title: string; subtitle: string }> = {
-  open: { title: 'The Governance Problem', subtitle: 'Autonomy vs. control' },
-  reel: { title: 'Meet the Platform', subtitle: 'SZL portfolio surfaces' },
-  fabric: { title: 'The Counsel Fabric', subtitle: 'Agentic backbone' },
-  cortex: { title: 'APEX Intelligence', subtitle: 'Cross-domain correlation' },
-  close: { title: 'Governed Autonomy', subtitle: 'The SZL difference' },
+  shot1: { title: 'Hero Reveal', subtitle: 'Governed orchestration' },
+  shot2: { title: 'Ecosystem', subtitle: 'One backbone, many surfaces' },
+  shot3: { title: 'Signal Flow', subtitle: 'Signal to proof' },
+  shot4: { title: 'Metrics', subtitle: 'Built for proof' },
+  shot5: { title: 'Trust Surfaces', subtitle: 'Structural governance' },
+  shot6: { title: 'Domain Packs', subtitle: 'Seven verticals' },
+  shot7: { title: 'The Platform', subtitle: 'Seven-layer fabric' },
+  shot8: { title: 'End Card', subtitle: 'Governed intelligence' },
 };
 
 function VideoPlayer({
@@ -84,11 +75,14 @@ function VideoPlayer({
   return (
     <div className="absolute inset-0">
       <AnimatePresence mode="popLayout">
-        {fullSceneIndex === 0 && <Scene1 key="open" />}
-        {fullSceneIndex === 1 && <Scene2 key="reel" />}
-        {fullSceneIndex === 2 && <Scene3 key="fabric" />}
-        {fullSceneIndex === 3 && <Scene4 key="cortex" />}
-        {fullSceneIndex === 4 && <Scene5 key="close" />}
+        {fullSceneIndex === 0 && <Scene1 key="shot1" />}
+        {fullSceneIndex === 1 && <Scene2 key="shot2" />}
+        {fullSceneIndex === 2 && <Scene3 key="shot3" />}
+        {fullSceneIndex === 3 && <Scene4 key="shot4" />}
+        {fullSceneIndex === 4 && <Scene5 key="shot5" />}
+        {fullSceneIndex === 5 && <Scene6 key="shot6" />}
+        {fullSceneIndex === 6 && <Scene7 key="shot7" />}
+        {fullSceneIndex === 7 && <Scene8 key="shot8" />}
       </AnimatePresence>
 
       <CaptionTrack
@@ -152,10 +146,10 @@ export default function VideoTemplate() {
         className="absolute w-[80vw] h-[80vw] rounded-full blur-[120px] opacity-20 pointer-events-none z-0"
         style={{ background: 'radial-gradient(circle, var(--color-lyte-cyan), transparent 70%)' }}
         animate={{
-          x: ['-20vw', '40vw', '-10vw', '20vw', '-20vw'],
-          y: ['-10vh', '30vh', '60vh', '-20vh', '-10vh'],
-          scale: [1, 1.2, 0.8, 1.1, 1],
-          opacity: [0.15, 0.25, 0.15, 0.3, 0.15],
+          x: ['-20vw', '40vw', '-10vw', '20vw', '30vw', '-15vw', '10vw', '-20vw'],
+          y: ['-10vh', '30vh', '60vh', '-20vh', '40vh', '10vh', '-30vh', '-10vh'],
+          scale: [1, 1.2, 0.8, 1.1, 0.9, 1.3, 1.0, 1],
+          opacity: [0.15, 0.25, 0.15, 0.3, 0.2, 0.25, 0.15, 0.15],
         }}
         transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
       />
@@ -163,10 +157,10 @@ export default function VideoTemplate() {
       <motion.div
         className="absolute h-[1px] bg-gradient-to-r from-transparent via-[var(--color-hero-accent)] to-transparent z-10"
         animate={{
-          left: ['-10%', '0%', '10%', '5%', '20%'][currentScene]!,
-          width: ['120%', '100%', '80%', '90%', '60%'][currentScene]!,
-          top: ['50%', '20%', '80%', '30%', '50%'][currentScene]!,
-          opacity: [0.3, 0.6, 0.4, 0.7, 0.2][currentScene]!,
+          left: ['-10%', '0%', '10%', '5%', '20%', '-5%', '15%', '0%'][currentScene] ?? '-10%',
+          width: ['120%', '100%', '80%', '90%', '60%', '110%', '70%', '100%'][currentScene] ?? '120%',
+          top: ['50%', '20%', '80%', '30%', '50%', '40%', '60%', '50%'][currentScene] ?? '50%',
+          opacity: [0.3, 0.6, 0.4, 0.7, 0.2, 0.5, 0.3, 0.1][currentScene] ?? 0.3,
         }}
         transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
       />

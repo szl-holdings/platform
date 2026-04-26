@@ -972,6 +972,177 @@ export function HomePage() {
         </div>
       </section>
 
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+        <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
+          <FadeIn>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(3rem, 6vw, 6rem)', alignItems: 'start' }}>
+              <div>
+                <SectionLabel>Publication</SectionLabel>
+                <h2 style={{
+                  fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontFamily: T.serif,
+                  fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
+                  lineHeight: 1.08, margin: '0 0 2rem',
+                }}>
+                  What is{' '}
+                  <span style={{ color: T.accent }}>a11oy?</span>
+                </h2>
+                <div style={{ fontSize: '1.0625rem', lineHeight: 1.8, color: T.textDim }}>
+                  <p style={{ margin: '0 0 1.25rem' }}>
+                    a11oy is a <strong style={{ color: T.text }}>governed decision operating system</strong> — the infrastructure layer that sits between frontier AI models and real-world consequence.
+                  </p>
+                  <p style={{ margin: '0 0 1.25rem' }}>
+                    The name comes from metallurgy: an alloy is multiple elements fused into something stronger than any single part. a11oy fuses signal intelligence, causal reasoning, policy enforcement, and cryptographic proof into one execution fabric.
+                  </p>
+                  <p style={{ margin: '0 0 1.25rem' }}>
+                    Most AI platforms stop at recommendation. a11oy governs what happens after the recommendation — who approves the action, under what conditions, with what evidence, and how the outcome is recorded.
+                  </p>
+                  <p style={{ margin: 0 }}>
+                    Every action carries proof. Every decision carries attribution. Every outcome feeds back into the system to make the next decision better.
+                  </p>
+                </div>
+              </div>
+              <div>
+                <div style={{
+                  padding: '2.5rem', borderRadius: 12, border: `1px solid ${T.border}`,
+                  background: T.surface,
+                }}>
+                  <p style={{
+                    fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 600,
+                    letterSpacing: '0.18em', textTransform: 'uppercase',
+                    color: T.accent, margin: '0 0 1.5rem',
+                  }}>The Governing Principle</p>
+                  <blockquote style={{
+                    fontSize: '1.5rem', fontFamily: T.serif, fontWeight: 400,
+                    lineHeight: 1.4, color: T.text, margin: '0 0 2rem',
+                    borderLeft: `2px solid ${T.accent}`, paddingLeft: '1.5rem',
+                    fontStyle: 'italic',
+                  }}>
+                    No material action executes without human approval. Not as an option. Not as a feature flag. As a structural guarantee embedded in the execution fabric.
+                  </blockquote>
+                  <div style={{
+                    display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px',
+                    background: T.border, borderRadius: 8, overflow: 'hidden',
+                    marginBottom: '1.5rem',
+                  }}>
+                    {[
+                      { val: '59', label: 'SDK Primitives' },
+                      { val: '133', label: 'API Endpoints' },
+                      { val: '7', label: 'Fabric Layers' },
+                      { val: '100%', label: 'Proof Integrity' },
+                    ].map(m => (
+                      <div key={m.label} style={{ padding: '1rem', background: T.bg }}>
+                        <p style={{ fontSize: '1.5rem', fontFamily: T.mono, fontWeight: 600, color: T.accent, margin: '0 0 0.25rem' }}>{m.val}</p>
+                        <p style={{ fontSize: '0.5625rem', fontFamily: T.mono, letterSpacing: '0.12em', textTransform: 'uppercase', color: T.textMuted, margin: 0 }}>{m.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', lineHeight: 1.6, color: T.textMuted, margin: 0, fontFamily: T.mono }}>
+                    SZL Holdings &middot; Est. 2023 &middot; London
+                  </p>
+                </div>
+              </div>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
+        <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(2rem, 5vw, 4rem)' }}>
+          <FadeIn>
+            <div style={{ marginBottom: '3.5rem', maxWidth: 720 }}>
+              <SectionLabel>Competitive Landscape</SectionLabel>
+              <h2 style={{
+                fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: T.serif,
+                fontWeight: 400, letterSpacing: '-0.03em', color: T.text,
+                lineHeight: 1.1, margin: '0 0 1rem',
+              }}>
+                Beyond aggregation.{' '}
+                <span style={{ color: T.accent }}>Into governance.</span>
+              </h2>
+              <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.textDim, margin: 0 }}>
+                Other platforms observe signals or automate workflows. a11oy governs the entire path from signal to consequence — with structural proof at every step.
+              </p>
+            </div>
+          </FadeIn>
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: '1px', background: T.border, borderRadius: 12, overflow: 'hidden',
+            border: `1px solid ${T.border}`,
+          }}>
+            {[
+              {
+                name: 'Palantir',
+                category: 'Decision Intelligence',
+                has: 'Enterprise data integration, analytical workflows, government credibility',
+                gap: 'Governance is proprietary and opaque. No open SDK. No developer primitives for proof or policy.',
+              },
+              {
+                name: 'Datadog / New Relic',
+                category: 'Technical Observability',
+                has: 'APM, logging, metrics, distributed tracing for infrastructure',
+                gap: 'Observes technical systems, not business decisions. No governance layer, no proof chain, no policy enforcement.',
+              },
+              {
+                name: 'ServiceNow',
+                category: 'Workflow Automation',
+                has: 'Enterprise workflow automation, ITSM, AI-assisted operations',
+                gap: 'Executes workflows but carries no proof of why a workflow executed. No immutable audit trail connecting signal to outcome.',
+              },
+              {
+                name: 'BOSS Technology',
+                category: 'Business Observability',
+                has: 'Signal aggregation, business observability concept, real-time data unification',
+                gap: 'Stops at aggregation. Does not govern what happens after data is aggregated. No policy engine, no proof chain.',
+              },
+              {
+                name: 'OpenAI / LangChain',
+                category: 'Agent Frameworks',
+                has: 'Agent building blocks, tool calling, memory, handoffs, multi-agent coordination',
+                gap: 'Builds the engine. Does not govern the engine. No structural enforcement that prevents agents from executing material actions without approval.',
+              },
+              {
+                name: 'a11oy',
+                category: 'Governed Execution',
+                has: 'Full stack: signal ingestion, causal reasoning, governed orchestration, cryptographic proof, alignment monitoring, 7 enterprise verticals',
+                gap: '',
+              },
+            ].map((comp, i) => (
+              <FadeIn key={comp.name} delay={i * 0.05}>
+                <div style={{
+                  padding: '2rem', background: comp.name === 'a11oy' ? T.accentGlow : T.bg,
+                  height: '100%', display: 'flex', flexDirection: 'column',
+                  border: comp.name === 'a11oy' ? `1px solid ${T.accentDim}` : 'none',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                    <h3 style={{
+                      fontSize: '1rem', fontWeight: 600, color: comp.name === 'a11oy' ? T.accent : T.text,
+                      margin: 0, letterSpacing: '-0.01em',
+                    }}>{comp.name}</h3>
+                  </div>
+                  <p style={{
+                    fontSize: '0.625rem', fontFamily: T.mono, fontWeight: 600,
+                    letterSpacing: '0.14em', textTransform: 'uppercase',
+                    color: T.textMuted, margin: '0 0 0.75rem',
+                  }}>{comp.category}</p>
+                  <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.textDim, margin: '0 0 0.75rem' }}>
+                    {comp.has}
+                  </p>
+                  {comp.gap && (
+                    <p style={{
+                      fontSize: '0.8125rem', lineHeight: 1.65, color: T.accent,
+                      margin: 0, marginTop: 'auto', paddingTop: '0.75rem',
+                      borderTop: `1px solid ${T.border}`,
+                    }}>
+                      {comp.gap}
+                    </p>
+                  )}
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section style={{ padding: 'clamp(8rem, 16vw, 14rem) 0', borderTop: `1px solid ${T.border}` }}>
         <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 2rem', textAlign: 'center' }}>
           <FadeIn>

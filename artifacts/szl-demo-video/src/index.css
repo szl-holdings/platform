@@ -1,28 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=JetBrains+Mono:wght@100..800&display=swap');
 @import "tailwindcss";
 
 :root {
-  --color-bg-base: hsl(214, 18%, 3%);
-  --color-surface: hsl(214, 12%, 8%);
-  --color-border: hsla(0, 0%, 100%, 0.08);
+  --color-bg-base: #0a0a0a;
+  --color-surface: rgba(255,255,255,0.025);
+  --color-border: rgba(255,255,255,0.08);
 
-  --color-text-primary: hsl(38, 8%, 95%);
-  --color-text-muted: hsl(214, 7%, 64%);
+  --color-text-primary: #f5f5f5;
+  --color-text-muted: #8a8a8a;
 
-  --color-hero-accent: hsl(38, 52%, 58%);
-  --color-lyte-cyan: hsl(191, 92%, 44%);
+  --color-accent: #c9b787;
 
-  --color-critical: hsl(0, 62%, 52%);
-  --color-warning: hsl(42, 80%, 50%);
-  --color-success: hsl(152, 50%, 42%);
+  --color-lyte: hsl(40, 100%, 50%); /* amber */
+  --color-aegis: hsl(270, 70%, 60%); /* violet */
+  --color-vessels: hsl(210, 100%, 50%); /* blue */
+  --color-terra: hsl(120, 60%, 40%); /* green */
+  --color-counsel: hsl(270, 70%, 60%); /* violet */
+  --color-carlota: hsl(330, 80%, 65%); /* pink */
+  --color-pulse: hsl(180, 100%, 40%); /* teal */
 
-  --color-aegis: hsl(222, 60%, 50%);
-  --color-vessels: hsl(206, 72%, 40%);
-  --color-terra: hsl(140, 50%, 38%);
-  --color-carlota: hsl(36, 48%, 52%);
-
-  --font-display: "Fraunces", serif;
-  --font-body: "Inter", sans-serif;
+  --font-display: "Cormorant Garamond", serif;
   --font-mono: "JetBrains Mono", monospace;
+  --font-body: "JetBrains Mono", monospace;
 }
 
 @theme inline {
@@ -31,18 +30,17 @@
   --color-border: var(--color-border);
   --color-text-primary: var(--color-text-primary);
   --color-text-muted: var(--color-text-muted);
-  --color-hero-accent: var(--color-hero-accent);
-  --color-lyte-cyan: var(--color-lyte-cyan);
-  --color-critical: var(--color-critical);
-  --color-warning: var(--color-warning);
-  --color-success: var(--color-success);
+  --color-accent: var(--color-accent);
+  --color-lyte: var(--color-lyte);
   --color-aegis: var(--color-aegis);
   --color-vessels: var(--color-vessels);
   --color-terra: var(--color-terra);
+  --color-counsel: var(--color-counsel);
   --color-carlota: var(--color-carlota);
+  --color-pulse: var(--color-pulse);
   --font-display: var(--font-display);
-  --font-body: var(--font-body);
   --font-mono: var(--font-mono);
+  --font-body: var(--font-body);
 }
 
 body {
@@ -63,6 +61,6 @@ body {
 
 .bg-noise {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  opacity: 0.03;
+  opacity: 0.05;
   pointer-events: none;
 }

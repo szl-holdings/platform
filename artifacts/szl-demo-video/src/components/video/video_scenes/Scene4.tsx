@@ -7,125 +7,65 @@ export function Scene4() {
 
   useEffect(() => {
     const timers = [
-      setTimeout(() => setPhase(1), 500), // Phone appears
-      setTimeout(() => setPhase(2), 2000), // First alert
-      setTimeout(() => setPhase(3), 3500), // Second alert linking
-      setTimeout(() => setPhase(4), 5000), // Third alert linking + policy
+      setTimeout(() => setPhase(1), 500),
+      setTimeout(() => setPhase(2), 1500),
+      setTimeout(() => setPhase(3), 3500), // VO
     ];
-    return () => timers.forEach((t) => clearTimeout(t));
+    return () => timers.forEach(t => clearTimeout(t));
   }, []);
 
-  const easeOut = { duration: 0.6, ease: [0.16, 1, 0.3, 1] } as const;
-  const easeOutFast = { duration: 0.45, ease: [0.16, 1, 0.3, 1] } as const;
+  const metrics = [
+    { value: '59', label: 'SDK Primitives' },
+    { value: '133', label: 'API Endpoints' },
+    { value: '16', label: 'Platform Tabs' },
+    { value: '7', label: 'Fabric Layers' },
+    { value: '8', label: 'Frontier AI Providers' },
+  ];
 
   return (
     <motion.div
-      className="absolute inset-0 flex items-center justify-center z-20"
-      {...sceneTransitions.slideUp}
+      className="absolute inset-0 flex flex-col items-center justify-center z-20 overflow-hidden"
+      {...sceneTransitions.wipe}
     >
-      <div className="flex w-[70vw] items-center justify-between">
-        {/* Left side text */}
-        <div className="w-[30vw]">
-          <motion.h2
-            className="font-display text-[3vw] text-[var(--color-text-primary)] leading-tight mb-[2vh]"
-            initial={{ opacity: 0, x: -30 }}
-            animate={phase >= 1 ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          >
-            APEX Mobile
-            <br />
-            <span className="text-[var(--color-text-muted)] text-[2vw]">Pocket-cockpit</span>
-          </motion.h2>
+      {/* Overlay Title */}
+      <motion.div
+        className="absolute top-[15vh] font-mono text-[1.5vw] text-white tracking-widest uppercase"
+        initial={{ opacity: 0, y: -20 }}
+        animate={phase >= 1 ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
+        transition={{ duration: 1 }}
+      >
+        Built for proof, not just demos.
+      </motion.div>
+
+      {/* Metrics Grid */}
+      <div className="flex flex-wrap justify-center gap-[4vw] px-[10vw] mt-[5vh]">
+        {metrics.map((m, i) => (
           <motion.div
-            className="font-mono text-[1vw] text-[var(--color-lyte-cyan)] mb-[1vh]"
-            initial={{ opacity: 0 }}
-            animate={phase >= 2 ? { opacity: 1 } : { opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            key={i}
+            className="flex flex-col items-center bg-surface border border-border p-[3vw] rounded-lg shadow-2xl min-w-[20vw]"
+            initial={{ opacity: 0, scale: 0.9, y: 40 }}
+            animate={phase >= 2 ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.9, y: 40 }}
+            transition={{ duration: 0.8, delay: i * 0.15, ease: [0.16, 1, 0.3, 1] }}
           >
-            CROSS-DOMAIN ALERTS ACTIVE
+            <div className="font-mono text-[5vw] text-accent font-light leading-none mb-[1vh]">
+              {m.value}
+            </div>
+            <div className="font-mono text-[1vw] text-text-muted uppercase tracking-wider">
+              {m.label}
+            </div>
           </motion.div>
-        </div>
-
-        {/* Vertical Phone Frame */}
-        <motion.div
-          className="w-[20vw] h-[40vw] bg-[#0A0A0A] rounded-[2vw] border-4 border-[#333] relative overflow-hidden shadow-2xl"
-          initial={{ opacity: 0, y: 40 }}
-          animate={phase >= 1 ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-          transition={easeOut}
-        >
-          <div className="absolute top-0 inset-x-0 h-[3vh] bg-[#111] flex justify-center items-center">
-            <div className="w-[6vw] h-[1vh] bg-black rounded-full" />
-          </div>
-
-          <div className="mt-[5vh] px-[1.5vw] flex flex-col gap-[1.5vh]">
-            {/* Alert 1 - Maritime */}
-            <motion.div
-              className="bg-[var(--color-surface)] p-[1.5vw] rounded-xl border border-[var(--color-vessels)]/40 relative"
-              initial={{ opacity: 0, x: 16 }}
-              animate={phase >= 2 ? { opacity: 1, x: 0 } : { opacity: 0, x: 16 }}
-              transition={easeOutFast}
-            >
-              <div className="font-mono text-[0.6vw] text-[var(--color-vessels)] mb-[0.5vh]">
-                MARITIME (Vessels)
-              </div>
-              <div className="font-body text-[1vw] text-[var(--color-text-primary)] font-medium leading-snug">
-                Sanctioned tanker PACIFIC MERIDIAN detected in Gulf.
-              </div>
-            </motion.div>
-
-            {/* Connection line 1 */}
-            <motion.div
-              className="w-[2px] h-[2vh] bg-[var(--color-lyte-cyan)] ml-[2vw]"
-              initial={{ scaleY: 0, opacity: 0 }}
-              animate={phase >= 3 ? { scaleY: 1, opacity: 1 } : { scaleY: 0, opacity: 0 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              style={{ transformOrigin: "top" }}
-            />
-
-            {/* Alert 2 - Real Estate */}
-            <motion.div
-              className="bg-[var(--color-surface)] p-[1.5vw] rounded-xl border border-[var(--color-terra)]/40"
-              initial={{ opacity: 0, x: -16 }}
-              animate={phase >= 3 ? { opacity: 1, x: 0 } : { opacity: 0, x: -16 }}
-              transition={easeOutFast}
-            >
-              <div className="font-mono text-[0.6vw] text-[var(--color-terra)] mb-[0.5vh]">
-                REAL ESTATE (Terra)
-              </div>
-              <div className="font-body text-[1vw] text-[var(--color-text-primary)] font-medium leading-snug">
-                Counterparty exposure to Meridian Tower lessee.
-              </div>
-            </motion.div>
-
-            {/* Connection line 2 */}
-            <motion.div
-              className="w-[2px] h-[2vh] bg-[var(--color-lyte-cyan)] ml-[2vw]"
-              initial={{ scaleY: 0, opacity: 0 }}
-              animate={phase >= 4 ? { scaleY: 1, opacity: 1 } : { scaleY: 0, opacity: 0 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              style={{ transformOrigin: "top" }}
-            />
-
-            {/* Alert 3 - Legal */}
-            <motion.div
-              className="bg-[var(--color-surface)] p-[1.5vw] rounded-xl border border-[var(--color-critical)]/40"
-              initial={{ opacity: 0, y: 14 }}
-              animate={phase >= 4 ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
-              transition={easeOutFast}
-            >
-              <div className="font-mono text-[0.6vw] text-[var(--color-critical)] mb-[0.5vh]">
-                LEGAL COMPLIANCE
-              </div>
-              <div className="font-body text-[1vw] text-[var(--color-text-primary)] font-medium leading-snug mb-[1.5vh]">
-                Immediate legal obligation triggered.
-              </div>
-              <div className="bg-[var(--color-critical)] text-black font-mono text-[0.7vw] py-[0.5vh] text-center rounded">
-                POLICY: HUMAN APPROVAL MANDATORY
-              </div>
-            </motion.div>
-          </div>
-        </motion.div>
+        ))}
       </div>
+
+      {/* Voiceover */}
+      <motion.div
+        className="absolute bottom-[10vh] w-[70vw] text-center font-display italic text-[2.5vw] text-white/90"
+        initial={{ opacity: 0, y: 20 }}
+        animate={phase >= 3 ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+        transition={{ duration: 1, ease: 'easeOut' }}
+      >
+        "Lyte is the command surface. A11oy is the execution fabric."
+      </motion.div>
     </motion.div>
   );
 }

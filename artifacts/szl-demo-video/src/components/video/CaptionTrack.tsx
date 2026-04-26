@@ -67,68 +67,41 @@ export function CaptionTrack({
 // Captions are scene-relative (ms from scene start) so they stay aligned
 // across the full demo and every social cut.
 export const SCENE_CAPTIONS: SceneCaptions = {
-  open: [
-    { startMs: 1000, endMs: 4500, text: 'The era of AI without receipts is ending.' },
-    {
-      startMs: 4500,
-      endMs: 9000,
-      text: 'Every action carries a trace ID, source, freshness, and citation.',
-    },
-    { startMs: 9000, endMs: 12000, text: 'Provenance is not optional.' },
+  shot1: [
+    { startMs: 800, endMs: 3500, text: 'Every consequential AI action should carry a receipt.' },
+    { startMs: 3500, endMs: 5800, text: 'Governed orchestration for consequence-bearing AI.' },
   ],
-  reel: [
-    { startMs: 0, endMs: 2500, text: 'Pulse — executive briefing, principal eyes only.' },
-    { startMs: 2500, endMs: 5000, text: 'Vessels — maritime intelligence with human approval.' },
-    { startMs: 5000, endMs: 7500, text: 'Terra — real estate intelligence across $4.2B+ AUM.' },
-    {
-      startMs: 7500,
-      endMs: 10000,
-      text: 'Aegis — defense and intel, blocked by policy until cleared.',
-    },
-    { startMs: 10000, endMs: 12500, text: 'Carlota Jo — private advisory, judgment-led.' },
-    { startMs: 12500, endMs: 15000, text: 'Aegis — cyber posture under guardian approval.' },
-    { startMs: 15000, endMs: 17500, text: 'Lyte — decision intelligence with confidence scores.' },
-    {
-      startMs: 17500,
-      endMs: 20000,
-      text: 'Counsel — legal exposure surfaced before crisis.',
-    },
-    {
-      startMs: 20000,
-      endMs: 22500,
-      text: 'Counsel — every obligation tracked, every deadline locked.',
-    },
-    { startMs: 22500, endMs: 25000, text: 'Unified Command — ten surfaces, one governed fabric.' },
+  shot2: [
+    { startMs: 500, endMs: 3000, text: 'One backbone. Seven surfaces. One governed fabric.' },
+    { startMs: 3000, endMs: 5800, text: 'Every domain speaks the same language of trust.' },
   ],
-  fabric: [
-    {
-      startMs: 500,
-      endMs: 4000,
-      text: 'The Decision Fabric — a governed substrate beneath every surface.',
-    },
-    { startMs: 4000, endMs: 10000, text: 'Constellation, Trace, Guardian, Eval, Memory, Tools.' },
-    { startMs: 10000, endMs: 18000, text: 'Six systems. One explainable runtime.' },
+  shot3: [
+    { startMs: 500, endMs: 3000, text: 'From raw signal to auditable proof — in milliseconds.' },
+    { startMs: 3500, endMs: 6000, text: 'Signal. Decision. Approval. Execute. Audit.' },
+    { startMs: 6000, endMs: 7800, text: 'Nothing executes without a receipt.' },
   ],
-  cortex: [
-    { startMs: 500, endMs: 2000, text: 'APEX Mobile — the pocket-cockpit.' },
-    { startMs: 2000, endMs: 3500, text: 'Maritime risk surfaces in real time.' },
-    {
-      startMs: 3500,
-      endMs: 5000,
-      text: 'Cross-domain correlation links exposure across the portfolio.',
-    },
-    { startMs: 5000, endMs: 10000, text: 'Human approval mandatory before consequential action.' },
+  shot4: [
+    { startMs: 500, endMs: 3000, text: 'Built for proof, not just demos.' },
+    { startMs: 3500, endMs: 6000, text: '59 SDK primitives. 133 API endpoints. 7 fabric layers.' },
+    { startMs: 6000, endMs: 7800, text: 'Every metric is verifiable.' },
   ],
-  close: [
-    { startMs: 1000, endMs: 3000, text: 'SZL Holdings — the Governed Decision Operating System.' },
-    { startMs: 3000, endMs: 5000, text: '"The era of AI-without-receipts is ending."' },
-    { startMs: 5000, endMs: 6500, text: 'Ten surfaces. One governed fabric.' },
-    {
-      startMs: 6500,
-      endMs: 12000,
-      text: 'Stephen Lutar, Founder & CEO — szl.com',
-      speaker: 'SZL Holdings',
-    },
+  shot5: [
+    { startMs: 500, endMs: 3000, text: 'Governance is structural, not optional.' },
+    { startMs: 3500, endMs: 6000, text: 'Proof chain. Constitutional enforcement. Agent welfare.' },
+    { startMs: 6000, endMs: 7800, text: 'Trust is architected in, not bolted on.' },
+  ],
+  shot6: [
+    { startMs: 500, endMs: 3000, text: 'Seven verticals. One orchestration layer.' },
+    { startMs: 3500, endMs: 6500, text: 'Defense. Maritime. Real estate. Legal. Advisory. Intelligence. Decision.' },
+  ],
+  shot7: [
+    { startMs: 500, endMs: 3500, text: 'The orchestration layer is taking shape.' },
+    { startMs: 3500, endMs: 7000, text: 'Signal Mesh. Causal Core. Context Engine. Workcell Engine.' },
+    { startMs: 7000, endMs: 9800, text: 'Proof Chain. Covenant Layer. Replay.' },
+  ],
+  shot8: [
+    { startMs: 500, endMs: 2500, text: 'SZL Holdings — Governed Operational Intelligence.' },
+    { startMs: 2500, endMs: 5500, text: 'The era of AI without receipts is ending.', speaker: 'SZL Holdings' },
   ],
 };
 

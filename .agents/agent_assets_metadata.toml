@@ -563,3 +563,15 @@ id = "T7nAWdTVqcxyrPuC0lX8W"
 uri = "file://artifacts/szl-demo-video/deliverables/linkedin-ready.mp4"
 type = "video"
 title = "SZL Demo Video — LinkedIn Ready (MP4, H.264, 1080p)"
+
+[[outputs]]
+id = "ZTP6Pfy57lck9CmmNTZLQ"
+uri = "file://content-package/substack-banner-1100x220.png"
+type = "image"
+title = "a11oy Substack Banner — Full (with tagline)"
+
+[[outputs]]
+id = "IuGMLV3b16FvTCyu-HUxE"
+uri = "file://content-package/substack-banner-minimal-1100x220.png"
+type = "image"
+title = "a11oy Substack Banner — Minimal (wordmark only)"

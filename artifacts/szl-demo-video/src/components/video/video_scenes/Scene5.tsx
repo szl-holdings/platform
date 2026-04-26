@@ -7,115 +7,61 @@ export function Scene5() {
 
   useEffect(() => {
     const timers = [
-      setTimeout(() => setPhase(1), 1000), // Parent lockup
-      setTimeout(() => setPhase(2), 3000), // Tagline
-      setTimeout(() => setPhase(3), 5000), // Stats
-      setTimeout(() => setPhase(4), 6500), // Stephen
-      setTimeout(() => setPhase(5), 10000), // Exit drift
+      setTimeout(() => setPhase(1), 500),
+      setTimeout(() => setPhase(2), 1500),
+      setTimeout(() => setPhase(3), 4000), // VO
     ];
-    return () => timers.forEach((t) => clearTimeout(t));
+    return () => timers.forEach(t => clearTimeout(t));
   }, []);
+
+  const cards = [
+    'Proof Chain',
+    'Constitutional Enforcement',
+    'Agent Welfare',
+    'Alignment Verification'
+  ];
 
   return (
     <motion.div
-      className="absolute inset-0 flex flex-col items-center justify-center z-20"
-      {...sceneTransitions.zoomThrough}
+      className="absolute inset-0 flex flex-col items-center justify-center z-20 overflow-hidden"
+      {...sceneTransitions.clipPolygon}
     >
-      <div className="text-center px-[5vw]">
-        <motion.div
-          className="mb-[4vh] relative inline-block"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={phase >= 1 ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
-          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <style
-            dangerouslySetInnerHTML={{
-              __html: `
-            @keyframes shimmer {
-              0% { background-position: -200% center; }
-              100% { background-position: 200% center; }
-            }
-            .shimmer-text {
-              background: linear-gradient(
-                90deg, 
-                var(--color-text-primary) 30%, 
-                #d4af37 50%, 
-                var(--color-text-primary) 70%
-              );
-              background-size: 200% auto;
-              color: transparent;
-              -webkit-background-clip: text;
-              background-clip: text;
-              animation: shimmer 3s ease-in-out infinite;
-            }
-          `,
-            }}
-          />
-          <h1 className="font-display text-[5vw] shimmer-text tracking-tight leading-none mb-[1vh]">
-            SZL Holdings
-          </h1>
-          <div className="font-mono text-[1.2vw] text-[var(--color-hero-accent)] tracking-widest uppercase">
-            Governed Decision Operating System
-          </div>
-        </motion.div>
+      <motion.div
+        className="absolute top-[15vh] font-mono text-[1.5vw] text-white tracking-widest uppercase"
+        initial={{ opacity: 0, y: -20 }}
+        animate={phase >= 1 ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
+        transition={{ duration: 1 }}
+      >
+        Governance is structural, not optional.
+      </motion.div>
 
-        <motion.div
-          className="mb-[6vh]"
-          initial={{ opacity: 0, filter: 'blur(10px)' }}
-          animate={
-            phase >= 2 ? { opacity: 1, filter: 'blur(0px)' } : { opacity: 0, filter: 'blur(10px)' }
-          }
-          transition={{ duration: 1 }}
-        >
-          <div className="font-display italic text-[2.5vw] text-[var(--color-text-muted)]">
-            "The era of AI-without-receipts is ending."
-          </div>
-        </motion.div>
-
-        <motion.div
-          className="flex justify-center gap-[2vw] mb-[6vh]"
-          initial={{ opacity: 0, y: 20 }}
-          animate={phase >= 3 ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.8 }}
-        >
-          {['10 surfaces', '1 governed fabric'].map((stat, i) => (
-            <div
-              key={i}
-              className="font-mono text-[0.9vw] bg-[var(--color-surface)] border border-[var(--color-border)] px-[1.5vw] py-[0.8vh] rounded-full text-[var(--color-text-primary)]"
-            >
-              {stat}
-            </div>
-          ))}
-        </motion.div>
-
-        <motion.div
-          className="flex flex-col items-center gap-[2vh]"
-          initial={{ opacity: 0 }}
-          animate={phase >= 4 ? { opacity: 1 } : { opacity: 0 }}
-          transition={{ duration: 1 }}
-        >
-          <div className="font-body text-[1.2vw] text-[var(--color-text-primary)]">
-            <span className="font-semibold">Stephen Lutar</span>{' '}
-            <span className="text-[var(--color-text-muted)]">— Founder & CEO, SZL Holdings</span>
-          </div>
-
+      <div className="flex gap-[2vw] mt-[10vh] px-[5vw]">
+        {cards.map((card, i) => (
           <motion.div
-            className="w-[2px] h-[4vh] bg-gradient-to-b from-[var(--color-hero-accent)] to-transparent"
-            initial={{ scaleY: 0, transformOrigin: 'top' }}
-            animate={phase >= 4 ? { scaleY: 1 } : { scaleY: 0 }}
-            transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          />
-
-          <motion.div
-            className="font-mono text-[1vw] text-[var(--color-text-muted)] hover:text-[var(--color-hero-accent)] transition-colors"
-            initial={{ opacity: 0, y: 10 }}
-            animate={phase >= 4 ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-            transition={{ duration: 0.5, delay: 1 }}
+            key={i}
+            className="w-[20vw] h-[35vh] bg-surface border border-border flex items-center justify-center p-[2vw] text-center relative overflow-hidden"
+            initial={{ clipPath: 'inset(100% 0 0 0)' }}
+            animate={phase >= 2 ? { clipPath: 'inset(0% 0 0 0)' } : { clipPath: 'inset(100% 0 0 0)' }}
+            transition={{ duration: 1, delay: i * 0.2, ease: [0.22, 1, 0.36, 1] }}
           >
-            szl.com
+            {/* Glow behind */}
+            <div className="absolute inset-0 bg-accent/5 blur-2xl" />
+            <div className="font-display text-[2vw] text-white leading-tight z-10">
+              {card}
+            </div>
           </motion.div>
-        </motion.div>
+        ))}
       </div>
+
+      {/* Voiceover */}
+      <motion.div
+        className="absolute bottom-[10vh] w-[70vw] text-center font-display italic text-[2.5vw] text-white/90"
+        initial={{ opacity: 0, y: 20 }}
+        animate={phase >= 3 ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+        transition={{ duration: 1, ease: 'easeOut' }}
+      >
+        "And every domain pack inherits the same governed backbone."
+      </motion.div>
     </motion.div>
   );
 }
