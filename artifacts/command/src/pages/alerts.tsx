@@ -15,7 +15,7 @@ import {
   Workflow,
   XCircle,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { OpsLayout } from '../components/ops-layout';
 
@@ -250,6 +250,119 @@ const STATUS_ICONS: Record<AlertStatus, React.ElementType> = {
   resolved: BellOff,
 };
 
+interface ScheduleStatus {
+  last_run_at: string | null;
+  next_run_at: string | null;
+  interval_minutes: number;
+}
+
+function formatRelativeTime(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const diffMs = Date.now() - d.getTime();
+  const secs = Math.floor(Math.abs(diffMs) / 1000);
+  const mins = Math.floor(secs / 60);
+  if (diffMs >= 0) {
+    if (secs < 60) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const h = Math.floor(mins / 60);
+    return `${h}h ago`;
+  }
+  if (secs < 60) return 'in <1m';
+  if (mins < 60) return `in ${mins}m`;
+  const h = Math.floor(mins / 60);
+  return `in ${h}h`;
+}
+
+function useCountdown(targetIso: string | null): string {
+  const [label, setLabel] = useState('');
+  const compute = useCallback(() => {
+    if (!targetIso) return '--';
+    const ts = new Date(targetIso).getTime();
+    if (!Number.isFinite(ts)) return '--';
+    const diff = ts - Date.now();
+    if (diff <= 0) return 'imminent';
+    const totalSecs = Math.ceil(diff / 1000);
+    const m = Math.floor(totalSecs / 60);
+    const s = totalSecs % 60;
+    return m > 0 ? `${m}m ${s.toString().padStart(2, '0')}s` : `${s}s`;
+  }, [targetIso]);
+
+  useEffect(() => {
+    setLabel(compute());
+    const id = setInterval(() => setLabel(compute()), 1000);
+    return () => clearInterval(id);
+  }, [compute]);
+
+  return label;
+}
+
+function ScheduleStatusBar() {
+  const { data, isError } = useStandardQuery<ScheduleStatus>({
+    queryKey: ['ops-schedule-status'],
+    queryFn: async () => {
+      const res = await fetch('/api/ops/alert-rules/schedule-status', {
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to load schedule status');
+      const json = await res.json();
+      return (json?.data ?? json) as ScheduleStatus;
+    },
+    refetchInterval: 30_000,
+    staleTime: 10_000,
+  });
+
+  const countdown = useCountdown(data?.next_run_at ?? null);
+
+  if (!data && !isError) return null;
+
+  if (isError || !data) {
+    return (
+      <div
+        className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-mono"
+        style={{
+          backgroundColor: 'var(--color-surface-base)',
+          border: '1px solid var(--color-surface-border)',
+          color: 'var(--color-fg-muted)',
+        }}
+      >
+        <Clock className="w-3.5 h-3.5" />
+        <span>Schedule status unavailable</span>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="flex items-center gap-4 px-4 py-2.5 rounded-lg text-xs font-mono"
+      style={{
+        backgroundColor: 'var(--color-surface-base)',
+        border: '1px solid var(--color-surface-border)',
+        color: 'var(--color-fg-muted)',
+      }}
+    >
+      <div className="flex items-center gap-1.5">
+        <Clock className="w-3.5 h-3.5" style={{ color: 'var(--color-fg-muted)' }} />
+        <span>Last evaluated:</span>
+        <span style={{ color: 'var(--color-fg-default)' }}>
+          {data.last_run_at ? formatRelativeTime(data.last_run_at) : 'never'}
+        </span>
+      </div>
+      <span style={{ color: 'var(--color-surface-border)' }}>|</span>
+      <div className="flex items-center gap-1.5">
+        <Workflow className="w-3.5 h-3.5" style={{ color: 'var(--color-fg-muted)' }} />
+        <span>Next evaluation:</span>
+        <span style={{ color: 'var(--color-fg-default)' }}>{countdown}</span>
+      </div>
+      <span style={{ color: 'var(--color-surface-border)' }}>|</span>
+      <div className="flex items-center gap-1.5">
+        <span>Interval:</span>
+        <span style={{ color: 'var(--color-fg-default)' }}>{data.interval_minutes}m</span>
+      </div>
+    </div>
+  );
+}
+
 export default function AlertsPage() {
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
@@ -409,6 +522,8 @@ export default function AlertsPage() {
             </div>
           ))}
         </div>
+
+        <ScheduleStatusBar />
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2">

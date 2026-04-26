@@ -1467,6 +1467,35 @@ router.get('/ops/alert-rules/evaluation-history', validateQuery(evalHistoryQuery
   }
 });
 
+router.get('/ops/alert-rules/schedule-status', async (_req, res) => {
+  try {
+    const intervalMinutes = Math.max(
+      1,
+      parseInt(process.env.ALERT_EVAL_INTERVAL_MINUTES ?? '5', 10) || 5,
+    );
+
+    const [lastRun] = await db
+      .select()
+      .from(alertEvaluationRunsTable)
+      .orderBy(desc(alertEvaluationRunsTable.evaluatedAt))
+      .limit(1);
+
+    const lastRunAt = lastRun?.evaluatedAt ? new Date(lastRun.evaluatedAt).toISOString() : null;
+    const nextRunAt = lastRunAt
+      ? new Date(new Date(lastRunAt).getTime() + intervalMinutes * 60_000).toISOString()
+      : null;
+
+    res.json({
+      last_run_at: lastRunAt,
+      next_run_at: nextRunAt,
+      interval_minutes: intervalMinutes,
+    });
+  } catch (err) {
+    logger.error({ err }, '[ops] Failed to fetch schedule status');
+    res.status(500).json({ error: 'Failed to fetch schedule status' });
+  }
+});
+
 // ──────────────────────────────────────────────────────────────────────────────
 // RUNBOOKS
 // ──────────────────────────────────────────────────────────────────────────────
