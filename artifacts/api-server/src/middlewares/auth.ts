@@ -1,7 +1,8 @@
 import type { OrgMembership as SharedOrgMembership } from '@szl-holdings/auth-shared';
-import { type RoleName, db, isReadOnlyRole, organizationsTable, orgMembersTable, ROLE_HIERARCHY, rolesTable, sessionsTable, toCanonicalRole, userRolesTable, usersTable } from '@szl-holdings/db';
+import { apiKeysTable, type RoleName, db, isReadOnlyRole, oauthClientsTable, organizationsTable, orgMembersTable, ROLE_HIERARCHY, rolesTable, sessionsTable, toCanonicalRole, userRolesTable, usersTable } from '@szl-holdings/db';
 import { serverTelemetry } from '@szl-holdings/observability';
 import { and, eq, gt, isNull } from 'drizzle-orm';
+import { createHash } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { sendError, sendForbidden, sendUnauthorized } from '../lib/api-response';
 import { readSessionCookie } from '../lib/auth';
@@ -12,6 +13,7 @@ import {
   verifyInternalHeader,
 } from '../lib/internal-tokens';
 import { logger } from '../lib/logger';
+import { verifyMeshToken } from '../lib/mesh-jwt';
 import { getSessionMinCreatedAt } from './session-policy';
 
 /**
@@ -35,12 +37,23 @@ export interface AuthenticatedUser {
   orgs: OrgMembership[];
 }
 
+/**
+ * MeshPrincipal — normalized identity across all auth mechanisms.
+ * Populated by authMiddleware regardless of which auth path resolved.
+ */
+export type MeshPrincipal =
+  | { type: 'session'; userId: number; orgIds: number[] }
+  | { type: 'api_key'; keyId: number; orgId: number | null; scopes: string[] }
+  | { type: 'oauth_client'; clientId: string; orgId: number | null; scopes: string[] }
+  | { type: 'internal_agent'; name: string; scopes: string[] };
+
 declare global {
   namespace Express {
     interface Request {
       user?: AuthenticatedUser;
       isInternalAgent?: boolean;
       internalAgent?: InternalAgentContext;
+      meshPrincipal?: MeshPrincipal;
     }
   }
 }
@@ -195,6 +208,126 @@ export async function resolveUserFromToken(token: string): Promise<SessionResolu
   };
 }
 
+/**
+ * Resolve a Bearer token against the api_keys table (SHA-256 hash lookup).
+ * Returns the resolved user and key metadata on success, null on miss.
+ */
+async function resolveApiKeyBearer(token: string): Promise<{
+  user: AuthenticatedUser;
+  principal: MeshPrincipal;
+} | null> {
+  const keyHash = createHash('sha256').update(token).digest('hex');
+  const [apiKey] = await db
+    .select()
+    .from(apiKeysTable)
+    .where(
+      and(
+        eq(apiKeysTable.keyHash, keyHash),
+        eq(apiKeysTable.isActive, true),
+      ),
+    )
+    .limit(1);
+
+  if (!apiKey) return null;
+
+  // Check expiry
+  if (apiKey.expiresAt && apiKey.expiresAt < new Date()) return null;
+
+  // Load the owning user
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, apiKey.userId));
+  if (!user?.isActive) return null;
+
+  const [userRoles, orgMemberships] = await Promise.all([
+    db
+      .select({ roleName: rolesTable.name })
+      .from(userRolesTable)
+      .innerJoin(rolesTable, eq(userRolesTable.roleId, rolesTable.id))
+      .where(eq(userRolesTable.userId, user.id)),
+    db
+      .select({
+        orgId: orgMembersTable.orgId,
+        orgSlug: organizationsTable.slug,
+        orgName: organizationsTable.name,
+        role: orgMembersTable.role,
+      })
+      .from(orgMembersTable)
+      .innerJoin(organizationsTable, eq(orgMembersTable.orgId, organizationsTable.id))
+      .where(eq(orgMembersTable.userId, user.id)),
+  ]);
+
+  // Update last_used_at asynchronously — don't block the request
+  db.update(apiKeysTable)
+    .set({ lastUsedAt: new Date() })
+    .where(eq(apiKeysTable.id, apiKey.id))
+    .catch((err) => logger.warn({ err, keyId: apiKey.id }, '[auth] Failed to update api key last_used_at'));
+
+  return {
+    user: {
+      id: user.id,
+      displayName: user.displayName,
+      email: user.email,
+      roles: userRoles.map((r) => r.roleName) as RoleName[],
+      orgs: orgMemberships.map((m) => ({
+        orgId: m.orgId,
+        orgSlug: m.orgSlug,
+        orgName: m.orgName,
+        role: m.role,
+      })),
+    },
+    principal: {
+      type: 'api_key',
+      keyId: apiKey.id,
+      orgId: apiKey.orgId ?? null,
+      scopes: apiKey.scopes ?? [],
+    },
+  };
+}
+
+/**
+ * Resolve a Bearer token as a platform-signed OAuth JWT (client_credentials).
+ * Returns a synthesized service-account user and mesh principal on success.
+ */
+async function resolveOAuthJwtBearer(token: string): Promise<{
+  user: AuthenticatedUser;
+  principal: MeshPrincipal;
+} | null> {
+  const payload = verifyMeshToken(token);
+  if (!payload) return null;
+
+  // Verify the oauth_client row is still active
+  const [oauthClient] = await db
+    .select()
+    .from(oauthClientsTable)
+    .where(
+      and(
+        eq(oauthClientsTable.clientId, payload.clientId),
+        eq(oauthClientsTable.isActive, true),
+      ),
+    )
+    .limit(1);
+
+  if (!oauthClient) return null;
+
+  // OAuth machine clients carry NO roles. Access is exclusively scope-based
+  // (enforced by requireMeshScope). Granting even 'ops' unconditionally would
+  // let any valid client bypass role-gated routes — that is privilege escalation.
+  return {
+    user: {
+      id: 0,
+      displayName: `OAuth Client (${oauthClient.name})`,
+      email: null,
+      roles: [] as RoleName[],
+      orgs: [],
+    },
+    principal: {
+      type: 'oauth_client',
+      clientId: payload.clientId,
+      orgId: payload.orgId,
+      scopes: payload.scopes,
+    },
+  };
+}
+
 export function authMiddleware(options: { required?: boolean } = {}) {
   const { required = true } = options;
 
@@ -205,15 +338,28 @@ export function authMiddleware(options: { required?: boolean } = {}) {
       // that principal instead of re-running session lookup, which would
       // otherwise overwrite req.user with undefined and reject the call.
       if (req.isInternalAgent && req.user) {
+        if (!req.meshPrincipal && req.internalAgent) {
+          req.meshPrincipal = {
+            type: 'internal_agent',
+            name: req.internalAgent.name,
+            scopes: Array.from(req.internalAgent.scopes),
+          };
+        }
         next();
         return;
       }
 
+      // Priority 1: x-internal-token header
       const internalCtx = checkInternalToken(req);
       if (internalCtx) {
         req.user = buildInternalAgentUser(internalCtx);
         req.isInternalAgent = true;
         req.internalAgent = internalCtx;
+        req.meshPrincipal = {
+          type: 'internal_agent',
+          name: internalCtx.name,
+          scopes: Array.from(internalCtx.scopes),
+        };
         next();
         return;
       }
@@ -224,23 +370,56 @@ export function authMiddleware(options: { required?: boolean } = {}) {
         | 'session_revoked'
         | 'session_pre_secret_rotation'
         | null = null;
+      let resolvedPrincipal: MeshPrincipal | undefined;
 
-      let token: string | undefined;
       const authHeader = req.headers.authorization;
       if (authHeader?.startsWith('Bearer ')) {
-        token = authHeader.slice(7);
-      } else {
-        // Reads `__Host-sid` first, falling back to the legacy `sid` cookie
-        // for the rollout window (FINDING-005).
-        token = readSessionCookie(req);
-      }
-      if (token) {
-        const resolved = await resolveUserFromToken(token);
+        const bearerToken = authHeader.slice(7);
+
+        // Priority 2: OAuth JWT bearer (platform-signed client_credentials token)
+        const oauthResult = await resolveOAuthJwtBearer(bearerToken);
+        if (oauthResult) {
+          req.user = oauthResult.user;
+          req.meshPrincipal = oauthResult.principal;
+          next();
+          return;
+        }
+
+        // Priority 3: API key bearer (SHA-256 hash lookup in api_keys table)
+        const apiKeyResult = await resolveApiKeyBearer(bearerToken);
+        if (apiKeyResult) {
+          req.user = apiKeyResult.user;
+          req.meshPrincipal = apiKeyResult.principal;
+          next();
+          return;
+        }
+
+        // Priority 4: Session token via Authorization: Bearer header
+        const resolved = await resolveUserFromToken(bearerToken);
         if (resolved.kind === 'ok') {
           user = resolved.user;
         } else if (resolved.kind === 'revoked') {
           revokedReason = resolved.reason;
         }
+      } else {
+        // Priority 4 (cookie path): Session cookie
+        const cookieToken = readSessionCookie(req);
+        if (cookieToken) {
+          const resolved = await resolveUserFromToken(cookieToken);
+          if (resolved.kind === 'ok') {
+            user = resolved.user;
+          } else if (resolved.kind === 'revoked') {
+            revokedReason = resolved.reason;
+          }
+        }
+      }
+
+      if (user) {
+        resolvedPrincipal = {
+          type: 'session',
+          userId: user.id,
+          orgIds: user.orgs.map((o) => o.orgId),
+        };
       }
 
       if (!user && required) {
@@ -254,6 +433,9 @@ export function authMiddleware(options: { required?: boolean } = {}) {
       }
 
       req.user = user ?? undefined;
+      if (resolvedPrincipal) {
+        req.meshPrincipal = resolvedPrincipal;
+      }
       next();
     } catch (err) {
       logger.error({ err }, 'Auth middleware error');
@@ -421,5 +603,32 @@ export function requireInternalScope(required: InternalScope) {
       message: `Internal token missing required scope: ${required}`,
       code: 'INTERNAL_SCOPE_MISSING',
     });
+  };
+}
+
+/**
+ * Gate a route on a specific OAuth or API key scope.
+ * For session-authenticated users, this check is bypassed (session users
+ * inherit all permissions via their roles). Only machine principals
+ * (oauth_client, api_key) are checked against declared scopes.
+ */
+export function requireMeshScope(required: string) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const principal = req.meshPrincipal;
+    if (!principal) {
+      sendUnauthorized(res);
+      return;
+    }
+    // Session users and internal agents are not scope-constrained via this check
+    if (principal.type === 'session' || principal.type === 'internal_agent') {
+      next();
+      return;
+    }
+    const scopes = principal.scopes ?? [];
+    if (scopes.includes(required) || scopes.includes('*')) {
+      next();
+      return;
+    }
+    sendForbidden(res, `Missing required scope: ${required}`);
   };
 }

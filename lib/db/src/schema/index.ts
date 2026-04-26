@@ -173,3 +173,5 @@ export * from './worldline';
 export * from './crisis_arena';
 export * from './precision_evolution';
 export * from './counsel_knowledge';
+export * from './oauth_clients';
+export * from './mesh_call_log';

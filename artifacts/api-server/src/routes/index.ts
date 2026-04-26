@@ -28,6 +28,9 @@ import decisionsRuntimeRouter from "./decisions-runtime";
 import a11oyFabricRouter from "./a11oy-fabric-api";
 import a11oyRuntimeRouter from "./a11oy-runtime-api.js";
 import a11oySovereignRouter from "./a11oy-sovereign-api.js";
+import apiKeysRouter from "./api-keys";
+import oauthRouter from "./oauth";
+import meshObservabilityRouter from "./mesh-observability";
 
 const router: IRouter = Router();
 
@@ -290,5 +293,13 @@ router.use(lazyMatch("/mobile-biometric", () => import("./mobile-biometric"), "m
 // Owns /evolution/* endpoints: candidates, evaluation, calibration, scoring,
 // drift, promotion, rollback, audit, and diagnostics.
 router.use(lazyMatch("/evolution", () => import("./evolution"), "evolution"));
+
+// Unified Auth Mesh — API key CRUD and OAuth client_credentials endpoints
+router.use(apiKeysRouter);
+router.use(oauthRouter);
+
+// Mesh observability — call topology and principal registry (ops/admin only)
+router.use(meshObservabilityRouter);
+
 
 export default router;

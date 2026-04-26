@@ -74,6 +74,14 @@ const PUBLIC_EXACT_PATHS = new Set([
   "/api/stream/status",
   "/api/federation/health",
   "/api/federation/agents",
+  // A2A delegation endpoint — public so external agents can delegate tasks without a
+  // browser session. Bearer-token auth (API key or OAuth JWT with federation:write scope)
+  // is enforced inside the route handler.
+  "/api/federation/delegate",
+  // OAuth 2.0 token endpoint — public so services can exchange client credentials
+  // for an access token before they have a session. The endpoint validates
+  // client_id + hashed client_secret internally.
+  "/api/oauth/token",
   // Self-healing orchestrator — read-only GET endpoints.
   // Exact-path matches ensure the mutating PATCH /policies/:id/toggle
   // (which requires auth) is NOT covered by these allowlist entries.

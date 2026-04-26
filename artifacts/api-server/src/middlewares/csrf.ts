@@ -78,6 +78,10 @@ const EXEMPT_PATHS = new Set([
   // snapshot when the key is absent). No per-user state is read or modified;
   // CSRF double-submit is not applicable.
   '/api/lyte/market-indicators/refresh',
+  // OAuth 2.0 client_credentials token endpoint — machine-to-machine; clients
+  // authenticate via HTTP Basic Auth (client_id + hashed secret), not browser
+  // cookies. CSRF double-submit protection does not apply.
+  '/api/oauth/token',
 ]);
 
 // Risk evidence store — public POST/DELETE endpoints accept any
@@ -90,6 +94,9 @@ function isExempt(path: string): boolean {
   if (EXEMPT_PATHS.has(path)) return true;
   if (path.startsWith('/api/webhooks/')) return true;
   if (path.startsWith('/api/risk-evidence/')) return true;
+  // A2A federation endpoints — machine-to-machine; authenticated via Bearer token
+  // (API key or OAuth JWT), not browser cookies. CSRF double-submit not applicable.
+  if (path.startsWith('/api/federation/')) return true;
   if (path.startsWith('/api-docs')) return true;
   if (path.startsWith('/api/ai/')) return true;
   if (path === '/api/alloy/channels/slack/webhook') return true;

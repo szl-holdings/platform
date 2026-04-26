@@ -26,6 +26,7 @@ import { authMiddleware } from './middlewares/auth';
 import { correlationMiddleware } from './middlewares/correlation';
 import { csrfMiddleware } from './middlewares/csrf';
 import { globalAuthEnforcer } from './middlewares/global-auth-enforcer';
+import { meshCallLogger } from './middlewares/mesh-call-logger';
 import { etagMiddleware } from './middlewares/optimistic-concurrency';
 import { otelSpanMiddleware } from './middlewares/otel-span';
 import { globalLimiter } from './middlewares/rate-limiters';
@@ -698,6 +699,7 @@ app.use('/api', etagMiddleware);
 app.use('/api', demoResetRouter);
 
 app.use(globalAuthEnforcer);
+app.use(meshCallLogger());
 app.use('/api', router);
 
 const nexusDist = join(__dirname, '../../mockup-sandbox/dist/public');

@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import { logger } from '../lib/logger';
 import { validateBody } from '../lib/validation';
+import { authMiddleware } from '../middlewares/auth';
 import { AGENT_REGISTRY, type AgentDefinition } from './nuro-mesh';
 
 const federationChatSchema = z.object({
@@ -157,25 +158,35 @@ federationRouter.get('/federation/agents/:agentId/capabilities', (req, res) => {
   });
 });
 
-federationRouter.post('/federation/agents/:agentId/chat', async (req, res) => {
+federationRouter.post('/federation/agents/:agentId/chat', authMiddleware({ required: false }), async (req, res) => {
   const agent = AGENT_REGISTRY.find((a) => a.id === req.params.agentId);
   if (!agent) {
     res.status(404).json({ error: 'Agent not found' });
     return;
   }
 
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith('Bearer ')) {
+  // A2A federation endpoint — only machine principals (api_key / oauth_client) are
+  // allowed. Session principals (browser users) and internal agents are explicitly
+  // rejected; they must use the internal service bus, not the external A2A surface.
+  const principal = req.meshPrincipal;
+  if (!principal) {
     res.status(401).json({
       error: 'Authentication required',
-      hint: 'Provide Bearer token in Authorization header',
+      hint: 'Provide a valid API key or OAuth access token in the Authorization Bearer header',
     });
     return;
   }
-  const token = authHeader.slice(7);
-  const validTokens = (process.env.FEDERATION_API_TOKENS ?? '').split(',').filter(Boolean);
-  if (validTokens.length > 0 && !validTokens.includes(token)) {
-    res.status(403).json({ error: 'Invalid API token' });
+  if (principal.type !== 'api_key' && principal.type !== 'oauth_client') {
+    res.status(403).json({
+      error: 'Bearer token required',
+      hint: 'Federation endpoints require an API key or OAuth access token, not a session cookie',
+    });
+    return;
+  }
+  // Require federation:write scope
+  const fedScopes = principal.scopes ?? [];
+  if (!fedScopes.includes('federation:write') && !fedScopes.includes('*')) {
+    res.status(403).json({ error: 'Insufficient scope', required: 'federation:write' });
     return;
   }
 
@@ -231,8 +242,31 @@ federationRouter.post('/federation/agents/:agentId/chat', async (req, res) => {
 
 federationRouter.post(
   '/federation/delegate',
+  authMiddleware({ required: false }),
   validateBody(federationDelegateSchema),
   async (req, res) => {
+    // A2A delegation endpoint — only machine principals (api_key / oauth_client) with
+    // federation:write scope are allowed. Session and internal principals are rejected.
+    const principal = req.meshPrincipal;
+    if (!principal) {
+      res.status(401).json({
+        error: 'Authentication required',
+        hint: 'Provide a valid API key or OAuth access token in the Authorization Bearer header',
+      });
+      return;
+    }
+    if (principal.type !== 'api_key' && principal.type !== 'oauth_client') {
+      res.status(403).json({
+        error: 'Bearer token required',
+        hint: 'Federation endpoints require an API key or OAuth access token, not a session cookie',
+      });
+      return;
+    }
+    const delScopes = principal.scopes ?? [];
+    if (!delScopes.includes('federation:write') && !delScopes.includes('*')) {
+      res.status(403).json({ error: 'Insufficient scope', required: 'federation:write' });
+      return;
+    }
     const {
       targetAgentId,
       task,

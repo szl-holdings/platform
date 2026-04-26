@@ -76,6 +76,8 @@ The platform is a pnpm monorepo built with TypeScript 5.9, React 19, Vite, and N
 
 **Mobile Biometric Sign-In:** Implemented as a real server-side authentication factor with cryptographic proof-of-possession, managing device registrations, step-up assertions, and biometric challenges.
 
+**Unified Auth Mesh (Task #3578):** Backend-only authentication unification layer. Auth priority order: internal `x-internal-token` → OAuth JWT bearer → API key bearer → session cookie. New DB tables: `oauth_clients` (machine client registry) and `mesh_call_log` (call-level observability). New routes: `POST /api/oauth/token` (OAuth 2.0 client_credentials), `GET/POST /api/oauth/clients`, `GET/POST/DELETE /api/api-keys`, `GET /api/mesh/topology`, `GET /api/mesh/principals`. Custom HS256 JWT in `mesh-jwt.ts` (no external library). Fire-and-forget `meshCallLogger` middleware records who calls whom, latency, and status for every authenticated request.
+
 **Forecast & Anomaly Fabric:** Unified forecasting service (`packages/forecast-fabric`) with calibrated interval outputs, and a unified streaming and batch anomaly detection service (`packages/anomaly-fabric`). Drift detection (`packages/drift-eval`) for performance drift against baseline snapshots and champion-vs-challenger evaluations.
 
 ## External Dependencies
