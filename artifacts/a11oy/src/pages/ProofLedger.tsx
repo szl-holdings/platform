@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, KpiCard, DemoBadge } from '../components/ui';
+import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 
 const GOLD = '#c9b787';
 
@@ -263,7 +263,7 @@ export function ProofLedger() {
       </Card>
 
       <div className="mt-4 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
-        <DemoBadge /> Proof chains are illustrative demo data. Production chains are cryptographically immutable and append-only — no node can be modified or deleted.
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] flex-shrink-0" /> Governed Environment — proof chains are reconstructed from the seed Proof Ledger. Production chains are cryptographically immutable and append-only.
       </div>
     </Layout>
   );

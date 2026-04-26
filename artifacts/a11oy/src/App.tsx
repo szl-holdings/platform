@@ -1,6 +1,8 @@
 import { lazy, Suspense } from 'react';
+import type { ReactNode } from 'react';
 import { Route, Switch } from 'wouter';
 import { GraphQLProvider } from './graphql';
+import { AppShell } from './components/shell/AppShell';
 
 function stripTrailingSlash(path: string) {
   return path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
@@ -17,6 +19,10 @@ function Loader() {
       />
     </div>
   );
+}
+
+function WithShell({ children }: { children: ReactNode }) {
+  return <AppShell>{children}</AppShell>;
 }
 
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
@@ -78,6 +84,12 @@ const AdversarialResilience = lazy(() => import('./pages/AdversarialResilience')
 const FrontierIntelligence = lazy(() => import('./pages/FrontierIntelligence').then(m => ({ default: m.FrontierIntelligence })));
 const ApprovalQueue = lazy(() => import('./pages/ApprovalQueue').then(m => ({ default: m.ApprovalQueue })));
 const VerifierAgent = lazy(() => import('./pages/VerifierAgent').then(m => ({ default: m.VerifierAgent })));
+const AtlasSection = lazy(() => import('./pages/AtlasSection').then(m => ({ default: m.AtlasSection })));
+const TokensSection = lazy(() => import('./pages/TokensSection').then(m => ({ default: m.TokensSection })));
+const VoiceSection = lazy(() => import('./pages/VoiceSection').then(m => ({ default: m.VoiceSection })));
+const LibrarySection = lazy(() => import('./pages/LibrarySection').then(m => ({ default: m.LibrarySection })));
+const ReleasesSection = lazy(() => import('./pages/ReleasesSection').then(m => ({ default: m.ReleasesSection })));
+const AuditSection = lazy(() => import('./pages/AuditSection').then(m => ({ default: m.AuditSection })));
 
 export default function App() {
   return (
@@ -144,6 +156,24 @@ export default function App() {
         <Route path={`${base}/frontier`} component={FrontierIntelligence} />
         <Route path={`${base}/approval-queue`} component={ApprovalQueue} />
         <Route path={`${base}/verifier`} component={VerifierAgent} />
+        <Route path={`${base}/atlas`}>
+          <WithShell><AtlasSection /></WithShell>
+        </Route>
+        <Route path={`${base}/tokens`}>
+          <WithShell><TokensSection /></WithShell>
+        </Route>
+        <Route path={`${base}/voice`}>
+          <WithShell><VoiceSection /></WithShell>
+        </Route>
+        <Route path={`${base}/library`}>
+          <WithShell><LibrarySection /></WithShell>
+        </Route>
+        <Route path={`${base}/releases`}>
+          <WithShell><ReleasesSection /></WithShell>
+        </Route>
+        <Route path={`${base}/audit`}>
+          <WithShell><AuditSection /></WithShell>
+        </Route>
         <Route>
           <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--color-a11oy-navy)', color: 'var(--color-a11oy-text)' }}>
             <div className="text-center">

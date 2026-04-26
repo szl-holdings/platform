@@ -1,5 +1,5 @@
 import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, KpiCard, DemoBadge, ApprovalGate, ActionButton } from '../components/ui';
+import { PageHeader, Card, SectionTitle, KpiCard, ApprovalGate, ActionButton } from '../components/ui';
 import { useAlloyApprovals, useAlloyWorkflows, useApprovalSubscription } from '../graphql';
 
 const POLICIES = [
@@ -168,7 +168,7 @@ export function Governance() {
               <ActionButton variant="ghost">Run Simulation</ActionButton>
             </div>
             <div className="mt-2 text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-              <DemoBadge /> Simulator output is illustrative
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] flex-shrink-0" /> Governed Environment — simulator output is illustrative
             </div>
           </Card>
         </div>

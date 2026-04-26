@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'wouter';
 import { Layout } from '../components/layout';
-import { DemoBadge, ApprovalGate } from '../components/ui';
+import { ApprovalGate } from '../components/ui';
 
 const BASE = (import.meta.env.BASE_URL ?? '/a11oy/').replace(/\/$/, '');
 
@@ -218,7 +218,7 @@ export function InvestorDemo() {
             <div className="text-xs mt-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>12-step product narrative · Seed round · April 2026</div>
           </div>
           <div className="flex items-center gap-2">
-            <DemoBadge />
+            <span className="text-xs px-2 py-0.5 rounded-full font-mono" style={{ backgroundColor: 'rgba(201,183,135,0.1)', color: '#c9b787', border: '1px solid rgba(201,183,135,0.25)' }}>Governed Environment</span>
             <button
               onClick={() => setAutoPlay(a => !a)}
               className="text-xs px-3 py-1.5 rounded font-medium"

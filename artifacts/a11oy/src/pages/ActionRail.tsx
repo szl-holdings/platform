@@ -1,5 +1,5 @@
 import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, KpiCard, ApprovalGate, DemoBadge, ActionButton } from '../components/ui';
+import { PageHeader, Card, SectionTitle, KpiCard, ApprovalGate, ActionButton } from '../components/ui';
 
 const ACTIONS = [
   {
@@ -95,7 +95,7 @@ export function ActionRail() {
       </div>
 
       <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
-        <DemoBadge /> All recommended actions, rationale, and counterfactuals are illustrative demo content.
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] flex-shrink-0" /> Governed Environment — all actions, rationale, and counterfactuals are from the seed Action Rail. No real actions execute without human approval.
       </div>
     </Layout>
   );

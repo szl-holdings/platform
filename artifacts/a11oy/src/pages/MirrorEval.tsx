@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, KpiCard, DemoBadge } from '../components/ui';
+import { PageHeader, Card, SectionTitle, KpiCard } from '../components/ui';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer,
   LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend,
@@ -414,7 +414,7 @@ export function MirrorEval() {
       )}
 
       <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
-        <DemoBadge /> MirrorEval 2.0 — demo mode. All eval results are seeded. Blocked dispositions prevent execution in the real runtime.
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] flex-shrink-0" /> Governed Environment — MirrorEval 2.0 scores are from the seed eval suite. Blocked dispositions prevent action execution in the live runtime — this behavior is real.
       </div>
     </Layout>
   );

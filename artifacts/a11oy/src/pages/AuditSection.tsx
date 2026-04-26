@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { findings } from '../data/findings';
 import { Badge } from '../components/ui/Badge';
-import { DemoBadge } from '../components/ui/DemoBadge';
 import { ShieldAlert, AlertTriangle, AlertCircle, Info, ChevronRight, ChevronDown } from 'lucide-react';
 
 export function AuditSection() {
@@ -157,7 +156,7 @@ export function AuditSection() {
                             <div className="bg-[var(--color-a11oy-surface)] border border-[var(--color-a11oy-border)] rounded p-4 flex flex-col">
                               <div className="flex items-center justify-between mb-2">
                                 <div className="text-[10px] uppercase tracking-widest text-[var(--color-a11oy-blue)] font-medium">Scripted Remediation</div>
-                                <DemoBadge className="scale-75 origin-right" />
+                                <span className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(201,183,135,0.1)', color: '#c9b787' }}>Governed</span>
                               </div>
                               <p className="text-sm text-[var(--color-a11oy-text)] mt-2">
                                 {finding.scriptedRecommendation}

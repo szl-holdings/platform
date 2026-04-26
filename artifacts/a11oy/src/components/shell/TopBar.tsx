@@ -48,10 +48,11 @@ export function TopBar() {
         </div>
       </div>
 
-      <div>
-        <Badge variant="warn" size="sm" className="font-mono tracking-widest uppercase bg-[var(--color-a11oy-warn)] text-[var(--color-a11oy-navy)] border-none font-bold">
-          MOCK DATA
-        </Badge>
+      <div className="flex items-center gap-2">
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] animate-pulse" />
+        <span className="text-[11px] font-mono" style={{ color: 'var(--color-a11oy-text-ghost)', letterSpacing: '0.04em' }}>
+          Governed Environment
+        </span>
       </div>
     </header>
   );

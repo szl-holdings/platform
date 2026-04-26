@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { toneMatrix, bannedTerms, preferredTerms, scriptedRewrites } from '../data/voice';
-import { DemoBadge } from '../components/ui/DemoBadge';
 import { Badge } from '../components/ui/Badge';
 import { MessageSquareOff, MessageSquarePlus, ArrowRight } from 'lucide-react';
 
@@ -106,7 +105,7 @@ export function VoiceSection() {
         <div className="lg:col-span-1 flex flex-col">
           <div className="flex items-center justify-between mb-4">
              <h2 className="text-sm font-medium text-[var(--color-a11oy-text)] uppercase tracking-wider">Rewrite Engine Preview</h2>
-             <DemoBadge />
+             <span className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(201,183,135,0.1)', color: '#c9b787' }}>Governed Environment</span>
           </div>
           <div className="bg-[var(--color-a11oy-card)] border border-[var(--color-a11oy-border)] rounded-lg flex flex-col flex-1 h-[300px] overflow-y-auto p-4 space-y-4">
             {scriptedRewrites.map((rewrite, i) => (

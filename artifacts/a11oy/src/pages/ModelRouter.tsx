@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout';
-import { PageHeader, Card, SectionTitle, KpiCard, DemoBadge, StatusPill } from '../components/ui';
+import { PageHeader, Card, SectionTitle, KpiCard, StatusPill } from '../components/ui';
 
 const API = '/api/a11oy';
 
@@ -616,7 +616,7 @@ export function ModelRouter() {
           </div>
 
           <div className="p-3 rounded-lg text-xs" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
-            <DemoBadge /> Demo mode — all inference routing is illustrative. Provider keys are read from environment variables; missing keys fall back to mock provider. No real model API calls.
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] flex-shrink-0" /> Governed Environment — all inference routing is illustrative. Provider keys are read from environment variables in production; no real model API calls are made in this environment.
           </div>
         </>
       )}

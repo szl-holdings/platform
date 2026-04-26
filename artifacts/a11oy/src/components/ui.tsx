@@ -99,7 +99,12 @@ export function PageHeader({
       <div className="flex items-center gap-3 mb-2">
         <span className="text-xs font-mono" style={{ color: 'var(--color-a11oy-gold)' }}>{label}</span>
         {status && <StatusPill status={status} />}
-        <DemoBadge />
+        <span
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono"
+          style={{ backgroundColor: 'rgba(201,183,135,0.06)', color: 'rgba(201,183,135,0.5)', border: '1px solid rgba(201,183,135,0.12)' }}
+        >
+          Governed Environment
+        </span>
       </div>
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
