@@ -195,7 +195,7 @@ router.post(
   tenantScope(),
   validateBody(
     z.object({
-      stateUpdates: z.record(z.unknown()).min(1),
+      stateUpdates: z.record(z.unknown()).refine((v) => Object.keys(v).length >= 1, { message: 'At least one state update is required' }),
       source: z.string().optional().default('api'),
     }),
   ),

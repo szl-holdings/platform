@@ -150,6 +150,10 @@ vi.mock('@szl-holdings/ai-engine/providers/openai', () => ({
       },
     },
   },
+  createResponse: vi.fn().mockResolvedValue({ content: 'hello from test' }),
+  createResponseStream: vi.fn().mockImplementation(async function* () {
+    yield 'hello from test';
+  }),
 }));
 
 vi.mock('@szl-holdings/ai-engine/providers/anthropic', () => ({

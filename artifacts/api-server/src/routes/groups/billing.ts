@@ -85,10 +85,12 @@ export function register(router: IRouter): void {
     ),
   );
 
+  router.use('/treasury', tenantScope({ required: true }));
   router.use('/treasury', _readLimiter);
   router.use('/treasury', _writeLimiter);
   router.use(lazyMatch('/treasury', () => import('../treasury'), 'treasury'));
 
+  router.use('/plugins', tenantScope({ required: true }));
   router.use('/plugins', _readLimiter);
   router.use('/plugins', _writeLimiter);
   router.use(lazyMatch('/plugins', () => import('../plugin-registry'), 'plugin-registry'));

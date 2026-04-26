@@ -17,6 +17,16 @@ vi.mock('@szl-holdings/ai-engine/providers/openai', () => ({
   openai: {
     chat: { completions: { create: (...args: unknown[]) => openaiCreateMock(...args) } },
   },
+  createResponse: async (messages: unknown[], options?: Record<string, unknown>) => {
+    const result = await openaiCreateMock({ messages, ...(options ?? {}) });
+    const text = result?.choices?.[0]?.message?.content ?? '';
+    return { content: text };
+  },
+  createResponseStream: async function* (messages: unknown[], options?: Record<string, unknown>) {
+    const result = await openaiCreateMock({ messages, ...(options ?? {}) });
+    const text = result?.choices?.[0]?.message?.content ?? '';
+    yield text;
+  },
 }));
 
 vi.mock('@szl-holdings/db', async () => {

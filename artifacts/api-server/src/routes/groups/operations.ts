@@ -60,6 +60,7 @@ export function register(router: IRouter): void {
     lazyMount(() => import('../retrieval-proof-chain'), 'retrieval-proof-chain'),
   );
 
+  router.use('/universal-search', tenantScope({ required: true }));
   router.use('/universal-search', _readLimiter);
   router.use(
     lazyMatch('/universal-search', () => import('../universal-search'), 'universal-search'),

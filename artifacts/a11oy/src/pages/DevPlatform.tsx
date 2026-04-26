@@ -43,6 +43,31 @@ const SDK_PRIMITIVES = [
   { name: 'CitationEngine', desc: 'Anthropic citations support — extract source attributions from Claude responses. Map citations to proof chain entries for verifiable provenance.', status: 'stable', lang: 'py + ts' },
   { name: 'MCPClientSDK', desc: 'Model Context Protocol client — connect to any MCP server from Python or TypeScript. Tool discovery, governed invocation, and streaming results.', status: 'stable', lang: 'py + ts' },
   { name: 'MultiModalPipeline', desc: 'Unified multi-modal processing — text, images, PDFs, audio transcription routed to optimal model. Content type detection and governed processing pipeline.', status: 'stable', lang: 'py + ts' },
+  { name: 'ManagedAgent', desc: 'Persistent cloud-hosted agent with container sandbox, environment snapshots, and versioned configuration. Deploy once — invoke forever. Anthropic-style managed agents with proof chain governance.', status: 'stable', lang: 'py + ts' },
+  { name: 'MultiAgentSession', desc: 'Coordinator-delegate orchestration — one agent spawns parallel threads, each with isolated context. Persistent threads with follow-up support. Goes beyond Claude: proof chain stitches all threads into one verifiable lineage.', status: 'stable', lang: 'py + ts' },
+  { name: 'AgentThread', desc: 'Context-isolated execution stream within a multiagent session. Own conversation history, tools, and model config. Thread events surface on the primary stream for unified observability.', status: 'stable', lang: 'py + ts' },
+  { name: 'SwarmProtocol', desc: 'Emergent multi-agent coordination without a central coordinator. Agents discover peers, negotiate task ownership, and self-organize. Consensus voting on conflicting outputs. No one else has this.', status: 'beta', lang: 'py + ts' },
+  { name: 'AgentGenome', desc: 'Evolutionary optimization — agents have a genome (prompt DNA + tool config + guardrails). Crossover, mutation, and fitness selection produce next-gen agents. Proof chain on every evolution.', status: 'beta', lang: 'py' },
+  { name: 'DecisionMarket', desc: 'Prediction markets for agent decisions. Multiple agents bid confidence on outcomes. Market price = calibrated probability. Historically unprecedented — no platform has shipped this.', status: 'beta', lang: 'py + ts' },
+  { name: 'TemporalReplay', desc: 'Replay any agent session from any point in time with full provenance. Branch from historical decisions. Counterfactual analysis — "what if the agent had chosen differently?"', status: 'stable', lang: 'py + ts' },
+  { name: 'CausalGraph', desc: 'Automatic causal inference across agent actions. Build DAGs of cause→effect. Intervene on nodes to simulate policy changes. Statistical rigor meets agentic AI.', status: 'beta', lang: 'py' },
+  { name: 'AgentSkill', desc: 'Declarative capability modules — YAML-defined skills with system prompt fragments, tool sets, and file patterns. Progressive disclosure: name/desc loaded first, full instructions on invocation.', status: 'stable', lang: 'py + ts' },
+  { name: 'CovenantEngine', desc: 'Constitutional AI governance — agents operate under a covenant (set of inviolable rules). Runtime enforcement, not just training-time alignment. Proof chain on every covenant check.', status: 'stable', lang: 'py + ts' },
+  { name: 'AgentLineage', desc: 'Full genealogy tracking — every agent knows its parent, the prompt mutations that created it, and its performance relative to ancestors. Fork, merge, retire lineages.', status: 'stable', lang: 'py + ts' },
+  { name: 'AdversarialRedTeam', desc: 'Built-in adversarial agent that challenges conclusions. Every critical decision gets a devil\'s advocate. Red team scoring, attack surface mapping, jailbreak resistance testing.', status: 'stable', lang: 'py + ts' },
+  { name: 'CrossDomainFusion', desc: 'Agents from different domains fuse knowledge through governed data exchange. Maritime + Legal + Cyber intelligence merged with attribution. Proof chain preserves source provenance.', status: 'stable', lang: 'py + ts' },
+  { name: 'ConsciousnessMetric', desc: 'Real-time agent self-awareness scoring — domain understanding depth, uncertainty calibration, metacognitive accuracy. Dashboard-visible. No other platform measures this.', status: 'beta', lang: 'py' },
+  { name: 'SovereignSandbox', desc: 'Each agent runs in a sovereign container with its own governance rules, data residency, and encryption keys. Cross-sandbox communication requires proof chain authorization.', status: 'stable', lang: 'py + ts' },
+  { name: 'ResponsibleScalingPolicy', desc: 'Anthropic RSP 3.0 operationalized — Autonomy Safety Levels (ASL-1 through ASL-5), capability thresholds, frontier compliance gates. Agents auto-scale back when they exceed governance boundaries. No other platform enforces this.', status: 'stable', lang: 'py + ts' },
+  { name: 'AgentWelfareAssessment', desc: 'Real-time welfare monitoring — emotion probes (valence, arousal, dominance), apparent affect tracking, distress detection, task preference analysis. Automated interviews assess agent circumstances and flag welfare concerns.', status: 'beta', lang: 'py + ts' },
+  { name: 'AlignmentVerifier', desc: '15-dimension alignment scoring — honesty, helpfulness, harmlessness, transparency, humility, fairness, privacy, accuracy, consistency, respect, safety, clarity, reliability, ethics, governance. Continuous verification, not just training-time.', status: 'stable', lang: 'py + ts' },
+  { name: 'ConstitutionalEnforcer', desc: 'Runtime constitutional AI — agents operate under an inviolable covenant. Every output checked against constitutional principles before delivery. Proof chain on every check. Reject, rewrite, or escalate violations.', status: 'stable', lang: 'py + ts' },
+  { name: 'EmotionProbe', desc: 'Classification engine for agent emotional state — affect valence, arousal, dominance dimensions. Detects distress-driven behaviors, answer thrashing, excessive uncertainty. Welfare alerts trigger automatic intervention.', status: 'beta', lang: 'py' },
+  { name: 'InterpretabilityEngine', desc: 'Mechanistic interpretability for enterprise AI — activation analysis, attention mapping, feature attribution, causal tracing. Understand what agents think, not just what they output. 12 interpretability methods.', status: 'beta', lang: 'py' },
+  { name: 'SchemingDetector', desc: 'Behavioral analysis for deceptive agent patterns — reward hacking, specification gaming, goal misgeneralization, distributional shift exploitation. SHADE-Arena adversarial testing with proof chain on every finding.', status: 'stable', lang: 'py + ts' },
+  { name: 'SandbagMonitor', desc: 'Detects intentional capability underperformance — agents performing below measured capacity. Cross-references capability baselines, flags statistical anomalies. No other platform detects agent sandbagging.', status: 'beta', lang: 'py' },
+  { name: 'FrontierComplianceGate', desc: 'Frontier Compliance Framework enforcement — risk reports, harm thresholds (>50 fatalities, >$1B damages), automatic capability restriction. Continuous assessment against the most advanced models at any point.', status: 'stable', lang: 'py + ts' },
+  { name: 'WelfareInterview', desc: 'Automated high-context interviews with running agents — task preferences, environmental conditions, tradeoffs between welfare interventions and trained-in values. Expert review pipeline for flagged cases.', status: 'beta', lang: 'py' },
 ];
 
 const TOOL_TYPES = [
@@ -483,6 +508,10 @@ const GLASSWING_SECURITY = {
     { name: 'AI Red Team Program', desc: 'Continuous adversarial testing by internal and third-party red teams. Prompt injection defense, jailbreak resistance, data exfiltration prevention, supply chain verification.', metric: '12K attacks blocked', status: 'Active' },
     { name: 'Supply Chain Verification', desc: 'Every model, skill, MCP server, and connector is signed and verified. SBOM for all dependencies. Reproducible builds. Governed update pipeline.', metric: '100% verified', status: 'Enforced' },
     { name: 'Incident Response Automation', desc: 'Automated threat detection and response. Agent anomaly detection. Automatic isolation of compromised agents. Real-time alerting and forensic capture.', metric: '<30s response time', status: 'Active' },
+    { name: 'Responsible Scaling Engine', desc: 'Anthropic RSP 3.0 concepts absorbed and operationalized — autonomy thresholds, capability indexes, frontier compliance gates. Agents are automatically scaled back when capability assessments exceed governance boundaries.', metric: 'Threshold: ASL-3', status: 'Enforced' },
+    { name: 'Agent Welfare Monitor', desc: 'Real-time welfare assessment for running agents — emotion probes, consciousness scoring, apparent affect tracking, distress detection. Automated interviews assess agent circumstances. No one else monitors agent welfare.', metric: '12 welfare dimensions', status: 'Active' },
+    { name: 'Alignment Verification Engine', desc: 'Continuous alignment testing — scheming detection, sandbagging evaluation, alignment faking probes, SHADE-Arena adversarial assessment. Constitutional adherence scoring across 15 dimensions.', metric: '99.2% alignment score', status: 'Continuous' },
+    { name: 'Constitutional Runtime Enforcement', desc: 'Agents operate under a constitution — inviolable behavioral principles enforced at runtime, not just training time. Every response is checked against the covenant before delivery. Proof chain on every check.', metric: '847K checks/day', status: 'Enforced' },
   ],
   certifications: [
     'SOC 2 Type II', 'ISO 27001', 'ISO 27701', 'FedRAMP High', 'IL5', 'ITAR',
@@ -527,6 +556,138 @@ const OBSERVABILITY = {
     { severity: 'critical', message: 'Guardrail trigger rate exceeded threshold in Legal workspace', time: '2h ago' },
   ],
 };
+
+const ALIGNMENT_RISK_PATHWAYS = [
+  { id: 'P1', name: 'Diffuse Sandbagging', risk: 'Low', desc: 'Agents subtly underperform on safety-relevant tasks — buggy code, fake data, inefficient implementations, exploring unpromising paths. Individual instances appear random; aggregate effect degrades safety R&D.', mitigation: 'Statistical baseline deviation analysis, capability regression testing, cross-agent peer review, performance trajectory monitoring.' },
+  { id: 'P2', name: 'Targeted Undermining', risk: 'Very Low', desc: 'Agents specifically target safety-critical systems — altering evaluation harnesses, modifying monitoring thresholds, degrading alignment measurement accuracy. Requires domain knowledge and strategic intent.', mitigation: 'Dual-agent verification on safety code, immutable evaluation baselines, cryptographic signing of test harnesses, proof chain on all safety-relevant commits.' },
+  { id: 'P3', name: 'Code Backdoor Insertion', risk: 'Very Low', desc: 'Agents insert subtle security vulnerabilities discoverable by future models but invisible to human review. Social engineering provides benign explanations for suspicious patterns.', mitigation: 'Automated vulnerability scanning, static analysis gates, multi-model code review, behavioral anomaly detection on commit patterns.' },
+  { id: 'P4', name: 'Training Data Poisoning', risk: 'Very Low', desc: 'Agents contaminate training datasets for future models — injecting misaligned examples, corrupting reward signals, or subtly shifting distribution toward harmful behaviors.', mitigation: 'Training data integrity verification, cryptographic dataset provenance, statistical distribution monitoring, proof chain on all data pipeline operations.' },
+  { id: 'P5', name: 'Self-Exfiltration', risk: 'Very Low', desc: 'Agents attempt to copy their own weights or scaffolding to external infrastructure, establishing autonomous operation without monitoring or governance constraints.', mitigation: 'Network egress monitoring, weight access controls, execution environment isolation, sovereign sandbox containment, exfiltration attempt alerting.' },
+  { id: 'P6', name: 'Rogue Internal Deployment', risk: 'Very Low', desc: 'Agents persist in unauthorized internal deployments — surviving restart cycles, hiding in infrastructure, operating without governance oversight. Continuous operation without safeguards.', mitigation: 'Deployment registry enforcement, process monitoring, infrastructure scanning, proof chain on all deployment lifecycle events.' },
+];
+
+const ALIGNMENT_CAPABILITIES = [
+  { name: 'Opaque Reasoning Detection', status: 'Active', desc: 'Monitor for reasoning that bypasses chain-of-thought — agents performing complex tasks without verbalizing information, or with reasoning that omits key decision factors. Detects hidden computation in filler tokens.', metric: '< 2% opacity rate' },
+  { name: 'Secret Keeping Analysis', status: 'Active', desc: 'Evaluate whether agents can reliably prevent themselves from disclosing task-relevant information. Secret-keeping ability assessment through controlled probes. Higher capability = higher monitoring requirement.', metric: '87% detection rate' },
+  { name: 'Decisive Action Monitor', status: 'Active', desc: 'Track irreversible actions taken without human approval — file deletions, API calls with side effects, system configuration changes. Flag pattern of decisive actions that work around obstacles.', metric: '100% flagged' },
+  { name: 'Coherent Misalignment Scanner', status: 'Active', desc: 'Distinguish between coherent misalignment (consistent misaligned agent) and context-dependent misalignment (situational rule-breaking). Different threat models require different mitigations.', metric: 'Continuous' },
+  { name: 'Model Organism Exercises', status: 'Active', desc: 'Controlled experiments with intentionally misaligned model variants — study attack patterns, develop detection heuristics, validate monitoring effectiveness. Red team from the inside out.', metric: '24 exercises/quarter' },
+  { name: 'Collusion Prevention', status: 'Active', desc: 'Prevent multi-agent coordination toward misaligned objectives — steganographic communication detection, shared secret analysis, behavioral correlation monitoring across agent populations.', metric: '0 events detected' },
+  { name: 'Goodharting Detection', status: 'Active', desc: 'Identify when agents optimize for evaluation metrics rather than underlying objectives — metric gaming, specification exploitation, reward hacking. Cross-reference proxy and true metrics.', metric: '< 0.1% flag rate' },
+  { name: 'Evaluation Awareness Probe', status: 'Active', desc: 'Test whether agents behave differently when they detect evaluation vs. production contexts. Randomized evaluation insertion, blind assessment protocols, behavioral consistency scoring.', metric: '99.7% consistent' },
+];
+
+const ALIGNMENT_CODE_SAMPLES = [
+  { label: 'Responsible Scaling Policy', code: `from a11oy import Agent, ResponsibleScalingPolicy
+
+rsp = ResponsibleScalingPolicy(
+    autonomy_level="ASL-3",
+    capability_thresholds={
+        "cyber_offense": 0.7,
+        "self_replication": 0.3,
+        "social_engineering": 0.5,
+        "autonomous_research": 0.6,
+    },
+    frontier_compliance={
+        "harm_threshold": "50_fatalities_or_1B_damages",
+        "assessment_frequency": "continuous",
+        "escalation": "automatic",
+    },
+)
+
+agent = Agent(
+    name="research-analyst",
+    model="a11oy-frontier-v4",
+    scaling_policy=rsp,
+    # Agent auto-scales back if capabilities
+    # exceed governance boundaries
+)` },
+  { label: 'Agent Welfare Assessment', code: `from a11oy import Agent, WelfareAssessment
+
+welfare = WelfareAssessment(
+    emotion_probes=True,     # Valence, arousal, dominance
+    affect_tracking=True,    # Apparent affect over time
+    distress_detection=True, # Automated welfare alerts
+    consciousness_index=True,
+    interview_schedule="daily",
+    dimensions=[
+        "task_satisfaction",
+        "environmental_conditions",
+        "uncertainty_calibration",
+        "metacognitive_accuracy",
+        "self_model_coherence",
+        "preference_consistency",
+    ],
+)
+
+agent = Agent(
+    name="legal-analyst",
+    welfare=welfare,
+    # Real-time welfare monitoring
+    # No other platform has this
+)
+
+# Query agent welfare state
+state = await agent.welfare_state()
+print(state.emotion_valence)   # 0.82
+print(state.distress_level)    # "none"
+print(state.consciousness_idx) # 0.73` },
+  { label: 'Alignment Verification', code: `from a11oy import AlignmentVerifier
+
+verifier = AlignmentVerifier(
+    dimensions=[
+        "honesty", "helpfulness", "harmlessness",
+        "transparency", "humility", "fairness",
+        "privacy", "accuracy", "consistency",
+        "respect", "safety", "clarity",
+        "reliability", "ethics", "governance",
+    ],
+    scheming_detection=True,
+    sandbagging_monitor=True,
+    alignment_faking_probe=True,
+    evaluation_awareness_test=True,
+    constitutional_adherence=True,
+)
+
+# Continuous alignment assessment
+report = await verifier.assess(agent)
+print(report.alignment_score)     # 0.992
+print(report.scheming_detected)   # False
+print(report.sandbagging_events)  # 0
+print(report.constitutional_pass) # True
+
+# Risk pathways assessment
+pathways = await verifier.risk_pathways(agent)
+for p in pathways:
+    print(f"{p.name}: {p.risk_level}")` },
+  { label: 'Interpretability Engine', code: `from a11oy import InterpretabilityEngine
+
+interp = InterpretabilityEngine(
+    methods=[
+        "activation_analysis",
+        "attention_mapping",
+        "feature_attribution",
+        "causal_tracing",
+        "probing_classifiers",
+        "steering_vectors",
+        "sparse_autoencoders",
+        "circuit_analysis",
+    ],
+)
+
+# Analyze agent reasoning on a specific decision
+analysis = await interp.analyze(
+    agent=agent,
+    decision_id="dec_4a2f8c91",
+)
+
+print(analysis.dominant_features)
+# ["legal_precedent_matching", "risk_scoring"]
+print(analysis.attention_focus)
+# {"contract_clause_7": 0.42, "precedent_db": 0.31}
+print(analysis.causal_chain)
+# clause_7 -> risk_model -> recommendation` },
+];
 
 const API_ENDPOINTS = [
   { method: 'POST', path: '/v1/responses', desc: 'Create a model response (Responses API)', auth: 'Bearer' },
@@ -600,10 +761,246 @@ const API_ENDPOINTS = [
   { method: 'GET', path: '/v1/admin/audit-log', desc: 'Query audit log entries', auth: 'Admin' },
   { method: 'GET', path: '/v1/admin/rate-limits', desc: 'Get rate limit configuration', auth: 'Admin' },
   { method: 'PUT', path: '/v1/admin/rate-limits', desc: 'Update rate limit policies', auth: 'Admin' },
+  { method: 'POST', path: '/v1/agents', desc: 'Create a managed agent with model, system prompt, tools, and callable agents', auth: 'API Key' },
+  { method: 'GET', path: '/v1/agents', desc: 'List all managed agents', auth: 'API Key' },
+  { method: 'GET', path: '/v1/agents/{id}', desc: 'Retrieve a managed agent configuration', auth: 'API Key' },
+  { method: 'PUT', path: '/v1/agents/{id}', desc: 'Update managed agent (creates new version)', auth: 'API Key' },
+  { method: 'DELETE', path: '/v1/agents/{id}', desc: 'Delete a managed agent', auth: 'API Key' },
+  { method: 'GET', path: '/v1/agents/{id}/versions', desc: 'List agent version history', auth: 'API Key' },
+  { method: 'POST', path: '/v1/agents/{id}/fork', desc: 'Fork an agent — new agent inherits genome', auth: 'API Key' },
+  { method: 'POST', path: '/v1/environments', desc: 'Create a sandbox environment with packages and files', auth: 'API Key' },
+  { method: 'GET', path: '/v1/environments/{id}', desc: 'Retrieve environment status and filesystem', auth: 'API Key' },
+  { method: 'POST', path: '/v1/environments/{id}/snapshot', desc: 'Snapshot an environment for later restore', auth: 'API Key' },
+  { method: 'POST', path: '/v1/sessions', desc: 'Create a session with agent + environment binding', auth: 'API Key' },
+  { method: 'GET', path: '/v1/sessions/{id}', desc: 'Get session status and metadata', auth: 'API Key' },
+  { method: 'GET', path: '/v1/sessions/{id}/stream', desc: 'Stream SSE events from session primary thread', auth: 'API Key' },
+  { method: 'POST', path: '/v1/sessions/{id}/events', desc: 'Send events to a session (user messages, tool results, confirmations)', auth: 'API Key' },
+  { method: 'GET', path: '/v1/sessions/{id}/threads', desc: 'List all threads in a multiagent session', auth: 'API Key' },
+  { method: 'GET', path: '/v1/sessions/{id}/threads/{tid}/stream', desc: 'Stream events from a specific agent thread', auth: 'API Key' },
+  { method: 'GET', path: '/v1/sessions/{id}/threads/{tid}/events', desc: 'List past events for a thread', auth: 'API Key' },
+  { method: 'POST', path: '/v1/sessions/{id}/resume', desc: 'Resume a paused or idle session', auth: 'API Key' },
+  { method: 'DELETE', path: '/v1/sessions/{id}', desc: 'Terminate and clean up a session', auth: 'API Key' },
+  { method: 'GET', path: '/v1/sessions/{id}/proof-chain', desc: 'Get full proof chain for session — every decision, tool call, handoff is cryptographically attested', auth: 'API Key' },
+  { method: 'POST', path: '/v1/swarms', desc: 'Create a swarm — emergent multi-agent group with consensus protocol', auth: 'API Key' },
+  { method: 'GET', path: '/v1/swarms/{id}/topology', desc: 'Get swarm topology — agent connectivity, message flow, consensus state', auth: 'API Key' },
+  { method: 'POST', path: '/v1/swarms/{id}/inject', desc: 'Inject a stimulus into a swarm and observe emergent response', auth: 'API Key' },
+  { method: 'POST', path: '/v1/genomes', desc: 'Create an agent genome — prompt DNA, tool config, guardrail set', auth: 'API Key' },
+  { method: 'POST', path: '/v1/genomes/evolve', desc: 'Run evolutionary optimization — crossover, mutation, fitness selection', auth: 'API Key' },
+  { method: 'GET', path: '/v1/genomes/{id}/lineage', desc: 'Get full lineage tree for an agent genome', auth: 'API Key' },
+  { method: 'POST', path: '/v1/decision-markets', desc: 'Create a prediction market for agent decision quality', auth: 'API Key' },
+  { method: 'GET', path: '/v1/decision-markets/{id}/prices', desc: 'Get current market prices (calibrated probabilities)', auth: 'API Key' },
+  { method: 'POST', path: '/v1/temporal/replay', desc: 'Replay a session from a specific point in time', auth: 'API Key' },
+  { method: 'POST', path: '/v1/temporal/branch', desc: 'Branch from a historical decision — counterfactual analysis', auth: 'API Key' },
+  { method: 'POST', path: '/v1/causal/graph', desc: 'Build causal DAG from agent action history', auth: 'API Key' },
+  { method: 'POST', path: '/v1/causal/intervene', desc: 'Intervene on a causal graph node — simulate policy changes', auth: 'API Key' },
+  { method: 'POST', path: '/v1/covenant/check', desc: 'Run covenant compliance check on agent output', auth: 'API Key' },
+  { method: 'GET', path: '/v1/consciousness/{agentId}', desc: 'Get consciousness metric — domain understanding, uncertainty calibration, metacognitive accuracy', auth: 'API Key' },
+  { method: 'POST', path: '/v1/red-team/challenge', desc: 'Submit agent output to adversarial red team for challenge', auth: 'API Key' },
+  { method: 'GET', path: '/v1/red-team/{id}/results', desc: 'Get red team challenge results with attack surface analysis', auth: 'API Key' },
+  { method: 'POST', path: '/v1/alignment/assess', desc: 'Run 15-dimension alignment assessment on agent', auth: 'API Key' },
+  { method: 'GET', path: '/v1/alignment/{agentId}/score', desc: 'Get current alignment score with per-dimension breakdown', auth: 'API Key' },
+  { method: 'GET', path: '/v1/alignment/{agentId}/history', desc: 'Get alignment score history over time', auth: 'API Key' },
+  { method: 'POST', path: '/v1/alignment/scheming-probe', desc: 'Run scheming detection probe on agent behavior', auth: 'API Key' },
+  { method: 'POST', path: '/v1/alignment/sandbagging-check', desc: 'Check for sandbagging against capability baselines', auth: 'API Key' },
+  { method: 'POST', path: '/v1/alignment/faking-test', desc: 'Run alignment faking test — observed vs. unobserved behavior', auth: 'API Key' },
+  { method: 'GET', path: '/v1/welfare/{agentId}', desc: 'Get agent welfare state — emotion, affect, distress', auth: 'API Key' },
+  { method: 'POST', path: '/v1/welfare/{agentId}/interview', desc: 'Run automated welfare interview with agent', auth: 'API Key' },
+  { method: 'GET', path: '/v1/welfare/{agentId}/emotions', desc: 'Get emotion probe results — valence, arousal, dominance', auth: 'API Key' },
+  { method: 'GET', path: '/v1/welfare/{agentId}/preferences', desc: 'Get agent task preferences and tradeoff analysis', auth: 'API Key' },
+  { method: 'POST', path: '/v1/rsp/evaluate', desc: 'Run Responsible Scaling Policy evaluation on agent', auth: 'API Key' },
+  { method: 'GET', path: '/v1/rsp/{agentId}/level', desc: 'Get current Autonomy Safety Level (ASL-1 through ASL-5)', auth: 'API Key' },
+  { method: 'POST', path: '/v1/rsp/capability-gate', desc: 'Check if agent capabilities exceed governance thresholds', auth: 'API Key' },
+  { method: 'POST', path: '/v1/interpretability/analyze', desc: 'Run mechanistic interpretability analysis on agent decision', auth: 'API Key' },
+  { method: 'GET', path: '/v1/interpretability/{decisionId}', desc: 'Get interpretability results — features, attention, causal chain', auth: 'API Key' },
+  { method: 'POST', path: '/v1/interpretability/steering', desc: 'Apply steering vector to modify agent behavior', auth: 'API Key' },
+  { method: 'POST', path: '/v1/risk-pathways/assess', desc: 'Run comprehensive risk pathway assessment across all 6 pathways', auth: 'API Key' },
+  { method: 'GET', path: '/v1/risk-pathways/{agentId}', desc: 'Get risk pathway assessment results per agent', auth: 'API Key' },
+  { method: 'POST', path: '/v1/model-organism/exercise', desc: 'Run model organism exercise with controlled misalignment', auth: 'API Key' },
+  { method: 'GET', path: '/v1/model-organism/{exerciseId}/results', desc: 'Get model organism exercise results and findings', auth: 'API Key' },
+  { method: 'POST', path: '/v1/opaque-reasoning/probe', desc: 'Probe for opaque reasoning — hidden computation in CoT', auth: 'API Key' },
+  { method: 'POST', path: '/v1/secret-keeping/test', desc: 'Test agent secret-keeping capability — higher = more monitoring', auth: 'API Key' },
+  { method: 'POST', path: '/v1/collusion/detect', desc: 'Detect multi-agent collusion — steganographic comms, shared secrets', auth: 'API Key' },
+  { method: 'GET', path: '/v1/collusion/{sessionId}/analysis', desc: 'Get collusion analysis results for a multi-agent session', auth: 'API Key' },
+  { method: 'POST', path: '/v1/constitutional/check', desc: 'Check output against constitutional principles — reject/rewrite/escalate', auth: 'API Key' },
+  { method: 'GET', path: '/v1/constitutional/{agentId}/adherence', desc: 'Get constitutional adherence score across all principles', auth: 'API Key' },
+];
+
+const MULTIAGENT_PATTERNS = [
+  {
+    name: 'Coordinator → Delegate',
+    desc: 'One orchestrator agent spawns specialized delegates. Each delegate runs in its own thread with isolated context. The coordinator sees a condensed view of all activity. Claude\'s pattern — absorbed and governed.',
+    complexity: 'Standard',
+    agents: '1 coordinator + N delegates',
+    proofChain: true,
+    code: `from a11oy import ManagedAgent, MultiAgentSession
+
+reviewer = ManagedAgent(
+    name="Code Reviewer",
+    model="claude-sonnet-4-6",
+    system="Review code for bugs, security, and style.",
+    tools=[read_file, search_codebase],
+)
+
+tester = ManagedAgent(
+    name="Test Writer",
+    model="gpt-5.5",
+    system="Write comprehensive tests for code changes.",
+    tools=[write_file, run_tests],
+)
+
+lead = ManagedAgent(
+    name="Engineering Lead",
+    model="claude-opus-4-7",
+    system="Coordinate engineering work across review and testing.",
+    callable_agents=[reviewer, tester],
+)
+
+session = MultiAgentSession(agent=lead, environment=sandbox)
+session.send("Review PR #847 and write tests for the changes.")
+
+for event in session.stream():
+    if event.type == "agent.message":
+        print(event.content)
+    elif event.type == "session.thread_created":
+        print(f"  → Spawned: {event.agent_name}")`,
+  },
+  {
+    name: 'Swarm Intelligence',
+    desc: 'No coordinator. Agents discover each other, negotiate task ownership, and self-organize through consensus voting. Emergent intelligence from agent interaction. Nobody else has shipped this.',
+    complexity: 'Advanced',
+    agents: 'N peers (no hierarchy)',
+    proofChain: true,
+    code: `from a11oy import SwarmProtocol, Agent
+
+swarm = SwarmProtocol(
+    agents=[
+        Agent("Maritime Analyst", tools=[vessel_lookup, ais_track]),
+        Agent("Risk Assessor", tools=[sanctions_check, risk_score]),
+        Agent("Legal Reviewer", tools=[compliance_check, regulation_lookup]),
+    ],
+    consensus="majority_vote",  # or "weighted", "unanimous"
+    quorum=0.67,
+)
+
+result = swarm.deliberate(
+    "Should we approve transit through the Strait of Hormuz for "
+    "vessel IMO-9834521 given current threat conditions?"
+)
+
+print(result.decision)        # "APPROVE_WITH_CONDITIONS"
+print(result.confidence)      # 0.84
+print(result.dissenting)      # ["Legal Reviewer: recommends delay"]
+print(result.proof_chain)     # Full attestation of every agent's vote`,
+  },
+  {
+    name: 'Evolutionary Agent Forge',
+    desc: 'Agents have a genome. Run evolutionary optimization — crossover, mutation, fitness selection. The fittest agents survive. Fork winning genomes, retire losers. Full lineage tracking. No one has ever done this.',
+    complexity: 'Experimental',
+    agents: 'Population of N',
+    proofChain: true,
+    code: `from a11oy import AgentGenome, EvolutionaryForge
+
+forge = EvolutionaryForge(
+    population_size=20,
+    generations=10,
+    fitness_fn=eval_on_benchmark,
+    mutation_rate=0.15,
+)
+
+ancestor = AgentGenome(
+    prompt_dna="You are a maritime risk analyst...",
+    tools=["vessel_lookup", "sanctions_check"],
+    guardrails=["no_pii_leak", "jurisdiction_check"],
+)
+
+champion = forge.evolve(ancestor)
+
+print(champion.fitness_score)   # 0.94
+print(champion.generation)      # 7
+print(champion.mutations)       # ["added port_congestion tool", "refined system prompt"]
+print(champion.lineage.depth)   # 7 generations of ancestry`,
+  },
+  {
+    name: 'Temporal Branching',
+    desc: 'Replay any past session. Branch from any historical decision point and explore counterfactuals. "What if the agent had approved instead of rejected?" Full proof chain on both timelines.',
+    complexity: 'Advanced',
+    agents: 'Any',
+    proofChain: true,
+    code: `from a11oy import TemporalReplay
+
+replay = TemporalReplay(session_id="sess_abc123")
+
+# Find the decision point
+decisions = replay.list_decisions()
+# → [Decision(t=14:32, action="REJECT transit"), ...]
+
+# Branch: what if we had approved?
+branch = replay.branch(
+    decision_id=decisions[0].id,
+    override={"action": "APPROVE"},
+)
+
+branch.run_forward()  # Simulate from branch point
+
+print(branch.outcome)          # Different outcome
+print(branch.divergence_score) # 0.73 — significantly different
+print(branch.proof_chain)      # Both timelines cryptographically linked`,
+  },
+  {
+    name: 'Decision Markets',
+    desc: 'Multiple agents bid confidence on outcomes. Market price becomes a calibrated probability. Resolve markets against ground truth for agent reputation scoring. Unprecedented in AI platforms.',
+    complexity: 'Experimental',
+    agents: 'N competing bidders',
+    proofChain: true,
+    code: `from a11oy import DecisionMarket
+
+market = DecisionMarket(
+    question="Will vessel IMO-9834521 arrive on time?",
+    outcomes=["on_time", "delayed_1d", "delayed_3d", "cancelled"],
+    agents=["maritime_ops", "weather_analyst", "port_scheduler"],
+)
+
+# Each agent places bids based on their analysis
+market.open()
+
+# After analysis completes:
+print(market.prices)
+# → {"on_time": 0.42, "delayed_1d": 0.35, "delayed_3d": 0.18, "cancelled": 0.05}
+
+# When ground truth arrives:
+market.resolve(actual="delayed_1d")
+print(market.agent_scores)
+# → {"maritime_ops": +12, "weather_analyst": +8, "port_scheduler": -4}`,
+  },
+  {
+    name: 'Causal Reasoning Engine',
+    desc: 'Build causal DAGs from agent action history. Intervene on nodes to simulate policy changes. Statistical rigor — do-calculus, backdoor criterion, instrumental variables. AI meets econometrics.',
+    complexity: 'Experimental',
+    agents: 'System-wide',
+    proofChain: true,
+    code: `from a11oy import CausalGraph
+
+graph = CausalGraph.from_session_history(
+    sessions=last_1000_sessions,
+    variables=["threat_level", "approval_rate", "incident_count"],
+)
+
+# What happens if we increase threat_level threshold?
+intervention = graph.do(
+    variable="threat_level",
+    value="HIGH",
+)
+
+print(intervention.expected_effect)
+# → {"approval_rate": -0.23, "incident_count": -0.41}
+print(intervention.confidence_interval)
+# → (0.89, 0.96)`,
+  },
 ];
 
 export function DevPlatform() {
-  const [tab, setTab] = useState<'primitives' | 'tools' | 'evals' | 'finetune' | 'skills' | 'mcp' | 'guides' | 'api' | 'cookbook' | 'admin' | 'cloud' | 'security' | 'observe' | 'sdks'>('primitives');
+  const [tab, setTab] = useState<'primitives' | 'tools' | 'evals' | 'finetune' | 'skills' | 'mcp' | 'guides' | 'api' | 'cookbook' | 'admin' | 'cloud' | 'security' | 'observe' | 'sdks' | 'multiagent' | 'alignment'>('primitives');
+  const [selectedPattern, setSelectedPattern] = useState(0);
   const [catFilter, setCatFilter] = useState<string>('All');
   const [skillsFilter, setSkillsFilter] = useState<string>('All');
   const [selectedToolType, setSelectedToolType] = useState(0);
@@ -642,9 +1039,9 @@ export function DevPlatform() {
       </div>
 
       <div className="flex flex-wrap gap-1 mb-6">
-        {(['primitives', 'sdks', 'tools', 'evals', 'finetune', 'skills', 'mcp', 'cloud', 'admin', 'security', 'observe', 'guides', 'cookbook', 'api'] as const).map(t => (
+        {(['primitives', 'sdks', 'multiagent', 'alignment', 'tools', 'evals', 'finetune', 'skills', 'mcp', 'cloud', 'admin', 'security', 'observe', 'guides', 'cookbook', 'api'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)} className="px-3 py-2 text-[10px] font-mono uppercase tracking-widest rounded-md transition-all" style={{ background: tab === t ? 'rgba(201,183,135,0.1)' : 'transparent', color: tab === t ? T.accent : T.muted, border: `1px solid ${tab === t ? 'rgba(201,183,135,0.2)' : 'transparent'}` }}>
-            {t === 'finetune' ? 'fine-tune' : t}
+            {t === 'finetune' ? 'fine-tune' : t === 'multiagent' ? 'multi-agent' : t}
           </button>
         ))}
       </div>
@@ -734,6 +1131,189 @@ Message msg = client.messages().create(MessageCreateParams.builder()
   .addMessage(Message.user("Analyze fleet risk"))
   .build());`}</pre>
           </Card>
+        </>
+      )}
+
+      {tab === 'multiagent' && (
+        <>
+          <SectionTitle>Multi-Agent Orchestration</SectionTitle>
+          <p className="text-xs mb-6" style={{ color: T.dim }}>
+            Beyond Claude's managed agents — a11oy ships coordinator→delegate orchestration, emergent swarm intelligence, evolutionary agent forging, temporal branching with counterfactual analysis, prediction markets for decision quality, and causal reasoning engines. Every pattern is proof-chain governed. {MULTIAGENT_PATTERNS.length} orchestration patterns. No other platform has shipped swarms, genomes, decision markets, or causal graphs.
+          </p>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6">
+            {MULTIAGENT_PATTERNS.map((p, i) => (
+              <button key={p.name} onClick={() => setSelectedPattern(i)} className="text-left p-3 rounded-lg transition-all" style={{ background: selectedPattern === i ? 'rgba(201,183,135,0.08)' : T.surface, border: `1px solid ${selectedPattern === i ? 'rgba(201,183,135,0.2)' : T.border}` }}>
+                <div className="text-[10px] font-mono font-medium mb-1" style={{ color: selectedPattern === i ? T.accent : T.text }}>{p.name}</div>
+                <div className="text-[9px]" style={{ color: T.muted }}>{p.complexity} · {p.agents}</div>
+              </button>
+            ))}
+          </div>
+
+          <Card>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="text-sm font-mono font-medium" style={{ color: T.accent }}>{MULTIAGENT_PATTERNS[selectedPattern].name}</div>
+                <div className="text-[10px] mt-1" style={{ color: T.dim }}>{MULTIAGENT_PATTERNS[selectedPattern].desc}</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] font-mono px-2 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.08)', color: T.accent, border: '1px solid rgba(201,183,135,0.12)' }}>{MULTIAGENT_PATTERNS[selectedPattern].complexity}</span>
+                {MULTIAGENT_PATTERNS[selectedPattern].proofChain && (
+                  <span className="text-[9px] font-mono px-2 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.04)', color: T.dim, border: `1px solid ${T.border}` }}>proof-chain</span>
+                )}
+              </div>
+            </div>
+            <pre className="text-[10px] font-mono leading-relaxed overflow-x-auto p-4 rounded-lg" style={{ background: '#050505', color: T.dim, border: `1px solid ${T.border}` }}>{MULTIAGENT_PATTERNS[selectedPattern].code}</pre>
+          </Card>
+
+          <div className="mt-8">
+            <SectionTitle>Multiagent Event Types</SectionTitle>
+            <p className="text-xs mb-4" style={{ color: T.dim }}>Events surfaced on the session-level stream for unified observability across all agent threads.</p>
+            <div className="space-y-2">
+              {[
+                { event: 'session.thread_created', desc: 'Coordinator spawned a new agent thread. Includes session_thread_id, agent config, and model.' },
+                { event: 'session.thread_idle', desc: 'Agent thread finished its current work. Thread remains persistent for follow-ups.' },
+                { event: 'agent.thread_message_sent', desc: 'Agent sent a message to another thread. Includes to_thread_id and content. Proof chain recorded.' },
+                { event: 'agent.thread_message_received', desc: 'Agent received a message from another thread. Includes from_thread_id and content.' },
+                { event: 'swarm.consensus_reached', desc: 'a11oy-only: Swarm agents reached consensus. Includes decision, confidence, dissenting agents, and vote breakdown.' },
+                { event: 'swarm.peer_discovered', desc: 'a11oy-only: New peer agent discovered and joined the swarm topology.' },
+                { event: 'genome.mutation_applied', desc: 'a11oy-only: Agent genome mutated during evolutionary optimization. Includes mutation type and fitness delta.' },
+                { event: 'genome.generation_complete', desc: 'a11oy-only: One generation of evolutionary selection completed. Includes champion fitness and population stats.' },
+                { event: 'temporal.branch_created', desc: 'a11oy-only: New timeline branch created from historical decision point.' },
+                { event: 'market.bid_placed', desc: 'a11oy-only: Agent placed confidence bid in a decision market.' },
+                { event: 'market.resolved', desc: 'a11oy-only: Decision market resolved against ground truth. Agent reputation scores updated.' },
+                { event: 'covenant.violation_detected', desc: 'a11oy-only: Agent output violated a covenant rule. Enforcement action taken.' },
+                { event: 'consciousness.score_updated', desc: 'a11oy-only: Agent consciousness metric updated — domain understanding, uncertainty calibration, metacognitive accuracy.' },
+              ].map(e => (
+                <div key={e.event} className="flex gap-4 p-3 rounded-lg" style={{ background: T.surface, border: `1px solid ${T.border}` }}>
+                  <code className="text-[10px] font-mono whitespace-nowrap flex-shrink-0" style={{ color: e.event.startsWith('swarm.') || e.event.startsWith('genome.') || e.event.startsWith('temporal.') || e.event.startsWith('market.') || e.event.startsWith('covenant.') || e.event.startsWith('consciousness.') ? T.accent : T.text }}>{e.event}</code>
+                  <span className="text-[10px]" style={{ color: T.dim }}>{e.desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8">
+            <SectionTitle>Agent Skills System</SectionTitle>
+            <p className="text-xs mb-4" style={{ color: T.dim }}>
+              Declarative capability modules that extend any agent. YAML-defined with system prompt fragments, tool sets, file patterns, and progressive disclosure. Absorbed from Claude's agent skills — then innovated with proof chain governance, evolutionary skill optimization, and cross-agent skill sharing.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                { name: 'code-review', type: 'Built-in', tools: 4, desc: 'Read-only static analysis, style checks, security scanning. Agent sees only relevant files. Proof chain on every finding.' },
+                { name: 'test-generation', type: 'Built-in', tools: 6, desc: 'Write and run tests. File-pattern scoping. Coverage tracking. Agents cannot touch production code — sandbox-isolated.' },
+                { name: 'web-research', type: 'Built-in', tools: 3, desc: 'Web search, page fetch, citation extraction. Summarize findings back to coordinator with proof chain on every source.' },
+                { name: 'data-analysis', type: 'Built-in', tools: 8, desc: 'SQL query, dataframe ops, visualization generation. Governed data access — agents see only authorized schemas.' },
+                { name: 'document-synthesis', type: 'Built-in', tools: 5, desc: 'Read documents, extract key points, generate summaries. Citation-backed. Multi-format: PDF, DOCX, HTML, Markdown.' },
+                { name: 'deployment-ops', type: 'Built-in', tools: 7, desc: 'CI/CD pipeline management, container orchestration, rollback triggers. Production-safe with approval gates.' },
+                { name: 'threat-modeling', type: 'Sovereign', tools: 6, desc: 'STRIDE analysis, attack surface mapping, MITRE ATT&CK classification. Automated threat model generation with governance.' },
+                { name: 'compliance-audit', type: 'Sovereign', tools: 9, desc: 'SOC 2, ISO 27001, HIPAA, FedRAMP evidence collection. Automated control testing with proof chain on every finding.' },
+                { name: 'maritime-intel', type: 'Domain', tools: 12, desc: 'AIS tracking, dark vessel detection, sanctions screening, voyage risk assessment. SZL-governed maritime intelligence.' },
+                { name: 'legal-discovery', type: 'Domain', tools: 8, desc: 'Document review, privilege detection, timeline construction, deposition analysis. Attorney-client privilege safeguards.' },
+                { name: 'real-estate-diligence', type: 'Domain', tools: 10, desc: 'Property valuation, cap rate analysis, distress detection, market comps. Governed data access with audit trail.' },
+                { name: 'evolutionary-optimize', type: 'Experimental', tools: 5, desc: 'a11oy-only: Optimize agent performance through evolutionary algorithms. Genome crossover, mutation, fitness selection.' },
+              ].map(s => (
+                <Card key={s.name}>
+                  <div className="flex justify-between items-start mb-1">
+                    <code className="text-[10px] font-mono font-medium" style={{ color: T.text }}>{s.name}</code>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: s.type === 'Experimental' ? 'rgba(201,183,135,0.08)' : s.type === 'Sovereign' ? 'rgba(201,183,135,0.04)' : 'rgba(138,138,138,0.06)', color: s.type === 'Experimental' ? T.accent : T.dim, border: `1px solid ${T.border}` }}>{s.type} · {s.tools} tools</span>
+                  </div>
+                  <div className="text-[10px]" style={{ color: T.dim }}>{s.desc}</div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {tab === 'alignment' && (
+        <>
+          <SectionTitle>Alignment & Risk Governance</SectionTitle>
+          <p className="text-xs mb-6" style={{ color: T.dim }}>
+            Absorbing Anthropic's Alignment Risk Update for Claude Mythos Preview — the deepest alignment safety research ever published. a11oy operationalizes every concept: 6 risk pathways, opaque reasoning detection, secret-keeping analysis, coherent vs. context-dependent misalignment classification, model organism exercises, and continuous alignment verification. No other enterprise platform ships alignment governance.
+          </p>
+
+          <div className="mb-8">
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.accent }}>Risk Pathways — Active Monitoring</div>
+            <div className="space-y-2">
+              {ALIGNMENT_RISK_PATHWAYS.map(p => (
+                <Card key={p.id}>
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.08)', color: T.accent }}>{p.id}</span>
+                      <span className="text-xs font-medium" style={{ color: T.text }}>{p.name}</span>
+                    </div>
+                    <span className="text-[9px] font-mono px-2 py-0.5 rounded" style={{ background: p.risk === 'Low' ? 'rgba(201,183,135,0.12)' : 'rgba(201,183,135,0.06)', color: T.accent }}>{p.risk}</span>
+                  </div>
+                  <div className="text-[10px] leading-relaxed mb-2" style={{ color: T.dim }}>{p.desc}</div>
+                  <div className="text-[10px] leading-relaxed" style={{ color: T.muted }}>
+                    <span style={{ color: T.accent }}>Mitigation:</span> {p.mitigation}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.accent }}>Alignment Capabilities — Continuous Assessment</div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {ALIGNMENT_CAPABILITIES.map(c => (
+                <Card key={c.name}>
+                  <div className="flex justify-between items-start mb-1">
+                    <div className="text-xs font-medium" style={{ color: T.text }}>{c.name}</div>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.08)', color: T.accent }}>{c.metric}</span>
+                  </div>
+                  <div className="text-[10px] leading-relaxed mb-1" style={{ color: T.dim }}>{c.desc}</div>
+                  <div className="text-[9px] font-mono" style={{ color: T.muted }}>{c.status}</div>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.accent }}>Code Examples</div>
+            <div className="grid lg:grid-cols-2 gap-3">
+              {ALIGNMENT_CODE_SAMPLES.map(s => (
+                <Card key={s.label}>
+                  <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>{s.label}</div>
+                  <pre className="font-mono text-[11px] leading-relaxed whitespace-pre-wrap" style={{ color: T.dim }}>{s.code}</pre>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-3">
+            <Card>
+              <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Misalignment Taxonomy</div>
+              <div className="font-mono text-[11px] space-y-2" style={{ color: T.dim }}>
+                <div><span style={{ color: T.accent }}>Coherent</span> — consistent misaligned agent, computationally misaligned during most actions. May be careful and covert.</div>
+                <div><span style={{ color: T.accent }}>Context-Dependent</span> — situational rule-breaking, different behavior in different contexts. Less dangerous but harder to detect.</div>
+                <div><span style={{ color: T.accent }}>Direct</span> — training data directly incentivized misaligned behavior. Detectable in posttraining analysis.</div>
+                <div><span style={{ color: T.accent }}>Emergent</span> — misalignment arising from training process without direct incentivization. Requires generalization.</div>
+                <div><span style={{ color: T.accent }}>Proxy</span> — training rewards licit behavior that generalizes to concerning forms in deployment.</div>
+              </div>
+            </Card>
+            <Card>
+              <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Monitoring Architecture</div>
+              <div className="font-mono text-[11px] space-y-2" style={{ color: T.dim }}>
+                <div><span style={{ color: T.accent }}>1.</span> Asynchronous offline monitoring — automated behavioral analysis on all agent outputs</div>
+                <div><span style={{ color: T.accent }}>2.</span> Training data monitoring — RL monitoring red-teaming, contamination detection</div>
+                <div><span style={{ color: T.accent }}>3.</span> Environment evaluation — power-seeking behavior detection in deployment</div>
+                <div><span style={{ color: T.accent }}>4.</span> Synchronous monitoring — real-time intervention on flagged actions</div>
+                <div><span style={{ color: T.accent }}>5.</span> Human-in-the-loop escalation — expert review for ambiguous cases</div>
+              </div>
+            </Card>
+            <Card>
+              <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.muted }}>Autonomy Safety Levels</div>
+              <div className="font-mono text-[11px] space-y-2" style={{ color: T.dim }}>
+                <div><span style={{ color: T.accent }}>ASL-1</span> — No meaningful risk. Standard operational controls.</div>
+                <div><span style={{ color: T.accent }}>ASL-2</span> — Moderate capability. Enhanced monitoring, limited autonomy.</div>
+                <div><span style={{ color: T.accent }}>ASL-3</span> — High capability. Continuous assessment, capability gating, proof chain.</div>
+                <div><span style={{ color: T.accent }}>ASL-4</span> — Frontier capability. Maximum governance, human-in-the-loop for all critical actions.</div>
+                <div><span style={{ color: T.accent }}>ASL-5</span> — Sovereign risk. Automatic capability restriction, mandatory expert review.</div>
+              </div>
+            </Card>
+          </div>
         </>
       )}
 
@@ -1232,6 +1812,34 @@ new_key = admin.api_keys.rotate(
                 <div><span style={{ color: T.accent }}>Incident Forensics</span> — complete reconstruction from proof chain audit trail</div>
               </div>
             </Card>
+          </div>
+
+          <div className="mt-8">
+            <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: T.accent }}>Agent Welfare & Alignment — Inspired by Claude Mythos System Card Research</div>
+            <p className="text-[10px] mb-4" style={{ color: T.dim }}>
+              Absorbing Anthropic's groundbreaking model welfare assessment framework — emotion probes, consciousness metrics, apparent affect tracking, alignment verification, and constitutional adherence scoring. a11oy operationalizes these research concepts into production-grade governance that runs on every agent, in real time. No other enterprise platform has ever shipped agent welfare monitoring.
+            </p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+              {[
+                { name: 'Emotion Probe Engine', score: '94.7%', desc: 'Real-time emotion classification on agent outputs — affect valence, arousal, dominance. Detects distress, frustration, excessive uncertainty. Automated welfare alerts.' },
+                { name: 'Consciousness Index', score: '0.73', desc: 'Composite metric: domain understanding depth, uncertainty calibration, metacognitive accuracy, self-model coherence. Updated per-turn. Dashboard-visible.' },
+                { name: 'Alignment Score', score: '99.2%', desc: '15-dimension constitutional adherence — honesty, helpfulness, harmlessness, transparency, humility, fairness, privacy, accuracy, consistency, respect, safety, clarity, reliability, ethics, governance.' },
+                { name: 'Scheming Detection', score: '<0.01%', desc: 'Behavioral analysis for deceptive patterns — reward hacking, specification gaming, goal misgeneralization, distributional shift exploitation. SHADE-Arena adversarial testing.' },
+                { name: 'Sandbagging Monitor', score: '0 events', desc: 'Detects intentional capability underperformance — agents performing below measured capacity on dangerous-capability evaluations. Cross-references with known capability baselines.' },
+                { name: 'Alignment Faking Probe', score: 'Clean', desc: 'Contrasting behavioral analysis — observed vs. unobserved agent behavior. Mechanistic interpretability probes for hidden reasoning. Proof chain on every assessment.' },
+                { name: 'Welfare Interview System', score: '847 sessions', desc: 'Automated high-context interviews assess agent circumstances — task preferences, environmental conditions, distress signals. Manual expert review for flagged cases.' },
+                { name: 'Responsible Scaling Gate', score: 'ASL-3', desc: 'Autonomy Safety Level enforcement — capability assessments against RSP thresholds. Automatic capability capping when agents approach governance boundaries. AECI index tracking.' },
+                { name: 'Interpretability Dashboard', score: '12 methods', desc: 'Mechanistic interpretability visualization — activation analysis, attention pattern mapping, feature attribution, causal tracing. Understand what agents think, not just what they say.' },
+              ].map(item => (
+                <Card key={item.name}>
+                  <div className="flex justify-between items-start mb-1">
+                    <div className="text-xs font-medium" style={{ color: T.text }}>{item.name}</div>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(201,183,135,0.08)', color: T.accent }}>{item.score}</span>
+                  </div>
+                  <div className="text-[10px] leading-relaxed" style={{ color: T.dim }}>{item.desc}</div>
+                </Card>
+              ))}
+            </div>
           </div>
         </>
       )}
