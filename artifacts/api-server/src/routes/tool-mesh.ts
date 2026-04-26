@@ -5,6 +5,7 @@ import {
   defaultGateway,
   defaultToolRegistry,
 } from '@workspace/tool-mesh';
+import { initSandboxRuntime } from '../lib/sandbox-init.js';
 import { type IRouter, Router } from 'express';
 import { handleRouteError, sendError, sendSuccess } from '../lib/api-response';
 import { logger } from '../lib/logger';
@@ -12,6 +13,12 @@ import { authMiddleware } from '../middlewares/auth';
 import { tenantScope } from '../middlewares/tenant-scope';
 
 const router: IRouter = Router();
+
+// Ensure sandbox tools are registered in the Tool Mesh gateway.
+// `initSandboxRuntime` is idempotent — if index.ts called it at startup this
+// is a no-op. Guarding here ensures tools are registered even when the route
+// module is loaded before the boot sequence (e.g., in test environments).
+void initSandboxRuntime();
 
 /**
  * Wire CodeSandbox to the registry's internal CatalogSearch so that

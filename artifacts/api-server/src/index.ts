@@ -45,6 +45,7 @@ import { isSeedDataAllowed, resolveRuntimeMode } from '@szl-holdings/config';
 import { otelReady, registerGraphQLHandler } from './app.js';
 import { buildGraphQLMiddleware } from './graphql/index.js';
 import { initCognitiveTelemetry } from './lib/cognitive-telemetry.js';
+import { initSandboxRuntime } from './lib/sandbox-init.js';
 import { registerGenAITelemetryBridge } from './lib/genai-telemetry-bridge.js';
 import { registerInferenceLogBridge } from './lib/inference-log-bridge.js';
 import { pingRedis } from './lib/redis-client.js';
@@ -557,6 +558,14 @@ export async function bootstrap(
       await initGuardianEngine();
       getAlloyRunManager();
       logger.info('[bootstrap] Guardian engine and Alloy RunManager ready');
+    });
+
+    // Step 2d: Register governed sandbox tools in the Tool Mesh gateway.
+    // Must run at startup (not on first route load) so MCP clients can
+    // discover sandbox tools via capability negotiation before any route
+    // handler is invoked.
+    await bootstrapStep('initSandboxRuntime', async () => {
+      await initSandboxRuntime();
     });
 
     // Step 3: Start durable (PostgreSQL-backed) job queue

@@ -233,6 +233,52 @@ const defaultStageExecutor: StageExecutorFn = async (stage, input, ctx) => {
       return { output: { approved: true, gatePassed: true }, confidence: 1 };
     }
 
+    case 'Sandbox': {
+      // Sandbox stages are routed to the sandbox runtime for governed execution.
+      // In non-live modes, side effects are suppressed to prevent mutation of
+      // production state — the result carries a suppressed marker for replay/counterfactual.
+      if (isNonLiveMode(mode)) {
+        return {
+          output: {
+            suppressed: true,
+            objective: stage.objective,
+            sessionId: stage.sessionId,
+            mode,
+            reason: 'non-live mode',
+          },
+          confidence: 0.9,
+        };
+      }
+
+      // Dynamic import to avoid hard-coupling the substrate to the sandbox runtime
+      // unless a Sandbox stage actually appears in the workflow. This preserves
+      // tree-shaking for workflows that never use sandbox stages.
+      const { defaultSandboxClient, ManifestSchema } = await import('@workspace/sandbox-runtime');
+      const manifest = ManifestSchema.parse(stage.manifest ?? { entries: [] });
+
+      const tenantId = stage.tenantId ?? 'system';
+
+      let sessionId = stage.sessionId;
+      // Pass tenantId to getSession — prevents cross-tenant session reuse
+      // if stage.sessionId originated from a different workflow or tenant.
+      let session = sessionId ? defaultSandboxClient.getSession(sessionId, tenantId) : undefined;
+
+      if (!session) {
+        session = await defaultSandboxClient.createSession(manifest, tenantId);
+        sessionId = session.sessionId;
+      }
+
+      const result = await defaultSandboxClient.runAgent(sessionId!, stage.objective, {
+        shellTimeoutMs: stage.shellTimeoutMs,
+        domain: 'substrate',
+      }, tenantId);
+
+      return {
+        output: result,
+        confidence: result.status === 'completed' ? 0.9 : 0.3,
+      };
+    }
+
     default: {
       // Exhaustiveness check — never typechecks if all cases are handled
       const _exhaustive: never = stage;

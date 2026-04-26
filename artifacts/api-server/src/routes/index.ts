@@ -284,6 +284,7 @@ router.use("/ontology", lazyMount(() => import("./ontology"), "ontology"));
 
 router.use(lazyMatch("/cognitive-runtime", () => import("./cognitive-runtime"), "cognitive-runtime"));
 router.use(lazyMatch("/agents", () => import("./agents"), "agents"));
+router.use(lazyMatch("/sandbox", () => import("./sandbox"), "sandbox"));
 router.use(lazyMatch("/atlas/artifacts", () => import("./atlas-artifacts"), "atlas-artifacts"));
 router.use(
   lazyMatch(

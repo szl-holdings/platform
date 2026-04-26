@@ -109,6 +109,7 @@
     "@szl-holdings/prompt-registry": "workspace:*",
     "@workspace/memory-fabric": "workspace:*",
     "@workspace/cognitive-observability": "workspace:*",
+    "@workspace/sandbox-runtime": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

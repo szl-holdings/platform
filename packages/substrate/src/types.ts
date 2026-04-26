@@ -37,7 +37,7 @@ export type SideEffectCategory =
 
 // ─── Stage Type / Runtime / Priority ─────────────────────────────────────────
 
-export type StageType = 'Reason' | 'Retrieve' | 'ToolCall' | 'Verify' | 'Decide' | 'ApprovalGate';
+export type StageType = 'Reason' | 'Retrieve' | 'ToolCall' | 'Verify' | 'Decide' | 'ApprovalGate' | 'Sandbox';
 export const StageTypeSchema = z.enum([
   'Reason',
   'Retrieve',
@@ -45,6 +45,7 @@ export const StageTypeSchema = z.enum([
   'Verify',
   'Decide',
   'ApprovalGate',
+  'Sandbox',
 ]);
 
 export type StageRuntime = 'typescript' | 'python';
@@ -131,13 +132,33 @@ export interface ApprovalGate extends BaseStage {
   approvalTimeoutMs: number;
 }
 
+/**
+ * SandboxStage — routes stage execution into a governed sandbox session.
+ * The stage creates (or resumes) a sandbox session, runs the objective
+ * inside it, and returns the agent run result including workspace artifacts.
+ */
+export interface SandboxStage extends BaseStage {
+  type: 'Sandbox';
+  /** Human-readable objective forwarded to SandboxAgent.run(). */
+  objective: string;
+  /** Sandbox manifest (inline files, env vars, output dirs). */
+  manifest?: Record<string, unknown>;
+  /** Sandbox session ID to reuse (if resuming an existing session). */
+  sessionId?: string;
+  /** Shell timeout override in milliseconds. */
+  shellTimeoutMs?: number;
+  /** Owning tenant org ID — required for session isolation. Defaults to 'system'. */
+  tenantId?: string;
+}
+
 export type AnyStage =
   | ReasonStage
   | RetrieveStage
   | ToolCallStage
   | VerifyStage
   | DecideStage
-  | ApprovalGate;
+  | ApprovalGate
+  | SandboxStage;
 
 // ─── Zod Schemas for AnyStage (runtime validation only) ──────────────────────
 
@@ -187,6 +208,15 @@ export const ApprovalGateSchema = BaseStageSchema.extend({
   approvalTimeoutMs: z.number().int().nonnegative().default(0),
 });
 
+export const SandboxStageSchema = BaseStageSchema.extend({
+  type: z.literal('Sandbox'),
+  objective: z.string().min(1),
+  manifest: z.record(z.unknown()).optional(),
+  sessionId: z.string().optional(),
+  shellTimeoutMs: z.number().int().positive().optional(),
+  tenantId: z.string().optional(),
+});
+
 export const AnyStageSchema = z.discriminatedUnion('type', [
   ReasonStageSchema,
   RetrieveStageSchema,
@@ -194,6 +224,7 @@ export const AnyStageSchema = z.discriminatedUnion('type', [
   VerifyStageSchema,
   DecideStageSchema,
   ApprovalGateSchema,
+  SandboxStageSchema,
 ]);
 
 // ─── Confidence Budget ────────────────────────────────────────────────────────

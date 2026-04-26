@@ -822,6 +822,9 @@ importers:
       '@workspace/run-ledger':
         specifier: workspace:*
         version: link:../../packages/run-ledger
+      '@workspace/sandbox-runtime':
+        specifier: workspace:*
+        version: link:../../packages/sandbox-runtime
       '@workspace/self-model':
         specifier: workspace:*
         version: link:../../packages/self-model
@@ -4866,6 +4869,37 @@ importers:
         specifier: 'catalog:'
         version: 25.3.5
 
+  packages/sandbox-runtime:
+    dependencies:
+      '@workspace/agents-core':
+        specifier: workspace:*
+        version: link:../agents-core
+      '@workspace/cognitive-observability':
+        specifier: workspace:*
+        version: link:../cognitive-observability
+      '@workspace/guardian':
+        specifier: workspace:*
+        version: link:../guardian
+      '@workspace/memory-fabric':
+        specifier: workspace:*
+        version: link:../memory-fabric
+      '@workspace/tool-mesh':
+        specifier: workspace:*
+        version: link:../tool-mesh
+      '@workspace/trace-graph':
+        specifier: workspace:*
+        version: link:../trace-graph
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
   packages/schemas:
     dependencies:
       zod:
@@ -4987,6 +5021,9 @@ importers:
       '@workspace/memory-fabric':
         specifier: workspace:*
         version: link:../memory-fabric
+      '@workspace/sandbox-runtime':
+        specifier: workspace:*
+        version: link:../sandbox-runtime
       '@workspace/tool-mesh':
         specifier: workspace:*
         version: link:../tool-mesh
