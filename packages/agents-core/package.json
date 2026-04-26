@@ -32,6 +32,26 @@
     "./step-log": {
       "types": "./dist/step-log.d.ts",
       "import": "./src/step-log.ts"
+    },
+    "./agent": {
+      "types": "./dist/agent.d.ts",
+      "import": "./src/agent.ts"
+    },
+    "./agent-runner": {
+      "types": "./dist/agent-runner.d.ts",
+      "import": "./src/agent-runner.ts"
+    },
+    "./hooks": {
+      "types": "./dist/hooks.d.ts",
+      "import": "./src/hooks.ts"
+    },
+    "./orchestration": {
+      "types": "./dist/orchestration.d.ts",
+      "import": "./src/orchestration.ts"
+    },
+    "./run-context": {
+      "types": "./dist/run-context.d.ts",
+      "import": "./src/run-context.ts"
     }
   },
   "dependencies": {

@@ -6,6 +6,13 @@ export * from './run.js';
 export * from './step-io-store.js';
 export * from './step-log.js';
 
+// Orchestration layer — Agent definitions, runner, context, hooks, primitives
+export * from './agent.js';
+export * from './agent-runner.js';
+export * from './hooks.js';
+export * from './orchestration.js';
+export * from './run-context.js';
+
 // Note: cognitive-runtime re-exports were removed to break the agents-core ↔
 // cognitive-runtime dependency cycle (cognitive-runtime now depends on
 // agents-core for the AgentRun lifecycle). Consumers should import directly

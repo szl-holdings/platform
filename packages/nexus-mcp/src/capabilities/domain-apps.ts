@@ -20,7 +20,7 @@ function buildFleetMapApp(ctx: TenantContext): string {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SEXTANT — Fleet Position Map</title>
+<title>Vessels — Fleet Position Map</title>
 <style>
 body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 .header{background:#0f1729;border-bottom:1px solid #1e3a5f;padding:12px 16px;display:flex;align-items:center;gap:8px}
@@ -41,7 +41,7 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 </head>
 <body>
 <div class="header">
-  <div class="logo">SEXTANT</div>
+  <div class="logo">Vessels</div>
   <div class="badge">MARITIME INTELLIGENCE</div>
   <div style="margin-left:auto;font-size:10px;color:#4b5563">Tenant: ${ctx.tenantId ?? 'global'}</div>
 </div>
@@ -62,7 +62,7 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
   <div class="vessel-card"><div class="vessel-name"><span class="status-dot"></span>ATLAS VENTURE</div><div class="vessel-status">Gulf of Aden · Monitoring</div></div>
 </div>
 <div style="padding:12px 16px;font-size:9px;color:#374151;text-align:center">
-  Live data via SEXTANT MCP · Proof-chained · ${new Date().toISOString()}
+  Live data via Vessels MCP · Proof-chained · ${new Date().toISOString()}
 </div>
 </body></html>`;
 }
@@ -72,7 +72,7 @@ function buildThreatTimelineApp(ctx: TenantContext): string {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TENAX — Live Threat Timeline</title>
+<title>Sentra — Live Threat Timeline</title>
 <style>
 body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 .header{background:#140e1a;border-bottom:1px solid #4c1d95;padding:12px 16px;display:flex;align-items:center;gap:8px}
@@ -94,7 +94,7 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 </head>
 <body>
 <div class="header">
-  <div class="logo">TENAX</div>
+  <div class="logo">Sentra</div>
   <div class="badge">CYBER RESILIENCE</div>
   <div style="margin-left:auto;font-size:10px;color:#4b5563">Org: ${ctx.orgId ?? 'global'}</div>
 </div>
@@ -109,7 +109,7 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 <div class="threat-item high"><div class="threat-title"><span class="severity high">HIGH</span>Lateral movement detected — Subnet B</div><div class="threat-meta">4h ago · Quarantine applied · Investigation open</div></div>
 <div class="threat-item medium"><div class="threat-title"><span class="severity medium">MEDIUM</span>Anomalous egress traffic — 14.2GB</div><div class="threat-meta">6h ago · DLP policy triggered · Analyst notified</div></div>
 <div style="padding:12px 16px;font-size:9px;color:#374151;text-align:center">
-  Live data via TENAX MCP · Guardian-governed · ${new Date().toISOString()}
+  Live data via Sentra MCP · Guardian-governed · ${new Date().toISOString()}
 </div>
 </body></html>`;
 }
@@ -119,7 +119,7 @@ function buildPropertyComparisonApp(ctx: TenantContext): string {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DOMAINE — Property Comparison</title>
+<title>Terra — Property Comparison</title>
 <style>
 body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 .header{background:#0a1a0e;border-bottom:1px solid #14532d;padding:12px 16px;display:flex;align-items:center;gap:8px}
@@ -141,7 +141,7 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 </head>
 <body>
 <div class="header">
-  <div class="logo">DOMAINE</div>
+  <div class="logo">Terra</div>
   <div class="badge">REAL ESTATE INTELLIGENCE</div>
   <div style="margin-left:auto;font-size:10px;color:#4b5563">Domain: ${ctx.domain ?? 'real-estate'}</div>
 </div>
@@ -169,7 +169,7 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
   </div>
 </div>
 <div style="padding:12px 16px;font-size:9px;color:#374151;text-align:center">
-  Live data via DOMAINE MCP · Proof-chained · ${new Date().toISOString()}
+  Live data via Terra MCP · Proof-chained · ${new Date().toISOString()}
 </div>
 </body></html>`;
 }
@@ -179,7 +179,7 @@ function buildCaseStatusApp(ctx: TenantContext): string {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>KORA — Decision Intelligence</title>
+<title>Lyte — Decision Intelligence</title>
 <style>
 body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 .header{background:#0e0a1a;border-bottom:1px solid #4c1d95;padding:12px 16px;display:flex;align-items:center;gap:8px}
@@ -200,7 +200,7 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 </head>
 <body>
 <div class="header">
-  <div class="logo">KORA</div>
+  <div class="logo">Lyte</div>
   <div class="badge">DECISION INTELLIGENCE</div>
   <div style="margin-left:auto;font-size:10px;color:#4b5563">Roles: ${(ctx.roles ?? ['viewer']).join(', ')}</div>
 </div>
@@ -215,7 +215,7 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
 <div class="decision-item"><div><div class="decision-title">Terra Portfolio Rebalancing Workflow</div><div class="decision-meta">Stage 3/5 · ETA: 8min</div></div><span class="status-pill running">RUNNING</span></div>
 <div class="decision-item"><div><div class="decision-title">Aegis Threat Containment Execution</div><div class="decision-meta">Approved by J.Chen · 14min ago</div></div><span class="status-pill approved">APPROVED</span></div>
 <div style="padding:12px 16px;font-size:9px;color:#374151;text-align:center">
-  Live data via KORA MCP · Governed Autonomy · ${new Date().toISOString()}
+  Live data via Lyte MCP · Governed Autonomy · ${new Date().toISOString()}
 </div>
 </body></html>`;
 }
@@ -231,28 +231,28 @@ export function createDomainApps(): NexusApp[] {
     {
       appId: 'sextant-fleet-map',
       domain: 'maritime',
-      title: 'SEXTANT Fleet Position Map',
+      title: 'Vessels Fleet Position Map',
       description: 'Live maritime fleet positions, voyage status, weather alerts, and AIS anomaly detection.',
       renderHtml: async (ctx: TenantContext) => buildFleetMapApp(ctx),
     },
     {
       appId: 'tenax-threat-timeline',
       domain: 'security',
-      title: 'TENAX Live Threat Timeline',
+      title: 'Sentra Live Threat Timeline',
       description: 'Real-time cybersecurity threat feed, CVE tracking, compliance scores, and incident status.',
       renderHtml: async (ctx: TenantContext) => buildThreatTimelineApp(ctx),
     },
     {
       appId: 'domaine-property-comparison',
       domain: 'real-estate',
-      title: 'DOMAINE Property Comparison Card',
+      title: 'Terra Property Comparison Card',
       description: 'Distressed property opportunities, portfolio analytics, and market signal comparisons.',
       renderHtml: async (ctx: TenantContext) => buildPropertyComparisonApp(ctx),
     },
     {
       appId: 'kora-case-status',
       domain: 'analytics',
-      title: 'KORA Decision Intelligence Dashboard',
+      title: 'Lyte Decision Intelligence Dashboard',
       description: 'Pending approvals, active workflow runs, platform health, and decision queue status.',
       renderHtml: async (ctx: TenantContext) => buildCaseStatusApp(ctx),
     },

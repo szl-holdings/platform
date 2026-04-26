@@ -471,6 +471,29 @@ export class AgentRun {
     return this.toSummary(completedAt, message, category);
   }
 
+  /**
+   * Mark this run as pending approval and suspended — use instead of `fail()`
+   * when an ApprovalRequiredError is thrown so the run is retrievable for
+   * resumption after the approval is granted.
+   */
+  async pendingApproval(reason: string): Promise<AgentRunSummary> {
+    await this.setStatus('pending_approval');
+    const suspendedAt = Date.now();
+
+    await emitStepLog({
+      runId: this.runId,
+      stepId: 'run:pending_approval',
+      stepName: 'run.pendingApproval',
+      level: 'info',
+      message: `Agent run suspended pending approval: ${reason}`,
+      data: { reason },
+    });
+
+    globalCollector.recordKnown('run_pending_approval' as any, 1, { runId: this.runId });
+
+    return this.toSummary(suspendedAt);
+  }
+
   toSummary(
     completedAt?: number,
     errorMessage?: string,
