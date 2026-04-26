@@ -12,6 +12,15 @@ Key capabilities include:
 - **Publication Palette (2026 rebrand):** Pure dark theme with a single warm accent.
 - **Multimodal Experience & Trust Proof (Task #3561):** Includes multilingual voice, wake-word detection, offline-first sync banner for mobile, CRDT live collaboration, digital twin simulator, PRAXIS graph hop traversal, chaos engineering drills, federated learning config, multi-fund tenancy views, and PDF export for PARAGON.
 
+## A11oy Launch Content Package (Task #3939)
+- **Screenshots:** 12 high-quality JPG captures of a11oy surfaces in `a11oy-launch-content/screenshots/` — landing page, SDK primitives, trust center, orchestration, proof chain, governance, solutions, now board, command surface, fabric architecture, agents, mirror eval.
+- **Posts:** Three thought-leadership articles in `a11oy-launch-content/`:
+  - `substack.md` — "The Missing Layer" founder narrative (~1,500 words)
+  - `medium.md` — Technical alignment risk analysis (~2,000 words)
+  - `linkedin.md` — Metrics-first executive positioning (~700 words)
+- **Demo Video:** 78-second animated walkthrough in `artifacts/szl-demo-video/` — 8 scenes from landing page through SDK, Now Board, Command Surface, Agent Registry, Fabric Architecture, Governance & Proof, to end card. Includes social cut variants (60s, 30s, 15s).
+- **Zip:** `a11oy-launch-content.zip` — all screenshots and posts packaged for distribution.
+
 ## User Preferences
 I prefer detailed explanations.
 I want iterative development.

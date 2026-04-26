@@ -623,3 +623,9 @@ id = "CdYTYIlsVqX-L_RcgLsX7"
 uri = "file://content-package/a11oy-thought-leadership-posts.docx"
 type = "word_document"
 title = "A11oy Thought Leadership Posts — Word Document"
+
+[[outputs]]
+id = "Xc9M7g7PZt1H5BIoOn4xH"
+uri = "file://a11oy-launch-content.zip"
+type = "unspecified"
+title = "A11oy Launch Content Package"
