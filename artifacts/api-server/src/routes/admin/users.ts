@@ -316,6 +316,8 @@ export function register(router: IRouter): void {
       const userFilter = req.query.user as string | undefined;
       const orgIdParam = req.query.orgId as string | undefined;
       const format = req.query.format as string | undefined;
+      const entityType = req.query.entityType as string | undefined;
+      const entityId = req.query.entityId as string | undefined;
       const limitParam = parseInt((req.query.limit as string) ?? '50', 10);
       const limit = format === 'csv' ? 10000 : Math.min(Number.isNaN(limitParam) ? 50 : limitParam, 200);
 
@@ -344,6 +346,8 @@ export function register(router: IRouter): void {
       }
 
       const conditions = [];
+      if (entityType) conditions.push(eq(auditEventsTable.entityType, entityType));
+      if (entityId) conditions.push(eq(auditEventsTable.entityId, entityId));
       if (dateFrom) conditions.push(gte(auditEventsTable.createdAt, new Date(dateFrom)));
       if (dateTo) conditions.push(lte(auditEventsTable.createdAt, new Date(dateTo)));
       if (action) {
