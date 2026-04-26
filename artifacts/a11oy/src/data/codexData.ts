@@ -47,6 +47,13 @@ export interface EnterpriseFeature {
   desc: string;
 }
 
+export interface AGICapability {
+  name: string;
+  desc: string;
+  status: 'operational' | 'governed' | 'unique';
+  proof: string;
+}
+
 export const USE_CASES: UseCase[] = [
   { title: 'Governed PR Review', desc: 'Catch regressions and policy violations before human review \u2014 every finding proof-chained', category: 'Integrations', team: 'Engineering', taskType: 'Workflow', governed: 'Proof chain on every review finding, approval gates enforce sign-off' },
   { title: 'Build Responsive Frontends', desc: 'Turn screenshots and visual references into responsive UI with governed visual checks', category: 'Front-end', team: 'Design', taskType: 'Design', governed: 'Brand compliance verification, accessibility audit on every build' },
@@ -277,10 +284,171 @@ export const RESEARCH_INNOVATIONS: ResearchInnovation[] = [
     date: 'Apr 2026', category: 'Platform',
   },
   {
+    title: 'Reinforcement Learning from Human Feedback',
+    origin: 'OpenAI \u2014 RLHF Research, InstructGPT',
+    desc: 'Training language models to follow human intent using reward models learned from human comparisons \u2014 the foundation of aligned AI',
+    a11oyEvolution: 'a11oy Alignment Engine extends RLHF with governed feedback loops \u2014 every reward signal attributed, every preference pair proof-chained. Enterprise orgs contribute governed alignment data from real workflows.',
+    date: 'Jan 2022', category: 'Research',
+  },
+  {
+    title: 'Scaling Laws for Neural Language Models',
+    origin: 'OpenAI \u2014 Kaplan et al. Scaling Laws',
+    desc: 'Empirical laws predicting model performance from compute, dataset size, and parameter count \u2014 enabling efficient frontier model training',
+    a11oyEvolution: 'a11oy Forecast Engine applies scaling laws to predict model routing efficiency \u2014 choosing the right model size for each task. Cost-performance tradeoffs are proof-chained and continuously optimized.',
+    date: 'Jan 2020', category: 'Research',
+  },
+  {
+    title: 'Constitutional AI Governance',
+    origin: 'OpenAI \u2014 Rule-Based Rewards, Constitutional Methods',
+    desc: 'Training models using principle-based reward signals rather than purely human-labeled data \u2014 scalable alignment',
+    a11oyEvolution: 'a11oy Covenant Constitution \u2014 organization-specific principles compiled into governance rules. Every model output evaluated against constitutional policies. Violations proof-chained.',
+    date: 'Mar 2024', category: 'Safety',
+  },
+  {
+    title: 'Multimodal Reasoning',
+    origin: 'OpenAI \u2014 GPT-4V, GPT-4o, Multimodal Research',
+    desc: 'Unified models that reason across text, images, audio, and video \u2014 understanding context from any input modality',
+    a11oyEvolution: 'a11oy Multimodal Pipeline governs every modality transition \u2014 image analysis proof-chained, audio transcription attributed, video reasoning evidence-captured. Cross-modal hallucination detection enforced.',
+    date: 'Mar 2024', category: 'Research',
+  },
+  {
+    title: 'Tool Use & Function Calling',
+    origin: 'OpenAI \u2014 Function Calling, Parallel Tool Use, Structured Outputs',
+    desc: 'Models that reliably call external tools, APIs, and functions with structured JSON outputs \u2014 enabling agentic workflows',
+    a11oyEvolution: 'a11oy Tool Governance Layer \u2014 every function call proof-chained, every API invocation attributed, every structured output validated against schema. Tool permissions governed by policy.',
+    date: 'Jun 2023', category: 'Platform',
+  },
+  {
+    title: 'Frontier Reasoning (o-series)',
+    origin: 'OpenAI \u2014 o1, o3, o4-mini, Chain-of-Thought Reasoning Research',
+    desc: 'Models trained to think step-by-step before answering \u2014 dramatically improving math, science, and coding performance through extended reasoning',
+    a11oyEvolution: 'a11oy Reasoning Engine routes complex tasks to o-series models with governed reasoning chains. Every thinking step recorded, reasoning depth governed by policy, compute budget proof-chained.',
+    date: 'Sep 2024', category: 'Research',
+  },
+  {
+    title: 'Whisper & Speech Intelligence',
+    origin: 'OpenAI \u2014 Whisper ASR, TTS Research',
+    desc: 'Open-source speech recognition approaching human-level accuracy and natural text-to-speech synthesis',
+    a11oyEvolution: 'a11oy Speech Pipeline \u2014 governed transcription with PII auto-redaction, speaker attribution, sentiment analysis. Voice commands proof-chained. TTS output carries generation provenance.',
+    date: 'Sep 2022', category: 'Platform',
+  },
+  {
+    title: 'DALL-E & Visual Generation',
+    origin: 'OpenAI \u2014 DALL-E 3, Image Generation Research',
+    desc: 'State-of-the-art text-to-image generation with precise prompt following and safety filtering',
+    a11oyEvolution: 'a11oy Visual Generation is governed \u2014 every generated image carries provenance (model, prompt, seed, parameters). Content policy gates enforced. Usage rights tracked. Brand compliance verified.',
+    date: 'Oct 2023', category: 'Platform',
+  },
+  {
+    title: 'Sora & Video Generation',
+    origin: 'OpenAI \u2014 Sora, Video World Models Research',
+    desc: 'Video generation from text \u2014 world simulation models that understand physics, motion, and temporal coherence',
+    a11oyEvolution: 'a11oy Video Pipeline \u2014 governed video generation with frame-level provenance. Content safety on every frame. Usage rights tracked. Enterprise brand guidelines enforced on generated video.',
+    date: 'Feb 2024', category: 'Research',
+  },
+  {
+    title: 'Superalignment',
+    origin: 'OpenAI \u2014 Superalignment Research, Weak-to-Strong Generalization',
+    desc: 'Research on aligning AI systems smarter than their human supervisors \u2014 using weaker models to supervise stronger ones',
+    a11oyEvolution: 'a11oy Alignment Hierarchy \u2014 multi-tier supervision where governance policies act as the alignment anchor. Stronger models are constrained by weaker model auditors. Alignment evidence proof-chained.',
+    date: 'Dec 2023', category: 'Safety',
+  },
+  {
+    title: 'Red Teaming & Adversarial Robustness',
+    origin: 'OpenAI \u2014 Red Teaming Network, Adversarial Attacks Research',
+    desc: 'Systematic adversarial testing of AI systems by diverse external teams to discover failure modes before deployment',
+    a11oyEvolution: 'a11oy Red Team Engine \u2014 automated adversarial testing runs on every model deployment. Red team findings proof-chained. Vulnerability patches governed. Continuous pen-testing, not one-time audits.',
+    date: 'Aug 2023', category: 'Safety',
+  },
+  {
+    title: 'Embeddings & Retrieval',
+    origin: 'OpenAI \u2014 text-embedding-3, Retrieval Research',
+    desc: 'High-dimensional vector representations for semantic search, clustering, and retrieval-augmented generation',
+    a11oyEvolution: 'a11oy Semantic Memory uses governed embeddings \u2014 every vector indexed with source attribution. Retrieval results carry confidence scores. Embedding model selection governed by data sensitivity policy.',
+    date: 'Jan 2024', category: 'Platform',
+  },
+  {
+    title: 'Process Reward Models',
+    origin: 'OpenAI \u2014 Let\'s Verify Step by Step, PRM Research',
+    desc: 'Rewarding each step of reasoning rather than just the final answer \u2014 dramatically reducing hallucination in mathematical and logical tasks',
+    a11oyEvolution: 'a11oy Step Verification Engine \u2014 every reasoning step validated independently. Process rewards proof-chained. Step-level confidence intervals on complex multi-hop reasoning tasks.',
+    date: 'May 2023', category: 'Research',
+  },
+  {
+    title: 'Batch & Async Inference',
+    origin: 'OpenAI \u2014 Batch API, Async Processing Research',
+    desc: 'Cost-efficient batch processing for large-scale AI workloads \u2014 50% cost reduction for non-time-sensitive tasks',
+    a11oyEvolution: 'a11oy Batch Orchestrator \u2014 governed batch processing with job provenance, priority queuing, and cost attribution. Batch results carry proof chains. SLA compliance monitored per-job.',
+    date: 'Apr 2024', category: 'Platform',
+  },
+  {
+    title: 'Model Distillation',
+    origin: 'OpenAI \u2014 Model Distillation, Stored Completions Research',
+    desc: 'Training smaller, faster models from larger frontier models while preserving capability \u2014 reducing cost and latency',
+    a11oyEvolution: 'a11oy Distillation Pipeline \u2014 governed distillation with training data lineage. Distilled model quality verified against parent. Performance regression detection. Deployment governed by quality gates.',
+    date: 'Oct 2024', category: 'Research',
+  },
+  {
+    title: 'Interpretability & Mechanistic Understanding',
+    origin: 'OpenAI \u2014 Sparse Autoencoders, Feature Visualization, Circuit Analysis',
+    desc: 'Understanding what neural networks learn internally \u2014 decomposing models into interpretable features and circuits',
+    a11oyEvolution: 'a11oy Interpretability Layer \u2014 model decisions carry feature-level explanations. High-stakes outputs include interpretability reports. Unexplainable decisions flagged by governance policy.',
+    date: 'Jun 2024', category: 'Research',
+  },
+  {
+    title: 'Structured Outputs & JSON Mode',
+    origin: 'OpenAI \u2014 Structured Outputs, JSON Mode, Guaranteed Schema',
+    desc: 'Guaranteed structured JSON output conforming to arbitrary schemas \u2014 eliminating parsing failures in production systems',
+    a11oyEvolution: 'a11oy Schema Governance \u2014 every structured output validated against registered schemas. Schema evolution versioned. Breaking changes blocked by governance gates. Output provenance tracked.',
+    date: 'Aug 2024', category: 'Platform',
+  },
+  {
+    title: 'Frontier Math & Scientific Reasoning',
+    origin: 'OpenAI \u2014 FrontierMath, STEM Benchmarks, Mathematical Olympiad Performance',
+    desc: 'Models achieving medal-level performance on international math olympiads and solving research-level mathematical problems',
+    a11oyEvolution: 'a11oy Scientific Compute \u2014 governed access to frontier reasoning for mathematical proof verification, scientific hypothesis testing, and quantitative analysis. Every computation proof-chained.',
+    date: 'Dec 2024', category: 'Research',
+  },
+  {
+    title: 'Multi-Agent Orchestration',
+    origin: 'OpenAI \u2014 Agents SDK, Swarm Framework, Multi-Agent Research',
+    desc: 'Frameworks for coordinating multiple specialized AI agents working together on complex tasks with handoff protocols',
+    a11oyEvolution: 'a11oy Agent Mesh \u2014 governed multi-agent orchestration with proof-chained handoffs. Agent communication monitored. Task delegation attributed. Resource allocation governed by policy. Outcome tracking across all agents.',
+    date: 'Mar 2025', category: 'Platform',
+  },
+  {
+    title: 'Evals & Capability Assessment',
+    origin: 'OpenAI \u2014 Evals Framework, SimpleQA, Benchmark Development',
+    desc: 'Systematic evaluation frameworks for measuring model capabilities, factuality, and safety across diverse benchmarks',
+    a11oyEvolution: 'a11oy Eval Engine \u2014 continuous capability assessment for every model in the router. Eval results proof-chained. Performance regressions trigger automatic governance alerts. Custom enterprise evals supported.',
+    date: 'Mar 2023', category: 'Governance',
+  },
+  {
     title: 'Cognitive Forecasting',
     origin: 'a11oy \u2014 Original Innovation',
     desc: 'No other platform predicts outcomes before execution. a11oy forecasts bug density, delivery timelines, security risk, costs, and vertical-specific outcomes from real signals.',
     a11oyEvolution: 'The Outcome Graph closes the loop \u2014 recording what actually happened and feeding it back to calibrate future forecasts. Every prediction carries a confidence interval and a proof chain. Models recalibrate continuously.',
+    date: 'Apr 2026', category: 'Innovation',
+  },
+  {
+    title: 'Governed Autonomy',
+    origin: 'a11oy \u2014 Original Innovation',
+    desc: 'The first platform where AI agents operate with full autonomy inside governance constraints. Not restricted. Governed. The difference between AGI that is useful and AGI that is safe.',
+    a11oyEvolution: 'Governed Autonomy is the a11oy thesis \u2014 agents can do anything within the governance boundary. No capability restrictions, only governance gates. Full audit trail. Full replay. Full accountability.',
+    date: 'Apr 2026', category: 'Innovation',
+  },
+  {
+    title: 'Proof Chain Architecture',
+    origin: 'a11oy \u2014 Original Innovation',
+    desc: 'Cryptographic evidence chain on every AI operation. Not logging. Proof. Tamper-resistant, content-addressed, queryable by any dimension.',
+    a11oyEvolution: 'The Proof Chain is what makes a11oy enterprise-ready and AGI-safe simultaneously. Every action, every model call, every decision \u2014 cryptographically committed, independently verifiable, legally admissible.',
+    date: 'Apr 2026', category: 'Innovation',
+  },
+  {
+    title: 'Outcome Graph',
+    origin: 'a11oy \u2014 Original Innovation',
+    desc: 'Closed-loop learning from real outcomes. What did the AI predict? What actually happened? Feed the delta back. Continuous calibration.',
+    a11oyEvolution: 'The Outcome Graph is the learning engine \u2014 every forecast, every prediction, every recommendation is tracked against real-world outcomes. Models improve from governed experience, not just training data.',
     date: 'Apr 2026', category: 'Innovation',
   },
 ];
@@ -363,12 +531,28 @@ export const PLATFORM_CAPABILITIES: PlatformCapability[] = [
 export const ENTERPRISE_FEATURES: EnterpriseFeature[] = [
   { name: 'Admin Console', icon: '\uD83D\uDEE0\uFE0F', desc: 'Centralized workspace management \u2014 teams, roles, policies, and usage analytics in one governed dashboard' },
   { name: 'SSO Integration', icon: '\uD83D\uDD10', desc: 'SAML 2.0 and OIDC single sign-on with governed identity provider configuration and session management' },
+  { name: 'SCIM Provisioning', icon: '\uD83D\uDC65', desc: 'Automated user provisioning and deprovisioning via SCIM 2.0 \u2014 sync with Okta, Azure AD, OneLogin. Identity lifecycle governed.' },
   { name: 'Data Retention Policies', icon: '\uD83D\uDCC5', desc: 'Configurable retention windows for threads, memories, proof chains, and replay data \u2014 compliance-ready' },
   { name: 'Usage Analytics', icon: '\uD83D\uDCCA', desc: 'Real-time dashboards for model usage, token consumption, agent activity, and governance compliance metrics' },
   { name: 'Custom Model Routing', icon: '\uD83D\uDD00', desc: 'Enterprise-specific model routing policies \u2014 route by sensitivity, cost, latency, or compliance requirement' },
   { name: 'Audit Log Export', icon: '\uD83D\uDCE4', desc: 'Export proof chain and governance logs to SIEM, compliance systems, or data warehouses \u2014 real-time streaming' },
   { name: 'IP Allowlisting', icon: '\uD83C\uDF10', desc: 'Restrict access by IP range, VPN, or network policy \u2014 governed access control at the network layer' },
   { name: 'Dedicated Compute', icon: '\u2601\uFE0F', desc: 'Isolated compute environments for enterprise workloads \u2014 no shared infrastructure, governed resource allocation' },
+  { name: 'Data Sovereignty', icon: '\uD83C\uDFF4', desc: 'Choose where your data lives \u2014 US, EU, APAC regions. Data never leaves your designated geography. Proof-chained residency.' },
+  { name: 'Zero Data Training', icon: '\uD83D\uDEAB', desc: 'Enterprise data is never used for model training. Contractual guarantee. Proof-chained data isolation. No exceptions.' },
+  { name: 'Custom Content Policies', icon: '\uD83D\uDCDD', desc: 'Define organization-specific content filters, safety thresholds, and output restrictions. Policies versioned and auditable.' },
+  { name: 'Domain Verification', icon: '\u2705', desc: 'Verify corporate domains for workspace access control. Only verified email domains can join. Invitation governance enforced.' },
+  { name: 'Extended Context', icon: '\uD83D\uDCDA', desc: 'Enterprise-grade 256K context windows for complex codebases, long documents, and multi-file reasoning. Token allocation governed.' },
+  { name: 'Priority Inference', icon: '\u26A1', desc: 'Dedicated inference capacity with guaranteed latency SLAs. No queuing, no throttling, no shared compute. Governed resource allocation.' },
+  { name: 'Team Workspaces', icon: '\uD83C\uDFE2', desc: 'Isolated team environments with separate governance policies, model routing rules, and usage budgets. Cross-team sharing governed.' },
+  { name: 'Compliance Certifications', icon: '\uD83C\uDFC5', desc: 'SOC 2 Type II, ISO 27001, HIPAA BAA, GDPR compliant. Certification evidence proof-chained and continuously monitored.' },
+  { name: 'Custom Fine-Tuning', icon: '\uD83E\uDDEC', desc: 'Fine-tune models on enterprise data with governed training pipelines. Training data lineage tracked. Model provenance immutable.' },
+  { name: 'API Rate Governance', icon: '\uD83D\uDCCF', desc: 'Per-user, per-team, per-project rate limits and token budgets. Usage caps enforced by governance engine. Overages governed by policy.' },
+  { name: 'Shared Templates', icon: '\uD83D\uDCC4', desc: 'Organization-wide prompt templates, workflow blueprints, and governed skill libraries. Version-controlled, access-governed.' },
+  { name: 'Enterprise Support', icon: '\uD83D\uDCDE', desc: 'Dedicated account management, 24/7 priority support, onboarding assistance, and quarterly business reviews. SLA-backed.' },
+  { name: 'Bulk Deployment', icon: '\uD83D\uDE80', desc: 'Deploy a11oy across thousands of seats with managed rollout, staged provisioning, and governed activation policies.' },
+  { name: 'Advanced Data Analysis', icon: '\uD83D\uDD2C', desc: 'Enterprise-grade data analysis with governed access to internal databases, data lakes, and BI tools. PII auto-filtered.' },
+  { name: 'Conversation Archival', icon: '\uD83D\uDDC4\uFE0F', desc: 'Automatic archival of all agent conversations to enterprise storage. Legal hold support. eDiscovery-ready. Proof-chained retention.' },
 ];
 
 export const CATEGORIES = ['All', 'Engineering', 'Front-end', 'iOS', 'macOS', 'Automation', 'Data', 'Integrations', 'Knowledge'];
@@ -380,8 +564,10 @@ export const COLLECTIONS = [
   { name: 'Native Development', desc: 'Build for iOS, Android, and macOS, refactor native UI, expose app actions \u2014 governed', icon: '\uD83D\uDCF1', count: 8 },
   { name: 'Game Development', desc: 'Develop games from first playable loop to production quality \u2014 governed', icon: '\uD83C\uDFAE', count: 3 },
   { name: 'Cognitive Forecasting', desc: 'Predict outcomes before execution \u2014 code quality, delivery, costs, security', icon: '\uD83D\uDD2E', count: 8 },
-  { name: 'Enterprise & Compliance', desc: 'Admin console, SSO, audit logs, data retention, IP allowlisting \u2014 governed', icon: '\uD83C\uDFE2', count: 8 },
+  { name: 'Enterprise & Compliance', desc: 'SSO, SCIM, data sovereignty, compliance certs, fine-tuning, archival \u2014 governed', icon: '\uD83C\uDFE2', count: 24 },
   { name: 'Platform Capabilities', desc: 'Worktrees, automations, cloud threads, IDE sync, actions, browser \u2014 governed', icon: '\u2699\uFE0F', count: 12 },
+  { name: 'Research Innovations', desc: 'RLHF, scaling laws, reasoning, alignment, interpretability, multimodal \u2014 absorbed & governed', icon: '\uD83E\uDDEA', count: 29 },
+  { name: 'AGI Readiness', desc: 'Governed autonomy, proof chain architecture, outcome graph, superalignment \u2014 AGI-safe', icon: '\uD83E\uDDE0', count: 4 },
 ];
 
 export const BENCHMARKS = [
@@ -393,6 +579,19 @@ export const BENCHMARKS = [
   { framework: 'Windsurf', score: 81.3, governed: false, multiAgent: false, proofChain: false, forecast: false, memory: false, multiModel: false },
 ];
 
+export const AGI_CAPABILITIES: AGICapability[] = [
+  { name: 'Autonomous Reasoning', desc: 'Multi-step, multi-hop reasoning across domains without human prompting. Agents decompose complex goals into governed sub-tasks.', status: 'operational', proof: 'Every reasoning chain recorded, every sub-task proof-chained, every delegation attributed' },
+  { name: 'Cross-Domain Transfer', desc: 'Knowledge from maritime ETA improves legal risk forecasting. Real estate signals inform defense threat models. Vertical intelligence compounds.', status: 'unique', proof: 'Cross-domain signal correlations proof-chained, transfer learning outcomes tracked in Outcome Graph' },
+  { name: 'Self-Improving Systems', desc: 'Outcome Graph feeds real results back to recalibrate forecasts. Agents learn from governed experience, not just training data. Continuous improvement, governed.', status: 'governed', proof: 'Every recalibration event proof-chained, improvement metrics tracked, regression detection automated' },
+  { name: 'Long-Horizon Planning', desc: 'Agents plan across hours, days, and weeks. Sprint planning, project roadmaps, multi-phase migrations \u2014 all with governed checkpoints.', status: 'operational', proof: 'Plan milestones proof-chained, checkpoint approvals governed, plan-vs-actual tracked in Outcome Graph' },
+  { name: 'Multi-Agent Collaboration', desc: 'Specialized agents hand off tasks with governed protocols. Code agent, research agent, analysis agent \u2014 coordinated by the governance layer.', status: 'operational', proof: 'Agent handoffs proof-chained, inter-agent communication monitored, resource allocation governed' },
+  { name: 'Tool Mastery', desc: 'Agents compose complex tool chains \u2014 APIs, databases, browsers, CLIs, IDEs, cloud services. Every tool call governed, every result attributed.', status: 'governed', proof: 'Tool call graph proof-chained, permission escalation governed, tool composition patterns learned' },
+  { name: 'Contextual Memory', desc: 'Five-tier memory fabric means agents carry context across sessions, projects, and organizations. No forgetting. No hallucinating past events.', status: 'unique', proof: 'Memory writes proof-chained, recall accuracy tracked, memory governance policies enforced' },
+  { name: 'Predictive Intelligence', desc: 'Cognitive Forecasting predicts outcomes before execution across 8 domains. No other AI platform forecasts. This is the moat.', status: 'unique', proof: 'Forecast accuracy continuously calibrated, prediction confidence intervals proof-chained, Outcome Graph closes the loop' },
+  { name: 'Governed Autonomy', desc: 'Full AGI capability within governance constraints. Not restricted \u2014 governed. The difference between dangerous AI and enterprise-ready AI.', status: 'unique', proof: 'Every autonomous action proof-chained, governance violations blocked before execution, full sovereign replay' },
+  { name: 'Enterprise-Grade Safety', desc: 'CoT monitoring, PII filtering, instruction hierarchy, dual-use classification, red team engine, superalignment hierarchy. Safety is the product.', status: 'governed', proof: 'Safety evaluations continuous, adversarial testing automated, alignment evidence proof-chained and auditable' },
+];
+
 export const CODEX_TOTALS = {
   useCases: USE_CASES.length,
   memoryTiers: MEMORY_TIERS.length,
@@ -401,4 +600,5 @@ export const CODEX_TOTALS = {
   collections: COLLECTIONS.length,
   platformCapabilities: PLATFORM_CAPABILITIES.length,
   enterpriseFeatures: ENTERPRISE_FEATURES.length,
+  agiCapabilities: AGI_CAPABILITIES.length,
 };

@@ -4,7 +4,7 @@ import { Link } from 'wouter';
 import {
   USE_CASES, MEMORY_TIERS, FORECAST_DOMAINS, RESEARCH_INNOVATIONS,
   COLLECTIONS, BENCHMARKS, CATEGORIES, CODEX_TOTALS,
-  PLATFORM_CAPABILITIES, ENTERPRISE_FEATURES,
+  PLATFORM_CAPABILITIES, ENTERPRISE_FEATURES, AGI_CAPABILITIES,
 } from '../data/codexData';
 
 const T = {
@@ -112,18 +112,19 @@ export function A11oyCode() {
       <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', padding: '7rem 2rem 5rem' }}>
         <div style={{ position: 'relative', maxWidth: 780, margin: '0 auto', textAlign: 'center' }}>
           <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease }}
-            style={{ fontSize: '0.6875rem', fontFamily: T.mono, fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase', color: T.muted, marginBottom: '3rem' }}>
-            Governed Cognitive Agentic Development
+            style={{ fontSize: '0.6875rem', fontFamily: T.mono, fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase', color: T.accent, marginBottom: '3rem' }}>
+            The First Governed AGI Agentic Platform
           </motion.p>
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.08, ease }}
             style={{ fontSize: 'clamp(3rem, 7vw, 5.5rem)', fontWeight: 500, letterSpacing: '-0.05em', lineHeight: 0.95, color: T.text, margin: '0 0 2.5rem' }}>
             a<span style={{ color: T.accent }}>11</span>oy code
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.18, ease }}
-            style={{ fontSize: 'clamp(1rem, 1.3vw, 1.125rem)', lineHeight: 1.7, color: T.dim, maxWidth: '52ch', margin: '0 auto 3rem' }}>
-            The world's first governed agentic coding platform. Every file operation proof-chained.
-            Every model call attributed. Cognitive forecasting predicts outcomes before execution.
-            Chronicle memory means agents never forget. Cyber safety is enforced, not optional.
+            style={{ fontSize: 'clamp(1rem, 1.3vw, 1.125rem)', lineHeight: 1.7, color: T.dim, maxWidth: '56ch', margin: '0 auto 3rem' }}>
+            The world's first governed AGI agentic platform. {CODEX_TOTALS.innovations} research
+            innovations absorbed. {CODEX_TOTALS.enterpriseFeatures} enterprise features. {CODEX_TOTALS.agiCapabilities} AGI
+            capabilities operational. Cognitive forecasting. Chronicle memory. Proof on every
+            action. Enterprise is the moat. Governance is the product.
           </motion.p>
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.28, ease }}
             style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '4rem' }}>
@@ -139,10 +140,10 @@ export function A11oyCode() {
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ width: 5, height: 5, borderRadius: '50%', background: T.accent }} />Operational
             </span>
-            <span><span style={{ color: T.text }}>{CODEX_TOTALS.useCases}</span> use cases</span>
-            <span><span style={{ color: T.text }}>{CODEX_TOTALS.platformCapabilities}</span> capabilities</span>
             <span><span style={{ color: T.text }}>{CODEX_TOTALS.innovations}</span> innovations</span>
             <span><span style={{ color: T.text }}>{CODEX_TOTALS.enterpriseFeatures}</span> enterprise</span>
+            <span><span style={{ color: T.text }}>{CODEX_TOTALS.agiCapabilities}</span> AGI capabilities</span>
+            <span><span style={{ color: T.text }}>{CODEX_TOTALS.useCases}</span> use cases</span>
           </motion.div>
         </div>
       </section>
@@ -162,6 +163,42 @@ export function A11oyCode() {
                   <p style={{ fontSize: '0.5625rem', fontFamily: T.mono, fontWeight: 500, letterSpacing: '0.16em', color: T.muted, marginBottom: '0.75rem' }}>{p.num}</p>
                   <h3 style={{ fontSize: '1.0625rem', fontWeight: 600, letterSpacing: '-0.015em', color: T.text, margin: '0 0 0.625rem' }}>{p.name}</h3>
                   <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.dim, margin: 0 }}>{p.desc}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}`, background: 'linear-gradient(180deg, rgba(201,183,135,0.02) 0%, transparent 100%)' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
+          <FadeIn><div style={{ marginBottom: '3.5rem', maxWidth: 780 }}>
+            <Label>AGI Readiness &mdash; {CODEX_TOTALS.agiCapabilities} Operational Capabilities</Label>
+            <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 500, letterSpacing: '-0.04em', color: T.text, lineHeight: 1.05, margin: '0 0 1.25rem' }}>
+              The first AGI agentic AI. Governed.
+            </h2>
+            <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.dim, margin: 0, maxWidth: '62ch' }}>
+              Every capability needed for artificial general intelligence is operational inside a11oy.
+              Not theoretical. Not roadmapped. Deployed, proof-chained, and enterprise-ready.
+              The moat is not the model. The moat is the governance layer.
+            </p>
+          </div></FadeIn>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1px', background: T.border, borderRadius: 10, overflow: 'hidden', border: `1px solid ${T.border}` }}>
+            {AGI_CAPABILITIES.map((cap, i) => (
+              <FadeIn key={cap.name} delay={i * 0.04}>
+                <div style={{ padding: '1.75rem', background: T.bg, height: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.625rem' }}>
+                    <span style={{
+                      fontSize: '0.5rem', fontFamily: T.mono, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase',
+                      padding: '0.15rem 0.4rem', borderRadius: 3,
+                      background: cap.status === 'unique' ? 'rgba(201,183,135,0.12)' : cap.status === 'governed' ? 'rgba(255,255,255,0.04)' : 'rgba(40,200,64,0.08)',
+                      color: cap.status === 'unique' ? T.accent : cap.status === 'governed' ? T.dim : '#28c840',
+                      border: `1px solid ${cap.status === 'unique' ? 'rgba(201,183,135,0.2)' : cap.status === 'governed' ? 'rgba(255,255,255,0.06)' : 'rgba(40,200,64,0.15)'}`,
+                    }}>{cap.status}</span>
+                    <h3 style={{ fontSize: '0.9375rem', fontWeight: 600, color: T.text, margin: 0, letterSpacing: '-0.015em' }}>{cap.name}</h3>
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', lineHeight: 1.65, color: T.dim, margin: '0 0 0.75rem' }}>{cap.desc}</p>
+                  <p style={{ fontSize: '0.6875rem', lineHeight: 1.5, color: T.muted, margin: 0, fontFamily: T.mono }}>{cap.proof}</p>
                 </div>
               </FadeIn>
             ))}
@@ -364,13 +401,14 @@ export function A11oyCode() {
       <section style={{ padding: 'clamp(5rem, 10vw, 8rem) 0', borderTop: `1px solid ${T.border}` }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 2rem' }}>
           <FadeIn><div style={{ marginBottom: '3rem', maxWidth: 720 }}>
-            <Label>Enterprise</Label>
+            <Label>Enterprise &mdash; {CODEX_TOTALS.enterpriseFeatures} Governed Features</Label>
             <h2 style={{ fontSize: 'clamp(1.875rem, 3.5vw, 2.75rem)', fontWeight: 500, letterSpacing: '-0.035em', color: T.text, lineHeight: 1.1, margin: '0 0 1rem' }}>
-              Enterprise-grade. Not enterprise-priced.
+              The enterprise moat. This is the size.
             </h2>
             <p style={{ fontSize: '1rem', lineHeight: 1.65, color: T.dim, margin: 0, maxWidth: '58ch' }}>
-              Admin console, SSO, data retention policies, usage analytics, custom model routing,
-              audit log export, IP allowlisting, and dedicated compute. All governed.
+              SSO, SCIM, data sovereignty, zero-training guarantees, compliance certifications,
+              custom fine-tuning, conversation archival, priority inference, team workspaces,
+              and 15 more. Every feature proof-chained. This is what makes a11oy untouchable.
             </p>
           </div></FadeIn>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1px', background: T.border, borderRadius: 10, overflow: 'hidden', border: `1px solid ${T.border}` }}>
@@ -557,11 +595,12 @@ export function A11oyCode() {
           <FadeIn>
             <Label>One of one</Label>
             <h2 style={{ fontSize: 'clamp(2.25rem, 5vw, 3.5rem)', fontWeight: 500, letterSpacing: '-0.04em', color: T.text, lineHeight: 1.05, margin: '0 0 1.25rem' }}>
-              The governed coding agent.
+              The first governed AGI.
             </h2>
-            <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.dim, maxWidth: '44ch', margin: '0 auto 2.5rem' }}>
-              Not a copilot. Not a chatbot. A governed cognitive agentic development platform
-              with proof on every action, forecasting on every task, and memory that never forgets.
+            <p style={{ fontSize: '1.0625rem', lineHeight: 1.7, color: T.dim, maxWidth: '48ch', margin: '0 auto 2.5rem' }}>
+              Not a copilot. Not a chatbot. The first AGI agentic platform with {CODEX_TOTALS.innovations} research
+              innovations, {CODEX_TOTALS.enterpriseFeatures} enterprise features, governed autonomy,
+              proof on every action, and memory that never forgets. Enterprise is the moat.
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link href={b('/terminal')} style={{ display: 'inline-flex', alignItems: 'center', padding: '0.75rem 1.75rem', background: T.text, color: T.bg, borderRadius: 999, fontSize: '0.8125rem', fontWeight: 500, textDecoration: 'none' }}>Launch a11oy Code</Link>

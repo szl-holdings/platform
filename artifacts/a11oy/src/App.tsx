@@ -57,6 +57,8 @@ const DevPlatform = lazy(() => import('./pages/DevPlatform').then(m => ({ defaul
 const A11oyCode = lazy(() => import('./pages/A11oyCode').then(m => ({ default: m.A11oyCode })));
 const AgentMesh = lazy(() => import('./pages/AgentMesh').then(m => ({ default: m.AgentMesh })));
 const PluginHub = lazy(() => import('./pages/PluginHub').then(m => ({ default: m.PluginHub })));
+const DeepResearch = lazy(() => import('./pages/DeepResearch').then(m => ({ default: m.DeepResearch })));
+const CiAction = lazy(() => import('./pages/CiAction').then(m => ({ default: m.CiAction })));
 
 export default function App() {
   return (
@@ -101,6 +103,8 @@ export default function App() {
         <Route path={`${base}/a11oy-code`} component={A11oyCode} />
         <Route path={`${base}/agent-mesh`} component={AgentMesh} />
         <Route path={`${base}/plugins`} component={PluginHub} />
+        <Route path={`${base}/deep-research`} component={DeepResearch} />
+        <Route path={`${base}/action`} component={CiAction} />
         <Route path={`${base}/about`} component={About} />
         <Route>
           <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--color-a11oy-navy)', color: 'var(--color-a11oy-text)' }}>
