@@ -85,6 +85,10 @@ const MIN_PROD_ENV: NodeJS.ProcessEnv = {
   UNSUBSCRIBE_SECRET: 'd'.repeat(32),
   RESEND_WEBHOOK_SECRET: 'whsec_' + 'e'.repeat(32),
   SENDGRID_WEBHOOK_SECRET: 'f'.repeat(32),
+  // Required in production after hardcoded values were removed from .replit
+  SUBSTRATE_SIGNING_KEY: 'a'.repeat(64),
+  SUBSTRATE_GATEWAY_API_KEY: 'szl_gw_test-prod-validation-key',
+  ADMIN_PIN: 'test-admin-pin-prod',
 };
 
 /**

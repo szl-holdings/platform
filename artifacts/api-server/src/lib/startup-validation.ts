@@ -1976,7 +1976,18 @@ export function validateStartupConfig(): ValidationResult {
   }
 
   const substrateSigningKey = process.env.SUBSTRATE_SIGNING_KEY;
-  if (substrateSigningKey === KNOWN_DEV_SUBSTRATE_KEY) {
+  if (!substrateSigningKey) {
+    if (isProduction) {
+      errors.push(
+        'SUBSTRATE_SIGNING_KEY is not set — required in production for agent-mesh HMAC request signing. ' +
+          'Generate a 64-char hex key (openssl rand -hex 32) and add it to Replit Secrets.',
+      );
+    } else {
+      warnings.push(
+        'SUBSTRATE_SIGNING_KEY is not set — agent-mesh HMAC signing will be disabled. Set before deploying to production.',
+      );
+    }
+  } else if (substrateSigningKey === KNOWN_DEV_SUBSTRATE_KEY) {
     if (isProduction) {
       errors.push(
         'SUBSTRATE_SIGNING_KEY matches the known dev-tier value from .replit — this key MUST NOT run in production. ' +
@@ -1990,7 +2001,18 @@ export function validateStartupConfig(): ValidationResult {
   }
 
   const substrateGwKey = process.env.SUBSTRATE_GATEWAY_API_KEY;
-  if (substrateGwKey === KNOWN_DEV_SUBSTRATE_GW_KEY) {
+  if (!substrateGwKey) {
+    if (isProduction) {
+      errors.push(
+        'SUBSTRATE_GATEWAY_API_KEY is not set — required in production for Substrate gateway authentication. ' +
+          'Generate a key and add it to Replit Secrets (run: bash scripts/rotate-secrets.sh).',
+      );
+    } else {
+      warnings.push(
+        'SUBSTRATE_GATEWAY_API_KEY is not set — Substrate gateway bearer-token auth is disabled. Set before deploying to production.',
+      );
+    }
+  } else if (substrateGwKey === KNOWN_DEV_SUBSTRATE_GW_KEY) {
     if (isProduction) {
       errors.push(
         'SUBSTRATE_GATEWAY_API_KEY matches the known dev-tier value — this key MUST NOT run in production. ' +
@@ -1999,6 +2021,19 @@ export function validateStartupConfig(): ValidationResult {
     } else {
       warnings.push(
         '[B-02] SUBSTRATE_GATEWAY_API_KEY is the known dev value — override via Replit Secrets before deploying.',
+      );
+    }
+  }
+
+  if (!process.env.ADMIN_PIN && !process.env.VITE_ADMIN_PIN) {
+    if (isProduction) {
+      errors.push(
+        'ADMIN_PIN is not set — the admin dashboard PIN gate is disabled in production, leaving admin routes unprotected. ' +
+          'Set ADMIN_PIN in Replit Secrets before deploying (run: bash scripts/rotate-secrets.sh).',
+      );
+    } else {
+      warnings.push(
+        'ADMIN_PIN is not set — admin dashboard PIN gate is disabled. Set ADMIN_PIN before deploying to production.',
       );
     }
   }
