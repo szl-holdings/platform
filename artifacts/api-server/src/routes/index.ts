@@ -278,6 +278,11 @@ router.use(lazyMatch("/nexus-mcp", () => import("./nexus-mcp"), "nexus-mcp"));
 
 router.use("/nexus", lazyMount(() => import("./nexus"), "nexus"));
 
+// Intelligence Economics Operating System — aggregate AI fleet economics,
+// calibration observatory, compound intelligence map, trust registry,
+// learning velocity, and provenance export. Auth-gated (admin/operator/analyst).
+router.use("/intelligence-economics", lazyMount(() => import("./intelligence-economics"), "intelligence-economics"));
+
 // NEXUS Ontology Fabric — unified entity registry + adjacency graph
 // across Terra/Vessels/Counsel/Sentra/etc. URI scheme: szl://<kind>/<ns>/<id>.
 router.use("/ontology", lazyMount(() => import("./ontology"), "ontology"));

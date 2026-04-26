@@ -81,6 +81,7 @@ const InvestorAnalyticsPage = lazy(() => import("@/pages/investor-analytics"));
 const ExportBuilderPage = lazy(() => import("@/pages/export-builder"));
 const ScheduledReportsPage = lazy(() => import("@/pages/scheduled-reports"));
 const AICostAnalyticsPage = lazy(() => import("@/pages/ai-cost-analytics"));
+const IntelligenceExchangePage = lazy(() => import("@/pages/intelligence-exchange"));
 const AdminPage = lazy(() => import("@/pages/admin"));
 const TenantHealthScorecardsPage = lazy(() => import("@/pages/tenant-health-scorecards"));
 const UnifiedSettingsPage = lazy(() => import("@/pages/unified-settings-page"));
@@ -1041,6 +1042,10 @@ function App() {
             </Route>
             <Route path="/alloy/mcp-tools">
               <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyMcpToolCreator /></AlloyAppPage></Suspense>
+            </Route>
+
+            <Route path="/alloy/intelligence-exchange">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><IntelligenceExchangePage /></AlloyAppPage></Suspense>
             </Route>
 
             {/* ── External platform redirects ── */}
