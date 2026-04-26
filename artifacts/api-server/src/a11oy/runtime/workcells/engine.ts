@@ -262,3 +262,50 @@ export function replayWorkcell(workcellId: string): WorkcellEntity | undefined {
 
   return clone;
 }
+
+// ─── Demo Seed ────────────────────────────────────────────────────────────────
+// Pre-populate the in-memory store with the canonical demo workcell entries so
+// that CLI replay, advance, and approve calls work against the standard IDs
+// without requiring a prior `POST /api/a11oy/workcells` call in the session.
+
+const DEMO_WORKCELLS: Array<{
+  id: string;
+  name: string;
+  description: string;
+  vertical: string;
+  operatorId: string;
+  approvalTier: 'auto' | 'operator' | 'executive';
+  phase: WorkcellPhase;
+}> = [
+  { id: 'wc-lyte-churn', name: 'Revenue Friction Remediation', description: 'Investigate and remediate enterprise ARR growth deceleration.', vertical: 'lyte-revenue', operatorId: 'op-csm-lyte', approvalTier: 'executive', phase: 'approval_required' },
+  { id: 'wc-terra-covenant', name: 'Terra Covenant Breach Response', description: 'Emergency lease-up and lender notification for covenant remediation.', vertical: 'terra-real-estate', operatorId: 'op-portfolio-terra', approvalTier: 'executive', phase: 'action_brief_created' },
+  { id: 'wc-vessels-psc', name: 'Voyage Risk Assessment', description: 'Assess and mitigate risks for active maritime voyages.', vertical: 'vessels-maritime', operatorId: 'op-fleet-vessels', approvalTier: 'operator', phase: 'risk_review' },
+  { id: 'wc-aegis-threat', name: 'APT Attribution & Containment', description: 'Threat intelligence and incident containment for state-level adversary.', vertical: 'aegis-defense', operatorId: 'op-ti-aegis', approvalTier: 'executive', phase: 'executing' },
+  { id: 'wc-a11oy-fabric-health', name: 'Fabric Health Sweep', description: 'Automated fabric health check and state engine maintenance.', vertical: 'alloy-core', operatorId: 'op-platform-a11oy', approvalTier: 'auto', phase: 'proven' },
+];
+
+function seedDemoWorkcells(): void {
+  const now = new Date().toISOString();
+  for (const seed of DEMO_WORKCELLS) {
+    if (!workcells.has(seed.id)) {
+      const wc: WorkcellEntity = {
+        id: seed.id,
+        name: seed.name,
+        description: seed.description,
+        vertical: seed.vertical,
+        phase: seed.phase,
+        operatorId: seed.operatorId,
+        tools: [],
+        approvalTier: seed.approvalTier,
+        maxRunDurationMs: 300_000,
+        originSignalIds: [],
+        createdAt: now,
+        updatedAt: now,
+        history: [{ phase: seed.phase, timestamp: now }],
+      };
+      workcells.set(wc.id, wc);
+    }
+  }
+}
+
+seedDemoWorkcells();

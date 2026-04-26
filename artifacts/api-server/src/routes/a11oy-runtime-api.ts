@@ -223,8 +223,9 @@ router.post('/a11oy/actions/:id/approve', async (req: Request, res: Response) =>
       return err(res, 409, 'conflict', `Action is already in "${action.status}" state.`);
     }
 
-    const { approvedBy, justification } = req.body as { approvedBy?: string; justification?: string };
-    if (!approvedBy) return err(res, 400, 'validation', 'approvedBy is required.');
+    const { approvedBy: rawApprovedBy, acknowledged, justification } = req.body as { approvedBy?: string; acknowledged?: boolean; justification?: string };
+    const approvedBy = rawApprovedBy ?? (acknowledged === true ? 'acknowledged-via-cli' : undefined);
+    if (!approvedBy) return err(res, 400, 'validation', 'approvedBy or acknowledged:true is required.');
 
     let approvalRecord = findApprovalByAction(action.id);
     if (!approvalRecord) {

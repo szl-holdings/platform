@@ -17,8 +17,10 @@ export class A11oyClient {
 
   private async request<T>(path: string, options: any = {}): Promise<Envelope<T>> {
     const url = `${API_BASE_URL}${path}`;
+    const bearerToken = process.env.A11OY_API_TOKEN || 'a11oy-demo-cli';
     const headers = {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${bearerToken}`,
       'X-API-Key': API_KEY,
       'X-Tenant-ID': this.tenant,
       ...options.headers,

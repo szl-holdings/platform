@@ -19,9 +19,28 @@ program.option('--trace', 'enable tracing');
 program.option('--verbose', 'enable verbose output');
 
 program.hook('preAction', (thisCommand) => {
-  const options = thisCommand.opts();
+  const options = thisCommand.optsWithGlobals();
   client.setTenant(options.tenant);
 });
+
+function globalOutputFormat(localOpts: Record<string, any> = {}): OutputFormat {
+  const global = program.opts();
+  return (localOpts.output ?? global.output ?? 'table') as OutputFormat;
+}
+
+function localError(message: string, format: OutputFormat): never {
+  if (format === 'json') {
+    const envelope: import('./envelope.js').Envelope<never> = {
+      ok: false,
+      error: { code: 'CLI_VALIDATION', message },
+      meta: { requestId: 'local', timestamp: new Date().toISOString() },
+    };
+    console.log(JSON.stringify(envelope, null, 2));
+  } else {
+    console.error(chalk.red('Error:'), message);
+  }
+  process.exit(1);
+}
 
 // a11oy now
 program
@@ -29,7 +48,7 @@ program
   .description('display NOW Board metrics')
   .action(async (options) => {
     const response = await client.get('/api/a11oy/now');
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 // a11oy signals
@@ -44,7 +63,7 @@ signals
   .action(async (options) => {
     const query = new URLSearchParams(options).toString();
     const response = await client.get(`/api/a11oy/signals?${query}`);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 signals
@@ -52,7 +71,7 @@ signals
   .description('get signal by ID')
   .action(async (id, options) => {
     const response = await client.get(`/api/a11oy/signals/${id}`);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 signals
@@ -70,7 +89,7 @@ signals
       data = JSON.parse(fs.readFileSync(0, 'utf8'));
     }
     const response = await client.post('/api/a11oy/signals', data);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 signals
@@ -78,7 +97,7 @@ signals
   .description('get signal explanation')
   .action(async (id, options) => {
     const response = await client.get(`/api/a11oy/signals/${id}?explain=true`);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 // a11oy outcomes
@@ -91,7 +110,7 @@ outcomes
   .action(async (options) => {
     const query = new URLSearchParams(options).toString();
     const response = await client.get(`/api/a11oy/outcomes?${query}`);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 outcomes
@@ -99,7 +118,7 @@ outcomes
   .description('get outcomes with drift analysis')
   .action(async (options) => {
     const response = await client.get('/api/a11oy/outcomes?drift=true');
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 // a11oy workcells
@@ -110,7 +129,7 @@ workcells
   .description('list workcells')
   .action(async (options) => {
     const response = await client.get('/api/a11oy/workcells');
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 workcells
@@ -118,15 +137,31 @@ workcells
   .description('get workcell by ID')
   .action(async (id, options) => {
     const response = await client.get(`/api/a11oy/workcells/${id}`);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 workcells
-  .command('start')
-  .description('start a workcell')
-  .action(async (options) => {
-    const response = await client.post('/api/a11oy/workcells', {});
-    formatOutput(response, options.output as OutputFormat);
+  .command('start [signalId]')
+  .description('start a new workcell, optionally seeded from a signal ID')
+  .option('--name <name>', 'workcell name', 'CLI Workcell')
+  .option('--vertical <vertical>', 'target vertical', 'alloy-core')
+  .action(async (signalId, options) => {
+    const body = {
+      name: options.name,
+      vertical: options.vertical,
+      ...(signalId ? { originSignalIds: [signalId] } : {}),
+    };
+    if (program.opts().dryRun) {
+      const previewEnvelope: import('./envelope.js').Envelope<Record<string, unknown>> = {
+        ok: true,
+        data: { dryRun: true, ...body, id: 'wc-preview' },
+        meta: { requestId: 'dry-run', timestamp: new Date().toISOString() },
+      };
+      formatOutput(previewEnvelope, globalOutputFormat(options));
+      return;
+    }
+    const response = await client.post('/api/a11oy/workcells', body);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 workcells
@@ -134,7 +169,7 @@ workcells
   .description('replay a workcell')
   .action(async (id, options) => {
     const response = await client.post(`/api/a11oy/workcells/${id}/replay`);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 // a11oy actions
@@ -147,7 +182,7 @@ actions
   .action(async (options) => {
     const query = new URLSearchParams(options).toString();
     const response = await client.get(`/api/a11oy/actions?${query}`);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 actions
@@ -155,16 +190,25 @@ actions
   .description('get action brief')
   .action(async (id, options) => {
     const response = await client.get(`/api/a11oy/actions/${id}`);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 actions
   .command('approve <id>')
   .description('approve an action')
-  .requiredOption('--approved-by <name>', 'name of the approver')
+  .option('--approved-by <name>', 'name of the approver')
+  .option('--acknowledged [value]', 'governance acknowledgment (pass "true" to confirm)')
   .action(async (id, options) => {
-    const response = await client.post(`/api/a11oy/actions/${id}/approve`, { approvedBy: options.approvedBy });
-    formatOutput(response, options.output as OutputFormat);
+    const format = globalOutputFormat(options);
+    const isAcknowledged = options.acknowledged === true || options.acknowledged === 'true';
+    if (!options.approvedBy && !isAcknowledged) {
+      localError('one of --approved-by <name> or --acknowledged true is required.', format);
+    }
+    const body: Record<string, unknown> = {};
+    if (options.approvedBy) body.approvedBy = options.approvedBy;
+    if (isAcknowledged) body.acknowledged = true;
+    const response = await client.post(`/api/a11oy/actions/${id}/approve`, body);
+    formatOutput(response, format);
   });
 
 actions
@@ -177,7 +221,7 @@ actions
       process.exit(1);
     }
     const response = await client.post(`/api/a11oy/actions/${id}/execute`);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 actions
@@ -185,7 +229,7 @@ actions
   .description('verify an action')
   .action(async (id, options) => {
     const response = await client.post(`/api/a11oy/actions/${id}/verify`);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 // a11oy proof
@@ -196,7 +240,7 @@ proof
   .description('list proofs')
   .action(async (options) => {
     const response = await client.get('/api/a11oy/proof');
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 proof
@@ -204,7 +248,7 @@ proof
   .description('get proof by entity ID')
   .action(async (entityId, options) => {
     const response = await client.get(`/api/a11oy/proof/${entityId}`);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 proof
@@ -212,7 +256,7 @@ proof
   .description('create proof for an action')
   .action(async (actionId, options) => {
     const response = await client.post('/api/a11oy/proof', { actionId });
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 // a11oy governance
@@ -223,7 +267,7 @@ governance
   .description('list governance policies')
   .action(async (options) => {
     const response = await client.get('/api/a11oy/governance');
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 governance
@@ -231,7 +275,7 @@ governance
   .description('perform dry-run policy check')
   .action(async (actionId, options) => {
     const response = await client.post('/api/a11oy/pce', { actionId, dryRun: true });
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 // a11oy agents
@@ -242,7 +286,7 @@ agents
   .description('list agents')
   .action(async (options) => {
     const response = await client.get('/api/a11oy/agents');
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 agents
@@ -250,7 +294,7 @@ agents
   .description('get agent trust score')
   .action(async (id, options) => {
     const response = await client.get(`/api/a11oy/agents/${id}`);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 // a11oy tools
@@ -261,7 +305,7 @@ tools
   .description('list tools')
   .action(async (options) => {
     const response = await client.get('/api/a11oy/tools');
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 tools
@@ -269,7 +313,7 @@ tools
   .description('simulate tool run')
   .action(async (id, options) => {
     const response = await client.post(`/api/a11oy/tools/${id}/simulate`);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 tools
@@ -282,7 +326,7 @@ tools
       process.exit(1);
     }
     const response = await client.post(`/api/a11oy/tools/${id}/run`);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 // a11oy evals
@@ -292,7 +336,7 @@ program
   .description('run evaluation')
   .action(async (targetId, options) => {
     const response = await client.post('/api/a11oy/evals/run', { targetId });
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 // a11oy memory
@@ -302,7 +346,7 @@ program
   .description('get memory status')
   .action(async (options) => {
     const response = await client.get('/api/a11oy/memory');
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 // a11oy demo
@@ -313,7 +357,7 @@ demo
   .description('seed demo data')
   .action(async (options) => {
     const response = await client.post('/api/a11oy/demo/seed');
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 demo
@@ -325,8 +369,8 @@ demo
       console.error(chalk.red('Error: --acknowledged true is required for demo reset.'));
       process.exit(1);
     }
-    const response = await client.post('/api/a11oy/demo/reset');
-    formatOutput(response, options.output as OutputFormat);
+    const response = await client.post('/api/a11oy/demo/reset', { acknowledged: true });
+    formatOutput(response, globalOutputFormat(options));
   });
 
 demo
@@ -334,7 +378,7 @@ demo
   .description('run named demo scenario')
   .action(async (name, options) => {
     const response = await client.post('/api/a11oy/demo/scenario', { name });
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 // a11oy pce
@@ -345,7 +389,7 @@ pce
   .description('create PCE contract')
   .action(async (options) => {
     const response = await client.post('/api/a11oy/pce');
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 pce
@@ -353,7 +397,7 @@ pce
   .description('validate PCE contract')
   .action(async (id, options) => {
     const response = await client.post(`/api/a11oy/pce/${id}/validate`);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 pce
@@ -361,7 +405,7 @@ pce
   .description('get PCE contract explanation')
   .action(async (id, options) => {
     const response = await client.get(`/api/a11oy/pce/${id}`);
-    formatOutput(response, options.output as OutputFormat);
+    formatOutput(response, globalOutputFormat(options));
   });
 
 // a11oy doctor

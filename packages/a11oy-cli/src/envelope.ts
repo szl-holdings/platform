@@ -1,8 +1,11 @@
 export type MetaSuccess = {
   requestId: string;
   timestamp: string;
-  mode: string;
-  tenant: string;
+  mode?: string;
+  tenant?: string;
+  total?: number;
+  page?: number;
+  pageSize?: number;
 };
 
 export type MetaError = {
@@ -12,18 +15,21 @@ export type MetaError = {
 
 export interface SuccessEnvelope<T> {
   ok: true;
-  result: T;
+  data: T;
   meta: MetaSuccess;
 }
 
 export interface ErrorEnvelope {
   ok: false;
   error: {
-    code: string;
+    code?: string;
+    type?: string;
     message: string;
     detail?: string;
+    retryable?: boolean;
+    timestamp?: string;
   };
-  meta: MetaError;
+  meta?: MetaError;
 }
 
 export type Envelope<T> = SuccessEnvelope<T> | ErrorEnvelope;

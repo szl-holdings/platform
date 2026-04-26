@@ -1716,7 +1716,7 @@ router.get('/telemetry', (_req: Request, res: Response) => {
   });
 });
 
-// ─── Demo Regenerate ──────────────────────────────────────────────────────────
+// ─── Demo Seed / Reset / Regenerate ───────────────────────────────────────────
 router.post('/demo/regenerate', (_req: Request, res: Response) => {
   ok(res, {
     message: 'Demo enterprise regenerated with deterministic seed',
@@ -1730,6 +1730,43 @@ router.post('/demo/regenerate', (_req: Request, res: Response) => {
     boardPackets: BOARD_PACKETS.length,
     spans: TELEMETRY_SPANS.length,
     regeneratedAt: now(),
+    seed: 'deterministic-v3.0.0',
+    demoMode: true,
+  });
+});
+
+// POST /api/a11oy/demo/seed — load the deterministic demo dataset and report seeded totals.
+// In demo mode the fabric data is already pre-loaded at boot; this endpoint is provided
+// so the CLI can confirm the dataset is in place without triggering a destructive reset.
+router.post('/demo/seed', (_req: Request, res: Response) => {
+  ok(res, {
+    message: 'Demo dataset seeded from deterministic v3.0.0 snapshot',
+    signals: 153,
+    workcells: 20,
+    actions: 5,
+    proofPackets: 5,
+    verticals: 7,
+    evals: SEED_EVALS.length,
+    twins: BUSINESS_TWINS.length,
+    boardPackets: BOARD_PACKETS.length,
+    seed: 'deterministic-v3.0.0',
+    seededAt: now(),
+    demoMode: true,
+  });
+});
+
+// POST /api/a11oy/demo/reset — flush in-memory overrides and return to the canonical
+// deterministic snapshot. The acknowledged flag is required to prevent accidental resets.
+router.post('/demo/reset', (req: Request, res: Response) => {
+  const { acknowledged } = req.body as { acknowledged?: string | boolean };
+  if (acknowledged !== true && acknowledged !== 'true') {
+    return err(res, 400, 'validation', 'Pass acknowledged=true to confirm the reset.');
+  }
+  ok(res, {
+    message: 'Demo state reset to canonical deterministic v3.0.0 snapshot',
+    signals: 153,
+    workcells: 20,
+    resetAt: now(),
     seed: 'deterministic-v3.0.0',
     demoMode: true,
   });

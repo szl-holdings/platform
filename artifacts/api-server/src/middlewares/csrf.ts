@@ -113,6 +113,14 @@ function isExempt(path: string): boolean {
   // Digest re-subscribe — public GET link on the unsubscribe confirmation page.
   if (path === '/api/notifications/resubscribe') return true;
   if (path === '/api/mcp' || path.startsWith('/api/mcp/')) return true;
+  // A11oy demo-management endpoints — public machine-to-machine paths called by
+  // the demo launchpad / presenter without a browser session. These endpoints
+  // only flush/reload the in-memory demo dataset (no per-user state mutated).
+  // All other A11oy mutation routes (approve, execute, replay, PCE, etc.) rely
+  // on the Bearer-token bypass above: the CLI always sends
+  // `Authorization: Bearer <A11OY_API_TOKEN|a11oy-demo-cli>`, and material
+  // execution is further gated by the PCE gate + MirrorEval block checks.
+  if (path.startsWith('/api/a11oy/demo/')) return true;
   if (path.match(/^\/api\/distribution-os\/linktree\/\d+\/click$/)) return true;
   // Non-production demo PIN verification — stateless read-only PIN check;
   // no session or user state is modified on the server side.

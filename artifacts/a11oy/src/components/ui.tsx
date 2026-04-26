@@ -115,11 +115,11 @@ export function PageHeader({
   );
 }
 
-export function Card({ children, className = '', onClick }: { children: ReactNode; className?: string; onClick?: () => void }) {
+export function Card({ children, className = '', onClick, style }: { children: ReactNode; className?: string; onClick?: () => void; style?: React.CSSProperties }) {
   return (
     <div
       className={`rounded-lg border p-4 ${className} ${onClick ? 'cursor-pointer transition-colors hover:border-blue-600/30' : ''}`}
-      style={{ backgroundColor: 'var(--color-a11oy-card)', borderColor: 'var(--color-a11oy-border)' }}
+      style={{ backgroundColor: 'var(--color-a11oy-card)', borderColor: 'var(--color-a11oy-border)', ...style }}
       onClick={onClick}
     >
       {children}

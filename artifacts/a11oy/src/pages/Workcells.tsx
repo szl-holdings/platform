@@ -51,6 +51,7 @@ export function Workcells() {
         <div className="flex gap-1">
           {['all', 'running', 'completed', 'idle', 'paused', 'error'].map(s => (
             <button
+              type="button"
               key={s}
               onClick={() => setFilterStatus(s)}
               className="text-xs px-2.5 py-1 rounded font-mono transition-colors"

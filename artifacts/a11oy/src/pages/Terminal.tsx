@@ -87,7 +87,7 @@ const COMMANDS: Record<string, (args: string[]) => string[]> = {
   },
   tools: () => [
     `── Tools Registry (${SEED_TOOLS.length}) ─────────────────────────────`,
-    ...SEED_TOOLS.map(t => `  [${t.status.padEnd(8)}] ${t.id.padEnd(18)} ${t.name.slice(0, 30)}`),
+    ...SEED_TOOLS.map(t => `  [${'active'.padEnd(8)}] ${t.id.padEnd(18)} ${t.name.slice(0, 30)}`),
   ],
   proof: () => {
     return [
@@ -246,7 +246,6 @@ export function Terminal() {
                   onKeyDown={handleKeyDown}
                   className="flex-1 bg-transparent outline-none font-mono text-xs"
                   style={{ color: '#3b82f6', caretColor: '#3b82f6' }}
-                  autoFocus
                   spellCheck={false}
                   autoComplete="off"
                 />

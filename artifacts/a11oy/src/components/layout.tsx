@@ -105,6 +105,7 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
             DEMO MODE — All data is synthetic. Connect enterprise sources to activate Live Mode.
           </div>
           <button
+            type="button"
             onClick={dismissBanner}
             className="opacity-60 hover:opacity-100 transition-opacity"
             style={{ color: '#f59e0b', background: 'none', border: 'none', cursor: 'pointer' }}
@@ -120,6 +121,7 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
       >
         <div className="flex items-center gap-3">
           <button
+            type="button"
             onClick={() => setSidebarOpen(o => !o)}
             className="w-7 h-7 flex items-center justify-center rounded text-sm transition-colors"
             style={{ color: 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}

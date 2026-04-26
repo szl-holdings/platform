@@ -17,7 +17,7 @@ export function WorkcellReplayDetail() {
   const steps = wc ? [
     { step: 'Signal Mesh: signals ingested and routed', status: 'completed', note: wc.signals.slice(0, 2).join(', ') },
     { step: 'Causal Core: evidence graph assembled', status: 'completed', note: `${wc.signals.length} causal links traced` },
-    { step: 'Context Engine: context pack built', status: 'completed', note: JSON.stringify(wc.contextPack).slice(0, 60) + '…' },
+    { step: 'Context Engine: context pack built', status: 'completed', note: `${JSON.stringify(wc.contextPack).slice(0, 60)}…` },
     ...wc.agentSequence.map(a => ({
       step: `${a.role}: ${a.action}`,
       status: wc.status === 'completed' ? 'completed' : wc.status === 'running' ? 'running' : 'pending',
@@ -86,6 +86,7 @@ export function WorkcellReplayDetail() {
                 <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>Speed:</span>
                 {[2000, 1000, 600, 300].map(s => (
                   <button
+                    type="button"
                     key={s}
                     onClick={() => setSpeed(s)}
                     className="px-2 py-0.5 rounded font-mono"

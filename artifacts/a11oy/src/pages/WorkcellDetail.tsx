@@ -14,6 +14,13 @@ const VERTICAL_LABELS: Record<string, string> = {
   'aegis-defense': 'Aegis Defense', 'prism-counsel': 'Counsel', 'carlota-jo': 'Carlota Jo', 'alloy-core': 'Alloy Core',
 };
 
+type WorkcellExecutionResult = {
+  status?: string;
+  durationMs?: number;
+  outputSummary?: string;
+  errorMessage?: string;
+};
+
 export function WorkcellDetail() {
   const params = useParams<{ id: string }>();
   const wc = SEED_WORKCELLS.find(w => w.id === params.id);
@@ -35,6 +42,7 @@ export function WorkcellDetail() {
   const proofPacket = SEED_PROOF_PACKETS.find(p => p.id === wc.proofPacketId);
   const color = VERTICAL_COLORS[wc.vertical] ?? '#9bacc4';
   const statusColor = { running: '#f59e0b', completed: '#10b981', error: '#ef4444', paused: '#9bacc4', idle: '#9bacc4' }[wc.status] ?? '#9bacc4';
+  const execResult = wc.mockExecutionResult as WorkcellExecutionResult;
 
   return (
     <Layout>
@@ -197,19 +205,19 @@ export function WorkcellDetail() {
             <SectionTitle>Mock Execution Result</SectionTitle>
             <Card className="text-xs">
               <div className="flex items-center gap-2 mb-2">
-                <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: wc.mockExecutionResult.status === 'success' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)', color: wc.mockExecutionResult.status === 'success' ? '#10b981' : '#ef4444' }}>
-                  {wc.mockExecutionResult.status}
+                <span className="font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: execResult.status === 'success' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)', color: execResult.status === 'success' ? '#10b981' : '#ef4444' }}>
+                  {execResult.status ?? 'unknown'}
                 </span>
                 <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>
-                  {wc.mockExecutionResult.durationMs}ms
+                  {execResult.durationMs}ms
                 </span>
               </div>
               <div className="font-mono text-xs p-2 rounded mb-2" style={{ backgroundColor: 'var(--color-a11oy-deep)', border: '1px solid var(--color-a11oy-border)', color: 'var(--color-a11oy-text-ghost)' }}>
-                {wc.mockExecutionResult.outputSummary}
+                {execResult.outputSummary}
               </div>
-              {wc.mockExecutionResult.errorMessage && (
+              {execResult.errorMessage && (
                 <div className="text-xs p-2 rounded" style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}>
-                  Error: {wc.mockExecutionResult.errorMessage}
+                  Error: {execResult.errorMessage}
                 </div>
               )}
             </Card>
@@ -263,8 +271,8 @@ export function WorkcellDetail() {
                     <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{proofPacket.kind}</div>
                   </div>
                   <div>
-                    <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Verified</div>
-                    <div style={{ color: proofPacket.verified ? '#10b981' : '#ef4444' }}>{proofPacket.verified ? 'YES' : 'NO'}</div>
+                    <div className="font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>Witnesses</div>
+                    <div style={{ color: proofPacket.witnessedBy.length > 0 ? '#10b981' : '#ef4444' }}>{proofPacket.witnessedBy.length > 0 ? `${proofPacket.witnessedBy.length} recorded` : 'NONE'}</div>
                   </div>
                 </div>
               </Card>

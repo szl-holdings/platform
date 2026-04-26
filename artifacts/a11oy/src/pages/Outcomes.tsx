@@ -28,7 +28,7 @@ export function Outcomes() {
   );
 
   const achieved = SEED_OUTCOMES.filter(o => o.status === 'achieved');
-  const atRisk = SEED_OUTCOMES.filter(o => o.status === 'blocked' || o.status === 'at_risk' || o.status === 'missed');
+  const atRisk = SEED_OUTCOMES.filter(o => o.status === 'blocked' || o.status === 'missed');
   const inProgress = SEED_OUTCOMES.filter(o => o.status === 'in_progress');
 
   const selectedOutcome = selected ? SEED_OUTCOMES.find(o => o.id === selected) : null;
@@ -87,8 +87,8 @@ export function Outcomes() {
               const statusColor = STATUS_COLORS[o.status] ?? '#9bacc4';
               const color = VERTICAL_COLORS[o.vertical] ?? '#9bacc4';
               const isSelected = o.id === selected;
-              const signals = SEED_SIGNALS.filter(s => o.signalRefs.includes(s.id));
-              const workcell = SEED_WORKCELLS.find(w => w.id === o.workcellId);
+              const signals = SEED_SIGNALS.filter(s => o.linkedSignalIds.includes(s.id));
+              const workcell = SEED_WORKCELLS.find(w => w.signals.some(sid => o.linkedSignalIds.includes(sid)));
               return (
                 <div
                   key={o.id}
@@ -136,7 +136,7 @@ export function Outcomes() {
                             <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>None assigned</div>
                           )}
                           <div className="mt-2 font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>DEADLINE</div>
-                          <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{o.deadline ?? '—'}</div>
+                          <div style={{ color: 'var(--color-a11oy-text-sub)' }}>{o.targetDate ?? '—'}</div>
                         </div>
                       </div>
                     </div>

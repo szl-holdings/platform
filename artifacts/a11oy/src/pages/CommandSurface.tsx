@@ -117,7 +117,7 @@ export function CommandSurface() {
             <span className="text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>SIGNAL TIMELINE</span>
             <span className="ml-auto text-xs font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{filtered.length} events</span>
           </div>
-          <div className="flex flex-col divide-y" style={{ divideColor: 'var(--color-a11oy-border)' }}>
+          <div className="flex flex-col divide-y divide-white/5">
             {filtered.length === 0 ? (
               <div className="p-8 text-center text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>No signals match the current filters.</div>
             ) : filtered.map(s => {
