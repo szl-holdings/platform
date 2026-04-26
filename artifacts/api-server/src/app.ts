@@ -615,12 +615,20 @@ app.get('/api/env-registry', async (req: Request, res: Response) => {
     const providedToken = req.headers['x-internal-token'] as string | undefined;
     const match = verifyInternalHeader(providedToken, req.originalUrl || req.url);
     const hasInternalAccess = match !== null && tokenHasScope(match.context, 'internal:read');
-    if (!hasInternalAccess && !req.isAuthenticated()) {
-      sendUnauthorized(
-        res,
-        'Environment registry is restricted to authenticated or internal users in production',
-      );
-      return;
+    if (!hasInternalAccess) {
+      if (!req.isAuthenticated()) {
+        sendUnauthorized(
+          res,
+          'Environment registry is restricted to authenticated users in production',
+        );
+        return;
+      }
+      const userRoles: string[] = (req.user as { roles?: string[] })?.roles ?? [];
+      const hasElevatedRole = userRoles.some((r) => ['ops', 'super_admin'].includes(r));
+      if (!hasElevatedRole) {
+        sendForbidden(res, 'Environment registry requires ops or super_admin role');
+        return;
+      }
     }
   }
   const groups = ENV_SPECS.reduce<
