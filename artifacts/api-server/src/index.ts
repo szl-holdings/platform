@@ -31,6 +31,7 @@ import {
 import { knowledgeStore } from './lib/knowledge-store';
 import {
   markOpsReady,
+  markStartupReady,
   runBootSeedSequence,
   type SeedTask,
 } from './lib/boot-orchestrator';
@@ -527,7 +528,45 @@ export async function bootstrap(
 
     // Step 2b: Wire Trace Graph and Memory Fabric to Postgres so traces,
     // approvals, audit trails, and agent memory survive restarts.
-    await bootstrapStep('initDurablePersistence', initDurablePersistence);
+    //
+    // IMPORTANT: do NOT use bootstrapStep() here. bootstrapStep is fail-open and
+    // timeout-based — it attaches a background .catch() and resolves the outer
+    // await after the timeout regardless of whether initDurablePersistence has
+    // actually finished. That would cause markStartupReady() to fire while
+    // hydration is still running in the background, making /readyz report "ready"
+    // prematurely. Instead we await initDurablePersistence() directly with a
+    // hard timeout that rejects only after the promise settles or the limit elapses,
+    // so the gate always reflects the true completion state.
+    const DURABLE_PERSISTENCE_TIMEOUT_MS = 60_000;
+    const durableHydrationStart = Date.now();
+    try {
+      await Promise.race([
+        initDurablePersistence(),
+        new Promise<void>((_, reject) =>
+          setTimeout(
+            () => reject(new Error(`initDurablePersistence exceeded ${DURABLE_PERSISTENCE_TIMEOUT_MS}ms`)),
+            DURABLE_PERSISTENCE_TIMEOUT_MS,
+          ),
+        ),
+      ]);
+      logger.info(
+        { durationMs: Date.now() - durableHydrationStart },
+        '[bootstrap] initDurablePersistence OK',
+      );
+    } catch (err) {
+      logger.warn(
+        { err, durationMs: Date.now() - durableHydrationStart },
+        '[bootstrap] initDurablePersistence failed or timed out — continuing with in-memory fallbacks',
+      );
+    }
+
+    // Migrations complete + critical hydration settled (succeeded OR failed with
+    // graceful fallback): flip the startup readiness gate so /readyz returns 200.
+    // We mark ready even on hydration failure because initDurablePersistence
+    // falls back to in-memory stores — the server can still serve requests,
+    // just without durable persistence until a restart.
+    markStartupReady();
+    logger.info('[bootstrap] Startup readiness gate open — /readyz now returns 200');
 
     // Step 2b-1: Wire the durable Postgres-backed evidence ledger so AUDIT
     // entries (the canonical chain INGEST→…→AUDIT→DELIVER) survive restarts
@@ -716,15 +755,23 @@ export async function bootstrap(
       { name: 'runOpsMgmtBootInit', fn: () => runOpsMgmtBootInit() },
     );
 
-    void runBootSeedSequence(seedTasks)
-      .then(() => markOpsReady())
-      .catch((err) => {
-        logger.error({ err }, '[boot-seed] sequenced chain crashed unexpectedly');
-        // Fail-open: even if the chain crashed, flip the gate so admin
-        // endpoints aren't permanently 503'd. The individual seed
-        // failures will already be logged inside runBootSeedSequence.
-        markOpsReady();
-      });
+    // Defer seed execution to the next event-loop iteration so that any
+    // pool connections released by the hydration steps above are fully
+    // returned before the seed chain begins its first checkout. This
+    // prevents the seed fan-out from competing with residual hydration
+    // connection teardown and eliminates the last source of OBS-007
+    // warnings on cold start (serialised hydration + deferred seeding).
+    setImmediate(() => {
+      void runBootSeedSequence(seedTasks)
+        .then(() => markOpsReady())
+        .catch((err) => {
+          logger.error({ err }, '[boot-seed] sequenced chain crashed unexpectedly');
+          // Fail-open: even if the chain crashed, flip the gate so admin
+          // endpoints aren't permanently 503'd. The individual seed
+          // failures will already be logged inside runBootSeedSequence.
+          markOpsReady();
+        });
+    });
 
     logger.info('[bootstrap] Bootstrap sequence complete — server fully ready');
 

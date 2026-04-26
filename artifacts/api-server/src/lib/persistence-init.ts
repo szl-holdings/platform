@@ -90,16 +90,16 @@ export async function initDurablePersistence(): Promise<void> {
       logger,
     });
 
-    const [tracesLoaded, memLoaded] = await Promise.all([
-      traceStore.hydrate(TRACE_HYDRATE_LIMIT).catch((err) => {
-        logger.warn({ err }, "[persistence] Trace hydration failed");
-        return 0;
-      }),
-      memoryStore.hydrate(MEMORY_HYDRATE_LIMIT).catch((err) => {
-        logger.warn({ err }, "[persistence] Memory hydration failed");
-        return 0;
-      }),
-    ]);
+    // Serialised — one connection at a time so hydration never exhausts
+    // the shared pool (OBS-007 fix: replaced concurrent Promise.all).
+    const tracesLoaded = await traceStore.hydrate(TRACE_HYDRATE_LIMIT).catch((err) => {
+      logger.warn({ err }, "[persistence] Trace hydration failed");
+      return 0;
+    });
+    const memLoaded = await memoryStore.hydrate(MEMORY_HYDRATE_LIMIT).catch((err) => {
+      logger.warn({ err }, "[persistence] Memory hydration failed");
+      return 0;
+    });
 
     defaultTraceStore.setBackend(traceStore);
     defaultMemoryStore.setBackend(memoryStore);
@@ -132,7 +132,9 @@ export async function initDurablePersistence(): Promise<void> {
         logger,
       });
 
-      const [hydratedSignals, evidenceLoaded, recsLoaded, entitiesLoaded] = await Promise.all([
+      // Serialised in batches of 2 — avoids a 4-way concurrent fan-out that
+      // could saturate the pool during startup (OBS-007 fix).
+      const [hydratedSignals, evidenceLoaded] = await Promise.all([
         signalBusStore.hydrate().catch((err) => {
           logger.warn({ err }, "[persistence] Signal bus hydration failed");
           return [] as Awaited<ReturnType<PostgresSignalBusStore["hydrate"]>>;
@@ -141,6 +143,8 @@ export async function initDurablePersistence(): Promise<void> {
           logger.warn({ err }, "[persistence] Evidence store hydration failed");
           return 0;
         }),
+      ]);
+      const [recsLoaded, entitiesLoaded] = await Promise.all([
         recommendationStore.hydrate().catch((err) => {
           logger.warn({ err }, "[persistence] Recommendation store hydration failed");
           return 0;
@@ -325,21 +329,20 @@ export async function initDurablePersistence(): Promise<void> {
         },
       };
 
-      const [skillRows, runRows] = await Promise.all([
-        db.select().from(skillsTable).catch((err) => {
-          logger.warn({ err }, "[persistence] Skill registry hydration failed");
+      // Serialised — avoids concurrent fan-out on the shared pool (OBS-007 fix).
+      const skillRows = await db.select().from(skillsTable).catch((err) => {
+        logger.warn({ err }, "[persistence] Skill registry hydration failed");
+        return [] as Record<string, unknown>[];
+      });
+      const runRows = await db
+        .select()
+        .from(skillRunsTable)
+        .orderBy(desc(skillRunsTable.startedAt))
+        .limit(2000)
+        .catch((err) => {
+          logger.warn({ err }, "[persistence] Skill run store hydration failed");
           return [] as Record<string, unknown>[];
-        }),
-        db
-          .select()
-          .from(skillRunsTable)
-          .orderBy(desc(skillRunsTable.startedAt))
-          .limit(2000)
-          .catch((err) => {
-            logger.warn({ err }, "[persistence] Skill run store hydration failed");
-            return [] as Record<string, unknown>[];
-          }),
-      ]);
+        });
 
       const hydratedSkills = (skillRows as Record<string, unknown>[]).map(rowToSkill);
       const hydratedRuns = (runRows as Record<string, unknown>[]).map(rowToRun);

@@ -401,6 +401,26 @@ app.get('/healthz', (_req: Request, res: Response) => {
 app.get('/readyz', handleReadiness);
 
 async function handleReadiness(_req: Request, res: Response) {
+  // Gate 1: startup phase (migrations + critical hydration).
+  // Import lazily to avoid a circular-module issue at app-module load time
+  // (boot-orchestrator has no dependency on app, but app loads before index.ts
+  // calls markStartupReady, so the flag starts false and flips during boot).
+  const { isStartupReady } = await import('./lib/boot-orchestrator.js');
+  if (!isStartupReady()) {
+    res.status(503).json({
+      status: 'starting',
+      message: 'Server is still initialising (migrations or critical hydration in progress). Retry shortly.',
+      timestamp: new Date().toISOString(),
+      checks: {
+        startup: 'pending',
+        database: 'pending',
+        uptime: process.uptime(),
+      },
+    });
+    return;
+  }
+
+  // Gate 2: DB reachability (post-startup, ongoing health).
   const dbUrl = process.env.DATABASE_URL;
   let dbStatus = 'not_configured';
 
@@ -424,6 +444,7 @@ async function handleReadiness(_req: Request, res: Response) {
     status: allOk ? 'ready' : 'degraded',
     timestamp: new Date().toISOString(),
     checks: {
+      startup: 'ready',
       server: 'ok',
       database: dbStatus,
       uptime: process.uptime(),

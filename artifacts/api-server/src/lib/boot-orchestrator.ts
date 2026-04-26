@@ -43,6 +43,28 @@ export interface SeedTask {
 let opsReady = false;
 const opsReadyWaiters: Array<() => void> = [];
 
+// ── Startup readiness gate ─────────────────────────────────────────────────
+// Tracks whether migrations AND critical hydration (initDurablePersistence)
+// have both completed. Separate from `opsReady` which guards the seed chain.
+// /readyz and /api/health/ready return 503 until this is flipped.
+let startupReady = false;
+
+/** Returns true once migrations + critical hydration have completed. */
+export function isStartupReady(): boolean {
+  return startupReady;
+}
+
+/** Mark startup as fully ready (migrations + critical hydration done). */
+export function markStartupReady(): void {
+  if (startupReady) return;
+  startupReady = true;
+}
+
+/** Test-only — reset the startup-ready gate. */
+export function _resetStartupReadyForTests(): void {
+  startupReady = false;
+}
+
 /** Returns true once `markOpsReady()` has been called at least once. */
 export function isOpsReady(): boolean {
   return opsReady;

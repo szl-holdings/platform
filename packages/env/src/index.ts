@@ -76,7 +76,10 @@ export const envSchema = z.object({
   // client.release) is held longer than this many ms. Catches leaked
   // clients and runaway transactions at the per-checkout level instead of
   // only when aggregate pool saturation has already happened.
-  DB_CHECKOUT_WARN_THRESHOLD_MS: optionalInt("30000"),
+  // Default reduced from 30 000 → 10 000 ms (Phase 4 hardening, 2026-04-26):
+  // serialised hydration means no legitimate startup checkout should exceed
+  // a few seconds, so 10 s is a tighter, more actionable signal threshold.
+  DB_CHECKOUT_WARN_THRESHOLD_MS: optionalInt("10000"),
 
   // ── Authentication ──────────────────────────────────────────────────────
   SESSION_SECRET: z.string().min(32, "SESSION_SECRET must be at least 32 characters").optional(),
