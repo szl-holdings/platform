@@ -716,6 +716,26 @@ export {
   validateAndBuildTriageDecision,
 } from './tradecraft/index.js';
 export {
+  type DomainModelMapping,
+  type FineTunedRouteResult,
+  getDomainMappings,
+  getAvailableDomainsWithFineTuning,
+  registerDomainMapping,
+  routeForDomain,
+  routeWithFallback,
+} from './fine-tuned-router.js';
+export {
+  type SupportedLanguage,
+  type LanguageConfig,
+  SUPPORTED_LANGUAGES,
+  getSupportedLanguages,
+  isLanguageSupported,
+  detectLanguage,
+  transcribeMultilingual,
+  synthesizeSpeech,
+  multilingualVoiceChat,
+} from './providers/openai/audio/multilingual.js';
+export {
   analyzeQueryComplexity,
   applyMetaLearningToRouting,
   buildCausalContext,

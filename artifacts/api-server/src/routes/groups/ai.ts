@@ -161,4 +161,30 @@ export function register(router: IRouter): void {
   router.use('/ai/prompts', _readLimiter);
   router.use('/ai/prompts', _writeLimiter);
   router.use(lazyMatch('/ai', () => import('../prompt-registry'), 'prompt-registry'));
+
+  router.use('/crew', tenantScope({ required: true }));
+  router.use('/crew', _writeLimiter);
+  router.use(lazyMatch('/crew', () => import('../multi-agent-crew'), 'multi-agent-crew'));
+
+  router.use('/trust', tenantScope({ required: true }));
+  router.use('/trust', _readLimiter);
+  router.use('/trust', _writeLimiter);
+  router.use(lazyMatch('/trust', () => import('../trust-score'), 'trust-score'));
+
+  router.use('/voice', tenantScope({ required: true }));
+  router.use('/voice', _readLimiter);
+  router.use('/voice', _writeLimiter);
+  router.use(lazyMatch('/voice', () => import('../multilingual-voice'), 'multilingual-voice'));
+
+  router.use('/fine-tuned', tenantScope({ required: true }));
+  router.use('/fine-tuned', _readLimiter);
+  router.use(
+    lazyMatch('/fine-tuned', () => import('../fine-tuned-routing'), 'fine-tuned-routing'),
+  );
+
+  router.use('/offline-sync', tenantScope({ required: true }));
+  router.use('/offline-sync', _writeLimiter);
+  router.use(
+    lazyMatch('/offline-sync', () => import('../offline-sync'), 'offline-sync'),
+  );
 }

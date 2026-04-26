@@ -3,12 +3,14 @@ import * as Speech from 'expo-speech';
 import { useCallback, useRef, useState } from 'react';
 import type { WorkspaceDomain } from '@/context/WorkspaceContext';
 
-export type VoiceLanguage = 'en' | 'es' | 'zh';
+export type VoiceLanguage = 'en' | 'es' | 'zh' | 'ar' | 'fr';
 
 export const VOICE_LANGUAGES: Record<VoiceLanguage, { label: string; speechLocale: string; flag: string }> = {
   en: { label: 'English', speechLocale: 'en-US', flag: '🇺🇸' },
   es: { label: 'Español', speechLocale: 'es-ES', flag: '🇪🇸' },
   zh: { label: '中文', speechLocale: 'zh-CN', flag: '🇨🇳' },
+  ar: { label: 'العربية', speechLocale: 'ar-SA', flag: '🇸🇦' },
+  fr: { label: 'Français', speechLocale: 'fr-FR', flag: '🇫🇷' },
 };
 
 export interface VoiceQueryResult {
@@ -64,6 +66,30 @@ const DOMAIN_KEYWORDS_ZH: Record<WorkspaceDomain, string[]> = {
   founder: ['创始人', '创业', '文章', '个人'],
 };
 
+const DOMAIN_KEYWORDS_AR: Record<WorkspaceDomain, string[]> = {
+  intelligence: ['استخبارات', 'اندماج', 'ارتباط', 'مشترك'],
+  command: ['قيادة', 'حالة', 'نظرة عامة', 'عام', 'نظام بيئي', 'إيجاز'],
+  defense: ['تهديد', 'أمن', 'دفاع', 'هجوم', 'ثغرة', 'حادث'],
+  fleet: ['سفينة', 'أسطول', 'بحري', 'شحن', 'ميناء', 'رحلة'],
+  properties: ['عقار', 'عقارات', 'مبنى', 'تقييم', 'صفقة', 'تنظيم'],
+  operations: ['عمليات', 'نظام', 'وقت التشغيل', 'صحة', 'إشارة'],
+  advisory: ['استشارة', 'عميل', 'جلسة', 'وثيقة'],
+  portfolio: ['محفظة', 'استثمار', 'صندوق', 'عائد', 'أصول'],
+  founder: ['مؤسس', 'ريادة', 'مقال', 'شخصي'],
+};
+
+const DOMAIN_KEYWORDS_FR: Record<WorkspaceDomain, string[]> = {
+  intelligence: ['renseignement', 'fusion', 'interdomaine', 'corrélation'],
+  command: ['commandement', 'statut', 'aperçu', 'général', 'écosystème', 'briefing'],
+  defense: ['menace', 'sécurité', 'défense', 'attaque', 'vulnérabilité', 'incident'],
+  fleet: ['navire', 'flotte', 'maritime', 'cargo', 'port', 'voyage'],
+  properties: ['propriété', 'immobilier', 'bâtiment', 'évaluation', 'transaction', 'zonage'],
+  operations: ['opérations', 'système', 'disponibilité', 'santé', 'signal'],
+  advisory: ['conseil', 'client', 'consultation', 'session', 'document'],
+  portfolio: ['portefeuille', 'investissement', 'fonds', 'rendement', 'actif'],
+  founder: ['fondateur', 'entreprise', 'article', 'personnel'],
+};
+
 const DOMAIN_RESPONSES: Record<VoiceLanguage, Record<WorkspaceDomain, { response: string; cards: VoiceResultCard[] }>> = {
   en: {
     command: { response: 'Cross-domain status nominal. 2 high-priority signals require attention across Defense and Fleet.', cards: [{ id: '1', label: 'Active Signals', value: '14', change: '+3', trend: 'up', severity: 'high' }, { id: '2', label: 'Critical Alerts', value: '2', trend: 'up', severity: 'critical' }, { id: '3', label: 'Domains Online', value: '7/7', trend: 'neutral' }] },
@@ -98,6 +124,28 @@ const DOMAIN_RESPONSES: Record<VoiceLanguage, Record<WorkspaceDomain, { response
     portfolio: { response: '本周投资组合上涨2.1%。Counsel基金跑赢基准340bps。', cards: [{ id: '1', label: '组合价值', value: '8.47亿美元', change: '+2.1%', trend: 'up' }, { id: '2', label: 'Counsel超额', value: '+340bps', trend: 'up' }, { id: '3', label: '活跃仓位', value: '23', trend: 'neutral' }] },
     founder: { response: '2篇文章待发布。4家企业处于积极尽调阶段。', cards: [{ id: '1', label: '待发文章', value: '2', trend: 'neutral' }, { id: '2', label: '活跃企业', value: '4', trend: 'up' }, { id: '3', label: '组合IRR', value: '18.4%', trend: 'up' }] },
   },
+  ar: {
+    command: { response: 'حالة النظام البيئي طبيعية. إشارتان ذات أولوية عالية تتطلبان الانتباه في الدفاع والأسطول.', cards: [{ id: '1', label: 'إشارات نشطة', value: '14', change: '+3', trend: 'up', severity: 'high' }, { id: '2', label: 'تنبيهات حرجة', value: '2', trend: 'up', severity: 'critical' }, { id: '3', label: 'النطاقات المتصلة', value: '7/7', trend: 'neutral' }] },
+    intelligence: { response: 'محرك دمج الاستخبارات يوفر ارتباط الإشارات عبر النطاقات.', cards: [] },
+    defense: { response: 'وضع الدفاع مرتفع. حادث نشط واحد، 3 ثغرات حرجة بانتظار التحقق.', cards: [{ id: '1', label: 'مستوى التهديد', value: 'مرتفع', severity: 'high' }, { id: '2', label: 'حوادث نشطة', value: '1', severity: 'critical' }, { id: '3', label: 'تصحيحات معلقة', value: '3 CVEs', trend: 'down' }] },
+    fleet: { response: 'الأسطول يعمل. 12 سفينة نشطة، واحدة متأخرة في ميناء روتردام بسبب الطقس.', cards: [{ id: '1', label: 'السفن النشطة', value: '12', trend: 'neutral' }, { id: '2', label: 'في الموعد', value: '11/12', trend: 'up' }, { id: '3', label: 'قيمة الشحن', value: '$84.2M', trend: 'up' }] },
+    properties: { response: 'أداء المحفظة جيد. تم اكتشاف 3 إشارات ضائقة جديدة في ممر ميامي ديد.', cards: [{ id: '1', label: 'قيمة المحفظة', value: '$2.4B', change: '+1.2%', trend: 'up' }, { id: '2', label: 'صفقات نشطة', value: '7', trend: 'neutral' }, { id: '3', label: 'إشارات ضائقة', value: '3', severity: 'medium' }] },
+    operations: { response: 'الأنظمة سليمة. زمن استجابة API ارتفع 12% — وكيل Lyte يحقق في السبب.', cards: [{ id: '1', label: 'صحة النظام', value: '94%', trend: 'down' }, { id: '2', label: 'زمن API', value: '238ms', change: '+12%', trend: 'up', severity: 'medium' }, { id: '3', label: 'إشارات نشطة', value: '5', trend: 'neutral' }] },
+    advisory: { response: '3 جلسات عملاء مجدولة اليوم. مراجعة وثائق معلقة لتعاون بلاكستون.', cards: [{ id: '1', label: 'جلسات اليوم', value: '3', trend: 'neutral' }, { id: '2', label: 'مراجعات معلقة', value: '2 وثائق', severity: 'low' }, { id: '3', label: 'NPS العملاء', value: '94', trend: 'up' }] },
+    portfolio: { response: 'المحفظة ارتفعت 2.1% هذا الأسبوع. صندوق Counsel يتفوق على المعيار بـ 340 نقطة أساس.', cards: [{ id: '1', label: 'قيمة المحفظة', value: '$847M', change: '+2.1%', trend: 'up' }, { id: '2', label: 'ألفا Counsel', value: '+340bps', trend: 'up' }, { id: '3', label: 'مراكز نشطة', value: '23', trend: 'neutral' }] },
+    founder: { response: 'مقالان بانتظار النشر. 4 مشاريع في مرحلة العناية الواجبة.', cards: [{ id: '1', label: 'مقالات معلقة', value: '2', trend: 'neutral' }, { id: '2', label: 'مشاريع نشطة', value: '4', trend: 'up' }, { id: '3', label: 'IRR المحفظة', value: '18.4%', trend: 'up' }] },
+  },
+  fr: {
+    command: { response: 'Statut interdomaine nominal. 2 signaux haute priorite requierent attention en Defense et Flotte.', cards: [{ id: '1', label: 'Signaux Actifs', value: '14', change: '+3', trend: 'up', severity: 'high' }, { id: '2', label: 'Alertes Critiques', value: '2', trend: 'up', severity: 'critical' }, { id: '3', label: 'Domaines en Ligne', value: '7/7', trend: 'neutral' }] },
+    intelligence: { response: 'Le moteur de fusion du renseignement fournit la correlation des signaux interdomaines.', cards: [] },
+    defense: { response: 'Posture de defense elevee. 1 incident actif, 3 CVE critiques en attente de validation.', cards: [{ id: '1', label: 'Niveau de Menace', value: 'ELEVE', severity: 'high' }, { id: '2', label: 'Incidents Actifs', value: '1', severity: 'critical' }, { id: '3', label: 'Correctifs en Attente', value: '3 CVEs', trend: 'down' }] },
+    fleet: { response: 'Flotte operationnelle. 12 navires actifs, 1 retarde au port de Rotterdam pour cause meteo.', cards: [{ id: '1', label: 'Navires Actifs', value: '12', trend: 'neutral' }, { id: '2', label: 'A l\'Heure', value: '11/12', trend: 'up' }, { id: '3', label: 'Valeur Cargo', value: '$84.2M', trend: 'up' }] },
+    properties: { response: 'Portefeuille performant. 3 nouveaux signaux de detresse detectes dans le couloir Miami-Dade.', cards: [{ id: '1', label: 'Valeur Portefeuille', value: '$2.4B', change: '+1.2%', trend: 'up' }, { id: '2', label: 'Transactions Actives', value: '7', trend: 'neutral' }, { id: '3', label: 'Signaux de Detresse', value: '3', severity: 'medium' }] },
+    operations: { response: 'Systemes sains. Latence API en hausse de 12% — agent Lyte enquete sur la cause.', cards: [{ id: '1', label: 'Sante Systeme', value: '94%', trend: 'down' }, { id: '2', label: 'Latence API', value: '238ms', change: '+12%', trend: 'up', severity: 'medium' }, { id: '3', label: 'Signaux Actifs', value: '5', trend: 'neutral' }] },
+    advisory: { response: '3 sessions clients prevues aujourd\'hui. Revision de documents en attente pour l\'engagement Blackstone.', cards: [{ id: '1', label: 'Sessions Aujourd\'hui', value: '3', trend: 'neutral' }, { id: '2', label: 'Revisions en Attente', value: '2 docs', severity: 'low' }, { id: '3', label: 'NPS Clients', value: '94', trend: 'up' }] },
+    portfolio: { response: 'Portefeuille en hausse de 2.1% cette semaine. Le fonds Counsel surperforme le benchmark de 340bps.', cards: [{ id: '1', label: 'Valeur Portefeuille', value: '$847M', change: '+2.1%', trend: 'up' }, { id: '2', label: 'Alpha Counsel', value: '+340bps', trend: 'up' }, { id: '3', label: 'Positions Actives', value: '23', trend: 'neutral' }] },
+    founder: { response: '2 articles en attente de publication. 4 entreprises en phase active de due diligence.', cards: [{ id: '1', label: 'Articles en Attente', value: '2', trend: 'neutral' }, { id: '2', label: 'Entreprises Actives', value: '4', trend: 'up' }, { id: '3', label: 'IRR Portefeuille', value: '18.4%', trend: 'up' }] },
+  },
 };
 
 function routeToDomain(query: string, language: VoiceLanguage): WorkspaceDomain {
@@ -106,6 +154,8 @@ function routeToDomain(query: string, language: VoiceLanguage): WorkspaceDomain 
   let bestScore = 0;
 
   const keywordsMap =
+    language === 'ar' ? DOMAIN_KEYWORDS_AR :
+    language === 'fr' ? DOMAIN_KEYWORDS_FR :
     language === 'es' ? DOMAIN_KEYWORDS_ES :
     language === 'zh' ? DOMAIN_KEYWORDS_ZH :
     DOMAIN_KEYWORDS_EN;

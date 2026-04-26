@@ -39,6 +39,8 @@
     "./providers/openai/batch": "./src/providers/openai/batch/index.ts",
     "./providers/openai/image": "./src/providers/openai/image/index.ts",
     "./providers/openai/audio": "./src/providers/openai/audio/index.ts",
+    "./providers/openai/audio/multilingual": "./src/providers/openai/audio/multilingual.ts",
+    "./fine-tuned-router": "./src/fine-tuned-router.ts",
     "./digital-twins/twin-engine-spatial": "./src/digital-twins/twin-engine-spatial.ts",
     "./provenance": "./src/provenance.ts",
     "./market-data": "./src/market-data/index.ts",

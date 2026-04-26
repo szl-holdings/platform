@@ -82,6 +82,7 @@
     "expo-file-system": "~19.0.21",
     "expo-screen-capture": "^8.0.9",
     "expo-speech": "^14.0.8",
+    "expo-sqlite": "^55.0.15",
     "graphql": "^16.13.2",
     "urql": "^5.0.1"
   }

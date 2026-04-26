@@ -104,6 +104,9 @@ export default function ShellLayout() {
             <Stack.Screen name="intelligence" />
             <Stack.Screen name="notifications" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="usage" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="search" options={{ animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="agents" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="sync-status" options={{ animation: 'slide_from_right' }} />
           </Stack>
         </View>
         <BottomTabBar />

@@ -15,6 +15,8 @@ const WAKE_PHRASES: Record<VoiceLanguage, string[]> = {
   en: ['hey command', 'ok command', 'hey szl', 'command mode'],
   es: ['hola comando', 'activar comando', 'hey comando'],
   zh: ['你好指挥', '启动指挥', '嘿指挥'],
+  ar: ['يا قيادة', 'تفعيل القيادة', 'مرحبا قيادة'],
+  fr: ['salut commande', 'activer commande', 'hey commande'],
 };
 
 export type WakeWordState =
@@ -98,6 +100,8 @@ const LANG_BCP47: Record<VoiceLanguage, string> = {
   en: 'en-US',
   es: 'es-ES',
   zh: 'zh-CN',
+  ar: 'ar-SA',
+  fr: 'fr-FR',
 };
 
 /**

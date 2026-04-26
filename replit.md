@@ -49,6 +49,13 @@ The platform is a pnpm monorepo built with TypeScript 5.9, React 19, Vite, and N
 - **Cross-Domain Signal Bus (Alert Bus):** A "When/then" automation engine routing signals across product domains.
 - **AEEP Core Packages:** Includes contracts, agent core, workflow runtime, retrieval core, memory core, memory fabric, evidence ledger, policy guard, domain profiles, and platform metrics registry, featuring a two-stage retrieval pipeline, multimodal retrieval, and scoped memory management.
 - **Email Deliverability:** All outbound transactional email uses a centralized library with suppression lists.
+- **Multi-Agent Crew System:** Specialized agent roles (analyst, drafter, hunter, sourcer, coordinator) with plan decomposition and trust-aware execution in `packages/alloy/src/multi-agent-crew.ts`.
+- **Trust Score Engine:** Graduated autonomy system with rolling accuracy tracking, trust levels (untrusted→supervised→trusted→autonomous), auto-promotion/demotion, and approval routing in `packages/alloy/src/trust-score.ts`.
+- **Fine-Tuned Model Router:** Domain-aware model routing with fine-tuned model resolution and cascading fallback chains in `lib/ai-engine/src/fine-tuned-router.ts`.
+- **Multi-Language Voice Pipeline:** 5-language support (en/es/zh/ar/fr) with auto-detection, multilingual transcription, TTS, and voice chat in `lib/ai-engine/src/providers/openai/audio/multilingual.ts`.
+- **Offline-First Sync:** Mobile offline sync with local cache, background sync queue, conflict resolution in `artifacts/szl-holdings-mobile/lib/offline-sync.ts` and `hooks/useOfflineSync.ts`.
+- **Wake-Word Detection:** On-device "Hey Command" wake-word detection supporting 5 languages in `artifacts/szl-holdings-mobile/hooks/useWakeWord.ts`.
+- **Mobile Web Parity:** Global search, agent trust dashboard, and offline sync status screens in mobile app.
 - **Mobile Biometric Sign-In:** Real server-side authentication factor with cryptographic proof-of-possession.
 - **Unified Auth Mesh:** A backend-only authentication unification layer using custom HS256 JWT, with specific priority order, new database tables, and routes for OAuth and API keys.
 - **Forecast & Anomaly Fabric:** Unified forecasting service with calibrated interval outputs, and a unified streaming and batch anomaly detection service. Includes drift detection and champion-challenger evaluations.
