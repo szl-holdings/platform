@@ -147,13 +147,21 @@ All screenshots are verified, unmodified captures from the live platform. No moc
 
 ## Current Status
 
-**Active prototype / demo platform under development.**
+**Alpha — runtime verified 2026-04-26. All 13 web surfaces load. No artifacts are broken.**
 
-- A11oy Phase 1: fully implemented
-- Six domain pack verticals: implemented and active with demo data
-- AI recommendations: multi-provider routing with governed policy constraints
-- Authentication: OIDC/PKCE with multi-role RBAC
-- All screenshots are from the active platform — no mockups or AI-generated imagery
+| Classification | Artifacts |
+|---|---|
+| `alpha working` | SZL Holdings, A11oy, API Server, Carlota Jo, Counsel, Pulse, Aegis (7) |
+| `alpha partial` | Vessels, Terra, Command, Sentra, Lyte, Mobile (6) |
+| `demo-only` | SZL Demo Video (1) |
+| `internal only` | Mockup Sandbox (1) |
+
+- A11oy Phase 1: fully implemented; Phase 2 workcell engine in progress
+- Seven domain pack verticals: all routes functional with demo/seeded data; see matrix for live data gaps
+- AI recommendations: multi-provider routing with governed policy constraints — live
+- Authentication: OIDC/PKCE with multi-role RBAC — all auth gates verified correct
+- Known gaps: `/api/sentra/risks` unregistered (API route); Terra maps require Mapbox token; AIS telemetry simulated
+- Full evidence: [`audit/runtime/app-status-classification.md`](audit/runtime/app-status-classification.md)
 
 ---
 
@@ -187,22 +195,24 @@ This repository is proprietary. Source code, architecture, and implementation de
 
 **Artifact inventory:**
 
-| Artifact | Kind | Preview | Status (active prototype) |
-|----------|------|---------|--------------------------|
-| SZL Holdings Dashboard | web | `/` | Active prototype |
-| A11oy — Live Enterprise Execution Fabric | web | `/a11oy/` | Active prototype — Phase 1 complete |
-| API Server | web | `/api/` | Active prototype — backend API |
-| FORGE Command Portal | web | `/command/` | Active prototype — cross-domain command surface |
-| TENAX — Cyber Resilience Command | web | `/sentra/` | Active prototype — domain pack |
-| Counsel — Legal Matter Command | web | `/counsel/` | Active prototype — domain pack |
-| DOMAINE — Real Estate Intelligence | web | `/terra/` | Active prototype — domain pack |
-| SEXTANT Maritime Intelligence | web | `/vessels/` | Active prototype — domain pack |
-| Carlota Jo Consulting | web | `/carlota-jo/` | Active prototype — domain pack |
-| KORA — Decision Intelligence | web | `/lyte/` | Active prototype — decision intelligence command surface |
-| LUMINA — AI Executive Briefing | web | `/pulse/` | Active prototype — cross-domain briefing |
-| PARAGON (Investor Pitch Deck) | web | `/aegis/` | Active prototype — investor slides and ATLAS runtime |
-| SZL Holdings — Governed Autonomy Demo | video | `/szl-demo-video/` | Active prototype — 60-second demo video |
-| SZL Holdings — Mobile Command (APEX) | mobile | `/szl-holdings-mobile/` | Deferred — after APEX ships |
+> Status labels reflect runtime verification as of 2026-04-26. See [`audit/runtime/app-status-classification.md`](audit/runtime/app-status-classification.md) for full evidence and upgrade paths.
+
+| Artifact | Kind | Preview | Runtime Status |
+|----------|------|---------|----------------|
+| SZL Holdings Dashboard | web | `/` | `alpha working` — all routes live, KPIs seeded |
+| A11oy — Live Enterprise Execution Fabric | web | `/a11oy/` | `alpha working` — Phase 1 complete, Phase 2 in progress |
+| API Server | web | `/api/` | `alpha working` — demo mode; auth-gated routes correct |
+| FORGE Command Portal | web | `/command/` | `alpha partial` — CORTEX badge counts not wired to live API |
+| TENAX — Cyber Resilience Command | web | `/sentra/` | `alpha partial` — UI complete; `/api/sentra/risks` route missing |
+| Counsel — Legal Matter Command | web | `/counsel/` | `alpha working` — matter tracking functional; CourtListener token pending |
+| DOMAINE — Real Estate Intelligence | web | `/terra/` | `alpha partial` — maps blank (Mapbox token not configured) |
+| SEXTANT Maritime Intelligence | web | `/vessels/` | `alpha partial` — AIS simulated; 3 commercial modules not wired |
+| Carlota Jo Consulting | web | `/carlota-jo/` | `alpha working` — most complete artifact; live integrations active |
+| KORA — Decision Intelligence | web | `/lyte/` | `alpha partial` — routes functional; legacy path alias missing |
+| LUMINA — AI Executive Briefing | web | `/pulse/` | `alpha working` — AI multi-provider routing active |
+| PARAGON — Defense & Intelligence | web | `/aegis/` | `alpha working` — CISA KEV, NVD CVE, MITRE ATT&CK v14 active |
+| SZL Holdings — Governed Autonomy Demo | video | `/szl-demo-video/` | `demo-only` — promotional video artifact |
+| SZL Holdings — Mobile Command (APEX) | mobile | `/szl-holdings-mobile/` | `alpha partial` — scaffold complete; splash/icon and push linking pending |
 
 ---
 

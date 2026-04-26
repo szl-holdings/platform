@@ -16,14 +16,18 @@ export const ARTIFACT_PORTS = {
   'api-server': 8080,
   'szl-holdings': 21130,
   aegis: 3002,
-  vessels: 8099,
-  terra: 6099,
-  'carlota-jo': 3101,
+  vessels: 8097,
+  terra: 6100,
+  'carlota-jo': 8098,
   command: 5000,
   pulse: 5201,
   'szl-demo-video': 8765,
   'szl-holdings-mobile': 8085,
   'mockup-sandbox': 8008,
+  sentra: 4099,
+  counsel: 4199,
+  'lyte-command-center': 7099,
+  a11oy: 4110,
 };
 
 /**

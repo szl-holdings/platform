@@ -37,6 +37,11 @@ const VESSELS_URL = process.env.VESSELS_URL || artifactUrl('vessels');
 const CJ_URL = process.env.CJ_URL || artifactUrl('carlota-jo');
 const CMD_URL = process.env.CMD_URL || artifactUrl('command');
 const API_URL = process.env.API_URL || artifactUrl('api-server');
+const PULSE_URL = process.env.PULSE_URL || artifactUrl('pulse');
+const SENTRA_URL = process.env.SENTRA_URL || artifactUrl('sentra');
+const COUNSEL_URL = process.env.COUNSEL_URL || artifactUrl('counsel');
+const LYTE_URL = process.env.LYTE_URL || artifactUrl('lyte-command-center');
+const A11OY_URL = process.env.A11OY_URL || artifactUrl('a11oy');
 
 // Legacy single-base-url override (used by external callers)
 const BASE_URL = process.env.BASE_URL || null;
@@ -182,6 +187,104 @@ const WEB_DOMAIN_CONFIGS = [
     baseUrl: BASE_URL ? `${BASE_URL}` : CMD_URL,
     routes: ['/command/'],
   },
+  {
+    name: 'Pulse — AI Executive Briefing',
+    baseUrl: BASE_URL ? `${BASE_URL}` : PULSE_URL,
+    routes: [
+      '/pulse/',
+      '/pulse/watchlist',
+      '/pulse/library',
+      '/pulse/confidence',
+      '/pulse/custom',
+      '/pulse/dissent',
+      '/pulse/system',
+      '/pulse/settings',
+      '/pulse/constellation',
+      '/pulse/engine',
+      '/pulse/decisions',
+    ],
+  },
+  {
+    name: 'Sentra — Cyber Resilience',
+    baseUrl: BASE_URL ? `${BASE_URL}` : SENTRA_URL,
+    routes: [
+      '/sentra/',
+      '/sentra/decision-center',
+      '/sentra/dashboard',
+      '/sentra/threats',
+      '/sentra/assets',
+      '/sentra/incident',
+      '/sentra/exposure',
+      '/sentra/controls',
+      '/sentra/resilience',
+      '/sentra/soc',
+      '/sentra/alerts',
+      '/sentra/incidents',
+      '/sentra/investigations',
+      '/sentra/threat-intelligence',
+      '/sentra/compliance',
+      '/sentra/mesh/map',
+    ],
+  },
+  {
+    name: 'Counsel — Legal Matter Command',
+    baseUrl: BASE_URL ? `${BASE_URL}` : COUNSEL_URL,
+    routes: [
+      '/counsel/',
+      '/counsel/dashboard',
+      '/counsel/matters',
+      '/counsel/alerts',
+      '/counsel/risk',
+      '/counsel/approvals',
+      '/counsel/evidence',
+      '/counsel/forecast',
+      '/counsel/knowledge',
+      '/counsel/obligations',
+      '/counsel/performance',
+      '/counsel/decision-center',
+    ],
+  },
+  {
+    name: 'Lyte — Decision Intelligence',
+    baseUrl: BASE_URL ? `${BASE_URL}` : LYTE_URL,
+    routes: [
+      '/lyte/',
+      '/lyte/overview',
+      '/lyte/decisions',
+      '/lyte/signals',
+      '/lyte/brief',
+      '/lyte/board',
+      '/lyte/forecast',
+      '/lyte/scenarios',
+      '/lyte/causal',
+      '/lyte/pressure-map',
+      '/lyte/action-debt',
+      '/lyte/entities',
+      '/lyte/policies',
+    ],
+  },
+  {
+    name: 'A11oy — Brand Orchestration',
+    baseUrl: BASE_URL ? `${BASE_URL}` : A11OY_URL,
+    routes: [
+      '/a11oy/',
+      '/a11oy/now',
+      '/a11oy/recommendations',
+      '/a11oy/brief',
+      '/a11oy/command',
+      '/a11oy/signals',
+      '/a11oy/actions',
+      '/a11oy/proof',
+      '/a11oy/governance',
+      '/a11oy/agents',
+      '/a11oy/workcells',
+      '/a11oy/connectors',
+      '/a11oy/sovereign',
+      '/a11oy/verticals',
+      '/a11oy/fabric',
+      '/a11oy/tools',
+    ],
+  },
 ];
 
 const KNOWN_READ_API_ROUTES = [
@@ -239,16 +342,18 @@ async function main() {
     .filter((p) => !knownApiSet.has(p));
 
   if (!JSON_OUTPUT) {
+    console.log(`\nSZL Holdings — Route Smoke Runner`);
+    console.log(`Timeout: ${TIMEOUT_MS}ms  Concurrency: ${CONCURRENCY}  API-only: ${API_ONLY}  Web-only: ${WEB_ONLY}\n`);
   }
 
   const domainSummary = [];
   const allResults = {};
-  let _totalPassed = 0;
+  let totalPassed = 0;
   let totalFailed = 0;
 
   if (!API_ONLY) {
     for (const { name, baseUrl, routes } of WEB_DOMAIN_CONFIGS) {
-      if (!JSON_OUTPUT) {}
+      if (!JSON_OUTPUT) console.log(`\n[${name}]  base: ${baseUrl}`);
 
       const results = await runDomainBatch(baseUrl, routes, 'web', CONCURRENCY, TIMEOUT_MS);
       let dp = 0,
@@ -256,11 +361,11 @@ async function main() {
 
       for (const result of results) {
         if (result.ok) {
-          if (!JSON_OUTPUT) {}
+          if (!JSON_OUTPUT) console.log(`  PASS  ${result.status}  ${result.duration}ms  ${result.url.replace(baseUrl, '')}`);
           dp++;
-          _totalPassed++;
+          totalPassed++;
         } else {
-          if (!JSON_OUTPUT) {}
+          if (!JSON_OUTPUT) console.error(`  FAIL  ${result.status}  ${result.duration}ms  ${result.url.replace(baseUrl, '')}${result.error ? '  err=' + result.error : ''}`);
           df++;
           totalFailed++;
         }
@@ -274,7 +379,7 @@ async function main() {
         error: r.error ?? null,
       }));
       domainSummary.push({ domain: name, passed: dp, failed: df, total: routes.length });
-      if (!JSON_OUTPUT) {}
+      if (!JSON_OUTPUT) console.log(`  → ${dp}/${routes.length} passed${df > 0 ? `  (${df} FAILED)` : ''}`);
     }
   }
 
@@ -291,7 +396,7 @@ async function main() {
 
     for (const { label, paths, tier } of apiSections) {
       if (paths.length === 0) continue;
-      if (!JSON_OUTPUT) {}
+      if (!JSON_OUTPUT) console.log(`\n[${label}]  base: ${apiBaseUrl}`);
 
       const results = await runDomainBatch(apiBaseUrl, paths, tier, CONCURRENCY, TIMEOUT_MS);
       let dp = 0,
@@ -299,11 +404,11 @@ async function main() {
 
       for (const result of results) {
         if (result.ok) {
-          if (!JSON_OUTPUT) {}
+          if (!JSON_OUTPUT) console.log(`  PASS  ${result.status}  ${result.duration}ms  ${result.url.replace(apiBaseUrl, '')}`);
           dp++;
-          _totalPassed++;
+          totalPassed++;
         } else {
-          if (!JSON_OUTPUT) {}
+          if (!JSON_OUTPUT) console.error(`  FAIL  ${result.status}  ${result.duration}ms  ${result.url.replace(apiBaseUrl, '')}${result.error ? '  err=' + result.error : ''}`);
           df++;
           totalFailed++;
         }
@@ -317,22 +422,26 @@ async function main() {
         error: r.error ?? null,
       }));
       domainSummary.push({ domain: label, passed: dp, failed: df, total: paths.length });
-      if (!JSON_OUTPUT) {}
+      if (!JSON_OUTPUT) console.log(`  → ${dp}/${paths.length} passed${df > 0 ? `  (${df} FAILED)` : ''}`);
     }
   }
 
   if (JSON_OUTPUT) {
+    console.log(JSON.stringify({ summary: domainSummary, results: allResults }, null, 2));
   } else {
+    console.log('\n--- Summary ---');
     for (const { domain, passed, failed, total } of domainSummary) {
-      const _icon = failed === 0 ? '✓' : '✗';
+      const icon = failed === 0 ? '✓' : '✗';
+      console.log(`  ${icon}  ${domain}: ${passed}/${total}${failed > 0 ? `  (${failed} failed)` : ''}`);
     }
+    console.log(`\nTotal: ${totalPassed} passed, ${totalFailed} failed`);
   }
 
   if (totalFailed > 0) {
-    if (!JSON_OUTPUT) {}
+    if (!JSON_OUTPUT) console.error(`\nSmoke run FAILED — ${totalFailed} route(s) did not meet expectations.`);
     process.exit(1);
   } else {
-    if (!JSON_OUTPUT) {}
+    if (!JSON_OUTPUT) console.log(`\nSmoke run PASSED`);
     process.exit(0);
   }
 }
