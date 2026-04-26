@@ -16,6 +16,27 @@ export type StepExecutorFn = (
   context: { traceId: string; planId: string; agentId: string; dryRun: boolean },
 ) => Promise<unknown>;
 
+export type CodeModeExecutorFn = (
+  step: PlanStep,
+  script: string,
+  context: { traceId: string; planId: string; agentId: string; dryRun: boolean },
+) => Promise<{ output: string; returnValue: unknown; toolCallsMade: string[]; durationMs: number }>;
+
+/**
+ * Called when a step has `executionMode: 'code'` but no pre-written
+ * `codeScript` in its metadata. Receives the step and the list of tool IDs
+ * discovered for it, and must return a JavaScript string ready for sandbox
+ * execution or `null` to fall through to the standard fail-fast path.
+ *
+ * Callers that integrate an LLM-based code generation step should supply
+ * this function to `ExecutePhaseOptions.codeScriptGenerator`.
+ */
+export type CodeScriptGeneratorFn = (
+  step: PlanStep,
+  discoveredToolIds: string[],
+  context: { traceId: string; planId: string; agentId: string; dryRun: boolean },
+) => Promise<string | null>;
+
 export interface ExecutePhaseOptions {
   ctx: ResolvedCognitiveContext;
   guardian?: GuardianDecisionEngine;
@@ -26,6 +47,16 @@ export interface ExecutePhaseOptions {
    * this sandbox. Callers no longer need to manually wrap with createCodeStepExecutor.
    */
   codeSandbox?: CodeSandbox;
+  /** Flexible code-mode executor for steps whose metadata.executionMode === 'code'. */
+  codeModeExecutor?: CodeModeExecutorFn;
+  /**
+   * Optional script generator for code-mode steps. When `executionMode` is
+   * 'code' but the planner has not yet attached a `codeScript` to the step,
+   * this function is called to produce one. Returning `null` causes the step
+   * to fail with a descriptive error, which is the same behaviour as if no
+   * generator were supplied.
+   */
+  codeScriptGenerator?: CodeScriptGeneratorFn;
   checkpointStore?: CheckpointStore;
   run: CognitiveLoopRun;
   resumeFromStepIndex?: number;
@@ -120,6 +151,78 @@ async function executeStep(
         guardianOutcome: decision.outcome,
         error: `Step requires ${decision.outcome.replace('-', ' ')}: ${decision.reason}`,
         retries: 0,
+        durationMs: Date.now() - stepStartedAt,
+      };
+    }
+  }
+
+  const isCodeMode =
+    step.metadata?.executionMode === 'code' && opts.codeModeExecutor !== undefined;
+
+  if (isCodeMode && opts.codeModeExecutor) {
+    let script: string | null =
+      typeof step.metadata?.codeScript === 'string' && step.metadata.codeScript.trim() !== ''
+        ? step.metadata.codeScript
+        : null;
+
+    // When no pre-written script is attached, attempt to generate one via the
+    // injected code-script generator (e.g. an LLM-based code-generation step).
+    // This is the entry point for end-to-end code-mode: callers supply a
+    // generator that takes the step + discovered tools and returns a JS string.
+    if (script === null && opts.codeScriptGenerator) {
+      const discoveredToolIds: string[] = Array.isArray(step.metadata?.discoveredToolIds)
+        ? (step.metadata.discoveredToolIds as string[])
+        : [];
+      const execCtx = { traceId, planId: run.planId ?? '', agentId: ctx.agentId, dryRun: ctx.dryRun };
+      script = await opts.codeScriptGenerator(step, discoveredToolIds, execCtx);
+    }
+
+    // No script available — fail explicitly so the planning gap is surfaced.
+    // Silently running a no-op would produce a spurious "completed" result.
+    if (script === null) {
+      return {
+        stepId: step.stepId,
+        stepTitle: step.title,
+        status: 'failed',
+        error:
+          `Code-mode step '${step.title}' (${step.stepId}) has no script. ` +
+          'Provide step.metadata.codeScript in the plan or attach a codeScriptGenerator ' +
+          'to ExecutePhaseOptions to generate scripts at runtime.',
+        retries: 0,
+        toolId: step.route.toolId,
+        durationMs: 0,
+      };
+    }
+    try {
+      const codeResult = await opts.codeModeExecutor(step, script, {
+        traceId,
+        planId: run.planId ?? '',
+        agentId: ctx.agentId,
+        dryRun: ctx.dryRun,
+      });
+      return {
+        stepId: step.stepId,
+        stepTitle: step.title,
+        status: 'completed',
+        output: {
+          sandboxOutput: codeResult.output,
+          returnValue: codeResult.returnValue,
+          toolCallsMade: codeResult.toolCallsMade,
+          durationMs: codeResult.durationMs,
+          executionMode: 'code',
+        },
+        retries: 0,
+        toolId: step.route.toolId,
+        durationMs: codeResult.durationMs,
+      };
+    } catch (err) {
+      return {
+        stepId: step.stepId,
+        stepTitle: step.title,
+        status: 'failed',
+        error: `Code mode execution failed: ${err instanceof Error ? err.message : String(err)}`,
+        retries: 0,
+        toolId: step.route.toolId,
         durationMs: Date.now() - stepStartedAt,
       };
     }

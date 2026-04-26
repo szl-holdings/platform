@@ -7,6 +7,8 @@ export * from './mcp-bridge.js';
 export * from './rate-limiter.js';
 export * from './registry.js';
 export * from './schema-validator.js';
+export * from './server-registry.js';
+export * from './stub-generator.js';
 export * from './tools/document-retrieval.js';
 export * from './tools/finance-tools.js';
 export * from './tools/graph-query.js';

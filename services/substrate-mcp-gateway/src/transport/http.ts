@@ -20,7 +20,7 @@ import {
   SUBSTRATE_RESOURCES,
   SUBSTRATE_TOOLS,
 } from '../descriptor.js';
-import { handlePromptGet, handleResourceRead, handleToolCall } from '../handlers.js';
+import { getAvailableTools, handlePromptGet, handleResourceRead, handleToolCall } from '../handlers.js';
 import { type RunLifecycleEvent, runEventBus } from '../run-events.js';
 
 // ─── JSON-RPC Helpers ─────────────────────────────────────────────────────────
@@ -73,8 +73,9 @@ async function handleMcpMethod(req: JsonRpcRequest, actorId: string): Promise<Js
         return rpcOk(id, {});
 
       case 'tools/list':
+        // Use the live tool set — changes when enable_server / disable_server is called.
         return rpcOk(id, {
-          tools: SUBSTRATE_TOOLS.map((t) => ({
+          tools: getAvailableTools().map((t) => ({
             name: t.name,
             description: t.description,
             inputSchema: t.inputSchema,
@@ -91,7 +92,8 @@ async function handleMcpMethod(req: JsonRpcRequest, actorId: string): Promise<Js
           });
         }
 
-        const known = SUBSTRATE_TOOLS.find((t) => t.name === toolName);
+        const liveTools = getAvailableTools();
+        const known = liveTools.find((t) => t.name === toolName);
         if (!known) {
           return rpcErr(id, -32601, 'METHOD_NOT_FOUND', { reason: `No tool named '${toolName}'` });
         }
@@ -260,9 +262,20 @@ export function createHttpTransport(): express.Router {
       actorId: ctx.actorId,
     });
 
-    // Subscribe to run lifecycle events from tool handlers and fan-out to this client
+    // Subscribe to run lifecycle events from tool handlers and fan-out to this
+    // client. tool_list_changed is translated to a proper MCP notification so
+    // that conforming clients can call tools/list again without custom event
+    // parsing. All other event types are forwarded verbatim under their type.
     const unsubscribeRunEvents = runEventBus.subscribe((event: RunLifecycleEvent) => {
-      writeEvent(event.type, event);
+      if (event.type === 'tool_list_changed') {
+        writeEvent('notification', {
+          jsonrpc: '2.0',
+          method: 'notifications/tools/list_changed',
+          params: {},
+        });
+      } else {
+        writeEvent(event.type, event);
+      }
     });
 
     // Subscribe to substrate runtime journal events so SSE clients receive

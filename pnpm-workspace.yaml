@@ -53,6 +53,7 @@ minimumReleaseAgeExclude:
 onlyBuiltDependencies:
   - '@swc/core'
   - esbuild
+  - isolated-vm
   - msw
   - onnxruntime-node
   - sharp

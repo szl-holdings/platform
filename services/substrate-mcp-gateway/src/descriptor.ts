@@ -18,7 +18,7 @@ export const SERVER_INFO = {
 } as const;
 
 export const CAPABILITIES = {
-  tools: { listChanged: false },
+  tools: { listChanged: true },
   resources: { subscribe: false, listChanged: false },
   prompts: { listChanged: false },
   logging: {},
@@ -252,6 +252,67 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
     inputSchema: {
       type: 'object',
       properties: {},
+      additionalProperties: false,
+    },
+  },
+
+  {
+    name: 'search_available_servers',
+    description:
+      'Search available MCP server endpoints by natural-language query. ' +
+      'Returns server IDs, names, capability summaries, and current connection status. ' +
+      'Use enable_server to establish a connection on demand.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'Natural-language search terms (e.g. "document retrieval", "finance tools")',
+        },
+        limit: {
+          type: 'number',
+          description: 'Maximum results (default: 10)',
+        },
+      },
+      required: ['query'],
+      additionalProperties: false,
+    },
+  },
+
+  {
+    name: 'enable_server',
+    description:
+      'Establish an on-demand connection to an MCP server and surface its tools. ' +
+      'Lazy — only connects when called. ' +
+      'Use search_available_servers to find available server IDs. ' +
+      'After a successful connection, call tools/list to discover the newly added tools.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        serverId: {
+          type: 'string',
+          description: 'Server ID returned by search_available_servers',
+        },
+      },
+      required: ['serverId'],
+      additionalProperties: false,
+    },
+  },
+
+  {
+    name: 'disable_server',
+    description:
+      'Disconnect from an MCP server and remove its tools from the active set. ' +
+      'Use when a server is no longer needed for the current task to free context allocation.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        serverId: {
+          type: 'string',
+          description: 'Server ID to disconnect',
+        },
+      },
+      required: ['serverId'],
       additionalProperties: false,
     },
   },

@@ -14,9 +14,17 @@ export {
   generateExecutiveBrief,
 } from './brief.js';
 export * from './checkpoint.js';
+export {
+  type CodeSandboxOptions,
+  CodeSandbox,
+  defaultCodeSandbox,
+  type SandboxExecution,
+  type SandboxToolInvoker,
+} from './code-sandbox.js';
 export { type CognitiveRuntimeOptions, type RunResult, run } from './orchestrator.js';
 export {
   createCodeStepExecutor,
+  type CodeModeExecutorFn,
   type ExecutePhaseOptions,
   type ExecutePhaseOutput,
   executePhase,

@@ -93,6 +93,26 @@ export const METRIC_DEFINITIONS = {
     unit: 'event',
     description: 'Structured observability event for a single code-sandbox execution, keyed by executionId',
   },
+  discovery_cache_hit_rate: {
+    type: 'gauge' as const,
+    unit: 'ratio',
+    description: 'BM25 progressive tool discovery: fraction of plan steps with cached/pre-loaded tool IDs',
+  },
+  token_savings_estimate: {
+    type: 'counter' as const,
+    unit: 'tokens',
+    description: 'Estimated token savings from code-mode batch execution vs individual tool calls',
+  },
+  stub_generation_count: {
+    type: 'counter' as const,
+    unit: 'events',
+    description: 'Number of typed tool stub bundles generated for code-mode sandbox execution',
+  },
+  code_sandbox_success_rate: {
+    type: 'gauge' as const,
+    unit: 'ratio',
+    description: 'Fraction of code-mode sandbox executions that completed without error',
+  },
 } satisfies Record<string, { type: MetricType; unit: string; description: string }>;
 
 export type KnownMetricName = keyof typeof METRIC_DEFINITIONS;

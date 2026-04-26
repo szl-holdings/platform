@@ -1,11 +1,21 @@
+import type { ToolRegistry } from '@workspace/tool-mesh';
 import { randomUUID } from 'node:crypto';
 import { decomposeObjective } from './decomposer.js';
 import { generateFallbackPlans } from './fallback-generator.js';
+import { annotateStepsWithDiscovery, type DiscoveryOptions } from './progressive-discovery.js';
 import { rankFallbacks } from './ranker.js';
 import { estimateRiskAndApprovals, levelForRisk, topoSort } from './risk-estimator.js';
 import { routePlanSteps } from './router.js';
 import { defaultPlanStore, type PlanStore } from './store.js';
 import { type PlanContext, PlanContextSchema, type PlanGraph, type PlanStep } from './types.js';
+
+export interface PlannerOptions {
+  store?: PlanStore;
+  persist?: boolean;
+  toolRegistry?: ToolRegistry;
+  discoveryThresholdCount?: number;
+  maxToolsPerStep?: number;
+}
 
 /**
  * Build a plan graph for the given objective:
@@ -24,7 +34,7 @@ import { type PlanContext, PlanContextSchema, type PlanGraph, type PlanStep } fr
 export async function createPlan(
   objective: string,
   context: PlanContext = {},
-  options: { store?: PlanStore; persist?: boolean } = {},
+  options: PlannerOptions = {},
 ): Promise<PlanGraph> {
   if (!objective?.trim()) {
     throw new Error('objective must be a non-empty string');
@@ -36,13 +46,25 @@ export async function createPlan(
   const decomposed = decomposeObjective(objective, ctx);
   const routed = routePlanSteps(decomposed, ctx);
   const risked = estimateRiskAndApprovals(routed, ctx);
-  const order = topoSort(risked);
+
+  const discovered =
+    options.toolRegistry
+      ? (() => {
+          const discoveryOpts: DiscoveryOptions = {
+            registry: options.toolRegistry,
+            maxToolsPerStep: options.maxToolsPerStep,
+            discoveryThresholdCount: options.discoveryThresholdCount,
+          };
+          return annotateStepsWithDiscovery(risked, discoveryOpts);
+        })()
+      : risked;
+  const order = topoSort(discovered);
 
   const now = Date.now();
   const planId = randomUUID();
-  const aggregateRisk = avg(risked.map((s) => s.estimatedRisk));
-  const aggregateValue = avg(risked.map((s) => s.estimatedValue));
-  const aggregateCost = risked.reduce((sum, s) => sum + s.route.estimatedCostUsd, 0);
+  const aggregateRisk = avg(discovered.map((s) => s.estimatedRisk));
+  const aggregateValue = avg(discovered.map((s) => s.estimatedValue));
+  const aggregateCost = discovered.reduce((sum, s) => sum + s.route.estimatedCostUsd, 0);
 
   const primary: PlanGraph = {
     planId,
@@ -50,7 +72,7 @@ export async function createPlan(
     title: deriveTitle(objective),
     objective,
     status: 'draft',
-    steps: risked,
+    steps: discovered,
     executionOrder: order,
     estimatedCostUsd: aggregateCost,
     estimatedValue: aggregateValue,

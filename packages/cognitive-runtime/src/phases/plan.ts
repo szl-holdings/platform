@@ -1,4 +1,6 @@
 import { createPlan, type PlanContext, type PlanGraph } from '@workspace/planner';
+import { globalCollector } from '@workspace/cognitive-observability';
+import type { ToolRegistry } from '@workspace/tool-mesh';
 import type { PhaseResult } from '../types.js';
 import type { OrientOutput } from './orient.js';
 
@@ -24,6 +26,15 @@ export interface PlanPhaseOptions {
   preferredProvider?: string;
   preferredModel?: string;
   promptVersionId?: string;
+  /**
+   * Tool registry for progressive discovery. When provided and the registry
+   * contains more tools than the discovery threshold, `createPlan` will
+   * annotate each step with discovered tool IDs via BM25 keyword search so
+   * the execute phase can generate typed stubs and route tool calls accurately.
+   */
+  toolRegistry?: ToolRegistry;
+  discoveryThresholdCount?: number;
+  maxToolsPerStep?: number;
 }
 
 export interface PlanPhaseOutput {
@@ -74,7 +85,14 @@ export async function planPhase(
 
   while (true) {
     try {
-      plan = await createPlan(planObjective, planContext, { persist: true });
+      plan = await createPlan(planObjective, planContext, {
+        persist: true,
+        ...(opts.toolRegistry ? { toolRegistry: opts.toolRegistry } : {}),
+        ...(opts.discoveryThresholdCount !== undefined
+          ? { discoveryThresholdCount: opts.discoveryThresholdCount }
+          : {}),
+        ...(opts.maxToolsPerStep !== undefined ? { maxToolsPerStep: opts.maxToolsPerStep } : {}),
+      });
       break;
     } catch (err) {
       retryCount++;
@@ -92,6 +110,21 @@ export async function planPhase(
         };
       }
     }
+  }
+
+  // ── Observability: BM25 progressive discovery coverage ───────────────────
+  // Measure what fraction of plan steps received discoveredToolIds from BM25
+  // search. A ratio of 1.0 means every step had relevant tools pre-discovered;
+  // 0.0 means the registry was below the discovery threshold.
+  if (plan?.steps && plan.steps.length > 0) {
+    const stepsWithDiscovery = plan.steps.filter(
+      (s) => Array.isArray(s.metadata?.discoveredToolIds) && (s.metadata?.discoveredToolIds as string[]).length > 0,
+    ).length;
+    globalCollector.recordKnown('discovery_cache_hit_rate', stepsWithDiscovery / plan.steps.length, {
+      planId: plan.planId,
+      agentId: opts.agentId ?? 'unknown',
+      revision: String(opts.revisionContext?.revision ?? 0),
+    });
   }
 
   // Apply caller-pinned routing overrides. This is what allows eval variant

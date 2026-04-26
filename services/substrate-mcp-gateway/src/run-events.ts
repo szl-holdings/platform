@@ -20,11 +20,12 @@ export type RunEventType =
   | 'run_failed'
   | 'approval_required'
   | 'approval_granted'
-  | 'approval_rejected';
+  | 'approval_rejected'
+  | 'tool_list_changed';
 
 export interface RunLifecycleEvent {
   type: RunEventType;
-  runId: string;
+  runId?: string;
   workflowId?: string;
   workflowName?: string;
   status?: string;
@@ -58,4 +59,16 @@ runEventBus.setMaxListeners(512);
  */
 export function emitRunEvent(event: RunLifecycleEvent): void {
   runEventBus.emit_run_event(event);
+}
+
+/**
+ * Emit a `notifications/tools/list_changed` signal to all connected SSE
+ * clients. Call this after any operation that changes the set of tools the
+ * gateway exposes (e.g. enabling or disabling an MCP server).
+ *
+ * Clients that receive this notification should call `tools/list` again to
+ * refresh their working tool set.
+ */
+export function emitToolListChanged(): void {
+  runEventBus.emit_run_event({ type: 'tool_list_changed', timestamp: Date.now() });
 }

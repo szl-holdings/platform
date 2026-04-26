@@ -10,6 +10,7 @@
  * evidence-chain writes happen inside the substrate runtime itself.
  */
 
+import { randomUUID } from 'node:crypto';
 import {
   defaultRunStore,
   defaultRuntime,
@@ -26,9 +27,321 @@ import {
   submitApprovalAction,
 } from '@workspace/approvals-inbox';
 import { globalCollector } from '@workspace/cognitive-observability';
+import {
+  defaultGateway,
+  defaultToolRegistry,
+  McpServerRegistry,
+  ToolManifestSchema,
+  type ToolManifest,
+} from '@workspace/tool-mesh';
 import { z } from 'zod';
-import { emitRunEvent } from './run-events.js';
+import { type McpToolDescriptor, SUBSTRATE_TOOLS } from './descriptor.js';
+import { emitRunEvent, emitToolListChanged } from './run-events.js';
 import { getAllRuns, getRun, storeRun, updateRun } from './run-store.js';
+
+// ─── Per-server dynamic tool cache ────────────────────────────────────────────
+// HTTP-connected servers: tool schemas fetched on connect, cleared on disconnect.
+// Internal non-tool-mesh servers: populated from INTERNAL_SERVER_TOOLS on connect.
+const externalServerToolCache = new Map<string, import('./descriptor.js').McpToolDescriptor[]>();
+
+// Tracks which tool IDs were registered in defaultToolRegistry for each server
+// so they can be cleanly unregistered when the server is disabled.
+const internalServerRegisteredTools = new Map<string, string[]>();
+
+// ─── Internal server tool catalog ─────────────────────────────────────────────
+// Manifests registered on connect → discoverable via BM25 search and tools/list.
+// No in-process handlers wired; calling returns "No handler registered" until a
+// real service adapter is attached via defaultGateway.registerHandler().
+type InternalServerEntry = {
+  manifests: ToolManifest[];
+};
+
+const INTERNAL_SERVER_TOOLS: Record<string, InternalServerEntry> = {
+  'szl-counsel-evidence': {
+    manifests: [
+      ToolManifestSchema.parse({
+        id: 'counsel_search_evidence',
+        name: 'counsel_search_evidence',
+        description: 'Search legal matter evidence packages and contract analysis results.',
+        domainTags: ['legal', 'documents'],
+        policyTier: 'operator-assisted',
+        inputSchema: { type: 'object', properties: { query: { type: 'string' }, matterId: { type: 'string' } }, required: ['query'] },
+      }),
+      ToolManifestSchema.parse({
+        id: 'counsel_analyze_contract',
+        name: 'counsel_analyze_contract',
+        description: 'Analyze a contract document for regulatory compliance and risk clauses.',
+        domainTags: ['legal', 'documents'],
+        policyTier: 'operator-assisted',
+        inputSchema: { type: 'object', properties: { contractText: { type: 'string' }, jurisdiction: { type: 'string' } }, required: ['contractText'] },
+      }),
+    ],
+  },
+  'szl-terra-portfolio': {
+    manifests: [
+      ToolManifestSchema.parse({
+        id: 'terra_get_portfolio',
+        name: 'terra_get_portfolio',
+        description: 'Retrieve real estate portfolio summary and performance metrics.',
+        domainTags: ['finance', 'analytics'],
+        policyTier: 'internal-workflow',
+        timeoutMs: 15000,
+        inputSchema: { type: 'object', properties: { portfolioId: { type: 'string' }, period: { type: 'string' } }, required: ['portfolioId'] },
+      }),
+      ToolManifestSchema.parse({
+        id: 'terra_analyze_anomaly',
+        name: 'terra_analyze_anomaly',
+        description: 'Detect and analyze anomalies in property valuations and transaction data.',
+        domainTags: ['finance', 'analytics'],
+        policyTier: 'internal-workflow',
+        timeoutMs: 15000,
+        inputSchema: { type: 'object', properties: { propertyId: { type: 'string' }, threshold: { type: 'number' } }, required: ['propertyId'] },
+      }),
+    ],
+  },
+  'szl-aegis-threat': {
+    manifests: [
+      ToolManifestSchema.parse({
+        id: 'aegis_triage_threat',
+        name: 'aegis_triage_threat',
+        description: 'Triage and classify an incoming threat signal using adversarial pattern matching.',
+        domainTags: ['security', 'analytics'],
+        policyTier: 'operator-assisted',
+        timeoutMs: 20000,
+        inputSchema: { type: 'object', properties: { signalId: { type: 'string' }, severity: { type: 'string' } }, required: ['signalId'] },
+      }),
+      ToolManifestSchema.parse({
+        id: 'aegis_search_signals',
+        name: 'aegis_search_signals',
+        description: 'Search defense and intelligence threat signals by domain, actor, or time range.',
+        domainTags: ['security', 'analytics'],
+        policyTier: 'operator-assisted',
+        timeoutMs: 20000,
+        inputSchema: { type: 'object', properties: { query: { type: 'string' }, domain: { type: 'string' }, limit: { type: 'number' } }, required: ['query'] },
+      }),
+    ],
+  },
+  'szl-vessels-maritime': {
+    manifests: [
+      ToolManifestSchema.parse({
+        id: 'vessels_track_voyage',
+        name: 'vessels_track_voyage',
+        description: 'Track a maritime vessel voyage by IMO number and return current position and route.',
+        domainTags: ['infrastructure', 'analytics'],
+        policyTier: 'internal-workflow',
+        timeoutMs: 15000,
+        inputSchema: { type: 'object', properties: { imoNumber: { type: 'string' }, includeHistory: { type: 'boolean' } }, required: ['imoNumber'] },
+      }),
+      ToolManifestSchema.parse({
+        id: 'vessels_detect_anomaly',
+        name: 'vessels_detect_anomaly',
+        description: 'Detect anomalous voyage behavior such as AIS gaps, dark periods, or route deviations.',
+        domainTags: ['infrastructure', 'analytics'],
+        policyTier: 'internal-workflow',
+        timeoutMs: 15000,
+        inputSchema: { type: 'object', properties: { vesselId: { type: 'string' }, lookbackHours: { type: 'number' } }, required: ['vesselId'] },
+      }),
+    ],
+  },
+  'szl-cognitive-observability': {
+    manifests: [
+      ToolManifestSchema.parse({
+        id: 'observability_get_trace',
+        name: 'observability_get_trace',
+        description: 'Retrieve a cognitive agent run trace by trace ID.',
+        domainTags: ['analytics', 'infrastructure'],
+        policyTier: 'internal-workflow',
+        timeoutMs: 10000,
+        observabilityHooks: { emitTrace: false, emitMetrics: true },
+        inputSchema: { type: 'object', properties: { traceId: { type: 'string' } }, required: ['traceId'] },
+      }),
+      ToolManifestSchema.parse({
+        id: 'observability_query_metrics',
+        name: 'observability_query_metrics',
+        description: 'Query collected cognitive metrics by name, label, or time window.',
+        domainTags: ['analytics', 'infrastructure'],
+        policyTier: 'internal-workflow',
+        timeoutMs: 10000,
+        observabilityHooks: { emitTrace: false, emitMetrics: true },
+        inputSchema: { type: 'object', properties: { metricName: { type: 'string' }, labels: { type: 'object' }, limitMs: { type: 'number' } }, required: ['metricName'] },
+      }),
+    ],
+  },
+};
+
+/** Register tool manifests for an internal server on connect (discoverable, not yet callable). */
+function registerInternalServerTools(serverId: string): void {
+  const entry = INTERNAL_SERVER_TOOLS[serverId];
+  if (!entry) return;
+  const registeredIds: string[] = [];
+  for (const manifest of entry.manifests) {
+    defaultToolRegistry.register(manifest);
+    registeredIds.push(manifest.id);
+  }
+  internalServerRegisteredTools.set(serverId, registeredIds);
+}
+
+/** Unregister tool manifests for an internal server on disconnect. */
+function unregisterInternalServerTools(serverId: string): void {
+  const ids = internalServerRegisteredTools.get(serverId) ?? [];
+  for (const toolId of ids) {
+    defaultToolRegistry.unregister(toolId);
+  }
+  internalServerRegisteredTools.delete(serverId);
+}
+
+/**
+ * Attempt to fetch the MCP tool listing from an HTTP/HTTPS endpoint and
+ * populate the per-server tool cache. Supports two standard discovery routes:
+ *   GET {endpoint}/tools        — returns { tools: [...] }
+ *   GET {endpoint}/v1/tools     — returns { tools: [...] }
+ * Failures are logged but non-fatal — the server is still marked connected
+ * in the registry (it may offer non-tool capabilities or the route may differ).
+ */
+async function fetchAndCacheExternalTools(serverId: string, endpoint: string): Promise<void> {
+  const routes = [`${endpoint}/tools`, `${endpoint}/v1/tools`];
+  for (const url of routes) {
+    try {
+      const resp = await fetch(url, {
+        method: 'GET',
+        headers: { Accept: 'application/json', 'User-Agent': 'szl-substrate-mcp-gateway/1.0' },
+        signal: AbortSignal.timeout(5_000),
+      });
+      if (!resp.ok) continue;
+      const body = (await resp.json()) as Record<string, unknown>;
+      const rawTools = Array.isArray(body['tools']) ? (body['tools'] as unknown[]) : [];
+      const descriptors: import('./descriptor.js').McpToolDescriptor[] = rawTools
+        .filter((t): t is Record<string, unknown> => typeof t === 'object' && t !== null)
+        .map((t) => ({
+          name: String(t['name'] ?? ''),
+          description: String(t['description'] ?? ''),
+          inputSchema: (t['inputSchema'] ?? { type: 'object', properties: {} }) as import('./descriptor.js').McpToolDescriptor['inputSchema'],
+        }))
+        .filter((d) => d.name.length > 0);
+      if (descriptors.length > 0) {
+        externalServerToolCache.set(serverId, descriptors);
+        globalCollector.recordKnown('token_count', 0, {
+          phase: 'server_registry',
+          event: 'tools_fetched',
+          serverId,
+          toolCount: String(descriptors.length),
+        });
+        // Emit a second notification now that tools are populated so clients
+        // that refreshed immediately after enable_server see the complete list.
+        emitToolListChanged();
+        return;
+      }
+    } catch {
+      // Connection refused / timeout / parse error — try next route
+    }
+  }
+}
+
+// ─── Server lifecycle hooks ────────────────────────────────────────────────────
+// `onConnect` and `onDisconnect` are invoked by McpServerRegistry.enableServer /
+// disableServer and represent the full connection lifecycle contract for this
+// registry instance.
+//
+// Internal endpoints (internal://…) are in-process and need no TCP socket.
+// External HTTP/HTTPS endpoints trigger an automatic tool-discovery fetch
+// so `getAvailableTools()` returns an accurate, live tool surface for the
+// newly connected server. stdio/process endpoints are noted in observability
+// but require a spawned subprocess (see the stdio transport module).
+const serverRegistry = new McpServerRegistry({
+  onConnect: async (entry) => {
+    globalCollector.recordKnown('token_count', 0, {
+      phase: 'server_registry',
+      event: 'connected',
+      serverId: entry.serverId,
+      endpoint: entry.endpoint,
+    });
+    const ep = entry.endpoint;
+    if (ep.startsWith('http://') || ep.startsWith('https://')) {
+      // External HTTP MCP server: fetch tool listing and cache it for discovery.
+      void fetchAndCacheExternalTools(entry.serverId, ep);
+    } else if (ep.startsWith('stdio://') || ep.startsWith('exec://')) {
+      // Stdio server: transport must be established externally; record the intent.
+      globalCollector.recordKnown('token_count', 0, {
+        phase: 'server_registry',
+        event: 'stdio_connect_pending',
+        serverId: entry.serverId,
+        endpoint: ep,
+      });
+    } else if (ep.startsWith('internal://') && entry.serverId !== 'szl-tool-mesh') {
+      // Internal domain server: register tool manifests and gateway handlers so
+      // tools are both discoverable and callable while the server is connected.
+      registerInternalServerTools(entry.serverId);
+    }
+  },
+  onDisconnect: async (entry) => {
+    globalCollector.recordKnown('token_count', 0, {
+      phase: 'server_registry',
+      event: 'disconnected',
+      serverId: entry.serverId,
+      endpoint: entry.endpoint,
+    });
+    // Clear external HTTP tool cache.
+    externalServerToolCache.delete(entry.serverId);
+    // Unregister internal server tools from the registry so they are no longer
+    // discoverable or routable while the server is disconnected.
+    if (entry.endpoint.startsWith('internal://') && entry.serverId !== 'szl-tool-mesh') {
+      unregisterInternalServerTools(entry.serverId);
+    }
+  },
+});
+
+// ─── Pre-registered MCP server catalog ────────────────────────────────────────
+// These entries describe the available tool-mesh endpoints, domain verticals,
+// and external MCP integrations that agents can connect to on demand.
+// Connections are lazy — established only when enable_server is called.
+
+serverRegistry.register({
+  serverId: 'szl-tool-mesh',
+  name: 'SZL Tool Mesh',
+  description: 'Core SZL tool mesh — document retrieval, finance, security, graph-query, and operations tools.',
+  capabilitiesSummary: 'documents, finance, security, infrastructure, analytics, graph',
+  endpoint: 'internal://tool-mesh',
+});
+
+serverRegistry.register({
+  serverId: 'szl-counsel-evidence',
+  name: 'Counsel Evidence MCP',
+  description: 'Legal matter evidence packaging, contract analysis, and regulatory document tools for PRISM Counsel.',
+  capabilitiesSummary: 'legal, documents, evidence, contracts, compliance',
+  endpoint: 'internal://counsel-evidence',
+});
+
+serverRegistry.register({
+  serverId: 'szl-terra-portfolio',
+  name: 'Terra Portfolio MCP',
+  description: 'Real estate portfolio analytics, anomaly detection, and property intelligence tools for DOMAINE.',
+  capabilitiesSummary: 'finance, analytics, real-estate, portfolio, data',
+  endpoint: 'internal://terra-portfolio',
+});
+
+serverRegistry.register({
+  serverId: 'szl-aegis-threat',
+  name: 'AEGIS Threat Intelligence MCP',
+  description: 'Defense and intelligence threat triage, security signal analysis, and adversarial pattern detection.',
+  capabilitiesSummary: 'security, intelligence, threat, defense, analytics',
+  endpoint: 'internal://aegis-threat',
+});
+
+serverRegistry.register({
+  serverId: 'szl-vessels-maritime',
+  name: 'Vessels Maritime Intelligence MCP',
+  description: 'Maritime voyage anomaly detection, vessel tracking, and logistics intelligence tools.',
+  capabilitiesSummary: 'logistics, analytics, infrastructure, maritime, data',
+  endpoint: 'internal://vessels-maritime',
+});
+
+serverRegistry.register({
+  serverId: 'szl-cognitive-observability',
+  name: 'Cognitive Observability MCP',
+  description: 'Trace graph, metrics collection, run ledger, and agent reliability observability tools.',
+  capabilitiesSummary: 'analytics, infrastructure, observability, tracing, metrics',
+  endpoint: 'internal://cognitive-observability',
+});
 
 // ─── Zod Schemas ──────────────────────────────────────────────────────────────
 
@@ -76,6 +389,19 @@ const RejectSchema = z.object({
 
 const _ListWorkflowsSchema = z.object({});
 
+const SearchServersSchema = z.object({
+  query: z.string().min(1),
+  limit: z.number().int().positive().max(50).default(10),
+});
+
+const EnableServerSchema = z.object({
+  serverId: z.string().min(1),
+});
+
+const DisableServerSchema = z.object({
+  serverId: z.string().min(1),
+});
+
 // ─── Registered workflows cache ───────────────────────────────────────────────
 // Since WorkflowRegistry in the substrate is module-local, we maintain our own
 // copy of known workflow definitions from submit calls.
@@ -101,6 +427,63 @@ function recordTool(toolName: string, success: boolean, latencyMs: number): void
 }
 
 // ─── Tool Handlers ────────────────────────────────────────────────────────────
+
+// ── Dynamic Tool Surface ───────────────────────────────────────────────────────
+// Returns SUBSTRATE_TOOLS (always available) plus the tool schemas contributed
+// by each currently connected internal MCP server. Callers use this to respond
+// to tools/list requests — the result changes whenever enable_server or
+// disable_server is called, giving clients an accurate, live tool set.
+export function getAvailableTools(): McpToolDescriptor[] {
+  const tools: McpToolDescriptor[] = [...SUBSTRATE_TOOLS];
+
+  for (const server of serverRegistry.getConnectedServers()) {
+    if (server.endpoint === 'internal://tool-mesh') {
+      // The tool-mesh server is in-process: surface its live tool registry.
+      for (const m of defaultToolRegistry.list({ enabled: true })) {
+        const props = (m.inputSchema?.properties ?? {}) as Record<string, unknown>;
+        const required = Array.isArray(m.inputSchema?.required)
+          ? (m.inputSchema.required as string[])
+          : undefined;
+        const schema: McpToolDescriptor['inputSchema'] = { type: 'object', properties: props };
+        if (required && required.length > 0) schema.required = required;
+        tools.push({
+          name: m.id,
+          description: `[${m.domainTags.join(',')}] ${m.description}`,
+          inputSchema: schema,
+        });
+      }
+    } else {
+      // Internal domain servers: surface tools registered on connect.
+      const internalIds = internalServerRegisteredTools.get(server.serverId);
+      if (internalIds && internalIds.length > 0) {
+        for (const toolId of internalIds) {
+          const m = defaultToolRegistry.get(toolId);
+          if (!m) continue;
+          const props = (m.inputSchema?.properties ?? {}) as Record<string, unknown>;
+          const required = Array.isArray(m.inputSchema?.required)
+            ? (m.inputSchema.required as string[])
+            : undefined;
+          const schema: McpToolDescriptor['inputSchema'] = { type: 'object', properties: props };
+          if (required && required.length > 0) schema.required = required;
+          tools.push({
+            name: m.id,
+            description: `[${m.domainTags.join(',')}] ${m.description}`,
+            inputSchema: schema,
+          });
+        }
+      }
+      // External HTTP/stdio MCP servers: surface cached tool schemas.
+      const cached = externalServerToolCache.get(server.serverId);
+      if (cached && cached.length > 0) {
+        for (const tool of cached) {
+          tools.push(tool);
+        }
+      }
+    }
+  }
+
+  return tools;
+}
 
 export interface ToolResult {
   content: Array<{ type: 'text'; text: string }>;
@@ -161,8 +544,77 @@ async function dispatchTool(
       return handleReject(rawParams, actorId);
     case 'substrate_list_workflows':
       return handleListWorkflows();
-    default:
+    case 'substrate_search_servers':
+    case 'search_available_servers':
+      return handleSearchServers(rawParams);
+    case 'substrate_enable_server':
+    case 'enable_server':
+      return handleEnableServer(rawParams);
+    case 'substrate_disable_server':
+    case 'disable_server':
+      return handleDisableServer(rawParams);
+    default: {
+      const manifest = defaultToolRegistry.getToolDetails(toolName);
+      if (manifest) {
+        // Determine whether the tool's owning server is currently connected.
+        // Dynamic internal-server tools are present in the registry only while
+        // connected (registered on enable, unregistered on disable). Tool-mesh
+        // tools are pre-loaded, so we check the server connection explicitly.
+        const fromDynamicServer = [...internalServerRegisteredTools.values()]
+          .flat()
+          .includes(toolName);
+        const toolMeshConnected = serverRegistry
+          .getConnectedServers()
+          .some((s) => s.endpoint === 'internal://tool-mesh');
+
+        if (fromDynamicServer || toolMeshConnected) {
+          const args =
+            rawParams && typeof rawParams === 'object' && !Array.isArray(rawParams)
+              ? (rawParams as Record<string, unknown>)
+              : {};
+          try {
+            const result = await defaultGateway.invoke(toolName, args, {
+              requestId: randomUUID(),
+              agentId: actorId,
+            });
+            if (!result.success) {
+              return err(result.error ?? `Tool '${toolName}' invocation denied by guardrail chain.`);
+            }
+            return ok(result);
+          } catch (e) {
+            return err(`Tool '${toolName}' execution failed: ${e instanceof Error ? e.message : String(e)}`);
+          }
+        }
+      }
+
+      // External HTTP MCP server: check whether any connected server cached this
+      // tool on connect and forward the call to its MCP /tools/call endpoint.
+      for (const [serverId, descriptors] of externalServerToolCache) {
+        const descriptor = descriptors.find((d) => d.name === toolName);
+        if (!descriptor) continue;
+        const server = serverRegistry.getServer(serverId);
+        if (!server || server.status !== 'connected') continue;
+        const ep = server.endpoint;
+        if (!ep.startsWith('http://') && !ep.startsWith('https://')) continue;
+        try {
+          const httpRes = await fetch(`${ep.replace(/\/$/, '')}/tools/call`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: toolName, arguments: rawParams ?? {} }),
+            signal: AbortSignal.timeout(30_000),
+          });
+          if (!httpRes.ok) {
+            return err(`External server '${serverId}' returned HTTP ${httpRes.status} for tool '${toolName}'.`);
+          }
+          const payload = (await httpRes.json()) as unknown;
+          return ok(payload);
+        } catch (e) {
+          return err(`External tool '${toolName}' call to '${serverId}' failed: ${e instanceof Error ? e.message : String(e)}`);
+        }
+      }
+
       return err(`Unknown tool: ${toolName}`);
+    }
   }
 }
 
@@ -597,6 +1049,80 @@ function handleListWorkflows(): ToolResult {
             'will fail with a REGISTRY_EMPTY error until at least one workflow is registered.',
         }
       : {}),
+  });
+}
+
+// ── substrate_search_servers ──────────────────────────────────────────────────
+
+function handleSearchServers(rawParams: unknown): ToolResult {
+  const parsed = SearchServersSchema.safeParse(rawParams);
+  if (!parsed.success) return err('Invalid parameters', parsed.error.flatten());
+
+  const { query, limit } = parsed.data;
+  const results = serverRegistry.searchServers(query, limit);
+
+  return ok({
+    query,
+    count: results.length,
+    servers: results,
+    hint:
+      results.length === 0
+        ? 'No servers matched the query. Register servers via the McpServerRegistry API.'
+        : 'Use enable_server with a serverId to establish a connection.',
+  });
+}
+
+// ── substrate_enable_server ───────────────────────────────────────────────────
+
+async function handleEnableServer(rawParams: unknown): Promise<ToolResult> {
+  const parsed = EnableServerSchema.safeParse(rawParams);
+  if (!parsed.success) return err('Invalid parameters', parsed.error.flatten());
+
+  const { serverId } = parsed.data;
+  const result = await serverRegistry.enableServer(serverId);
+
+  if (!result.success) {
+    return err(`Failed to enable server '${serverId}': ${result.error}`);
+  }
+
+  const entry = serverRegistry.getServer(serverId);
+
+  // Notify SSE clients that the tool list has grown. MCP spec §6.5 — clients
+  // that receive this notification must call tools/list again to refresh.
+  emitToolListChanged();
+
+  return ok({
+    serverId,
+    status: entry?.status ?? 'connected',
+    connectedAt: entry?.connectedAt ?? Date.now(),
+    message: `Server '${serverId}' is now connected.`,
+  });
+}
+
+// ── substrate_disable_server ──────────────────────────────────────────────────
+
+async function handleDisableServer(rawParams: unknown): Promise<ToolResult> {
+  const parsed = DisableServerSchema.safeParse(rawParams);
+  if (!parsed.success) return err('Invalid parameters', parsed.error.flatten());
+
+  const { serverId } = parsed.data;
+  const result = await serverRegistry.disableServer(serverId);
+
+  if (!result.success) {
+    return err(`Failed to disable server '${serverId}': ${result.error}`);
+  }
+
+  const entry = serverRegistry.getServer(serverId);
+
+  // Notify SSE clients that the tool list has changed. MCP spec §6.5 — clients
+  // that receive this notification must call tools/list again to refresh.
+  emitToolListChanged();
+
+  return ok({
+    serverId,
+    status: entry?.status ?? 'disconnected',
+    disconnectedAt: entry?.disconnectedAt ?? Date.now(),
+    message: `Server '${serverId}' has been disconnected.`,
   });
 }
 

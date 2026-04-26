@@ -6,6 +6,7 @@ import type { PlanGraph } from '@workspace/planner';
 import { defaultRunLedgerStore, RunLedgerBuilder } from '@workspace/run-ledger';
 import { evaluateQualityGate, type QualityGateProfile } from '@workspace/run-ledger/quality-gate';
 import { type SelfModelStore, defaultSelfModelStore } from '@workspace/self-model';
+import { defaultGateway, defaultToolRegistry, generateStubsForIds, type ToolMeshGateway, type ToolRegistry } from '@workspace/tool-mesh';
 import { type TraceStore, defaultTraceStore, TraceWriter } from '@workspace/trace-graph';
 import { randomUUID } from 'node:crypto';
 import { extractApprovalInterrupt, raiseApprovalInterrupt } from './approval-interrupt.js';
@@ -15,7 +16,8 @@ import {
   loadCheckpoint,
   saveCheckpoint,
 } from './checkpoint.js';
-import { type ExecutePhaseOutput, executePhase, GuardianDecisionEngine, type StepExecutorFn } from './phases/execute.js';
+import { CodeSandbox } from './code-sandbox.js';
+import { type CodeModeExecutorFn, type CodeScriptGeneratorFn, type ExecutePhaseOutput, executePhase, GuardianDecisionEngine, type StepExecutorFn } from './phases/execute.js';
 import { type OrientOutput, orientPhase } from './phases/orient.js';
 import { perceivePhase } from './phases/perceive.js';
 import { type PlanRevisionContext, planPhase } from './phases/plan.js';
@@ -31,7 +33,195 @@ export interface CognitiveRuntimeOptions {
   checkpointStore?: CheckpointStore;
   guardian?: GuardianDecisionEngine;
   stepExecutor?: StepExecutorFn;
+  /**
+   * Executor for code-mode steps (steps whose metadata.executionMode === 'code').
+   * Defaults to a sandboxed isolated-vm executor that routes tool calls through
+   * the ToolMeshGateway for full guardrail enforcement (PII scan, policy-engine,
+   * Guardian decision, rate-limiter, approval gates). Override to supply a custom
+   * gateway instance or a fully custom executor.
+   */
+  codeModeExecutor?: CodeModeExecutorFn;
+  /**
+   * Gateway used by the default code-mode executor to invoke tools from sandbox
+   * scripts. Defaults to `defaultGateway` from `@workspace/tool-mesh`. Supply an
+   * instance with registered handlers for tools used in code-mode steps.
+   */
+  gateway?: ToolMeshGateway;
+  /**
+   * Tool registry forwarded to the planner for progressive discovery. When the
+   * registry has more tools than the discovery threshold (default: 10), each
+   * plan step is annotated with the top-N relevant tool IDs via BM25 search.
+   * Those IDs drive both routing in execute phase and typed stub generation for
+   * code-mode steps. Defaults to `defaultToolRegistry` when not supplied.
+   */
+  toolRegistry?: ToolRegistry;
+  /**
+   * Script generator for code-mode steps that arrive without a pre-written
+   * `metadata.codeScript`. The built-in default produces a template-based
+   * script from the step description and discovered tool stubs; supply a
+   * custom implementation to drive LLM-based code generation instead.
+   */
+  codeScriptGenerator?: CodeScriptGeneratorFn;
   onPhaseComplete?: (phase: string, result: PhaseResult) => void | Promise<void>;
+}
+
+function buildDefaultCodeModeExecutor(
+  gateway: ToolMeshGateway,
+  context: { agentId: string; sessionId?: string; traceId?: string; traceWriter?: TraceWriter },
+  registry: ToolRegistry,
+): CodeModeExecutorFn {
+  const sandbox = new CodeSandbox({ timeoutMs: 15_000, memoryLimitMb: 64, maxToolCalls: 50 });
+
+  return async (step, script, execContext) => {
+    // Stubs for tools discovered by BM25 in progressive mode (if any).
+    const discoveredToolIds: string[] = Array.isArray(step.metadata?.discoveredToolIds)
+      ? (step.metadata.discoveredToolIds as string[])
+      : [];
+    const stubSource =
+      discoveredToolIds.length > 0
+        ? generateStubsForIds(discoveredToolIds, registry).fullSource
+        : '';
+
+    // ── Observability: stub generation ──────────────────────────────────────
+    if (stubSource.length > 0) {
+      globalCollector.recordKnown('stub_generation_count', 1, {
+        agentId: context.agentId,
+        stepId: step.stepId,
+        toolCount: String(discoveredToolIds.length),
+      });
+    }
+
+    // ── Trace span: code-mode sandbox execution ──────────────────────────────
+    const spanStartedAt = new Date().toISOString();
+    const sandboxSpanId = randomUUID();
+
+    // Tool calls from sandbox scripts route through the full guardrail chain.
+    const invoker = async (
+      toolId: string,
+      args: Record<string, unknown>,
+    ): Promise<unknown> => {
+      const result = await gateway.invoke(toolId, args, {
+        requestId: randomUUID(),
+        agentId: context.agentId,
+        sessionId: context.sessionId,
+        workflowId: execContext.planId || undefined,
+        dryRun: execContext.dryRun,
+      });
+      if (!result.success) {
+        throw new Error(
+          result.error ??
+            `Tool '${toolId}' invocation failed via ToolMeshGateway (sandbox caller).`,
+        );
+      }
+      return result.output;
+    };
+
+    const execStartMs = Date.now();
+    const result = await sandbox.execute(script, stubSource, invoker);
+    const execDurationMs = Date.now() - execStartMs;
+
+    // ── Observability: sandbox result ────────────────────────────────────────
+    globalCollector.recordKnown('code_sandbox_success_rate', result.success ? 1 : 0, {
+      agentId: context.agentId,
+      stepId: step.stepId,
+    });
+
+    // ── Trace span: complete ─────────────────────────────────────────────────
+    if (context.traceWriter && context.traceId) {
+      try {
+        context.traceWriter.appendSpan(context.traceId, {
+          spanId: sandboxSpanId,
+          name: 'code_mode.sandbox_execute',
+          startedAt: spanStartedAt,
+          endedAt: new Date().toISOString(),
+          latencyMs: execDurationMs,
+          status: result.success ? 'ok' : 'error',
+          errorMessage: result.success ? undefined : (result.error ?? 'sandbox execution failed'),
+          attributes: {
+            stepId: step.stepId,
+            stepTitle: step.title,
+            discoveredToolCount: discoveredToolIds.length,
+            stubsGenerated: stubSource.length > 0,
+            scriptHash: result.scriptHash,
+            toolCallsMade: result.toolCallsMade?.length ?? 0,
+          },
+        });
+      } catch {
+        // trace write failure must not break the execution path
+      }
+    }
+
+    if (!result.success) {
+      throw new Error(
+        result.error ??
+          `Code-mode sandbox execution failed (script hash: ${result.scriptHash}).`,
+      );
+    }
+
+    return result;
+  };
+}
+
+/** Default code-script generator for steps without a pre-written codeScript. */
+function buildDefaultCodeScriptGenerator(registry: ToolRegistry): CodeScriptGeneratorFn {
+  return async (step, discoveredToolIds, _context) => {
+    // Sanitize values for safe interpolation into template literals.
+    const safeTitle = step.title.replace(/`/g, "'").replace(/\\/g, '\\\\');
+    const safeDesc = (typeof step.description === 'string' ? step.description : safeTitle)
+      .replace(/`/g, "'")
+      .replace(/\\/g, '\\\\');
+
+    if (discoveredToolIds.length === 0) {
+      // No tools — return a structured acknowledgement that records the step intent.
+      return [
+        `// Auto-generated default code-mode script (no discovered tools)`,
+        `// Step: ${safeTitle}`,
+        `return { stepId: ${JSON.stringify(step.stepId)}, title: ${JSON.stringify(step.title)}, output: "No tools available for code-mode execution.", codeModeGenerated: true };`,
+      ].join('\n');
+    }
+
+    const primaryToolId = discoveredToolIds[0];
+    const manifest = registry.getToolDetails(primaryToolId);
+    // Build a safe JS identifier from the tool ID (replace non-word chars with _).
+    const fnName = primaryToolId.replace(/[^a-zA-Z0-9_]/g, '_');
+
+    const lines: string[] = [
+      `// Auto-generated default code-mode script`,
+      `// Step: ${safeTitle}`,
+      `// Description: ${safeDesc}`,
+      `// Primary tool: ${primaryToolId}`,
+      `// All discovered tools: ${discoveredToolIds.join(', ')}`,
+      ``,
+    ];
+
+    // Build a minimal args object from the tool's inputSchema (use empty object
+    // when schema is absent — the gateway will validate and surface any errors).
+    const schemaProps =
+      manifest?.inputSchema &&
+      typeof manifest.inputSchema === 'object' &&
+      'properties' in manifest.inputSchema
+        ? (manifest.inputSchema as { properties: Record<string, unknown> }).properties
+        : {};
+    const argKeys = Object.keys(schemaProps);
+
+    if (argKeys.length === 0) {
+      lines.push(`const result = await ${fnName}({});`);
+    } else {
+      // Populate required string args with the step description as a best-effort
+      // value; callers with LLM generators should override this for precision.
+      const argEntries = argKeys
+        .slice(0, 3) // limit to avoid bloat
+        .map((k) => `  ${k}: ${JSON.stringify(safeDesc)}`)
+        .join(',\n');
+      lines.push(`const result = await ${fnName}({\n${argEntries}\n});`);
+    }
+
+    lines.push(
+      `return { stepId: ${JSON.stringify(step.stepId)}, toolId: ${JSON.stringify(primaryToolId)}, output: result, codeModeGenerated: true };`,
+    );
+
+    return lines.join('\n');
+  };
 }
 
 export interface RunResult {
@@ -53,14 +243,11 @@ export async function run(
   const selfModelStore = options.selfModelStore ?? defaultSelfModelStore;
   const checkpointStore = options.checkpointStore ?? defaultCheckpointStore;
   const guardian = options.guardian ?? new GuardianDecisionEngine();
+  const gateway = options.gateway ?? defaultGateway;
 
   const traceWriter = new TraceWriter(traceStore);
   const globalStartedAt = Date.now();
 
-  // ─── AgentRun (agents-core) ─────────────────────────────────────────────────
-  // Use the agents-core AgentRun primitive to drive the run-level lifecycle
-  // (status transitions, structured step-log emission, observability counters)
-  // instead of managing those concerns ad-hoc in this orchestrator.
   const agentRunOptions: ConstructorParameters<typeof AgentRun>[1] = {
     runId,
     agentId: ctx.agentId,
@@ -290,6 +477,7 @@ export async function run(
         preferredProvider: ctx.preferredProvider,
         preferredModel: ctx.preferredModel,
         promptVersionId: ctx.promptVersionId,
+        toolRegistry: options.toolRegistry ?? defaultToolRegistry,
       });
       recordPhase(planResult);
 
@@ -355,10 +543,23 @@ export async function run(
 
       // ─── PHASE 4: EXECUTE ──────────────────────────────────────────────────
       loopRun.currentPhase = 'execute';
+      const effectiveRegistry = options.toolRegistry ?? defaultToolRegistry;
       const executeResult = await executePhase(plan, {
         ctx,
         guardian,
         stepExecutor: options.stepExecutor,
+        codeModeExecutor:
+          options.codeModeExecutor ??
+          buildDefaultCodeModeExecutor(
+            gateway,
+            { agentId: ctx.agentId, sessionId: ctx.sessionId, traceId, traceWriter },
+            effectiveRegistry,
+          ),
+        // Wire built-in default code-script generator so code-mode steps work
+        // end-to-end without requiring callers to supply their own script.
+        // Callers with LLM-based generators override via CognitiveRuntimeOptions.
+        codeScriptGenerator:
+          options.codeScriptGenerator ?? buildDefaultCodeScriptGenerator(effectiveRegistry),
         checkpointStore,
         run: loopRun,
         resumeFromStepIndex: isFirstIteration ? resumeFromStepIndex : 0,
@@ -366,6 +567,30 @@ export async function run(
       recordPhase(executeResult);
       lastExecuteOutput = executeResult.output;
       loopRun.stepResults = [...loopRun.stepResults, ...executeResult.output.stepResults];
+
+      // ── Observability: token savings estimate (code-mode batch efficiency) ──
+      // Each tool call made inside a code-mode sandbox avoids a separate model
+      // turn that would have been needed in sequential tool-call mode. Estimate
+      // 50 tokens of overhead saved per batched call (prompt + parse savings).
+      const codeModeToolCallTotal = executeResult.output.stepResults
+        .filter(
+          (sr) =>
+            sr.status === 'completed' &&
+            typeof sr.output === 'object' &&
+            sr.output !== null &&
+            (sr.output as Record<string, unknown>)['executionMode'] === 'code',
+        )
+        .reduce((sum, sr) => {
+          const calls = (sr.output as Record<string, unknown>)['toolCallsMade'];
+          return sum + (Array.isArray(calls) ? calls.length : 0);
+        }, 0);
+      if (codeModeToolCallTotal > 0) {
+        globalCollector.recordKnown('token_savings_estimate', codeModeToolCallTotal * 50, {
+          agentId: ctx.agentId,
+          runId,
+          iteration: String(iteration),
+        });
+      }
 
       // ─── GOVERNED APPROVAL INTERRUPT detection ────────────────────────────
       // Scan newly completed step outputs for an __approvalInterrupt spec.
@@ -511,6 +736,7 @@ export async function run(
           preferredModel: ctx.preferredModel,
           promptVersionId: ctx.promptVersionId,
           revisionContext: revisionCtx,
+          toolRegistry: options.toolRegistry ?? defaultToolRegistry,
         });
         recordPhase(replanResult);
         loopRun.planRevisions = (loopRun.planRevisions ?? 0) + 1;

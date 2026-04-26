@@ -23,7 +23,8 @@ import {
   SUBSTRATE_RESOURCES,
   SUBSTRATE_TOOLS,
 } from '../descriptor.js';
-import { handlePromptGet, handleResourceRead, handleToolCall } from '../handlers.js';
+import { getAvailableTools, handlePromptGet, handleResourceRead, handleToolCall } from '../handlers.js';
+import { runEventBus } from '../run-events.js';
 
 // ─── JSON-RPC Helpers ─────────────────────────────────────────────────────────
 
@@ -65,15 +66,18 @@ async function handle(req: JsonRpcRequest): Promise<void> {
         ok(id, {});
         break;
 
-      case 'tools/list':
+      case 'tools/list': {
+        // Use the live tool set — changes when enable_server / disable_server is called.
+        const availableTools = getAvailableTools();
         ok(id, {
-          tools: SUBSTRATE_TOOLS.map((t) => ({
+          tools: availableTools.map((t) => ({
             name: t.name,
             description: t.description,
             inputSchema: t.inputSchema,
           })),
         });
         break;
+      }
 
       case 'tools/call': {
         const toolName = String(params.name ?? '');
@@ -82,7 +86,8 @@ async function handle(req: JsonRpcRequest): Promise<void> {
           err(id, -32602, 'INVALID_PARAMS', { reason: 'Missing tool name' });
           break;
         }
-        const known = SUBSTRATE_TOOLS.find((t) => t.name === toolName);
+        const liveTools = getAvailableTools();
+        const known = liveTools.find((t) => t.name === toolName);
         if (!known) {
           err(id, -32601, 'METHOD_NOT_FOUND', { reason: `No tool '${toolName}'` });
           break;
@@ -143,6 +148,14 @@ async function handle(req: JsonRpcRequest): Promise<void> {
 // ─── Stdio Loop ───────────────────────────────────────────────────────────────
 
 export function startStdioTransport(): void {
+  // Forward tool_list_changed events to the connected MCP host as a proper
+  // notifications/tools/list_changed notification (MCP spec §6.5). The host
+  // will respond by calling tools/list again to refresh its working set.
+  runEventBus.subscribe((event) => {
+    if (event.type === 'tool_list_changed') {
+      send({ jsonrpc: '2.0', method: 'notifications/tools/list_changed', params: {} });
+    }
+  });
 
   const rl = readline.createInterface({ input: process.stdin, terminal: false });
 
