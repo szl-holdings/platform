@@ -173,7 +173,7 @@ function categorize(name, _fromPath, source) {
   if (source.includes('/analytics')) return 'Analytics';
   if (source.includes('receipt-graph') || /Provenance|Receipt|Trust/.test(name)) return 'Receipt Graph';
   if (source.includes('operational-primitives') || name.startsWith('Operational')) return 'Operational Primitives';
-  if (name.startsWith('Cortex')) return 'Cortex AI';
+  if (name.startsWith('APEX')) return 'APEX AI';
   if (/(autonomy|alloydecision|decisioncard|decisionshield|decisionreceipt|decisioncenter|simulation|whatif|recommendation|alloy)/.test(lc)) return 'AI Controls';
   if (/(constellation|knowledge|hierarchical|timelinegraph|nodedetail|graphlegend|graphstats|graphqldata|tornado|cohort|funnel|probabilitydensity|cumulativedist|confidenceband|scenariocomparison|simulationresult)/.test(lc)) return 'Visualization';
   if (/(twin|sourcehealth|freshness|status|sync|realtime|policyresult|policyverdict|stale|servicestatus)/.test(lc)) return 'Monitoring';
@@ -192,8 +192,8 @@ function categorize(name, _fromPath, source) {
 
 const STATUS_OVERRIDES = {
   CrdtEntityPanel: 'experimental', DigitalTwinCard: 'experimental',
-  CortexVoice: 'experimental', CortexVoiceTrigger: 'experimental',
-  ConstellationGraph: 'beta', CortexEntityGraph: 'beta', CortexWhatIf: 'beta',
+  APEXVoice: 'experimental', APEXVoiceTrigger: 'experimental',
+  ConstellationGraph: 'beta', APEXEntityGraph: 'beta', APEXWhatIf: 'beta',
   SimulationCockpit: 'beta', SimulationCockpitCompact: 'beta',
   SimulationProgressTracker: 'beta', SimulationResultCard: 'beta',
   KnowledgeGraphViz: 'beta', HierarchicalGraphViz: 'beta',

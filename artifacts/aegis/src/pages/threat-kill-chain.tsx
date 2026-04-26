@@ -156,7 +156,7 @@ const KILL_CHAIN_STAGES = [
     status: 'blocked',
     timestamp: '—',
     findings:
-      'BLOCKED: PARAGON DLP prevented S3 upload of finance.zip (2.4GB). No exfiltration confirmed.',
+      'BLOCKED: Aegis DLP prevented S3 upload of finance.zip (2.4GB). No exfiltration confirmed.',
   },
 ];
 
@@ -230,7 +230,7 @@ const DEFENDER_TIMELINE = [
     time: '07:04:18',
     action: 'PowerShell execution blocked on WORKSTATION-142',
     type: 'detect',
-    actor: 'PARAGON Sensor',
+    actor: 'Aegis Sensor',
   },
   {
     time: '07:04:22',
@@ -254,7 +254,7 @@ const DEFENDER_TIMELINE = [
     time: '07:09:00',
     action: 'INC-2847 created — assigned to J. Chen (SOC L2)',
     type: 'action',
-    actor: 'PARAGON SOAR',
+    actor: 'Aegis SOAR',
   },
   {
     time: '08:32:51',
@@ -266,7 +266,7 @@ const DEFENDER_TIMELINE = [
     time: '08:33:04',
     action: 'DC-PROD-03 network isolation initiated',
     type: 'block',
-    actor: 'PARAGON SOAR Playbook',
+    actor: 'Aegis SOAR Playbook',
   },
   {
     time: '08:45:12',

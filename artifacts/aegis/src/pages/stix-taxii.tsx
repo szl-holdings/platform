@@ -261,7 +261,7 @@ export default function StixTaxii() {
   });
 
   const exportMutation = useStandardMutation({
-    mutationFn: (objectIds: string[]) => api.stix.export(objectIds, 'PARAGON Intelligence Bundle'),
+    mutationFn: (objectIds: string[]) => api.stix.export(objectIds, 'Aegis Intelligence Bundle'),
     onSuccess: (data) => {
       toast.success(`STIX bundle exported — ID: ${data?.data?.bundle?.id?.slice(0, 30) ?? 'N/A'}`);
     },

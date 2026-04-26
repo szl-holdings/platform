@@ -14,7 +14,7 @@ export default function TerraBillingPage() {
       <BillingAccount
         accentColor={ACCENT}
         pricingUrl="/pricing"
-        productName="DOMAINE"
+        productName="Terra"
       />
     </div>
   );

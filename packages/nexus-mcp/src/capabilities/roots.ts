@@ -1,5 +1,5 @@
 /**
- * NEXUS MCP — Roots Capability
+ * PRAXIS MCP — Roots Capability
  *
  * Defines tenant-scoped filesystem boundary constraints for connected MCP
  * clients. Roots are governed by the existing tenant isolation policy:
@@ -10,7 +10,7 @@
 
 import type { TenantContext } from '../server.js';
 
-export interface NexusRoot {
+export interface PRAXISRoot {
   uri: string;
   name?: string;
 }
@@ -20,8 +20,8 @@ export interface NexusRoot {
  * Connected clients that support Roots are expected to confine their
  * filesystem operations to these URIs.
  */
-export function buildTenantRoots(ctx: TenantContext): NexusRoot[] {
-  const roots: NexusRoot[] = [];
+export function buildTenantRoots(ctx: TenantContext): PRAXISRoot[] {
+  const roots: PRAXISRoot[] = [];
 
   if (!ctx.tenantId) {
     // Unauthenticated connections get read-only access to public schemas only

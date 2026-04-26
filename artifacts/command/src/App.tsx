@@ -16,9 +16,9 @@ import {
 import { AgentCopilot } from '@szl-holdings/shared-ui/copilot';
 import { commandConfig } from '@szl-holdings/shared-ui/copilot-configs';
 import {
-  CortexVoice,
-  CortexVoiceTrigger,
-  useCortexVoice,
+  APEXVoice,
+  APEXVoiceTrigger,
+  useAPEXVoice,
 } from '@szl-holdings/shared-ui/cortex-voice';
 import {
   DemoPersonaProvider,
@@ -522,7 +522,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
 
 function AppShell() {
   const [location, navigate] = useLocation();
-  const { open: cortexOpen, setOpen: setCortexOpen } = useCortexVoice();
+  const { open: cortexOpen, setOpen: setAPEXOpen } = useAPEXVoice();
   const isMarketing = location.startsWith('/marketing');
 
   const mode = getMode(location);
@@ -592,14 +592,14 @@ function AppShell() {
         appName="Command"
         accentColor={accent}
       />
-      <CortexVoice
+      <APEXVoice
         open={cortexOpen}
-        onClose={() => setCortexOpen(false)}
+        onClose={() => setAPEXOpen(false)}
         accentColor={accent}
         appName="Command"
       />
       <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 9990 }}>
-        <CortexVoiceTrigger accentColor={accent} onClick={() => setCortexOpen(true)} />
+        <APEXVoiceTrigger accentColor={accent} onClick={() => setAPEXOpen(true)} />
       </div>
 
       <div style={{ height: 'calc(100vh - 40px)', overflow: 'hidden' }}>

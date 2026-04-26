@@ -5,7 +5,7 @@
  * Uses real DB + drizzle-orm (same as db-integration.test.ts) — no drizzle/DB mocks.
  * External side-effects (email, pubsub, AI engine, geocoding) are mocked.
  *
- * Domains covered: Vessels, Terra, PRISM Counsel, Aegis/Firestorm, Lyte, Carlota Jo, SZL Holdings
+ * Domains covered: Vessels, Terra, Counsel, Aegis/Aegis, Lyte, Carlota Jo, SZL Holdings
  */
 import { describe, it, expect, afterAll, afterEach, vi } from "vitest";
 import request from "supertest";
@@ -303,11 +303,11 @@ describe("Domain: Terra", () => {
   });
 });
 
-// ── Domain: PRISM Counsel routes were removed in Task #2696 ──────────────────
+// ── Domain: Counsel routes were removed in Task #2696 ──────────────────
 
-// ── Domain: Aegis / Firestorm ─────────────────────────────────────────────────
+// ── Domain: Aegis / Aegis ─────────────────────────────────────────────────
 
-describe("Domain: Aegis / Firestorm", () => {
+describe("Domain: Aegis / Aegis", () => {
   afterEach(async () => {
     await flushCleanup();
   });
@@ -675,7 +675,7 @@ describe("Cross-Domain: Response shape contracts", () => {
   });
 });
 
-// ── Domain: PRISM Counsel — POST round-trip coverage ─────────────────────────
+// ── Domain: Counsel — POST round-trip coverage ─────────────────────────
 
 describe("Domain: Counsel", () => {
   afterEach(async () => {

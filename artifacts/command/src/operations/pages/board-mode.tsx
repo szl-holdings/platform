@@ -77,7 +77,7 @@ const DECISIONS: BoardItem[] = [
     impact: '$2.1M',
     owner: 'Finance VP',
     deadline: 'SLA breach at 26h',
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
     detail:
       'Three vessels are awaiting fuel surcharge approval before re-routing can proceed. The SLA breach window is 4 hours. Finance VP sign-off is required.',
@@ -94,7 +94,7 @@ const RISKS: BoardItem[] = [
     impact: '$2.1M',
     owner: 'Fleet Ops',
     deadline: 'SLA breach imminent',
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
     detail:
       'Vessel M/V Meridian, Pacific Star, and Coral Wind are all operating outside SLA windows. If no corrective action is taken in the next 4 hours, penalty clauses activate automatically.',
@@ -120,7 +120,7 @@ const RISKS: BoardItem[] = [
     impact: '$320K',
     owner: 'Legal',
     deadline: 'Tenant deadline in 3d',
-    pack: 'DOMAINE',
+    pack: 'Terra',
     packColor: '#a07848',
     detail:
       'Exhibit B missing from the lease renewal document. If not resolved within 3 days, tenant has the right to void the renewal. A signed exhibit B must be obtained from the property manager.',
@@ -136,7 +136,7 @@ const ASKS: BoardItem[] = [
     impact: '$2.1M at stake',
     owner: 'CFO',
     deadline: 'Need answer in 2h',
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
     detail:
       'The Finance VP who must approve the fuel surcharge is currently in a calendar conflict. Clarification is needed: who is the designated backup approver for fleet surcharge decisions?',
@@ -162,7 +162,7 @@ const ASKS: BoardItem[] = [
     impact: '$320K',
     owner: 'Carlota Jo Account',
     deadline: '3d tenant window',
-    pack: 'DOMAINE',
+    pack: 'Terra',
     packColor: '#a07848',
     detail:
       "The property manager responsible for obtaining Exhibit B has been unresponsive for 48 hours. Authorization is requested to escalate directly to the property management firm's director and, if needed, engage legal to obtain the document.",

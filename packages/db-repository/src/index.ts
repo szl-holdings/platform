@@ -13,6 +13,6 @@
 export { AlloyRepository, alloyRepository } from './alloy';
 export { type AuditEntry, AuditRepository, auditRepository } from './audit';
 export { AuthRepository, authRepository } from './auth';
-export { FirestormRepository, firestormRepository } from './firestorm';
+export { AegisRepository, firestormRepository } from './firestorm';
 export { TerraRepository, terraRepository } from './terra';
 export { VesselsRepository, vesselsRepository } from './vessels';

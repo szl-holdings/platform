@@ -346,9 +346,9 @@ test.describe('SZL Holdings — User Journey: Platform Navigation', () => {
     const nexusLink = nav
       .locator("a[href='/nexus'], a:has-text('PRAXIS'), a[href*='platform'], a:has-text('Platform')")
       .first();
-    const hasNexusLink = await nexusLink.isVisible({ timeout: 8000 }).catch(() => false);
+    const hasPRAXISLink = await nexusLink.isVisible({ timeout: 8000 }).catch(() => false);
 
-    if (!hasNexusLink) {
+    if (!hasPRAXISLink) {
       const nexusUrl = `${BASE_PATH}nexus`.replace('//', '/');
       const resp = await page.goto(nexusUrl, { waitUntil: 'domcontentloaded' }).catch(() => null);
       if (!resp || resp.status() >= 500) {

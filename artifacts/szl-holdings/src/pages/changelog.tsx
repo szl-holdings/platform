@@ -40,8 +40,8 @@ const entries = [
     type: "minor",
     highlight: "APEX GPU Monitoring + LLM Evaluation launch",
     changes: [
-      { type: "feature", text: "SZL Cortex: GPU Cluster Monitoring with thermal, utilization, and memory pressure tracking" },
-      { type: "feature", text: "SZL Cortex: LLM Evaluation Studio with automated regression testing and A/B model comparison" },
+      { type: "feature", text: "SZL APEX: GPU Cluster Monitoring with thermal, utilization, and memory pressure tracking" },
+      { type: "feature", text: "SZL APEX: LLM Evaluation Studio with automated regression testing and A/B model comparison" },
       { type: "feature", text: "Counsel: Prediction Studio with multi-channel scenario modeling" },
       { type: "feature", text: "Counsel: Confidence Scoring with probabilistic output and assumption tracking" },
       { type: "improvement", text: "Aegis: Risk Register redesign with dynamic filtering and bulk status updates" },

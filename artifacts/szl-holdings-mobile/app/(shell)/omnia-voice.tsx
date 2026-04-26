@@ -43,7 +43,7 @@ const SUGGESTED_QUERIES = [
   'What is the current portfolio NAV?',
   'Show me active threat alerts',
   'Which vessels are off course?',
-  'Summarize DOMAINE covenant compliance',
+  'Summarize Terra covenant compliance',
   'What HITL approvals are pending in A11oy?',
   'Any legal matter deadlines today?',
 ];
@@ -63,7 +63,7 @@ const DOMAIN_COLORS: Record<string, string> = {
 
 const MOCK_RESPONSES: Record<string, string> = {
   nav: 'Portfolio NAV stands at $1.24B — up 0.4% over the last 24 hours. Real estate: $841M · Maritime: $243M · Liquid: $112M · Advisory fees: $44M.',
-  threat: 'Two active threat alerts: (1) APT-41 cluster elevated to HIGH confidence — 14 IOC matches across PARAGON; (2) MV Stellarwind route deviation — 82% insurance tier breach probability.',
+  threat: 'Two active threat alerts: (1) APT-41 cluster elevated to HIGH confidence — 14 IOC matches across Aegis; (2) MV Stellarwind route deviation — 82% insurance tier breach probability.',
   vessel: 'MV Stellarwind is 14 nm off its planned route. All other 6 vessels are tracking normally. Weather radar clear across all active corridors.',
   terra: '14 of 16 properties are fully covenant-compliant. TER-4402 is on watch with DSCR 1.01x. TER-8821 was restored to compliance yesterday after a governance action.',
   hitl: 'Three HITL approvals are pending in A11oy: (1) Counterparty risk model update; (2) Maritime reinsurance renewal; (3) Legal matter CJL-2291 posture change.',

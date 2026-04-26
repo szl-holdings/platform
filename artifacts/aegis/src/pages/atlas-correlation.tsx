@@ -67,7 +67,7 @@ const DOMAIN_META: Record<
   }
 > = {
   aegis: {
-    label: 'PARAGON · Cybersecurity',
+    label: 'Aegis · Cybersecurity',
     short: 'AEG',
     color: '#f5f5f5',
     bg: 'rgba(245,245,245,0.08)',
@@ -403,7 +403,7 @@ export default function AegisAtlasCorrelation() {
             Worldline Correlation Theater
           </h1>
           <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            Time-aligned threat surface across PARAGON security incidents, Vessels route anomalies,
+            Time-aligned threat surface across Aegis security incidents, Vessels route anomalies,
             and Terra physical / financial signals.
           </p>
         </div>

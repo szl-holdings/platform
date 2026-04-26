@@ -1,5 +1,5 @@
 /**
- * NexusHopQuery — dedicated hop-traversal query interface for the NEXUS knowledge graph.
+ * PRAXISHopQuery — dedicated hop-traversal query interface for the PRAXIS knowledge graph.
  * Lets operators traverse entity relationships visually and ask natural-language
  * graph questions ("show me all entities connected to this vessel owner within 2 hops").
  */
@@ -26,8 +26,8 @@ import {
   type EntityRecord,
   type EdgeRecord,
   type EntityType,
-  NEXUS_ENTITIES,
-  NEXUS_EDGES,
+  PRAXIS_ENTITIES,
+  PRAXIS_EDGES,
 } from '@/lib/nexus/graph';
 
 interface HopResult {
@@ -164,15 +164,15 @@ function buildNaturalLanguageAnswer(
   return answer;
 }
 
-interface NexusHopQueryProps {
+interface PRAXISHopQueryProps {
   initialAnchorId?: string;
 }
 
-export function NexusHopQuery({ initialAnchorId }: NexusHopQueryProps) {
+export function PRAXISHopQuery({ initialAnchorId }: PRAXISHopQueryProps) {
   const [query, setQuery] = useState('');
   const [anchorSearch, setAnchorSearch] = useState('');
   const [selectedAnchor, setSelectedAnchor] = useState<EntityRecord | null>(
-    initialAnchorId ? NEXUS_ENTITIES.find((e) => e.id === initialAnchorId) ?? null : null,
+    initialAnchorId ? PRAXIS_ENTITIES.find((e) => e.id === initialAnchorId) ?? null : null,
   );
   const [maxHops, setMaxHops] = useState(2);
   const [isRunning, setIsRunning] = useState(false);
@@ -181,7 +181,7 @@ export function NexusHopQuery({ initialAnchorId }: NexusHopQueryProps) {
   const [selectedHopResult, setSelectedHopResult] = useState<HopResult | null>(null);
 
   const filteredEntities = anchorSearch.length >= 2
-    ? NEXUS_ENTITIES.filter((e) =>
+    ? PRAXIS_ENTITIES.filter((e) =>
         e.label.toLowerCase().includes(anchorSearch.toLowerCase()) ||
         e.type.toLowerCase().includes(anchorSearch.toLowerCase())
       ).slice(0, 8)
@@ -195,7 +195,7 @@ export function NexusHopQuery({ initialAnchorId }: NexusHopQueryProps) {
     const start = Date.now();
     await new Promise((r) => setTimeout(r, 800));
 
-    const results = traverseGraph(selectedAnchor.id, maxHops, NEXUS_ENTITIES, NEXUS_EDGES);
+    const results = traverseGraph(selectedAnchor.id, maxHops, PRAXIS_ENTITIES, PRAXIS_EDGES);
     const naturalLanguageAnswer = buildNaturalLanguageAnswer(query, selectedAnchor, results, maxHops);
 
     setResult({

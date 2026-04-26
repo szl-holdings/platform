@@ -1,5 +1,5 @@
 /**
- * @szl/substrate — PRISM Counsel Vertical Pack: Matter Evidence Packaging and Deadline Escalation
+ * @szl/substrate — Counsel Vertical Pack: Matter Evidence Packaging and Deadline Escalation
  *
  * Retrieves matter records, documents, and deadline schedules for active legal
  * matters, packages structured evidence bundles for attorney review, and

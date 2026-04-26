@@ -61,7 +61,7 @@ const DEMO_RECENT_RUNS: ApiEvalRun[] = [
   {
     runId: 'run-eval-841',
     suiteId: 'aegis-threat-classify',
-    suiteName: 'PARAGON Threat Classification',
+    suiteName: 'Aegis Threat Classification',
     domain: 'aegis',
     passRate: 0.821,
     totalCases: 124,
@@ -107,7 +107,7 @@ const DEMO_RECENT_RUNS: ApiEvalRun[] = [
 const DEMO_PENDING_APPROVALS: ApiApproval[] = [
   {
     id: 'ap-101',
-    title: 'Promote PARAGON threat-classify v2.4 to production',
+    title: 'Promote Aegis threat-classify v2.4 to production',
     domain: 'aegis',
     requestedAt: '13:50',
     riskLevel: 'high',

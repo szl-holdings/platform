@@ -245,7 +245,7 @@ export default function ChaosEngineeringDrills() {
           </div>
           <div className="flex items-center gap-2 mt-3">
             <div className="h-px flex-1 bg-[#f5f5f5]/10" />
-            <span className="text-[10px] text-[#f5f5f5]/40 font-mono uppercase tracking-wider">PARAGON Resilience Suite</span>
+            <span className="text-[10px] text-[#f5f5f5]/40 font-mono uppercase tracking-wider">Aegis Resilience Suite</span>
             <div className="h-px flex-1 bg-[#f5f5f5]/10" />
           </div>
         </div>

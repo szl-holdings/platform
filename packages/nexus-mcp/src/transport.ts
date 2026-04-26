@@ -1,5 +1,5 @@
 /**
- * NEXUS MCP — Transport Factories
+ * PRAXIS MCP — Transport Factories
  *
  * Convenience factories for creating SDK transports used by
  * Substrate Gateway, API server, and Tool Mesh surfaces.

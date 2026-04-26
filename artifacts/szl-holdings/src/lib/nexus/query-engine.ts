@@ -1,5 +1,5 @@
 /**
- * NEXUS "Follow the Thread" Natural Language Query Engine
+ * PRAXIS "Follow the Thread" Natural Language Query Engine
  * Parses natural language queries, resolves entities, and traverses the knowledge graph
  * to return relevant subgraphs with highlighted paths.
  */
@@ -231,7 +231,7 @@ export function parseQueryIntent(query: string): QueryIntent {
 }
 
 /**
- * Execute a NEXUS query against the knowledge graph.
+ * Execute a PRAXIS query against the knowledge graph.
  * Returns a subgraph result with entity/edge IDs to highlight.
  */
 export function executeQuery(

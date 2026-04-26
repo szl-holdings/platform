@@ -171,7 +171,7 @@ const TRUST_METRICS: TrustMetric[] = [
 
 const DOMAIN_ROWS: DomainTrustRow[] = [
   {
-    domain: 'PARAGON Security',
+    domain: 'Aegis Security',
     icon: '⚔',
     color: '#ef4444',
     acceptanceRate: 0.81,

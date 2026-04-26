@@ -548,7 +548,7 @@ export default function CommandHome() {
               className="text-[9px] font-mono uppercase tracking-[0.15em]"
               style={{ color: DS.text.muted }}
             >
-              PARAGON Cyber-Resilience Platform
+              Aegis Cyber-Resilience Platform
             </p>
           </div>
         </div>

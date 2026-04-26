@@ -5,7 +5,7 @@
  *   - Streamable HTTP transport (MCP 2025 spec) — POST /mcp (stateful session)
  *   - Legacy SSE transport (MCP 2024-11-05) — GET /mcp/sse + POST /mcp/message
  *
- * Both transports share the same NexusMcpServer instance (same tool surface,
+ * Both transports share the same PRAXISMcpServer instance (same tool surface,
  * same governance layer). The SDK handles session isolation internally.
  *
  * REST convenience endpoints (/health, /tools, /resources, /prompts) are
@@ -431,7 +431,7 @@ export function createHttpTransport(): express.Router {
       return;
     }
 
-    // New session — create a fresh transport and connect the NexusMcpServer
+    // New session — create a fresh transport and connect the PRAXISMcpServer
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
       onsessioninitialized: (id: string) => {
@@ -835,9 +835,9 @@ export function createHttpTransport(): express.Router {
     });
   });
 
-  // ── NEXUS Proof Verification Endpoints ────────────────────────────────────────
+  // ── PRAXIS Proof Verification Endpoints ────────────────────────────────────────
 
-  // GET /mcp/nexus/verify/:hash — verify a NEXUS proof by its SHA-256 hash
+  // GET /mcp/nexus/verify/:hash — verify a PRAXIS proof by its SHA-256 hash
   router.get('/nexus/verify/:hash', (req: Request, res: Response) => {
     const hash = String(req.params['hash'] ?? '');
     if (!/^[0-9a-f]{64}$/i.test(hash)) {

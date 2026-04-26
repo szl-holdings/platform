@@ -2,7 +2,7 @@
  * @szl/substrate — Sovereign Execution Substrate
  *
  * The single, opinionated execution runtime that every SZL product surface
- * (Lyte, Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo) calls the same way.
+ * (Lyte, Aegis, Vessels, Terra, Counsel, Carlota Jo) calls the same way.
  *
  * Primary entry points:
  *   defineWorkflow({ stages, policy, budget }) → WorkflowDefinition

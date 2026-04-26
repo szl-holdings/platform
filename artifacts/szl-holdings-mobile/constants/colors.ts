@@ -4,7 +4,7 @@ const _a = giColors.accent;
 const _bg = giColors.bg;
 
 /**
- * Theme-aware color palette for the CORTEX/APEX mobile app.
+ * Theme-aware color palette for the APEX/APEX mobile app.
  *
  * Two modes:
  *   - `light` — dark-mode palette (used when isDark === true). Semantic accent

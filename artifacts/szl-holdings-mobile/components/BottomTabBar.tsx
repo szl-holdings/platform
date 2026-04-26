@@ -128,7 +128,7 @@ function useAdvisoryBadge() {
   }, [proposalsQuery.data, setBadge]);
 }
 
-function useCortexBadge() {
+function useAPEXBadge() {
   const { setBadge } = useWorkspace();
 
   const feedQuery = useQuery<{ stats?: { critical?: number; active?: number } }>({
@@ -181,7 +181,7 @@ export function BottomTabBar() {
   const { unreadCount } = useNotificationCountContext();
   const scrollRef = useRef<ScrollView>(null);
 
-  useCortexBadge();
+  useAPEXBadge();
   useOperationsBadge();
   useAdvisoryBadge();
 

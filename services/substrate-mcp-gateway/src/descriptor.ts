@@ -389,7 +389,7 @@ export const SUBSTRATE_TOOLS: McpToolDescriptor[] = [
           type: 'string',
           description:
             'Agent ID or canonical name from nexus://agents/registry ' +
-            "(e.g. 'helmsman' / 'SEXTANT', 'sentinel' / 'TENAX', 'terra' / 'DOMAINE', 'lexis' / 'Counsel')",
+            "(e.g. 'helmsman' / 'Vessels', 'sentinel' / 'Sentra', 'terra' / 'Terra', 'lexis' / 'Counsel')",
         },
         taskDescription: {
           type: 'string',
@@ -491,7 +491,7 @@ export const SUBSTRATE_RESOURCES: McpResourceDescriptor[] = [
     mimeType: 'application/json',
   },
 
-  // ─── NEXUS Intelligence Fabric Resources ─────────────────────────────────────
+  // ─── PRAXIS Intelligence Fabric Resources ─────────────────────────────────────
 
   {
     uri: 'nexus://convergence/active',

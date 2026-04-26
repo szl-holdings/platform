@@ -1,18 +1,18 @@
 /**
- * @workspace/nexus-mcp — NEXUS MCP SDK Foundation
+ * @workspace/nexus-mcp — PRAXIS MCP SDK Foundation
  *
  * Official @modelcontextprotocol/sdk foundation wrapped with SZL governance:
  * Guardian policy evaluation, proof chain audit writes, tenant isolation,
  * role enforcement, and the full 2025 spec innovation layer.
  *
  * Usage:
- *   import { NexusMcpServer } from '@workspace/nexus-mcp';
- *   const server = new NexusMcpServer({ name: 'my-server', version: '1.0.0' });
+ *   import { PRAXISMcpServer } from '@workspace/nexus-mcp';
+ *   const server = new PRAXISMcpServer({ name: 'my-server', version: '1.0.0' });
  *   server.rawTool('my_tool', 'description', schema, handler);
  *   await server.connect(transport);
  */
 
-export { NexusMcpServer } from './server.js';
+export { PRAXISMcpServer } from './server.js';
 export type {
   TenantContext,
   GuardianPolicyResult,
@@ -20,9 +20,9 @@ export type {
   PolicyEvaluator,
   ProofChainWriter,
   AuditLogger,
-  NexusMcpServerConfig,
-  NexusTask,
-  NexusApp,
+  PRAXISMcpServerConfig,
+  PRAXISTask,
+  PRAXISApp,
   DiscoveryEventType,
   ToolContent,
 } from './server.js';

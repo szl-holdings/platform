@@ -17,15 +17,15 @@ const OMNIA_PURPLE = '#8b7ac8';
 const ARTIFACT_META: Record<string, { color: string; name: string }> = {
   command: { color: '#6366f1', name: 'Command' },
   holdings: { color: '#c9b787', name: 'SZL Holdings' },
-  aegis: { color: '#ef4444', name: 'PARAGON' },
-  sentra: { color: '#22c55e', name: 'TENAX' },
-  terra: { color: '#22c55e', name: 'DOMAINE' },
-  vessels: { color: '#0ea5e9', name: 'SEXTANT' },
+  aegis: { color: '#ef4444', name: 'Aegis' },
+  sentra: { color: '#22c55e', name: 'Sentra' },
+  terra: { color: '#22c55e', name: 'Terra' },
+  vessels: { color: '#0ea5e9', name: 'Vessels' },
   counsel: { color: '#8b5cf6', name: 'Counsel' },
   a11oy: { color: '#c9b787', name: 'A11oy' },
-  pulse: { color: '#f59e0b', name: 'LUMINA' },
+  pulse: { color: '#f59e0b', name: 'Pulse' },
   'carlota-jo': { color: '#8b7ac8', name: 'Carlota Jo' },
-  lyte: { color: '#3b82f6', name: 'KORA' },
+  lyte: { color: '#3b82f6', name: 'Lyte' },
   praxis: { color: '#8b7ac8', name: 'Praxis' },
 };
 

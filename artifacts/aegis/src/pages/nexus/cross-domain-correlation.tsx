@@ -56,7 +56,7 @@ const SIGNALS: DomainSignal[] = [
   {
     id: 'SIG-002',
     domain: 'cyber',
-    source: 'PARAGON Threat Intel',
+    source: 'Aegis Threat Intel',
     timestamp: '2024-03-15T14:18:00Z',
     signal: 'APT-41 infrastructure detected targeting shipping logistics companies',
     severity: 'critical',
@@ -110,7 +110,7 @@ const SIGNALS: DomainSignal[] = [
   {
     id: 'SIG-008',
     domain: 'cyber',
-    source: 'PARAGON SIEM',
+    source: 'Aegis SIEM',
     timestamp: '2024-03-15T12:40:00Z',
     signal: 'Spear-phishing campaign targeting logistics operations teams — OceanLotus TTPs',
     severity: 'high',

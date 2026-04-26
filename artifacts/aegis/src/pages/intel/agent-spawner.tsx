@@ -45,7 +45,7 @@ const DOMAIN_TEMPLATES = [
       'Auto-triages IT tickets, predicts outages, and orchestrates remediation playbooks.',
     defaultInstruction:
       'Monitor ticket queue for patterns, predict infrastructure failures 4 hours ahead, auto-triage P1 incidents.',
-    domain: 'PARAGON Operations',
+    domain: 'Aegis Operations',
     systemType: 'deep' as const,
     capabilities: [
       'Ticket auto-triage',
@@ -176,7 +176,7 @@ const LIVE_AGENTS = [
   },
   {
     name: 'IT Sentinel',
-    domain: 'PARAGON Operations',
+    domain: 'Aegis Operations',
     status: 'active',
     uptime: '7d 2h',
     actions: 3847,

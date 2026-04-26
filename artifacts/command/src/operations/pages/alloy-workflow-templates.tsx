@@ -63,7 +63,7 @@ const TEMPLATES: WorkflowTemplate[] = [
     name: 'Fleet ETA Compliance Check',
     description:
       'Polls fleet position data and checks vessel ETAs against SLA windows. Flags compliance gaps with impact estimates.',
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
     trigger: 'interval',
     requiresApproval: false,
@@ -85,7 +85,7 @@ const TEMPLATES: WorkflowTemplate[] = [
     name: 'Security Posture Audit',
     description:
       'Comprehensive security posture assessment across physical, digital, and personnel dimensions. Produces a scored audit report.',
-    pack: 'PARAGON',
+    pack: 'Aegis',
     packColor: '#4f6ef7',
     trigger: 'manual',
     requiresApproval: true,
@@ -107,7 +107,7 @@ const TEMPLATES: WorkflowTemplate[] = [
     name: 'Asset Valuation Batch',
     description:
       'Runs batch valuation models across the real estate portfolio using current market comps and income data.',
-    pack: 'DOMAINE',
+    pack: 'Terra',
     packColor: '#a07848',
     trigger: 'scheduled',
     requiresApproval: false,
@@ -151,7 +151,7 @@ const TEMPLATES: WorkflowTemplate[] = [
     name: 'Fuel Surcharge Rate Calculator',
     description:
       'Calculates updated fuel surcharge rates based on current Brent crude index. Requires finance approval before applying to charter rates.',
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
     trigger: 'signal',
     requiresApproval: true,

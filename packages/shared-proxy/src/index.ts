@@ -20,7 +20,7 @@ export const CARLOTA_JO_PORT = 8098;
 export const COMMAND_PORT = 5000;
 export const COUNSEL_PORT = 4199;
 export const LYTE_PORT = 7099;
-export const NEXUS_PORT = 8008;
+export const PRAXIS_PORT = 8008;
 export const SENTRA_PORT = 4099;
 export const TERRA_PORT = 6000;
 export const VESSELS_PORT = 8099;
@@ -38,7 +38,7 @@ export const PROXY_ROUTES: ProxyRoute[] = [
   { prefix: '/carlota-jo/', port: CARLOTA_JO_PORT },
   { prefix: '/command/', port: COMMAND_PORT },
   { prefix: '/counsel/', port: COUNSEL_PORT },
-  { prefix: '/nexus/', port: NEXUS_PORT },
+  { prefix: '/nexus/', port: PRAXIS_PORT },
   { prefix: '/sentra/', port: SENTRA_PORT },
   { prefix: '/terra/', port: TERRA_PORT },
   { prefix: '/vessels/', port: VESSELS_PORT },

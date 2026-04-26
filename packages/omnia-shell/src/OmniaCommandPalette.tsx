@@ -21,14 +21,14 @@ import type { WorldModelEntity } from './types.js';
 const ARTIFACT_META: Record<string, { name: string; icon: React.ReactNode; path: string; accent: string }> = {
   command: { name: 'Command', icon: <Command size={12} />, path: '/command', accent: '#8b7ac8' },
   holdings: { name: 'SZL Holdings', icon: <Building size={12} />, path: '/', accent: '#c9b787' },
-  aegis: { name: 'PARAGON', icon: <Shield size={12} />, path: '/aegis', accent: '#ef4444' },
-  sentra: { name: 'TENAX', icon: <Activity size={12} />, path: '/sentra', accent: '#22c55e' },
-  terra: { name: 'DOMAINE', icon: <Globe size={12} />, path: '/terra', accent: '#22c55e' },
-  vessels: { name: 'SEXTANT', icon: <Ship size={12} />, path: '/vessels', accent: '#0ea5e9' },
+  aegis: { name: 'Aegis', icon: <Shield size={12} />, path: '/aegis', accent: '#ef4444' },
+  sentra: { name: 'Sentra', icon: <Activity size={12} />, path: '/sentra', accent: '#22c55e' },
+  terra: { name: 'Terra', icon: <Globe size={12} />, path: '/terra', accent: '#22c55e' },
+  vessels: { name: 'Vessels', icon: <Ship size={12} />, path: '/vessels', accent: '#0ea5e9' },
   counsel: { name: 'Counsel', icon: <BookOpen size={12} />, path: '/counsel', accent: '#8b5cf6' },
   a11oy: { name: 'A11oy', icon: <Layers size={12} />, path: '/a11oy', accent: '#c9b787' },
-  pulse: { name: 'LUMINA', icon: <Zap size={12} />, path: '/pulse', accent: '#f59e0b' },
-  lyte: { name: 'KORA', icon: <Activity size={12} />, path: '/lyte', accent: '#3b82f6' },
+  pulse: { name: 'Pulse', icon: <Zap size={12} />, path: '/pulse', accent: '#f59e0b' },
+  lyte: { name: 'Lyte', icon: <Activity size={12} />, path: '/lyte', accent: '#3b82f6' },
   praxis: { name: 'PRAXIS', icon: <Network size={12} />, path: '/nexus', accent: '#8b5cf6' },
 };
 
@@ -50,14 +50,14 @@ const QUICK_ACTIONS = [
   { id: 'nav-a11oy-adoption', label: 'OMNIA Shell Adoption (A11oy)', group: 'Navigate', path: '/a11oy/omnia-adoption', icon: <Layers size={13} /> },
   { id: 'nav-command', label: 'Go to Command', group: 'Switch App', path: '/command', icon: ARTIFACT_META.command.icon },
   { id: 'nav-holdings', label: 'Go to SZL Holdings', group: 'Switch App', path: '/', icon: ARTIFACT_META.holdings.icon },
-  { id: 'nav-aegis', label: 'Go to PARAGON', group: 'Switch App', path: '/aegis', icon: ARTIFACT_META.aegis.icon },
-  { id: 'nav-vessels', label: 'Go to SEXTANT', group: 'Switch App', path: '/vessels', icon: ARTIFACT_META.vessels.icon },
-  { id: 'nav-terra', label: 'Go to DOMAINE', group: 'Switch App', path: '/terra', icon: ARTIFACT_META.terra.icon },
+  { id: 'nav-aegis', label: 'Go to Aegis', group: 'Switch App', path: '/aegis', icon: ARTIFACT_META.aegis.icon },
+  { id: 'nav-vessels', label: 'Go to Vessels', group: 'Switch App', path: '/vessels', icon: ARTIFACT_META.vessels.icon },
+  { id: 'nav-terra', label: 'Go to Terra', group: 'Switch App', path: '/terra', icon: ARTIFACT_META.terra.icon },
   { id: 'nav-counsel', label: 'Go to Counsel', group: 'Switch App', path: '/counsel', icon: ARTIFACT_META.counsel.icon },
-  { id: 'nav-sentra', label: 'Go to TENAX', group: 'Switch App', path: '/sentra', icon: ARTIFACT_META.sentra.icon },
+  { id: 'nav-sentra', label: 'Go to Sentra', group: 'Switch App', path: '/sentra', icon: ARTIFACT_META.sentra.icon },
   { id: 'nav-a11oy', label: 'Go to A11oy', group: 'Switch App', path: '/a11oy', icon: ARTIFACT_META.a11oy.icon },
-  { id: 'nav-pulse', label: 'Go to LUMINA', group: 'Switch App', path: '/pulse', icon: ARTIFACT_META.pulse.icon },
-  { id: 'nav-lyte', label: 'Go to KORA', group: 'Switch App', path: '/lyte', icon: ARTIFACT_META.lyte.icon },
+  { id: 'nav-pulse', label: 'Go to Pulse', group: 'Switch App', path: '/pulse', icon: ARTIFACT_META.pulse.icon },
+  { id: 'nav-lyte', label: 'Go to Lyte', group: 'Switch App', path: '/lyte', icon: ARTIFACT_META.lyte.icon },
 ];
 
 function fuzzyMatch(query: string, text: string): boolean {

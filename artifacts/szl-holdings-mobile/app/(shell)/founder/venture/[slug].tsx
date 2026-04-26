@@ -58,7 +58,7 @@ const VENTURES_MAP: Record<
     name: 'Aegis',
     tagline: 'Unified Defense & Intelligence',
     description:
-      'A unified command surface for enterprise cybersecurity converging Security Operations (Firestorm), Managed Services (Aegis Operations), and Intelligence Engine (Aegis Labs). Aegis brings together threat detection, incident response, and managed operations under a single enterprise-grade interface.',
+      'A unified command surface for enterprise cybersecurity converging Security Operations (Aegis), Managed Services (Aegis Operations), and Intelligence Engine (Aegis Labs). Aegis brings together threat detection, incident response, and managed operations under a single enterprise-grade interface.',
     color: '#6366f1',
     url: 'https://aegis.szlholdings.com',
     status: 'Live',

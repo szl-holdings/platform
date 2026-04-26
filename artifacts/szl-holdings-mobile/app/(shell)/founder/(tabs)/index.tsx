@@ -196,7 +196,7 @@ const MILESTONES = [
     logoInitials: 'AG',
     logoColor: giColors.accent.violet,
     detail:
-      'Shipped unified cybersecurity command surface converging SOC operations (Firestorm), Managed Services (Aegis Operations), and Intelligence Engine (Aegis Labs).',
+      'Shipped unified cybersecurity command surface converging SOC operations (Aegis), Managed Services (Aegis Operations), and Intelligence Engine (Aegis Labs).',
     achievement: 'MITRE ATT&CK mapping, <1 min automated response',
     highlight: false,
   },
@@ -240,7 +240,7 @@ const CASE_STUDIES_FALLBACK: CaseStudy[] = [
     title: 'Unified SOC Command Surface — Aegis',
     slug: 'aegis-soc-command',
     summary:
-      'Converged three disparate security toolsets (Firestorm incident response, Aegis Operations MSP management, and Aegis Labs threat intelligence) into a single operator command surface mapped to the MITRE ATT&CK framework.',
+      'Converged three disparate security toolsets (Aegis incident response, Aegis Operations MSP management, and Aegis Labs threat intelligence) into a single operator command surface mapped to the MITRE ATT&CK framework.',
     outcome: 'Mean time to containment reduced from 18 minutes to under 60 seconds.',
   },
   {

@@ -9,7 +9,7 @@ const VERTICAL_COLORS: Record<string, string> = {
   'aegis-defense': '#f5f5f5', 'prism-counsel': '#8a8a8a', 'carlota-jo': '#c9b787', 'alloy-core': '#8a8a8a',
 };
 const VERTICAL_LABELS: Record<string, string> = {
-  'lyte-revenue': 'KORA Revenue', 'vessels-maritime': 'Vessels Maritime', 'terra-real-estate': 'DOMAINE Real Estate',
+  'lyte-revenue': 'Lyte Revenue', 'vessels-maritime': 'Vessels Maritime', 'terra-real-estate': 'Terra Real Estate',
   'aegis-defense': 'Aegis Defense', 'prism-counsel': 'Counsel', 'carlota-jo': 'Carlota Jo', 'alloy-core': 'Alloy Core',
 };
 

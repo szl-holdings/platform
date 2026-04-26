@@ -152,9 +152,9 @@ describe('OpenAPI contract — Vessels domain', () => {
   });
 });
 
-// ── Domain: Aegis / Firestorm (SOC) ──────────────────────────────────────────
+// ── Domain: Aegis / Aegis (SOC) ──────────────────────────────────────────
 
-describe('OpenAPI contract — Aegis / Firestorm domain', () => {
+describe('OpenAPI contract — Aegis / Aegis domain', () => {
   it('defines GET /firestorm/campaigns campaigns list endpoint', () => {
     expect(spec.paths).toHaveProperty('/firestorm/campaigns');
     expect(spec.paths['/firestorm/campaigns']).toHaveProperty('get');
@@ -494,9 +494,9 @@ describe('GraphQL schema — domain type coverage (static analysis)', () => {
     expect(src).toContain('lyteWorkspaces');
   });
 
-  it('firestorm GraphQL domain defines Firestorm types', () => {
+  it('firestorm GraphQL domain defines Aegis types', () => {
     const src = readDomainTypeDefs('firestorm.ts');
-    expect(src).toContain('Firestorm');
+    expect(src).toContain('Aegis');
   });
 
   it('holdings GraphQL domain extends Query type', () => {

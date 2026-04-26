@@ -70,9 +70,9 @@ const SEED: OmniaNotification[] = [
   {
     id: 'n-001',
     artifactId: 'aegis',
-    artifactName: 'PARAGON',
+    artifactName: 'Aegis',
     title: 'APT-41 threat cluster elevated',
-    message: 'Cluster upgraded to HIGH confidence (0.92). Two DOMAINE assets affected.',
+    message: 'Cluster upgraded to HIGH confidence (0.92). Two Terra assets affected.',
     level: 'critical',
     timestamp: new Date(Date.now() - 45_000).toISOString(),
     read: false,
@@ -82,7 +82,7 @@ const SEED: OmniaNotification[] = [
   {
     id: 'n-002',
     artifactId: 'vessels',
-    artifactName: 'SEXTANT',
+    artifactName: 'Vessels',
     title: 'MV Stellarwind route deviation',
     message: '14 nm off planned route. Insurance tier breach probability 82%.',
     level: 'warning',
@@ -117,7 +117,7 @@ const SEED: OmniaNotification[] = [
   {
     id: 'n-005',
     artifactId: 'terra',
-    artifactName: 'DOMAINE',
+    artifactName: 'Terra',
     title: 'TER-8821 restored to compliance',
     message: 'Property returned to full covenant compliance after governance action.',
     level: 'success',

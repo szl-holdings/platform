@@ -490,7 +490,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
             <Menu className="w-4 h-4" />
           </button>
           <div className="flex items-center gap-2 text-xs text-[#8a8a8a] font-mono">
-            <span>KORA</span>
+            <span>Lyte</span>
             {currentPage && (
               <>
                 <ChevronRight className="w-3 h-3" />
@@ -526,7 +526,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
         onClose={sentientHide}
         onOpen={sentientShow}
         surfaceId="lyte"
-        surfaceName="KORA Decision Intelligence"
+        surfaceName="Lyte Decision Intelligence"
         accentColor={LYTE_ACCENT}
         entityType="Opportunity"
         entityLabel="Vantex Acquisition — Q2 Close"
@@ -539,7 +539,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
         commands={paletteCommands}
-        appName="KORA"
+        appName="Lyte"
         accentColor={LYTE_ACCENT}
         placeholder="Search Lyte — pages, decisions, actions..."
       />

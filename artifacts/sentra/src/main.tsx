@@ -25,7 +25,7 @@ if ('serviceWorker' in navigator && !import.meta.env.DEV) {
 }
 
 createRoot(document.getElementById('root')!).render(
-  <ErrorBoundary appName="TENAX Cyber Resilience Command" accentColor="#22c55e">
+  <ErrorBoundary appName="Sentra Cyber Resilience Command" accentColor="#22c55e">
     <GraphQLProvider>
       <OmniaShellProvider config={{ artifactId: 'sentra', accentColor: '#22c55e' }}>
         <App />

@@ -18,25 +18,25 @@ export function MarketingNav() {
                   href="/marketing/apps/terra"
                   className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
                 >
-                  DOMAINE
+                  Terra
                 </Link>
                 <Link
                   href="/marketing/apps/vessels"
                   className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
                 >
-                  SEXTANT
+                  Vessels
                 </Link>
                 <Link
                   href="/marketing/apps/lyte"
                   className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
                 >
-                  KORA
+                  Lyte
                 </Link>
                 <Link
                   href="/marketing/apps/aegis"
                   className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
                 >
-                  PARAGON
+                  Aegis
                 </Link>
                 <Link
                   href="/marketing/apps/prism"
@@ -72,7 +72,7 @@ export function MarketingNav() {
                   href="/aegis/"
                   className="block p-2 hover:bg-white/5 rounded text-white transition-colors"
                 >
-                  PARAGON
+                  Aegis
                 </Link>
               </div>
             </div>

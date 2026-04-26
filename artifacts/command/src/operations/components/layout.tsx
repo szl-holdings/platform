@@ -246,7 +246,7 @@ export function Layout({ children }: { children: ReactNode }) {
       >
         {ALL_ITEMS.find(
           (i) => i.href === location || (i.href !== '/' && location.startsWith(i.href as string)),
-        )?.label || 'KORA'}
+        )?.label || 'Lyte'}
       </h1>
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1.5 text-[10px] font-mono">

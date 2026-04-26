@@ -100,7 +100,7 @@ export default function CrisisArenaLeaderboard() {
             <div className="w-7 h-7 rounded-md flex items-center justify-center" style={{ background: 'var(--gi-error-bg)', border: '1px solid var(--gi-error-border)' }}>
               <Activity className="w-3.5 h-3.5" style={{ color: 'var(--gi-accent-red)' }} />
             </div>
-            <span className="text-xs font-mono uppercase tracking-wider" style={{ color: 'var(--gi-text-muted)' }}>TENAX · Adversarial Simulation Program</span>
+            <span className="text-xs font-mono uppercase tracking-wider" style={{ color: 'var(--gi-text-muted)' }}>Sentra · Adversarial Simulation Program</span>
           </div>
           <h1 className="text-2xl font-bold mb-2" style={{ letterSpacing: '-0.02em', color: 'var(--gi-text-primary)' }}>
             Analyst Performance Registry

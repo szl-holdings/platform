@@ -5,7 +5,7 @@
  * Accepts the raw document and routes it through the configurable pipeline.
  * Also exposes lane-specific ingestors used as reference integrations:
  *
- *   - ingestCounselFiling   — PRISM Counsel contract/filing
+ *   - ingestCounselFiling   — Counsel contract/filing
  *   - ingestVesselsInsuranceException — Vessels insurance exception document
  *   - ingestTerraDistressFiling      — Terra distress filing
  */
@@ -63,7 +63,7 @@ export function buildIngestionRequest(
 }
 
 /**
- * Reference integration: PRISM Counsel — contract or court filing ingestion.
+ * Reference integration: Counsel — contract or court filing ingestion.
  * Used by the Counsel lane (PRISM) as the canonical document intake path.
  */
 export async function ingestCounselFiling(

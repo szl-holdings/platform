@@ -244,7 +244,7 @@ export const DEMO_COMPANY_KPIS: CompanyKPI[] = [
     change: +34.5,
     changeLabel: 'vs 30d ago',
     lane: 'security',
-    description: 'Composite security posture index across Firestorm & Aegis Operations',
+    description: 'Composite security posture index across Aegis & Aegis Operations',
   },
   {
     id: 'threat-d2c',

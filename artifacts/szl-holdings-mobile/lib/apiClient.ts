@@ -327,7 +327,7 @@ const MOBILE_DEMO_FIXTURES: Record<string, unknown> = {
         type: 'notification',
         title: 'Notify charter counterparties of potential delay',
         content:
-          'Dear Charter Operations Team,\n\nCORTEX has detected a significant throughput decline at Port of Rotterdam (18% below 30-day average). MSC Horizon and Atlantic Guardian are on affected routes. We are evaluating climate routing alternatives and will advise within 4 hours. Please review demurrage clauses on both charters.\n\nSZL Holdings — Maritime Operations',
+          'Dear Charter Operations Team,\n\nAPEX has detected a significant throughput decline at Port of Rotterdam (18% below 30-day average). MSC Horizon and Atlantic Guardian are on affected routes. We are evaluating climate routing alternatives and will advise within 4 hours. Please review demurrage clauses on both charters.\n\nSZL Holdings — Maritime Operations',
         recipient: 'charter-ops@szlholdings.com',
         priority: 'high',
         status: 'pending',

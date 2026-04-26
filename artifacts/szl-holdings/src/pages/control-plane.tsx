@@ -313,7 +313,7 @@ const featureFlags = [
   {
     key: 'multi_agent_orchestration',
     label: 'Multi-Agent Orchestration',
-    scope: 'Counsel, SZL Cortex',
+    scope: 'Counsel, SZL APEX',
     enabled: true,
     rollout: 60,
     owner: 'AI Team',

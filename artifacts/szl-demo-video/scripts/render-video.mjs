@@ -412,7 +412,7 @@ const SCENE_CAPTIONS = {
     { startMs: 10000, endMs: 12500, text: 'Carlota Jo — private advisory, judgment-led.' },
     { startMs: 12500, endMs: 15000, text: 'Sentra — cyber posture under guardian approval.' },
     { startMs: 15000, endMs: 17500, text: 'Lyte — decision intelligence with confidence scores.' },
-    { startMs: 17500, endMs: 20000, text: 'PRISM Counsel — legal exposure surfaced before crisis.' },
+    { startMs: 17500, endMs: 20000, text: 'Counsel — legal exposure surfaced before crisis.' },
     { startMs: 20000, endMs: 22500, text: 'Counsel — every obligation tracked, every deadline locked.' },
     { startMs: 22500, endMs: 25000, text: 'Unified Command — ten surfaces, one governed fabric.' },
   ],
@@ -422,7 +422,7 @@ const SCENE_CAPTIONS = {
     { startMs: 10000, endMs: 18000, text: 'Six systems. One explainable runtime.' },
   ],
   cortex: [
-    { startMs: 500,   endMs: 2000,  text: 'CORTEX Mobile — the pocket-cockpit.' },
+    { startMs: 500,   endMs: 2000,  text: 'APEX Mobile — the pocket-cockpit.' },
     { startMs: 2000,  endMs: 3500,  text: 'Maritime risk surfaces in real time.' },
     { startMs: 3500,  endMs: 5000,  text: 'Cross-domain correlation links exposure across the portfolio.' },
     { startMs: 5000,  endMs: 10000, text: 'Human approval mandatory before consequential action.' },

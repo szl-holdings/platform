@@ -127,7 +127,7 @@ function AgentTopology() {
     { name: 'Guardian', x: 85, y: 40, active: true },
     { name: 'Counsel', x: 15, y: 70, active: true },
     { name: 'Oracle', x: 50, y: 70, active: true },
-    { name: 'DOMAINE', x: 85, y: 70, active: true },
+    { name: 'Terra', x: 85, y: 70, active: true },
     { name: 'MirrorEval', x: 50, y: 95, active: true },
   ];
 

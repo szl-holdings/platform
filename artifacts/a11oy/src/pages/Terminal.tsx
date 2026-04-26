@@ -107,7 +107,7 @@ const COMMANDS: Record<string, (args: string[]) => string[]> = {
     '  [active  ] op-counsel   Counsel Sentinel        prism-counsel',
     '  [active  ] op-pipeline  Pipeline Oracle         lyte-revenue',
     '  [active  ] op-guardian  Guardian                aegis-defense',
-    '  [active  ] op-terra     DOMAINE Analyst           terra-real-estate',
+    '  [active  ] op-terra     Terra Analyst           terra-real-estate',
     '  [active  ] op-watchdog  Fabric Watchdog         alloy-core',
   ],
   pce: () => {

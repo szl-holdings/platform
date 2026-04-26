@@ -17,7 +17,7 @@ const MAX_RETRIES = 5;
 const POLL_INTERVAL_MS = 5000;
 
 // Additional queue storage keys used by existing operational flows
-// (mobile-shared sync engine, CORTEX approvals, defense tradecraft).
+// (mobile-shared sync engine, APEX approvals, defense tradecraft).
 // The banner and flush watch all of them so users see the real total.
 const LEGACY_QUEUE_KEYS = [
   'mobile-shared:offline-mutation-queue',

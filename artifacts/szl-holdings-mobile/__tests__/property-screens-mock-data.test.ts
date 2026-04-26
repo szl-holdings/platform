@@ -1,7 +1,7 @@
 /**
  * Task #1424 — Property screens mock data ↔ interface contract
  *
- * Two CORTEX property screens render local mock arrays as a fallback when
+ * Two APEX property screens render local mock arrays as a fallback when
  * the API has no data. If those arrays drift from their TypeScript
  * interfaces, the screens silently render blank tiles (missing address,
  * percentComplete, applicantName, annualIncome, etc.).

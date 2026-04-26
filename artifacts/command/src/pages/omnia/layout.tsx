@@ -118,10 +118,10 @@ export function OmniaLayout({ title, subtitle, children }: OmniaLayoutProps) {
             </div>
             {[
               { href: '/', label: 'Holdings', accent: '#c9b787' },
-              { href: '/aegis', label: 'PARAGON', accent: '#ef4444' },
-              { href: '/sentra', label: 'TENAX', accent: '#22c55e' },
-              { href: '/terra', label: 'DOMAINE', accent: '#22c55e' },
-              { href: '/vessels', label: 'SEXTANT', accent: '#0ea5e9' },
+              { href: '/aegis', label: 'Aegis', accent: '#ef4444' },
+              { href: '/sentra', label: 'Sentra', accent: '#22c55e' },
+              { href: '/terra', label: 'Terra', accent: '#22c55e' },
+              { href: '/vessels', label: 'Vessels', accent: '#0ea5e9' },
               { href: '/counsel', label: 'Counsel', accent: '#8b5cf6' },
               { href: '/a11oy', label: 'A11oy', accent: '#c9b787' },
             ].map((app) => (

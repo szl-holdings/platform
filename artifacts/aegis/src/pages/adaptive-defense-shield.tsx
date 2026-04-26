@@ -55,7 +55,7 @@ const SEED_DECISIONS: PolicyDecision[] = [
     id: 'pd2',
     timestamp: new Date(Date.now() - 18000),
     agent: 'IT Sentinel',
-    domain: 'PARAGON Operations',
+    domain: 'Aegis Operations',
     action: 'Write auto-remediation script to production server',
     actionType: 'external_api',
     decision: 'escalated',
@@ -154,7 +154,7 @@ const SEED_DECISIONS: PolicyDecision[] = [
     id: 'pd10',
     timestamp: new Date(Date.now() - 275000),
     agent: 'IT Sentinel',
-    domain: 'PARAGON Operations',
+    domain: 'Aegis Operations',
     action: 'Read all client device inventories across Aegis Operations accounts',
     actionType: 'data_access',
     decision: 'permitted',
@@ -176,7 +176,7 @@ function generateDecision(): PolicyDecision {
   ];
   const domains = [
     'Vessels',
-    'PARAGON Operations',
+    'Aegis Operations',
     'Terra',
     'Counsel',
     'Aegis',

@@ -53,7 +53,7 @@ interface CrossDomainTwin {
   summary: string;
 }
 
-interface FirestormIncident {
+interface AegisIncident {
   id: number;
   title: string;
   severity: string;
@@ -62,12 +62,12 @@ interface FirestormIncident {
 }
 
 const DOMAIN_CONFIG: Record<Domain, { label: string; color: string; icon: typeof Globe }> = {
-  aegis: { label: "PARAGON"— Defense', color: '#ef4444', icon: Shield },
-  terra: { label: "DOMAINE — Real Estate", color: '#10b981', icon: Globe },
+  aegis: { label: "Aegis"— Defense', color: '#ef4444', icon: Shield },
+  terra: { label: "Terra — Real Estate", color: '#10b981', icon: Globe },
   vessels: { label: 'Vessels — Maritime', color: '#06b6d4', icon: Network },
   alloy: { label: 'Counsel — Execution', color: '#4B8BDB', icon: Zap },
   prism: { label: 'Prism — Counsel', color: '#f59e0b', icon: Globe },
-  lyte: { label: "KORA — AIOps", color: '#d4a054', icon: Activity },
+  lyte: { label: "Lyte — AIOps", color: '#d4a054', icon: Activity },
 };
 
 const STATE_CONFIG: Record<
@@ -97,7 +97,7 @@ const STATE_CONFIG: Record<
 const SEED_TWINS: CrossDomainTwin[] = [
   {
     id: 'tw-aeg-001',
-    name: 'PARAGON Posture Twin',
+    name: 'Aegis Posture Twin',
     domain: 'aegis',
     state: 'degraded',
     driftScore: 28,
@@ -109,7 +109,7 @@ const SEED_TWINS: CrossDomainTwin[] = [
   },
   {
     id: 'tw-aeg-002',
-    name: 'PARAGON OT/ICS Twin',
+    name: 'Aegis OT/ICS Twin',
     domain: 'aegis',
     state: 'awaiting_approval',
     driftScore: 18,
@@ -326,8 +326,8 @@ function useTwinSyncStatuses(twinIds: string[]) {
   });
 }
 
-function useFirestormIncidents() {
-  return useStandardQuery<FirestormIncident[]>({
+function useAegisIncidents() {
+  return useStandardQuery<AegisIncident[]>({
     queryKey: ['command-firestorm-incidents'],
     queryFn: () =>
       fetch('/api/firestorm/incidents')
@@ -356,7 +356,7 @@ export function AtlasRuntimePage() {
     data: incidentData,
     isLoading: loadingIncidents,
     refetch: refetchIncidents,
-  } = useFirestormIncidents();
+  } = useAegisIncidents();
 
   const seedTwinIds = useMemo(() => SEED_TWINS.map((t) => t.id), []);
   const {
@@ -399,7 +399,7 @@ export function AtlasRuntimePage() {
       const liveState: TwinState = criticalIncidents.length >= 3 ? 'degraded' : merged.state;
       const liveSummary =
         openIncidents.length > 0 && merged.id === 'tw-aeg-001'
-          ? `${openIncidents.length} open incident${openIncidents.length !== 1 ? 's' : ''} — ${criticalIncidents.length} critical — live from Firestorm`
+          ? `${openIncidents.length} open incident${openIncidents.length !== 1 ? 's' : ''} — ${criticalIncidents.length} critical — live from Aegis`
           : merged.summary;
       merged = {
         ...merged,
@@ -576,7 +576,7 @@ export function AtlasRuntimePage() {
         >
           <Activity className="w-3 h-3 shrink-0" style={{ color: '#ef4444' }} />
           <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            Firestorm live feed:{' '}
+            Aegis live feed:{' '}
             <span className="font-bold font-mono" style={{ color: '#ef4444' }}>
               {openIncidents.length}
             </span>{' '}
@@ -587,7 +587,7 @@ export function AtlasRuntimePage() {
             >
               {criticalIncidents.length}
             </span>{' '}
-            critical — PARAGON twins updated
+            critical — Aegis twins updated
           </span>
           <span className="ml-auto text-[9px] font-mono" style={{ color: 'rgba(255,255,255,0.2)' }}>
             {lastRefresh.toLocaleTimeString()}

@@ -23,9 +23,9 @@ const ACCENT = giProductAccent.holdings;
 const AMBER = palette.high;
 const RED = palette.critical;
 
-const CORTEX_QUEUE_KEY = 'cortex:approval-offline-queue';
-const CORTEX_COMMENT_QUEUE_KEY = 'cortex:approval-comment-offline-queue';
-const CORTEX_ESCALATION_QUEUE_KEY = 'cortex:approval-escalation-offline-queue';
+const APEX_QUEUE_KEY = 'cortex:approval-offline-queue';
+const APEX_COMMENT_QUEUE_KEY = 'cortex:approval-comment-offline-queue';
+const APEX_ESCALATION_QUEUE_KEY = 'cortex:approval-escalation-offline-queue';
 const TRADECRAFT_QUEUE_KEY = 'defense:tradecraft-offline-queue';
 const SHARED_QUEUE_KEY = 'mobile-shared:offline-mutation-queue';
 const SHARED_CONFLICTS_KEY = 'mobile-shared:offline-conflicts';
@@ -40,7 +40,7 @@ export interface UnifiedQueuedItem {
   timestamp: number;
 }
 
-interface CortexQueued {
+interface APEXQueued {
   approvalId: number;
   approvalTitle: string;
   decision: 'approved' | 'rejected' | 'revised';
@@ -48,7 +48,7 @@ interface CortexQueued {
   queuedAt: string;
 }
 
-interface CortexCommentQueued {
+interface APEXCommentQueued {
   id: string;
   approvalId: number;
   approvalTitle: string;
@@ -56,7 +56,7 @@ interface CortexCommentQueued {
   queuedAt: string;
 }
 
-interface CortexEscalationQueued {
+interface APEXEscalationQueued {
   id: string;
   approvalId: number;
   approvalTitle: string;
@@ -142,9 +142,9 @@ function relative(ts: number): string {
 
 export async function loadAllQueued(): Promise<UnifiedQueuedItem[]> {
   const [cortex, cortexComments, cortexEscalations, defense, shared] = await Promise.all([
-    readJson<CortexQueued[]>(CORTEX_QUEUE_KEY, []),
-    readJson<CortexCommentQueued[]>(CORTEX_COMMENT_QUEUE_KEY, []),
-    readJson<CortexEscalationQueued[]>(CORTEX_ESCALATION_QUEUE_KEY, []),
+    readJson<APEXQueued[]>(APEX_QUEUE_KEY, []),
+    readJson<APEXCommentQueued[]>(APEX_COMMENT_QUEUE_KEY, []),
+    readJson<APEXEscalationQueued[]>(APEX_ESCALATION_QUEUE_KEY, []),
     readJson<DefenseQueued[]>(TRADECRAFT_QUEUE_KEY, []),
     readJson<SharedQueued[]>(SHARED_QUEUE_KEY, []),
   ]);
@@ -233,7 +233,7 @@ async function bumpSharedRetry(sharedId: string): Promise<boolean> {
 async function retryItem(item: UnifiedQueuedItem): Promise<{ ok: boolean; reason?: string }> {
   if (item.source === 'cortex') {
     const approvalId = Number(item.id.split(':')[1]);
-    const queue = await readJson<CortexQueued[]>(CORTEX_QUEUE_KEY, []);
+    const queue = await readJson<APEXQueued[]>(APEX_QUEUE_KEY, []);
     const entry = queue.find((q) => q.approvalId === approvalId);
     if (!entry) return { ok: false, reason: 'Queued entry not found.' };
     try {
@@ -243,7 +243,7 @@ async function retryItem(item: UnifiedQueuedItem): Promise<{ ok: boolean; reason
       });
       if (!res.ok) return { ok: false, reason: `Server returned ${res.status}` };
       await writeJson(
-        CORTEX_QUEUE_KEY,
+        APEX_QUEUE_KEY,
         queue.filter((q) => q.approvalId !== approvalId),
       );
       return { ok: true };
@@ -254,7 +254,7 @@ async function retryItem(item: UnifiedQueuedItem): Promise<{ ok: boolean; reason
 
   if (item.source === 'cortex-comment') {
     const commentId = item.id.split(':').slice(1).join(':');
-    const queue = await readJson<CortexCommentQueued[]>(CORTEX_COMMENT_QUEUE_KEY, []);
+    const queue = await readJson<APEXCommentQueued[]>(APEX_COMMENT_QUEUE_KEY, []);
     const entry = queue.find((q) => q.id === commentId);
     if (!entry) return { ok: false, reason: 'Queued entry not found.' };
     try {
@@ -264,7 +264,7 @@ async function retryItem(item: UnifiedQueuedItem): Promise<{ ok: boolean; reason
       });
       if (!res.ok) return { ok: false, reason: `Server returned ${res.status}` };
       await writeJson(
-        CORTEX_COMMENT_QUEUE_KEY,
+        APEX_COMMENT_QUEUE_KEY,
         queue.filter((q) => q.id !== commentId),
       );
       return { ok: true };
@@ -275,7 +275,7 @@ async function retryItem(item: UnifiedQueuedItem): Promise<{ ok: boolean; reason
 
   if (item.source === 'cortex-escalation') {
     const escalationId = item.id.split(':').slice(1).join(':');
-    const queue = await readJson<CortexEscalationQueued[]>(CORTEX_ESCALATION_QUEUE_KEY, []);
+    const queue = await readJson<APEXEscalationQueued[]>(APEX_ESCALATION_QUEUE_KEY, []);
     const entry = queue.find((q) => q.id === escalationId);
     if (!entry) return { ok: false, reason: 'Queued entry not found.' };
     try {
@@ -285,7 +285,7 @@ async function retryItem(item: UnifiedQueuedItem): Promise<{ ok: boolean; reason
       });
       if (!res.ok) return { ok: false, reason: `Server returned ${res.status}` };
       await writeJson(
-        CORTEX_ESCALATION_QUEUE_KEY,
+        APEX_ESCALATION_QUEUE_KEY,
         queue.filter((q) => q.id !== escalationId),
       );
       return { ok: true };
@@ -439,23 +439,23 @@ function previewValue(value: unknown, max = 80): string {
 async function discardItem(item: UnifiedQueuedItem): Promise<void> {
   if (item.source === 'cortex') {
     const approvalId = Number(item.id.split(':')[1]);
-    const queue = await readJson<CortexQueued[]>(CORTEX_QUEUE_KEY, []);
+    const queue = await readJson<APEXQueued[]>(APEX_QUEUE_KEY, []);
     await writeJson(
-      CORTEX_QUEUE_KEY,
+      APEX_QUEUE_KEY,
       queue.filter((q) => q.approvalId !== approvalId),
     );
   } else if (item.source === 'cortex-comment') {
     const commentId = item.id.split(':').slice(1).join(':');
-    const queue = await readJson<CortexCommentQueued[]>(CORTEX_COMMENT_QUEUE_KEY, []);
+    const queue = await readJson<APEXCommentQueued[]>(APEX_COMMENT_QUEUE_KEY, []);
     await writeJson(
-      CORTEX_COMMENT_QUEUE_KEY,
+      APEX_COMMENT_QUEUE_KEY,
       queue.filter((q) => q.id !== commentId),
     );
   } else if (item.source === 'cortex-escalation') {
     const escalationId = item.id.split(':').slice(1).join(':');
-    const queue = await readJson<CortexEscalationQueued[]>(CORTEX_ESCALATION_QUEUE_KEY, []);
+    const queue = await readJson<APEXEscalationQueued[]>(APEX_ESCALATION_QUEUE_KEY, []);
     await writeJson(
-      CORTEX_ESCALATION_QUEUE_KEY,
+      APEX_ESCALATION_QUEUE_KEY,
       queue.filter((q) => q.id !== escalationId),
     );
   } else if (item.source === 'defense') {

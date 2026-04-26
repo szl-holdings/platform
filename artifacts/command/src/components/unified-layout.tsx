@@ -105,7 +105,7 @@ const STRATEGY_NAV: NavGroup[] = [
       { href: '/strategy/digital-twins', label: 'Digital Twin Registry', icon: Cpu },
       { href: '/strategy/worldline-registry', label: 'Worldline Registry', icon: GitBranch },
       { href: '/vessels/atlas-runtime', label: 'Vessels ATLAS Runtime', icon: Satellite, external: true },
-      { href: '/terra/atlas-runtime', label: 'DOMAINE ATLAS Runtime', icon: Map, external: true },
+      { href: '/terra/atlas-runtime', label: 'Terra ATLAS Runtime', icon: Map, external: true },
     ],
   },
   {
@@ -784,9 +784,9 @@ function UnifiedLayoutInner({
           </div>
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
             {[
-              { label: "PARAGON", href: '/aegis/' },
-              { label: 'DOMAINE', href: '/terra/' },
-              { label: 'SEXTANT', href: '/vessels/' },
+              { label: "Aegis", href: '/aegis/' },
+              { label: 'Terra', href: '/terra/' },
+              { label: 'Vessels', href: '/vessels/' },
               { label: 'Counsel', href: '/counsel/' },
             ].map((p) => (
               <a

@@ -8,7 +8,7 @@
  *
  * • `CatalogSearchEngine` — extended index that handles both ToolManifest records and
  *   free-form skill entries via indexTools()/indexSkills() API.
- *   Used by the NEXUS catalog-search bridge tool and the API catalog-search route.
+ *   Used by the PRAXIS catalog-search bridge tool and the API catalog-search route.
  *
  * Both use BM25 (Robertson-Sparck Jones, b=0.75). `CatalogSearch` uses k1=1.2 with
  * stop-word filtering; `CatalogSearchEngine` uses k1=1.5 (TREC default).

@@ -1,12 +1,12 @@
 /**
- * NexusMcpServer — Official SDK Foundation + SZL Governance Layer
+ * PRAXISMcpServer — Official SDK Foundation + SZL Governance Layer
  *
  * Wraps the official @modelcontextprotocol/sdk McpServer with the SZL
  * innovation layer: Guardian policy evaluation, proof chain audit writes,
  * tenant isolation, role enforcement, and all 2025 spec capabilities
  * (Sampling, Elicitation, Tasks, Apps, Instructions, Discovery, Roots).
  *
- * All SZL MCP surfaces instantiate NexusMcpServer instead of the raw SDK
+ * All SZL MCP surfaces instantiate PRAXISMcpServer instead of the raw SDK
  * McpServer. The wrapper is transparent to downstream consumers — the same
  * tool registration API, the same transport connect API, the same hook
  * interface — while injecting governance at every interaction boundary.
@@ -84,7 +84,7 @@ export function errorContent(message: string, details?: unknown): ToolContent {
 
 // ─── Capability Config ────────────────────────────────────────────────────────
 
-export interface NexusMcpServerConfig {
+export interface PRAXISMcpServerConfig {
   name: string;
   version: string;
 
@@ -133,7 +133,7 @@ export interface NexusMcpServerConfig {
 
 // ─── Task Registry ────────────────────────────────────────────────────────────
 
-export interface NexusTask {
+export interface PRAXISTask {
   taskId: string;
   toolName: string;
   substateRunId?: string;
@@ -147,7 +147,7 @@ export interface NexusTask {
 
 // ─── App Registry ─────────────────────────────────────────────────────────────
 
-export interface NexusApp {
+export interface PRAXISApp {
   appId: string;
   domain: string;
   title: string;
@@ -162,17 +162,17 @@ export type DiscoveryEventType =
   | 'resources/list_changed'
   | 'prompts/list_changed';
 
-// ─── NexusMcpServer ───────────────────────────────────────────────────────────
+// ─── PRAXISMcpServer ───────────────────────────────────────────────────────────
 
-export class NexusMcpServer {
+export class PRAXISMcpServer {
   private readonly _sdk: McpServer;
-  private readonly _config: NexusMcpServerConfig;
-  private readonly _tasks = new Map<string, NexusTask>();
-  private readonly _apps = new Map<string, NexusApp>();
+  private readonly _config: PRAXISMcpServerConfig;
+  private readonly _tasks = new Map<string, PRAXISTask>();
+  private readonly _apps = new Map<string, PRAXISApp>();
   private readonly _discoveryBus = new EventEmitter();
   private readonly _externalNotifyListeners = new Set<(type: DiscoveryEventType) => void>();
 
-  constructor(config: NexusMcpServerConfig) {
+  constructor(config: PRAXISMcpServerConfig) {
     this._config = config;
 
     const capabilities: Record<string, unknown> = {
@@ -241,7 +241,7 @@ export class NexusMcpServer {
     handler: (args: z.infer<z.ZodObject<T>>, ctx: TenantContext) => Promise<{ content: ToolContent; isError?: boolean }>,
   ): void {
     const self = this;
-    // Cast to bypass generic inference — NexusMcpServer provides its own type-safe wrapper generics
+    // Cast to bypass generic inference — PRAXISMcpServer provides its own type-safe wrapper generics
     const sdkRegister = this._sdk.registerTool.bind(this._sdk) as (
       name: string,
       config: { description: string; inputSchema: ZodRawShape },
@@ -409,7 +409,7 @@ export class NexusMcpServer {
         // Detect if the handler returned a pre-formed CallToolResult (has a
         // content[] array) and pass it through verbatim, preserving any _meta
         // structured metadata the gateway may have attached. This allows
-        // higher-level handlers (e.g. the NEXUS governance layer in
+        // higher-level handlers (e.g. the PRAXIS governance layer in
         // nexus-gateway-server.ts) to produce first-class MCP metadata fields
         // without having them re-serialized into a single text blob.
         if (
@@ -739,10 +739,10 @@ export class NexusMcpServer {
     toolName: string;
     substateRunId?: string;
     progressToken?: string | number;
-  }): NexusTask {
+  }): PRAXISTask {
     const taskId = randomUUID();
     const now = new Date().toISOString();
-    const task: NexusTask = {
+    const task: PRAXISTask = {
       taskId,
       toolName: params.toolName,
       substateRunId: params.substateRunId,
@@ -797,12 +797,12 @@ export class NexusMcpServer {
   }
 
   /** Get task by ID */
-  getTask(taskId: string): NexusTask | undefined {
+  getTask(taskId: string): PRAXISTask | undefined {
     return this._tasks.get(taskId);
   }
 
   /** List all active tasks */
-  listTasks(): NexusTask[] {
+  listTasks(): PRAXISTask[] {
     return [...this._tasks.values()];
   }
 
@@ -812,17 +812,17 @@ export class NexusMcpServer {
    * Register a domain App — a lightweight interactive HTML micro-dashboard
    * rendered inline by MCP clients that support the Apps capability.
    */
-  registerApp(app: NexusApp): void {
+  registerApp(app: PRAXISApp): void {
     this._apps.set(app.appId, app);
   }
 
   /** Get registered App by ID */
-  getApp(appId: string): NexusApp | undefined {
+  getApp(appId: string): PRAXISApp | undefined {
     return this._apps.get(appId);
   }
 
   /** List all registered Apps */
-  listApps(): NexusApp[] {
+  listApps(): PRAXISApp[] {
     return [...this._apps.values()];
   }
 

@@ -289,7 +289,7 @@ const SEED_CHANGES: TwinChange[] = [
       'SG misconfiguration remediated post-approval. Drift score reset to Δ4%. Worldline re-merged to WL-ALPHA.',
     driftDelta: 4,
     worldline: 'WL-ALPHA',
-    actor: 'PARAGON Remediation Engine',
+    actor: 'Aegis Remediation Engine',
   },
 ];
 

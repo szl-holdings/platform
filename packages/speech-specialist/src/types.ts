@@ -130,7 +130,7 @@ export interface DiarizationResult {
 /**
  * Executive Briefing Audio Render Request
  *
- * Used by Lyte, Command Portal, and CORTEX to request an audio render
+ * Used by Lyte, Command Portal, and APEX to request an audio render
  * of a structured executive briefing. The specialist converts the brief
  * to natural speech and returns an audio blob URL + metadata.
  */

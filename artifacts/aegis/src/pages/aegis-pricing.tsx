@@ -65,7 +65,7 @@ const tiers = [
     cta: 'Contact Sales',
     highlight: false,
     features: [
-      'Full PARAGON platform — all workspaces',
+      'Full Aegis platform — all workspaces',
       'AI Intelligence Labs access',
       'Custom AI security models',
       'Classified threat feed integration',
@@ -107,7 +107,7 @@ export default function AegisPricingPage() {
             >
               <Shield className="w-3.5 h-3.5" style={{ color: ACCENT }} />
             </div>
-            <span className="text-sm font-semibold tracking-tight text-white">PARAGON</span>
+            <span className="text-sm font-semibold tracking-tight text-white">Aegis</span>
           </a>
           <a href="/aegis/" className="text-[12px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
             ← Back to Platform

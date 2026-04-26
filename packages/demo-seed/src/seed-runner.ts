@@ -773,7 +773,7 @@ async function seedMaritimeNarrative() {
     .onConflictDoNothing({ target: alloyArtifacts.externalId });
 }
 
-// ─── Narrative 4: Legal / Compliance / PRISM Counsel ─────────────────────────
+// ─── Narrative 4: Legal / Compliance / Counsel ─────────────────────────
 
 async function seedLegalNarrative() {
 

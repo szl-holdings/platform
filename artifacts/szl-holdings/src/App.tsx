@@ -64,14 +64,14 @@ const PilotPrismCounselPage = lazy(() => import("@/pages/pilot-prism-counsel"));
 const PilotTerraPage = lazy(() => import("@/pages/pilot-terra"));
 const PilotVesselsPage = lazy(() => import("@/pages/pilot-vessels"));
 const PilotAegisPage = lazy(() => import("@/pages/pilot-aegis"));
-const NexusCommandPage = lazy(() => import("@/pages/nexus-command"));
-const NexusExplorerPage = lazy(() => import("@/pages/nexus-explorer"));
+const PRAXISCommandPage = lazy(() => import("@/pages/nexus-command"));
+const PRAXISExplorerPage = lazy(() => import("@/pages/nexus-explorer"));
 const DigitalTwinSimulatorPage = lazy(() => import("@/pages/digital-twin-simulator"));
 const ControlTowerPage = lazy(() => import("@/pages/control-tower"));
 const BusinessStatePage = lazy(() => import("@/pages/business-state"));
 const IntelligenceFabricPage = lazy(() => import("@/pages/intelligence-fabric"));
 const GovernedCockpitPage = lazy(() => import("@/pages/governed-cockpit"));
-const CortexIntelligenceHubPage = lazy(() => import("@/pages/cortex-intelligence-hub"));
+const APEXIntelligenceHubPage = lazy(() => import("@/pages/cortex-intelligence-hub"));
 const AnalystWorkspacePage = lazy(() => import("@/pages/analyst-workspace"));
 const OracleBriefingPage = lazy(() => import("@/pages/oracle-briefing"));
 const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
@@ -120,7 +120,7 @@ const SupportSubmitPage = lazy(() => import("@/pages/support-submit"));
 const SupportTicketsPage = lazy(() => import("@/pages/support-tickets"));
 const SupportTicketDetailPage = lazy(() => import("@/pages/support-ticket-detail"));
 const AdminDataRetentionPage = lazy(() => import("@/pages/admin-data-retention"));
-const NexusMcpAdminPage = lazy(() => import("@/pages/nexus-mcp-admin"));
+const PRAXISMcpAdminPage = lazy(() => import("@/pages/nexus-mcp-admin"));
 
 // New platform-repositioning pages
 const DecisioningCommandPage = lazy(() => import("@/pages/decisioning-command"));
@@ -1138,7 +1138,7 @@ function App() {
 
             {/* ── Intelligence Fabric ── */}
             <Route path="/intelligence/cortex">
-              <RequireAuth><Suspense fallback={<PageLoader />}><CortexIntelligenceHubPage /></Suspense></RequireAuth>
+              <RequireAuth><Suspense fallback={<PageLoader />}><APEXIntelligenceHubPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/intelligence/fabric">
               <RequireAuth><Suspense fallback={<PageLoader />}><IntelligenceFabricPage /></Suspense></RequireAuth>
@@ -1149,7 +1149,7 @@ function App() {
 
             {/* ── Admin routes ── */}
             <Route path="/nexus/explorer">
-              <RequireAuth><Suspense fallback={<PageLoader />}><NexusExplorerPage /></Suspense></RequireAuth>
+              <RequireAuth><Suspense fallback={<PageLoader />}><PRAXISExplorerPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/digital-twin">
               <RequireAuth><Suspense fallback={<PageLoader />}><DigitalTwinSimulatorPage /></Suspense></RequireAuth>
@@ -1158,7 +1158,7 @@ function App() {
               <RequireAuth><Suspense fallback={<PageLoader />}><OracleBriefingPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/nexus">
-              <RequireAuth><Suspense fallback={<PageLoader />}><NexusCommandPage /></Suspense></RequireAuth>
+              <RequireAuth><Suspense fallback={<PageLoader />}><PRAXISCommandPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/control-tower">
               <RequireAuth><Suspense fallback={<PageLoader />}><ControlTowerPage /></Suspense></RequireAuth>
@@ -1200,7 +1200,7 @@ function App() {
               <RequireAuth><Suspense fallback={<PageLoader />}><AdminDataRetentionPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/admin/nexus-mcp">
-              <RequireAuth><RequireAdmin><Suspense fallback={<PageLoader />}><NexusMcpAdminPage /></Suspense></RequireAdmin></RequireAuth>
+              <RequireAuth><RequireAdmin><Suspense fallback={<PageLoader />}><PRAXISMcpAdminPage /></Suspense></RequireAdmin></RequireAuth>
             </Route>
             <Route path="/admin/growth-command">
               <RequireAuth><RequireAdmin><Suspense fallback={<PageLoader />}><AdminGrowthCommandPage /></Suspense></RequireAdmin></RequireAuth>

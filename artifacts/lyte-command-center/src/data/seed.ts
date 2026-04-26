@@ -1314,7 +1314,7 @@ export const evidenceItems: EvidenceItem[] = [
     source: 'Pipeline Analytics',
     value: '31% (was 84% — 53pp decline over 47 days)',
     detail:
-      "KORA's motion model computed close probability decline from 84% at deal entry (2026-02-28) to 31% at detection (2026-04-14). Decline rate: 1.13pp/day. Comparable deals at <35% probability after 45d stall have a 60% historical loss rate.",
+      "Lyte's motion model computed close probability decline from 84% at deal entry (2026-02-28) to 31% at detection (2026-04-14). Decline rate: 1.13pp/day. Comparable deals at <35% probability after 45d stall have a 60% historical loss rate.",
     linkedEntityId: 'lyte-opp-vantex-001',
     linkedEntityType: 'opportunity',
     linkedEntityLabel: 'Vantex Acquisition — Q2 Close',

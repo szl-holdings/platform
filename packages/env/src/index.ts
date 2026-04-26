@@ -289,7 +289,7 @@ export const envSchema = z.object({
   IP_HASH_SALT: optionalStr,
   SERVICE_ROLE_KEY: optionalStr,
 
-  // ── Mobile (Expo / CORTEX) ───────────────────────────────────────────────
+  // ── Mobile (Expo / APEX) ───────────────────────────────────────────────
   EXPO_PUBLIC_API_URL: optionalUrl,
   EXPO_PUBLIC_API_BASE_URL: optionalUrl,
   EXPO_PUBLIC_ISSUER_URL: optionalUrl,

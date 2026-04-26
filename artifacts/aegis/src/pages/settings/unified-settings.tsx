@@ -52,7 +52,7 @@ function AccountPanel() {
   const user = data?.user;
 
   return (
-    <SettingsSectionPanel title="Account" description="Your profile on the PARAGON MSP platform">
+    <SettingsSectionPanel title="Account" description="Your profile on the Aegis MSP platform">
       <SettingsCard title="Profile">
         <SettingsRow label="Display Name">
           <p className="text-sm">{user?.name ?? '—'}</p>
@@ -272,13 +272,13 @@ function BillingPanel() {
   return (
     <SettingsSectionPanel
       title="Billing"
-      description="Subscription, plan, and usage billing for your PARAGON MSP account"
+      description="Subscription, plan, and usage billing for your Aegis MSP account"
     >
       <SettingsCard title="Current Plan">
         <SettingsRow label="Plan">
           <div className="flex items-center gap-2">
             <Building className="w-4 h-4 text-[#8a8a8a]" />
-            <span className="text-sm">Managed via the PARAGON platform portal</span>
+            <span className="text-sm">Managed via the Aegis platform portal</span>
           </div>
         </SettingsRow>
         <SettingsRow label="Billing Portal">
@@ -289,7 +289,7 @@ function BillingPanel() {
       </SettingsCard>
       <div className="mt-4 p-3 rounded-lg bg-[#8a8a8a]/5 border border-indigo-500/15">
         <p className="text-xs text-[#8a8a8a]/70">
-          Billing changes and invoices are managed through the PARAGON platform admin panel.
+          Billing changes and invoices are managed through the Aegis platform admin panel.
           Contact your platform administrator for billing assistance.
         </p>
       </div>
@@ -517,7 +517,7 @@ export default function AegisUnifiedSettings() {
             'audit',
           ]}
           accentColor={AEGIS_ACCENT}
-          appName="PARAGON MSP"
+          appName="Aegis MSP"
         >
           {panels[activeSection] ?? (
             <div className="p-6 text-sm text-muted-foreground">

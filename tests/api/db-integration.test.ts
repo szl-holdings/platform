@@ -452,8 +452,8 @@ describe("DB Integration — Lyte domain", () => {
   });
 });
 
-// ── Domain: Aegis / Firestorm ─────────────────────────────────────────────────
-describe("DB Integration — Aegis / Firestorm domain", () => {
+// ── Domain: Aegis / Aegis ─────────────────────────────────────────────────
+describe("DB Integration — Aegis / Aegis domain", () => {
   let app: express.Express;
   let tempAssessmentId: number | undefined;
 
@@ -584,7 +584,7 @@ describe("DB Integration — Aegis / Firestorm domain", () => {
   });
 });
 
-// ── Domain: PRISM Counsel — REMOVED (Task #2696, routes archived) ────────────
+// ── Domain: Counsel — REMOVED (Task #2696, routes archived) ────────────
 
 // ── Domain: Terra ─────────────────────────────────────────────────────────────
 describe("DB Integration — Terra (Real Estate) domain", () => {

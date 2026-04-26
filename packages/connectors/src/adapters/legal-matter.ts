@@ -2,7 +2,7 @@
  * Legal Matter Demo Adapter
  *
  * Synthetic legal signals: matter deadlines, retainer alerts,
- * and billing milestone events for PRISM Counsel.
+ * and billing milestone events for Counsel.
  */
 
 import type { Signal, SignalInput } from "@workspace/ontology/signal";

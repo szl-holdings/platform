@@ -1,6 +1,6 @@
 {
   "app": "cortex",
-  "name": "CORTEX — Unified Command",
+  "name": "APEX — Unified Command",
   "generatedAt": "2026-04-18T00:00:00.000Z",
   "instructions": {
     "step1": "Run: npx expo start --web  (or start the Expo workflow in Replit)",
@@ -19,7 +19,7 @@
       "notes": "iPhone 15 Pro Max / 14 Plus",
       "screens": [
         "Command Feed — cross-domain live signals and domain health cards",
-        "CORTEX Intelligence — fusion signals, cognitive runtime grid",
+        "APEX Intelligence — fusion signals, cognitive runtime grid",
         "Portfolio Investor — quarterly letters, cap table, strategic priorities",
         "Portfolio Analytics — MRR, ARR, customer growth, plan distribution",
         "Fleet — vessel list with status, speed, ETA"
@@ -36,7 +36,7 @@
       "notes": "iPhone 11 Pro Max / XS Max",
       "screens": [
         "Command Feed — cross-domain live signals and domain health cards",
-        "CORTEX Intelligence — fusion signals, cognitive runtime grid",
+        "APEX Intelligence — fusion signals, cognitive runtime grid",
         "Portfolio Investor — quarterly letters, cap table, strategic priorities",
         "Portfolio Analytics — MRR, ARR, customer growth, plan distribution",
         "Fleet — vessel list with status, speed, ETA"
@@ -53,7 +53,7 @@
       "notes": "iPhone 8 Plus",
       "screens": [
         "Command Feed — cross-domain live signals and domain health cards",
-        "CORTEX Intelligence — fusion signals, cognitive runtime grid",
+        "APEX Intelligence — fusion signals, cognitive runtime grid",
         "Portfolio Investor — quarterly letters, cap table, strategic priorities",
         "Portfolio Analytics — MRR, ARR, customer growth, plan distribution",
         "Fleet — vessel list with status, speed, ETA"
@@ -70,7 +70,7 @@
       "notes": "iPad Pro 12.9\" 3rd gen+. Note: app is portrait-only.",
       "screens": [
         "Command Feed — cross-domain live signals and domain health cards",
-        "CORTEX Intelligence — fusion signals, cognitive runtime grid",
+        "APEX Intelligence — fusion signals, cognitive runtime grid",
         "Portfolio Investor — quarterly letters, cap table, strategic priorities",
         "Portfolio Analytics — MRR, ARR, customer growth, plan distribution",
         "Fleet — vessel list with status, speed, ETA"
@@ -89,7 +89,7 @@
       "notes": "Standard Android phone",
       "screens": [
         "Command Feed — cross-domain live signals and domain health cards",
-        "CORTEX Intelligence — fusion signals, cognitive runtime grid",
+        "APEX Intelligence — fusion signals, cognitive runtime grid",
         "Portfolio Investor — quarterly letters, cap table, strategic priorities",
         "Portfolio Analytics — MRR, ARR, customer growth, plan distribution",
         "Fleet — vessel list with status, speed, ETA"
@@ -106,7 +106,7 @@
       "notes": "7-inch tablet",
       "screens": [
         "Command Feed — cross-domain live signals and domain health cards",
-        "CORTEX Intelligence — fusion signals, cognitive runtime grid",
+        "APEX Intelligence — fusion signals, cognitive runtime grid",
         "Portfolio Investor — quarterly letters, cap table, strategic priorities",
         "Portfolio Analytics — MRR, ARR, customer growth, plan distribution",
         "Fleet — vessel list with status, speed, ETA"

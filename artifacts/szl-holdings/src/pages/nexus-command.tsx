@@ -701,7 +701,7 @@ function SectionHeader({
   );
 }
 
-export default function NexusCommandPage() {
+export default function PRAXISCommandPage() {
   const [now, setNow] = useState(new Date());
   useEffect(() => {
     document.title = 'PRAXIS Command — SZL Holdings';

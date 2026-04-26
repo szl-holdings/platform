@@ -113,7 +113,7 @@ const STATIC_TIMELINE: CrisisEvent[] = [
     detail:
       'Neural explorer had flagged pattern 8 minutes before SIEM alert. APT29 C2 beacon on INC-2846 linked.',
     severity: 'high',
-    source: 'PARAGON Labs · AI',
+    source: 'Aegis Labs · AI',
     confirmed: true,
   },
   {
@@ -954,7 +954,7 @@ export default function CitadelWarRoom() {
               {drillsLoading && (
                 <div className="flex items-center gap-2 text-xs py-4" style={{ color: DS.text.muted }}>
                   <div className="w-3.5 h-3.5 border-2 border-[#f5f5f5]/40 border-t-red-400 rounded-full animate-spin" />
-                  Loading drill scenarios from Firestorm…
+                  Loading drill scenarios from Aegis…
                 </div>
               )}
 

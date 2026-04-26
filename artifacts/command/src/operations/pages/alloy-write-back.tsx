@@ -49,7 +49,7 @@ const GATE_ITEMS: WriteBackItem[] = [
     description:
       'Approved Q2 pricing revision will be written to the charter rate system. This action is irreversible without a full rollback workflow.',
     target: 'Charter Rate System',
-    pack: 'SEXTANT',
+    pack: 'Vessels',
     packColor: '#38bdf8',
     status: 'pending',
     requestedBy: 'Fleet Ops',
@@ -65,7 +65,7 @@ const GATE_ITEMS: WriteBackItem[] = [
     description:
       'Full asset valuation dataset export for external auditor. Contains appraisal values, income data, and cap rates for 14 assets.',
     target: 'Secure Auditor Portal',
-    pack: 'DOMAINE',
+    pack: 'Terra',
     packColor: '#a07848',
     status: 'pending',
     requestedBy: 'Finance',
@@ -81,7 +81,7 @@ const GATE_ITEMS: WriteBackItem[] = [
     description:
       'Asset valuation workflow completed. Results will overwrite existing NAV records in the asset management system.',
     target: 'Asset Management System',
-    pack: 'DOMAINE',
+    pack: 'Terra',
     packColor: '#a07848',
     status: 'approved',
     requestedBy: 'Finance',
@@ -93,11 +93,11 @@ const GATE_ITEMS: WriteBackItem[] = [
   {
     id: 'GW-1033',
     type: 'export',
-    title: 'PARAGON — Security posture export for board',
+    title: 'Aegis — Security posture export for board',
     description:
       'Board-level security posture summary export. Sanitized for external distribution, no operational details included.',
     target: 'Board Reporting Package',
-    pack: 'PARAGON',
+    pack: 'Aegis',
     packColor: '#4f6ef7',
     status: 'approved',
     requestedBy: 'Lisa Monroe',

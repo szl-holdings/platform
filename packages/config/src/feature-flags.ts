@@ -65,8 +65,8 @@ export const FEATURE_FLAGS: Record<string, FeatureFlag> = {
     enabledFor: ['demo'],
     notes: 'Demo mode only; shows role-based view switching.',
   },
-  NEXUS_PUBLIC_ACCESS: {
-    id: 'NEXUS_PUBLIC_ACCESS',
+  PRAXIS_PUBLIC_ACCESS: {
+    id: 'PRAXIS_PUBLIC_ACCESS',
     description: 'Allow unauthenticated access to PRAXIS mockup-sandbox preview.',
     enabledFor: [],
     notes:

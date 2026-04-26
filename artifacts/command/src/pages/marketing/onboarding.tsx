@@ -53,26 +53,26 @@ const DEFAULT_STATE: OnboardingState = {
 const PLATFORMS = [
   {
     id: 'aegis',
-    name: 'PARAGON',
+    name: 'Aegis',
     icon: Shield,
     desc: 'Defense & Intelligence Command',
     color: '#3b82f6',
   },
   {
     id: 'vessels',
-    name: 'SEXTANT',
+    name: 'Vessels',
     icon: Anchor,
     desc: 'Maritime Fleet Management',
     color: '#0ea5e9',
   },
   {
     id: 'terra',
-    name: 'DOMAINE',
+    name: 'Terra',
     icon: Building2,
     desc: 'Real Estate Intelligence',
     color: '#40856a',
   },
-  { id: 'lyte', name: 'KORA', icon: Activity, desc: 'AIOps & Autonomous Ops', color: '#d4a054' },
+  { id: 'lyte', name: 'Lyte', icon: Activity, desc: 'AIOps & Autonomous Ops', color: '#d4a054' },
   {
     id: 'prism',
     name: 'Counsel',

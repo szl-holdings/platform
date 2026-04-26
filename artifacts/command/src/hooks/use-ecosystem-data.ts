@@ -8,7 +8,7 @@ const DEMO_SNAPSHOT: EcosystemSnapshot = {
   domains: [
     {
       id: 'aegis',
-      name: 'PARAGON',
+      name: 'Aegis',
       icon: 'shield',
       color: '#6366f1',
       score: 91,
@@ -23,7 +23,7 @@ const DEMO_SNAPSHOT: EcosystemSnapshot = {
     },
     {
       id: 'vessels',
-      name: 'SEXTANT',
+      name: 'Vessels',
       icon: 'ship',
       color: '#0ea5e9',
       score: 87,
@@ -38,7 +38,7 @@ const DEMO_SNAPSHOT: EcosystemSnapshot = {
     },
     {
       id: 'terra',
-      name: 'DOMAINE',
+      name: 'Terra',
       icon: 'map',
       color: '#10b981',
       score: 79,
@@ -53,7 +53,7 @@ const DEMO_SNAPSHOT: EcosystemSnapshot = {
     },
     {
       id: 'lyte',
-      name: 'KORA',
+      name: 'Lyte',
       icon: 'zap',
       color: '#d4a054',
       score: 82,
@@ -171,8 +171,8 @@ const DEMO_SNAPSHOT: EcosystemSnapshot = {
       title: 'Cross-domain correlation',
       severity: 'info',
       description:
-        'PRISM detected correlation between PARAGON perimeter events and Vessels port congestion in Singapore.',
-      entities: ['PARAGON-Zone-4', 'SG-Port-Authority'],
+        'PRISM detected correlation between Aegis perimeter events and Vessels port congestion in Singapore.',
+      entities: ['Aegis-Zone-4', 'SG-Port-Authority'],
       action: 'Investigate pattern',
     },
   ],

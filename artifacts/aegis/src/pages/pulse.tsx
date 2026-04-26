@@ -223,7 +223,7 @@ export default function AegisPulse() {
       <ParticleField accentColor="#c9b787" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <PulseHeader
-          title="PARAGON Threat Intelligence"
+          title="Aegis Threat Intelligence"
           subtitle={`SOC operations — ${totalThreats.toLocaleString()} threats processed · 6 defense agents active`}
           accentColor="#c9b787"
         />
@@ -460,7 +460,7 @@ export default function AegisPulse() {
             className="text-[9px] uppercase tracking-[0.25em]"
             style={{ color: 'rgba(255,255,255,0.08)' }}
           >
-            PARAGON — Unified Defense & Intelligence Command — Threat Intelligence
+            Aegis — Unified Defense & Intelligence Command — Threat Intelligence
           </p>
         </div>
       </div>

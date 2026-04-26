@@ -573,7 +573,7 @@ function generateBriefingHTML(
 <body>
 <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:4px;">
   <div>
-    <p style="font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:#888; margin-bottom:2px;">KORA — DECISION TWIN BRIEFING</p>
+    <p style="font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:#888; margin-bottom:2px;">Lyte — DECISION TWIN BRIEFING</p>
     <h1>${sig.title}</h1>
   </div>
   <div style="text-align:right;">

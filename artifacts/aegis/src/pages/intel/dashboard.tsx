@@ -452,7 +452,7 @@ const collaborativeReport = {
   authors: ['Dr. Chen', 'M. Rodriguez', 'S. Park'],
   highlights: [
     'TITAN v2 achieves 91.8 MMLU — 3.2pts above baseline',
-    'PARAGON lateral collision avoidance: 69.4 nuScenes mAP',
+    'Aegis lateral collision avoidance: 69.4 nuScenes mAP',
     'GPU cost reduced 18% via workload consolidation',
   ],
 };

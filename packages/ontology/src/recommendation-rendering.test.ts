@@ -9,7 +9,7 @@
  *
  * Covered domains / products:
  *   maritime      — Vessels Maritime Intelligence
- *   legal         — PRISM Counsel / Counsel Legal Matter Command
+ *   legal         — Counsel / Counsel Legal Matter Command
  *   security      — Sentra Cyber Resilience Command
  *   finance       — SZL Holdings Treasury / Pulse Executive Briefing
  *   real-estate   — Terra Real Estate Intelligence
@@ -125,7 +125,7 @@ describe('recommendation rendering — maritime (Vessels)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// legal — PRISM Counsel / Counsel Legal Matter Command
+// legal — Counsel / Counsel Legal Matter Command
 // ---------------------------------------------------------------------------
 
 describe('recommendation rendering — legal (Counsel / PRISM)', () => {

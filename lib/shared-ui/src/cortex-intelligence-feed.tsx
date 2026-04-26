@@ -19,7 +19,7 @@ export interface IntelligenceSignal {
   hasActionDrafts?: boolean;
 }
 
-export interface CortexFeedStats {
+export interface APEXFeedStats {
   total: number;
   active: number;
   critical: number;
@@ -27,9 +27,9 @@ export interface CortexFeedStats {
   domainsAffected?: string[];
 }
 
-export interface CortexIntelligenceFeedProps {
+export interface APEXIntelligenceFeedProps {
   signals?: IntelligenceSignal[];
-  stats?: CortexFeedStats;
+  stats?: APEXFeedStats;
   accentColor?: string;
   className?: string;
   maxItems?: number;
@@ -423,7 +423,7 @@ const DOMAIN_FILTERS = [
   { key: 'szl', label: 'Portfolio' },
 ];
 
-export function CortexIntelligenceFeed({
+export function APEXIntelligenceFeed({
   signals = [],
   stats,
   accentColor = '#c9a84c',
@@ -433,7 +433,7 @@ export function CortexIntelligenceFeed({
   onGenerateDrafts,
   onAcknowledge,
   loading,
-}: CortexIntelligenceFeedProps) {
+}: APEXIntelligenceFeedProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [severityFilter, setSeverityFilter] = useState('all');
   const [domainFilter, setDomainFilter] = useState('all');
@@ -610,4 +610,4 @@ export function CortexIntelligenceFeed({
   );
 }
 
-export type { IntelligenceSignal as CortexSignal };
+export type { IntelligenceSignal as APEXSignal };

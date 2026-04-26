@@ -1,7 +1,7 @@
 /**
- * Substrate MCP Gateway — NexusMcpServer Registration
+ * Substrate MCP Gateway — PRAXISMcpServer Registration
  *
- * Creates and configures the NexusMcpServer instance that backs the Substrate
+ * Creates and configures the PRAXISMcpServer instance that backs the Substrate
  * MCP Gateway. All substrate tools plus server-discovery tools are registered
  * here using the official SDK's typed registration API.
  *
@@ -11,7 +11,7 @@
  */
 
 import { z } from 'zod';
-import { NexusMcpServer, buildTenantInstructions, createDomainApps, type TenantContext } from '@workspace/nexus-mcp';
+import { PRAXISMcpServer, buildTenantInstructions, createDomainApps, type TenantContext } from '@workspace/nexus-mcp';
 import { getCurrentActorId } from './request-context.js';
 import { GATEWAY_VERSION, SERVER_INFO, SUBSTRATE_RESOURCES, SUBSTRATE_PROMPTS } from './descriptor.js';
 import {
@@ -20,21 +20,21 @@ import {
   handleResourceRead,
   handlePromptGet,
 } from './handlers.js';
-import { buildNexusEnvelopes, setResourceUpdateCallback } from './nexus-fabric.js';
+import { buildPRAXISEnvelopes, setResourceUpdateCallback } from './nexus-fabric.js';
 import { emitToolListChanged, type RunLifecycleEvent } from './run-events.js';
 
-// ─── Singleton NexusMcpServer ─────────────────────────────────────────────────
+// ─── Singleton PRAXISMcpServer ─────────────────────────────────────────────────
 
-let _server: NexusMcpServer | null = null;
+let _server: PRAXISMcpServer | null = null;
 
 /**
- * Return (or create) the singleton NexusMcpServer for the Substrate Gateway.
+ * Return (or create) the singleton PRAXISMcpServer for the Substrate Gateway.
  * Called once at startup by both HTTP and stdio entry points.
  */
-export function getGatewayServer(): NexusMcpServer {
+export function getGatewayServer(): PRAXISMcpServer {
   if (_server) return _server;
 
-  _server = new NexusMcpServer({
+  _server = new PRAXISMcpServer({
     name: SERVER_INFO.name,
     version: GATEWAY_VERSION,
     enableSampling: true,
@@ -87,7 +87,7 @@ export function getGatewayServer(): NexusMcpServer {
         const primaryText = r.contents[0]?.text ?? '';
 
         // Append PRAXIS consciousness + proof envelopes to every resource read
-        const envelopes = buildNexusEnvelopes({
+        const envelopes = buildPRAXISEnvelopes({
           toolName: `resource:${String(uri)}`,
           actor: 'mcp-resource',
           responseText: primaryText,
@@ -135,11 +135,11 @@ export function getGatewayServer(): NexusMcpServer {
 }
 
 /**
- * Register a single substrate tool on the NexusMcpServer, bridging to
+ * Register a single substrate tool on the PRAXISMcpServer, bridging to
  * the existing handleToolCall() dispatcher in handlers.ts.
  */
 function _registerSubstrateTool(
-  server: NexusMcpServer,
+  server: PRAXISMcpServer,
   toolName: string,
   description: string,
   inputSchema: { type: 'object'; properties: Record<string, unknown>; required?: string[]; additionalProperties?: boolean },
@@ -155,7 +155,7 @@ function _registerSubstrateTool(
     const result = await handleToolCall(toolName, args, actorId);
 
     // ── Inject PRAXIS envelopes as a trailing content item ────────────────────
-    // Attach NEXUS governance envelopes to every tool response (including
+    // Attach PRAXIS governance envelopes to every tool response (including
     // agent_delegate). Both a trailing text content block (human-readable) and
     // a first-class _meta structured field (programmatic) are emitted.
     //
@@ -174,7 +174,7 @@ function _registerSubstrateTool(
         }, null, 2),
       };
       // Return a fully-typed CallToolResult with _meta for programmatic clients.
-      // The rawTool passthrough in NexusMcpServer.rawTool() detects content[]
+      // The rawTool passthrough in PRAXISMcpServer.rawTool() detects content[]
       // arrays and preserves _meta without re-serializing to text.
       // Emit _meta with both:
       //   • Canonical flat keys ("x-nexus-consciousness", "x-nexus-proof") for
@@ -202,7 +202,7 @@ function _registerSubstrateTool(
 }
 
 /**
- * Notify the gateway's NexusMcpServer that the tool list has changed.
+ * Notify the gateway's PRAXISMcpServer that the tool list has changed.
  * Call this after enable_server / disable_server to push discovery
  * notifications to connected clients.
  */

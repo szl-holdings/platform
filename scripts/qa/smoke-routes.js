@@ -108,7 +108,7 @@ const WEB_DOMAIN_CONFIGS = [
     ],
   },
   {
-    name: 'Aegis / Firestorm',
+    name: 'Aegis / Aegis',
     baseUrl: BASE_URL ? `${BASE_URL}` : AEGIS_URL,
     // Routes use the /aegis/ base path
     routes: [

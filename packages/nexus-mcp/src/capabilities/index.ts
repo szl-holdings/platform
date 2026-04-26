@@ -1,5 +1,5 @@
 /**
- * NEXUS MCP — 2025 Spec Capability Definitions
+ * PRAXIS MCP — 2025 Spec Capability Definitions
  *
  * Re-exports the standard SZL domain App registrations and
  * helper factories for Sampling, Elicitation, Tasks, and Roots.

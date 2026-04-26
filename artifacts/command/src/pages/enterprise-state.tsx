@@ -322,10 +322,10 @@ const FG_MUT = 'var(--color-fg-muted)';
 
 // ── Domain config ──────────────────────────────────────────────────────────────
 const DOMAINS = {
-  aegis: { name: 'PARAGON', color: '#6366f1' },
-  terra: { name: 'DOMAINE', color: '#4d7c0f' },
-  vessels: { name: 'SEXTANT', color: '#3b82f6' },
-  lyte: { name: 'KORA', color: '#f59e0b' },
+  aegis: { name: 'Aegis', color: '#6366f1' },
+  terra: { name: 'Terra', color: '#4d7c0f' },
+  vessels: { name: 'Vessels', color: '#3b82f6' },
+  lyte: { name: 'Lyte', color: '#f59e0b' },
   prism: { name: 'PRAXIS', color: '#a855f7' },
   carlota: { name: 'Carlota', color: '#c2a55a' },
 } as const;
@@ -423,7 +423,7 @@ const CAUSAL_EVENTS = [
     id: 'e3',
     time: '11:45',
     domain: 'aegis' as DomainKey,
-    title: 'PARAGON Bundle Size Threshold Warning',
+    title: 'Aegis Bundle Size Threshold Warning',
     description:
       'Main bundle grew 8.3% this week (1.24MB → 1.34MB). MITRE ATT&CK module loaded eagerly.',
     severity: 'medium',
@@ -495,7 +495,7 @@ const RECOMMENDATIONS = [
   {
     id: 'r3',
     rank: 3,
-    title: 'Code-Split PARAGON MITRE ATT&CK Module',
+    title: 'Code-Split Aegis MITRE ATT&CK Module',
     domain: 'aegis' as DomainKey,
     impact: 'medium',
     effort: 'medium',
@@ -606,7 +606,7 @@ const HEATMAP_RISKS = [
   },
   {
     id: 'hr3',
-    title: 'PARAGON Bundle Over-Budget',
+    title: 'Aegis Bundle Over-Budget',
     domain: 'aegis' as DomainKey,
     domainColor: '#6366f1',
     probability: 0.6,
@@ -2476,7 +2476,7 @@ function ValueWidgets() {
       breakdown: [
         { label: 'Carlota data pipeline', amount: '$380K', domain: 'carlota' as DomainKey },
         { label: 'Lyte SLA penalties', amount: '$420K', domain: 'lyte' as DomainKey },
-        { label: "PARAGON"bundle degradation', amount: '$280K', domain: 'aegis' as DomainKey },
+        { label: "Aegis"bundle degradation', amount: '$280K', domain: 'aegis' as DomainKey },
       ],
     },
     {

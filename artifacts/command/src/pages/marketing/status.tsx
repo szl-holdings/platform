@@ -59,7 +59,7 @@ const BASELINE_SERVICES: ServiceHealth[] = [
   { name: 'API Gateway', status: 'operational', uptime: '99.99%', responseTimeMs: 42 },
   { name: 'Identity & Auth', status: 'operational', uptime: '99.99%', responseTimeMs: 38 },
   {
-    name: 'PARAGON — Defense Intelligence',
+    name: 'Aegis — Defense Intelligence',
     status: 'operational',
     uptime: '99.98%',
     responseTimeMs: 71,
@@ -83,7 +83,7 @@ const BASELINE_SERVICES: ServiceHealth[] = [
   },
   { name: 'Command Portal', status: 'operational', uptime: '100%', responseTimeMs: 35 },
   {
-    name: 'PARAGON — Defense & Intelligence',
+    name: 'Aegis — Defense & Intelligence',
     status: 'operational',
     uptime: '99.97%',
     responseTimeMs: 76,

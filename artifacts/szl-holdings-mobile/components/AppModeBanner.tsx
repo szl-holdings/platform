@@ -1,5 +1,5 @@
 /**
- * AppModeBanner (React Native) — CORTEX Mobile
+ * AppModeBanner (React Native) — APEX Mobile
  *
  * Reads EXPO_PUBLIC_APP_MODE to show a persistent environment banner.
  *

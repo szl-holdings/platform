@@ -56,7 +56,7 @@ const PLATFORM_NODES = [
   {
     id: 'lyte-core',
     label: 'Command Core',
-    platform: 'KORA',
+    platform: 'Lyte',
     connects: ['signal-bus', 'action-router', 'prism-engine'],
   },
   {
@@ -67,14 +67,14 @@ const PLATFORM_NODES = [
   },
   {
     id: 'firestorm-soc',
-    label: "PARAGON"SOC',
-    platform: 'PARAGON',
+    label: "Aegis"SOC',
+    platform: 'Aegis',
     connects: ['signal-bus', 'threat-db'],
   },
   {
     id: 'terra-lyte',
     label: 'Terra Command',
-    platform: 'DOMAINE',
+    platform: 'Terra',
     connects: ['signal-bus', 'geo-index'],
   },
   {
@@ -90,7 +90,7 @@ const PLATFORM_NODES = [
     platform: 'Counsel',
     connects: ['metrics-store', 'action-router'],
   },
-  { id: 'prism-engine', label: 'PRISM Engine', platform: 'KORA', connects: ['metrics-store'] },
+  { id: 'prism-engine', label: 'PRISM Engine', platform: 'Lyte', connects: ['metrics-store'] },
   { id: 'alert-engine', label: 'Alert Engine', platform: 'Core', connects: ['notification-svc'] },
   {
     id: 'escalation-mgr',
@@ -98,11 +98,11 @@ const PLATFORM_NODES = [
     platform: 'Core',
     connects: ['notification-svc', 'action-router'],
   },
-  { id: 'action-router', label: 'Action Router', platform: 'KORA', connects: [] },
+  { id: 'action-router', label: 'Action Router', platform: 'Lyte', connects: [] },
   { id: 'metrics-store', label: 'Metrics Store', platform: 'Core', connects: [] },
   { id: 'notification-svc', label: 'Notification Svc', platform: 'Core', connects: [] },
-  { id: 'threat-db', label: 'Threat DB', platform: 'PARAGON', connects: [] },
-  { id: 'geo-index', label: 'Geo Index', platform: 'DOMAINE', connects: [] },
+  { id: 'threat-db', label: 'Threat DB', platform: 'Aegis', connects: [] },
+  { id: 'geo-index', label: 'Geo Index', platform: 'Terra', connects: [] },
 ];
 
 const PLATFORM_COLORS: Record<string, string> = {
@@ -111,7 +111,7 @@ const PLATFORM_COLORS: Record<string, string> = {
   FORGE: '#4B8BDB',
   Terra: '#4a90b8',
   Vessels: '#38bdf8',
-  PARAGON: '#c45a4a',
+  Aegis: '#c45a4a',
 };
 
 const HEALTH_COLORS = {
@@ -696,7 +696,7 @@ export default function LivingTopology() {
               <span className="w-2 h-2 rounded-sm" style={{ background: '#4a90b8' }} /> Terra
             </div>
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-sm" style={{ background: '#c45a4a' }} /> PARAGON
+              <span className="w-2 h-2 rounded-sm" style={{ background: '#c45a4a' }} /> Aegis
             </div>
           </div>
         </div>

@@ -32,9 +32,9 @@ async function seed() {
       },
       {
         type: 'achievement',
-        title: 'Firestorm v2.0 Release',
+        title: 'Aegis v2.0 Release',
         content:
-          'Released the second major version of Firestorm — a real-time incident response system processing 10,000+ alerts per minute with 99.99% uptime.',
+          'Released the second major version of Aegis — a real-time incident response system processing 10,000+ alerts per minute with 99.99% uptime.',
         icon: 'Flame',
         date: '2021-01',
         sortOrder: 3,
@@ -243,12 +243,12 @@ async function seed() {
           '40% reduction in fuel costs through optimized routing, 99.99% uptime over 18 months of operation.',
       },
       {
-        title: 'Firestorm: Enterprise Incident Response System',
+        title: 'Aegis: Enterprise Incident Response System',
         slug: 'firestorm-incident-response',
         summary:
           'Developed a high-throughput incident response platform processing 10,000+ alerts per minute with intelligent triage and automated escalation workflows.',
         content:
-          'Firestorm was built to address the challenge of alert fatigue in enterprise security operations centers. The platform ingests alerts from multiple sources (SIEM, IDS, endpoint agents), applies ML-based correlation and deduplication, and presents operators with prioritized incident queues.\n\nThe system architecture uses Apache Kafka for event streaming, a custom rules engine for alert correlation, and a React-based war room dashboard with real-time collaboration features. Automated playbooks handle common incident types, reducing mean time to resolution by 65%.\n\nKey technologies: TypeScript, React, Kafka, Elasticsearch, Python (ML), Kubernetes.',
+          'Aegis was built to address the challenge of alert fatigue in enterprise security operations centers. The platform ingests alerts from multiple sources (SIEM, IDS, endpoint agents), applies ML-based correlation and deduplication, and presents operators with prioritized incident queues.\n\nThe system architecture uses Apache Kafka for event streaming, a custom rules engine for alert correlation, and a React-based war room dashboard with real-time collaboration features. Automated playbooks handle common incident types, reducing mean time to resolution by 65%.\n\nKey technologies: TypeScript, React, Kafka, Elasticsearch, Python (ML), Kubernetes.',
         tags: ['Security', 'Real-Time', 'ML', 'Enterprise'],
         featured: true,
         client: 'Fortune 500 Financial Services',

@@ -1,8 +1,8 @@
 /**
- * CORTEX — Expo Speech TTS Adapter
+ * APEX — Expo Speech TTS Adapter
  *
  * A mobile-native TTSAdapter backed by expo-speech. Implements the same
- * TTSAdapter interface as BrowserWebSpeechTTSAdapter so the CORTEX executive
+ * TTSAdapter interface as BrowserWebSpeechTTSAdapter so the APEX executive
  * briefing path runs through SpeechSpecialist.renderBriefing() rather than
  * calling expo-speech directly.
  *

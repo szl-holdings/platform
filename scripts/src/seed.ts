@@ -683,7 +683,7 @@ async function seed() {
     },
     {
       slug: 'firestorm',
-      name: 'Firestorm Marketing',
+      name: 'Aegis Marketing',
       description: 'Campaign management and lead generation',
       icon: 'Flame',
       color: '#f97316',
@@ -843,7 +843,7 @@ async function seed() {
         status: 'active',
       },
       {
-        name: 'Firestorm Campaign Engine',
+        name: 'Aegis Campaign Engine',
         description: 'Build automated campaign management system',
         status: 'active',
       },
@@ -2035,7 +2035,7 @@ async function seed() {
     },
     {
       workspaceId: lyteWorkspace.id,
-      title: 'Launch Firestorm campaign analytics v2',
+      title: 'Launch Aegis campaign analytics v2',
       description: 'New analytics dashboard ready for production deployment',
       category: 'growth',
       priority: 'high',
@@ -2199,9 +2199,9 @@ async function seed() {
         status: 'pre_production',
       },
       {
-        name: 'Firestorm Product Launch',
-        description: 'Social media campaign assets for Firestorm marketing platform launch',
-        clientName: 'Firestorm Team',
+        name: 'Aegis Product Launch',
+        description: 'Social media campaign assets for Aegis marketing platform launch',
+        clientName: 'Aegis Team',
         type: 'product_launch',
         status: 'review',
       },
@@ -2223,7 +2223,7 @@ async function seed() {
       type: 'video',
       metadata: { resolution: '4K', duration: '45s' },
     },
-    { projectId: dProjects[2].id, name: 'Firestorm UI Screenshots', type: 'image' },
+    { projectId: dProjects[2].id, name: 'Aegis UI Screenshots', type: 'image' },
   ]);
 
   const dCampaigns = await db
@@ -2249,9 +2249,9 @@ async function seed() {
         targetAudience: 'Shipping companies, logistics partners',
       },
       {
-        name: 'Firestorm Product Launch',
-        description: 'Social media campaign assets for Firestorm marketing platform launch',
-        clientName: 'Firestorm Team',
+        name: 'Aegis Product Launch',
+        description: 'Social media campaign assets for Aegis marketing platform launch',
+        clientName: 'Aegis Team',
         status: 'review',
         category: 'product_launch',
         targetAudience: 'Marketing professionals, SMBs',
@@ -2274,7 +2274,7 @@ async function seed() {
         campaignId: dCampaigns[0].id,
         title: 'Brand Story - Episode 1: Origins',
         content:
-          'FADE IN:\n\nEXT. CITY SKYLINE - DAWN\n\nNARRATOR (V.O.)\nEvery great journey begins with a single step. For SZL Holdings, that step was taken in a small office in 2020...\n\nCUT TO:\nINT. MODERN OFFICE - DAY\n\nStephen sits at his desk, multiple monitors displaying code and dashboards.\n\nNARRATOR (V.O.)\nWhat started as a vision to unify technology consulting has grown into a portfolio of innovative solutions...\n\nMONTAGE: Various SZL products in action - Vessels tracking ships, Firestorm campaigns running, Dreamscape creative workflows...',
+          'FADE IN:\n\nEXT. CITY SKYLINE - DAWN\n\nNARRATOR (V.O.)\nEvery great journey begins with a single step. For SZL Holdings, that step was taken in a small office in 2020...\n\nCUT TO:\nINT. MODERN OFFICE - DAY\n\nStephen sits at his desk, multiple monitors displaying code and dashboards.\n\nNARRATOR (V.O.)\nWhat started as a vision to unify technology consulting has grown into a portfolio of innovative solutions...\n\nMONTAGE: Various SZL products in action - Vessels tracking ships, Aegis campaigns running, Dreamscape creative workflows...',
         version: 3,
         status: 'approved',
         notes: 'Final approved version after client feedback',
@@ -2289,9 +2289,9 @@ async function seed() {
       },
       {
         campaignId: dCampaigns[2].id,
-        title: 'Firestorm Launch - 30s Spot',
+        title: 'Aegis Launch - 30s Spot',
         content:
-          'OPEN ON:\nFast-paced montage of marketing dashboards, lead scoring, campaign analytics.\n\nVO: "Your campaigns. Supercharged."\n\nProduct demo footage. Clean UI. Data flowing.\n\nVO: "Firestorm by SZL Holdings. Marketing intelligence, reimagined."\n\nLOGO + CTA',
+          'OPEN ON:\nFast-paced montage of marketing dashboards, lead scoring, campaign analytics.\n\nVO: "Your campaigns. Supercharged."\n\nProduct demo footage. Clean UI. Data flowing.\n\nVO: "Aegis by SZL Holdings. Marketing intelligence, reimagined."\n\nLOGO + CTA',
         version: 2,
         status: 'review',
         notes: 'Pending final voiceover recording',
@@ -2342,10 +2342,10 @@ async function seed() {
     },
     {
       campaignId: dCampaigns[2].id,
-      title: 'Firestorm hero shot',
+      title: 'Aegis hero shot',
       sceneNumber: 1,
       visualDescription:
-        'Screen capture of Firestorm dashboard with animated data. Dark theme with orange accents.',
+        'Screen capture of Aegis dashboard with animated data. Dark theme with orange accents.',
       duration: '5s',
     },
     {
@@ -2379,9 +2379,9 @@ async function seed() {
     },
     {
       campaignId: dCampaigns[2].id,
-      name: 'Firestorm VO - 30s Spot',
+      name: 'Aegis VO - 30s Spot',
       provider: 'placeholder',
-      text: 'Your campaigns. Supercharged. Firestorm by SZL Holdings. Marketing intelligence, reimagined.',
+      text: 'Your campaigns. Supercharged. Aegis by SZL Holdings. Marketing intelligence, reimagined.',
       status: 'pending',
       duration: '8s',
     },
@@ -2414,7 +2414,7 @@ async function seed() {
     },
     {
       campaignId: dCampaigns[2].id,
-      name: 'Firestorm UI Screenshots',
+      name: 'Aegis UI Screenshots',
       type: 'image',
       mimeType: 'image/png',
       fileSize: 3200000,
@@ -3114,7 +3114,7 @@ async function seed() {
       },
       {
         slug: 'firestorm',
-        name: 'Firestorm',
+        name: 'Aegis',
         description: 'AI-powered security simulation and red team platform',
         sector: 'Cybersecurity',
         status: 'active',
@@ -3364,7 +3364,7 @@ async function seed() {
       company: 'EnterpriseCorp',
       subject: 'Partnership Proposal',
       message:
-        "We'd like to explore a strategic partnership around your Vessels and Firestorm platforms.",
+        "We'd like to explore a strategic partnership around your Vessels and Aegis platforms.",
       status: 'replied',
     },
   ]);

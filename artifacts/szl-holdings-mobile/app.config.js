@@ -1,10 +1,10 @@
 module.exports = {
   expo: {
-    name: 'CORTEX',
+    name: 'APEX',
     slug: 'szl-holdings-mobile',
     version: '2.0.0',
     description:
-      'CORTEX Unified Command — The SZL Holdings ecosystem command app. Defense, Fleet, Properties, Operations, Advisory, Portfolio, and Founder workspaces in a single secured command surface.',
+      'APEX Unified Command — The SZL Holdings ecosystem command app. Defense, Fleet, Properties, Operations, Advisory, Portfolio, and Founder workspaces in a single secured command surface.',
     runtimeVersion: {
       policy: 'appVersion',
     },
@@ -24,11 +24,11 @@ module.exports = {
       buildNumber: '1',
       googleServicesFile: process.env.GOOGLE_SERVICE_INFO_PLIST ?? './GoogleService-Info.plist',
       infoPlist: {
-        NSFaceIDUsageDescription: 'CORTEX uses Face ID for secure command access.',
+        NSFaceIDUsageDescription: 'APEX uses Face ID for secure command access.',
         NSCameraUsageDescription:
-          'CORTEX uses your camera for AR property intelligence overlays and document scanning.',
+          'APEX uses your camera for AR property intelligence overlays and document scanning.',
         NSUserNotificationUsageDescription:
-          'CORTEX sends cross-domain alerts, signals, and executive briefings.',
+          'APEX sends cross-domain alerts, signals, and executive briefings.',
         ITSAppUsesNonExemptEncryption: false,
       },
       privacyManifests: {
@@ -80,7 +80,7 @@ module.exports = {
       [
         'expo-local-authentication',
         {
-          faceIDPermission: 'Allow CORTEX to use Face ID for secure command access.',
+          faceIDPermission: 'Allow APEX to use Face ID for secure command access.',
         },
       ],
       [

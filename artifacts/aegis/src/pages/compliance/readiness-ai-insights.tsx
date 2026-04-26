@@ -139,7 +139,7 @@ export default function ReadinessAIInsights() {
         <button
           onClick={() =>
             setSummaryText(
-              'Based on current readiness metrics, PARAGON demonstrates strong positioning across cybersecurity (82%) and cloud infrastructure (78%) dimensions. Key areas for improvement include AI/ML maturity (+12 potential points) and data governance frameworks. Recommended actions: 1) Accelerate Zero Trust implementation, 2) Expand AI training programs, 3) Implement automated compliance scanning.',
+              'Based on current readiness metrics, Aegis demonstrates strong positioning across cybersecurity (82%) and cloud infrastructure (78%) dimensions. Key areas for improvement include AI/ML maturity (+12 potential points) and data governance frameworks. Recommended actions: 1) Accelerate Zero Trust implementation, 2) Expand AI training programs, 3) Implement automated compliance scanning.',
             )
           }
           className="text-xs px-4 py-2 rounded-lg bg-[#c9b787]/10 text-[#c9b787] border border-[#c9b787]/20 hover:bg-[#c9b787]/20 transition-all flex items-center gap-2"

@@ -14,7 +14,7 @@ export default function LyteBillingPage() {
       <BillingAccount
         accentColor={ACCENT}
         pricingUrl="/pricing"
-        productName="KORA"
+        productName="Lyte"
       />
     </div>
   );

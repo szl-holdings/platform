@@ -281,7 +281,7 @@ describe('HTTP tenancy — Terra domain', () => {
   });
 });
 
-// ── PRISM Counsel — tenant isolation ─────────────────────────────────────────
+// ── Counsel — tenant isolation ─────────────────────────────────────────
 
 describe('HTTP tenancy — Counsel domain', () => {
   it('Org A user accesses own PRISM matters → 200', async () => {
@@ -303,16 +303,16 @@ describe('HTTP tenancy — Counsel domain', () => {
   });
 });
 
-// ── Firestorm — tenant isolation ──────────────────────────────────────────────
+// ── Aegis — tenant isolation ──────────────────────────────────────────────
 
-describe('HTTP tenancy — Firestorm domain', () => {
-  it('Org A user accesses own Firestorm findings → 200', async () => {
+describe('HTTP tenancy — Aegis domain', () => {
+  it('Org A user accesses own Aegis findings → 200', async () => {
     const app = buildDomainApp('firestorm', orgA);
     const res = await request(app).get('/firestorm/findings');
     expect(res.status).toBe(200);
   });
 
-  it('Org B user forging Org A orgSlug in Firestorm → 403', async () => {
+  it('Org B user forging Org A orgSlug in Aegis → 403', async () => {
     const app = buildOrgSlugApp('firestorm', orgB);
     const res = await request(app).get('/firestorm/org-a/findings');
     expect(res.status).toBe(403);

@@ -21,7 +21,7 @@
       "category": "Core"
     },
     {
-      "name": "KORA — Decision Intelligence",
+      "name": "Lyte — Decision Intelligence",
       "slug": "lyte-command-center",
       "previewPath": "/lyte/",
       "description": "AI-powered decision intelligence and analytics hub",
@@ -29,7 +29,7 @@
       "category": "Intelligence"
     },
     {
-      "name": "LUMINA — AI Executive Briefing",
+      "name": "Pulse — AI Executive Briefing",
       "slug": "pulse",
       "previewPath": "/pulse/",
       "description": "Automated executive briefing and signal aggregation",
@@ -37,7 +37,7 @@
       "category": "Intelligence"
     },
     {
-      "name": "SEXTANT — Maritime Intelligence",
+      "name": "Vessels — Maritime Intelligence",
       "slug": "vessels",
       "previewPath": "/vessels/",
       "description": "Real-time maritime fleet tracking and weather risk intelligence",
@@ -45,7 +45,7 @@
       "category": "Domain"
     },
     {
-      "name": "TENAX — Cyber Resilience Command",
+      "name": "Sentra — Cyber Resilience Command",
       "slug": "sentra",
       "previewPath": "/sentra/",
       "description": "Security operations, threat detection, and compliance management",
@@ -53,7 +53,7 @@
       "category": "Domain"
     },
     {
-      "name": "DOMAINE — Real Estate Intelligence",
+      "name": "Terra — Real Estate Intelligence",
       "slug": "terra",
       "previewPath": "/terra/",
       "description": "Real estate market intelligence and investment analytics",
@@ -69,7 +69,7 @@
       "category": "Domain"
     },
     {
-      "name": "PARAGON — Defense & Intelligence Command",
+      "name": "Aegis — Defense & Intelligence Command",
       "slug": "aegis",
       "previewPath": "/aegis/",
       "description": "Defense readiness, threat intelligence, and operations command",

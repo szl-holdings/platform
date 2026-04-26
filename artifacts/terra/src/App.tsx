@@ -400,7 +400,7 @@ function PrivateApp({
   setCmdOpen: (v: boolean) => void;
 }) {
   return (
-    <PowerUserProvider shortcuts={terraShortcuts} appName="DOMAINE" accentColor={TERRA_ACCENT}>
+    <PowerUserProvider shortcuts={terraShortcuts} appName="Terra" accentColor={TERRA_ACCENT}>
       <div className="flex flex-col h-screen" style={{ background: '#0a0c10' }}>
         <EcosystemNav
           currentAppId="terra"
@@ -419,7 +419,7 @@ function PrivateApp({
         open={cmdOpen}
         onClose={() => setCmdOpen(false)}
         commands={terraCommands}
-        appName="DOMAINE"
+        appName="Terra"
         accentColor={TERRA_ACCENT}
       />
     </PowerUserProvider>
@@ -521,7 +521,7 @@ function AppContent({
   }
 
   return (
-    <PrivateAppGuard appName="DOMAINE" accentColor={TERRA_ACCENT}>
+    <PrivateAppGuard appName="Terra" accentColor={TERRA_ACCENT}>
       <PrivateApp cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
     </PrivateAppGuard>
   );

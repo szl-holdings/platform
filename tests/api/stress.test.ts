@@ -105,7 +105,7 @@ vi.mock("@szl-holdings/ai-engine/domain-embedding-hooks", () => ({
 
 vi.mock("@szl-holdings/ai-engine", () => ({
   validateAndBuildDecision: vi.fn().mockResolvedValue({ id: "test-decision" }),
-  fusionCortex: { crossDomainSignals: vi.fn().mockResolvedValue([]) },
+  fusionAPEX: { crossDomainSignals: vi.fn().mockResolvedValue([]) },
   ontologyEngine: { entityGraph: vi.fn().mockResolvedValue({ nodes: [], edges: [] }) },
 }));
 
@@ -293,7 +293,7 @@ describe.skipIf(!HAS_DB)("Stress — Concurrent GET requests across domain route
     expect(p95).toBeLessThan(MAX_ACCEPTABLE_P95_MS);
   });
 
-  // PRISM Counsel stress test removed in Task #2696 (routes archived).
+  // Counsel stress test removed in Task #2696 (routes archived).
 
   it(`handles ${STRESS_CONCURRENCY} concurrent GET /terra/market-intelligence requests without errors`, async () => {
     const app = buildStressApp();

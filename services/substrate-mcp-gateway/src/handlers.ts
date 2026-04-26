@@ -37,7 +37,7 @@ import {
 import { z } from 'zod';
 import { type McpToolDescriptor, SUBSTRATE_TOOLS } from './descriptor.js';
 import {
-  buildNexusEnvelopes,
+  buildPRAXISEnvelopes,
   delegateToAgent,
   getActiveCorrelations,
   getAgentRegistry,
@@ -50,14 +50,14 @@ import {
   lookupProof,
   getRecentProofs,
   startConvergenceBridge,
-  type NexusSignalDomain,
+  type PRAXISSignalDomain,
 } from './nexus-fabric.js';
 import { getMcpApp } from './mcp-apps/apps.js';
 import { emitRunEvent, emitToolListChanged } from './run-events.js';
 import { getCurrentTenantId } from './request-context.js';
 import { getAllRuns, getRun, storeRun, updateRun } from './run-store.js';
 
-// ─── Start NEXUS Convergence Bridge ──────────────────────────────────────────
+// ─── Start PRAXIS Convergence Bridge ──────────────────────────────────────────
 // Subscribe to Prism Bus cross-domain correlation events and buffer them
 // for the nexus://convergence/* MCP resources.
 startConvergenceBridge();
@@ -329,7 +329,7 @@ serverRegistry.register({
 serverRegistry.register({
   serverId: 'szl-counsel-evidence',
   name: 'Counsel Evidence MCP',
-  description: 'Legal matter evidence packaging, contract analysis, and regulatory document tools for PRISM Counsel.',
+  description: 'Legal matter evidence packaging, contract analysis, and regulatory document tools for Counsel.',
   capabilitiesSummary: 'legal, documents, evidence, contracts, compliance',
   endpoint: 'internal://counsel-evidence',
 });
@@ -533,14 +533,14 @@ export async function handleToolCall(
   toolName: string,
   rawParams: unknown,
   actorId: string,
-): Promise<ToolResult & { _nexus?: import('./nexus-fabric.js').NexusEnvelopes }> {
+): Promise<ToolResult & { _nexus?: import('./nexus-fabric.js').PRAXISEnvelopes }> {
   const t0 = Date.now();
   let success = false;
   try {
     const result = await dispatchTool(toolName, rawParams, actorId);
     success = !result.isError;
 
-    // ── Attach NEXUS consciousness + proof envelopes ──────────────────────────
+    // ── Attach PRAXIS consciousness + proof envelopes ──────────────────────────
     // Every tool response gets metacognitive confidence metadata and a
     // cryptographic proof envelope. We build the envelopes from the serialized
     // response text so the proof hash covers the actual content delivered to the
@@ -551,14 +551,14 @@ export async function handleToolCall(
     // Pass the effective tenantId from the request context so evaluateCovenant()
     // can use the real tenant authorization decision instead of keyword heuristics alone.
     const effectiveTenant = getCurrentTenantId();
-    const nexusEnvelopes = buildNexusEnvelopes({
+    const nexusEnvelopes = buildPRAXISEnvelopes({
       toolName,
       actor: actorId,
       responseText,
       isError: result.isError ?? false,
       tenantId: effectiveTenant,
     });
-    (result as ToolResult & { _nexus?: import('./nexus-fabric.js').NexusEnvelopes })._nexus =
+    (result as ToolResult & { _nexus?: import('./nexus-fabric.js').PRAXISEnvelopes })._nexus =
       nexusEnvelopes;
 
     return result;
@@ -1412,7 +1412,7 @@ export async function handleResourceRead(
         ],
       };
     }
-    // ── NEXUS Convergence Resources ─────────────────────────────────────────────
+    // ── PRAXIS Convergence Resources ─────────────────────────────────────────────
     case 'nexus://convergence/active': {
       const correlations = getActiveCorrelations();
       return {
@@ -1448,13 +1448,13 @@ export async function handleResourceRead(
       };
     }
 
-    // ── NEXUS Signal Stream Resources ────────────────────────────────────────────
+    // ── PRAXIS Signal Stream Resources ────────────────────────────────────────────
     case 'nexus://signals/maritime':
     case 'nexus://signals/security':
     case 'nexus://signals/realestate':
     case 'nexus://signals/legal':
     case 'nexus://signals/all': {
-      const domainPart = uri.replace('nexus://signals/', '') as NexusSignalDomain;
+      const domainPart = uri.replace('nexus://signals/', '') as PRAXISSignalDomain;
       const signals = await getSignalsForDomain(domainPart, effectiveTenantId);
       return {
         contents: [{
@@ -1473,7 +1473,7 @@ export async function handleResourceRead(
       };
     }
 
-    // ── NEXUS Agent Registry Resource ─────────────────────────────────────────────
+    // ── PRAXIS Agent Registry Resource ─────────────────────────────────────────────
     case 'nexus://agents/registry': {
       const agents = getAgentRegistry();
       return {
@@ -1492,7 +1492,7 @@ export async function handleResourceRead(
       };
     }
 
-    // ── NEXUS Evidence Graph Resources ────────────────────────────────────────────
+    // ── PRAXIS Evidence Graph Resources ────────────────────────────────────────────
     case 'nexus://evidence/graph': {
       const items = getEvidenceGraph();
       return {
@@ -1529,7 +1529,7 @@ export async function handleResourceRead(
       };
     }
 
-    // ── NEXUS Proof Verification Resource ─────────────────────────────────────────
+    // ── PRAXIS Proof Verification Resource ─────────────────────────────────────────
     case 'nexus://proof/recent': {
       const proofs = getRecentProofs(20);
       return {
@@ -1559,12 +1559,12 @@ export async function handleResourceRead(
         const parts = remainder.split('/');
         if (parts.length === 2) {
           const [domainPart, uriTenantId] = parts as [string, string];
-          const validDomains: NexusSignalDomain[] = ['maritime', 'security', 'realestate', 'legal', 'all'];
-          if (validDomains.includes(domainPart as NexusSignalDomain)) {
+          const validDomains: PRAXISSignalDomain[] = ['maritime', 'security', 'realestate', 'legal', 'all'];
+          if (validDomains.includes(domainPart as PRAXISSignalDomain)) {
             // Use the request-context tenant as the authoritative tenant for access control;
             // fall back to the URI tenant segment for subscription-driven reads.
             const resolvedTenant = effectiveTenantId ?? uriTenantId;
-            const signals = await getSignalsForDomain(domainPart as NexusSignalDomain, resolvedTenant);
+            const signals = await getSignalsForDomain(domainPart as PRAXISSignalDomain, resolvedTenant);
             return {
               contents: [{
                 uri,

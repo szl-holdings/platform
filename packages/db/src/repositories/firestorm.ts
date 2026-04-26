@@ -1,5 +1,5 @@
 /**
- * Firestorm / Aegis security operations repository — typed query helpers.
+ * Aegis / Aegis security operations repository — typed query helpers.
  * Uses @szl-holdings/db as the single relational entry point.
  */
 import { db } from '@szl-holdings/db';

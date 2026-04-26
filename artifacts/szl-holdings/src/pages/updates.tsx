@@ -7,7 +7,7 @@ const updates = [
     tag: 'Platform',
     headline: 'Navigation & page architecture overhaul across all portfolio apps',
     summary:
-      'Completed a comprehensive restructuring of the site architecture across SZL Holdings, Vessels, SZL Cortex, Carlota Jo, and Stephen Site. Each app now has clean marketing navigation, proper route structures, and expanded page coverage matching the master payload spec.',
+      'Completed a comprehensive restructuring of the site architecture across SZL Holdings, Vessels, SZL APEX, Carlota Jo, and Stephen Site. Each app now has clean marketing navigation, proper route structures, and expanded page coverage matching the master payload spec.',
   },
   {
     date: 'February 2026',

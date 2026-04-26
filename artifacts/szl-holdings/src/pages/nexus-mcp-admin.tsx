@@ -482,7 +482,7 @@ function WorkflowRow({ workflow }: { workflow: GovernedWorkflow }) {
   );
 }
 
-export default function NexusMcpAdminPage() {
+export default function PRAXISMcpAdminPage() {
   const [servers, setServers] = useState<ExternalServer[]>([]);
   const [workflows, setWorkflows] = useState<GovernedWorkflow[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);

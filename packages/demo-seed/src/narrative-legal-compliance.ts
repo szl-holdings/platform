@@ -2,7 +2,7 @@
  * Demo Narrative 4: Legal / Compliance / Matter Command Lens
  *
  * Scenario: Marchetti & Osei LLP — A personal injury matter involving a rideshare
- * accident has stalled. PRISM Counsel detects an insurer-side clock violation,
+ * accident has stalled. Counsel detects an insurer-side clock violation,
  * surfaces a demand readiness gap, generates a legal recommendation, routes it
  * through partner approval, exports the demand packet, and creates a proof chain
  * for every action taken.

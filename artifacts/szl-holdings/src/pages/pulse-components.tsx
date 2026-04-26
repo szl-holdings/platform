@@ -184,7 +184,7 @@ export const AGENT_TYPES = [
   { id: 'vessels-autonomous', domain: 'vessels', name: 'Vessels Fleet', color: '#06b6d4' },
   { id: 'terra-autonomous', domain: 'terra', name: 'Terra Analyst', color: '#10b981' },
   { id: 'lyte-autonomous', domain: 'lyte', name: 'Lyte Ops', color: '#f59e0b' },
-  { id: 'nexus-autonomous', domain: 'nexus', name: 'Nexus Fusion', color: '#ec4899' },
+  { id: 'nexus-autonomous', domain: 'nexus', name: 'PRAXIS Fusion', color: '#ec4899' },
   { id: 'inca-autonomous', domain: 'inca', name: 'Inca Lab', color: '#8b5cf6' },
   { id: 'msp-autonomous', domain: 'msp', name: 'MSP Watchdog', color: '#64748b' },
   { id: 'lexis-autonomous', domain: 'legal', name: 'Lexis Legal', color: '#a855f7' },

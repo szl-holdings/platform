@@ -1,17 +1,17 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { color } from '@szl-holdings/design-system';
-import { type ActionDraft, CortexActionDrafts } from '@szl-holdings/shared-ui/cortex-action-drafts';
+import { type ActionDraft, APEXActionDrafts } from '@szl-holdings/shared-ui/cortex-action-drafts';
 import {
-  CortexEntityGraph,
+  APEXEntityGraph,
   type EntityGraphEdge,
   type EntityGraphNode,
   type SnapshotInfo,
 } from '@szl-holdings/shared-ui/cortex-entity-graph';
 import {
-  CortexIntelligenceFeed,
+  APEXIntelligenceFeed,
   type IntelligenceSignal,
 } from '@szl-holdings/shared-ui/cortex-intelligence-feed';
-import { CortexWhatIf, type WhatIfResult } from '@szl-holdings/shared-ui/cortex-what-if';
+import { APEXWhatIf, type WhatIfResult } from '@szl-holdings/shared-ui/cortex-what-if';
 import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, m } from 'framer-motion';
@@ -134,7 +134,7 @@ const HEALTH_COLORS: Record<string, string> = {
   critical: color.accent.red,
 };
 
-export default function CortexIntelligenceHub() {
+export default function APEXIntelligenceHub() {
   const [activeTab, setActiveTab] = useState<HubTab>('feed');
   const [graphDomain, setGraphDomain] = useState<string | undefined>(undefined);
   const [graphSinceHours, setGraphSinceHours] = useState<number | undefined>(undefined);
@@ -492,7 +492,7 @@ export default function CortexIntelligenceHub() {
             transition={{ duration: 0.2 }}
           >
             {activeTab === 'feed' && (
-              <CortexIntelligenceFeed
+              <APEXIntelligenceFeed
                 signals={signals}
                 stats={stats}
                 accentColor={ACCENT}
@@ -514,7 +514,7 @@ export default function CortexIntelligenceHub() {
                   by domain, entity type, time window, and risk threshold. Click any node to
                   inspect.
                 </p>
-                <CortexEntityGraph
+                <APEXEntityGraph
                   nodes={
                     graphViewMode === 'snapshot'
                       ? (snapshotDetailQuery.data?.snapshot?.nodes ?? [])
@@ -560,7 +560,7 @@ export default function CortexIntelligenceHub() {
                   queues them for your one-click approval. All approvals are persisted with a
                   governance audit trail. No action is taken without human sign-off.
                 </p>
-                <CortexActionDrafts
+                <APEXActionDrafts
                   drafts={draftsQuery.data?.drafts ?? []}
                   pendingCount={pendingCount}
                   accentColor={ACCENT}
@@ -581,7 +581,7 @@ export default function CortexIntelligenceHub() {
                   portfolio value — using the cross-domain entity graph and historical pattern
                   library.
                 </p>
-                <CortexWhatIf accentColor={ACCENT} onQuery={handleWhatIfQuery} />
+                <APEXWhatIf accentColor={ACCENT} onQuery={handleWhatIfQuery} />
               </div>
             )}
 

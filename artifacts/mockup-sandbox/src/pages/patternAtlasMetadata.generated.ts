@@ -550,7 +550,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
       { name: "onCorrelationClick", type: "(correlation: CrossDomainCorrelation) => void", required: false, description: "" },
     ],
   },
-  "CortexActionDrafts": {
+  "APEXActionDrafts": {
     category: "APEX AI",
     status: "stable",
     source: "lib/shared-ui/src/cortex-action-drafts.tsx",
@@ -564,7 +564,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
       { name: "loading", type: "boolean", required: false, description: "" },
     ],
   },
-  "CortexEntityGraph": {
+  "APEXEntityGraph": {
     category: "APEX AI",
     status: "beta",
     source: "lib/shared-ui/src/cortex-entity-graph.tsx",
@@ -593,13 +593,13 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
       { name: "snapshotLoading", type: "boolean", required: false, description: "" },
     ],
   },
-  "CortexIntelligenceFeed": {
+  "APEXIntelligenceFeed": {
     category: "APEX AI",
     status: "stable",
     source: "lib/shared-ui/src/cortex-intelligence-feed.tsx",
     props: [
       { name: "signals", type: "IntelligenceSignal[]", required: false, description: "" },
-      { name: "stats", type: "CortexFeedStats", required: false, description: "" },
+      { name: "stats", type: "APEXFeedStats", required: false, description: "" },
       { name: "accentColor", type: "string", required: false, description: "" },
       { name: "className", type: "string", required: false, description: "" },
       { name: "maxItems", type: "number", required: false, description: "" },
@@ -609,7 +609,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
       { name: "loading", type: "boolean", required: false, description: "" },
     ],
   },
-  "CortexVoice": {
+  "APEXVoice": {
     category: "APEX AI",
     status: "experimental",
     source: "lib/shared-ui/src/cortex-voice.tsx",
@@ -618,10 +618,10 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
       { name: "onClose", type: "() => void", required: true, description: "" },
       { name: "accentColor", type: "string", required: false, description: "" },
       { name: "appName", type: "string", required: false, description: "" },
-      { name: "onQuery", type: "(query: string) => Promise<CortexResult>", required: false, description: "" },
+      { name: "onQuery", type: "(query: string) => Promise<APEXResult>", required: false, description: "" },
     ],
   },
-  "CortexVoiceTrigger": {
+  "APEXVoiceTrigger": {
     category: "APEX AI",
     status: "experimental",
     source: "lib/shared-ui/src/cortex-voice.tsx",
@@ -630,7 +630,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
       { name: "onClick", type: "() => void", required: true, description: "" },
     ],
   },
-  "CortexWhatIf": {
+  "APEXWhatIf": {
     category: "APEX AI",
     status: "beta",
     source: "lib/shared-ui/src/cortex-what-if.tsx",

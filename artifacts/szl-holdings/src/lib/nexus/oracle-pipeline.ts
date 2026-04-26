@@ -1,7 +1,7 @@
 /**
  * ORACLE Intelligence Briefing Pipeline
  * Analyzes cross-domain graph data + anomalies and generates a structured daily brief.
- * This is a deterministic pipeline driven by the NEXUS knowledge graph state.
+ * This is a deterministic pipeline driven by the PRAXIS knowledge graph state.
  */
 
 import { type AnomalyMatch, type AnomalyReport, runAnomalyDetection } from './anomaly-engine';
@@ -271,7 +271,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
         {
           priority: 'today',
           action:
-            'Inform PRISM legal team of NEXUS-discovered cross-network co-investment — assess conflict implications',
+            'Inform PRISM legal team of PRAXIS-discovered cross-network co-investment — assess conflict implications',
           owner: 'Counsel',
           entityIds: entityIdArr,
         },
@@ -405,7 +405,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
         {
           priority: 'this-week',
           action:
-            'Convene cross-domain risk committee — review NEXUS-identified concentrations before Q2 close',
+            'Convene cross-domain risk committee — review PRAXIS-identified concentrations before Q2 close',
           owner: 'SZL Executive',
           entityIds: [],
         },
@@ -474,7 +474,7 @@ export function generateOracleBrief(graph: KnowledgeGraph = KNOWLEDGE_GRAPH): Or
       {
         priority: 'today',
         action:
-          'Brief PRISM counsel on any NEXUS-discovered conflicts affecting active matters — assess disclosure obligations',
+          'Brief PRISM counsel on any PRAXIS-discovered conflicts affecting active matters — assess disclosure obligations',
         owner: 'Counsel',
         entityIds: entityIdArr,
       },

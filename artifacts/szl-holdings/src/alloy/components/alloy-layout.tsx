@@ -197,7 +197,7 @@ const INTELLIGENCE_NAV = [
   { href: '/alloy/browser', label: 'Web Automation', icon: Globe },
 ];
 
-const NEXUS_EXCHANGE_NAV = [
+const PRAXIS_EXCHANGE_NAV = [
   { href: '/alloy/intelligence-exchange', label: 'Intelligence Exchange', icon: BarChart3, badge: 'New' },
 ];
 
@@ -323,7 +323,7 @@ const ALL_NAV_SECTIONS = [
   { items: DOCS_NAV, group: 'Navigate' },
   { items: INTELLIGENCE_NAV, group: 'Navigate' },
   { items: NURO_FORGE_NAV, group: 'Navigate' },
-  { items: NEXUS_EXCHANGE_NAV, group: 'Navigate' },
+  { items: PRAXIS_EXCHANGE_NAV, group: 'Navigate' },
   { items: ENTERPRISE_NAV, group: 'Actions' },
   { items: MCP_NAV, group: 'Actions' },
 ];
@@ -731,7 +731,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             >
               Ecosystem Intelligence
             </div>
-            {NEXUS_EXCHANGE_NAV.map((item) => (
+            {PRAXIS_EXCHANGE_NAV.map((item) => (
               <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
             ))}
 

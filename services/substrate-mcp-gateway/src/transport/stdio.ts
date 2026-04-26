@@ -5,7 +5,7 @@
  * StdioServerTransport. The transport reads from stdin and writes to stdout,
  * following the MCP stdio protocol exactly.
  *
- * The NexusMcpServer instance (shared with the HTTP transport) provides the
+ * The PRAXISMcpServer instance (shared with the HTTP transport) provides the
  * full tool surface plus governance middleware. The SDK transport handles
  * framing, session management, and protocol handshake.
  *
@@ -20,7 +20,7 @@ import { getGatewayServer } from '../nexus-gateway-server.js';
 
 /**
  * Start the stdio MCP transport.
- * Connects the singleton NexusMcpServer to a StdioServerTransport and
+ * Connects the singleton PRAXISMcpServer to a StdioServerTransport and
  * subscribes to tool-list-changed events so the host is notified when
  * enable_server / disable_server changes the active tool set.
  */

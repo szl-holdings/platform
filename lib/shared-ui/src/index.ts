@@ -189,34 +189,34 @@ export {
   type ActionDraftPriority,
   type ActionDraftStatus,
   type ActionDraftType,
-  CortexActionDrafts,
-  type CortexActionDraftsProps,
+  APEXActionDrafts,
+  type APEXActionDraftsProps,
 } from './cortex-action-drafts';
 export {
-  CortexEntityGraph,
-  type CortexEntityGraphProps,
+  APEXEntityGraph,
+  type APEXEntityGraphProps,
   type EntityGraphEdge,
   type EntityGraphMeta,
   type EntityGraphNode,
 } from './cortex-entity-graph';
 export {
-  type CortexFeedStats,
-  CortexIntelligenceFeed,
-  type CortexIntelligenceFeedProps,
-  type CortexSignal,
+  type APEXFeedStats,
+  APEXIntelligenceFeed,
+  type APEXIntelligenceFeedProps,
+  type APEXSignal,
   type IntelligenceSignal,
 } from './cortex-intelligence-feed';
 export {
-  type CortexIntent,
-  type CortexResult,
-  CortexVoice,
-  type CortexVoiceProps,
-  CortexVoiceTrigger,
-  useCortexVoice,
+  type APEXIntent,
+  type APEXResult,
+  APEXVoice,
+  type APEXVoiceProps,
+  APEXVoiceTrigger,
+  useAPEXVoice,
 } from './cortex-voice';
 export {
-  CortexWhatIf,
-  type CortexWhatIfProps,
+  APEXWhatIf,
+  type APEXWhatIfProps,
   type WhatIfCascade,
   type WhatIfResult,
 } from './cortex-what-if';

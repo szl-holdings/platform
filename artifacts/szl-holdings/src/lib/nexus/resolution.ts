@@ -1,5 +1,5 @@
 /**
- * NEXUS Entity Resolution Engine
+ * PRAXIS Entity Resolution Engine
  * Fuzzy name matching, shared identifier resolution, and confidence-scored entity linking.
  */
 

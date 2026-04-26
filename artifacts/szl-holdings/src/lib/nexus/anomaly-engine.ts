@@ -1,5 +1,5 @@
 /**
- * NEXUS Cross-Domain Anomaly Detection Engine
+ * PRAXIS Cross-Domain Anomaly Detection Engine
  * Pattern matching rules and statistical analysis that flag when correlated signals
  * appear across multiple verticals simultaneously.
  */

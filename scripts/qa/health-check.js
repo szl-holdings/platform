@@ -298,9 +298,9 @@ async function probeGraphQL(base, timeout) {
 const DOMAIN_ENDPOINTS = [
   { path: '/api/lyte', name: 'Lyte API' },
   { path: '/api/vessels', name: 'Vessels API' },
-  { path: '/api/firestorm', name: 'Firestorm (Aegis) API' },
+  { path: '/api/firestorm', name: 'Aegis (Aegis) API' },
   { path: '/api/terra', name: 'Terra API' },
-  { path: '/api/prism-counsel', name: 'PRISM Counsel API' },
+  { path: '/api/prism-counsel', name: 'Counsel API' },
   { path: '/api/alloy', name: 'Alloy API' },
   { path: '/api/forge', name: 'Forge Runtime API' },
   { path: '/api/distribution-os', name: 'Distribution OS API' },

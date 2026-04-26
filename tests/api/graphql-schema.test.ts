@@ -215,18 +215,18 @@ vi.mock('../../artifacts/api-server/src/lib/domain-services/carlota-jo/index.js'
 }));
 
 vi.mock('../../artifacts/api-server/src/lib/domain-services/firestorm/index.js', () => ({
-  buildFirestormStorage: vi.fn().mockResolvedValue({
+  buildAegisStorage: vi.fn().mockResolvedValue({
     listIncidents: vi.fn().mockResolvedValue([]),
     listAlerts: vi.fn().mockResolvedValue([]),
     listAssets: vi.fn().mockResolvedValue([]),
     listScenarios: vi.fn().mockResolvedValue([]),
     listFindings: vi.fn().mockResolvedValue([]),
   }),
-  listFirestormIncidents: vi.fn().mockResolvedValue([]),
-  listFirestormAlerts: vi.fn().mockResolvedValue([]),
-  listFirestormAssets: vi.fn().mockResolvedValue([]),
-  listFirestormScenarios: vi.fn().mockResolvedValue([]),
-  listFirestormFindings: vi.fn().mockResolvedValue([]),
+  listAegisIncidents: vi.fn().mockResolvedValue([]),
+  listAegisAlerts: vi.fn().mockResolvedValue([]),
+  listAegisAssets: vi.fn().mockResolvedValue([]),
+  listAegisScenarios: vi.fn().mockResolvedValue([]),
+  listAegisFindings: vi.fn().mockResolvedValue([]),
 }));
 
 // ── Mock: infrastructure (pubsub, WS, events) ─────────────────────────────────
@@ -298,7 +298,7 @@ describe('GraphQL Schema — introspection and type validity', () => {
     expect(typeNames).toContain('Vessel');
     expect(typeNames).toContain('HoldingsVenture');
     expect(typeNames).toContain('LyteIncident');
-    expect(typeNames).toContain('FirestormIncident');
+    expect(typeNames).toContain('AegisIncident');
   });
 
   it('_version query resolves without error', async () => {

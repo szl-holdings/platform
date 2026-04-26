@@ -77,7 +77,7 @@ export interface McpServer {
 const SZL_SERVERS: McpServer[] = [
   {
     namespace: 'com.szlholdings.vessels',
-    displayName: 'SEXTANT Maritime Intelligence',
+    displayName: 'Vessels Maritime Intelligence',
     owner: 'szl-holdings',
     description: 'Real-time maritime fleet intelligence: AIS positions, voyage economics, port risk overlay, weather routing, and sanctions cross-reference. Covers global fleet operations for institutional operators.',
     tier: 'Verified',
@@ -107,7 +107,7 @@ const SZL_SERVERS: McpServer[] = [
   },
   {
     namespace: 'com.szlholdings.sentra',
-    displayName: 'TENAX Cyber Resilience',
+    displayName: 'Sentra Cyber Resilience',
     owner: 'szl-holdings',
     description: 'Enterprise SOC command surface: CVE threat scanning, compliance framework scoring, incident correlation, and real-time alert management with MITRE ATT&CK attribution.',
     tier: 'Verified',
@@ -136,7 +136,7 @@ const SZL_SERVERS: McpServer[] = [
   },
   {
     namespace: 'com.szlholdings.terra',
-    displayName: 'DOMAINE Real Estate Intelligence',
+    displayName: 'Terra Real Estate Intelligence',
     owner: 'szl-holdings',
     description: 'NYC and metro real estate market intelligence: distressed property detection, tax lien analysis, acquisition brief generation, and market momentum scoring.',
     tier: 'Verified',
@@ -159,7 +159,7 @@ const SZL_SERVERS: McpServer[] = [
   },
   {
     namespace: 'com.szlholdings.lyte',
-    displayName: 'KORA Decision Intelligence',
+    displayName: 'Lyte Decision Intelligence',
     owner: 'szl-holdings',
     description: 'Ecosystem-wide health monitoring, decision intelligence, and executive summary generation. Aggregates signals across all SZL portfolio apps into a single coherent operational picture.',
     tier: 'Verified',
@@ -184,7 +184,7 @@ const SZL_SERVERS: McpServer[] = [
   },
   {
     namespace: 'com.szlholdings.pulse',
-    displayName: 'LUMINA AI Executive Briefing',
+    displayName: 'Pulse AI Executive Briefing',
     owner: 'szl-holdings',
     description: 'AI-curated executive intelligence briefing: multi-domain signal aggregation, insight ranking by urgency × novelty, scheduled delivery, and engagement-aware personalization.',
     tier: 'Verified',
@@ -218,7 +218,7 @@ const SZL_SERVERS: McpServer[] = [
     specVersion: '2025-11-25',
     tools: [
       { name: 'counsel_list_matters', description: 'List active legal matters with status and priority.', reversibility: 'read-only' },
-      { name: 'counsel_risk_cross_reference', description: 'Cross-reference open matters against PARAGON threat intel.', reversibility: 'read-only' },
+      { name: 'counsel_risk_cross_reference', description: 'Cross-reference open matters against Aegis threat intel.', reversibility: 'read-only' },
       { name: 'counsel_draft_brief', description: 'Generate legal brief draft from matter evidence.', reversibility: 'reversible-write' },
     ],
     resources: [{ uri: 'counsel://matters/index', name: 'Matter Index', mimeType: 'application/json' }],
@@ -240,7 +240,7 @@ const SZL_SERVERS: McpServer[] = [
     transport: 'streamable-http',
     specVersion: '2025-11-25',
     tools: [
-      { name: 'command_cross_domain_correlate', description: 'Correlate signals across PARAGON, SEXTANT, DOMAINE, and Counsel domains.', reversibility: 'read-only' },
+      { name: 'command_cross_domain_correlate', description: 'Correlate signals across Aegis, Vessels, Terra, and Counsel domains.', reversibility: 'read-only' },
       { name: 'command_surface_anomalies', description: 'Statistical anomaly surfacing with 7-day rolling baseline.', reversibility: 'read-only' },
       { name: 'command_prioritize_actions', description: 'Rank actions by severity × asset_value × time_sensitivity.', reversibility: 'read-only' },
     ],

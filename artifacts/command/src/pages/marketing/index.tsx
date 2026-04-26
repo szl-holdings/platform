@@ -22,28 +22,28 @@ export function MarketingHome() {
   const apps = [
     {
       id: 'aegis',
-      name: 'PARAGON',
+      name: 'Aegis',
       icon: Shield,
       desc: 'Unified defense & intelligence command',
       color: 'text-[#3b82f6]',
     },
     {
       id: 'vessels',
-      name: 'SEXTANT',
+      name: 'Vessels',
       icon: Anchor,
       desc: 'Maritime fleet management & routing',
       color: 'text-[#0ea5e9]',
     },
     {
       id: 'terra',
-      name: 'DOMAINE',
+      name: 'Terra',
       icon: Building2,
       desc: 'Real estate intelligence & forecasting',
       color: 'text-[#40856a]',
     },
     {
       id: 'lyte',
-      name: 'KORA',
+      name: 'Lyte',
       icon: Activity,
       desc: 'Autonomous incident detection & AIOps',
       color: 'text-[#d4a054]',

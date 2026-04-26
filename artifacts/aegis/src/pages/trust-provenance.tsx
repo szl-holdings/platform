@@ -295,7 +295,7 @@ export default function TrustProvenancePage() {
         ) : (
           <AdminAuditTrail
             entries={auditEntries}
-            title="PARAGON Decision Audit Trail"
+            title="Aegis Decision Audit Trail"
             accentColor={ACCENT}
             showFilters
             domainLabel="Security Operations"

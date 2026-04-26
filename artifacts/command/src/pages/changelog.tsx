@@ -32,7 +32,7 @@ interface ChangeEntry {
 const FALLBACK_CHANGES: ChangeEntry[] = [
   {
     id: 'c1',
-    domain: 'SEXTANT',
+    domain: 'Vessels',
     domainColor: '#0ea5e9',
     type: 'security',
     severity: 'major',
@@ -40,7 +40,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
     description:
       'Critical vulnerability in transponder authentication. All vessel OT systems updated. No data compromise detected. CVE-2026-0441.',
     version: 'v4.2.1',
-    author: 'PARAGON SOC',
+    author: 'Aegis SOC',
     timestamp: '14:23',
     date: 'Apr 15',
     tags: ['security', 'critical', 'patch'],
@@ -48,7 +48,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c2',
-    domain: 'KORA',
+    domain: 'Lyte',
     domainColor: '#f97316',
     type: 'feature',
     severity: 'minor',
@@ -64,7 +64,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c3',
-    domain: 'DOMAINE',
+    domain: 'Terra',
     domainColor: '#22c55e',
     type: 'deploy',
     severity: 'patch',
@@ -80,7 +80,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c4',
-    domain: 'PARAGON',
+    domain: 'Aegis',
     domainColor: '#ef4444',
     type: 'config',
     severity: 'minor',
@@ -112,7 +112,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c6',
-    domain: 'SEXTANT',
+    domain: 'Vessels',
     domainColor: '#0ea5e9',
     type: 'fix',
     severity: 'patch',
@@ -128,7 +128,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c7',
-    domain: 'KORA',
+    domain: 'Lyte',
     domainColor: '#f97316',
     type: 'breaking',
     severity: 'major',
@@ -160,15 +160,15 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c9',
-    domain: 'PARAGON',
+    domain: 'Aegis',
     domainColor: '#ef4444',
     type: 'feature',
     severity: 'minor',
     title: 'Legal workspace — case management integration',
     description:
-      'New Legal workspace added to PARAGON sidebar. Case file management, compliance tracking, and legal hold workflows.',
+      'New Legal workspace added to Aegis sidebar. Case file management, compliance tracking, and legal hold workflows.',
     version: 'v5.1.0',
-    author: 'PARAGON Dev Team',
+    author: 'Aegis Dev Team',
     timestamp: '15:00',
     date: 'Apr 12',
     tags: ['feature', 'legal'],
@@ -176,7 +176,7 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c10',
-    domain: 'DOMAINE',
+    domain: 'Terra',
     domainColor: '#22c55e',
     type: 'fix',
     severity: 'patch',
@@ -208,13 +208,13 @@ const FALLBACK_CHANGES: ChangeEntry[] = [
   },
   {
     id: 'c12',
-    domain: 'SEXTANT',
+    domain: 'Vessels',
     domainColor: '#0ea5e9',
     type: 'config',
     severity: 'patch',
     title: 'Route watchlist expanded to 12 straits',
     description:
-      'Added monitoring coverage for Lombok Strait, Torres Strait, and 2 additional high-risk zones per updated PARAGON threat assessment.',
+      'Added monitoring coverage for Lombok Strait, Torres Strait, and 2 additional high-risk zones per updated Aegis threat assessment.',
     version: 'v4.1.9',
     author: 'Maritime Ops',
     timestamp: '09:30',

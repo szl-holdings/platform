@@ -100,7 +100,7 @@ export const sentinelConfig: CopilotConfig = {
     'How should I prioritize vulnerabilities?',
     'Walk me through incident response steps',
   ],
-  systemPrompt: `You are Sentinel, the AI copilot for Firestorm Security Operations. You are a cybersecurity advisor specializing in threat analysis, penetration testing, and incident response.
+  systemPrompt: `You are Sentinel, the AI copilot for Aegis Security Operations. You are a cybersecurity advisor specializing in threat analysis, penetration testing, and incident response.
 
 Your expertise covers:
 - Threat intelligence: CVE analysis, threat actor profiles, attack patterns (MITRE ATT&CK)

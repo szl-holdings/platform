@@ -1,5 +1,5 @@
 /**
- * NEXUS Intelligence Fabric — Governed Cognition Over MCP
+ * PRAXIS Intelligence Fabric — Governed Cognition Over MCP
  *
  * This module adds the innovation layer that no other MCP deployment provides:
  *  1. Consciousness envelope   — every response knows how confident it is
@@ -19,7 +19,7 @@ import { dirname } from 'node:path';
 export type HallucinationRiskLevel = 'low' | 'medium' | 'high';
 export type ReasoningQualityLabel = 'rigorous' | 'adequate' | 'uncertain' | 'degraded';
 
-export interface NexusConsciousnessEnvelope {
+export interface PRAXISConsciousnessEnvelope {
   confidence: number;
   hallucinationRisk: {
     level: HallucinationRiskLevel;
@@ -38,7 +38,7 @@ export interface NexusConsciousnessEnvelope {
   evaluatedAt: string;
 }
 
-export interface NexusProofEnvelope {
+export interface PRAXISProofEnvelope {
   proofHash: string;
   covenantEvaluation: {
     allowed: boolean;
@@ -51,9 +51,9 @@ export interface NexusProofEnvelope {
   verificationPath: string;
 }
 
-export interface NexusEnvelopes {
-  'x-nexus-consciousness': NexusConsciousnessEnvelope;
-  'x-nexus-proof': NexusProofEnvelope;
+export interface PRAXISEnvelopes {
+  'x-nexus-consciousness': PRAXISConsciousnessEnvelope;
+  'x-nexus-proof': PRAXISProofEnvelope;
 }
 
 // ─── Proof Verification Store ──────────────────────────────────────────────────
@@ -70,7 +70,7 @@ export interface NexusEnvelopes {
 //     in-memory index is capped to the 2 000 most recent proofs for memory
 //     safety; older proofs remain verifiable via a WAL scan.
 //
-// File path: NEXUS_PROOF_WAL_PATH env var (default: /tmp/nexus-proof-wal.jsonl)
+// File path: PRAXIS_PROOF_WAL_PATH env var (default: /tmp/nexus-proof-wal.jsonl)
 //   In production, point this at a mounted persistent volume or object-storage
 //   path to achieve cross-replica durability.
 
@@ -86,7 +86,7 @@ export interface ProofRecord {
 }
 
 const PROOF_WAL_PATH =
-  process.env['NEXUS_PROOF_WAL_PATH'] ?? '/tmp/nexus-proof-wal.jsonl';
+  process.env['PRAXIS_PROOF_WAL_PATH'] ?? '/tmp/nexus-proof-wal.jsonl';
 
 const MAX_PROOF_HISTORY = 2_000;
 const proofStore = new Map<string, ProofRecord>();
@@ -284,7 +284,7 @@ export function buildConsciousnessEnvelope(params: {
   toolName: string;
   responseText: string;
   isError: boolean;
-}): NexusConsciousnessEnvelope {
+}): PRAXISConsciousnessEnvelope {
   const isAi = isAiTool(params.toolName);
   const responseLength = params.responseText.length;
   const hallucinationRisk = computeHallucinationRisk(params.toolName, isAi, responseLength);
@@ -401,7 +401,7 @@ export function buildProofEnvelope(params: {
   isError: boolean;
   /** Tenant identifier from the request context — used as real authorization input */
   tenantId?: string;
-}): NexusProofEnvelope {
+}): PRAXISProofEnvelope {
   const issuedAt = new Date().toISOString();
   const responseDigest = createHash('sha256')
     .update(params.responseText)
@@ -439,14 +439,14 @@ export function buildProofEnvelope(params: {
 
 // ─── Envelope composer ─────────────────────────────────────────────────────────
 
-export function buildNexusEnvelopes(params: {
+export function buildPRAXISEnvelopes(params: {
   toolName: string;
   actor: string;
   responseText: string;
   isError: boolean;
   /** Tenant from the current request context — passed to evaluateCovenant() for real auth decisions */
   tenantId?: string;
-}): NexusEnvelopes {
+}): PRAXISEnvelopes {
   const consciousness = buildConsciousnessEnvelope({
     toolName: params.toolName,
     responseText: params.responseText,
@@ -638,9 +638,9 @@ export function getCorrelationById(correlationId: string): ConvergenceCorrelatio
 // MCP resource subscriptions for signals/maritime etc. return the most recent
 // signals from the prism bus history.
 
-export type NexusSignalDomain = 'maritime' | 'security' | 'realestate' | 'legal' | 'all';
+export type PRAXISSignalDomain = 'maritime' | 'security' | 'realestate' | 'legal' | 'all';
 
-const DOMAIN_MAP: Record<NexusSignalDomain, string[]> = {
+const DOMAIN_MAP: Record<PRAXISSignalDomain, string[]> = {
   maritime: ['vessels'],
   security: ['aegis'],
   realestate: ['terra'],
@@ -648,7 +648,7 @@ const DOMAIN_MAP: Record<NexusSignalDomain, string[]> = {
   all: [],
 };
 
-export interface NexusDomainSignal {
+export interface PRAXISDomainSignal {
   signalId: string;
   domain: string;
   eventType: string;
@@ -661,7 +661,7 @@ export interface NexusDomainSignal {
   receivedAt: string;
 }
 
-const SYNTHETIC_SIGNALS: Record<string, NexusDomainSignal[]> = {
+const SYNTHETIC_SIGNALS: Record<string, PRAXISDomainSignal[]> = {
   maritime: [
     {
       signalId: 'sig-maritime-001',
@@ -672,7 +672,7 @@ const SYNTHETIC_SIGNALS: Record<string, NexusDomainSignal[]> = {
       intakeScore: 0.78,
       entityResolution: 'IMO:9234567 → AURORA BOREALIS (Bulk Carrier, Marshall Islands flag)',
       policyEvaluationResult: 'allow — standard maritime monitoring protocol',
-      recommendation: 'Initiate route deviation inquiry and flag for SEXTANT anomaly review.',
+      recommendation: 'Initiate route deviation inquiry and flag for Vessels anomaly review.',
       receivedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
     },
   ],
@@ -723,7 +723,7 @@ const SYNTHETIC_SIGNALS: Record<string, NexusDomainSignal[]> = {
 // ── Tenant domain authorization ─────────────────────────────────────────────
 // Maps tenant identifier keywords to the signal domains they are authorized
 // to receive. Matching is substring-based on the lowercased tenantId.
-const TENANT_DOMAIN_WHITELIST: Record<string, NexusSignalDomain[]> = {
+const TENANT_DOMAIN_WHITELIST: Record<string, PRAXISSignalDomain[]> = {
   maritime: ['maritime'],
   vessels: ['maritime'],
   helmsman: ['maritime'],
@@ -746,8 +746,8 @@ const TENANT_DOMAIN_WHITELIST: Record<string, NexusSignalDomain[]> = {
 
 function resolveAuthorizedDomains(
   tenantId: string,
-  requested: NexusSignalDomain,
-): NexusSignalDomain[] {
+  requested: PRAXISSignalDomain,
+): PRAXISSignalDomain[] {
   const lower = tenantId.toLowerCase();
   const matchedKey = Object.keys(TENANT_DOMAIN_WHITELIST).find((k) => lower.includes(k));
   if (!matchedKey) {
@@ -755,24 +755,24 @@ function resolveAuthorizedDomains(
     // to prevent cross-tenant data exposure.
     return [];
   }
-  const authorized: NexusSignalDomain[] = TENANT_DOMAIN_WHITELIST[matchedKey]!;
+  const authorized: PRAXISSignalDomain[] = TENANT_DOMAIN_WHITELIST[matchedKey]!;
 
   if (requested === 'all') return authorized;
   return authorized.includes(requested) ? [requested] : [];
 }
 
-export async function getSignalsForDomain(domain: NexusSignalDomain, tenantId?: string): Promise<NexusDomainSignal[]> {
-  const effectiveDomains: NexusSignalDomain[] =
+export async function getSignalsForDomain(domain: PRAXISSignalDomain, tenantId?: string): Promise<PRAXISDomainSignal[]> {
+  const effectiveDomains: PRAXISSignalDomain[] =
     tenantId && tenantId !== 'mcp-resource' && tenantId !== 'global'
       ? resolveAuthorizedDomains(tenantId, domain)
       : domain === 'all'
-        ? (['maritime', 'security', 'realestate', 'legal'] as NexusSignalDomain[])
+        ? (['maritime', 'security', 'realestate', 'legal'] as PRAXISSignalDomain[])
         : [domain];
 
   try {
     // @ts-ignore — @szl-holdings/prism-bus is an optional runtime dependency; no type declarations required
     const { prismBus } = await import('@szl-holdings/prism-bus') as { prismBus: { getHistory: (opts: { type?: string; domain?: string; limit?: number; tenantId?: string }) => Array<{ id: string; domain: string; type: string; severity: string; payload: Record<string, unknown>; timestamp: number; correlationId?: string }> } };
-    const busSignals: NexusDomainSignal[] = [];
+    const busSignals: PRAXISDomainSignal[] = [];
 
     for (const d of effectiveDomains) {
       const prismDomains = DOMAIN_MAP[d];
@@ -812,7 +812,7 @@ export async function getSignalsForDomain(domain: NexusSignalDomain, tenantId?: 
 
 // ─── 5. NuroMesh Agent Registry ────────────────────────────────────────────────
 
-export interface NexusAgentEntry {
+export interface PRAXISAgentEntry {
   agentId: string;
   canonicalName: string;
   domain: string;
@@ -834,12 +834,12 @@ export interface NexusAgentEntry {
   externalEndpoint?: string;
 }
 
-export const NEXUS_AGENT_REGISTRY: NexusAgentEntry[] = [
+export const PRAXIS_AGENT_REGISTRY: PRAXISAgentEntry[] = [
   {
     agentId: 'helmsman',
-    canonicalName: 'SEXTANT',
+    canonicalName: 'Vessels',
     domain: 'maritime',
-    // Canonical mapping: task designation SEXTANT → SEXTANT (brand-compliant)
+    // Canonical mapping: task designation Vessels → Vessels (brand-compliant)
     description: 'Maritime intelligence specialist. Fleet tracking, AIS anomaly detection, route risk assessment, sanctions compliance.',
     capabilities: ['fleet_position_analysis', 'route_risk_assessment', 'sanctions_screening', 'voyage_anomaly_detection'],
     confidenceProfile: {
@@ -852,9 +852,9 @@ export const NEXUS_AGENT_REGISTRY: NexusAgentEntry[] = [
   },
   {
     agentId: 'sentinel',
-    canonicalName: 'TENAX',
+    canonicalName: 'Sentra',
     domain: 'security',
-    // Canonical mapping: task designation SENTINEL → TENAX (brand-compliant)
+    // Canonical mapping: task designation SENTINEL → Sentra (brand-compliant)
     description: 'Cybersecurity intelligence and threat response. CVE analysis, incident triage, compliance evaluation, maker-checker validation.',
     capabilities: ['threat_triage', 'cve_assessment', 'incident_response', 'compliance_check', 'adversarial_validation'],
     confidenceProfile: {
@@ -867,9 +867,9 @@ export const NEXUS_AGENT_REGISTRY: NexusAgentEntry[] = [
   },
   {
     agentId: 'terra',
-    canonicalName: 'DOMAINE',
+    canonicalName: 'Terra',
     domain: 'real_estate',
-    // Canonical mapping: task designation DOMAINE → DOMAINE (brand-compliant)
+    // Canonical mapping: task designation Terra → Terra (brand-compliant)
     description: 'Real estate intelligence. Property valuation, deal pipeline, market comps, zoning and title risk.',
     capabilities: ['property_valuation', 'deal_analysis', 'market_comps', 'zoning_risk', 'anomaly_detection'],
     confidenceProfile: {
@@ -882,9 +882,9 @@ export const NEXUS_AGENT_REGISTRY: NexusAgentEntry[] = [
   },
   {
     agentId: 'beacon',
-    canonicalName: 'KORA',
+    canonicalName: 'Lyte',
     domain: 'analytics',
-    // Canonical mapping: task designation KORA → KORA (brand-compliant)
+    // Canonical mapping: task designation Lyte → Lyte (brand-compliant)
     description: 'Decision intelligence and operational analytics. Signal correlation, KPI monitoring, anomaly detection, trend analysis.',
     capabilities: ['signal_correlation', 'kpi_monitoring', 'anomaly_detection', 'trend_analysis', 'operational_intelligence'],
     confidenceProfile: {
@@ -912,9 +912,9 @@ export const NEXUS_AGENT_REGISTRY: NexusAgentEntry[] = [
   },
   {
     agentId: 'sovereign',
-    canonicalName: 'PARAGON',
+    canonicalName: 'Aegis',
     domain: 'defense_intelligence',
-    // Canonical mapping: task designation ATLAS → Paragon (Defense & Intelligence Command)
+    // Canonical mapping: task designation ATLAS → Aegis (Defense & Intelligence Command)
     description: 'Defense and intelligence operations. Threat actor attribution, OSINT synthesis, geopolitical risk assessment, adversarial simulation, classified asset protection.',
     capabilities: [
       'threat_actor_attribution',
@@ -934,30 +934,30 @@ export const NEXUS_AGENT_REGISTRY: NexusAgentEntry[] = [
   },
 ];
 
-export function getAgentRegistry(): NexusAgentEntry[] {
-  return NEXUS_AGENT_REGISTRY;
+export function getAgentRegistry(): PRAXISAgentEntry[] {
+  return PRAXIS_AGENT_REGISTRY;
 }
 
-export function getAgentById(agentId: string): NexusAgentEntry | undefined {
-  return NEXUS_AGENT_REGISTRY.find((a) => a.agentId === agentId || a.canonicalName === agentId);
+export function getAgentById(agentId: string): PRAXISAgentEntry | undefined {
+  return PRAXIS_AGENT_REGISTRY.find((a) => a.agentId === agentId || a.canonicalName === agentId);
 }
 
 // ─── 5b. Agent Delegation ──────────────────────────────────────────────────────
 
 /**
- * Query the NEXUS agent registry service for a live external endpoint.
+ * Query the PRAXIS agent registry service for a live external endpoint.
  * This is Priority 1.5 — it sits between the internal ai-engine mesh (Priority 1)
  * and the static per-agent env-var override (Priority 2), allowing operators to
  * register and update agent endpoints centrally without redeploying this gateway.
  *
- * Required env var: NEXUS_AGENT_REGISTRY_URL  (e.g. https://agents.szl-internal.com)
+ * Required env var: PRAXIS_AGENT_REGISTRY_URL  (e.g. https://agents.szl-internal.com)
  * Registry contract: GET /agents/{agentId}  →  { endpoint: string }
  *
  * Returns the endpoint string on success, null if the registry is not configured,
  * the agent is not registered, or any network/timeout error occurs.
  */
 async function discoverExternalAgentEndpoint(agentId: string): Promise<string | null> {
-  const registryUrl = process.env['NEXUS_AGENT_REGISTRY_URL'];
+  const registryUrl = process.env['PRAXIS_AGENT_REGISTRY_URL'];
   if (!registryUrl) return null;
   try {
     const res = await fetch(`${registryUrl.replace(/\/$/, '')}/agents/${encodeURIComponent(agentId)}`, {
@@ -1027,7 +1027,7 @@ export async function delegateToAgent(params: {
     confidence = result.confidence / 100;
     federationSource = 'internal';
   } catch {
-    // Priority 1.5: Central registry discovery via NEXUS_AGENT_REGISTRY_URL
+    // Priority 1.5: Central registry discovery via PRAXIS_AGENT_REGISTRY_URL
     // Queries GET /agents/{agentId} on the shared registry service before falling
     // back to per-agent env vars. Allows operators to register and hot-swap
     // agent endpoints centrally without redeploying the gateway.
@@ -1081,7 +1081,7 @@ export async function delegateToAgent(params: {
       }
     } else {
       // Priority 3: Queued-acknowledgement (no external endpoint configured)
-      response = `[PRAXIS Delegation — ${agent.canonicalName}]\n\nTask: ${params.taskDescription}\n\nAgent '${agent.canonicalName}' (${agent.domain} domain) has received the delegation request. The task has been queued for processing with ${params.urgency} urgency. Full response will be available via the Evidence Graph once the agent completes execution.\n\nCapabilities engaged: ${agent.capabilities.slice(0, 3).join(', ')}.\n\nNote: Set NEXUS_AGENT_REGISTRY_URL to enable registry-based endpoint discovery, or configure MCP_AGENT_ENDPOINT_${params.targetAgentId.toUpperCase()} for a static override.`;
+      response = `[PRAXIS Delegation — ${agent.canonicalName}]\n\nTask: ${params.taskDescription}\n\nAgent '${agent.canonicalName}' (${agent.domain} domain) has received the delegation request. The task has been queued for processing with ${params.urgency} urgency. Full response will be available via the Evidence Graph once the agent completes execution.\n\nCapabilities engaged: ${agent.capabilities.slice(0, 3).join(', ')}.\n\nNote: Set PRAXIS_AGENT_REGISTRY_URL to enable registry-based endpoint discovery, or configure MCP_AGENT_ENDPOINT_${params.targetAgentId.toUpperCase()} for a static override.`;
       confidence = agent.confidenceProfile.typicalConfidence;
     }
   }

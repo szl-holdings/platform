@@ -53,7 +53,7 @@ interface ThreatEvent {
   mitre: string;
 }
 
-interface FirestormIncident {
+interface AegisIncident {
   id: number;
   title: string;
   severity: string;
@@ -228,7 +228,7 @@ const SEVERITY_TYPE_MAP: Record<string, ThreatEvent['type']> = {
   low: 'exfil',
 };
 
-function incidentToEvent(inc: FirestormIncident, idx: number): ThreatEvent {
+function incidentToEvent(inc: AegisIncident, idx: number): ThreatEvent {
   const twinIds = ['tw-003', 'tw-006', 'tw-004', 'tw-003', 'tw-006'];
   const sev = (
     ['critical', 'high', 'medium'].includes(inc.severity) ? inc.severity : 'medium'
@@ -438,9 +438,9 @@ function AegisAtlasRuntimeContent() {
     data: incidentData,
     isLoading: loadingIncidents,
     refetch,
-  } = useStandardQuery<FirestormIncident[]>({
+  } = useStandardQuery<AegisIncident[]>({
     queryKey: ['firestorm-incidents-atlas'],
-    queryFn: () => apiFetch<FirestormIncident[]>('/firestorm/incidents'),
+    queryFn: () => apiFetch<AegisIncident[]>('/firestorm/incidents'),
     staleTime: 30000,
     retry: 1,
   });
@@ -496,7 +496,7 @@ function AegisAtlasRuntimeContent() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#8b7ac8' }}
             >
-              PARAGON · ATLAS Spatial Runtime
+              Aegis · ATLAS Spatial Runtime
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Posture Twin Theater</h1>
@@ -591,7 +591,7 @@ function AegisAtlasRuntimeContent() {
             </span>{' '}
             live incident
             {liveIncidents.filter((i) => i.status !== 'resolved').length !== 1 ? 's' : ''} ingested
-            from Firestorm — Incident Theater shows real-time feed
+            from Aegis — Incident Theater shows real-time feed
           </span>
           <span className="ml-auto text-[9px] font-mono" style={{ color: 'rgba(255,255,255,0.2)' }}>
             Updated {lastRefresh.toLocaleTimeString()}

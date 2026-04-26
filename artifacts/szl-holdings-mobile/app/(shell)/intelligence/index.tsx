@@ -422,7 +422,7 @@ function CascadeCard({
   );
 }
 
-export default function CortexIntelligenceScreen() {
+export default function APEXIntelligenceScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { setActiveWorkspace } = useWorkspace();

@@ -17,8 +17,8 @@
  *   - Verifier                (pre-existing partial coverage)
  *   - Vessels                 (new)
  *   - Terra                   (new — consolidates #1281)
- *   - PRISM Counsel           (new — consolidates #1281)
- *   - Firestorm               (new)
+ *   - Counsel           (new — consolidates #1281)
+ *   - Aegis               (new)
  *   - Lyte                    (new)
  *   - Alloy                   (new)
  *   - Aegis                   (new)
@@ -218,8 +218,8 @@ describecsrfDomain('Terra — properties & leases', ['/api/terra/properties', '/
 describecsrfDomain('Terra — pro-forma', ['/api/terra/pro-forma']);
 describecsrfDomain('Counsel — matters', ['/api/prism/matters']);
 describecsrfDomain('Counsel — documents', ['/api/prism/documents']);
-describecsrfDomain('Firestorm — findings', ['/api/firestorm/findings']);
-describecsrfDomain('Firestorm — assessments', ['/api/firestorm/assessments']);
+describecsrfDomain('Aegis — findings', ['/api/firestorm/findings']);
+describecsrfDomain('Aegis — assessments', ['/api/firestorm/assessments']);
 describecsrfDomain('Lyte — scenarios', ['/api/lyte/scenarios']);
 describecsrfDomain('Lyte — decisions', ['/api/lyte/decisions']);
 describecsrfDomain('Counsel — channels', ['/api/alloy/channels']);
@@ -237,7 +237,7 @@ describecsrfDomain('Signals', ['/api/signals']);
 describecsrfDomain('Vessels — alerts (PATCH)', ['/api/vessels/alerts'], 'PATCH');
 describecsrfDomain('Terra — properties (PATCH)', ['/api/terra/properties'], 'PATCH');
 describecsrfDomain('Counsel — matters (DELETE)', ['/api/prism/matters'], 'DELETE');
-describecsrfDomain('Firestorm — findings (DELETE)', ['/api/firestorm/findings'], 'DELETE');
+describecsrfDomain('Aegis — findings (DELETE)', ['/api/firestorm/findings'], 'DELETE');
 
 // ── CSRF token endpoint itself ─────────────────────────────────────────────────
 

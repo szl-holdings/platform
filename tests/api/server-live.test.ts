@@ -105,9 +105,9 @@ vi.mock("../../artifacts/api-server/src/lib/email", () => ({
 
 vi.mock("@szl-holdings/ai-engine/domain-embedding-hooks", () => ({
   ingestLyteSystem: vi.fn().mockResolvedValue(undefined),
-  ingestFirestormFinding: vi.fn().mockResolvedValue(undefined),
-  ingestFirestormScenario: vi.fn().mockResolvedValue(undefined),
-  ingestFirestormAlert: vi.fn().mockResolvedValue(undefined),
+  ingestAegisFinding: vi.fn().mockResolvedValue(undefined),
+  ingestAegisScenario: vi.fn().mockResolvedValue(undefined),
+  ingestAegisAlert: vi.fn().mockResolvedValue(undefined),
   ingestCarlotaService: vi.fn().mockResolvedValue(undefined),
   ingestPrismMatter: vi.fn().mockResolvedValue(undefined),
 }));
@@ -268,7 +268,7 @@ describe.skipIf(!LIVE_TOKEN)("Live Server — REST endpoints through real CSRF +
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  // PRISM Counsel routes were removed in Task #2696.
+  // Counsel routes were removed in Task #2696.
 
   it("GET without valid auth returns 401 — real authMiddleware enforces authentication", async () => {
     const router = (await import("../../artifacts/api-server/src/routes/vessels")).default;
@@ -397,7 +397,7 @@ describe.skipIf(!LIVE_TOKEN)("Live Server — Successful POST mutations via CSRF
   });
 
   it("POST /api/prism-counsel/matters creates a matter after acquiring CSRF token from GET", async () => {
-    // PRISM Counsel routes resolve an org id from req.user.orgs and reject the
+    // Counsel routes resolve an org id from req.user.orgs and reject the
     // request with 403 when none is present.  The bare ALLOY_INTERNAL_TOKEN
     // principal has an empty orgs array, so we mount a tiny pre-middleware
     // that pre-populates req.user with `admin` (which lets the documented
@@ -575,14 +575,14 @@ describe.skipIf(!LIVE_TOKEN)("Live Server — GraphQL contract suite over HTTP (
     }
   });
 
-  it("firestormIncidents query resolves over HTTP from real DB (Aegis/Firestorm domain)", async () => {
+  it("firestormIncidents query resolves over HTTP from real DB (Aegis/Aegis domain)", async () => {
     const res = await request(gqlApp!)
       .post("/api/graphql")
       .set("Content-Type", "application/json")
-      .set("X-Apollo-Operation-Name", "ListFirestormIncidents")
+      .set("X-Apollo-Operation-Name", "ListAegisIncidents")
       .send({
-        operationName: "ListFirestormIncidents",
-        query: `query ListFirestormIncidents { firestormIncidents(limit: 5) { id } }`,
+        operationName: "ListAegisIncidents",
+        query: `query ListAegisIncidents { firestormIncidents(limit: 5) { id } }`,
       });
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty("data");

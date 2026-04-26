@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { typography } from './tokens';
 
-export interface CortexIntent {
+export interface APEXIntent {
   type: 'navigate' | 'query' | 'action' | 'report' | 'workflow';
   domain?: string;
   target?: string;
@@ -10,7 +10,7 @@ export interface CortexIntent {
   destructive?: boolean;
 }
 
-export interface CortexResult {
+export interface APEXResult {
   summary: string;
   domain?: string;
   data?: unknown;
@@ -18,12 +18,12 @@ export interface CortexResult {
   confidence: number;
 }
 
-export interface CortexVoiceProps {
+export interface APEXVoiceProps {
   open: boolean;
   onClose: () => void;
   accentColor?: string;
   appName?: string;
-  onQuery?: (query: string) => Promise<CortexResult>;
+  onQuery?: (query: string) => Promise<APEXResult>;
 }
 
 type VoiceState = 'idle' | 'listening' | 'processing' | 'result' | 'confirming';
@@ -47,7 +47,7 @@ const DOMAIN_COLORS: Record<string, string> = {
   lyte: '#06b6d4',
 };
 
-async function defaultQueryHandler(query: string): Promise<CortexResult> {
+async function defaultQueryHandler(query: string): Promise<APEXResult> {
   try {
     const res = await fetch('/api/cortex/query', {
       method: 'POST',
@@ -87,16 +87,16 @@ async function defaultQueryHandler(query: string): Promise<CortexResult> {
   }
 }
 
-export function CortexVoice({
+export function APEXVoice({
   open,
   onClose,
   accentColor = '#8b7ac8',
   appName,
   onQuery = defaultQueryHandler,
-}: CortexVoiceProps) {
+}: APEXVoiceProps) {
   const [voiceState, setVoiceState] = useState<VoiceState>('idle');
   const [query, setQuery] = useState('');
-  const [result, setResult] = useState<CortexResult | null>(null);
+  const [result, setResult] = useState<APEXResult | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [pendingAction, setPendingAction] = useState<{ label: string; action: () => void } | null>(
     null,
@@ -620,7 +620,7 @@ export function CortexVoice({
   );
 }
 
-export function useCortexVoice() {
+export function useAPEXVoice() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -637,7 +637,7 @@ export function useCortexVoice() {
   return { open, setOpen };
 }
 
-export function CortexVoiceTrigger({
+export function APEXVoiceTrigger({
   accentColor = '#8b7ac8',
   onClick,
 }: {

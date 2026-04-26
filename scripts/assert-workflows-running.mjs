@@ -30,13 +30,13 @@ const BASE_URL = process.env.PLAYWRIGHT_BASE_URL
  */
 const REQUIRED_ROUTES = [
   { id: 'a11oy', path: '/a11oy/', description: 'A11oy — Live Enterprise Execution Fabric', required: true },
-  { id: 'command', path: '/command/', description: 'FORGE Command Portal', required: false },
-  { id: 'aegis', path: '/aegis/', description: 'PARAGON (Aegis)', required: false },
-  { id: 'sentra', path: '/sentra/', description: 'TENAX (Sentra)', required: false },
-  { id: 'pulse', path: '/pulse/', description: 'LUMINA (Pulse)', required: false },
+  { id: 'command', path: '/command/', description: 'Command', required: false },
+  { id: 'aegis', path: '/aegis/', description: 'Aegis', required: false },
+  { id: 'sentra', path: '/sentra/', description: 'Sentra', required: false },
+  { id: 'pulse', path: '/pulse/', description: 'Pulse', required: false },
   { id: 'counsel', path: '/counsel/', description: 'Counsel', required: false },
-  { id: 'terra', path: '/terra/', description: 'DOMAINE (Terra)', required: false },
-  { id: 'vessels', path: '/vessels/', description: 'SEXTANT (Vessels)', required: false },
+  { id: 'terra', path: '/terra/', description: 'Terra', required: false },
+  { id: 'vessels', path: '/vessels/', description: 'Vessels', required: false },
   { id: 'carlota-jo', path: '/carlota-jo/', description: 'Carlota Jo', required: false },
   { id: 'szl-holdings', path: '/', description: 'SZL Holdings Dashboard', required: false },
 ];

@@ -1,17 +1,17 @@
 /**
- * Tool Mesh — NEXUS Protocol Bridge Handlers
+ * Tool Mesh — PRAXIS Protocol Bridge Handlers
  *
- * Registers concrete handlers for the NEXUS MCP/A2A/ACP protocol bridge
+ * Registers concrete handlers for the PRAXIS MCP/A2A/ACP protocol bridge
  * tools (web_search, memory_read, document_parse, delegate_research, etc.)
  * into the default Tool Mesh Gateway and Tool Registry, so `callTool` from
  * the FORGE code sandbox routes through the full guardrail chain before
  * reaching these implementations.
  *
  * Each handler is intentionally thin — it delegates to the appropriate
- * NEXUS in-process service or produces a well-typed stub result when the
+ * PRAXIS in-process service or produces a well-typed stub result when the
  * backing service is not yet available, rather than silently returning empty.
  *
- * Call `registerNexusHandlers()` once during server startup (api-server).
+ * Call `registerPRAXISHandlers()` once during server startup (api-server).
  */
 
 import { ToolManifestSchema, type ToolManifest } from './manifest.js';
@@ -19,9 +19,9 @@ import { defaultToolRegistry } from './registry.js';
 import { defaultGateway } from './gateway.js';
 import { defaultCatalogSearch } from './catalog-search.js';
 
-// ─── Manifest definitions for NEXUS protocol bridge tools ─────────────────────
+// ─── Manifest definitions for PRAXIS protocol bridge tools ─────────────────────
 
-const NEXUS_TOOL_MANIFESTS: ToolManifest[] = [
+const PRAXIS_TOOL_MANIFESTS: ToolManifest[] = [
   ToolManifestSchema.parse({
     id: 'nexus.web_search',
     name: 'web_search',
@@ -233,7 +233,7 @@ let _registered = false;
 
 /**
  * Idempotent — safe to call multiple times; only registers once.
- * Call from server startup (e.g., api-server bootstrap) to wire NEXUS bridge
+ * Call from server startup (e.g., api-server bootstrap) to wire PRAXIS bridge
  * tools into the Tool Mesh Gateway so `callTool` from the FORGE code sandbox
  * routes through the guardrail chain before reaching these handlers.
  *
@@ -244,12 +244,12 @@ let _registered = false;
  * `callTool('nexus.web_search', ...)` will receive a clear "tool not registered"
  * error from the Gateway rather than a misleading empty success envelope.
  */
-export function registerNexusHandlers(): void {
+export function registerPRAXISHandlers(): void {
   if (_registered) return;
   _registered = true;
 
   // Only register the catalog_search manifest — it has a real backend.
-  const catalogManifest = NEXUS_TOOL_MANIFESTS.find((m) => m.id === 'nexus.catalog_search');
+  const catalogManifest = PRAXIS_TOOL_MANIFESTS.find((m) => m.id === 'nexus.catalog_search');
   if (catalogManifest) {
     defaultToolRegistry.register(catalogManifest);
   }

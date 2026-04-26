@@ -34,7 +34,7 @@ export interface SnapshotInfo {
   meta?: Record<string, unknown>;
 }
 
-export interface CortexEntityGraphProps {
+export interface APEXEntityGraphProps {
   nodes: EntityGraphNode[];
   edges: EntityGraphEdge[];
   meta?: EntityGraphMeta;
@@ -191,7 +191,7 @@ function tickSimulation(
 const ENTITY_TYPES = ['all', 'person', 'organization', 'vessel', 'property', 'case', 'threat'];
 const DOMAINS_LIST = ['all', 'vessels', 'firestorm', 'terra', 'prism', 'szl', 'lyte'];
 
-export function CortexEntityGraph({
+export function APEXEntityGraph({
   nodes,
   edges,
   meta,
@@ -214,7 +214,7 @@ export function CortexEntityGraph({
   onSnapshotSelect,
   onSnapshotCapture,
   snapshotLoading,
-}: CortexEntityGraphProps) {
+}: APEXEntityGraphProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const simNodesRef = useRef<SimNode[]>([]);

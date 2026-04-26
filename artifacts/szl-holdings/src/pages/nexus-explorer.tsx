@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'wouter';
-import { NexusHopQuery } from '@/components/NexusHopQuery';
+import { PRAXISHopQuery } from '@/components/PRAXISHopQuery';
 import { SiteNav } from '@/components/SiteNav';
 import { runAnomalyDetection } from '@/lib/nexus/anomaly-engine';
 import {
@@ -27,8 +27,8 @@ import {
   type EntityType,
   getConnectedEdges,
   KNOWLEDGE_GRAPH,
-  NEXUS_EDGES,
-  NEXUS_ENTITIES,
+  PRAXIS_EDGES,
+  PRAXIS_ENTITIES,
 } from '@/lib/nexus/graph';
 import { executeQuery } from '@/lib/nexus/query-engine';
 
@@ -89,11 +89,11 @@ interface SimNode {
 function useForceSimulation() {
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>(() =>
     Object.fromEntries(
-      NEXUS_ENTITIES.map((n) => [n.id, INITIAL_POSITIONS[n.id] ?? { x: 490, y: 300 }]),
+      PRAXIS_ENTITIES.map((n) => [n.id, INITIAL_POSITIONS[n.id] ?? { x: 490, y: 300 }]),
     ),
   );
   const nodeState = useRef<SimNode[]>(
-    NEXUS_ENTITIES.map((n) => ({
+    PRAXIS_ENTITIES.map((n) => ({
       id: n.id,
       ...(INITIAL_POSITIONS[n.id] ?? { x: 490, y: 300 }),
       vx: 0,
@@ -125,7 +125,7 @@ function useForceSimulation() {
           fx += (dx / dist) * force;
           fy += (dy / dist) * force;
         }
-        for (const e of NEXUS_EDGES) {
+        for (const e of PRAXIS_EDGES) {
           const otherId =
             e.sourceId === n.id ? e.targetId : e.targetId === n.id ? e.sourceId : null;
           if (!otherId) continue;
@@ -176,7 +176,7 @@ function GraphCanvas({
         </marker>
       </defs>
 
-      {NEXUS_EDGES.map((e) => {
+      {PRAXIS_EDGES.map((e) => {
         const src = positions[e.sourceId];
         const tgt = positions[e.targetId];
         if (!src || !tgt) return null;
@@ -214,7 +214,7 @@ function GraphCanvas({
         );
       })}
 
-      {NEXUS_ENTITIES.map((n) => {
+      {PRAXIS_ENTITIES.map((n) => {
         const pos = positions[n.id];
         if (!pos) return null;
         const color = DOMAIN_COLORS[n.type];
@@ -313,7 +313,7 @@ function EntityPanel({ entity, onClose }: { entity: EntityRecord; onClose: () =>
   const neighbors = useMemo(
     () =>
       neighborIds
-        .map((id) => NEXUS_ENTITIES.find((n) => n.id === id))
+        .map((id) => PRAXIS_ENTITIES.find((n) => n.id === id))
         .filter(Boolean) as EntityRecord[],
     [neighborIds],
   );
@@ -816,7 +816,7 @@ function makeActorId(): string {
   return `nx-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
-function useNexusPresence(
+function usePRAXISPresence(
   selectedId: string | null,
   onRemoteSelection?: (entityId: string | null) => void,
 ) {
@@ -869,7 +869,7 @@ function useNexusPresence(
 }
 // ── End CRDT Presence + Delta Sync ────────────────────────────────────────────
 
-export default function NexusExplorerPage() {
+export default function PRAXISExplorerPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [queryResult, setQueryResult] = useState<{ summary: string; confidence: number } | null>(
@@ -882,7 +882,7 @@ export default function NexusExplorerPage() {
   const onRemoteSelection = useCallback((remoteEntityId: string | null) => {
     if (remoteEntityId) {
       const connected = new Set<string>([remoteEntityId]);
-      NEXUS_EDGES.forEach((e) => {
+      PRAXIS_EDGES.forEach((e) => {
         if (e.sourceId === remoteEntityId) connected.add(e.targetId);
         if (e.targetId === remoteEntityId) connected.add(e.sourceId);
       });
@@ -890,7 +890,7 @@ export default function NexusExplorerPage() {
     }
   }, []);
 
-  const { peers } = useNexusPresence(selectedId, onRemoteSelection);
+  const { peers } = usePRAXISPresence(selectedId, onRemoteSelection);
 
   const anomalyReport = useMemo(() => runAnomalyDetection(KNOWLEDGE_GRAPH), []);
 
@@ -908,7 +908,7 @@ export default function NexusExplorerPage() {
       }
       // Selecting — highlight entity and its neighbors
       const connected = new Set<string>([id]);
-      NEXUS_EDGES.forEach((e) => {
+      PRAXIS_EDGES.forEach((e) => {
         if (e.sourceId === id) connected.add(e.targetId);
         if (e.targetId === id) connected.add(e.sourceId);
       });
@@ -953,7 +953,7 @@ export default function NexusExplorerPage() {
     {
       date: 'Apr 14',
       time: '22:15',
-      event: `PRAXIS graph refresh — ${NEXUS_EDGES.filter((e) => e.inferred).length} new inferred edges`,
+      event: `PRAXIS graph refresh — ${PRAXIS_EDGES.filter((e) => e.inferred).length} new inferred edges`,
       domain: 'PRAXIS',
       accent: '#60a5fa',
     },
@@ -1023,7 +1023,7 @@ export default function NexusExplorerPage() {
   ];
 
   const selectedEntity = selectedId
-    ? (NEXUS_ENTITIES.find((n) => n.id === selectedId) ?? null)
+    ? (PRAXIS_ENTITIES.find((n) => n.id === selectedId) ?? null)
     : null;
 
   return (
@@ -1118,8 +1118,8 @@ export default function NexusExplorerPage() {
                   Entity Knowledge Graph
                 </h1>
                 <p style={{ fontSize: '11px', color: 'hsl(210,5%,42%)', marginTop: '4px' }}>
-                  {NEXUS_ENTITIES.length} entities · {NEXUS_EDGES.length} relationships (
-                  {NEXUS_EDGES.filter((e) => e.inferred).length} inferred) ·{' '}
+                  {PRAXIS_ENTITIES.length} entities · {PRAXIS_EDGES.length} relationships (
+                  {PRAXIS_EDGES.filter((e) => e.inferred).length} inferred) ·{' '}
                   {anomalyReport.totalCount} cross-domain anomalies
                 </p>
               </div>
@@ -1671,7 +1671,7 @@ export default function NexusExplorerPage() {
                       </div>
                       <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
                         {a.involvedEntityIds.slice(0, 4).map((eid) => {
-                          const entity = NEXUS_ENTITIES.find((x) => x.id === eid);
+                          const entity = PRAXIS_ENTITIES.find((x) => x.id === eid);
                           return entity ? (
                             <button
                               key={eid}
@@ -1874,7 +1874,7 @@ export default function NexusExplorerPage() {
                   padding: '1.5rem',
                 }}
               >
-                <NexusHopQuery initialAnchorId={selectedId ?? undefined} />
+                <PRAXISHopQuery initialAnchorId={selectedId ?? undefined} />
               </div>
             </m.div>
           )}

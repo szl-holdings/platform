@@ -73,7 +73,7 @@ const ARTIFACTS = [
   {
     id: 'prism-counsel',
     path: '/prism-counsel/',
-    label: 'PRISM Counsel — Legal Command',
+    label: 'Counsel — Legal Command',
     views: [
       { name: 'hero', suffix: '', delay: 3000 },
       { name: 'matters', suffix: '', delay: 5000 },

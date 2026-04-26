@@ -1,5 +1,5 @@
 /**
- * NEXUS MCP — Domain Apps Capability
+ * PRAXIS MCP — Domain Apps Capability
  *
  * Each major domain agent registers an App that serves a lightweight,
  * interactive HTML micro-dashboard rendered inline by MCP clients that
@@ -10,7 +10,7 @@
  * inline HTML/CSS/JS so clients can render without network calls.
  */
 
-import type { NexusApp, TenantContext } from '../server.js';
+import type { PRAXISApp, TenantContext } from '../server.js';
 
 // ─── App HTML Builders ────────────────────────────────────────────────────────
 
@@ -226,7 +226,7 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0}
  * Create the standard set of SZL domain Apps.
  * Each App serves a tenant-scoped, data-live HTML micro-dashboard.
  */
-export function createDomainApps(): NexusApp[] {
+export function createDomainApps(): PRAXISApp[] {
   return [
     {
       appId: 'vessels-fleet-map',

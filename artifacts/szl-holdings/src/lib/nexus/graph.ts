@@ -1,5 +1,5 @@
 /**
- * NEXUS Knowledge Graph — Core Data Model
+ * PRAXIS Knowledge Graph — Core Data Model
  * Entity types, relationship types, and the base graph with domain-cross-referenced records.
  */
 
@@ -105,7 +105,7 @@ export interface EdgeRecord {
   relationship: RelationshipType;
   confidence: number; // 0–100, how confident we are this edge is real
   strength: number; // 0–1, how strong/direct the relationship is
-  inferred: boolean; // true = NEXUS-inferred, false = directly evidenced
+  inferred: boolean; // true = PRAXIS-inferred, false = directly evidenced
   evidenceSources: string[]; // where this edge was derived from
   discoveredAt: string;
 }
@@ -118,10 +118,10 @@ export interface KnowledgeGraph {
 }
 
 /**
- * Raw entity data — the canonical NEXUS knowledge base.
+ * Raw entity data — the canonical PRAXIS knowledge base.
  * All cross-domain enrichment lives here.
  */
-export const NEXUS_ENTITIES: EntityRecord[] = [
+export const PRAXIS_ENTITIES: EntityRecord[] = [
   {
     id: 'viktor-sorokin',
     label: 'Viktor Sorokin',
@@ -414,7 +414,7 @@ export const NEXUS_ENTITIES: EntityRecord[] = [
   },
 ];
 
-export const NEXUS_EDGES: EdgeRecord[] = [
+export const PRAXIS_EDGES: EdgeRecord[] = [
   {
     id: 'e001',
     sourceId: 'viktor-sorokin',
@@ -594,8 +594,8 @@ export const NEXUS_EDGES: EdgeRecord[] = [
 ];
 
 export const KNOWLEDGE_GRAPH: KnowledgeGraph = {
-  entities: NEXUS_ENTITIES,
-  edges: NEXUS_EDGES,
+  entities: PRAXIS_ENTITIES,
+  edges: PRAXIS_EDGES,
   version: '2026-0414-r22',
   lastRefreshed: '2026-04-14T22:15:00Z',
 };

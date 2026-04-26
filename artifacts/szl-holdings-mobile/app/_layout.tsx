@@ -66,7 +66,7 @@ if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
 }
 
-async function getCortexAuthToken(): Promise<string | null> {
+async function getAPEXAuthToken(): Promise<string | null> {
   try {
     if (Platform.OS === 'web') {
       return typeof window !== 'undefined' ? window.localStorage.getItem(AUTH_TOKEN_KEY) : null;
@@ -77,8 +77,8 @@ async function getCortexAuthToken(): Promise<string | null> {
   }
 }
 
-setAuthTokenGetter(getCortexAuthToken);
-setUploadAuthTokenGetter(getCortexAuthToken);
+setAuthTokenGetter(getAPEXAuthToken);
+setUploadAuthTokenGetter(getAPEXAuthToken);
 
 // Wire the shared user-preferences store to our authenticated API client so
 // `time_zone` (and any future preference) round-trips with the web app.
@@ -256,7 +256,7 @@ function AppShell() {
   usePushNotificationsBase({
     onTokenAcquired: async (token) => {
       try {
-        const authToken = await getCortexAuthToken();
+        const authToken = await getAPEXAuthToken();
         const headers: Record<string, string> = { 'Content-Type': 'application/json' };
         if (authToken) headers.Authorization = `Bearer ${authToken}`;
         await fetch(`${API_BASE}/push-tokens`, {
@@ -344,7 +344,7 @@ export default function RootLayout() {
               <BiometricSignInProvider>
               <WorkspaceProvider>
                 <ScreenshotGuardProvider>
-                  <NotificationProvider apiBase={API_BASE} getAuthToken={getCortexAuthToken}>
+                  <NotificationProvider apiBase={API_BASE} getAuthToken={getAPEXAuthToken}>
                     <BiometricProvider
                       config={{
                         storagePrefix: 'cortex',
@@ -352,7 +352,7 @@ export default function RootLayout() {
                         promptMessage: 'Authenticate to access Unified Command',
                       }}
                     >
-                      <SyncEngineProvider domain="cortex" getToken={getCortexAuthToken}>
+                      <SyncEngineProvider domain="cortex" getToken={getAPEXAuthToken}>
                         <GestureHandlerRootView style={{ flex: 1 }}>
                           <ThemeProvider defaultMode="dark" storageKey="cortex-theme-mode">
                             <View style={{ flex: 1 }}>

@@ -10,7 +10,7 @@ import {
   vesselsTable,
 } from '@szl-holdings/db';
 
-async function seedFirestorm() {
+async function seedAegis() {
   const assets = await db
     .insert(firestormAssetsTable)
     .values([
@@ -463,7 +463,7 @@ async function seedVessels() {
 async function main() {
 
   try {
-    await seedFirestorm();
+    await seedAegis();
     await seedLyte();
     await seedVessels();
     process.exit(0);

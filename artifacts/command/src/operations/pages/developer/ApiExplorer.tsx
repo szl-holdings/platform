@@ -38,7 +38,7 @@ const ENDPOINTS: Endpoint[] = [
   {
     method: 'GET',
     path: '/api/aegis/health',
-    summary: 'PARAGON platform health — all modules',
+    summary: 'Aegis platform health — all modules',
     tag: 'Security',
     auth: false,
   },

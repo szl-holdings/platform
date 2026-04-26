@@ -1,5 +1,5 @@
 /**
- * Firestorm Repository — typed access to security simulation tables.
+ * Aegis Repository — typed access to security simulation tables.
  */
 import {
   db,
@@ -9,7 +9,7 @@ import {
 } from "@szl-holdings/db";
 import { desc, eq } from 'drizzle-orm';
 
-export class FirestormRepository {
+export class AegisRepository {
   async findScenarioById(id: number) {
     const rows = await db
       .select()
@@ -45,4 +45,4 @@ export class FirestormRepository {
   }
 }
 
-export const firestormRepository = new FirestormRepository();
+export const firestormRepository = new AegisRepository();

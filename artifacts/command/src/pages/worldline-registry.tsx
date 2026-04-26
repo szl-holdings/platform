@@ -54,12 +54,12 @@ const DOMAIN_CONFIG: Record<
   Domain,
   { label: string; color: string; icon: typeof Globe; appPath: string }
 > = {
-  aegis: { label: "PARAGON"— Defense', color: '#ef4444', icon: Shield, appPath: '/aegis' },
-  terra: { label: "DOMAINE — Real Estate", color: '#10b981', icon: Globe, appPath: '/terra' },
+  aegis: { label: "Aegis"— Defense', color: '#ef4444', icon: Shield, appPath: '/aegis' },
+  terra: { label: "Terra — Real Estate", color: '#10b981', icon: Globe, appPath: '/terra' },
   vessels: { label: 'Vessels — Maritime', color: '#06b6d4', icon: Network, appPath: '/vessels' },
   alloy: { label: 'Counsel — Execution', color: '#4B8BDB', icon: Zap, appPath: '/command' },
   prism: { label: 'Prism — Counsel', color: '#f59e0b', icon: Globe, appPath: '/command' },
-  lyte: { label: "KORA — AIOps", color: '#d4a054', icon: Activity, appPath: '/command' },
+  lyte: { label: "Lyte — AIOps", color: '#d4a054', icon: Activity, appPath: '/command' },
 };
 
 const STATE_CONFIG: Record<
@@ -158,7 +158,7 @@ const DEMO_WORLDLINES: Worldline[] = [
     twins: [
       {
         id: 'tw-aeg-001',
-        name: 'PARAGON Posture Twin',
+        name: 'Aegis Posture Twin',
         domain: 'aegis',
         state: 'degraded',
         driftScore: 28,
@@ -191,7 +191,7 @@ const DEMO_WORLDLINES: Worldline[] = [
     twins: [
       {
         id: 'tw-aeg-002',
-        name: 'PARAGON OT/ICS Twin',
+        name: 'Aegis OT/ICS Twin',
         domain: 'aegis',
         state: 'awaiting_approval',
         driftScore: 18,

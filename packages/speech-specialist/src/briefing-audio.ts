@@ -3,7 +3,7 @@
  *
  * Converts a structured executive briefing into a natural-language script
  * and invokes the TTS adapter to produce an audio render.
- * Called by Lyte, Command Portal, and CORTEX.
+ * Called by Lyte, Command Portal, and APEX.
  */
 
 import type { TTSAdapter } from './adapters.js';

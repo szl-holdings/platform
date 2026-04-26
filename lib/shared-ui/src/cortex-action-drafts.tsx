@@ -29,7 +29,7 @@ export interface ActionDraft {
   approvedBy?: string;
 }
 
-export interface CortexActionDraftsProps {
+export interface APEXActionDraftsProps {
   drafts?: ActionDraft[];
   pendingCount?: number;
   accentColor?: string;
@@ -353,7 +353,7 @@ function DraftCard({
   );
 }
 
-export function CortexActionDrafts({
+export function APEXActionDrafts({
   drafts = [],
   pendingCount,
   accentColor = '#c9a84c',
@@ -361,7 +361,7 @@ export function CortexActionDrafts({
   onApprove,
   onDismiss,
   loading,
-}: CortexActionDraftsProps) {
+}: APEXActionDraftsProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'dismissed'>(
     'pending',

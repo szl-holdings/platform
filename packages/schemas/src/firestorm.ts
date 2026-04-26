@@ -1,5 +1,5 @@
 /**
- * Aegis / Firestorm security operations domain schemas.
+ * Aegis / Aegis security operations domain schemas.
  */
 import { z } from 'zod';
 

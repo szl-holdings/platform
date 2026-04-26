@@ -125,7 +125,7 @@ export default function GovernedCockpit() {
             </div>
             <div>
               <div className="text-sm font-semibold" style={{ color: '#c8d8e8' }}>
-                PARAGON — Governed Security Intelligence
+                Aegis — Governed Security Intelligence
               </div>
               <div className="text-xs" style={{ color: '#4a6070' }}>
                 Every threat, compliance gap, and risk carries a full proof chain

@@ -1,8 +1,8 @@
 /**
- * CORTEX & Counsel API Smoke Tests
+ * APEX & Counsel API Smoke Tests
  *
  * Covers routes not previously tested in cross-app-smoke.test.ts:
- *   - CORTEX Intelligence: /cortex/* (cross-domain fusion engine)
+ *   - APEX Intelligence: /cortex/* (cross-domain fusion engine)
  *   - Counsel (Aegis Intelligence): /inca/* (AI research & model management)
  *   - Autopilot: /autopilot/* (autonomous operations)
  *   - Command Portal: /snapshot, /search (unified command endpoints)
@@ -71,7 +71,7 @@ vi.mock('../../artifacts/api-server/src/lib/platform-flags', () => ({
 
 vi.mock('@szl-holdings/ai-engine', () => ({
   validateAndBuildDecision: vi.fn().mockResolvedValue({ id: 'test-decision' }),
-  fusionCortex: {
+  fusionAPEX: {
     crossDomainSignals: vi.fn().mockResolvedValue([]),
     intelligenceFeed: vi.fn().mockResolvedValue([]),
     entityGraph: vi.fn().mockResolvedValue({ nodes: [], edges: [] }),
@@ -245,7 +245,7 @@ describe('Domain: Counsel (Aegis Intelligence)', () => {
   });
 });
 
-// ── Domain: CORTEX Intelligence ───────────────────────────────────────────────
+// ── Domain: APEX Intelligence ───────────────────────────────────────────────
 
 describe('Domain: APEX Intelligence', () => {
   it('GET /cortex/domains returns 200 with a domains array', async () => {

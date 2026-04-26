@@ -2,7 +2,7 @@
  * Tool Mesh MCP Bridge
  *
  * Bridges the ToolMeshGateway's progressive-discovery architecture into the
- * official MCP SDK via a NexusMcpServer wrapper. All meta-tools
+ * official MCP SDK via a PRAXISMcpServer wrapper. All meta-tools
  * (search_tools, get_tool_details, call_tool), manifest-backed tools, and
  * external registrations are wired to the SDK's typed tool API so they can
  * be served over any SDK transport (SSE, Streamable HTTP, stdio).
@@ -13,7 +13,7 @@
  */
 
 import { globalCollector } from '@workspace/cognitive-observability';
-import { NexusMcpServer, buildTenantInstructions } from '@workspace/nexus-mcp';
+import { PRAXISMcpServer, buildTenantInstructions } from '@workspace/nexus-mcp';
 import { type GatewayInvocationResult, defaultGateway, type ToolMeshGateway } from './gateway.js';
 import type { ToolManifest } from './manifest.js';
 import { type ToolRegistry, defaultToolRegistry } from './registry.js';
@@ -170,7 +170,7 @@ export class ToolMeshMcpBridge {
   private readonly externalTools = new Map<string, ExternalToolRegistration>();
   private readonly discoveryConfig: ProgressiveDiscoveryConfig;
   private readonly listChangedListeners = new Set<() => void>();
-  private _nexusServer: NexusMcpServer | null = null;
+  private _nexusServer: PRAXISMcpServer | null = null;
 
   /**
    * Tracks tool IDs that a client has explicitly inspected via `get_tool_details`
@@ -197,7 +197,7 @@ export class ToolMeshMcpBridge {
 
     if (registry.onToolsChanged) {
       registry.onToolsChanged(() => {
-        this._nexusServer = null; // invalidate cached NexusMcpServer on registry change
+        this._nexusServer = null; // invalidate cached PRAXISMcpServer on registry change
         for (const listener of this.listChangedListeners) {
           try {
             listener();
@@ -212,19 +212,19 @@ export class ToolMeshMcpBridge {
   // ── SDK integration ───────────────────────────────────────────────────────
 
   /**
-   * Returns (or lazily creates) a NexusMcpServer pre-loaded with all
+   * Returns (or lazily creates) a PRAXISMcpServer pre-loaded with all
    * progressive-discovery tools, manifest-backed tools, and external tool
    * registrations. Connect the returned server to any SDK transport
    * (SSEServerTransport, StreamableHTTPServerTransport, StdioServerTransport)
    * to serve the full tool mesh over the official MCP protocol.
    *
-   * The NexusMcpServer is invalidated whenever the underlying registry changes
+   * The PRAXISMcpServer is invalidated whenever the underlying registry changes
    * so newly registered or deregistered tools are always reflected.
    */
-  toNexusMcpServer(): NexusMcpServer {
+  toPRAXISMcpServer(): PRAXISMcpServer {
     if (this._nexusServer) return this._nexusServer;
 
-    const server = new NexusMcpServer({
+    const server = new PRAXISMcpServer({
       name: this.serverName,
       version: this.serverVersion,
       enableSampling: false,
@@ -304,7 +304,7 @@ export class ToolMeshMcpBridge {
   }
 
   private _registerMetaTool(
-    server: NexusMcpServer,
+    server: PRAXISMcpServer,
     def: McpToolDefinition,
     handler: (args: Record<string, unknown>) => Promise<McpCallResult>,
   ): void {
@@ -346,7 +346,7 @@ export class ToolMeshMcpBridge {
 
   registerExternalTool(tool: ExternalToolRegistration): void {
     this.externalTools.set(tool.name, tool);
-    this._nexusServer = null; // invalidate so new tool is included on next toNexusMcpServer() call
+    this._nexusServer = null; // invalidate so new tool is included on next toPRAXISMcpServer() call
   }
 
   unregisterExternalTool(name: string): void {

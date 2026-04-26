@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "CORTEX",
+    "name": "APEX",
     "slug": "szl-holdings-mobile",
     "version": "2.0.0",
-    "description": "CORTEX Unified Command — The SZL Holdings ecosystem command app. Defense, Fleet, Properties, Operations, Advisory, Portfolio, and Founder workspaces in a single secured command surface.",
+    "description": "APEX Unified Command — The SZL Holdings ecosystem command app. Defense, Fleet, Properties, Operations, Advisory, Portfolio, and Founder workspaces in a single secured command surface.",
     "runtimeVersion": {
       "policy": "appVersion"
     },
@@ -22,9 +22,9 @@
       "bundleIdentifier": "com.szlholdings.executive.mobile",
       "buildNumber": "1",
       "infoPlist": {
-        "NSFaceIDUsageDescription": "CORTEX uses Face ID for secure command access.",
-        "NSCameraUsageDescription": "CORTEX uses your camera for AR property intelligence overlays and document scanning.",
-        "NSUserNotificationUsageDescription": "CORTEX sends cross-domain alerts, signals, and executive briefings.",
+        "NSFaceIDUsageDescription": "APEX uses Face ID for secure command access.",
+        "NSCameraUsageDescription": "APEX uses your camera for AR property intelligence overlays and document scanning.",
+        "NSUserNotificationUsageDescription": "APEX sends cross-domain alerts, signals, and executive briefings.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "privacyManifests": {
@@ -75,7 +75,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Allow CORTEX to use Face ID for secure command access."
+          "faceIDPermission": "Allow APEX to use Face ID for secure command access."
         }
       ],
       [

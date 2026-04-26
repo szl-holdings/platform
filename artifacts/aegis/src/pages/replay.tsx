@@ -43,7 +43,7 @@ interface ReplayEvent {
   evidence: string;
 }
 
-interface FirestormIncident {
+interface AegisIncident {
   id: number;
   title: string;
   severity: string;
@@ -247,9 +247,9 @@ function AegisReplayContent() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const safeMode = useExecutiveSafeMode();
 
-  const { data: incidentData, isLoading } = useStandardQuery<FirestormIncident[]>({
+  const { data: incidentData, isLoading } = useStandardQuery<AegisIncident[]>({
     queryKey: ['firestorm-incidents-replay'],
-    queryFn: () => apiFetch<FirestormIncident[]>('/firestorm/incidents'),
+    queryFn: () => apiFetch<AegisIncident[]>('/firestorm/incidents'),
     staleTime: 60000,
     retry: 1,
   });
@@ -319,7 +319,7 @@ function AegisReplayContent() {
               className="text-[10px] font-bold uppercase tracking-widest font-mono"
               style={{ color: '#8b7ac8' }}
             >
-              PARAGON · ATLAS Replay Engine
+              Aegis · ATLAS Replay Engine
             </span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Attack Path Replay</h1>
@@ -372,7 +372,7 @@ function AegisReplayContent() {
             className="text-[10px] font-bold uppercase tracking-widest font-mono"
             style={{ color: '#8b7ac8' }}
           >
-            PARAGON · ATLAS Replay Engine
+            Aegis · ATLAS Replay Engine
           </span>
           {isLoading && (
             <Loader2

@@ -74,8 +74,8 @@
   {
     "year": "2025",
     "quarter": "Q3",
-    "title": "PRISM Counsel & Carlota Jo Enter Alpha",
-    "description": "Two new portfolio companies entered private alpha: PRISM Counsel (legal matter intelligence) and Carlota Jo (brand intelligence platform). Combined 20 pilot clients signed before public launch.",
+    "title": "Counsel & Carlota Jo Enter Alpha",
+    "description": "Two new portfolio companies entered private alpha: Counsel (legal matter intelligence) and Carlota Jo (brand intelligence platform). Combined 20 pilot clients signed before public launch.",
     "highlight": "6 Portfolio Companies",
     "metric": { "label": "Pilot Clients", "value": "20" }
   },
@@ -83,7 +83,7 @@
     "year": "2026",
     "quarter": "Q1",
     "title": "Series B & Global Scale",
-    "description": "Targeting $45M Series B to fund international expansion, accelerate PRISM Counsel and Carlota Jo to general availability, and triple Aegis's defense sector presence. Portfolio ARR exceeding $35M with a path to profitability.",
+    "description": "Targeting $45M Series B to fund international expansion, accelerate Counsel and Carlota Jo to general availability, and triple Aegis's defense sector presence. Portfolio ARR exceeding $35M with a path to profitability.",
     "highlight": "Series B Target · $45M",
     "metric": { "label": "Target ARR", "value": "$35M+" }
   }

@@ -14,7 +14,7 @@ const MEMORY_ENTRIES = [
   { id: 'mem-003', kind: 'domain', key: 'q2_pipeline_baseline', value: 'Q2 baseline velocity: 18.2 deals/week. Current: 14.1. Drop of 22.5%.', operator: 'Pipeline Oracle', ts: '2026-04-25T01:00:00Z', ttl: 'indefinite' },
   { id: 'mem-004', kind: 'threat', key: 'tg_ember_fingerprint', value: 'TG-Ember: C2 pattern on 443/8080, exfil via DNS-over-HTTPS. YARA rules active.', operator: 'Guardian', ts: '2026-04-24T18:00:00Z', ttl: 'indefinite' },
   { id: 'mem-005', kind: 'operational', key: 'proof_chain_last_verified', value: 'Chain tail: sha256:f1c6b3a8…. Last verified: 2026-04-25T04:40:00Z. 5 entries, 0 tampering.', operator: 'Fabric Watchdog', ts: '2026-04-25T04:40:00Z', ttl: '1h' },
-  { id: 'mem-006', kind: 'domain', key: 'plano_cap_rate_trend', value: 'Cap rate +18bps over 30d. At 6.2%. Historical reversal threshold: 6.5%.', operator: 'DOMAINE Analyst', ts: '2026-04-24T22:00:00Z', ttl: 'indefinite' },
+  { id: 'mem-006', kind: 'domain', key: 'plano_cap_rate_trend', value: 'Cap rate +18bps over 30d. At 6.2%. Historical reversal threshold: 6.5%.', operator: 'Terra Analyst', ts: '2026-04-24T22:00:00Z', ttl: 'indefinite' },
   { id: 'mem-007', kind: 'system', key: 'mirror_eval_baseline', value: 'Global MirrorEval pass rate: 94.2%. Maritime domain: 96.1%, Legal: 97.4%, Defense: 91.8%.', operator: 'Fabric Watchdog', ts: '2026-04-25T03:00:00Z', ttl: '24h' },
   { id: 'mem-008', kind: 'domain', key: 'carlota_client_patterns', value: '3 clients pending follow-up from last advisory deck review cycle. Average follow-up delay: 4.2 days.', operator: 'Carlota Jo Advisor', ts: '2026-04-24T16:00:00Z', ttl: 'indefinite' },
 ];

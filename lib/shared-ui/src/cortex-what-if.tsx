@@ -24,7 +24,7 @@ export interface WhatIfResult {
   source?: 'llm' | 'pattern';
 }
 
-export interface CortexWhatIfProps {
+export interface APEXWhatIfProps {
   accentColor?: string;
   className?: string;
   onQuery?: (query: string) => Promise<WhatIfResult>;
@@ -376,12 +376,12 @@ async function defaultQueryStream(
   return parseWhatIfResult(fullContent, query);
 }
 
-export function CortexWhatIf({
+export function APEXWhatIf({
   accentColor = '#c9a84c',
   className,
   onQuery,
   initialResult,
-}: CortexWhatIfProps) {
+}: APEXWhatIfProps) {
   const [query, setQuery] = useState('');
   const [result, setResult] = useState<WhatIfResult | null>(initialResult ?? null);
   const [loading, setLoading] = useState(false);
