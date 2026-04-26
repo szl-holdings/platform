@@ -71,7 +71,7 @@ function PrepareDialog({
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const res = await apiFetch('/api/counsel/court-filings', {
+      const res = await apiFetch('/counsel/court-filings', {
         method: 'POST',
         body: JSON.stringify({
           filingType,
@@ -238,7 +238,7 @@ export default function CourtFilingsPage() {
   const { data: filingsData, isLoading } = useQuery<{ data: CourtFiling[] }>({
     queryKey: ['court-filings'],
     queryFn: async () => {
-      const res = await apiFetch('/api/counsel/court-filings?limit=50');
+      const res = await apiFetch('/counsel/court-filings?limit=50');
       if (!res.ok) throw new Error('Failed to fetch');
       return res.json();
     },
@@ -247,7 +247,7 @@ export default function CourtFilingsPage() {
   const { data: jurisdictionsData } = useQuery<{ data: { jurisdictions: Jurisdiction[] } }>({
     queryKey: ['court-filings-jurisdictions'],
     queryFn: async () => {
-      const res = await apiFetch('/api/counsel/court-filings/jurisdictions');
+      const res = await apiFetch('/counsel/court-filings/jurisdictions');
       if (!res.ok) throw new Error('Failed to fetch');
       return res.json();
     },
@@ -255,7 +255,7 @@ export default function CourtFilingsPage() {
 
   const submitMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await apiFetch(`/api/counsel/court-filings/${id}/submit`, {
+      const res = await apiFetch(`/counsel/court-filings/${id}/submit`, {
         method: 'POST',
         body: JSON.stringify({ attestationAccepted: true }),
       });

@@ -42,6 +42,7 @@ import {
   ShieldAlert,
   Zap,
 } from 'lucide-react';
+import { LegalDisclaimerBanner } from './components/LegalDisclaimerBanner';
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 
@@ -545,6 +546,7 @@ function AppShell() {
           currentAppName="Counsel Legal Matter Command"
           accentColor={COUNSEL_ACCENT}
         />
+        <LegalDisclaimerBanner />
         <Suspense fallback={<div style={{ height: '100vh', background: '#0a0614' }} />}>
           <CounselLandingPage />
         </Suspense>
@@ -560,6 +562,7 @@ function AppShell() {
         currentAppName="Counsel Legal Matter Command"
         accentColor={COUNSEL_ACCENT}
       />
+      <LegalDisclaimerBanner />
       <SharedDashboardShell
         sidebar={
           <CounselSidebarContent

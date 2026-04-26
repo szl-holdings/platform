@@ -1,6 +1,8 @@
+import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { ingestCounselFiling, type DocumentPipelineResult } from '@szl-holdings/document-intelligence';
 import { cn } from '@szl-holdings/shared-ui/utils';
-import { Cpu, FileSearch, FileText, Filter, GitBranch, Hash, Link2, Lock, ShieldCheck } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { AlertTriangle, ChevronDown, ChevronLeft, ChevronRight, Cpu, FileSearch, FileText, Filter, GitBranch, Hash, Link2, Lock, ShieldCheck } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 type ProvenanceKind = 'recommendation' | 'policy' | 'approval' | 'rejection' | 'drift';
@@ -20,99 +22,48 @@ interface ProvenanceEntry {
   status: VerificationStatus;
 }
 
-const entries: ProvenanceEntry[] = [
-  {
-    id: 'pv-9012',
-    kind: 'approval',
-    action: 'Approved: Reassign Draft Regulatory Report → Sterling & Ross',
-    matter: 'Meridian Compliance v.3',
-    actor: 'Lead Counsel (Admin)',
-    time: '2h ago',
-    modelVersion: 'counsel-os 0.6.2',
-    proofHash: '0x8d1e4b9a...c290',
-    policyRefs: ['Engagement Policy §4.2', 'Reassignment Threshold §6.1'],
-    evidenceCount: 3,
-    status: 'verified',
-  },
-  {
-    id: 'pv-9011',
-    kind: 'recommendation',
-    action: 'Recommendation: Trigger formal performance review of Morrison & Vance',
-    matter: 'Morrison & Vance — firm-wide',
-    actor: 'Counsel OS Engine',
-    time: '8h ago',
-    modelVersion: 'counsel-os 0.6.2',
-    proofHash: '0x4f02ab17...11de',
-    policyRefs: ['Master Engagement Letter §4.2', 'Escalation Playbook EP-09'],
-    evidenceCount: 2,
-    status: 'verified',
-  },
-  {
-    id: 'pv-9010',
-    kind: 'policy',
-    action: 'Policy decision: Privilege auto-classification applied to 12 documents',
-    matter: 'Hargreave IP Settlement',
-    actor: 'Policy Engine',
-    time: '12h ago',
-    modelVersion: 'counsel-os 0.6.2',
-    proofHash: '0x71ee23c5...90fa',
-    policyRefs: ['Privilege Classification Policy §1.3'],
-    evidenceCount: 12,
-    status: 'verified',
-  },
-  {
-    id: 'pv-9009',
-    kind: 'rejection',
-    action: 'Rejected: Auto-extend Discovery deadline by 14 days',
-    matter: 'Meridian Compliance v.3',
-    actor: 'Lead Counsel (Admin)',
-    time: '18h ago',
-    modelVersion: 'counsel-os 0.6.1',
-    proofHash: '0xa011fc83...62b7',
-    policyRefs: ['Deadline Extension Policy §2.2'],
-    evidenceCount: 4,
-    status: 'verified',
-  },
-  {
-    id: 'pv-9008',
-    kind: 'drift',
-    action: 'Drift detected: Privilege log baseline divergence > threshold',
-    matter: 'Hargreave IP Settlement',
-    actor: 'System Engine',
-    time: '1d ago',
-    modelVersion: 'counsel-os 0.6.2',
-    proofHash: '0xc4e92d10...8845',
-    policyRefs: ['Drift Monitoring Policy §5.1'],
-    evidenceCount: 1,
-    status: 'verified',
-  },
-  {
-    id: 'pv-9007',
-    kind: 'recommendation',
-    action: 'Recommendation: Increase Hargreave reserve estimate $1.2M → $1.4M',
-    matter: 'Hargreave IP Settlement',
-    actor: 'Counsel OS Engine',
-    time: '1d ago',
-    modelVersion: 'counsel-os 0.6.2',
-    proofHash: '0xb20c91fe...77a4',
-    policyRefs: ['Reserve Policy §3.4'],
-    evidenceCount: 3,
-    status: 'pending',
-  },
-  {
-    id: 'pv-9006',
-    kind: 'policy',
-    action: 'Policy decision: Document Reuse Policy applied to EU clarification memo',
-    matter: 'Global Data Privacy Audit',
-    actor: 'Policy Engine',
-    time: '2d ago',
-    modelVersion: 'counsel-os 0.6.2',
-    proofHash: '0xe9a715c8...4031',
-    policyRefs: ['Document Reuse Policy §2.1'],
-    evidenceCount: 2,
-    status: 'verified',
-  },
-];
+interface ApiMatter {
+  id: string;
+  name: string;
+}
+
+interface ProofChainEntry {
+  id: string;
+  matterId: string;
+  timestamp: string;
+  eventType: string;
+  title: string;
+  summary: string;
+  privilegeLevel: string;
+  author: string;
+  parties: string[];
+  documentRef?: string;
+  hash?: string;
+  redacted: boolean;
+}
+
+function eventTypeToKind(eventType: string): ProvenanceKind {
+  switch (eventType) {
+    case 'filing': return 'approval';
+    case 'communication': return 'recommendation';
+    case 'discovery': return 'policy';
+    case 'order': return 'approval';
+    case 'settlement': return 'recommendation';
+    case 'hearing': return 'policy';
+    case 'deadline': return 'drift';
+    case 'expert-report': return 'recommendation';
+    default: return 'policy';
+  }
+}
+
+function relativeTime(isoString: string): string {
+  const ms = Date.now() - new Date(isoString).getTime();
+  const minutes = Math.floor(ms / 60000);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
 
 const kindStyle: Record<
   ProvenanceKind,
@@ -188,9 +139,58 @@ const FILTERS: ('all' | ProvenanceKind)[] = [
   'drift',
 ];
 
+function mapProofChainEntries(entries: ProofChainEntry[], matterName: string): ProvenanceEntry[] {
+  return entries.map((pc) => ({
+    id: pc.id,
+    kind: eventTypeToKind(pc.eventType),
+    action: pc.title,
+    matter: matterName,
+    actor: pc.author,
+    time: relativeTime(pc.timestamp),
+    modelVersion: 'counsel-os 0.6.2',
+    proofHash: pc.hash ?? '0x—',
+    policyRefs: pc.parties.length > 0 ? [`${pc.eventType} §1`] : [],
+    evidenceCount: pc.parties.length,
+    status: pc.redacted ? 'pending' : 'verified',
+  }));
+}
+
+const PAGE_SIZE = 10;
+
 export default function TrustProvenance() {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>('all');
+  const [selectedMatterId, setSelectedMatterId] = useState<string | null>(null);
   const [pipelineResult, setPipelineResult] = useState<DocumentPipelineResult | null>(null);
+  const [page, setPage] = useState(1);
+
+  const { data: mattersData, isLoading: mattersLoading, isError: mattersError } = useQuery<{ matters: ApiMatter[] }>({
+    queryKey: ['counsel-matters-list-provenance'],
+    queryFn: async () => {
+      const res = await apiFetch('/counsel/matters');
+      if (!res.ok) throw new Error('Failed to fetch matters');
+      return res.json();
+    },
+  });
+
+  const matters = mattersData?.matters ?? [];
+  const activeMatterId = selectedMatterId ?? matters[0]?.id ?? null;
+  const activeMatterName = matters.find((m) => m.id === activeMatterId)?.name ?? activeMatterId ?? '';
+
+  useEffect(() => { setPage(1); }, [filter, activeMatterId]);
+
+  const { data: proofChainData, isLoading: proofLoading, isError: proofError } = useQuery<{ matterId: string; entries: ProofChainEntry[] }>({
+    queryKey: ['counsel-proof-chain', activeMatterId],
+    queryFn: async () => {
+      if (!activeMatterId) throw new Error('No matter selected');
+      const res = await apiFetch(`/counsel/proof-chain?matterId=${encodeURIComponent(activeMatterId)}`);
+      if (!res.ok) throw new Error('Failed to fetch proof chain');
+      return res.json();
+    },
+    enabled: !!activeMatterId,
+  });
+
+  const isLoading = mattersLoading || proofLoading;
+  const isError = mattersError || proofError;
 
   useEffect(() => {
     ingestCounselFiling({
@@ -202,13 +202,22 @@ export default function TrustProvenance() {
       .catch(() => {});
   }, []);
 
-  const visible = useMemo(
+  const entries = useMemo(() => {
+    if (!proofChainData?.entries) return [];
+    return mapProofChainEntries(proofChainData.entries, activeMatterName);
+  }, [proofChainData, activeMatterName]);
+
+  const filtered = useMemo(
     () => (filter === 'all' ? entries : entries.filter((e) => e.kind === filter)),
-    [filter],
+    [filter, entries],
   );
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const visible = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
   const verified = entries.filter((e) => e.status === 'verified').length;
-  const integrity = Math.round((verified / entries.length) * 100);
+  const integrity = entries.length > 0 ? Math.round((verified / entries.length) * 100) : 100;
 
   return (
     <div className="p-6 space-y-6">
@@ -226,12 +235,34 @@ export default function TrustProvenance() {
         </p>
       </header>
 
+      {matters.length > 1 && (
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-violet-400/60">Matter:</span>
+          <div className="relative">
+            <select
+              value={activeMatterId ?? ''}
+              onChange={(e) => setSelectedMatterId(e.target.value)}
+              className="appearance-none bg-violet-500/5 border border-violet-500/20 text-violet-100 text-xs rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:border-violet-500/40"
+            >
+              {matters.map((m) => (
+                <option key={m.id} value={m.id}>{m.name}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-violet-400/60 pointer-events-none" />
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-violet-500/5 border border-violet-500/10 rounded-xl p-4">
           <div className="text-[10px] font-mono uppercase tracking-widest text-violet-300/70 mb-2">
-            Entries (24h)
+            Entries (live)
           </div>
-          <div className="text-3xl font-bold text-violet-50">{entries.length}</div>
+          {isLoading ? (
+            <div className="w-5 h-5 border-2 border-violet-500/40 border-t-violet-400 rounded-full animate-spin" />
+          ) : (
+            <div className="text-3xl font-bold text-violet-50">{entries.length}</div>
+          )}
         </div>
         <div className="bg-emerald-500/5 border border-emerald-500/15 rounded-xl p-4">
           <div className="text-[10px] font-mono uppercase tracking-widest text-emerald-300/80 mb-2">
@@ -398,76 +429,136 @@ export default function TrustProvenance() {
         </div>
       </div>
 
-      <div className="space-y-3">
-        {visible.map((e) => {
-          const k = kindStyle[e.kind];
-          const s = statusStyle[e.status];
-          const Icon = k.icon;
-          return (
-            <div key={e.id} className="bg-[#0a0614] border border-violet-500/10 rounded-xl p-4">
-              <div className="flex items-start gap-4">
-                <div
-                  className={cn(
-                    'w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border',
-                    k.bg,
-                    k.border,
-                  )}
-                >
-                  <Icon className={cn('w-5 h-5', k.text)} />
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="w-6 h-6 border-2 border-violet-500/40 border-t-violet-400 rounded-full animate-spin" />
+        </div>
+      )}
+
+      {isError && (
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-red-500/5 border border-red-500/20">
+          <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+          <p className="text-sm text-red-300">Failed to load proof-chain entries. Please try again.</p>
+        </div>
+      )}
+
+      {!isLoading && !isError && (
+        <div className="space-y-3">
+          {visible.length === 0 && (
+            <div className="text-center py-10 text-violet-400/40 text-sm">
+              No entries matching the selected filter.
+            </div>
+          )}
+          {visible.map((e) => {
+            const k = kindStyle[e.kind];
+            const s = statusStyle[e.status];
+            const Icon = k.icon;
+            return (
+              <div key={e.id} className="bg-[#0a0614] border border-violet-500/10 rounded-xl p-4">
+                <div className="flex items-start gap-4">
+                  <div
+                    className={cn(
+                      'w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border',
+                      k.bg,
+                      k.border,
+                    )}
+                  >
+                    <Icon className={cn('w-5 h-5', k.text)} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span
+                        className={cn(
+                          'px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider border',
+                          k.bg,
+                          k.border,
+                          k.text,
+                        )}
+                      >
+                        {k.label}
+                      </span>
+                      <span className="text-[10px] font-mono text-violet-400/60">{e.id}</span>
+                      <span className="text-[10px] font-mono text-violet-400/40">·</span>
+                      <span className="text-[10px] font-mono text-violet-400/60">{e.time}</span>
+                    </div>
+                    <div className="text-sm font-semibold text-violet-50 leading-snug">
+                      {e.action}
+                    </div>
+                    <div className="text-[11px] text-violet-300/60 mt-0.5">
+                      Matter: {e.matter} · Actor:{' '}
+                      <span className="text-violet-200/80">{e.actor}</span>
+                    </div>
+                    <div className="mt-3 flex items-center gap-x-4 gap-y-1 flex-wrap text-[10px] font-mono text-violet-400/60">
+                      <span className="flex items-center gap-1.5">
+                        <GitBranch className="w-3 h-3" /> {e.modelVersion}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Hash className="w-3 h-3" /> {e.proofHash}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <FileText className="w-3 h-3" /> {e.evidenceCount} evidence refs
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <ShieldCheck className="w-3 h-3" /> {e.policyRefs.length} policy refs
+                      </span>
+                    </div>
+                  </div>
+                  <span
+                    className={cn(
+                      'px-2 py-0.5 rounded text-[10px] font-mono font-bold tracking-wider shrink-0 border',
+                      s.bg,
+                      s.border,
+                      s.text,
+                    )}
+                  >
+                    {s.label}
+                  </span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span
-                      className={cn(
-                        'px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider border',
-                        k.bg,
-                        k.border,
-                        k.text,
-                      )}
-                    >
-                      {k.label}
-                    </span>
-                    <span className="text-[10px] font-mono text-violet-400/60">{e.id}</span>
-                    <span className="text-[10px] font-mono text-violet-400/40">·</span>
-                    <span className="text-[10px] font-mono text-violet-400/60">{e.time}</span>
-                  </div>
-                  <div className="text-sm font-semibold text-violet-50 leading-snug">
-                    {e.action}
-                  </div>
-                  <div className="text-[11px] text-violet-300/60 mt-0.5">
-                    Matter: {e.matter} · Actor:{' '}
-                    <span className="text-violet-200/80">{e.actor}</span>
-                  </div>
-                  <div className="mt-3 flex items-center gap-x-4 gap-y-1 flex-wrap text-[10px] font-mono text-violet-400/60">
-                    <span className="flex items-center gap-1.5">
-                      <GitBranch className="w-3 h-3" /> {e.modelVersion}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Hash className="w-3 h-3" /> {e.proofHash}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <FileText className="w-3 h-3" /> {e.evidenceCount} evidence refs
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <ShieldCheck className="w-3 h-3" /> {e.policyRefs.length} policy refs
-                    </span>
-                  </div>
-                </div>
-                <span
-                  className={cn(
-                    'px-2 py-0.5 rounded text-[10px] font-mono font-bold tracking-wider shrink-0 border',
-                    s.bg,
-                    s.border,
-                    s.text,
-                  )}
+              </div>
+            );
+          })}
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-[10px] font-mono text-violet-400/50">
+                {filtered.length} entries · page {safePage} of {totalPages}
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={safePage <= 1}
+                  className="p-1.5 rounded-lg border border-violet-500/20 text-violet-400 hover:bg-violet-500/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Previous page"
                 >
-                  {s.label}
-                </span>
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={cn(
+                      'w-6 h-6 rounded text-[10px] font-mono transition-colors',
+                      p === safePage
+                        ? 'bg-violet-500/20 border border-violet-500/40 text-violet-100'
+                        : 'text-violet-400/60 hover:bg-violet-500/10',
+                    )}
+                  >
+                    {p}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safePage >= totalPages}
+                  className="p-1.5 rounded-lg border border-violet-500/20 text-violet-400 hover:bg-violet-500/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Next page"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
-          );
-        })}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

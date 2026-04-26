@@ -83,7 +83,7 @@ function SendDialog({
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const res = await apiFetch('/api/counsel/esignature/send', {
+      const res = await apiFetch('/counsel/esignature/send', {
         method: 'POST',
         body: JSON.stringify({
           documentTitle,
@@ -241,7 +241,7 @@ export default function EsignaturePage() {
   const { data, isLoading, refetch } = useQuery<{ data: EsignatureRequest[] }>({
     queryKey: ['esignature-requests'],
     queryFn: async () => {
-      const res = await apiFetch('/api/counsel/esignature/requests?limit=50');
+      const res = await apiFetch('/counsel/esignature/requests?limit=50');
       if (!res.ok) throw new Error('Failed to fetch');
       return res.json();
     },
@@ -249,7 +249,7 @@ export default function EsignaturePage() {
 
   const voidMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await apiFetch(`/api/counsel/esignature/requests/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/counsel/esignature/requests/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to void');
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['esignature-requests'] }),

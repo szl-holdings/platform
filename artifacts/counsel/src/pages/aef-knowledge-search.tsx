@@ -190,15 +190,15 @@ export default function AefKnowledgeSearch() {
       </form>
 
       {!configured && !error && (
-        <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 p-4 flex items-start gap-3">
-          <AlertTriangle className="w-4 h-4 text-violet-400 shrink-0 mt-0.5" />
+        <div className="rounded-lg border border-violet-500/15 bg-violet-500/5 p-8 flex flex-col items-center gap-3 text-center">
+          <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+            <Search className="w-5 h-5 text-violet-400/50" />
+          </div>
           <div>
-            <p className="text-xs font-semibold text-violet-200">AEF Not Configured</p>
-            <p className="text-[10px] text-violet-400/60 mt-1 leading-relaxed">
-              Set <code className="font-mono text-violet-300">VITE_AEF_GATEWAY_URL</code> and{' '}
-              <code className="font-mono text-violet-300">VITE_AEF_API_KEY</code> in your
-              environment. See{' '}
-              <code className="font-mono text-violet-300">docs/aef/RUNBOOK.md</code>.
+            <p className="text-sm font-semibold text-violet-200">No knowledge index available</p>
+            <p className="text-[11px] text-violet-400/50 mt-1 leading-relaxed">
+              The AEF knowledge index for this matter domain has not been configured yet.
+              Contact your system administrator to enable matter-aware search.
             </p>
           </div>
         </div>

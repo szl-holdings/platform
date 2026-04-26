@@ -1,6 +1,9 @@
+import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { cn } from '@szl-holdings/shared-ui/utils';
+import { useQuery } from '@tanstack/react-query';
 import {
+  AlertTriangle,
   ArrowUpRight,
   CheckCircle2,
   Clock,
@@ -12,7 +15,6 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { matterTwins } from '../data/counsel-twin';
 
 type Decision = 'pending' | 'approved' | 'rejected';
 
@@ -99,11 +101,28 @@ const proofs: ProofEnvelope[] = [
   },
 ];
 
+interface ApiMatter {
+  id: string;
+  name: string;
+}
+
 export default function Approvals() {
   const [decisions, setDecisions] = useState<Record<string, Decision>>({});
   const [active, setActive] = useState<string | null>(proofs[0]?.id ?? null);
 
-  const matterById = useMemo(() => Object.fromEntries(matterTwins.map((m) => [m.id, m])), []);
+  const { data: mattersData, isLoading: mattersLoading, isError: mattersError } = useQuery<{ matters: ApiMatter[] }>({
+    queryKey: ['counsel-matters-approvals'],
+    queryFn: async () => {
+      const res = await apiFetch('/counsel/matters');
+      if (!res.ok) throw new Error('Failed to fetch matters');
+      return res.json();
+    },
+  });
+
+  const matterById = useMemo(
+    () => Object.fromEntries((mattersData?.matters ?? []).map((m) => [m.id, m])),
+    [mattersData],
+  );
 
   const pending = proofs.filter((p) => (decisions[p.id] ?? 'pending') === 'pending');
   const approved = proofs.filter((p) => decisions[p.id] === 'approved');
@@ -134,6 +153,20 @@ export default function Approvals() {
           approve or reject.
         </p>
       </header>
+
+      {mattersLoading && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-violet-500/5 border border-violet-500/15">
+          <div className="w-4 h-4 border-2 border-violet-500/40 border-t-violet-400 rounded-full animate-spin shrink-0" />
+          <span className="text-xs text-violet-400/70 font-mono">Loading matter context…</span>
+        </div>
+      )}
+
+      {mattersError && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
+          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+          <span className="text-xs text-amber-300/80">Matter names unavailable — matter IDs shown below.</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-violet-500/5 border border-violet-500/10 rounded-xl p-4">

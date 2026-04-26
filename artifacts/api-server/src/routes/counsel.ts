@@ -1882,4 +1882,83 @@ router.get(
   },
 );
 
+const FORECAST_HEADS = [
+  {
+    headName: 'counsel:deadline-slippage',
+    label: 'Deadline Slippage Risk',
+    intervals: [
+      { horizon: '7d', point: 0.42, lower: 0.27, upper: 0.59, confidence: 0.84, unit: 'score' },
+      { horizon: '14d', point: 0.56, lower: 0.39, upper: 0.73, confidence: 0.78, unit: 'score' },
+      { horizon: '30d', point: 0.67, lower: 0.49, upper: 0.83, confidence: 0.71, unit: 'score' },
+    ],
+    provenance: {
+      modelId: 'safe-default-counsel:deadline-slippage',
+      modelVersion: '0.1.0',
+      adapterId: 'safe-default',
+      generatedAt: new Date().toISOString(),
+    },
+    alertThreshold: 0.65,
+    thresholdBreached: true,
+  },
+  {
+    headName: 'counsel:filing-defect',
+    label: 'Filing Defect Probability',
+    intervals: [
+      { horizon: '1d', point: 0.19, lower: 0.08, upper: 0.34, confidence: 0.91, unit: 'score' },
+      { horizon: '7d', point: 0.31, lower: 0.18, upper: 0.46, confidence: 0.85, unit: 'score' },
+      { horizon: '30d', point: 0.44, lower: 0.29, upper: 0.61, confidence: 0.78, unit: 'score' },
+    ],
+    provenance: {
+      modelId: 'safe-default-counsel:filing-defect',
+      modelVersion: '0.1.0',
+      adapterId: 'safe-default',
+      generatedAt: new Date().toISOString(),
+    },
+    alertThreshold: 0.5,
+    thresholdBreached: false,
+  },
+  {
+    headName: 'counsel:recovery',
+    label: 'Recovery Likelihood',
+    intervals: [
+      { horizon: '30d', point: 0.52, lower: 0.37, upper: 0.67, confidence: 0.83, unit: 'score' },
+      { horizon: '90d', point: 0.64, lower: 0.47, upper: 0.81, confidence: 0.77, unit: 'score' },
+      { horizon: '180d', point: 0.72, lower: 0.54, upper: 0.88, confidence: 0.70, unit: 'score' },
+    ],
+    provenance: {
+      modelId: 'safe-default-counsel:recovery',
+      modelVersion: '0.1.0',
+      adapterId: 'safe-default',
+      generatedAt: new Date().toISOString(),
+    },
+    thresholdBreached: false,
+  },
+  {
+    headName: 'counsel:staffing-pressure',
+    label: 'Staffing Pressure Score',
+    intervals: [
+      { horizon: '7d', point: 0.58, lower: 0.43, upper: 0.73, confidence: 0.82, unit: 'score' },
+      { horizon: '14d', point: 0.65, lower: 0.48, upper: 0.81, confidence: 0.76, unit: 'score' },
+      { horizon: '30d', point: 0.74, lower: 0.56, upper: 0.90, confidence: 0.69, unit: 'score' },
+    ],
+    provenance: {
+      modelId: 'safe-default-counsel:staffing-pressure',
+      modelVersion: '0.1.0',
+      adapterId: 'safe-default',
+      generatedAt: new Date().toISOString(),
+    },
+    alertThreshold: 0.7,
+    thresholdBreached: true,
+  },
+];
+
+router.get('/counsel/forecast', (_req: Request, res: Response) => {
+  sendSuccess(res, {
+    heads: FORECAST_HEADS,
+    generatedAt: new Date().toISOString(),
+    adapter: 'safe-default',
+    domain: 'counsel',
+  });
+});
+
 export default router;
