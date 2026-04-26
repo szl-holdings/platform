@@ -1,11 +1,11 @@
 import * as Sentry from '@sentry/node';
 import { type Request, type Response, Router } from 'express';
 import { logger } from '../lib/logger';
-import { authMiddleware } from '../middlewares/auth';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 
 const router = Router();
 
-router.get('/debug/sentry-test', authMiddleware(), (req: Request, res: Response) => {
+router.get('/debug/sentry-test', authMiddleware(), requireRole('admin'), (req: Request, res: Response) => {
   const isProduction = process.env.NODE_ENV === 'production';
   if (isProduction) {
     res
@@ -55,7 +55,7 @@ router.get('/debug/sentry-test', authMiddleware(), (req: Request, res: Response)
   }
 });
 
-router.get('/debug/integrations', authMiddleware(), (_req: Request, res: Response) => {
+router.get('/debug/integrations', authMiddleware(), requireRole('admin'), (_req: Request, res: Response) => {
   const isProduction = process.env.NODE_ENV === 'production';
   if (isProduction) {
     res.status(403).json({

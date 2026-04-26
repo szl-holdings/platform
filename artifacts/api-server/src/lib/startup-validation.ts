@@ -2036,6 +2036,21 @@ export function validateStartupConfig(): ValidationResult {
         'ADMIN_PIN is not set — admin dashboard PIN gate is disabled. Set ADMIN_PIN before deploying to production.',
       );
     }
+  } else if (process.env.ADMIN_PIN === '000000') {
+    if (isProduction) {
+      errors.push(
+        'ADMIN_PIN is set to the default placeholder value (000000) — this must be changed before deploying to production. ' +
+          'Generate a strong PIN and set it in Replit Secrets.',
+      );
+    } else {
+      warnings.push(
+        'ADMIN_PIN is set to the default placeholder value — change it before deploying to production.',
+      );
+    }
+  } else if (process.env.VITE_ADMIN_PIN === '0000') {
+    warnings.push(
+      'VITE_ADMIN_PIN is set to the default placeholder value — change it before deploying to production.',
+    );
   }
 
   const connectorKey = process.env.CONNECTOR_ENCRYPTION_KEY;

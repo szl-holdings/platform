@@ -38,7 +38,7 @@ Every SZL application implements RBAC as a first-class concern.
 - Access is granted by explicit role assignment, not by default
 - Roles are scoped to operational need: executives see strategic summaries; operators see tactical queues; compliance personnel see audit logs
 - Destructive or irreversible actions require multi-step confirmation and are flagged in the audit trail
-- Session tokens are short-lived. Privileged sessions require explicit re-authentication
+- Session tokens have a bounded lifetime with server-side invalidation on role change or forced logout
 
 **Role model — 11 granted user roles** (`auth.rbac_roles.count: 11` per `audit/source-of-truth.json`):
 

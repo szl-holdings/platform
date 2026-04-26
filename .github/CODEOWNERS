@@ -69,7 +69,16 @@ CHANGELOG.md  @stephenlutar2-hash
 
 # ── Security-sensitive files ──────────────────────────────────────────────────
 SECURITY.md  @stephenlutar2-hash
+INCIDENT_RESPONSE.md  @stephenlutar2-hash
+SUPPORT.md  @stephenlutar2-hash
+threat_model.md  @stephenlutar2-hash
+KNOWN-GAPS.md  @stephenlutar2-hash
+AUDIT_FINDINGS_REGISTER.md  @stephenlutar2-hash
 CODE_OF_CONDUCT.md  @stephenlutar2-hash
 LICENSE.md  @stephenlutar2-hash
 .env.example  @stephenlutar2-hash
 .gitleaks.toml  @stephenlutar2-hash
+/security/  @stephenlutar2-hash
+/audit/security/  @stephenlutar2-hash
+/docs/trust/  @stephenlutar2-hash
+/docs/security/  @stephenlutar2-hash

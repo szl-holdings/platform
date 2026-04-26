@@ -1,3 +1,15 @@
+/**
+ * ALPHA — MCP Governance & Agent Gateway
+ *
+ * Status: Alpha — access controls under development.
+ *
+ * MCP gateway governance routes are currently accessible to any authenticated
+ * user without an operator-level role check. Multi-tenant production exposure
+ * requires resolving AF-022 (operator-only RBAC on governance routes) and
+ * AF-026 (anonymous telemetry/discovery surface) in `threat_model.md`.
+ *
+ * Do NOT expose MCP governance routes to external tenants without resolving AF-022.
+ */
 import {
   agentMeshContainmentRulesTable,
   agentMeshExposuresTable,

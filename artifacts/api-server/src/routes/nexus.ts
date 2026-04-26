@@ -1,3 +1,15 @@
+/**
+ * ALPHA — NEXUS Shared Control Plane
+ *
+ * Status: Alpha — tenant and ownership isolation pending.
+ *
+ * NEXUS memory, skills, tools, and orchestration stores are currently
+ * platform-global shared state with no per-tenant or per-owner scoping.
+ * Multi-tenant production use requires resolving AF-020 (tenant scoping)
+ * and AF-021 (loopback confused deputy) in `threat_model.md`.
+ *
+ * Do NOT onboard additional tenants to NEXUS without resolving AF-020 and AF-021.
+ */
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { type NexusIngestJobRow, type NexusIngestStatus, type NexusMemoryRow, type NexusMemoryTier, type NexusMemoryType, type NexusOrchestrationPlanRow, type NexusOrchestrationStatus, type NexusProtocolToolRow, type NexusSkillPrimitiveType, type NexusSkillRow, type NexusToolProtocol, db, nexusIngestJobsTable, nexusMemoryTable, nexusOrchestrationPlansTable, nexusProtocolToolsTable, nexusSkillsTable } from '@szl-holdings/db';
 import { forgeEvidenceStore, forgeRuntime, forgeTimeline, runCodeHandler } from '@szl-holdings/forge-runtime';

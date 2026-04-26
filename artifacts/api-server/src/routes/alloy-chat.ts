@@ -1,3 +1,15 @@
+/**
+ * INTERNAL — Alloy Chat Persistence
+ *
+ * Status: Alpha — tenant isolation pending.
+ *
+ * The `conversations` and `messages` tables do not currently carry an `org_id`
+ * column, making this a single-tenant-safe surface only. Cross-tenant data
+ * isolation for chat history is tracked as AF-008 in `threat_model.md` and
+ * must be resolved before this surface is exposed to multi-tenant production traffic.
+ *
+ * Do NOT expand the public footprint of these routes without resolving AF-008.
+ */
 import { anthropic } from '@szl-holdings/ai-engine/providers/anthropic';
 import { createResponse, createResponseStream } from '@szl-holdings/ai-engine/providers/openai';
 import { conversations, db, messages, pool } from '@szl-holdings/db';
