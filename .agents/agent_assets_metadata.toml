@@ -586,4 +586,22 @@ title = "A11oy — Medium Post (Ready to Publish)"
 id = "erC_IsD3Vu3I9_h_SIb_l"
 uri = "file://content-package/a11oy-content-package.zip"
 type = "unspecified"
-title = "A11oy Content Package (screenshots + posts + Medium HTML)"
+title = "A11oy Full Content Package (Video + Screenshots + Posts)"
+
+[[outputs]]
+id = "08E_0gsxqBX8cZ0585g3n"
+uri = "file://content-package/video/a11oy-demo-video.mp4"
+type = "video"
+title = "A11oy Demo Video (MP4 — LinkedIn Ready)"
+
+[[outputs]]
+id = "oyvpkhBazR6ABfJhjRxoC"
+uri = "file://content-package/video/a11oy-demo-16x9.mp4"
+type = "video"
+title = "A11oy Demo Video (16:9 Widescreen)"
+
+[[outputs]]
+id = "xlwOfG4KADfQsQobIZJoK"
+uri = "file://content-package/video/a11oy-demo-square.mp4"
+type = "video"
+title = "A11oy Demo Video (1:1 Square)"
