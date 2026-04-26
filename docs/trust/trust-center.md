@@ -17,11 +17,11 @@ This is not a compliance checklist. It is a record of how we build and why we bu
 
 The SZL platform is organised into four functional layers:
 
-**Observe · Decide · Act** — Real-time data acquisition, signal structuring, and domain-specific intelligence across five verticals.  
-Platforms: Lyte (business observability), Aegis (defense & intelligence), Terra (real estate intelligence), Vessels (maritime intelligence).
+**Observe · Decide · Act** — Real-time data acquisition, signal structuring, and domain-specific intelligence across six domain packs.  
+Domain packs: TENAX (cyber resilience), Counsel (legal matter command), DOMAINE (real estate intelligence), SEXTANT (maritime intelligence), PARAGON (defense & intelligence), Carlota Jo (principal advisory and consulting).
 
 **Execute** — Workflow orchestration, action routing, and human-in-the-loop approval gates.  
-System: Alloy (execution fabric and agent coordination layer).
+Systems: Alloy (execution fabric and agent coordination layer), KORA (cross-domain decision intelligence).
 
 **Advise** — Principal-led advisory translating platform intelligence into strategic decisions.  
 Platform: Carlota Jo Consulting.

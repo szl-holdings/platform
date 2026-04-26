@@ -20,7 +20,7 @@ AI outputs without traceability create noise, not trust. Signal to routing to ap
 
 **KORA** — Flagship command surface. Surfaces execution risk, ownership drift, and workflow friction before they compound. PRAXIS framework: People, Revenue, Infrastructure, Security, Market.
 
-**A11oy** — Governed agentic execution fabric. Senses, structures, correlates, explains, recommends, approves, executes, verifies, and preserves cryptographic proof in real time across all seven SZL verticals.
+**A11oy** — Governed agentic execution fabric. Senses, structures, correlates, explains, recommends, approves, executes, verifies, and preserves cryptographic proof in real time across all SZL domain packs.
 
 ---
 

@@ -104,7 +104,6 @@ This document defines the trust classification for every product surface in the 
 | Surface | Notes |
 |---------|-------|
 | `artifacts/firestorm` | Fully absorbed into Aegis. Dir exists with DEPRECATED.md. |
-| `artifacts/lyte-command-center` | Absorbed into Command. Legacy build dist present. |
 | `artifacts/imperium` | Was an internal admin concept. Never built. |
 | `artifacts/prism-counsel` | Legal matter management. Deregistered and archived. |
 | `artifacts/stephen-site` | Founder profile moved to `/founder` in szl-holdings. |
@@ -119,7 +118,7 @@ The SZL Holdings platform upholds the following honesty standards for all invest
 2. **Demo data must be labeled.** Any screen showing illustrative or seeded data must carry a visible "Demo" badge.
 3. **Metrics shown in demos must be real or clearly labeled as benchmarks/targets.** Product metrics ("< 4 min signal detection", "2.4M+ signals/day") must be labeled as performance benchmarks, not production statistics, until verified with live workloads.
 4. **Financial figures require founder verification.** Any funding amounts or ARR figures in public-facing materials must be confirmed as accurate before publication.
-5. **Archived surfaces are not demoed.** The five archived artifact directories are never shown as active product.
+5. **Archived surfaces are not demoed.** Archived artifact directories (firestorm, imperium, prism-counsel, stephen-site) are never shown as active product.
 
 ---
 

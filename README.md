@@ -50,7 +50,7 @@ All screenshots are verified, unmodified captures from the live platform. No moc
 
 ![A11oy — Execution Fabric](brand/screenshots/a11oy-execution-fabric.jpg)
 
-*A11oy — seven-layer governed agentic fabric with 19 operator surfaces, live signal mesh, and cryptographic proof ledger.*
+*A11oy — seven-layer governed agentic fabric, live signal mesh, and cryptographic proof ledger.*
 
 ### FORGE — Unified Command Surface
 
@@ -100,11 +100,10 @@ All screenshots are verified, unmodified captures from the live platform. No moc
 
 | Metric | Count |
 |--------|-------|
-| Deployable artifacts | 16 |
-| Packages | 93 |
+| Deployable artifacts | 14 |
+| Packages | 100 |
 | Shared libraries | 51 |
-| Domain verticals | 8 |
-| A11oy operator surfaces | 19 |
+| Operator products | 8 |
 
 ---
 
@@ -150,8 +149,8 @@ All screenshots are verified, unmodified captures from the live platform. No moc
 
 **Active prototype / demo platform under development.**
 
-- A11oy Phase 1: fully implemented across 19 operator surfaces
-- Eight domain pack verticals: implemented and active with demo data
+- A11oy Phase 1: fully implemented
+- Six domain pack verticals: implemented and active with demo data
 - AI recommendations: multi-provider routing with governed policy constraints
 - Authentication: OIDC/PKCE with multi-role RBAC
 - All screenshots are from the active platform — no mockups or AI-generated imagery
@@ -199,6 +198,7 @@ This repository is proprietary. Source code, architecture, and implementation de
 | DOMAINE — Real Estate Intelligence | web | `/terra/` | Active prototype — domain pack |
 | SEXTANT Maritime Intelligence | web | `/vessels/` | Active prototype — domain pack |
 | Carlota Jo Consulting | web | `/carlota-jo/` | Active prototype — domain pack |
+| KORA — Decision Intelligence | web | `/lyte/` | Active prototype — decision intelligence command surface |
 | LUMINA — AI Executive Briefing | web | `/pulse/` | Active prototype — cross-domain briefing |
 | PARAGON (Investor Pitch Deck) | web | `/aegis/` | Active prototype — investor slides and ATLAS runtime |
 | SZL Holdings — Governed Autonomy Demo | video | `/szl-demo-video/` | Active prototype — 60-second demo video |
