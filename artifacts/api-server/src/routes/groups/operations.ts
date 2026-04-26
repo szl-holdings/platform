@@ -59,4 +59,9 @@ export function register(router: IRouter): void {
     '/retrieval/proof-chain',
     lazyMount(() => import('../retrieval-proof-chain'), 'retrieval-proof-chain'),
   );
+
+  router.use('/universal-search', _readLimiter);
+  router.use(
+    lazyMatch('/universal-search', () => import('../universal-search'), 'universal-search'),
+  );
 }

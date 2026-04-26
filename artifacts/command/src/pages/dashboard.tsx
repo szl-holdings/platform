@@ -58,9 +58,9 @@ function SectionNav() {
         href={`${BASE}/competitive-atlas`}
         className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80"
         style={{
-          backgroundColor: 'color-mix(in srgb, #8b7ac8 8%, var(--color-bg-elevated))',
-          border: '1px solid color-mix(in srgb, #8b7ac8 25%, transparent)',
-          color: '#a78bfa',
+          backgroundColor: 'var(--color-bg-elevated)',
+          border: '1px solid var(--color-surface-border)',
+          color: 'var(--color-fg-muted)',
         }}
       >
         <TrendingUp className="w-3 h-3" />
@@ -174,7 +174,7 @@ export function Dashboard() {
           {!activation.isLoading && (
             <ActivationBanner
               steps={activationSteps}
-              accentColor="#8b7ac8"
+              accentColor="#c9b787"
               storageKey="command_activation_banner"
               variant="banner"
               onNavigate={handleNavigate}
@@ -201,7 +201,7 @@ export function Dashboard() {
 
         <AmbientSignalRanker />
 
-        <MorningBriefingCard briefing={DEMO_BRIEFING_HISTORY[0]} accentColor="#8b7ac8" />
+        <MorningBriefingCard briefing={DEMO_BRIEFING_HISTORY[0]} accentColor="#c9b787" />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 flex flex-col gap-8">
@@ -223,7 +223,7 @@ export function Dashboard() {
         >
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div className="flex items-center gap-2">
-              <GitBranch className="w-4 h-4" style={{ color: '#8b7ac8' }} />
+              <GitBranch className="w-4 h-4" style={{ color: 'var(--color-fg-muted)' }} />
               <span
                 className="text-xs font-bold uppercase tracking-widest"
                 style={{ color: 'var(--color-fg-muted)' }}

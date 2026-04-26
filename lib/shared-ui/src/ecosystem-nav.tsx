@@ -10,6 +10,7 @@ import {
 import { type LiveNotification, useNotificationCenter } from './notification-center';
 import { SandboxToggle } from './sandbox-mode';
 import { typography } from './tokens';
+import { UniversalSearch } from './universal-search';
 import { useUserPreferences } from './use-user-preferences';
 
 export interface EcosystemApp {
@@ -2249,9 +2250,15 @@ export function EcosystemNav({
       </nav>
 
       {showSearch && (
-        <GlobalSearchPanel
+        <UniversalSearch
+          open={showSearch}
           onClose={() => setShowSearch(false)}
-          {...(onSearch !== undefined ? { onSearch } : {})}
+          onNavigate={(href) => {
+            window.location.href = href;
+          }}
+          apiBase="/api"
+          appName={currentAppName ?? 'SZL'}
+          accentColor={accentColor ?? '#c9a227'}
         />
       )}
 

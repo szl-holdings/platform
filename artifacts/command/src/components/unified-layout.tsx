@@ -1,10 +1,6 @@
 import { EvidenceDrawer } from '@szl-holdings/design-system/cockpit/evidence-drawer';
 import { useAuth } from '@szl-holdings/replit-auth-web';
-import { EnvironmentLabel } from '@szl-holdings/shared-ui/alloy-decision-card';
 import {
-  MODE_COLORS,
-  MODE_ICONS,
-  MODE_LABELS,
   useDemoMode,
 } from '@szl-holdings/shared-ui/demo-mode';
 import { useQuery } from '@tanstack/react-query';
@@ -14,7 +10,6 @@ import {
   Archive,
   BarChart3,
   Bell,
-  BellOff,
   BookOpen,
   Bot,
   Brain,
@@ -65,21 +60,26 @@ import { FabricShellProvider, useFabricShell } from '../lib/fabric-shell-context
 
 export type WorkspaceMode = 'strategy' | 'operations' | 'infrastructure';
 
-const ACCENT: Record<WorkspaceMode, string> = {
-  strategy: '#8b7ac8',
-  operations: '#d4a054',
-  infrastructure: '#c9a227',
+const T = {
+  bg: '#0a0a0a',
+  surface: 'rgba(255,255,255,0.018)',
+  border: 'rgba(255,255,255,0.08)',
+  borderStrong: 'rgba(255,255,255,0.12)',
+  text: '#f5f5f5',
+  textDim: '#8a8a8a',
+  textMuted: '#5e5e5e',
+  accent: '#c9b787',
+  mono: 'ui-monospace, SFMono-Regular, Menlo, monospace',
 };
 
 const WORKSPACE_TABS: {
   mode: WorkspaceMode;
   label: string;
   icon: typeof LayoutDashboard;
-  sublabel: string;
 }[] = [
-  { mode: 'strategy', label: 'Strategy', sublabel: 'Governed Decision Loop', icon: Globe2 },
-  { mode: 'operations', label: 'Operations', sublabel: 'Lyte — AIOps', icon: Zap },
-  { mode: 'infrastructure', label: 'Infrastructure', sublabel: 'IMPERIUM', icon: Shield },
+  { mode: 'strategy', label: 'Strategy', icon: Globe2 },
+  { mode: 'operations', label: 'Operations', icon: Zap },
+  { mode: 'infrastructure', label: 'Infrastructure', icon: Shield },
 ];
 
 type NavItemDef = { href: string; label: string; icon: typeof LayoutDashboard; external?: boolean };
@@ -103,12 +103,7 @@ const STRATEGY_NAV: NavGroup[] = [
       { href: '/strategy/atlas-runtime', label: 'Cross-Domain Twin View', icon: Layers },
       { href: '/strategy/digital-twins', label: 'Digital Twin Registry', icon: Cpu },
       { href: '/strategy/worldline-registry', label: 'Worldline Registry', icon: GitBranch },
-      {
-        href: '/vessels/atlas-runtime',
-        label: 'Vessels ATLAS Runtime',
-        icon: Satellite,
-        external: true,
-      },
+      { href: '/vessels/atlas-runtime', label: 'Vessels ATLAS Runtime', icon: Satellite, external: true },
       { href: '/terra/atlas-runtime', label: 'Terra ATLAS Runtime', icon: Map, external: true },
     ],
   },
@@ -239,7 +234,7 @@ const OPERATIONS_NAV: NavGroup[] = [
       { href: '/operations/finops', label: 'FinOps', icon: DollarSign },
       { href: '/operations/on-call', label: 'On-Call', icon: Phone },
       { href: '/operations/runbook-studio', label: 'Runbook Studio', icon: BookOpen },
-      { href: '/operations/noise-reduction', label: 'Noise Reduction', icon: BellOff },
+      { href: '/operations/noise-reduction', label: 'Noise Reduction', icon: Bell },
     ],
   },
   {
@@ -316,14 +311,14 @@ function SectionHeader({ label }: { label: string }) {
     <div
       aria-hidden="true"
       style={{
-        padding: '0.5rem 0.625rem 0.25rem',
-        fontSize: '7px',
-        fontWeight: 700,
+        padding: '0.625rem 1rem 0.25rem',
+        fontSize: '0.5625rem',
+        fontWeight: 500,
         letterSpacing: '0.14em',
         textTransform: 'uppercase',
-        color: 'rgba(255,255,255,0.6)',
-        fontFamily: 'monospace',
-        marginTop: '0.5rem',
+        color: T.textMuted,
+        fontFamily: T.mono,
+        marginTop: '0.375rem',
       }}
     >
       {label}
@@ -336,7 +331,6 @@ function NavItem({
   label,
   icon: Icon,
   isActive,
-  accent,
   badge,
   external,
 }: {
@@ -344,57 +338,69 @@ function NavItem({
   label: string;
   icon: typeof LayoutDashboard;
   isActive: boolean;
-  accent: string;
   badge?: ReactNode;
   external?: boolean;
 }) {
-  const className =
-    'flex items-center gap-2 px-2.5 py-[5px] text-[10px] font-medium transition-all relative group rounded';
-  const style = {
-    color: isActive ? accent : 'rgba(255,255,255,0.75)',
-    background: isActive ? `${accent}12` : 'transparent',
-  } as const;
+  const s: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.3rem 1rem',
+    fontSize: '0.75rem',
+    fontWeight: isActive ? 500 : 400,
+    color: isActive ? T.text : T.textDim,
+    background: isActive ? 'rgba(255,255,255,0.03)' : 'transparent',
+    borderLeft: isActive ? `2px solid ${T.accent}` : '2px solid transparent',
+    textDecoration: 'none',
+    letterSpacing: '-0.005em',
+    transition: 'color 0.15s, background 0.15s',
+    cursor: 'pointer',
+  };
   const inner = (
     <>
-      {isActive && (
-        <div
-          className="absolute left-0 top-1 bottom-1 w-[2px] rounded-r"
-          style={{ background: accent }}
-        />
-      )}
-      <Icon
-        className="w-3 h-3 shrink-0"
-        style={{ color: isActive ? accent : 'rgba(255,255,255,0.65)' }}
-      />
-      <span className="flex-1 truncate">{label}</span>
+      <Icon style={{ width: 13, height: 13, flexShrink: 0, color: isActive ? T.text : T.textMuted, opacity: isActive ? 1 : 0.7 }} />
+      <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
       {badge}
       {external && (
-        <ChevronRight
-          className="w-2.5 h-2.5 shrink-0 -rotate-45"
-          style={{ color: 'rgba(255,255,255,0.25)' }}
-        />
+        <ChevronRight style={{ width: 10, height: 10, flexShrink: 0, color: T.textMuted, transform: 'rotate(-45deg)' }} />
       )}
     </>
   );
   if (external) {
-    return (
-      <a href={href} className={className} style={style}>
-        {inner}
-      </a>
-    );
+    return <a href={href} style={s}>{inner}</a>;
   }
+  return <Link href={href} style={s}>{inner}</Link>;
+}
+
+function CountBadge({ count, title }: { count: number; title?: string }) {
+  if (!count) return null;
   return (
-    <Link href={href} className={className} style={style}>
-      {inner}
-    </Link>
+    <span
+      style={{
+        fontSize: '0.5625rem',
+        fontFamily: T.mono,
+        fontWeight: 600,
+        padding: '0 0.3rem',
+        borderRadius: 4,
+        color: T.textDim,
+        background: 'rgba(255,255,255,0.04)',
+        border: `1px solid ${T.border}`,
+        minWidth: 14,
+        textAlign: 'center',
+        lineHeight: '15px',
+        flexShrink: 0,
+      }}
+      title={title}
+    >
+      {count > 99 ? '99+' : count}
+    </span>
   );
 }
 
-function ConsolesOverviewBadge({ accent }: { accent: string }) {
+function ConsolesOverviewBadge() {
   const base = (import.meta.env.BASE_URL ?? '/command/').replace(/\/$/, '');
   const apiUrl = (path: string) => `${base}/api${path}`;
-
-  const fetchJson = <T,>(url: string): Promise<T> =>
+  const fetchJson = <TData,>(url: string): Promise<TData> =>
     fetch(url, { credentials: 'include' }).then((r) =>
       r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)),
     );
@@ -402,25 +408,17 @@ function ConsolesOverviewBadge({ accent }: { accent: string }) {
   const evalsQuery = useQuery<{ recentRuns?: Array<{ regressionSeverity?: string }> }>({
     queryKey: ['cognitive-overview-badge', 'evals-summary'],
     queryFn: () => fetchJson(apiUrl('/cognitive/evals/summary')),
-    refetchInterval: 30_000,
-    staleTime: 15_000,
-    retry: 0,
+    refetchInterval: 30_000, staleTime: 15_000, retry: 0,
   });
-
   const approvalsQuery = useQuery<{ data?: unknown[]; meta?: { total?: number } }>({
     queryKey: ['cognitive-overview-badge', 'approvals-pending'],
     queryFn: () => fetchJson(apiUrl('/approvals?status=pending&limit=10')),
-    refetchInterval: 30_000,
-    staleTime: 15_000,
-    retry: 0,
+    refetchInterval: 30_000, staleTime: 15_000, retry: 0,
   });
-
   const tracesQuery = useQuery<{ data?: Array<{ status?: string; errors?: unknown[] }> }>({
     queryKey: ['cognitive-overview-badge', 'traces-recent'],
     queryFn: () => fetchJson(apiUrl('/cognitive/traces?limit=10')),
-    refetchInterval: 30_000,
-    staleTime: 15_000,
-    retry: 0,
+    refetchInterval: 30_000, staleTime: 15_000, retry: 0,
   });
 
   const regressions = (evalsQuery.data?.recentRuns ?? []).filter(
@@ -430,37 +428,12 @@ function ConsolesOverviewBadge({ accent }: { accent: string }) {
   const flagged = (tracesQuery.data?.data ?? []).filter(
     (t) => t.status === 'flagged' || (t.errors && t.errors.length > 0),
   ).length;
-
   const total = regressions + approvals + flagged;
-  if (!total) return null;
 
-  const titleParts: string[] = [];
-  if (approvals)
-    titleParts.push(`${approvals} pending policy approval${approvals === 1 ? '' : 's'}`);
-  if (regressions)
-    titleParts.push(`${regressions} active regression${regressions === 1 ? '' : 's'}`);
-  if (flagged) titleParts.push(`${flagged} flagged trace${flagged === 1 ? '' : 's'}`);
-
-  return (
-    <span
-      className="text-[8px] font-mono font-bold px-1 rounded shrink-0"
-      style={{
-        color: accent,
-        background: `${accent}1a`,
-        border: `1px solid ${accent}40`,
-        minWidth: 14,
-        textAlign: 'center',
-        lineHeight: '13px',
-      }}
-      data-testid="consoles-overview-badge"
-      title={titleParts.join(' · ')}
-    >
-      {total > 99 ? '99+' : total}
-    </span>
-  );
+  return <CountBadge count={total} title={total ? `${total} items needing attention` : undefined} />;
 }
 
-function CommandCenterBadge({ accent }: { accent: string }) {
+function CommandCenterBadge() {
   const base = (import.meta.env.BASE_URL ?? '/command/').replace(/\/$/, '');
   const { data } = useQuery<{ total: number }>({
     queryKey: ['admin', 'command-center-badge'],
@@ -468,61 +441,21 @@ function CommandCenterBadge({ accent }: { accent: string }) {
       fetch(`${base}/api/admin/command-center/badge`, { credentials: 'include' }).then((r) =>
         r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)),
       ),
-    refetchInterval: 60_000,
-    staleTime: 30_000,
-    retry: 0,
+    refetchInterval: 60_000, staleTime: 30_000, retry: 0,
   });
-  const count = data?.total ?? 0;
-  if (!count) return null;
-  return (
-    <span
-      className="text-[8px] font-mono font-bold px-1 rounded shrink-0"
-      style={{
-        color: accent,
-        background: `${accent}1a`,
-        border: `1px solid ${accent}40`,
-        minWidth: 14,
-        textAlign: 'center',
-        lineHeight: '13px',
-      }}
-      data-testid="command-center-badge"
-      title={`${count} pending item${count === 1 ? '' : 's'}`}
-    >
-      {count > 99 ? '99+' : count}
-    </span>
-  );
+  return <CountBadge count={data?.total ?? 0} />;
 }
 
-function PendingApprovalsBadge({ accent }: { accent: string }) {
+function PendingApprovalsBadge() {
   const { data } = useQuery<{ data?: unknown[]; meta?: { total?: number } }>({
     queryKey: ['guardian', 'actions-pending-count'],
     queryFn: () =>
       fetch('/api/guardian/actions?status=pending&limit=1', { credentials: 'include' }).then((r) =>
         r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)),
       ),
-    refetchInterval: 30_000,
-    staleTime: 15_000,
-    retry: 0,
+    refetchInterval: 30_000, staleTime: 15_000, retry: 0,
   });
-  const count = data?.meta?.total ?? data?.data?.length ?? 0;
-  if (!count) return null;
-  return (
-    <span
-      className="text-[8px] font-mono font-bold px-1 rounded shrink-0"
-      style={{
-        color: accent,
-        background: `${accent}1a`,
-        border: `1px solid ${accent}40`,
-        minWidth: 14,
-        textAlign: 'center',
-        lineHeight: '13px',
-      }}
-      data-testid="policy-approvals-badge"
-      title={`${count} pending policy approval${count === 1 ? '' : 's'}`}
-    >
-      {count > 99 ? '99+' : count}
-    </span>
-  );
+  return <CountBadge count={data?.meta?.total ?? data?.data?.length ?? 0} />;
 }
 
 function WorkspaceSwitcher({
@@ -533,29 +466,36 @@ function WorkspaceSwitcher({
   onModeChange: (m: WorkspaceMode) => void;
 }) {
   return (
-    <div className="px-2 py-2 border-b" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
-      <div className="grid grid-cols-3 gap-0.5">
+    <div style={{ padding: '0.5rem 0.75rem', borderBottom: `1px solid ${T.border}` }}>
+      <div style={{ display: 'flex', gap: 2 }}>
         {WORKSPACE_TABS.map((tab) => {
-          const Icon = tab.icon;
           const isActive = mode === tab.mode;
-          const accent = ACCENT[tab.mode];
           return (
             <button
               key={tab.mode}
               onClick={() => onModeChange(tab.mode)}
-              className="flex flex-col items-center py-1.5 px-1 rounded transition-all"
               style={{
-                background: isActive ? `${accent}12` : 'transparent',
-                border: `1px solid ${isActive ? `${accent}30` : 'transparent'}`,
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                padding: '0.375rem 0.25rem',
+                borderRadius: 6,
+                border: `1px solid ${isActive ? T.borderStrong : 'transparent'}`,
+                background: isActive ? 'rgba(255,255,255,0.03)' : 'transparent',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
               }}
             >
-              <Icon
-                className="w-3 h-3 mb-0.5"
-                style={{ color: isActive ? accent : 'rgba(255,255,255,0.65)' }}
-              />
               <span
-                className="text-[8px] font-semibold uppercase tracking-wider"
-                style={{ color: isActive ? accent : 'rgba(255,255,255,0.65)' }}
+                style={{
+                  fontSize: '0.5625rem',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  fontFamily: T.mono,
+                  color: isActive ? T.text : T.textMuted,
+                }}
               >
                 {tab.label}
               </span>
@@ -567,258 +507,76 @@ function WorkspaceSwitcher({
   );
 }
 
-type EnvKind = 'live' | 'pilot' | 'demo' | 'seeded' | 'simulated';
-
-function resolveEnvironment(): EnvKind {
-  const override = (import.meta.env.VITE_DEPLOY_ENV as string | undefined)?.toLowerCase();
-  if (override && ['live', 'pilot', 'demo', 'seeded', 'simulated'].includes(override)) {
-    return override as EnvKind;
-  }
-  return import.meta.env.PROD ? 'live' : 'demo';
-}
-
-interface HealthSummary {
-  summary?: {
-    total?: number;
-    liveConfigured?: number;
-    mockedDemoMode?: number;
-    manualRequired?: number;
-  };
-}
-
-function HeaderStatusPills() {
-  const { mode: persona } = useDemoMode();
-  const personaColors = MODE_COLORS[persona];
-  const environment = resolveEnvironment();
-
-  const {
-    data: health,
-    isError: healthError,
-    isLoading: healthLoading,
-  } = useQuery<HealthSummary>({
-    queryKey: ['unified-layout-svc-health'],
-    queryFn: () =>
-      fetch('/api/services/health/app/command').then((r) =>
-        r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)),
-      ),
-    refetchInterval: 60_000,
-    staleTime: 30_000,
-    retry: 1,
-  });
-
-  const summary = health?.summary;
-  const unhealthy = summary?.manualRequired ?? 0;
-  const mocked = summary?.mockedDemoMode ?? 0;
-
-  let svc: { color: string; bg: string; border: string; label: string; title: string };
-  if (healthLoading) {
-    svc = {
-      color: '#7c8a9a',
-      bg: 'rgba(124,138,154,0.08)',
-      border: 'rgba(124,138,154,0.2)',
-      label: 'SVC …',
-      title: 'Checking command-plane health',
-    };
-  } else if (healthError) {
-    svc = {
-      color: '#7c8a9a',
-      bg: 'rgba(124,138,154,0.08)',
-      border: 'rgba(124,138,154,0.2)',
-      label: 'SVC ?',
-      title: 'Health endpoint unreachable',
-    };
-  } else if (unhealthy > 0) {
-    svc = {
-      color: '#c45a4a',
-      bg: 'rgba(196,90,74,0.08)',
-      border: 'rgba(196,90,74,0.22)',
-      label: `SVC ${unhealthy}!`,
-      title: `${unhealthy} service(s) require manual attention`,
-    };
-  } else if (mocked > 0) {
-    svc = {
-      color: '#c8953c',
-      bg: 'rgba(200,149,60,0.08)',
-      border: 'rgba(200,149,60,0.22)',
-      label: `SVC MOCK`,
-      title: `${mocked} service(s) running in demo/mock mode`,
-    };
-  } else {
-    svc = {
-      color: '#6b8f71',
-      bg: 'rgba(107,143,113,0.08)',
-      border: 'rgba(107,143,113,0.2)',
-      label: 'SVC OK',
-      title: 'All command-plane services healthy',
-    };
-  }
-
-  return (
-    <div className="hidden md:flex items-center gap-1.5" data-testid="header-status-pills">
-      <EnvironmentLabel environment={environment} />
-      <span
-        className="flex items-center gap-1 text-[8px] font-mono font-semibold tracking-wider px-2 py-0.5 rounded"
-        style={{
-          color: personaColors.text,
-          background: personaColors.bg,
-          border: `1px solid ${personaColors.border}`,
-        }}
-        title={`Persona view: ${MODE_LABELS[persona]}`}
-        data-testid="header-persona-pill"
-      >
-        <span style={{ fontSize: '10px' }}>{MODE_ICONS[persona]}</span>
-        {MODE_LABELS[persona].toUpperCase()}
-      </span>
-      <span
-        className="flex items-center gap-1 text-[8px] font-mono font-semibold tracking-wider px-2 py-0.5 rounded"
-        style={{ color: svc.color, background: svc.bg, border: `1px solid ${svc.border}` }}
-        title={svc.title}
-        data-testid="header-svc-pill"
-      >
-        <span className="w-1 h-1 rounded-full" style={{ background: svc.color }} />
-        {svc.label}
-      </span>
-    </div>
-  );
-}
-
-interface LiveApiProbeResult {
-  selfHealing: boolean;
-  simulation: boolean;
-  infrastructure: boolean;
-  allLive: boolean;
-  liveCount: number;
-}
-
-async function probeEndpoint(
-  method: 'GET' | 'POST',
-  path: string,
-  body?: unknown,
-): Promise<boolean> {
-  try {
-    const res = await fetch(path, {
-      method,
-      credentials: 'include',
-      headers: body ? { 'Content-Type': 'application/json' } : undefined,
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
-async function probeLiveApis(): Promise<LiveApiProbeResult> {
-  const [selfHealing, simulation, infrastructure] = await Promise.all([
-    probeEndpoint('GET', '/api/self-healing/stats'),
-    probeEndpoint('POST', '/api/simulation/what-if', { variables: {}, iterations: 1 }),
-    probeEndpoint('GET', '/api/infrastructure/status'),
-  ]);
-  const liveCount = [selfHealing, simulation, infrastructure].filter(Boolean).length;
-  return { selfHealing, simulation, infrastructure, allLive: liveCount === 3, liveCount };
-}
-
-function DemoEnvironmentBanner({ environment }: { environment: string }) {
-  const [dismissed, setDismissed] = useState(false);
-  const isDemo = environment === 'demo' || environment === 'simulated';
-
-  const { data: probe } = useQuery<LiveApiProbeResult>({
-    queryKey: ['command-live-api-probe'],
-    queryFn: probeLiveApis,
-    refetchInterval: 60_000,
-    staleTime: 30_000,
-    retry: 0,
-    enabled: isDemo && !dismissed,
-  });
-
-  if (!isDemo || dismissed) return null;
-  if (probe?.allLive) return null;
-
-  const partial = (probe?.liveCount ?? 0) > 0;
-  const accent = partial ? '#c9a227' : '#d4a054';
-  const message = partial
-    ? `Hybrid mode · ${probe?.liveCount}/3 live API connections · Remaining surfaces use synthetic data`
-    : 'Synthetic data · No live systems connected · All actions are safe';
-  const label = partial ? 'Hybrid Mode' : 'Demo Mode';
-
-  return (
-    <div
-      className="flex items-center justify-between gap-2 px-4 py-1.5 shrink-0"
-      style={{
-        background: `linear-gradient(90deg, ${accent}14 0%, ${accent}0a 100%)`,
-        borderBottom: `1px solid ${accent}24`,
-      }}
-    >
-      <div className="flex items-center gap-2.5">
-        <FlaskConical className="w-3 h-3 shrink-0" style={{ color: accent }} />
-        <span
-          className="text-[9px] font-mono font-bold uppercase tracking-widest"
-          style={{ color: accent }}
-        >
-          {label}
-        </span>
-        <span className="hidden sm:inline text-[9px] font-mono" style={{ color: `${accent}80` }}>
-          {message}
-        </span>
-      </div>
-      <button
-        onClick={() => setDismissed(true)}
-        className="text-[9px] font-mono hover:opacity-80 transition-opacity shrink-0"
-        style={{ color: `${accent}66` }}
-        aria-label="Dismiss demo banner"
-      >
-        dismiss
-      </button>
-    </div>
-  );
-}
-
 function GlobalActivityTicker() {
   const { auditEvents } = useFabricShell();
   if (auditEvents.length === 0) return null;
   return (
     <div
-      className="shrink-0 flex items-center overflow-hidden"
       style={{
         height: 24,
-        background: 'rgba(6,10,18,0.95)',
-        borderTop: '1px solid rgba(255,255,255,0.04)',
+        display: 'flex',
+        alignItems: 'center',
+        overflow: 'hidden',
+        flexShrink: 0,
+        background: T.bg,
+        borderTop: `1px solid ${T.border}`,
       }}
     >
       <div
-        className="flex items-center gap-2 px-3 shrink-0 border-r"
-        style={{ borderColor: 'rgba(255,255,255,0.04)', height: '100%' }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          padding: '0 0.75rem',
+          flexShrink: 0,
+          borderRight: `1px solid ${T.border}`,
+          height: '100%',
+        }}
       >
-        <Activity className="w-2.5 h-2.5" style={{ color: '#8b7ac8' }} />
+        <Activity style={{ width: 10, height: 10, color: T.textMuted }} />
         <span
-          className="text-[8px] font-bold uppercase tracking-widest"
-          style={{ color: '#8b7ac8' }}
+          style={{
+            fontSize: '0.5rem',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.14em',
+            fontFamily: T.mono,
+            color: T.textMuted,
+          }}
         >
           Fabric
         </span>
       </div>
-      <div className="flex-1 overflow-hidden">
+      <div style={{ flex: 1, overflow: 'hidden' }}>
         <div
-          className="flex items-center gap-6 pl-3 whitespace-nowrap"
-          style={{ animation: 'fabric-scroll 25s linear infinite' }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1.5rem',
+            paddingLeft: '0.75rem',
+            whiteSpace: 'nowrap',
+            animation: 'fabric-scroll 25s linear infinite',
+          }}
         >
           {[...auditEvents.slice(0, 10), ...auditEvents.slice(0, 10)].map((ev, i) => (
             <span
               key={`${ev.eventId}-${i}`}
-              className="text-[9px] shrink-0 flex items-center gap-1.5"
-              style={{ color: 'rgba(255,255,255,0.4)' }}
+              style={{
+                fontSize: '0.5625rem',
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.375rem',
+                color: T.textMuted,
+              }}
             >
               <span
-                className="w-1 h-1 rounded-full inline-block"
                 style={{
-                  background:
-                    ev.kind === 'approval'
-                      ? '#22c55e'
-                      : ev.kind === 'policy-gate'
-                        ? '#f59e0b'
-                        : ev.kind === 'agent-action'
-                          ? '#d4a054'
-                          : '#8b7ac8',
+                  width: 3,
+                  height: 3,
+                  borderRadius: '50%',
+                  display: 'inline-block',
+                  background: T.textMuted,
                 }}
               />
               {ev.action}
@@ -839,7 +597,7 @@ function GlobalEvidenceDrawerShell() {
       onClose={closeEvidenceDrawer}
       title={drawerTitle}
       evidence={drawerEvidence}
-      accent="#8b7ac8"
+      accent={T.accent}
     />
   );
 }
@@ -855,7 +613,6 @@ function UnifiedLayoutInner({
 }) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const accent = ACCENT[mode];
   const { user } = useAuth();
   const userRoles: string[] = (user as { roles?: string[] } | null | undefined)?.roles ?? [];
   const isAdmin = userRoles.some((r) => ADMIN_ROLES.has(r));
@@ -883,47 +640,60 @@ function UnifiedLayoutInner({
   }, [location, mode]);
 
   return (
-    <div className="flex h-full overflow-hidden" style={{ background: '#060a12' }}>
+    <div style={{ display: 'flex', height: '100%', overflow: 'hidden', background: T.bg, fontFeatureSettings: '"ss01", "cv11"' }}>
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-10 md:hidden"
           onClick={() => setSidebarOpen(false)}
+          style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(0,0,0,0.6)',
+            zIndex: 10,
+          }}
         />
       )}
 
       <aside
-        className={[
-          'flex flex-col shrink-0 relative z-20 transition-transform duration-200',
-          'fixed md:relative inset-y-0 left-0 w-52',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
-        ].join(' ')}
-        style={{ background: '#060a12', borderRight: '1px solid rgba(255,255,255,0.04)' }}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexShrink: 0,
+          width: 210,
+          background: T.bg,
+          borderRight: `1px solid ${T.border}`,
+          position: 'relative',
+          zIndex: 20,
+          overflow: 'hidden',
+        }}
       >
         <div
-          className="h-12 flex items-center px-3 border-b"
-          style={{ borderColor: 'rgba(255,255,255,0.04)' }}
+          style={{
+            height: 48,
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 0.875rem',
+            borderBottom: `1px solid ${T.border}`,
+            gap: '0.5rem',
+          }}
         >
-          <div className="flex items-center gap-2">
-            <div
-              className="w-6 h-6 rounded flex items-center justify-center"
-              style={{ background: `${accent}12`, border: `1px solid ${accent}20` }}
-            >
-              <Globe2 className="w-3.5 h-3.5" style={{ color: accent }} />
-            </div>
-            <div>
-              <div
-                className="text-[11px] font-bold tracking-wide leading-none"
-                style={{ color: 'rgba(255,255,255,0.9)' }}
-              >
-                COMMAND
-              </div>
-              <div
-                aria-hidden="true"
-                className="text-[7px] uppercase tracking-[0.15em] mt-px"
-                style={{ color: accent }}
-              >
-                Unified Command
-              </div>
+          <div
+            style={{
+              width: 20,
+              height: 20,
+              borderRadius: 4,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: `1px solid ${T.borderStrong}`,
+              fontSize: '0.5625rem',
+              fontFamily: T.mono,
+              color: T.text,
+            }}
+          >
+            C
+          </div>
+          <div>
+            <div style={{ fontSize: '0.8125rem', fontWeight: 500, color: T.text, lineHeight: 1, letterSpacing: '-0.01em' }}>
+              Command
             </div>
           </div>
         </div>
@@ -938,7 +708,12 @@ function UnifiedLayoutInner({
 
         <nav
           ref={navScrollRef}
-          className="flex-1 min-h-0 px-1.5 py-1 overflow-y-auto flex flex-col"
+          style={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: 'auto',
+            padding: '0.25rem 0',
+          }}
         >
           {navGroups.map((group) => (
             <div
@@ -947,13 +722,7 @@ function UnifiedLayoutInner({
             >
               <SectionHeader label={group.section} />
               {group.items.map((item) => {
-                const exactOnlyRoutes = [
-                  '/strategy',
-                  '/operations',
-                  '/infrastructure',
-                  '/cognitive',
-                  '/strategy/cross-platform',
-                ];
+                const exactOnlyRoutes = ['/strategy', '/operations', '/infrastructure', '/cognitive', '/strategy/cross-platform'];
                 const isActive = exactOnlyRoutes.includes(item.href)
                   ? location === item.href || (location === '/' && item.href === '/strategy')
                   : location.startsWith(item.href) && !exactOnlyRoutes.includes(item.href)
@@ -961,11 +730,11 @@ function UnifiedLayoutInner({
                     : location === item.href;
                 const badge =
                   item.href === '/operations/policy-approvals' ? (
-                    <PendingApprovalsBadge accent={accent} />
+                    <PendingApprovalsBadge />
                   ) : item.href === '/cognitive/overview' ? (
-                    <ConsolesOverviewBadge accent={accent} />
+                    <ConsolesOverviewBadge />
                   ) : item.href === '/admin/command-center' ? (
-                    <CommandCenterBadge accent={accent} />
+                    <CommandCenterBadge />
                   ) : undefined;
                 return (
                   <NavItem
@@ -974,7 +743,6 @@ function UnifiedLayoutInner({
                     label={item.label}
                     icon={item.icon}
                     isActive={isActive}
-                    accent={accent}
                     badge={badge}
                     external={item.external}
                   />
@@ -984,28 +752,40 @@ function UnifiedLayoutInner({
           ))}
         </nav>
 
-        <div className="px-3 py-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
+        <div style={{ padding: '0.5rem 0.875rem', borderTop: `1px solid ${T.border}` }}>
           <div
-            className="text-[7px] uppercase tracking-widest font-mono mb-1.5"
-            style={{ color: 'rgba(255,255,255,0.65)' }}
+            style={{
+              fontSize: '0.5rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.14em',
+              fontFamily: T.mono,
+              fontWeight: 500,
+              color: T.textMuted,
+              marginBottom: '0.375rem',
+            }}
           >
             Domain Packs
           </div>
-          <div className="flex gap-1 flex-wrap">
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
             {[
-              { label: 'Aegis', href: '/aegis/', color: '#ef4444' },
-              { label: 'Terra', href: '/terra/', color: '#22c55e' },
-              { label: 'Vessels', href: '/vessels/', color: '#0ea5e9' },
-              { label: 'COUNSEL', href: '/counsel/', color: '#8b7ac8' },
+              { label: 'Aegis', href: '/aegis/' },
+              { label: 'Terra', href: '/terra/' },
+              { label: 'Vessels', href: '/vessels/' },
+              { label: 'Counsel', href: '/counsel/' },
             ].map((p) => (
               <a
                 key={p.label}
                 href={p.href}
-                className="text-[7px] px-1 py-px rounded font-mono hover:opacity-80"
                 style={{
-                  color: p.color,
-                  background: `${p.color}10`,
-                  border: `1px solid ${p.color}18`,
+                  fontSize: '0.5625rem',
+                  padding: '0.125rem 0.375rem',
+                  borderRadius: 4,
+                  fontFamily: T.mono,
+                  color: T.textDim,
+                  background: 'rgba(255,255,255,0.03)',
+                  border: `1px solid ${T.border}`,
+                  textDecoration: 'none',
+                  transition: 'color 0.15s',
                 }}
               >
                 {p.label}
@@ -1015,64 +795,115 @@ function UnifiedLayoutInner({
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
         <header
-          className="h-10 flex items-center justify-between px-3 md:px-4 shrink-0 z-10 border-b"
           style={{
-            borderColor: 'rgba(255,255,255,0.04)',
-            background: 'rgba(6,10,18,0.9)',
-            backdropFilter: 'blur(8px)',
+            height: 48,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0 1.25rem',
+            flexShrink: 0,
+            zIndex: 10,
+            borderBottom: `1px solid ${T.border}`,
+            background: 'rgba(10,10,10,0.92)',
+            backdropFilter: 'blur(12px)',
           }}
         >
-          <div className="flex items-center gap-2.5">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden p-1 rounded hover:bg-white/5 mr-1"
-              style={{ color: 'rgba(255,255,255,0.5)' }}
+              style={{
+                display: 'none',
+                padding: 4,
+                borderRadius: 4,
+                background: 'none',
+                border: 'none',
+                color: T.textDim,
+                cursor: 'pointer',
+              }}
+              className="md-show"
             >
-              {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              {sidebarOpen ? <X style={{ width: 16, height: 16 }} /> : <Menu style={{ width: 16, height: 16 }} />}
             </button>
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: accent }} />
-            <span className="text-[11px] font-mono font-semibold" style={{ color: accent }}>
+            <span style={{
+              fontSize: '0.8125rem',
+              fontWeight: 500,
+              color: T.text,
+              letterSpacing: '-0.01em',
+            }}>
               {WORKSPACE_TABS.find((t) => t.mode === mode)?.label}
             </span>
-            <span className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.65)' }}>
-              · {WORKSPACE_TABS.find((t) => t.mode === mode)?.sublabel}
-            </span>
-            <div
-              className="hidden md:block w-px h-3.5 mx-1"
-              style={{ background: 'rgba(255,255,255,0.06)' }}
-            />
-            <HeaderStatusPills />
+            <span style={{
+              width: 1,
+              height: 14,
+              background: T.border,
+            }} />
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              fontSize: '0.6875rem',
+              fontFamily: T.mono,
+              color: T.textDim,
+              letterSpacing: '0.04em',
+            }}>
+              <span style={{
+                width: 5,
+                height: 5,
+                borderRadius: '50%',
+                background: T.accent,
+                boxShadow: `0 0 6px ${T.accent}`,
+              }} />
+              Operational
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
             <button
               aria-label="Notifications"
-              className="relative p-1 rounded hover:bg-white/5 transition-colors"
-              style={{ color: 'rgba(255,255,255,0.75)' }}
+              style={{
+                padding: 4,
+                borderRadius: 4,
+                background: 'none',
+                border: 'none',
+                color: T.textDim,
+                cursor: 'pointer',
+                transition: 'color 0.15s',
+              }}
             >
-              <Bell className="w-3.5 h-3.5" />
+              <Bell style={{ width: 14, height: 14 }} />
             </button>
-            <div className="text-right hidden sm:block">
-              <div className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                Stephen Lutar
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 500, color: T.text, lineHeight: 1.2, letterSpacing: '-0.005em' }}>
+                {(user as { firstName?: string } | null)?.firstName ?? 'Stephen Lutar'}
               </div>
-              <div className="text-[8px] font-mono" style={{ color: accent }}>
+              <div style={{ fontSize: '0.5625rem', fontFamily: T.mono, color: T.textMuted, letterSpacing: '0.04em' }}>
                 SZL Holdings
               </div>
             </div>
             <div
-              className="w-6 h-6 rounded flex items-center justify-center text-[9px] font-bold"
-              style={{ background: `${accent}12`, border: `1px solid ${accent}20`, color: accent }}
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: 6,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.5625rem',
+                fontWeight: 600,
+                fontFamily: T.mono,
+                background: 'rgba(255,255,255,0.04)',
+                border: `1px solid ${T.borderStrong}`,
+                color: T.text,
+              }}
             >
               SL
             </div>
           </div>
         </header>
 
-        <DemoEnvironmentBanner environment={resolveEnvironment()} />
-
-        <main className="flex-1 overflow-auto" style={{ background: '#080c14' }}>
+        <main style={{ flex: 1, overflowY: 'auto', background: T.bg }}>
           {children}
         </main>
 

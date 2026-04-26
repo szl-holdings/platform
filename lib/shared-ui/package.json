@@ -33,6 +33,7 @@
     "./AuthGate": "./src/AuthGate.tsx",
     "./ecosystem-nav": "./src/ecosystem-nav.tsx",
     "./command-palette": "./src/command-palette.tsx",
+    "./universal-search": "./src/universal-search.tsx",
     "./collaboration": "./src/collaboration.tsx",
     "./data-export": "./src/data-export.tsx",
     "./keyboard-shortcuts": "./src/keyboard-shortcuts.tsx",

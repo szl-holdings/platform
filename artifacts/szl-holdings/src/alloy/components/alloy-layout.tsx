@@ -3,10 +3,13 @@ import {
   CommandPalette,
   createBaselineWebActions,
   getEcosystemSwitchCommands,
-  useCommandPalette,
   useRegisterCommands,
 } from '@szl-holdings/shared-ui/command-palette';
 import { SectionErrorBoundary } from '@szl-holdings/shared-ui/error-boundary';
+import {
+  UniversalSearch,
+  useUniversalSearch,
+} from '@szl-holdings/shared-ui/universal-search';
 import {
   GettingStartedChecklist,
   type OnboardingConfig,
@@ -528,17 +531,19 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
       },
     }),
   );
-  const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(alloyCommands);
+  const { open: searchOpen, setOpen: setSearchOpen } = useUniversalSearch();
 
   return (
     <div className="flex h-full overflow-hidden">
-      <CommandPalette
-        open={paletteOpen}
-        onClose={() => setPaletteOpen(false)}
-        commands={alloyCommands}
-        appName="Counsel"
+      <UniversalSearch
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onNavigate={(href) => {
+          window.location.href = href;
+        }}
+        apiBase="/api"
+        appName="SZL"
         accentColor="#4B8BDB"
-        placeholder="Navigate to any screen or / for slash commands..."
       />
       {sidebarOpen && (
         <div
@@ -914,7 +919,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setPaletteOpen(true)}
+              onClick={() => setSearchOpen(true)}
               className="flex items-center gap-2 px-2.5 py-1 rounded-lg hover:bg-white/5 transition-colors text-[10px] font-mono"
               style={{
                 color: 'rgba(255,255,255,0.35)',

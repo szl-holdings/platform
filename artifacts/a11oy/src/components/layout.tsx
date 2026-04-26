@@ -12,61 +12,68 @@ const NAV_GROUPS = [
   {
     label: 'NOW',
     items: [
-      { href: '/',        label: 'Home',          icon: '◈' },
-      { href: '/now',     label: 'Now Board',     icon: '⬡' },
-      { href: '/command', label: 'Command',        icon: '▸' },
+      { href: '/',        label: 'Home' },
+      { href: '/now',     label: 'Now Board' },
+      { href: '/command', label: 'Command' },
     ],
   },
   {
     label: 'FABRIC',
     items: [
-      { href: '/fabric',     label: 'Fabric',       icon: '◫' },
-      { href: '/verticals',  label: 'Verticals',    icon: '▤' },
-      { href: '/signals',    label: 'Signal Mesh',  icon: '∿' },
-      { href: '/outcomes',   label: 'Outcomes',     icon: '◎' },
-      { href: '/actions',    label: 'Action Rail',  icon: '→' },
-      { href: '/proof',      label: 'Proof Ledger', icon: '◇' },
-      { href: '/governance', label: 'Governance',   icon: '⚖' },
+      { href: '/fabric',     label: 'Fabric' },
+      { href: '/verticals',  label: 'Verticals' },
+      { href: '/signals',    label: 'Signal Mesh' },
+      { href: '/outcomes',   label: 'Outcomes' },
+      { href: '/actions',    label: 'Action Rail' },
+      { href: '/proof',      label: 'Proof Ledger' },
+      { href: '/governance', label: 'Governance' },
     ],
   },
   {
     label: 'RUNTIME',
     items: [
-      { href: '/agents',    label: 'Operators',    icon: '⊙' },
-      { href: '/workcells', label: 'Workcells',    icon: '△' },
-      { href: '/evals',     label: 'MirrorEval',   icon: '⟺' },
-      { href: '/memory',    label: 'Memory',       icon: '⊛' },
-      { href: '/pce',       label: 'PCE',          icon: '⊡' },
+      { href: '/agents',    label: 'Operators' },
+      { href: '/workcells', label: 'Workcells' },
+      { href: '/evals',     label: 'MirrorEval' },
+      { href: '/memory',    label: 'Memory' },
+      { href: '/pce',       label: 'PCE' },
     ],
   },
   {
     label: 'PLATFORM',
     items: [
-      { href: '/tools',        label: 'Tools',        icon: '⊕' },
-      { href: '/skills',       label: 'Skills',       icon: '⊗' },
-      { href: '/model-router', label: 'Model Router', icon: '⊞' },
-      { href: '/connectors',   label: 'Connectors',   icon: '⬟' },
-      { href: '/twins',        label: 'Twin Foundry', icon: '⊘' },
-      { href: '/terminal',     label: 'Terminal',     icon: '▷' },
+      { href: '/tools',        label: 'Tools' },
+      { href: '/skills',       label: 'Skills' },
+      { href: '/model-router', label: 'Model Router' },
+      { href: '/connectors',   label: 'Connectors' },
+      { href: '/twins',        label: 'Twin Foundry' },
+      { href: '/terminal',     label: 'Terminal' },
     ],
   },
   {
     label: 'TRUST',
     items: [
-      { href: '/trust',         label: 'Trust Center',  icon: '◆' },
-      { href: '/sovereign',     label: 'Sovereign',     icon: '⬛' },
-      { href: '/boardroom',     label: 'Boardroom',     icon: '▣' },
-      { href: '/investor-demo', label: 'Investor Demo', icon: '▶' },
-      { href: '/demo',          label: 'Demo Mode',     icon: '⬚' },
-      { href: '/about',         label: 'About',         icon: '◻' },
+      { href: '/trust',         label: 'Trust Center' },
+      { href: '/sovereign',     label: 'Sovereign' },
+      { href: '/boardroom',     label: 'Boardroom' },
+      { href: '/investor-demo', label: 'Investor Demo' },
+      { href: '/about',         label: 'About' },
     ],
   },
 ];
 
-function useActiveRoute() {
-  const [location] = useLocation();
-  return location;
-}
+const TOKENS = {
+  bg: '#0a0a0a',
+  bgPure: '#000000',
+  surface: 'rgba(255,255,255,0.018)',
+  border: 'rgba(255,255,255,0.08)',
+  borderStrong: 'rgba(255,255,255,0.12)',
+  text: '#f5f5f5',
+  textDim: '#8a8a8a',
+  textMuted: '#5e5e5e',
+  accent: '#c9b787',
+  mono: 'var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)',
+};
 
 interface LayoutProps {
   children: ReactNode;
@@ -74,109 +81,112 @@ interface LayoutProps {
 }
 
 export function Layout({ children, fullscreen = false }: LayoutProps) {
-  const [bannerDismissed, setBannerDismissed] = useState(() => {
-    try { return sessionStorage.getItem('a11oy-banner-dismissed') === '1'; } catch { return false; }
-  });
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const location = useActiveRoute();
-
-  function dismissBanner() {
-    try { sessionStorage.setItem('a11oy-banner-dismissed', '1'); } catch {}
-    setBannerDismissed(true);
-  }
+  const [location] = useLocation();
 
   if (fullscreen) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-a11oy-navy)', color: 'var(--color-a11oy-text)' }}>
+      <div style={{ minHeight: '100vh', backgroundColor: TOKENS.bg, color: TOKENS.text, display: 'flex', flexDirection: 'column' }}>
         {children}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-a11oy-navy)', color: 'var(--color-a11oy-text)' }}>
-      {!bannerDismissed && (
-        <div
-          className="flex items-center justify-between gap-4 px-4 py-2 text-xs font-mono"
-          style={{ backgroundColor: 'rgba(245,158,11,0.08)', borderBottom: '1px solid rgba(245,158,11,0.2)', color: '#f59e0b' }}
-        >
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#f59e0b' }} />
-            DEMO MODE — All data is synthetic. Connect enterprise sources to activate Live Mode.
-          </div>
-          <button
-            type="button"
-            onClick={dismissBanner}
-            className="opacity-60 hover:opacity-100 transition-opacity"
-            style={{ color: '#f59e0b', background: 'none', border: 'none', cursor: 'pointer' }}
-            aria-label="Dismiss banner"
-          >
-            ✕
-          </button>
-        </div>
-      )}
-      <div
-        className="flex items-center justify-between px-4 h-12 border-b sticky top-0 z-40 backdrop-blur-sm"
-        style={{ backgroundColor: 'rgba(10,15,30,0.94)', borderColor: 'var(--color-a11oy-border)' }}
-      >
-        <div className="flex items-center gap-3">
+    <div style={{ minHeight: '100vh', backgroundColor: TOKENS.bg, color: TOKENS.text, display: 'flex', flexDirection: 'column', fontFeatureSettings: '"ss01", "cv11"' }}>
+      {/* TOP BAR — minimal, monochrome */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 1.25rem',
+        height: 52,
+        borderBottom: `1px solid ${TOKENS.border}`,
+        position: 'sticky',
+        top: 0,
+        zIndex: 40,
+        background: 'rgba(10,10,10,0.92)',
+        backdropFilter: 'blur(12px)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <button
             type="button"
             onClick={() => setSidebarOpen(o => !o)}
-            className="w-7 h-7 flex items-center justify-center rounded text-sm transition-colors"
-            style={{ color: 'var(--color-a11oy-text-ghost)', background: 'none', border: 'none', cursor: 'pointer' }}
+            style={{
+              width: 26, height: 26,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'none', border: 'none',
+              color: TOKENS.textDim, cursor: 'pointer',
+              fontSize: 13,
+            }}
             aria-label="Toggle sidebar"
-          >
-            ☰
-          </button>
-          <Link href={b('/')} className="flex items-center gap-2" style={{ textDecoration: 'none' }}>
-            <div
-              className="w-5 h-5 rounded flex items-center justify-center font-mono text-xs font-bold"
-              style={{ backgroundColor: 'var(--color-a11oy-blue)', color: 'white' }}
-            >
-              A
-            </div>
-            <span className="font-display font-semibold text-sm tracking-tight" style={{ color: 'var(--color-a11oy-text)' }}>
-              A11oy
-            </span>
-            <span className="font-mono px-1 py-0.5 rounded hidden sm:inline-block" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: 'var(--color-a11oy-text-ghost)', fontSize: '9px' }}>
-              v2.0 · DEMO
+          >☰</button>
+          <Link href={b('/')} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              width: 18, height: 18,
+              border: `1px solid ${TOKENS.borderStrong}`,
+              borderRadius: 3,
+              fontSize: 10, fontFamily: TOKENS.mono, color: TOKENS.text,
+            }}>a</span>
+            <span style={{ fontSize: '0.875rem', fontWeight: 500, color: TOKENS.text, letterSpacing: '-0.01em' }}>
+              a11oy
             </span>
           </Link>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-1.5 text-xs" style={{ color: '#10b981' }}>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#10b981' }} />
-            <span className="font-mono">Fabric operational</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+            fontSize: '0.6875rem', fontFamily: TOKENS.mono, color: TOKENS.textDim,
+            letterSpacing: '0.04em',
+          }}>
+            <span style={{
+              width: 5, height: 5, borderRadius: '50%',
+              background: TOKENS.accent, boxShadow: `0 0 6px ${TOKENS.accent}`,
+            }} />
+            Fabric operational
           </div>
           <Link
-            href={b('/boardroom')}
-            className="text-xs px-2.5 py-1 rounded font-medium hidden sm:inline-block"
-            style={{ backgroundColor: 'rgba(245,158,11,0.12)', color: '#f59e0b', textDecoration: 'none', border: '1px solid rgba(245,158,11,0.25)' }}
-          >
-            Boardroom
-          </Link>
-          <Link
             href={b('/investor-demo')}
-            className="text-xs px-2.5 py-1 rounded font-medium"
-            style={{ backgroundColor: 'var(--color-a11oy-blue)', color: 'white', textDecoration: 'none' }}
+            style={{
+              padding: '0.4rem 0.875rem',
+              fontSize: '0.75rem', fontWeight: 500,
+              color: '#0a0a0a',
+              background: TOKENS.text,
+              borderRadius: 999,
+              textDecoration: 'none',
+              letterSpacing: '-0.005em',
+            }}
           >
-            Investor Demo
+            Investor demo
           </Link>
         </div>
       </div>
-      <div className="flex flex-1" style={{ minHeight: 0 }}>
+
+      <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         {sidebarOpen && (
-          <aside
-            className="w-48 border-r flex-shrink-0 overflow-y-auto py-4"
-            style={{ backgroundColor: 'var(--color-a11oy-deep)', borderColor: 'var(--color-a11oy-border)', position: 'sticky', top: 48, height: 'calc(100vh - 48px)' }}
-          >
+          <aside style={{
+            width: 200,
+            borderRight: `1px solid ${TOKENS.border}`,
+            flexShrink: 0,
+            overflowY: 'auto',
+            padding: '1.5rem 0',
+            background: TOKENS.bg,
+            position: 'sticky',
+            top: 52,
+            height: 'calc(100vh - 52px)',
+          }}>
             {NAV_GROUPS.map(group => (
-              <div key={group.label} className="mb-4">
-                <div
-                  className="px-4 mb-1 text-xs font-mono font-medium tracking-widest"
-                  style={{ color: 'var(--color-a11oy-text-ghost)' }}
-                >
+              <div key={group.label} style={{ marginBottom: '1.5rem' }}>
+                <div style={{
+                  padding: '0 1.25rem',
+                  marginBottom: '0.5rem',
+                  fontSize: '0.625rem',
+                  fontFamily: TOKENS.mono,
+                  fontWeight: 500,
+                  letterSpacing: '0.16em',
+                  color: TOKENS.textMuted,
+                }}>
                   {group.label}
                 </div>
                 {group.items.map(item => {
@@ -189,20 +199,20 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
                     <Link
                       key={item.href}
                       href={fullHref}
-                      className="flex items-center gap-2 px-4 py-1.5 text-xs transition-colors"
                       style={{
+                        display: 'block',
+                        padding: '0.4rem 1.25rem',
+                        fontSize: '0.8125rem',
                         textDecoration: 'none',
-                        color: isActive ? 'var(--color-a11oy-text)' : 'var(--color-a11oy-text-sub)',
-                        backgroundColor: isActive ? 'rgba(59,130,246,0.08)' : 'transparent',
-                        borderLeft: isActive ? '2px solid var(--color-a11oy-blue)' : '2px solid transparent',
+                        color: isActive ? TOKENS.text : TOKENS.textDim,
+                        background: isActive ? 'rgba(255,255,255,0.03)' : 'transparent',
+                        borderLeft: isActive ? `2px solid ${TOKENS.accent}` : '2px solid transparent',
                         fontWeight: isActive ? 500 : 400,
-                        display: 'flex',
+                        letterSpacing: '-0.005em',
+                        transition: 'color 0.15s, background 0.15s',
                       }}
                     >
-                      <span className="text-xs w-4 text-center flex-shrink-0" style={{ color: isActive ? 'var(--color-a11oy-blue)' : 'var(--color-a11oy-text-ghost)' }}>
-                        {item.icon}
-                      </span>
-                      <span>{item.label}</span>
+                      {item.label}
                     </Link>
                   );
                 })}
@@ -210,7 +220,7 @@ export function Layout({ children, fullscreen = false }: LayoutProps) {
             ))}
           </aside>
         )}
-        <main className="flex-1 overflow-y-auto p-6" style={{ minWidth: 0 }}>
+        <main style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', minWidth: 0, background: TOKENS.bg }}>
           {children}
         </main>
       </div>

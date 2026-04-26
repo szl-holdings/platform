@@ -6,11 +6,13 @@ import { Toaster } from '@szl-holdings/shared-ui/ui/sonner';
 import { useSessionRevocationToast } from '@szl-holdings/shared-ui/use-session-revocation-toast';
 import {
   type CommandItem,
-  CommandPalette,
   createBaselineWebActions,
   getEcosystemSwitchCommands,
-  useCommandPalette,
 } from '@szl-holdings/shared-ui/command-palette';
+import {
+  UniversalSearch,
+  useUniversalSearch,
+} from '@szl-holdings/shared-ui/universal-search';
 import { AgentCopilot } from '@szl-holdings/shared-ui/copilot';
 import { commandConfig } from '@szl-holdings/shared-ui/copilot-configs';
 import {
@@ -510,7 +512,7 @@ function AppShell() {
       action: () => navigate(r.href),
     })),
   ];
-  const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette(paletteCommands);
+  const { open: searchOpen, setOpen: setSearchOpen } = useUniversalSearch();
 
   useEffect(() => {
     const start = performance.now();
@@ -557,13 +559,13 @@ function AppShell() {
         accentColor={accent}
       />
       <EcosystemNav currentAppId="command" currentAppName="Unified Command" accentColor={accent} />
-      <CommandPalette
-        open={paletteOpen}
-        onClose={() => setPaletteOpen(false)}
-        commands={paletteCommands}
+      <UniversalSearch
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onNavigate={(href) => navigate(href)}
+        apiBase="/api"
         appName="Command"
         accentColor={accent}
-        placeholder="Search Command — pages, ops, infrastructure..."
       />
       <CortexVoice
         open={cortexOpen}
