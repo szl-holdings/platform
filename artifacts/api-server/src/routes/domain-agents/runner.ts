@@ -5,6 +5,7 @@ import {
   type DomainEvalContext,
   enqueueForReview,
   type RecommendationType,
+  resolveModelForAgent,
   runEvaluatorHooksForTrace,
   type TraceDomain,
   updateTraceStatus,
@@ -140,6 +141,17 @@ export async function runDomainAgentChat(
   const modelConfig = getModelConfig(agentType);
   const messages = getOrCreateConversation(conversationId, agentType);
 
+  // Resolve whether a fine-tuned model is available for this agent.
+  // Falls back silently to the base model config on any resolution error.
+  let effectiveModel = modelConfig.model;
+  try {
+    const resolution = await resolveModelForAgent(agentType, modelConfig.model, {
+      preferFineTuned: true,
+      minLifecycle: 'canary',
+    });
+    if (resolution.isFineTuned) effectiveModel = resolution.model;
+  } catch {}
+
   messages.push({ role: 'user', content: userMessage });
 
   const ai = services.ai;
@@ -198,7 +210,7 @@ export async function runDomainAgentChat(
     rounds++;
 
     const result = await ai.chatCompletion(chatMessages, {
-      model: modelConfig.model,
+      model: effectiveModel,
       maxTokens: modelConfig.maxCompletionTokens,
     });
     lastCompletion = result;
@@ -266,6 +278,16 @@ export async function streamDomainAgentChat(
   const modelConfig = getModelConfig(agentType);
   const messages = getOrCreateConversation(conversationId, agentType);
 
+  // Resolve fine-tuned model for this agent (same as non-streaming path).
+  let effectiveStreamModel = modelConfig.model;
+  try {
+    const resolution = await resolveModelForAgent(agentType, modelConfig.model, {
+      preferFineTuned: true,
+      minLifecycle: 'canary',
+    });
+    if (resolution.isFineTuned) effectiveStreamModel = resolution.model;
+  } catch {}
+
   messages.push({ role: 'user', content: userMessage });
 
   const ai = services.ai;
@@ -300,7 +322,7 @@ export async function streamDomainAgentChat(
 
   try {
     const stream = ai.streamChatCompletion(chatMessages, {
-      model: modelConfig.model,
+      model: effectiveStreamModel,
       maxTokens: modelConfig.maxCompletionTokens,
     });
 
@@ -314,7 +336,7 @@ export async function streamDomainAgentChat(
     const streamTrace = captureTrace({
       domain,
       recommendationType: recType,
-      model: modelConfig.model,
+      model: effectiveStreamModel,
       modelProvider: ai.isProviderConfigured('replit-proxy')
         ? 'replit-proxy'
         : ai.isProviderConfigured('anthropic')

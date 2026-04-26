@@ -63,9 +63,12 @@ async function submitOpenAIFineTuning(
   hyperparameters: FineTuningJobRequest['hyperparameters'],
   suffix: string,
 ): Promise<{ providerJobId: string }> {
-  const openaiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
-  if (!openaiKey) throw new Error('AI_INTEGRATIONS_OPENAI_API_KEY not configured');
-  const openaiBase = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ?? 'https://api.openai.com/v1';
+  const openaiKey = process.env.OPENAI_FINE_TUNING_API_KEY;
+  if (!openaiKey)
+    throw new Error(
+      'OPENAI_FINE_TUNING_API_KEY not configured (set this to a direct OpenAI key, not the proxy key)',
+    );
+  const openaiBase = process.env.OPENAI_FINE_TUNING_BASE_URL ?? 'https://api.openai.com/v1';
 
   const fileBlob = new Blob([samples], { type: 'application/jsonl' });
   const formData = new FormData();
@@ -144,7 +147,8 @@ async function submitHuggingFaceFineTuning(
   });
 
   if (!response.ok) {
-    return { providerJobId: `hf-simulated-${jobId}` };
+    const err = await response.text().catch(() => '');
+    throw new Error(`HuggingFace fine-tuning submission failed: ${response.status} ${err}`);
   }
 
   const data = (await response.json()) as { id: string; name: string };
@@ -157,9 +161,9 @@ async function pollOpenAIJobStatus(providerJobId: string): Promise<{
   trainingCost?: number;
   error?: string;
 }> {
-  const openaiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
-  if (!openaiKey) throw new Error('AI_INTEGRATIONS_OPENAI_API_KEY not configured');
-  const openaiBase = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ?? 'https://api.openai.com/v1';
+  const openaiKey = process.env.OPENAI_FINE_TUNING_API_KEY;
+  if (!openaiKey) throw new Error('OPENAI_FINE_TUNING_API_KEY not configured');
+  const openaiBase = process.env.OPENAI_FINE_TUNING_BASE_URL ?? 'https://api.openai.com/v1';
 
   const response = await fetch(`${openaiBase}/fine_tuning/jobs/${providerJobId}`, {
     headers: { Authorization: `Bearer ${openaiKey}` },
@@ -195,10 +199,6 @@ async function pollHuggingFaceJobStatus(providerJobId: string): Promise<{
   fineTunedModelId?: string;
   error?: string;
 }> {
-  if (providerJobId.startsWith('hf-simulated-')) {
-    return { status: 'running' };
-  }
-
   const hfToken = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
   if (!hfToken) throw new Error('HF_TOKEN not configured');
 
@@ -210,7 +210,8 @@ async function pollHuggingFaceJobStatus(providerJobId: string): Promise<{
   );
 
   if (!response.ok) {
-    return { status: 'running' };
+    const errBody = await response.text().catch(() => '');
+    throw new Error(`HuggingFace job poll failed: ${response.status} ${errBody}`);
   }
 
   const data = (await response.json()) as { status: string; model_id?: string; error?: string };
@@ -338,16 +339,54 @@ export async function pollJobStatus(jobId: string): Promise<FineTuningJobStatus>
     } else {
       polledStatus = await pollHuggingFaceJobStatus(providerJobId);
     }
-  } catch {
+  } catch (pollErr) {
+    const errMsg = pollErr instanceof Error ? pollErr.message : String(pollErr);
+    const hp = job.hyperparameters as Record<string, unknown>;
+    const consecutivePollErrors =
+      typeof hp.consecutivePollErrors === 'number' ? hp.consecutivePollErrors + 1 : 1;
+    const MAX_CONSECUTIVE_POLL_ERRORS = 5;
+
+    if (consecutivePollErrors >= MAX_CONSECUTIVE_POLL_ERRORS) {
+      // Mark as permanently failed after repeated consecutive poll errors.
+      await db
+        .update(fineTuningJobs)
+        .set({
+          status: 'failed',
+          errorMessage: `Provider poll failed ${consecutivePollErrors} consecutive times: ${errMsg}`,
+          updatedAt: new Date(),
+          completedAt: new Date(),
+          hyperparameters: { ...hp, consecutivePollErrors },
+        })
+        .where(eq(fineTuningJobs.jobId, jobId));
+      const [failed] = await db
+        .select()
+        .from(fineTuningJobs)
+        .where(eq(fineTuningJobs.jobId, jobId))
+        .limit(1);
+      return mapJobToStatus(failed ?? job);
+    }
+
+    // Transient error — keep current status, bump counter, surface error message.
+    await db
+      .update(fineTuningJobs)
+      .set({
+        errorMessage: `Transient poll error (${consecutivePollErrors}/${MAX_CONSECUTIVE_POLL_ERRORS}): ${errMsg}`,
+        updatedAt: new Date(),
+        hyperparameters: { ...hp, consecutivePollErrors },
+      })
+      .where(eq(fineTuningJobs.jobId, jobId));
     return mapJobToStatus(job);
   }
 
   const providerStatus = mapProviderStatus(polledStatus.status);
 
+  const hp = job.hyperparameters as Record<string, unknown>;
   type JobUpdate = Parameters<ReturnType<typeof db.update<typeof fineTuningJobs>>['set']>[0];
   const updatePayload: JobUpdate = {
     status: providerStatus,
     updatedAt: new Date(),
+    // Reset retry counter on any successful provider response.
+    hyperparameters: { ...hp, consecutivePollErrors: 0 },
     ...(polledStatus.fineTunedModelId ? { fineTunedModelId: polledStatus.fineTunedModelId } : {}),
     ...(polledStatus.trainingCost ? { trainingCostUsd: polledStatus.trainingCost } : {}),
     ...(polledStatus.error ? { errorMessage: polledStatus.error } : {}),
@@ -508,10 +547,9 @@ export async function cancelFineTuningJob(jobId: string): Promise<void> {
   const providerJobId = hyperparams.providerJobId as string;
 
   if (job.provider === 'openai' && providerJobId) {
-    const openaiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+    const openaiKey = process.env.OPENAI_FINE_TUNING_API_KEY;
     if (openaiKey) {
-      const openaiBase =
-        process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ?? 'https://api.openai.com/v1';
+      const openaiBase = process.env.OPENAI_FINE_TUNING_BASE_URL ?? 'https://api.openai.com/v1';
       await fetch(`${openaiBase}/fine_tuning/jobs/${providerJobId}/cancel`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${openaiKey}` },

@@ -336,6 +336,38 @@ export async function bootstrap(
   const signalFusionInterval = setInterval(runScheduledSignalFusion, signalFusionIntervalMs);
   signalFusionInterval.unref();
 
+  // Poll active fine-tuning jobs every 60 seconds so status updates flow into
+  // the DB automatically without requiring manual refresh from the admin UI.
+  const ftPollerInterval = setInterval(() => {
+    import('@szl-holdings/ai-engine')
+      .then(({ listFineTuningJobs, pollJobStatus }) => {
+        listFineTuningJobs()
+          .then(async (jobs) => {
+            const active = jobs.filter((j) =>
+              ['pending', 'preparing', 'running'].includes(j.status),
+            );
+            for (const job of active) {
+              await pollJobStatus(job.jobId).catch((err) => {
+                logger.warn({ err, jobId: job.jobId }, '[fine-tuning-poller] poll error (non-fatal)');
+              });
+            }
+            if (active.length > 0) {
+              logger.info(
+                { polled: active.length },
+                '[fine-tuning-poller] Active job statuses refreshed',
+              );
+            }
+          })
+          .catch((err) => {
+            logger.warn({ err }, '[fine-tuning-poller] Failed to list jobs (non-fatal)');
+          });
+      })
+      .catch((err) => {
+        logger.warn({ err }, '[fine-tuning-poller] Failed to import ai-engine (non-fatal)');
+      });
+  }, 60_000);
+  ftPollerInterval.unref();
+
   import('./routes/rmm')
     .then((m) => m.startSyncScheduler())
     .catch((err) => logger.warn({ err }, 'RMM sync scheduler start failed (non-fatal)'));
@@ -762,6 +794,7 @@ export async function bootstrap(
     providerHealth.stopActiveProbes();
     agentScheduler.stop();
     clearInterval(prismPoller);
+    clearInterval(ftPollerInterval);
 
     try {
       await jobQueue.shutdown();

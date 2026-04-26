@@ -15,6 +15,64 @@ import {
   type HFToolDef,
 } from './providers/hf-client.js';
 import { type RouteClass, type RouteResult, routeModel } from './providers/hf-router.js';
+import { resolveModelForAgent } from './fine-tuning/model-registry-extension.js';
+
+/**
+ * Dispatch a chat completion to the OpenAI API directly.
+ * Used when a fine-tuned model's provider is 'openai' so inference is sent
+ * to the correct endpoint instead of the HuggingFace router.
+ */
+async function openaiChatCompletion(
+  messages: HFChatMessage[],
+  route: RouteResult,
+  options?: { tools?: HFToolDef[]; responseFormat?: { type: 'json_object' } | { type: 'text' } },
+): Promise<HFCompletionResult> {
+  const apiKey = process.env.OPENAI_FINE_TUNING_API_KEY ?? process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+  if (!apiKey) throw new Error('No OpenAI API key configured for cross-provider fine-tuned dispatch');
+  const baseUrl = process.env.OPENAI_FINE_TUNING_BASE_URL ?? 'https://api.openai.com/v1';
+
+  const start = Date.now();
+  const body: Record<string, unknown> = {
+    model: route.model,
+    messages,
+    max_tokens: route.maxTokens,
+    temperature: route.temperature,
+  };
+  if (options?.tools?.length) body.tools = options.tools;
+  if (options?.responseFormat) body.response_format = options.responseFormat;
+
+  const response = await fetch(`${baseUrl}/chat/completions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text().catch(() => '');
+    throw new Error(`OpenAI fine-tuned dispatch error ${response.status}: ${errText}`);
+  }
+
+  const data = (await response.json()) as {
+    choices?: Array<{ message?: { content?: string }; finish_reason?: string }>;
+    usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
+  };
+
+  const choice = data.choices?.[0];
+  return {
+    content: choice?.message?.content ?? '',
+    model: route.model,
+    provider: route.provider,
+    finishReason: choice?.finish_reason ?? 'stop',
+    usage: data.usage
+      ? {
+          promptTokens: data.usage.prompt_tokens ?? 0,
+          completionTokens: data.usage.completion_tokens ?? 0,
+          totalTokens: data.usage.total_tokens ?? 0,
+        }
+      : undefined,
+    latencyMs: Date.now() - start,
+  };
+}
 
 export type { RouteClass, RouteResult };
 
@@ -132,6 +190,7 @@ export interface RouterCallOptions {
   correlationId?: string;
   taskId?: string;
   useFallback?: boolean;
+  agentId?: string;
 }
 
 export interface RouterCallResult {
@@ -153,6 +212,7 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
     correlationId,
     taskId,
     useFallback = true,
+    agentId,
   } = options;
 
   const policyCheck = checkTenantPolicy(routeClass, tenantToggles);
@@ -163,25 +223,44 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
     );
   }
 
-  const modelOverride = overrideModel ?? tenantToggles?.overrideModel?.[routeClass];
+  const baseRoute = routeModel(routeClass);
 
+  let resolvedFineTunedModel: string | undefined;
+  let resolvedFineTunedProvider: string | undefined;
+  if (agentId && !overrideModel) {
+    const resolution = await resolveModelForAgent(agentId, baseRoute.model, {
+      preferFineTuned: true,
+      minLifecycle: 'canary',
+    }).catch(() => null);
+    if (resolution?.isFineTuned) {
+      resolvedFineTunedModel = resolution.model;
+      resolvedFineTunedProvider = resolution.provider;
+    }
+  }
+
+  const modelOverride = resolvedFineTunedModel ?? overrideModel ?? tenantToggles?.overrideModel?.[routeClass];
+
+  const route = {
+    ...routeModel(routeClass, {
+      ...(modelOverride !== undefined ? { model: modelOverride } : {}),
+      ...(overrideMaxTokens !== undefined ? { maxTokens: overrideMaxTokens } : {}),
+      ...(overrideTemperature !== undefined ? { temperature: overrideTemperature } : {}),
+    }),
+    // Reflect the effective provider in the route for telemetry and policy checks.
+    ...(resolvedFineTunedProvider !== undefined ? { provider: resolvedFineTunedProvider } : {}),
+  };
+
+  // Apply allowedProviders policy against the effective resolved provider, not
+  // the static default lane provider, so fine-tuned routing is evaluated fairly.
   if (
     tenantToggles?.allowedProviders?.length &&
-    !tenantToggles.allowedProviders.includes(routeModel(routeClass).provider)
+    !tenantToggles.allowedProviders.includes(route.provider)
   ) {
     throw Object.assign(
-      new Error(
-        `Provider '${routeModel(routeClass).provider}' not in allowed providers for tenant`,
-      ),
+      new Error(`Provider '${route.provider}' not in allowed providers for tenant`),
       { code: 'PROVIDER_NOT_ALLOWED' },
     );
   }
-
-  const route = routeModel(routeClass, {
-    ...(modelOverride !== undefined ? { model: modelOverride } : {}),
-    ...(overrideMaxTokens !== undefined ? { maxTokens: overrideMaxTokens } : {}),
-    ...(overrideTemperature !== undefined ? { temperature: overrideTemperature } : {}),
-  });
 
   const start = Date.now();
   let completion: HFCompletionResult;
@@ -191,20 +270,27 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
     ...(tools !== undefined ? { tools } : {}),
     ...(responseFormat !== undefined ? { responseFormat } : {}),
   };
+
+  // Dispatch to the correct inference client based on the effective provider.
+  // OpenAI fine-tuned models must be sent to the OpenAI API directly since
+  // the HuggingFace router cannot serve them.
+  const dispatchCompletion = async (r: RouteResult): Promise<HFCompletionResult> =>
+    r.provider === 'openai' ? openaiChatCompletion(messages, r, _chatOpts) : chatCompletion(messages, r, _chatOpts);
+
   if (useFallback) {
     try {
-      completion = await chatCompletion(messages, route, _chatOpts);
+      completion = await dispatchCompletion(route);
     } catch (primaryErr) {
       const fallbackRoute = routeModel('background_batch', (modelOverride !== undefined ? { model: modelOverride } : {}));
       try {
-        completion = await chatCompletion(messages, fallbackRoute, _chatOpts);
+        completion = await dispatchCompletion(fallbackRoute);
         usedFallback = true;
       } catch {
         throw primaryErr;
       }
     }
   } else {
-    completion = await chatCompletion(messages, route, _chatOpts);
+    completion = await dispatchCompletion(route);
   }
 
   const latencyMs = Date.now() - start;

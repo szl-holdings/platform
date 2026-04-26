@@ -1150,13 +1150,15 @@ router.post(
   ),
   async (req: Request, res: Response) => {
     try {
-      const { laneType, messages, correlationId, overrideModel, overrideMaxTokens } = req.body as {
-        laneType?: string;
-        messages?: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
-        correlationId?: string;
-        overrideModel?: string;
-        overrideMaxTokens?: number;
-      };
+      const { laneType, messages, correlationId, overrideModel, overrideMaxTokens, agentId } =
+        req.body as {
+          laneType?: string;
+          messages?: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
+          correlationId?: string;
+          overrideModel?: string;
+          overrideMaxTokens?: number;
+          agentId?: string;
+        };
 
       if (!laneType || !messages?.length) {
         sendBadRequest(res, 'laneType and messages are required');
@@ -1178,6 +1180,7 @@ router.post(
         overrideMaxTokens,
         correlationId,
         tenantToggles: { tenantId: user?.orgs?.[0]?.orgId },
+        ...(agentId !== undefined ? { agentId } : {}),
       });
 
       sendSuccess(res, {
