@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from 'crypto';
 import { Router, type Request, type Response } from 'express';
 import { db, notificationPreferencesTable, usersTable } from '@szl-holdings/db';
 import { eq } from 'drizzle-orm';
@@ -8,16 +9,59 @@ const router = Router();
 
 function validateSendGridSignature(req: Request): boolean {
   const secret = process.env.SENDGRID_WEBHOOK_SECRET;
-  if (!secret) return true;
+  if (!secret) {
+    logger.warn('[email-webhook/sendgrid] SENDGRID_WEBHOOK_SECRET is not configured — rejecting request');
+    return false;
+  }
   const provided = req.headers['authorization'];
-  return provided === secret;
+  if (typeof provided !== 'string') return false;
+  const a = Buffer.from(secret, 'utf8');
+  const b = Buffer.from(provided, 'utf8');
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
 }
 
 function validateResendSignature(req: Request): boolean {
   const secret = process.env.RESEND_WEBHOOK_SECRET;
-  if (!secret) return true;
-  const provided = req.headers['svix-signature'] ?? req.headers['resend-signature'];
-  return typeof provided === 'string' && provided.length > 0;
+  if (!secret) {
+    logger.warn('[email-webhook/resend] RESEND_WEBHOOK_SECRET is not configured — rejecting request');
+    return false;
+  }
+
+  const msgId = req.headers['svix-id'];
+  const msgTimestamp = req.headers['svix-timestamp'];
+  const msgSignature = req.headers['svix-signature'];
+
+  if (typeof msgId !== 'string' || typeof msgTimestamp !== 'string' || typeof msgSignature !== 'string') {
+    return false;
+  }
+
+  const rawBody = (req as Request & { rawBody?: Buffer }).rawBody;
+  if (!rawBody) return false;
+
+  const signedContent = `${msgId}.${msgTimestamp}.${rawBody.toString('utf8')}`;
+
+  const secretBytes = Buffer.from(
+    secret.startsWith('whsec_') ? secret.slice(6) : secret,
+    'base64',
+  );
+
+  const computedSig = createHmac('sha256', secretBytes).update(signedContent).digest('base64');
+
+  const signatures = msgSignature.split(' ');
+  for (const sig of signatures) {
+    const commaIdx = sig.indexOf(',');
+    if (commaIdx === -1) continue;
+    const version = sig.slice(0, commaIdx);
+    const value = sig.slice(commaIdx + 1);
+    if (version !== 'v1') continue;
+    const providedBuf = Buffer.from(value, 'base64');
+    const computedBuf = Buffer.from(computedSig, 'base64');
+    if (providedBuf.length === computedBuf.length && timingSafeEqual(providedBuf, computedBuf)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 router.post('/email-webhooks/sendgrid', async (req: Request, res: Response) => {

@@ -274,15 +274,23 @@ export function getEmailProviderStatus(): { primary: string; available: string[]
 
 // ─── Suppression List ─────────────────────────────────────────────────────────
 
-const UNSUBSCRIBE_SECRET = process.env.UNSUBSCRIBE_SECRET || 'szl-unsubscribe-default-secret';
+function getUnsubscribeSecret(): string {
+  const secret = process.env.UNSUBSCRIBE_SECRET;
+  if (!secret) {
+    throw new Error(
+      'UNSUBSCRIBE_SECRET is not configured. Set a cryptographically random secret in the environment.',
+    );
+  }
+  return secret;
+}
 
 export function generateUnsubscribeToken(email: string): string {
-  return createHmac('sha256', UNSUBSCRIBE_SECRET).update(email.toLowerCase().trim()).digest('hex');
+  return createHmac('sha256', getUnsubscribeSecret()).update(email.toLowerCase().trim()).digest('hex');
 }
 
 export function verifyUnsubscribeToken(email: string, token: string): boolean {
-  const expected = generateUnsubscribeToken(email);
   try {
+    const expected = generateUnsubscribeToken(email);
     return timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(token, 'hex'));
   } catch {
     return false;

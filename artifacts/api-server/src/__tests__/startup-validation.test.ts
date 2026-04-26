@@ -82,6 +82,9 @@ const MIN_PROD_ENV: NodeJS.ProcessEnv = {
   CONNECTOR_ENCRYPTION_KEY: 'a'.repeat(64),
   MFA_SECRET_ENCRYPTION_KEY: 'c'.repeat(64),
   ALPHA_VANTAGE_API_KEY: 'test-alpha-vantage-key-prod-validation',
+  UNSUBSCRIBE_SECRET: 'd'.repeat(32),
+  RESEND_WEBHOOK_SECRET: 'whsec_' + 'e'.repeat(32),
+  SENDGRID_WEBHOOK_SECRET: 'f'.repeat(32),
 };
 
 /**

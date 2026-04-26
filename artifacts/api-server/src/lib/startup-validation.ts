@@ -2069,6 +2069,49 @@ export function validateStartupConfig(): ValidationResult {
     );
   }
 
+  if (!process.env.UNSUBSCRIBE_SECRET) {
+    if (isProduction) {
+      errors.push(
+        'UNSUBSCRIBE_SECRET is not set — email unsubscribe tokens cannot be signed or verified. ' +
+          'Without this secret, unsubscribe and resubscribe links will fail for all users. ' +
+          'Generate a cryptographically random 32+ character secret and set it in Replit Secrets.',
+      );
+    } else {
+      warnings.push(
+        'UNSUBSCRIBE_SECRET not set — generateUnsubscribeToken() and verifyUnsubscribeToken() will throw at runtime. ' +
+          'Set UNSUBSCRIBE_SECRET before testing email unsubscribe flows.',
+      );
+    }
+  }
+
+  if (!process.env.RESEND_WEBHOOK_SECRET) {
+    if (isProduction) {
+      errors.push(
+        'RESEND_WEBHOOK_SECRET is not set — Resend email webhook payloads cannot be authenticated. ' +
+          'All POST requests to /api/email-webhooks/resend will be rejected with 401. ' +
+          'Set the webhook signing secret from the Resend dashboard in Replit Secrets.',
+      );
+    } else {
+      warnings.push(
+        'RESEND_WEBHOOK_SECRET not set — /api/email-webhooks/resend will reject all webhook deliveries with 401',
+      );
+    }
+  }
+
+  if (!process.env.SENDGRID_WEBHOOK_SECRET) {
+    if (isProduction) {
+      errors.push(
+        'SENDGRID_WEBHOOK_SECRET is not set — SendGrid email webhook payloads cannot be authenticated. ' +
+          'All POST requests to /api/email-webhooks/sendgrid will be rejected with 401. ' +
+          'Set the event webhook verification key from the SendGrid dashboard in Replit Secrets.',
+      );
+    } else {
+      warnings.push(
+        'SENDGRID_WEBHOOK_SECRET not set — /api/email-webhooks/sendgrid will reject all webhook deliveries with 401',
+      );
+    }
+  }
+
   if (isDemoMode) {
     logger.info(
       { runtimeMode },
