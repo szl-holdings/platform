@@ -283,6 +283,9 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/intel/federated-learning', label: 'Federated Learning', icon: Lock, comp: L(() => import('@/pages/federated-learning')) },
       { path: '/intel/darpa-mto', label: 'DARPA MTO Innovation', icon: FlaskConical, comp: L(() => import('@/pages/darpa-mto-hub')) },
       { path: '/intel/pqc-readiness', label: 'PQC Readiness', icon: Lock, comp: L(() => import('@/pages/pqc-readiness')) },
+      { path: '/intel/hardware-trust', label: 'Hardware Root of Trust', icon: Cpu, comp: L(() => import('@/pages/hardware-root-of-trust')) },
+      { path: '/intel/adversarial-defense', label: 'Adversarial ML Defense', icon: Swords, comp: L(() => import('@/pages/adversarial-defense-console')) },
+      { path: '/intel/cyber-roadmap', label: 'Cyber Innovation Roadmap', icon: Microscope, comp: L(() => import('@/pages/cyber-innovation-roadmap')) },
     ],
   },
   {
