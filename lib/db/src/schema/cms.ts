@@ -565,3 +565,22 @@ export const contactSubmissionRepliesTable = pgTable('contact_submission_replies
 });
 
 export type ContactSubmissionReply = typeof contactSubmissionRepliesTable.$inferSelect;
+
+export const supportEmailLogTable = pgTable('support_email_log', {
+  id: serial('id').primaryKey(),
+  contactSubmissionId: integer('contact_submission_id')
+    .notNull()
+    .references(() => contactSubmissionsTable.id, { onDelete: 'cascade' }),
+  recipient: text('recipient').notNull(),
+  subject: text('subject').notNull(),
+  template: text('template').notNull(),
+  previousStatus: text('previous_status'),
+  newStatus: text('new_status'),
+  deliveryStatus: text('delivery_status', { enum: ['sent', 'failed'] }).notNull(),
+  provider: text('provider'),
+  messageId: text('message_id'),
+  error: text('error'),
+  sentAt: timestamp('sent_at').notNull().defaultNow(),
+});
+
+export type SupportEmailLog = typeof supportEmailLogTable.$inferSelect;

@@ -1537,6 +1537,105 @@ interface SupportReply {
   sentAt: string;
 }
 
+interface EmailLogEntry {
+  id: number;
+  contactSubmissionId: number;
+  recipient: string;
+  subject: string;
+  template: string;
+  previousStatus: string | null;
+  newStatus: string | null;
+  deliveryStatus: 'sent' | 'failed';
+  provider: string | null;
+  messageId: string | null;
+  error: string | null;
+  sentAt: string;
+}
+
+function TicketEmailLog({ ticketId }: { ticketId: number }) {
+  const { data, isLoading } = useStandardQuery<{ logs: EmailLogEntry[] }>({
+    queryKey: ['ticket-email-log', ticketId],
+    queryFn: () => adminFetch(`/admin/support-queue/${ticketId}/email-log`),
+    refetchInterval: 30000,
+  });
+
+  const logs = data?.logs ?? [];
+
+  if (isLoading)
+    return (
+      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground py-1">
+        <Loader2 className="w-3 h-3 animate-spin" /> Loading email log…
+      </div>
+    );
+
+  if (logs.length === 0)
+    return (
+      <p className="text-[10px] text-muted-foreground/60 italic">No emails logged yet.</p>
+    );
+
+  const failedCount = logs.filter((l) => l.deliveryStatus === 'failed').length;
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      {failedCount > 0 && (
+        <div className="flex items-center gap-1.5 px-2 py-1.5 bg-red-500/10 border border-red-500/20 rounded-md">
+          <AlertCircle className="w-3 h-3 text-red-500 shrink-0" />
+          <span className="text-[10px] font-semibold text-red-500">
+            {failedCount} failed deliver{failedCount === 1 ? 'y' : 'ies'} — manual follow-up may be needed
+          </span>
+        </div>
+      )}
+      {logs.map((l) => {
+        const isFailed = l.deliveryStatus === 'failed';
+        const templateLabel = l.template === 'status_change' ? 'Status Change' : l.template === 'agent_reply' ? 'Agent Reply' : l.template;
+        return (
+          <div
+            key={l.id}
+            className={cn(
+              'border rounded-lg px-3 py-2 space-y-0.5',
+              isFailed ? 'bg-red-500/5 border-red-500/20' : 'bg-primary/5 border-primary/15',
+            )}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 min-w-0">
+                {isFailed ? (
+                  <XCircle className="w-3 h-3 text-red-500 shrink-0" />
+                ) : (
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
+                )}
+                <span className={cn('text-[10px] font-semibold truncate', isFailed ? 'text-red-500' : 'text-primary/80')}>
+                  {l.subject}
+                </span>
+              </div>
+              <span className="text-[9px] text-muted-foreground shrink-0">
+                {new Date(l.sentAt).toLocaleString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
+              <span className="px-1.5 py-0.5 rounded bg-muted/50 font-medium">{templateLabel}</span>
+              {l.previousStatus && l.newStatus && (
+                <span>{l.previousStatus} → {l.newStatus}</span>
+              )}
+              {l.provider && <span>via {l.provider}</span>}
+              <span>to {l.recipient}</span>
+            </div>
+            {isFailed && l.error && (
+              <div className="text-[9px] text-red-400 bg-red-500/5 rounded px-2 py-1 mt-1 font-mono break-all">
+                {l.error}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function TicketReplyHistory({ ticketId }: { ticketId: number }) {
   const { data, isLoading } = useStandardQuery<{ replies: SupportReply[] }>({
     queryKey: ['ticket-replies', ticketId],
@@ -2237,6 +2336,13 @@ function SupportPanel() {
                             <MessageSquare className="w-3 h-3" /> Reply History
                           </div>
                           <TicketReplyHistory ticketId={t.id} />
+                        </div>
+
+                        <div className="pt-2 space-y-1.5" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground">
+                            <Mail className="w-3 h-3" /> Email Audit Log
+                          </div>
+                          <TicketEmailLog ticketId={t.id} />
                         </div>
 
                         <div className="pt-2 space-y-1.5" onClick={(e) => e.stopPropagation()}>

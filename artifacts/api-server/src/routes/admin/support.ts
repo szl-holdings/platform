@@ -3,6 +3,7 @@ import {
   contactSubmissionsTable,
   db,
   leadStatusTable,
+  supportEmailLogTable,
   supportKnowledgeArticlesTable,
 } from '@szl-holdings/db';
 import { and, asc, desc, eq, ilike, or, sql } from 'drizzle-orm';
@@ -27,6 +28,63 @@ import {
 import { pool } from '@szl-holdings/db';
 
 const SUPPORT_NOTIFICATIONS_ENABLED = process.env.SUPPORT_EMAIL_NOTIFICATIONS !== 'false';
+
+pool
+  .query(
+    `CREATE TABLE IF NOT EXISTS support_email_log (
+       id SERIAL PRIMARY KEY,
+       contact_submission_id INTEGER NOT NULL REFERENCES contact_submissions(id) ON DELETE CASCADE,
+       recipient TEXT NOT NULL,
+       subject TEXT NOT NULL,
+       template TEXT NOT NULL,
+       previous_status TEXT,
+       new_status TEXT,
+       delivery_status TEXT NOT NULL,
+       provider TEXT,
+       message_id TEXT,
+       error TEXT,
+       sent_at TIMESTAMP NOT NULL DEFAULT NOW()
+     )`,
+  )
+  .then(() =>
+    pool.query(
+      `CREATE INDEX IF NOT EXISTS idx_support_email_log_ticket_sent
+       ON support_email_log (contact_submission_id, sent_at DESC)`,
+    ),
+  )
+  .catch((err) => {
+    logger.warn({ err }, '[support] Failed to bootstrap support_email_log table');
+  });
+
+async function persistEmailLog(opts: {
+  contactSubmissionId: number;
+  recipient: string;
+  subject: string;
+  template: string;
+  previousStatus?: string | null;
+  newStatus?: string | null;
+  deliveryStatus: 'sent' | 'failed';
+  provider?: string;
+  messageId?: string;
+  error?: string;
+}): Promise<void> {
+  try {
+    await db.insert(supportEmailLogTable).values({
+      contactSubmissionId: opts.contactSubmissionId,
+      recipient: opts.recipient,
+      subject: opts.subject,
+      template: opts.template,
+      previousStatus: opts.previousStatus ?? null,
+      newStatus: opts.newStatus ?? null,
+      deliveryStatus: opts.deliveryStatus,
+      provider: opts.provider ?? null,
+      messageId: opts.messageId ?? null,
+      error: opts.error ?? null,
+    });
+  } catch (err) {
+    logger.warn({ err, ticketId: opts.contactSubmissionId }, '[support] Failed to persist email log');
+  }
+}
 
 /** Resolve the configured support notification reply-to email from DB, falling back to env var. */
 async function getSupportReplyEmail(): Promise<string> {
@@ -363,7 +421,6 @@ export function register(router: IRouter): void {
                   { id, provider: result.provider },
                   '[admin/support-queue] Status notification email sent',
                 );
-                // Mark notification_sent_at on lead_status
                 await db
                   .update(leadStatusTable)
                   .set({ notificationSentAt: new Date() })
@@ -386,12 +443,34 @@ export function register(router: IRouter): void {
                 provider: result.provider,
                 error: result.error,
               });
+              persistEmailLog({
+                contactSubmissionId: id,
+                recipient: submission.email,
+                subject: emailPayload.subject,
+                template: 'status_change',
+                previousStatus: previousStatus ?? null,
+                newStatus: status ?? leadRow!.status,
+                deliveryStatus: result.success ? 'sent' : 'failed',
+                provider: result.provider,
+                messageId: result.messageId,
+                error: result.error,
+              });
             })
             .catch((err) => {
               logger.error(
                 { err, id },
                 '[admin/support-queue] Status notification email threw unexpectedly',
               );
+              persistEmailLog({
+                contactSubmissionId: id,
+                recipient: submission.email,
+                subject: emailPayload.subject,
+                template: 'status_change',
+                previousStatus: previousStatus ?? null,
+                newStatus: status ?? 'unknown',
+                deliveryStatus: 'failed',
+                error: String(err),
+              });
             });
         }
 
@@ -554,6 +633,16 @@ export function register(router: IRouter): void {
         provider: emailResult.provider,
         error: emailResult.error,
       });
+      await persistEmailLog({
+        contactSubmissionId: id,
+        recipient: submission.email,
+        subject: emailSubject,
+        template: 'agent_reply',
+        deliveryStatus: emailResult.success ? 'sent' : 'failed',
+        provider: emailResult.provider,
+        messageId: emailResult.messageId,
+        error: emailResult.error,
+      });
 
       if (!emailResult.success) {
         logger.warn({ id, error: emailResult.error }, '[admin/support-queue] Reply email failed');
@@ -602,6 +691,38 @@ export function register(router: IRouter): void {
     } catch (err) {
       logger.error({ err }, '[admin/support-queue] GET replies failed');
       sendError(res, 'Failed to fetch replies', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  // ── Per-ticket email audit log ────────────────────────────────────────────
+  router.get('/admin/support-queue/:id/email-log', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) {
+        sendBadRequest(res, 'Invalid ticket ID');
+        return;
+      }
+
+      const [submission] = await db
+        .select({ id: contactSubmissionsTable.id })
+        .from(contactSubmissionsTable)
+        .where(eq(contactSubmissionsTable.id, id));
+
+      if (!submission) {
+        sendNotFound(res, 'Ticket');
+        return;
+      }
+
+      const logs = await db
+        .select()
+        .from(supportEmailLogTable)
+        .where(eq(supportEmailLogTable.contactSubmissionId, id))
+        .orderBy(desc(supportEmailLogTable.sentAt));
+
+      res.json({ logs });
+    } catch (err) {
+      logger.error({ err }, '[admin/support-queue] GET email-log failed');
+      sendError(res, 'Failed to fetch email log', 500, 'INTERNAL_ERROR');
     }
   });
 
