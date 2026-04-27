@@ -124,6 +124,8 @@ Secrets are managed via **Replit Secrets** (development) and **Azure Key Vault**
 
 ### AI Integrations
 
+All AI access goes through the **Replit AI Integrations proxy**. Use the `AI_INTEGRATIONS_*` variables below — do **not** create `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `GEMINI_API_KEY` entries in Replit Secrets or Azure Key Vault; those direct-key variables have been removed and are no longer used.
+
 | Variable | Description |
 |----------|-------------|
 | `AI_INTEGRATIONS_OPENAI_API_KEY` | OpenAI API key (Replit AI proxy) |
@@ -132,6 +134,22 @@ Secrets are managed via **Replit Secrets** (development) and **Azure Key Vault**
 | `AI_INTEGRATIONS_ANTHROPIC_BASE_URL` | Anthropic base URL (Replit proxy) |
 | `AI_INTEGRATIONS_GEMINI_API_KEY` | Gemini API key (Replit AI proxy) |
 | `AI_INTEGRATIONS_GEMINI_BASE_URL` | Gemini base URL (Replit proxy) |
+
+> **Azure Key Vault (production):** If any legacy `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `GEMINI_API_KEY` secrets exist in the vault, delete them — they are deprecated. Only the `AI_INTEGRATIONS_*` keys above should be provisioned.
+
+#### Cleanup Record — 2026-04-27
+
+Direct provider keys were audited and confirmed absent from Replit Secrets (development environment):
+
+| Secret | Status |
+|--------|--------|
+| `OPENAI_API_KEY` | **Absent** — confirmed removed |
+| `ANTHROPIC_API_KEY` | **Absent** — confirmed removed |
+| `GEMINI_API_KEY` | **Absent** — confirmed removed |
+
+All six `AI_INTEGRATIONS_*` proxy credentials (three keys + three base URLs) are present and active. AI features route exclusively through the Replit AI Integrations proxy.
+
+Azure Key Vault has not yet been provisioned (Azure is the target production architecture but is not live as of this date). When it is provisioned, operators must not add the deprecated direct-key names — only the `AI_INTEGRATIONS_*` set above.
 
 ### Mobile
 
