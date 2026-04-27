@@ -402,6 +402,13 @@
       "breakpoints": true
     },
     {
+      "idx": 57,
+      "version": "7",
+      "when": 1776469100000,
+      "tag": "0057_password_reset_token",
+      "breakpoints": true
+    },
+    {
       "idx": 58,
       "version": "7",
       "when": 1776475200000,
@@ -409,10 +416,31 @@
       "breakpoints": true
     },
     {
+      "idx": 59,
+      "version": "7",
+      "when": 1776478969411,
+      "tag": "0059_ai_evals_tables",
+      "breakpoints": true
+    },
+    {
       "idx": 60,
       "version": "7",
       "when": 1776482738821,
       "tag": "0060_business_events_composite_idx",
+      "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1776488492547,
+      "tag": "0061_replay_and_eval_persistence",
+      "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1776494246274,
+      "tag": "0062_atlas_execution_runs",
       "breakpoints": true
     },
     {
@@ -455,6 +483,139 @@
       "version": "7",
       "when": 1776634400000,
       "tag": "0068_atlas_tenant_isolation",
+      "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1776639060493,
+      "tag": "0069_fund_nav_lp_reports_and_portfolio",
+      "breakpoints": true
+    },
+    {
+      "idx": 70,
+      "version": "7",
+      "when": 1776643720986,
+      "tag": "0070_lyte_surfaces",
+      "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1776648381479,
+      "tag": "0071_ot_ics_conversation_payload_hex",
+      "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1776653041972,
+      "tag": "0072_mfa_secrets",
+      "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1776657702465,
+      "tag": "0073_alloy_autonomy_modes",
+      "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1776662362958,
+      "tag": "0074_organizations_mfa_required",
+      "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1776667023451,
+      "tag": "0075_fund_lp_reports_preferred_return_accrued",
+      "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "7",
+      "when": 1776671683944,
+      "tag": "0076_vessels_org_id",
+      "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1776676344437,
+      "tag": "0077_carlota_advisory_data",
+      "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1776681004930,
+      "tag": "0078_memory_fabric",
+      "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1776685665422,
+      "tag": "0079_platform_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "7",
+      "when": 1776690325915,
+      "tag": "0080_pipeline_deals",
+      "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "7",
+      "when": 1776694986408,
+      "tag": "0081_agent_mesh_telemetry",
+      "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "7",
+      "when": 1776699646901,
+      "tag": "0082_mcp_gateway_persistence",
+      "breakpoints": true
+    },
+    {
+      "idx": 83,
+      "version": "7",
+      "when": 1776704307394,
+      "tag": "0083_team_pages",
+      "breakpoints": true
+    },
+    {
+      "idx": 84,
+      "version": "7",
+      "when": 1776708967887,
+      "tag": "0084_alloy_run_failure_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 85,
+      "version": "7",
+      "when": 1776713628380,
+      "tag": "0085_compliance_calendar_supervision_queue",
+      "breakpoints": true
+    },
+    {
+      "idx": 86,
+      "version": "7",
+      "when": 1776718288873,
+      "tag": "0086_aef_profile_registry_pointers",
+      "breakpoints": true
+    },
+    {
+      "idx": 87,
+      "version": "7",
+      "when": 1776722949366,
+      "tag": "0087_alloy_policy_versions_studio",
       "breakpoints": true
     },
     {
@@ -528,6 +689,13 @@
       "breakpoints": true
     },
     {
+      "idx": 98,
+      "version": "7",
+      "when": 1761238200000,
+      "tag": "0098_lyte_pressure_acknowledged",
+      "breakpoints": true
+    },
+    {
       "idx": 99,
       "version": "7",
       "when": 1777200000000,
@@ -560,6 +728,55 @@
       "version": "7",
       "when": 1745600000000,
       "tag": "0110_backfill_last_digest_sent_at",
+      "breakpoints": true
+    },
+    {
+      "idx": 104,
+      "version": "7",
+      "when": 1745612500000,
+      "tag": "0102_email_system_completion",
+      "breakpoints": true
+    },
+    {
+      "idx": 105,
+      "version": "7",
+      "when": 1745625000000,
+      "tag": "0103_export_storage_key",
+      "breakpoints": true
+    },
+    {
+      "idx": 106,
+      "version": "7",
+      "when": 1745637500000,
+      "tag": "0104_ot_ics_triage_cols",
+      "breakpoints": true
+    },
+    {
+      "idx": 107,
+      "version": "7",
+      "when": 1745650000000,
+      "tag": "0105_notification_preferences_last_digest_sent_at",
+      "breakpoints": true
+    },
+    {
+      "idx": 108,
+      "version": "7",
+      "when": 1745662500000,
+      "tag": "0106_alert_rule_notify_cooldown",
+      "breakpoints": true
+    },
+    {
+      "idx": 109,
+      "version": "7",
+      "when": 1745675000000,
+      "tag": "0107_alert_evaluation_runs",
+      "breakpoints": true
+    },
+    {
+      "idx": 110,
+      "version": "7",
+      "when": 1745687500000,
+      "tag": "0108_fusion_cortex_alerts",
       "breakpoints": true
     },
     {
@@ -602,6 +819,202 @@
       "version": "7",
       "when": 1745956860000,
       "tag": "0116_revenue_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 117,
+      "version": "7",
+      "when": 1777881600000,
+      "tag": "0116_szl_saas_layer_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 118,
+      "version": "7",
+      "when": 1777968000000,
+      "tag": "0117_crdt_change_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 119,
+      "version": "7",
+      "when": 1778054400000,
+      "tag": "0118_multi_channel_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 120,
+      "version": "7",
+      "when": 1778140800000,
+      "tag": "0119_constellation_graph",
+      "breakpoints": true
+    },
+    {
+      "idx": 121,
+      "version": "7",
+      "when": 1778227200000,
+      "tag": "0120_deployments_registry",
+      "breakpoints": true
+    },
+    {
+      "idx": 122,
+      "version": "7",
+      "when": 1778313600000,
+      "tag": "0121_guardian_tool_mesh",
+      "breakpoints": true
+    },
+    {
+      "idx": 123,
+      "version": "7",
+      "when": 1778400000000,
+      "tag": "0122_szl_decisioning_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 124,
+      "version": "7",
+      "when": 1778486400000,
+      "tag": "0123_session_lifecycle_hardening",
+      "breakpoints": true
+    },
+    {
+      "idx": 125,
+      "version": "7",
+      "when": 1778572800000,
+      "tag": "0124_self_healing_persistence",
+      "breakpoints": true
+    },
+    {
+      "idx": 126,
+      "version": "7",
+      "when": 1778659200000,
+      "tag": "0125_terra_portfolio_modules",
+      "breakpoints": true
+    },
+    {
+      "idx": 127,
+      "version": "7",
+      "when": 1778745600000,
+      "tag": "0126_vessels_bol_persistence",
+      "breakpoints": true
+    },
+    {
+      "idx": 128,
+      "version": "7",
+      "when": 1778832000000,
+      "tag": "0127_carlota_radar_competitors",
+      "breakpoints": true
+    },
+    {
+      "idx": 129,
+      "version": "7",
+      "when": 1778918400000,
+      "tag": "0128_pulse_email_subscriptions",
+      "breakpoints": true
+    },
+    {
+      "idx": 130,
+      "version": "7",
+      "when": 1779004800000,
+      "tag": "0129_apps_registry_owner_team",
+      "breakpoints": true
+    },
+    {
+      "idx": 131,
+      "version": "7",
+      "when": 1779091200000,
+      "tag": "0130_vessels_vessel_class",
+      "breakpoints": true
+    },
+    {
+      "idx": 132,
+      "version": "7",
+      "when": 1779177600000,
+      "tag": "0131_pulse_saved_briefings_unique",
+      "breakpoints": true
+    },
+    {
+      "idx": 133,
+      "version": "7",
+      "when": 1779264000000,
+      "tag": "0132_lyte_entity_graph",
+      "breakpoints": true
+    },
+    {
+      "idx": 134,
+      "version": "7",
+      "when": 1779350400000,
+      "tag": "0133_lyte_interventions",
+      "breakpoints": true
+    },
+    {
+      "idx": 135,
+      "version": "7",
+      "when": 1779436800000,
+      "tag": "0134_file_scan_lp_uploads",
+      "breakpoints": true
+    },
+    {
+      "idx": 136,
+      "version": "7",
+      "when": 1779523200000,
+      "tag": "0135_signal_bus_rules",
+      "breakpoints": true
+    },
+    {
+      "idx": 137,
+      "version": "7",
+      "when": 1779609600000,
+      "tag": "0136_status_checks_composite_idx",
+      "breakpoints": true
+    },
+    {
+      "idx": 138,
+      "version": "7",
+      "when": 1779696000000,
+      "tag": "0137_nexus_orchestration_created_by",
+      "breakpoints": true
+    },
+    {
+      "idx": 139,
+      "version": "7",
+      "when": 1779782400000,
+      "tag": "0138_fine_tuning_pipeline_expansion",
+      "breakpoints": true
+    },
+    {
+      "idx": 140,
+      "version": "7",
+      "when": 1779868800000,
+      "tag": "0139_pulse_watchlist_followups_pushschedule",
+      "breakpoints": true
+    },
+    {
+      "idx": 141,
+      "version": "7",
+      "when": 1779955200000,
+      "tag": "0140_tax_automation",
+      "breakpoints": true
+    },
+    {
+      "idx": 142,
+      "version": "7",
+      "when": 1780041600000,
+      "tag": "0141_onboarding_wizard_step_constraint",
+      "breakpoints": true
+    },
+    {
+      "idx": 143,
+      "version": "7",
+      "when": 1780128000000,
+      "tag": "0142_support_tickets_and_kb",
+      "breakpoints": true
+    },
+    {
+      "idx": 144,
+      "version": "7",
+      "when": 1780214400000,
+      "tag": "0143_atlas_retention_indexes",
       "breakpoints": true
     }
   ]
