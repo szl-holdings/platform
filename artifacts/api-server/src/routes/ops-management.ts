@@ -1291,8 +1291,8 @@ export async function runAlertRuleEvaluation(triggeredBy: 'scheduled' | 'manual'
     if (triggered) {
       const alertMsg = `${rule.name}: ${rule.metric_name} = ${metricVal} (threshold: ${rule.condition} ${rule.threshold})`;
       await pool.query(
-        `INSERT INTO platform_alert_events (rule_id, rule_name, severity, metric_name, metric_value, threshold, condition, message)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+        `INSERT INTO platform_alert_events (rule_id, rule_name, severity, metric_name, metric_value, threshold, condition, message, status)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'firing')`,
         [
           rule.id,
           rule.name,
@@ -1400,6 +1400,18 @@ export async function runAlertRuleEvaluation(triggeredBy: 'scheduled' | 'manual'
           }
         }
       }
+    } else {
+      // Rule did not trigger — resolve any currently-firing events for this rule
+      await pool
+        .query(
+          `UPDATE platform_alert_events
+           SET status = 'resolved', resolved_at = NOW()
+           WHERE rule_id = $1 AND status = 'firing'`,
+          [rule.id],
+        )
+        .catch((err) =>
+          logger.warn({ err, ruleId: rule.id }, '[ops] Failed to resolve stale firing events (non-fatal)'),
+        );
     }
   }
 
@@ -1942,12 +1954,12 @@ router.get('/ops/slo', async (_req, res) => {
     }
 
     const p0ActiveAlerts = activeAlertsRes.rows.filter(
-      (a) => a.rule_name.startsWith('[P0]') || (a.severity === 'critical' && a.metric_value >= 99),
+      (a) => a.rule_name.startsWith('[P0]') || a.severity === 'critical',
     );
     const p1ActiveAlerts = activeAlertsRes.rows.filter(
       (a) =>
-        a.rule_name.startsWith('[P1]') ||
-        (a.severity === 'critical' && !a.rule_name.startsWith('[P0]')),
+        !p0ActiveAlerts.some((p) => p.id === a.id) &&
+        (a.rule_name.startsWith('[P1]') || a.severity === 'warning' || a.severity === 'major'),
     );
 
     const latencySlos = {
