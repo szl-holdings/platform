@@ -66,6 +66,10 @@ jobs:
             filter: "@workspace/a11oy"
             dist: artifacts/a11oy/dist
             port: 3010
+          - name: conduit
+            filter: "@workspace/conduit"
+            dist: artifacts/conduit/dist
+            port: 3011
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
