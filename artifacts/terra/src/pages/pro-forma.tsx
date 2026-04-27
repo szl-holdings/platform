@@ -665,6 +665,30 @@ const COMPARISON_METRICS: ComparisonMetric[] = [
   },
 ];
 
+function buildHeatMapCSVRows(baseInputs: ProFormaInputs, baseScenarioName: string): string[][] {
+  const colCfg = SENS_AXES.hardCost;
+  const rowCfg = SENS_AXES.capRate;
+
+  const sectionRows: string[][] = [
+    ['=== 2D SENSITIVITY — LEVERED IRR ==='],
+    [`Columns: ${colCfg.label}  ·  Rows: ${rowCfg.label}  ·  Base scenario: ${baseScenarioName}`],
+    [],
+    [`${rowCfg.shortLabel} ↓ / ${colCfg.shortLabel} →`, ...colCfg.steps.map((d) => colCfg.formatStep(d))],
+  ];
+
+  for (const rowDelta of rowCfg.steps) {
+    const rowLabel = rowCfg.formatStep(rowDelta) + (rowDelta === 0 ? ' (base)' : '');
+    const cells = colCfg.steps.map((colDelta) => {
+      const modified = rowCfg.applyDelta(colCfg.applyDelta(baseInputs, colDelta), rowDelta);
+      const r = calcProForma(modified);
+      return pct(r.irr);
+    });
+    sectionRows.push([rowLabel, ...cells]);
+  }
+
+  return sectionRows;
+}
+
 function exportComparisonCSV(scenarios: Scenario[]) {
   const results = scenarios.map((s) => ({ ...s, r: calcProForma(s.inputs) }));
   const header = ['Metric', ...results.map((s) => s.name)];
@@ -680,6 +704,7 @@ function exportComparisonCSV(scenarios: Scenario[]) {
     ['Financing Rate', ...results.map((s) => `${s.inputs.financingRate}%`)],
     ['Exit Cap Rate', ...results.map((s) => `${s.inputs.exitCapRate}%`)],
   ];
+  const heatMapRows = buildHeatMapCSVRows(scenarios[0].inputs, scenarios[0].name);
   const csv = [
     ['Terra — Scenario Comparison'],
     [`Export Date: ${new Date().toLocaleDateString()}`],
@@ -688,6 +713,8 @@ function exportComparisonCSV(scenarios: Scenario[]) {
     ...rows,
     [],
     ...inputRows,
+    [],
+    ...heatMapRows,
   ]
     .map((r) => r.map((c) => `"${c}"`).join(','))
     .join('\n');
