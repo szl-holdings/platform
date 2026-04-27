@@ -1,11 +1,11 @@
 # Accessibility Audit — Findings Register
 
-**Audit date:** 2026-04-21  
-**Tool:** `@axe-core/playwright` v4.11.3 (Playwright v1.58.2, Chromium 138)  
-**Method:** Live axe-core scan against all 10 running artifact dev servers — WCAG 2.1 AA rule set (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`)  
+**Audit date:** 2026-04-27 (initial audit 2026-04-21; conduit/a11oy added 2026-04-27)
+**Tool:** `@axe-core/playwright` v4.11.3 (Playwright v1.58.2, Chromium 138)
+**Method:** Live axe-core scan against all running artifact dev servers — WCAG 2.1 AA rule set (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`)
 **Standard:** WCAG 2.1 Level AA (baseline; full AA certification is out of scope for this round)
 
-**Scan command:**
+**Scan command (live proxy — all artifacts including aegis):**
 ```bash
 PLAYWRIGHT_BASE_URL=http://localhost:9090 \
 PLAYWRIGHT_CHROMIUM_PATH=$(which chromium) \
@@ -15,28 +15,37 @@ pnpm exec playwright test tests/e2e/a11y.spec.ts \
 
 ---
 
-## Summary — Final Verified Results (2026-04-21)
+## Summary — Per-Artifact Scorecard
 
-**30/30 tests passing — zero critical or serious violations on all 10 artifacts.**
+### CI Matrix (11 artifacts — built + scanned on every PR)
 
-| Artifact | Critical | Serious | Moderate | Minor | Status |
-|----------|:--------:|:-------:|:--------:|:-----:|--------|
-| szl-holdings | 0 | 0 | 0 | 0 | ✅ PASS |
-| aegis | 0 | 0 | 0 | 0 | ✅ PASS |
-| carlota-jo | 0 | 0 | 0 | 0 | ✅ PASS |
-| command | 0 | 0 | 0 | 0 | ✅ PASS |
-| counsel | 0 | 0 | 0 | 0 | ✅ PASS |
-| lyte-command-center | 0 | 0 | 0 | 0 | ✅ PASS |
-| pulse | 0 | 0 | 0 | 0 | ✅ PASS |
-| sentra | 0 | 0 | 0 | 0 | ✅ PASS |
-| terra | 0 | 0 | 0 | 0 | ✅ PASS |
-| vessels | 0 | 0 | 0 | 0 | ✅ PASS |
+**33/33 tests passing — zero critical or serious violations on all 11 CI-scanned artifacts.**
 
-**Totals across all artifacts:** 0 critical, 0 serious, 0 moderate, 0 minor
+| Artifact | Critical | Serious | Moderate | Minor | CI Build | Status |
+|----------|:--------:|:-------:|:--------:|:-----:|:--------:|--------|
+| szl-holdings | 0 | 0 | 0 | 0 | ✅ | ✅ PASS |
+| carlota-jo | 0 | 0 | 0 | 0 | ✅ | ✅ PASS |
+| command | 0 | 0 | 0 | 0 | ✅ | ✅ PASS |
+| conduit | 0 | 0 | 0 | 0 | ✅ | ✅ PASS |
+| counsel | 0 | 0 | 0 | 0 | ✅ | ✅ PASS |
+| lyte-command-center | 0 | 0 | 0 | 0 | ✅ | ✅ PASS |
+| pulse | 0 | 0 | 0 | 0 | ✅ | ✅ PASS |
+| sentra | 0 | 0 | 0 | 0 | ✅ | ✅ PASS |
+| terra | 0 | 0 | 0 | 0 | ✅ | ✅ PASS |
+| vessels | 0 | 0 | 0 | 0 | ✅ | ✅ PASS |
+| a11oy | 0 | 0 | 0 | 0 | ✅ | ✅ PASS |
+
+**Totals across 11 CI-scanned artifacts:** 0 critical, 0 serious, 0 moderate, 0 minor
+
+### Live Proxy Scan Only (not in CI matrix)
+
+| Artifact | Critical | Serious | Status | Note |
+|----------|:--------:|:-------:|--------|------|
+| aegis | 0 | 0 | ✅ PASS | No package.json/build config — can only be scanned via live monorepo proxy, not CI build |
 
 ---
 
-## Resolved Findings
+## Resolved Findings (2026-04-21 — original 10 artifacts)
 
 ### A11Y-CRIT-001 — `button-name`: Icon-only clear button with no accessible text ✅ FIXED
 
@@ -83,20 +92,80 @@ pnpm exec playwright test tests/e2e/a11y.spec.ts \
 
 ---
 
+## Resolved Findings (2026-04-27 — conduit & a11oy)
+
+### A11Y-CRIT-002 — `button-name`: Sidebar toggle button has no accessible name ✅ FIXED
+
+- **Artifact:** `conduit`
+- **axe-core rule:** `button-name`
+- **WCAG criterion:** 4.1.2 Name, Role, Value (Level A)
+- **Fix:** Added `aria-label` (`"Collapse sidebar"` / `"Expand sidebar"`) and `aria-expanded` to the
+  icon-only `<Menu>` toggle button in `artifacts/conduit/src/components/layout.tsx`.
+  Also marked the `<Menu>` icon `aria-hidden="true"`, added `aria-label` to collapsed nav links
+  (replacing `title`-only), `aria-current="page"` to active links, and `aria-label="Main navigation"` to the `<nav>` element.
+
+### A11Y-SER-004 — `color-contrast`: Muted text below 4.5:1 in conduit ✅ FIXED
+
+- **Artifact:** `conduit`
+- **axe-core rule:** `color-contrast`
+- **WCAG criterion:** 1.4.3 Contrast Minimum (Level AA)
+- **Root cause:** `--muted-foreground: 220 8% 40%` rendered as ~#5c6370 on background #050508
+  (contrast ≈ 3.9:1, below 4.5:1 required for normal text).
+- **Fix:** `artifacts/conduit/src/index.css`: `--muted-foreground: 220 8% 40%` → `220 8% 62%`
+  (contrast ≈ 7.2:1).
+
+### A11Y-SER-005 — `color-contrast`: Ghost text below 4.5:1 in a11oy ✅ FIXED
+
+- **Artifact:** `a11oy`
+- **axe-core rule:** `color-contrast`
+- **WCAG criterion:** 1.4.3 Contrast Minimum (Level AA)
+- **Root cause:** `--color-a11oy-text-ghost: #5e5e5e` on near-black background `#0e0e0e`
+  (contrast ≈ 3.25:1, below 4.5:1 required for normal text at 10–11 px).
+- **Fix:** `artifacts/a11oy/src/index.css`: `--color-a11oy-text-ghost: #5e5e5e` → `#888888`
+  (contrast ≈ 5.7:1 on `#0e0e0e`).
+
+### A11Y-SER-006 — `interactive-supports-focus`: Org switcher not keyboard-accessible in a11oy ✅ FIXED
+
+- **Artifact:** `a11oy`
+- **WCAG criterion:** 2.1.1 Keyboard (Level A)
+- **Root cause:** The org switcher in `TopBar.tsx` used a CSS-hover-only `<div>` trigger,
+  making the dropdown unreachable via keyboard.
+- **Fix:** Replaced the hover `<div>` trigger with a proper `<button>` element using
+  `useState` to control the open/closed state, `aria-haspopup="listbox"`, `aria-expanded`,
+  an `aria-label` describing the current selection, `role="listbox"` on the dropdown,
+  `role="option"` + `aria-selected` on each item, and keyboard `Escape` support to close
+  and return focus to the trigger. Added click-outside-to-close via `useEffect`.
+
+### Build fix — a11oy Vite alias for `@szl-holdings/shared-ui/billing` ✅ FIXED
+
+- **Artifact:** `a11oy`
+- **Root cause:** `billing-account.tsx` imported from `@szl-holdings/shared-ui/billing` — a subpath
+  export defined in `lib/shared-ui/package.json` but not yet aliased in a11oy's Vite config, so
+  Rollup couldn't resolve the TypeScript source during build.
+- **Fix:** Added `{ find: /^@szl-holdings\/shared-ui\/billing$/, replacement: ... }` to
+  `artifacts/a11oy/vite.config.ts`, matching the pattern used for omnia-shell subpaths.
+  `pnpm --filter @workspace/a11oy run build` now succeeds.
+
+---
+
 ## CI Integration
 
 The automated axe check runs on every PR via `.github/workflows/a11y.yml`:
-- Builds each artifact, serves it with `serve --single` (SPA fallback)
+- Builds each of the **11 CI-buildable web artifacts**, serves with `serve --single` (SPA fallback)
 - Runs `pnpm exec playwright test tests/e2e/a11y.spec.ts --grep "Per-Artifact Root Page"`
-- The spec asserts **zero critical AND zero serious violations** (`tests/e2e/a11y.spec.ts` line 147)
-- Advisory mode (CI workflow uses `continue-on-error: true`) — all 10 artifacts now pass; ready to flip to hard-gate
+- The spec asserts **zero critical AND zero serious violations** — hard fail (exit 1)
+- The `a11y-gate` job fails the workflow if any per-artifact scan job fails
+- **CI gate status: HARD GATE (flipped from advisory on 2026-04-27)**
 
-To flip to hard-fail (all 10 now clean, safe to enable):
-```
-# In .github/workflows/a11y.yml:
-# 1. Remove continue-on-error: true from a11y-axe and a11y-gate jobs
-# 2. Add 'a11y-gate' to the needs list in the ci-gate job in ci.yml
-```
+> **Note on aegis:** `artifacts/aegis/` has no `package.json` or Vite config, so it cannot be built
+> in CI. It remains in `tests/e2e/a11y.spec.ts` for live-proxy scans (via `PLAYWRIGHT_BASE_URL`)
+> and passed the last live scan (2026-04-21, 0 critical/serious violations).
+> See follow-up task #4398 for expanding sub-route coverage.
+
+To add a new artifact to the CI scan:
+1. Add an entry to `ARTIFACTS` in `tests/e2e/a11y.spec.ts`
+2. Add a matrix entry to `.github/workflows/a11y.yml` (name, filter, dist, unique port 4100+)
+3. Run the scan locally and fix any findings before merging
 
 ## How to Re-run
 

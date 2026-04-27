@@ -84,8 +84,10 @@ const ARTIFACT_NAME = process.env.A11Y_ARTIFACT_NAME ?? 'all';
 const ARTIFACTS = [
   { name: 'szl-holdings', rootPath: '/' },
   { name: 'aegis',         rootPath: '/aegis/' },
+  { name: 'a11oy',         rootPath: '/a11oy/' },
   { name: 'carlota-jo',    rootPath: '/carlota-jo/' },
   { name: 'command',       rootPath: '/command/' },
+  { name: 'conduit',       rootPath: '/conduit/' },
   { name: 'counsel',       rootPath: '/counsel/' },
   { name: 'lyte-command-center', rootPath: '/lyte/' },
   { name: 'pulse',         rootPath: '/pulse/' },

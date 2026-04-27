@@ -1,4 +1,4 @@
-name: Accessibility Checks (advisory)
+name: Accessibility Checks
 
 on:
   workflow_dispatch:
@@ -19,7 +19,6 @@ jobs:
     name: A11y axe / ${{ matrix.app.name }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    continue-on-error: true
     permissions:
       contents: read
     strategy:
@@ -66,6 +65,10 @@ jobs:
             filter: "@workspace/a11oy"
             dist: artifacts/a11oy/dist
             port: 4110
+          - name: conduit
+            filter: "@workspace/conduit"
+            dist: artifacts/conduit/dist
+            port: 4111
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
@@ -111,7 +114,7 @@ jobs:
           done
         shell: bash
 
-      - name: Run axe accessibility scan (WCAG 2.1 AA, advisory)
+      - name: Run axe accessibility scan (WCAG 2.1 AA)
         run: |
           echo "Running axe-core accessibility scan for ${{ matrix.app.name }}..."
           PLAYWRIGHT_BASE_URL=http://localhost:${{ matrix.app.port }} \
@@ -120,9 +123,9 @@ jobs:
             --grep "Per-Artifact Root Page" \
             --reporter=list \
             --project=chromium || {
-              echo "::warning::axe violations found in ${{ matrix.app.name }} — see output above."
+              echo "::error::axe violations found in ${{ matrix.app.name }} — see output above."
               echo "Review audit/a11y/findings.md for documented findings and remediation owners."
-              exit 0
+              exit 1
             }
         env:
           CI: true
@@ -138,24 +141,20 @@ jobs:
           retention-days: 14
 
   a11y-gate:
-    name: A11y Gate (advisory)
+    name: A11y Gate
     needs: a11y-axe
     runs-on: ubuntu-latest
     if: always()
-    continue-on-error: true
     permissions:
       contents: read
     steps:
-      - name: Report a11y advisory status
+      - name: Enforce a11y gate
         run: |
-          echo "Accessibility checks completed (advisory — not a hard gate)."
-          echo "Tool: @axe-core/playwright — WCAG 2.1 AA tags (wcag2a, wcag2aa, wcag21a, wcag21aa)"
-          echo "See audit/a11y/findings.md for the full findings register and remediation owners."
-          echo ""
-          echo "To flip to hard-fail:"
-          echo "  1. Remove 'continue-on-error: true' from the a11y-axe and a11y-gate jobs."
-          echo "  2. Change 'exit 0' to 'exit 1' in the scan step."
-          echo "  3. Add 'a11y-gate' to the ci-gate needs list in .github/workflows/ci.yml."
+          echo "Accessibility gate — WCAG 2.1 AA (wcag2a, wcag2aa, wcag21a, wcag21aa)"
+          echo "Tool: @axe-core/playwright — 11 CI-scanned web artifacts (+ aegis via live-proxy only)."
+          echo "See audit/a11y/findings.md for the findings register."
           if [[ "${{ needs.a11y-axe.result }}" == "failure" ]]; then
-            echo "::warning::One or more axe jobs failed — check uploaded playwright-report artifacts."
+            echo "::error::One or more axe scans failed — zero critical/serious violations required."
+            exit 1
           fi
+          echo "All axe scans passed."
