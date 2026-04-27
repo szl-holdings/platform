@@ -1720,9 +1720,9 @@ router.get('/nexus/v1/playground', (_req, res) => {
 <main id="main-content" tabindex="-1">
   <div class="panel panel-left">
     <div class="tabs" role="tablist" aria-label="PRAXIS sections">
-      <div id="tab-btn-query" class="tab active" role="tab" aria-selected="true" aria-controls="tab-query" tabindex="0" onclick="switchTab('query')" onkeydown="if(event.key==='Enter'||event.key===' ')switchTab('query')">Query</div>
-      <div id="tab-btn-actions" class="tab" role="tab" aria-selected="false" aria-controls="tab-actions" tabindex="-1" onclick="switchTab('actions')" onkeydown="if(event.key==='Enter'||event.key===' ')switchTab('actions')">Actions</div>
-      <div id="tab-btn-capabilities" class="tab" role="tab" aria-selected="false" aria-controls="tab-capabilities" tabindex="-1" onclick="switchTab('capabilities')" onkeydown="if(event.key==='Enter'||event.key===' ')switchTab('capabilities')">Capabilities</div>
+      <div id="tab-btn-query" class="tab active" role="tab" aria-selected="true" aria-controls="tab-query" tabindex="0" onclick="switchTab('query')" onkeydown="handleTabKeydown(event,'query')">Query</div>
+      <div id="tab-btn-actions" class="tab" role="tab" aria-selected="false" aria-controls="tab-actions" tabindex="-1" onclick="switchTab('actions')" onkeydown="handleTabKeydown(event,'actions')">Actions</div>
+      <div id="tab-btn-capabilities" class="tab" role="tab" aria-selected="false" aria-controls="tab-capabilities" tabindex="-1" onclick="switchTab('capabilities')" onkeydown="handleTabKeydown(event,'capabilities')">Capabilities</div>
     </div>
 
     <!-- QUERY TAB -->
@@ -1822,6 +1822,31 @@ router.get('/nexus/v1/playground', (_req, res) => {
 
 <script>
 let currentTab = 'query';
+
+const TAB_ORDER = ['query', 'actions', 'capabilities'];
+
+function handleTabKeydown(event, tab) {
+  const idx = TAB_ORDER.indexOf(tab);
+  let nextTab = null;
+  if (event.key === 'ArrowRight') {
+    nextTab = TAB_ORDER[(idx + 1) % TAB_ORDER.length];
+  } else if (event.key === 'ArrowLeft') {
+    nextTab = TAB_ORDER[(idx - 1 + TAB_ORDER.length) % TAB_ORDER.length];
+  } else if (event.key === 'Home') {
+    nextTab = TAB_ORDER[0];
+  } else if (event.key === 'End') {
+    nextTab = TAB_ORDER[TAB_ORDER.length - 1];
+  } else if (event.key === 'Enter' || event.key === ' ') {
+    switchTab(tab);
+    event.preventDefault();
+    return;
+  }
+  if (nextTab) {
+    event.preventDefault();
+    switchTab(nextTab);
+    document.getElementById('tab-btn-' + nextTab)?.focus();
+  }
+}
 
 function switchTab(tab) {
   document.querySelectorAll('[role="tab"]').forEach(t => {

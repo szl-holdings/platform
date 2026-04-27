@@ -95,7 +95,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main id="main-content" tabIndex={-1} className="flex-1 flex flex-col min-w-0 overflow-hidden relative" style={{ outline: 'none' }}>
+      <main id="main-content" tabIndex={-1} className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         <header className="h-14 flex items-center px-6 border-b border-border bg-card/50 backdrop-blur shrink-0 justify-between">
            <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <span className="text-foreground capitalize">{location.split('/')[1] || 'Dashboard'}</span>

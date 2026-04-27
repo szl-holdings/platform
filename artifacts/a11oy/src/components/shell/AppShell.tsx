@@ -8,7 +8,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <TopBar />
       <div className="flex flex-1">
         <Sidebar />
-        <main id="main-content" tabIndex={-1} className="flex-1 min-w-0 flex flex-col relative" style={{ outline: 'none' }}>
+        <main id="main-content" tabIndex={-1} className="flex-1 min-w-0 flex flex-col relative">
           {children}
         </main>
       </div>

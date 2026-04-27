@@ -541,7 +541,7 @@ function App() {
           <PageViewTracker />
           <EcosystemNav currentAppId="szl-holdings" currentAppName="SZL Holdings" accentColor={SZL_ACCENT} />
           {/* eslint-disable-next-line jsx-a11y/no-redundant-roles */}
-          <main id="main-content" tabIndex={-1} style={{ outline: 'none' }}>
+          <main id="main-content" tabIndex={-1}>
           <Switch>
             {/* ── Public marketing routes ── */}
             <Route path="/">

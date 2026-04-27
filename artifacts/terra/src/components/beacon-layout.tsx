@@ -273,7 +273,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </header>
-        <main id="main-content" tabIndex={-1} className="flex-1 overflow-auto p-4 md:p-6" style={{ background: '#080c14', outline: 'none' }}>
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-auto p-4 md:p-6" style={{ background: '#080c14' }}>
           {children}
         </main>
       </div>
