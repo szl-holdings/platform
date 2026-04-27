@@ -147,6 +147,15 @@ const PLATFORM_APPS: PlatformApp[] = [
   },
   // Ecosystem (external standalone apps)
   {
+    href: '/conduit/',
+    label: 'Conduit — Reverse ETL',
+    description: 'Visual no-code Reverse ETL — map SZL data to SaaS destinations',
+    icon: Workflow,
+    color: '#22c55e',
+    external: true,
+    category: 'Ecosystem',
+  },
+  {
     href: '/imperium/',
     label: 'IMPERIUM',
     description: 'Infrastructure command — orchestration, governance, perimeter',

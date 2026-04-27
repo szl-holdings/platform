@@ -92,6 +92,7 @@ type NavGroup = { section: string; items: NavItemDef[] };
 const ECOSYSTEM_APPS_NAV: NavGroup = {
   section: 'Ecosystem Apps',
   items: [
+    { href: '/conduit/', label: 'Conduit — Reverse ETL', icon: Workflow, external: true },
     { href: '/counsel/', label: 'Counsel — Legal', icon: Scale, external: true },
     { href: '/imperium/', label: 'IMPERIUM', icon: Crown, external: true },
     { href: '/lyte-command-center/', label: 'Lyte Command Center', icon: Zap, external: true },

@@ -1,6 +1,14 @@
-import { Cpu, Crown, ExternalLink, Globe, Zap } from 'lucide-react';
+import { Cpu, Crown, ExternalLink, Globe, Workflow, Zap } from 'lucide-react';
 
 export const ECOSYSTEM_APPS = [
+  {
+    href: '/conduit/',
+    label: 'Conduit — Reverse ETL',
+    description:
+      'Visual no-code Reverse ETL — map SZL data to Salesforce, HubSpot, Slack, Sheets, Notion, and more',
+    icon: Workflow,
+    color: '#22c55e',
+  },
   {
     href: '/imperium/',
     label: 'IMPERIUM',
