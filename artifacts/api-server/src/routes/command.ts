@@ -2138,6 +2138,130 @@ router.get('/badge-counts', requireAnyAuth(), async (req: Request, res: Response
 });
 
 /**
+ * GET /api/command/badge-counts/stream
+ *
+ * SSE endpoint that pushes badge-count updates as soon as they change
+ * (or at most every 5 seconds). Consumers replace the 30-second polling
+ * loop in the frontend `useOpsBadgeCounts` hook.
+ *
+ * Each event is a JSON object with the same shape as /badge-counts:
+ *   { alerts, slaBreaches, costOverBudget, governancePending, generatedAt }
+ *
+ * Requires the same auth as the one-shot /badge-counts endpoint. When the
+ * SSE connection is rejected (401/403), the frontend hook falls back to
+ * the existing 30-second polling loop automatically.
+ */
+router.get('/badge-counts/stream', requireAnyAuth(), async (req: Request, res: Response) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  res.flushHeaders();
+
+  const tenantId = req.user?.orgs?.[0]?.orgId?.toString() ?? null;
+  const isAdmin = req.user?.roles?.some((r) => r === 'super_admin' || r === 'admin') ?? false;
+  const orgIds = req.user?.orgs?.map((o) => o.orgId).filter((id): id is number => typeof id === 'number') ?? [];
+
+  async function computeBadgeCounts(): Promise<{
+    alerts: number | null;
+    slaBreaches: number | null;
+    costOverBudget: number | null;
+    governancePending: number | null;
+  }> {
+    const alertsP = (async () => {
+      try {
+        const rawAlerts = await computeAlerts({ tenantId, isAdmin });
+        const states = await loadAlertStates(tenantId);
+        const alerts = applyAlertStates(rawAlerts, states, new Map());
+        return alerts.filter((a) => a.status === 'active').length;
+      } catch {
+        return null;
+      }
+    })();
+
+    const slaP = (async () => {
+      try {
+        const slas = await computeSlas();
+        return slas.filter((s) => s.breach).length;
+      } catch {
+        return null;
+      }
+    })();
+
+    const costP = (async () => {
+      try {
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const mtdEvents = await db
+          .select({
+            featureKey: usageEventsTable.featureKey,
+            total: sql<number>`COALESCE(SUM(${usageEventsTable.quantity}), 0)::int`,
+          })
+          .from(usageEventsTable)
+          .where(gte(usageEventsTable.recordedAt, monthStart))
+          .groupBy(usageEventsTable.featureKey);
+        const domainSpend = new Map<string, number>();
+        Object.keys(COST_DOMAIN_BUDGETS).forEach((d) => domainSpend.set(d, 0));
+        for (const e of mtdEvents) {
+          const r = COST_RATE_CARD[e.featureKey];
+          if (!r) continue;
+          domainSpend.set(r.domain, (domainSpend.get(r.domain) ?? 0) + Number(e.total) * r.unitCost);
+        }
+        return Array.from(domainSpend.entries()).filter(
+          ([d, spent]) => spent > (COST_DOMAIN_BUDGETS[d] ?? Infinity),
+        ).length;
+      } catch {
+        return null;
+      }
+    })();
+
+    const govP = (async () => {
+      try {
+        const orgFilter =
+          orgIds.length > 0 ? inArray(approvalRequestsTable.orgId, orgIds) : undefined;
+        const [row] = await db
+          .select({ count: sql<number>`COUNT(*)::int` })
+          .from(approvalRequestsTable)
+          .where(
+            and(
+              eq(approvalRequestsTable.status, 'pending'),
+              eq(approvalRequestsTable.resourceType, 'policy'),
+              orgFilter,
+            ),
+          );
+        return Number(row?.count ?? 0);
+      } catch {
+        return null;
+      }
+    })();
+
+    const [alerts, slaBreaches, costOverBudget, governancePending] = await Promise.all([
+      alertsP,
+      slaP,
+      costP,
+      govP,
+    ]);
+    return { alerts, slaBreaches, costOverBudget, governancePending };
+  }
+
+  const send = async () => {
+    try {
+      const counts = await computeBadgeCounts();
+      res.write(`data: ${JSON.stringify({ ...counts, generatedAt: new Date().toISOString() })}\n\n`);
+    } catch (err) {
+      logger.error({ err }, 'command badge-counts SSE error');
+    }
+  };
+
+  await send();
+  const interval = setInterval(() => void send(), 5_000);
+
+  req.on('close', () => {
+    clearInterval(interval);
+  });
+});
+
+/**
  * GET /api/command/overview-kpis
  *
  * Aggregated platform-wide KPIs for the Executive Summary panel. The

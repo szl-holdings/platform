@@ -52,7 +52,8 @@ export function hasAnyAlert(counts: OpsBadgeCounts): boolean {
   );
 }
 
-const POLL_INTERVAL_MS = 30_000;
+const FALLBACK_POLL_INTERVAL_MS = 30_000;
+const SSE_RECONNECT_DELAY_MS = 5_000;
 
 let snapshot: OpsBadgeCounts = {
   alerts: null,
@@ -61,8 +62,15 @@ let snapshot: OpsBadgeCounts = {
   costOverBudget: null,
 };
 const subscribers = new Set<() => void>();
-let interval: ReturnType<typeof setInterval> | null = null;
+
+let es: EventSource | null = null;
+let fallbackInterval: ReturnType<typeof setInterval> | null = null;
+let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
 let inFlight = false;
+
+function notify(): void {
+  subscribers.forEach((cb) => cb());
+}
 
 async function safeFetchCount(url: string): Promise<number | null> {
   try {
@@ -75,11 +83,6 @@ async function safeFetchCount(url: string): Promise<number | null> {
   }
 }
 
-/**
- * Try the single-call aggregator first. If it 404s (older deployments) or
- * fails for any reason, fall back to the four legacy per-counter endpoints
- * so the badge bar still works during a rolling deploy / upgrade.
- */
 async function fetchAggregated(): Promise<OpsBadgeCounts | null> {
   try {
     const res = await fetch('/api/command/badge-counts', { credentials: 'include' });
@@ -97,7 +100,7 @@ async function fetchAggregated(): Promise<OpsBadgeCounts | null> {
   }
 }
 
-async function refresh(): Promise<void> {
+async function pollOnce(): Promise<void> {
   if (inFlight) return;
   inFlight = true;
   try {
@@ -105,8 +108,6 @@ async function refresh(): Promise<void> {
     if (aggregated) {
       snapshot = aggregated;
     } else {
-      // Fan-out fallback: aggregator unavailable, fetch each counter
-      // individually so the badge bar continues to function.
       const [alerts, slaBreaches, governancePending, costOverBudget] = await Promise.all([
         safeFetchCount('/api/command/alerts/count'),
         safeFetchCount('/api/command/sla/breaches'),
@@ -115,32 +116,94 @@ async function refresh(): Promise<void> {
       ]);
       snapshot = { alerts, slaBreaches, governancePending, costOverBudget };
     }
-    subscribers.forEach((cb) => cb());
+    notify();
   } finally {
     inFlight = false;
   }
 }
 
-function ensurePolling(): void {
-  if (interval !== null) return;
-  void refresh();
-  interval = setInterval(() => {
-    void refresh();
-  }, POLL_INTERVAL_MS);
+function startFallbackPolling(): void {
+  if (fallbackInterval !== null) return;
+  void pollOnce();
+  fallbackInterval = setInterval(() => void pollOnce(), FALLBACK_POLL_INTERVAL_MS);
 }
 
-function stopPolling(): void {
-  if (interval === null) return;
-  clearInterval(interval);
-  interval = null;
+function stopFallbackPolling(): void {
+  if (fallbackInterval === null) return;
+  clearInterval(fallbackInterval);
+  fallbackInterval = null;
+}
+
+function startSSE(): void {
+  if (es !== null) {
+    es.close();
+    es = null;
+  }
+
+  const source = new EventSource('/api/command/badge-counts/stream');
+  es = source;
+
+  source.onopen = () => {
+    stopFallbackPolling();
+    if (reconnectTimeout !== null) {
+      clearTimeout(reconnectTimeout);
+      reconnectTimeout = null;
+    }
+  };
+
+  source.onmessage = (event) => {
+    try {
+      const body = JSON.parse(event.data) as Partial<OpsBadgeCounts>;
+      snapshot = {
+        alerts: typeof body.alerts === 'number' ? body.alerts : snapshot.alerts,
+        slaBreaches:
+          typeof body.slaBreaches === 'number' ? body.slaBreaches : snapshot.slaBreaches,
+        governancePending:
+          typeof body.governancePending === 'number'
+            ? body.governancePending
+            : snapshot.governancePending,
+        costOverBudget:
+          typeof body.costOverBudget === 'number' ? body.costOverBudget : snapshot.costOverBudget,
+      };
+      notify();
+    } catch {}
+  };
+
+  source.onerror = () => {
+    source.close();
+    if (es === source) es = null;
+    startFallbackPolling();
+    if (reconnectTimeout === null) {
+      reconnectTimeout = setTimeout(() => {
+        reconnectTimeout = null;
+        if (subscribers.size > 0) startSSE();
+      }, SSE_RECONNECT_DELAY_MS);
+    }
+  };
+}
+
+function stopSSE(): void {
+  if (es !== null) {
+    es.close();
+    es = null;
+  }
+  if (reconnectTimeout !== null) {
+    clearTimeout(reconnectTimeout);
+    reconnectTimeout = null;
+  }
 }
 
 function subscribe(cb: () => void): () => void {
   subscribers.add(cb);
-  ensurePolling();
+  if (subscribers.size === 1) {
+    startSSE();
+  }
   return () => {
     subscribers.delete(cb);
-    if (subscribers.size === 0) stopPolling();
+    if (subscribers.size === 0) {
+      stopSSE();
+      stopFallbackPolling();
+    }
   };
 }
 
@@ -149,9 +212,11 @@ function getSnapshot(): OpsBadgeCounts {
 }
 
 /**
- * Shared, deduplicated polling hook. Layout + grid + any other consumer
- * share a single 30s polling loop and a single in-memory snapshot. The
- * loop stops when no components are mounted.
+ * Shared, deduplicated SSE-backed hook. Layout + grid + any other consumer
+ * share a single EventSource and a single in-memory snapshot. Badge counts
+ * update within ~5 seconds of the underlying event firing. Falls back to
+ * 30-second polling while the SSE connection is re-establishing. The
+ * connection closes when no components are mounted.
  */
 export function useOpsBadgeCounts(): OpsBadgeCounts {
   return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
