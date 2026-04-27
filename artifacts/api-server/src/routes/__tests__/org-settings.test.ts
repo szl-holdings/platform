@@ -8,6 +8,8 @@
  *  - GET    /orgs/:orgSlug/notification-prefs     — get org notification settings
  *  - PUT    /orgs/:orgSlug/notification-prefs     — partial update merges with existing values
  *  - GET    /gdpr/export                          — returns valid JSON user export
+ *  - POST   /gdpr/erasure                         — GDPR right-to-erasure (Article 17)
+ *  - GET    /gdpr/data-processing-records         — GDPR Article 30 records of processing activities
  */
 
 import express, { type NextFunction, type Request, type Response } from 'express';
@@ -60,6 +62,7 @@ let _insertReturnQueue: unknown[][] = [];
 let _updateReturnQueue: unknown[][] = [];
 let _deleteReturns: unknown[] = [];
 let _poolQueryQueue: { rows: unknown[] }[] = [];
+let _transactionCalled = false;
 
 // ---------------------------------------------------------------------------
 // Module mocks
@@ -113,6 +116,21 @@ vi.mock('@szl-holdings/db', () => {
             return Promise.resolve();
           },
         };
+      },
+      async transaction(fn: (tx: unknown) => Promise<unknown>) {
+        _transactionCalled = true;
+        const tx = {
+          execute: vi.fn(() => Promise.resolve()),
+          delete(_table: unknown) {
+            return {
+              where: () => {
+                _deleteReturns.push(true);
+                return Promise.resolve();
+              },
+            };
+          },
+        };
+        return fn(tx);
       },
     },
     pool: poolMock,
@@ -923,5 +941,154 @@ describe('PUT /orgs/:orgSlug/support-settings — update support notification em
       .send({ notificationEmail: 'helpdesk@acme.example' });
 
     expect(res.status).toBe(403);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// GDPR Erasure
+// ---------------------------------------------------------------------------
+
+describe('POST /gdpr/erasure — GDPR right-to-erasure (Article 17)', () => {
+  beforeEach(() => {
+    _selectQueue = [];
+    _insertReturnQueue = [];
+    _updateReturnQueue = [];
+    _deleteReturns = [];
+    _poolQueryQueue = [];
+    _transactionCalled = false;
+    _currentUser = makeOrgAdminUser();
+  });
+
+  it('returns 204 when the exact confirmation string is provided', async () => {
+    const app = await getGdprApp();
+    const res = await request(app)
+      .post('/gdpr/erasure')
+      .send({ confirmation: 'DELETE MY DATA' });
+
+    expect(res.status).toBe(204);
+  });
+
+  it('issues a database transaction on successful erasure', async () => {
+    const app = await getGdprApp();
+    await request(app)
+      .post('/gdpr/erasure')
+      .send({ confirmation: 'DELETE MY DATA' });
+
+    expect(_transactionCalled).toBe(true);
+  });
+
+  it('records a delete inside the transaction', async () => {
+    const app = await getGdprApp();
+    await request(app)
+      .post('/gdpr/erasure')
+      .send({ confirmation: 'DELETE MY DATA' });
+
+    expect(_deleteReturns.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('returns 400 when confirmation string is wrong', async () => {
+    const app = await getGdprApp();
+    const res = await request(app)
+      .post('/gdpr/erasure')
+      .send({ confirmation: 'delete my data' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when confirmation string is close but not exact', async () => {
+    const app = await getGdprApp();
+    const res = await request(app)
+      .post('/gdpr/erasure')
+      .send({ confirmation: 'DELETE MY DATA ' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when confirmation field is missing entirely', async () => {
+    const app = await getGdprApp();
+    const res = await request(app)
+      .post('/gdpr/erasure')
+      .send({ reason: 'no longer need account' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('does not issue a transaction when confirmation is wrong', async () => {
+    const app = await getGdprApp();
+    await request(app)
+      .post('/gdpr/erasure')
+      .send({ confirmation: 'WRONG STRING' });
+
+    expect(_transactionCalled).toBe(false);
+  });
+
+  it('accepts an optional reason field alongside the correct confirmation', async () => {
+    const app = await getGdprApp();
+    const res = await request(app)
+      .post('/gdpr/erasure')
+      .send({ confirmation: 'DELETE MY DATA', reason: 'Closing my account' });
+
+    expect(res.status).toBe(204);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// GDPR Data Processing Records
+// ---------------------------------------------------------------------------
+
+describe('GET /gdpr/data-processing-records — Article 30 processing register', () => {
+  beforeEach(() => {
+    _selectQueue = [];
+    _insertReturnQueue = [];
+    _updateReturnQueue = [];
+    _deleteReturns = [];
+    _poolQueryQueue = [];
+    _transactionCalled = false;
+    _currentUser = makeOrgAdminUser();
+  });
+
+  it('returns 200 with a JSON body', async () => {
+    const app = await getGdprApp();
+    const res = await request(app).get('/gdpr/data-processing-records');
+
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/application\/json/);
+  });
+
+  it('response body contains a processingActivities array', async () => {
+    const app = await getGdprApp();
+    const res = await request(app).get('/gdpr/data-processing-records');
+
+    expect(Array.isArray(res.body.processingActivities)).toBe(true);
+    expect(res.body.processingActivities.length).toBeGreaterThan(0);
+  });
+
+  it('each processing activity has a legalBasis string', async () => {
+    const app = await getGdprApp();
+    const res = await request(app).get('/gdpr/data-processing-records');
+
+    for (const activity of res.body.processingActivities as { legalBasis: unknown }[]) {
+      expect(typeof activity.legalBasis).toBe('string');
+      expect(activity.legalBasis).toBeTruthy();
+    }
+  });
+
+  it('response includes controller, userRights, and supervisoryAuthority fields', async () => {
+    const app = await getGdprApp();
+    const res = await request(app).get('/gdpr/data-processing-records');
+
+    const body = res.body as Record<string, unknown>;
+    expect(body.controller).toBeDefined();
+    expect(Array.isArray(body.userRights)).toBe(true);
+    expect(typeof body.supervisoryAuthority).toBe('string');
+  });
+
+  it('controller includes name and contact fields', async () => {
+    const app = await getGdprApp();
+    const res = await request(app).get('/gdpr/data-processing-records');
+
+    const controller = res.body.controller as Record<string, unknown>;
+    expect(typeof controller.name).toBe('string');
+    expect(typeof controller.contact).toBe('string');
   });
 });
