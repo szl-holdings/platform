@@ -12,7 +12,7 @@ SZL Holdings uses GitHub Packages as the authoritative artifact registry across 
 | Registry | Scope/Namespace | Status | Ecosystem |
 |----------|----------------|--------|-----------|
 | npm | `@szl-holdings` | **Active** — 22+ packages ready | TypeScript/JavaScript |
-| Container (ghcr.io) | `ghcr.io/szl-holdings/*` | **Active** — 8 images ready | Docker/OCI |
+| Container (ghcr.io) | `ghcr.io/szl-holdings/*` | **Active** — 7 images ready | Docker/OCI |
 | Maven | `com.szlholdings` | **Template ready** | Java/Kotlin |
 | NuGet | `SzlHoldings.*` | **Template ready** | .NET |
 | RubyGems | `szl-holdings-*` | **Template ready** | Ruby |
@@ -171,8 +171,8 @@ Activate when the first Ruby gem is added.
 | npm | `@szl-holdings/<kebab-name>` | `@szl-holdings/shared-ui` |
 | Container | `ghcr.io/szl-holdings/<kebab-name>` | `ghcr.io/szl-holdings/api-server` |
 | Maven | `com.szlholdings:<kebab-artifact-id>` | `com.szlholdings:szl-core` |
-| NuGet | `SzlHoldings.<PascalName>` | `SzlHoldings.Lyte` |
-| RubyGems | `szl-holdings-<kebab-name>` | `szl-holdings-lyte` |
+| NuGet | `SzlHoldings.<PascalName>` | `SzlHoldings.Command` |
+| RubyGems | `szl-holdings-<kebab-name>` | `szl-holdings-command` |
 
 ---
 
