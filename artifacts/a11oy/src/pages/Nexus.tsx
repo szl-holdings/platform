@@ -122,7 +122,6 @@ async function reassignApprover(workcellId: string) {
   const rail = new ActionRail();
   const covenant = new CovenantEngine();
   
-  // Emergency covenant lift for time-critical reassignment
   const lift = await covenant.requestLift({
     policy: 'COV-APPROVAL-3',
     reason: 'approver_departure_void',
@@ -162,31 +161,44 @@ function formatRelative(ts: number): string {
   return `${Math.floor(diff / 86400000)}d ago`;
 }
 
+function SafeMarkdown({ text }: { text: string }) {
+  const parts = text.split(/(\*\*.*?\*\*|`[^`]+`|\n)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part === '\n') return <br key={i} />;
+        const boldMatch = part.match(/^\*\*(.*)\*\*$/);
+        if (boldMatch) return <strong key={i} style={{ color: 'rgba(255,255,255,0.95)', fontWeight: 600 }}>{boldMatch[1]}</strong>;
+        const codeMatch = part.match(/^`([^`]+)`$/);
+        if (codeMatch) return <code key={i} className="px-1.5 py-0.5 rounded text-xs font-mono" style={{ background: 'rgba(201,183,135,0.06)', color: 'rgba(201,183,135,0.85)' }}>{codeMatch[1]}</code>;
+        return <span key={i}>{part}</span>;
+      })}
+    </>
+  );
+}
+
 function ThinkingBlock({ text }: { text: string }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <div className="mb-3">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-2 text-xs font-medium transition-colors"
-        style={{ color: 'rgba(201,183,135,0.7)' }}
+        className="flex items-center gap-2 text-xs transition-colors"
+        style={{ color: 'rgba(201,183,135,0.6)' }}
       >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
           <path d={expanded ? 'M19 9l-7 7-7-7' : 'M9 5l7 7-7 7'} />
         </svg>
         <span className="flex items-center gap-1.5">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
             <circle cx="12" cy="12" r="10" />
             <path d="M12 6v6l4 2" />
           </svg>
-          Reasoning trace
+          Reasoning
         </span>
       </button>
       {expanded && (
-        <div
-          className="mt-2 p-3 rounded-lg text-xs leading-relaxed font-mono"
-          style={{ backgroundColor: 'rgba(201,183,135,0.06)', color: 'rgba(255,255,255,0.5)', borderLeft: '2px solid rgba(201,183,135,0.2)' }}
-        >
+        <div className="mt-2 pl-4 text-xs leading-relaxed font-mono" style={{ color: 'rgba(255,255,255,0.4)', borderLeft: '2px solid rgba(201,183,135,0.15)' }}>
           {text}
         </div>
       )}
@@ -200,20 +212,14 @@ function ToolCallList({ tools }: { tools: ToolCall[] }) {
       {tools.map((t, i) => (
         <span
           key={i}
-          className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-mono"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono"
           style={{
-            backgroundColor: t.status === 'complete' ? 'rgba(34,197,94,0.08)' : t.status === 'error' ? 'rgba(239,68,68,0.08)' : 'rgba(201,183,135,0.08)',
-            color: t.status === 'complete' ? 'rgba(34,197,94,0.8)' : t.status === 'error' ? 'rgba(239,68,68,0.8)' : 'rgba(201,183,135,0.8)',
-            border: '1px solid',
-            borderColor: t.status === 'complete' ? 'rgba(34,197,94,0.15)' : t.status === 'error' ? 'rgba(239,68,68,0.15)' : 'rgba(201,183,135,0.15)',
+            backgroundColor: t.status === 'complete' ? 'rgba(34,197,94,0.06)' : 'rgba(201,183,135,0.06)',
+            color: t.status === 'complete' ? 'rgba(34,197,94,0.7)' : 'rgba(201,183,135,0.7)',
           }}
         >
-          {t.status === 'complete' ? (
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
-          ) : t.status === 'running' ? (
-            <div className="w-2.5 h-2.5 rounded-full border border-current animate-spin" style={{ borderTopColor: 'transparent' }} />
-          ) : (
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
+          {t.status === 'complete' && (
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
           )}
           {t.name}
           {t.duration && <span style={{ opacity: 0.5 }}>{t.duration}ms</span>}
@@ -225,39 +231,31 @@ function ToolCallList({ tools }: { tools: ToolCall[] }) {
 
 function ArtifactPanel({ artifact, onClose }: { artifact: Artifact; onClose: () => void }) {
   return (
-    <div className="flex flex-col h-full" style={{ backgroundColor: '#0d0d0d' }}>
-      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="flex items-center gap-2">
+    <div className="flex flex-col h-full" style={{ backgroundColor: '#0c0c0c' }}>
+      <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="flex items-center gap-2.5">
           <span
             className="px-1.5 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider"
             style={{
-              backgroundColor: artifact.type === 'code' ? 'rgba(59,130,246,0.12)' : artifact.type === 'analysis' ? 'rgba(201,183,135,0.12)' : 'rgba(34,197,94,0.12)',
-              color: artifact.type === 'code' ? 'rgba(59,130,246,0.9)' : artifact.type === 'analysis' ? 'rgba(201,183,135,0.9)' : 'rgba(34,197,94,0.9)',
+              backgroundColor: artifact.type === 'code' ? 'rgba(59,130,246,0.1)' : 'rgba(201,183,135,0.1)',
+              color: artifact.type === 'code' ? 'rgba(59,130,246,0.8)' : 'rgba(201,183,135,0.8)',
             }}
           >
             {artifact.type}
           </span>
           <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.85)' }}>{artifact.title}</span>
         </div>
-        <div className="flex items-center gap-1">
-          <button className="p-1.5 rounded transition-colors hover:bg-white/5" style={{ color: 'rgba(255,255,255,0.4)' }} title="Copy">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-          </button>
-          <button className="p-1.5 rounded transition-colors hover:bg-white/5" onClick={onClose} style={{ color: 'rgba(255,255,255,0.4)' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
-          </button>
-        </div>
+        <button className="p-1.5 rounded-lg transition-colors hover:bg-white/5" onClick={onClose} style={{ color: 'rgba(255,255,255,0.3)' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+        </button>
       </div>
-      <div className="flex-1 overflow-auto p-4">
-        <pre
-          className="text-xs leading-relaxed font-mono whitespace-pre-wrap"
-          style={{ color: 'rgba(255,255,255,0.75)' }}
-        >
+      <div className="flex-1 overflow-auto p-5">
+        <pre className="text-xs leading-relaxed font-mono whitespace-pre-wrap" style={{ color: 'rgba(255,255,255,0.7)' }}>
           {artifact.content}
         </pre>
       </div>
       {artifact.language && (
-        <div className="px-4 py-2 text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.25)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="px-5 py-2.5 text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.2)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           {artifact.language}
         </div>
       )}
@@ -269,48 +267,36 @@ function MessageBubble({ msg, onArtifactClick }: { msg: Message; onArtifactClick
   const isUser = msg.role === 'user';
 
   return (
-    <div className={`max-w-3xl mx-auto px-6 py-5 ${isUser ? '' : ''}`}>
-      <div className="flex gap-3">
-        {!isUser && (
-          <div
-            className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-bold mt-0.5"
-            style={{ backgroundColor: 'rgba(201,183,135,0.12)', color: '#c9b787' }}
-          >
-            a
+    <div className="max-w-3xl mx-auto px-6 py-6">
+      <div className="flex gap-4">
+        {!isUser ? (
+          <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5" style={{ background: 'linear-gradient(135deg, rgba(201,183,135,0.2), rgba(201,183,135,0.05))' }}>
+            <span className="text-sm font-semibold" style={{ color: '#c9b787' }}>a</span>
+          </div>
+        ) : (
+          <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
           </div>
         )}
-        <div className="flex-1 min-w-0">
-          {!isUser && (
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-medium" style={{ color: '#c9b787' }}>a1.1oy</span>
-              {msg.model && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(201,183,135,0.08)', color: 'rgba(201,183,135,0.5)' }}>
-                  {msg.model}
-                </span>
-              )}
-              <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.2)' }}>{formatTime(msg.timestamp)}</span>
-            </div>
-          )}
-          {isUser && (
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>You</span>
-              <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.2)' }}>{formatTime(msg.timestamp)}</span>
-            </div>
-          )}
+        <div className="flex-1 min-w-0 pt-1">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[13px] font-semibold" style={{ color: isUser ? 'rgba(255,255,255,0.85)' : '#c9b787' }}>
+              {isUser ? 'You' : 'a1.1oy'}
+            </span>
+            {msg.model && !isUser && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-mono" style={{ backgroundColor: 'rgba(201,183,135,0.06)', color: 'rgba(201,183,135,0.4)' }}>
+                {msg.model}
+              </span>
+            )}
+            <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.15)' }}>{formatTime(msg.timestamp)}</span>
+          </div>
 
           {msg.thinking && <ThinkingBlock text={msg.thinking} />}
           {msg.tools && msg.tools.length > 0 && <ToolCallList tools={msg.tools} />}
 
-          <div
-            className="text-sm leading-relaxed whitespace-pre-wrap"
-            style={{ color: isUser ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.8)' }}
-            dangerouslySetInnerHTML={{
-              __html: msg.content
-                .replace(/\*\*(.*?)\*\*/g, '<strong style="color:rgba(255,255,255,0.95)">$1</strong>')
-                .replace(/`([^`]+)`/g, '<code style="background:rgba(201,183,135,0.08);padding:1px 5px;border-radius:3px;font-size:12px;color:#c9b787">$1</code>')
-                .replace(/\n/g, '<br/>')
-            }}
-          />
+          <div className="text-[14px] leading-[1.7] whitespace-pre-wrap" style={{ color: isUser ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.78)' }}>
+            <SafeMarkdown text={msg.content} />
+          </div>
 
           {msg.artifacts && msg.artifacts.length > 0 && (
             <div className="mt-4 flex flex-col gap-2">
@@ -318,28 +304,23 @@ function MessageBubble({ msg, onArtifactClick }: { msg: Message; onArtifactClick
                 <button
                   key={a.id}
                   onClick={() => onArtifactClick(a)}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all hover:translate-x-0.5"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                  className="group flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
                 >
-                  <div
-                    className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0"
-                    style={{
-                      backgroundColor: a.type === 'code' ? 'rgba(59,130,246,0.1)' : a.type === 'analysis' ? 'rgba(201,183,135,0.1)' : 'rgba(34,197,94,0.1)',
-                    }}
-                  >
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: a.type === 'code' ? 'rgba(59,130,246,0.08)' : 'rgba(201,183,135,0.08)' }}>
                     {a.type === 'code' ? (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={a.type === 'code' ? '#3b82f6' : '#c9b787'} strokeWidth="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="1.5"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
                     ) : (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9b787" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9b787" strokeWidth="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
                     )}
                   </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-medium truncate" style={{ color: 'rgba(255,255,255,0.8)' }}>{a.title}</div>
-                    <div className="text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[13px] font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>{a.title}</div>
+                    <div className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
                       {a.type}{a.language ? ` · ${a.language}` : ''}
                     </div>
                   </div>
-                  <svg className="ml-auto flex-shrink-0" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+                  <svg className="flex-shrink-0 transition-transform group-hover:translate-x-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
               ))}
             </div>
@@ -347,15 +328,13 @@ function MessageBubble({ msg, onArtifactClick }: { msg: Message; onArtifactClick
 
           {msg.proofId && (
             <div className="mt-3 flex items-center gap-1.5">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(34,197,94,0.5)" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              <span className="text-[10px] font-mono" style={{ color: 'rgba(34,197,94,0.5)' }}>
-                Proof: {msg.proofId}
-              </span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(34,197,94,0.5)" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span className="text-[11px] font-mono" style={{ color: 'rgba(34,197,94,0.5)' }}>Proof: {msg.proofId}</span>
             </div>
           )}
 
           {msg.tokens && (
-            <div className="mt-1 text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.15)' }}>
+            <div className="mt-1 text-[10px] font-mono" style={{ color: 'rgba(255,255,255,0.12)' }}>
               {msg.tokens.input} in · {msg.tokens.output} out
             </div>
           )}
@@ -366,12 +345,10 @@ function MessageBubble({ msg, onArtifactClick }: { msg: Message; onArtifactClick
 }
 
 const SUGGESTIONS = [
-  { icon: '🔍', text: 'Analyze signal mesh for anomalies', category: 'Intelligence' },
-  { icon: '⚡', text: 'Deploy a new workcell for deal review', category: 'Execution' },
-  { icon: '🛡️', text: 'Run covenant compliance check', category: 'Governance' },
-  { icon: '🔧', text: 'Refactor the approval chain logic', category: 'Code' },
-  { icon: '📊', text: 'Generate executive briefing for Q2', category: 'Intelligence' },
-  { icon: '🤖', text: 'Inspect MCP connector health', category: 'Operations' },
+  { text: 'Analyze signal mesh for anomalies', desc: 'Intelligence' },
+  { text: 'Deploy a new workcell for deal review', desc: 'Execution' },
+  { text: 'Run covenant compliance check', desc: 'Governance' },
+  { text: 'Refactor the approval chain logic', desc: 'Code' },
 ];
 
 export function Nexus() {
@@ -384,12 +361,31 @@ export function Nexus() {
   const [isStreaming, setIsStreaming] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const modelRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
+  useEffect(() => { scrollToBottom(); }, [messages, isStreaming, scrollToBottom]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!showModelPicker) return;
+    const handler = (e: MouseEvent) => {
+      if (modelRef.current && !modelRef.current.contains(e.target as Node)) {
+        setShowModelPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showModelPicker]);
 
   const handleSubmit = () => {
     if (!input.trim() || isStreaming) return;
@@ -403,7 +399,12 @@ export function Nexus() {
     setInput('');
     setIsStreaming(true);
 
-    setTimeout(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+    }
+
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
       const assistantMsg: Message = {
         id: `m-${Date.now()}`,
         role: 'assistant',
@@ -438,30 +439,26 @@ export function Nexus() {
     <Layout>
       <div className="flex h-[calc(100vh-48px)]" style={{ backgroundColor: '#0a0a0a' }}>
         {showThreads && (
-          <div className="w-72 flex-shrink-0 flex flex-col" style={{ borderRight: '1px solid rgba(255,255,255,0.06)', backgroundColor: '#080808' }}>
-            <div className="p-4 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-              <span className="text-xs font-semibold tracking-wider uppercase" style={{ color: 'rgba(255,255,255,0.4)' }}>Threads</span>
+          <div className="w-64 flex-shrink-0 flex flex-col" style={{ borderRight: '1px solid rgba(255,255,255,0.05)', backgroundColor: '#080808' }}>
+            <div className="p-4 flex items-center justify-between">
+              <span className="text-[11px] font-medium uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>Threads</span>
               <button
-                onClick={() => { setMessages([]); }}
-                className="px-2 py-1 rounded text-[10px] font-medium transition-colors"
-                style={{ backgroundColor: 'rgba(201,183,135,0.1)', color: '#c9b787' }}
+                onClick={() => { setMessages([]); setSelectedArtifact(null); }}
+                className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-white/5"
+                style={{ color: 'rgba(255,255,255,0.4)' }}
               >
-                + New
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
               </button>
             </div>
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-auto px-2">
               {SEED_THREADS.map((t) => (
                 <button
                   key={t.id}
-                  className="w-full px-4 py-3 text-left transition-colors hover:bg-white/[0.02]"
-                  style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}
+                  className="w-full px-3 py-2.5 mb-0.5 rounded-lg text-left transition-colors hover:bg-white/[0.03]"
                 >
-                  <div className="text-xs font-medium truncate" style={{ color: 'rgba(255,255,255,0.7)' }}>{t.title}</div>
-                  <div className="text-[10px] truncate mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>{t.lastMessage}</div>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.2)' }}>{formatRelative(t.timestamp)}</span>
-                    <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.15)' }}>{t.messageCount} msgs</span>
-                  </div>
+                  <div className="text-[12px] font-medium truncate" style={{ color: 'rgba(255,255,255,0.65)' }}>{t.title}</div>
+                  <div className="text-[11px] truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.25)' }}>{t.lastMessage}</div>
+                  <span className="text-[10px] mt-1 inline-block" style={{ color: 'rgba(255,255,255,0.15)' }}>{formatRelative(t.timestamp)}</span>
                 </button>
               ))}
             </div>
@@ -469,55 +466,58 @@ export function Nexus() {
         )}
 
         <div className="flex-1 flex flex-col min-w-0">
-          <div className="flex items-center justify-between px-4 py-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between px-4 h-12 flex-shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowThreads(!showThreads)}
-                className="p-1.5 rounded transition-colors hover:bg-white/5"
-                style={{ color: 'rgba(255,255,255,0.4)' }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-white/5"
+                style={{ color: showThreads ? '#c9b787' : 'rgba(255,255,255,0.3)' }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
               </button>
-              <div className="relative">
-                <button
-                  onClick={() => setShowModelPicker(!showModelPicker)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors hover:bg-white/5"
-                  style={{ border: '1px solid rgba(255,255,255,0.06)' }}
-                >
-                  <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>{selectedModel.label}</span>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-                {showModelPicker && (
-                  <div
-                    className="absolute top-full left-0 mt-1 w-72 rounded-lg shadow-2xl z-50 py-1"
-                    style={{ backgroundColor: '#141414', border: '1px solid rgba(255,255,255,0.08)' }}
-                  >
-                    {MODELS.map((m) => (
-                      <button
-                        key={m.id}
-                        onClick={() => { setSelectedModel(m); setShowModelPicker(false); }}
-                        className="w-full px-3 py-2.5 text-left transition-colors hover:bg-white/[0.04] flex items-center justify-between"
-                      >
-                        <div>
-                          <div className="text-xs font-medium" style={{ color: selectedModel.id === m.id ? '#c9b787' : 'rgba(255,255,255,0.7)' }}>{m.label}</div>
-                          <div className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>{m.description}</div>
-                        </div>
-                        {selectedModel.id === m.id && (
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c9b787" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <button
+                onClick={() => { setMessages([]); setSelectedArtifact(null); if (timerRef.current) { clearTimeout(timerRef.current); setIsStreaming(false); } }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-white/5"
+                style={{ color: 'rgba(255,255,255,0.3)' }}
+                title="New conversation"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-mono" style={{ backgroundColor: 'rgba(34,197,94,0.08)', color: 'rgba(34,197,94,0.7)' }}>
-                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'rgba(34,197,94,0.8)' }} />
-                Fabric connected
-              </span>
-              <span className="text-[10px] font-mono px-2 py-1 rounded" style={{ backgroundColor: 'rgba(201,183,135,0.06)', color: 'rgba(201,183,135,0.5)' }}>
-                MCP: 14 tools
+
+            <div className="relative" ref={modelRef}>
+              <button
+                onClick={() => setShowModelPicker(!showModelPicker)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors hover:bg-white/[0.03]"
+              >
+                <span className="text-[13px] font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>{selectedModel.label}</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              {showModelPicker && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-72 rounded-xl shadow-2xl z-50 py-1.5 overflow-hidden" style={{ backgroundColor: '#161616', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  {MODELS.map((m) => (
+                    <button
+                      key={m.id}
+                      onClick={() => { setSelectedModel(m); setShowModelPicker(false); }}
+                      className="w-full px-4 py-2.5 text-left transition-colors hover:bg-white/[0.04] flex items-center justify-between"
+                    >
+                      <div>
+                        <div className="text-[13px] font-medium" style={{ color: selectedModel.id === m.id ? '#c9b787' : 'rgba(255,255,255,0.7)' }}>{m.label}</div>
+                        <div className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>{m.description}</div>
+                      </div>
+                      {selectedModel.id === m.id && (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9b787" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center">
+              <span className="flex items-center gap-1.5 text-[11px] font-mono" style={{ color: 'rgba(34,197,94,0.5)' }}>
+                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'rgba(34,197,94,0.6)' }} />
+                Connected
               </span>
             </div>
           </div>
@@ -525,63 +525,100 @@ export function Nexus() {
           <div className="flex-1 overflow-auto">
             {showEmpty ? (
               <div className="flex flex-col items-center justify-center h-full px-6">
-                <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
-                  style={{ backgroundColor: 'rgba(201,183,135,0.08)', border: '1px solid rgba(201,183,135,0.12)' }}
-                >
-                  <span className="text-2xl font-bold" style={{ color: '#c9b787' }}>a</span>
-                </div>
-                <h2 className="text-xl font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                  a1.1oy
-                </h2>
-                <p className="text-sm text-center max-w-md mb-8" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  Governed AI with full proof chains. Every response is backed by evidence, every action is auditable, every decision is replayable.
-                </p>
-                <div className="grid grid-cols-2 gap-2 max-w-lg w-full">
-                  {SUGGESTIONS.map((s, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setInput(s.text)}
-                      className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left transition-all hover:translate-y-[-1px]"
-                      style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
-                    >
-                      <span className="text-sm">{s.icon}</span>
-                      <div>
-                        <div className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>{s.text}</div>
-                        <div className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.25)' }}>{s.category}</div>
+                <div className="flex flex-col items-center" style={{ marginTop: '-60px' }}>
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center mb-6" style={{ background: 'linear-gradient(135deg, rgba(201,183,135,0.15), rgba(201,183,135,0.03))' }}>
+                    <span className="text-xl font-semibold" style={{ color: '#c9b787' }}>a</span>
+                  </div>
+                  <h1 className="text-2xl font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.9)', letterSpacing: '-0.01em' }}>
+                    What can I help with?
+                  </h1>
+                  <p className="text-[14px] text-center max-w-sm mb-10" style={{ color: 'rgba(255,255,255,0.35)', lineHeight: 1.5 }}>
+                    Governed AI. Every response carries a proof chain.
+                  </p>
+
+                  <div className="w-full max-w-2xl mb-8">
+                    <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                      <textarea
+                        ref={inputRef}
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Ask anything — analyze, build, deploy, govern..."
+                        rows={1}
+                        className="w-full px-5 pt-4 pb-2 bg-transparent text-[14px] resize-none focus:outline-none"
+                        style={{ color: 'rgba(255,255,255,0.85)', minHeight: '52px', maxHeight: '200px' }}
+                        onInput={(e) => {
+                          const el = e.currentTarget;
+                          el.style.height = 'auto';
+                          el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+                        }}
+                      />
+                      <div className="flex items-center justify-between px-3 pb-3">
+                        <div className="flex items-center gap-0.5">
+                          <button className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-white/5" style={{ color: 'rgba(255,255,255,0.25)' }} title="Attach">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+                          </button>
+                          <button className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-white/5" style={{ color: 'rgba(255,255,255,0.25)' }} title="MCP Tools">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+                          </button>
+                          <button className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-white/5" style={{ color: 'rgba(255,255,255,0.25)' }} title="Search knowledge">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                          </button>
+                        </div>
+                        <button
+                          onClick={handleSubmit}
+                          disabled={!input.trim() || isStreaming}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+                          style={{
+                            backgroundColor: input.trim() ? '#c9b787' : 'rgba(255,255,255,0.05)',
+                            color: input.trim() ? '#0a0a0a' : 'rgba(255,255,255,0.15)',
+                          }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
                       </div>
-                    </button>
-                  ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap justify-center gap-2 max-w-xl">
+                    {SUGGESTIONS.map((s, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setInput(s.text)}
+                        className="px-4 py-2 rounded-full text-[13px] transition-all hover:bg-white/[0.04]"
+                        style={{ border: '1px solid rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)' }}
+                      >
+                        {s.text}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="py-4">
+              <div className="py-2">
                 {messages.map((msg) => (
                   <MessageBubble key={msg.id} msg={msg} onArtifactClick={setSelectedArtifact} />
                 ))}
                 {isStreaming && (
-                  <div className="max-w-3xl mx-auto px-6 py-5">
-                    <div className="flex gap-3">
-                      <div
-                        className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-bold"
-                        style={{ backgroundColor: 'rgba(201,183,135,0.12)', color: '#c9b787' }}
-                      >
-                        a
+                  <div className="max-w-3xl mx-auto px-6 py-6">
+                    <div className="flex gap-4">
+                      <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(201,183,135,0.2), rgba(201,183,135,0.05))' }}>
+                        <span className="text-sm font-semibold" style={{ color: '#c9b787' }}>a</span>
                       </div>
-                      <div>
+                      <div className="pt-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs font-medium" style={{ color: '#c9b787' }}>a1.1oy</span>
-                          <span className="text-[10px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(201,183,135,0.08)', color: 'rgba(201,183,135,0.5)' }}>
+                          <span className="text-[13px] font-semibold" style={{ color: '#c9b787' }}>a1.1oy</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full font-mono" style={{ backgroundColor: 'rgba(201,183,135,0.06)', color: 'rgba(201,183,135,0.4)' }}>
                             {selectedModel.id}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                           <div className="flex gap-1">
-                            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#c9b787', animationDelay: '0ms' }} />
-                            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#c9b787', animationDelay: '200ms' }} />
-                            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#c9b787', animationDelay: '400ms' }} />
+                            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: 'rgba(201,183,135,0.6)', animationDelay: '0ms' }} />
+                            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: 'rgba(201,183,135,0.6)', animationDelay: '200ms' }} />
+                            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: 'rgba(201,183,135,0.6)', animationDelay: '400ms' }} />
                           </div>
-                          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>Processing through governed fabric...</span>
+                          <span className="text-[13px]" style={{ color: 'rgba(255,255,255,0.25)' }}>Thinking...</span>
                         </div>
                       </div>
                     </div>
@@ -592,61 +629,57 @@ export function Nexus() {
             )}
           </div>
 
-          <div className="px-4 pb-4 pt-2">
-            <div
-              className="max-w-3xl mx-auto rounded-xl overflow-hidden"
-              style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
-            >
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask a1.1oy anything — code, analyze, deploy, govern..."
-                rows={1}
-                className="w-full px-4 pt-3.5 pb-1 bg-transparent text-sm resize-none focus:outline-none"
-                style={{ color: 'rgba(255,255,255,0.85)', minHeight: '44px', maxHeight: '200px' }}
-                onInput={(e) => {
-                  const el = e.currentTarget;
-                  el.style.height = 'auto';
-                  el.style.height = Math.min(el.scrollHeight, 200) + 'px';
-                }}
-              />
-              <div className="flex items-center justify-between px-3 pb-2.5">
-                <div className="flex items-center gap-1">
-                  <button className="p-1.5 rounded transition-colors hover:bg-white/5" style={{ color: 'rgba(255,255,255,0.3)' }} title="Attach file">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
-                  </button>
-                  <button className="p-1.5 rounded transition-colors hover:bg-white/5" style={{ color: 'rgba(255,255,255,0.3)' }} title="Use MCP tool">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-                  </button>
-                  <button className="p-1.5 rounded transition-colors hover:bg-white/5" style={{ color: 'rgba(255,255,255,0.3)' }} title="Knowledge base">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                  </button>
+          {!showEmpty && (
+            <div className="px-4 pb-5 pt-2">
+              <div className="max-w-3xl mx-auto">
+                <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <textarea
+                    ref={inputRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Reply to a1.1oy..."
+                    rows={1}
+                    className="w-full px-5 pt-4 pb-2 bg-transparent text-[14px] resize-none focus:outline-none"
+                    style={{ color: 'rgba(255,255,255,0.85)', minHeight: '52px', maxHeight: '200px' }}
+                    onInput={(e) => {
+                      const el = e.currentTarget;
+                      el.style.height = 'auto';
+                      el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+                    }}
+                  />
+                  <div className="flex items-center justify-between px-3 pb-3">
+                    <div className="flex items-center gap-0.5">
+                      <button className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-white/5" style={{ color: 'rgba(255,255,255,0.25)' }} title="Attach">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+                      </button>
+                      <button className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-white/5" style={{ color: 'rgba(255,255,255,0.25)' }} title="MCP Tools">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+                      </button>
+                      <button className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-white/5" style={{ color: 'rgba(255,255,255,0.25)' }} title="Search knowledge">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                      </button>
+                    </div>
+                    <button
+                      onClick={handleSubmit}
+                      disabled={!input.trim() || isStreaming}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+                      style={{
+                        backgroundColor: input.trim() ? '#c9b787' : 'rgba(255,255,255,0.05)',
+                        color: input.trim() ? '#0a0a0a' : 'rgba(255,255,255,0.15)',
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={handleSubmit}
-                  disabled={!input.trim() || isStreaming}
-                  className="p-2 rounded-lg transition-all"
-                  style={{
-                    backgroundColor: input.trim() ? 'rgba(201,183,135,0.15)' : 'rgba(255,255,255,0.03)',
-                    color: input.trim() ? '#c9b787' : 'rgba(255,255,255,0.15)',
-                  }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-                </button>
               </div>
             </div>
-            <div className="max-w-3xl mx-auto mt-2 text-center">
-              <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.15)' }}>
-                a1.1oy · Governed AI · Every response carries a proof chain
-              </span>
-            </div>
-          </div>
+          )}
         </div>
 
         {selectedArtifact && (
-          <div className="w-[420px] flex-shrink-0" style={{ borderLeft: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="w-[420px] flex-shrink-0" style={{ borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
             <ArtifactPanel artifact={selectedArtifact} onClose={() => setSelectedArtifact(null)} />
           </div>
         )}

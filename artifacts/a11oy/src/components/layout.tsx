@@ -85,6 +85,14 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'a1.1oy',
+    items: [
+      { href: '/nexus',        label: 'a1.1oy Chat' },
+      { href: '/mcp-hub',      label: 'MCP Hub' },
+      { href: '/agentic-rag',  label: 'Agentic RAG' },
+    ],
+  },
+  {
     label: 'PLATFORM',
     items: [
       { href: '/tools',        label: 'Tools' },
