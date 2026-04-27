@@ -351,7 +351,7 @@ const SUGGESTIONS = [
   { text: 'Refactor the approval chain logic', desc: 'Code' },
 ];
 
-export function Nexus() {
+export function Praxis() {
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
   const [input, setInput] = useState('');
   const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(null);

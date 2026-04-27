@@ -141,7 +141,7 @@ const SelfOptimization = lazy(() => import('./pages/SelfOptimization').then(m =>
 const GovernedSecurityAgents = lazy(() => import('./pages/GovernedSecurityAgents').then(m => ({ default: m.GovernedSecurityAgents })));
 const A11oyBillingPage = lazy(() => import('./pages/billing-account'));
 const KarpathyEvolution = lazy(() => import('./pages/KarpathyEvolution').then(m => ({ default: m.KarpathyEvolution })));
-const Nexus = lazy(() => import('./pages/Nexus').then(m => ({ default: m.Nexus })));
+const Praxis = lazy(() => import('./pages/Praxis').then(m => ({ default: m.Praxis })));
 const McpHub = lazy(() => import('./pages/McpHub').then(m => ({ default: m.McpHub })));
 const AgenticRag = lazy(() => import('./pages/AgenticRag').then(m => ({ default: m.AgenticRag })));
 
@@ -180,7 +180,7 @@ export default function App() {
         <Route path={`${base}/boardroom`} component={BoardroomMode} />
         <Route path={`${base}/investor-demo`} component={InvestorDemo} />
         <Route path={`${base}/terminal`} component={Terminal} />
-        <Route path={`${base}/nexus`} component={Nexus} />
+        <Route path={`${base}/nexus`} component={Praxis} />
         <Route path={`${base}/mcp-hub`} component={McpHub} />
         <Route path={`${base}/agentic-rag`} component={AgenticRag} />
         <Route path={`${base}/fabric`} component={Fabric} />
