@@ -52,6 +52,7 @@ import { initSandboxRuntime } from './lib/sandbox-init.js';
 import { registerGenAITelemetryBridge } from './lib/genai-telemetry-bridge.js';
 import { registerInferenceLogBridge } from './lib/inference-log-bridge.js';
 import { pingRedis } from './lib/redis-client.js';
+import { providerCircuitBreaker } from './lib/ai-gateway.js';
 import { seedAiBudgetPolicies } from './lib/seed-ai-budget';
 import { seedConstellationData } from './lib/seed-constellation';
 import { seedDreamscapeData } from './lib/seed-dreamscape';
@@ -392,6 +393,11 @@ export async function bootstrap(
     .then((m) => m.startSyncScheduler())
     .catch((err) => logger.warn({ err }, 'RMM sync scheduler start failed (non-fatal)'));
   pingRedis().catch((err) => logger.warn({ err }, '[redis] Startup ping failed (non-fatal)'));
+  providerCircuitBreaker
+    .initialize()
+    .catch((err) =>
+      logger.warn({ err }, '[circuit-breaker] Failed to restore state from Redis (non-fatal)'),
+    );
   prewarmIntelligenceCache().catch((err) => {
     logger.warn({ err }, '[intelligence-cache] Prewarm failed (non-fatal)');
   });

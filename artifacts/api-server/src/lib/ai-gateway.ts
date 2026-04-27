@@ -2,6 +2,7 @@ import { type ChatCompletionResult, type ChatMessage, services } from '@szl-hold
 import { estimateCost, type InferenceProvider, inferenceTelemetry } from './inference-telemetry';
 import { logger } from './logger';
 import { providerHealth } from './provider-health';
+import { redisGet, redisSet } from './redis-client';
 
 export type RoutingStrategy = 'fastest' | 'cheapest' | 'preferred' | 'fallback';
 
@@ -105,21 +106,22 @@ export interface CircuitBreakerStatus {
 
 const CIRCUIT_FAILURE_THRESHOLD = 3;
 const CIRCUIT_RECOVERY_MS = 60_000;
+const CIRCUIT_REDIS_KEY_PREFIX = 'cb:';
+const CIRCUIT_REDIS_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+interface CircuitEntry {
+  state: CircuitState;
+  consecutiveFailures: number;
+  openedAt: number | null;
+  lastTestedAt: number | null;
+  totalTripped: number;
+  probing: boolean;
+}
 
 class ProviderCircuitBreaker {
-  private circuits: Map<
-    InferenceProvider,
-    {
-      state: CircuitState;
-      consecutiveFailures: number;
-      openedAt: number | null;
-      lastTestedAt: number | null;
-      totalTripped: number;
-      probing: boolean;
-    }
-  > = new Map();
+  private circuits: Map<InferenceProvider, CircuitEntry> = new Map();
 
-  private getOrCreate(provider: InferenceProvider) {
+  private getOrCreate(provider: InferenceProvider): CircuitEntry {
     let circuit = this.circuits.get(provider);
     if (!circuit) {
       circuit = {
@@ -135,6 +137,41 @@ class ProviderCircuitBreaker {
     return circuit;
   }
 
+  private _persist(provider: InferenceProvider): void {
+    const circuit = this.circuits.get(provider);
+    if (!circuit) return;
+    const { probing: _probing, ...persisted } = circuit;
+    void redisSet(`${CIRCUIT_REDIS_KEY_PREFIX}${provider}`, persisted, CIRCUIT_REDIS_TTL_MS);
+  }
+
+  async initialize(): Promise<void> {
+    const providers: InferenceProvider[] = [
+      'replit-proxy',
+      'openai',
+      'anthropic',
+      'gemini',
+      'huggingface',
+    ];
+    await Promise.all(
+      providers.map(async (provider) => {
+        try {
+          const saved = await redisGet<Omit<CircuitEntry, 'probing'>>(
+            `${CIRCUIT_REDIS_KEY_PREFIX}${provider}`,
+          );
+          if (saved) {
+            this.circuits.set(provider, { ...saved, probing: false });
+            logger.info(
+              { provider, state: saved.state, consecutiveFailures: saved.consecutiveFailures },
+              '[circuit-breaker] Restored state from Redis',
+            );
+          }
+        } catch (err) {
+          logger.warn({ provider, err }, '[circuit-breaker] Failed to restore state from Redis');
+        }
+      }),
+    );
+  }
+
   isOpen(provider: InferenceProvider): boolean {
     const circuit = this.getOrCreate(provider);
 
@@ -147,6 +184,7 @@ class ProviderCircuitBreaker {
           circuit.state = 'half-open';
           circuit.probing = true;
           circuit.lastTestedAt = Date.now();
+          this._persist(provider);
           logger.info(
             { provider, elapsedMs: elapsed },
             'Circuit breaker half-opening — allowing single probe request',
@@ -171,6 +209,7 @@ class ProviderCircuitBreaker {
     circuit.state = 'closed';
     circuit.consecutiveFailures = 0;
     circuit.probing = false;
+    this._persist(provider);
     if (wasHalfOpen) {
       logger.info({ provider }, 'Circuit breaker closed after successful probe');
     }
@@ -184,6 +223,7 @@ class ProviderCircuitBreaker {
     if (circuit.state === 'half-open') {
       circuit.state = 'open';
       circuit.openedAt = Date.now();
+      this._persist(provider);
       logger.warn({ provider }, 'Circuit breaker re-opened after failed probe');
       return;
     }
@@ -192,6 +232,7 @@ class ProviderCircuitBreaker {
       circuit.state = 'open';
       circuit.openedAt = Date.now();
       circuit.totalTripped++;
+      this._persist(provider);
       logger.error(
         {
           provider,
@@ -200,7 +241,10 @@ class ProviderCircuitBreaker {
         },
         'Circuit breaker opened — provider will receive no traffic until recovery window expires',
       );
+      return;
     }
+
+    this._persist(provider);
   }
 
   getStatus(provider: InferenceProvider): CircuitBreakerStatus {
