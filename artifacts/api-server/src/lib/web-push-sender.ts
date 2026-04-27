@@ -1,5 +1,5 @@
 import { db, webPushSubscriptionsTable } from '@szl-holdings/db';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import webpush from 'web-push';
 import { logger } from './logger';
 
@@ -63,6 +63,32 @@ export async function sendWebPushToAll(payload: WebPushPayload): Promise<SendWeb
 
   if (subs.length === 0) return { sent: 0, failed: 0, deactivated: 0 };
 
+  return sendToSubscriptions(subs, payload);
+}
+
+export async function sendWebPushToUsers(
+  userIds: number[],
+  payload: WebPushPayload,
+): Promise<SendWebPushResult> {
+  if (!ensureVapidConfigured() || userIds.length === 0) {
+    return { sent: 0, failed: 0, deactivated: 0 };
+  }
+  let subs: (typeof webPushSubscriptionsTable.$inferSelect)[];
+  try {
+    subs = await db
+      .select()
+      .from(webPushSubscriptionsTable)
+      .where(
+        and(
+          eq(webPushSubscriptionsTable.isActive, true),
+          inArray(webPushSubscriptionsTable.userId, userIds),
+        ),
+      );
+  } catch (err) {
+    logger.warn({ err }, '[web-push] Failed to query subscriptions for users');
+    return { sent: 0, failed: 0, deactivated: 0 };
+  }
+  if (subs.length === 0) return { sent: 0, failed: 0, deactivated: 0 };
   return sendToSubscriptions(subs, payload);
 }
 

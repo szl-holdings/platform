@@ -1,8 +1,11 @@
-import { ChevronLeft, } from 'lucide-react';
+import { Building2, ChevronLeft } from 'lucide-react';
+import { useState } from 'react';
 import { Link, useParams } from 'wouter';
 import AgentBadge from '../components/AgentBadge';
 import ConfidenceChip from '../components/ConfidenceChip';
-import { isDemoMode, useBriefing } from '../lib/api';
+import { PublicationHistory } from '../components/PublicationHistory';
+import { PublishDialog } from '../components/PublishDialog';
+import { isDemoMode, useBriefing, usePublications, usePublishBriefing, usePublishPermission } from '../lib/api';
 import { PULSE_SYNTHESIZED_LABEL } from '../lib/claims';
 import { AGENTS, getRiskColor } from '../lib/data';
 
@@ -46,6 +49,11 @@ const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') || '/pulse';
 export default function BriefingDetail() {
   const { id } = useParams<{ id: string }>();
   const { data: brief, isLoading, error } = useBriefing(id);
+  const { data: publications, isLoading: pubsLoading } = usePublications(id);
+  const publishMutation = usePublishBriefing(id);
+  const { data: canPublish } = usePublishPermission();
+  const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const [isRepublish, setIsRepublish] = useState(false);
 
   if (isLoading) {
     return (
@@ -100,21 +108,53 @@ export default function BriefingDetail() {
 
   return (
     <div style={{ padding: '28px 28px 40px' }}>
-      <Link href={`${BASE}/library`}>
-        <a
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 5,
-            color: 'var(--pulse-text-muted)',
-            fontSize: '0.8rem',
-            textDecoration: 'none',
-            marginBottom: 20,
-          }}
-        >
-          <ChevronLeft size={14} /> Back to Library
-        </a>
-      </Link>
+      {showPublishDialog && brief && (
+        <PublishDialog
+          briefingId={brief.id}
+          briefingHeadline={brief.headline}
+          forceRepublish={isRepublish}
+          onClose={() => { setShowPublishDialog(false); setIsRepublish(false); }}
+          onPublish={(input) => publishMutation.mutateAsync(input)}
+        />
+      )}
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <Link href={`${BASE}/library`}>
+          <a
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              color: 'var(--pulse-text-muted)',
+              fontSize: '0.8rem',
+              textDecoration: 'none',
+            }}
+          >
+            <ChevronLeft size={14} /> Back to Library
+          </a>
+        </Link>
+        {!isDemoMode() && canPublish && (
+          <button
+            onClick={() => setShowPublishDialog(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '6px 12px',
+              borderRadius: 6,
+              border: '1px solid rgba(200,168,75,0.4)',
+              background: 'rgba(200,168,75,0.1)',
+              color: 'var(--pulse-gold)',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            <Building2 size={13} />
+            Publish to Organization
+          </button>
+        )}
+      </div>
 
       {/* Header */}
       <div
@@ -282,6 +322,15 @@ export default function BriefingDetail() {
           </div>
         );
       })}
+
+      {/* Publication history */}
+      {!isDemoMode() && (
+        <PublicationHistory
+          publications={publications ?? []}
+          loading={pubsLoading}
+          onRepublish={() => { setIsRepublish(true); setShowPublishDialog(true); }}
+        />
+      )}
     </div>
   );
 }

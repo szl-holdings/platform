@@ -2,6 +2,7 @@ import { type AutonomyMode, ProofEnvelope } from '@szl-holdings/design-system';
 import {
   AlertTriangle,
   Bot,
+  Building2,
   ChevronDown,
   ChevronUp,
   Clock,
@@ -26,6 +27,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { HeliosFrontierBriefing } from '../components/HeliosFrontierBriefing';
 import MeshCard from '../components/MeshCard';
 import { BriefSkeleton } from '../components/SkeletonRow';
+import { PublishDialog } from '../components/PublishDialog';
 import {
   exportBriefingPdf,
   type FollowUp,
@@ -33,6 +35,8 @@ import {
   useAskFollowUp,
   useFollowUps,
   useGenerateBriefing,
+  usePublishBriefing,
+  usePublishPermission,
   useTodaysBrief,
 } from '../lib/api';
 import { PULSE_SYNTHESIZED_LABEL } from '../lib/claims';
@@ -692,8 +696,11 @@ function getAudioApiBase() {
 export default function TodaysBrief() {
   const { data: brief, isLoading, error } = useTodaysBrief();
   const generate = useGenerateBriefing();
+  const publishMutation = usePublishBriefing(brief?.id);
+  const { data: canPublish } = usePublishPermission();
   const [exporting, setExporting] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
+  const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [, navigate] = useLocation();
 
   const [audioBriefState, setAudioBriefState] = useState<AudioBriefState>('idle');
@@ -889,6 +896,15 @@ export default function TodaysBrief() {
 
   return (
     <div style={{ padding: '0 0 40px' }}>
+      {showPublishDialog && brief && (
+        <PublishDialog
+          briefingId={brief.id}
+          briefingHeadline={brief.headline}
+          onClose={() => setShowPublishDialog(false)}
+          onPublish={(input) => publishMutation.mutateAsync(input)}
+        />
+      )}
+
       {/* Brief header */}
       <div
         style={{
@@ -1034,6 +1050,29 @@ export default function TodaysBrief() {
                 >
                   <Sparkles size={13} />
                   {generate.isPending ? 'Generating…' : 'Generate Live Briefing'}
+                </button>
+              )}
+              {!isDemoMode() && brief && canPublish && (
+                <button
+                  type="button"
+                  onClick={() => setShowPublishDialog(true)}
+                  title="Publish this briefing to all org members"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '8px 14px',
+                    borderRadius: 6,
+                    background: 'rgba(200,168,75,0.10)',
+                    border: '1px solid rgba(200,168,75,0.35)',
+                    color: 'var(--pulse-gold)',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Building2 size={13} />
+                  Publish to Org
                 </button>
               )}
               <button

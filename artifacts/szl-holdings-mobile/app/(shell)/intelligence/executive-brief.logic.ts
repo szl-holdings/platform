@@ -61,3 +61,32 @@ export function buildPulseWebUrl(apiBase: string | null | undefined): string {
   if (!apiBase) return '/pulse/';
   return `${apiBase.replace(/\/api\/?$/, '')}/pulse/`;
 }
+
+// ─── Push notification deep link handling ─────────────────────────────────────
+
+export type PushNotificationData = {
+  type?: string;
+  briefingId?: string;
+  publicationId?: string;
+  [key: string]: unknown;
+};
+
+/**
+ * Returns true when a push notification payload indicates it is an
+ * org-wide briefing publication and should navigate to the executive brief.
+ */
+export function isPulseBriefingPush(data: PushNotificationData): boolean {
+  return data?.type === 'pulse_briefing_published' && typeof data?.briefingId === 'string';
+}
+
+/**
+ * Extracts the briefing ID from a push notification payload.
+ */
+export function extractBriefingIdFromPush(
+  data: PushNotificationData,
+): string | null {
+  if (isPulseBriefingPush(data) && typeof data.briefingId === 'string') {
+    return data.briefingId;
+  }
+  return null;
+}

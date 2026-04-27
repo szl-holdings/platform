@@ -281,6 +281,41 @@ export const pulseOrgAuditLogTable = pgTable('pulse_org_audit_log', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
+// ─── Org-wide briefing publications (v1: in-app + push) ────────────────────────
+// One row per on-demand publish action. Tenant-isolated by org_id.
+// A uniqueness guard (org_id + briefing_id + status != 'failed') prevents
+// accidental double-fan-out; "Republish" explicitly creates a new row.
+export const pulseBriefingPublicationsTable = pgTable(
+  'pulse_briefing_publications',
+  {
+    id: serial('id').primaryKey(),
+    publicationId: text('publication_id').notNull().unique(),
+    briefingId: text('briefing_id').notNull(),
+    orgId: integer('org_id').notNull(),
+    publisherUserId: integer('publisher_user_id').notNull(),
+    audienceType: text('audience_type', { enum: ['all', 'roles'] }).notNull().default('all'),
+    audienceRoles: jsonb('audience_roles').$type<string[]>().default([]),
+    channels: jsonb('channels').notNull().$type<string[]>().default(['in_app', 'push']),
+    headlineOverride: text('headline_override'),
+    messageOverride: text('message_override'),
+    status: text('status', { enum: ['publishing', 'published', 'failed'] })
+      .notNull()
+      .default('publishing'),
+    totalRecipients: integer('total_recipients').notNull().default(0),
+    inAppDelivered: integer('in_app_delivered').notNull().default(0),
+    pushSent: integer('push_sent').notNull().default(0),
+    pushFailed: integer('push_failed').notNull().default(0),
+    publishedAt: timestamp('published_at').notNull().defaultNow(),
+    completedAt: timestamp('completed_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('pulse_briefing_pubs_org_briefing_idx').on(t.orgId, t.briefingId),
+    index('pulse_briefing_pubs_org_created_idx').on(t.orgId, t.createdAt),
+  ],
+);
+
 export const pulseExecBriefsTable = pgTable('pulse_exec_briefs', {
   id: text('id').primaryKey(),
   briefingId: text('briefing_id'),

@@ -791,3 +791,96 @@ export function useUpdatePushSchedule() {
     },
   });
 }
+
+// ─── Org-wide briefing publication ────────────────────────────────────────────
+
+export interface BriefingPublication {
+  id: number;
+  publicationId: string;
+  briefingId: string;
+  orgId: number;
+  publisherUserId: number;
+  publisherName: string | null;
+  audienceType: 'all' | 'roles';
+  audienceRoles: string[] | null;
+  channels: string[];
+  headlineOverride: string | null;
+  messageOverride: string | null;
+  status: 'publishing' | 'published' | 'failed';
+  totalRecipients: number;
+  inAppDelivered: number;
+  pushSent: number;
+  pushFailed: number;
+  publishedAt: string;
+  completedAt: string | null;
+  createdAt: string;
+}
+
+export interface PublishBriefingInput {
+  audienceType?: 'all' | 'roles';
+  audienceRoles?: string[];
+  channels?: string[];
+  headlineOverride?: string;
+  messageOverride?: string;
+  force?: boolean;
+}
+
+export function usePublishPermission() {
+  return useQuery({
+    queryKey: ['pulse', 'publish-permission'],
+    queryFn: () =>
+      apiFetch<{ success: true; canPublish: boolean }>('/api/pulse/publish-permission').then(
+        (d) => d.canPublish,
+      ),
+    enabled: !isDemoMode(),
+    staleTime: 60_000,
+  });
+}
+
+export function usePublications(briefingId: string | undefined) {
+  return useQuery({
+    queryKey: ['pulse', 'publications', briefingId],
+    queryFn: () =>
+      apiFetch<{ success: true; publications: BriefingPublication[] }>(
+        `/api/pulse/briefings/${briefingId}/publications`,
+      ).then((d) => d.publications),
+    enabled: !!briefingId && !isDemoMode(),
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (Array.isArray(data) && data.some((p: BriefingPublication) => p.status === 'publishing'))
+        return 2000;
+      return false;
+    },
+  });
+}
+
+export function usePublishBriefing(briefingId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: PublishBriefingInput) => {
+      if (!briefingId) return Promise.reject(new Error('No briefing ID'));
+      if (isDemoMode()) {
+        return Promise.reject(new Error('Publishing is not available in demo mode.'));
+      }
+      return apiFetch<{
+        success: true;
+        publication: {
+          publicationId: string;
+          briefingId: string;
+          audienceType: string;
+          channels: string[];
+          totalRecipients: number;
+          status: string;
+        };
+      }>(`/api/pulse/briefings/${briefingId}/publish`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pulse', 'publications', briefingId] });
+      qc.invalidateQueries({ queryKey: ['pulse', 'briefing', briefingId] });
+      qc.invalidateQueries({ queryKey: ['pulse', 'today'] });
+    },
+  });
+}

@@ -9,6 +9,9 @@ import {
   fleetExceptionsTable,
   holdingsMetricsTable,
   maritimeExceptionsTable,
+  notificationsTable,
+  orgMembersTable,
+  pulseBriefingPublicationsTable,
   pulseBriefingsTable,
   pulseCustomBriefsTable,
   pulseDissentsTable,
@@ -17,6 +20,11 @@ import {
   pulsePersonalizedNarrativesTable,
   pulsePushScheduleTable,
   pulseWatchlistTable,
+  pushTokensTable,
+  rolesTable,
+  userRolesTable,
+  usersTable,
+  webPushSubscriptionsTable,
 } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
@@ -34,8 +42,20 @@ import {
   type ConfidenceLevel,
   type RiskLevel,
 } from '../lib/pulse-confidence';
+import { sendPushToUser, isAlertCategoryAllowedForUser } from '../lib/expo-push';
 import { listQuerySchema, validateBody, validateParams, validateQuery } from '../lib/validation';
+import { sendWebPushToUsers } from '../lib/web-push-sender';
+import { publish, WS_CHANNELS } from '../lib/websocket';
 import { authMiddleware, requireRole } from '../middlewares/auth';
+import {
+  canPublishBriefing,
+  isBriefingOwnedByPublisher,
+  isDuplicatePublishBlocked,
+  normalizeChannels as normalizePublishChannels,
+  PUBLISH_AUDIENCE_ROLES,
+  publishBriefingSchema,
+  validateAudienceRoles as validatePublishAudienceRoles,
+} from '../lib/pulse-publish';
 
 const router = Router();
 
@@ -240,6 +260,8 @@ const PULSE_AUTHENTICATED_PREFIXES = [
   '/dissents',
   '/domain-panel',
   '/export',
+  '/publications',
+  '/publish-permission',
   '/subscriptions',
   '/today',
 ];
@@ -2609,6 +2631,388 @@ router.post(
           .where(eq(pulseFollowUpsTable.followUpId, followUpId));
       }
     });
+  },
+);
+
+// ─── Org-wide briefing publication (v1: in-app + push) ────────────────────────
+
+/**
+ * Resolve user IDs in the given org that match the audience spec.
+ * Always tenant-scoped — never returns users from a different org.
+ */
+async function resolveAudienceUserIds(
+  orgId: number,
+  audienceType: 'all' | 'roles',
+  audienceRoles: string[],
+): Promise<number[] | { error: string }> {
+  // Validate audience spec using the shared helper from lib/pulse-publish.ts
+  const validationError = validatePublishAudienceRoles(audienceType, audienceRoles);
+  if (validationError) return validationError;
+
+  let rows: { userId: number }[];
+  if (audienceType === 'all') {
+    rows = await db
+      .selectDistinct({ userId: orgMembersTable.userId })
+      .from(orgMembersTable)
+      .where(eq(orgMembersTable.orgId, orgId));
+  } else {
+    const validRoles = audienceRoles.filter((r) =>
+      PUBLISH_AUDIENCE_ROLES.includes(r as (typeof PUBLISH_AUDIENCE_ROLES)[number]),
+    );
+    rows = await db
+      .selectDistinct({ userId: orgMembersTable.userId })
+      .from(orgMembersTable)
+      .innerJoin(userRolesTable, eq(userRolesTable.userId, orgMembersTable.userId))
+      .innerJoin(rolesTable, eq(rolesTable.id, userRolesTable.roleId))
+      .where(
+        and(
+          eq(orgMembersTable.orgId, orgId),
+          inArray(rolesTable.name, validRoles),
+        ),
+      );
+  }
+  return rows
+    .map((r) => r.userId)
+    .filter((id): id is number => typeof id === 'number');
+}
+
+router.post(
+  '/briefings/:id/publish',
+  requireRole('owner', 'exec', 'ops'),
+  async (req: Request, res: Response): Promise<void> => {
+    if (!req.user) { sendUnauthorized(res); return; }
+
+    // Strict RBAC: requireRole lets admin/super_admin through by default, but
+    // Task #2949 limits publish to exactly owner, exec, or ops. Enforce here.
+    if (!canPublishBriefing(req.user.roles)) {
+      res.status(403).json({
+        success: false,
+        error: 'Forbidden: Only users with owner, exec, or ops roles may publish briefings.',
+      });
+      return;
+    }
+
+    const { id: briefingId } = req.params as { id: string };
+    const user = req.user;
+
+    // Validate the request body against our schema
+    const parseResult = publishBriefingSchema.safeParse(req.body ?? {});
+    if (!parseResult.success) {
+      sendBadRequest(res, parseResult.error.errors.map((e) => e.message).join('; '));
+      return;
+    }
+    const {
+      audienceType,
+      audienceRoles,
+      headlineOverride,
+      messageOverride,
+      force,
+    } = parseResult.data;
+
+    // Enforce in_app as always-on regardless of client payload (v1 requirement)
+    const channels = normalizePublishChannels(parseResult.data.channels);
+
+    // Resolve org — use primary org membership
+    const orgId = user.orgs?.[0]?.orgId ?? null;
+    if (!orgId) {
+      sendBadRequest(res, 'Publisher has no org membership');
+      return;
+    }
+
+    // Validate audience early — fail before creating any DB record
+    const audienceResult = await resolveAudienceUserIds(orgId, audienceType, audienceRoles);
+    if ('error' in audienceResult) {
+      sendBadRequest(res, audienceResult.error);
+      return;
+    }
+
+    // Verify briefing exists and enforce org ownership when the briefing is tenant-scoped
+    const [briefingRow] = await db
+      .select()
+      .from(pulseBriefingsTable)
+      .where(eq(pulseBriefingsTable.id, briefingId))
+      .limit(1);
+    if (!briefingRow) {
+      sendNotFound(res, `Briefing '${briefingId}' not found`);
+      return;
+    }
+    // If the briefing has an org_id set, it must match the publisher's org to prevent
+    // cross-tenant content publication.
+    if (!isBriefingOwnedByPublisher(briefingRow.orgId, orgId)) {
+      res.status(403).json({ success: false, error: 'Briefing does not belong to your organization.' });
+      return;
+    }
+
+    // Duplicate-publish guard — prevent accidental fan-out within a 5-minute window.
+    // Explicit republish semantics: the caller passes force=true to bypass this guard.
+    // The publications table stores history; the guard is application-level (see
+    // lib/pulse-publish.ts for rationale on why no DB uniqueness constraint exists).
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const [recentPub] = await db
+      .select({ publicationId: pulseBriefingPublicationsTable.publicationId })
+      .from(pulseBriefingPublicationsTable)
+      .where(
+        and(
+          eq(pulseBriefingPublicationsTable.briefingId, briefingId),
+          eq(pulseBriefingPublicationsTable.orgId, orgId),
+          gte(pulseBriefingPublicationsTable.publishedAt, fiveMinutesAgo),
+        ),
+      )
+      .limit(1);
+    if (isDuplicatePublishBlocked(!!recentPub, force)) {
+      res.status(409).json({
+        success: false,
+        error: 'This briefing was already published to the org within the last 5 minutes. To republish intentionally, set force=true.',
+        duplicatePublicationId: recentPub!.publicationId,
+      });
+      return;
+    }
+
+    // Create the publication record
+    const publicationId = `pub-${briefingId}-${Date.now()}-${randomBytes(4).toString('hex')}`;
+    const [pubRow] = await db
+      .insert(pulseBriefingPublicationsTable)
+      .values({
+        publicationId,
+        briefingId,
+        orgId,
+        publisherUserId: user.id,
+        audienceType,
+        audienceRoles,
+        channels,
+        headlineOverride: headlineOverride ?? null,
+        messageOverride: messageOverride ?? null,
+        status: 'publishing',
+      })
+      .returning();
+
+    if (!pubRow) {
+      res.status(500).json({ success: false, error: 'Failed to create publication record' });
+      return;
+    }
+
+    // Flip briefing status to published
+    await db
+      .update(pulseBriefingsTable)
+      .set({ status: 'published' })
+      .where(eq(pulseBriefingsTable.id, briefingId));
+
+    const recipientUserIds = audienceResult;
+    const totalRecipients = recipientUserIds.length;
+
+    res.json({
+      success: true,
+      publication: {
+        publicationId,
+        briefingId,
+        audienceType,
+        channels,
+        totalRecipients,
+        status: 'publishing',
+      },
+    });
+
+    // ─── Async fan-out ────────────────────────────────────────────────────────
+    const briefingUrl = `/pulse/briefings/${briefingId}`;
+    const title = headlineOverride ?? briefingRow.headline;
+    const message =
+      messageOverride ?? `A new intelligence briefing has been published to your organization.`;
+
+    let inAppDelivered = 0;
+    let pushSent = 0;
+    let pushFailed = 0;
+
+    // 1. In-app notifications — always on
+    if (channels.includes('in_app') && recipientUserIds.length > 0) {
+      try {
+        const notifRows = await db
+          .insert(notificationsTable)
+          .values(
+            recipientUserIds.map((userId) => ({
+              userId,
+              type: 'info' as const,
+              channel: 'in_app' as const,
+              title: `📋 ${title}`,
+              message,
+              actionUrl: briefingUrl,
+            })),
+          )
+          .returning();
+        inAppDelivered = notifRows.length;
+
+        // Broadcast to open WebSocket connections
+        for (const notif of notifRows) {
+          publish(WS_CHANNELS.NOTIFICATIONS, 'new_notification', notif);
+        }
+      } catch (err) {
+        logger.error({ err, publicationId }, '[pulse-publish] Failed to create in-app notifications');
+      }
+    }
+
+    // 2. Push — web push (VAPID) + Expo mobile push
+    if (channels.includes('push') && recipientUserIds.length > 0) {
+      const pushPayload = {
+        title: `📋 ${title}`,
+        body: message,
+        tag: `pulse-briefing-${briefingId}`,
+        actionUrl: briefingUrl,
+        data: {
+          type: 'pulse_briefing_published',
+          briefingId,
+          publicationId,
+          actionUrl: briefingUrl,
+        },
+      };
+
+      // Pre-filter recipients by DND/quiet-hours — applies to both web push and Expo push
+      // to ensure consistent behavior across delivery channels.
+      const pushEligibleUserIds: number[] = [];
+      const dndFilteredCount = { failed: 0 };
+      for (const userId of recipientUserIds) {
+        try {
+          const allowed = await isAlertCategoryAllowedForUser(userId, 'approvals');
+          if (allowed) {
+            pushEligibleUserIds.push(userId);
+          } else {
+            dndFilteredCount.failed++;
+          }
+        } catch {
+          pushEligibleUserIds.push(userId);
+        }
+      }
+      pushFailed += dndFilteredCount.failed;
+
+      // Web push (VAPID) — DND filtered
+      if (pushEligibleUserIds.length > 0) {
+        try {
+          const webResult = await sendWebPushToUsers(pushEligibleUserIds, pushPayload);
+          pushSent += webResult.sent;
+          pushFailed += webResult.failed;
+        } catch (err) {
+          logger.warn({ err, publicationId }, '[pulse-publish] Web push failed');
+        }
+      }
+
+      // Expo mobile push — DND already filtered above
+      const expoPayload = {
+        title: `📋 ${title}`,
+        body: message,
+        data: {
+          type: 'pulse_briefing_published',
+          briefingId,
+          publicationId,
+          screen: 'executive-brief',
+          actionUrl: briefingUrl,
+        },
+        channelId: 'intelligence',
+      };
+      for (const userId of pushEligibleUserIds) {
+        try {
+          const result = await sendPushToUser(userId, expoPayload, { appId: 'cortex-mobile' });
+          pushSent += result.sent;
+          pushFailed += result.failed;
+        } catch (err) {
+          logger.warn({ err, userId, publicationId }, '[pulse-publish] Expo push failed');
+          pushFailed++;
+        }
+      }
+    }
+
+    // Update publication record with final counts
+    try {
+      await db
+        .update(pulseBriefingPublicationsTable)
+        .set({
+          status: 'published',
+          totalRecipients,
+          inAppDelivered,
+          pushSent,
+          pushFailed,
+          completedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(pulseBriefingPublicationsTable.publicationId, publicationId));
+    } catch (err) {
+      logger.error({ err, publicationId }, '[pulse-publish] Failed to update publication record');
+    }
+
+    logger.info(
+      { publicationId, briefingId, orgId, totalRecipients, inAppDelivered, pushSent, pushFailed },
+      '[pulse-publish] Fan-out complete',
+    );
+  },
+);
+
+router.get(
+  '/publish-permission',
+  async (req: Request, res: Response): Promise<void> => {
+    if (!req.user) { sendUnauthorized(res); return; }
+    const userRoles = (req.user as { roles?: string[] }).roles ?? [];
+    const canPublish = userRoles.some((r) => ['owner', 'exec', 'ops'].includes(r));
+    res.json({ success: true, canPublish });
+  },
+);
+
+router.get(
+  '/briefings/:id/publications',
+  async (req: Request, res: Response): Promise<void> => {
+    if (!req.user) { sendUnauthorized(res); return; }
+    const { id: briefingId } = req.params as { id: string };
+    const orgId = req.user.orgs?.[0]?.orgId ?? null;
+    if (!orgId) { res.json({ success: true, publications: [] }); return; }
+
+    const rows = await db
+      .select({
+        id: pulseBriefingPublicationsTable.id,
+        publicationId: pulseBriefingPublicationsTable.publicationId,
+        briefingId: pulseBriefingPublicationsTable.briefingId,
+        orgId: pulseBriefingPublicationsTable.orgId,
+        publisherUserId: pulseBriefingPublicationsTable.publisherUserId,
+        publisherName: usersTable.displayName,
+        audienceType: pulseBriefingPublicationsTable.audienceType,
+        audienceRoles: pulseBriefingPublicationsTable.audienceRoles,
+        channels: pulseBriefingPublicationsTable.channels,
+        headlineOverride: pulseBriefingPublicationsTable.headlineOverride,
+        messageOverride: pulseBriefingPublicationsTable.messageOverride,
+        status: pulseBriefingPublicationsTable.status,
+        totalRecipients: pulseBriefingPublicationsTable.totalRecipients,
+        inAppDelivered: pulseBriefingPublicationsTable.inAppDelivered,
+        pushSent: pulseBriefingPublicationsTable.pushSent,
+        pushFailed: pulseBriefingPublicationsTable.pushFailed,
+        publishedAt: pulseBriefingPublicationsTable.publishedAt,
+        completedAt: pulseBriefingPublicationsTable.completedAt,
+        createdAt: pulseBriefingPublicationsTable.createdAt,
+      })
+      .from(pulseBriefingPublicationsTable)
+      .leftJoin(usersTable, eq(usersTable.id, pulseBriefingPublicationsTable.publisherUserId))
+      .where(
+        and(
+          eq(pulseBriefingPublicationsTable.briefingId, briefingId),
+          eq(pulseBriefingPublicationsTable.orgId, orgId),
+        ),
+      )
+      .orderBy(desc(pulseBriefingPublicationsTable.createdAt))
+      .limit(20);
+
+    res.json({ success: true, publications: rows });
+  },
+);
+
+router.get(
+  '/publications/recent',
+  async (req: Request, res: Response): Promise<void> => {
+    if (!req.user) { sendUnauthorized(res); return; }
+    const orgId = req.user.orgs?.[0]?.orgId ?? null;
+    if (!orgId) { res.json({ success: true, publications: [] }); return; }
+
+    const rows = await db
+      .select()
+      .from(pulseBriefingPublicationsTable)
+      .where(eq(pulseBriefingPublicationsTable.orgId, orgId))
+      .orderBy(desc(pulseBriefingPublicationsTable.createdAt))
+      .limit(50);
+
+    res.json({ success: true, publications: rows });
   },
 );
 
