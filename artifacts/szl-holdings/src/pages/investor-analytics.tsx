@@ -1,5 +1,5 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Area,
   AreaChart,
@@ -508,7 +508,14 @@ export default function InvestorAnalytics() {
   const [tab, setTab] = useState<'metrics' | 'funnel' | 'cohort' | 'diffs' | 'dataRoom'>(
     'metrics',
   );
-  const [cohortGranularity, setCohortGranularity] = useState<'month' | 'week'>('month');
+  const [cohortGranularity, setCohortGranularity] = useState<'month' | 'week'>(() => {
+    const saved = localStorage.getItem('szl:cohortGranularity');
+    return saved === 'week' ? 'week' : 'month';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('szl:cohortGranularity', cohortGranularity);
+  }, [cohortGranularity]);
 
   const { data: metricsRaw, isLoading: mLoading } = useStandardQuery({
     queryKey: ['investor-metrics'],
