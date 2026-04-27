@@ -257,6 +257,29 @@ export function useNotificationCenter(appName: string): NotificationCenterState 
     };
   }, [connect]);
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') return;
+      const ws = wsRef.current;
+      const isOpenOrConnecting =
+        ws !== null &&
+        (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING);
+      if (!isOpenOrConnecting) {
+        if (reconnectTimerRef.current) {
+          clearTimeout(reconnectTimerRef.current);
+          reconnectTimerRef.current = null;
+        }
+        reconnectAttemptsRef.current = 0;
+        connect();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [connect]);
+
   const markRead = useCallback((id: string) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
     if (id.startsWith('api-')) {
