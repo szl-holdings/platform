@@ -72,7 +72,7 @@ export default function Header() {
           </div>
         </Link>
 
-        <div className="hidden md:flex items-center gap-6">
+        <nav aria-label="Main navigation" className="hidden md:flex items-center gap-6">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -127,7 +127,7 @@ export default function Header() {
           >
             {t('nav.requestConsultation')}
           </Link>
-        </div>
+        </nav>
 
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -152,7 +152,7 @@ export default function Header() {
               borderBottom: '1px solid rgba(154,125,82,0.12)',
             }}
           >
-            <div className="px-6 py-5 flex flex-col gap-4">
+            <nav aria-label="Mobile navigation" className="px-6 py-5 flex flex-col gap-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -186,7 +186,7 @@ export default function Header() {
               >
                 {t('nav.requestConsultation')}
               </Link>
-            </div>
+            </nav>
           </motion.div>
         )}
       </AnimatePresence>

@@ -186,7 +186,10 @@ export default function ContactPage() {
       {__pageMeta}
       <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
         <SiteNav />
-        <main id="main-content" >
+        {/* App.tsx already provides <main id="main-content" tabIndex={-1}> wrapping all routes
+            (see App.tsx line ~544). Using a plain div here avoids a nested-main landmark
+            violation (axe rule: landmark-no-duplicate-main). */}
+        <div>
   
           {/* Hero */}
           <section style={{ borderBottom: "1px solid var(--color-szl-border)", paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)" }}>
@@ -247,8 +250,9 @@ export default function ContactPage() {
                       />
                       <div className="szl-grid-2">
                         <div>
-                          <label style={labelStyle}>Your name *</label>
+                          <label htmlFor="szl-name" style={labelStyle}>Your name *</label>
                           <input
+                            id="szl-name"
                             type="text"
                             required
                             value={form.name}
@@ -260,8 +264,9 @@ export default function ContactPage() {
                           />
                         </div>
                         <div>
-                          <label style={labelStyle}>Email address *</label>
+                          <label htmlFor="szl-email" style={labelStyle}>Email address *</label>
                           <input
+                            id="szl-email"
                             type="email"
                             required
                             value={form.email}
@@ -275,8 +280,9 @@ export default function ContactPage() {
                       </div>
   
                       <div>
-                        <label style={labelStyle}>Organization</label>
+                        <label htmlFor="szl-org" style={labelStyle}>Organization</label>
                         <input
+                          id="szl-org"
                           type="text"
                           value={form.org}
                           onChange={(e) => setForm({ ...form, org: e.target.value })}
@@ -287,8 +293,8 @@ export default function ContactPage() {
                         />
                       </div>
   
-                      <div>
-                        <label style={labelStyle}>What brings you here? *</label>
+                      <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
+                        <legend style={labelStyle}>What brings you here? *</legend>
                         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                           {INQUIRY_TYPES.map((t) => (
                             <label
@@ -320,7 +326,7 @@ export default function ContactPage() {
                             </label>
                           ))}
                         </div>
-                      </div>
+                      </fieldset>
   
                       {form.type === "security" && (
                         <div style={{
@@ -341,8 +347,9 @@ export default function ContactPage() {
                       )}
   
                       <div>
-                        <label style={labelStyle}>Tell us more *</label>
+                        <label htmlFor="szl-message" style={labelStyle}>Tell us more *</label>
                         <textarea
+                          id="szl-message"
                           required
                           rows={5}
                           value={form.message}
@@ -457,7 +464,7 @@ export default function ContactPage() {
             </div>
           </section>
   
-        </main>
+        </div>
         <SiteFooter />
       </div>
         </>

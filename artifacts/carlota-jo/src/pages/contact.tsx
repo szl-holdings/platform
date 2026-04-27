@@ -77,7 +77,7 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-cream-warm)' }}>
       <Header />
-      <div className="pt-24">
+      <main id="main-content" tabIndex={-1} style={{ outline: 'none' }} className="pt-24">
         <section
           className="py-20 lg:py-28"
           style={{ borderBottom: '1px solid var(--color-stone-200)' }}
@@ -157,6 +157,7 @@ export default function ContactPage() {
                       viewport={{ once: true }}
                       transition={{ duration: 0.4, delay: i * 0.06 }}
                       onClick={() => setSelectedPath(selectedPath === path.id ? null : path.id)}
+                      aria-pressed={selectedPath === path.id}
                       className="w-full text-left p-5 transition-all duration-300"
                       style={{
                         border: `1px solid ${selectedPath === path.id ? 'var(--color-gold)' : 'var(--color-stone-200)'}`,
@@ -221,12 +222,14 @@ export default function ContactPage() {
                     <form onSubmit={handleSubmit} className="max-w-xl space-y-6">
                       <div>
                         <label
+                          htmlFor="cj-name"
                           className="block text-[11px] font-medium tracking-[0.2em] uppercase mb-2"
                           style={{ color: 'var(--color-stone-600)' }}
                         >
                           Your name
                         </label>
                         <input
+                          id="cj-name"
                           type="text"
                           required
                           value={formData.name}
@@ -250,12 +253,14 @@ export default function ContactPage() {
                       </div>
                       <div>
                         <label
+                          htmlFor="cj-email"
                           className="block text-[11px] font-medium tracking-[0.2em] uppercase mb-2"
                           style={{ color: 'var(--color-stone-600)' }}
                         >
                           Your email
                         </label>
                         <input
+                          id="cj-email"
                           type="email"
                           required
                           value={formData.email}
@@ -279,12 +284,14 @@ export default function ContactPage() {
                       </div>
                       <div>
                         <label
+                          htmlFor="cj-message"
                           className="block text-[11px] font-medium tracking-[0.2em] uppercase mb-2"
                           style={{ color: 'var(--color-stone-600)' }}
                         >
                           Tell Rosa about your situation
                         </label>
                         <textarea
+                          id="cj-message"
                           required
                           rows={5}
                           value={formData.message}
@@ -308,12 +315,14 @@ export default function ContactPage() {
                       </div>
                       <div>
                         <label
+                          htmlFor="cj-how-heard"
                           className="block text-[11px] font-medium tracking-[0.2em] uppercase mb-2"
                           style={{ color: 'var(--color-stone-600)' }}
                         >
                           How did you hear about Carlota Jo? (optional)
                         </label>
                         <input
+                          id="cj-how-heard"
                           type="text"
                           value={formData.howHeard}
                           onChange={(e) => setFormData((d) => ({ ...d, howHeard: e.target.value }))}
@@ -452,7 +461,7 @@ export default function ContactPage() {
             </div>
           </div>
         </section>
-      </div>
+      </main>
       <Footer />
     </div>
   );
