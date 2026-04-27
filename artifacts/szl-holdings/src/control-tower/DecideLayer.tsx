@@ -16,6 +16,7 @@ export function DecideLayer() {
     depth: 'standard',
   });
   const [expandedDecision, setExpandedDecision] = useState<string | null>(null);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: agentsData, isLoading: agentsLoading } = useStandardQuery<{
@@ -132,13 +133,23 @@ export function DecideLayer() {
         <div className="space-y-4">
           <SectionCard title="Orchestrate Query" icon={Brain} color="text-fuchsia-400">
             <div className="space-y-2">
-              <textarea
-                className="w-full text-xs bg-muted/20 border border-border rounded-lg p-2.5 text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/40"
-                rows={3}
-                placeholder="What cross-domain intelligence do you need?"
-                value={orchestrateForm.query}
-                onChange={(e) => setOrchestrateForm((f) => ({ ...f, query: e.target.value }))}
-              />
+              <div>
+                <textarea
+                  className={cn(
+                    'w-full text-xs bg-muted/20 border rounded-lg p-2.5 text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/40',
+                    submitAttempted && !orchestrateForm.query
+                      ? 'border-red-500/60'
+                      : 'border-border',
+                  )}
+                  rows={3}
+                  placeholder="What cross-domain intelligence do you need?"
+                  value={orchestrateForm.query}
+                  onChange={(e) => setOrchestrateForm((f) => ({ ...f, query: e.target.value }))}
+                />
+                {submitAttempted && !orchestrateForm.query && (
+                  <p className="text-[10px] text-red-400 mt-1">Query is required.</p>
+                )}
+              </div>
               <div className="flex items-center gap-2">
                 <select
                   className="text-xs bg-muted/30 border border-border rounded px-2 py-1 text-foreground flex-1"
@@ -155,14 +166,15 @@ export function DecideLayer() {
                   <option value="deep">Deep</option>
                 </select>
                 <button
-                  onClick={() =>
-                    orchestrateForm.query &&
+                  onClick={() => {
+                    setSubmitAttempted(true);
+                    if (!orchestrateForm.query) return;
                     orchestrateMutation.mutate({
                       query: orchestrateForm.query,
                       depth: orchestrateForm.depth,
-                    })
-                  }
-                  disabled={!orchestrateForm.query || orchestrateMutation.isPending}
+                    });
+                  }}
+                  disabled={orchestrateMutation.isPending}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
                 >
                   <Play className="w-3 h-3" />

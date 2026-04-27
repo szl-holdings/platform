@@ -16,6 +16,7 @@ export function EvolveLayer() {
     description: '',
     expectedImprovement: '',
   });
+  const [submitAttempted, setSubmitAttempted] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: metricsData, isLoading: metricsLoading } = useStandardQuery<{
@@ -35,6 +36,7 @@ export function EvolveLayer() {
       }).then((r) => r.json()),
     onSuccess: () => {
       setProposeForm((f) => ({ ...f, description: '', expectedImprovement: '' }));
+      setSubmitAttempted(false);
       queryClient.invalidateQueries({ queryKey: ['ct-evolve-metrics'] });
     },
   });
@@ -197,28 +199,48 @@ export function EvolveLayer() {
 
           <SectionCard title="Propose Optimization" icon={FlaskConical} color="text-amber-400">
             <div className="space-y-2">
-              <select
-                className="w-full text-xs bg-muted/30 border border-border rounded px-2 py-1.5 text-foreground"
-                value={proposeForm.agentId}
-                onChange={(e) => setProposeForm((f) => ({ ...f, agentId: e.target.value }))}
-              >
-                <option value="">Select agent…</option>
-                {agentMetrics.map((a: unknown) => {
-                  const ag = a as Record<string, unknown>;
-                  return (
-                    <option key={String(ag.agentId)} value={String(ag.agentId)}>
-                      {String(ag.agentName)}
-                    </option>
-                  );
-                })}
-              </select>
-              <textarea
-                className="w-full text-xs bg-muted/20 border border-border rounded-lg p-2 text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/40"
-                rows={2}
-                placeholder="Describe the optimization…"
-                value={proposeForm.description}
-                onChange={(e) => setProposeForm((f) => ({ ...f, description: e.target.value }))}
-              />
+              <div>
+                <select
+                  className={cn(
+                    'w-full text-xs bg-muted/30 border rounded px-2 py-1.5 text-foreground',
+                    submitAttempted && !proposeForm.agentId
+                      ? 'border-red-500/60'
+                      : 'border-border',
+                  )}
+                  value={proposeForm.agentId}
+                  onChange={(e) => setProposeForm((f) => ({ ...f, agentId: e.target.value }))}
+                >
+                  <option value="">Select agent…</option>
+                  {agentMetrics.map((a: unknown) => {
+                    const ag = a as Record<string, unknown>;
+                    return (
+                      <option key={String(ag.agentId)} value={String(ag.agentId)}>
+                        {String(ag.agentName)}
+                      </option>
+                    );
+                  })}
+                </select>
+                {submitAttempted && !proposeForm.agentId && (
+                  <p className="text-[10px] text-red-400 mt-1">Please select an agent.</p>
+                )}
+              </div>
+              <div>
+                <textarea
+                  className={cn(
+                    'w-full text-xs bg-muted/20 border rounded-lg p-2 text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/40',
+                    submitAttempted && !proposeForm.description
+                      ? 'border-red-500/60'
+                      : 'border-border',
+                  )}
+                  rows={2}
+                  placeholder="Describe the optimization…"
+                  value={proposeForm.description}
+                  onChange={(e) => setProposeForm((f) => ({ ...f, description: e.target.value }))}
+                />
+                {submitAttempted && !proposeForm.description && (
+                  <p className="text-[10px] text-red-400 mt-1">Description is required.</p>
+                )}
+              </div>
               <input
                 className="w-full text-xs bg-muted/20 border border-border rounded-lg px-2 py-1.5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/40"
                 placeholder="Expected improvement…"
@@ -228,18 +250,16 @@ export function EvolveLayer() {
                 }
               />
               <button
-                onClick={() =>
-                  proposeForm.agentId &&
-                  proposeForm.description &&
+                onClick={() => {
+                  setSubmitAttempted(true);
+                  if (!proposeForm.agentId || !proposeForm.description) return;
                   proposeMutation.mutate({
                     agentId: proposeForm.agentId,
                     description: proposeForm.description,
                     expectedImprovement: proposeForm.expectedImprovement,
-                  })
-                }
-                disabled={
-                  !proposeForm.agentId || !proposeForm.description || proposeMutation.isPending
-                }
+                  });
+                }}
+                disabled={proposeMutation.isPending}
                 className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
               >
                 <Sparkles className="w-3 h-3" />
