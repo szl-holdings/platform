@@ -312,8 +312,66 @@ export function SignalChainsPanel({ apiBase = '' }: SignalChainsPanelProps) {
     }
   }
 
+  const isDemoChain = (chainId: string) =>
+    DEMO_CHAINS.some((c) => c.id === chainId) &&
+    chains.every((c) => DEMO_CHAINS.some((d) => d.id === c.id));
+
   async function triggerChain(chainId: string) {
     setTriggering(chainId);
+
+    if (isDemoChain(chainId)) {
+      await new Promise((resolve) => setTimeout(resolve, 1800));
+      setChains((prev) =>
+        prev.map((c) => {
+          if (c.id !== chainId) return c;
+          const demoChain = DEMO_CHAINS.find((d) => d.id === chainId);
+          const existingExecution = demoChain?.lastExecution ?? c.lastExecution;
+          const now = Date.now();
+          const simulatedExecution: SignalChainExecution = existingExecution
+            ? {
+                ...existingExecution,
+                executionId: `exec-sim-${Math.floor(Math.random() * 9000) + 1000}`,
+                triggeredAt: now,
+                triggerReason: existingExecution.triggerReason.replace(
+                  /\d+m ago|\d+h ago|\d+d ago|Just now/,
+                  'Just now',
+                ),
+                status: 'completed',
+                steps: existingExecution.steps.map((s) => ({
+                  ...s,
+                  executedAt: now,
+                })),
+              }
+            : {
+                executionId: `exec-sim-${Math.floor(Math.random() * 9000) + 1000}`,
+                chainId: c.id,
+                triggeredAt: now,
+                triggerReason: `${c.triggerSignal} threshold of ${c.triggerThreshold} exceeded — manual trigger initiated`,
+                triggerValue: c.triggerThreshold * 1.1,
+                threshold: c.triggerThreshold,
+                status: 'completed',
+                steps: Array.from({ length: c.stepCount }, (_, i) => ({
+                  id: `step-${i + 1}`,
+                  domain: i === 0 ? c.triggerDomain : (c.targetDomains[i - 1] ?? c.triggerDomain),
+                  action: i === 0 ? `Evaluate ${c.triggerSignal} signal` : `Execute action on ${c.targetDomains[i - 1] ?? c.triggerDomain}`,
+                  status: 'executed' as const,
+                  executedAt: now + i * 30000,
+                  explainability: `Step ${i + 1} completed successfully as part of automated chain execution`,
+                })),
+              };
+          return {
+            ...c,
+            executionCount: c.executionCount + 1,
+            lastExecuted: now,
+            lastExecution: simulatedExecution,
+          };
+        }),
+      );
+      setExpanded(chainId);
+      setTriggering(null);
+      return;
+    }
+
     try {
       const res = await fetch(`${apiBase}/api/signal-chains/${chainId}/trigger`, {
         method: 'POST',
