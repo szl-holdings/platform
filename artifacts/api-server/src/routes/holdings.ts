@@ -141,7 +141,7 @@ router.get("/holdings/kpis", authMiddleware(), async (_req, res) => {
         vessels: { trackedVessels: vessels, fleets: fleets, href: "/vessels/" },
         alloy: { workflowRuns: workflowRuns, activeWorkflows: workflows, href: "/alloy/" },
         lyte: { incidents: lyteIncidents, href: "/command/operations/" },
-        aegis: { incidents: firestormIncidents, findings: firestormFindings, href: "/aegis/" },
+        sentra: { incidents: firestormIncidents, findings: firestormFindings, href: "/sentra/" },
         carlotaJo: { inquiries: carlotaInquiries, href: "/carlota-jo/" },
       },
       aggregate: {

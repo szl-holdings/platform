@@ -6,7 +6,6 @@ const ecosystemLinks = [
   { label: 'SZL Holdings', href: '/' },
   { label: 'Lyte', href: '/command/operations/' },
   { label: 'Vessels', href: '/vessels/' },
-  { label: 'Aegis', href: '/aegis/' },
   { label: 'Terra', href: '/terra/' },
 ];
 

@@ -638,14 +638,6 @@ const ECOSYSTEM_APPS = [
     shortcut: '⌥C',
   },
   {
-    id: 'aegis',
-    name: 'Aegis',
-    path: '/aegis/',
-    icon: '🛡',
-    description: 'Unified Defense & Intelligence',
-    shortcut: '⌥G',
-  },
-  {
     id: 'vessels',
     name: 'Vessels',
     path: '/vessels/',

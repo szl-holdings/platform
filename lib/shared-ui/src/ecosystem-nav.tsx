@@ -198,15 +198,6 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     description: 'Unified Command — Strategy, Operations & Infrastructure',
   },
   {
-    id: 'aegis',
-    name: 'Aegis',
-    subtitle: 'Domain Pack · Unified Defense & Intelligence',
-    path: '/aegis/',
-    accent: '#c9b787',
-    icon: '⬡',
-    description: 'Unified Defense, Managed Operations & AI Intelligence',
-  },
-  {
     id: 'vessels',
     name: 'Vessels',
     subtitle: 'Domain Pack · Maritime Intelligence',

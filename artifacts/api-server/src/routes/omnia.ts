@@ -56,7 +56,7 @@ const SYNTHESIS_NARRATIVE = {
       domain: 'aegis',
       entityRefs: ['e-apt41', 'e-ter8821'],
       confidence: 0.92,
-      deepLink: '/aegis',
+      deepLink: '/sentra',
     },
     {
       id: 'p-002',
@@ -92,7 +92,7 @@ const SYNTHESIS_NARRATIVE = {
     },
   ],
   signals: [
-    { id: 's-001', label: 'APT-41 cluster elevated to HIGH', domain: 'aegis', severity: 'high', timestamp: ago(45_000), deepLink: '/aegis' },
+    { id: 's-001', label: 'APT-41 cluster elevated to HIGH', domain: 'aegis', severity: 'high', timestamp: ago(45_000), deepLink: '/sentra' },
     { id: 's-002', label: 'MV Stellarwind deviation — 82% threshold', domain: 'vessels', severity: 'medium', timestamp: ago(3 * 60_000), deepLink: '/vessels' },
     { id: 's-003', label: 'CJL-2291 deadline in 48h — no draft filed', domain: 'counsel', severity: 'medium', timestamp: ago(60 * 60_000), deepLink: '/counsel' },
     { id: 's-004', label: 'TER-4402 covenant watch — DSCR 1.01x', domain: 'terra', severity: 'low', timestamp: ago(2 * 60_000), deepLink: '/terra' },
@@ -125,7 +125,7 @@ const PORTFOLIO_NOTIFICATIONS = [
     level: 'critical',
     timestamp: ago(45_000),
     read: false,
-    actionUrl: '/aegis',
+    actionUrl: '/sentra',
     entityRef: 'e-apt41',
   },
   {

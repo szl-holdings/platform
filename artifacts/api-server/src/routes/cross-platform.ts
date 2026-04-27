@@ -60,7 +60,7 @@ const PRODUCT_META: Record<
   vessels: { label: 'Vessels', color: DOMAIN_COLORS.vessels, icon: '⚓', drillBase: '/vessels' },
   terra: { label: 'Terra', color: DOMAIN_COLORS.terra, icon: '⬢', drillBase: '/terra' },
   prism: { label: 'Counsel', color: DOMAIN_COLORS.prism, icon: '⚖', drillBase: '/prism-counsel' },
-  aegis: { label: 'Aegis Security', color: DOMAIN_COLORS.aegis, icon: '⚔', drillBase: '/aegis' },
+  aegis: { label: 'Sentra Security', color: DOMAIN_COLORS.aegis, icon: '⚔', drillBase: '/sentra' },
   carlota: { label: 'Carlota Jo', color: DOMAIN_COLORS.carlota, icon: '◉', drillBase: '/carlota-jo' },
 };
 

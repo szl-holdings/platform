@@ -31,7 +31,6 @@ const NAVIGATION_ITEMS: Omit<SearchResult, 'score'>[] = [
   { id: 'nav-command', type: 'navigation', domain: 'Command', title: 'Unified Command', subtitle: 'Strategy, operations & infrastructure', icon: '◆', href: '/command/' },
   { id: 'nav-alerts', type: 'navigation', domain: 'Command', title: 'Alert Inbox', subtitle: 'Active alerts and incident management', icon: '🔔', href: '/command/alerts' },
   { id: 'nav-ops-alerts', type: 'navigation', domain: 'Operations', title: 'Alert Management', subtitle: 'Alert rules, evaluation, and history', icon: '⚙', href: '/command/operations/alerts' },
-  { id: 'nav-aegis', type: 'navigation', domain: 'Aegis', title: 'Aegis', subtitle: 'Defense & intelligence command', icon: '🛡', href: '/aegis/' },
   { id: 'nav-vessels', type: 'navigation', domain: 'Vessels', title: 'Sextant', subtitle: 'Maritime intelligence & fleet tracking', icon: '⚓', href: '/vessels/' },
   { id: 'nav-terra', type: 'navigation', domain: 'Terra', title: 'Domaine', subtitle: 'Real estate intelligence', icon: '🏢', href: '/terra/' },
   { id: 'nav-counsel', type: 'navigation', domain: 'Counsel', title: 'Counsel', subtitle: 'Legal matter command', icon: '⚖', href: '/counsel/' },

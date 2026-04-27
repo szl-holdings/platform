@@ -507,7 +507,6 @@ function EcosystemTab() {
     { name: 'Sentra — Cyber Resilience', path: '/sentra/', category: 'Domain', desc: 'Security operations and threat detection' },
     { name: 'Terra — Real Estate Intelligence', path: '/terra/', category: 'Domain', desc: 'Real estate market intelligence and investment analytics' },
     { name: 'Counsel — Legal Matter Command', path: '/counsel/', category: 'Domain', desc: 'Legal matter management and document intelligence' },
-    { name: 'Aegis — Defense Command', path: '/aegis/', category: 'Domain', desc: 'Defense readiness and threat intelligence' },
     { name: 'A11oy — Brand Orchestration', path: '/a11oy/', category: 'Platform', desc: 'Brand asset management and design system orchestration' },
     { name: 'API Server', path: '/api/', category: 'Infrastructure', desc: 'Shared Express API with MCP, Alloy, and domain routes' },
     { name: 'Mobile Command', path: '/szl-holdings-mobile/', category: 'Mobile', desc: 'React Native mobile command center' },

@@ -41,7 +41,6 @@ const SHARED_PROXY_PORT = Number(process.env.SHARED_PROXY_PORT ?? 9090);
  */
 const ARTIFACT_PROBES: readonly ArtifactProbe[] = [
   { name: 'a11oy', prefix: '/a11oy/' },
-  { name: 'aegis', prefix: '/aegis/' },
   { name: 'carlota-jo', prefix: '/carlota-jo/' },
   { name: 'command', prefix: '/command/' },
   { name: 'counsel', prefix: '/counsel/' },
