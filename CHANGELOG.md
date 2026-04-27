@@ -12,6 +12,35 @@ See `/docs/releases/versioning-policy.md` for the full versioning policy.
 
 ---
 
+## Rehaul 9/9 — CI Cleanup, Scope Rationalization & Investor Readiness Closeout — 2026-04-27
+
+### Fixed
+
+- **`uptime-monitor.yml`**: Changed cron schedule from `* * * * *` (every 1 minute = 1,440 GitHub Actions runs/day) to `*/5 * * * *` (every 5 minutes = 288 runs/day). The every-minute schedule was burning ~5× the necessary Actions minutes with no SLA benefit — 12 health checks per hour is well above any reasonable uptime detection requirement.
+
+### Added
+
+**CI Audit**
+- `audit/ci/workflow-audit.md` — Per-workflow classification for all 25 `.github/workflows/` files: purpose, trigger, signal quality, required-status status, and action taken. All 24 workflows retained; 1 fixed.
+- `audit/ci/workflow-status-matrix.md` — Current pass/fail status matrix with last-known result per workflow. Branch protection assumptions documented.
+
+**Release Readiness**
+- `audit/release/alpha-release-readiness.md` — Documents the `pnpm release:alpha` gate (`scripts/release/alpha.sh`), current v1.0.0-alpha release state, release checklist status, known gaps at alpha, and v1.1.0 criteria.
+
+**Strategy Matrices**
+- `audit/strategy/active-vs-defer-matrix.md` — Artifact-by-artifact classification: Flagship, Supporting, Internal Only, Deferred, Archived, Concept. Defines public claim surface.
+- `audit/strategy/public-focus-recommendation.md` — Investor messaging hierarchy: Tier 1 (lead with), Tier 2 (domain-specific), Tier 3 (explicit disclosure), Tier 4 (do not demo). Core messaging discipline.
+- `audit/strategy/non-core-scope-reduction-plan.md` — Concrete scope reduction actions: immediate (hours), medium-term (30 days), and deferred (post-Series A).
+
+**Final Readiness Scorecards**
+- `audit/final/executive-rehaul-summary.md` — Single executive summary of all Rehaul phases 1–9: what was verified, what was fixed, what remains open. Platform verdict: **Operational Alpha**.
+- `audit/final/top-25-risks-and-gaps.md` — Brutally honest enumeration of the 25 highest-risk items ranked by severity × diligence likelihood. Each item has severity, status, and mitigation plan.
+- `audit/final/what-was-fixed.md` — Complete record of every fix applied across the Rehaul program (visual, CI, bugs, architecture, CI phase 9).
+- `audit/final/what-remains-unverified.md` — Honest accounting of claims and features that have NOT been independently verified in this cycle. Includes action required before Series A diligence.
+- `audit/final/series-a-surface-scorecard.md` — Per-artifact 1–5 scoring across three lenses (Enterprise Buyer, Technical Diligence, Investor Signal). Overall platform score: **4.1/5 — Fundable at Series A with honest alpha positioning.**
+
+---
+
 ## [Unreleased]
 
 ### Fixed
