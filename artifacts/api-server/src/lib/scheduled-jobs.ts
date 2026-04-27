@@ -3530,6 +3530,9 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_OVERAGE_THRESHOLD_CHECK, async (
       notificationPreferencesTable,
       orgMembersTable,
       usersTable,
+      quotaViolationsTable,
+      userRolesTable,
+      rolesTable,
     } = await import('@szl-holdings/db');
     const { dispatchToExternalChannels } = await import('../routes/notifications');
     const { eq, and, gte, lte, inArray } = await import('drizzle-orm');
@@ -3725,6 +3728,109 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_OVERAGE_THRESHOLD_CHECK, async (
             logger.warn(
               { err: notifErr, orgId: agg.orgId, userId, threshold },
               'hourly_overage_threshold_check: failed to dispatch notification to admin',
+            );
+          }
+        }
+
+        // ── Notify platform super-admins (platform admins) ────────────────
+        // Platform admins need visibility on warning (≥80%) and overage (100%)
+        // events across all tenants, not just their own org membership.
+        if (threshold >= 80) {
+          try {
+            const [superAdminRole] = await db
+              .select({ id: rolesTable.id })
+              .from(rolesTable)
+              .where(eq(rolesTable.name, 'super_admin'))
+              .limit(1);
+
+            if (superAdminRole) {
+              const superAdminUsers = await db
+                .select({ userId: userRolesTable.userId })
+                .from(userRolesTable)
+                .where(eq(userRolesTable.roleId, superAdminRole.id));
+
+              for (const { userId } of superAdminUsers) {
+                if (adminMembers.some((m) => m.userId === userId)) continue;
+
+                try {
+                  const [pref] = await db
+                    .select({ inAppEnabled: notificationPreferencesTable.inAppEnabled })
+                    .from(notificationPreferencesTable)
+                    .where(eq(notificationPreferencesTable.userId, userId))
+                    .limit(1);
+                  const inAppOn = pref ? pref.inAppEnabled : true;
+
+                  let notificationId = 0;
+                  if (inAppOn) {
+                    const [notif] = await db
+                      .insert(notificationsTable)
+                      .values({
+                        userId,
+                        type: threshold === 100 ? 'warning' : 'info',
+                        channel: 'in_app',
+                        title: notifTitle,
+                        message: notifMessage,
+                        actionUrl,
+                      })
+                      .returning();
+                    if (notif) notificationId = notif.id;
+                  }
+
+                  await dispatchToExternalChannels({
+                    notificationId,
+                    userId,
+                    type: threshold === 100 ? 'warning' : 'info',
+                    title: notifTitle,
+                    message: notifMessage,
+                    actionUrl,
+                  });
+                } catch (superAdminNotifErr) {
+                  logger.warn(
+                    { err: superAdminNotifErr, orgId: agg.orgId, userId, threshold },
+                    'hourly_overage_threshold_check: failed to dispatch notification to super_admin',
+                  );
+                }
+              }
+            }
+          } catch (superAdminLookupErr) {
+            logger.warn(
+              { err: superAdminLookupErr, orgId: agg.orgId, threshold },
+              'hourly_overage_threshold_check: failed to look up super_admin users',
+            );
+          }
+        }
+
+        // ── Log to quota_violations ───────────────────────────────────────
+        // 80% hit = soft violation (warning); 100% hit = hard violation (overage).
+        if (threshold === 80 || threshold === 100) {
+          try {
+            await db.insert(quotaViolationsTable).values({
+              orgId: agg.orgId,
+              featureKey: agg.featureKey,
+              violationType: threshold === 100 ? 'hard' : 'soft',
+              action: 'notify',
+              currentUsage: currentUsage.toString(),
+              limitValue: includedUnits.toString(),
+              metadata: {
+                threshold,
+                pct: Math.round(pct),
+                orgName,
+                triggeredBy: 'hourly_overage_threshold_check',
+              },
+            });
+            logger.info(
+              {
+                orgId: agg.orgId,
+                meterKey: agg.featureKey,
+                threshold,
+                violationType: threshold === 100 ? 'hard' : 'soft',
+              },
+              'hourly_overage_threshold_check: quota_violation logged',
+            );
+          } catch (violationErr) {
+            logger.warn(
+              { err: violationErr, orgId: agg.orgId, meterKey: agg.featureKey, threshold },
+              'hourly_overage_threshold_check: failed to log quota_violation',
             );
           }
         }
