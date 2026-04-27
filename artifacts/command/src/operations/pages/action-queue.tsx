@@ -10,12 +10,22 @@ import { Badge } from '@szl-holdings/shared-ui/ui/badge';
 import { Button } from '@szl-holdings/shared-ui/ui/button';
 import { Card, CardContent } from '@szl-holdings/shared-ui/ui/card';
 import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@szl-holdings/shared-ui/ui/dialog';
+import { Input } from '@szl-holdings/shared-ui/ui/input';
+import { Label } from '@szl-holdings/shared-ui/ui/label';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@szl-holdings/shared-ui/ui/select';
+import { Textarea } from '@szl-holdings/shared-ui/ui/textarea';
 import { toast } from '@szl-holdings/shared-ui/ui/sonner';
 import { cn } from '@szl-holdings/shared-ui/utils';
 import { useQueryClient } from '@tanstack/react-query';
@@ -33,6 +43,7 @@ import {
   Filter,
   GitBranch,
   Package,
+  Plus,
   TrendingDown,
   User,
   Users,
@@ -586,6 +597,15 @@ const WS_CHANNEL = 'lyte:action-queue';
 const WS_RECONNECT_DELAY_MS = 3000;
 const WS_FALLBACK_POLL_MS = 5 * 60 * 1000;
 
+const EMPTY_FORM = {
+  title: '',
+  description: '',
+  signalCategory: '',
+  priority: 'medium' as 'urgent' | 'high' | 'medium' | 'low',
+  owner: '',
+  dueDate: '',
+};
+
 export default function ActionQueuePage() {
   const queryClient = useQueryClient();
   const [role, setRole] = useState<Role>('operations');
@@ -594,6 +614,8 @@ export default function ActionQueuePage() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [newActionOpen, setNewActionOpen] = useState(false);
+  const [form, setForm] = useState({ ...EMPTY_FORM });
 
   const IS_DEMO = import.meta.env.VITE_IS_DEMO === 'true';
 
@@ -696,6 +718,39 @@ export default function ActionQueuePage() {
     onError: () => toast.error('Failed to transition action'),
   });
 
+  const createAction = useStandardMutation({
+    mutationFn: (payload: Record<string, unknown>) =>
+      apiFetch('/lyte/actions', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: () => {
+      toast.success('Action created');
+      queryClient.invalidateQueries({ queryKey: ['lyte-actions'] });
+      setNewActionOpen(false);
+      setForm({ ...EMPTY_FORM });
+    },
+    onError: () => toast.error('Failed to create action'),
+  });
+
+  function handleCreateSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.title.trim() || !form.signalCategory) {
+      toast.error('Title and Signal Category are required');
+      return;
+    }
+    const payload: Record<string, unknown> = {
+      title: form.title.trim(),
+      signalCategory: form.signalCategory,
+      priority: form.priority,
+      state: 'new',
+    };
+    if (form.description.trim()) payload.description = form.description.trim();
+    if (form.owner.trim()) payload.owner = form.owner.trim();
+    if (form.dueDate) payload.dueAt = new Date(form.dueDate).toISOString();
+    createAction.mutate(payload);
+  }
+
   const cfg = ROLE_KPI_CONFIG[role];
 
   const filtered = actions.filter((a: any) => {
@@ -726,6 +781,15 @@ export default function ActionQueuePage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            className="h-8 px-3 text-xs bg-[#d4a054]/15 border border-[#d4a054]/30 text-[#d4a054] hover:bg-[#d4a054]/25 hover:text-[#d4a054]"
+            variant="outline"
+            onClick={() => setNewActionOpen(true)}
+          >
+            <Plus className="w-3.5 h-3.5 mr-1.5" />
+            New Action
+          </Button>
           <div className="flex rounded-lg border border-zinc-700 overflow-hidden">
             {(['executive', 'operations', 'delivery'] as Role[]).map((r) => (
               <button
@@ -1005,6 +1069,130 @@ export default function ActionQueuePage() {
           );
         })}
       </div>
+
+      <Dialog open={newActionOpen} onOpenChange={setNewActionOpen}>
+        <DialogContent className="bg-zinc-900 border-zinc-700 text-white max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-base font-semibold text-white flex items-center gap-2">
+              <Plus className="w-4 h-4 text-[#d4a054]" />
+              New Action Item
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateSubmit} className="space-y-4 pt-1">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-zinc-400">
+                Title <span className="text-[#c45a4a]">*</span>
+              </Label>
+              <Input
+                className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 text-sm"
+                placeholder="Describe the operational signal or escalation"
+                value={form.title}
+                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                maxLength={200}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-zinc-400">Description</Label>
+              <Textarea
+                className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 text-sm resize-none"
+                placeholder="Additional context or impact details"
+                rows={2}
+                value={form.description}
+                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                maxLength={1000}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-zinc-400">
+                  Signal Category <span className="text-[#c45a4a]">*</span>
+                </Label>
+                <Select
+                  value={form.signalCategory}
+                  onValueChange={(v) => setForm((f) => ({ ...f, signalCategory: v }))}
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-300 text-sm h-9">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-900 border-zinc-700">
+                    {Object.entries(SIGNAL_CATEGORY_LABELS).map(([key, { label }]) => (
+                      <SelectItem key={key} value={key} className="text-zinc-300">
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-zinc-400">Priority</Label>
+                <Select
+                  value={form.priority}
+                  onValueChange={(v) =>
+                    setForm((f) => ({
+                      ...f,
+                      priority: v as 'urgent' | 'high' | 'medium' | 'low',
+                    }))
+                  }
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-300 text-sm h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-900 border-zinc-700">
+                    {(['urgent', 'high', 'medium', 'low'] as const).map((p) => (
+                      <SelectItem key={p} value={p} className="capitalize text-zinc-300">
+                        {p}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-zinc-400">Owner</Label>
+                <Input
+                  className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 text-sm"
+                  placeholder="Name or team"
+                  value={form.owner}
+                  onChange={(e) => setForm((f) => ({ ...f, owner: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-zinc-400">Due Date</Label>
+                <Input
+                  type="date"
+                  className="bg-zinc-800 border-zinc-700 text-white text-sm [color-scheme:dark]"
+                  value={form.dueDate}
+                  onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))}
+                />
+              </div>
+            </div>
+            <DialogFooter className="pt-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-zinc-400 hover:text-zinc-200"
+                onClick={() => {
+                  setNewActionOpen(false);
+                  setForm({ ...EMPTY_FORM });
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={createAction.isPending}
+                className="bg-[#d4a054]/20 border border-[#d4a054]/40 text-[#d4a054] hover:bg-[#d4a054]/30"
+                variant="outline"
+              >
+                {createAction.isPending ? 'Creating…' : 'Create Action'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
