@@ -96,6 +96,17 @@ export function register(router: IRouter): void {
     ),
   );
 
+  router.use('/billing/refund-workflow', _readLimiter);
+  router.use('/billing/refund-workflow', _writeLimiter);
+  router.use('/billing/refund-workflow', optionalIdempotencyMiddleware);
+  router.use(
+    lazyMatch(
+      '/billing/refund-workflow',
+      () => import('../refund-workflow'),
+      'refund-workflow',
+    ),
+  );
+
   router.use('/billing/ach', _writeLimiter);
   router.use('/billing/ach', optionalIdempotencyMiddleware);
   router.use('/billing/crypto', _writeLimiter);

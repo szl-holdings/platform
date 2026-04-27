@@ -310,7 +310,7 @@ export const billingRefundRequestsTable = pgTable(
     requestedBy: integer('requested_by'),
     approvedBy: integer('approved_by'),
     notes: text('notes'),
-    idempotencyKey: text('idempotency_key').unique(),
+    idempotencyKey: text('idempotency_key'),
     metadata: jsonb('metadata'),
     requestedAt: timestamp('requested_at').notNull().defaultNow(),
     processedAt: timestamp('processed_at'),
@@ -321,6 +321,9 @@ export const billingRefundRequestsTable = pgTable(
     index('billing_refund_requests_org_id_idx').on(t.orgId),
     index('billing_refund_requests_status_idx').on(t.status),
     index('billing_refund_requests_charge_id_idx').on(t.stripeChargeId),
+    // Composite unique key: idempotency is scoped per org so different tenants
+    // can use the same key without conflict, and cross-tenant lookups are impossible.
+    unique('billing_refund_requests_org_idempotency_key').on(t.orgId, t.idempotencyKey),
   ],
 );
 
@@ -332,6 +335,50 @@ export const insertBillingRefundRequestSchema = createInsertSchema(billingRefund
 });
 export type InsertBillingRefundRequest = z.infer<typeof insertBillingRefundRequestSchema>;
 export type BillingRefundRequest = typeof billingRefundRequestsTable.$inferSelect;
+
+// ─── Subscription Credit Ledger ───────────────────────────────────────────────
+// Tracks per-subscription credits issued as a result of refunds, adjustments,
+// or other billing events. Acts as an explicit, queryable credit balance ledger
+// so finance teams can audit subscription-level credits without scanning audit logs.
+// On partial refunds the engine inserts a row here; on full refunds the linked
+// invoice is voided (no credit row needed — money returned directly).
+
+export const subscriptionCreditsTable = pgTable(
+  'subscription_credits',
+  {
+    id: serial('id').primaryKey(),
+    orgId: integer('org_id')
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: 'cascade' }),
+    subscriptionId: integer('subscription_id').references(() => subscriptionsTable.id, {
+      onDelete: 'set null',
+    }),
+    amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
+    currency: text('currency').notNull().default('usd'),
+    type: text('type', {
+      enum: ['refund_partial', 'refund_adjustment', 'promo', 'void_offset'],
+    })
+      .notNull()
+      .default('refund_partial'),
+    sourceRefundId: integer('source_refund_id').references(() => billingRefundRequestsTable.id, {
+      onDelete: 'set null',
+    }),
+    appliedToInvoiceId: integer('applied_to_invoice_id').references(() => invoicesTable.id, {
+      onDelete: 'set null',
+    }),
+    createdBy: integer('created_by'),
+    note: text('note'),
+    metadata: jsonb('metadata'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('subscription_credits_org_id_idx').on(t.orgId),
+    index('subscription_credits_subscription_id_idx').on(t.subscriptionId),
+    index('subscription_credits_source_refund_id_idx').on(t.sourceRefundId),
+  ],
+);
+
+export type SubscriptionCredit = typeof subscriptionCreditsTable.$inferSelect;
 
 // ─── Tax IDs ──────────────────────────────────────────────────────────────────
 // Stores validated tax registration numbers per org (VAT, GST/HST, US EIN,

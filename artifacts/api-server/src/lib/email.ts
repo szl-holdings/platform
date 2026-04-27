@@ -2226,6 +2226,169 @@ export interface ReconciliationMismatchEmailOptions {
   adminUrl?: string;
 }
 
+// ─── Refund workflow emails ───────────────────────────────────────────────────
+
+export interface RefundApprovedEmailOptions {
+  requestId: number;
+  amount: number | null;
+  currency: string;
+  reasonCode: string;
+  customerFacingNote?: string;
+}
+
+export function buildRefundApprovedEmail(opts: RefundApprovedEmailOptions): {
+  subject: string;
+  html: string;
+  text: string;
+} {
+  const billingUrl = `${process.env.APP_URL ?? 'https://szlholdings.com'}/billing`;
+  const amountDisplay =
+    opts.amount != null
+      ? `${opts.currency.toUpperCase()} ${opts.amount.toFixed(2)}`
+      : 'the requested amount';
+
+  const subject = `Your refund request has been approved — Ref #${opts.requestId}`;
+
+  const html = szlBrand(`
+    <h2>Refund Approved</h2>
+    <p>Good news — your refund request has been approved and is being processed.</p>
+    <div class="highlight">
+      <p class="label">Reference</p>
+      <p>#${opts.requestId}</p>
+      <p class="label" style="margin-top:8px;">Amount</p>
+      <p>${amountDisplay}</p>
+    </div>
+    ${opts.customerFacingNote ? `<p>${opts.customerFacingNote}</p>` : ''}
+    <p>Refunds typically appear on your statement within 5–10 business days depending on your bank or payment provider.</p>
+    <a class="cta" href="${billingUrl}">View Billing</a>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">Questions? Contact us at <strong>billing@szlholdings.com</strong>.</p>
+  `);
+
+  const text = [
+    'Refund Approved',
+    '',
+    `Reference: #${opts.requestId}`,
+    `Amount: ${amountDisplay}`,
+    opts.customerFacingNote ? `Note: ${opts.customerFacingNote}` : '',
+    '',
+    'Refunds typically appear on your statement within 5–10 business days.',
+    '',
+    `View billing: ${billingUrl}`,
+  ]
+    .filter((l) => l !== undefined)
+    .join('\n');
+
+  return { subject, html, text };
+}
+
+export interface RefundCompletedEmailOptions {
+  requestId: number;
+  refundId?: string;
+  amount: number | null;
+  currency: string;
+  reasonCode: string;
+  customerFacingNote?: string;
+}
+
+export function buildRefundCompletedEmail(opts: RefundCompletedEmailOptions): {
+  subject: string;
+  html: string;
+  text: string;
+} {
+  const billingUrl = `${process.env.APP_URL ?? 'https://szlholdings.com'}/billing`;
+  const amountDisplay =
+    opts.amount != null
+      ? `${opts.currency.toUpperCase()} ${opts.amount.toFixed(2)}`
+      : 'the requested amount';
+
+  const subject = `Your refund has been processed — Ref #${opts.requestId}`;
+
+  const html = szlBrand(`
+    <h2>Refund Processed</h2>
+    <p>Your refund has been successfully issued. Please allow 5–10 business days for it to appear on your statement.</p>
+    <div class="highlight">
+      <p class="label">Reference</p>
+      <p>#${opts.requestId}</p>
+      <p class="label" style="margin-top:8px;">Amount Refunded</p>
+      <p>${amountDisplay}</p>
+      ${opts.refundId ? `<p class="label" style="margin-top:8px;">Transaction ID</p><p style="font-family:monospace;">${opts.refundId}</p>` : ''}
+    </div>
+    ${opts.customerFacingNote ? `<p>${opts.customerFacingNote}</p>` : ''}
+    <a class="cta" href="${billingUrl}">View Billing</a>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">Questions? Contact us at <strong>billing@szlholdings.com</strong>.</p>
+  `);
+
+  const text = [
+    'Refund Processed',
+    '',
+    `Reference: #${opts.requestId}`,
+    `Amount Refunded: ${amountDisplay}`,
+    opts.refundId ? `Transaction ID: ${opts.refundId}` : '',
+    opts.customerFacingNote ? `Note: ${opts.customerFacingNote}` : '',
+    '',
+    'Please allow 5–10 business days for the refund to appear on your statement.',
+    '',
+    `View billing: ${billingUrl}`,
+  ]
+    .filter((l) => l !== undefined)
+    .join('\n');
+
+  return { subject, html, text };
+}
+
+export interface RefundDeniedEmailOptions {
+  requestId: number;
+  amount: number | null;
+  currency: string;
+  denialReason: string;
+}
+
+export function buildRefundDeniedEmail(opts: RefundDeniedEmailOptions): {
+  subject: string;
+  html: string;
+  text: string;
+} {
+  const supportUrl = `${process.env.APP_URL ?? 'https://szlholdings.com'}/support`;
+  const amountDisplay =
+    opts.amount != null
+      ? `${opts.currency.toUpperCase()} ${opts.amount.toFixed(2)}`
+      : 'the requested amount';
+
+  const subject = `Your refund request was not approved — Ref #${opts.requestId}`;
+
+  const html = szlBrand(`
+    <h2 style="color:#dc2626;">Refund Request Not Approved</h2>
+    <p>We have reviewed your refund request and are unable to approve it at this time.</p>
+    <div class="highlight">
+      <p class="label">Reference</p>
+      <p>#${opts.requestId}</p>
+      <p class="label" style="margin-top:8px;">Amount Requested</p>
+      <p>${amountDisplay}</p>
+      <p class="label" style="margin-top:8px;">Reason</p>
+      <p>${opts.denialReason}</p>
+    </div>
+    <p>If you believe this decision is in error or have additional information to share, please contact our support team.</p>
+    <a class="cta" href="${supportUrl}">Contact Support</a>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">Questions? Contact us at <strong>billing@szlholdings.com</strong>.</p>
+  `);
+
+  const text = [
+    'Refund Request Not Approved',
+    '',
+    `Reference: #${opts.requestId}`,
+    `Amount Requested: ${amountDisplay}`,
+    `Reason: ${opts.denialReason}`,
+    '',
+    'If you believe this decision is in error, please contact our support team.',
+    '',
+    `Contact support: ${supportUrl}`,
+  ].join('\n');
+
+  return { subject, html, text };
+}
+
+// ─── Settlement reconciliation alert email ────────────────────────────────────
+
 export function buildReconciliationMismatchEmail(opts: ReconciliationMismatchEmailOptions): string {
   const adminUrl =
     opts.adminUrl ??

@@ -684,6 +684,119 @@ async function chargeInvoiceCard(
   };
 }
 
+// ─── Refund payment ───────────────────────────────────────────────────────────
+//
+// Rail-agnostic refund facade. Callers never need to branch on rail type.
+//
+// Card / ACH: Stripe's createRefund() handles both rails (ACH bank transfers
+//   use the same API as card charges — just different underlying payment_method).
+//   Returns the Stripe refund ID and a 'succeeded' status.
+//
+// Crypto: Coinbase Commerce does not support programmatic refunds. This path
+//   returns a pending_manual result with a reference ID. Operators must process
+//   the disbursement manually via the Coinbase dashboard.
+
+export interface RefundPaymentParams {
+  rail: PaymentRail;
+  chargeId?: string | null;
+  paymentIntentId?: string | null;
+  amount?: number | null;
+  reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer' | 'other';
+  idempotencyKey?: string;
+}
+
+export interface RefundPaymentResult {
+  status: 'succeeded' | 'pending_manual' | 'failed';
+  rail: PaymentRail;
+  refundId?: string;
+  failureReason?: string;
+  requiresManualDisbursement?: boolean;
+  demo?: boolean;
+}
+
+export async function refundPayment(
+  params: RefundPaymentParams,
+): Promise<RailResult<RefundPaymentResult>> {
+  const { rail, chargeId, paymentIntentId, amount, reason, idempotencyKey } = params;
+  const hasStripeRef = !!(chargeId || paymentIntentId);
+
+  try {
+    if (rail === 'crypto') {
+      // Coinbase Commerce has no programmatic refund API — emit structured manual reference
+      const refundId = `crypto_manual_${Date.now()}`;
+      logger.warn(
+        { refundId, chargeId, paymentIntentId },
+        '[payment-rail-adapter] Crypto refund requires manual disbursement via Coinbase dashboard',
+      );
+      return {
+        success: true,
+        data: {
+          status: 'pending_manual',
+          rail: 'crypto',
+          refundId,
+          requiresManualDisbursement: true,
+        },
+      };
+    }
+
+    if (services.stripe.isLive) {
+      // Live Stripe path — require a valid charge or payment intent reference.
+      // Without one, we cannot issue a real refund; returning a fake demo ID
+      // in live mode would mark the request completed without moving money.
+      if (!hasStripeRef) {
+        return {
+          success: false,
+          error:
+            'Cannot refund in live mode: no Stripe charge or payment intent reference found. ' +
+            'Ensure the original payment was recorded with a stripeChargeId or stripePaymentIntentId.',
+          errorCode: 'MISSING_STRIPE_REF',
+        };
+      }
+
+      // Handles both card and ACH bank transfer refunds (same Stripe refund API)
+      const refundResult = await services.stripe.createRefund({
+        chargeId: chargeId ?? undefined,
+        paymentIntentId: paymentIntentId ?? undefined,
+        amount: amount != null ? Math.round(amount * 100) : undefined,
+        reason: reason ?? 'requested_by_customer',
+        idempotencyKey,
+      });
+      return {
+        success: true,
+        data: {
+          status: refundResult.status === 'failed' ? 'failed' : 'succeeded',
+          rail,
+          refundId: refundResult.id,
+        },
+      };
+    }
+
+    // Demo mode (only reached when services.stripe.isLive === false)
+    // Returns a deterministic demo refund ID so dev/test flows can exercise
+    // the full workflow without live Stripe credentials.
+    const demoRefundId = `re_demo_rail_${rail}_${Date.now()}`;
+    logger.info({ demoRefundId, rail }, '[payment-rail-adapter] Demo refund processed');
+    return {
+      success: true,
+      data: {
+        status: 'succeeded',
+        rail,
+        refundId: demoRefundId,
+        demo: true,
+      },
+    };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown rail error';
+    const errorCode = (err as { code?: string }).code ?? 'RAIL_REFUND_FAILED';
+    logger.error({ err, rail, chargeId, paymentIntentId }, '[payment-rail-adapter] Refund failed');
+    return {
+      success: false,
+      error: errorMessage,
+      errorCode,
+    };
+  }
+}
+
 // ─── Handle rail webhook ───────────────────────────────────────────────────────
 
 export async function handleRailWebhook(

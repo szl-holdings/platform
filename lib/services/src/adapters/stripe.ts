@@ -880,6 +880,22 @@ export class StripeAdapter extends ServiceAdapter {
    * Returns `null` in demo mode (isLive=false) — callers must still apply their
    * own org-level ownership check using billingCustomerId from the DB.
    */
+  /**
+   * getInvoicePaymentIntent — resolves the Stripe payment_intent ID attached
+   * to a Stripe invoice. Used by the refund workflow when a request was linked
+   * only by invoiceId (no direct chargeId/paymentIntentId on the request row).
+   *
+   * Returns null in demo mode — callers must handle the null case gracefully
+   * (demo mode's refundPayment() does not require a Stripe ref).
+   */
+  async getInvoicePaymentIntent(stripeInvoiceId: string): Promise<string | null> {
+    if (!this.isLive) return null;
+    const invoice = (await this.stripeRequest(`/invoices/${stripeInvoiceId}`)) as {
+      payment_intent?: string | null;
+    };
+    return invoice.payment_intent ?? null;
+  }
+
   async resolveChargeCustomer(options: {
     chargeId?: string;
     paymentIntentId?: string;
