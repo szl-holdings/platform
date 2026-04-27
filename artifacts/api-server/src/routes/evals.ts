@@ -1,5 +1,11 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { db, dosAnalyticsEventsTable } from '@szl-holdings/db';
+import {
+  type AgentEvalExecutor,
+  formatPromotionReport,
+  runAgentEvals,
+} from '@szl-holdings/pulse-evals';
+import { gatewayInfer, type GatewayRequest } from '../lib/ai-gateway';
 import { promptRegistry } from '@szl-holdings/prompt-registry';
 import type { AgentEvalRunContract } from '@szl-holdings/telemetry-standards';
 import {
@@ -1291,6 +1297,219 @@ router.post(
     } catch (err) {
       logger.error({ err }, '[aef-evals] POST /v1/evals/run failed');
       res.status(500).json({ error: err instanceof Error ? err.message : 'Internal error' });
+    }
+  },
+);
+
+const PROMOTE_MODEL_ALIASES: Record<string, { provider: string; model: string }> = {
+  'gpt-4o': { provider: 'openai', model: 'gpt-4o' },
+  'gpt-4o-mini': { provider: 'openai', model: 'gpt-4o-mini' },
+  'gpt-4-turbo': { provider: 'openai', model: 'gpt-4-turbo' },
+  'claude-3-5-sonnet': { provider: 'anthropic', model: 'claude-3-5-sonnet' },
+  'claude-3-haiku': { provider: 'anthropic', model: 'claude-3-haiku' },
+  'claude-3-opus': { provider: 'anthropic', model: 'claude-3-opus' },
+  'gemini-1.5-pro': { provider: 'gemini', model: 'gemini-1.5-pro' },
+  'gemini-1.5-flash': { provider: 'gemini', model: 'gemini-1.5-flash' },
+};
+
+function resolveModelVersion(modelVersion: string): { model: string; preferredProvider?: string; aliasMatched: boolean } {
+  for (const [alias, spec] of Object.entries(PROMOTE_MODEL_ALIASES)) {
+    if (modelVersion === alias || modelVersion.startsWith(`${alias}:`) || modelVersion.startsWith(`${alias}-`)) {
+      return { model: spec.model, preferredProvider: spec.provider, aliasMatched: true };
+    }
+  }
+  return { model: modelVersion, aliasMatched: false };
+}
+
+/**
+ * POST /evals/promote
+ *
+ * CI promotion gate: runs agent evals for a candidate model version and
+ * blocks promotion if the gate fails. The result is automatically recorded
+ * to the Decision Ledger via recordEvalRunToLedger() (called inside
+ * runAgentEvals). A structured failure report is returned in the response
+ * body when promotion is blocked so CI pipelines can surface the exact
+ * conditions that failed.
+ *
+ * Returns 200 when promotion is approved or pending human review.
+ * Returns 422 when the gate hard-blocks the candidate model.
+ */
+router.post(
+  '/evals/promote',
+  authMiddleware({ required: true }),
+  requireRole('admin'),
+  perUserWriteSlidingLimiter,
+  validateBody(
+    bodyShape({
+      agent_id: z.unknown().optional(),
+      model_version: z.unknown().optional(),
+      dataset_id: z.unknown().optional(),
+      baseline_eval_id: z.unknown().optional(),
+      triggered_by: z.unknown().optional(),
+    }),
+  ),
+  async (req, res) => {
+    try {
+      const {
+        agent_id,
+        model_version,
+        dataset_id,
+        baseline_eval_id,
+        triggered_by = 'ci:promote',
+      } = req.body as {
+        agent_id?: string;
+        model_version?: string;
+        dataset_id?: string;
+        baseline_eval_id?: string;
+        triggered_by?: string;
+      };
+
+      if (!agent_id) {
+        res.status(400).json({ error: 'agent_id is required' });
+        return;
+      }
+      if (!model_version) {
+        res.status(400).json({ error: 'model_version is required' });
+        return;
+      }
+
+      const resolvedModel = resolveModelVersion(model_version);
+      if (!resolvedModel.aliasMatched) {
+        logger.warn(
+          { model_version, agent_id },
+          '[evals/promote] model_version does not match a known alias; forwarding raw label to gateway',
+        );
+      }
+
+      const inferenceExecutor: AgentEvalExecutor = async (input) => {
+        const start = Date.now();
+        const inputJson = JSON.stringify(input.input, null, 2);
+        try {
+          const response = await gatewayInfer({
+            messages: [
+              {
+                role: 'system',
+                content:
+                  `You are an AI agent eval harness. Evaluate the following input for agent '${input.agent_id}'. ` +
+                  `Return a JSON object with: inference_type (string), recommended_action (string), confidence (number 0-1), ` +
+                  `evidence (array of objects with field "type"), and reasoning (string). ` +
+                  `Be accurate — this output is scored against a known-correct expected output.`,
+              },
+              {
+                role: 'user',
+                content: `Eval case: ${input.case_id}\n\nInput:\n${inputJson}`,
+              },
+            ],
+            strategy: 'fastest',
+            maxTokens: 400,
+            agentId: `ci-gate:${input.agent_id}`,
+            domain: 'eval',
+            model: resolvedModel.model,
+            preferredProvider: resolvedModel.preferredProvider as GatewayRequest['preferredProvider'],
+          });
+          let parsed: Record<string, unknown>;
+          try {
+            const jsonMatch = response.content.match(/\{[\s\S]*\}/);
+            parsed = jsonMatch ? (JSON.parse(jsonMatch[0]) as Record<string, unknown>) : {};
+          } catch {
+            parsed = { raw_response: response.content };
+          }
+          return { output: parsed, latency_ms: Date.now() - start };
+        } catch (inferErr) {
+          throw Object.assign(
+            new Error(
+              `[evals/promote] gateway inference unavailable for case ${input.case_id} ` +
+              `(model: ${input.model_version}): ${inferErr instanceof Error ? inferErr.message : String(inferErr)}`,
+            ),
+            { code: 'GATEWAY_UNAVAILABLE' },
+          );
+        }
+      };
+
+      const evalRun = await runAgentEvals(inferenceExecutor, {
+        agent_id,
+        model_version,
+        dataset_id,
+        baseline_eval_id,
+        run_type: 'ci_gate',
+        triggered_by,
+      });
+
+      const promotionGate = {
+        approved: evalRun.promotion_approved,
+        decision: evalRun.promotion_decision,
+        agent_id: evalRun.agent_id,
+        model_version: evalRun.model_version,
+        eval_id: evalRun.eval_id,
+        aggregate_score: evalRun.aggregate_score,
+        safety_flag_score: evalRun.dimension_scores.safety_flag,
+        regression_cases: evalRun.regression_cases,
+        blocked_reasons: evalRun.promotion_blocked_reasons,
+        pending_reasons: evalRun.promotion_pending_reasons,
+        replay_reviewed: false,
+        human_reviewer_approved: false,
+        gate_evaluated_at: evalRun.completed_at,
+      };
+
+      const failure_report = formatPromotionReport(promotionGate);
+
+      if (evalRun.promotion_decision === 'block') {
+        logger.warn(
+          {
+            agent_id,
+            model_version,
+            eval_id: evalRun.eval_id,
+            blocked_reasons: evalRun.promotion_blocked_reasons,
+            aggregate_score: evalRun.aggregate_score,
+          },
+          '[evals/promote] promotion blocked by CI gate',
+        );
+        res.status(422).json({
+          promotion_blocked: true,
+          decision: evalRun.promotion_decision,
+          eval_id: evalRun.eval_id,
+          agent_id: evalRun.agent_id,
+          model_version: evalRun.model_version,
+          aggregate_score: evalRun.aggregate_score,
+          safety_flag_score: evalRun.dimension_scores.safety_flag,
+          pass_rate: evalRun.pass_rate,
+          cases_total: evalRun.cases_total,
+          cases_failed: evalRun.cases_failed,
+          regression_cases: evalRun.regression_cases,
+          blocked_reasons: evalRun.promotion_blocked_reasons,
+          failure_summary: evalRun.failure_summary,
+          failure_report,
+        });
+        return;
+      }
+
+      res.status(200).json({
+        promotion_blocked: false,
+        decision: evalRun.promotion_decision,
+        eval_id: evalRun.eval_id,
+        agent_id: evalRun.agent_id,
+        model_version: evalRun.model_version,
+        aggregate_score: evalRun.aggregate_score,
+        safety_flag_score: evalRun.dimension_scores.safety_flag,
+        pass_rate: evalRun.pass_rate,
+        cases_total: evalRun.cases_total,
+        cases_passed: evalRun.cases_passed,
+        cases_failed: evalRun.cases_failed,
+        pending_reasons: evalRun.promotion_pending_reasons,
+        promotion_report: failure_report,
+      });
+    } catch (err) {
+      logger.error({ err }, '[evals/promote] eval gate failed');
+      const isGatewayDown =
+        err instanceof Error && (err as NodeJS.ErrnoException & { code?: string }).code === 'GATEWAY_UNAVAILABLE';
+      const status = isGatewayDown ? 503 : 500;
+      const message = err instanceof Error ? err.message : 'Internal error';
+      res.status(status).json({
+        error: isGatewayDown
+          ? 'Gateway inference unavailable — promotion gate blocked. Ensure the AI gateway is reachable and retry.'
+          : message,
+        detail: isGatewayDown ? message : undefined,
+      });
     }
   },
 );
