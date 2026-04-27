@@ -54,15 +54,15 @@ The following mobile app directories exist as empty stubs and should be archived
 
 ### Root-Level Docs Superseded by Canonical Ops Files
 
-| Deprecated File | Superseded By | Action |
+| Deprecated File | Superseded By | Status |
 |----------------|--------------|--------|
-| `BACKUP_AND_RECOVERY.md` | `ops/infra/recovery-and-backup-model.md` | Add deprecation notice at top |
-| `docs/disaster-recovery.md` | `ops/infra/recovery-and-backup-model.md` | Add deprecation notice at top |
-| `DEPLOYMENT_READINESS.md` | `ops/infra/target-production-architecture.md` + `ops/frontier/launch-readiness-scorecard.md` | Add deprecation notice |
-| `ENV_MATRIX.md` | `ops/infra/environment-matrix.md` | Add deprecation notice |
-| `ops/mobile/eas-secrets-matrix.md` | `ops/mobile/eas-and-store-secrets-matrix.md` | Add deprecation notice |
-| `ops/mobile/store-assets-checklist.md` | `ops/mobile/store-asset-inventory.md` | Add deprecation notice |
-| `ops/replit-agent/target-architecture.md` | `ops/infra/target-production-architecture.md` | Add deprecation notice |
+| `BACKUP_AND_RECOVERY.md` | `ops/infra/recovery-and-backup-model.md` | File removed from repo — no notice needed (verified 2026-04-27) |
+| `docs/disaster-recovery.md` | `ops/infra/recovery-and-backup-model.md` | File removed from repo — no notice needed (verified 2026-04-27) |
+| `DEPLOYMENT_READINESS.md` | `ops/infra/target-production-architecture.md` + `ops/frontier/launch-readiness-scorecard.md` | File removed from repo — no notice needed (verified 2026-04-27) |
+| `ENV_MATRIX.md` | `ops/infra/environment-matrix.md` | File removed from repo — no notice needed (verified 2026-04-27) |
+| `ops/mobile/eas-secrets-matrix.md` | `ops/mobile/eas-and-store-secrets-matrix.md` | Notice added |
+| `ops/mobile/store-assets-checklist.md` | `ops/mobile/store-asset-inventory.md` | Notice added |
+| `ops/replit-agent/target-architecture.md` | `ops/infra/target-production-architecture.md` | Notice added 2026-04-27 |
 
 ### Deprecation Notice Template
 
@@ -92,7 +92,7 @@ No active workflows are marked for removal at this time. If workflows for deprec
 
 ## Deprecation Execution Checklist
 
-- [ ] Add deprecation notices to all root-level docs listed above
+- [x] Add deprecation notices to all root-level docs listed above — **Done 2026-04-27** (notices added to `ops/replit-agent/target-architecture.md`; `ops/mobile/eas-secrets-matrix.md` and `ops/mobile/store-assets-checklist.md` already had notices; `BACKUP_AND_RECOVERY.md`, `docs/disaster-recovery.md`, `DEPLOYMENT_READINESS.md`, and `ENV_MATRIX.md` do not exist in the repo)
 - [x] Remove duplicate artifact registration — **Done 2026-04-18**
 - [x] Remove deprecated artifact registrations from artifact registry — **Confirmed not registered (2026-04-18)**
 - [x] Audit all `import` and cross-link references to deprecated apps — **Done 2026-04-18** (README.md artifact inventory table and PRODUCT-SURFACES.md updated)

@@ -1,5 +1,8 @@
 # SZL Holdings — Target Architecture
 
+> **DEPRECATED** — This document has been superseded by [`ops/infra/target-production-architecture.md`](../infra/target-production-architecture.md).
+> This file is retained for historical reference only. Do not update it.
+
 Generated: 2026-04-15
 
 ## Canonical Product Topology
