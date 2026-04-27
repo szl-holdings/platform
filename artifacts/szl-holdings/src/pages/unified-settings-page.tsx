@@ -12,7 +12,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   Bell,
   BellOff,
+  ChevronRight,
   FileText,
+  Filter,
   Key,
   Loader2,
   Lock,
@@ -26,7 +28,7 @@ import {
   VolumeX,
   X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 const API = '/api';
@@ -84,6 +86,8 @@ interface AuditEntry {
   newValue: unknown;
   createdAt: string;
   actorId: number | null;
+  actorName: string | null;
+  actorEmail: string | null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -524,92 +528,253 @@ function _PlatformSettingsPanel() {
 // Audit Log Panel
 // ─────────────────────────────────────────────────────────────────────────────
 
+const AUDIT_PAGE_SIZE = 25;
+
+interface AuditPage {
+  entries: AuditEntry[];
+  total: number;
+  offset: number;
+  limit: number;
+}
+
 function AuditLogPanel() {
+  const [nsFilter, setNsFilter] = useState('');
+  const [afterDate, setAfterDate] = useState('');
+  const [beforeDate, setBeforeDate] = useState('');
+  const [applied, setApplied] = useState({ ns: '', after: '', before: '' });
+  const [offset, setOffset] = useState(0);
+  const [allEntries, setAllEntries] = useState<AuditEntry[]>([]);
+  const [total, setTotal] = useState<number | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const params = new URLSearchParams({ limit: String(AUDIT_PAGE_SIZE), offset: String(offset) });
+  if (applied.ns) params.set('namespace', applied.ns);
+  if (applied.after) params.set('after', applied.after);
+  if (applied.before) params.set('before', applied.before);
+
   const { data, isLoading } = useStandardQuery({
-    queryKey: ['settings-audit'],
-    queryFn: () => apiFetch<AuditEntry[]>('/settings/audit?limit=50'),
+    queryKey: ['szl-settings-audit', applied, offset],
+    queryFn: () => apiFetch<AuditPage>(`/settings/audit?${params.toString()}`),
     staleTime: 30_000,
   });
 
-  const entries = data ?? [];
+  const isFirstPage = offset === 0;
 
-  const tierColor: Record<string, string> = {
-    platform: 'text-amber-400',
-    tenant: 'text-sky-400',
-    user: 'text-violet-400',
+  useEffect(() => {
+    if (!data || loadingMore) return;
+    if (isFirstPage) {
+      setTotal(data.total);
+      setAllEntries(data.entries ?? []);
+    }
+  }, [data, isFirstPage, loadingMore]);
+
+  const displayedEntries = isFirstPage && !loadingMore ? (data?.entries ?? allEntries) : allEntries;
+  const hasMore = total !== null && displayedEntries.length < total;
+
+  const loadMore = async () => {
+    setLoadingMore(true);
+    const nextOffset = offset + AUDIT_PAGE_SIZE;
+    const moreParams = new URLSearchParams({ limit: String(AUDIT_PAGE_SIZE), offset: String(nextOffset) });
+    if (applied.ns) moreParams.set('namespace', applied.ns);
+    if (applied.after) moreParams.set('after', applied.after);
+    if (applied.before) moreParams.set('before', applied.before);
+    try {
+      const page = await apiFetch<AuditPage>(`/settings/audit?${moreParams.toString()}`);
+      setAllEntries((prev) => [...prev, ...(page.entries ?? [])]);
+      setTotal(page.total);
+      setOffset(nextOffset);
+    } finally {
+      setLoadingMore(false);
+    }
   };
 
-  const actionColor: Record<string, string> = {
-    create: 'text-emerald-400',
-    update: 'text-sky-400',
-    delete: 'text-red-400',
+  const applyFilters = () => {
+    setOffset(0);
+    setAllEntries([]);
+    setTotal(null);
+    setApplied({ ns: nsFilter, after: afterDate, before: beforeDate });
+  };
+  const clearFilters = () => {
+    setNsFilter('');
+    setAfterDate('');
+    setBeforeDate('');
+    setOffset(0);
+    setAllEntries([]);
+    setTotal(null);
+    setApplied({ ns: '', after: '', before: '' });
+  };
+
+  const actionBadge: Record<string, string> = {
+    create: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+    update: 'bg-sky-500/10 border-sky-500/20 text-sky-400',
+    delete: 'bg-red-500/10 border-red-500/20 text-red-400',
+  };
+
+  const tierBadge: Record<string, string> = {
+    platform: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
+    tenant: 'bg-sky-500/10 border-sky-500/20 text-sky-400',
+    user: 'bg-violet-500/10 border-violet-500/20 text-violet-400',
   };
 
   return (
     <SettingsSectionPanel
-      title="Audit Log"
-      description="Every settings change with actor, timestamp, and before/after values"
+      title="Settings Change History"
+      description="Audit trail of platform, tenant, and user-level settings changes with actor, old→new values, and timestamps"
     >
-      {isLoading ? (
+      <p className="mb-4 text-xs text-muted-foreground/70">
+        Platform and org admins see the full team history. Other members see only their own changes.
+      </p>
+
+      <div className="mb-4 p-3 rounded-lg border border-border bg-muted/20 flex flex-wrap items-end gap-3">
+        <div className="flex flex-col gap-1 min-w-[160px]">
+          <label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">
+            Namespace prefix
+          </label>
+          <input
+            type="text"
+            value={nsFilter}
+            onChange={(e) => setNsFilter(e.target.value)}
+            placeholder="e.g. szl.notifications"
+            className="h-7 px-2 text-xs rounded border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">
+            From
+          </label>
+          <input
+            type="date"
+            value={afterDate}
+            onChange={(e) => setAfterDate(e.target.value)}
+            className="h-7 px-2 text-xs rounded border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">
+            To
+          </label>
+          <input
+            type="date"
+            value={beforeDate}
+            onChange={(e) => setBeforeDate(e.target.value)}
+            className="h-7 px-2 text-xs rounded border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+          />
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={applyFilters}
+            className="flex items-center gap-1.5 h-7 px-3 text-xs font-medium rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20 transition-colors"
+          >
+            <Filter className="w-3 h-3" /> Apply
+          </button>
+          <button
+            onClick={clearFilters}
+            className="h-7 px-3 text-xs text-muted-foreground hover:text-foreground border border-border rounded transition-colors"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+
+      {total !== null && (
+        <p className="mb-3 text-xs text-muted-foreground/70">
+          Showing {displayedEntries.length} of {total} record{total !== 1 ? 's' : ''}
+        </p>
+      )}
+
+      {isLoading && offset === 0 ? (
         <div className="space-y-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-12 bg-muted animate-pulse rounded" />
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-14 bg-muted animate-pulse rounded" />
           ))}
         </div>
-      ) : entries.length === 0 ? (
-        <div className="py-8 text-center">
+      ) : displayedEntries.length === 0 ? (
+        <div className="py-10 text-center">
           <FileText className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">No settings changes logged yet</p>
+          <p className="text-sm text-muted-foreground">No settings changes found</p>
+          <p className="text-xs text-muted-foreground/60 mt-1">
+            Changes will appear here when settings are modified
+          </p>
         </div>
       ) : (
-        <div className="space-y-1">
-          {entries.map((entry) => (
+        <div className="space-y-1.5">
+          {displayedEntries.map((entry) => (
             <div
               key={entry.id}
-              className="flex items-start gap-3 py-2.5 px-3 rounded-lg hover:bg-muted/30 transition-colors"
+              className="rounded-lg border border-border/50 bg-muted/10 hover:bg-muted/20 transition-colors px-3 py-2.5"
             >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span
-                    className={cn(
-                      'text-[10px] font-bold uppercase',
-                      tierColor[entry.tier] ?? 'text-muted-foreground',
+              <div className="flex items-center gap-2 flex-wrap">
+                <span
+                  className={cn(
+                    'text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border',
+                    actionBadge[entry.action] ?? 'bg-muted border-border text-muted-foreground',
+                  )}
+                >
+                  {entry.action}
+                </span>
+                <span className="font-mono text-xs text-foreground">
+                  {entry.namespace}
+                  <span className="text-muted-foreground">.</span>
+                  {entry.key}
+                </span>
+                <span className="ml-auto text-[10px] text-muted-foreground shrink-0 tabular-nums">
+                  {formatDateTime(entry.createdAt, { withSeconds: false })}
+                </span>
+              </div>
+              <div className="mt-1.5 flex items-center gap-2 flex-wrap text-xs">
+                {entry.actorName ? (
+                  <span className="text-muted-foreground">
+                    by{' '}
+                    <span className="text-foreground font-medium">{entry.actorName}</span>
+                    {entry.actorEmail && (
+                      <span className="text-muted-foreground/70"> ({entry.actorEmail})</span>
                     )}
-                  >
-                    {entry.tier}
                   </span>
-                  <span className="text-xs font-mono text-foreground">
-                    {entry.namespace}.{entry.key}
-                  </span>
-                  <span
-                    className={cn(
-                      'text-[10px] font-semibold uppercase',
-                      actionColor[entry.action] ?? 'text-muted-foreground',
-                    )}
-                  >
-                    {entry.action}
-                  </span>
-                </div>
+                ) : entry.actorId ? (
+                  <span className="text-muted-foreground">by user #{entry.actorId}</span>
+                ) : (
+                  <span className="text-muted-foreground/50 italic">system</span>
+                )}
                 {(entry.oldValue != null || entry.newValue != null) && (
-                  <div className="flex items-center gap-2 mt-0.5">
+                  <span className="flex items-center gap-1 font-mono text-[10px]">
                     {entry.oldValue != null && (
-                      <span className="text-[10px] font-mono text-muted-foreground line-through">
+                      <span className="px-1.5 py-0.5 rounded bg-red-500/5 border border-red-500/20 text-red-400/80 line-through">
                         {JSON.stringify(entry.oldValue)}
                       </span>
                     )}
+                    {entry.oldValue != null && entry.newValue != null && (
+                      <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
+                    )}
                     {entry.newValue != null && (
-                      <span className="text-[10px] font-mono text-foreground">
-                        → {JSON.stringify(entry.newValue)}
+                      <span className="px-1.5 py-0.5 rounded bg-amber-500/5 border border-amber-500/20 text-amber-400/80">
+                        {JSON.stringify(entry.newValue)}
                       </span>
                     )}
-                  </div>
+                  </span>
                 )}
+                <span
+                  className={cn(
+                    'ml-auto text-[10px] px-1.5 py-0.5 rounded border capitalize',
+                    tierBadge[entry.tier] ?? 'bg-muted border-border text-muted-foreground',
+                  )}
+                >
+                  {entry.tier}
+                </span>
               </div>
-              <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">
-                {formatDateTime(entry.createdAt, { withSeconds: false })}
-              </span>
             </div>
           ))}
+          {hasMore && (
+            <div className="pt-2 text-center">
+              <button
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="flex items-center gap-1.5 mx-auto h-7 px-4 text-xs font-medium rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20 disabled:opacity-50 transition-colors"
+              >
+                {loadingMore ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                {loadingMore ? 'Loading…' : 'Load more'}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </SettingsSectionPanel>
