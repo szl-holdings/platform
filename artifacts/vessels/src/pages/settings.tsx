@@ -12,6 +12,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   Bell,
   BellOff,
+  ChevronDown,
   ChevronRight,
   CreditCard,
   FileText,
@@ -22,7 +23,7 @@ import {
   Shield,
   Users,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const VESSELS_ACCENT = '#38bdf8';
 
@@ -487,29 +488,85 @@ interface AuditEntry {
   createdAt: string;
 }
 
+const PAGE_SIZE = 25;
+
+interface AuditPage {
+  entries: AuditEntry[];
+  total: number;
+  offset: number;
+  limit: number;
+}
+
 function AuditPanel() {
   const [nsFilter, setNsFilter] = useState('');
   const [afterDate, setAfterDate] = useState('');
   const [beforeDate, setBeforeDate] = useState('');
   const [applied, setApplied] = useState({ ns: '', after: '', before: '' });
+  const [offset, setOffset] = useState(0);
+  const [allEntries, setAllEntries] = useState<AuditEntry[]>([]);
+  const [total, setTotal] = useState<number | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  const params = new URLSearchParams({ namespace: applied.ns || 'vessels', limit: '100' });
+  const params = new URLSearchParams({
+    namespace: applied.ns || 'vessels',
+    limit: String(PAGE_SIZE),
+    offset: String(offset),
+  });
   if (applied.after) params.set('after', applied.after);
   if (applied.before) params.set('before', applied.before);
 
   const { data, isLoading } = useStandardQuery({
-    queryKey: ['vessels-settings-audit', applied],
-    queryFn: () => apiFetch<AuditEntry[]>(`/settings/audit?${params.toString()}`),
+    queryKey: ['vessels-settings-audit', applied, offset],
+    queryFn: () => apiFetch<AuditPage>(`/settings/audit?${params.toString()}`),
     staleTime: 30_000,
   });
 
-  const entries = data ?? [];
+  const isFirstPage = offset === 0;
 
-  const applyFilters = () => setApplied({ ns: nsFilter, after: afterDate, before: beforeDate });
+  useEffect(() => {
+    if (!data || loadingMore) return;
+    if (isFirstPage) {
+      setTotal(data.total);
+      setAllEntries(data.entries ?? []);
+    }
+  }, [data, isFirstPage, loadingMore]);
+
+  const displayedEntries = isFirstPage && !loadingMore ? (data?.entries ?? allEntries) : allEntries;
+  const hasMore = total !== null && displayedEntries.length < total;
+
+  const loadMore = async () => {
+    setLoadingMore(true);
+    const nextOffset = offset + PAGE_SIZE;
+    const moreParams = new URLSearchParams({
+      namespace: applied.ns || 'vessels',
+      limit: String(PAGE_SIZE),
+      offset: String(nextOffset),
+    });
+    if (applied.after) moreParams.set('after', applied.after);
+    if (applied.before) moreParams.set('before', applied.before);
+    try {
+      const page = await apiFetch<AuditPage>(`/settings/audit?${moreParams.toString()}`);
+      setAllEntries((prev) => [...prev, ...(page.entries ?? [])]);
+      setTotal(page.total);
+      setOffset(nextOffset);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const applyFilters = () => {
+    setOffset(0);
+    setAllEntries([]);
+    setTotal(null);
+    setApplied({ ns: nsFilter, after: afterDate, before: beforeDate });
+  };
   const clearFilters = () => {
     setNsFilter('');
     setAfterDate('');
     setBeforeDate('');
+    setOffset(0);
+    setAllEntries([]);
+    setTotal(null);
     setApplied({ ns: '', after: '', before: '' });
   };
 
@@ -573,13 +630,19 @@ function AuditPanel() {
         </div>
       </div>
 
-      {isLoading ? (
+      {total !== null && (
+        <p className="mb-3 text-xs text-sky-400/50">
+          Showing {displayedEntries.length} of {total} record{total !== 1 ? 's' : ''}
+        </p>
+      )}
+
+      {isLoading && offset === 0 ? (
         <div className="space-y-2">
           {[0, 1, 2].map((i) => (
             <div key={i} className="h-14 bg-sky-500/5 animate-pulse rounded" />
           ))}
         </div>
-      ) : entries.length === 0 ? (
+      ) : displayedEntries.length === 0 ? (
         <div className="py-10 text-center">
           <FileText className="w-6 h-6 text-sky-400/30 mx-auto mb-2" />
           <p className="text-sm text-sky-400/50">No settings changes found</p>
@@ -589,7 +652,7 @@ function AuditPanel() {
         </div>
       ) : (
         <div className="space-y-1.5">
-          {entries.map((e) => (
+          {displayedEntries.map((e) => (
             <div
               key={e.id}
               className="rounded-lg border border-sky-500/10 bg-sky-500/5 hover:bg-sky-500/10 transition-colors px-3 py-2.5"
@@ -650,6 +713,20 @@ function AuditPanel() {
               </div>
             </div>
           ))}
+          {hasMore && (
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="mt-2 w-full flex items-center justify-center gap-1.5 h-8 text-xs font-medium rounded-lg border border-sky-500/10 bg-sky-500/5 hover:bg-sky-500/10 text-sky-400/60 hover:text-sky-300 transition-colors disabled:opacity-50"
+            >
+              {loadingMore ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <ChevronDown className="w-3 h-3" />
+              )}
+              {loadingMore ? 'Loading…' : `Load more (${total! - displayedEntries.length} remaining)`}
+            </button>
+          )}
         </div>
       )}
     </SettingsSectionPanel>

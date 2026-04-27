@@ -26,7 +26,7 @@ import {
   userSettingsTable,
   usersTable,
 } from '@szl-holdings/db';
-import { and, asc, desc, eq, gte, like, lte } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, like, lte } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -783,7 +783,10 @@ router.get(
 
       const tier = req.query.tier as string | undefined;
       const namespace = req.query.namespace as string | undefined;
-      const limit = Math.min(parseInt(String(req.query.limit ?? '100'), 10), 500);
+      const parsedLimit = parseInt(String(req.query.limit ?? '25'), 10);
+      const parsedOffset = parseInt(String(req.query.offset ?? '0'), 10);
+      const limit = Number.isFinite(parsedLimit) ? Math.min(Math.max(parsedLimit, 1), 500) : 25;
+      const offset = Number.isFinite(parsedOffset) ? Math.max(parsedOffset, 0) : 0;
       const after = req.query.after ? new Date(req.query.after as string) : undefined;
       // Make `before` inclusive of the full selected day (23:59:59.999 UTC)
       let before: Date | undefined;
@@ -843,35 +846,44 @@ router.get(
         conditions.push(lte(settingsAuditLogTable.createdAt, before));
       }
 
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
       // Admins get full fields including actorEmail and ipAddress.
       // Non-admins only see their own entries and never receive sensitive fields.
-      const rows = await db
-        .select({
-          id: settingsAuditLogTable.id,
-          tier: settingsAuditLogTable.tier,
-          settingId: settingsAuditLogTable.settingId,
-          namespace: settingsAuditLogTable.namespace,
-          key: settingsAuditLogTable.key,
-          orgId: settingsAuditLogTable.orgId,
-          userId: settingsAuditLogTable.userId,
-          actorId: settingsAuditLogTable.actorId,
-          action: settingsAuditLogTable.action,
-          oldValue: settingsAuditLogTable.oldValue,
-          newValue: settingsAuditLogTable.newValue,
-          // ipAddress only returned to admins
-          ...(isAdmin ? { ipAddress: settingsAuditLogTable.ipAddress } : {}),
-          createdAt: settingsAuditLogTable.createdAt,
-          actorName: usersTable.displayName,
-          // actorEmail only returned to admins
-          ...(isAdmin ? { actorEmail: usersTable.email } : {}),
-        })
-        .from(settingsAuditLogTable)
-        .leftJoin(usersTable, eq(settingsAuditLogTable.actorId, usersTable.id))
-        .where(conditions.length > 0 ? and(...conditions) : undefined)
-        .orderBy(desc(settingsAuditLogTable.createdAt))
-        .limit(limit);
+      const [rows, [{ total }]] = await Promise.all([
+        db
+          .select({
+            id: settingsAuditLogTable.id,
+            tier: settingsAuditLogTable.tier,
+            settingId: settingsAuditLogTable.settingId,
+            namespace: settingsAuditLogTable.namespace,
+            key: settingsAuditLogTable.key,
+            orgId: settingsAuditLogTable.orgId,
+            userId: settingsAuditLogTable.userId,
+            actorId: settingsAuditLogTable.actorId,
+            action: settingsAuditLogTable.action,
+            oldValue: settingsAuditLogTable.oldValue,
+            newValue: settingsAuditLogTable.newValue,
+            // ipAddress only returned to admins
+            ...(isAdmin ? { ipAddress: settingsAuditLogTable.ipAddress } : {}),
+            createdAt: settingsAuditLogTable.createdAt,
+            actorName: usersTable.displayName,
+            // actorEmail only returned to admins
+            ...(isAdmin ? { actorEmail: usersTable.email } : {}),
+          })
+          .from(settingsAuditLogTable)
+          .leftJoin(usersTable, eq(settingsAuditLogTable.actorId, usersTable.id))
+          .where(whereClause)
+          .orderBy(desc(settingsAuditLogTable.createdAt))
+          .limit(limit)
+          .offset(offset),
+        db
+          .select({ total: count() })
+          .from(settingsAuditLogTable)
+          .where(whereClause),
+      ]);
 
-      sendSuccess(res, rows);
+      sendSuccess(res, { entries: rows, total, offset, limit });
     } catch (err) {
       handleRouteError(res, err, 'Failed to fetch settings audit log');
     }
