@@ -1113,6 +1113,50 @@ router.post("/investors/inquiry", authMiddleware(), validateBody(inquirySchema),
     });
     logger.info({ email: req.body.email, materials: req.body.materialsRequested }, "Investor deeper access inquiry received");
     res.json({ data: { submitted: true } });
+
+    // Fire-and-forget email notifications: ack to requester + alert to investors inbox.
+    const { name, email, company, role, materialsRequested, context } = req.body as {
+      name: string;
+      email: string;
+      company: string;
+      role?: string;
+      materialsRequested: string[];
+      context?: string;
+    };
+    const inquirySubject = `Investor Access Inquiry — ${company} — ${name}`;
+    setImmediate(async () => {
+      try {
+        await sendEmail({
+          to: email,
+          subject: `We received your access inquiry — SZL Holdings`,
+          html: buildInquiryAckEmail(name, inquirySubject),
+        });
+      } catch (emailErr) {
+        logger.warn({ err: emailErr, email }, "[investors/inquiry] Ack email send failed (non-blocking)");
+      }
+      try {
+        const materialsList = materialsRequested.map((m) => `• ${m}`).join("\n");
+        await sendEmail({
+          to: INVESTOR_NOTIFY_EMAIL,
+          subject: inquirySubject,
+          html: buildLeadNotificationEmail({
+            name,
+            email,
+            company,
+            subject: inquirySubject,
+            message: [
+              role ? `Role: ${role}` : null,
+              `Materials requested:\n${materialsList}`,
+              context ? `Context: ${context}` : null,
+            ].filter(Boolean).join("\n\n"),
+            source: "investor-data-room",
+          }),
+          replyTo: email,
+        });
+      } catch (emailErr) {
+        logger.warn({ err: emailErr, to: INVESTOR_NOTIFY_EMAIL }, "[investors/inquiry] Alert email failed (non-blocking)");
+      }
+    });
   } catch (err) {
     logger.error({ err }, "Failed to record investor inquiry");
     res.status(500).json({ error: "Failed to submit inquiry" });
