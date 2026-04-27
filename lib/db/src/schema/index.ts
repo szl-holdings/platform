@@ -1,3 +1,4 @@
+export * from './a11oy_defense';
 export * from './a2a';
 export * from './activity';
 export * from './aef_profiles';

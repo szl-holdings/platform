@@ -30,6 +30,7 @@ import a11oyRuntimeRouter from "./a11oy-runtime-api.js";
 import a11oySovereignRouter from "./a11oy-sovereign-api.js";
 import publicA11oyRouter from "./public-a11oy-api";
 import internalA11oyRouter from "./internal-a11oy-api";
+import internalA11oyDefenseRouter from "./internal-a11oy-defense";
 import apiKeysRouter from "./api-keys";
 import oauthRouter from "./oauth";
 import meshObservabilityRouter from "./mesh-observability";
@@ -212,6 +213,11 @@ router.use(publicA11oyRouter);
 // A11oy Internal API — authenticated operational routes for readiness, health, and storage.
 // GET /api/internal/a11oy/readiness, /verticals/health, /proof/summary, /mcp/readiness, /storage/status.
 router.use(internalA11oyRouter);
+
+// A11oy Internal Defense API — read-only endpoints for the 6 defense pages
+// (PrecisionAI, WeaponizedIntel, AgentZeroTrust, AtlasShield, SwarmOrchestrator, PlaybookEngine).
+// GET /api/internal/a11oy/defense/{precision-ai|weaponized-intel|agent-zero-trust|atlas-shield|swarm-orchestrator|playbook-engine}.
+router.use(internalA11oyDefenseRouter);
 
 // A11oy Sovereign API (Phase 3) — Sovereign Execution Lab endpoints.
 // model-router, MirrorEval 2.0, replay, connector firewall, twin foundry, skills, boardroom, trust center.

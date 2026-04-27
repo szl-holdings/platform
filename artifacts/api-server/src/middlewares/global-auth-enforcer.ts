@@ -430,6 +430,11 @@ const PUBLIC_PREFIXES = [
   // Fully public in demo mode (DB-backed, no tenant PII exposed). Write routes
   // are still protected by CSRF double-submit (global csrfMiddleware in app.ts).
   "/api/conduit/",
+  // A11oy defense pages — read-only GET endpoints serving demo data for the
+  // PrecisionAI, WeaponizedIntel, AgentZeroTrust, AtlasShield, SwarmOrchestrator,
+  // and PlaybookEngine screens. No tenant PII; static educational/threat-model
+  // payloads. Public in demo mode so the a11oy frontend can render without auth.
+  "/api/internal/a11oy/defense/",
 ];
 
 /**
