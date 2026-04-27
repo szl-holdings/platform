@@ -3,13 +3,19 @@ import { lazyMatch, lazyMount, lazyRegisterMatch } from '../../lib/lazy-router';
 import { aiControlPlane } from '../../middlewares/ai-control-plane';
 import { idempotencyMiddleware } from '../../middlewares/idempotency';
 import {
+  aiInferenceSlidingLimiter,
   perUserApiSlidingLimiter,
   perUserWriteSlidingLimiter,
 } from '../../middlewares/sliding-window-limiter';
+import { aiInferenceLimiter } from '../../middlewares/rate-limiters';
 import { tenantScope } from '../../middlewares/tenant-scope';
 
 const _readLimiter = perUserApiSlidingLimiter;
 const _writeLimiter = perUserWriteSlidingLimiter;
+// Stricter limiter for endpoints that invoke AI model inference. Applied in
+// addition to the general read limiter to prevent runaway token spend.
+const _aiInferenceLimiter = aiInferenceLimiter;
+const _aiInferenceSlidingLimiter = aiInferenceSlidingLimiter;
 
 export function register(router: IRouter): void {
   router.use('/ai', tenantScope({ required: true }));
@@ -38,6 +44,14 @@ export function register(router: IRouter): void {
   router.use('/atlas/spatial', tenantScope({ required: true }));
 
   router.use('/ai', _readLimiter);
+  // Stricter inference-specific limiters on model-invoking endpoints.
+  // Applied before aiControlPlane so cost-gating sees the same throttled view.
+  router.use('/ai/respond', _aiInferenceLimiter, _aiInferenceSlidingLimiter);
+  router.use('/ai/triage', _aiInferenceLimiter, _aiInferenceSlidingLimiter);
+  router.use('/ai/extract', _aiInferenceLimiter, _aiInferenceSlidingLimiter);
+  router.use('/ai/plan', _aiInferenceLimiter, _aiInferenceSlidingLimiter);
+  router.use('/ai/tools/execute', _aiInferenceLimiter, _aiInferenceSlidingLimiter);
+  router.use('/ai/evals/run', _aiInferenceLimiter, _aiInferenceSlidingLimiter);
   router.use('/ai/tools/execute', idempotencyMiddleware);
   router.use(
     '/ai/respond',
@@ -132,6 +146,7 @@ export function register(router: IRouter): void {
 
   router.use('/forge', _readLimiter);
   router.use('/forge', _writeLimiter);
+  router.use('/forge', _aiInferenceLimiter, _aiInferenceSlidingLimiter);
   router.use('/forge', aiControlPlane({ policyRouteClass: 'reasoning', costRouteClass: 'forge' }));
   router.use(lazyMatch('/forge', () => import('../forge'), 'forge'));
 

@@ -195,3 +195,27 @@ export const strictAuthSlidingLimiter = createSlidingWindowLimiter({
   skip: (req) => req.method === 'GET',
   failOpen: false,
 });
+
+/**
+ * AI inference sliding-window limiter (PostgreSQL-backed, multi-instance safe).
+ *
+ * Enforces a strict per-user/IP cap on AI model invocations (reasoning,
+ * generation, extraction, planning). Tighter than the general read limiter
+ * because AI calls carry real token costs and can trigger runaway spend if
+ * a client loops.
+ *
+ * Production:  20 inference calls / minute per user (or IP for anonymous)
+ * Development: 200 calls / minute (permissive for local iteration)
+ *
+ * failOpen: false — a DB failure blocks the request rather than permitting
+ * it, because unthrottled AI calls have direct cost consequences.
+ */
+export const aiInferenceSlidingLimiter = createSlidingWindowLimiter({
+  windowMs: 60 * 1000,
+  max: isProduction ? 20 : 200,
+  endpointGroup: 'ai-inference',
+  message: {
+    error: 'AI inference rate limit exceeded. Max 20 requests per minute per user.',
+  },
+  failOpen: false,
+});

@@ -182,8 +182,6 @@ app.use(
   }),
 );
 
-app.use(globalLimiter);
-
 app.use(telemetryMiddleware);
 app.use(traceEmitMiddleware);
 
@@ -305,6 +303,9 @@ app.use('/api/alloy-embedding-api', _aefRouter);
 app.use(csrfMiddleware);
 app.use(authMiddleware({ required: false }));
 app.use(sessionRefreshPolicy());
+// Global rate limiter runs AFTER auth so req.user is populated and authenticated
+// traffic is keyed by user/org ID rather than falling back to IP.
+app.use(globalLimiter);
 
 app.get('/api/health', async (_req: Request, res: Response) => {
   const memUsage = process.memoryUsage();

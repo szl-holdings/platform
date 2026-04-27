@@ -1,6 +1,7 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import { sendError } from '../lib/api-response';
+import { verifyInternalHeader } from '../lib/internal-tokens';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -27,6 +28,38 @@ function makeServiceUnavailableHandler(message: string) {
   };
 }
 
+/**
+ * Key generator that uses user/org ID for authenticated traffic and falls back
+ * to IP address for anonymous traffic. Applied consistently across all limiters
+ * so authenticated users share a budget that isn't polluted by IP collisions
+ * (e.g. shared NAT, CDN egress nodes).
+ */
+function userOrgKeyGenerator(req: Request): string {
+  const user = (req as Request & { user?: { id?: string | number; orgId?: string | number } })
+    .user;
+  if (user?.orgId != null) return `org:${user.orgId}`;
+  if (user?.id != null) return `user:${user.id}`;
+  return req.ip ?? 'unknown';
+}
+
+/**
+ * Skip function that bypasses rate limiting for verified internal service
+ * callers (those presenting a valid X-Internal-Token header matched against
+ * INTERNAL_SERVICE_TOKENS). Internal callers are trusted pipeline services
+ * (e.g. Alloy runner, health-prober) that should never be throttled.
+ *
+ * NOTE: This is a single-instance in-memory limiter (v1). A distributed
+ * deployment sharing rate-limit state across instances should migrate to
+ * the PostgreSQL-backed sliding-window limiter (sliding-window-limiter.ts).
+ */
+export function skipForInternalCallers(req: Request): boolean {
+  if (req.path === '/api/health' || req.path === '/healthz' || req.path === '/readyz') return true;
+  const token = req.headers['x-internal-token'] as string | undefined;
+  if (!token) return false;
+  const match = verifyInternalHeader(token, req.originalUrl || req.url);
+  return match !== null;
+}
+
 export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: isProduction ? 200 : 1000,
@@ -37,12 +70,14 @@ export const globalLimiter = rateLimit({
   // by express-rate-limit on 429 responses.
   standardHeaders: true,
   legacyHeaders: true,
+  keyGenerator: userOrgKeyGenerator,
   handler: makeRateLimitHandler('Too many requests, please try again later.'),
   skip: (req) =>
     req.path === '/api/health' ||
     req.path === '/api/health/live' ||
     req.path === '/api/health/ready' ||
-    req.path === '/api/ready',
+    req.path === '/api/ready' ||
+    skipForInternalCallers(req),
 }) as unknown as RequestHandler;
 
 export const writeLimiter = rateLimit({
@@ -50,7 +85,9 @@ export const writeLimiter = rateLimit({
   max: isProduction ? 100 : 500,
   standardHeaders: true,
   legacyHeaders: true,
+  keyGenerator: userOrgKeyGenerator,
   handler: makeRateLimitHandler('Too many write requests, please try again later.'),
+  skip: skipForInternalCallers,
 }) as unknown as RequestHandler;
 
 export const readLimiter = rateLimit({
@@ -58,7 +95,9 @@ export const readLimiter = rateLimit({
   max: isProduction ? 600 : 2000,
   standardHeaders: true,
   legacyHeaders: true,
+  keyGenerator: userOrgKeyGenerator,
   handler: makeRateLimitHandler('Too many requests, please try again later.'),
+  skip: skipForInternalCallers,
 }) as unknown as RequestHandler;
 
 export const publicSubmitLimiter = rateLimit({
@@ -122,6 +161,59 @@ export const gdprLimiter = rateLimit({
   handler: makeRateLimitHandler(
     'Too many data requests from this IP. Please try again in an hour.',
   ),
+}) as unknown as RequestHandler;
+
+/**
+ * AI inference limiter.
+ *
+ * Applied to endpoints that invoke AI model calls (reasoning, generation,
+ * extraction, planning, forge). Stricter than the general read limiter to
+ * prevent runaway cost spikes from misconfigured clients or accidental loops.
+ *
+ * Keyed by user/org for authenticated traffic, by IP for anonymous callers.
+ * Internal service callers are bypassed (skipForInternalCallers).
+ *
+ * Production:  30 calls / 15 min per user/org
+ * Development: 200 calls / 15 min (permissive for local iteration)
+ *
+ * Pair with the DB-backed `aiInferenceSlidingLimiter` (sliding-window-limiter.ts)
+ * for per-user minute-level enforcement that survives process restarts.
+ */
+export const aiInferenceLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: isProduction ? 30 : 200,
+  standardHeaders: true,
+  legacyHeaders: true,
+  keyGenerator: userOrgKeyGenerator,
+  handler: makeRateLimitHandler(
+    'AI inference rate limit exceeded. Please wait before making additional AI requests.',
+  ),
+  skip: skipForInternalCallers,
+}) as unknown as RequestHandler;
+
+/**
+ * Bulk export limiter.
+ *
+ * Applied to endpoints that generate heavyweight exports (PDF reports,
+ * SIEM export bundles, data dumps). These requests are CPU/IO intensive
+ * and can saturate the server if not throttled.
+ *
+ * Keyed by user/org for authenticated traffic, by IP for anonymous callers.
+ * Internal service callers are bypassed (skipForInternalCallers).
+ *
+ * Production:  10 exports / hour per user/org
+ * Development: 100 exports / hour
+ */
+export const bulkExportLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: isProduction ? 10 : 100,
+  standardHeaders: true,
+  legacyHeaders: true,
+  keyGenerator: userOrgKeyGenerator,
+  handler: makeRateLimitHandler(
+    'Export rate limit exceeded. You may generate up to 10 exports per hour. Please try again later.',
+  ),
+  skip: skipForInternalCallers,
 }) as unknown as RequestHandler;
 
 export { makeServiceUnavailableHandler };

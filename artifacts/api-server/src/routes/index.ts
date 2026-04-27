@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
+import { bulkExportLimiter } from "../middlewares/rate-limiters";
 import { guardianPolicyCheck } from "../middlewares/guardian-policy";
 import { lazyMount, lazyMatch } from "../lib/lazy-router";
 import emailWebhooksRouter from "./email-webhooks";
@@ -183,6 +184,8 @@ router.use(lazyMatch("/sentra", () => import("./sentra-agents"), "sentra-agents"
 router.use(lazyMatch("/sentra", () => import("./sentra-siem"), "sentra-siem"));
 
 // Sentra SIEM Export — outbound export of findings to Splunk (CEF), Sentinel (ASIM), Chronicle (UDM).
+// Heavy export operation: apply bulk export rate limit before route handlers.
+router.use("/sentra/siem-export", bulkExportLimiter);
 router.use(lazyMatch("/sentra/siem-export", () => import("./sentra-siem-export"), "sentra-siem-export"));
 
 // Sentra Threat Hunter — hunt approval and remediation plan approval endpoints.
@@ -425,6 +428,8 @@ router.use(lazyMatch("/document-lifecycle", () => import("./document-lifecycle")
 
 router.use(lazyMatch("/fund-management", () => import("./fund-management"), "fund-management"));
 
+// Aegis PDF export — heavyweight CPU/IO operation; apply bulk export limit.
+router.use("/aegis-export", bulkExportLimiter);
 router.use(lazyMatch("/aegis-export", () => import("./aegis-export"), "aegis-export"));
 
 router.use(lazyMatch("/mobile-biometric", () => import("./mobile-biometric"), "mobile-biometric"));
