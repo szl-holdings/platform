@@ -1,4 +1,5 @@
 import { readEnvFeatureFlags } from '@szl-holdings/config';
+import { UsageIndicator } from '@szl-holdings/shared-ui/billing';
 import { AnalyticsProvider } from '@szl-holdings/shared-ui/analytics-provider';
 import { AppModeBanner, AppModeProvider } from '@szl-holdings/shared-ui/app-mode-banner';
 import {
@@ -521,6 +522,12 @@ function SentraSidebarContent({
                 </div>
               </div>
             </div>
+            <UsageIndicator
+              featureKey="agent_runs"
+              label="Agent usage"
+              accentColor="#f5f5f5"
+              billingHref={`${BASE}/account/billing`}
+            />
             <button
               onClick={onToggleCollapse}
               className="flex items-center justify-center w-full py-1 text-[10px] rounded transition-colors hover:bg-white/5 text-[#f5f5f5]/40"

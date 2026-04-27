@@ -817,6 +817,11 @@ function DashboardRoutes() {
           </Suspense>
         </Route>
       ))}
+      <Route path="/account/billing">
+        <Suspense fallback={<PageLoader />}>
+          <AegisBillingPage />
+        </Suspense>
+      </Route>
       <Route>
         <div className="flex flex-col items-center justify-center h-full p-10 text-center">
           <Shield className="w-10 h-10 text-[#f5f5f5]/50 mb-4" />
@@ -1072,6 +1077,7 @@ function SlideDeck() {
 }
 
 const HomePage = lazy(() => import('./pages/aegis-home'));
+const AegisBillingPage = lazy(() => import('./pages/billing-account'));
 
 function AppShell({
   sidebarOpen,

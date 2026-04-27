@@ -11,8 +11,8 @@ export interface EntitlementResult {
 async function fetchEntitlement(featureKey: string, orgId?: number): Promise<EntitlementResult> {
   const params = new URLSearchParams({ featureKey });
   if (orgId != null) params.set('orgId', String(orgId));
-  const res = await apiFetch<{ data: EntitlementResult }>(`/api/billing/entitlements/check?${params}`);
-  return res.data;
+  const res = await apiFetch<EntitlementResult>(`/api/billing/entitlements/check?${params}`);
+  return res;
 }
 
 export function useEntitlement(featureKey: string, orgId?: number) {

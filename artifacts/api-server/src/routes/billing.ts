@@ -2329,4 +2329,170 @@ router.get(
   },
 );
 
+// ---------------------------------------------------------------------------
+// GET /billing/usage-summary?featureKey=...
+// Returns usage and limit for a given feature key for the authenticated org.
+// ---------------------------------------------------------------------------
+router.get(
+  '/billing/usage-summary',
+  authMiddleware(),
+  async (req: Request, res: Response) => {
+    try {
+      const orgId = req.tenantOrgId;
+      if (!orgId) {
+        sendForbidden(res, 'No organization context');
+        return;
+      }
+
+      const featureKey = (req.query['featureKey'] as string | undefined)?.trim() ?? 'default';
+
+      // Unit labels for known feature keys
+      const UNIT_MAP: Record<string, string> = {
+        api_calls: 'calls',
+        agent_runs: 'runs',
+        vessels_tracked: 'vessels',
+        briefings: 'briefings',
+        default: 'events',
+      };
+      const unit = UNIT_MAP[featureKey] ?? 'events';
+
+      // Sum usage events for this org + featureKey in the current 30-day window
+      const periodStart = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const events = await db
+        .select({ quantity: usageEventsTable.quantity })
+        .from(usageEventsTable)
+        .where(
+          and(
+            eq(usageEventsTable.orgId, orgId),
+            eq(usageEventsTable.featureKey, featureKey),
+            gt(usageEventsTable.recordedAt, periodStart),
+          ),
+        );
+      const used = events.reduce((acc, e) => acc + (e.quantity ?? 0), 0);
+
+      // Attempt to find the org's active subscription plan and feature limit
+      const [sub] = await db
+        .select({ planId: subscriptionsTable.planId })
+        .from(subscriptionsTable)
+        .where(
+          and(
+            eq(subscriptionsTable.orgId, orgId),
+            or(eq(subscriptionsTable.status, 'active'), eq(subscriptionsTable.status, 'trialing')),
+          ),
+        )
+        .limit(1);
+
+      let limitValue: number | null = null;
+      if (sub?.planId) {
+        const [entitlement] = await db
+          .select({ limitValue: entitlementsTable.limitValue })
+          .from(entitlementsTable)
+          .where(
+            and(
+              eq(entitlementsTable.planId, sub.planId),
+              eq(entitlementsTable.featureKey, featureKey),
+            ),
+          )
+          .limit(1);
+        limitValue = entitlement?.limitValue ?? null;
+      }
+
+      sendSuccess(res, { limit: limitValue, used, unit });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to compute usage summary');
+    }
+  },
+);
+
+// ---------------------------------------------------------------------------
+// GET /billing/health-summary
+// Returns aggregate billing health for super admins or org admins.
+// ---------------------------------------------------------------------------
+router.get(
+  '/billing/health-summary',
+  authMiddleware(),
+  requireRole('admin', 'super_admin'),
+  async (req: Request, res: Response) => {
+    try {
+      const orgId = req.tenantOrgId;
+      const isSuperAdmin = req.user?.role === 'super_admin';
+
+      // Non-super-admins must have an org context; prevent query execution without org filter.
+      if (!isSuperAdmin && !orgId) {
+        sendForbidden(res, 'No organization context');
+        return;
+      }
+
+      // MRR and pastDueCount: super admins see platform-wide analytics;
+      // org admins see their own subscription metrics only (no cross-tenant leakage).
+      let mrr = 0;
+      let pastDueCount = 0;
+      if (isSuperAdmin) {
+        const analytics = await services.stripe.getRevenueAnalytics();
+        mrr = analytics.mrr;
+        pastDueCount = analytics.pastDueSubscriptions;
+      } else if (orgId) {
+        const orgSubs = await db
+          .select({ planId: subscriptionsTable.planId, status: subscriptionsTable.status })
+          .from(subscriptionsTable)
+          .where(eq(subscriptionsTable.orgId, orgId));
+        pastDueCount = orgSubs.filter((s) => s.status === 'past_due').length;
+        const activePlanIds = orgSubs
+          .filter((s) => s.status === 'active' || s.status === 'trialing')
+          .map((s) => s.planId);
+        if (activePlanIds.length > 0) {
+          const plans = await db
+            .select({ priceMonthly: billingPlansTable.priceMonthly })
+            .from(billingPlansTable)
+            .where(inArray(billingPlansTable.id, activePlanIds));
+          mrr = plans.reduce(
+            (sum, p) => sum + Math.round(parseFloat(String(p.priceMonthly)) * 100),
+            0,
+          );
+        }
+      }
+
+      // Count pending/processing refund requests — super admins see all, admins see their org only
+      const refundConditions = [
+        isSuperAdmin ? undefined : orgId ? eq(billingRefundRequestsTable.orgId, orgId) : undefined,
+        or(
+          eq(billingRefundRequestsTable.status, 'pending'),
+          eq(billingRefundRequestsTable.status, 'processing'),
+        ),
+      ].filter(Boolean) as Parameters<typeof and>;
+      const pendingRefunds = await db
+        .select({ id: billingRefundRequestsTable.id })
+        .from(billingRefundRequestsTable)
+        .where(and(...refundConditions));
+      const refundQueueDepth = pendingRefunds.length;
+
+      // Sum open/uncollectible invoices from DB — super admins see all, admins see their org only
+      const openInvoiceConditions = [
+        isSuperAdmin ? undefined : orgId ? eq(invoicesTable.orgId, orgId) : undefined,
+        inArray(invoicesTable.status, ['open', 'uncollectible', 'ach_pending']),
+      ].filter(Boolean) as Parameters<typeof and>;
+      const openInvoiceRows = await db
+        .select({ amount: invoicesTable.amount, currency: invoicesTable.currency })
+        .from(invoicesTable)
+        .where(and(...openInvoiceConditions));
+      const openInvoicesTotal = openInvoiceRows.reduce(
+        (sum, inv) => sum + Math.round(parseFloat(String(inv.amount)) * 100),
+        0,
+      );
+      const openInvoicesCurrency = openInvoiceRows[0]?.currency ?? 'usd';
+
+      sendSuccess(res, {
+        mrr,
+        mrrCurrency: 'usd',
+        openInvoicesTotal,
+        openInvoicesCurrency,
+        pastDueCount,
+        refundQueueDepth,
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to compute billing health summary');
+    }
+  },
+);
+
 export default router;

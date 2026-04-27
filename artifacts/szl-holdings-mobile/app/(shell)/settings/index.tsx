@@ -29,6 +29,13 @@ interface SettingItem {
 
 const SETTINGS: SettingItem[] = [
   {
+    title: 'Billing & Subscription',
+    description: 'Invoices, subscription status, usage metering, and payment portal',
+    route: '/(shell)/billing',
+    icon: 'credit-card',
+    accent: '#d4a054',
+  },
+  {
     title: 'Notifications',
     description: 'Inbox, read history, and notification channel preferences',
     route: '/(shell)/notifications',

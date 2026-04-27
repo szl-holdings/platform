@@ -5,12 +5,22 @@ import {
   CheckCircle2,
   CreditCard,
   FileText,
+  FlaskConical,
   RefreshCw,
   Zap,
 } from 'lucide-react';
 import * as React from 'react';
 import { apiFetch } from '../api-fetch';
 import { cn } from '../utils';
+
+function isBillingDemoMode(): boolean {
+  try {
+    const env = (import.meta as unknown as { env?: Record<string, unknown> }).env;
+    return env?.VITE_BILLING_DEMO_MODE === 'true' || env?.VITE_BILLING_DEMO_MODE === true;
+  } catch {
+    return false;
+  }
+}
 
 interface SubscriptionData {
   subscribed: boolean;
@@ -98,10 +108,10 @@ export function BillingAccount({
     queryKey: ['billing-subscription-status', customerEmail],
     queryFn: async () => {
       const params = customerEmail ? `?email=${encodeURIComponent(customerEmail)}` : '';
-      const res = await apiFetch<{ data: SubscriptionData }>(
+      const res = await apiFetch<SubscriptionData>(
         `/api/billing/subscription-status${params}`,
       );
-      return res.data;
+      return res;
     },
     staleTime: 30_000,
     refetchInterval: checkoutSuccess ? 5_000 : false,
@@ -110,8 +120,8 @@ export function BillingAccount({
   const invoicesQuery = useQuery({
     queryKey: ['billing-stripe-invoices', customerEmail],
     queryFn: async () => {
-      const res = await apiFetch<{ data: StripeInvoice[] }>('/api/billing/stripe-invoices');
-      return res.data ?? [];
+      const invoices = await apiFetch<StripeInvoice[]>('/api/billing/stripe-invoices');
+      return invoices ?? [];
     },
     staleTime: 60_000,
   });
@@ -121,12 +131,12 @@ export function BillingAccount({
     setPortalError(null);
     try {
       const returnUrl = window.location.href;
-      const res = await apiFetch<{ data: { url: string } }>('/api/billing/portal-session', {
+      const res = await apiFetch<{ url: string }>('/api/billing/portal-session', {
         method: 'POST',
         body: JSON.stringify({ returnUrl }),
       });
-      if (res.data?.url) {
-        window.location.href = res.data.url;
+      if (res?.url) {
+        window.location.href = res.url;
       }
     } catch {
       setPortalError('Unable to open billing portal. Please try again.');
@@ -151,8 +161,30 @@ export function BillingAccount({
   const currency = sub?.items?.data?.[0]?.price?.currency ?? 'usd';
   const interval = sub?.items?.data?.[0]?.price?.recurring?.interval;
 
+  const demoMode = isBillingDemoMode();
+
   return (
     <div className={cn('space-y-6', className)}>
+      {demoMode && (
+        <div
+          className="flex items-center gap-3 px-4 py-3 rounded-xl border"
+          style={{
+            background: 'rgba(245,158,11,0.06)',
+            borderColor: 'rgba(245,158,11,0.2)',
+          }}
+        >
+          <FlaskConical className="w-4 h-4 shrink-0" style={{ color: '#f59e0b' }} />
+          <div>
+            <p className="text-[13px] font-semibold" style={{ color: '#f59e0b' }}>
+              Demo mode active
+            </p>
+            <p className="text-[12px] mt-0.5" style={{ color: 'rgba(245,158,11,0.7)' }}>
+              Showing realistic sample data. Live billing is not enabled — configure{' '}
+              <code className="font-mono text-[11px]">STRIPE_SECRET_KEY</code> to go live.
+            </p>
+          </div>
+        </div>
+      )}
       {checkoutSuccess && (
         <div
           className="flex items-center gap-3 px-4 py-3.5 rounded-xl border"

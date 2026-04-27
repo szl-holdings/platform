@@ -1,6 +1,7 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
 import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 import { toast } from '@szl-holdings/shared-ui/ui/sonner';
+import { BillingHealthCard } from '../../components/BillingHealthCard';
 import {
   Activity,
   AlertTriangle,
@@ -145,6 +146,8 @@ export default function AdminOverview() {
           Updated {new Date(data.timestamp).toLocaleTimeString()}
         </div>
       </div>
+
+      <BillingHealthCard />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[

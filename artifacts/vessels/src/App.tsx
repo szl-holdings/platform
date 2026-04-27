@@ -1,4 +1,5 @@
 import { readEnvFeatureFlags } from '@szl-holdings/config';
+import { UsageIndicator } from '@szl-holdings/shared-ui/billing';
 import { PolicyModeBadge } from '@szl-holdings/design-system/proof/policy-mode-badge';
 
 /**
@@ -1000,6 +1001,12 @@ function VesselsSidebarContent({
         expanded ? (
           <div className="space-y-3">
             {fleetStatusFooter}
+            <UsageIndicator
+              featureKey="vessels_tracked"
+              label="Vessel tracking"
+              accentColor="#4d8fcc"
+              billingHref={`${(import.meta.env.BASE_URL ?? '/vessels/').replace(/\/$/, '')}/account/billing`}
+            />
             <button
               onClick={onToggleCollapse}
               className="flex items-center justify-center w-full py-1 text-[10px] rounded transition-colors hover:bg-white/5"

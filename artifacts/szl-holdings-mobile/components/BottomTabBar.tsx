@@ -84,7 +84,7 @@ const TABS: TabItem[] = [
   },
 ];
 
-const HIDDEN_ROUTES = ['/(shell)/notifications', '/(shell)/usage'];
+const HIDDEN_ROUTES = ['/(shell)/notifications', '/(shell)/usage', '/(shell)/billing'];
 
 function useOperationsBadge() {
   const { setBadge } = useWorkspace();
@@ -197,6 +197,7 @@ export function BottomTabBar() {
   const isSettingsActive =
     pathname === '/(shell)/settings' || pathname.startsWith('/(shell)/settings/');
   const isCommandDeckActive = pathname === '/(shell)/quick-actions';
+  const isBillingActive = pathname === '/(shell)/billing';
 
   return (
     <View
@@ -298,6 +299,38 @@ export function BottomTabBar() {
         </TouchableOpacity>
 
         <OfflineQueueLauncher />
+
+        <TouchableOpacity
+          onPress={() => router.navigate('/(shell)/billing' as never)}
+          style={styles.utilityTab}
+          activeOpacity={0.7}
+          accessibilityLabel="Billing"
+          accessibilityRole="button"
+        >
+          <View style={styles.tabInner}>
+            {isBillingActive && (
+              <View style={[styles.activeIndicator, { backgroundColor: '#d4a054' }]} />
+            )}
+            <View style={styles.iconWrap}>
+              <Feather
+                name="credit-card"
+                size={18}
+                color={isBillingActive ? '#d4a054' : colors.mutedForeground}
+              />
+            </View>
+            <Text
+              style={[
+                styles.label,
+                {
+                  color: isBillingActive ? '#d4a054' : colors.mutedForeground,
+                  fontFamily: isBillingActive ? 'Inter_600SemiBold' : 'Inter_400Regular',
+                },
+              ]}
+            >
+              Billing
+            </Text>
+          </View>
+        </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => router.navigate('/(shell)/settings' as never)}

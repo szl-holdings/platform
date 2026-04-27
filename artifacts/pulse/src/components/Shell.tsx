@@ -1,3 +1,4 @@
+import { UsageIndicator } from '@szl-holdings/shared-ui/billing';
 import {
   Activity,
   BarChart2,
@@ -199,6 +200,16 @@ export default function Shell({ children }: { children: ReactNode }) {
             ))}
           </div>
         </nav>
+
+        {/* Usage indicator */}
+        <div style={{ padding: '8px 14px' }}>
+          <UsageIndicator
+            featureKey="briefings"
+            label="Briefing usage"
+            accentColor="var(--pulse-gold, #d4a054)"
+            billingHref="/pulse/account/billing"
+          />
+        </div>
 
         {/* Classification footer */}
         <div style={{ padding: '12px 14px', borderTop: '1px solid var(--pulse-border)' }}>

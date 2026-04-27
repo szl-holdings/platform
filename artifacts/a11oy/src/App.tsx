@@ -136,6 +136,7 @@ const A2AInterop = lazy(() => import('./pages/A2AInterop').then(m => ({ default:
 const AgentIdentityRegistry = lazy(() => import('./pages/AgentIdentityRegistry').then(m => ({ default: m.AgentIdentityRegistry })));
 const SelfOptimization = lazy(() => import('./pages/SelfOptimization').then(m => ({ default: m.SelfOptimization })));
 const GovernedSecurityAgents = lazy(() => import('./pages/GovernedSecurityAgents').then(m => ({ default: m.GovernedSecurityAgents })));
+const A11oyBillingPage = lazy(() => import('./pages/billing-account'));
 
 export default function App() {
   return (
@@ -265,6 +266,9 @@ export default function App() {
         </Route>
         <Route path={`${base}/audit`}>
           <WithShell><AuditSection /></WithShell>
+        </Route>
+        <Route path={`${base}/account/billing`}>
+          <WithShell><A11oyBillingPage /></WithShell>
         </Route>
         <Route>
           <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: 'var(--color-a11oy-navy)', color: 'var(--color-a11oy-text)' }}>

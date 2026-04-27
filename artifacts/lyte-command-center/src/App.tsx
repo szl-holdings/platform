@@ -1,3 +1,4 @@
+import { UsageIndicator } from '@szl-holdings/shared-ui/billing';
 import { AppModeBanner, AppModeProvider } from '@szl-holdings/shared-ui/app-mode-banner';
 import {
   type CommandItem,
@@ -316,7 +317,7 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
 
       {/* Footer */}
       {expanded && (
-        <div className="px-3 py-3 border-t border-white/[0.06] shrink-0">
+        <div className="px-3 py-3 border-t border-white/[0.06] shrink-0 space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
               <Users className="w-3 h-3 text-[#c9a85c]" />
@@ -326,6 +327,12 @@ function Sidebar({ expanded, onToggle }: { expanded: boolean; onToggle: () => vo
               <p className="text-[9px] text-[#5e5e5e] font-mono">LYTE-SEED-v2</p>
             </div>
           </div>
+          <UsageIndicator
+            featureKey="api_calls"
+            label="API usage"
+            accentColor="#c9a85c"
+            billingHref={`${BASE.replace(/\/$/, '')}/account/billing`}
+          />
         </div>
       )}
     </aside>
