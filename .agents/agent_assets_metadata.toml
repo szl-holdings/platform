@@ -743,3 +743,9 @@ id = "jmxuaJ0hE-HkF1mOOf2sZ"
 uri = "file://screenshots/a11oy-landing/15-verticals.jpg"
 type = "image"
 title = "A11oy — Vertical Coverage Map (7 Verticals)"
+
+[[outputs]]
+id = "DxDpQwpmxktYvaVrhL4ty"
+uri = "file://screenshots/a11oy-demo-video-v2.mp4"
+type = "video"
+title = "A11oy Demo Video v2 — Professional Narrated (5:26)"
