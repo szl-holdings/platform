@@ -749,3 +749,9 @@ id = "DxDpQwpmxktYvaVrhL4ty"
 uri = "file://screenshots/a11oy-demo-video-v2.mp4"
 type = "video"
 title = "A11oy Demo Video v2 — Professional Narrated (5:26)"
+
+[[outputs]]
+id = "Qb8d6khVl5zv2g4Trdgq3"
+uri = "file://screenshots/a11oy-content-package.zip"
+type = "unspecified"
+title = "A11oy Content Package — Screenshots, Video & Written Content (38 MB)"
