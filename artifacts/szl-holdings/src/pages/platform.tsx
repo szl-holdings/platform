@@ -5,6 +5,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { GovernedLoopViz } from "@/components/GovernedLoopViz";
+import { PlatformArchitectureDiagram } from "@/components/diagrams/PlatformArchitectureDiagram";
 
 const LAYERS = [
   {
@@ -163,6 +164,22 @@ export default function PlatformPage() {
             </div>
           </section>
   
+          <section
+            aria-label="Platform architecture diagram"
+            style={{ padding: "clamp(3rem,6vw,5rem) 0", borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}
+          >
+            <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+              <m.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <PlatformArchitectureDiagram />
+              </m.div>
+            </div>
+          </section>
+
           <section
             aria-label="Core platform layers"
             style={{ padding: "clamp(4rem,7vw,6rem) 0", borderBottom: "1px solid hsla(0,0%,100%,0.04)" }}
