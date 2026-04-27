@@ -52,6 +52,7 @@ import {
   updateDecisionStatus,
 } from '../lib/alloy-decision-store';
 import { sendBadRequest, sendError, sendNotFound } from '../lib/api-response';
+import { getCircuitBreakerMetrics } from '../lib/ai-model-observability';
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { type AuthenticatedUser, authMiddleware, requireRole } from '../middlewares/auth';
@@ -136,6 +137,7 @@ async function runAndPersistEval(trace: AITrace, ctx: DomainEvalContext): Promis
 router.get('/ai/health', (_req, res) => {
   const config = getRouteConfig();
   const token = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
+  const circuitBreakers = getCircuitBreakerMetrics();
   res.json({
     status: token ? 'configured' : 'no_token',
     provider: config.config.executionMode,
@@ -150,6 +152,21 @@ router.get('/ai/health', (_req, res) => {
       approvalForHighRisk: config.config.requireApprovalForHighRisk,
     },
     auditLogSize: auditLog.length,
+    circuitBreakers: {
+      summary: {
+        openCount: circuitBreakers.openCount,
+        halfOpenCount: circuitBreakers.halfOpenCount,
+        closedCount: circuitBreakers.closedCount,
+      },
+      providers: circuitBreakers.circuits.map((c) => ({
+        provider: c.provider,
+        state: c.state,
+        consecutiveFailures: c.consecutiveFailures,
+        openedAt: c.openedAt != null ? new Date(c.openedAt).toISOString() : null,
+        lastTestedAt: c.lastTestedAt != null ? new Date(c.lastTestedAt).toISOString() : null,
+        totalTripped: c.totalTripped,
+      })),
+    },
   });
 });
 

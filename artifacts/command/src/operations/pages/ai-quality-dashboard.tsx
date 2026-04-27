@@ -10,6 +10,7 @@ import {
   Check,
   CheckCircle,
   ChevronRight,
+  CircuitBoard,
   ClipboardList,
   DollarSign,
   Filter,
@@ -94,6 +95,20 @@ interface TraceItem {
   requiresReview: boolean;
   riskLevel?: string;
   createdAt: string;
+}
+
+interface CircuitBreakerProviderStatus {
+  provider: string;
+  state: 'closed' | 'open' | 'half-open';
+  consecutiveFailures: number;
+  openedAt: number | null;
+  lastTestedAt: number | null;
+  totalTripped: number;
+}
+
+interface CircuitBreakerData {
+  circuits: CircuitBreakerProviderStatus[];
+  generatedAt: string;
 }
 
 function fmt(n: number, digits = 2) {
@@ -858,7 +873,14 @@ export default function AIQualityDashboard() {
     refetchInterval: 30000,
   });
 
+  const { data: circuitBreakerRaw } = useStandardQuery({
+    queryKey: ['ai-ops-circuit-breaker'],
+    queryFn: () => apiFetch<CircuitBreakerData>('/ai/ops/circuit-breaker'),
+    refetchInterval: 15000,
+  });
+
   const summary = summaryRaw as AIOpsTrace | undefined;
+  const circuitBreakerData = circuitBreakerRaw as CircuitBreakerData | undefined;
 
   const traces = summary?.traces;
   const reviewQueue = summary?.reviewQueue;
@@ -1031,6 +1053,101 @@ export default function AIQualityDashboard() {
           <span className="text-3xl font-bold font-mono" style={{ color: '#6b8f71' }}>
             {isLoading || traces?.evalPassRate == null ? '—' : pct(traces.evalPassRate)}
           </span>
+        </div>
+      </div>
+
+      <div
+        className="rounded-xl"
+        style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
+      >
+        <div
+          className="px-4 pt-4 pb-3"
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+        >
+          <h3
+            className="text-sm font-semibold flex items-center gap-2"
+            style={{ color: 'rgba(255,255,255,0.88)' }}
+          >
+            <CircuitBoard className="w-4 h-4" style={{ color: '#8b7ac8' }} />
+            AI Gateway — Provider Circuit Breakers
+          </h3>
+          <p className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            Per-provider fault isolation state · refreshes every 15s
+          </p>
+        </div>
+        <div className="p-4">
+          {!circuitBreakerData ? (
+            <div
+              className="text-xs py-3 text-center"
+              style={{ color: 'rgba(255,255,255,0.25)' }}
+            >
+              Loading circuit state…
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              {(circuitBreakerData.circuits ?? []).map((c) => {
+                const isOpen = c.state === 'open';
+                const isHalfOpen = c.state === 'half-open';
+                const color = isOpen ? '#c45a4a' : isHalfOpen ? '#c8953c' : '#6b8f71';
+                const bg = isOpen
+                  ? 'rgba(196,90,74,0.08)'
+                  : isHalfOpen
+                    ? 'rgba(200,149,60,0.08)'
+                    : 'rgba(107,143,113,0.08)';
+                const border = isOpen
+                  ? 'rgba(196,90,74,0.2)'
+                  : isHalfOpen
+                    ? 'rgba(200,149,60,0.2)'
+                    : 'rgba(107,143,113,0.2)';
+                const stateLabel = isOpen ? 'OPEN' : isHalfOpen ? 'HALF-OPEN' : 'CLOSED';
+                return (
+                  <div
+                    key={c.provider}
+                    className="rounded-lg p-3 flex flex-col gap-2"
+                    style={{ background: bg, border: `1px solid ${border}` }}
+                  >
+                    <div className="flex items-center justify-between gap-1">
+                      <span
+                        className="text-[9px] uppercase tracking-widest font-medium truncate"
+                        style={{ color: 'rgba(255,255,255,0.5)' }}
+                      >
+                        {c.provider}
+                      </span>
+                      <span
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ background: color, boxShadow: isOpen ? `0 0 6px ${color}` : undefined }}
+                      />
+                    </div>
+                    <span
+                      className="text-[11px] font-bold tracking-wide"
+                      style={{ color }}
+                    >
+                      {stateLabel}
+                    </span>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                        {c.consecutiveFailures} consecutive fail{c.consecutiveFailures !== 1 ? 's' : ''}
+                      </span>
+                      {c.openedAt != null && (
+                        <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                          Opened{' '}
+                          {new Date(c.openedAt).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      )}
+                      {c.totalTripped > 0 && (
+                        <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                          {c.totalTripped}× tripped total
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
