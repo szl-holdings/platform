@@ -282,7 +282,7 @@ function MessageBubble({ msg, onArtifactClick }: { msg: Message; onArtifactClick
         <div className="flex-1 min-w-0">
           {!isUser && (
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-medium" style={{ color: '#c9b787' }}>A11oy</span>
+              <span className="text-xs font-medium" style={{ color: '#c9b787' }}>a1.1oy</span>
               {msg.model && (
                 <span className="text-[10px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(201,183,135,0.08)', color: 'rgba(201,183,135,0.5)' }}>
                   {msg.model}
@@ -407,9 +407,9 @@ export function Nexus() {
       const assistantMsg: Message = {
         id: `m-${Date.now()}`,
         role: 'assistant',
-        content: `I've processed your request through the A11oy Fabric. Here's what I found:\n\n**Analysis Complete**\nYour query has been routed through the governed execution pipeline with full proof chain attached.\n\n1. All relevant signals have been cross-referenced against the active signal mesh\n2. Covenant policies have been validated — no violations detected\n3. MirrorEval score: **0.94** (above threshold)\n\nThe full evidence trail is available in the proof ledger. Would you like me to drill deeper into any specific aspect?`,
+        content: `I've processed your request through the a1.1oy Fabric. Here's what I found:\n\n**Analysis Complete**\nYour query has been routed through the governed execution pipeline with full proof chain attached.\n\n1. All relevant signals have been cross-referenced against the active signal mesh\n2. Covenant policies have been validated — no violations detected\n3. MirrorEval score: **0.94** (above threshold)\n\nThe full evidence trail is available in the proof ledger. Would you like me to drill deeper into any specific aspect?`,
         timestamp: Date.now(),
-        thinking: 'Processing query through A11oy Fabric... Routing to appropriate workcell template. Checking covenant compliance. Running MirrorEval assessment. Generating proof packet.',
+        thinking: 'Processing query through a1.1oy Fabric... Routing to appropriate workcell template. Checking covenant compliance. Running MirrorEval assessment. Generating proof packet.',
         tools: [
           { name: 'fabric.query', status: 'complete', duration: 156 },
           { name: 'covenant.validate', status: 'complete', duration: 42 },
@@ -532,7 +532,7 @@ export function Nexus() {
                   <span className="text-2xl font-bold" style={{ color: '#c9b787' }}>a</span>
                 </div>
                 <h2 className="text-xl font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                  A11oy Nexus
+                  a1.1oy
                 </h2>
                 <p className="text-sm text-center max-w-md mb-8" style={{ color: 'rgba(255,255,255,0.4)' }}>
                   Governed AI with full proof chains. Every response is backed by evidence, every action is auditable, every decision is replayable.
@@ -570,7 +570,7 @@ export function Nexus() {
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs font-medium" style={{ color: '#c9b787' }}>A11oy</span>
+                          <span className="text-xs font-medium" style={{ color: '#c9b787' }}>a1.1oy</span>
                           <span className="text-[10px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(201,183,135,0.08)', color: 'rgba(201,183,135,0.5)' }}>
                             {selectedModel.id}
                           </span>
@@ -602,7 +602,7 @@ export function Nexus() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask A11oy anything — code, analyze, deploy, govern..."
+                placeholder="Ask a1.1oy anything — code, analyze, deploy, govern..."
                 rows={1}
                 className="w-full px-4 pt-3.5 pb-1 bg-transparent text-sm resize-none focus:outline-none"
                 style={{ color: 'rgba(255,255,255,0.85)', minHeight: '44px', maxHeight: '200px' }}
@@ -639,7 +639,7 @@ export function Nexus() {
             </div>
             <div className="max-w-3xl mx-auto mt-2 text-center">
               <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.15)' }}>
-                A11oy Nexus · Governed AI · Every response carries a proof chain
+                a1.1oy · Governed AI · Every response carries a proof chain
               </span>
             </div>
           </div>
