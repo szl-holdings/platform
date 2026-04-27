@@ -481,6 +481,29 @@ router.get(
 
       const pageViewVisitors = pageViewStats?.uniqueSessions ?? 0;
 
+      // Per-day visitor sparkline — last 30 calendar days (UTC day boundaries),
+      // distinct sessions per day. Starting from the beginning of the day 29 days
+      // ago gives exactly 30 full UTC days (day-29 through today inclusive).
+      const funnelNow = new Date();
+      const todayUtc = new Date(
+        Date.UTC(funnelNow.getUTCFullYear(), funnelNow.getUTCMonth(), funnelNow.getUTCDate()),
+      );
+      const thirtyDaysAgo = new Date(todayUtc.getTime() - 29 * 24 * 60 * 60 * 1000);
+      const visitorsByDayRows = await db
+        .select({
+          date: sql<string>`to_char(date_trunc('day', occurred_at AT TIME ZONE 'UTC'), 'YYYY-MM-DD')`,
+          sessions: sql<number>`count(distinct session_id)::int`,
+        })
+        .from(pageViewEventsTable)
+        .where(gte(pageViewEventsTable.occurredAt, thirtyDaysAgo))
+        .groupBy(sql`date_trunc('day', occurred_at AT TIME ZONE 'UTC')`)
+        .orderBy(sql`date_trunc('day', occurred_at AT TIME ZONE 'UTC')`);
+
+      const visitorsByDay = visitorsByDayRows.map((r) => ({
+        date: r.date,
+        sessions: r.sessions,
+      }));
+
       // Fallback: distinct IPs in audit events (authenticated sessions only)
       let auditVisitors = 0;
       if (pageViewVisitors === 0) {
@@ -616,6 +639,7 @@ router.get(
             stages,
           },
           monthlyFunnel,
+          visitorsByDay,
         },
         200,
         { computedAt: new Date().toISOString() },
