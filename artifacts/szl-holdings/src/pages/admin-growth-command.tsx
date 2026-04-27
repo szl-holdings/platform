@@ -201,14 +201,25 @@ interface FunnelData {
   hasServerData: boolean;
 }
 
-const TOP_CONTENT = [
-  { path: '/platform', views: 540 },
-  { path: '/demo', views: 210 },
-  { path: '/solutions', views: 480 },
-  { path: '/trust', views: 160 },
-  { path: '/insights', views: 340 },
-  { path: '/pricing', views: 140 },
-];
+interface PlausibleSource {
+  source: string;
+  visitors: number;
+}
+
+interface PlausiblePage {
+  page: string;
+  visitors: number;
+  pageviews: number;
+}
+
+interface PlausibleData {
+  configured: boolean;
+  visitors7d: number | null;
+  topSources: PlausibleSource[];
+  topPages: PlausiblePage[];
+  investorPageViews: number | null;
+  deckClickEvents: number | null;
+}
 
 export default function AdminGrowthCommandPage() {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -225,6 +236,12 @@ export default function AdminGrowthCommandPage() {
     refetchInterval: 60_000,
   });
 
+  const plausibleQuery = useStandardQuery<PlausibleData>({
+    queryKey: ['admin-plausible', refreshKey],
+    queryFn: () => adminFetch<PlausibleData>('/admin/analytics/plausible'),
+    refetchInterval: 300_000,
+  });
+
   const healthQuery = useStandardQuery<HealthData>({
     queryKey: ['admin-health-detailed', refreshKey],
     queryFn: () => adminFetch<HealthData>('/health/detailed'),
@@ -234,6 +251,7 @@ export default function AdminGrowthCommandPage() {
   const growth = growthQuery.data;
   const health = healthQuery.data;
   const funnel = funnelQuery.data;
+  const plausible = plausibleQuery.data;
 
   const telemetry = parseTelemetryDetail(health?.checks?.telemetry?.details);
   const queue = parseQueueDetail(health?.checks?.job_queue?.details);
@@ -245,6 +263,17 @@ export default function AdminGrowthCommandPage() {
   const dbLatency = health?.checks?.database?.latencyMs;
 
   const maxProduct = Math.max(...(growth?.productBreakdown.map((p) => p.count) ?? [1]), 1);
+
+  const siteVisits7d = plausible?.visitors7d ?? null;
+  const visitDemoConv =
+    siteVisits7d != null && siteVisits7d > 0
+      ? ((totalThisWeek / siteVisits7d) * 100).toFixed(1)
+      : null;
+
+  const topPages = plausible?.topPages ?? [];
+  const topSources = plausible?.topSources ?? [];
+  const maxPageViews = Math.max(...topPages.map((p) => p.pageviews), 1);
+  const maxSourceVisitors = Math.max(...topSources.map((s) => s.visitors), 1);
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -283,7 +312,18 @@ export default function AdminGrowthCommandPage() {
 
         {/* ── Primary KPIs ────────────────────────────────────────── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard label="Site Visits (7d)" value="—" sub="Plausible" icon={BarChart3} />
+          <KpiCard
+            label="Site Visits (7d)"
+            value={
+              plausibleQuery.isLoading
+                ? '…'
+                : siteVisits7d != null
+                  ? siteVisits7d.toLocaleString()
+                  : '—'
+            }
+            sub={plausible?.configured === false ? 'Plausible not configured' : 'unique visitors'}
+            icon={BarChart3}
+          />
           <KpiCard
             label="Demo Requests"
             value={growthQuery.isLoading ? '…' : totalThisWeek}
@@ -291,7 +331,18 @@ export default function AdminGrowthCommandPage() {
             sub="this week"
             icon={Users}
           />
-          <KpiCard label="Visit → Demo Conv." value="—" sub="Plausible + DB" icon={TrendingUp} />
+          <KpiCard
+            label="Visit → Demo Conv."
+            value={
+              plausibleQuery.isLoading || growthQuery.isLoading
+                ? '…'
+                : visitDemoConv != null
+                  ? `${visitDemoConv}%`
+                  : '—'
+            }
+            sub={visitDemoConv != null ? 'demos / site visits' : 'Plausible + DB'}
+            icon={TrendingUp}
+          />
           <KpiCard
             label="Unresponded > 48h"
             value={growthQuery.isLoading ? '…' : unrespondedCount}
@@ -545,21 +596,49 @@ export default function AdminGrowthCommandPage() {
           <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-5">
             <SectionHeader
               title="Top Content This Week"
-              sub="Indicative — connect Plausible for live page views"
+              sub={
+                plausible?.configured
+                  ? 'Live page views from Plausible'
+                  : 'Connect Plausible for live page views'
+              }
             />
-            <div className="space-y-2">
-              {TOP_CONTENT.map((page, i) => (
-                <div key={page.path} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="text-zinc-600 text-xs w-4 tabular-nums">{i + 1}</span>
-                    <code className="text-sky-400 text-xs">{page.path}</code>
+            {plausibleQuery.isLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="h-6 rounded bg-zinc-800/40 animate-pulse" />
+                ))}
+              </div>
+            ) : topPages.length > 0 ? (
+              <div className="space-y-2.5">
+                {topPages.map((page, i) => (
+                  <div key={page.page} className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-zinc-600 text-xs w-4 tabular-nums shrink-0">
+                          {i + 1}
+                        </span>
+                        <code className="text-sky-400 text-xs truncate">{page.page}</code>
+                      </div>
+                      <span className="text-zinc-300 text-xs font-medium tabular-nums shrink-0 ml-2">
+                        {page.pageviews.toLocaleString()} views
+                      </span>
+                    </div>
+                    <div className="h-1 rounded-full bg-zinc-800 overflow-hidden ml-6">
+                      <div
+                        className="h-full rounded-full bg-sky-500/60"
+                        style={{ width: `${Math.round((page.pageviews / maxPageViews) * 100)}%` }}
+                      />
+                    </div>
                   </div>
-                  <span className="text-zinc-300 text-xs font-medium tabular-nums">
-                    {page.views.toLocaleString()} views
-                  </span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-zinc-500">
+                {plausible?.configured === false
+                  ? 'Set PLAUSIBLE_API_KEY and PLAUSIBLE_SITE_ID to see live page data.'
+                  : 'No page view data yet.'}
+              </p>
+            )}
           </div>
 
           {/* Unresponded inquiries */}
@@ -687,26 +766,83 @@ export default function AdminGrowthCommandPage() {
           </div>
         </div>
 
+        {/* ── Top Referrers ─────────────────────────────────────── */}
+        {(topSources.length > 0 || plausibleQuery.isLoading) && (
+          <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-5">
+            <SectionHeader
+              title="Top Traffic Sources This Week"
+              sub="Where site visitors are coming from · Plausible"
+            />
+            {plausibleQuery.isLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="h-12 rounded-lg bg-zinc-800/40 animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {topSources.map((src, i) => (
+                  <div key={src.source} className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className="text-zinc-600 text-xs w-4 tabular-nums">{i + 1}</span>
+                        <span className="text-zinc-300 text-xs font-medium">{src.source}</span>
+                      </div>
+                      <span className="text-zinc-400 text-xs tabular-nums">
+                        {src.visitors.toLocaleString()} visitors
+                      </span>
+                    </div>
+                    <div className="h-1 rounded-full bg-zinc-800 overflow-hidden ml-6">
+                      <div
+                        className="h-full rounded-full bg-violet-500/60"
+                        style={{
+                          width: `${Math.round((src.visitors / maxSourceVisitors) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ── Investor funnel strip ─────────────────────────────── */}
         <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/40 px-5 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
               Investor Funnel
             </span>
             <div className="flex items-center gap-6 text-xs">
               <div className="text-center">
-                <div className="text-zinc-200 font-semibold">—</div>
-                <div className="text-zinc-600 text-[10px]">Visits</div>
+                <div className="text-zinc-200 font-semibold tabular-nums">
+                  {plausibleQuery.isLoading
+                    ? '…'
+                    : plausible?.investorPageViews != null
+                      ? plausible.investorPageViews.toLocaleString()
+                      : '—'}
+                </div>
+                <div className="text-zinc-600 text-[10px]">/investors Views</div>
               </div>
               <div className="text-center">
-                <div className="text-zinc-200 font-semibold">—</div>
-                <div className="text-zinc-600 text-[10px]">Deck Views</div>
+                <div className="text-zinc-200 font-semibold tabular-nums">
+                  {plausibleQuery.isLoading
+                    ? '…'
+                    : plausible?.deckClickEvents != null
+                      ? plausible.deckClickEvents.toLocaleString()
+                      : '—'}
+                </div>
+                <div className="text-zinc-600 text-[10px]">Deck Clicks</div>
               </div>
               <div className="text-center">
-                <div className="text-zinc-200 font-semibold">—</div>
-                <div className="text-zinc-600 text-[10px]">Inquiries</div>
+                <div className="text-zinc-200 font-semibold tabular-nums">
+                  {growthQuery.isLoading ? '…' : totalThisWeek}
+                </div>
+                <div className="text-zinc-600 text-[10px]">Demo Requests</div>
               </div>
-              <span className="text-zinc-600 text-[10px]">Connect Plausible for live data</span>
+              {plausible?.configured === false && (
+                <span className="text-zinc-600 text-[10px]">Connect Plausible for live data</span>
+              )}
             </div>
           </div>
         </div>
