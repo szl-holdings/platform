@@ -86,12 +86,34 @@ durableJobQueue.register(JOB_TYPES.HEALTH_SCAN, async (job) => {
     });
   }
 
+  // Determine API health status from telemetry
+  const apiStatus: 'operational' | 'degraded' | 'down' =
+    snapshot.errorRate >= 50 ? 'down'
+    : errorRateHigh || p95High ? 'degraded'
+    : 'operational';
+  const latencyMs = Math.round(snapshot.p95Latency ?? 0);
+
+  // Persist health check result so SLO availability is calculated from real data
+  try {
+    await pool.query(
+      `INSERT INTO platform_status_checks (service_id, status, latency_ms, checked_at)
+       VALUES ($1, $2, $3, NOW())`,
+      ['api', apiStatus, latencyMs],
+    );
+    // Prune records older than 90 days to keep the table under ~100k rows
+    await pool.query(
+      `DELETE FROM platform_status_checks WHERE checked_at < NOW() - INTERVAL '90 days'`,
+    );
+  } catch (err) {
+    logger.warn({ err, jobId: job.id }, "Health scan: failed to write platform_status_checks");
+  }
+
   serverTelemetry.recordBusinessEvent({
     type: "health_scan_completed",
     success: !errorRateHigh,
-    metadata: { services: serviceList, alertsRaised: errorRateHigh || p95High ? 1 : 0 },
+    metadata: { services: serviceList, alertsRaised: errorRateHigh || p95High ? 1 : 0, apiStatus },
   });
-  logger.info({ jobId: job.id }, "Health scan completed");
+  logger.info({ jobId: job.id, apiStatus, latencyMs }, "Health scan completed");
 });
 
 durableJobQueue.register(JOB_TYPES.ALERT_CHECK, async (job) => {

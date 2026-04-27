@@ -139,6 +139,15 @@ async function ensureSchema(): Promise<void> {
       metrics JSONB,
       triggered_by TEXT NOT NULL DEFAULT 'scheduled'
     )`,
+    `CREATE TABLE IF NOT EXISTS platform_status_checks (
+      id SERIAL PRIMARY KEY,
+      service_id TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'operational',
+      latency_ms INTEGER,
+      checked_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+    `CREATE INDEX IF NOT EXISTS platform_status_checks_service_checked_idx
+      ON platform_status_checks (service_id, checked_at DESC)`,
   ];
   for (const sql of migrations) {
     await pool
