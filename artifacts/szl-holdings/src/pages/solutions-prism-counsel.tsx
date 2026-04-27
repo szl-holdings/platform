@@ -53,6 +53,12 @@ const USE_CASES = [
   },
 ];
 
+const COUNSEL_SIGNAL_STYLE = {
+  bg: "rgba(212,160,84,0.14)",
+  border: "1px solid rgba(212,160,84,0.38)",
+  numberColor: "#d4a054",
+  labelColor: "#d4a054",
+};
 
 export default function SolutionsPrismCounselPage() {
   const __pageMeta = usePageMeta({
@@ -133,22 +139,7 @@ export default function SolutionsPrismCounselPage() {
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 340px), 1fr))", gap: "1.25rem" }}>
             {USE_CASES.map((uc, i) => (
-              <UseCaseLane
-                key={uc.label}
-                useCase={uc}
-                delay={i * 0.08}
-                accentColor="#d4a054"
-                signalColor="#d4a054"
-                signalBg="rgba(212,160,84,0.14)"
-                signalBorder="1px solid rgba(212,160,84,0.38)"
-                proofColor="#34d399"
-                proofBg="rgba(52,211,153,0.10)"
-                proofBorder="1px solid rgba(52,211,153,0.28)"
-                cardClassName="rounded-lg border border-white/[0.06]"
-                cardStyle={{ background: "#0c1220" }}
-                titleStyle={{ color: "#e2e8f0" }}
-                roleStyle={{ color: "rgba(148,163,184,0.6)" }}
-              />
+              <UseCaseLane key={uc.label} useCase={uc} color="#d4a054" delay={i * 0.08} signalStyle={COUNSEL_SIGNAL_STYLE} variant="counsel" />
             ))}
           </div>
         </section>

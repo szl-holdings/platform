@@ -54,6 +54,12 @@ const USE_CASES = [
   },
 ];
 
+const TERRA_SIGNAL_STYLE = {
+  bg: "hsla(140,50%,38%,0.15)",
+  border: "1px solid hsla(140,50%,38%,0.40)",
+  numberColor: "hsl(140,50%,62%)",
+  labelColor: "hsl(140,50%,58%)",
+};
 
 export default function SolutionsTerraPage() {
   const __pageMeta = usePageMeta({
@@ -141,15 +147,7 @@ export default function SolutionsTerraPage() {
               </m.div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 360px), 1fr))", gap: "1.25rem" }}>
                 {USE_CASES.map((uc, i) => (
-                  <UseCaseLane
-                    key={uc.label}
-                    useCase={uc}
-                    delay={i * 0.08}
-                    accentColor="var(--color-terra)"
-                    signalColor="hsl(140,50%,62%)"
-                    signalBg="hsla(140,50%,38%,0.15)"
-                    signalBorder="1px solid hsla(140,50%,38%,0.40)"
-                  />
+                  <UseCaseLane key={uc.label} useCase={uc} color="var(--color-terra)" delay={i * 0.08} signalStyle={TERRA_SIGNAL_STYLE} />
                 ))}
               </div>
             </div>

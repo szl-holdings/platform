@@ -54,6 +54,12 @@ const USE_CASES = [
   },
 ];
 
+const AEGIS_SIGNAL_STYLE = {
+  bg: "hsla(222,60%,50%,0.15)",
+  border: "1px solid hsla(222,60%,50%,0.35)",
+  numberColor: "hsl(222,60%,70%)",
+  labelColor: "hsl(222,60%,68%)",
+};
 
 export default function SolutionsAegisPage() {
   const __pageMeta = usePageMeta({
@@ -145,15 +151,7 @@ export default function SolutionsAegisPage() {
               </m.div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 360px), 1fr))", gap: "1.25rem" }}>
                 {USE_CASES.map((uc, i) => (
-                  <UseCaseLane
-                    key={uc.label}
-                    useCase={uc}
-                    delay={i * 0.08}
-                    accentColor="var(--color-aegis)"
-                    signalColor="hsl(222,60%,70%)"
-                    signalBg="hsla(222,60%,50%,0.15)"
-                    signalBorder="1px solid hsla(222,60%,50%,0.35)"
-                  />
+                  <UseCaseLane key={uc.label} useCase={uc} color="var(--color-aegis)" delay={i * 0.08} signalStyle={AEGIS_SIGNAL_STYLE} />
                 ))}
               </div>
             </div>

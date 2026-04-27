@@ -54,6 +54,12 @@ const USE_CASES = [
   },
 ];
 
+const VESSELS_SIGNAL_STYLE = {
+  bg: "hsla(206,72%,40%,0.15)",
+  border: "1px solid hsla(206,72%,40%,0.40)",
+  numberColor: "hsl(206,72%,68%)",
+  labelColor: "hsl(206,72%,65%)",
+};
 
 export default function SolutionsVesselsPage() {
   const __pageMeta = usePageMeta({
@@ -141,15 +147,7 @@ export default function SolutionsVesselsPage() {
               </m.div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 360px), 1fr))", gap: "1.25rem" }}>
                 {USE_CASES.map((uc, i) => (
-                  <UseCaseLane
-                    key={uc.label}
-                    useCase={uc}
-                    delay={i * 0.08}
-                    accentColor="var(--color-vessels)"
-                    signalColor="hsl(206,72%,68%)"
-                    signalBg="hsla(206,72%,40%,0.15)"
-                    signalBorder="1px solid hsla(206,72%,40%,0.40)"
-                  />
+                  <UseCaseLane key={uc.label} useCase={uc} color="var(--color-vessels)" delay={i * 0.08} signalStyle={VESSELS_SIGNAL_STYLE} />
                 ))}
               </div>
             </div>

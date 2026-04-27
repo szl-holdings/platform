@@ -15,47 +15,46 @@ export interface UseCase {
   steps: UseCaseStep[];
 }
 
-interface UseCaseLaneProps {
-  useCase: UseCase;
-  delay?: number;
-  accentColor: string;
-  signalColor: string;
-  signalBg: string;
-  signalBorder: string;
-  proofColor?: string;
-  proofBg?: string;
-  proofBorder?: string;
-  cardClassName?: string;
-  cardStyle?: React.CSSProperties;
-  labelStyle?: React.CSSProperties;
-  titleStyle?: React.CSSProperties;
-  roleStyle?: React.CSSProperties;
+export interface SignalStyle {
+  bg: string;
+  border: string;
+  numberColor: string;
+  labelColor: string;
 }
 
-const DEFAULT_PROOF_COLOR = "hsl(152,70%,55%)";
-const DEFAULT_PROOF_BG = "hsla(152,70%,50%,0.12)";
-const DEFAULT_PROOF_BORDER = "1px solid hsla(152,70%,50%,0.30)";
+interface UseCaseLaneProps {
+  useCase: UseCase;
+  color: string;
+  delay?: number;
+  signalStyle?: SignalStyle;
+  variant?: "default" | "counsel";
+}
+
+const DEFAULT_SIGNAL_STYLE: SignalStyle = {
+  bg: "hsla(222,60%,50%,0.15)",
+  border: "1px solid hsla(222,60%,50%,0.35)",
+  numberColor: "hsl(222,60%,70%)",
+  labelColor: "hsl(222,60%,68%)",
+};
 
 export function UseCaseLane({
   useCase,
+  color,
   delay = 0,
-  accentColor,
-  signalColor,
-  signalBg,
-  signalBorder,
-  proofColor = DEFAULT_PROOF_COLOR,
-  proofBg = DEFAULT_PROOF_BG,
-  proofBorder = DEFAULT_PROOF_BORDER,
-  cardClassName = "szl-card",
-  cardStyle,
-  labelStyle,
-  titleStyle,
-  roleStyle,
+  signalStyle = DEFAULT_SIGNAL_STYLE,
+  variant = "default",
 }: UseCaseLaneProps) {
   const [activeStep, setActiveStep] = useState<number | null>(null);
+  const isCounsel = variant === "counsel";
+  const fontMono = isCounsel ? "var(--font-mono, monospace)" : "var(--font-mono)";
   const totalSteps = useCase.steps.length;
   const isPlaying = activeStep !== null;
   const isComplete = activeStep === totalSteps - 1;
+
+  const proofBg = isCounsel ? "rgba(52,211,153,0.10)" : "hsla(152,70%,50%,0.12)";
+  const proofBorder = isCounsel ? "1px solid rgba(52,211,153,0.28)" : "1px solid hsla(152,70%,50%,0.30)";
+  const proofColor = isCounsel ? "#34d399" : "hsl(152,70%,55%)";
+  const proofTextColor = isCounsel ? "#6ee7b7" : "hsl(152,40%,72%)";
 
   function handleStep() {
     if (activeStep === null) {
@@ -82,51 +81,49 @@ export function UseCaseLane({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.42, delay }}
-      className={cardClassName}
+      className={isCounsel ? "rounded-lg border border-white/[0.06]" : "szl-card"}
       style={{
-        borderRadius: "0.875rem",
+        borderRadius: isCounsel ? undefined : "0.875rem",
         padding: "clamp(1.5rem,3vw,2rem)",
         display: "flex",
         flexDirection: "column",
         gap: "1.25rem",
-        ...cardStyle,
+        ...(isCounsel ? { background: "#0c1220" } : {}),
       }}
     >
       <div>
         <span
           style={{
-            fontFamily: "var(--font-mono)",
+            fontFamily: fontMono,
             fontSize: "0.625rem",
             fontWeight: 600,
             letterSpacing: "0.12em",
             textTransform: "uppercase",
-            color: accentColor,
+            color,
             opacity: 0.85,
-            ...labelStyle,
           }}
         >
           {useCase.label}
         </span>
         <h3
           style={{
-            fontSize: "clamp(1rem,1.8vw,1.125rem)",
+            fontSize: isCounsel ? "1.0625rem" : "clamp(1rem,1.8vw,1.125rem)",
             fontWeight: 600,
             letterSpacing: "-0.016em",
             lineHeight: 1.3,
             marginTop: "0.4rem",
             marginBottom: "0.375rem",
-            ...titleStyle,
+            ...(isCounsel ? { color: "#e2e8f0" } : {}),
           }}
         >
           {useCase.title}
         </h3>
         <p
           style={{
-            fontFamily: "var(--font-mono)",
+            fontFamily: fontMono,
             fontSize: "0.625rem",
-            color: "hsl(214,7%,48%)",
+            color: isCounsel ? "rgba(148,163,184,0.6)" : "hsl(214,7%,48%)",
             letterSpacing: "0.06em",
-            ...roleStyle,
           }}
         >
           {useCase.role}
@@ -141,25 +138,25 @@ export function UseCaseLane({
           const isUpcoming = state === "upcoming";
 
           const nodeBg = step.signal
-            ? signalBg
+            ? signalStyle.bg
             : step.proof
             ? proofBg
-            : "hsla(214,12%,14%,1)";
+            : isCounsel ? "rgba(255,255,255,0.04)" : "hsla(214,12%,14%,1)";
           const nodeBorder = step.signal
-            ? signalBorder
+            ? signalStyle.border
             : step.proof
             ? proofBorder
-            : "1px solid hsla(0,0%,100%,0.08)";
+            : isCounsel ? "1px solid rgba(255,255,255,0.08)" : "1px solid hsla(0,0%,100%,0.08)";
           const nodeColor = step.signal
-            ? signalColor
+            ? signalStyle.numberColor
             : step.proof
             ? proofColor
-            : "hsl(214,7%,52%)";
+            : isCounsel ? "#64748b" : "hsl(214,7%,52%)";
           const textColor = step.signal
-            ? "hsl(38,8%,88%)"
+            ? isCounsel ? "#e2e8f0" : "hsl(38,8%,88%)"
             : step.proof
-            ? "hsl(152,40%,72%)"
-            : "hsl(214,7%,62%)";
+            ? proofTextColor
+            : isCounsel ? "#94a3b8" : "hsl(214,7%,62%)";
 
           const opacity = isUpcoming ? 0.32 : isCompleted ? 0.55 : 1;
 
@@ -182,13 +179,13 @@ export function UseCaseLane({
                     alignItems: "center",
                     justifyContent: "center",
                     flexShrink: 0,
-                    background: isActive ? nodeBg : isCompleted ? "hsla(214,12%,14%,1)" : nodeBg,
-                    border: isActive ? nodeBorder : isCompleted ? "1px solid hsla(0,0%,100%,0.08)" : nodeBorder,
+                    background: isCompleted ? (isCounsel ? "rgba(255,255,255,0.04)" : "hsla(214,12%,14%,1)") : nodeBg,
+                    border: isCompleted ? (isCounsel ? "1px solid rgba(255,255,255,0.08)" : "1px solid hsla(0,0%,100%,0.08)") : nodeBorder,
                     fontSize: "0.6rem",
                     fontWeight: 700,
-                    color: isActive ? nodeColor : isCompleted ? "hsl(214,7%,36%)" : nodeColor,
-                    fontFamily: "var(--font-mono)",
-                    boxShadow: isActive ? `0 0 0 3px ${signalBg}` : "none",
+                    color: isCompleted ? (isCounsel ? "#334155" : "hsl(214,7%,36%)") : nodeColor,
+                    fontFamily: fontMono,
+                    boxShadow: isActive ? `0 0 0 3px ${signalStyle.bg}` : "none",
                     transition: "box-shadow 0.3s ease",
                   }}
                 >
@@ -201,7 +198,7 @@ export function UseCaseLane({
                       height: "1.5rem",
                       background: isCompleted
                         ? "hsla(0,0%,100%,0.14)"
-                        : "hsla(0,0%,100%,0.07)",
+                        : isCounsel ? "rgba(255,255,255,0.06)" : "hsla(0,0%,100%,0.07)",
                       margin: "0.25rem 0",
                       transition: "background 0.3s ease",
                     }}
@@ -213,12 +210,12 @@ export function UseCaseLane({
                   {step.signal && (
                     <span
                       style={{
-                        fontFamily: "var(--font-mono)",
+                        fontFamily: fontMono,
                         fontSize: "0.5625rem",
                         fontWeight: 700,
                         letterSpacing: "0.10em",
                         textTransform: "uppercase",
-                        color: signalColor,
+                        color: signalStyle.labelColor,
                         marginRight: "0.4rem",
                       }}
                     >
@@ -228,7 +225,7 @@ export function UseCaseLane({
                   {step.proof && (
                     <span
                       style={{
-                        fontFamily: "var(--font-mono)",
+                        fontFamily: fontMono,
                         fontSize: "0.5625rem",
                         fontWeight: 700,
                         letterSpacing: "0.10em",
@@ -264,24 +261,28 @@ export function UseCaseLane({
                 gap: "0.375rem",
                 padding: "0.3125rem 0.75rem",
                 borderRadius: "0.375rem",
-                background: "hsla(214,12%,12%,1)",
-                border: `1px solid ${accentColor}30`,
-                fontFamily: "var(--font-mono)",
+                background: isCounsel ? "rgba(255,255,255,0.04)" : "hsla(214,12%,12%,1)",
+                border: `1px solid ${color}30`,
+                fontFamily: fontMono,
                 fontSize: "0.625rem",
                 fontWeight: 600,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
-                color: accentColor,
+                color,
                 cursor: "pointer",
                 transition: "border-color 0.2s, background 0.2s",
               }}
               onMouseEnter={e => {
-                (e.currentTarget as HTMLButtonElement).style.borderColor = `${accentColor}60`;
-                (e.currentTarget as HTMLButtonElement).style.background = `hsla(214,12%,14%,1)`;
+                (e.currentTarget as HTMLButtonElement).style.borderColor = `${color}60`;
+                (e.currentTarget as HTMLButtonElement).style.background = isCounsel
+                  ? "rgba(255,255,255,0.08)"
+                  : "hsla(214,12%,14%,1)";
               }}
               onMouseLeave={e => {
-                (e.currentTarget as HTMLButtonElement).style.borderColor = `${accentColor}30`;
-                (e.currentTarget as HTMLButtonElement).style.background = `hsla(214,12%,12%,1)`;
+                (e.currentTarget as HTMLButtonElement).style.borderColor = `${color}30`;
+                (e.currentTarget as HTMLButtonElement).style.background = isCounsel
+                  ? "rgba(255,255,255,0.04)"
+                  : "hsla(214,12%,12%,1)";
               }}
             >
               {!isPlaying ? "Play through" : `Step ${(activeStep ?? 0) + 2} of ${totalSteps}`}
@@ -301,14 +302,14 @@ export function UseCaseLane({
                 gap: "0.375rem",
                 padding: "0.3125rem 0.75rem",
                 borderRadius: "0.375rem",
-                background: "hsla(214,12%,12%,1)",
+                background: isCounsel ? "rgba(255,255,255,0.04)" : "hsla(214,12%,12%,1)",
                 border: "1px solid hsla(0,0%,100%,0.10)",
-                fontFamily: "var(--font-mono)",
+                fontFamily: fontMono,
                 fontSize: "0.625rem",
                 fontWeight: 600,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
-                color: "hsl(214,7%,52%)",
+                color: isCounsel ? "#64748b" : "hsl(214,7%,52%)",
                 cursor: "pointer",
                 transition: "border-color 0.2s",
               }}
@@ -330,9 +331,9 @@ export function UseCaseLane({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             style={{
-              fontFamily: "var(--font-mono)",
+              fontFamily: fontMono,
               fontSize: "0.5625rem",
-              color: "hsl(214,7%,38%)",
+              color: isCounsel ? "#475569" : "hsl(214,7%,38%)",
               letterSpacing: "0.06em",
             }}
           >
