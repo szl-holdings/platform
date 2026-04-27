@@ -3,7 +3,23 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import fs from 'node:fs';
 import path from 'node:path';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
+
+function sitemapPlugin(): Plugin {
+  return {
+    name: 'vite-plugin-sitemap',
+    apply: 'build',
+    async generateBundle() {
+      // Import the generator — shares all logic with `node scripts/generate-sitemap.mjs`.
+      const { generateSitemap } = await import('./scripts/generate-sitemap.mjs');
+      const appTsxPath = path.resolve(import.meta.dirname, 'src', 'App.tsx');
+      const { xml, paths } = generateSitemap(appTsxPath);
+      // Emit the file into the bundle — Rollup/Vite places it at the root of outDir.
+      this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: xml });
+      console.log(`[sitemap] Generated ${paths.length} URLs → sitemap.xml`);
+    },
+  };
+}
 
 // Limit esbuild Go runtime threads to prevent OS thread exhaustion
 // when multiple Vite dev servers run simultaneously
@@ -61,6 +77,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
+    sitemapPlugin(),
     ...(process.env.NODE_ENV !== 'production' && process.env.REPL_ID !== undefined
       ? [
           await import('@replit/vite-plugin-cartographer').then((m) =>
