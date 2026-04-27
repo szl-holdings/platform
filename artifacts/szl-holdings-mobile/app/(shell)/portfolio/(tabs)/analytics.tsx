@@ -12,6 +12,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { Path, Svg } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { trackEvent } from '@/lib/analytics';
@@ -273,6 +274,53 @@ function growthColor(val: number | undefined | null): string {
   return '#94a3b8';
 }
 
+const SPARKLINE_W = 56;
+const SPARKLINE_H = 24;
+
+function buildSparkPath(data: number[]): string {
+  if (data.length < 2) return '';
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const xStep = SPARKLINE_W / (data.length - 1);
+  return data
+    .map((v, i) => {
+      const x = i * xStep;
+      const y = SPARKLINE_H - ((v - min) / range) * SPARKLINE_H;
+      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(' ');
+}
+
+interface SparklineProps {
+  data: number[];
+  inverted?: boolean;
+}
+
+function Sparkline({ data, inverted = false }: SparklineProps) {
+  if (data.length < 2) return null;
+  const prev = data[data.length - 2];
+  const last = data[data.length - 1];
+  const trending = last >= prev;
+  const color = inverted
+    ? trending ? '#ef4444' : '#10b981'
+    : trending ? '#10b981' : '#ef4444';
+  const d = buildSparkPath(data);
+  return (
+    <Svg width={SPARKLINE_W} height={SPARKLINE_H} style={kpiCardStyles.sparkline}>
+      <Path
+        d={d}
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        opacity={0.85}
+      />
+    </Svg>
+  );
+}
+
 interface KpiCardProps {
   label: string;
   value: string;
@@ -280,9 +328,11 @@ interface KpiCardProps {
   subColor?: string;
   icon: FeatherIconName;
   iconColor?: string;
+  sparkData?: number[];
+  sparkInverted?: boolean;
 }
 
-function KpiCard({ label, value, sub, subColor, icon, iconColor = ACCENT }: KpiCardProps) {
+function KpiCard({ label, value, sub, subColor, icon, iconColor = ACCENT, sparkData, sparkInverted }: KpiCardProps) {
   const colors = useColors();
   return (
     <View
@@ -291,8 +341,13 @@ function KpiCard({ label, value, sub, subColor, icon, iconColor = ACCENT }: KpiC
         { backgroundColor: colors.card, borderColor: colors.borderSubtle },
       ]}
     >
-      <View style={[kpiCardStyles.iconWrap, { backgroundColor: `${iconColor}15` }]}>
-        <Feather name={icon} size={14} color={iconColor} />
+      <View style={kpiCardStyles.cardTop}>
+        <View style={[kpiCardStyles.iconWrap, { backgroundColor: `${iconColor}15` }]}>
+          <Feather name={icon} size={14} color={iconColor} />
+        </View>
+        {sparkData != null && sparkData.length >= 2 && (
+          <Sparkline data={sparkData} inverted={sparkInverted} />
+        )}
       </View>
       <Text style={[kpiCardStyles.label, { color: colors.mutedForeground }]}>{label}</Text>
       <Text
@@ -320,13 +375,21 @@ const kpiCardStyles = StyleSheet.create({
     gap: 4,
     minWidth: 100,
   },
+  cardTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 2,
+  },
   iconWrap: {
     width: 28,
     height: 28,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 2,
+  },
+  sparkline: {
+    alignSelf: 'flex-end',
   },
   label: {
     fontSize: 9,
@@ -522,6 +585,10 @@ export default function AnalyticsScreen() {
 
   const recentTimeSeries = (metrics?.timeSeries ?? []).slice(-6);
 
+  const sparkMrr = (metrics?.timeSeries ?? []).map((d) => d.mrr);
+  const sparkCustomers = (metrics?.timeSeries ?? []).map((d) => d.customers);
+  const sparkChurn = (metrics?.timeSeries ?? []).map((d) => d.churnRate);
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
@@ -577,11 +644,13 @@ export default function AnalyticsScreen() {
                       : undefined
                   }
                   subColor={mrrGrowthColor}
+                  sparkData={sparkMrr}
                 />
                 <KpiCard
                   label="ARR"
                   icon="dollar-sign"
                   value={fmt(s?.arr, { currency: true, compact: true })}
+                  sparkData={sparkMrr}
                 />
               </View>
               <View style={styles.kpiRow}>
@@ -600,6 +669,8 @@ export default function AnalyticsScreen() {
                           : 'High'
                       : undefined
                   }
+                  sparkData={sparkChurn}
+                  sparkInverted
                 />
                 <KpiCard
                   label="NRR"
@@ -608,6 +679,7 @@ export default function AnalyticsScreen() {
                   iconColor={nrrColor}
                   sub={s?.nrr != null ? (s.nrr >= 100 ? 'Expanding' : 'Contracting') : undefined}
                   subColor={nrrColor}
+                  sparkData={sparkMrr}
                 />
               </View>
               <View style={styles.kpiRow}>
@@ -621,6 +693,7 @@ export default function AnalyticsScreen() {
                       : undefined
                   }
                   subColor={custGrowthColor}
+                  sparkData={sparkCustomers}
                 />
                 <KpiCard
                   label="MAU"
@@ -631,6 +704,7 @@ export default function AnalyticsScreen() {
                       ? `${fmt(s.activeUsers7d, { compact: true })} WAU`
                       : undefined
                   }
+                  sparkData={sparkCustomers}
                 />
               </View>
             </View>
