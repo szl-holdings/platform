@@ -1,8 +1,8 @@
 # SZL Holdings — Release Readiness Scorecard
 
-> **Phase 7 Edition — Cloud, Ops & Release**  
-> Generated: April 25, 2026  
-> Scope: Per-lane readiness across functionality, evidence, evals, performance, security, and docs
+> **Diligence Audit Edition — 2026-04-27**
+> Scope: Honest pass/fail results from running typecheck, lint, build, and test as of audit date
+> Prior version (April 25, 2026 — Phase 7 Edition) is superseded by this document.
 
 ---
 
@@ -10,157 +10,119 @@
 
 | Metric | Status |
 |--------|--------|
-| Platform Pipeline | **14/16 PASS (88%)** |
-| Lanes Assessed | **6 / 6** |
-| Overall Release Confidence | **High — no blocking items** |
-| Blocking Items | **0** |
-| Non-Blocking Known Issues | **4** |
+| Pipeline P0 checks | **4/5 FAIL** |
+| Blocking items | **4** (typecheck, lint, build, unit tests) |
+| Overall Release Confidence | **LOW — pipeline failures present** |
 
 ---
 
-## Platform Pipeline Status
+## Platform Pipeline Status (2026-04-27 Run)
 
-| Stage | Status | Evidence |
+| Stage | Result | Evidence |
 |-------|--------|----------|
-| Install | PASS | `pnpm install` completes successfully |
-| Typecheck | PASS | TypeScript compilation succeeds for all artifacts |
-| Lint | PASS | Biome runs without critical violations |
-| Build | PASS | All artifacts build to dist/ |
-| Unit Tests | PASS | 256 test files present and executed |
-| Integration Tests | PASS | API smoke tests pass (health, signal chains) |
-| E2E Tests | PASS | Nexus smoke tests pass (22 Playwright tests) |
-| Security Tests | PASS | Security test suite passes |
-| Health Checks | PASS | API server returns HTTP 200 with 11ms DB latency |
-| Metrics Generation | PASS | `scripts/audit/generate-platform-metrics.ts` produces valid output |
-| Arena Evaluation | PASS | 6/6 lane suites pass (avg score 0.914) |
-| AEF Eval Suite | PASS | Overall 0.929; gate compliance 1.00 across 55 scenarios |
-| Docs Link Check | PARTIAL | Internal references verified; external links not yet automated |
-| Screenshot Validation | PASS | 10 verified screenshots in `screenshots/approved/` |
-| SBOM Readiness | NO | SBOM generation not yet in CI pipeline |
-| SLSA Provenance | NO | Git SHA + build timestamps captured; full SLSA not yet implemented |
+| Install | NOT RUN | Skipped this audit run |
+| Typecheck | **FAIL** | 9 packages: `aef-sdk`, `reflection-engine`, `aef-storage-adapters`, `alloy-rank-worker`, `alloy-embed-worker`, `aef-retrieval-core`, `aef-policy-guard`, `@szl-holdings/db`, `api-client-react` |
+| Lint | **FAIL** | 23 errors, 15,060 warnings across 6,780 files (Biome) |
+| Build | **FAIL** | `@szl-holdings/sdk` TS errors cascade: 10 of 27 build targets fail |
+| Unit Tests | **FAIL** | api-server governance tests fail (4 failures): `governance-restart-process.test.ts` (1), `governance-editor-attribution.test.ts` (1), `governance-persistence.test.ts` (2); root cause: `billing_audit_log` relation missing (schema/migration gap) |
+| Integration Tests | **NOT RUN** | Not executed this audit |
+| E2E Tests | **NOT RUN** | Playwright not executed this audit |
+| Metrics Generation | **PASS** | `generate-platform-metrics.ts` → valid JSON; 6,235 TS/TSX files, 1,047 DB tables, 6,063 route handlers |
+| API Health | **PASS (prior)** | API server returned HTTP 200 / 11ms DB latency in prior audit run; not re-verified live |
 
-**Pipeline result: 14/16 PASS (88%)**
+**Pipeline result: FAIL. Four P0 checks fail (typecheck, lint, build, unit tests). Release gate is NOT cleared.**
 
 ---
 
-## Per-Lane Release Readiness
+## Typecheck Failures
 
-### LYTE — Decision Intelligence
+The following packages fail `turbo run typecheck` (exit code 1, confirmed 2026-04-27):
 
-| Dimension | Result | Notes |
-|-----------|--------|-------|
-| Functionality | 4 / 5 | Signal fusion, action queue, Monte Carlo live; decision replay UI pending |
-| Evidence | 4 / 5 | Proof chain active; outcome graph persistence partial |
-| Evals | 0.920 | `lyte-decision-suite` v3.1.0 — run-003-2026-04-22 |
-| Performance | PASS | p95 < 1.8s on signal fusion |
-| Security | PASS | RBAC, tenant isolation, rate limiting confirmed |
-| Docs | PASS | Demo path, trust center, innovation lane all current |
-| **Gate** | ✓ RELEASE | Ready for production |
-
-### AEGIS / TENAX — Security & Cyber Resilience
-
-| Dimension | Result | Notes |
-|-----------|--------|-------|
-| Functionality | 4 / 5 | SOC, MSP, Intel workspaces live; SOAR execution pending |
-| Evidence | 5 / 5 | MITRE ATT&CK v14; CISA KEV/NVD live; proof chain on all incidents |
-| Evals | 0.915 | `aegis-triage-suite` v1.5.0 — run-005-2026-04-21 |
-| Performance | PASS | Alert ingestion p95 < 500ms |
-| Security | PASS | Guardian middleware; zero-trust admin guard |
-| Docs | PASS | Trust center and demo path current |
-| **Gate** | ✓ RELEASE | Ready for production |
-
-### VESSELS / SEXTANT — Maritime Intelligence
-
-| Dimension | Result | Notes |
-|-----------|--------|-------|
-| Functionality | 3.5 / 5 | Port monitoring, vessel tracking, delay detection live; commercial modules pending |
-| Evidence | 4 / 5 | Proof chain on signal triggers; delay cascade demo verified |
-| Evals | 0.905 | `maritime-core-suite` v2.0.0 — run-007-2026-04-20 |
-| Performance | PASS | Signal detection p95 < 800ms; cascade < 2s |
-| Security | PASS | Tenant isolation confirmed; rate limiting active |
-| Docs | PASS | Demo path 1 (maritime delay cascade) documented and verified |
-| **Gate** | ✓ RELEASE | Ready for production |
-
-### TERRA / DOMAINE — Real Estate Intelligence
-
-| Dimension | Result | Notes |
-|-----------|--------|-------|
-| Functionality | 3.5 / 5 | Property intelligence and risk scoring live; live MLS feed pending |
-| Evidence | 3.5 / 5 | Signal chain evidence confirmed; proof chain on property risk updates |
-| Evals | 0.860 | `terra-risk-suite` v1.2.0 — run-003-2026-04-19 |
-| Performance | PASS | Property query p95 < 1.2s |
-| Security | PASS | RBAC; tenant isolation confirmed |
-| Docs | PASS | Demo path covers maritime → real estate cascade |
-| **Gate** | ✓ RELEASE | Ready for production |
-
-### COUNSEL — Legal Matter Command
-
-| Dimension | Result | Notes |
-|-----------|--------|-------|
-| Functionality | 4 / 5 | Contract analysis, legal hold, matter tracking live; e-signature pending |
-| Evidence | 4 / 5 | Proof chain on legal hold initiations; cascade receiver operational |
-| Evals | 0.880 | `counsel-legal-suite` v1.0.0 — run-004-2026-04-18 |
-| Performance | PASS | Contract analysis p95 < 3s (acceptable for batch) |
-| Security | PASS | Attorney-client data isolation confirmed |
-| Docs | PASS | Demo path 2 (security → legal hold → executive) documented |
-| **Gate** | ✓ RELEASE | Ready for production |
-
-### COMMAND — Unified Command Center
-
-| Dimension | Result | Notes |
-|-----------|--------|-------|
-| Functionality | 4.5 / 5 | Cross-domain approval queue, exec briefing, signal routing, support queue live |
-| Evidence | 4.5 / 5 | All approvals proof-chained; exec briefing sourced from live platform data |
-| Evals | 0.920 | `core-policy-suite` v2.0.0 — run-001-2026-04-23 |
-| Performance | PASS | Approval queue p95 < 400ms |
-| Security | PASS | Super_admin gate on cross-tenant views; RBAC throughout |
-| Docs | PASS | Demo path 3 (governance walk-through) documented |
-| **Gate** | ✓ RELEASE | Ready for production |
+| Package | Notes |
+|---------|-------|
+| `@workspace/aef-sdk` | TypeScript typecheck error |
+| `@workspace/reflection-engine` | TypeScript typecheck error |
+| `@workspace/aef-storage-adapters` | TypeScript typecheck error |
+| `@workspace/alloy-rank-worker` | TypeScript typecheck error |
+| `@workspace/alloy-embed-worker` | TypeScript typecheck error |
+| `@workspace/aef-retrieval-core` | TypeScript typecheck error |
+| `@workspace/aef-policy-guard` | TypeScript typecheck error |
+| `@szl-holdings/db` | TypeScript typecheck error |
+| `@szl-holdings/api-client-react` | TypeScript typecheck + build error |
 
 ---
 
-## Inference vs Training/Eval Boundary
+## Build Failures
 
-| Control | Status |
-|---------|--------|
-| Boundary documented | ✓ `infra/INFERENCE_VS_TRAINING_BOUNDARY.md` |
-| `RUN_MODE` enforcement in policy-engine | ✓ Documented |
-| Separate Azure App Service for eval runner | ✓ Documented |
-| Eval costs separated from production billing | ✓ `audit/phase7-ops-hardening.md` |
-| No eval packages importable on production request path | ✓ Code review gate in place |
+### Root Cause
+
+`packages/szl-sdk/src/resources/plugins.ts` and `treasury.ts`:
+```
+error TS2345: Argument of type 'PaginationOptions & { ... }' is not assignable to
+parameter of type 'Record<string, string | number | boolean | undefined> | undefined'.
+Index signature for type 'string' is missing in type 'PaginationOptions & { ... }'.
+```
+
+### Cascading Failures (10 packages)
+
+| Package | Build Status |
+|---------|-------------|
+| `@workspace/a11oy` | FAIL (cascaded) |
+| `@workspace/szl-holdings-mobile` | FAIL (cascaded) |
+| `@workspace/helios` | FAIL (cascaded) |
+| `@workspace/pluginmesh` | FAIL (cascaded) |
+| `@workspace/szl-demo-video` | FAIL (cascaded) |
+| `@szl/alloy` | FAIL (cascaded) |
+| `@workspace/alloy-ingestion-orchestrator` | FAIL (cascaded) |
+| `@szl/substrate` | FAIL (cascaded) |
+| Storybook | FAIL (cascaded) |
+
+**Packages that build successfully: 17 of 27** (63%)
 
 ---
 
-## Registry Readiness
+## Lint Summary (Biome)
 
-| Registry | Version Metadata | Rollback Path | Eval Gate | Status |
-|----------|-----------------|---------------|-----------|--------|
-| Prompt Registry | ✓ Semver + status lifecycle | ✓ < 5 min | ✓ Score ≥ 0.85 | READY |
-| Eval Registry (eval-os) | ✓ Semver + status lifecycle | ✓ < 15 min | ✓ Promotion gate | READY |
-| Run Ledger | ✓ Append-only with full metadata | N/A (audit log) | N/A | READY |
-| Model Policy Registry | ✓ Risk-tiered with fallback policies | ✓ Fallback to manual | ✓ Arena eval required | READY |
+| Severity | Count |
+|----------|-------|
+| Errors | 23 |
+| Warnings | 15,060 |
+| Infos | 699 |
+| Files checked | 6,780 |
+
+Lint fails are spread across the codebase. The 23 errors are blocking; 15,060 warnings require systematic triage but do not individually block.
 
 ---
 
-## Ops Hardening (Phase 7)
+## Per-Lane Runtime Readiness (unchanged from runtime evidence)
 
-| Area | Gaps Found | Implemented | Policy Documented (Phase 8) | Accepted |
-|------|-----------|-------------|---------------------------|---------|
-| Secrets Handling | 5 | 3 | 2 | 0 |
-| Tenant Isolation | 3 | 3 | 0 | 0 |
-| Audit Retention | 3 | 3 | 0 | 0 |
-| Cost Controls | 4 | 1 | 2 | 1 |
-| **Total** | **15** | **10** | **4** | **1** |
-
-"Implemented" = code or deploy-config change shipped in Phase 7. "Policy Documented" = written requirement recorded; runtime enforcement is a Phase 8 item.
-
-Full detail: `audit/phase7-ops-hardening.md`
+| Lane | Runtime Status | Notes |
+|------|---------------|-------|
+| SZL Holdings (corporate) | Alpha working | Seeded KPIs; auth live |
+| Aegis (PARAGON/TENAX security) | Alpha working | CISA KEV, NVD CVE, MITRE ATT&CK v14 live |
+| Counsel | Alpha working | Matter tracking functional |
+| Pulse (LUMINA) | Alpha working | AI multi-provider briefing active |
+| Carlota Jo | Alpha working | Live integrations active |
+| API Server | Alpha working | HTTP 200; auth-gated routes correct |
+| Vessels (SEXTANT) | Alpha partial | AIS simulated; commercial modules pending |
+| Terra (DOMAINE) | Alpha partial | Maps blank (Mapbox token missing) |
+| Lyte (KORA) | Alpha partial | Routes functional; legacy alias gap |
+| Command (FORGE) | Alpha partial | Badge counts not wired |
+| Sentra (TENAX) | Alpha partial | `/api/sentra/risks` route missing |
+| A11oy | Build fail | Artifact build fails; Phase 1 code present |
+| Mobile (APEX) | Build fail | Scaffold present; build fails |
+| SZL Demo Video | Build fail | Build fails |
 
 ---
 
 ## Blocking Items
 
-**None.**
+| # | Item | Severity | Fix |
+|---|------|----------|-----|
+| 1 | `@szl-holdings/sdk` TypeScript index signature error | **P0** | Add index signature to `PaginationOptions` type |
+| 2 | TypeScript typecheck failures (9 packages: `aef-sdk`, `reflection-engine`, `aef-storage-adapters`, `alloy-rank-worker`, `alloy-embed-worker`, `aef-retrieval-core`, `aef-policy-guard`, `@szl-holdings/db`, `api-client-react`) | **P0** | Fix package-specific TS errors |
+| 3 | Biome lint 23 errors | **P0** | Fix lint violations |
+| 4 | Unit test failures (governance tests; `billing_audit_log` relation missing) | **P0** | Add missing migration or fix schema reference |
 
 ---
 
@@ -168,32 +130,23 @@ Full detail: `audit/phase7-ops-hardening.md`
 
 | Issue | Severity | Remediation |
 |-------|----------|-------------|
-| SBOM generation not in CI | Low | Phase 8 / GitHub push prep |
-| External link check not automated | Low | Phase 8 |
-| SLSA provenance not fully implemented | Low | Post-GA roadmap |
-| Customer-facing cost dashboard | Low | Post-GA roadmap |
-
----
-
-## Release Trust Pack Contents
-
-| Artifact | Location |
-|----------|----------|
-| Platform metrics | `generated/platform-metrics.json` |
-| Arena results | `generated/arena-results/` |
-| AEF eval results | `generated/arena-results/` (aef-* runs) |
-| Fix log | `docs/FIX_LOG.md` |
-| Security posture | `docs/SECURITY_POSTURE.md` |
-| Known risks | `docs/OPEN_RISKS.md` |
-| Ops hardening audit | `audit/phase7-ops-hardening.md` |
-| Inference boundary | `infra/INFERENCE_VS_TRAINING_BOUNDARY.md` |
-| Screenshots | `screenshots/approved/` |
-| Run ledger | `lib/run-ledger/README.md` |
+| SBOM generation not in CI | Low | Add to release workflow |
+| External link check not automated | Low | Add link-check CI step |
+| SLSA provenance not implemented | Low | Post-GA roadmap |
+| `conduit`, `pluginmesh`, `helios` unregistered artifact dirs; `artifacts/audit` miscounted by metrics script | Low | Register, remove, or exclude from metrics script |
+| AIS telemetry simulated | Low | Paid subscription required |
+| Mapbox token missing | Low | Paid subscription required |
+| Redis sessions not configured | Medium | Configure before production |
+| Sentry not configured | Medium | Configure before production |
 
 ---
 
 ## Overall Verdict
 
-**Release readiness: HIGH — no blocking items.**
+**Release readiness: LOW — pipeline failures block clean CI.**
 
-All six product lanes pass their release gates. The inference/eval boundary is documented and enforced. All registries have version metadata and tested rollback paths. Ops hardening closed 14 of 15 gaps found. Recommended next step: Phase 8 — GitHub Push Prep.
+Compared to the April 25, 2026 Phase 7 scorecard, this audit has identified 3 new blocking failures (typecheck, lint, build) that were not present or not captured in the prior run. The runtime evidence (surfaces serve, API responds) remains consistent with the prior scorecard. Resolution of the `@szl-holdings/sdk` TypeScript error alone would likely clear the build cascade; the remaining typecheck and lint failures require targeted fixes per package.
+
+---
+
+*This scorecard supersedes all prior editions. Do not cite the April 25, 2026 Phase 7 Edition.*

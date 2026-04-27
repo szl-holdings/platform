@@ -66,7 +66,7 @@ These demo narratives are grounded in what the current codebase can actually sup
 
 1. **Health Overview** — Start at `/api/health`. Show 8 platform apps, database latency, service status.
 
-2. **Platform Metrics** — Show `generated/platform-metrics.json` with code-derived counts: 17 artifacts, 123 packages, 4,900+ TS/TSX files, 920 DB tables, 12/12 primitives implemented.
+2. **Platform Metrics** — Show `generated/platform-metrics.json` with code-derived counts: 15 registered artifacts (19 dirs on disk), 152 packages, 6,235 TS/TSX files, 1,047 DB tables, 12/12 primitives implemented.
 
 3. **Command Arena** — Run `npx tsx scripts/evals/run-arena.ts`. Show 5 scenario evaluations with multi-dimensional scoring: correctness, evidence completeness, approval compliance, replay integrity, policy adherence.
 

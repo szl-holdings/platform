@@ -15,10 +15,10 @@ All counts are derived from the platform metrics registry. **Do not edit this fi
 | Fact | Value |
 |------|-------|
 | Platform name | SZL Holdings Platform |
-| Codename | AEEP (Alloy Execution and Evidence Platform) |
-| Version | 4.0.0 |
+| Codename | AEEP (A11oy Execution and Evidence Platform) |
+| Version | 4.1.0 |
 | Founded | 2024 |
-| Last comprehensive audit | 2026-04-21 |
+| Last comprehensive audit | 2026-04-27 |
 
 ---
 
@@ -50,9 +50,9 @@ All counts are derived from the platform metrics registry. **Do not edit this fi
 
 | Metric | Count |
 |--------|-------|
-| Domain packages (`packages/`) | 82 |
-| Shared library packages (`lib/`) | 41 |
-| Total packages | 123 |
+| Domain packages (`packages/`) | 101 |
+| Shared library packages (`lib/`) | 51 |
+| Total packages | 152 |
 
 ---
 
@@ -62,7 +62,7 @@ All counts are derived from the platform metrics registry. **Do not edit this fi
 
 | Metric | Count |
 |--------|-------|
-| Database tables (Drizzle pgTable) | 915 |
+| Database tables (Drizzle pgTable) | 1,047 |
 | Schema files | 165 |
 | Schema domains | 10 |
 

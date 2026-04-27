@@ -38,7 +38,7 @@ Every step in the pipeline has a traceable owner, a policy constraint, and an im
 
 ## Platform Screenshots
 
-All screenshots are verified, unmodified captures from the live platform. No mockups or AI-generated imagery.
+Screenshots depict the alpha demo state of the platform (development environment, seeded data). Screenshots are not committed to the git repository and cannot be independently verified as unmodified captures.
 
 ### SZL Holdings — Governed Decision Operating System
 
@@ -75,7 +75,7 @@ All screenshots are verified, unmodified captures from the live platform. No moc
 | ![PARAGON](brand/screenshots/paragon-defense.jpg) |
 | Threat intelligence, defense operations command, and spatial analytics |
 
-> All screenshots captured 2026-04-25 from the live platform. Unmodified captures — no mockups or AI-generated imagery.
+> Screenshots captured from the alpha demo environment (development build, seeded data) — 2026-04-25. Screenshots are not tracked in the git repository.
 
 ---
 
@@ -100,8 +100,8 @@ All screenshots are verified, unmodified captures from the live platform. No moc
 
 | Metric | Count |
 |--------|-------|
-| Deployable artifacts | 14 |
-| Packages | 100 |
+| Deployable artifacts | 15 |
+| Packages | 152 |
 | Shared libraries | 51 |
 | Operator products | 8 |
 
@@ -147,21 +147,22 @@ All screenshots are verified, unmodified captures from the live platform. No moc
 
 ## Current Status
 
-**Alpha — runtime verified 2026-04-26. All 13 web surfaces load. No artifacts are broken.**
+**Alpha — last runtime verification 2026-04-26. Web surfaces serve in development. Build pipeline has active failures (see below).**
 
 | Classification | Artifacts |
 |---|---|
-| `alpha working` | SZL Holdings, A11oy, API Server, Carlota Jo, Counsel, Pulse, Aegis (7) |
-| `alpha partial` | Vessels, Terra, Command, Sentra, Lyte, Mobile (6) |
+| `alpha working` | SZL Holdings, API Server, Carlota Jo, Counsel, Pulse, Aegis (6) |
+| `alpha partial` | Vessels, Terra, Command, Sentra, Lyte (5) |
+| `build failing` | A11oy, Mobile (APEX), SZL Demo Video (3) — cascaded from SDK dependency |
 | `demo-only` | SZL Demo Video (1) |
 | `internal only` | Mockup Sandbox (1) |
 
-- A11oy Phase 1: fully implemented; Phase 2 workcell engine in progress
-- Seven domain pack verticals: all routes functional with demo/seeded data; see matrix for live data gaps
+- A11oy Phase 1: code present; Phase 2 workcell engine in progress; artifact build currently fails
+- Six domain pack verticals serve in development; all use seeded/demo data; see matrix for live data gaps
 - AI recommendations: multi-provider routing with governed policy constraints — live
-- Authentication: OIDC/PKCE with multi-role RBAC — all auth gates verified correct
-- Known gaps: `/api/sentra/risks` unregistered (API route); Terra maps require Mapbox token; AIS telemetry simulated
-- Full evidence: [`audit/runtime/app-status-classification.md`](audit/runtime/app-status-classification.md)
+- Authentication: OIDC/PKCE with multi-role RBAC — auth gates in place
+- Known gaps: `/api/sentra/risks` route missing; Terra maps require Mapbox token; AIS telemetry simulated (not live); TypeScript build fails for `@szl-holdings/sdk` and 9 dependent packages
+- Full evidence: [`docs/RELEASE_READINESS_SCORECARD.md`](docs/RELEASE_READINESS_SCORECARD.md)
 
 ---
 

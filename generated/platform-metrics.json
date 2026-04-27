@@ -1,18 +1,22 @@
 {
-  "generated_at": "2026-04-22T04:14:40.950Z",
+  "generated_at": "2026-04-27T03:50:50.019Z",
   "generator": "scripts/audit/generate-platform-metrics.ts",
   "repository": {
-    "typescript_files": 3097,
-    "tsx_files": 1844,
-    "total_ts_tsx": 4941,
-    "python_files": 31,
-    "css_files": 16,
-    "markdown_docs": 1411,
+    "typescript_files": 3801,
+    "tsx_files": 2434,
+    "total_ts_tsx": 6235,
+    "python_files": 145,
+    "css_files": 19,
+    "markdown_docs": 1679,
     "screenshot_assets": 0
   },
   "architecture": {
-    "artifacts": 17,
+    "artifacts": 19,
     "artifact_list": [
+      {
+        "name": "@workspace/a11oy",
+        "kind": "web"
+      },
       {
         "name": "@workspace/aegis",
         "kind": "web"
@@ -20,6 +24,10 @@
       {
         "name": "@workspace/api-server",
         "kind": "backend"
+      },
+      {
+        "name": "audit",
+        "kind": "web"
       },
       {
         "name": "@workspace/carlota-jo",
@@ -30,15 +38,15 @@
         "kind": "web"
       },
       {
-        "name": "cortex-mobile",
-        "kind": "mobile"
+        "name": "@workspace/conduit",
+        "kind": "web"
       },
       {
         "name": "@workspace/counsel",
         "kind": "web"
       },
       {
-        "name": "imperium",
+        "name": "@workspace/helios",
         "kind": "web"
       },
       {
@@ -50,7 +58,7 @@
         "kind": "design"
       },
       {
-        "name": "prism-counsel",
+        "name": "@workspace/pluginmesh",
         "kind": "web"
       },
       {
@@ -82,19 +90,19 @@
         "kind": "web"
       }
     ],
-    "lib_packages": 41,
-    "standalone_packages": 82,
-    "total_packages": 123
+    "lib_packages": 51,
+    "standalone_packages": 101,
+    "total_packages": 152
   },
   "api_surface": {
-    "route_files_recursive": 131,
-    "route_handlers": 4659,
-    "db_tables_defined": 920,
-    "migrations": 27
+    "route_files_recursive": 180,
+    "route_handlers": 6063,
+    "db_tables_defined": 1047,
+    "migrations": 59
   },
   "quality": {
-    "test_files": 256,
-    "ci_workflows": 22
+    "test_files": 387,
+    "ci_workflows": 25
   },
   "platform_primitives": [
     {

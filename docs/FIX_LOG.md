@@ -1,5 +1,89 @@
 # SZL Holdings — Fix Log
 
+---
+
+## 2026-04-27 — Diligence Audit (Task #3206)
+
+**Session scope:** Comprehensive diligence audit — claim reconciliation, pipeline evidence capture, documentation refresh. No code changes applied (audit-only scope per task definition).
+
+### Findings Logged (Not Fixed — Queued for Engineering Sprint)
+
+#### FINDING-001: SDK TypeScript Index Signature Error (P0 — Build Blocking)
+
+**Problem:** `packages/szl-sdk/src/resources/plugins.ts` and `treasury.ts` use `PaginationOptions & { ... }` where a `Record<string, string | number | boolean | undefined>` is expected. The type is missing an index signature.
+
+**Impact:** Cascades to 10 dependent packages: `a11oy`, `szl-holdings-mobile`, `helios`, `pluginmesh`, `szl-demo-video`, `@szl/alloy`, `alloy-ingestion-orchestrator`, `@szl/substrate`.
+
+**Fix required:** Add index signature to `PaginationOptions` in the SDK, or cast at call sites.
+
+**Files:** `packages/szl-sdk/src/resources/plugins.ts`, `packages/szl-sdk/src/resources/treasury.ts`
+
+---
+
+#### FINDING-002: Multiple Typecheck Failures (P0)
+
+**Problem:** `turbo run typecheck` fails for 9 packages (confirmed 2026-04-27): `@workspace/aef-sdk`, `@workspace/reflection-engine`, `@workspace/aef-storage-adapters`, `@workspace/alloy-rank-worker`, `@workspace/alloy-embed-worker`, `@workspace/aef-retrieval-core`, `@workspace/aef-policy-guard`, `@szl-holdings/db`, `@szl-holdings/api-client-react`.
+
+**Impact:** CI pipeline fails; cannot claim clean TypeScript.
+
+**Fix required:** Per-package investigation and type error resolution.
+
+---
+
+#### FINDING-003: Biome Lint Failures (P0)
+
+**Problem:** `biome lint .` reports 23 errors and 15,060 warnings across 6,780 files.
+
+**Impact:** CI pipeline fails on lint.
+
+**Fix required:** Address 23 errors; triage warnings for systematic reduction.
+
+---
+
+#### FINDING-004: Unregistered Artifact Directories (P1)
+
+**Problem:** `artifacts/helios` and `artifacts/pluginmesh` exist on disk but are not registered in the workspace artifact registry. Both fail to build.
+
+**Fix required:** Either register these artifacts or remove their directories from the monorepo.
+
+---
+
+#### FINDING-005: `metrics:generate` Points to Different Path Than Audit Script (P1)
+
+**Problem:** Root `package.json` declares `metrics:generate` as `tsx scripts/generate-platform-metrics.ts` (root-level), but the comprehensive metrics generator used by this audit is `scripts/audit/generate-platform-metrics.ts` (subdirectory). Two separate scripts may produce different outputs.
+
+**Clarification on `audit:all` vs `audit:full`:** Both ARE declared in root `package.json`. `pnpm audit:all` runs the P1 advisory suite (mocks, routes, copy, deps, design-system, links, smoke, crawl, stress). `pnpm audit:full` runs the full P0+P1 pipeline (includes `audit:all` plus install, typecheck, test, build, and E2E). They are distinct and not interchangeable.
+
+**Fix required:** Verify both `metrics:generate` scripts produce identical output; consolidate to one canonical script. Use `audit:full` for P0 release gating and `audit:all` for advisory checks.
+
+---
+
+#### FINDING-006: Stale Metrics in Public Docs (P1)
+
+**Problem:** `README.md` says "100 packages, 14 artifacts"; `docs/platform-facts.md` says 123 packages. Current metrics show 152 packages, 15 registered artifacts.
+
+**Fix required:** Update README.md and platform-facts.md to reflect current metrics.
+
+---
+
+#### FINDING-007: PLATFORM_OVERVIEW.md Uses Old Product Name "Alloy" (P1)
+
+**Problem:** `docs/PLATFORM_OVERVIEW.md` refers to the execution fabric as "Alloy" throughout. Current product name is "A11oy".
+
+**Fix required:** Global find/replace of "Alloy" → "A11oy" in PLATFORM_OVERVIEW.md with review for accuracy.
+
+---
+
+#### FINDING-008: OPERABILITY_MATRIX References Archived "CORTEX Mobile" (P1 — fixed in this audit)
+
+**Problem:** Previous OPERABILITY_MATRIX listed "CORTEX Mobile" in the Mobile section. `cortex-mobile` is an archived artifact. Current registered mobile artifact is `szl-holdings-mobile` (APEX).
+
+**Status:** Fixed in this audit session — OPERABILITY_MATRIX.md updated.
+
+---
+
+## 2026-04-22 — API Server Clog Fix + Platform Hardening
+
 **Date:** April 22, 2026
 **Session scope:** API server clog fix + platform hardening audit
 

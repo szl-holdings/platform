@@ -12,17 +12,17 @@ The defining characteristic of the SZL ecosystem is architectural unity. Every p
 
 ---
 
-## The Shared Execution Fabric: Alloy
+## The Shared Execution Fabric: A11oy
 
-At the center of every SZL platform is **Alloy** — the execution fabric that closes the loop from signal to confirmed action.
+At the center of every SZL platform is **A11oy** — the execution fabric that closes the loop from signal to confirmed action.
 
-Alloy provides:
+A11oy provides:
 - **Workflow orchestration** — structured routing of operational signals to the right actor at the right time
 - **Audit trail** — an immutable, attributable record of every significant decision and action
 - **Human-in-the-loop gates** — required approval checkpoints for consequential operations
 - **Agent coordination** — governed management of AI advisory agents across the ecosystem
 
-When Lyte surfaces a business risk signal, Alloy routes the action. When Vessels flags a dark vessel anomaly, Alloy coordinates the response. When Aegis identifies a threat, Alloy governs the escalation path. The execution fabric is the same across every domain.
+When Lyte surfaces a business risk signal, A11oy routes the action. When Vessels flags a dark vessel anomaly, A11oy coordinates the response. When Aegis identifies a threat, A11oy governs the escalation path. The execution fabric is the same across every domain.
 
 ---
 
@@ -56,7 +56,7 @@ Fleet command for maritime operators. Real-time AIS telemetry, voyage economics,
 
 ### Execute
 
-**Alloy — Execution Fabric**
+**A11oy — Execution Fabric**
 The connective tissue of the ecosystem. Routes signals to action, maintains the audit trail, governs the agent network, and enforces human-in-the-loop accountability across all platforms.
 
 ### Advise

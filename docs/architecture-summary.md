@@ -57,7 +57,7 @@ The six platform primitives are the structural differentiators — what makes th
 | Payments | Stripe (Checkout, Subscriptions, Invoicing) |
 | CI/CD | GitHub Actions — CodeQL SAST, dependency review, secret scanning, build gates |
 | Infrastructure | Azure Bicep IaC for enterprise deployments |
-| Monorepo | pnpm workspaces; Turborepo task graph; 123 packages (82 domain packages + 41 lib packages; `packages.total_packages.count: 123` per audit/source-of-truth.json) |
+| Monorepo | pnpm workspaces; Turborepo task graph; 152 packages (101 domain packages + 51 lib packages; `generated/platform-metrics.json` 2026-04-27T03:50:50Z) |
 
 ---
 

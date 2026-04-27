@@ -55,7 +55,7 @@
 ### Carlota Jo — Private Advisory
 - **Artifact:** `artifacts/carlota-jo`
 - **Preview path:** `/carlota-jo/`
-- **Status:** Live
+- **Status:** Beta (most complete artifact; live integrations active)
 - **Audience:** Founders, executives, UHNW clients
 
 ### TENAX — Cyber Resilience Command
