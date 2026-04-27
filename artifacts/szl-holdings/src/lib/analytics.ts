@@ -223,6 +223,35 @@ export function stopMarketingSessionRecording(): void {
   }
 }
 
+const PAGE_VIEW_TRACKING_ENDPOINT = '/api/track/page-view';
+
+/**
+ * Fire-and-forget POST to the anonymous page-view tracking endpoint.
+ * Uses the same sessionStorage session ID as the rest of the analytics module
+ * so all events from one browser tab share a stable ID.
+ */
+export function sendPageViewEvent(path: string): void {
+  if (typeof window === 'undefined') return;
+  const sessionId = getSessionId();
+  if (!sessionId) return;
+  try {
+    const payload: Record<string, string | null> = {
+      sessionId,
+      path,
+      referrer: document.referrer || null,
+      userAgent: navigator.userAgent || null,
+    };
+    void fetch(PAGE_VIEW_TRACKING_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    }).catch(() => {});
+  } catch {
+    // noop — tracking must never break the page
+  }
+}
+
 export const analytics = {
   pageView: (page: string, site = 'szl-holdings') => track('page_view', { site, page }),
 

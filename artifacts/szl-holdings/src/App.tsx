@@ -8,7 +8,7 @@ import { apiRequest, registerProductionConfirmFn } from "@/lib/api";
 import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { navigatorConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
-import { analytics as szlAnalytics, startMarketingSessionRecording, stopMarketingSessionRecording } from "@/lib/analytics";
+import { analytics as szlAnalytics, sendPageViewEvent, startMarketingSessionRecording, stopMarketingSessionRecording } from "@/lib/analytics";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
 import { DemoModeProvider, useDemoMode } from "@szl-holdings/shared-ui/demo-mode";
@@ -469,6 +469,9 @@ function PageViewTracker() {
   useEffect(() => {
     const path = location || "/";
     szlAnalytics.pageView(path);
+    // Send an anonymous page-view event to the dedicated tracking endpoint so
+    // visitor counts in the funnel dashboard are populated automatically.
+    sendPageViewEvent(path);
     // Enforce session-recording boundaries at the router level: only
     // marketing/funnel pages may be recorded. Navigating to anything else
     // (dashboards, admin, authenticated surfaces) explicitly stops capture.
