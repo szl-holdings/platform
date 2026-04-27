@@ -1354,6 +1354,21 @@ export interface ReserveTrendPoint {
   level: number;
 }
 
+// Append a new datapoint to a pool's trend history, replacing the existing
+// entry if today's date is already present. Date defaults to today (UTC) so
+// it lines up with the existing YYYY-MM-DD trendHistory format.
+export function appendReserveTrendPoint(
+  history: ReserveTrendPoint[],
+  level: number,
+  date: string = new Date().toISOString().slice(0, 10),
+): ReserveTrendPoint[] {
+  const last = history[history.length - 1];
+  if (last && last.date === date) {
+    return [...history.slice(0, -1), { date, level }];
+  }
+  return [...history, { date, level }];
+}
+
 export interface ReservePool {
   id: string;
   name: string;

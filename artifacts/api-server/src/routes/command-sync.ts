@@ -1006,12 +1006,24 @@ router.post(
                 : pctLeft < 35
                   ? 'REDUCED'
                   : 'NOMINAL';
+          // Append a new datapoint to the trend so the chart immediately
+          // reflects the impact of the approval. If today's date is already
+          // present (e.g. multiple drawdowns in the same day), replace it
+          // rather than stacking duplicate entries.
+          const today = new Date().toISOString().slice(0, 10);
+          const prevHistory = pool.trendHistory ?? [];
+          const lastPoint = prevHistory[prevHistory.length - 1];
+          const newTrendHistory =
+            lastPoint && lastPoint.date === today
+              ? [...prevHistory.slice(0, -1), { date: today, level: newLevel }]
+              : [...prevHistory, { date: today, level: newLevel }];
           const [pp] = await tx
             .update(commandReservePoolsTable)
             .set({
               currentLevel: newLevel,
               status: newStatus,
               lastDrawdown: new Date(),
+              trendHistory: newTrendHistory,
               updatedAt: new Date(),
             })
             .where(eq(commandReservePoolsTable.id, pool.id))

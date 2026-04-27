@@ -1,5 +1,6 @@
 import { ClassificationBadge } from '@imp/components/classification-badge';
 import {
+  appendReserveTrendPoint,
   type DrawdownRequest,
   type ReservePool,
   type ReserveTrendPoint,
@@ -680,6 +681,7 @@ export default function StrategicReserves() {
               currentLevel: newLevel,
               status: newStatus,
               lastDrawdown: new Date().toISOString(),
+              trendHistory: appendReserveTrendPoint(p.trendHistory, newLevel),
             };
           })
         : prev.data.pools;
