@@ -10,33 +10,39 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
+import { organizationsTable } from './organizations';
 
 // ─── CERTIFICATION PROGRAMS ───────────────────────────────────────────────────
 
-export const certificationProgramsTable = pgTable('certification_programs', {
-  id: serial('id').primaryKey(),
-  slug: text('slug').notNull().unique(),
-  name: text('name').notNull(),
-  shortName: text('short_name'),
-  administeredBy: text('administered_by'),
-  programType: text('program_type', {
-    enum: ['state', 'federal', 'municipal', 'third_party'],
-  })
-    .notNull()
-    .default('state'),
-  targetDemographic: text('target_demographic'),
-  description: text('description'),
-  eligibilitySummary: text('eligibility_summary'),
-  applicationUrl: text('application_url'),
-  renewalIntervalMonths: integer('renewal_interval_months'),
-  isActive: boolean('is_active').notNull().default(true),
-  requiresAttorneyReview: boolean('requires_attorney_review').notNull().default(false),
-  requiresCpaReview: boolean('requires_cpa_review').notNull().default(false),
-  notes: text('notes'),
-  metadata: jsonb('metadata'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
+export const certificationProgramsTable = pgTable(
+  'certification_programs',
+  {
+    id: serial('id').primaryKey(),
+    orgId: integer('org_id').references(() => organizationsTable.id, { onDelete: 'set null' }),
+    slug: text('slug').notNull().unique(),
+    name: text('name').notNull(),
+    shortName: text('short_name'),
+    administeredBy: text('administered_by'),
+    programType: text('program_type', {
+      enum: ['state', 'federal', 'municipal', 'third_party'],
+    })
+      .notNull()
+      .default('state'),
+    targetDemographic: text('target_demographic'),
+    description: text('description'),
+    eligibilitySummary: text('eligibility_summary'),
+    applicationUrl: text('application_url'),
+    renewalIntervalMonths: integer('renewal_interval_months'),
+    isActive: boolean('is_active').notNull().default(true),
+    requiresAttorneyReview: boolean('requires_attorney_review').notNull().default(false),
+    requiresCpaReview: boolean('requires_cpa_review').notNull().default(false),
+    notes: text('notes'),
+    metadata: jsonb('metadata'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [index('cert_programs_org_idx').on(t.orgId)],
+);
 
 // ─── CERTIFICATION REQUIREMENTS ───────────────────────────────────────────────
 
@@ -114,7 +120,10 @@ export const certificationStatusTable = pgTable(
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
-  (t) => [index('cert_status_program_idx').on(t.programId)],
+  (t) => [
+    index('cert_status_program_idx').on(t.programId),
+    index('cert_status_overall_status_idx').on(t.overallStatus),
+  ],
 );
 
 // ─── CERTIFICATION TASKS ──────────────────────────────────────────────────────

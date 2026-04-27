@@ -5,11 +5,18 @@ const root = path.resolve(__dirname, '..', '..');
 const apiClientReactSrc = path.resolve(root, 'lib', 'api-client-react', 'src');
 const apiZodSrc = path.resolve(root, 'lib', 'api-zod', 'src');
 
-// Our exports make assumptions about the title of the API being "Api" (i.e. generated output is `api.ts`).
-const titleTransformer: InputTransformerFn = (config) => {
+// Stamps the spec description so every generated file's JSDoc reflects when
+// types were last regenerated — makes regeneration runs traceable in git.
+// Also normalises the API title to "Api" so generated output lands in `api.ts`.
+const regeneratedOn = new Date().toISOString().slice(0, 10);
+
+const withRegenerationStamp: InputTransformerFn = (config) => {
   config.info ??= {};
   config.info.title = 'Api';
-
+  config.info.description = (config.info.description ?? '')
+    .replace(/\ntypes-regenerated: \d{4}-\d{2}-\d{2}/, '')
+    .trimEnd()
+    + `\ntypes-regenerated: ${regeneratedOn}`;
   return config;
 };
 
@@ -18,7 +25,7 @@ export default defineConfig({
     input: {
       target: './openapi.yaml',
       override: {
-        transformer: titleTransformer,
+        transformer: withRegenerationStamp,
       },
     },
     output: {
@@ -44,7 +51,7 @@ export default defineConfig({
     input: {
       target: './openapi.yaml',
       override: {
-        transformer: titleTransformer,
+        transformer: withRegenerationStamp,
       },
     },
     output: {

@@ -66,11 +66,25 @@ export const corridorsTable = pgTable(
     geopoliticalRisk: integer('geopolitical_risk').default(0),
     weatherRisk: integer('weather_risk').default(0),
     pirateRisk: integer('pirate_risk').default(0),
+    status: text('status', { enum: ['operational', 'monitored', 'restricted', 'deprecated'] })
+      .notNull()
+      .default('operational'),
+    controlledByNation: text('controlled_by_nation'),
+    sanctionedTerritory: integer('sanctioned_territory').notNull().default(0),
+    alternativeRouteIds: jsonb('alternative_route_ids').$type<number[]>().default([]),
+    insurancePremiumModifier: numeric('insurance_premium_modifier', {
+      precision: 5,
+      scale: 4,
+    }).default('1.0000'),
     metadata: jsonb('metadata'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
-  (t) => [index('corridors_org_idx').on(t.orgId)],
+  (t) => [
+    index('corridors_org_idx').on(t.orgId),
+    index('corridors_status_idx').on(t.status),
+    index('corridors_risk_level_idx').on(t.riskLevel),
+  ],
 );
 
 export const maritimeVesselsTable = pgTable(

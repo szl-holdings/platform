@@ -5,7 +5,7 @@
  * Platform API for the SZL Holdings DreamStack suite.
 Full coverage across all active domains: auth, billing, terra, vessels, alloy/AI, holdings,
 admin, reports, exports, notifications, connectors, projects, files, observability, and more.
-
+types-regenerated: 2026-04-27
  * OpenAPI spec version: 0.3.0
  */
 import type { ExportAtlasProofBundle503Details } from './exportAtlasProofBundle503Details';

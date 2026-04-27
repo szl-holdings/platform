@@ -220,6 +220,38 @@ export const lyteReadinessItemsTable = pgTable('lyte_readiness_items', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
+export const lytePriorityItemsTable = pgTable(
+  'lyte_priority_items',
+  {
+    id: serial('id').primaryKey(),
+    workspaceId: integer('workspace_id').references(() => lyteWorkspacesTable.id, {
+      onDelete: 'cascade',
+    }),
+    campaignId: integer('campaign_id'),
+    title: text('title').notNull(),
+    description: text('description'),
+    priority: text('priority', { enum: ['critical', 'high', 'medium', 'low'] })
+      .notNull()
+      .default('medium'),
+    status: text('status', {
+      enum: ['open', 'in_progress', 'blocked', 'resolved', 'dismissed'],
+    })
+      .notNull()
+      .default('open'),
+    owner: text('owner'),
+    dueAt: timestamp('due_at'),
+    resolvedAt: timestamp('resolved_at'),
+    metadata: jsonb('metadata'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('lyte_priority_items_workspace_idx').on(t.workspaceId),
+    index('lyte_priority_items_campaign_idx').on(t.campaignId),
+    index('lyte_priority_items_status_idx').on(t.status),
+  ],
+);
+
 export const insertLyteActionSchema = createInsertSchema(lyteActionsTable).omit({
   id: true,
   createdAt: true,
@@ -478,3 +510,11 @@ export const insertLyteEscalationSchema = createInsertSchema(lyteEscalationsTabl
 });
 export type InsertLyteEscalation = z.infer<typeof insertLyteEscalationSchema>;
 export type LyteEscalation = typeof lyteEscalationsTable.$inferSelect;
+
+export const insertLytePriorityItemSchema = createInsertSchema(lytePriorityItemsTable).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertLytePriorityItem = z.infer<typeof insertLytePriorityItemSchema>;
+export type LytePriorityItem = typeof lytePriorityItemsTable.$inferSelect;
