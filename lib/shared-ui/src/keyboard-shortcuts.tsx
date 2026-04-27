@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { typography } from './tokens';
+import type { CommandItem } from './command-palette';
 
 export interface KeyboardShortcut {
   key: string;
@@ -77,6 +78,16 @@ export function useKeyboardShortcuts({
   return { showHelp, setShowHelp };
 }
 
+export function commandItemsToShortcuts(items: CommandItem[]): KeyboardShortcut[] {
+  return items
+    .filter((item) => !!item.shortcut)
+    .map((item) => ({
+      key: item.shortcut!,
+      description: item.label,
+      category: item.group ?? 'Actions',
+    }));
+}
+
 const UNIVERSAL_SHORTCUTS: KeyboardShortcut[] = [
   { key: '⌘K / Ctrl+K', description: 'Open command palette', category: 'Global' },
   { key: '/', description: 'Focus search', category: 'Global' },
@@ -90,6 +101,7 @@ interface ShortcutHelpOverlayProps {
   open: boolean;
   onClose: () => void;
   shortcuts?: KeyboardShortcut[];
+  commandItems?: CommandItem[];
   appName?: string;
   accentColor?: string;
 }
@@ -98,6 +110,7 @@ export function ShortcutHelpOverlay({
   open,
   onClose,
   shortcuts = [],
+  commandItems = [],
   appName,
   accentColor = '#8b7ac8',
 }: ShortcutHelpOverlayProps) {
@@ -114,7 +127,7 @@ export function ShortcutHelpOverlay({
 
   if (!open) return null;
 
-  const allShortcuts = [...UNIVERSAL_SHORTCUTS, ...shortcuts];
+  const allShortcuts = [...UNIVERSAL_SHORTCUTS, ...shortcuts, ...commandItemsToShortcuts(commandItems)];
   const categories: Record<string, KeyboardShortcut[]> = {};
   for (const s of allShortcuts) {
     const cat = s.category ?? 'Other';
@@ -322,12 +335,14 @@ export function ShortcutHelpOverlay({
 export function PowerUserProvider({
   children,
   shortcuts = [],
+  commandItems = [],
   appName,
   accentColor,
   onSearchFocus,
 }: {
   children: React.ReactNode;
   shortcuts?: KeyboardShortcut[];
+  commandItems?: CommandItem[];
   appName?: string;
   accentColor?: string;
   onSearchFocus?: () => void;
@@ -346,6 +361,7 @@ export function PowerUserProvider({
         {...(appName !== undefined ? { appName } : {})}
         {...(accentColor !== undefined ? { accentColor } : {})}
         shortcuts={shortcuts}
+        commandItems={commandItems}
       />
     </>
   );
