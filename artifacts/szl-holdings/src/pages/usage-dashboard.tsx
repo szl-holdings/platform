@@ -12,13 +12,15 @@ import {
   Filter,
   HardDrive,
   Loader2,
+  Pencil,
   Search,
   Shield,
   TrendingUp,
   Users,
+  X,
   Zap,
 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Bar,
   BarChart,
@@ -74,6 +76,8 @@ type AdminUsageRow = {
   storageBytes: number;
   storageMB: number;
   storageDataAvailable: boolean;
+  hasQuotaOverrides?: boolean;
+  quotaOverrides?: { apiCalls: number | null; members: number | null; storageMB: number | null };
   overages: {
     apiCalls: 'none' | 'warn' | 'over';
     members: 'none' | 'warn' | 'over';
@@ -153,11 +157,241 @@ function OverageBadge({ level }: { level: 'none' | 'warn' | 'over' }) {
   );
 }
 
+async function apiPut<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${API}${path}`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const json = await res.json();
+  return json.data ?? json;
+}
+
+function LimitInput({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <div>
+      <label className="block text-xs text-white/50 mb-1.5">{label}</label>
+      <input
+        type="number"
+        min={0}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#6366f1]/60 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+      />
+      <p className="text-[10px] text-white/25 mt-1">Leave blank to use plan default</p>
+    </div>
+  );
+}
+
+function TenantLimitsDrawer({
+  row,
+  onClose,
+  onSaved,
+}: {
+  row: AdminUsageRow;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [apiCalls, setApiCalls] = useState(
+    row.quotaOverrides?.apiCalls != null ? String(row.quotaOverrides.apiCalls) : '',
+  );
+  const [members, setMembers] = useState(
+    row.quotaOverrides?.members != null ? String(row.quotaOverrides.members) : '',
+  );
+  const [storageMB, setStorageMB] = useState(
+    row.quotaOverrides?.storageMB != null ? String(row.quotaOverrides.storageMB) : '',
+  );
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [onClose]);
+
+  async function handleSave() {
+    setSaving(true);
+    setError(null);
+    try {
+      await apiPut(`/admin/usage/${row.orgId}/limits`, {
+        apiCalls: apiCalls !== '' ? Number(apiCalls) : null,
+        members: members !== '' ? Number(members) : null,
+        storageMB: storageMB !== '' ? Number(storageMB) : null,
+      });
+      setSaved(true);
+      setTimeout(() => {
+        onSaved();
+        onClose();
+      }, 700);
+    } catch (err) {
+      setError((err as Error).message ?? 'Failed to save limits');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex">
+      <div
+        ref={overlayRef}
+        className="flex-1 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <m.div
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
+        transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+        className="w-full max-w-sm bg-[#0f0f0f] border-l border-white/10 flex flex-col"
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-[#6366f1]/20 flex items-center justify-center">
+              <Building2 size={13} className="text-[#6366f1]" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">{row.orgName}</p>
+              <p className="text-[10px] text-white/35 font-mono">{row.orgSlug}</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-white/30 hover:text-white/70 transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="px-5 py-3 border-b border-white/8 bg-white/2">
+          <div className="flex items-center gap-4 text-xs">
+            <span className="text-white/40">Plan</span>
+            <span
+              className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide"
+              style={{
+                backgroundColor: `${PLAN_COLOR[row.plan] ?? '#6b7280'}20`,
+                color: PLAN_COLOR[row.plan] ?? '#6b7280',
+              }}
+            >
+              {row.plan}
+            </span>
+            {row.hasQuotaOverrides && (
+              <span className="ml-auto text-[#6366f1] text-[10px] font-semibold flex items-center gap-1">
+                <Pencil size={9} />
+                Custom limits active
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
+          <div>
+            <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-4">
+              Current Usage
+            </h3>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: 'API Calls', value: fmt(row.apiCalls), overage: row.overages.apiCalls },
+                { label: 'Members', value: fmt(row.members), overage: row.overages.members },
+                {
+                  label: 'Storage',
+                  value: row.storageDataAvailable ? `${row.storageMB}MB` : '—',
+                  overage: row.overages.storage,
+                },
+              ].map((s) => (
+                <div key={s.label} className="bg-white/4 rounded-xl p-3 text-center">
+                  <p className="text-[10px] text-white/40 mb-1">{s.label}</p>
+                  <p className="text-sm font-bold font-mono">{s.value}</p>
+                  <div className="mt-1 flex justify-center">
+                    <OverageBadge level={s.overage} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-white/8 pt-5">
+            <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-4">
+              Quota Overrides
+            </h3>
+            <div className="space-y-4">
+              <LimitInput
+                label="API Calls / month"
+                value={apiCalls}
+                onChange={setApiCalls}
+                placeholder={`Plan default: ${row.planLimits.apiCalls != null ? fmt(row.planLimits.apiCalls) : 'Unlimited'}`}
+              />
+              <LimitInput
+                label="Member seats"
+                value={members}
+                onChange={setMembers}
+                placeholder={`Plan default: ${row.planLimits.members != null ? fmt(row.planLimits.members) : 'Unlimited'}`}
+              />
+              <LimitInput
+                label="Storage (MB)"
+                value={storageMB}
+                onChange={setStorageMB}
+                placeholder={`Plan default: ${row.planLimits.storageMB != null ? fmt(row.planLimits.storageMB) : 'Unlimited'}`}
+              />
+            </div>
+          </div>
+
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-xs text-red-400">
+              {error}
+            </div>
+          )}
+        </div>
+
+        <div className="px-5 py-4 border-t border-white/10 flex items-center gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 rounded-lg border border-white/10 text-xs text-white/50 hover:text-white hover:border-white/20 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving || saved}
+            className="flex-1 px-4 py-2.5 rounded-lg bg-[#6366f1] text-xs text-white font-semibold hover:bg-[#5254cc] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {saving ? (
+              <Loader2 size={12} className="animate-spin" />
+            ) : saved ? (
+              'Saved!'
+            ) : (
+              'Save Limits'
+            )}
+          </button>
+        </div>
+      </m.div>
+    </div>
+  );
+}
+
 function AdminUsageView({ days }: { days: number }) {
   const [planFilter, setPlanFilter] = useState('');
   const [orgSearch, setOrgSearch] = useState('');
   const [showPlanMenu, setShowPlanMenu] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [selectedRow, setSelectedRow] = useState<AdminUsageRow | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(orgSearch), 300);
@@ -180,6 +414,10 @@ function AdminUsageView({ days }: { days: number }) {
 
   const rows = adminQuery.data?.rows ?? [];
   const totals = adminQuery.data?.totals;
+
+  function handleRowClick(row: AdminUsageRow) {
+    setSelectedRow(row);
+  }
 
   const avgApiCalls = rows.length > 0 ? rows.reduce((s, r) => s + r.apiCalls, 0) / rows.length : 0;
 
@@ -323,7 +561,8 @@ function AdminUsageView({ days }: { days: number }) {
                   return (
                     <tr
                       key={row.orgId}
-                      className={`border-b border-white/5 last:border-0 transition-colors hover:bg-white/3 ${
+                      onClick={() => handleRowClick(row)}
+                      className={`border-b border-white/5 last:border-0 transition-colors cursor-pointer hover:bg-white/5 ${
                         row.isSpike
                           ? 'bg-amber-500/5'
                           : hasAnyOverage && Object.values(row.overages).some((v) => v === 'over')
@@ -340,6 +579,12 @@ function AdminUsageView({ days }: { days: number }) {
                             <p className="font-medium text-white/80">{row.orgName}</p>
                             <p className="text-white/30 font-mono">{row.orgSlug}</p>
                           </div>
+                          {row.hasQuotaOverrides && (
+                            <span className="ml-1 flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#6366f1]/15 text-[#6366f1]">
+                              <Pencil size={8} />
+                              Custom
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="px-3 py-3">
@@ -394,21 +639,26 @@ function AdminUsageView({ days }: { days: number }) {
                         )}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        {hasAnyOverage ? (
-                          Object.values(row.overages).some((v) => v === 'over') ? (
-                            <span className="inline-flex items-center gap-1 text-red-400">
-                              <AlertCircle size={12} />
-                              <span>Over limit</span>
-                            </span>
+                        <div className="flex items-center justify-end gap-2">
+                          {hasAnyOverage ? (
+                            Object.values(row.overages).some((v) => v === 'over') ? (
+                              <span className="inline-flex items-center gap-1 text-red-400">
+                                <AlertCircle size={12} />
+                                <span>Over limit</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-amber-400">
+                                <AlertTriangle size={12} />
+                                <span>Near limit</span>
+                              </span>
+                            )
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-amber-400">
-                              <AlertTriangle size={12} />
-                              <span>Near limit</span>
-                            </span>
-                          )
-                        ) : (
-                          <span className="text-white/25">—</span>
-                        )}
+                            <span className="text-white/25">—</span>
+                          )}
+                          <span className="text-white/20 group-hover:text-white/50 transition-colors">
+                            <Pencil size={11} />
+                          </span>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -424,6 +674,14 @@ function AdminUsageView({ days }: { days: number }) {
             </table>
           </div>
         </div>
+      )}
+
+      {selectedRow && (
+        <TenantLimitsDrawer
+          row={selectedRow}
+          onClose={() => setSelectedRow(null)}
+          onSaved={() => adminQuery.refetch()}
+        />
       )}
     </div>
   );

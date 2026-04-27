@@ -9,6 +9,9 @@
  *     org     — search by org name or slug (partial match)
  *     limit   — max rows (default: 100, max: 500)
  *     offset  — pagination offset (default: 0)
+ *
+ * PUT /api/admin/usage/:orgId/limits — set per-org quota overrides
+ *   Body: { apiCalls?: number | null, members?: number | null, storageMB?: number | null }
  */
 
 import {
@@ -16,6 +19,7 @@ import {
   organizationsTable,
   orgMembersTable,
   pool,
+  quotaConfigsTable,
   usageEventsTable,
   usersTable,
 } from '@szl-holdings/db';
@@ -25,10 +29,11 @@ import {
   handleRouteError,
   sendBadRequest,
   sendForbidden,
+  sendNotFound,
   sendSuccess,
 } from '../../lib/api-response.js';
 import { listQuerySchema, validateQuery } from '../../lib/validation.js';
-import { readLimiter } from '../../middlewares/rate-limiters.js';
+import { readLimiter, writeLimiter } from '../../middlewares/rate-limiters.js';
 
 function requireSuperAdmin(req: Request, res: Response): boolean {
   if (!req.user?.roles.includes('super_admin')) {
@@ -44,6 +49,12 @@ const PLAN_LIMITS: Record<string, { apiCalls: number; members: number; storageMB
   professional: { apiCalls: 100_000, members: 100, storageMB: 50_000 },
   enterprise: { apiCalls: Infinity, members: Infinity, storageMB: Infinity },
 };
+
+const QUOTA_FEATURE_KEYS = {
+  apiCalls: 'api.calls',
+  members: 'members',
+  storageMB: 'storage_mb',
+} as const;
 
 function overage(value: number, limit: number): 'none' | 'warn' | 'over' {
   if (limit === Infinity) return 'none';
@@ -126,7 +137,7 @@ export function register(router: IRouter): void {
 
         const orgIds = orgs.map((o) => o.id);
 
-        const [memberCounts, activeUserCounts, usageTotals] = await Promise.all([
+        const [memberCounts, activeUserCounts, usageTotals, quotaConfigs] = await Promise.all([
           db
             .select({ orgId: orgMembersTable.orgId, count: count() })
             .from(orgMembersTable)
@@ -161,11 +172,35 @@ export function register(router: IRouter): void {
               ),
             )
             .groupBy(usageEventsTable.orgId),
+
+          db
+            .select({
+              orgId: quotaConfigsTable.orgId,
+              featureKey: quotaConfigsTable.featureKey,
+              hardLimit: quotaConfigsTable.hardLimit,
+            })
+            .from(quotaConfigsTable)
+            .where(
+              and(
+                sql`${quotaConfigsTable.orgId} = ANY(${orgIds})`,
+                eq(quotaConfigsTable.isActive, true),
+                eq(quotaConfigsTable.periodType, 'month'),
+                eq(quotaConfigsTable.product, 'platform'),
+              ),
+            ),
         ]);
 
         const memberByOrg = new Map(memberCounts.map((r) => [r.orgId, Number(r.count)]));
         const activeByOrg = new Map(activeUserCounts.map((r) => [r.orgId, Number(r.count)]));
         const usageByOrg = new Map(usageTotals.map((r) => [r.orgId, r]));
+
+        const quotaByOrg = new Map<number, Record<string, number | null>>();
+        for (const qc of quotaConfigs) {
+          if (qc.orgId == null) continue;
+          if (!quotaByOrg.has(qc.orgId)) quotaByOrg.set(qc.orgId, {});
+          quotaByOrg.get(qc.orgId)![qc.featureKey] =
+            qc.hardLimit != null ? Number(qc.hardLimit) : null;
+        }
 
         let storagePollWorked = false;
         const storageByOrg = new Map<number, number>();
@@ -193,7 +228,32 @@ export function register(router: IRouter): void {
           const featureCount = usage?.featureCount ?? 0;
           const storageBytes = storageByOrg.get(org.id) ?? 0;
           const storageMB = Math.round(storageBytes / (1024 * 1024));
-          const limits = PLAN_LIMITS[org.plan] ?? PLAN_LIMITS.free;
+          const planDefaults = PLAN_LIMITS[org.plan] ?? PLAN_LIMITS.free;
+          const overrides = quotaByOrg.get(org.id) ?? {};
+
+          const effectiveLimits = {
+            apiCalls:
+              overrides[QUOTA_FEATURE_KEYS.apiCalls] != null
+                ? (overrides[QUOTA_FEATURE_KEYS.apiCalls] as number)
+                : planDefaults.apiCalls,
+            members:
+              overrides[QUOTA_FEATURE_KEYS.members] != null
+                ? (overrides[QUOTA_FEATURE_KEYS.members] as number)
+                : planDefaults.members,
+            storageMB:
+              overrides[QUOTA_FEATURE_KEYS.storageMB] != null
+                ? (overrides[QUOTA_FEATURE_KEYS.storageMB] as number)
+                : planDefaults.storageMB,
+          };
+
+          const hasOverrides =
+            overrides[QUOTA_FEATURE_KEYS.apiCalls] != null ||
+            overrides[QUOTA_FEATURE_KEYS.members] != null ||
+            overrides[QUOTA_FEATURE_KEYS.storageMB] != null;
+
+          const rawApiCallsOverride = overrides[QUOTA_FEATURE_KEYS.apiCalls] ?? null;
+          const rawMembersOverride = overrides[QUOTA_FEATURE_KEYS.members] ?? null;
+          const rawStorageMBOverride = overrides[QUOTA_FEATURE_KEYS.storageMB] ?? null;
 
           return {
             orgId: org.id,
@@ -209,15 +269,24 @@ export function register(router: IRouter): void {
             storageBytes,
             storageMB,
             storageDataAvailable: storagePollWorked,
+            hasQuotaOverrides: hasOverrides,
+            quotaOverrides: {
+              apiCalls: rawApiCallsOverride,
+              members: rawMembersOverride,
+              storageMB: rawStorageMBOverride,
+            },
             overages: {
-              apiCalls: overage(apiCalls, limits.apiCalls),
-              members: overage(members, limits.members),
-              storage: storagePollWorked ? overage(storageMB, limits.storageMB) : 'none',
+              apiCalls: overage(apiCalls, effectiveLimits.apiCalls),
+              members: overage(members, effectiveLimits.members),
+              storage: storagePollWorked
+                ? overage(storageMB, effectiveLimits.storageMB)
+                : 'none',
             },
             planLimits: {
-              apiCalls: limits.apiCalls === Infinity ? null : limits.apiCalls,
-              members: limits.members === Infinity ? null : limits.members,
-              storageMB: limits.storageMB === Infinity ? null : limits.storageMB,
+              apiCalls: effectiveLimits.apiCalls === Infinity ? null : effectiveLimits.apiCalls,
+              members: effectiveLimits.members === Infinity ? null : effectiveLimits.members,
+              storageMB:
+                effectiveLimits.storageMB === Infinity ? null : effectiveLimits.storageMB,
             },
           };
         });
@@ -254,6 +323,122 @@ export function register(router: IRouter): void {
         });
       } catch (err) {
         handleRouteError(res, err, 'Failed to aggregate admin usage data');
+      }
+    },
+  );
+
+  router.put(
+    '/admin/usage/:orgId/limits',
+    writeLimiter,
+    async (req: Request, res: Response) => {
+      try {
+        if (!requireSuperAdmin(req, res)) return;
+
+        const orgId = parseInt(req.params.orgId, 10);
+        if (Number.isNaN(orgId)) {
+          sendBadRequest(res, 'Invalid orgId');
+          return;
+        }
+
+        const org = await db
+          .select({ id: organizationsTable.id, plan: organizationsTable.plan })
+          .from(organizationsTable)
+          .where(eq(organizationsTable.id, orgId))
+          .limit(1);
+
+        if (org.length === 0) {
+          sendNotFound(res, 'Organization');
+          return;
+        }
+
+        const body = req.body as Record<string, unknown>;
+
+        type FieldSpec = { bodyKey: string; featureKey: string };
+        const FIELDS: FieldSpec[] = [
+          { bodyKey: 'apiCalls', featureKey: QUOTA_FEATURE_KEYS.apiCalls },
+          { bodyKey: 'members', featureKey: QUOTA_FEATURE_KEYS.members },
+          { bodyKey: 'storageMB', featureKey: QUOTA_FEATURE_KEYS.storageMB },
+        ];
+
+        for (const { bodyKey, featureKey } of FIELDS) {
+          if (!(bodyKey in body)) continue;
+
+          const raw = body[bodyKey];
+
+          if (raw === null) {
+            await db
+              .delete(quotaConfigsTable)
+              .where(
+                and(
+                  eq(quotaConfigsTable.orgId, orgId),
+                  eq(quotaConfigsTable.featureKey, featureKey),
+                  eq(quotaConfigsTable.periodType, 'month'),
+                  eq(quotaConfigsTable.product, 'platform'),
+                ),
+              );
+          } else {
+            const value = Number(raw);
+            if (!Number.isFinite(value) || value < 0) {
+              sendBadRequest(res, `Invalid value for ${bodyKey}: must be a non-negative number`);
+              return;
+            }
+
+            await db
+              .insert(quotaConfigsTable)
+              .values({
+                orgId,
+                featureKey,
+                product: 'platform',
+                periodType: 'month',
+                hardLimit: String(value),
+                hardLimitAction: 'block',
+                softLimitAction: 'notify',
+                isActive: true,
+              })
+              .onConflictDoUpdate({
+                target: [
+                  quotaConfigsTable.orgId,
+                  quotaConfigsTable.featureKey,
+                  quotaConfigsTable.periodType,
+                ],
+                set: {
+                  hardLimit: String(value),
+                  isActive: true,
+                  updatedAt: new Date(),
+                },
+              });
+          }
+        }
+
+        const saved = await db
+          .select({
+            featureKey: quotaConfigsTable.featureKey,
+            hardLimit: quotaConfigsTable.hardLimit,
+          })
+          .from(quotaConfigsTable)
+          .where(
+            and(
+              eq(quotaConfigsTable.orgId, orgId),
+              eq(quotaConfigsTable.isActive, true),
+              eq(quotaConfigsTable.periodType, 'month'),
+              eq(quotaConfigsTable.product, 'platform'),
+            ),
+          );
+
+        const savedMap = Object.fromEntries(
+          saved.map((r) => [r.featureKey, r.hardLimit != null ? Number(r.hardLimit) : null]),
+        );
+
+        sendSuccess(res, {
+          orgId,
+          limits: {
+            apiCalls: savedMap[QUOTA_FEATURE_KEYS.apiCalls] ?? null,
+            members: savedMap[QUOTA_FEATURE_KEYS.members] ?? null,
+            storageMB: savedMap[QUOTA_FEATURE_KEYS.storageMB] ?? null,
+          },
+        });
+      } catch (err) {
+        handleRouteError(res, err, 'Failed to update quota limits');
       }
     },
   );
