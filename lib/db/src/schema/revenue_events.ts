@@ -13,6 +13,8 @@ export const revenueEventsTable = pgTable(
         'subscription.trialing',
         'subscription.past_due',
         'subscription.canceled',
+        'subscription.upgraded',
+        'subscription.downgraded',
         'invoice.paid',
         'invoice.payment_failed',
         'pilot.created',

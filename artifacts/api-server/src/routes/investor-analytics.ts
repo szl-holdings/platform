@@ -22,9 +22,13 @@
  * Churn Rate — (subscriptions canceled in month / cumulative active customers
  *               at start of month) × 100.  Returns 0 when no customers exist.
  *
- * NRR (Net Revenue Retention) — (currentMRR / prevMonthMRR) × 100.
- *   This is a simplified single-period NRR proxy using plan revenue,
- *   not a full expansion/contraction/churn decomposition.
+ * NRR (Net Revenue Retention) — full four-component decomposition.
+ *   startingMrr     = prevMonthMRR (MRR at start of trailing calendar month)
+ *   expansionMrr    = Σ subscription.upgraded event amounts in the period
+ *   contractionMrr  = Σ subscription.downgraded event amounts in the period
+ *   churnedMrr      = Σ priceMonthly of subs canceled during the period
+ *   endingMrr       = startingMrr + expansionMrr − contractionMrr − churnedMrr
+ *   nrr             = endingMrr / startingMrr × 100
  *   Returns null when prevMonthMRR = 0 (no billing baseline).
  *
  * LTV — (avgMRR per customer) / avgMonthlyChurnRate.
@@ -156,6 +160,27 @@ router.get(
           ),
         )
         .orderBy(asc(revenueEventsTable.occurredAt));
+
+      // ── NRR Component Events (upgrades / downgrades) ─────────────────────
+      // These events carry the MRR delta as `amount` (positive for upgrades,
+      // positive for downgrades — direction is captured by the event type).
+      const nrrPeriodStart = monthStart(addMonths(now, -1));
+      const nrrComponentEvents = await db
+        .select({
+          amount: revenueEventsTable.amount,
+          eventType: revenueEventsTable.eventType,
+        })
+        .from(revenueEventsTable)
+        .where(
+          and(
+            inArray(revenueEventsTable.eventType, [
+              'subscription.upgraded',
+              'subscription.downgraded',
+            ]),
+            gte(revenueEventsTable.occurredAt, nrrPeriodStart),
+            lte(revenueEventsTable.occurredAt, now),
+          ),
+        );
 
       // ── Organizations (customers) ────────────────────────────────────────
       const orgs = await db
@@ -292,11 +317,57 @@ router.get(
       // Churn rate (current month)
       const currentChurn = churnByMonth[monthKey(now)] || 0;
 
-      // NRR (Net Revenue Retention): simplified single-period proxy.
-      // = (currentMRR / prevMonthMRR) × 100.
-      // null = no prior billing baseline (avoids a misleading "100%" when no data exists)
-      const nrr: number | null =
-        prevMrr > 0 ? parseFloat(((currentMrr / prevMrr) * 100).toFixed(1)) : null;
+      // NRR Breakdown — full four-component decomposition.
+      //
+      //   startingMrr     = MRR at the start of the trailing month period
+      //   expansionMrr    = MRR gained from upgrades (subscription.upgraded events)
+      //   contractionMrr  = MRR lost from downgrades (subscription.downgraded events)
+      //   churnedMrr      = MRR lost from cancellations (subs canceled during period)
+      //   endingMrr       = startingMrr + expansionMrr − contractionMrr − churnedMrr
+      //   nrr             = endingMrr / startingMrr × 100
+      //
+      // When prevMrr = 0 all values are null (no baseline to compute against).
+
+      const nrrPeriodStartKey = monthKey(nrrPeriodStart);
+
+      // Expansion MRR: sum of upgrade event amounts
+      const expansionMrr = nrrComponentEvents
+        .filter((e) => e.eventType === 'subscription.upgraded')
+        .reduce((sum, e) => sum + parseFloat(String(e.amount || 0)), 0);
+
+      // Contraction MRR: sum of downgrade event amounts
+      const contractionMrr = nrrComponentEvents
+        .filter((e) => e.eventType === 'subscription.downgraded')
+        .reduce((sum, e) => sum + parseFloat(String(e.amount || 0)), 0);
+
+      // Churned MRR: plan revenue from subs canceled in the trailing month period
+      const churnedMrr = allSubs
+        .filter((s) => {
+          if (!s.canceledAt) return false;
+          const cancelMonth = monthKey(s.canceledAt);
+          return cancelMonth >= nrrPeriodStartKey && cancelMonth <= monthKey(now);
+        })
+        .reduce((sum, s) => sum + parseFloat(String(s.priceMonthly || 0)), 0);
+
+      const nrrBreakdown =
+        prevMrr > 0
+          ? {
+              startingMrr: Math.round(prevMrr * 100) / 100,
+              expansionMrr: Math.round(expansionMrr * 100) / 100,
+              contractionMrr: Math.round(contractionMrr * 100) / 100,
+              churnedMrr: Math.round(churnedMrr * 100) / 100,
+              nrr: parseFloat(
+                (
+                  ((prevMrr + expansionMrr - contractionMrr - churnedMrr) / prevMrr) *
+                  100
+                ).toFixed(1),
+              ),
+            }
+          : null;
+
+      // Top-level nrr scalar for backward-compat (sourced from the breakdown when available,
+      // otherwise falls back to the old simplified proxy).
+      const nrr: number | null = nrrBreakdown?.nrr ?? null;
 
       // LTV: avgMrrPerCustomer / monthlyChurnRate (standard SaaS formula using real billing data)
       const avgMrrPerCustomer = totalCustomers > 0 ? currentMrr / totalCustomers : 0;
@@ -352,6 +423,7 @@ router.get(
           customerGrowth,
           churnRate: currentChurn,
           nrr,
+          nrrBreakdown,
           cacPayback,
           ltvCacRatio: ltv_cac,
           activeUsers30d: userStats[0]?.active30d ?? 0,

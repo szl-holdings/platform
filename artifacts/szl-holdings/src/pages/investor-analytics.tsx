@@ -97,6 +97,91 @@ function MetricCard({
   );
 }
 
+type NrrBreakdown = {
+  startingMrr: number;
+  expansionMrr: number;
+  contractionMrr: number;
+  churnedMrr: number;
+  nrr: number;
+} | null;
+
+function NrrCard({ nrr, breakdown }: { nrr: number | null | undefined; breakdown: NrrBreakdown }) {
+  const [expanded, setExpanded] = useState(false);
+  const isNoData = nrr == null || !Number.isFinite(nrr);
+  const color = isNoData ? MUTED : nrr >= 100 ? EMERALD : AMBER;
+
+  return (
+    <div className="bg-[#111318] border border-[#1e2230] rounded-xl p-5">
+      <p className="text-xs text-[#7a8099] uppercase tracking-widest mb-2">NRR</p>
+      <p className="text-2xl font-bold mb-1" style={{ color: isNoData ? '#52525b' : color }}>
+        {isNoData ? NO_DATA : `${nrr.toFixed(1)}%`}
+      </p>
+      {isNoData && <p className="text-xs text-[#3a3d4a]">Insufficient data to compute</p>}
+      {!isNoData && !expanded && (
+        <button
+          onClick={() => setExpanded(true)}
+          className="text-xs text-[#7a8099] hover:text-[#c2a55a] transition-colors cursor-pointer"
+        >
+          Net revenue retention · Show breakdown ▾
+        </button>
+      )}
+      {!isNoData && expanded && (
+        <div className="mt-3 space-y-1.5">
+          <div className="flex justify-between text-xs">
+            <span className="text-[#7a8099]">Starting MRR</span>
+            <span className="text-zinc-300 font-medium">
+              {fmtCurrency(breakdown?.startingMrr)}
+            </span>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span className="text-emerald-400">+ Expansion</span>
+            <span className="text-emerald-400 font-medium">
+              {breakdown && breakdown.expansionMrr > 0
+                ? `+${fmtCurrency(breakdown.expansionMrr)}`
+                : fmtCurrency(breakdown?.expansionMrr ?? 0)}
+            </span>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span className="text-amber-400">− Contraction</span>
+            <span className="text-amber-400 font-medium">
+              {breakdown && breakdown.contractionMrr > 0
+                ? `−${fmtCurrency(breakdown.contractionMrr)}`
+                : fmtCurrency(breakdown?.contractionMrr ?? 0)}
+            </span>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span className="text-rose-400">− Churn</span>
+            <span className="text-rose-400 font-medium">
+              {breakdown && breakdown.churnedMrr > 0
+                ? `−${fmtCurrency(breakdown.churnedMrr)}`
+                : fmtCurrency(breakdown?.churnedMrr ?? 0)}
+            </span>
+          </div>
+          <div className="border-t border-[#1e2230] pt-1.5 flex justify-between text-xs">
+            <span className="text-[#7a8099]">Ending MRR</span>
+            <span className="font-semibold" style={{ color }}>
+              {breakdown
+                ? fmtCurrency(
+                    breakdown.startingMrr +
+                      breakdown.expansionMrr -
+                      breakdown.contractionMrr -
+                      breakdown.churnedMrr,
+                  )
+                : NO_DATA}
+            </span>
+          </div>
+          <button
+            onClick={() => setExpanded(false)}
+            className="text-xs text-[#7a8099] hover:text-[#c2a55a] transition-colors cursor-pointer mt-1"
+          >
+            Hide breakdown ▴
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function SectionHeader({ title, sub }: { title: string; sub?: string }) {
   return (
     <div className="mb-4">
@@ -582,12 +667,7 @@ export default function InvestorAnalytics() {
                     sub="Monthly customer churn"
                     color={(summary.churnRate ?? 0) < 5 ? EMERALD : ROSE}
                   />
-                  <MetricCard
-                    label="NRR"
-                    value={fmtPct(summary.nrr)}
-                    sub={summary.nrr != null ? 'Net revenue retention' : undefined}
-                    color={summary.nrr != null ? (summary.nrr >= 100 ? EMERALD : AMBER) : MUTED}
-                  />
+                  <NrrCard nrr={summary.nrr} breakdown={summary.nrrBreakdown ?? null} />
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
