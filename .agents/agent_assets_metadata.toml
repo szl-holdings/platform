@@ -629,3 +629,27 @@ id = "Xc9M7g7PZt1H5BIoOn4xH"
 uri = "file://a11oy-launch-content.zip"
 type = "unspecified"
 title = "A11oy Launch Content Package"
+
+[[outputs]]
+id = "NRAJLyIA7l9l5fFnmsz-l"
+uri = "file://screenshots/a11oy-demo-video.mp4"
+type = "video"
+title = "A11oy Command Fabric — Demo Video (74s)"
+
+[[outputs]]
+id = "nflNPiGcIt67grchgAynS"
+uri = "file://screenshots/content-linkedin.md"
+type = "text"
+title = "LinkedIn Post — A11oy Command Fabric"
+
+[[outputs]]
+id = "Fmg1M1xDBAqAs__zAP930"
+uri = "file://screenshots/content-medium.md"
+type = "text"
+title = "Medium Post — Governed Intelligence Layer"
+
+[[outputs]]
+id = "ahBrEL9U_6uTmzWgJcmbm"
+uri = "file://screenshots/content-substack.md"
+type = "text"
+title = "Substack Post — Governed Autonomy"
