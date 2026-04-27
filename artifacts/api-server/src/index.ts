@@ -45,6 +45,7 @@ import './lib/terra-nyc-ingestion';
 import './lib/terra-nyc-extended-ingestion';
 import { startOtIcsStreamFeed } from './jobs/ot-ics-stream-feed';
 import { isSeedDataAllowed, resolveRuntimeMode } from '@szl-holdings/config';
+import { shutdownTracer } from '@szl-holdings/observability';
 import { otelReady, registerGraphQLHandler } from './app.js';
 import { buildGraphQLMiddleware } from './graphql/index.js';
 import { initCognitiveTelemetry } from './lib/cognitive-telemetry.js';
@@ -888,6 +889,13 @@ export async function bootstrap(
     }
 
     await flushSentry(2000).catch(() => {});
+
+    try {
+      await shutdownTracer(4000);
+      logger.info('OTel tracer flushed');
+    } catch (err) {
+      logger.warn({ err }, 'Error flushing OTel tracer');
+    }
 
     stopDomainNotificationGenerators();
     stopSelfMonitoring();

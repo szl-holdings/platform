@@ -321,3 +321,29 @@ export function getInMemorySpans() {
 export function flushInMemorySpans() {
   inMemoryExporter?.reset();
 }
+
+/**
+ * Flush all pending spans and shut down the tracer provider.
+ *
+ * Call this during graceful process shutdown so that spans buffered in the
+ * BatchSpanProcessor are exported to the collector before the process exits.
+ * Without this, any spans accumulated since the last batch flush interval are
+ * silently dropped.
+ *
+ * The call is idempotent and resolves even when OTel was never initialized.
+ * A timeout guard prevents the flush from blocking shutdown indefinitely if
+ * the collector is unreachable.
+ */
+export async function shutdownTracer(timeoutMs = 5_000): Promise<void> {
+  if (!_provider) return;
+  try {
+    await Promise.race([
+      _provider.shutdown(),
+      new Promise<void>((_, reject) =>
+        setTimeout(() => reject(new Error('OTel provider shutdown timed out')), timeoutMs),
+      ),
+    ]);
+  } catch {
+    // Best-effort: a timeout or export error must never block process exit.
+  }
+}

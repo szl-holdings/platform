@@ -206,6 +206,45 @@ The `szl.correlation.id` is the thread that connects every span in a business ev
 
 ---
 
+## Environment Variable Configuration
+
+These environment variables control OTel trace export. All are optional — if none are set, the SDK initializes in-process only (no external export) so trace context propagation still works in-process.
+
+| Variable | Required for export | Description |
+|---|---|---|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Yes (primary) | OTLP/HTTP endpoint for the collector. Accepts any OTLP-compatible backend: Jaeger (`http://jaeger:4318`), Grafana Tempo (`https://tempo.example.com`), Honeycomb (`https://api.honeycomb.io`), Datadog (`https://trace.agent.datadoghq.com`), etc. If the URL does not end in `/v1/traces`, the SDK appends it automatically. |
+| `OTLP_ENDPOINT` | — | Legacy alias for `OTEL_EXPORTER_OTLP_ENDPOINT`. Both are checked; `OTLP_ENDPOINT` takes precedence when both are set. |
+| `OTEL_SERVICE_NAME` | — | Value written to the `service.name` resource attribute (default: `szl-api-server`). Use the canonical names from the Service Names table above. |
+| `OTEL_CONSOLE_EXPORT` | — | Set to `"true"` to additionally log every span to stdout via `ConsoleSpanExporter`. Useful during local development. |
+| `OTEL_IN_MEMORY` | — | Set to `"true"` in non-production environments to keep the last 2 000 spans in the in-process `InMemorySpanExporter`. Enabled automatically when `NODE_ENV !== "production"`. |
+| `AZURE_APP_INSIGHTS_CONNECTION_STRING` | — | Azure Application Insights connection string. Recognised by the API server bootstrap (`artifacts/api-server/src/lib/observability.ts`) and reported in the health endpoint; a dedicated Azure Monitor OTLP exporter would need to be added to `lib/observability/src/otel.ts` to activate it. |
+| `NEW_RELIC_LICENSE_KEY` | — | New Relic licence key. Recognised by the API server bootstrap and reported in the health endpoint; activate it by pointing `OTEL_EXPORTER_OTLP_ENDPOINT` at the New Relic OTLP endpoint and setting the key as the `api-key` header via `OTEL_EXPORTER_OTLP_HEADERS`. |
+
+### Quick-start examples
+
+```bash
+# Jaeger (self-hosted, OTLP/HTTP default port)
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+
+# Grafana Tempo (cloud)
+OTEL_EXPORTER_OTLP_ENDPOINT=https://tempo-prod-04-prod-us-east-0.grafana.net:443
+
+# Honeycomb
+OTEL_EXPORTER_OTLP_ENDPOINT=https://api.honeycomb.io
+# (set OTEL_EXPORTER_OTLP_HEADERS="x-honeycomb-team=<api-key>" separately)
+
+# Datadog Agent
+OTEL_EXPORTER_OTLP_ENDPOINT=http://datadog-agent:4318
+
+# Console only (dev)
+OTEL_CONSOLE_EXPORT=true
+```
+
+> **Spans exported when endpoint is configured**
+> `alloy.workflow.start`, `alloy.workflow.step.execute`, `alloy.workflow.approval.receive`, `alloy.workflow.complete`, and all HTTP API spans via `http.server.request`. All spans carry `szl.*` attributes per this spec.
+
+---
+
 ## Collector and Export Configuration
 
 ```yaml
