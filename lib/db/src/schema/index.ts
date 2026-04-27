@@ -79,6 +79,7 @@ export * from './forge';
 export * from './fusion_cortex';
 export * from './fund_inbound_deals';
 export * from './fund_ops';
+export * from './geo_intel';
 export * from './governance';
 export * from './guardian_tools';
 export * from './health_checks';

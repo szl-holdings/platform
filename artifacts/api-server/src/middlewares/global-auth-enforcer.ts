@@ -388,6 +388,9 @@ const PUBLIC_PREFIXES = [
   // Geospatial intelligence feed — read-only GET endpoints returning live-
   // mutating GeoPin data for the Command Geospatial Intelligence map. Public
   // so the map loads without a session (same model as /api/agent-mesh/).
+  // PATCH/POST/DELETE on /api/geo-intel/pins persist to `geo_intel_pins` and
+  // are NOT covered by this prefix bypass — they enforce auth via requireAuth
+  // + denyIfReadOnly inside routes/geo-intel.ts.
   "/api/geo-intel/",
   // Decision Runtime v1 — per-card GET endpoints (GET /api/decisions/cards/:id).
   // Public so the Decision Center demo works without a session; route handlers

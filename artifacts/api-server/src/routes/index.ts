@@ -157,9 +157,12 @@ router.use(lazyMatch("/risk-evidence", () => import("./risk-evidence"), "risk-ev
 // destructive side-effects beyond rewriting the per-org telemetry slice).
 router.use(lazyMatch("/agent-mesh", () => import("./agent-mesh"), "agent-mesh"));
 
-// Geospatial intelligence feed — public read-only. Serves live-mutating GeoPin
-// data for the Command Geospatial Intelligence map. Mounted before
-// guardianPolicyCheck so the map loads without auth.
+// Geospatial intelligence feed — Serves live-mutating GeoPin data for the
+// Command Geospatial Intelligence map. GET /pins and /meta are public read-only
+// so the map loads without auth (mounted before guardianPolicyCheck and
+// whitelisted in global-auth-enforcer.ts). PATCH/POST/DELETE on /pins persist
+// to `geo_intel_pins` and require an authenticated, write-capable session via
+// requireAuth + denyIfReadOnly enforced inside the route handlers.
 router.use(lazyMatch("/geo-intel", () => import("./geo-intel"), "geo-intel"));
 
 // RF Intelligence — satellite AIS correlation engine, anomaly detection, and geo-intel surface.

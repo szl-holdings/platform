@@ -30,8 +30,31 @@ import { type IRouter, type Request, type Response, Router } from 'express';
 import { type Incident, type IncidentSeverity } from '../services/sentra-store';
 import { computeStatus, type ThreatLevel } from '../services/infrastructure-service';
 import { getActiveRfAnomalies, type RfAnomaly } from '../services/rf-intel-store';
+import { authMiddleware, denyIfReadOnly } from '../middlewares/auth';
+import {
+  deletePin as storeDeletePin,
+  getAllPins as storeGetAllPins,
+  getPin as storeGetPin,
+  updatePin as storeUpdatePin,
+  upsertPin as storeUpsertPin,
+  type Classification as StoreClassification,
+  type GeoLayer as StoreGeoLayer,
+  type GeoPin as StoreGeoPin,
+  type GeoThreat as StoreGeoThreat,
+  type PinUpdate,
+} from '../services/geo-intel-store';
 
 const router: IRouter = Router();
+
+// PATCH/POST/DELETE on /geo-intel/pins persist to `geo_intel_pins` and would
+// otherwise allow unauthenticated tampering with operational map state because
+// the `/api/geo-intel/` prefix is whitelisted in global-auth-enforcer.ts for
+// the read-only GETs. Write paths therefore explicitly require an authenticated
+// session via `requireAuth`, and `denyIfReadOnly` further blocks the
+// executive_viewer / anonymous_visitor canonical roles. Same pattern as
+// action-store.ts and alloy-policy-compiler.ts.
+const requireAuth = authMiddleware({ required: true });
+const denyReadOnly = denyIfReadOnly();
 
 type GeoLayer = 'SIGINT' | 'INFRASTRUCTURE' | 'PERSONNEL' | 'WEATHER' | 'RF_INTEL';
 type GeoThreat = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'NOMINAL';
@@ -336,111 +359,21 @@ function buildInfraSummary(
   return base.join(' ');
 }
 
-// ─── Static PERSONNEL + WEATHER baseline pins ────────────────────────────────
+// ─── PERSONNEL + WEATHER baseline pins ───────────────────────────────────────
 //
-// No live source for individual session tracking or weather APIs at this time.
-// These represent operational baselines and are listed as such.
+// These pins originate from operational baselines (no live external source
+// for individual session tracking or weather APIs at this time) but are
+// fully mutable via the PATCH/POST/DELETE endpoints below. They live in
+// `services/geo-intel-store.ts`, which hydrates from `geo_intel_pins` on
+// boot and writes through to the DB on every mutation so threat-level
+// changes survive API server restarts.
 
-const PERSONNEL_PINS: GeoPin[] = [
-  {
-    id: 'geo-personnel-001',
-    layer: 'PERSONNEL',
-    lat: 40.7128,
-    lng: -74.006,
-    label: 'EXEC — New York',
-    sublabel: 'Authorized administrator',
-    classification: 'SOVEREIGN',
-    threat: 'NOMINAL',
-    stale: false,
-    updatedAt: new Date().toISOString(),
-    detail: {
-      summary: 'C-suite executive access via Zero Trust NAC. MFA verified. Session active. Read-only mode.',
-      source: 'Entra ID / Conditional Access',
-      timestamp: 'T-00:02',
-      confidence: 100,
-      tags: ['C-SUITE', 'MFA-VERIFIED', 'READ-ONLY'],
-    },
-  },
-  {
-    id: 'geo-personnel-002',
-    layer: 'PERSONNEL',
-    lat: 34.0522,
-    lng: -118.2437,
-    label: 'DEVOPS — Los Angeles',
-    sublabel: 'Infrastructure engineer',
-    classification: 'RESTRICTED',
-    threat: 'NOMINAL',
-    stale: false,
-    updatedAt: new Date().toISOString(),
-    detail: {
-      summary: 'Senior DevOps engineer. Active deployment pipeline session. Azure RBAC: Contributor on Compute RG. Approved change window.',
-      source: 'Entra ID / Azure RBAC',
-      timestamp: 'T-00:08',
-      confidence: 100,
-      tags: ['DEVOPS', 'CONTRIBUTOR', 'CHANGE-WINDOW'],
-    },
-  },
-  {
-    id: 'geo-personnel-003',
-    layer: 'PERSONNEL',
-    lat: 48.8566,
-    lng: 2.3522,
-    label: 'ANALYST — Paris',
-    sublabel: 'Security analyst — read-only',
-    classification: 'CONFIDENTIAL',
-    threat: 'NOMINAL',
-    stale: false,
-    updatedAt: new Date().toISOString(),
-    detail: {
-      summary: 'SOC analyst reviewing threat telemetry. Reader role on Aegis SIEM workspace. No anomalies.',
-      source: 'Entra ID / Aegis Access Log',
-      timestamp: 'T-00:14',
-      confidence: 100,
-      tags: ['SOC', 'READER', 'NOMINAL'],
-    },
-  },
-];
-
-const WEATHER_PINS: GeoPin[] = [
-  {
-    id: 'geo-weather-001',
-    layer: 'WEATHER',
-    lat: 38.9072,
-    lng: -77.0369,
-    label: 'WEATHER-DC — Thunderstorm risk',
-    sublabel: 'AZ-1 availability concern',
-    classification: 'OPEN',
-    threat: 'LOW',
-    stale: false,
-    updatedAt: new Date().toISOString(),
-    detail: {
-      summary: 'Severe thunderstorm watch in DC metro. Azure US East AZ-1 may experience power fluctuation. HA failover pre-warmed to AZ-2.',
-      source: 'NOAA API / Azure Health',
-      timestamp: 'T-00:30',
-      confidence: 78,
-      tags: ['WEATHER', 'AZ-RISK', 'PRE-WARMED'],
-    },
-  },
-  {
-    id: 'geo-weather-002',
-    layer: 'WEATHER',
-    lat: 35.6762,
-    lng: 139.6503,
-    label: 'WEATHER-Tokyo — Seismic alert',
-    sublabel: 'APAC edge node monitoring',
-    classification: 'OPEN',
-    threat: 'LOW',
-    stale: false,
-    updatedAt: new Date().toISOString(),
-    detail: {
-      summary: 'M4.2 earthquake registered near Tokyo. Azure Japan East CDN edge operating normally. No infrastructure impact detected.',
-      source: 'JMA / Azure Health Advisories',
-      timestamp: 'T-01:15',
-      confidence: 90,
-      tags: ['SEISMIC', 'MONITORING', 'NO-IMPACT'],
-    },
-  },
-];
+async function getPersistentPins(): Promise<GeoPin[]> {
+  const stored = await storeGetAllPins();
+  // Cast: store's GeoPin shape is identical to this file's GeoPin shape
+  // (intentionally mirrored). The cast simply forwards the values.
+  return stored as unknown as GeoPin[];
+}
 
 // ─── RF Intel pins from satellite correlation engine ──────────────────────────
 //
@@ -503,10 +436,13 @@ function currentGeneration(): number {
 // ─── Route handlers ───────────────────────────────────────────────────────────
 
 router.get('/geo-intel/pins', async (_req: Request, res: Response) => {
-  const sigintPins = await buildSigintPins();
+  const [sigintPins, persistentPins] = await Promise.all([
+    buildSigintPins(),
+    getPersistentPins(),
+  ]);
   const infraPins = buildInfraPins();
   const rfPins = buildRfIntelPins();
-  const allPins: GeoPin[] = [...sigintPins, ...infraPins, ...PERSONNEL_PINS, ...WEATHER_PINS, ...rfPins];
+  const allPins: GeoPin[] = [...sigintPins, ...infraPins, ...persistentPins, ...rfPins];
 
   // Filter out any stale pins. Resolved incidents are excluded upstream;
   // only non-resolved incidents, live infra, personnel, weather, and RF anomalies are included.
@@ -521,10 +457,13 @@ router.get('/geo-intel/pins', async (_req: Request, res: Response) => {
 });
 
 router.get('/geo-intel/meta', async (_req: Request, res: Response) => {
-  const sigintPins = await buildSigintPins();
+  const [sigintPins, persistentPins] = await Promise.all([
+    buildSigintPins(),
+    getPersistentPins(),
+  ]);
   const infraPins = buildInfraPins();
   const rfPins = buildRfIntelPins();
-  const all = [...sigintPins, ...infraPins, ...PERSONNEL_PINS, ...WEATHER_PINS, ...rfPins];
+  const all = [...sigintPins, ...infraPins, ...persistentPins, ...rfPins];
   const active = all.filter((p) => !p.stale);
 
   const status = computeStatus();
@@ -546,6 +485,190 @@ router.get('/geo-intel/meta', async (_req: Request, res: Response) => {
     },
     nextPollMs: POLL_INTERVAL_MS,
   });
+});
+
+// ─── Mutation endpoints (write-through to geo_intel_pins) ────────────────────
+//
+// Operators can change a pin's threat level (and other display fields), add
+// brand-new ephemeral pins, or remove resolved signals. Every mutation is
+// persisted to `geo_intel_pins` so the change survives an API server restart.
+
+const VALID_LAYERS = new Set<StoreGeoLayer>([
+  'SIGINT',
+  'INFRASTRUCTURE',
+  'PERSONNEL',
+  'WEATHER',
+  'RF_INTEL',
+]);
+const VALID_THREATS = new Set<StoreGeoThreat>([
+  'CRITICAL',
+  'HIGH',
+  'MEDIUM',
+  'LOW',
+  'NOMINAL',
+]);
+const VALID_CLASSIFICATIONS = new Set<StoreClassification>([
+  'OPEN',
+  'RESTRICTED',
+  'CONFIDENTIAL',
+  'SOVEREIGN',
+]);
+
+function isString(v: unknown): v is string {
+  return typeof v === 'string';
+}
+function isNumber(v: unknown): v is number {
+  return typeof v === 'number' && Number.isFinite(v);
+}
+function isStringArray(v: unknown): v is string[] {
+  return Array.isArray(v) && v.every((x) => typeof x === 'string');
+}
+
+function parsePinUpdate(body: unknown): PinUpdate | { error: string } {
+  if (!body || typeof body !== 'object') return { error: 'body must be an object' };
+  const b = body as Record<string, unknown>;
+  const patch: PinUpdate = {};
+
+  if (b.layer !== undefined) {
+    if (!isString(b.layer) || !VALID_LAYERS.has(b.layer as StoreGeoLayer)) {
+      return { error: 'layer must be one of SIGINT|INFRASTRUCTURE|PERSONNEL|WEATHER|RF_INTEL' };
+    }
+    patch.layer = b.layer as StoreGeoLayer;
+  }
+  if (b.lat !== undefined) {
+    if (!isNumber(b.lat)) return { error: 'lat must be a finite number' };
+    patch.lat = b.lat;
+  }
+  if (b.lng !== undefined) {
+    if (!isNumber(b.lng)) return { error: 'lng must be a finite number' };
+    patch.lng = b.lng;
+  }
+  if (b.label !== undefined) {
+    if (!isString(b.label)) return { error: 'label must be a string' };
+    patch.label = b.label;
+  }
+  if (b.sublabel !== undefined) {
+    if (!isString(b.sublabel)) return { error: 'sublabel must be a string' };
+    patch.sublabel = b.sublabel;
+  }
+  if (b.classification !== undefined) {
+    if (
+      !isString(b.classification) ||
+      !VALID_CLASSIFICATIONS.has(b.classification as StoreClassification)
+    ) {
+      return { error: 'classification must be one of OPEN|RESTRICTED|CONFIDENTIAL|SOVEREIGN' };
+    }
+    patch.classification = b.classification as StoreClassification;
+  }
+  if (b.threat !== undefined) {
+    if (!isString(b.threat) || !VALID_THREATS.has(b.threat as StoreGeoThreat)) {
+      return { error: 'threat must be one of CRITICAL|HIGH|MEDIUM|LOW|NOMINAL' };
+    }
+    patch.threat = b.threat as StoreGeoThreat;
+  }
+  if (b.stale !== undefined) {
+    if (typeof b.stale !== 'boolean') return { error: 'stale must be a boolean' };
+    patch.stale = b.stale;
+  }
+  if (b.detail !== undefined) {
+    if (!b.detail || typeof b.detail !== 'object') return { error: 'detail must be an object' };
+    const d = b.detail as Record<string, unknown>;
+    const detail: PinUpdate['detail'] = {};
+    if (d.summary !== undefined) {
+      if (!isString(d.summary)) return { error: 'detail.summary must be a string' };
+      detail.summary = d.summary;
+    }
+    if (d.source !== undefined) {
+      if (!isString(d.source)) return { error: 'detail.source must be a string' };
+      detail.source = d.source;
+    }
+    if (d.timestamp !== undefined) {
+      if (!isString(d.timestamp)) return { error: 'detail.timestamp must be a string' };
+      detail.timestamp = d.timestamp;
+    }
+    if (d.confidence !== undefined) {
+      if (!isNumber(d.confidence)) return { error: 'detail.confidence must be a number' };
+      detail.confidence = Math.round(d.confidence);
+    }
+    if (d.tags !== undefined) {
+      if (!isStringArray(d.tags)) return { error: 'detail.tags must be an array of strings' };
+      detail.tags = d.tags;
+    }
+    patch.detail = detail;
+  }
+  return patch;
+}
+
+router.patch('/geo-intel/pins/:id', requireAuth, denyReadOnly, async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const parsed = parsePinUpdate(req.body);
+  if ('error' in parsed) {
+    res.status(400).json({ error: parsed.error });
+    return;
+  }
+  const updated = await storeUpdatePin(id, parsed);
+  if (!updated) {
+    res.status(404).json({ error: `pin ${id} not found` });
+    return;
+  }
+  res.json({ pin: updated });
+});
+
+router.post('/geo-intel/pins', requireAuth, denyReadOnly, async (req: Request, res: Response) => {
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  const required = ['id', 'layer', 'lat', 'lng', 'label', 'sublabel', 'classification', 'threat'];
+  for (const k of required) {
+    if (body[k] === undefined) {
+      res.status(400).json({ error: `${k} is required` });
+      return;
+    }
+  }
+  const parsed = parsePinUpdate(body);
+  if ('error' in parsed) {
+    res.status(400).json({ error: parsed.error });
+    return;
+  }
+  if (!isString(body.id) || body.id.length === 0) {
+    res.status(400).json({ error: 'id must be a non-empty string' });
+    return;
+  }
+  const detail = {
+    summary: parsed.detail?.summary ?? '',
+    source: parsed.detail?.source ?? 'Operator-added',
+    timestamp: parsed.detail?.timestamp ?? 'T-00:00',
+    confidence: parsed.detail?.confidence ?? 80,
+    tags: parsed.detail?.tags ?? [],
+  };
+  const pin: StoreGeoPin = {
+    id: body.id,
+    layer: parsed.layer ?? 'SIGINT',
+    lat: parsed.lat ?? 0,
+    lng: parsed.lng ?? 0,
+    label: parsed.label ?? body.id,
+    sublabel: parsed.sublabel ?? '',
+    classification: parsed.classification ?? 'OPEN',
+    threat: parsed.threat ?? 'NOMINAL',
+    stale: parsed.stale ?? false,
+    updatedAt: new Date().toISOString(),
+    detail,
+  };
+  const existing = await storeGetPin(pin.id);
+  if (existing) {
+    res.status(409).json({ error: `pin ${pin.id} already exists` });
+    return;
+  }
+  const created = await storeUpsertPin(pin);
+  res.status(201).json({ pin: created });
+});
+
+router.delete('/geo-intel/pins/:id', requireAuth, denyReadOnly, async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const removed = await storeDeletePin(id);
+  if (!removed) {
+    res.status(404).json({ error: `pin ${id} not found` });
+    return;
+  }
+  res.status(204).end();
 });
 
 export default router;
