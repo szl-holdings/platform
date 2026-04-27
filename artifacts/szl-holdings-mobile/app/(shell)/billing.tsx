@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
+import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 import {
@@ -49,6 +50,11 @@ type UsageSummary = {
     storageBytes: number;
     storageMB: number;
   };
+};
+
+type StripeConfig = {
+  stripeConnected: boolean;
+  stripeMode: 'live' | 'test' | 'mock';
 };
 
 const DEMO_SUBSCRIPTION: SubscriptionStatus = {
@@ -116,19 +122,40 @@ export default function BillingScreen() {
   const colors = useColors();
   const [portalLoading, setPortalLoading] = useState(false);
 
-  const subscriptionQuery = useQuery<SubscriptionStatus | null>({
-    queryKey: ['mobile-billing-subscription'],
+  // Probe Stripe mode first — when the server reports a live Stripe key, we
+  // ignore EXPO_PUBLIC_BILLING_DEMO_MODE and serve real data even if the env
+  // flag is still set. This keeps the demo fixtures useful for offline/local
+  // dev without overriding live billing in deployed builds.
+  const stripeConfigQuery = useQuery<StripeConfig | null>({
+    queryKey: ['mobile-billing-stripe-config'],
     queryFn: async () => {
-      if (isDemoMode()) return DEMO_SUBSCRIPTION;
+      try {
+        return await apiFetch<StripeConfig>('/api/billing/stripe-config');
+      } catch {
+        return null;
+      }
+    },
+    staleTime: 5 * 60_000,
+  });
+
+  const stripeLive = stripeConfigQuery.data?.stripeMode === 'live';
+  const effectiveDemoMode = isDemoMode() && !stripeLive;
+
+  const subscriptionQuery = useQuery<SubscriptionStatus | null>({
+    // Include effectiveDemoMode in the key so the query refetches once
+    // stripe-config resolves and flips us off demo data.
+    queryKey: ['mobile-billing-subscription', effectiveDemoMode],
+    queryFn: async () => {
+      if (effectiveDemoMode) return DEMO_SUBSCRIPTION;
       return apiFetch<SubscriptionStatus>('/api/billing/subscription-status');
     },
     staleTime: 30_000,
   });
 
   const invoicesQuery = useQuery<StripeInvoice[]>({
-    queryKey: ['mobile-billing-invoices'],
+    queryKey: ['mobile-billing-invoices', effectiveDemoMode],
     queryFn: async () => {
-      if (isDemoMode()) return DEMO_INVOICES;
+      if (effectiveDemoMode) return DEMO_INVOICES;
       return apiFetch<StripeInvoice[]>('/api/billing/stripe-invoices');
     },
     staleTime: 60_000,
@@ -150,17 +177,19 @@ export default function BillingScreen() {
   const sub = subscriptionQuery.data?.subscription ?? null;
   const invoices = invoicesQuery.data ?? [];
   const usage = usageQuery.data?.summary;
+  const showDemoBadge = effectiveDemoMode;
 
   async function openPortal() {
-    if (isDemoMode()) {
+    if (effectiveDemoMode) {
       Alert.alert('Demo Mode', 'The Stripe billing portal is not available in demo mode. Configure a live Stripe key to enable this feature.');
       return;
     }
     setPortalLoading(true);
     try {
+      const returnUrl = Linking.createURL('billing');
       const res = await apiFetch<{ url: string }>('/api/billing/portal-session', {
         method: 'POST',
-        body: JSON.stringify({ returnUrl: 'szlholdings://billing' }),
+        body: JSON.stringify({ returnUrl }),
       });
       const url = res.url;
       if (url) {
@@ -176,6 +205,7 @@ export default function BillingScreen() {
   }
 
   function onRefresh() {
+    stripeConfigQuery.refetch();
     subscriptionQuery.refetch();
     invoicesQuery.refetch();
     usageQuery.refetch();
@@ -196,7 +226,7 @@ export default function BillingScreen() {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Billing</Text>
-        {isDemoMode() && (
+        {showDemoBadge && (
           <View style={styles.demoBadge}>
             <Feather name="zap" size={11} color="#f59e0b" />
             <Text style={styles.demoBadgeText}>Demo</Text>
