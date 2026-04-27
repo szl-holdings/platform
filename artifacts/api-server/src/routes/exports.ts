@@ -24,7 +24,7 @@ import {
   sendNotFound,
   sendSuccess,
 } from '../lib/api-response';
-import { type ExportColumn, fetchExportBufferFromStorage, generateCsv, generatePdf, generateXlsx, getExportBuffer, getExportByToken, getExportJobStatus, listExportHistory, runExport, storeExportBuffer } from '../lib/export-service';
+import { type ExportColumn, generateCsv, generatePdf, generateXlsx, getExportBuffer, getExportByToken, getExportJobStatus, getOrFetchExportBuffer, listExportHistory, runExport, storeExportBuffer } from '../lib/export-service';
 import { checkExportSafe } from '../lib/export-safety';
 import { isFlagEnabled } from '../lib/platform-flags';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
@@ -1336,7 +1336,7 @@ router.post(
           const fileSizeBytes = buffer.length;
           const rowCount = rows.length;
 
-          // Persist to GCS for durable re-downloads after server restarts.
+          // Persist to object storage for durable re-downloads after server restarts.
           const ext = format === 'pdf' ? 'pdf' : format === 'xlsx' ? 'xlsx' : 'csv';
           const exportContentType =
             format === 'pdf'
@@ -1345,12 +1345,19 @@ router.post(
                 ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                 : 'text/csv';
           let storageKey: string | null = null;
-          try {
-            const { ObjectStorageService: OSS } = await import('../lib/objectStorage');
-            const oss = new OSS();
-            storageKey = await oss.uploadBuffer(buffer, `exports/${exportId}.${ext}`, exportContentType);
-          } catch {
-            // GCS not configured — in-memory buffer will serve
+          const bucketId = process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID;
+          if (bucketId) {
+            try {
+              const { objectStorageClient: gcs } = await import('../lib/objectStorage');
+              const objectName = `exports/${exportId}.${ext}`;
+              await gcs.bucket(bucketId).file(objectName).save(buffer, {
+                contentType: exportContentType,
+                resumable: false,
+              });
+              storageKey = objectName;
+            } catch {
+              // Storage not available — in-memory buffer will serve
+            }
           }
 
           // Build a durable download URL stored in the DB so clients can
@@ -1369,7 +1376,7 @@ router.post(
             })
             .where(eq(exportJobsTable.exportId, exportId));
 
-          storeExportBuffer(exportId, buffer, expiresAt, format, name);
+          storeExportBuffer(exportId, buffer, expiresAt, format, name, storageKey);
 
           await db
             .insert(auditEventsTable)
@@ -1465,20 +1472,10 @@ router.get(
         return sendError(res, 'Export download link has expired', 410, 'EXPORT_EXPIRED');
       }
       if (await checkExportSafe(res, exportId, `export:job`)) return;
-      // Try in-memory buffer first (fast path for recent exports), then GCS fallback.
-      let fileBuffer: Buffer | null = null;
-      let fileFormat = job.format ?? 'csv';
-      let fileName = job.name ?? 'export';
-
-      const stored = getExportBuffer(exportId);
-      if (stored) {
-        fileBuffer = stored.buffer;
-        fileFormat = stored.format;
-        fileName = stored.name;
-      } else if (job.storageKey) {
-        // In-memory buffer evicted — fetch from durable GCS storage.
-        fileBuffer = await fetchExportBufferFromStorage(job.storageKey);
-      }
+      // Try in-memory buffer first (fast path for recent exports), then storage fallback.
+      const fileFormat = job.format ?? 'csv';
+      const fileName = job.name ?? 'export';
+      const fileBuffer = await getOrFetchExportBuffer(exportId, job.storageKey);
 
       if (!fileBuffer) {
         return sendError(
@@ -1842,20 +1839,37 @@ router.get('/exports/download/:token', async (req: Request, res: Response) => {
       return;
     }
 
-    res.json({
-      exportId: job.exportId,
-      name: job.name,
-      dataSource: job.dataSource,
-      format: job.format,
-      status: job.status,
-      rowCount: job.rowCount,
-      fileSizeBytes: job.fileSizeBytes,
-      expiresAt: job.expiresAt,
-      completedAt: job.completedAt,
-      triggeredByEmail: job.triggeredByEmail,
-      message:
-        'Re-trigger the export to download the file — files are generated on-demand and not stored server-side for security.',
-    });
+    const fileFormat = job.format ?? 'csv';
+    const fileName = job.name ?? 'export';
+    const fileBuffer = await getOrFetchExportBuffer(job.exportId, job.storageKey);
+
+    if (!fileBuffer) {
+      sendError(
+        res,
+        'Export file is no longer available. Please re-export.',
+        410,
+        'BUFFER_EXPIRED',
+      );
+      return;
+    }
+
+    const ext = fileFormat === 'pdf' ? 'pdf' : fileFormat === 'xlsx' ? 'xlsx' : 'csv';
+    const contentType =
+      fileFormat === 'pdf'
+        ? 'application/pdf'
+        : fileFormat === 'xlsx'
+          ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          : 'text/csv';
+    const safeName = fileName.replace(/[^a-z0-9\-_.]/gi, '-').toLowerCase();
+    res.setHeader('Content-Type', contentType);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${safeName}-${job.exportId.slice(0, 8)}.${ext}"`,
+    );
+    res.setHeader('X-Export-Id', job.exportId);
+    res.setHeader('X-Row-Count', String(job.rowCount ?? 0));
+    res.setHeader('X-Export-Expires', job.expiresAt?.toISOString() ?? '');
+    res.send(fileBuffer);
   } catch (err) {
     handleRouteError(res, err, 'Failed to fetch export');
   }

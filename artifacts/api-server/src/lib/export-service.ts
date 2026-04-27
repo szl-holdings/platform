@@ -11,16 +11,20 @@
 import { Document, Page, renderToBuffer, StyleSheet, Text, View } from '@react-pdf/renderer';
 import { db, exportJobsTable, usersTable } from '@szl-holdings/db';
 import { randomUUID } from 'node:crypto';
-import { and, desc, eq, gte, ilike, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, ilike, isNotNull, lte, sql } from 'drizzle-orm';
 import React from 'react';
 import * as XLSX from 'xlsx';
 import { logger } from './logger';
-import { ObjectStorageService } from './objectStorage';
+import { objectStorageClient, ObjectStorageService } from './objectStorage';
 
 const _MAX_ROWS_INLINE = 10_000;
 const EXPORT_TTL_MS = 24 * 60 * 60 * 1000;
 
 const objectStorageService = new ObjectStorageService();
+
+function getExportBucketId(): string | null {
+  return process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID ?? null;
+}
 
 // ─── In-memory buffer store (serves re-downloads within 24h) ─────────────────
 interface StoredBuffer {
@@ -28,15 +32,72 @@ interface StoredBuffer {
   expiresAt: Date;
   format: string;
   name: string;
+  storageKey: string | null;
 }
 const exportBufferStore = new Map<string, StoredBuffer>();
 
+async function deleteFromStorage(storageKey: string): Promise<void> {
+  if (!storageKey) return;
+  try {
+    if (storageKey.startsWith('/objects/')) {
+      // Legacy format produced by ObjectStorageService.uploadBuffer() — resolve via service.
+      // We don't pass ignoreNotFound since we catch all errors below.
+      const file = await objectStorageService.getObjectEntityFile(storageKey);
+      await file.delete();
+      return;
+    }
+    // New format: raw bucket object name (DEFAULT_OBJECT_STORAGE_BUCKET_ID)
+    const bucketId = getExportBucketId();
+    if (!bucketId) return;
+    await objectStorageClient.bucket(bucketId).file(storageKey).delete();
+  } catch {
+    // Ignore all errors (including 404) — cleanup is best-effort.
+  }
+}
+
+/**
+ * Delete a batch of expired export storage objects and mark each row's storageKey
+ * as NULL after a successful deletion so the same rows aren't reprocessed.
+ * Ordered by id ASC for deterministic pagination.
+ */
+async function cleanupExpiredDbExports(): Promise<void> {
+  try {
+    const expired = await db
+      .select({ exportId: exportJobsTable.exportId, storageKey: exportJobsTable.storageKey })
+      .from(exportJobsTable)
+      .where(
+        and(
+          isNotNull(exportJobsTable.storageKey),
+          lte(exportJobsTable.expiresAt, new Date()),
+        ),
+      )
+      .orderBy(exportJobsTable.id)
+      .limit(200);
+    for (const row of expired) {
+      if (!row.storageKey) continue;
+      await deleteFromStorage(row.storageKey);
+      // Mark as cleaned so this row is not reprocessed on next interval tick.
+      await db
+        .update(exportJobsTable)
+        .set({ storageKey: null })
+        .where(eq(exportJobsTable.exportId, row.exportId))
+        .catch(() => {});
+    }
+  } catch {
+    // Best-effort cleanup; don't throw.
+  }
+}
+
 const cleanupInterval = setInterval(
-  () => {
+  async () => {
     const now = new Date();
     for (const [key, val] of exportBufferStore) {
-      if (val.expiresAt < now) exportBufferStore.delete(key);
+      if (val.expiresAt < now) {
+        exportBufferStore.delete(key);
+        if (val.storageKey) await deleteFromStorage(val.storageKey);
+      }
     }
+    await cleanupExpiredDbExports();
   },
   60 * 60 * 1000,
 );
@@ -48,8 +109,9 @@ export function storeExportBuffer(
   expiresAt: Date,
   format: string,
   name: string,
+  storageKey: string | null = null,
 ) {
-  exportBufferStore.set(exportId, { buffer, expiresAt, format, name });
+  exportBufferStore.set(exportId, { buffer, expiresAt, format, name, storageKey });
 }
 
 export function getExportBuffer(exportId: string): StoredBuffer | null {
@@ -57,22 +119,56 @@ export function getExportBuffer(exportId: string): StoredBuffer | null {
   if (!entry) return null;
   if (entry.expiresAt < new Date()) {
     exportBufferStore.delete(exportId);
+    if (entry.storageKey) deleteFromStorage(entry.storageKey).catch(() => {});
     return null;
   }
   return entry;
 }
 
 /**
- * Try to fetch an export buffer from GCS when the in-memory store doesn't have it.
- * Returns null if GCS is not configured or the object doesn't exist.
+ * Try to fetch an export buffer from object storage when the in-memory store doesn't have it.
+ *
+ * Supports two storageKey formats:
+ *  - Legacy "/objects/exports/<id>.<ext>" — written by ObjectStorageService.uploadBuffer()
+ *    (the async enqueue path before this task). Delegates to downloadObjectToBuffer().
+ *  - New "exports/<id>.<ext>" — raw GCS object name stored directly in
+ *    DEFAULT_OBJECT_STORAGE_BUCKET_ID. Written by persistExportToStorage().
+ *
+ * Returns null if storage is not configured or the object does not exist.
  */
 export async function fetchExportBufferFromStorage(storageKey: string | null | undefined): Promise<Buffer | null> {
   if (!storageKey) return null;
   try {
-    return await objectStorageService.downloadObjectToBuffer(storageKey);
+    // Legacy format produced by ObjectStorageService.uploadBuffer()
+    if (storageKey.startsWith('/objects/')) {
+      return await objectStorageService.downloadObjectToBuffer(storageKey);
+    }
+    // New format: raw bucket object name
+    const bucketId = getExportBucketId();
+    if (!bucketId) return null;
+    const file = objectStorageClient.bucket(bucketId).file(storageKey);
+    const [exists] = await file.exists();
+    if (!exists) return null;
+    const [contents] = await file.download();
+    return contents;
   } catch {
     return null;
   }
+}
+
+/**
+ * Primary entry point for serving an export buffer. Checks the in-memory store first
+ * (fast path for recent exports), then falls back to object storage when the buffer
+ * has been evicted — e.g. after a server restart. Returns null only if the file is
+ * genuinely unavailable in both stores.
+ */
+export async function getOrFetchExportBuffer(
+  exportId: string,
+  storageKey?: string | null,
+): Promise<Buffer | null> {
+  const stored = getExportBuffer(exportId);
+  if (stored) return stored.buffer;
+  return fetchExportBufferFromStorage(storageKey);
 }
 
 export async function getExportJobStatus(exportId: string) {
@@ -289,14 +385,17 @@ export async function generatePdf(
 }
 
 /**
- * Persist an export buffer to GCS for durable download across server restarts.
- * Returns the normalized storageKey or null if GCS is not configured.
+ * Persist an export buffer to object storage for durable download across server restarts.
+ * Uses DEFAULT_OBJECT_STORAGE_BUCKET_ID directly as the bucket. Returns the GCS object name
+ * (e.g. "exports/<exportId>.csv") used as storageKey, or null if storage is not configured.
  */
 async function persistExportToStorage(
   exportId: string,
   buffer: Buffer,
   format: 'csv' | 'pdf' | 'xlsx',
 ): Promise<string | null> {
+  const bucketId = getExportBucketId();
+  if (!bucketId) return null;
   const ext = format === 'pdf' ? 'pdf' : format === 'xlsx' ? 'xlsx' : 'csv';
   const contentType =
     format === 'pdf'
@@ -304,12 +403,15 @@ async function persistExportToStorage(
       : format === 'xlsx'
         ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         : 'text/csv';
-  const subPath = `exports/${exportId}.${ext}`;
+  const objectName = `exports/${exportId}.${ext}`;
   try {
-    const storageKey = await objectStorageService.uploadBuffer(buffer, subPath, contentType);
-    return storageKey;
+    await objectStorageClient.bucket(bucketId).file(objectName).save(buffer, {
+      contentType,
+      resumable: false,
+    });
+    return objectName;
   } catch {
-    // GCS not configured or upload failed — in-memory buffer will serve instead.
+    // Storage not available or upload failed — in-memory buffer will serve instead.
     return null;
   }
 }
@@ -363,7 +465,7 @@ export async function runExport(options: ExportOptions): Promise<ExportResult> {
       })
       .where(eq(exportJobsTable.exportId, exportId));
 
-    storeExportBuffer(exportId, buffer, expiresAt, options.format, options.name);
+    storeExportBuffer(exportId, buffer, expiresAt, options.format, options.name, storageKey);
 
     logger.info(
       {
