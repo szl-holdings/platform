@@ -1,7 +1,7 @@
 import { useStandardQuery } from '@szl-holdings/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, '') || '';
 const API = `${BASE}/api`;
@@ -45,12 +45,35 @@ interface ReportStats {
   byDomain: Array<{ domain: string; count: number }>;
 }
 
+type DeliveryStatus = 'pending' | 'sent' | 'delivered' | 'opened' | 'failed';
+
+interface Distribution {
+  distributionId: string;
+  reportId: string;
+  recipientEmail: string;
+  recipientName: string | null;
+  channel: string;
+  status: DeliveryStatus;
+  sentAt: string | null;
+  openedAt: string | null;
+  errorMessage: string | null;
+  createdAt: string;
+}
+
 const STATUS_COLORS: Record<ReportStatus, string> = {
   draft: 'text-zinc-400 bg-zinc-800',
   review: 'text-amber-400 bg-amber-950',
   approved: 'text-emerald-400 bg-emerald-950',
   distributed: 'text-blue-400 bg-blue-950',
   archived: 'text-zinc-500 bg-zinc-900',
+};
+
+const DELIVERY_STATUS_STYLES: Record<DeliveryStatus, string> = {
+  pending: 'text-zinc-400 bg-zinc-800',
+  sent: 'text-blue-400 bg-blue-950',
+  delivered: 'text-emerald-400 bg-emerald-950',
+  opened: 'text-purple-400 bg-purple-950',
+  failed: 'text-red-400 bg-red-950',
 };
 
 const DOMAIN_LABELS: Record<string, string> = {
@@ -216,6 +239,103 @@ function ReportRow({
         </div>
       </div>
     </motion.div>
+  );
+}
+
+function DistributionLog({
+  reportId,
+  autoRefreshMs,
+}: {
+  reportId: string;
+  autoRefreshMs?: number;
+}) {
+  const [distributions, setDistributions] = useState<Distribution[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchDistributions = async () => {
+    try {
+      const result = await apiFetch(`/reports/${reportId}/distributions`);
+      const rows: Distribution[] = Array.isArray(result?.data) ? result.data : Array.isArray(result) ? result : [];
+      setDistributions(rows);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load distribution log');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDistributions();
+    if (autoRefreshMs) {
+      const interval = setInterval(fetchDistributions, autoRefreshMs);
+      return () => clearInterval(interval);
+    }
+  }, [reportId, autoRefreshMs]);
+
+  if (loading) {
+    return <p className="text-xs text-zinc-600 py-2">Loading delivery log...</p>;
+  }
+
+  if (error) {
+    return <p className="text-xs text-red-400 py-2">{error}</p>;
+  }
+
+  if (!distributions || distributions.length === 0) {
+    return <p className="text-xs text-zinc-600 py-2">No distribution records found.</p>;
+  }
+
+  const sentCount = distributions.filter((d) => d.status === 'sent' || d.status === 'delivered' || d.status === 'opened').length;
+  const failedCount = distributions.filter((d) => d.status === 'failed').length;
+  const pendingCount = distributions.filter((d) => d.status === 'pending').length;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-3 mb-2">
+        <span className="text-xs text-zinc-500">{distributions.length} recipient{distributions.length !== 1 ? 's' : ''}</span>
+        {sentCount > 0 && (
+          <span className="text-xs px-1.5 py-0.5 rounded bg-blue-950 text-blue-400">{sentCount} sent</span>
+        )}
+        {failedCount > 0 && (
+          <span className="text-xs px-1.5 py-0.5 rounded bg-red-950 text-red-400">{failedCount} failed</span>
+        )}
+        {pendingCount > 0 && (
+          <span className="text-xs px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">{pendingCount} pending</span>
+        )}
+        <button
+          onClick={fetchDistributions}
+          className="ml-auto text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+          title="Refresh"
+        >
+          ↻ Refresh
+        </button>
+      </div>
+      <div className="divide-y divide-zinc-800 border border-zinc-800 rounded-lg overflow-hidden">
+        {distributions.map((d) => (
+          <div key={d.distributionId} className="px-3 py-2 bg-zinc-900/60">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-zinc-300 truncate flex-1">{d.recipientEmail}</span>
+              <span
+                className={`text-xs px-1.5 py-0.5 rounded shrink-0 ${DELIVERY_STATUS_STYLES[d.status] || 'text-zinc-400 bg-zinc-800'}`}
+              >
+                {d.status}
+              </span>
+            </div>
+            {d.sentAt && (
+              <p className="text-xs text-zinc-600 mt-0.5">
+                Sent {new Date(d.sentAt).toLocaleString()}
+              </p>
+            )}
+            {d.status === 'failed' && d.errorMessage && (
+              <p className="text-xs text-red-400 mt-1 bg-red-950/40 px-2 py-1 rounded">
+                {d.errorMessage}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -414,6 +534,7 @@ function DistributeModal({
   const [emails, setEmails] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [distributed, setDistributed] = useState(false);
 
   const handleDistribute = async () => {
     const emailList = emails
@@ -434,7 +555,7 @@ function DistributeModal({
           channel: 'email',
         }),
       });
-      onDone();
+      setDistributed(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to distribute');
     } finally {
@@ -444,38 +565,58 @@ function DistributeModal({
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-6 w-full max-w-md">
+      <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <h2 className="text-lg font-bold text-zinc-100 mb-4">Distribute Report</h2>
-        <div className="space-y-3">
-          <div>
-            <label className="text-xs text-zinc-500 block mb-1">
-              Recipient Emails (one per line or comma-separated)
-            </label>
-            <textarea
-              value={emails}
-              onChange={(e) => setEmails(e.target.value)}
-              rows={4}
-              placeholder="recipient@example.com"
-              className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500 placeholder:text-zinc-600"
-            />
-          </div>
-          {error && <p className="text-xs text-red-400 bg-red-950 px-3 py-2 rounded">{error}</p>}
-        </div>
-        <div className="flex justify-end gap-3 mt-4">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm text-zinc-400 hover:text-zinc-200 border border-zinc-700 rounded-lg"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleDistribute}
-            disabled={loading}
-            className="px-4 py-2 text-sm font-medium text-zinc-900 bg-blue-500 rounded-lg hover:bg-blue-400 disabled:opacity-50"
-          >
-            {loading ? 'Distributing...' : 'Distribute'}
-          </button>
-        </div>
+
+        {!distributed ? (
+          <>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-zinc-500 block mb-1">
+                  Recipient Emails (one per line or comma-separated)
+                </label>
+                <textarea
+                  value={emails}
+                  onChange={(e) => setEmails(e.target.value)}
+                  rows={4}
+                  placeholder="recipient@example.com"
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-zinc-500 placeholder:text-zinc-600"
+                />
+              </div>
+              {error && <p className="text-xs text-red-400 bg-red-950 px-3 py-2 rounded">{error}</p>}
+            </div>
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 text-sm text-zinc-400 hover:text-zinc-200 border border-zinc-700 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDistribute}
+                disabled={loading}
+                className="px-4 py-2 text-sm font-medium text-zinc-900 bg-blue-500 rounded-lg hover:bg-blue-400 disabled:opacity-50"
+              >
+                {loading ? 'Distributing...' : 'Distribute'}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="mb-4">
+              <p className="text-xs text-zinc-500 uppercase tracking-widest mb-2">Delivery Status</p>
+              <DistributionLog reportId={reportId} autoRefreshMs={5000} />
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={onDone}
+                className="px-4 py-2 text-sm font-medium text-zinc-900 bg-[#c2a55a] rounded-lg hover:bg-[#d4bc82]"
+              >
+                Done
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -871,6 +1012,15 @@ export default function ReportsHub() {
                   </div>
                 )}
               </div>
+
+              {selectedReport.status === 'distributed' && (
+                <div className="pt-4 border-t border-zinc-800">
+                  <p className="text-xs text-zinc-500 uppercase tracking-widest mb-2">
+                    Distribution Log
+                  </p>
+                  <DistributionLog reportId={selectedReport.reportId} autoRefreshMs={10000} />
+                </div>
+              )}
 
               <div className="pt-4 border-t border-zinc-800 space-y-2">
                 {selectedReport.pdfSizeBytes && (
