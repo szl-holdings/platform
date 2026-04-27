@@ -274,6 +274,7 @@ const terraCommands: CommandItem[] = [
     label: 'Overview',
     icon: '◼',
     group: 'Navigation',
+    shortcut: '⌥D',
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/dashboard');
     },
@@ -292,6 +293,7 @@ const terraCommands: CommandItem[] = [
     label: 'Market',
     icon: '↑',
     group: 'Navigation',
+    shortcut: '⌥M',
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/market');
     },
@@ -301,6 +303,7 @@ const terraCommands: CommandItem[] = [
     label: 'Pipeline',
     icon: '◈',
     group: 'Navigation',
+    shortcut: '⌥L',
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/pipeline');
     },
@@ -319,6 +322,7 @@ const terraCommands: CommandItem[] = [
     label: 'Deals',
     icon: '◈',
     group: 'Navigation',
+    shortcut: '⌥E',
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/deals');
     },

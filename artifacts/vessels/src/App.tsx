@@ -1179,6 +1179,7 @@ const vesselsCommands: CommandItem[] = [
     label: 'Dashboard Overview',
     icon: '📊',
     group: 'Navigation',
+    shortcut: '⌥D',
     keywords: ['dashboard', 'overview', 'kpi'],
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/dashboard');
@@ -1189,6 +1190,7 @@ const vesselsCommands: CommandItem[] = [
     label: 'Fleet Map',
     icon: '🗺️',
     group: 'Navigation',
+    shortcut: '⌥F',
     keywords: ['map', 'fleet', 'positions'],
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/dashboard/fleet');
@@ -1209,6 +1211,7 @@ const vesselsCommands: CommandItem[] = [
     label: 'Alerts',
     icon: '⚠️',
     group: 'Navigation',
+    shortcut: '⌥L',
     keywords: ['alerts', 'exceptions', 'issues'],
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/dashboard/alerts');
@@ -1219,6 +1222,7 @@ const vesselsCommands: CommandItem[] = [
     label: 'Voyage Economics',
     icon: '💰',
     group: 'Navigation',
+    shortcut: '⌥E',
     keywords: ['economics', 'revenue', 'margin'],
     action: () => {
       window.location.href = window.location.pathname.replace(/\/[^/]*$/, '/economics');

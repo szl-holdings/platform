@@ -480,8 +480,10 @@ export function CommandPalette({
   );
 }
 
-export function useCommandPalette(_commands: CommandItem[]) {
+export function useCommandPalette(commands: CommandItem[]) {
   const [open, setOpen] = useState(false);
+  const commandsRef = useRef(commands);
+  commandsRef.current = commands;
 
   useEffect(() => {
     (window as any).__hasCommandPalette = true;
@@ -495,6 +497,15 @@ export function useCommandPalette(_commands: CommandItem[]) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setOpen((v) => !v);
+        return;
+      }
+      if (e.altKey && !e.metaKey && !e.ctrlKey && e.key.length === 1) {
+        const shortcut = `⌥${e.key.toUpperCase()}`;
+        const cmd = commandsRef.current.find((c) => c.shortcut === shortcut);
+        if (cmd) {
+          e.preventDefault();
+          cmd.action();
+        }
       }
     }
     window.addEventListener('keydown', handleKeyDown);
