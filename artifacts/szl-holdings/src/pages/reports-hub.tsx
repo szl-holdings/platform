@@ -8,6 +8,20 @@ const API = `${BASE}/api`;
 
 type ReportStatus = 'draft' | 'review' | 'approved' | 'distributed' | 'archived';
 
+interface Distribution {
+  distributionId: string;
+  reportId: string;
+  recipientEmail: string;
+  recipientName: string | null;
+  channel: 'email' | 'webhook' | 'dashboard' | 'download';
+  status: 'pending' | 'sent' | 'delivered' | 'opened' | 'failed';
+  sentAt: string | null;
+  openedAt: string | null;
+  errorMessage: string | null;
+  retryCount: number;
+  createdAt: string;
+}
+
 interface Report {
   reportId: string;
   title: string;
@@ -467,6 +481,91 @@ function DistributeModal({
   );
 }
 
+const DIST_STATUS_STYLES: Record<string, string> = {
+  pending: 'text-zinc-400 bg-zinc-800',
+  sent: 'text-blue-400 bg-blue-950',
+  delivered: 'text-emerald-400 bg-emerald-950',
+  opened: 'text-purple-400 bg-purple-950',
+  failed: 'text-red-400 bg-red-950',
+};
+
+function DistributionLog({ reportId }: { reportId: string }) {
+  const qc = useQueryClient();
+  const [retrying, setRetrying] = useState<Record<string, boolean>>({});
+  const [retryErrors, setRetryErrors] = useState<Record<string, string>>({});
+
+  const { data, isLoading } = useStandardQuery({
+    queryKey: ['distributions', reportId],
+    queryFn: () => apiFetch(`/reports/${reportId}/distributions`),
+    refetchInterval: 10_000,
+  });
+
+  const distributions: Distribution[] = data?.data ?? [];
+
+  const handleRetry = async (distributionId: string) => {
+    setRetrying((r) => ({ ...r, [distributionId]: true }));
+    setRetryErrors((e) => ({ ...e, [distributionId]: '' }));
+    try {
+      await apiFetch(`/reports/${reportId}/distributions/${distributionId}/retry`, {
+        method: 'POST',
+      });
+      qc.invalidateQueries({ queryKey: ['distributions', reportId] });
+    } catch (err) {
+      setRetryErrors((e) => ({
+        ...e,
+        [distributionId]: err instanceof Error ? err.message : 'Retry failed',
+      }));
+    } finally {
+      setRetrying((r) => ({ ...r, [distributionId]: false }));
+    }
+  };
+
+  if (isLoading) {
+    return <p className="text-xs text-zinc-600 py-2">Loading distribution log...</p>;
+  }
+
+  if (distributions.length === 0) {
+    return <p className="text-xs text-zinc-600 py-2">No distributions recorded.</p>;
+  }
+
+  return (
+    <div className="space-y-2">
+      {distributions.map((d) => (
+        <div key={d.distributionId} className="bg-zinc-800 rounded-lg p-3 space-y-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs text-zinc-300 font-medium truncate flex-1">{d.recipientEmail}</p>
+            <span className={`text-xs px-2 py-0.5 rounded shrink-0 ${DIST_STATUS_STYLES[d.status] ?? 'text-zinc-400 bg-zinc-700'}`}>
+              {d.status}
+            </span>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-zinc-500">
+            <span>{d.channel}</span>
+            {d.sentAt && <span>Sent {new Date(d.sentAt).toLocaleString()}</span>}
+            {d.retryCount > 0 && (
+              <span className="text-amber-500">{d.retryCount} retr{d.retryCount === 1 ? 'y' : 'ies'}</span>
+            )}
+          </div>
+          {d.errorMessage && (
+            <p className="text-xs text-red-400 bg-red-950/50 px-2 py-1 rounded">{d.errorMessage}</p>
+          )}
+          {retryErrors[d.distributionId] && (
+            <p className="text-xs text-red-400">{retryErrors[d.distributionId]}</p>
+          )}
+          {d.status === 'failed' && (
+            <button
+              onClick={() => handleRetry(d.distributionId)}
+              disabled={retrying[d.distributionId]}
+              className="text-xs px-3 py-1 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {retrying[d.distributionId] ? 'Retrying...' : 'Retry'}
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function ReportsHub() {
   const qc = useQueryClient();
   const [showGenerate, setShowGenerate] = useState(false);
@@ -816,6 +915,11 @@ export default function ReportsHub() {
                     Distribute
                   </button>
                 )}
+              </div>
+
+              <div className="pt-4 border-t border-zinc-800">
+                <p className="text-xs text-zinc-500 uppercase tracking-widest mb-3">Distribution Log</p>
+                <DistributionLog reportId={selectedReport.reportId} />
               </div>
             </div>
           </div>

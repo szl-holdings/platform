@@ -367,7 +367,7 @@ export async function createDistribution(params: {
 export async function markDistributionSent(distributionId: string) {
   await db
     .update(reportDistributionsTable)
-    .set({ status: 'sent', sentAt: new Date() })
+    .set({ status: 'sent', sentAt: new Date(), errorMessage: null })
     .where(eq(reportDistributionsTable.distributionId, distributionId));
 }
 
@@ -375,6 +375,24 @@ export async function markDistributionFailed(distributionId: string, errorMessag
   await db
     .update(reportDistributionsTable)
     .set({ status: 'failed', errorMessage: errorMessage ?? null })
+    .where(eq(reportDistributionsTable.distributionId, distributionId));
+}
+
+export async function getDistributionById(distributionId: string) {
+  const [row] = await db
+    .select()
+    .from(reportDistributionsTable)
+    .where(eq(reportDistributionsTable.distributionId, distributionId))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function incrementDistributionRetryCount(distributionId: string) {
+  await db
+    .update(reportDistributionsTable)
+    .set({
+      retryCount: sql<number>`${reportDistributionsTable.retryCount} + 1`,
+    })
     .where(eq(reportDistributionsTable.distributionId, distributionId));
 }
 

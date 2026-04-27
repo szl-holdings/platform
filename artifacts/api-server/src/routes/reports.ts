@@ -27,6 +27,7 @@ import {
   createReportSchedule,
   createReportTemplate,
   getApprovalForReport,
+  getDistributionById,
   getReportGeneration,
   getReportPdfBuffer,
   getReportScheduleById,
@@ -34,6 +35,7 @@ import {
   getReportTemplate,
   getReportVersionHistory,
   getSchedulesDue,
+  incrementDistributionRetryCount,
   listDistributionsForReport,
   listReportGenerations,
   listReportSchedules,
@@ -800,6 +802,101 @@ router.get(
       sendSuccess(res, distributions);
     } catch (err) {
       handleRouteError(res, err, 'Failed to list distributions');
+    }
+  },
+);
+
+router.post(
+  '/reports/:reportId/distributions/:distributionId/retry',
+  authMiddleware(),
+  requireRole('admin', 'ops'),
+  async (req: Request, res: Response) => {
+    try {
+      const { reportId, distributionId } = req.params as {
+        reportId: string;
+        distributionId: string;
+      };
+
+      const distribution = await getDistributionById(distributionId);
+      if (!distribution) return sendNotFound(res, 'Distribution');
+      if (distribution.reportId !== reportId)
+        return sendBadRequest(res, 'Distribution does not belong to this report');
+      if (distribution.status !== 'failed')
+        return sendBadRequest(res, 'Only failed distributions can be retried');
+
+      const report = await getReportGeneration(reportId);
+      if (!report) return sendNotFound(res, 'Report');
+
+      // Increment retry count first — does not change status, so row stays retryable
+      // if anything throws below.
+      await incrementDistributionRetryCount(distributionId);
+
+      let result: Awaited<ReturnType<typeof sendEmail>>;
+      try {
+        const downloadUrl = buildReportDownloadUrl(reportId);
+        const generatedAtStr = new Date(report.generatedAt).toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          timeZoneName: 'short',
+        });
+
+        const { subject, html, text } = buildScheduledReportEmail({
+          reportId,
+          reportTitle: report.title,
+          scheduleName: report.scheduledRunId ?? 'Manual Distribution',
+          domain: report.domain,
+          frequency: 'on_demand',
+          generatedAt: generatedAtStr,
+          downloadUrl,
+          linkMode: 'auth',
+        });
+
+        result = await sendEmail({
+          to: distribution.recipientEmail,
+          subject,
+          html,
+          text,
+        });
+      } catch (sendErr) {
+        // Ensure row remains in 'failed' state so admin can retry again.
+        const errMsg = sendErr instanceof Error ? sendErr.message : String(sendErr);
+        await markDistributionFailed(distributionId, `Retry error: ${errMsg}`);
+        logger.error(
+          { reportId, distributionId, email: distribution.recipientEmail, err: sendErr },
+          'Distribution retry threw an unexpected error',
+        );
+        throw sendErr;
+      }
+
+      if (result.success) {
+        await markDistributionSent(distributionId);
+        logger.info(
+          { reportId, distributionId, email: distribution.recipientEmail, messageId: result.messageId },
+          'Distribution retry succeeded',
+        );
+        sendSuccess(res, {
+          distributionId,
+          status: 'sent',
+          messageId: result.messageId,
+          provider: result.provider,
+        });
+      } else {
+        await markDistributionFailed(distributionId, result.error ?? 'Retry delivery failed');
+        logger.warn(
+          { reportId, distributionId, email: distribution.recipientEmail, error: result.error },
+          'Distribution retry failed',
+        );
+        sendSuccess(res, {
+          distributionId,
+          status: 'failed',
+          error: result.error,
+        });
+      }
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to retry distribution');
     }
   },
 );

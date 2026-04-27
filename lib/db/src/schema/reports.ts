@@ -115,6 +115,7 @@ export const reportDistributionsTable = pgTable('report_distributions', {
   sentAt: timestamp('sent_at'),
   openedAt: timestamp('opened_at'),
   errorMessage: text('error_message'),
+  retryCount: integer('retry_count').notNull().default(0),
   distributedByUserId: integer('distributed_by_user_id').references(() => usersTable.id, {
     onDelete: 'set null',
   }),
