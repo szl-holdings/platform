@@ -9,6 +9,10 @@
  */
 
 import {
+  substrateEndpointManager,
+  type SubstrateCompletionResult,
+} from '@szl-holdings/substrate-adapters';
+import {
   chatCompletion,
   type HFChatMessage,
   type HFCompletionResult,
@@ -76,6 +80,67 @@ async function openaiChatCompletion(
   };
 }
 
+async function substrateEnsureModelLoaded(modelId: string): Promise<void> {
+  const health = await substrateEndpointManager.checkHealth();
+  if (health.loadedModels.includes(modelId)) return;
+  if (health.status === 'offline') {
+    throw new Error('Substrate service unreachable');
+  }
+
+  const result = await substrateEndpointManager.loadModel(modelId);
+  if (!result.success) {
+    throw new Error(`Substrate auto-load failed for '${modelId}': ${result.message}`);
+  }
+}
+
+async function substrateChatCompletion(
+  messages: HFChatMessage[],
+  route: RouteResult,
+  options?: { tools?: HFToolDef[]; responseFormat?: { type: 'json_object' } | { type: 'text' } },
+): Promise<HFCompletionResult> {
+  await substrateEnsureModelLoaded(route.model);
+
+  const endpointId = `substrate-${route.model}`;
+  const substrateMessages = messages.map((m) => ({
+    role: m.role,
+    content: m.content,
+    ...(m.tool_call_id ? { tool_call_id: m.tool_call_id } : {}),
+  }));
+
+  let result: SubstrateCompletionResult;
+  try {
+    result = await substrateEndpointManager.complete({
+      endpointId,
+      messages: substrateMessages,
+      temperature: route.temperature,
+      maxTokens: route.maxTokens,
+      tools: options?.tools,
+      responseFormat: options?.responseFormat,
+    });
+  } catch (err: unknown) {
+    throw new Error(
+      `Substrate inference error: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+
+  return {
+    content: result.content,
+    model: result.model,
+    provider: 'substrate',
+    finishReason: result.finishReason ?? 'stop',
+    usage: result.usage
+      ? {
+          promptTokens: result.usage.promptTokens,
+          completionTokens: result.usage.completionTokens,
+          totalTokens: result.usage.totalTokens,
+        }
+      : null,
+    latencyMs: result.latencyMs,
+    toolCalls: [],
+    raw: result,
+  };
+}
+
 export type { RouteClass, RouteResult };
 
 export interface ModelRouterTelemetry {
@@ -130,6 +195,13 @@ const COST_PER_TOKEN_USD: Record<string, number> = {
   'Qwen/Qwen3-8B': 0.0000002,
   'Qwen/Qwen3-0.6B': 0.00000005,
   'Qwen/Qwen2.5-VL-7B-Instruct': 0.0000002,
+  // Substrate Edge Inference (oLLM) — zero cost, local GPU
+  'llama-3.3-70b-instruct': 0,
+  'llama-3.1-8b-instruct': 0,
+  'qwen3-next-80b': 0,
+  'gemma3-12b': 0,
+  'gpt-oss-20b': 0,
+  'voxtral-small-24b': 0,
   default: 0.0000002,
 };
 
@@ -276,8 +348,12 @@ export async function routerCall(options: RouterCallOptions): Promise<RouterCall
   // Dispatch to the correct inference client based on the effective provider.
   // OpenAI fine-tuned models must be sent to the OpenAI API directly since
   // the HuggingFace router cannot serve them.
-  const dispatchCompletion = async (r: RouteResult): Promise<HFCompletionResult> =>
-    r.provider === 'openai' ? openaiChatCompletion(messages, r, _chatOpts) : chatCompletion(messages, r, _chatOpts);
+  // Substrate endpoints use the same OpenAI-compatible API surface (local GPU).
+  const dispatchCompletion = async (r: RouteResult): Promise<HFCompletionResult> => {
+    if (r.provider === 'openai') return openaiChatCompletion(messages, r, _chatOpts);
+    if (r.provider === 'substrate') return substrateChatCompletion(messages, r, _chatOpts);
+    return chatCompletion(messages, r, _chatOpts);
+  };
 
   if (useFallback) {
     try {

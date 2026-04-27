@@ -3,7 +3,7 @@ import { createLogger } from './logger.js';
 
 const logger = createLogger('ai-control-plane:router');
 
-export type ProviderType = 'openai' | 'anthropic' | 'local' | 'self-hosted' | 'nim';
+export type ProviderType = 'openai' | 'anthropic' | 'local' | 'self-hosted' | 'nim' | 'substrate';
 
 export type RouteClass =
   | 'reasoning'
@@ -104,6 +104,78 @@ const DEFAULT_ENDPOINTS: ModelEndpoint[] = [
     costPerOutputToken: 0,
     tags: ['reasoning', 'generation', 'triage'],
     evalScore: 0.78,
+    enabled: true,
+  },
+  {
+    provider: 'substrate',
+    model: 'llama-3.3-70b-instruct',
+    baseUrl: 'http://localhost:8070/v1',
+    priority: 40,
+    maxTokens: 131072,
+    costPerInputToken: 0,
+    costPerOutputToken: 0,
+    tags: ['reasoning', 'generation', 'planning'],
+    evalScore: 0.78,
+    enabled: true,
+  },
+  {
+    provider: 'substrate',
+    model: 'qwen3-next-80b',
+    baseUrl: 'http://localhost:8070/v1',
+    priority: 41,
+    maxTokens: 131072,
+    costPerInputToken: 0,
+    costPerOutputToken: 0,
+    tags: ['reasoning', 'generation', 'planning'],
+    evalScore: 0.80,
+    enabled: true,
+  },
+  {
+    provider: 'substrate',
+    model: 'gemma3-12b',
+    baseUrl: 'http://localhost:8070/v1',
+    priority: 42,
+    maxTokens: 32768,
+    costPerInputToken: 0,
+    costPerOutputToken: 0,
+    tags: ['reasoning', 'generation', 'summarization'],
+    evalScore: 0.75,
+    enabled: true,
+  },
+  {
+    provider: 'substrate',
+    model: 'gpt-oss-20b',
+    baseUrl: 'http://localhost:8070/v1',
+    priority: 43,
+    maxTokens: 65536,
+    costPerInputToken: 0,
+    costPerOutputToken: 0,
+    tags: ['reasoning', 'generation', 'triage'],
+    evalScore: 0.74,
+    enabled: true,
+  },
+  {
+    provider: 'substrate',
+    model: 'voxtral-small-24b',
+    baseUrl: 'http://localhost:8070/v1',
+    priority: 44,
+    maxTokens: 32768,
+    costPerInputToken: 0,
+    costPerOutputToken: 0,
+    tags: ['generation', 'summarization'],
+    evalScore: 0.73,
+    enabled: true,
+  },
+  {
+    provider: 'substrate',
+    model: 'llama-3.1-8b-instruct',
+    baseUrl: 'http://localhost:8070/v1',
+    priority: 45,
+    maxTokens: 131072,
+    costPerInputToken: 0,
+    costPerOutputToken: 0,
+    tags: ['triage', 'classification', 'extraction', 'summarization'],
+    evalScore: 0.70,
     enabled: true,
   },
 ];

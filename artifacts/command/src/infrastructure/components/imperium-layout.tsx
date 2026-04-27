@@ -13,6 +13,7 @@ import {
   Network,
   Radio,
   Satellite,
+  Server,
   Shield,
   Users,
   X,
@@ -87,6 +88,12 @@ const NAV_ITEMS = [
     label: 'STRATEGIC RESERVES',
     sublabel: 'Reserve Drawdown',
     icon: Database,
+  },
+  {
+    path: '/infrastructure/substrate',
+    label: 'SUBSTRATE INFERENCE',
+    sublabel: 'Edge GPU / oLLM',
+    icon: Server,
   },
 ];
 

@@ -31,13 +31,13 @@ The platform is a pnpm monorepo built with TypeScript 5.9, React 19, Vite, and N
 - **Living Signal Mesh & Evidence Graph:** Unifies event/signal handling with a 9-stage pipeline and an `EvidenceStore`.
 - **Memory Fabric & FORGE Runtime:** A tiered memory layer with provenance, freshness, retention, and sensitivity tracking.
 
-**Monorepo Structure:** Organizes active/archived artifacts, shared infrastructure, and packages for business observability, AI Control Plane, and NVIDIA-Ready Modules, utilizing Drizzle ORM for PostgreSQL schemas.
+**Monorepo Structure:** Organizes active/archived artifacts, shared infrastructure, and packages for business observability, AI Control Plane, NVIDIA-Ready Modules, and Substrate Edge Inference, utilizing Drizzle ORM for PostgreSQL schemas. Key AI packages: `packages/ai-control-plane` (routing, fallback, cost), `packages/nvidia-adapters` (NIM endpoints), `packages/substrate-adapters` (oLLM local GPU inference), `lib/ai-engine` (model router, telemetry). The Substrate inference service lives at `apps/substrate-inference/` (Python/FastAPI).
 
 **UI/UX and Design System:** The Governed-Intelligence Design Language v2 (`@szl-holdings/design-system`) is the single visual source of truth, defining the enterprise accent palette, typography, spacing, and UI components. All authenticated product surfaces are evidence-first, utilizing a pure dark theme with a single warm accent. The platform uses a One-of-One Platform Shell to unify user interfaces across applications.
 
 **API Layers:** Includes REST API, GraphQL API (Apollo Server), and an MCP Gateway. The A11oy frontend connects to the API server's `/api/graphql` endpoint via `urql`.
 
-**AI Infrastructure:** Features a multi-provider AI backend, AI evaluation infrastructure, AI Ops Dashboard, and NVIDIA-Ready Packages.
+**AI Infrastructure:** Features a multi-provider AI backend, AI evaluation infrastructure, AI Ops Dashboard, NVIDIA-Ready Packages, and Substrate Edge Inference (oLLM).
 - **Forge – AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents.
 - **Precision Evolution Runtime (PER):** A governed, evidence-gated system for continuously evolving agent policies.
 - **PRAXIS – Unified Agentic AI Layer:** An internal tooling sandbox for AI agent research, memory management, skill registry, and AI Control Plane features.
@@ -81,7 +81,7 @@ The platform is a pnpm monorepo built with TypeScript 5.9, React 19, Vite, and N
 -   **Database:** PostgreSQL 16
 -   **Authentication:** Replit Auth
 -   **Payment Processing:** Stripe
--   **AI Providers:** OpenAI, Anthropic, Gemini, HuggingFace Inference API, HuggingFace MCP, Elevenlabs
+-   **AI Providers:** OpenAI, Anthropic, Gemini, HuggingFace Inference API, HuggingFace MCP, Elevenlabs, Substrate/oLLM (local GPU)
 -   **Communication:** Slack, Twilio, Resend, SendGrid
 -   **Maritime Data:** MarineTraffic, AISHub, Digitraffic AIS, BarentsWatch AIS, Open-Meteo Marine Weather
 -   **Threat Intelligence:** STIX/TAXII, AlienVault OTX, MISP OSINT, OFAC SDN, EU Consolidated List, Shodan, GreyNoise, MalwareBazaar

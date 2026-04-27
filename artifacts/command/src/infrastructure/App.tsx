@@ -40,6 +40,7 @@ const GeospatialIntelligence = lazy(() => import('@/pages/geospatial'));
 const DirectiveCascade = lazy(() => import('@/pages/directive-cascade'));
 const Coalition = lazy(() => import('@/pages/coalition'));
 const StrategicReserves = lazy(() => import('@/pages/strategic-reserves'));
+const SubstrateInference = lazy(() => import('@/pages/substrate-inference'));
 
 const base = (import.meta.env.BASE_URL || '/imperium/').replace(/\/$/, '');
 
@@ -62,6 +63,7 @@ export default function App() {
               <Route path="/directives" component={DirectiveCascade} />
               <Route path="/coalition" component={Coalition} />
               <Route path="/reserves" component={StrategicReserves} />
+              <Route path="/substrate" component={SubstrateInference} />
               <Route>
                 <div className="flex items-center justify-center h-64 text-slate-400 text-sm font-display tracking-widest">
                   PAGE NOT FOUND — RETURN TO IMPERIUM

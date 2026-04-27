@@ -47,6 +47,7 @@ import {
   Satellite,
   Scale,
   Search,
+  Server,
   Shield,
   ShieldCheck,
   Sigma,
@@ -320,6 +321,7 @@ const INFRASTRUCTURE_NAV: NavGroup[] = [
     items: [
       { href: '/infrastructure/supply-lines', label: 'Network Topology', icon: Network },
       { href: '/infrastructure/geospatial', label: 'Geospatial Intel', icon: Satellite },
+      { href: '/infrastructure/substrate', label: 'Substrate Inference', icon: Server },
     ],
   },
   {

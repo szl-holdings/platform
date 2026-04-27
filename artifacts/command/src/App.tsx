@@ -340,6 +340,7 @@ const GeospatialIntelligence = lazy(() => import('@imp/pages/geospatial'));
 const DirectiveCascade = lazy(() => import('@imp/pages/directive-cascade'));
 const Coalition = lazy(() => import('@imp/pages/coalition'));
 const StrategicReserves = lazy(() => import('@imp/pages/strategic-reserves'));
+const SubstrateInferencePage = lazy(() => import('@imp/pages/substrate-inference'));
 
 const AdminOpsConsole = lazy(() => import('./operations/pages/admin/ops-console'));
 const AdminOverview = lazy(() => import('./operations/pages/admin/overview'));
@@ -523,6 +524,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/infrastructure/directives', label: 'Directive Cascade', group: 'Infrastructure' },
   { href: '/infrastructure/coalition', label: 'Coalition', group: 'Infrastructure' },
   { href: '/infrastructure/reserves', label: 'Strategic Reserves', group: 'Infrastructure' },
+  { href: '/infrastructure/substrate', label: 'Substrate Edge Inference', group: 'Infrastructure' },
   { href: '/infrastructure/data-fabric', label: 'Data Fabric', group: 'Infrastructure' },
   { href: '/ecosystem', label: 'MCP Ecosystem — Topology Map', group: 'MCP Ecosystem' },
   { href: '/ecosystem/observatory', label: 'MCP Ecosystem — Agent Observatory', group: 'MCP Ecosystem' },
@@ -888,6 +890,7 @@ function AppShell() {
               <Route path="/infrastructure/directives" component={() => <DirectiveCascade />} />
               <Route path="/infrastructure/coalition" component={() => <Coalition />} />
               <Route path="/infrastructure/reserves" component={() => <StrategicReserves />} />
+              <Route path="/infrastructure/substrate" component={() => <SubstrateInferencePage />} />
               <Route path="/infrastructure/data-fabric" component={() => <DataFabric />} />
               <Route
                 path="/infrastructure/imperium/atlas-execute"
