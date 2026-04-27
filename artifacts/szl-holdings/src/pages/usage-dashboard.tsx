@@ -9,6 +9,7 @@ import {
   Building2,
   Calendar,
   ChevronDown,
+  Download,
   Filter,
   HardDrive,
   Loader2,
@@ -386,6 +387,67 @@ function TenantLimitsDrawer({
   );
 }
 
+function exportUsageCSV(
+  rows: (AdminUsageRow & { isSpike: boolean })[],
+  period: { from: string; to: string },
+) {
+  const headers = [
+    'Organization',
+    'Slug',
+    'Plan',
+    'Members',
+    'Member Limit',
+    'Active Users',
+    'API Calls',
+    'API Call Limit',
+    'Features Used',
+    'Storage',
+    'Storage Limit (MB)',
+    'Overage Flag',
+  ];
+
+  const esc = (val: string | number) => {
+    const s = String(val);
+    const sanitized = s.match(/^[=+\-@]/) ? `\t${s}` : s;
+    return sanitized.includes(',') || sanitized.includes('"') || sanitized.includes('\n')
+      ? `"${sanitized.replace(/"/g, '""')}"`
+      : sanitized;
+  };
+
+  const csvRows = rows.map((row) => {
+    const anyOver = Object.values(row.overages).some((v) => v === 'over');
+    const anyWarn = Object.values(row.overages).some((v) => v === 'warn');
+    const overageFlag = anyOver ? 'Over limit' : anyWarn ? 'Near limit' : 'OK';
+    return [
+      esc(row.orgName),
+      esc(row.orgSlug),
+      esc(row.plan),
+      esc(row.members),
+      esc(row.planLimits.members ?? 'Unlimited'),
+      esc(row.activeUsers),
+      esc(row.apiCalls),
+      esc(row.planLimits.apiCalls ?? 'Unlimited'),
+      esc(row.featureCount),
+      esc(row.storageDataAvailable ? fmtBytes(row.storageBytes) : 'N/A'),
+      esc(row.planLimits.storageMB ?? 'Unlimited'),
+      esc(overageFlag),
+    ].join(',');
+  });
+
+  const fromLabel = new Date(period.from).toISOString().slice(0, 10);
+  const toLabel = new Date(period.to).toISOString().slice(0, 10);
+  const csv = [headers.join(','), ...csvRows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `tenant-usage-${fromLabel}-to-${toLabel}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 function AdminUsageView({ days }: { days: number }) {
   const [planFilter, setPlanFilter] = useState('');
   const [orgSearch, setOrgSearch] = useState('');
@@ -522,6 +584,18 @@ function AdminUsageView({ days }: { days: number }) {
         <span className="text-xs text-white/30 ml-auto">
           {rows.length} tenant{rows.length !== 1 ? 's' : ''}
         </span>
+        <button
+          onClick={() => {
+            if (adminQuery.data && processedRows.length > 0) {
+              exportUsageCSV(processedRows, adminQuery.data.period);
+            }
+          }}
+          disabled={processedRows.length === 0 || adminQuery.isLoading}
+          className="flex items-center gap-1.5 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-xs text-white/60 hover:text-white hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        >
+          <Download size={12} />
+          Export CSV
+        </button>
       </div>
 
       {adminQuery.isLoading ? (
