@@ -4,7 +4,14 @@ import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Platform, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Platform,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { trackEvent } from '@/lib/analytics';
@@ -47,6 +54,182 @@ interface ApiEnvelope<T> {
   data: T;
   meta?: Record<string, unknown>;
 }
+
+interface CohortRow {
+  cohort: string;
+  size: number;
+  retention: number[];
+}
+
+interface CohortRetentionData {
+  granularity: string;
+  cohorts: CohortRow[];
+  averageRetentionCurve: number[];
+  periodLabels: string[];
+}
+
+function useCohortRetention() {
+  return useQuery<CohortRetentionData>({
+    queryKey: ['investor-analytics-cohort'],
+    queryFn: async (): Promise<CohortRetentionData> => {
+      const envelope = await apiFetch<ApiEnvelope<CohortRetentionData>>(
+        '/api/investor-analytics/cohort?granularity=month&periods=6',
+      );
+      return envelope.data;
+    },
+    refetchInterval: 300000,
+    retry: 2,
+  });
+}
+
+function retentionCellColor(pct: number): string {
+  if (pct >= 80) return `${ACCENT}e6`;
+  if (pct >= 60) return `${ACCENT}b3`;
+  if (pct >= 40) return `${ACCENT}80`;
+  if (pct >= 20) return `${ACCENT}4d`;
+  return `${ACCENT}26`;
+}
+
+function CohortRetentionGrid({ data }: { data: CohortRetentionData }) {
+  const colors = useColors();
+
+  if (data.cohorts.length === 0) {
+    return (
+      <View style={cohortStyles.empty}>
+        <Text style={[cohortStyles.emptyText, { color: colors.mutedForeground }]}>
+          No cohort data available yet
+        </Text>
+      </View>
+    );
+  }
+
+  const maxPeriods = Math.max(...data.cohorts.map((c) => c.retention.length));
+  const labels = data.periodLabels.slice(0, maxPeriods);
+
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <View>
+        <View style={cohortStyles.headerRow}>
+          <View style={cohortStyles.cohortLabelCell} />
+          <View style={cohortStyles.sizeCell}>
+            <Text style={[cohortStyles.headerText, { color: colors.mutedForeground }]}>Users</Text>
+          </View>
+          {labels.map((label) => (
+            <View key={label} style={cohortStyles.cell}>
+              <Text style={[cohortStyles.headerText, { color: colors.mutedForeground }]}>
+                {label}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        {data.cohorts.map((row) => (
+          <View
+            key={row.cohort}
+            style={[cohortStyles.dataRow, { borderBottomColor: colors.borderSubtle }]}
+          >
+            <View style={cohortStyles.cohortLabelCell}>
+              <Text style={[cohortStyles.cohortLabel, { color: colors.cream }]}>{row.cohort}</Text>
+            </View>
+            <View style={cohortStyles.sizeCell}>
+              <Text style={[cohortStyles.sizeText, { color: colors.mutedForeground }]}>
+                {row.size}
+              </Text>
+            </View>
+            {labels.map((_, i) => {
+              const pct = row.retention[i];
+              if (pct === undefined) {
+                return (
+                  <View key={i} style={cohortStyles.cell}>
+                    <Text style={[cohortStyles.cellText, { color: colors.mutedForeground }]}>
+                      —
+                    </Text>
+                  </View>
+                );
+              }
+              return (
+                <View
+                  key={i}
+                  style={[cohortStyles.cell, { backgroundColor: retentionCellColor(pct) }]}
+                >
+                  <Text
+                    style={[
+                      cohortStyles.cellText,
+                      { color: pct >= 40 ? colors.background : colors.cream },
+                    ]}
+                  >
+                    {pct === 100 ? '100%' : `${pct.toFixed(1)}%`}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        ))}
+
+        <View style={[cohortStyles.avgRow, { borderTopColor: colors.borderSubtle }]}>
+          <View style={cohortStyles.cohortLabelCell}>
+            <Text style={[cohortStyles.avgLabel, { color: ACCENT }]}>Avg</Text>
+          </View>
+          <View style={cohortStyles.sizeCell} />
+          {data.averageRetentionCurve.slice(0, maxPeriods).map((pct, i) => (
+            <View key={i} style={cohortStyles.cell}>
+              <Text style={[cohortStyles.avgCellText, { color: ACCENT }]}>
+                {pct === 100 ? '100%' : `${pct.toFixed(1)}%`}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+const cohortStyles = StyleSheet.create({
+  headerRow: { flexDirection: 'row', paddingBottom: 6 },
+  dataRow: {
+    flexDirection: 'row',
+    paddingVertical: 4,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  avgRow: {
+    flexDirection: 'row',
+    paddingTop: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  cohortLabelCell: {
+    width: 68,
+    justifyContent: 'center',
+    paddingRight: 4,
+  },
+  sizeCell: {
+    width: 44,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingRight: 6,
+  },
+  cell: {
+    width: 56,
+    height: 32,
+    borderRadius: 4,
+    marginHorizontal: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerText: {
+    fontSize: 8,
+    fontFamily: 'Inter_500Medium',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
+    textAlign: 'center',
+  },
+  cohortLabel: { fontSize: 10, fontFamily: 'Inter_500Medium' },
+  sizeText: { fontSize: 10, fontFamily: 'Inter_400Regular' },
+  cellText: { fontSize: 10, fontFamily: 'Inter_600SemiBold' },
+  avgLabel: { fontSize: 10, fontFamily: 'Inter_600SemiBold' },
+  avgCellText: { fontSize: 10, fontFamily: 'Inter_600SemiBold', textAlign: 'center' },
+  empty: { paddingVertical: 20, alignItems: 'center' },
+  emptyText: { fontSize: 12, fontFamily: 'Inter_400Regular' },
+});
 
 function useInvestorMetrics() {
   return useQuery<InvestorMetrics>({
@@ -310,12 +493,19 @@ export default function AnalyticsScreen() {
     refetch: refetchMetrics,
   } = useInvestorMetrics();
 
+  const {
+    data: cohortData,
+    isLoading: cohortLoading,
+    isError: cohortError,
+    refetch: refetchCohort,
+  } = useCohortRetention();
+
   const onRefresh = useCallback(async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setRefreshing(true);
-    await refetchMetrics();
+    await Promise.all([refetchMetrics(), refetchCohort()]);
     setRefreshing(false);
-  }, [refetchMetrics]);
+  }, [refetchMetrics, refetchCohort]);
 
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const bottomPad = Platform.OS === 'web' ? 34 + 84 : 90;
@@ -511,6 +701,27 @@ export default function AnalyticsScreen() {
             </View>
           </View>
         )}
+
+        <View style={[styles.section, { borderTopColor: colors.borderSubtle }]}>
+          <SectionHeader label="Cohort Retention" icon="grid" />
+          {cohortLoading ? (
+            <SkeletonLoader width="100%" height={180} borderRadius={12} />
+          ) : cohortError ? (
+            <ErrorState
+              message="Could not load cohort data — server may be offline"
+              onRetry={refetchCohort}
+            />
+          ) : cohortData != null ? (
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: colors.card, borderColor: colors.borderSubtle },
+              ]}
+            >
+              <CohortRetentionGrid data={cohortData} />
+            </View>
+          ) : null}
+        </View>
 
         {!metricsError && !metricsLoading && recentTimeSeries.length > 0 && (
           <View style={[styles.section, { borderTopColor: colors.borderSubtle }]}>
