@@ -634,7 +634,7 @@ title = "A11oy Launch Content Package"
 id = "NRAJLyIA7l9l5fFnmsz-l"
 uri = "file://screenshots/a11oy-demo-video.mp4"
 type = "video"
-title = "A11oy Command Fabric — Demo Video (74s)"
+title = "A11oy — Narrated Demo Video (2:30)"
 
 [[outputs]]
 id = "nflNPiGcIt67grchgAynS"
@@ -653,3 +653,93 @@ id = "ahBrEL9U_6uTmzWgJcmbm"
 uri = "file://screenshots/content-substack.md"
 type = "text"
 title = "Substack Post — Governed Autonomy"
+
+[[outputs]]
+id = "_xQy5Jhri3yacCIJWTa1i"
+uri = "file://screenshots/a11oy-landing/01-hero.jpg"
+type = "image"
+title = "A11oy — Hero Landing Page"
+
+[[outputs]]
+id = "UkDDBdJJBp8nmPMQZpTTy"
+uri = "file://screenshots/a11oy-landing/02-architecture.jpg"
+type = "image"
+title = "A11oy — Architecture (11 Components)"
+
+[[outputs]]
+id = "Pm4YcpaBjwqMl6dTwugIq"
+uri = "file://screenshots/a11oy-landing/03-applications.jpg"
+type = "image"
+title = "A11oy — Applications Catalog"
+
+[[outputs]]
+id = "4oU70_wZcogRi2L422NvV"
+uri = "file://screenshots/a11oy-landing/04-now-board.jpg"
+type = "image"
+title = "A11oy — Now Board (Live Operations)"
+
+[[outputs]]
+id = "zAIyOo9bLzsRefv7czN6E"
+uri = "file://screenshots/a11oy-landing/05-fabric-cockpit.jpg"
+type = "image"
+title = "A11oy — Command Fabric Cockpit"
+
+[[outputs]]
+id = "8diU1UUjsNCq8KjfFd1_d"
+uri = "file://screenshots/a11oy-landing/06-command-surface.jpg"
+type = "image"
+title = "A11oy — Unified Command Surface"
+
+[[outputs]]
+id = "Tzyr5JOz6q7ywvnFOXdEm"
+uri = "file://screenshots/a11oy-landing/07-constellation.jpg"
+type = "image"
+title = "A11oy — 12-Vertical Constellation"
+
+[[outputs]]
+id = "vEiXy917WJZIsmuguZE1u"
+uri = "file://screenshots/a11oy-landing/08-executive-brief.jpg"
+type = "image"
+title = "A11oy — Decision Intelligence (Recommendations)"
+
+[[outputs]]
+id = "uUNVsYO6b5k8RRzKRw8WV"
+uri = "file://screenshots/a11oy-landing/09-governance.jpg"
+type = "image"
+title = "A11oy — Covenant Governance & Policy Gates"
+
+[[outputs]]
+id = "ZP2IOrGWnrV4aLGKD2Cyz"
+uri = "file://screenshots/a11oy-landing/10-trust-center.jpg"
+type = "image"
+title = "A11oy — Trust Center & Security Posture"
+
+[[outputs]]
+id = "GLm-E-pF3fOKxxIW5x8UT"
+uri = "file://screenshots/a11oy-landing/11-agents.jpg"
+type = "image"
+title = "A11oy — Operator Agent Registry"
+
+[[outputs]]
+id = "_wPWlZ8z6mu-7AYN-07yN"
+uri = "file://screenshots/a11oy-landing/12-investor-demo.jpg"
+type = "image"
+title = "A11oy — Investor Demo (14-Step Narrative)"
+
+[[outputs]]
+id = "T6eCIbDCBklo-8SI-pYXY"
+uri = "file://screenshots/a11oy-landing/13-signal-mesh.jpg"
+type = "image"
+title = "A11oy — Signal Mesh & Knowledge Graph"
+
+[[outputs]]
+id = "md2ibjoeEaQszQJVQz9xF"
+uri = "file://screenshots/a11oy-landing/14-proof-ledger.jpg"
+type = "image"
+title = "A11oy — Proof Chain with Reasoning Traces"
+
+[[outputs]]
+id = "jmxuaJ0hE-HkF1mOOf2sZ"
+uri = "file://screenshots/a11oy-landing/15-verticals.jpg"
+type = "image"
+title = "A11oy — Vertical Coverage Map (7 Verticals)"
