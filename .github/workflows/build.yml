@@ -24,7 +24,16 @@ jobs:
         with: { version: 10 }
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with: { node-version: '24', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
+      - name: Cache node_modules
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            node_modules
+            **/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+      - run: pnpm install --frozen-lockfile --prefer-offline
       - run: pnpm --filter @workspace/api-server run build
       - run: pnpm --filter @workspace/szl-holdings run build
       - run: pnpm --filter @workspace/aegis run build
