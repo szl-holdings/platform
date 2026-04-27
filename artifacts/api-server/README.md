@@ -1,167 +1,55 @@
 # API Server — Platform Backend
 
-> The shared infrastructure backbone: 2,816 REST and GraphQL endpoints, 11-role RBAC, org-scoped multi-tenancy, immutable Proof Chain, and real-time SSE signal feeds.
+> Shared Express 5 API server powering all SZL Holdings domain packs — auth, AI services, data, webhooks, and the Proof Chain.
 
 [![CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-Proprietary-red?style=flat-square)](../../LICENSE.md)
 
+[Architecture](../../docs/architecture/architecture.md) · [Onboarding Guide](../../docs/onboarding.md) · [Investor Dashboard](https://szlholdings.com/stephen/investor) · [Platform Thesis](../../docs/investor/platform-thesis.md)
+
+![API Server — Health Endpoint](../../.github/assets/screenshots/api-server-hero.jpg)
+
 ---
 
 ## What it does
 
-The API Server is the shared backend platform that powers every SZL Holdings surface: the Dashboard, Command, Vessels, Terra, Sentra, Carlota Jo, Pulse, and the mobile CORTEX app. It is the single source of truth for authentication, authorization, data access, AI orchestration, audit logging, and real-time signal delivery.
+This is the single shared backend that serves every SZL Holdings front-end artifact. It handles OIDC/PKCE authentication, multi-provider AI orchestration (Anthropic, OpenAI, Gemini), all database operations via Drizzle ORM, webhook ingestion, the Proof Chain immutable audit trail, and the n8n automation bridge.
 
-It is not a microservice. It is a carefully structured monolith with domain-scoped service layers — a deliberate architectural choice that preserves cross-domain correlation (the PRISM Bus event system) without the operational complexity of distributed services.
+All domain routes are scoped under `/api/<domain>/` — maritme, real estate, advisory, cybersecurity, defense, operations.
 
-## Capabilities
-
-- **REST + GraphQL** — 2,816 endpoints across REST route handlers and Apollo GraphQL schema
-- **11-Role RBAC** — Deny-by-default role-based access control. Every route is access-controlled; no unprotected endpoints
-- **Org-Scoped Multi-Tenancy** — All database queries include `org_id` isolation. Cross-tenant access architecturally prevented
-- **Proof Chain** — Immutable, append-only audit log for every consequential action with actor attribution, timestamp, source, and decision context
-- **Alloy Execution Fabric** — Durable workflow orchestration, approval chains, human-in-the-loop gates, and agent coordination
-- **PRISM Bus** — Cross-domain event system that normalizes, routes, and correlates signals across all domain packs
-- **SSE Real-Time Feeds** — Server-Sent Events for live domain signal feeds (one per domain pack, one aggregate)
-- **AI Orchestration** — Multi-provider AI (Anthropic, OpenAI, Gemini) with evidence-backed retrieval and mock/live execution modes
-- **Rate Limiting** — Per-route and per-tenant rate limits with structured error responses
-- **Request Tracing** — Every request carries a correlation ID for end-to-end traceability
-
-## Architecture
-
-```
-Client (Web / Mobile)
-          |
-    Express 5 (middleware chain)
-          |
-    Auth Middleware (OIDC/PKCE token verification)
-          |
-    RBAC Middleware (role check, deny-by-default)
-          |
-    Rate Limiter + Request ID
-          |
-    Route Handler → Domain Service
-          |
-    Repository Layer (Drizzle ORM)
-          |
-    PostgreSQL 16
-```
-
-See [`ARCHITECTURE.md`](../../ARCHITECTURE.md) and [`API-SPEC.md`](../../API-SPEC.md) for the full route inventory and auth model.
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| **Runtime** | Node.js 22, Express 5 |
-| **Language** | TypeScript (strict mode) |
-| **API** | REST (Express Router) + GraphQL (Apollo Server) |
-| **ORM** | Drizzle ORM (type-safe, PostgreSQL-first) |
-| **Database** | PostgreSQL 16 |
-| **Auth** | OIDC/PKCE, JWT, session signing (express-session) |
-| **AI** | Anthropic Claude, OpenAI GPT, Google Gemini |
-| **Real-time** | Server-Sent Events (SSE) |
-| **Validation** | Zod (all request/response schemas) |
-| **Testing** | Vitest, Supertest |
-| **Process** | Custom supervisor (fast-start, port-proxy, graceful restart) |
-
-## Quick Start
+## Run locally
 
 ```bash
 # From the monorepo root
 pnpm install
-
-# Set required environment variables (see Environment Variables section)
-# Then:
-pnpm --filter @szl-holdings/api-server dev
+pnpm --filter @workspace/api-server dev
 ```
 
-Run tests:
+**Health check:** `GET /api/health`
 
-```bash
-pnpm test:unit               # API server unit tests
-pnpm test:integration        # Integration tests (requires live database)
-```
+## Key route groups
 
-## Sub-router middleware path-scoping
+| Route Group | Domain | Purpose |
+|-------------|--------|---------|
+| `/api/auth/*` | Platform | OIDC/PKCE, session, token management |
+| `/api/vessels/*` | Maritime | Fleet data, voyage intelligence, sanctions |
+| `/api/terra/*` | Real Estate | Distress pipeline, ownership graph, deals |
+| `/api/sentra/*` | Cyber | Threat feeds, incidents, posture |
+| `/api/aegis/*` | Defense | SOC data, managed services, Labs |
+| `/api/counsel/*` | Legal | Matters, obligations, counterparties, RAG |
+| `/api/carlota-jo/*` | Advisory | Client portal, appointments, documents |
+| `/api/command/*` | Operations | Signals, actions, approvals, automations |
+| `/api/proof-chain/*` | Platform | Immutable audit trail writes and queries |
 
-> **Rule.** Any `authMiddleware`, `tenantScope`, or `requireRole` installed at
-> the **top of a sub-router file** (e.g. `src/routes/foo.ts`) **must be
-> path-scoped** to the prefix that file owns:
->
-> ```ts
-> // ❌ BAD — runs for every request that reaches this point in the parent
-> //         router's chain. Silently 401/403s sibling routes that share the
-> //         same broad mount prefix.
-> router.use(authMiddleware());
-> router.use(tenantScope({ required: true }));
->
-> // ✅ GOOD — runs only for requests this file actually handles.
-> router.use('/foo', authMiddleware());
-> router.use('/foo/private', tenantScope({ required: true }));
-> ```
->
-> **Why.** Most sub-routers are mounted on a parent group via
-> `lazyMatch('/<prefix>', loader)` (see `src/lib/lazy-router.ts`). `lazyMatch`
-> does **not** strip the prefix from `req.url`, and several files share the
-> same broad prefix (e.g. multiple files under `/alloy`, `/nuro-mesh`,
-> `/booking`, `/forge`, `/connectors`). An unprefixed `router.use(authMw)` at
-> the top of one of those files therefore runs for **every** request to the
-> shared prefix and will reject sibling-router traffic that has nothing to do
-> with this file. This footgun has burned us in tasks #718, #1329, the
-> original Carlota Jo `/booking/time-entries` regression, and the task #1395
-> sweep.
->
-> **`lazyMount`-mounted files (task #3453).** Files mounted via
-> `router.use('/<prefix>', lazyMount(...))` in the parent group already have
-> Express strip the prefix and only invoke the inner router for matching
-> paths, so an unprefixed top-level guard there is not a footgun *today*.
-> However, if the mount style is ever changed to `lazyMatch` the same
-> footgun resurfaces. Task #3453 defensively path-scoped all remaining
-> `lazyMount`-mounted files (innovation-engine, knowledge-graph,
-> prism-counsel-{s31,review,pilot,pilot-one}, nexus, provenance, signal-bus,
-> pulse) using their owned route prefixes.
->
-> The static regression test
-> `src/routes/__tests__/sub-router-middleware-path-scope.test.ts` enforces
-> this rule for all audited files (tasks #718, #1395, #3453); extend it when
-> you add new shared-prefix sub-routers.
+## Tech stack
 
-## Notable Source Paths
+Express 5 · TypeScript (strict) · PostgreSQL 16 · Drizzle ORM · Anthropic / OpenAI / Gemini · OIDC/PKCE (Clerk) · Node 22
 
-| Path | Purpose |
-|------|---------|
-| `src/app.ts`, `src/index.ts` | Express bootstrap and entrypoint |
-| `src/routes/` | REST route handlers (organized by domain) |
-| `src/graphql/` | Apollo GraphQL schema and resolvers |
-| `src/middlewares/` | Auth, RBAC, rate limit, CORS, validation, request ID |
-| `src/services/` | Domain services (proof chain, signals, alloy, AI, etc.) |
-| `src/data/` | Drizzle ORM schema and repositories |
-| `src/jobs/` | Scheduled and background jobs |
-| `src/config/` | Environment and runtime configuration |
-| `src/__tests__/` | Vitest test suites |
-| `supervisor.mjs`, `port-proxy.mjs`, `fast-start.mjs` | Process supervision and dev startup |
+## Architecture reference
 
-## Environment Variables
-
-| Variable | Purpose |
-|----------|---------|
-| `APP_ENV`, `APP_URL`, `APP_BASE_URL` | Runtime mode and public URLs |
-| `DATABASE_URL` | PostgreSQL connection string |
-| `SESSION_SECRET`, `JWT_SECRET` | Auth/session signing |
-| `ADMIN_PIN` | Forge admin PIN gate |
-| `AI_EXECUTION_MODE` | AI execution policy (`live`, `mock`, etc.) |
-| `AI_INTEGRATIONS_OPENAI_API_KEY` | OpenAI API key |
-| `AI_INTEGRATIONS_ANTHROPIC_API_KEY` | Anthropic API key |
-| `AI_INTEGRATIONS_GEMINI_API_KEY` | Google Gemini API key |
-| `AI_INTEGRATIONS_OPENAI_BASE_URL` | Override for OpenAI-compatible base URL |
-| `ALLOY_INTERNAL_TOKEN`, `ALLOY_EMAIL_INGEST_SECRET` | Alloy ingest auth |
-| `ALLOY_WORKFLOW_AUTO_RUN`, `ALLOY_REQUIRE_APPROVAL_CRITICAL` | Alloy runtime policy |
-| `AIS_FEED_ENABLED` | Toggle AIS maritime feed |
-| `AMPLITUDE_API_KEY` | Server-side analytics |
-
-See [`ops/infra/environment-matrix.md`](../../ops/infra/environment-matrix.md) for the complete matrix.
+Full system architecture: [`docs/architecture/architecture.md`](../../docs/architecture/architecture.md)
 
 ---
 
-**SZL Holdings** · [szlholdings.com](https://szlholdings.com) · [security@szlholdings.com](mailto:security@szlholdings.com)
+**SZL Holdings** · [szlholdings.com](https://szlholdings.com) · [inquiries@szlholdings.com](mailto:inquiries@szlholdings.com)

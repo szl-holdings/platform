@@ -6,6 +6,8 @@
 
 > Signal detection, AI-governed recommendations, human approval gates, cryptographic proof of every outcome — across eight enterprise verticals from a single platform.
 
+**What this is in 30 seconds:** SZL Holdings is a TypeScript monorepo containing 14 deployable artifacts — a governed AI decision platform across cybersecurity, real estate, maritime, legal, defense, and advisory verticals. Every product shares one API backend, one authentication model, one design system, and one audit infrastructure. The defining capability is **A11oy**: a seven-layer fabric that connects live signals to human-confirmed actions with cryptographic proof at every step. No action executes autonomously — governance is structural, not advisory.
+
 ---
 
 ## The Problem
@@ -42,40 +44,59 @@ Screenshots depict the alpha demo state of the platform (development environment
 
 ### SZL Holdings — Governed Decision Operating System
 
-![SZL Holdings — Platform Dashboard](brand/screenshots/szl-holdings-dashboard.jpg)
+![SZL Holdings — Platform Dashboard](.github/assets/screenshots/szl-holdings-hero.jpg)
 
 *Parent company dashboard — governed infrastructure for high-consequence decisions across eight enterprise verticals.*
 
 ### A11oy — Live Enterprise Execution Fabric
 
-![A11oy — Execution Fabric](brand/screenshots/a11oy-execution-fabric.jpg)
+![A11oy — Execution Fabric](.github/assets/screenshots/a11oy-hero.jpg)
 
 *A11oy — seven-layer governed agentic fabric, live signal mesh, and cryptographic proof ledger.*
 
-### FORGE — Unified Command Surface
+### Unified Command — Operations Surface
 
-![FORGE Command Portal](brand/screenshots/forge-command-portal.jpg)
+![Unified Command](.github/assets/screenshots/command-hero.jpg)
 
-*Cross-domain operator surface with governed decision loop, spatial runtime, and cross-platform intelligence.*
+*Cross-domain operator surface with governed decision loop, signal timeline, and approval queue.*
 
 ### Domain Pack Verticals
 
-| TENAX — Cyber Resilience | Counsel — Legal Matter Command |
+| Sentra — Cyber Resilience | Counsel — Legal Matter Command |
 |---|---|
-| ![TENAX](brand/screenshots/tenax-cyber-resilience.jpg) | ![Counsel](brand/screenshots/counsel-legal-command.jpg) |
+| ![ Sentra](.github/assets/screenshots/sentra-hero.jpg) | ![Counsel](.github/assets/screenshots/counsel-hero.jpg) |
 | Cyber posture, recovery readiness, and live incident command | Matter tracking, obligation mapping, and legal exposure management |
 
-| DOMAINE — Real Estate Intelligence | SEXTANT — Maritime Intelligence |
+| Terra — Real Estate Intelligence | Vessels — Maritime Intelligence |
 |---|---|
-| ![DOMAINE](brand/screenshots/domaine-real-estate.jpg) | ![SEXTANT](brand/screenshots/sextant-maritime.jpg) |
+| ![Terra](.github/assets/screenshots/terra-hero.jpg) | ![Vessels](.github/assets/screenshots/vessels-hero.jpg) |
 | Deal pipeline, portfolio analytics, and market intelligence | Fleet command, route optimization, and maritime operations |
 
-| PARAGON — Defense & Intelligence |
+| Aegis — Defense & Intelligence |
 |---|
-| ![PARAGON](brand/screenshots/paragon-defense.jpg) |
+| ![Aegis](.github/assets/screenshots/aegis-hero.jpg) |
 | Threat intelligence, defense operations command, and spatial analytics |
 
 > Screenshots captured from the alpha demo environment (development build, seeded data) — 2026-04-25. Screenshots are not tracked in the git repository.
+> Canonical screenshots are in [`.github/assets/screenshots/`](.github/assets/screenshots/). All captures are from the live platform — no mockups or AI-generated imagery.
+
+---
+
+## Demo Videos
+
+### SZL Holdings — Governed Autonomy Platform Demo
+
+> Full platform walkthrough: A11oy execution fabric, domain packs, governed decision loop, and cryptographic proof chain.
+
+**[Watch on szlholdings.com →](https://szlholdings.com/szl-demo-video/)**
+
+The demo covers the end-to-end governed decision loop: signal ingestion → AI recommendation → human approval gate → Proof Chain record. All domain packs are shown with live seeded data.
+
+### Developer Walkthrough (~90s)
+
+> Monorepo orientation: repo open → API server up → artifact running → preview pane live → readme:check green.
+
+See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script (start commands, directory map, and verification steps). The full platform demo above covers the same product flow with all domain packs.
 
 ---
 

@@ -6,6 +6,8 @@ The SZL Holdings platform is a **proprietary, founder-led governed decision infr
 
 All participants in SZL Holdings spaces are expected to follow our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
+**New here?** Start with [`docs/onboarding.md`](./docs/onboarding.md) — the 10-minute path from clone to a running artifact with tests passing. This document is the contribution workflow; the onboarding doc is the hands-on path.
+
 ---
 
 ## Who Contributes
