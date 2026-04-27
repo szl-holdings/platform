@@ -199,6 +199,8 @@ tags:
     description: "Auto-generated tag for cortex route group"
   - name: counsel
     description: "Auto-generated tag for counsel route group"
+  - name: conduit
+    description: Conduit Reverse ETL — connections, syncs, field mappings, sync runs, and templates
   - name: covenant-policy-api
     description: "Auto-generated tag for covenant-policy-api route group"
   - name: crm
@@ -64574,6 +64576,486 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+  /conduit/stats:
+    get:
+      operationId: getConduitStats
+      summary: Get Conduit dashboard stats
+      tags: [conduit]
+      responses:
+        "200":
+          description: Stats snapshot
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConduitStats" }
+
+  /conduit/connections:
+    get:
+      operationId: listConduitConnections
+      summary: List all connections
+      tags: [conduit]
+      responses:
+        "200":
+          description: Connection list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ConduitConnection" }
+    post:
+      operationId: createConduitConnection
+      summary: Create a connection
+      tags: [conduit]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateConduitConnectionBody" }
+      responses:
+        "201":
+          description: Created connection
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConduitConnection" }
+
+  /conduit/connections/{id}:
+    get:
+      operationId: getConduitConnection
+      summary: Get a connection
+      tags: [conduit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Connection
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConduitConnection" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConduitError" }
+    patch:
+      operationId: updateConduitConnection
+      summary: Update a connection
+      tags: [conduit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateConduitConnectionBody" }
+      responses:
+        "200":
+          description: Updated connection
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConduitConnection" }
+    delete:
+      operationId: deleteConduitConnection
+      summary: Delete a connection
+      tags: [conduit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "204":
+          description: Deleted
+
+  /conduit/connections/{id}/test:
+    post:
+      operationId: testConduitConnection
+      summary: Test a connection
+      tags: [conduit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Test result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConduitConnectionTestResult" }
+
+  /conduit/syncs:
+    get:
+      operationId: listConduitSyncs
+      summary: List all syncs
+      tags: [conduit]
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: destinationId
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Sync list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ConduitSync" }
+    post:
+      operationId: createConduitSync
+      summary: Create a sync
+      tags: [conduit]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateConduitSyncBody" }
+      responses:
+        "201":
+          description: Created sync
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConduitSync" }
+
+  /conduit/syncs/{id}:
+    get:
+      operationId: getConduitSync
+      summary: Get a sync
+      tags: [conduit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Sync
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConduitSync" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConduitError" }
+    patch:
+      operationId: updateConduitSync
+      summary: Update a sync
+      tags: [conduit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateConduitSyncBody" }
+      responses:
+        "200":
+          description: Updated sync
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConduitSync" }
+    delete:
+      operationId: deleteConduitSync
+      summary: Delete a sync
+      tags: [conduit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "204":
+          description: Deleted
+
+  /conduit/syncs/{id}/run:
+    post:
+      operationId: runConduitSync
+      summary: Trigger an immediate sync run
+      tags: [conduit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "202":
+          description: Run started
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConduitSyncRun" }
+
+  /conduit/syncs/{id}/mappings:
+    get:
+      operationId: getConduitSyncMappings
+      summary: Get field mappings for a sync
+      tags: [conduit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Field mappings
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ConduitSyncMapping" }
+    put:
+      operationId: updateConduitSyncMappings
+      summary: Replace field mappings for a sync
+      tags: [conduit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mappings]
+              properties:
+                mappings:
+                  type: array
+                  items: { $ref: "#/components/schemas/ConduitSyncMappingInput" }
+      responses:
+        "200":
+          description: Updated mappings
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ConduitSyncMapping" }
+
+  /conduit/sync-runs:
+    get:
+      operationId: listConduitSyncRuns
+      summary: List sync runs
+      tags: [conduit]
+      parameters:
+        - name: syncId
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50 }
+        - name: offset
+          in: query
+          schema: { type: integer, default: 0 }
+      responses:
+        "200":
+          description: Sync run list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/ConduitSyncRun" }
+                  total: { type: integer }
+
+  /conduit/sync-runs/{id}:
+    get:
+      operationId: getConduitSyncRun
+      summary: Get a sync run with details
+      tags: [conduit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Sync run detail
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConduitSyncRunDetail" }
+
+  /conduit/sync-runs/{id}/rows:
+    get:
+      operationId: listConduitSyncRunRows
+      summary: List row-level errors for a sync run
+      tags: [conduit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 100 }
+        - name: offset
+          in: query
+          schema: { type: integer, default: 0 }
+      responses:
+        "200":
+          description: Failed rows
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ConduitSyncRunRow" }
+
+  /conduit/sync-runs/{id}/rows/{rowId}/retry:
+    post:
+      operationId: retryConduitSyncRunRow
+      summary: Retry a failed row
+      tags: [conduit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: rowId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "202":
+          description: Retry queued
+
+  /conduit/templates:
+    get:
+      operationId: listConduitTemplates
+      summary: List available sync templates
+      tags: [conduit]
+      responses:
+        "200":
+          description: Template list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ConduitTemplate" }
+
+  /conduit/templates/{id}:
+    get:
+      operationId: getConduitTemplate
+      summary: Get a sync template
+      tags: [conduit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Template
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConduitTemplate" }
+
+  /conduit/templates/{id}/apply:
+    post:
+      operationId: applyConduitTemplate
+      summary: Apply a template to create a pre-populated sync
+      tags: [conduit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                connectionId: { type: string }
+                name: { type: string }
+      responses:
+        "201":
+          description: Created sync from template
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConduitSync" }
+
+  /conduit/sources/preview:
+    post:
+      operationId: previewConduitSource
+      summary: Preview source rows for a given source configuration
+      tags: [conduit]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ConduitSourcePreviewRequest" }
+      responses:
+        "200":
+          description: Preview rows
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConduitSourcePreviewResult" }
+
+  /conduit/destinations/{destination}/objects:
+    get:
+      operationId: listConduitDestinationObjects
+      summary: List available destination objects for a connector type
+      tags: [conduit]
+      parameters:
+        - name: destination
+          in: path
+          required: true
+          schema: { type: string }
+        - name: connectionId
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Object list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ConduitDestinationObject" }
+
+  /conduit/destinations/{destination}/objects/{objectType}/fields:
+    get:
+      operationId: listConduitDestinationFields
+      summary: List fields for a destination object
+      tags: [conduit]
+      parameters:
+        - name: destination
+          in: path
+          required: true
+          schema: { type: string }
+        - name: objectType
+          in: path
+          required: true
+          schema: { type: string }
+        - name: connectionId
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Field list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ConduitDestinationField" }
+
+
 components:
   securitySchemes:
     bearerAuth:
@@ -67201,3 +67683,263 @@ components:
         parties:
           type: array
           items: { $ref: "#/components/schemas/CounselParty" }
+
+    ConduitStats:
+      type: object
+      properties:
+        totalSyncs: { type: integer }
+        activeSyncs: { type: integer }
+        totalRuns: { type: integer }
+        successfulRuns: { type: integer }
+        failedRuns: { type: integer }
+        totalRowsWritten: { type: integer }
+        successRate: { type: number }
+        recentRuns:
+          type: array
+          items: { $ref: "#/components/schemas/ConduitSyncRun" }
+
+    ConduitConnection:
+      type: object
+      required: [id, name, destination, status, createdAt]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        destination: { type: string }
+        status:
+          type: string
+          enum: [active, error, untested]
+        credentialMeta:
+          type: object
+          additionalProperties: true
+        testedAt: { type: ["string", "null"] }
+        createdAt: { type: string }
+        updatedAt: { type: string }
+
+    CreateConduitConnectionBody:
+      type: object
+      required: [name, destination]
+      properties:
+        name: { type: string }
+        destination: { type: string }
+        credentials:
+          type: object
+          additionalProperties: true
+
+    UpdateConduitConnectionBody:
+      type: object
+      properties:
+        name: { type: string }
+        credentials:
+          type: object
+          additionalProperties: true
+
+    ConduitConnectionTestResult:
+      type: object
+      required: [success]
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        latencyMs: { type: number }
+
+    ConduitSync:
+      type: object
+      required: [id, name, sourceType, connectionId, objectType, runMode, semantics, status, createdAt]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        sourceType:
+          type: string
+          enum: [postgres, csv, api_resource, snowflake, bigquery]
+        sourceMeta:
+          type: object
+          additionalProperties: true
+        connectionId: { type: string }
+        objectType: { type: string }
+        runMode:
+          type: string
+          enum: [manual, scheduled, on_change]
+        scheduleExpr: { type: ["string", "null"] }
+        semantics:
+          type: string
+          enum: [insert, upsert, mirror]
+        upsertKey: { type: ["string", "null"] }
+        status:
+          type: string
+          enum: [active, paused, draft, error]
+        lastRunId: { type: ["string", "null"] }
+        lastRunAt: { type: ["string", "null"] }
+        lastRunStatus: { type: ["string", "null"] }
+        mappingCount: { type: integer }
+        createdAt: { type: string }
+        updatedAt: { type: string }
+        connection: { $ref: "#/components/schemas/ConduitConnection" }
+
+    CreateConduitSyncBody:
+      type: object
+      required: [name, sourceType, connectionId, objectType, runMode, semantics]
+      properties:
+        name: { type: string }
+        sourceType: { type: string }
+        sourceMeta:
+          type: object
+          additionalProperties: true
+        connectionId: { type: string }
+        objectType: { type: string }
+        runMode: { type: string }
+        scheduleExpr: { type: string }
+        semantics: { type: string }
+        upsertKey: { type: string }
+
+    UpdateConduitSyncBody:
+      type: object
+      properties:
+        name: { type: string }
+        sourceType: { type: string }
+        sourceMeta:
+          type: object
+          additionalProperties: true
+        connectionId: { type: string }
+        objectType: { type: string }
+        runMode: { type: string }
+        scheduleExpr: { type: string }
+        semantics: { type: string }
+        upsertKey: { type: string }
+        status: { type: string }
+
+    ConduitSyncMapping:
+      type: object
+      required: [id, syncId, sourceField, destinationField]
+      properties:
+        id: { type: string }
+        syncId: { type: string }
+        sourceField: { type: string }
+        destinationField: { type: string }
+        transform:
+          type: ["string", "null"]
+          enum: [uppercase, lowercase, concat, split, format_date, lookup, json_extract, constant, conditional, null]
+        transformConfig:
+          type: object
+          additionalProperties: true
+        sortOrder: { type: integer }
+
+    ConduitSyncMappingInput:
+      type: object
+      required: [sourceField, destinationField]
+      properties:
+        sourceField: { type: string }
+        destinationField: { type: string }
+        transform: { type: string }
+        transformConfig:
+          type: object
+          additionalProperties: true
+        sortOrder: { type: integer }
+
+    ConduitSyncRun:
+      type: object
+      required: [id, syncId, status, startedAt]
+      properties:
+        id: { type: string }
+        syncId: { type: string }
+        syncName: { type: string }
+        status:
+          type: string
+          enum: [running, success, failed, partial]
+        rowsRead: { type: integer }
+        rowsWritten: { type: integer }
+        rowsFailed: { type: integer }
+        durationMs: { type: ["integer", "null"] }
+        errorMessage: { type: ["string", "null"] }
+        startedAt: { type: string }
+        finishedAt: { type: ["string", "null"] }
+        triggeredBy:
+          type: string
+          enum: [manual, scheduled, on_change]
+
+    ConduitSyncRunDetail:
+      allOf:
+        - $ref: "#/components/schemas/ConduitSyncRun"
+        - type: object
+          properties:
+            sync: { $ref: "#/components/schemas/ConduitSync" }
+            sampleErrors:
+              type: array
+              items: { $ref: "#/components/schemas/ConduitSyncRunRow" }
+
+    ConduitSyncRunRow:
+      type: object
+      required: [id, runId, rowIndex]
+      properties:
+        id: { type: string }
+        runId: { type: string }
+        rowIndex: { type: integer }
+        sourceData:
+          type: object
+          additionalProperties: true
+        errorMessage: { type: ["string", "null"] }
+        retried: { type: boolean }
+        retriedAt: { type: ["string", "null"] }
+
+    ConduitTemplate:
+      type: object
+      required: [id, name, sourceType, destination, description]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        sourceType: { type: string }
+        destination: { type: string }
+        description: { type: string }
+        category: { type: string }
+        icon: { type: string }
+        mappingCount: { type: integer }
+        mappings:
+          type: array
+          items: { $ref: "#/components/schemas/ConduitSyncMappingInput" }
+
+    ConduitSourcePreviewRequest:
+      type: object
+      required: [sourceType]
+      properties:
+        sourceType: { type: string }
+        sourceMeta:
+          type: object
+          additionalProperties: true
+        mappings:
+          type: array
+          items: { $ref: "#/components/schemas/ConduitSyncMappingInput" }
+
+    ConduitSourcePreviewResult:
+      type: object
+      properties:
+        fields:
+          type: array
+          items: { type: string }
+        rows:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        totalRows: { type: integer }
+
+    ConduitDestinationObject:
+      type: object
+      required: [name, label]
+      properties:
+        name: { type: string }
+        label: { type: string }
+        description: { type: string }
+
+    ConduitDestinationField:
+      type: object
+      required: [name, label, type]
+      properties:
+        name: { type: string }
+        label: { type: string }
+        type: { type: string }
+        required: { type: boolean }
+        updateable: { type: boolean }
+        description: { type: string }
+
+    ConduitError:
+      type: object
+      properties:
+        error: { type: string }

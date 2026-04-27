@@ -27,6 +27,7 @@ export const VESSELS_PORT = 8099;
 export const PULSE_PORT = 5201;
 export const SZL_DEMO_VIDEO_PORT = 8765;
 export const PLUGINMESH_PORT = 8190;
+export const CONDUIT_PORT = 5300;
 
 export const PROXY_ROUTES: ProxyRoute[] = [
   { prefix: '/a11oy/', port: A11OY_PORT },
@@ -37,6 +38,7 @@ export const PROXY_ROUTES: ProxyRoute[] = [
   { prefix: '/ws/', port: API_PORT },
   { prefix: '/carlota-jo/', port: CARLOTA_JO_PORT },
   { prefix: '/command/', port: COMMAND_PORT },
+  { prefix: '/conduit/', port: CONDUIT_PORT },
   { prefix: '/counsel/', port: COUNSEL_PORT },
   { prefix: '/nexus/', port: PRAXIS_PORT },
   { prefix: '/sentra/', port: SENTRA_PORT },

@@ -184,7 +184,7 @@ export const ListDecisionsResponse = zod.object({
           rawInput: zod.string().nullish(),
           rawOutput: zod.string().nullish(),
         })
-        .describe('Schema-validated Counsel decision object (v2.0.0)'),
+        .describe('Schema-validated Alloy decision object (v2.0.0)'),
     )
     .optional(),
 });
@@ -279,7 +279,7 @@ export const GetDecisionResponse = zod.object({
       rawOutput: zod.string().nullish(),
     })
     .optional()
-    .describe('Schema-validated Counsel decision object (v2.0.0)'),
+    .describe('Schema-validated Alloy decision object (v2.0.0)'),
   approvalPolicy: zod
     .object({
       requiresApproval: zod.boolean().optional(),
@@ -358,7 +358,7 @@ export const ApproveDecisionResponse = zod.object({
       rawOutput: zod.string().nullish(),
     })
     .optional()
-    .describe('Schema-validated Counsel decision object (v2.0.0)'),
+    .describe('Schema-validated Alloy decision object (v2.0.0)'),
   message: zod.string().optional(),
 });
 
@@ -429,7 +429,7 @@ export const RejectDecisionResponse = zod.object({
       rawOutput: zod.string().nullish(),
     })
     .optional()
-    .describe('Schema-validated Counsel decision object (v2.0.0)'),
+    .describe('Schema-validated Alloy decision object (v2.0.0)'),
   message: zod.string().optional(),
 });
 
@@ -473,7 +473,7 @@ export const ListObservabilityAppsResponse = zod.array(
 export const GetAppObservabilityParams = zod.object({
   appSlug: zod.coerce
     .string()
-    .describe('App identifier slug (e.g. "rosie", "terra", "alloy")'),
+    .describe('App identifier slug (e.g. \"rosie\", \"terra\", \"alloy\")'),
 });
 
 export const GetAppObservabilityResponse = zod.object({}).passthrough();
@@ -1695,7 +1695,7 @@ export const RequestUploadUrlBody = zod.object({
     .string()
     .optional()
     .describe(
-      'Product domain for file type allowlist enforcement\n(e.g. "prism", "terra", "vessels", "aegis", "lyte", "szl", "carlota-jo").\nOmit or use "default" for the global allowlist.\n',
+      'Product domain for file type allowlist enforcement\n(e.g. \"prism\", \"terra\", \"vessels\", \"aegis\", \"lyte\", \"szl\", \"carlota-jo\").\nOmit or use \"default\" for the global allowlist.\n',
     ),
   orgId: zod
     .number()
@@ -1710,7 +1710,7 @@ export const RequestUploadUrlResponse = zod.object({
   objectPath: zod
     .string()
     .describe(
-      'Normalized object path (e.g. /objects/uploads/uuid). Store this in your database.',
+      'Normalized object path (e.g. \/objects\/uploads\/uuid). Store this in your database.',
     ),
   metadata: zod
     .object({
@@ -1721,7 +1721,7 @@ export const RequestUploadUrlResponse = zod.object({
         .string()
         .optional()
         .describe(
-          'Product domain for file type allowlist enforcement\n(e.g. "prism", "terra", "vessels", "aegis", "lyte", "szl", "carlota-jo").\nOmit or use "default" for the global allowlist.\n',
+          'Product domain for file type allowlist enforcement\n(e.g. \"prism\", \"terra\", \"vessels\", \"aegis\", \"lyte\", \"szl\", \"carlota-jo\").\nOmit or use \"default\" for the global allowlist.\n',
         ),
       orgId: zod
         .number()
@@ -3337,7 +3337,7 @@ export const ListPlatformDecisionsResponse = zod.object({
           rawInput: zod.string().nullish(),
           rawOutput: zod.string().nullish(),
         })
-        .describe('Schema-validated Counsel decision object (v2.0.0)'),
+        .describe('Schema-validated Alloy decision object (v2.0.0)'),
     )
     .optional(),
 });
@@ -3412,7 +3412,7 @@ export const GetPlatformDecisionResponse = zod
     rawInput: zod.string().nullish(),
     rawOutput: zod.string().nullish(),
   })
-  .describe('Schema-validated Counsel decision object (v2.0.0)');
+  .describe('Schema-validated Alloy decision object (v2.0.0)');
 
 /**
  * @summary Approve a platform-level decision
@@ -5147,7 +5147,7 @@ export const RegisterWebhookBody = zod.object({
     ])
     .optional()
     .describe(
-      'Event types to subscribe to. Use `"*"` for all events, or an array of specific\nevent type strings such as `["decision.created", "decision.executed"]`.\n',
+      'Event types to subscribe to. Use `\"\*\"` for all events, or an array of specific\nevent type strings such as `[\"decision.created\", \"decision.executed\"]`.\n',
     ),
   description: zod
     .string()
@@ -5223,7 +5223,7 @@ export const RegisterWebhookEndpointBody = zod.object({
     ])
     .optional()
     .describe(
-      'Event types to subscribe to. Use `"*"` for all events, or an array of specific\nevent type strings such as `["decision.created", "decision.executed"]`.\n',
+      'Event types to subscribe to. Use `\"\*\"` for all events, or an array of specific\nevent type strings such as `[\"decision.created\", \"decision.executed\"]`.\n',
     ),
   description: zod
     .string()
@@ -5307,7 +5307,7 @@ export const ListWebhookDeliveriesQueryParams = zod.object({
     .string()
     .optional()
     .describe(
-      'Filter by event type. Supports prefix wildcard, e.g. `decision.*`',
+      'Filter by event type. Supports prefix wildcard, e.g. `decision.\*`',
     ),
   limit: zod.coerce
     .number()
@@ -6707,3 +6707,14423 @@ export const ExportAtlasOpenUSDManifestResponse = zod
   .describe(
     'Standard ATLAS export adapter envelope returned directly as the 200 response body\nby all ATLAS export endpoints (no outer wrapper).\n',
   );
+
+/**
+ * @summary [stub] List/get /.well-known/a2a/agents/{agentId} (a2a)
+ */
+export const A2aGetWellKnownA2aAgentsAgentIdParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /.well-known/a2a/agents/{agentId}/health (a2a)
+ */
+export const A2aGetWellKnownA2aAgentsAgentIdHealthParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /.well-known/a2a/agents/{agentId}/heartbeat (a2a)
+ */
+export const A2aPostWellKnownA2aAgentsAgentIdHeartbeatParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /.well-known/a2a/agents/{agentId}/rpc (a2a)
+ */
+export const A2aPostWellKnownA2aAgentsAgentIdRpcParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /.well-known/a2a/agents/{agentId}/status (a2a)
+ */
+export const A2aGetWellKnownA2aAgentsAgentIdStatusParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /.well-known/a2a/agents/{agentId}/stream (a2a)
+ */
+export const A2aGetWellKnownA2aAgentsAgentIdStreamParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /.well-known/a2a/agents/{agentId}/tasks (a2a)
+ */
+export const A2aGetWellKnownA2aAgentsAgentIdTasksParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /.well-known/a2a/agents/{agentId}/tasks (a2a)
+ */
+export const A2aPostWellKnownA2aAgentsAgentIdTasksParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /.well-known/a2a/agents/{agentId}/tasks/{taskId} (a2a)
+ */
+export const A2aGetWellKnownA2aAgentsAgentIdTasksTaskIdParams = zod.object({
+  agentId: zod.coerce.string(),
+  taskId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /.well-known/a2a/delegate/{taskId} (a2a)
+ */
+export const A2aGetWellKnownA2aDelegateTaskIdParams = zod.object({
+  taskId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /a2a/a2a/agents/{agentId} (a2a)
+ */
+export const A2aGetA2aA2aAgentsAgentIdParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /a2a/a2a/agents/{agentId}/health (a2a)
+ */
+export const A2aGetA2aA2aAgentsAgentIdHealthParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /a2a/a2a/agents/{agentId}/heartbeat (a2a)
+ */
+export const A2aPostA2aA2aAgentsAgentIdHeartbeatParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /a2a/a2a/agents/{agentId}/rpc (a2a)
+ */
+export const A2aPostA2aA2aAgentsAgentIdRpcParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /a2a/a2a/agents/{agentId}/status (a2a)
+ */
+export const A2aGetA2aA2aAgentsAgentIdStatusParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /a2a/a2a/agents/{agentId}/stream (a2a)
+ */
+export const A2aGetA2aA2aAgentsAgentIdStreamParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /a2a/a2a/agents/{agentId}/tasks (a2a)
+ */
+export const A2aGetA2aA2aAgentsAgentIdTasksParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /a2a/a2a/agents/{agentId}/tasks (a2a)
+ */
+export const A2aPostA2aA2aAgentsAgentIdTasksParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /a2a/a2a/agents/{agentId}/tasks/{taskId} (a2a)
+ */
+export const A2aGetA2aA2aAgentsAgentIdTasksTaskIdParams = zod.object({
+  agentId: zod.coerce.string(),
+  taskId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /a2a/a2a/delegate/{taskId} (a2a)
+ */
+export const A2aGetA2aA2aDelegateTaskIdParams = zod.object({
+  taskId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /act/control-tower/act/pipelines/{id} (act)
+ */
+export const ActGetActControlTowerActPipelinesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /act/control-tower/act/pipelines/{id}/run (act)
+ */
+export const ActPostActControlTowerActPipelinesIdRunParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/actions/{id} (guardian)
+ */
+export const GuardianGetActionsActionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /actions/actions/{id}/approve (guardian)
+ */
+export const GuardianPostActionsActionsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /actions/actions/{id}/reject (guardian)
+ */
+export const GuardianPostActionsActionsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/agents/{agentId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetActionsAgentsAgentIdParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/agents/{agentId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimeGetActionsAgentsAgentIdVersionsParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /actions/agents/{agentId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimePostActionsAgentsAgentIdVersionsParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/approvals/{requestId} (guardian)
+ */
+export const GuardianGetActionsApprovalsRequestIdParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /actions/approvals/{requestId}/review (guardian)
+ */
+export const GuardianPostActionsApprovalsRequestIdReviewParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/guardrail-configs/{id} (guardian)
+ */
+export const GuardianGetActionsGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /actions/guardrail-configs/{id} (guardian)
+ */
+export const GuardianPatchActionsGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /actions/guardrail-configs/{id} (guardian)
+ */
+export const GuardianDeleteActionsGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/models/{modelId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetActionsModelsModelIdParams = zod.object({
+  modelId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/policies/{id} (guardian)
+ */
+export const GuardianGetActionsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /actions/policies/{id} (guardian)
+ */
+export const GuardianPatchActionsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /actions/policies/{id} (guardian)
+ */
+export const GuardianDeleteActionsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/policies/{id}/assignments (guardian)
+ */
+export const GuardianGetActionsPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /actions/policies/{id}/assignments (guardian)
+ */
+export const GuardianPostActionsPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /actions/policies/{id}/assignments/{assignmentId} (guardian)
+ */
+export const GuardianDeleteActionsPoliciesIdAssignmentsAssignmentIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    assignmentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /actions/policies/{id}/audit (guardian)
+ */
+export const GuardianGetActionsPoliciesIdAuditParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /actions/policies/tiers/{tier} (guardian)
+ */
+export const GuardianPatchActionsPoliciesTiersTierParams = zod.object({
+  tier: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/prompts/{promptId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetActionsPromptsPromptIdParams = zod.object({
+  promptId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/prompts/{promptId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimeGetActionsPromptsPromptIdVersionsParams = zod.object({
+  promptId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /actions/rmm/actions/{id}/approve (actions)
+ */
+export const ActionsPostActionsRmmActionsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /actions/rmm/actions/{id}/cancel (actions)
+ */
+export const ActionsPostActionsRmmActionsIdCancelParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/rollback-events/{id} (guardian)
+ */
+export const GuardianGetActionsRollbackEventsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /actions/rollback-events/{id}/status (guardian)
+ */
+export const GuardianPatchActionsRollbackEventsIdStatusParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/signals/{signalId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetActionsSignalsSignalIdParams = zod.object({
+  signalId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /actions/signals/{signalId}/status (alloy-runtime)
+ */
+export const AlloyRuntimePatchActionsSignalsSignalIdStatusParams = zod.object({
+  signalId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /actions/tool-approvals/{id}/approve (guardian)
+ */
+export const GuardianPostActionsToolApprovalsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /actions/tool-approvals/{id}/reject (guardian)
+ */
+export const GuardianPostActionsToolApprovalsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/tools/{toolId} (guardian)
+ */
+export const GuardianGetActionsToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /actions/tools/{toolId} (guardian)
+ */
+export const GuardianPatchActionsToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/tools/{toolId}/audit (guardian)
+ */
+export const GuardianGetActionsToolsToolIdAuditParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianGetActionsToolsToolIdPermissionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /actions/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianPostActionsToolsToolIdPermissionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /actions/tools/{toolId}/permissions/{permissionId} (guardian)
+ */
+export const GuardianDeleteActionsToolsToolIdPermissionsPermissionIdParams =
+  zod.object({
+    toolId: zod.coerce.string(),
+    permissionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /actions/tools/{toolId}/versions (guardian)
+ */
+export const GuardianGetActionsToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /actions/tools/{toolId}/versions (guardian)
+ */
+export const GuardianPostActionsToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/workflow-runs/{runId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetActionsWorkflowRunsRunIdParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /actions/workflow-runs/{runId}/replay (alloy-runtime)
+ */
+export const AlloyRuntimePostActionsWorkflowRunsRunIdReplayParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /actions/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetActionsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /actions/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimePatchActionsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /actions/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimeDeleteActionsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /admin/status/incidents/{id} (public-status)
+ */
+export const PublicStatusPatchAdminStatusIncidentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /aegis/aegis/action-queue/{id}/complete (aegis-modules)
+ */
+export const AegisModulesPostAegisAegisActionQueueIdCompleteParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Create/invoke /aegis/aegis/action-queue/{id}/escalate (aegis-modules)
+ */
+export const AegisModulesPostAegisAegisActionQueueIdEscalateParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Create/invoke /aegis/aegis/deception/events/{id}/push-ioc (aegis-modules)
+ */
+export const AegisModulesPostAegisAegisDeceptionEventsIdPushIocParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /aegis/aegis/digital-twin/scenarios/{id}/pause (aegis-modules)
+ */
+export const AegisModulesPostAegisAegisDigitalTwinScenariosIdPauseParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /aegis/aegis/digital-twin/scenarios/{id}/resume (aegis-modules)
+ */
+export const AegisModulesPostAegisAegisDigitalTwinScenariosIdResumeParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /aegis/aegis/digital-twin/scenarios/{id}/run (aegis-modules)
+ */
+export const AegisModulesPostAegisAegisDigitalTwinScenariosIdRunParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /aegis/aegis/scenarios/{scenarioId}/export (aegis-digital-twin)
+ */
+export const AegisDigitalTwinGetAegisAegisScenariosScenarioIdExportParams =
+  zod.object({
+    scenarioId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /aegis/aegis/soar-builder/playbooks/{id} (aegis-modules)
+ */
+export const AegisModulesGetAegisAegisSoarBuilderPlaybooksIdParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Update /aegis/aegis/soar-builder/playbooks/{id} (aegis-modules)
+ */
+export const AegisModulesPutAegisAegisSoarBuilderPlaybooksIdParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Delete /aegis/aegis/soar-builder/playbooks/{id} (aegis-modules)
+ */
+export const AegisModulesDeleteAegisAegisSoarBuilderPlaybooksIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /agent-autonomy/agent-autonomy/agents/{agentId}/reflection (agent-autonomy)
+ */
+export const AgentAutonomyGetAgentAutonomyAgentAutonomyAgentsAgentIdReflectionParams =
+  zod.object({
+    agentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /agent-autonomy/agent-autonomy/connectors/{connectorId}/health (agent-autonomy)
+ */
+export const AgentAutonomyPostAgentAutonomyAgentAutonomyConnectorsConnectorIdHealthParams =
+  zod.object({
+    connectorId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /agent-mesh/agent-mesh/drift/{id}/approve (agent-mesh)
+ */
+export const AgentMeshPostAgentMeshAgentMeshDriftIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /agent-mesh/agent-mesh/drift/{id}/rollback (agent-mesh)
+ */
+export const AgentMeshPostAgentMeshAgentMeshDriftIdRollbackParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /agent-os/agent-os/feed/{domain} (agent-os)
+ */
+export const AgentOsGetAgentOsAgentOsFeedDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /agent-os/agent-os/run/{agentId} (agent-os)
+ */
+export const AgentOsPostAgentOsAgentOsRunAgentIdParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /agents/agents/{agentId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetAgentsAgentsAgentIdParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /agents/agents/{agentId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimeGetAgentsAgentsAgentIdVersionsParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /agents/agents/{agentId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimePostAgentsAgentsAgentIdVersionsParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /agents/agents/approvals/{runId}/{stepId}/resolve (agents)
+ */
+export const AgentsPostAgentsAgentsApprovalsRunIdStepIdResolveParams =
+  zod.object({
+    runId: zod.coerce.string(),
+    stepId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /agents/agents/runs/{runId}/step-log (agents)
+ */
+export const AgentsGetAgentsAgentsRunsRunIdStepLogParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /agents/models/{modelId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetAgentsModelsModelIdParams = zod.object({
+  modelId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /agents/prompts/{promptId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetAgentsPromptsPromptIdParams = zod.object({
+  promptId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /agents/prompts/{promptId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimeGetAgentsPromptsPromptIdVersionsParams = zod.object({
+  promptId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /agents/signals/{signalId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetAgentsSignalsSignalIdParams = zod.object({
+  signalId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /agents/signals/{signalId}/status (alloy-runtime)
+ */
+export const AlloyRuntimePatchAgentsSignalsSignalIdStatusParams = zod.object({
+  signalId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /agents/workflow-runs/{runId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetAgentsWorkflowRunsRunIdParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /agents/workflow-runs/{runId}/replay (alloy-runtime)
+ */
+export const AlloyRuntimePostAgentsWorkflowRunsRunIdReplayParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /agents/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetAgentsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /agents/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimePatchAgentsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /agents/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimeDeleteAgentsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /ai-routes/intelligence/ai/chat/{sessionId} (ai-routes)
+ */
+export const AiRoutesDeleteAiRoutesIntelligenceAiChatSessionIdParams =
+  zod.object({
+    sessionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /ai-routes/intelligence/ai/chat/{sessionId}/history (ai-routes)
+ */
+export const AiRoutesGetAiRoutesIntelligenceAiChatSessionIdHistoryParams =
+  zod.object({
+    sessionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /ai-safety/incidents/{id}/resolve (governance)
+ */
+export const GovernancePatchAiSafetyIncidentsIdResolveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /ai-safety/model-routing/{id} (governance)
+ */
+export const GovernancePatchAiSafetyModelRoutingIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ai-safety/policies/{id} (governance)
+ */
+export const GovernanceGetAiSafetyPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /ai-safety/policies/{id} (governance)
+ */
+export const GovernancePatchAiSafetyPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /ai-safety/policies/{id} (governance)
+ */
+export const GovernanceDeleteAiSafetyPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ai/ai/decision/{id} (ai-engine)
+ */
+export const AiEngineGetAiAiDecisionIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ai/ai/decision/{id}/approve (ai-engine)
+ */
+export const AiEnginePostAiAiDecisionIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ai/ai/decision/{id}/reject (ai-engine)
+ */
+export const AiEnginePostAiAiDecisionIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /ai/ai/ops/review-queue/{reviewId}/claim (ai-ops-dashboard)
+ */
+export const AiOpsDashboardPatchAiAiOpsReviewQueueReviewIdClaimParams =
+  zod.object({
+    reviewId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /ai/ai/ops/review-queue/{reviewId}/decision (ai-ops-dashboard)
+ */
+export const AiOpsDashboardPatchAiAiOpsReviewQueueReviewIdDecisionParams =
+  zod.object({
+    reviewId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /ai/ai/ops/traces/{id}/feedback (ai-ops-dashboard)
+ */
+export const AiOpsDashboardGetAiAiOpsTracesIdFeedbackParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ai/ai/ops/traces/{id}/feedback (ai-ops-dashboard)
+ */
+export const AiOpsDashboardPostAiAiOpsTracesIdFeedbackParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ai/ai/ops/traces/{traceId} (ai-ops-dashboard)
+ */
+export const AiOpsDashboardGetAiAiOpsTracesTraceIdParams = zod.object({
+  traceId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /ai/ai/ops/traces/{traceId}/status (ai-ops-dashboard)
+ */
+export const AiOpsDashboardPatchAiAiOpsTracesTraceIdStatusParams = zod.object({
+  traceId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ai/ai/prompts/{id} (prompt-registry)
+ */
+export const PromptRegistryGetAiAiPromptsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ai/ai/prompts/{id}/promote (prompt-registry)
+ */
+export const PromptRegistryPostAiAiPromptsIdPromoteParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ai/ai/prompts/{id}/versions/{versionId}/eval (prompt-registry)
+ */
+export const PromptRegistryPostAiAiPromptsIdVersionsVersionIdEvalParams =
+  zod.object({
+    id: zod.coerce.string(),
+    versionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /ai/graph/{entityId} (knowledge-graph)
+ */
+export const KnowledgeGraphGetAiGraphEntityIdParams = zod.object({
+  entityId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ai/graph/{fromId}/paths/{toId} (knowledge-graph)
+ */
+export const KnowledgeGraphGetAiGraphFromIdPathsToIdParams = zod.object({
+  fromId: zod.coerce.string(),
+  toId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /alloy/alloy/admin/flags/{key} (alloy)
+ */
+export const AlloyPatchAlloyAlloyAdminFlagsKeyParams = zod.object({
+  key: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /alloy/alloy/agents/{agentId}/accuracy (alloy-skills)
+ */
+export const AlloySkillsGetAlloyAlloyAgentsAgentIdAccuracyParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /alloy/alloy/agents/{agentId}/calibration (alloy-skills)
+ */
+export const AlloySkillsGetAlloyAlloyAgentsAgentIdCalibrationParams =
+  zod.object({
+    agentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /alloy/alloy/agents/{agentId}/performance (alloy-skills)
+ */
+export const AlloySkillsGetAlloyAlloyAgentsAgentIdPerformanceParams =
+  zod.object({
+    agentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /alloy/alloy/agents/{agentId}/performance/history (alloy-skills)
+ */
+export const AlloySkillsGetAlloyAlloyAgentsAgentIdPerformanceHistoryParams =
+  zod.object({
+    agentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/agents/{agentId}/performance/snapshot (alloy-skills)
+ */
+export const AlloySkillsPostAlloyAlloyAgentsAgentIdPerformanceSnapshotParams =
+  zod.object({
+    agentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /alloy/alloy/agents/{agentId}/reflections (alloy-skills)
+ */
+export const AlloySkillsGetAlloyAlloyAgentsAgentIdReflectionsParams =
+  zod.object({
+    agentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /alloy/alloy/agents/{agentId}/self-reflection (alloy-skills)
+ */
+export const AlloySkillsGetAlloyAlloyAgentsAgentIdSelfReflectionParams =
+  zod.object({
+    agentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /alloy/alloy/agents/{agentId}/skill-effectiveness (alloy-skills)
+ */
+export const AlloySkillsGetAlloyAlloyAgentsAgentIdSkillEffectivenessParams =
+  zod.object({
+    agentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /alloy/alloy/agents/{agentId}/trend (alloy-skills)
+ */
+export const AlloySkillsGetAlloyAlloyAgentsAgentIdTrendParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/approvals/{id}/decide (alloy)
+ */
+export const AlloyPostAlloyAlloyApprovalsIdDecideParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /alloy/alloy/artifacts/{id} (alloy)
+ */
+export const AlloyGetAlloyAlloyArtifactsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/artifacts/{id}/approve (alloy)
+ */
+export const AlloyPostAlloyAlloyArtifactsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/artifacts/{id}/reject (alloy)
+ */
+export const AlloyPostAlloyAlloyArtifactsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /alloy/alloy/browser/allowlist/{id} (alloy-research)
+ */
+export const AlloyResearchDeleteAlloyAlloyBrowserAllowlistIdParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/browser/tasks/{id}/execute (alloy-research)
+ */
+export const AlloyResearchPostAlloyAlloyBrowserTasksIdExecuteParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/browser/tasks/{id}/pause (alloy-research)
+ */
+export const AlloyResearchPostAlloyAlloyBrowserTasksIdPauseParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/browser/tasks/{id}/resume (alloy-research)
+ */
+export const AlloyResearchPostAlloyAlloyBrowserTasksIdResumeParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/channels/approvals/{id}/decide (alloy-channels)
+ */
+export const AlloyChannelsPostAlloyAlloyChannelsApprovalsIdDecideParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /alloy/alloy/channels/config/{channelId} (alloy-channels)
+ */
+export const AlloyChannelsPatchAlloyAlloyChannelsConfigChannelIdParams =
+  zod.object({
+    channelId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /alloy/alloy/cognitive/calibration/{agentId} (alloy-cognitive-learning)
+ */
+export const AlloyCognitiveLearningGetAlloyAlloyCognitiveCalibrationAgentIdParams =
+  zod.object({
+    agentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /alloy/alloy/cognitive/corrections/{agentId} (alloy-cognitive-learning)
+ */
+export const AlloyCognitiveLearningGetAlloyAlloyCognitiveCorrectionsAgentIdParams =
+  zod.object({
+    agentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/decisions/{decisionId}/outcome (alloy-skills)
+ */
+export const AlloySkillsPostAlloyAlloyDecisionsDecisionIdOutcomeParams =
+  zod.object({
+    decisionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /alloy/alloy/digest/{id} (alloy-digest)
+ */
+export const AlloyDigestGetAlloyAlloyDigestIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /alloy/alloy/email/triage/{id} (alloy-email)
+ */
+export const AlloyEmailGetAlloyAlloyEmailTriageIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /alloy/alloy/email/triage/{id} (alloy-email)
+ */
+export const AlloyEmailPatchAlloyAlloyEmailTriageIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/email/triage/{id}/draft (alloy-email)
+ */
+export const AlloyEmailPostAlloyAlloyEmailTriageIdDraftParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/email/triage/{id}/route (alloy-email)
+ */
+export const AlloyEmailPostAlloyAlloyEmailTriageIdRouteParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /alloy/alloy/evidence/{id} (alloy)
+ */
+export const AlloyGetAlloyAlloyEvidenceIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /alloy/alloy/governance/incidents/{id}/resolve (alloy-governance)
+ */
+export const AlloyGovernancePatchAlloyAlloyGovernanceIncidentsIdResolveParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /alloy/alloy/integrations/connections/{id} (alloy-integrations)
+ */
+export const AlloyIntegrationsPatchAlloyAlloyIntegrationsConnectionsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /alloy/alloy/integrations/connections/{id} (alloy-integrations)
+ */
+export const AlloyIntegrationsDeleteAlloyAlloyIntegrationsConnectionsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/integrations/connections/{id}/test (alloy-integrations)
+ */
+export const AlloyIntegrationsPostAlloyAlloyIntegrationsConnectionsIdTestParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/integrations/webhooks/receive/{endpointId} (alloy-integrations)
+ */
+export const AlloyIntegrationsPostAlloyAlloyIntegrationsWebhooksReceiveEndpointIdParams =
+  zod.object({
+    endpointId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /alloy/alloy/meetings/{id} (alloy-meetings)
+ */
+export const AlloyMeetingsGetAlloyAlloyMeetingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /alloy/alloy/meetings/{id}/action-items/{itemId} (alloy-meetings)
+ */
+export const AlloyMeetingsPatchAlloyAlloyMeetingsIdActionItemsItemIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    itemId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /alloy/alloy/meetings/{id}/follow-up (alloy-meetings)
+ */
+export const AlloyMeetingsGetAlloyAlloyMeetingsIdFollowUpParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /alloy/alloy/performance/alerts/{alertId}/resolve (alloy-skills)
+ */
+export const AlloySkillsPatchAlloyAlloyPerformanceAlertsAlertIdResolveParams =
+  zod.object({
+    alertId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /alloy/alloy/policies/{id} (alloy-governance)
+ */
+export const AlloyGovernanceGetAlloyAlloyPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /alloy/alloy/policies/{id} (alloy-governance)
+ */
+export const AlloyGovernancePatchAlloyAlloyPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /alloy/alloy/policies/{id} (alloy-governance)
+ */
+export const AlloyGovernanceDeleteAlloyAlloyPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/policies/{id}/apply (alloy-governance)
+ */
+export const AlloyGovernancePostAlloyAlloyPoliciesIdApplyParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /alloy/alloy/research/spaces/{id} (alloy-research)
+ */
+export const AlloyResearchGetAlloyAlloyResearchSpacesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /alloy/alloy/research/spaces/{id} (alloy-research)
+ */
+export const AlloyResearchDeleteAlloyAlloyResearchSpacesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/research/spaces/{id}/run (alloy-research)
+ */
+export const AlloyResearchPostAlloyAlloyResearchSpacesIdRunParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /alloy/alloy/runs/{id} (alloy)
+ */
+export const AlloyGetAlloyAlloyRunsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/runs/{id}/cancel (alloy)
+ */
+export const AlloyPostAlloyAlloyRunsIdCancelParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/runs/{id}/retry (alloy)
+ */
+export const AlloyPostAlloyAlloyRunsIdRetryParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /alloy/alloy/runs/{id}/steps (alloy)
+ */
+export const AlloyGetAlloyAlloyRunsIdStepsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /alloy/alloy/skills/{skillId} (alloy-skills)
+ */
+export const AlloySkillsGetAlloyAlloySkillsSkillIdParams = zod.object({
+  skillId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /alloy/alloy/skills/{skillId} (alloy-skills)
+ */
+export const AlloySkillsPatchAlloyAlloySkillsSkillIdParams = zod.object({
+  skillId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /alloy/alloy/skills/{skillId} (alloy-skills)
+ */
+export const AlloySkillsDeleteAlloyAlloySkillsSkillIdParams = zod.object({
+  skillId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /alloy/alloy/skills/chains/{chainId} (alloy-skills)
+ */
+export const AlloySkillsDeleteAlloyAlloySkillsChainsChainIdParams = zod.object({
+  chainId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/skills/chains/{chainId}/plan (alloy-skills)
+ */
+export const AlloySkillsPostAlloyAlloySkillsChainsChainIdPlanParams =
+  zod.object({
+    chainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /alloy/alloy/skills/chains/prebuilt/{scenario} (alloy-skills)
+ */
+export const AlloySkillsGetAlloyAlloySkillsChainsPrebuiltScenarioParams =
+  zod.object({
+    scenario: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /alloy/alloy/voice/notes/{id} (alloy-voice)
+ */
+export const AlloyVoiceGetAlloyAlloyVoiceNotesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /alloy/alloy/voice/notes/{id} (alloy-voice)
+ */
+export const AlloyVoiceDeleteAlloyAlloyVoiceNotesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /alloy/alloy/workflows/{id} (alloy)
+ */
+export const AlloyGetAlloyAlloyWorkflowsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /alloy/alloy/workflows/{id} (alloy)
+ */
+export const AlloyPatchAlloyAlloyWorkflowsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /alloy/alloy/workflows/{id} (alloy)
+ */
+export const AlloyDeleteAlloyAlloyWorkflowsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /alloy/alloy/workflows/{id}/run (alloy)
+ */
+export const AlloyPostAlloyAlloyWorkflowsIdRunParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /alloy/decisions/{id} (alloy)
+ */
+export const AlloyGetAlloyDecisionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /alloy/decisions/{id}/approve (alloy)
+ */
+export const AlloyPostAlloyDecisionsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /alloy/decisions/{id}/reject (alloy)
+ */
+export const AlloyPostAlloyDecisionsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /alloy/policies/incidents/{id} (public-status)
+ */
+export const PublicStatusPatchAlloyPoliciesIncidentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /alloy/policy-compiler/alloy/policy-compiler/test-cases/{externalId} (alloy-policy-compiler)
+ */
+export const AlloyPolicyCompilerDeleteAlloyPolicyCompilerAlloyPolicyCompilerTestCasesExternalIdParams =
+  zod.object({
+    externalId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /alloy/policy-compiler/alloy/policy-compiler/versions/{externalId}/sign (alloy-policy-compiler)
+ */
+export const AlloyPolicyCompilerPostAlloyPolicyCompilerAlloyPolicyCompilerVersionsExternalIdSignParams =
+  zod.object({
+    externalId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /alloy/skills/{id} (alloy)
+ */
+export const AlloyGetAlloySkillsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /alloy/skills/{id} (alloy)
+ */
+export const AlloyPatchAlloySkillsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /alloy/skills/{id}/runs (alloy)
+ */
+export const AlloyGetAlloySkillsIdRunsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /approvals/actions/{id} (guardian)
+ */
+export const GuardianGetApprovalsActionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /approvals/actions/{id}/approve (guardian)
+ */
+export const GuardianPostApprovalsActionsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /approvals/actions/{id}/reject (guardian)
+ */
+export const GuardianPostApprovalsActionsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /approvals/approvals/{id} (approvals)
+ */
+export const ApprovalsGetApprovalsApprovalsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /approvals/approvals/{id}/audit-trail (approvals)
+ */
+export const ApprovalsGetApprovalsApprovalsIdAuditTrailParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /approvals/approvals/{id}/comment (approvals)
+ */
+export const ApprovalsPostApprovalsApprovalsIdCommentParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /approvals/approvals/{id}/comments (approvals)
+ */
+export const ApprovalsGetApprovalsApprovalsIdCommentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /approvals/approvals/{id}/escalate (approvals)
+ */
+export const ApprovalsPostApprovalsApprovalsIdEscalateParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /approvals/approvals/{id}/review (approvals)
+ */
+export const ApprovalsPostApprovalsApprovalsIdReviewParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /approvals/approvals/{requestId} (guardian)
+ */
+export const GuardianGetApprovalsApprovalsRequestIdParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /approvals/approvals/{requestId}/review (guardian)
+ */
+export const GuardianPostApprovalsApprovalsRequestIdReviewParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /approvals/approvals/by-resource/{resourceType}/{resourceId} (approvals)
+ */
+export const ApprovalsGetApprovalsApprovalsByResourceResourceTypeResourceIdParams =
+  zod.object({
+    resourceType: zod.coerce.string(),
+    resourceId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /approvals/guardrail-configs/{id} (guardian)
+ */
+export const GuardianGetApprovalsGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /approvals/guardrail-configs/{id} (guardian)
+ */
+export const GuardianPatchApprovalsGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /approvals/guardrail-configs/{id} (guardian)
+ */
+export const GuardianDeleteApprovalsGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /approvals/policies/{id} (guardian)
+ */
+export const GuardianGetApprovalsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /approvals/policies/{id} (guardian)
+ */
+export const GuardianPatchApprovalsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /approvals/policies/{id} (guardian)
+ */
+export const GuardianDeleteApprovalsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /approvals/policies/{id}/assignments (guardian)
+ */
+export const GuardianGetApprovalsPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /approvals/policies/{id}/assignments (guardian)
+ */
+export const GuardianPostApprovalsPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /approvals/policies/{id}/assignments/{assignmentId} (guardian)
+ */
+export const GuardianDeleteApprovalsPoliciesIdAssignmentsAssignmentIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    assignmentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /approvals/policies/{id}/audit (guardian)
+ */
+export const GuardianGetApprovalsPoliciesIdAuditParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /approvals/policies/tiers/{tier} (guardian)
+ */
+export const GuardianPatchApprovalsPoliciesTiersTierParams = zod.object({
+  tier: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /approvals/rollback-events/{id} (guardian)
+ */
+export const GuardianGetApprovalsRollbackEventsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /approvals/rollback-events/{id}/status (guardian)
+ */
+export const GuardianPatchApprovalsRollbackEventsIdStatusParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /approvals/tool-approvals/{id}/approve (guardian)
+ */
+export const GuardianPostApprovalsToolApprovalsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /approvals/tool-approvals/{id}/reject (guardian)
+ */
+export const GuardianPostApprovalsToolApprovalsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /approvals/tools/{toolId} (guardian)
+ */
+export const GuardianGetApprovalsToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /approvals/tools/{toolId} (guardian)
+ */
+export const GuardianPatchApprovalsToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /approvals/tools/{toolId}/audit (guardian)
+ */
+export const GuardianGetApprovalsToolsToolIdAuditParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /approvals/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianGetApprovalsToolsToolIdPermissionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /approvals/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianPostApprovalsToolsToolIdPermissionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /approvals/tools/{toolId}/permissions/{permissionId} (guardian)
+ */
+export const GuardianDeleteApprovalsToolsToolIdPermissionsPermissionIdParams =
+  zod.object({
+    toolId: zod.coerce.string(),
+    permissionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /approvals/tools/{toolId}/versions (guardian)
+ */
+export const GuardianGetApprovalsToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /approvals/tools/{toolId}/versions (guardian)
+ */
+export const GuardianPostApprovalsToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /apps-registry/admin/apps/{slug} (apps-registry)
+ */
+export const AppsRegistryDeleteAppsRegistryAdminAppsSlugParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /apps-registry/admin/apps/{slug}/owner-team (apps-registry)
+ */
+export const AppsRegistryPutAppsRegistryAdminAppsSlugOwnerTeamParams =
+  zod.object({
+    slug: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /apps-registry/admin/apps/{slug}/status (apps-registry)
+ */
+export const AppsRegistryPutAppsRegistryAdminAppsSlugStatusParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /assets-cases/firestorm/assets/{id} (assets-cases)
+ */
+export const AssetsCasesGetAssetsCasesFirestormAssetsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /assets-cases/firestorm/assets/{id} (assets-cases)
+ */
+export const AssetsCasesPutAssetsCasesFirestormAssetsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /assets-cases/firestorm/cases/{id} (assets-cases)
+ */
+export const AssetsCasesGetAssetsCasesFirestormCasesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /assets-cases/firestorm/cases/{id} (assets-cases)
+ */
+export const AssetsCasesPatchAssetsCasesFirestormCasesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /assets-cases/firestorm/hardening-controls/{id} (assets-cases)
+ */
+export const AssetsCasesGetAssetsCasesFirestormHardeningControlsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /assets-cases/firestorm/hardening-controls/{id} (assets-cases)
+ */
+export const AssetsCasesPutAssetsCasesFirestormHardeningControlsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /assets-cases/firestorm/mitre-detections/{techniqueId} (assets-cases)
+ */
+export const AssetsCasesGetAssetsCasesFirestormMitreDetectionsTechniqueIdParams =
+  zod.object({
+    techniqueId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /assets-cases/firestorm/tradecraft/case-memory/{caseId} (assets-cases)
+ */
+export const AssetsCasesGetAssetsCasesFirestormTradecraftCaseMemoryCaseIdParams =
+  zod.object({
+    caseId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /assets-cases/firestorm/tradecraft/case-memory/{caseId} (assets-cases)
+ */
+export const AssetsCasesPutAssetsCasesFirestormTradecraftCaseMemoryCaseIdParams =
+  zod.object({
+    caseId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /assets-cases/firestorm/tradecraft/decisions/{objectId} (assets-cases)
+ */
+export const AssetsCasesGetAssetsCasesFirestormTradecraftDecisionsObjectIdParams =
+  zod.object({
+    objectId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /assets-cases/firestorm/tradecraft/decisions/{objectId} (assets-cases)
+ */
+export const AssetsCasesPutAssetsCasesFirestormTradecraftDecisionsObjectIdParams =
+  zod.object({
+    objectId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /assets-cases/firestorm/tradecraft/notebook/{noteId} (assets-cases)
+ */
+export const AssetsCasesPutAssetsCasesFirestormTradecraftNotebookNoteIdParams =
+  zod.object({
+    noteId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /assets-cases/firestorm/tradecraft/notebook/{noteId} (assets-cases)
+ */
+export const AssetsCasesDeleteAssetsCasesFirestormTradecraftNotebookNoteIdParams =
+  zod.object({
+    noteId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /assets-cases/firestorm/workflow-actions/{id} (assets-cases)
+ */
+export const AssetsCasesPatchAssetsCasesFirestormWorkflowActionsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /assets/files/{id} (files)
+ */
+export const FilesGetAssetsFilesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /assets/files/{id} (files)
+ */
+export const FilesDeleteAssetsFilesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /atlas/${prefix}/evaluate (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionPostAtlasPrefixEvaluateParams = zod.object({
+  prefix: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /atlas/${prefix}/evaluation-hooks (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionGetAtlasPrefixEvaluationHooksParams =
+  zod.object({
+    prefix: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /atlas/${prefix}/evaluation-hooks/replay (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionPostAtlasPrefixEvaluationHooksReplayParams =
+  zod.object({
+    prefix: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/${prefix}/evidence (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionGetAtlasPrefixEvidenceParams = zod.object({
+  prefix: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /atlas/${prefix}/evidence (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionPostAtlasPrefixEvidenceParams = zod.object({
+  prefix: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /atlas/${prefix}/execute (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionPostAtlasPrefixExecuteParams = zod.object({
+  prefix: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /atlas/${prefix}/outcome (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionPostAtlasPrefixOutcomeParams = zod.object({
+  prefix: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /atlas/${prefix}/outcomes (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionGetAtlasPrefixOutcomesParams = zod.object({
+  prefix: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /atlas/${prefix}/policy-check (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionPostAtlasPrefixPolicyCheckParams = zod.object({
+  prefix: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /atlas/${prefix}/runs (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionGetAtlasPrefixRunsParams = zod.object({
+  prefix: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /atlas/${prefix}/runs/{runId} (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionGetAtlasPrefixRunsRunIdParams = zod.object({
+  prefix: zod.coerce.string(),
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /atlas/${prefix}/runs/{runId}/approve (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionPostAtlasPrefixRunsRunIdApproveParams =
+  zod.object({
+    prefix: zod.coerce.string(),
+    runId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /atlas/${prefix}/runs/{runId}/cancel (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionPostAtlasPrefixRunsRunIdCancelParams =
+  zod.object({
+    prefix: zod.coerce.string(),
+    runId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/${prefix}/signals (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionGetAtlasPrefixSignalsParams = zod.object({
+  prefix: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /atlas/${prefix}/signals (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionPostAtlasPrefixSignalsParams = zod.object({
+  prefix: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /atlas/${prefix}/signals/{signalId}/status (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionPatchAtlasPrefixSignalsSignalIdStatusParams =
+  zod.object({
+    prefix: zod.coerce.string(),
+    signalId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/${prefix}/status (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionGetAtlasPrefixStatusParams = zod.object({
+  prefix: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /atlas/${prefix}/workflows (domain-atlas-execution)
+ */
+export const DomainAtlasExecutionGetAtlasPrefixWorkflowsParams = zod.object({
+  prefix: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /atlas/branch/atlas/export/openusd/{sceneId} (atlas-scene-export)
+ */
+export const AtlasSceneExportGetAtlasBranchAtlasExportOpenusdSceneIdParams =
+  zod.object({
+    sceneId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/branch/atlas/snapshot/{sceneId} (atlas-scene-export)
+ */
+export const AtlasSceneExportGetAtlasBranchAtlasSnapshotSceneIdParams =
+  zod.object({
+    sceneId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/export/atlas/export/openusd/{sceneId} (atlas-scene-export)
+ */
+export const AtlasSceneExportGetAtlasExportAtlasExportOpenusdSceneIdParams =
+  zod.object({
+    sceneId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/export/atlas/snapshot/{sceneId} (atlas-scene-export)
+ */
+export const AtlasSceneExportGetAtlasExportAtlasSnapshotSceneIdParams =
+  zod.object({
+    sceneId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/proof-bundle/atlas/export/openusd/{sceneId} (atlas-scene-export)
+ */
+export const AtlasSceneExportGetAtlasProofBundleAtlasExportOpenusdSceneIdParams =
+  zod.object({
+    sceneId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/proof-bundle/atlas/snapshot/{sceneId} (atlas-scene-export)
+ */
+export const AtlasSceneExportGetAtlasProofBundleAtlasSnapshotSceneIdParams =
+  zod.object({
+    sceneId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/snapshot/atlas/export/openusd/{sceneId} (atlas-scene-export)
+ */
+export const AtlasSceneExportGetAtlasSnapshotAtlasExportOpenusdSceneIdParams =
+  zod.object({
+    sceneId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/snapshot/atlas/snapshot/{sceneId} (atlas-scene-export)
+ */
+export const AtlasSceneExportGetAtlasSnapshotAtlasSnapshotSceneIdParams =
+  zod.object({
+    sceneId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/spatial/atlas/spatial/branches/{branchId} (atlas-spatial-runtime)
+ */
+export const AtlasSpatialRuntimeGetAtlasSpatialAtlasSpatialBranchesBranchIdParams =
+  zod.object({
+    branchId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /atlas/spatial/atlas/spatial/branches/{branchId} (atlas-spatial-runtime)
+ */
+export const AtlasSpatialRuntimePatchAtlasSpatialAtlasSpatialBranchesBranchIdParams =
+  zod.object({
+    branchId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /atlas/spatial/atlas/spatial/branches/{branchId} (atlas-spatial-runtime)
+ */
+export const AtlasSpatialRuntimeDeleteAtlasSpatialAtlasSpatialBranchesBranchIdParams =
+  zod.object({
+    branchId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/spatial/atlas/spatial/drift/{twinId}/latest (atlas-spatial-runtime)
+ */
+export const AtlasSpatialRuntimeGetAtlasSpatialAtlasSpatialDriftTwinIdLatestParams =
+  zod.object({
+    twinId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/spatial/atlas/spatial/memory/{twinId} (atlas-spatial-runtime)
+ */
+export const AtlasSpatialRuntimeGetAtlasSpatialAtlasSpatialMemoryTwinIdParams =
+  zod.object({
+    twinId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/spatial/atlas/spatial/proof-bundle/{contentType}/{contentId} (atlas-spatial-runtime)
+ */
+export const AtlasSpatialRuntimeGetAtlasSpatialAtlasSpatialProofBundleContentTypeContentIdParams =
+  zod.object({
+    contentType: zod.coerce.string(),
+    contentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/spatial/atlas/spatial/replay/{twinId}/frame/{frameIndex} (atlas-spatial-runtime)
+ */
+export const AtlasSpatialRuntimeGetAtlasSpatialAtlasSpatialReplayTwinIdFrameFrameIndexParams =
+  zod.object({
+    twinId: zod.coerce.string(),
+    frameIndex: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/spatial/atlas/spatial/replay/{twinId}/timeline (atlas-spatial-runtime)
+ */
+export const AtlasSpatialRuntimeGetAtlasSpatialAtlasSpatialReplayTwinIdTimelineParams =
+  zod.object({
+    twinId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/spatial/atlas/spatial/snapshots/{twinId} (atlas-spatial-runtime)
+ */
+export const AtlasSpatialRuntimeGetAtlasSpatialAtlasSpatialSnapshotsTwinIdParams =
+  zod.object({
+    twinId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /atlas/spatial/atlas/spatial/worldline/overlays/{overlayId} (atlas-spatial-runtime)
+ */
+export const AtlasSpatialRuntimeGetAtlasSpatialAtlasSpatialWorldlineOverlaysOverlayIdParams =
+  zod.object({
+    overlayId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /atlas/spatial/atlas/spatial/worldline/overlays/{overlayId}/expire (atlas-spatial-runtime)
+ */
+export const AtlasSpatialRuntimePatchAtlasSpatialAtlasSpatialWorldlineOverlaysOverlayIdExpireParams =
+  zod.object({
+    overlayId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /audit-log/approvals/{id} (approvals)
+ */
+export const ApprovalsGetAuditLogApprovalsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /audit-log/approvals/{id}/audit-trail (approvals)
+ */
+export const ApprovalsGetAuditLogApprovalsIdAuditTrailParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /audit-log/approvals/{id}/comment (approvals)
+ */
+export const ApprovalsPostAuditLogApprovalsIdCommentParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /audit-log/approvals/{id}/comments (approvals)
+ */
+export const ApprovalsGetAuditLogApprovalsIdCommentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /audit-log/approvals/{id}/escalate (approvals)
+ */
+export const ApprovalsPostAuditLogApprovalsIdEscalateParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /audit-log/approvals/{id}/review (approvals)
+ */
+export const ApprovalsPostAuditLogApprovalsIdReviewParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /audit-log/approvals/by-resource/{resourceType}/{resourceId} (approvals)
+ */
+export const ApprovalsGetAuditLogApprovalsByResourceResourceTypeResourceIdParams =
+  zod.object({
+    resourceType: zod.coerce.string(),
+    resourceId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /audit/actions/{id} (guardian)
+ */
+export const GuardianGetAuditActionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /audit/actions/{id}/approve (guardian)
+ */
+export const GuardianPostAuditActionsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /audit/actions/{id}/reject (guardian)
+ */
+export const GuardianPostAuditActionsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /audit/approvals/{requestId} (guardian)
+ */
+export const GuardianGetAuditApprovalsRequestIdParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /audit/approvals/{requestId}/review (guardian)
+ */
+export const GuardianPostAuditApprovalsRequestIdReviewParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /audit/guardrail-configs/{id} (guardian)
+ */
+export const GuardianGetAuditGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /audit/guardrail-configs/{id} (guardian)
+ */
+export const GuardianPatchAuditGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /audit/guardrail-configs/{id} (guardian)
+ */
+export const GuardianDeleteAuditGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /audit/policies/{id} (guardian)
+ */
+export const GuardianGetAuditPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /audit/policies/{id} (guardian)
+ */
+export const GuardianPatchAuditPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /audit/policies/{id} (guardian)
+ */
+export const GuardianDeleteAuditPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /audit/policies/{id}/assignments (guardian)
+ */
+export const GuardianGetAuditPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /audit/policies/{id}/assignments (guardian)
+ */
+export const GuardianPostAuditPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /audit/policies/{id}/assignments/{assignmentId} (guardian)
+ */
+export const GuardianDeleteAuditPoliciesIdAssignmentsAssignmentIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    assignmentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /audit/policies/{id}/audit (guardian)
+ */
+export const GuardianGetAuditPoliciesIdAuditParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /audit/policies/tiers/{tier} (guardian)
+ */
+export const GuardianPatchAuditPoliciesTiersTierParams = zod.object({
+  tier: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /audit/rollback-events/{id} (guardian)
+ */
+export const GuardianGetAuditRollbackEventsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /audit/rollback-events/{id}/status (guardian)
+ */
+export const GuardianPatchAuditRollbackEventsIdStatusParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /audit/tool-approvals/{id}/approve (guardian)
+ */
+export const GuardianPostAuditToolApprovalsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /audit/tool-approvals/{id}/reject (guardian)
+ */
+export const GuardianPostAuditToolApprovalsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /audit/tools/{toolId} (guardian)
+ */
+export const GuardianGetAuditToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /audit/tools/{toolId} (guardian)
+ */
+export const GuardianPatchAuditToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /audit/tools/{toolId}/audit (guardian)
+ */
+export const GuardianGetAuditToolsToolIdAuditParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /audit/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianGetAuditToolsToolIdPermissionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /audit/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianPostAuditToolsToolIdPermissionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /audit/tools/{toolId}/permissions/{permissionId} (guardian)
+ */
+export const GuardianDeleteAuditToolsToolIdPermissionsPermissionIdParams =
+  zod.object({
+    toolId: zod.coerce.string(),
+    permissionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /audit/tools/{toolId}/versions (guardian)
+ */
+export const GuardianGetAuditToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /audit/tools/{toolId}/versions (guardian)
+ */
+export const GuardianPostAuditToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /auth/auth/sessions/{id} (auth)
+ */
+export const AuthDeleteAuthAuthSessionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /billing/billing/checkout-session/{sessionId} (billing)
+ */
+export const BillingGetBillingBillingCheckoutSessionSessionIdParams =
+  zod.object({
+    sessionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /billing/billing/plans/{id} (billing)
+ */
+export const BillingGetBillingBillingPlansIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /booking/booking/appointments/{id} (booking)
+ */
+export const BookingGetBookingBookingAppointmentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /booking/booking/inquiries/{id} (carlota-jo)
+ */
+export const CarlotaJoGetBookingBookingInquiriesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /booking/booking/inquiries/{id} (carlota-jo)
+ */
+export const CarlotaJoPatchBookingBookingInquiriesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /booking/booking/inquiries/{id} (carlota-jo)
+ */
+export const CarlotaJoDeleteBookingBookingInquiriesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /booking/booking/invoices/{invoiceId} (carlota-jo)
+ */
+export const CarlotaJoGetBookingBookingInvoicesInvoiceIdParams = zod.object({
+  invoiceId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /booking/booking/invoices/email-log/{invoiceId} (carlota-jo-invoice-email)
+ */
+export const CarlotaJoInvoiceEmailGetBookingBookingInvoicesEmailLogInvoiceIdParams =
+  zod.object({
+    invoiceId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /booking/booking/reservations/{id} (carlota-jo)
+ */
+export const CarlotaJoGetBookingBookingReservationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /booking/booking/reservations/{id} (carlota-jo)
+ */
+export const CarlotaJoPatchBookingBookingReservationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /booking/booking/reservations/{id} (carlota-jo)
+ */
+export const CarlotaJoDeleteBookingBookingReservationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /booking/booking/services/{id} (carlota-jo)
+ */
+export const CarlotaJoPatchBookingBookingServicesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /booking/booking/services/{id} (carlota-jo)
+ */
+export const CarlotaJoDeleteBookingBookingServicesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /booking/booking/time-entries/{id} (carlota-time-tracking)
+ */
+export const CarlotaTimeTrackingPatchBookingBookingTimeEntriesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /booking/booking/time-entries/{id} (carlota-time-tracking)
+ */
+export const CarlotaTimeTrackingDeleteBookingBookingTimeEntriesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /booking/booking/time-invoices/{id} (carlota-time-tracking)
+ */
+export const CarlotaTimeTrackingPatchBookingBookingTimeInvoicesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /booking/booking/time-invoices/{id} (carlota-time-tracking)
+ */
+export const CarlotaTimeTrackingDeleteBookingBookingTimeInvoicesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /booking/carlota/admin/clients/{clientId}/advisory-data (carlota-jo)
+ */
+export const CarlotaJoGetBookingCarlotaAdminClientsClientIdAdvisoryDataParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /booking/carlota/admin/clients/{clientId}/competitors (carlota-jo)
+ */
+export const CarlotaJoPutBookingCarlotaAdminClientsClientIdCompetitorsParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /booking/carlota/admin/clients/{clientId}/margin-history (carlota-jo)
+ */
+export const CarlotaJoPutBookingCarlotaAdminClientsClientIdMarginHistoryParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /booking/carlota/admin/clients/{clientId}/market-trend (carlota-jo)
+ */
+export const CarlotaJoPutBookingCarlotaAdminClientsClientIdMarketTrendParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /booking/carlota/admin/clients/{clientId}/radar-signals (carlota-jo)
+ */
+export const CarlotaJoPutBookingCarlotaAdminClientsClientIdRadarSignalsParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /booking/carlota/admin/clients/{clientId}/roi-benchmarks (carlota-jo)
+ */
+export const CarlotaJoPutBookingCarlotaAdminClientsClientIdRoiBenchmarksParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /booking/carlota/admin/clients/{clientId}/roi-trend (carlota-jo)
+ */
+export const CarlotaJoPutBookingCarlotaAdminClientsClientIdRoiTrendParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /booking/carlota/experts/{id} (carlota-jo)
+ */
+export const CarlotaJoPutBookingCarlotaExpertsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /booking/carlota/experts/{id} (carlota-jo)
+ */
+export const CarlotaJoDeleteBookingCarlotaExpertsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /booking/carlota/knowledge/{id} (carlota-jo)
+ */
+export const CarlotaJoPutBookingCarlotaKnowledgeIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /booking/carlota/knowledge/{id} (carlota-jo)
+ */
+export const CarlotaJoDeleteBookingCarlotaKnowledgeIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /booking/carlota/proposals/{id} (carlota-jo)
+ */
+export const CarlotaJoPutBookingCarlotaProposalsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /booking/carlota/proposals/{id} (carlota-jo)
+ */
+export const CarlotaJoDeleteBookingCarlotaProposalsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /briefing/briefing/{date} (briefing)
+ */
+export const BriefingGetBriefingBriefingDateParams = zod.object({
+  date: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /briefings/briefings/{domain} (briefings)
+ */
+export const BriefingsGetBriefingsBriefingsDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /briefings/briefings/{id} (pulse)
+ */
+export const PulseGetBriefingsBriefingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /briefings/briefings/{id}/approve (briefings)
+ */
+export const BriefingsPutBriefingsBriefingsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /briefings/briefings/{id}/archive (briefings)
+ */
+export const BriefingsPutBriefingsBriefingsIdArchiveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /briefings/briefings/{id}/save (pulse)
+ */
+export const PulsePostBriefingsBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /briefings/briefings/{id}/save (pulse)
+ */
+export const PulseDeleteBriefingsBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /briefings/dissents/{id} (pulse)
+ */
+export const PulsePatchBriefingsDissentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /briefings/domain-panel/{domain} (pulse)
+ */
+export const PulseGetBriefingsDomainPanelDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /briefings/subscriptions/{id} (pulse)
+ */
+export const PulsePatchBriefingsSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /briefings/subscriptions/{id} (pulse)
+ */
+export const PulseDeleteBriefingsSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /business-events/accounts/{accountId} (dataverse)
+ */
+export const DataverseGetBusinessEventsAccountsAccountIdParams = zod.object({
+  accountId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /business-events/activities/{activityId} (dataverse)
+ */
+export const DataverseGetBusinessEventsActivitiesActivityIdParams = zod.object({
+  activityId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /business-events/activities/{activityId} (dataverse)
+ */
+export const DataversePatchBusinessEventsActivitiesActivityIdParams =
+  zod.object({
+    activityId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /business-events/activities/{activityId} (dataverse)
+ */
+export const DataverseDeleteBusinessEventsActivitiesActivityIdParams =
+  zod.object({
+    activityId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /business-events/contacts/{contactId} (dataverse)
+ */
+export const DataverseGetBusinessEventsContactsContactIdParams = zod.object({
+  contactId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /business-events/contacts/{contactId} (dataverse)
+ */
+export const DataversePatchBusinessEventsContactsContactIdParams = zod.object({
+  contactId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /business-events/contacts/{contactId} (dataverse)
+ */
+export const DataverseDeleteBusinessEventsContactsContactIdParams = zod.object({
+  contactId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /business-events/leads/{leadId} (dataverse)
+ */
+export const DataverseGetBusinessEventsLeadsLeadIdParams = zod.object({
+  leadId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /business-events/leads/{leadId} (dataverse)
+ */
+export const DataversePatchBusinessEventsLeadsLeadIdParams = zod.object({
+  leadId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /business-events/leads/{leadId} (dataverse)
+ */
+export const DataverseDeleteBusinessEventsLeadsLeadIdParams = zod.object({
+  leadId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /business-events/opportunities/{opportunityId} (dataverse)
+ */
+export const DataverseGetBusinessEventsOpportunitiesOpportunityIdParams =
+  zod.object({
+    opportunityId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /business-events/opportunities/{opportunityId} (dataverse)
+ */
+export const DataversePatchBusinessEventsOpportunitiesOpportunityIdParams =
+  zod.object({
+    opportunityId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /business-events/opportunities/{opportunityId} (dataverse)
+ */
+export const DataverseDeleteBusinessEventsOpportunitiesOpportunityIdParams =
+  zod.object({
+    opportunityId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /business-events/opportunities/{opportunityId}/stage (dataverse)
+ */
+export const DataversePatchBusinessEventsOpportunitiesOpportunityIdStageParams =
+  zod.object({
+    opportunityId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /capital/capital/artifacts/{id} (capital-readiness)
+ */
+export const CapitalReadinessPatchCapitalCapitalArtifactsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /capital/capital/artifacts/{id} (capital-readiness)
+ */
+export const CapitalReadinessDeleteCapitalCapitalArtifactsIdParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Patch /capital/capital/cap-table/{id} (capital-readiness)
+ */
+export const CapitalReadinessPatchCapitalCapitalCapTableIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /capital/capital/cap-table/{id} (capital-readiness)
+ */
+export const CapitalReadinessDeleteCapitalCapitalCapTableIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /capital/capital/diligence-checklist-items/{id} (capital-readiness)
+ */
+export const CapitalReadinessPatchCapitalCapitalDiligenceChecklistItemsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /capital/capital/diligence-checklist-items/{id} (capital-readiness)
+ */
+export const CapitalReadinessDeleteCapitalCapitalDiligenceChecklistItemsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /capital/capital/diligence-checklists/{id} (capital-readiness)
+ */
+export const CapitalReadinessGetCapitalCapitalDiligenceChecklistsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /capital/capital/diligence-checklists/{id} (capital-readiness)
+ */
+export const CapitalReadinessPatchCapitalCapitalDiligenceChecklistsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /capital/capital/diligence-checklists/{id} (capital-readiness)
+ */
+export const CapitalReadinessDeleteCapitalCapitalDiligenceChecklistsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /capital/capital/financial-models/{id} (capital-readiness)
+ */
+export const CapitalReadinessPatchCapitalCapitalFinancialModelsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /capital/capital/financial-models/{id} (capital-readiness)
+ */
+export const CapitalReadinessDeleteCapitalCapitalFinancialModelsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /capital/capital/generate-investor-packet/{id} (capital-readiness)
+ */
+export const CapitalReadinessPostCapitalCapitalGenerateInvestorPacketIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /capital/capital/generate-lender-packet/{id} (capital-readiness)
+ */
+export const CapitalReadinessPostCapitalCapitalGenerateLenderPacketIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /capital/capital/investor-deliverables/{id} (capital-readiness)
+ */
+export const CapitalReadinessPatchCapitalCapitalInvestorDeliverablesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /capital/capital/investor-deliverables/{id} (capital-readiness)
+ */
+export const CapitalReadinessDeleteCapitalCapitalInvestorDeliverablesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /capital/capital/investor-packets/{id} (capital-readiness)
+ */
+export const CapitalReadinessGetCapitalCapitalInvestorPacketsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /capital/capital/investor-packets/{id} (capital-readiness)
+ */
+export const CapitalReadinessPatchCapitalCapitalInvestorPacketsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /capital/capital/investor-packets/{id} (capital-readiness)
+ */
+export const CapitalReadinessDeleteCapitalCapitalInvestorPacketsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /capital/capital/lender-deliverables/{id} (capital-readiness)
+ */
+export const CapitalReadinessPatchCapitalCapitalLenderDeliverablesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /capital/capital/lender-deliverables/{id} (capital-readiness)
+ */
+export const CapitalReadinessDeleteCapitalCapitalLenderDeliverablesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /capital/capital/lender-packets/{id} (capital-readiness)
+ */
+export const CapitalReadinessGetCapitalCapitalLenderPacketsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /capital/capital/lender-packets/{id} (capital-readiness)
+ */
+export const CapitalReadinessPatchCapitalCapitalLenderPacketsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /capital/capital/lender-packets/{id} (capital-readiness)
+ */
+export const CapitalReadinessDeleteCapitalCapitalLenderPacketsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /capital/capital/milestones/{id} (capital-readiness)
+ */
+export const CapitalReadinessPatchCapitalCapitalMilestonesIdParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Delete /capital/capital/milestones/{id} (capital-readiness)
+ */
+export const CapitalReadinessDeleteCapitalCapitalMilestonesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /capital/capital/use-of-funds/{id} (capital-readiness)
+ */
+export const CapitalReadinessPatchCapitalCapitalUseOfFundsIdParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Delete /capital/capital/use-of-funds/{id} (capital-readiness)
+ */
+export const CapitalReadinessDeleteCapitalCapitalUseOfFundsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /carlota/booking/inquiries/{id} (carlota-jo)
+ */
+export const CarlotaJoGetCarlotaBookingInquiriesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /carlota/booking/inquiries/{id} (carlota-jo)
+ */
+export const CarlotaJoPatchCarlotaBookingInquiriesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /carlota/booking/inquiries/{id} (carlota-jo)
+ */
+export const CarlotaJoDeleteCarlotaBookingInquiriesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /carlota/booking/invoices/{invoiceId} (carlota-jo)
+ */
+export const CarlotaJoGetCarlotaBookingInvoicesInvoiceIdParams = zod.object({
+  invoiceId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /carlota/booking/reservations/{id} (carlota-jo)
+ */
+export const CarlotaJoGetCarlotaBookingReservationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /carlota/booking/reservations/{id} (carlota-jo)
+ */
+export const CarlotaJoPatchCarlotaBookingReservationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /carlota/booking/reservations/{id} (carlota-jo)
+ */
+export const CarlotaJoDeleteCarlotaBookingReservationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /carlota/booking/services/{id} (carlota-jo)
+ */
+export const CarlotaJoPatchCarlotaBookingServicesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /carlota/booking/services/{id} (carlota-jo)
+ */
+export const CarlotaJoDeleteCarlotaBookingServicesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /carlota/carlota/admin/clients/{clientId}/advisory-data (carlota-jo)
+ */
+export const CarlotaJoGetCarlotaCarlotaAdminClientsClientIdAdvisoryDataParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /carlota/carlota/admin/clients/{clientId}/competitors (carlota-jo)
+ */
+export const CarlotaJoPutCarlotaCarlotaAdminClientsClientIdCompetitorsParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /carlota/carlota/admin/clients/{clientId}/margin-history (carlota-jo)
+ */
+export const CarlotaJoPutCarlotaCarlotaAdminClientsClientIdMarginHistoryParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /carlota/carlota/admin/clients/{clientId}/market-trend (carlota-jo)
+ */
+export const CarlotaJoPutCarlotaCarlotaAdminClientsClientIdMarketTrendParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /carlota/carlota/admin/clients/{clientId}/radar-signals (carlota-jo)
+ */
+export const CarlotaJoPutCarlotaCarlotaAdminClientsClientIdRadarSignalsParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /carlota/carlota/admin/clients/{clientId}/roi-benchmarks (carlota-jo)
+ */
+export const CarlotaJoPutCarlotaCarlotaAdminClientsClientIdRoiBenchmarksParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /carlota/carlota/admin/clients/{clientId}/roi-trend (carlota-jo)
+ */
+export const CarlotaJoPutCarlotaCarlotaAdminClientsClientIdRoiTrendParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /carlota/carlota/experts/{id} (carlota-jo)
+ */
+export const CarlotaJoPutCarlotaCarlotaExpertsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /carlota/carlota/experts/{id} (carlota-jo)
+ */
+export const CarlotaJoDeleteCarlotaCarlotaExpertsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /carlota/carlota/knowledge/{id} (carlota-jo)
+ */
+export const CarlotaJoPutCarlotaCarlotaKnowledgeIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /carlota/carlota/knowledge/{id} (carlota-jo)
+ */
+export const CarlotaJoDeleteCarlotaCarlotaKnowledgeIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /carlota/carlota/proposals/{id} (carlota-jo)
+ */
+export const CarlotaJoPutCarlotaCarlotaProposalsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /carlota/carlota/proposals/{id} (carlota-jo)
+ */
+export const CarlotaJoDeleteCarlotaCarlotaProposalsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /certification/certification/artifacts/{id} (certification-readiness)
+ */
+export const CertificationReadinessPatchCertificationCertificationArtifactsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /certification/certification/artifacts/{id} (certification-readiness)
+ */
+export const CertificationReadinessDeleteCertificationCertificationArtifactsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /certification/certification/calendar/{id} (certification-readiness)
+ */
+export const CertificationReadinessPatchCertificationCertificationCalendarIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /certification/certification/calendar/{id} (certification-readiness)
+ */
+export const CertificationReadinessDeleteCertificationCertificationCalendarIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /certification/certification/legal-reviews/{id} (certification-readiness)
+ */
+export const CertificationReadinessPatchCertificationCertificationLegalReviewsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /certification/certification/legal-reviews/{id} (certification-readiness)
+ */
+export const CertificationReadinessDeleteCertificationCertificationLegalReviewsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /certification/certification/opportunities/{id} (certification-readiness)
+ */
+export const CertificationReadinessPatchCertificationCertificationOpportunitiesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /certification/certification/opportunities/{id} (certification-readiness)
+ */
+export const CertificationReadinessDeleteCertificationCertificationOpportunitiesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /certification/certification/ownership-scenarios/{id} (certification-readiness)
+ */
+export const CertificationReadinessPatchCertificationCertificationOwnershipScenariosIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /certification/certification/ownership-scenarios/{id} (certification-readiness)
+ */
+export const CertificationReadinessDeleteCertificationCertificationOwnershipScenariosIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /certification/certification/procurement-contacts/{id} (certification-readiness)
+ */
+export const CertificationReadinessPatchCertificationCertificationProcurementContactsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /certification/certification/procurement-contacts/{id} (certification-readiness)
+ */
+export const CertificationReadinessDeleteCertificationCertificationProcurementContactsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /certification/certification/programs/{id} (certification-readiness)
+ */
+export const CertificationReadinessGetCertificationCertificationProgramsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /certification/certification/programs/{id} (certification-readiness)
+ */
+export const CertificationReadinessPatchCertificationCertificationProgramsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /certification/certification/programs/{id} (certification-readiness)
+ */
+export const CertificationReadinessDeleteCertificationCertificationProgramsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /certification/certification/requirements/{id} (certification-readiness)
+ */
+export const CertificationReadinessPatchCertificationCertificationRequirementsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /certification/certification/requirements/{id} (certification-readiness)
+ */
+export const CertificationReadinessDeleteCertificationCertificationRequirementsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /certification/certification/status/{id} (certification-readiness)
+ */
+export const CertificationReadinessPatchCertificationCertificationStatusIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /certification/certification/status/{id} (certification-readiness)
+ */
+export const CertificationReadinessDeleteCertificationCertificationStatusIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /certification/certification/tasks/{id} (certification-readiness)
+ */
+export const CertificationReadinessPatchCertificationCertificationTasksIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /certification/certification/tasks/{id} (certification-readiness)
+ */
+export const CertificationReadinessDeleteCertificationCertificationTasksIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /cms/cms/articles/{id} (cms)
+ */
+export const CmsPatchCmsCmsArticlesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /cms/cms/articles/{id} (cms)
+ */
+export const CmsDeleteCmsCmsArticlesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /cms/cms/articles/{slug} (cms)
+ */
+export const CmsGetCmsCmsArticlesSlugParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /cms/cms/case-studies/{id} (cms)
+ */
+export const CmsPatchCmsCmsCaseStudiesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /cms/cms/case-studies/{id} (cms)
+ */
+export const CmsDeleteCmsCmsCaseStudiesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /cms/cms/case-studies/{slug} (cms)
+ */
+export const CmsGetCmsCmsCaseStudiesSlugParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /cms/cms/ctas/{id} (cms)
+ */
+export const CmsPatchCmsCmsCtasIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /cms/cms/ctas/{id} (cms)
+ */
+export const CmsDeleteCmsCmsCtasIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /cms/cms/downloads/{id} (cms)
+ */
+export const CmsPatchCmsCmsDownloadsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /cms/cms/faqs/{id} (cms)
+ */
+export const CmsPatchCmsCmsFaqsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /cms/cms/faqs/{id} (cms)
+ */
+export const CmsDeleteCmsCmsFaqsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /cms/cms/lead-status/{id} (cms)
+ */
+export const CmsPatchCmsCmsLeadStatusIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /cms/cms/media-assets/{id} (cms)
+ */
+export const CmsDeleteCmsCmsMediaAssetsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /cms/cms/navigation-items/{id} (cms)
+ */
+export const CmsPatchCmsCmsNavigationItemsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /cms/cms/navigation-items/{id} (cms)
+ */
+export const CmsDeleteCmsCmsNavigationItemsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /cms/cms/pages/{id} (cms)
+ */
+export const CmsGetCmsCmsPagesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /cms/cms/pages/{id} (cms)
+ */
+export const CmsPatchCmsCmsPagesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /cms/cms/pages/{id} (cms)
+ */
+export const CmsDeleteCmsCmsPagesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /cms/cms/posts/{id} (cms)
+ */
+export const CmsPutCmsCmsPostsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /cms/cms/posts/{id} (cms)
+ */
+export const CmsPatchCmsCmsPostsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /cms/cms/posts/{id} (cms)
+ */
+export const CmsDeleteCmsCmsPostsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /cms/cms/posts/{slug} (cms)
+ */
+export const CmsGetCmsCmsPostsSlugParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /cms/cms/redirects/{id} (cms)
+ */
+export const CmsDeleteCmsCmsRedirectsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /cms/cms/roadmap-items/{id} (cms)
+ */
+export const CmsPatchCmsCmsRoadmapItemsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /cms/cms/roadmap-items/{id} (cms)
+ */
+export const CmsDeleteCmsCmsRoadmapItemsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /cms/cms/sections/{id} (cms)
+ */
+export const CmsPatchCmsCmsSectionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /cms/cms/sections/{id} (cms)
+ */
+export const CmsDeleteCmsCmsSectionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /cms/cms/services-items/{id} (cms)
+ */
+export const CmsPatchCmsCmsServicesItemsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /cms/cms/services-items/{id} (cms)
+ */
+export const CmsDeleteCmsCmsServicesItemsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /cms/cms/site-settings/{id} (cms)
+ */
+export const CmsDeleteCmsCmsSiteSettingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /cms/cms/site-settings/{siteId} (cms)
+ */
+export const CmsGetCmsCmsSiteSettingsSiteIdParams = zod.object({
+  siteId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /cms/cms/sites/{id} (cms)
+ */
+export const CmsPatchCmsCmsSitesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /cms/cms/sites/{slug} (cms)
+ */
+export const CmsGetCmsCmsSitesSlugParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /cms/cms/testimonials/{id} (cms)
+ */
+export const CmsPatchCmsCmsTestimonialsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /cms/cms/testimonials/{id} (cms)
+ */
+export const CmsDeleteCmsCmsTestimonialsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /cms/cms/updates/{id} (cms)
+ */
+export const CmsPatchCmsCmsUpdatesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /cms/cms/ventures/{id} (cms)
+ */
+export const CmsPatchCmsCmsVenturesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /cms/cms/ventures/{id} (cms)
+ */
+export const CmsDeleteCmsCmsVenturesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /cms/cms/ventures/{slug} (cms)
+ */
+export const CmsGetCmsCmsVenturesSlugParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /cognitive-runtime/cognitive-runtime/checkpoint/{ref} (cognitive-runtime)
+ */
+export const CognitiveRuntimeGetCognitiveRuntimeCognitiveRuntimeCheckpointRefParams =
+  zod.object({
+    ref: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /comments/comments/{entityType}/{entityId} (comments)
+ */
+export const CommentsGetCommentsCommentsEntityTypeEntityIdParams = zod.object({
+  entityType: zod.coerce.string(),
+  entityId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /comments/comments/{entityType}/{entityId} (comments)
+ */
+export const CommentsPostCommentsCommentsEntityTypeEntityIdParams = zod.object({
+  entityType: zod.coerce.string(),
+  entityId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /comments/comments/{id} (comments)
+ */
+export const CommentsPatchCommentsCommentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /comments/comments/{id} (comments)
+ */
+export const CommentsDeleteCommentsCommentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /competitive-intel/alerts/{id}/dismiss (competitive-intel)
+ */
+export const CompetitiveIntelPostCompetitiveIntelAlertsIdDismissParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /competitive-intel/feeds/{id} (competitive-intel)
+ */
+export const CompetitiveIntelPatchCompetitiveIntelFeedsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /competitive-intel/feeds/{id} (competitive-intel)
+ */
+export const CompetitiveIntelDeleteCompetitiveIntelFeedsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /competitive-intel/lanes/{laneId}/mute (competitive-intel)
+ */
+export const CompetitiveIntelPostCompetitiveIntelLanesLaneIdMuteParams =
+  zod.object({
+    laneId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /compliance/compliance/suitability/{id}/review (compliance)
+ */
+export const CompliancePatchComplianceComplianceSuitabilityIdReviewParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /compliance/compliance/supervision/{itemId}/action (compliance)
+ */
+export const CompliancePatchComplianceComplianceSupervisionItemIdActionParams =
+  zod.object({
+    itemId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /confidence/briefings/{id} (pulse)
+ */
+export const PulseGetConfidenceBriefingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /confidence/briefings/{id}/save (pulse)
+ */
+export const PulsePostConfidenceBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /confidence/briefings/{id}/save (pulse)
+ */
+export const PulseDeleteConfidenceBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /confidence/dissents/{id} (pulse)
+ */
+export const PulsePatchConfidenceDissentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /confidence/domain-panel/{domain} (pulse)
+ */
+export const PulseGetConfidenceDomainPanelDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /confidence/subscriptions/{id} (pulse)
+ */
+export const PulsePatchConfidenceSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /confidence/subscriptions/{id} (pulse)
+ */
+export const PulseDeleteConfidenceSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /connector-hub/connector-hub/connectors/{connectorId}/toggle (connector-hub)
+ */
+export const ConnectorHubPatchConnectorHubConnectorHubConnectorsConnectorIdToggleParams =
+  zod.object({
+    connectorId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /connector-hub/connector-hub/health/{connectorId} (connector-hub)
+ */
+export const ConnectorHubGetConnectorHubConnectorHubHealthConnectorIdParams =
+  zod.object({
+    connectorId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /connector-hub/connector-hub/registry/{connectorId} (connector-hub)
+ */
+export const ConnectorHubGetConnectorHubConnectorHubRegistryConnectorIdParams =
+  zod.object({
+    connectorId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /connectors/connectors/{id} (connectors)
+ */
+export const ConnectorsGetConnectorsConnectorsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /connectors/connectors/{id} (connectors)
+ */
+export const ConnectorsPatchConnectorsConnectorsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /connectors/connectors/{id} (connectors)
+ */
+export const ConnectorsDeleteConnectorsConnectorsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /connectors/connectors/{id}/logs (connectors)
+ */
+export const ConnectorsGetConnectorsConnectorsIdLogsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /constellation/constellation/views/{id} (constellation-views)
+ */
+export const ConstellationViewsPatchConstellationConstellationViewsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /constellation/constellation/views/{id} (constellation-views)
+ */
+export const ConstellationViewsDeleteConstellationConstellationViewsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /content-crud/articles/{id} (content-crud)
+ */
+export const ContentCrudGetContentCrudArticlesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /content-crud/articles/{id} (content-crud)
+ */
+export const ContentCrudPatchContentCrudArticlesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /content-crud/articles/{id} (content-crud)
+ */
+export const ContentCrudDeleteContentCrudArticlesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /content-crud/articles/{id}/versions (content-crud)
+ */
+export const ContentCrudGetContentCrudArticlesIdVersionsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /content-crud/articles/slug/{slug} (content-crud)
+ */
+export const ContentCrudGetContentCrudArticlesSlugSlugParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /content-crud/automation-runs/{id} (content-crud)
+ */
+export const ContentCrudPatchContentCrudAutomationRunsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /content-crud/automation-runs/trigger/{jobType} (content-crud)
+ */
+export const ContentCrudPostContentCrudAutomationRunsTriggerJobTypeParams =
+  zod.object({
+    jobType: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /content-crud/calendar/{id} (content-crud)
+ */
+export const ContentCrudPatchContentCrudCalendarIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /content-crud/campaigns/{id} (content-crud)
+ */
+export const ContentCrudPatchContentCrudCampaignsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /content-crud/campaigns/{id}/links (content-crud)
+ */
+export const ContentCrudGetContentCrudCampaignsIdLinksParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /content-crud/campaigns/{id}/links (content-crud)
+ */
+export const ContentCrudPostContentCrudCampaignsIdLinksParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /content-crud/carousels/{id} (content-crud)
+ */
+export const ContentCrudGetContentCrudCarouselsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /content-crud/carousels/{id} (content-crud)
+ */
+export const ContentCrudPatchContentCrudCarouselsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /content-crud/distribution/{id} (content-crud)
+ */
+export const ContentCrudPatchContentCrudDistributionIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /content-crud/integrations/{id} (content-crud)
+ */
+export const ContentCrudPatchContentCrudIntegrationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /content-crud/integrations/retry/{provider} (content-crud)
+ */
+export const ContentCrudPostContentCrudIntegrationsRetryProviderParams =
+  zod.object({
+    provider: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /content-crud/leads/{id} (content-crud)
+ */
+export const ContentCrudPatchContentCrudLeadsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /content-crud/leads/{id} (content-crud)
+ */
+export const ContentCrudDeleteContentCrudLeadsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /content-crud/leads/{id}/notes (content-crud)
+ */
+export const ContentCrudGetContentCrudLeadsIdNotesParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /content-crud/leads/{id}/notes (content-crud)
+ */
+export const ContentCrudPostContentCrudLeadsIdNotesParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /content-crud/linktree/{id} (content-crud)
+ */
+export const ContentCrudPatchContentCrudLinktreeIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /content-crud/linktree/{id} (content-crud)
+ */
+export const ContentCrudDeleteContentCrudLinktreeIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /content-crud/newsletters/{id} (content-crud)
+ */
+export const ContentCrudGetContentCrudNewslettersIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /content-crud/newsletters/{id} (content-crud)
+ */
+export const ContentCrudPatchContentCrudNewslettersIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /content-crud/newsletters/{id} (content-crud)
+ */
+export const ContentCrudDeleteContentCrudNewslettersIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /content-crud/settings/{key} (content-crud)
+ */
+export const ContentCrudPatchContentCrudSettingsKeyParams = zod.object({
+  key: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /content-crud/x-posts/{id} (content-crud)
+ */
+export const ContentCrudGetContentCrudXPostsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /content-crud/x-posts/{id} (content-crud)
+ */
+export const ContentCrudPatchContentCrudXPostsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /content-crud/x-posts/{id} (content-crud)
+ */
+export const ContentCrudDeleteContentCrudXPostsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /content-crud/x-posts/{id}/queue (content-crud)
+ */
+export const ContentCrudPostContentCrudXPostsIdQueueParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /core/actions/{id} (lyte-extended)
+ */
+export const LyteExtendedPatchCoreActionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /core/actions/{id} (lyte-extended)
+ */
+export const LyteExtendedDeleteCoreActionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /core/readiness/{id} (lyte-extended)
+ */
+export const LyteExtendedPatchCoreReadinessIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /core/saved-views/{id} (lyte-extended)
+ */
+export const LyteExtendedPatchCoreSavedViewsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /core/saved-views/{id} (lyte-extended)
+ */
+export const LyteExtendedDeleteCoreSavedViewsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /core/signals/{id}/acknowledge (lyte-extended)
+ */
+export const LyteExtendedPostCoreSignalsIdAcknowledgeParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /core/signals/{id}/assign (lyte-extended)
+ */
+export const LyteExtendedPostCoreSignalsIdAssignParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /core/signals/{id}/comments (lyte-extended)
+ */
+export const LyteExtendedGetCoreSignalsIdCommentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /core/signals/{id}/comments (lyte-extended)
+ */
+export const LyteExtendedPostCoreSignalsIdCommentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /core/signals/{id}/escalate (lyte-extended)
+ */
+export const LyteExtendedPostCoreSignalsIdEscalateParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /core/signals/{id}/override (lyte-extended)
+ */
+export const LyteExtendedPostCoreSignalsIdOverrideParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /core/signals/{id}/resolve (lyte-extended)
+ */
+export const LyteExtendedPostCoreSignalsIdResolveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /core/signals/{id}/timeline (lyte-extended)
+ */
+export const LyteExtendedGetCoreSignalsIdTimelineParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /cortex/cortex/action-drafts/{id}/approve (cortex)
+ */
+export const CortexPostCortexCortexActionDraftsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /cortex/cortex/action-drafts/{id}/dismiss (cortex)
+ */
+export const CortexPostCortexCortexActionDraftsIdDismissParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /cortex/cortex/entity-graph/snapshot/{uuid} (cortex)
+ */
+export const CortexGetCortexCortexEntityGraphSnapshotUuidParams = zod.object({
+  uuid: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /cortex/cortex/entity-graph/snapshot/{uuid} (cortex)
+ */
+export const CortexDeleteCortexCortexEntityGraphSnapshotUuidParams = zod.object(
+  {
+    uuid: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Create/invoke /cortex/cortex/quick-actions/{id}/action (cortex)
+ */
+export const CortexPostCortexCortexQuickActionsIdActionParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /counsel/counsel/matters/{id} (counsel)
+ */
+export const CounselGetCounselCounselMattersIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /counsel/counsel/matters/{id} (counsel)
+ */
+export const CounselPatchCounselCounselMattersIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /counsel/counsel/matters/{id} (counsel)
+ */
+export const CounselDeleteCounselCounselMattersIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /counsel/counsel/obligations/{id} (counsel)
+ */
+export const CounselPatchCounselCounselObligationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /covenant/covenant/policies/{policyId} (covenant-policy-api)
+ */
+export const CovenantPolicyApiDeleteCovenantCovenantPoliciesPolicyIdParams =
+  zod.object({
+    policyId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /covenant/covenant/scenarios/{id} (covenant-policy-api)
+ */
+export const CovenantPolicyApiGetCovenantCovenantScenariosIdParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Delete /covenant/covenant/scenarios/{id} (covenant-policy-api)
+ */
+export const CovenantPolicyApiDeleteCovenantCovenantScenariosIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /covenant/covenant/scenarios/{id}/run (covenant-policy-api)
+ */
+export const CovenantPolicyApiPostCovenantCovenantScenariosIdRunParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /covenant/covenant/templates/{templateKey}/instantiate (covenant-policy-api)
+ */
+export const CovenantPolicyApiPostCovenantCovenantTemplatesTemplateKeyInstantiateParams =
+  zod.object({
+    templateKey: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /crm/crm/sync/{crmType} (crm)
+ */
+export const CrmPostCrmCrmSyncCrmTypeParams = zod.object({
+  crmType: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /crud/documents/{id} (crud)
+ */
+export const CrudPutCrudDocumentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /crud/documents/{id} (crud)
+ */
+export const CrudDeleteCrudDocumentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /crud/documents/{id}/comments (crud)
+ */
+export const CrudPostCrudDocumentsIdCommentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /crud/documents/{id}/restore (crud)
+ */
+export const CrudPostCrudDocumentsIdRestoreParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /crud/documents/{id}/versions (crud)
+ */
+export const CrudGetCrudDocumentsIdVersionsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /crud/documents/comments/{commentId}/resolve (crud)
+ */
+export const CrudPatchCrudDocumentsCommentsCommentIdResolveParams = zod.object({
+  commentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /crud/documents/templates/{id} (crud)
+ */
+export const CrudGetCrudDocumentsTemplatesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /crud/firestorm/assessments/{id} (crud)
+ */
+export const CrudGetCrudFirestormAssessmentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /crud/firestorm/assessments/{id} (crud)
+ */
+export const CrudPutCrudFirestormAssessmentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /crud/firestorm/assessments/{id} (crud)
+ */
+export const CrudDeleteCrudFirestormAssessmentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /crud/firestorm/findings/{id} (crud)
+ */
+export const CrudGetCrudFirestormFindingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /crud/firestorm/findings/{id} (crud)
+ */
+export const CrudPutCrudFirestormFindingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /crud/firestorm/reports/{assessmentId} (crud)
+ */
+export const CrudGetCrudFirestormReportsAssessmentIdParams = zod.object({
+  assessmentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /crud/firestorm/scenarios/{id} (crud)
+ */
+export const CrudGetCrudFirestormScenariosIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /crud/firestorm/scenarios/{id} (crud)
+ */
+export const CrudPutCrudFirestormScenariosIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /crud/firestorm/scenarios/{id} (crud)
+ */
+export const CrudDeleteCrudFirestormScenariosIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /crud/firestorm/simulations/{id} (crud)
+ */
+export const CrudGetCrudFirestormSimulationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /custom/briefings/{id} (pulse)
+ */
+export const PulseGetCustomBriefingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /custom/briefings/{id}/save (pulse)
+ */
+export const PulsePostCustomBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /custom/briefings/{id}/save (pulse)
+ */
+export const PulseDeleteCustomBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /custom/dissents/{id} (pulse)
+ */
+export const PulsePatchCustomDissentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /custom/domain-panel/{domain} (pulse)
+ */
+export const PulseGetCustomDomainPanelDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /custom/subscriptions/{id} (pulse)
+ */
+export const PulsePatchCustomSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /custom/subscriptions/{id} (pulse)
+ */
+export const PulseDeleteCustomSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /data-retention/data-retention/policies/{policyId}/run (data-retention)
+ */
+export const DataRetentionPostDataRetentionDataRetentionPoliciesPolicyIdRunParams =
+  zod.object({
+    policyId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /deals/terra/pipeline/deals/{id}/stage (deals)
+ */
+export const DealsPatchDealsTerraPipelineDealsIdStageParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /decide/control-tower/decide/approve/{id} (decide)
+ */
+export const DecidePostDecideControlTowerDecideApproveIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /decide/control-tower/decide/journal/{id} (decide)
+ */
+export const DecidePatchDecideControlTowerDecideJournalIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /decisioning/decisioning/runs/{runId} (decisioning)
+ */
+export const DecisioningGetDecisioningDecisioningRunsRunIdParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /decisioning/decisioning/runs/{runId}/outcome (decisioning)
+ */
+export const DecisioningPostDecisioningDecisioningRunsRunIdOutcomeParams =
+  zod.object({
+    runId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /decisioning/decisioning/runs/{runId}/prove (decisioning)
+ */
+export const DecisioningPostDecisioningDecisioningRunsRunIdProveParams =
+  zod.object({
+    runId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /decisions-runtime/decisions/cards/{id} (decisions-runtime)
+ */
+export const DecisionsRuntimeGetDecisionsRuntimeDecisionsCardsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /decisions-runtime/decisions/cards/{id}/approve (decisions-runtime)
+ */
+export const DecisionsRuntimePostDecisionsRuntimeDecisionsCardsIdApproveParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /decisions-runtime/decisions/cards/{id}/delegate (decisions-runtime)
+ */
+export const DecisionsRuntimePostDecisionsRuntimeDecisionsCardsIdDelegateParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /decisions-runtime/decisions/cards/{id}/reject (decisions-runtime)
+ */
+export const DecisionsRuntimePostDecisionsRuntimeDecisionsCardsIdRejectParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /decisions-runtime/decisions/cards/{id}/request-changes (decisions-runtime)
+ */
+export const DecisionsRuntimePostDecisionsRuntimeDecisionsCardsIdRequestChangesParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /decisions-runtime/decisions/cards/{id}/validate-and-promote (decisions-runtime)
+ */
+export const DecisionsRuntimePostDecisionsRuntimeDecisionsCardsIdValidateAndPromoteParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /decisions/alloy/admin/flags/{key} (alloy)
+ */
+export const AlloyPatchDecisionsAlloyAdminFlagsKeyParams = zod.object({
+  key: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /decisions/alloy/approvals/{id}/decide (alloy)
+ */
+export const AlloyPostDecisionsAlloyApprovalsIdDecideParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /decisions/alloy/artifacts/{id} (alloy)
+ */
+export const AlloyGetDecisionsAlloyArtifactsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /decisions/alloy/artifacts/{id}/approve (alloy)
+ */
+export const AlloyPostDecisionsAlloyArtifactsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /decisions/alloy/artifacts/{id}/reject (alloy)
+ */
+export const AlloyPostDecisionsAlloyArtifactsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /decisions/alloy/evidence/{id} (alloy)
+ */
+export const AlloyGetDecisionsAlloyEvidenceIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /decisions/alloy/runs/{id} (alloy)
+ */
+export const AlloyGetDecisionsAlloyRunsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /decisions/alloy/runs/{id}/cancel (alloy)
+ */
+export const AlloyPostDecisionsAlloyRunsIdCancelParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /decisions/alloy/runs/{id}/retry (alloy)
+ */
+export const AlloyPostDecisionsAlloyRunsIdRetryParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /decisions/alloy/runs/{id}/steps (alloy)
+ */
+export const AlloyGetDecisionsAlloyRunsIdStepsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /decisions/alloy/workflows/{id} (alloy)
+ */
+export const AlloyGetDecisionsAlloyWorkflowsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /decisions/alloy/workflows/{id} (alloy)
+ */
+export const AlloyPatchDecisionsAlloyWorkflowsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /decisions/alloy/workflows/{id} (alloy)
+ */
+export const AlloyDeleteDecisionsAlloyWorkflowsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /decisions/alloy/workflows/{id}/run (alloy)
+ */
+export const AlloyPostDecisionsAlloyWorkflowsIdRunParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /decisions/decisions/{id} (alloy)
+ */
+export const AlloyGetDecisionsDecisionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /decisions/decisions/{id}/approve (alloy)
+ */
+export const AlloyPostDecisionsDecisionsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /decisions/decisions/{id}/reject (alloy)
+ */
+export const AlloyPostDecisionsDecisionsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /decisions/decisions/receipts/{receiptId} (decisions-receipts)
+ */
+export const DecisionsReceiptsGetDecisionsDecisionsReceiptsReceiptIdParams =
+  zod.object({
+    receiptId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /decisions/decisions/receipts/download/{receiptId} (decisions-receipts)
+ */
+export const DecisionsReceiptsGetDecisionsDecisionsReceiptsDownloadReceiptIdParams =
+  zod.object({
+    receiptId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /decisions/skills/{id} (alloy)
+ */
+export const AlloyGetDecisionsSkillsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /decisions/skills/{id} (alloy)
+ */
+export const AlloyPatchDecisionsSkillsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /decisions/skills/{id}/runs (alloy)
+ */
+export const AlloyGetDecisionsSkillsIdRunsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /demo/briefings/{id} (pulse)
+ */
+export const PulseGetDemoBriefingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /demo/briefings/{id}/save (pulse)
+ */
+export const PulsePostDemoBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /demo/briefings/{id}/save (pulse)
+ */
+export const PulseDeleteDemoBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /demo/dissents/{id} (pulse)
+ */
+export const PulsePatchDemoDissentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /demo/domain-panel/{domain} (pulse)
+ */
+export const PulseGetDemoDomainPanelDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /demo/subscriptions/{id} (pulse)
+ */
+export const PulsePatchDemoSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /demo/subscriptions/{id} (pulse)
+ */
+export const PulseDeleteDemoSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /deployments/deployments/{appId} (deployments)
+ */
+export const DeploymentsGetDeploymentsDeploymentsAppIdParams = zod.object({
+  appId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /deployments/deployments/{appId}/history (deployments)
+ */
+export const DeploymentsGetDeploymentsDeploymentsAppIdHistoryParams =
+  zod.object({
+    appId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /deployments/deployments/{appId}/rollback (deployments)
+ */
+export const DeploymentsPostDeploymentsDeploymentsAppIdRollbackParams =
+  zod.object({
+    appId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /digital-twins/digital-twins/{twinId} (digital-twins)
+ */
+export const DigitalTwinsGetDigitalTwinsDigitalTwinsTwinIdParams = zod.object({
+  twinId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /digital-twins/digital-twins/{twinId} (digital-twins)
+ */
+export const DigitalTwinsPatchDigitalTwinsDigitalTwinsTwinIdParams = zod.object(
+  {
+    twinId: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Create/invoke /digital-twins/digital-twins/{twinId}/simulate (digital-twins)
+ */
+export const DigitalTwinsPostDigitalTwinsDigitalTwinsTwinIdSimulateParams =
+  zod.object({
+    twinId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /digital-twins/digital-twins/entity/{entityId} (digital-twins)
+ */
+export const DigitalTwinsGetDigitalTwinsDigitalTwinsEntityEntityIdParams =
+  zod.object({
+    entityId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /digital-twins/digital-twins/type/{type} (digital-twins)
+ */
+export const DigitalTwinsGetDigitalTwinsDigitalTwinsTypeTypeParams = zod.object(
+  {
+    type: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] List/get /dissents/briefings/{id} (pulse)
+ */
+export const PulseGetDissentsBriefingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /dissents/briefings/{id}/save (pulse)
+ */
+export const PulsePostDissentsBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /dissents/briefings/{id}/save (pulse)
+ */
+export const PulseDeleteDissentsBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /dissents/dissents/{id} (pulse)
+ */
+export const PulsePatchDissentsDissentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /dissents/domain-panel/{domain} (pulse)
+ */
+export const PulseGetDissentsDomainPanelDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /dissents/subscriptions/{id} (pulse)
+ */
+export const PulsePatchDissentsSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /dissents/subscriptions/{id} (pulse)
+ */
+export const PulseDeleteDissentsSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /domain-panel/briefings/{id} (pulse)
+ */
+export const PulseGetDomainPanelBriefingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /domain-panel/briefings/{id}/save (pulse)
+ */
+export const PulsePostDomainPanelBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /domain-panel/briefings/{id}/save (pulse)
+ */
+export const PulseDeleteDomainPanelBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /domain-panel/dissents/{id} (pulse)
+ */
+export const PulsePatchDomainPanelDissentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /domain-panel/domain-panel/{domain} (pulse)
+ */
+export const PulseGetDomainPanelDomainPanelDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /domain-panel/subscriptions/{id} (pulse)
+ */
+export const PulsePatchDomainPanelSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /domain-panel/subscriptions/{id} (pulse)
+ */
+export const PulseDeleteDomainPanelSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /domains/domains/{domain}/graph (domains)
+ */
+export const DomainsGetDomainsDomainsDomainGraphParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /dreamscape/dreamscape/campaign-assets/{id} (dreamscape)
+ */
+export const DreamscapeDeleteDreamscapeDreamscapeCampaignAssetsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /dreamscape/dreamscape/campaigns/{id} (dreamscape)
+ */
+export const DreamscapeGetDreamscapeDreamscapeCampaignsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /dreamscape/dreamscape/campaigns/{id} (dreamscape)
+ */
+export const DreamscapePatchDreamscapeDreamscapeCampaignsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /dreamscape/dreamscape/campaigns/{id} (dreamscape)
+ */
+export const DreamscapeDeleteDreamscapeDreamscapeCampaignsIdParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] List/get /dreamscape/dreamscape/campaigns/{id}/assets (dreamscape)
+ */
+export const DreamscapeGetDreamscapeDreamscapeCampaignsIdAssetsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /dreamscape/dreamscape/campaigns/{id}/reviews (dreamscape)
+ */
+export const DreamscapeGetDreamscapeDreamscapeCampaignsIdReviewsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /dreamscape/dreamscape/campaigns/{id}/scripts (dreamscape)
+ */
+export const DreamscapeGetDreamscapeDreamscapeCampaignsIdScriptsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /dreamscape/dreamscape/campaigns/{id}/storyboards (dreamscape)
+ */
+export const DreamscapeGetDreamscapeDreamscapeCampaignsIdStoryboardsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /dreamscape/dreamscape/campaigns/{id}/voice-assets (dreamscape)
+ */
+export const DreamscapeGetDreamscapeDreamscapeCampaignsIdVoiceAssetsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /dreamscape/dreamscape/reviews/{id} (dreamscape)
+ */
+export const DreamscapePatchDreamscapeDreamscapeReviewsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /dreamscape/dreamscape/reviews/{id} (dreamscape)
+ */
+export const DreamscapeDeleteDreamscapeDreamscapeReviewsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /dreamscape/dreamscape/scripts/{id} (dreamscape)
+ */
+export const DreamscapeGetDreamscapeDreamscapeScriptsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /dreamscape/dreamscape/scripts/{id} (dreamscape)
+ */
+export const DreamscapePatchDreamscapeDreamscapeScriptsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /dreamscape/dreamscape/scripts/{id} (dreamscape)
+ */
+export const DreamscapeDeleteDreamscapeDreamscapeScriptsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /dreamscape/dreamscape/storyboards/{id} (dreamscape)
+ */
+export const DreamscapePatchDreamscapeDreamscapeStoryboardsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /dreamscape/dreamscape/storyboards/{id} (dreamscape)
+ */
+export const DreamscapeDeleteDreamscapeDreamscapeStoryboardsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /dreamscape/dreamscape/voice-assets/{id} (dreamscape)
+ */
+export const DreamscapePatchDreamscapeDreamscapeVoiceAssetsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /dreamscape/dreamscape/voice-assets/{id} (dreamscape)
+ */
+export const DreamscapeDeleteDreamscapeDreamscapeVoiceAssetsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /drift/drift/{domain} (drift)
+ */
+export const DriftGetDriftDriftDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /dynamics/crm/sync/{crmType} (crm)
+ */
+export const CrmPostDynamicsCrmSyncCrmTypeParams = zod.object({
+  crmType: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /evals/evals/{id} (evals)
+ */
+export const EvalsGetEvalsEvalsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /evals/evals/runs/{runId} (evals)
+ */
+export const EvalsGetEvalsEvalsRunsRunIdParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /evals/evals/scores/{scoreId}/human-label (evals)
+ */
+export const EvalsPatchEvalsEvalsScoresScoreIdHumanLabelParams = zod.object({
+  scoreId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /evals/evals/suites/{suiteId} (evals)
+ */
+export const EvalsGetEvalsEvalsSuitesSuiteIdParams = zod.object({
+  suiteId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /evals/evals/suites/{suiteId}/runs/variant (evals)
+ */
+export const EvalsPostEvalsEvalsSuitesSuiteIdRunsVariantParams = zod.object({
+  suiteId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /evidence-graph/evidence-graph/recommendations/{id} (evidence-graph)
+ */
+export const EvidenceGraphGetEvidenceGraphEvidenceGraphRecommendationsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /evidence-graph/evidence-graph/recommendations/{id}/decision (evidence-graph)
+ */
+export const EvidenceGraphPostEvidenceGraphEvidenceGraphRecommendationsIdDecisionParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /evidence-graph/evidence-graph/recommendations/{id}/decisions (evidence-graph)
+ */
+export const EvidenceGraphGetEvidenceGraphEvidenceGraphRecommendationsIdDecisionsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /evidence-graph/evidence-graph/why/{entityId} (evidence-graph)
+ */
+export const EvidenceGraphGetEvidenceGraphEvidenceGraphWhyEntityIdParams =
+  zod.object({
+    entityId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /executive/executive/{domain} (executive-briefings)
+ */
+export const ExecutiveBriefingsGetExecutiveExecutiveDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /executive/executive/brief/{id} (executive-briefings)
+ */
+export const ExecutiveBriefingsGetExecutiveExecutiveBriefIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /executive/executive/generate/{domain} (executive-briefings)
+ */
+export const ExecutiveBriefingsPostExecutiveExecutiveGenerateDomainParams =
+  zod.object({
+    domain: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /export/briefings/{id} (pulse)
+ */
+export const PulseGetExportBriefingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /export/briefings/{id}/save (pulse)
+ */
+export const PulsePostExportBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /export/briefings/{id}/save (pulse)
+ */
+export const PulseDeleteExportBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /export/dissents/{id} (pulse)
+ */
+export const PulsePatchExportDissentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /export/domain-panel/{domain} (pulse)
+ */
+export const PulseGetExportDomainPanelDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /export/subscriptions/{id} (pulse)
+ */
+export const PulsePatchExportSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /export/subscriptions/{id} (pulse)
+ */
+export const PulseDeleteExportSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /exports/exports/download/{token} (exports)
+ */
+export const ExportsGetExportsExportsDownloadTokenParams = zod.object({
+  token: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /exports/exports/jobs/{exportId} (exports)
+ */
+export const ExportsGetExportsExportsJobsExportIdParams = zod.object({
+  exportId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /exports/exports/jobs/{exportId}/download (exports)
+ */
+export const ExportsGetExportsExportsJobsExportIdDownloadParams = zod.object({
+  exportId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /feature-flags/feature-flags/{id} (feature-flags)
+ */
+export const FeatureFlagsPatchFeatureFlagsFeatureFlagsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /feature-flags/feature-flags/{id} (feature-flags)
+ */
+export const FeatureFlagsDeleteFeatureFlagsFeatureFlagsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /feature-flags/feature-flags/{id}/overrides (feature-flags)
+ */
+export const FeatureFlagsGetFeatureFlagsFeatureFlagsIdOverridesParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /feature-flags/feature-flags/{id}/overrides (feature-flags)
+ */
+export const FeatureFlagsPostFeatureFlagsFeatureFlagsIdOverridesParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /feature-flags/feature-flags/{id}/overrides/{overrideId} (feature-flags)
+ */
+export const FeatureFlagsDeleteFeatureFlagsFeatureFlagsIdOverridesOverrideIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    overrideId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /feature-flags/feature-flags/check/{key} (feature-flags)
+ */
+export const FeatureFlagsGetFeatureFlagsFeatureFlagsCheckKeyParams = zod.object(
+  {
+    key: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] List/get /files/files/{id} (files)
+ */
+export const FilesGetFilesFilesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /files/files/{id} (files)
+ */
+export const FilesDeleteFilesFilesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /firestorm/firestorm/command/decisions/{id}/approve (firestorm-command-surfaces)
+ */
+export const FirestormCommandSurfacesPostFirestormFirestormCommandDecisionsIdApproveParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /flags/admin/feature-flags/{key} (flags)
+ */
+export const FlagsPutFlagsAdminFeatureFlagsKeyParams = zod.object({
+  key: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /forge/forge/agents/{id} (forge)
+ */
+export const ForgeGetForgeForgeAgentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /forge/forge/agents/{id}/execute (forge)
+ */
+export const ForgePostForgeForgeAgentsIdExecuteParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /forge/forge/agents/{id}/promote (forge)
+ */
+export const ForgePostForgeForgeAgentsIdPromoteParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /forge/forge/agents/{id}/rollback (forge)
+ */
+export const ForgePostForgeForgeAgentsIdRollbackParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /forge/forge/agents/{id}/versions (forge)
+ */
+export const ForgeGetForgeForgeAgentsIdVersionsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /forge/forge/agents/{id}/versions (forge)
+ */
+export const ForgePostForgeForgeAgentsIdVersionsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /forge/forge/executions/{executionId} (forge-runtime-api)
+ */
+export const ForgeRuntimeApiGetForgeForgeExecutionsExecutionIdParams =
+  zod.object({
+    executionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /forge/forge/executions/{executionId}/approve (forge-runtime-api)
+ */
+export const ForgeRuntimeApiPostForgeForgeExecutionsExecutionIdApproveParams =
+  zod.object({
+    executionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /forge/forge/executions/{id} (forge)
+ */
+export const ForgeGetForgeForgeExecutionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /forge/forge/promotions/{id}/approve (forge)
+ */
+export const ForgePostForgeForgePromotionsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /fund-inbound-deals/fund-inbound-deals/{pipelineId} (fund-inbound-deals)
+ */
+export const FundInboundDealsPatchFundInboundDealsFundInboundDealsPipelineIdParams =
+  zod.object({
+    pipelineId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /fund-inbound-deals/fund-inbound-deals/{pipelineId}/attachments/{idx} (fund-inbound-deals)
+ */
+export const FundInboundDealsGetFundInboundDealsFundInboundDealsPipelineIdAttachmentsIdxParams =
+  zod.object({
+    pipelineId: zod.coerce.string(),
+    idx: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /fund-ops/fund-ops/accredited-investors/{id} (fund-ops)
+ */
+export const FundOpsGetFundOpsFundOpsAccreditedInvestorsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /fund-ops/fund-ops/accredited-investors/{id} (fund-ops)
+ */
+export const FundOpsPatchFundOpsFundOpsAccreditedInvestorsIdParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Patch /fund-ops/fund-ops/cap-table-holders/{id} (fund-ops)
+ */
+export const FundOpsPatchFundOpsFundOpsCapTableHoldersIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /fund-ops/fund-ops/capital-call-lines/{id} (fund-ops)
+ */
+export const FundOpsPatchFundOpsFundOpsCapitalCallLinesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /fund-ops/fund-ops/capital-calls/{id} (fund-ops)
+ */
+export const FundOpsGetFundOpsFundOpsCapitalCallsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /fund-ops/fund-ops/capital-calls/{id} (fund-ops)
+ */
+export const FundOpsPatchFundOpsFundOpsCapitalCallsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /fund-ops/fund-ops/distributions/{id} (fund-ops)
+ */
+export const FundOpsGetFundOpsFundOpsDistributionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /fund-ops/fund-ops/distributions/{id} (fund-ops)
+ */
+export const FundOpsPatchFundOpsFundOpsDistributionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /fund-ops/fund-ops/form-d-filings/{id} (fund-ops)
+ */
+export const FundOpsPatchFundOpsFundOpsFormDFilingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /fund-ops/fund-ops/form-d-filings/{id} (fund-ops)
+ */
+export const FundOpsDeleteFundOpsFundOpsFormDFilingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /fund-ops/fund-ops/lp-capital-accounts/{id} (fund-ops)
+ */
+export const FundOpsPatchFundOpsFundOpsLpCapitalAccountsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /fund-ops/fund-ops/lp-reports/{id} (fund-ops)
+ */
+export const FundOpsGetFundOpsFundOpsLpReportsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /fund-ops/fund-ops/lp-reports/{id} (fund-ops)
+ */
+export const FundOpsPatchFundOpsFundOpsLpReportsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /fund-ops/fund-ops/portfolio-financials/{id} (fund-ops)
+ */
+export const FundOpsGetFundOpsFundOpsPortfolioFinancialsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /fund-ops/fund-ops/portfolio-financials/{id} (fund-ops)
+ */
+export const FundOpsPatchFundOpsFundOpsPortfolioFinancialsIdParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Delete /fund-ops/fund-ops/portfolio-financials/{id} (fund-ops)
+ */
+export const FundOpsDeleteFundOpsFundOpsPortfolioFinancialsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /fund-ops/fund-ops/portfolio-kpis/{id} (fund-ops)
+ */
+export const FundOpsPatchFundOpsFundOpsPortfolioKpisIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /fund-ops/fund-ops/portfolio-kpis/{id} (fund-ops)
+ */
+export const FundOpsDeleteFundOpsFundOpsPortfolioKpisIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /fund-ops/fund-ops/share-classes/{id} (fund-ops)
+ */
+export const FundOpsPatchFundOpsFundOpsShareClassesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /fund-ops/fund-ops/vesting-schedules/{id} (fund-ops)
+ */
+export const FundOpsPatchFundOpsFundOpsVestingSchedulesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /fusion/fusion/alerts/{alertId}/feedback (fusion)
+ */
+export const FusionPostFusionFusionAlertsAlertIdFeedbackParams = zod.object({
+  alertId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /fusion/fusion/alerts/{id}/acknowledge (fusion)
+ */
+export const FusionPostFusionFusionAlertsIdAcknowledgeParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /fusion/fusion/alerts/{id}/resolve (fusion)
+ */
+export const FusionPostFusionFusionAlertsIdResolveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /fusion/fusion/patterns/{id} (fusion)
+ */
+export const FusionGetFusionFusionPatternsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /fusion/fusion/patterns/{id}/feedback (fusion)
+ */
+export const FusionPostFusionFusionPatternsIdFeedbackParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /fusion/fusion/predictive/alerts/{id}/resolve (fusion)
+ */
+export const FusionPostFusionFusionPredictiveAlertsIdResolveParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] List/get /genai-telemetry/genai-telemetry/dashboard/{appSlug} (genai-telemetry)
+ */
+export const GenaiTelemetryGetGenaiTelemetryGenaiTelemetryDashboardAppSlugParams =
+  zod.object({
+    appSlug: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /genai-telemetry/genai-telemetry/langfuse/{traceId} (genai-telemetry)
+ */
+export const GenaiTelemetryGetGenaiTelemetryGenaiTelemetryLangfuseTraceIdParams =
+  zod.object({
+    traceId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /genai-telemetry/genai-telemetry/trace/{traceId} (genai-telemetry)
+ */
+export const GenaiTelemetryGetGenaiTelemetryGenaiTelemetryTraceTraceIdParams =
+  zod.object({
+    traceId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /govern-evolve/control-tower/evolve/propose/{proposalId} (govern-evolve)
+ */
+export const GovernEvolvePatchGovernEvolveControlTowerEvolveProposeProposalIdParams =
+  zod.object({
+    proposalId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /graph/graph/entities/{fromId}/path/{toId} (graph)
+ */
+export const GraphGetGraphGraphEntitiesFromIdPathToIdParams = zod.object({
+  fromId: zod.coerce.string(),
+  toId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /graph/graph/entities/{id} (graph)
+ */
+export const GraphGetGraphGraphEntitiesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /graph/graph/entities/{id}/neighbors (graph)
+ */
+export const GraphGetGraphGraphEntitiesIdNeighborsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /graph/graph/entities/{id}/subgraph (graph)
+ */
+export const GraphGetGraphGraphEntitiesIdSubgraphParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /graph/graph/entities/{id}/subgraph/export (graph)
+ */
+export const GraphGetGraphGraphEntitiesIdSubgraphExportParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /guardian/actions/{id} (guardian)
+ */
+export const GuardianGetGuardianActionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /guardian/actions/{id}/approve (guardian)
+ */
+export const GuardianPostGuardianActionsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /guardian/actions/{id}/reject (guardian)
+ */
+export const GuardianPostGuardianActionsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /guardian/approvals/{requestId} (guardian)
+ */
+export const GuardianGetGuardianApprovalsRequestIdParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /guardian/approvals/{requestId}/review (guardian)
+ */
+export const GuardianPostGuardianApprovalsRequestIdReviewParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /guardian/guardrail-configs/{id} (guardian)
+ */
+export const GuardianGetGuardianGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /guardian/guardrail-configs/{id} (guardian)
+ */
+export const GuardianPatchGuardianGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /guardian/guardrail-configs/{id} (guardian)
+ */
+export const GuardianDeleteGuardianGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /guardian/policies/{id} (guardian)
+ */
+export const GuardianGetGuardianPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /guardian/policies/{id} (guardian)
+ */
+export const GuardianPatchGuardianPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /guardian/policies/{id} (guardian)
+ */
+export const GuardianDeleteGuardianPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /guardian/policies/{id}/assignments (guardian)
+ */
+export const GuardianGetGuardianPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /guardian/policies/{id}/assignments (guardian)
+ */
+export const GuardianPostGuardianPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /guardian/policies/{id}/assignments/{assignmentId} (guardian)
+ */
+export const GuardianDeleteGuardianPoliciesIdAssignmentsAssignmentIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    assignmentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /guardian/policies/{id}/audit (guardian)
+ */
+export const GuardianGetGuardianPoliciesIdAuditParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /guardian/policies/tiers/{tier} (guardian)
+ */
+export const GuardianPatchGuardianPoliciesTiersTierParams = zod.object({
+  tier: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /guardian/rollback-events/{id} (guardian)
+ */
+export const GuardianGetGuardianRollbackEventsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /guardian/rollback-events/{id}/status (guardian)
+ */
+export const GuardianPatchGuardianRollbackEventsIdStatusParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /guardian/tool-approvals/{id}/approve (guardian)
+ */
+export const GuardianPostGuardianToolApprovalsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /guardian/tool-approvals/{id}/reject (guardian)
+ */
+export const GuardianPostGuardianToolApprovalsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /guardian/tools/{toolId} (guardian)
+ */
+export const GuardianGetGuardianToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /guardian/tools/{toolId} (guardian)
+ */
+export const GuardianPatchGuardianToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /guardian/tools/{toolId}/audit (guardian)
+ */
+export const GuardianGetGuardianToolsToolIdAuditParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /guardian/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianGetGuardianToolsToolIdPermissionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /guardian/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianPostGuardianToolsToolIdPermissionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /guardian/tools/{toolId}/permissions/{permissionId} (guardian)
+ */
+export const GuardianDeleteGuardianToolsToolIdPermissionsPermissionIdParams =
+  zod.object({
+    toolId: zod.coerce.string(),
+    permissionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /guardian/tools/{toolId}/versions (guardian)
+ */
+export const GuardianGetGuardianToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /guardian/tools/{toolId}/versions (guardian)
+ */
+export const GuardianPostGuardianToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /guardrail-configs/actions/{id} (guardian)
+ */
+export const GuardianGetGuardrailConfigsActionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /guardrail-configs/actions/{id}/approve (guardian)
+ */
+export const GuardianPostGuardrailConfigsActionsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /guardrail-configs/actions/{id}/reject (guardian)
+ */
+export const GuardianPostGuardrailConfigsActionsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /guardrail-configs/approvals/{requestId} (guardian)
+ */
+export const GuardianGetGuardrailConfigsApprovalsRequestIdParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /guardrail-configs/approvals/{requestId}/review (guardian)
+ */
+export const GuardianPostGuardrailConfigsApprovalsRequestIdReviewParams =
+  zod.object({
+    requestId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /guardrail-configs/guardrail-configs/{id} (guardian)
+ */
+export const GuardianGetGuardrailConfigsGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /guardrail-configs/guardrail-configs/{id} (guardian)
+ */
+export const GuardianPatchGuardrailConfigsGuardrailConfigsIdParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Delete /guardrail-configs/guardrail-configs/{id} (guardian)
+ */
+export const GuardianDeleteGuardrailConfigsGuardrailConfigsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /guardrail-configs/policies/{id} (guardian)
+ */
+export const GuardianGetGuardrailConfigsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /guardrail-configs/policies/{id} (guardian)
+ */
+export const GuardianPatchGuardrailConfigsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /guardrail-configs/policies/{id} (guardian)
+ */
+export const GuardianDeleteGuardrailConfigsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /guardrail-configs/policies/{id}/assignments (guardian)
+ */
+export const GuardianGetGuardrailConfigsPoliciesIdAssignmentsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /guardrail-configs/policies/{id}/assignments (guardian)
+ */
+export const GuardianPostGuardrailConfigsPoliciesIdAssignmentsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /guardrail-configs/policies/{id}/assignments/{assignmentId} (guardian)
+ */
+export const GuardianDeleteGuardrailConfigsPoliciesIdAssignmentsAssignmentIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    assignmentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /guardrail-configs/policies/{id}/audit (guardian)
+ */
+export const GuardianGetGuardrailConfigsPoliciesIdAuditParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /guardrail-configs/policies/tiers/{tier} (guardian)
+ */
+export const GuardianPatchGuardrailConfigsPoliciesTiersTierParams = zod.object({
+  tier: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /guardrail-configs/rollback-events/{id} (guardian)
+ */
+export const GuardianGetGuardrailConfigsRollbackEventsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /guardrail-configs/rollback-events/{id}/status (guardian)
+ */
+export const GuardianPatchGuardrailConfigsRollbackEventsIdStatusParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /guardrail-configs/tool-approvals/{id}/approve (guardian)
+ */
+export const GuardianPostGuardrailConfigsToolApprovalsIdApproveParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /guardrail-configs/tool-approvals/{id}/reject (guardian)
+ */
+export const GuardianPostGuardrailConfigsToolApprovalsIdRejectParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /guardrail-configs/tools/{toolId} (guardian)
+ */
+export const GuardianGetGuardrailConfigsToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /guardrail-configs/tools/{toolId} (guardian)
+ */
+export const GuardianPatchGuardrailConfigsToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /guardrail-configs/tools/{toolId}/audit (guardian)
+ */
+export const GuardianGetGuardrailConfigsToolsToolIdAuditParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /guardrail-configs/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianGetGuardrailConfigsToolsToolIdPermissionsParams =
+  zod.object({
+    toolId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /guardrail-configs/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianPostGuardrailConfigsToolsToolIdPermissionsParams =
+  zod.object({
+    toolId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /guardrail-configs/tools/{toolId}/permissions/{permissionId} (guardian)
+ */
+export const GuardianDeleteGuardrailConfigsToolsToolIdPermissionsPermissionIdParams =
+  zod.object({
+    toolId: zod.coerce.string(),
+    permissionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /guardrail-configs/tools/{toolId}/versions (guardian)
+ */
+export const GuardianGetGuardrailConfigsToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /guardrail-configs/tools/{toolId}/versions (guardian)
+ */
+export const GuardianPostGuardrailConfigsToolsToolIdVersionsParams = zod.object(
+  {
+    toolId: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] List/get /health/integrations/health/{name} (health-integrations)
+ */
+export const HealthIntegrationsGetHealthIntegrationsHealthNameParams =
+  zod.object({
+    name: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /holdings/holdings/inquiries/{id} (holdings)
+ */
+export const HoldingsDeleteHoldingsHoldingsInquiriesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /holdings/holdings/leadership/{id} (holdings)
+ */
+export const HoldingsDeleteHoldingsHoldingsLeadershipIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /holdings/holdings/metrics/{id} (holdings)
+ */
+export const HoldingsDeleteHoldingsHoldingsMetricsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /holdings/holdings/milestones/{id} (holdings)
+ */
+export const HoldingsDeleteHoldingsHoldingsMilestonesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /holdings/holdings/ventures/{id} (holdings)
+ */
+export const HoldingsGetHoldingsHoldingsVenturesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /holdings/holdings/ventures/{id} (holdings)
+ */
+export const HoldingsPatchHoldingsHoldingsVenturesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /holdings/holdings/ventures/{id} (holdings)
+ */
+export const HoldingsDeleteHoldingsHoldingsVenturesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /holdings/investors/docs/{id} (holdings)
+ */
+export const HoldingsGetHoldingsInvestorsDocsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /holdings/investors/docs/{id}/download (holdings)
+ */
+export const HoldingsGetHoldingsInvestorsDocsIdDownloadParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /hubspot/crm/sync/{crmType} (crm)
+ */
+export const CrmPostHubspotCrmSyncCrmTypeParams = zod.object({
+  crmType: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /identity/admin/tenants/{id}/branding (identity)
+ */
+export const IdentityGetIdentityAdminTenantsIdBrandingParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /identity/admin/tenants/{id}/branding (identity)
+ */
+export const IdentityPutIdentityAdminTenantsIdBrandingParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /identity/admin/tenants/{id}/branding (identity)
+ */
+export const IdentityDeleteIdentityAdminTenantsIdBrandingParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /identity/admin/tenants/{id}/scim/provisioned-users (identity)
+ */
+export const IdentityGetIdentityAdminTenantsIdScimProvisionedUsersParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /identity/admin/tenants/{id}/scim/sync (identity)
+ */
+export const IdentityPostIdentityAdminTenantsIdScimSyncParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /identity/admin/tenants/{id}/scim/tokens (identity)
+ */
+export const IdentityGetIdentityAdminTenantsIdScimTokensParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /identity/admin/tenants/{id}/scim/tokens (identity)
+ */
+export const IdentityPostIdentityAdminTenantsIdScimTokensParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /identity/admin/tenants/{id}/scim/tokens/{tokenId} (identity)
+ */
+export const IdentityDeleteIdentityAdminTenantsIdScimTokensTokenIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    tokenId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /identity/tenant-branding/{azureTenantId} (identity)
+ */
+export const IdentityGetIdentityTenantBrandingAzureTenantIdParams = zod.object({
+  azureTenantId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /inca/inca/experiments/{id} (aegis-intel)
+ */
+export const AegisIntelPatchIncaIncaExperimentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /inca/inca/experiments/{id} (aegis-intel)
+ */
+export const AegisIntelDeleteIncaIncaExperimentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /inca/inca/insights/{id} (aegis-intel)
+ */
+export const AegisIntelDeleteIncaIncaInsightsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /inca/inca/models/{id} (aegis-intel)
+ */
+export const AegisIntelPatchIncaIncaModelsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /inca/inca/models/{id} (aegis-intel)
+ */
+export const AegisIntelDeleteIncaIncaModelsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /inca/inca/projects/{id} (aegis-intel)
+ */
+export const AegisIntelGetIncaIncaProjectsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /inca/inca/projects/{id} (aegis-intel)
+ */
+export const AegisIntelPatchIncaIncaProjectsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /inca/inca/projects/{id} (aegis-intel)
+ */
+export const AegisIntelDeleteIncaIncaProjectsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /inca/inca/projects/{id}/experiments (aegis-intel)
+ */
+export const AegisIntelGetIncaIncaProjectsIdExperimentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /inca/inca/projects/{id}/models (aegis-intel)
+ */
+export const AegisIntelGetIncaIncaProjectsIdModelsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /inca/inca/provider/models/{id} (aegis-intel)
+ */
+export const AegisIntelGetIncaIncaProviderModelsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /incidents-alerts/firestorm/alerts/{id} (incidents-alerts)
+ */
+export const IncidentsAlertsPutIncidentsAlertsFirestormAlertsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /incidents-alerts/firestorm/compliance/{controlId} (incidents-alerts)
+ */
+export const IncidentsAlertsPutIncidentsAlertsFirestormComplianceControlIdParams =
+  zod.object({
+    controlId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /incidents-alerts/firestorm/incidents/{id} (incidents-alerts)
+ */
+export const IncidentsAlertsGetIncidentsAlertsFirestormIncidentsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /incidents-alerts/firestorm/incidents/{id} (incidents-alerts)
+ */
+export const IncidentsAlertsPutIncidentsAlertsFirestormIncidentsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /incidents-alerts/firestorm/incidents/{id} (incidents-alerts)
+ */
+export const IncidentsAlertsDeleteIncidentsAlertsFirestormIncidentsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /incidents-alerts/firestorm/vulnerabilities/{id} (incidents-alerts)
+ */
+export const IncidentsAlertsGetIncidentsAlertsFirestormVulnerabilitiesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /incidents-alerts/firestorm/vulnerabilities/{id} (incidents-alerts)
+ */
+export const IncidentsAlertsPutIncidentsAlertsFirestormVulnerabilitiesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /integrations/actions/{id}/resolve (command)
+ */
+export const CommandPostIntegrationsActionsIdResolveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /integrations/admin/connectors/{name}/enable (integrations)
+ */
+export const IntegrationsPutIntegrationsAdminConnectorsNameEnableParams =
+  zod.object({
+    name: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /integrations/admin/connectors/{name}/sync (integrations)
+ */
+export const IntegrationsPostIntegrationsAdminConnectorsNameSyncParams =
+  zod.object({
+    name: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /integrations/admin/connectors/{name}/test (integrations)
+ */
+export const IntegrationsPostIntegrationsAdminConnectorsNameTestParams =
+  zod.object({
+    name: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /integrations/alerts/{alertId}/audit (command)
+ */
+export const CommandGetIntegrationsAlertsAlertIdAuditParams = zod.object({
+  alertId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /integrations/alerts/{alertId}/state (command)
+ */
+export const CommandPostIntegrationsAlertsAlertIdStateParams = zod.object({
+  alertId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /integrations/integrations/atlassian/tenant/{clientKey} (integrations)
+ */
+export const IntegrationsGetIntegrationsIntegrationsAtlassianTenantClientKeyParams =
+  zod.object({
+    clientKey: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /integrations/integrations/atlassian/tenant/{clientKey} (integrations)
+ */
+export const IntegrationsDeleteIntegrationsIntegrationsAtlassianTenantClientKeyParams =
+  zod.object({
+    clientKey: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /integrations/integrations/health/{name} (health-integrations)
+ */
+export const HealthIntegrationsGetIntegrationsIntegrationsHealthNameParams =
+  zod.object({
+    name: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /integrations/integrations/sharepoint/webparts/{id} (microsoft-integrations)
+ */
+export const MicrosoftIntegrationsGetIntegrationsIntegrationsSharepointWebpartsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /integrations/integrations/status/{adapter} (external-integrations)
+ */
+export const ExternalIntegrationsGetIntegrationsIntegrationsStatusAdapterParams =
+  zod.object({
+    adapter: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /investors/holdings/inquiries/{id} (holdings)
+ */
+export const HoldingsDeleteInvestorsHoldingsInquiriesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /investors/holdings/leadership/{id} (holdings)
+ */
+export const HoldingsDeleteInvestorsHoldingsLeadershipIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /investors/holdings/metrics/{id} (holdings)
+ */
+export const HoldingsDeleteInvestorsHoldingsMetricsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /investors/holdings/milestones/{id} (holdings)
+ */
+export const HoldingsDeleteInvestorsHoldingsMilestonesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /investors/holdings/ventures/{id} (holdings)
+ */
+export const HoldingsGetInvestorsHoldingsVenturesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /investors/holdings/ventures/{id} (holdings)
+ */
+export const HoldingsPatchInvestorsHoldingsVenturesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /investors/holdings/ventures/{id} (holdings)
+ */
+export const HoldingsDeleteInvestorsHoldingsVenturesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /investors/investors/docs/{id} (holdings)
+ */
+export const HoldingsGetInvestorsInvestorsDocsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /investors/investors/docs/{id}/download (holdings)
+ */
+export const HoldingsGetInvestorsInvestorsDocsIdDownloadParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /jobs/jobs/durable/{jobId}/cancel (jobs)
+ */
+export const JobsPostJobsJobsDurableJobIdCancelParams = zod.object({
+  jobId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /jobs/jobs/durable/dead-letter/{jobId}/replay (jobs)
+ */
+export const JobsPostJobsJobsDurableDeadLetterJobIdReplayParams = zod.object({
+  jobId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /jobs/jobs/schedules/{name}/enable (jobs)
+ */
+export const JobsPatchJobsJobsSchedulesNameEnableParams = zod.object({
+  name: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /jobs/jobs/schedules/{name}/trigger (jobs)
+ */
+export const JobsPostJobsJobsSchedulesNameTriggerParams = zod.object({
+  name: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /jobs/jobs/trigger/{type} (jobs)
+ */
+export const JobsPostJobsJobsTriggerTypeParams = zod.object({
+  type: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /leads/terra/crm/leads/{id} (leads)
+ */
+export const LeadsGetLeadsTerraCrmLeadsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /leads/terra/crm/leads/{id} (leads)
+ */
+export const LeadsPatchLeadsTerraCrmLeadsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ledger/actions/{id} (guardian)
+ */
+export const GuardianGetLedgerActionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ledger/actions/{id}/approve (guardian)
+ */
+export const GuardianPostLedgerActionsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ledger/actions/{id}/reject (guardian)
+ */
+export const GuardianPostLedgerActionsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ledger/approvals/{requestId} (guardian)
+ */
+export const GuardianGetLedgerApprovalsRequestIdParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ledger/approvals/{requestId}/review (guardian)
+ */
+export const GuardianPostLedgerApprovalsRequestIdReviewParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ledger/guardrail-configs/{id} (guardian)
+ */
+export const GuardianGetLedgerGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /ledger/guardrail-configs/{id} (guardian)
+ */
+export const GuardianPatchLedgerGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /ledger/guardrail-configs/{id} (guardian)
+ */
+export const GuardianDeleteLedgerGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ledger/policies/{id} (guardian)
+ */
+export const GuardianGetLedgerPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /ledger/policies/{id} (guardian)
+ */
+export const GuardianPatchLedgerPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /ledger/policies/{id} (guardian)
+ */
+export const GuardianDeleteLedgerPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ledger/policies/{id}/assignments (guardian)
+ */
+export const GuardianGetLedgerPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ledger/policies/{id}/assignments (guardian)
+ */
+export const GuardianPostLedgerPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /ledger/policies/{id}/assignments/{assignmentId} (guardian)
+ */
+export const GuardianDeleteLedgerPoliciesIdAssignmentsAssignmentIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    assignmentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /ledger/policies/{id}/audit (guardian)
+ */
+export const GuardianGetLedgerPoliciesIdAuditParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /ledger/policies/tiers/{tier} (guardian)
+ */
+export const GuardianPatchLedgerPoliciesTiersTierParams = zod.object({
+  tier: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ledger/rollback-events/{id} (guardian)
+ */
+export const GuardianGetLedgerRollbackEventsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /ledger/rollback-events/{id}/status (guardian)
+ */
+export const GuardianPatchLedgerRollbackEventsIdStatusParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ledger/tool-approvals/{id}/approve (guardian)
+ */
+export const GuardianPostLedgerToolApprovalsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ledger/tool-approvals/{id}/reject (guardian)
+ */
+export const GuardianPostLedgerToolApprovalsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ledger/tools/{toolId} (guardian)
+ */
+export const GuardianGetLedgerToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /ledger/tools/{toolId} (guardian)
+ */
+export const GuardianPatchLedgerToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ledger/tools/{toolId}/audit (guardian)
+ */
+export const GuardianGetLedgerToolsToolIdAuditParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ledger/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianGetLedgerToolsToolIdPermissionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ledger/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianPostLedgerToolsToolIdPermissionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /ledger/tools/{toolId}/permissions/{permissionId} (guardian)
+ */
+export const GuardianDeleteLedgerToolsToolIdPermissionsPermissionIdParams =
+  zod.object({
+    toolId: zod.coerce.string(),
+    permissionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /ledger/tools/{toolId}/versions (guardian)
+ */
+export const GuardianGetLedgerToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ledger/tools/{toolId}/versions (guardian)
+ */
+export const GuardianPostLedgerToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /lp-portal/lp-portal/lps/{id}/activity (lp-portal)
+ */
+export const LpPortalGetLpPortalLpPortalLpsIdActivityParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /lp-portal/lp-portal/lps/{id}/activity (lp-portal)
+ */
+export const LpPortalPostLpPortalLpPortalLpsIdActivityParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /lp-portal/lp-portal/lps/{id}/capital-account (lp-portal)
+ */
+export const LpPortalGetLpPortalLpPortalLpsIdCapitalAccountParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /lp-portal/lp-portal/lps/{id}/documents (lp-portal)
+ */
+export const LpPortalGetLpPortalLpPortalLpsIdDocumentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /lp-portal/lp-portal/lps/{id}/messages (lp-portal)
+ */
+export const LpPortalGetLpPortalLpPortalLpsIdMessagesParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /lp-portal/lp-portal/lps/{id}/messages (lp-portal)
+ */
+export const LpPortalPostLpPortalLpPortalLpsIdMessagesParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /lp-portal/lp-portal/lps/{id}/reports (lp-portal)
+ */
+export const LpPortalGetLpPortalLpPortalLpsIdReportsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /lyte/lyte/actions/{id} (lyte)
+ */
+export const LytePatchLyteLyteActionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /lyte/lyte/alerts/{id} (lyte-observability)
+ */
+export const LyteObservabilityGetLyteLyteAlertsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /lyte/lyte/alerts/{id} (lyte-observability)
+ */
+export const LyteObservabilityPatchLyteLyteAlertsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /lyte/lyte/alerts/{id} (lyte-observability)
+ */
+export const LyteObservabilityDeleteLyteLyteAlertsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /lyte/lyte/command-cards/{id} (lyte)
+ */
+export const LytePatchLyteLyteCommandCardsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /lyte/lyte/command-cards/{id} (lyte)
+ */
+export const LyteDeleteLyteLyteCommandCardsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /lyte/lyte/dashboards/{id} (lyte-observability)
+ */
+export const LyteObservabilityGetLyteLyteDashboardsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /lyte/lyte/dashboards/{id} (lyte-observability)
+ */
+export const LyteObservabilityPutLyteLyteDashboardsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /lyte/lyte/dashboards/{id} (lyte-observability)
+ */
+export const LyteObservabilityDeleteLyteLyteDashboardsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /lyte/lyte/dashboards/shared/{token} (lyte-observability)
+ */
+export const LyteObservabilityGetLyteLyteDashboardsSharedTokenParams =
+  zod.object({
+    token: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /lyte/lyte/decision-replay/{id} (lyte-surfaces)
+ */
+export const LyteSurfacesGetLyteLyteDecisionReplayIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /lyte/lyte/escalations/{id} (lyte-observability)
+ */
+export const LyteObservabilityPatchLyteLyteEscalationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /lyte/lyte/incidents/{id} (lyte)
+ */
+export const LytePatchLyteLyteIncidentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /lyte/lyte/incidents/{id} (lyte)
+ */
+export const LyteDeleteLyteLyteIncidentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /lyte/lyte/playbooks/{id} (lyte)
+ */
+export const LyteGetLyteLytePlaybooksIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /lyte/lyte/playbooks/{id} (lyte)
+ */
+export const LytePatchLyteLytePlaybooksIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /lyte/lyte/playbooks/{id} (lyte)
+ */
+export const LyteDeleteLyteLytePlaybooksIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /lyte/lyte/readiness/{id} (lyte)
+ */
+export const LytePatchLyteLyteReadinessIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /lyte/lyte/recommendations/{id} (lyte)
+ */
+export const LytePatchLyteLyteRecommendationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /lyte/lyte/recommendations/{id} (lyte)
+ */
+export const LyteDeleteLyteLyteRecommendationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /lyte/lyte/signals/{id} (lyte)
+ */
+export const LytePatchLyteLyteSignalsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /lyte/lyte/signals/{id} (lyte)
+ */
+export const LyteDeleteLyteLyteSignalsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /lyte/lyte/views/{id} (lyte)
+ */
+export const LytePatchLyteLyteViewsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /lyte/lyte/views/{id} (lyte)
+ */
+export const LyteDeleteLyteLyteViewsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /lyte/lyte/workspaces/{id} (lyte)
+ */
+export const LyteGetLyteLyteWorkspacesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /lyte/stakeholder-views/{lens} (innovation-engine)
+ */
+export const InnovationEngineGetLyteStakeholderViewsLensParams = zod.object({
+  lens: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /mcp-gateway/mcp-gateway/rules/{ruleId}/enforcement-mode (mcp-gateway)
+ */
+export const McpGatewayPatchMcpGatewayMcpGatewayRulesRuleIdEnforcementModeParams =
+  zod.object({
+    ruleId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /memory/memory/{id} (memory)
+ */
+export const MemoryGetMemoryMemoryIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /memory/memory/{id} (memory)
+ */
+export const MemoryPutMemoryMemoryIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /memory/memory/{id} (memory)
+ */
+export const MemoryDeleteMemoryMemoryIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /memory/memory/{id}/pin (memory)
+ */
+export const MemoryPostMemoryMemoryIdPinParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /memory/memory/{id}/pin (memory)
+ */
+export const MemoryDeleteMemoryMemoryIdPinParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ml/ml/ab-tests/{testId}/assign (ml-pipeline)
+ */
+export const MlPipelinePostMlMlAbTestsTestIdAssignParams = zod.object({
+  testId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ml/ml/ab-tests/{testId}/conclude (ml-pipeline)
+ */
+export const MlPipelinePostMlMlAbTestsTestIdConcludeParams = zod.object({
+  testId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ml/ml/ab-tests/{testId}/evaluate (ml-pipeline)
+ */
+export const MlPipelineGetMlMlAbTestsTestIdEvaluateParams = zod.object({
+  testId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ml/ml/ab-tests/{testId}/outcome (ml-pipeline)
+ */
+export const MlPipelinePostMlMlAbTestsTestIdOutcomeParams = zod.object({
+  testId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ml/ml/datasets/{datasetId} (ml-pipeline)
+ */
+export const MlPipelineGetMlMlDatasetsDatasetIdParams = zod.object({
+  datasetId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ml/ml/datasets/{datasetId}/refresh (ml-pipeline)
+ */
+export const MlPipelinePostMlMlDatasetsDatasetIdRefreshParams = zod.object({
+  datasetId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ml/ml/monitoring/run/{modelVersionId} (ml-pipeline)
+ */
+export const MlPipelinePostMlMlMonitoringRunModelVersionIdParams = zod.object({
+  modelVersionId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ml/ml/registry/models/{modelVersionId} (ml-pipeline)
+ */
+export const MlPipelineGetMlMlRegistryModelsModelVersionIdParams = zod.object({
+  modelVersionId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ml/ml/registry/models/{modelVersionId}/lineage (ml-pipeline)
+ */
+export const MlPipelineGetMlMlRegistryModelsModelVersionIdLineageParams =
+  zod.object({
+    modelVersionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /ml/ml/registry/models/{modelVersionId}/promote (ml-pipeline)
+ */
+export const MlPipelinePostMlMlRegistryModelsModelVersionIdPromoteParams =
+  zod.object({
+    modelVersionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /ml/ml/templates/{domain} (ml-pipeline)
+ */
+export const MlPipelineGetMlMlTemplatesDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ml/ml/templates/{domain}/{modelType} (ml-pipeline)
+ */
+export const MlPipelineGetMlMlTemplatesDomainModelTypeParams = zod.object({
+  domain: zod.coerce.string(),
+  modelType: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ml/ml/training/runs/{runId} (ml-pipeline)
+ */
+export const MlPipelineGetMlMlTrainingRunsRunIdParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ml/ml/training/trigger/{domain} (ml-pipeline)
+ */
+export const MlPipelinePostMlMlTrainingTriggerDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /models/agents/{agentId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetModelsAgentsAgentIdParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /models/agents/{agentId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimeGetModelsAgentsAgentIdVersionsParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /models/agents/{agentId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimePostModelsAgentsAgentIdVersionsParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /models/models/{modelId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetModelsModelsModelIdParams = zod.object({
+  modelId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /models/prompts/{promptId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetModelsPromptsPromptIdParams = zod.object({
+  promptId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /models/prompts/{promptId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimeGetModelsPromptsPromptIdVersionsParams = zod.object({
+  promptId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /models/signals/{signalId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetModelsSignalsSignalIdParams = zod.object({
+  signalId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /models/signals/{signalId}/status (alloy-runtime)
+ */
+export const AlloyRuntimePatchModelsSignalsSignalIdStatusParams = zod.object({
+  signalId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /models/workflow-runs/{runId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetModelsWorkflowRunsRunIdParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /models/workflow-runs/{runId}/replay (alloy-runtime)
+ */
+export const AlloyRuntimePostModelsWorkflowRunsRunIdReplayParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /models/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetModelsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /models/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimePatchModelsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /models/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimeDeleteModelsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /monitoring/rmm/org-site-mappings/{id} (monitoring)
+ */
+export const MonitoringPatchMonitoringRmmOrgSiteMappingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /monitoring/rmm/org-site-mappings/{id} (monitoring)
+ */
+export const MonitoringDeleteMonitoringRmmOrgSiteMappingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /monitoring/rmm/psa/ticket/{psaTicketId}/close (monitoring)
+ */
+export const MonitoringPostMonitoringRmmPsaTicketPsaTicketIdCloseParams =
+  zod.object({
+    psaTicketId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /monte-carlo/monte-carlo/jobs/{id} (monte-carlo)
+ */
+export const MonteCarloGetMonteCarloMonteCarloJobsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /monte-carlo/monte-carlo/jobs/{id}/stream (monte-carlo)
+ */
+export const MonteCarloGetMonteCarloMonteCarloJobsIdStreamParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /monte-carlo/monte-carlo/scenarios/{id} (monte-carlo)
+ */
+export const MonteCarloGetMonteCarloMonteCarloScenariosIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /msp/msp/clients/{id} (msp)
+ */
+export const MspGetMspMspClientsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /msp/msp/tickets/{id} (msp)
+ */
+export const MspGetMspMspTicketsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /msp/msp/tickets/{id} (msp)
+ */
+export const MspPatchMspMspTicketsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /narratives/narratives/{id} (narratives)
+ */
+export const NarrativesGetNarrativesNarrativesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /nexus/bridge/tools/{id} (nexus)
+ */
+export const NexusPutNexusBridgeToolsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /nexus/bridge/tools/{id} (nexus)
+ */
+export const NexusDeleteNexusBridgeToolsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /nexus/ingest/{id} (nexus)
+ */
+export const NexusGetNexusIngestIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /nexus/ingest/{id}/retry (nexus)
+ */
+export const NexusPostNexusIngestIdRetryParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /nexus/memory/{id} (nexus)
+ */
+export const NexusPutNexusMemoryIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /nexus/memory/{id} (nexus)
+ */
+export const NexusDeleteNexusMemoryIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /nexus/orchestrate/{id} (nexus)
+ */
+export const NexusGetNexusOrchestrateIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /nexus/orchestrate/{id}/retry (nexus)
+ */
+export const NexusPostNexusOrchestrateIdRetryParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /nexus/research/{id} (nexus)
+ */
+export const NexusGetNexusResearchIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /nexus/research/{id}/stream (nexus)
+ */
+export const NexusGetNexusResearchIdStreamParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /nexus/skills/{id} (nexus)
+ */
+export const NexusPutNexusSkillsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /nexus/skills/{id}/toggle (nexus)
+ */
+export const NexusPostNexusSkillsIdToggleParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /notification-recipients/notification-recipients/{id} (notification-recipients)
+ */
+export const NotificationRecipientsPatchNotificationRecipientsNotificationRecipientsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /notification-recipients/notification-recipients/{id} (notification-recipients)
+ */
+export const NotificationRecipientsDeleteNotificationRecipientsNotificationRecipientsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /notifications/notifications/{id} (notifications)
+ */
+export const NotificationsDeleteNotificationsNotificationsIdParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Patch /notifications/notifications/{id}/read (notifications)
+ */
+export const NotificationsPatchNotificationsNotificationsIdReadParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /nuro-mesh/nuro-mesh/cost/budget/{workflowId} (nuro-mesh-advanced)
+ */
+export const NuroMeshAdvancedGetNuroMeshNuroMeshCostBudgetWorkflowIdParams =
+  zod.object({
+    workflowId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /nuro-mesh/nuro-mesh/memory/stats/{agentId} (nuro-mesh-advanced)
+ */
+export const NuroMeshAdvancedGetNuroMeshNuroMeshMemoryStatsAgentIdParams =
+  zod.object({
+    agentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /nuro-mesh/nuro-mesh/observability/traces/{traceId} (nuro-mesh-advanced)
+ */
+export const NuroMeshAdvancedGetNuroMeshNuroMeshObservabilityTracesTraceIdParams =
+  zod.object({
+    traceId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /observability/observability/{appSlug} (observability)
+ */
+export const ObservabilityGetObservabilityObservabilityAppSlugParams =
+  zod.object({
+    appSlug: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /observability/observability/alerts/{id}/resolve (observability)
+ */
+export const ObservabilityPostObservabilityObservabilityAlertsIdResolveParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /onboarding/onboarding/resend-invite/{orgSlug} (onboarding)
+ */
+export const OnboardingPostOnboardingOnboardingResendInviteOrgSlugParams =
+  zod.object({
+    orgSlug: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /onboarding/onboarding/wizard/{orgSlug} (onboarding)
+ */
+export const OnboardingGetOnboardingOnboardingWizardOrgSlugParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /onboarding/onboarding/wizard/{orgSlug} (onboarding)
+ */
+export const OnboardingPutOnboardingOnboardingWizardOrgSlugParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /onboarding/onboarding/wizard/{orgSlug}/complete (onboarding)
+ */
+export const OnboardingPostOnboardingOnboardingWizardOrgSlugCompleteParams =
+  zod.object({
+    orgSlug: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /ontology/ontology/domain/{domain} (ontology)
+ */
+export const OntologyGetOntologyOntologyDomainDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ontology/ontology/entity/{id} (ontology)
+ */
+export const OntologyGetOntologyOntologyEntityIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ontology/ontology/entity/{id}/connections (ontology)
+ */
+export const OntologyGetOntologyOntologyEntityIdConnectionsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ontology/ontology/entity/{id}/traverse (ontology)
+ */
+export const OntologyGetOntologyOntologyEntityIdTraverseParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /ops/ops/alert-events/{id}/acknowledge (ops-management)
+ */
+export const OpsManagementPostOpsOpsAlertEventsIdAcknowledgeParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Patch /ops/ops/alert-rules/{id} (ops-management)
+ */
+export const OpsManagementPatchOpsOpsAlertRulesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /ops/ops/alert-rules/{id} (ops-management)
+ */
+export const OpsManagementDeleteOpsOpsAlertRulesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ops/ops/incidents/{id} (ops-management)
+ */
+export const OpsManagementGetOpsOpsIncidentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /ops/ops/incidents/{id} (ops-management)
+ */
+export const OpsManagementPatchOpsOpsIncidentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /ops/ops/incidents/{id} (ops-management)
+ */
+export const OpsManagementDeleteOpsOpsIncidentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /ops/ops/runbooks/{id} (ops-management)
+ */
+export const OpsManagementGetOpsOpsRunbooksIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /ops/ops/runbooks/{id} (ops-management)
+ */
+export const OpsManagementPatchOpsOpsRunbooksIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /ops/ops/runbooks/{id} (ops-management)
+ */
+export const OpsManagementDeleteOpsOpsRunbooksIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /ops/ops/service-deps/{id} (ops-management)
+ */
+export const OpsManagementDeleteOpsOpsServiceDepsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /org-branding/org-branding/{orgSlug} (partner-portal)
+ */
+export const PartnerPortalGetOrgBrandingOrgBrandingOrgSlugParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /org-branding/orgs/{orgId}/branding (partner-portal)
+ */
+export const PartnerPortalGetOrgBrandingOrgsOrgIdBrandingParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /org-branding/orgs/{orgId}/branding (partner-portal)
+ */
+export const PartnerPortalPutOrgBrandingOrgsOrgIdBrandingParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /org-branding/orgs/{orgId}/branding (partner-portal)
+ */
+export const PartnerPortalDeleteOrgBrandingOrgsOrgIdBrandingParams = zod.object(
+  {
+    orgId: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] List/get /org-branding/orgs/{orgId}/custom-domains (partner-portal)
+ */
+export const PartnerPortalGetOrgBrandingOrgsOrgIdCustomDomainsParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /org-branding/orgs/{orgId}/custom-domains (partner-portal)
+ */
+export const PartnerPortalPostOrgBrandingOrgsOrgIdCustomDomainsParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /org-branding/orgs/{orgId}/custom-domains/{domainId} (partner-portal)
+ */
+export const PartnerPortalPatchOrgBrandingOrgsOrgIdCustomDomainsDomainIdParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+    domainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /org-branding/orgs/{orgId}/custom-domains/{domainId} (partner-portal)
+ */
+export const PartnerPortalDeleteOrgBrandingOrgsOrgIdCustomDomainsDomainIdParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+    domainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /org-branding/orgs/{orgId}/custom-domains/{domainId}/activate (partner-portal)
+ */
+export const PartnerPortalPostOrgBrandingOrgsOrgIdCustomDomainsDomainIdActivateParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+    domainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /org-branding/orgs/{orgId}/custom-domains/{domainId}/verify (partner-portal)
+ */
+export const PartnerPortalPostOrgBrandingOrgsOrgIdCustomDomainsDomainIdVerifyParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+    domainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /org-branding/partner/accounts/{id} (partner-portal)
+ */
+export const PartnerPortalGetOrgBrandingPartnerAccountsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /org-branding/partner/accounts/{id} (partner-portal)
+ */
+export const PartnerPortalPatchOrgBrandingPartnerAccountsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /org-branding/partner/accounts/{id}/tenants (partner-portal)
+ */
+export const PartnerPortalPostOrgBrandingPartnerAccountsIdTenantsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /org-branding/partner/accounts/{id}/tenants/{orgId} (partner-portal)
+ */
+export const PartnerPortalDeleteOrgBrandingPartnerAccountsIdTenantsOrgIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    orgId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /org-branding/partner/accounts/{id}/tenants/assign (partner-portal)
+ */
+export const PartnerPortalPostOrgBrandingPartnerAccountsIdTenantsAssignParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /org-branding/partner/accounts/{id}/usage (partner-portal)
+ */
+export const PartnerPortalGetOrgBrandingPartnerAccountsIdUsageParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /orgs/approvals/{approvalId}/resolve (prism-counsel-ops)
+ */
+export const PrismCounselOpsPatchOrgsApprovalsApprovalIdResolveParams =
+  zod.object({
+    approvalId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /orgs/connectors/{accountId}/history (prism-counsel-ops)
+ */
+export const PrismCounselOpsGetOrgsConnectorsAccountIdHistoryParams =
+  zod.object({
+    accountId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /orgs/connectors/{accountId}/sync (prism-counsel-ops)
+ */
+export const PrismCounselOpsPostOrgsConnectorsAccountIdSyncParams = zod.object({
+  accountId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /orgs/jobs/dead-letter/{eventId}/replay (prism-counsel-ops)
+ */
+export const PrismCounselOpsPostOrgsJobsDeadLetterEventIdReplayParams =
+  zod.object({
+    eventId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /orgs/matters/{matterId} (prism-counsel-ops)
+ */
+export const PrismCounselOpsGetOrgsMattersMatterIdParams = zod.object({
+  matterId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /orgs/matters/{matterId} (prism-counsel-ops)
+ */
+export const PrismCounselOpsPatchOrgsMattersMatterIdParams = zod.object({
+  matterId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /orgs/matters/{matterId}/communications (prism-counsel-ops)
+ */
+export const PrismCounselOpsGetOrgsMattersMatterIdCommunicationsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /orgs/matters/{matterId}/deadlines (prism-counsel-ops)
+ */
+export const PrismCounselOpsGetOrgsMattersMatterIdDeadlinesParams = zod.object({
+  matterId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /orgs/matters/{matterId}/deadlines (prism-counsel-ops)
+ */
+export const PrismCounselOpsPostOrgsMattersMatterIdDeadlinesParams = zod.object(
+  {
+    matterId: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] List/get /orgs/matters/{matterId}/discovery (prism-counsel-ops)
+ */
+export const PrismCounselOpsGetOrgsMattersMatterIdDiscoveryParams = zod.object({
+  matterId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /orgs/matters/{matterId}/documents (prism-counsel-ops)
+ */
+export const PrismCounselOpsGetOrgsMattersMatterIdDocumentsParams = zod.object({
+  matterId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /orgs/matters/{matterId}/parties (prism-counsel-ops)
+ */
+export const PrismCounselOpsGetOrgsMattersMatterIdPartiesParams = zod.object({
+  matterId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /orgs/matters/{matterId}/parties (prism-counsel-ops)
+ */
+export const PrismCounselOpsPostOrgsMattersMatterIdPartiesParams = zod.object({
+  matterId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /orgs/matters/{matterId}/witnesses (prism-counsel-ops)
+ */
+export const PrismCounselOpsGetOrgsMattersMatterIdWitnessesParams = zod.object({
+  matterId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /orgs/org-branding/{orgSlug} (partner-portal)
+ */
+export const PartnerPortalGetOrgsOrgBrandingOrgSlugParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /orgs/orgs/{orgId}/branding (partner-portal)
+ */
+export const PartnerPortalGetOrgsOrgsOrgIdBrandingParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /orgs/orgs/{orgId}/branding (partner-portal)
+ */
+export const PartnerPortalPutOrgsOrgsOrgIdBrandingParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /orgs/orgs/{orgId}/branding (partner-portal)
+ */
+export const PartnerPortalDeleteOrgsOrgsOrgIdBrandingParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /orgs/orgs/{orgId}/custom-domains (partner-portal)
+ */
+export const PartnerPortalGetOrgsOrgsOrgIdCustomDomainsParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /orgs/orgs/{orgId}/custom-domains (partner-portal)
+ */
+export const PartnerPortalPostOrgsOrgsOrgIdCustomDomainsParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /orgs/orgs/{orgId}/custom-domains/{domainId} (partner-portal)
+ */
+export const PartnerPortalPatchOrgsOrgsOrgIdCustomDomainsDomainIdParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+    domainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /orgs/orgs/{orgId}/custom-domains/{domainId} (partner-portal)
+ */
+export const PartnerPortalDeleteOrgsOrgsOrgIdCustomDomainsDomainIdParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+    domainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /orgs/orgs/{orgId}/custom-domains/{domainId}/activate (partner-portal)
+ */
+export const PartnerPortalPostOrgsOrgsOrgIdCustomDomainsDomainIdActivateParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+    domainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /orgs/orgs/{orgId}/custom-domains/{domainId}/verify (partner-portal)
+ */
+export const PartnerPortalPostOrgsOrgsOrgIdCustomDomainsDomainIdVerifyParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+    domainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /orgs/orgs/{orgSlug} (org-settings)
+ */
+export const OrgSettingsPatchOrgsOrgsOrgSlugParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /orgs/orgs/{orgSlug}/invitations (invitations)
+ */
+export const InvitationsGetOrgsOrgsOrgSlugInvitationsParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /orgs/orgs/{orgSlug}/invitations/{invitationId} (invitations)
+ */
+export const InvitationsDeleteOrgsOrgsOrgSlugInvitationsInvitationIdParams =
+  zod.object({
+    orgSlug: zod.coerce.string(),
+    invitationId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /orgs/orgs/{orgSlug}/invite (invitations)
+ */
+export const InvitationsPostOrgsOrgsOrgSlugInviteParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /orgs/orgs/{orgSlug}/members (org-settings)
+ */
+export const OrgSettingsGetOrgsOrgsOrgSlugMembersParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /orgs/orgs/{orgSlug}/members/{userId} (org-settings)
+ */
+export const OrgSettingsDeleteOrgsOrgsOrgSlugMembersUserIdParams = zod.object({
+  orgSlug: zod.coerce.string(),
+  userId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /orgs/orgs/{orgSlug}/members/{userId}/role (org-settings)
+ */
+export const OrgSettingsPutOrgsOrgsOrgSlugMembersUserIdRoleParams = zod.object({
+  orgSlug: zod.coerce.string(),
+  userId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /orgs/orgs/{orgSlug}/mfa-required (org-settings)
+ */
+export const OrgSettingsPatchOrgsOrgsOrgSlugMfaRequiredParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /orgs/orgs/{orgSlug}/notification-prefs (org-settings)
+ */
+export const OrgSettingsGetOrgsOrgsOrgSlugNotificationPrefsParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /orgs/orgs/{orgSlug}/notification-prefs (org-settings)
+ */
+export const OrgSettingsPutOrgsOrgsOrgSlugNotificationPrefsParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /orgs/orgs/{orgSlug}/profile (org-settings)
+ */
+export const OrgSettingsGetOrgsOrgsOrgSlugProfileParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /orgs/orgs/{orgSlug}/profile (org-settings)
+ */
+export const OrgSettingsPutOrgsOrgsOrgSlugProfileParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /orgs/orgs/{orgSlug}/usage (usage)
+ */
+export const UsageGetOrgsOrgsOrgSlugUsageParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /orgs/orgs/{orgSlug}/usage/events (usage)
+ */
+export const UsagePostOrgsOrgsOrgSlugUsageEventsParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /orgs/orgs/{orgSlug}/usage/history (usage)
+ */
+export const UsageGetOrgsOrgsOrgSlugUsageHistoryParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /orgs/partner/accounts/{id} (partner-portal)
+ */
+export const PartnerPortalGetOrgsPartnerAccountsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /orgs/partner/accounts/{id} (partner-portal)
+ */
+export const PartnerPortalPatchOrgsPartnerAccountsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /orgs/partner/accounts/{id}/tenants (partner-portal)
+ */
+export const PartnerPortalPostOrgsPartnerAccountsIdTenantsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /orgs/partner/accounts/{id}/tenants/{orgId} (partner-portal)
+ */
+export const PartnerPortalDeleteOrgsPartnerAccountsIdTenantsOrgIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    orgId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /orgs/partner/accounts/{id}/tenants/assign (partner-portal)
+ */
+export const PartnerPortalPostOrgsPartnerAccountsIdTenantsAssignParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /orgs/partner/accounts/{id}/usage (partner-portal)
+ */
+export const PartnerPortalGetOrgsPartnerAccountsIdUsageParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /ownership/ownership/allocations/{id} (ownership-control)
+ */
+export const OwnershipControlPatchOwnershipOwnershipAllocationsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /ownership/ownership/allocations/{id} (ownership-control)
+ */
+export const OwnershipControlDeleteOwnershipOwnershipAllocationsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /ownership/ownership/capital-contributions/{id} (ownership-control)
+ */
+export const OwnershipControlPatchOwnershipOwnershipCapitalContributionsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /ownership/ownership/capital-contributions/{id} (ownership-control)
+ */
+export const OwnershipControlDeleteOwnershipOwnershipCapitalContributionsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /ownership/ownership/certification-readiness/{id} (ownership-control)
+ */
+export const OwnershipControlPatchOwnershipOwnershipCertificationReadinessIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /ownership/ownership/certification-readiness/{id} (ownership-control)
+ */
+export const OwnershipControlDeleteOwnershipOwnershipCertificationReadinessIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /ownership/ownership/control-roles/{id} (ownership-control)
+ */
+export const OwnershipControlPatchOwnershipOwnershipControlRolesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /ownership/ownership/control-roles/{id} (ownership-control)
+ */
+export const OwnershipControlDeleteOwnershipOwnershipControlRolesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /ownership/ownership/decision-log/{id} (ownership-control)
+ */
+export const OwnershipControlDeleteOwnershipOwnershipDecisionLogIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /ownership/ownership/governance-documents/{id} (ownership-control)
+ */
+export const OwnershipControlPatchOwnershipOwnershipGovernanceDocumentsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /ownership/ownership/governance-documents/{id} (ownership-control)
+ */
+export const OwnershipControlDeleteOwnershipOwnershipGovernanceDocumentsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /ownership/ownership/legal-flags/{id} (ownership-control)
+ */
+export const OwnershipControlPatchOwnershipOwnershipLegalFlagsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /ownership/ownership/legal-flags/{id} (ownership-control)
+ */
+export const OwnershipControlDeleteOwnershipOwnershipLegalFlagsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /ownership/ownership/manager-roles/{id} (ownership-control)
+ */
+export const OwnershipControlPatchOwnershipOwnershipManagerRolesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /ownership/ownership/manager-roles/{id} (ownership-control)
+ */
+export const OwnershipControlDeleteOwnershipOwnershipManagerRolesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /ownership/ownership/officer-roles/{id} (ownership-control)
+ */
+export const OwnershipControlPatchOwnershipOwnershipOfficerRolesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /ownership/ownership/officer-roles/{id} (ownership-control)
+ */
+export const OwnershipControlDeleteOwnershipOwnershipOfficerRolesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /ownership/ownership/scenarios/{id} (ownership-control)
+ */
+export const OwnershipControlGetOwnershipOwnershipScenariosIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /ownership/ownership/scenarios/{id} (ownership-control)
+ */
+export const OwnershipControlPatchOwnershipOwnershipScenariosIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /ownership/ownership/scenarios/{id} (ownership-control)
+ */
+export const OwnershipControlDeleteOwnershipOwnershipScenariosIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /ownership/ownership/scenarios/{id}/allocations (ownership-control)
+ */
+export const OwnershipControlGetOwnershipOwnershipScenariosIdAllocationsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /ownership/ownership/scenarios/{id}/allocations (ownership-control)
+ */
+export const OwnershipControlPostOwnershipOwnershipScenariosIdAllocationsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /ownership/ownership/scenarios/{id}/capital-contributions (ownership-control)
+ */
+export const OwnershipControlPostOwnershipOwnershipScenariosIdCapitalContributionsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /ownership/ownership/scenarios/{id}/certification-readiness (ownership-control)
+ */
+export const OwnershipControlPostOwnershipOwnershipScenariosIdCertificationReadinessParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /ownership/ownership/scenarios/{id}/control-roles (ownership-control)
+ */
+export const OwnershipControlPostOwnershipOwnershipScenariosIdControlRolesParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /ownership/ownership/scenarios/{id}/decision-log (ownership-control)
+ */
+export const OwnershipControlGetOwnershipOwnershipScenariosIdDecisionLogParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /ownership/ownership/scenarios/{id}/decision-log (ownership-control)
+ */
+export const OwnershipControlPostOwnershipOwnershipScenariosIdDecisionLogParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /ownership/ownership/scenarios/{id}/governance-documents (ownership-control)
+ */
+export const OwnershipControlPostOwnershipOwnershipScenariosIdGovernanceDocumentsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /ownership/ownership/scenarios/{id}/legal-flags (ownership-control)
+ */
+export const OwnershipControlGetOwnershipOwnershipScenariosIdLegalFlagsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /ownership/ownership/scenarios/{id}/legal-flags (ownership-control)
+ */
+export const OwnershipControlPostOwnershipOwnershipScenariosIdLegalFlagsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /ownership/ownership/scenarios/{id}/manager-roles (ownership-control)
+ */
+export const OwnershipControlPostOwnershipOwnershipScenariosIdManagerRolesParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /ownership/ownership/scenarios/{id}/officer-roles (ownership-control)
+ */
+export const OwnershipControlPostOwnershipOwnershipScenariosIdOfficerRolesParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /ownership/ownership/scenarios/{id}/signature-authority (ownership-control)
+ */
+export const OwnershipControlPostOwnershipOwnershipScenariosIdSignatureAuthorityParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /ownership/ownership/scenarios/{id}/voting-rights (ownership-control)
+ */
+export const OwnershipControlPostOwnershipOwnershipScenariosIdVotingRightsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /ownership/ownership/signature-authority/{id} (ownership-control)
+ */
+export const OwnershipControlPatchOwnershipOwnershipSignatureAuthorityIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /ownership/ownership/signature-authority/{id} (ownership-control)
+ */
+export const OwnershipControlDeleteOwnershipOwnershipSignatureAuthorityIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /ownership/ownership/voting-rights/{id} (ownership-control)
+ */
+export const OwnershipControlPatchOwnershipOwnershipVotingRightsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /ownership/ownership/voting-rights/{id} (ownership-control)
+ */
+export const OwnershipControlDeleteOwnershipOwnershipVotingRightsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /partner/org-branding/{orgSlug} (partner-portal)
+ */
+export const PartnerPortalGetPartnerOrgBrandingOrgSlugParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /partner/orgs/{orgId}/branding (partner-portal)
+ */
+export const PartnerPortalGetPartnerOrgsOrgIdBrandingParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /partner/orgs/{orgId}/branding (partner-portal)
+ */
+export const PartnerPortalPutPartnerOrgsOrgIdBrandingParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /partner/orgs/{orgId}/branding (partner-portal)
+ */
+export const PartnerPortalDeletePartnerOrgsOrgIdBrandingParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /partner/orgs/{orgId}/custom-domains (partner-portal)
+ */
+export const PartnerPortalGetPartnerOrgsOrgIdCustomDomainsParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /partner/orgs/{orgId}/custom-domains (partner-portal)
+ */
+export const PartnerPortalPostPartnerOrgsOrgIdCustomDomainsParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /partner/orgs/{orgId}/custom-domains/{domainId} (partner-portal)
+ */
+export const PartnerPortalPatchPartnerOrgsOrgIdCustomDomainsDomainIdParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+    domainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /partner/orgs/{orgId}/custom-domains/{domainId} (partner-portal)
+ */
+export const PartnerPortalDeletePartnerOrgsOrgIdCustomDomainsDomainIdParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+    domainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /partner/orgs/{orgId}/custom-domains/{domainId}/activate (partner-portal)
+ */
+export const PartnerPortalPostPartnerOrgsOrgIdCustomDomainsDomainIdActivateParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+    domainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /partner/orgs/{orgId}/custom-domains/{domainId}/verify (partner-portal)
+ */
+export const PartnerPortalPostPartnerOrgsOrgIdCustomDomainsDomainIdVerifyParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+    domainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /partner/partner/accounts/{id} (partner-portal)
+ */
+export const PartnerPortalGetPartnerPartnerAccountsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /partner/partner/accounts/{id} (partner-portal)
+ */
+export const PartnerPortalPatchPartnerPartnerAccountsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /partner/partner/accounts/{id}/tenants (partner-portal)
+ */
+export const PartnerPortalPostPartnerPartnerAccountsIdTenantsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /partner/partner/accounts/{id}/tenants/{orgId} (partner-portal)
+ */
+export const PartnerPortalDeletePartnerPartnerAccountsIdTenantsOrgIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    orgId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /partner/partner/accounts/{id}/tenants/assign (partner-portal)
+ */
+export const PartnerPortalPostPartnerPartnerAccountsIdTenantsAssignParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /partner/partner/accounts/{id}/usage (partner-portal)
+ */
+export const PartnerPortalGetPartnerPartnerAccountsIdUsageParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /pdf/documents/{id} (pdf)
+ */
+export const PdfGetPdfDocumentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /pdf/documents/{id}/docusign/embed/{sigId} (pdf)
+ */
+export const PdfPostPdfDocumentsIdDocusignEmbedSigIdParams = zod.object({
+  id: zod.coerce.string(),
+  sigId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /pdf/documents/{id}/docusign/send (pdf)
+ */
+export const PdfPostPdfDocumentsIdDocusignSendParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /pdf/documents/{id}/pdf (pdf)
+ */
+export const PdfGetPdfDocumentsIdPdfParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /pdf/documents/{id}/versions/{versionA}/diff/{versionB} (pdf)
+ */
+export const PdfGetPdfDocumentsIdVersionsVersionADiffVersionBParams =
+  zod.object({
+    id: zod.coerce.string(),
+    versionA: zod.coerce.string(),
+    versionB: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /pdf/documents/batch-pdf/{batchId} (pdf)
+ */
+export const PdfGetPdfDocumentsBatchPdfBatchIdParams = zod.object({
+  batchId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /pdf/documents/batch-pdf/{batchId}/cancel (pdf)
+ */
+export const PdfPostPdfDocumentsBatchPdfBatchIdCancelParams = zod.object({
+  batchId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /pdf/documents/batch-pdf/{batchId}/zip (pdf)
+ */
+export const PdfGetPdfDocumentsBatchPdfBatchIdZipParams = zod.object({
+  batchId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /pdf/documents/pdf-jobs/{jobId}/retry (pdf)
+ */
+export const PdfPostPdfDocumentsPdfJobsJobIdRetryParams = zod.object({
+  jobId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /pdf/documents/pdf-output/{filename} (pdf)
+ */
+export const PdfGetPdfDocumentsPdfOutputFilenameParams = zod.object({
+  filename: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /pipeline-deals/admin/pipeline-deals/{id} (pipeline-deals)
+ */
+export const PipelineDealsPatchPipelineDealsAdminPipelineDealsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /pipeline-deals/admin/pipeline-deals/{id} (pipeline-deals)
+ */
+export const PipelineDealsDeletePipelineDealsAdminPipelineDealsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /pipeline-deals/admin/pipeline-deals/{id}/events (pipeline-deals)
+ */
+export const PipelineDealsGetPipelineDealsAdminPipelineDealsIdEventsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /plans/plans/{id} (plans)
+ */
+export const PlansGetPlansPlansIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /plans/plans/{id}/execute (plans)
+ */
+export const PlansPostPlansPlansIdExecuteParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /plans/plans/{id}/fallbacks (plans)
+ */
+export const PlansGetPlansPlansIdFallbacksParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /plans/plans/{id}/replay (plans)
+ */
+export const PlansPostPlansPlansIdReplayParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /plans/plans/{id}/steps/{stepId}/approve (plans)
+ */
+export const PlansPostPlansPlansIdStepsStepIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+  stepId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /plans/plans/{id}/steps/{stepId}/deny (plans)
+ */
+export const PlansPostPlansPlansIdStepsStepIdDenyParams = zod.object({
+  id: zod.coerce.string(),
+  stepId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /plans/plans/{id}/steps/{stepId}/reject (plans)
+ */
+export const PlansPostPlansPlansIdStepsStepIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+  stepId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /platform-analytics/api-keys/{id} (platform-analytics)
+ */
+export const PlatformAnalyticsDeletePlatformAnalyticsApiKeysIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /platform-analytics/atomizer/jobs/{jobId} (platform-analytics)
+ */
+export const PlatformAnalyticsGetPlatformAnalyticsAtomizerJobsJobIdParams =
+  zod.object({
+    jobId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /platform-analytics/webhook-subscriptions/{id} (platform-analytics)
+ */
+export const PlatformAnalyticsDeletePlatformAnalyticsWebhookSubscriptionsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /platform-analytics/webhook-subscriptions/{id}/test (platform-analytics)
+ */
+export const PlatformAnalyticsPostPlatformAnalyticsWebhookSubscriptionsIdTestParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /playbooks/rmm/playbooks/{id} (playbooks)
+ */
+export const PlaybooksPatchPlaybooksRmmPlaybooksIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /playbooks/rmm/playbooks/{id} (playbooks)
+ */
+export const PlaybooksDeletePlaybooksRmmPlaybooksIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /playbooks/rmm/playbooks/{id}/execute (playbooks)
+ */
+export const PlaybooksPostPlaybooksRmmPlaybooksIdExecuteParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /playbooks/rmm/playbooks/executions/{id}/approve (playbooks)
+ */
+export const PlaybooksPostPlaybooksRmmPlaybooksExecutionsIdApproveParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /playbooks/rmm/playbooks/executions/{id}/reject (playbooks)
+ */
+export const PlaybooksPostPlaybooksRmmPlaybooksExecutionsIdRejectParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /policies/actions/{id} (guardian)
+ */
+export const GuardianGetPoliciesActionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /policies/actions/{id}/approve (guardian)
+ */
+export const GuardianPostPoliciesActionsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /policies/actions/{id}/reject (guardian)
+ */
+export const GuardianPostPoliciesActionsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /policies/approvals/{requestId} (guardian)
+ */
+export const GuardianGetPoliciesApprovalsRequestIdParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /policies/approvals/{requestId}/review (guardian)
+ */
+export const GuardianPostPoliciesApprovalsRequestIdReviewParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /policies/guardrail-configs/{id} (guardian)
+ */
+export const GuardianGetPoliciesGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /policies/guardrail-configs/{id} (guardian)
+ */
+export const GuardianPatchPoliciesGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /policies/guardrail-configs/{id} (guardian)
+ */
+export const GuardianDeletePoliciesGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /policies/policies/{id} (guardian)
+ */
+export const GuardianGetPoliciesPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /policies/policies/{id} (guardian)
+ */
+export const GuardianPatchPoliciesPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /policies/policies/{id} (guardian)
+ */
+export const GuardianDeletePoliciesPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /policies/policies/{id}/assignments (guardian)
+ */
+export const GuardianGetPoliciesPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /policies/policies/{id}/assignments (guardian)
+ */
+export const GuardianPostPoliciesPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /policies/policies/{id}/assignments/{assignmentId} (guardian)
+ */
+export const GuardianDeletePoliciesPoliciesIdAssignmentsAssignmentIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    assignmentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /policies/policies/{id}/audit (guardian)
+ */
+export const GuardianGetPoliciesPoliciesIdAuditParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /policies/policies/tiers/{tier} (guardian)
+ */
+export const GuardianPatchPoliciesPoliciesTiersTierParams = zod.object({
+  tier: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /policies/rollback-events/{id} (guardian)
+ */
+export const GuardianGetPoliciesRollbackEventsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /policies/rollback-events/{id}/status (guardian)
+ */
+export const GuardianPatchPoliciesRollbackEventsIdStatusParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /policies/tool-approvals/{id}/approve (guardian)
+ */
+export const GuardianPostPoliciesToolApprovalsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /policies/tool-approvals/{id}/reject (guardian)
+ */
+export const GuardianPostPoliciesToolApprovalsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /policies/tools/{toolId} (guardian)
+ */
+export const GuardianGetPoliciesToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /policies/tools/{toolId} (guardian)
+ */
+export const GuardianPatchPoliciesToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /policies/tools/{toolId}/audit (guardian)
+ */
+export const GuardianGetPoliciesToolsToolIdAuditParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /policies/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianGetPoliciesToolsToolIdPermissionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /policies/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianPostPoliciesToolsToolIdPermissionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /policies/tools/{toolId}/permissions/{permissionId} (guardian)
+ */
+export const GuardianDeletePoliciesToolsToolIdPermissionsPermissionIdParams =
+  zod.object({
+    toolId: zod.coerce.string(),
+    permissionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /policies/tools/{toolId}/versions (guardian)
+ */
+export const GuardianGetPoliciesToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /policies/tools/{toolId}/versions (guardian)
+ */
+export const GuardianPostPoliciesToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /policy-modes/policy-modes/{id} (policy-modes)
+ */
+export const PolicyModesGetPolicyModesPolicyModesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /policy-modes/policy-modes/{id} (policy-modes)
+ */
+export const PolicyModesPatchPolicyModesPolicyModesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /policy-modes/policy-modes/{id} (policy-modes)
+ */
+export const PolicyModesDeletePolicyModesPolicyModesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /portal/booking/inquiries/{id} (carlota-jo)
+ */
+export const CarlotaJoGetPortalBookingInquiriesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /portal/booking/inquiries/{id} (carlota-jo)
+ */
+export const CarlotaJoPatchPortalBookingInquiriesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /portal/booking/inquiries/{id} (carlota-jo)
+ */
+export const CarlotaJoDeletePortalBookingInquiriesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /portal/booking/invoices/{invoiceId} (carlota-jo)
+ */
+export const CarlotaJoGetPortalBookingInvoicesInvoiceIdParams = zod.object({
+  invoiceId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /portal/booking/reservations/{id} (carlota-jo)
+ */
+export const CarlotaJoGetPortalBookingReservationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /portal/booking/reservations/{id} (carlota-jo)
+ */
+export const CarlotaJoPatchPortalBookingReservationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /portal/booking/reservations/{id} (carlota-jo)
+ */
+export const CarlotaJoDeletePortalBookingReservationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /portal/booking/services/{id} (carlota-jo)
+ */
+export const CarlotaJoPatchPortalBookingServicesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /portal/booking/services/{id} (carlota-jo)
+ */
+export const CarlotaJoDeletePortalBookingServicesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /portal/carlota/admin/clients/{clientId}/advisory-data (carlota-jo)
+ */
+export const CarlotaJoGetPortalCarlotaAdminClientsClientIdAdvisoryDataParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /portal/carlota/admin/clients/{clientId}/competitors (carlota-jo)
+ */
+export const CarlotaJoPutPortalCarlotaAdminClientsClientIdCompetitorsParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /portal/carlota/admin/clients/{clientId}/margin-history (carlota-jo)
+ */
+export const CarlotaJoPutPortalCarlotaAdminClientsClientIdMarginHistoryParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /portal/carlota/admin/clients/{clientId}/market-trend (carlota-jo)
+ */
+export const CarlotaJoPutPortalCarlotaAdminClientsClientIdMarketTrendParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /portal/carlota/admin/clients/{clientId}/radar-signals (carlota-jo)
+ */
+export const CarlotaJoPutPortalCarlotaAdminClientsClientIdRadarSignalsParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /portal/carlota/admin/clients/{clientId}/roi-benchmarks (carlota-jo)
+ */
+export const CarlotaJoPutPortalCarlotaAdminClientsClientIdRoiBenchmarksParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /portal/carlota/admin/clients/{clientId}/roi-trend (carlota-jo)
+ */
+export const CarlotaJoPutPortalCarlotaAdminClientsClientIdRoiTrendParams =
+  zod.object({
+    clientId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /portal/carlota/experts/{id} (carlota-jo)
+ */
+export const CarlotaJoPutPortalCarlotaExpertsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /portal/carlota/experts/{id} (carlota-jo)
+ */
+export const CarlotaJoDeletePortalCarlotaExpertsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /portal/carlota/knowledge/{id} (carlota-jo)
+ */
+export const CarlotaJoPutPortalCarlotaKnowledgeIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /portal/carlota/knowledge/{id} (carlota-jo)
+ */
+export const CarlotaJoDeletePortalCarlotaKnowledgeIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /portal/carlota/proposals/{id} (carlota-jo)
+ */
+export const CarlotaJoPutPortalCarlotaProposalsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /portal/carlota/proposals/{id} (carlota-jo)
+ */
+export const CarlotaJoDeletePortalCarlotaProposalsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /powerbi/admin/tenants/{id}/powerbi-config (powerbi)
+ */
+export const PowerbiGetPowerbiAdminTenantsIdPowerbiConfigParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /powerbi/admin/tenants/{id}/powerbi-config (powerbi)
+ */
+export const PowerbiPutPowerbiAdminTenantsIdPowerbiConfigParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/copilot/drafts/{draftId}/advance (prism-counsel-court)
+ */
+export const PrismCounselCourtPostPrismCounselCopilotDraftsDraftIdAdvanceParams =
+  zod.object({
+    draftId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/court/dockets/{id} (prism-counsel-court)
+ */
+export const PrismCounselCourtGetPrismCounselCourtDocketsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/court/matters/{matterId}/link-docket (prism-counsel-court)
+ */
+export const PrismCounselCourtPostPrismCounselCourtMattersMatterIdLinkDocketParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/court/matters/{matterId}/linked-dockets (prism-counsel-court)
+ */
+export const PrismCounselCourtGetPrismCounselCourtMattersMatterIdLinkedDocketsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/pilot-one/forecasts/pilot-one/{matterId}/compute (prism-counsel-pilot-one)
+ */
+export const PrismCounselPilotOnePostPrismCounselPilotOneForecastsPilotOneMatterIdComputeParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/pilot-one/forecasts/pilot-one/{matterId}/diff-view (prism-counsel-pilot-one)
+ */
+export const PrismCounselPilotOneGetPrismCounselPilotOneForecastsPilotOneMatterIdDiffViewParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/pilot-one/friction/{matterId} (prism-counsel-pilot-one)
+ */
+export const PrismCounselPilotOneGetPrismCounselPilotOneFrictionMatterIdParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/pilot-one/friction/{matterId}/compute (prism-counsel-pilot-one)
+ */
+export const PrismCounselPilotOnePostPrismCounselPilotOneFrictionMatterIdComputeParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/pilot-one/friction/{matterId}/recommendations (prism-counsel-pilot-one)
+ */
+export const PrismCounselPilotOneGetPrismCounselPilotOneFrictionMatterIdRecommendationsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/pilot-one/friction/recommendations/{id}/accept (prism-counsel-pilot-one)
+ */
+export const PrismCounselPilotOnePostPrismCounselPilotOneFrictionRecommendationsIdAcceptParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/pilot-one/portfolio/best-next-30/{userId} (prism-counsel-pilot-one)
+ */
+export const PrismCounselPilotOneGetPrismCounselPilotOnePortfolioBestNext30UserIdParams =
+  zod.object({
+    userId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/pilot-one/portfolio/quiet-risk/{matterId} (prism-counsel-pilot-one)
+ */
+export const PrismCounselPilotOnePostPrismCounselPilotOnePortfolioQuietRiskMatterIdParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/pilot-one/pressure/{matterId} (prism-counsel-pilot-one)
+ */
+export const PrismCounselPilotOneGetPrismCounselPilotOnePressureMatterIdParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/pilot-one/pressure/{matterId}/compute (prism-counsel-pilot-one)
+ */
+export const PrismCounselPilotOnePostPrismCounselPilotOnePressureMatterIdComputeParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/pilot-one/pressure/{matterId}/events (prism-counsel-pilot-one)
+ */
+export const PrismCounselPilotOnePostPrismCounselPilotOnePressureMatterIdEventsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/pilot/exports/{id} (prism-counsel-pilot)
+ */
+export const PrismCounselPilotGetPrismCounselPilotExportsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /prism-counsel/pilot/exports/{id}/content (prism-counsel-pilot)
+ */
+export const PrismCounselPilotGetPrismCounselPilotExportsIdContentParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/pilot/forecasts/{matterId} (prism-counsel-pilot)
+ */
+export const PrismCounselPilotGetPrismCounselPilotForecastsMatterIdParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/pilot/matter-desk/{id} (prism-counsel-pilot)
+ */
+export const PrismCounselPilotGetPrismCounselPilotMatterDeskIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/pilot/reviews/{id} (prism-counsel-pilot)
+ */
+export const PrismCounselPilotGetPrismCounselPilotReviewsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /prism-counsel/pilot/reviews/{id}/state (prism-counsel-pilot)
+ */
+export const PrismCounselPilotPatchPrismCounselPilotReviewsIdStateParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/pilot/reviews/{id}/submit-signoff (prism-counsel-pilot)
+ */
+export const PrismCounselPilotPostPrismCounselPilotReviewsIdSubmitSignoffParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/pilot/signoffs/{id}/resolve (prism-counsel-pilot)
+ */
+export const PrismCounselPilotPostPrismCounselPilotSignoffsIdResolveParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/pilot/today/next-actions/{id}/complete (prism-counsel-pilot)
+ */
+export const PrismCounselPilotPostPrismCounselPilotTodayNextActionsIdCompleteParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/admin/dashboards/{type} (prism-counsel-core)
+ */
+export const PrismCounselCoreGetPrismCounselPrismCounselAdminDashboardsTypeParams =
+  zod.object({
+    type: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/prism-counsel/approvals/{id}/approve (prism-counsel-core)
+ */
+export const PrismCounselCorePostPrismCounselPrismCounselApprovalsIdApproveParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/prism-counsel/approvals/{id}/reject (prism-counsel-core)
+ */
+export const PrismCounselCorePostPrismCounselPrismCounselApprovalsIdRejectParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/matters/{id} (prism-counsel-core)
+ */
+export const PrismCounselCoreGetPrismCounselPrismCounselMattersIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /prism-counsel/prism-counsel/matters/{id} (prism-counsel-core)
+ */
+export const PrismCounselCorePatchPrismCounselPrismCounselMattersIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/matters/{id}/audit-packets (prism-counsel-core)
+ */
+export const PrismCounselCoreGetPrismCounselPrismCounselMattersIdAuditPacketsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/matters/{id}/contradictions (prism-counsel-core)
+ */
+export const PrismCounselCoreGetPrismCounselPrismCounselMattersIdContradictionsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/matters/{id}/copilot-drafts (prism-counsel-core)
+ */
+export const PrismCounselCoreGetPrismCounselPrismCounselMattersIdCopilotDraftsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/matters/{id}/forecast-diffs (prism-counsel-core)
+ */
+export const PrismCounselCoreGetPrismCounselPrismCounselMattersIdForecastDiffsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/matters/{id}/pressure (prism-counsel-core)
+ */
+export const PrismCounselCoreGetPrismCounselPrismCounselMattersIdPressureParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/matters/{id}/proof-chain (prism-counsel-core)
+ */
+export const PrismCounselCoreGetPrismCounselPrismCounselMattersIdProofChainParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/matters/{id}/twin (prism-counsel-core)
+ */
+export const PrismCounselCoreGetPrismCounselPrismCounselMattersIdTwinParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /prism-counsel/prism-counsel/ny/ai-reviews/{id}/approve (prism-counsel-ny)
+ */
+export const PrismCounselNyPatchPrismCounselPrismCounselNyAiReviewsIdApproveParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/clock-rules/{id} (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyClockRulesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/clocks/{clockId}/events (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyClocksClockIdEventsParams =
+  zod.object({
+    clockId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/insurer-profiles/{id} (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyInsurerProfilesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId} (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/ai-reviews (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdAiReviewsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/appeals (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdAppealsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/prism-counsel/ny/matters/{matterId}/appeals (prism-counsel-ny)
+ */
+export const PrismCounselNyPostPrismCounselPrismCounselNyMattersMatterIdAppealsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/clocks (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdClocksParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/prism-counsel/ny/matters/{matterId}/clocks (prism-counsel-ny)
+ */
+export const PrismCounselNyPostPrismCounselPrismCounselNyMattersMatterIdClocksParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/communication-windows (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdCommunicationWindowsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/coverage-positions (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdCoveragePositionsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/defensibility (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdDefensibilityParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/demand-packets (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdDemandPacketsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/prism-counsel/ny/matters/{matterId}/demand-packets (prism-counsel-ny)
+ */
+export const PrismCounselNyPostPrismCounselPrismCounselNyMattersMatterIdDemandPacketsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/demand-readiness (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdDemandReadinessParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/denials (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdDenialsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/disclaimers (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdDisclaimersParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/external-appeals (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdExternalAppealsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/forecasts (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdForecastsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/prism-counsel/ny/matters/{matterId}/forecasts/compute (prism-counsel-ny)
+ */
+export const PrismCounselNyPostPrismCounselPrismCounselNyMattersMatterIdForecastsComputeParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/forecasts/latest (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdForecastsLatestParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/mediation-events (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdMediationEventsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/mediations (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdMediationsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/medical-bills (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdMedicalBillsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/no-fault-claims (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdNoFaultClaimsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/prism-counsel/ny/matters/{matterId}/no-fault-claims (prism-counsel-ny)
+ */
+export const PrismCounselNyPostPrismCounselPrismCounselNyMattersMatterIdNoFaultClaimsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/offer-movements (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdOfferMovementsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/prism-counsel/ny/matters/{matterId}/offer-movements (prism-counsel-ny)
+ */
+export const PrismCounselNyPostPrismCounselPrismCounselNyMattersMatterIdOfferMovementsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/offers (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdOffersParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/readiness-snapshots (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdReadinessSnapshotsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/reserve-movements (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdReserveMovementsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/matters/{matterId}/verifications (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyMattersMatterIdVerificationsParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/prism-counsel/ny/venue-profiles/{id} (prism-counsel-ny)
+ */
+export const PrismCounselNyGetPrismCounselPrismCounselNyVenueProfilesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/privilege/clawback/{tagId} (prism-counsel-court)
+ */
+export const PrismCounselCourtPostPrismCounselPrivilegeClawbackTagIdParams =
+  zod.object({
+    tagId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/privilege/log/{matterId}/production (prism-counsel-court)
+ */
+export const PrismCounselCourtGetPrismCounselPrivilegeLogMatterIdProductionParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/privilege/review/{tagId}/resolve (prism-counsel-court)
+ */
+export const PrismCounselCourtPostPrismCounselPrivilegeReviewTagIdResolveParams =
+  zod.object({
+    tagId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/purview/export-handoffs/{id}/confirm (prism-counsel-purview)
+ */
+export const PrismCounselPurviewPostPrismCounselPurviewExportHandoffsIdConfirmParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/review-desk/items/{id} (prism-counsel-review)
+ */
+export const PrismCounselReviewGetPrismCounselReviewDeskItemsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/review-desk/items/{id}/actions/approve (prism-counsel-review)
+ */
+export const PrismCounselReviewPostPrismCounselReviewDeskItemsIdActionsApproveParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/review-desk/items/{id}/actions/assign (prism-counsel-review)
+ */
+export const PrismCounselReviewPostPrismCounselReviewDeskItemsIdActionsAssignParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/review-desk/items/{id}/actions/block (prism-counsel-review)
+ */
+export const PrismCounselReviewPostPrismCounselReviewDeskItemsIdActionsBlockParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/review-desk/items/{id}/actions/escalate (prism-counsel-review)
+ */
+export const PrismCounselReviewPostPrismCounselReviewDeskItemsIdActionsEscalateParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/review-desk/items/{id}/actions/export-packet (prism-counsel-review)
+ */
+export const PrismCounselReviewPostPrismCounselReviewDeskItemsIdActionsExportPacketParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/review-desk/items/{id}/actions/generate-review-packet (prism-counsel-review)
+ */
+export const PrismCounselReviewPostPrismCounselReviewDeskItemsIdActionsGenerateReviewPacketParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/review-desk/items/{id}/actions/reject (prism-counsel-review)
+ */
+export const PrismCounselReviewPostPrismCounselReviewDeskItemsIdActionsRejectParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/review-desk/items/{id}/actions/request-support (prism-counsel-review)
+ */
+export const PrismCounselReviewPostPrismCounselReviewDeskItemsIdActionsRequestSupportParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/review-desk/items/{id}/actions/revise (prism-counsel-review)
+ */
+export const PrismCounselReviewPostPrismCounselReviewDeskItemsIdActionsReviseParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/review-desk/items/{id}/notes (prism-counsel-review)
+ */
+export const PrismCounselReviewPostPrismCounselReviewDeskItemsIdNotesParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/review-desk/items/{id}/transition (prism-counsel-review)
+ */
+export const PrismCounselReviewPostPrismCounselReviewDeskItemsIdTransitionParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/s31/copilot/sessions/{sessionId}/history (prism-counsel-s31)
+ */
+export const PrismCounselS31GetPrismCounselS31CopilotSessionsSessionIdHistoryParams =
+  zod.object({
+    sessionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/s31/copilot/sessions/{sessionId}/message (prism-counsel-s31)
+ */
+export const PrismCounselS31PostPrismCounselS31CopilotSessionsSessionIdMessageParams =
+  zod.object({
+    sessionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/s31/data-products/{matterId} (prism-counsel-s31)
+ */
+export const PrismCounselS31GetPrismCounselS31DataProductsMatterIdParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/s31/forecast-diff/{matterId} (prism-counsel-s31)
+ */
+export const PrismCounselS31GetPrismCounselS31ForecastDiffMatterIdParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/s31/matter-twin/{matterId} (prism-counsel-s31)
+ */
+export const PrismCounselS31GetPrismCounselS31MatterTwinMatterIdParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/s31/matter-twin/{matterId}/history (prism-counsel-s31)
+ */
+export const PrismCounselS31GetPrismCounselS31MatterTwinMatterIdHistoryParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/s31/matter-twin/{matterId}/snapshot (prism-counsel-s31)
+ */
+export const PrismCounselS31PostPrismCounselS31MatterTwinMatterIdSnapshotParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/s31/pressure-graph/{matterId} (prism-counsel-s31)
+ */
+export const PrismCounselS31GetPrismCounselS31PressureGraphMatterIdParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/s31/pressure-graph/{matterId}/compute (prism-counsel-s31)
+ */
+export const PrismCounselS31PostPrismCounselS31PressureGraphMatterIdComputeParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/s31/proof-chain/{id}/approve (prism-counsel-s31)
+ */
+export const PrismCounselS31PostPrismCounselS31ProofChainIdApproveParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/s31/proof-chain/{id}/review (prism-counsel-s31)
+ */
+export const PrismCounselS31PostPrismCounselS31ProofChainIdReviewParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/s31/proof-chain/{id}/trace (prism-counsel-s31)
+ */
+export const PrismCounselS31GetPrismCounselS31ProofChainIdTraceParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/s31/proof-chain/{id}/verify (prism-counsel-s31)
+ */
+export const PrismCounselS31GetPrismCounselS31ProofChainIdVerifyParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/s31/proof-chain/audit-packet/{matterId} (prism-counsel-s31)
+ */
+export const PrismCounselS31GetPrismCounselS31ProofChainAuditPacketMatterIdParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/s31/proof-chain/matter/{matterId} (prism-counsel-s31)
+ */
+export const PrismCounselS31GetPrismCounselS31ProofChainMatterMatterIdParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /prism-counsel/s31/worldline/features/{matterId} (prism-counsel-s31)
+ */
+export const PrismCounselS31GetPrismCounselS31WorldlineFeaturesMatterIdParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /prism-counsel/s31/worldline/fetch/{sourceId} (prism-counsel-s31)
+ */
+export const PrismCounselS31PostPrismCounselS31WorldlineFetchSourceIdParams =
+  zod.object({
+    sourceId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /projects/projects/{id} (projects)
+ */
+export const ProjectsGetProjectsProjectsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /projects/projects/{id} (projects)
+ */
+export const ProjectsPatchProjectsProjectsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /projects/projects/{id} (projects)
+ */
+export const ProjectsDeleteProjectsProjectsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /prompts/agents/{agentId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetPromptsAgentsAgentIdParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /prompts/agents/{agentId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimeGetPromptsAgentsAgentIdVersionsParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /prompts/agents/{agentId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimePostPromptsAgentsAgentIdVersionsParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /prompts/models/{modelId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetPromptsModelsModelIdParams = zod.object({
+  modelId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /prompts/prompts/{promptId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetPromptsPromptsPromptIdParams = zod.object({
+  promptId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /prompts/prompts/{promptId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimeGetPromptsPromptsPromptIdVersionsParams = zod.object({
+  promptId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /prompts/signals/{signalId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetPromptsSignalsSignalIdParams = zod.object({
+  signalId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /prompts/signals/{signalId}/status (alloy-runtime)
+ */
+export const AlloyRuntimePatchPromptsSignalsSignalIdStatusParams = zod.object({
+  signalId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /prompts/workflow-runs/{runId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetPromptsWorkflowRunsRunIdParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /prompts/workflow-runs/{runId}/replay (alloy-runtime)
+ */
+export const AlloyRuntimePostPromptsWorkflowRunsRunIdReplayParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /prompts/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetPromptsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /prompts/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimePatchPromptsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /prompts/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimeDeletePromptsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /proof-chain/proof-chain/{id} (proof-chain)
+ */
+export const ProofChainGetProofChainProofChainIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /proof-chain/proof-chain/{id}/review (proof-chain)
+ */
+export const ProofChainPostProofChainProofChainIdReviewParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /proof-chain/proof-chain/by-content/{contentType}/{contentId} (proof-chain)
+ */
+export const ProofChainGetProofChainProofChainByContentContentTypeContentIdParams =
+  zod.object({
+    contentType: zod.coerce.string(),
+    contentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /providers/rmm/providers/{id} (providers)
+ */
+export const ProvidersGetProvidersRmmProvidersIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /providers/rmm/providers/{id} (providers)
+ */
+export const ProvidersPatchProvidersRmmProvidersIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /providers/rmm/providers/{id} (providers)
+ */
+export const ProvidersDeleteProvidersRmmProvidersIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /providers/rmm/providers/{id}/sync (providers)
+ */
+export const ProvidersPostProvidersRmmProvidersIdSyncParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /providers/rmm/providers/{id}/test (providers)
+ */
+export const ProvidersPostProvidersRmmProvidersIdTestParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /public/fund-inbound-deals/fund-inbound-deals/{pipelineId} (fund-inbound-deals)
+ */
+export const FundInboundDealsPatchPublicFundInboundDealsFundInboundDealsPipelineIdParams =
+  zod.object({
+    pipelineId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /public/fund-inbound-deals/fund-inbound-deals/{pipelineId}/attachments/{idx} (fund-inbound-deals)
+ */
+export const FundInboundDealsGetPublicFundInboundDealsFundInboundDealsPipelineIdAttachmentsIdxParams =
+  zod.object({
+    pipelineId: zod.coerce.string(),
+    idx: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /publishing/articles/{id}/publish-medium (publishing)
+ */
+export const PublishingPostPublishingArticlesIdPublishMediumParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Delete /publishing/campaigns/{id} (publishing)
+ */
+export const PublishingDeletePublishingCampaignsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /publishing/carousels/{id}/export-pdf (publishing)
+ */
+export const PublishingGetPublishingCarouselsIdExportPdfParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /publishing/carousels/{id}/publish-linkedin (publishing)
+ */
+export const PublishingPostPublishingCarouselsIdPublishLinkedinParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /publishing/linktree/{id}/click (publishing)
+ */
+export const PublishingPostPublishingLinktreeIdClickParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /publishing/newsletters/{id}/publish-substack (publishing)
+ */
+export const PublishingPostPublishingNewslettersIdPublishSubstackParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /publishing/x-posts/{id}/publish (publishing)
+ */
+export const PublishingPostPublishingXPostsIdPublishParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /pulse-evals/pulse-evals/datasets/{domain} (pulse-evals)
+ */
+export const PulseEvalsGetPulseEvalsPulseEvalsDatasetsDomainParams = zod.object(
+  {
+    domain: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] List/get /pulse/briefings/{id} (pulse)
+ */
+export const PulseGetPulseBriefingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /pulse/briefings/{id}/save (pulse)
+ */
+export const PulsePostPulseBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /pulse/briefings/{id}/save (pulse)
+ */
+export const PulseDeletePulseBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /pulse/dissents/{id} (pulse)
+ */
+export const PulsePatchPulseDissentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /pulse/domain-panel/{domain} (pulse)
+ */
+export const PulseGetPulseDomainPanelDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /pulse/subscriptions/{id} (pulse)
+ */
+export const PulsePatchPulseSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /pulse/subscriptions/{id} (pulse)
+ */
+export const PulseDeletePulseSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /push-notifications/push-notifications/scheduled/{id} (push-notifications)
+ */
+export const PushNotificationsDeletePushNotificationsPushNotificationsScheduledIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /push-preferences/push-preferences/{appId} (push-preferences)
+ */
+export const PushPreferencesGetPushPreferencesPushPreferencesAppIdParams =
+  zod.object({
+    appId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /push-preferences/push-preferences/{appId} (push-preferences)
+ */
+export const PushPreferencesDeletePushPreferencesPushPreferencesAppIdParams =
+  zod.object({
+    appId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /push-preferences/push-preferences/{appId}/{category} (push-preferences)
+ */
+export const PushPreferencesPutPushPreferencesPushPreferencesAppIdCategoryParams =
+  zod.object({
+    appId: zod.coerce.string(),
+    category: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /push-preferences/push-preferences/categories/{appId} (push-preferences)
+ */
+export const PushPreferencesGetPushPreferencesPushPreferencesCategoriesAppIdParams =
+  zod.object({
+    appId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /push-tokens/push-tokens/{token} (push-tokens)
+ */
+export const PushTokensDeletePushTokensPushTokensTokenParams = zod.object({
+  token: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /rate-cards/metering/dashboard/{orgId} (rate-cards)
+ */
+export const RateCardsGetRateCardsMeteringDashboardOrgIdParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /rate-cards/metering/rate-cards/{id} (rate-cards)
+ */
+export const RateCardsGetRateCardsMeteringRateCardsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /rate-cards/metering/rate-cards/{id} (rate-cards)
+ */
+export const RateCardsPutRateCardsMeteringRateCardsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /rate-cards/metering/rate-cards/{id}/assign (rate-cards)
+ */
+export const RateCardsPostRateCardsMeteringRateCardsIdAssignParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] List/get /rate-cards/metering/rate-cards/assignments/{orgId} (rate-cards)
+ */
+export const RateCardsGetRateCardsMeteringRateCardsAssignmentsOrgIdParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /rate-cards/metering/usage/{orgId} (rate-cards)
+ */
+export const RateCardsGetRateCardsMeteringUsageOrgIdParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /readiness/readiness/alerts/{id} (readiness)
+ */
+export const ReadinessPatchReadinessReadinessAlertsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /readiness/readiness/alerts/{id} (readiness)
+ */
+export const ReadinessDeleteReadinessReadinessAlertsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /readiness/readiness/dimensions/{id} (readiness)
+ */
+export const ReadinessPatchReadinessReadinessDimensionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /readiness/readiness/dimensions/{id} (readiness)
+ */
+export const ReadinessDeleteReadinessReadinessDimensionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /readiness/readiness/dimensions/{id}/scores (readiness)
+ */
+export const ReadinessGetReadinessReadinessDimensionsIdScoresParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /readiness/readiness/milestones/{id} (readiness)
+ */
+export const ReadinessPatchReadinessReadinessMilestonesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /readiness/readiness/milestones/{id} (readiness)
+ */
+export const ReadinessDeleteReadinessReadinessMilestonesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /readiness/readiness/programs/{id} (readiness)
+ */
+export const ReadinessGetReadinessReadinessProgramsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /readiness/readiness/programs/{id} (readiness)
+ */
+export const ReadinessPatchReadinessReadinessProgramsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /readiness/readiness/programs/{id} (readiness)
+ */
+export const ReadinessDeleteReadinessReadinessProgramsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /readiness/readiness/programs/{id}/alerts (readiness)
+ */
+export const ReadinessGetReadinessReadinessProgramsIdAlertsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /readiness/readiness/programs/{id}/dimensions (readiness)
+ */
+export const ReadinessGetReadinessReadinessProgramsIdDimensionsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /readiness/readiness/programs/{id}/milestones (readiness)
+ */
+export const ReadinessGetReadinessReadinessProgramsIdMilestonesParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /readiness/readiness/programs/{id}/risks (readiness)
+ */
+export const ReadinessGetReadinessReadinessProgramsIdRisksParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /readiness/readiness/risks/{id} (readiness)
+ */
+export const ReadinessPatchReadinessReadinessRisksIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /readiness/readiness/risks/{id} (readiness)
+ */
+export const ReadinessDeleteReadinessReadinessRisksIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /realtime/realtime/history/{channel} (realtime)
+ */
+export const RealtimeGetRealtimeRealtimeHistoryChannelParams = zod.object({
+  channel: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /realtime/realtime/presence/{channel} (realtime)
+ */
+export const RealtimeGetRealtimeRealtimePresenceChannelParams = zod.object({
+  channel: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /receipt-graph/receipt-graph/audit/{receiptId} (receipt-graph)
+ */
+export const ReceiptGraphGetReceiptGraphReceiptGraphAuditReceiptIdParams =
+  zod.object({
+    receiptId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /receipt-graph/receipt-graph/by-content/{contentType}/{contentId} (receipt-graph)
+ */
+export const ReceiptGraphGetReceiptGraphReceiptGraphByContentContentTypeContentIdParams =
+  zod.object({
+    contentType: zod.coerce.string(),
+    contentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /receipt-graph/receipt-graph/graph/{receiptId} (receipt-graph)
+ */
+export const ReceiptGraphGetReceiptGraphReceiptGraphGraphReceiptIdParams =
+  zod.object({
+    receiptId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /receipt-graph/receipt-graph/receipts/{receiptId} (receipt-graph)
+ */
+export const ReceiptGraphGetReceiptGraphReceiptGraphReceiptsReceiptIdParams =
+  zod.object({
+    receiptId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /receipt-graph/receipt-graph/receipts/{receiptId}/approve (receipt-graph)
+ */
+export const ReceiptGraphPostReceiptGraphReceiptGraphReceiptsReceiptIdApproveParams =
+  zod.object({
+    receiptId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /receipt-graph/receipt-graph/receipts/{receiptId}/delta (receipt-graph)
+ */
+export const ReceiptGraphPostReceiptGraphReceiptGraphReceiptsReceiptIdDeltaParams =
+  zod.object({
+    receiptId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /receipt-graph/receipt-graph/receipts/{receiptId}/reject (receipt-graph)
+ */
+export const ReceiptGraphPostReceiptGraphReceiptGraphReceiptsReceiptIdRejectParams =
+  zod.object({
+    receiptId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /receipt-graph/receipt-graph/receipts/{receiptId}/retract (receipt-graph)
+ */
+export const ReceiptGraphPostReceiptGraphReceiptGraphReceiptsReceiptIdRetractParams =
+  zod.object({
+    receiptId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /recommendations/agents/{agentId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetRecommendationsAgentsAgentIdParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /recommendations/agents/{agentId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimeGetRecommendationsAgentsAgentIdVersionsParams =
+  zod.object({
+    agentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /recommendations/agents/{agentId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimePostRecommendationsAgentsAgentIdVersionsParams =
+  zod.object({
+    agentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /recommendations/models/{modelId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetRecommendationsModelsModelIdParams = zod.object({
+  modelId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /recommendations/prompts/{promptId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetRecommendationsPromptsPromptIdParams = zod.object({
+  promptId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /recommendations/prompts/{promptId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimeGetRecommendationsPromptsPromptIdVersionsParams =
+  zod.object({
+    promptId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /recommendations/signals/{signalId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetRecommendationsSignalsSignalIdParams = zod.object({
+  signalId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /recommendations/signals/{signalId}/status (alloy-runtime)
+ */
+export const AlloyRuntimePatchRecommendationsSignalsSignalIdStatusParams =
+  zod.object({
+    signalId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /recommendations/workflow-runs/{runId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetRecommendationsWorkflowRunsRunIdParams = zod.object(
+  {
+    runId: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Create/invoke /recommendations/workflow-runs/{runId}/replay (alloy-runtime)
+ */
+export const AlloyRuntimePostRecommendationsWorkflowRunsRunIdReplayParams =
+  zod.object({
+    runId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /recommendations/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetRecommendationsWorkflowsWorkflowIdParams =
+  zod.object({
+    workflowId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /recommendations/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimePatchRecommendationsWorkflowsWorkflowIdParams =
+  zod.object({
+    workflowId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /recommendations/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimeDeleteRecommendationsWorkflowsWorkflowIdParams =
+  zod.object({
+    workflowId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /reflections/reflections/{id} (reflections)
+ */
+export const ReflectionsGetReflectionsReflectionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /reflections/reflections/{id}/skills/{skillName}/adopt (reflections)
+ */
+export const ReflectionsPostReflectionsReflectionsIdSkillsSkillNameAdoptParams =
+  zod.object({
+    id: zod.coerce.string(),
+    skillName: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /reflections/reflections/{id}/skills/{skillName}/reject (reflections)
+ */
+export const ReflectionsPostReflectionsReflectionsIdSkillsSkillNameRejectParams =
+  zod.object({
+    id: zod.coerce.string(),
+    skillName: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /reflections/reflections/{id}/strategy/{index}/apply (reflections)
+ */
+export const ReflectionsPostReflectionsReflectionsIdStrategyIndexApplyParams =
+  zod.object({
+    id: zod.coerce.string(),
+    index: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /reflections/reflections/{id}/strategy/{index}/defer (reflections)
+ */
+export const ReflectionsPostReflectionsReflectionsIdStrategyIndexDeferParams =
+  zod.object({
+    id: zod.coerce.string(),
+    index: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /reflections/reflections/by-trace/{traceId} (reflections)
+ */
+export const ReflectionsGetReflectionsReflectionsByTraceTraceIdParams =
+  zod.object({
+    traceId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /replay/replay/scenarios/{scenarioId} (replay)
+ */
+export const ReplayGetReplayReplayScenariosScenarioIdParams = zod.object({
+  scenarioId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /reports/reports/{reportId} (reports)
+ */
+export const ReportsGetReportsReportsReportIdParams = zod.object({
+  reportId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /reports/reports/{reportId}/approval (reports)
+ */
+export const ReportsGetReportsReportsReportIdApprovalParams = zod.object({
+  reportId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /reports/reports/{reportId}/distribute (reports)
+ */
+export const ReportsPostReportsReportsReportIdDistributeParams = zod.object({
+  reportId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /reports/reports/{reportId}/distributions (reports)
+ */
+export const ReportsGetReportsReportsReportIdDistributionsParams = zod.object({
+  reportId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /reports/reports/{reportId}/pdf (reports)
+ */
+export const ReportsGetReportsReportsReportIdPdfParams = zod.object({
+  reportId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /reports/reports/{reportId}/request-approval (reports)
+ */
+export const ReportsPostReportsReportsReportIdRequestApprovalParams =
+  zod.object({
+    reportId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /reports/reports/{reportId}/review (reports)
+ */
+export const ReportsPostReportsReportsReportIdReviewParams = zod.object({
+  reportId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /reports/reports/{reportId}/status (reports)
+ */
+export const ReportsPatchReportsReportsReportIdStatusParams = zod.object({
+  reportId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /reports/reports/{reportId}/versions (reports)
+ */
+export const ReportsGetReportsReportsReportIdVersionsParams = zod.object({
+  reportId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /reports/reports/schedules/{scheduleId} (reports)
+ */
+export const ReportsPatchReportsReportsSchedulesScheduleIdParams = zod.object({
+  scheduleId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /reports/reports/schedules/{scheduleId}/run (reports)
+ */
+export const ReportsPostReportsReportsSchedulesScheduleIdRunParams = zod.object(
+  {
+    scheduleId: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] List/get /reports/reports/templates/{templateId} (reports)
+ */
+export const ReportsGetReportsReportsTemplatesTemplateIdParams = zod.object({
+  templateId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /reports/reports/templates/{templateId} (reports)
+ */
+export const ReportsPatchReportsReportsTemplatesTemplateIdParams = zod.object({
+  templateId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /reports/reports/templates/built-in/{key} (reports)
+ */
+export const ReportsGetReportsReportsTemplatesBuiltInKeyParams = zod.object({
+  key: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /research/intelligence/ai-models/{modelId} (research)
+ */
+export const ResearchGetResearchIntelligenceAiModelsModelIdParams = zod.object({
+  modelId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /resolve-domain/org-branding/{orgSlug} (partner-portal)
+ */
+export const PartnerPortalGetResolveDomainOrgBrandingOrgSlugParams = zod.object(
+  {
+    orgSlug: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] List/get /resolve-domain/orgs/{orgId}/branding (partner-portal)
+ */
+export const PartnerPortalGetResolveDomainOrgsOrgIdBrandingParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /resolve-domain/orgs/{orgId}/branding (partner-portal)
+ */
+export const PartnerPortalPutResolveDomainOrgsOrgIdBrandingParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /resolve-domain/orgs/{orgId}/branding (partner-portal)
+ */
+export const PartnerPortalDeleteResolveDomainOrgsOrgIdBrandingParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /resolve-domain/orgs/{orgId}/custom-domains (partner-portal)
+ */
+export const PartnerPortalGetResolveDomainOrgsOrgIdCustomDomainsParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /resolve-domain/orgs/{orgId}/custom-domains (partner-portal)
+ */
+export const PartnerPortalPostResolveDomainOrgsOrgIdCustomDomainsParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /resolve-domain/orgs/{orgId}/custom-domains/{domainId} (partner-portal)
+ */
+export const PartnerPortalPatchResolveDomainOrgsOrgIdCustomDomainsDomainIdParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+    domainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /resolve-domain/orgs/{orgId}/custom-domains/{domainId} (partner-portal)
+ */
+export const PartnerPortalDeleteResolveDomainOrgsOrgIdCustomDomainsDomainIdParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+    domainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /resolve-domain/orgs/{orgId}/custom-domains/{domainId}/activate (partner-portal)
+ */
+export const PartnerPortalPostResolveDomainOrgsOrgIdCustomDomainsDomainIdActivateParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+    domainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /resolve-domain/orgs/{orgId}/custom-domains/{domainId}/verify (partner-portal)
+ */
+export const PartnerPortalPostResolveDomainOrgsOrgIdCustomDomainsDomainIdVerifyParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+    domainId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /resolve-domain/partner/accounts/{id} (partner-portal)
+ */
+export const PartnerPortalGetResolveDomainPartnerAccountsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /resolve-domain/partner/accounts/{id} (partner-portal)
+ */
+export const PartnerPortalPatchResolveDomainPartnerAccountsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /resolve-domain/partner/accounts/{id}/tenants (partner-portal)
+ */
+export const PartnerPortalPostResolveDomainPartnerAccountsIdTenantsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /resolve-domain/partner/accounts/{id}/tenants/{orgId} (partner-portal)
+ */
+export const PartnerPortalDeleteResolveDomainPartnerAccountsIdTenantsOrgIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    orgId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /resolve-domain/partner/accounts/{id}/tenants/assign (partner-portal)
+ */
+export const PartnerPortalPostResolveDomainPartnerAccountsIdTenantsAssignParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /resolve-domain/partner/accounts/{id}/usage (partner-portal)
+ */
+export const PartnerPortalGetResolveDomainPartnerAccountsIdUsageParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /risk-evidence/risk-evidence/{domain} (risk-evidence)
+ */
+export const RiskEvidenceGetRiskEvidenceRiskEvidenceDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /risk-evidence/risk-evidence/{domain} (risk-evidence)
+ */
+export const RiskEvidencePostRiskEvidenceRiskEvidenceDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /risk-evidence/risk-evidence/{domain}/{evidenceId} (risk-evidence)
+ */
+export const RiskEvidenceDeleteRiskEvidenceRiskEvidenceDomainEvidenceIdParams =
+  zod.object({
+    domain: zod.coerce.string(),
+    evidenceId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /risk-evidence/risk-evidence/by-id/{evidenceId} (risk-evidence)
+ */
+export const RiskEvidenceGetRiskEvidenceRiskEvidenceByIdEvidenceIdParams =
+  zod.object({
+    evidenceId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /rollback-events/actions/{id} (guardian)
+ */
+export const GuardianGetRollbackEventsActionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /rollback-events/actions/{id}/approve (guardian)
+ */
+export const GuardianPostRollbackEventsActionsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /rollback-events/actions/{id}/reject (guardian)
+ */
+export const GuardianPostRollbackEventsActionsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /rollback-events/approvals/{requestId} (guardian)
+ */
+export const GuardianGetRollbackEventsApprovalsRequestIdParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /rollback-events/approvals/{requestId}/review (guardian)
+ */
+export const GuardianPostRollbackEventsApprovalsRequestIdReviewParams =
+  zod.object({
+    requestId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /rollback-events/guardrail-configs/{id} (guardian)
+ */
+export const GuardianGetRollbackEventsGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /rollback-events/guardrail-configs/{id} (guardian)
+ */
+export const GuardianPatchRollbackEventsGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /rollback-events/guardrail-configs/{id} (guardian)
+ */
+export const GuardianDeleteRollbackEventsGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /rollback-events/policies/{id} (guardian)
+ */
+export const GuardianGetRollbackEventsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /rollback-events/policies/{id} (guardian)
+ */
+export const GuardianPatchRollbackEventsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /rollback-events/policies/{id} (guardian)
+ */
+export const GuardianDeleteRollbackEventsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /rollback-events/policies/{id}/assignments (guardian)
+ */
+export const GuardianGetRollbackEventsPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /rollback-events/policies/{id}/assignments (guardian)
+ */
+export const GuardianPostRollbackEventsPoliciesIdAssignmentsParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Delete /rollback-events/policies/{id}/assignments/{assignmentId} (guardian)
+ */
+export const GuardianDeleteRollbackEventsPoliciesIdAssignmentsAssignmentIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    assignmentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /rollback-events/policies/{id}/audit (guardian)
+ */
+export const GuardianGetRollbackEventsPoliciesIdAuditParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /rollback-events/policies/tiers/{tier} (guardian)
+ */
+export const GuardianPatchRollbackEventsPoliciesTiersTierParams = zod.object({
+  tier: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /rollback-events/rollback-events/{id} (guardian)
+ */
+export const GuardianGetRollbackEventsRollbackEventsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /rollback-events/rollback-events/{id}/status (guardian)
+ */
+export const GuardianPatchRollbackEventsRollbackEventsIdStatusParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /rollback-events/tool-approvals/{id}/approve (guardian)
+ */
+export const GuardianPostRollbackEventsToolApprovalsIdApproveParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /rollback-events/tool-approvals/{id}/reject (guardian)
+ */
+export const GuardianPostRollbackEventsToolApprovalsIdRejectParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] List/get /rollback-events/tools/{toolId} (guardian)
+ */
+export const GuardianGetRollbackEventsToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /rollback-events/tools/{toolId} (guardian)
+ */
+export const GuardianPatchRollbackEventsToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /rollback-events/tools/{toolId}/audit (guardian)
+ */
+export const GuardianGetRollbackEventsToolsToolIdAuditParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /rollback-events/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianGetRollbackEventsToolsToolIdPermissionsParams = zod.object(
+  {
+    toolId: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Create/invoke /rollback-events/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianPostRollbackEventsToolsToolIdPermissionsParams =
+  zod.object({
+    toolId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /rollback-events/tools/{toolId}/permissions/{permissionId} (guardian)
+ */
+export const GuardianDeleteRollbackEventsToolsToolIdPermissionsPermissionIdParams =
+  zod.object({
+    toolId: zod.coerce.string(),
+    permissionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /rollback-events/tools/{toolId}/versions (guardian)
+ */
+export const GuardianGetRollbackEventsToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /rollback-events/tools/{toolId}/versions (guardian)
+ */
+export const GuardianPostRollbackEventsToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /runs/runs/{id} (traces)
+ */
+export const TracesGetRunsRunsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /runs/runs/{id}/replay (traces)
+ */
+export const TracesPostRunsRunsIdReplayParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /runs/traces/{id} (traces)
+ */
+export const TracesGetRunsTracesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /runs/traces/{id}/comment (traces)
+ */
+export const TracesPostRunsTracesIdCommentParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /runs/traces/{id}/diff/{compareId} (traces)
+ */
+export const TracesGetRunsTracesIdDiffCompareIdParams = zod.object({
+  id: zod.coerce.string(),
+  compareId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /runs/traces/{id}/grade (traces)
+ */
+export const TracesPostRunsTracesIdGradeParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /runs/traces/{id}/link-entity (traces)
+ */
+export const TracesPostRunsTracesIdLinkEntityParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /runs/traces/{id}/replay (traces)
+ */
+export const TracesPostRunsTracesIdReplayParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /salesforce/crm/sync/{crmType} (crm)
+ */
+export const CrmPostSalesforceCrmSyncCrmTypeParams = zod.object({
+  crmType: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /scim/admin/tenants/{id}/organization (scim)
+ */
+export const ScimPatchScimAdminTenantsIdOrganizationParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /scim/admin/tenants/{id}/scim/deprovision-user (scim)
+ */
+export const ScimPostScimAdminTenantsIdScimDeprovisionUserParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /scim/admin/tenants/{id}/scim/sync-users (scim)
+ */
+export const ScimPostScimAdminTenantsIdScimSyncUsersParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /scim/scim/v2/Groups/{id} (scim)
+ */
+export const ScimGetScimScimV2GroupsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /scim/scim/v2/Groups/{id} (scim)
+ */
+export const ScimPutScimScimV2GroupsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /scim/scim/v2/Groups/{id} (scim)
+ */
+export const ScimPatchScimScimV2GroupsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /scim/scim/v2/Groups/{id} (scim)
+ */
+export const ScimDeleteScimScimV2GroupsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /scim/scim/v2/Users/{id} (scim)
+ */
+export const ScimGetScimScimV2UsersIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /scim/scim/v2/Users/{id} (scim)
+ */
+export const ScimPutScimScimV2UsersIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /scim/scim/v2/Users/{id} (scim)
+ */
+export const ScimPatchScimScimV2UsersIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /scim/scim/v2/Users/{id} (scim)
+ */
+export const ScimDeleteScimScimV2UsersIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /self-healing/self-healing/policies/{id} (self-healing)
+ */
+export const SelfHealingPutSelfHealingSelfHealingPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /self-healing/self-healing/policies/{id} (self-healing)
+ */
+export const SelfHealingDeleteSelfHealingSelfHealingPoliciesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /self-healing/self-healing/policies/{id}/history (self-healing)
+ */
+export const SelfHealingGetSelfHealingSelfHealingPoliciesIdHistoryParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /self-healing/self-healing/policies/{id}/toggle (self-healing)
+ */
+export const SelfHealingPatchSelfHealingSelfHealingPoliciesIdToggleParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /self-healing/self-healing/runs/{id} (self-healing)
+ */
+export const SelfHealingGetSelfHealingSelfHealingRunsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /self-healing/self-healing/runs/{id}/approve (self-healing)
+ */
+export const SelfHealingPostSelfHealingSelfHealingRunsIdApproveParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /self-healing/self-healing/runs/{id}/reject (self-healing)
+ */
+export const SelfHealingPostSelfHealingSelfHealingRunsIdRejectParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /sentra/sentra/alerts/{id} (sentra)
+ */
+export const SentraPatchSentraSentraAlertsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /sentra/sentra/incidents/{id} (sentra)
+ */
+export const SentraGetSentraSentraIncidentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /sentra/sentra/incidents/{id} (sentra)
+ */
+export const SentraPatchSentraSentraIncidentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /sessions/sessions/command/{id} (multiplayer-sessions)
+ */
+export const MultiplayerSessionsDeleteSessionsSessionsCommandIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /sessions/sessions/command/{sessionId} (multiplayer-sessions)
+ */
+export const MultiplayerSessionsGetSessionsSessionsCommandSessionIdParams =
+  zod.object({
+    sessionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /sessions/sessions/command/{sessionId}/comments (multiplayer-sessions)
+ */
+export const MultiplayerSessionsGetSessionsSessionsCommandSessionIdCommentsParams =
+  zod.object({
+    sessionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /sessions/sessions/command/{sessionId}/comments (multiplayer-sessions)
+ */
+export const MultiplayerSessionsPostSessionsSessionsCommandSessionIdCommentsParams =
+  zod.object({
+    sessionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /settings/settings/{tier}/{id} (unified-settings)
+ */
+export const UnifiedSettingsDeleteSettingsSettingsTierIdParams = zod.object({
+  tier: zod.coerce.string(),
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /settings/settings/tenant/{orgId} (unified-settings)
+ */
+export const UnifiedSettingsGetSettingsSettingsTenantOrgIdParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /settings/settings/tenant/{orgId} (unified-settings)
+ */
+export const UnifiedSettingsPostSettingsSettingsTenantOrgIdParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /signal-chains/signal-chains/{id} (signal-chains)
+ */
+export const SignalChainsGetSignalChainsSignalChainsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /signal-chains/signal-chains/{id}/audit (signal-chains)
+ */
+export const SignalChainsGetSignalChainsSignalChainsIdAuditParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /signal-chains/signal-chains/{id}/trigger (signal-chains)
+ */
+export const SignalChainsPostSignalChainsSignalChainsIdTriggerParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /signals/agents/{agentId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetSignalsAgentsAgentIdParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /signals/agents/{agentId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimeGetSignalsAgentsAgentIdVersionsParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /signals/agents/{agentId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimePostSignalsAgentsAgentIdVersionsParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /signals/models/{modelId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetSignalsModelsModelIdParams = zod.object({
+  modelId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /signals/prompts/{promptId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetSignalsPromptsPromptIdParams = zod.object({
+  promptId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /signals/prompts/{promptId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimeGetSignalsPromptsPromptIdVersionsParams = zod.object({
+  promptId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /signals/signals/{signalId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetSignalsSignalsSignalIdParams = zod.object({
+  signalId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /signals/signals/{signalId}/status (alloy-runtime)
+ */
+export const AlloyRuntimePatchSignalsSignalsSignalIdStatusParams = zod.object({
+  signalId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /signals/workflow-runs/{runId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetSignalsWorkflowRunsRunIdParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /signals/workflow-runs/{runId}/replay (alloy-runtime)
+ */
+export const AlloyRuntimePostSignalsWorkflowRunsRunIdReplayParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /signals/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetSignalsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /signals/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimePatchSignalsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /signals/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimeDeleteSignalsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /signatures/documents/{id}/sign (signatures)
+ */
+export const SignaturesPostSignaturesDocumentsIdSignParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /signatures/documents/{id}/sign/{sigId} (signatures)
+ */
+export const SignaturesPostSignaturesDocumentsIdSignSigIdParams = zod.object({
+  id: zod.coerce.string(),
+  sigId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /signatures/documents/{id}/signatures (signatures)
+ */
+export const SignaturesGetSignaturesDocumentsIdSignaturesParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /signatures/documents/{id}/signatures/{sigId}/decline (signatures)
+ */
+export const SignaturesPostSignaturesDocumentsIdSignaturesSigIdDeclineParams =
+  zod.object({
+    id: zod.coerce.string(),
+    sigId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /signatures/documents/{id}/signatures/{sigId}/remind (signatures)
+ */
+export const SignaturesPostSignaturesDocumentsIdSignaturesSigIdRemindParams =
+  zod.object({
+    id: zod.coerce.string(),
+    sigId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /signatures/documents/sign/{token} (signatures)
+ */
+export const SignaturesGetSignaturesDocumentsSignTokenParams = zod.object({
+  token: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /signatures/documents/sign/{token}/decline (signatures)
+ */
+export const SignaturesPostSignaturesDocumentsSignTokenDeclineParams =
+  zod.object({
+    token: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /signatures/documents/sign/{token}/submit (signatures)
+ */
+export const SignaturesPostSignaturesDocumentsSignTokenSubmitParams =
+  zod.object({
+    token: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /skill-runs/skill-runs/{runId} (skills)
+ */
+export const SkillsGetSkillRunsSkillRunsRunIdParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /skill-runs/skills/{id} (skills)
+ */
+export const SkillsGetSkillRunsSkillsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /skill-runs/skills/{id}/run (skills)
+ */
+export const SkillsPostSkillRunsSkillsIdRunParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /skill-runs/skills/{id}/runs (skills)
+ */
+export const SkillsGetSkillRunsSkillsIdRunsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /skills/alloy/admin/flags/{key} (alloy)
+ */
+export const AlloyPatchSkillsAlloyAdminFlagsKeyParams = zod.object({
+  key: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /skills/alloy/approvals/{id}/decide (alloy)
+ */
+export const AlloyPostSkillsAlloyApprovalsIdDecideParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /skills/alloy/artifacts/{id} (alloy)
+ */
+export const AlloyGetSkillsAlloyArtifactsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /skills/alloy/artifacts/{id}/approve (alloy)
+ */
+export const AlloyPostSkillsAlloyArtifactsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /skills/alloy/artifacts/{id}/reject (alloy)
+ */
+export const AlloyPostSkillsAlloyArtifactsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /skills/alloy/evidence/{id} (alloy)
+ */
+export const AlloyGetSkillsAlloyEvidenceIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /skills/alloy/runs/{id} (alloy)
+ */
+export const AlloyGetSkillsAlloyRunsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /skills/alloy/runs/{id}/cancel (alloy)
+ */
+export const AlloyPostSkillsAlloyRunsIdCancelParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /skills/alloy/runs/{id}/retry (alloy)
+ */
+export const AlloyPostSkillsAlloyRunsIdRetryParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /skills/alloy/runs/{id}/steps (alloy)
+ */
+export const AlloyGetSkillsAlloyRunsIdStepsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /skills/alloy/workflows/{id} (alloy)
+ */
+export const AlloyGetSkillsAlloyWorkflowsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /skills/alloy/workflows/{id} (alloy)
+ */
+export const AlloyPatchSkillsAlloyWorkflowsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /skills/alloy/workflows/{id} (alloy)
+ */
+export const AlloyDeleteSkillsAlloyWorkflowsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /skills/alloy/workflows/{id}/run (alloy)
+ */
+export const AlloyPostSkillsAlloyWorkflowsIdRunParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /skills/decisions/{id} (alloy)
+ */
+export const AlloyGetSkillsDecisionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /skills/decisions/{id}/approve (alloy)
+ */
+export const AlloyPostSkillsDecisionsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /skills/decisions/{id}/reject (alloy)
+ */
+export const AlloyPostSkillsDecisionsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /skills/skill-runs/{runId} (skills)
+ */
+export const SkillsGetSkillsSkillRunsRunIdParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /skills/skills/{id} (alloy)
+ */
+export const AlloyGetSkillsSkillsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /skills/skills/{id} (alloy)
+ */
+export const AlloyPatchSkillsSkillsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /skills/skills/{id}/run (skills)
+ */
+export const SkillsPostSkillsSkillsIdRunParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /skills/skills/{id}/runs (alloy)
+ */
+export const AlloyGetSkillsSkillsIdRunsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /stephen/stephen/booking-requests/{id} (stephen)
+ */
+export const StephenPatchStephenStephenBookingRequestsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /stephen/stephen/case-studies/{slug} (stephen)
+ */
+export const StephenGetStephenStephenCaseStudiesSlugParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /stephen/stephen/content-blocks/{id} (stephen)
+ */
+export const StephenPatchStephenStephenContentBlocksIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /stephen/stephen/content-blocks/{id} (stephen)
+ */
+export const StephenDeleteStephenStephenContentBlocksIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /stephen/stephen/portfolio-case-studies/{slug} (stephen)
+ */
+export const StephenGetStephenStephenPortfolioCaseStudiesSlugParams =
+  zod.object({
+    slug: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /stephen/stephen/portfolio-case-studies/{slug} (stephen)
+ */
+export const StephenPatchStephenStephenPortfolioCaseStudiesSlugParams =
+  zod.object({
+    slug: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /stephen/stephen/portfolio-case-studies/{slug} (stephen)
+ */
+export const StephenDeleteStephenStephenPortfolioCaseStudiesSlugParams =
+  zod.object({
+    slug: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /stripe/billing/checkout-session/{sessionId} (billing)
+ */
+export const BillingGetStripeBillingCheckoutSessionSessionIdParams = zod.object(
+  {
+    sessionId: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] List/get /stripe/billing/plans/{id} (billing)
+ */
+export const BillingGetStripeBillingPlansIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /subscriptions/briefings/{id} (pulse)
+ */
+export const PulseGetSubscriptionsBriefingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /subscriptions/briefings/{id}/save (pulse)
+ */
+export const PulsePostSubscriptionsBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /subscriptions/briefings/{id}/save (pulse)
+ */
+export const PulseDeleteSubscriptionsBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /subscriptions/dissents/{id} (pulse)
+ */
+export const PulsePatchSubscriptionsDissentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /subscriptions/domain-panel/{domain} (pulse)
+ */
+export const PulseGetSubscriptionsDomainPanelDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /subscriptions/subscriptions/{id} (pulse)
+ */
+export const PulsePatchSubscriptionsSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /subscriptions/subscriptions/{id} (pulse)
+ */
+export const PulseDeleteSubscriptionsSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /substrate-replay/substrate/run/{runId} (substrate-replay)
+ */
+export const SubstrateReplayGetSubstrateReplaySubstrateRunRunIdParams =
+  zod.object({
+    runId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /support/admin/kb-articles/{id} (support)
+ */
+export const SupportPatchSupportAdminKbArticlesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /support/admin/kb-articles/{id} (support)
+ */
+export const SupportDeleteSupportAdminKbArticlesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /support/admin/support-queue/{id}/reopen (support)
+ */
+export const SupportPostSupportAdminSupportQueueIdReopenParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /support/admin/support-queue/{id}/reply (support)
+ */
+export const SupportPostSupportAdminSupportQueueIdReplyParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /support/admin/support-queue/{id}/resolve (support)
+ */
+export const SupportPostSupportAdminSupportQueueIdResolveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /support/admin/support-queue/{id}/status (support)
+ */
+export const SupportPostSupportAdminSupportQueueIdStatusParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /support/support/knowledge/{slug} (support)
+ */
+export const SupportGetSupportSupportKnowledgeSlugParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /support/support/tickets/{id} (support)
+ */
+export const SupportGetSupportSupportTicketsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /support/support/tickets/{id}/comments (support)
+ */
+export const SupportPostSupportSupportTicketsIdCommentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /support/support/tickets/{id}/status (support)
+ */
+export const SupportPatchSupportSupportTicketsIdStatusParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /system/admin/artifact-approvals/{id}/approve (system)
+ */
+export const SystemPostSystemAdminArtifactApprovalsIdApproveParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Create/invoke /system/admin/artifact-approvals/{id}/reject (system)
+ */
+export const SystemPostSystemAdminArtifactApprovalsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /system/admin/workflow-runs/{id} (system)
+ */
+export const SystemGetSystemAdminWorkflowRunsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /teams/teams/{team} (teams)
+ */
+export const TeamsGetTeamsTeamsTeamParams = zod.object({
+  team: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /teams/teams/{team}/page (teams)
+ */
+export const TeamsPostTeamsTeamsTeamPageParams = zod.object({
+  team: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /teams/teams/{team}/pages (teams)
+ */
+export const TeamsGetTeamsTeamsTeamPagesParams = zod.object({
+  team: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /teams/teams/{team}/schedule (teams)
+ */
+export const TeamsGetTeamsTeamsTeamScheduleParams = zod.object({
+  team: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /teams/teams/{team}/schedule (teams)
+ */
+export const TeamsPutTeamsTeamsTeamScheduleParams = zod.object({
+  team: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /teams/teams/{team}/schedule/overrides (teams)
+ */
+export const TeamsPostTeamsTeamsTeamScheduleOverridesParams = zod.object({
+  team: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /teams/teams/{team}/schedule/overrides/{id} (teams)
+ */
+export const TeamsDeleteTeamsTeamsTeamScheduleOverridesIdParams = zod.object({
+  team: zod.coerce.string(),
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /teams/users/{id}/pages (teams)
+ */
+export const TeamsGetTeamsUsersIdPagesParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tenant-health/tenant-health/{orgId} (tenant-health)
+ */
+export const TenantHealthGetTenantHealthTenantHealthOrgIdParams = zod.object({
+  orgId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /tenant-health/tenant-health/{orgId}/compute (tenant-health)
+ */
+export const TenantHealthPostTenantHealthTenantHealthOrgIdComputeParams =
+  zod.object({
+    orgId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /tenants/admin/tenants/{id} (tenants)
+ */
+export const TenantsGetTenantsAdminTenantsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /tenants/admin/tenants/{id} (tenants)
+ */
+export const TenantsDeleteTenantsAdminTenantsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tenants/admin/tenants/{id}/admin-consent-url (tenants)
+ */
+export const TenantsGetTenantsAdminTenantsIdAdminConsentUrlParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tenants/admin/tenants/{id}/dataverse/connections (tenants)
+ */
+export const TenantsGetTenantsAdminTenantsIdDataverseConnectionsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /tenants/admin/tenants/{id}/dataverse/connections (tenants)
+ */
+export const TenantsPostTenantsAdminTenantsIdDataverseConnectionsParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /tenants/admin/tenants/{id}/dataverse/connections/{connectionId}/signals (tenants)
+ */
+export const TenantsGetTenantsAdminTenantsIdDataverseConnectionsConnectionIdSignalsParams =
+  zod.object({
+    id: zod.coerce.string(),
+    connectionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /tenants/admin/tenants/{id}/dataverse/connections/{connectionId}/sync (tenants)
+ */
+export const TenantsPostTenantsAdminTenantsIdDataverseConnectionsConnectionIdSyncParams =
+  zod.object({
+    id: zod.coerce.string(),
+    connectionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /tenants/admin/tenants/{id}/dataverse/connections/{connectionId}/test (tenants)
+ */
+export const TenantsPostTenantsAdminTenantsIdDataverseConnectionsConnectionIdTestParams =
+  zod.object({
+    id: zod.coerce.string(),
+    connectionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /tenants/admin/tenants/{id}/provisioning-config (tenants)
+ */
+export const TenantsPatchTenantsAdminTenantsIdProvisioningConfigParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /tenants/admin/tenants/{id}/status (tenants)
+ */
+export const TenantsPatchTenantsAdminTenantsIdStatusParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /terra/terra/{propertyId}/digital-twin (terra-digital-twin)
+ */
+export const TerraDigitalTwinGetTerraTerraPropertyIdDigitalTwinParams =
+  zod.object({
+    propertyId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /terra/terra/{propertyId}/simulate (terra-digital-twin)
+ */
+export const TerraDigitalTwinPostTerraTerraPropertyIdSimulateParams =
+  zod.object({
+    propertyId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /terra/terra/broker/inquiries/{id} (terra-broker)
+ */
+export const TerraBrokerPatchTerraTerraBrokerInquiriesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /terra/terra/broker/listings/{id} (terra-broker)
+ */
+export const TerraBrokerGetTerraTerraBrokerListingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /terra/terra/broker/listings/{id} (terra-broker)
+ */
+export const TerraBrokerPatchTerraTerraBrokerListingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /terra/terra/broker/listings/{id} (terra-broker)
+ */
+export const TerraBrokerDeleteTerraTerraBrokerListingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /terra/terra/cognitive/covenants/{id} (terra-cognitive)
+ */
+export const TerraCognitivePatchTerraTerraCognitiveCovenantsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /terra/terra/cognitive/covenants/{id} (terra-cognitive)
+ */
+export const TerraCognitiveDeleteTerraTerraCognitiveCovenantsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /terra/terra/cognitive/diligence-room/evidence/{evidenceId} (terra-cognitive)
+ */
+export const TerraCognitivePatchTerraTerraCognitiveDiligenceRoomEvidenceEvidenceIdParams =
+  zod.object({
+    evidenceId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /terra/terra/cognitive/diligence-room/evidence/{evidenceId}/download (terra-cognitive)
+ */
+export const TerraCognitiveGetTerraTerraCognitiveDiligenceRoomEvidenceEvidenceIdDownloadParams =
+  zod.object({
+    evidenceId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /terra/terra/cognitive/diligence-room/matters/{matterId}/evidence (terra-cognitive)
+ */
+export const TerraCognitivePostTerraTerraCognitiveDiligenceRoomMattersMatterIdEvidenceParams =
+  zod.object({
+    matterId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /terra/terra/construction-projects/{id} (terra-modules)
+ */
+export const TerraModulesPutTerraTerraConstructionProjectsIdParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Delete /terra/terra/construction-projects/{id} (terra-modules)
+ */
+export const TerraModulesDeleteTerraTerraConstructionProjectsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /terra/terra/distress/property/{id} (terra-distress)
+ */
+export const TerraDistressGetTerraTerraDistressPropertyIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /terra/terra/exchanges-1031/{id} (terra-modules)
+ */
+export const TerraModulesPutTerraTerraExchanges1031IdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /terra/terra/exchanges-1031/{id} (terra-modules)
+ */
+export const TerraModulesDeleteTerraTerraExchanges1031IdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /terra/terra/leases/{id} (terra-modules)
+ */
+export const TerraModulesPutTerraTerraLeasesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /terra/terra/leases/{id} (terra-modules)
+ */
+export const TerraModulesDeleteTerraTerraLeasesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /terra/terra/pro-forma-projects/{id} (terra-modules)
+ */
+export const TerraModulesPutTerraTerraProFormaProjectsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /terra/terra/pro-forma-projects/{id} (terra-modules)
+ */
+export const TerraModulesDeleteTerraTerraProFormaProjectsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /terra/terra/properties/{id} (terra)
+ */
+export const TerraGetTerraTerraPropertiesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /terra/terra/properties/{id}/climate-risk (terra-property-intel)
+ */
+export const TerraPropertyIntelGetTerraTerraPropertiesIdClimateRiskParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /terra/terra/properties/{id}/history (terra)
+ */
+export const TerraGetTerraTerraPropertiesIdHistoryParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /terra/terra/properties/{id}/neighborhood-momentum (terra-property-intel)
+ */
+export const TerraPropertyIntelGetTerraTerraPropertiesIdNeighborhoodMomentumParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /terra/terra/properties/{id}/seller-motivation (terra-property-intel)
+ */
+export const TerraPropertyIntelGetTerraTerraPropertiesIdSellerMotivationParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /terra/terra/properties/{id}/spatial-walkthrough (terra-property-intel)
+ */
+export const TerraPropertyIntelGetTerraTerraPropertiesIdSpatialWalkthroughParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /terra/terra/properties/{id}/waterfall (terra-property-intel)
+ */
+export const TerraPropertyIntelGetTerraTerraPropertiesIdWaterfallParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /terra/terra/properties/{id}/zoning (terra-property-intel)
+ */
+export const TerraPropertyIntelGetTerraTerraPropertiesIdZoningParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /terra/terra/tax-appeals/{id} (terra-modules)
+ */
+export const TerraModulesPutTerraTerraTaxAppealsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /terra/terra/tax-appeals/{id} (terra-modules)
+ */
+export const TerraModulesDeleteTerraTerraTaxAppealsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /terra/terra/tenant-applications/{id} (terra-modules)
+ */
+export const TerraModulesPutTerraTerraTenantApplicationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /terra/terra/tenant-applications/{id} (terra-modules)
+ */
+export const TerraModulesDeleteTerraTerraTenantApplicationsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Update /terra/terra/waterfall-structures/{id} (terra-modules)
+ */
+export const TerraModulesPutTerraTerraWaterfallStructuresIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /terra/terra/waterfall-structures/{id} (terra-modules)
+ */
+export const TerraModulesDeleteTerraTerraWaterfallStructuresIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /terra/terra/why-this-property/{propertyId} (terra-why-this-property)
+ */
+export const TerraWhyThisPropertyGetTerraTerraWhyThisPropertyPropertyIdParams =
+  zod.object({
+    propertyId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /today/briefings/{id} (pulse)
+ */
+export const PulseGetTodayBriefingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /today/briefings/{id}/save (pulse)
+ */
+export const PulsePostTodayBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /today/briefings/{id}/save (pulse)
+ */
+export const PulseDeleteTodayBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /today/dissents/{id} (pulse)
+ */
+export const PulsePatchTodayDissentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /today/domain-panel/{domain} (pulse)
+ */
+export const PulseGetTodayDomainPanelDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /today/subscriptions/{id} (pulse)
+ */
+export const PulsePatchTodaySubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /today/subscriptions/{id} (pulse)
+ */
+export const PulseDeleteTodaySubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tool-approvals/actions/{id} (guardian)
+ */
+export const GuardianGetToolApprovalsActionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /tool-approvals/actions/{id}/approve (guardian)
+ */
+export const GuardianPostToolApprovalsActionsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /tool-approvals/actions/{id}/reject (guardian)
+ */
+export const GuardianPostToolApprovalsActionsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tool-approvals/approvals/{requestId} (guardian)
+ */
+export const GuardianGetToolApprovalsApprovalsRequestIdParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /tool-approvals/approvals/{requestId}/review (guardian)
+ */
+export const GuardianPostToolApprovalsApprovalsRequestIdReviewParams =
+  zod.object({
+    requestId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /tool-approvals/guardrail-configs/{id} (guardian)
+ */
+export const GuardianGetToolApprovalsGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /tool-approvals/guardrail-configs/{id} (guardian)
+ */
+export const GuardianPatchToolApprovalsGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /tool-approvals/guardrail-configs/{id} (guardian)
+ */
+export const GuardianDeleteToolApprovalsGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tool-approvals/policies/{id} (guardian)
+ */
+export const GuardianGetToolApprovalsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /tool-approvals/policies/{id} (guardian)
+ */
+export const GuardianPatchToolApprovalsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /tool-approvals/policies/{id} (guardian)
+ */
+export const GuardianDeleteToolApprovalsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tool-approvals/policies/{id}/assignments (guardian)
+ */
+export const GuardianGetToolApprovalsPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /tool-approvals/policies/{id}/assignments (guardian)
+ */
+export const GuardianPostToolApprovalsPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /tool-approvals/policies/{id}/assignments/{assignmentId} (guardian)
+ */
+export const GuardianDeleteToolApprovalsPoliciesIdAssignmentsAssignmentIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    assignmentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /tool-approvals/policies/{id}/audit (guardian)
+ */
+export const GuardianGetToolApprovalsPoliciesIdAuditParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /tool-approvals/policies/tiers/{tier} (guardian)
+ */
+export const GuardianPatchToolApprovalsPoliciesTiersTierParams = zod.object({
+  tier: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tool-approvals/rollback-events/{id} (guardian)
+ */
+export const GuardianGetToolApprovalsRollbackEventsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /tool-approvals/rollback-events/{id}/status (guardian)
+ */
+export const GuardianPatchToolApprovalsRollbackEventsIdStatusParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /tool-approvals/tool-approvals/{id}/approve (guardian)
+ */
+export const GuardianPostToolApprovalsToolApprovalsIdApproveParams = zod.object(
+  {
+    id: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Create/invoke /tool-approvals/tool-approvals/{id}/reject (guardian)
+ */
+export const GuardianPostToolApprovalsToolApprovalsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tool-approvals/tools/{toolId} (guardian)
+ */
+export const GuardianGetToolApprovalsToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /tool-approvals/tools/{toolId} (guardian)
+ */
+export const GuardianPatchToolApprovalsToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tool-approvals/tools/{toolId}/audit (guardian)
+ */
+export const GuardianGetToolApprovalsToolsToolIdAuditParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tool-approvals/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianGetToolApprovalsToolsToolIdPermissionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /tool-approvals/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianPostToolApprovalsToolsToolIdPermissionsParams = zod.object(
+  {
+    toolId: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Delete /tool-approvals/tools/{toolId}/permissions/{permissionId} (guardian)
+ */
+export const GuardianDeleteToolApprovalsToolsToolIdPermissionsPermissionIdParams =
+  zod.object({
+    toolId: zod.coerce.string(),
+    permissionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /tool-approvals/tools/{toolId}/versions (guardian)
+ */
+export const GuardianGetToolApprovalsToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /tool-approvals/tools/{toolId}/versions (guardian)
+ */
+export const GuardianPostToolApprovalsToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tools/actions/{id} (guardian)
+ */
+export const GuardianGetToolsActionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /tools/actions/{id}/approve (guardian)
+ */
+export const GuardianPostToolsActionsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /tools/actions/{id}/reject (guardian)
+ */
+export const GuardianPostToolsActionsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tools/approvals/{requestId} (guardian)
+ */
+export const GuardianGetToolsApprovalsRequestIdParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /tools/approvals/{requestId}/review (guardian)
+ */
+export const GuardianPostToolsApprovalsRequestIdReviewParams = zod.object({
+  requestId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tools/guardrail-configs/{id} (guardian)
+ */
+export const GuardianGetToolsGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /tools/guardrail-configs/{id} (guardian)
+ */
+export const GuardianPatchToolsGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /tools/guardrail-configs/{id} (guardian)
+ */
+export const GuardianDeleteToolsGuardrailConfigsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tools/policies/{id} (guardian)
+ */
+export const GuardianGetToolsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /tools/policies/{id} (guardian)
+ */
+export const GuardianPatchToolsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /tools/policies/{id} (guardian)
+ */
+export const GuardianDeleteToolsPoliciesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tools/policies/{id}/assignments (guardian)
+ */
+export const GuardianGetToolsPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /tools/policies/{id}/assignments (guardian)
+ */
+export const GuardianPostToolsPoliciesIdAssignmentsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /tools/policies/{id}/assignments/{assignmentId} (guardian)
+ */
+export const GuardianDeleteToolsPoliciesIdAssignmentsAssignmentIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+    assignmentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /tools/policies/{id}/audit (guardian)
+ */
+export const GuardianGetToolsPoliciesIdAuditParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /tools/policies/tiers/{tier} (guardian)
+ */
+export const GuardianPatchToolsPoliciesTiersTierParams = zod.object({
+  tier: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tools/rollback-events/{id} (guardian)
+ */
+export const GuardianGetToolsRollbackEventsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /tools/rollback-events/{id}/status (guardian)
+ */
+export const GuardianPatchToolsRollbackEventsIdStatusParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /tools/tool-approvals/{id}/approve (guardian)
+ */
+export const GuardianPostToolsToolApprovalsIdApproveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /tools/tool-approvals/{id}/reject (guardian)
+ */
+export const GuardianPostToolsToolApprovalsIdRejectParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tools/tools/{toolId} (guardian)
+ */
+export const GuardianGetToolsToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /tools/tools/{toolId} (guardian)
+ */
+export const GuardianPatchToolsToolsToolIdParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tools/tools/{toolId}/audit (guardian)
+ */
+export const GuardianGetToolsToolsToolIdAuditParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /tools/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianGetToolsToolsToolIdPermissionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /tools/tools/{toolId}/permissions (guardian)
+ */
+export const GuardianPostToolsToolsToolIdPermissionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /tools/tools/{toolId}/permissions/{permissionId} (guardian)
+ */
+export const GuardianDeleteToolsToolsToolIdPermissionsPermissionIdParams =
+  zod.object({
+    toolId: zod.coerce.string(),
+    permissionId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /tools/tools/{toolId}/versions (guardian)
+ */
+export const GuardianGetToolsToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /tools/tools/{toolId}/versions (guardian)
+ */
+export const GuardianPostToolsToolsToolIdVersionsParams = zod.object({
+  toolId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /traces/runs/{id} (traces)
+ */
+export const TracesGetTracesRunsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /traces/runs/{id}/replay (traces)
+ */
+export const TracesPostTracesRunsIdReplayParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /traces/traces/{id} (traces)
+ */
+export const TracesGetTracesTracesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /traces/traces/{id}/comment (traces)
+ */
+export const TracesPostTracesTracesIdCommentParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /traces/traces/{id}/diff/{compareId} (traces)
+ */
+export const TracesGetTracesTracesIdDiffCompareIdParams = zod.object({
+  id: zod.coerce.string(),
+  compareId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /traces/traces/{id}/grade (traces)
+ */
+export const TracesPostTracesTracesIdGradeParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /traces/traces/{id}/link-entity (traces)
+ */
+export const TracesPostTracesTracesIdLinkEntityParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /traces/traces/{id}/replay (traces)
+ */
+export const TracesPostTracesTracesIdReplayParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /unsubscribe/briefings/{id} (pulse)
+ */
+export const PulseGetUnsubscribeBriefingsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /unsubscribe/briefings/{id}/save (pulse)
+ */
+export const PulsePostUnsubscribeBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /unsubscribe/briefings/{id}/save (pulse)
+ */
+export const PulseDeleteUnsubscribeBriefingsIdSaveParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /unsubscribe/dissents/{id} (pulse)
+ */
+export const PulsePatchUnsubscribeDissentsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /unsubscribe/domain-panel/{domain} (pulse)
+ */
+export const PulseGetUnsubscribeDomainPanelDomainParams = zod.object({
+  domain: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /unsubscribe/subscriptions/{id} (pulse)
+ */
+export const PulsePatchUnsubscribeSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /unsubscribe/subscriptions/{id} (pulse)
+ */
+export const PulseDeleteUnsubscribeSubscriptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /user/orgs/{orgSlug} (org-settings)
+ */
+export const OrgSettingsPatchUserOrgsOrgSlugParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /user/orgs/{orgSlug}/members (org-settings)
+ */
+export const OrgSettingsGetUserOrgsOrgSlugMembersParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /user/orgs/{orgSlug}/members/{userId} (org-settings)
+ */
+export const OrgSettingsDeleteUserOrgsOrgSlugMembersUserIdParams = zod.object({
+  orgSlug: zod.coerce.string(),
+  userId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /user/orgs/{orgSlug}/members/{userId}/role (org-settings)
+ */
+export const OrgSettingsPutUserOrgsOrgSlugMembersUserIdRoleParams = zod.object({
+  orgSlug: zod.coerce.string(),
+  userId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /user/orgs/{orgSlug}/mfa-required (org-settings)
+ */
+export const OrgSettingsPatchUserOrgsOrgSlugMfaRequiredParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /user/orgs/{orgSlug}/notification-prefs (org-settings)
+ */
+export const OrgSettingsGetUserOrgsOrgSlugNotificationPrefsParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /user/orgs/{orgSlug}/notification-prefs (org-settings)
+ */
+export const OrgSettingsPutUserOrgsOrgSlugNotificationPrefsParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /user/orgs/{orgSlug}/profile (org-settings)
+ */
+export const OrgSettingsGetUserOrgsOrgSlugProfileParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /user/orgs/{orgSlug}/profile (org-settings)
+ */
+export const OrgSettingsPutUserOrgsOrgSlugProfileParams = zod.object({
+  orgSlug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /users/admin/impersonate/{userId} (users)
+ */
+export const UsersPostUsersAdminImpersonateUserIdParams = zod.object({
+  userId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /users/admin/sessions/{userId} (users)
+ */
+export const UsersDeleteUsersAdminSessionsUserIdParams = zod.object({
+  userId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /users/admin/users/{id}/deactivate (users)
+ */
+export const UsersPatchUsersAdminUsersIdDeactivateParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /users/admin/users/{id}/detail (users)
+ */
+export const UsersGetUsersAdminUsersIdDetailParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /users/admin/users/{id}/revoke-sessions (users)
+ */
+export const UsersPostUsersAdminUsersIdRevokeSessionsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /users/admin/users/{id}/role (users)
+ */
+export const UsersPatchUsersAdminUsersIdRoleParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /users/admin/users/{userId}/roles (users)
+ */
+export const UsersPutUsersAdminUsersUserIdRolesParams = zod.object({
+  userId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /users/teams/{team} (teams)
+ */
+export const TeamsGetUsersTeamsTeamParams = zod.object({
+  team: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /users/teams/{team}/page (teams)
+ */
+export const TeamsPostUsersTeamsTeamPageParams = zod.object({
+  team: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /users/teams/{team}/pages (teams)
+ */
+export const TeamsGetUsersTeamsTeamPagesParams = zod.object({
+  team: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /users/teams/{team}/schedule (teams)
+ */
+export const TeamsGetUsersTeamsTeamScheduleParams = zod.object({
+  team: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /users/teams/{team}/schedule (teams)
+ */
+export const TeamsPutUsersTeamsTeamScheduleParams = zod.object({
+  team: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /users/teams/{team}/schedule/overrides (teams)
+ */
+export const TeamsPostUsersTeamsTeamScheduleOverridesParams = zod.object({
+  team: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /users/teams/{team}/schedule/overrides/{id} (teams)
+ */
+export const TeamsDeleteUsersTeamsTeamScheduleOverridesIdParams = zod.object({
+  team: zod.coerce.string(),
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /users/users/{id}/pages (teams)
+ */
+export const TeamsGetUsersUsersIdPagesParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /v1/approvals/{id} (v1-approvals)
+ */
+export const V1ApprovalsGetV1ApprovalsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /v1/approvals/{id}/decide (v1-approvals)
+ */
+export const V1ApprovalsPostV1ApprovalsIdDecideParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /v1/runs/{id}/ledger (v1-runs)
+ */
+export const V1RunsGetV1RunsIdLedgerParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /verifier/verifier/{id} (verifier)
+ */
+export const VerifierGetVerifierVerifierIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /verifier/verifier/{id} (verifier)
+ */
+export const VerifierDeleteVerifierVerifierIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /verifier/verifier/target/{targetType}/{targetId} (verifier)
+ */
+export const VerifierGetVerifierVerifierTargetTargetTypeTargetIdParams =
+  zod.object({
+    targetType: zod.coerce.string(),
+    targetId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /vessels/vessels/{id} (vessels)
+ */
+export const VesselsGetVesselsVesselsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /vessels/vessels/{id} (vessels)
+ */
+export const VesselsPutVesselsVesselsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /vessels/vessels/{id} (vessels)
+ */
+export const VesselsDeleteVesselsVesselsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/{id}/cargo (vessels)
+ */
+export const VesselsGetVesselsVesselsIdCargoParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/{id}/detail (vessels-extended)
+ */
+export const VesselsExtendedGetVesselsVesselsIdDetailParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/{id}/events (vessels)
+ */
+export const VesselsGetVesselsVesselsIdEventsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/{id}/exceptions (vessels-extended)
+ */
+export const VesselsExtendedGetVesselsVesselsIdExceptionsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/{id}/maintenance (vessels-extended)
+ */
+export const VesselsExtendedGetVesselsVesselsIdMaintenanceParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/{id}/port-calls (vessels-extended)
+ */
+export const VesselsExtendedGetVesselsVesselsIdPortCallsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/{id}/positions (vessels)
+ */
+export const VesselsGetVesselsVesselsIdPositionsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/{id}/psc/checklist (vessels-psc)
+ */
+export const VesselsPscGetVesselsVesselsIdPscChecklistParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /vessels/vessels/{id}/psc/checklist (vessels-psc)
+ */
+export const VesselsPscPostVesselsVesselsIdPscChecklistParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/{id}/psc/inspections (vessels-psc)
+ */
+export const VesselsPscGetVesselsVesselsIdPscInspectionsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/{id}/route (vessels)
+ */
+export const VesselsGetVesselsVesselsIdRouteParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/{id}/routes (vessels)
+ */
+export const VesselsGetVesselsVesselsIdRoutesParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/{id}/sanctions (vessels-extended)
+ */
+export const VesselsExtendedGetVesselsVesselsIdSanctionsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/{id}/voyages (vessels-extended)
+ */
+export const VesselsExtendedGetVesselsVesselsIdVoyagesParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/{imo}/digital-twin (vessels-digital-twin)
+ */
+export const VesselsDigitalTwinGetVesselsVesselsImoDigitalTwinParams =
+  zod.object({
+    imo: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /vessels/vessels/{imo}/simulate (vessels-digital-twin)
+ */
+export const VesselsDigitalTwinPostVesselsVesselsImoSimulateParams = zod.object(
+  {
+    imo: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Update /vessels/vessels/alert-rules/{id} (vessels)
+ */
+export const VesselsPutVesselsVesselsAlertRulesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /vessels/vessels/alert-rules/{id} (vessels)
+ */
+export const VesselsDeleteVesselsVesselsAlertRulesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /vessels/vessels/alerts/{id} (vessels)
+ */
+export const VesselsDeleteVesselsVesselsAlertsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/cognitive/sanctions-chain/{vesselImo} (vessels-cognitive)
+ */
+export const VesselsCognitiveGetVesselsVesselsCognitiveSanctionsChainVesselImoParams =
+  zod.object({
+    vesselImo: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /vessels/vessels/cognitive/voyage-twin/{voyageRef} (vessels-cognitive)
+ */
+export const VesselsCognitiveGetVesselsVesselsCognitiveVoyageTwinVoyageRefParams =
+  zod.object({
+    voyageRef: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /vessels/vessels/command-workflows/{id} (vessels)
+ */
+export const VesselsPatchVesselsVesselsCommandWorkflowsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/corridors/{id} (vessels-extended)
+ */
+export const VesselsExtendedGetVesselsVesselsCorridorsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /vessels/vessels/events/{id} (vessels)
+ */
+export const VesselsPatchVesselsVesselsEventsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/exceptions/{id} (vessels-extended)
+ */
+export const VesselsExtendedGetVesselsVesselsExceptionsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /vessels/vessels/exceptions/{id}/acknowledge (vessels-extended)
+ */
+export const VesselsExtendedPostVesselsVesselsExceptionsIdAcknowledgeParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /vessels/vessels/exceptions/{id}/escalate (vessels-extended)
+ */
+export const VesselsExtendedPostVesselsVesselsExceptionsIdEscalateParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /vessels/vessels/exceptions/{id}/resolve (vessels-extended)
+ */
+export const VesselsExtendedPostVesselsVesselsExceptionsIdResolveParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /vessels/vessels/fleets/{id} (vessels)
+ */
+export const VesselsGetVesselsVesselsFleetsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /vessels/vessels/fleets/{id} (vessels)
+ */
+export const VesselsPutVesselsVesselsFleetsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /vessels/vessels/fleets/{id} (vessels)
+ */
+export const VesselsDeleteVesselsVesselsFleetsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Update /vessels/vessels/insurance/claims/{id}/status (vessels-insurance)
+ */
+export const VesselsInsurancePutVesselsVesselsInsuranceClaimsIdStatusParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /vessels/vessels/insurance/policies/{id} (vessels-insurance)
+ */
+export const VesselsInsuranceGetVesselsVesselsInsurancePoliciesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /vessels/vessels/insurance/quotes/{id}/bind (vessels-insurance)
+ */
+export const VesselsInsurancePostVesselsVesselsInsuranceQuotesIdBindParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /vessels/vessels/live/vessel-details/{mmsi} (vessels-live)
+ */
+export const VesselsLiveGetVesselsVesselsLiveVesselDetailsMmsiParams =
+  zod.object({
+    mmsi: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /vessels/vessels/modules/bills-of-lading/{id} (vessels-modules)
+ */
+export const VesselsModulesGetVesselsVesselsModulesBillsOfLadingIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /vessels/vessels/modules/bills-of-lading/{id}/transfer (vessels-modules)
+ */
+export const VesselsModulesPostVesselsVesselsModulesBillsOfLadingIdTransferParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /vessels/vessels/modules/bills-of-lading/{id}/verify (vessels-modules)
+ */
+export const VesselsModulesGetVesselsVesselsModulesBillsOfLadingIdVerifyParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /vessels/vessels/modules/crew/{id} (vessels-modules)
+ */
+export const VesselsModulesGetVesselsVesselsModulesCrewIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/modules/voyages-emissions/{id} (vessels-modules)
+ */
+export const VesselsModulesGetVesselsVesselsModulesVoyagesEmissionsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /vessels/vessels/platform/exceptions/{id} (vessels-platform)
+ */
+export const VesselsPlatformGetVesselsVesselsPlatformExceptionsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /vessels/vessels/platform/exceptions/{id}/acknowledge (vessels-platform)
+ */
+export const VesselsPlatformPostVesselsVesselsPlatformExceptionsIdAcknowledgeParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /vessels/vessels/platform/exceptions/{id}/assign (vessels-platform)
+ */
+export const VesselsPlatformPostVesselsVesselsPlatformExceptionsIdAssignParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /vessels/vessels/platform/exceptions/{id}/escalate (vessels-platform)
+ */
+export const VesselsPlatformPostVesselsVesselsPlatformExceptionsIdEscalateParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /vessels/vessels/platform/exceptions/{id}/resolve (vessels-platform)
+ */
+export const VesselsPlatformPostVesselsVesselsPlatformExceptionsIdResolveParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /vessels/vessels/platform/routes/{id} (vessels-platform)
+ */
+export const VesselsPlatformGetVesselsVesselsPlatformRoutesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /vessels/vessels/platform/vessels/{id} (vessels-platform)
+ */
+export const VesselsPlatformGetVesselsVesselsPlatformVesselsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /vessels/vessels/platform/vessels/{id} (vessels-platform)
+ */
+export const VesselsPlatformPatchVesselsVesselsPlatformVesselsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /vessels/vessels/platform/voyages/{id} (vessels-platform)
+ */
+export const VesselsPlatformGetVesselsVesselsPlatformVoyagesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /vessels/vessels/platform/voyages/{id} (vessels-platform)
+ */
+export const VesselsPlatformPatchVesselsVesselsPlatformVoyagesIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /vessels/vessels/psc/checklist/{itemId} (vessels-psc)
+ */
+export const VesselsPscPatchVesselsVesselsPscChecklistItemIdParams = zod.object(
+  {
+    itemId: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] Update /vessels/vessels/routes/{id} (vessels)
+ */
+export const VesselsPutVesselsVesselsRoutesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /vessels/vessels/routes/{id} (vessels)
+ */
+export const VesselsDeleteVesselsVesselsRoutesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/simulations/{id} (vessels)
+ */
+export const VesselsGetVesselsVesselsSimulationsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/track/{vesselId} (vessels-extended)
+ */
+export const VesselsExtendedGetVesselsVesselsTrackVesselIdParams = zod.object({
+  vesselId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /vessels/vessels/trading/instruments/{id} (vessels-trading)
+ */
+export const VesselsTradingGetVesselsVesselsTradingInstrumentsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /vessels/vessels/trading/market-depth/{symbol} (vessels-trading)
+ */
+export const VesselsTradingGetVesselsVesselsTradingMarketDepthSymbolParams =
+  zod.object({
+    symbol: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /vessels/vessels/trading/orders/{id} (vessels-trading)
+ */
+export const VesselsTradingDeleteVesselsVesselsTradingOrdersIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /vessels/vessels/voyage-economics/{id} (vessels-extended)
+ */
+export const VesselsExtendedGetVesselsVesselsVoyageEconomicsIdParams =
+  zod.object({
+    id: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /vessels/vessels/voyages/{id} (vessels-extended)
+ */
+export const VesselsExtendedGetVesselsVesselsVoyagesIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /webhooks/integrations/status/{adapter} (external-integrations)
+ */
+export const ExternalIntegrationsGetWebhooksIntegrationsStatusAdapterParams =
+  zod.object({
+    adapter: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Patch /webhooks/webhooks/endpoints/{id} (webhooks)
+ */
+export const WebhooksPatchWebhooksWebhooksEndpointsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /webhooks/webhooks/endpoints/{id} (webhooks)
+ */
+export const WebhooksDeleteWebhooksWebhooksEndpointsIdParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /webhooks/webhooks/endpoints/{id}/ping (webhooks)
+ */
+export const WebhooksPostWebhooksWebhooksEndpointsIdPingParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /workflow-runs/agents/{agentId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetWorkflowRunsAgentsAgentIdParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /workflow-runs/agents/{agentId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimeGetWorkflowRunsAgentsAgentIdVersionsParams =
+  zod.object({
+    agentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Create/invoke /workflow-runs/agents/{agentId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimePostWorkflowRunsAgentsAgentIdVersionsParams =
+  zod.object({
+    agentId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /workflow-runs/models/{modelId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetWorkflowRunsModelsModelIdParams = zod.object({
+  modelId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /workflow-runs/prompts/{promptId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetWorkflowRunsPromptsPromptIdParams = zod.object({
+  promptId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /workflow-runs/prompts/{promptId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimeGetWorkflowRunsPromptsPromptIdVersionsParams =
+  zod.object({
+    promptId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /workflow-runs/signals/{signalId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetWorkflowRunsSignalsSignalIdParams = zod.object({
+  signalId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /workflow-runs/signals/{signalId}/status (alloy-runtime)
+ */
+export const AlloyRuntimePatchWorkflowRunsSignalsSignalIdStatusParams =
+  zod.object({
+    signalId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /workflow-runs/workflow-runs/{runId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetWorkflowRunsWorkflowRunsRunIdParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /workflow-runs/workflow-runs/{runId}/replay (alloy-runtime)
+ */
+export const AlloyRuntimePostWorkflowRunsWorkflowRunsRunIdReplayParams =
+  zod.object({
+    runId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /workflow-runs/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetWorkflowRunsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /workflow-runs/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimePatchWorkflowRunsWorkflowsWorkflowIdParams =
+  zod.object({
+    workflowId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] Delete /workflow-runs/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimeDeleteWorkflowRunsWorkflowsWorkflowIdParams =
+  zod.object({
+    workflowId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /workflows/agents/{agentId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetWorkflowsAgentsAgentIdParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /workflows/agents/{agentId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimeGetWorkflowsAgentsAgentIdVersionsParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /workflows/agents/{agentId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimePostWorkflowsAgentsAgentIdVersionsParams = zod.object({
+  agentId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /workflows/models/{modelId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetWorkflowsModelsModelIdParams = zod.object({
+  modelId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /workflows/prompts/{promptId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetWorkflowsPromptsPromptIdParams = zod.object({
+  promptId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /workflows/prompts/{promptId}/versions (alloy-runtime)
+ */
+export const AlloyRuntimeGetWorkflowsPromptsPromptIdVersionsParams = zod.object(
+  {
+    promptId: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] List/get /workflows/signals/{signalId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetWorkflowsSignalsSignalIdParams = zod.object({
+  signalId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /workflows/signals/{signalId}/status (alloy-runtime)
+ */
+export const AlloyRuntimePatchWorkflowsSignalsSignalIdStatusParams = zod.object(
+  {
+    signalId: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] List/get /workflows/workflow-runs/{runId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetWorkflowsWorkflowRunsRunIdParams = zod.object({
+  runId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /workflows/workflow-runs/{runId}/replay (alloy-runtime)
+ */
+export const AlloyRuntimePostWorkflowsWorkflowRunsRunIdReplayParams =
+  zod.object({
+    runId: zod.coerce.string(),
+  });
+
+/**
+ * @summary [stub] List/get /workflows/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimeGetWorkflowsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Patch /workflows/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimePatchWorkflowsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Delete /workflows/workflows/{workflowId} (alloy-runtime)
+ */
+export const AlloyRuntimeDeleteWorkflowsWorkflowsWorkflowIdParams = zod.object({
+  workflowId: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] List/get /worldline/worldline/sources/{slug} (worldline)
+ */
+export const WorldlineGetWorldlineWorldlineSourcesSlugParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+/**
+ * @summary [stub] Create/invoke /worldline/worldline/sources/{slug}/fetch (worldline)
+ */
+export const WorldlinePostWorldlineWorldlineSourcesSlugFetchParams = zod.object(
+  {
+    slug: zod.coerce.string(),
+  },
+);
+
+/**
+ * @summary [stub] List/get /worldline/worldline/sources/{slug}/history (worldline)
+ */
+export const WorldlineGetWorldlineWorldlineSourcesSlugHistoryParams =
+  zod.object({
+    slug: zod.coerce.string(),
+  });
+
+/**
+ * @summary Get Conduit dashboard stats
+ */
+export const GetConduitStatsResponse = zod.object({
+  totalSyncs: zod.number().optional(),
+  activeSyncs: zod.number().optional(),
+  totalRuns: zod.number().optional(),
+  successfulRuns: zod.number().optional(),
+  failedRuns: zod.number().optional(),
+  totalRowsWritten: zod.number().optional(),
+  successRate: zod.number().optional(),
+  recentRuns: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        syncId: zod.string(),
+        syncName: zod.string().optional(),
+        status: zod.enum(['running', 'success', 'failed', 'partial']),
+        rowsRead: zod.number().optional(),
+        rowsWritten: zod.number().optional(),
+        rowsFailed: zod.number().optional(),
+        durationMs: zod.number().nullish(),
+        errorMessage: zod.string().nullish(),
+        startedAt: zod.string(),
+        finishedAt: zod.string().nullish(),
+        triggeredBy: zod.enum(['manual', 'scheduled', 'on_change']).optional(),
+      }),
+    )
+    .optional(),
+});
+
+/**
+ * @summary List all connections
+ */
+export const ListConduitConnectionsResponseItem = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  destination: zod.string(),
+  status: zod.enum(['active', 'error', 'untested']),
+  credentialMeta: zod.record(zod.string(), zod.unknown()).optional(),
+  testedAt: zod.string().nullish(),
+  createdAt: zod.string(),
+  updatedAt: zod.string().optional(),
+});
+export const ListConduitConnectionsResponse = zod.array(
+  ListConduitConnectionsResponseItem,
+);
+
+/**
+ * @summary Create a connection
+ */
+export const CreateConduitConnectionBody = zod.object({
+  name: zod.string(),
+  destination: zod.string(),
+  credentials: zod.record(zod.string(), zod.unknown()).optional(),
+});
+
+/**
+ * @summary Get a connection
+ */
+export const GetConduitConnectionParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetConduitConnectionResponse = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  destination: zod.string(),
+  status: zod.enum(['active', 'error', 'untested']),
+  credentialMeta: zod.record(zod.string(), zod.unknown()).optional(),
+  testedAt: zod.string().nullish(),
+  createdAt: zod.string(),
+  updatedAt: zod.string().optional(),
+});
+
+/**
+ * @summary Update a connection
+ */
+export const UpdateConduitConnectionParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const UpdateConduitConnectionBody = zod.object({
+  name: zod.string().optional(),
+  credentials: zod.record(zod.string(), zod.unknown()).optional(),
+});
+
+export const UpdateConduitConnectionResponse = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  destination: zod.string(),
+  status: zod.enum(['active', 'error', 'untested']),
+  credentialMeta: zod.record(zod.string(), zod.unknown()).optional(),
+  testedAt: zod.string().nullish(),
+  createdAt: zod.string(),
+  updatedAt: zod.string().optional(),
+});
+
+/**
+ * @summary Delete a connection
+ */
+export const DeleteConduitConnectionParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary Test a connection
+ */
+export const TestConduitConnectionParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const TestConduitConnectionResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string().optional(),
+  latencyMs: zod.number().optional(),
+});
+
+/**
+ * @summary List all syncs
+ */
+export const ListConduitSyncsQueryParams = zod.object({
+  status: zod.coerce.string().optional(),
+  destinationId: zod.coerce.string().optional(),
+});
+
+export const ListConduitSyncsResponseItem = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  sourceType: zod.enum([
+    'postgres',
+    'csv',
+    'api_resource',
+    'snowflake',
+    'bigquery',
+  ]),
+  sourceMeta: zod.record(zod.string(), zod.unknown()).optional(),
+  connectionId: zod.string(),
+  objectType: zod.string(),
+  runMode: zod.enum(['manual', 'scheduled', 'on_change']),
+  scheduleExpr: zod.string().nullish(),
+  semantics: zod.enum(['insert', 'upsert', 'mirror']),
+  upsertKey: zod.string().nullish(),
+  status: zod.enum(['active', 'paused', 'draft', 'error']),
+  lastRunId: zod.string().nullish(),
+  lastRunAt: zod.string().nullish(),
+  lastRunStatus: zod.string().nullish(),
+  mappingCount: zod.number().optional(),
+  createdAt: zod.string(),
+  updatedAt: zod.string().optional(),
+  connection: zod
+    .object({
+      id: zod.string(),
+      name: zod.string(),
+      destination: zod.string(),
+      status: zod.enum(['active', 'error', 'untested']),
+      credentialMeta: zod.record(zod.string(), zod.unknown()).optional(),
+      testedAt: zod.string().nullish(),
+      createdAt: zod.string(),
+      updatedAt: zod.string().optional(),
+    })
+    .optional(),
+});
+export const ListConduitSyncsResponse = zod.array(ListConduitSyncsResponseItem);
+
+/**
+ * @summary Create a sync
+ */
+export const CreateConduitSyncBody = zod.object({
+  name: zod.string(),
+  sourceType: zod.string(),
+  sourceMeta: zod.record(zod.string(), zod.unknown()).optional(),
+  connectionId: zod.string(),
+  objectType: zod.string(),
+  runMode: zod.string(),
+  scheduleExpr: zod.string().optional(),
+  semantics: zod.string(),
+  upsertKey: zod.string().optional(),
+});
+
+/**
+ * @summary Get a sync
+ */
+export const GetConduitSyncParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetConduitSyncResponse = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  sourceType: zod.enum([
+    'postgres',
+    'csv',
+    'api_resource',
+    'snowflake',
+    'bigquery',
+  ]),
+  sourceMeta: zod.record(zod.string(), zod.unknown()).optional(),
+  connectionId: zod.string(),
+  objectType: zod.string(),
+  runMode: zod.enum(['manual', 'scheduled', 'on_change']),
+  scheduleExpr: zod.string().nullish(),
+  semantics: zod.enum(['insert', 'upsert', 'mirror']),
+  upsertKey: zod.string().nullish(),
+  status: zod.enum(['active', 'paused', 'draft', 'error']),
+  lastRunId: zod.string().nullish(),
+  lastRunAt: zod.string().nullish(),
+  lastRunStatus: zod.string().nullish(),
+  mappingCount: zod.number().optional(),
+  createdAt: zod.string(),
+  updatedAt: zod.string().optional(),
+  connection: zod
+    .object({
+      id: zod.string(),
+      name: zod.string(),
+      destination: zod.string(),
+      status: zod.enum(['active', 'error', 'untested']),
+      credentialMeta: zod.record(zod.string(), zod.unknown()).optional(),
+      testedAt: zod.string().nullish(),
+      createdAt: zod.string(),
+      updatedAt: zod.string().optional(),
+    })
+    .optional(),
+});
+
+/**
+ * @summary Update a sync
+ */
+export const UpdateConduitSyncParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const UpdateConduitSyncBody = zod.object({
+  name: zod.string().optional(),
+  sourceType: zod.string().optional(),
+  sourceMeta: zod.record(zod.string(), zod.unknown()).optional(),
+  connectionId: zod.string().optional(),
+  objectType: zod.string().optional(),
+  runMode: zod.string().optional(),
+  scheduleExpr: zod.string().optional(),
+  semantics: zod.string().optional(),
+  upsertKey: zod.string().optional(),
+  status: zod.string().optional(),
+});
+
+export const UpdateConduitSyncResponse = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  sourceType: zod.enum([
+    'postgres',
+    'csv',
+    'api_resource',
+    'snowflake',
+    'bigquery',
+  ]),
+  sourceMeta: zod.record(zod.string(), zod.unknown()).optional(),
+  connectionId: zod.string(),
+  objectType: zod.string(),
+  runMode: zod.enum(['manual', 'scheduled', 'on_change']),
+  scheduleExpr: zod.string().nullish(),
+  semantics: zod.enum(['insert', 'upsert', 'mirror']),
+  upsertKey: zod.string().nullish(),
+  status: zod.enum(['active', 'paused', 'draft', 'error']),
+  lastRunId: zod.string().nullish(),
+  lastRunAt: zod.string().nullish(),
+  lastRunStatus: zod.string().nullish(),
+  mappingCount: zod.number().optional(),
+  createdAt: zod.string(),
+  updatedAt: zod.string().optional(),
+  connection: zod
+    .object({
+      id: zod.string(),
+      name: zod.string(),
+      destination: zod.string(),
+      status: zod.enum(['active', 'error', 'untested']),
+      credentialMeta: zod.record(zod.string(), zod.unknown()).optional(),
+      testedAt: zod.string().nullish(),
+      createdAt: zod.string(),
+      updatedAt: zod.string().optional(),
+    })
+    .optional(),
+});
+
+/**
+ * @summary Delete a sync
+ */
+export const DeleteConduitSyncParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary Trigger an immediate sync run
+ */
+export const RunConduitSyncParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary Get field mappings for a sync
+ */
+export const GetConduitSyncMappingsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetConduitSyncMappingsResponseItem = zod.object({
+  id: zod.string(),
+  syncId: zod.string(),
+  sourceField: zod.string(),
+  destinationField: zod.string(),
+  transform: zod
+    .union([
+      zod.literal('uppercase'),
+      zod.literal('lowercase'),
+      zod.literal('concat'),
+      zod.literal('split'),
+      zod.literal('format_date'),
+      zod.literal('lookup'),
+      zod.literal('json_extract'),
+      zod.literal('constant'),
+      zod.literal('conditional'),
+      zod.literal(null),
+    ])
+    .nullish(),
+  transformConfig: zod.record(zod.string(), zod.unknown()).optional(),
+  sortOrder: zod.number().optional(),
+});
+export const GetConduitSyncMappingsResponse = zod.array(
+  GetConduitSyncMappingsResponseItem,
+);
+
+/**
+ * @summary Replace field mappings for a sync
+ */
+export const UpdateConduitSyncMappingsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const UpdateConduitSyncMappingsBody = zod.object({
+  mappings: zod.array(
+    zod.object({
+      sourceField: zod.string(),
+      destinationField: zod.string(),
+      transform: zod.string().optional(),
+      transformConfig: zod.record(zod.string(), zod.unknown()).optional(),
+      sortOrder: zod.number().optional(),
+    }),
+  ),
+});
+
+export const UpdateConduitSyncMappingsResponseItem = zod.object({
+  id: zod.string(),
+  syncId: zod.string(),
+  sourceField: zod.string(),
+  destinationField: zod.string(),
+  transform: zod
+    .union([
+      zod.literal('uppercase'),
+      zod.literal('lowercase'),
+      zod.literal('concat'),
+      zod.literal('split'),
+      zod.literal('format_date'),
+      zod.literal('lookup'),
+      zod.literal('json_extract'),
+      zod.literal('constant'),
+      zod.literal('conditional'),
+      zod.literal(null),
+    ])
+    .nullish(),
+  transformConfig: zod.record(zod.string(), zod.unknown()).optional(),
+  sortOrder: zod.number().optional(),
+});
+export const UpdateConduitSyncMappingsResponse = zod.array(
+  UpdateConduitSyncMappingsResponseItem,
+);
+
+/**
+ * @summary List sync runs
+ */
+export const listConduitSyncRunsQueryLimitDefault = 50;
+export const listConduitSyncRunsQueryOffsetDefault = 0;
+
+export const ListConduitSyncRunsQueryParams = zod.object({
+  syncId: zod.coerce.string().optional(),
+  status: zod.coerce.string().optional(),
+  limit: zod.coerce.number().default(listConduitSyncRunsQueryLimitDefault),
+  offset: zod.coerce.number().default(listConduitSyncRunsQueryOffsetDefault),
+});
+
+export const ListConduitSyncRunsResponse = zod.object({
+  data: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        syncId: zod.string(),
+        syncName: zod.string().optional(),
+        status: zod.enum(['running', 'success', 'failed', 'partial']),
+        rowsRead: zod.number().optional(),
+        rowsWritten: zod.number().optional(),
+        rowsFailed: zod.number().optional(),
+        durationMs: zod.number().nullish(),
+        errorMessage: zod.string().nullish(),
+        startedAt: zod.string(),
+        finishedAt: zod.string().nullish(),
+        triggeredBy: zod.enum(['manual', 'scheduled', 'on_change']).optional(),
+      }),
+    )
+    .optional(),
+  total: zod.number().optional(),
+});
+
+/**
+ * @summary Get a sync run with details
+ */
+export const GetConduitSyncRunParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetConduitSyncRunResponse = zod
+  .object({
+    id: zod.string(),
+    syncId: zod.string(),
+    syncName: zod.string().optional(),
+    status: zod.enum(['running', 'success', 'failed', 'partial']),
+    rowsRead: zod.number().optional(),
+    rowsWritten: zod.number().optional(),
+    rowsFailed: zod.number().optional(),
+    durationMs: zod.number().nullish(),
+    errorMessage: zod.string().nullish(),
+    startedAt: zod.string(),
+    finishedAt: zod.string().nullish(),
+    triggeredBy: zod.enum(['manual', 'scheduled', 'on_change']).optional(),
+  })
+  .and(
+    zod.object({
+      sync: zod
+        .object({
+          id: zod.string(),
+          name: zod.string(),
+          sourceType: zod.enum([
+            'postgres',
+            'csv',
+            'api_resource',
+            'snowflake',
+            'bigquery',
+          ]),
+          sourceMeta: zod.record(zod.string(), zod.unknown()).optional(),
+          connectionId: zod.string(),
+          objectType: zod.string(),
+          runMode: zod.enum(['manual', 'scheduled', 'on_change']),
+          scheduleExpr: zod.string().nullish(),
+          semantics: zod.enum(['insert', 'upsert', 'mirror']),
+          upsertKey: zod.string().nullish(),
+          status: zod.enum(['active', 'paused', 'draft', 'error']),
+          lastRunId: zod.string().nullish(),
+          lastRunAt: zod.string().nullish(),
+          lastRunStatus: zod.string().nullish(),
+          mappingCount: zod.number().optional(),
+          createdAt: zod.string(),
+          updatedAt: zod.string().optional(),
+          connection: zod
+            .object({
+              id: zod.string(),
+              name: zod.string(),
+              destination: zod.string(),
+              status: zod.enum(['active', 'error', 'untested']),
+              credentialMeta: zod
+                .record(zod.string(), zod.unknown())
+                .optional(),
+              testedAt: zod.string().nullish(),
+              createdAt: zod.string(),
+              updatedAt: zod.string().optional(),
+            })
+            .optional(),
+        })
+        .optional(),
+      sampleErrors: zod
+        .array(
+          zod.object({
+            id: zod.string(),
+            runId: zod.string(),
+            rowIndex: zod.number(),
+            sourceData: zod.record(zod.string(), zod.unknown()).optional(),
+            errorMessage: zod.string().nullish(),
+            retried: zod.boolean().optional(),
+            retriedAt: zod.string().nullish(),
+          }),
+        )
+        .optional(),
+    }),
+  );
+
+/**
+ * @summary List row-level errors for a sync run
+ */
+export const ListConduitSyncRunRowsParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const listConduitSyncRunRowsQueryLimitDefault = 100;
+export const listConduitSyncRunRowsQueryOffsetDefault = 0;
+
+export const ListConduitSyncRunRowsQueryParams = zod.object({
+  limit: zod.coerce.number().default(listConduitSyncRunRowsQueryLimitDefault),
+  offset: zod.coerce.number().default(listConduitSyncRunRowsQueryOffsetDefault),
+});
+
+export const ListConduitSyncRunRowsResponseItem = zod.object({
+  id: zod.string(),
+  runId: zod.string(),
+  rowIndex: zod.number(),
+  sourceData: zod.record(zod.string(), zod.unknown()).optional(),
+  errorMessage: zod.string().nullish(),
+  retried: zod.boolean().optional(),
+  retriedAt: zod.string().nullish(),
+});
+export const ListConduitSyncRunRowsResponse = zod.array(
+  ListConduitSyncRunRowsResponseItem,
+);
+
+/**
+ * @summary Retry a failed row
+ */
+export const RetryConduitSyncRunRowParams = zod.object({
+  id: zod.coerce.string(),
+  rowId: zod.coerce.string(),
+});
+
+/**
+ * @summary List available sync templates
+ */
+export const ListConduitTemplatesResponseItem = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  sourceType: zod.string(),
+  destination: zod.string(),
+  description: zod.string(),
+  category: zod.string().optional(),
+  icon: zod.string().optional(),
+  mappingCount: zod.number().optional(),
+  mappings: zod
+    .array(
+      zod.object({
+        sourceField: zod.string(),
+        destinationField: zod.string(),
+        transform: zod.string().optional(),
+        transformConfig: zod.record(zod.string(), zod.unknown()).optional(),
+        sortOrder: zod.number().optional(),
+      }),
+    )
+    .optional(),
+});
+export const ListConduitTemplatesResponse = zod.array(
+  ListConduitTemplatesResponseItem,
+);
+
+/**
+ * @summary Get a sync template
+ */
+export const GetConduitTemplateParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetConduitTemplateResponse = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  sourceType: zod.string(),
+  destination: zod.string(),
+  description: zod.string(),
+  category: zod.string().optional(),
+  icon: zod.string().optional(),
+  mappingCount: zod.number().optional(),
+  mappings: zod
+    .array(
+      zod.object({
+        sourceField: zod.string(),
+        destinationField: zod.string(),
+        transform: zod.string().optional(),
+        transformConfig: zod.record(zod.string(), zod.unknown()).optional(),
+        sortOrder: zod.number().optional(),
+      }),
+    )
+    .optional(),
+});
+
+/**
+ * @summary Apply a template to create a pre-populated sync
+ */
+export const ApplyConduitTemplateParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const ApplyConduitTemplateBody = zod.object({
+  connectionId: zod.string().optional(),
+  name: zod.string().optional(),
+});
+
+/**
+ * @summary Preview source rows for a given source configuration
+ */
+export const PreviewConduitSourceBody = zod.object({
+  sourceType: zod.string(),
+  sourceMeta: zod.record(zod.string(), zod.unknown()).optional(),
+  mappings: zod
+    .array(
+      zod.object({
+        sourceField: zod.string(),
+        destinationField: zod.string(),
+        transform: zod.string().optional(),
+        transformConfig: zod.record(zod.string(), zod.unknown()).optional(),
+        sortOrder: zod.number().optional(),
+      }),
+    )
+    .optional(),
+});
+
+export const PreviewConduitSourceResponse = zod.object({
+  fields: zod.array(zod.string()).optional(),
+  rows: zod.array(zod.record(zod.string(), zod.unknown())).optional(),
+  totalRows: zod.number().optional(),
+});
+
+/**
+ * @summary List available destination objects for a connector type
+ */
+export const ListConduitDestinationObjectsParams = zod.object({
+  destination: zod.coerce.string(),
+});
+
+export const ListConduitDestinationObjectsQueryParams = zod.object({
+  connectionId: zod.coerce.string().optional(),
+});
+
+export const ListConduitDestinationObjectsResponseItem = zod.object({
+  name: zod.string(),
+  label: zod.string(),
+  description: zod.string().optional(),
+});
+export const ListConduitDestinationObjectsResponse = zod.array(
+  ListConduitDestinationObjectsResponseItem,
+);
+
+/**
+ * @summary List fields for a destination object
+ */
+export const ListConduitDestinationFieldsParams = zod.object({
+  destination: zod.coerce.string(),
+  objectType: zod.coerce.string(),
+});
+
+export const ListConduitDestinationFieldsQueryParams = zod.object({
+  connectionId: zod.coerce.string().optional(),
+});
+
+export const ListConduitDestinationFieldsResponseItem = zod.object({
+  name: zod.string(),
+  label: zod.string(),
+  type: zod.string(),
+  required: zod.boolean().optional(),
+  updateable: zod.boolean().optional(),
+  description: zod.string().optional(),
+});
+export const ListConduitDestinationFieldsResponse = zod.array(
+  ListConduitDestinationFieldsResponseItem,
+);

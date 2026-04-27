@@ -422,6 +422,11 @@ const PUBLIC_PREFIXES = [
   // future routes beginning with /api/mission-runbooks- (e.g. a hypothetical
   // /api/mission-runbooks-archive route would not be accidentally whitelisted).
   "/api/mission-runbooks/",
+  // Conduit Reverse ETL — connection CRUD, sync CRUD, mapping editor, run
+  // orchestration, template library, destination metadata, and stats surface.
+  // Fully public in demo mode (DB-backed, no tenant PII exposed). Write routes
+  // are still protected by CSRF double-submit (global csrfMiddleware in app.ts).
+  "/api/conduit/",
 ];
 
 /**

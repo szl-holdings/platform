@@ -2687,6 +2687,302 @@ export interface CounselMatterUpdate {
   parties?: CounselParty[];
 }
 
+export type ConduitSyncRunStatus =
+  (typeof ConduitSyncRunStatus)[keyof typeof ConduitSyncRunStatus];
+
+export const ConduitSyncRunStatus = {
+  running: 'running',
+  success: 'success',
+  failed: 'failed',
+  partial: 'partial',
+} as const;
+
+export type ConduitSyncRunTriggeredBy =
+  (typeof ConduitSyncRunTriggeredBy)[keyof typeof ConduitSyncRunTriggeredBy];
+
+export const ConduitSyncRunTriggeredBy = {
+  manual: 'manual',
+  scheduled: 'scheduled',
+  on_change: 'on_change',
+} as const;
+
+export interface ConduitSyncRun {
+  id: string;
+  syncId: string;
+  syncName?: string;
+  status: ConduitSyncRunStatus;
+  rowsRead?: number;
+  rowsWritten?: number;
+  rowsFailed?: number;
+  /** @nullable */
+  durationMs?: number | null;
+  /** @nullable */
+  errorMessage?: string | null;
+  startedAt: string;
+  /** @nullable */
+  finishedAt?: string | null;
+  triggeredBy?: ConduitSyncRunTriggeredBy;
+}
+
+export interface ConduitStats {
+  totalSyncs?: number;
+  activeSyncs?: number;
+  totalRuns?: number;
+  successfulRuns?: number;
+  failedRuns?: number;
+  totalRowsWritten?: number;
+  successRate?: number;
+  recentRuns?: ConduitSyncRun[];
+}
+
+export type ConduitConnectionStatus =
+  (typeof ConduitConnectionStatus)[keyof typeof ConduitConnectionStatus];
+
+export const ConduitConnectionStatus = {
+  active: 'active',
+  error: 'error',
+  untested: 'untested',
+} as const;
+
+export type ConduitConnectionCredentialMeta = { [key: string]: unknown };
+
+export interface ConduitConnection {
+  id: string;
+  name: string;
+  destination: string;
+  status: ConduitConnectionStatus;
+  credentialMeta?: ConduitConnectionCredentialMeta;
+  /** @nullable */
+  testedAt?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export type CreateConduitConnectionBodyCredentials = { [key: string]: unknown };
+
+export interface CreateConduitConnectionBody {
+  name: string;
+  destination: string;
+  credentials?: CreateConduitConnectionBodyCredentials;
+}
+
+export type UpdateConduitConnectionBodyCredentials = { [key: string]: unknown };
+
+export interface UpdateConduitConnectionBody {
+  name?: string;
+  credentials?: UpdateConduitConnectionBodyCredentials;
+}
+
+export interface ConduitConnectionTestResult {
+  success: boolean;
+  message?: string;
+  latencyMs?: number;
+}
+
+export type ConduitSyncSourceType =
+  (typeof ConduitSyncSourceType)[keyof typeof ConduitSyncSourceType];
+
+export const ConduitSyncSourceType = {
+  postgres: 'postgres',
+  csv: 'csv',
+  api_resource: 'api_resource',
+  snowflake: 'snowflake',
+  bigquery: 'bigquery',
+} as const;
+
+export type ConduitSyncSourceMeta = { [key: string]: unknown };
+
+export type ConduitSyncRunMode =
+  (typeof ConduitSyncRunMode)[keyof typeof ConduitSyncRunMode];
+
+export const ConduitSyncRunMode = {
+  manual: 'manual',
+  scheduled: 'scheduled',
+  on_change: 'on_change',
+} as const;
+
+export type ConduitSyncSemantics =
+  (typeof ConduitSyncSemantics)[keyof typeof ConduitSyncSemantics];
+
+export const ConduitSyncSemantics = {
+  insert: 'insert',
+  upsert: 'upsert',
+  mirror: 'mirror',
+} as const;
+
+export type ConduitSyncStatus =
+  (typeof ConduitSyncStatus)[keyof typeof ConduitSyncStatus];
+
+export const ConduitSyncStatus = {
+  active: 'active',
+  paused: 'paused',
+  draft: 'draft',
+  error: 'error',
+} as const;
+
+export interface ConduitSync {
+  id: string;
+  name: string;
+  sourceType: ConduitSyncSourceType;
+  sourceMeta?: ConduitSyncSourceMeta;
+  connectionId: string;
+  objectType: string;
+  runMode: ConduitSyncRunMode;
+  /** @nullable */
+  scheduleExpr?: string | null;
+  semantics: ConduitSyncSemantics;
+  /** @nullable */
+  upsertKey?: string | null;
+  status: ConduitSyncStatus;
+  /** @nullable */
+  lastRunId?: string | null;
+  /** @nullable */
+  lastRunAt?: string | null;
+  /** @nullable */
+  lastRunStatus?: string | null;
+  mappingCount?: number;
+  createdAt: string;
+  updatedAt?: string;
+  connection?: ConduitConnection;
+}
+
+export type CreateConduitSyncBodySourceMeta = { [key: string]: unknown };
+
+export interface CreateConduitSyncBody {
+  name: string;
+  sourceType: string;
+  sourceMeta?: CreateConduitSyncBodySourceMeta;
+  connectionId: string;
+  objectType: string;
+  runMode: string;
+  scheduleExpr?: string;
+  semantics: string;
+  upsertKey?: string;
+}
+
+export type UpdateConduitSyncBodySourceMeta = { [key: string]: unknown };
+
+export interface UpdateConduitSyncBody {
+  name?: string;
+  sourceType?: string;
+  sourceMeta?: UpdateConduitSyncBodySourceMeta;
+  connectionId?: string;
+  objectType?: string;
+  runMode?: string;
+  scheduleExpr?: string;
+  semantics?: string;
+  upsertKey?: string;
+  status?: string;
+}
+
+/**
+ * @nullable
+ */
+export type ConduitSyncMappingTransform =
+  | (typeof ConduitSyncMappingTransform)[keyof typeof ConduitSyncMappingTransform]
+  | null;
+
+export const ConduitSyncMappingTransform = {
+  uppercase: 'uppercase',
+  lowercase: 'lowercase',
+  concat: 'concat',
+  split: 'split',
+  format_date: 'format_date',
+  lookup: 'lookup',
+  json_extract: 'json_extract',
+  constant: 'constant',
+  conditional: 'conditional',
+} as const;
+
+export type ConduitSyncMappingTransformConfig = { [key: string]: unknown };
+
+export interface ConduitSyncMapping {
+  id: string;
+  syncId: string;
+  sourceField: string;
+  destinationField: string;
+  /** @nullable */
+  transform?: ConduitSyncMappingTransform;
+  transformConfig?: ConduitSyncMappingTransformConfig;
+  sortOrder?: number;
+}
+
+export type ConduitSyncMappingInputTransformConfig = { [key: string]: unknown };
+
+export interface ConduitSyncMappingInput {
+  sourceField: string;
+  destinationField: string;
+  transform?: string;
+  transformConfig?: ConduitSyncMappingInputTransformConfig;
+  sortOrder?: number;
+}
+
+export type ConduitSyncRunRowSourceData = { [key: string]: unknown };
+
+export interface ConduitSyncRunRow {
+  id: string;
+  runId: string;
+  rowIndex: number;
+  sourceData?: ConduitSyncRunRowSourceData;
+  /** @nullable */
+  errorMessage?: string | null;
+  retried?: boolean;
+  /** @nullable */
+  retriedAt?: string | null;
+}
+
+export type ConduitSyncRunDetail = ConduitSyncRun & {
+  sync?: ConduitSync;
+  sampleErrors?: ConduitSyncRunRow[];
+};
+
+export interface ConduitTemplate {
+  id: string;
+  name: string;
+  sourceType: string;
+  destination: string;
+  description: string;
+  category?: string;
+  icon?: string;
+  mappingCount?: number;
+  mappings?: ConduitSyncMappingInput[];
+}
+
+export type ConduitSourcePreviewRequestSourceMeta = { [key: string]: unknown };
+
+export interface ConduitSourcePreviewRequest {
+  sourceType: string;
+  sourceMeta?: ConduitSourcePreviewRequestSourceMeta;
+  mappings?: ConduitSyncMappingInput[];
+}
+
+export type ConduitSourcePreviewResultRowsItem = { [key: string]: unknown };
+
+export interface ConduitSourcePreviewResult {
+  fields?: string[];
+  rows?: ConduitSourcePreviewResultRowsItem[];
+  totalRows?: number;
+}
+
+export interface ConduitDestinationObject {
+  name: string;
+  label: string;
+  description?: string;
+}
+
+export interface ConduitDestinationField {
+  name: string;
+  label: string;
+  type: string;
+  required?: boolean;
+  updateable?: boolean;
+  description?: string;
+}
+
+export interface ConduitError {
+  error?: string;
+}
+
 export type BadRequestResponse = {
   error?: string;
   message?: string;
@@ -4781,4 +5077,43 @@ export type ExportAtlasOpenUSDManifest503 = {
   requestId?: string;
   correlationId?: string;
   details?: ExportAtlasOpenUSDManifest503Details;
+};
+
+export type ListConduitSyncsParams = {
+  status?: string;
+  destinationId?: string;
+};
+
+export type UpdateConduitSyncMappingsBody = {
+  mappings: ConduitSyncMappingInput[];
+};
+
+export type ListConduitSyncRunsParams = {
+  syncId?: string;
+  status?: string;
+  limit?: number;
+  offset?: number;
+};
+
+export type ListConduitSyncRuns200 = {
+  data?: ConduitSyncRun[];
+  total?: number;
+};
+
+export type ListConduitSyncRunRowsParams = {
+  limit?: number;
+  offset?: number;
+};
+
+export type ApplyConduitTemplateBody = {
+  connectionId?: string;
+  name?: string;
+};
+
+export type ListConduitDestinationObjectsParams = {
+  connectionId?: string;
+};
+
+export type ListConduitDestinationFieldsParams = {
+  connectionId?: string;
 };

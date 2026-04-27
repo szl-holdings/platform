@@ -449,6 +449,14 @@ router.use(lazyMatch("/omnia", () => import("./omnia"), "omnia"));
 // GET  /openai/daily-briefing/today             — today's daily briefing audio+provenance (mobile)
 router.use("/openai", openaiConversationsRouter);
 
+// Conduit — Reverse ETL: map SZL internal data to third-party SaaS destinations
+// GET/POST/PATCH/DELETE /conduit/connections, /conduit/syncs, /conduit/sync-runs
+// POST /conduit/syncs/:id/run, GET/PUT /conduit/syncs/:id/mappings
+// GET /conduit/templates, POST /conduit/templates/:id/apply
+// GET /conduit/destinations/:destination/objects
+// POST /conduit/sources/preview, GET /conduit/stats
+router.use(lazyMatch("/conduit", () => import("./conduit"), "conduit"));
+
 // Carlota Jo drip email engine — lead nurturing sequences, engagement tracking, unsubscribe.
 router.use(lazyMatch("/booking/drip", () => import("./carlota-drip"), "carlota-drip"));
 
