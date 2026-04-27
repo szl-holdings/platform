@@ -3786,6 +3786,19 @@ export default function AdminCommandCenter() {
             <Activity className="w-4 h-4 shrink-0" />
             {sidebarOpen && <span className="truncate text-xs">Tenant Health</span>}
           </Link>
+          <Link
+            href="/admin/growth-command"
+            className={cn(
+              'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors',
+              currentPath === '/admin/growth-command'
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+            )}
+            title={!sidebarOpen ? 'Growth Command' : undefined}
+          >
+            <TrendingUp className="w-4 h-4 shrink-0" />
+            {sidebarOpen && <span className="truncate text-xs">Growth Command</span>}
+          </Link>
           <div className={cn('flex items-center gap-2 px-2.5 py-2 rounded-lg')}>
             <Lock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             {sidebarOpen && (
