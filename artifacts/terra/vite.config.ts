@@ -7,7 +7,7 @@ import { sharedProxyPlugin } from '@szl-holdings/shared-proxy';
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
 
-const vitePort = Number(process.env.VITE_PORT) || 6100;
+const vitePort = Number(process.env.VITE_PORT) || 6000;
 const basePath = process.env.BASE_PATH || '/terra/';
 
 export default defineConfig({

@@ -28,5 +28,5 @@ kind = "web"
   to = "/index.html"
 
   [services.env]
-  VITE_PORT = "6100"
+  VITE_PORT = "6000"
   BASE_PATH = "/terra/"

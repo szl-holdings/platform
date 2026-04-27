@@ -28,5 +28,5 @@ from = "/*"
 to = "/index.html"
 
 [services.env]
-VITE_PORT = "8097"
+VITE_PORT = "8099"
 BASE_PATH = "/vessels/"
