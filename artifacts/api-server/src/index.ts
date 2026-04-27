@@ -61,6 +61,7 @@ import { seedLyteActions } from './lib/seed-lyte-actions';
 import { seedLyteSurfaces } from './lib/seed-lyte-surfaces';
 import { seedMspData } from './lib/seed-msp';
 import { seedPlatformData } from './lib/seed-platform';
+import { seedBillingData } from './seed/seed-billing';
 import {
   prewarmIntelligenceCache,
   scheduleIntelligenceCachePruning,
@@ -738,6 +739,7 @@ export async function bootstrap(
         { name: 'seedLyteActions', fn: seedLyteActions },
         { name: 'seedLyteSurfaces', fn: seedLyteSurfaces },
         { name: 'seedTerraPortfolioModules', fn: seedTerraPortfolioModules },
+        { name: 'seedBillingData', fn: seedBillingData },
       );
     } else {
       logger.info(

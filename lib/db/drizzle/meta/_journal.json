@@ -596,6 +596,13 @@
       "when": 1745956800000,
       "tag": "0115_email_send_log",
       "breakpoints": true
+    },
+    {
+      "idx": 116,
+      "version": "7",
+      "when": 1745956860000,
+      "tag": "0116_revenue_events",
+      "breakpoints": true
     }
   ]
 }
