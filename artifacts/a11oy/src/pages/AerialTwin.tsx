@@ -1,3 +1,4 @@
+import { Link } from 'wouter';
 import { Layout } from '../components/layout';
 import {
   PageHeader, Card, SectionTitle, KpiCard, StatusBadge, InfoRow,
@@ -7,6 +8,7 @@ import {
   PRIMITIVES, OPEN_SOURCE_LEADERS, VERTICAL_BINDINGS, INNOVATION_SEEDS, ROADMAP, GUARDRAILS, AERIAL_TWIN_CITATIONS,
   type SeedStatus, type RoadmapPhase, type VerticalId,
 } from '../data/aerialTwin';
+import { AERIAL_TWIN_MILESTONES } from '../data/aerialTwinMilestones';
 
 const GOLD = '#c9b787';
 const TEXT = 'var(--color-a11oy-text)';
@@ -31,6 +33,8 @@ const PHASE_LABEL: Record<RoadmapPhase, string> = {
   '7–12':  'Months 7–12 · Reinforcement',
   '13–24': 'Months 13–24 · Hardening',
 };
+
+const base = (import.meta.env.BASE_URL || '/a11oy/').replace(/\/$/, '');
 
 export function AerialTwin() {
   const phases: RoadmapPhase[] = ['0–6', '7–12', '13–24'];
@@ -242,6 +246,30 @@ export function AerialTwin() {
               {g.enforcedBy}
             </div>
           </Card>
+        ))}
+      </div>
+
+      {/* Operational surfaces hub */}
+      <SectionTitle className="mt-2">Operational surfaces — all 8 milestones delivered</SectionTitle>
+      <p className="text-xs mb-3" style={{ color: SUB }}>
+        Each milestone is a full surface with deliverables, OSS distillations, guardrails, and citations.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        {AERIAL_TWIN_MILESTONES.map((m) => (
+          <Link key={m.slug} href={`${base}/aerial-twin/${m.slug}`} className="block">
+            <Card className="h-full cursor-pointer" style={{ borderColor: 'rgba(201,183,135,0.25)' }}>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-mono text-[10px] px-1.5 py-0.5 rounded" style={{ color: GOLD, backgroundColor: 'rgba(201,183,135,0.12)' }}>
+                  M{m.number}
+                </span>
+                <span className="font-mono text-[10px] px-1.5 py-0.5 rounded" style={{ color: '#7afa7a', backgroundColor: 'rgba(122,250,122,0.08)' }}>
+                  DELIVERED
+                </span>
+              </div>
+              <div className="text-xs font-medium mb-1" style={{ color: TEXT }}>{m.title}</div>
+              <div className="text-[10px] font-mono" style={{ color: GHOST }}>{m.phase} months · {m.deliverables.length} deliverables</div>
+            </Card>
+          </Link>
         ))}
       </div>
 

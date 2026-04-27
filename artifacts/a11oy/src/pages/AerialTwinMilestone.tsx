@@ -38,10 +38,8 @@ export function AerialTwinMilestone() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {AERIAL_TWIN_MILESTONES.map((m) => (
-              <Link key={m.slug} href={`${base}/aerial-twin/${m.slug}`}>
-                <a className="block text-xs px-3 py-2 rounded" style={{ color: GOLD, border: '1px solid rgba(201,183,135,0.18)' }}>
-                  Milestone {m.number} · {m.title}
-                </a>
+              <Link key={m.slug} href={`${base}/aerial-twin/${m.slug}`} className="block text-xs px-3 py-2 rounded" style={{ color: GOLD, border: '1px solid rgba(201,183,135,0.18)' }}>
+                Milestone {m.number} · {m.title}
               </Link>
             ))}
           </div>
@@ -156,11 +154,9 @@ export function AerialTwinMilestone() {
                 const r = getMilestonePack(slug);
                 if (!r) return null;
                 return (
-                  <Link key={slug} href={`${base}/aerial-twin/${r.slug}`}>
-                    <a className="block text-xs px-3 py-2 rounded" style={{ color: GOLD, border: '1px solid rgba(201,183,135,0.18)' }}>
-                      <span className="font-mono text-[10px] mr-1" style={{ color: GHOST }}>M{r.number}</span>
-                      {r.title}
-                    </a>
+                  <Link key={slug} href={`${base}/aerial-twin/${r.slug}`} className="block text-xs px-3 py-2 rounded" style={{ color: GOLD, border: '1px solid rgba(201,183,135,0.18)' }}>
+                    <span className="font-mono text-[10px] mr-1" style={{ color: GHOST }}>M{r.number}</span>
+                    {r.title}
                   </Link>
                 );
               })}
