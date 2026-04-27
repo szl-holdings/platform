@@ -14,6 +14,7 @@ import {
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { useUtm } from "@/hooks/useUtm";
 
 const capitalPaths = [
   {
@@ -56,6 +57,7 @@ export default function InvestorRelationsPage() {
   const [form, setForm] = useState({ email: "", company: "", message: "", error: "" });
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const utm = useUtm();
 
   const __pageMeta = usePageMeta({
     title: "Investor Relations \u2014 SZL Holdings",
@@ -84,6 +86,10 @@ export default function InvestorRelationsPage() {
           message:
             form.message.trim() ||
             `Capital inquiry from ${form.email.trim()}${form.company.trim() ? ` (${form.company.trim()})` : ""}.`,
+          ...(utm.utm_source && { utm_source: utm.utm_source }),
+          ...(utm.utm_medium && { utm_medium: utm.utm_medium }),
+          ...(utm.utm_campaign && { utm_campaign: utm.utm_campaign }),
+          ...(utm.utm_content && { utm_content: utm.utm_content }),
         }),
       });
 
