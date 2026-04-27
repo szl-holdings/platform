@@ -1147,7 +1147,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
   "GettingStartedChecklist": {
     category: "Onboarding",
     status: "stable",
-    source: "lib/shared-ui/src/onboarding/legacy-wizard.tsx",
+    source: "lib/shared-ui/src/onboarding/onboarding-wizard.tsx",
     props: [
       { name: "appId", type: "string", required: true, description: "" },
       { name: "appName", type: "string", required: true, description: "" },
@@ -1550,7 +1550,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
   "OnboardingReplayButton": {
     category: "Onboarding",
     status: "stable",
-    source: "lib/shared-ui/src/onboarding/legacy-wizard.tsx",
+    source: "lib/shared-ui/src/onboarding/onboarding-wizard.tsx",
     props: [
       { name: "onClick", type: "() => void", required: true, description: "" },
       { name: "accentColor", type: "string", required: false, description: "" },
@@ -1559,7 +1559,7 @@ export const GENERATED_METADATA: Record<string, GeneratedComponentMeta> = {
   "OnboardingWizard": {
     category: "Onboarding",
     status: "stable",
-    source: "lib/shared-ui/src/onboarding/legacy-wizard.tsx",
+    source: "lib/shared-ui/src/onboarding/onboarding-wizard.tsx",
     props: [
       { name: "config", type: "OnboardingConfig", required: true, description: "" },
       { name: "onComplete", type: "() => void", required: false, description: "" },

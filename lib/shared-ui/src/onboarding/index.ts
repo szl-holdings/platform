@@ -26,7 +26,7 @@ export {
   type OnboardingWizardProps,
   useChecklistState,
   useOnboardingState,
-} from './legacy-wizard';
+} from './onboarding-wizard';
 export {
   type ChecklistItem,
   OnboardingChecklist,
