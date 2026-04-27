@@ -113,6 +113,7 @@ const AIUserTurn = lazy(() => import('./pages/AIUserTurn').then(m => ({ default:
 const AgentWelfare = lazy(() => import('./pages/AgentWelfare').then(m => ({ default: m.AgentWelfare })));
 const RedTeam = lazy(() => import('./pages/RedTeam').then(m => ({ default: m.RedTeam })));
 const GlasswingPage = lazy(() => import('./pages/Glasswing').then(m => ({ default: m.Glasswing })));
+const ArgoForgePage = lazy(() => import('./pages/ArgoForge').then(m => ({ default: m.ArgoForge })));
 const SystemCard = lazy(() => import('./pages/SystemCard').then(m => ({ default: m.SystemCard })));
 const CapabilityTrajectory = lazy(() => import('./pages/CapabilityTrajectory').then(m => ({ default: m.CapabilityTrajectory })));
 const MythosSpec = lazy(() => import('./pages/MythosSpec').then(m => ({ default: m.MythosSpec })));
@@ -229,6 +230,7 @@ export default function App() {
         <Route path={`${base}/welfare`} component={AgentWelfare} />
         <Route path={`${base}/red-team`} component={RedTeam} />
         <Route path={`${base}/glasswing`} component={GlasswingPage} />
+        <Route path={`${base}/argo`} component={ArgoForgePage} />
         <Route path={`${base}/system-card/:id`} component={SystemCard} />
         <Route path={`${base}/capability-trajectory`} component={CapabilityTrajectory} />
         <Route path={`${base}/resilience`} component={DarpaResilienceHub} />
