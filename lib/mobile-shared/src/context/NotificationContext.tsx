@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { AppState } from 'react-native';
 
 export interface AppNotification {
   id: number;
@@ -148,6 +149,16 @@ export function NotificationProvider({
     const interval = setInterval(refresh, pollInterval);
     return () => clearInterval(interval);
   }, [enabled, pollInterval, refresh]);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        void refresh();
+      }
+    });
+    return () => subscription.remove();
+  }, [enabled, refresh]);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 

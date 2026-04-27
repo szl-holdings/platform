@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 import { apiFetch, getApiBase, getCachedAuthToken } from '@/lib/apiClient';
 import { useAuth } from '@/context/AuthContext';
 
@@ -165,6 +166,30 @@ export function useNotificationCount(): NotificationCountResult {
       }),
     [],
   );
+
+  const fetchBadgeCount = useCallback(async () => {
+    try {
+      const data = await apiFetch<{ data?: { unreadCount: number }; unreadCount?: number }>(
+        '/api/notifications/count',
+      );
+      const count =
+        (data as { data?: { unreadCount: number } })?.data?.unreadCount ??
+        (data as { unreadCount?: number })?.unreadCount ??
+        0;
+      setUnreadCount(count);
+    } catch {
+      // silently ignore; stale count is better than a crash
+    }
+  }, []);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        void fetchBadgeCount();
+      }
+    });
+    return () => subscription.remove();
+  }, [fetchBadgeCount]);
 
   return { unreadCount };
 }
