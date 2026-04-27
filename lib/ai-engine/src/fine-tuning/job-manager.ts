@@ -131,7 +131,7 @@ async function submitGeminiFineTuning(
   agentId: string,
   hyperparameters: FineTuningJobRequest['hyperparameters'],
 ): Promise<{ providerJobId: string }> {
-  const geminiKey = process.env.GEMINI_FINE_TUNING_API_KEY ?? process.env.GEMINI_API_KEY ?? process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
+  const geminiKey = process.env.GEMINI_FINE_TUNING_API_KEY ?? process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
   if (!geminiKey) throw new Error('GEMINI_FINE_TUNING_API_KEY not configured');
 
   const geminiBase =
@@ -427,7 +427,7 @@ async function pollGeminiJobStatus(providerJobId: string): Promise<{
   fineTunedModelId?: string;
   error?: string;
 }> {
-  const geminiKey = process.env.GEMINI_FINE_TUNING_API_KEY ?? process.env.GEMINI_API_KEY ?? process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
+  const geminiKey = process.env.GEMINI_FINE_TUNING_API_KEY ?? process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
   if (!geminiKey) throw new Error('GEMINI_FINE_TUNING_API_KEY not configured');
 
   const geminiBase =

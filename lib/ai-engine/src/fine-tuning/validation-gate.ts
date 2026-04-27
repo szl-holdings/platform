@@ -124,7 +124,7 @@ async function callGeminiForEval(
   modelId: string,
   input: string,
 ): Promise<Record<string, unknown>> {
-  const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY ?? process.env.GEMINI_API_KEY;
+  const geminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
   if (!geminiKey) throw new Error('Gemini key not configured');
   const geminiBase =
     process.env.AI_INTEGRATIONS_GEMINI_BASE_URL ?? 'https://generativelanguage.googleapis.com/v1beta';
