@@ -52,6 +52,15 @@ const BoardroomMode = lazy(() => import('./pages/BoardroomMode').then(m => ({ de
 const InvestorDemo = lazy(() => import('./pages/InvestorDemo').then(m => ({ default: m.InvestorDemo })));
 const Terminal = lazy(() => import('./pages/Terminal').then(m => ({ default: m.Terminal })));
 const Fabric = lazy(() => import('./pages/Fabric').then(m => ({ default: m.Fabric })));
+const FabricCockpit = lazy(() => import('./pages/fabric/FabricCockpit').then(m => ({ default: m.FabricCockpit })));
+const FabricVerticalsCommand = lazy(() => import('./pages/fabric/VerticalsCommand').then(m => ({ default: m.VerticalsCommand })));
+const FabricDomainTwins = lazy(() => import('./pages/fabric/DomainTwins').then(m => ({ default: m.DomainTwins })));
+const FabricSignalMeshPage = lazy(() => import('./pages/fabric/SignalMesh').then(m => ({ default: m.FabricSignalMesh })));
+const FabricRiskMatrix = lazy(() => import('./pages/fabric/RiskMatrix').then(m => ({ default: m.RiskMatrix })));
+const FabricDecisionQueue = lazy(() => import('./pages/fabric/DecisionQueue').then(m => ({ default: m.DecisionQueue })));
+const FabricOutcomeMemory = lazy(() => import('./pages/fabric/OutcomeMemory').then(m => ({ default: m.OutcomeMemory })));
+const FabricEvidenceLedger = lazy(() => import('./pages/fabric/EvidenceLedger').then(m => ({ default: m.EvidenceLedger })));
+const FabricEcosystemRoadmap = lazy(() => import('./pages/fabric/EcosystemRoadmap').then(m => ({ default: m.EcosystemRoadmap })));
 const Verticals = lazy(() => import('./pages/Verticals').then(m => ({ default: m.Verticals })));
 const Outcomes = lazy(() => import('./pages/Outcomes').then(m => ({ default: m.Outcomes })));
 const Memory = lazy(() => import('./pages/Memory').then(m => ({ default: m.Memory })));
@@ -187,7 +196,15 @@ export default function App() {
         <Route path={`${base}/nexus`} component={Praxis} />
         <Route path={`${base}/mcp-hub`} component={McpHub} />
         <Route path={`${base}/agentic-rag`} component={AgenticRag} />
-        <Route path={`${base}/fabric`} component={Fabric} />
+        <Route path={`${base}/fabric/verticals`} component={FabricVerticalsCommand} />
+        <Route path={`${base}/fabric/twins`} component={FabricDomainTwins} />
+        <Route path={`${base}/fabric/signals`} component={FabricSignalMeshPage} />
+        <Route path={`${base}/fabric/risks`} component={FabricRiskMatrix} />
+        <Route path={`${base}/fabric/decisions`} component={FabricDecisionQueue} />
+        <Route path={`${base}/fabric/outcomes`} component={FabricOutcomeMemory} />
+        <Route path={`${base}/fabric/evidence`} component={FabricEvidenceLedger} />
+        <Route path={`${base}/fabric/roadmap`} component={FabricEcosystemRoadmap} />
+        <Route path={`${base}/fabric`} component={FabricCockpit} />
         <Route path={`${base}/verticals`} component={Verticals} />
         <Route path={`${base}/outcomes`} component={Outcomes} />
         <Route path={`${base}/memory`} component={Memory} />

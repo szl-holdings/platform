@@ -35,9 +35,22 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: 'FABRIC',
+    label: 'COMMAND FABRIC',
     items: [
-      { href: '/fabric',     label: 'Fabric' },
+      { href: '/fabric',            label: 'Fabric Cockpit' },
+      { href: '/fabric/verticals',  label: 'Verticals Command' },
+      { href: '/fabric/twins',      label: 'Domain Twins' },
+      { href: '/fabric/signals',    label: 'Signal Mesh' },
+      { href: '/fabric/risks',      label: 'Risk Matrix' },
+      { href: '/fabric/decisions',  label: 'Decision Queue' },
+      { href: '/fabric/outcomes',   label: 'Outcome Memory' },
+      { href: '/fabric/evidence',   label: 'Evidence Ledger' },
+      { href: '/fabric/roadmap',    label: 'Ecosystem Roadmap' },
+    ],
+  },
+  {
+    label: 'FABRIC LEGACY',
+    items: [
       { href: '/verticals',  label: 'Verticals' },
       { href: '/signals',    label: 'Signal Mesh + KG' },
       { href: '/outcomes',   label: 'Outcomes' },
