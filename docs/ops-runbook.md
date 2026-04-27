@@ -757,6 +757,51 @@ This document was audited against the following source files. When a claim in th
 
 ---
 
+## Google Search Console — Sitemap Submission
+
+**Property:** `szlholdings.com`  
+**Sitemap URL:** `https://szlholdings.com/sitemap.xml`  
+**Sitemap file:** `artifacts/szl-holdings/public/sitemap.xml`  
+**Robots file:** `artifacts/szl-holdings/public/robots.txt`
+
+### Current State (April 2026)
+- `sitemap.xml` is deployed and well-formed (validated against the sitemap 0.9 XSD schema)
+- `robots.txt` references the sitemap at `Sitemap: https://szlholdings.com/sitemap.xml`
+- All URLs in the sitemap are crawlable (not blocked by `robots.txt`)
+- The `/investors/*` hub was intentionally excluded from the sitemap because `robots.txt` disallows that path
+
+### Manual Submission Steps
+The sitemap must be submitted once by a verified domain owner. This cannot be automated.
+
+1. Sign in to [Google Search Console](https://search.google.com/search-console/) with the Google account associated with `szlholdings.com`
+2. **Add property** → select "Domain" type → enter `szlholdings.com`
+3. Follow the DNS TXT verification instructions (add the provided TXT record to the DNS host for `szlholdings.com`)
+4. Once verified, navigate to **Indexing → Sitemaps** in the left sidebar
+5. In the "Add a new sitemap" field, enter: `sitemap.xml`
+6. Click **Submit**
+7. Refresh after a few minutes — status should show "Success" with a URL count
+
+### Ongoing Monitoring
+- **Coverage report:** Check weekly for "Error" or "Excluded" URLs, especially after deploying new routes
+- **Core Web Vitals:** Available ~28 days after initial crawl data; target "Good" status on mobile and desktop
+- **Sitemap errors:** If new routes are added, ensure they are added to `sitemap.xml` and not blocked by `robots.txt`
+
+### robots.txt — Intentionally Disallowed Paths
+The following paths are blocked from indexing by design:
+
+| Path | Reason |
+|------|--------|
+| `/admin` | Internal admin panel |
+| `/ops` | Internal operations dashboard |
+| `/kpi-dashboard` | Internal KPI view |
+| `/investors` | Gated investor hub (access-controlled) |
+| `/alloy` | Internal product surface |
+| `/prism-counsel` | Deprecated product route |
+| `/s31`, `/s32`, `/ny` | Internal staging/regional routes |
+| `/__mockup`, `/forge`, `/nexus`, `/oracle`, `/control-tower`, `/analyst` | Internal tooling |
+
+---
+
 ## Related Documentation
 
 | Document | Location | Contents |
