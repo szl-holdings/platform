@@ -19,14 +19,16 @@ import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { cn } from '@/lib/utils';
 
-async function adminFetch<T>(path: string): Promise<T> {
+async function adminFetch<T = unknown>(path: string, method = 'GET', body?: unknown): Promise<T> {
   const res = await fetch(`/api${path}`, {
+    method,
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
+    body: body !== undefined ? JSON.stringify(body) : undefined,
   });
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body?.error ?? `HTTP ${res.status}`);
+    const resBody = await res.json().catch(() => ({}));
+    throw new Error(resBody?.error ?? `HTTP ${res.status}`);
   }
   return res.json();
 }
@@ -223,6 +225,24 @@ interface PlausibleData {
 
 export default function AdminGrowthCommandPage() {
   const [refreshKey, setRefreshKey] = useState(0);
+  const [contactedIds, setContactedIds] = useState<Set<number>>(new Set());
+  const [contactingId, setContactingId] = useState<number | null>(null);
+
+  async function markContacted(id: number) {
+    setContactedIds((prev) => new Set(prev).add(id));
+    setContactingId(id);
+    try {
+      await adminFetch(`/admin/support-queue/${id}/status`, 'POST', { status: 'contacted' });
+    } catch {
+      setContactedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    } finally {
+      setContactingId(null);
+    }
+  }
 
   const growthQuery = useStandardQuery<GrowthData>({
     queryKey: ['admin-growth-inquiries', refreshKey],
@@ -258,7 +278,8 @@ export default function AdminGrowthCommandPage() {
 
   const totalThisWeek = growth?.thisWeek.count ?? 0;
   const delta = growth?.thisWeek.delta ?? 0;
-  const unrespondedCount = growth?.unresponded.length ?? 0;
+  const visibleUnresponded = (growth?.unresponded ?? []).filter((item) => !contactedIds.has(item.id));
+  const unrespondedCount = visibleUnresponded.length;
   const dbStatus = health?.checks?.database?.status ?? '—';
   const dbLatency = health?.checks?.database?.latencyMs;
 
@@ -653,14 +674,14 @@ export default function AdminGrowthCommandPage() {
                   <div key={i} className="h-12 rounded-lg bg-zinc-800/40 animate-pulse" />
                 ))}
               </div>
-            ) : (growth?.unresponded.length ?? 0) === 0 ? (
+            ) : visibleUnresponded.length === 0 ? (
               <div className="flex items-center gap-2 text-xs text-emerald-400">
                 <CheckCircle2 className="w-4 h-4" />
                 No overdue inquiries — inbox is clear.
               </div>
             ) : (
               <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1">
-                {growth?.unresponded.map((item) => (
+                {visibleUnresponded.map((item) => (
                   <div
                     key={item.id}
                     className="rounded-lg border border-red-500/20 bg-red-950/20 px-3 py-2.5 space-y-1"
@@ -682,11 +703,21 @@ export default function AdminGrowthCommandPage() {
                     {item.message && (
                       <p className="text-xs text-zinc-500 line-clamp-1">{item.message}</p>
                     )}
+                    <div className="pt-1">
+                      <button
+                        onClick={() => markContacted(item.id)}
+                        disabled={contactingId === item.id}
+                        className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                      >
+                        <CheckCircle2 className="w-3 h-3" />
+                        {contactingId === item.id ? 'Saving…' : 'Mark Contacted'}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
-            {(growth?.unresponded.length ?? 0) > 0 && (
+            {(growth?.unresponded.length ?? 0) > 0 && !growthQuery.isLoading && (
               <div className="mt-3 pt-3 border-t border-zinc-800">
                 <Link
                   href="/admin/command-center"
