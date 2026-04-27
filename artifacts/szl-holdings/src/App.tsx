@@ -167,6 +167,7 @@ const FounderPressPage = lazy(() => import("@/pages/founder/FounderPress"));
 const FounderContactPage = lazy(() => import("@/pages/founder/FounderContact"));
 const NotFoundPage = lazy(() => import("@/pages/not-found"));
 const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
+const ForgotPasswordPage = lazy(() => import("@/pages/forgot-password"));
 const EcosystemPage = lazy(() => import("@/pages/ecosystem"));
 const AutopilotPage = lazy(() => import("@/pages/autopilot"));
 const CaseStudiesPage = lazy(() => import("@/pages/case-studies"));
@@ -378,6 +379,18 @@ function RequireAuth({ children }: { children: ReactNode }) {
           >
             Sign In
           </button>
+          <a
+            href={`${import.meta.env.BASE_URL}forgot-password`.replace(/\/\//g, "/")}
+            style={{
+              display: "block",
+              marginTop: "0.875rem",
+              fontSize: "0.8125rem",
+              color: "hsl(192,72%,52%)",
+              textDecoration: "none",
+            }}
+          >
+            Forgot password?
+          </a>
         </div>
       </div>
     );
@@ -1347,6 +1360,9 @@ function App() {
             </Route>
 
             {/* ── Auth utility routes ── */}
+            <Route path="/forgot-password">
+              <Suspense fallback={<PageLoader />}><ForgotPasswordPage /></Suspense>
+            </Route>
             <Route path="/reset-password">
               <Suspense fallback={<PageLoader />}><ResetPasswordPage /></Suspense>
             </Route>
