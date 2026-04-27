@@ -189,7 +189,7 @@ export default function HardwareRootOfTrust() {
 
       {activeTab === 'anchors' && anchor && (
         <div className="space-y-4">
-          <button type="button" onClick={() => setSelectedAnchor(null)} className="text-[12px] text-white/40 hover:text-white/60 transition-colors">← Back to trust anchors</button>
+          <button type="button" onClick={() => setSelectedAnchor(null)} aria-label="Back to trust anchors list" className="text-[12px] text-white/40 hover:text-white/60 transition-colors"><span aria-hidden="true">←</span> Back to trust anchors</button>
           <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-6">
             <div className="flex items-start justify-between mb-4">
               <div>

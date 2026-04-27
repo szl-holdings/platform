@@ -136,10 +136,14 @@ export default function CyberInnovationRoadmap() {
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto">
+      <div role="tablist" aria-label="Roadmap phases" className="flex gap-2 overflow-x-auto">
         {PHASES.map((phase) => (
           <button
             type="button"
+            role="tab"
+            aria-selected={expandedPhase === phase.id}
+            aria-pressed={expandedPhase === phase.id}
+            aria-label={`Show details for ${phase.label} phase, ${phase.quarter}, status ${phase.status}`}
             key={phase.id}
             onClick={() => setExpandedPhase(phase.id)}
             className={cn(
