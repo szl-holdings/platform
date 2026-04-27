@@ -793,6 +793,147 @@ function buildHeatMapHtml(baseInputs: ProFormaInputs, baseScenarioName: string):
   </div>`;
 }
 
+function exportSingleScenarioPDF(scenario: Scenario) {
+  const inp = scenario.inputs;
+  const r = calcProForma(inp);
+
+  const metricRows = COMPARISON_METRICS.map((m) => {
+    const v = r[m.key];
+    const isOk = m.good(v);
+    const color = isOk ? '#40856a' : '#c0503a';
+    return `<tr>
+      <td style="padding:6px 12px;color:#999;border:1px solid #111">${m.label}</td>
+      <td style="padding:6px 12px;text-align:right;font-family:monospace;font-weight:600;color:${color};border:1px solid #111">${m.format(v)}</td>
+    </tr>`;
+  }).join('');
+
+  const incomeExpenseRows = [
+    { label: 'Gross Potential Rent', value: fmt(r.grossPotentialRent), sub: 'annualized' },
+    { label: 'Effective Gross Income', value: fmt(r.effectiveGrossIncome), sub: `at ${inp.stabilizedOccupancy}% occ.` },
+    { label: 'Operating Expenses', value: fmt(r.opex), sub: `$${inp.opexPerSF}/SF/yr` },
+    { label: 'Net Operating Income', value: fmt(r.noi), sub: `${pct(r.yieldOnCost)} yield on cost` },
+  ]
+    .map(
+      (m) =>
+        `<tr>
+          <td style="padding:6px 12px;color:#999;border:1px solid #111">${m.label}</td>
+          <td style="padding:6px 12px;text-align:right;font-family:monospace;font-weight:600;color:#b8943c;border:1px solid #111">${m.value}</td>
+          <td style="padding:6px 12px;text-align:right;font-size:10px;color:#555;border:1px solid #111">${m.sub}</td>
+        </tr>`,
+    )
+    .join('');
+
+  const inputSummaryRows = [
+    ['Total Units', `${inp.totalUnits}`],
+    ['Avg Unit SF', `${inp.avgUnitSF} SF`],
+    ['Land Cost', fmt(inp.landCost)],
+    ['Hard Cost/SF', `$${inp.hardCostPerSF}`],
+    ['Soft Cost %', `${inp.softCostPct}%`],
+    ['Contingency %', `${inp.contingencyPct}%`],
+    ['Financing Rate', `${inp.financingRate}%`],
+    ['Loan-to-Cost', `${inp.loanToCost}%`],
+    ['Construction Mo.', `${inp.constructionMonths} mo`],
+    ['Absorption Mo.', `${inp.absorptionMonths} mo`],
+    ['Market Rent/SF/Mo', `$${inp.marketRentPerSF}`],
+    ['Stabilized Occupancy', `${inp.stabilizedOccupancy}%`],
+    ['OpEx/SF/Yr', `$${inp.opexPerSF}`],
+    ['Exit Cap Rate', `${inp.exitCapRate}%`],
+  ]
+    .map(
+      ([label, value]) =>
+        `<tr>
+          <td style="padding:4px 12px;color:#666;font-size:10px;border:1px solid #111">${label}</td>
+          <td style="padding:4px 12px;font-family:monospace;font-size:10px;color:#ccc;border:1px solid #111">${value}</td>
+        </tr>`,
+    )
+    .join('');
+
+  const sensTableRows = r.sensRows
+    .map((row) => {
+      const isBase = Math.abs(row.capRate - inp.exitCapRate) < 0.01;
+      const profitColor = row.profit > 0 ? '#40856a' : '#c0503a';
+      const emColor = row.em >= inp.equityMultipleTarget ? '#40856a' : '#c0503a';
+      const labelStyle = isBase ? 'color:#b8943c;font-weight:700' : 'color:#999';
+      const bgStyle = isBase ? 'background:rgba(255,255,255,0.02)' : '';
+      return `<tr style="${bgStyle}">
+        <td style="padding:4px 12px;font-family:monospace;font-size:10px;border:1px solid #111;${labelStyle}">${pct(row.capRate)}${isBase ? ' ← base' : ''}</td>
+        <td style="padding:4px 12px;font-family:monospace;font-size:10px;color:#999;border:1px solid #111">${fmt(row.value)}</td>
+        <td style="padding:4px 12px;font-family:monospace;font-size:10px;color:${profitColor};border:1px solid #111">${fmt(row.profit)}</td>
+        <td style="padding:4px 12px;font-family:monospace;font-size:10px;color:${emColor};border:1px solid #111">${row.em.toFixed(2)}×</td>
+      </tr>`;
+    })
+    .join('');
+
+  const heatMapSection = buildHeatMapHtml(inp, scenario.name);
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <title>Terra — Pro Forma Report: ${scenario.name}</title>
+  <style>
+    body{background:#0a0c10;color:#ddd;font-family:sans-serif;padding:32px;font-size:13px}
+    h1{color:#b8943c;font-size:20px;margin-bottom:4px}
+    h2{color:#b8943c;font-size:15px;margin:28px 0 6px}
+    p{color:#555;margin-bottom:16px;font-size:11px}
+    table{border-collapse:collapse;background:#0d0f15}
+    th{font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+    .full-width{width:100%}
+    @media print{
+      body{background:white;color:#111}
+      table{background:white}
+      h1,h2{color:#7a6028}
+    }
+  </style>
+</head>
+<body>
+  <h1>Terra — Pro Forma Report</h1>
+  <p>Scenario: <strong style="color:#b8943c">${scenario.name}</strong> &nbsp;·&nbsp; Exported ${new Date().toLocaleString()}</p>
+
+  <h2>Key Metrics</h2>
+  <table class="full-width">
+    <thead><tr>
+      <th style="padding:8px 12px;text-align:left;color:#555;border:1px solid #222">Metric</th>
+      <th style="padding:8px 12px;text-align:right;color:${scenario.color};border:1px solid #222;font-family:monospace">${scenario.name}</th>
+    </tr></thead>
+    <tbody>${metricRows}</tbody>
+  </table>
+
+  <h2>Income & Expense Summary</h2>
+  <table class="full-width">
+    <thead><tr>
+      <th style="padding:8px 12px;text-align:left;color:#555;border:1px solid #222">Item</th>
+      <th style="padding:8px 12px;text-align:right;color:#555;border:1px solid #222">Value</th>
+      <th style="padding:8px 12px;text-align:right;color:#555;border:1px solid #222">Detail</th>
+    </tr></thead>
+    <tbody>${incomeExpenseRows}</tbody>
+  </table>
+
+  <h2>Project Inputs</h2>
+  <table class="full-width">
+    <tbody>${inputSummaryRows}</tbody>
+  </table>
+
+  <h2>Exit Cap Rate Sensitivity</h2>
+  <table class="full-width">
+    <thead><tr>
+      ${['Cap Rate', 'Stabilized Value', 'Developer Profit', 'Equity Multiple']
+        .map((h) => `<th style="padding:8px 12px;text-align:left;color:#555;border:1px solid #222">${h}</th>`)
+        .join('')}
+    </tr></thead>
+    <tbody>${sensTableRows}</tbody>
+  </table>
+
+  ${heatMapSection}
+</body>
+</html>`;
+  const win = window.open('', '_blank');
+  if (win) {
+    win.document.write(html);
+    win.document.close();
+    win.print();
+  }
+}
+
 function exportComparisonPDF(scenarios: Scenario[]) {
   const results = scenarios.map((s) => ({ ...s, r: calcProForma(s.inputs) }));
   const headerCells = results
@@ -1610,6 +1751,22 @@ export default function ProFormaPage() {
 
       {activeTab === 'builder' && (
         <>
+          <div className="flex items-center justify-end">
+            <button
+              onClick={() => exportSingleScenarioPDF(activeScenario)}
+              className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg font-semibold transition-all"
+              style={{
+                background: `${DS.accent.blue}12`,
+                border: `1px solid ${DS.accent.blue}30`,
+                color: DS.accent.blue,
+              }}
+              title="Download a shareable Pro Forma report for the current scenario"
+            >
+              <Download className="w-3 h-3" />
+              Download Report
+            </button>
+          </div>
+
           <div className="grid grid-cols-3 gap-3">
             {[
               {
