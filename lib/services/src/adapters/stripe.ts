@@ -415,6 +415,54 @@ export class StripeAdapter extends ServiceAdapter {
     }));
   }
 
+  /**
+   * List open (unpaid) invoices. Optionally scoped to a single Stripe customer.
+   * Used by the billing health summary endpoint to compute outstanding balance
+   * directly from Stripe rather than the local invoice mirror.
+   */
+  async listOpenInvoices(
+    customerId?: string,
+    limit = 100,
+  ): Promise<StripeInvoice[]> {
+    if (!this.isLive) return [];
+
+    let path = `/invoices?status=open&limit=${limit}`;
+    if (customerId) path += `&customer=${customerId}`;
+
+    const data = (await this.stripeRequest(path)) as {
+      data: Array<{
+        id: string;
+        customer: string;
+        subscription: string | null;
+        amount_due: number | null;
+        amount_remaining: number | null;
+        amount_paid: number | null;
+        currency: string;
+        status: string;
+        status_transitions: { paid_at: number | null };
+        created: number;
+        hosted_invoice_url: string | null;
+        invoice_pdf: string | null;
+      }>;
+    };
+
+    return data.data.map((inv) => ({
+      id: inv.id,
+      customerId: inv.customer,
+      subscriptionId: inv.subscription ?? undefined,
+      // Prefer amount_remaining (still owed); fall back to amount_due, then
+      // amount_paid for compatibility with older Stripe responses.
+      amount:
+        inv.amount_remaining ?? inv.amount_due ?? inv.amount_paid ?? 0,
+      currency: inv.currency,
+      status: inv.status,
+      paidAt: inv.status_transitions.paid_at ?? undefined,
+      created: inv.created,
+      hostedInvoiceUrl: inv.hosted_invoice_url ?? undefined,
+      invoicePdf: inv.invoice_pdf ?? undefined,
+    }));
+  }
+
   async getCheckoutSession(sessionId: string): Promise<StripeCheckoutSession | null> {
     if (!this.isLive) return null;
 

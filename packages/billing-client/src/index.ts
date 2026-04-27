@@ -91,6 +91,20 @@ export interface RefundRequestResult {
   demo?: boolean;
 }
 
+/**
+ * Aggregate billing health for an org (or platform-wide for super admins).
+ * Fields are denominated in the smallest currency unit (e.g. cents for USD).
+ */
+export interface BillingHealthSummary {
+  openInvoicesTotal: number;
+  openInvoicesCurrency: string;
+  pastDueCount: number;
+  refundQueueDepth: number;
+  mrr: number;
+  mrrCurrency: string;
+  demo?: boolean;
+}
+
 // ─── Async state reducer ──────────────────────────────────────────────────────
 
 interface AsyncState<T> {
@@ -511,6 +525,67 @@ export function useTaxBreakdown(invoiceId: string | null): AsyncState<{
   }, [invoiceId]);
 
   return state;
+}
+
+/**
+ * useBillingHealth — fetches the aggregate billing health summary
+ * (open invoices, MRR, past-due count, refund queue depth) for the
+ * current org from `/billing/health-summary`.
+ *
+ * Returns demo fixtures when VITE_BILLING_DEMO_MODE is set so the card
+ * renders meaningful values without a live Stripe key. Auto-refreshes
+ * on mount, on the configured interval, and when `refetch()` is called.
+ */
+const DEMO_BILLING_HEALTH: BillingHealthSummary = {
+  openInvoicesTotal: 48500,
+  openInvoicesCurrency: 'usd',
+  pastDueCount: 3,
+  refundQueueDepth: 1,
+  mrr: 124000,
+  mrrCurrency: 'usd',
+  demo: true,
+};
+
+const DEFAULT_BILLING_HEALTH_REFRESH_MS = 2 * 60 * 1000;
+
+export function useBillingHealth(options?: {
+  refreshIntervalMs?: number | null;
+}): AsyncState<BillingHealthSummary> & {
+  refetch: () => void;
+} {
+  const [state, dispatch] = useAsyncState<BillingHealthSummary>();
+  const fetchRef = useRef(0);
+  const refreshIntervalMs =
+    options?.refreshIntervalMs === undefined
+      ? DEFAULT_BILLING_HEALTH_REFRESH_MS
+      : options.refreshIntervalMs;
+
+  const fetch_ = useCallback(async () => {
+    const id = ++fetchRef.current;
+    dispatch({ type: 'loading' });
+    try {
+      if (isDemoMode()) {
+        if (id === fetchRef.current)
+          dispatch({ type: 'success', data: DEMO_BILLING_HEALTH });
+        return;
+      }
+      const data = await apiFetch<BillingHealthSummary>('/billing/health-summary');
+      if (id === fetchRef.current) dispatch({ type: 'success', data });
+    } catch (err) {
+      if (id === fetchRef.current)
+        dispatch({ type: 'error', error: (err as Error).message });
+    }
+  }, []);
+
+  useEffect(() => { void fetch_(); }, [fetch_]);
+
+  useEffect(() => {
+    if (!refreshIntervalMs || refreshIntervalMs <= 0) return;
+    const handle = setInterval(() => { void fetch_(); }, refreshIntervalMs);
+    return () => clearInterval(handle);
+  }, [fetch_, refreshIntervalMs]);
+
+  return { ...state, refetch: () => { void fetch_(); } };
 }
 
 /**

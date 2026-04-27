@@ -1,5 +1,4 @@
-import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
-import { useQuery } from '@tanstack/react-query';
+import { useBillingHealth, type BillingHealthSummary } from '@szl-holdings/billing-client';
 import {
   AlertTriangle,
   CreditCard,
@@ -9,26 +8,6 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { Link } from 'wouter';
-
-interface BillingHealth {
-  openInvoicesTotal: number;
-  openInvoicesCurrency: string;
-  pastDueCount: number;
-  refundQueueDepth: number;
-  mrr: number;
-  mrrCurrency: string;
-  demo?: boolean;
-}
-
-const DEMO_HEALTH: BillingHealth = {
-  openInvoicesTotal: 48500,
-  openInvoicesCurrency: 'usd',
-  pastDueCount: 3,
-  refundQueueDepth: 1,
-  mrr: 124000,
-  mrrCurrency: 'usd',
-  demo: true,
-};
 
 function isDemoMode(): boolean {
   try {
@@ -76,19 +55,15 @@ function MetricChip({ icon: Icon, label, value, accent = '#d4a054', alert = fals
 }
 
 export function BillingHealthCard() {
-  const { data, isLoading, refetch } = useQuery<BillingHealth>({
-    queryKey: ['command-billing-health'],
-    queryFn: async () => {
-      if (isDemoMode()) return DEMO_HEALTH;
-      const health = await apiFetch<BillingHealth>('/api/billing/health-summary');
-      return health;
-    },
-    staleTime: 60_000,
-    refetchInterval: 120_000,
-  });
+  const { data: health, loading, error, refetch } = useBillingHealth();
 
-  const health = data ?? (isDemoMode() ? DEMO_HEALTH : null);
-  const showDemo = isDemoMode() || (health?.demo ?? false);
+  // Demo badge ONLY when explicitly opted in via the env flag, OR the API
+  // hands us back demo fixtures (e.g. when the server side runs without a
+  // live Stripe key and signals it). Live data must never carry the badge.
+  const envDemo = isDemoMode();
+  const showDemo = envDemo || (health?.demo === true);
+
+  const summary: BillingHealthSummary | null = health ?? null;
 
   return (
     <div
@@ -117,7 +92,7 @@ export function BillingHealthCard() {
             className="p-1 rounded transition-colors hover:bg-white/5"
             title="Refresh billing health"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} style={{ color: 'rgba(255,255,255,0.3)' }} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} style={{ color: 'rgba(255,255,255,0.3)' }} />
           </button>
           <Link href="/account/billing" className="text-[11px] transition-opacity hover:opacity-70" style={{ color: '#d4a054' }}>
             View billing →
@@ -125,52 +100,52 @@ export function BillingHealthCard() {
         </div>
       </div>
 
-      {health ? (
+      {summary ? (
         <>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <MetricChip
               icon={DollarSign}
               label="MRR"
-              value={fmtCurrency(health.mrr, health.mrrCurrency)}
+              value={fmtCurrency(summary.mrr, summary.mrrCurrency)}
               accent="#22c55e"
             />
             <MetricChip
               icon={FileText}
               label="Open invoices"
-              value={fmtCurrency(health.openInvoicesTotal, health.openInvoicesCurrency)}
+              value={fmtCurrency(summary.openInvoicesTotal, summary.openInvoicesCurrency)}
               accent="#d4a054"
-              alert={health.openInvoicesTotal > 0}
+              alert={summary.openInvoicesTotal > 0}
             />
             <MetricChip
               icon={AlertTriangle}
               label="Past due"
-              value={health.pastDueCount}
+              value={summary.pastDueCount}
               accent="#ef4444"
-              alert={health.pastDueCount > 0}
+              alert={summary.pastDueCount > 0}
             />
             <MetricChip
               icon={RotateCcw}
               label="Refund queue"
-              value={health.refundQueueDepth}
+              value={summary.refundQueueDepth}
               accent="#8b5cf6"
-              alert={health.refundQueueDepth > 0}
+              alert={summary.refundQueueDepth > 0}
             />
           </div>
 
-          {(health.pastDueCount > 0 || health.refundQueueDepth > 0) && (
+          {(summary.pastDueCount > 0 || summary.refundQueueDepth > 0) && (
             <div
               className="mt-3 flex items-center gap-2 text-[12px] px-3 py-2 rounded-lg"
               style={{ background: 'rgba(239,68,68,0.06)', color: '#fca5a5' }}
             >
               <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-red-400" />
-              {health.pastDueCount > 0 && (
+              {summary.pastDueCount > 0 && (
                 <span>
-                  {health.pastDueCount} past-due {health.pastDueCount === 1 ? 'account requires' : 'accounts require'} attention.
+                  {summary.pastDueCount} past-due {summary.pastDueCount === 1 ? 'account requires' : 'accounts require'} attention.
                 </span>
               )}
-              {health.refundQueueDepth > 0 && (
+              {summary.refundQueueDepth > 0 && (
                 <span className="ml-1">
-                  {health.refundQueueDepth} refund {health.refundQueueDepth === 1 ? 'request' : 'requests'} pending.
+                  {summary.refundQueueDepth} refund {summary.refundQueueDepth === 1 ? 'request' : 'requests'} pending.
                 </span>
               )}
             </div>
@@ -182,7 +157,13 @@ export function BillingHealthCard() {
           style={{ color: 'rgba(255,255,255,0.35)' }}
         >
           <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-          <span>Billing data unavailable — configure the API server to see live metrics.</span>
+          <span>
+            {error
+              ? `Billing data unavailable — ${error}`
+              : loading
+                ? 'Loading billing data…'
+                : 'Billing data unavailable — configure the API server to see live metrics.'}
+          </span>
         </div>
       )}
     </div>

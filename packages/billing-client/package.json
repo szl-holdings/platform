@@ -3,15 +3,12 @@
   "version": "1.0.0",
   "description": "Shared billing client: typed React hooks + demo-mode fixtures for all SZL Holdings artifacts",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
+    ".": "./src/index.ts"
   },
-  "files": ["dist"],
+  "files": ["src", "dist"],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch"

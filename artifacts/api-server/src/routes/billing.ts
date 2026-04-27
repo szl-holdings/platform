@@ -2407,6 +2407,14 @@ router.get(
 // ---------------------------------------------------------------------------
 // GET /billing/health-summary
 // Returns aggregate billing health for super admins or org admins.
+//
+// Data sources, in priority order:
+//   1. Stripe API (open invoices, MRR, past-due subscription count) — preferred
+//      so the dashboard reflects real billing state, not just our local mirror.
+//   2. Local DB fallback when Stripe is not live (no STRIPE_SECRET_KEY) or when
+//      the org has not yet been linked to a Stripe customer.
+//   3. Refund queue depth always comes from the local refund requests table —
+//      that workflow is owned by us and not stored in Stripe.
 // ---------------------------------------------------------------------------
 router.get(
   '/billing/health-summary',
@@ -2423,36 +2431,146 @@ router.get(
         return;
       }
 
-      // MRR and pastDueCount: super admins see platform-wide analytics;
-      // org admins see their own subscription metrics only (no cross-tenant leakage).
+      const stripeLive = services.stripe.isLive;
+
       let mrr = 0;
       let pastDueCount = 0;
+      let openInvoicesTotal = 0;
+      let openInvoicesCurrency = 'usd';
+
       if (isSuperAdmin) {
-        const analytics = await services.stripe.getRevenueAnalytics();
-        mrr = analytics.mrr;
-        pastDueCount = analytics.pastDueSubscriptions;
-      } else if (orgId) {
-        const orgSubs = await db
-          .select({ planId: subscriptionsTable.planId, status: subscriptionsTable.status })
-          .from(subscriptionsTable)
-          .where(eq(subscriptionsTable.orgId, orgId));
-        pastDueCount = orgSubs.filter((s) => s.status === 'past_due').length;
-        const activePlanIds = orgSubs
-          .filter((s) => s.status === 'active' || s.status === 'trialing')
-          .map((s) => s.planId);
-        if (activePlanIds.length > 0) {
-          const plans = await db
-            .select({ priceMonthly: billingPlansTable.priceMonthly })
-            .from(billingPlansTable)
-            .where(inArray(billingPlansTable.id, activePlanIds));
-          mrr = plans.reduce(
-            (sum, p) => sum + Math.round(parseFloat(String(p.priceMonthly)) * 100),
+        // Super admin: platform-wide analytics from Stripe.
+        if (stripeLive) {
+          const [analytics, openInvoices] = await Promise.all([
+            services.stripe.getRevenueAnalytics(),
+            services.stripe.listOpenInvoices(),
+          ]);
+          mrr = analytics.mrr;
+          pastDueCount = analytics.pastDueSubscriptions;
+          openInvoicesTotal = openInvoices.reduce((sum, inv) => sum + (inv.amount ?? 0), 0);
+          openInvoicesCurrency = openInvoices[0]?.currency ?? 'usd';
+        } else {
+          // Fallback: derive platform-wide totals from the local mirror so the
+          // dashboard still shows real data when Stripe isn't live.
+          const allSubs = await db
+            .select({ planId: subscriptionsTable.planId, status: subscriptionsTable.status })
+            .from(subscriptionsTable);
+          pastDueCount = allSubs.filter((s) => s.status === 'past_due').length;
+          const activePlanIds = allSubs
+            .filter((s) => s.status === 'active' || s.status === 'trialing')
+            .map((s) => s.planId);
+          if (activePlanIds.length > 0) {
+            const plans = await db
+              .select({ id: billingPlansTable.id, priceMonthly: billingPlansTable.priceMonthly })
+              .from(billingPlansTable)
+              .where(inArray(billingPlansTable.id, activePlanIds));
+            const monthlyById = new Map(plans.map((p) => [p.id, p.priceMonthly]));
+            for (const sub of allSubs) {
+              if (sub.status !== 'active' && sub.status !== 'trialing') continue;
+              const monthly = monthlyById.get(sub.planId);
+              if (monthly == null) continue;
+              mrr += Math.round(parseFloat(String(monthly)) * 100);
+            }
+          }
+
+          const openInvoiceRows = await db
+            .select({ amount: invoicesTable.amount, currency: invoicesTable.currency })
+            .from(invoicesTable)
+            .where(inArray(invoicesTable.status, ['open', 'uncollectible', 'ach_pending']));
+          openInvoicesTotal = openInvoiceRows.reduce(
+            (sum, inv) => sum + Math.round(parseFloat(String(inv.amount)) * 100),
             0,
           );
+          openInvoicesCurrency = openInvoiceRows[0]?.currency ?? 'usd';
+        }
+      } else if (orgId) {
+        // Org admin: scope strictly to this org's Stripe customer (or fall back
+        // to local DB when not linked / Stripe unavailable).
+        const [org] = await db
+          .select({ billingCustomerId: organizationsTable.billingCustomerId })
+          .from(organizationsTable)
+          .where(eq(organizationsTable.id, orgId));
+        const billingCustomerId = org?.billingCustomerId ?? null;
+
+        if (stripeLive && billingCustomerId) {
+          // Pull subscriptions + open invoices from Stripe in parallel.
+          const [subs, openInvoices] = await Promise.all([
+            services.stripe.listCustomerSubscriptions(billingCustomerId),
+            services.stripe.listOpenInvoices(billingCustomerId),
+          ]);
+
+          pastDueCount = subs.filter((s) => s.status === 'past_due').length;
+
+          // MRR computed from local plan price for any active/trialing sub
+          // whose Stripe price ID we recognise. Stripe items don't carry
+          // unit_amount in our adapter, so look up the matching plan row.
+          const activePriceIds = Array.from(
+            new Set(
+              subs
+                .filter((s) => s.status === 'active' || s.status === 'trialing')
+                .flatMap((s) => s.items.map((i) => i.priceId).filter(Boolean)),
+            ),
+          );
+          if (activePriceIds.length > 0) {
+            const plans = await db
+              .select({
+                stripePriceId: billingPlansTable.stripePriceId,
+                priceMonthly: billingPlansTable.priceMonthly,
+              })
+              .from(billingPlansTable)
+              .where(inArray(billingPlansTable.stripePriceId, activePriceIds));
+            const priceById = new Map(plans.map((p) => [p.stripePriceId, p.priceMonthly]));
+            for (const sub of subs) {
+              if (sub.status !== 'active' && sub.status !== 'trialing') continue;
+              for (const item of sub.items) {
+                const monthly = priceById.get(item.priceId);
+                if (monthly == null) continue;
+                mrr += Math.round(parseFloat(String(monthly)) * 100) * (item.quantity ?? 1);
+              }
+            }
+          }
+
+          openInvoicesTotal = openInvoices.reduce((sum, inv) => sum + (inv.amount ?? 0), 0);
+          openInvoicesCurrency = openInvoices[0]?.currency ?? 'usd';
+        } else {
+          // Fallback: derive from the local mirror (kept in sync via Stripe webhooks).
+          const orgSubs = await db
+            .select({ planId: subscriptionsTable.planId, status: subscriptionsTable.status })
+            .from(subscriptionsTable)
+            .where(eq(subscriptionsTable.orgId, orgId));
+          pastDueCount = orgSubs.filter((s) => s.status === 'past_due').length;
+          const activePlanIds = orgSubs
+            .filter((s) => s.status === 'active' || s.status === 'trialing')
+            .map((s) => s.planId);
+          if (activePlanIds.length > 0) {
+            const plans = await db
+              .select({ priceMonthly: billingPlansTable.priceMonthly })
+              .from(billingPlansTable)
+              .where(inArray(billingPlansTable.id, activePlanIds));
+            mrr = plans.reduce(
+              (sum, p) => sum + Math.round(parseFloat(String(p.priceMonthly)) * 100),
+              0,
+            );
+          }
+
+          const openInvoiceRows = await db
+            .select({ amount: invoicesTable.amount, currency: invoicesTable.currency })
+            .from(invoicesTable)
+            .where(
+              and(
+                eq(invoicesTable.orgId, orgId),
+                inArray(invoicesTable.status, ['open', 'uncollectible', 'ach_pending']),
+              ),
+            );
+          openInvoicesTotal = openInvoiceRows.reduce(
+            (sum, inv) => sum + Math.round(parseFloat(String(inv.amount)) * 100),
+            0,
+          );
+          openInvoicesCurrency = openInvoiceRows[0]?.currency ?? 'usd';
         }
       }
 
-      // Count pending/processing refund requests — super admins see all, admins see their org only
+      // Count pending/processing refund requests — super admins see all, admins see their org only.
       const refundConditions = [
         isSuperAdmin ? undefined : orgId ? eq(billingRefundRequestsTable.orgId, orgId) : undefined,
         or(
@@ -2465,21 +2583,6 @@ router.get(
         .from(billingRefundRequestsTable)
         .where(and(...refundConditions));
       const refundQueueDepth = pendingRefunds.length;
-
-      // Sum open/uncollectible invoices from DB — super admins see all, admins see their org only
-      const openInvoiceConditions = [
-        isSuperAdmin ? undefined : orgId ? eq(invoicesTable.orgId, orgId) : undefined,
-        inArray(invoicesTable.status, ['open', 'uncollectible', 'ach_pending']),
-      ].filter(Boolean) as Parameters<typeof and>;
-      const openInvoiceRows = await db
-        .select({ amount: invoicesTable.amount, currency: invoicesTable.currency })
-        .from(invoicesTable)
-        .where(and(...openInvoiceConditions));
-      const openInvoicesTotal = openInvoiceRows.reduce(
-        (sum, inv) => sum + Math.round(parseFloat(String(inv.amount)) * 100),
-        0,
-      );
-      const openInvoicesCurrency = openInvoiceRows[0]?.currency ?? 'usd';
 
       sendSuccess(res, {
         mrr,
