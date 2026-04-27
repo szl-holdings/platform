@@ -116,6 +116,7 @@ const GlasswingPage = lazy(() => import('./pages/Glasswing').then(m => ({ defaul
 const ArgoForgePage = lazy(() => import('./pages/ArgoForge').then(m => ({ default: m.ArgoForge })));
 const MythosLayerPage = lazy(() => import('./pages/MythosLayer').then(m => ({ default: m.MythosLayer })));
 const AerialTwinPage = lazy(() => import('./pages/AerialTwin').then(m => ({ default: m.AerialTwin })));
+const AerialTwinMilestonePage = lazy(() => import('./pages/AerialTwinMilestone').then(m => ({ default: m.AerialTwinMilestone })));
 const SystemCard = lazy(() => import('./pages/SystemCard').then(m => ({ default: m.SystemCard })));
 const CapabilityTrajectory = lazy(() => import('./pages/CapabilityTrajectory').then(m => ({ default: m.CapabilityTrajectory })));
 const MythosSpec = lazy(() => import('./pages/MythosSpec').then(m => ({ default: m.MythosSpec })));
@@ -235,6 +236,7 @@ export default function App() {
         <Route path={`${base}/argo`} component={ArgoForgePage} />
         <Route path={`${base}/mythos-layer`} component={MythosLayerPage} />
         <Route path={`${base}/aerial-twin`} component={AerialTwinPage} />
+        <Route path={`${base}/aerial-twin/:milestone`} component={AerialTwinMilestonePage} />
         <Route path={`${base}/system-card/:id`} component={SystemCard} />
         <Route path={`${base}/capability-trajectory`} component={CapabilityTrajectory} />
         <Route path={`${base}/resilience`} component={DarpaResilienceHub} />
