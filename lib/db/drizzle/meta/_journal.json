@@ -1016,6 +1016,13 @@
       "when": 1780214400000,
       "tag": "0143_atlas_retention_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 145,
+      "version": "7",
+      "when": 1780300800000,
+      "tag": "0144_skill_library_schema_audit",
+      "breakpoints": true
     }
   ]
 }

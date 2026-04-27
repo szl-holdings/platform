@@ -54,7 +54,7 @@ const DOMAIN_PACKS = [
   },
   {
     id: 'counsel',
-    label: 'PRISM Counsel',
+    label: 'Counsel',
     sublabel: 'Legal Matter Command',
     color: 'hsl(260,60%,65%)',
     bg: 'hsla(260,60%,65%,0.07)',

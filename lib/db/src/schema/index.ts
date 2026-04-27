@@ -150,10 +150,14 @@ export * from './self_healing';
 export * from './self_improvement';
 export * from './sentra';
 export * from './settings';
-// ./skill_library is intentionally NOT re-exported: its `skill_runs` table
-// duplicates the canonical one in ./cognitive_runtime and produces a
-// "duplicated index name across public schema" warning from drizzle-kit.
-// The file is kept for reference but is dead code.
+// skill_library.ts is intentionally excluded from this barrel.
+// It previously defined pgTable('skills',...) / pgTable('skill_runs',...)
+// which duplicated the canonical tables owned by cognitive_runtime.ts and
+// produced "duplicated index name" warnings from drizzle-kit.  The table
+// names in that file were updated to 'skill_library'/'skill_library_runs'
+// to resolve the TypeScript conflict, and the file was then removed entirely
+// (those renamed tables were never created via migration — see
+// 0144_skill_library_schema_audit.sql for the full audit trail).
 export * from './signal_chain_executions';
 export * from './signal_mesh';
 export * from './simulation';
