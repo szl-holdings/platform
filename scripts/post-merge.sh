@@ -14,8 +14,12 @@ pnpm install --frozen-lockfile 2>&1 || pnpm install 2>&1 || true
 # (DB_MIGRATE_TIMEOUT_MS, DB_MIGRATE_FAIL_ON_PROMPT).
 # stdin is /dev/null so any remaining prompt receives EOF and fails immediately
 # rather than blocking forever.
-# Non-fatal: a migration warning must never block workflow reconciliation.
-DB_MIGRATE_TIMEOUT_MS=140000 pnpm --filter @szl-holdings/db push-non-interactive < /dev/null 2>&1 || echo "drizzle-kit push timed out or failed (non-fatal)"
+# The duplicate-index-name error caused by skill_library.ts has been resolved
+# (that file is excluded from the schema barrel — see lib/db/src/schema/index.ts
+# and lib/db/drizzle/0144_skill_library_schema_audit.sql for details).
+# drizzle-kit push is now expected to complete with exit code 0; failures are
+# treated as fatal so they surface immediately rather than being silently swallowed.
+DB_MIGRATE_TIMEOUT_MS=140000 pnpm --filter @szl-holdings/db push-non-interactive < /dev/null 2>&1
 
 # Ensure the corporate site's capability manifest is a symlink to the audit
 # source-of-truth, never a stale hand-copied file. The Product Readiness Matrix,
