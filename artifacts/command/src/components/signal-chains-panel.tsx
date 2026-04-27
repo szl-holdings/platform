@@ -252,6 +252,7 @@ interface SignalChainsPanelProps {
 export function SignalChainsPanel({ apiBase = '' }: SignalChainsPanelProps) {
   const [chains, setChains] = useState<SignalChain[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isDemo, setIsDemo] = useState<boolean | null>(null);
   const [triggering, setTriggering] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [auditView, setAuditView] = useState<string | null>(null);
@@ -265,17 +266,25 @@ export function SignalChainsPanel({ apiBase = '' }: SignalChainsPanelProps) {
     try {
       const res = await fetch(`${apiBase}/api/signal-chains`);
       if (res.status === 401 || res.status === 403) {
-        setChains((prev) => (prev.length > 0 ? prev : DEMO_CHAINS));
+        if (chains.length === 0) {
+          setChains(DEMO_CHAINS);
+          setIsDemo(true);
+        }
         return;
       }
       const data = await res.json();
       if (data.success && Array.isArray(data.chains) && data.chains.length > 0) {
         setChains(data.chains);
-      } else {
-        setChains((prev) => (prev.length > 0 ? prev : DEMO_CHAINS));
+        setIsDemo(false);
+      } else if (chains.length === 0) {
+        setChains(DEMO_CHAINS);
+        setIsDemo(true);
       }
     } catch {
-      setChains((prev) => (prev.length > 0 ? prev : DEMO_CHAINS));
+      if (chains.length === 0) {
+        setChains(DEMO_CHAINS);
+        setIsDemo(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -373,6 +382,36 @@ export function SignalChainsPanel({ apiBase = '' }: SignalChainsPanelProps) {
           >
             Autonomous Signal Chains
           </h2>
+          {!loading && isDemo === true && (
+            <span
+              className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+              title="Showing illustrative demo data — live API unavailable"
+              style={{
+                color: '#f59e0b',
+                backgroundColor: 'color-mix(in srgb, #f59e0b 12%, transparent)',
+                border: '1px solid color-mix(in srgb, #f59e0b 30%, transparent)',
+              }}
+            >
+              Demo
+            </span>
+          )}
+          {!loading && isDemo === false && (
+            <span
+              className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded inline-flex items-center gap-1"
+              title="Connected to live data"
+              style={{
+                color: '#22c55e',
+                backgroundColor: 'color-mix(in srgb, #22c55e 12%, transparent)',
+                border: '1px solid color-mix(in srgb, #22c55e 30%, transparent)',
+              }}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full animate-pulse"
+                style={{ backgroundColor: '#22c55e' }}
+              />
+              Live
+            </span>
+          )}
           {chains.length > 0 && (
             <span
               className="text-[10px] px-2 py-0.5 rounded font-mono"

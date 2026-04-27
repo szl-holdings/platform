@@ -328,6 +328,7 @@ export function CorrelationMapViz({ apiBase = '' }: CorrelationMapVizProps) {
   const [stats, setStats] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDemo, setIsDemo] = useState<boolean | null>(null);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [hoveredEdge, setHoveredEdge] = useState<GraphEdge | null>(null);
   const [zoom, setZoom] = useState(1);
@@ -356,6 +357,7 @@ export function CorrelationMapViz({ apiBase = '' }: CorrelationMapVizProps) {
         setNodes(laid);
         setEdges(DEMO_EDGES);
         setStats(DEMO_STATS);
+        setIsDemo(true);
         return;
       }
       const data = await res.json();
@@ -364,17 +366,20 @@ export function CorrelationMapViz({ apiBase = '' }: CorrelationMapVizProps) {
         setNodes(laid);
         setEdges(data.edges);
         setStats(data.stats ?? {});
+        setIsDemo(false);
       } else {
         const laid = layoutNodes(DEMO_NODES, DEMO_EDGES, dimensions.w, dimensions.h);
         setNodes(laid);
         setEdges(DEMO_EDGES);
         setStats(DEMO_STATS);
+        setIsDemo(true);
       }
     } catch {
       const laid = layoutNodes(DEMO_NODES, DEMO_EDGES, dimensions.w, dimensions.h);
       setNodes(laid);
       setEdges(DEMO_EDGES);
       setStats(DEMO_STATS);
+      setIsDemo(true);
     } finally {
       setLoading(false);
     }
@@ -414,6 +419,36 @@ export function CorrelationMapViz({ apiBase = '' }: CorrelationMapVizProps) {
           >
             Correlation Map
           </h2>
+          {!loading && isDemo === true && (
+            <span
+              className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+              title="Showing illustrative demo data — live API unavailable"
+              style={{
+                color: '#f59e0b',
+                backgroundColor: 'color-mix(in srgb, #f59e0b 12%, transparent)',
+                border: '1px solid color-mix(in srgb, #f59e0b 30%, transparent)',
+              }}
+            >
+              Demo
+            </span>
+          )}
+          {!loading && isDemo === false && (
+            <span
+              className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded inline-flex items-center gap-1"
+              title="Connected to live data"
+              style={{
+                color: '#22c55e',
+                backgroundColor: 'color-mix(in srgb, #22c55e 12%, transparent)',
+                border: '1px solid color-mix(in srgb, #22c55e 30%, transparent)',
+              }}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full animate-pulse"
+                style={{ backgroundColor: '#22c55e' }}
+              />
+              Live
+            </span>
+          )}
           {!loading && (
             <span
               className="text-[10px] font-mono px-2 py-0.5 rounded"

@@ -139,6 +139,7 @@ interface AmbientSignalRankerProps {
 export function AmbientSignalRanker({ apiBase = "" }: AmbientSignalRankerProps) {
   const [signals, setSignals] = useState<AmbientSignal[]>(STATIC_SIGNALS);
   const [loading, setLoading] = useState(false);
+  const [isDemo, setIsDemo] = useState(true);
   const [lastRefreshed, setLastRefreshed] = useState(Date.now());
 
   async function fetchSignals() {
@@ -155,10 +156,15 @@ export function AmbientSignalRanker({ apiBase = "" }: AmbientSignalRankerProps) 
             live: s.live === true,
           }));
           setSignals(enriched.sort((a, b) => b.score - a.score));
+          setIsDemo(false);
+          return;
         }
       }
+      setSignals(STATIC_SIGNALS);
+      setIsDemo(true);
     } catch {
-      /* keep static */
+      setSignals(STATIC_SIGNALS);
+      setIsDemo(true);
     } finally {
       setLoading(false);
       setLastRefreshed(Date.now());
@@ -176,9 +182,41 @@ export function AmbientSignalRanker({ apiBase = "" }: AmbientSignalRankerProps) 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xs font-bold tracking-widest uppercase" style={{ color: "var(--color-fg-muted)" }}>
-          Ambient Signal Ranker
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-xs font-bold tracking-widest uppercase" style={{ color: "var(--color-fg-muted)" }}>
+            Ambient Signal Ranker
+          </h2>
+          {!loading && isDemo && (
+            <span
+              className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+              title="Showing illustrative demo data — live API unavailable"
+              style={{
+                color: "#f59e0b",
+                backgroundColor: "color-mix(in srgb, #f59e0b 12%, transparent)",
+                border: "1px solid color-mix(in srgb, #f59e0b 30%, transparent)",
+              }}
+            >
+              Demo
+            </span>
+          )}
+          {!loading && !isDemo && (
+            <span
+              className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded inline-flex items-center gap-1"
+              title="Connected to live data"
+              style={{
+                color: "#22c55e",
+                backgroundColor: "color-mix(in srgb, #22c55e 12%, transparent)",
+                border: "1px solid color-mix(in srgb, #22c55e 30%, transparent)",
+              }}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full animate-pulse"
+                style={{ backgroundColor: "#22c55e" }}
+              />
+              Live
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-3">
           <span className="text-[10px] font-mono flex items-center gap-1" style={{ color: "var(--color-fg-muted)" }}>
             <Clock className="w-3 h-3" />
