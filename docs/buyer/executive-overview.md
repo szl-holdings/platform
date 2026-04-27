@@ -1,7 +1,7 @@
 # SZL Holdings — Executive Overview for Buyers
 
 **For:** C-suite and senior leadership evaluating the SZL Holdings platform ecosystem  
-**Date:** Q1 2026
+**Date:** Q2 2026
 
 ---
 
@@ -17,19 +17,19 @@ SZL Holdings builds that system.
 
 ## What We Build
 
-**Lyte — Business Observability**  
-The operational command surface for executives, operations leads, and PMOs. Lyte makes every operational surface visible, contextual, and actionable through the PRISM framework (Pulse, Risk, Intelligence, Signals, Motion). Command inbox. Action queue. Approval latency detection. Readiness scoring. All in one surface, with full audit trail.
+**KORA — Decision Intelligence**  
+The cross-domain decision command surface for executives, operations leads, and PMOs. KORA makes every operational surface visible, contextual, and actionable through the PRISM framework (Pulse, Risk, Intelligence, Signals, Motion). Command inbox. Action queue. Approval latency detection. Readiness scoring. All in one surface, with full audit trail.
 
-**Alloy — Execution Fabric**  
-The system that closes the loop. When Lyte surfaces a signal, Alloy routes the action. Workflow engine, human-in-the-loop approval gates, agent coordination, and immutable audit trail. Every consequential action is confirmed by a person and recorded permanently.
+**A11oy — Execution Fabric**  
+The system that closes the loop. When KORA surfaces a signal, A11oy routes the action. Workflow engine, human-in-the-loop approval gates, agent coordination, and immutable audit trail. Every consequential action is confirmed by a person and recorded permanently.
 
-**Aegis — Defense & Intelligence**  
+**PARAGON — Defense & Intelligence**  
 For organizations that need unified visibility across security operations, managed services, and AI research. Three workspaces, one context: Defense (SOC), Command (managed services), Intelligence (AI governance).
 
-**Vessels — Maritime Intelligence**  
+**SEXTANT — Maritime Intelligence**  
 Fleet command with real intelligence. AIS telemetry, voyage economics, dark vessel detection, sanctions screening, route analysis. For maritime operators where the cost of poor visibility is measured in sanctions exposure and voyage economics.
 
-**Terra — Real Estate Intelligence**  
+**DOMAINE — Real Estate Intelligence**  
 Property intelligence for NYC brokers and investors. Live distress data pipeline, ownership structure tracking, deal pipeline management. Finding opportunities before the competition does.
 
 ---

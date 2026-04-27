@@ -1,6 +1,6 @@
 # SZL Holdings — Solution Brief
 
-**Date:** Q1 2026
+**Date:** Q2 2026
 
 ---
 
@@ -8,16 +8,16 @@
 
 | Platform | Problem Solved | Primary Buyer | Key Differentiator |
 |----------|--------------|--------------|-------------------|
-| **Lyte** | Operational signal fragmentation — no real-time business view | COO, VP Ops, PMO | PRISM framework: 5 analytical dimensions, signal-to-action lifecycle |
-| **Alloy** | Unaccountable workflow execution — actions without audit trail | Operations, Compliance | Human-in-the-loop gates enforced at engine level |
-| **Aegis** | Security operations fragmented across disconnected tools | CISO, SOC, MSP | Three workspaces in one context — Defense, Command, Intelligence |
-| **Vessels** | Fleet risk invisible until it is expensive | Fleet Exec, Commercial Dir | AIS + economics + compliance in one command surface |
-| **Terra** | Distress opportunities lost to manual research delays | NYC Broker, Investor | Live NYC public data pipeline + ownership structure tracking |
+| **KORA** | Operational signal fragmentation — no real-time business view | COO, VP Ops, PMO | PRISM framework: 5 analytical dimensions, signal-to-action lifecycle |
+| **A11oy** | Unaccountable workflow execution — actions without audit trail | Operations, Compliance | Human-in-the-loop gates enforced at engine level |
+| **PARAGON** | Security operations fragmented across disconnected tools | CISO, SOC, MSP | Three workspaces in one context — Defense, Command, Intelligence |
+| **SEXTANT** | Fleet risk invisible until it is expensive | Fleet Exec, Commercial Dir | AIS + economics + compliance in one command surface |
+| **DOMAINE** | Distress opportunities lost to manual research delays | NYC Broker, Investor | Live NYC public data pipeline + ownership structure tracking |
 | **Carlota Jo** | Advisory disconnected from operational reality | Founder, CMO, Executive | Principal advisory grounded in platform intelligence |
 
 ---
 
-## Lyte — Detailed Solution Brief
+## KORA — Detailed Solution Brief
 
 ### The Problem
 
@@ -27,7 +27,7 @@ When problems compound — a delayed approval cascades into a missed SLA cascade
 
 ### The Solution
 
-Lyte delivers **Business Observability** — the capability to see across an organization's full operational surface in real time and understand signal, causality, and recommended action in a single, traceable workflow.
+KORA delivers **Decision Intelligence** — the capability to see across an organization's full operational surface in real time and understand signal, causality, and recommended action in a single, traceable workflow.
 
 **PRISM Framework:**
 - **Pulse** — Organization's operating heartbeat: revenue trend, team health, delivery cadence, customer satisfaction
@@ -42,7 +42,7 @@ Lyte delivers **Business Observability** — the capability to see across an org
 
 **Approvals Center:** Every approval that's waiting, who it's waiting on, and how long it's been sitting.
 
-**Alloy Integration:** Every signal can become a workflow. Every action is approved, logged, and attributed.
+**A11oy Integration:** Every signal can become a workflow. Every action is approved, logged, and attributed.
 
 ### Use Cases
 
@@ -56,7 +56,7 @@ Lyte delivers **Business Observability** — the capability to see across an org
 
 ---
 
-## Aegis — Detailed Solution Brief
+## PARAGON — Detailed Solution Brief
 
 ### The Problem
 
@@ -64,17 +64,17 @@ Security operations teams are drowning in alerts and tools. The average enterpri
 
 ### The Solution
 
-Aegis delivers unified defense and intelligence command — three workspaces sharing one intelligence context.
+PARAGON delivers unified defense and intelligence command — three workspaces sharing one intelligence context.
 
 **Defense Workspace:** SOC command, MITRE ATT&CK v14 detection coverage, SOAR playbook engine, threat intelligence integration (STIX/TAXII).
 
 **Command Workspace:** MSP operations command — multi-client SLA management, ticketing, client health dashboards. For managed security providers.
 
-**Intelligence Workspace (INCA):** AI research command — model registry, experiment tracking, ensemble evaluation, LLM governance. For organizations building or evaluating AI systems.
+**Intelligence Workspace:** AI research command — model registry, experiment tracking, ensemble evaluation, LLM governance. For organizations building or evaluating AI systems.
 
 ---
 
-## Vessels — Detailed Solution Brief
+## SEXTANT — Detailed Solution Brief
 
 ### The Problem
 
@@ -82,7 +82,7 @@ Fleet operators have vessel position data in one system, voyage economics in a s
 
 ### The Solution
 
-Vessels delivers maritime intelligence in one command surface:
+SEXTANT delivers maritime intelligence in one command surface:
 - Real-time AIS telemetry and fleet tracking
 - Voyage economics modeling (cost per mile, ETA accuracy, fuel efficiency)
 - Dark vessel detection (AIS signal gap analysis)

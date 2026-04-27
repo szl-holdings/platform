@@ -9,7 +9,7 @@
 
 These capabilities are live, data-seeded, and suitable for prospect, partner, and investor demonstrations:
 
-### Lyte (Business Observability)
+### KORA (Decision Intelligence)
 - Command Inbox with pending approval items
 - PRISM framework — all five dimensions (Pulse, Risk, Intelligence, Signals, Motion)
 - Signal lifecycle: signal → context → recommendation → simulation → policy → execution
@@ -18,7 +18,7 @@ These capabilities are live, data-seeded, and suitable for prospect, partner, an
 - Readiness module with SLA tracking
 - Role-based views (executive vs. operator vs. analyst)
 
-### Aegis (Security Command)
+### PARAGON (Defense & Intelligence)
 - SOC dashboard with active incident queue
 - MITRE ATT&CK framework mapping
 - CISA KEV and NVD CVE signal integration (live data)
@@ -28,7 +28,7 @@ These capabilities are live, data-seeded, and suitable for prospect, partner, an
 - Compliance readiness posture (SOC 2, ISO 27001 framework alignment)
 - Dual-persona demo: CISO approval view + analyst execution view
 
-### Vessels (Maritime Intelligence)
+### SEXTANT (Maritime Intelligence)
 - Fleet command dashboard with vessel cards
 - Voyage Twin model: cargo, route, crew, compliance, P&L
 - AIS anomaly detection (dark vessel, route deviation)
@@ -38,7 +38,7 @@ These capabilities are live, data-seeded, and suitable for prospect, partner, an
 - Compliance audit trail: full voyage decision record
 - Dual-persona demo: Fleet Ops Director + CCO auditor view
 
-### PRISM Counsel (Legal Matter Command)
+### Counsel (Legal Matter Command)
 - Matter Twin: parties, deadlines, documents, insurer behavior
 - Statutory deadline tracking (NY DFS Regulation 68)
 - Demand readiness scoring
@@ -50,11 +50,11 @@ These capabilities are live, data-seeded, and suitable for prospect, partner, an
 
 ### Platform-Wide
 - Demo data banners and data state badges (all platforms)
-- Alloy execution fabric: workflow routing with approval gates
+- A11oy execution fabric: workflow routing with approval gates
 - Full audit trail with actor attribution on all consequential actions
 - Demo reset scripts (`scripts/demo-reset/`)
 - Role-based persona switching (executive, operator, analyst, auditor)
-- Four polished demo narratives with realistic scenario data
+- Five polished demo narratives with realistic scenario data
 
 ---
 
@@ -62,27 +62,27 @@ These capabilities are live, data-seeded, and suitable for prospect, partner, an
 
 These capabilities are functional but require verbal caveats during demo presentations.
 
-### Live AIS Data (Vessels)
+### Live AIS Data (SEXTANT)
 - **Current state:** Vessel positions are simulated. The AIS telemetry model is real; live feed integration requires an enterprise AIS provider subscription (e.g., Spire Maritime, exactEarth).
 - **Demo caveat:** "Fleet positions are simulated in this environment. Live AIS is available at enterprise tier — the integration model is built."
 - **Remaining work:** Activate an AIS provider contract; configure the Helmsman agent's live data connector.
 
-### Live SIEM / EDR Connector (Aegis)
+### Live SIEM / EDR Connector (PARAGON)
 - **Current state:** Security signals in the demo are seeded. The Sentinel agent's connector framework supports SIEM integration (Splunk, Microsoft Sentinel). Live connections require tenant-side API access.
 - **Demo caveat:** "Threat signals in this demo are representative. For your environment, we'd connect to your existing SIEM in the activation phase."
 - **Remaining work:** Activate a tenant-configurable SIEM connector with OAuth flow.
 
-### CRM Data Integration (Lyte)
-- **Current state:** Pipeline signals in Lyte are seeded. CRM connectors (Salesforce, HubSpot) are in the connector registry but require tenant OAuth provisioning.
+### CRM Data Integration (KORA)
+- **Current state:** Pipeline signals in KORA are seeded. CRM connectors (Salesforce, HubSpot) are in the connector registry but require tenant OAuth provisioning.
 - **Demo caveat:** "This pipeline data represents a typical RevOps setup. For your organization, we'd connect directly to your CRM."
-- **Remaining work:** Complete the Salesforce and HubSpot OAuth connector flows in Alloy.
+- **Remaining work:** Complete the Salesforce and HubSpot OAuth connector flows in A11oy.
 
-### Medicare Lien Data (PRISM Counsel)
+### Medicare Lien Data (Counsel)
 - **Current state:** The CMS MSPRP integration is modeled but the live query endpoint requires a registered CMS provider account.
 - **Demo caveat:** "The Medicare lien query is seeded here. Live CMS MSPRP integration is available with the appropriate provider registration."
 - **Remaining work:** Register CMS provider credentials; activate the MSPRP API connector.
 
-### Mobile (CORTEX)
+### Mobile (APEX)
 - **Current state:** The Expo mobile app is functional with seeded data. Push notification deep-linking and cross-domain badge counts are not yet live.
 - **Demo caveat:** "The mobile command surface works — you can approve actions and see cross-domain alerts. Deep-linking from push notifications is on the roadmap."
 - **Remaining work:** Push notification integration with approval deep-linking; live badge count API endpoints.
@@ -109,17 +109,17 @@ These items are not blockers for current demonstrations but would significantly 
 
 | Item | Benefit | Estimated Effort |
 |------|---------|-----------------|
-| Live AIS data activation (Vessels) | Removes "simulated" caveat; demonstrates real-time fleet intelligence | Medium — commercial AIS subscription + connector activation |
+| Live AIS data activation (SEXTANT) | Removes "simulated" caveat; demonstrates real-time fleet intelligence | Medium — commercial AIS subscription + connector activation |
 | Persona switcher UI in demo toolbar | Instant role switching during live demos without re-authentication | Small — UI component + session mock |
 | Demo reset API endpoint | Allows one-click reset from within the platform during demos | Small — REST endpoint wrapping the seed scripts |
-| Seeded "before vs. after" comparison view | Shows the impact of Lyte/Aegis recommendations visually | Small — UI state toggle |
+| Seeded "before vs. after" comparison view | Shows the impact of KORA/PARAGON recommendations visually | Small — UI state toggle |
 
 ### P2 — Supports Commercial Activation
 
 | Item | Benefit | Estimated Effort |
 |------|---------|-----------------|
-| Salesforce CRM connector (Lyte) | Removes pipeline data caveat; enables live RevOps demos | Medium |
-| SIEM connector (Aegis) | Enables prospect-connected security demos | Medium |
+| Salesforce CRM connector (KORA) | Removes pipeline data caveat; enables live RevOps demos | Medium |
+| SIEM connector (PARAGON) | Enables prospect-connected security demos | Medium |
 | Live AIS alert replay | Shows a real dark-vessel event from historical AIS data | Small |
 | Stripe billing activation | Converts demo interest to commercial pilots | Small — infrastructure built, activation required |
 
@@ -127,8 +127,8 @@ These items are not blockers for current demonstrations but would significantly 
 
 | Item | Benefit | Estimated Effort |
 |------|---------|-----------------|
-| Terra public-facing demo mode | Enables self-serve Terra exploration | Medium |
-| PRISM Counsel public demo mode | Enables self-serve legal matter exploration | Medium |
+| DOMAINE public-facing demo mode | Enables self-serve DOMAINE exploration | Medium |
+| Counsel public demo mode | Enables self-serve legal matter exploration | Medium |
 | Demo environment isolated from production | Prevents any risk of demo data touching production | Medium |
 | Guided product tour (interactive overlay) | Enables async demos without a presenter | Large |
 
@@ -139,10 +139,10 @@ These items are not blockers for current demonstrations but would significantly 
 | Gap | Impact | Workaround |
 |-----|--------|-----------|
 | Push notification deep-linking not live | Mobile demo requires manual navigation | Presenter drives mobile demo directly |
-| CRM connector not live | Pipeline signals are seeded, not connected | Verbal caveat during Lyte narrative |
+| CRM connector not live | Pipeline signals are seeded, not connected | Verbal caveat during KORA narrative |
 | AIS positions simulated | Vessel positions don't update in real time | Present as "representative fleet view" |
 | SIEM not connected | Security signals are seeded | Present as "representative threat posture" |
-| Terra demo flow not in formal narrative | Terra is shown as a live app but without a structured narrative | Use the distress map and deal pipeline as supporting evidence |
+| DOMAINE demo flow not in formal narrative | DOMAINE is shown as a live app but without a structured narrative | Use the distress map and deal pipeline as supporting evidence |
 | Carlota Jo not in formal narrative | Carlota Jo is accessible but not part of the core four narratives | Show as "premium advisory surface" in the platform compounding section |
 
 ---

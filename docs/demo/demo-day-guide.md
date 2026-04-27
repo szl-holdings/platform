@@ -15,7 +15,7 @@ Complete this checklist 30–60 minutes before any demo session.
 
 - [ ] Run the demo reset script: `./scripts/demo-reset/reset.sh`
 - [ ] Verify API health: `curl /api/health` returns `{"status":"healthy"}`
-- [ ] Confirm all workflows are running (SZL Holdings, Vessels, Aegis, Lyte, PRISM Counsel)
+- [ ] Confirm all workflows are running (SZL Holdings, SEXTANT, PARAGON, KORA, Counsel)
 - [ ] Open browser windows for each platform — do not use a cold start during the demo
 - [ ] Set browser zoom to 90% for 1920×1080 presentations (avoids scroll-heavy views)
 - [ ] Close all unrelated tabs; hide browser bookmarks bar
@@ -24,17 +24,17 @@ Complete this checklist 30–60 minutes before any demo session.
 ### Data State Verification
 
 - [ ] Verify demo data banners are visible in each platform (data state badges should show "Demo Mode")
-- [ ] Confirm at least one pending approval is in the Command Inbox (Lyte)
-- [ ] Confirm MV Soltana is visible in the Vessels fleet dashboard with an active alert
-- [ ] Confirm Rivera matter is in the PRISM Counsel dashboard with a clock violation badge
-- [ ] Confirm the credential stuffing incident is in the Aegis SOC queue
-- [ ] Confirm 1847 Flatbush Ave (compounded distress: lis pendens + tax lien) is at the top of the Terra distress queue
+- [ ] Confirm at least one pending approval is in the Command Inbox (KORA)
+- [ ] Confirm MV Soltana is visible in the SEXTANT fleet dashboard with an active alert
+- [ ] Confirm Rivera matter is in the Counsel dashboard with a clock violation badge
+- [ ] Confirm the credential stuffing incident is in the PARAGON SOC queue
+- [ ] Confirm 1847 Flatbush Ave (compounded distress: lis pendens + tax lien) is at the top of the DOMAINE distress queue
 
 ### Devices
 
 - [ ] Laptop screen tested at presentation resolution
 - [ ] External display connected and mirroring confirmed (if using projector)
-- [ ] CORTEX mobile app loaded and signed in (if showing the mobile demo)
+- [ ] APEX mobile app loaded and signed in (if showing the mobile demo)
 - [ ] Backup device ready (tablet or second laptop) in case of technical issues
 
 ---
@@ -49,13 +49,13 @@ In the demo environment, personas are configured via the demo toolbar at the bot
 
 | Persona | Role Tag | Use When |
 |---------|----------|----------|
-| Marcus Holt (CFO) | `executive` | Lyte / Business Observability demo |
-| Diana Reyes (CISO) | `executive` | Aegis Security — CISO view |
-| Priya Nair (SOC Analyst) | `analyst` | Aegis Security — analyst execution view |
-| Captain James Wren | `operator` | Vessels maritime demo |
-| Robert Tanner (CCO) | `auditor` | Vessels — read-only compliance view |
-| Sophia Marchetti | `operator` | PRISM Counsel legal demo |
-| Marcus Holt (Apex Capital) | `operator` | Terra real-estate distress demo |
+| Marcus Holt (CFO) | `executive` | KORA / Decision Intelligence demo |
+| Diana Reyes (CISO) | `executive` | PARAGON Security — CISO view |
+| Priya Nair (SOC Analyst) | `analyst` | PARAGON Security — analyst execution view |
+| Captain James Wren | `operator` | SEXTANT maritime demo |
+| Robert Tanner (CCO) | `auditor` | SEXTANT — read-only compliance view |
+| Sophia Marchetti | `operator` | Counsel legal demo |
+| Marcus Holt (Apex Capital) | `operator` | DOMAINE real-estate distress demo |
 
 ### Role-Based View Differences
 
@@ -79,13 +79,13 @@ Best for: Series A investors, strategic partners, enterprise executive evaluator
 | Time | Section | Platform | Persona |
 |------|---------|----------|---------|
 | 0–5 min | Opening thesis — the governed intelligence loop | SZL Holdings homepage | — |
-| 5–17 min | Narrative 1: Business Observability | Lyte | Marcus Holt (CFO) |
-| 17–29 min | Narrative 3: Maritime / Sanctions | Vessels | James Wren → Robert Tanner |
-| 29–41 min | Narrative 2: Security / SOC | Aegis | Priya Nair → Diana Reyes |
-| 41–53 min | Narrative 4: Legal / PRISM Counsel | PRISM Counsel | Sophia Marchetti |
-| 53–65 min | Narrative 5: Real Estate / Distress Diligence | Terra | Marcus Holt (Apex Capital) |
+| 5–17 min | Narrative 1: Decision Intelligence | KORA (`/lyte/`) | Marcus Holt (CFO) |
+| 17–29 min | Narrative 3: Maritime / Sanctions | SEXTANT (`/vessels/`) | James Wren → Robert Tanner |
+| 29–41 min | Narrative 2: Security / SOC | PARAGON (`/sentra/`) | Priya Nair → Diana Reyes |
+| 41–53 min | Narrative 4: Legal Matter Command | Counsel (`/counsel/`) | Sophia Marchetti |
+| 53–65 min | Narrative 5: Real Estate / Distress Diligence | DOMAINE (`/terra/`) | Marcus Holt (Apex Capital) |
 | 65–70 min | Platform compounding thesis | SZL Holdings architecture view | — |
-| 70–75 min | Mobile (optional) + Q&A | CORTEX | — |
+| 70–75 min | Mobile (optional) + Q&A | APEX | — |
 
 For self-serve prospect exploration, send a direct deep link with `?demo=true` to any of the five product apps. Each app auto-enables Demo Mode and surfaces a guided walkthrough sidebar (steps mirror the talking script below).
 
@@ -96,8 +96,8 @@ Best for: Time-constrained meetings, second-round check-ins, conference booths
 | Time | Section | Platform |
 |------|---------|----------|
 | 0–3 min | Opening thesis | SZL Holdings |
-| 3–11 min | Lyte: Command Inbox + Proof Chain | Lyte |
-| 11–19 min | Vessels: AIS anomaly + OFAC + Audit View | Vessels |
+| 3–11 min | KORA: Command Inbox + Proof Chain | KORA (`/lyte/`) |
+| 11–19 min | SEXTANT: AIS anomaly + OFAC + Audit View | SEXTANT (`/vessels/`) |
 | 19–23 min | Platform compounding thesis | SZL Holdings |
 | 23–25 min | Q&A | — |
 
@@ -113,7 +113,7 @@ Show only the relevant narrative. Use the full 12-minute script with role switch
 
 ### For Financial Investors (PE / VC)
 
-**Lead with:** Business Observability (Lyte) and the portfolio-level view.  
+**Lead with:** Decision Intelligence (KORA) and the portfolio-level view.  
 **Emphasize:** Compounding architecture economics — one infrastructure investment, N vertical products.  
 **Avoid:** Deep technical implementation details unless asked.  
 **Best question to ask:** "Where does operational decision-making break down most painfully in your portfolio companies?"
@@ -127,14 +127,14 @@ Show only the relevant narrative. Use the full 12-minute script with role switch
 
 ### For Technical Evaluators (CTO, Platform Architects)
 
-**Lead with:** The shared architecture — monorepo, shared event model, Alloy workflow engine.  
+**Lead with:** The shared architecture — monorepo, shared event model, A11oy workflow engine.  
 **Emphasize:** TypeScript end-to-end, OpenAPI codegen, Drizzle ORM, RBAC with organization scoping.  
 **Allow:** Deeper dives into any layer — have the codebase ready to show.  
 **Best question to ask:** "What's your current approach to workflow orchestration and audit trail?"
 
 ### For Legal/Compliance Professionals
 
-**Lead with:** PRISM Counsel. Show the proof chain first — it earns the room.  
+**Lead with:** Counsel. Show the proof chain first — it earns the room.  
 **Emphasize:** Privilege-aware architecture, attorney work product protection, NY DFS Reg 68 clock tracking.  
 **Avoid:** Technical implementation. Stay in the matter management and legal workflow layer.  
 **Best question to ask:** "How are you currently tracking insurer response deadlines across your active matters?"
@@ -180,11 +180,11 @@ Complete these within 24 hours of every demo.
 
 | Narrative | Scenario | Key Metric |
 |-----------|---------|-----------|
-| Business / Lyte | $4.2M pipeline stall, 47 days — resolved in 26 hours | Close probability 31% → 74% |
-| Security / Aegis | Credential stuffing, CVSS 9.1, 2,400 attempts — contained in 23 min | 0 accounts compromised |
-| Maritime / Vessels | AIS dark 134 min, OFAC corridor — cleared in 4.5 hours | Demurrage $112K recoverable |
-| Legal / PRISM Counsel | Reg 68 clock violation — insurer responded in 5 days | Settlement conference: $395K offer |
-| Real Estate / Terra | Brooklyn multifamily, lis pendens + tax lien — LOI in 9 days | $2.05M acquisition vs. $3.45M ARV |
+| Decision Intelligence / KORA | $4.2M pipeline stall, 47 days — resolved in 26 hours | Close probability 31% → 74% |
+| Security / PARAGON | Credential stuffing, CVSS 9.1, 2,400 attempts — contained in 23 min | 0 accounts compromised |
+| Maritime / SEXTANT | AIS dark 134 min, OFAC corridor — cleared in 4.5 hours | Demurrage $112K recoverable |
+| Legal / Counsel | Reg 68 clock violation — insurer responded in 5 days | Settlement conference: $395K offer |
+| Real Estate / DOMAINE | Brooklyn multifamily, lis pendens + tax lien — LOI in 9 days | $2.05M acquisition vs. $3.45M ARV |
 
 ---
 

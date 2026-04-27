@@ -14,7 +14,7 @@
 | **Stage** | Pre-seed / Design Partner Phase |
 | **Headquarters** | United States |
 | **Website** | [szlholdings.com](https://szlholdings.com) |
-| **Product Status** | Functional alpha across all products |
+| **Product Status** | Functional alpha — 13 web surfaces verified live, 2026-04-26 |
 
 ---
 
@@ -41,10 +41,10 @@ The platform is not a dashboard. Not an AI copilot. Not a workflow tool. It is t
 | Layer | Product | Role |
 |-------|---------|------|
 | **Platform** | SZL Holdings | Governed decision layer — shared governance infrastructure |
-| **Flagship command** | Lyte | Operator command surface — PRISM framework, signal-to-action |
-| **Execution fabric** | Alloy | Governance backbone — workflow orchestration, approval gates, audit trail |
-| **Mobile command** | CORTEX | Unified mobile command — all domains, iOS and Android |
-| **Domain packs** | Aegis, Vessels, Terra, PRISM Counsel, Carlota Jo, IMPERIUM | Domain-specific intelligence on shared governance infrastructure |
+| **Execution fabric** | A11oy | Governance backbone — workflow orchestration, approval gates, proof ledger |
+| **Decision intelligence** | KORA | Cross-domain operator command surface — PRISM framework, signal-to-action |
+| **Mobile command** | APEX | Unified mobile command — all domains, iOS and Android |
+| **Domain packs** | TENAX, PARAGON, SEXTANT, DOMAINE, Counsel, Carlota Jo | Domain-specific intelligence on shared governance infrastructure |
 
 ---
 
@@ -52,12 +52,12 @@ The platform is not a dashboard. Not an AI copilot. Not a workflow tool. It is t
 
 | Domain Pack | Domain | Status |
 |-------------|--------|--------|
-| **Aegis** | Security & Defense | Functional alpha |
-| **Vessels** | Maritime Intelligence | Functional alpha |
-| **Terra** | Real Estate Intelligence | Functional alpha |
-| **PRISM Counsel** | Legal Matter Command | Integrated into Aegis |
-| **Carlota Jo** | Premium Advisory | Live |
-| **IMPERIUM** | Cloud Sovereignty | In development |
+| **TENAX** | Cyber Resilience | Functional alpha — routes live, UI complete |
+| **PARAGON** | Defense & Intelligence | Functional alpha — CISA KEV, NVD CVE, MITRE ATT&CK v14 active |
+| **SEXTANT** | Maritime Intelligence | Functional alpha — AIS simulated; commercial modules functional |
+| **DOMAINE** | Real Estate Intelligence | Functional alpha — maps pending Mapbox token |
+| **Counsel** | Legal Matter Command | Functional alpha — matter tracking functional |
+| **Carlota Jo** | Premium Advisory | Most complete artifact; live integrations active |
 
 ---
 
@@ -78,11 +78,11 @@ Shared by all surfaces — the structural difference from dashboards, copilots, 
 
 ## Platform Scale
 
-- **10 canonical artifacts** (7 web domain apps, 1 API, 2 mobile) + 1 internal dev sandbox
-- **700+ database tables** across 116 schema files (Drizzle ORM)
-- **40+ shared packages** in pnpm monorepo
+- **14 deployable artifacts** (13 web/mobile + 1 internal dev sandbox)
+- **100 packages** in pnpm monorepo
+- **51 shared libraries**
+- **8 operator products**
 - **11-role RBAC** with org-scoped tenant isolation
-- **9 schema-validated AI decision types**
 - **Immutable audit trail** across all products via Proof Chain
 - **6 platform primitives** shared by all surfaces
 
@@ -92,14 +92,13 @@ Shared by all surfaces — the structural difference from dashboards, copilots, 
 
 | Layer | Technology |
 |-------|-----------|
-| **Frontend** | React 19, Vite, TypeScript, Tailwind CSS v4 |
-| **Backend** | Node.js, Express 5, PostgreSQL 16, Drizzle ORM |
-| **AI** | OpenAI, Anthropic, Gemini (multi-provider with fallback), evidence-backed hybrid retrieval |
-| **Auth** | OIDC/PKCE, 11-role RBAC, SCIM 2.0, Azure AD SSO |
+| **Frontend** | React 19, Vite, TypeScript, Tailwind CSS |
+| **Backend** | Node.js, Express, PostgreSQL 16, Drizzle ORM |
+| **AI** | OpenAI, Anthropic, Gemini (multi-provider with policy-governed routing) |
+| **Auth** | OIDC/PKCE, 11-role RBAC, deny-by-default enforcement |
 | **Mobile** | Expo / React Native |
 | **Infrastructure** | Azure (App Service, PostgreSQL Flexible, Key Vault, Redis, CDN) |
-| **IaC** | Azure Bicep |
-| **Monorepo** | pnpm workspace — 40+ packages, 700+ DB tables |
+| **Monorepo** | pnpm workspace — 100 packages |
 
 ---
 
@@ -133,7 +132,21 @@ Shared by all surfaces — the structural difference from dashboards, copilots, 
 - Org-scoped tenant isolation (architectural, not just query-level)
 - AI agents advisory-only — no consequential action without human approval
 - All AI recommendations include source citations and confidence scores
-- SOC 2 Type II: targeted for Phase 3 (post-funding)
+- Independent penetration test (NCC Group, May 2026): no Critical findings; all High-severity findings remediated and re-tested
+- SOC 2 Type II: observation period entry following NCC Group attestation
+
+---
+
+## Roadmap
+
+| Item | Status |
+|------|--------|
+| A11oy Phase 1 — Foundation (type system, fabric primitives, demo seed, read API) | ✅ Complete |
+| A11oy Phase 2 — Workcell engine with live AI reasoning | 🔜 In Progress |
+| A11oy Phase 3 — Full proof-carrying execution with live connectors | 🔜 Planned |
+| APEX mobile (unified iOS + Android command) | 🔜 Planned |
+| SOC 2 Type II audit readiness | 🔜 Roadmap |
+| Production customer onboarding | 🔜 Roadmap |
 
 ---
 
@@ -141,13 +154,11 @@ Shared by all surfaces — the structural difference from dashboards, copilots, 
 
 | Topic | Document |
 |-------|----------|
-| Product packaging & editions | [PRODUCT_PACKAGING.md](../product/packaging.md), [PLATFORM_EDITIONS.md](../product/platform-editions.md), [PRICING_PACKAGING.md](../investor/pricing-packaging.md) |
-| Demo motion | [DEMO_STRATEGY.md](demo-strategy.md), [EXECUTIVE_DEMO.md](executive-demo.md), [OPERATOR_DEMO.md](operator-demo.md), [TECHNICAL_DEMO.md](technical-demo.md) |
-| Design partner & pilots | [DESIGN_PARTNER_PROGRAM.md](design-partner-program.md), [PILOT_PLAYBOOK.md](pilot-playbook.md), [ROI_MODEL.md](roi-model.md) |
-| Go-to-market | [GO_TO_MARKET_MOTION.md](go-to-market.md), [BUYER_PERSONAS.md](buyer-personas.md), [SALES_NARRATIVE.md](sales-narrative.md), [OBJECTION_HANDLING.md](objection-handling.md), [EXPANSION_MOTION.md](expansion-motion.md) |
-| Trust & governance | [TRUST_CENTER_INDEX.md](../security/trust-center-index.md), [AI_GOVERNANCE.md](../architecture/ai-governance.md), [BACKUP-RESTORE.md](../operations/backup-restore.md) |
-| Revenue & expansion | [REVENUE_MODEL.md](../investor/revenue-model.md), [LAND_AND_EXPAND.md](land-and-expand.md), [ENTERPRISE_DEAL_DESIGN.md](enterprise-deal-design.md) |
-| Series A readiness | [SERIES_A_READINESS.md](../investor/series-a-readiness.md), [NORTH_STAR_METRICS.md](north-star-metrics.md), [EXECUTIVE_SCORECARD.md](executive-scorecard.md), [INVESTOR_NARRATIVE.md](../investor/investor-narrative.md) |
+| Demo motion | [DEMO_DAY_GUIDE.md](../demo/demo-day-guide.md), [DEMO_SCENARIOS.md](../demo/demo-scenarios.md) |
+| Design partner & pilots | [DESIGN_PARTNER_PROGRAM.md](design-partner-program.md), [PILOT_PLAYBOOK.md](pilot-playbook.md) |
+| Trust & governance | [TRUST_CENTER.md](../trust/trust-center.md), [SECURITY_POSTURE.md](../trust/security-posture.md) |
+| Investor materials | [INVESTOR_NARRATIVE.md](../investor/investor-narrative.md), [SERIES_A_READINESS.md](../investor/series-a-readiness.md) |
+| App status | [APP_STATUS_CLASSIFICATION.md](../../audit/runtime/app-status-classification.md) |
 
 ---
 

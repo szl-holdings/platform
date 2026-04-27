@@ -1,19 +1,19 @@
-# Lyte + Alloy — Canonical Demo Flow
+# KORA + A11oy — Canonical Demo Flow
 
 **Duration**: 8–12 minutes  
 **Audience**: Investors, enterprise buyers, design partners, lenders  
 **Environment**: Demo (Seeded Data)  
-**Version**: 2.0 — April 2026
+**Version**: 2.1 — April 2026
 
 ---
 
 ## Overview
 
-**Surface routing policy:** This buyer-facing demo uses the `/command/` portal (Unified Command artifact). Internal operator access to Lyte functionality uses `/lyte/` within `artifacts/szl-holdings` — see `docs/internal/demo/demo-runbook.md`. Both surfaces expose the same underlying Lyte workspace; `/command/` is the canonical path for all buyer-facing and investor demos.
+**Surface routing policy:** This buyer-facing demo uses the `/command/` portal (FORGE Command artifact). Internal operator access to KORA functionality also uses `/lyte/` within `artifacts/szl-holdings` — see `docs/internal/demo/demo-runbook.md`. Both surfaces expose the same underlying KORA workspace; `/command/` is the canonical path for all buyer-facing and investor demos.
 
-This is the single canonical demo flow for Lyte + Alloy. It walks through the complete operating loop:
+This is the single canonical demo flow for KORA + A11oy. It walks through the complete operating loop:
 
-> Signal enters Lyte → PRISM scores and correlates it → Alloy retrieves evidence → Alloy produces a structured decision object → Approval gate assessed → Human approves or revises → Action created and routed → Audit trail closes the loop → Dashboard reflects resolution
+> Signal enters KORA → PRISM scores and correlates it → A11oy retrieves evidence → A11oy produces a structured decision object → Approval gate assessed → Human approves or revises → Action created and routed → Audit trail closes the loop → Dashboard reflects resolution
 
 Every step is reproducible using the seeded demo dataset. Every screen exists in the live application.
 
@@ -46,7 +46,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 **URL**: `/command/signals`
 
-**Narration**: *"Lyte watches your entire operational surface. When something changes — a new risk, a missed SLA, a compliance gap — Lyte catches it and structures it as a signal. Not a generic alert. A structured business event with context attached."*
+**Narration**: *"KORA watches your entire operational surface. When something changes — a new risk, a missed SLA, a compliance gap — KORA catches it and structures it as a signal. Not a generic alert. A structured business event with context attached."*
 
 **Show**:
 1. Open Signals Feed
@@ -61,7 +61,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 **Key messages**:
 - Signals come from your existing systems — no rip-and-replace
 - Business context and value at risk quantified automatically, not just a severity label
-- Lyte normalizes signals across 20+ source types into a common schema
+- KORA normalizes signals across 20+ source types into a common schema
 
 ---
 
@@ -69,7 +69,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 **URL**: `/command/prism`
 
-**Narration**: *"PRISM is Lyte's intelligence framework. It doesn't just show you alerts — it correlates them. Let me show you what that means."*
+**Narration**: *"PRISM is KORA's intelligence framework. It doesn't just show you alerts — it correlates them. Let me show you what that means."*
 
 **Show**:
 1. Open PRISM Dashboard
@@ -90,10 +90,10 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 **URL**: `/command/alloy/intelligence` → Retrieval tab
 
-**Narration**: *"Before Alloy makes any recommendation, it retrieves evidence. It searches your organization's actual knowledge — prior incidents, approval policies, owner metadata, connector context. Not generic AI. Your data."*
+**Narration**: *"Before A11oy makes any recommendation, it retrieves evidence. It searches your organization's actual knowledge — prior incidents, approval policies, owner metadata, connector context. Not generic AI. Your data."*
 
 **Show**:
-1. Navigate to Alloy Intelligence → Retrieval tab
+1. Navigate to A11oy Intelligence → Retrieval tab
 2. Show the knowledge base query issued against the signal
 3. Walk through retrieved evidence:
    - Prior similar payment stall (resolved in 4h, 3 months ago — Stripe config change)
@@ -113,7 +113,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 **URL**: `/command/alloy/intelligence` → Triage Engine
 
-**Narration**: *"Alloy doesn't give you a paragraph of AI text. It produces a structured decision object — validated against a schema, with typed fields, confidence scores, evidence references, and a clear recommended action."*
+**Narration**: *"A11oy doesn't give you a paragraph of AI text. It produces a structured decision object — validated against a schema, with typed fields, confidence scores, evidence references, and a clear recommended action."*
 
 **Show**:
 1. Enter the signal into the Triage Engine (or show pre-populated result)
@@ -132,13 +132,13 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
    - **Risk Level**: High
    - **Rationale**: Payment revenue impact $2.3M, prior incident resolved with processor scale
    - **Alternatives**: Two other approaches shown at lower confidence
-6. Say: *"Schema-validated decisions, not freeform text. Every field is typed. Every recommendation is sourced. The alternatives panel means humans can override with context Alloy doesn't have."*
+6. Say: *"Schema-validated decisions, not freeform text. Every field is typed. Every recommendation is sourced. The alternatives panel means humans can override with context A11oy doesn't have."*
 
 **Key messages**:
 - Decision object is machine-readable JSON — not a prose summary
 - Every field is typed and validated against a schema
 - Alternatives shown so humans can make an informed override
-- This is the core Alloy IP — structured intelligence, not chat output
+- This is the core A11oy IP — structured intelligence, not chat output
 
 ---
 
@@ -146,7 +146,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 **URL**: `/command/approvals`
 
-**Narration**: *"This is a P1 action with $2.3M at stake. Alloy requires explicit human approval before anything executes. The approval gate is structural — enforced at the workflow layer, not just in the UI. It cannot be bypassed in code."*
+**Narration**: *"This is a P1 action with $2.3M at stake. A11oy requires explicit human approval before anything executes. The approval gate is structural — enforced at the workflow layer, not just in the UI. It cannot be bypassed in code."*
 
 **Show**:
 1. Open Approvals Center
@@ -171,7 +171,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 **URL**: `/command/actions`
 
-**Narration**: *"Once approved, Alloy creates the action item, routes it to the right owner, and attaches the full decision context. No copy-paste. No re-explanation. The owner gets everything they need to act."*
+**Narration**: *"Once approved, A11oy creates the action item, routes it to the right owner, and attaches the full decision context. No copy-paste. No re-explanation. The owner gets everything they need to act."*
 
 **Show**:
 1. Navigate to Action Center
@@ -218,7 +218,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 
 **URL**: `/command/`
 
-**Narration**: *"Back to the dashboard. The signal that was Critical and unassigned 10 minutes ago is now In Progress with an owner assigned and an action underway. This is Business Observability — not dashboards, not reports, not AI autopilot. Structured intelligence with human accountability at every step."*
+**Narration**: *"Back to the dashboard. The signal that was Critical and unassigned 10 minutes ago is now In Progress with an owner assigned and an action underway. This is governed decision intelligence — not dashboards, not reports, not AI autopilot. Structured intelligence with human accountability at every step."*
 
 **Show**:
 1. Return to main Dashboard
@@ -226,7 +226,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 3. Show the value at risk counter updated (action in progress reduces exposure)
 4. Optional: brief pan across Readiness Module if time permits
 
-**Closing line**: *"Signal in → Evidence retrieved → Decision produced → Human approved → Action routed → Audit written. That's the Lyte + Alloy operating loop."*
+**Closing line**: *"Signal in → Evidence retrieved → Decision produced → Human approved → Action routed → Audit written. That's the KORA + A11oy operating loop."*
 
 ---
 
@@ -239,8 +239,8 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 | Payment pipeline stalled — Stripe webhook queue 14.2k | PagerDuty | Critical | $2.3M |
 | RDS replication lag 127s — failover risk | AWS CloudWatch | Critical | $800K |
 | auth-service CrashLoopBackOff — Enterprise SSO broken | Sentry | High | $4.2M ARR |
-| Q1 revenue forecast drift — 8.3% below plan | Terra | Medium | $800K |
-| Northgate contract approval SLA breach — 48h overdue | Terra | Medium | $840K |
+| Q1 revenue forecast drift — 8.3% below plan | DOMAINE | Medium | $800K |
+| Northgate contract approval SLA breach — 48h overdue | DOMAINE | Medium | $840K |
 | IAM credential exfiltration — prod account | AWS GuardDuty | High | — |
 
 ### Supporting Signals
@@ -252,7 +252,7 @@ Every step is reproducible using the seeded demo dataset. Every screen exists in
 | Payment decline rate 12.3% | Stripe | High |
 | Deploy pipeline blocked — P1 hotfix OOM | GitHub Actions | Medium |
 | CDN cache hit ratio dropped to 62% | CloudFlare | Low |
-| NIST CSF gap — 3 controls unresolved | Lyte Readiness | Medium |
+| NIST CSF gap — 3 controls unresolved | KORA Readiness | Medium |
 | MV Pacific Voyager — 18h delay, weather diversion | AIS | High |
 
 ### Seeded Knowledge Base
@@ -285,7 +285,7 @@ All demo screens display the **DEMO** badge in the header when `?demo=true` is s
 
 | Objection | Response |
 |-----------|----------|
-| "We already have PagerDuty / Datadog / Jira" | Lyte doesn't replace those. PagerDuty sends signals. Lyte structures them into decisions with business context and routes action — that's the missing layer. |
+| "We already have PagerDuty / Datadog / Jira" | KORA doesn't replace those. PagerDuty sends signals. KORA structures them into decisions with business context and routes action — that's the missing layer. |
 | "Is the AI making autonomous decisions?" | The default mode is `propose_only`. AI proposes; humans approve. This is enforced at the workflow layer, not just the UI. |
 | "How do we trust the AI output?" | Every recommendation includes evidence sources and a confidence score. No black-box verdicts. The audit trail shows exactly why every recommendation was made. |
 | "What does implementation look like?" | A pilot starts with one workflow instrumented — typically a contract approval or onboarding flow. No rip-and-replace. Connectors to existing systems. 4–6 weeks to first value. |
