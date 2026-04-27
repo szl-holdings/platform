@@ -190,3 +190,4 @@ export * from './counsel_clauses';
 export * from './outbound_gateway';
 export * from './carlota_drip';
 export * from './siem_export';
+export * from './document_lifecycle';

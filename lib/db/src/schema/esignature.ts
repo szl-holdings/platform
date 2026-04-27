@@ -20,6 +20,7 @@ export const esignatureRequestsTable = pgTable(
       .notNull()
       .references(() => organizationsTable.id, { onDelete: 'cascade' }),
     matterId: integer('matter_id'),
+    lifecycleDocumentId: text('lifecycle_document_id'),
     requestedById: integer('requested_by_id').references(() => usersTable.id, {
       onDelete: 'set null',
     }),
@@ -55,6 +56,7 @@ export const esignatureRequestsTable = pgTable(
     index('esig_requests_matter_id_idx').on(t.matterId),
     index('esig_requests_status_idx').on(t.status),
     index('esig_requests_envelope_id_idx').on(t.providerEnvelopeId),
+    index('esig_requests_lifecycle_doc_idx').on(t.lifecycleDocumentId),
   ],
 );
 

@@ -109,6 +109,9 @@ export const DOMAIN_ENTITY_TYPES = [
   // Counsel
   'matter',
   'obligation',
+  'document',
+  // Aegis — Fund Management
+  'fund',
   // Carlota Jo
   'engagement',
   // Pulse
@@ -150,6 +153,8 @@ export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
   engagement: 'Engagement',
   matter: 'Matter',
   obligation: 'Obligation',
+  document: 'Document',
+  fund: 'Fund',
   brief: 'Brief',
   opportunity: 'Opportunity',
   project: 'Project',
@@ -270,6 +275,8 @@ export const ENTITY_TYPE_DOMAINS: Record<EntityType, Domain[]> = {
   control: ['sentra'],
   matter: ['counsel'],
   obligation: ['counsel'],
+  document: ['counsel', 'security', 'platform'],
+  fund: ['security'],
   engagement: ['carlota'],
   brief: ['pulse'],
   opportunity: ['lyte'],
@@ -412,6 +419,53 @@ export interface ObligationEntity extends BaseEntity {
   riskIfMissed?: string | undefined;
 }
 
+export const DOCUMENT_LIFECYCLE_STATES = [
+  'draft',
+  'review',
+  'sign',
+  'file',
+  'archive',
+] as const;
+
+export type DocumentLifecycleState = (typeof DOCUMENT_LIFECYCLE_STATES)[number];
+
+export const DOCUMENT_LIFECYCLE_TRANSITIONS: Record<DocumentLifecycleState, DocumentLifecycleState[]> = {
+  draft: ['review'],
+  review: ['draft', 'sign', 'file'],
+  sign: ['review', 'file'],
+  file: ['archive'],
+  archive: [],
+};
+
+export interface DocumentEntity extends BaseEntity {
+  entityType: 'document';
+  domain: 'counsel' | 'security' | 'platform';
+  documentType: 'filing' | 'contract' | 'brief' | 'memo' | 'exhibit' | 'certificate' | 'deck' | 'report';
+  lifecycleState: DocumentLifecycleState;
+  matterId?: string | undefined;
+  fundId?: string | undefined;
+  title: string;
+  version: number;
+  signatureStatus?: 'none' | 'pending' | 'partially_signed' | 'completed' | 'declined' | undefined;
+  jurisdictionCode?: string | undefined;
+  frozenMetrics?: Record<string, unknown> | undefined;
+}
+
+export interface FundEntity extends BaseEntity {
+  entityType: 'fund';
+  domain: 'security';
+  fundName: string;
+  fundType: 'venture' | 'growth' | 'buyout' | 'hedge' | 'real_estate' | 'fund_of_funds';
+  vintage: number;
+  aumUsd: number;
+  status: 'fundraising' | 'investing' | 'harvesting' | 'closed' | 'liquidating';
+  gpEntityId?: string | undefined;
+  lpCount?: number | undefined;
+  irr?: number | undefined;
+  tvpi?: number | undefined;
+  dpi?: number | undefined;
+}
+
 export interface EngagementEntity extends BaseEntity {
   entityType: 'engagement';
   domain: 'carlota';
@@ -510,6 +564,8 @@ export type DomainEntity =
   | ControlEntity
   | MatterEntity
   | ObligationEntity
+  | DocumentEntity
+  | FundEntity
   | EngagementEntity
   | BriefEntity
   | OpportunityEntity

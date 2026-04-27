@@ -407,6 +407,12 @@ router.use("/signal-bus", lazyMount(() => import("./signal-bus"), "signal-bus"))
 // Outbound Gateway — unified external delivery with tracking, retry, and audit.
 router.use("/outbound", lazyMount(() => import("./outbound-gateway"), "outbound-gateway"));
 
+router.use(lazyMatch("/document-lifecycle", () => import("./document-lifecycle"), "document-lifecycle"));
+
+router.use(lazyMatch("/fund-management", () => import("./fund-management"), "fund-management"));
+
+router.use(lazyMatch("/aegis-export", () => import("./aegis-export"), "aegis-export"));
+
 router.use(lazyMatch("/mobile-biometric", () => import("./mobile-biometric"), "mobile-biometric"));
 
 // Precision Evolution Runtime (PER) — governed AI evolution control plane.

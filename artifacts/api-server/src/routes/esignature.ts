@@ -9,8 +9,11 @@
  * docusign, hellosign, or internal (simulated) adapters.
  */
 
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import {
   db,
+  documentAuditTrailTable,
+  documentLifecycleTable,
   esignatureEventsTable,
   esignatureRequestsTable,
 } from '@szl-holdings/db';
@@ -31,6 +34,27 @@ import { bodyShape } from '@szl-holdings/contracts/common';
 
 const router: IRouter = Router();
 
+const WEBHOOK_SECRET = process.env.ESIGNATURE_WEBHOOK_SECRET;
+
+type RequestWithRawBody = Request & { rawBody?: Buffer };
+
+function verifyWebhookSignature(req: Request): boolean {
+  if (!WEBHOOK_SECRET) {
+    logger.warn('ESIGNATURE_WEBHOOK_SECRET not configured — rejecting webhook');
+    return false;
+  }
+  const signature = req.headers['x-esignature-signature'] as string | undefined;
+  if (!signature) return false;
+  const raw = (req as RequestWithRawBody).rawBody;
+  const body = raw ? raw.toString('utf8') : JSON.stringify(req.body);
+  const expected = createHmac('sha256', WEBHOOK_SECRET).update(body).digest('hex');
+  try {
+    return timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expected, 'hex'));
+  } catch {
+    return false;
+  }
+}
+
 const PROVIDER = (process.env.ESIGNATURE_PROVIDER ?? 'internal') as
   | 'docusign'
   | 'hellosign'
@@ -45,6 +69,7 @@ const signatorySchema = z.object({
 
 const sendForSignatureSchema = z.object({
   matterId: z.number().int().positive().optional(),
+  lifecycleDocumentId: z.string().max(100).optional(),
   documentTitle: z.string().min(1).max(500),
   documentUrl: z.string().url().optional(),
   documentBase64: z.string().optional(),
@@ -113,16 +138,57 @@ router.post(
     const orgId = [...orgIds][0];
 
     try {
-      const { matterId, documentTitle, documentUrl, signatories, expiresInDays, message } = parsed.data;
+      const { matterId, lifecycleDocumentId, documentTitle, documentUrl, signatories, expiresInDays, message } = parsed.data;
 
       const envelopeId = `ENV-${orgId}-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
       const expiresAt = new Date(Date.now() + (expiresInDays ?? 30) * 24 * 60 * 60 * 1000);
+
+      if (lifecycleDocumentId) {
+        const [doc] = await db
+          .select()
+          .from(documentLifecycleTable)
+          .where(
+            and(
+              eq(documentLifecycleTable.documentId, lifecycleDocumentId),
+              eq(documentLifecycleTable.orgId, orgId),
+            ),
+          )
+          .limit(1);
+
+        if (doc && (doc.lifecycleState === 'review' || doc.lifecycleState === 'draft')) {
+          await db
+            .update(documentLifecycleTable)
+            .set({
+              lifecycleState: 'sign',
+              signatureStatus: 'pending',
+              updatedAt: new Date(),
+            })
+            .where(eq(documentLifecycleTable.documentId, lifecycleDocumentId));
+
+          await db.insert(documentAuditTrailTable).values({
+            documentId: lifecycleDocumentId,
+            fromState: doc.lifecycleState,
+            toState: 'sign',
+            performedById: req.user!.id,
+            performedByName: req.user!.displayName,
+            roleUsed: req.user!.roles[0] ?? 'analyst',
+            reason: `Sent for e-signature via ${PROVIDER} — envelope ${envelopeId}`,
+            orgId,
+          });
+
+          logger.info(
+            { lifecycleDocumentId, from: doc.lifecycleState, to: 'sign', envelopeId },
+            'Document lifecycle transitioned to sign on e-signature send',
+          );
+        }
+      }
 
       const [request] = await db
         .insert(esignatureRequestsTable)
         .values({
           orgId,
           matterId,
+          lifecycleDocumentId,
           requestedById: req.user!.id,
           provider: PROVIDER,
           providerEnvelopeId: envelopeId,
@@ -146,19 +212,21 @@ router.post(
           signatories: signatories.map((s) => ({ email: s.email, name: s.name })),
           documentTitle,
           envelopeId,
+          lifecycleDocumentId,
         },
       });
 
       const { providerUrl } = await dispatchToProvider(orgId, parsed.data, envelopeId);
 
       logger.info(
-        { orgId, requestId: request.id, envelopeId, provider: PROVIDER, matterId },
+        { orgId, requestId: request.id, envelopeId, provider: PROVIDER, matterId, lifecycleDocumentId },
         'E-signature request created and sent',
       );
 
       sendSuccess(res, {
         id: request.id,
         envelopeId,
+        lifecycleDocumentId,
         documentTitle: request.documentTitle,
         status: request.status,
         provider: request.provider,
@@ -314,6 +382,12 @@ router.post(
   '/counsel/esignature/webhook',
   validateBody(bodyShape({})),
   async (req: Request, res: Response) => {
+    if (!verifyWebhookSignature(req)) {
+      logger.warn({ ip: req.ip }, 'E-signature webhook rejected — invalid or missing signature');
+      res.status(401).json({ error: 'Invalid webhook signature' });
+      return;
+    }
+
     const parsed = providerWebhookSchema.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ error: 'Invalid webhook payload' });
@@ -353,6 +427,41 @@ router.post(
             updatedAt: new Date(),
           })
           .where(eq(esignatureRequestsTable.id, request.id));
+      }
+
+      if (request.lifecycleDocumentId && (newStatus === 'completed' || newStatus === 'declined')) {
+        const targetState = newStatus === 'completed' ? 'file' : 'review';
+        const sigStatus = newStatus === 'completed' ? 'completed' : 'declined';
+
+        await db
+          .update(documentLifecycleTable)
+          .set({
+            lifecycleState: targetState,
+            signatureStatus: sigStatus,
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(documentLifecycleTable.documentId, request.lifecycleDocumentId),
+              eq(documentLifecycleTable.orgId, request.orgId),
+            ),
+          );
+
+        await db.insert(documentAuditTrailTable).values({
+          documentId: request.lifecycleDocumentId,
+          fromState: 'sign',
+          toState: targetState,
+          performedById: null,
+          performedByName: signatoryName ?? 'e-signature webhook',
+          roleUsed: 'system',
+          reason: `E-signature ${newStatus} — envelope ${envelopeId}`,
+          orgId: request.orgId,
+        });
+
+        logger.info(
+          { lifecycleDocumentId: request.lifecycleDocumentId, from: 'sign', to: targetState, envelopeId },
+          'Document lifecycle transitioned on e-signature webhook',
+        );
       }
 
       await db.insert(esignatureEventsTable).values({

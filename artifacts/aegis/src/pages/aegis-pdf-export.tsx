@@ -2,19 +2,23 @@ import {
   AlertTriangle,
   BarChart3,
   CheckCircle,
+  Clock,
   Download,
   FileText,
   Globe,
+  History,
   Layers,
   Lock,
   Network,
   Printer,
   Shield,
   ShieldCheck,
+  Snowflake,
   TrendingUp,
   Users,
 } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
+import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 
 interface ExportSection {
   id: string;
@@ -59,10 +63,66 @@ const INCIDENT_DATA = [
   { date: 'Apr 2026', count: 2, critical: 1, resolved: 1 },
 ];
 
+interface FrozenSnapshot {
+  id: string;
+  frozenAt: string;
+  frozenBy: string;
+  format: 'pdf' | 'executive-brief';
+  sectionsIncluded: string[];
+  metrics: ReportMetric[];
+  incidents: typeof INCIDENT_DATA;
+}
+
+const EXPORT_HISTORY: FrozenSnapshot[] = [
+  {
+    id: 'exp-001',
+    frozenAt: '2026-04-15T14:30:00Z',
+    frozenBy: 'J. Martinez (CISO)',
+    format: 'pdf',
+    sectionsIncluded: ['executive-summary', 'threat-posture', 'incident-timeline', 'compliance-scorecard', 'mitre-coverage'],
+    metrics: REPORT_METRICS,
+    incidents: INCIDENT_DATA,
+  },
+  {
+    id: 'exp-002',
+    frozenAt: '2026-03-31T10:15:00Z',
+    frozenBy: 'A. Chen (VP Security)',
+    format: 'executive-brief',
+    sectionsIncluded: ['executive-summary', 'threat-posture'],
+    metrics: [
+      { label: 'Overall Posture Score', value: '71 / 100', change: '+2 from last quarter', status: 'warn' },
+      { label: 'Active Incidents', value: '3', status: 'warn' },
+      { label: 'Critical CVEs Unpatched', value: '1', status: 'critical' },
+      { label: 'MITRE Coverage', value: '63%', change: '+4% from last quarter', status: 'warn' },
+      { label: 'Mean Time to Detect', value: '5.4h', change: '−18% improvement', status: 'good' },
+      { label: 'Mean Time to Respond', value: '21h', change: '−8% improvement', status: 'warn' },
+      { label: 'Compliance Score', value: '94%', status: 'good' },
+      { label: 'Zero Trust Maturity', value: 'Level 2', status: 'warn' },
+    ],
+    incidents: [
+      { date: 'Dec 2025', count: 4, critical: 1, resolved: 4 },
+      { date: 'Jan 2026', count: 5, critical: 1, resolved: 5 },
+      { date: 'Feb 2026', count: 3, critical: 0, resolved: 3 },
+      { date: 'Mar 2026', count: 7, critical: 2, resolved: 6 },
+    ],
+  },
+  {
+    id: 'exp-003',
+    frozenAt: '2026-01-15T09:00:00Z',
+    frozenBy: 'J. Martinez (CISO)',
+    format: 'pdf',
+    sectionsIncluded: ['executive-summary', 'threat-posture', 'incident-timeline', 'compliance-scorecard', 'mitre-coverage', 'risk-scoring'],
+    metrics: REPORT_METRICS,
+    incidents: INCIDENT_DATA,
+  },
+];
+
 export default function AegisPdfExport() {
   const [sections, setSections] = useState<ExportSection[]>(EXPORT_SECTIONS);
   const [isGenerating, setIsGenerating] = useState(false);
   const [format, setFormat] = useState<'pdf' | 'executive-brief'>('pdf');
+  const [showHistory, setShowHistory] = useState(false);
+  const [frozenSnapshots, setFrozenSnapshots] = useState<FrozenSnapshot[]>(EXPORT_HISTORY);
   const printRef = useRef<HTMLDivElement>(null);
 
   const toggleSection = useCallback((id: string) => {
@@ -71,12 +131,82 @@ export default function AegisPdfExport() {
     );
   }, []);
 
-  const handlePrint = useCallback(async () => {
-    setIsGenerating(true);
-    await new Promise((r) => setTimeout(r, 800));
-    window.print();
-    setIsGenerating(false);
+  const pollRenderStatus = useCallback(async (jobId: string): Promise<{ status: string; outputUrl?: string }> => {
+    for (let i = 0; i < 20; i++) {
+      await new Promise((r) => setTimeout(r, 1000));
+      try {
+        const result = await apiFetch<{ data: { status: string; outputUrl?: string } }>(
+          `/aegis-export/render-status/${jobId}`,
+        );
+        const { status, outputUrl } = result?.data ?? {};
+        if (status === 'completed' && outputUrl) return { status, outputUrl };
+        if (status === 'failed') return { status };
+      } catch {
+        break;
+      }
+    }
+    return { status: 'timeout' };
   }, []);
+
+  const freezeAndExport = useCallback(async () => {
+    setIsGenerating(true);
+    const includedSections = sections.filter((s) => s.included).map((s) => s.id);
+    const metricsObj = Object.fromEntries(REPORT_METRICS.map((m) => [m.label, m.value]));
+
+    try {
+      const freezeResult = await apiFetch<{ data: { snapshotId: string; frozenAt: string } }>('/aegis-export/freeze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          format,
+          sectionsIncluded: includedSections,
+          metrics: metricsObj,
+        }),
+      });
+      const serverSnapshotId = freezeResult?.data?.snapshotId;
+      const frozenAt = freezeResult?.data?.frozenAt ?? new Date().toISOString();
+
+      if (!serverSnapshotId) {
+        throw new Error('Server did not return a snapshot ID');
+      }
+
+      const snapshot: FrozenSnapshot = {
+        id: serverSnapshotId,
+        frozenAt,
+        frozenBy: 'Current User',
+        format,
+        sectionsIncluded: includedSections,
+        metrics: [...REPORT_METRICS],
+        incidents: [...INCIDENT_DATA],
+      };
+      setFrozenSnapshots((prev) => [snapshot, ...prev]);
+
+      const renderResult = await apiFetch<{ data: { jobId: string } }>('/aegis-export/render-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ snapshotId: serverSnapshotId }),
+      });
+      const jobId = renderResult?.data?.jobId;
+
+      if (jobId) {
+        const { status, outputUrl } = await pollRenderStatus(jobId);
+        if (status === 'completed' && outputUrl) {
+          window.open(outputUrl, '_blank');
+        } else {
+          window.print();
+        }
+      } else {
+        window.print();
+      }
+    } catch (err) {
+      console.error('[aegis-export] Export failed — snapshot was not persisted:', err);
+      window.print();
+    }
+
+    setIsGenerating(false);
+  }, [format, sections, frozenSnapshots.length, pollRenderStatus]);
+
+  const handlePrint = freezeAndExport;
 
   const STATUS_COLORS: Record<ReportMetric['status'], string> = {
     good: '#c9b787',
@@ -174,15 +304,61 @@ export default function AegisPdfExport() {
                 {isGenerating ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Generating…
+                    Freezing Metrics & Generating…
                   </>
                 ) : (
                   <>
-                    <Printer className="w-4 h-4" />
-                    Export to PDF
+                    <Snowflake className="w-4 h-4" />
+                    Freeze Metrics & Export PDF
                   </>
                 )}
               </button>
+              <p className="text-[10px] text-[#f5f5f5]/40 text-center mt-2">
+                Metrics are frozen at export time — each snapshot is immutable
+              </p>
+
+              <button
+                onClick={() => setShowHistory(!showHistory)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-white/[0.06] hover:border-[#f5f5f5]/20 text-[#f5f5f5]/60 text-xs font-semibold transition-all mt-2"
+              >
+                <History className="w-3.5 h-3.5" />
+                Export History ({frozenSnapshots.length})
+              </button>
+
+              {showHistory && (
+                <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                  <h3 className="text-xs font-mono uppercase tracking-wider text-[#f5f5f5]/60 mb-3">Frozen Snapshots</h3>
+                  <div className="space-y-2">
+                    {frozenSnapshots.map((snap) => (
+                      <div key={snap.id} className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-1.5">
+                            <Snowflake className="w-3 h-3 text-[#c9b787]/60" />
+                            <span className="text-[11px] font-semibold text-[#f5f5f5]">{snap.id}</span>
+                          </div>
+                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#c9b787]/10 text-[#c9b787]">
+                            {snap.format === 'executive-brief' ? 'Brief' : 'Full'}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-[#f5f5f5]/50">
+                          {new Date(snap.frozenAt).toLocaleString()}
+                        </div>
+                        <div className="text-[10px] text-[#f5f5f5]/40 mt-0.5">
+                          By {snap.frozenBy} · {snap.sectionsIncluded.length} sections
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <div className="text-[9px] text-[#f5f5f5]/30">
+                            Posture: {snap.metrics[0]?.value}
+                          </div>
+                          <div className="text-[9px] text-[#f5f5f5]/30">
+                            Incidents: {snap.metrics[1]?.value}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Print Preview */}

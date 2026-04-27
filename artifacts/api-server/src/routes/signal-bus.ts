@@ -1,15 +1,16 @@
 import { randomUUID } from 'crypto';
-import { and, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm';
 import { Router, type Request, type Response } from 'express';
 import {
   db,
+  meshSignalsTable,
   signalBusRulesTable,
   signalBusRoutedEventsTable,
   signalBusDeadLettersTable,
 } from '@szl-holdings/db';
 import { defaultSignalBus } from '@szl-holdings/signal-mesh';
 import { createSignal, type Signal, type SignalDomain, type SignalType } from '@workspace/ontology/signal';
-import { authMiddleware } from '../middlewares/auth';
+import { authMiddleware, requireRole } from '../middlewares/auth';
 import { getUserOrgIds } from '../middlewares/tenant-scope';
 import { handleRouteError } from '../lib/api-response.js';
 import { logger } from '../lib/logger.js';
@@ -18,6 +19,7 @@ import { submitDelivery, type OutboundChannel } from '../services/outbound-gatew
 const router = Router();
 
 const SIGNAL_BUS_OWNED_PREFIXES = [
+  '/backfill',
   '/dead-letters',
   '/events',
   '/publish',
@@ -523,6 +525,178 @@ router.post('/test-fire', async (req: Request, res: Response) => {
     res.json({ signalId: signal.signalId, scenario, message: `Demo signal "${scenario}" published — rules will evaluate` });
   } catch (err) {
     handleRouteError(res, err, 'Failed to fire test scenario');
+  }
+});
+
+router.post('/backfill', requireRole('admin', 'ops', 'super_admin'), async (req: Request, res: Response) => {
+  try {
+    const { startDate, endDate, domain, type, dryRun } = req.body;
+    if (!startDate || !endDate) {
+      res.status(400).json({ error: 'Missing required fields: startDate, endDate (ISO 8601)' });
+      return;
+    }
+
+    const start = new Date(startDate as string);
+    const end = new Date(endDate as string);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      res.status(400).json({ error: 'Invalid date format. Use ISO 8601 (e.g. 2026-01-01T00:00:00Z)' });
+      return;
+    }
+    if (end <= start) {
+      res.status(400).json({ error: 'endDate must be after startDate' });
+      return;
+    }
+
+    const maxRangeMs = 90 * 24 * 60 * 60 * 1000;
+    if (end.getTime() - start.getTime() > maxRangeMs) {
+      res.status(400).json({ error: 'Date range cannot exceed 90 days' });
+      return;
+    }
+
+    const orgIds = getUserOrgIds(req.user!);
+
+    const ruleConditions = [eq(signalBusRulesTable.enabled, 'true')];
+    if (orgIds !== null) {
+      const orgStringIds = [...orgIds].map(String);
+      ruleConditions.push(inArray(signalBusRulesTable.orgId, orgStringIds));
+    }
+
+    const rules = await db
+      .select()
+      .from(signalBusRulesTable)
+      .where(and(...ruleConditions));
+
+    if (rules.length === 0) {
+      res.json({ backfilled: 0, matched: 0, message: 'No enabled rules to evaluate' });
+      return;
+    }
+
+    const signalConditions = [
+      gte(meshSignalsTable.occurredAt, start),
+      lte(meshSignalsTable.occurredAt, end),
+    ];
+    if (domain) signalConditions.push(eq(meshSignalsTable.domain, domain as string));
+    if (type) signalConditions.push(eq(meshSignalsTable.type, type as string));
+    if (orgIds !== null) {
+      const orgStringIds = [...orgIds].map(String);
+      signalConditions.push(inArray(meshSignalsTable.tenantId, orgStringIds));
+    }
+
+    const historicalRows = await db
+      .select()
+      .from(meshSignalsTable)
+      .where(and(...signalConditions))
+      .orderBy(meshSignalsTable.occurredAt);
+
+    if (historicalRows.length === 0) {
+      res.json({
+        backfilled: 0,
+        matched: 0,
+        dryRun: !!dryRun,
+        dateRange: { start: start.toISOString(), end: end.toISOString() },
+        rulesEvaluated: rules.length,
+        message: 'No historical signals found in the specified date range',
+      });
+      return;
+    }
+
+    const replayedSignals: Signal[] = historicalRows.map((row) => {
+      const storedPayload = row.payload as { signal?: unknown } | unknown;
+      const rawPayload = typeof storedPayload === 'object' && storedPayload !== null && 'signal' in (storedPayload as Record<string, unknown>)
+        ? (storedPayload as { signal: unknown }).signal
+        : storedPayload;
+
+      return createSignal({
+        source: row.source,
+        type: row.type as SignalType,
+        domain: row.domain as SignalDomain,
+        occurredAt: row.occurredAt.toISOString(),
+        freshness: row.freshness,
+        confidence: row.confidence,
+        severity: (row.severity ?? 'medium') as Signal['severity'],
+        tenantId: row.tenantId ?? undefined,
+        entityRefs: [],
+        rawPayload: rawPayload as Record<string, unknown>,
+        tags: ['backfill-replay'],
+        provenance: {
+          sourceService: 'signal-bus-backfill',
+          correlationId: `backfill-replay-${start.toISOString()}-${end.toISOString()}`,
+          originalSignalId: row.signalId,
+        },
+      });
+    });
+
+    let matched = 0;
+    const matchDetails: Array<{ signalId: string; domain: string; type: string; rulesMatched: string[] }> = [];
+
+    for (const signal of replayedSignals) {
+      const rulesMatched: string[] = [];
+      for (const rule of rules) {
+        if (rule.sourceDomain !== '*' && rule.sourceDomain !== signal.domain) continue;
+        if (rule.sourceType !== '*' && rule.sourceType !== signal.type) continue;
+        if (!severityMet(signal.severity, rule.minSeverity)) continue;
+        if (!evaluateConditions(signal, rule.conditions as Record<string, unknown>)) continue;
+        rulesMatched.push(rule.name);
+
+        if (!dryRun) {
+          try {
+            const result = await executeAction(rule, signal);
+            await db.insert(signalBusRoutedEventsTable).values({
+              eventId: randomUUID(),
+              ruleId: rule.ruleId,
+              ruleName: rule.name,
+              sourceSignalId: signal.signalId,
+              sourceDomain: signal.domain,
+              sourceType: signal.type,
+              actionType: rule.actionType,
+              actionResult: { ...result, isBackfill: true },
+              status: 'success',
+              orgId: rule.orgId,
+            });
+          } catch (actionErr) {
+            const errMsg = actionErr instanceof Error ? actionErr.message : 'Backfill action failed';
+            await db.insert(signalBusDeadLettersTable).values({
+              deadLetterId: randomUUID(),
+              ruleId: rule.ruleId,
+              sourceSignalId: signal.signalId,
+              sourceDomain: signal.domain,
+              sourceType: signal.type,
+              errorMessage: errMsg,
+              payload: { signal: signal.rawPayload, rule: { name: rule.name, actionType: rule.actionType }, isBackfill: true },
+              orgId: rule.orgId,
+            });
+          }
+        }
+      }
+      if (rulesMatched.length > 0) {
+        matched++;
+        if (matchDetails.length < 50) {
+          matchDetails.push({ signalId: signal.signalId, domain: signal.domain, type: signal.type, rulesMatched });
+        }
+      }
+    }
+
+    const actor = { userId: req.user!.id, displayName: req.user!.displayName, roles: req.user!.roles };
+
+    logger.info(
+      { startDate, endDate, domain, signalCount: replayedSignals.length, matched, dryRun: !!dryRun, actor },
+      '[signal-bus] backfill replay completed',
+    );
+
+    res.json({
+      backfilled: replayedSignals.length,
+      matched,
+      dryRun: !!dryRun,
+      dateRange: { start: start.toISOString(), end: end.toISOString() },
+      rulesEvaluated: rules.length,
+      matchDetails: dryRun ? matchDetails : undefined,
+      actor: { userId: actor.userId, displayName: actor.displayName },
+      message: dryRun
+        ? `Dry run: ${replayedSignals.length} historical signals replayed, ${matched} would match current rules`
+        : `Backfilled ${replayedSignals.length} historical signals, ${matched} matched active rules`,
+    });
+  } catch (err) {
+    handleRouteError(res, err, 'Failed to backfill signals');
   }
 });
 

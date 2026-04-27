@@ -31,6 +31,8 @@ export const EntityTypeSchema = z.enum([
   'model',
   'workflow',
   'connector',
+  'document',
+  'fund',
   'custom',
 ]);
 export type EntityType = z.infer<typeof EntityTypeSchema>;

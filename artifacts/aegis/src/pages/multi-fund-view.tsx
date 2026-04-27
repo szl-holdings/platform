@@ -20,7 +20,8 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
 
 interface FundView {
   id: string;
@@ -44,6 +45,7 @@ interface FundView {
   lastNav: string;
   currency: string;
   positions: FundPosition[];
+  lps: LimitedPartner[];
 }
 
 interface FundPosition {
@@ -56,7 +58,17 @@ interface FundPosition {
   status: 'active' | 'exited' | 'watchlist';
 }
 
-const FUNDS: FundView[] = [
+interface LimitedPartner {
+  id: string;
+  name: string;
+  type: 'institutional' | 'family_office' | 'endowment' | 'sovereign_wealth' | 'hni';
+  commitmentUsd: number;
+  calledUsd: number;
+  distributedUsd: number;
+  nav: number;
+}
+
+const SEED_FUNDS: FundView[] = [
   {
     id: 'fund-alpha',
     name: 'Aegis Alpha Fund I',
@@ -82,6 +94,13 @@ const FUNDS: FundView[] = [
       { id: 'p1', name: 'CyberGuard Systems', type: 'Equity', nav: 84000000, irr: 31.2, riskScore: 22, status: 'active' },
       { id: 'p2', name: 'ThreatStack AI', type: 'Equity', nav: 112000000, irr: 44.8, riskScore: 18, status: 'active' },
       { id: 'p3', name: 'SecureVault Inc', type: 'Convertible', nav: 67000000, irr: 18.1, riskScore: 31, status: 'active' },
+    ],
+    lps: [
+      { id: 'lp1', name: 'CalPERS', type: 'institutional', commitmentUsd: 120000000, calledUsd: 81600000, distributedUsd: 34272000, nav: 153000000 },
+      { id: 'lp2', name: 'GIC Singapore', type: 'sovereign_wealth', commitmentUsd: 100000000, calledUsd: 68000000, distributedUsd: 28560000, nav: 127500000 },
+      { id: 'lp3', name: 'Walton Family Office', type: 'family_office', commitmentUsd: 80000000, calledUsd: 54400000, distributedUsd: 22848000, nav: 102000000 },
+      { id: 'lp4', name: 'MIT Endowment', type: 'endowment', commitmentUsd: 60000000, calledUsd: 40800000, distributedUsd: 17136000, nav: 76500000 },
+      { id: 'lp5', name: 'Ontario Teachers', type: 'institutional', commitmentUsd: 50000000, calledUsd: 34000000, distributedUsd: 14280000, nav: 63750000 },
     ],
   },
   {
@@ -110,6 +129,11 @@ const FUNDS: FundView[] = [
       { id: 'p5', name: 'Sentinel AI Corp', type: 'Equity', nav: 88000000, irr: 12.1, riskScore: 38, status: 'watchlist' },
       { id: 'p6', name: 'EdgeDefense Systems', type: 'Preferred', nav: 34000000, irr: 9.8, riskScore: 55, status: 'watchlist' },
     ],
+    lps: [
+      { id: 'lp6', name: 'Abu Dhabi Investment Authority', type: 'sovereign_wealth', commitmentUsd: 80000000, calledUsd: 36000000, distributedUsd: 2880000, nav: 85120000 },
+      { id: 'lp7', name: 'Andreessen Horowitz', type: 'institutional', commitmentUsd: 60000000, calledUsd: 27000000, distributedUsd: 2160000, nav: 63840000 },
+      { id: 'lp8', name: 'Koch Industries Family', type: 'family_office', commitmentUsd: 40000000, calledUsd: 18000000, distributedUsd: 1440000, nav: 42560000 },
+    ],
   },
   {
     id: 'fund-gamma',
@@ -136,6 +160,10 @@ const FUNDS: FundView[] = [
       { id: 'p7', name: 'GridSafe Networks', type: 'Senior Debt', nav: 62000000, irr: 8.4, riskScore: 14, status: 'active' },
       { id: 'p8', name: 'SecureComm Rail', type: 'Mezzanine', nav: 45000000, irr: 11.2, riskScore: 22, status: 'active' },
     ],
+    lps: [
+      { id: 'lp9', name: 'Blackstone RE Partners', type: 'institutional', commitmentUsd: 75000000, calledUsd: 69000000, distributedUsd: 21390000, nav: 81870000 },
+      { id: 'lp10', name: 'Yale Endowment', type: 'endowment', commitmentUsd: 50000000, calledUsd: 46000000, distributedUsd: 14260000, nav: 54580000 },
+    ],
   },
 ];
 
@@ -152,16 +180,66 @@ function fmt(n: number): string {
   return `$${n.toLocaleString()}`;
 }
 
+interface RollupEntry {
+  companySlug: string;
+  companyName: string;
+  totalRevenue: string;
+  totalEbitda: string;
+  totalCash: string;
+  periods: number;
+}
+
 export default function MultiFundView() {
   const [viewMode, setViewMode] = useState<'gp' | 'fund'>('gp');
   const [selectedFund, setSelectedFund] = useState<FundView | null>(null);
   const [expandedPositions, setExpandedPositions] = useState<Set<string>>(new Set());
+  const [funds, setFunds] = useState<FundView[]>(SEED_FUNDS);
+  const [crossFundRollup, setCrossFundRollup] = useState<RollupEntry[]>([]);
+  const [dataSource, setDataSource] = useState<'seed' | 'api'>('seed');
 
-  const totalAum = FUNDS.reduce((s, f) => s + f.aum, 0);
-  const totalNav = FUNDS.reduce((s, f) => s + f.nav, 0);
-  const weightedIrr = FUNDS.reduce((s, f) => s + f.irr * (f.aum / totalAum), 0);
-  const totalIncidents = FUNDS.reduce((s, f) => s + f.activeIncidents, 0);
-  const avgCompliance = FUNDS.reduce((s, f) => s + f.complianceScore / FUNDS.length, 0);
+  const fetchFundData = useCallback(async () => {
+    try {
+      const [fundsRes, rollupRes] = await Promise.all([
+        apiFetch<{ data: { funds: Array<{ companySlug: string; companyName: string }> } }>('/fund-management/funds'),
+        apiFetch<{ data: { rollup: RollupEntry[] } }>('/fund-management/cross-fund-rollup'),
+      ]);
+
+      const apiFunds = fundsRes?.data?.funds;
+      const apiRollup = rollupRes?.data?.rollup;
+
+      if (apiRollup && apiRollup.length > 0) {
+        setCrossFundRollup(apiRollup);
+      }
+
+      if (apiFunds && apiFunds.length > 0) {
+        const enrichedFunds: FundView[] = apiFunds.map((f, idx) => {
+          const rollupEntry = apiRollup?.find((r: RollupEntry) => r.companySlug === f.companySlug);
+          const seedMatch = SEED_FUNDS[idx % SEED_FUNDS.length];
+          return {
+            ...seedMatch,
+            id: f.companySlug,
+            name: f.companyName,
+            aum: rollupEntry ? parseFloat(rollupEntry.totalRevenue) || seedMatch.aum : seedMatch.aum,
+            nav: rollupEntry ? parseFloat(rollupEntry.totalCash) || seedMatch.nav : seedMatch.nav,
+          };
+        });
+        setFunds(enrichedFunds);
+        setDataSource('api');
+      }
+    } catch {
+      console.debug('[multi-fund] API unavailable, using seed data');
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchFundData();
+  }, [fetchFundData]);
+
+  const totalAum = funds.reduce((s, f) => s + f.aum, 0);
+  const totalNav = funds.reduce((s, f) => s + f.nav, 0);
+  const weightedIrr = funds.reduce((s, f) => s + f.irr * (f.aum / totalAum), 0);
+  const totalIncidents = funds.reduce((s, f) => s + f.activeIncidents, 0);
+  const avgCompliance = funds.reduce((s, f) => s + f.complianceScore / funds.length, 0);
 
   return (
     <div className="h-full overflow-auto bg-[#080510] text-[#f5f5f5]" style={{ fontFamily: 'ui-monospace, monospace' }}>
@@ -175,7 +253,7 @@ export default function MultiFundView() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-[#f5f5f5]">Multi-Fund View</h1>
-                <p className="text-xs text-[#f5f5f5]/60 mt-0.5">Aegis GP · {FUNDS.length} funds · Separate fund access controls + consolidated GP roll-up</p>
+                <p className="text-xs text-[#f5f5f5]/60 mt-0.5">Aegis GP · {funds.length} funds · {dataSource === 'api' ? 'Live data' : 'Seed data'} · Separate fund access controls + consolidated GP roll-up</p>
               </div>
             </div>
             <div className="flex items-center gap-1 p-1 bg-white/[0.03] rounded-lg">
@@ -217,6 +295,54 @@ export default function MultiFundView() {
               ))}
             </div>
 
+            {/* Cross-Fund LP Rollup */}
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden mb-6">
+              <div className="p-4 border-b border-white/[0.06]">
+                <h3 className="text-xs font-mono uppercase tracking-wider text-[#f5f5f5]/60">Cross-Fund LP Rollup</h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-[11px]">
+                  <thead>
+                    <tr className="border-b border-white/[0.06]">
+                      {['LP Name', 'Type', 'Funds', 'Total Commitment', 'Total Called', 'Total Distributed', 'Combined NAV'].map((h) => (
+                        <th key={h} className="px-4 py-2.5 text-left text-[#f5f5f5]/40 font-normal whitespace-nowrap">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(() => {
+                      const lpMap = new Map<string, { name: string; type: string; funds: number; commitment: number; called: number; distributed: number; nav: number }>();
+                      for (const fund of funds) {
+                        for (const lp of fund.lps) {
+                          const existing = lpMap.get(lp.name);
+                          if (existing) {
+                            existing.funds += 1;
+                            existing.commitment += lp.commitmentUsd;
+                            existing.called += lp.calledUsd;
+                            existing.distributed += lp.distributedUsd;
+                            existing.nav += lp.nav;
+                          } else {
+                            lpMap.set(lp.name, { name: lp.name, type: lp.type, funds: 1, commitment: lp.commitmentUsd, called: lp.calledUsd, distributed: lp.distributedUsd, nav: lp.nav });
+                          }
+                        }
+                      }
+                      return Array.from(lpMap.values()).sort((a, b) => b.commitment - a.commitment);
+                    })().map((lp) => (
+                      <tr key={lp.name} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
+                        <td className="px-4 py-2.5 text-[#f5f5f5] font-semibold whitespace-nowrap">{lp.name}</td>
+                        <td className="px-4 py-2.5"><span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#c9b787]/10 text-[#c9b787]">{lp.type.replace(/_/g, ' ')}</span></td>
+                        <td className="px-4 py-2.5 text-[#f5f5f5]/60">{lp.funds}</td>
+                        <td className="px-4 py-2.5 font-mono text-[#f5f5f5]">{fmt(lp.commitment)}</td>
+                        <td className="px-4 py-2.5 font-mono text-[#f5f5f5]/70">{fmt(lp.called)}</td>
+                        <td className="px-4 py-2.5 font-mono text-[#c9b787]">{fmt(lp.distributed)}</td>
+                        <td className="px-4 py-2.5 font-mono text-[#f5f5f5]">{fmt(lp.nav)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
             {/* Fund Comparison Table */}
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
               <div className="p-4 border-b border-white/[0.06]">
@@ -232,7 +358,7 @@ export default function MultiFundView() {
                     </tr>
                   </thead>
                   <tbody>
-                    {FUNDS.map((fund) => (
+                    {funds.map((fund) => (
                       <tr
                         key={fund.id}
                         onClick={() => { setSelectedFund(fund); setViewMode('fund'); }}
@@ -288,7 +414,7 @@ export default function MultiFundView() {
           <div className="space-y-5">
             {/* Fund Selector */}
             <div className="flex gap-2 overflow-x-auto pb-1">
-              {FUNDS.map((fund) => (
+              {funds.map((fund) => (
                 <button
                   key={fund.id}
                   onClick={() => setSelectedFund(fund)}
@@ -363,6 +489,48 @@ export default function MultiFundView() {
                       ))}
                     </div>
                     <p className="text-[10px] text-[#f5f5f5]/30 mt-3">NAV as of {selectedFund.lastNav} · Currency: {selectedFund.currency}</p>
+                  </div>
+
+                  {/* LP Management */}
+                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
+                    <h3 className="text-xs font-mono uppercase tracking-wider text-[#f5f5f5]/60 mb-4">
+                      Limited Partners — {selectedFund.lps.length} LPs · {fmt(selectedFund.lps.reduce((s, lp) => s + lp.commitmentUsd, 0))} Total Commitment
+                    </h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-[11px]">
+                        <thead>
+                          <tr className="border-b border-white/[0.06]">
+                            {['LP Name', 'Type', 'Commitment', 'Called', 'Distributed', 'NAV', 'Call %'].map((h) => (
+                              <th key={h} className="px-3 py-2 text-left text-[#f5f5f5]/40 font-normal whitespace-nowrap">{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {selectedFund.lps.map((lp) => (
+                            <tr key={lp.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
+                              <td className="px-3 py-2.5 text-[#f5f5f5] font-semibold whitespace-nowrap">{lp.name}</td>
+                              <td className="px-3 py-2.5">
+                                <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#c9b787]/10 text-[#c9b787]">
+                                  {lp.type.replace(/_/g, ' ')}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2.5 font-mono text-[#f5f5f5]">{fmt(lp.commitmentUsd)}</td>
+                              <td className="px-3 py-2.5 font-mono text-[#f5f5f5]/70">{fmt(lp.calledUsd)}</td>
+                              <td className="px-3 py-2.5 font-mono text-[#c9b787]">{fmt(lp.distributedUsd)}</td>
+                              <td className="px-3 py-2.5 font-mono text-[#f5f5f5]">{fmt(lp.nav)}</td>
+                              <td className="px-3 py-2.5">
+                                <div className="flex items-center gap-1.5">
+                                  <div className="w-10 h-1 bg-white/[0.06] rounded-full overflow-hidden">
+                                    <div className="h-full rounded-full bg-[#c9b787]" style={{ width: `${(lp.calledUsd / lp.commitmentUsd * 100)}%` }} />
+                                  </div>
+                                  <span className="text-[#f5f5f5]/50">{(lp.calledUsd / lp.commitmentUsd * 100).toFixed(0)}%</span>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
 
                   {/* Portfolio Positions */}
