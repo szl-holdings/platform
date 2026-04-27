@@ -4,6 +4,7 @@ import { ArrowRight, Building2, BarChart3, Map, FileText, AlertOctagon, Workflow
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { UseCaseLane } from "@/components/UseCaseLane";
 
 const CAPABILITIES = [
   { icon: AlertOctagon, title: "Distress Property Detection", body: "Lyte monitors market signals, tax records, foreclosure filings, and price anomalies to surface distressed opportunities before they're widely visible." },
@@ -53,51 +54,6 @@ const USE_CASES = [
   },
 ];
 
-function UseCaseLane({ useCase, delay }: { useCase: typeof USE_CASES[0]; delay: number }) {
-  return (
-    <m.div
-      initial={{ opacity: 0, y: 14 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.42, delay }}
-      className="szl-card"
-      style={{ borderRadius: "0.875rem", padding: "clamp(1.5rem,3vw,2rem)", display: "flex", flexDirection: "column", gap: "1.5rem" }}
-    >
-      <div>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-terra)", opacity: 0.85 }}>{useCase.label}</span>
-        <h3 style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", fontWeight: 600, letterSpacing: "-0.016em", lineHeight: 1.3, marginTop: "0.4rem", marginBottom: "0.375rem" }}>{useCase.title}</h3>
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.625rem", color: "hsl(214,7%,48%)", letterSpacing: "0.06em" }}>{useCase.role}</p>
-      </div>
-      <ol style={{ display: "flex", flexDirection: "column", gap: "0", listStyle: "none", margin: 0, padding: 0 }}>
-        {useCase.steps.map((step, i) => (
-          <li key={i} style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start" }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
-              <div style={{
-                width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                background: step.signal ? `hsla(140,50%,38%,0.15)` : step.proof ? `hsla(152,70%,50%,0.12)` : "hsla(214,12%,14%,1)",
-                border: step.signal ? `1px solid hsla(140,50%,38%,0.40)` : step.proof ? `1px solid hsla(152,70%,50%,0.30)` : "1px solid hsla(0,0%,100%,0.08)",
-                fontSize: "0.6rem", fontWeight: 700, color: step.signal ? "hsl(140,50%,62%)" : step.proof ? "hsl(152,70%,55%)" : "hsl(214,7%,52%)",
-                fontFamily: "var(--font-mono)",
-              }}>
-                {i + 1}
-              </div>
-              {i < useCase.steps.length - 1 && (
-                <div style={{ width: "1px", height: "1.5rem", background: "hsla(0,0%,100%,0.07)", margin: "0.25rem 0" }} />
-              )}
-            </div>
-            <div style={{ paddingTop: "0.2rem" }}>
-              <p style={{ fontSize: "0.8125rem", lineHeight: 1.62, color: step.signal ? "hsl(38,8%,88%)" : step.proof ? "hsl(152,40%,72%)" : "hsl(214,7%,62%)" }}>
-                {step.signal && <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(140,50%,58%)", marginRight: "0.4rem" }}>Signal</span>}
-                {step.proof && <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(152,70%,55%)", marginRight: "0.4rem" }}>Proof Chain</span>}
-                {step.text}
-              </p>
-            </div>
-          </li>
-        ))}
-      </ol>
-    </m.div>
-  );
-}
 
 export default function SolutionsTerraPage() {
   const __pageMeta = usePageMeta({
@@ -185,7 +141,15 @@ export default function SolutionsTerraPage() {
               </m.div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 360px), 1fr))", gap: "1.25rem" }}>
                 {USE_CASES.map((uc, i) => (
-                  <UseCaseLane key={uc.label} useCase={uc} delay={i * 0.08} />
+                  <UseCaseLane
+                    key={uc.label}
+                    useCase={uc}
+                    delay={i * 0.08}
+                    accentColor="var(--color-terra)"
+                    signalColor="hsl(140,50%,62%)"
+                    signalBg="hsla(140,50%,38%,0.15)"
+                    signalBorder="1px solid hsla(140,50%,38%,0.40)"
+                  />
                 ))}
               </div>
             </div>

@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { m } from "framer-motion";
 import { SiteNav } from "@/components/SiteNav";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { UseCaseLane } from "@/components/UseCaseLane";
 
 const PILLARS = [
   { icon: Eye, name: "Posture", desc: "Liability, coverage, venue, and opposing counsel posture assessment. Insurer behavior profiling and adjuster pattern intelligence." },
@@ -52,52 +53,6 @@ const USE_CASES = [
   },
 ];
 
-function UseCaseLane({ useCase, delay }: { useCase: typeof USE_CASES[0]; delay: number }) {
-  const gold = "#d4a054";
-  return (
-    <m.div
-      initial={{ opacity: 0, y: 14 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.42, delay }}
-      className="rounded-lg border border-white/[0.06]"
-      style={{ background: "#0c1220", padding: "clamp(1.5rem,3vw,2rem)", display: "flex", flexDirection: "column", gap: "1.5rem" }}
-    >
-      <div>
-        <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: gold, opacity: 0.85 }}>{useCase.label}</span>
-        <h3 style={{ fontSize: "1.0625rem", fontWeight: 600, letterSpacing: "-0.016em", lineHeight: 1.3, marginTop: "0.4rem", marginBottom: "0.375rem", color: "#e2e8f0" }}>{useCase.title}</h3>
-        <p style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "0.625rem", color: "rgba(148,163,184,0.6)", letterSpacing: "0.06em" }}>{useCase.role}</p>
-      </div>
-      <ol style={{ display: "flex", flexDirection: "column", gap: "0", listStyle: "none", margin: 0, padding: 0 }}>
-        {useCase.steps.map((step, i) => (
-          <li key={i} style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start" }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
-              <div style={{
-                width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                background: step.signal ? `rgba(212,160,84,0.14)` : step.proof ? `rgba(52,211,153,0.10)` : "rgba(255,255,255,0.04)",
-                border: step.signal ? `1px solid rgba(212,160,84,0.38)` : step.proof ? `1px solid rgba(52,211,153,0.28)` : "1px solid rgba(255,255,255,0.08)",
-                fontSize: "0.6rem", fontWeight: 700, color: step.signal ? gold : step.proof ? "#34d399" : "#64748b",
-                fontFamily: "var(--font-mono, monospace)",
-              }}>
-                {i + 1}
-              </div>
-              {i < useCase.steps.length - 1 && (
-                <div style={{ width: "1px", height: "1.5rem", background: "rgba(255,255,255,0.06)", margin: "0.25rem 0" }} />
-              )}
-            </div>
-            <div style={{ paddingTop: "0.2rem" }}>
-              <p style={{ fontSize: "0.8125rem", lineHeight: 1.62, color: step.signal ? "#e2e8f0" : step.proof ? "#6ee7b7" : "#94a3b8" }}>
-                {step.signal && <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "0.5625rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: gold, marginRight: "0.4rem" }}>Signal</span>}
-                {step.proof && <span style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "0.5625rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "#34d399", marginRight: "0.4rem" }}>Proof Chain</span>}
-                {step.text}
-              </p>
-            </div>
-          </li>
-        ))}
-      </ol>
-    </m.div>
-  );
-}
 
 export default function SolutionsPrismCounselPage() {
   const __pageMeta = usePageMeta({
@@ -178,7 +133,22 @@ export default function SolutionsPrismCounselPage() {
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 340px), 1fr))", gap: "1.25rem" }}>
             {USE_CASES.map((uc, i) => (
-              <UseCaseLane key={uc.label} useCase={uc} delay={i * 0.08} />
+              <UseCaseLane
+                key={uc.label}
+                useCase={uc}
+                delay={i * 0.08}
+                accentColor="#d4a054"
+                signalColor="#d4a054"
+                signalBg="rgba(212,160,84,0.14)"
+                signalBorder="1px solid rgba(212,160,84,0.38)"
+                proofColor="#34d399"
+                proofBg="rgba(52,211,153,0.10)"
+                proofBorder="1px solid rgba(52,211,153,0.28)"
+                cardClassName="rounded-lg border border-white/[0.06]"
+                cardStyle={{ background: "#0c1220" }}
+                titleStyle={{ color: "#e2e8f0" }}
+                roleStyle={{ color: "rgba(148,163,184,0.6)" }}
+              />
             ))}
           </div>
         </section>
