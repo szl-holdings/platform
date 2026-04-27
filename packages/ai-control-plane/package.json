@@ -20,7 +20,7 @@
     "./policy-engine": "./src/policy-engine.ts"
   },
   "dependencies": {
-    "pino": "^9"
+    "pino": "^10"
   },
   "devDependencies": {
     "@types/node": "catalog:"

@@ -15,7 +15,7 @@
     "./substrate-models": "./src/substrate-models.ts"
   },
   "dependencies": {
-    "pino": "^9"
+    "pino": "^10"
   },
   "devDependencies": {
     "@types/node": "catalog:"

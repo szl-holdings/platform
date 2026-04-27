@@ -162,7 +162,7 @@
     "openid-client": "^6.8.2",
     "otplib": "^13.4.0",
     "pdfkit": "^0.18.0",
-    "pino": "^9",
+    "pino": "^10",
     "pino-http": "^10",
     "react": "catalog:",
     "swagger-ui-express": "^5.0.1",

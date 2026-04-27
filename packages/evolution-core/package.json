@@ -25,7 +25,7 @@
     "@szl-holdings/db": "workspace:*",
     "@szl-holdings/nvidia-adapters": "workspace:*",
     "@szl-holdings/policy-engine": "workspace:*",
-    "pino": "^9",
+    "pino": "^10",
     "zod": "catalog:"
   },
   "devDependencies": {
