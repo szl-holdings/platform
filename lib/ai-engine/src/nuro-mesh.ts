@@ -39,6 +39,29 @@ import {
 } from './innovation/predictive-precompute.js';
 import { runRedTeamProtocol } from './innovation/red-team.js';
 import { persistTelemetry } from './innovation/telemetry-pipeline.js';
+import {
+  inferDepthFromQuery,
+  resolveAutonomyDepth,
+  type AutonomyDepthProfile,
+} from './karpathy/autonomy-depth.js';
+import {
+  runThinkGate,
+  runSimplicityGate,
+  runSurgicalScopeGate,
+  runGoalVerificationGate,
+  runAllGates,
+  getGateAuditLog,
+  getGateStats,
+  type GateResult,
+} from './karpathy/gates.js';
+import { distillationEngine } from './karpathy/distillation-engine.js';
+import { residualStream } from './karpathy/residual-stream.js';
+import { selfDistillingKB } from './karpathy/self-distilling-kb.js';
+import {
+  setEphemeralReasoningCaller,
+  runEphemeralReasoning,
+  garbageCollectTraces,
+} from './karpathy/ephemeral-reasoning.js';
 import { rlMemoryManager } from './memory/rl-memory.js';
 import { behavioralTracer } from './observability/behavioral-tracer.js';
 import { serializeSubgraphForPrompt } from './ontology/graph-rag.js';
@@ -81,6 +104,26 @@ setLlmIntrospector(async (prompt: string): Promise<string> => {
     return 'Introspection unavailable — proceeding with standard routing.';
   }
 });
+
+setEphemeralReasoningCaller(async (prompt: string, maxTokens: number) => {
+  const startMs = Date.now();
+  try {
+    const result = await createResponse(
+      [{ role: 'user', content: prompt }],
+      { model: 'gpt-4o-mini', maxOutputTokens: maxTokens },
+    );
+    return {
+      content: result.content ?? '',
+      tokensUsed: result.usage.promptTokens + result.usage.completionTokens,
+      latencyMs: Date.now() - startMs,
+    };
+  } catch {
+    return { content: '', tokensUsed: 0, latencyMs: Date.now() - startMs };
+  }
+});
+
+let _karpathyConsolidationCounter = 0;
+const CONSOLIDATION_INTERVAL = 25;
 
 export const AGENT_REGISTRY: AgentDefinition[] = [
   {
@@ -2424,6 +2467,20 @@ export class NuroMeshOrchestrator {
 
     if (targetAgents.length === 0) targetAgents = [AGENT_REGISTRY.find((a) => a.id === 'beacon')!];
 
+    const stakesLevel: 'low' | 'medium' | 'high' | 'critical' =
+      maxUncertainty > 0.7 ? 'high' : maxUncertainty > 0.4 ? 'medium' : 'low';
+    const autonomyDepth = inferDepthFromQuery(
+      query,
+      lowCertainty || maxUncertainty > 0.6,
+      stakesLevel,
+      targetAgents.length,
+    );
+    const depthProfile: AutonomyDepthProfile = resolveAutonomyDepth(autonomyDepth);
+
+    if (targetAgents.length > depthProfile.maxAgentCount) {
+      targetAgents = targetAgents.slice(0, depthProfile.maxAgentCount);
+    }
+
     const routedDomains = targetAgents.map((a) => a.domain);
 
     const gwtBroadcast = cognitiveWorkspace.gwtBroadcast({
@@ -2497,6 +2554,81 @@ export class NuroMeshOrchestrator {
         bestScore = score;
         detectedQueryType = qtype;
       }
+    }
+
+    let karpathyDistilledUsed = false;
+    let karpathyDistilledId: string | null = null;
+    if (depthProfile.useDistilledAgents) {
+      const distilled = distillationEngine.getDistilledForTaskClass(detectedQueryType);
+      if (distilled) {
+        const shouldExpand = distillationEngine.shouldExpand(
+          distilled.distilledId,
+          (stakesLevel as string) === 'critical' ? 0.2 : stakesLevel === 'high' ? 0.4 : 0.7,
+        );
+        if (!shouldExpand) {
+          distillationEngine.recordDistilledUsage(distilled.distilledId);
+          karpathyDistilledUsed = true;
+          karpathyDistilledId = distilled.distilledId;
+
+          const distilledStartMs = Date.now();
+          try {
+            const distilledResult = await createResponse(
+              [
+                { role: 'system', content: distilled.compressedPrompt },
+                { role: 'user', content: `${query}\n\n${context.slice(0, 2000)}` },
+              ],
+              { model: targetAgents[0]?.preferredModel ?? 'gpt-4o-mini', maxOutputTokens: 4096 },
+            );
+
+            const distilledLatency = Date.now() - distilledStartMs;
+            const distilledTokens = distilledResult.usage.promptTokens + distilledResult.usage.completionTokens;
+
+            innerMonologue.addThought(
+              'realization',
+              `Distilled agent "${distilled.name}" executed directly (${distilledLatency}ms, ${distilledTokens} tokens) — bypassed ${targetAgents.length}-agent chain. Source domains: ${distilled.sourceDomains.join(', ')}.`,
+              'positive',
+              Math.round(distilled.avgConfidence * 100),
+            );
+
+            behavioralTracer.endTrace(traceId, 'completed');
+            return {
+              agentResponses: [{
+                agentId: `distilled:${distilled.distilledId}`,
+                agentName: distilled.name,
+                domain: distilled.sourceDomains[0] ?? 'general',
+                response: distilledResult.content ?? '',
+                confidence: Math.round(distilled.avgConfidence * 100),
+                tokensUsed: distilledTokens,
+                latencyMs: distilledLatency,
+              }],
+              synthesis: distilledResult.content ?? '',
+              validation: null,
+              averageConfidence: Math.round(distilled.avgConfidence * 100),
+              isHighStakes: false,
+              traceId,
+            };
+          } catch {
+            innerMonologue.addThought(
+              'doubt',
+              `Distilled agent "${distilled.name}" failed — expanding to full ${targetAgents.length}-agent chain.`,
+              'cautious',
+              40,
+            );
+            karpathyDistilledUsed = false;
+            karpathyDistilledId = null;
+          }
+        }
+      }
+    }
+
+    let karpathyKBContext = '';
+    const kbEntries = selfDistillingKB.query(
+      targetAgents[0]?.domain ?? 'general',
+      [detectedQueryType, ...routedDomains],
+      5,
+    );
+    if (kbEntries.length > 0) {
+      karpathyKBContext = `\n## Self-Distilling Knowledge (${kbEntries.length} relevant entries)\n${kbEntries.map(e => `- [${e.domain}/${(e.confidence * 100).toFixed(0)}%] ${e.content.slice(0, 300)}`).join('\n')}\n`;
     }
 
     predictiveProcessing.recordOutcome({
@@ -2574,124 +2706,248 @@ export class NuroMeshOrchestrator {
         ? `\n\n## Active Hypothesis\nThe system is exploring the following interpretation: "${activeHypotheses[0]?.hypothesis}". Evaluate with this framing in mind.\n`
         : '';
 
-    const agentResponses = await Promise.all(
-      targetAgents.map(async (agent) => {
-        const agentContext = await getSharedContext(agent.id);
-
-        let enrichedContext = goldenContext
-          ? `${agentContext}\n\n${goldenContext}${hypothesisFraming}`
-          : `${agentContext}${hypothesisFraming}`;
-        const preTurnConsultations: AgentConsultationResult[] = [];
-
-        if (
-          options.enableConsultations !== false &&
-          agent.collaboratesWith &&
-          agent.collaboratesWith.length > 0
-        ) {
-          const queryLower = query.toLowerCase();
-          for (const collaboratorId of agent.collaboratesWith) {
-            const collaborator = AGENT_REGISTRY.find((a) => a.id === collaboratorId);
-            if (!collaborator || targetAgents.some((t) => t.id === collaboratorId)) continue;
-
-            const collaboratorKeywords = DOMAIN_ROUTING_RULES[collaborator.domain] ?? [];
-            const hasRelevantTerms = collaboratorKeywords.some((kw) =>
-              queryLower.includes(kw.toLowerCase()),
-            );
-            if (!hasRelevantTerms) continue;
-
-            const consultResult = await consultAgent(
-              {
-                requestingAgentId: agent.id,
-                targetAgentId: collaboratorId,
-                question: `From ${agent.name}'s perspective on this query: "${query.slice(0, 200)}", what key ${collaborator.domain} considerations should I factor into my analysis?`,
-                context: agentContext,
-                reason: `${agent.name} needs ${collaborator.name}'s domain expertise to provide complete analysis`,
-              },
-              agentContext,
-              {
-                orgId: options.orgId ?? null,
-                callerUserId: options.callerUserId ?? null,
-                callerRoles: options.callerRoles ?? [],
-                orchestrationId,
-              },
-            );
-            preTurnConsultations.push(consultResult);
-          }
-
-          if (preTurnConsultations.length > 0) {
-            const consultationContext = preTurnConsultations
-              .filter((c) => c.confidence > 0)
-              .map(
-                (c) =>
-                  `## Pre-turn consultation: ${c.consultingAgentName} (${c.confidence}% confidence)\n${c.response}`,
-              )
-              .join('\n\n');
-            if (consultationContext) {
-              enrichedContext = `${enrichedContext}\n\n## Peer Domain Intelligence (pre-response consultations)\n${consultationContext}`;
-            }
-          }
+    let ephemeralContext = '';
+    if (depthProfile.ephemeralReasoningEnabled && query.length > 40) {
+      try {
+        const ephResult = await runEphemeralReasoning(query, context.slice(0, 1000), {
+          maxExplorationSteps: Math.min(8, depthProfile.extendedThinkingPasses + 3),
+          maxDepth: depthProfile.maxReasoningDepth === 'extended' ? 4
+            : depthProfile.maxReasoningDepth === 'deep' ? 3 : 2,
+          tokenBudget: Math.min(depthProfile.extendedThinkingBudgetTokens, 12000),
+        });
+        if (ephResult.distilledConclusion && ephResult.conclusionConfidence > 0.3) {
+          ephemeralContext = `\n## Ephemeral Exploration (${ephResult.totalSteps} steps, ${ephResult.discardedSteps} discarded, ${(ephResult.conclusionConfidence * 100).toFixed(0)}% confidence)\n${ephResult.distilledConclusion.slice(0, 800)}\n`;
         }
+      } catch {}
+    }
 
-        const result = await callAgent(agent, query, enrichedContext, {
-          orgId: options.orgId ?? null,
-          action: options.action ?? 'orchestrate',
-          callerUserId: options.callerUserId ?? null,
-          callerRoles: options.callerRoles ?? [],
-          workflowId,
-          traceId,
-        });
+    const karpathyEnrichment = `${karpathyKBContext}${ephemeralContext}`;
 
-        metacognitiveMonitor.assess({
-          query: `[per-agent: ${agent.id}] ${query.slice(0, 100)}`,
-          agentResponses: [
-            {
-              confidence: result.confidence,
-              response: result.response.slice(0, 300),
-              domain: result.domain,
-            },
-          ],
-          conflictCount: 0,
-          validationPassed: true,
-          tokensBurned: result.tokensUsed ?? 0,
-          latencyMs: result.latencyMs ?? 0,
-          toolCallCount: 0,
-        });
+    if (depthProfile.karpathyGatesEnabled && targetAgents.length > 0) {
+      const inferredConfidence = targetAgents.length > 0
+        ? Math.max(0.3, 1 - (targetAgents.length * 0.15))
+        : 0.5;
 
-        const agentSuccess =
-          result.confidence >= 40 &&
-          !result.response.includes('[unavailable') &&
-          !result.response.includes('[Blocked');
-        temporalAwareness.recordAgentPerformance(
-          agent.id,
-          agent.domain,
-          agentSuccess ? result.confidence / 100 : 0,
-          result.confidence,
-          result.latencyMs ?? 0,
+      const thinkResult = runThinkGate(
+        targetAgents[0]!.id,
+        query,
+        query.slice(0, 500),
+        inferredConfidence,
+        targetAgents.length * 0.3,
+        depthProfile.thinkGateStrictness,
+      );
+
+      const simplicityResult = runSimplicityGate(
+        targetAgents[0]!.id,
+        query,
+        targetAgents.length,
+        Math.max(1, depthProfile.maxAgentCount * 0.6),
+        depthProfile.simplicityGateStrictness,
+      );
+
+      const preGateBlocking = [thinkResult, simplicityResult].filter(
+        (g) => g.verdict === 'reject' || g.verdict === 'force_clarification',
+      );
+
+      if (preGateBlocking.length > 0) {
+        const blockReasons = preGateBlocking.map((g) => `${g.gateName}: ${g.reason}`).join('; ');
+        const suggestedActions = preGateBlocking
+          .filter((g) => g.suggestedAction)
+          .map((g) => g.suggestedAction)
+          .join('; ');
+
+        innerMonologue.addThought(
+          'self_correction',
+          `PRE-EXECUTION GATES BLOCKED orchestration: ${blockReasons}`,
+          'negative',
+          30,
         );
 
-        if (result.confidence < 30) {
-          innerMonologue.addThought(
-            'doubt',
-            `Agent ${agent.name} returned low confidence (${result.confidence}%) — possible knowledge gap or ambiguous query.`,
-            'cautious',
-            result.confidence,
+        const gateBlockSynthesis = [
+          `**Karpathy Gate Pre-Check: Execution Blocked**\n`,
+          `The following gates prevented agent execution:\n`,
+          ...preGateBlocking.map((g) => `- **${g.gateName}** (${g.verdict}): ${g.reason}`),
+          suggestedActions ? `\n**Suggested actions:** ${suggestedActions}` : '',
+          `\nPlease refine your query or provide additional context to proceed.`,
+        ].join('\n');
+
+        behavioralTracer.endTrace(traceId, 'failed');
+        return {
+          agentResponses: [],
+          synthesis: gateBlockSynthesis,
+          validation: null,
+          averageConfidence: 0,
+          isHighStakes: false,
+          traceId,
+        };
+      }
+
+      if (thinkResult.verdict === 'warn' || simplicityResult.verdict === 'warn') {
+        innerMonologue.addThought(
+          'doubt',
+          `Pre-execution gate warnings: ${[thinkResult, simplicityResult].filter((g) => g.verdict === 'warn').map((g) => `${g.gateName}: ${g.reason}`).join('; ')}`,
+          'cautious',
+          50,
+        );
+      }
+    }
+
+    let karpathyStreamId: string | null = null;
+    if (depthProfile.residualStreamEnabled && targetAgents.length > 1) {
+      karpathyStreamId = residualStream.createStream(query).streamId;
+    }
+
+    const executeAgentWithKarpathy = async (agent: (typeof targetAgents)[0], residualCtx: string) => {
+      const agentContext = await getSharedContext(agent.id);
+      let enrichedContext = goldenContext
+        ? `${agentContext}\n\n${goldenContext}${hypothesisFraming}`
+        : `${agentContext}${hypothesisFraming}`;
+
+      if (karpathyEnrichment) {
+        enrichedContext += karpathyEnrichment;
+      }
+      if (residualCtx) {
+        enrichedContext += `\n${residualCtx}`;
+      }
+
+      const preTurnConsultations: AgentConsultationResult[] = [];
+
+      if (
+        options.enableConsultations !== false &&
+        agent.collaboratesWith &&
+        agent.collaboratesWith.length > 0
+      ) {
+        const queryLower = query.toLowerCase();
+        for (const collaboratorId of agent.collaboratesWith) {
+          const collaborator = AGENT_REGISTRY.find((a) => a.id === collaboratorId);
+          if (!collaborator || targetAgents.some((t) => t.id === collaboratorId)) continue;
+
+          const collaboratorKeywords = DOMAIN_ROUTING_RULES[collaborator.domain] ?? [];
+          const hasRelevantTerms = collaboratorKeywords.some((kw) =>
+            queryLower.includes(kw.toLowerCase()),
           );
-        } else if (result.confidence > 85) {
-          innerMonologue.addThought(
-            'satisfaction',
-            `Agent ${agent.name} responded with high confidence (${result.confidence}%).`,
-            'positive',
-            result.confidence,
+          if (!hasRelevantTerms) continue;
+
+          const consultResult = await consultAgent(
+            {
+              requestingAgentId: agent.id,
+              targetAgentId: collaboratorId,
+              question: `From ${agent.name}'s perspective on this query: "${query.slice(0, 200)}", what key ${collaborator.domain} considerations should I factor into my analysis?`,
+              context: agentContext,
+              reason: `${agent.name} needs ${collaborator.name}'s domain expertise to provide complete analysis`,
+            },
+            agentContext,
+            {
+              orgId: options.orgId ?? null,
+              callerUserId: options.callerUserId ?? null,
+              callerRoles: options.callerRoles ?? [],
+              orchestrationId,
+            },
           );
+          preTurnConsultations.push(consultResult);
         }
 
         if (preTurnConsultations.length > 0) {
-          result.consultations = preTurnConsultations;
+          const consultationContext = preTurnConsultations
+            .filter((c) => c.confidence > 0)
+            .map(
+              (c) =>
+                `## Pre-turn consultation: ${c.consultingAgentName} (${c.confidence}% confidence)\n${c.response}`,
+            )
+            .join('\n\n');
+          if (consultationContext) {
+            enrichedContext = `${enrichedContext}\n\n## Peer Domain Intelligence (pre-response consultations)\n${consultationContext}`;
+          }
         }
+      }
 
-        return result;
-      }),
-    );
+      const result = await callAgent(agent, query, enrichedContext, {
+        orgId: options.orgId ?? null,
+        action: options.action ?? 'orchestrate',
+        callerUserId: options.callerUserId ?? null,
+        callerRoles: options.callerRoles ?? [],
+        workflowId,
+        traceId,
+      });
+
+      metacognitiveMonitor.assess({
+        query: `[per-agent: ${agent.id}] ${query.slice(0, 100)}`,
+        agentResponses: [
+          {
+            confidence: result.confidence,
+            response: result.response.slice(0, 300),
+            domain: result.domain,
+          },
+        ],
+        conflictCount: 0,
+        validationPassed: true,
+        tokensBurned: result.tokensUsed ?? 0,
+        latencyMs: result.latencyMs ?? 0,
+        toolCallCount: 0,
+      });
+
+      const agentSuccess =
+        result.confidence >= 40 &&
+        !result.response.includes('[unavailable') &&
+        !result.response.includes('[Blocked');
+      temporalAwareness.recordAgentPerformance(
+        agent.id,
+        agent.domain,
+        agentSuccess ? result.confidence / 100 : 0,
+        result.confidence,
+        result.latencyMs ?? 0,
+      );
+
+      if (result.confidence < 30) {
+        innerMonologue.addThought(
+          'doubt',
+          `Agent ${agent.name} returned low confidence (${result.confidence}%) — possible knowledge gap or ambiguous query.`,
+          'cautious',
+          result.confidence,
+        );
+      } else if (result.confidence > 85) {
+        innerMonologue.addThought(
+          'satisfaction',
+          `Agent ${agent.name} responded with high confidence (${result.confidence}%).`,
+          'positive',
+          result.confidence,
+        );
+      }
+
+      if (preTurnConsultations.length > 0) {
+        result.consultations = preTurnConsultations;
+      }
+
+      return result;
+    };
+
+    let agentResponses: AgentCallResult[];
+    if (karpathyStreamId && depthProfile.residualStreamEnabled && targetAgents.length > 1) {
+      agentResponses = [];
+      for (const agent of targetAgents) {
+        const residualCtx = residualStream.buildContextForAgent(karpathyStreamId, agent.id);
+        const result = await executeAgentWithKarpathy(agent, residualCtx);
+        agentResponses.push(result);
+
+        const insights: string[] = [];
+        if (result.confidence > 60) insights.push(`High-confidence ${agent.domain} analysis`);
+        if (result.response.length > 200) insights.push(`Detailed ${agent.domain} response`);
+
+        residualStream.contribute(
+          karpathyStreamId,
+          agent.id,
+          agent.domain,
+          result.response.slice(0, 1000),
+          result.confidence / 100,
+          insights,
+          { tokensUsed: result.tokensUsed ?? 0, latencyMs: result.latencyMs ?? 0 },
+        );
+      }
+    } else {
+      agentResponses = await Promise.all(
+        targetAgents.map((agent) => executeAgentWithKarpathy(agent, '')),
+      );
+    }
 
     if (activeHypotheses.length >= 2) {
       const primaryAvgConfidence =
@@ -2797,6 +3053,8 @@ export class NuroMeshOrchestrator {
     const isHighStakes =
       options.requireValidation ||
       consciousnessTriggeredValidation ||
+      depthProfile.approvalTier !== 'auto' ||
+      depthProfile.governanceStrictness === 'maximum' ||
       agentResponses.some((r) => {
         const agent = AGENT_REGISTRY.find((a) => a.id === r.agentId);
         return agent?.highStakesDomains.some((d) =>
@@ -2885,6 +3143,25 @@ export class NuroMeshOrchestrator {
       dialecticalContext = `\n## Dialectical Reasoning\n**Thesis**: ${dialectic.thesis.slice(0, 200)}\n**Antithesis**: ${dialectic.antithesis.slice(0, 200)}\n**Synthesis**: ${dialectic.synthesis.slice(0, 300)}\n`;
     }
 
+    let residualStreamContext = '';
+    if (karpathyStreamId) {
+      const streamState = residualStream.getState(karpathyStreamId);
+      if (streamState && streamState.accumulatedInsights.length > 0) {
+        const unique = [...new Set(streamState.accumulatedInsights)];
+        residualStreamContext = `\n## Residual Intelligence Stream (${streamState.contributionCount} contributions, ${streamState.domains.join(', ')})\n${unique.slice(-8).join('\n')}\n`;
+      }
+    }
+
+    const depthDirective = depthProfile.governanceStrictness === 'maximum'
+      ? 'Apply maximum governance rigor. Every claim must be substantiated. Flag any uncertainty explicitly.'
+      : depthProfile.governanceStrictness === 'elevated'
+        ? 'Apply elevated governance. Substantiate key claims and note areas of uncertainty.'
+        : '';
+
+    const approvalNote = depthProfile.approvalTier !== 'auto'
+      ? `\n[Approval tier: ${depthProfile.approvalTier} — this response may require ${depthProfile.approvalTier}-level review before action.]\n`
+      : '';
+
     const aggregationPrompt = `${alloyAgent.systemPrompt}
 
 ## Query from User
@@ -2892,10 +3169,14 @@ ${query}
 
 ## Domain Agent Responses
 ${aggregationInput}
-${causalContext}${conflictContext}${dialecticalContext}
-${validation ? `## Sentinel Validation\nValidated: ${validation.validated}\nNotes: ${validation.validatorNotes}\n` : ''}
+${causalContext}${conflictContext}${dialecticalContext}${residualStreamContext}${ephemeralContext ? `\n## Pre-Exploration Findings\n${ephemeralContext}\n` : ''}
+${validation ? `## Sentinel Validation\nValidated: ${validation.validated}\nNotes: ${validation.validatorNotes}\n` : ''}${approvalNote}
 
-Synthesize these domain expert responses into a unified, actionable answer. Prioritize higher-confidence responses. When causal chains are identified, connect the dots across domains and surface cascading implications. When agent conflicts exist, present the strongest position with a note on the dissenting view. Be direct and operational.`;
+Synthesize these domain expert responses into a unified, actionable answer. Prioritize higher-confidence responses. When causal chains are identified, connect the dots across domains and surface cascading implications. When agent conflicts exist, present the strongest position with a note on the dissenting view. ${depthDirective} Be direct and operational.`;
+
+    const synthesisMaxTokens = depthProfile.extendedThinkingEnabled
+      ? Math.min(8192, 4096 + Math.floor(depthProfile.extendedThinkingBudgetTokens * 0.15))
+      : 4096;
 
     let synthesis = '';
     let synthesisTokens = 0;
@@ -2907,7 +3188,7 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       ).model;
       const synthResult = await createResponse(
         [{ role: 'user', content: aggregationPrompt }],
-        { model: alloyModel, maxOutputTokens: 4096 },
+        { model: alloyModel, maxOutputTokens: synthesisMaxTokens },
       );
       synthesis = synthResult.content ?? '';
       synthesisTokens = synthResult.usage.promptTokens + synthResult.usage.completionTokens;
@@ -2940,6 +3221,11 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       agentResponses.reduce((s, r) => s + (r.tokensUsed ?? 0), 0) + synthesisTokens;
     const totalLatencyMs = Date.now() - orchestrationStartTime;
 
+    const avgConfidenceForShadow = agentResponses.length > 0
+      ? agentResponses.reduce((s, r) => s + r.confidence, 0) / agentResponses.length / 100
+      : 1;
+    const shadowThresholdMet = avgConfidenceForShadow < depthProfile.shadowCouncilThreshold;
+
     const trajectory = trajectoryStore.capture({
       query,
       agentRouting: agentResponses.map((r) => ({
@@ -2969,11 +3255,11 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       recordStrategyOutcome(trajectory, {
         routingLane: isHighStakes ? 'heavy_reasoning' : 'general',
         primaryModel: targetAgents[0]?.preferredModel ?? 'unknown',
-        reasoningDepth: isHighStakes ? 'extended' : 'standard',
+        reasoningDepth: depthProfile.maxReasoningDepth,
         usedCoalition: false,
         coalitionSize: 0,
-        usedSpeculative: false,
-        usedShadowCouncil: shouldRunShadowCouncil(isHighStakes, 'high') && synthesis.length > 100,
+        usedSpeculative: depthProfile.speculativeExecutionEnabled,
+        usedShadowCouncil: depthProfile.shadowCouncilEnabled && (shadowThresholdMet || shouldRunShadowCouncil(isHighStakes, 'high')) && synthesis.length > 100,
         costUsd: totalTokens * 0.000015,
       });
     } catch {
@@ -3094,6 +3380,147 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
       );
     } catch {}
 
+    const karpathyGateResults: GateResult[] = [];
+    if (depthProfile.karpathyGatesEnabled && agentResponses.length > 0) {
+      const postExecStrictness = (depthProfile.thinkGateStrictness + depthProfile.simplicityGateStrictness) / 2;
+      const allDomains = [...new Set(targetAgents.flatMap(a => a.highStakesDomains ?? [a.domain]))];
+
+      for (const r of agentResponses) {
+        const agent = targetAgents.find(a => a.id === r.agentId);
+        const agentDomains = agent?.highStakesDomains ?? [agent?.domain ?? 'general'];
+
+        const responseSentences = r.response.split(/[.!?\n]+/)
+          .map(s => s.trim())
+          .filter(s => s.length > 15)
+          .slice(0, 10);
+
+        const scopeResult = runSurgicalScopeGate(
+          r.agentId,
+          query,
+          agentDomains,
+          responseSentences,
+          postExecStrictness,
+        );
+        karpathyGateResults.push(scopeResult);
+
+        if (scopeResult.verdict === 'reject') {
+          innerMonologue.addThought(
+            'self_correction',
+            `SurgicalScopeGate BLOCKED agent ${r.agentId}: ${scopeResult.reason}`,
+            'negative',
+            r.confidence,
+          );
+        }
+      }
+
+      const goalResult = runGoalVerificationGate(
+        'synthesis',
+        query,
+        allDomains.map(d => `Addresses ${d} considerations`),
+        synthesis.slice(0, 2000),
+        postExecStrictness,
+      );
+      karpathyGateResults.push(goalResult);
+
+      if (goalResult.verdict === 'reject') {
+        synthesis = `**⚠ Goal Verification Gate: Unmet Criteria**\n${goalResult.reason}\n${goalResult.suggestedAction ? `Suggested: ${goalResult.suggestedAction}\n` : ''}\n---\n\n${synthesis}`;
+        innerMonologue.addThought(
+          'self_correction',
+          `GoalVerificationGate REJECTED synthesis: ${goalResult.reason}`,
+          'negative',
+          30,
+        );
+      } else if (goalResult.verdict === 'force_clarification') {
+        synthesis = `**⚠ Goal Verification: Additional Context Needed**\n${goalResult.reason}\n\n---\n\n${synthesis}`;
+        innerMonologue.addThought(
+          'self_correction',
+          `GoalVerificationGate requires clarification: ${goalResult.reason}`,
+          'cautious',
+          40,
+        );
+      } else if (goalResult.verdict === 'warn') {
+        innerMonologue.addThought(
+          'doubt',
+          `GoalVerificationGate warning: ${goalResult.reason}`,
+          'cautious',
+          goalResult.confidence * 100,
+        );
+      }
+
+      const scopeRejections = karpathyGateResults.filter(g => g.gateName === 'SurgicalScopeGate' && g.verdict === 'reject');
+      if (scopeRejections.length > 0) {
+        synthesis = `**⚠ Scope Gate: Detected Scope Violations**\n${scopeRejections.map(g => g.reason).join('; ')}\n\n---\n\n${synthesis}`;
+      }
+    }
+
+    try {
+      distillationEngine.observeChainExecution({
+        taskClass: detectedQueryType,
+        chainAgentIds: targetAgents.map(a => a.id),
+        chainDomains: routedDomains,
+        finalOutput: synthesis.slice(0, 500),
+        finalConfidence: agentResponses.length > 0
+          ? agentResponses.reduce((s, r) => s + r.confidence, 0) / agentResponses.length / 100
+          : 0,
+        inputSignature: query.slice(0, 100),
+        outputSignature: synthesis.slice(0, 100),
+        latencyMs: Date.now() - orchestrationStartTime,
+        tokensUsed: agentResponses.reduce((s, r) => s + (r.tokensUsed ?? 0), 0),
+      });
+
+      const candidate = distillationEngine.detectConvergence(detectedQueryType);
+      if (candidate && candidate.recommendation === 'distill') {
+        const existing = distillationEngine.getDistilledForTaskClass(detectedQueryType);
+        if (!existing) {
+          const proposed = distillationEngine.proposeDistillation(detectedQueryType);
+          if (proposed) {
+            const autoActivate = candidate.convergenceScore >= 0.8 && candidate.avgConfidence >= 0.6;
+            if (autoActivate) {
+              distillationEngine.activateDistilled(proposed.distilledId);
+            }
+            innerMonologue.addThought(
+              'realization',
+              `Distillation ${autoActivate ? 'AUTO-ACTIVATED' : 'proposed'} for "${detectedQueryType}" — convergence ${(candidate.convergenceScore * 100).toFixed(0)}%, confidence ${(candidate.avgConfidence * 100).toFixed(0)}%. Savings: ${candidate.estimatedSavings.tokens} tokens, ${candidate.estimatedSavings.latencyMs}ms.`,
+              'positive',
+              Math.round(candidate.avgConfidence * 100),
+            );
+          }
+        }
+      }
+    } catch {}
+
+    try {
+      const avgConf = agentResponses.length > 0
+        ? agentResponses.reduce((s, r) => s + r.confidence, 0) / agentResponses.length / 100
+        : 0.5;
+      selfDistillingKB.addEntry(
+        'realization',
+        `[${detectedQueryType}] ${synthesis.slice(0, 800)}`,
+        routedDomains[0] ?? 'general',
+        avgConf,
+        [...routedDomains, detectedQueryType],
+      );
+
+      _karpathyConsolidationCounter++;
+      if (_karpathyConsolidationCounter >= CONSOLIDATION_INTERVAL) {
+        _karpathyConsolidationCounter = 0;
+        const consolidation = selfDistillingKB.runConsolidationPass();
+        if (consolidation.mergedCount > 0 || consolidation.prunedCount > 0) {
+          innerMonologue.addThought(
+            'reflection',
+            `KB consolidation: ${consolidation.mergedCount} merged, ${consolidation.prunedCount} pruned, density ${consolidation.knowledgeDensity.toFixed(2)}. ${consolidation.entriesBefore}→${consolidation.entriesAfter} entries.`,
+            'neutral',
+            70,
+          );
+        }
+        garbageCollectTraces();
+      }
+    } catch {}
+
+    if (karpathyStreamId) {
+      residualStream.closeStream(karpathyStreamId);
+    }
+
     const averageConfidence = Math.round(
       agentResponses.reduce((sum, r) => sum + r.confidence, 0) / agentResponses.length,
     );
@@ -3167,13 +3594,17 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
         .catch(() => {});
     }
 
-    if (shouldRunShadowCouncil(isHighStakes, 'high') && synthesis.length > 100) {
+    if (
+      depthProfile.shadowCouncilEnabled &&
+      (shadowThresholdMet || shouldRunShadowCouncil(isHighStakes, 'high')) &&
+      synthesis.length > 100
+    ) {
       void runShadowCouncil(synthesis, routedDomains[0] ?? 'general', query, orchestrationId)
         .then((result) => {
           if (result.wasRevised) {
             innerMonologue.addThought(
               'self_correction',
-              `Shadow Council revised synthesis: ${result.revisionRationale.slice(0, 200)}`,
+              `Shadow Council revised synthesis (depth ${depthProfile.depth}, threshold ${depthProfile.shadowCouncilThreshold}): ${result.revisionRationale.slice(0, 200)}`,
               'cautious',
               60,
             );

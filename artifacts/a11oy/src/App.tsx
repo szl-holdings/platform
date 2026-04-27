@@ -137,6 +137,8 @@ const AgentIdentityRegistry = lazy(() => import('./pages/AgentIdentityRegistry')
 const SelfOptimization = lazy(() => import('./pages/SelfOptimization').then(m => ({ default: m.SelfOptimization })));
 const GovernedSecurityAgents = lazy(() => import('./pages/GovernedSecurityAgents').then(m => ({ default: m.GovernedSecurityAgents })));
 const A11oyBillingPage = lazy(() => import('./pages/billing-account'));
+const KarpathyEvolution = lazy(() => import('./pages/KarpathyEvolution').then(m => ({ default: m.KarpathyEvolution })));
+
 
 export default function App() {
   return (
@@ -249,6 +251,8 @@ export default function App() {
         <Route path={`${base}/agent-identity`} component={AgentIdentityRegistry} />
         <Route path={`${base}/self-optimization`} component={SelfOptimization} />
         <Route path={`${base}/security-agents`} component={GovernedSecurityAgents} />
+        <Route path={`${base}/karpathy-evolution`} component={KarpathyEvolution} />
+
         <Route path={`${base}/atlas`}>
           <WithShell><AtlasSection /></WithShell>
         </Route>
