@@ -40,6 +40,9 @@ const MirrorEval = lazy(() => import('./pages/MirrorEval').then(m => ({ default:
 const ConnectorFirewall = lazy(() => import('./pages/ConnectorFirewall').then(m => ({ default: m.ConnectorFirewall })));
 const TwinFoundry = lazy(() => import('./pages/TwinFoundry').then(m => ({ default: m.TwinFoundry })));
 const TrustCenter = lazy(() => import('./pages/TrustCenter').then(m => ({ default: m.TrustCenter })));
+const Constitution = lazy(() => import('./pages/Constitution').then(m => ({ default: m.Constitution })));
+const SecurityCompliance = lazy(() => import('./pages/SecurityCompliance').then(m => ({ default: m.SecurityCompliance })));
+const RightToAudit = lazy(() => import('./pages/RightToAudit').then(m => ({ default: m.RightToAudit })));
 const ModelRouter = lazy(() => import('./pages/ModelRouter').then(m => ({ default: m.ModelRouter })));
 const SkillsLibrary = lazy(() => import('./pages/SkillsLibrary').then(m => ({ default: m.SkillsLibrary })));
 const WorkcellReplay = lazy(() => import('./pages/WorkcellReplay').then(m => ({ default: m.WorkcellReplay })));
@@ -167,6 +170,9 @@ export default function App() {
         <Route path={`${base}/replay/:id`} component={SovereignReplayDetail} />
         <Route path={`${base}/replay`} component={WorkcellReplay} />
         <Route path={`${base}/trust`} component={TrustCenter} />
+        <Route path={`${base}/constitution`} component={Constitution} />
+        <Route path={`${base}/security-compliance`} component={SecurityCompliance} />
+        <Route path={`${base}/right-to-audit`} component={RightToAudit} />
         <Route path={`${base}/sovereign`} component={Sovereign} />
         <Route path={`${base}/boardroom`} component={BoardroomMode} />
         <Route path={`${base}/investor-demo`} component={InvestorDemo} />

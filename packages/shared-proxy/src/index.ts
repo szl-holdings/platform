@@ -40,6 +40,7 @@ export const PROXY_ROUTES: ProxyRoute[] = [
   { prefix: '/command/', port: COMMAND_PORT },
   { prefix: '/conduit/', port: CONDUIT_PORT },
   { prefix: '/counsel/', port: COUNSEL_PORT },
+  { prefix: '/lyte/', port: LYTE_PORT },
   { prefix: '/nexus/', port: PRAXIS_PORT },
   { prefix: '/sentra/', port: SENTRA_PORT },
   { prefix: '/terra/', port: TERRA_PORT },

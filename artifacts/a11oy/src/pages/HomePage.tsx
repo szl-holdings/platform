@@ -1287,6 +1287,7 @@ export function HomePage() {
               { title: 'Platform', links: [{ label: 'Now Board', href: b('/now') }, { label: 'Proof Chain', href: b('/proof') }, { label: 'Governance', href: b('/governance') }, { label: 'Fabric', href: b('/fabric') }] },
               { title: 'Solutions', links: [{ label: 'Verticals', href: b('/verticals') }, { label: 'Agents', href: b('/agents') }, { label: 'Connectors', href: b('/connectors') }, { label: 'Model Router', href: b('/model-router') }] },
               { title: 'Resources', links: [{ label: 'Investor Demo', href: b('/investor-demo') }, { label: 'SDK & Cookbook', href: b('/sdk') }, { label: 'Deep Research', href: b('/deep-research') }] },
+              { title: 'Trust & Policies', links: [{ label: 'Constitution', href: b('/constitution') }, { label: 'Security & Compliance', href: b('/security-compliance') }, { label: 'Right to Audit', href: b('/right-to-audit') }, { label: 'Trust Center', href: b('/trust') }, { label: 'Public Trust Portal', href: b('/trust-portal') }, { label: '90-Day Report', href: b('/transparency-report') }] },
             ].map(col => (
               <div key={col.title}>
                 <p style={{

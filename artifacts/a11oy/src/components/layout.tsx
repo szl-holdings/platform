@@ -158,8 +158,11 @@ const NAV_GROUPS = [
   {
     label: 'TRUST',
     items: [
-      { href: '/trust',         label: 'Trust Center' },
-      { href: '/trust-portal',  label: 'Public Trust Portal' },
+      { href: '/trust',                label: 'Trust Center' },
+      { href: '/trust-portal',         label: 'Public Trust Portal' },
+      { href: '/constitution',         label: 'Constitution' },
+      { href: '/security-compliance',  label: 'Security & Compliance' },
+      { href: '/right-to-audit',       label: 'Right to Audit' },
       { href: '/sovereign',     label: 'Sovereign' },
       { href: '/boardroom',     label: 'Boardroom' },
       { href: '/investor-demo', label: 'Investor Demo' },
