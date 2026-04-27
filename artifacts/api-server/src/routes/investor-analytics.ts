@@ -111,11 +111,17 @@ router.get(
   '/investor-analytics/metrics',
   authMiddleware(),
   requireRole(...ALLOWED_ROLES),
-  async (_req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     try {
       const now = new Date();
+
+      // period param: '30d' = 1 month, '3m' = 3 months, '12m' = 12 months (default)
+      const periodParam = (req.query.period as string) ?? '12m';
+      const lookbackMonths =
+        periodParam === '30d' ? 1 : periodParam === '3m' ? 3 : 12;
+
       const twelveMonthsAgo = new Date(now);
-      twelveMonthsAgo.setUTCMonth(twelveMonthsAgo.getUTCMonth() - 12);
+      twelveMonthsAgo.setUTCMonth(twelveMonthsAgo.getUTCMonth() - lookbackMonths);
 
       // ── Subscriptions ────────────────────────────────────────────────────
       const allSubs = await db
@@ -371,10 +377,10 @@ router.get(
       };
 
       logger.info(
-        { mrr: result.summary.mrr, customers: result.summary.totalCustomers },
+        { mrr: result.summary.mrr, customers: result.summary.totalCustomers, period: periodParam },
         '[investor-analytics] Metrics computed',
       );
-      sendSuccess(res, result, 200, { computedAt: new Date().toISOString() });
+      sendSuccess(res, result, 200, { computedAt: new Date().toISOString(), period: periodParam });
     } catch (err) {
       handleRouteError(res, err, 'Failed to compute investor metrics');
     }

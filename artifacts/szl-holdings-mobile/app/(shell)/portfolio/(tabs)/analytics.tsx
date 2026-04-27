@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Platform,
+  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -19,6 +20,14 @@ import { trackEvent } from '@/lib/analytics';
 import { apiFetch } from '@/lib/apiClient';
 
 const ACCENT = '#c9a84c';
+
+type Period = '30d' | '3m' | '12m';
+
+const PERIODS: Array<{ label: string; value: Period }> = [
+  { label: 'Last 30d', value: '30d' },
+  { label: 'Last 3m', value: '3m' },
+  { label: 'Last 12m', value: '12m' },
+];
 
 type FeatherIconName = React.ComponentProps<typeof Feather>['name'];
 
@@ -56,6 +65,7 @@ interface ApiEnvelope<T> {
   meta?: Record<string, unknown>;
 }
 
+<<<<<<< HEAD
 interface CohortRow {
   cohort: string;
   size: number;
@@ -232,12 +242,12 @@ const cohortStyles = StyleSheet.create({
   emptyText: { fontSize: 12, fontFamily: 'Inter_400Regular' },
 });
 
-function useInvestorMetrics() {
+function useInvestorMetrics(period: Period) {
   return useQuery<InvestorMetrics>({
-    queryKey: ['investor-analytics-metrics'],
+    queryKey: ['investor-analytics-metrics', period],
     queryFn: async (): Promise<InvestorMetrics> => {
       const envelope = await apiFetch<ApiEnvelope<InvestorMetrics>>(
-        '/api/investor-analytics/metrics',
+        `/api/investor-analytics/metrics?period=${period}`,
       );
       return envelope.data;
     },
@@ -544,6 +554,7 @@ export default function AnalyticsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>('12m');
 
   useEffect(() => {
     trackEvent('page_view', { page: 'analytics', product: 'szl-holdings-mobile' });
@@ -554,7 +565,16 @@ export default function AnalyticsScreen() {
     isLoading: metricsLoading,
     isError: metricsError,
     refetch: refetchMetrics,
-  } = useInvestorMetrics();
+  } = useInvestorMetrics(selectedPeriod);
+
+  const handlePeriodChange = useCallback(
+    (period: Period) => {
+      if (period === selectedPeriod) return;
+      Haptics.selectionAsync();
+      setSelectedPeriod(period);
+    },
+    [selectedPeriod],
+  );
 
   const {
     data: cohortData,
@@ -583,7 +603,7 @@ export default function AnalyticsScreen() {
   const funnelStages = metrics != null ? buildFunnelStages(metrics) : [];
   const maxFunnelCount = funnelStages[0]?.count ?? 1;
 
-  const recentTimeSeries = (metrics?.timeSeries ?? []).slice(-6);
+  const recentTimeSeries = metrics?.timeSeries ?? [];
 
   const sparkMrr = (metrics?.timeSeries ?? []).map((d) => d.mrr);
   const sparkCustomers = (metrics?.timeSeries ?? []).map((d) => d.customers);
@@ -615,6 +635,34 @@ export default function AnalyticsScreen() {
           <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
             Live SaaS performance · platform data
           </Text>
+        </View>
+
+        <View style={periodStyles.row}>
+          {PERIODS.map((p) => {
+            const active = p.value === selectedPeriod;
+            return (
+              <Pressable
+                key={p.value}
+                onPress={() => handlePeriodChange(p.value)}
+                style={[
+                  periodStyles.pill,
+                  {
+                    backgroundColor: active ? ACCENT : colors.card,
+                    borderColor: active ? ACCENT : colors.borderSubtle,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    periodStyles.pillLabel,
+                    { color: active ? '#0a0a0a' : colors.mutedForeground },
+                  ]}
+                >
+                  {p.label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
 
         <View style={[styles.section, { borderTopColor: colors.borderSubtle }]}>
@@ -923,6 +971,28 @@ const monthlyStyles = StyleSheet.create({
   colRight: {
     textAlign: 'right',
     fontFamily: 'Inter_500Medium',
+  },
+});
+
+const periodStyles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 4,
+  },
+  pill: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 20,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pillLabel: {
+    fontSize: 11,
+    fontFamily: 'Inter_600SemiBold',
+    letterSpacing: 0.3,
   },
 });
 
