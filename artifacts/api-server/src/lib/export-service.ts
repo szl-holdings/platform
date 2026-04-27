@@ -11,7 +11,7 @@
 import { Document, Page, renderToBuffer, StyleSheet, Text, View } from '@react-pdf/renderer';
 import { db, exportJobsTable, usersTable } from '@szl-holdings/db';
 import { randomUUID } from 'node:crypto';
-import { desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, ilike, lte, sql } from 'drizzle-orm';
 import React from 'react';
 import * as XLSX from 'xlsx';
 import { logger } from './logger';
@@ -407,12 +407,33 @@ export async function getExportByToken(token: string) {
 }
 
 export async function listExportHistory(
-  opts: { limit?: number; offset?: number; userId?: number | null } = {},
+  opts: {
+    limit?: number;
+    offset?: number;
+    userId?: number | null;
+    dataSource?: string;
+    status?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    search?: string;
+  } = {},
 ) {
   const limit = Math.min(opts.limit ?? 50, 200);
   const offset = opts.offset ?? 0;
-  const userFilter =
-    opts.userId != null ? eq(exportJobsTable.triggeredByUserId, opts.userId) : undefined;
+
+  const conditions = [];
+  if (opts.userId != null) conditions.push(eq(exportJobsTable.triggeredByUserId, opts.userId));
+  if (opts.dataSource) conditions.push(eq(exportJobsTable.dataSource, opts.dataSource));
+  if (opts.status) conditions.push(eq(exportJobsTable.status, opts.status as 'pending' | 'processing' | 'completed' | 'failed'));
+  if (opts.dateFrom) conditions.push(gte(exportJobsTable.createdAt, new Date(opts.dateFrom)));
+  if (opts.dateTo) {
+    const end = new Date(opts.dateTo);
+    end.setHours(23, 59, 59, 999);
+    conditions.push(lte(exportJobsTable.createdAt, end));
+  }
+  if (opts.search) conditions.push(ilike(exportJobsTable.name, `%${opts.search}%`));
+
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
   const rows = await db
     .select({
@@ -437,7 +458,7 @@ export async function listExportHistory(
     })
     .from(exportJobsTable)
     .leftJoin(usersTable, eq(exportJobsTable.triggeredByUserId, usersTable.id))
-    .where(userFilter)
+    .where(whereClause)
     .orderBy(desc(exportJobsTable.createdAt))
     .limit(limit)
     .offset(offset);
@@ -445,7 +466,7 @@ export async function listExportHistory(
   const [{ count }] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(exportJobsTable)
-    .where(userFilter);
+    .where(whereClause);
 
   return { exports: rows, total: count };
 }

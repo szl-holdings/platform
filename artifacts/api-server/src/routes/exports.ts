@@ -1787,7 +1787,22 @@ router.get(
       );
       const userIdFilter = seesAllHistory ? null : getUserId(req);
 
-      const result = await listExportHistory({ limit, offset, userId: userIdFilter });
+      const dataSource = (req.query.dataSource as string) || undefined;
+      const statusFilter = (req.query.status as string) || undefined;
+      const dateFrom = (req.query.dateFrom as string) || (req.query.from as string) || undefined;
+      const dateTo = (req.query.dateTo as string) || (req.query.to as string) || undefined;
+      const search = (req.query.search as string) || (req.query.q as string) || undefined;
+
+      const result = await listExportHistory({
+        limit,
+        offset,
+        userId: userIdFilter,
+        dataSource,
+        status: statusFilter,
+        dateFrom,
+        dateTo,
+        search,
+      });
       const now = new Date();
       const enriched = result.exports.map((job) => ({
         ...job,

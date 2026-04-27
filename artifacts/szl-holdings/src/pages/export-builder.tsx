@@ -50,14 +50,42 @@ const DATA_SOURCE_TO_DOMAIN: Record<string, DataDomain> = {
   invoices: 'revenue_events',
 };
 
-async function fetchExportHistoryItems(): Promise<ExportHistoryItem[]> {
-  const res = await fetch(`${API}/exports/history?limit=10`, { credentials: 'include' });
+const HISTORY_PAGE_SIZE = 20;
+
+interface HistoryFilters {
+  dataSource: string;
+  status: string;
+  dateFrom: string;
+  dateTo: string;
+  search: string;
+  page: number;
+}
+
+interface ExportHistoryResult {
+  items: ExportHistoryItem[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+async function fetchExportHistoryItems(filters: HistoryFilters): Promise<ExportHistoryResult> {
+  const params = new URLSearchParams();
+  params.set('limit', String(HISTORY_PAGE_SIZE));
+  params.set('page', String(filters.page));
+  if (filters.dataSource) params.set('dataSource', filters.dataSource);
+  if (filters.status) params.set('status', filters.status);
+  if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
+  if (filters.dateTo) params.set('dateTo', filters.dateTo);
+  if (filters.search) params.set('search', filters.search);
+  const res = await fetch(`${API}/exports/history?${params}`, { credentials: 'include' });
   if (!res.ok) {
-    if (res.status === 403) return [];
+    if (res.status === 403) return { items: [], total: 0, page: 1, limit: HISTORY_PAGE_SIZE };
     throw new Error(`Failed to load export history (${res.status})`);
   }
   const json = await res.json();
-  return Array.isArray(json.data) ? json.data : [];
+  const items: ExportHistoryItem[] = Array.isArray(json.data) ? json.data : [];
+  const meta = json.meta ?? {};
+  return { items, total: meta.total ?? items.length, page: meta.page ?? 1, limit: meta.limit ?? HISTORY_PAGE_SIZE };
 }
 
 function formatBytes(bytes: number | null): string {
@@ -355,16 +383,31 @@ export default function ExportBuilder() {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [reDownloadItem, setReDownloadItem] = useState<ExportHistoryItem | null>(null);
 
+  const [historyFilters, setHistoryFilters] = useState<HistoryFilters>({
+    dataSource: '',
+    status: '',
+    dateFrom: '',
+    dateTo: '',
+    search: '',
+    page: 1,
+  });
+  const [historySearchInput, setHistorySearchInput] = useState('');
+  const historySearchRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const {
-    data: exportHistory,
+    data: historyResult,
     isLoading: historyLoading,
     isError: historyError,
+    refetch: refetchHistoryItems,
   } = useStandardQuery({
-    queryKey: ['export-history-items'],
-    queryFn: fetchExportHistoryItems,
+    queryKey: ['export-history-items', historyFilters],
+    queryFn: () => fetchExportHistoryItems(historyFilters),
     refetchInterval: 30_000,
     retry: 1,
   });
+  const exportHistory = historyResult?.items ?? [];
+  const historyTotal = historyResult?.total ?? 0;
+  const historyTotalPages = Math.max(1, Math.ceil(historyTotal / HISTORY_PAGE_SIZE));
 
   const { data: previewData, isLoading: previewLoading } = useStandardQuery({
     queryKey: ['export-preview', domain, filters],
@@ -420,6 +463,7 @@ export default function ExportBuilder() {
         if (pollRef.current) clearInterval(pollRef.current);
         setActiveExport((prev) => (prev ? { ...prev, status: 'completed', progress: 100 } : null));
         refetchHistory();
+        refetchHistoryItems();
         await triggerDownload(activeExport.exportId, activeExport.format, activeExport.name);
         setTimeout(() => {
           setActiveExport(null);
@@ -1090,12 +1134,86 @@ export default function ExportBuilder() {
               </ul>
             </div>
 
-            {/* Recent Exports */}
+            {/* Export History */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
               <div className="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
-                <p className="text-xs text-zinc-500 uppercase tracking-widest">Recent Exports</p>
-                {exportHistory && exportHistory.length > 0 && (
-                  <span className="text-xs text-zinc-600">{exportHistory.length} recent</span>
+                <p className="text-xs text-zinc-500 uppercase tracking-widest">Export History</p>
+                <div className="flex items-center gap-2">
+                  {historyTotal > 0 && (
+                    <span className="text-xs text-zinc-600">{historyTotal.toLocaleString()} total</span>
+                  )}
+                  <button
+                    onClick={() => refetchHistoryItems()}
+                    className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+                  >
+                    ↺ Refresh
+                  </button>
+                </div>
+              </div>
+
+              {/* Filter bar */}
+              <div className="px-4 py-3 border-b border-zinc-800 flex flex-wrap gap-2 items-center">
+                <input
+                  type="text"
+                  placeholder="Search by name…"
+                  value={historySearchInput}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setHistorySearchInput(val);
+                    if (historySearchRef.current) clearTimeout(historySearchRef.current);
+                    historySearchRef.current = setTimeout(() => {
+                      setHistoryFilters((f) => ({ ...f, search: val, page: 1 }));
+                    }, 350);
+                  }}
+                  className="flex-1 min-w-[140px] bg-zinc-800 border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-zinc-500"
+                />
+                <select
+                  value={historyFilters.dataSource}
+                  onChange={(e) => setHistoryFilters((f) => ({ ...f, dataSource: e.target.value, page: 1 }))}
+                  className="bg-zinc-800 border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-zinc-300 focus:outline-none focus:border-zinc-500"
+                >
+                  <option value="">All domains</option>
+                  {Object.entries(DATA_SOURCE_TO_DOMAIN).map(([src]) => (
+                    <option key={src} value={src}>
+                      {DOMAIN_CONFIGS[DATA_SOURCE_TO_DOMAIN[src]]?.label ?? src.replace(/_/g, ' ')}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={historyFilters.status}
+                  onChange={(e) => setHistoryFilters((f) => ({ ...f, status: e.target.value, page: 1 }))}
+                  className="bg-zinc-800 border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-zinc-300 focus:outline-none focus:border-zinc-500"
+                >
+                  <option value="">All statuses</option>
+                  <option value="completed">Completed</option>
+                  <option value="processing">Processing</option>
+                  <option value="pending">Pending</option>
+                  <option value="failed">Failed</option>
+                </select>
+                <input
+                  type="date"
+                  value={historyFilters.dateFrom}
+                  onChange={(e) => setHistoryFilters((f) => ({ ...f, dateFrom: e.target.value, page: 1 }))}
+                  title="From date"
+                  className="bg-zinc-800 border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-zinc-300 focus:outline-none focus:border-zinc-500"
+                />
+                <input
+                  type="date"
+                  value={historyFilters.dateTo}
+                  onChange={(e) => setHistoryFilters((f) => ({ ...f, dateTo: e.target.value, page: 1 }))}
+                  title="To date"
+                  className="bg-zinc-800 border border-zinc-700 rounded px-2.5 py-1.5 text-xs text-zinc-300 focus:outline-none focus:border-zinc-500"
+                />
+                {(historyFilters.dataSource || historyFilters.status || historyFilters.dateFrom || historyFilters.dateTo || historyFilters.search) && (
+                  <button
+                    onClick={() => {
+                      setHistoryFilters({ dataSource: '', status: '', dateFrom: '', dateTo: '', search: '', page: 1 });
+                      setHistorySearchInput('');
+                    }}
+                    className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors whitespace-nowrap"
+                  >
+                    ✕ Clear
+                  </button>
                 )}
               </div>
 
@@ -1109,10 +1227,12 @@ export default function ExportBuilder() {
                     Could not load export history. Check your connection or permissions.
                   </p>
                 </div>
-              ) : !exportHistory || exportHistory.length === 0 ? (
+              ) : exportHistory.length === 0 ? (
                 <div className="px-4 py-8 text-center">
                   <p className="text-xs text-zinc-600">
-                    No exports yet. Run your first export above.
+                    {historyFilters.dataSource || historyFilters.status || historyFilters.dateFrom || historyFilters.dateTo || historyFilters.search
+                      ? 'No exports match your filters.'
+                      : 'No exports yet. Run your first export above.'}
                   </p>
                 </div>
               ) : (
@@ -1211,6 +1331,39 @@ export default function ExportBuilder() {
                   })}
                 </div>
               )}
+
+              {/* Pagination */}
+              {historyTotalPages > 1 && (
+                <div className="px-4 py-2.5 border-t border-zinc-800 flex items-center justify-between">
+                  <button
+                    disabled={historyFilters.page <= 1}
+                    onClick={() => setHistoryFilters((f) => ({ ...f, page: f.page - 1 }))}
+                    className="text-xs px-2.5 py-1 rounded border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    ← Prev
+                  </button>
+                  <span className="text-[11px] text-zinc-600">
+                    Page {historyFilters.page} of {historyTotalPages}
+                  </span>
+                  <button
+                    disabled={historyFilters.page >= historyTotalPages}
+                    onClick={() => setHistoryFilters((f) => ({ ...f, page: f.page + 1 }))}
+                    className="text-xs px-2.5 py-1 rounded border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
+
+              <div className="px-4 py-2 bg-zinc-900/50 text-[11px] text-zinc-600 flex items-center justify-between">
+                <span>
+                  {historyTotal > 0
+                    ? `Showing ${Math.min((historyFilters.page - 1) * HISTORY_PAGE_SIZE + 1, historyTotal)}–${Math.min(historyFilters.page * HISTORY_PAGE_SIZE, historyTotal)} of ${historyTotal.toLocaleString()}`
+                    : 'No results'}
+                  {' · Files available for 24h after generation'}
+                </span>
+                <span>All exports are logged in the audit trail</span>
+              </div>
             </div>
           </div>
         </div>
