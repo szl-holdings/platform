@@ -132,6 +132,10 @@ const AgentZeroTrust = lazy(() => import('./pages/AgentZeroTrust').then(m => ({ 
 const AtlasShield = lazy(() => import('./pages/AtlasShield').then(m => ({ default: m.AtlasShield })));
 const SwarmOrchestrator = lazy(() => import('./pages/SwarmOrchestrator').then(m => ({ default: m.SwarmOrchestrator })));
 const PlaybookEngine = lazy(() => import('./pages/PlaybookEngine').then(m => ({ default: m.PlaybookEngine })));
+const A2AInterop = lazy(() => import('./pages/A2AInterop').then(m => ({ default: m.A2AInterop })));
+const AgentIdentityRegistry = lazy(() => import('./pages/AgentIdentityRegistry').then(m => ({ default: m.AgentIdentityRegistry })));
+const SelfOptimization = lazy(() => import('./pages/SelfOptimization').then(m => ({ default: m.SelfOptimization })));
+const GovernedSecurityAgents = lazy(() => import('./pages/GovernedSecurityAgents').then(m => ({ default: m.GovernedSecurityAgents })));
 
 export default function App() {
   return (
@@ -240,6 +244,10 @@ export default function App() {
         <Route path={`${base}/atlas-shield`} component={AtlasShield} />
         <Route path={`${base}/swarm-orchestrator`} component={SwarmOrchestrator} />
         <Route path={`${base}/playbook-engine`} component={PlaybookEngine} />
+        <Route path={`${base}/a2a-interop`} component={A2AInterop} />
+        <Route path={`${base}/agent-identity`} component={AgentIdentityRegistry} />
+        <Route path={`${base}/self-optimization`} component={SelfOptimization} />
+        <Route path={`${base}/security-agents`} component={GovernedSecurityAgents} />
         <Route path={`${base}/atlas`}>
           <WithShell><AtlasSection /></WithShell>
         </Route>

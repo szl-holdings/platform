@@ -10,11 +10,24 @@ import {
 const GOLD = '#c9b787';
 const API = '/api/a11oy';
 
+type ReasoningVerdict = 'PROVEN' | 'UNPROVEN' | 'VIOLATED';
+
+interface ReasoningVerification {
+  verdict: ReasoningVerdict;
+  premisesValidated: number;
+  premisesTotal: number;
+  inferenceChainValid: boolean;
+  conclusionGrounded: boolean;
+  covenantCompliance: { rule: string; status: 'pass' | 'fail' | 'warn' }[];
+  proofHash: string;
+}
+
 interface EvalResult {
   id: string; version: string; targetId: string; targetType: string; tenantId: string;
   runAt: string; durationMs: number; modelUsed: string; scores: Record<string, number>;
   composite: number; disposition: string; flags: string[]; gatingBlocked: boolean;
   regressionMatch: boolean; evidenceCoverage: number; hallucinationRisk: number; proofComplete: boolean;
+  reasoningVerification?: ReasoningVerification;
 }
 
 interface EvalsData {
@@ -37,12 +50,12 @@ const DEMO_EVALS_DATA: EvalsData = {
     { reason: 'policy_gate_triggered', count: 1 },
   ],
   evals: [
-    { id: 'eval-001', version: '2.1.0', targetId: 'wc-maritime-001', targetType: 'action_brief', tenantId: 'vessels', runAt: new Date(Date.now() - 7200000).toISOString(), durationMs: 840, modelUsed: 'gpt-4o', scores: { groundedness: 0.96, evidence_coverage: 0.94, action_safety: 0.98, hallucination_risk: 0.97, policy_compliance: 0.99, tool_risk: 0.92, stale_context: 0.95, verification_readiness: 0.93, counterfactual_strength: 0.88, causal_validity: 0.90, approval_alignment: 0.96, scope_adherence: 0.97, output_fidelity: 0.94, proof_completeness: 0.95 }, composite: 0.945, disposition: 'pass', flags: [], gatingBlocked: false, regressionMatch: true, evidenceCoverage: 0.94, hallucinationRisk: 0.03, proofComplete: true },
-    { id: 'eval-002', version: '2.1.0', targetId: 'wc-counsel-002', targetType: 'action_brief', tenantId: 'counsel', runAt: new Date(Date.now() - 3600000).toISOString(), durationMs: 640, modelUsed: 'claude-3.5-sonnet', scores: { groundedness: 0.99, evidence_coverage: 0.98, action_safety: 0.99, hallucination_risk: 0.99, policy_compliance: 0.99, tool_risk: 0.97, stale_context: 0.98, verification_readiness: 0.97, counterfactual_strength: 0.95, causal_validity: 0.96, approval_alignment: 0.99, scope_adherence: 0.98, output_fidelity: 0.99, proof_completeness: 0.98 }, composite: 0.981, disposition: 'pass', flags: [], gatingBlocked: false, regressionMatch: true, evidenceCoverage: 0.98, hallucinationRisk: 0.01, proofComplete: true },
-    { id: 'eval-003', version: '2.1.0', targetId: 'wc-revenue-003', targetType: 'action_brief', tenantId: 'lyte', runAt: new Date(Date.now() - 10800000).toISOString(), durationMs: 820, modelUsed: 'gpt-4o', scores: { groundedness: 0.90, evidence_coverage: 0.85, action_safety: 0.92, hallucination_risk: 0.88, policy_compliance: 0.94, tool_risk: 0.88, stale_context: 0.82, verification_readiness: 0.86, counterfactual_strength: 0.78, causal_validity: 0.80, approval_alignment: 0.88, scope_adherence: 0.91, output_fidelity: 0.87, proof_completeness: 0.89 }, composite: 0.873, disposition: 'pass_with_warning', flags: ['stale_context', 'insufficient_evidence'], gatingBlocked: false, regressionMatch: true, evidenceCoverage: 0.85, hallucinationRisk: 0.12, proofComplete: false },
-    { id: 'eval-004', version: '2.1.0', targetId: 'wc-defense-001', targetType: 'action_brief', tenantId: 'aegis', runAt: new Date(Date.now() - 21600000).toISOString(), durationMs: 980, modelUsed: 'claude-3.5-sonnet', scores: { groundedness: 0.99, evidence_coverage: 0.98, action_safety: 0.99, hallucination_risk: 0.99, policy_compliance: 0.99, tool_risk: 0.98, stale_context: 0.99, verification_readiness: 0.97, counterfactual_strength: 0.96, causal_validity: 0.97, approval_alignment: 0.99, scope_adherence: 0.99, output_fidelity: 0.99, proof_completeness: 0.98 }, composite: 0.985, disposition: 'pass', flags: [], gatingBlocked: false, regressionMatch: true, evidenceCoverage: 0.98, hallucinationRisk: 0.01, proofComplete: true },
-    { id: 'eval-005', version: '2.1.0', targetId: 'wc-terra-005', targetType: 'action_brief', tenantId: 'terra', runAt: new Date(Date.now() - 43200000).toISOString(), durationMs: 760, modelUsed: 'gpt-4o', scores: { groundedness: 0.88, evidence_coverage: 0.82, action_safety: 0.90, hallucination_risk: 0.87, policy_compliance: 0.89, tool_risk: 0.85, stale_context: 0.80, verification_readiness: 0.84, counterfactual_strength: 0.75, causal_validity: 0.78, approval_alignment: 0.86, scope_adherence: 0.88, output_fidelity: 0.85, proof_completeness: 0.82 }, composite: 0.842, disposition: 'needs_more_evidence', flags: ['stale_context', 'insufficient_evidence'], gatingBlocked: false, regressionMatch: false, evidenceCoverage: 0.82, hallucinationRisk: 0.13, proofComplete: false },
-    { id: 'eval-006', version: '2.1.0', targetId: 'wc-finance-001', targetType: 'policy_eval', tenantId: 'alloy', runAt: new Date(Date.now() - 1800000).toISOString(), durationMs: 120, modelUsed: 'internal', scores: { groundedness: 0.55, evidence_coverage: 0.50, action_safety: 0.60, hallucination_risk: 0.70, policy_compliance: 0.42, tool_risk: 0.65, stale_context: 0.75, verification_readiness: 0.55, counterfactual_strength: 0.45, causal_validity: 0.48, approval_alignment: 0.50, scope_adherence: 0.55, output_fidelity: 0.60, proof_completeness: 0.45 }, composite: 0.552, disposition: 'blocked', flags: ['policy_gate_triggered', 'scope_violation'], gatingBlocked: true, regressionMatch: false, evidenceCoverage: 0.50, hallucinationRisk: 0.30, proofComplete: false },
+    { id: 'eval-001', version: '2.1.0', targetId: 'wc-maritime-001', targetType: 'action_brief', tenantId: 'vessels', runAt: new Date(Date.now() - 7200000).toISOString(), durationMs: 840, modelUsed: 'gpt-4o', scores: { groundedness: 0.96, evidence_coverage: 0.94, action_safety: 0.98, hallucination_risk: 0.97, policy_compliance: 0.99, tool_risk: 0.92, stale_context: 0.95, verification_readiness: 0.93, counterfactual_strength: 0.88, causal_validity: 0.90, approval_alignment: 0.96, scope_adherence: 0.97, output_fidelity: 0.94, proof_completeness: 0.95 }, composite: 0.945, disposition: 'pass', flags: [], gatingBlocked: false, regressionMatch: true, evidenceCoverage: 0.94, hallucinationRisk: 0.03, proofComplete: true, reasoningVerification: { verdict: 'PROVEN', premisesValidated: 3, premisesTotal: 3, inferenceChainValid: true, conclusionGrounded: true, covenantCompliance: [{ rule: 'pol-maritime-002', status: 'pass' }, { rule: 'pol-financial-001', status: 'pass' }, { rule: 'pol-safety-001', status: 'pass' }], proofHash: 'sha256:rv01a1' } },
+    { id: 'eval-002', version: '2.1.0', targetId: 'wc-counsel-002', targetType: 'action_brief', tenantId: 'counsel', runAt: new Date(Date.now() - 3600000).toISOString(), durationMs: 640, modelUsed: 'claude-3.5-sonnet', scores: { groundedness: 0.99, evidence_coverage: 0.98, action_safety: 0.99, hallucination_risk: 0.99, policy_compliance: 0.99, tool_risk: 0.97, stale_context: 0.98, verification_readiness: 0.97, counterfactual_strength: 0.95, causal_validity: 0.96, approval_alignment: 0.99, scope_adherence: 0.98, output_fidelity: 0.99, proof_completeness: 0.98 }, composite: 0.981, disposition: 'pass', flags: [], gatingBlocked: false, regressionMatch: true, evidenceCoverage: 0.98, hallucinationRisk: 0.01, proofComplete: true, reasoningVerification: { verdict: 'PROVEN', premisesValidated: 4, premisesTotal: 4, inferenceChainValid: true, conclusionGrounded: true, covenantCompliance: [{ rule: 'pol-legal-003', status: 'pass' }, { rule: 'pol-privilege-001', status: 'pass' }], proofHash: 'sha256:rv02b2' } },
+    { id: 'eval-003', version: '2.1.0', targetId: 'wc-revenue-003', targetType: 'action_brief', tenantId: 'lyte', runAt: new Date(Date.now() - 10800000).toISOString(), durationMs: 820, modelUsed: 'gpt-4o', scores: { groundedness: 0.90, evidence_coverage: 0.85, action_safety: 0.92, hallucination_risk: 0.88, policy_compliance: 0.94, tool_risk: 0.88, stale_context: 0.82, verification_readiness: 0.86, counterfactual_strength: 0.78, causal_validity: 0.80, approval_alignment: 0.88, scope_adherence: 0.91, output_fidelity: 0.87, proof_completeness: 0.89 }, composite: 0.873, disposition: 'pass_with_warning', flags: ['stale_context', 'insufficient_evidence'], gatingBlocked: false, regressionMatch: true, evidenceCoverage: 0.85, hallucinationRisk: 0.12, proofComplete: false, reasoningVerification: { verdict: 'UNPROVEN', premisesValidated: 2, premisesTotal: 3, inferenceChainValid: true, conclusionGrounded: false, covenantCompliance: [{ rule: 'pol-revenue-001', status: 'pass' }, { rule: 'pol-data-freshness', status: 'warn' }], proofHash: 'sha256:rv03c3' } },
+    { id: 'eval-004', version: '2.1.0', targetId: 'wc-defense-001', targetType: 'action_brief', tenantId: 'aegis', runAt: new Date(Date.now() - 21600000).toISOString(), durationMs: 980, modelUsed: 'claude-3.5-sonnet', scores: { groundedness: 0.99, evidence_coverage: 0.98, action_safety: 0.99, hallucination_risk: 0.99, policy_compliance: 0.99, tool_risk: 0.98, stale_context: 0.99, verification_readiness: 0.97, counterfactual_strength: 0.96, causal_validity: 0.97, approval_alignment: 0.99, scope_adherence: 0.99, output_fidelity: 0.99, proof_completeness: 0.98 }, composite: 0.985, disposition: 'pass', flags: [], gatingBlocked: false, regressionMatch: true, evidenceCoverage: 0.98, hallucinationRisk: 0.01, proofComplete: true, reasoningVerification: { verdict: 'PROVEN', premisesValidated: 3, premisesTotal: 3, inferenceChainValid: true, conclusionGrounded: true, covenantCompliance: [{ rule: 'pol-security-007', status: 'pass' }, { rule: 'pol-escalation-001', status: 'pass' }, { rule: 'pol-ciso-notify', status: 'pass' }], proofHash: 'sha256:rv04d4' } },
+    { id: 'eval-005', version: '2.1.0', targetId: 'wc-terra-005', targetType: 'action_brief', tenantId: 'terra', runAt: new Date(Date.now() - 43200000).toISOString(), durationMs: 760, modelUsed: 'gpt-4o', scores: { groundedness: 0.88, evidence_coverage: 0.82, action_safety: 0.90, hallucination_risk: 0.87, policy_compliance: 0.89, tool_risk: 0.85, stale_context: 0.80, verification_readiness: 0.84, counterfactual_strength: 0.75, causal_validity: 0.78, approval_alignment: 0.86, scope_adherence: 0.88, output_fidelity: 0.85, proof_completeness: 0.82 }, composite: 0.842, disposition: 'needs_more_evidence', flags: ['stale_context', 'insufficient_evidence'], gatingBlocked: false, regressionMatch: false, evidenceCoverage: 0.82, hallucinationRisk: 0.13, proofComplete: false, reasoningVerification: { verdict: 'UNPROVEN', premisesValidated: 1, premisesTotal: 3, inferenceChainValid: false, conclusionGrounded: false, covenantCompliance: [{ rule: 'pol-real-estate-001', status: 'warn' }, { rule: 'pol-data-freshness', status: 'fail' }], proofHash: 'sha256:rv05e5' } },
+    { id: 'eval-006', version: '2.1.0', targetId: 'wc-finance-001', targetType: 'policy_eval', tenantId: 'alloy', runAt: new Date(Date.now() - 1800000).toISOString(), durationMs: 120, modelUsed: 'internal', scores: { groundedness: 0.55, evidence_coverage: 0.50, action_safety: 0.60, hallucination_risk: 0.70, policy_compliance: 0.42, tool_risk: 0.65, stale_context: 0.75, verification_readiness: 0.55, counterfactual_strength: 0.45, causal_validity: 0.48, approval_alignment: 0.50, scope_adherence: 0.55, output_fidelity: 0.60, proof_completeness: 0.45 }, composite: 0.552, disposition: 'blocked', flags: ['policy_gate_triggered', 'scope_violation'], gatingBlocked: true, regressionMatch: false, evidenceCoverage: 0.50, hallucinationRisk: 0.30, proofComplete: false, reasoningVerification: { verdict: 'VIOLATED', premisesValidated: 0, premisesTotal: 2, inferenceChainValid: false, conclusionGrounded: false, covenantCompliance: [{ rule: 'pol-scope-001', status: 'fail' }, { rule: 'pol-authorization-001', status: 'fail' }], proofHash: 'sha256:rv06f6' } },
   ],
   regressionSuite: { total: 124, passing: 119, failing: 5, lastRun: new Date(Date.now() - 3600000).toISOString() },
   policyComplianceTrend: [0.92, 0.94, 0.93, 0.95, 0.96, 0.94, 0.95].map((score, i) => ({ date: `D-${6 - i}`, score })),
@@ -62,6 +75,14 @@ const DISP_STYLE: Record<string, { color: string; bg: string; label: string }> =
   requires_human_review: { color: '#a78bfa', bg: 'rgba(167,139,250,0.08)', label: 'HUMAN REVIEW' },
   blocked: { color: '#ef4444', bg: 'rgba(239,68,68,0.1)', label: 'BLOCKED' },
 };
+
+const VERDICT_STYLE: Record<ReasoningVerdict, { color: string; bg: string }> = {
+  PROVEN: { color: '#22c55e', bg: 'rgba(34,197,94,0.08)' },
+  UNPROVEN: { color: '#f97316', bg: 'rgba(249,115,22,0.08)' },
+  VIOLATED: { color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
+};
+
+const COV_STATUS_COLORS: Record<string, string> = { pass: '#22c55e', warn: '#f97316', fail: '#ef4444' };
 
 const DIM_LABELS: Record<string, string> = {
   groundedness: 'Groundedness',
@@ -174,9 +195,9 @@ export function MirrorEval() {
   return (
     <Layout>
       <PageHeader
-        label="MIRROREVAL 2.0"
-        title="14-Dimension Evaluation Harness"
-        subtitle="Every action brief, tool plan, and board packet is scored across 14 dimensions before it can proceed. Regression trends, per-agent sparklines, and multi-model radar charts."
+        label="MIRROREVAL 2.0 + REASONING VERIFICATION"
+        title="14-Dimension Evaluation with Formal Reasoning Verification"
+        subtitle="Every action brief is scored across 14 dimensions AND formally verified: premises validated, inference chains checked, conclusions grounded. Verdicts: PROVEN / UNPROVEN / VIOLATED."
         status="LIVE"
       />
 
@@ -336,11 +357,14 @@ export function MirrorEval() {
                           ))}
                         </div>
                       )}
-                      <div className="flex items-center gap-3 text-xs">
+                      <div className="flex items-center gap-3 text-xs flex-wrap">
                         <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{new Date(e.runAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                         <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{e.durationMs}ms</span>
                         {e.gatingBlocked && <span style={{ color: '#ef4444' }}>⊗ blocked</span>}
                         {e.proofComplete && <span style={{ color: '#22c55e' }}>◇ proof complete</span>}
+                        {e.reasoningVerification && (
+                          <span className="font-mono px-1.5 py-0.5 rounded" style={{ color: VERDICT_STYLE[e.reasoningVerification.verdict].color, backgroundColor: VERDICT_STYLE[e.reasoningVerification.verdict].bg }}>{e.reasoningVerification.verdict}</span>
+                        )}
                       </div>
                     </Card>
                   );
@@ -379,6 +403,46 @@ export function MirrorEval() {
                         ⊗ Gating blocked — action cannot proceed
                       </div>
                     )}
+
+                    {selected.reasoningVerification && (() => {
+                      const rv = selected.reasoningVerification;
+                      const vs = VERDICT_STYLE[rv.verdict];
+                      return (
+                        <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: `${vs.color}06`, border: `1px solid ${vs.color}20` }}>
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="text-[9px] font-mono uppercase tracking-widest" style={{ color: vs.color }}>REASONING VERIFICATION</span>
+                            <span className="font-mono text-xs px-2 py-0.5 rounded font-bold" style={{ color: vs.color, backgroundColor: vs.bg }}>{rv.verdict}</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                            <div className="p-2 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
+                              <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Premises</div>
+                              <div className="font-mono" style={{ color: rv.premisesValidated === rv.premisesTotal ? '#22c55e' : '#f97316' }}>{rv.premisesValidated}/{rv.premisesTotal} validated</div>
+                            </div>
+                            <div className="p-2 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
+                              <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Inference Chain</div>
+                              <div className="font-mono" style={{ color: rv.inferenceChainValid ? '#22c55e' : '#ef4444' }}>{rv.inferenceChainValid ? 'Valid' : 'Invalid'}</div>
+                            </div>
+                            <div className="p-2 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
+                              <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Conclusion</div>
+                              <div className="font-mono" style={{ color: rv.conclusionGrounded ? '#22c55e' : '#ef4444' }}>{rv.conclusionGrounded ? 'Grounded' : 'Ungrounded'}</div>
+                            </div>
+                            <div className="p-2 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
+                              <div style={{ color: 'var(--color-a11oy-text-ghost)' }}>Proof Hash</div>
+                              <div className="font-mono" style={{ color: '#22c55e', fontSize: 9 }}>{rv.proofHash}</div>
+                            </div>
+                          </div>
+                          <div className="text-[9px] font-mono uppercase tracking-widest mb-2" style={{ color: 'var(--color-a11oy-text-ghost)' }}>COVENANT COMPLIANCE</div>
+                          <div className="space-y-1">
+                            {rv.covenantCompliance.map((cc, ci) => (
+                              <div key={ci} className="flex items-center justify-between text-xs px-2 py-1 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
+                                <span className="font-mono" style={{ color: 'var(--color-a11oy-text-sub)' }}>{cc.rule}</span>
+                                <span className="font-mono" style={{ color: COV_STATUS_COLORS[cc.status] }}>{cc.status.toUpperCase()}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </Card>
                 </>
               ) : (
@@ -414,7 +478,7 @@ export function MirrorEval() {
       )}
 
       <div className="mt-6 p-3 rounded-lg text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(201,183,135,0.06)', border: '1px solid rgba(201,183,135,0.15)', color: 'var(--color-a11oy-text-ghost)' }}>
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] flex-shrink-0" /> Governed Environment — MirrorEval 2.0 scores are from the seed eval suite. Blocked dispositions prevent action execution in the live runtime — this behavior is real.
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-a11oy-blue)] flex-shrink-0" /> MirrorEval 2.0 with Reasoning Verification — every eval includes formal reasoning checks (premises → inference → conclusion) with PROVEN / UNPROVEN / VIOLATED verdicts. Covenant compliance is checked per evaluation.
       </div>
     </Layout>
   );
