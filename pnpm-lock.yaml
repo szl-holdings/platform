@@ -19,8 +19,8 @@ catalogs:
       specifier: ^4.1.14
       version: 4.2.1
     '@tanstack/react-query':
-      specifier: 5.99.0
-      version: 5.99.0
+      specifier: 5.100.5
+      version: 5.100.5
     '@types/node':
       specifier: 25.3.5
       version: 25.3.5
@@ -416,7 +416,7 @@ importers:
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -462,112 +462,6 @@ importers:
       zod:
         specifier: 'catalog:'
         version: 3.25.76
-
-  artifacts/aegis:
-    dependencies:
-      '@szl-holdings/api-client-react':
-        specifier: workspace:*
-        version: link:../../lib/api-client-react
-      '@szl-holdings/brand-registry':
-        specifier: workspace:*
-        version: link:../../packages/brand-registry
-      '@szl-holdings/config':
-        specifier: workspace:*
-        version: link:../../lib/config
-      '@szl-holdings/design-system':
-        specifier: workspace:*
-        version: link:../../packages/design-system
-      '@szl-holdings/domain-claims':
-        specifier: workspace:*
-        version: link:../../packages/domain-claims
-      '@szl-holdings/env':
-        specifier: workspace:*
-        version: link:../../packages/env
-      '@szl-holdings/graphql-client':
-        specifier: workspace:*
-        version: link:../../lib/graphql-client
-      '@szl-holdings/observability':
-        specifier: workspace:*
-        version: link:../../lib/observability
-      '@szl-holdings/omnia-shell':
-        specifier: workspace:*
-        version: link:../../packages/omnia-shell
-      '@szl-holdings/services':
-        specifier: workspace:*
-        version: link:../../lib/services
-      '@szl-holdings/shared-ui':
-        specifier: workspace:*
-        version: link:../../lib/shared-ui
-      '@szl/alloy':
-        specifier: workspace:*
-        version: link:../../packages/szl-alloy
-      '@tanstack/react-query':
-        specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
-      '@workspace/tokens':
-        specifier: workspace:*
-        version: link:../../packages/tokens
-      framer-motion:
-        specifier: 'catalog:'
-        version: 12.35.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      recharts:
-        specifier: 'catalog:'
-        version: 2.15.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-    devDependencies:
-      '@replit/vite-plugin-cartographer':
-        specifier: 'catalog:'
-        version: 0.5.1
-      '@replit/vite-plugin-dev-banner':
-        specifier: 'catalog:'
-        version: 0.1.2
-      '@replit/vite-plugin-runtime-error-modal':
-        specifier: 'catalog:'
-        version: 0.0.6
-      '@szl-holdings/shared-proxy':
-        specifier: workspace:*
-        version: link:../../packages/shared-proxy
-      '@tailwindcss/vite':
-        specifier: 'catalog:'
-        version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@types/node':
-        specifier: 'catalog:'
-        version: 25.3.5
-      '@types/react':
-        specifier: 19.2.14
-        version: 19.2.14
-      '@types/react-dom':
-        specifier: ^19.2.0
-        version: 19.2.3(@types/react@19.2.14)
-      '@vitejs/plugin-react':
-        specifier: 'catalog:'
-        version: 5.1.4(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@workspace/aef-contracts':
-        specifier: workspace:*
-        version: link:../../packages/aef-contracts
-      '@workspace/aef-sdk':
-        specifier: workspace:*
-        version: link:../../packages/aef-sdk
-      clsx:
-        specifier: 'catalog:'
-        version: 2.1.1
-      lucide-react:
-        specifier: 'catalog:'
-        version: 0.545.0(react@19.1.0)
-      react:
-        specifier: 19.1.0
-        version: 19.1.0
-      react-dom:
-        specifier: 19.1.0
-        version: 19.1.0(react@19.1.0)
-      tailwindcss:
-        specifier: 'catalog:'
-        version: 4.2.1
-      vite:
-        specifier: 7.3.2
-        version: 7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
-      wouter:
-        specifier: ^3.3.5
-        version: 3.9.0(react@19.1.0)
 
   artifacts/api-server:
     dependencies:
@@ -1100,7 +994,7 @@ importers:
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -1210,11 +1104,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/substrate-client
       '@tanstack/query-persist-client-core':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@tanstack/query-sync-storage-persister':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@types/leaflet':
         specifier: ^1.9.21
         version: 1.9.21
@@ -1275,7 +1169,7 @@ importers:
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -1384,7 +1278,7 @@ importers:
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -1464,11 +1358,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/szl-alloy
       '@tanstack/query-persist-client-core':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@tanstack/query-sync-storage-persister':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@workspace/aef-contracts':
         specifier: workspace:*
         version: link:../../packages/aef-contracts
@@ -1511,7 +1405,7 @@ importers:
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -1596,7 +1490,7 @@ importers:
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -1690,7 +1584,7 @@ importers:
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -1958,7 +1852,7 @@ importers:
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -2067,7 +1961,7 @@ importers:
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -2153,11 +2047,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/szl-alloy
       '@tanstack/query-persist-client-core':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@tanstack/query-sync-storage-persister':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@workspace/aef-sdk':
         specifier: workspace:*
         version: link:../../packages/aef-sdk
@@ -2200,7 +2094,7 @@ importers:
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -2439,7 +2333,7 @@ importers:
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -2498,14 +2392,14 @@ importers:
         specifier: workspace:*
         version: link:../../lib/shared-ui
       '@tanstack/query-async-storage-persister':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@tanstack/query-persist-client-core':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@tanstack/query-sync-storage-persister':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@workspace/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
@@ -2566,7 +2460,7 @@ importers:
         version: link:../../packages/speech-specialist
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@types/jest':
         specifier: ^29.5.14
         version: 29.5.14
@@ -2733,11 +2627,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/szl-alloy
       '@tanstack/query-persist-client-core':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@tanstack/query-sync-storage-persister':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@types/mapbox-gl':
         specifier: ^3.5.0
         version: 3.5.0
@@ -2780,7 +2674,7 @@ importers:
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -2878,11 +2772,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/szl-alloy
       '@tanstack/query-persist-client-core':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@tanstack/query-sync-storage-persister':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@types/mapbox-gl':
         specifier: ^3.5.0
         version: 3.5.0
@@ -2925,7 +2819,7 @@ importers:
         version: 4.2.1(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -3046,7 +2940,7 @@ importers:
     dependencies:
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
     devDependencies:
       '@szl-holdings/api-spec':
         specifier: workspace:*
@@ -3346,7 +3240,7 @@ importers:
         version: 1.29.0(zod@4.3.6)
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@workspace/nexus-mcp':
         specifier: workspace:*
         version: link:../../packages/nexus-mcp
@@ -3364,14 +3258,14 @@ importers:
   lib/mobile-shared:
     dependencies:
       '@tanstack/query-async-storage-persister':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@tanstack/query-persist-client-core':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@tanstack/query-sync-storage-persister':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -3381,7 +3275,7 @@ importers:
         version: 2.2.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
@@ -3733,14 +3627,14 @@ importers:
         specifier: workspace:*
         version: link:../replit-auth-web
       '@tanstack/query-persist-client-core':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@tanstack/query-sync-storage-persister':
-        specifier: ^5.99.0
-        version: 5.99.0
+        specifier: ^5.100.5
+        version: 5.100.5
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@udecode/plate-common':
         specifier: ^42.0.0
         version: 42.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -4606,7 +4500,7 @@ importers:
     devDependencies:
       '@tanstack/react-query':
         specifier: 'catalog:'
-        version: 5.99.0(react@19.1.0)
+        version: 5.100.5(react@19.1.0)
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
@@ -9703,17 +9597,25 @@ packages:
     peerDependencies:
       vite: 7.3.2
 
-  '@tanstack/query-async-storage-persister@5.99.0':
-    resolution: {integrity: sha512-RUG++yZf8RoRK1Yz83WHHYJ6EF8DqKIF/UNNUUDEw/cY9SLKhAeEd4a0+kDzNRdb4RGXXeF5UIuzoEFJ7elLwQ==}
+  '@tanstack/query-async-storage-persister@5.100.5':
+    resolution: {integrity: sha512-Jdke52IjYiv6WDcMbOT9ujWatJSqxwd4zarT8rqkRdc9VgFUaeuTJ57O1Vnu6RVDRnWB2B0mOV8fRZDZ1E4Scg==}
+
+  '@tanstack/query-core@5.100.5':
+    resolution: {integrity: sha512-t20KrhKkf0HXzqQkPbJ5erhFesup68BAbwFgYmTrS7bxMF7O5MdmL8jUkik4thsG7Hg00fblz30h6yF1d5TxGg==}
 
   '@tanstack/query-core@5.99.0':
     resolution: {integrity: sha512-3Jv3WQG0BCcH7G+7lf/bP8QyBfJOXeY+T08Rin3GZ1bshvwlbPt7NrDHMEzGdKIOmOzvIQmxjk28YEQX60k7pQ==}
 
-  '@tanstack/query-persist-client-core@5.99.0':
-    resolution: {integrity: sha512-FzXoxqGYa+ozGNGBIPHJT06rJD4geiHGbVXNS8K7cwN34te64LXlO5Ep+roQYvZjXJFNrLa4W48DIYITpMxzuA==}
+  '@tanstack/query-persist-client-core@5.100.5':
+    resolution: {integrity: sha512-Vp8UL1GL/QRBWmUT+6pUmsjNhL72Vme8hJ7fTox2A8/syrCab0nCHBbskbhioRtJrdLw7k8sZos/068A8ZTEwA==}
 
-  '@tanstack/query-sync-storage-persister@5.99.0':
-    resolution: {integrity: sha512-Q7xJ+AiesEEB8ZKGrsv7qJfhyr0eT1Z+84TZxQspGZZnJziOalcLUOLGgHOxPaEQGGcxqM1NbrgGYO/WpnTjeQ==}
+  '@tanstack/query-sync-storage-persister@5.100.5':
+    resolution: {integrity: sha512-W6y30mo+IgI4QMTtUpkJcaZ/xHwkEfzuA82tUoz9X0ZffTW2hcjglV9usXRbmU7AOr087DhvaBVF+NvSbPu1Mg==}
+
+  '@tanstack/react-query@5.100.5':
+    resolution: {integrity: sha512-aNwj1mi2v2bQ9IxkyR1grLOUkv3BYWoykHy9KDyLNbjC3tsahbOHJibK+Wjtr1wRhG59/AvJhiJG5OlthaCgJA==}
+    peerDependencies:
+      react: 19.1.0
 
   '@tanstack/react-query@5.99.0':
     resolution: {integrity: sha512-OY2bCqPemT1LlqJ8Y2CUau4KELnIhhG9Ol3ZndPbdnB095pRbPo1cHuXTndg8iIwtoHTgwZjyaDnQ0xD0mYwAw==}
@@ -21257,21 +21159,28 @@ snapshots:
       tailwindcss: 4.2.1
       vite: 7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
-  '@tanstack/query-async-storage-persister@5.99.0':
+  '@tanstack/query-async-storage-persister@5.100.5':
     dependencies:
-      '@tanstack/query-core': 5.99.0
-      '@tanstack/query-persist-client-core': 5.99.0
+      '@tanstack/query-core': 5.100.5
+      '@tanstack/query-persist-client-core': 5.100.5
+
+  '@tanstack/query-core@5.100.5': {}
 
   '@tanstack/query-core@5.99.0': {}
 
-  '@tanstack/query-persist-client-core@5.99.0':
+  '@tanstack/query-persist-client-core@5.100.5':
     dependencies:
-      '@tanstack/query-core': 5.99.0
+      '@tanstack/query-core': 5.100.5
 
-  '@tanstack/query-sync-storage-persister@5.99.0':
+  '@tanstack/query-sync-storage-persister@5.100.5':
     dependencies:
-      '@tanstack/query-core': 5.99.0
-      '@tanstack/query-persist-client-core': 5.99.0
+      '@tanstack/query-core': 5.100.5
+      '@tanstack/query-persist-client-core': 5.100.5
+
+  '@tanstack/react-query@5.100.5(react@19.1.0)':
+    dependencies:
+      '@tanstack/query-core': 5.100.5
+      react: 19.1.0
 
   '@tanstack/react-query@5.99.0(react@19.1.0)':
     dependencies:
