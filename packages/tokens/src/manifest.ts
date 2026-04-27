@@ -15,7 +15,6 @@ export const TOKEN_GOVERNED_ARTIFACTS: readonly ArtifactDescriptor[] = [
   { id: 'szl-holdings-mobile', dir: 'artifacts/szl-holdings-mobile', title: 'SZL Holdings — Mobile Command', kind: 'mobile' },
   { id: 'szl-demo-video', dir: 'artifacts/szl-demo-video', title: 'SZL Holdings — Governed Autonomy Demo', kind: 'video' },
   { id: 'pulse', dir: 'artifacts/pulse', title: 'Pulse — AI Executive Briefing', kind: 'web' },
-  { id: 'aegis', dir: 'artifacts/aegis', title: 'SZL Holdings — Investor Pitch Deck', kind: 'web' },
   { id: 'command', dir: 'artifacts/command', title: 'Unified Command', kind: 'web' },
   { id: 'terra', dir: 'artifacts/terra', title: 'Terra — Real Estate Intelligence', kind: 'web' },
   { id: 'carlota-jo', dir: 'artifacts/carlota-jo', title: 'Carlota Jo Consulting', kind: 'web' },

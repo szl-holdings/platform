@@ -16,8 +16,8 @@
     {
       "product": "Aegis",
       "domain": "Security and defense intelligence — SOC command, advanced security modules, SOAR playbooks, threat intelligence",
-      "status": "Domain backend active; web UI archived (Task #920) — see `artifacts/aegis/`",
-      "artifactId": "artifacts/aegis"
+      "status": "Removed — source directory deleted (Task #1548). Domain backend active; security features consolidated into artifacts/sentra.",
+      "artifactId": null
     },
     {
       "product": "Vessels",

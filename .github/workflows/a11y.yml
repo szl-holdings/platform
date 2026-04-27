@@ -30,10 +30,6 @@ jobs:
             filter: "@workspace/szl-holdings"
             dist: artifacts/szl-holdings/dist
             port: 4100
-          - name: aegis
-            filter: "@workspace/aegis"
-            dist: artifacts/aegis/dist
-            port: 4101
           - name: carlota-jo
             filter: "@workspace/carlota-jo"
             dist: artifacts/carlota-jo/dist

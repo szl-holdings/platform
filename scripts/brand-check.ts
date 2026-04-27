@@ -252,9 +252,6 @@ function scanFile(filePath: string): Violation[] {
     }
 
     for (const { pattern, reason } of DEPRECATED_PATTERNS) {
-      // Skip Beacon checks for the aegis security artifact — "beacon" is a
-      // legitimate cybersecurity term there (C2 beacon, DNS beacon, etc.).
-      if (reason.includes('"Beacon"') && rel.startsWith('artifacts/aegis/')) continue;
       pattern.lastIndex = 0;
       const m = pattern.exec(line);
       if (m) check(i, m.index, reason);

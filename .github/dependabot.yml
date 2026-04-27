@@ -178,21 +178,6 @@ updates:
       prefix: "chore(deps-docker)"
 
   - package-ecosystem: docker
-    directory: /artifacts/aegis
-    schedule:
-      interval: weekly
-      day: monday
-      time: "09:00"
-      timezone: "America/New_York"
-    open-pull-requests-limit: 3
-    labels:
-      - dependencies
-      - docker
-      - automated
-    commit-message:
-      prefix: "chore(deps-docker)"
-
-  - package-ecosystem: docker
     directory: /artifacts/carlota-jo
     schedule:
       interval: weekly

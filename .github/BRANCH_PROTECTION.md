@@ -137,7 +137,7 @@ Dependabot is configured in `.github/dependabot.yml` to update four package ecos
 |-----------|------------|----------|---------|
 | `npm` | Root (all pnpm workspaces) | 10 | React, Vite, testing, TypeScript, UI, database, TanStack |
 | `pip` | `workers/substrate-python`, `services/substrate-py-workers`, `services/lyte-metrics-store`, `scripts/media` | 3 per dir | None |
-| `docker` | `artifacts/api-server`, `artifacts/szl-holdings`, `artifacts/vessels`, `artifacts/terra`, `artifacts/aegis`, `artifacts/carlota-jo` | 3 per dir | None |
+| `docker` | `artifacts/api-server`, `artifacts/szl-holdings`, `artifacts/vessels`, `artifacts/terra`, `artifacts/carlota-jo` | 3 per dir | None |
 | `github-actions` | Root | 5 | `actions/*`, `github/*`, CI tooling |
 
 To enable **Dependabot auto-merge** for patch-level updates (optional):

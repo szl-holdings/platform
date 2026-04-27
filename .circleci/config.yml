@@ -126,9 +126,6 @@ jobs:
           name: Build @workspace/command (Ecosystem Command Portal)
           command: pnpm --filter @workspace/command run build
       - run:
-          name: Build @workspace/aegis (Defense & Intelligence)
-          command: pnpm --filter @workspace/aegis run build
-      - run:
           name: Build @workspace/pulse (Executive Briefing)
           command: pnpm --filter @workspace/pulse run build
       - run:

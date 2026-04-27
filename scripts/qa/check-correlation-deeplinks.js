@@ -51,8 +51,6 @@ function productDashboardUrl(product) {
       return '/terra/dashboard';
     case 'carlota':
       return '/carlota-jo/';
-    case 'aegis':
-      return '/aegis/';
     case 'prism':
       return '/operations/prism';
     case 'lyte':
@@ -74,8 +72,6 @@ function productEntityUrl(product, entityId) {
       return `/carlota-jo/inquiries?entity=${id}`;
     case 'prism':
       return `/operations/prism?entity=${id}`;
-    case 'aegis':
-      return `/aegis/?entity=${id}`;
     case 'lyte':
       return `/operations?entity=${id}`;
     default:
@@ -111,14 +107,6 @@ function inferProductForEntity(entityId, candidateProducts = []) {
   )
     return 'prism';
   if (
-    id.startsWith('cve') ||
-    id.startsWith('finding') ||
-    id.startsWith('threat') ||
-    id.startsWith('ioc-') ||
-    id.startsWith('aegis')
-  )
-    return 'aegis';
-  if (
     id.startsWith('carlota') ||
     id.startsWith('engagement') ||
     id.startsWith('partner') ||
@@ -133,7 +121,7 @@ function inferProductForEntity(entityId, candidateProducts = []) {
   )
     return 'lyte';
   const fallback = candidateProducts[0]?.toLowerCase();
-  const known = ['lyte', 'vessels', 'terra', 'prism', 'aegis', 'carlota'];
+  const known = ['lyte', 'vessels', 'terra', 'prism', 'carlota'];
   if (fallback && known.includes(fallback)) return fallback;
   return 'lyte';
 }
@@ -146,11 +134,9 @@ const REQUIRED_SOURCE_STRINGS = [
   '"/vessels/dashboard"',
   '"/terra/dashboard"',
   '"/carlota-jo/"',
-  '"/aegis/"',
   '`/vessels/vessels/${id}`',
   '`/terra/property/${id}`',
   '`/carlota-jo/inquiries?entity=${id}`',
-  '`/aegis/?entity=${id}`',
 ];
 const driftErrors = REQUIRED_SOURCE_STRINGS.filter((s) => !productLinksSrc.includes(s));
 if (driftErrors.length > 0) {
@@ -167,7 +153,6 @@ const ARTIFACTS = [
   { product: 'vessels', base: '/vessels', appPath: 'artifacts/vessels/src/App.tsx' },
   { product: 'terra', base: '/terra', appPath: 'artifacts/terra/src/App.tsx' },
   { product: 'carlota', base: '/carlota-jo', appPath: 'artifacts/carlota-jo/src/App.tsx' },
-  { product: 'aegis', base: '/aegis', appPath: 'artifacts/aegis/src/App.tsx' },
 ];
 
 const ROUTE_WITH_PATH_RX = /<Route\s+path=["']([^"']+)["']/g;
@@ -261,16 +246,15 @@ function resolveUrl(url) {
 const ENTITY_FIXTURES = {
   vessels: ['IMO9876543', 'MMSI367123456', 'vessel-123', 'VOYAGE-2025-AB12'],
   terra: ['BBL-1-00207-7501', 'BIN-1234567', 'PROP-XYZ', 'NYC-BK-001'],
-  // Aegis/PRISM/Carlota/Lyte are best-effort surfaces; we still verify the
+  // PRISM/Carlota/Lyte are best-effort surfaces; we still verify the
   // dashboard URL resolves, but per-entity URLs use query params and may
   // legitimately land on the dashboard route.
   prism: ['matter-001', 'filing-2025-alpha'],
-  aegis: ['CVE-2025-0001', 'finding-42'],
   carlota: ['INQ-2025-001'],
   lyte: ['INC-001'],
 };
 
-const VERIFIED_PRODUCTS = ['vessels', 'terra', 'carlota', 'aegis'];
+const VERIFIED_PRODUCTS = ['vessels', 'terra', 'carlota'];
 
 let _failures = 0;
 const results = [];
@@ -315,8 +299,6 @@ const inferenceCases = [
   { id: 'BIN-1234567', expect: 'terra' },
   { id: 'PROP-001', expect: 'terra' },
   { id: 'matter-001', expect: 'prism' },
-  { id: 'CVE-2025-0001', expect: 'aegis' },
-  { id: 'finding-42', expect: 'aegis' },
   { id: 'carlota-001', expect: 'carlota' },
   { id: 'engagement-q1', expect: 'carlota' },
   { id: 'INC-001', expect: 'lyte' },
@@ -349,15 +331,7 @@ for (const r of results) {
 // strict (catch-all-only = failure) but does not turn CI red while the
 // follow-up is in flight. Each entry MUST cite the tracking task and SHOULD
 // be removed the moment the underlying bug is fixed.
-const KNOWN_FAILURES = new Map([
-  // Tracked by follow-up #2010: Aegis pitch-deck artifact only registers a
-  // <SlideDeck> catch-all, so productEntityUrl URLs land on the deck rather
-  // than a dedicated entity surface. Either drop entity URLs from the helper
-  // for aegis or add real entity routes to artifacts/aegis/src/App.tsx.
-  ['dashboard:aegis', 'followup-#2010'],
-  ['entity:aegis:CVE-2025-0001', 'followup-#2010'],
-  ['entity:aegis:finding-42', 'followup-#2010'],
-]);
+const KNOWN_FAILURES = new Map([]);
 
 const unexpected = results.filter((r) => !r.ok && !KNOWN_FAILURES.has(r.label));
 const expected = results.filter((r) => !r.ok && KNOWN_FAILURES.has(r.label));

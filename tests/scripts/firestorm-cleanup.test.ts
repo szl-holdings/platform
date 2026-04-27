@@ -26,15 +26,7 @@ describe('firestorm directory cleanup (task #1438)', () => {
     expect(read('scripts/portfolio.config.json')).not.toMatch(/artifacts\/firestorm\//);
   });
 
-  it('artifacts/aegis/vite.config.ts must not contain a /firestorm/ proxy entry', () => {
-    expect(read('artifacts/aegis/vite.config.ts')).not.toMatch(/\/firestorm\//);
-  });
-
-  it('artifacts/aegis/README.md must not reference artifacts/firestorm/', () => {
-    expect(read('artifacts/aegis/README.md')).not.toMatch(/artifacts\/firestorm/);
-  });
-
-  it('scripts/media/capture-screenshots.ts must use /aegis/ paths, not /firestorm/', () => {
+  it('scripts/media/capture-screenshots.ts must not reference /firestorm/ paths', () => {
     expect(read('scripts/media/capture-screenshots.ts')).not.toMatch(/\/firestorm\//);
   });
 

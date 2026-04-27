@@ -3,7 +3,7 @@
  * Placeholder Empty-State Lint
  *
  * Fails the build if operator-facing pages under
- *   artifacts/{aegis,vessels,terra}/src/pages
+ *   artifacts/{vessels,terra}/src/pages
  * contain generic placeholder copy ("No data", "No results",
  * "No items found") that should instead use the shared
  * <EmptyState /> component from `@workspace/shared-ui`
@@ -23,7 +23,7 @@
  *   1) JSON allow-list — edit
  *        scripts/check-placeholder-empty-states.allowlist.json
  *      and add an entry of the form:
- *        { "file": "artifacts/aegis/src/pages/foo.tsx",
+ *        { "file": "artifacts/vessels/src/pages/foo.tsx",
  *          "line": 42,
  *          "match": "No data",
  *          "reason": "Quoted incident title from CISA advisory" }
@@ -47,7 +47,6 @@ const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, '..');
 
 export const SCAN_DIRS = [
-  'artifacts/aegis/src/pages',
   'artifacts/vessels/src/pages',
   'artifacts/terra/src/pages',
 ];

@@ -1,6 +1,6 @@
 # Archive and Deprecate Register
 
-Updated: 2026-04-18
+Updated: 2026-04-27
 
 ## Purpose
 
@@ -15,7 +15,7 @@ This document tracks every app, document, and script that has been identified as
 Five artifact directories (see `ops/frontier/disposition-matrix.md` for the full per-artifact record) were identified as stale, duplicate, or superseded. All have been deregistered from the artifact registry as of 2026-04-18.
 
 **Summary of dispositions:**
-- Duplicate security entry point → deregistered; superseded by `artifacts/aegis`
+- Duplicate security entry point → deregistered; superseded by `artifacts/sentra`
 - Unbuilt infrastructure tool stub → deregistered; merged into `artifacts/command`
 - Legacy ops command surface → deregistered; merged into `artifacts/command`
 - Legal matter management platform → deregistered; backend data retained in api-server
@@ -99,6 +99,7 @@ No active workflows are marked for removal at this time. If workflows for deprec
 - [x] Update `README.md` to remove references to deprecated apps — **Done 2026-04-18** (removed stale artifact rows from inventory table)
 - [x] Update `PRODUCT_SURFACE_MAP.md` and `PRODUCT-SURFACES.md` to reflect current state — **Done 2026-04-18** (PRODUCT-SURFACES.md updated; PRODUCT_SURFACE_MAP.md had no references)
 - [x] Verify no CI jobs reference deprecated app directories — **Done 2026-04-18** (removed stale entries from build.yml and e2e.yml; legacy archived CI workflow already disabled)
+- [x] Remove `artifacts/aegis/` source directory — **Done 2026-04-27** (directory deleted; e2e matrix entry, `AEGIS_BASE_PATH` env var, and `AEGIS_PORT` proxy constant removed; firestorm-cleanup and proxy-routes-shared tests updated)
 
 ---
 

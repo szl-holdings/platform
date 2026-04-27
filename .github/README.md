@@ -93,7 +93,7 @@ Dependabot is configured in `dependabot.yml` with the following schedule and lim
 |-----------|------------|----------|----------|---------|
 | `npm` | Root (all pnpm workspaces) | Weekly (Mon 09:00 ET) | 10 | React, Vite, testing, TypeScript, UI, DB, TanStack |
 | `pip` | `workers/substrate-python`, `services/substrate-py-workers`, `services/lyte-metrics-store`, `scripts/media` | Weekly (Mon 09:00 ET) | 3 per dir | None (low volume) |
-| `docker` | `artifacts/api-server`, `artifacts/szl-holdings`, `artifacts/vessels`, `artifacts/terra`, `artifacts/aegis`, `artifacts/carlota-jo` | Weekly (Mon 09:00 ET) | 3 per dir | None (low volume) |
+| `docker` | `artifacts/api-server`, `artifacts/szl-holdings`, `artifacts/vessels`, `artifacts/terra`, `artifacts/carlota-jo` | Weekly (Mon 09:00 ET) | 3 per dir | None (low volume) |
 | `github-actions` | Root | Weekly (Mon 09:00 ET) | 5 | `actions/*`, `github/*`, CI tooling |
 
 All Dependabot PRs must pass the same required CI checks as any other PR.

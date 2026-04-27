@@ -37,11 +37,6 @@ jobs:
             dist: artifacts/szl-holdings/dist/public
             port: 3000
             spec: forge.spec.ts
-          - app: aegis
-            filter: "@workspace/aegis"
-            dist: artifacts/aegis/dist/public
-            port: 3001
-            spec: aegis.spec.ts
           - app: terra
             filter: "@workspace/terra"
             dist: artifacts/terra/dist/public
@@ -133,11 +128,11 @@ jobs:
             port: 3000
             spec: stephen-site.spec.ts
           # correlation-deeplinks.spec.ts targets multiple artifacts
-          # (Vessels, Terra, Command + secondary aegis/carlota/prism/lyte).
+          # (Vessels, Terra, Command + secondary carlota/prism/lyte).
           # We bind this matrix entry to the command build because the
           # cross-platform evidence registry and correlation pages live there;
           # the spec uses isReachable() / appAvailable guards so the
-          # vessels/terra/aegis/carlota detail-page tests skip cleanly when
+          # vessels/terra/carlota detail-page tests skip cleanly when
           # those artifacts are not being served on this runner.
           - app: correlation-deeplinks
             filter: "@workspace/command"
@@ -231,7 +226,6 @@ jobs:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:${{ matrix.port }}
           SZL_BASE_PATH: /
-          AEGIS_BASE_PATH: /
           TERRA_BASE_PATH: /
           VESSELS_BASE_PATH: /
           CARLOTA_BASE_PATH: /

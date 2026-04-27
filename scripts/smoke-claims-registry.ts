@@ -124,7 +124,6 @@ const expectedProductIds = [
   'szl-holdings',
   'carlota-jo',
   'pulse',
-  'aegis',
   'terra',
   'vessels',
   'command',
@@ -253,16 +252,6 @@ const perArtifactAdapters: Array<{
     ],
   },
   {
-    artifact: 'aegis',
-    exports: [
-      'AEGIS_SIMULATIONS',
-      'AEGIS_MITRE_COVERAGE',
-      'AEGIS_MARKET_MARITIME',
-      'AEGIS_MARKET_GOVERNED_DECISION',
-      'metricDisplay',
-    ],
-  },
-  {
     artifact: 'pulse',
     exports: ['PULSE_FALLBACK_BRIEFING', 'PULSE_SYNTHESIZED_LABEL', 'metricDisplay'],
   },
@@ -345,15 +334,6 @@ const adapterConsumptionChecks: Array<{
     ],
   },
   {
-    artifact: 'aegis',
-    consumers: [
-      {
-        file: 'artifacts/aegis/src/pages/digital-twin.tsx',
-        symbol: 'AEGIS_MITRE_COVERAGE',
-      },
-    ],
-  },
-  {
     artifact: 'pulse',
     consumers: [
       {
@@ -399,7 +379,6 @@ const migratedArtifacts = [
   'command',
   'carlota-jo',
   'vessels',
-  'aegis',
   'pulse',
   'terra',
   'szl-holdings',

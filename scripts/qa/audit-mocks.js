@@ -56,7 +56,6 @@ const SCAN_DIRS = [
   'artifacts/szl-holdings/src/pages',
   'artifacts/lyte-command-center/src/pages',
   'artifacts/terra/src/pages',
-  'artifacts/aegis/src/pages',
   'artifacts/vessels/src/pages',
   'artifacts/carlota-jo/src/pages',
 ];

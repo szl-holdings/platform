@@ -48,11 +48,6 @@ jobs:
             dockerfile: artifacts/terra/Dockerfile
             image: ghcr.io/szl-holdings/terra
 
-          - service: aegis
-            context: .
-            dockerfile: artifacts/aegis/Dockerfile
-            image: ghcr.io/szl-holdings/aegis
-
           - service: carlota-jo
             context: .
             dockerfile: artifacts/carlota-jo/Dockerfile
@@ -118,5 +113,4 @@ jobs:
           echo "| szl-holdings | \`ghcr.io/szl-holdings/szl-holdings-web\` | ${{ needs.build-and-push.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| vessels | \`ghcr.io/szl-holdings/vessels\` | ${{ needs.build-and-push.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| terra | \`ghcr.io/szl-holdings/terra\` | ${{ needs.build-and-push.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| aegis | \`ghcr.io/szl-holdings/aegis\` | ${{ needs.build-and-push.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| carlota-jo | \`ghcr.io/szl-holdings/carlota-jo\` | ${{ needs.build-and-push.result }} |" >> $GITHUB_STEP_SUMMARY

@@ -15,7 +15,6 @@ SEARCH_DIRS=(
   "artifacts/command/src/pages"
   "artifacts/command/src/infrastructure/pages"
   "artifacts/terra/src"
-  "artifacts/aegis/src"
 )
 
 # Patterns that indicate a generic, unhelpful empty state.

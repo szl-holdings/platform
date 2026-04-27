@@ -68,10 +68,10 @@ describe('scanSource', () => {
       '  return <div>No data</div>;',
       '}',
     ].join('\n');
-    const v = scanSource('artifacts/aegis/src/pages/fake.tsx', src);
+    const v = scanSource('artifacts/vessels/src/pages/fake.tsx', src);
     expect(v).toHaveLength(1);
     expect(v[0]).toMatchObject({
-      file: 'artifacts/aegis/src/pages/fake.tsx',
+      file: 'artifacts/vessels/src/pages/fake.tsx',
       line: 3,
       match: 'No data',
     });

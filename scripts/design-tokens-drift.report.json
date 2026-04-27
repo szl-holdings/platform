@@ -2,7 +2,7 @@
   "generatedAt": "2026-04-26T19:43:16.950Z",
   "threshold": 50,
   "averageScore": 51,
-  "totalArtifacts": 14,
+  "totalArtifacts": 13,
   "artifacts": [
     {
       "id": "sentra",
@@ -509,108 +509,6 @@
             "#c8a84b",
             "#c8a84b",
             "#c8a84b"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "aegis",
-      "dir": "artifacts/aegis",
-      "title": "SZL Holdings — Investor Pitch Deck",
-      "kind": "web",
-      "lines": 112992,
-      "files": 227,
-      "violations": 10562,
-      "score": 7,
-      "top": [
-        {
-          "file": "artifacts/aegis/src/pages/xdr-incident-workbench.tsx",
-          "count": 171,
-          "examples": [
-            "#f5f5f5",
-            "#c9b787",
-            "#8a8a8a"
-          ]
-        },
-        {
-          "file": "artifacts/aegis/src/pages/consciousness.tsx",
-          "count": 170,
-          "examples": [
-            "#f5f5f5",
-            "#f5f5f5",
-            "#f5f5f5"
-          ]
-        },
-        {
-          "file": "artifacts/aegis/src/pages/command-home.tsx",
-          "count": 162,
-          "examples": [
-            "#0a0a0a",
-            "#f5f5f5",
-            "#f5f5f5"
-          ]
-        },
-        {
-          "file": "artifacts/aegis/src/pages/intel/agent-autonomy.tsx",
-          "count": 150,
-          "examples": [
-            "#c9b787",
-            "#f5f5f5",
-            "#c9b787"
-          ]
-        },
-        {
-          "file": "artifacts/aegis/src/pages/soc-dashboard.tsx",
-          "count": 144,
-          "examples": [
-            "#c9b787",
-            "#f5f5f5",
-            "#8a8a8a"
-          ]
-        },
-        {
-          "file": "artifacts/aegis/src/pages/adversary-narrative-engine.tsx",
-          "count": 139,
-          "examples": [
-            "#2041",
-            "#c9b787",
-            "#c9b787"
-          ]
-        },
-        {
-          "file": "artifacts/aegis/src/pages/threat-twin-view.tsx",
-          "count": 136,
-          "examples": [
-            "#c9b787",
-            "#c9b787",
-            "#64748b"
-          ]
-        },
-        {
-          "file": "artifacts/aegis/src/pages/threat-intel-feed.tsx",
-          "count": 120,
-          "examples": [
-            "#c9b787",
-            "#c9b787",
-            "#c9b787"
-          ]
-        },
-        {
-          "file": "artifacts/aegis/src/pages/response-orchestration.tsx",
-          "count": 119,
-          "examples": [
-            "#c9b787",
-            "#c9b787",
-            "#c9b787"
-          ]
-        },
-        {
-          "file": "artifacts/aegis/src/pages/worldline-registry.tsx",
-          "count": 118,
-          "examples": [
-            "#f5f5f5",
-            "#c9b787",
-            "#d4a054"
           ]
         }
       ]

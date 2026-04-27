@@ -101,8 +101,7 @@
               "../api-server": "Artifacts must not import from other artifacts. Use a shared package instead.",
               "../../artifacts/szl-holdings": "Artifacts must not import from other artifacts. Use a shared package instead.",
               "../../artifacts/vessels": "Artifacts must not import from other artifacts. Use a shared package instead.",
-              "../../artifacts/terra": "Artifacts must not import from other artifacts. Use a shared package instead.",
-              "../../artifacts/aegis": "Artifacts must not import from other artifacts. Use a shared package instead."
+              "../../artifacts/terra": "Artifacts must not import from other artifacts. Use a shared package instead."
             }
           }
         }

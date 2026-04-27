@@ -18,7 +18,6 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  AEGIS_PORT,
   CARLOTA_JO_PORT,
   COMMAND_PORT,
   PROXY_ROUTES,
@@ -30,7 +29,6 @@ import {
 const REPO_ROOT = resolve(__dirname, '..', '..');
 
 const GATEWAY_CONFIGS = [
-  'artifacts/aegis/vite.config.ts',
   'artifacts/terra/vite.config.ts',
   'artifacts/carlota-jo/vite.config.ts',
   'artifacts/vessels/vite.config.ts',
@@ -89,7 +87,6 @@ describe('Per-app port constants are exported and wired into PROXY_ROUTES', () =
   // app named in the task spec must have a named export AND that export
   // must agree with the corresponding entry in PROXY_ROUTES.
   it.each([
-    ['/aegis/', AEGIS_PORT],
     ['/terra/', TERRA_PORT],
     ['/carlota-jo/', CARLOTA_JO_PORT],
     ['/vessels/', VESSELS_PORT],

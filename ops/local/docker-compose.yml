@@ -104,20 +104,6 @@ services:
       - api-server
     restart: unless-stopped
 
-  aegis:
-    build:
-      context: .
-      dockerfile: artifacts/aegis/Dockerfile
-    image: ghcr.io/szl-holdings/aegis:local
-    container_name: szl-aegis
-    environment:
-      <<: *common-env
-    ports:
-      - "4004:8080"
-    depends_on:
-      - api-server
-    restart: unless-stopped
-
   carlota-jo:
     build:
       context: .
