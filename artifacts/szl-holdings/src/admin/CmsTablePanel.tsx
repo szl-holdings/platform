@@ -734,6 +734,28 @@ function InquiriesPanel() {
     closed: 'bg-muted text-muted-foreground border-border',
   };
 
+  const sourceBreakdown = (() => {
+    const counts: Record<string, number> = {};
+    for (const inq of inquiries) {
+      const key = inq.utmSource?.trim() || 'Direct / Organic';
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+    const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const max = entries[0]?.[1] ?? 1;
+    return entries.map(([source, count]) => ({ source, count, pct: Math.round((count / max) * 100) }));
+  })();
+
+  const sourceColors = [
+    'bg-cyan-500',
+    'bg-violet-500',
+    'bg-emerald-500',
+    'bg-amber-500',
+    'bg-rose-500',
+    'bg-blue-500',
+    'bg-pink-500',
+    'bg-indigo-500',
+  ];
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -753,6 +775,33 @@ function InquiriesPanel() {
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
+
+      {!isLoading && inquiries.length > 0 && (
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-primary" /> Source Breakdown
+          </h3>
+          <div className="space-y-3">
+            {sourceBreakdown.map(({ source, count, pct }, i) => (
+              <div key={source} className="flex items-center gap-3">
+                <div className="w-32 shrink-0 text-xs text-muted-foreground truncate text-right">
+                  {source}
+                </div>
+                <div className="flex-1 bg-muted/40 rounded-full h-2 overflow-hidden">
+                  <div
+                    className={cn('h-2 rounded-full transition-all duration-500', sourceColors[i % sourceColors.length])}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <div className="w-8 shrink-0 text-xs font-semibold text-foreground text-right">
+                  {count}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
