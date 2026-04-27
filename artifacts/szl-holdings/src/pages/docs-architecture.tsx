@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ArrowRight, Layers, Database, Network, Cpu, Shield, GitBranch } from "lucide-react";
+import { ArrowRight, Layers, Database, Network, Cpu, Shield, GitBranch, FlaskConical, Scale } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -127,13 +127,48 @@ export default function DocsArchitecturePage() {
             </div>
           </section>
   
+          {/* Primitives */}
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Platform primitives</p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">Core primitives that power the architecture</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">
+                Each primitive is a first-class, documented subsystem of the platform. Together they compose
+                the full signal-to-action pipeline described above.
+              </p>
+              <div className="mt-8 grid gap-4 sm:grid-cols-3">
+                {[
+                  { icon: Network, label: "Outcome Graph", href: "/docs/outcome-graph", detail: "The directed signal and state fabric connecting every input, inference, decision, and output in the platform." },
+                  { icon: FlaskConical, label: "Simulation", href: "/docs/simulation", detail: "Forward-looking scenario modeling — project the effects of decisions and signal changes before committing." },
+                  { icon: Scale, label: "Covenant Policy", href: "/docs/covenant-policy", detail: "The governance rules engine defining what the platform is and is not permitted to do on behalf of any principal." },
+                ].map(({ icon: Icon, label, href, detail }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className="flex flex-col gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5 transition hover:border-white/12 hover:bg-white/[0.04]"
+                  >
+                    <div className="inline-flex rounded-xl border border-white/10 bg-white/[0.04] p-2.5 self-start">
+                      <Icon className="h-4 w-4 text-white/50" />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-semibold text-white">{label}</span>
+                        <ArrowRight className="h-3.5 w-3.5 flex-shrink-0 text-white/30" />
+                      </div>
+                      <p className="mt-1 text-xs leading-5 text-white/50">{detail}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+
           {/* Related docs */}
           <section>
             <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Related documentation</p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {[
-                  { label: "Covenant Policy", href: "/docs/control-plane", detail: "Governance API and Covenant Policy management" },
                   { label: "Audit Timeline", href: "/docs/worldline", detail: "The unified chronological event and decision record" },
                   { label: "Proof chain", href: "/docs/proof-chain", detail: "How outputs are traced back to source signals" },
                   { label: "Governed inference", href: "/docs/model-mesh", detail: "AI model routing, versioning, and cost management" },

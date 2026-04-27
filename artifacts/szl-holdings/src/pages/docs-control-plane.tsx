@@ -166,7 +166,7 @@ export default function DocsControlPlanePage() {
                   { label: "Proof Chain", href: "/docs/proof-chain", detail: "How outputs are traced to source signals" },
                   { label: "Simulation", href: "/docs/simulation", detail: "Test Covenant configurations before deploying" },
                   { label: "Audit Timeline", href: "/docs/worldline", detail: "Chronological event and decision record" },
-                  { label: "Trust", href: "/docs/trust", detail: "Trust controls and governance documentation" },
+                  { label: "Architecture", href: "/docs/architecture", detail: "Full platform pipeline and how Covenant Policy fits in" },
                   { label: "Back to docs hub", href: "/docs", detail: "Full documentation index" },
                 ].map((link) => (
                   <Link

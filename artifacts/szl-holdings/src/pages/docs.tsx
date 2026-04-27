@@ -68,54 +68,63 @@ const TECHNICAL_DOCS = [
     title: "Architecture",
     desc: "Signal ingestion, Twin enrichment, signal-to-action pipeline, governance layer, and proof chain — documented end to end.",
     href: "/docs/architecture",
-  },
-  {
-    icon: Network,
-    title: "Outcome Graph",
-    desc: "The directed signal and state fabric connecting every input, inference, decision, and output in the platform.",
-    href: "/docs/outcome-graph",
+    isPrimitive: false,
   },
   {
     icon: Link2,
     title: "Proof Chain",
     desc: "How every output traces every claim back to its source signal, model invocation, and human approval record.",
     href: "/docs/proof-chain",
-  },
-  {
-    icon: Scale,
-    title: "Covenant Policy",
-    desc: "The governance rules engine defining what the platform is and is not permitted to do on behalf of any principal.",
-    href: "/docs/covenant-policy",
-  },
-  {
-    icon: FlaskConical,
-    title: "Simulation",
-    desc: "Forward-looking scenario modeling — project the effects of decisions and signal changes before committing.",
-    href: "/docs/simulation",
+    isPrimitive: false,
   },
   {
     icon: Clock,
     title: "Audit Timeline",
     desc: "The unified, immutable chronological record of all signal, decision, and execution events in a workflow.",
     href: "/docs/worldline",
+    isPrimitive: false,
   },
   {
     icon: Cpu,
     title: "Governed Inference",
     desc: "AI model routing, versioning, cost tracking, quality signals, and governance integration across all inference.",
     href: "/docs/model-mesh",
+    isPrimitive: false,
   },
   {
     icon: ShieldCheck,
     title: "Trust (technical)",
     desc: "Structural trust controls, governance commitments, and domain-specific compliance considerations by vertical.",
     href: "/docs/trust",
+    isPrimitive: false,
   },
   {
     icon: GitBranch,
     title: "GitHub",
     desc: "GitHub as technical proof and implementation evidence — not the primary CTA. Who it's for and what it demonstrates.",
     href: "/docs/github",
+    isPrimitive: false,
+  },
+  {
+    icon: Network,
+    title: "Outcome Graph",
+    desc: "The directed signal and state fabric connecting every input, inference, decision, and output in the platform.",
+    href: "/docs/outcome-graph",
+    isPrimitive: true,
+  },
+  {
+    icon: Scale,
+    title: "Covenant Policy",
+    desc: "The governance rules engine defining what the platform is and is not permitted to do on behalf of any principal.",
+    href: "/docs/covenant-policy",
+    isPrimitive: true,
+  },
+  {
+    icon: FlaskConical,
+    title: "Simulation",
+    desc: "Forward-looking scenario modeling — project the effects of decisions and signal changes before committing.",
+    href: "/docs/simulation",
+    isPrimitive: true,
   },
 ];
 
@@ -184,8 +193,53 @@ export default function DocsPage() {
                 <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "0.75rem" }}>Technical documentation</p>
                 <h2 style={{ fontSize: "clamp(1.25rem,3vw,1.75rem)", fontWeight: 600, letterSpacing: "-0.020em", lineHeight: 1.18, marginBottom: "2rem" }}>Architecture, governance, and system documentation.</h2>
               </m.div>
+
+              {/* Non-primitive technical docs */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: "1rem" }}>
-                {TECHNICAL_DOCS.map((doc, i) => {
+                {TECHNICAL_DOCS.filter((d) => !d.isPrimitive).map((doc, i) => {
+                  const Icon = doc.icon;
+                  return (
+                    <m.div
+                      key={doc.title}
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.35, delay: i * 0.05 }}
+                    >
+                      <Link
+                        href={doc.href}
+                        style={{ display: "block", borderRadius: "0.75rem", border: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.025)", padding: "1.25rem", textDecoration: "none", transition: "border-color 0.18s, background 0.18s" }}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border-hover)"; (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)"; }}
+                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--color-szl-border)"; (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.025)"; }}
+                      >
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: "0.875rem" }}>
+                          <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "hsla(0,0%,100%,0.05)", border: "1px solid var(--color-szl-border)", borderRadius: "0.5rem", flexShrink: 0 }}>
+                            <Icon size={15} color="hsla(0,0%,100%,0.50)" />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem", marginBottom: "0.375rem" }}>
+                              <span style={{ fontSize: "0.9375rem", fontWeight: 600, color: "hsl(38,8%,92%)" }}>{doc.title}</span>
+                              <ArrowRight size={14} color="hsla(0,0%,100%,0.25)" style={{ flexShrink: 0 }} />
+                            </div>
+                            <p style={{ fontSize: "0.8125rem", lineHeight: 1.55, color: "hsl(214,7%,58%)" }}>{doc.desc}</p>
+                          </div>
+                        </div>
+                      </Link>
+                    </m.div>
+                  );
+                })}
+              </div>
+
+              {/* Primitives sub-section */}
+              <m.div initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} style={{ marginTop: "2.5rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)" }}>Primitives</p>
+                  <div style={{ flex: 1, height: "1px", background: "var(--color-szl-border)" }} />
+                </div>
+                <p style={{ fontSize: "0.875rem", lineHeight: 1.6, color: "hsl(214,7%,54%)", marginBottom: "1.25rem", maxWidth: "52ch" }}>Core subsystems that compose the platform's signal-to-action pipeline. Each primitive is independently documented.</p>
+              </m.div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: "1rem" }}>
+                {TECHNICAL_DOCS.filter((d) => d.isPrimitive).map((doc, i) => {
                   const Icon = doc.icon;
                   return (
                     <m.div
