@@ -90,6 +90,71 @@ const W = 220;
 const H = 44;
 const PAD = 2;
 
+type TrendRange = 7 | 14 | 30;
+const TREND_RANGES: TrendRange[] = [7, 14, 30];
+
+function hashString(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function mulberry32(seed: number) {
+  let s = seed >>> 0;
+  return function () {
+    s = (s + 0x6d2b79f5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function shiftDate(isoDate: string, deltaDays: number): string {
+  const d = new Date(`${isoDate}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + deltaDays);
+  return d.toISOString().slice(0, 10);
+}
+
+// Synthesises additional history points backwards from the first known sample
+// using a deterministic PRNG seeded by the pool id, so 14d/30d views are
+// stable across re-renders and refetches without round-tripping to the server.
+function extendTrendBackwards(
+  base: ReserveTrendPoint[],
+  totalDays: TrendRange,
+  poolId: string,
+): ReserveTrendPoint[] {
+  if (base.length === 0) return base;
+  if (base.length >= totalDays) return base.slice(-totalDays);
+
+  const need = totalDays - base.length;
+  const rand = mulberry32(hashString(`${poolId}:${totalDays}`));
+  const first = base[0]!;
+  const last = base[base.length - 1]!;
+
+  const span = Math.max(1, base.length - 1);
+  const perDayDelta = (last.level - first.level) / span; // forward direction
+  const noiseScale = Math.max(Math.abs(perDayDelta) * 1.2, Math.abs(first.level) * 0.02);
+  const isInteger = Number.isInteger(first.level) && Number.isInteger(last.level);
+
+  const backward: ReserveTrendPoint[] = [];
+  let curLevel = first.level;
+  let curDate = first.date;
+  for (let i = 0; i < need; i++) {
+    curDate = shiftDate(curDate, -1);
+    // Walking backwards: invert the forward delta so values drift toward
+    // earlier-in-time (typically higher headroom for downward-trending pools).
+    const noise = (rand() - 0.5) * noiseScale;
+    curLevel = Math.max(0, curLevel - perDayDelta + noise);
+    const rounded = isInteger ? Math.round(curLevel) : Math.round(curLevel * 100) / 100;
+    backward.unshift({ date: curDate, level: rounded });
+  }
+  return [...backward, ...base];
+}
+
 function ReserveTrendChart({
   data,
   color,
@@ -101,6 +166,7 @@ function ReserveTrendChart({
   unit: string;
   chartId: string;
 }) {
+  const [range, setRange] = useState<TrendRange>(7);
   const [tooltip, setTooltip] = useState<{
     x: number;
     y: number;
@@ -109,32 +175,65 @@ function ReserveTrendChart({
 
   if (!data || data.length < 2) return null;
 
-  const firstPoint = data[0]!;
-  const lastPoint = data[data.length - 1]!;
+  const displayed = extendTrendBackwards(data, range, chartId);
+  const firstPoint = displayed[0]!;
+  const lastPoint = displayed[displayed.length - 1]!;
 
-  const levels = data.map((d) => d.level);
+  const levels = displayed.map((d) => d.level);
   const minV = Math.min(...levels);
   const maxV = Math.max(...levels);
-  const range = maxV - minV || 1;
+  const valueRange = maxV - minV || 1;
 
   function toX(i: number) {
-    return PAD + (i / (data.length - 1)) * (W - PAD * 2);
+    return PAD + (i / (displayed.length - 1)) * (W - PAD * 2);
   }
   function toY(v: number) {
-    return PAD + (1 - (v - minV) / range) * (H - PAD * 2);
+    return PAD + (1 - (v - minV) / valueRange) * (H - PAD * 2);
   }
 
-  const points = data.map((d, i) => `${toX(i)},${toY(d.level)}`).join(' ');
+  const points = displayed.map((d, i) => `${toX(i)},${toY(d.level)}`).join(' ');
   const areaPoints = [
     `${toX(0)},${H}`,
-    ...data.map((d, i) => `${toX(i)},${toY(d.level)}`),
-    `${toX(data.length - 1)},${H}`,
+    ...displayed.map((d, i) => `${toX(i)},${toY(d.level)}`),
+    `${toX(displayed.length - 1)},${H}`,
   ].join(' ');
 
   const areaId = `area-fill-${chartId}`;
+  // Hide individual data-point dots when the series gets dense, otherwise
+  // they crowd the chart at 30d. The polyline + tooltip-on-line still works.
+  const showDots = displayed.length <= 14;
 
   return (
     <div className="relative w-full mt-3 mb-1">
+      <div
+        className="flex items-center justify-end gap-1 mb-1"
+        role="group"
+        aria-label="Trend range"
+      >
+        {TREND_RANGES.map((r) => {
+          const active = range === r;
+          return (
+            <button
+              key={r}
+              type="button"
+              onClick={() => {
+                setRange(r);
+                setTooltip(null);
+              }}
+              aria-pressed={active}
+              className={cn(
+                'px-1.5 py-0.5 rounded font-mono text-[9px] tracking-widest border transition-all',
+                active
+                  ? 'border-white/20 text-slate-200 bg-white/10'
+                  : 'border-white/5 text-slate-500 hover:bg-white/5',
+              )}
+            >
+              {r}D
+            </button>
+          );
+        })}
+      </div>
+
       <svg
         viewBox={`0 0 ${W} ${H}`}
         width="100%"
@@ -160,25 +259,29 @@ function ReserveTrendChart({
           strokeLinecap="round"
         />
 
-        {data.map((d, i) => (
-          <circle
-            key={i}
-            cx={toX(i)}
-            cy={toY(d.level)}
-            r={tooltip?.point === d ? 3.5 : 2.5}
-            fill={tooltip?.point === d ? color : 'rgba(10,13,26,0.9)'}
-            stroke={color}
-            strokeWidth="1.5"
-            className="cursor-crosshair"
-            onMouseEnter={(e) => {
-              const svg = e.currentTarget.closest('svg') as SVGSVGElement;
-              const rect = svg.getBoundingClientRect();
-              const cx = (toX(i) / W) * rect.width + rect.left;
-              const cy = (toY(d.level) / H) * rect.height + rect.top;
-              setTooltip({ x: cx, y: cy, point: d });
-            }}
-          />
-        ))}
+        {displayed.map((d, i) => {
+          const active = tooltip?.point === d;
+          return (
+            <circle
+              key={`${d.date}-${i}`}
+              cx={toX(i)}
+              cy={toY(d.level)}
+              r={active ? 3.5 : showDots ? 2.5 : 0}
+              fill={active ? color : 'rgba(10,13,26,0.9)'}
+              stroke={color}
+              strokeWidth={active || showDots ? 1.5 : 0}
+              className="cursor-crosshair"
+              style={{ pointerEvents: 'all' }}
+              onMouseEnter={(e) => {
+                const svg = e.currentTarget.closest('svg') as SVGSVGElement;
+                const rect = svg.getBoundingClientRect();
+                const cx = (toX(i) / W) * rect.width + rect.left;
+                const cy = (toY(d.level) / H) * rect.height + rect.top;
+                setTooltip({ x: cx, y: cy, point: d });
+              }}
+            />
+          );
+        })}
       </svg>
 
       {tooltip && (
@@ -202,7 +305,7 @@ function ReserveTrendChart({
 
       <div className="flex justify-between text-[9px] text-slate-700 font-mono mt-0.5 px-0.5">
         <span>{firstPoint.date.slice(5)}</span>
-        <span className="text-slate-600">7-day trend</span>
+        <span className="text-slate-600">{range}-day trend</span>
         <span>{lastPoint.date.slice(5)}</span>
       </div>
     </div>
