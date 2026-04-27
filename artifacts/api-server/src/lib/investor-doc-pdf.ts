@@ -18,6 +18,7 @@ const CONTENT_WIDTH = 612 - MARGIN * 2; // letter = 612 pts wide
 function newPage(doc: PDFKit.PDFDocument): void {
   doc.addPage();
   doc.rect(0, 0, doc.page.width, doc.page.height).fill(BRAND.bg);
+  drawPageHeader(doc);
 }
 
 function ensureSpace(doc: PDFKit.PDFDocument, needed: number): void {
