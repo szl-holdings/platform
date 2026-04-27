@@ -65,20 +65,6 @@ jobs:
             dist: artifacts/command/dist/public
             port: 3005
             spec: governed-decision-loop.spec.ts
-          # IMPERIUM is embedded in the command artifact at /infrastructure/imperium-map.
-          # Runs against the same @workspace/command build as command.spec.ts.
-          - app: imperium
-            filter: "@workspace/command"
-            dist: artifacts/command/dist/public
-            port: 3005
-            spec: imperium.spec.ts
-          # Lyte Command Center is embedded in the szl-holdings artifact at /lyte.
-          # Runs against the same @workspace/szl-holdings build as szl-holdings.spec.ts.
-          - app: lyte
-            filter: "@workspace/szl-holdings"
-            dist: artifacts/szl-holdings/dist/public
-            port: 3000
-            spec: lyte.spec.ts
           # Auth E2E: tests the full client-side session cycle (login wall,
           # Sign In redirect, session persistence, logout) via page.route()
           # interception against the SZL Holdings static build.  No live API
@@ -178,9 +164,10 @@ jobs:
             dist: artifacts/szl-holdings/dist/public
             port: 3000
             spec: billing.spec.ts
-          # No specs are currently excluded from this matrix.
-          # All registered specs use appAvailable guards and call testInfo.skip()
-          # when the target path is unavailable — they will not cause false failures.
+          # NOTE: imperium.spec.ts and lyte.spec.ts were removed (2026-04-27) because
+          # the IMPERIUM and Lyte Command Center artifacts are archived and those tests
+          # could never pass.  All remaining specs use appAvailable guards and call
+          # testInfo.skip() when the target path is unavailable.
           # See docs/TESTING_MATRIX.md §4a for the full coverage map.
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -230,8 +217,6 @@ jobs:
           VESSELS_BASE_PATH: /
           CARLOTA_BASE_PATH: /
           COMMAND_BASE_PATH: /
-          LYTE_BASE_PATH: /
-          IMPERIUM_BASE_PATH: /
           STEPHEN_BASE_PATH: /stephen
           SENTRA_BASE_PATH: /
           COUNSEL_BASE_PATH: /
