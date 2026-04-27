@@ -74,10 +74,12 @@ from Production." Run once. Every item is binary.
 
 ## Phase 5 — Workloads
 
-- [ ] All seven canonical web artifacts (szl-holdings, api-server,
-      aegis, terra, vessels, carlota-jo, command) build cleanly via
-      their respective workflows
-- [ ] No archived artifact (see disposition-matrix.md) is registered to a production route
+- [ ] All canonical web artifacts (szl-holdings, api-server,
+      terra, vessels, carlota-jo, command, conduit, a11oy, sentra,
+      counsel, pulse) build cleanly via their respective workflows
+- [ ] No archived artifact (firestorm, imperium, lyte-command-center,
+      prism-counsel, stephen-site — see disposition-matrix.md) is
+      registered to a production route
 - [ ] Mockup sandbox and any internal-only artifact are NOT exposed
       under any production path
 

@@ -31,9 +31,12 @@ Beta readiness is read off `ops/frontier/market-benchmark-gap-analysis.md`:
 | szl-holdings (flagship) | Public alpha (already serving) |
 | Carlota Jo | Limited GA — operational with real backend |
 | Command (unified ops) | Design partner beta |
-| Aegis | Design partner beta — but only with stubbed-data acknowledged |
-| Terra | Design partner beta — same caveat |
-| Vessels | Design partner beta — same caveat |
+| Terra | Design partner beta — stubbed-data caveat applies |
+| Vessels | Design partner beta — stubbed-data caveat applies |
+| Conduit | Design partner beta — data connector scope must be disclosed |
+| Sentra | Design partner beta — demo mode feeds; live connector required for pilot |
+| Counsel | Design partner beta |
+| Pulse | Design partner beta |
 | api-server | Underlies all the above |
 
 ## Beta Discipline Rules

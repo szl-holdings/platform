@@ -19,15 +19,20 @@ Generated: 2026-04-15
 
 ## Active Web Artifacts (HTTP 200, registered, with workflows)
 
-| App | Path | Port | Status |
-|-----|------|------|--------|
-| szl-holdings | `/` | 21130 | Production flagship |
-| aegis | `/aegis/` | 23933 | Defense/Intel command |
-| terra | `/terra/` | 25100 | Real estate intel |
-| vessels | `/vessels/` | 18485 | Maritime intel |
-| carlota-jo | `/carlota-jo/` | 21200 | Advisory consulting |
-| command | `/command/` | 25200 | Unified ops command |
-| _(5 surfaces archived)_ | — | — | See `ops/frontier/disposition-matrix.md` |
+| App | Path | Status |
+|-----|------|--------|
+| szl-holdings | `/` | Production flagship |
+| api-server | `/api/` | Canonical backend (Express + GraphQL) |
+| terra | `/terra/` | Real estate intel |
+| vessels | `/vessels/` | Maritime intel |
+| carlota-jo | `/carlota-jo/` | Advisory consulting |
+| command | `/command/` | Unified ops command (merged Command + Lyte + Imperium) |
+| conduit | `/conduit/` | Reverse ETL data pipeline |
+| a11oy | `/a11oy/` | Brand orchestration layer |
+| sentra | `/sentra/` | Cyber resilience command |
+| counsel | `/counsel/` | Legal matter command |
+| pulse | `/pulse/` | AI executive briefing |
+| _(5 surfaces archived)_ | — | Deregistered — see `ops/frontier/disposition-matrix.md` |
 
 ## API Server
 

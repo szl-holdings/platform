@@ -21,10 +21,10 @@ Generated: 2026-04-15
 
 ## P1 — High Priority
 
-### 4. Archived Apps — Deregistration Pending
-- 5 surfaces are classified ARCHIVE in `ops/frontier/disposition-matrix.md` but may still have registered artifacts
-- Canonical active surfaces: `szl-holdings`, `aegis` (`/aegis/`), `terra`, `vessels`, `carlota-jo`, `command`
-- **Fix**: Deregister archived artifact entries when Replit artifact limit allows
+### 4. Archived Apps — ✅ RESOLVED
+- 5 surfaces (firestorm, imperium, lyte-command-center, prism-counsel, stephen-site) were classified ARCHIVE in `ops/frontier/disposition-matrix.md` and have been deregistered
+- Canonical active surfaces: `szl-holdings`, `api-server`, `terra`, `vessels`, `carlota-jo`, `command`, `conduit`, `a11oy`, `sentra`, `counsel`, `pulse`
+- Source directories retained on disk for historical reference; no active workflows or registered routes remain for archived surfaces
 
 ### 5. No Production Secret Rotation Documentation
 - No inventory of which secrets exist, which are rotatable, expiration dates

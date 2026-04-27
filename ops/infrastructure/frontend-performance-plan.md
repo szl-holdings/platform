@@ -16,10 +16,12 @@ All web artifacts use:
 | App | Risk | Reason |
 |-----|------|--------|
 | szl-holdings | Medium | Large shared-ui imports, many routes |
-| firestorm | Medium | Complex workspace switching, map components |
 | terra | High | Map libraries (Mapbox/Leaflet), data visualization |
 | vessels | High | Map libraries, real-time tracking |
 | command | Medium | Multiple mode switching, dashboard data |
+| conduit | Medium | Data pipeline visualizations, connector graphs |
+| sentra | Medium | Security dashboard, real-time alert streams |
+| pulse | Low | AI briefing cards, minimal interactivity |
 
 ## Performance Optimization Plan
 

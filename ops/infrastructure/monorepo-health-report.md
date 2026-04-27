@@ -4,35 +4,39 @@ Generated: 2026-04-15
 
 ## Overview
 
+Updated: 2026-04-27
+
 | Metric | Value |
 |--------|-------|
 | Package Manager | pnpm 9.x with workspaces |
 | Language | TypeScript 5.x (strict mode) |
-| Active Artifacts | 15 |
-| Shared Libraries | 34 |
+| Active Artifacts | 14 (see below) |
+| Shared Libraries | 37 |
 | Database Tables | 561 |
 | Node Modules | ~3.2GB (shared via pnpm content-addressable store) |
 
 ## Workspace Structure
 
 ```
-artifacts/          # 15 deployable apps
-  ├── szl-holdings/      # Flagship web (marketing, trust, docs)
-  ├── firestorm/         # Aegis defense command
-  ├── terra/             # Real estate intelligence
-  ├── vessels/           # Maritime intelligence
-  ├── carlota-jo/        # Advisory consulting
-  ├── command/           # Unified operations
-  ├── cortex-mobile/     # Mobile command center (Expo)
+artifacts/          # Active deployable apps
+  ├── szl-holdings/       # Flagship web (marketing, trust, docs)
+  ├── api-server/         # Express API + GraphQL + WS
+  ├── terra/              # Real estate intelligence
+  ├── vessels/            # Maritime intelligence
+  ├── carlota-jo/         # Advisory consulting
+  ├── command/            # Unified operations (merged Command + Lyte + Imperium)
+  ├── conduit/            # Reverse ETL data pipeline
+  ├── a11oy/              # Brand orchestration layer
+  ├── sentra/             # Cyber resilience command
+  ├── counsel/            # Legal matter command
+  ├── pulse/              # AI executive briefing
+  ├── cortex-mobile/      # Mobile command center (Expo)
   ├── szl-holdings-mobile/ # Holdings companion (Expo)
-  ├── api-server/        # Express API + GraphQL + WS
-  ├── mockup-sandbox/    # Design prototyping
-  ├── aegis/             # Archived (duplicate of firestorm)
-  ├── imperium/          # Archived (merged into command)
-  ├── lyte-command-center/ # Archived (merged into command)
-  ├── prism-counsel/     # Archived (deprecated)
-  └── stephen-site/      # Archived (deprecated)
-lib/                # 34 shared packages
+  └── mockup-sandbox/     # Internal design prototyping (not public)
+  # Archived dirs (code retained for reference, not registered):
+  # firestorm/, aegis/, imperium/, lyte-command-center/, prism-counsel/, stephen-site/
+  # See ops/frontier/disposition-matrix.md for disposition details
+lib/                # 37 shared packages
 ops/                # Operational documentation
 docs/               # Project-level documentation
 tests/              # Integration and e2e tests
@@ -46,9 +50,8 @@ tests/              # Integration and e2e tests
 - No circular dependencies detected in lib/
 
 ### Concerns
-- 5 archived artifacts still registered and consuming workflow slots
-- Some archived artifacts may have stale dependency versions
-- Build time increases with workspace size
+- Build time increases with workspace size (currently within acceptable range)
+- Some archived artifact directories remain on disk; workflows and registrations removed
 
 ## TypeScript Configuration
 

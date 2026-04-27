@@ -8,19 +8,23 @@ Generated: 2026-04-16 (updated)
 
 ### Web App Landscape (Current)
 
-| App | Path | Port | State |
-|-----|------|------|-------|
-| szl-holdings | `/` | 21130 | Running — canonical flagship |
-| api-server | `/api/` | 8080 | Running — canonical backend |
-| aegis | `/aegis/` | 23933 | Running — canonical defense UI |
-| _(5 archived)_ | _(various)_ | — | Archived/deregistered — see disposition-matrix.md |
-| terra | `/terra/` | 25100 | Running — canonical |
-| vessels | `/vessels/` | 18485 | Running — canonical |
-| carlota-jo | `/carlota-jo/` | 21200 | Running — canonical |
-| command | `/command/` | 25200 | Running — canonical unified ops |
-| mockup-sandbox | `/__mockup/` | — | Internal tool only |
+| App | Path | State |
+|-----|------|-------|
+| szl-holdings | `/` | Running — canonical flagship |
+| api-server | `/api/` | Running — canonical backend |
+| terra | `/terra/` | Running — canonical |
+| vessels | `/vessels/` | Running — canonical |
+| carlota-jo | `/carlota-jo/` | Running — canonical |
+| command | `/command/` | Running — canonical unified ops |
+| conduit | `/conduit/` | Running — Reverse ETL |
+| a11oy | `/a11oy/` | Running — brand orchestration |
+| sentra | `/sentra/` | Running — cyber resilience |
+| counsel | `/counsel/` | Running — legal matter command |
+| pulse | `/pulse/` | Running — AI executive briefing |
+| mockup-sandbox | `/nexus/` | Internal tool only (not public) |
+| _(6 archived)_ | _(various)_ | Archived/deregistered — see disposition-matrix.md |
 
-**Problem:** 5 of 13 registered web apps are redundant or deprecated but still running, consuming resources and creating routing confusion.
+**Note:** The 6 archived surfaces (firestorm, aegis, imperium, lyte-command-center, prism-counsel, stephen-site) have been deregistered. Source directories retained for historical reference. See `ops/frontier/disposition-matrix.md` for full disposition record.
 
 ### Mobile Landscape (Current)
 
@@ -47,13 +51,17 @@ Generated: 2026-04-16 (updated)
 |-----|------|---------|
 | szl-holdings | `/` | Canonical flagship — single public web entry point |
 | api-server | `/api/` | Backend platform — all REST/GraphQL/WebSocket |
-| aegis | `/aegis/` | Defense & intelligence command (full app) |
 | terra | `/terra/` | Real estate intelligence |
 | vessels | `/vessels/` | Maritime intelligence |
 | carlota-jo | `/carlota-jo/` | Premium advisory |
 | command | `/command/` | Unified ops command (merged operator surfaces) |
+| conduit | `/conduit/` | Reverse ETL data pipeline |
+| a11oy | `/a11oy/` | Brand orchestration layer |
+| sentra | `/sentra/` | Cyber resilience command |
+| counsel | `/counsel/` | Legal matter command |
+| pulse | `/pulse/` | AI executive briefing |
 
-**Eliminated:** 5 archived artifacts deregistered — see `ops/frontier/disposition-matrix.md` for redirect and disposition details.
+**Eliminated:** 6 archived artifacts deregistered (firestorm, aegis, imperium, lyte-command-center, prism-counsel, stephen-site) — see `ops/frontier/disposition-matrix.md` for redirect and disposition details.
 
 ### Mobile Target Topology
 
@@ -96,7 +104,7 @@ Generated: 2026-04-16 (updated)
 
 | Gap | Priority | Downstream Task |
 |-----|----------|-----------------|
-| 5 redundant/deprecated apps still registered and running | P1 | Product topology & portfolio rationalization (Phases 2-3) |
+| 6 redundant/deprecated apps deregistered and archived (firestorm, aegis, imperium, lyte-command-center, prism-counsel, stephen-site) | ✅ RESOLVED | `ops/frontier/disposition-matrix.md` |
 | OAUTH_STATE_SECRET hardcoded in .replit | P0 | This task (Phase 1) |
 | VAPID_PRIVATE_KEY hardcoded in .replit | P0 | This task (Phase 1) |
 | Mobile Firebase configs need .gitignore protection | P0 | This task (Phase 1) |

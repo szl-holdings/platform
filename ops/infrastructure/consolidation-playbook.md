@@ -6,24 +6,19 @@ Generated: 2026-04-15
 
 Reduce operational complexity by consolidating duplicated functionality, deregistering archived apps, and establishing clear ownership boundaries.
 
-## Step 1: Deregister Archived Artifacts
+## Step 1: Deregister Archived Artifacts — ✅ COMPLETE
 
-These artifacts are deprecated and should be deregistered:
+The following artifacts were deprecated and have been deregistered. Workflows removed; code directories retained for historical reference per `ops/frontier/disposition-matrix.md`.
 
-| Artifact | Reason | Dependencies to Check |
-|----------|--------|----------------------|
-| aegis | Duplicate of firestorm | Verify no unique routes |
-| imperium | Merged into command | Verify all features in command |
-| lyte-command-center | Merged into command | Verify all features in command |
-| prism-counsel | Deprecated (#579) | Check for active users |
-| stephen-site | Deprecated (#579) | Content moved to /founder |
+| Artifact | Reason | Disposition |
+|----------|--------|-------------|
+| firestorm | Superseded by aegis (canonical defense path) | Deregistered; ARCHIVED.md added |
+| imperium | Merged into command | Deregistered; DEPRECATED.md added |
+| lyte-command-center | Merged into command | Deregistered; DEPRECATED.md added |
+| prism-counsel | Deprecated (task #579) | Deregistered; DEPRECATED.md added |
+| stephen-site | Deprecated (task #579); content moved to /founder | Deregistered; DEPRECATED.md added |
 
-### Process
-1. Verify no active traffic to archived apps
-2. Stop workflows for archived apps
-3. Deregister artifacts
-4. Remove from Replit workflow configuration
-5. Keep code in repository (do not delete)
+No active workflow or registered route exists for any of these surfaces. See `ops/frontier/disposition-matrix.md` for the canonical disposition record.
 
 ## Step 2: Library Consolidation Audit
 
