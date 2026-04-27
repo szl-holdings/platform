@@ -951,9 +951,9 @@ function AppShell({
           </div>
         }
       >
-        <main data-szl-shell-main className="flex-1 overflow-auto h-full">
+        <div data-szl-shell-main className="flex-1 overflow-auto h-full">
           <DashboardRoutes />
-        </main>
+        </div>
       </SharedDashboardShell>
       <CommandPalette
         open={paletteOpen}

@@ -662,9 +662,9 @@ function AppShell() {
           </div>
         }
       >
-        <main className="flex-1 overflow-auto h-full">
+        <div className="flex-1 overflow-auto h-full">
           <DashboardRouter />
-        </main>
+        </div>
       </SharedDashboardShell>
       <CommandPalette
         open={paletteOpen}

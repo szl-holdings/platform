@@ -44,28 +44,31 @@ export function Layout({ children }: { children: React.ReactNode }) {
           )}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            aria-expanded={isSidebarOpen}
             className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors mx-auto"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
+        <nav aria-label="Main navigation" className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
           {navItems.map((item) => {
             const isActive = location === item.href || (item.href !== '/' && location.startsWith(item.href));
             return (
               <Link
                 key={item.name}
                 href={item.href}
+                aria-label={!isSidebarOpen ? item.name : undefined}
+                aria-current={isActive ? 'page' : undefined}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-md transition-colors font-medium text-sm",
                   isActive
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
-                title={!isSidebarOpen ? item.name : undefined}
               >
-                <item.icon className={cn("w-5 h-5 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+                <item.icon className={cn("w-5 h-5 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} aria-hidden="true" />
                 {isSidebarOpen && <span>{item.name}</span>}
               </Link>
             );
@@ -92,7 +95,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+      <main id="main-content" tabIndex={-1} className="flex-1 flex flex-col min-w-0 overflow-hidden relative" style={{ outline: 'none' }}>
         <header className="h-14 flex items-center px-6 border-b border-border bg-card/50 backdrop-blur shrink-0 justify-between">
            <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <span className="text-foreground capitalize">{location.split('/')[1] || 'Dashboard'}</span>

@@ -202,7 +202,7 @@ export default function Layout({
       </nav>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto" style={{ outline: 'none' }}>{children}</main>
         <StatusStrip org={org} />
       </div>
     </div>
