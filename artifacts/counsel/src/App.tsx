@@ -615,7 +615,9 @@ function AppShell() {
         />
         <LegalDisclaimerBanner />
         <Suspense fallback={<div style={{ height: '100vh', background: '#0a0614' }} />}>
-          <CounselLandingPage />
+          <main id="main-content" tabIndex={-1}>
+            <CounselLandingPage />
+          </main>
         </Suspense>
         <Toaster position="bottom-right" theme="dark" />
       </>

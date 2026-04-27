@@ -901,7 +901,9 @@ function AppShell({
       <>
         <EcosystemNav currentAppId="sentra" currentAppName="Sentra" accentColor={accent} />
         <Suspense fallback={<div style={{ height: '100vh', background: '#09090b' }} />}>
-          <SentraLandingPage />
+          <main id="main-content" tabIndex={-1}>
+            <SentraLandingPage />
+          </main>
         </Suspense>
         <CommandPalette
           open={paletteOpen}
