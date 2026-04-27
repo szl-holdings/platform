@@ -13,6 +13,13 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
+interface JobRunHistoryEntry {
+  at: number;
+  status: 'completed' | 'failed';
+  durationMs?: number;
+  result?: Record<string, unknown>;
+}
+
 interface JobRegistryEntry {
   type: string;
   name: string;
@@ -23,6 +30,8 @@ interface JobRegistryEntry {
   nextRunAt?: number;
   lastStatus?: 'completed' | 'failed' | 'running' | 'pending';
   lastDurationMs?: number;
+  lastResult?: Record<string, unknown>;
+  runHistory?: JobRunHistoryEntry[];
   runCount: number;
   failCount: number;
 }
@@ -92,6 +101,85 @@ function StatusBadge({ status }: { status?: string }) {
       {icons[status]}
       {status}
     </span>
+  );
+}
+
+function PurgeHistorySparkline({
+  history,
+  windowMs,
+}: {
+  history: JobRunHistoryEntry[];
+  windowMs: number;
+}) {
+  const cutoff = Date.now() - windowMs;
+  const points = history
+    .filter((h) => h.at >= cutoff)
+    .map((h) => ({
+      at: h.at,
+      purged: typeof h.result?.purged === 'number' ? (h.result.purged as number) : 0,
+      failed: h.status === 'failed',
+    }));
+  if (points.length === 0) {
+    return <span className="text-[10px] text-muted-foreground">no history</span>;
+  }
+  const width = 84;
+  const height = 18;
+  const max = Math.max(1, ...points.map((p) => p.purged));
+  const step = points.length > 1 ? width / (points.length - 1) : 0;
+  const polyline = points
+    .map((p, i) => {
+      const x = points.length === 1 ? width / 2 : i * step;
+      const y = height - (p.purged / max) * (height - 2) - 1;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(' ');
+  return (
+    <svg width={width} height={height} className="inline-block align-middle" aria-hidden="true">
+      <polyline
+        points={polyline}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        className="text-[#4a90b8]"
+      />
+      {points.map((p, i) => {
+        const x = points.length === 1 ? width / 2 : i * step;
+        const y = height - (p.purged / max) * (height - 2) - 1;
+        return (
+          <circle
+            key={`${p.at}-${i}`}
+            cx={x}
+            cy={y}
+            r={1.5}
+            className={p.failed ? 'fill-[#c45a4a]' : 'fill-[#4a90b8]'}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+function PurgeHistoryStrip({ history }: { history: JobRunHistoryEntry[] }) {
+  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  const cutoff = Date.now() - sevenDaysMs;
+  const recent = history.filter((h) => h.at >= cutoff);
+  const total = recent.reduce((sum, h) => {
+    const purged = typeof h.result?.purged === 'number' ? (h.result.purged as number) : 0;
+    return sum + purged;
+  }, 0);
+  return (
+    <div className="flex items-center gap-3 mt-1.5 text-[10px] text-muted-foreground">
+      <span>
+        7-day total:{' '}
+        <span className="text-foreground font-medium">{total.toLocaleString()} rows</span>
+      </span>
+      <PurgeHistorySparkline history={history} windowMs={sevenDaysMs} />
+      <span className="opacity-70">
+        {recent.length} run{recent.length === 1 ? '' : 's'}
+      </span>
+    </div>
   );
 }
 
@@ -236,12 +324,24 @@ export default function JobsPage() {
                           <span>Next: {timeUntil(job.nextRunAt)}</span>
                         )}
                         <span>Duration: {formatMs(job.lastDurationMs)}</span>
+                        {typeof job.lastResult?.purged === 'number' && (
+                          <span>
+                            Last purged:{' '}
+                            <span className="text-foreground font-medium">
+                              {(job.lastResult.purged as number).toLocaleString()} rows
+                            </span>
+                          </span>
+                        )}
                         <span className="text-[#6b8f71]">{job.runCount} runs</span>
                         {job.failCount > 0 && (
                           <span className="text-[#c45a4a]">{job.failCount} failures</span>
                         )}
                         <span className="font-mono text-[9px] opacity-60">{job.type}</span>
                       </div>
+                      {job.runHistory &&
+                        job.runHistory.some((h) => typeof h.result?.purged === 'number') && (
+                          <PurgeHistoryStrip history={job.runHistory} />
+                        )}
                     </div>
                     {job.schedule === 'on_demand' && (
                       <button

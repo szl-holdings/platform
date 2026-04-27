@@ -52,6 +52,13 @@ export const NAMED_JOB_TYPES = {
 
 export type NamedJobType = (typeof NAMED_JOB_TYPES)[keyof typeof NAMED_JOB_TYPES];
 
+export interface JobRunHistoryEntry {
+  at: number;
+  status: 'completed' | 'failed';
+  durationMs?: number;
+  result?: Record<string, unknown>;
+}
+
 export interface JobScheduleEntry {
   type: NamedJobType;
   name: string;
@@ -62,9 +69,13 @@ export interface JobScheduleEntry {
   nextRunAt?: number;
   lastStatus?: 'completed' | 'failed' | 'running' | 'pending';
   lastDurationMs?: number;
+  lastResult?: Record<string, unknown>;
+  runHistory?: JobRunHistoryEntry[];
   runCount: number;
   failCount: number;
 }
+
+const RUN_HISTORY_LIMIT = 30;
 
 const jobRegistry = new Map<NamedJobType, JobScheduleEntry>();
 
@@ -102,7 +113,7 @@ registerEntry({ type: NAMED_JOB_TYPES.MESH_TELEMETRY_SCAN, name: "Agent Mesh Tel
 registerEntry({ type: NAMED_JOB_TYPES.STUCK_RUN_NOTIFY, name: "Stuck Run Notifier", description: "Runs every 5 minutes. Scans platform_workflow_runs for runs that have been in state='running' past the stuck threshold (default 10 minutes since startedAt) and pushes a one-time 'agent run stuck' alert to the run owner via Expo, deep-linking to /(shell)/intelligence/run-review. Idempotent via the alloy_run_failure_notifications dedup table — re-running the sweeper never duplicates an alert.", schedule: "hourly", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.ON_CALL_HANDOFF_NOTIFY, name: "On-Call Hand-off Notifier", description: "Runs every minute. Inspects on_call_schedules + on_call_shifts for upcoming hand-off boundaries (rotation slot edges, override start/end). Notifies the next on-call user N minutes before (per schedule.warningMinutes, default 30) and at the moment of hand-off. Idempotent via on_call_handoff_notifications dedup table. Uses dispatchToExternalChannels so email/SMS/Slack work per the recipient's notification_preferences.", schedule: "minutely" as JobScheduleEntry["schedule"], enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_LIVE_SIGNAL_REFRESH, name: "Daily Live Signal Refresh", description: "Rolls timestamps forward on the seeded firestorm_incidents, vessels_alerts, and vessels_events delay rows so the Innovation Layer always shows fresh-looking activity (within the last 24-48h). Also rotates one row per table — closing the oldest open record and re-opening the most-recently-resolved one — to give the feed visible motion across reloads. Idempotent and safe to run repeatedly.", schedule: "daily", enabled: true });
-registerEntry({ type: NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, name: "APEX Graph Snapshot Prune", description: "Deletes cortex_graph_snapshots rows whose expires_at is in the past. Each snapshot's expiry is set at insert time from CORTEX_SNAPSHOT_RETENTION_DAYS (default 30). Logs purged row count per run.", schedule: "daily", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, name: "CORTEX Graph Snapshot Prune", description: "Deletes cortex_graph_snapshots rows whose expires_at is in the past. Each snapshot's expiry is set at insert time from CORTEX_SNAPSHOT_RETENTION_DAYS (default 30). Logs purged row count per run.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.OT_ICS_STREAM_FEED, name: "OT/ICS Live Protocol Stream Feed", description: "Continuously ingests simulated Modbus/DNP3/S7 protocol frames, conversation rows, and rolling anomaly scores into the OT/ICS tables. Runs every 8 seconds so the decoder dashboard reflects live traffic without manual re-seeding. Replace the synthetic generators with real PCAP relay / partner SOC feed clients when a live source is available.", schedule: "continuous", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_MARKET_DATA_REFRESH, name: "Hourly Market Data Refresh", description: "Fetches delayed/EOD macro indicators (equity indices, FX rates, commodity prices, treasury yields) from Alpha Vantage via the market-data-adapter and warms the in-process LRU cache used by GET /lyte/market-indicators. Credentials are read from ALPHA_VANTAGE_API_KEY. Falls back gracefully to the built-in seed snapshot when the key is absent or the provider is rate-limited. Applies exponential backoff with up to 3 retries per API call.", schedule: "hourly", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_ONBOARDING_STALL_CHECK, name: "Daily Onboarding Stall Check", description: "Scans onboarding_wizard_state for organizations that are mid-onboarding (completed_at IS NULL, completed_steps > 0) and whose updated_at is older than a configurable threshold (ONBOARDING_STALL_THRESHOLD_DAYS env var, default 3 days). Sends in-app notifications and optional external alerts to super-admin and admin users listing the stalled organizations so they can follow up proactively.", schedule: "daily", enabled: true });
@@ -420,6 +431,13 @@ durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_EXECUTIVE_DIGEST, async (job) =>
 function updateRegistry(type: NamedJobType, update: Partial<JobScheduleEntry>) {
   const entry = jobRegistry.get(type);
   if (entry) jobRegistry.set(type, { ...entry, ...update });
+}
+
+function recordRunHistory(type: NamedJobType, entry: JobRunHistoryEntry) {
+  const existing = jobRegistry.get(type);
+  if (!existing) return;
+  const history = [...(existing.runHistory ?? []), entry].slice(-RUN_HISTORY_LIMIT);
+  jobRegistry.set(type, { ...existing, runHistory: history });
 }
 
 async function enqueueNamedJob(type: NamedJobType, payload: Record<string, unknown> = {}) {
@@ -2817,26 +2835,42 @@ durableJobQueue.register(NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, async (job
       .where(lt(cortexGraphSnapshotsTable.expiresAt, cutoff))
       .returning({ id: cortexGraphSnapshotsTable.id });
     const purged = deleted.length;
+    const durationMs = Date.now() - start;
     serverTelemetry.recordBusinessEvent({
       type: 'cortex_graph_snapshot_prune_completed',
       domain: 'cortex',
-      durationMs: Date.now() - start,
+      durationMs,
       success: true,
       metadata: { purged, cutoff: cutoff.toISOString() },
     });
     updateRegistry(NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, {
       lastStatus: 'completed',
-      lastDurationMs: Date.now() - start,
+      lastDurationMs: durationMs,
+      lastResult: { purged, cutoff: cutoff.toISOString() },
+      runCount:
+        (jobRegistry.get(NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE)?.runCount || 0) + 1,
+    });
+    recordRunHistory(NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, {
+      at: start,
+      status: 'completed',
+      durationMs,
+      result: { purged },
     });
     logger.info(
-      { jobId: job.id, purged, cutoff: cutoff.toISOString(), durationMs: Date.now() - start },
+      { jobId: job.id, purged, cutoff: cutoff.toISOString(), durationMs },
       'cortex_graph_snapshot_prune: complete',
     );
   } catch (err) {
+    const durationMs = Date.now() - start;
     updateRegistry(NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, {
       lastStatus: 'failed',
-      lastDurationMs: Date.now() - start,
+      lastDurationMs: durationMs,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE)?.failCount || 0) + 1,
+    });
+    recordRunHistory(NAMED_JOB_TYPES.CORTEX_GRAPH_SNAPSHOT_PRUNE, {
+      at: start,
+      status: 'failed',
+      durationMs,
     });
     logger.error({ err, jobId: job.id }, 'cortex_graph_snapshot_prune: failed');
     throw err;

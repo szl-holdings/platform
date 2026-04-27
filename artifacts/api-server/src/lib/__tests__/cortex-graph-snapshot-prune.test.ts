@@ -116,6 +116,18 @@ describe('cortex_graph_snapshot_prune', () => {
 
     const logEntry = loggerSpy.info.mock.calls.find((c) => c[1] === 'cortex_graph_snapshot_prune: complete');
     expect(logEntry?.[0].purged).toBe(3);
+
+    const { getJobRegistry } = await import('../scheduled-jobs');
+    const entry = getJobRegistry().find((e) => e.type === 'cortex_graph_snapshot_prune');
+    expect(entry).toBeDefined();
+    expect(entry?.lastStatus).toBe('completed');
+    expect(entry?.lastResult?.purged).toBe(3);
+    expect(typeof entry?.lastResult?.cutoff).toBe('string');
+    expect(entry?.runCount).toBe(1);
+    expect(entry?.runHistory?.length).toBe(1);
+    expect(entry?.runHistory?.[0]?.status).toBe('completed');
+    expect(entry?.runHistory?.[0]?.result?.purged).toBe(3);
+    expect(typeof entry?.runHistory?.[0]?.durationMs).toBe('number');
   });
 
   it('reports zero when no rows are eligible for prune', async () => {
@@ -126,6 +138,59 @@ describe('cortex_graph_snapshot_prune', () => {
     const event = recordBusinessEventSpy.mock.calls[0]?.[0];
     expect(event.success).toBe(true);
     expect(event.metadata.purged).toBe(0);
+
+    const { getJobRegistry } = await import('../scheduled-jobs');
+    const entry = getJobRegistry().find((e) => e.type === 'cortex_graph_snapshot_prune');
+    expect(entry?.lastResult?.purged).toBe(0);
+    expect(entry?.runHistory?.[entry.runHistory.length - 1]?.result?.purged).toBe(0);
+  });
+
+  it('appends to run history across multiple runs and caps growth', async () => {
+    for (let i = 0; i < 5; i++) {
+      _deletedQueue.push([{ id: i }]);
+      await runHandler({ id: `job-history-${i}`, payload: {} });
+    }
+
+    const { getJobRegistry } = await import('../scheduled-jobs');
+    const entry = getJobRegistry().find((e) => e.type === 'cortex_graph_snapshot_prune');
+    expect(entry?.runHistory?.length).toBe(5);
+    expect(entry?.runCount).toBe(5);
+    const purgedTotals = entry?.runHistory?.map((h) => h.result?.purged);
+    expect(purgedTotals).toEqual([1, 1, 1, 1, 1]);
+  });
+
+  it('records a failed entry in run history when the prune throws', async () => {
+    vi.resetModules();
+    vi.doMock('@szl-holdings/db', () => ({
+      cortexGraphSnapshotsTable: { id: {}, expiresAt: {} },
+      terraDistressPropertiesTable: { id: {}, status: {}, updatedAt: {} },
+      db: {
+        delete: () => ({
+          where: () => ({
+            returning: () => Promise.reject(new Error('history-fail')),
+          }),
+        }),
+        select: () => ({ from: () => ({ where: () => Promise.resolve([]) }) }),
+        update: () => ({ set: () => ({ where: () => Promise.resolve() }) }),
+      },
+    }));
+    const captured = new Map<string, (job: { id: string; payload: Record<string, unknown> }) => Promise<void>>();
+    const forge = await import('@szl-holdings/forge-runtime');
+    (forge.durableJobQueue.register as ReturnType<typeof vi.fn>).mockImplementation(
+      (type: string, fn: (job: { id: string; payload: Record<string, unknown> }) => Promise<void>) => {
+        captured.set(type, fn);
+      },
+    );
+    const mod = await import('../scheduled-jobs');
+    const handler = captured.get('cortex_graph_snapshot_prune')!;
+
+    await expect(handler({ id: 'job-fail-history', payload: {} })).rejects.toThrow('history-fail');
+
+    const entry = mod.getJobRegistry().find((e) => e.type === 'cortex_graph_snapshot_prune');
+    expect(entry?.lastStatus).toBe('failed');
+    expect(entry?.failCount).toBe(1);
+    const last = entry?.runHistory?.[entry.runHistory.length - 1];
+    expect(last?.status).toBe('failed');
   });
 
   it('rethrows DB errors so the durable scheduler retries', async () => {
