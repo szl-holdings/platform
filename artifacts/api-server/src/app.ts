@@ -768,6 +768,10 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 
   if (isServerError) {
     logger.error({ err, statusCode }, 'Unhandled server error');
+    // NOTE: Sentry.setupExpressErrorHandler (above) is the primary Sentry capture
+    // mechanism for errors that propagate through this handler. captureServerException
+    // is reserved for explicit use inside route try/catch blocks where an error is
+    // caught and handled without re-throwing — see docs/observability/request-tracing-runbook.md.
   } else {
     logger.warn({ err, statusCode }, 'Client error');
   }

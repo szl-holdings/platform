@@ -26,13 +26,72 @@ export function initServerSentry(): void {
     ],
     ignoreErrors: ['ECONNRESET', 'EPIPE', 'ETIMEDOUT'],
     beforeSend(event) {
+      // --- Scrub sensitive request headers ---
       if (event.request?.headers) {
         const sanitized = { ...event.request.headers };
-        delete sanitized.authorization;
-        delete sanitized.cookie;
-        delete sanitized['x-internal-token'];
+        const SCRUBBED_HEADERS = [
+          'authorization',
+          'cookie',
+          'x-internal-token',
+          'x-api-key',
+          'x-csrf-token',
+          'x-szl-correlation-id',
+          'set-cookie',
+          'proxy-authorization',
+        ];
+        for (const h of SCRUBBED_HEADERS) {
+          if (h in sanitized) sanitized[h] = '[REDACTED]';
+        }
         event.request.headers = sanitized;
       }
+
+      // --- Scrub sensitive body fields ---
+      if (event.request?.data && typeof event.request.data === 'object') {
+        const SCRUBBED_BODY_KEYS = new Set([
+          'password',
+          'currentPassword',
+          'newPassword',
+          'token',
+          'accessToken',
+          'access_token',
+          'refreshToken',
+          'refresh_token',
+          'idToken',
+          'id_token',
+          'apiKey',
+          'api_key',
+          'secret',
+          'clientSecret',
+          'client_secret',
+          'sessionToken',
+          'session_token',
+          'privateKey',
+          'private_key',
+          'webhookSecret',
+          'webhook_secret',
+          'ssn',
+          'creditCard',
+          'credit_card',
+          'cardNumber',
+          'card_number',
+          'cvv',
+          'pin',
+        ]);
+        const scrubValue = (v: unknown): unknown => {
+          if (v === null || typeof v !== 'object') return v;
+          if (Array.isArray(v)) return v.map(scrubValue);
+          return scrubObject(v as Record<string, unknown>);
+        };
+        const scrubObject = (obj: Record<string, unknown>): Record<string, unknown> => {
+          const out: Record<string, unknown> = {};
+          for (const [k, v] of Object.entries(obj)) {
+            out[k] = SCRUBBED_BODY_KEYS.has(k) ? '[REDACTED]' : scrubValue(v);
+          }
+          return out;
+        };
+        event.request.data = scrubObject(event.request.data as Record<string, unknown>);
+      }
+
       return event;
     },
   });
