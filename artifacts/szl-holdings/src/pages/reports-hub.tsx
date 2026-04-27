@@ -572,7 +572,6 @@ export default function ReportsHub() {
   const [distributeReportId, setDistributeReportId] = useState<string | null>(null);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [filters, setFilters] = useState<{ domain?: string; status?: string; search?: string }>({});
-
   const { data: statsData } = useStandardQuery({
     queryKey: ['report-stats'],
     queryFn: () => apiFetch('/reports/stats'),
