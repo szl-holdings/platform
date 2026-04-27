@@ -186,28 +186,31 @@ function OrderEntry({
   onSubmit: (d: any) => void;
   submitting: boolean;
 }) {
-  const [side, setSide] = useState<Side>('buy');
-  const [instrumentId, setInstrumentId] = useState<string>('');
-  const [orderType, setOrderType] = useState<OrderType>('market');
-  const [quantity, setQuantity] = useState('');
-  const [limitPrice, setLimitPrice] = useState('');
-  const [error, setError] = useState('');
+  const [orderForm, setOrderForm] = useState<{
+    side: Side;
+    instrumentId: string;
+    orderType: OrderType;
+    quantity: string;
+    limitPrice: string;
+    error: string;
+  }>({ side: 'buy', instrumentId: '', orderType: 'market', quantity: '', limitPrice: '', error: '' });
 
-  const selected = instruments.find((i) => String(i.id) === instrumentId);
+  const selected = instruments.find((i) => String(i.id) === orderForm.instrumentId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    const { side, instrumentId, orderType, quantity, limitPrice } = orderForm;
+    setOrderForm((f) => ({ ...f, error: '' }));
     if (!instrumentId) {
-      setError('Select an instrument');
+      setOrderForm((f) => ({ ...f, error: 'Select an instrument' }));
       return;
     }
     if (!quantity || parseFloat(quantity) <= 0) {
-      setError('Enter a valid quantity');
+      setOrderForm((f) => ({ ...f, error: 'Enter a valid quantity' }));
       return;
     }
     if (orderType === 'limit' && (!limitPrice || parseFloat(limitPrice) <= 0)) {
-      setError('Enter a limit price');
+      setOrderForm((f) => ({ ...f, error: 'Enter a limit price' }));
       return;
     }
     onSubmit({
@@ -217,14 +220,13 @@ function OrderEntry({
       quantity,
       limitPrice: orderType === 'limit' ? limitPrice : undefined,
     });
-    setQuantity('');
-    setLimitPrice('');
+    setOrderForm((f) => ({ ...f, quantity: '', limitPrice: '' }));
   };
 
   const notional =
-    selected && quantity
-      ? parseFloat(quantity) *
-        (orderType === 'limit' && limitPrice ? parseFloat(limitPrice) : selected.currentPrice)
+    selected && orderForm.quantity
+      ? parseFloat(orderForm.quantity) *
+        (orderForm.orderType === 'limit' && orderForm.limitPrice ? parseFloat(orderForm.limitPrice) : selected.currentPrice)
       : null;
 
   return (
@@ -237,11 +239,11 @@ function OrderEntry({
           <button
             key={s}
             type="button"
-            onClick={() => setSide(s)}
+            onClick={() => setOrderForm((f) => ({ ...f, side: s }))}
             className="py-2 text-[11px] font-semibold uppercase tracking-wide transition-colors"
             style={{
-              background: side === s ? (s === 'buy' ? `${GREEN}20` : `${RED}20`) : 'transparent',
-              color: side === s ? (s === 'buy' ? GREEN : RED) : TEXT.muted,
+              background: orderForm.side === s ? (s === 'buy' ? `${GREEN}20` : `${RED}20`) : 'transparent',
+              color: orderForm.side === s ? (s === 'buy' ? GREEN : RED) : TEXT.muted,
             }}
           >
             {s}
@@ -257,8 +259,8 @@ function OrderEntry({
           Instrument
         </label>
         <select
-          value={instrumentId}
-          onChange={(e) => setInstrumentId(e.target.value)}
+          value={orderForm.instrumentId}
+          onChange={(e) => setOrderForm((f) => ({ ...f, instrumentId: e.target.value }))}
           className="w-full rounded-lg px-3 py-2 text-[12px] outline-none"
           style={{
             background: 'rgba(255,255,255,0.04)',
@@ -306,12 +308,12 @@ function OrderEntry({
           <button
             key={ot}
             type="button"
-            onClick={() => setOrderType(ot)}
+            onClick={() => setOrderForm((f) => ({ ...f, orderType: ot }))}
             className="py-1.5 rounded-lg text-[10px] font-medium capitalize transition-colors"
             style={{
-              background: orderType === ot ? `${ACCENT}18` : 'rgba(255,255,255,0.04)',
-              color: orderType === ot ? ACCENT : TEXT.muted,
-              border: `1px solid ${orderType === ot ? `${ACCENT}40` : BORDER.muted}`,
+              background: orderForm.orderType === ot ? `${ACCENT}18` : 'rgba(255,255,255,0.04)',
+              color: orderForm.orderType === ot ? ACCENT : TEXT.muted,
+              border: `1px solid ${orderForm.orderType === ot ? `${ACCENT}40` : BORDER.muted}`,
             }}
           >
             {ot}
@@ -328,8 +330,8 @@ function OrderEntry({
         </label>
         <input
           type="number"
-          value={quantity}
-          onChange={(e) => setQuantity(e.target.value)}
+          value={orderForm.quantity}
+          onChange={(e) => setOrderForm((f) => ({ ...f, quantity: e.target.value }))}
           placeholder="e.g. 5"
           min="0.1"
           step="0.1"
@@ -342,7 +344,7 @@ function OrderEntry({
         />
       </div>
 
-      {orderType === 'limit' && (
+      {orderForm.orderType === 'limit' && (
         <div>
           <label
             className="block text-[10px] uppercase tracking-wider mb-1.5"
@@ -352,8 +354,8 @@ function OrderEntry({
           </label>
           <input
             type="number"
-            value={limitPrice}
-            onChange={(e) => setLimitPrice(e.target.value)}
+            value={orderForm.limitPrice}
+            onChange={(e) => setOrderForm((f) => ({ ...f, limitPrice: e.target.value }))}
             placeholder={selected ? String(Math.round(selected.currentPrice)) : 'Price'}
             min="0.01"
             step="0.01"
@@ -387,14 +389,14 @@ function OrderEntry({
         </div>
       )}
 
-      {error && (
+      {orderForm.error && (
         <div
           className="rounded-lg px-3 py-2 flex items-center gap-2"
           style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}
         >
           <AlertCircle className="w-3.5 h-3.5 shrink-0" style={{ color: RED }} />
           <span className="text-[11px]" style={{ color: RED }}>
-            {error}
+            {orderForm.error}
           </span>
         </div>
       )}
@@ -404,14 +406,14 @@ function OrderEntry({
         disabled={submitting}
         className="py-2.5 rounded-lg text-[12px] font-semibold uppercase tracking-wide transition-all disabled:opacity-50"
         style={{
-          background: side === 'buy' ? `${GREEN}22` : `${RED}22`,
-          color: side === 'buy' ? GREEN : RED,
-          border: `1px solid ${side === 'buy' ? `${GREEN}40` : `${RED}40`}`,
+          background: orderForm.side === 'buy' ? `${GREEN}22` : `${RED}22`,
+          color: orderForm.side === 'buy' ? GREEN : RED,
+          border: `1px solid ${orderForm.side === 'buy' ? `${GREEN}40` : `${RED}40`}`,
         }}
       >
         {submitting
           ? 'Submitting…'
-          : `${orderType === 'market' ? 'Market' : 'Limit'} ${side.toUpperCase()}`}
+          : `${orderForm.orderType === 'market' ? 'Market' : 'Limit'} ${orderForm.side.toUpperCase()}`}
       </button>
     </form>
   );

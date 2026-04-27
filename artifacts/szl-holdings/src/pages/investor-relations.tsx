@@ -53,12 +53,9 @@ const milestones = [
 ];
 
 export default function InvestorRelationsPage() {
-  const [email, setEmail] = useState("");
-  const [company, setCompany] = useState("");
-  const [message, setMessage] = useState("");
+  const [form, setForm] = useState({ email: "", company: "", message: "", error: "" });
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
 
   const __pageMeta = usePageMeta({
     title: "Investor Relations \u2014 SZL Holdings",
@@ -67,13 +64,13 @@ export default function InvestorRelationsPage() {
     canonical: "https://szlholdings.com/investor-relations",
   });
 
-  const canSubmit = useMemo(() => email.trim().length > 3, [email]);
+  const canSubmit = useMemo(() => form.email.trim().length > 3, [form.email]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!canSubmit) return;
     setSubmitting(true);
-    setError("");
+    setForm((f) => ({ ...f, error: "" }));
     try {
       const res = await fetch("/api/holdings/inquiries", {
         method: "POST",
@@ -81,12 +78,12 @@ export default function InvestorRelationsPage() {
         body: JSON.stringify({
           intent: "investor",
           source: "investor_relations",
-          name: company.trim() || "Investor / Capital Inquiry",
-          email: email.trim(),
+          name: form.company.trim() || "Investor / Capital Inquiry",
+          email: form.email.trim(),
           subject: "Capital / Investor Relations Inquiry",
           message:
-            message.trim() ||
-            `Capital inquiry from ${email.trim()}${company.trim() ? ` (${company.trim()})` : ""}.`,
+            form.message.trim() ||
+            `Capital inquiry from ${form.email.trim()}${form.company.trim() ? ` (${form.company.trim()})` : ""}.`,
         }),
       });
 
@@ -95,11 +92,9 @@ export default function InvestorRelationsPage() {
       }
 
       setSent(true);
-      setEmail("");
-      setCompany("");
-      setMessage("");
+      setForm({ email: "", company: "", message: "", error: "" });
     } catch {
-      setError("Unable to submit right now. Please email hello@szlholdings.com directly.");
+      setForm((f) => ({ ...f, error: "Unable to submit right now. Please email hello@szlholdings.com directly." }));
     } finally {
       setSubmitting(false);
     }
@@ -263,8 +258,8 @@ export default function InvestorRelationsPage() {
                           Email
                         </label>
                         <input
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          value={form.email}
+                          onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                           type="email"
                           required
                           className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-white/25"
@@ -276,8 +271,8 @@ export default function InvestorRelationsPage() {
                           Firm or company
                         </label>
                         <input
-                          value={company}
-                          onChange={(e) => setCompany(e.target.value)}
+                          value={form.company}
+                          onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
                           className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-white/25"
                           placeholder="Optional"
                         />
@@ -287,14 +282,14 @@ export default function InvestorRelationsPage() {
                           What are you looking for?
                         </label>
                         <textarea
-                          value={message}
-                          onChange={(e) => setMessage(e.target.value)}
+                          value={form.message}
+                          onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
                           rows={5}
                           className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-white/25"
                           placeholder="Bank / SBA conversation, angel materials, design-partner proposal, etc."
                         />
                       </div>
-                      {error ? <p className="text-sm text-[#c45a4a]">{error}</p> : null}
+                      {form.error ? <p className="text-sm text-[#c45a4a]">{form.error}</p> : null}
                       <button
                         type="submit"
                         disabled={!canSubmit || submitting}

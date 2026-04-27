@@ -737,15 +737,16 @@ function GeneratorPanel({
   const [pillarId, setPillarId] = useState<number | ''>('');
   const [saving, setSaving] = useState(false);
   const [generatedSlides, setGeneratedSlides] = useState<Slide[]>([]);
-  const [importBlock, setImportBlock] = useState('');
-  const [shortCaption, setShortCaption] = useState('');
-  const [longCaption, setLongCaption] = useState('');
-  const [xThread, setXThread] = useState('');
-  const [instagramCaption, setInstagramCaption] = useState('');
+  const [generatedCaptions, setGeneratedCaptions] = useState({
+    importBlock: '',
+    shortCaption: '',
+    longCaption: '',
+    xThread: '',
+    instagramCaption: '',
+  });
   const [activeTab, setActiveTab] = useState<'slides' | 'captions' | 'import'>('slides');
   const [selectedCtaIndex, setSelectedCtaIndex] = useState(0);
-  const [customCtaText, setCustomCtaText] = useState('');
-  const [customCtaUrl, setCustomCtaUrl] = useState('');
+  const [customCta, setCustomCta] = useState({ text: '', url: '' });
 
   const template = CAROUSEL_TEMPLATES.find((t) => t.id === selectedTemplate)!;
   const pillar = pillars.find((p) => p.id === Number(pillarId));
@@ -755,20 +756,20 @@ function GeneratorPanel({
     : DEFAULT_TOPIC_IDEAS;
 
   const selectedCta = CTA_OPTIONS[selectedCtaIndex];
-  const ctaText = selectedCta.label === 'Custom CTA' ? customCtaText : selectedCta.text;
-  const ctaUrl = selectedCta.label === 'Custom CTA' ? customCtaUrl : selectedCta.url;
+  const ctaText = selectedCta.label === 'Custom CTA' ? customCta.text : selectedCta.text;
+  const ctaUrl = selectedCta.label === 'Custom CTA' ? customCta.url : selectedCta.url;
 
   function generate() {
     const slides = generateSlides(selectedTemplate, topic, pillar?.name || 'Business');
     setGeneratedSlides(slides);
     const hook = template.hook.replace(/\[.*?\]/g, topic || '[TOPIC]');
-    setImportBlock(buildImportBlock(slides, topic));
-    setShortCaption(buildLinkedInShortCaption(topic, hook, ctaText || template.cta));
-    setLongCaption(
-      buildLinkedInLongCaption(topic, pillar?.name || 'Business', hook, ctaText || template.cta),
-    );
-    setXThread(buildXThread(topic, slides));
-    setInstagramCaption(buildInstagramCaption(topic, hook, template.hashtags));
+    setGeneratedCaptions({
+      importBlock: buildImportBlock(slides, topic),
+      shortCaption: buildLinkedInShortCaption(topic, hook, ctaText || template.cta),
+      longCaption: buildLinkedInLongCaption(topic, pillar?.name || 'Business', hook, ctaText || template.cta),
+      xThread: buildXThread(topic, slides),
+      instagramCaption: buildInstagramCaption(topic, hook, template.hashtags),
+    });
     setStep('preview');
   }
 
@@ -784,12 +785,12 @@ function GeneratorPanel({
         topic,
         hook,
         pillarId: pillarId || null,
-        linkedinShortCaption: shortCaption,
-        linkedinLongCaption: longCaption,
-        xThreadAdaptation: xThread,
-        instagramCaption,
+        linkedinShortCaption: generatedCaptions.shortCaption,
+        linkedinLongCaption: generatedCaptions.longCaption,
+        xThreadAdaptation: generatedCaptions.xThread,
+        instagramCaption: generatedCaptions.instagramCaption,
         visualDirectionNotes: `Template: ${template.name}. Hashtags: ${template.hashtags.join(', ')}. Destination: ${ctaUrl || template.destinationUrl}. Use brand colors (gold #d4a054, dark #070a10). Clean layout, minimal text per slide. Recommended PDF title: "${topic} — ${template.name} by SZL Holdings".`,
-        aiCarouselsImportBlock: importBlock,
+        aiCarouselsImportBlock: generatedCaptions.importBlock,
         ctaText: ctaText || template.cta,
         ctaUrl: ctaUrl || template.destinationUrl,
         status: 'draft',
@@ -1074,8 +1075,8 @@ function GeneratorPanel({
               }}
             >
               <input
-                value={customCtaText}
-                onChange={(e) => setCustomCtaText(e.target.value)}
+                value={customCta.text}
+                onChange={(e) => setCustomCta((c) => ({ ...c, text: e.target.value }))}
                 placeholder="Custom CTA text…"
                 style={{
                   padding: '0.5rem 0.75rem',
@@ -1087,8 +1088,8 @@ function GeneratorPanel({
                 }}
               />
               <input
-                value={customCtaUrl}
-                onChange={(e) => setCustomCtaUrl(e.target.value)}
+                value={customCta.url}
+                onChange={(e) => setCustomCta((c) => ({ ...c, url: e.target.value }))}
                 placeholder="/destination-url"
                 style={{
                   padding: '0.5rem 0.75rem',
@@ -1335,10 +1336,10 @@ function GeneratorPanel({
           {activeTab === 'captions' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {[
-                { label: 'LinkedIn — Short Caption', text: shortCaption, platform: 'LinkedIn' },
-                { label: 'LinkedIn — Long Caption', text: longCaption, platform: 'LinkedIn' },
-                { label: 'X / Threads Adaptation', text: xThread, platform: 'X' },
-                { label: 'Instagram Caption', text: instagramCaption, platform: 'Instagram' },
+                { label: 'LinkedIn — Short Caption', text: generatedCaptions.shortCaption, platform: 'LinkedIn' },
+                { label: 'LinkedIn — Long Caption', text: generatedCaptions.longCaption, platform: 'LinkedIn' },
+                { label: 'X / Threads Adaptation', text: generatedCaptions.xThread, platform: 'X' },
+                { label: 'Instagram Caption', text: generatedCaptions.instagramCaption, platform: 'Instagram' },
               ].map(({ label, text, platform }) => (
                 <div
                   key={label}
@@ -1446,7 +1447,7 @@ function GeneratorPanel({
                     Copy this text and paste it into aiCarousels → Import → Text Import
                   </div>
                 </div>
-                <CopyButton text={importBlock} label="Copy Import Block" />
+                <CopyButton text={generatedCaptions.importBlock} label="Copy Import Block" />
               </div>
               <div
                 style={{
@@ -1466,7 +1467,7 @@ function GeneratorPanel({
                     margin: 0,
                   }}
                 >
-                  {importBlock}
+                  {generatedCaptions.importBlock}
                 </pre>
               </div>
               <div

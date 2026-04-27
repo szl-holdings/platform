@@ -2481,27 +2481,24 @@ interface AuditGroup {
 
 function AuditPanel() {
   const [search, setSearch] = useState('');
-  const [action, setAction] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [tenantFilter, setTenantFilter] = useState('');
+  const [auditFilter, setAuditFilter] = useState({ action: '', dateFrom: '', dateTo: '', tenantFilter: '' });
   const [selectedEntry, setSelectedEntry] = useState<AuditEntry | null>(null);
   const [exporting, setExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
-  const isAllTenants = !tenantFilter;
+  const isAllTenants = !auditFilter.tenantFilter;
 
   const params = new URLSearchParams();
   if (search) params.set('search', search);
-  if (action) params.set('action', action);
-  if (dateFrom) params.set('dateFrom', dateFrom);
-  if (dateTo) params.set('dateTo', dateTo);
-  if (tenantFilter) params.set('orgId', tenantFilter);
+  if (auditFilter.action) params.set('action', auditFilter.action);
+  if (auditFilter.dateFrom) params.set('dateFrom', auditFilter.dateFrom);
+  if (auditFilter.dateTo) params.set('dateTo', auditFilter.dateTo);
+  if (auditFilter.tenantFilter) params.set('orgId', auditFilter.tenantFilter);
   params.set('limit', '100');
 
   const { data, isLoading, refetch } = useStandardQuery<{ logs: AuditEntry[]; total: number }>({
-    queryKey: ['admin-audit', search, action, dateFrom, dateTo, tenantFilter],
+    queryKey: ['admin-audit', search, auditFilter.action, auditFilter.dateFrom, auditFilter.dateTo, auditFilter.tenantFilter],
     queryFn: () => adminFetch(`/admin/audit-log?${params}`),
   });
 
@@ -2610,19 +2607,19 @@ function AuditPanel() {
           />
         </div>
         <input
-          value={action}
-          onChange={(e) => setAction(e.target.value)}
+          value={auditFilter.action}
+          onChange={(e) => setAuditFilter((f) => ({ ...f, action: e.target.value }))}
           placeholder="Filter action..."
           className="px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
         />
         <div className="relative">
           <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
           <select
-            value={tenantFilter}
-            onChange={(e) => setTenantFilter(e.target.value)}
+            value={auditFilter.tenantFilter}
+            onChange={(e) => setAuditFilter((f) => ({ ...f, tenantFilter: e.target.value }))}
             className={cn(
               'w-full pl-9 pr-3 py-2 bg-background border rounded-lg text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 appearance-none',
-              tenantFilter ? 'border-primary/50 text-foreground font-medium' : 'border-border',
+              auditFilter.tenantFilter ? 'border-primary/50 text-foreground font-medium' : 'border-border',
             )}
           >
             <option value="">All Tenants</option>
@@ -2635,27 +2632,27 @@ function AuditPanel() {
         </div>
         <input
           type="date"
-          value={dateFrom}
-          onChange={(e) => setDateFrom(e.target.value)}
+          value={auditFilter.dateFrom}
+          onChange={(e) => setAuditFilter((f) => ({ ...f, dateFrom: e.target.value }))}
           className="px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
         />
         <input
           type="date"
-          value={dateTo}
-          onChange={(e) => setDateTo(e.target.value)}
+          value={auditFilter.dateTo}
+          onChange={(e) => setAuditFilter((f) => ({ ...f, dateTo: e.target.value }))}
           className="px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
         />
       </div>
-      {tenantFilter && (
+      {auditFilter.tenantFilter && (
         <div className="flex items-center gap-2 text-xs text-primary">
           <Building2 className="w-3.5 h-3.5" />
           <span className="font-medium">
             Showing events for:{' '}
-            {tenantsData?.tenants.find((t) => String(t.id) === tenantFilter)?.name ??
+            {tenantsData?.tenants.find((t) => String(t.id) === auditFilter.tenantFilter)?.name ??
               'selected tenant'}
           </span>
           <button
-            onClick={() => setTenantFilter('')}
+            onClick={() => setAuditFilter((f) => ({ ...f, tenantFilter: '' }))}
             className="ml-auto text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
           >
             <X className="w-3 h-3" /> Clear

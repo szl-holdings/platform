@@ -28,9 +28,7 @@ const audiences = [
 ];
 
 export function ContactCTA() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
+  const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -282,8 +280,8 @@ export function ContactCTA() {
                     </label>
                     <input
                       type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      value={form.name}
+                      onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                       required
                       style={inputStyle}
                       placeholder="Your name"
@@ -312,8 +310,8 @@ export function ContactCTA() {
                     </label>
                     <input
                       type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={form.email}
+                      onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                       required
                       style={inputStyle}
                       placeholder="your@email.com"
@@ -342,8 +340,8 @@ export function ContactCTA() {
                     Message
                   </label>
                   <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    value={form.message}
+                    onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
                     required
                     rows={4}
                     style={{ ...inputStyle, resize: 'none' }}

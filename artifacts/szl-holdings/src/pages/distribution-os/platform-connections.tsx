@@ -216,9 +216,7 @@ const AUTH_LABELS: Record<string, string> = {
 
 function ConnectModal({ platform, onClose }: { platform: Platform; onClose: () => void }) {
   const [step, setStep] = useState<'info' | 'credentials' | 'success'>('info');
-  const [apiKey, setApiKey] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [credentials, setCredentials] = useState({ apiKey: '', username: '', password: '' });
   const [connecting, setConnecting] = useState(false);
 
   async function connect() {
@@ -401,8 +399,8 @@ function ConnectModal({ platform, onClose }: { platform: Platform; onClose: () =
                   </label>
                   <input
                     type="password"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
+                    value={credentials.apiKey}
+                    onChange={(e) => setCredentials((c) => ({ ...c, apiKey: e.target.value }))}
                     placeholder={
                       platform.authType === 'api-key' ? 'Enter API key...' : 'Enter bearer token...'
                     }
@@ -435,8 +433,8 @@ function ConnectModal({ platform, onClose }: { platform: Platform; onClose: () =
                       Username
                     </label>
                     <input
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
+                      value={credentials.username}
+                      onChange={(e) => setCredentials((c) => ({ ...c, username: e.target.value }))}
                       placeholder="Enter username..."
                       style={{
                         width: '100%',
@@ -465,8 +463,8 @@ function ConnectModal({ platform, onClose }: { platform: Platform; onClose: () =
                     </label>
                     <input
                       type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      value={credentials.password}
+                      onChange={(e) => setCredentials((c) => ({ ...c, password: e.target.value }))}
                       placeholder="Enter app password..."
                       style={{
                         width: '100%',
@@ -544,7 +542,7 @@ function ConnectModal({ platform, onClose }: { platform: Platform; onClose: () =
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               <button
                 onClick={connect}
-                disabled={connecting || (!apiKey && !username)}
+                disabled={connecting || (!credentials.apiKey && !credentials.username)}
                 style={{
                   flex: 1,
                   padding: '0.625rem',

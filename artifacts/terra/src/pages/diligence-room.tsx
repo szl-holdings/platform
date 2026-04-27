@@ -202,17 +202,11 @@ function EvidenceCard({
   const [expanded, setExpanded] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [citationOpen, setCitationOpen] = useState(false);
-  const [citRef, setCitRef] = useState('');
-  const [citPage, setCitPage] = useState('');
-  const [citExcerpt, setCitExcerpt] = useState('');
-  const [citUrl, setCitUrl] = useState('');
+  const [newCit, setNewCit] = useState({ ref: '', page: '', excerpt: '', url: '' });
   const [citBusy, setCitBusy] = useState(false);
   const [citErr, setCitErr] = useState<string | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editRef, setEditRef] = useState('');
-  const [editPage, setEditPage] = useState('');
-  const [editExcerpt, setEditExcerpt] = useState('');
-  const [editUrl, setEditUrl] = useState('');
+  const [editCit, setEditCit] = useState({ ref: '', page: '', excerpt: '', url: '' });
   const [editBusy, setEditBusy] = useState(false);
   const [editErr, setEditErr] = useState<string | null>(null);
   const [removeConfirm, setRemoveConfirm] = useState<number | null>(null);
@@ -227,20 +221,17 @@ function EvidenceCard({
     setCitFieldErrors({});
     setCitBusy(true);
     try {
-      const pageNum = citPage.trim() ? Number(citPage) : undefined;
+      const pageNum = newCit.page.trim() ? Number(newCit.page) : undefined;
       if (pageNum !== undefined && (!Number.isFinite(pageNum) || pageNum < 0)) {
         throw new Error('Page must be a non-negative number');
       }
       await onAddCitation({
-        ref: citRef.trim(),
+        ref: newCit.ref.trim(),
         page: pageNum,
-        excerpt: citExcerpt.trim(),
-        url: citUrl.trim() || undefined,
+        excerpt: newCit.excerpt.trim(),
+        url: newCit.url.trim() || undefined,
       });
-      setCitRef('');
-      setCitPage('');
-      setCitExcerpt('');
-      setCitUrl('');
+      setNewCit({ ref: '', page: '', excerpt: '', url: '' });
       setCitationOpen(false);
     } catch (err) {
       if (err instanceof ValidationError) {
@@ -455,8 +446,8 @@ function EvidenceCard({
               <div className="grid grid-cols-3 gap-2">
                 <div className="col-span-2">
                   <input
-                    value={citRef}
-                    onChange={(e) => setCitRef(e.target.value)}
+                    value={newCit.ref}
+                    onChange={(e) => setNewCit((c) => ({ ...c, ref: e.target.value }))}
                     placeholder="Reference (e.g. Schedule B-II §4)"
                     className="w-full px-2 py-1 text-[11px] rounded"
                     style={{
@@ -469,8 +460,8 @@ function EvidenceCard({
                 </div>
                 <div>
                   <input
-                    value={citPage}
-                    onChange={(e) => setCitPage(e.target.value)}
+                    value={newCit.page}
+                    onChange={(e) => setNewCit((c) => ({ ...c, page: e.target.value }))}
                     placeholder="Page"
                     inputMode="numeric"
                     className="w-full px-2 py-1 text-[11px] rounded"
@@ -485,8 +476,8 @@ function EvidenceCard({
               </div>
               <div>
                 <textarea
-                  value={citExcerpt}
-                  onChange={(e) => setCitExcerpt(e.target.value)}
+                  value={newCit.excerpt}
+                  onChange={(e) => setNewCit((c) => ({ ...c, excerpt: e.target.value }))}
                   placeholder="Excerpt / blockquote text"
                   rows={2}
                   className="w-full px-2 py-1 text-[11px] rounded"
@@ -500,8 +491,8 @@ function EvidenceCard({
               </div>
               <div>
                 <input
-                  value={citUrl}
-                  onChange={(e) => setCitUrl(e.target.value)}
+                  value={newCit.url}
+                  onChange={(e) => setNewCit((c) => ({ ...c, url: e.target.value }))}
                   placeholder="Source URL (optional)"
                   className="w-full px-2 py-1 text-[11px] rounded"
                   style={{
@@ -520,7 +511,7 @@ function EvidenceCard({
               )}
               <div className="flex gap-2">
                 <button
-                  disabled={citBusy || citRef.trim().length < 1 || citExcerpt.trim().length < 1}
+                  disabled={citBusy || newCit.ref.trim().length < 1 || newCit.excerpt.trim().length < 1}
                   onClick={submitCitation}
                   className="flex-1 py-1 text-[10px] font-semibold rounded disabled:opacity-50"
                   style={{ background: ACCENT, color: '#0a0f0c' }}
@@ -560,8 +551,8 @@ function EvidenceCard({
                 >
                   <div className="grid grid-cols-3 gap-2">
                     <input
-                      value={editRef}
-                      onChange={(e) => setEditRef(e.target.value)}
+                      value={editCit.ref}
+                      onChange={(e) => setEditCit((c) => ({ ...c, ref: e.target.value }))}
                       placeholder="Reference"
                       className="col-span-2 px-2 py-1 text-[11px] rounded"
                       style={{
@@ -571,8 +562,8 @@ function EvidenceCard({
                       }}
                     />
                     <input
-                      value={editPage}
-                      onChange={(e) => setEditPage(e.target.value)}
+                      value={editCit.page}
+                      onChange={(e) => setEditCit((c) => ({ ...c, page: e.target.value }))}
                       placeholder="Page"
                       inputMode="numeric"
                       className="px-2 py-1 text-[11px] rounded"
@@ -584,8 +575,8 @@ function EvidenceCard({
                     />
                   </div>
                   <textarea
-                    value={editExcerpt}
-                    onChange={(e) => setEditExcerpt(e.target.value)}
+                    value={editCit.excerpt}
+                    onChange={(e) => setEditCit((c) => ({ ...c, excerpt: e.target.value }))}
                     placeholder="Excerpt / blockquote text"
                     rows={2}
                     className="w-full px-2 py-1 text-[11px] rounded"
@@ -596,8 +587,8 @@ function EvidenceCard({
                     }}
                   />
                   <input
-                    value={editUrl}
-                    onChange={(e) => setEditUrl(e.target.value)}
+                    value={editCit.url}
+                    onChange={(e) => setEditCit((c) => ({ ...c, url: e.target.value }))}
                     placeholder="Source URL (optional)"
                     className="w-full px-2 py-1 text-[11px] rounded"
                     style={{
@@ -613,22 +604,22 @@ function EvidenceCard({
                   )}
                   <div className="flex gap-2">
                     <button
-                      disabled={editBusy || editRef.trim().length < 1 || editExcerpt.trim().length < 1}
+                      disabled={editBusy || editCit.ref.trim().length < 1 || editCit.excerpt.trim().length < 1}
                       onClick={async (e) => {
                         e.stopPropagation();
                         if (!onEditCitation) return;
                         setEditErr(null);
                         setEditBusy(true);
                         try {
-                          const pageNum = editPage.trim() ? Number(editPage) : undefined;
+                          const pageNum = editCit.page.trim() ? Number(editCit.page) : undefined;
                           if (pageNum !== undefined && (!Number.isFinite(pageNum) || pageNum < 0)) {
                             throw new Error('Page must be a non-negative number');
                           }
                           await onEditCitation(i, {
-                            ref: editRef.trim(),
+                            ref: editCit.ref.trim(),
                             page: pageNum,
-                            excerpt: editExcerpt.trim(),
-                            url: editUrl.trim() || undefined,
+                            excerpt: editCit.excerpt.trim(),
+                            url: editCit.url.trim() || undefined,
                           });
                           setEditingIndex(null);
                         } catch (err) {
@@ -717,10 +708,7 @@ function EvidenceCard({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setEditRef(cit.ref ?? '');
-                          setEditPage(cit.page != null ? String(cit.page) : '');
-                          setEditExcerpt(cit.excerpt ?? '');
-                          setEditUrl(cit.url ?? '');
+                          setEditCit({ ref: cit.ref ?? '', page: cit.page != null ? String(cit.page) : '', excerpt: cit.excerpt ?? '', url: cit.url ?? '' });
                           setEditErr(null);
                           setEditingIndex(i);
                           setRemoveConfirm(null);
@@ -775,11 +763,7 @@ function EvidenceCard({
 
 function NewMatterForm({ onCreated }: { onCreated: (id: string) => void }) {
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState('');
-  const [borough, setBorough] = useState('');
-  const [targetCloseDate, setTargetCloseDate] = useState('');
-  const [stage, setStage] = useState('pre_diligence');
-  const [ownerName, setOwnerName] = useState('');
+  const [matterForm, setMatterForm] = useState({ title: '', borough: '', targetCloseDate: '', stage: 'pre_diligence', ownerName: '' });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -788,19 +772,16 @@ function NewMatterForm({ onCreated }: { onCreated: (id: string) => void }) {
     setBusy(true);
     try {
       const r = await createMatter({
-        title,
-        borough: borough || undefined,
-        targetCloseDate: targetCloseDate || undefined,
-        stage,
-        ownerName: ownerName || undefined,
+        title: matterForm.title,
+        borough: matterForm.borough || undefined,
+        targetCloseDate: matterForm.targetCloseDate || undefined,
+        stage: matterForm.stage,
+        ownerName: matterForm.ownerName || undefined,
       });
       if (r?.matter?.id) {
         onCreated(r.matter.id);
         setOpen(false);
-        setTitle('');
-        setBorough('');
-        setTargetCloseDate('');
-        setOwnerName('');
+        setMatterForm({ title: '', borough: '', targetCloseDate: '', stage: 'pre_diligence', ownerName: '' });
       }
     } catch (e) {
       setErr((e as Error).message);
@@ -826,8 +807,8 @@ function NewMatterForm({ onCreated }: { onCreated: (id: string) => void }) {
       style={{ background: 'rgba(64,133,106,0.06)', border: `1px solid ${ACCENT}30` }}
     >
       <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        value={matterForm.title}
+        onChange={(e) => setMatterForm((f) => ({ ...f, title: e.target.value }))}
         placeholder="Matter title (e.g. 245 Park — Acquisition)"
         className="w-full px-2 py-1 text-[11px] rounded"
         style={{
@@ -838,8 +819,8 @@ function NewMatterForm({ onCreated }: { onCreated: (id: string) => void }) {
       />
       <div className="grid grid-cols-2 gap-2">
         <input
-          value={borough}
-          onChange={(e) => setBorough(e.target.value)}
+          value={matterForm.borough}
+          onChange={(e) => setMatterForm((f) => ({ ...f, borough: e.target.value }))}
           placeholder="Borough"
           className="px-2 py-1 text-[11px] rounded"
           style={{
@@ -849,8 +830,8 @@ function NewMatterForm({ onCreated }: { onCreated: (id: string) => void }) {
           }}
         />
         <input
-          value={targetCloseDate}
-          onChange={(e) => setTargetCloseDate(e.target.value)}
+          value={matterForm.targetCloseDate}
+          onChange={(e) => setMatterForm((f) => ({ ...f, targetCloseDate: e.target.value }))}
           placeholder="Target close YYYY-MM-DD"
           className="px-2 py-1 text-[11px] rounded"
           style={{
@@ -862,8 +843,8 @@ function NewMatterForm({ onCreated }: { onCreated: (id: string) => void }) {
       </div>
       <div className="grid grid-cols-2 gap-2">
         <select
-          value={stage}
-          onChange={(e) => setStage(e.target.value)}
+          value={matterForm.stage}
+          onChange={(e) => setMatterForm((f) => ({ ...f, stage: e.target.value }))}
           className="px-2 py-1 text-[11px] rounded"
           style={{
             background: 'rgba(0,0,0,0.3)',
@@ -880,8 +861,8 @@ function NewMatterForm({ onCreated }: { onCreated: (id: string) => void }) {
           <option value="final_approval">IC Sign-Off</option>
         </select>
         <input
-          value={ownerName}
-          onChange={(e) => setOwnerName(e.target.value)}
+          value={matterForm.ownerName}
+          onChange={(e) => setMatterForm((f) => ({ ...f, ownerName: e.target.value }))}
           placeholder="Owner (optional)"
           className="px-2 py-1 text-[11px] rounded"
           style={{
@@ -898,7 +879,7 @@ function NewMatterForm({ onCreated }: { onCreated: (id: string) => void }) {
       )}
       <div className="flex gap-2">
         <button
-          disabled={busy || title.length < 3}
+          disabled={busy || matterForm.title.length < 3}
           onClick={submit}
           className="flex-1 py-1 text-[10px] font-semibold rounded disabled:opacity-50"
           style={{ background: ACCENT, color: '#0a0f0c' }}
@@ -919,10 +900,7 @@ function NewMatterForm({ onCreated }: { onCreated: (id: string) => void }) {
 
 function AddEvidenceForm({ matterId, onAdded }: { matterId: string; onAdded: () => void }) {
   const [open, setOpen] = useState(false);
-  const [category, setCategory] = useState('title');
-  const [label, setLabel] = useState('');
-  const [summary, setSummary] = useState('');
-  const [source, setSource] = useState('');
+  const [evidenceForm, setEvidenceForm] = useState({ category: 'title', label: '', summary: '', source: '' });
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -935,17 +913,15 @@ function AddEvidenceForm({ matterId, onAdded }: { matterId: string; onAdded: () 
     try {
       await uploadEvidence(matterId, {
         file,
-        category,
-        label,
-        source: source || undefined,
-        summary: summary || undefined,
+        category: evidenceForm.category,
+        label: evidenceForm.label,
+        source: evidenceForm.source || undefined,
+        summary: evidenceForm.summary || undefined,
         status: 'pending',
         confidence: 0.7,
       });
       setOpen(false);
-      setLabel('');
-      setSummary('');
-      setSource('');
+      setEvidenceForm({ category: 'title', label: '', summary: '', source: '' });
       setFile(null);
       onAdded();
     } catch (e) {
@@ -979,8 +955,8 @@ function AddEvidenceForm({ matterId, onAdded }: { matterId: string; onAdded: () 
       <div className="grid grid-cols-2 gap-2">
         <div>
           <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            value={evidenceForm.category}
+            onChange={(e) => setEvidenceForm((f) => ({ ...f, category: e.target.value }))}
             className="w-full px-2 py-1 text-[11px] rounded"
             style={{
               background: 'rgba(0,0,0,0.3)',
@@ -998,8 +974,8 @@ function AddEvidenceForm({ matterId, onAdded }: { matterId: string; onAdded: () 
         </div>
         <div>
           <input
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
+            value={evidenceForm.label}
+            onChange={(e) => setEvidenceForm((f) => ({ ...f, label: e.target.value }))}
             placeholder="Label (e.g. Title Commitment)"
             className="w-full px-2 py-1 text-[11px] rounded"
             style={{
@@ -1013,8 +989,8 @@ function AddEvidenceForm({ matterId, onAdded }: { matterId: string; onAdded: () 
       </div>
       <div>
         <input
-          value={source}
-          onChange={(e) => setSource(e.target.value)}
+          value={evidenceForm.source}
+          onChange={(e) => setEvidenceForm((f) => ({ ...f, source: e.target.value }))}
           placeholder="Source (e.g. Chicago Title Insurance)"
           className="w-full px-2 py-1 text-[11px] rounded"
           style={{
@@ -1027,8 +1003,8 @@ function AddEvidenceForm({ matterId, onAdded }: { matterId: string; onAdded: () 
       </div>
       <div>
         <textarea
-          value={summary}
-          onChange={(e) => setSummary(e.target.value)}
+          value={evidenceForm.summary}
+          onChange={(e) => setEvidenceForm((f) => ({ ...f, summary: e.target.value }))}
           placeholder="Summary / findings"
           rows={2}
           className="w-full px-2 py-1 text-[11px] rounded"
@@ -1054,7 +1030,7 @@ function AddEvidenceForm({ matterId, onAdded }: { matterId: string; onAdded: () 
       )}
       <div className="flex gap-2">
         <button
-          disabled={busy || label.length < 2}
+          disabled={busy || evidenceForm.label.length < 2}
           onClick={submit}
           className="flex-1 py-1 text-[10px] font-semibold rounded disabled:opacity-50"
           style={{ background: ACCENT, color: '#0a0f0c' }}

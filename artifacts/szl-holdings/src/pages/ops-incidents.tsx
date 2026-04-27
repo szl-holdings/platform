@@ -110,10 +110,12 @@ function IncidentDetailModal({
   const [updates, setUpdates] = useState<IncidentUpdate[]>([]);
   const [loading, setLoading] = useState(true);
   const [runbooks, setRunbooks] = useState<RunbookSummary[]>([]);
-  const [updateMsg, setUpdateMsg] = useState('');
-  const [nextStatus, setNextStatus] = useState<IncidentStatus>(incident.status);
-  const [assignee, setAssignee] = useState(incident.assignee ?? '');
-  const [postmortem, setPostmortem] = useState(incident.postmortem ?? '');
+  const [updateForm, setUpdateForm] = useState({
+    updateMsg: '',
+    nextStatus: incident.status as IncidentStatus,
+    assignee: incident.assignee ?? '',
+    postmortem: incident.postmortem ?? '',
+  });
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [activeTab, setActiveTab] = useState<'timeline' | 'postmortem' | 'runbooks'>('timeline');
@@ -159,10 +161,10 @@ function IncidentDetailModal({
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          status: nextStatus !== incident.status ? nextStatus : undefined,
-          message: updateMsg || undefined,
-          assignee: assignee !== (incident.assignee ?? '') ? assignee : undefined,
-          postmortem: postmortem !== (incident.postmortem ?? '') ? postmortem : undefined,
+          status: updateForm.nextStatus !== incident.status ? updateForm.nextStatus : undefined,
+          message: updateForm.updateMsg || undefined,
+          assignee: updateForm.assignee !== (incident.assignee ?? '') ? updateForm.assignee : undefined,
+          postmortem: updateForm.postmortem !== (incident.postmortem ?? '') ? updateForm.postmortem : undefined,
         }),
       });
       if (!res.ok) {
@@ -171,7 +173,7 @@ function IncidentDetailModal({
         setSaving(false);
         return;
       }
-      setUpdateMsg('');
+      setUpdateForm((f) => ({ ...f, updateMsg: '' }));
       onUpdated();
       onClose();
     } catch {
@@ -387,8 +389,8 @@ function IncidentDetailModal({
               Postmortem Notes
             </div>
             <textarea
-              value={postmortem}
-              onChange={(e) => setPostmortem(e.target.value)}
+              value={updateForm.postmortem}
+              onChange={(e) => setUpdateForm((f) => ({ ...f, postmortem: e.target.value }))}
               placeholder="Document root cause, timeline, impact, and preventive actions..."
               rows={10}
               style={{
@@ -539,8 +541,8 @@ function IncidentDetailModal({
                 )}
               </label>
               <select
-                value={nextStatus}
-                onChange={(e) => setNextStatus(e.target.value as IncidentStatus)}
+                value={updateForm.nextStatus}
+                onChange={(e) => setUpdateForm((f) => ({ ...f, nextStatus: e.target.value as IncidentStatus }))}
                 disabled={validNextStatuses.length === 1}
                 style={{
                   width: '100%',
@@ -572,8 +574,8 @@ function IncidentDetailModal({
                 Assignee
               </label>
               <input
-                value={assignee}
-                onChange={(e) => setAssignee(e.target.value)}
+                value={updateForm.assignee}
+                onChange={(e) => setUpdateForm((f) => ({ ...f, assignee: e.target.value }))}
                 placeholder="Name or email"
                 style={{
                   width: '100%',
@@ -590,8 +592,8 @@ function IncidentDetailModal({
             </div>
           </div>
           <textarea
-            value={updateMsg}
-            onChange={(e) => setUpdateMsg(e.target.value)}
+            value={updateForm.updateMsg}
+            onChange={(e) => setUpdateForm((f) => ({ ...f, updateMsg: e.target.value }))}
             placeholder="Add update message for the timeline..."
             rows={3}
             style={{
@@ -654,16 +656,12 @@ function CreateIncidentModal({
   onClose: () => void;
   onCreated: () => void;
 }) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [severity, setSeverity] = useState<IncidentSeverity>('minor');
-  const [services, setServices] = useState('');
-  const [assignee, setAssignee] = useState('');
+  const [createForm, setCreateForm] = useState({ title: '', description: '', severity: 'minor' as IncidentSeverity, services: '', assignee: '' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   const create = async () => {
-    if (!title || !description) {
+    if (!createForm.title || !createForm.description) {
       setError('Title and description are required.');
       return;
     }
@@ -674,14 +672,14 @@ function CreateIncidentModal({
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title,
-          description,
-          severity,
-          affectedServices: services
+          title: createForm.title,
+          description: createForm.description,
+          severity: createForm.severity,
+          affectedServices: createForm.services
             .split(',')
             .map((s) => s.trim())
             .filter(Boolean),
-          assignee: assignee || undefined,
+          assignee: createForm.assignee || undefined,
         }),
       });
       if (!res.ok) throw new Error(await res.text());
@@ -764,8 +762,8 @@ function CreateIncidentModal({
               Title *
             </label>
             <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={createForm.title}
+              onChange={(e) => setCreateForm((f) => ({ ...f, title: e.target.value }))}
               placeholder="Brief summary of the incident"
               style={{
                 width: '100%',
@@ -793,8 +791,8 @@ function CreateIncidentModal({
                 Severity
               </label>
               <select
-                value={severity}
-                onChange={(e) => setSeverity(e.target.value as IncidentSeverity)}
+                value={createForm.severity}
+                onChange={(e) => setCreateForm((f) => ({ ...f, severity: e.target.value as IncidentSeverity }))}
                 style={{
                   width: '100%',
                   background: 'hsl(210,12%,10%)',
@@ -822,8 +820,8 @@ function CreateIncidentModal({
                 Assignee
               </label>
               <input
-                value={assignee}
-                onChange={(e) => setAssignee(e.target.value)}
+                value={createForm.assignee}
+                onChange={(e) => setCreateForm((f) => ({ ...f, assignee: e.target.value }))}
                 placeholder="Name or email"
                 style={{
                   width: '100%',
@@ -846,8 +844,8 @@ function CreateIncidentModal({
               Affected Services (comma-separated)
             </label>
             <input
-              value={services}
-              onChange={(e) => setServices(e.target.value)}
+              value={createForm.services}
+              onChange={(e) => setCreateForm((f) => ({ ...f, services: e.target.value }))}
               placeholder="api, database, auth"
               style={{
                 width: '100%',
@@ -869,8 +867,8 @@ function CreateIncidentModal({
               Description *
             </label>
             <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={createForm.description}
+              onChange={(e) => setCreateForm((f) => ({ ...f, description: e.target.value }))}
               placeholder="What is happening and what is the user impact?"
               rows={4}
               style={{

@@ -59,13 +59,15 @@ function ScoreBar({ score, color = ACCENT }: { score: number; color?: string }) 
 }
 
 export default function PropertyValuationAiPage() {
-  const [address, setAddress] = useState('123 Market Street, San Francisco, CA 94105');
-  const [sqft, setSqft] = useState('2400');
-  const [beds, setBeds] = useState('3');
-  const [baths, setBaths] = useState('2');
-  const [yearBuilt, setYearBuilt] = useState('1998');
-  const [propertyType, setPropertyType] = useState('residential');
-  const [marketContext, setMarketContext] = useState('Tech sector layoffs dampening luxury demand. Interest rate at 6.8%.');
+  const [valuationForm, setValuationForm] = useState({
+    address: '123 Market Street, San Francisco, CA 94105',
+    sqft: '2400',
+    beds: '3',
+    baths: '2',
+    yearBuilt: '1998',
+    propertyType: 'residential',
+    marketContext: 'Tech sector layoffs dampening luxury demand. Interest rate at 6.8%.',
+  });
 
   const mutation = useMutation<ValuationResult, Error, object>({
     mutationFn: async (payload) => {
@@ -81,13 +83,13 @@ export default function PropertyValuationAiPage() {
 
   function handleSubmit() {
     mutation.mutate({
-      address: address.trim() || undefined,
-      sqft: sqft ? parseInt(sqft, 10) : undefined,
-      beds: beds ? parseInt(beds, 10) : undefined,
-      baths: baths ? parseInt(baths, 10) : undefined,
-      yearBuilt: yearBuilt ? parseInt(yearBuilt, 10) : undefined,
-      propertyType: propertyType || undefined,
-      marketContext: marketContext.trim() || undefined,
+      address: valuationForm.address.trim() || undefined,
+      sqft: valuationForm.sqft ? parseInt(valuationForm.sqft, 10) : undefined,
+      beds: valuationForm.beds ? parseInt(valuationForm.beds, 10) : undefined,
+      baths: valuationForm.baths ? parseInt(valuationForm.baths, 10) : undefined,
+      yearBuilt: valuationForm.yearBuilt ? parseInt(valuationForm.yearBuilt, 10) : undefined,
+      propertyType: valuationForm.propertyType || undefined,
+      marketContext: valuationForm.marketContext.trim() || undefined,
     });
   }
 
@@ -135,17 +137,19 @@ export default function PropertyValuationAiPage() {
               color: '#e2e8f0',
             }}
             placeholder="123 Main St, City, State ZIP"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            value={valuationForm.address}
+            onChange={(e) => setValuationForm((f) => ({ ...f, address: e.target.value }))}
           />
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {[
-            { label: 'Sq Ft', value: sqft, setter: setSqft, placeholder: '2000' },
-            { label: 'Beds', value: beds, setter: setBeds, placeholder: '3' },
-            { label: 'Baths', value: baths, setter: setBaths, placeholder: '2' },
-            { label: 'Year Built', value: yearBuilt, setter: setYearBuilt, placeholder: '2000' },
-          ].map((f) => (
+          {(
+            [
+              { label: 'Sq Ft', field: 'sqft' as const, placeholder: '2000' },
+              { label: 'Beds', field: 'beds' as const, placeholder: '3' },
+              { label: 'Baths', field: 'baths' as const, placeholder: '2' },
+              { label: 'Year Built', field: 'yearBuilt' as const, placeholder: '2000' },
+            ] as const
+          ).map((f) => (
             <div key={f.label} className="space-y-1">
               <label className="text-xs font-medium text-white/40 uppercase tracking-widest">{f.label}</label>
               <input
@@ -157,8 +161,8 @@ export default function PropertyValuationAiPage() {
                   color: '#e2e8f0',
                 }}
                 placeholder={f.placeholder}
-                value={f.value}
-                onChange={(e) => f.setter(e.target.value)}
+                value={valuationForm[f.field]}
+                onChange={(e) => setValuationForm((v) => ({ ...v, [f.field]: e.target.value }))}
               />
             </div>
           ))}
@@ -172,8 +176,8 @@ export default function PropertyValuationAiPage() {
               border: '1px solid rgba(255,255,255,0.06)',
               color: '#e2e8f0',
             }}
-            value={propertyType}
-            onChange={(e) => setPropertyType(e.target.value)}
+            value={valuationForm.propertyType}
+            onChange={(e) => setValuationForm((f) => ({ ...f, propertyType: e.target.value }))}
           >
             {PROPERTY_TYPES.map((t) => (
               <option key={t} value={t} style={{ background: '#0f172a' }}>
@@ -194,13 +198,13 @@ export default function PropertyValuationAiPage() {
               color: '#cbd5e1',
             }}
             placeholder="Describe current market conditions, macro environment…"
-            value={marketContext}
-            onChange={(e) => setMarketContext(e.target.value)}
+            value={valuationForm.marketContext}
+            onChange={(e) => setValuationForm((f) => ({ ...f, marketContext: e.target.value }))}
           />
         </div>
         <button
           onClick={handleSubmit}
-          disabled={mutation.isPending || (!address.trim() && !sqft)}
+          disabled={mutation.isPending || (!valuationForm.address.trim() && !valuationForm.sqft)}
           className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all disabled:opacity-40"
           style={{ background: ACCENT, color: '#fff' }}
         >

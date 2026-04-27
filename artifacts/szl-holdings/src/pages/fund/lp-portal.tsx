@@ -212,9 +212,7 @@ export default function FundLpPortalPage() {
 
   // Upload form state
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploadDocType, setUploadDocType] = useState<UploadDocType>("signed_agreement");
-  const [uploadNotes, setUploadNotes] = useState("");
+  const [uploadForm, setUploadForm] = useState<{ uploadFile: File | null; uploadDocType: UploadDocType; uploadNotes: string }>({ uploadFile: null, uploadDocType: "signed_agreement", uploadNotes: "" });
   const [uploadProgress, setUploadProgress] = useState<"idle" | "uploading" | "success" | "error">("idle");
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -364,11 +362,11 @@ export default function FundLpPortalPage() {
   }
 
   async function handleSubmitUpload() {
-    if (!uploadFile || lpId == null) return;
+    if (!uploadForm.uploadFile || lpId == null) return;
     setUploadProgress("uploading");
     setUploadError(null);
     try {
-      const mimeType = uploadFile.type || "application/octet-stream";
+      const mimeType = uploadForm.uploadFile.type || "application/octet-stream";
 
       // Step 1: Request a presigned GCS upload URL (requires auth; silently falls back to
       // metadata-only demo mode if the user is not authenticated).
@@ -379,8 +377,8 @@ export default function FundLpPortalPage() {
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name: uploadFile.name,
-            size: uploadFile.size,
+            name: uploadForm.uploadFile.name,
+            size: uploadForm.uploadFile.size,
             contentType: mimeType,
             domain: "lp_uploads",
           }),
@@ -391,7 +389,7 @@ export default function FundLpPortalPage() {
           const putResp = await fetch(presignData.uploadURL, {
             method: "PUT",
             headers: { "Content-Type": mimeType },
-            body: uploadFile,
+            body: uploadForm.uploadFile,
           });
           if (!putResp.ok) throw new Error(`Storage upload failed: ${putResp.status}`);
           objectPath = presignData.objectPath;
@@ -405,17 +403,16 @@ export default function FundLpPortalPage() {
       // Step 3: Register the upload record in the backend.
       const resp = await apiRequest<{ data: UploadItem } | UploadItem>("POST", `/api/lp-portal/lps/${lpId}/uploads`, {
         ...(objectPath ? { objectPath } : {}),
-        originalName: uploadFile.name,
-        docType: uploadDocType,
-        notes: uploadNotes.trim() || undefined,
+        originalName: uploadForm.uploadFile.name,
+        docType: uploadForm.uploadDocType,
+        notes: uploadForm.uploadNotes.trim() || undefined,
         mimeType,
-        size: uploadFile.size,
+        size: uploadForm.uploadFile.size,
       });
       const created = unwrap(resp);
       setUploads(prev => [created as UploadItem, ...prev]);
       setUploadProgress("success");
-      setUploadFile(null);
-      setUploadNotes("");
+      setUploadForm((f) => ({ ...f, uploadFile: null, uploadNotes: "" }));
       if (fileInputRef.current) fileInputRef.current.value = "";
       setTimeout(() => setUploadProgress("idle"), 3500);
     } catch (e) {
@@ -924,8 +921,8 @@ export default function FundLpPortalPage() {
                         Document Type
                       </label>
                       <select
-                        value={uploadDocType}
-                        onChange={e => setUploadDocType(e.target.value as UploadDocType)}
+                        value={uploadForm.uploadDocType}
+                        onChange={e => setUploadForm((f) => ({ ...f, uploadDocType: e.target.value as UploadDocType }))}
                         className="w-full rounded-xl border border-white/[0.08] bg-black/30 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#4a90b8]/50"
                         data-testid="select-upload-doc-type"
                       >
@@ -945,7 +942,7 @@ export default function FundLpPortalPage() {
                           ref={fileInputRef}
                           type="file"
                           accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.xlsx,.csv"
-                          onChange={e => setUploadFile(e.target.files?.[0] ?? null)}
+                          onChange={e => setUploadForm((f) => ({ ...f, uploadFile: e.target.files?.[0] ?? null }))}
                           className="hidden"
                           data-testid="input-upload-file"
                         />
@@ -954,15 +951,15 @@ export default function FundLpPortalPage() {
                           className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/[0.07] transition-colors"
                         >
                           <Upload className="h-3.5 w-3.5" />
-                          {uploadFile ? "Change file" : "Choose file"}
+                          {uploadForm.uploadFile ? "Change file" : "Choose file"}
                         </button>
-                        {uploadFile && (
+                        {uploadForm.uploadFile && (
                           <div className="flex items-center gap-1.5 flex-1 min-w-0">
                             <FileText className="h-3.5 w-3.5 text-white/40 flex-shrink-0" />
-                            <span className="text-xs text-white/70 truncate">{uploadFile.name}</span>
-                            <span className="text-[10px] text-white/35 flex-shrink-0">({fmtFileSize(uploadFile.size)})</span>
+                            <span className="text-xs text-white/70 truncate">{uploadForm.uploadFile.name}</span>
+                            <span className="text-[10px] text-white/35 flex-shrink-0">({fmtFileSize(uploadForm.uploadFile.size)})</span>
                             <button
-                              onClick={() => { setUploadFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                              onClick={() => { setUploadForm((f) => ({ ...f, uploadFile: null })); if (fileInputRef.current) fileInputRef.current.value = ""; }}
                               className="ml-auto text-white/30 hover:text-white/60 transition-colors flex-shrink-0"
                             >
                               <X className="h-3.5 w-3.5" />
@@ -978,8 +975,8 @@ export default function FundLpPortalPage() {
                       Notes to GP (optional)
                     </label>
                     <textarea
-                      value={uploadNotes}
-                      onChange={e => setUploadNotes(e.target.value)}
+                      value={uploadForm.uploadNotes}
+                      onChange={e => setUploadForm((f) => ({ ...f, uploadNotes: e.target.value }))}
                       placeholder="e.g., Signed subscription agreement for Fund II, wire sent on Apr 23 for $500K capital call..."
                       rows={2}
                       className="w-full rounded-xl border border-white/[0.08] bg-black/30 px-3 py-2.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-[#4a90b8]/50 resize-none"
@@ -1003,7 +1000,7 @@ export default function FundLpPortalPage() {
 
                   <button
                     onClick={handleSubmitUpload}
-                    disabled={!uploadFile || uploadProgress === "uploading"}
+                    disabled={!uploadForm.uploadFile || uploadProgress === "uploading"}
                     data-testid="button-submit-upload"
                     className="flex items-center gap-2 rounded-xl bg-[#4a90b8] px-4 py-2.5 text-xs font-semibold text-black hover:bg-[#4a90b8]/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >

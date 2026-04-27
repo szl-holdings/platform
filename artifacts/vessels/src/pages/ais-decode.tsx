@@ -56,10 +56,7 @@ function ScoreBar({ score }: { score: number }) {
 }
 
 export default function AisDecodePage() {
-  const [rawMessage, setRawMessage] = useState(SAMPLE_NMEA);
-  const [mmsi, setMmsi] = useState('');
-  const [vesselName, setVesselName] = useState('');
-  const [context, setContext] = useState('');
+  const [decodeForm, setDecodeForm] = useState({ rawMessage: SAMPLE_NMEA, mmsi: '', vesselName: '', context: '' });
 
   const mutation = useMutation<AisDecodeResult, Error, object>({
     mutationFn: async (payload) => {
@@ -75,10 +72,10 @@ export default function AisDecodePage() {
 
   function handleSubmit() {
     const payload: Record<string, unknown> = {};
-    if (rawMessage.trim()) payload.rawMessage = rawMessage.trim();
-    if (mmsi.trim()) payload.mmsi = mmsi.trim();
-    if (vesselName.trim()) payload.vesselName = vesselName.trim();
-    if (context.trim()) payload.context = context.trim();
+    if (decodeForm.rawMessage.trim()) payload.rawMessage = decodeForm.rawMessage.trim();
+    if (decodeForm.mmsi.trim()) payload.mmsi = decodeForm.mmsi.trim();
+    if (decodeForm.vesselName.trim()) payload.vesselName = decodeForm.vesselName.trim();
+    if (decodeForm.context.trim()) payload.context = decodeForm.context.trim();
     mutation.mutate(payload);
   }
 
@@ -123,8 +120,8 @@ export default function AisDecodePage() {
               color: '#7dd3fc',
             }}
             placeholder="!AIVDM,1,1,,A,…"
-            value={rawMessage}
-            onChange={(e) => setRawMessage(e.target.value)}
+            value={decodeForm.rawMessage}
+            onChange={(e) => setDecodeForm((f) => ({ ...f, rawMessage: e.target.value }))}
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -138,8 +135,8 @@ export default function AisDecodePage() {
                 color: '#e2e8f0',
               }}
               placeholder="123456789"
-              value={mmsi}
-              onChange={(e) => setMmsi(e.target.value)}
+              value={decodeForm.mmsi}
+              onChange={(e) => setDecodeForm((f) => ({ ...f, mmsi: e.target.value }))}
             />
           </div>
           <div className="space-y-1">
@@ -152,8 +149,8 @@ export default function AisDecodePage() {
                 color: '#e2e8f0',
               }}
               placeholder="PACIFIC MERIDIAN"
-              value={vesselName}
-              onChange={(e) => setVesselName(e.target.value)}
+              value={decodeForm.vesselName}
+              onChange={(e) => setDecodeForm((f) => ({ ...f, vesselName: e.target.value }))}
             />
           </div>
         </div>
@@ -169,13 +166,13 @@ export default function AisDecodePage() {
               color: '#e2e8f0',
             }}
             placeholder="Previous port calls, flag state, cargo type…"
-            value={context}
-            onChange={(e) => setContext(e.target.value)}
+            value={decodeForm.context}
+            onChange={(e) => setDecodeForm((f) => ({ ...f, context: e.target.value }))}
           />
         </div>
         <button
           onClick={handleSubmit}
-          disabled={mutation.isPending || (!rawMessage.trim() && !mmsi.trim() && !vesselName.trim())}
+          disabled={mutation.isPending || (!decodeForm.rawMessage.trim() && !decodeForm.mmsi.trim() && !decodeForm.vesselName.trim())}
           className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all disabled:opacity-40"
           style={{ background: ACCENT, color: '#fff' }}
         >

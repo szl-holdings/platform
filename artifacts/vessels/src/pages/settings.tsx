@@ -498,9 +498,7 @@ interface AuditPage {
 }
 
 function AuditPanel() {
-  const [nsFilter, setNsFilter] = useState('');
-  const [afterDate, setAfterDate] = useState('');
-  const [beforeDate, setBeforeDate] = useState('');
+  const [filterForm, setFilterForm] = useState({ nsFilter: '', afterDate: '', beforeDate: '' });
   const [applied, setApplied] = useState({ ns: '', after: '', before: '' });
   const [offset, setOffset] = useState(0);
   const [allEntries, setAllEntries] = useState<AuditEntry[]>([]);
@@ -558,12 +556,10 @@ function AuditPanel() {
     setOffset(0);
     setAllEntries([]);
     setTotal(null);
-    setApplied({ ns: nsFilter, after: afterDate, before: beforeDate });
+    setApplied({ ns: filterForm.nsFilter, after: filterForm.afterDate, before: filterForm.beforeDate });
   };
   const clearFilters = () => {
-    setNsFilter('');
-    setAfterDate('');
-    setBeforeDate('');
+    setFilterForm({ nsFilter: '', afterDate: '', beforeDate: '' });
     setOffset(0);
     setAllEntries([]);
     setTotal(null);
@@ -586,8 +582,8 @@ function AuditPanel() {
           </label>
           <input
             type="text"
-            value={nsFilter}
-            onChange={(e) => setNsFilter(e.target.value)}
+            value={filterForm.nsFilter}
+            onChange={(e) => setFilterForm((f) => ({ ...f, nsFilter: e.target.value }))}
             placeholder="e.g. vessels.notifications"
             className="h-7 px-2 text-xs rounded border border-sky-500/20 bg-[#040c1a] text-sky-100 placeholder:text-sky-400/30 focus:outline-none focus:ring-1 focus:ring-sky-500/40"
           />
@@ -598,8 +594,8 @@ function AuditPanel() {
           </label>
           <input
             type="date"
-            value={afterDate}
-            onChange={(e) => setAfterDate(e.target.value)}
+            value={filterForm.afterDate}
+            onChange={(e) => setFilterForm((f) => ({ ...f, afterDate: e.target.value }))}
             className="h-7 px-2 text-xs rounded border border-sky-500/20 bg-[#040c1a] text-sky-100 focus:outline-none focus:ring-1 focus:ring-sky-500/40"
           />
         </div>
@@ -609,8 +605,8 @@ function AuditPanel() {
           </label>
           <input
             type="date"
-            value={beforeDate}
-            onChange={(e) => setBeforeDate(e.target.value)}
+            value={filterForm.beforeDate}
+            onChange={(e) => setFilterForm((f) => ({ ...f, beforeDate: e.target.value }))}
             className="h-7 px-2 text-xs rounded border border-sky-500/20 bg-[#040c1a] text-sky-100 focus:outline-none focus:ring-1 focus:ring-sky-500/40"
           />
         </div>

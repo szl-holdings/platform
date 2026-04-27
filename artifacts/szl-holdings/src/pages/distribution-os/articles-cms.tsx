@@ -51,9 +51,7 @@ export default function ArticlesCmsPage() {
   const [location] = useLocation();
   const [articles, setArticles] = useState<Article[]>([]);
   const [showNew, setShowNew] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [newSlug, setNewSlug] = useState('');
-  const [newType, setNewType] = useState('flagship-essay');
+  const [newArticle, setNewArticle] = useState({ title: '', slug: '', type: 'flagship-essay' });
   const [publishing, setPublishing] = useState<number | null>(null);
 
   useEffect(() => {
@@ -64,10 +62,10 @@ export default function ArticlesCmsPage() {
   }, []);
 
   async function createArticle() {
-    if (!newTitle) return;
+    if (!newArticle.title) return;
     const slug =
-      newSlug ||
-      newTitle
+      newArticle.slug ||
+      newArticle.title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '');
@@ -75,13 +73,12 @@ export default function ArticlesCmsPage() {
       method: 'POST',
       credentials: 'include',
       headers: writeHeaders(),
-      body: JSON.stringify({ title: newTitle, slug, articleType: newType }),
+      body: JSON.stringify({ title: newArticle.title, slug, articleType: newArticle.type }),
     });
     const article = await res.json();
     setArticles((prev) => [article, ...prev]);
     setShowNew(false);
-    setNewTitle('');
-    setNewSlug('');
+    setNewArticle({ title: '', slug: '', type: 'flagship-essay' });
   }
 
   async function updateStatus(id: number, status: string) {
@@ -192,10 +189,10 @@ export default function ArticlesCmsPage() {
                   Title
                 </label>
                 <input
-                  value={newTitle}
+                  value={newArticle.title}
                   onChange={(e) => {
-                    setNewTitle(e.target.value);
-                    setNewSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+                    const title = e.target.value;
+                    setNewArticle((a) => ({ ...a, title, slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-') }));
                   }}
                   placeholder="Article title..."
                   style={{
@@ -223,8 +220,8 @@ export default function ArticlesCmsPage() {
                   Type
                 </label>
                 <select
-                  value={newType}
-                  onChange={(e) => setNewType(e.target.value)}
+                  value={newArticle.type}
+                  onChange={(e) => setNewArticle((a) => ({ ...a, type: e.target.value }))}
                   style={{
                     width: '100%',
                     padding: '0.625rem 0.75rem',
