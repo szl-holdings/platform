@@ -1,5 +1,5 @@
 import { useStandardMutation, useStandardQuery } from '@szl-holdings/api-client-react';
-import { apiFetch } from '@szl-holdings/shared-ui/api-fetch';
+import { apiFetch, getAccessToken } from '@szl-holdings/shared-ui/api-fetch';
 import {
   type AuditHistoryEntry,
   type EvidenceItem,
@@ -38,7 +38,7 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type Role = 'executive' | 'operations' | 'delivery';
 type ActionState = 'new' | 'acknowledged' | 'assigned' | 'escalated' | 'resolved' | 'dismissed';
@@ -582,14 +582,91 @@ function getAgeHours(createdAt: string): number {
   return Math.floor((Date.now() - new Date(createdAt).getTime()) / 3600000);
 }
 
+const WS_CHANNEL = 'lyte:action-queue';
+const WS_RECONNECT_DELAY_MS = 3000;
+const WS_FALLBACK_POLL_MS = 5 * 60 * 1000;
+
 export default function ActionQueuePage() {
   const queryClient = useQueryClient();
   const [role, setRole] = useState<Role>('operations');
   const [stateFilter, setStateFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const IS_DEMO = import.meta.env.VITE_IS_DEMO === 'true';
+
+  useEffect(() => {
+    let destroyed = false;
+
+    function connect() {
+      if (destroyed) return;
+
+      const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const ws = new WebSocket(`${proto}//${window.location.host}/api/ws`);
+      wsRef.current = ws;
+
+      ws.addEventListener('open', () => {
+        if (destroyed) {
+          ws.close();
+          return;
+        }
+        const token = getAccessToken();
+        ws.send(
+          JSON.stringify({
+            type: 'subscribe',
+            channel: WS_CHANNEL,
+            ...(token ? { token } : {}),
+          }),
+        );
+      });
+
+      ws.addEventListener('message', (evt) => {
+        try {
+          const msg = JSON.parse(evt.data as string) as {
+            type?: string;
+            channel?: string;
+            event?: string;
+          };
+          if (
+            msg.type === 'message' &&
+            msg.channel === WS_CHANNEL &&
+            (msg.event === 'action-created' || msg.event === 'action-updated')
+          ) {
+            queryClient.invalidateQueries({ queryKey: ['lyte-actions'] });
+          }
+        } catch {
+          /* ignore parse errors */
+        }
+      });
+
+      ws.addEventListener('close', () => {
+        wsRef.current = null;
+        if (!destroyed) {
+          reconnectTimerRef.current = setTimeout(connect, WS_RECONNECT_DELAY_MS);
+        }
+      });
+
+      ws.addEventListener('error', () => {
+        ws.close();
+      });
+    }
+
+    connect();
+
+    return () => {
+      destroyed = true;
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+    };
+  }, [queryClient]);
 
   const { data: rawActions } = useStandardQuery<any[]>({
     queryKey: ['lyte-actions', role],
@@ -598,7 +675,7 @@ export default function ActionQueuePage() {
       return Array.isArray(json) ? json : ((json as { data: any[] }).data ?? []);
     },
     placeholderData: IS_DEMO ? DEMO_ACTIONS : undefined,
-    refetchInterval: 30000,
+    refetchInterval: WS_FALLBACK_POLL_MS,
     refetchOnWindowFocus: true,
     retry: 2,
   });

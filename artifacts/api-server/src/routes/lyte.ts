@@ -769,7 +769,9 @@ router.post(
   async (req, res) => {
     try {
       const [row] = await db.insert(lyteActionsTable).values(req.body).returning();
-      sendSuccess(res, formatActionRow(row), 201);
+      const formatted = formatActionRow(row);
+      publish(WS_CHANNELS.LYTE_ACTION_QUEUE, 'action-created', formatted);
+      sendSuccess(res, formatted, 201);
     } catch (err) {
       handleRouteError(res, err, 'Failed to create action');
     }
@@ -836,7 +838,9 @@ router.patch(
         })
         .where(eq(lyteActionsTable.id, id))
         .returning();
-      sendSuccess(res, formatActionRow(row));
+      const formatted = formatActionRow(row);
+      publish(WS_CHANNELS.LYTE_ACTION_QUEUE, 'action-updated', formatted);
+      sendSuccess(res, formatted);
     } catch (err) {
       handleRouteError(res, err, 'Failed to update action');
     }
