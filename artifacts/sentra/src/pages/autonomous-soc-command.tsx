@@ -10,95 +10,27 @@ import {
   Cpu,
   Database,
   GitMerge,
-  Layers,
-  Network,
-  RefreshCw,
+  Loader2,
   Shield,
   TrendingUp,
   Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import {
+  type AutonomousSocResponse,
+  type AutonomousSocStage,
+  type SmartScoreAlert,
+  getAutonomousSocPage,
+} from '../lib/sentra-api';
 
-type PipelineStage = {
-  id: string;
-  label: string;
-  count: number;
-  avgTime: string;
-  status: 'active' | 'idle' | 'overloaded';
-  icon: typeof Brain;
+const STAGE_ICONS: Record<string, typeof Brain> = {
+  database: Database,
+  brain: Brain,
+  gitMerge: GitMerge,
+  trendingUp: TrendingUp,
+  zap: Zap,
+  shield: Shield,
 };
-
-const PIPELINE_STAGES: PipelineStage[] = [
-  { id: 'ingest', label: 'Ingest & Normalize', count: 14_832, avgTime: '0.3s', status: 'active', icon: Database },
-  { id: 'enrich', label: 'ML Enrichment', count: 14_832, avgTime: '1.2s', status: 'active', icon: Brain },
-  { id: 'correlate', label: 'Alert Correlation', count: 4_291, avgTime: '2.1s', status: 'active', icon: GitMerge },
-  { id: 'smartscore', label: 'SmartScore Prioritize', count: 4_291, avgTime: '0.8s', status: 'active', icon: TrendingUp },
-  { id: 'triage', label: 'Auto-Triage', count: 3_847, avgTime: '4.7s', status: 'active', icon: Zap },
-  { id: 'respond', label: 'Autonomous Response', count: 2_104, avgTime: '12.3s', status: 'active', icon: Shield },
-];
-
-type SmartScoreAlert = {
-  id: string;
-  title: string;
-  score: number;
-  severity: 'critical' | 'high' | 'medium' | 'low';
-  source: string;
-  triageTime: string;
-  resolution: string;
-  correlatedAlerts: number;
-};
-
-const SMARTSCORE_ALERTS: SmartScoreAlert[] = [
-  { id: 'SSA-0001', title: 'Ransomware Pre-Encryption Behavior Chain', score: 98, severity: 'critical', source: 'EDR + SIEM + NDR', triageTime: '8s', resolution: 'Isolated 3 endpoints via EDR API', correlatedAlerts: 47 },
-  { id: 'SSA-0002', title: 'APT29 C2 Beacon — Cobalt Strike Profile', score: 96, severity: 'critical', source: 'NDR + Threat Intel', triageTime: '12s', resolution: 'Blocked C2 domain, quarantined host', correlatedAlerts: 23 },
-  { id: 'SSA-0003', title: 'Credential Harvesting via LSASS Dump', score: 94, severity: 'critical', source: 'EDR + Identity', triageTime: '6s', resolution: 'Disabled account, forced password reset', correlatedAlerts: 15 },
-  { id: 'SSA-0004', title: 'Supply Chain — Compromised NPM Package', score: 89, severity: 'high', source: 'SCA + SIEM', triageTime: '18s', resolution: 'Quarantined artifact, notified DevSecOps', correlatedAlerts: 8 },
-  { id: 'SSA-0005', title: 'Data Exfiltration via DNS Tunneling', score: 87, severity: 'high', source: 'NDR + DLP', triageTime: '22s', resolution: 'Blocked DNS queries, initiated forensics', correlatedAlerts: 12 },
-  { id: 'SSA-0006', title: 'Privilege Escalation — Token Impersonation', score: 82, severity: 'high', source: 'EDR', triageTime: '14s', resolution: 'Revoked token, isolated workstation', correlatedAlerts: 6 },
-];
-
-type MLModelCluster = {
-  category: string;
-  count: number;
-  accuracy: number;
-  status: 'operational' | 'retraining' | 'degraded';
-  lastUpdated: string;
-};
-
-const ML_MODEL_CLUSTERS: MLModelCluster[] = [
-  { category: 'Behavioral Analytics', count: 487, accuracy: 97.3, status: 'operational', lastUpdated: '2h ago' },
-  { category: 'Network Anomaly Detection', count: 342, accuracy: 96.8, status: 'operational', lastUpdated: '4h ago' },
-  { category: 'Malware Classification', count: 291, accuracy: 98.1, status: 'operational', lastUpdated: '1h ago' },
-  { category: 'Identity Threat Detection', count: 256, accuracy: 95.4, status: 'retraining', lastUpdated: '6h ago' },
-  { category: 'Phishing & Social Engineering', count: 198, accuracy: 97.9, status: 'operational', lastUpdated: '3h ago' },
-  { category: 'Cloud Security Posture', count: 384, accuracy: 96.2, status: 'operational', lastUpdated: '2h ago' },
-  { category: 'Insider Threat Models', count: 167, accuracy: 94.7, status: 'operational', lastUpdated: '5h ago' },
-  { category: 'Supply Chain Risk', count: 143, accuracy: 95.1, status: 'operational', lastUpdated: '8h ago' },
-  { category: 'IoT/OT Anomaly', count: 312, accuracy: 93.8, status: 'degraded', lastUpdated: '12h ago' },
-  { category: 'Encrypted Traffic Analysis', count: 234, accuracy: 96.5, status: 'operational', lastUpdated: '1h ago' },
-];
-
-const TOTAL_MODELS = ML_MODEL_CLUSTERS.reduce((s, c) => s + c.count, 0);
-
-type AgentiXAgent = {
-  id: string;
-  name: string;
-  phase: 'plan' | 'reason' | 'execute' | 'monitor';
-  task: string;
-  alertsProcessed: number;
-  mttr: string;
-  confidence: number;
-  status: 'active' | 'idle' | 'cooldown';
-};
-
-const AGENTIX_WORKFORCE: AgentiXAgent[] = [
-  { id: 'AX-001', name: 'Precision Triage Alpha', phase: 'execute', task: 'Auto-closing 12 low-confidence alerts', alertsProcessed: 1_847, mttr: '8s', confidence: 97, status: 'active' },
-  { id: 'AX-002', name: 'Correlation Engine Beta', phase: 'reason', task: 'Cross-referencing 47 alerts across 3 data sources', alertsProcessed: 1_293, mttr: '14s', confidence: 94, status: 'active' },
-  { id: 'AX-003', name: 'Response Orchestrator', phase: 'execute', task: 'Executing PB-042: Endpoint Isolation Playbook', alertsProcessed: 892, mttr: '23s', confidence: 96, status: 'active' },
-  { id: 'AX-004', name: 'Threat Hunter Gamma', phase: 'plan', task: 'Planning proactive hunt for APT29 indicators', alertsProcessed: 567, mttr: '3m 12s', confidence: 88, status: 'active' },
-  { id: 'AX-005', name: 'Evidence Collector', phase: 'monitor', task: 'Monitoring forensic chain-of-custody for INC-2847', alertsProcessed: 423, mttr: '45s', confidence: 99, status: 'active' },
-  { id: 'AX-006', name: 'Compliance Auditor', phase: 'execute', task: 'Generating SOC 2 evidence artifacts', alertsProcessed: 312, mttr: '2m 08s', confidence: 100, status: 'cooldown' },
-];
 
 const PHASE_COLORS: Record<string, string> = {
   plan: '#c9b787',
@@ -127,13 +59,59 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 export default function AutonomousSOCCommand() {
+  const [data, setData] = useState<AutonomousSocResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedAlert, setSelectedAlert] = useState<SmartScoreAlert | null>(null);
   const [pipelinePulse, setPipelinePulse] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(null);
+    getAutonomousSocPage()
+      .then((res) => {
+        if (!active) return;
+        if (!res) {
+          setError('Unable to load Autonomous SOC data.');
+        } else {
+          setData(res);
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     const iv = setInterval(() => setPipelinePulse((p) => p + 1), 2000);
     return () => clearInterval(iv);
   }, []);
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center gap-2 text-xs text-zinc-400">
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        Loading Autonomous SOC data…
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="p-6">
+        <div className="rounded-xl border border-[#f5f5f5]/30 bg-[#f5f5f5]/5 p-4 text-xs text-[#f5f5f5]">
+          {error ?? 'Autonomous SOC data unavailable.'}
+        </div>
+      </div>
+    );
+  }
+
+  const { pipelineStages, smartScoreAlerts, mlModelClusters, agentixWorkforce, metrics, correlation } = data;
+  const totalModels = mlModelClusters.reduce((s, c) => s + c.count, 0);
 
   return (
     <div className="p-6 space-y-6 max-w-full">
@@ -147,7 +125,7 @@ export default function AutonomousSOCCommand() {
             </span>
           </div>
           <p className="text-xs text-zinc-500">
-            Real-time autonomous detection & response pipeline — SmartScore prioritization, {TOTAL_MODELS.toLocaleString()}+ ML models, sub-30s incident resolution
+            Real-time autonomous detection & response pipeline — SmartScore prioritization, {totalModels.toLocaleString()}+ ML models, sub-30s incident resolution
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -160,11 +138,11 @@ export default function AutonomousSOCCommand() {
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
-          { label: 'ML Models Active', value: TOTAL_MODELS, sub: 'across 10 clusters', color: '#8a8a8a', icon: Cpu },
-          { label: 'Alerts Ingested (24h)', value: 14_832, sub: '71% auto-resolved', color: '#f5f5f5', icon: AlertTriangle },
-          { label: 'Avg SmartScore Time', value: '0.8s', sub: 'dynamic risk scoring', color: '#c9b787', icon: TrendingUp },
-          { label: 'Auto-Triage Rate', value: '89%', sub: 'closed < 30s', color: '#c9b787', icon: Zap },
-          { label: 'MTTR (Autonomous)', value: '18s', sub: 'vs 45m manual baseline', color: '#c9b787', icon: Clock },
+          { label: 'ML Models Active', value: totalModels, sub: `across ${mlModelClusters.length} clusters`, color: '#8a8a8a', icon: Cpu },
+          { label: 'Alerts Ingested (24h)', value: metrics.alertsIngested24h, sub: `${metrics.autoTriageRate} auto-resolved`, color: '#f5f5f5', icon: AlertTriangle },
+          { label: 'Avg SmartScore Time', value: metrics.avgSmartScoreTime, sub: 'dynamic risk scoring', color: '#c9b787', icon: TrendingUp },
+          { label: 'Auto-Triage Rate', value: metrics.autoTriageRate, sub: 'closed < 30s', color: '#c9b787', icon: Zap },
+          { label: 'MTTR (Autonomous)', value: metrics.autonomousMttr, sub: 'vs 45m manual baseline', color: '#c9b787', icon: Clock },
         ].map((m) => {
           const Icon = m.icon;
           return (
@@ -188,9 +166,9 @@ export default function AutonomousSOCCommand() {
           Detection & Response Pipeline
         </h2>
         <div className="flex items-center gap-1 overflow-x-auto pb-2">
-          {PIPELINE_STAGES.map((stage, i) => {
-            const Icon = stage.icon;
-            const isActive = pipelinePulse % PIPELINE_STAGES.length === i;
+          {pipelineStages.map((stage: AutonomousSocStage, i) => {
+            const Icon = STAGE_ICONS[stage.icon] ?? Brain;
+            const isActive = pipelinePulse % pipelineStages.length === i;
             return (
               <div key={stage.id} className="flex items-center gap-1 shrink-0">
                 <div className={cn(
@@ -206,7 +184,7 @@ export default function AutonomousSOCCommand() {
                     <span className="text-[10px] text-zinc-500">{stage.avgTime}</span>
                   </div>
                 </div>
-                {i < PIPELINE_STAGES.length - 1 && (
+                {i < pipelineStages.length - 1 && (
                   <ArrowRight className={cn('w-3.5 h-3.5 shrink-0 transition-colors', isActive ? 'text-[#c9b787]' : 'text-zinc-700')} />
                 )}
               </div>
@@ -222,7 +200,7 @@ export default function AutonomousSOCCommand() {
             SmartScore — Dynamic Risk Prioritization
           </h2>
           <div className="space-y-2">
-            {SMARTSCORE_ALERTS.map((alert) => (
+            {smartScoreAlerts.map((alert) => (
               <button
                 key={alert.id}
                 onClick={() => setSelectedAlert(selectedAlert?.id === alert.id ? null : alert)}
@@ -279,10 +257,10 @@ export default function AutonomousSOCCommand() {
           <div>
             <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-2">
               <Cpu className="w-3.5 h-3.5 text-[#8a8a8a]" />
-              ML Model Fleet — {TOTAL_MODELS.toLocaleString()} Models
+              ML Model Fleet — {totalModels.toLocaleString()} Models
             </h2>
             <div className="grid grid-cols-2 gap-2">
-              {ML_MODEL_CLUSTERS.map((cluster) => (
+              {mlModelClusters.map((cluster) => (
                 <div key={cluster.category} className={cn(
                   'rounded-xl border p-3',
                   cluster.status === 'degraded' ? 'border-[#c9b787]/30 bg-[#c9b787]/5' : 'border-white/8 bg-white/3',
@@ -325,7 +303,7 @@ export default function AutonomousSOCCommand() {
           <span className="text-[9px] text-zinc-600 font-mono ml-auto">Plan → Reason → Execute → Monitor</span>
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
-          {AGENTIX_WORKFORCE.map((agent) => (
+          {agentixWorkforce.map((agent) => (
             <div key={agent.id} className={cn(
               'rounded-xl border p-3 transition-all',
               agent.status === 'active' ? 'border-white/8 bg-white/3' : 'border-white/5 bg-white/[0.015]',
@@ -364,14 +342,14 @@ export default function AutonomousSOCCommand() {
         <div className="flex items-center gap-2 mb-3">
           <GitMerge className="w-4 h-4 text-[#c9b787]" />
           <span className="text-xs font-semibold text-[#c9b787]">Alert-to-Case Correlation Engine</span>
-          <span className="text-[9px] text-zinc-500 font-mono ml-auto">Real-time · 47 → 1 case compression</span>
+          <span className="text-[9px] text-zinc-500 font-mono ml-auto">Real-time · {correlation.compressionRatio} case compression</span>
         </div>
         <div className="grid grid-cols-4 gap-3">
           {[
-            { label: 'Raw Alerts (24h)', value: '14,832', color: '#f5f5f5' },
-            { label: 'After Dedup', value: '4,291', color: '#c9b787' },
-            { label: 'Correlated Cases', value: '312', color: '#c9b787' },
-            { label: 'Compression Ratio', value: '47:1', color: '#8a8a8a' },
+            { label: 'Raw Alerts (24h)', value: correlation.rawAlerts24h.toLocaleString(), color: '#f5f5f5' },
+            { label: 'After Dedup', value: correlation.afterDedup.toLocaleString(), color: '#c9b787' },
+            { label: 'Correlated Cases', value: correlation.correlatedCases.toLocaleString(), color: '#c9b787' },
+            { label: 'Compression Ratio', value: correlation.compressionRatio, color: '#8a8a8a' },
           ].map((s) => (
             <div key={s.label} className="text-center">
               <div className="text-lg font-bold font-mono" style={{ color: s.color }}>{s.value}</div>

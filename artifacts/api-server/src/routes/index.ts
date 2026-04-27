@@ -188,6 +188,11 @@ router.use(lazyMatch("/sentra/siem-export", () => import("./sentra-siem-export")
 // Publishes typed domain events to the signal mesh when analyst approves a hunt or plan.
 router.use(lazyMatch("/sentra", () => import("./sentra-hunt"), "sentra-hunt"));
 
+// Sentra "research surfaces" — read-only datasets for the rich operator pages
+// (Autonomous SOC Command, Frontier AI Threat Lab, Attack Surface Command,
+// AI Swarm Defense, MITRE ATLAS Overlay, Weaponized Intel Feed, SOAR Hub).
+router.use(lazyMatch("/sentra/pages", () => import("./sentra-pages"), "sentra-pages"));
+
 // Crisis Arena — crowdsourced business crisis simulation. Public leaderboard
 // endpoints are unauthenticated and rate-limited; all client/architect
 // endpoints enforce auth. Every state change is written to Proof Chain.

@@ -2,82 +2,24 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
   AlertTriangle,
-  ArrowRight,
-  Bot,
   Cloud,
   Eye,
   Globe,
   Key,
   Layers,
+  Loader2,
   Network,
   Search,
   Server,
-  Shield,
   ShieldAlert,
-  TrendingUp,
   Wifi,
   Zap,
 } from 'lucide-react';
-import { useState } from 'react';
-
-type DiscoveredAsset = {
-  id: string;
-  domain: string;
-  type: 'web' | 'api' | 'rdp' | 'ssh' | 'database' | 'cloud' | 'iot' | 'email';
-  ip: string;
-  port: number;
-  severity: 'critical' | 'high' | 'medium' | 'low';
-  isKnown: boolean;
-  isShadowIT: boolean;
-  lastSeen: string;
-  org: string;
-  cves: number;
-  risk: number;
-};
-
-const DISCOVERED_ASSETS: DiscoveredAsset[] = [
-  { id: 'da-1', domain: 'legacy-erp.corp.io', type: 'web', ip: '203.45.67.12', port: 443, severity: 'critical', isKnown: false, isShadowIT: true, lastSeen: '2m ago', org: 'Finance', cves: 4, risk: 97 },
-  { id: 'da-2', domain: 'dev-api.staging.corp.io', type: 'api', ip: '52.14.89.201', port: 8080, severity: 'critical', isKnown: false, isShadowIT: true, lastSeen: '5m ago', org: 'Engineering', cves: 2, risk: 94 },
-  { id: 'da-3', domain: 'rdp.branch-office.corp.io', type: 'rdp', ip: '10.4.5.88', port: 3389, severity: 'critical', isKnown: true, isShadowIT: false, lastSeen: '1m ago', org: 'Operations', cves: 1, risk: 92 },
-  { id: 'da-4', domain: 'backup-db.internal.corp.io', type: 'database', ip: '172.16.4.55', port: 5432, severity: 'high', isKnown: false, isShadowIT: true, lastSeen: '12m ago', org: 'IT', cves: 3, risk: 87 },
-  { id: 'da-5', domain: 'contractor-vpn.corp.io', type: 'ssh', ip: '198.51.100.44', port: 22, severity: 'high', isKnown: true, isShadowIT: false, lastSeen: '8m ago', org: 'Vendors', cves: 0, risk: 78 },
-  { id: 'da-6', domain: 'cloud-app.corp.io', type: 'cloud', ip: '34.127.44.89', port: 443, severity: 'high', isKnown: true, isShadowIT: false, lastSeen: '3m ago', org: 'Product', cves: 1, risk: 74 },
-  { id: 'da-7', domain: 'iot-gateway.mfg.corp.io', type: 'iot', ip: '10.8.12.100', port: 502, severity: 'high', isKnown: false, isShadowIT: true, lastSeen: '22m ago', org: 'Manufacturing', cves: 5, risk: 85 },
-  { id: 'da-8', domain: 'mail-relay.corp.io', type: 'email', ip: '192.168.1.50', port: 25, severity: 'medium', isKnown: true, isShadowIT: false, lastSeen: '15m ago', org: 'IT', cves: 0, risk: 62 },
-];
-
-type SupplyChainVendor = {
-  id: string;
-  name: string;
-  exposedAssets: number;
-  risk: 'critical' | 'high' | 'medium' | 'low';
-  lastAssessment: string;
-  breachHistory: number;
-};
-
-const SUPPLY_CHAIN_VENDORS: SupplyChainVendor[] = [
-  { id: 'sc-1', name: 'CloudStack Solutions', exposedAssets: 12, risk: 'critical', lastAssessment: '3 months ago', breachHistory: 2 },
-  { id: 'sc-2', name: 'DataPipe Analytics', exposedAssets: 8, risk: 'high', lastAssessment: '1 month ago', breachHistory: 1 },
-  { id: 'sc-3', name: 'NetSecure VPN', exposedAssets: 5, risk: 'high', lastAssessment: '2 weeks ago', breachHistory: 0 },
-  { id: 'sc-4', name: 'BuildForge CI/CD', exposedAssets: 3, risk: 'medium', lastAssessment: '1 week ago', breachHistory: 0 },
-  { id: 'sc-5', name: 'MonitorPro SaaS', exposedAssets: 2, risk: 'medium', lastAssessment: '2 months ago', breachHistory: 1 },
-];
-
-type ResponsePlaybook = {
-  id: string;
-  name: string;
-  trigger: string;
-  actions: string[];
-  autoExecute: boolean;
-  lastRun: string;
-};
-
-const RESPONSE_PLAYBOOKS: ResponsePlaybook[] = [
-  { id: 'pb-1', name: 'Exposed RDP Lockdown', trigger: 'RDP port 3389 externally accessible', actions: ['Block inbound RDP at edge FW', 'Enable NLA requirement', 'Alert SOC team', 'Scan for brute force attempts'], autoExecute: true, lastRun: '4h ago' },
-  { id: 'pb-2', name: 'Shadow IT Quarantine', trigger: 'Unknown asset discovered with high risk', actions: ['Isolate from production VLAN', 'Run vulnerability scan', 'Identify asset owner', 'Generate compliance exception'], autoExecute: false, lastRun: '2d ago' },
-  { id: 'pb-3', name: 'Exposed API Remediation', trigger: 'API endpoint without auth on internet', actions: ['Deploy API gateway', 'Enable rate limiting', 'Add OAuth2 requirement', 'Scan for data exposure'], autoExecute: true, lastRun: '1h ago' },
-  { id: 'pb-4', name: 'SSH Key Rotation', trigger: 'SSH service with default or weak credentials', actions: ['Force key rotation', 'Disable password auth', 'Update authorized_keys', 'Enable fail2ban'], autoExecute: true, lastRun: '6h ago' },
-];
+import { useEffect, useState } from 'react';
+import {
+  type AttackSurfaceResponse,
+  getAttackSurfacePage,
+} from '../lib/sentra-api';
 
 const TYPE_ICONS: Record<string, typeof Server> = {
   web: Globe, api: Network, rdp: Server, ssh: Key,
@@ -90,20 +32,64 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 export default function AttackSurfaceCommand() {
+  const [data, setData] = useState<AttackSurfaceResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'shadow' | 'critical'>('all');
 
-  const totalAssets = DISCOVERED_ASSETS.length;
-  const unknownAssets = DISCOVERED_ASSETS.filter((a) => !a.isKnown).length;
-  const shadowIT = DISCOVERED_ASSETS.filter((a) => a.isShadowIT).length;
-  const criticalExposed = DISCOVERED_ASSETS.filter((a) => a.severity === 'critical').length;
-  const discoveryRate = Math.round((unknownAssets / totalAssets) * 100);
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(null);
+    getAttackSurfacePage()
+      .then((res) => {
+        if (!active) return;
+        if (!res) {
+          setError('Unable to load Attack Surface data.');
+        } else {
+          setData(res);
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center gap-2 text-xs text-zinc-400">
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        Loading Attack Surface data…
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="p-6">
+        <div className="rounded-xl border border-[#f5f5f5]/30 bg-[#f5f5f5]/5 p-4 text-xs text-[#f5f5f5]">
+          {error ?? 'Attack Surface data unavailable.'}
+        </div>
+      </div>
+    );
+  }
+
+  const { discoveredAssets, supplyChainVendors, responsePlaybooks } = data;
+  const totalAssets = discoveredAssets.length;
+  const unknownAssets = discoveredAssets.filter((a) => !a.isKnown).length;
+  const shadowIT = discoveredAssets.filter((a) => a.isShadowIT).length;
+  const criticalExposed = discoveredAssets.filter((a) => a.severity === 'critical').length;
+  const discoveryRate = totalAssets > 0 ? Math.round((unknownAssets / totalAssets) * 100) : 0;
 
   const filtered = filter === 'shadow'
-    ? DISCOVERED_ASSETS.filter((a) => a.isShadowIT)
+    ? discoveredAssets.filter((a) => a.isShadowIT)
     : filter === 'critical'
-      ? DISCOVERED_ASSETS.filter((a) => a.severity === 'critical')
-      : DISCOVERED_ASSETS;
+      ? discoveredAssets.filter((a) => a.severity === 'critical')
+      : discoveredAssets;
 
   return (
     <div className="p-6 space-y-6 max-w-full">
@@ -134,7 +120,7 @@ export default function AttackSurfaceCommand() {
           { label: 'Unknown Assets', value: unknownAssets.toString(), sub: `${discoveryRate}% discovery rate`, color: '#f5f5f5', icon: AlertTriangle },
           { label: 'Shadow IT Detected', value: shadowIT.toString(), sub: 'unmanaged services', color: '#c9b787', icon: Eye },
           { label: 'Critical Exposures', value: criticalExposed.toString(), sub: 'internet-facing risk', color: '#f5f5f5', icon: ShieldAlert },
-          { label: 'Vendor Exposure', value: SUPPLY_CHAIN_VENDORS.length.toString(), sub: 'third-party risk vectors', color: '#c9b787', icon: Network },
+          { label: 'Vendor Exposure', value: supplyChainVendors.length.toString(), sub: 'third-party risk vectors', color: '#c9b787', icon: Network },
         ].map((m) => {
           const Icon = m.icon;
           return (
@@ -228,7 +214,7 @@ export default function AttackSurfaceCommand() {
               Supply Chain Exposure
             </h2>
             <div className="space-y-2">
-              {SUPPLY_CHAIN_VENDORS.map((vendor) => (
+              {supplyChainVendors.map((vendor) => (
                 <div key={vendor.id} className={cn(
                   'rounded-xl border p-3',
                   vendor.risk === 'critical' ? 'border-[#f5f5f5]/20 bg-[#f5f5f5]/3' : 'border-white/8 bg-white/3',
@@ -260,7 +246,7 @@ export default function AttackSurfaceCommand() {
               Active Response Playbooks
             </h2>
             <div className="space-y-2">
-              {RESPONSE_PLAYBOOKS.map((pb) => (
+              {responsePlaybooks.map((pb) => (
                 <div key={pb.id} className="rounded-xl border border-white/8 bg-white/3 p-3">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[11px] font-medium text-white">{pb.name}</span>

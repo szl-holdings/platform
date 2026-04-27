@@ -507,3 +507,357 @@ export async function approveRemediation(
     return { ok: false, error: 'Network error' };
   }
 }
+
+// ── Research surfaces — read-only datasets for the rich command pages ───────
+
+export interface ResearchEnvelope {
+  source: 'live' | 'seed';
+  lastUpdated: string;
+}
+
+async function getJson<T>(path: string): Promise<T | null> {
+  try {
+    const res = await fetch(`${BASE}${path}`, { credentials: 'include' });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+// Autonomous SOC Command
+export type AutonomousSocStageStatus = 'active' | 'idle' | 'overloaded';
+export interface AutonomousSocStage {
+  id: string;
+  label: string;
+  count: number;
+  avgTime: string;
+  status: AutonomousSocStageStatus;
+  icon: string;
+}
+
+export interface SmartScoreAlert {
+  id: string;
+  title: string;
+  score: number;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  source: string;
+  triageTime: string;
+  resolution: string;
+  correlatedAlerts: number;
+}
+
+export interface MlModelCluster {
+  category: string;
+  count: number;
+  accuracy: number;
+  status: 'operational' | 'retraining' | 'degraded';
+  lastUpdated: string;
+}
+
+export interface AgentixAgent {
+  id: string;
+  name: string;
+  phase: 'plan' | 'reason' | 'execute' | 'monitor';
+  task: string;
+  alertsProcessed: number;
+  mttr: string;
+  confidence: number;
+  status: 'active' | 'idle' | 'cooldown';
+}
+
+export interface AutonomousSocResponse extends ResearchEnvelope {
+  pipelineStages: AutonomousSocStage[];
+  smartScoreAlerts: SmartScoreAlert[];
+  mlModelClusters: MlModelCluster[];
+  agentixWorkforce: AgentixAgent[];
+  metrics: {
+    alertsIngested24h: number;
+    avgSmartScoreTime: string;
+    autoTriageRate: string;
+    autonomousMttr: string;
+  };
+  correlation: {
+    rawAlerts24h: number;
+    afterDedup: number;
+    correlatedCases: number;
+    compressionRatio: string;
+  };
+}
+
+export function getAutonomousSocPage() {
+  return getJson<AutonomousSocResponse>('/sentra/pages/autonomous-soc');
+}
+
+// Frontier AI Threat Lab
+export interface KillChainPhase {
+  id: string;
+  phase: string;
+  technique: string;
+  timeElapsed: string;
+  totalMinutes: number;
+  description: string;
+  aiAgent: string;
+  status: 'complete' | 'active' | 'pending';
+}
+
+export interface MultiAgentAttack {
+  id: string;
+  name: string;
+  framework: string;
+  role: string;
+  target: string;
+  status: 'attacking' | 'detected' | 'contained' | 'evaded';
+  confidence: number;
+}
+
+export interface FrontierExposure {
+  id: string;
+  vector: string;
+  severity: 'critical' | 'high' | 'medium';
+  exposure: string;
+  weaponizationDays: number;
+  mitigation: string;
+}
+
+export interface FrontierAiThreatLabResponse extends ResearchEnvelope {
+  killChain: KillChainPhase[];
+  multiAgentAttacks: MultiAgentAttack[];
+  frontierExposures: FrontierExposure[];
+  metrics: {
+    fullChainDuration: string;
+    aiSpecialistAgents: number;
+    cveWeaponizationDays: string;
+    detectionGap: string;
+  };
+}
+
+export function getFrontierAiThreatLabPage() {
+  return getJson<FrontierAiThreatLabResponse>('/sentra/pages/frontier-ai-threat-lab');
+}
+
+// Attack Surface Command
+export type DiscoveredAssetType = 'web' | 'api' | 'rdp' | 'ssh' | 'database' | 'cloud' | 'iot' | 'email';
+export interface DiscoveredAsset {
+  id: string;
+  domain: string;
+  type: DiscoveredAssetType;
+  ip: string;
+  port: number;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  isKnown: boolean;
+  isShadowIT: boolean;
+  lastSeen: string;
+  org: string;
+  cves: number;
+  risk: number;
+}
+
+export interface SupplyChainVendor {
+  id: string;
+  name: string;
+  exposedAssets: number;
+  risk: 'critical' | 'high' | 'medium' | 'low';
+  lastAssessment: string;
+  breachHistory: number;
+}
+
+export interface AttackSurfacePlaybook {
+  id: string;
+  name: string;
+  trigger: string;
+  actions: string[];
+  autoExecute: boolean;
+  lastRun: string;
+}
+
+export interface AttackSurfaceResponse extends ResearchEnvelope {
+  discoveredAssets: DiscoveredAsset[];
+  supplyChainVendors: SupplyChainVendor[];
+  responsePlaybooks: AttackSurfacePlaybook[];
+}
+
+export function getAttackSurfacePage() {
+  return getJson<AttackSurfaceResponse>('/sentra/pages/attack-surface');
+}
+
+// AI Swarm Defense
+export interface SwarmDefenseAgent {
+  id: string;
+  name: string;
+  role: 'detector' | 'analyzer' | 'disruptor' | 'coordinator';
+  status: 'active' | 'engaged' | 'standby' | 'deploying';
+  load: number;
+  threatsBlocked: number;
+  region: string;
+}
+
+export interface SwarmPattern {
+  id: string;
+  name: string;
+  type: 'coordinated_scan' | 'distributed_brute' | 'ai_probe' | 'botnet_swarm' | 'apt_multi_vector';
+  agentCount: number;
+  confidence: number;
+  status: 'active' | 'mitigated' | 'analyzing';
+  firstSeen: string;
+  description: string;
+}
+
+export interface KillChainDisruption {
+  phase: string;
+  blocked: number;
+  method: string;
+  latency: string;
+}
+
+export interface AiSwarmDefenseResponse extends ResearchEnvelope {
+  defenseAgents: SwarmDefenseAgent[];
+  swarmPatterns: SwarmPattern[];
+  killChainDisruptions: KillChainDisruption[];
+  counterSwarm: {
+    activeCounterSwarms: number;
+    ipsBlacklisted24h: number;
+    autoPlaybooksExecuted: number;
+    falsePositiveRate: string;
+  };
+  metrics: {
+    avgDisruptionLatency: string;
+  };
+}
+
+export function getAiSwarmDefensePage() {
+  return getJson<AiSwarmDefenseResponse>('/sentra/pages/ai-swarm-defense');
+}
+
+// MITRE ATLAS Overlay
+export interface AtlasTactic {
+  id: string;
+  name: string;
+  techniques: number;
+  subTechniques: number;
+  covered: number;
+  detections: number;
+}
+
+export interface AgenticVector {
+  id: string;
+  technique: string;
+  atlasId: string;
+  description: string;
+  severity: 'critical' | 'high' | 'medium';
+  detections: number;
+  status: 'covered' | 'partial' | 'gap';
+}
+
+export interface AtlasCaseStudy {
+  id: string;
+  title: string;
+  source: string;
+  techniques: string[];
+  impact: string;
+  date: string;
+}
+
+export interface MitreAtlasResponse extends ResearchEnvelope {
+  atlasTactics: AtlasTactic[];
+  agenticVectors: AgenticVector[];
+  caseStudies: AtlasCaseStudy[];
+}
+
+export function getMitreAtlasPage() {
+  return getJson<MitreAtlasResponse>('/sentra/pages/mitre-atlas');
+}
+
+// Weaponized Intel Feed
+export interface AptCampaign {
+  id: string;
+  name: string;
+  alias: string[];
+  nationState: string;
+  status: 'active' | 'dormant' | 'emerging';
+  targetSectors: string[];
+  ttps: string[];
+  lastActivity: string;
+  description: string;
+  confidence: number;
+}
+
+export interface RansomwareTrend {
+  id: string;
+  group: string;
+  medianDemand: number;
+  avgPayment: number;
+  victims30d: number;
+  trend: 'up' | 'down' | 'stable';
+  sector: string;
+}
+
+export interface SocialEngineeringDetection {
+  id: string;
+  type: 'phishing' | 'vishing' | 'deepfake' | 'sms_phishing';
+  method: string;
+  detected: number;
+  blocked: number;
+  aiGenerated: boolean;
+  description: string;
+}
+
+export interface WeaponizedIntelResponse extends ResearchEnvelope {
+  aptCampaigns: AptCampaign[];
+  ransomwareTrends: RansomwareTrend[];
+  socialEngineeringDetections: SocialEngineeringDetection[];
+  metrics: {
+    medianRansomDemand: string;
+    medianRansomYoyChange: string;
+    deepfakeAttacks30d: number;
+    deepfakeBlockRate: string;
+  };
+}
+
+export function getWeaponizedIntelPage() {
+  return getJson<WeaponizedIntelResponse>('/sentra/pages/weaponized-intel');
+}
+
+// SOAR Automation Hub
+export interface PlaybookTemplate {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  steps: number;
+  integrations: string[];
+  uses: number;
+  lastUpdated: string;
+  copsFormat: boolean;
+  status: 'active' | 'draft' | 'archived';
+}
+
+export interface XdrSyncItem {
+  id: string;
+  source: string;
+  incidentId: string;
+  status: 'synced' | 'pending' | 'conflict';
+  direction: 'inbound' | 'outbound';
+  lastSync: string;
+  severity: string;
+}
+
+export interface SoarPipelineStatus {
+  id: string;
+  playbook: string;
+  version: string;
+  stage: 'build' | 'test' | 'staging' | 'production';
+  status: 'success' | 'running' | 'failed';
+  timestamp: string;
+}
+
+export interface SoarAutomationResponse extends ResearchEnvelope {
+  totalTemplates: number;
+  playbookTemplates: PlaybookTemplate[];
+  xdrSyncItems: XdrSyncItem[];
+  pipelineStatus: SoarPipelineStatus[];
+}
+
+export function getSoarAutomationPage() {
+  return getJson<SoarAutomationResponse>('/sentra/pages/soar-automation');
+}

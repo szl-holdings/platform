@@ -2,82 +2,20 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
   AlertTriangle,
-  ArrowRight,
   Bot,
   Brain,
-  Clock,
   Cloud,
-  Cpu,
   Eye,
-  GitBranch,
-  Layers,
-  Network,
-  Shield,
+  Loader2,
   Skull,
   Target,
   Timer,
-  TrendingUp,
-  Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-
-type KillChainPhase = {
-  id: string;
-  phase: string;
-  technique: string;
-  timeElapsed: string;
-  totalMinutes: number;
-  description: string;
-  aiAgent: string;
-  status: 'complete' | 'active' | 'pending';
-};
-
-const AUTONOMOUS_KILL_CHAIN: KillChainPhase[] = [
-  { id: 'kc-1', phase: 'Reconnaissance', technique: 'AI-Powered OSINT Scraping', timeElapsed: '0:00', totalMinutes: 0, description: 'LLM agent scrapes LinkedIn, GitHub, Shodan for target org infrastructure data', aiAgent: 'ReconBot-7', status: 'complete' },
-  { id: 'kc-2', phase: 'Weaponization', technique: 'Polymorphic Payload Generation', timeElapsed: '3:12', totalMinutes: 3, description: 'AI generates evasion-optimized payload using reinforcement learning, unique per-target signature', aiAgent: 'WeaponForge', status: 'complete' },
-  { id: 'kc-3', phase: 'Delivery', technique: 'AI-Crafted Spear Phishing', timeElapsed: '5:47', totalMinutes: 6, description: 'GPT-class model generates contextually perfect phishing email using scraped OSINT data', aiAgent: 'PhishCraft', status: 'complete' },
-  { id: 'kc-4', phase: 'Exploitation', technique: 'Zero-Day Exploit Chain', timeElapsed: '8:33', totalMinutes: 9, description: 'AI fuzzer discovers and chains 2 zero-days in target application stack', aiAgent: 'ExploitGPT', status: 'complete' },
-  { id: 'kc-5', phase: 'Installation', technique: 'Fileless Persistence via LOLBins', timeElapsed: '11:15', totalMinutes: 11, description: 'Living-off-the-land techniques selected by AI for maximum stealth', aiAgent: 'PersistAgent', status: 'active' },
-  { id: 'kc-6', phase: 'C2 Establishment', technique: 'Domain-Fronted C2 via CDN', timeElapsed: '14:02', totalMinutes: 14, description: 'AI selects CDN-fronted C2 channel to evade network detection', aiAgent: 'C2Pilot', status: 'pending' },
-  { id: 'kc-7', phase: 'Actions on Objectives', technique: 'Automated Data Exfil + Ransomware', timeElapsed: '25:00', totalMinutes: 25, description: 'Coordinated exfiltration and encryption — full ransomware chain complete in 25 min', aiAgent: 'RansomOrch', status: 'pending' },
-];
-
-type AgentCloudAttack = {
-  id: string;
-  name: string;
-  framework: string;
-  role: string;
-  target: string;
-  status: 'attacking' | 'detected' | 'contained' | 'evaded';
-  confidence: number;
-};
-
-const MULTI_AGENT_ATTACKS: AgentCloudAttack[] = [
-  { id: 'ma-1', name: 'CloudRecon-Alpha', framework: 'CrewAI', role: 'Cloud Enumerator', target: 'AWS S3 Buckets', status: 'detected', confidence: 94 },
-  { id: 'ma-2', name: 'IAMEscalator', framework: 'AutoGen', role: 'Privilege Escalation', target: 'IAM Policies', status: 'contained', confidence: 91 },
-  { id: 'ma-3', name: 'LambdaInjector', framework: 'CrewAI', role: 'Serverless Backdoor', target: 'Lambda Functions', status: 'attacking', confidence: 78 },
-  { id: 'ma-4', name: 'SecretHarvester', framework: 'AutoGen', role: 'Credential Extraction', target: 'Secrets Manager', status: 'evaded', confidence: 67 },
-  { id: 'ma-5', name: 'K8sBreaker', framework: 'CrewAI', role: 'Container Escape', target: 'EKS Clusters', status: 'detected', confidence: 89 },
-  { id: 'ma-6', name: 'DataExfilBot', framework: 'AutoGen', role: 'Data Exfiltration', target: 'RDS Databases', status: 'contained', confidence: 96 },
-];
-
-type FrontierExposure = {
-  id: string;
-  vector: string;
-  severity: 'critical' | 'high' | 'medium';
-  exposure: string;
-  weaponizationDays: number;
-  mitigation: string;
-};
-
-const FRONTIER_EXPOSURES: FrontierExposure[] = [
-  { id: 'fe-1', vector: 'LLM Prompt Injection via Public API', severity: 'critical', exposure: '3 public-facing LLM endpoints', weaponizationDays: 2, mitigation: 'Input sanitization + output guardrails' },
-  { id: 'fe-2', vector: 'Model Poisoning via Training Pipeline', severity: 'critical', exposure: 'CI/CD pipeline to ML model registry', weaponizationDays: 7, mitigation: 'Data provenance verification' },
-  { id: 'fe-3', vector: 'AI Agent Goal Hijacking', severity: 'high', exposure: '12 autonomous agent deployments', weaponizationDays: 3, mitigation: 'Agent sandboxing + policy constraints' },
-  { id: 'fe-4', vector: 'Deepfake Voice Cloning for Vishing', severity: 'high', exposure: 'Executive voice samples on public calls', weaponizationDays: 1, mitigation: 'Voice authentication watermarking' },
-  { id: 'fe-5', vector: 'Adversarial ML Evasion of EDR', severity: 'high', exposure: 'ML-based EDR models (3 vendors)', weaponizationDays: 14, mitigation: 'Adversarial training + ensemble models' },
-  { id: 'fe-6', vector: 'Supply Chain LLM Dependency Attack', severity: 'medium', exposure: '47 AI/ML pip packages', weaponizationDays: 30, mitigation: 'Dependency pinning + hash verification' },
-];
+import {
+  type FrontierAiThreatLabResponse,
+  getFrontierAiThreatLabPage,
+} from '../lib/sentra-api';
 
 const STATUS_COLORS: Record<string, string> = {
   attacking: 'text-[#f5f5f5] border-[#f5f5f5]/30 bg-[#f5f5f5]/10',
@@ -87,16 +25,62 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function FrontierAIThreatLab() {
+  const [data, setData] = useState<FrontierAiThreatLabResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activePhase, setActivePhase] = useState(4);
   const [simRunning, setSimRunning] = useState(true);
 
   useEffect(() => {
-    if (!simRunning) return;
+    let active = true;
+    setLoading(true);
+    setError(null);
+    getFrontierAiThreatLabPage()
+      .then((res) => {
+        if (!active) return;
+        if (!res) {
+          setError('Unable to load Frontier AI Threat Lab data.');
+        } else {
+          setData(res);
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!simRunning || !data) return;
+    const len = data.killChain.length;
     const iv = setInterval(() => {
-      setActivePhase((p) => (p + 1) % AUTONOMOUS_KILL_CHAIN.length);
+      setActivePhase((p) => (p + 1) % len);
     }, 3000);
     return () => clearInterval(iv);
-  }, [simRunning]);
+  }, [simRunning, data]);
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center gap-2 text-xs text-zinc-400">
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        Loading Frontier AI Threat Lab…
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="p-6">
+        <div className="rounded-xl border border-[#f5f5f5]/30 bg-[#f5f5f5]/5 p-4 text-xs text-[#f5f5f5]">
+          {error ?? 'Frontier AI Threat Lab data unavailable.'}
+        </div>
+      </div>
+    );
+  }
+
+  const { killChain, multiAgentAttacks, frontierExposures, metrics } = data;
 
   return (
     <div className="p-6 space-y-6 max-w-full">
@@ -126,10 +110,10 @@ export default function FrontierAIThreatLab() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Full Ransomware Chain', value: '25 min', sub: 'AI agent autonomous execution', color: '#f5f5f5', icon: Skull },
-          { label: 'AI Specialist Agents', value: '7', sub: 'per kill chain phase', color: '#c9b787', icon: Bot },
-          { label: 'CVE Weaponization', value: '< 2 days', sub: 'AI-accelerated exploit dev', color: '#c9b787', icon: Target },
-          { label: 'Detection Gap', value: '14 min', sub: 'between breach and detection', color: '#f5f5f5', icon: Eye },
+          { label: 'Full Ransomware Chain', value: metrics.fullChainDuration, sub: 'AI agent autonomous execution', color: '#f5f5f5', icon: Skull },
+          { label: 'AI Specialist Agents', value: metrics.aiSpecialistAgents.toString(), sub: 'per kill chain phase', color: '#c9b787', icon: Bot },
+          { label: 'CVE Weaponization', value: metrics.cveWeaponizationDays, sub: 'AI-accelerated exploit dev', color: '#c9b787', icon: Target },
+          { label: 'Detection Gap', value: metrics.detectionGap, sub: 'between breach and detection', color: '#f5f5f5', icon: Eye },
         ].map((m) => {
           const Icon = m.icon;
           return (
@@ -148,10 +132,10 @@ export default function FrontierAIThreatLab() {
       <div>
         <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-2">
           <Skull className="w-3.5 h-3.5 text-[#f5f5f5]" />
-          Autonomous Kill-Chain Simulator — 25-Minute Ransomware Chain
+          Autonomous Kill-Chain Simulator — {metrics.fullChainDuration} Ransomware Chain
         </h2>
         <div className="space-y-1.5">
-          {AUTONOMOUS_KILL_CHAIN.map((phase, i) => {
+          {killChain.map((phase, i) => {
             const isHighlight = i === activePhase;
             return (
               <div key={phase.id} className={cn(
@@ -198,7 +182,7 @@ export default function FrontierAIThreatLab() {
         </div>
         <div className="mt-2 h-2 rounded-full bg-white/5 overflow-hidden">
           <div className="h-full rounded-full transition-all duration-1000" style={{
-            width: `${((activePhase + 1) / AUTONOMOUS_KILL_CHAIN.length) * 100}%`,
+            width: `${((activePhase + 1) / killChain.length) * 100}%`,
             background: 'linear-gradient(90deg, #c9b787, #f5f5f5)',
           }} />
         </div>
@@ -211,7 +195,7 @@ export default function FrontierAIThreatLab() {
             Multi-Agent Cloud Attack Chain (CrewAI/AutoGen PoC)
           </h2>
           <div className="space-y-2">
-            {MULTI_AGENT_ATTACKS.map((agent) => (
+            {multiAgentAttacks.map((agent) => (
               <div key={agent.id} className="rounded-xl border border-white/8 bg-white/3 p-3">
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2">
@@ -238,7 +222,7 @@ export default function FrontierAIThreatLab() {
             Frontier AI Exposure Analysis
           </h2>
           <div className="space-y-2">
-            {FRONTIER_EXPOSURES.map((exp) => (
+            {frontierExposures.map((exp) => (
               <div key={exp.id} className={cn(
                 'rounded-xl border p-3',
                 exp.severity === 'critical' ? 'border-[#f5f5f5]/20 bg-[#f5f5f5]/3' : 'border-white/8 bg-white/3',

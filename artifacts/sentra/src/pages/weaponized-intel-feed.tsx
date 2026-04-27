@@ -1,83 +1,22 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
-  AlertTriangle,
-  BarChart3,
   Bot,
-  Brain,
   Clock,
   Crosshair,
   DollarSign,
   Eye,
-  Globe,
+  Loader2,
   Mail,
   Phone,
   Radio,
-  Shield,
   Skull,
-  Target,
-  TrendingUp,
-  Users,
-  Zap,
 } from 'lucide-react';
-import { useState } from 'react';
-
-type APTCampaign = {
-  id: string;
-  name: string;
-  alias: string[];
-  nationState: string;
-  status: 'active' | 'dormant' | 'emerging';
-  targetSectors: string[];
-  ttps: string[];
-  lastActivity: string;
-  description: string;
-  confidence: number;
-};
-
-const APT_CAMPAIGNS: APTCampaign[] = [
-  { id: 'apt-1', name: 'BRICKSTORM', alias: ['UNC5221', 'Volt Typhoon'], nationState: 'China', status: 'active', targetSectors: ['Critical Infrastructure', 'Government', 'Telecom'], ttps: ['T1190', 'T1059.001', 'T1071.001', 'T1548'], lastActivity: '2h ago', description: 'Active exploitation of Ivanti VPN zero-days with living-off-the-land persistence targeting US critical infrastructure', confidence: 97 },
-  { id: 'apt-2', name: 'Contagious Interview', alias: ['Famous Chollima', 'DPRK IT Workers'], nationState: 'North Korea', status: 'active', targetSectors: ['Technology', 'Crypto', 'DeFi'], ttps: ['T1566.001', 'T1204.002', 'T1059.007'], lastActivity: '6h ago', description: 'Social engineering campaign targeting developers via fake job interviews, deploying BeaverTail and InvisibleFerret malware', confidence: 94 },
-  { id: 'apt-3', name: 'Wagemole', alias: ['DPRK Freelancers'], nationState: 'North Korea', status: 'active', targetSectors: ['Technology', 'Fortune 500'], ttps: ['T1078', 'T1530', 'T1567'], lastActivity: '1d ago', description: 'North Korean IT workers infiltrating US companies as remote contractors, exfiltrating source code and cryptocurrency', confidence: 91 },
-  { id: 'apt-4', name: 'Midnight Blizzard', alias: ['APT29', 'Cozy Bear'], nationState: 'Russia', status: 'active', targetSectors: ['Government', 'Diplomatic', 'Cloud'], ttps: ['T1195.002', 'T1078.004', 'T1550.001'], lastActivity: '4h ago', description: 'Ongoing campaign targeting Microsoft 365 tenants via OAuth application abuse and token theft', confidence: 96 },
-  { id: 'apt-5', name: 'Scattered Spider', alias: ['UNC3944', 'Octo Tempest'], nationState: 'Multinational', status: 'active', targetSectors: ['Telecom', 'Hospitality', 'Finance'], ttps: ['T1566.004', 'T1621', 'T1078'], lastActivity: '12h ago', description: 'Sophisticated social engineering group using SIM swapping, MFA fatigue, and help desk manipulation', confidence: 93 },
-];
-
-type RansomwareTrend = {
-  id: string;
-  group: string;
-  medianDemand: number;
-  avgPayment: number;
-  victims30d: number;
-  trend: 'up' | 'down' | 'stable';
-  sector: string;
-};
-
-const RANSOMWARE_TRENDS: RansomwareTrend[] = [
-  { id: 'rw-1', group: 'LockBit 4.0', medianDemand: 2_500_000, avgPayment: 1_800_000, victims30d: 47, trend: 'up', sector: 'Healthcare' },
-  { id: 'rw-2', group: 'ALPHV/BlackCat', medianDemand: 1_500_000, avgPayment: 1_200_000, victims30d: 31, trend: 'stable', sector: 'Finance' },
-  { id: 'rw-3', group: 'Cl0p', medianDemand: 3_000_000, avgPayment: 2_100_000, victims30d: 23, trend: 'down', sector: 'Technology' },
-  { id: 'rw-4', group: 'Play', medianDemand: 800_000, avgPayment: 450_000, victims30d: 38, trend: 'up', sector: 'Manufacturing' },
-  { id: 'rw-5', group: 'Akira', medianDemand: 1_200_000, avgPayment: 700_000, victims30d: 19, trend: 'up', sector: 'Education' },
-];
-
-type SocialEngineeringDetection = {
-  id: string;
-  type: 'phishing' | 'vishing' | 'deepfake' | 'sms_phishing';
-  method: string;
-  detected: number;
-  blocked: number;
-  aiGenerated: boolean;
-  description: string;
-};
-
-const SE_DETECTIONS: SocialEngineeringDetection[] = [
-  { id: 'se-1', type: 'phishing', method: 'LLM-Generated Spear Phish', detected: 847, blocked: 841, aiGenerated: true, description: 'GPT-generated emails mimicking executive writing style with contextual urgency — 99.3% block rate' },
-  { id: 'se-2', type: 'vishing', method: 'AI Voice Clone Attack', detected: 23, blocked: 19, aiGenerated: true, description: 'Real-time voice cloning targeting CFO/CEO for wire transfer authorization — detected via voice watermark analysis' },
-  { id: 'se-3', type: 'deepfake', method: 'Video Deepfake Impersonation', detected: 7, blocked: 7, aiGenerated: true, description: 'Deepfake video calls impersonating executives during Zoom meetings for BEC fraud' },
-  { id: 'se-4', type: 'sms_phishing', method: 'AI-Personalized SMS Campaign', detected: 2_341, blocked: 2_298, aiGenerated: true, description: 'Contextually personalized smishing using scraped social media data and AI text generation' },
-  { id: 'se-5', type: 'phishing', method: 'Adversarial QR Code Phishing', detected: 156, blocked: 148, aiGenerated: false, description: 'QR codes in physical mail and office spaces redirecting to credential harvesting pages' },
-];
+import { useEffect, useState } from 'react';
+import {
+  type WeaponizedIntelResponse,
+  getWeaponizedIntelPage,
+} from '../lib/sentra-api';
 
 function fmtUsd(n: number) {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -100,7 +39,55 @@ const SE_TYPE_COLORS: Record<string, string> = {
 };
 
 export default function WeaponizedIntelFeed() {
+  const [data, setData] = useState<WeaponizedIntelResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedCampaign, setSelectedCampaign] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(null);
+    getWeaponizedIntelPage()
+      .then((res) => {
+        if (!active) return;
+        if (!res) {
+          setError('Unable to load Weaponized Intel data.');
+        } else {
+          setData(res);
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center gap-2 text-xs text-zinc-400">
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        Loading Weaponized Intel feed…
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="p-6">
+        <div className="rounded-xl border border-[#f5f5f5]/30 bg-[#f5f5f5]/5 p-4 text-xs text-[#f5f5f5]">
+          {error ?? 'Weaponized Intel feed unavailable.'}
+        </div>
+      </div>
+    );
+  }
+
+  const { aptCampaigns, ransomwareTrends, socialEngineeringDetections, metrics } = data;
+  const totalSeDetected = socialEngineeringDetections.reduce((s, d) => s + d.detected, 0);
+  const totalSeBlocked = socialEngineeringDetections.reduce((s, d) => s + d.blocked, 0);
+  const seBlockRate = totalSeDetected > 0 ? ((totalSeBlocked / totalSeDetected) * 100).toFixed(1) : '0';
 
   return (
     <div className="p-6 space-y-6 max-w-full">
@@ -121,10 +108,10 @@ export default function WeaponizedIntelFeed() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Active APT Campaigns', value: APT_CAMPAIGNS.filter(c => c.status === 'active').length.toString(), sub: `${APT_CAMPAIGNS.length} total tracked`, color: '#f5f5f5', icon: Crosshair },
-          { label: 'Median Ransom Demand', value: '$1.5M', sub: 'up 47% YoY', color: '#c9b787', icon: DollarSign },
-          { label: 'AI Phishing Detected', value: SE_DETECTIONS.reduce((s, d) => s + d.detected, 0).toLocaleString(), sub: '99.1% blocked', color: '#c9b787', icon: Mail },
-          { label: 'Deepfake Attacks (30d)', value: '7', sub: '100% detected and blocked', color: '#8a8a8a', icon: Eye },
+          { label: 'Active APT Campaigns', value: aptCampaigns.filter(c => c.status === 'active').length.toString(), sub: `${aptCampaigns.length} total tracked`, color: '#f5f5f5', icon: Crosshair },
+          { label: 'Median Ransom Demand', value: metrics.medianRansomDemand, sub: metrics.medianRansomYoyChange, color: '#c9b787', icon: DollarSign },
+          { label: 'AI Phishing Detected', value: totalSeDetected.toLocaleString(), sub: `${seBlockRate}% blocked`, color: '#c9b787', icon: Mail },
+          { label: 'Deepfake Attacks (30d)', value: metrics.deepfakeAttacks30d.toString(), sub: metrics.deepfakeBlockRate, color: '#8a8a8a', icon: Eye },
         ].map((m) => {
           const Icon = m.icon;
           return (
@@ -146,7 +133,7 @@ export default function WeaponizedIntelFeed() {
           Nation-State APT Campaign Tracker
         </h2>
         <div className="space-y-2">
-          {APT_CAMPAIGNS.map((campaign) => {
+          {aptCampaigns.map((campaign) => {
             const isSelected = selectedCampaign === campaign.id;
             return (
               <button key={campaign.id} onClick={() => setSelectedCampaign(isSelected ? null : campaign.id)} className={cn(
@@ -205,7 +192,7 @@ export default function WeaponizedIntelFeed() {
             Ransomware Demand Trends
           </h2>
           <div className="space-y-2">
-            {RANSOMWARE_TRENDS.map((rw) => (
+            {ransomwareTrends.map((rw) => (
               <div key={rw.id} className="rounded-xl border border-white/8 bg-white/3 p-3">
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2">
@@ -246,7 +233,7 @@ export default function WeaponizedIntelFeed() {
             AI-Accelerated Social Engineering Detection
           </h2>
           <div className="space-y-2">
-            {SE_DETECTIONS.map((det) => {
+            {socialEngineeringDetections.map((det) => {
               const Icon = SE_TYPE_ICONS[det.type] ?? Activity;
               return (
                 <div key={det.id} className={cn(

@@ -1,79 +1,19 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
   AlertTriangle,
-  ArrowRight,
   Bot,
-  Brain,
-  CheckCircle2,
   Clock,
-  Cpu,
   GitBranch,
-  Layers,
+  Loader2,
   Network,
   Shield,
-  Target,
-  TrendingUp,
   Zap,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-
-type SwarmAgent = {
-  id: string;
-  name: string;
-  role: 'detector' | 'analyzer' | 'disruptor' | 'coordinator';
-  status: 'active' | 'engaged' | 'standby' | 'deploying';
-  load: number;
-  threatsBlocked: number;
-  region: string;
-};
-
-const DEFENSE_AGENTS: SwarmAgent[] = [
-  { id: 'sd-001', name: 'Sentinel-North-1', role: 'detector', status: 'active', load: 78, threatsBlocked: 142, region: 'US-East' },
-  { id: 'sd-002', name: 'Sentinel-North-2', role: 'detector', status: 'engaged', load: 94, threatsBlocked: 89, region: 'US-West' },
-  { id: 'sd-003', name: 'Analyzer-Prime', role: 'analyzer', status: 'active', load: 67, threatsBlocked: 0, region: 'EU-West' },
-  { id: 'sd-004', name: 'Disruptor-Alpha', role: 'disruptor', status: 'engaged', load: 88, threatsBlocked: 312, region: 'US-East' },
-  { id: 'sd-005', name: 'Disruptor-Beta', role: 'disruptor', status: 'active', load: 45, threatsBlocked: 187, region: 'APAC' },
-  { id: 'sd-006', name: 'Coordinator-Central', role: 'coordinator', status: 'active', load: 56, threatsBlocked: 0, region: 'Global' },
-  { id: 'sd-007', name: 'Sentinel-South-1', role: 'detector', status: 'standby', load: 12, threatsBlocked: 34, region: 'US-South' },
-  { id: 'sd-008', name: 'Analyzer-Secondary', role: 'analyzer', status: 'deploying', load: 0, threatsBlocked: 0, region: 'EU-East' },
-];
-
-type SwarmPattern = {
-  id: string;
-  name: string;
-  type: 'coordinated_scan' | 'distributed_brute' | 'ai_probe' | 'botnet_swarm' | 'apt_multi_vector';
-  agentCount: number;
-  confidence: number;
-  status: 'active' | 'mitigated' | 'analyzing';
-  firstSeen: string;
-  description: string;
-};
-
-const SWARM_PATTERNS: SwarmPattern[] = [
-  { id: 'sp-1', name: 'Coordinated API Enumeration', type: 'coordinated_scan', agentCount: 847, confidence: 96, status: 'active', firstSeen: '4m ago', description: '847 unique IPs probing API endpoints in synchronized 2s intervals — matches AI-orchestrated reconnaissance pattern' },
-  { id: 'sp-2', name: 'Distributed Credential Spray', type: 'distributed_brute', agentCount: 2_341, confidence: 94, status: 'mitigated', firstSeen: '18m ago', description: 'Low-and-slow credential spray across 2,341 source IPs targeting Azure AD — 1 attempt per IP to evade lockout' },
-  { id: 'sp-3', name: 'AI-Driven Vulnerability Probe', type: 'ai_probe', agentCount: 156, confidence: 89, status: 'active', firstSeen: '7m ago', description: 'Adaptive scanning adjusting payloads based on responses — indicative of AI fuzzer with reinforcement learning' },
-  { id: 'sp-4', name: 'IoT Botnet DDoS Swarm', type: 'botnet_swarm', agentCount: 14_892, confidence: 98, status: 'mitigated', firstSeen: '45m ago', description: 'Mirai-variant botnet with 14,892 compromised IoT devices targeting edge load balancers' },
-  { id: 'sp-5', name: 'APT Multi-Vector Campaign', type: 'apt_multi_vector', agentCount: 23, confidence: 87, status: 'analyzing', firstSeen: '2h ago', description: '23 coordinated attack agents across phishing, exploitation, and lateral movement — matches APT41 TTP profile' },
-];
-
-type KillChainDisruption = {
-  phase: string;
-  blocked: number;
-  method: string;
-  latency: string;
-};
-
-const KILL_CHAIN_DISRUPTIONS: KillChainDisruption[] = [
-  { phase: 'Reconnaissance', blocked: 847, method: 'Honeypot redirection + rate limiting', latency: '0.3s' },
-  { phase: 'Weaponization', blocked: 12, method: 'Payload signature detection + sandbox detonation', latency: '1.8s' },
-  { phase: 'Delivery', blocked: 2_341, method: 'IP reputation blocking + credential lockout', latency: '0.1s' },
-  { phase: 'Exploitation', blocked: 156, method: 'WAF rule injection + virtual patching', latency: '0.5s' },
-  { phase: 'Lateral Movement', blocked: 34, method: 'Microsegmentation enforcement + token revocation', latency: '2.1s' },
-  { phase: 'C2 Communication', blocked: 89, method: 'DNS sinkholing + TLS inspection', latency: '0.4s' },
-  { phase: 'Exfiltration', blocked: 7, method: 'DLP enforcement + network isolation', latency: '0.8s' },
-];
+import {
+  type AiSwarmDefenseResponse,
+  getAiSwarmDefensePage,
+} from '../lib/sentra-api';
 
 const ROLE_COLORS: Record<string, string> = {
   detector: '#c9b787',
@@ -92,14 +32,59 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function AISwarmDefense() {
+  const [data, setData] = useState<AiSwarmDefenseResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [pulse, setPulse] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(null);
+    getAiSwarmDefensePage()
+      .then((res) => {
+        if (!active) return;
+        if (!res) {
+          setError('Unable to load AI Swarm Defense data.');
+        } else {
+          setData(res);
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   useEffect(() => {
     const iv = setInterval(() => setPulse((p) => p + 1), 2000);
     return () => clearInterval(iv);
   }, []);
 
-  const totalBlocked = DEFENSE_AGENTS.reduce((s, a) => s + a.threatsBlocked, 0);
-  const activeAgents = DEFENSE_AGENTS.filter((a) => a.status === 'active' || a.status === 'engaged').length;
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center gap-2 text-xs text-zinc-400">
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        Loading AI Swarm Defense data…
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="p-6">
+        <div className="rounded-xl border border-[#f5f5f5]/30 bg-[#f5f5f5]/5 p-4 text-xs text-[#f5f5f5]">
+          {error ?? 'AI Swarm Defense data unavailable.'}
+        </div>
+      </div>
+    );
+  }
+
+  const { defenseAgents, swarmPatterns, killChainDisruptions, counterSwarm, metrics } = data;
+  const totalBlocked = defenseAgents.reduce((s, a) => s + a.threatsBlocked, 0);
+  const activeAgents = defenseAgents.filter((a) => a.status === 'active' || a.status === 'engaged').length;
 
   return (
     <div className="p-6 space-y-6 max-w-full">
@@ -120,10 +105,10 @@ export default function AISwarmDefense() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Defense Agents', value: `${activeAgents}/${DEFENSE_AGENTS.length}`, sub: 'active / total deployed', color: '#c9b787', icon: Bot },
-          { label: 'Swarm Attacks Detected', value: SWARM_PATTERNS.length.toString(), sub: `${SWARM_PATTERNS.filter(p => p.status === 'active').length} currently active`, color: '#f5f5f5', icon: AlertTriangle },
+          { label: 'Defense Agents', value: `${activeAgents}/${defenseAgents.length}`, sub: 'active / total deployed', color: '#c9b787', icon: Bot },
+          { label: 'Swarm Attacks Detected', value: swarmPatterns.length.toString(), sub: `${swarmPatterns.filter(p => p.status === 'active').length} currently active`, color: '#f5f5f5', icon: AlertTriangle },
           { label: 'Threats Blocked (24h)', value: totalBlocked.toLocaleString(), sub: 'across all defense agents', color: '#c9b787', icon: Shield },
-          { label: 'Avg Disruption Latency', value: '0.7s', sub: 'from detection to block', color: '#8a8a8a', icon: Clock },
+          { label: 'Avg Disruption Latency', value: metrics.avgDisruptionLatency, sub: 'from detection to block', color: '#8a8a8a', icon: Clock },
         ].map((m) => {
           const Icon = m.icon;
           return (
@@ -146,7 +131,7 @@ export default function AISwarmDefense() {
             Parallel Detection Agent Deployment
           </h2>
           <div className="grid grid-cols-2 gap-2">
-            {DEFENSE_AGENTS.map((agent) => {
+            {defenseAgents.map((agent) => {
               const isActive = agent.status === 'active' || agent.status === 'engaged';
               return (
                 <div key={agent.id} className={cn(
@@ -170,7 +155,7 @@ export default function AISwarmDefense() {
                     <div className="flex-1 h-1.5 rounded-full bg-white/5">
                       <div className="h-full rounded-full transition-all" style={{
                         width: `${agent.load}%`,
-                        background: agent.load > 80 ? '#f5f5f5' : agent.load > 50 ? '#c9b787' : '#c9b787',
+                        background: agent.load > 80 ? '#f5f5f5' : '#c9b787',
                       }} />
                     </div>
                     <span className="text-[9px] text-zinc-500 font-mono">{agent.load}%</span>
@@ -190,7 +175,7 @@ export default function AISwarmDefense() {
             Swarm Pattern Recognition
           </h2>
           <div className="space-y-2">
-            {SWARM_PATTERNS.map((pattern) => (
+            {swarmPatterns.map((pattern) => (
               <div key={pattern.id} className={cn(
                 'rounded-xl border p-3',
                 pattern.status === 'active' ? 'border-[#f5f5f5]/20 bg-[#f5f5f5]/3' : 'border-white/8 bg-white/3',
@@ -219,8 +204,8 @@ export default function AISwarmDefense() {
           Distributed Kill-Chain Disruption
         </h2>
         <div className="grid grid-cols-7 gap-1.5">
-          {KILL_CHAIN_DISRUPTIONS.map((d, i) => {
-            const isHighlight = pulse % 7 === i;
+          {killChainDisruptions.map((d, i) => {
+            const isHighlight = pulse % killChainDisruptions.length === i;
             return (
               <div key={d.phase} className={cn(
                 'rounded-xl border p-3 text-center transition-all',
@@ -244,10 +229,10 @@ export default function AISwarmDefense() {
         </div>
         <div className="grid grid-cols-4 gap-3">
           {[
-            { label: 'Active Counter-Swarms', value: '3', color: '#c9b787' },
-            { label: 'IPs Blacklisted (24h)', value: '18,234', color: '#f5f5f5' },
-            { label: 'Auto-Playbooks Executed', value: '47', color: '#c9b787' },
-            { label: 'False Positive Rate', value: '0.02%', color: '#8a8a8a' },
+            { label: 'Active Counter-Swarms', value: counterSwarm.activeCounterSwarms.toString(), color: '#c9b787' },
+            { label: 'IPs Blacklisted (24h)', value: counterSwarm.ipsBlacklisted24h.toLocaleString(), color: '#f5f5f5' },
+            { label: 'Auto-Playbooks Executed', value: counterSwarm.autoPlaybooksExecuted.toString(), color: '#c9b787' },
+            { label: 'False Positive Rate', value: counterSwarm.falsePositiveRate, color: '#8a8a8a' },
           ].map((s) => (
             <div key={s.label} className="text-center">
               <div className="text-lg font-bold font-mono" style={{ color: s.color }}>{s.value}</div>

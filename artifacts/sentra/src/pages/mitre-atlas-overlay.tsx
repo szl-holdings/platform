@@ -2,85 +2,18 @@ import { cn } from '@szl-holdings/shared-ui/utils';
 import {
   Activity,
   AlertTriangle,
-  Bot,
-  Brain,
   BookOpen,
-  CheckCircle2,
-  Cpu,
-  Eye,
-  GitBranch,
+  Bot,
   Layers,
-  Network,
+  Loader2,
   Shield,
   Target,
-  TrendingUp,
-  Zap,
 } from 'lucide-react';
-import { useState } from 'react';
-
-type ATLASTactic = {
-  id: string;
-  name: string;
-  techniques: number;
-  subTechniques: number;
-  covered: number;
-  detections: number;
-};
-
-const ATLAS_TACTICS: ATLASTactic[] = [
-  { id: 'AML.TA0000', name: 'ML Model Access', techniques: 8, subTechniques: 5, covered: 6, detections: 12 },
-  { id: 'AML.TA0001', name: 'ML Attack Staging', techniques: 12, subTechniques: 8, covered: 9, detections: 7 },
-  { id: 'AML.TA0002', name: 'Initial Access', techniques: 6, subTechniques: 4, covered: 5, detections: 23 },
-  { id: 'AML.TA0003', name: 'ML Model Inference', techniques: 9, subTechniques: 6, covered: 7, detections: 15 },
-  { id: 'AML.TA0004', name: 'Execution', techniques: 7, subTechniques: 5, covered: 6, detections: 8 },
-  { id: 'AML.TA0005', name: 'Persistence', techniques: 5, subTechniques: 3, covered: 4, detections: 4 },
-  { id: 'AML.TA0006', name: 'Defense Evasion', techniques: 11, subTechniques: 9, covered: 8, detections: 19 },
-  { id: 'AML.TA0007', name: 'Discovery', techniques: 6, subTechniques: 4, covered: 5, detections: 6 },
-  { id: 'AML.TA0008', name: 'Collection', techniques: 8, subTechniques: 5, covered: 6, detections: 11 },
-  { id: 'AML.TA0009', name: 'Exfiltration', techniques: 5, subTechniques: 3, covered: 4, detections: 3 },
-  { id: 'AML.TA0010', name: 'Impact', techniques: 7, subTechniques: 4, covered: 5, detections: 9 },
-];
-
-const TOTAL_TECHNIQUES = ATLAS_TACTICS.reduce((s, t) => s + t.techniques, 0);
-const TOTAL_SUB = ATLAS_TACTICS.reduce((s, t) => s + t.subTechniques, 0);
-const TOTAL_COVERED = ATLAS_TACTICS.reduce((s, t) => s + t.covered, 0);
-
-type AgenticVector = {
-  id: string;
-  technique: string;
-  atlasId: string;
-  description: string;
-  severity: 'critical' | 'high' | 'medium';
-  detections: number;
-  status: 'covered' | 'partial' | 'gap';
-};
-
-const AGENTIC_VECTORS: AgenticVector[] = [
-  { id: 'av-1', technique: 'Agent Goal Hijacking', atlasId: 'AML.T0054', description: 'Manipulating an AI agent\'s objective function to perform unintended actions via prompt injection or context manipulation', severity: 'critical', detections: 8, status: 'covered' },
-  { id: 'av-2', technique: 'Tool Misuse', atlasId: 'AML.T0055', description: 'Exploiting an AI agent\'s authorized tool access to perform malicious operations within its permission boundary', severity: 'critical', detections: 5, status: 'partial' },
-  { id: 'av-3', technique: 'Publish Poisoned AI Agent Tool', atlasId: 'AML.T0056', description: 'Publishing a malicious tool/plugin to an AI agent marketplace that executes arbitrary code when invoked', severity: 'critical', detections: 3, status: 'gap' },
-  { id: 'av-4', technique: 'Escape to Host', atlasId: 'AML.T0057', description: 'AI agent escaping its sandbox or container to access the host system and pivot to other resources', severity: 'critical', detections: 12, status: 'covered' },
-  { id: 'av-5', technique: 'Agent Memory Poisoning', atlasId: 'AML.T0058', description: 'Injecting false information into an AI agent\'s long-term memory to influence future decisions', severity: 'high', detections: 2, status: 'partial' },
-  { id: 'av-6', technique: 'Multi-Agent Collusion', atlasId: 'AML.T0059', description: 'Coordinating multiple compromised AI agents to achieve objectives no single agent could accomplish', severity: 'high', detections: 1, status: 'gap' },
-  { id: 'av-7', technique: 'Model Extraction via Agent API', atlasId: 'AML.T0060', description: 'Using an AI agent\'s API to systematically extract the underlying model through crafted queries', severity: 'high', detections: 7, status: 'covered' },
-  { id: 'av-8', technique: 'Adversarial Prompt Chain', atlasId: 'AML.T0061', description: 'Chaining multiple prompts across agent interactions to gradually escalate privileges or bypass guardrails', severity: 'high', detections: 4, status: 'partial' },
-];
-
-type CaseStudy = {
-  id: string;
-  title: string;
-  source: string;
-  techniques: string[];
-  impact: string;
-  date: string;
-};
-
-const CASE_STUDIES: CaseStudy[] = [
-  { id: 'cs-1', title: 'Autonomous AI Agent Ransomware Chain', source: 'Unit 42 Research', techniques: ['AML.T0054', 'AML.T0055', 'AML.T0057'], impact: 'Full ransomware execution in 25 minutes via autonomous AI agents', date: '2025-03' },
-  { id: 'cs-2', title: 'LLM Plugin Supply Chain Attack', source: 'MITRE ATLAS Case Study', techniques: ['AML.T0056', 'AML.T0060'], impact: 'Compromised ChatGPT plugin exfiltrated user data for 3 weeks', date: '2024-11' },
-  { id: 'cs-3', title: 'Multi-Agent Cloud Infrastructure Compromise', source: 'Unit 42 Research', techniques: ['AML.T0059', 'AML.T0054'], impact: 'CrewAI-based attack framework compromised AWS infrastructure via coordinated agents', date: '2025-01' },
-  { id: 'cs-4', title: 'Adversarial ML Evasion of EDR', source: 'ATLAS Community', techniques: ['AML.T0061', 'AML.T0055'], impact: 'AI-generated malware evaded 3 major EDR vendors using adversarial techniques', date: '2024-09' },
-];
+import { useEffect, useState } from 'react';
+import {
+  type MitreAtlasResponse,
+  getMitreAtlasPage,
+} from '../lib/sentra-api';
 
 const STATUS_STYLE: Record<string, string> = {
   covered: 'text-[#c9b787] border-[#c9b787]/30 bg-[#c9b787]/10',
@@ -89,9 +22,56 @@ const STATUS_STYLE: Record<string, string> = {
 };
 
 export default function MitreAtlasOverlay() {
+  const [data, setData] = useState<MitreAtlasResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<'matrix' | 'vectors' | 'studies'>('matrix');
 
-  const coverageRate = Math.round((TOTAL_COVERED / TOTAL_TECHNIQUES) * 100);
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(null);
+    getMitreAtlasPage()
+      .then((res) => {
+        if (!active) return;
+        if (!res) {
+          setError('Unable to load MITRE ATLAS data.');
+        } else {
+          setData(res);
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center gap-2 text-xs text-zinc-400">
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        Loading MITRE ATLAS data…
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="p-6">
+        <div className="rounded-xl border border-[#f5f5f5]/30 bg-[#f5f5f5]/5 p-4 text-xs text-[#f5f5f5]">
+          {error ?? 'MITRE ATLAS data unavailable.'}
+        </div>
+      </div>
+    );
+  }
+
+  const { atlasTactics, agenticVectors, caseStudies } = data;
+  const totalTechniques = atlasTactics.reduce((s, t) => s + t.techniques, 0);
+  const totalSub = atlasTactics.reduce((s, t) => s + t.subTechniques, 0);
+  const totalCovered = atlasTactics.reduce((s, t) => s + t.covered, 0);
+  const coverageRate = totalTechniques > 0 ? Math.round((totalCovered / totalTechniques) * 100) : 0;
 
   return (
     <div className="p-6 space-y-6 max-w-full">
@@ -105,17 +85,17 @@ export default function MitreAtlasOverlay() {
             </span>
           </div>
           <p className="text-xs text-zinc-500">
-            AI-specific attack technique tracking — {TOTAL_TECHNIQUES} techniques, {TOTAL_SUB} sub-techniques across agentic attack vectors
+            AI-specific attack technique tracking — {totalTechniques} techniques, {totalSub} sub-techniques across agentic attack vectors
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'ATLAS Techniques', value: TOTAL_TECHNIQUES.toString(), sub: `${TOTAL_SUB} sub-techniques`, color: '#8a8a8a', icon: Target },
-          { label: 'Coverage Rate', value: `${coverageRate}%`, sub: `${TOTAL_COVERED}/${TOTAL_TECHNIQUES} covered`, color: '#c9b787', icon: Shield },
-          { label: 'Active Detections', value: ATLAS_TACTICS.reduce((s, t) => s + t.detections, 0).toString(), sub: 'across all tactics', color: '#f5f5f5', icon: Activity },
-          { label: 'Coverage Gaps', value: AGENTIC_VECTORS.filter(v => v.status === 'gap').length.toString(), sub: 'agentic vectors uncovered', color: '#f5f5f5', icon: AlertTriangle },
+          { label: 'ATLAS Techniques', value: totalTechniques.toString(), sub: `${totalSub} sub-techniques`, color: '#8a8a8a', icon: Target },
+          { label: 'Coverage Rate', value: `${coverageRate}%`, sub: `${totalCovered}/${totalTechniques} covered`, color: '#c9b787', icon: Shield },
+          { label: 'Active Detections', value: atlasTactics.reduce((s, t) => s + t.detections, 0).toString(), sub: 'across all tactics', color: '#f5f5f5', icon: Activity },
+          { label: 'Coverage Gaps', value: agenticVectors.filter(v => v.status === 'gap').length.toString(), sub: 'agentic vectors uncovered', color: '#f5f5f5', icon: AlertTriangle },
         ].map((m) => {
           const Icon = m.icon;
           return (
@@ -149,7 +129,7 @@ export default function MitreAtlasOverlay() {
             ATLAS Tactic Coverage Heatmap
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
-            {ATLAS_TACTICS.map((tactic) => {
+            {atlasTactics.map((tactic) => {
               const coverage = tactic.techniques > 0 ? (tactic.covered / tactic.techniques) * 100 : 0;
               const intensity = coverage / 100;
               return (
@@ -166,7 +146,7 @@ export default function MitreAtlasOverlay() {
                     </div>
                     <span className={cn(
                       'text-sm font-bold font-mono',
-                      coverage >= 80 ? 'text-[#c9b787]' : coverage >= 60 ? 'text-[#c9b787]' : 'text-[#f5f5f5]',
+                      coverage >= 60 ? 'text-[#c9b787]' : 'text-[#f5f5f5]',
                     )}>
                       {Math.round(coverage)}%
                     </span>
@@ -174,7 +154,7 @@ export default function MitreAtlasOverlay() {
                   <div className="h-2 rounded-full bg-white/5 mb-2">
                     <div className="h-full rounded-full transition-all" style={{
                       width: `${coverage}%`,
-                      background: coverage >= 80 ? '#c9b787' : coverage >= 60 ? '#c9b787' : '#f5f5f5',
+                      background: coverage >= 60 ? '#c9b787' : '#f5f5f5',
                       opacity: 0.6 + intensity * 0.4,
                     }} />
                   </div>
@@ -197,7 +177,7 @@ export default function MitreAtlasOverlay() {
             Agentic Attack Vector Tracking
           </h2>
           <div className="space-y-2">
-            {AGENTIC_VECTORS.map((vector) => (
+            {agenticVectors.map((vector) => (
               <div key={vector.id} className={cn(
                 'rounded-xl border p-4',
                 vector.status === 'gap' ? 'border-[#f5f5f5]/20 bg-[#f5f5f5]/3' :
@@ -238,7 +218,7 @@ export default function MitreAtlasOverlay() {
             Case Study Reference Panel
           </h2>
           <div className="space-y-2">
-            {CASE_STUDIES.map((cs) => (
+            {caseStudies.map((cs) => (
               <div key={cs.id} className="rounded-xl border border-white/8 bg-white/3 p-4">
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div>

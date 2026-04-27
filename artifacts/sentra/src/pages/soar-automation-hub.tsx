@@ -1,88 +1,20 @@
 import { cn } from '@szl-holdings/shared-ui/utils';
 import {
-  Activity,
-  ArrowRight,
   BookOpen,
-  Bot,
-  Check,
-  CheckCircle2,
-  Clock,
-  Code,
   Download,
   GitBranch,
-  Layers,
-  Network,
+  Loader2,
   Play,
   RefreshCw,
   Search,
-  Shield,
   Upload,
   Workflow,
-  Zap,
 } from 'lucide-react';
-import { useState } from 'react';
-
-type PlaybookTemplate = {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  steps: number;
-  integrations: string[];
-  uses: number;
-  lastUpdated: string;
-  copsFormat: boolean;
-  status: 'active' | 'draft' | 'archived';
-};
-
-const PLAYBOOK_TEMPLATES: PlaybookTemplate[] = [
-  { id: 'pb-001', name: 'Phishing Email Triage', category: 'Email Security', description: 'Auto-analyze reported phishing emails, extract IOCs, check reputation, notify user, and escalate if malicious', steps: 12, integrations: ['Exchange', 'VirusTotal', 'Slack'], uses: 2847, lastUpdated: '2d ago', copsFormat: true, status: 'active' },
-  { id: 'pb-002', name: 'Ransomware Containment', category: 'Incident Response', description: 'Isolate infected endpoints, block C2 communication, capture forensic image, and notify CISO', steps: 18, integrations: ['CrowdStrike', 'Palo Alto FW', 'ServiceNow'], uses: 423, lastUpdated: '1w ago', copsFormat: true, status: 'active' },
-  { id: 'pb-003', name: 'Malware Investigation', category: 'Threat Analysis', description: 'Detonate sample in sandbox, extract IOCs, correlate with threat intel, and update blocklists', steps: 15, integrations: ['Any.Run', 'MISP', 'EDR'], uses: 1234, lastUpdated: '3d ago', copsFormat: true, status: 'active' },
-  { id: 'pb-004', name: 'Brute Force Response', category: 'Identity Protection', description: 'Detect credential spray, lock accounts, block source IPs, investigate scope, and generate report', steps: 10, integrations: ['Azure AD', 'Firewall', 'SIEM'], uses: 987, lastUpdated: '5d ago', copsFormat: true, status: 'active' },
-  { id: 'pb-005', name: 'CVE Prioritization', category: 'Vulnerability Management', description: 'Fetch NVD data, correlate with asset inventory, calculate risk score, and create patching tickets', steps: 8, integrations: ['NVD', 'CMDB', 'Jira'], uses: 654, lastUpdated: '1d ago', copsFormat: true, status: 'active' },
-  { id: 'pb-006', name: 'Cloud Misconfiguration Remediation', category: 'Cloud Security', description: 'Detect misconfigured resources, validate against CIS benchmarks, auto-remediate, and verify', steps: 14, integrations: ['AWS Config', 'Azure Policy', 'Terraform'], uses: 789, lastUpdated: '4d ago', copsFormat: true, status: 'active' },
-  { id: 'pb-007', name: 'Data Exfiltration Detection', category: 'Data Protection', description: 'Monitor DLP alerts, correlate with user behavior, assess severity, and invoke incident response', steps: 11, integrations: ['DLP', 'UEBA', 'SIEM'], uses: 456, lastUpdated: '2w ago', copsFormat: true, status: 'active' },
-  { id: 'pb-008', name: 'Insider Threat Investigation', category: 'Insider Risk', description: 'Aggregate UEBA alerts, timeline user activity, correlate with HR data, and prepare evidence package', steps: 16, integrations: ['UEBA', 'HRIS', 'DLP', 'Email Gateway'], uses: 178, lastUpdated: '1w ago', copsFormat: true, status: 'active' },
-  { id: 'pb-009', name: 'Threat Intel Enrichment', category: 'Threat Intelligence', description: 'Enrich IOCs from multiple sources, calculate confidence scores, and push to detection tools', steps: 9, integrations: ['MISP', 'OTX', 'VirusTotal', 'Shodan'], uses: 1567, lastUpdated: '6h ago', copsFormat: true, status: 'active' },
-];
-
-const TOTAL_TEMPLATES = 87;
-
-type XDRSyncItem = {
-  id: string;
-  source: string;
-  incidentId: string;
-  status: 'synced' | 'pending' | 'conflict';
-  direction: 'inbound' | 'outbound';
-  lastSync: string;
-  severity: string;
-};
-
-const XDR_SYNC_ITEMS: XDRSyncItem[] = [
-  { id: 'xs-1', source: 'CrowdStrike Falcon', incidentId: 'INC-84721', status: 'synced', direction: 'inbound', lastSync: '2m ago', severity: 'Critical' },
-  { id: 'xs-2', source: 'Microsoft Sentinel', incidentId: 'INC-84720', status: 'synced', direction: 'outbound', lastSync: '5m ago', severity: 'High' },
-  { id: 'xs-3', source: 'Palo Alto XDR', incidentId: 'INC-84719', status: 'pending', direction: 'inbound', lastSync: '12m ago', severity: 'High' },
-  { id: 'xs-4', source: 'SentinelOne', incidentId: 'INC-84718', status: 'synced', direction: 'inbound', lastSync: '8m ago', severity: 'Medium' },
-  { id: 'xs-5', source: 'CrowdStrike Falcon', incidentId: 'INC-84717', status: 'conflict', direction: 'outbound', lastSync: '22m ago', severity: 'Critical' },
-];
-
-type PipelineStatus = {
-  id: string;
-  playbook: string;
-  version: string;
-  stage: 'build' | 'test' | 'staging' | 'production';
-  status: 'success' | 'running' | 'failed';
-  timestamp: string;
-};
-
-const PIPELINE_STATUS: PipelineStatus[] = [
-  { id: 'ci-1', playbook: 'Phishing Email Triage', version: 'v3.2.1', stage: 'production', status: 'success', timestamp: '1h ago' },
-  { id: 'ci-2', playbook: 'Ransomware Containment', version: 'v2.8.0', stage: 'staging', status: 'running', timestamp: '15m ago' },
-  { id: 'ci-3', playbook: 'CVE Prioritization', version: 'v1.5.3', stage: 'test', status: 'success', timestamp: '3h ago' },
-  { id: 'ci-4', playbook: 'Cloud Misconfiguration', version: 'v2.1.0', stage: 'build', status: 'failed', timestamp: '45m ago' },
-  { id: 'ci-5', playbook: 'Threat Intel Enrichment', version: 'v4.0.0', stage: 'production', status: 'success', timestamp: '30m ago' },
-];
+import { useEffect, useState } from 'react';
+import {
+  type SoarAutomationResponse,
+  getSoarAutomationPage,
+} from '../lib/sentra-api';
 
 const STAGE_COLORS: Record<string, string> = {
   build: '#8a8a8a',
@@ -110,12 +42,56 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function SOARAutomationHub() {
+  const [data, setData] = useState<SoarAutomationResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchFilter, setSearchFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
 
-  const categories = [...new Set(PLAYBOOK_TEMPLATES.map((p) => p.category))];
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(null);
+    getSoarAutomationPage()
+      .then((res) => {
+        if (!active) return;
+        if (!res) {
+          setError('Unable to load SOAR Automation data.');
+        } else {
+          setData(res);
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
-  const filtered = PLAYBOOK_TEMPLATES.filter((p) => {
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center gap-2 text-xs text-zinc-400">
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        Loading SOAR Automation data…
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="p-6">
+        <div className="rounded-xl border border-[#f5f5f5]/30 bg-[#f5f5f5]/5 p-4 text-xs text-[#f5f5f5]">
+          {error ?? 'SOAR Automation data unavailable.'}
+        </div>
+      </div>
+    );
+  }
+
+  const { totalTemplates, playbookTemplates, xdrSyncItems, pipelineStatus } = data;
+  const categories = [...new Set(playbookTemplates.map((p) => p.category))];
+
+  const filtered = playbookTemplates.filter((p) => {
     const matchesSearch = !searchFilter || p.name.toLowerCase().includes(searchFilter.toLowerCase()) || p.description.toLowerCase().includes(searchFilter.toLowerCase());
     const matchesCategory = !categoryFilter || p.category === categoryFilter;
     return matchesSearch && matchesCategory;
@@ -148,10 +124,10 @@ export default function SOARAutomationHub() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Playbook Templates', value: TOTAL_TEMPLATES.toString(), sub: `${PLAYBOOK_TEMPLATES.length} shown`, color: '#c9b787', icon: BookOpen },
-          { label: 'Total Executions', value: PLAYBOOK_TEMPLATES.reduce((s, p) => s + p.uses, 0).toLocaleString(), sub: 'across all playbooks', color: '#8a8a8a', icon: Play },
-          { label: 'XDR Incidents Synced', value: XDR_SYNC_ITEMS.filter(x => x.status === 'synced').length.toString(), sub: `${XDR_SYNC_ITEMS.length} total`, color: '#c9b787', icon: RefreshCw },
-          { label: 'CI/CD Pipeline Health', value: `${PIPELINE_STATUS.filter(p => p.status === 'success').length}/${PIPELINE_STATUS.length}`, sub: 'deployments passing', color: '#c9b787', icon: GitBranch },
+          { label: 'Playbook Templates', value: totalTemplates.toString(), sub: `${playbookTemplates.length} shown`, color: '#c9b787', icon: BookOpen },
+          { label: 'Total Executions', value: playbookTemplates.reduce((s, p) => s + p.uses, 0).toLocaleString(), sub: 'across all playbooks', color: '#8a8a8a', icon: Play },
+          { label: 'XDR Incidents Synced', value: xdrSyncItems.filter(x => x.status === 'synced').length.toString(), sub: `${xdrSyncItems.length} total`, color: '#c9b787', icon: RefreshCw },
+          { label: 'CI/CD Pipeline Health', value: `${pipelineStatus.filter(p => p.status === 'success').length}/${pipelineStatus.length}`, sub: 'deployments passing', color: '#c9b787', icon: GitBranch },
         ].map((m) => {
           const Icon = m.icon;
           return (
@@ -171,7 +147,7 @@ export default function SOARAutomationHub() {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
             <BookOpen className="w-3.5 h-3.5 text-[#c9b787]" />
-            Visual Playbook Library ({TOTAL_TEMPLATES} templates)
+            Visual Playbook Library ({totalTemplates} templates)
           </h2>
           <div className="relative w-48">
             <Search className="absolute left-2.5 top-2 w-3 h-3 text-zinc-500" />
@@ -241,7 +217,7 @@ export default function SOARAutomationHub() {
             Bi-Directional XDR Incident Sync
           </h2>
           <div className="space-y-2">
-            {XDR_SYNC_ITEMS.map((item) => (
+            {xdrSyncItems.map((item) => (
               <div key={item.id} className={cn(
                 'rounded-xl border p-3',
                 item.status === 'conflict' ? 'border-[#f5f5f5]/20 bg-[#f5f5f5]/3' : 'border-white/8 bg-white/3',
@@ -281,46 +257,48 @@ export default function SOARAutomationHub() {
             Playbook CI/CD Pipeline
           </h2>
           <div className="space-y-2">
-            {PIPELINE_STATUS.map((pipeline) => (
-              <div key={pipeline.id} className={cn(
-                'rounded-xl border p-3',
-                pipeline.status === 'failed' ? 'border-[#f5f5f5]/20 bg-[#f5f5f5]/3' : 'border-white/8 bg-white/3',
-              )}>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-medium text-white">{pipeline.playbook}</span>
-                    <span className="text-[9px] text-zinc-500 font-mono">{pipeline.version}</span>
+            {pipelineStatus.map((pipeline) => {
+              const stageOrder = ['build', 'test', 'staging', 'production'];
+              const currentIdx = stageOrder.indexOf(pipeline.stage);
+              return (
+                <div key={pipeline.id} className={cn(
+                  'rounded-xl border p-3',
+                  pipeline.status === 'failed' ? 'border-[#f5f5f5]/20 bg-[#f5f5f5]/3' : 'border-white/8 bg-white/3',
+                )}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-medium text-white">{pipeline.playbook}</span>
+                      <span className="text-[9px] text-zinc-500 font-mono">{pipeline.version}</span>
+                    </div>
+                    <span className={cn('text-[9px] px-1.5 py-0.5 rounded border', PIPELINE_STATUS_COLORS[pipeline.status])}>
+                      {pipeline.status}
+                    </span>
                   </div>
-                  <span className={cn('text-[9px] px-1.5 py-0.5 rounded border', PIPELINE_STATUS_COLORS[pipeline.status])}>
-                    {pipeline.status}
-                  </span>
+                  <div className="flex items-center gap-1">
+                    {stageOrder.map((stage, i) => {
+                      const isComplete = i < currentIdx;
+                      const isCurrent = i === currentIdx;
+                      return (
+                        <div key={stage} className="flex items-center gap-1 flex-1">
+                          <div className={cn(
+                            'flex-1 h-1.5 rounded-full transition-all',
+                            isComplete ? 'bg-[#c9b787]/60' :
+                            isCurrent && pipeline.status === 'success' ? 'bg-[#c9b787]/60' :
+                            isCurrent && pipeline.status === 'running' ? 'bg-[#8a8a8a]/60 animate-pulse' :
+                            isCurrent && pipeline.status === 'failed' ? 'bg-[#f5f5f5]/60' :
+                            'bg-white/5',
+                          )} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex items-center justify-between mt-1.5 text-[9px] text-zinc-500">
+                    <span className="capitalize" style={{ color: STAGE_COLORS[pipeline.stage] }}>{pipeline.stage}</span>
+                    <span>{pipeline.timestamp}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  {['build', 'test', 'staging', 'production'].map((stage, i) => {
-                    const stageOrder = ['build', 'test', 'staging', 'production'];
-                    const currentIdx = stageOrder.indexOf(pipeline.stage);
-                    const isComplete = i < currentIdx;
-                    const isCurrent = i === currentIdx;
-                    return (
-                      <div key={stage} className="flex items-center gap-1 flex-1">
-                        <div className={cn(
-                          'flex-1 h-1.5 rounded-full transition-all',
-                          isComplete ? 'bg-[#c9b787]/60' :
-                          isCurrent && pipeline.status === 'success' ? 'bg-[#c9b787]/60' :
-                          isCurrent && pipeline.status === 'running' ? 'bg-[#8a8a8a]/60 animate-pulse' :
-                          isCurrent && pipeline.status === 'failed' ? 'bg-[#f5f5f5]/60' :
-                          'bg-white/5',
-                        )} />
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="flex items-center justify-between mt-1.5 text-[9px] text-zinc-500">
-                  <span className="capitalize" style={{ color: STAGE_COLORS[pipeline.stage] }}>{pipeline.stage}</span>
-                  <span>{pipeline.timestamp}</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
