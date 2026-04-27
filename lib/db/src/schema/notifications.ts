@@ -54,6 +54,36 @@ export const notificationPreferencesTable = pgTable('notification_preferences', 
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
+export const emailSendLogTable = pgTable(
+  'email_send_log',
+  {
+    id: serial('id').primaryKey(),
+    notificationId: integer('notification_id'),
+    channel: text('channel').notNull().default('email'),
+    provider: text('provider'),
+    messageId: text('message_id'),
+    recipient: text('recipient').notNull(),
+    subject: text('subject'),
+    status: text('status', { enum: ['sent', 'failed', 'bounced'] })
+      .notNull()
+      .default('sent'),
+    error: text('error'),
+    sentAt: timestamp('sent_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('email_send_log_notification_idx').on(t.notificationId),
+    index('email_send_log_status_idx').on(t.status),
+    index('email_send_log_sent_at_idx').on(t.sentAt),
+  ],
+);
+
+export const insertEmailSendLogSchema = createInsertSchema(emailSendLogTable).omit({
+  id: true,
+  sentAt: true,
+});
+export type InsertEmailSendLog = z.infer<typeof insertEmailSendLogSchema>;
+export type EmailSendLog = typeof emailSendLogTable.$inferSelect;
+
 export const insertNotificationSchema = createInsertSchema(notificationsTable).omit({
   id: true,
   createdAt: true,

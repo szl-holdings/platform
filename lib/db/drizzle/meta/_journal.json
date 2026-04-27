@@ -589,6 +589,13 @@
       "when": 1745870400000,
       "tag": "0114_net30_invoicing",
       "breakpoints": true
+    },
+    {
+      "idx": 115,
+      "version": "7",
+      "when": 1745956800000,
+      "tag": "0115_email_send_log",
+      "breakpoints": true
     }
   ]
 }

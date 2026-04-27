@@ -1,5 +1,6 @@
 import {
   db,
+  emailSendLogTable,
   notificationPreferencesTable,
   notificationRecipientsTable,
   notificationsTable,
@@ -1020,6 +1021,19 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DISPATCH, async (job) =
         text,
       });
 
+      await db.insert(emailSendLogTable).values({
+        notificationId: payload.notificationId,
+        channel: 'email',
+        provider: result.provider ?? null,
+        messageId: result.messageId ?? null,
+        recipient: user.email ?? '',
+        subject: payload.title,
+        status: result.success ? 'sent' : 'failed',
+        error: result.success ? null : (result.error ?? null),
+      }).catch((logErr: unknown) => {
+        logger.warn({ logErr }, '[notification-dispatch] Failed to write email_send_log row');
+      });
+
       if (result.success) {
         logger.info(
           {
@@ -1261,6 +1275,19 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, async (job) => 
       subject,
       html,
       text: `You have ${row.count} unread notification${row.count !== 1 ? 's' : ''} in the last ${hours} hours. Visit ${appUrl} to view them.`,
+    });
+
+    await db.insert(emailSendLogTable).values({
+      notificationId: null,
+      channel: 'email',
+      provider: result.provider ?? null,
+      messageId: result.messageId ?? null,
+      recipient: user.email ?? '',
+      subject,
+      status: result.success ? 'sent' : 'failed',
+      error: result.success ? null : (result.error ?? null),
+    }).catch((logErr: unknown) => {
+      logger.warn({ logErr }, '[notification-digest] Failed to write email_send_log row');
     });
 
     if (result.success) {

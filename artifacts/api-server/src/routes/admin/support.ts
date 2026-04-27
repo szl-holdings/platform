@@ -2,6 +2,7 @@ import {
   contactSubmissionRepliesTable,
   contactSubmissionsTable,
   db,
+  emailSendLogTable,
   leadStatusTable,
   supportEmailLogTable,
   supportKnowledgeArticlesTable,
@@ -802,6 +803,64 @@ export function register(router: IRouter): void {
     } catch (err) {
       logger.error({ err }, '[admin/notification-audit-log] GET failed');
       sendError(res, 'Failed to fetch audit log', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  router.get('/admin/email-delivery-stats', async (_req, res) => {
+    try {
+      const [stats] = await db
+        .select({
+          total: sql<number>`COUNT(*)::int`,
+          sent: sql<number>`COUNT(*) FILTER (WHERE status = 'sent')::int`,
+          failed: sql<number>`COUNT(*) FILTER (WHERE status = 'failed')::int`,
+          bounced: sql<number>`COUNT(*) FILTER (WHERE status = 'bounced')::int`,
+        })
+        .from(emailSendLogTable);
+
+      const byProvider = await db
+        .select({
+          provider: emailSendLogTable.provider,
+          total: sql<number>`COUNT(*)::int`,
+          sent: sql<number>`COUNT(*) FILTER (WHERE status = 'sent')::int`,
+          failed: sql<number>`COUNT(*) FILTER (WHERE status = 'failed')::int`,
+        })
+        .from(emailSendLogTable)
+        .groupBy(emailSendLogTable.provider);
+
+      sendSuccess(res, { stats, byProvider });
+    } catch (err) {
+      logger.error({ err }, '[admin/email-delivery-stats] GET failed');
+      sendError(res, 'Failed to fetch email delivery stats', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  router.get('/admin/email-send-log', async (req, res) => {
+    try {
+      const limitParam = parseInt((req.query.limit as string) ?? '100', 10);
+      const limit = Math.min(Number.isNaN(limitParam) ? 100 : limitParam, 500);
+      const status = req.query.status as string | undefined;
+      const recipient = req.query.recipient as string | undefined;
+
+      const conditions = [];
+      if (status) conditions.push(eq(emailSendLogTable.status, status as 'sent' | 'failed' | 'bounced'));
+      if (recipient) conditions.push(ilike(emailSendLogTable.recipient, `%${recipient}%`));
+
+      const logs = await db
+        .select()
+        .from(emailSendLogTable)
+        .where(conditions.length > 0 ? and(...conditions) : undefined)
+        .orderBy(desc(emailSendLogTable.sentAt))
+        .limit(limit);
+
+      const [{ total }] = await db
+        .select({ total: sql<number>`COUNT(*)::int` })
+        .from(emailSendLogTable)
+        .where(conditions.length > 0 ? and(...conditions) : undefined);
+
+      sendSuccess(res, { logs, total });
+    } catch (err) {
+      logger.error({ err }, '[admin/email-send-log] GET failed');
+      sendError(res, 'Failed to fetch email send log', 500, 'INTERNAL_ERROR');
     }
   });
 
