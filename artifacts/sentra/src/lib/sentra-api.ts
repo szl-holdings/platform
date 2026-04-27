@@ -88,7 +88,7 @@ export interface Agent {
   hostname: string;
   os: AgentOS;
   version: string;
-  enrollmentToken: string;
+  enrollmentToken?: string;
   tenantId: string;
   tags: string[];
   status: AgentStatus;

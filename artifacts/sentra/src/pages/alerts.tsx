@@ -205,7 +205,16 @@ export default function AlertsPage() {
                   <td className="px-5 py-4">
                     <SeverityChip severity={alert.severity} />
                   </td>
-                  <td className="px-5 py-4 text-xs text-slate-400 font-mono">{alert.source}</td>
+                  <td className="px-5 py-4">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-slate-400 font-mono">{alert.source}</span>
+                      {(alert.source.includes('webhook') || alert.source.includes('splunk')) && (
+                        <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-mono uppercase border border-[#c9b787]/30 bg-[#c9b787]/10 text-[#c9b787] w-fit">
+                          SIEM
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-5 py-4 text-xs text-slate-400 font-mono">{alert.asset ?? '—'}</td>
                   <td className="px-5 py-4">
                     <StatusChip status={alert.status} />

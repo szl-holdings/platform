@@ -310,11 +310,23 @@ async function copyConfigFiles() {
   }
 }
 
+async function copyAgentStubs() {
+  const distDir = path.resolve(artifactDir, 'dist');
+  const stubsSrc = path.join(artifactDir, 'src', 'agents', 'stubs');
+  const stubsDest = path.join(distDir, 'agents', 'stubs');
+  try {
+    await mkdir(stubsDest, { recursive: true });
+    await cp(stubsSrc, stubsDest, { recursive: true });
+  } catch (_err) {
+  }
+}
+
 buildAll()
   .then(() =>
     createFastStartWrapper(path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'dist')),
   )
   .then(() => copyConfigFiles())
+  .then(() => copyAgentStubs())
   .then(() => copyPdfkitData())
   .catch((_err) => {
     process.exit(1);

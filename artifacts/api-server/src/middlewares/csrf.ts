@@ -132,10 +132,13 @@ function isExempt(path: string): boolean {
   // execution is further gated by the PCE gate + MirrorEval block checks.
   if (path.startsWith('/api/a11oy/demo/')) return true;
   if (path.match(/^\/api\/distribution-os\/linktree\/\d+\/click$/)) return true;
-  // Sentra EDR agent heartbeat — machine-to-machine POST from enrolled endpoint
-  // agents. Agents authenticate via enrollment token header (x-enrollment-token),
-  // not browser cookies; CSRF double-submit is not applicable.
+  // Sentra EDR agent endpoints — machine-to-machine; agents authenticate via
+  // long-lived bearer tokens issued at enrollment-token exchange time.
+  // No browser session or cookie involved; CSRF double-submit not applicable.
   if (path === '/api/sentra/agents/heartbeat') return true;
+  if (path === '/api/sentra/agents/exchange') return true;
+  if (path === '/api/sentra/agents/poll') return true;
+  if (path.startsWith('/api/sentra/agents/commands/') && path.endsWith('/ack')) return true;
   // Sentra SIEM webhook ingest — external SIEM platforms push events to this
   // endpoint. HMAC-SHA256 signature in x-signature-sha256 header authenticates
   // the push; no browser session or cookie involved, CSRF not applicable.

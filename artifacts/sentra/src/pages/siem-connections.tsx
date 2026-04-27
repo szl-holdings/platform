@@ -411,11 +411,25 @@ function ConnectionCard({
           )}
 
           {connection.adapterId === 'generic-webhook' && (
-            <div className="p-3 rounded bg-slate-950 border border-slate-800">
-              <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">Webhook Ingest URL</div>
-              <code className="text-[11px] text-[#c9b787] font-mono break-all">
-                {window.location.origin}/api/sentra/siem/ingest/{connection.id}
-              </code>
+            <div className="space-y-2">
+              <div className="p-3 rounded bg-slate-950 border border-slate-800">
+                <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">Webhook Ingest URL</div>
+                <code className="text-[11px] text-[#c9b787] font-mono break-all">
+                  {window.location.origin}/api/sentra/siem/ingest/{connection.id}
+                </code>
+              </div>
+              <div className="p-3 rounded bg-slate-950 border border-slate-800">
+                <div className="text-[10px] text-slate-500 font-mono uppercase mb-1">HMAC-SHA256 Signature</div>
+                <p className="text-[10px] text-slate-500 mb-2">
+                  Sign the raw request body with your <code className="text-[#c9b787]">hmacSecret</code> and include as{' '}
+                  <code className="text-[#c9b787]">X-Signature-SHA256: sha256=&lt;hex&gt;</code>
+                </p>
+                <pre className="text-[10px] text-slate-400 font-mono whitespace-pre-wrap">{`# Node.js
+const sig = 'sha256=' + crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
+
+# Python
+sig = 'sha256=' + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()`}</pre>
+              </div>
             </div>
           )}
 

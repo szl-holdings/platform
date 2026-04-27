@@ -93,18 +93,33 @@ function DeployAgentModal({ onClose, onDeployed }: DeployModalProps) {
 
   const startWaiting = () => {
     setStep('waiting');
-    pollRef.current = setInterval(async () => {
-      const { agents } = await listAgents();
-      const found = agents.some((a) => a.enrollmentToken === token);
-      if (found) {
-        clearInterval(pollRef.current!);
-        setConnected(true);
-        setTimeout(() => {
-          onDeployed();
-          onClose();
-        }, 1500);
-      }
-    }, 3000);
+    // Capture the set of agent IDs already enrolled before we start waiting.
+    listAgents().then(({ agents: initial }) => {
+      const knownIds = new Set(initial.map((a) => a.id));
+      pollRef.current = setInterval(async () => {
+        const { agents } = await listAgents();
+        // A new agent appeared — enrollment complete
+        const hasNew = agents.some((a) => !knownIds.has(a.id));
+        if (hasNew) {
+          clearInterval(pollRef.current!);
+          setConnected(true);
+          setTimeout(() => {
+            onDeployed();
+            onClose();
+          }, 1500);
+        }
+      }, 3000);
+    }).catch(() => {
+      // Fallback: just poll for any agents
+      pollRef.current = setInterval(async () => {
+        const { agents } = await listAgents();
+        if (agents.length > 0) {
+          clearInterval(pollRef.current!);
+          setConnected(true);
+          setTimeout(() => { onDeployed(); onClose(); }, 1500);
+        }
+      }, 3000);
+    });
   };
 
   useEffect(() => {
