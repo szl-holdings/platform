@@ -97,7 +97,6 @@ const ECOSYSTEM_APPS_NAV: NavGroup = {
     { href: '/imperium/', label: 'IMPERIUM', icon: Crown, external: true },
     { href: '/lyte-command-center/', label: 'Lyte Command Center', icon: Zap, external: true },
     { href: '/stephen-site/', label: 'Stephen Site', icon: Globe, external: true },
-    { href: '/cortex-mobile/', label: 'APEX Mobile', icon: Cpu, external: true },
   ],
 };
 

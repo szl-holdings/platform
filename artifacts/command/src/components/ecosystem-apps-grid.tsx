@@ -1,4 +1,4 @@
-import { Cpu, Crown, ExternalLink, Globe, Workflow, Zap } from 'lucide-react';
+import { Crown, ExternalLink, Globe, Workflow, Zap } from 'lucide-react';
 
 export const ECOSYSTEM_APPS = [
   {
@@ -31,13 +31,6 @@ export const ECOSYSTEM_APPS = [
     description: 'Personal portfolio and thought-leadership platform for executive communications',
     icon: Globe,
     color: '#4d8fcc',
-  },
-  {
-    href: '/cortex-mobile/',
-    label: 'APEX Mobile',
-    description: 'Mobile command interface — governed decision loop and briefings on the go',
-    icon: Cpu,
-    color: '#f97316',
   },
 ];
 
