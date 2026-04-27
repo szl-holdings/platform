@@ -74,7 +74,7 @@ const OPERATING_LOOP = [
   { step: "Learn", desc: "Outcomes feed back into signal calibration. The system improves with every decision cycle.", icon: BarChart3 },
 ];
 
-const PORTFOLIO_COLUMNS = [
+const ECOSYSTEM_COLUMNS = [
   {
     label: "Commercial Wedge",
     color: ACCENT,
@@ -212,16 +212,16 @@ export default function OperatingDoctrinePage() {
             </div>
           </section>
   
-          {/* Portfolio Architecture */}
+          {/* Ecosystem Architecture */}
           <section className="border-b border-white/10">
             <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8 lg:py-20">
               <div className="mb-12">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-white/40 mb-3">Portfolio Architecture</p>
+                <p className="text-[11px] uppercase tracking-[0.24em] text-white/40 mb-3">Ecosystem Architecture</p>
                 <h2 className="text-3xl font-semibold text-white">One wedge. Staged expansion.</h2>
-                <p className="mt-3 text-white/60 max-w-2xl">The portfolio is intentionally staged. Capital and GTM resources concentrate on the commercial wedge. Expansion lanes remain visible as future value built on the same operating spine.</p>
+                <p className="mt-3 text-white/60 max-w-2xl">The ecosystem is intentionally staged. Capital and GTM resources concentrate on the commercial wedge. Expansion lanes remain visible as future value built on the same operating spine.</p>
               </div>
               <div className="grid gap-6 md:grid-cols-3">
-                {PORTFOLIO_COLUMNS.map((col, ci) => (
+                {ECOSYSTEM_COLUMNS.map((col, ci) => (
                   <m.div
                     key={col.label}
                     custom={ci}
@@ -312,7 +312,7 @@ export default function OperatingDoctrinePage() {
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                 <div>
                   <h2 className="text-2xl font-semibold text-white mb-2">See the platform in action</h2>
-                  <p className="text-white/55">Explore the commercial wedge and the full portfolio map.</p>
+                  <p className="text-white/55">Explore the commercial wedge and the full ecosystem map.</p>
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <a href="/command/operations/" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-80" style={{ background: ACCENT, color: "#070a10" }}>
