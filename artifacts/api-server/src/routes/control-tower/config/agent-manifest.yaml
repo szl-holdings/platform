@@ -1,0 +1,40 @@
+# Version: 1.0.0
+# Date: 2025-01-01
+agents:
+  - id: sense-agent
+    name: Sense Agent
+    subtitle: Signal Monitoring
+    domain: sense
+    capabilities:
+      - signal-monitoring
+      - event-tracking
+    riskTolerance: low
+    collaborationRules:
+      - escalate-to-decide
+    scopeCertMaxRisk: high
+    version: "1.0.0"
+  - id: decide-agent
+    name: Decide Agent
+    subtitle: Decision Orchestration
+    domain: decide
+    capabilities:
+      - decision-making
+      - orchestration
+    riskTolerance: medium
+    collaborationRules:
+      - consult-sense
+      - delegate-to-act
+    scopeCertMaxRisk: high
+    version: "1.0.0"
+  - id: act-agent
+    name: Act Agent
+    subtitle: Pipeline Execution
+    domain: act
+    capabilities:
+      - pipeline-execution
+      - action-dispatch
+    riskTolerance: medium
+    collaborationRules:
+      - report-to-decide
+    scopeCertMaxRisk: high
+    version: "1.0.0"
