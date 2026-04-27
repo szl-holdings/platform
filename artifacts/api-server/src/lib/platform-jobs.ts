@@ -16,6 +16,7 @@ import { and, eq, gte, sql } from 'drizzle-orm';
 import {
   buildNotificationDigestEmail,
   buildTransactionalNotificationEmail,
+  generateUnsubscribeToken,
   sendEmail,
 } from './email';
 import { logger } from './logger';
@@ -1256,6 +1257,9 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, async (job) => 
       )
       .limit(10);
 
+    const unsubToken = generateUnsubscribeToken(user.email ?? '');
+    const digestUnsubscribeUrl = `${appUrl}/api/notifications/unsubscribe?e=${encodeURIComponent(user.email ?? '')}&t=${encodeURIComponent(unsubToken)}`;
+
     const html = buildNotificationDigestEmail({
       userName: user.displayName ?? user.email,
       date: dateLabel,
@@ -1266,6 +1270,7 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, async (job) => 
         actionUrl: n.actionUrl ?? null,
         createdAt: n.createdAt.toISOString(),
       })),
+      unsubscribeUrl: digestUnsubscribeUrl,
     });
 
     const subject = `Your ${hours >= 24 ? 'daily' : `${hours}-hour`} digest — ${row.count} unread notification${row.count !== 1 ? 's' : ''}`;
@@ -1274,7 +1279,8 @@ durableJobQueue.register(PLATFORM_JOB_TYPES.NOTIFICATION_DIGEST, async (job) => 
       to: user.email ?? '',
       subject,
       html,
-      text: `You have ${row.count} unread notification${row.count !== 1 ? 's' : ''} in the last ${hours} hours. Visit ${appUrl} to view them.`,
+      text: `You have ${row.count} unread notification${row.count !== 1 ? 's' : ''} in the last ${hours} hours. Visit ${appUrl} to view them.\n\nTo unsubscribe from digest emails: ${digestUnsubscribeUrl}`,
+      unsubscribeToken: unsubToken,
     });
 
     await db.insert(emailSendLogTable).values({
