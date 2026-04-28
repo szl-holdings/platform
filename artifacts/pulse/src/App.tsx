@@ -513,6 +513,7 @@ export default function App() {
                   </Suspense>
                 )}
               </Route>
+              <Route path={`${BASE}/benchmarks`} component={lazy(() => import('@/pages/benchmarks'))} />
               <Route path={`${BASE}/governed-cockpit`}>
                 {() => (
                   <Suspense fallback={null}>

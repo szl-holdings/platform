@@ -491,6 +491,7 @@ const COMMAND_NAV_ROUTES: Array<{ href: string; label: string; group: string }> 
   { href: '/operations/evidence-explorer', label: 'Evidence Explorer', group: 'Operations' },
   { href: '/operations/eval-studio', label: 'Eval Studio', group: 'Operations' },
   { href: '/eval-forge', label: 'Eval Forge', group: 'Operations' },
+  { href: '/open-eval-hub', label: 'Open Eval Hub', group: 'Operations' },
   { href: '/evolution', label: 'PER — Runtime Overview', group: 'Evolution' },
   { href: '/evolution/evaluation', label: 'PER — Evaluation Console', group: 'Evolution' },
   { href: '/evolution/governance', label: 'PER — Governance Console', group: 'Evolution' },
@@ -833,6 +834,7 @@ function AppShell() {
               <Route path="/operations/eval-studio" component={() => <EvalStudio />} />
               <Route path="/eval-forge" component={() => <EvalForge />} />
               <Route path="/eval-forge/runs/:runId" component={() => <EvalForge />} />
+              <Route path="/open-eval-hub" component={lazy(() => import('./pages/open-eval-hub'))} />
               <Route path="/operations/forge" component={() => <ForgePage />} />
 
               {/* A11oy Phase 2 — Agent Runtime */}

@@ -32,6 +32,7 @@ const NAV_ITEMS = [
   { href: `${BASE}/dissent`, label: 'Dissent Channel', icon: MessageSquare },
   { href: `${BASE}/constellation`, label: 'Constellation', icon: Network },
   { href: `${BASE}/governed-cockpit`, label: 'Governed Intelligence', icon: Shield },
+  { href: `${BASE}/benchmarks`, label: 'Benchmarks', icon: BarChart2 },
   { href: `${BASE}/system`, label: 'System Health', icon: Activity },
   { href: `${BASE}/settings`, label: 'Settings', icon: Settings },
 ];

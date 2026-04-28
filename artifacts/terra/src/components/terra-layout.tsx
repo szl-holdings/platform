@@ -521,6 +521,18 @@ const NAV_SECTIONS: SidebarNavSection[] = [
       },
     ],
   },
+  {
+    id: 'benchmarks',
+    label: 'Benchmarks',
+    items: [
+      {
+        id: 'benchmarks',
+        href: '/benchmarks',
+        label: 'Benchmarks & Leaderboards',
+        icon: <BarChart3 className="w-full h-full" />,
+      },
+    ],
+  },
 ];
 
 const API = '/api';

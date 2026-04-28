@@ -27,6 +27,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   Bell,
   BookOpen,
+  BarChart3,
   Brain,
   Briefcase,
   CheckCircle2,
@@ -54,6 +55,7 @@ const DashboardPage = lazy(() => import('./pages/dashboard'));
 const CounselLandingPage = lazy(() => import('./pages/counsel-landing'));
 const CounselPricingPage = lazy(() => import('./pages/pricing'));
 const CounselBillingPage = lazy(() => import('./pages/billing-account'));
+const CounselBenchmarksPage = lazy(() => import('./pages/benchmarks'));
 const MatterOverviewPage = lazy(() => import('./pages/matter-overview'));
 const ObligationTimelinePage = lazy(() => import('./pages/obligation-timeline'));
 const DependencyGraphPage = lazy(() => import('./pages/dependency-graph'));
@@ -241,6 +243,18 @@ function CounselSidebarContent({
         },
       ],
     },
+    {
+      id: 'benchmarks',
+      label: 'Benchmarks',
+      items: [
+        {
+          id: '/benchmarks',
+          label: 'Benchmarks & Leaderboards',
+          href: '/benchmarks',
+          icon: <BarChart3 className="w-3.5 h-3.5" />,
+        },
+      ],
+    },
   ];
 
   return (
@@ -363,6 +377,7 @@ function DashboardRouter() {
         <Route path="/aef-search" component={AefKnowledgeSearchPage} />
         <Route path="/forecast" component={ForecastPage} />
         <Route path="/pricing" component={CounselPricingPage} />
+        <Route path="/benchmarks" component={CounselBenchmarksPage} />
         <Route path="/account/billing" component={CounselBillingPage} />
         <Route path="/evidence" component={EvidenceExplorerPage} />
         <Route path="/esignature" component={EsignaturePage} />

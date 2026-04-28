@@ -861,6 +861,18 @@ function VesselsSidebarContent({
       ],
     },
     {
+      id: 'benchmarks',
+      label: 'Benchmarks',
+      items: [
+        {
+          id: '/benchmarks',
+          label: 'Benchmarks & Leaderboards',
+          href: '/benchmarks',
+          icon: <BarChart3 className="w-3.5 h-3.5" />,
+        },
+      ],
+    },
+    {
       id: 'settings',
       label: 'Settings',
       items: adminNavItems.map(({ path, label, icon: Icon }) => ({
@@ -1059,6 +1071,7 @@ function DashboardRouter() {
         <Route path="/dashboard/alerts" component={AlertCenterPage} />
         <Route path="/dashboard/reports" component={PerformanceAnalyticsPage} />
         <Route path="/dashboard/billing" component={VesselsBillingPanelPage} />
+        <Route path="/benchmarks" component={lazy(() => import('@/pages/benchmarks'))} />
         <Route path="/account/billing" component={VesselsBillingAccountPage} />
         <Route path="/dashboard/settings" component={VesselsSettingsPage} />
         <Route path="/dashboard/team" component={VesselsTeamPanelPage} />

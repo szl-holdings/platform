@@ -209,6 +209,7 @@ function PrivateRouter() {
         <Route path="/document-engine/:sub" component={DocumentEngine} />
         <Route path="/atlas-artifacts" component={TerraAtlasArtifactsPage} />
         <Route path="/pricing" component={TerraPerricingPage} />
+        <Route path="/benchmarks" component={lazy(() => import('@/pages/benchmarks'))} />
         <Route path="/account/billing" component={TerraBillingPage} />
         <Route path="/lender-report" component={LenderReport} />
         <Route path="/property-desk" component={PropertyDesk} />

@@ -37,6 +37,7 @@ import {
   Terminal,
   Thermometer,
   TrendingUp,
+  Trophy,
   Users,
   Workflow,
   Zap,
@@ -195,6 +196,12 @@ const NAV_GROUPS: NavGroup[] = [
         badge: 'NEW',
         badgeColor: 'amber' as const,
       },
+    ],
+  },
+  {
+    label: 'Benchmarks',
+    items: [
+      { label: 'Benchmarks & Leaderboards', href: '/benchmarks', icon: <Trophy className="w-3.5 h-3.5" /> },
     ],
   },
   {
@@ -597,6 +604,7 @@ function DashboardRoutes() {
         <Route path="/policies" component={PolicyCenterPage} />
         <Route path="/eval" component={EvalStudioPage} />
         <Route path="/brief" component={BriefPage} />
+        <Route path="/benchmarks" component={lazy(() => import('@/pages/benchmarks'))} />
         <Route path="/account/billing" component={LyteBillingPage} />
         {/* Legacy surfaces */}
         <Route path="/board" component={BoardViewPage} />

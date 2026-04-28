@@ -609,6 +609,111 @@ export default function HomePage() {
             </div>
           </section>
 
+          {/* ── Evidence Scores ──────────────────────────────── */}
+          <section style={{ padding: "clamp(5rem, 10vw, 8rem) 0", borderTop: `1px solid ${BORDER}` }}>
+            <div style={{ maxWidth: "1080px", margin: "0 auto", padding: "0 2rem" }}>
+              <FadeIn>
+                <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "3rem", gap: "2rem", flexWrap: "wrap" }}>
+                  <div style={{ maxWidth: "560px" }}>
+                    <SectionLabel>Open Evaluation Layer</SectionLabel>
+                    <h2 style={{ fontSize: "clamp(1.875rem, 3.5vw, 2.75rem)", fontWeight: 500, letterSpacing: "-0.035em", color: TEXT, marginBottom: "1rem", lineHeight: 1.1 }}>
+                      Every domain score is verified.
+                    </h2>
+                    <p style={{ fontSize: "1rem", lineHeight: 1.65, color: TEXT_DIM, margin: 0 }}>
+                      Cryptographically verified benchmark results across all SZL domain products.
+                      No opaque claims — every score links to its source trace, leaderboard, and eval framework.
+                    </p>
+                  </div>
+                  <Link href="/evidence-scores" style={{ textDecoration: "none" }}>
+                    <span style={{
+                      display: "inline-flex", alignItems: "center", gap: "0.4rem",
+                      fontSize: "0.8125rem", color: TEXT_DIM, fontFamily: MONO,
+                      letterSpacing: "0.04em", textTransform: "uppercase",
+                      transition: "color 0.2s",
+                    }}>
+                      Full leaderboard <ArrowUpRight size={14} />
+                    </span>
+                  </Link>
+                </div>
+              </FadeIn>
+
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: "1px",
+                background: BORDER,
+                border: `1px solid ${BORDER}`,
+                borderRadius: "12px",
+                overflow: "hidden",
+              }}>
+                {[
+                  { domain: "Pulse", href: "/pulse/benchmarks", score: "94.2%", metric: "Brief Relevance", badge: "Verified", rank: 1 },
+                  { domain: "Sentra", href: "/sentra/benchmarks", score: "91.4%", metric: "Threat Detection Recall", badge: "Verified", rank: 2 },
+                  { domain: "Lyte", href: "/lyte-command-center/benchmarks", score: "88.7%", metric: "Decision Quality Index", badge: "Verified", rank: 3 },
+                  { domain: "Counsel", href: "/counsel/benchmarks", score: "87.9%", metric: "Contract Extraction", badge: "Verified", rank: 4 },
+                  { domain: "Terra", href: "/terra/benchmarks", score: "83.6%", metric: "Distress Signal Precision", badge: "Community", rank: 5 },
+                  { domain: "Vessels", href: "/vessels/benchmarks", score: "79.1%", metric: "Port ETA Accuracy", badge: "Community", rank: 6 },
+                ].map((item, i) => (
+                  <FadeIn key={item.domain} delay={i * 0.04}>
+                    <Link href={item.href} style={{ textDecoration: "none", display: "block", height: "100%" }}>
+                      <m.div
+                        whileHover={{ background: "rgba(255,255,255,0.025)" }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                          background: BG,
+                          padding: "1.75rem 2rem",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "0.875rem",
+                          cursor: "pointer",
+                          height: "100%",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <span style={{ fontSize: "0.625rem", fontFamily: MONO, fontWeight: 500, letterSpacing: "0.14em", textTransform: "uppercase", color: TEXT_MUTED }}>
+                            #{item.rank} · {item.domain}
+                          </span>
+                          <span style={{
+                            display: "inline-flex", alignItems: "center", gap: "0.25rem",
+                            fontSize: "0.65rem", fontFamily: MONO, fontWeight: 500,
+                            letterSpacing: "0.06em", textTransform: "uppercase",
+                            color: item.badge === "Verified" ? "#22c55e" : ACCENT,
+                            background: item.badge === "Verified" ? "rgba(34,197,94,0.08)" : "rgba(201,183,135,0.08)",
+                            border: `1px solid ${item.badge === "Verified" ? "rgba(34,197,94,0.25)" : "rgba(201,183,135,0.25)"}`,
+                            borderRadius: "999px",
+                            padding: "0.2rem 0.5rem",
+                          }}>
+                            {item.badge}
+                          </span>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: "2rem", fontWeight: 600, color: TEXT, letterSpacing: "-0.04em", margin: "0 0 0.25rem", fontFamily: MONO, lineHeight: 1 }}>
+                            {item.score}
+                          </p>
+                          <p style={{ fontSize: "0.8125rem", color: TEXT_DIM, margin: 0, lineHeight: 1.4 }}>{item.metric}</p>
+                        </div>
+                        <div style={{ marginTop: "auto", display: "flex", alignItems: "center", gap: "0.25rem", paddingTop: "0.75rem", borderTop: `1px solid ${BORDER}` }}>
+                          <span style={{ fontSize: "0.75rem", color: TEXT_MUTED, fontFamily: MONO, letterSpacing: "0.04em" }}>View benchmark</span>
+                          <ArrowUpRight size={11} style={{ color: TEXT_MUTED }} />
+                        </div>
+                      </m.div>
+                    </Link>
+                  </FadeIn>
+                ))}
+              </div>
+
+              <FadeIn delay={0.2}>
+                <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
+                  <Link href="/evidence-scores" style={{ textDecoration: "none" }}>
+                    <span style={{ fontSize: "0.8125rem", color: TEXT_MUTED }}>
+                      View full portfolio leaderboard with dispute queue and submission history →
+                    </span>
+                  </Link>
+                </div>
+              </FadeIn>
+            </div>
+          </section>
+
           {/* ── Trust ────────────────────────────────────────── */}
           <section style={{ padding: "clamp(5rem, 10vw, 8rem) 0", borderTop: `1px solid ${BORDER}` }}>
             <div style={{ maxWidth: "1080px", margin: "0 auto", padding: "0 2rem" }}>

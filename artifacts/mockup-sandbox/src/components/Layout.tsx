@@ -75,6 +75,13 @@ const NAV_ITEMS: Array<{
     description: 'Eval Console',
     group: 'control',
   },
+  {
+    id: 'eval-layer',
+    label: 'Open Evals',
+    icon: BarChart2,
+    description: 'Open Evaluation Layer — Leaderboards',
+    group: 'control',
+  },
 ];
 
 export default function Layout({

@@ -76,6 +76,7 @@ import {
   Target,
   Terminal,
   TrendingUp,
+  Trophy,
   Users,
   Workflow,
   Zap,
@@ -341,6 +342,13 @@ const NAV_SECTIONS: NavSection[] = [
       { path: '/crisis-arena/leaderboard', label: 'Analyst Rankings', icon: Users, comp: L(() => import('@/pages/crisis-arena-leaderboard')) },
       { path: '/crisis-arena/engagements', label: 'Engagements', icon: Activity, comp: L(() => import('@/pages/crisis-arena-engagements')) },
       { path: '/crisis-arena/architect', label: 'Analyst Workspace', icon: Zap, comp: L(() => import('@/pages/crisis-arena-architect')) },
+    ],
+  },
+  {
+    id: 'benchmarks',
+    label: 'Benchmarks',
+    items: [
+      { path: '/benchmarks', label: 'Benchmarks & Leaderboards', icon: Trophy, comp: L(() => import('@/pages/benchmarks')) },
     ],
   },
 ];

@@ -13,7 +13,8 @@ export type Page =
   | 'prompt-registry'
   | 'eval-console'
   | 'audit'
-  | 'marketplace';
+  | 'marketplace'
+  | 'eval-layer';
 
 export interface PraxisStatus {
   activeSwarms: number;

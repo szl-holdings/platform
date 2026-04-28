@@ -7,6 +7,7 @@ import AuditTrail from './pages/AuditTrail';
 import Bridge from './pages/Bridge';
 import DesignSystemPage from './pages/DesignSystemPage';
 import EvalConsole from './pages/EvalConsole';
+import EvalLayer from './pages/EvalLayer';
 import Home from './pages/Home';
 import Ingest from './pages/Ingest';
 import Marketplace from './pages/Marketplace';
@@ -77,6 +78,7 @@ function AppInner() {
       {page === 'ai-quality' && <AIQuality />}
       {page === 'prompt-registry' && <PromptRegistry />}
       {page === 'eval-console' && <EvalConsole />}
+      {page === 'eval-layer' && <EvalLayer />}
       {page === 'audit' && <AuditTrail />}
     </Layout>
   );
