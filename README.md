@@ -1,6 +1,6 @@
 # SZL Holdings
 
-[![CI](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/ci.yml) [![CodeQL](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/codeql.yml) [![Security](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/security.yml/badge.svg)](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/security.yml) [![License](https://img.shields.io/badge/license-Proprietary-red)](./LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/) [![pnpm](https://img.shields.io/badge/pnpm-monorepo-orange)](https://pnpm.io/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
+[![CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml) [![CodeQL](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml) [![Security](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml) [![License](https://img.shields.io/badge/license-Proprietary-red)](./LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/) [![pnpm](https://img.shields.io/badge/pnpm-monorepo-orange)](https://pnpm.io/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
 
 **The governed infrastructure for high-consequence decisions.**
 
@@ -234,7 +234,7 @@ This repository is proprietary. Source code, architecture, and implementation de
 | Lyte — Decision Intelligence | web | `/lyte/` | `alpha partial` — routes functional; legacy path alias missing |
 | Pulse — AI Executive Briefing | web | `/pulse/` | `alpha working` — AI multi-provider routing active |
 | SZL Holdings — Governed Autonomy Demo | video | `/szl-demo-video/` | `demo-only` — promotional video artifact |
-| SZL Holdings Mobile Command | mobile | `/szl-holdings-mobile/` | `not started` — scaffold complete; splash/icon and push linking pending |
+| SZL Holdings — Mobile Command | mobile | `/szl-holdings-mobile/` | `not started` — scaffold complete; splash/icon and push linking pending |
 
 ---
 
