@@ -1,6 +1,5 @@
 import {
-  type AutonomyMode,
-  AutonomyModeToggle,
+  GovernedCockpitShell,
   type EvidenceSource,
   type PolicyState,
   ProofEnvelope,
@@ -8,7 +7,6 @@ import {
   color,
 } from '@szl-holdings/design-system';
 import { AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
-import { useState } from 'react';
 import { SubstrateWorkflowPanel } from '@/components/SubstrateWorkflowPanel';
 
 const ACCENT = productAccent.carlota;
@@ -107,80 +105,23 @@ const PROPOSAL_EVIDENCE: EvidenceSource[] = [
 ];
 
 export default function GovernedCockpit() {
-  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>('recommend');
-
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background: '#060b12',
-        color: '#c8d8e8',
-        fontFamily: "'Inter', system-ui, sans-serif",
-      }}
+    <GovernedCockpitShell
+      accentColor={ACCENT}
+      headerIcon={<Briefcase className="w-4 h-4" style={{ color: ACCENT }} />}
+      headerTitle="Carlota Jo — Governed Strategic Advisory"
+      headerSubtitle="Every engagement recommendation, risk signal, and proposal carries a full proof chain"
+      liveIndicatorLabel="Advisory Intelligence · Deterministic Fallback (Counsel integration active)"
+      defaultAutonomyMode="recommend"
+      kpiCards={[
+        { label: 'Active Engagements', value: '7', icon: Briefcase, color: ACCENT },
+        { label: 'Pipeline Value', value: '£1.4M', icon: TrendingUp, color: color.accent.green },
+        { label: 'At-Risk Accounts', value: '2', icon: AlertTriangle, color: color.accent.red },
+        { label: 'Prospects Tracked', value: '34', icon: Users, color: '#7a99b8' },
+      ]}
     >
-      <div className="border-b" style={{ borderColor: '#1a2535', background: '#0d1520' }}>
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: `${ACCENT}18`, border: `1px solid ${ACCENT}40` }}
-            >
-              <Briefcase className="w-4 h-4" style={{ color: ACCENT }} />
-            </div>
-            <div>
-              <div className="text-sm font-semibold" style={{ color: '#c8d8e8' }}>
-                Carlota Jo — Governed Strategic Advisory
-              </div>
-              <div className="text-xs" style={{ color: '#4a6070' }}>
-                Every engagement recommendation, risk signal, and proposal carries a full proof
-                chain
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-widest" style={{ color: '#4a6070' }}>
-              Autonomy Mode
-            </span>
-            <AutonomyModeToggle value={autonomyMode} onChange={setAutonomyMode} variant="compact" />
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
-          <span
-            className="text-xs uppercase tracking-widest font-semibold"
-            style={{ color: '#4a6070' }}
-          >
-            Advisory Intelligence · Deterministic Fallback (Counsel integration active)
-          </span>
-        </div>
-
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          {[
-            { label: 'Active Engagements', value: '7', icon: Briefcase, color: ACCENT },
-            { label: 'Pipeline Value', value: '£1.4M', icon: TrendingUp, color: color.accent.green },
-            { label: 'At-Risk Accounts', value: '2', icon: AlertTriangle, color: color.accent.red },
-            { label: 'Prospects Tracked', value: '34', icon: Users, color: '#7a99b8' },
-          ].map(({ label, value, icon: Icon, color }) => (
-            <div
-              key={label}
-              className="rounded-xl p-4"
-              style={{ background: '#0d1520', border: '1px solid #1a2535' }}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Icon className="w-3.5 h-3.5" style={{ color }} />
-                <span className="text-xs uppercase tracking-wide" style={{ color: '#4a6070' }}>
-                  {label}
-                </span>
-              </div>
-              <div className="text-2xl font-bold" style={{ color }}>
-                {value}
-              </div>
-            </div>
-          ))}
-        </div>
+      {(autonomyMode, setAutonomyMode) => (
+        <>
 
         <ProofEnvelope
           title="Market Entry Signal: Apex Wealth Management — Consumer Duty Tailwind"
@@ -304,7 +245,8 @@ export default function GovernedCockpit() {
         <div className="px-1">
           <SubstrateWorkflowPanel />
         </div>
-      </div>
-    </div>
+        </>
+      )}
+    </GovernedCockpitShell>
   );
 }

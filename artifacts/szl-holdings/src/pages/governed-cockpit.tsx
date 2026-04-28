@@ -1,6 +1,5 @@
 import {
-  type AutonomyMode,
-  AutonomyModeToggle,
+  GovernedCockpitShell,
   type EvidenceSource,
   type PolicyState,
   ProofEnvelope,
@@ -8,7 +7,6 @@ import {
   color,
 } from '@szl-holdings/design-system';
 import { AlertTriangle, BarChart3, Layers, TrendingUp } from 'lucide-react';
-import { useState } from 'react';
 
 const ACCENT = productAccent.holdings;
 
@@ -106,80 +104,23 @@ const DEPLOYMENT_EVIDENCE: EvidenceSource[] = [
 ];
 
 export default function GovernedCockpit() {
-  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>('recommend');
-
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background: 'var(--gi-bg-base)',
-        color: 'var(--gi-text-primary)',
-        fontFamily: "'Inter', system-ui, sans-serif",
-      }}
+    <GovernedCockpitShell
+      accentColor={ACCENT}
+      headerIcon={<BarChart3 className="w-4 h-4" style={{ color: ACCENT }} />}
+      headerTitle="SZL Holdings — Governed Portfolio Intelligence"
+      headerSubtitle="Every fund metric, venture signal, and deployment decision carries a full proof chain"
+      liveIndicatorLabel="Portfolio Intelligence · Deterministic Fallback (Counsel integration active)"
+      defaultAutonomyMode="recommend"
+      kpiCards={[
+        { label: 'Fund NAV', value: '$142M', icon: BarChart3, color: ACCENT },
+        { label: 'IRR (Inception)', value: '24.1%', icon: TrendingUp, color: color.accent.green },
+        { label: 'Undeployed Capital', value: '$12.4M', icon: Layers, color: color.accent.amber },
+        { label: 'Portfolio Companies', value: '5', icon: AlertTriangle, color: '#7a99b8' },
+      ]}
     >
-      <div className="border-b" style={{ borderColor: 'var(--gi-border-subtle)', background: 'var(--gi-bg-surface)' }}>
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: `${ACCENT}18`, border: `1px solid ${ACCENT}40` }}
-            >
-              <BarChart3 className="w-4 h-4" style={{ color: ACCENT }} />
-            </div>
-            <div>
-              <div className="text-sm font-semibold" style={{ color: 'var(--gi-text-primary)' }}>
-                SZL Holdings — Governed Portfolio Intelligence
-              </div>
-              <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
-                Every fund metric, venture signal, and deployment decision carries a full proof
-                chain
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--gi-text-muted)' }}>
-              Autonomy Mode
-            </span>
-            <AutonomyModeToggle value={autonomyMode} onChange={setAutonomyMode} variant="compact" />
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
-          <span
-            className="text-xs uppercase tracking-widest font-semibold"
-            style={{ color: 'var(--gi-text-muted)' }}
-          >
-            Portfolio Intelligence · Deterministic Fallback (Counsel integration active)
-          </span>
-        </div>
-
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          {[
-            { label: 'Fund NAV', value: '$142M', icon: BarChart3, color: ACCENT },
-            { label: 'IRR (Inception)', value: '24.1%', icon: TrendingUp, color: color.accent.green },
-            { label: 'Undeployed Capital', value: '$12.4M', icon: Layers, color: color.accent.amber },
-            { label: 'Portfolio Companies', value: '5', icon: AlertTriangle, color: 'var(--gi-text-secondary)' },
-          ].map(({ label, value, icon: Icon, color }) => (
-            <div
-              key={label}
-              className="rounded-xl p-4"
-              style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-subtle)' }}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Icon className="w-3.5 h-3.5" style={{ color }} />
-                <span className="text-xs uppercase tracking-wide" style={{ color: 'var(--gi-text-muted)' }}>
-                  {label}
-                </span>
-              </div>
-              <div className="text-2xl font-bold" style={{ color }}>
-                {value}
-              </div>
-            </div>
-          ))}
-        </div>
+      {(autonomyMode, setAutonomyMode) => (
+        <>
 
         <ProofEnvelope
           title="Fund Performance Briefing: $142.3M NAV — 24.1% IRR (Inception)"
@@ -314,7 +255,8 @@ export default function GovernedCockpit() {
             </div>
           </div>
         </ProofEnvelope>
-      </div>
-    </div>
+        </>
+      )}
+    </GovernedCockpitShell>
   );
 }

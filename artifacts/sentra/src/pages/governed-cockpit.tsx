@@ -1,6 +1,5 @@
 import {
-  type AutonomyMode,
-  AutonomyModeToggle,
+  GovernedCockpitShell,
   type EvidenceSource,
   type PolicyState,
   ProofEnvelope,
@@ -8,7 +7,6 @@ import {
   color,
 } from '@szl-holdings/design-system';
 import { Activity, AlertTriangle, Shield } from 'lucide-react';
-import { useState } from 'react';
 
 const ACCENT = productAccent.aegis;
 
@@ -103,78 +101,22 @@ const RISK_EVIDENCE: EvidenceSource[] = [
 ];
 
 export default function GovernedCockpit() {
-  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>('ask-to-act');
-
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background: 'var(--gi-bg-base)',
-        color: 'var(--gi-text-primary)',
-        fontFamily: "'Inter', system-ui, sans-serif",
-      }}
+    <GovernedCockpitShell
+      accentColor={ACCENT}
+      headerIcon={<Shield className="w-4 h-4" style={{ color: ACCENT }} />}
+      headerTitle="PARAGON — Governed Security Intelligence"
+      headerSubtitle="Every threat, compliance gap, and risk carries a full proof chain"
+      liveIndicatorLabel="Live Threat Intelligence · Deterministic Fallback (Counsel integration active)"
+      defaultAutonomyMode="ask-to-act"
+      kpiCards={[
+        { label: 'Active Threats', value: '3', icon: AlertTriangle, color: color.accent.red },
+        { label: 'Open Findings', value: '17', icon: Shield, color: ACCENT },
+        { label: 'Hosts Monitored', value: '2,847', icon: Activity, color: color.accent.green },
+      ]}
     >
-      <div className="border-b" style={{ borderColor: 'var(--gi-border-subtle)', background: 'var(--gi-bg-surface)' }}>
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: `${ACCENT}18`, border: `1px solid ${ACCENT}40` }}
-            >
-              <Shield className="w-4 h-4" style={{ color: ACCENT }} />
-            </div>
-            <div>
-              <div className="text-sm font-semibold" style={{ color: 'var(--gi-text-primary)' }}>
-                PARAGON — Governed Security Intelligence
-              </div>
-              <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
-                Every threat, compliance gap, and risk carries a full proof chain
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--gi-text-muted)' }}>
-              Autonomy Mode
-            </span>
-            <AutonomyModeToggle value={autonomyMode} onChange={setAutonomyMode} variant="compact" />
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
-          <span
-            className="text-xs uppercase tracking-widest font-semibold"
-            style={{ color: 'var(--gi-text-muted)' }}
-          >
-            Live Threat Intelligence · Deterministic Fallback (Counsel integration active)
-          </span>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          {[
-            { label: 'Active Threats', value: '3', icon: AlertTriangle, color: color.accent.red },
-            { label: 'Open Findings', value: '17', icon: Shield, color: ACCENT },
-            { label: 'Hosts Monitored', value: '2,847', icon: Activity, color: color.accent.green },
-          ].map(({ label, value, icon: Icon, color }) => (
-            <div
-              key={label}
-              className="rounded-xl p-4"
-              style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-subtle)' }}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Icon className="w-3.5 h-3.5" style={{ color }} />
-                <span className="text-xs uppercase tracking-wide" style={{ color: 'var(--gi-text-muted)' }}>
-                  {label}
-                </span>
-              </div>
-              <div className="text-2xl font-bold" style={{ color }}>
-                {value}
-              </div>
-            </div>
-          ))}
-        </div>
+      {(autonomyMode, setAutonomyMode) => (
+        <>
 
         <ProofEnvelope
           title="Critical: Active Lateral Movement — APT-29 TTP Cluster"
@@ -306,7 +248,8 @@ export default function GovernedCockpit() {
             </div>
           </div>
         </ProofEnvelope>
-      </div>
-    </div>
+        </>
+      )}
+    </GovernedCockpitShell>
   );
 }

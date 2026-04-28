@@ -71,6 +71,9 @@
 | RecommendationCard | `keep` | Proposed action with proof |
 | RunTimeline | `keep` | Workflow run visualiser |
 | TimelineLane | `keep` | Multi-lane event timeline |
+| **SubstrateWorkflowPanel** | `keep` (new — consolidated) | Agent substrate workflow panel — was duplicated across 5 artifacts (terra, carlota-jo, lyte, vessels, sentra). Consolidated into design-system; artifacts now use thin wrappers with domain props. No hardcoded hex — uses `--gi-*` tokens. |
+| **AtlasScenePanel** | `keep` (new — consolidated) | Geographic/scene context panel — was duplicated across 3 artifacts (terra, vessels, sentra). Consolidated into design-system; tab content injected via `ReactNode` props. Accepts `headerRight` slot for status badges. |
+| **GovernedCockpitShell** | `keep` (new — consolidated) | Page-level shell for governed cockpit surfaces — header, KPI grid, AutonomyModeToggle, and children render prop. Replaced boilerplate across 7 artifacts (pulse, sentra, szl-holdings, vessels, carlota-jo, terra, command). |
 
 ---
 
@@ -184,3 +187,6 @@
 | Skeleton loaders | Absent or per-artifact — inconsistent | 4 standardised variants: Text, Card, KPI, Table |
 | Toast system | Absent — no cross-product notifications | `ToastContainer` + `useToast` hook |
 | Breadcrumb | Absent | `Breadcrumb` component added to shell |
+| SubstrateWorkflowPanel | Duplicated across 5 artifacts with hardcoded hex | Consolidated into `@szl-holdings/design-system/cockpit`; artifacts use thin wrappers with domain props; all `--gi-*` tokens |
+| AtlasScenePanel | Duplicated across 3 artifacts with hardcoded hex | Consolidated into `@szl-holdings/design-system/cockpit`; tab content via ReactNode; `headerRight` slot for status badges |
+| GovernedCockpitShell | Boilerplate duplicated across 7 governed-cockpit pages | Consolidated into design-system; render prop `(autonomyMode, setAutonomyMode) => ReactNode` for domain body |

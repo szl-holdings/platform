@@ -26,6 +26,9 @@
     "./cockpit/recommendation-card": "./src/cockpit/RecommendationCard.tsx",
     "./cockpit/approval-dialog": "./src/cockpit/ApprovalDialog.tsx",
     "./cockpit/audit-rail": "./src/cockpit/AuditRail.tsx",
+    "./cockpit/substrate-workflow-panel": "./src/cockpit/SubstrateWorkflowPanel.tsx",
+    "./cockpit/atlas-scene-panel": "./src/cockpit/AtlasScenePanel.tsx",
+    "./cockpit/governed-cockpit-shell": "./src/cockpit/GovernedCockpitShell.tsx",
     "./data": "./src/data/index.ts",
     "./data/status-badge": "./src/data/StatusBadge.tsx",
     "./data/metric-stat": "./src/data/MetricStat.tsx",
@@ -68,7 +71,8 @@
     "framer-motion": "catalog:",
     "lucide-react": "catalog:",
     "tailwind-merge": "catalog:",
-    "@workspace/alloy": "workspace:*"
+    "@workspace/alloy": "workspace:*",
+    "@szl-holdings/shared-ui": "workspace:*"
   },
   "scripts": {
     "lint": "biome lint ./src",

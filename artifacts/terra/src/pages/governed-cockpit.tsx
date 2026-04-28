@@ -1,6 +1,5 @@
 import {
-  type AutonomyMode,
-  AutonomyModeToggle,
+  GovernedCockpitShell,
   type EvidenceSource,
   type PolicyState,
   ProofEnvelope,
@@ -9,7 +8,6 @@ import {
 } from '@szl-holdings/design-system';
 import { RiskEvidenceList } from '@szl-holdings/shared-ui/risk-evidence';
 import { AlertTriangle, Building2, MapPin, TrendingUp } from 'lucide-react';
-import { useState } from 'react';
 
 const ACCENT = productAccent.terra;
 
@@ -107,79 +105,23 @@ const RISK_EVIDENCE: EvidenceSource[] = [
 ];
 
 export default function GovernedCockpit() {
-  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>('recommend');
-
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background: 'var(--gi-bg-base)',
-        color: 'var(--gi-text-primary)',
-        fontFamily: "'Inter', system-ui, sans-serif",
-      }}
+    <GovernedCockpitShell
+      accentColor={ACCENT}
+      headerIcon={<Building2 className="w-4 h-4" style={{ color: ACCENT }} />}
+      headerTitle="DOMAINE — Governed Real Estate Intelligence"
+      headerSubtitle="Every acquisition signal, valuation, and risk factor carries a full proof chain"
+      liveIndicatorLabel="Property Intelligence · Deterministic Fallback (Counsel integration active)"
+      defaultAutonomyMode="recommend"
+      kpiCards={[
+        { label: 'Active Deals', value: '34', icon: Building2, color: ACCENT },
+        { label: 'Distress Signals', value: '847', icon: AlertTriangle, color: color.accent.amber },
+        { label: 'Pipeline Value', value: '$284M', icon: TrendingUp, color: color.accent.green },
+        { label: 'Markets Tracked', value: '12', icon: MapPin, color: '#7a99b8' },
+      ]}
     >
-      <div className="border-b" style={{ borderColor: 'var(--gi-border-subtle)', background: 'var(--gi-bg-surface)' }}>
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: `${ACCENT}18`, border: `1px solid ${ACCENT}40` }}
-            >
-              <Building2 className="w-4 h-4" style={{ color: ACCENT }} />
-            </div>
-            <div>
-              <div className="text-sm font-semibold" style={{ color: 'var(--gi-text-primary)' }}>
-                DOMAINE — Governed Real Estate Intelligence
-              </div>
-              <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
-                Every acquisition signal, valuation, and risk factor carries a full proof chain
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--gi-text-muted)' }}>
-              Autonomy Mode
-            </span>
-            <AutonomyModeToggle value={autonomyMode} onChange={setAutonomyMode} variant="compact" />
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
-          <span
-            className="text-xs uppercase tracking-widest font-semibold"
-            style={{ color: 'var(--gi-text-muted)' }}
-          >
-            Property Intelligence · Deterministic Fallback (Counsel integration active)
-          </span>
-        </div>
-
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          {[
-            { label: 'Active Deals', value: '34', icon: Building2, color: ACCENT },
-            { label: 'Distress Signals', value: '847', icon: AlertTriangle, color: color.accent.amber },
-            { label: 'Pipeline Value', value: '$284M', icon: TrendingUp, color: color.accent.green },
-            { label: 'Markets Tracked', value: '12', icon: MapPin, color: 'var(--gi-text-secondary)' },
-          ].map(({ label, value, icon: Icon, color }) => (
-            <div
-              key={label}
-              className="rounded-xl p-4"
-              style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-subtle)' }}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Icon className="w-3.5 h-3.5" style={{ color }} />
-                <span className="text-xs uppercase tracking-wide" style={{ color: 'var(--gi-text-muted)' }}>
-                  {label}
-                </span>
-              </div>
-              <div className="text-2xl font-bold" style={{ color }}>
-                {value}
-              </div>
-            </div>
-          ))}
-        </div>
+      {(autonomyMode, setAutonomyMode) => (
+        <>
 
         <ProofEnvelope
           title="Acquisition Signal: 847 Meridian Ave, Austin TX — Off-Market Distress Opportunity"
@@ -304,7 +246,8 @@ export default function GovernedCockpit() {
           accentColor={ACCENT}
           emptyHint="No risk-simulation runs have been cited yet. Open Risk Simulation and use Save run as evidence to attach percentile bands and sensitivities to a covenant or acquisition decision."
         />
-      </div>
-    </div>
+        </>
+      )}
+    </GovernedCockpitShell>
   );
 }

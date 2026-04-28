@@ -1,6 +1,5 @@
 import {
-  type AutonomyMode,
-  AutonomyModeToggle,
+  GovernedCockpitShell,
   type EvidenceSource,
   type PolicyState,
   ProofEnvelope,
@@ -8,7 +7,6 @@ import {
   color,
 } from '@szl-holdings/design-system';
 import { AlertTriangle, BarChart3, TrendingUp, Zap } from 'lucide-react';
-import { useState } from 'react';
 
 const ACCENT = productAccent.pulse;
 
@@ -106,79 +104,23 @@ const DECISION_EVIDENCE: EvidenceSource[] = [
 ];
 
 export default function GovernedCockpit() {
-  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>('draft');
-
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background: 'var(--gi-bg-base)',
-        color: 'var(--gi-text-primary)',
-        fontFamily: "'Inter', system-ui, sans-serif",
-      }}
+    <GovernedCockpitShell
+      accentColor={ACCENT}
+      headerIcon={<Zap className="w-4 h-4" style={{ color: ACCENT }} />}
+      headerTitle="Pulse — Governed Executive Briefing"
+      headerSubtitle="Every briefing signal, dissent, and decision carries a full proof chain"
+      liveIndicatorLabel="Executive Intelligence · Deterministic Fallback (Counsel integration active)"
+      defaultAutonomyMode="draft"
+      kpiCards={[
+        { label: "Today's Signals", value: '47', icon: Zap, color: ACCENT },
+        { label: 'Briefings Issued', value: '3', icon: BarChart3, color: '#7a99b8' },
+        { label: 'Open Decisions', value: '2', icon: TrendingUp, color: color.accent.green },
+        { label: 'Dissent Flags', value: '1', icon: AlertTriangle, color: color.accent.red },
+      ]}
     >
-      <div className="border-b" style={{ borderColor: 'var(--gi-border-subtle)', background: 'var(--gi-bg-surface)' }}>
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: `${ACCENT}18`, border: `1px solid ${ACCENT}40` }}
-            >
-              <Zap className="w-4 h-4" style={{ color: ACCENT }} />
-            </div>
-            <div>
-              <div className="text-sm font-semibold" style={{ color: 'var(--gi-text-primary)' }}>
-                Pulse — Governed Executive Briefing
-              </div>
-              <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
-                Every briefing signal, dissent, and decision carries a full proof chain
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--gi-text-muted)' }}>
-              Autonomy Mode
-            </span>
-            <AutonomyModeToggle value={autonomyMode} onChange={setAutonomyMode} variant="compact" />
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
-          <span
-            className="text-xs uppercase tracking-widest font-semibold"
-            style={{ color: 'var(--gi-text-muted)' }}
-          >
-            Executive Intelligence · Deterministic Fallback (Counsel integration active)
-          </span>
-        </div>
-
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          {[
-            { label: "Today's Signals", value: '47', icon: Zap, color: ACCENT },
-            { label: 'Briefings Issued', value: '3', icon: BarChart3, color: 'var(--gi-text-secondary)' },
-            { label: 'Open Decisions', value: '2', icon: TrendingUp, color: color.accent.green },
-            { label: 'Dissent Flags', value: '1', icon: AlertTriangle, color: color.accent.red },
-          ].map(({ label, value, icon: Icon, color }) => (
-            <div
-              key={label}
-              className="rounded-xl p-4"
-              style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-subtle)' }}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Icon className="w-3.5 h-3.5" style={{ color }} />
-                <span className="text-xs uppercase tracking-wide" style={{ color: 'var(--gi-text-muted)' }}>
-                  {label}
-                </span>
-              </div>
-              <div className="text-2xl font-bold" style={{ color }}>
-                {value}
-              </div>
-            </div>
-          ))}
-        </div>
+      {(autonomyMode, setAutonomyMode) => (
+        <>
 
         <ProofEnvelope
           title="Executive Brief: Macro Rate Regime Shift — De-Risk Signal"
@@ -302,7 +244,8 @@ export default function GovernedCockpit() {
             </div>
           </div>
         </ProofEnvelope>
-      </div>
-    </div>
+        </>
+      )}
+    </GovernedCockpitShell>
   );
 }

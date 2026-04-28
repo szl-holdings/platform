@@ -1,6 +1,5 @@
 import {
-  type AutonomyMode,
-  AutonomyModeToggle,
+  GovernedCockpitShell,
   type EvidenceSource,
   type PolicyState,
   ProofEnvelope,
@@ -185,7 +184,6 @@ function useLiveCounts(): LiveCounts {
 }
 
 export default function GovernedCockpit() {
-  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>('ask-to-act');
   const counts = useLiveCounts();
 
   const isDemo = (v: number | null) => v === null;
@@ -222,52 +220,16 @@ export default function GovernedCockpit() {
   ];
 
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background: 'var(--gi-bg-base)',
-        color: '#e2e8f0',
-        fontFamily: "'Inter', system-ui, sans-serif",
-      }}
+    <GovernedCockpitShell
+      accentColor={ACCENT}
+      headerIcon={<Command className="w-4 h-4" style={{ color: ACCENT }} />}
+      headerTitle="Command — Unified Governed Decision Surface"
+      headerSubtitle="Every cross-domain signal, correlation, and approval carries a full proof chain"
+      liveIndicatorLabel="Cross-Domain Intelligence · Deterministic Fallback (Counsel integration active)"
+      defaultAutonomyMode="ask-to-act"
     >
-      <div className="border-b" style={{ borderColor: 'var(--gi-border-subtle)', background: 'var(--gi-bg-surface)' }}>
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: `${ACCENT}18`, border: `1px solid ${ACCENT}40` }}
-            >
-              <Command className="w-4 h-4" style={{ color: ACCENT }} />
-            </div>
-            <div>
-              <div className="text-sm font-semibold" style={{ color: 'var(--gi-text-primary)' }}>
-                Command — Unified Governed Decision Surface
-              </div>
-              <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
-                Every cross-domain signal, correlation, and approval carries a full proof chain
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--gi-text-muted)' }}>
-              Autonomy Mode
-            </span>
-            <AutonomyModeToggle value={autonomyMode} onChange={setAutonomyMode} variant="compact" />
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
-          <span
-            className="text-xs uppercase tracking-widest font-semibold"
-            style={{ color: 'var(--gi-text-muted)' }}
-          >
-            Cross-Domain Intelligence · Deterministic Fallback (Counsel integration active)
-          </span>
-        </div>
-
+      {(autonomyMode, setAutonomyMode) => (
+        <>
         <div className="grid grid-cols-4 gap-4 mb-6">
           {tiles.map(({ label, value, demo, icon: Icon, color }) => (
             <div
@@ -446,7 +408,8 @@ export default function GovernedCockpit() {
             </div>
           </div>
         </ProofEnvelope>
-      </div>
-    </div>
+        </>
+      )}
+    </GovernedCockpitShell>
   );
 }

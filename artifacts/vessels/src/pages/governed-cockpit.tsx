@@ -1,6 +1,5 @@
 import {
-  type AutonomyMode,
-  AutonomyModeToggle,
+  GovernedCockpitShell,
   type EvidenceSource,
   type PolicyState,
   ProofEnvelope,
@@ -9,7 +8,6 @@ import {
 } from '@szl-holdings/design-system';
 import { RiskEvidenceList } from '@szl-holdings/shared-ui/risk-evidence';
 import { AlertTriangle, Anchor, Navigation, Ship } from 'lucide-react';
-import { useState } from 'react';
 
 const ACCENT = productAccent.vessels;
 
@@ -107,79 +105,23 @@ const MAINTENANCE_EVIDENCE: EvidenceSource[] = [
 ];
 
 export default function GovernedCockpit() {
-  const [autonomyMode, setAutonomyMode] = useState<AutonomyMode>('ask-to-act');
-
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background: 'var(--gi-bg-base)',
-        color: 'var(--gi-text-primary)',
-        fontFamily: "'Inter', system-ui, sans-serif",
-      }}
+    <GovernedCockpitShell
+      accentColor={ACCENT}
+      headerIcon={<Ship className="w-4 h-4" style={{ color: ACCENT }} />}
+      headerTitle="SEXTANT — Governed Maritime Intelligence"
+      headerSubtitle="Every routing decision, risk flag, and alert carries a full proof chain"
+      liveIndicatorLabel="Fleet Intelligence · Deterministic Fallback (Counsel integration active)"
+      defaultAutonomyMode="ask-to-act"
+      kpiCards={[
+        { label: 'SEXTANT at Sea', value: '47', icon: Ship, color: ACCENT },
+        { label: 'Alerts Active', value: '6', icon: AlertTriangle, color: color.accent.red },
+        { label: 'Routes Optimised', value: '12', icon: Navigation, color: color.accent.green },
+        { label: 'In Port', value: '8', icon: Anchor, color: color.accent.amber },
+      ]}
     >
-      <div className="border-b" style={{ borderColor: 'var(--gi-border-subtle)', background: 'var(--gi-bg-surface)' }}>
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: `${ACCENT}18`, border: `1px solid ${ACCENT}40` }}
-            >
-              <Ship className="w-4 h-4" style={{ color: ACCENT }} />
-            </div>
-            <div>
-              <div className="text-sm font-semibold" style={{ color: 'var(--gi-text-primary)' }}>
-                SEXTANT — Governed Maritime Intelligence
-              </div>
-              <div className="text-xs" style={{ color: 'var(--gi-text-muted)' }}>
-                Every routing decision, risk flag, and alert carries a full proof chain
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--gi-text-muted)' }}>
-              Autonomy Mode
-            </span>
-            <AutonomyModeToggle value={autonomyMode} onChange={setAutonomyMode} variant="compact" />
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
-          <span
-            className="text-xs uppercase tracking-widest font-semibold"
-            style={{ color: 'var(--gi-text-muted)' }}
-          >
-            Fleet Intelligence · Deterministic Fallback (Counsel integration active)
-          </span>
-        </div>
-
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          {[
-            { label: 'SEXTANT at Sea', value: '47', icon: Ship, color: ACCENT },
-            { label: 'Alerts Active', value: '6', icon: AlertTriangle, color: color.accent.red },
-            { label: 'Routes Optimised', value: '12', icon: Navigation, color: color.accent.green },
-            { label: 'In Port', value: '8', icon: Anchor, color: color.accent.amber },
-          ].map(({ label, value, icon: Icon, color }) => (
-            <div
-              key={label}
-              className="rounded-xl p-4"
-              style={{ background: 'var(--gi-bg-surface)', border: '1px solid var(--gi-border-subtle)' }}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Icon className="w-3.5 h-3.5" style={{ color }} />
-                <span className="text-xs uppercase tracking-wide" style={{ color: 'var(--gi-text-muted)' }}>
-                  {label}
-                </span>
-              </div>
-              <div className="text-2xl font-bold" style={{ color }}>
-                {value}
-              </div>
-            </div>
-          ))}
-        </div>
+      {(autonomyMode, setAutonomyMode) => (
+        <>
 
         <ProofEnvelope
           title="Route Advisory: Deviate MV Horizon Breeze SIN→HAM — Cyclone Aiko"
@@ -310,7 +252,8 @@ export default function GovernedCockpit() {
           accentColor={ACCENT}
           emptyHint="No risk-simulation runs have been cited yet. Open Risk Simulation and use Save run as evidence to attach voyage cost percentiles to a routing or counterparty decision."
         />
-      </div>
-    </div>
+        </>
+      )}
+    </GovernedCockpitShell>
   );
 }
