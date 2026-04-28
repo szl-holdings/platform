@@ -53,16 +53,16 @@ This Trust Center documents the security posture, governance controls, and compl
 | Audit logging | Implemented | `lib/proof-chain` |
 | Data isolation | Implemented | `tenant-scope.ts` middleware |
 | Incident response | Documented | Signal chain: `security-legal` |
-| Change management | Implemented | 22 GitHub CI workflows |
+| Change management | Implemented | 25 GitHub CI workflows (source: `generated/platform-metrics.json`) |
 | AI governance | Implemented | Covenant Policy Engine |
-| Vulnerability management | Partial | Dependency audit in CI; SBOM in progress |
+| Vulnerability management | Partial | Dependency audit in CI; SBOM generated weekly (CI artifact, not yet release-attached) |
 
 ## Known Gaps (Disclosed)
 
 | Gap | Severity | Remediation Plan |
 |-----|----------|-----------------|
 | SOC 2 Type II not yet obtained | Medium | Targeted Q3 2026 |
-| SBOM generation not in CI | Low | Scheduled for next release cycle |
+| SBOM not release-attached | Low | SBOM generated weekly (`security.yml` CI artifact); not yet attached to GitHub release tags |
 | Sentry error monitoring not wired | Medium | Configuration pending |
 | Redis session store not configured | Low | Using in-memory sessions; Redis planned |
 

@@ -104,7 +104,7 @@ The `platformRole` text column in `lib/db/src/schema/auth.ts` (lines 21–36) co
 |---------|--------|
 | CodeQL SAST | Active in `.github/workflows/codeql.yml` | VERIFIED |
 | Dependency review | Active in `.github/workflows/security.yml` | VERIFIED |
-| Secret scanning | Active (GitHub native + Security workflow) | VERIFIED |
+| Secret scanning | Active — Gitleaks PR gate (`secret-scan.yml`) + weekly scheduled scans (`secret-scan-scheduled.yml`, `security.yml`) | VERIFIED |
 | Dependency audit | `pnpm audit` integrated into CI | VERIFIED |
 | Branch protection | CI must pass before merge | PARTIALLY VERIFIED |
 

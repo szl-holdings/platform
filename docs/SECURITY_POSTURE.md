@@ -44,8 +44,8 @@ The platform implements security at every layer of the stack, following a defens
 ### Layer 7: Supply Chain
 - Dependency audit in CI pipeline
 - Lock file integrity verification
-- 22 GitHub CI workflows covering build, test, and security scanning
-- SBOM generation planned for next release cycle
+- 25 GitHub CI workflows covering build, test, and security scanning (source: `generated/platform-metrics.json`)
+- SBOM generated weekly via `security.yml` (`scripts/qa/generate-sbom.js` → `security/sbom-latest.json`, 90-day CI artifact retention)
 
 ## Vulnerability Disclosure
 
