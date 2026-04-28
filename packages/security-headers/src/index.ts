@@ -84,7 +84,7 @@ export interface SecurityHeadersOptions {
 export const BASELINE_CSP_DIRECTIVES: Readonly<CspDirectives> = {
   defaultSrc: ["'self'"],
   scriptSrc: ["'self'", "'unsafe-inline'"],
-  styleSrc: ["'self'", "'unsafe-inline'"],
+  styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
   // 'https:' is intentionally absent from imgSrc; artifacts that display images
   // from user-supplied or third-party URLs must add origins via additionalDirectives.
   imgSrc: ["'self'", 'data:', 'blob:'],

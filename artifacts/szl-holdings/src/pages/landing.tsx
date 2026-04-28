@@ -157,7 +157,7 @@ function AlloyMark() {
 
 function LoopDiagram() {
   return (
-    <svg viewBox="0 0 600 240" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
+    <svg viewBox="0 0 600 240" width="100%" xmlns="http://www.w3.org/2000/svg" style={{ display: "block", height: "auto" }}>
       <line x1="40" y1="120" x2="560" y2="120" stroke="rgba(255,255,255,0.12)" strokeWidth="1" strokeDasharray="2 4" />
       {LOOP.map((step, i) => {
         const x = 40 + i * (520 / 8);
@@ -175,7 +175,7 @@ function LoopDiagram() {
 
 function ArchitectureDiagram() {
   return (
-    <svg viewBox="0 0 600 320" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
+    <svg viewBox="0 0 600 320" width="100%" xmlns="http://www.w3.org/2000/svg" style={{ display: "block", height: "auto" }}>
       {/* Layer 01 — Surfaces */}
       <g>
         {[140, 300, 460].map((x, i) => (
