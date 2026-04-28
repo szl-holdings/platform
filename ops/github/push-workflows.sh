@@ -52,11 +52,13 @@ push_branch() {
     echo "    no changes for $branch"
     return
   fi
-  git commit -m "ci: add security and quality gate workflows (task #2187)
+  git commit -m "ci: update GitHub Actions workflows — disable broken automated triggers, fix codenames (task #3163)
 
-Pushes the .github/workflows directory so the required status checks
-(CI Gate, E2E Gate, Lighthouse Gate, CodeQL Analysis / analyze,
-Dependency Review, Security Audit & SBOM / Security Gate) actually run."
+- container-publish.yml: disabled automated release/tag triggers (Dockerfiles not present)
+- npm-publish.yml: disabled automated release/tag triggers (packages not ready)
+- ci.yml: fix comment — LUMINA → Pulse (AI Executive Briefing)
+All core CI jobs (lint, typecheck, build, integration-test, e2e,
+security, readiness-gate, proof-chain, brand-strings) remain unchanged."
   git push origin "$branch"
 }
 

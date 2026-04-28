@@ -1,6 +1,6 @@
 # SZL Holdings
 
-[![CI](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/ci.yml) [![CodeQL](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/codeql.yml) [![Security](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/security.yml/badge.svg)](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/security.yml) [![License](https://img.shields.io/badge/license-Proprietary-red)](./LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/) [![pnpm](https://img.shields.io/badge/pnpm-monorepo-orange)](https://pnpm.io/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
+[![CI](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/ci.yml) [![CodeQL](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/codeql.yml) [![Security](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml/badge.svg)](https://github.com/szl-holdings/szl-holdings-platform/actions/workflows/security.yml) [![License](https://img.shields.io/badge/license-Proprietary-red)](./LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/) [![pnpm](https://img.shields.io/badge/pnpm-monorepo-orange)](https://pnpm.io/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
 
 **The governed infrastructure for high-consequence decisions.**
 
@@ -113,7 +113,7 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 | **Pulse** | Executive Briefing | Board-ready decision briefings with attribution and proof chains |
 | **Carlota Jo** | Private Advisory | Concierge advisory with live integrations and booking workflow |
 
-**Additional surfaces:** Command (unified operator surface), SZL Holdings Mobile (iOS/Android command)
+**Additional surfaces:** Command (unified operator surface), Mobile Command (iOS/Android)
 
 ---
 
@@ -160,7 +160,7 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 | A11oy Phase 1 — Foundation (type system, fabric primitives, demo seed, read API) | ✅ Complete |
 | A11oy Phase 2 — Workcell engine with live AI reasoning | 🔜 In Progress |
 | A11oy Phase 3 — Full proof-carrying execution with live connectors | 🔜 Planned |
-| SZL Holdings Mobile (unified iOS + Android command) | 🔜 Planned |
+| Mobile Command (unified iOS + Android command) | 🔜 Planned |
 | SOC 2 Type 1 audit readiness | 🔜 Roadmap |
 | Production customer onboarding | 🔜 Roadmap |
 
@@ -175,7 +175,7 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 | `alpha working` | SZL Holdings, API Server, Carlota Jo, Counsel, Pulse (5) |
 | `alpha partial` | Vessels, Terra, Command, Sentra, Lyte (5) |
 | `build failing` | A11oy, SZL Demo Video (2) — cascaded from SDK dependency |
-| `not started` | SZL Holdings Mobile — scaffold complete, workflow not active |
+| `not started` | Mobile Command — scaffold complete, workflow not active |
 | `demo-only` | SZL Demo Video (1) |
 | `internal only` | Mockup Sandbox (1) |
 
@@ -234,7 +234,7 @@ This repository is proprietary. Source code, architecture, and implementation de
 | Lyte — Decision Intelligence | web | `/lyte/` | `alpha partial` — routes functional; legacy path alias missing |
 | Pulse — AI Executive Briefing | web | `/pulse/` | `alpha working` — AI multi-provider routing active |
 | SZL Holdings — Governed Autonomy Demo | video | `/szl-demo-video/` | `demo-only` — promotional video artifact |
-| SZL Holdings Mobile Command | mobile | `/szl-holdings-mobile/` | `not started` — scaffold complete; splash/icon and push linking pending |
+| SZL Holdings — Mobile Command | mobile | `/szl-holdings-mobile/` | `not started` — scaffold complete; splash/icon and push linking pending |
 
 ---
 
