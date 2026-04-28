@@ -177,6 +177,7 @@ const DigitalTwinsManagementPage = lazy(() =>
 );
 const WorldlineRegistryPage = lazy(() => import('./pages/worldline-registry'));
 const WhatChangedPage = lazy(() => import('./operations/pages/what-changed'));
+const OpenEvalHubPage = lazy(() => import('./operations/pages/open-eval-hub'));
 const DeploymentsPage = lazy(() => import('./operations/pages/deployments'));
 const BoardModePage = lazy(() => import('@lyte/pages/board-mode'));
 const DemoLivePage = lazy(() => import('@lyte/pages/demo-live'));
@@ -200,23 +201,23 @@ const PrismDashboard = lazy(() => import('@lyte/pages/prism-dashboard'));
 const BlockerBoard = lazy(() => import('@lyte/pages/blocker-board'));
 const DigestCenter = lazy(() => import('@lyte/pages/digest-center'));
 const TrustAudit = lazy(() => import('@lyte/pages/trust-audit'));
-const ContinuumActionConsole = lazy(() => import('@lyte/pages/continuum-action-console'));
+const ContinuumActionConsole = lazy(() => import('@lyte/pages/alloy-action-console'));
 const DecisionCenterPage = lazy(() => import('./pages/decision-center'));
 const EvidenceExplorerPage = lazy(() => import('./pages/intelligence/evidence-explorer'));
-const ContinuumWorkflowCanvas = lazy(() => import('@lyte/pages/continuum-workflow-canvas'));
-const ContinuumIntelligence = lazy(() => import('@lyte/pages/continuum-intelligence'));
-const ContinuumGovernance = lazy(() => import('@lyte/pages/continuum-governance'));
-const ContinuumWorkflowTemplates = lazy(() => import('@lyte/pages/continuum-workflow-templates'));
-const ContinuumWriteBack = lazy(() => import('@lyte/pages/continuum-write-back'));
-const ContinuumAgentMonitor = lazy(() => import('@lyte/pages/continuum-agent-monitor'));
-const ContinuumExecutionTraces = lazy(() => import('@lyte/pages/continuum-execution-traces'));
-const ContinuumReplayTimeline = lazy(() => import('@lyte/pages/continuum-replay-timeline'));
-const ContinuumPolicySim = lazy(() => import('@lyte/pages/continuum-policy-sim'));
-const ContinuumAgentHandoffs = lazy(() => import('@lyte/pages/continuum-agent-handoffs'));
-const ContinuumTrustReceipts = lazy(() => import('@lyte/pages/continuum-trust-receipts'));
-const ContinuumIntegrationHealth = lazy(() => import('@lyte/pages/continuum-integration-health'));
-const ContinuumGraphCompiler = lazy(() => import('@lyte/pages/continuum-graph-compiler'));
-const ContinuumPolicyCompiler = lazy(() => import('@lyte/pages/continuum-policy-compiler'));
+const ContinuumWorkflowCanvas = lazy(() => import('@lyte/pages/alloy-workflow-canvas'));
+const ContinuumIntelligence = lazy(() => import('@lyte/pages/alloy-intelligence'));
+const ContinuumGovernance = lazy(() => import('@lyte/pages/alloy-governance'));
+const ContinuumWorkflowTemplates = lazy(() => import('@lyte/pages/alloy-workflow-templates'));
+const ContinuumWriteBack = lazy(() => import('@lyte/pages/alloy-write-back'));
+const ContinuumAgentMonitor = lazy(() => import('@lyte/pages/alloy-agent-monitor'));
+const ContinuumExecutionTraces = lazy(() => import('@lyte/pages/alloy-execution-traces'));
+const ContinuumReplayTimeline = lazy(() => import('@lyte/pages/alloy-replay-timeline'));
+const ContinuumPolicySim = lazy(() => import('@lyte/pages/alloy-policy-sim'));
+const ContinuumAgentHandoffs = lazy(() => import('@lyte/pages/alloy-agent-handoffs'));
+const ContinuumTrustReceipts = lazy(() => import('@lyte/pages/alloy-trust-receipts'));
+const ContinuumIntegrationHealth = lazy(() => import('@lyte/pages/alloy-integration-health'));
+const ContinuumGraphCompiler = lazy(() => import('@lyte/pages/alloy-graph-compiler'));
+const ContinuumPolicyCompiler = lazy(() => import('@lyte/pages/alloy-policy-compiler'));
 const OmniaHubPage = lazy(() => import('./pages/omnia/index'));
 const OmniaWorldModelPage = lazy(() => import('./pages/omnia/world-model'));
 const OmniaNarrativePage = lazy(() => import('./pages/omnia/narrative'));
@@ -720,6 +721,7 @@ function AppShell() {
               <Route path="/operations/explorer" component={() => <ExplorerPage />} />
               <Route path="/operations/escalation-intelligence" component={() => <EscalationIntelligencePage />} />
               <Route path="/operations/what-changed" component={() => <WhatChangedPage />} />
+              <Route path="/operations/open-eval-hub" component={() => <OpenEvalHubPage />} />
               <Route path="/operations/deployments" component={() => <DeploymentsPage />} />
               <Route path="/lyte/what-changed" component={() => <WhatChangedPage />} />
               <Route path="/operations/digest" component={() => <DigestCenter />} />

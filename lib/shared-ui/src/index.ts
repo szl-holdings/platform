@@ -972,3 +972,11 @@ export {
   PubDividerCell,
   PubAnimatePresence,
 } from './publication';
+
+export {
+  ActivityFeed,
+  type ActivityFeedProps,
+  CommentThread,
+  type CommentThreadProps,
+  type Comment as CollabComment,
+} from './collaboration';

@@ -1,5 +1,5 @@
 import { useDemoMode } from '@lyte/lib/demo-mode';
-import { EnvironmentLabel } from '@szl-holdings/shared-ui/continuum-decision-card';
+import { EnvironmentLabel } from '@szl-holdings/shared-ui/alloy-decision-card';
 import { SectionErrorBoundary } from '@szl-holdings/shared-ui/error-boundary';
 import { useAuth } from '@szl-holdings/replit-auth-web';
 import {

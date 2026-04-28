@@ -12,7 +12,7 @@ export { realEstateFixtures } from './real-estate.js';
 export { TERRA_GOLDEN_QUERIES, TERRA_MOCK_CORPUS } from './terra.js';
 export { VESSELS_GOLDEN_QUERIES, VESSELS_MOCK_CORPUS } from './vessels.js';
 
-import type { AEFDomain } from '@workspace/cf-domain-profiles/schema';
+import type { AEFDomain } from '@workspace/aef-domain-profiles/schema';
 import type { GoldenQuery } from '../metrics.js';
 import type { GoldenFixtureSet } from '../types.js';
 import { advisoryFixtures } from './advisory.js';

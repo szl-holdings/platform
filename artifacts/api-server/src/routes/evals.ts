@@ -12,7 +12,7 @@ import {
   AEF_DOMAIN_PROFILE_DOMAINS,
   type AEFDomain,
   defaultProfileRegistry,
-} from '@workspace/cf-domain-profiles';
+} from '@workspace/aef-domain-profiles';
 import {
   ALL_GOLDEN_QUERIES,
   ALL_MOCK_CORPORA,
@@ -21,7 +21,7 @@ import {
   type RetrievalAdapter,
   type RetrievedResult,
   runRetrievalEval,
-} from '@workspace/cf-evals';
+} from '@workspace/aef-evals';
 import { type CognitiveContext, run as runCognitiveLoop } from '@workspace/cognitive-runtime';
 import {
   ALL_EVAL_TYPES,

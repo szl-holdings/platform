@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { SearchHit } from '@workspace/aef-contracts';
-import { AefClient } from '@workspace/cf-sdk/client';
-import { AefAuthError, AefPolicyError, AefUnavailableError } from '@workspace/cf-sdk/errors';
+import { AefClient } from '@workspace/aef-sdk/client';
+import { AefAuthError, AefPolicyError, AefUnavailableError } from '@workspace/aef-sdk/errors';
 import { z } from 'zod';
 import type { ToolHandler } from '../gateway.js';
 import type { ToolManifest } from '../manifest.js';

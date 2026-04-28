@@ -13,7 +13,7 @@ import {
   defaultProfileRegistry,
   type ProfilePointerStore,
   type TenantProfilePointer,
-} from '@workspace/cf-domain-profiles';
+} from '@workspace/aef-domain-profiles';
 import { sql } from 'drizzle-orm';
 import { logger } from './logger';
 

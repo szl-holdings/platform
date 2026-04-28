@@ -8,7 +8,7 @@ import {
   DegradedModeBanner,
   EnvironmentLabel,
   EvidencePanel,
-} from '@szl-holdings/shared-ui/continuum-decision-card';
+} from '@szl-holdings/shared-ui/alloy-decision-card';
 import {
   Activity,
   AlertTriangle,

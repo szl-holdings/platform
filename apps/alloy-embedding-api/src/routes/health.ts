@@ -1,6 +1,6 @@
 import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
-import { getDefaultEmbedWorker } from "@workspace/continuum-embed-worker";
-import { getDefaultRerankWorker } from "@workspace/continuum-rerank-worker";
+import { getDefaultEmbedWorker } from "@workspace/alloy-embed-worker";
+import { getDefaultRerankWorker } from "@workspace/alloy-rerank-worker";
 
 export const healthRouter: IRouter = Router();
 

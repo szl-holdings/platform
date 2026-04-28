@@ -265,6 +265,15 @@ const OPERATIONS_NAV: NavGroup[] = [
       { href: '/cognitive/policies', label: 'Policy Console', icon: ShieldCheck },
     ],
   },
+  {
+    section: 'Open Evaluation Layer',
+    items: [
+      { href: '/operations/open-eval-hub', label: 'Open Evaluation Hub', icon: FlaskConical },
+      { href: '/agents/evals', label: 'MirrorEval', icon: Sigma },
+      { href: '/operations/eval-studio', label: 'Eval Studio', icon: Layers },
+      { href: '/evolution/evaluation', label: 'Evolution Eval Console', icon: GitBranch },
+    ],
+  },
   ECOSYSTEM_APPS_NAV,
 ];
 

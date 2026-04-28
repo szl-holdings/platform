@@ -1,4 +1,4 @@
-import { getKernel } from '@szl/continuum/prompts';
+import { getKernel } from '@szl/alloy/prompts';
 import { BookOpen, Brain, RefreshCw, Sparkles } from 'lucide-react';
 import { useMemo, useState } from 'react';
 

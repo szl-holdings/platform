@@ -7,7 +7,7 @@
  * performance.now() for sub-millisecond precision on Replit CPU.
  */
 
-import type { DomainProfile } from '@workspace/cf-domain-profiles/schema';
+import type { DomainProfile } from '@workspace/aef-domain-profiles/schema';
 import {
   aggregateMetrics,
   computeAllMetrics,

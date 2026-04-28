@@ -1,4 +1,4 @@
-import type { ProfileDescriptor } from '@workspace/cf-contracts';
+import type { ProfileDescriptor } from '@workspace/aef-contracts';
 
 export const DEFAULT_PROFILE: ProfileDescriptor = {
   profileId: 'default',

@@ -19,7 +19,7 @@ import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { identifyAnalyticsUser, resetAnalyticsUser, setUser as setSentryUser, clearUser as clearSentryUser } from "@szl-holdings/observability/react";
-import { ContinuumLayout } from "@/continuum/components/continuum-layout";
+import { ContinuumLayout } from "@/continuum/components/alloy-layout";
 import { DesignSystemProvider } from "@szl-holdings/design-system";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";

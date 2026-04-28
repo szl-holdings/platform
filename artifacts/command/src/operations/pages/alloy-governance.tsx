@@ -1,4 +1,4 @@
-import { EnvironmentLabel } from '@szl-holdings/shared-ui/continuum-decision-card';
+import { EnvironmentLabel } from '@szl-holdings/shared-ui/alloy-decision-card';
 import {
   AlertTriangle,
   ArrowRight,

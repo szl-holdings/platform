@@ -1,4 +1,4 @@
-import type { HybridSearchResponse } from '@workspace/cf-contracts';
+import type { HybridSearchResponse } from '@workspace/aef-contracts';
 import { useCallback, useRef, useState } from 'react';
 import { AefClient } from './client.js';
 import type { AefClientConfig } from './config.js';
