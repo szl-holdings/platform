@@ -1,6 +1,6 @@
 import { serverTelemetry } from '@szl-holdings/observability';
 import { type IRouter, type Request, type Response, Router } from 'express';
-import { getJobRegistry } from '../lib/scheduled-jobs';
+import { getJobRegistrySync } from '../lib/scheduled-jobs';
 import { authMiddleware } from '../middlewares/auth';
 
 const autopilotRouter: IRouter = Router();
@@ -340,7 +340,7 @@ const FEATURE_USAGE_DATA = [
 
 autopilotRouter.get('/autopilot/feature-usage', (_req: Request, res: Response) => {
   // Pull job run counts from registry to add real telemetry signal
-  const registry = getJobRegistry();
+  const registry = getJobRegistrySync();
   const jobSignals = registry.reduce<Record<string, number>>((acc, job) => {
     acc[job.type] = job.runCount;
     return acc;
@@ -601,7 +601,7 @@ const PLAYBOOKS_DATA = [
 
 autopilotRouter.get('/autopilot/playbooks', (_req: Request, res: Response) => {
   // Augment with real workflow engine stats if available
-  const registry = getJobRegistry();
+  const registry = getJobRegistrySync();
   const playbooksWithSignals = PLAYBOOKS_DATA.map((p) => ({
     ...p,
     scheduledJobsRelated: registry.filter((j) =>
@@ -771,7 +771,7 @@ autopilotRouter.get('/autopilot/next-best-actions', (_req: Request, res: Respons
 
 autopilotRouter.get('/autopilot/summary', (_req: Request, res: Response) => {
   const genomeScore = computeGenomeScore();
-  const registry = getJobRegistry();
+  const registry = getJobRegistrySync();
   const allLevels = Object.values(GENOME_CONFIG).flatMap((a) => Object.values(a));
 
   res.json({

@@ -200,3 +200,4 @@ export * from './document_lifecycle';
 export * from './conduit';
 export * from './ai_usage';
 export * from './eval_registry';
+export * from './scheduled_job_runs';

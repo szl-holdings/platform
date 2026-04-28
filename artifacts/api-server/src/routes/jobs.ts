@@ -96,8 +96,14 @@ router.get(
   },
 );
 
-router.get('/jobs/registry', authMiddleware(), requireRole('ops', 'admin'), (_req, res) => {
-  sendSuccess(res, getJobRegistry());
+router.get('/jobs/registry', authMiddleware(), requireRole('ops', 'admin'), async (_req, res) => {
+  try {
+    const registry = await getJobRegistry();
+    sendSuccess(res, registry);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to get job registry';
+    sendError(res, message, 500);
+  }
 });
 
 router.get('/jobs/types', authMiddleware(), requireRole('ops', 'admin'), (_req, res) => {

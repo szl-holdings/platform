@@ -17,6 +17,7 @@ vi.mock('@szl-holdings/db', () => {
   return {
     cortexGraphSnapshotsTable,
     terraDistressPropertiesTable,
+    pool: { query: vi.fn().mockResolvedValue({ rows: [] }) },
     db: {
       delete() {
         return {
@@ -32,7 +33,7 @@ vi.mock('@szl-holdings/db', () => {
         };
       },
       select() { return { from: () => ({ where: () => Promise.resolve([]) }) }; },
-      update() { return { set: () => ({ where: () => Promise.resolve([]) }) }; },
+      update() { return { set: () => ({ where: () => Promise.resolve() }) }; },
     },
   };
 });
@@ -117,8 +118,8 @@ describe('cortex_graph_snapshot_prune', () => {
     const logEntry = loggerSpy.info.mock.calls.find((c) => c[1] === 'cortex_graph_snapshot_prune: complete');
     expect(logEntry?.[0].purged).toBe(3);
 
-    const { getJobRegistry } = await import('../scheduled-jobs');
-    const entry = getJobRegistry().find((e) => e.type === 'cortex_graph_snapshot_prune');
+    const { getJobRegistrySync } = await import('../scheduled-jobs');
+    const entry = getJobRegistrySync().find((e) => e.type === 'cortex_graph_snapshot_prune');
     expect(entry).toBeDefined();
     expect(entry?.lastStatus).toBe('completed');
     expect(entry?.lastResult?.purged).toBe(3);
@@ -139,8 +140,8 @@ describe('cortex_graph_snapshot_prune', () => {
     expect(event.success).toBe(true);
     expect(event.metadata.purged).toBe(0);
 
-    const { getJobRegistry } = await import('../scheduled-jobs');
-    const entry = getJobRegistry().find((e) => e.type === 'cortex_graph_snapshot_prune');
+    const { getJobRegistrySync } = await import('../scheduled-jobs');
+    const entry = getJobRegistrySync().find((e) => e.type === 'cortex_graph_snapshot_prune');
     expect(entry?.lastResult?.purged).toBe(0);
     expect(entry?.runHistory?.[entry.runHistory.length - 1]?.result?.purged).toBe(0);
   });
@@ -151,8 +152,8 @@ describe('cortex_graph_snapshot_prune', () => {
       await runHandler({ id: `job-history-${i}`, payload: {} });
     }
 
-    const { getJobRegistry } = await import('../scheduled-jobs');
-    const entry = getJobRegistry().find((e) => e.type === 'cortex_graph_snapshot_prune');
+    const { getJobRegistrySync } = await import('../scheduled-jobs');
+    const entry = getJobRegistrySync().find((e) => e.type === 'cortex_graph_snapshot_prune');
     expect(entry?.runHistory?.length).toBe(5);
     expect(entry?.runCount).toBe(5);
     const purgedTotals = entry?.runHistory?.map((h) => h.result?.purged);
@@ -164,6 +165,7 @@ describe('cortex_graph_snapshot_prune', () => {
     vi.doMock('@szl-holdings/db', () => ({
       cortexGraphSnapshotsTable: { id: {}, expiresAt: {} },
       terraDistressPropertiesTable: { id: {}, status: {}, updatedAt: {} },
+      pool: { query: vi.fn().mockResolvedValue({ rows: [] }) },
       db: {
         delete: () => ({
           where: () => ({
@@ -186,7 +188,7 @@ describe('cortex_graph_snapshot_prune', () => {
 
     await expect(handler({ id: 'job-fail-history', payload: {} })).rejects.toThrow('history-fail');
 
-    const entry = mod.getJobRegistry().find((e) => e.type === 'cortex_graph_snapshot_prune');
+    const entry = mod.getJobRegistrySync().find((e) => e.type === 'cortex_graph_snapshot_prune');
     expect(entry?.lastStatus).toBe('failed');
     expect(entry?.failCount).toBe(1);
     const last = entry?.runHistory?.[entry.runHistory.length - 1];
@@ -200,6 +202,7 @@ describe('cortex_graph_snapshot_prune', () => {
     vi.doMock('@szl-holdings/db', () => ({
       cortexGraphSnapshotsTable: { id: {}, expiresAt: {} },
       terraDistressPropertiesTable: { id: {}, status: {}, updatedAt: {} },
+      pool: { query: vi.fn().mockResolvedValue({ rows: [] }) },
       db: {
         delete: () => ({
           where: () => ({

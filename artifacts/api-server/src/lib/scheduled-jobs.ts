@@ -634,6 +634,71 @@ function recordRunHistory(type: NamedJobType, entry: JobRunHistoryEntry) {
   if (!existing) return;
   const history = [...(existing.runHistory ?? []), entry].slice(-RUN_HISTORY_LIMIT);
   jobRegistry.set(type, { ...existing, runHistory: history });
+
+  persistRunHistory(type, entry);
+}
+
+let _persistPool: import('pg').Pool | null = null;
+
+function setPersistPool(pool: import('pg').Pool) {
+  _persistPool = pool;
+}
+
+function persistRunHistory(type: string, entry: JobRunHistoryEntry) {
+  if (!_persistPool) return;
+  _persistPool
+    .query(
+      `INSERT INTO scheduled_job_runs (job_type, started_at, status, duration_ms, result)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [
+        type,
+        new Date(entry.at),
+        entry.status,
+        entry.durationMs ?? null,
+        JSON.stringify((entry.result as Record<string, unknown>) ?? {}),
+      ],
+    )
+    .catch((err) => {
+      logger.warn({ err, jobType: type }, 'persistRunHistory: insert failed');
+    });
+}
+
+async function loadRunHistoryFromDb(): Promise<Map<string, JobRunHistoryEntry[]>> {
+  const historyMap = new Map<string, JobRunHistoryEntry[]>();
+  try {
+    const { pool: dbPool } = await import('@szl-holdings/db');
+    setPersistPool(dbPool);
+    const res = await dbPool.query<{
+      job_type: string;
+      started_at: Date;
+      status: string;
+      duration_ms: number | null;
+      result: Record<string, unknown> | null;
+    }>(
+      `SELECT job_type, started_at, status, duration_ms, result
+       FROM (
+         SELECT *, row_number() OVER (PARTITION BY job_type ORDER BY started_at DESC) AS rn
+         FROM scheduled_job_runs
+       ) ranked
+       WHERE rn <= $1
+       ORDER BY job_type, started_at ASC`,
+      [RUN_HISTORY_LIMIT],
+    );
+
+    for (const row of res.rows) {
+      const list = historyMap.get(row.job_type) ?? [];
+      list.push({
+        at: row.started_at.getTime(),
+        status: row.status as 'completed' | 'failed',
+        durationMs: row.duration_ms ?? undefined,
+        result: row.result ?? undefined,
+      });
+      historyMap.set(row.job_type, list);
+    }
+  } catch (err) {
+    logger.warn({ err }, 'loadRunHistoryFromDb: query failed, returning empty');
+  }
+  return historyMap;
 }
 
 async function enqueueNamedJob(type: NamedJobType, payload: Record<string, unknown> = {}) {
@@ -1771,7 +1836,7 @@ durableJobQueue.register(NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, async
     // ── Fetch live metrics from autopilot data sources ──────────────────────
 
     // Job registry signals
-    const registry = getJobRegistry();
+    const registry = getJobRegistrySync();
     const activeJobs = registry.filter((j) => j.enabled).length;
     const failedJobs = registry.filter((j) => j.lastStatus === 'failed').length;
 
@@ -4680,8 +4745,29 @@ export function startNamedScheduledJobs() {
   );
 }
 
-export function getJobRegistry(): JobScheduleEntry[] {
+export function getJobRegistrySync(): JobScheduleEntry[] {
   return Array.from(jobRegistry.values());
+}
+
+export async function getJobRegistry(): Promise<JobScheduleEntry[]> {
+  const entries = Array.from(jobRegistry.values());
+  try {
+    const dbHistory = await loadRunHistoryFromDb();
+    return entries.map((entry) => {
+      const dbRuns = dbHistory.get(entry.type);
+      if (dbRuns && dbRuns.length > 0) {
+        const lastRun = dbRuns[dbRuns.length - 1];
+        return {
+          ...entry,
+          runHistory: dbRuns,
+          lastResult: lastRun?.result ?? entry.lastResult,
+        };
+      }
+      return entry;
+    });
+  } catch {
+    return entries;
+  }
 }
 
 export async function triggerOnDemandJob(

@@ -130,19 +130,19 @@ describe('HOURLY_MARKET_DATA_REFRESH scheduled job', () => {
 
   describe('job registry', () => {
     it('HOURLY_MARKET_DATA_REFRESH is present in the named job registry', () => {
-      const registry = scheduledJobs.getJobRegistry();
+      const registry = scheduledJobs.getJobRegistrySync();
       const entry = registry.find((e) => e.type === HOURLY_MARKET_DATA_REFRESH);
       expect(entry, 'job entry should exist in registry').toBeDefined();
     });
 
     it('registry entry has schedule=hourly', () => {
-      const registry = scheduledJobs.getJobRegistry();
+      const registry = scheduledJobs.getJobRegistrySync();
       const entry = registry.find((e) => e.type === HOURLY_MARKET_DATA_REFRESH);
       expect(entry?.schedule).toBe('hourly');
     });
 
     it('registry entry starts with runCount=0 and failCount=0', () => {
-      const registry = scheduledJobs.getJobRegistry();
+      const registry = scheduledJobs.getJobRegistrySync();
       const entry = registry.find((e) => e.type === HOURLY_MARKET_DATA_REFRESH);
       expect(entry?.runCount).toBe(0);
       expect(entry?.failCount).toBe(0);
@@ -167,9 +167,9 @@ describe('HOURLY_MARKET_DATA_REFRESH scheduled job', () => {
       const snapshot = makeSeedSnapshot();
       mockAdapterImpl.getMarketData.mockResolvedValue(snapshot);
 
-      const before = scheduledJobs.getJobRegistry().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH)?.runCount ?? 0;
+      const before = scheduledJobs.getJobRegistrySync().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH)?.runCount ?? 0;
       await handler({ id: 'test-job-success-1' });
-      const after = scheduledJobs.getJobRegistry().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH)?.runCount ?? -1;
+      const after = scheduledJobs.getJobRegistrySync().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH)?.runCount ?? -1;
 
       expect(after).toBe(before + 1);
     });
@@ -181,7 +181,7 @@ describe('HOURLY_MARKET_DATA_REFRESH scheduled job', () => {
       mockAdapterImpl.getMarketData.mockResolvedValue(makeSeedSnapshot());
       await handler({ id: 'test-job-success-2' });
 
-      const entry = scheduledJobs.getJobRegistry().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH);
+      const entry = scheduledJobs.getJobRegistrySync().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH);
       expect(entry?.lastStatus).toBe('completed');
     });
 
@@ -192,7 +192,7 @@ describe('HOURLY_MARKET_DATA_REFRESH scheduled job', () => {
       mockAdapterImpl.getMarketData.mockResolvedValue(makeSeedSnapshot());
       await handler({ id: 'test-job-success-3' });
 
-      const entry = scheduledJobs.getJobRegistry().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH);
+      const entry = scheduledJobs.getJobRegistrySync().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH);
       expect(typeof entry?.lastDurationMs).toBe('number');
       expect(entry?.lastDurationMs).toBeGreaterThanOrEqual(0);
     });
@@ -205,7 +205,7 @@ describe('HOURLY_MARKET_DATA_REFRESH scheduled job', () => {
       mockAdapterImpl.getMarketData.mockResolvedValue(makeSeedSnapshot());
       await handler({ id: 'test-job-success-4' });
 
-      const entry = scheduledJobs.getJobRegistry().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH);
+      const entry = scheduledJobs.getJobRegistrySync().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH);
       expect(entry?.lastRunAt).toBeGreaterThanOrEqual(before);
     });
 
@@ -242,7 +242,7 @@ describe('HOURLY_MARKET_DATA_REFRESH scheduled job', () => {
       mockAdapterImpl.getMarketData.mockResolvedValue(makeSeedSnapshot());
       await handler({ id: 'test-job-success-7' });
 
-      const entry = scheduledJobs.getJobRegistry().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH);
+      const entry = scheduledJobs.getJobRegistrySync().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH);
       expect(entry?.failCount).toBe(0);
     });
 
@@ -272,9 +272,9 @@ describe('HOURLY_MARKET_DATA_REFRESH scheduled job', () => {
 
       mockAdapterImpl.getMarketData.mockRejectedValue(new Error('Simulated provider failure'));
 
-      const before = scheduledJobs.getJobRegistry().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH)?.failCount ?? 0;
+      const before = scheduledJobs.getJobRegistrySync().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH)?.failCount ?? 0;
       await expect(handler({ id: 'test-job-fail-1' })).rejects.toThrow('Simulated provider failure');
-      const after = scheduledJobs.getJobRegistry().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH)?.failCount ?? -1;
+      const after = scheduledJobs.getJobRegistrySync().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH)?.failCount ?? -1;
 
       expect(after).toBe(before + 1);
     });
@@ -286,7 +286,7 @@ describe('HOURLY_MARKET_DATA_REFRESH scheduled job', () => {
       mockAdapterImpl.getMarketData.mockRejectedValue(new Error('Simulated provider failure'));
       await expect(handler({ id: 'test-job-fail-2' })).rejects.toThrow();
 
-      const entry = scheduledJobs.getJobRegistry().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH);
+      const entry = scheduledJobs.getJobRegistrySync().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH);
       expect(entry?.lastStatus).toBe('failed');
     });
 
@@ -305,11 +305,11 @@ describe('HOURLY_MARKET_DATA_REFRESH scheduled job', () => {
       if (!handler) throw new Error('handler not registered');
 
       mockAdapterImpl.getMarketData.mockRejectedValue(new Error('Simulated provider failure'));
-      const before = scheduledJobs.getJobRegistry().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH)?.runCount ?? 0;
+      const before = scheduledJobs.getJobRegistrySync().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH)?.runCount ?? 0;
 
       await expect(handler({ id: 'test-job-fail-4' })).rejects.toThrow();
 
-      const after = scheduledJobs.getJobRegistry().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH)?.runCount ?? -1;
+      const after = scheduledJobs.getJobRegistrySync().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH)?.runCount ?? -1;
       expect(after).toBe(before);
     });
 
@@ -320,7 +320,7 @@ describe('HOURLY_MARKET_DATA_REFRESH scheduled job', () => {
       mockAdapterImpl.getMarketData.mockRejectedValue(new Error('Simulated provider failure'));
       await expect(handler({ id: 'test-job-fail-5' })).rejects.toThrow();
 
-      const entry = scheduledJobs.getJobRegistry().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH);
+      const entry = scheduledJobs.getJobRegistrySync().find((e) => e.type === HOURLY_MARKET_DATA_REFRESH);
       expect(typeof entry?.lastDurationMs).toBe('number');
       expect(entry?.lastDurationMs).toBeGreaterThanOrEqual(0);
     });
