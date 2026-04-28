@@ -13,7 +13,7 @@ import { db, exportJobsTable, usersTable } from '@szl-holdings/db';
 import { randomUUID } from 'node:crypto';
 import { and, desc, eq, gte, ilike, isNotNull, lte, sql } from 'drizzle-orm';
 import React from 'react';
-import * as XLSX from 'xlsx';
+import * as XLSX from '@e965/xlsx';
 import { logger } from './logger';
 import { objectStorageClient, ObjectStorageService } from './objectStorage';
 

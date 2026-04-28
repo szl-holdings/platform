@@ -169,7 +169,7 @@
     "swagger-ui-express": "^5.0.1",
     "web-push": "^3.6.7",
     "ws": "^8.20.0",
-    "xlsx": "^0.18.5",
+    "@e965/xlsx": "^0.20.3",
     "zod": "catalog:",
     "@workspace/tokens": "workspace:*"
   },
