@@ -8,6 +8,7 @@ export * from './agent_os';
 export * from './agent_skills';
 export * from './agent_training';
 export * from './ai_evals';
+export * from './alloy_compat';
 export * from './continuum';
 export * from './continuum_ai_decisions';
 export * from './continuum_autonomy_modes';

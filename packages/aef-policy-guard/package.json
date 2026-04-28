@@ -1,5 +1,5 @@
 {
-  "name": "@workspace/cf-policy-guard",
+  "name": "@workspace/aef-policy-guard",
   "version": "0.0.0",
   "private": false,
   "type": "module",
@@ -31,7 +31,7 @@
     }
   },
   "dependencies": {
-    "@workspace/cf-contracts": "workspace:*",
+    "@workspace/aef-contracts": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

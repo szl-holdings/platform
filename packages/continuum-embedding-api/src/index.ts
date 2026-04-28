@@ -1,0 +1,11 @@
+import { Router } from 'express';
+
+export function createAefRouter(): Router {
+  const router = Router();
+
+  router.get('/health', (_req, res) => {
+    res.json({ status: 'ok', service: 'continuum-embedding-api' });
+  });
+
+  return router;
+}

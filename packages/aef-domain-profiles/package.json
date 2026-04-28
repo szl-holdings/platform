@@ -1,5 +1,5 @@
 {
-  "name": "@workspace/cf-domain-profiles",
+  "name": "@workspace/aef-domain-profiles",
   "version": "0.0.0",
   "private": false,
   "type": "module",
@@ -27,7 +27,7 @@
     }
   },
   "dependencies": {
-    "@workspace/cf-contracts": "workspace:*",
+    "@workspace/aef-contracts": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

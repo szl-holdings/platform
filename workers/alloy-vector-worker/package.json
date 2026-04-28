@@ -1,5 +1,5 @@
 {
-  "name": "@workspace/continuum-vector-worker",
+  "name": "@workspace/alloy-vector-worker",
   "version": "0.0.0",
   "private": true,
   "type": "module",

@@ -1,5 +1,5 @@
 {
-  "name": "@workspace/continuum-rank-worker",
+  "name": "@workspace/alloy-rank-worker",
   "version": "0.0.0",
   "private": true,
   "type": "module",

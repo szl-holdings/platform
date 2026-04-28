@@ -1,5 +1,5 @@
 {
-  "name": "@workspace/continuum-embed-worker",
+  "name": "@workspace/alloy-embed-worker",
   "version": "0.0.0",
   "private": false,
   "type": "module",

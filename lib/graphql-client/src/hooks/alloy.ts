@@ -119,3 +119,11 @@ export function useUpdateAlloyWorkflowRun() {
 export function useAlloyWorkflowRunUpdated(variables?: { workflowId?: string }) {
   return useSubscription(ALLOY_WORKFLOW_RUN_UPDATED, variables !== undefined ? { variables } : {});
 }
+
+export function useContinuumSignals(variables?: { limit?: number; offset?: number }) {
+  return useAlloySignals(variables);
+}
+
+export function useContinuumWorkflows(variables?: { limit?: number; offset?: number }) {
+  return useAlloyWorkflows(variables);
+}

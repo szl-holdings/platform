@@ -1,5 +1,5 @@
 {
-  "name": "@workspace/cf-workflow-runtime",
+  "name": "@workspace/aef-workflow-runtime",
   "version": "0.0.0",
   "private": false,
   "type": "module",
@@ -31,7 +31,7 @@
     }
   },
   "dependencies": {
-    "@workspace/cf-contracts": "workspace:*",
+    "@workspace/aef-contracts": "workspace:*",
     "@workspace/alloy-vector-worker": "workspace:*",
     "zod": "catalog:"
   },
