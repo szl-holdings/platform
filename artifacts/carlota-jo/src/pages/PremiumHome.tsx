@@ -841,7 +841,7 @@ export default function PremiumHomePage() {
   return (
     <div style={{ minHeight: '100vh', background: CREAM }}>
       <Header />
-      <main id="main-content" tabIndex={-1} style={{ outline: 'none' }}>
+      <main id="main-content" tabIndex={-1}>
       <LuxuryHero />
       <ServicesOverview />
       <DiscreetApproach />

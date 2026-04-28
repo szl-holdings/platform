@@ -901,7 +901,9 @@ function AppShell({
       <>
         <EcosystemNav currentAppId="sentra" currentAppName="Sentra" accentColor={accent} />
         <Suspense fallback={<div style={{ height: '100vh', background: '#09090b' }} />}>
-          <SentraLandingPage />
+          <main id="main-content" tabIndex={-1}>
+            <SentraLandingPage />
+          </main>
         </Suspense>
         <CommandPalette
           open={paletteOpen}
@@ -951,9 +953,9 @@ function AppShell({
           </div>
         }
       >
-        <main data-szl-shell-main className="flex-1 overflow-auto h-full">
+        <div data-szl-shell-main className="flex-1 overflow-auto h-full">
           <DashboardRoutes />
-        </main>
+        </div>
       </SharedDashboardShell>
       <CommandPalette
         open={paletteOpen}

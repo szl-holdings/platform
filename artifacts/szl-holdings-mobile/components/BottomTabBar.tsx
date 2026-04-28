@@ -230,9 +230,14 @@ export function BottomTabBar() {
               onPress={() => handlePress(tab)}
               style={styles.tab}
               activeOpacity={0.7}
-              accessibilityLabel={tab.label}
+              accessibilityLabel={
+                badge > 0
+                  ? `${tab.label}, ${badge} notification${badge === 1 ? '' : 's'}`
+                  : tab.label
+              }
               accessibilityRole="tab"
               accessibilityState={{ selected: isActive }}
+              accessibilityHint={`Navigate to ${tab.label} workspace`}
             >
               <View style={styles.tabInner}>
                 {isActive && (
@@ -336,7 +341,11 @@ export function BottomTabBar() {
           onPress={() => router.navigate('/(shell)/settings' as never)}
           style={styles.utilityTab}
           activeOpacity={0.7}
-          accessibilityLabel="Settings"
+          accessibilityLabel={
+            unreadCount > 0
+              ? `Settings, ${unreadCount} unread notification${unreadCount === 1 ? '' : 's'}`
+              : 'Settings'
+          }
           accessibilityRole="button"
         >
           <View style={styles.tabInner}>
@@ -395,12 +404,16 @@ const styles = StyleSheet.create({
   },
   tab: {
     minWidth: 64,
+    minHeight: 44,
     alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: giSpacing[1],
   },
   utilityTab: {
     flex: 1,
+    minHeight: 44,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   tabInner: {
     alignItems: 'center',

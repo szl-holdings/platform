@@ -19,6 +19,7 @@ import Animated, {
   interpolate,
   runOnJS,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withSpring,
   withTiming,
@@ -90,6 +91,7 @@ interface ActionCardProps {
 
 function ActionCard({ action, isTop, index, onSwipeLeft, onSwipeRight, colors }: ActionCardProps) {
   const translateX = useSharedValue(0);
+  const reducedMotion = useReducedMotion();
   const urg = WORKSPACES.find((w) => w.id === action.domain);
   const accent = urg?.accent ?? ACCENT;
   const urgColor = urgencyColor(action.urgency, colors);
@@ -111,13 +113,17 @@ function ActionCard({ action, isTop, index, onSwipeLeft, onSwipeRight, colors }:
     })
     .onEnd((event) => {
       if (event.translationX > SWIPE_THRESHOLD) {
-        translateX.value = withTiming(SCREEN_WIDTH * 1.5, { duration: 300 });
+        translateX.value = reducedMotion
+          ? SCREEN_WIDTH * 1.5
+          : withTiming(SCREEN_WIDTH * 1.5, { duration: 300 });
         runOnJS(handleSwipeRight)();
       } else if (event.translationX < -SWIPE_THRESHOLD) {
-        translateX.value = withTiming(-SCREEN_WIDTH * 1.5, { duration: 300 });
+        translateX.value = reducedMotion
+          ? -SCREEN_WIDTH * 1.5
+          : withTiming(-SCREEN_WIDTH * 1.5, { duration: 300 });
         runOnJS(handleSwipeLeft)();
       } else {
-        translateX.value = withSpring(0);
+        translateX.value = reducedMotion ? 0 : withSpring(0);
       }
     });
 

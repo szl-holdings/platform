@@ -1377,14 +1377,12 @@ function VesselsDashboard({
             </div>
           }
         >
-          <main
-            id="main-content"
+          <div
             data-szl-shell-main
             className="flex-1 overflow-auto h-full"
-            tabIndex={-1}
           >
             <DashboardRouter />
-          </main>
+          </div>
         </SharedDashboardShell>
         <div className="fixed bottom-0 left-0 right-0 z-40">
           <ServiceStatusRail />

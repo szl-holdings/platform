@@ -15,6 +15,7 @@ export {
   runStateToPolicyReason,
   runStatusToPolicyState,
 } from './alloy-bridge.js';
+export * from './a11y/index.js';
 export * from './cockpit/index.js';
 export * from './data/index.js';
 export * from './detail/index.js';

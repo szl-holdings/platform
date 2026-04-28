@@ -234,7 +234,7 @@ export default function Shell({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main content */}
-      <main style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+      <main id="main-content" tabIndex={-1} style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
         {/* Classification bar */}
         <div
           className="classification-bar"

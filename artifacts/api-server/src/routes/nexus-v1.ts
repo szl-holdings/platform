@@ -1659,7 +1659,11 @@ router.get('/nexus/v1/playground', (_req, res) => {
     .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
     label { display: block; color: var(--text-dim); font-size: 11px; margin-bottom: 4px; margin-top: 8px; }
     input, textarea, select { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 10px; border-radius: 4px; font-family: var(--mono); font-size: 12px; outline: none; }
-    input:focus, textarea:focus, select:focus { border-color: var(--cyan-dim); }
+    input:focus-visible, textarea:focus-visible, select:focus-visible { border-color: var(--cyan-dim); outline: 3px solid var(--cyan-dim); outline-offset: 1px; }
+    :focus-visible { outline: 3px solid var(--cyan-dim); outline-offset: 2px; border-radius: 2px; }
+    .skip-link { position: absolute; top: -40px; left: 0; background: var(--cyan); color: var(--bg); padding: 8px 16px; border-radius: 0 0 4px 0; font-size: 12px; font-weight: 700; text-decoration: none; z-index: 9999; transition: top 0.15s; }
+    .skip-link:focus { top: 0; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; } }
     textarea { resize: vertical; min-height: 80px; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
@@ -1706,22 +1710,23 @@ router.get('/nexus/v1/playground', (_req, res) => {
   </style>
 </head>
 <body>
-<header>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<header role="banner">
   <span class="logo">PRAXIS</span>
   <span class="badge">v1</span>
   <span class="logo" style="font-size:13px;font-weight:400;color:var(--text-dim)">Unified Intelligence Protocol</span>
   <span class="subtitle"><span class="status-dot"></span>API operational · <a href="/api/nexus/v1/openapi.json" target="_blank">OpenAPI Spec</a> · <a href="/api/nexus/v1/capabilities" target="_blank">Capabilities</a></span>
 </header>
-<main>
+<main id="main-content" tabindex="-1">
   <div class="panel panel-left">
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab('query')">Query</div>
-      <div class="tab" onclick="switchTab('actions')">Actions</div>
-      <div class="tab" onclick="switchTab('capabilities')">Capabilities</div>
+    <div class="tabs" role="tablist" aria-label="PRAXIS sections">
+      <div id="tab-btn-query" class="tab active" role="tab" aria-selected="true" aria-controls="tab-query" tabindex="0" onclick="switchTab('query')" onkeydown="handleTabKeydown(event,'query')">Query</div>
+      <div id="tab-btn-actions" class="tab" role="tab" aria-selected="false" aria-controls="tab-actions" tabindex="-1" onclick="switchTab('actions')" onkeydown="handleTabKeydown(event,'actions')">Actions</div>
+      <div id="tab-btn-capabilities" class="tab" role="tab" aria-selected="false" aria-controls="tab-capabilities" tabindex="-1" onclick="switchTab('capabilities')" onkeydown="handleTabKeydown(event,'capabilities')">Capabilities</div>
     </div>
 
     <!-- QUERY TAB -->
-    <div class="tab-content active" id="tab-query">
+    <div class="tab-content active" id="tab-query" role="tabpanel" aria-labelledby="tab-btn-query">
       <section>
         <div class="section-title">Natural Language Query</div>
         <label>Input</label>
@@ -1765,7 +1770,7 @@ router.get('/nexus/v1/playground', (_req, res) => {
     </div>
 
     <!-- ACTIONS TAB -->
-    <div class="tab-content" id="tab-actions">
+    <div class="tab-content" id="tab-actions" role="tabpanel" aria-labelledby="tab-btn-actions" hidden>
       <section>
         <div class="section-title">Governed Business Action</div>
         <label>Action</label>
@@ -1800,7 +1805,7 @@ router.get('/nexus/v1/playground', (_req, res) => {
     </div>
 
     <!-- CAPABILITIES TAB -->
-    <div class="tab-content" id="tab-capabilities">
+    <div class="tab-content" id="tab-capabilities" role="tabpanel" aria-labelledby="tab-btn-capabilities" hidden>
       <section>
         <div class="section-title">Available Domains & Actions</div>
         <div class="capabilities-grid" id="cap-grid">Loading...</div>
@@ -1818,11 +1823,52 @@ router.get('/nexus/v1/playground', (_req, res) => {
 <script>
 let currentTab = 'query';
 
+const TAB_ORDER = ['query', 'actions', 'capabilities'];
+
+function handleTabKeydown(event, tab) {
+  const idx = TAB_ORDER.indexOf(tab);
+  let nextTab = null;
+  if (event.key === 'ArrowRight') {
+    nextTab = TAB_ORDER[(idx + 1) % TAB_ORDER.length];
+  } else if (event.key === 'ArrowLeft') {
+    nextTab = TAB_ORDER[(idx - 1 + TAB_ORDER.length) % TAB_ORDER.length];
+  } else if (event.key === 'Home') {
+    nextTab = TAB_ORDER[0];
+  } else if (event.key === 'End') {
+    nextTab = TAB_ORDER[TAB_ORDER.length - 1];
+  } else if (event.key === 'Enter' || event.key === ' ') {
+    switchTab(tab);
+    event.preventDefault();
+    return;
+  }
+  if (nextTab) {
+    event.preventDefault();
+    switchTab(nextTab);
+    document.getElementById('tab-btn-' + nextTab)?.focus();
+  }
+}
+
 function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelector('.tab:nth-child(' + (tab === 'query' ? 1 : tab === 'actions' ? 2 : 3) + ')').classList.add('active');
-  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('[role="tab"]').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
+    t.setAttribute('tabindex', '-1');
+  });
+  document.querySelectorAll('[role="tabpanel"]').forEach(t => {
+    t.classList.remove('active');
+    t.hidden = true;
+  });
+  const activeTab = document.querySelector(\`[role="tab"][aria-controls="tab-\${tab}"]\`);
+  if (activeTab) {
+    activeTab.classList.add('active');
+    activeTab.setAttribute('aria-selected', 'true');
+    activeTab.setAttribute('tabindex', '0');
+  }
+  const panel = document.getElementById('tab-' + tab);
+  if (panel) {
+    panel.classList.add('active');
+    panel.hidden = false;
+  }
   currentTab = tab;
   if (tab === 'capabilities') loadCapabilities();
 }

@@ -171,6 +171,8 @@ export function AppShell({
 
           <button
             type="button"
+            aria-label="Search or run a command (⌘K)"
+            aria-keyshortcuts="Meta+k"
             className="flex items-center gap-2 px-3 rounded text-xs"
             style={{
               background: color.bg.overlay,
@@ -180,8 +182,9 @@ export function AppShell({
               cursor: 'pointer',
             }}
           >
-            Search or run command…
+            <span aria-hidden="true">Search or run command…</span>
             <kbd
+              aria-hidden="true"
               className="rounded px-1"
               style={{
                 background: color.border.subtle,
@@ -198,6 +201,8 @@ export function AppShell({
 
         <div className="flex flex-1 min-h-0 overflow-hidden">
           <main
+            id="main-content"
+            tabIndex={-1}
             className="flex-1 overflow-y-auto"
             style={{ padding: pagePadding, background: color.bg.base }}
           >

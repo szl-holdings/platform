@@ -545,6 +545,8 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
         {/* Content */}
         <main
+          id="main-content"
+          tabIndex={-1}
           className={`flex-1 overflow-y-auto ${location === '/entities' ? 'overflow-hidden flex flex-col' : ''}`}
         >
           <Suspense fallback={<PageLoader />}>{children}</Suspense>

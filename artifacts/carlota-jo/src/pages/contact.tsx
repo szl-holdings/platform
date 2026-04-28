@@ -77,7 +77,7 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-cream-warm)' }}>
       <Header />
-      <main id="main-content" tabIndex={-1} style={{ outline: 'none' }} className="pt-24">
+      <main id="main-content" tabIndex={-1} className="pt-24">
         <section
           className="py-20 lg:py-28"
           style={{ borderBottom: '1px solid var(--color-stone-200)' }}

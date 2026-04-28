@@ -314,9 +314,9 @@ export function Layout({ children }: { children: ReactNode }) {
           headerBg: HEADER_BG,
         }}
       >
-        <main id="main-content" className="flex-1 p-6 relative" tabIndex={-1}>
+        <div className="flex-1 p-6 relative">
           {children}
-        </main>
+        </div>
       </DashboardShell>
     </>
   );
