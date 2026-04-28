@@ -3,7 +3,8 @@ import type {
   PatternFamily,
   ProtocolTool,
   Skill,
-} from '../services/nexus/nexus-types';
+  ThirdPartyLeader,
+} from './nexus-types';
 
 export const SEED_SKILLS_DATA: Array<Omit<Skill, 'isCustom'>> = [
     {
@@ -223,17 +224,6 @@ export const SEED_SKILLS_DATA: Array<Omit<Skill, 'isCustom'>> = [
       tags: ['prompts', 'optimization', 'context', 'hooks'],
     },
   ];
-
-  // Only seed skills we don't already have (DB-hydrated state wins).
-  for (const seed of SEED_SKILLS) {
-    if (!skillStore.has(seed.id)) {
-      const skill: Skill = { ...seed, isCustom: false };
-      skillStore.set(skill.id, skill);
-      if (persist) void persistSkillToDB(skill);
-    }
-  }
-
-  // Seed pattern families
 
 export const PATTERNS_DATA: PatternFamily[] = [
     {
@@ -589,16 +579,6 @@ export const TOOLS_DATA: Array<Omit<ProtocolTool, 'isCustom'>> = [
     },
   ];
 
-  for (const seed of TOOLS) {
-    if (!toolStore.has(seed.id)) {
-      const tool: ProtocolTool = { ...seed, isCustom: false };
-      toolStore.set(tool.id, tool);
-      if (persist) void persistToolToDB(tool);
-    }
-  }
-
-  // Seed memory with a few items
-
 export const SEED_MEMORY_DATA: MemoryItem[] = [
     {
       id: 'mem_001',
@@ -643,5 +623,113 @@ export const SEED_MEMORY_DATA: MemoryItem[] = [
       tags: ['entity', 'portfolio', 'szl'],
     },
   ];
+
+export const THIRD_PARTY_LEADERS_DATA: ThirdPartyLeader[] = [
+  {
+    id: 'tpl_hyperframes',
+    name: 'HyperFrames',
+    sourceRepo: 'HyperFrames',
+    sourceUrl: 'https://github.com/hyperframes/hyperframes',
+    licenseSpdx: 'MIT',
+    capabilitySummary:
+      'Programmatic video rendering engine that composes React-based frame sequences into MP4/WebM output with timeline-aware animations, voiceover sync, and export pipelines.',
+    capabilityTags: ['video.render', 'animation', 'export', 'react'],
+    integrationMode: 'in-process',
+    policyState: 'allowed',
+    policyNote: 'MIT license; no bundling restrictions. In-process import approved.',
+    lastFetchedCommit: 'pending',
+    lastFetchedAt: new Date().toISOString(),
+    enabled: false,
+    logicalCapability: 'video.render',
+  },
+  {
+    id: 'tpl_camofox',
+    name: 'Camofox',
+    sourceRepo: 'Camofox',
+    sourceUrl: 'https://github.com/camofox/camofox',
+    licenseSpdx: 'Apache-2.0',
+    capabilitySummary:
+      'Stealth-browser toolkit that runs headless Chromium with fingerprint randomization, residential proxy rotation, and CAPTCHA-solver hooks — designed for large-scale web intelligence gathering without detection.',
+    capabilityTags: ['web.stealth', 'browser', 'scraping', 'fingerprint'],
+    integrationMode: 'in-process',
+    policyState: 'requires-review',
+    policyNote:
+      'Apache-2.0 approved for bundling. Policy gate required: stealth-browsing carries legal and ethical risk depending on target domains. Each invocation must pass the PRAXIS policy engine with an explicit use-case justification.',
+    lastFetchedCommit: 'pending',
+    lastFetchedAt: new Date().toISOString(),
+    enabled: false,
+    logicalCapability: 'web.stealth',
+  },
+  {
+    id: 'tpl_claude_ads',
+    name: 'claude-ads',
+    sourceRepo: 'claude-ads',
+    sourceUrl: 'https://github.com/anthropics/claude-ads',
+    licenseSpdx: 'MIT',
+    capabilitySummary:
+      'Ad-creative audit and generation skill pack that evaluates copy against brand guidelines, scores emotional resonance, and produces multi-variant ad candidates optimized for platform-specific formats.',
+    capabilityTags: ['marketing.audit', 'ad-creative', 'brand', 'copy'],
+    integrationMode: 'in-process',
+    policyState: 'allowed',
+    policyNote: 'MIT license; no bundling restrictions. In-process import approved.',
+    lastFetchedCommit: 'pending',
+    lastFetchedAt: new Date().toISOString(),
+    enabled: false,
+    logicalCapability: 'marketing.audit',
+  },
+  {
+    id: 'tpl_toprank',
+    name: 'Toprank',
+    sourceRepo: 'Toprank',
+    sourceUrl: 'https://github.com/toprank/toprank',
+    licenseSpdx: 'MIT',
+    capabilitySummary:
+      'SEO audit and competitive ranking intelligence skill pack: keyword gap analysis, SERP feature detection, backlink scoring, and AI-generated on-page recommendations.',
+    capabilityTags: ['seo.audit', 'ranking', 'keywords', 'competitive'],
+    integrationMode: 'in-process',
+    policyState: 'allowed',
+    policyNote: 'MIT license; no bundling restrictions. In-process import approved.',
+    lastFetchedCommit: 'pending',
+    lastFetchedAt: new Date().toISOString(),
+    enabled: false,
+    logicalCapability: 'seo.audit',
+  },
+  {
+    id: 'tpl_fincept_terminal',
+    name: 'Fincept Terminal',
+    sourceRepo: 'fincept-terminal',
+    sourceUrl: 'https://github.com/Fincept-Corporation/FinceptTerminal',
+    licenseSpdx: 'AGPL-3.0',
+    capabilitySummary:
+      'Open-source financial data terminal providing real-time market quotes, economic indicators, portfolio analytics, and AI-powered macro research — comparable to Bloomberg Terminal for quantitative workflows.',
+    capabilityTags: ['finance.terminal', 'market-data', 'portfolio', 'macro'],
+    integrationMode: 'external-service',
+    policyState: 'allowed',
+    policyNote:
+      'AGPL-3.0 — do not bundle. Must be invoked as a remote MCP target (external-service mode). Any modifications must be open-sourced. Approved for external-service integration only.',
+    lastFetchedCommit: 'pending',
+    lastFetchedAt: new Date().toISOString(),
+    enabled: false,
+    logicalCapability: 'finance.terminal',
+  },
+  {
+    id: 'tpl_cloudflare_agents',
+    name: 'Cloudflare Agents',
+    sourceRepo: 'cloudflare-agents',
+    sourceUrl: 'https://github.com/cloudflare/agents',
+    licenseSpdx: 'Apache-2.0',
+    capabilitySummary:
+      'Pattern reference for building durable, hibernating per-session agents on Cloudflare Durable Objects. Agents persist state across calls, resume after hibernation, and scale to millions of concurrent sessions without a central orchestrator.',
+    capabilityTags: ['pattern-reference', 'durable-objects', 'hibernation', 'edge'],
+    integrationMode: 'pattern-reference',
+    policyState: 'allowed',
+    policyNote:
+      'Pattern reference only — no runtime swap in this task. Architecture feeds the PRAXIS Workcell roadmap for durable per-session agent state.',
+    lastFetchedCommit: 'pending',
+    lastFetchedAt: new Date().toISOString(),
+    enabled: false,
+    logicalCapability: undefined,
+  },
+];
 
 

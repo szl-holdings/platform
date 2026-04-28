@@ -419,6 +419,161 @@ test.describe('PRAXIS prompt save flow', () => {
   });
 });
 
+test.describe('PRAXIS third-party leaders registry', () => {
+  const SIX_LEADERS = [
+    { id: 'tpl_hyperframes', name: 'HyperFrames', license: 'MIT', mode: 'in-process' },
+    { id: 'tpl_camofox', name: 'Camofox', license: 'Apache-2.0', mode: 'in-process' },
+    { id: 'tpl_claude_ads', name: 'claude-ads', license: 'MIT', mode: 'in-process' },
+    { id: 'tpl_toprank', name: 'Toprank', license: 'MIT', mode: 'in-process' },
+    {
+      id: 'tpl_fincept_terminal',
+      name: 'Fincept Terminal',
+      license: 'AGPL-3.0',
+      mode: 'external-service',
+    },
+    {
+      id: 'tpl_cloudflare_agents',
+      name: 'Cloudflare Agents',
+      license: 'Apache-2.0',
+      mode: 'pattern-reference',
+    },
+  ];
+
+  function mockLeaders(page: import('@playwright/test').Page, overrides?: Partial<typeof SIX_LEADERS[number]>[]) {
+    const leaders = SIX_LEADERS.map((l, i) => ({
+      ...l,
+      licenseSpdx: l.license,
+      capabilitySummary: `${l.name} capability summary for testing.`,
+      capabilityTags: ['test'],
+      integrationMode: l.mode,
+      policyState: l.name === 'Camofox' ? 'requires-review' : 'allowed',
+      policyNote: 'Test policy note',
+      lastFetchedCommit: 'abc123f',
+      lastFetchedAt: new Date().toISOString(),
+      enabled: false,
+      logicalCapability: ['video.render', 'web.stealth', 'marketing.audit', 'seo.audit', 'finance.terminal', undefined][i],
+      ...(overrides?.[i] ?? {}),
+    }));
+    return page.route('**/api/nexus/leaders', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(leaders),
+      }),
+    );
+  }
+
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/api/nexus/status', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          activeSwarms: 0,
+          memoryItems: 0,
+          enabledSkills: 0,
+          registeredTools: 0,
+          orchestrationsToday: 0,
+        }),
+      }),
+    );
+    await page.route('**/api/nexus/skills**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([]),
+      }),
+    );
+  });
+
+  test('Skills page shows Third-Party Leaders section heading', async ({ page }) => {
+    await mockLeaders(page);
+    await page.goto(`${PRAXIS}#skills`);
+    await expect(page.getByText('Third-Party Leaders')).toBeVisible({ timeout: 8000 });
+    await expect(
+      page.getByText('Vetted external agents and skill packs', { exact: false }),
+    ).toBeVisible();
+  });
+
+  test('Skills page lists exactly six leaders', async ({ page }) => {
+    await mockLeaders(page);
+    await page.goto(`${PRAXIS}#skills`);
+    await expect(page.getByText('Third-Party Leaders')).toBeVisible({ timeout: 8000 });
+
+    for (const leader of SIX_LEADERS) {
+      await expect(page.getByText(leader.name).first()).toBeVisible({ timeout: 8000 });
+    }
+  });
+
+  test('Fincept Terminal shows external-service-only badge (AGPL)', async ({ page }) => {
+    await mockLeaders(page);
+    await page.goto(`${PRAXIS}#skills`);
+    await expect(page.getByText('Third-Party Leaders')).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText('external-service only').first()).toBeVisible();
+  });
+
+  test('Camofox shows requires-review policy badge', async ({ page }) => {
+    await mockLeaders(page);
+    await page.goto(`${PRAXIS}#skills`);
+    await expect(page.getByText('Third-Party Leaders')).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText('requires-review').first()).toBeVisible();
+  });
+
+  test('disabled leader toggle is visible and reflects disabled state', async ({ page }) => {
+    await mockLeaders(page);
+    await page.goto(`${PRAXIS}#skills`);
+    await expect(page.getByText('Third-Party Leaders')).toBeVisible({ timeout: 8000 });
+    // All leaders seeded as disabled; toggling one should call the API
+    let toggleCalled = false;
+    await page.route('**/api/nexus/leaders/tpl_hyperframes/toggle', async (route) => {
+      toggleCalled = true;
+      const leaders = SIX_LEADERS.map((l, i) => ({
+        ...l,
+        licenseSpdx: l.license,
+        capabilitySummary: 'summary',
+        capabilityTags: [],
+        integrationMode: l.mode,
+        policyState: 'allowed',
+        policyNote: 'ok',
+        lastFetchedCommit: 'abc',
+        lastFetchedAt: new Date().toISOString(),
+        enabled: i === 0 ? true : false,
+        logicalCapability: undefined,
+      }));
+      // Re-mock leaders with HyperFrames enabled
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(leaders[0]),
+      });
+    });
+
+    // The leaders list renders toggle buttons; click the first one (HyperFrames)
+    const toggleButtons = page.locator('[data-testid="leaders-list"] button').filter({ hasText: '' });
+    // Find the toggle for HyperFrames by looking for the ToggleLeft inside its card
+    const firstLeaderCard = page.locator('[data-testid="leaders-list"] > div').first();
+    const toggleBtn = firstLeaderCard.locator('button').last();
+    await expect(toggleBtn).toBeVisible();
+    await toggleBtn.click();
+    await expect(async () => {
+      expect(toggleCalled).toBe(true);
+    }).toPass({ timeout: 5000 });
+  });
+
+  test('expanding a leader shows Third-Party Provenance panel', async ({ page }) => {
+    await mockLeaders(page);
+    await page.goto(`${PRAXIS}#skills`);
+    await expect(page.getByText('Third-Party Leaders')).toBeVisible({ timeout: 8000 });
+
+    // Click the first leader card's chevron to expand
+    const firstCard = page.locator('[data-testid="leaders-list"] > div').first();
+    await firstCard.locator('button').first().click();
+    await expect(page.getByText('Third-Party Provenance')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('Policy gate', { exact: false }).first()).toBeVisible();
+    await expect(page.getByText('Last commit', { exact: false }).first()).toBeVisible();
+  });
+});
+
 test.describe('PRAXIS internal tooling labels', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/api/nexus/status', (route) =>

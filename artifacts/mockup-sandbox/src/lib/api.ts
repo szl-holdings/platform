@@ -107,6 +107,14 @@ export const praxisApi = {
       method: 'POST',
       body: JSON.stringify({}),
     }),
+
+  listLeaders: () => req<import('./types').ThirdPartyLeader[]>('/leaders'),
+
+  toggleLeader: (id: string, enabled: boolean) =>
+    req<import('./types').ThirdPartyLeader>(`/leaders/${id}/toggle`, {
+      method: 'POST',
+      body: JSON.stringify({ enabled }),
+    }),
 };
 
 export function getApiBase() {

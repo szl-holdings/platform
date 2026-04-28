@@ -203,3 +203,23 @@ export interface IngestJob {
   completedAt?: string;
   error?: string;
 }
+
+export type ThirdPartyIntegrationMode = 'in-process' | 'external-service' | 'pattern-reference';
+export type ThirdPartyPolicyState = 'allowed' | 'requires-review' | 'blocked';
+
+export interface ThirdPartyLeader {
+  id: string;
+  name: string;
+  sourceRepo: string;
+  sourceUrl: string;
+  licenseSpdx: string;
+  capabilitySummary: string;
+  capabilityTags: string[];
+  integrationMode: ThirdPartyIntegrationMode;
+  policyState: ThirdPartyPolicyState;
+  policyNote?: string;
+  lastFetchedCommit?: string;
+  lastFetchedAt?: string;
+  enabled: boolean;
+  logicalCapability?: string;
+}

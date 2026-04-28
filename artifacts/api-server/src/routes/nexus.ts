@@ -13,7 +13,7 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
 import { type NexusIngestJobRow, type NexusIngestStatus, type NexusMemoryRow, type NexusMemoryTier, type NexusMemoryType, type NexusOrchestrationPlanRow, type NexusOrchestrationStatus, type NexusProtocolToolRow, type NexusSkillPrimitiveType, type NexusSkillRow, type NexusToolProtocol, db, nexusIngestJobsTable, nexusMemoryTable, nexusOrchestrationPlansTable, nexusProtocolToolsTable, nexusSkillsTable } from '@szl-holdings/db';
 import { forgeEvidenceStore, forgeRuntime, forgeTimeline, runCodeHandler } from '@szl-holdings/forge-runtime';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { defaultCatalogSearch, defaultToolRegistry, registerPRAXISHandlers as registerNexusHandlers } from '@workspace/tool-mesh';
 import { type NextFunction, type Request, type Response, Router } from 'express';
@@ -23,6 +23,7 @@ import { handleRouteError, sendBadRequest, sendCreated, sendError, sendSuccess }
 import { logger } from '../lib/logger';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
 import { authMiddleware, requireRole } from '../middlewares/auth';
+import { writeAuditEvent } from '../middlewares/session-policy';
 import {
   perUserApiSlidingLimiter,
   perUserWriteSlidingLimiter,
@@ -84,6 +85,7 @@ const NEXUS_OWNED_PREFIXES = [
   '/bridge',
   '/customizations',
   '/ingest',
+  '/leaders',
   '/memory',
   '/orchestrate',
   '/patterns',
@@ -107,11 +109,13 @@ import type {
   OrchestrationPlan,
   OrchestrationStep,
   IngestJob,
+  ThirdPartyLeader,
 } from '../services/nexus/nexus-types';
 import {
   PATTERNS_DATA,
   SEED_MEMORY_DATA,
   SEED_SKILLS_DATA,
+  THIRD_PARTY_LEADERS_DATA,
   TOOLS_DATA,
 } from '../services/nexus/nexus-seed-data';
 
@@ -122,7 +126,16 @@ const skillStore = new Map<string, Skill>();
 const toolStore = new Map<string, ProtocolTool>();
 const orchestrationStore = new Map<string, OrchestrationPlan>();
 const ingestStore = new Map<string, IngestJob>();
+const leaderStore = new Map<string, ThirdPartyLeader>();
 let orchestrationsToday = 0;
+
+// Exported only for unit-test setup. Do NOT call in production code.
+export function __setLeaderForTest(leader: ThirdPartyLeader): void {
+  leaderStore.set(leader.id, leader);
+}
+export function __clearLeaderStoreForTest(): void {
+  leaderStore.clear();
+}
 
 // ─── Seed data ────────────────────────────────────────────────────────────────
 
@@ -150,6 +163,14 @@ function seedData(persist = false) {
     if (!memoryStore.has(item.id)) {
       memoryStore.set(item.id, item);
       if (persist) void persistMemoryToDB(item);
+    }
+  }
+
+  // Seed third-party leaders registry — never overwrite enabled-state changes
+  // made by ops (leaderStore already has the entry with user-toggled state).
+  for (const leader of THIRD_PARTY_LEADERS_DATA) {
+    if (!leaderStore.has(leader.id)) {
+      leaderStore.set(leader.id, { ...leader });
     }
   }
 }
@@ -1521,6 +1542,344 @@ router.put(
   },
 );
 
+// ─── Third-Party Call Wrapper ─────────────────────────────────────────────────
+//
+// Every invocation of a registered third-party leader must go through
+// thirdPartyCall(). It:
+//   1. Resolves the leader and checks policy + enabled state.
+//   2. Executes the caller-supplied fn if the gate passes.
+//   3. Writes a structured audit-log row with caller, target, policy decision,
+//      cost estimate, and a request hash (for idempotency tracing).
+//
+// Usage: await thirdPartyCall('tpl_hyperframes', 'nexus-orchestrator', async () => { ... });
+
+interface ThirdPartyCallContext {
+  callerAgent: string;
+  requestPayload?: unknown;
+}
+
+interface ThirdPartyCallResult<T> {
+  ok: boolean;
+  policyDecision: 'allowed' | 'blocked' | 'requires-review';
+  policyNote?: string;
+  result?: T;
+  error?: string;
+  durationMs: number;
+  requestHash: string;
+  tokensEstimate: number;
+  costEstimateUsd: number;
+}
+
+async function thirdPartyCall<T>(
+  leaderId: string,
+  ctx: ThirdPartyCallContext,
+  fn: () => Promise<T>,
+): Promise<ThirdPartyCallResult<T>> {
+  const start = Date.now();
+  const leader = leaderStore.get(leaderId);
+
+  const payloadStr = ctx.requestPayload
+    ? JSON.stringify(ctx.requestPayload).slice(0, 4000)
+    : '';
+  const requestHash = createHash('sha256')
+    .update(`${leaderId}:${ctx.callerAgent}:${payloadStr}`)
+    .digest('hex')
+    .slice(0, 16);
+
+  if (!leader) {
+    const durationMs = Date.now() - start;
+    logger.warn(
+      {
+        event: 'praxis.third_party_call.unknown_leader',
+        leaderId,
+        callerAgent: ctx.callerAgent,
+        requestHash,
+        durationMs,
+      },
+      'Third-party call blocked — leader not registered',
+    );
+    void writeAuditEvent({
+      userId: null,
+      action: 'praxis.third_party_call.blocked',
+      entityType: 'nexus_leader',
+      entityId: leaderId,
+      newValues: {
+        callerAgent: ctx.callerAgent,
+        policyDecision: 'blocked',
+        policyNote: 'Leader not found in registry',
+        requestHash,
+        tokensEstimate: 0,
+        costEstimateUsd: 0,
+        durationMs,
+      },
+    });
+    return {
+      ok: false,
+      policyDecision: 'blocked',
+      policyNote: 'Leader not found in registry',
+      error: `Leader '${leaderId}' is not registered in the PRAXIS third-party registry`,
+      durationMs,
+      requestHash,
+      tokensEstimate: 0,
+      costEstimateUsd: 0,
+    };
+  }
+
+  if (!leader.enabled) {
+    const durationMs = Date.now() - start;
+    logger.warn(
+      {
+        event: 'praxis.third_party_call.leader_disabled',
+        leaderId,
+        leaderName: leader.name,
+        callerAgent: ctx.callerAgent,
+        requestHash,
+        policyState: leader.policyState,
+        durationMs,
+      },
+      'Third-party call blocked — leader is disabled',
+    );
+    void writeAuditEvent({
+      userId: null,
+      action: 'praxis.third_party_call.blocked',
+      entityType: 'nexus_leader',
+      entityId: leaderId,
+      newValues: {
+        leaderName: leader.name,
+        callerAgent: ctx.callerAgent,
+        policyDecision: 'blocked',
+        policyNote: `Leader '${leader.name}' is disabled`,
+        requestHash,
+        tokensEstimate: 0,
+        costEstimateUsd: 0,
+        durationMs,
+      },
+    });
+    return {
+      ok: false,
+      policyDecision: 'blocked',
+      policyNote: `Leader '${leader.name}' is disabled. Enable it in the Skills → Third-Party Leaders registry.`,
+      error: `Leader '${leader.name}' is disabled`,
+      durationMs,
+      requestHash,
+      tokensEstimate: 0,
+      costEstimateUsd: 0,
+    };
+  }
+
+  if (leader.policyState === 'blocked') {
+    const durationMs = Date.now() - start;
+    logger.warn(
+      {
+        event: 'praxis.third_party_call.policy_blocked',
+        leaderId,
+        leaderName: leader.name,
+        callerAgent: ctx.callerAgent,
+        requestHash,
+        policyState: leader.policyState,
+        policyNote: leader.policyNote,
+        durationMs,
+      },
+      'Third-party call blocked by policy gate',
+    );
+    void writeAuditEvent({
+      userId: null,
+      action: 'praxis.third_party_call.policy_blocked',
+      entityType: 'nexus_leader',
+      entityId: leaderId,
+      newValues: {
+        leaderName: leader.name,
+        callerAgent: ctx.callerAgent,
+        policyDecision: 'blocked',
+        policyNote: leader.policyNote,
+        requestHash,
+        tokensEstimate: 0,
+        costEstimateUsd: 0,
+        durationMs,
+      },
+    });
+    return {
+      ok: false,
+      policyDecision: 'blocked',
+      policyNote: leader.policyNote,
+      error: `Leader '${leader.name}' is blocked by policy`,
+      durationMs,
+      requestHash,
+      tokensEstimate: 0,
+      costEstimateUsd: 0,
+    };
+  }
+
+  const policyDecision = leader.policyState;
+  let result: T | undefined;
+  let callError: string | undefined;
+  let ok = false;
+
+  try {
+    result = await fn();
+    ok = true;
+  } catch (err) {
+    callError = err instanceof Error ? err.message : String(err);
+  }
+
+  const durationMs = Date.now() - start;
+  const tokensEstimate = Math.ceil(payloadStr.length / 4);
+  const costEstimateUsd = tokensEstimate * 0.000003;
+
+  logger.info(
+    {
+      event: 'praxis.third_party_call.executed',
+      leaderId,
+      leaderName: leader.name,
+      callerAgent: ctx.callerAgent,
+      policyDecision,
+      policyNote: leader.policyNote,
+      requestHash,
+      tokensEstimate,
+      costEstimateUsd,
+      durationMs,
+      ok,
+      error: callError,
+    },
+    ok ? 'Third-party leader invoked successfully' : 'Third-party leader invocation failed',
+  );
+  void writeAuditEvent({
+    userId: null,
+    action: ok ? 'praxis.third_party_call.executed' : 'praxis.third_party_call.error',
+    entityType: 'nexus_leader',
+    entityId: leaderId,
+    newValues: {
+      leaderName: leader.name,
+      callerAgent: ctx.callerAgent,
+      policyDecision,
+      policyNote: leader.policyNote,
+      requestHash,
+      tokensEstimate,
+      costEstimateUsd,
+      durationMs,
+      ok,
+      error: callError,
+    },
+  });
+
+  return {
+    ok,
+    policyDecision,
+    policyNote: leader.policyNote,
+    result,
+    error: callError,
+    durationMs,
+    requestHash,
+    tokensEstimate,
+    costEstimateUsd,
+  };
+}
+
+// Export for downstream leader integrations so they don't re-implement gating.
+export { thirdPartyCall };
+
+// ─── Third-Party Leaders Routes ───────────────────────────────────────────────
+
+router.use(['/leaders'], authMiddleware({ required: true }));
+
+router.get('/leaders', async (_req: Request, res: Response) => {
+  try {
+    const leaders = Array.from(leaderStore.values());
+    sendSuccess(res, leaders);
+  } catch (err) {
+    handleRouteError(res, err, 'GET /api/nexus/leaders');
+  }
+});
+
+router.post(
+  '/leaders/:id/toggle',
+  requireNexusOps,
+  perUserWriteSlidingLimiter,
+  async (req: Request, res: Response) => {
+    try {
+      const leader = leaderStore.get(req.params.id as string);
+      if (!leader) {
+        sendError(res, 'Leader not found', 404);
+        return;
+      }
+      if (leader.policyState === 'blocked') {
+        sendError(
+          res,
+          `Leader '${leader.name}' is blocked by policy and cannot be enabled`,
+          403,
+        );
+        return;
+      }
+      const body = req.body as { enabled?: boolean };
+      const enabled = typeof body.enabled === 'boolean' ? body.enabled : !leader.enabled;
+
+      const updated: ThirdPartyLeader = { ...leader, enabled };
+      leaderStore.set(leader.id, updated);
+
+      logger.info(
+        {
+          event: 'praxis.leader.toggled',
+          leaderId: leader.id,
+          leaderName: leader.name,
+          enabled,
+          actor: req.user?.email ?? req.user?.displayName ?? 'anonymous',
+        },
+        `Third-party leader ${enabled ? 'enabled' : 'disabled'}`,
+      );
+
+      sendSuccess(res, updated);
+    } catch (err) {
+      handleRouteError(res, err, 'POST /api/nexus/leaders/:id/toggle');
+    }
+  },
+);
+
+router.post(
+  '/leaders/:id/invoke',
+  requireNexusOps,
+  perUserWriteSlidingLimiter,
+  async (req: Request, res: Response) => {
+    try {
+      const leaderId = req.params.id as string;
+      const { callerAgent, requestPayload } = req.body as {
+        callerAgent?: string;
+        requestPayload?: unknown;
+      };
+      const caller = callerAgent ?? req.user?.email ?? 'nexus-orchestrator';
+
+      const callResult = await thirdPartyCall(
+        leaderId,
+        { callerAgent: caller, requestPayload },
+        async () => ({ invoked: true, leaderId, callerAgent: caller }),
+      );
+
+      if (!callResult.ok) {
+        res.status(403).json({
+          error: callResult.error ?? 'Invocation blocked by policy',
+          policyDecision: callResult.policyDecision,
+          policyNote: callResult.policyNote,
+          requestHash: callResult.requestHash,
+          durationMs: callResult.durationMs,
+        });
+        return;
+      }
+
+      sendSuccess(res, {
+        ok: true,
+        policyDecision: callResult.policyDecision,
+        policyNote: callResult.policyNote,
+        requestHash: callResult.requestHash,
+        tokensEstimate: callResult.tokensEstimate,
+        costEstimateUsd: callResult.costEstimateUsd,
+        durationMs: callResult.durationMs,
+        result: callResult.result,
+      });
+    } catch (err) {
+      handleRouteError(res, err, 'POST /api/nexus/leaders/:id/invoke');
+    }
+  },
+);
+
 // ─── Pattern Atlas Routes ─────────────────────────────────────────────────────
 
 router.get('/patterns', async (_req: Request, res: Response) => {
@@ -1889,6 +2248,29 @@ const APP_CAPABILITIES: Record<string, { name: string; endpoints: string[] }> = 
       '/api/imperium/intelligence/briefs',
     ],
   },
+  // ── Third-party leader logical capabilities ────────────────────────────────
+  // These entries wire the Orchestrator's intent-matching to the leader registry.
+  // Once individual integration tasks ship, they replace these stubs with real endpoints.
+  'video.render': {
+    name: 'HyperFrames — Video Render',
+    endpoints: ['/api/nexus/leaders/tpl_hyperframes/invoke'],
+  },
+  'web.stealth': {
+    name: 'Camofox — Stealth Browser',
+    endpoints: ['/api/nexus/leaders/tpl_camofox/invoke'],
+  },
+  'marketing.audit': {
+    name: 'claude-ads — Marketing Audit',
+    endpoints: ['/api/nexus/leaders/tpl_claude_ads/invoke'],
+  },
+  'seo.audit': {
+    name: 'Toprank — SEO Audit',
+    endpoints: ['/api/nexus/leaders/tpl_toprank/invoke'],
+  },
+  'finance.terminal': {
+    name: 'Fincept Terminal — Finance Data',
+    endpoints: ['/api/nexus/leaders/tpl_fincept_terminal/invoke'],
+  },
 };
 
 const INTERNAL_API_BASE = `http://127.0.0.1:${process.env.PORT ?? '8080'}`;
@@ -2006,6 +2388,46 @@ async function planOrchestration(intent: string): Promise<OrchestrationStep[]> {
     intentLower.includes('status')
   ) {
     addStep('pulse', 'Compile core platform health metrics');
+  }
+
+  // ── Third-party leader logical capabilities ─────────────────────────────────
+  if (
+    intentLower.includes('video') ||
+    intentLower.includes('render') ||
+    intentLower.includes('hyperframes')
+  ) {
+    addStep('video.render', 'Render video via HyperFrames leader');
+  }
+  if (
+    intentLower.includes('stealth') ||
+    intentLower.includes('scrape') ||
+    intentLower.includes('camofox')
+  ) {
+    addStep('web.stealth', 'Execute stealth browser task via Camofox leader');
+  }
+  if (
+    intentLower.includes('marketing') ||
+    intentLower.includes('ad') ||
+    intentLower.includes('ads') ||
+    intentLower.includes('creative')
+  ) {
+    addStep('marketing.audit', 'Audit ad creative via claude-ads leader');
+  }
+  if (
+    intentLower.includes('seo') ||
+    intentLower.includes('ranking') ||
+    intentLower.includes('toprank') ||
+    intentLower.includes('keyword')
+  ) {
+    addStep('seo.audit', 'Run SEO audit via Toprank leader');
+  }
+  if (
+    intentLower.includes('finance') ||
+    intentLower.includes('market data') ||
+    intentLower.includes('fincept') ||
+    intentLower.includes('portfolio analytics')
+  ) {
+    addStep('finance.terminal', 'Query financial data via Fincept Terminal leader');
   }
 
   if (steps.length === 0) {
