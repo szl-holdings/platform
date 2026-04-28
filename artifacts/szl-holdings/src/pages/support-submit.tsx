@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
-import { m } from "framer-motion";
-import { ArrowLeft, CheckCircle2, Send } from "lucide-react";
+import { m, AnimatePresence } from "framer-motion";
+import { ArrowLeft, CheckCircle2, Send, BookOpen, X, ThumbsUp } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -27,6 +27,15 @@ const PRIORITIES = [
   { value: "urgent", label: "Urgent", desc: "Production outage or data loss" },
 ];
 
+interface KbArticle {
+  id: number;
+  slug: string;
+  title: string;
+  summary: string | null;
+  category: string;
+  score: number;
+}
+
 export default function SupportSubmitPage() {
   const __pageMeta = usePageMeta({
     title: "Submit a Request — SZL Holdings Support",
@@ -44,6 +53,48 @@ export default function SupportSubmitPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState<{ ticketRef: string } | null>(null);
   const [honeypot, setHoneypot] = useState("");
+  const [kbSuggestions, setKbSuggestions] = useState<KbArticle[]>([]);
+  const [deflectedWith, setDeflectedWith] = useState<string | null>(null);
+  const deflectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const q = form.subject.trim();
+    if (q.length < 5) {
+      setKbSuggestions([]);
+      return;
+    }
+    if (deflectTimer.current) clearTimeout(deflectTimer.current);
+    deflectTimer.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API}/support/knowledge/deflect?q=${encodeURIComponent(q)}&limit=3`, {
+          credentials: "include",
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        setKbSuggestions(data.articles ?? []);
+      } catch {
+        // silently ignore
+      }
+    }, 600);
+    return () => {
+      if (deflectTimer.current) clearTimeout(deflectTimer.current);
+    };
+  }, [form.subject]);
+
+  const handleDeflectionConfirm = async (slug: string, title: string) => {
+    try {
+      await fetch(`${API}/support/knowledge/deflect/${slug}/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({}),
+      });
+      setDeflectedWith(title);
+      setKbSuggestions([]);
+    } catch {
+      toast.error("Could not record your confirmation. Please try again.");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,6 +140,43 @@ export default function SupportSubmitPage() {
   };
 
   const _ACCENT = "hsl(192,72%,48%)";
+
+  if (deflectedWith) {
+    return (
+      <>
+        {__pageMeta}
+        <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+          <SiteNav />
+          <main style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 200px)", padding: "6rem 1.5rem 4rem" }}>
+            <m.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ textAlign: "center", maxWidth: "480px" }}>
+              <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "hsla(192,72%,48%,0.1)", border: "1px solid hsla(192,72%,48%,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem" }}>
+                <ThumbsUp size={24} style={{ color: "hsl(192,72%,48%)" }} />
+              </div>
+              <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: "hsl(38,12%,94%)", marginBottom: "0.75rem" }}>Great — glad that helped!</h1>
+              <p style={{ fontSize: "14px", color: "hsl(210,5%,55%)", lineHeight: 1.7, marginBottom: "0.75rem" }}>
+                The article <strong style={{ color: "hsl(38,12%,80%)" }}>"{deflectedWith}"</strong> answered your question. No ticket has been created.
+              </p>
+              <p style={{ fontSize: "13px", color: "hsl(210,5%,45%)", lineHeight: 1.6, marginBottom: "2rem" }}>
+                If you still need help, you can submit a ticket any time.
+              </p>
+              <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
+                <button
+                  onClick={() => { setDeflectedWith(null); setKbSuggestions([]); }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.75rem 1.25rem", borderRadius: "6px", fontSize: "13px", fontWeight: 600, color: "hsl(210,12%,6%)", background: "hsl(210,8%,88%)", border: "none", cursor: "pointer" }}
+                >
+                  Submit a ticket anyway
+                </button>
+                <Link href="/support" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.75rem 1.25rem", borderRadius: "6px", fontSize: "13px", fontWeight: 500, color: "hsl(210,5%,55%)", border: "1px solid hsla(0,0%,100%,0.09)", textDecoration: "none" }}>
+                  Back to support
+                </Link>
+              </div>
+            </m.div>
+          </main>
+          <SiteFooter />
+        </div>
+      </>
+    );
+  }
 
   if (submitted) {
     return (
@@ -197,7 +285,70 @@ export default function SupportSubmitPage() {
 
             <div>
               <label style={labelStyle}>Subject *</label>
-              <input type="text" required value={form.subject} onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))} placeholder="Brief description of your issue" style={fieldStyle} maxLength={200} minLength={5} />
+              <input
+                type="text"
+                required
+                value={form.subject}
+                onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
+                placeholder="Brief description of your issue"
+                style={fieldStyle}
+                maxLength={200}
+                minLength={5}
+              />
+              <AnimatePresence>
+                {kbSuggestions.length > 0 && (
+                  <m.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ marginTop: "0.75rem", padding: "1rem", borderRadius: "8px", background: "hsla(192,72%,48%,0.06)", border: "1px solid hsla(192,72%,48%,0.2)" }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <BookOpen size={13} style={{ color: "hsl(192,72%,48%)" }} />
+                        <span style={{ fontSize: "12px", fontWeight: 600, color: "hsl(192,72%,48%)" }}>We found articles that may help</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setKbSuggestions([])}
+                        style={{ background: "none", border: "none", cursor: "pointer", padding: "2px", color: "hsl(210,5%,42%)", display: "flex" }}
+                        aria-label="Dismiss suggestions"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                      {kbSuggestions.map((article) => (
+                        <div
+                          key={article.id}
+                          style={{ padding: "0.75rem", borderRadius: "6px", background: "hsla(0,0%,100%,0.03)", border: "1px solid hsla(0,0%,100%,0.07)" }}
+                        >
+                          <div style={{ display: "flex", alignItems: "start", justifyContent: "space-between", gap: "0.75rem" }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,88%)", marginBottom: "0.25rem" }}>{article.title}</p>
+                              {article.summary && (
+                                <p style={{ fontSize: "12px", color: "hsl(210,5%,48%)", lineHeight: 1.5, margin: 0, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{article.summary}</p>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeflectionConfirm(article.slug, article.title)}
+                              style={{ flexShrink: 0, display: "inline-flex", alignItems: "center", gap: "5px", padding: "0.4rem 0.75rem", borderRadius: "5px", fontSize: "11px", fontWeight: 600, background: "hsla(192,72%,48%,0.12)", border: "1px solid hsla(192,72%,48%,0.3)", color: "hsl(192,72%,52%)", cursor: "pointer", whiteSpace: "nowrap" }}
+                            >
+                              <ThumbsUp size={10} />
+                              This helped
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p style={{ fontSize: "11px", color: "hsl(210,5%,38%)", marginTop: "0.625rem", marginBottom: 0 }}>
+                      If an article answers your question, click "This helped" to close without creating a ticket.
+                    </p>
+                  </m.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <div>

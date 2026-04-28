@@ -120,6 +120,7 @@ const SupportPortalPage = lazy(() => import("@/pages/support-portal"));
 const SupportSubmitPage = lazy(() => import("@/pages/support-submit"));
 const SupportTicketsPage = lazy(() => import("@/pages/support-tickets"));
 const SupportTicketDetailPage = lazy(() => import("@/pages/support-ticket-detail"));
+const SupportCsatPage = lazy(() => import("@/pages/support-csat"));
 const AdminDataRetentionPage = lazy(() => import("@/pages/admin-data-retention"));
 const PRAXISMcpAdminPage = lazy(() => import("@/pages/nexus-mcp-admin"));
 
@@ -1354,6 +1355,9 @@ function App() {
             </Route>
 
             {/* ── Support portal routes ── */}
+            <Route path="/support/csat">
+              <Suspense fallback={<PageLoader />}><SupportCsatPage /></Suspense>
+            </Route>
             <Route path="/support/tickets/:id">
               <RequireAuth><Suspense fallback={<PageLoader />}><SupportTicketDetailPage /></Suspense></RequireAuth>
             </Route>

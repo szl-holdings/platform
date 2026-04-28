@@ -965,4 +965,307 @@ export function register(router: IRouter): void {
       }
     },
   );
+
+  // ── Canned Responses CRUD ─────────────────────────────────────────────────
+
+  const cannedResponseSchema = z.object({
+    title: z.string().min(1).max(200),
+    category: z.string().min(1).max(100).default('general'),
+    body: z.string().min(1).max(10000),
+    tags: z.array(z.string().max(50)).max(20).default([]),
+  });
+
+  router.get('/admin/support/canned-responses', async (_req, res) => {
+    try {
+      const responses = await pool.query(
+        `SELECT * FROM support_canned_responses ORDER BY usage_count DESC, created_at DESC LIMIT 200`,
+      );
+      res.json({ responses: responses.rows, total: responses.rowCount ?? responses.rows.length });
+    } catch (err) {
+      logger.error({ err }, '[admin/support/canned-responses] GET failed');
+      sendError(res, 'Failed to fetch canned responses', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  router.post('/admin/support/canned-responses', validateBody(cannedResponseSchema), async (req, res) => {
+    try {
+      const { title, category, body, tags } = req.body as z.infer<typeof cannedResponseSchema>;
+      const userId = (req as any).user?.id ?? null;
+      const result = await pool.query(
+        `INSERT INTO support_canned_responses (title, category, body, tags, created_by_id)
+         VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+        [title, category, body, tags, userId],
+      );
+      logger.info({ id: result.rows[0].id }, '[admin/support/canned-responses] Created');
+      res.status(201).json({ response: result.rows[0] });
+    } catch (err) {
+      logger.error({ err }, '[admin/support/canned-responses] POST failed');
+      sendError(res, 'Failed to create canned response', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  router.patch('/admin/support/canned-responses/:id', validateBody(cannedResponseSchema.partial()), async (req, res) => {
+    try {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) { sendBadRequest(res, 'Invalid ID'); return; }
+      const { title, category, body, tags } = req.body as Partial<z.infer<typeof cannedResponseSchema>>;
+      const sets: string[] = ['updated_at = NOW()'];
+      const params: unknown[] = [id];
+      if (title !== undefined) { params.push(title); sets.push(`title = $${params.length}`); }
+      if (category !== undefined) { params.push(category); sets.push(`category = $${params.length}`); }
+      if (body !== undefined) { params.push(body); sets.push(`body = $${params.length}`); }
+      if (tags !== undefined) { params.push(tags); sets.push(`tags = $${params.length}`); }
+      if (sets.length === 1) { sendBadRequest(res, 'No fields to update'); return; }
+      const result = await pool.query(
+        `UPDATE support_canned_responses SET ${sets.join(', ')} WHERE id = $1 RETURNING *`,
+        params,
+      );
+      if ((result.rowCount ?? 0) === 0) { sendNotFound(res, 'Canned response'); return; }
+      res.json({ response: result.rows[0] });
+    } catch (err) {
+      logger.error({ err }, '[admin/support/canned-responses] PATCH failed');
+      sendError(res, 'Failed to update canned response', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  router.delete('/admin/support/canned-responses/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) { sendBadRequest(res, 'Invalid ID'); return; }
+      const result = await pool.query(`DELETE FROM support_canned_responses WHERE id = $1`, [id]);
+      if ((result.rowCount ?? 0) === 0) { sendNotFound(res, 'Canned response'); return; }
+      res.json({ success: true });
+    } catch (err) {
+      logger.error({ err }, '[admin/support/canned-responses] DELETE failed');
+      sendError(res, 'Failed to delete canned response', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  router.post('/admin/support/canned-responses/:id/use', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id as string, 10);
+      if (Number.isNaN(id)) { sendBadRequest(res, 'Invalid ID'); return; }
+      await pool.query(`UPDATE support_canned_responses SET usage_count = usage_count + 1 WHERE id = $1`, [id]);
+      res.json({ success: true });
+    } catch (err) {
+      logger.error({ err }, '[admin/support/canned-responses] USE failed');
+      sendError(res, 'Failed to record usage', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  // ── Ticket Merge ──────────────────────────────────────────────────────────
+
+  router.post('/admin/support/tickets/:id/merge', async (req, res) => {
+    try {
+      const sourceId = parseInt(req.params.id as string, 10);
+      const { targetId, reason } = req.body as { targetId?: number; reason?: string };
+      if (Number.isNaN(sourceId) || !targetId || Number.isNaN(targetId)) {
+        sendBadRequest(res, 'sourceId and targetId are required');
+        return;
+      }
+      if (sourceId === targetId) {
+        sendBadRequest(res, 'Cannot merge a ticket into itself');
+        return;
+      }
+
+      const sourceResult = await pool.query<{ id: number; ticket_ref: string; subject: string }>(
+        `SELECT id, ticket_ref, subject FROM support_tickets WHERE id = $1`,
+        [sourceId],
+      );
+      const source = sourceResult.rows[0];
+      const targetResult = await pool.query<{ id: number; ticket_ref: string }>(
+        `SELECT id, ticket_ref FROM support_tickets WHERE id = $1`,
+        [targetId],
+      );
+      const target = targetResult.rows[0];
+      if (!source) { sendNotFound(res, 'Source ticket'); return; }
+      if (!target) { sendNotFound(res, 'Target ticket'); return; }
+
+      await pool.query(
+        `UPDATE support_tickets SET merged_into_id = $1, merged_at = NOW(), status = 'closed', closed_at = NOW() WHERE id = $2`,
+        [targetId, sourceId],
+      );
+
+      const agentName = (req as any).user?.displayName ?? (req as any).user?.email ?? 'Admin';
+      const mergeNote = reason
+        ? `Merged into ticket #${target.ticket_ref}: ${reason}`
+        : `Merged into ticket #${target.ticket_ref} by ${agentName}`;
+
+      await pool.query(
+        `INSERT INTO support_ticket_comments (ticket_id, author_name, author_role, body, is_internal)
+         VALUES ($1, $2, 'admin', $3, TRUE)`,
+        [sourceId, agentName, mergeNote],
+      );
+
+      logger.info({ sourceId, targetId }, '[admin/support/tickets] Ticket merged');
+      res.json({ success: true, sourceRef: source.ticket_ref, targetRef: target.ticket_ref });
+    } catch (err) {
+      logger.error({ err }, '[admin/support/tickets/merge] Failed');
+      sendError(res, 'Failed to merge tickets', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  // ── Support Ops Analytics ─────────────────────────────────────────────────
+
+  router.get('/admin/support/tickets', async (req, res) => {
+    try {
+      const limitParam = parseInt((req.query.limit as string) ?? '100', 10);
+      const limit = Math.min(Number.isNaN(limitParam) ? 100 : limitParam, 500);
+      const status = req.query.status as string | undefined;
+      const priority = req.query.priority as string | undefined;
+      const category = req.query.category as string | undefined;
+      const assignedTo = req.query.assignedTo as string | undefined;
+      const search = req.query.search as string | undefined;
+      const slaBreached = req.query.slaBreached === 'true';
+      const unassigned = req.query.unassigned === 'true';
+
+      const conditions: string[] = [];
+      const params: unknown[] = [];
+
+      if (status) { params.push(status); conditions.push(`status = $${params.length}`); }
+      if (priority) { params.push(priority); conditions.push(`priority = $${params.length}`); }
+      if (category) { params.push(category); conditions.push(`category = $${params.length}`); }
+      if (assignedTo) { params.push(assignedTo); conditions.push(`assigned_to_name ILIKE $${params.length}`); }
+      if (search) { params.push(`%${search}%`); conditions.push(`(subject ILIKE $${params.length} OR submitter_name ILIKE $${params.length} OR submitter_email ILIKE $${params.length} OR ticket_ref ILIKE $${params.length})`); }
+      if (slaBreached) { conditions.push(`(sla_response_breached = TRUE OR sla_resolution_breached = TRUE)`); }
+      if (unassigned) { conditions.push(`assigned_to_id IS NULL`); }
+      conditions.push(`merged_into_id IS NULL`);
+
+      const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+      params.push(limit);
+      const result = await pool.query(
+        `SELECT *, 
+           CASE WHEN sla_response_deadline IS NOT NULL AND first_response_at IS NULL
+                THEN EXTRACT(EPOCH FROM (sla_response_deadline - NOW()))
+                ELSE NULL END AS sla_response_seconds_remaining,
+           CASE WHEN sla_resolution_deadline IS NOT NULL AND resolved_at IS NULL
+                THEN EXTRACT(EPOCH FROM (sla_resolution_deadline - NOW()))
+                ELSE NULL END AS sla_resolution_seconds_remaining
+         FROM support_tickets ${where} ORDER BY created_at DESC LIMIT $${params.length}`,
+        params,
+      );
+
+      const countResult = await pool.query(
+        `SELECT COUNT(*)::int AS total FROM support_tickets ${where}`,
+        params.slice(0, -1),
+      );
+
+      res.json({ tickets: result.rows, total: countResult.rows[0]?.total ?? 0 });
+    } catch (err) {
+      logger.error({ err }, '[admin/support/tickets] GET failed');
+      sendError(res, 'Failed to fetch support tickets', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  router.get('/admin/support/analytics', async (req, res) => {
+    try {
+      const days = parseInt((req.query.days as string) ?? '30', 10);
+      const since = new Date(Date.now() - days * 24 * 3600 * 1000);
+
+      const [overview] = (await pool.query(
+        `SELECT
+           COUNT(*)::int AS total_tickets,
+           COUNT(*) FILTER (WHERE status IN ('open', 'in_progress'))::int AS open_tickets,
+           COUNT(*) FILTER (WHERE status IN ('resolved', 'closed'))::int AS resolved_tickets,
+           COUNT(*) FILTER (WHERE sla_response_breached = TRUE)::int AS sla_response_breaches,
+           COUNT(*) FILTER (WHERE sla_resolution_breached = TRUE)::int AS sla_resolution_breaches,
+           ROUND(AVG(CASE WHEN csat_rating IS NOT NULL THEN csat_rating END)::numeric, 2) AS avg_csat,
+           COUNT(csat_rating)::int AS csat_count,
+           ROUND(EXTRACT(EPOCH FROM AVG(CASE WHEN first_response_at IS NOT NULL THEN first_response_at - created_at END)) / 3600, 2) AS avg_first_response_hrs,
+           ROUND(EXTRACT(EPOCH FROM AVG(CASE WHEN resolved_at IS NOT NULL THEN resolved_at - created_at END)) / 3600, 2) AS avg_resolution_hrs
+         FROM support_tickets WHERE created_at >= $1`,
+        [since],
+      )).rows;
+
+      const csatDistribution = (await pool.query(
+        `SELECT csat_rating AS rating, COUNT(*)::int AS count
+         FROM support_tickets WHERE csat_rating IS NOT NULL AND created_at >= $1
+         GROUP BY csat_rating ORDER BY csat_rating`,
+        [since],
+      )).rows;
+
+      const volumeByDay = (await pool.query(
+        `SELECT DATE_TRUNC('day', created_at) AS day, COUNT(*)::int AS count
+         FROM support_tickets WHERE created_at >= $1
+         GROUP BY day ORDER BY day`,
+        [since],
+      )).rows;
+
+      const byCategory = (await pool.query(
+        `SELECT category,
+           COUNT(*)::int AS total,
+           COUNT(*) FILTER (WHERE status IN ('open','in_progress'))::int AS open,
+           ROUND(AVG(csat_rating)::numeric, 2) AS avg_csat
+         FROM support_tickets WHERE created_at >= $1
+         GROUP BY category ORDER BY total DESC`,
+        [since],
+      )).rows;
+
+      const byPriority = (await pool.query(
+        `SELECT priority,
+           COUNT(*)::int AS total,
+           COUNT(*) FILTER (WHERE sla_response_breached = TRUE OR sla_resolution_breached = TRUE)::int AS breached
+         FROM support_tickets WHERE created_at >= $1
+         GROUP BY priority ORDER BY total DESC`,
+        [since],
+      )).rows;
+
+      const agentLeaderboard = (await pool.query(
+        `SELECT
+           COALESCE(assigned_to_name, 'Unassigned') AS agent,
+           COUNT(*)::int AS total,
+           COUNT(*) FILTER (WHERE status IN ('open','in_progress'))::int AS open,
+           COUNT(*) FILTER (WHERE status IN ('resolved','closed'))::int AS resolved,
+           ROUND(AVG(csat_rating)::numeric, 2) AS avg_csat,
+           ROUND(EXTRACT(EPOCH FROM AVG(CASE WHEN first_response_at IS NOT NULL THEN first_response_at - created_at END)) / 3600, 2) AS avg_response_hrs
+         FROM support_tickets WHERE created_at >= $1
+         GROUP BY assigned_to_name
+         ORDER BY resolved DESC LIMIT 20`,
+        [since],
+      )).rows;
+
+      const slaComplianceRate =
+        overview.total_tickets > 0
+          ? Math.round(
+              ((overview.total_tickets -
+                Math.max(
+                  overview.sla_response_breaches ?? 0,
+                  overview.sla_resolution_breaches ?? 0,
+                )) /
+                overview.total_tickets) *
+                100,
+            )
+          : 100;
+
+      const deflectionStats = (await pool.query(
+        `SELECT SUM(deflection_count)::int AS total_deflections, COUNT(*)::int AS articles
+         FROM support_knowledge_articles WHERE deflection_count > 0`,
+      )).rows[0];
+
+      res.json({
+        period: { days, from: since.toISOString(), to: new Date().toISOString() },
+        overview: { ...overview, slaComplianceRate },
+        csatDistribution,
+        volumeByDay,
+        byCategory,
+        byPriority,
+        agentLeaderboard,
+        deflectionStats,
+      });
+    } catch (err) {
+      logger.error({ err }, '[admin/support/analytics] GET failed');
+      sendError(res, 'Failed to fetch support analytics', 500, 'INTERNAL_ERROR');
+    }
+  });
+
+  router.get('/admin/support/sla-policies', async (_req, res) => {
+    res.json({
+      policies: {
+        urgent: { responseHours: 1, resolutionHours: 4 },
+        high: { responseHours: 4, resolutionHours: 24 },
+        medium: { responseHours: 8, resolutionHours: 48 },
+        low: { responseHours: 24, resolutionHours: 72 },
+      },
+    });
+  });
 }

@@ -39,6 +39,7 @@ import {
   Gauge,
   GitBranch,
   Globe,
+  Headphones,
   Heart,
   Inbox,
   Layers,
@@ -294,6 +295,7 @@ const ADMIN_NAV = [
   { href: '/operations/admin/seeder', label: 'Seeder', icon: Database },
   { href: '/operations/admin/jobs', label: 'Jobs', icon: Activity },
   { href: '/operations/admin/kb', label: 'Knowledge Base', icon: BookOpen },
+  { href: '/operations/admin/support', label: 'Support Ops', icon: Headphones },
 ];
 
 const ADMIN_ROLES = ['admin', 'super_admin', 'ops'];

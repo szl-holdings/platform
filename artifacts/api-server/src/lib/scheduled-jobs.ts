@@ -3,6 +3,7 @@ import { durableJobQueue } from '@szl-holdings/forge-runtime';
 import { serverTelemetry } from '@szl-holdings/observability';
 
 export const NAMED_JOB_TYPES = {
+  HOURLY_SLA_ESCALATION_SCAN: "hourly_sla_escalation_scan",
   DAILY_SETTLEMENT_RECONCILIATION: "daily_settlement_reconciliation",
   WEEKLY_ECOSYSTEM_HEALTH_BRIEFING: "weekly_ecosystem_health_briefing",
   DAILY_LYTE_DIGEST: "daily_lyte_digest",
@@ -85,6 +86,7 @@ function registerEntry(entry: Omit<JobScheduleEntry, 'runCount' | 'failCount'>) 
   jobRegistry.set(entry.type, { ...entry, runCount: 0, failCount: 0 });
 }
 
+registerEntry({ type: NAMED_JOB_TYPES.HOURLY_SLA_ESCALATION_SCAN, name: "SLA Escalation Scan", description: "Scans all open support tickets for imminent or breached SLA deadlines. Marks breached tickets, auto-escalates priority when 75% of SLA time has elapsed, and reassigns to the agent with the lowest open workload. Fires internal notifications to the assigned agent and support admin when a breach occurs. Runs every minute to reliably catch 75% threshold for 1-hour urgent SLAs.", schedule: "minutely" as JobScheduleEntry["schedule"], enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_SETTLEMENT_RECONCILIATION, name: "Daily Settlement Reconciliation", description: "Pulls Coinbase Commerce settlements and Stripe ACH payouts, matches them to internal invoices, and flags mismatches. Sends a reconciliation alert email to the configured billing admin address (BILLING_RECONCILIATION_EMAIL) when mismatches are detected. Safe to run multiple times per day; idempotent by revenue event idempotency keys.", schedule: "daily", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.WEEKLY_ECOSYSTEM_HEALTH_BRIEFING, name: "Weekly Ecosystem Health Briefing", description: "Generates and delivers the weekly Ecosystem Autopilot briefing — capability maturity changes, drift alerts, feature usage trends, feedback sentiment shifts, and competitive positioning deltas. Delivered via email, Slack, and in-app notification.", schedule: "weekly", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.DAILY_PULSE_BRIEFING_DIGEST, name: "Daily Pulse Briefing Digest", description: "Delivers the latest published Pulse briefing to all active email subscribers. Filters sections per subscription's domain selection and tracks last-sent briefing to prevent duplicate delivery.", schedule: "daily", enabled: true });
@@ -173,6 +175,189 @@ registerEntry({
   enabled: true,
 });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_ORG_PUBLICATION_SCHEDULER, name: "Hourly Org Publication Scheduler", description: "Checks pulse_org_schedules for due recurrence entries (next_run_at <= now, paused=false) and triggers org-wide fan-out publications for each due schedule. Advances next_run_at after enqueuing each publication. Compatible with the org fan-out v2 channel adapters (email, SMS, Slack, Teams, push, webhook, in-app).", schedule: "hourly", enabled: true });
+
+durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_SLA_ESCALATION_SCAN, async (job) => {
+  const start = Date.now();
+  let escalated = 0;
+  let breached = 0;
+  let scanned = 0;
+  logger.info({ jobId: job.id }, 'hourly_sla_escalation_scan: starting');
+  try {
+    const { pool: dbPool } = await import('@szl-holdings/db') as { pool: import('pg').Pool };
+    const now = new Date();
+
+    const openTickets = await dbPool.query(
+      `SELECT id, priority, status, assigned_to_name, assigned_to_id,
+              sla_response_deadline, sla_resolution_deadline,
+              first_response_at, created_at, escalated_at,
+              sla_response_breached, sla_resolution_breached,
+              escalation_count
+       FROM support_tickets
+       WHERE status IN ('open', 'in_progress')
+         AND merged_into_id IS NULL
+         AND (sla_response_deadline IS NOT NULL OR sla_resolution_deadline IS NOT NULL)`,
+    );
+
+    scanned = openTickets.rows.length;
+
+    const PRIORITY_ORDER = ['low', 'medium', 'high', 'urgent'];
+
+    for (const ticket of openTickets.rows) {
+      const responseDeadline = ticket.sla_response_deadline ? new Date(ticket.sla_response_deadline) : null;
+      const resolutionDeadline = ticket.sla_resolution_deadline ? new Date(ticket.sla_resolution_deadline) : null;
+      const recentlyEscalated =
+        ticket.escalated_at &&
+        now.getTime() - new Date(ticket.escalated_at).getTime() < 3 * 3600 * 1000;
+
+      let responseBreached = false;
+      let resolutionBreached = false;
+      let shouldEscalate = false;
+
+      if (responseDeadline && !ticket.first_response_at) {
+        const totalMs = responseDeadline.getTime() - new Date(ticket.created_at).getTime();
+        const elapsedMs = now.getTime() - new Date(ticket.created_at).getTime();
+        const pct = totalMs > 0 ? elapsedMs / totalMs : 1;
+
+        if (now > responseDeadline && !ticket.sla_response_breached) {
+          responseBreached = true;
+          breached++;
+        }
+        if (pct >= 0.75 && !ticket.sla_response_breached && !recentlyEscalated) {
+          shouldEscalate = true;
+        }
+      }
+
+      if (resolutionDeadline) {
+        const totalMs = resolutionDeadline.getTime() - new Date(ticket.created_at).getTime();
+        const elapsedMs = now.getTime() - new Date(ticket.created_at).getTime();
+        const pct = totalMs > 0 ? elapsedMs / totalMs : 1;
+
+        if (now > resolutionDeadline && !ticket.sla_resolution_breached) {
+          resolutionBreached = true;
+          breached++;
+        }
+        if (pct >= 0.75 && !ticket.sla_resolution_breached && !recentlyEscalated) {
+          shouldEscalate = true;
+        }
+      }
+
+      const wasBreached = responseBreached || resolutionBreached;
+
+      let newPriority: string | null = null;
+      let reassignToId: string | null = null;
+      let reassignToName: string | null = null;
+
+      if (shouldEscalate && ticket.escalation_count < 3) {
+        const currentPriorityIdx = PRIORITY_ORDER.indexOf(ticket.priority);
+        if (currentPriorityIdx < PRIORITY_ORDER.length - 1) {
+          newPriority = PRIORITY_ORDER[currentPriorityIdx + 1];
+          escalated++;
+
+          const reassignResult = await dbPool.query<{ agent_id: string; agent_name: string; open_count: number }>(
+            `SELECT
+               u.id::text AS agent_id,
+               u.display_name AS agent_name,
+               COUNT(st.id)::int AS open_count
+             FROM users u
+             INNER JOIN user_roles ur ON ur.user_id = u.id
+             INNER JOIN roles r ON r.id = ur.role_id
+             LEFT JOIN support_tickets st
+               ON st.assigned_to_id = u.id
+               AND st.status IN ('open', 'in_progress')
+               AND st.merged_into_id IS NULL
+               AND st.id != $1
+             WHERE r.name IN ('ops', 'admin', 'super_admin')
+             GROUP BY u.id, u.display_name
+             ORDER BY open_count ASC, u.id ASC
+             LIMIT 1`,
+            [ticket.id],
+          );
+          if (reassignResult.rows.length > 0) {
+            reassignToId = reassignResult.rows[0].agent_id;
+            reassignToName = reassignResult.rows[0].agent_name;
+          }
+        }
+      }
+
+      const slaResponseBreached = responseBreached ? true : undefined;
+      const slaResolutionBreached = resolutionBreached ? true : undefined;
+
+      if (slaResponseBreached !== undefined || slaResolutionBreached !== undefined || newPriority !== null) {
+        await dbPool.query(
+          `UPDATE support_tickets SET
+             sla_response_breached   = CASE WHEN $2 THEN TRUE ELSE sla_response_breached END,
+             sla_resolution_breached = CASE WHEN $3 THEN TRUE ELSE sla_resolution_breached END,
+             priority                = CASE WHEN $4::text IS NOT NULL THEN $4::text ELSE priority END,
+             escalation_count        = CASE WHEN $4::text IS NOT NULL THEN escalation_count + 1 ELSE escalation_count END,
+             escalated_at            = CASE WHEN $4::text IS NOT NULL THEN NOW() ELSE escalated_at END,
+             assigned_to_id          = CASE WHEN $5::text IS NOT NULL THEN $5::integer ELSE assigned_to_id END,
+             assigned_to_name        = CASE WHEN $6::text IS NOT NULL THEN $6::text ELSE assigned_to_name END,
+             updated_at              = NOW()
+           WHERE id = $1`,
+          [ticket.id, slaResponseBreached ?? false, slaResolutionBreached ?? false, newPriority, reassignToId, reassignToName],
+        );
+      }
+
+      if (wasBreached) {
+        try {
+          const ticketRef = await dbPool.query<{ ticket_ref: string; subject: string }>(
+            `SELECT ticket_ref, subject FROM support_tickets WHERE id = $1`,
+            [ticket.id],
+          );
+          const t = ticketRef.rows[0];
+          if (t) {
+            const notifTitle = 'SLA Breach Detected';
+            const notifBody = `SLA breach on ticket ${t.ticket_ref}: "${t.subject}". Priority: ${ticket.priority}. Assigned: ${ticket.assigned_to_name ?? 'Unassigned'}.`;
+            await dbPool.query(
+              `INSERT INTO notifications (user_id, title, body, type, entity_type, entity_id, read)
+               SELECT u.id, $1, $2, 'sla_breach', 'support_ticket', $3::text, false
+               FROM users u
+               INNER JOIN user_roles ur ON ur.user_id = u.id
+               INNER JOIN roles r ON r.id = ur.role_id
+               WHERE r.name IN ('admin', 'super_admin')
+               ON CONFLICT DO NOTHING`,
+              [notifTitle, notifBody, String(ticket.id)],
+            ).catch(() => {});
+
+            if (ticket.assigned_to_id) {
+              await dbPool.query(
+                `INSERT INTO notifications (user_id, title, body, type, entity_type, entity_id, read)
+                 VALUES ($1::integer, $2, $3, 'sla_breach', 'support_ticket', $4::text, false)
+                 ON CONFLICT DO NOTHING`,
+                [ticket.assigned_to_id, notifTitle, notifBody, String(ticket.id)],
+              ).catch(() => {});
+            }
+          }
+        } catch (notifErr) {
+          logger.warn({ notifErr, ticketId: ticket.id }, 'SLA breach notification insert failed');
+        }
+      }
+    }
+
+    const durationMs = Date.now() - start;
+    serverTelemetry.recordBusinessEvent({
+      type: 'sla_escalation_scan_completed',
+      domain: 'support',
+      durationMs,
+      success: true,
+      metadata: { scanned, escalated, breached },
+    });
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_SLA_ESCALATION_SCAN, {
+      lastStatus: 'completed',
+      lastDurationMs: durationMs,
+      lastResult: { scanned, escalated, breached },
+    });
+    logger.info({ jobId: job.id, scanned, escalated, breached, durationMs }, 'hourly_sla_escalation_scan: complete');
+  } catch (err) {
+    const durationMs = Date.now() - start;
+    logger.error({ err, jobId: job.id }, 'hourly_sla_escalation_scan: fatal error');
+    updateRegistry(NAMED_JOB_TYPES.HOURLY_SLA_ESCALATION_SCAN, {
+      lastStatus: 'failed',
+      lastDurationMs: durationMs,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.HOURLY_SLA_ESCALATION_SCAN)?.failCount || 0) + 1,
+    });
+  }
+});
 
 durableJobQueue.register(NAMED_JOB_TYPES.LAUNCH_PUBLISH_SCAN, async (job) => {
   const start = Date.now();
