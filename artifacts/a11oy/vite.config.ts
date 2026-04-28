@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
 import { defineConfig } from 'vite';
+import { securityHeadersVitePlugin } from '@szl-holdings/security-headers';
 
 const vitePort = Number(process.env.VITE_PORT) || 4110;
 const basePath = process.env.BASE_PATH || '/a11oy/';
@@ -11,6 +12,7 @@ const basePath = process.env.BASE_PATH || '/a11oy/';
 export default defineConfig({
   base: basePath,
   plugins: [
+    securityHeadersVitePlugin(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),

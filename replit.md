@@ -65,7 +65,8 @@ The platform is a pnpm monorepo, known as the FORGE Execution and Evidence Platf
 - **A11oy × Sentra Glasswing Command Layer (Risk-as-Reward):** Premium executive command surface synthesizing agent constellations and a "Risk-as-Reward" novelty thesis.
 - **A11oy Command Fabric — Universal Intelligence Layer:** Cross-vertical command layer spanning all SZL verticals with interactive data views.
 - **A11oy Trust & Policies:** Three new operational policy pages covering Constitution, Security & Compliance, and Right to Audit.
-- **Shared Reverse Proxy:** `packages/shared-proxy` — all artifacts share a single reverse-proxy Vite plugin on port 9090 with `SO_REUSEPORT`.
+- **Shared Reverse Proxy:** `packages/shared-proxy` — all artifacts share a single reverse-proxy Vite plugin on port 9090 with `SO_REUSEPORT`. The `PROXY_ROUTES` array must contain an entry for every artifact's path prefix. When adding a new artifact, add its route to `PROXY_ROUTES` and restart ALL running workflows so every `reusePort` listener picks up the updated route table. Port constants: A11OY=4110, AEGIS=3002, API=8080, CARLOTA_JO=8098, COMMAND=5000, CONDUIT=5300, COUNSEL=4199, LYTE=7099, PRAXIS=8008, SENTRA=4099, TERRA=6000, VESSELS=8099, PULSE=5201, SZL_DEMO_VIDEO=8765, PLUGINMESH=8190.
+- **Shared Security Headers:** `packages/security-headers` (`@szl-holdings/security-headers`) exports `securityHeadersVitePlugin()` (wired into every web artifact's vite.config.ts) and `buildHelmetOptions()` (used by the API server). Enforces HSTS, CSP, X-Content-Type-Options, Referrer-Policy, X-Frame-Options, and Permissions-Policy consistently across the platform. CI smoke check: `scripts/check-security-headers.mjs`. Runbook: `docs/csp-allowlist.md`.
 
 ## External Dependencies
 - **Database:** PostgreSQL 16

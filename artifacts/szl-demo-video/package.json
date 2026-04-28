@@ -15,6 +15,7 @@
     "render:ci": "node scripts/render-video.mjs --install-browsers"
   },
   "devDependencies": {
+    "@szl-holdings/security-headers": "workspace:*",
     "@react-spring/web": "^10.0.3",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",

@@ -11,6 +11,7 @@ import { randomBytes } from 'node:crypto';
 import express, { type Express, type NextFunction, type Request, type Response } from 'express';
 import { readFileSync } from 'node:fs';
 import helmet from 'helmet';
+import { buildHelmetOptions } from '@szl-holdings/security-headers';
 import { dirname, join } from 'node:path';
 import pinoHttp from 'pino-http';
 import swaggerUi from 'swagger-ui-express';
@@ -62,34 +63,9 @@ app.use(apiVersionMiddleware);
 app.use(appModeMiddleware);
 
 app.use(
-  helmet({
-    contentSecurityPolicy: isProduction
-      ? {
-          directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            imgSrc: ["'self'", 'data:', 'https:'],
-            connectSrc: ["'self'", 'https:'],
-            fontSrc: ["'self'", 'data:', 'https:'],
-            objectSrc: ["'none'"],
-            mediaSrc: ["'self'"],
-            frameSrc: ["'self'"],
-            baseUri: ["'self'"],
-            formAction: ["'self'"],
-            upgradeInsecureRequests: [],
-          },
-        }
-      : false,
-    crossOriginEmbedderPolicy: false,
-    crossOriginOpenerPolicy: { policy: 'same-origin' },
-    crossOriginResourcePolicy: { policy: 'cross-origin' },
-    hsts: isProduction ? { maxAge: 63072000, includeSubDomains: true, preload: true } : false,
-    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-    frameguard: { action: 'sameorigin' },
-    dnsPrefetchControl: { allow: false },
-    permittedCrossDomainPolicies: { permittedPolicies: 'none' },
-  }),
+  helmet(
+    buildHelmetOptions({ isProduction }) as Parameters<typeof helmet>[0],
+  ),
 );
 
 app.use((_req: Request, res: Response, next: NextFunction) => {

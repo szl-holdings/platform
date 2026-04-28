@@ -27,6 +27,7 @@
     "urql": "^5.0.1"
   },
   "devDependencies": {
+    "@szl-holdings/security-headers": "workspace:*",
     "@replit/vite-plugin-cartographer": "catalog:",
     "@replit/vite-plugin-dev-banner": "catalog:",
     "@replit/vite-plugin-runtime-error-modal": "catalog:",

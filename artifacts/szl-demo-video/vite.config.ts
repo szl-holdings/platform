@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 import path from 'node:path';
 import { defineConfig } from 'vite';
 import { sharedProxyPlugin } from '@szl-holdings/shared-proxy';
+import { securityHeadersVitePlugin } from '@szl-holdings/security-headers';
 
 const rawPort = process.env.VITE_PORT;
 const port = rawPort && !Number.isNaN(Number(rawPort)) && Number(rawPort) > 0
@@ -15,6 +16,7 @@ const basePath = process.env.BASE_PATH || '/szl-demo-video/';
 export default defineConfig({
   base: basePath,
   plugins: [
+    securityHeadersVitePlugin(),
     react(),
     runtimeErrorOverlay(),
     tailwindcss(),

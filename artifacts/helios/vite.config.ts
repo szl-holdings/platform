@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { defineConfig } from 'vite';
 import { sharedProxyPlugin } from '@szl-holdings/shared-proxy';
+import { securityHeadersVitePlugin } from '@szl-holdings/security-headers';
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
 
@@ -57,6 +58,7 @@ const workspaceAliases = buildWorkspaceAliases();
 export default defineConfig({
   base: basePath,
   plugins: [
+    securityHeadersVitePlugin(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),

@@ -6,6 +6,7 @@ import net from 'node:net';
 import path from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
 import { PLUGINMESH_PORT, sharedProxyPlugin } from '@szl-holdings/shared-proxy';
+import { securityHeadersVitePlugin } from '@szl-holdings/security-headers';
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
 
@@ -88,6 +89,7 @@ function portBridgePlugin(bridgePort: number, targetPort: number): Plugin {
 export default defineConfig({
   base: basePath,
   plugins: [
+    securityHeadersVitePlugin(),
     healthCheckPlugin(),
     portBridgePlugin(PLUGINMESH_PORT, vitePort),
     sharedProxyPlugin(),

@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 import path from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
 import { sharedProxyPlugin } from '@szl-holdings/shared-proxy';
+import { securityHeadersVitePlugin } from '@szl-holdings/security-headers';
 
 process.env.GOMAXPROCS = process.env.GOMAXPROCS ?? '2';
 
@@ -30,6 +31,7 @@ function healthCheckPlugin(): Plugin {
 export default defineConfig({
   base: basePath,
   plugins: [
+    securityHeadersVitePlugin(),
     healthCheckPlugin(),
     sharedProxyPlugin(),
     react(),

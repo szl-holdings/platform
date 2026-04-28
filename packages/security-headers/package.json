@@ -1,0 +1,16 @@
+{
+  "name": "@szl-holdings/security-headers",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared security headers configuration (CSP, HSTS, X-Frame-Options, etc.) consumed by all web artifacts and the API server.",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

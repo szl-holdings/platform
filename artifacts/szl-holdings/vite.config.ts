@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 import fs from 'node:fs';
 import path from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
+import { securityHeadersVitePlugin } from '@szl-holdings/security-headers';
 
 function sitemapPlugin(): Plugin {
   return {
@@ -74,6 +75,7 @@ const workspaceAliases = buildWorkspaceAliases();
 export default defineConfig({
   base: basePath,
   plugins: [
+    securityHeadersVitePlugin(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
