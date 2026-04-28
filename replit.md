@@ -27,7 +27,7 @@ The platform is a pnpm monorepo, known as the Continuum Business Observability F
 
 **API Layers:** Includes REST API, GraphQL API (Apollo Server), and an MCP Gateway.
 
-**Zero-Trust Auth Hardening:** Implemented on the API server with passwordless magic-link authentication, device fingerprinting, adaptive risk scoring, progressive brute-force protection, session management API, and security event audit logging.
+**Zero-Trust Auth Hardening:** Implemented on the API server with passwordless magic-link authentication, device fingerprinting, adaptive risk scoring, progressive brute-force protection, session management API, and security event audit logging. Architecture guardrail tests enforce auth coverage: `tenant-scope-group-registration.test.ts` covers group files, `group-gate-coverage.test.ts` covers per-route gates within groups, and `loose-mount-coverage.test.ts` covers all non-group mounts in `routes/index.ts` via two position-enforced categories (`ALLOWED_PUBLIC_MOUNTS` for pre-guardian public routes, `GUARDIAN_GATED_MOUNTS` for post-guardian gated routes) — any new `router.use()` / `lazyMatch` / `lazyMount` addition to index.ts must be categorized with its auth strategy or CI fails.
 
 **AI Infrastructure:** Features a multi-provider AI backend, AI evaluation infrastructure, AI Ops Dashboard, NVIDIA-Ready Packages, and Substrate Edge Inference (oLLM).
 - **Forge – AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents.
