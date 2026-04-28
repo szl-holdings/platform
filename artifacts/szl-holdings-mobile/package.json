@@ -64,7 +64,7 @@
     "react-native-web": "^0.21.0",
     "react-native-worklets": "0.5.1",
     "ts-jest": "^29.4.9",
-    "typescript": "~5.9.2",
+    "typescript": "~6.0.3",
     "zod": "catalog:"
   },
   "dependencies": {
