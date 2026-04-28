@@ -77,7 +77,7 @@ Screenshots depict the alpha demo state of the platform (development environment
 | ![Aegis](.github/assets/screenshots/aegis-hero.jpg) |
 | Threat intelligence, defense operations command, and spatial analytics |
 
-> Screenshots captured from the alpha demo environment (development build, seeded data) — 2026-04-25. Screenshots are not tracked in the git repository.
+> Screenshots captured from the alpha demo environment (development build, seeded data) — 2026-04-27. Screenshots are not tracked in the git repository.
 > Canonical screenshots are in [`.github/assets/screenshots/`](.github/assets/screenshots/). All captures are from the live platform — no mockups or AI-generated imagery.
 
 ---
@@ -105,15 +105,15 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 | Product | Domain | What It Does |
 |---------|--------|--------------|
 | **A11oy** | Execution Fabric | Governed agentic layer — signal mesh, proof ledger, covenant policies, operator surfaces |
-| **TENAX** | Cybersecurity | Cyber posture management, recovery readiness, incident command |
-| **DOMAINE** | Real Estate | Deal pipeline intelligence, portfolio analytics, market signals |
-| **SEXTANT** | Maritime | Fleet command, route optimization, compliance tracking |
-| **PARAGON** | Defense & Intel | Threat intelligence, spatial analytics, operations command |
+| **Sentra** | Cybersecurity | Cyber posture management, recovery readiness, incident command |
+| **Terra** | Real Estate | Deal pipeline intelligence, portfolio analytics, market signals |
+| **Vessels** | Maritime | Fleet command, route optimization, compliance tracking |
 | **Counsel** | Legal | Matter tracking, obligation dependency mapping, exposure management |
-| **KORA** | Decision Intelligence | Cross-domain metrics, outcome tracking, decision quality scoring |
-| **LUMINA** | Executive Briefing | Board-ready decision briefings with attribution and proof chains |
+| **Lyte** | Decision Intelligence | Cross-domain metrics, outcome tracking, decision quality scoring |
+| **Pulse** | Executive Briefing | Board-ready decision briefings with attribution and proof chains |
+| **Carlota Jo** | Private Advisory | Concierge advisory with live integrations and booking workflow |
 
-**Additional surfaces:** FORGE (unified command), Carlota Jo (consulting), APEX (mobile command — iOS/Android)
+**Additional surfaces:** Command (unified operator surface), SZL Holdings Mobile (iOS/Android command)
 
 ---
 
@@ -160,7 +160,7 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 | A11oy Phase 1 — Foundation (type system, fabric primitives, demo seed, read API) | ✅ Complete |
 | A11oy Phase 2 — Workcell engine with live AI reasoning | 🔜 In Progress |
 | A11oy Phase 3 — Full proof-carrying execution with live connectors | 🔜 Planned |
-| APEX mobile (unified iOS + Android command) | 🔜 Planned |
+| SZL Holdings Mobile (unified iOS + Android command) | 🔜 Planned |
 | SOC 2 Type 1 audit readiness | 🔜 Roadmap |
 | Production customer onboarding | 🔜 Roadmap |
 
@@ -168,13 +168,14 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 
 ## Current Status
 
-**Alpha — last runtime verification 2026-04-26. Web surfaces serve in development. Build pipeline has active failures (see below).**
+**Alpha — last runtime verification 2026-04-27. Web surfaces serve in development. Build pipeline has active failures (see below).**
 
 | Classification | Artifacts |
 |---|---|
-| `alpha working` | SZL Holdings, API Server, Carlota Jo, Counsel, Pulse, Aegis (6) |
+| `alpha working` | SZL Holdings, API Server, Carlota Jo, Counsel, Pulse (5) |
 | `alpha partial` | Vessels, Terra, Command, Sentra, Lyte (5) |
-| `build failing` | A11oy, Mobile (APEX), SZL Demo Video (3) — cascaded from SDK dependency |
+| `build failing` | A11oy, SZL Demo Video (2) — cascaded from SDK dependency |
+| `not started` | SZL Holdings Mobile — scaffold complete, workflow not active |
 | `demo-only` | SZL Demo Video (1) |
 | `internal only` | Mockup Sandbox (1) |
 
@@ -205,7 +206,7 @@ This repository is proprietary. Source code, architecture, and implementation de
 | `artifacts/a11oy/` | A11oy — Live Enterprise Execution Fabric |
 | `lib/` | Shared libraries: database client, auth, AI, event bus, UI components |
 | `apps/` | Background applications: embedding API, ingestion orchestrator, runtime API |
-| `services/` | Platform services: FORGE fabric, KORA metrics, Substrate MCP gateway |
+| `services/` | Platform services: Command fabric, Lyte metrics engine, Substrate MCP gateway |
 | `workers/` | Background workers: embedding, ranking, reranking, vector, Python substrate |
 | `packages/` | Domain packages: design system, substrate, agent core, evidence ledger, policy guard |
 | `scripts/` | Seed scripts, QA scripts, screenshot capture, deployment utilities |
@@ -217,24 +218,23 @@ This repository is proprietary. Source code, architecture, and implementation de
 
 **Artifact inventory:**
 
-> Status labels reflect runtime verification as of 2026-04-26. See [`audit/runtime/app-status-classification.md`](audit/runtime/app-status-classification.md) for full evidence and upgrade paths.
+> Status labels reflect runtime verification as of 2026-04-27. See [`audit/runtime/app-status-classification.md`](audit/runtime/app-status-classification.md) for full evidence and upgrade paths.
 
 | Artifact | Kind | Preview | Runtime Status |
 |----------|------|---------|----------------|
 | SZL Holdings Dashboard | web | `/` | `alpha working` — all routes live, KPIs seeded |
-| A11oy — Live Enterprise Execution Fabric | web | `/a11oy/` | `alpha working` — Phase 1 complete, Phase 2 in progress |
+| A11oy — Governed Agentic Execution Fabric | web | `/a11oy/` | `build failing` — Phase 1 complete, Phase 2 in progress; SDK dep build issue |
 | API Server | web | `/api/` | `alpha working` — demo mode; auth-gated routes correct |
-| FORGE Command Portal | web | `/command/` | `alpha partial` — CORTEX badge counts not wired to live API |
-| TENAX — Cyber Resilience Command | web | `/sentra/` | `alpha partial` — UI complete; `/api/sentra/risks` route missing |
+| Command — Unified Command Portal | web | `/command/` | `alpha partial` — CORTEX badge counts not wired to live API |
+| Sentra — Cyber Resilience Command | web | `/sentra/` | `alpha partial` — UI complete; `/api/sentra/risks` route missing |
 | Counsel — Legal Matter Command | web | `/counsel/` | `alpha working` — matter tracking functional; CourtListener token pending |
-| DOMAINE — Real Estate Intelligence | web | `/terra/` | `alpha partial` — maps blank (Mapbox token not configured) |
-| SEXTANT Maritime Intelligence | web | `/vessels/` | `alpha partial` — AIS simulated; 3 commercial modules not wired |
+| Terra — Real Estate Intelligence | web | `/terra/` | `alpha partial` — maps blank (Mapbox token not configured) |
+| Vessels — Maritime Intelligence | web | `/vessels/` | `alpha partial` — AIS simulated; 3 commercial modules not wired |
 | Carlota Jo Consulting | web | `/carlota-jo/` | `alpha working` — most complete artifact; live integrations active |
-| KORA — Decision Intelligence | web | `/lyte/` | `alpha partial` — routes functional; legacy path alias missing |
-| LUMINA — AI Executive Briefing | web | `/pulse/` | `alpha working` — AI multi-provider routing active |
-| PARAGON — Defense & Intelligence | web | `/aegis/` | `alpha working` — CISA KEV, NVD CVE, MITRE ATT&CK v14 active |
+| Lyte — Decision Intelligence | web | `/lyte/` | `alpha partial` — routes functional; legacy path alias missing |
+| Pulse — AI Executive Briefing | web | `/pulse/` | `alpha working` — AI multi-provider routing active |
 | SZL Holdings — Governed Autonomy Demo | video | `/szl-demo-video/` | `demo-only` — promotional video artifact |
-| SZL Holdings — Mobile Command (APEX) | mobile | `/szl-holdings-mobile/` | `alpha partial` — scaffold complete; splash/icon and push linking pending |
+| SZL Holdings Mobile Command | mobile | `/szl-holdings-mobile/` | `not started` — scaffold complete; splash/icon and push linking pending |
 
 ---
 
@@ -254,4 +254,4 @@ Copyright (c) 2024-2026 SZL Holdings. All rights reserved.
 
 This repository and all contents — including source code, architecture, documentation, and brand assets — are the sole and exclusive property of SZL Holdings. No license, right, or interest is granted by virtue of access. See [LICENSE](./LICENSE).
 
-SZL Holdings, A11oy, TENAX, DOMAINE, SEXTANT, PARAGON, KORA, LUMINA, Counsel, Carlota Jo, FORGE, APEX, and IMPERIUM are trademarks of SZL Holdings. Certain methods and architectures may be the subject of pending or future patent applications.
+SZL Holdings, A11oy, Sentra, Terra, Vessels, Counsel, Lyte, Pulse, Command, Carlota Jo, and IMPERIUM are trademarks of SZL Holdings. Certain methods and architectures may be the subject of pending or future patent applications.
