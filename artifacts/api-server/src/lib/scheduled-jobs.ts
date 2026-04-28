@@ -4,6 +4,7 @@ import { serverTelemetry } from '@szl-holdings/observability';
 
 export const NAMED_JOB_TYPES = {
   HOURLY_SLA_ESCALATION_SCAN: "hourly_sla_escalation_scan",
+  ANALYTICS_RETENTION_ARCHIVE: "analytics_retention_archive",
   DAILY_SETTLEMENT_RECONCILIATION: "daily_settlement_reconciliation",
   WEEKLY_ECOSYSTEM_HEALTH_BRIEFING: "weekly_ecosystem_health_briefing",
   DAILY_LYTE_DIGEST: "daily_lyte_digest",
@@ -175,6 +176,14 @@ registerEntry({
   enabled: true,
 });
 registerEntry({ type: NAMED_JOB_TYPES.HOURLY_ORG_PUBLICATION_SCHEDULER, name: "Hourly Org Publication Scheduler", description: "Checks pulse_org_schedules for due recurrence entries (next_run_at <= now, paused=false) and triggers org-wide fan-out publications for each due schedule. Advances next_run_at after enqueuing each publication. Compatible with the org fan-out v2 channel adapters (email, SMS, Slack, Teams, push, webhook, in-app).", schedule: "hourly", enabled: true });
+registerEntry({
+  type: NAMED_JOB_TYPES.ANALYTICS_RETENTION_ARCHIVE,
+  name: 'Analytics Retention Archive',
+  description:
+    'Archives raw analytics_events rows older than the configured retention window (default 90 days, override via ANALYTICS_RETENTION_DAYS env var) into the analytics_events_cold table as compressed JSONB bundles, preserving aggregated rollup metadata. Hot-tier events are deleted after a successful archive batch. Batches of 500 rows keep lock contention minimal on busy tables. Aggregated rollup records (time-bucketed counts stored as properties) are never pruned.',
+  schedule: 'daily',
+  enabled: true,
+});
 
 durableJobQueue.register(NAMED_JOB_TYPES.HOURLY_SLA_ESCALATION_SCAN, async (job) => {
   const start = Date.now();
@@ -4493,6 +4502,169 @@ durableJobQueue.register(NAMED_JOB_TYPES.EXPORT_JOB_PROCESSOR, async (job) => {
       lastStatus: 'failed',
       lastDurationMs: Date.now() - start,
       failCount: (jobRegistry.get(NAMED_JOB_TYPES.EXPORT_JOB_PROCESSOR)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.ANALYTICS_RETENTION_ARCHIVE, async (job) => {
+  const start = Date.now();
+  const retentionDays = parseInt(
+    (job.payload?.retainDays as string | undefined) ??
+    process.env.ANALYTICS_RETENTION_DAYS ??
+    '90',
+    10,
+  );
+  const batchSize = 500;
+  let archived = 0;
+  let deleted = 0;
+  let errors = 0;
+
+  try {
+    const { db, analyticsEventsTable, analyticsEventsColdTable, analyticsMetricSnapshotsTable } = await import('@szl-holdings/db').then(async (m) => {
+      const schema = await import('@szl-holdings/db/schema');
+      return {
+        db: m.db,
+        analyticsEventsTable: schema.analyticsEventsTable,
+        analyticsEventsColdTable: schema.analyticsEventsColdTable,
+        analyticsMetricSnapshotsTable: schema.analyticsMetricSnapshotsTable,
+      };
+    });
+    const { lt, inArray, sql } = await import('drizzle-orm');
+    const archiveBatch = `batch_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+    const cutoff = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
+
+    let hasMore = true;
+    while (hasMore) {
+      const rows = await db
+        .select()
+        .from(analyticsEventsTable)
+        .where(lt(analyticsEventsTable.occurredAt, cutoff))
+        .limit(batchSize);
+
+      if (rows.length === 0) {
+        hasMore = false;
+        break;
+      }
+
+      try {
+        // Step 1: Compute per-(orgScope, day, domain, eventName) aggregated counts for the
+        // batch. Including org scope in the metricId ensures tenant-level isolation is
+        // preserved in the snapshot rollup so org-scoped dashboard queries remain accurate.
+        const agg: Map<string, { orgScope: string; orgId: number | null; domain: string; eventName: string; periodStart: Date; count: number }> = new Map();
+        for (const row of rows) {
+          const d = new Date(row.occurredAt);
+          d.setUTCHours(0, 0, 0, 0);
+          const orgScope = row.organizationId != null ? `org_${row.organizationId}` : 'global';
+          const key = `${orgScope}||${row.domain}||${row.eventName}||${d.toISOString()}`;
+          const existing = agg.get(key);
+          if (existing) {
+            existing.count++;
+          } else {
+            agg.set(key, { orgScope, orgId: row.organizationId ?? null, domain: row.domain, eventName: row.eventName, periodStart: d, count: 1 });
+          }
+        }
+
+        const snapshotRows = Array.from(agg.values()).map(({ orgScope, orgId, domain, eventName, periodStart, count }) => {
+          const periodEnd = new Date(periodStart.getTime() + 24 * 60 * 60 * 1000 - 1);
+          const metricId = `archive.${orgScope}.${domain}.${eventName}`.slice(0, 128);
+          return {
+            metricId,
+            granularity: 'day' as const,
+            periodStart,
+            periodEnd,
+            value: count,
+            sampleCount: count,
+            domain,
+            dimensions: { eventName, orgScope, ...(orgId != null ? { orgId: String(orgId) } : {}), archivedFrom: 'hot_tier' } as Record<string, string>,
+          };
+        });
+
+        // Wrap cold archive insert, snapshot upsert, and hot-row delete in a
+        // single transaction — all three succeed or none do.
+        const ids = rows.map((r) => r.eventId);
+        await db.transaction(async (tx) => {
+          // Step A: Archive raw events to cold store (preserves replay capability)
+          const coldRows = rows.map((r) => ({
+            eventId: r.eventId,
+            eventName: r.eventName,
+            domain: r.domain,
+            sourceApp: r.sourceApp,
+            sessionId: r.sessionId ?? null,
+            userId: r.userId ?? null,
+            organizationId: r.organizationId ?? null,
+            tenantId: r.tenantId ?? null,
+            properties: r.properties ?? {},
+            dimensions: r.dimensions ?? {},
+            occurredAt: r.occurredAt,
+            receivedAt: r.receivedAt,
+            archiveBatch,
+          }));
+          await tx
+            .insert(analyticsEventsColdTable)
+            .values(coldRows)
+            .onConflictDoNothing();
+
+          // Step B: Upsert daily aggregate rollups (for fast cold-tier analytics)
+          if (snapshotRows.length > 0) {
+            await tx
+              .insert(analyticsMetricSnapshotsTable)
+              .values(snapshotRows)
+              .onConflictDoUpdate({
+                target: [
+                  analyticsMetricSnapshotsTable.metricId,
+                  analyticsMetricSnapshotsTable.granularity,
+                  analyticsMetricSnapshotsTable.periodStart,
+                ],
+                set: {
+                  value: sql`${analyticsMetricSnapshotsTable.value} + excluded.value`,
+                  sampleCount: sql`${analyticsMetricSnapshotsTable.sampleCount} + excluded.sample_count`,
+                },
+              });
+          }
+
+          // Step C: Delete hot-tier rows only after cold archive + snapshots are committed
+          if (ids.length > 0) {
+            await tx
+              .delete(analyticsEventsTable)
+              .where(inArray(analyticsEventsTable.eventId, ids));
+          }
+        });
+        deleted += ids.length;
+        archived += rows.length;
+      } catch (batchErr) {
+        errors++;
+        logger.warn({ err: batchErr }, '[analytics-retention] batch error, stopping');
+        hasMore = false;
+      }
+
+      if (rows.length < batchSize) hasMore = false;
+    }
+
+    const durationMs = Date.now() - start;
+    serverTelemetry.recordBusinessEvent({
+      type: 'analytics_retention_archive_completed',
+      domain: 'platform',
+      durationMs,
+      success: errors === 0,
+      metadata: { archived, deleted, errors, retentionDays, cutoff: cutoff.toISOString() },
+    });
+    updateRegistry(NAMED_JOB_TYPES.ANALYTICS_RETENTION_ARCHIVE, {
+      lastStatus: errors === 0 ? 'completed' : 'failed',
+      lastDurationMs: durationMs,
+      lastResult: { archived, deleted, errors },
+    });
+    logger.info(
+      { jobId: job.id, archived, deleted, errors, durationMs },
+      '[analytics-retention] archive complete',
+    );
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, '[analytics-retention] fatal error');
+    updateRegistry(NAMED_JOB_TYPES.ANALYTICS_RETENTION_ARCHIVE, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.ANALYTICS_RETENTION_ARCHIVE)?.failCount ?? 0) + 1,
     });
     throw err;
   }

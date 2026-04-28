@@ -355,6 +355,7 @@ const AdminSeeder = lazy(() => import('./operations/pages/admin/seeder'));
 const AdminJobs = lazy(() => import('./operations/pages/admin/jobs'));
 const AdminKbArticles = lazy(() => import('./operations/pages/admin/kb-articles'));
 const AdminSupportOps = lazy(() => import('./operations/pages/admin/support-ops'));
+const AdminAnalytics = lazy(() => import('./operations/pages/admin/analytics-dashboard'));
 
 const CarlotaPipelinePage = lazy(() => import('./pages/carlota-pipeline'));
 
@@ -917,6 +918,7 @@ function AppShell() {
               <Route path="/operations/admin/jobs" component={() => <AdminJobs />} />
               <Route path="/operations/admin/kb" component={() => <AdminKbArticles />} />
               <Route path="/operations/admin/support" component={() => <AdminSupportOps />} />
+              <Route path="/operations/admin/analytics" component={() => <AdminAnalytics />} />
 
               <Route path="/carlota/pipeline" component={() => <CarlotaPipelinePage />} />
 

@@ -95,6 +95,41 @@ export type InsertAnalyticsEvent = z.infer<typeof insertAnalyticsEventSchema>;
 export type AnalyticsEvent = typeof analyticsEventsTable.$inferSelect;
 
 // ---------------------------------------------------------------------------
+// Cold Event Archive (events older than retention window, raw payloads preserved)
+// ---------------------------------------------------------------------------
+
+export const analyticsEventsColdTable = pgTable(
+  'analytics_events_cold',
+  {
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    eventId: text('event_id').notNull().unique(),
+    eventName: text('event_name').notNull(),
+    domain: text('domain').notNull(),
+    sourceApp: text('source_app').notNull(),
+    sessionId: text('session_id'),
+    userId: text('user_id'),
+    organizationId: integer('organization_id'),
+    tenantId: text('tenant_id'),
+    properties: jsonb('properties').$type<Record<string, unknown>>().default({}),
+    dimensions: jsonb('dimensions').$type<Record<string, string>>().default({}),
+    occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull(),
+    receivedAt: timestamp('received_at', { withTimezone: true }).notNull(),
+    archivedAt: timestamp('archived_at', { withTimezone: true }).notNull().defaultNow(),
+    archiveBatch: text('archive_batch'),
+  },
+  (t) => [
+    index('ae_cold_event_name_idx').on(t.eventName),
+    index('ae_cold_domain_idx').on(t.domain),
+    index('ae_cold_user_idx').on(t.userId),
+    index('ae_cold_org_idx').on(t.organizationId),
+    index('ae_cold_occurred_idx').on(t.occurredAt),
+    index('ae_cold_archived_idx').on(t.archivedAt),
+  ],
+);
+
+export type AnalyticsEventCold = typeof analyticsEventsColdTable.$inferSelect;
+
+// ---------------------------------------------------------------------------
 // Custom Metric Definitions
 // ---------------------------------------------------------------------------
 
