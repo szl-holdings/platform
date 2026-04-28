@@ -1,1 +1,65 @@
-{}
+{
+  "artifacts/carlota-jo/src/components/AlloyKernelPanel.tsx": {
+    "Continuum": 1
+  },
+  "artifacts/carlota-jo/src/components/ContinuumKernelPanel.tsx": {
+    "Continuum": 1
+  },
+  "artifacts/command/src/components/AlloyKernelPanel.tsx": {
+    "Continuum": 1
+  },
+  "artifacts/command/src/components/ContinuumKernelPanel.tsx": {
+    "Continuum": 1
+  },
+  "artifacts/counsel/src/components/AlloyKernelPanel.tsx": {
+    "Continuum": 1
+  },
+  "artifacts/counsel/src/components/ContinuumKernelPanel.tsx": {
+    "Continuum": 1
+  },
+  "artifacts/lyte-command-center/src/components/AlloyKernelPanel.tsx": {
+    "Continuum": 1
+  },
+  "artifacts/sentra/src/components/AlloyKernelPanel.tsx": {
+    "Continuum": 1
+  },
+  "artifacts/sentra/src/components/ContinuumKernelPanel.tsx": {
+    "Continuum": 1
+  },
+  "artifacts/szl-holdings/src/components/AlloyKernelPanel.tsx": {
+    "Continuum": 1
+  },
+  "artifacts/szl-holdings/src/components/ContinuumKernelPanel.tsx": {
+    "Continuum": 1
+  },
+  "artifacts/szl-holdings/src/lib/a11oy-pdf.ts": {
+    "Continuum": 1
+  },
+  "artifacts/szl-holdings/src/pages/a11oy-philosophy.tsx": {
+    "Continuum": 2
+  },
+  "artifacts/szl-holdings/src/pages/meridian-intelligence.tsx": {
+    "Continuum": 1
+  },
+  "artifacts/terra/src/components/AlloyKernelPanel.tsx": {
+    "Continuum": 1
+  },
+  "artifacts/terra/src/components/ContinuumKernelPanel.tsx": {
+    "Continuum": 1
+  },
+  "artifacts/vessels/src/components/AlloyKernelPanel.tsx": {
+    "Continuum": 1
+  },
+  "artifacts/vessels/src/components/ContinuumKernelPanel.tsx": {
+    "Continuum": 1
+  },
+  "packages/agents-core/src/agent.ts": {
+    "Continuum": 1
+  },
+  "packages/agents-sdk-bridge/src/__tests__/integration.test.ts": {
+    "Continuum": 2
+  },
+  "packages/agents-sdk-bridge/src/__tests__/metrics-bridge.test.ts": {
+    "Continuum": 4
+  }
+}
