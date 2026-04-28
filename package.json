@@ -59,6 +59,7 @@
     "test:atlas": "vitest run --config vitest.config.ts --reporter=verbose lib/scene-export",
     "test:unit": "pnpm --filter ./artifacts/api-server test",
     "test:smoke": "node scripts/qa/smoke-routes.js && node scripts/qa/smoke-test-integrations.js",
+    "test:stress": "node scripts/stress-test.mjs",
     "db:reset:demo": "pnpm --filter @szl-holdings/db run migrate && pnpm seed:demo",
     "verify:env": "node scripts/qa/verify-env.js",
     "ais:disclosure": "tsx scripts/check-ais-disclosure.ts",

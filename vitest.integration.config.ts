@@ -53,6 +53,7 @@ export default defineConfig({
       'tests/api/graphql-schema.test.ts',
       'tests/api/server-live.test.ts',
       'tests/api/stress.test.ts',
+      'tests/api/lp-portal-isolation.test.ts',
       'tests/api/cortex-inca-smoke.test.ts',
       'tests/api/websocket-stress.test.ts',
     ],
