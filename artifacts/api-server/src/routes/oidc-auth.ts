@@ -4,7 +4,6 @@ import * as oidc from 'openid-client';
 import { z } from 'zod';
 import {
   clearSessionCookie,
-  createOidcSession,
   deleteOidcSession,
   getAzureAdConfig,
   getOidcConfig,
@@ -124,10 +123,11 @@ router.get('/callback', async (req: Request, res: Response) => {
 
     const returnTo = getSafeReturnTo(req.cookies?.return_to);
 
-    res.clearCookie('code_verifier', { path: '/' });
-    res.clearCookie('nonce', { path: '/' });
-    res.clearCookie('state', { path: '/' });
-    res.clearCookie('return_to', { path: '/' });
+    const oidcCookieClearOpts = { httpOnly: true, secure: true, sameSite: 'lax' as const, path: '/' };
+    res.clearCookie('code_verifier', oidcCookieClearOpts);
+    res.clearCookie('nonce', oidcCookieClearOpts);
+    res.clearCookie('state', oidcCookieClearOpts);
+    res.clearCookie('return_to', oidcCookieClearOpts);
 
     const claims = tokens.claims();
     if (!claims) {
@@ -136,13 +136,14 @@ router.get('/callback', async (req: Request, res: Response) => {
     }
 
     const user = await upsertUserFromOidc(claims as unknown as Record<string, unknown>);
-    const token = await createOidcSession(
-      user.id,
-      req.ip ?? null,
-      req.headers['user-agent'] ?? null,
-    );
+    const created = await createSessionWithRefresh({
+      userId: user.id,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers['user-agent'] ?? null,
+      reason: 'oidc_callback',
+    });
 
-    setSessionCookie(res, token);
+    setSessionCookie(res, created.token);
     res.redirect(returnTo);
   } catch (err) {
     req.log?.error({ err }, 'OIDC callback failed');
@@ -358,11 +359,12 @@ router.get('/azure-ad/callback', async (req: Request, res: Response) => {
       return;
     }
 
-    res.clearCookie('aad_code_verifier', { path: '/' });
-    res.clearCookie('aad_nonce', { path: '/' });
-    res.clearCookie('aad_state', { path: '/' });
-    res.clearCookie('aad_return_to', { path: '/' });
-    res.clearCookie('aad_tenant_id', { path: '/' });
+    const aadCookieClearOpts = { httpOnly: true, secure: true, sameSite: 'lax' as const, path: '/' };
+    res.clearCookie('aad_code_verifier', aadCookieClearOpts);
+    res.clearCookie('aad_nonce', aadCookieClearOpts);
+    res.clearCookie('aad_state', aadCookieClearOpts);
+    res.clearCookie('aad_return_to', aadCookieClearOpts);
+    res.clearCookie('aad_tenant_id', aadCookieClearOpts);
 
     const claims = tokens.claims();
     if (!claims) {
@@ -389,13 +391,14 @@ router.get('/azure-ad/callback', async (req: Request, res: Response) => {
     }
 
     const user = await upsertUserFromAzureAd(claims as unknown as Record<string, unknown>);
-    const token = await createOidcSession(
-      user.id,
-      req.ip ?? null,
-      req.headers['user-agent'] ?? null,
-    );
+    const created = await createSessionWithRefresh({
+      userId: user.id,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers['user-agent'] ?? null,
+      reason: 'azure_ad_callback',
+    });
 
-    setSessionCookie(res, token);
+    setSessionCookie(res, created.token);
     res.redirect(returnTo);
   } catch (err) {
     req.log?.error({ err }, 'Azure AD callback failed');

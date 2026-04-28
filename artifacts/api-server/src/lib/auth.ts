@@ -1,7 +1,7 @@
 import { hashIp } from '@szl-holdings/audit';
 import { type RoleName, azureTenantsTable, db, orgMembersTable, rolesTable, sessionsTable, userRolesTable, usersTable } from '@szl-holdings/db';
 import crypto from 'node:crypto';
-import { and, eq, gt } from 'drizzle-orm';
+import { and, eq, gt, isNull } from 'drizzle-orm';
 import type { Request, Response } from 'express';
 import * as client from 'openid-client';
 
@@ -336,7 +336,13 @@ export async function getSessionUser(token: string): Promise<{
   const [session] = await db
     .select()
     .from(sessionsTable)
-    .where(and(eq(sessionsTable.token, token), gt(sessionsTable.expiresAt, new Date())));
+    .where(
+      and(
+        eq(sessionsTable.token, token),
+        gt(sessionsTable.expiresAt, new Date()),
+        isNull(sessionsTable.revokedAt),
+      ),
+    );
 
   if (!session) return null;
 
@@ -389,8 +395,21 @@ export function setSessionCookie(res: Response, token: string): void {
 }
 
 export function clearSessionCookie(res: Response): void {
-  res.clearCookie(SESSION_COOKIE, { path: '/' });
-  res.clearCookie(LEGACY_SESSION_COOKIE, { path: '/' });
+  // __Host- cookies require the same secure/sameSite/httpOnly/path attributes
+  // on clearing as they had when set; browsers may ignore a clear-cookie header
+  // that doesn't match the original Set-Cookie attributes.
+  res.clearCookie(SESSION_COOKIE, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
+  });
+  res.clearCookie(LEGACY_SESSION_COOKIE, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
+  });
 }
 
 export function setOidcCookie(res: Response, name: string, value: string): void {

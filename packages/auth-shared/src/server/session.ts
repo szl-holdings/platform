@@ -13,14 +13,35 @@ const SESSION_TOKEN_BYTES = 32;
 /** Default session TTL in milliseconds (7 days). */
 export const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
-/** Absolute maximum session lifetime from creation (30 days). */
-export const SESSION_ABSOLUTE_MAX_MS = 30 * 24 * 60 * 60 * 1000;
+/**
+ * Absolute maximum session lifetime from creation (7 days).
+ *
+ * Matches the `SESSION_TTL` constant enforced by the sliding-window
+ * refresh policy in `artifacts/api-server/src/middlewares/session-policy.ts`.
+ * No session may outlive `createdAt + SESSION_ABSOLUTE_MAX_MS` regardless of
+ * how many sliding-window refreshes occur.
+ */
+export const SESSION_ABSOLUTE_MAX_MS = 7 * 24 * 60 * 60 * 1000;
 
-/** Refresh token TTL (30 days — matches absolute max). */
-export const REFRESH_TOKEN_TTL_MS = SESSION_ABSOLUTE_MAX_MS;
+/**
+ * Refresh token TTL (30 days).
+ *
+ * Refresh tokens live longer than access sessions so users can silently
+ * re-authenticate after the 7-day session window without a full OIDC redirect.
+ * After 30 days the refresh token expires and the user must log in again.
+ */
+export const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
-/** Cookie name used to carry the opaque session token. */
-export const SESSION_COOKIE_NAME = 'sid' as const;
+/**
+ * Cookie name used to carry the opaque session token.
+ *
+ * Uses the `__Host-` prefix (FINDING-005, NCC Group 2026-04 pen test) so
+ * browsers enforce Secure=true, Path=/, and no Domain attribute, preventing
+ * subdomain cookie-injection attacks.
+ *
+ * @see artifacts/api-server/src/lib/auth.ts — SESSION_COOKIE / LEGACY_SESSION_COOKIE
+ */
+export const SESSION_COOKIE_NAME = '__Host-sid' as const;
 
 /** Generates a new cryptographically random session token. */
 export function generateSessionToken(): SessionToken {
@@ -44,11 +65,18 @@ export interface SessionCookieOptions {
   ttlMs?: number;
 }
 
-/** Returns `res.cookie(...)` options for the session cookie. */
+/**
+ * Returns `res.cookie(...)` options for the session cookie.
+ *
+ * `secure` is always `true` — the `__Host-` prefix mandates it, and the
+ * platform only runs over HTTPS in all environments (development uses the
+ * Replit proxy, which terminates TLS). Passing `isProduction` is kept for
+ * API back-compat but no longer affects the `secure` flag.
+ */
 export function sessionCookieOptions(opts: SessionCookieOptions) {
   return {
     httpOnly: true,
-    secure: opts.isProduction,
+    secure: true,
     sameSite: 'lax' as const,
     maxAge: opts.ttlMs ?? SESSION_TTL_MS,
     path: '/',
@@ -59,7 +87,7 @@ export function sessionCookieOptions(opts: SessionCookieOptions) {
 export function sessionClearCookieOptions(opts: Pick<SessionCookieOptions, 'isProduction'>) {
   return {
     httpOnly: true,
-    secure: opts.isProduction,
+    secure: true,
     sameSite: 'lax' as const,
     path: '/',
   };

@@ -9,7 +9,7 @@ import { logActivity } from "../lib/activity-logger";
 import { logger } from "../lib/logger";
 import { createAuthService } from "@szl-holdings/auth";
 import { issueWsTicket } from "../lib/websocket.js";
-import { getSessionToken, getSessionUser } from "../lib/auth";
+import { clearSessionCookie, getSessionToken, getSessionUser } from "../lib/auth";
 import {
   createSessionWithRefresh,
   rotateRefreshToken,
@@ -376,12 +376,11 @@ router.post("/auth/refresh", loginLimiter, validateBody(refreshBodySchema), asyn
 
 router.delete("/auth/sessions/current", validateBody(bodyShape({})), authMiddleware(), async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith("Bearer ")) {
+    const token = getSessionToken(req);
+    if (!token) {
       sendBadRequest(res, "No active session token to revoke");
       return;
     }
-    const token = authHeader.slice(7);
     const [session] = await db
       .select()
       .from(sessionsTable)
@@ -393,6 +392,8 @@ router.delete("/auth/sessions/current", validateBody(bodyShape({})), authMiddlew
     }
 
     await db.delete(sessionsTable).where(eq(sessionsTable.token, token));
+    // Clear the session cookie so browser clients don't retain a dangling token
+    clearSessionCookie(res);
     await logActivity(req, "delete", "session", String(session.id));
     await writeAuditEvent({
       userId: req.user?.id,

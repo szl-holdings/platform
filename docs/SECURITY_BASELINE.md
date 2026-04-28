@@ -45,7 +45,7 @@ CI enforcement: `secret-scan` job in `security.yml` runs `node scripts/qa/scan-s
 - All API routes enforce authentication via `authMiddleware({ required: true })` or are explicitly documented as intentionally public
 - Public routes limited to: health checks, contact form, demo request, public status, webhook receivers
 - OIDC/PKCE flow — no password storage in SZL systems
-- Session cookies: `HttpOnly`, `SameSite=Strict`, `Secure` flags required
+- Session cookies: `HttpOnly`, `SameSite=Lax`, `Secure` flags required; cookie name uses `__Host-` prefix to block subdomain injection
 - Bearer tokens on all protected API endpoints
 - WebSocket tickets: HMAC-signed, 5-minute TTL, per-channel ACL
 - Route security coverage: ≥ 155 of 170 top-level route files (91%)
