@@ -457,6 +457,13 @@ export const ENV_SPECS: EnvVarSpec[] = [
     group: 'integrations',
   },
   {
+    key: 'QCLAW_ENDPOINT',
+    required: false,
+    description:
+      'Custom inference endpoint URL for QClaw-4B (defaults to HuggingFace Inference API at https://api-inference.huggingface.co/models/LakoMoor/QClaw-4B). Set this to a dedicated endpoint for higher throughput and lower latency.',
+    group: 'integrations',
+  },
+  {
     key: 'AI_INTEGRATIONS_OPENAI_BASE_URL',
     required: false,
     description: 'Replit AI Integrations proxy base URL for OpenAI-compatible endpoint',

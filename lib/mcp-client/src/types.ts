@@ -54,6 +54,8 @@ export type McpDomain =
   | 'carlota-jo'
   | 'szl-holdings'
   | 'stephen'
+  | 'counsel'
+  | 'sentra'
   | 'global';
 
 export const DOMAIN_TOOLS: Record<McpDomain, string[]> = {
@@ -106,6 +108,20 @@ export const DOMAIN_TOOLS: Record<McpDomain, string[]> = {
     'get_platform_status',
   ],
   stephen: ['alloy_research', 'alloy_create_artifact', 'get_platform_info'],
+  counsel: [
+    'counsel_case_lookup',
+    'counsel_legal_review',
+    'counsel_matter_status',
+    'alloy_research',
+    'alloy_create_artifact',
+  ],
+  sentra: [
+    'sentra_threat_scan',
+    'sentra_compliance_check',
+    'sentra_containment',
+    'alloy_research',
+    'alloy_launch_workflow',
+  ],
   global: [
     'hf_search_models',
     'hf_search_datasets',

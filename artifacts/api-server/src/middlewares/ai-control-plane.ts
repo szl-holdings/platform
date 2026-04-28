@@ -41,6 +41,7 @@ const PROVIDER_PRICING: Record<string, { inputPerToken: number; outputPerToken: 
   openai: { inputPerToken: 0.0000025, outputPerToken: 0.00001 },
   anthropic: { inputPerToken: 0.000003, outputPerToken: 0.000015 },
   huggingface: { inputPerToken: 0.000001, outputPerToken: 0.000002 },
+  qclaw: { inputPerToken: 0.00000004, outputPerToken: 0.00000008 },
   local: { inputPerToken: 0, outputPerToken: 0 },
 };
 

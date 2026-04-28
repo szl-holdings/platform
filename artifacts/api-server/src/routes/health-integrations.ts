@@ -759,6 +759,43 @@ router.get('/health/ai', async (_req, res) => {
       providers.huggingface = { status: 'unconfigured' };
     }
 
+    if (hfToken) {
+      const qclawEndpoint =
+        process.env.QCLAW_ENDPOINT ?? 'https://huggingface.co/LakoMoor/QClaw-4B';
+      const qclawStart = Date.now();
+      try {
+        const qclawResp = (await Promise.race([
+          fetch(qclawEndpoint, {
+            method: 'HEAD',
+            headers: { Authorization: `Bearer ${hfToken}` },
+            signal: AbortSignal.timeout(5000),
+          }),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000)),
+        ])) as Response;
+        providers.qclaw = {
+          status: qclawResp.ok || qclawResp.status < 500 ? 'healthy' : 'degraded',
+          latencyMs: Date.now() - qclawStart,
+          details: {
+            model: 'LakoMoor/QClaw-4B',
+            clawBenchScore: 84.8,
+            license: 'Apache-2.0',
+            endpointType: process.env.QCLAW_ENDPOINT ? 'custom' : 'huggingface-inference-api',
+          },
+        };
+      } catch {
+        providers.qclaw = {
+          status: 'degraded',
+          latencyMs: Date.now() - qclawStart,
+          details: { model: 'LakoMoor/QClaw-4B', note: 'Endpoint probe failed — model may still be usable' },
+        };
+      }
+    } else {
+      providers.qclaw = {
+        status: 'unconfigured',
+        details: { note: 'Set HUGGINGFACE_API_KEY or HF_TOKEN to enable QClaw-4B' },
+      };
+    }
+
     const anyHealthy = Object.values(providers).some(
       (p) => p.status === 'healthy' || p.status === 'configured',
     );

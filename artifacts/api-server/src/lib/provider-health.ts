@@ -37,7 +37,7 @@ const LATENCY_WINDOW = 20;
 const DEGRADED_LATENCY_MS = 5000;
 const PROBE_INTERVAL_MS = 120_000;
 
-const KNOWN_PROVIDERS: InferenceProvider[] = ['replit-proxy', 'huggingface'];
+const KNOWN_PROVIDERS: InferenceProvider[] = ['replit-proxy', 'huggingface', 'qclaw'];
 
 class ProviderHealthMonitor {
   private providers: Map<InferenceProvider, ProviderHealthRecord> = new Map();
@@ -202,14 +202,19 @@ class ProviderHealthMonitor {
   }
 
   private async probeProvider(provider: InferenceProvider): Promise<boolean> {
+    const hfToken = process.env.HUGGINGFACE_API_KEY ?? process.env.HF_TOKEN;
+    const qclawEndpoint = process.env.QCLAW_ENDPOINT;
+
     const probeEndpoints: Record<string, string | undefined> = {
       'replit-proxy': process.env.AI_INTEGRATIONS_OPENAI_BASE_URL
         ? `${process.env.AI_INTEGRATIONS_OPENAI_BASE_URL}/models`
         : undefined,
-      huggingface:
-        process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY
-          ? `${process.env.HF_API_BASE || 'https://router.huggingface.co/hf-inference/v1'}/models`
-          : undefined,
+      huggingface: hfToken
+        ? `${process.env.HF_API_BASE || 'https://router.huggingface.co/hf-inference/v1'}/models`
+        : undefined,
+      qclaw: hfToken
+        ? qclawEndpoint ?? 'https://huggingface.co/LakoMoor/QClaw-4B'
+        : undefined,
     };
 
     const endpoint = probeEndpoints[provider];
@@ -218,9 +223,8 @@ class ProviderHealthMonitor {
     const headers: Record<string, string> = {};
     if (provider === 'replit-proxy' && process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
       headers.Authorization = `Bearer ${process.env.AI_INTEGRATIONS_OPENAI_API_KEY}`;
-    } else if (provider === 'huggingface') {
-      const hfToken = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
-      if (hfToken) headers.Authorization = `Bearer ${hfToken}`;
+    } else if ((provider === 'huggingface' || provider === 'qclaw') && hfToken) {
+      headers.Authorization = `Bearer ${hfToken}`;
     }
 
     const controller = new AbortController();

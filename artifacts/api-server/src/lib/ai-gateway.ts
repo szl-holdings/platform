@@ -13,6 +13,7 @@ const VALID_PROVIDERS = new Set<InferenceProvider>([
   'replit-proxy',
   'gemini',
   'huggingface',
+  'qclaw',
   'mock',
 ]);
 
@@ -53,7 +54,7 @@ interface ProviderCandidate {
   reason: string;
 }
 
-type TargetableProvider = 'replit-proxy' | 'openai' | 'anthropic' | 'gemini' | 'huggingface';
+type TargetableProvider = 'replit-proxy' | 'openai' | 'anthropic' | 'gemini' | 'huggingface' | 'qclaw';
 
 const PROVIDER_MODELS: Record<string, { provider: InferenceProvider; model: string }[]> = {
   reasoning: [
@@ -75,16 +76,30 @@ const PROVIDER_MODELS: Record<string, { provider: InferenceProvider; model: stri
     { provider: 'huggingface', model: 'Qwen/Qwen3-8B' },
   ],
   fast: [
+    { provider: 'qclaw', model: 'LakoMoor/QClaw-4B' },
     { provider: 'replit-proxy', model: 'gpt-4o-mini' },
     { provider: 'gemini', model: 'gemini-2.0-flash' },
     { provider: 'anthropic', model: 'claude-3-haiku-20240307' },
     { provider: 'huggingface', model: 'Qwen/Qwen3-8B' },
+  ],
+  agentic: [
+    { provider: 'qclaw', model: 'LakoMoor/QClaw-4B' },
+    { provider: 'anthropic', model: 'claude-sonnet-4-20250514' },
+    { provider: 'replit-proxy', model: 'gpt-5.2' },
+    { provider: 'openai', model: 'gpt-5.2' },
+  ],
+  'tool-use': [
+    { provider: 'qclaw', model: 'LakoMoor/QClaw-4B' },
+    { provider: 'anthropic', model: 'claude-sonnet-4-20250514' },
+    { provider: 'openai', model: 'gpt-5.2' },
+    { provider: 'gemini', model: 'gemini-2.0-flash' },
   ],
   default: [
     { provider: 'replit-proxy', model: 'gpt-5.2' },
     { provider: 'anthropic', model: 'claude-sonnet-4-20250514' },
     { provider: 'gemini', model: 'gemini-2.0-flash' },
     { provider: 'openai', model: 'gpt-5.2' },
+    { provider: 'qclaw', model: 'LakoMoor/QClaw-4B' },
     { provider: 'huggingface', model: 'Qwen/Qwen3-8B' },
   ],
 };
@@ -151,6 +166,7 @@ class ProviderCircuitBreaker {
       'anthropic',
       'gemini',
       'huggingface',
+      'qclaw',
     ];
     await Promise.all(
       providers.map(async (provider) => {
@@ -266,6 +282,7 @@ class ProviderCircuitBreaker {
       'anthropic',
       'gemini',
       'huggingface',
+      'qclaw',
     ];
     return providers.map((p) => this.getStatus(p));
   }
@@ -282,6 +299,9 @@ function isTargetableProvider(provider: InferenceProvider): provider is Targetab
 function isProviderAvailable(provider: InferenceProvider): boolean {
   if (provider === 'mock') return false;
   if (!isTargetableProvider(provider)) return false;
+  if (provider === 'qclaw') {
+    return !!(process.env.HUGGINGFACE_API_KEY ?? process.env.HF_TOKEN);
+  }
   return services.ai.isProviderConfigured(provider);
 }
 
@@ -373,7 +393,38 @@ function detectTaskType(messages: ChatMessage[]): string {
   ];
   const generationKeywords = ['generate', 'create', 'write', 'compose', 'draft', 'design', 'build'];
   const fastKeywords = ['quick', 'brief', 'short', 'summarize', 'classify', 'tag', 'label'];
+  const agenticKeywords = [
+    'execute',
+    'run agent',
+    'agentic',
+    'autonomous',
+    'multi-step',
+    'plan and execute',
+    'orchestrate',
+    'coordinate',
+    'take action',
+    'sentinel',
+    'helmsman',
+    'warden',
+    'scout',
+  ];
+  const toolUseKeywords = [
+    'call tool',
+    'use tool',
+    'invoke',
+    'tool call',
+    'function call',
+    'threat scan',
+    'fleet lookup',
+    'property search',
+    'legal check',
+    'compliance check',
+    'sanctions check',
+    'ais lookup',
+  ];
 
+  if (agenticKeywords.some((k) => content.includes(k))) return 'agentic';
+  if (toolUseKeywords.some((k) => content.includes(k))) return 'tool-use';
   if (fastKeywords.some((k) => content.includes(k))) return 'fast';
   if (analysisKeywords.some((k) => content.includes(k))) return 'analysis';
   if (generationKeywords.some((k) => content.includes(k))) return 'generation';
@@ -397,6 +448,55 @@ async function executeProviderInference(
   }, timeoutMs);
 
   try {
+    if (provider === 'qclaw') {
+      const hfToken = process.env.HUGGINGFACE_API_KEY ?? process.env.HF_TOKEN;
+      if (!hfToken) throw new Error('QClaw-4B requires HUGGINGFACE_API_KEY or HF_TOKEN');
+      const endpointUrl =
+        process.env.QCLAW_ENDPOINT ??
+        `https://api-inference.huggingface.co/models/${model}`;
+
+      const prompt = messages
+        .map((m) => `${m.role === 'user' ? 'User' : m.role === 'assistant' ? 'Assistant' : 'System'}: ${m.content}`)
+        .join('\n') + '\nAssistant:';
+
+      const resp = await fetch(endpointUrl, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${hfToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          inputs: prompt,
+          parameters: {
+            max_new_tokens: maxTokens,
+            return_full_text: false,
+            temperature: 0.7,
+            do_sample: true,
+          },
+        }),
+        signal: controller.signal,
+      });
+
+      if (!resp.ok) {
+        throw new Error(`QClaw inference returned HTTP ${resp.status}`);
+      }
+
+      const data = (await resp.json()) as unknown;
+      const content: string = Array.isArray(data)
+        ? ((data[0] as Record<string, string>)?.generated_text ?? '')
+        : ((data as Record<string, string>)?.generated_text ?? '');
+
+      const promptTokens = Math.ceil(prompt.length / 4);
+      const completionTokens = Math.ceil(content.length / 4);
+
+      return {
+        content,
+        model,
+        provider: 'qclaw',
+        usage: { promptTokens, completionTokens },
+      };
+    }
+
     if (provider === 'openai' || provider === 'replit-proxy') {
       try {
         return await services.ai.responsesForProvider(provider, messages, {
@@ -455,6 +555,7 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
       'anthropic',
       'gemini',
       'huggingface',
+      'qclaw',
     ];
     const openCircuitProvider = targetable.find(
       (p) => isProviderAvailable(p) && providerCircuitBreaker.getStatus(p).state !== 'closed',
@@ -633,15 +734,20 @@ export function getGatewayStatus(): {
     'anthropic',
     'gemini',
     'huggingface',
+    'qclaw',
   ];
   const availableProviders = providers.map((p) => {
     const health = providerHealth.getStatus(p);
     const stats = inferenceTelemetry.getProviderStats(300000).find((s) => s.provider === p);
     const circuit = providerCircuitBreaker.getStatus(p);
+    const configured =
+      p === 'qclaw'
+        ? !!(process.env.HUGGINGFACE_API_KEY ?? process.env.HF_TOKEN)
+        : services.ai.isProviderConfigured(p);
     return {
       provider: p as InferenceProvider,
       status: health.status,
-      configured: services.ai.isProviderConfigured(p),
+      configured,
       avgLatencyMs: stats?.avgLatencyMs ?? 0,
       circuitState: circuit.state,
     };

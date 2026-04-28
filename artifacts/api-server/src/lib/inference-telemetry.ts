@@ -6,6 +6,7 @@ export type InferenceProvider =
   | 'replit-proxy'
   | 'gemini'
   | 'huggingface'
+  | 'qclaw'
   | 'mock';
 
 export interface InferenceRecord {
@@ -89,6 +90,7 @@ const COST_PER_1K_TOKENS: Record<string, { input: number; output: number }> = {
   'Qwen/Qwen3-8B': { input: 0.0001, output: 0.0001 },
   'Qwen/Qwen3-0.6B': { input: 0.00002, output: 0.00002 },
   'Qwen/Qwen2.5-VL-7B-Instruct': { input: 0.0001, output: 0.0001 },
+  'LakoMoor/QClaw-4B': { input: 0.00004, output: 0.00008 },
 };
 
 export function estimateCost(
