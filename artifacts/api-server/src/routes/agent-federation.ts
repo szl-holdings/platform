@@ -6,7 +6,10 @@ import { z } from 'zod';
 import { logger } from '../lib/logger';
 import { validateBody } from '../lib/validation';
 import { authMiddleware } from '../middlewares/auth';
-import { AGENT_REGISTRY, type AgentDefinition } from './nuro-mesh';
+import {
+  AGENT_REGISTRY,
+  type AgentDefinition,
+} from '../services/nuro-mesh/agent-registry';
 
 const federationChatSchema = z.object({
   message: z.string().min(1).max(50000),

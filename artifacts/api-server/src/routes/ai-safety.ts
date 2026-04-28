@@ -2,7 +2,7 @@ import { agentModelAssignments, aiSafetyEvents, db } from '@szl-holdings/db';
 import { and, desc, eq, gte, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type RequestHandler, type Response, Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { AGENT_REGISTRY } from './nuro-mesh.js';
+import { AGENT_REGISTRY } from '../services/nuro-mesh/agent-registry';
 
 const safetyRouter: IRouter = Router();
 

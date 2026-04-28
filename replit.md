@@ -79,3 +79,39 @@ The platform is a pnpm monorepo, known as the FORGE Execution and Evidence Platf
 - **Government Data:** CISA KEV, NVD CVE, MITRE ATT&CK, Census/BLS, FEMA NRI, NYC Open Data, SEC EDGAR
 - **Legal Data:** CourtListener REST API
 - **Other APIs/Services:** GitHub API, Figma, Google APIs, HubSpot
+
+## API Server Service Layer (Refactor — April 2026)
+
+Route files were refactored to extract shared logic into a service/library layer under `artifacts/api-server/src/services/` and `artifacts/api-server/src/lib/`. No breaking API changes were made. All extractions were pure lifts with re-exports — behaviour is identical.
+
+**New service files created:**
+
+| File | Contents | Lines |
+|------|----------|-------|
+| `src/services/vessels/vessels-carbon.ts` | AIS engine (haversineNm, safeJson, deriveAisTrack), fuel factors, computeEmissions, ciiRating | 168 |
+| `src/services/vessels/vessels-emissions.ts` | VOYAGE_EMISSIONS seed data, VoyageEmissionRecord type, EU ETS constants, refreshInProgressFromAis | 238 |
+| `src/services/terra/screening-provider.ts` | ScreeningProvider interface, MockScreeningProvider, EquifaxScreeningProvider, getScreeningProvider factory | 181 |
+| `src/lib/lease-extractor.ts` | extractLeaseFromText — regex-based lease document parser | 183 |
+| `src/services/command/domain-aggregators.ts` | All domain getter functions (getAegisData, getVesselsData, getLyteData, getPrismData, getCarlotaJoData, getStephenData, getSzlData, getTerraData), clamp/relTime/tenantKey utilities, buildTimeline | 473 |
+| `src/services/nexus/nexus-types.ts` | TypeScript interfaces: ResearchRun, AgentLane, Citation, MemoryItem, Skill, PatternFamily, ProtocolTool, OrchestrationPlan, OrchestrationStep, IngestJob | 128 |
+| `src/services/nexus/nexus-seed-data.ts` | Static seed data arrays: SEED_SKILLS_DATA, PATTERNS_DATA, TOOLS_DATA, SEED_MEMORY_DATA | 647 |
+| `src/services/nuro-mesh/agent-registry.ts` | AgentDefinition interface, AGENT_REGISTRY (12 agents), DOMAIN_ROUTING_RULES, DOMAIN_SEMANTIC_INTENTS, CROSS_DOMAIN_AFFINITY, routeToAgents | 481 |
+| `src/services/guardian/guardian-mappers.ts` | policyRowToApi, policyRowToRule, toolRowToManifest, assignmentRowToApi, versionRowToApi, permissionRowToApi, resolveActorMap, actorOrUndefined, approvalRowToApi, redactPayload, isAdminUser, userOrgId | 237 |
+| `src/lib/crud-factory.ts` | Reusable CRUD patterns: handleList, handleGetOne, handleCreate, handleUpdate, handleDelete | 124 |
+
+**Route files reduced:**
+
+| Route file | Before | After | Saved |
+|------------|--------|-------|-------|
+| `nexus.ts` | 3,688 | 2,946 | -742 |
+| `guardian.ts` | 3,997 | 3,792 | -205 |
+| `command.ts` | 3,950 | 3,503 | -447 |
+| `vessels-modules.ts` | 1,948 | 1,552 | -396 |
+| `terra-modules.ts` | 2,077 | 1,692 | -385 |
+| `nuro-mesh.ts` | 2,038 | 1,589 | -449 |
+
+Total: **2,624 lines removed** from route files into 10 reusable service/lib files.
+
+**Other files updated for re-export compatibility:**
+- `src/routes/agent-federation.ts` — imports AgentDefinition/AGENT_REGISTRY from service
+- `src/routes/ai-safety.ts` — imports AGENT_REGISTRY from service
