@@ -8,29 +8,9 @@
       "reason": "Old internal codename — canonical product name is Sentra (Cyber Resilience Command)"
     },
     {
-      "term": "PARAGON",
-      "replacement": "Aegis",
-      "reason": "Old internal codename — canonical product name is Aegis (Defense & Intelligence Command)"
-    },
-    {
-      "term": "DOMAINE",
-      "replacement": "Terra",
-      "reason": "Old internal codename — canonical product name is Terra (Real Estate Intelligence)"
-    },
-    {
       "term": "LUMINA",
       "replacement": "Pulse",
       "reason": "Old internal codename — canonical product name is Pulse (AI Executive Briefing)"
-    },
-    {
-      "term": "KORA",
-      "replacement": "Lyte",
-      "reason": "Old internal codename — canonical product name is Lyte (Decision Intelligence)"
-    },
-    {
-      "term": "SEXTANT",
-      "replacement": "Vessels",
-      "reason": "Old internal codename — canonical product name is Vessels (Maritime Intelligence)"
     },
     {
       "term": "CORTEX",

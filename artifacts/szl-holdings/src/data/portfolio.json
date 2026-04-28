@@ -1,7 +1,7 @@
 [
   {
     "id": "vessels",
-    "name": "Vessels",
+    "name": "SEXTANT",
     "doctrineRole": "OBSERVE",
     "tagline": "Maritime Intelligence Platform",
     "description": "Full-spectrum maritime domain awareness integrating AIS data, satellite imagery, and multi-source sensor fusion to deliver real-time vessel tracking, route optimization, dark vessel detection, and predictive risk analytics across global shipping lanes. The only platform that identifies sanctions evasion events an average of 34 days before formal designations.",
@@ -10,7 +10,7 @@
     "link": "/vessels/",
     "icon": "Ship",
     "color": "#3b82f6",
-    "cta": "View Vessels",
+    "cta": "View SEXTANT",
     "metrics": [
       { "label": "Fleet visibility", "value": "Unified" },
       { "label": "Route intelligence", "value": "Active" },
@@ -21,7 +21,7 @@
   },
   {
     "id": "aegis-intel",
-    "name": "Aegis Intel",
+    "name": "PARAGON Intel",
     "tagline": "Intelligence and Visibility Platform",
     "description": "A secure intelligence layer built for visibility, triage, and more structured decision-making across complex operating environments.",
     "status": "In Development",
@@ -29,7 +29,7 @@
     "link": "/aegis/intel/dashboard",
     "icon": "BarChart3",
     "color": "#10b981",
-    "cta": "View Aegis Intel",
+    "cta": "View PARAGON Intel",
     "metrics": [
       { "label": "Signal visibility", "value": "Structured" },
       { "label": "Triage workflows", "value": "Organized" },
@@ -98,7 +98,7 @@
   },
   {
     "id": "aegis",
-    "name": "Aegis",
+    "name": "PARAGON",
     "doctrineRole": "DEFEND",
     "tagline": "Unified Defense & Intelligence Command",
     "description": "One platform, three workspaces — Command (managed operations), Defense (security operations), and Labs (intelligence engine). Unified operator overview with cross-module correlations, severity tracking, and investigation timelines.",
@@ -107,7 +107,7 @@
     "link": "/aegis/",
     "icon": "Shield",
     "color": "#6366f1",
-    "cta": "View Aegis",
+    "cta": "View PARAGON",
     "metrics": [
       { "label": "Workspaces", "value": "3" },
       { "label": "Cross-Module Correlations", "value": "Active" }
@@ -116,7 +116,7 @@
   },
   {
     "id": "lyte",
-    "name": "Lyte",
+    "name": "KORA",
     "doctrineRole": "OBSERVE",
     "tagline": "Decision Intelligence Platform",
     "description": "Governed decision intelligence platform that detects operational risk, surfaces ownership gaps, and routes human action before business damage occurs. Built on the PRISM framework — Pulse, Risk, Intelligence, Signals, Motion.",
@@ -154,10 +154,10 @@
   },
   {
     "id": "aegis",
-    "name": "Aegis",
+    "name": "PARAGON",
     "doctrineRole": "DECIDE",
     "tagline": "Control Plane, Risk Register & Governance",
-    "description": "Enterprise control plane for risk register management, compliance scoring, remediation tracking, and governance automation. Aegis enforces NIST CSF 2.0, FedRAMP, and CMMC frameworks across the SZL ecosystem — transforming compliance from a cost center into a strategic advantage.",
+    "description": "Enterprise control plane for risk register management, compliance scoring, remediation tracking, and governance automation. PARAGON enforces NIST CSF 2.0, FedRAMP, and CMMC frameworks across the SZL ecosystem — transforming compliance from a cost center into a strategic advantage.",
     "status": "Live",
     "category": "Governance & Risk",
     "link": "/aegis/",
@@ -173,7 +173,7 @@
   },
   {
     "id": "terra",
-    "name": "Terra",
+    "name": "DOMAINE",
     "doctrineRole": "OBSERVE",
     "tagline": "NYC Real Estate Intelligence",
     "description": "Property intelligence platform surfacing distressed properties, tracking ownership structures, managing deal pipelines, and delivering market intelligence — all from one operating surface built for brokers, investors, and portfolio teams who move fast.",
@@ -192,7 +192,7 @@
   },
   {
     "id": "aegis-research",
-    "name": "Aegis Research",
+    "name": "PARAGON Research",
     "doctrineRole": "UNDERSTAND",
     "tagline": "AI Research Command Center",
     "description": "AI-native research platform transforming unstructured enterprise data into strategic intelligence — combining experiment tracking, model registry, LLM evaluation, and automated reporting for high-stakes decision environments.",
