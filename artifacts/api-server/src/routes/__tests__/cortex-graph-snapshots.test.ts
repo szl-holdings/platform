@@ -194,13 +194,13 @@ describe('POST /cortex/entity-graph/snapshot', () => {
     });
   });
 
-  it('rejects capture with 400 when the caller has no org context', async () => {
+  it('rejects capture with 403 when the caller has no org context', async () => {
     const previousUser = _currentUser;
     _currentUser = { ...previousUser, orgs: [] };
     try {
       const app = await getApp();
       const res = await request(app).post('/cortex/entity-graph/snapshot').send({});
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(403);
       expect(captureGraphSnapshotMock).not.toHaveBeenCalled();
     } finally {
       _currentUser = previousUser;
@@ -238,15 +238,13 @@ describe('GET /cortex/entity-graph/snapshots', () => {
     expect(res.body.snapshots[0].id).toBe('uuid-1');
   });
 
-  it('returns an empty list when the caller has no orgs', async () => {
+  it('returns 403 when the caller has no org context', async () => {
     const previousUser = _currentUser;
     _currentUser = { ...previousUser, orgs: [] };
     try {
       const app = await getApp();
       const res = await request(app).get('/cortex/entity-graph/snapshots');
-      expect(res.status).toBe(200);
-      expect(res.body.snapshots).toEqual([]);
-      expect(res.body.total).toBe(0);
+      expect(res.status).toBe(403);
     } finally {
       _currentUser = previousUser;
     }
@@ -317,5 +315,56 @@ describe('GET /cortex/entity-graph/snapshot/:uuid', () => {
     const app = await getApp();
     const res = await request(app).get('/cortex/entity-graph/snapshot/uuid-stale');
     expect(res.status).toBe(404);
+  });
+
+  it('returns 403 when the caller has no org context', async () => {
+    const previousUser = _currentUser;
+    _currentUser = { ...previousUser, orgs: [] };
+    try {
+      const app = await getApp();
+      const res = await request(app).get('/cortex/entity-graph/snapshot/uuid-1');
+      expect(res.status).toBe(403);
+    } finally {
+      _currentUser = previousUser;
+    }
+  });
+});
+
+describe('DELETE /cortex/entity-graph/snapshot/:uuid', () => {
+  it('deletes an org-owned snapshot and returns success', async () => {
+    _selectQueue.push([{ id: 1, orgId: 42 }]);
+
+    const app = await getApp();
+    const res = await request(app).delete('/cortex/entity-graph/snapshot/uuid-1');
+    expect(res.status).toBe(200);
+    expect(res.body.message).toMatch(/deleted/i);
+  });
+
+  it('returns 404 when the snapshot belongs to a different org', async () => {
+    _selectQueue.push([{ id: 2, orgId: 999 }]);
+
+    const app = await getApp();
+    const res = await request(app).delete('/cortex/entity-graph/snapshot/uuid-other');
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 404 when no matching snapshot is found', async () => {
+    _selectQueue.push([]);
+
+    const app = await getApp();
+    const res = await request(app).delete('/cortex/entity-graph/snapshot/uuid-missing');
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 403 when the caller has no org context', async () => {
+    const previousUser = _currentUser;
+    _currentUser = { ...previousUser, orgs: [] };
+    try {
+      const app = await getApp();
+      const res = await request(app).delete('/cortex/entity-graph/snapshot/uuid-1');
+      expect(res.status).toBe(403);
+    } finally {
+      _currentUser = previousUser;
+    }
   });
 });

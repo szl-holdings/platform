@@ -41,7 +41,7 @@ import { and, desc, eq, gt, gte, inArray, lte, sql } from 'drizzle-orm';
 import { captureGraphSnapshot } from '../services/cortex-graph-snapshot';
 import { type IRouter, Router } from 'express';
 import { z } from 'zod';
-import { handleRouteError, sendBadRequest, sendNotFound, sendSuccess } from '../lib/api-response';
+import { handleRouteError, sendBadRequest, sendForbidden, sendNotFound, sendSuccess } from '../lib/api-response';
 import { type ExportColumn, runExport } from '../lib/export-service';
 import { DOMAIN_COLORS } from '../lib/domain-colors';
 import { logger } from '../lib/logger';
@@ -2016,9 +2016,9 @@ router.post(
       const orgIds = callerOrgIds(req as unknown as any);
       const now = new Date();
 
-      // Deny-by-default: no org membership → no scope → 404 (no existence leak).
+      // Deny-by-default: no org membership → caller is not authorised to act on any draft.
       if (orgIds.length === 0) {
-        sendNotFound(res, 'Action draft');
+        sendForbidden(res, 'An organisation context is required to approve action drafts');
         return;
       }
 
@@ -2087,9 +2087,9 @@ router.post(
       const caller = callerEmail(req as unknown as any);
       const orgIds = callerOrgIds(req as unknown as any);
 
-      // Deny-by-default: no org membership → no scope → 404 (no existence leak).
+      // Deny-by-default: no org membership → caller is not authorised to act on any draft.
       if (orgIds.length === 0) {
-        sendNotFound(res, 'Action draft');
+        sendForbidden(res, 'An organisation context is required to dismiss action drafts');
         return;
       }
 
@@ -2194,7 +2194,7 @@ router.post(
     try {
       const orgId = callerOrgId(req as any);
       if (!orgId) {
-        sendBadRequest(res, 'An organisation context is required to create a graph snapshot');
+        sendForbidden(res, 'An organisation context is required to create a graph snapshot');
         return;
       }
 
@@ -2247,7 +2247,7 @@ router.get(
     try {
       const orgIds = callerOrgIds(req as any);
       if (orgIds.length === 0) {
-        sendSuccess(res, { snapshots: [], total: 0 });
+        sendForbidden(res, 'An organisation context is required to list graph snapshots');
         return;
       }
       const limit = Math.min(parseInt(String(req.query.limit ?? '20'), 10), 100);
@@ -2296,7 +2296,7 @@ router.get(
       const orgIds = callerOrgIds(req as any);
 
       if (orgIds.length === 0) {
-        sendNotFound(res, 'Snapshot not found');
+        sendForbidden(res, 'An organisation context is required to retrieve a graph snapshot');
         return;
       }
 
@@ -2351,7 +2351,7 @@ router.delete(
       const orgIds = callerOrgIds(req as any);
 
       if (orgIds.length === 0) {
-        sendNotFound(res, 'Snapshot not found');
+        sendForbidden(res, 'An organisation context is required to delete a graph snapshot');
         return;
       }
 

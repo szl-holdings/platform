@@ -443,7 +443,7 @@ describe('APEX action-drafts — multi-tenant security', () => {
       expect(res.status).not.toBe(403);
     });
 
-    it('deny-by-default: returns 404 when user has no org memberships (no DB query issued)', async () => {
+    it('deny-by-default: returns 403 when user has no org memberships (no DB query issued)', async () => {
       _currentUser = { ..._currentUser, orgs: [] };
       // Populate queue — must not be consumed
       _updateQueue = [[{ ...ORG1_DRAFT, status: 'approved' }]];
@@ -453,7 +453,7 @@ describe('APEX action-drafts — multi-tenant security', () => {
         .post(`/cortex/action-drafts/${ORG1_DRAFT.draftUuid}/approve`)
         .send({});
 
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(403);
       // No DB update should have been attempted
       expect(_capturedUpdateWheres).toHaveLength(0);
     });
@@ -525,7 +525,7 @@ describe('APEX action-drafts — multi-tenant security', () => {
       expect(res.status).not.toBe(403);
     });
 
-    it('deny-by-default: returns 404 when user has no org memberships (no DB query issued)', async () => {
+    it('deny-by-default: returns 403 when user has no org memberships (no DB query issued)', async () => {
       _currentUser = { ..._currentUser, orgs: [] };
       _updateQueue = [[{ ...ORG1_DRAFT, status: 'dismissed' }]];
 
@@ -534,7 +534,7 @@ describe('APEX action-drafts — multi-tenant security', () => {
         .post(`/cortex/action-drafts/${ORG1_DRAFT.draftUuid}/dismiss`)
         .send({});
 
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(403);
       expect(_capturedUpdateWheres).toHaveLength(0);
     });
 
@@ -821,7 +821,7 @@ describe('APEX entity-graph snapshots — multi-tenant security', () => {
   // =========================================================================
 
   describe('POST /cortex/entity-graph/snapshot', () => {
-    it('returns 400 when the caller has no org memberships (deny-by-default)', async () => {
+    it('returns 403 when the caller has no org memberships (deny-by-default)', async () => {
       _currentUser = { ..._currentUser, orgs: [] };
 
       const app = await getApp();
@@ -829,7 +829,7 @@ describe('APEX entity-graph snapshots — multi-tenant security', () => {
         .post('/cortex/entity-graph/snapshot')
         .send({ label: 'Test snapshot' });
 
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(403);
       expect(captureGraphSnapshotMock).not.toHaveBeenCalled();
     });
 
@@ -862,16 +862,14 @@ describe('APEX entity-graph snapshots — multi-tenant security', () => {
   // =========================================================================
 
   describe('GET /cortex/entity-graph/snapshots', () => {
-    it('deny-by-default: returns empty list without issuing a DB query when user has no orgs', async () => {
+    it('deny-by-default: returns 403 without issuing a DB query when user has no orgs', async () => {
       _currentUser = { ..._currentUser, orgs: [] };
       _selectQueue = [[ORG1_SNAPSHOT, ORG2_SNAPSHOT]];
 
       const app = await getApp();
       const res = await request(app).get('/cortex/entity-graph/snapshots');
 
-      expect(res.status).toBe(200);
-      expect(res.body.snapshots).toHaveLength(0);
-      expect(res.body.total).toBe(0);
+      expect(res.status).toBe(403);
       expect(_capturedSelectWheres).toHaveLength(0);
     });
 
@@ -958,7 +956,7 @@ describe('APEX entity-graph snapshots — multi-tenant security', () => {
       expect(res.status).not.toBe(403);
     });
 
-    it('deny-by-default: returns 404 without issuing a DB query when caller has no org memberships', async () => {
+    it('deny-by-default: returns 403 without issuing a DB query when caller has no org memberships', async () => {
       _currentUser = { ..._currentUser, orgs: [] };
       _selectQueue = [[ORG1_SNAPSHOT]];
 
@@ -967,7 +965,7 @@ describe('APEX entity-graph snapshots — multi-tenant security', () => {
         `/cortex/entity-graph/snapshot/${ORG1_SNAPSHOT.snapshotUuid}`,
       );
 
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(403);
       expect(_capturedSelectWheres).toHaveLength(0);
     });
 
@@ -1058,7 +1056,7 @@ describe('APEX entity-graph snapshots — multi-tenant security', () => {
       expect(res.status).not.toBe(403);
     });
 
-    it('deny-by-default: returns 404 without issuing a DB query when caller has no org memberships', async () => {
+    it('deny-by-default: returns 403 without issuing a DB query when caller has no org memberships', async () => {
       _currentUser = { ..._currentUser, orgs: [] };
       _selectQueue = [[{ id: ORG1_SNAPSHOT.id, orgId: ORG1_SNAPSHOT.orgId }]];
 
@@ -1067,7 +1065,7 @@ describe('APEX entity-graph snapshots — multi-tenant security', () => {
         `/cortex/entity-graph/snapshot/${ORG1_SNAPSHOT.snapshotUuid}`,
       );
 
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(403);
       expect(_capturedSelectWheres).toHaveLength(0);
       expect(_capturedDeleteWheres).toHaveLength(0);
     });

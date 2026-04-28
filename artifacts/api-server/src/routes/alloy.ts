@@ -161,6 +161,21 @@ function canAccessOrgResource(user: AuthenticatedUser | undefined, resourceOrgId
   return getUserOrgIds(user).includes(resourceOrgId);
 }
 
+/**
+ * Returns the org-id list to use for tenant-scoped WHERE clauses.
+ *
+ * - `null`  → caller is a global admin; callers must apply NO org filter.
+ * - `[]`    → caller has no org membership; callers must immediately return 403.
+ * - `[…]`   → caller belongs to these orgs; callers must add inArray to WHERE.
+ *
+ * This sentinel distinguishes "bypass" (admin) from "deny" (no orgs) so that
+ * a zero-org non-admin user can NEVER fall back to an unscoped query.
+ */
+function callerOrgFilter(user: AuthenticatedUser | undefined): number[] | null {
+  if (isGlobalAdmin(user)) return null;
+  return getUserOrgIds(user);
+}
+
 async function writeAudit(params: {
   orgId?: number | null;
   userId?: number | null;
@@ -295,9 +310,11 @@ router.get("/alloy/workflows", authMiddleware(), validateQuery(listQuerySchema),
 router.get("/alloy/workflows/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const [row] = await db.select().from(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, id));
+    const orgIds = callerOrgFilter(req.user);
+    if (orgIds !== null && orgIds.length === 0) { sendForbidden(res, "No organization membership"); return; }
+    const where = orgIds !== null ? and(eq(alloyWorkflowsTable.id, id), inArray(alloyWorkflowsTable.orgId, orgIds)) : eq(alloyWorkflowsTable.id, id);
+    const [row] = await db.select().from(alloyWorkflowsTable).where(where);
     if (!row) { sendNotFound(res, "Workflow"); return; }
-    if (!canAccessOrgResource(req.user, row.orgId)) { sendNotFound(res, "Workflow"); return; }
     sendSuccess(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to get workflow");
@@ -332,11 +349,13 @@ router.post("/alloy/workflows", authMiddleware(), requireRole("super_admin", "op
 router.patch("/alloy/workflows/:id", authMiddleware(), requireRole("super_admin", "ops", "analyst"), validateBody(patchWorkflowSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const [before] = await db.select().from(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, id));
+    const orgIds = callerOrgFilter(req.user);
+    if (orgIds !== null && orgIds.length === 0) { sendForbidden(res, "No organization membership"); return; }
+    const scopedWhere = orgIds !== null ? and(eq(alloyWorkflowsTable.id, id), inArray(alloyWorkflowsTable.orgId, orgIds)) : eq(alloyWorkflowsTable.id, id);
+    const [before] = await db.select().from(alloyWorkflowsTable).where(scopedWhere);
     if (!before) { sendNotFound(res, "Workflow"); return; }
-    if (!canAccessOrgResource(req.user, before.orgId)) { sendNotFound(res, "Workflow"); return; }
     const patch = req.body as z.infer<typeof patchWorkflowSchema>;
-    const [row] = await db.update(alloyWorkflowsTable).set({ ...patch, updatedAt: new Date() }).where(eq(alloyWorkflowsTable.id, id)).returning();
+    const [row] = await db.update(alloyWorkflowsTable).set({ ...patch, updatedAt: new Date() }).where(scopedWhere).returning();
     await writeAudit({ orgId: row.orgId, userId: req.user?.id, action: "update_workflow", resourceType: "alloy_workflow", resourceId: String(id), before, after: row });
     sendSuccess(res, row);
   } catch (err) {
@@ -347,10 +366,12 @@ router.patch("/alloy/workflows/:id", authMiddleware(), requireRole("super_admin"
 router.delete("/alloy/workflows/:id", validateBody(alloyWorkflowDeleteSchema), authMiddleware(), requireRole("super_admin", "ops"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const [existing] = await db.select().from(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, id));
+    const orgIds = callerOrgFilter(req.user);
+    if (orgIds !== null && orgIds.length === 0) { sendForbidden(res, "No organization membership"); return; }
+    const scopedWhere = orgIds !== null ? and(eq(alloyWorkflowsTable.id, id), inArray(alloyWorkflowsTable.orgId, orgIds)) : eq(alloyWorkflowsTable.id, id);
+    const [existing] = await db.select().from(alloyWorkflowsTable).where(scopedWhere);
     if (!existing) { sendNotFound(res, "Workflow"); return; }
-    if (!canAccessOrgResource(req.user, existing.orgId)) { sendNotFound(res, "Workflow"); return; }
-    await db.delete(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, id));
+    await db.delete(alloyWorkflowsTable).where(scopedWhere);
     sendNoContent(res);
   } catch (err) {
     handleRouteError(res, err, "Failed to delete workflow");
@@ -360,9 +381,11 @@ router.delete("/alloy/workflows/:id", validateBody(alloyWorkflowDeleteSchema), a
 router.post("/alloy/workflows/:id/run", authMiddleware(), validateBody(workflowRunSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const [workflow] = await withDbSpan(req, () => db.select().from(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, id)), "alloy_workflows:get");
+    const orgIds = callerOrgFilter(req.user);
+    if (orgIds !== null && orgIds.length === 0) { sendForbidden(res, "No organization membership"); return; }
+    const workflowWhere = orgIds !== null ? and(eq(alloyWorkflowsTable.id, id), inArray(alloyWorkflowsTable.orgId, orgIds)) : eq(alloyWorkflowsTable.id, id);
+    const [workflow] = await withDbSpan(req, () => db.select().from(alloyWorkflowsTable).where(workflowWhere), "alloy_workflows:get");
     if (!workflow) { sendNotFound(res, "Workflow"); return; }
-    if (!canAccessOrgResource(req.user, workflow.orgId)) { sendNotFound(res, "Workflow"); return; }
     if (!workflow.isActive) { sendBadRequest(res, "Workflow is not active"); return; }
 
     if (workflow.orgId != null) {
@@ -585,9 +608,11 @@ router.get("/alloy/artifacts", authMiddleware(), validateQuery(listQuerySchema),
 router.get("/alloy/artifacts/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const [row] = await db.select().from(alloyArtifactsTable).where(eq(alloyArtifactsTable.id, id));
+    const orgIds = callerOrgFilter(req.user);
+    if (orgIds !== null && orgIds.length === 0) { sendForbidden(res, "No organization membership"); return; }
+    const where = orgIds !== null ? and(eq(alloyArtifactsTable.id, id), inArray(alloyArtifactsTable.orgId, orgIds)) : eq(alloyArtifactsTable.id, id);
+    const [row] = await db.select().from(alloyArtifactsTable).where(where);
     if (!row) { sendNotFound(res, "Artifact"); return; }
-    if (!canAccessOrgResource(req.user, row.orgId)) { sendNotFound(res, "Artifact"); return; }
     sendSuccess(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to get artifact");
@@ -597,9 +622,11 @@ router.get("/alloy/artifacts/:id", authMiddleware(), async (req, res) => {
 router.post("/alloy/artifacts/:id/approve", authMiddleware(), requireRole("super_admin", "ops", "compliance"), validateBody(artifactApproveSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const [artifact] = await db.select().from(alloyArtifactsTable).where(eq(alloyArtifactsTable.id, id));
+    const orgIds = callerOrgFilter(req.user);
+    if (orgIds !== null && orgIds.length === 0) { sendForbidden(res, "No organization membership"); return; }
+    const scopedWhere = orgIds !== null ? and(eq(alloyArtifactsTable.id, id), inArray(alloyArtifactsTable.orgId, orgIds)) : eq(alloyArtifactsTable.id, id);
+    const [artifact] = await db.select().from(alloyArtifactsTable).where(scopedWhere);
     if (!artifact) { sendNotFound(res, "Artifact"); return; }
-    if (!canAccessOrgResource(req.user, artifact.orgId)) { sendNotFound(res, "Artifact"); return; }
     const [updated] = await db.update(alloyArtifactsTable).set({
       status: "approved",
       approvalStatus: "approved",
@@ -607,7 +634,7 @@ router.post("/alloy/artifacts/:id/approve", authMiddleware(), requireRole("super
       reviewedAt: new Date(),
       reviewNotes: req.body.notes ?? null,
       updatedAt: new Date(),
-    }).where(eq(alloyArtifactsTable.id, id)).returning();
+    }).where(scopedWhere).returning();
     if (updated.workflowRunId) {
       await db.update(alloyApprovalsTable).set({
         status: "approved",
@@ -627,9 +654,11 @@ router.post("/alloy/artifacts/:id/approve", authMiddleware(), requireRole("super
 router.post("/alloy/artifacts/:id/reject", authMiddleware(), requireRole("super_admin", "ops", "compliance"), validateBody(artifactRejectSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const [artifact] = await db.select().from(alloyArtifactsTable).where(eq(alloyArtifactsTable.id, id));
+    const orgIds = callerOrgFilter(req.user);
+    if (orgIds !== null && orgIds.length === 0) { sendForbidden(res, "No organization membership"); return; }
+    const scopedWhere = orgIds !== null ? and(eq(alloyArtifactsTable.id, id), inArray(alloyArtifactsTable.orgId, orgIds)) : eq(alloyArtifactsTable.id, id);
+    const [artifact] = await db.select().from(alloyArtifactsTable).where(scopedWhere);
     if (!artifact) { sendNotFound(res, "Artifact"); return; }
-    if (!canAccessOrgResource(req.user, artifact.orgId)) { sendNotFound(res, "Artifact"); return; }
     const [updated] = await db.update(alloyArtifactsTable).set({
       status: "rejected",
       approvalStatus: "rejected",
@@ -637,7 +666,7 @@ router.post("/alloy/artifacts/:id/reject", authMiddleware(), requireRole("super_
       reviewedAt: new Date(),
       reviewNotes: req.body.reason ?? null,
       updatedAt: new Date(),
-    }).where(eq(alloyArtifactsTable.id, id)).returning();
+    }).where(scopedWhere).returning();
     if (updated.workflowRunId) {
       await db.update(alloyApprovalsTable).set({
         status: "rejected",

@@ -35,6 +35,10 @@ vi.mock("@szl-holdings/observability", () => ({
 vi.mock("../../middlewares/sliding-window-limiter", () => ({
   perUserApiSlidingLimiter: (_req: Request, _res: Response, next: NextFunction) => next(),
   perUserWriteSlidingLimiter: (_req: Request, _res: Response, next: NextFunction) => next(),
+  // task-3145: aiInferenceSlidingLimiter must be mocked so the ai group file
+  // loads correctly in tests. The real implementation connects to a sliding
+  // window store that is unavailable in unit-test context.
+  aiInferenceSlidingLimiter: (_req: Request, _res: Response, next: NextFunction) => next(),
 }));
 
 vi.mock("../../middlewares/idempotency", () => ({
@@ -352,6 +356,10 @@ describe("Domain group tenant gate — integration via assembled router", () => 
     { group: "misc", testPath: "/forge/status", description: "/forge (misc — previously ungated)" },
     { group: "misc", testPath: "/stephen/status", description: "/stephen (misc — previously ungated)" },
     { group: "ai", testPath: "/forge/agents", description: "/forge (ai — previously ungated)" },
+    // task-3145: /stream and /jobs carry per-tenant AI workloads; verify they
+    // are blocked for no-org users at the middleware layer.
+    { group: "ai", testPath: "/stream/status", description: "/stream (ai — task-3145 hardening)" },
+    { group: "ai", testPath: "/jobs/status", description: "/jobs (ai — task-3145 hardening)" },
   ];
 
   for (const { group, testPath, description } of GROUPS) {

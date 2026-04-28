@@ -37,6 +37,9 @@ export function register(router: IRouter): void {
   router.use('/ai-safety', tenantScope({ required: true }));
   router.use('/forge', tenantScope({ required: true }));
   router.use('/rag', tenantScope({ required: true }));
+  // task-3145: /stream and /jobs are background/streaming inference paths that
+  // carry per-tenant AI workloads; required:true ensures callers without an org
+  // are rejected at the middleware layer before any handler runs.
   router.use('/stream', tenantScope({ required: true }));
   router.use('/connector-hub', tenantScope({ required: true }));
   router.use('/a2a', tenantScope({ required: true }));

@@ -112,6 +112,15 @@ function tokenDigest(value: string): Buffer {
   return createHmac('sha256', HMAC_KEY).update(Buffer.from(value, 'utf8')).digest();
 }
 
+/**
+ * Constant-time string comparison using HMAC-SHA256 digests.
+ *
+ * Both inputs are hashed to a fixed 32-byte digest before the comparison so
+ * that `crypto.timingSafeEqual` never throws on a length mismatch (which would
+ * itself be a timing side-channel). This replaces the previous `Buffer.equals`
+ * path that short-circuited on length and leaked whether the caller's token had
+ * the right length. See: KNOWN-GAPS AF-001, task-3145 adminGuard hardening.
+ */
 function constantTimeEqual(a: string, b: string): boolean {
   try {
     return timingSafeEqual(tokenDigest(a), tokenDigest(b));
