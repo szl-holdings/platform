@@ -195,7 +195,7 @@ const DEMO_PROMPTS: PromptEntry[] = [
   },
   {
     id: 'p-orchestrator-plan',
-    name: 'PRAXIS Orchestration Planner',
+    name: 'NEXUS Orchestration Planner',
     description: 'Generates a parallelized agent execution plan from a high-level intent string.',
     domain: 'praxis',
     routeClass: 'planning',
@@ -211,7 +211,7 @@ const DEMO_PROMPTS: PromptEntry[] = [
       {
         versionId: 'p-orchestrator-plan@v2',
         version: 2,
-        template: `You are the PRAXIS orchestration planner.\n\nGiven the following intent, generate a parallelized agent execution plan:\n\nIntent: {{intent}}\n\nAvailable agents: {{agent_registry}}\n\nRules:\n1. Identify data dependencies between steps. Steps with no dependency on each other MUST be parallelized.\n2. Each step must specify: agent_id, action, inputs, outputs, depends_on[]\n3. Add estimated latency per step based on historical p50.\n4. Flag any steps that require human approval before execution.\n5. Include a contingency path for each step that may fail.\n\nOutput JSON matching the OrchestrationPlan schema.`,
+        template: `You are the NEXUS orchestration planner.\n\nGiven the following intent, generate a parallelized agent execution plan:\n\nIntent: {{intent}}\n\nAvailable agents: {{agent_registry}}\n\nRules:\n1. Identify data dependencies between steps. Steps with no dependency on each other MUST be parallelized.\n2. Each step must specify: agent_id, action, inputs, outputs, depends_on[]\n3. Add estimated latency per step based on historical p50.\n4. Flag any steps that require human approval before execution.\n5. Include a contingency path for each step that may fail.\n\nOutput JSON matching the OrchestrationPlan schema.`,
         changelog: 'Added contingency path requirement per step. Added human approval flagging. Enforced parallelization rule explicitly.',
         createdBy: 'praxis-agent',
         createdAt: '2026-04-18T11:00:00Z',

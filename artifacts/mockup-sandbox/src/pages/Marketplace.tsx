@@ -260,7 +260,7 @@ const SZL_SERVERS: McpServer[] = [
   },
   {
     namespace: 'com.szlholdings.nexus',
-    displayName: 'PRAXIS Governed Orchestration',
+    displayName: 'NEXUS Governed Orchestration',
     owner: 'szl-holdings',
     description: 'The governed agentic orchestration backbone. MCP gateway with policy enforcement, agent-mesh topology, parallel research swarms, persistent memory fabric, and cross-portfolio workflow execution.',
     tier: 'Verified',
@@ -528,7 +528,7 @@ function GovernedAutonomyStrip() {
       </div>
       <div className="px-4 py-2 border-t border-nexus-cyan/10 flex items-center justify-between">
         <span className="text-[9px] font-mono text-muted-foreground/40">8 SZL servers · 100% policy-compliant · 2025-11-25 spec</span>
-        <span className="text-[9px] font-mono text-muted-foreground/30">powered by PRAXIS MCP Gateway</span>
+        <span className="text-[9px] font-mono text-muted-foreground/30">powered by NEXUS MCP Gateway</span>
       </div>
     </div>
   );
@@ -821,7 +821,7 @@ function ServerDetailView({ server, onBack }: { server: McpServer; onBack: () =>
                   {copied ? 'Copied!' : 'Copy Install'}
                 </button>
                 <button className="flex items-center gap-1.5 text-[10px] font-mono px-2 py-1 rounded border border-nexus/60 text-muted-foreground hover:text-foreground transition-colors">
-                  <ExternalLink className="w-3 h-3" /> Open in PRAXIS
+                  <ExternalLink className="w-3 h-3" /> Open in NEXUS
                 </button>
               </div>
             </div>
@@ -986,7 +986,7 @@ function MethodologyView() {
     { key: 'uptime_probe', label: 'Uptime Probe', weight: 20, description: 'Rolling 30-day availability via periodic ping. Measured against the server\'s declared endpoint. Score degrades linearly from 100% to 95% uptime. Below 95% scores 0.', color: '#22d3ee' },
     { key: 'capability_stability', label: 'Capability Stability', weight: 20, description: 'Fingerprint hash of the tool/resource/prompt catalog, tracked via the Observatory drift detector. Each unreviewed drift event in the last 90 days deducts points. Reviewed and approved drifts score neutral.', color: '#a3e635' },
     { key: 'manifest_signature', label: 'Manifest Signature', weight: 20, description: 'Validity of the server.json cryptographic signature against the SZL platform key. Full score requires a valid SLSA-style attestation. Unverified manifests score 4. Self-signed score 8. Platform-verified score 20.', color: '#f59e0b' },
-    { key: 'audit_completeness', label: 'Audit Completeness', weight: 20, description: 'For SZL-owned servers only: completeness of the audit trail in the PRAXIS audit log. Checks 30 days of invocations. Community servers score 0 here by design — this component rewards internal transparency.', color: '#8b5cf6' },
+    { key: 'audit_completeness', label: 'Audit Completeness', weight: 20, description: 'For SZL-owned servers only: completeness of the audit trail in the NEXUS audit log. Checks 30 days of invocations. Community servers score 0 here by design — this component rewards internal transparency.', color: '#8b5cf6' },
     { key: 'transport_conformance', label: 'Transport Conformance', weight: 10, description: 'Automated probe against the 2025-11-25 MCP spec. Tests initialize handshake, tools/list, resources/list, and one tools/call roundtrip. Partial credit for each passing check.', color: '#f472b6' },
     { key: 'reversibility_coverage', label: 'Reversibility Coverage', weight: 10, description: 'Fraction of declared write tools that carry an explicit reversibility annotation (read-only / reversible-write / irreversible-write). 100% annotated = full score. Unannotated write tools reduce score proportionally.', color: '#fb923c' },
   ];
@@ -1101,7 +1101,7 @@ function SubmitView() {
       <h2 className="text-xl font-bold mb-2">Submit Your MCP Server</h2>
       <p className="text-sm text-muted-foreground/70 leading-relaxed mb-8">
         We validate your manifest against the spec, run an automated capability and transport probe, 
-        then queue your server in PRAXIS Governance for human tier assignment. You'll be notified on assignment.
+        then queue your server in NEXUS Governance for human tier assignment. You'll be notified on assignment.
       </p>
 
       {phase === 'queued' ? (
@@ -1319,7 +1319,7 @@ export default function Marketplace({ onBack }: { onBack: () => void }) {
           className="flex items-center gap-1.5 text-xs text-muted-foreground/50 hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span className="font-mono">PRAXIS</span>
+          <span className="font-mono">NEXUS</span>
         </button>
         <div className="w-px h-4 bg-nexus" />
         <div className="flex items-center gap-1.5">

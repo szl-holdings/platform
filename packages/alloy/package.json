@@ -1,27 +1,60 @@
 {
-  "name": "@workspace/continuum",
+  "name": "@workspace/alloy",
   "version": "1.0.0",
   "type": "module",
   "description": "Continuum — Business Observability Fabric. Governed multi-agent coordinator providing a continuous, governed view of every signal and decision flowing through the business. Composes specialist sub-agents, persists tool-call ledger, and returns Open-Responses-style envelopes.",
   "exports": {
-    ".": "./src/index.ts",
-    "./envelope": "./src/envelope.ts",
-    "./specialists": "./src/specialists.ts",
-    "./coordinator": "./src/coordinator.ts"
-  },
-  "scripts": {
-    "typecheck": "tsc --noEmit"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./src/types.ts"
+    },
+    "./run-manager": {
+      "types": "./dist/run-manager.d.ts",
+      "import": "./src/run-manager.ts"
+    },
+    "./checkpoint": {
+      "types": "./dist/checkpoint.d.ts",
+      "import": "./src/checkpoint.ts"
+    },
+    "./model-router": {
+      "types": "./dist/model-router.d.ts",
+      "import": "./src/model-router.ts"
+    },
+    "./ledger": {
+      "types": "./dist/ledger.d.ts",
+      "import": "./src/ledger.ts"
+    },
+    "./workflow": {
+      "types": "./dist/workflow.d.ts",
+      "import": "./src/workflow.ts"
+    },
+    "./plan-orchestrator": {
+      "types": "./dist/plan-orchestrator.d.ts",
+      "import": "./src/plan-orchestrator.ts"
+    }
   },
   "dependencies": {
-    "@workspace/eval-os": "workspace:*",
+    "@szl-holdings/action-engine": "workspace:*",
+    "@workspace/guardian": "workspace:*",
     "@workspace/planner": "workspace:*",
-    "@workspace/run-ledger": "workspace:*",
-    "@szl-holdings/policy-guard": "workspace:*",
-    "@szl-holdings/retrieval-core": "workspace:*",
-    "@szl-holdings/shared-contracts": "workspace:*",
+    "@workspace/tool-mesh": "workspace:*",
+    "@workspace/trace-graph": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "typescript": "catalog:"
+    "@types/node": "catalog:",
+    "vitest": "^4.1.2"
+  },
+  "scripts": {
+    "lint": "biome lint ./src",
+    "lint:ci": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   }
 }

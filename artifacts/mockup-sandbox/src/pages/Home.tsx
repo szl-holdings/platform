@@ -23,13 +23,13 @@ const PILLARS = [
     name: 'Persistent Memory + Skills',
     tagline: 'Cross-session memory fabric',
     description:
-      'Long-lived memory built on the memory-fabric multi-tier store (working → session → episodic → semantic). The Skills Library adapts 50+ patterns from public repos into native PRAXIS capabilities.',
+      'Long-lived memory built on the memory-fabric multi-tier store (working → session → episodic → semantic). The Skills Library adapts 50+ patterns from public repos into native NEXUS capabilities.',
     accent: 'var(--gi-accent-violet)',
     bullets: [
       'Facts, preferences, entities persist across sessions',
       'Automatic memory write from Research Swarm',
       '50+ adapted skills from 20+ public repos',
-      'Original-vs-PRAXIS diff for every skill',
+      'Original-vs-NEXUS diff for every skill',
     ],
   },
   {
@@ -93,7 +93,7 @@ export default function Home({ navigate }: { navigate: (p: Page) => void }) {
           </div>
 
           <h1 className="text-5xl font-bold tracking-tight mb-3 font-mono">
-            <span className="text-praxis-cyan">PRAXIS</span>
+            <span className="text-praxis-cyan">NEXUS</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-2 font-mono tracking-wide">One of One.</p>
           <p className="text-base text-muted-foreground/70 max-w-2xl leading-relaxed mb-10">
@@ -184,7 +184,7 @@ export default function Home({ navigate }: { navigate: (p: Page) => void }) {
         <div className="mt-8 bg-praxis-surface border border-praxis-cyan/20 rounded-xl p-6">
           <div className="flex items-center gap-2 mb-3">
             <Shield className="w-4 h-4 text-praxis-cyan" />
-            <h3 className="text-sm font-semibold text-praxis-cyan">Why PRAXIS is One of One</h3>
+            <h3 className="text-sm font-semibold text-praxis-cyan">Why NEXUS is One of One</h3>
           </div>
           <div className="grid grid-cols-3 gap-6 text-xs text-muted-foreground leading-relaxed">
             <div>
@@ -195,7 +195,7 @@ export default function Home({ navigate }: { navigate: (p: Page) => void }) {
             </div>
             <div>
               <strong className="text-foreground/80">Protocol-agnostic from day one.</strong> MCP is
-              today's standard. A2A, ACP, and ANP are tomorrow's. PRAXIS speaks all four through a
+              today's standard. A2A, ACP, and ANP are tomorrow's. NEXUS speaks all four through a
               unified façade so your tools stay callable no matter how the landscape shifts.
             </div>
             <div>

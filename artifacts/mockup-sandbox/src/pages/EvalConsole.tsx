@@ -73,7 +73,7 @@ const EVAL_SUITES: EvalSuite[] = [
   },
   {
     id: 'orchestrator-plan-v2',
-    name: 'PRAXIS Orchestration Planner v2',
+    name: 'NEXUS Orchestration Planner v2',
     domain: 'praxis',
     description: 'Tests parallelization correctness, dependency graph validity, and contingency path generation.',
     model: 'claude-3-5-sonnet-20241022',

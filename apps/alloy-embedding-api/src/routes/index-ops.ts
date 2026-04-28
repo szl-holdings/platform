@@ -1,5 +1,5 @@
 import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
-import { IndexRebuildRequestSchema, IndexVerifyRequestSchema } from "@workspace/aef-contracts";
+import { IndexRebuildRequestSchema, IndexVerifyRequestSchema } from "@workspace/cf-contracts";
 import { logger } from "../middleware/logger.js";
 import { submitRebuildIndex, submitVerifyIndexHealth, getRun } from "@workspace/alloy-ingestion-orchestrator/client";
 

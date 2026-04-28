@@ -1,4 +1,4 @@
-import { AEF_DOMAIN_PROFILE_DOMAINS, defaultProfileRegistry } from '@workspace/aef-domain-profiles';
+import { AEF_DOMAIN_PROFILE_DOMAINS, defaultProfileRegistry } from '@workspace/cf-domain-profiles';
 import { describe, expect, it } from 'vitest';
 import { ALL_GOLDEN_QUERIES, LYTE_MOCK_CORPUS, VESSELS_MOCK_CORPUS } from './fixtures/index.js';
 import { computeLatencyPercentiles, runRetrievalEval } from './harness.js';

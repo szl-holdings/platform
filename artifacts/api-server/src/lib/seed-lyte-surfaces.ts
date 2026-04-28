@@ -250,7 +250,7 @@ const REPLAY_SCENARIOS = [
       {
         id: 're-01',
         timestamp: '2026-04-14T08:22:00Z',
-        actor: 'KORA Signal Scanner',
+        actor: 'Lyte Signal Scanner',
         role: 'System',
         action: 'Signal detected',
         signal: 'approval_chain_stall',
@@ -262,7 +262,7 @@ const REPLAY_SCENARIOS = [
       {
         id: 're-02',
         timestamp: '2026-04-14T08:24:00Z',
-        actor: 'KORA Decision Engine',
+        actor: 'Lyte Decision Engine',
         role: 'AI Agent',
         action: 'Recommendation generated',
         detail:

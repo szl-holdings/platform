@@ -158,7 +158,7 @@ export default function S05Architecture() {
                 'Proof Chain',
                 'Covenant Policy',
                 'Simulation Engine',
-                'PRAXIS Bus',
+                'NEXUS Bus',
               ].map((d) => (
                 <span
                   key={d}
@@ -219,7 +219,7 @@ export default function S05Architecture() {
               </div>
             </div>
             <div style={{ flex: 1, display: 'flex', gap: '1.5vw', flexWrap: 'wrap' }}>
-              {['KORA Command Center', 'APEX Mobile', 'Command Portal'].map((d) => (
+              {['Lyte Command Center', 'CORTEX Mobile', 'Command Portal'].map((d) => (
                 <span
                   key={d}
                   style={{

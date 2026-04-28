@@ -27,7 +27,7 @@
     }
   },
   "dependencies": {
-    "@workspace/aef-contracts": "workspace:*"
+    "@workspace/cf-contracts": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18.0.0"

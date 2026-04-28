@@ -1,17 +1,18 @@
 kind = "design"
-previewPath = "/nexus/"
-title = "PRAXIS — Unified Agentic AI Layer"
-version = "1.0.0"
-id = "XegfDyZt7HqfW2Bb8Ghoy"
+  previewPath = "/nexus/"
+  title = "NEXUS — Unified Agentic AI Layer"
+  version = "1.0.0"
+  id = "XegfDyZt7HqfW2Bb8Ghoy"
 
-[[services]]
-localPort = 9090
-name = "web"
-paths = ["/nexus/"]
+  [[services]]
+  localPort = 9090
+  name = "web"
+  paths = ["/nexus/"]
 
-[services.env]
-VITE_PORT = "8008"
-BASE_PATH = "/nexus/"
+  [services.env]
+  VITE_PORT = "8008"
+  BASE_PATH = "/nexus/"
 
-[services.development]
-run = "bash /home/runner/workspace/artifacts/mockup-sandbox/start.sh"
+  [services.development]
+  run = "bash /home/runner/workspace/artifacts/mockup-sandbox/start.sh"
+  

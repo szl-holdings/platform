@@ -1,7 +1,7 @@
 import { createApprovalRequest } from '@szl-holdings/covenant-policy';
-import { defaultLedger } from '@workspace/forge/ledger';
-import { RunManager } from '@workspace/forge/run-manager';
-import type { ApprovalGate } from '@workspace/forge/types';
+import { defaultLedger } from '@workspace/alloy/ledger';
+import { RunManager } from '@workspace/alloy/run-manager';
+import type { ApprovalGate } from '@workspace/alloy/types';
 import { logger } from './logger';
 
 const dbApprovalGate: ApprovalGate = {

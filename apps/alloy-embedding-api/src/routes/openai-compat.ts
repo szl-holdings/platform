@@ -1,6 +1,6 @@
 import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
-import { OpenAIEmbedRequestSchema } from "@workspace/aef-contracts";
-import { embedTexts } from "@workspace/alloy-embed-worker";
+import { OpenAIEmbedRequestSchema } from "@workspace/cf-contracts";
+import { embedTexts } from "@workspace/continuum-embed-worker";
 import { logger } from "../middleware/logger.js";
 import { randomUUID } from "node:crypto";
 import { errorBudgetCounter } from "../middleware/prometheus.js";

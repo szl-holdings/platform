@@ -50,7 +50,7 @@
     "@szl-holdings/decision-engine": "workspace:*",
     "@szl-holdings/policy-engine": "workspace:*",
     "@szl-holdings/prompt-registry": "workspace:*",
-    "@workspace/forge": "workspace:*",
+    "@workspace/alloy": "workspace:*",
     "@workspace/memory-fabric": "workspace:*",
     "@workspace/trace-graph": "workspace:*",
     "zod": "catalog:"

@@ -48,7 +48,7 @@ const FIGMA_TOOLS: DemoTool[] = [
     ],
     mockResponse: () => ({
       files: [
-        { key: 'abc123', name: 'PRAXIS Design System v2.4', last_modified: '2026-04-22T14:30:00Z', thumbnail_url: null },
+        { key: 'abc123', name: 'NEXUS Design System v2.4', last_modified: '2026-04-22T14:30:00Z', thumbnail_url: null },
         { key: 'def456', name: 'SZL Holdings Dashboard — Q2 2026', last_modified: '2026-04-20T09:15:00Z', thumbnail_url: null },
         { key: 'ghi789', name: 'Sentra Cyber Command — Wireframes', last_modified: '2026-04-18T16:45:00Z', thumbnail_url: null },
         { key: 'jkl012', name: 'Mobile Command — iOS/Android', last_modified: '2026-04-17T11:00:00Z', thumbnail_url: null },
@@ -136,7 +136,7 @@ const GITHUB_TOOLS: DemoTool[] = [
       additions: 847,
       deletions: 42,
       changed_files: 12,
-      body: 'Adds scripted demo adapters for Figma, GitHub, Linear, and Design-Token CDN to the PRAXIS Protocol Bridge.',
+      body: 'Adds scripted demo adapters for Figma, GitHub, Linear, and Design-Token CDN to the NEXUS Protocol Bridge.',
       labels: ['enhancement', 'praxis'],
     }),
   },
@@ -178,7 +178,7 @@ const LINEAR_TOOLS: DemoTool[] = [
     mockResponse: () => ({
       issues: [
         { id: 'PRX-483', title: 'Fill Bridge placeholder pages', priority: 'urgent', state: 'in_progress', assignee: 'praxis-agent', created_at: '2026-04-25T09:00:00Z' },
-        { id: 'PRX-479', title: 'Add org switcher to PRAXIS layout', priority: 'high', state: 'done', assignee: 'praxis-agent', created_at: '2026-04-24T14:00:00Z' },
+        { id: 'PRX-479', title: 'Add org switcher to NEXUS layout', priority: 'high', state: 'done', assignee: 'praxis-agent', created_at: '2026-04-24T14:00:00Z' },
         { id: 'PRX-471', title: 'Eval Console scripted suites', priority: 'medium', state: 'todo', assignee: null, created_at: '2026-04-23T10:00:00Z' },
       ],
       total: 3,
@@ -197,7 +197,7 @@ const LINEAR_TOOLS: DemoTool[] = [
     mockResponse: (args) => ({
       id: (args.issue_id as string) || 'PRX-483',
       title: 'Fill Bridge placeholder pages',
-      description: 'Adds scripted demo adapters for Figma, GitHub, Linear, and Design-Token CDN to the PRAXIS Protocol Bridge.',
+      description: 'Adds scripted demo adapters for Figma, GitHub, Linear, and Design-Token CDN to the NEXUS Protocol Bridge.',
       priority: 'urgent',
       state: 'in_progress',
       assignee: 'praxis-agent',

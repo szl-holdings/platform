@@ -143,7 +143,7 @@ const ARCHITECTURE_LAYERS = [
     name: "Infer",
     color: "#8b7ac8",
     description: "AI agents synthesize signals into typed inferences with confidence scores — never autonomous execution",
-    examples: ["Sentinel maritime agent", "PRAXIS framework synthesis", "RAG knowledge retrieval (tenant-isolated)", "Model mesh routing"],
+    examples: ["Sentinel maritime agent", "NEXUS framework synthesis", "RAG knowledge retrieval (tenant-isolated)", "Model mesh routing"],
   },
   {
     name: "Govern",
@@ -221,7 +221,7 @@ export default function TechnicalProofPage() {
                 <p style={{ fontSize: "0.9rem", color: "hsl(210,5%,55%)", marginBottom: "2rem", maxWidth: "52ch", lineHeight: 1.65 }}>
                   Source: <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>architecture.md</code>,{" "}
                   <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>policy-model.md</code>,{" "}
-                  <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>packages/forge/</code>
+                  <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>packages/alloy/</code>
                 </p>
               </m.div>
   
@@ -322,7 +322,7 @@ export default function TechnicalProofPage() {
                 </h2>
                 <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,52%)", marginBottom: "1.25rem", lineHeight: 1.6 }}>
                   Source: <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>artifacts/api-server/src/db/schema.ts</code> → auditTrailTable,{" "}
-                  <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>packages/forge/</code> (CAP-010, working_demo → proof chain).
+                  <code style={{ fontSize: "12px", color: "hsl(210,55%,60%)" }}>packages/alloy/</code> (CAP-010, working_demo → proof chain).
                   Every confirmed decision generates an event of this shape. SHA256 hash chain links signal → inference → confirmation → outcome.
                 </p>
               </m.div>

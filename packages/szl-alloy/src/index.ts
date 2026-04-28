@@ -20,12 +20,12 @@ export {
   registerPolicy,
   unregisterPolicy,
 } from '@szl-holdings/policy-engine';
-export { createCheckpoint, InMemoryCheckpointStore } from '@workspace/forge/checkpoint';
-export { defaultLedger, InMemoryActionLedger, makeLedgerEntry } from '@workspace/forge/ledger';
+export { createCheckpoint, InMemoryCheckpointStore } from '@workspace/alloy/checkpoint';
+export { defaultLedger, InMemoryActionLedger, makeLedgerEntry } from '@workspace/alloy/ledger';
 export {
   RunManager,
   type RunManagerOptions,
-} from '@workspace/forge/run-manager';
+} from '@workspace/alloy/run-manager';
 export type {
   ApprovalGate,
   RunConfig,
@@ -34,7 +34,7 @@ export type {
   StepContext,
   StepResult,
   WorkflowStep,
-} from '@workspace/forge/types';
+} from '@workspace/alloy/types';
 export {
   InMemoryStore as InMemoryMemoryStore,
   type MemoryEntry,

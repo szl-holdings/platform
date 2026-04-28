@@ -21,7 +21,7 @@ import {
   AEF_DOMAIN_PROFILE_DOMAINS,
   type AEFDomain,
   defaultProfileRegistry,
-} from '@workspace/aef-domain-profiles';
+} from '@workspace/cf-domain-profiles';
 import { ALL_GOLDEN_QUERIES, ALL_MOCK_CORPORA } from './fixtures/index.js';
 import { type RetrievalAdapter, runRetrievalEval } from './harness.js';
 import type { GoldenQuery, RetrievedResult } from './metrics.js';

@@ -1073,7 +1073,7 @@ export const continuumResolvers = {
         if (!['completed', 'failed'].includes(args.result)) {
           throw new Error(`Invalid step result '${args.result}' — must be 'completed' or 'failed'`);
         }
-        const { advanceWorkflowStep } = await import('../../lib/continuum-orchestration.js');
+        const { advanceWorkflowStep } = await import('../../lib/alloy-orchestration.js');
         await advanceWorkflowStep(
           parseIntId(args.runId),
           args.stepNumber,

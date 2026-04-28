@@ -64,7 +64,7 @@ export function PRAXISMap() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase bg-violet-500/10 text-violet-400 border border-violet-500/20 mb-4">
-            Ecosystem PRAXIS
+            Ecosystem NEXUS
           </span>
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
             Interconnected{' '}

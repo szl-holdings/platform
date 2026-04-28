@@ -8,8 +8,8 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@huggingface/transformers": "^4.1.0",
-    "@workspace/aef-contracts": "workspace:*",
-    "@workspace/aef-storage-adapters": "workspace:*",
+    "@workspace/cf-contracts": "workspace:*",
+    "@workspace/cf-storage-adapters": "workspace:*",
     "express": "^5.0.0",
     "zod": "catalog:"
   },

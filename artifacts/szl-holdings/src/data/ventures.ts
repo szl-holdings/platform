@@ -375,7 +375,7 @@ export const ventures: Venture[] = [
   },
   {
     id: 'inca',
-    name: 'SZL APEX',
+    name: 'SZL CORTEX',
     tagline: 'AI Research Command Center',
     oneLiner:
       'Enterprise-grade LLM evaluation, model governance, and AI research management platform.',
@@ -385,9 +385,9 @@ export const ventures: Venture[] = [
     status: 'Live',
     accentColor: '#8b5cf6',
     description:
-      'SZL APEX provides the evaluation and governance infrastructure that enterprise AI deployments need. It tests models against proprietary data distributions, detects behavioral drift, tracks experiments, and delivers the model registry and compliance trails that regulated industries require.',
+      'SZL CORTEX provides the evaluation and governance infrastructure that enterprise AI deployments need. It tests models against proprietary data distributions, detects behavioral drift, tracks experiments, and delivers the model registry and compliance trails that regulated industries require.',
     painSolved:
-      "General benchmarks don't tell you how a model performs on your data, in your context, at your risk threshold. SZL APEX closes the evaluation gap between public benchmarks and operational deployment — and maintains the governance layer that allows enterprises to deploy AI in regulated environments.",
+      "General benchmarks don't tell you how a model performs on your data, in your context, at your risk threshold. SZL CORTEX closes the evaluation gap between public benchmarks and operational deployment — and maintains the governance layer that allows enterprises to deploy AI in regulated environments.",
     metrics: [
       { label: 'Pilot Clients', value: '12', trend: 'up' },
       { label: 'Series A Raised', value: '$14M', trend: 'neutral' },
@@ -406,7 +406,7 @@ export const ventures: Venture[] = [
         problem:
           "An enterprise deploying LLMs for contract analysis found benchmark scores didn't correlate with accuracy on their document types.",
         solution:
-          'SZL APEX built a custom evaluation suite against their proprietary document corpus and operational edge cases.',
+          'SZL CORTEX built a custom evaluation suite against their proprietary document corpus and operational edge cases.',
         result: 'Model selection improved. Production failure rate dropped 67%.',
       },
     ],
@@ -542,7 +542,7 @@ export const ventures: Venture[] = [
       'Multi-agent coordination and policy enforcement',
       'DAG execution engine with retry and escalation',
       'Performance attribution per model variant',
-      'Integration with SZL APEX, PARAGON, KORA, and SEXTANT',
+      'Integration with SZL CORTEX, Aegis, Lyte, and Vessels',
     ],
     nextMilestone: 'Counsel Scenario Model Library public launch (Q2 2026)',
     path: '/ventures/continuum',

@@ -10,7 +10,7 @@ export default function S04Loop() {
       n: '02',
       label: 'Context',
       color: '#8a8a8a',
-      desc: 'Cross-domain enrichment via PRAXIS Bus — correlation ID attached',
+      desc: 'Cross-domain enrichment via NEXUS Bus — correlation ID attached',
     },
     {
       n: '03',

@@ -128,7 +128,7 @@ export default function Memory() {
             Internal Tooling — Not Production
           </span>
           <span className="text-[10px] text-muted-foreground/60 ml-1">
-            This module is for internal PRAXIS development only. Data here is not customer-facing.
+            This module is for internal NEXUS development only. Data here is not customer-facing.
           </span>
         </div>
 

@@ -17,7 +17,7 @@ Continuum provides the run manager, checkpoint/replay hooks, model router interf
 ### Running a Workflow
 
 ```typescript
-import { RunManager, RunConfigSchema } from '@workspace/forge';
+import { RunManager, RunConfigSchema } from '@workspace/alloy';
 
 const manager = new RunManager();
 
@@ -44,7 +44,7 @@ console.log(state.status); // 'completed' | 'failed' | ...
 ### Reference Workflow
 
 ```typescript
-import { runReferenceWorkflow } from '@workspace/forge/workflow';
+import { runReferenceWorkflow } from '@workspace/alloy/workflow';
 
 const result = await runReferenceWorkflow('hello world', {
   policyTier: 'internal-workflow',

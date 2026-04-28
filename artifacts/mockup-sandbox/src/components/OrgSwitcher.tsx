@@ -49,7 +49,7 @@ export const MOCK_ORGS: MockOrg[] = [
   },
   {
     id: 'praxis-internal',
-    name: 'PRAXIS Internal',
+    name: 'NEXUS Internal',
     tier: 'Internal',
     color: '#818cf8',
     swarms: 12,

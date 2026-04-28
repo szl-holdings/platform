@@ -143,7 +143,7 @@ function buildNaturalLanguageAnswer(
   const threats = results.filter((r) => r.entity.type === 'threat');
   const orgs = results.filter((r) => r.entity.type === 'organization');
 
-  let answer = `Within ${maxHops} hop${maxHops !== 1 ? 's' : ''} of **${anchor.label}**, PRAXIS identified ${results.length} connected entit${results.length !== 1 ? 'ies' : 'y'}. `;
+  let answer = `Within ${maxHops} hop${maxHops !== 1 ? 's' : ''} of **${anchor.label}**, NEXUS identified ${results.length} connected entit${results.length !== 1 ? 'ies' : 'y'}. `;
 
   if (criticalCount > 0) {
     answer += `**${criticalCount} critical-risk** entit${criticalCount !== 1 ? 'ies' : 'y'} require immediate attention. `;
@@ -377,7 +377,7 @@ export function PRAXISHopQuery({ initialAnchorId }: PRAXISHopQueryProps) {
             <div className="rounded-xl p-4" style={{ background: `${color.accent.blue}08`, border: `1px solid ${color.accent.blue}20` }}>
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="w-3.5 h-3.5" style={{ color: color.accent.blue }} />
-                <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: color.accent.blue }}>PRAXIS Answer</span>
+                <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: color.accent.blue }}>NEXUS Answer</span>
                 <span className="ml-auto text-[10px]" style={{ color: color.text.muted }}>{result.executionMs}ms</span>
               </div>
               <p

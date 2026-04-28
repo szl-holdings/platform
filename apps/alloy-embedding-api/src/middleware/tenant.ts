@@ -1,4 +1,4 @@
-import { type TenantId, TenantIdSchema } from '@workspace/aef-contracts';
+import { type TenantId, TenantIdSchema } from '@workspace/cf-contracts';
 import type { NextFunction, Request, Response } from 'express';
 
 declare module 'express' {

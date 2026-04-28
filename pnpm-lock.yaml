@@ -224,25 +224,25 @@ importers:
 
   apps/alloy-embedding-api:
     dependencies:
-      '@workspace/aef-contracts':
-        specifier: workspace:*
-        version: link:../../packages/aef-contracts
-      '@workspace/aef-evidence-ledger':
-        specifier: workspace:*
-        version: link:../../packages/aef-evidence-ledger
-      '@workspace/aef-policy-guard':
-        specifier: workspace:*
-        version: link:../../packages/aef-policy-guard
-      '@workspace/aef-retrieval-core':
-        specifier: workspace:*
-        version: link:../../packages/aef-retrieval-core
-      '@workspace/alloy-embed-worker':
-        specifier: workspace:*
-        version: link:../../workers/alloy-embed-worker
       '@workspace/alloy-ingestion-orchestrator':
         specifier: workspace:*
         version: link:../alloy-ingestion-orchestrator
-      '@workspace/alloy-rerank-worker':
+      '@workspace/cf-contracts':
+        specifier: workspace:*
+        version: link:../../packages/aef-contracts
+      '@workspace/cf-evidence-ledger':
+        specifier: workspace:*
+        version: link:../../packages/aef-evidence-ledger
+      '@workspace/cf-policy-guard':
+        specifier: workspace:*
+        version: link:../../packages/aef-policy-guard
+      '@workspace/cf-retrieval-core':
+        specifier: workspace:*
+        version: link:../../packages/aef-retrieval-core
+      '@workspace/continuum-embed-worker':
+        specifier: workspace:*
+        version: link:../../workers/alloy-embed-worker
+      '@workspace/continuum-rerank-worker':
         specifier: workspace:*
         version: link:../../workers/alloy-rerank-worker
       cors:
@@ -279,21 +279,21 @@ importers:
 
   apps/alloy-ingestion-orchestrator:
     dependencies:
-      '@workspace/aef-contracts':
-        specifier: workspace:*
-        version: link:../../packages/aef-contracts
-      '@workspace/aef-evidence-ledger':
-        specifier: workspace:*
-        version: link:../../packages/aef-evidence-ledger
-      '@workspace/aef-policy-guard':
-        specifier: workspace:*
-        version: link:../../packages/aef-policy-guard
-      '@workspace/aef-retrieval-core':
-        specifier: workspace:*
-        version: link:../../packages/aef-retrieval-core
       '@workspace/approvals-inbox':
         specifier: workspace:*
         version: link:../../packages/approvals-inbox
+      '@workspace/cf-contracts':
+        specifier: workspace:*
+        version: link:../../packages/aef-contracts
+      '@workspace/cf-evidence-ledger':
+        specifier: workspace:*
+        version: link:../../packages/aef-evidence-ledger
+      '@workspace/cf-policy-guard':
+        specifier: workspace:*
+        version: link:../../packages/aef-policy-guard
+      '@workspace/cf-retrieval-core':
+        specifier: workspace:*
+        version: link:../../packages/aef-retrieval-core
       cors:
         specifier: ^2.8.5
         version: 2.8.6
@@ -690,12 +690,6 @@ importers:
       '@workspace/a11oy-fabric':
         specifier: workspace:*
         version: link:../../lib/a11oy-fabric
-      '@workspace/aef-domain-profiles':
-        specifier: workspace:*
-        version: link:../../packages/aef-domain-profiles
-      '@workspace/aef-evals':
-        specifier: workspace:*
-        version: link:../../packages/aef-evals
       '@workspace/agents-core':
         specifier: workspace:*
         version: link:../../packages/agents-core
@@ -711,18 +705,33 @@ importers:
       '@workspace/agents-tools':
         specifier: workspace:*
         version: link:../../packages/agents-tools
+      '@workspace/alloy':
+        specifier: workspace:*
+        version: link:../../packages/alloy
+      '@workspace/alloy-crew':
+        specifier: workspace:*
+        version: link:../../packages/alloy-crew
+      '@workspace/alloy-embedding-api':
+        specifier: workspace:*
+        version: link:../../apps/alloy-embedding-api
       '@workspace/approvals-inbox':
         specifier: workspace:*
         version: link:../../packages/approvals-inbox
+      '@workspace/cf-domain-profiles':
+        specifier: workspace:*
+        version: link:../../packages/aef-domain-profiles
+      '@workspace/cf-evals':
+        specifier: workspace:*
+        version: link:../../packages/aef-evals
       '@workspace/cognitive-runtime':
         specifier: workspace:*
         version: link:../../packages/cognitive-runtime
-      '@workspace/continuum':
+      '@workspace/continuum-embed-worker':
         specifier: workspace:*
-        version: link:../../packages/alloy
-      '@workspace/continuum-embedding-api':
+        version: link:../../workers/alloy-embed-worker
+      '@workspace/continuum-rerank-worker':
         specifier: workspace:*
-        version: link:../../packages/continuum-embedding-api
+        version: link:../../workers/alloy-rerank-worker
       '@workspace/demo-seed':
         specifier: workspace:*
         version: link:../../packages/demo-seed
@@ -735,9 +744,6 @@ importers:
       '@workspace/executive-briefing':
         specifier: workspace:*
         version: link:../../packages/executive-briefing
-      '@workspace/forge':
-        specifier: workspace:*
-        version: link:../../packages/forge
       '@workspace/guardian':
         specifier: workspace:*
         version: link:../../packages/guardian
@@ -1031,10 +1037,10 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../../packages/aef-contracts
-      '@workspace/aef-sdk':
+      '@workspace/cf-sdk':
         specifier: workspace:*
         version: link:../../packages/aef-sdk
       framer-motion:
@@ -1396,10 +1402,10 @@ importers:
       '@tanstack/query-sync-storage-persister':
         specifier: ^5.99.0
         version: 5.99.0
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../../packages/aef-contracts
-      '@workspace/aef-sdk':
+      '@workspace/cf-sdk':
         specifier: workspace:*
         version: link:../../packages/aef-sdk
       '@workspace/tokens':
@@ -1639,10 +1645,10 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../../packages/aef-contracts
-      '@workspace/aef-sdk':
+      '@workspace/cf-sdk':
         specifier: workspace:*
         version: link:../../packages/aef-sdk
       framer-motion:
@@ -2103,7 +2109,7 @@ importers:
       '@tanstack/query-sync-storage-persister':
         specifier: ^5.99.0
         version: 5.99.0
-      '@workspace/aef-sdk':
+      '@workspace/cf-sdk':
         specifier: workspace:*
         version: link:../../packages/aef-sdk
       '@workspace/tokens':
@@ -2753,10 +2759,10 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../../packages/aef-contracts
-      '@workspace/aef-sdk':
+      '@workspace/cf-sdk':
         specifier: workspace:*
         version: link:../../packages/aef-sdk
       clsx:
@@ -2901,10 +2907,10 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.2(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../../packages/aef-contracts
-      '@workspace/aef-sdk':
+      '@workspace/cf-sdk':
         specifier: workspace:*
         version: link:../../packages/aef-sdk
       framer-motion:
@@ -3897,7 +3903,7 @@ importers:
 
   packages/aef-domain-profiles:
     dependencies:
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../aef-contracts
       zod:
@@ -3913,13 +3919,13 @@ importers:
 
   packages/aef-evals:
     dependencies:
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../aef-contracts
-      '@workspace/aef-domain-profiles':
+      '@workspace/cf-domain-profiles':
         specifier: workspace:*
         version: link:../aef-domain-profiles
-      '@workspace/aef-retrieval-core':
+      '@workspace/cf-retrieval-core':
         specifier: workspace:*
         version: link:../aef-retrieval-core
       zod:
@@ -3929,7 +3935,7 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
-      '@workspace/alloy-vector-worker':
+      '@workspace/continuum-vector-worker':
         specifier: workspace:*
         version: link:../../workers/alloy-vector-worker
       vitest:
@@ -3938,7 +3944,7 @@ importers:
 
   packages/aef-evidence-ledger:
     dependencies:
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../aef-contracts
       zod:
@@ -3954,7 +3960,7 @@ importers:
 
   packages/aef-policy-guard:
     dependencies:
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../aef-contracts
       zod:
@@ -3970,7 +3976,7 @@ importers:
 
   packages/aef-retrieval-core:
     dependencies:
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../aef-contracts
     devDependencies:
@@ -3983,7 +3989,7 @@ importers:
 
   packages/aef-sdk:
     dependencies:
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../aef-contracts
     devDependencies:
@@ -4008,7 +4014,7 @@ importers:
 
   packages/aef-storage-adapters:
     dependencies:
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../aef-contracts
       zod:
@@ -4024,10 +4030,10 @@ importers:
 
   packages/aef-workflow-runtime:
     dependencies:
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../aef-contracts
-      '@workspace/alloy-vector-worker':
+      '@workspace/continuum-vector-worker':
         specifier: workspace:*
         version: link:../../workers/alloy-vector-worker
       zod:
@@ -4202,6 +4208,34 @@ importers:
         version: 25.3.5
 
   packages/alloy:
+    dependencies:
+      '@szl-holdings/action-engine':
+        specifier: workspace:*
+        version: link:../action-engine
+      '@workspace/guardian':
+        specifier: workspace:*
+        version: link:../guardian
+      '@workspace/planner':
+        specifier: workspace:*
+        version: link:../planner
+      '@workspace/tool-mesh':
+        specifier: workspace:*
+        version: link:../tool-mesh
+      '@workspace/trace-graph':
+        specifier: workspace:*
+        version: link:../trace-graph
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/alloy-crew:
     dependencies:
       '@szl-holdings/policy-guard':
         specifier: workspace:*
@@ -4442,8 +4476,6 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
-  packages/continuum-embedding-api: {}
-
   packages/contracts:
     dependencies:
       zod:
@@ -4576,9 +4608,9 @@ importers:
 
   packages/design-system:
     dependencies:
-      '@workspace/forge':
+      '@workspace/alloy':
         specifier: workspace:*
-        version: link:../forge
+        version: link:../alloy
       clsx:
         specifier: 'catalog:'
         version: 2.1.1
@@ -4761,34 +4793,6 @@ importers:
 
   packages/forecast-fabric:
     dependencies:
-      zod:
-        specifier: 'catalog:'
-        version: 3.25.76
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 25.3.5
-      vitest:
-        specifier: ^4.1.2
-        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
-
-  packages/forge:
-    dependencies:
-      '@szl-holdings/action-engine':
-        specifier: workspace:*
-        version: link:../action-engine
-      '@workspace/guardian':
-        specifier: workspace:*
-        version: link:../guardian
-      '@workspace/planner':
-        specifier: workspace:*
-        version: link:../planner
-      '@workspace/tool-mesh':
-        specifier: workspace:*
-        version: link:../tool-mesh
-      '@workspace/trace-graph':
-        specifier: workspace:*
-        version: link:../trace-graph
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -5391,9 +5395,9 @@ importers:
       '@szl-holdings/prompt-registry':
         specifier: workspace:*
         version: link:../prompt-registry
-      '@workspace/forge':
+      '@workspace/alloy':
         specifier: workspace:*
-        version: link:../forge
+        version: link:../alloy
       '@workspace/memory-fabric':
         specifier: workspace:*
         version: link:../memory-fabric
@@ -5454,10 +5458,10 @@ importers:
       '@szl-holdings/policy-engine':
         specifier: workspace:*
         version: link:../policy-engine
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../aef-contracts
-      '@workspace/aef-sdk':
+      '@workspace/cf-sdk':
         specifier: workspace:*
         version: link:../aef-sdk
       '@workspace/cognitive-observability':
@@ -5561,10 +5565,10 @@ importers:
       '@szl-holdings/env':
         specifier: workspace:*
         version: link:../packages/env
-      '@workspace/aef-domain-profiles':
+      '@workspace/cf-domain-profiles':
         specifier: workspace:*
         version: link:../packages/aef-domain-profiles
-      '@workspace/aef-evals':
+      '@workspace/cf-evals':
         specifier: workspace:*
         version: link:../packages/aef-evals
       '@workspace/memory-fabric':
@@ -5592,34 +5596,34 @@ importers:
 
   services/alloy-fabric-api:
     dependencies:
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../../packages/aef-contracts
-      '@workspace/aef-domain-profiles':
+      '@workspace/cf-domain-profiles':
         specifier: workspace:*
         version: link:../../packages/aef-domain-profiles
-      '@workspace/aef-evals':
+      '@workspace/cf-evals':
         specifier: workspace:*
         version: link:../../packages/aef-evals
-      '@workspace/aef-evidence-ledger':
+      '@workspace/cf-evidence-ledger':
         specifier: workspace:*
         version: link:../../packages/aef-evidence-ledger
-      '@workspace/aef-policy-guard':
+      '@workspace/cf-policy-guard':
         specifier: workspace:*
         version: link:../../packages/aef-policy-guard
-      '@workspace/aef-retrieval-core':
+      '@workspace/cf-retrieval-core':
         specifier: workspace:*
         version: link:../../packages/aef-retrieval-core
-      '@workspace/aef-storage-adapters':
+      '@workspace/cf-storage-adapters':
         specifier: workspace:*
         version: link:../../packages/aef-storage-adapters
-      '@workspace/aef-workflow-runtime':
+      '@workspace/cf-workflow-runtime':
         specifier: workspace:*
         version: link:../../packages/aef-workflow-runtime
-      '@workspace/alloy-rank-worker':
+      '@workspace/continuum-rank-worker':
         specifier: workspace:*
         version: link:../../workers/alloy-rank-worker
-      '@workspace/alloy-vector-worker':
+      '@workspace/continuum-vector-worker':
         specifier: workspace:*
         version: link:../../workers/alloy-vector-worker
       express:
@@ -5644,22 +5648,22 @@ importers:
 
   services/alloy-fabric-ingest-control:
     dependencies:
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../../packages/aef-contracts
-      '@workspace/aef-domain-profiles':
+      '@workspace/cf-domain-profiles':
         specifier: workspace:*
         version: link:../../packages/aef-domain-profiles
-      '@workspace/aef-evidence-ledger':
+      '@workspace/cf-evidence-ledger':
         specifier: workspace:*
         version: link:../../packages/aef-evidence-ledger
-      '@workspace/aef-policy-guard':
+      '@workspace/cf-policy-guard':
         specifier: workspace:*
         version: link:../../packages/aef-policy-guard
-      '@workspace/aef-storage-adapters':
+      '@workspace/cf-storage-adapters':
         specifier: workspace:*
         version: link:../../packages/aef-storage-adapters
-      '@workspace/aef-workflow-runtime':
+      '@workspace/cf-workflow-runtime':
         specifier: workspace:*
         version: link:../../packages/aef-workflow-runtime
       express:
@@ -5736,7 +5740,7 @@ importers:
 
   workers/alloy-embed-worker:
     dependencies:
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../../packages/aef-contracts
       zod:
@@ -5758,7 +5762,7 @@ importers:
 
   workers/alloy-rank-worker:
     dependencies:
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../../packages/aef-contracts
       express:
@@ -5783,7 +5787,7 @@ importers:
 
   workers/alloy-rerank-worker:
     dependencies:
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../../packages/aef-contracts
       zod:
@@ -5808,10 +5812,10 @@ importers:
       '@huggingface/transformers':
         specifier: ^4.1.0
         version: 4.1.0
-      '@workspace/aef-contracts':
+      '@workspace/cf-contracts':
         specifier: workspace:*
         version: link:../../packages/aef-contracts
-      '@workspace/aef-storage-adapters':
+      '@workspace/cf-storage-adapters':
         specifier: workspace:*
         version: link:../../packages/aef-storage-adapters
       express:
@@ -23893,7 +23897,7 @@ snapshots:
 
   expo-file-system@19.0.21(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0)):
     dependencies:
-      expo: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)
+      expo: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(graphql@16.13.2)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0)
       react-native: 0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0)
 
   expo-font@14.0.11(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0):

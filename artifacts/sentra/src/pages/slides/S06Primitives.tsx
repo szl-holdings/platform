@@ -26,7 +26,7 @@ export default function S06Primitives() {
       color: '#8a8a8a',
     },
     {
-      name: 'PRAXIS Bus',
+      name: 'NEXUS Bus',
       desc: 'Cross-domain event fabric — signal routing with correlation IDs across all domain packs',
       color: '#c9b787',
     },

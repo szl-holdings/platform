@@ -9,7 +9,7 @@ const FOOTER_COLS = [
       { label: 'Platform Overview', href: '/platform' },
       { label: 'KORA — Command', href: '/lyte' },
       { label: 'Counsel — Execution', href: '/continuum-fabric' },
-      { label: 'APEX — Mobile', href: 'https://cortex.szlholdings.com' },
+      { label: 'CORTEX — Mobile', href: 'https://cortex.szlholdings.com' },
       { label: 'Architecture', href: '/architecture' },
     ],
   },

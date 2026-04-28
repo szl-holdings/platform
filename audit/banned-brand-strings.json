@@ -1,41 +1,11 @@
 {
-  "$comment": "Canonical brand-string mapping for the trademark/regression guard (scripts/check-banned-brand-strings.ts). This file moved from scripts/ to audit/ in Task #3255 (codename rollout) so the canonical mapping lives next to the rest of the audit artifacts. Source of truth: ORIGINALITY_REPORT.md rename map. The check direction is: BAN the OLD pre-rename codenames, REPLACE with the canonical post-rename brand names. Counsel-related entries are intentionally preserved as-is per Task #3255 hard constraint #1.",
-  "$bannedStringsComment": "Each entry matches case-sensitively with strict boundaries (no adjacency to word chars, hyphens, underscores, slashes, colons). To catch a brand in multiple casings, add separate entries for `Pascal` and `UPPER` variants. The audit intentionally preserved lowercase URL slugs (e.g. /aegis/) so do NOT add lowercase variants. Optional fields: `risk: true` flags a term that is banned because of an unresolved trademark/availability concern (the check still surfaces these as violations; the flag exists so reviewers see the risk without re-running the trademark analysis). `notes` is a one-line human note attached to risk entries.",
+  "$comment": "Central allowlist for the brand-string validation check (scripts/check-banned-brand-strings.ts). Add new banned trademarks to `bannedStrings`. Add legitimate occurrences to `lineAllowlist` (preferred) or `fileAllowlist` (whole-file exemption). Source of truth: ORIGINALITY_REPORT.md rename map. NOTE (2026-04-28): The originality-audit rename was reverted at the user's request — CORTEX, NEXUS, Sentra, Lyte, etc. are the canonical product names again. The banned-strings list below has been cleared of entries that would reject the original names. INCA and PRISM Counsel remain banned as they were already deprecated before the audit.",
+  "$bannedStringsComment": "Each entry matches case-sensitively with strict boundaries (no adjacency to word chars, hyphens, underscores, slashes, colons). To catch a brand in multiple casings, add separate entries for `Pascal` and `UPPER` variants. The audit intentionally preserved lowercase URL slugs (e.g. /aegis/) so do NOT add lowercase variants.",
   "bannedStrings": [
-    {
-      "term": "TENAX",
-      "replacement": "Sentra",
-      "reason": "Old internal codename — canonical product name is Sentra (Cyber Resilience Command)"
-    },
-    {
-      "term": "LUMINA",
-      "replacement": "Pulse",
-      "reason": "Old internal codename — canonical product name is Pulse (AI Executive Briefing)"
-    },
-    {
-      "term": "CORTEX",
-      "replacement": "APEX",
-      "reason": "Old internal codename — canonical product name is APEX (also avoids Palo Alto Networks trademark)"
-    },
-    {
-      "term": "Cortex",
-      "replacement": "APEX",
-      "reason": "Old internal codename — canonical product name is APEX (also avoids Palo Alto Networks trademark)"
-    },
     {
       "term": "INCA",
       "replacement": "Counsel",
       "reason": "Old internal codename — canonical product name is Counsel (Legal Matter Command)"
-    },
-    {
-      "term": "NEXUS",
-      "replacement": "PRAXIS",
-      "reason": "Trademark conflict (HubSpot, Salesforce, dozens of enterprise products); canonical name is PRAXIS"
-    },
-    {
-      "term": "Nexus",
-      "replacement": "PRAXIS",
-      "reason": "Trademark conflict (HubSpot, Salesforce, dozens of enterprise products); canonical name is PRAXIS"
     },
     {
       "term": "PRISM Counsel",

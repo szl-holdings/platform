@@ -1,5 +1,5 @@
 import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
-import { IngestRequestSchema } from "@workspace/aef-contracts";
+import { IngestRequestSchema } from "@workspace/cf-contracts";
 import { logger } from "../middleware/logger.js";
 import { submitIngestDocument, getRun } from "@workspace/alloy-ingestion-orchestrator/client";
 

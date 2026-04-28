@@ -460,7 +460,7 @@ router.post(
                   'approvals.plan-step-flip-denied-cross-tenant',
                 );
               } else {
-                const { approvePlanStep } = await import('@workspace/forge/plan-orchestrator');
+                const { approvePlanStep } = await import('@workspace/alloy/plan-orchestrator');
                 await approvePlanStep(payload.planId, payload.stepId);
               }
             }

@@ -95,7 +95,7 @@ const DECISIONS = [
     approver: 'SOC Manager',
     confidence: 95,
     sensitivityLabel: 'INTERNAL',
-    tenantLabel: 'APEX-LOGISTICS',
+    tenantLabel: 'CORTEX-LOGISTICS',
     envLabel: 'PRODUCTION',
     evidence: [{ id: 'EV-10', name: 'auth-fail-log-1204.csv', trustLevel: 'verified' }],
     keyAssumptions: [

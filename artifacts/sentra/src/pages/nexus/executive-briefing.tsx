@@ -137,7 +137,7 @@ const BRIEFINGS: Briefing[] = [
         summary:
           'Overall geopolitical risk index increased 12 points to 74/100 this week, driven by Middle East escalation and South China Sea tensions. Three risk vectors now classified ELEVATED: maritime trade disruption, cyber infrastructure targeting, and regulatory acceleration.',
         evidence: [
-          'PRAXIS geopolitical risk model',
+          'NEXUS geopolitical risk model',
           'OSINT sentiment analysis',
           'Historical pattern matching',
         ],

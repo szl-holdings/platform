@@ -77,7 +77,7 @@ import './lib/cross-app-notification-relay.js';
 import { getAlloyRunManager } from './lib/alloy-run-manager-singleton';
 import { registerAnalyticsJobHandlers } from './lib/analytics-jobs';
 import { startMeshPublisher } from './lib/control-tower-mesh-publisher';
-import { initializeForgeDomainEventSubscriptions } from './lib/domain-events/forge-wiring.js';
+import { initializeAlloyDomainEventSubscriptions } from './lib/domain-events/alloy-wiring.js';
 import { getWorkerStatus, startEmbeddingWorker, stopEmbeddingWorker } from './lib/embedding-worker';
 import { initGuardianEngine } from './lib/guardian-engine';
 import { initIngestionFramework } from './lib/ingestion-framework';
@@ -95,7 +95,7 @@ import { twinRegistry } from '@szl-holdings/ai-engine';
 failFastOnInvalidConfig();
 validateMarketDataConfig();
 
-initializeForgeDomainEventSubscriptions();
+initializeAlloyDomainEventSubscriptions();
 
 registerGenAITelemetryBridge();
 registerInferenceLogBridge();

@@ -67,7 +67,7 @@ export class SourceNormalizerActor extends WorkflowActor {
 
 /**
  * Truncation policy injected from the active DomainProfile. Mirrors the shape
- * of `@workspace/aef-domain-profiles`'s TruncationPolicySchema so callers can
+ * of `@workspace/cf-domain-profiles`'s TruncationPolicySchema so callers can
  * pass the profile's value through unchanged.
  */
 export interface ChunkTruncationPolicy {

@@ -37,7 +37,7 @@ function generateAuditEntries(): AuditEntry[] {
     { slug: 'terra', name: 'DOMAINE Distress Agent', actions: ['scan_distress_signals', 'score_property_risk', 'generate_acquisition_brief'] },
     { slug: 'pulse', name: 'Pulse Briefing Agent', actions: ['compile_executive_brief', 'rank_insights', 'schedule_delivery'] },
     { slug: 'command', name: 'Command Correlation Agent', actions: ['cross_domain_correlate', 'surface_anomalies', 'prioritize_actions'] },
-    { slug: 'praxis', name: 'PRAXIS Orchestrator', actions: ['plan_agent_sequence', 'stitch_outputs', 'verify_completeness'] },
+    { slug: 'praxis', name: 'NEXUS Orchestrator', actions: ['plan_agent_sequence', 'stitch_outputs', 'verify_completeness'] },
   ];
 
   const reasonings: Record<string, string[]> = {

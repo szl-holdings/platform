@@ -1,5 +1,5 @@
 import { bodyShape } from '@szl-holdings/contracts/common';
-import { executePlan } from '@workspace/forge/plan-orchestrator';
+import { executePlan } from '@workspace/alloy/plan-orchestrator';
 import {
   createPlan,
   defaultPlanStore,

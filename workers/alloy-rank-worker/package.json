@@ -7,7 +7,7 @@
   "main": "src/index.ts",
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@workspace/aef-contracts": "workspace:*",
+    "@workspace/cf-contracts": "workspace:*",
     "express": "^5.0.0",
     "zod": "catalog:"
   },

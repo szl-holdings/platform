@@ -7,7 +7,7 @@
  *
  * Import Continuum types from packages/forge/src/types.ts (peer contract).
  */
-import type { ApprovalGate, LedgerEntry, RunState, RunStatus } from '@workspace/forge/types';
+import type { ApprovalGate, LedgerEntry, RunState, RunStatus } from '@workspace/alloy/types';
 import type { TimelineEvent, TimelineEventSeverity } from './cockpit/TimelineLane';
 import type { AutonomyMode } from './proof/AutonomyModeToggle';
 import type { EvidenceSource } from './proof/EvidenceBadge';

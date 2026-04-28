@@ -1,8 +1,8 @@
 import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
-import { EmbedRequestSchema } from "@workspace/aef-contracts";
-import { defaultLedgerStore } from "@workspace/aef-evidence-ledger";
-import { PolicyEngine } from "@workspace/aef-policy-guard";
-import { embedTexts } from "@workspace/alloy-embed-worker";
+import { EmbedRequestSchema } from "@workspace/cf-contracts";
+import { defaultLedgerStore } from "@workspace/cf-evidence-ledger";
+import { PolicyEngine } from "@workspace/cf-policy-guard";
+import { embedTexts } from "@workspace/continuum-embed-worker";
 import { randomUUID } from "node:crypto";
 import { logger } from "../middleware/logger.js";
 import { getProfile } from "../profiles/default.js";

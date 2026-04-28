@@ -610,7 +610,7 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-xl font-display font-bold text-foreground tracking-tight">
-              Agentic Intelligence APEX
+              Agentic Intelligence NEXUS
             </h1>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#c9b787]/10 text-[#c9b787]/80 border border-[#c9b787]/15">
               AI Engine v2.1
@@ -627,7 +627,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* AI APEX Summary Banner */}
+      {/* AI NEXUS Summary Banner */}
       <div className="relative bg-gradient-to-r from-amber-500/8 via-yellow-500/5 to-emerald-500/5 border border-[#c9b787]/15 rounded-xl p-5 overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.03]"

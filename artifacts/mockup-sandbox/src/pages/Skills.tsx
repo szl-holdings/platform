@@ -153,7 +153,7 @@ export default function Skills() {
           <div className="flex-1">
             <h1 className="text-lg font-semibold">Skills Library</h1>
             <p className="text-xs text-muted-foreground">
-              Adapted from 20+ public repos · Native PRAXIS primitives · {enabledCount} enabled
+              Adapted from 20+ public repos · Native NEXUS primitives · {enabledCount} enabled
               {customCount > 0 && ` · ${customCount} custom`}
               {modifiedCount > 0 && ` · ${modifiedCount} modified`}
             </p>
@@ -179,7 +179,7 @@ export default function Skills() {
             Internal Tooling — Not Production
           </span>
           <span className="text-[10px] text-muted-foreground/60 ml-1">
-            This module is for internal PRAXIS development only. Skill toggles affect the internal
+            This module is for internal NEXUS development only. Skill toggles affect the internal
             agent runtime only.
           </span>
         </div>
@@ -443,7 +443,7 @@ function SkillCard({
             </div>
             <div>
               <h4 className="text-[10px] font-mono text-praxis-cyan/70 uppercase tracking-widest mb-1.5">
-                PRAXIS Adaptation
+                NEXUS Adaptation
               </h4>
               <div
                 className="bg-praxis-bg rounded-lg p-3 text-xs leading-relaxed"

@@ -48,7 +48,7 @@ const VERTICALS = [
 ];
 
 const ARCHITECTURE = [
-  { tier: "01", title: "Command Surfaces", body: "How operators see and act on signals. KORA web command, APEX mobile, and the ecosystem portal — each surface speaks the same governance vocabulary.", items: ["KORA — Web command", "APEX — iOS · Android", "Command — Ecosystem portal"] },
+  { tier: "01", title: "Command Surfaces", body: "How operators see and act on signals. Lyte web command, CORTEX mobile, and the ecosystem portal — each surface speaks the same governance vocabulary.", items: ["Lyte — Web command", "CORTEX — iOS · Android", "Command — Ecosystem portal"] },
   { tier: "02", title: "Execution Fabric", body: "The structural layer beneath every product. a11oy enforces policy, records provenance, and orchestrates durable multi-step workflows.", items: ["a11oy — Orchestration", "Proof Chain — Audit trail", "Covenant — Policy engine", "Simulation — Risk modeling", "Outcome Graph — Feedback"] },
   { tier: "03", title: "Domain Packs", body: "Industry-specific data models, workflows, and intelligence — all running on the same loop, the same policy engine, and the same proof chain.", items: ["PARAGON · SEXTANT · DOMAINE", "Counsel · Carlota Jo · IMPERIUM"] },
 ];
@@ -181,7 +181,7 @@ function ArchitectureDiagram() {
         {[140, 300, 460].map((x, i) => (
           <g key={`s-${i}`}>
             <rect x={x - 50} y={20} width="100" height="44" rx="4" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1" />
-            <text x={x} y={47} textAnchor="middle" fontSize="11" fill={TEXT}>{["KORA", "APEX", "Command"][i]}</text>
+            <text x={x} y={47} textAnchor="middle" fontSize="11" fill={TEXT}>{["Lyte", "CORTEX", "Command"][i]}</text>
           </g>
         ))}
       </g>

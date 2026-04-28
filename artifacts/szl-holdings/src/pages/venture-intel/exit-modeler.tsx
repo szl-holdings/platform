@@ -138,7 +138,7 @@ const COMPANIES = [
   },
   {
     id: "prism",
-    name: "PRAXIS",
+    name: "NEXUS",
     color: "#a855f7",
     rgb: "168,85,247",
     currentArr: "5.4M",
@@ -153,7 +153,7 @@ const COMPANIES = [
         valuation: { bear: "$130M", base: "$190M", bull: "$280M" },
         multiple: "24–52× ARR",
         acquirerProfile: "LegalTech platform (Clio, Thomson Reuters, LexisNexis, Relativity)",
-        rationale: "LegalTech M&A is active and PRAXIS's AI-native matter intelligence layer is what legacy legal platforms lack. Thomson Reuters and LexisNexis have multi-billion acquisition capacity and active LegalTech acquisition mandates.",
+        rationale: "LegalTech M&A is active and NEXUS's AI-native matter intelligence layer is what legacy legal platforms lack. Thomson Reuters and LexisNexis have multi-billion acquisition capacity and active LegalTech acquisition mandates.",
         comparables: ["Thomson Reuters acquired CoCounsel", "Clio acquisition strategy at 15–25× ARR"],
         keyDrivers: ["Matter volume growth >20% QoQ", "Governed review automation", "Enterprise law firm penetration"],
       },
@@ -186,7 +186,7 @@ const COMPANIES = [
     ],
     optimalTiming: "Acquisition — 40 months",
     optimalValue: "$140M base case",
-    recommendation: "PRAXIS synergy pipeline is the fastest path to CAC reduction and valuation improvement. Accelerate Terra-PRAXIS distress-to-litigation data feed. CoStar partnership is also a potential precursor to acquisition.",
+    recommendation: "NEXUS synergy pipeline is the fastest path to CAC reduction and valuation improvement. Accelerate Terra-NEXUS distress-to-litigation data feed. CoStar partnership is also a potential precursor to acquisition.",
   },
   {
     id: "carlota",

@@ -29,7 +29,7 @@ const KERNELS: Record<string, Kernel> = {
           description: 'Series A investor deck from 3-sentence brief',
           output: `Brief: "We automate governed AI execution for enterprise ops teams."
 → Slide 1: The Problem — Manual oversight can't scale at AI speed
-→ Slide 2: The Solution — PRAXIS: Governed Agentic AI
+→ Slide 2: The Solution — NEXUS: Governed Agentic AI
 → Slide 3: How it Works — 4-step covenant cycle
 → Slide 4: Traction — [insert verified metrics here]
 → Slide 5: Ask — [insert funding ask and use of proceeds]`,

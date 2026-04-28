@@ -5,6 +5,22 @@
 
 ---
 
+> **REVERT NOTICE — 2026-04-28**
+>
+> At the user's request, all product renames introduced by this audit have been reverted.
+> The original names below are the canonical product names again:
+> Sentra, Aegis, Terra, Pulse, Lyte, Vessels, NEXUS, CORTEX, Alloy.
+>
+> Only the PRISM Counsel → Counsel and INCA → Counsel renames are retained (those were pre-existing
+> issues unrelated to the originality audit).
+>
+> The `scripts/banned-brand-strings.json` has been updated accordingly — CORTEX, NEXUS, and the
+> other original names are no longer banned. The internal Alloy execution package has been physically
+> moved from `packages/forge/` back to `packages/alloy/` with npm package name `@workspace/alloy`.
+> The coordinator package now lives at `packages/alloy-crew/` as `@workspace/alloy-crew`.
+
+---
+
 ## 1. Rename Map
 
 The following product codenames were identified as colliding with real companies, registered trademarks, or recognizable brand names. Each has been replaced with an original, ownable codename across all user-facing strings, metadata, and API responses.

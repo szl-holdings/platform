@@ -121,7 +121,7 @@ export default function NeuralExplorer() {
 
       <div className="rounded-xl border border-border bg-card p-5">
         <h2 className="font-display font-semibold mb-4 flex items-center gap-2">
-          <Layers className="w-4 h-4 text-[#8a8a8a]" /> Model APEX Visualization — SZL-LLM-7B
+          <Layers className="w-4 h-4 text-[#8a8a8a]" /> Model CORTEX Visualization — SZL-LLM-7B
         </h2>
         <div className="flex items-center gap-2 overflow-x-auto pb-4">
           {layerVisualization.map((layer, i) => (

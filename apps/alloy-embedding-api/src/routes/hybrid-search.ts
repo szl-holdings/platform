@@ -1,10 +1,10 @@
 import { Router, type IRouter, type RequestHandler, type Request, type Response } from 'express';
-import { HybridSearchRequestSchema } from "@workspace/aef-contracts";
-import { defaultLedgerStore } from "@workspace/aef-evidence-ledger";
-import { PolicyEngine } from "@workspace/aef-policy-guard";
-import { reciprocalRankFusion, applyExactMatchBoosts, normalizeScores, assembleCitations } from "@workspace/aef-retrieval-core";
-import { embedTexts } from "@workspace/alloy-embed-worker";
-import { rerankCandidates } from "@workspace/alloy-rerank-worker";
+import { HybridSearchRequestSchema } from "@workspace/cf-contracts";
+import { defaultLedgerStore } from "@workspace/cf-evidence-ledger";
+import { PolicyEngine } from "@workspace/cf-policy-guard";
+import { reciprocalRankFusion, applyExactMatchBoosts, normalizeScores, assembleCitations } from "@workspace/cf-retrieval-core";
+import { embedTexts } from "@workspace/continuum-embed-worker";
+import { rerankCandidates } from "@workspace/continuum-rerank-worker";
 import { randomUUID } from "node:crypto";
 import { logger } from "../middleware/logger.js";
 import { getProfile } from "../profiles/default.js";

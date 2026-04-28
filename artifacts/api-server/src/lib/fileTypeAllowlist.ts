@@ -48,7 +48,7 @@ const ALLOWLISTS: Record<UploadDomain, DomainAllowlist> = {
   },
 
   terra: {
-    label: 'DOMAINE Real Estate',
+    label: 'Terra Real Estate',
     mimeTypes: new Set([
       'application/pdf',
       'image/jpeg',

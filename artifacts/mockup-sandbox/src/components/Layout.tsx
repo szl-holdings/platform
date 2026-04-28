@@ -27,7 +27,7 @@ const NAV_ITEMS: Array<{
   description: string;
   group?: string;
 }> = [
-  { id: 'home', label: 'PRAXIS', icon: Home, description: 'Home & Overview' },
+  { id: 'home', label: 'NEXUS', icon: Home, description: 'Home & Overview' },
   { id: 'research', label: 'Research', icon: FlaskConical, description: 'Parallel Swarm' },
   { id: 'memory', label: 'Memory', icon: Brain, description: 'Persistent Memory' },
   { id: 'skills', label: 'Skills', icon: Layers, description: 'Skills Library' },
@@ -106,7 +106,7 @@ export default function Layout({
             {expanded && (
               <div className="min-w-0 overflow-hidden">
                 <div className="text-praxis-cyan font-mono font-bold text-sm tracking-widest">
-                  PRAXIS
+                  NEXUS
                 </div>
                 <div className="text-[10px] text-muted-foreground/70 tracking-wide">ONE OF ONE</div>
               </div>
@@ -253,7 +253,7 @@ function StatusStrip({ org }: { org: MockOrg }) {
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-1.5 h-1.5 rounded-full bg-praxis-green pulse-dot" />
-          <span className="text-[10px] text-muted-foreground/60 font-mono">PRAXIS ONLINE</span>
+          <span className="text-[10px] text-muted-foreground/60 font-mono">NEXUS ONLINE</span>
         </div>
       </div>
     </div>
