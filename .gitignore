@@ -79,14 +79,10 @@ nohup.out
 *.out
 *.log
 
-# Large zip archives at repo root (quarantined to archive/ — do not re-add to root)
-/01-thursday-intro.zip
-/02-sunday-deep-dive.zip
-/03-monday-operator-lens.zip
-/LINKEDIN-LAUNCH.zip
-/X-LAUNCH-SERIES.zip
+# Root-level zip archives (all moved to archive/ — add new zips there, never at root)
+/*.zip
 
-# Root-level build scripts (relocated to archive/scripts/ by Zero-Gap Track 1)
+# Root-level build scripts (relocated to archive/scripts/)
 /build_carousel.py
 /build_video.sh
 
@@ -167,11 +163,9 @@ build
 screenshots/raw
 
 # ── Rehaul 2/9 — Repo hygiene additions (Task #2937) ──────────────────────────
-# Launch-series zip archives and unpacked dirs (removed; canonical: audit/launch/)
+# Launch-series unpacked dirs (removed; canonical: audit/launch/)
 /X-LAUNCH-SERIES/
-/X-LAUNCH-SERIES.zip
 /a11oy-launch-content/
-/a11oy-launch-content.zip
 # Demo asset exports (removed; carousel/screenshots not committed)
 /demo-assets/
 # Root launch/ directory (content migrated to audit/launch/)
@@ -189,6 +183,6 @@ screenshots/raw
 # Social and SharePoint content dirs (not source code)
 /social-content/
 /spfx-webparts/
-# Root-level build/generation scripts (noise at repo root)
+# Root-level build/generation scripts (noise at repo root — see archive/scripts/)
 /build_carousel.py
 /build_video.sh
