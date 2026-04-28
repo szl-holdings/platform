@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { PageHeader, Card, SectionTitle, KpiCard, SeverityDot, VerticalBadge, SeverityBadge } from '../components/ui';
 import { SEED_SIGNALS } from '@workspace/a11oy-fabric';
+import { KnowledgeGraphViz } from '../components/KnowledgeGraphViz';
 
 const GOLD = '#c9b787';
 
@@ -107,6 +108,7 @@ export function SignalMesh() {
   const [filterVertical, setFilterVertical] = useState('all');
   const [filterSeverity, setFilterSeverity] = useState('all');
   const [selectedEntity, setSelectedEntity] = useState<KGEntity | null>(null);
+  const [kgView, setKgView] = useState<'graph' | 'cards'>('graph');
 
   const filtered = SEED_SIGNALS.filter(s =>
     (filterVertical === 'all' || s.vertical === filterVertical) &&
@@ -251,90 +253,168 @@ export function SignalMesh() {
       )}
 
       {activeView === 'knowledge' && (
-        <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <SectionTitle>Knowledge Graph Entities ({KG_ENTITIES.length})</SectionTitle>
-            <div className="grid sm:grid-cols-2 gap-3">
-              {KG_ENTITIES.map(entity => {
-                const vColor = VERTICAL_COLORS[entity.vertical] ?? '#5e5e5e';
-                const isSelected = selectedEntity?.id === entity.id;
-                return (
-                  <div key={entity.id} className="rounded-xl border p-4 cursor-pointer transition-all" onClick={() => setSelectedEntity(isSelected ? null : entity)} style={{ backgroundColor: isSelected ? 'rgba(201,183,135,0.03)' : 'var(--color-a11oy-card)', borderColor: isSelected ? GOLD : 'var(--color-a11oy-border)' }}>
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div>
-                        <div className="text-sm font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{entity.label}</div>
-                        <div className="text-[9px] font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{entity.type}</div>
-                      </div>
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color: vColor, backgroundColor: `${vColor}15` }}>{VERTICAL_LABELS[entity.vertical]?.split(' ')[0]}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {Object.entries(entity.properties).slice(0, 3).map(([k, v]) => (
-                        <span key={k} className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: 'var(--color-a11oy-text-ghost)' }}>{k}: {v}</span>
-                      ))}
-                    </div>
-                    <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{entity.connections.length} connections</div>
-                  </div>
-                );
-              })}
-            </div>
+        <>
+          <div className="flex items-center gap-2 mb-4">
+            {(['graph', 'cards'] as const).map(v => (
+              <button key={v} onClick={() => setKgView(v)} className="px-3 py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-widest transition-all" style={{ background: kgView === v ? 'rgba(201,183,135,0.1)' : 'transparent', color: kgView === v ? GOLD : '#5e5e5e', border: `1px solid ${kgView === v ? 'rgba(201,183,135,0.2)' : 'transparent'}`, cursor: 'pointer' }}>
+                {v === 'graph' ? 'Force Graph' : 'Entity Cards'}
+              </button>
+            ))}
+            <span className="ml-auto text-[10px] font-mono" style={{ color: '#5e5e5e' }}>{KG_ENTITIES.length} entities · {KG_ENTITIES.reduce((a, e) => a + e.connections.length, 0)} edges</span>
           </div>
 
-          <div>
-            {selectedEntity ? (
-              <>
-                <SectionTitle>Entity — {selectedEntity.label}</SectionTitle>
-                <Card>
-                  <div className="text-sm font-semibold mb-1" style={{ color: 'var(--color-a11oy-text)' }}>{selectedEntity.label}</div>
-                  <div className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{selectedEntity.type} · {VERTICAL_LABELS[selectedEntity.vertical]}</div>
+          {kgView === 'graph' ? (
+            <div className="grid lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <KnowledgeGraphViz
+                  entities={KG_ENTITIES}
+                  onSelectEntity={setSelectedEntity}
+                  selectedEntityId={selectedEntity?.id}
+                />
+              </div>
+              <div>
+                {selectedEntity ? (
+                  <>
+                    <SectionTitle>Entity — {selectedEntity.label}</SectionTitle>
+                    <Card>
+                      <div className="text-sm font-semibold mb-1" style={{ color: 'var(--color-a11oy-text)' }}>{selectedEntity.label}</div>
+                      <div className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{selectedEntity.type} · {VERTICAL_LABELS[selectedEntity.vertical]}</div>
 
-                  <div className="space-y-3 text-xs">
-                    <div>
-                      <div className="font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>PROPERTIES</div>
-                      <div className="space-y-1">
-                        {Object.entries(selectedEntity.properties).map(([k, v]) => (
-                          <div key={k} className="flex items-center justify-between px-2 py-1 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
-                            <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{k}</span>
-                            <span className="font-mono" style={{ color: GOLD }}>{v}</span>
+                      <div className="space-y-3 text-xs">
+                        <div>
+                          <div className="font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>PROPERTIES</div>
+                          <div className="space-y-1">
+                            {Object.entries(selectedEntity.properties).map(([k, v]) => (
+                              <div key={k} className="flex items-center justify-between px-2 py-1 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
+                                <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{k}</span>
+                                <span className="font-mono" style={{ color: GOLD }}>{v}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>RELATIONSHIPS</div>
+                          <div className="space-y-1">
+                            {selectedEntity.connections.map((c, i) => {
+                              const relColor = REL_COLORS[c.relation] ?? '#8a8a8a';
+                              return (
+                                <div key={i} className="flex items-center gap-2 px-2 py-1.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
+                                  <span className="font-mono text-[9px] px-1 py-0.5 rounded" style={{ color: relColor, backgroundColor: `${relColor}12` }}>{c.relation}</span>
+                                  <span className="flex-1 truncate" style={{ color: 'var(--color-a11oy-text-sub)' }}>{c.target}</span>
+                                  <span className="font-mono text-[9px]" style={{ color: c.strength >= 0.9 ? '#22c55e' : GOLD }}>{Math.round(c.strength * 100)}%</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  </>
+                ) : (
+                  <>
+                    <SectionTitle>Relationship Types</SectionTitle>
+                    <Card>
+                      <div className="space-y-2 text-xs">
+                        {Object.entries(REL_COLORS).map(([rel, color]) => (
+                          <div key={rel} className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                            <span className="font-mono" style={{ color: 'var(--color-a11oy-text-sub)' }}>{rel}</span>
                           </div>
                         ))}
                       </div>
-                    </div>
+                    </Card>
+                  </>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="grid lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <SectionTitle>Knowledge Graph Entities ({KG_ENTITIES.length})</SectionTitle>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {KG_ENTITIES.map(entity => {
+                    const vColor = VERTICAL_COLORS[entity.vertical] ?? '#5e5e5e';
+                    const isSelected = selectedEntity?.id === entity.id;
+                    return (
+                      <div key={entity.id} className="rounded-xl border p-4 cursor-pointer transition-all" onClick={() => setSelectedEntity(isSelected ? null : entity)} style={{ backgroundColor: isSelected ? 'rgba(201,183,135,0.03)' : 'var(--color-a11oy-card)', borderColor: isSelected ? GOLD : 'var(--color-a11oy-border)' }}>
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div>
+                            <div className="text-sm font-semibold" style={{ color: 'var(--color-a11oy-text)' }}>{entity.label}</div>
+                            <div className="text-[9px] font-mono" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{entity.type}</div>
+                          </div>
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ color: vColor, backgroundColor: `${vColor}15` }}>{VERTICAL_LABELS[entity.vertical]?.split(' ')[0]}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {Object.entries(entity.properties).slice(0, 3).map(([k, v]) => (
+                            <span key={k} className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'var(--color-a11oy-muted)', color: 'var(--color-a11oy-text-ghost)' }}>{k}: {v}</span>
+                          ))}
+                        </div>
+                        <div className="text-xs" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{entity.connections.length} connections</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
 
-                    <div>
-                      <div className="font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>RELATIONSHIPS</div>
-                      <div className="space-y-1">
-                        {selectedEntity.connections.map((c, i) => {
-                          const relColor = REL_COLORS[c.relation] ?? '#8a8a8a';
-                          return (
-                            <div key={i} className="flex items-center gap-2 px-2 py-1.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
-                              <span className="font-mono text-[9px] px-1 py-0.5 rounded" style={{ color: relColor, backgroundColor: `${relColor}12` }}>{c.relation}</span>
-                              <span className="flex-1 truncate" style={{ color: 'var(--color-a11oy-text-sub)' }}>{c.target}</span>
-                              <span className="font-mono text-[9px]" style={{ color: c.strength >= 0.9 ? '#22c55e' : GOLD }}>{Math.round(c.strength * 100)}%</span>
-                            </div>
-                          );
-                        })}
+              <div>
+                {selectedEntity ? (
+                  <>
+                    <SectionTitle>Entity — {selectedEntity.label}</SectionTitle>
+                    <Card>
+                      <div className="text-sm font-semibold mb-1" style={{ color: 'var(--color-a11oy-text)' }}>{selectedEntity.label}</div>
+                      <div className="text-xs mb-3" style={{ color: 'var(--color-a11oy-text-ghost)' }}>{selectedEntity.type} · {VERTICAL_LABELS[selectedEntity.vertical]}</div>
+
+                      <div className="space-y-3 text-xs">
+                        <div>
+                          <div className="font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>PROPERTIES</div>
+                          <div className="space-y-1">
+                            {Object.entries(selectedEntity.properties).map(([k, v]) => (
+                              <div key={k} className="flex items-center justify-between px-2 py-1 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
+                                <span style={{ color: 'var(--color-a11oy-text-ghost)' }}>{k}</span>
+                                <span className="font-mono" style={{ color: GOLD }}>{v}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="font-mono mb-1" style={{ color: 'var(--color-a11oy-text-ghost)' }}>RELATIONSHIPS</div>
+                          <div className="space-y-1">
+                            {selectedEntity.connections.map((c, i) => {
+                              const relColor = REL_COLORS[c.relation] ?? '#8a8a8a';
+                              return (
+                                <div key={i} className="flex items-center gap-2 px-2 py-1.5 rounded" style={{ backgroundColor: 'var(--color-a11oy-deep)' }}>
+                                  <span className="font-mono text-[9px] px-1 py-0.5 rounded" style={{ color: relColor, backgroundColor: `${relColor}12` }}>{c.relation}</span>
+                                  <span className="flex-1 truncate" style={{ color: 'var(--color-a11oy-text-sub)' }}>{c.target}</span>
+                                  <span className="font-mono text-[9px]" style={{ color: c.strength >= 0.9 ? '#22c55e' : GOLD }}>{Math.round(c.strength * 100)}%</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </Card>
-              </>
-            ) : (
-              <>
-                <SectionTitle>Relationship Types</SectionTitle>
-                <Card>
-                  <div className="space-y-2 text-xs">
-                    {Object.entries(REL_COLORS).map(([rel, color]) => (
-                      <div key={rel} className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-                        <span className="font-mono" style={{ color: 'var(--color-a11oy-text-sub)' }}>{rel}</span>
+                    </Card>
+                  </>
+                ) : (
+                  <>
+                    <SectionTitle>Relationship Types</SectionTitle>
+                    <Card>
+                      <div className="space-y-2 text-xs">
+                        {Object.entries(REL_COLORS).map(([rel, color]) => (
+                          <div key={rel} className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                            <span className="font-mono" style={{ color: 'var(--color-a11oy-text-sub)' }}>{rel}</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </Card>
-              </>
-            )}
-          </div>
-        </div>
+                    </Card>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {activeView === 'search' && (
