@@ -491,4 +491,19 @@ router.use(
 // Feature flag evaluation — POST /flags/evaluate, GET /flags/:key
 router.use(lazyRegisterMatch(["/flags"], () => import("./feature-flags-public"), "feature-flags-public"));
 
+// Open Evaluation Layer — benchmark registry, leaderboards, result submission & verification
+// GET  /eval-registry/benchmarks
+// GET  /eval-registry/benchmarks/:benchmarkId
+// GET  /eval-registry/benchmarks/:benchmarkId/tasks
+// GET  /eval-registry/benchmarks/:benchmarkId/leaderboard
+// GET  /eval-registry/entities/:entityId/results
+// GET  /eval-registry/results/:resultId
+// POST /eval-registry/results
+// POST /eval-registry/results/:resultId/verify
+// GET  /eval-registry/submissions
+// POST /eval-registry/submissions
+// PATCH /eval-registry/submissions/:id/accept
+// PATCH /eval-registry/submissions/:id/reject
+router.use(lazyMatch("/eval-registry", () => import("./eval-registry"), "eval-registry"));
+
 export default router;

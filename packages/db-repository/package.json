@@ -9,6 +9,7 @@
     "./auth": "./src/auth.ts",
     "./alloy": "./src/alloy.ts",
     "./audit": "./src/audit.ts",
+    "./eval-registry": "./src/eval-registry.ts",
     "./vessels": "./src/vessels.ts",
     "./terra": "./src/terra.ts",
     "./firestorm": "./src/firestorm.ts"

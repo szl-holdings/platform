@@ -37,13 +37,18 @@
       "types": "./dist/cli.d.ts",
       "import": "./src/cli.ts"
     },
+    "./submit-cli": {
+      "types": "./dist/submit-cli.d.ts",
+      "import": "./src/submit-cli.ts"
+    },
     "./suites": {
       "types": "./dist/suites/index.d.ts",
       "import": "./src/suites/index.ts"
     }
   },
   "bin": {
-    "eval-forge": "./src/cli.ts"
+    "eval-forge": "./src/cli.ts",
+    "eval-submit": "./src/submit-cli.ts"
   },
   "scripts": {
     "test": "vitest run",
@@ -55,6 +60,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@szl-holdings/shared-contracts": "workspace:*",
+    "yaml": "^2.7.1",
     "zod": "catalog:"
   },
   "devDependencies": {

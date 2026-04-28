@@ -13,6 +13,15 @@
 export { AlloyRepository, alloyRepository } from './alloy';
 export { type AuditEntry, AuditRepository, auditRepository } from './audit';
 export { AuthRepository, authRepository } from './auth';
+export {
+  EvalRegistryRepository,
+  evalRegistryRepository,
+  type EvalBenchmarkRow,
+  type EvalCommunitySubmissionRow,
+  type EvalResultRow,
+  type EvalVerificationTokenRow,
+  type LeaderboardRow,
+} from './eval-registry';
 export { AegisRepository, firestormRepository } from './firestorm';
 export { TerraRepository, terraRepository } from './terra';
 export { VesselsRepository, vesselsRepository } from './vessels';

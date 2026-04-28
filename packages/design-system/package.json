@@ -43,7 +43,14 @@
     "./shell/breadcrumb": "./src/shell/Breadcrumb.tsx",
     "./shell/app-shell": "./src/shell/AppShell.tsx",
     "./alloy-bridge": "./src/alloy-bridge.ts",
-    "./tokens/css": "./src/tokens/gi-tokens.css"
+    "./tokens/css": "./src/tokens/gi-tokens.css",
+    "./eval": "./src/eval/index.ts",
+    "./eval/badge": "./src/eval/EvalBadge.tsx",
+    "./eval/score-chip": "./src/eval/ScoreChip.tsx",
+    "./eval/leaderboard-table": "./src/eval/LeaderboardTable.tsx",
+    "./eval/benchmark-card": "./src/eval/BenchmarkCard.tsx",
+    "./eval/result-detail-drawer": "./src/eval/ResultDetailDrawer.tsx",
+    "./eval/submit-score-form": "./src/eval/SubmitScoreForm.tsx"
   },
   "peerDependencies": {
     "react": "^19.0.0",

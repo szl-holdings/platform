@@ -28,5 +28,6 @@ export * from './proof/index.js';
 export * from './providers/index.js';
 export * from './shell/index.js';
 export * from './timeline/index.js';
+export * from './eval/index.js';
 export * from './tokens/index.js';
 export { cn } from './utils.js';

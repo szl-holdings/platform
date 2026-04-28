@@ -198,6 +198,8 @@ async function buildAll() {
       'puppeteer',
       'puppeteer-core',
       'electron',
+      'graphql-query-complexity',
+      '@hono/zod-openapi',
     ],
     sourcemap: 'linked',
     plugins: [
