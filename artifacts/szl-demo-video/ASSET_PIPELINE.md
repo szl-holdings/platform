@@ -15,7 +15,7 @@ in the task refers to the 10 *surfaces* shown, not 10 separate scene files.
 | I — Problem | 1 `open` | The Governance Problem | 12s | Hook: "The era of AI without receipts is ending." |
 | II — Solution | 2 `reel` | Meet the Platform | 25s | Tour all 10 product surfaces with live mock UIs |
 | II — Solution | 3 `fabric` | The Alloy Fabric | 18s | Decision fabric constellation graph |
-| II — Solution | 4 `cortex` | CORTEX Mobile | 10s | Cross-domain alert correlation on mobile |
+| II — Solution | 4 `cortex` | APEX Mobile | 10s | Cross-domain alert correlation on mobile (the `cortex` scene slug is preserved as a stable URL identifier per the originality audit) |
 | III — Brand | 5 `close` | Governed Autonomy | 12s | SZL Holdings brand lockup + CTA |
 
 ### The 10 product surfaces (covered in Scene 2 — `reel`)
@@ -29,7 +29,7 @@ in the task refers to the 10 *surfaces* shown, not 10 separate scene files.
 | 5 | Carlota Jo | Private advisory | 2.5s |
 | 6 | Sentra | Cyber posture | 2.5s |
 | 7 | Lyte | Decision intelligence | 2.5s |
-| 8 | PRISM Counsel | Legal command | 2.5s |
+| 8 | Conduit | Reverse ETL data integration | 2.5s |
 | 9 | Counsel | Legal matters | 2.5s |
 | 10 | Unified Command | Cross-domain nerve center | 2.5s |
 
@@ -70,7 +70,7 @@ Every on-screen claim is either **sourced** (linked to a real artifact or data p
 | 6 fabric primitives (Constellation, Trace, etc.) | Sourced | Implemented in `artifacts/api-server` — see `packages/governance-core` |
 | "Every signal → recommendation → action" | Sourced | Matches trace schema in `artifacts/api-server/src/routes/trace.ts` |
 
-### Scene 4 — CORTEX Mobile
+### Scene 4 — APEX Mobile
 
 | Claim | Status | Source |
 |-------|--------|--------|
@@ -81,7 +81,7 @@ Every on-screen claim is either **sourced** (linked to a real artifact or data p
 
 | Claim | Status | Source |
 |-------|--------|--------|
-| "10 surfaces" | Sourced | Pulse, Vessels, Terra, Aegis, Carlota Jo, Sentra, Lyte, PRISM Counsel, Counsel, Unified Command |
+| "10 surfaces" | Sourced | Pulse, Vessels, Terra, Aegis, Carlota Jo, Sentra, Lyte, Conduit, Counsel, Unified Command |
 | "1 governed fabric" | Sourced | `packages/governance-core` |
 | Stephen Lutar, Founder & CEO | Sourced | szl.com |
 

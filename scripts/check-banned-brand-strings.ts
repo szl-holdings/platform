@@ -5,9 +5,12 @@
  * Scans .ts and .tsx source files for trademark-conflicting brand names that
  * were renamed during the originality audit (see ORIGINALITY_REPORT.md).
  *
- * Configuration is loaded from `scripts/banned-brand-strings.json`. New banned
+ * Configuration is loaded from `audit/banned-brand-strings.json`. New banned
  * strings, file allowlist entries, and per-line exemptions can be added there
- * without modifying this script.
+ * without modifying this script. (The file moved from `scripts/` to `audit/`
+ * in Task #3255 so the canonical mapping sits with the rest of the audit
+ * artifacts; the baseline counter file remains in `scripts/` because it is a
+ * tooling state file, not part of the canonical mapping.)
  *
  * Detection rules:
  *   - Match the banned term with word boundaries.
@@ -36,6 +39,16 @@ interface BannedString {
   replacement: string;
   reason: string;
   caseSensitive?: boolean;
+  /**
+   * When true, the term is banned because of an unresolved trademark /
+   * availability concern. Violations of risk: true terms are still reported as
+   * normal violations; the flag is surfaced in the failure output and in
+   * `--verbose` mode so reviewers see the risk without re-running the
+   * trademark analysis.
+   */
+  risk?: boolean;
+  /** One-line note attached to risk: true entries. */
+  notes?: string;
 }
 
 interface LineAllow {
@@ -51,8 +64,20 @@ interface Config {
   lineAllowlist: LineAllow[];
 }
 
-const CONFIG_PATH = join(ROOT, 'scripts/banned-brand-strings.json');
+const CONFIG_PATH = join(ROOT, 'audit/banned-brand-strings.json');
 const config = JSON.parse(readFileSync(CONFIG_PATH, 'utf8')) as Config;
+
+// Index banned strings by term so we can attach risk metadata to violation
+// reporting without re-scanning the config on every line.
+const RISK_INDEX = new Map<string, { notes?: string }>();
+for (const b of config.bannedStrings) {
+  if (b.risk) RISK_INDEX.set(b.term, { notes: b.notes });
+}
+if (VERBOSE && RISK_INDEX.size > 0) {
+  console.error(
+    `[brand-strings] risk-flagged terms in config: ${Array.from(RISK_INDEX.keys()).join(', ')}`,
+  );
+}
 
 const SCAN_EXTENSIONS = new Set(['.ts', '.tsx']);
 // Source roots derived from pnpm-workspace.yaml (apps, artifacts, lib,
@@ -282,14 +307,19 @@ console.error(`\n❌  Banned brand-string check FAILED — ${newViolations.lengt
 for (const [file, vs] of byFile) {
   console.error(`  ${file}`);
   for (const v of vs) {
-    console.error(`    ${v.line}:${v.col}  "${v.term}" → use "${v.replacement}"  (${v.reason})`);
+    const risk = RISK_INDEX.get(v.term);
+    const riskTag = risk ? '  [RISK]' : '';
+    console.error(`    ${v.line}:${v.col}${riskTag}  "${v.term}" → use "${v.replacement}"  (${v.reason})`);
+    if (risk?.notes) {
+      console.error(`      note: ${risk.notes}`);
+    }
     console.error(`      ${v.snippet}`);
   }
 }
 
 console.error(`\nFix by replacing the banned term with its canonical replacement.`);
 console.error(`Legitimate occurrences (e.g. external entity name, citation) can be added to`);
-console.error(`scripts/banned-brand-strings.json under "lineAllowlist" or "fileAllowlist".`);
+console.error(`audit/banned-brand-strings.json under "lineAllowlist" or "fileAllowlist".`);
 console.error(`If a deliberate refactor introduced these and they are intentional, regenerate`);
 console.error(`the baseline with: tsx scripts/check-banned-brand-strings.ts --update-baseline\n`);
 

@@ -1,7 +1,21 @@
 # Screenshot Catalog — SZL Holdings Platform
 **Track 6 — 2026-04-21**
 **Updated — 2026-04-22 (Task #3103, README screenshot block refresh)**
+**Updated — 2026-04-28 (Task #3255, codename rollout — see Track 7 note below)**
 **Status:** Complete disposition ledger. Per-file keep/archive executed.
+
+---
+
+## Track 7 — Task #3255 disposition (2026-04-28)
+
+The codename rollout (Task #3255) made no edits to any artifact's visible UI brand text. Changes were limited to:
+
+- `artifacts/szl-demo-video/ASSET_PIPELINE.md` and `artifacts/szl-demo-video/README.md` (markdown copy only — `CORTEX → APEX` and one duplicate `PRISM Counsel` row replaced with the current `Conduit` surface)
+- The brand-strings tooling (`audit/banned-brand-strings.json` moved from `scripts/`, `Continuum` added as a risk-flagged entry, baseline refreshed) and the CI wiring (`.github/workflows/ci.yml` `push` trigger added)
+
+**Effect on the approved-screenshots set: none.** No artifact's chrome, navigation lockup, hero text, or visible labels changed. The committed contents of `screenshots/approved/` (per the "Repository state" note in Section 1 below) are unchanged. No re-captures were required for this task.
+
+The full inventory of files touched by Task #3255 lives in `audit/brand-rollout-inventory.md`. The intentionally-preserved legacy names list lives in `audit/brand-historical-references.md`.
 
 ---
 

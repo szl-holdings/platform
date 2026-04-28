@@ -1,6 +1,6 @@
 {
-  "$comment": "Central allowlist for the brand-string validation check (scripts/check-banned-brand-strings.ts). Add new banned trademarks to `bannedStrings`. Add legitimate occurrences to `lineAllowlist` (preferred) or `fileAllowlist` (whole-file exemption). Source of truth: ORIGINALITY_REPORT.md rename map. The check direction is: BAN the OLD pre-rename codenames, REPLACE with the canonical post-rename brand names.",
-  "$bannedStringsComment": "Each entry matches case-sensitively with strict boundaries (no adjacency to word chars, hyphens, underscores, slashes, colons). To catch a brand in multiple casings, add separate entries for `Pascal` and `UPPER` variants. The audit intentionally preserved lowercase URL slugs (e.g. /aegis/) so do NOT add lowercase variants.",
+  "$comment": "Canonical brand-string mapping for the trademark/regression guard (scripts/check-banned-brand-strings.ts). This file moved from scripts/ to audit/ in Task #3255 (codename rollout) so the canonical mapping lives next to the rest of the audit artifacts. Source of truth: ORIGINALITY_REPORT.md rename map. The check direction is: BAN the OLD pre-rename codenames, REPLACE with the canonical post-rename brand names. Counsel-related entries are intentionally preserved as-is per Task #3255 hard constraint #1.",
+  "$bannedStringsComment": "Each entry matches case-sensitively with strict boundaries (no adjacency to word chars, hyphens, underscores, slashes, colons). To catch a brand in multiple casings, add separate entries for `Pascal` and `UPPER` variants. The audit intentionally preserved lowercase URL slugs (e.g. /aegis/) so do NOT add lowercase variants. Optional fields: `risk: true` flags a term that is banned because of an unresolved trademark/availability concern (the check still surfaces these as violations; the flag exists so reviewers see the risk without re-running the trademark analysis). `notes` is a one-line human note attached to risk entries.",
   "bannedStrings": [
     {
       "term": "TENAX",
@@ -46,10 +46,18 @@
       "term": "PRISM-Counsel",
       "replacement": "Counsel",
       "reason": "PRISM has NSA program brand association; prefix removed — canonical name is Counsel"
+    },
+    {
+      "term": "Continuum",
+      "replacement": "(do not introduce — pending review)",
+      "reason": "Trademark / availability risk per the prior originality analysis; flagged so any new use surfaces a warning instead of slipping through review.",
+      "risk": true,
+      "notes": "Do not redo the trademark analysis (Task #3255 constraint #2). Treat the prior outcome as final until brand counsel re-clears the term. See ORIGINALITY_REPORT.md and audit/brand-historical-references.md for context."
     }
   ],
   "$fileAllowlistComment": "Whole-file exemptions. Use sparingly; prefer lineAllowlist. Globs are not supported — list explicit paths relative to repo root, or directory prefixes ending with '/'.",
   "fileAllowlist": [
+    "audit/banned-brand-strings.json",
     "scripts/banned-brand-strings.json",
     "scripts/check-banned-brand-strings.ts",
     "scripts/brand-check.ts",
