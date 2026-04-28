@@ -32,7 +32,7 @@ export default function Settings() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-display font-bold tracking-tight">Settings</h1>
-        <p className="text-sm text-muted-foreground mt-1">Global configuration for Conduit</p>
+        <p className="text-sm text-muted-foreground mt-1">Global configuration for Amaru</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -59,7 +59,7 @@ export default function Settings() {
       <div className="conduit-card p-5">
         <div className="flex items-center gap-3 mb-3">
           <SettingsIcon className="w-5 h-5 text-primary" />
-          <h2 className="font-semibold">About Conduit</h2>
+          <h2 className="font-semibold">About Amaru</h2>
         </div>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
           <dt className="text-muted-foreground">Version</dt>

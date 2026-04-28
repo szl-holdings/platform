@@ -25,6 +25,7 @@ function WithShell({ children }: { children: ReactNode }) {
   return <AppShell>{children}</AppShell>;
 }
 
+const LoopReasoner = lazy(() => import('./pages/LoopReasoner').then(m => ({ default: m.LoopReasoner })));
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
 const NowBoard = lazy(() => import('./pages/NowBoard').then(m => ({ default: m.NowBoard })));
 const CommandSurface = lazy(() => import('./pages/CommandSurface').then(m => ({ default: m.CommandSurface })));
@@ -166,6 +167,7 @@ const SelfHealingEngine = lazy(() => import('./pages/SelfHealingEngine').then(m 
 const ObservabilityAsCode = lazy(() => import('./pages/ObservabilityAsCode').then(m => ({ default: m.ObservabilityAsCode })));
 const AlertTriage = lazy(() => import('./pages/AlertTriage').then(m => ({ default: m.AlertTriage })));
 const CostAwareMonitoring = lazy(() => import('./pages/CostAwareMonitoring').then(m => ({ default: m.CostAwareMonitoring })));
+const AndeanOrchestration = lazy(() => import('./pages/AndeanOrchestration').then(m => ({ default: m.AndeanOrchestration })));
 
 
 export default function App() {
@@ -175,6 +177,7 @@ export default function App() {
       <Switch>
         <Route path={`${base}/`} component={HomePage} />
         <Route path={`${base}`} component={HomePage} />
+        <Route path={`${base}/loop-reasoner`} component={LoopReasoner} />
         <Route path={`${base}/now`} component={NowBoard} />
         <Route path={`${base}/recommendations`} component={Recommendations} />
         <Route path={`${base}/brief`} component={ExecutiveBrief} />
@@ -307,6 +310,7 @@ export default function App() {
         <Route path={`${base}/observability-as-code`} component={ObservabilityAsCode} />
         <Route path={`${base}/alert-triage`} component={AlertTriage} />
         <Route path={`${base}/cost-monitoring`} component={CostAwareMonitoring} />
+        <Route path={`${base}/andean-orchestration`} component={AndeanOrchestration} />
 
         <Route path={`${base}/atlas`}>
           <WithShell><AtlasSection /></WithShell>

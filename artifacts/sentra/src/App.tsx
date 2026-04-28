@@ -149,6 +149,13 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    id: 'loop-layer',
+    label: 'Loop Layer',
+    items: [
+      { path: '/recursive-threat-modeler', label: 'Recursive Threat Modeler', icon: RotateCcw, comp: L(() => import('@/pages/recursive-threat-modeler')) },
+    ],
+  },
+  {
     id: 'core',
     label: 'Core',
     items: [

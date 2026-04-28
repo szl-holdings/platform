@@ -1,6 +1,6 @@
 kind = "web"
   previewPath = "/conduit/"
-  title = "Conduit — Reverse ETL"
+  title = "Amaru — The Andean Ouroboros"
   version = "1.0.0"
   id = "artifacts/conduit"
   router = "path"

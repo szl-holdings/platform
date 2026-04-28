@@ -13,6 +13,7 @@ import RunsList from '@/pages/runs/list';
 import RunsDetail from '@/pages/runs/detail';
 import TemplatesList from '@/pages/templates/list';
 import Settings from '@/pages/settings';
+import ConvergentSync from '@/pages/convergent-sync';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +39,7 @@ function AppContent() {
         <Route path="/runs/:id" component={RunsDetail} />
         <Route path="/templates" component={TemplatesList} />
         <Route path="/settings" component={Settings} />
+        <Route path="/convergent-sync" component={ConvergentSync} />
         <Route>
           <div className="flex h-full items-center justify-center text-muted-foreground">
             Page not found

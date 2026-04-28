@@ -41,7 +41,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <div className="w-6 h-6 rounded bg-primary/20 flex items-center justify-center border border-primary/50">
                 <Cable className="w-4 h-4 text-primary" />
               </div>
-              CONDUIT
+              AMARU
             </Link>
           )}
           <button

@@ -21,6 +21,7 @@
     "@szl-holdings/shared-proxy": "workspace:*",
     "@urql/exchange-graphcache": "^9.0.0",
     "@workspace/a11oy-fabric": "workspace:*",
+    "@workspace/ouroboros": "workspace:*",
     "d3": "^7.9.0",
     "graphql": "^16.13.2",
     "graphql-ws": "^6.0.8",
