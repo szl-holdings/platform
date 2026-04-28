@@ -42,7 +42,7 @@ We build that system.
 
 ## A11oy
 
-**A11oy** is the flagship governed agentic execution fabric. It senses, structures, correlates, explains, recommends, approves, executes, verifies, and preserves cryptographic proof — in real time, across all seven SZL verticals.
+**A11oy** is the flagship governed agentic execution fabric. It senses, structures, correlates, explains, recommends, approves, executes, verifies, and preserves cryptographic proof — in real time, across all SZL verticals.
 
 Every step is instrumented. Every decision is attributed. No material action executes without human confirmation.
 
@@ -89,16 +89,16 @@ From raw signal through routing logic through human approval through executed ou
 
 | Product | Domain | Status |
 |---------|--------|--------|
-| **A11oy** | Governed agentic execution fabric — signal-to-proof across all seven verticals | Active — Phase 1 |
-| **KORA** | Flagship command surface — PRAXIS framework (People, Revenue, Infrastructure, Security, Market) | Active |
-| **LUMINA** | AI executive briefing — daily intelligence digest across every domain, source-cited | Active |
-| **TENAX** | Cyber resilience command — exposure mapping, recovery readiness, incident command | Active |
-| **SEXTANT** | Maritime fleet command — AIS tracking, sanctions screening, voyage economics | Active |
-| **DOMAINE** | Real estate intelligence — distress signals, ownership graph, deal pipeline | Active |
+| **A11oy** | Governed agentic execution fabric — signal-to-proof across all verticals | Active — Phase 1 |
+| **Lyte** | Flagship command surface — PRAXIS framework (People, Revenue, Infrastructure, Security, Market) | Active |
+| **Pulse** | AI executive briefing — daily intelligence digest across every domain, source-cited | Active |
+| **Sentra** | Cyber resilience command — exposure mapping, recovery readiness, incident command | Active |
+| **Vessels** | Maritime fleet command — AIS tracking, sanctions screening, voyage economics | Active |
+| **Terra** | Real estate intelligence — distress signals, ownership graph, deal pipeline | Active |
 | **Counsel** | Legal matter command — diligence, evidence, and AI-assisted contract risk | Active |
 | **Carlota Jo** | Premium advisory operations for UHNW clients | Active |
-| **PARAGON** | Defense and intelligence command — SOC command, SOAR playbooks, threat intelligence | Active |
-| **APEX** | Unified mobile command — all domain workspaces in one Expo/React Native app | Deferred |
+| **Aegis** | Defense and intelligence command — SOC command, SOAR playbooks, threat intelligence | Active |
+| **SZL Holdings Mobile** | Unified mobile command — all domain workspaces in one Expo/React Native app | Deferred |
 
 ---
 
@@ -139,14 +139,14 @@ From raw signal through routing logic through human approval through executed ou
 +------------------------------------------------------------------------+
 |  A11oy  — Governed agentic execution fabric (signal-to-proof)         |
 +------------------------------------------------------------------------+
-|  KORA                  — Command surface (PRAXIS framework)           |
-|  FORGE                 — Execution fabric (workflows, approvals, audit)|
-|  APEX                  — Unified mobile command (iOS + Android)       |
+|  Lyte                  — Command surface (PRAXIS framework)           |
+|  Command               — Unified operator surface (cross-domain)      |
+|  SZL Holdings Mobile   — Unified mobile command (iOS + Android)       |
 +------------------------------------------------------------------------+
 |  DOMAIN PACKS                                                          |
 |                                                                        |
-|  TENAX    Counsel   PARAGON  SEXTANT    DOMAINE                       |
-|  Carlota Jo         LUMINA                                            |
+|  Sentra   Counsel   Aegis    Vessels    Terra                         |
+|  Carlota Jo         Pulse                                             |
 +------------------------------------------------------------------------+
 |  GOVERNANCE INFRASTRUCTURE                                             |
 |                                                                        |
@@ -202,20 +202,20 @@ Verified, unmodified captures from the active demo platform. No mockups or AI-ge
 **SZL Holdings Dashboard — Cross-Portfolio Command**
 ![SZL Holdings Dashboard](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/szl-holdings-dashboard-2026-04-21.jpg)
 
-**KORA — PRAXIS Command Surface**
-![KORA PRAXIS Command](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/kora-praxis-command-2026-04-21.jpg)
+**Lyte — PRAXIS Command Surface**
+![Lyte PRAXIS Command](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/kora-praxis-command-2026-04-21.jpg)
 
-**FORGE Command Portal — Unified Executive View**
-![FORGE Command Portal](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/forge-command-portal-executive-2026-04-21.jpg)
+**Command — Unified Executive View**
+![Command Portal](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/forge-command-portal-executive-2026-04-21.jpg)
 
-**TENAX — SOC Command**
-![TENAX SOC Command](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/tenax-soc-command-2026-04-21.jpg)
+**Sentra — SOC Command**
+![Sentra SOC Command](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/tenax-soc-command-2026-04-21.jpg)
 
-**SEXTANT — Fleet Command**
-![SEXTANT Fleet Command](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/sextant-fleet-command-2026-04-21.jpg)
+**Vessels — Fleet Command**
+![Vessels Fleet Command](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/sextant-fleet-command-2026-04-21.jpg)
 
-**DOMAINE — Deal Pipeline**
-![DOMAINE Deal Pipeline](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/domaine-deal-pipeline-2026-04-21.jpg)
+**Terra — Deal Pipeline**
+![Terra Deal Pipeline](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/domaine-deal-pipeline-2026-04-21.jpg)
 
 **Carlota Jo — Client Portal**
 ![Carlota Jo Client Portal](https://raw.githubusercontent.com/szl-holdings/szl-holdings-platform/main/docs/assets/screenshots/current/carlota-jo-client-portal-2026-04-21.jpg)
@@ -239,7 +239,7 @@ The canonical platform monorepo. TypeScript throughout. A11oy, all domain packs,
 | A11oy Phase 1 — Foundation (type system, fabric, demo seed, read API) | ✅ Complete |
 | A11oy Phase 2 — Workcell engine with live AI reasoning | 🔜 Planned |
 | A11oy Phase 3 — Full proof-carrying execution, live connectors | 🔜 Planned |
-| APEX mobile (iOS + Android unified command) | 🔜 Deferred |
+| SZL Holdings Mobile (iOS + Android unified command) | 🔜 Deferred |
 | SOC 2 Type 1 audit readiness | 🔜 Roadmap |
 | Production customer onboarding | 🔜 Roadmap |
 
