@@ -188,6 +188,33 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 
 ---
 
+## A11oy Doctrine
+
+The A11oy Doctrine is the permanent governance framework that defines how all AI agents, contributors, and automated systems operate inside this codebase. Every agent and contributor must read the applicable doctrine before making changes.
+
+| Document | Purpose |
+|----------|---------|
+| [`AGENTS.md`](./AGENTS.md) | Root operating contract — execution loop, forbidden actions, naming rules, definition of done |
+| [`docs/A11OY_DOCTRINE.md`](./docs/A11OY_DOCTRINE.md) | Core product thesis and operating philosophy |
+| [`docs/A11OY_OPERATING_PRINCIPLES.md`](./docs/A11OY_OPERATING_PRINCIPLES.md) | Governing principles for all platform decisions |
+| [`docs/A11OY_AGENT_DOCTRINE.md`](./docs/A11OY_AGENT_DOCTRINE.md) | 18 named agent roles, scopes, and proof obligations |
+| [`docs/A11OY_NON_NEGOTIABLES.md`](./docs/A11OY_NON_NEGOTIABLES.md) | Absolute rules that cannot be overridden |
+| [`docs/A11OY_PRODUCT_LANGUAGE.md`](./docs/A11OY_PRODUCT_LANGUAGE.md) | Approved terminology, naming conventions, voice rules |
+| [`docs/A11OY_WORKCELL_DOCTRINE.md`](./docs/A11OY_WORKCELL_DOCTRINE.md) | How workcells are structured, scoped, and executed |
+| [`docs/A11OY_PROOF_DOCTRINE.md`](./docs/A11OY_PROOF_DOCTRINE.md) | Proof requirements for every consequential action |
+| [`docs/A11OY_SCREENSHOT_DOCTRINE.md`](./docs/A11OY_SCREENSHOT_DOCTRINE.md) | Screenshot capture, labeling, and freshness standards |
+| [`docs/A11OY_PUBLIC_CLAIMS_DOCTRINE.md`](./docs/A11OY_PUBLIC_CLAIMS_DOCTRINE.md) | Rules for all claims made on public-facing surfaces |
+| [`docs/A11OY_SECURITY_DOCTRINE.md`](./docs/A11OY_SECURITY_DOCTRINE.md) | Security rules, secret handling, and audit requirements |
+| [`docs/A11OY_RELEASE_DOCTRINE.md`](./docs/A11OY_RELEASE_DOCTRINE.md) | Release gates, promotion criteria, and rollback policy |
+| [`docs/A11OY_REPLIT_CODEX_DOCTRINE.md`](./docs/A11OY_REPLIT_CODEX_DOCTRINE.md) | Replit Agent and Codex-specific operating rules |
+| [`docs/A11OY_DEFINITION_OF_DONE.md`](./docs/A11OY_DEFINITION_OF_DONE.md) | Universal definition of done for all work in this repo |
+| [`skills/a11oy-code/SKILL.md`](./skills/a11oy-code/SKILL.md) | Reusable skill — prompts, checklists, and agent roster |
+| [`audit/A11OY_DOCTRINE_INSTALL_REPORT.md`](./audit/A11OY_DOCTRINE_INSTALL_REPORT.md) | Doctrine install validation and gap closure report |
+
+The doctrine is grounded in [`docs/doctrine/szl-doctrine.md`](./docs/doctrine/szl-doctrine.md) (the Four Pillars) and [`docs/strategy/FRONTIER_DOCTRINE.md`](./docs/strategy/FRONTIER_DOCTRINE.md) (layer-by-layer platform mapping).
+
+---
+
 ## Access & Collaboration
 
 This repository is proprietary. Source code, architecture, and implementation details are confidential.

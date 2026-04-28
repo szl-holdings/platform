@@ -1,7 +1,7 @@
 # A11OY_DOCTRINE_GAPS_FILLED.md — Gap Closure Log
 
-**Date:** 2026-04-25  
-**Task:** #3481 — Install the A11oy Doctrine System  
+**Initial Install:** 2026-04-25 — Task #3481  
+**Validation & Completion:** 2026-04-28 — Task #3514  
 **Agent:** PatchPilot
 
 This document records every gap identified during the doctrine installation sweep and the action taken to fill it.
@@ -28,8 +28,9 @@ This document records every gap identified during the doctrine installation swee
 | 14 | No formal Definition of Done | Created `docs/A11OY_DEFINITION_OF_DONE.md` | `docs/A11OY_DEFINITION_OF_DONE.md` | Ten-section checklist, minimum bar, explicit definition of "not done" |
 | 15 | No skill pack for agent sessions | Created `/skills/a11oy-code/` with 5 files | `skills/a11oy-code/` directory | README.md, SKILL.md, prompts.md (11 prompts), checklist.md (7 checklists), agent-roster.md (18 agents) |
 | 16 | Missing `.gitignore` patterns: `build`, `.next`, `screenshots/raw` | Appended three missing patterns to `.gitignore` | `.gitignore` | All existing entries preserved; additions noted with A11oy doctrine comment |
-| 17 | README.md lacked A11oy Doctrine section | Added `## A11oy Doctrine` section with core loop and 8 required links | `README.md` | Section added after existing A11oy product description; no existing content removed |
+| 17 | README.md lacked A11oy Doctrine section (Task #3481) | Added `## A11oy Doctrine` section with core loop and 8 required links | `README.md` | Section added after existing A11oy product description; no existing content removed |
 | 18 | No doctrine install report | Created this report and two companion audit files | `audit/A11OY_DOCTRINE_INSTALL_REPORT.md`, `audit/A11OY_DOCTRINE_GAPS_FILLED.md`, `audit/A11OY_NEXT_WORKCELLS.md` | All three required audit files created |
+| 19 | README.md A11oy Doctrine section missing at Task #3514 start (gap re-opened) | Re-added `## A11oy Doctrine` section with expanded 16-row reference table | `README.md` | Task #3514 found section absent; re-added with full table covering all 13 doctrine docs, skills package, audit file, and grounding links to Four Pillars and Frontier Doctrine |
 
 ---
 

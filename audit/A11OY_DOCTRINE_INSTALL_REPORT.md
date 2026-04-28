@@ -1,10 +1,50 @@
 # A11OY_DOCTRINE_INSTALL_REPORT.md — Doctrine Installation Report
 
-**Date:** 2026-04-25  
-**Task:** #3481 — Install the A11oy Doctrine System  
+**Initial Install Date:** 2026-04-25 — Task #3481  
+**Validation & Completion Date:** 2026-04-28 — Task #3514  
 **Agent:** PatchPilot (execution) / ProofSmith (report assembly)  
 **Risk Class:** Medium  
 **Approval Tier:** Operator
+
+---
+
+## Task #3514 — Validation Run (2026-04-28)
+
+Task #3514 ("Install the full A11oy Doctrine governance system into the repo") performed a full validation sweep of all doctrine artifacts created by Task #3481 and completed the one remaining gap.
+
+### Validation Results
+
+| Deliverable | Status | Validation Notes |
+|-------------|--------|-----------------|
+| `AGENTS.md` (root) | Confirmed present — 443 lines | Full execution loop, forbidden actions, naming rules, 18 agent references, definition of done |
+| 13 doctrine docs in `docs/` | Confirmed present — all 13 files, 1,883 total lines | All files verified for substantive content coverage |
+| `skills/a11oy-code/` package | Confirmed present — 5 files, 556 total lines | SKILL.md, README.md, prompts.md, checklist.md, agent-roster.md |
+| 3 audit files in `audit/` | Confirmed present — 449 total lines | INSTALL_REPORT, GAPS_FILLED, NEXT_WORKCELLS |
+| `README.md` — A11oy Doctrine section | **Gap filled by Task #3514** | Section was absent; added with 16-row reference table linking all doctrine, skills, and audit files |
+| `.gitignore` security patterns | Confirmed present | `build`, `.next`, `screenshots/raw`, `.env*`, `node_modules`, `dist`, `coverage`, `*.log` all covered |
+| No Bo11y/Bolly/Boss naming | Confirmed | Forbidden terms appear only in prohibition tables and rules — zero instances used as product names |
+| No plagiarized content | Confirmed | All content original to SZL Holdings / A11oy doctrine |
+
+### Gap Filled by Task #3514
+
+The `README.md` "A11oy Doctrine" section was absent at the start of Task #3514 despite being a required deliverable. It was added with a 16-row reference table covering:
+- Root `AGENTS.md`
+- All 13 doctrine docs
+- `skills/a11oy-code/SKILL.md`
+- `audit/A11OY_DOCTRINE_INSTALL_REPORT.md`
+- Grounding links to `docs/doctrine/szl-doctrine.md` and `docs/strategy/FRONTIER_DOCTRINE.md`
+
+### Validation Commands Run (Task #3514)
+
+| Command | Result |
+|---------|--------|
+| `ls docs/A11OY_*.md \| wc -l` | 13 — all 13 doctrine files present |
+| `ls skills/a11oy-code/` | 5 files — SKILL.md, README.md, prompts.md, checklist.md, agent-roster.md |
+| `wc -l AGENTS.md` | 443 lines |
+| `ls audit/A11OY_DOCTRINE_*.md \| wc -l` | 3 — all 3 audit files present |
+| `grep "A11oy Doctrine" README.md` | Section confirmed present at line 194 |
+| `grep -ri "bo11y\|bolly\|boss" docs/A11OY*.md AGENTS.md skills/a11oy-code/` | Matches in prohibition tables only — no naming violations |
+| `pnpm brand:strings` (CI) | Passed — no new violations |
 
 ---
 
