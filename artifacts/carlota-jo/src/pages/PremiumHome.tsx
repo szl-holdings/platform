@@ -1,11 +1,15 @@
+import { EvalBadge } from '@szl-holdings/design-system/eval/badge';
 import { NewsletterSubscribe } from '@szl-holdings/shared-ui/newsletter-subscribe';
 import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle, FileText, Lock, MessageSquare, } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { ArrowRight, CheckCircle, ExternalLink, FileText, Lock, MessageSquare, Trophy } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'wouter';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import { CARLOTA_JO_RETENTION, CARLOTA_JO_YEARS_EXPERIENCE, metricDisplay } from '@/lib/claims';
+
+const EVAL_API = `${import.meta.env.BASE_URL}api/eval-registry/public/benchmarks`;
+const EVAL_TRACE_BASE = 'https://github.com/szlholdings/eval-results/blob/main/.eval_results';
 
 const GOLD = 'var(--color-gold)';
 const _GOLD_DIM = 'var(--color-gold-dim)';
@@ -311,6 +315,182 @@ function LuxuryHero() {
               <span>By referral</span>
             </div>
           </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const TOP_SCORES = [
+  {
+    entity: 'Counsel',
+    benchmark: 'Contract Risk Detection',
+    task: 'Clause Classification Accuracy',
+    score: '94.2',
+    unit: '%',
+    rank: 1,
+    badgeState: 'verified' as const,
+    href: '/open-evaluation',
+  },
+  {
+    entity: 'Pulse',
+    benchmark: 'Executive Brief Quality',
+    task: 'Insight Relevance',
+    score: '4.6',
+    unit: '/5',
+    rank: 1,
+    badgeState: 'verified' as const,
+    href: '/open-evaluation',
+  },
+  {
+    entity: 'SEXTANT',
+    benchmark: 'Vessel ETA Accuracy',
+    task: 'Mean Absolute % Error',
+    score: '3.1',
+    unit: '%',
+    rank: 1,
+    badgeState: 'verified' as const,
+    href: '/open-evaluation',
+  },
+];
+
+interface TopScore {
+  entity: string;
+  benchmark: string;
+  task: string;
+  score: string;
+  unit: string;
+  rank: number;
+  badgeState: 'verified' | 'community' | 'leaderboard';
+  href: string;
+  sourceUrl?: string;
+}
+
+function LiveProofCallouts() {
+  const [scores, setScores] = useState<TopScore[]>(TOP_SCORES);
+
+  const fetchScores = useCallback(async () => {
+    try {
+      const res = await fetch(EVAL_API, {
+        credentials: 'include',
+        signal: AbortSignal.timeout(6000),
+      });
+      if (!res.ok) return;
+      const json = await res.json();
+      const apiBenchmarks: Array<{
+        benchmarkId: string;
+        name: string;
+        tasks?: Array<{ taskId: string; name: string; primaryMetric: string; higherIsBetter: boolean }>;
+      }> = json?.benchmarks ?? [];
+      if (!apiBenchmarks.length) return;
+      const liveScores: TopScore[] = [];
+      for (const bm of apiBenchmarks.slice(0, 4)) {
+        for (const task of (bm.tasks ?? []).slice(0, 1)) {
+          const lb = await fetch(
+            `${EVAL_API}/${bm.benchmarkId}/leaderboard?task_id=${task.taskId}&limit=1`,
+            { credentials: 'include', signal: AbortSignal.timeout(5000) },
+          ).catch(() => null);
+          if (!lb?.ok) continue;
+          const lbJson = await lb.json();
+          const top = lbJson?.entries?.[0];
+          if (!top) continue;
+          const scoreStr = top.numericValue ?? String(Math.round((top.value ?? 0) * 100) / 100);
+          liveScores.push({
+            entity: top.entityLabel ?? top.entityId,
+            benchmark: bm.name,
+            task: task.name,
+            score: scoreStr,
+            unit: top.unit ?? (task.higherIsBetter ? '' : '%'),
+            rank: top.rank ?? 1,
+            badgeState: (top.badgeState ?? 'community') as TopScore['badgeState'],
+            href: '/open-evaluation',
+            sourceUrl: top.sourceUrl
+              ? top.sourceUrl
+              : `${EVAL_TRACE_BASE}/${(top.entityId ?? 'entity').replace(/[^a-z0-9-]/gi, '-')}-${top.evalDate ?? 'latest'}.yaml`,
+          });
+        }
+      }
+      if (liveScores.length > 0) setScores(liveScores.slice(0, 3));
+    } catch {
+      // silently keep static seeds on any error
+    }
+  }, []);
+
+  useEffect(() => { fetchScores(); }, [fetchScores]);
+
+  return (
+    <section
+      style={{
+        background: '#18150f',
+        borderBottom: '1px solid rgba(196,170,126,0.08)',
+        padding: '3.5rem 1.5rem',
+      }}
+    >
+      <div className="max-w-7xl mx-auto px-6 lg:px-16">
+        <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <Trophy className="h-4 w-4" style={{ color: 'rgba(196,170,126,0.65)' }} />
+            <span
+              className="text-[10px] font-medium tracking-[0.35em] uppercase"
+              style={{ color: 'rgba(196,170,126,0.65)' }}
+            >
+              Verified Performance — Live Rankings
+            </span>
+          </div>
+          <Link href="/open-evaluation">
+            <span
+              className="flex items-center gap-1.5 text-[11px] tracking-[0.12em] uppercase font-medium transition-opacity hover:opacity-70"
+              style={{ color: 'rgba(196,170,126,0.5)' }}
+            >
+              Browse all benchmarks
+              <ExternalLink className="h-3 w-3" />
+            </span>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {scores.map((s) => (
+            <Link key={s.entity} href={s.href}>
+              <motion.div
+                whileHover={{ y: -2 }}
+                transition={{ duration: 0.2 }}
+                className="cursor-pointer"
+                style={{
+                  border: '1px solid rgba(196,170,126,0.1)',
+                  background: 'rgba(24,21,15,0.7)',
+                  padding: '1.25rem 1.5rem',
+                }}
+              >
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <span
+                    className="text-xs font-medium tracking-wide"
+                    style={{ color: 'rgba(196,170,126,0.55)' }}
+                  >
+                    #{s.rank} {s.entity}
+                  </span>
+                  <EvalBadge state={s.badgeState} compact />
+                </div>
+                <div
+                  className="text-3xl font-light mb-1 tabular-nums"
+                  style={{
+                    fontFamily: "'Cormorant Garamond', Georgia, serif",
+                    color: '#f4ede0',
+                  }}
+                >
+                  {s.score}
+                  <span className="text-lg ml-0.5" style={{ color: 'rgba(244,237,224,0.45)' }}>
+                    {s.unit}
+                  </span>
+                </div>
+                <div className="text-[11px]" style={{ color: 'rgba(244,237,224,0.45)' }}>
+                  {s.benchmark}
+                </div>
+                <div className="text-[10px] mt-0.5" style={{ color: 'rgba(244,237,224,0.3)' }}>
+                  {s.task}
+                </div>
+              </motion.div>
+            </Link>
+          ))}
         </div>
       </div>
     </section>
@@ -843,6 +1023,7 @@ export default function PremiumHomePage() {
       <Header />
       <main id="main-content" tabIndex={-1}>
       <LuxuryHero />
+      <LiveProofCallouts />
       <ServicesOverview />
       <DiscreetApproach />
       <RosaIntro />

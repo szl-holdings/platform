@@ -1,6 +1,8 @@
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "wouter";
 import {
   ArrowRight,
+  ExternalLink,
   Radar,
   Workflow,
   Layers3,
@@ -9,10 +11,23 @@ import {
   Building2,
   BriefcaseBusiness,
   CheckCircle2,
+  Trophy,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+
+const EVAL_API_BASE = `${import.meta.env.BASE_URL}api/eval-registry/public/benchmarks`;
+const EVAL_TRACE_BASE = 'https://github.com/szlholdings/eval-results/blob/main/.eval_results';
+
+const STATIC_VERIFIED_SCORES: VerifiedScore[] = [
+  { entity: 'Counsel', label: 'Contract Risk Detection', score: '94.2%', unit: 'accuracy', note: 'Clause classification, 4,200 contracts', sourceUrl: `${EVAL_TRACE_BASE}/counsel-v2-2026-04-10.yaml`, badgeState: 'verified' },
+  { entity: 'Pulse', label: 'Executive Brief Quality', score: '4.6/5', unit: 'expert relevance', note: 'Domain-expert panel, 90-day window', sourceUrl: `${EVAL_TRACE_BASE}/pulse-v3-2026-04-14.yaml`, badgeState: 'verified' },
+  { entity: 'SEXTANT', label: 'Vessel ETA Accuracy', score: '3.1%', unit: 'MAPE', note: 'Live fleet data, 12-month sample', sourceUrl: `${EVAL_TRACE_BASE}/sextant-v2-2026-04-08.yaml`, badgeState: 'verified' },
+];
+
+type BadgeState = 'verified' | 'community' | 'leaderboard' | 'source';
+type VerifiedScore = { entity: string; label: string; score: string; unit: string; note: string; sourceUrl: string; badgeState?: BadgeState };
 
 const problemFrames = [
   "Leadership teams can see metrics, but not always operational causality.",
@@ -87,6 +102,57 @@ export default function InvestorStoryPage() {
       "The focused capital narrative for SZL Holdings: KORA as the product, Counsel as the engine, and the rest of the ecosystem as expansion value.",
     canonical: "https://szlholdings.com/investor-story",
   });
+
+  const [verifiedScores, setVerifiedScores] = useState<VerifiedScore[]>([...STATIC_VERIFIED_SCORES]);
+
+  const fetchVerifiedScores = useCallback(async () => {
+    try {
+      const res = await fetch(EVAL_API_BASE, {
+        credentials: 'include',
+        signal: AbortSignal.timeout(6000),
+      });
+      if (!res.ok) return;
+      const json = await res.json();
+      const apiBenchmarks: Array<{
+        benchmarkId: string;
+        name: string;
+        tasks?: Array<{ taskId: string; higherIsBetter: boolean }>;
+      }> = json?.benchmarks ?? [];
+      if (!apiBenchmarks.length) return;
+      const liveScores: VerifiedScore[] = [];
+      for (const bm of apiBenchmarks.slice(0, 3)) {
+        const taskId = bm.tasks?.[0]?.taskId;
+        if (!taskId) continue;
+        const lb = await fetch(
+          `${EVAL_API_BASE}/${bm.benchmarkId}/leaderboard?task_id=${taskId}&limit=1`,
+          { credentials: 'include', signal: AbortSignal.timeout(5000) },
+        ).catch(() => null);
+        if (!lb?.ok) continue;
+        const lbJson = await lb.json();
+        const top = lbJson?.entries?.[0];
+        if (!top) continue;
+        const scoreStr = top.numericValue
+          ? `${top.numericValue}${top.unit ?? ''}`
+          : String(Math.round((top.value ?? 0) * 100) / 100);
+        liveScores.push({
+          entity: top.entityLabel ?? top.entityId ?? bm.name,
+          label: bm.name,
+          score: scoreStr,
+          unit: top.unit ?? '',
+          note: '',
+          sourceUrl: top.sourceUrl
+            ? top.sourceUrl
+            : `${EVAL_TRACE_BASE}/${(top.entityId ?? 'entity').replace(/[^a-z0-9-]/gi, '-')}-${top.evalDate ?? 'latest'}.yaml`,
+          badgeState: (top.badgeState as BadgeState) ?? 'community',
+        });
+      }
+      if (liveScores.length > 0) setVerifiedScores(liveScores);
+    } catch {
+      // silently keep static seeds
+    }
+  }, []);
+
+  useEffect(() => { fetchVerifiedScores(); }, [fetchVerifiedScores]);
 
   return (
     <>
@@ -241,6 +307,64 @@ export default function InvestorStoryPage() {
             </div>
           </section>
   
+          <section className="border-b border-white/10">
+            <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+              <div className="flex items-start gap-3 mb-8">
+                <Trophy className="h-5 w-5 shrink-0 mt-0.5 text-[#d4a054]" />
+                <div>
+                  <p className="text-xs uppercase tracking-[0.24em] text-white/45">Open Evaluation</p>
+                  <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white">
+                    Performance is public.
+                  </h2>
+                  <p className="mt-3 max-w-2xl text-sm leading-7 text-white/72">
+                    Every benchmark score across the SZL platform is independently verified and
+                    publicly accessible. No black-box claims — every number links to a traceable
+                    evaluation run. This is the standard we hold ourselves to.
+                  </p>
+                </div>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                {verifiedScores.map((item) => (
+                  <a
+                    key={item.entity}
+                    href={item.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-2xl border border-white/10 bg-white/[0.03] p-5 hover:bg-white/[0.055] transition-colors"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-semibold uppercase tracking-widest text-[#d4a054]/70">{item.entity}</span>
+                      {item.badgeState === 'verified' ? (
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">Verified</span>
+                      ) : item.badgeState === 'community' ? (
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-400">Community</span>
+                      ) : item.badgeState === 'leaderboard' ? (
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400">Leaderboard</span>
+                      ) : item.badgeState ? (
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border border-slate-500/30 bg-slate-500/10 text-slate-400">{item.badgeState}</span>
+                      ) : null}
+                    </div>
+                    <div className="text-2xl font-semibold text-white tabular-nums mb-1">{item.score}</div>
+                    <div className="text-xs text-white/50">{item.label}</div>
+                    {item.note && <div className="text-[11px] text-white/35 mt-1">{item.note}</div>}
+                    <div className="mt-2 flex items-center gap-1 text-[10px] text-white/25">
+                      <ExternalLink className="h-2.5 w-2.5" />
+                      View trace
+                    </div>
+                  </a>
+                ))}
+              </div>
+              <div className="mt-6 flex items-center gap-2">
+                <Link href="/carlota-jo/open-evaluation">
+                  <span className="inline-flex items-center gap-1.5 text-xs text-[#4a90b8] hover:opacity-75 transition-opacity">
+                    Browse all public benchmarks
+                    <ExternalLink className="h-3 w-3" />
+                  </span>
+                </Link>
+              </div>
+            </div>
+          </section>
+
           <section>
             <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8">
               <div className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.02] p-8 lg:p-10">

@@ -198,6 +198,7 @@ export function BottomTabBar() {
     pathname === '/(shell)/settings' || pathname.startsWith('/(shell)/settings/');
   const isCommandDeckActive = pathname === '/(shell)/quick-actions';
   const isBillingActive = pathname === '/(shell)/billing';
+  const isLeaderboardsActive = pathname === '/(shell)/leaderboards';
 
   return (
     <View
@@ -304,6 +305,38 @@ export function BottomTabBar() {
         </TouchableOpacity>
 
         <OfflineQueueLauncher />
+
+        <TouchableOpacity
+          onPress={() => router.navigate('/(shell)/leaderboards' as never)}
+          style={styles.utilityTab}
+          activeOpacity={0.7}
+          accessibilityLabel="Leaderboards"
+          accessibilityRole="button"
+        >
+          <View style={styles.tabInner}>
+            {isLeaderboardsActive && (
+              <View style={[styles.activeIndicator, { backgroundColor: '#c9a84c' }]} />
+            )}
+            <View style={styles.iconWrap}>
+              <Feather
+                name="award"
+                size={18}
+                color={isLeaderboardsActive ? '#c9a84c' : colors.mutedForeground}
+              />
+            </View>
+            <Text
+              style={[
+                styles.label,
+                {
+                  color: isLeaderboardsActive ? '#c9a84c' : colors.mutedForeground,
+                  fontFamily: isLeaderboardsActive ? 'Inter_600SemiBold' : 'Inter_400Regular',
+                },
+              ]}
+            >
+              Rankings
+            </Text>
+          </View>
+        </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => router.navigate('/(shell)/billing' as never)}

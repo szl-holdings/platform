@@ -1,12 +1,14 @@
 import { Feather } from '@expo/vector-icons';
 import { getApiBaseUrl } from '@szl-holdings/api-client-react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Linking,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TouchableOpacity,
   View,
@@ -15,6 +17,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/AuthContext';
 import { useColors } from '@/hooks/useColors';
 import { trackEvent } from '@/lib/analytics';
+
+const RANK_PUSH_PREF_KEY = 'rankChangePushEnabled';
 
 const ACCENT = '#c9a84c';
 
@@ -94,6 +98,21 @@ export default function SettingsIndexScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const [billingLoading, setBillingLoading] = useState(false);
+  const [rankPushEnabled, setRankPushEnabled] = useState(true);
+
+  useEffect(() => {
+    AsyncStorage.getItem(RANK_PUSH_PREF_KEY).then((val) => {
+      if (val !== null) setRankPushEnabled(val !== 'false');
+    }).catch(() => {});
+  }, []);
+
+  async function handleRankPushToggle(value: boolean) {
+    setRankPushEnabled(value);
+    try {
+      await AsyncStorage.setItem(RANK_PUSH_PREF_KEY, value ? 'true' : 'false');
+      trackEvent('rank_push_toggle', { enabled: value });
+    } catch {}
+  }
 
   async function handleUpgrade() {
     setBillingLoading(true);
@@ -178,6 +197,31 @@ export default function SettingsIndexScreen() {
               <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
             </TouchableOpacity>
           ))}
+        </View>
+
+        <Text style={[styles.sectionLabel, { color: colors.mutedForeground, marginTop: 4 }]}>
+          OPEN EVALUATION
+        </Text>
+        <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View style={[styles.settingRow, { justifyContent: 'space-between' }]}>
+            <View style={[styles.itemIcon, { backgroundColor: '#a78bfa15' }]}>
+              <Feather name="award" size={16} color="#a78bfa" />
+            </View>
+            <View style={[styles.itemText, { flex: 1 }]}>
+              <Text style={[styles.itemTitle, { color: colors.foreground }]}>
+                Rank-change notifications
+              </Text>
+              <Text style={[styles.itemDesc, { color: colors.mutedForeground }]}>
+                Push alert when your agents move on public leaderboards
+              </Text>
+            </View>
+            <Switch
+              value={rankPushEnabled}
+              onValueChange={handleRankPushToggle}
+              trackColor={{ false: colors.border, true: '#a78bfa60' }}
+              thumbColor={rankPushEnabled ? '#a78bfa' : colors.mutedForeground}
+            />
+          </View>
         </View>
 
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground, marginTop: 4 }]}>

@@ -722,6 +722,93 @@ router.patch(
   },
 );
 
+// ─── Public (unauthenticated) eval-registry endpoints ────────────────────────
+// These expose the same read-only benchmark and leaderboard data without
+// requiring a session token, enabling public-facing pages (Carlota Jo Open
+// Evaluation, SZL investor story, mobile leaderboards) to fetch live data
+// and fall back to seeds when the registry is unreachable.
+
+/**
+ * GET /eval-registry/public/benchmarks
+ * List all publicly-visible benchmarks; no auth required.
+ */
+router.get(
+  '/eval-registry/public/benchmarks',
+  authMiddleware({ required: false }),
+  async (req: Request, res: Response) => {
+    try {
+      const domain = req.query.domain ? String(req.query.domain) : undefined;
+      const benchmarks = await evalRegistryRepository.listBenchmarks({
+        domain,
+        orgId: null,
+        limit: 200,
+      });
+      sendSuccess(res, { benchmarks, total: benchmarks.length });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to list public benchmarks');
+    }
+  },
+);
+
+/**
+ * GET /eval-registry/public/benchmarks/:benchmarkId/leaderboard
+ * Returns ranked leaderboard for a benchmark×task; no auth required.
+ * Query params: task_id (optional), higher_is_better (default true), limit (default 20, max 50)
+ */
+router.get(
+  '/eval-registry/public/benchmarks/:benchmarkId/leaderboard',
+  authMiddleware({ required: false }),
+  async (req: Request, res: Response) => {
+    try {
+      const { benchmarkId } = req.params;
+      const taskId = req.query.task_id ? String(req.query.task_id) : undefined;
+      const higherIsBetter = req.query.higher_is_better !== 'false';
+      const limitRaw = Number(req.query.limit ?? 20);
+      const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 50) : 20;
+
+      if (!taskId) {
+        const benchmark = await evalRegistryRepository.findBenchmarkByBenchmarkId(
+          benchmarkId,
+          null,
+        );
+        if (!benchmark) {
+          res.status(404).json({ error: 'Benchmark not found', benchmarkId });
+          return;
+        }
+        const tasks = (benchmark.tasks ?? []) as Array<{
+          taskId: string;
+          higherIsBetter?: boolean;
+        }>;
+        const leaderboards = await Promise.all(
+          tasks.map((task) =>
+            evalRegistryRepository.leaderboard({
+              benchmarkId,
+              taskId: task.taskId,
+              orgId: null,
+              higherIsBetter: task.higherIsBetter ?? true,
+              limit,
+            }),
+          ),
+        );
+        const result = tasks.map((task, i) => ({ task, entries: leaderboards[i] }));
+        sendSuccess(res, { benchmarkId, leaderboards: result });
+        return;
+      }
+
+      const entries = await evalRegistryRepository.leaderboard({
+        benchmarkId,
+        taskId,
+        orgId: null,
+        higherIsBetter,
+        limit,
+      });
+      sendSuccess(res, { benchmarkId, taskId, entries, total: entries.length });
+    } catch (err) {
+      handleRouteError(res, err, 'Failed to get public leaderboard');
+    }
+  },
+);
+
 export default router;
 
 // ─── Helpers (non-blocking side effects) ─────────────────────────────────────

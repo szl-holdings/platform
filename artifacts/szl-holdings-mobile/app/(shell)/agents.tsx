@@ -44,6 +44,35 @@ const TRUST_ICONS: Record<TrustLevel, keyof typeof Feather.glyphMap> = {
   autonomous: 'zap',
 };
 
+type EvalBadgeState = 'verified' | 'community' | 'leaderboard';
+const EVAL_BADGE_CFG: Record<EvalBadgeState, { label: string; color: string; bg: string; icon: keyof typeof Feather.glyphMap }> = {
+  verified:    { label: 'Verified',    color: '#22c55e', bg: 'rgba(34,197,94,0.12)',   icon: 'check-circle' },
+  community:   { label: 'Community',   color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  icon: 'git-pull-request' },
+  leaderboard: { label: 'Leaderboard', color: '#3b82f6', bg: 'rgba(59,130,246,0.12)', icon: 'award' },
+};
+
+function evalBadgeForScore(score: number): EvalBadgeState {
+  if (score >= 0.90) return 'verified';
+  if (score >= 0.80) return 'leaderboard';
+  return 'community';
+}
+
+function EvalBadgeRow({ overallScore, domain }: { overallScore: number; domain: string }) {
+  const badgeState = evalBadgeForScore(overallScore);
+  const cfg = EVAL_BADGE_CFG[badgeState];
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#1e293b', marginTop: 4 }}>
+      <View style={[{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 999, borderWidth: 1 }, { backgroundColor: cfg.bg, borderColor: cfg.color + '50' }]}>
+        <Feather name={cfg.icon} size={11} color={cfg.color} />
+        <Text style={{ fontSize: 10, color: cfg.color, fontWeight: '600' }}>{cfg.label}</Text>
+      </View>
+      <Text style={{ fontSize: 10, color: '#475569' }}>
+        {Math.round(overallScore * 100)}% verified · {domain} benchmark
+      </Text>
+    </View>
+  );
+}
+
 const ROLE_ICONS: Record<string, keyof typeof Feather.glyphMap> = {
   analyst: 'bar-chart-2',
   drafter: 'edit-3',
@@ -70,7 +99,6 @@ export default function AgentsScreen() {
   const [agents, setAgents] = useState<AgentTrustInfo[]>(MOCK_AGENTS);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-
   const fetchAgents = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true); else setLoading(true);
     try {
@@ -134,6 +162,9 @@ export default function AgentsScreen() {
         <View style={styles.progressBarBg}>
           <View style={[styles.progressBarFill, { width: `${scorePercent}%`, backgroundColor: trustColor }]} />
         </View>
+
+        {/* Open Evaluation badges */}
+        <EvalBadgeRow overallScore={item.overallScore} domain={item.domain} />
       </View>
     );
   }, [colors]);

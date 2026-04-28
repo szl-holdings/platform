@@ -22,6 +22,7 @@ export default function Header() {
     { label: t('nav.howWeWork'), href: '/engagements' },
     { label: 'Begin Engagement', href: '/engage' },
     { label: t('nav.about'), href: '/founder' },
+    { label: 'Open Evaluation', href: '/open-evaluation' },
   ];
 
   useEffect(() => {

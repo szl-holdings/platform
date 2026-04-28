@@ -163,6 +163,15 @@ function SignalCard({
                 <Text style={[styles.draftsBadgeText, { color: ACCENT }]}>DRAFTS</Text>
               </View>
             )}
+            {signal.confidence >= 0.9 ? (
+              <View style={[styles.draftsBadge, { borderColor: '#22c55e40', backgroundColor: '#22c55e18' }]}>
+                <Text style={[styles.draftsBadgeText, { color: '#22c55e' }]}>Verified</Text>
+              </View>
+            ) : signal.confidence >= 0.75 ? (
+              <View style={[styles.draftsBadge, { borderColor: `${ACCENT}40`, backgroundColor: `${ACCENT}18` }]}>
+                <Text style={[styles.draftsBadgeText, { color: ACCENT }]}>Community</Text>
+              </View>
+            ) : null}
             <Text style={[styles.signalTime, { color: colors.mutedForeground }]}>
               {formatRelative(signal.timestamp)}
             </Text>

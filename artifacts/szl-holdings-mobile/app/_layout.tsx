@@ -55,6 +55,7 @@ import { ScreenshotGuardProvider } from '@/context/ScreenshotGuardContext';
 import { WorkspaceProvider } from '@/context/WorkspaceContext';
 import { useEscalatedApprovalNotifier } from '@/hooks/operations/useEscalatedApprovalNotifier';
 import { useRunFailureNotifier } from '@/hooks/operations/useRunFailureNotifier';
+import { useRankChangePush } from '@/hooks/useRankChangePush';
 import { isAnalyticsEnabled, trackEvent } from '@/lib/analytics';
 import { initSentryGlobalHandlers } from '@/lib/sentry';
 
@@ -211,6 +212,9 @@ function AppShell() {
   // approvals — fire regardless of which screen is active.
   useRunFailureNotifier();
   useEscalatedApprovalNotifier();
+  // Rank-change push notifications — polls the public eval registry for any
+  // agents the user follows on benchmarks they're subscribed to.
+  useRankChangePush();
 
   // Cold-start: if the app was launched by tapping a notification, replay the
   // last response once per process. We track the consumed identifier in
