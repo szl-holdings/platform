@@ -9,8 +9,7 @@ import {
   TEAM,
   TIME_ENTRIES,
 } from '@/data/operationalData';
-
-const API = '/api';
+import { apiJson } from '@/lib/api';
 
 // ── API types ─────────────────────────────────────────────────────────────────
 
@@ -113,11 +112,9 @@ const fmtGBP = (v: number): string => {
   return `£${v}`;
 };
 
-async function fetchData<T>(url: string): Promise<T[]> {
-  const res = await fetch(url, { credentials: 'include' });
-  if (!res.ok) throw new Error(`API error ${res.status}`);
-  const json = await res.json();
-  if (Array.isArray(json?.data)) return json.data as T[];
+async function fetchList<T>(path: string): Promise<T[]> {
+  const result = await apiJson<T[] | T>(path);
+  if (Array.isArray(result)) return result;
   return [];
 }
 
@@ -126,7 +123,7 @@ async function fetchData<T>(url: string): Promise<T[]> {
 export function useConsultingMetrics(): ConsultingMetrics {
   const { data: teamApi = [], isLoading: teamLoading } = useQuery<ApiTeamMember[]>({
     queryKey: ['carlota-team'],
-    queryFn: () => fetchData<ApiTeamMember>(`${API}/booking/team`),
+    queryFn: () => fetchList<ApiTeamMember>('/booking/team'),
     staleTime: 120_000,
     retry: 1,
     refetchInterval: 180_000,
@@ -134,7 +131,7 @@ export function useConsultingMetrics(): ConsultingMetrics {
 
   const { data: engagementsApi = [], isLoading: engagementsLoading } = useQuery<ApiEngagement[]>({
     queryKey: ['carlota-engagements-summary'],
-    queryFn: () => fetchData<ApiEngagement>(`${API}/booking/engagements-summary`),
+    queryFn: () => fetchList<ApiEngagement>('/booking/engagements-summary'),
     staleTime: 120_000,
     retry: 1,
     refetchInterval: 180_000,
@@ -142,7 +139,7 @@ export function useConsultingMetrics(): ConsultingMetrics {
 
   const { data: timeEntriesApi = [], isLoading: timeEntriesLoading } = useQuery<ApiTimeEntry[]>({
     queryKey: ['carlota-time-entries-metrics'],
-    queryFn: () => fetchData<ApiTimeEntry>(`${API}/booking/time-entries`),
+    queryFn: () => fetchList<ApiTimeEntry>('/booking/time-entries'),
     staleTime: 60_000,
     retry: 1,
     refetchInterval: 120_000,
@@ -150,7 +147,7 @@ export function useConsultingMetrics(): ConsultingMetrics {
 
   const { data: invoicesApi = [], isLoading: invoicesLoading } = useQuery<ApiInvoice[]>({
     queryKey: ['carlota-invoices-metrics'],
-    queryFn: () => fetchData<ApiInvoice>(`${API}/booking/time-invoices`),
+    queryFn: () => fetchList<ApiInvoice>('/booking/time-invoices'),
     staleTime: 60_000,
     retry: 1,
     refetchInterval: 120_000,

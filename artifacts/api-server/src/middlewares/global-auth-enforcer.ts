@@ -245,6 +245,11 @@ const PUBLIC_PREFIXES = [
   // HuggingFace ML Intelligence — POST inference endpoints. All are public demo surfaces.
   "/api/hf-intelligence/",
   "/api/contact/",
+  // Carlota Jo inquiry submission — public POST endpoint for the contact/inquiry
+  // form on the marketing site. Rate-limited (10/hour) inside the route handler.
+  // GET /booking/inquiries (staff inbox) enforces its own authMiddleware() so
+  // listing is still protected; only the POST creation path is public.
+  "/api/booking/inquiries",
   // Carlota Jo time tracking & invoice persistence — publicly accessible from the
   // time-tracking page (which is unauthenticated like the rest of the marketing
   // demo). Backed by Postgres so the data syncs across devices.

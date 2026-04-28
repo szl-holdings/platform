@@ -18,9 +18,9 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePageMeta } from '@/hooks/usePageMeta';
+import { apiJson } from '@/lib/api';
 
 const GOLD = 'var(--color-gold)';
-const BASE = import.meta.env.BASE_URL;
 
 type Expert = {
   id: number;
@@ -78,36 +78,6 @@ const EMPTY_FORM: ExpertForm = {
   languages: ['English'],
 };
 
-async function apiGet<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}api${path}`, { credentials: 'include' });
-  const json = await res.json();
-  if (!json.success) throw new Error(json.error ?? 'Request failed');
-  return json.data as T;
-}
-
-let csrfTokenCache: string | null = null;
-
-async function getCsrfToken(): Promise<string> {
-  if (csrfTokenCache) return csrfTokenCache;
-  const r = await fetch(`${BASE}api/csrf-token`, { credentials: 'include' });
-  const b = (await r.json()) as { csrfToken?: string };
-  csrfTokenCache = String(b.csrfToken ?? '');
-  return csrfTokenCache;
-}
-
-async function apiMutation<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const csrfToken = await getCsrfToken();
-  const res = await fetch(`${BASE}api${path}`, {
-    method,
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (res.status === 403) csrfTokenCache = null;
-  const json = await res.json();
-  if (!json.success) throw new Error(json.error ?? 'Request failed');
-  return json.data as T;
-}
 
 export default function ExpertNetwork() {
   const { t } = useTranslation();
@@ -141,7 +111,7 @@ export default function ExpertNetwork() {
     setLoading(true);
     setError(null);
     try {
-      const data = await apiGet<{ experts: Expert[] }>('/carlota/experts');
+      const data = await apiJson<{ experts: Expert[] }>('/carlota/experts');
       setExperts(data.experts);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load experts');
@@ -203,11 +173,11 @@ export default function ExpertNetwork() {
     setSaving(true);
     try {
       if (editingExpert) {
-        const updated = await apiMutation<Expert>('PUT', `/carlota/experts/${editingExpert.id}`, form);
+        const updated = await apiJson<Expert>(`/carlota/experts/${editingExpert.id}`, { method: 'PUT', body: JSON.stringify(form) });
         setExperts((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
         if (selectedExpert?.id === updated.id) setSelectedExpert(updated);
       } else {
-        const created = await apiMutation<Expert>('POST', '/carlota/experts', form);
+        const created = await apiJson<Expert>('/carlota/experts', { method: 'POST', body: JSON.stringify(form) });
         setExperts((prev) => [created, ...prev]);
       }
       closeModal();
@@ -222,7 +192,7 @@ export default function ExpertNetwork() {
     if (!deleteConfirm) return;
     setDeleting(true);
     try {
-      await apiMutation('DELETE', `/carlota/experts/${deleteConfirm.id}`);
+      await apiJson(`/carlota/experts/${deleteConfirm.id}`, { method: 'DELETE' });
       setExperts((prev) => prev.filter((e) => e.id !== deleteConfirm.id));
       if (selectedExpert?.id === deleteConfirm.id) setSelectedExpert(null);
       setDeleteConfirm(null);
@@ -247,7 +217,7 @@ Respond with EXACTLY this JSON (no markdown):
   "teamRationale": "2-3 sentences explaining why this team combination is optimal",
   "estimatedCost": "£XX,000 – £XX,000"
 }`;
-      const resp = await fetch(`${BASE}api/intelligence/ai/advisory`, {
+      const resp = await fetch('/api/intelligence/ai/advisory', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

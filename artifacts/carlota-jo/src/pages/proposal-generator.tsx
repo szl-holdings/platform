@@ -21,9 +21,9 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePageMeta } from '@/hooks/usePageMeta';
+import { apiJson } from '@/lib/api';
 
 const GOLD = 'var(--color-gold)';
-const BASE = import.meta.env.BASE_URL;
 
 type GeneratedProposal = {
   prospectName: string;
@@ -67,36 +67,6 @@ type KnowledgeSuggestion = {
   industries: string[];
 };
 
-async function apiGet<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}api${path}`, { credentials: 'include' });
-  const json = await res.json();
-  if (!json.success) throw new Error(json.error ?? 'Request failed');
-  return json.data as T;
-}
-
-let csrfTokenCache: string | null = null;
-
-async function getCsrfToken(): Promise<string> {
-  if (csrfTokenCache) return csrfTokenCache;
-  const r = await fetch(`${BASE}api/csrf-token`, { credentials: 'include' });
-  const b = (await r.json()) as { csrfToken?: string };
-  csrfTokenCache = String(b.csrfToken ?? '');
-  return csrfTokenCache;
-}
-
-async function apiMutation<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const csrfToken = await getCsrfToken();
-  const res = await fetch(`${BASE}api${path}`, {
-    method,
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (res.status === 403) csrfTokenCache = null;
-  const json = await res.json();
-  if (!json.success) throw new Error(json.error ?? 'Request failed');
-  return json.data as T;
-}
 
 function exportToPDF(proposal: GeneratedProposal) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -308,7 +278,7 @@ export default function ProposalGenerator() {
   useEffect(() => {
     void (async () => {
       try {
-        const data = await apiGet<{ clients: AdvisoryClient[] }>('/carlota/proposals/clients');
+        const data = await apiJson<{ clients: AdvisoryClient[] }>('/carlota/proposals/clients');
         setAdvisoryClients(data.clients ?? []);
       } catch {
         // Optional — proposal still works without prefill
@@ -339,7 +309,7 @@ export default function ProposalGenerator() {
   const fetchDrafts = useCallback(async () => {
     setDraftsLoading(true);
     try {
-      const data = await apiGet<{ proposals: ProposalDraft[] }>('/carlota/proposals');
+      const data = await apiJson<{ proposals: ProposalDraft[] }>('/carlota/proposals');
       setDrafts(data.proposals);
     } catch {
       // Silent fail — drafts are optional
@@ -370,14 +340,10 @@ export default function ProposalGenerator() {
         status: (currentProposal ?? proposal) ? 'generated' : 'draft',
       };
       if (savedDraftId) {
-        const updated = await apiMutation<ProposalDraft>(
-          'PUT',
-          `/carlota/proposals/${savedDraftId}`,
-          body,
-        );
+        const updated = await apiJson<ProposalDraft>(`/carlota/proposals/${savedDraftId}`, { method: 'PUT', body: JSON.stringify(body) });
         setDrafts((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
       } else {
-        const created = await apiMutation<ProposalDraft>('POST', '/carlota/proposals', body);
+        const created = await apiJson<ProposalDraft>('/carlota/proposals', { method: 'POST', body: JSON.stringify(body) });
         setSavedDraftId(created.id);
         setDrafts((prev) => [created, ...prev]);
       }
@@ -406,7 +372,7 @@ export default function ProposalGenerator() {
   const deleteDraft = async (id: number) => {
     setDeletingDraftId(id);
     try {
-      await apiMutation('DELETE', `/carlota/proposals/${id}`);
+      await apiJson(`/carlota/proposals/${id}`, { method: 'DELETE' });
       setDrafts((prev) => prev.filter((d) => d.id !== id));
       if (savedDraftId === id) {
         setSavedDraftId(null);
@@ -436,7 +402,7 @@ export default function ProposalGenerator() {
     try {
       let suggestions: KnowledgeSuggestion[] = [];
       try {
-        const data = await apiGet<{ items: KnowledgeSuggestion[] }>(
+        const data = await apiJson<{ items: KnowledgeSuggestion[] }>(
           `/carlota/proposals/knowledge-suggestions?industry=${encodeURIComponent(form.industry)}`,
         );
         suggestions = data.items ?? [];
@@ -491,7 +457,7 @@ Additional context: ${form.additionalContext}
 
 Template: ${selectedTemplate}. Use UK spelling. Return ONLY valid JSON.${knowledgeBlock}`;
 
-      const res = await fetch(`${BASE}api/intelligence/ai/advisory`, {
+      const res = await fetch('/api/intelligence/ai/advisory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

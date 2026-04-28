@@ -13,8 +13,8 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { usePageMeta } from '@/hooks/usePageMeta';
+import { apiJson, apiJsonFull } from '@/lib/api';
 
-const API = '/api';
 const GOLD = 'var(--color-gold)';
 
 type InquiryStatus = 'new' | 'in_review' | 'in_progress' | 'contacted' | 'closed';
@@ -90,23 +90,14 @@ const NEXT_STATUS_LABEL: Record<string, string> = {
 };
 
 async function fetchInquiries(page = 1, limit = 25): Promise<ApiResponse> {
-  const res = await fetch(`${API}/booking/inquiries?page=${page}&limit=${limit}`, {
-    credentials: 'include',
-  });
-  if (!res.ok) throw new Error(`Failed to fetch inquiries (${res.status})`);
-  return res.json();
+  return apiJsonFull<ApiResponse>(`/booking/inquiries?page=${page}&limit=${limit}`);
 }
 
 async function updateStatus(id: number, status: InquiryStatus): Promise<Inquiry> {
-  const res = await fetch(`${API}/booking/inquiries/${id}`, {
+  return apiJson<Inquiry>(`/booking/inquiries/${id}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
     body: JSON.stringify({ status }),
   });
-  if (!res.ok) throw new Error(`Failed to update inquiry (${res.status})`);
-  const json = await res.json();
-  return json.data;
 }
 
 function formatDate(iso: string): string {

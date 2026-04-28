@@ -23,7 +23,7 @@ async function getCsrfToken(): Promise<string> {
   return csrfTokenCache;
 }
 
-export async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
+async function apiFetch(path: string, init?: RequestInit): Promise<unknown> {
   const method = (init?.method ?? 'GET').toUpperCase();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -41,6 +41,22 @@ export async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
     if (res.status === 403) csrfTokenCache = null;
     throw new Error(`HTTP ${res.status}`);
   }
-  const body = await res.json();
-  return (body?.data ?? body) as T;
+  return res.json();
+}
+
+/**
+ * Make an API call and unwrap the standard `{ data: … }` envelope.
+ * Use for most endpoints that return a single object or array.
+ */
+export async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const body = await apiFetch(path, init);
+  return ((body as Record<string, unknown>)?.data ?? body) as T;
+}
+
+/**
+ * Make an API call and return the raw response body (envelope included).
+ * Use for paginated endpoints that need both `data` and `meta` fields.
+ */
+export async function apiJsonFull<T>(path: string, init?: RequestInit): Promise<T> {
+  return apiFetch(path, init) as Promise<T>;
 }

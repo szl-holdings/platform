@@ -20,9 +20,9 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePageMeta } from '@/hooks/usePageMeta';
+import { apiJson } from '@/lib/api';
 
 const GOLD = 'var(--color-gold)';
-const BASE = import.meta.env.BASE_URL;
 
 type KnowledgeType = 'framework' | 'playbook' | 'template' | 'case-study' | 'research';
 
@@ -69,36 +69,6 @@ type AiSearchResult = {
   reasoning: string;
 };
 
-async function apiGet<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}api${path}`, { credentials: 'include' });
-  const json = await res.json();
-  if (!json.success) throw new Error(json.error ?? 'Request failed');
-  return json.data as T;
-}
-
-let csrfTokenCache: string | null = null;
-
-async function getCsrfToken(): Promise<string> {
-  if (csrfTokenCache) return csrfTokenCache;
-  const r = await fetch(`${BASE}api/csrf-token`, { credentials: 'include' });
-  const b = (await r.json()) as { csrfToken?: string };
-  csrfTokenCache = String(b.csrfToken ?? '');
-  return csrfTokenCache;
-}
-
-async function apiMutation<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const csrfToken = await getCsrfToken();
-  const res = await fetch(`${BASE}api${path}`, {
-    method,
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (res.status === 403) csrfTokenCache = null;
-  const json = await res.json();
-  if (!json.success) throw new Error(json.error ?? 'Request failed');
-  return json.data as T;
-}
 
 export default function KnowledgeVault() {
   const { t } = useTranslation();
@@ -130,7 +100,7 @@ export default function KnowledgeVault() {
     setLoading(true);
     setError(null);
     try {
-      const data = await apiGet<{ items: KnowledgeItem[] }>('/carlota/knowledge');
+      const data = await apiJson<{ items: KnowledgeItem[] }>('/carlota/knowledge');
       setItems(data.items);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load knowledge items');
@@ -158,7 +128,7 @@ export default function KnowledgeVault() {
     setAiSearching(true);
     try {
       const prompt = `You are a knowledge management AI for Carlota Jo consulting. The user searched for: "${searchQuery}". Available knowledge items: ${items.map((k) => `"${k.title}" (${k.type}) - ${k.tags.join(', ')}`).join('; ')}. Identify the 1-3 most relevant items by exact title and explain in 2 sentences why each is relevant.`;
-      const resp = await fetch(`${BASE}api/intelligence/ai/advisory`, {
+      const resp = await fetch('/api/intelligence/ai/advisory', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -225,7 +195,7 @@ export default function KnowledgeVault() {
     setSaving(true);
     try {
       if (editingItem) {
-        const updated = await apiMutation<KnowledgeItem>('PUT', `/carlota/knowledge/${editingItem.id}`, form);
+        const updated = await apiJson<KnowledgeItem>(`/carlota/knowledge/${editingItem.id}`, { method: 'PUT', body: JSON.stringify(form) });
         setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
         if (selectedItem?.id === updated.id) setSelectedItem(updated);
         if (aiResult) {
@@ -234,7 +204,7 @@ export default function KnowledgeVault() {
           );
         }
       } else {
-        const created = await apiMutation<KnowledgeItem>('POST', '/carlota/knowledge', form);
+        const created = await apiJson<KnowledgeItem>('/carlota/knowledge', { method: 'POST', body: JSON.stringify(form) });
         setItems((prev) => [created, ...prev]);
       }
       closeModal();
@@ -249,7 +219,7 @@ export default function KnowledgeVault() {
     if (!deleteConfirm) return;
     setDeleting(true);
     try {
-      await apiMutation('DELETE', `/carlota/knowledge/${deleteConfirm.id}`);
+      await apiJson(`/carlota/knowledge/${deleteConfirm.id}`, { method: 'DELETE' });
       setItems((prev) => prev.filter((i) => i.id !== deleteConfirm.id));
       if (selectedItem?.id === deleteConfirm.id) setSelectedItem(null);
       if (aiResult) {
