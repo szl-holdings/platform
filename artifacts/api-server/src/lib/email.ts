@@ -2427,3 +2427,87 @@ export function buildReconciliationMismatchEmail(opts: ReconciliationMismatchEma
     <a class="cta" href="${adminUrl}">Open Reconciliation Dashboard</a>
   `);
 }
+
+// ─── Magic Link email ─────────────────────────────────────────────────────────
+
+export function buildMagicLinkEmail(opts: {
+  displayName: string;
+  magicLinkUrl: string;
+  expiryMinutes: number;
+  ipAddress?: string;
+}): { subject: string; html: string; text: string } {
+  const subject = 'Your sign-in link for SZL Holdings';
+  const html = szlBrand(`
+    <h2>Sign in to SZL Holdings</h2>
+    <p>Hi ${opts.displayName || 'there'},</p>
+    <p>Click the button below to sign in. This link is valid for <strong>${opts.expiryMinutes} minutes</strong> and can only be used once.</p>
+    <a href="${opts.magicLinkUrl}" class="cta">Sign In Securely</a>
+    <div class="highlight">
+      <p class="label">Security note</p>
+      <p>If you didn't request this link, you can safely ignore this email. Your account is not at risk.</p>
+    </div>
+    ${opts.ipAddress ? `<p style="font-size:12px;color:#9ca3af;">Requested from IP: ${opts.ipAddress}</p>` : ''}
+    <p style="font-size:12px;color:#9ca3af;margin-top:16px;">This link expires in ${opts.expiryMinutes} minutes and is single-use.</p>
+  `);
+  const text = [
+    'Sign in to SZL Holdings',
+    '',
+    `Hi ${opts.displayName || 'there'},`,
+    '',
+    `Click the link below to sign in. This link expires in ${opts.expiryMinutes} minutes and can only be used once.`,
+    '',
+    opts.magicLinkUrl,
+    '',
+    "If you didn't request this, ignore this email — your account is safe.",
+    ...(opts.ipAddress ? ['', `Requested from IP: ${opts.ipAddress}`] : []),
+  ].join('\n');
+  return { subject, html, text };
+}
+
+// ─── New device alert email ────────────────────────────────────────────────────
+
+export function buildNewDeviceAlertEmail(opts: {
+  displayName: string;
+  deviceName: string;
+  ipAddress?: string;
+  timestamp: string;
+  sessionsUrl: string;
+}): { subject: string; html: string; text: string } {
+  const subject = 'New device sign-in to your SZL Holdings account';
+  const html = szlBrand(`
+    <h2 style="color:#d97706;">&#9888; New Device Sign-In Detected</h2>
+    <p>Hi ${opts.displayName},</p>
+    <p>A sign-in to your SZL Holdings account was detected from a new device. If this was you, no action is needed.</p>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:8px 0;color:#6b7280;font-weight:500;width:40%;">Device</td>
+        <td style="padding:8px 0;">${opts.deviceName}</td>
+      </tr>
+      <tr style="border-top:1px solid #f3f4f6;">
+        <td style="padding:8px 0;color:#6b7280;font-weight:500;">Time</td>
+        <td style="padding:8px 0;">${opts.timestamp}</td>
+      </tr>
+      ${opts.ipAddress ? `<tr style="border-top:1px solid #f3f4f6;"><td style="padding:8px 0;color:#6b7280;font-weight:500;">IP</td><td style="padding:8px 0;font-family:monospace;">${opts.ipAddress}</td></tr>` : ''}
+    </table>
+    <p><strong>If this wasn't you</strong>, revoke this session immediately:</p>
+    <a href="${opts.sessionsUrl}" class="cta">Manage My Sessions</a>
+    <div class="highlight">
+      <p class="label">Security recommendation</p>
+      <p>If you don't recognize this sign-in, change your password and enable multi-factor authentication.</p>
+    </div>
+  `);
+  const text = [
+    'New Device Sign-In Detected',
+    '',
+    `Hi ${opts.displayName},`,
+    '',
+    'A sign-in from a new device was detected on your account.',
+    '',
+    `Device: ${opts.deviceName}`,
+    `Time: ${opts.timestamp}`,
+    ...(opts.ipAddress ? [`IP: ${opts.ipAddress}`] : []),
+    '',
+    `If this wasn't you, manage your sessions at: ${opts.sessionsUrl}`,
+  ].join('\n');
+  return { subject, html, text };
+}

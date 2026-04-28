@@ -92,6 +92,13 @@ const EXEMPT_PATHS = new Set([
   // the booking is scoped to the provided email/name fields. Auth-gated CRUD
   // routes (PATCH/DELETE /booking/reservations/:id) are covered by authMiddleware.
   '/api/booking/reservations',
+  // Magic link auth — passwordless email-based sign-in. POST /request is called
+  // from any page (including pre-session); GET /verify is a one-time token link
+  // from an email. Neither flow uses browser cookies; CSRF does not apply.
+  '/api/auth/magic-link/request',
+  '/api/auth/magic-link/verify',
+  '/api/auth/lockout-status',
+  '/api/auth/risk-assessment',
 ]);
 
 // Risk evidence store — public POST/DELETE endpoints accept any

@@ -1023,6 +1023,20 @@
       "when": 1780300800000,
       "tag": "0144_skill_library_schema_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 146,
+      "version": "7",
+      "when": 1780387200000,
+      "tag": "0145_feature_flag_check_logs",
+      "breakpoints": true
+    },
+    {
+      "idx": 147,
+      "version": "7",
+      "when": 1780473600000,
+      "tag": "0146_zero_trust_auth_hardening",
+      "breakpoints": true
     }
   ]
 }

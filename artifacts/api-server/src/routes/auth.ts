@@ -1,27 +1,36 @@
 import { Router, type IRouter } from "express";
 import { bodyShape } from "@szl-holdings/contracts/common";
-import { db, usersTable, sessionsTable, rolesTable, userRolesTable, organizationsTable, orgMembersTable, mfaSecretsTable, toCanonicalRole, type RoleName } from "@szl-holdings/db";
-import { eq, desc, and, inArray } from "drizzle-orm";
-import { randomBytes, pbkdf2Sync, timingSafeEqual, createCipheriv, createDecipheriv } from "node:crypto";
+import { db, usersTable, sessionsTable, rolesTable, userRolesTable, organizationsTable, orgMembersTable, mfaSecretsTable, magicLinksTable, userDevicesTable, auditEventsTable, loginAttemptsTable, toCanonicalRole, type RoleName } from "@szl-holdings/db";
+import { eq, desc, and, inArray, lt, gte, isNull, count } from "drizzle-orm";
+import { randomBytes, pbkdf2Sync, timingSafeEqual, createCipheriv, createDecipheriv, createHash } from "node:crypto";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendForbidden, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { logActivity } from "../lib/activity-logger";
 import { logger } from "../lib/logger";
 import { createAuthService } from "@szl-holdings/auth";
 import { issueWsTicket } from "../lib/websocket.js";
-import { clearSessionCookie, getSessionToken, getSessionUser } from "../lib/auth";
+import { clearSessionCookie, getSessionToken, getSessionUser, getOrigin } from "../lib/auth";
 import {
   createSessionWithRefresh,
   rotateRefreshToken,
   writeAuditEvent,
   RefreshTokenInvalidError,
   RefreshTokenReplayError,
+  bumpUserSessionVersion,
 } from "../middlewares/session-policy";
 import { z } from "zod";
 import { listQuerySchema, loginPasswordSchema, validateBody, validateQuery } from "../lib/validation";
 import { generateSecret as otpGenerateSecret, verifySync as otpVerifySync, generateURI as otpGenerateURI } from "otplib";
 import { redisGet, redisSet, redisDel } from "../lib/redis-client.js";
 import { loginLimiter } from "../middlewares/rate-limiters";
+import { sendEmail, buildMagicLinkEmail, buildNewDeviceAlertEmail } from "../lib/email";
+import {
+  assessLoginRisk,
+  recordLoginAttempt,
+  getAccountLockoutStatus,
+  upsertUserDevice,
+  hashDeviceFingerprint,
+} from "../lib/adaptive-risk";
 
 const router: IRouter = Router();
 const authService = createAuthService();
@@ -651,6 +660,20 @@ router.get("/auth/verify-email", validateQuery(listQuerySchema), async (req, res
 router.post("/auth/login-password", loginLimiter, validateBody(loginPasswordSchema), async (req, res) => {
   try {
     const { email, password } = req.body as z.infer<typeof loginPasswordSchema>;
+    const invalidMsg = "Invalid email or password.";
+
+    // Progressive brute-force protection: check account lockout before any DB user lookup
+    const lockout = await getAccountLockoutStatus(email);
+    if (lockout.locked) {
+      await recordLoginAttempt({ email, ipAddress: req.ip ?? null, success: false, failureReason: "account_locked" });
+      sendError(
+        res,
+        `Too many failed attempts. Account is locked. Try again after ${lockout.lockedUntilMs ? new Date(lockout.lockedUntilMs).toUTCString() : "a few minutes"}.`,
+        429,
+        "ACCOUNT_LOCKED",
+      );
+      return;
+    }
 
     const [user] = await db
       .select()
@@ -658,14 +681,16 @@ router.post("/auth/login-password", loginLimiter, validateBody(loginPasswordSche
       .where(eq(usersTable.email, email))
       .limit(1);
 
-    const invalidMsg = "Invalid email or password.";
     if (!user?.passwordHash) {
+      // Still record attempt even for non-existent users to prevent timing oracles
+      await recordLoginAttempt({ email, ipAddress: req.ip ?? null, success: false, failureReason: "user_not_found" });
       sendError(res, invalidMsg, 401, "INVALID_CREDENTIALS");
       return;
     }
 
     const [, salt, storedHash] = user.passwordHash.split(":");
     if (!salt || !storedHash) {
+      await recordLoginAttempt({ email, ipAddress: req.ip ?? null, success: false, failureReason: "corrupt_hash" });
       sendError(res, invalidMsg, 401, "INVALID_CREDENTIALS");
       return;
     }
@@ -673,12 +698,35 @@ router.post("/auth/login-password", loginLimiter, validateBody(loginPasswordSche
     const candidateHash = pbkdf2Sync(password, salt, 100_000, 64, "sha512").toString("hex");
     const isValid = timingSafeEqual(Buffer.from(storedHash, "hex"), Buffer.from(candidateHash, "hex"));
     if (!isValid) {
+      await recordLoginAttempt({ email, ipAddress: req.ip ?? null, success: false, failureReason: "wrong_password" });
       sendError(res, invalidMsg, 401, "INVALID_CREDENTIALS");
       return;
     }
 
     if (!user.isActive) {
+      await recordLoginAttempt({ email, ipAddress: req.ip ?? null, success: false, failureReason: "account_inactive" });
       sendError(res, "Account is not yet verified. Please check your email.", 403, "EMAIL_NOT_VERIFIED");
+      return;
+    }
+
+    // Adaptive risk scoring — assess risk after credential validation (block critical, step-up high)
+    const risk = await assessLoginRisk({
+      email: user.email!,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      deviceFingerprintHash: null,
+      userId: user.id,
+    });
+
+    if (risk.blocked) {
+      await recordLoginAttempt({
+        email,
+        ipAddress: req.ip ?? null,
+        success: false,
+        failureReason: "risk_blocked",
+        riskScore: risk.score,
+      });
+      sendError(res, "Sign-in blocked due to suspicious activity. Please contact support.", 403, "RISK_BLOCKED");
       return;
     }
 
@@ -688,10 +736,14 @@ router.post("/auth/login-password", loginLimiter, validateBody(loginPasswordSche
       .where(eq(mfaSecretsTable.userId, user.id))
       .limit(1);
 
-    if (mfaRecord?.enabled) {
+    if (mfaRecord?.enabled || risk.stepUpRequired) {
       await db.update(usersTable).set({ lastLoginAt: new Date(), updatedAt: new Date() }).where(eq(usersTable.id, user.id));
       const mfaChallengeToken = await createMfaChallengeToken(user.id);
-      sendSuccess(res, { mfa_required: true, mfa_challenge_token: mfaChallengeToken });
+      sendSuccess(res, {
+        mfa_required: true,
+        mfa_challenge_token: mfaChallengeToken,
+        ...(risk.stepUpRequired && !mfaRecord?.enabled ? { step_up_required: true, step_up_reason: risk.reasons } : {}),
+      });
       return;
     }
 
@@ -713,6 +765,8 @@ router.post("/auth/login-password", loginLimiter, validateBody(loginPasswordSche
     });
 
     await db.update(usersTable).set({ lastLoginAt: new Date(), updatedAt: new Date() }).where(eq(usersTable.id, user.id));
+
+    await recordLoginAttempt({ email, ipAddress: req.ip ?? null, success: true, riskScore: risk.score });
 
     sendSuccess(res, {
       token: created.token,
@@ -1105,5 +1159,580 @@ router.get("/auth/mfa/status", authMiddleware(), async (req, res) => {
     handleRouteError(res, err, "Failed to get MFA status");
   }
 });
+
+// ─── Magic Link Authentication ─────────────────────────────────────────────────
+
+const MAGIC_LINK_TTL_MS = 15 * 60 * 1000;
+const MAGIC_LINK_EXPIRY_MINUTES = 15;
+
+const magicLinkRequestSchema = z.object({
+  email: z.string().email("Valid email is required"),
+});
+
+router.post("/auth/magic-link/request", loginLimiter, validateBody(magicLinkRequestSchema), async (req, res) => {
+  try {
+    const { email } = req.body as z.infer<typeof magicLinkRequestSchema>;
+
+    const lockout = await getAccountLockoutStatus(email);
+    if (lockout.locked) {
+      await recordLoginAttempt({ email, ipAddress: req.ip ?? null, success: false, failureReason: "account_locked" });
+      sendError(res, "Too many failed attempts. Account is temporarily locked. Please try again later.", 429, "ACCOUNT_LOCKED");
+      return;
+    }
+
+    const [user] = await db
+      .select({ id: usersTable.id, displayName: usersTable.displayName, email: usersTable.email, isActive: usersTable.isActive })
+      .from(usersTable)
+      .where(eq(usersTable.email, email.toLowerCase()))
+      .limit(1);
+
+    if (lockout.captchaRequired) {
+      // Require caller to complete CAPTCHA before we issue a link — do not silently send
+      sendError(res, "Too many recent attempts. Please complete the CAPTCHA challenge before requesting a sign-in link.", 429, "CAPTCHA_REQUIRED");
+      return;
+    }
+
+    if (!user || !user.isActive) {
+      sendSuccess(res, { sent: true, message: "If an account with that email exists, a sign-in link has been sent." });
+      return;
+    }
+
+    await db
+      .update(magicLinksTable)
+      .set({ usedAt: new Date() })
+      .where(and(eq(magicLinksTable.email, email.toLowerCase()), isNull(magicLinksTable.usedAt)));
+
+    const token = randomBytes(48).toString("hex");
+    const expiresAt = new Date(Date.now() + MAGIC_LINK_TTL_MS);
+
+    await db.insert(magicLinksTable).values({
+      userId: user.id,
+      email: email.toLowerCase(),
+      token,
+      expiresAt,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+    });
+
+    const appUrl = process.env.APP_URL ?? getOrigin(req);
+    const magicLinkUrl = `${appUrl}/api/auth/magic-link/verify?token=${encodeURIComponent(token)}`;
+
+    await sendEmail({
+      to: user.email!,
+      subject: "Your sign-in link for SZL Holdings",
+      ...buildMagicLinkEmail({
+        displayName: user.displayName,
+        magicLinkUrl,
+        expiryMinutes: MAGIC_LINK_EXPIRY_MINUTES,
+        ipAddress: req.ip ?? undefined,
+      }),
+    });
+
+    await writeAuditEvent({
+      userId: user.id,
+      action: "auth.magic_link.requested",
+      entityType: "user",
+      entityId: String(user.id),
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+    });
+
+    sendSuccess(res, { sent: true, message: "If an account with that email exists, a sign-in link has been sent." });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to send magic link");
+  }
+});
+
+router.get("/auth/magic-link/verify", async (req, res) => {
+  try {
+    const token = typeof req.query.token === "string" ? req.query.token : null;
+    if (!token) {
+      sendBadRequest(res, "Missing token");
+      return;
+    }
+
+    // Atomically consume the token: only succeeds if it exists, is unused,
+    // and has not expired. This prevents TOCTOU race-window reuse.
+    const now = new Date();
+    const consumed = await db
+      .update(magicLinksTable)
+      .set({ usedAt: now })
+      .where(
+        and(
+          eq(magicLinksTable.token, token),
+          isNull(magicLinksTable.usedAt),
+          gte(magicLinksTable.expiresAt, now),
+        ),
+      )
+      .returning();
+
+    if (consumed.length === 0) {
+      // Could be: invalid token, already used, or expired — same generic message for security
+      sendError(res, "Invalid, already-used, or expired sign-in link. Please request a new one.", 400, "INVALID_TOKEN");
+      return;
+    }
+
+    const link = consumed[0];
+
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, link.userId!))
+      .limit(1);
+
+    if (!user?.isActive) {
+      sendError(res, "Account not found or disabled.", 403, "ACCOUNT_DISABLED");
+      return;
+    }
+
+    // Adaptive risk assessment — block critical attempts even on magic link verify
+    const risk = await assessLoginRisk({
+      email: user.email!,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      deviceFingerprintHash: null,
+      userId: user.id,
+    });
+
+    if (risk.blocked) {
+      await recordLoginAttempt({
+        email: user.email!,
+        ipAddress: req.ip ?? null,
+        success: false,
+        failureReason: "risk_blocked",
+        riskScore: risk.score,
+      });
+      sendError(res, "Sign-in blocked due to suspicious activity. Please contact support.", 403, "RISK_BLOCKED");
+      return;
+    }
+
+    const created = await createSessionWithRefresh({
+      userId: user.id,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      reason: "magic_link",
+    });
+
+    await db.update(usersTable).set({ lastLoginAt: new Date(), updatedAt: new Date() }).where(eq(usersTable.id, user.id));
+
+    await recordLoginAttempt({
+      email: user.email!,
+      ipAddress: req.ip ?? null,
+      success: true,
+      riskScore: risk.score,
+    });
+
+    await writeAuditEvent({
+      userId: user.id,
+      action: "auth.magic_link.verified",
+      entityType: "session",
+      entityId: String(created.sessionId),
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+    });
+
+    sendSuccess(res, {
+      token: created.token,
+      refreshToken: created.refreshToken,
+      expiresAt: created.expiresAt.toISOString(),
+      refreshTokenExpiresAt: created.refreshTokenExpiresAt.toISOString(),
+      stepUpRequired: risk.stepUpRequired,
+      user: { id: user.id, displayName: user.displayName, email: user.email },
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to verify magic link");
+  }
+});
+
+// ─── Device Fingerprinting ────────────────────────────────────────────────────
+
+const deviceFingerprintSchema = z.object({
+  fingerprintRaw: z.string().min(1, "fingerprintRaw is required"),
+  displayName: z.string().optional(),
+});
+
+router.post("/auth/device-fingerprint", authMiddleware(), validateBody(deviceFingerprintSchema), async (req, res) => {
+  try {
+    const userId = req.user?.id!;
+    const { fingerprintRaw, displayName } = req.body as z.infer<typeof deviceFingerprintSchema>;
+    const fingerprintHash = hashDeviceFingerprint(fingerprintRaw);
+
+    const { isNewDevice } = await upsertUserDevice({
+      userId,
+      fingerprintHash,
+      userAgent: req.headers["user-agent"] ?? null,
+      ipAddress: req.ip ?? null,
+      displayName,
+    });
+
+    if (isNewDevice) {
+      const [user] = await db
+        .select({ email: usersTable.email, displayName: usersTable.displayName })
+        .from(usersTable)
+        .where(eq(usersTable.id, userId))
+        .limit(1);
+
+      if (user?.email) {
+        const appUrl = process.env.APP_URL ?? getOrigin(req);
+        const emailContent = buildNewDeviceAlertEmail({
+          displayName: user.displayName,
+          deviceName: displayName ?? deriveDeviceName(req.headers["user-agent"] ?? null),
+          ipAddress: req.ip ?? undefined,
+          timestamp: new Date().toUTCString(),
+          sessionsUrl: `${appUrl}/settings/sessions`,
+        });
+        sendEmail({ to: user.email, ...emailContent }).catch(() => {});
+      }
+
+      await writeAuditEvent({
+        userId,
+        action: "auth.device.new_device_detected",
+        entityType: "user",
+        entityId: String(userId),
+        ipAddress: req.ip ?? null,
+        userAgent: req.headers["user-agent"] ?? null,
+        newValues: { fingerprintHash, displayName },
+      });
+    }
+
+    const devices = await db
+      .select({
+        id: userDevicesTable.id,
+        displayName: userDevicesTable.displayName,
+        userAgent: userDevicesTable.userAgent,
+        firstSeenAt: userDevicesTable.firstSeenAt,
+        lastSeenAt: userDevicesTable.lastSeenAt,
+        isTrusted: userDevicesTable.isTrusted,
+      })
+      .from(userDevicesTable)
+      .where(and(eq(userDevicesTable.userId, userId), isNull(userDevicesTable.revokedAt)))
+      .orderBy(desc(userDevicesTable.lastSeenAt));
+
+    sendSuccess(res, { isNewDevice, fingerprintHash, devices });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to register device fingerprint");
+  }
+});
+
+router.get("/auth/devices", authMiddleware(), async (req, res) => {
+  try {
+    const userId = req.user?.id!;
+    const devices = await db
+      .select({
+        id: userDevicesTable.id,
+        displayName: userDevicesTable.displayName,
+        userAgent: userDevicesTable.userAgent,
+        firstSeenAt: userDevicesTable.firstSeenAt,
+        lastSeenAt: userDevicesTable.lastSeenAt,
+        isTrusted: userDevicesTable.isTrusted,
+      })
+      .from(userDevicesTable)
+      .where(and(eq(userDevicesTable.userId, userId), isNull(userDevicesTable.revokedAt)))
+      .orderBy(desc(userDevicesTable.lastSeenAt));
+
+    sendSuccess(res, devices);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list devices");
+  }
+});
+
+router.delete("/auth/devices/:id", authMiddleware(), async (req, res) => {
+  try {
+    const deviceId = parseIdParam(req.params.id);
+    const userId = req.user?.id!;
+
+    const [device] = await db
+      .select({ id: userDevicesTable.id, userId: userDevicesTable.userId })
+      .from(userDevicesTable)
+      .where(eq(userDevicesTable.id, deviceId))
+      .limit(1);
+
+    if (!device || device.userId !== userId) {
+      sendNotFound(res, "Device");
+      return;
+    }
+
+    await db
+      .update(userDevicesTable)
+      .set({ revokedAt: new Date(), isTrusted: false })
+      .where(eq(userDevicesTable.id, deviceId));
+
+    await writeAuditEvent({
+      userId,
+      action: "auth.device.revoked",
+      entityType: "user_device",
+      entityId: String(deviceId),
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+    });
+
+    sendNoContent(res);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to revoke device");
+  }
+});
+
+// ─── Session Management (user-facing) ────────────────────────────────────────
+
+router.get("/auth/sessions", authMiddleware(), async (req, res) => {
+  try {
+    const userId = req.user?.id!;
+    const currentToken = getSessionToken(req);
+
+    const sessions = await db
+      .select({
+        id: sessionsTable.id,
+        token: sessionsTable.token,
+        ipAddress: sessionsTable.ipAddress,
+        userAgent: sessionsTable.userAgent,
+        createdAt: sessionsTable.createdAt,
+        expiresAt: sessionsTable.expiresAt,
+      })
+      .from(sessionsTable)
+      .where(
+        and(
+          eq(sessionsTable.userId, userId),
+          isNull(sessionsTable.revokedAt),
+          gte(sessionsTable.expiresAt, new Date()),
+        ),
+      )
+      .orderBy(desc(sessionsTable.createdAt));
+
+    // Identify the current session by exact token match — never guess by position
+    const result = sessions.map((s) => ({
+      id: s.id,
+      userAgent: s.userAgent,
+      ipAddress: s.ipAddress,
+      createdAt: s.createdAt,
+      expiresAt: s.expiresAt,
+      isCurrent: !!currentToken && s.token === currentToken,
+    }));
+
+    sendSuccess(res, result);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list sessions");
+  }
+});
+
+router.delete("/auth/sessions/all", authMiddleware(), async (req, res) => {
+  try {
+    const userId = req.user?.id!;
+    const currentToken = getSessionToken(req);
+
+    const activeSessions = await db
+      .select({ id: sessionsTable.id, token: sessionsTable.token })
+      .from(sessionsTable)
+      .where(
+        and(
+          eq(sessionsTable.userId, userId),
+          isNull(sessionsTable.revokedAt),
+          gte(sessionsTable.expiresAt, new Date()),
+        ),
+      );
+
+    const now = new Date();
+    // Revoke ALL active sessions for this user — "sign out everywhere" must include the current session
+    await db
+      .update(sessionsTable)
+      .set({ revokedAt: now, revokedReason: "sign_out_all" })
+      .where(
+        and(
+          eq(sessionsTable.userId, userId),
+          isNull(sessionsTable.revokedAt),
+        ),
+      );
+
+    await bumpUserSessionVersion(userId);
+    clearSessionCookie(res);
+
+    await writeAuditEvent({
+      userId,
+      action: "session.revoke_all",
+      entityType: "user",
+      entityId: String(userId),
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      newValues: { revokedCount: activeSessions.length, reason: "sign_out_all" },
+    });
+
+    sendSuccess(res, { revokedCount: activeSessions.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to sign out all sessions");
+  }
+});
+
+// ─── Adaptive Risk Scoring ────────────────────────────────────────────────────
+
+const riskAssessmentSchema = z.object({
+  email: z.string().email(),
+  fingerprintRaw: z.string().optional(),
+});
+
+router.post("/auth/risk-assessment", loginLimiter, validateBody(riskAssessmentSchema), async (req, res) => {
+  try {
+    const { email, fingerprintRaw } = req.body as z.infer<typeof riskAssessmentSchema>;
+
+    const [user] = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(eq(usersTable.email, email.toLowerCase()))
+      .limit(1);
+
+    const fingerprintHash = fingerprintRaw ? hashDeviceFingerprint(fingerprintRaw) : null;
+
+    const assessment = await assessLoginRisk({
+      email,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      deviceFingerprintHash: fingerprintHash,
+      userId: user?.id ?? null,
+    });
+
+    const lockout = await getAccountLockoutStatus(email);
+
+    sendSuccess(res, {
+      score: assessment.score,
+      level: assessment.level,
+      stepUpRequired: assessment.stepUpRequired || lockout.captchaRequired,
+      blocked: assessment.blocked || lockout.locked,
+      captchaRequired: lockout.captchaRequired,
+      reasons: assessment.reasons,
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to assess login risk");
+  }
+});
+
+// ─── Security Event Audit Log (admin-facing) ──────────────────────────────────
+
+const securityEventsQuerySchema = z.object({
+  page: z.string().optional(),
+  limit: z.string().optional(),
+  action: z.string().optional(),
+  userId: z.string().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+  format: z.enum(["json", "csv"]).optional().default("json"),
+});
+
+const SECURITY_AUDIT_ACTIONS = new Set([
+  "session.create",
+  "session.invalidate",
+  "session.revoke_all",
+  "session.refresh",
+  "session.refresh.replay",
+  "auth.magic_link.requested",
+  "auth.magic_link.verified",
+  "auth.device.new_device_detected",
+  "auth.device.revoked",
+  "mfa.enabled",
+  "mfa.disabled",
+]);
+
+router.get("/auth/security-events", authMiddleware(), requireRole("ops", "admin", "super_admin"), validateQuery(securityEventsQuerySchema), async (req, res) => {
+  try {
+    const {
+      page: pageStr,
+      limit: limitStr,
+      action,
+      userId: userIdStr,
+      from: fromStr,
+      to: toStr,
+      format,
+    } = req.query as z.infer<typeof securityEventsQuerySchema>;
+
+    const limit = Math.min(parseInt(limitStr ?? "50", 10) || 50, 500);
+    const page = Math.max(parseInt(pageStr ?? "1", 10) || 1, 1);
+    const offset = (page - 1) * limit;
+
+    // When a specific action is requested, use it; otherwise scope to known security events
+    const actionFilter = action
+      ? eq(auditEventsTable.action, action)
+      : inArray(auditEventsTable.action, Array.from(SECURITY_AUDIT_ACTIONS));
+
+    const conditions = [actionFilter] as Parameters<typeof and>;
+
+    if (userIdStr) {
+      const uid = parseInt(userIdStr, 10);
+      if (!isNaN(uid)) conditions.push(eq(auditEventsTable.userId, uid));
+    }
+    if (fromStr) {
+      const fromDate = new Date(fromStr);
+      if (!isNaN(fromDate.getTime())) conditions.push(gte(auditEventsTable.createdAt, fromDate));
+    }
+    if (toStr) {
+      const toDate = new Date(toStr);
+      if (!isNaN(toDate.getTime())) conditions.push(lt(auditEventsTable.createdAt, toDate));
+    }
+
+    const whereClause = and(...conditions);
+
+    const events = await db
+      .select()
+      .from(auditEventsTable)
+      .where(whereClause)
+      .orderBy(desc(auditEventsTable.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    if (format === "csv") {
+      const header = "id,userId,action,entityType,entityId,ipAddress,userAgent,createdAt";
+      const rows = events.map((e) =>
+        [
+          e.id,
+          e.userId ?? "",
+          `"${e.action}"`,
+          `"${e.entityType}"`,
+          e.entityId ?? "",
+          e.ipAddress ?? "",
+          `"${(e.userAgent ?? "").replace(/"/g, "'")}"`,
+          e.createdAt.toISOString(),
+        ].join(","),
+      );
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", `attachment; filename="security-events-${Date.now()}.csv"`);
+      res.send([header, ...rows].join("\n"));
+      return;
+    }
+
+    sendSuccess(res, events, 200, { page, limit, offset });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list security events");
+  }
+});
+
+// ─── Brute-Force Lockout Status ───────────────────────────────────────────────
+
+router.get("/auth/lockout-status", loginLimiter, async (req, res) => {
+  try {
+    const email = typeof req.query.email === "string" ? req.query.email : null;
+    if (!email) {
+      sendBadRequest(res, "email query parameter required");
+      return;
+    }
+
+    const lockout = await getAccountLockoutStatus(email);
+    sendSuccess(res, {
+      locked: lockout.locked,
+      lockedUntil: lockout.lockedUntilMs ? new Date(lockout.lockedUntilMs).toISOString() : null,
+      captchaRequired: lockout.captchaRequired,
+      failureCount: lockout.failureCount,
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get lockout status");
+  }
+});
+
+function deriveDeviceName(ua: string | null): string {
+  if (!ua) return "Unknown device";
+  const lower = ua.toLowerCase();
+  if (lower.includes("iphone")) return "iPhone";
+  if (lower.includes("ipad")) return "iPad";
+  if (lower.includes("android")) return "Android device";
+  if (lower.includes("mac os")) return "Mac";
+  if (lower.includes("windows")) return "Windows PC";
+  if (lower.includes("linux")) return "Linux device";
+  return "Unknown device";
+}
 
 export default router;

@@ -27,6 +27,15 @@ The platform is a pnpm monorepo, known as the FORGE Execution and Evidence Platf
 
 **API Layers:** Includes REST API, GraphQL API (Apollo Server), and an MCP Gateway.
 
+**Zero-Trust Auth Hardening (Task #3339):** Implemented on the API server:
+- **Passwordless magic-link auth** — `POST /api/auth/magic-link/request` + `GET /api/auth/magic-link/verify`. Single-use, 15-min TTL tokens.
+- **Device fingerprinting** — `POST /api/auth/device-fingerprint`, `GET /api/auth/devices`, `DELETE /api/auth/devices/:id`. New-device email alerts via `buildNewDeviceAlertEmail`.
+- **Adaptive risk scoring** — `POST /api/auth/risk-assessment` (score 0-100, levels: low/medium/high/critical). Factors: IP velocity, account failure rate, UA anomaly, time-of-day, known device.
+- **Progressive brute-force protection** — exponential backoff + lockout via `loginAttemptsTable` + Redis; `GET /api/auth/lockout-status` exposes current state; CAPTCHA flag at 5+ failures.
+- **Session management API** — `GET /api/auth/sessions` (list active sessions), `DELETE /api/auth/sessions/all` (revoke all + bump session version).
+- **Security event audit log** — `GET /api/auth/security-events` (admin/ops only): filterable by action/userId/date, supports CSV export.
+- **DB schema additions** — `magicLinksTable`, `userDevicesTable`, `loginAttemptsTable` in `lib/db/src/schema/auth.ts`; migration `0146_zero_trust_auth_hardening.sql`.
+
 **AI Infrastructure:** Features a multi-provider AI backend, AI evaluation infrastructure, AI Ops Dashboard, NVIDIA-Ready Packages, and Substrate Edge Inference (oLLM).
 - **Forge – AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents.
 - **Precision Evolution Runtime (PER):** A governed, evidence-gated system for continuously evolving agent policies.

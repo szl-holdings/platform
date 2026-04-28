@@ -201,6 +201,71 @@ export const biometricChallengesTable = pgTable(
   ],
 );
 
+export const magicLinksTable = pgTable(
+  'magic_links',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id').references(() => usersTable.id, { onDelete: 'cascade' }),
+    email: text('email').notNull(),
+    token: text('token').notNull().unique(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    usedAt: timestamp('used_at', { withTimezone: true }),
+    ipAddress: text('ip_address'),
+    userAgent: text('user_agent'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('magic_links_token_idx').on(t.token),
+    index('magic_links_email_idx').on(t.email),
+    index('magic_links_expires_at_idx').on(t.expiresAt),
+  ],
+);
+
+export const userDevicesTable = pgTable(
+  'user_devices',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
+    fingerprintHash: text('fingerprint_hash').notNull(),
+    userAgent: text('user_agent'),
+    displayName: text('display_name'),
+    firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow(),
+    lastIpHash: text('last_ip_hash'),
+    isTrusted: boolean('is_trusted').notNull().default(false),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex('user_devices_user_fingerprint_unique').on(t.userId, t.fingerprintHash),
+    index('user_devices_user_id_idx').on(t.userId),
+  ],
+);
+
+export const loginAttemptsTable = pgTable(
+  'login_attempts',
+  {
+    id: serial('id').primaryKey(),
+    email: text('email').notNull(),
+    ipAddress: text('ip_address'),
+    success: boolean('success').notNull().default(false),
+    failureReason: text('failure_reason'),
+    deviceFingerprintHash: text('device_fingerprint_hash'),
+    riskScore: integer('risk_score'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('login_attempts_email_idx').on(t.email),
+    index('login_attempts_ip_idx').on(t.ipAddress),
+    index('login_attempts_created_at_idx').on(t.createdAt),
+  ],
+);
+
+export type MagicLink = typeof magicLinksTable.$inferSelect;
+export type UserDevice = typeof userDevicesTable.$inferSelect;
+export type LoginAttempt = typeof loginAttemptsTable.$inferSelect;
+
 export const insertUserSchema = createInsertSchema(usersTable).omit({
   id: true,
   createdAt: true,
