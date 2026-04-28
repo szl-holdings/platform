@@ -16,7 +16,7 @@ localPort = 9090
 autoStart = true
 
 [services.development]
-run = "bash -c 'cd /home/runner/workspace/artifacts/command && exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
+run = "bash -c 'cd /home/runner/workspace/artifacts/command && PORT=5000 BASE_PATH=/command/ exec node_modules/.bin/vite --config vite.config.ts --host 0.0.0.0'"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/command", "run", "build" ]

@@ -158,4 +158,12 @@ export default defineConfig({
     host: '0.0.0.0',
     allowedHosts: true,
   },
+  define: {
+    'import.meta.env.VITE_SUBSTRATE_GATEWAY_URL': JSON.stringify(
+      process.env.VITE_SUBSTRATE_GATEWAY_URL ?? 'http://localhost:3700',
+    ),
+    'import.meta.env.VITE_OTEL_ENDPOINT': JSON.stringify(
+      process.env.VITE_OTEL_ENDPOINT ?? '',
+    ),
+  },
 });
