@@ -20,7 +20,7 @@ catalog:
   '@tanstack/react-query': 5.99.0
   '@types/node': 25.3.5
   '@types/react': 19.2.14
-  '@types/react-dom': ^19.2.0
+  '@types/react-dom': ^19.2.3
   '@vitejs/plugin-react': ^5.0.4
   class-variance-authority: ^0.7.1
   clsx: 2.1.1
@@ -49,6 +49,12 @@ minimumReleaseAgeExclude:
   - picomatch
   - lodash
   - '@tootallnate/once'
+  - expo-glass-effect
+  - expo-image-picker
+  - expo-document-picker
+  - expo-location
+  - expo-sensors
+  - expo-symbols
 
 onlyBuiltDependencies:
   - '@swc/core'
