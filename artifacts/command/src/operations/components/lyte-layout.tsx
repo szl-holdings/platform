@@ -1,6 +1,7 @@
 import { useDemoMode } from '@lyte/lib/demo-mode';
 import { EnvironmentLabel } from '@szl-holdings/shared-ui/alloy-decision-card';
 import { SectionErrorBoundary } from '@szl-holdings/shared-ui/error-boundary';
+import { useAuth } from '@szl-holdings/replit-auth-web';
 import {
   GettingStartedChecklist,
   type OnboardingConfig,
@@ -281,6 +282,8 @@ const NAV_GROUPS = [
 const ADMIN_NAV = [
   { href: '/operations/admin/ops', label: 'Ops Console', icon: Network },
   { href: '/operations/admin/overview', label: 'System', icon: Settings },
+  { href: '/operations/admin/settings', label: 'Platform Settings', icon: Settings },
+  { href: '/operations/admin/tenant-health', label: 'Tenant Health', icon: Building },
   { href: '/operations/admin/users', label: 'Users', icon: Users },
   { href: '/operations/admin/flags', label: 'Flags', icon: Flag },
   { href: '/operations/admin/apps', label: 'Apps', icon: Boxes },
@@ -292,6 +295,8 @@ const ADMIN_NAV = [
   { href: '/operations/admin/jobs', label: 'Jobs', icon: Activity },
   { href: '/operations/admin/kb', label: 'Knowledge Base', icon: BookOpen },
 ];
+
+const ADMIN_ROLES = ['admin', 'super_admin', 'ops'];
 
 const PRISM_COLORS: Record<string, string> = {
   Pulse: '#d4a054',
@@ -394,6 +399,10 @@ function DemoModeToggle() {
 
 function AdminSection({ location }: { location: string }) {
   const [open, setOpen] = useState(false);
+  const { user } = useAuth();
+  const userRoles: string[] = (user as { roles?: string[] })?.roles ?? [];
+  const isAdmin = userRoles.some((r) => ADMIN_ROLES.includes(r));
+  if (!isAdmin) return null;
   const isInAdmin = location.startsWith('/operations/admin');
   if (!open && !isInAdmin) {
     return (
@@ -422,7 +431,7 @@ function AdminSection({ location }: { location: string }) {
         <ChevronDown className="w-2.5 h-2.5 ml-auto rotate-180" style={{ color: TEXT.muted }} />
       </button>
       {ADMIN_NAV.map((item) => {
-        const isActive = location.startsWith(item.href);
+        const isActive = location === item.href || location.startsWith(item.href + '/') || (item.href !== '/operations/admin' && location.startsWith(item.href));
         return (
           <NavItem
             key={item.href}

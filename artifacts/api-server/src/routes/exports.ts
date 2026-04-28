@@ -9,12 +9,14 @@ import {
   lyteSignalsTable,
   meteringEventsTable,
   mspTicketsTable,
+  orgMembersTable,
+  organizationsTable,
   terraDealsTable,
   usersTable,
   vesselsTable,
 } from '@szl-holdings/db';
 import { randomUUID } from 'node:crypto';
-import { and, desc, eq, gte, ilike, lte, or, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, ilike, inArray, lte, or, sql } from 'drizzle-orm';
 import { type IRouter, type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -91,6 +93,7 @@ router.post(
       dateFrom: z.unknown().optional(),
       dateTo: z.unknown().optional(),
       format: z.unknown().optional(),
+      orgId: z.unknown().optional(),
       schedule: z.unknown().optional(),
       search: z.unknown().optional(),
     }),
@@ -105,6 +108,7 @@ router.post(
         dateTo,
         search,
         action,
+        orgId: orgIdRaw,
         schedule = 'once',
         columns: selectedColumns,
       } = req.body as {
@@ -113,6 +117,7 @@ router.post(
         dateTo?: string;
         search?: string;
         action?: string;
+        orgId?: string;
         schedule?: 'once' | 'daily' | 'weekly' | 'monthly';
         columns?: string[];
       };
@@ -121,6 +126,58 @@ router.post(
         return sendBadRequest(res, 'Invalid format — must be csv, pdf, or xlsx');
       if (!['once', 'daily', 'weekly', 'monthly'].includes(schedule))
         return sendBadRequest(res, 'Invalid schedule');
+
+      // Resolve org member user IDs when an orgId filter is provided —
+      // mirrors the same logic in GET /admin/audit-log (admin/users.ts).
+      let orgMemberUserIds: number[] | null = null;
+      let filteredOrgName: string | null = null;
+      if (orgIdRaw) {
+        const orgId = parseInt(String(orgIdRaw), 10);
+        if (Number.isNaN(orgId) || orgId < 1)
+          return sendBadRequest(res, 'Invalid orgId — must be a positive integer');
+        const [orgRow] = await db
+          .select({ name: organizationsTable.name })
+          .from(organizationsTable)
+          .where(eq(organizationsTable.id, orgId));
+        filteredOrgName = orgRow?.name ?? null;
+        const members = await db
+          .select({ userId: orgMembersTable.userId })
+          .from(orgMembersTable)
+          .where(eq(orgMembersTable.orgId, orgId));
+        orgMemberUserIds = members.map((m) => m.userId);
+        // Org exists but has no members — return empty CSV.
+        if (orgMemberUserIds.length === 0) {
+          const emptyResult = await runExport({
+            name: `Audit Log Export — ${new Date().toISOString().slice(0, 10)}`,
+            dataSource: 'audit_events',
+            format,
+            columns: [
+              { key: 'id', label: 'ID' },
+              { key: 'createdAt', label: 'Timestamp' },
+              { key: 'action', label: 'Action' },
+              { key: 'org', label: 'Org' },
+              { key: 'entityType', label: 'Entity Type' },
+              { key: 'entityId', label: 'Entity ID' },
+              { key: 'userEmail', label: 'Actor Email' },
+              { key: 'userName', label: 'Actor Name' },
+              { key: 'ipAddress', label: 'IP Address' },
+              { key: 'userAgent', label: 'User Agent' },
+            ],
+            rows: [],
+            triggeredByUserId: getUserId(req),
+            triggeredByEmail: getUserEmail(req),
+            filterParams: JSON.stringify({ dateFrom, dateTo, search, action, orgId: orgIdRaw }),
+            scheduleFrequency: schedule,
+          });
+          res.setHeader('Content-Type', CONTENT_TYPES[format] ?? 'application/octet-stream');
+          res.setHeader('Content-Disposition', `attachment; filename="audit-log-${emptyResult.exportId}.${FILE_EXTENSIONS[format]}"`);
+          res.setHeader('X-Export-Id', emptyResult.exportId);
+          res.setHeader('X-Download-Token', emptyResult.downloadToken);
+          res.setHeader('X-Export-Expires', emptyResult.expiresAt.toISOString());
+          res.setHeader('X-Row-Count', '0');
+          return res.send(emptyResult.buffer);
+        }
+      }
 
       const conditions = [];
       if (dateFrom) conditions.push(gte(auditEventsTable.createdAt, new Date(dateFrom)));
@@ -133,6 +190,9 @@ router.post(
             ilike(auditEventsTable.entityType, `%${search}%`),
           )!,
         );
+      }
+      if (orgMemberUserIds !== null) {
+        conditions.push(inArray(auditEventsTable.userId, orgMemberUserIds));
       }
 
       const rows = await db
@@ -154,10 +214,18 @@ router.post(
         .orderBy(desc(auditEventsTable.createdAt))
         .limit(10_000);
 
+      // Attach org name to each row — always the filtered org name when an
+      // orgId filter is active (all rows belong to that org), otherwise null.
+      const enrichedRows = rows.map((r) => ({
+        ...r,
+        org: filteredOrgName ?? null,
+      }));
+
       const allColumns: ExportColumn[] = [
         { key: 'id', label: 'ID' },
         { key: 'createdAt', label: 'Timestamp' },
         { key: 'action', label: 'Action' },
+        { key: 'org', label: 'Org' },
         { key: 'entityType', label: 'Entity Type' },
         { key: 'entityId', label: 'Entity ID' },
         { key: 'userEmail', label: 'Actor Email' },
@@ -167,7 +235,7 @@ router.post(
       ];
       const columns = filterColumns(allColumns, selectedColumns);
 
-      const filterParams = JSON.stringify({ dateFrom, dateTo, search, action });
+      const filterParams = JSON.stringify({ dateFrom, dateTo, search, action, orgId: orgIdRaw });
       const name = `Audit Log Export — ${new Date().toISOString().slice(0, 10)}`;
 
       const result = await runExport({
@@ -175,7 +243,7 @@ router.post(
         dataSource: 'audit_events',
         format,
         columns,
-        rows: rows as Record<string, unknown>[],
+        rows: enrichedRows as Record<string, unknown>[],
         triggeredByUserId: getUserId(req),
         triggeredByEmail: getUserEmail(req),
         filterParams,

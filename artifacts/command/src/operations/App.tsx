@@ -101,6 +101,8 @@ const AdminSeederPage = lazy(() => import('@/pages/admin/seeder'));
 const AdminExportHistoryPage = lazy(() => import('@/pages/admin/export-history'));
 const AdminDiagnosticsPage = lazy(() => import('@/pages/admin/diagnostics'));
 const AdminBillingPage = lazy(() => import('@/pages/admin/billing-admin'));
+const AdminPlatformSettingsPage = AdminDiagnosticsPage;
+const AdminTenantHealthPage = lazy(() => import('@/pages/admin/platform-health'));
 const AdminOpsConsolePage = lazy(() => import('@/pages/admin/ops-console'));
 const AdminIntegrationManagerPage = lazy(() => import('@/pages/admin/integration-manager'));
 const AdminAppsRegistryPage = lazy(() => import('@/pages/admin/apps-registry'));
@@ -292,6 +294,8 @@ function PrivateRouter() {
           {() => <AdminRoute component={AdminDiagnosticsPage} />}
         </Route>
         <Route path="/admin/billing">{() => <AdminRoute component={AdminBillingPage} />}</Route>
+        <Route path="/admin/settings">{() => <AdminRoute component={AdminPlatformSettingsPage} />}</Route>
+        <Route path="/admin/tenant-health">{() => <AdminRoute component={AdminTenantHealthPage} />}</Route>
         <Route path="/admin/ops">{() => <AdminRoute component={AdminOpsConsolePage} />}</Route>
         <Route path="/admin/integrations">
           {() => <AdminRoute component={AdminIntegrationManagerPage} />}
