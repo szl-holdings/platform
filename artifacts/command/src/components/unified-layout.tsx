@@ -282,6 +282,7 @@ const OPERATIONS_ADMIN_NAV: NavGroup = {
   items: [
     { href: '/admin/command-center', label: 'Command Center', icon: LayoutDashboard },
     { href: '/operations/admin/analytics', label: 'Analytics Intelligence', icon: BarChart3 },
+    { href: '/operations/admin/experiments', label: 'Experimentation', icon: FlaskConical },
     { href: '/operations/governance-tiers', label: 'Governance Tiers', icon: ShieldCheck },
     { href: '/operations/guardrail-configs', label: 'Guardrail Configs', icon: Lock },
   ],

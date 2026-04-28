@@ -72,6 +72,7 @@ export * from './enterprise_idp';
 export * from './eval_forge';
 export * from './eval_os';
 export * from './export_jobs';
+export * from './experiments';
 export * from './feature_flags';
 export * from './feedback';
 export * from './files';

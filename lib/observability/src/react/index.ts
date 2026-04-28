@@ -25,3 +25,9 @@ export {
   showUserFeedback,
 } from './sentry.js';
 export { initWebVitals } from './web-vitals.js';
+export {
+  type BatchExperimentResult,
+  type ExperimentVariantResult,
+  useExperiment,
+  useExperiments,
+} from './use-experiment.js';

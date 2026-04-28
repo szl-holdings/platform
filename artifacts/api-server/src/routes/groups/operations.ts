@@ -18,6 +18,10 @@ export function register(router: IRouter): void {
   router.use('/admin', adminGuard);
   router.use(lazyMatch('/admin', () => import('../admin'), 'admin'));
 
+  router.use('/experiments', _readLimiter);
+  router.use('/experiments', _writeLimiter);
+  router.use(lazyMatch('/experiments', () => import('../experiments'), 'experiments'));
+
   router.use('/observability', _readLimiter);
   router.use(lazyMatch('/observability', () => import('../observability'), 'observability'));
 

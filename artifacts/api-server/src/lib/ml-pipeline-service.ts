@@ -198,31 +198,31 @@ export const monitoringService = {
 // ---------------------------------------------------------------------------
 
 export const abTestingService = {
-  create(input: Parameters<typeof createAbTest>[0]) {
+  async create(input: Parameters<typeof createAbTest>[0]) {
     return createAbTest(input);
   },
 
-  assign(testId: string, entityId: string) {
+  async assign(testId: string, entityId: string) {
     return assignVariant(testId, entityId);
   },
 
-  record(testId: string, variant: 'control' | 'treatment', metricValue: number) {
+  async record(testId: string, variant: 'control' | 'treatment', metricValue: number) {
     return recordAbTestOutcome(testId, variant, metricValue);
   },
 
-  evaluate(testId: string) {
+  async evaluate(testId: string) {
     return evaluateAbTest(testId);
   },
 
-  conclude(testId: string) {
+  async conclude(testId: string) {
     return concludeAbTest(testId);
   },
 
-  list(domain?: string) {
+  async list(domain?: string) {
     return listAbTests(domain);
   },
 
-  getSummary() {
+  async getSummary() {
     return getAbTestSummary();
   },
 };
@@ -303,14 +303,15 @@ export const domainTemplatesService = {
 // Full ML Pipeline Status
 // ---------------------------------------------------------------------------
 
-export function getMlPipelineStatus() {
+export async function getMlPipelineStatus() {
+  const abTesting = await abTestingService.getSummary();
   return {
     featureStore: featureStoreService.getSummary(),
     trainingPipeline: trainingService.getSummary(),
     modelRegistry: modelRegistryService.getSummary(),
     inference: inferenceService.getStats(),
     monitoring: monitoringService.getSummary(),
-    abTesting: abTestingService.getSummary(),
+    abTesting,
     datasets: datasetService.getSummary(),
     timestamp: new Date().toISOString(),
   };

@@ -52,9 +52,9 @@ const _createTrainingRunSchema = z.object({
 // Status
 // ---------------------------------------------------------------------------
 
-router.get('/ml/status', authMiddleware(), (_req, res) => {
+router.get('/ml/status', authMiddleware(), async (_req, res) => {
   try {
-    res.json(getMlPipelineStatus());
+    res.json(await getMlPipelineStatus());
   } catch (err) {
     handleRouteError(res, err, 'Operation failed');
   }
@@ -590,18 +590,18 @@ router.post(
 // A/B Testing
 // ---------------------------------------------------------------------------
 
-router.get('/ml/ab-tests', authMiddleware(), validateQuery(listQuerySchema), (req, res) => {
+router.get('/ml/ab-tests', authMiddleware(), validateQuery(listQuerySchema), async (req, res) => {
   try {
     const { domain } = req.query as { domain?: string };
-    res.json(abTestingService.list(domain));
+    res.json(await abTestingService.list(domain));
   } catch (err) {
     handleRouteError(res, err, 'Operation failed');
   }
 });
 
-router.get('/ml/ab-tests/summary', authMiddleware(), (_req, res) => {
+router.get('/ml/ab-tests/summary', authMiddleware(), async (_req, res) => {
   try {
-    res.json(abTestingService.getSummary());
+    res.json(await abTestingService.getSummary());
   } catch (err) {
     handleRouteError(res, err, 'Operation failed');
   }
@@ -623,7 +623,7 @@ router.post(
       treatmentModelVersionId: z.unknown().optional(),
     }),
   ),
-  (req, res) => {
+  async (req, res) => {
     try {
       const {
         name,
@@ -642,7 +642,7 @@ router.post(
           'name, domain, controlModelVersionId, and treatmentModelVersionId are required',
         );
       }
-      const test = abTestingService.create({
+      const test = await abTestingService.create({
         name,
         domain,
         controlModelVersionId,
@@ -668,11 +668,11 @@ router.post(
       entityId: z.unknown().optional(),
     }),
   ),
-  (req, res) => {
+  async (req, res) => {
     try {
       const { entityId } = req.body;
       if (!entityId) return sendBadRequest(res, 'entityId is required');
-      const assignment = abTestingService.assign(req.params.testId as string, entityId);
+      const assignment = await abTestingService.assign(req.params.testId as string, entityId);
       if (!assignment) return sendNotFound(res, 'A/B test not found or not running');
       res.json(assignment);
     } catch (err) {
@@ -690,12 +690,12 @@ router.post(
       variant: z.unknown().optional(),
     }),
   ),
-  (req, res) => {
+  async (req, res) => {
     try {
       const { variant, metricValue } = req.body;
       if (!variant || metricValue === undefined)
         return sendBadRequest(res, 'variant and metricValue are required');
-      abTestingService.record(req.params.testId as string, variant, metricValue);
+      await abTestingService.record(req.params.testId as string, variant, metricValue);
       res.json({ recorded: true });
     } catch (err) {
       handleRouteError(res, err, 'Operation failed');
@@ -705,7 +705,7 @@ router.post(
 
 router.get('/ml/ab-tests/:testId/evaluate', authMiddleware(), async (req, res) => {
   try {
-    const result = abTestingService.evaluate(req.params.testId as string);
+    const result = await abTestingService.evaluate(req.params.testId as string);
     if (!result) {
       res.json({ status: 'insufficient_samples' });
       return;
@@ -720,9 +720,9 @@ router.post(
   '/ml/ab-tests/:testId/conclude',
   authMiddleware(),
   validateBody(bodyShape({})),
-  (req, res) => {
+  async (req, res) => {
     try {
-      const test = abTestingService.conclude(req.params.testId as string);
+      const test = await abTestingService.conclude(req.params.testId as string);
       if (!test) return sendNotFound(res, 'A/B test not found or already concluded');
       res.json(test);
     } catch (err) {

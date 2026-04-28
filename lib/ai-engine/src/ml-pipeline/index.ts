@@ -1,4 +1,5 @@
 export * from './ab-testing.js';
+export * from './bayesian-analysis.js';
 export * from './dataset-manager.js';
 export * from './domain-templates.js';
 export * from './explainability.js';

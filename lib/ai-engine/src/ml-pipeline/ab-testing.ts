@@ -1,3 +1,11 @@
+import {
+  db,
+  experimentAssignmentsTable,
+  experimentEventsTable,
+  experimentsTable,
+  experimentVariantsTable,
+} from '@szl-holdings/db';
+import { and, eq, sql } from 'drizzle-orm';
 import { logger } from './logger.js';
 import { mlModelRegistry } from './ml-model-registry.js';
 
@@ -43,14 +51,16 @@ export interface AbTestResult {
 }
 
 // ---------------------------------------------------------------------------
-// In-memory test store
-// ---------------------------------------------------------------------------
-
-const testStore = new Map<string, AbTest>();
-
-// ---------------------------------------------------------------------------
 // Statistical helpers
 // ---------------------------------------------------------------------------
+
+function normalCdf(z: number): number {
+  const t = 1 / (1 + 0.2316419 * Math.abs(z));
+  const d = 0.3989423 * Math.exp((-z * z) / 2);
+  const p =
+    d * t * (0.3193815 + t * (-0.3565638 + t * (1.7814779 + t * (-1.821256 + t * 1.3302744))));
+  return z > 0 ? 1 - p : p;
+}
 
 function computeZTest(
   controlMean: number,
@@ -72,26 +82,83 @@ function computeZTest(
   );
   const cohensD = pooledStd > 0 ? (treatmentMean - controlMean) / pooledStd : 0;
 
-  // Approximate two-tailed p-value from z-score
   const absZ = Math.abs(z);
   const pValue = 2 * (1 - normalCdf(absZ));
 
   return { pValue: parseFloat(pValue.toFixed(6)), effectSize: parseFloat(cohensD.toFixed(4)) };
 }
 
-function normalCdf(z: number): number {
-  const t = 1 / (1 + 0.2316419 * Math.abs(z));
-  const d = 0.3989423 * Math.exp((-z * z) / 2);
-  const p =
-    d * t * (0.3193815 + t * (-0.3565638 + t * (1.7814779 + t * (-1.821256 + t * 1.3302744))));
-  return z > 0 ? 1 - p : p;
+// ---------------------------------------------------------------------------
+// DB-backed helpers
+// ---------------------------------------------------------------------------
+
+interface StoredOutcome {
+  winner?: AbTestWinner;
+  pValue?: number;
+  effectSize?: number;
+  controlMetrics?: Record<string, number>;
+  treatmentMetrics?: Record<string, number>;
+}
+
+function readStoredOutcome(exp: typeof experimentsTable.$inferSelect): StoredOutcome {
+  const meta = exp.metadata as Record<string, unknown> | null;
+  if (!meta) return {};
+  const outcome = meta.abTestOutcome as StoredOutcome | undefined;
+  return outcome ?? {};
+}
+
+function mapDbRowToAbTest(
+  exp: typeof experimentsTable.$inferSelect,
+  controlVariant: typeof experimentVariantsTable.$inferSelect,
+  treatmentVariant: typeof experimentVariantsTable.$inferSelect,
+  extraFields?: {
+    winner?: AbTestWinner;
+    pValue?: number;
+    effectSize?: number;
+    controlMetrics?: Record<string, number>;
+    treatmentMetrics?: Record<string, number>;
+    sampleCount?: number;
+  },
+): AbTest {
+  const statusMap: Record<string, AbTestStatus> = {
+    running: 'running',
+    paused: 'paused',
+    concluded: 'concluded',
+    stopped: 'concluded',
+    draft: 'running',
+  };
+
+  const stored = readStoredOutcome(exp);
+  const meta = exp.metadata as Record<string, unknown> | null;
+
+  return {
+    testId: exp.key,
+    name: exp.name,
+    domain: (meta?.domain as string | undefined) ?? 'unknown',
+    description: exp.description ?? undefined,
+    controlModelVersionId: controlVariant.mlModelVersionId ?? '',
+    treatmentModelVersionId: treatmentVariant.mlModelVersionId ?? '',
+    trafficSplitPct: treatmentVariant.trafficWeight / 100,
+    primaryMetric: exp.primaryMetric,
+    significanceThreshold: parseFloat(String(exp.significanceThreshold)),
+    minSampleSize: exp.minSampleSize,
+    status: statusMap[exp.status] ?? 'running',
+    winner: extraFields?.winner ?? stored.winner ?? null,
+    pValue: extraFields?.pValue ?? stored.pValue ?? null,
+    effectSize: extraFields?.effectSize ?? stored.effectSize ?? null,
+    controlMetrics: extraFields?.controlMetrics ?? stored.controlMetrics ?? null,
+    treatmentMetrics: extraFields?.treatmentMetrics ?? stored.treatmentMetrics ?? null,
+    sampleCount: extraFields?.sampleCount ?? 0,
+    startedAt: exp.startedAt ?? exp.createdAt,
+    concludedAt: exp.concludedAt ?? null,
+  };
 }
 
 // ---------------------------------------------------------------------------
-// A/B Test API
+// A/B Test API (all async, DB-backed)
 // ---------------------------------------------------------------------------
 
-export function createAbTest(input: {
+export async function createAbTest(input: {
   name: string;
   domain: string;
   description?: string;
@@ -101,7 +168,7 @@ export function createAbTest(input: {
   primaryMetric?: string;
   significanceThreshold?: number;
   minSampleSize?: number;
-}): AbTest {
+}): Promise<AbTest> {
   const control = mlModelRegistry.getModel(input.controlModelVersionId);
   const treatment = mlModelRegistry.getModel(input.treatmentModelVersionId);
 
@@ -110,90 +177,211 @@ export function createAbTest(input: {
   if (control.domain !== treatment.domain)
     throw new Error('Control and treatment models must belong to the same domain');
 
-  const test: AbTest = {
-    testId: `ab-${crypto.randomUUID()}`,
-    name: input.name,
-    domain: input.domain,
-    ...(input.description !== undefined ? { description: input.description } : {}),
-    controlModelVersionId: input.controlModelVersionId,
-    treatmentModelVersionId: input.treatmentModelVersionId,
-    trafficSplitPct: input.trafficSplitPct ?? 0.5,
-    primaryMetric: input.primaryMetric ?? 'accuracy',
-    significanceThreshold: input.significanceThreshold ?? 0.05,
-    minSampleSize: input.minSampleSize ?? 100,
-    status: 'running',
-    winner: null,
-    pValue: null,
-    effectSize: null,
-    controlMetrics: null,
-    treatmentMetrics: null,
-    sampleCount: 0,
-    startedAt: new Date(),
-    concludedAt: null,
+  const testKey = `ab-${crypto.randomUUID()}`;
+  const trafficSplitPct = input.trafficSplitPct ?? 0.5;
+
+  const [experiment] = await db
+    .insert(experimentsTable)
+    .values({
+      key: testKey,
+      name: input.name,
+      description: input.description,
+      type: 'ml_model',
+      status: 'running',
+      primaryMetric: input.primaryMetric ?? 'accuracy',
+      trafficAllocation: 100,
+      isBandit: false,
+      minSampleSize: input.minSampleSize ?? 100,
+      significanceThreshold: String(input.significanceThreshold ?? 0.05),
+      startedAt: new Date(),
+      metadata: { domain: input.domain },
+    })
+    .returning();
+
+  if (!experiment) throw new Error('Failed to create ab-test experiment record');
+
+  const treatmentWeight = Math.round(trafficSplitPct * 100);
+  const controlWeight = 100 - treatmentWeight;
+
+  const [controlVariant, treatmentVariant] = await db
+    .insert(experimentVariantsTable)
+    .values([
+      {
+        experimentId: experiment.id,
+        key: 'control',
+        name: 'Control',
+        isControl: true,
+        trafficWeight: controlWeight,
+        mlModelVersionId: input.controlModelVersionId,
+      },
+      {
+        experimentId: experiment.id,
+        key: 'treatment',
+        name: 'Treatment',
+        isControl: false,
+        trafficWeight: treatmentWeight,
+        mlModelVersionId: input.treatmentModelVersionId,
+      },
+    ])
+    .returning();
+
+  logger.info({ testId: testKey, domain: input.domain, name: input.name }, 'A/B test created');
+
+  return mapDbRowToAbTest(experiment, controlVariant!, treatmentVariant!);
+}
+
+export async function assignVariant(testId: string, entityId: string): Promise<AbTestAssignment | null> {
+  const [experiment] = await db
+    .select()
+    .from(experimentsTable)
+    .where(eq(experimentsTable.key, testId))
+    .limit(1);
+
+  if (!experiment || experiment.status !== 'running') return null;
+
+  const variants = await db
+    .select()
+    .from(experimentVariantsTable)
+    .where(eq(experimentVariantsTable.experimentId, experiment.id))
+    .orderBy(experimentVariantsTable.id);
+
+  const controlVariant = variants.find((v) => v.isControl);
+  const treatmentVariant = variants.find((v) => !v.isControl);
+  if (!controlVariant || !treatmentVariant) return null;
+
+  const [existing] = await db
+    .select()
+    .from(experimentAssignmentsTable)
+    .where(
+      and(
+        eq(experimentAssignmentsTable.experimentId, experiment.id),
+        eq(experimentAssignmentsTable.entityId, entityId),
+      ),
+    )
+    .limit(1);
+
+  let assignedVariant: typeof variants[0];
+
+  if (existing) {
+    assignedVariant = variants.find((v) => v.id === existing.variantId) ?? controlVariant;
+  } else {
+    const hash = entityId.split('').reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 0);
+    const normalised = (hash % 1000) / 1000;
+    const trafficSplit = treatmentVariant.trafficWeight / 100;
+    assignedVariant = normalised < trafficSplit ? treatmentVariant : controlVariant;
+
+    await db
+      .insert(experimentAssignmentsTable)
+      .values({
+        experimentId: experiment.id,
+        variantId: assignedVariant.id,
+        entityType: 'user',
+        entityId,
+      })
+      .onConflictDoNothing();
+  }
+
+  const isControl = assignedVariant.isControl;
+  const modelVersionId = assignedVariant.mlModelVersionId ?? '';
+
+  return {
+    testId,
+    variant: isControl ? 'control' : 'treatment',
+    modelVersionId,
   };
-
-  testStore.set(test.testId, test);
-  logger.info({ testId: test.testId, domain: input.domain, name: input.name }, 'A/B test created');
-  return test;
 }
 
-export function assignVariant(testId: string, entityId: string): AbTestAssignment | null {
-  const test = testStore.get(testId);
-  if (!test || test.status !== 'running') return null;
-
-  const hash = entityId.split('').reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 0);
-  const normalised = (hash % 1000) / 1000;
-  const variant: 'control' | 'treatment' =
-    normalised < test.trafficSplitPct ? 'treatment' : 'control';
-  const modelVersionId =
-    variant === 'treatment' ? test.treatmentModelVersionId : test.controlModelVersionId;
-
-  return { testId, variant, modelVersionId };
-}
-
-export function recordAbTestOutcome(
+export async function recordAbTestOutcome(
   testId: string,
   variant: 'control' | 'treatment',
   metricValue: number,
-): void {
-  const test = testStore.get(testId);
-  if (!test || test.status !== 'running') return;
+): Promise<void> {
+  const [experiment] = await db
+    .select()
+    .from(experimentsTable)
+    .where(eq(experimentsTable.key, testId))
+    .limit(1);
 
-  test.sampleCount++;
+  if (!experiment || experiment.status !== 'running') return;
 
-  if (!test.controlMetrics) test.controlMetrics = { sum: 0, count: 0, sumSq: 0 };
-  if (!test.treatmentMetrics) test.treatmentMetrics = { sum: 0, count: 0, sumSq: 0 };
+  const variants = await db
+    .select()
+    .from(experimentVariantsTable)
+    .where(eq(experimentVariantsTable.experimentId, experiment.id));
 
-  const target = variant === 'control' ? test.controlMetrics : test.treatmentMetrics;
-  target.sum = (target.sum ?? 0) + metricValue;
-  target.sumSq = (target.sumSq ?? 0) + metricValue ** 2;
-  target.count = (target.count ?? 0) + 1;
+  const targetVariant = variants.find((v) =>
+    variant === 'control' ? v.isControl : !v.isControl,
+  );
+
+  if (!targetVariant) return;
+
+  await db.insert(experimentEventsTable).values({
+    experimentId: experiment.id,
+    variantId: targetVariant.id,
+    entityId: 'batch',
+    eventType: 'metric',
+    metricKey: experiment.primaryMetric,
+    metricValue: String(metricValue),
+  });
 }
 
-export function evaluateAbTest(testId: string): AbTestResult | null {
-  const test = testStore.get(testId);
-  if (!test) return null;
+export async function evaluateAbTest(testId: string): Promise<AbTestResult | null> {
+  const [experiment] = await db
+    .select()
+    .from(experimentsTable)
+    .where(eq(experimentsTable.key, testId))
+    .limit(1);
 
-  const cm = test.controlMetrics;
-  const tm = test.treatmentMetrics;
-  if (!cm || !tm) return null;
+  if (!experiment) return null;
 
-  const cCount = cm.count ?? 0;
-  const tCount = tm.count ?? 0;
+  const variants = await db
+    .select()
+    .from(experimentVariantsTable)
+    .where(eq(experimentVariantsTable.experimentId, experiment.id));
 
-  if (cCount < test.minSampleSize || tCount < test.minSampleSize) return null;
+  const controlVariant = variants.find((v) => v.isControl);
+  const treatmentVariant = variants.find((v) => !v.isControl);
+  if (!controlVariant || !treatmentVariant) return null;
 
-  const cMean = cCount > 0 ? (cm.sum ?? 0) / cCount : 0;
-  const tMean = tCount > 0 ? (tm.sum ?? 0) / tCount : 0;
-  const cVariance = cCount > 1 ? ((cm.sumSq ?? 0) - cCount * cMean ** 2) / (cCount - 1) : 0;
-  const tVariance = tCount > 1 ? ((tm.sumSq ?? 0) - tCount * tMean ** 2) / (tCount - 1) : 0;
+  const aggregates = await db
+    .select({
+      variantId: experimentEventsTable.variantId,
+      count: sql<number>`count(*)::int`,
+      metricSum: sql<number>`coalesce(sum(metric_value::numeric), 0)`,
+      metricSumSq: sql<number>`coalesce(sum((metric_value::numeric)^2), 0)`,
+    })
+    .from(experimentEventsTable)
+    .where(
+      and(
+        eq(experimentEventsTable.experimentId, experiment.id),
+        eq(experimentEventsTable.eventType, 'metric'),
+      ),
+    )
+    .groupBy(experimentEventsTable.variantId);
+
+  const cAgg = aggregates.find((a) => a.variantId === controlVariant.id);
+  const tAgg = aggregates.find((a) => a.variantId === treatmentVariant.id);
+
+  const cCount = cAgg?.count ?? 0;
+  const tCount = tAgg?.count ?? 0;
+  const minSampleSize = experiment.minSampleSize;
+
+  if (cCount < minSampleSize || tCount < minSampleSize) return null;
+
+  const cMean = cCount > 0 ? (cAgg?.metricSum ?? 0) / cCount : 0;
+  const tMean = tCount > 0 ? (tAgg?.metricSum ?? 0) / tCount : 0;
+  const cVariance =
+    cCount > 1 ? ((cAgg?.metricSumSq ?? 0) - cCount * cMean ** 2) / (cCount - 1) : 0;
+  const tVariance =
+    tCount > 1 ? ((tAgg?.metricSumSq ?? 0) - tCount * tMean ** 2) / (tCount - 1) : 0;
   const cStd = Math.sqrt(Math.max(0, cVariance));
   const tStd = Math.sqrt(Math.max(0, tVariance));
 
+  const significanceThreshold = parseFloat(String(experiment.significanceThreshold));
   const { pValue, effectSize } = computeZTest(cMean, tMean, cCount, tCount, cStd, tStd);
 
   let winner: AbTestWinner = 'inconclusive';
-  if (pValue < test.significanceThreshold) {
+  if (pValue < significanceThreshold) {
     winner = tMean > cMean ? 'treatment' : 'control';
   }
 
@@ -214,7 +402,7 @@ export function evaluateAbTest(testId: string): AbTestResult | null {
       ? `Promote treatment model — statistically significant improvement of ${improvement.toFixed(1)}% (p=${pValue}).`
       : winner === 'control'
         ? `Retain control model — treatment underperforms by ${Math.abs(improvement).toFixed(1)}% (p=${pValue}).`
-        : `Continue test — insufficient evidence (p=${pValue}, threshold ${test.significanceThreshold}). Need ${Math.max(0, test.minSampleSize - Math.min(cCount, tCount))} more samples.`;
+        : `Continue test — insufficient evidence (p=${pValue}, threshold ${significanceThreshold}). Need ${Math.max(0, minSampleSize - Math.min(cCount, tCount))} more samples.`;
 
   return {
     testId,
@@ -227,50 +415,168 @@ export function evaluateAbTest(testId: string): AbTestResult | null {
   };
 }
 
-export function concludeAbTest(testId: string): AbTest | null {
-  const test = testStore.get(testId);
-  if (!test || test.status !== 'running') return null;
+export async function concludeAbTest(testId: string): Promise<AbTest | null> {
+  const [experiment] = await db
+    .select()
+    .from(experimentsTable)
+    .where(eq(experimentsTable.key, testId))
+    .limit(1);
 
-  const result = evaluateAbTest(testId);
-  if (result) {
-    test.winner = result.winner;
-    test.pValue = result.pValue;
-    test.effectSize = result.effectSize;
-    test.controlMetrics = result.controlMetrics;
-    test.treatmentMetrics = result.treatmentMetrics;
+  if (!experiment || experiment.status !== 'running') return null;
+
+  const variants = await db
+    .select()
+    .from(experimentVariantsTable)
+    .where(eq(experimentVariantsTable.experimentId, experiment.id));
+
+  const controlVariant = variants.find((v) => v.isControl);
+  const treatmentVariant = variants.find((v) => !v.isControl);
+  if (!controlVariant || !treatmentVariant) return null;
+
+  const result = await evaluateAbTest(testId);
+
+  let winnerId: number | null = null;
+  if (result?.winner === 'treatment') {
+    winnerId = treatmentVariant.id;
+  } else if (result?.winner === 'control') {
+    winnerId = controlVariant.id;
   }
 
-  test.status = 'concluded';
-  test.concludedAt = new Date();
+  const existingMetadata = (experiment.metadata as Record<string, unknown> | null) ?? {};
+  const outcomeMetadata = {
+    ...existingMetadata,
+    abTestOutcome: {
+      winner: result?.winner ?? 'inconclusive',
+      pValue: result?.pValue ?? null,
+      effectSize: result?.effectSize ?? null,
+      controlMetrics: result?.controlMetrics ?? null,
+      treatmentMetrics: result?.treatmentMetrics ?? null,
+      concludedAt: new Date().toISOString(),
+    },
+  };
 
-  if (result?.winner === 'treatment') {
-    mlModelRegistry.promoteModel(test.treatmentModelVersionId, 'production', 'ab-test-auto');
+  const [updatedExperiment] = await db
+    .update(experimentsTable)
+    .set({
+      status: 'concluded',
+      concludedAt: new Date(),
+      updatedAt: new Date(),
+      winnerId,
+      metadata: outcomeMetadata,
+    })
+    .where(eq(experimentsTable.key, testId))
+    .returning();
+
+  if (!updatedExperiment) return null;
+
+  if (result?.winner === 'treatment' && treatmentVariant.mlModelVersionId) {
+    mlModelRegistry.promoteModel(treatmentVariant.mlModelVersionId, 'production', 'ab-test-auto');
     logger.info(
       { testId, winner: 'treatment' },
       'A/B test concluded — treatment model promoted to production',
     );
   }
 
-  return test;
+  return mapDbRowToAbTest(updatedExperiment, controlVariant, treatmentVariant, {
+    winner: result?.winner,
+    pValue: result?.pValue,
+    effectSize: result?.effectSize,
+    controlMetrics: result?.controlMetrics,
+    treatmentMetrics: result?.treatmentMetrics,
+  });
 }
 
-export function getAbTest(testId: string): AbTest | null {
-  return testStore.get(testId) ?? null;
+export async function getAbTest(testId: string): Promise<AbTest | null> {
+  const [experiment] = await db
+    .select()
+    .from(experimentsTable)
+    .where(eq(experimentsTable.key, testId))
+    .limit(1);
+
+  if (!experiment) return null;
+
+  const variants = await db
+    .select()
+    .from(experimentVariantsTable)
+    .where(eq(experimentVariantsTable.experimentId, experiment.id));
+
+  const controlVariant = variants.find((v) => v.isControl);
+  const treatmentVariant = variants.find((v) => !v.isControl);
+  if (!controlVariant || !treatmentVariant) return null;
+
+  return mapDbRowToAbTest(experiment, controlVariant, treatmentVariant);
 }
 
-export function listAbTests(domain?: string): AbTest[] {
-  const all = Array.from(testStore.values());
-  return domain ? all.filter((t) => t.domain === domain) : all;
+export async function listAbTests(domain?: string): Promise<AbTest[]> {
+  const experiments = await db
+    .select()
+    .from(experimentsTable)
+    .where(eq(experimentsTable.type, 'ml_model'));
+
+  const results: AbTest[] = [];
+
+  for (const exp of experiments) {
+    const expDomain = (exp.metadata as Record<string, string> | null)?.domain ?? 'unknown';
+    if (domain && expDomain !== domain) continue;
+
+    const variants = await db
+      .select()
+      .from(experimentVariantsTable)
+      .where(eq(experimentVariantsTable.experimentId, exp.id));
+
+    const controlVariant = variants.find((v) => v.isControl);
+    const treatmentVariant = variants.find((v) => !v.isControl);
+    if (!controlVariant || !treatmentVariant) continue;
+
+    results.push(mapDbRowToAbTest(exp, controlVariant, treatmentVariant));
+  }
+
+  return results;
 }
 
-export function getAbTestSummary() {
-  const tests = Array.from(testStore.values());
+export async function getAbTestSummary(): Promise<{
+  total: number;
+  running: number;
+  concluded: number;
+  treatmentWins: number;
+  controlWins: number;
+  inconclusive: number;
+}> {
+  const experiments = await db
+    .select()
+    .from(experimentsTable)
+    .where(eq(experimentsTable.type, 'ml_model'));
+
+  let treatmentWins = 0;
+  let controlWins = 0;
+  let inconclusive = 0;
+  const concluded = experiments.filter((e) => e.status === 'concluded' || e.status === 'stopped');
+
+  for (const exp of concluded) {
+    if (exp.winnerId === null) {
+      inconclusive++;
+      continue;
+    }
+
+    const [winnerVariant] = await db
+      .select({ isControl: experimentVariantsTable.isControl })
+      .from(experimentVariantsTable)
+      .where(eq(experimentVariantsTable.id, exp.winnerId))
+      .limit(1);
+
+    if (winnerVariant?.isControl) {
+      controlWins++;
+    } else {
+      treatmentWins++;
+    }
+  }
+
   return {
-    total: tests.length,
-    running: tests.filter((t) => t.status === 'running').length,
-    concluded: tests.filter((t) => t.status === 'concluded').length,
-    treatmentWins: tests.filter((t) => t.winner === 'treatment').length,
-    controlWins: tests.filter((t) => t.winner === 'control').length,
-    inconclusive: tests.filter((t) => t.winner === 'inconclusive').length,
+    total: experiments.length,
+    running: experiments.filter((e) => e.status === 'running').length,
+    concluded: concluded.length,
+    treatmentWins,
+    controlWins,
+    inconclusive,
   };
 }
