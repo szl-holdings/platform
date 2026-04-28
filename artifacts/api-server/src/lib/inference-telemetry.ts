@@ -86,6 +86,9 @@ const COST_PER_1K_TOKENS: Record<string, { input: number; output: number }> = {
   'claude-sonnet-4-6': { input: 0.003, output: 0.015 },
   'claude-sonnet-4-20250514': { input: 0.003, output: 0.015 },
   'claude-3-haiku-20240307': { input: 0.00025, output: 0.00125 },
+  'Qwen/Qwen3-8B': { input: 0.0001, output: 0.0001 },
+  'Qwen/Qwen3-0.6B': { input: 0.00002, output: 0.00002 },
+  'Qwen/Qwen2.5-VL-7B-Instruct': { input: 0.0001, output: 0.0001 },
 };
 
 export function estimateCost(

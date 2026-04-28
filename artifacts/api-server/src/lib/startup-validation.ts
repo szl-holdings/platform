@@ -450,6 +450,13 @@ export const ENV_SPECS: EnvVarSpec[] = [
     group: 'integrations',
   },
   {
+    key: 'HF_API_BASE',
+    required: false,
+    description:
+      'Override the HuggingFace inference base URL (e.g. a dedicated Inference Endpoint). Defaults to https://router.huggingface.co/hf-inference/v1',
+    group: 'integrations',
+  },
+  {
     key: 'AI_INTEGRATIONS_OPENAI_BASE_URL',
     required: false,
     description: 'Replit AI Integrations proxy base URL for OpenAI-compatible endpoint',
@@ -2162,6 +2169,23 @@ export function validateStartupConfig(): ValidationResult {
     }
   }
 
+  // ── HuggingFace connectivity ────────────────────────────────────────────
+  const hfToken = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
+  if (!hfToken) {
+    warnings.push(
+      'Neither HF_TOKEN nor HUGGINGFACE_API_KEY is set. ' +
+        'HuggingFace inference (Qwen3-8B) will be unavailable; the gateway will fall back to other configured providers. ' +
+        'Set HF_TOKEN in Replit Secrets to enable HuggingFace inference.',
+    );
+  } else {
+    const hfBase = process.env.HF_API_BASE || 'https://router.huggingface.co/hf-inference/v1';
+    logger.info(
+      { endpoint: hfBase, dedicated: !!process.env.HF_API_BASE },
+      'HuggingFace token present — inference will route to Qwen/Qwen3-8B via ' +
+        (process.env.HF_API_BASE ? `dedicated endpoint: ${hfBase}` : 'serverless router'),
+    );
+  }
+
   if (isDemoMode) {
     logger.info(
       { runtimeMode },
@@ -2210,5 +2234,55 @@ export function failFastOnInvalidConfig(): void {
   if (!result.valid) {
     logger.fatal({ errors: result.errors }, 'Cannot start server — fix configuration errors above');
     process.exit(1);
+  }
+}
+
+/**
+ * Probes the HuggingFace inference endpoint to confirm the token and URL are valid.
+ * Called after server startup when HF_TOKEN / HUGGINGFACE_API_KEY is present.
+ * Never throws — failures are logged as warnings so the server still boots.
+ */
+export async function validateHFConnectivity(): Promise<void> {
+  const token = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
+  if (!token) {
+    logger.warn(
+      'validateHFConnectivity: no HF token present — HuggingFace inference (Qwen3-8B) is disabled',
+    );
+    return;
+  }
+
+  const base = process.env.HF_API_BASE || 'https://router.huggingface.co/hf-inference/v1';
+  const probeUrl = `${base}/models`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const response = await fetch(probeUrl, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+      signal: controller.signal,
+    });
+
+    if (response.ok || response.status === 200) {
+      logger.info(
+        { endpoint: base, status: response.status },
+        'HuggingFace connectivity verified — Qwen/Qwen3-8B is reachable',
+      );
+    } else {
+      logger.warn(
+        { endpoint: base, status: response.status },
+        'HuggingFace probe returned non-OK status — inference may be degraded. ' +
+          'Check HF_TOKEN validity and quota.',
+      );
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.warn(
+      { endpoint: base, error: message },
+      'HuggingFace connectivity probe failed — inference may be unavailable. ' +
+        'Set HF_API_BASE if using a dedicated endpoint.',
+    );
+  } finally {
+    clearTimeout(timer);
   }
 }

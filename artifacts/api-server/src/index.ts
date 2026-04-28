@@ -39,6 +39,7 @@ import { runOpsMgmtBootInit } from './routes/ops-management';
 import { ensurePlatformFlags } from './lib/platform-flags';
 import { runMigrations } from './lib/run-migrations';
 import { runStartupSmokeCheck } from './lib/startup-smoke-check';
+import { validateHFConnectivity } from './lib/startup-validation';
 import { startSelfMonitoring, stopSelfMonitoring } from './lib/self-monitor';
 import { startScheduledTriggerChecks, stopScheduledTriggerChecks } from '@szl-holdings/ai-engine';
 import './lib/terra-nyc-ingestion';
@@ -228,6 +229,13 @@ export async function bootstrap(
       logger.warn({ err }, '[smoke] Startup smoke check failed (non-fatal)'),
     );
   }, 6_000).unref();
+
+  // Best-effort HuggingFace connectivity probe. Confirms Qwen3-8B is
+  // reachable when HF_TOKEN is set; warns clearly when absent.
+  // Never blocks startup.
+  validateHFConnectivity().catch((err) =>
+    logger.warn({ err }, '[hf] HuggingFace connectivity probe failed (non-fatal)'),
+  );
 
   // Schedule analytics aggregation every hour
   setInterval(

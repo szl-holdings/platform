@@ -2955,6 +2955,9 @@ importers:
       '@szl-holdings/proof-chain':
         specifier: workspace:*
         version: link:../proof-chain
+      '@szl-holdings/schemas':
+        specifier: workspace:*
+        version: link:../../packages/schemas
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../services

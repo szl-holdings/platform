@@ -27,7 +27,8 @@ export interface HFCompletionResult {
   raw: unknown;
 }
 
-const HF_API_BASE = 'https://router.huggingface.co/hf-inference/v1';
+const HF_API_BASE =
+  process.env.HF_API_BASE || 'https://router.huggingface.co/hf-inference/v1';
 
 function getHeaders(): Record<string, string> {
   const token = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;

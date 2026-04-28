@@ -1,4 +1,15 @@
 export {
+  type AdapterContext,
+  type AdapterRoutingStrategy,
+  createGatewayAdapter,
+  type ExtractResult,
+  type GatewayAdapter,
+  type PlanResult,
+  type RespondResult,
+  type StructuredAdapterResult,
+  type TriageResult,
+} from './gateway-adapter.js';
+export {
   type DelegationRequest,
   type DelegationResult,
   type DelegationStatus,

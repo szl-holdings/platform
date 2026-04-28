@@ -149,6 +149,7 @@ export const envSchema = z.object({
   NIM_API_BASE_URL: optionalUrl,
   HF_TOKEN: optionalStr,
   HUGGINGFACE_API_KEY: optionalStr,
+  HF_API_BASE: optionalUrl,
 
   // ── WebSocket ────────────────────────────────────────────────────────────
   // ALLOY_INTERNAL_TOKEN doubles as WS auth token (declared above)

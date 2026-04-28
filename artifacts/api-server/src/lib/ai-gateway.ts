@@ -72,20 +72,20 @@ const PROVIDER_MODELS: Record<string, { provider: InferenceProvider; model: stri
     { provider: 'replit-proxy', model: 'gpt-5.2' },
     { provider: 'anthropic', model: 'claude-sonnet-4-20250514' },
     { provider: 'gemini', model: 'gemini-2.0-flash' },
-    { provider: 'huggingface', model: 'mistralai/Mixtral-8x7B-Instruct-v0.1' },
+    { provider: 'huggingface', model: 'Qwen/Qwen3-8B' },
   ],
   fast: [
     { provider: 'replit-proxy', model: 'gpt-4o-mini' },
     { provider: 'gemini', model: 'gemini-2.0-flash' },
     { provider: 'anthropic', model: 'claude-3-haiku-20240307' },
-    { provider: 'huggingface', model: 'mistralai/Mixtral-8x7B-Instruct-v0.1' },
+    { provider: 'huggingface', model: 'Qwen/Qwen3-8B' },
   ],
   default: [
     { provider: 'replit-proxy', model: 'gpt-5.2' },
     { provider: 'anthropic', model: 'claude-sonnet-4-20250514' },
     { provider: 'gemini', model: 'gemini-2.0-flash' },
     { provider: 'openai', model: 'gpt-5.2' },
-    { provider: 'huggingface', model: 'mistralai/Mixtral-8x7B-Instruct-v0.1' },
+    { provider: 'huggingface', model: 'Qwen/Qwen3-8B' },
   ],
 };
 
@@ -331,7 +331,8 @@ function selectCandidates(request: GatewayRequest): ProviderCandidate[] {
         model.includes('mini') ||
         model.includes('haiku') ||
         model.includes('flash') ||
-        model.includes('Mixtral')
+        model.includes('Qwen3-8B') ||
+        model.includes('Qwen3-0.6B')
       )
         score += 40;
     }

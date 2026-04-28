@@ -206,9 +206,10 @@ class ProviderHealthMonitor {
       'replit-proxy': process.env.AI_INTEGRATIONS_OPENAI_BASE_URL
         ? `${process.env.AI_INTEGRATIONS_OPENAI_BASE_URL}/models`
         : undefined,
-      huggingface: process.env.HUGGINGFACE_API_KEY
-        ? 'https://api-inference.huggingface.co/status'
-        : undefined,
+      huggingface:
+        process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY
+          ? `${process.env.HF_API_BASE || 'https://router.huggingface.co/hf-inference/v1'}/models`
+          : undefined,
     };
 
     const endpoint = probeEndpoints[provider];
@@ -217,8 +218,9 @@ class ProviderHealthMonitor {
     const headers: Record<string, string> = {};
     if (provider === 'replit-proxy' && process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
       headers.Authorization = `Bearer ${process.env.AI_INTEGRATIONS_OPENAI_API_KEY}`;
-    } else if (provider === 'huggingface' && process.env.HUGGINGFACE_API_KEY) {
-      headers.Authorization = `Bearer ${process.env.HUGGINGFACE_API_KEY}`;
+    } else if (provider === 'huggingface') {
+      const hfToken = process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
+      if (hfToken) headers.Authorization = `Bearer ${hfToken}`;
     }
 
     const controller = new AbortController();

@@ -46,7 +46,7 @@ export class AIAdapter extends ServiceAdapter {
   }
 
   private get huggingfaceKey(): string | undefined {
-    return process.env.HUGGINGFACE_API_KEY;
+    return process.env.HF_TOKEN || process.env.HUGGINGFACE_API_KEY;
   }
 
   private get hasReplitProxy(): boolean {
@@ -558,24 +558,23 @@ export class AIAdapter extends ServiceAdapter {
     options?: { model?: string; maxTokens?: number },
     signal?: AbortSignal,
   ): Promise<ChatCompletionResult> {
-    const model = options?.model ?? "mistralai/Mixtral-8x7B-Instruct-v0.1";
+    const model = options?.model ?? "Qwen/Qwen3-8B";
+    const apiBase =
+      process.env.HF_API_BASE || "https://router.huggingface.co/hf-inference/v1";
 
-    const response = await fetch(
-      `https://api-inference.huggingface.co/models/${model}/v1/chat/completions`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.huggingfaceKey}`,
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          max_tokens: options?.maxTokens ?? 1024,
-        }),
-        signal: signal ?? null,
+    const response = await fetch(`${apiBase}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.huggingfaceKey}`,
       },
-    );
+      body: JSON.stringify({
+        model,
+        messages,
+        max_tokens: options?.maxTokens ?? 1024,
+      }),
+      signal: signal ?? null,
+    });
 
     if (!response.ok) {
       throw new Error(`HuggingFace API error: ${response.status} ${response.statusText}`);
