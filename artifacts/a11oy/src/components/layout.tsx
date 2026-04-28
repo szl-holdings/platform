@@ -81,6 +81,7 @@ const NAV_GROUPS = [
       { href: '/verifier',       label: 'Verifier Agent' },
       { href: '/memory',         label: 'Memory Vault' },
       { href: '/pce',            label: 'PCE' },
+      { href: '/flexcache',      label: 'FlexCache Runtime' },
     ],
   },
   {
