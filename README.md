@@ -113,7 +113,7 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 | **Pulse** | Executive Briefing | Board-ready decision briefings with attribution and proof chains |
 | **Carlota Jo** | Private Advisory | Concierge advisory with live integrations and booking workflow |
 
-**Additional surfaces:** Command (unified operator surface), SZL Holdings Mobile (iOS/Android command)
+**Additional surfaces:** Command (unified operator surface), Mobile Command (iOS/Android)
 
 ---
 
@@ -160,7 +160,7 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 | A11oy Phase 1 — Foundation (type system, fabric primitives, demo seed, read API) | ✅ Complete |
 | A11oy Phase 2 — Workcell engine with live AI reasoning | 🔜 In Progress |
 | A11oy Phase 3 — Full proof-carrying execution with live connectors | 🔜 Planned |
-| SZL Holdings Mobile (unified iOS + Android command) | 🔜 Planned |
+| Mobile Command (unified iOS + Android command) | 🔜 Planned |
 | SOC 2 Type 1 audit readiness | 🔜 Roadmap |
 | Production customer onboarding | 🔜 Roadmap |
 
@@ -175,7 +175,7 @@ See [`media/WALKTHROUGH.md`](./media/WALKTHROUGH.md) for the step-by-step script
 | `alpha working` | SZL Holdings, API Server, Carlota Jo, Counsel, Pulse (5) |
 | `alpha partial` | Vessels, Terra, Command, Sentra, Lyte (5) |
 | `build failing` | A11oy, SZL Demo Video (2) — cascaded from SDK dependency |
-| `not started` | SZL Holdings Mobile — scaffold complete, workflow not active |
+| `not started` | Mobile Command — scaffold complete, workflow not active |
 | `demo-only` | SZL Demo Video (1) |
 | `internal only` | Mockup Sandbox (1) |
 
