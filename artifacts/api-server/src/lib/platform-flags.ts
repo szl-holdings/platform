@@ -1,6 +1,61 @@
-import { db, featureFlagOverridesTable, featureFlagsTable } from '@szl-holdings/db';
+import {
+  db,
+  featureFlagOverridesTable,
+  featureFlagsTable,
+  flagCheckLogsTable,
+  type FeatureFlag,
+  type FeatureFlagOverride,
+} from '@szl-holdings/db';
 import { and, eq } from 'drizzle-orm';
 import { logger } from './logger';
+
+// ─── In-memory TTL Cache ──────────────────────────────────────────────────────
+// Short-lived cache that avoids a DB round-trip on every flag check.
+// TTL is 30 seconds by default; admin writes call `invalidateFlagCache(key)`
+// to bust the relevant entry immediately.
+
+const FLAG_CACHE_TTL_MS = 30_000;
+
+interface CacheEntry<T> {
+  value: T;
+  expiresAt: number;
+}
+
+const flagRowCache = new Map<string, CacheEntry<FeatureFlag | null>>();
+const overrideCache = new Map<number, CacheEntry<FeatureFlagOverride[]>>();
+
+async function getCachedFlag(key: string): Promise<FeatureFlag | null> {
+  const entry = flagRowCache.get(key);
+  if (entry && entry.expiresAt > Date.now()) return entry.value;
+  const [flag] = await db
+    .select()
+    .from(featureFlagsTable)
+    .where(eq(featureFlagsTable.key, key))
+    .limit(1);
+  const value: FeatureFlag | null = flag ?? null;
+  flagRowCache.set(key, { value, expiresAt: Date.now() + FLAG_CACHE_TTL_MS });
+  return value;
+}
+
+async function getCachedOverrides(flagId: number): Promise<FeatureFlagOverride[]> {
+  const entry = overrideCache.get(flagId);
+  if (entry && entry.expiresAt > Date.now()) return entry.value;
+  const overrides = await db
+    .select()
+    .from(featureFlagOverridesTable)
+    .where(eq(featureFlagOverridesTable.flagId, flagId));
+  overrideCache.set(flagId, { value: overrides, expiresAt: Date.now() + FLAG_CACHE_TTL_MS });
+  return overrides;
+}
+
+/** Immediately bust the cache for a given flag key. Called by admin write routes. */
+export function invalidateFlagCache(key: string): void {
+  const entry = flagRowCache.get(key);
+  flagRowCache.delete(key);
+  if (entry?.value) {
+    overrideCache.delete(entry.value.id);
+  }
+}
 
 export const PLATFORM_FLAGS = [
   {
@@ -223,6 +278,17 @@ export interface FlagEvaluationContext {
   userId?: number;
   orgId?: number;
   roles?: string[];
+  callerTag?: string;
+  skipLog?: boolean;
+  /**
+   * When true, rollout bucketing is skipped and only the global on/off toggle
+   * and explicit overrides are used for evaluation. Set this for anonymous
+   * callers who lack a stable entity ID to bucket against, so they cannot
+   * receive a stale bucket-0 result that doesn't reflect their true audience.
+   * Conservative: partial rollouts (< 100%) evaluate as disabled for skipRollout
+   * callers.
+   */
+  skipRollout?: boolean;
 }
 
 export interface FlagEvaluationResult {
@@ -241,89 +307,133 @@ function computeRolloutBucket(key: string, entityId: number | string): number {
   return Math.abs(hash) % 100;
 }
 
+function persistCheckLog(
+  key: string,
+  result: FlagEvaluationResult,
+  ctx: FlagEvaluationContext,
+): void {
+  db.insert(flagCheckLogsTable)
+    .values({
+      flagKey: key,
+      userId: ctx.userId ?? null,
+      orgId: ctx.orgId ?? null,
+      result: result.enabled,
+      source: result.source,
+      callerTag: ctx.callerTag ?? null,
+    })
+    .catch((err) => logger.warn({ err, key }, 'Failed to persist flag check log'));
+}
+
 export async function evaluateFlag(
   key: string,
   ctx: FlagEvaluationContext = {},
 ): Promise<FlagEvaluationResult> {
   try {
-    const [flag] = await db
-      .select()
-      .from(featureFlagsTable)
-      .where(eq(featureFlagsTable.key, key))
-      .limit(1);
+    const flag = await getCachedFlag(key);
 
     if (!flag) {
-      return { key, enabled: false, source: 'default' };
+      const result: FlagEvaluationResult = { key, enabled: false, source: 'default' };
+      if (!ctx.skipLog) persistCheckLog(key, result, ctx);
+      return result;
     }
 
     if (!flag.isEnabled) {
-      return { key, enabled: false, source: 'global', rolloutPercentage: flag.rolloutPercentage };
+      const result: FlagEvaluationResult = {
+        key,
+        enabled: false,
+        source: 'global',
+        rolloutPercentage: flag.rolloutPercentage,
+      };
+      if (!ctx.skipLog) persistCheckLog(key, result, ctx);
+      return result;
     }
 
-    if (ctx.userId !== undefined) {
-      const [userOverride] = await db
-        .select()
-        .from(featureFlagOverridesTable)
-        .where(
-          and(
-            eq(featureFlagOverridesTable.flagId, flag.id),
-            eq(featureFlagOverridesTable.entityType, 'user'),
-            eq(featureFlagOverridesTable.entityId, String(ctx.userId)),
-          ),
-        )
-        .limit(1);
+    // Fetch all overrides for this flag in a single cached query, then filter
+    // in memory — avoids N+1 DB calls for user/org/role checks.
+    const allOverrides = await getCachedOverrides(flag.id);
 
+    if (ctx.userId !== undefined) {
+      const userOverride = allOverrides.find(
+        (o) => o.entityType === 'user' && o.entityId === String(ctx.userId),
+      );
       if (userOverride) {
-        return { key, enabled: userOverride.isEnabled, source: 'override' };
+        const result: FlagEvaluationResult = {
+          key,
+          enabled: userOverride.isEnabled,
+          source: 'override',
+        };
+        if (!ctx.skipLog) persistCheckLog(key, result, ctx);
+        return result;
       }
     }
 
     if (ctx.orgId !== undefined) {
-      const [orgOverride] = await db
-        .select()
-        .from(featureFlagOverridesTable)
-        .where(
-          and(
-            eq(featureFlagOverridesTable.flagId, flag.id),
-            eq(featureFlagOverridesTable.entityType, 'org'),
-            eq(featureFlagOverridesTable.entityId, String(ctx.orgId)),
-          ),
-        )
-        .limit(1);
-
+      const orgOverride = allOverrides.find(
+        (o) => o.entityType === 'org' && o.entityId === String(ctx.orgId),
+      );
       if (orgOverride) {
-        return { key, enabled: orgOverride.isEnabled, source: 'override' };
+        const result: FlagEvaluationResult = {
+          key,
+          enabled: orgOverride.isEnabled,
+          source: 'override',
+        };
+        if (!ctx.skipLog) persistCheckLog(key, result, ctx);
+        return result;
       }
     }
 
     if (ctx.roles && ctx.roles.length > 0) {
       for (const role of ctx.roles) {
-        const [roleOverride] = await db
-          .select()
-          .from(featureFlagOverridesTable)
-          .where(
-            and(
-              eq(featureFlagOverridesTable.flagId, flag.id),
-              eq(featureFlagOverridesTable.entityType, 'role'),
-              eq(featureFlagOverridesTable.entityId, role),
-            ),
-          )
-          .limit(1);
-
+        const roleOverride = allOverrides.find(
+          (o) => o.entityType === 'role' && o.entityId === role,
+        );
         if (roleOverride) {
-          return { key, enabled: roleOverride.isEnabled, source: 'override' };
+          const result: FlagEvaluationResult = {
+            key,
+            enabled: roleOverride.isEnabled,
+            source: 'override',
+          };
+          if (!ctx.skipLog) persistCheckLog(key, result, ctx);
+          return result;
         }
       }
     }
 
     if (flag.rolloutPercentage < 100) {
+      if (ctx.skipRollout) {
+        // Anonymous callers have no stable bucket ID — disable rather than
+        // assign them the deterministic bucket-0 result which misrepresents
+        // whether they are actually in the rollout cohort.
+        const result: FlagEvaluationResult = {
+          key,
+          enabled: false,
+          source: 'global',
+          rolloutPercentage: flag.rolloutPercentage,
+        };
+        if (!ctx.skipLog) persistCheckLog(key, result, ctx);
+        return result;
+      }
       const bucketId = ctx.userId ?? ctx.orgId ?? 0;
       const bucket = computeRolloutBucket(key, bucketId);
       const enabled = bucket < flag.rolloutPercentage;
-      return { key, enabled, source: 'rollout', rolloutPercentage: flag.rolloutPercentage };
+      const result: FlagEvaluationResult = {
+        key,
+        enabled,
+        source: 'rollout',
+        rolloutPercentage: flag.rolloutPercentage,
+      };
+      if (!ctx.skipLog) persistCheckLog(key, result, ctx);
+      return result;
     }
 
-    return { key, enabled: true, source: 'global', rolloutPercentage: flag.rolloutPercentage };
+    const result: FlagEvaluationResult = {
+      key,
+      enabled: true,
+      source: 'global',
+      rolloutPercentage: flag.rolloutPercentage,
+    };
+    if (!ctx.skipLog) persistCheckLog(key, result, ctx);
+    return result;
   } catch (err) {
     logger.warn({ err, key }, 'Feature flag evaluation failed — defaulting to disabled');
     return { key, enabled: false, source: 'default' };

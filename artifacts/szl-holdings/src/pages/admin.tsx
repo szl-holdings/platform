@@ -56,6 +56,7 @@ import {
   UpdatesPanel,
   VenturesPanel,
 } from '@/admin/ContentPanels';
+import { FeatureFlagsPanel } from '@/admin/FeatureFlagsPanel';
 import { FeedbackPanel } from '@/admin/FeedbackPanel';
 import { OnboardingPanel } from '@/admin/OnboardingPanel';
 import { ProvisioningPanel } from '@/admin/ProvisioningPanel';
@@ -195,6 +196,7 @@ const ADMIN_SECTIONS = [
   { id: 'submissions', label: 'Submissions', icon: Mail },
   { id: 'feedback', label: 'Feedback & NPS', icon: SmilePlus },
   { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+  { id: 'feature-flags', label: 'Feature Flags', icon: Settings },
   { id: 'backup', label: 'Backup & Recovery', icon: Database },
   { id: 'provisioning', label: 'Service Provisioning', icon: Layers },
 ];
@@ -632,6 +634,7 @@ export default function AdminPage() {
             {activeSection === 'submissions' && <SubmissionsPanel />}
             {activeSection === 'feedback' && <FeedbackPanel />}
             {activeSection === 'analytics' && <AnalyticsPanel />}
+            {activeSection === 'feature-flags' && <FeatureFlagsPanel />}
             {activeSection === 'backup' && <BackupPanel />}
             {activeSection === 'provisioning' && <ProvisioningPanel />}
           </m.div>

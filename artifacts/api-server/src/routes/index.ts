@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { perUserApiSlidingLimiter } from "../middlewares/sliding-window-limiter";
 import { bulkExportLimiter } from "../middlewares/rate-limiters";
 import { guardianPolicyCheck } from "../middlewares/guardian-policy";
-import { lazyMount, lazyMatch } from "../lib/lazy-router";
+import { lazyMount, lazyMatch, lazyRegisterMatch } from "../lib/lazy-router";
 import emailWebhooksRouter from "./email-webhooks";
 import * as core from "./groups/core";
 import * as vessels from "./groups/vessels";
@@ -487,5 +487,8 @@ router.use(
     "carlota-jo",
   ),
 );
+
+// Feature flag evaluation — POST /flags/evaluate, GET /flags/:key
+router.use(lazyRegisterMatch(["/flags"], () => import("./feature-flags-public"), "feature-flags-public"));
 
 export default router;

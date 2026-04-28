@@ -1,4 +1,13 @@
-import { boolean, integer, jsonb, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+} from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import type { z } from 'zod/v4';
 
@@ -31,6 +40,25 @@ export const featureFlagOverridesTable = pgTable('feature_flag_overrides', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
+export const flagCheckLogsTable = pgTable(
+  'flag_check_logs',
+  {
+    id: serial('id').primaryKey(),
+    flagKey: text('flag_key').notNull(),
+    userId: integer('user_id'),
+    orgId: integer('org_id'),
+    result: boolean('result').notNull(),
+    source: text('source', { enum: ['override', 'rollout', 'global', 'default'] }).notNull(),
+    callerTag: text('caller_tag'),
+    checkedAt: timestamp('checked_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('flag_check_logs_key_idx').on(t.flagKey),
+    index('flag_check_logs_org_id_idx').on(t.orgId),
+    index('flag_check_logs_checked_at_idx').on(t.checkedAt),
+  ],
+);
+
 export const insertFeatureFlagSchema = createInsertSchema(featureFlagsTable).omit({
   id: true,
   createdAt: true,
@@ -45,3 +73,10 @@ export const insertFeatureFlagOverrideSchema = createInsertSchema(featureFlagOve
 });
 export type InsertFeatureFlagOverride = z.infer<typeof insertFeatureFlagOverrideSchema>;
 export type FeatureFlagOverride = typeof featureFlagOverridesTable.$inferSelect;
+
+export const insertFlagCheckLogSchema = createInsertSchema(flagCheckLogsTable).omit({
+  id: true,
+  checkedAt: true,
+});
+export type InsertFlagCheckLog = z.infer<typeof insertFlagCheckLogSchema>;
+export type FlagCheckLog = typeof flagCheckLogsTable.$inferSelect;
