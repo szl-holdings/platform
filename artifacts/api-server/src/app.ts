@@ -24,6 +24,7 @@ import { ENV_SPECS } from './lib/startup-validation';
 import { apiVersionMiddleware } from './middlewares/api-version';
 import { appModeMiddleware } from './middlewares/app-mode.js';
 import { authMiddleware } from './middlewares/auth';
+import { brotliMiddleware } from './middlewares/brotli';
 import { correlationMiddleware } from './middlewares/correlation';
 import { csrfMiddleware } from './middlewares/csrf';
 import { globalAuthEnforcer } from './middlewares/global-auth-enforcer';
@@ -34,6 +35,7 @@ import { globalLimiter } from './middlewares/rate-limiters';
 import { sessionRefreshPolicy } from './middlewares/session-policy';
 import { telemetryMiddleware } from './middlewares/telemetry';
 import { traceEmitMiddleware } from './middlewares/trace-emit';
+import { createHonoApp, createHonoExpressHandler } from './hono/index';
 import router from './routes';
 import demoResetRouter from './routes/demo-reset';
 
@@ -157,6 +159,12 @@ app.use(
     },
   }),
 );
+
+// Brotli compression runs BEFORE gzip. Clients that advertise `Accept-Encoding: br`
+// receive Brotli-compressed responses (typically 15-25% smaller than gzip at
+// equivalent CPU cost). Clients without `br` support fall through to the
+// gzip `compression` middleware above.
+app.use(brotliMiddleware);
 
 app.use(telemetryMiddleware);
 app.use(traceEmitMiddleware);
@@ -695,6 +703,17 @@ app.use('/api', etagMiddleware);
 //   2) `DEMO_MODE=true` env flag (404 otherwise)
 //   3) `authMiddleware({ required: true })` + admin role check (401/403 otherwise)
 app.use('/api', demoResetRouter);
+
+// ── Hono Edge Router ─────────────────────────────────────────────────────────
+// Hono handles new endpoints in parallel with Express for higher throughput.
+// Auth, CORS, and telemetry context set by Express middleware is forwarded
+// into Hono via the adapter. If Hono returns a 404 (no matching route),
+// the request falls through to the next Express handler.
+// New endpoints should be defined in src/hono/index.ts using @hono/zod-openapi
+// which auto-generates an OpenAPI 3.1 spec from route definitions.
+const _honoApp = createHonoApp();
+const _honoHandler = createHonoExpressHandler(_honoApp);
+app.use(_honoHandler);
 
 app.use(globalAuthEnforcer);
 app.use(meshCallLogger());

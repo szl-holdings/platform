@@ -14,18 +14,19 @@
     "format": "biome format --write ./src"
   },
   "devDependencies": {
-    "@szl-holdings/security-headers": "workspace:*",
     "@replit/vite-plugin-cartographer": "catalog:",
     "@replit/vite-plugin-dev-banner": "catalog:",
     "@replit/vite-plugin-runtime-error-modal": "catalog:",
     "@szl-holdings/api-client-react": "workspace:*",
     "@szl-holdings/mcp-client": "workspace:*",
+    "@szl-holdings/security-headers": "workspace:*",
     "@tailwindcss/vite": "catalog:",
     "@tanstack/react-query": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
+    "babel-plugin-react-compiler": "19.0.0-beta-ebf51a3-20250411",
     "framer-motion": "catalog:",
     "lucide-react": "catalog:",
     "react": "catalog:",
@@ -37,18 +38,18 @@
     "wouter": "^3.3.5"
   },
   "dependencies": {
-    "@szl/alloy": "workspace:*",
     "@szl-holdings/analytics": "workspace:*",
-    "@szl-holdings/crdt-sync": "workspace:*",
     "@szl-holdings/brand-registry": "workspace:*",
     "@szl-holdings/config": "workspace:*",
     "@szl-holdings/covenant-policy": "workspace:*",
+    "@szl-holdings/crdt-sync": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",
     "@szl-holdings/domain-claims": "workspace:*",
     "@szl-holdings/evidence-ledger": "workspace:*",
     "@szl-holdings/graphql-client": "workspace:*",
     "@szl-holdings/monte-carlo": "workspace:*",
     "@szl-holdings/observability": "workspace:*",
+    "@szl-holdings/omnia-shell": "workspace:*",
     "@szl-holdings/platform-registry": "workspace:*",
     "@szl-holdings/policy-guard": "workspace:*",
     "@szl-holdings/prism-bus": "workspace:*",
@@ -56,6 +57,8 @@
     "@szl-holdings/shared-contracts": "workspace:*",
     "@szl-holdings/shared-ui": "workspace:*",
     "@szl-holdings/workflow-runtime": "workspace:*",
+    "@szl/alloy": "workspace:*",
+    "@workspace/tokens": "workspace:*",
     "clsx": "catalog:",
     "date-fns": "^3.6.0",
     "i18next": "^26.0.3",
@@ -67,8 +70,6 @@
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "sonner": "^2.0.7",
-    "zod": "catalog:",
-    "@szl-holdings/omnia-shell": "workspace:*",
-    "@workspace/tokens": "workspace:*"
+    "zod": "catalog:"
   }
 }

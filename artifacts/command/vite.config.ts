@@ -34,7 +34,16 @@ export default defineConfig({
     securityHeadersVitePlugin(),
     healthCheckPlugin(),
     sharedProxyPlugin(),
-    react(),
+    react({
+      babel: {
+        plugins: [
+          // React Compiler — eliminates the need for manual useMemo/useCallback/React.memo.
+          // The compiler statically analyses component trees and inserts memoization
+          // only where it provides a measurable benefit.
+          ['babel-plugin-react-compiler', { target: '19' }],
+        ],
+      },
+    }),
     tailwindcss(),
     runtimeErrorOverlay(),
     ...(process.env.NODE_ENV !== 'production' && process.env.REPL_ID !== undefined
