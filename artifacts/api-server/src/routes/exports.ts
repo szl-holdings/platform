@@ -26,7 +26,8 @@ import {
   sendNotFound,
   sendSuccess,
 } from '../lib/api-response';
-import { type ExportColumn, generateCsv, generatePdf, generateXlsx, getExportBuffer, getExportByToken, getExportJobStatus, getOrFetchExportBuffer, listExportHistory, runExport, storeExportBuffer } from '../lib/export-service';
+import { type ExportColumn, generateCsv, generatePdf, generateXlsx, getExportBuffer, getExportByToken, getExportJobStatus, getOrFetchExportBuffer, listExportHistory, runExport } from '../lib/export-service';
+import { processExportJobById } from '../jobs/export-job-processor';
 import { checkExportSafe } from '../lib/export-safety';
 import { isFlagEnabled } from '../lib/platform-flags';
 import { listQuerySchema, validateBody, validateQuery } from '../lib/validation';
@@ -1071,7 +1072,7 @@ router.post(
         status: 'pending',
         triggeredByUserId: getUserId(req),
         triggeredByEmail: getUserEmail(req),
-        filterParams: JSON.stringify({ dateFrom, dateTo, search, status, orgId, action }),
+        filterParams: JSON.stringify({ dateFrom, dateTo, search, status, orgId, action, selectedColumns }),
         scheduleFrequency: schedule,
         downloadToken,
         expiresAt,
@@ -1102,384 +1103,37 @@ router.post(
 
       sendSuccess(res, { exportId, status: 'pending', name, format, expiresAt });
 
-      setImmediate(async () => {
-        try {
-          await db
-            .update(exportJobsTable)
-            .set({ status: 'processing' })
-            .where(eq(exportJobsTable.exportId, exportId));
-
-          let rows: Record<string, unknown>[] = [];
-          let allColumns: ExportColumn[] = [];
-          const from = dateFrom ? new Date(dateFrom) : undefined;
-          const to = dateTo ? new Date(dateTo) : undefined;
-
-          switch (domain) {
-            case 'audit_events': {
-              const conditions = [];
-              if (from) conditions.push(gte(auditEventsTable.createdAt, from));
-              if (to) conditions.push(lte(auditEventsTable.createdAt, to));
-              if (action) conditions.push(ilike(auditEventsTable.action, `%${action}%`));
-              else if (search)
-                conditions.push(
-                  or(
-                    ilike(auditEventsTable.action, `%${search}%`),
-                    ilike(auditEventsTable.entityType, `%${search}%`),
-                  )!,
-                );
-              rows = (await db
-                .select({
-                  id: auditEventsTable.id,
-                  action: auditEventsTable.action,
-                  entityType: auditEventsTable.entityType,
-                  entityId: auditEventsTable.entityId,
-                  userId: auditEventsTable.userId,
-                  userEmail: usersTable.email,
-                  userName: usersTable.displayName,
-                  ipAddress: auditEventsTable.ipAddress,
-                  userAgent: auditEventsTable.userAgent,
-                  createdAt: auditEventsTable.createdAt,
-                })
-                .from(auditEventsTable)
-                .leftJoin(usersTable, sql`${auditEventsTable.userId} = ${usersTable.id}`)
-                .where(conditions.length ? and(...conditions) : undefined)
-                .orderBy(desc(auditEventsTable.createdAt))
-                .limit(10_000)) as Record<string, unknown>[];
-              allColumns = [
-                { key: 'id', label: 'ID' },
-                { key: 'createdAt', label: 'Timestamp' },
-                { key: 'action', label: 'Action' },
-                { key: 'entityType', label: 'Entity Type' },
-                { key: 'entityId', label: 'Entity ID' },
-                { key: 'userEmail', label: 'Actor Email' },
-                { key: 'userName', label: 'Actor Name' },
-                { key: 'ipAddress', label: 'IP Address' },
-                { key: 'userAgent', label: 'User Agent' },
-              ];
-              break;
-            }
-            case 'aegis_incidents': {
-              const conditions = [];
-              if (from) conditions.push(gte(firestormFindingsTable.createdAt, from));
-              if (to) conditions.push(lte(firestormFindingsTable.createdAt, to));
-              if (status && status !== 'all')
-                conditions.push(eq(firestormFindingsTable.status, status as any));
-              if (search)
-                conditions.push(
-                  or(
-                    ilike(firestormFindingsTable.title, `%${search}%`),
-                    ilike(firestormFindingsTable.category, `%${search}%`),
-                  )!,
-                );
-              rows = (await db
-                .select()
-                .from(firestormFindingsTable)
-                .where(conditions.length ? and(...conditions) : undefined)
-                .orderBy(desc(firestormFindingsTable.createdAt))
-                .limit(10_000)) as Record<string, unknown>[];
-              allColumns = [
-                { key: 'id', label: 'ID' },
-                { key: 'createdAt', label: 'Created At' },
-                { key: 'title', label: 'Title' },
-                { key: 'severity', label: 'Severity' },
-                { key: 'status', label: 'Status' },
-                { key: 'category', label: 'Category' },
-                { key: 'description', label: 'Description' },
-                { key: 'recommendation', label: 'Recommendation' },
-              ];
-              break;
-            }
-            case 'vessels': {
-              const conditions = [];
-              if (from) conditions.push(gte(vesselsTable.createdAt, from));
-              if (to) conditions.push(lte(vesselsTable.createdAt, to));
-              if (status && status !== 'all')
-                conditions.push(eq(vesselsTable.status, status as any));
-              if (search)
-                conditions.push(
-                  or(
-                    ilike(vesselsTable.name, `%${search}%`),
-                    ilike(vesselsTable.mmsi, `%${search}%`),
-                  )!,
-                );
-              rows = (await db
-                .select()
-                .from(vesselsTable)
-                .where(conditions.length ? and(...conditions) : undefined)
-                .orderBy(desc(vesselsTable.createdAt))
-                .limit(10_000)) as Record<string, unknown>[];
-              allColumns = [
-                { key: 'id', label: 'ID' },
-                { key: 'createdAt', label: 'Created At' },
-                { key: 'name', label: 'Vessel Name' },
-                { key: 'mmsi', label: 'MMSI' },
-                { key: 'imo', label: 'IMO' },
-                { key: 'type', label: 'Type' },
-                { key: 'flag', label: 'Flag' },
-                { key: 'status', label: 'Status' },
-                { key: 'currentPort', label: 'Current Port' },
-                { key: 'nextPort', label: 'Next Port' },
-                { key: 'grossTonnage', label: 'Gross Tonnage' },
-              ];
-              break;
-            }
-            case 'terra_deals': {
-              const conditions = [];
-              if (from) conditions.push(gte(terraDealsTable.createdAt, from));
-              if (to) conditions.push(lte(terraDealsTable.createdAt, to));
-              if (status && status !== 'all')
-                conditions.push(eq(terraDealsTable.stage, status as any));
-              if (search)
-                conditions.push(
-                  or(
-                    ilike(terraDealsTable.address, `%${search}%`),
-                    ilike(terraDealsTable.ownerName, `%${search}%`),
-                  )!,
-                );
-              rows = (await db
-                .select()
-                .from(terraDealsTable)
-                .where(conditions.length ? and(...conditions) : undefined)
-                .orderBy(desc(terraDealsTable.createdAt))
-                .limit(10_000)) as Record<string, unknown>[];
-              allColumns = [
-                { key: 'id', label: 'ID' },
-                { key: 'createdAt', label: 'Created At' },
-                { key: 'address', label: 'Address' },
-                { key: 'borough', label: 'Borough' },
-                { key: 'stage', label: 'Stage' },
-                { key: 'type', label: 'Deal Type' },
-                { key: 'price', label: 'Price' },
-                { key: 'askingPrice', label: 'Asking Price' },
-                { key: 'riskLevel', label: 'Risk Level' },
-                { key: 'ownerName', label: 'Owner' },
-                { key: 'clientName', label: 'Client' },
-                { key: 'estimatedCloseDate', label: 'Est. Close Date' },
-              ];
-              break;
-            }
-            case 'lyte_signals': {
-              const conditions = [];
-              if (from) conditions.push(gte(lyteSignalsTable.createdAt, from));
-              if (to) conditions.push(lte(lyteSignalsTable.createdAt, to));
-              if (status && status !== 'all')
-                conditions.push(eq(lyteSignalsTable.status, status as any));
-              if (search)
-                conditions.push(
-                  or(
-                    ilike(lyteSignalsTable.title, `%${search}%`),
-                    ilike(lyteSignalsTable.source, `%${search}%`),
-                  )!,
-                );
-              rows = (await db
-                .select()
-                .from(lyteSignalsTable)
-                .where(conditions.length ? and(...conditions) : undefined)
-                .orderBy(desc(lyteSignalsTable.createdAt))
-                .limit(10_000)) as Record<string, unknown>[];
-              allColumns = [
-                { key: 'id', label: 'ID' },
-                { key: 'createdAt', label: 'Created At' },
-                { key: 'title', label: 'Signal Title' },
-                { key: 'severity', label: 'Severity' },
-                { key: 'status', label: 'Status' },
-                { key: 'source', label: 'Source' },
-                { key: 'sourceType', label: 'Source Type' },
-                { key: 'description', label: 'Description' },
-              ];
-              break;
-            }
-            case 'msp_tickets': {
-              const conditions = [];
-              if (from) conditions.push(gte(mspTicketsTable.createdAt, from));
-              if (to) conditions.push(lte(mspTicketsTable.createdAt, to));
-              if (status && status !== 'all')
-                conditions.push(eq(mspTicketsTable.status, status as any));
-              if (search)
-                conditions.push(
-                  or(
-                    ilike(mspTicketsTable.subject, `%${search}%`),
-                    ilike(mspTicketsTable.category, `%${search}%`),
-                  )!,
-                );
-              rows = (await db
-                .select()
-                .from(mspTicketsTable)
-                .where(conditions.length ? and(...conditions) : undefined)
-                .orderBy(desc(mspTicketsTable.createdAt))
-                .limit(10_000)) as Record<string, unknown>[];
-              allColumns = [
-                { key: 'id', label: 'ID' },
-                { key: 'createdAt', label: 'Created At' },
-                { key: 'ticketNumber', label: 'Ticket Number' },
-                { key: 'subject', label: 'Subject' },
-                { key: 'status', label: 'Status' },
-                { key: 'priority', label: 'Priority' },
-                { key: 'category', label: 'Category' },
-                { key: 'clientName', label: 'Client' },
-                { key: 'assigneeName', label: 'Assignee' },
-                { key: 'slaStatus', label: 'SLA Status' },
-                { key: 'resolvedAt', label: 'Resolved At' },
-              ];
-              break;
-            }
-            case 'usage_metering': {
-              const conditions = [];
-              if (from) conditions.push(gte(meteringEventsTable.occurredAt, from));
-              if (to) conditions.push(lte(meteringEventsTable.occurredAt, to));
-              if (orgId) conditions.push(eq(meteringEventsTable.orgId, orgId));
-              rows = (await db
-                .select({
-                  id: meteringEventsTable.id,
-                  orgId: meteringEventsTable.orgId,
-                  featureKey: meteringEventsTable.featureKey,
-                  product: meteringEventsTable.product,
-                  quantity: meteringEventsTable.quantity,
-                  unitLabel: meteringEventsTable.unitLabel,
-                  occurredAt: meteringEventsTable.occurredAt,
-                })
-                .from(meteringEventsTable)
-                .where(conditions.length ? and(...conditions) : undefined)
-                .orderBy(desc(meteringEventsTable.occurredAt))
-                .limit(10_000)) as Record<string, unknown>[];
-              allColumns = [
-                { key: 'id', label: 'ID' },
-                { key: 'orgId', label: 'Org ID' },
-                { key: 'featureKey', label: 'Feature' },
-                { key: 'product', label: 'Product' },
-                { key: 'quantity', label: 'Quantity' },
-                { key: 'unitLabel', label: 'Unit' },
-                { key: 'occurredAt', label: 'Occurred At' },
-              ];
-              break;
-            }
-            case 'revenue_events': {
-              const conditions = [];
-              if (from) conditions.push(gte(invoicesTable.createdAt, from));
-              if (to) conditions.push(lte(invoicesTable.createdAt, to));
-              if (status && status !== 'all')
-                conditions.push(eq(invoicesTable.status, status as any));
-              if (orgId) conditions.push(eq(invoicesTable.orgId, orgId));
-              rows = (await db
-                .select({
-                  id: invoicesTable.id,
-                  orgId: invoicesTable.orgId,
-                  stripeInvoiceId: invoicesTable.stripeInvoiceId,
-                  amount: invoicesTable.amount,
-                  currency: invoicesTable.currency,
-                  status: invoicesTable.status,
-                  paidAt: invoicesTable.paidAt,
-                  createdAt: invoicesTable.createdAt,
-                })
-                .from(invoicesTable)
-                .where(conditions.length ? and(...conditions) : undefined)
-                .orderBy(desc(invoicesTable.createdAt))
-                .limit(10_000)) as Record<string, unknown>[];
-              allColumns = [
-                { key: 'id', label: 'ID' },
-                { key: 'orgId', label: 'Org ID' },
-                { key: 'stripeInvoiceId', label: 'Stripe Invoice' },
-                { key: 'amount', label: 'Amount' },
-                { key: 'currency', label: 'Currency' },
-                { key: 'status', label: 'Status' },
-                { key: 'paidAt', label: 'Paid At' },
-                { key: 'createdAt', label: 'Created At' },
-              ];
-              break;
-            }
-          }
-
-          const columns = selectedColumns?.length
-            ? allColumns.filter((c) => selectedColumns.includes(c.key))
-            : allColumns;
-          let buffer: Buffer;
-          if (format === 'csv') {
-            buffer = generateCsv(columns, rows);
-          } else if (format === 'xlsx') {
-            buffer = generateXlsx(name, columns, rows);
-          } else {
-            buffer = await generatePdf(name, columns, rows, now);
-          }
-
-          const fileSizeBytes = buffer.length;
-          const rowCount = rows.length;
-
-          // Persist to object storage for durable re-downloads after server restarts.
-          const ext = format === 'pdf' ? 'pdf' : format === 'xlsx' ? 'xlsx' : 'csv';
-          const exportContentType =
-            format === 'pdf'
-              ? 'application/pdf'
-              : format === 'xlsx'
-                ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                : 'text/csv';
-          let storageKey: string | null = null;
-          const bucketId = process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID;
-          if (bucketId) {
-            try {
-              const { objectStorageClient: gcs } = await import('../lib/objectStorage');
-              const objectName = `exports/${exportId}.${ext}`;
-              await gcs.bucket(bucketId).file(objectName).save(buffer, {
-                contentType: exportContentType,
-                resumable: false,
-              });
-              storageKey = objectName;
-            } catch {
-              // Storage not available — in-memory buffer will serve
-            }
-          }
-
-          // Build a durable download URL stored in the DB so clients can
-          // retrieve it even after a server restart (via the job status endpoint).
-          const downloadUrl = `/api/exports/jobs/${exportId}/download?token=${downloadToken}`;
-
-          await db
-            .update(exportJobsTable)
-            .set({
-              status: 'completed',
-              rowCount,
-              fileSizeBytes,
-              completedAt: new Date(),
-              downloadUrl,
-              storageKey,
-            })
-            .where(eq(exportJobsTable.exportId, exportId));
-
-          storeExportBuffer(exportId, buffer, expiresAt, format, name, storageKey);
-
-          await db
-            .insert(auditEventsTable)
-            .values({
-              userId: getUserId(req),
-              action: 'export.completed',
-              entityType: 'export_job',
-              entityId: exportId,
-              newValues: { domain, format, rowCount, fileSizeBytes, name },
-            })
-            .catch(() => {});
-        } catch (bgErr) {
-          await db
-            .update(exportJobsTable)
-            .set({ status: 'failed', errorMessage: String(bgErr) })
-            .where(eq(exportJobsTable.exportId, exportId))
-            .catch(() => {});
-
-          await db
-            .insert(auditEventsTable)
-            .values({
-              userId: getUserId(req),
-              action: 'export.failed',
-              entityType: 'export_job',
-              entityId: exportId,
-              newValues: { domain, format, error: String(bgErr) },
-            })
-            .catch(() => {});
-        }
+      setImmediate(() => {
+        processExportJobById(exportId)
+          .then(() => {
+            db.insert(auditEventsTable)
+              .values({
+                userId: getUserId(req),
+                action: 'export.completed',
+                entityType: 'export_job',
+                entityId: exportId,
+                newValues: { domain, format, name },
+              })
+              .catch(() => {});
+          })
+          .catch((bgErr: unknown) => {
+            db.insert(auditEventsTable)
+              .values({
+                userId: getUserId(req),
+                action: 'export.failed',
+                entityType: 'export_job',
+                entityId: exportId,
+                newValues: { domain, format, error: String(bgErr) },
+              })
+              .catch(() => {});
+          });
       });
     } catch (err) {
       handleRouteError(res, err, 'Failed to enqueue export');
     }
   },
 );
+
 
 // ─── Export Job Status ────────────────────────────────────────────────────────
 

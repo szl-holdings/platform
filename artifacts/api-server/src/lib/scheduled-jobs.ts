@@ -48,6 +48,8 @@ export const NAMED_JOB_TYPES = {
   HOURLY_NET30_DUNNING: "hourly_net30_dunning",
   HOURLY_ORG_PUBLICATION_SCHEDULER: "hourly_org_publication_scheduler",
   TRACES_RETENTION_PRUNE: "traces_retention_prune",
+  OUTCOME_GRAPH_CALIBRATION: "outcome_graph_calibration",
+  EXPORT_JOB_PROCESSOR: "export_job_processor",
 } as const;
 
 export type NamedJobType = (typeof NAMED_JOB_TYPES)[keyof typeof NAMED_JOB_TYPES];
@@ -4204,6 +4206,111 @@ durableJobQueue.register(NAMED_JOB_TYPES.TRACES_RETENTION_PRUNE, async (job) => 
     { retainDays, cutoff: cutoff.toISOString(), dryRun, counts, totalDeleted, failed, durationMs: Date.now() - start },
     'traces_retention_prune: complete',
   );
+});
+
+registerEntry({
+  type: NAMED_JOB_TYPES.OUTCOME_GRAPH_CALIBRATION,
+  name: 'Outcome Graph Learning Calibration',
+  description:
+    'Runs the AI recommendation learning calibration across all active domains. Adjusts confidence thresholds, ranking weights, and escalation logic based on accumulated outcome feedback. Schedule is configurable via the CALIBRATION_CRON_SCHEDULE environment variable (default: weekly on Sundays at 01:00 UTC). Can also be triggered on-demand from the admin jobs panel.',
+  schedule: 'weekly',
+  enabled: true,
+});
+
+registerEntry({
+  type: NAMED_JOB_TYPES.EXPORT_JOB_PROCESSOR,
+  name: 'Export Job Processor',
+  description:
+    'Scans for export jobs stuck in the pending or processing state (e.g. after a server restart mid-generation) and re-queues them. Runs hourly as a safety net; normal export generation is handled inline by the enqueue endpoint.',
+  schedule: 'hourly',
+  enabled: true,
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.OUTCOME_GRAPH_CALIBRATION, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, 'outcome_graph_calibration: starting');
+  try {
+    const { runScheduledCalibration } = await import('./agent-scheduler');
+    const result = await runScheduledCalibration();
+    serverTelemetry.recordBusinessEvent({
+      type: 'outcome_graph_calibration_completed',
+      domain: 'ai',
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: result,
+    });
+    updateRegistry(NAMED_JOB_TYPES.OUTCOME_GRAPH_CALIBRATION, {
+      lastStatus: 'completed',
+      lastDurationMs: Date.now() - start,
+      lastResult: result as Record<string, unknown>,
+    });
+    logger.info({ jobId: job.id, ...result, durationMs: Date.now() - start }, 'outcome_graph_calibration: complete');
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, 'outcome_graph_calibration: fatal');
+    updateRegistry(NAMED_JOB_TYPES.OUTCOME_GRAPH_CALIBRATION, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.OUTCOME_GRAPH_CALIBRATION)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
+});
+
+durableJobQueue.register(NAMED_JOB_TYPES.EXPORT_JOB_PROCESSOR, async (job) => {
+  const start = Date.now();
+  logger.info({ jobId: job.id }, 'export_job_processor: scanning for stuck export jobs');
+  let processed = 0;
+  let failed = 0;
+  try {
+    const { db, exportJobsTable } = await import('@szl-holdings/db');
+    const { and, lt, or, eq } = await import('drizzle-orm');
+    const { processExportJobById } = await import('../jobs/export-job-processor');
+    const stuckCutoff = new Date(Date.now() - 10 * 60 * 1000);
+    const stuck = await db
+      .select({ exportId: exportJobsTable.exportId })
+      .from(exportJobsTable)
+      .where(
+        and(
+          or(
+            eq(exportJobsTable.status, 'pending' as const),
+            eq(exportJobsTable.status, 'processing' as const),
+          ),
+          lt(exportJobsTable.createdAt, stuckCutoff),
+        ),
+      )
+      .limit(20);
+    for (const { exportId } of stuck) {
+      try {
+        await processExportJobById(exportId);
+        processed++;
+      } catch {
+        failed++;
+        logger.warn({ exportId }, 'export_job_processor: failed to process export job');
+      }
+    }
+    const durationMs = Date.now() - start;
+    serverTelemetry.recordBusinessEvent({
+      type: 'export_job_processor_completed',
+      domain: 'exports',
+      durationMs,
+      success: failed === 0,
+      metadata: { processed, failed, total: stuck.length },
+    });
+    updateRegistry(NAMED_JOB_TYPES.EXPORT_JOB_PROCESSOR, {
+      lastStatus: failed === 0 ? 'completed' : 'failed',
+      lastDurationMs: durationMs,
+      lastResult: { processed, failed },
+    });
+    logger.info({ jobId: job.id, processed, failed, durationMs }, 'export_job_processor: complete');
+  } catch (err) {
+    logger.error({ err, jobId: job.id }, 'export_job_processor: fatal');
+    updateRegistry(NAMED_JOB_TYPES.EXPORT_JOB_PROCESSOR, {
+      lastStatus: 'failed',
+      lastDurationMs: Date.now() - start,
+      failCount: (jobRegistry.get(NAMED_JOB_TYPES.EXPORT_JOB_PROCESSOR)?.failCount || 0) + 1,
+    });
+    throw err;
+  }
 });
 
 let namedJobsStarted = false;

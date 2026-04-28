@@ -65,7 +65,6 @@ interface ApiEnvelope<T> {
   meta?: Record<string, unknown>;
 }
 
-<<<<<<< HEAD
 interface CohortRow {
   cohort: string;
   size: number;

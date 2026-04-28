@@ -603,7 +603,16 @@ export async function registerDefaultSchedules(): Promise<void> {
   durableScheduleEntries.push({
     name: 'outcome_graph_calibration',
     jobType: 'outcome_graph_calibration',
-    cronExpression: '0 1 * * 0',
+    cronExpression: process.env.CALIBRATION_CRON_SCHEDULE ?? '0 1 * * 0',
+    payload: {},
+    queue: 'maintenance',
+    maxRetries: 1,
+  });
+
+  durableScheduleEntries.push({
+    name: 'export_job_processor',
+    jobType: 'export_job_processor',
+    cronExpression: '0 * * * *',
     payload: {},
     queue: 'maintenance',
     maxRetries: 1,
