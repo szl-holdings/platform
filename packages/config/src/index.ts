@@ -5,13 +5,13 @@
  * contract, and public-facing registry.
  *
  * Usage:
- *   import { PLATFORM_PRODUCTS, getProduct } from "@szl-holdings/config/platform-registry"
- *   import { PUBLIC_CLAIMS, FOUNDER_YEARS_EXPERIENCE } from "@szl-holdings/config/public-claims"
- *   import { FEATURE_FLAGS, isFlagEnabled } from "@szl-holdings/config/feature-flags"
- *   import { ENV_CONTRACT, getRequiredVars } from "@szl-holdings/config/env-contract"
+ *   import { PLATFORM_PRODUCTS, getProduct } from "@szl-holdings/platform-registry/platform-registry"
+ *   import { PUBLIC_CLAIMS, FOUNDER_YEARS_EXPERIENCE } from "@szl-holdings/platform-registry/public-claims"
+ *   import { FEATURE_FLAGS, isFlagEnabled } from "@szl-holdings/platform-registry/feature-flags"
+ *   import { ENV_CONTRACT, getRequiredVars } from "@szl-holdings/platform-registry/env-contract"
  *
  * Or import everything from the root:
- *   import { PLATFORM_PRODUCTS, PUBLIC_CLAIMS, FEATURE_FLAGS, ENV_CONTRACT } from "@szl-holdings/config"
+ *   import { PLATFORM_PRODUCTS, PUBLIC_CLAIMS, FEATURE_FLAGS, ENV_CONTRACT } from "@szl-holdings/platform-registry"
  */
 
 export * from './env-contract';
@@ -23,7 +23,7 @@ export * from './runtime-mode';
 // ---------------------------------------------------------------------------
 // Legacy app-level constants (previously exported from lib/config)
 // Keep here so that api-server and other consumers that import
-// "@szl-holdings/config" continue to get these without changes.
+// "@szl-holdings/platform-registry" continue to get these without changes.
 // ---------------------------------------------------------------------------
 
 export const APP_NAME = 'SZL Holdings Platform';
@@ -40,6 +40,7 @@ export const PLATFORM_APPS = [
   { slug: 'aegis', name: 'PARAGON Control Plane', icon: 'Shield', color: '#10b981' },
   { slug: 'career', name: 'Career — Founder Identity', icon: 'Globe', color: '#6366f1' },
   { slug: 'control-plane', name: 'Admin Control Plane', icon: 'Settings', color: '#64748b' },
+  { slug: 'inca', name: 'AI Research Lab', icon: 'FlaskConical', color: '#7c3aed' },
 ] as const;
 
 export type AppSlug = (typeof PLATFORM_APPS)[number]['slug'];

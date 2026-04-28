@@ -1,4 +1,4 @@
-import { APP_INTEGRATIONS } from '@szl-holdings/config';
+import { APP_INTEGRATIONS } from '@szl-holdings/platform-registry';
 import { services } from '@szl-holdings/services';
 import { type IRouter, Router } from 'express';
 import { type IntegrationActivity, integrationActivityLog } from './admin/index.js';

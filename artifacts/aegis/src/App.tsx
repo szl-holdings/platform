@@ -1,4 +1,4 @@
-import { readEnvFeatureFlags } from '@szl-holdings/config';
+import { readEnvFeatureFlags } from '@szl-holdings/platform-registry';
 import { PrivateAppGuard, PowerUserProvider } from '@szl-holdings/shared-ui';
 import { AnalyticsProvider } from '@szl-holdings/shared-ui/analytics-provider';
 import { AppModeBanner, AppModeProvider } from '@szl-holdings/shared-ui/app-mode-banner';

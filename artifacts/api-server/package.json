@@ -62,7 +62,6 @@
     "@szl-holdings/auth": "workspace:*",
     "@szl-holdings/auth-shared": "workspace:*",
     "@szl-holdings/business-events": "workspace:*",
-    "@szl-holdings/config": "workspace:*",
     "@szl-holdings/connectors": "workspace:*",
     "@szl-holdings/constellation": "workspace:*",
     "@szl-holdings/contracts": "workspace:*",
@@ -80,7 +79,6 @@
     "@szl-holdings/intelligence-feeds": "workspace:*",
     "@szl-holdings/monte-carlo": "workspace:*",
     "@szl-holdings/observability": "workspace:*",
-    "@szl-holdings/ontology": "workspace:*",
     "@szl-holdings/openusd-export": "workspace:*",
     "@szl-holdings/otel": "workspace:*",
     "@szl-holdings/outcome-graph": "workspace:*",
@@ -174,7 +172,8 @@
     "web-push": "^3.6.7",
     "ws": "^8.20.0",
     "@e965/xlsx": "^0.20.3",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@szl-holdings/platform-registry": "workspace:*"
   },
   "devDependencies": {
     "@szl-holdings/security-headers": "workspace:*",

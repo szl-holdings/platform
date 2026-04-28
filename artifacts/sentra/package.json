@@ -54,10 +54,10 @@
     "@szl-holdings/brand-registry": "workspace:*",
     "@szl-holdings/omnia-shell": "workspace:*",
     "@workspace/tokens": "workspace:*",
-    "@szl-holdings/config": "workspace:*",
-    "@szl-holdings/domain-claims": "workspace:*",
     "@szl-holdings/env": "workspace:*",
     "@szl-holdings/api-client-react": "workspace:*",
-    "@workspace/aef-sdk": "workspace:*"
+    "@workspace/aef-sdk": "workspace:*",
+    "@workspace/cf-sdk": "workspace:*",
+    "@szl-holdings/platform-registry": "workspace:*"
   }
 }

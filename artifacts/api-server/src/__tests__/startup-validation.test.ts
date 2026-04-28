@@ -23,7 +23,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 // Mocks — must be declared before the module under test is imported
 // ---------------------------------------------------------------------------
 
-vi.mock('@szl-holdings/config', () => ({
+vi.mock('@szl-holdings/platform-registry', () => ({
   isProductionMode: vi.fn(() => false),
   isDemoMode: vi.fn(() => false),
   resolveRuntimeMode: vi.fn(() => 'local-dev'),
@@ -49,7 +49,7 @@ vi.mock('../lib/logger', () => ({
   },
 }));
 
-import { isProductionMode } from '@szl-holdings/config';
+import { isProductionMode } from '@szl-holdings/platform-registry';
 import { ENV_SPECS, failFastOnInvalidConfig, validateStartupConfig } from '../lib/startup-validation';
 
 // ---------------------------------------------------------------------------

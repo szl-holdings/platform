@@ -52,7 +52,7 @@ export default defineConfig({
         replacement: resolve(__dirname, 'lib/observability/src/index.ts'),
       },
       { find: '@workspace/services', replacement: resolve(__dirname, 'lib/services/src/index.ts') },
-      { find: '@workspace/config', replacement: resolve(__dirname, 'lib/config/src/index.ts') },
+      { find: '@workspace/config', replacement: resolve(__dirname, 'packages/config/src/index.ts') },
       { find: '@workspace/audit', replacement: resolve(__dirname, 'lib/audit/src/index.ts') },
       {
         find: '@workspace/forge-runtime',
@@ -84,7 +84,7 @@ export default defineConfig({
         find: '@szl-holdings/services',
         replacement: resolve(__dirname, 'lib/services/src/index.ts'),
       },
-      { find: '@szl-holdings/config', replacement: resolve(__dirname, 'lib/config/src/index.ts') },
+      { find: '@szl-holdings/platform-registry', replacement: resolve(__dirname, 'packages/config/src/index.ts') },
       { find: '@szl-holdings/audit', replacement: resolve(__dirname, 'lib/audit/src/index.ts') },
       {
         find: '@szl-holdings/forge-runtime',
@@ -104,6 +104,10 @@ export default defineConfig({
       },
       {
         find: '@workspace/ontology',
+        replacement: resolve(__dirname, 'packages/ontology/src/index.ts'),
+      },
+      {
+        find: '@szl-holdings/ontology',
         replacement: resolve(__dirname, 'packages/ontology/src/index.ts'),
       },
       {

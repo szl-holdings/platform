@@ -1,7 +1,7 @@
 import nodeHttp from 'node:http';
 import v8 from 'node:v8';
 import * as Sentry from '@sentry/node';
-import { resolveRuntimeMode } from '@szl-holdings/config';
+import { resolveRuntimeMode } from '@szl-holdings/platform-registry';
 import { initializeOpenTelemetry } from '@szl-holdings/observability';
 import { createAefRouter } from '@workspace/alloy-embedding-api';
 import compression from 'compression';

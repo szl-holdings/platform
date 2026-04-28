@@ -54,7 +54,7 @@
       "path": "../../lib/audit"
     },
     {
-      "path": "../../lib/config"
+      "path": "../../packages/config"
     },
     {
       "path": "../../lib/auth"

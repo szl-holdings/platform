@@ -60,9 +60,7 @@
     "@opentelemetry/semantic-conventions": "^1.40.0",
     "@szl-holdings/billing-client": "workspace:*",
     "@szl-holdings/brand-registry": "workspace:*",
-    "@szl-holdings/config": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",
-    "@szl-holdings/domain-claims": "workspace:*",
     "@szl-holdings/omnia-shell": "workspace:*",
     "@szl-holdings/speech-specialist": "workspace:*",
     "@szl-holdings/telemetry-standards": "workspace:*",
@@ -75,6 +73,7 @@
     "@workspace/tokens": "workspace:*",
     "jspdf": "^4.2.1",
     "leaflet": "^1.9.4",
-    "react-leaflet": "^5.0.0"
+    "react-leaflet": "^5.0.0",
+    "@szl-holdings/platform-registry": "workspace:*"
   }
 }

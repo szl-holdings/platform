@@ -13,7 +13,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { PLATFORM_APPS } from '@szl-holdings/config';
+import { PLATFORM_APPS } from '@szl-holdings/platform-registry';
 
 describe('brand-name regressions', () => {
   describe('inca / AI Research Lab', () => {

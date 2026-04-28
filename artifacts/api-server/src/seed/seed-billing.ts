@@ -12,7 +12,7 @@
  * ENABLE_DEMO_SEED must be set in non-production environments).
  */
 
-import { getRuntimeMode, isSeedDataAllowed } from '@szl-holdings/config';
+import { getRuntimeMode, isSeedDataAllowed } from '@szl-holdings/platform-registry';
 import {
   billingPlansTable,
   db,

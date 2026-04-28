@@ -124,7 +124,7 @@ vi.mock('@szl-holdings/observability', () => ({
 }));
 
 vi.mock('@szl-holdings/audit', () => ({ hashIp: (ip: string) => `hashed-${ip}` }));
-vi.mock('@szl-holdings/config', () => ({ resolveRuntimeMode: () => 'standard' }));
+vi.mock('@szl-holdings/platform-registry', () => ({ resolveRuntimeMode: () => 'standard' }));
 
 vi.mock('../../lib/pubsub-bridge', () => ({
   broadcastWs: vi.fn(),

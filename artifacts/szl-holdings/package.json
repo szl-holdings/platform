@@ -40,11 +40,9 @@
   "dependencies": {
     "@szl-holdings/analytics": "workspace:*",
     "@szl-holdings/brand-registry": "workspace:*",
-    "@szl-holdings/config": "workspace:*",
     "@szl-holdings/covenant-policy": "workspace:*",
     "@szl-holdings/crdt-sync": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",
-    "@szl-holdings/domain-claims": "workspace:*",
     "@szl-holdings/evidence-ledger": "workspace:*",
     "@szl-holdings/graphql-client": "workspace:*",
     "@szl-holdings/monte-carlo": "workspace:*",

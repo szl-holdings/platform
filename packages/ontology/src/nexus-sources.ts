@@ -5,8 +5,8 @@
  * `register*` helper from its write path so the unified entity graph stays
  * in sync with the per-domain tables.
  */
-import { registerEntity } from './registry.js';
-import { entityUri, type EntityKind } from './uri.js';
+import { registerEntity } from './nexus-registry.js';
+import { entityUri, type EntityKind } from './nexus-uri.js';
 
 export interface TerraPropertyLike {
   id: number;

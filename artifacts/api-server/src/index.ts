@@ -45,7 +45,7 @@ import { startScheduledTriggerChecks, stopScheduledTriggerChecks } from '@szl-ho
 import './lib/terra-nyc-ingestion';
 import './lib/terra-nyc-extended-ingestion';
 import { startOtIcsStreamFeed } from './jobs/ot-ics-stream-feed';
-import { isSeedDataAllowed, resolveRuntimeMode } from '@szl-holdings/config';
+import { isSeedDataAllowed, resolveRuntimeMode } from '@szl-holdings/platform-registry';
 import { shutdownTracer } from '@szl-holdings/observability';
 import { otelReady, registerGraphQLHandler } from './app.js';
 import { buildGraphQLMiddleware } from './graphql/index.js';

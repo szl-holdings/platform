@@ -155,7 +155,6 @@ const IGNORE_PATHS_EXACT = new Set([
   'lib/tool-registry',
   'lib/tool-mesh',
   'lib/prompt-registry',
-  'lib/policy-engine',
   'lib/telemetry-standards',
   'lib/nvidia-adapters',
 ]);

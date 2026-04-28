@@ -17,7 +17,7 @@
  * (see global-auth-enforcer).
  */
 
-import { getRuntimeMode, isSeedDataAllowed } from '@szl-holdings/config';
+import { getRuntimeMode, isSeedDataAllowed } from '@szl-holdings/platform-registry';
 import { defaultEvidenceStore, defaultRecommendationStore } from '@szl-holdings/evidence-graph';
 import { defaultSignalBus } from '@szl-holdings/signal-mesh';
 import { defaultEntityRegistry } from '@workspace/ontology';

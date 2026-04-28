@@ -1,6 +1,23 @@
 import { defineConfig } from 'vitest/config';
+import { resolve } from 'path';
 
 export default defineConfig({
+  resolve: {
+    alias: [
+      {
+        find: '@szl-holdings/platform-registry',
+        replacement: resolve(__dirname, '../../packages/config/src/index.ts'),
+      },
+      {
+        find: '@szl-holdings/db',
+        replacement: resolve(__dirname, '../../lib/db/src/index.ts'),
+      },
+      {
+        find: '@workspace/ontology',
+        replacement: resolve(__dirname, '../../packages/ontology/src/index.ts'),
+      },
+    ],
+  },
   test: {
     environment: 'node',
     globals: false,

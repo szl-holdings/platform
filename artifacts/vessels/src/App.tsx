@@ -1,4 +1,4 @@
-import { readEnvFeatureFlags } from '@szl-holdings/config';
+import { readEnvFeatureFlags } from '@szl-holdings/platform-registry';
 import { UsageIndicator } from '@szl-holdings/shared-ui/billing';
 import { PolicyModeBadge } from '@szl-holdings/design-system/proof/policy-mode-badge';
 

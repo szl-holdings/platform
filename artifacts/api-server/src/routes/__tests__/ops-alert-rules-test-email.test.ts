@@ -108,7 +108,7 @@ vi.mock('../../middlewares/auth', () => ({
 vi.mock('@szl-holdings/observability', () => ({
   serverTelemetry: { recordRequest: vi.fn(), recordAuthFailure: vi.fn(), recordError: vi.fn() },
 }));
-vi.mock('@szl-holdings/config', () => ({
+vi.mock('@szl-holdings/platform-registry', () => ({
   isProductionMode: vi.fn(() => false),
   isDemoMode: vi.fn(() => false),
   resolveRuntimeMode: vi.fn(() => 'local-dev'),

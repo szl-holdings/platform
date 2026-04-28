@@ -66,7 +66,7 @@ vi.mock('@szl-holdings/forge-runtime', async () => {
   return m.createForgeRuntimeMock();
 });
 
-vi.mock('@szl-holdings/config', () => ({
+vi.mock('@szl-holdings/platform-registry', () => ({
   config: {},
   getConfig: () => ({}),
 }));

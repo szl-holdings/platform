@@ -44,9 +44,7 @@
     "@szl/alloy": "workspace:*",
     "@szl-holdings/analytics": "workspace:*",
     "@szl-holdings/brand-registry": "workspace:*",
-    "@szl-holdings/config": "workspace:*",
     "@szl-holdings/design-system": "workspace:*",
-    "@szl-holdings/domain-claims": "workspace:*",
     "@szl-holdings/graphql-client": "workspace:*",
     "@szl-holdings/prism-bus": "workspace:*",
     "@szl-holdings/replit-auth-web": "workspace:*",
@@ -56,6 +54,7 @@
     "jspdf": "^4.2.1",
     "react-i18next": "^17.0.2",
     "@szl-holdings/omnia-shell": "workspace:*",
-    "@workspace/tokens": "workspace:*"
+    "@workspace/tokens": "workspace:*",
+    "@szl-holdings/platform-registry": "workspace:*"
   }
 }

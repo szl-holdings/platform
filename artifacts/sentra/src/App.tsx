@@ -1,4 +1,4 @@
-import { readEnvFeatureFlags } from '@szl-holdings/config';
+import { readEnvFeatureFlags } from '@szl-holdings/platform-registry';
 import { UsageIndicator } from '@szl-holdings/shared-ui/billing';
 import { AnalyticsProvider } from '@szl-holdings/shared-ui/analytics-provider';
 import { AppModeBanner, AppModeProvider } from '@szl-holdings/shared-ui/app-mode-banner';

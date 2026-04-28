@@ -22,7 +22,7 @@
       "path": "./lib/shared-ui"
     },
     {
-      "path": "./lib/config"
+      "path": "./packages/config"
     },
     {
       "path": "./lib/auth"
@@ -131,9 +131,6 @@
     },
     {
       "path": "./packages/design-system"
-    },
-    {
-      "path": "./packages/db"
     },
     {
       "path": "./packages/contracts"

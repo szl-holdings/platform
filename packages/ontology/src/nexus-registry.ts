@@ -6,7 +6,7 @@ import {
   type NexusEdge,
   type NexusEntity,
 } from '@szl-holdings/db';
-import { type EntityKind, entityUri, parseUri } from './uri.js';
+import { type EntityKind, entityUri, parseUri } from './nexus-uri.js';
 
 export interface RegisterEntityInput {
   kind: EntityKind;

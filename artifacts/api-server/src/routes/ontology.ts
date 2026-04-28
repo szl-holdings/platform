@@ -10,7 +10,7 @@ import {
   registerEntity,
   resolveEntity,
   uriSchema,
-} from '@szl-holdings/ontology';
+} from '@workspace/ontology';
 import { authMiddleware, isElevatedUser } from '../middlewares/auth';
 import {
   handleRouteError,

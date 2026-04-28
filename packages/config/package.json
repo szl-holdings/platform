@@ -9,7 +9,8 @@
     "./platform-registry": "./src/platform-registry.ts",
     "./public-claims": "./src/public-claims.ts",
     "./feature-flags": "./src/feature-flags.ts",
-    "./env-contract": "./src/env-contract.ts"
+    "./env-contract": "./src/env-contract.ts",
+    "./domain-claims": "./src/domain-claims.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

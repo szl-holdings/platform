@@ -1,4 +1,4 @@
-import { APP_INTEGRATIONS, PLATFORM_APPS } from '@szl-holdings/config';
+import { APP_INTEGRATIONS, PLATFORM_APPS } from '@szl-holdings/platform-registry';
 import { db, webhookEventsTable } from '@szl-holdings/db';
 import { services } from '@szl-holdings/services';
 import { desc, eq, } from 'drizzle-orm';

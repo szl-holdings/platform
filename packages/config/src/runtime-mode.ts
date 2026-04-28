@@ -11,10 +11,10 @@
  *   → fallback: local-dev
  *
  * Usage (server-side):
- *   import { getRuntimeMode, isProductionMode, isDemoMode } from "@szl-holdings/config/runtime-mode";
+ *   import { getRuntimeMode, isProductionMode, isDemoMode } from "@szl-holdings/platform-registry/runtime-mode";
  *
  * Usage (client-side Vite):
- *   import { getClientRuntimeMode, clientFlags } from "@szl-holdings/config/runtime-mode";
+ *   import { getClientRuntimeMode, clientFlags } from "@szl-holdings/platform-registry/runtime-mode";
  */
 
 // ---------------------------------------------------------------------------

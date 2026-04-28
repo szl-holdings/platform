@@ -59,7 +59,6 @@
     "lib/tool-registry/",
     "lib/tool-mesh/",
     "lib/prompt-registry/",
-    "lib/policy-engine/",
     "lib/telemetry-standards/",
     "lib/nvidia-adapters/",
     "artifacts/command/src/pages/operations/forge.tsx",

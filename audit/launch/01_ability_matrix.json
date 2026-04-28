@@ -81,7 +81,7 @@
     "user_visible_surface": "API-enforced; no dedicated UI panel",
     "frontend_route": null,
     "backend_endpoint": "/api/rbac/check, /api/roles, /api/permissions",
-    "service_module": "lib/auth, lib/config",
+    "service_module": "lib/auth, packages/config",
     "db_tables_used": "roles, role_assignments, permissions, tenants",
     "worker_job_used": null,
     "current_status": "working",

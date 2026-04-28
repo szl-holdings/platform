@@ -12,8 +12,8 @@
  * Registry source:  packages/config/src/public-claims.ts
  */
 
-import { FOUNDER_YEARS_EXPERIENCE } from '@szl-holdings/config/public-claims';
-import { type ClaimValue, makeClaimResolver, metricDisplay } from '@szl-holdings/domain-claims';
+import { FOUNDER_YEARS_EXPERIENCE } from '@szl-holdings/platform-registry/public-claims';
+import { type ClaimValue, makeClaimResolver, metricDisplay } from '@szl-holdings/platform-registry/domain-claims';
 
 export type { ClaimValue };
 export { metricDisplay };

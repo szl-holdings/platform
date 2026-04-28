@@ -12,7 +12,7 @@ import {
 } from '@workspace/config';
 import { afterEach, describe, expect, it } from 'vitest';
 
-describe('@szl-holdings/config', () => {
+describe('@szl-holdings/platform-registry', () => {
   describe('constants', () => {
     it('exports APP_NAME', () => {
       expect(APP_NAME).toBe('SZL Holdings Platform');

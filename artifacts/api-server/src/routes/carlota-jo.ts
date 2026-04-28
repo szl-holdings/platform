@@ -321,7 +321,7 @@ router.post(
 
       // ── Ontology: register Person + Engagement entities for booking ──────────
       try {
-        const { registerEntity, entityUri, registerEdge } = await import('@szl-holdings/ontology');
+        const { registerEntity, entityUri, registerEdge } = await import('@workspace/ontology');
         const personKey = email.replace(/[@.]/g, '-');
         await registerEntity({
           kind: 'person',
@@ -4068,7 +4068,7 @@ When you believe the visitor is a strong fit for Carlota Jo's services, end your
 
       // ── Ontology entities — always write when we have any identity ──────────
       try {
-        const { registerEntity, entityUri, registerEdge } = await import('@szl-holdings/ontology');
+        const { registerEntity, entityUri, registerEdge } = await import('@workspace/ontology');
         const personKey = email ? email.replace(/[@.]/g, '-') : `anon-${sessionKey.replace(/[^A-Za-z0-9_.:-]/g, '-')}`;
         await registerEntity({
           kind: 'person',

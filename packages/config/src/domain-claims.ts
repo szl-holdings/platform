@@ -1,4 +1,4 @@
-import { type ClaimTruthValue, PUBLIC_CLAIMS } from '@szl-holdings/platform-registry/public-claims';
+import { type ClaimTruthValue, PUBLIC_CLAIMS } from './public-claims.js';
 
 export type { ClaimTruthValue };
 

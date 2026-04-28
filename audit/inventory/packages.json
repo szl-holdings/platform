@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-04-20T19:35:21.577Z",
-  "totalPackages": 142,
+  "generatedAt": "2026-04-28T00:00:00.000Z",
+  "totalPackages": 135,
   "packages": [
     {
       "path": "apps/alloy-embedding-api/package.json",
@@ -27,7 +27,15 @@
         "typescript",
         "vitest"
       ],
-      "scripts": ["dev", "start", "build", "typecheck", "test", "test:watch", "smoke"]
+      "scripts": [
+        "dev",
+        "start",
+        "build",
+        "typecheck",
+        "test",
+        "test:watch",
+        "smoke"
+      ]
     },
     {
       "path": "apps/alloy-ingestion-orchestrator/package.json",
@@ -51,7 +59,14 @@
         "typescript",
         "vitest"
       ],
-      "scripts": ["dev", "start", "build", "typecheck", "test", "test:watch"]
+      "scripts": [
+        "dev",
+        "start",
+        "build",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "apps/alloy-runtime-api/package.json",
@@ -67,8 +82,20 @@
         "express",
         "zod"
       ],
-      "devDependencies": ["@types/express", "@types/node", "tsx", "typescript", "vitest"],
-      "scripts": ["dev", "start", "build", "typecheck", "test"]
+      "devDependencies": [
+        "@types/express",
+        "@types/node",
+        "tsx",
+        "typescript",
+        "vitest"
+      ],
+      "scripts": [
+        "dev",
+        "start",
+        "build",
+        "typecheck",
+        "test"
+      ]
     },
     {
       "path": "artifacts/aegis/package.json",
@@ -86,7 +113,7 @@
         "recharts",
         "@szl-holdings/brand-registry",
         "@szl-holdings/config",
-        "@szl-holdings/domain-claims"
+        "@szl-holdings/platform-registry"
       ],
       "devDependencies": [
         "@replit/vite-plugin-cartographer",
@@ -305,7 +332,7 @@
         "react-i18next",
         "@szl-holdings/brand-registry",
         "@szl-holdings/config",
-        "@szl-holdings/domain-claims"
+        "@szl-holdings/platform-registry"
       ],
       "devDependencies": [
         "@replit/vite-plugin-cartographer",
@@ -327,7 +354,15 @@
         "vite",
         "wouter"
       ],
-      "scripts": ["dev", "build", "serve", "typecheck", "lint", "lint:ci", "format"]
+      "scripts": [
+        "dev",
+        "build",
+        "serve",
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "artifacts/command/package.json",
@@ -346,7 +381,7 @@
         "@opentelemetry/semantic-conventions",
         "@szl-holdings/brand-registry",
         "@szl-holdings/config",
-        "@szl-holdings/domain-claims",
+        "@szl-holdings/platform-registry",
         "@szl-holdings/design-system",
         "@szl-holdings/telemetry-standards",
         "@tanstack/query-persist-client-core",
@@ -388,7 +423,15 @@
         "vite",
         "wouter"
       ],
-      "scripts": ["dev", "build", "serve", "typecheck", "lint", "lint:ci", "format"]
+      "scripts": [
+        "dev",
+        "build",
+        "serve",
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "artifacts/counsel/package.json",
@@ -432,7 +475,15 @@
         "vite",
         "wouter"
       ],
-      "scripts": ["dev", "build", "serve", "typecheck", "lint", "lint:ci", "format"]
+      "scripts": [
+        "dev",
+        "build",
+        "serve",
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "artifacts/lyte-command-center/package.json",
@@ -467,7 +518,15 @@
         "vite",
         "wouter"
       ],
-      "scripts": ["dev", "build", "serve", "typecheck", "lint", "lint:ci", "format"]
+      "scripts": [
+        "dev",
+        "build",
+        "serve",
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "artifacts/mockup-sandbox/package.json",
@@ -538,7 +597,15 @@
         "@szl-holdings/shared-ui",
         "@szl-holdings/design-system"
       ],
-      "scripts": ["dev", "build", "preview", "typecheck", "lint", "lint:ci", "format"]
+      "scripts": [
+        "dev",
+        "build",
+        "preview",
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "artifacts/prism-counsel/package.json",
@@ -577,7 +644,15 @@
         "vite",
         "wouter"
       ],
-      "scripts": ["dev", "build", "serve", "typecheck", "lint", "lint:ci", "format"]
+      "scripts": [
+        "dev",
+        "build",
+        "serve",
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "artifacts/pulse/package.json",
@@ -594,7 +669,7 @@
         "zod",
         "@szl-holdings/brand-registry",
         "@szl-holdings/config",
-        "@szl-holdings/domain-claims"
+        "@szl-holdings/platform-registry"
       ],
       "devDependencies": [
         "@replit/vite-plugin-cartographer",
@@ -616,7 +691,15 @@
         "vite",
         "wouter"
       ],
-      "scripts": ["dev", "build", "serve", "typecheck", "lint", "lint:ci", "format"]
+      "scripts": [
+        "dev",
+        "build",
+        "serve",
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "artifacts/sentra/package.json",
@@ -660,7 +743,15 @@
         "vite",
         "wouter"
       ],
-      "scripts": ["dev", "build", "serve", "typecheck", "lint", "lint:ci", "format"]
+      "scripts": [
+        "dev",
+        "build",
+        "serve",
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "artifacts/szl-demo-video/package.json",
@@ -692,7 +783,16 @@
         "three",
         "vite"
       ],
-      "scripts": ["dev", "build", "serve", "typecheck", "lint", "lint:ci", "format", "render"]
+      "scripts": [
+        "dev",
+        "build",
+        "serve",
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format",
+        "render"
+      ]
     },
     {
       "path": "artifacts/szl-holdings-mobile/package.json",
@@ -767,7 +867,14 @@
         "typescript",
         "zod"
       ],
-      "scripts": ["dev", "build", "serve", "typecheck", "test", "test:watch"]
+      "scripts": [
+        "dev",
+        "build",
+        "serve",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "artifacts/szl-holdings/package.json",
@@ -796,7 +903,6 @@
         "zod",
         "@szl-holdings/brand-registry",
         "@szl-holdings/config",
-        "@szl-holdings/domain-claims",
         "@szl-holdings/platform-registry"
       ],
       "devDependencies": [
@@ -821,7 +927,15 @@
         "vite",
         "wouter"
       ],
-      "scripts": ["dev", "build", "serve", "typecheck", "lint", "lint:ci", "format"]
+      "scripts": [
+        "dev",
+        "build",
+        "serve",
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "artifacts/terra/package.json",
@@ -839,7 +953,7 @@
         "@szl-holdings/api-client-react",
         "@szl-holdings/brand-registry",
         "@szl-holdings/config",
-        "@szl-holdings/domain-claims"
+        "@szl-holdings/platform-registry"
       ],
       "devDependencies": [
         "@replit/vite-plugin-cartographer",
@@ -868,7 +982,15 @@
         "vite",
         "wouter"
       ],
-      "scripts": ["dev", "build", "serve", "typecheck", "lint", "lint:ci", "format"]
+      "scripts": [
+        "dev",
+        "build",
+        "serve",
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "artifacts/vessels/package.json",
@@ -889,7 +1011,7 @@
         "@szl-holdings/offline-engine",
         "@szl-holdings/brand-registry",
         "@szl-holdings/config",
-        "@szl-holdings/domain-claims"
+        "@szl-holdings/platform-registry"
       ],
       "devDependencies": [
         "@replit/vite-plugin-cartographer",
@@ -917,15 +1039,15 @@
         "vite",
         "wouter"
       ],
-      "scripts": ["dev", "build", "serve", "typecheck", "lint", "lint:ci", "format"]
-    },
-    {
-      "path": "lib/action-engine/package.json",
-      "name": "@szl-holdings/lib-action-engine",
-      "version": "0.0.0",
-      "dependencies": [],
-      "devDependencies": [],
-      "scripts": []
+      "scripts": [
+        "dev",
+        "build",
+        "serve",
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "lib/ai-engine/package.json",
@@ -943,48 +1065,94 @@
         "p-retry",
         "pino"
       ],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/analytics/package.json",
       "name": "@szl-holdings/analytics",
       "version": "0.0.0",
       "dependencies": [],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/api-client-react/package.json",
       "name": "@szl-holdings/api-client-react",
       "version": "0.0.0",
-      "dependencies": ["@tanstack/react-query"],
+      "dependencies": [
+        "@tanstack/react-query"
+      ],
       "devDependencies": [],
-      "scripts": ["build", "lint", "lint:ci", "format", "typecheck"]
+      "scripts": [
+        "build",
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/api-spec/package.json",
       "name": "@szl-holdings/api-spec",
       "version": "0.0.0",
       "dependencies": [],
-      "devDependencies": ["orval"],
-      "scripts": ["codegen", "typecheck"]
+      "devDependencies": [
+        "orval"
+      ],
+      "scripts": [
+        "codegen",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/api-zod/package.json",
       "name": "@szl-holdings/api-zod",
       "version": "0.0.0",
-      "dependencies": ["zod"],
+      "dependencies": [
+        "zod"
+      ],
       "devDependencies": [],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/atlas-artifacts/package.json",
       "name": "@szl-holdings/atlas-artifacts",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/db", "@szl-holdings/proof-chain", "drizzle-orm", "zod"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@szl-holdings/db",
+        "@szl-holdings/proof-chain",
+        "drizzle-orm",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/atlas-spatial-runtime/package.json",
@@ -997,32 +1165,52 @@
         "drizzle-orm",
         "zod"
       ],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/audit/package.json",
       "name": "@szl-holdings/audit",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/db", "drizzle-orm", "pino"],
-      "devDependencies": ["@types/express", "@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@szl-holdings/db",
+        "drizzle-orm",
+        "pino"
+      ],
+      "devDependencies": [
+        "@types/express",
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/auth/package.json",
       "name": "@szl-holdings/auth",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/env"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
-    },
-    {
-      "path": "lib/config/package.json",
-      "name": "@szl-holdings/config",
-      "version": "0.0.0",
-      "dependencies": [],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@szl-holdings/env"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/covenant-policy/package.json",
@@ -1034,31 +1222,66 @@
         "@szl-holdings/auth",
         "drizzle-orm"
       ],
-      "devDependencies": ["@types/node"],
-      "scripts": ["typecheck", "test", "lint", "lint:ci", "format", "test:watch"]
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "typecheck",
+        "test",
+        "lint",
+        "lint:ci",
+        "format",
+        "test:watch"
+      ]
     },
     {
       "path": "lib/crdt-sync/package.json",
       "name": "@szl-holdings/crdt-sync",
       "version": "0.0.0",
       "dependencies": [],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/data-connectors/package.json",
       "name": "@szl-holdings/data-connectors",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/services"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@szl-holdings/services"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/db/package.json",
       "name": "@szl-holdings/db",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/env", "drizzle-orm", "drizzle-zod", "pg", "zod"],
-      "devDependencies": ["@types/node", "@types/pg", "drizzle-kit"],
+      "dependencies": [
+        "@szl-holdings/env",
+        "drizzle-orm",
+        "drizzle-zod",
+        "pg",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "@types/pg",
+        "drizzle-kit"
+      ],
       "scripts": [
         "generate",
         "migrate",
@@ -1072,28 +1295,24 @@
       ]
     },
     {
-      "path": "lib/decision-engine/package.json",
-      "name": "@szl-holdings/lib-decision-engine",
-      "version": "0.0.0",
-      "dependencies": [],
-      "devDependencies": [],
-      "scripts": []
-    },
-    {
       "path": "lib/decision-fabric/package.json",
       "name": "@szl-holdings/decision-fabric",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/db", "@szl-holdings/outcome-graph", "drizzle-orm", "zod"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
-    },
-    {
-      "path": "lib/domain-claims/package.json",
-      "name": "@szl-holdings/lib-domain-claims",
-      "version": "0.0.0",
-      "dependencies": ["@szl-holdings/config"],
-      "devDependencies": ["@types/node", "typescript"],
-      "scripts": ["test", "lint", "lint:ci", "format", "typecheck", "test:watch"]
+      "dependencies": [
+        "@szl-holdings/db",
+        "@szl-holdings/outcome-graph",
+        "drizzle-orm",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/forge-runtime/package.json",
@@ -1109,24 +1328,51 @@
         "pino",
         "pino-pretty"
       ],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/graphql-client/package.json",
       "name": "@szl-holdings/graphql-client",
       "version": "0.0.0",
-      "dependencies": ["@apollo/client", "graphql", "graphql-ws"],
-      "devDependencies": ["@types/react"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@apollo/client",
+        "graphql",
+        "graphql-ws"
+      ],
+      "devDependencies": [
+        "@types/react"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/i18n/package.json",
       "name": "@szl-holdings/i18n",
       "version": "0.0.0",
-      "dependencies": ["i18next", "i18next-browser-languagedetector", "react-i18next"],
+      "dependencies": [
+        "i18next",
+        "i18next-browser-languagedetector",
+        "react-i18next"
+      ],
       "devDependencies": [],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/intelligence-feeds/package.json",
@@ -1138,16 +1384,34 @@
         "@szl-holdings/env",
         "drizzle-orm"
       ],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/mcp-client/package.json",
       "name": "@szl-holdings/mcp-client",
       "version": "0.0.0",
-      "dependencies": ["@tanstack/react-query", "lucide-react"],
-      "devDependencies": ["@types/node", "@types/react"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@tanstack/react-query",
+        "lucide-react"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "@types/react"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/mobile-shared/package.json",
@@ -1176,23 +1440,49 @@
         "react-native-keyboard-controller",
         "react-native-safe-area-context"
       ],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/monte-carlo/package.json",
       "name": "@szl-holdings/monte-carlo",
       "version": "0.0.0",
       "dependencies": [],
-      "devDependencies": ["@types/node"],
-      "scripts": ["typecheck", "test", "lint", "lint:ci", "format", "test:watch"]
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "typecheck",
+        "test",
+        "lint",
+        "lint:ci",
+        "format",
+        "test:watch"
+      ]
     },
     {
       "path": "lib/object-storage-web/package.json",
       "name": "@workspace/object-storage-web",
       "version": "0.0.0",
-      "dependencies": ["@uppy/aws-s3", "@uppy/core", "@uppy/dashboard", "@uppy/react"],
-      "devDependencies": ["@types/react"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@uppy/aws-s3",
+        "@uppy/core",
+        "@uppy/dashboard",
+        "@uppy/react"
+      ],
+      "devDependencies": [
+        "@types/react"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/observability/package.json",
@@ -1211,72 +1501,145 @@
         "@szl-holdings/env",
         "posthog-js"
       ],
-      "devDependencies": ["@types/node", "@types/react"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "devDependencies": [
+        "@types/node",
+        "@types/react"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/offline-engine/package.json",
       "name": "@szl-holdings/offline-engine",
       "version": "0.0.0",
-      "dependencies": ["idb"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "idb"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/outcome-graph/package.json",
       "name": "@szl-holdings/outcome-graph",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/db", "drizzle-orm", "zod"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
-    },
-    {
-      "path": "lib/policy-engine/package.json",
-      "name": "@szl-holdings/lib-policy-engine",
-      "version": "0.0.0",
-      "dependencies": [],
-      "devDependencies": [],
-      "scripts": []
+      "dependencies": [
+        "@szl-holdings/db",
+        "drizzle-orm",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/prism-bus/package.json",
       "name": "@szl-holdings/prism-bus",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/mcp-client"],
-      "devDependencies": ["@types/node", "@types/react"],
-      "scripts": ["typecheck", "test", "lint", "lint:ci", "format", "test:watch"]
+      "dependencies": [
+        "@szl-holdings/mcp-client"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "@types/react"
+      ],
+      "scripts": [
+        "typecheck",
+        "test",
+        "lint",
+        "lint:ci",
+        "format",
+        "test:watch"
+      ]
     },
     {
       "path": "lib/proof-chain/package.json",
       "name": "@szl-holdings/proof-chain",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/db", "drizzle-orm", "zod"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@szl-holdings/db",
+        "drizzle-orm",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/pulse-evals/package.json",
       "name": "@szl-holdings/pulse-evals",
       "version": "0.0.0",
-      "dependencies": ["zod"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/receipt-graph/package.json",
       "name": "@szl-holdings/receipt-graph",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/proof-chain", "@szl-holdings/db", "drizzle-orm", "zod"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@szl-holdings/proof-chain",
+        "@szl-holdings/db",
+        "drizzle-orm",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/replit-auth-web/package.json",
       "name": "@szl-holdings/replit-auth-web",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/api-client-react"],
-      "devDependencies": ["@types/react"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@szl-holdings/api-client-react"
+      ],
+      "devDependencies": [
+        "@types/react"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/scene-export/package.json",
@@ -1287,8 +1650,15 @@
         "@szl-holdings/db",
         "@szl-holdings/proof-chain"
       ],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/services/connectors/jira-marketplace/package.json",
@@ -1296,15 +1666,28 @@
       "version": "1.0.0",
       "dependencies": [],
       "devDependencies": [],
-      "scripts": ["validate", "bundle"]
+      "scripts": [
+        "validate",
+        "bundle"
+      ]
     },
     {
       "path": "lib/services/package.json",
       "name": "@szl-holdings/services",
       "version": "0.0.0",
-      "dependencies": ["@google-cloud/storage", "@szl-holdings/env"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@google-cloud/storage",
+        "@szl-holdings/env"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/shared-ui/package.json",
@@ -1368,24 +1751,50 @@
         "tailwind-merge",
         "vaul"
       ],
-      "devDependencies": ["@types/node", "@types/react"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "devDependencies": [
+        "@types/node",
+        "@types/react"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/workflow-engine/package.json",
       "name": "@szl-holdings/workflow-engine",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/forge-runtime"],
+      "dependencies": [
+        "@szl-holdings/forge-runtime"
+      ],
       "devDependencies": [],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "lib/worldline/package.json",
       "name": "@szl-holdings/worldline",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/db", "drizzle-orm", "zod"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@szl-holdings/db",
+        "drizzle-orm",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "package.json",
@@ -1543,24 +1952,57 @@
         "@szl-holdings/policy-engine",
         "zod"
       ],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["build", "lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "build",
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/aef-contracts/package.json",
       "name": "@workspace/aef-contracts",
       "version": "0.0.0",
-      "dependencies": ["zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "dependencies": [
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/aef-domain-profiles/package.json",
       "name": "@workspace/aef-domain-profiles",
       "version": "0.0.0",
-      "dependencies": ["@workspace/aef-contracts", "zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["typecheck", "test", "test:watch"]
+      "dependencies": [
+        "@workspace/aef-contracts",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/aef-evals/package.json",
@@ -1572,56 +2014,128 @@
         "@workspace/aef-retrieval-core",
         "zod"
       ],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["typecheck", "test", "test:watch"]
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/aef-evidence-ledger/package.json",
       "name": "@workspace/aef-evidence-ledger",
       "version": "0.0.0",
-      "dependencies": ["@workspace/aef-contracts", "zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "dependencies": [
+        "@workspace/aef-contracts",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/aef-policy-guard/package.json",
       "name": "@workspace/aef-policy-guard",
       "version": "0.0.0",
-      "dependencies": ["@workspace/aef-contracts", "zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "dependencies": [
+        "@workspace/aef-contracts",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/aef-retrieval-core/package.json",
       "name": "@workspace/aef-retrieval-core",
       "version": "0.0.0",
-      "dependencies": ["@workspace/aef-contracts"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "dependencies": [
+        "@workspace/aef-contracts"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/aef-storage-adapters/package.json",
       "name": "@workspace/aef-storage-adapters",
       "version": "0.0.0",
-      "dependencies": ["@workspace/aef-contracts", "zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["typecheck", "test", "test:watch"]
+      "dependencies": [
+        "@workspace/aef-contracts",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/aef-workflow-runtime/package.json",
       "name": "@workspace/aef-workflow-runtime",
       "version": "0.0.0",
-      "dependencies": ["@workspace/aef-contracts", "zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["typecheck", "test", "test:watch"]
+      "dependencies": [
+        "@workspace/aef-contracts",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/agent-core/package.json",
       "name": "@szl-holdings/agent-core",
       "version": "0.1.0",
-      "dependencies": ["@szl-holdings/shared-contracts"],
-      "devDependencies": ["typescript", "zod"],
-      "scripts": ["typecheck"]
+      "dependencies": [
+        "@szl-holdings/shared-contracts"
+      ],
+      "devDependencies": [
+        "typescript",
+        "zod"
+      ],
+      "scripts": [
+        "typecheck"
+      ]
     },
     {
       "path": "packages/agents-core/package.json",
@@ -1637,8 +2151,18 @@
         "@workspace/trace-graph",
         "zod"
       ],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/agents-evals/package.json",
@@ -1653,16 +2177,35 @@
         "@workspace/agents-prompts",
         "zod"
       ],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/agents-prompts/package.json",
       "name": "@workspace/agents-prompts",
       "version": "0.1.0",
-      "dependencies": ["@szl-holdings/prompt-registry", "zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@szl-holdings/prompt-registry",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/agents-tools/package.json",
@@ -1674,16 +2217,32 @@
         "@workspace/cognitive-observability",
         "zod"
       ],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/ai-control-plane/package.json",
       "name": "@szl-holdings/ai-control-plane",
       "version": "0.0.0",
-      "dependencies": ["pino"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format"]
+      "dependencies": [
+        "pino"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "packages/alloy/package.json",
@@ -1697,56 +2256,121 @@
         "@workspace/trace-graph",
         "zod"
       ],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/approvals-inbox/package.json",
       "name": "@workspace/approvals-inbox",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/contracts"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["build", "lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@szl-holdings/contracts"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "build",
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/atlas-core/package.json",
       "name": "@szl-holdings/atlas-core",
       "version": "0.0.0",
-      "dependencies": ["zod"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/atlas-events/package.json",
       "name": "@szl-holdings/atlas-events",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/atlas-core", "zod"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@szl-holdings/atlas-core",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/brand-registry/package.json",
       "name": "@szl-holdings/brand-registry",
       "version": "1.0.0",
       "dependencies": [],
-      "devDependencies": ["typescript"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "devDependencies": [
+        "typescript"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/business-events/package.json",
       "name": "@szl-holdings/business-events",
       "version": "0.0.0",
       "dependencies": [],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format"]
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "packages/cognitive-observability/package.json",
       "name": "@workspace/cognitive-observability",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/observability-core", "zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "dependencies": [
+        "@szl-holdings/observability-core",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/cognitive-runtime/package.json",
@@ -1769,24 +2393,54 @@
         "drizzle-orm",
         "zod"
       ],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/config/package.json",
       "name": "@szl-holdings/platform-registry",
       "version": "0.1.0",
       "dependencies": [],
-      "devDependencies": ["typescript"],
-      "scripts": ["typecheck", "lint", "lint:ci", "format"]
+      "devDependencies": [
+        "typescript"
+      ],
+      "scripts": [
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "packages/connectors/package.json",
       "name": "@szl-holdings/connectors",
       "version": "0.0.0",
-      "dependencies": ["@workspace/ontology", "zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "dependencies": [
+        "@workspace/ontology",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/constellation/package.json",
@@ -1800,56 +2454,136 @@
         "drizzle-orm",
         "zod"
       ],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/contracts/package.json",
       "name": "@szl-holdings/contracts",
       "version": "0.1.0",
-      "dependencies": ["zod"],
-      "devDependencies": ["@types/node", "typescript", "vitest"],
-      "scripts": ["typecheck", "test", "test:watch", "lint", "lint:ci", "format"]
+      "dependencies": [
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "typescript",
+        "vitest"
+      ],
+      "scripts": [
+        "typecheck",
+        "test",
+        "test:watch",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "packages/db-migrations/package.json",
       "name": "@szl-holdings/db-migrations",
       "version": "0.1.0",
-      "dependencies": ["@szl-holdings/db"],
-      "devDependencies": ["@types/node", "typescript"],
-      "scripts": ["generate", "migrate", "push", "typecheck", "lint", "lint:ci", "format"]
+      "dependencies": [
+        "@szl-holdings/db"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "typescript"
+      ],
+      "scripts": [
+        "generate",
+        "migrate",
+        "push",
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "packages/db-repository/package.json",
       "name": "@szl-holdings/db-repository",
       "version": "0.1.0",
-      "dependencies": ["@szl-holdings/db", "drizzle-orm", "zod"],
-      "devDependencies": ["@types/node", "typescript"],
-      "scripts": ["typecheck", "lint", "lint:ci", "format"]
+      "dependencies": [
+        "@szl-holdings/db",
+        "drizzle-orm",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "typescript"
+      ],
+      "scripts": [
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "packages/db-schema/package.json",
       "name": "@szl-holdings/db-schema",
       "version": "0.1.0",
-      "dependencies": ["@szl-holdings/db", "drizzle-orm"],
-      "devDependencies": ["@types/node", "typescript"],
-      "scripts": ["typecheck", "lint", "lint:ci", "format"]
+      "dependencies": [
+        "@szl-holdings/db",
+        "drizzle-orm"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "typescript"
+      ],
+      "scripts": [
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "packages/db/package.json",
       "name": "@szl-holdings/db-repository",
       "version": "0.1.0",
-      "dependencies": ["@szl-holdings/db", "@szl-holdings/db-schema", "drizzle-orm"],
-      "devDependencies": ["@types/node", "typescript"],
-      "scripts": ["typecheck", "lint", "lint:ci", "format"]
+      "dependencies": [
+        "@szl-holdings/db",
+        "@szl-holdings/db-schema",
+        "drizzle-orm"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "typescript"
+      ],
+      "scripts": [
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "packages/decision-engine/package.json",
       "name": "@szl-holdings/decision-engine",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/atlas-core", "zod"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["build", "lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@szl-holdings/atlas-core",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "build",
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/demo-seed/package.json",
@@ -1863,7 +2597,11 @@
         "@szl-holdings/signal-mesh",
         "@workspace/ontology"
       ],
-      "devDependencies": ["@types/node", "tsx", "typescript"],
+      "devDependencies": [
+        "@types/node",
+        "tsx",
+        "typescript"
+      ],
       "scripts": [
         "seed:all",
         "seed:business",
@@ -1895,71 +2633,140 @@
         "@types/react-dom",
         "typescript"
       ],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
-    },
-    {
-      "path": "packages/domain-claims/package.json",
-      "name": "@szl-holdings/domain-claims",
-      "version": "0.1.0",
-      "dependencies": ["@szl-holdings/platform-registry"],
-      "devDependencies": ["typescript"],
-      "scripts": ["typecheck", "lint", "lint:ci", "format"]
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/domain-profiles/package.json",
       "name": "@szl-holdings/domain-profiles",
       "version": "0.1.0",
-      "dependencies": ["@szl-holdings/shared-contracts"],
-      "devDependencies": ["typescript"],
-      "scripts": ["typecheck"]
+      "dependencies": [
+        "@szl-holdings/shared-contracts"
+      ],
+      "devDependencies": [
+        "typescript"
+      ],
+      "scripts": [
+        "typecheck"
+      ]
     },
     {
       "path": "packages/env/package.json",
       "name": "@szl-holdings/env",
       "version": "0.1.0",
-      "dependencies": ["zod"],
-      "devDependencies": ["@types/node", "typescript"],
-      "scripts": ["typecheck", "lint", "lint:ci", "format"]
+      "dependencies": [
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "typescript"
+      ],
+      "scripts": [
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "packages/eval-forge/package.json",
       "name": "@workspace/eval-forge",
       "version": "1.0.0",
-      "dependencies": ["zod"],
-      "devDependencies": ["@types/node", "tsx", "vitest"],
-      "scripts": ["test", "run-suite", "lint", "lint:ci", "format", "typecheck", "test:watch"]
+      "dependencies": [
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "tsx",
+        "vitest"
+      ],
+      "scripts": [
+        "test",
+        "run-suite",
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/evidence-graph/package.json",
       "name": "@szl-holdings/evidence-graph",
       "version": "0.0.0",
-      "dependencies": ["@workspace/ontology", "drizzle-orm", "zod"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@workspace/ontology",
+        "drizzle-orm",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/evidence-ledger/package.json",
       "name": "@szl-holdings/evidence-ledger",
       "version": "0.1.0",
-      "dependencies": ["@szl-holdings/shared-contracts"],
-      "devDependencies": ["typescript", "zod"],
-      "scripts": ["typecheck"]
+      "dependencies": [
+        "@szl-holdings/shared-contracts"
+      ],
+      "devDependencies": [
+        "typescript",
+        "zod"
+      ],
+      "scripts": [
+        "typecheck"
+      ]
     },
     {
       "path": "packages/executive-briefing/package.json",
       "name": "@workspace/executive-briefing",
       "version": "0.0.0",
-      "dependencies": ["@workspace/verifier", "zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@workspace/verifier",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/guardian/package.json",
       "name": "@workspace/guardian",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/policy-engine", "zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["test", "test:watch", "lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@szl-holdings/policy-engine",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "test",
+        "test:watch",
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/marketing/package.json",
@@ -1972,56 +2779,126 @@
         "tailwind-merge",
         "@szl-holdings/brand-registry"
       ],
-      "devDependencies": ["@types/react", "@types/react-dom", "typescript"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "devDependencies": [
+        "@types/react",
+        "@types/react-dom",
+        "typescript"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/memory-core/package.json",
       "name": "@szl-holdings/memory-core",
       "version": "0.1.0",
-      "dependencies": ["@szl-holdings/shared-contracts"],
-      "devDependencies": ["typescript", "zod"],
-      "scripts": ["typecheck"]
+      "dependencies": [
+        "@szl-holdings/shared-contracts"
+      ],
+      "devDependencies": [
+        "typescript",
+        "zod"
+      ],
+      "scripts": [
+        "typecheck"
+      ]
     },
     {
       "path": "packages/memory-fabric/package.json",
       "name": "@workspace/memory-fabric",
       "version": "2.0.0",
-      "dependencies": ["drizzle-orm", "zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "dependencies": [
+        "drizzle-orm",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/nvidia-adapters/package.json",
       "name": "@szl-holdings/nvidia-adapters",
       "version": "0.0.0",
-      "dependencies": ["pino"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format"]
+      "dependencies": [
+        "pino"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "packages/observability-core/package.json",
       "name": "@szl-holdings/observability-core",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/env", "@szl-holdings/observability"],
-      "devDependencies": ["@types/node", "@types/express"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@szl-holdings/env",
+        "@szl-holdings/observability"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "@types/express"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/ontology/package.json",
       "name": "@workspace/ontology",
       "version": "1.0.0",
-      "dependencies": ["zod"],
-      "devDependencies": ["@types/node", "typescript", "vitest"],
-      "scripts": ["build", "typecheck", "test", "lint", "lint:ci", "format", "test:watch"]
+      "dependencies": [
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "typescript",
+        "vitest"
+      ],
+      "scripts": [
+        "build",
+        "typecheck",
+        "test",
+        "lint",
+        "lint:ci",
+        "format",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/openusd-export/package.json",
       "name": "@szl-holdings/openusd-export",
       "version": "0.0.0",
-      "dependencies": ["pino"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format"]
+      "dependencies": [
+        "pino"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "packages/otel/package.json",
@@ -2032,8 +2909,16 @@
         "@opentelemetry/api",
         "@opentelemetry/sdk-trace-base"
       ],
-      "devDependencies": ["@types/node", "typescript"],
-      "scripts": ["typecheck", "lint", "lint:ci", "format"]
+      "devDependencies": [
+        "@types/node",
+        "typescript"
+      ],
+      "scripts": [
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "packages/planner/package.json",
@@ -2045,128 +2930,289 @@
         "drizzle-orm",
         "zod"
       ],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/platform-metrics-registry/package.json",
       "name": "@szl-holdings/platform-metrics-registry",
       "version": "0.1.0",
-      "dependencies": ["zod"],
-      "devDependencies": ["typescript"],
-      "scripts": ["typecheck"]
+      "dependencies": [
+        "zod"
+      ],
+      "devDependencies": [
+        "typescript"
+      ],
+      "scripts": [
+        "typecheck"
+      ]
     },
     {
       "path": "packages/policy-engine/package.json",
       "name": "@szl-holdings/policy-engine",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/atlas-core", "zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["build", "lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "dependencies": [
+        "@szl-holdings/atlas-core",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "build",
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/policy-guard/package.json",
       "name": "@szl-holdings/policy-guard",
       "version": "0.1.0",
-      "dependencies": ["@szl-holdings/shared-contracts"],
-      "devDependencies": ["typescript", "zod"],
-      "scripts": ["typecheck"]
+      "dependencies": [
+        "@szl-holdings/shared-contracts"
+      ],
+      "devDependencies": [
+        "typescript",
+        "zod"
+      ],
+      "scripts": [
+        "typecheck"
+      ]
     },
     {
       "path": "packages/prompt-registry/package.json",
       "name": "@szl-holdings/prompt-registry",
       "version": "0.0.0",
-      "dependencies": ["pino"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format"]
+      "dependencies": [
+        "pino"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "packages/reflection-engine/package.json",
       "name": "@workspace/reflection-engine",
       "version": "0.0.0",
-      "dependencies": ["@workspace/memory-fabric", "@workspace/trace-graph", "zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "dependencies": [
+        "@workspace/memory-fabric",
+        "@workspace/trace-graph",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/replay-core/package.json",
       "name": "@workspace/replay-core",
       "version": "0.0.0",
-      "dependencies": ["zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "dependencies": [
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/retrieval-core/package.json",
       "name": "@szl-holdings/retrieval-core",
       "version": "0.1.0",
-      "dependencies": ["@szl-holdings/shared-contracts", "@szl-holdings/agent-core"],
-      "devDependencies": ["typescript", "zod"],
-      "scripts": ["typecheck"]
+      "dependencies": [
+        "@szl-holdings/shared-contracts",
+        "@szl-holdings/agent-core"
+      ],
+      "devDependencies": [
+        "typescript",
+        "zod"
+      ],
+      "scripts": [
+        "typecheck"
+      ]
     },
     {
       "path": "packages/run-ledger/package.json",
       "name": "@workspace/run-ledger",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/contracts", "zod"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@szl-holdings/contracts",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/schemas/package.json",
       "name": "@szl-holdings/schemas",
       "version": "0.1.0",
-      "dependencies": ["zod"],
-      "devDependencies": ["@types/node", "typescript", "vitest"],
-      "scripts": ["typecheck", "test", "test:watch", "lint", "lint:ci", "format"]
+      "dependencies": [
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "typescript",
+        "vitest"
+      ],
+      "scripts": [
+        "typecheck",
+        "test",
+        "test:watch",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "packages/self-model/package.json",
       "name": "@workspace/self-model",
       "version": "0.0.0",
-      "dependencies": ["zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "dependencies": [
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/shared-contracts/package.json",
       "name": "@szl-holdings/shared-contracts",
       "version": "0.1.0",
       "dependencies": [],
-      "devDependencies": ["typescript", "zod"],
-      "scripts": ["typecheck"]
+      "devDependencies": [
+        "typescript",
+        "zod"
+      ],
+      "scripts": [
+        "typecheck"
+      ]
     },
     {
       "path": "packages/signal-mesh/package.json",
       "name": "@szl-holdings/signal-mesh",
       "version": "0.0.0",
-      "dependencies": ["@workspace/ontology", "drizzle-orm", "zod"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "@workspace/ontology",
+        "drizzle-orm",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/simulation/package.json",
       "name": "@workspace/simulation",
       "version": "0.0.0",
-      "dependencies": ["zod"],
-      "devDependencies": ["@types/node"],
-      "scripts": ["build", "lint", "lint:ci", "format", "typecheck"]
+      "dependencies": [
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "build",
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/skill-library/package.json",
       "name": "@workspace/skill-library",
       "version": "0.0.0",
-      "dependencies": ["drizzle-orm", "zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["test", "lint", "lint:ci", "format", "typecheck", "test:watch"]
+      "dependencies": [
+        "drizzle-orm",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "test",
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/substrate-client/package.json",
       "name": "@szl/substrate-client",
       "version": "1.0.0",
-      "dependencies": ["zod"],
-      "devDependencies": ["typescript", "@types/node"],
-      "scripts": ["build", "typecheck"]
+      "dependencies": [
+        "zod"
+      ],
+      "devDependencies": [
+        "typescript",
+        "@types/node"
+      ],
+      "scripts": [
+        "build",
+        "typecheck"
+      ]
     },
     {
       "path": "packages/substrate/package.json",
@@ -2184,8 +3230,17 @@
         "@workspace/cognitive-observability",
         "zod"
       ],
-      "devDependencies": ["typescript", "@types/node", "vitest"],
-      "scripts": ["build", "typecheck", "cli", "test"]
+      "devDependencies": [
+        "typescript",
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "build",
+        "typecheck",
+        "cli",
+        "test"
+      ]
     },
     {
       "path": "packages/szl-alloy/package.json",
@@ -2199,16 +3254,35 @@
         "@workspace/trace-graph",
         "zod"
       ],
-      "devDependencies": ["@types/node"],
-      "scripts": ["build", "typecheck", "lint", "lint:ci", "format"]
+      "devDependencies": [
+        "@types/node"
+      ],
+      "scripts": [
+        "build",
+        "typecheck",
+        "lint",
+        "lint:ci",
+        "format"
+      ]
     },
     {
       "path": "packages/telemetry-standards/package.json",
       "name": "@szl-holdings/telemetry-standards",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/business-events"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "test", "test:watch"]
+      "dependencies": [
+        "@szl-holdings/business-events"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/tool-mesh/package.json",
@@ -2220,32 +3294,78 @@
         "@workspace/trace-graph",
         "zod"
       ],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/trace-graph/package.json",
       "name": "@workspace/trace-graph",
       "version": "0.0.0",
-      "dependencies": ["@workspace/replay-core", "drizzle-orm", "zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "dependencies": [
+        "@workspace/replay-core",
+        "drizzle-orm",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/verifier/package.json",
       "name": "@workspace/verifier",
       "version": "0.0.0",
-      "dependencies": ["@szl-holdings/policy-engine", "drizzle-orm", "zod"],
-      "devDependencies": ["@types/node", "vitest"],
-      "scripts": ["lint", "lint:ci", "format", "typecheck", "test", "test:watch"]
+      "dependencies": [
+        "@szl-holdings/policy-engine",
+        "drizzle-orm",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "vitest"
+      ],
+      "scripts": [
+        "lint",
+        "lint:ci",
+        "format",
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "packages/workflow-runtime/package.json",
       "name": "@szl-holdings/workflow-runtime",
       "version": "0.1.0",
-      "dependencies": ["@szl-holdings/shared-contracts", "@szl-holdings/agent-core"],
-      "devDependencies": ["typescript", "zod"],
-      "scripts": ["typecheck"]
+      "dependencies": [
+        "@szl-holdings/shared-contracts",
+        "@szl-holdings/agent-core"
+      ],
+      "devDependencies": [
+        "typescript",
+        "zod"
+      ],
+      "scripts": [
+        "typecheck"
+      ]
     },
     {
       "path": "scripts/package.json",
@@ -2314,8 +3434,17 @@
         "express",
         "zod"
       ],
-      "devDependencies": ["@types/express", "@types/node", "tsx", "typescript"],
-      "scripts": ["dev", "start", "typecheck"]
+      "devDependencies": [
+        "@types/express",
+        "@types/node",
+        "tsx",
+        "typescript"
+      ],
+      "scripts": [
+        "dev",
+        "start",
+        "typecheck"
+      ]
     },
     {
       "path": "services/alloy-fabric-ingest-control/package.json",
@@ -2331,8 +3460,17 @@
         "express",
         "zod"
       ],
-      "devDependencies": ["@types/express", "@types/node", "tsx", "typescript"],
-      "scripts": ["dev", "start", "typecheck"]
+      "devDependencies": [
+        "@types/express",
+        "@types/node",
+        "tsx",
+        "typescript"
+      ],
+      "scripts": [
+        "dev",
+        "start",
+        "typecheck"
+      ]
     },
     {
       "path": "services/substrate-mcp-gateway/package.json",
@@ -2348,32 +3486,80 @@
         "express",
         "zod"
       ],
-      "devDependencies": ["typescript", "@types/node", "@types/express", "tsx"],
-      "scripts": ["start", "start:stdio", "build", "typecheck", "test"]
+      "devDependencies": [
+        "typescript",
+        "@types/node",
+        "@types/express",
+        "tsx"
+      ],
+      "scripts": [
+        "start",
+        "start:stdio",
+        "build",
+        "typecheck",
+        "test"
+      ]
     },
     {
       "path": "workers/alloy-embed-worker/package.json",
       "name": "@workspace/alloy-embed-worker",
       "version": "0.0.0",
-      "dependencies": ["@workspace/aef-contracts", "zod"],
-      "devDependencies": ["@types/node", "tsx", "typescript", "vitest"],
-      "scripts": ["typecheck", "test", "test:watch"]
+      "dependencies": [
+        "@workspace/aef-contracts",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "tsx",
+        "typescript",
+        "vitest"
+      ],
+      "scripts": [
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "workers/alloy-rank-worker/package.json",
       "name": "@workspace/alloy-rank-worker",
       "version": "0.0.0",
-      "dependencies": ["@workspace/aef-contracts", "express", "zod"],
-      "devDependencies": ["@types/express", "@types/node", "tsx", "typescript"],
-      "scripts": ["dev", "start", "typecheck"]
+      "dependencies": [
+        "@workspace/aef-contracts",
+        "express",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/express",
+        "@types/node",
+        "tsx",
+        "typescript"
+      ],
+      "scripts": [
+        "dev",
+        "start",
+        "typecheck"
+      ]
     },
     {
       "path": "workers/alloy-rerank-worker/package.json",
       "name": "@workspace/alloy-rerank-worker",
       "version": "0.0.0",
-      "dependencies": ["@workspace/aef-contracts", "zod"],
-      "devDependencies": ["@types/node", "tsx", "typescript", "vitest"],
-      "scripts": ["typecheck", "test", "test:watch"]
+      "dependencies": [
+        "@workspace/aef-contracts",
+        "zod"
+      ],
+      "devDependencies": [
+        "@types/node",
+        "tsx",
+        "typescript",
+        "vitest"
+      ],
+      "scripts": [
+        "typecheck",
+        "test",
+        "test:watch"
+      ]
     },
     {
       "path": "workers/alloy-vector-worker/package.json",
@@ -2385,8 +3571,17 @@
         "express",
         "zod"
       ],
-      "devDependencies": ["@types/express", "@types/node", "tsx", "typescript"],
-      "scripts": ["dev", "start", "typecheck"]
+      "devDependencies": [
+        "@types/express",
+        "@types/node",
+        "tsx",
+        "typescript"
+      ],
+      "scripts": [
+        "dev",
+        "start",
+        "typecheck"
+      ]
     }
   ]
 }

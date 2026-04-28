@@ -45,9 +45,8 @@
     "sonner": "^2.0.7",
     "zod": "catalog:",
     "@szl-holdings/brand-registry": "workspace:*",
-    "@szl-holdings/config": "workspace:*",
-    "@szl-holdings/domain-claims": "workspace:*",
     "@szl-holdings/omnia-shell": "workspace:*",
-    "@workspace/tokens": "workspace:*"
+    "@workspace/tokens": "workspace:*",
+    "@szl-holdings/platform-registry": "workspace:*"
   }
 }

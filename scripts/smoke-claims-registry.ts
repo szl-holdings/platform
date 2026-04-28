@@ -213,7 +213,7 @@ const claimsAdapterSource = readFileSync(claimsAdapterPath, 'utf8');
 check(
   'claims.ts imports from the public-claims registry package',
   claimsAdapterSource.includes('@szl-holdings/platform-registry/public-claims') ||
-    claimsAdapterSource.includes('@szl-holdings/config/public-claims'),
+    claimsAdapterSource.includes('@szl-holdings/platform-registry/public-claims'),
 );
 
 check(
@@ -272,8 +272,8 @@ for (const { artifact, exports } of perArtifactAdapters) {
   }
   check(`${artifact}/src/lib/claims.ts exists`, true);
   check(
-    `${artifact}/claims.ts imports from "@szl-holdings/config/public-claims"`,
-    adapterSource.includes('@szl-holdings/config/public-claims'),
+    `${artifact}/claims.ts imports from "@szl-holdings/platform-registry/public-claims"`,
+    adapterSource.includes('@szl-holdings/platform-registry/public-claims'),
   );
   for (const exp of exports) {
     check(`${artifact}/claims.ts exports "${exp}"`, new RegExp(`\\b${exp}\\b`).test(adapterSource));

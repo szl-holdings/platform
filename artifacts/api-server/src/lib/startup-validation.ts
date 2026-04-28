@@ -3,7 +3,7 @@ import {
   isProductionMode,
   isDemoMode as resolveIsDemoMode,
   resolveRuntimeMode,
-} from '@szl-holdings/config';
+} from '@szl-holdings/platform-registry';
 import { logger } from './logger';
 
 interface EnvVarSpec {
@@ -1811,7 +1811,7 @@ export interface ValidationResult {
   errors: string[];
   warnings: string[];
   resolved: Record<string, string>;
-  runtimeMode: import('@szl-holdings/config').RuntimeMode;
+  runtimeMode: import('@szl-holdings/platform-registry').RuntimeMode;
   envSummary: {
     group: string;
     vars: { key: string; configured: boolean; required: boolean; description: string }[];
@@ -1850,7 +1850,7 @@ export function validateStartupConfig(): ValidationResult {
 
   let isProduction = false;
   let isDemoMode = false;
-  let runtimeMode: import('@szl-holdings/config').RuntimeMode = 'local-dev';
+  let runtimeMode: import('@szl-holdings/platform-registry').RuntimeMode = 'local-dev';
   try {
     isProduction = isProductionMode();
     isDemoMode = resolveIsDemoMode();

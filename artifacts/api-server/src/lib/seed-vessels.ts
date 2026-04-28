@@ -1,4 +1,4 @@
-import { getRuntimeMode, isSeedDataAllowed } from '@szl-holdings/config';
+import { getRuntimeMode, isSeedDataAllowed } from '@szl-holdings/platform-registry';
 import {
   db,
   fleetExceptionsTable,

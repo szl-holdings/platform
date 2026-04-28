@@ -55,10 +55,9 @@
     "mapbox-gl": "^3.20.0",
     "@szl-holdings/api-client-react": "workspace:*",
     "@szl-holdings/brand-registry": "workspace:*",
-    "@szl-holdings/config": "workspace:*",
-    "@szl-holdings/domain-claims": "workspace:*",
     "@szl-holdings/document-intelligence": "workspace:*",
     "@szl-holdings/omnia-shell": "workspace:*",
-    "@workspace/tokens": "workspace:*"
+    "@workspace/tokens": "workspace:*",
+    "@szl-holdings/platform-registry": "workspace:*"
   }
 }

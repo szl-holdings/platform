@@ -127,7 +127,7 @@ vi.mock('@szl-holdings/audit', () => ({
   hashIp: (ip: string | null) => (ip ? `hashed-${ip}` : null),
 }));
 
-vi.mock('@szl-holdings/config', () => ({ resolveRuntimeMode: () => 'standard' }));
+vi.mock('@szl-holdings/platform-registry', () => ({ resolveRuntimeMode: () => 'standard' }));
 
 vi.mock('../../lib/platform-flags.js', () => ({
   isFlagEnabled: vi.fn(() => Promise.resolve(true)),

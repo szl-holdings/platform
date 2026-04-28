@@ -79,6 +79,11 @@ export {
 // Shared evidence & recommendation (interface-based + Zod schemas)
 export * from './evidence.js';
 
+// Nexus entity graph — URI utilities, DB-backed registry, and source adapters
+export * from './nexus-uri.js';
+export * from './nexus-registry.js';
+export * from './nexus-sources.js';
+
 export const ONTOLOGY_VERSION = '1.0.0' as const;
 
 export const SIGNAL_PIPELINE_STAGES = [

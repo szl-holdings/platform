@@ -4,7 +4,7 @@
  * Wires the @szl-holdings/connectors runner into the api-server. Audit events
  * are appended to the existing audit_chain_events table (hash-chained, with
  * the chain head bootstrapped from the DB on first use to survive restarts).
- * Ontology entities are registered through @szl-holdings/ontology.
+ * Ontology entities are registered through @workspace/ontology.
  *
  * Tenant isolation: all per-connector runtime state (drift baseline, run
  * history, enable/pause flag, counters) is scoped by `(orgId, connectorId)`
@@ -18,7 +18,7 @@
  */
 
 import { auditChainEventsTable, db } from '@szl-holdings/db';
-import { registerEntity } from '@szl-holdings/ontology';
+import { registerEntity } from '@workspace/ontology';
 import {
   BUILT_IN_CONNECTORS,
   ConnectorRunner,
