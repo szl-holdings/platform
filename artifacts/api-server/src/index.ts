@@ -77,6 +77,8 @@ import './lib/cross-app-notification-relay.js';
 import { getAlloyRunManager } from './lib/alloy-run-manager-singleton';
 import { registerAnalyticsJobHandlers } from './lib/analytics-jobs';
 import { startMeshPublisher } from './lib/control-tower-mesh-publisher';
+import { cleanupExpiredIdempotencyRecords } from './middlewares/idempotency';
+import { stopLoadMetricsSampling } from './middlewares/load-shedder';
 import { initializeAlloyDomainEventSubscriptions } from './lib/domain-events/alloy-wiring.js';
 import { getWorkerStatus, startEmbeddingWorker, stopEmbeddingWorker } from './lib/embedding-worker';
 import { initGuardianEngine } from './lib/guardian-engine';
@@ -184,6 +186,13 @@ export async function bootstrap(
   registerQueuedJobHandlers();
   const prismPoller = startPrismJobPoller(5000);
   startAtlasExportProcessor();
+
+  const idempotencyCleanupInterval = setInterval(() => {
+    cleanupExpiredIdempotencyRecords().catch((err) =>
+      logger.warn({ err }, '[idempotency] Scheduled cleanup error (non-fatal)'),
+    );
+  }, 60 * 60 * 1000);
+  idempotencyCleanupInterval.unref();
 
   const memoryMonitor = setInterval(() => {
     const { heapUsed, heapTotal } = process.memoryUsage();
@@ -876,7 +885,9 @@ export async function bootstrap(
     process.exit(1);
   }
 
-  const SHUTDOWN_TIMEOUT_MS = 10_000;
+  const _shutdownEnv = Number(process.env.SHUTDOWN_TIMEOUT_MS);
+  const SHUTDOWN_TIMEOUT_MS =
+    Number.isFinite(_shutdownEnv) && _shutdownEnv >= 1000 ? _shutdownEnv : 10_000;
 
   async function shutdown(signal: string) {
     logger.info({ signal }, 'Graceful shutdown initiated');
@@ -915,11 +926,13 @@ export async function bootstrap(
     stopPrismBusBridge();
     stopAtlasExportProcessor();
     stopEmbeddingWorker();
+    stopLoadMetricsSampling();
     await stopIntelligenceFeeds();
     providerHealth.stopActiveProbes();
     agentScheduler.stop();
     clearInterval(prismPoller);
     clearInterval(ftPollerInterval);
+    clearInterval(idempotencyCleanupInterval);
 
     try {
       await jobQueue.shutdown();

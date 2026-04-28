@@ -1112,4 +1112,172 @@ router.get('/integrations/nvd/cves/critical', authMiddleware(), async (_req, res
   }
 });
 
+// ─── /health/dependencies — live dependency status with circuit breaker state ─
+
+router.get('/health/dependencies', async (_req, res) => {
+  const { getAllCircuitBreakerSnapshots } = await import('../lib/circuit-breaker');
+  const { getLoadMetrics } = await import('../middlewares/load-shedder');
+  const { providerHealth } = await import('../lib/provider-health');
+  const { providerCircuitBreaker } = await import('../lib/ai-gateway');
+  const { getPoolStats } = await import('./health-dependency-helpers');
+
+  const cbSnapshots = getAllCircuitBreakerSnapshots();
+  const aiCbStatuses = providerCircuitBreaker.getAllStatuses();
+  const aiProviderHealth = providerHealth.getSummary();
+  const loadMetrics = getLoadMetrics();
+  const dbPool = getPoolStats();
+
+  const deps: Array<{
+    name: string;
+    kind: string;
+    status: string;
+    latencyMs?: number;
+    details?: Record<string, unknown>;
+    circuitBreaker?: {
+      state: string;
+      consecutiveFailures: number;
+      openedAt: number | null;
+      latencyMs: { p50: number | null; p95: number | null; p99: number | null; sampleCount: number };
+      rollingErrorRate: { calls: number; failures: number; errorPct: number; windowMs: number };
+    };
+  }> = [];
+
+  const dbStart = Date.now();
+  let dbStatus = 'unknown';
+  let dbLatency: number | undefined;
+  try {
+    const { db } = await import('@szl-holdings/db');
+    const { sql } = await import('drizzle-orm');
+    await Promise.race([
+      db.execute(sql`SELECT 1`),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000)),
+    ]);
+    dbStatus = 'healthy';
+    dbLatency = Date.now() - dbStart;
+  } catch {
+    dbStatus = 'degraded';
+    dbLatency = Date.now() - dbStart;
+  }
+
+  deps.push({
+    name: 'postgresql',
+    kind: 'database',
+    status: dbStatus,
+    latencyMs: dbLatency,
+    details: {
+      poolTotal: dbPool.total,
+      poolActive: dbPool.active,
+      poolIdle: dbPool.idle,
+      poolWaiting: dbPool.waiting,
+      poolMax: dbPool.max,
+      poolUsedPct: dbPool.usedPct,
+      poolStatus: dbPool.status,
+    },
+  });
+
+  const hasObjectStorage = !!process.env.OBJECT_STORAGE_BUCKET_ID;
+  deps.push({
+    name: 'object-storage',
+    kind: 'storage',
+    status: hasObjectStorage ? 'configured' : 'unconfigured',
+    details: { mode: hasObjectStorage ? 'cloud' : 'local' },
+  });
+
+  for (const aiStatus of aiCbStatuses) {
+    const healthRecord = aiProviderHealth.providers.find((p) => p.provider === aiStatus.provider);
+    const failureRate =
+      typeof aiStatus.totalTripped === 'number' && typeof aiStatus.consecutiveFailures === 'number'
+        ? aiStatus.consecutiveFailures
+        : 0;
+    deps.push({
+      name: `ai-provider:${aiStatus.provider}`,
+      kind: 'ai_provider',
+      status:
+        aiStatus.state === 'open'
+          ? 'circuit_open'
+          : healthRecord?.status === 'down'
+            ? 'down'
+            : healthRecord?.status === 'degraded'
+              ? 'degraded'
+              : 'healthy',
+      latencyMs: healthRecord?.avgLatencyMs,
+      details: {
+        provider: aiStatus.provider,
+        consecutiveFailures: aiStatus.consecutiveFailures,
+        totalTripped: aiStatus.totalTripped,
+        openedAt: aiStatus.openedAt,
+        lastTestedAt: aiStatus.lastTestedAt,
+      },
+      circuitBreaker: {
+        state: aiStatus.state,
+        consecutiveFailures: failureRate,
+        openedAt: aiStatus.openedAt,
+        latencyMs: {
+          p50: healthRecord?.avgLatencyMs ?? null,
+          p95: null,
+          p99: null,
+          sampleCount: 0,
+        },
+        rollingErrorRate: {
+          calls: 0,
+          failures: aiStatus.consecutiveFailures ?? 0,
+          errorPct: 0,
+          windowMs: 60_000,
+        },
+      },
+    });
+  }
+
+  for (const snap of cbSnapshots) {
+    deps.push({
+      name: snap.name,
+      kind: 'external_service',
+      status:
+        snap.state === 'open'
+          ? 'circuit_open'
+          : snap.state === 'half-open'
+            ? 'recovering'
+            : 'healthy',
+      details: {
+        totalCalls: snap.totalCalls,
+        totalFailures: snap.totalFailures,
+        totalSuccesses: snap.totalSuccesses,
+        lastErrorMessage: snap.lastErrorMessage,
+      },
+      circuitBreaker: {
+        state: snap.state,
+        consecutiveFailures: snap.consecutiveFailures,
+        openedAt: snap.openedAt,
+        latencyMs: snap.latency,
+        rollingErrorRate: snap.rollingErrorRate,
+      },
+    });
+  }
+
+  const degradedCount = deps.filter(
+    (d) => d.status === 'degraded' || d.status === 'circuit_open' || d.status === 'down',
+  ).length;
+  const overallStatus = degradedCount > 0 ? 'degraded' : 'healthy';
+
+  res.json({
+    status: overallStatus,
+    checkedAt: new Date().toISOString(),
+    uptime: Math.floor(process.uptime()),
+    dependencies: deps,
+    summary: {
+      total: deps.length,
+      healthy: deps.filter((d) => d.status === 'healthy' || d.status === 'configured').length,
+      degraded: deps.filter((d) => d.status === 'degraded').length,
+      circuitOpen: deps.filter((d) => d.status === 'circuit_open').length,
+      unconfigured: deps.filter((d) => d.status === 'unconfigured').length,
+    },
+    load: {
+      eventLoopLagMs: loadMetrics.eventLoopLagMs,
+      poolUsedPct: loadMetrics.poolUsedPct,
+      pressureLevel: loadMetrics.pressureLevel,
+      sampledAt: new Date(loadMetrics.sampledAt).toISOString(),
+    },
+  });
+});
+
 export default router;

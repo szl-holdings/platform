@@ -32,6 +32,7 @@ import { meshCallLogger } from './middlewares/mesh-call-logger';
 import { etagMiddleware } from './middlewares/optimistic-concurrency';
 import { otelSpanMiddleware } from './middlewares/otel-span';
 import { globalLimiter } from './middlewares/rate-limiters';
+import { adaptiveLoadShedder, startLoadMetricsSampling } from './middlewares/load-shedder';
 import { sessionRefreshPolicy } from './middlewares/session-policy';
 import { telemetryMiddleware } from './middlewares/telemetry';
 import { traceEmitMiddleware } from './middlewares/trace-emit';
@@ -303,9 +304,15 @@ app.use('/api/alloy-embedding-api', _aefRouter);
 app.use(csrfMiddleware);
 app.use(authMiddleware({ required: false }));
 app.use(sessionRefreshPolicy());
+// Adaptive load shedder — runs before auth/rate-limit heavy paths so that
+// low-priority background traffic (syncs, analytics) is rejected first under
+// high event-loop lag or pool saturation, before user-facing traffic is shed.
+app.use(adaptiveLoadShedder);
 // Global rate limiter runs AFTER auth so req.user is populated and authenticated
 // traffic is keyed by user/org ID rather than falling back to IP.
 app.use(globalLimiter);
+// Start background sampling of event-loop lag and DB pool saturation for load shedder.
+startLoadMetricsSampling();
 
 app.get('/api/health', async (_req: Request, res: Response) => {
   const memUsage = process.memoryUsage();
