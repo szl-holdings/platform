@@ -41,7 +41,8 @@ The platform is a pnpm monorepo, known as the Continuum Business Observability F
 - **Red-Team Game Day Engine:** Live competitive crisis simulation for resilience scoring.
 - **Cross-Domain Signal Bus (Alert Bus):** "When/then" automation engine routing signals across product domains.
 - **Outbound Gateway:** Unified omni-channel notification layer with pluggable adapters.
-- **Conduit — Reverse ETL:** Visual no-code tool for operators to map SZL internal data to third-party SaaS destinations.
+- **Amaru — Convergent Reverse-ETL (formerly Conduit):** Visual no-code Reverse-ETL rebrand-as "Amaru" (the Inca cosmic serpent). Runs syncs as Ouroboros loops until diff converges to zero. Directory and API paths remain `/conduit/`; user-facing strings say "Amaru".
+- **@workspace/ouroboros — Ouroboros Loop Kernel:** Shared TS package implementing bounded loops with measurable convergence. Exports `runLoop()` (async kernel), `allocateDepth()` (entropy-depth allocator), `stringConsistency()` / `numericConsistency()` / `setConsistency()` / `vectorConsistency()`, plus React components `OuroborosTrace` and `LoopGlyph`. Instantiated in A11oy (Loop Reasoner, Andean Orchestration), Sentra (Recursive Threat Modeler), and Amaru (Convergent Sync). Thesis: `docs/ouroboros-thesis.md`.
 - **Continuum Core Packages:** Includes contracts, agent core, workflow runtime, retrieval core, memory core, memory fabric, evidence ledger, policy guard, domain profiles, and platform metrics registry, featuring a two-stage retrieval pipeline, multimodal retrieval, and scoped memory management.
 - **Multi-Agent Crew System:** Specialized agent roles with plan decomposition and trust-aware execution.
 - **Trust Score Engine:** Graduated autonomy system with rolling accuracy tracking and approval routing.

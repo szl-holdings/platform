@@ -9,14 +9,13 @@
  * (upper world) and one in uku pacha (lower world). The two heads are Sentra
  * and Amaru; A11oy is the spine that connects them.
  *
- * Implements the §5 Distillation Corollary from the Ouroboros thesis:
+ * Implements the §6 Distillation Corollary from the Ouroboros thesis:
  *   "A surprising convergence pattern in one loop is a candidate teacher
  *    signal for the others."
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
-  type LoopStep,
   type LoopTrace,
   allocateDepth,
   runLoop,
@@ -121,13 +120,13 @@ const SCENARIOS = [
 
 export function AndeanOrchestration() {
   const [scenario, setScenario] = useState(SCENARIOS[0]);
-  const [trace, setTrace] = useState<LoopTrace<MetaState> | null>(null);
+  const [trace, setTrace] = useState<LoopTrace<MetaState, string> | null>(null);
   const [running, setRunning] = useState(false);
   const [useAdaptive, setUseAdaptive] = useState(false);
 
   const maxSteps = 8;
 
-  const run = useCallback(() => {
+  const run = useCallback(async () => {
     setRunning(true);
 
     const scenarioSeed =
@@ -144,15 +143,15 @@ export function AndeanOrchestration() {
       ? Math.min(
           maxSteps,
           allocateDepth({
-            probeDeltas: [0.5, 0.35, 0.22],
+            recentDeltas: [0.5, 0.35, 0.22],
             maxSteps,
             minSteps: 2,
           }).recommendedSteps,
         )
       : maxSteps;
 
-    const result = runLoop<MetaState>({
-      init: initialState,
+    const result = await runLoop<MetaState, string>({
+      initialState,
       step: (prev, idx) => {
         const seed = scenarioSeed + idx * 3;
         const sentra = simulateSentraLoop(seed);
@@ -160,7 +159,9 @@ export function AndeanOrchestration() {
         const crossSignals = deriveCrossSignals(sentra, amaru, idx + 1);
         const systemStable =
           sentra.finalConsistency > 0.88 && amaru.finalConsistency > 0.88;
-        return { sentra, amaru, crossSignals, systemStable };
+        const nextState: MetaState = { sentra, amaru, crossSignals, systemStable };
+        const sig = `${sentra.finalDelta}|${amaru.finalDelta}`;
+        return { state: nextState, output: sig };
       },
       delta: (prev, next) => {
         const sentraDrift = Math.abs(
@@ -172,13 +173,13 @@ export function AndeanOrchestration() {
         return (sentraDrift + amaruDrift) / 2;
       },
       consistency: (prevOutput, output) => {
-        const prevSig = `${prevOutput?.sentra.finalDelta}|${prevOutput?.amaru.finalDelta}`;
-        const curSig = `${output.sentra.finalDelta}|${output.amaru.finalDelta}`;
-        return stringConsistency(prevSig, curSig);
+        return stringConsistency(prevOutput ?? '', output ?? '');
       },
-      maxSteps: effectiveMax,
-      earlyExitDelta: 0.02,
-      safeExitConsistency: 0.92,
+      config: {
+        maxSteps: effectiveMax,
+        convergenceThreshold: 0.02,
+        safeExitConsistency: 0.92,
+      },
     });
 
     setTrace(result);
@@ -208,7 +209,7 @@ export function AndeanOrchestration() {
           marginBottom: 8,
         }}
       >
-        <LoopGlyph size={36} animate={running} />
+        <LoopGlyph size={36} spinning={running} />
         <div>
           <div
             style={{
@@ -239,7 +240,7 @@ export function AndeanOrchestration() {
         The two-headed serpent. A11oy runs Sentra's recursive threat model and
         Amaru's convergent sync as child loops inside a single meta-pass. The
         meta-loop exits when both sub-loops stabilize and cross-signals have
-        been extracted. This is §5 of the Ouroboros thesis — the mutually
+        been extracted. This is §6 of the Ouroboros thesis — the mutually
         distilling triad.
       </p>
 
@@ -503,7 +504,7 @@ export function AndeanOrchestration() {
               color: '#52525b',
             }}
           >
-            — §5 The Distillation Corollary, docs/ouroboros-thesis.md
+            — §6 The Distillation Corollary, docs/ouroboros-thesis.md
           </div>
         </blockquote>
       </div>
