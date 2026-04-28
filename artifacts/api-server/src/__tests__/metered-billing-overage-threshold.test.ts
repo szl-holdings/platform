@@ -63,6 +63,7 @@ vi.mock('drizzle-orm', () => ({
     { raw: (_s: string) => ({ __sqlRaw: _s }) },
   ),
   desc: (_col: unknown) => ({ __desc: _col }),
+  relations: (..._a: unknown[]) => ({}),
 }));
 
 // ---------------------------------------------------------------------------
@@ -97,6 +98,7 @@ vi.mock('@szl-holdings/db', () => ({
   // other tables that may be pulled in by other jobs
   meteringEventsTable:              { __t: 'metering_events' },
   usersSettingsTable:               { __t: 'user_settings' },
+  quotaViolationsTable:             { __t: 'quota_violations' },
 }));
 
 // ---------------------------------------------------------------------------

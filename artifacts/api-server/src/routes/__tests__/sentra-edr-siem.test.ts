@@ -37,7 +37,8 @@ function buildApp(): Application {
   const csrfMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const safeMethods = ['GET', 'HEAD', 'OPTIONS'];
     if (safeMethods.includes(req.method)) return next();
-    // Public endpoints: heartbeat (agent-side) and webhook ingest (SIEM push)
+    // Public endpoints: exchange + heartbeat (agent-side) and webhook ingest (SIEM push)
+    if (req.path.startsWith('/sentra/agents/exchange')) return next();
     if (req.path.startsWith('/sentra/agents/heartbeat')) return next();
     if (req.path.startsWith('/sentra/siem/ingest')) return next();
     const token = req.headers['x-csrf-token'] ?? req.cookies?.csrf_token;
@@ -102,30 +103,42 @@ describe('POST /api/sentra/agents/enroll', () => {
 });
 
 describe('POST /api/sentra/agents/heartbeat', () => {
-  it('registers new agent on first heartbeat', async () => {
-    const { router, agentsStore, enrollmentTokensStore } = await importAgentsRouter();
-    const app = buildApp();
-    app.use('/api', router);
-
+  async function enrollAndExchange(app: Application) {
     const enrollRes = await request(app)
       .post('/api/sentra/agents/enroll')
       .set('x-csrf-token', 'test-csrf-token')
       .send({ tenantId: 'acme', tags: ['test'] })
       .expect(201);
+    const enrollmentToken = enrollRes.body.token.token as string;
+    const exchangeRes = await request(app)
+      .post('/api/sentra/agents/exchange')
+      .send({ enrollmentToken, hostname: 'web-01.prod', os: 'linux', version: '1.2.3' })
+      .expect(201);
+    return {
+      enrollmentToken,
+      agentId: exchangeRes.body.agentId as string,
+      bearerToken: exchangeRes.body.agentToken as string,
+    };
+  }
 
-    const token = enrollRes.body.token.token as string;
+  it('registers new agent on first heartbeat', async () => {
+    const { router, agentsStore, enrollmentTokensStore } = await importAgentsRouter();
+    const app = buildApp();
+    app.use('/api', router);
+
+    const { enrollmentToken, agentId, bearerToken } = await enrollAndExchange(app);
 
     const hbRes = await request(app)
       .post('/api/sentra/agents/heartbeat')
-      .send({ token, hostname: 'web-01.prod', os: 'linux', version: '1.2.3' })
+      .set('Authorization', `Bearer ${bearerToken}`)
+      .send({ hostname: 'web-01.prod', os: 'linux', version: '1.2.3' })
       .expect(200);
 
     expect(hbRes.body.agentId).toBeTypeOf('string');
     expect(hbRes.body.status).toBe('healthy');
     expect(agentsStore.size).toBe(1);
 
-    const enrollment = enrollmentTokensStore.get(token);
-    expect(enrollment?.usedByAgentId).toBe(hbRes.body.agentId);
+    expect(enrollmentTokensStore.has(enrollmentToken)).toBe(false);
   });
 
   it('updates heartbeat timestamp on subsequent check-ins', async () => {
@@ -133,48 +146,53 @@ describe('POST /api/sentra/agents/heartbeat', () => {
     const app = buildApp();
     app.use('/api', router);
 
-    const enrollRes = await request(app)
-      .post('/api/sentra/agents/enroll')
-      .set('x-csrf-token', 'test-csrf-token')
-      .send({ tenantId: 'acme' })
-      .expect(201);
-
-    const token = enrollRes.body.token.token as string;
+    const { bearerToken } = await enrollAndExchange(app);
 
     await request(app)
       .post('/api/sentra/agents/heartbeat')
-      .send({ token, hostname: 'web-01', os: 'linux', version: '1.0.0' })
+      .set('Authorization', `Bearer ${bearerToken}`)
+      .send({ hostname: 'web-01', os: 'linux', version: '1.0.0' })
       .expect(200);
-
-    const firstHb = agentsStore.values().next().value!.lastHeartbeatAt;
 
     const secondRes = await request(app)
       .post('/api/sentra/agents/heartbeat')
-      .send({ token, hostname: 'web-01', os: 'linux', version: '1.0.0' })
+      .set('Authorization', `Bearer ${bearerToken}`)
+      .send({ hostname: 'web-01', os: 'linux', version: '1.0.0' })
       .expect(200);
 
     const agent = agentsStore.get(secondRes.body.agentId as string)!;
     expect(agent.lastHeartbeatAt).toBeDefined();
   });
 
-  it('rejects invalid enrollment token', async () => {
+  it('rejects invalid bearer token', async () => {
     const { router } = await importAgentsRouter();
     const app = buildApp();
     app.use('/api', router);
 
     await request(app)
       .post('/api/sentra/agents/heartbeat')
-      .send({ token: 'bad-token-12345678', hostname: 'web-01', os: 'linux', version: '1.0.0' })
+      .set('Authorization', 'Bearer bad-token-12345678')
+      .send({ hostname: 'web-01', os: 'linux', version: '1.0.0' })
       .expect(401);
   });
 });
 
 describe('POST /api/sentra/agents/:id/action', () => {
-  async function enrollAndConnect(app: Application, token: string) {
-    const hbRes = await request(app)
-      .post('/api/sentra/agents/heartbeat')
-      .send({ token, hostname: 'test-host', os: 'linux', version: '1.0.0' });
-    return hbRes.body.agentId as string;
+  async function enrollAndConnect(app: Application) {
+    const enrollRes = await request(app)
+      .post('/api/sentra/agents/enroll')
+      .set('x-csrf-token', 'test-csrf-token')
+      .send({ tenantId: 'acme', tags: ['test'] })
+      .expect(201);
+    const enrollmentToken = enrollRes.body.token.token as string;
+    const exchangeRes = await request(app)
+      .post('/api/sentra/agents/exchange')
+      .send({ enrollmentToken, hostname: 'test-host', os: 'linux', version: '1.0.0' })
+      .expect(201);
+    return {
+      agentId: exchangeRes.body.agentId as string,
+      enrollmentToken,
+    };
   }
 
   it('isolates and releases an agent', async () => {
@@ -182,28 +200,22 @@ describe('POST /api/sentra/agents/:id/action', () => {
     const app = buildApp();
     app.use('/api', router);
 
-    const enrollRes = await request(app)
-      .post('/api/sentra/agents/enroll')
-      .set('x-csrf-token', 'test-csrf-token')
-      .send({ tenantId: 'acme' })
-      .expect(201);
-    const token = enrollRes.body.token.token as string;
-    const agentId = await enrollAndConnect(app, token);
+    const { agentId } = await enrollAndConnect(app);
 
     const isolateRes = await request(app)
       .post(`/api/sentra/agents/${agentId}/action`)
       .set('x-csrf-token', 'test-csrf-token')
       .send({ action: 'isolate', actor: 'SOC Lead' })
       .expect(200);
-    expect(isolateRes.body.status).toBe('isolated');
-    expect(isolateRes.body.auditTrail[0].action).toBe('isolate');
+    expect(isolateRes.body.status).toBe('healthy');
+    expect(isolateRes.body.auditTrail[0].action).toBe('isolate-queued');
 
     const releaseRes = await request(app)
       .post(`/api/sentra/agents/${agentId}/action`)
       .set('x-csrf-token', 'test-csrf-token')
       .send({ action: 'release', actor: 'SOC Lead' })
       .expect(200);
-    expect(releaseRes.body.status).toBe('healthy');
+    expect(releaseRes.body.auditTrail[0].action).toBe('release-queued');
   });
 
   it('rotates the enrollment token', async () => {
@@ -211,13 +223,7 @@ describe('POST /api/sentra/agents/:id/action', () => {
     const app = buildApp();
     app.use('/api', router);
 
-    const enrollRes = await request(app)
-      .post('/api/sentra/agents/enroll')
-      .set('x-csrf-token', 'test-csrf-token')
-      .send({ tenantId: 'acme' })
-      .expect(201);
-    const oldToken = enrollRes.body.token.token as string;
-    const agentId = await enrollAndConnect(app, oldToken);
+    const { agentId, enrollmentToken: oldToken } = await enrollAndConnect(app);
 
     await request(app)
       .post(`/api/sentra/agents/${agentId}/action`)

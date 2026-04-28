@@ -148,6 +148,7 @@ vi.mock('drizzle-orm', () => ({
   gt: (col: unknown, val: unknown) => ({ op: 'gt', col, val }),
   gte: (col: unknown, val: unknown) => ({ op: 'gte', col, val }),
   lte: (col: unknown, val: unknown) => ({ op: 'lte', col, val }),
+  relations: (..._a: unknown[]) => ({}),
 }));
 
 vi.mock('../../middlewares/auth', () => ({

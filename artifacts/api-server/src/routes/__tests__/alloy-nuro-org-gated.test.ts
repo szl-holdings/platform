@@ -131,6 +131,7 @@ vi.mock('drizzle-orm', () => {
     sum: () => ({ op: 'sum' }),
     avg: () => ({ op: 'avg' }),
     sql: sqlFn,
+    relations: (..._a: unknown[]) => ({}),
   };
 });
 

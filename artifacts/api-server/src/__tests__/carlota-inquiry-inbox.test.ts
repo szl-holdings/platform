@@ -164,6 +164,7 @@ vi.mock('drizzle-orm', () => {
     or: vi.fn(),
     sql: sqlProxy,
     inArray: vi.fn(),
+    relations: (..._a: unknown[]) => ({}),
   };
 });
 

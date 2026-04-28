@@ -138,6 +138,7 @@ vi.mock('drizzle-orm', () => ({
   max: (c?: unknown) => ({ op: 'max', c }),
   min: (c?: unknown) => ({ op: 'min', c }),
   notInArray: (c: unknown, v: unknown) => ({ op: 'notInArray', c, v }),
+  relations: (..._a: unknown[]) => ({}),
 }));
 
 // Typed extension so req.user is accessible without unsafe casts.

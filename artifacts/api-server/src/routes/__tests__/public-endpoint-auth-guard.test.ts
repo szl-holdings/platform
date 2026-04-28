@@ -35,6 +35,11 @@ vi.mock('@szl-holdings/db', () => {
 vi.mock('drizzle-orm', () => ({
   eq: (col: unknown, val: unknown) => ({ op: 'eq', col, val }),
   desc: (_c: unknown) => ({ op: 'desc' }),
+  sql: Object.assign(
+    (_s: TemplateStringsArray, ..._v: unknown[]) => ({ op: 'sql' }),
+    { raw: (_s: string) => ({ op: 'sql_raw' }) },
+  ),
+  relations: (..._a: unknown[]) => ({}),
 }));
 
 vi.mock('../../lib/api-response', () => ({

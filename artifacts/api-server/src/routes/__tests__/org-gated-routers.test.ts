@@ -87,6 +87,7 @@ vi.mock('drizzle-orm', () => ({
   sum: () => ({ op: 'sum' }),
   avg: () => ({ op: 'avg' }),
   sql: (_s: TemplateStringsArray, ..._v: unknown[]) => ({ op: 'sql' }),
+  relations: (..._a: unknown[]) => ({}),
 }));
 
 // ---------- Auth middleware passthrough ------------------------------------
@@ -165,6 +166,12 @@ vi.mock('@szl-holdings/ai-engine/providers/anthropic', () => ({
       stream: vi.fn(),
     },
   },
+}));
+
+vi.mock('../../services/ai/call-model', () => ({
+  callModel: vi.fn().mockResolvedValue({ content: 'mocked', usage: { total: 0 } }),
+  enforceBudgetForOrg: vi.fn().mockResolvedValue(undefined),
+  recordModelUsage: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('express-rate-limit', () => ({

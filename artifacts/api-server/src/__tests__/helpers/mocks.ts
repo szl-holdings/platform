@@ -126,6 +126,7 @@ export function createDrizzleOrmMock() {
     like: noop,
     ilike: noop,
     not: noop,
+    relations: noop,
   };
 }
 

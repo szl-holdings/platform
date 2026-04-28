@@ -396,6 +396,7 @@ describe('ENV_SPECS — coverage of .env.example', () => {
     'ENABLE_DEMO_SEED',
     'UPTIME_MONITOR_ID',
     'DEMO_MODE',
+    'HF_API_BASE',
   ]);
 
   it('has no duplicate keys in ENV_SPECS', () => {
