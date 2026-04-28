@@ -32,8 +32,10 @@ export default function ConnectionsList() {
   const handleTest = (id: string) => {
     const promise = testConnection.mutateAsync(id);
     toast.promise(promise, {
-      loading: 'Testing connection...',
-      success: (data) => `Test successful: ${data.latencyMs}ms latency`,
+      loading: 'Validating credentials...',
+      success: (data) => data.success
+        ? `Credentials validated (${data.latencyMs}ms)`
+        : `Validation failed: ${data.message}`,
       error: (err) => `Test failed: ${err.message}`
     });
   };

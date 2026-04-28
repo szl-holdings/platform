@@ -6,10 +6,34 @@ function apiUrl(path: string): string {
   return `${base}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
+function getCsrfToken(): string | null {
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+async function ensureCsrfCookie(): Promise<string | null> {
+  let token = getCsrfToken();
+  if (token) return token;
+  await fetch(apiUrl('/api/csrf-token'), { credentials: 'include' });
+  return getCsrfToken();
+}
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(init?.headers as Record<string, string>),
+  };
+
+  if (init?.method && !['GET', 'HEAD', 'OPTIONS'].includes(init.method.toUpperCase())) {
+    const csrfToken = await ensureCsrfCookie();
+    if (csrfToken) {
+      headers['X-CSRF-Token'] = csrfToken;
+    }
+  }
+
   const res = await fetch(apiUrl(`/api${path}`), {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...init?.headers },
+    headers,
     ...init,
   });
   if (!res.ok) {
@@ -154,7 +178,9 @@ export const updateConnection = (id: string, body: { name?: string; credentials?
   apiFetch<Connection>(`/conduit/connections/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
 export const deleteConnection = (id: string) => apiFetch<void>(`/conduit/connections/${id}`, { method: 'DELETE' });
 export const testConnection = (id: string) =>
-  apiFetch<{ success: boolean; message: string; latencyMs: number }>(`/conduit/connections/${id}/test`, { method: 'POST' });
+  apiFetch<{ success: boolean; message: string; errors: string[]; latencyMs: number }>(`/conduit/connections/${id}/test`, { method: 'POST' });
+export const validateCredentials = (body: { destination: string; credentials: Record<string, string> }) =>
+  apiFetch<{ success: boolean; message: string; errors: string[]; latencyMs: number }>('/conduit/connections/validate', { method: 'POST', body: JSON.stringify(body) });
 
 // ─── Syncs ────────────────────────────────────────────────────────────────────
 export const listSyncs = () => apiFetch<Sync[]>('/conduit/syncs');

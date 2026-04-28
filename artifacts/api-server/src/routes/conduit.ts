@@ -19,6 +19,104 @@ const CONDUIT_DESTINATIONS = [
   'zendesk', 'marketo', 'intercom', 'pipedrive', 'mailchimp', 'segment', 'webhook',
 ];
 
+interface CredentialRule {
+  field: string;
+  label: string;
+  required: boolean;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: RegExp;
+  patternHint?: string;
+}
+
+const DESTINATION_CREDENTIAL_RULES: Record<string, CredentialRule[]> = {
+  salesforce: [
+    { field: 'apiKey', label: 'API Key', required: true, minLength: 15, maxLength: 256, pattern: /^[A-Za-z0-9!]+$/, patternHint: 'must contain only alphanumeric characters' },
+    { field: 'instanceUrl', label: 'Instance URL', required: true, pattern: /^https:\/\/.+\.salesforce\.com(\/.*)?$/, patternHint: 'must be a valid Salesforce URL (https://…salesforce.com)' },
+  ],
+  hubspot: [
+    { field: 'apiKey', label: 'API Key', required: true, minLength: 8, maxLength: 256, pattern: /^(pat-|hapi-)?[a-zA-Z0-9-]+$/, patternHint: 'must be a valid HubSpot API key or private app token' },
+    { field: 'instanceUrl', label: 'Portal URL', required: false, pattern: /^https:\/\/.+\.hubspot\.com(\/.*)?$/, patternHint: 'must be a valid HubSpot URL (https://…hubspot.com)' },
+  ],
+  slack: [
+    { field: 'apiKey', label: 'Bot Token', required: true, minLength: 10, maxLength: 256, pattern: /^xoxb-[A-Za-z0-9-]+$/, patternHint: 'must start with xoxb- (Slack bot token format)' },
+  ],
+  google_sheets: [
+    { field: 'apiKey', label: 'Service Account Key', required: true, minLength: 20, maxLength: 4096, patternHint: 'must be a valid service account JSON key or API key' },
+  ],
+  notion: [
+    { field: 'apiKey', label: 'Integration Token', required: true, minLength: 10, maxLength: 256, pattern: /^(ntn_|secret_)[A-Za-z0-9]+$/, patternHint: 'must start with ntn_ or secret_ (Notion token format)' },
+  ],
+  airtable: [
+    { field: 'apiKey', label: 'Personal Access Token', required: true, minLength: 10, maxLength: 256, pattern: /^(pat|key)[A-Za-z0-9.]+$/, patternHint: 'must start with pat or key (Airtable token format)' },
+  ],
+  zendesk: [
+    { field: 'apiKey', label: 'API Token', required: true, minLength: 8, maxLength: 256 },
+    { field: 'instanceUrl', label: 'Subdomain URL', required: true, pattern: /^https:\/\/.+\.zendesk\.com(\/.*)?$/, patternHint: 'must be a valid Zendesk URL (https://…zendesk.com)' },
+  ],
+  marketo: [
+    { field: 'apiKey', label: 'Client ID', required: true, minLength: 8, maxLength: 256, pattern: /^[a-f0-9-]+$/i, patternHint: 'must be a valid UUID-style client ID' },
+  ],
+  intercom: [
+    { field: 'apiKey', label: 'Access Token', required: true, minLength: 10, maxLength: 256, pattern: /^[A-Za-z0-9=_-]+$/, patternHint: 'must contain only alphanumeric characters, =, _, -' },
+  ],
+  pipedrive: [
+    { field: 'apiKey', label: 'API Token', required: true, minLength: 10, maxLength: 256, pattern: /^[a-f0-9]+$/, patternHint: 'must be a hexadecimal API token' },
+  ],
+  mailchimp: [
+    { field: 'apiKey', label: 'API Key', required: true, minLength: 10, maxLength: 256, pattern: /^[a-f0-9]+-us\d+$/, patternHint: 'must end with a data center suffix (e.g., -us21)' },
+  ],
+  segment: [
+    { field: 'apiKey', label: 'Write Key', required: true, minLength: 10, maxLength: 256, pattern: /^[A-Za-z0-9]+$/, patternHint: 'must contain only alphanumeric characters' },
+  ],
+  webhook: [
+    { field: 'apiKey', label: 'Webhook URL', required: true, minLength: 10, maxLength: 2048, pattern: /^https?:\/\/.+/, patternHint: 'must be a valid HTTP or HTTPS URL' },
+  ],
+};
+
+function validateDestinationCredentials(
+  destination: string,
+  credentials: Record<string, string> | null,
+  credentialMeta?: Record<string, unknown> | null,
+): { valid: boolean; errors: string[] } {
+  const rules = DESTINATION_CREDENTIAL_RULES[destination];
+  if (!rules) {
+    return { valid: false, errors: [`Unknown destination type: ${destination}`] };
+  }
+
+  const errors: string[] = [];
+  const creds = credentials || {};
+  const meta = credentialMeta || {};
+
+  for (const rule of rules) {
+    const value = creds[rule.field];
+    const metaHasKey = rule.field in meta;
+
+    if (credentials) {
+      if (rule.required && (!value || value.trim().length === 0)) {
+        errors.push(`${rule.label} is required`);
+        continue;
+      }
+
+      if (value && value.trim().length > 0) {
+        if (rule.minLength && value.length < rule.minLength) {
+          errors.push(`${rule.label} is too short (minimum ${rule.minLength} characters)`);
+        } else if (rule.maxLength && value.length > rule.maxLength) {
+          errors.push(`${rule.label} is too long (maximum ${rule.maxLength} characters)`);
+        } else if (rule.pattern && !rule.pattern.test(value)) {
+          errors.push(`${rule.label} format is invalid — ${rule.patternHint || 'check the value and try again'}`);
+        }
+      }
+    } else {
+      if (rule.required && !metaHasKey) {
+        errors.push(`${rule.label} is required but was not provided when this connection was created`);
+      }
+    }
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
 const BUILTIN_TEMPLATES = [
   {
     id: 'tpl-terra-salesforce',
@@ -134,7 +232,7 @@ router.get('/conduit/connections', async (req: Request, res: Response): Promise<
 });
 
 router.post('/conduit/connections', async (req: Request, res: Response): Promise<void> => {
-  const { name, destination, credentials } = req.body as { name?: string; destination?: string; credentials?: Record<string, unknown> };
+  const { name, destination, credentials } = req.body as { name?: string; destination?: string; credentials?: Record<string, string> };
   if (!name || !destination) {
     res.status(400).json({ error: 'name and destination are required' });
     return;
@@ -143,13 +241,18 @@ router.post('/conduit/connections', async (req: Request, res: Response): Promise
     res.status(400).json({ error: `Unknown destination: ${destination}` });
     return;
   }
+  const validation = validateDestinationCredentials(destination, credentials || null);
+  if (!validation.valid) {
+    res.status(400).json({ error: 'Invalid credentials: ' + validation.errors.join('; '), errors: validation.errors });
+    return;
+  }
   try {
     const credentialMeta = credentials ? Object.fromEntries(Object.keys(credentials).map(k => [k, '***'])) : {};
     const [connection] = await db.insert(conduitConnectionsTable).values({
       name,
       destination,
       credentialMeta,
-      status: 'untested',
+      status: 'active',
     }).returning();
     await logActivityFromRequest(req, 'conduit.connection.create', 'conduit_connection', connection.id, undefined, { name, destination });
     res.status(201).json(connection);
@@ -201,21 +304,55 @@ router.delete('/conduit/connections/:id', async (req: Request, res: Response): P
   }
 });
 
+router.post('/conduit/connections/validate', async (req: Request, res: Response): Promise<void> => {
+  const { destination, credentials } = req.body as { destination?: string; credentials?: Record<string, string> };
+  if (!destination) {
+    res.status(400).json({ error: 'destination is required' });
+    return;
+  }
+  if (!CONDUIT_DESTINATIONS.includes(destination)) {
+    res.status(400).json({ error: `Unknown destination: ${destination}` });
+    return;
+  }
+  const start = Date.now();
+  const result = validateDestinationCredentials(destination, credentials || null);
+  const latencyMs = Date.now() - start;
+  res.json({
+    success: result.valid,
+    message: result.valid
+      ? 'Credentials look good — format and structure validated'
+      : result.errors.join('; '),
+    errors: result.errors,
+    latencyMs,
+  });
+});
+
 router.post('/conduit/connections/:id/test', async (req: Request, res: Response): Promise<void> => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   try {
     const [connection] = await db.select().from(conduitConnectionsTable).where(eq(conduitConnectionsTable.id, id));
     if (!connection) { res.status(404).json({ error: 'Connection not found' }); return; }
     const start = Date.now();
-    // Simulate connection test (real implementation would call the destination API)
-    await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 300));
+    const { credentials } = req.body as { credentials?: Record<string, string> };
+    const result = validateDestinationCredentials(
+      connection.destination,
+      credentials || null,
+      connection.credentialMeta,
+    );
     const latencyMs = Date.now() - start;
-    const success = Math.random() > 0.1; // 90% success rate in mock
+    const newStatus = result.valid ? 'active' : 'error';
     await db.update(conduitConnectionsTable).set({
-      status: success ? 'active' : 'error',
+      status: newStatus,
       testedAt: new Date(),
     }).where(eq(conduitConnectionsTable.id, id));
-    res.json({ success, message: success ? 'Connection successful' : 'Connection refused: check credentials', latencyMs });
+    res.json({
+      success: result.valid,
+      message: result.valid
+        ? 'Credentials validated — connection marked active'
+        : result.errors.join('; '),
+      errors: result.errors,
+      latencyMs,
+    });
   } catch (err) {
     req.log.error({ err }, 'Failed to test connection');
     res.status(500).json({ error: 'Internal server error' });

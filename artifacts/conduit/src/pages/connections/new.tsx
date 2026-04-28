@@ -1,27 +1,59 @@
 import React from 'react';
 import { useLocation } from 'wouter';
-import { useCreateConnection } from '@/lib/api-hooks';
+import { useCreateConnection, useValidateCredentials } from '@/lib/api-hooks';
 import { DESTINATIONS } from '@/lib/api';
 import { Button, Input, Select } from '@/components/ui';
 import { toast } from 'sonner';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Activity, CheckCircle2, XCircle } from 'lucide-react';
 import { Link } from 'wouter';
 
 export default function ConnectionsNew() {
   const [, setLocation] = useLocation();
   const createConnection = useCreateConnection();
+  const validateCredentials = useValidateCredentials();
   
   const [name, setName] = React.useState('');
   const [destination, setDestination] = React.useState(DESTINATIONS[0].id);
   const [credentials, setCredentials] = React.useState<Record<string, string>>({});
+  const [validationResult, setValidationResult] = React.useState<{
+    success: boolean;
+    message: string;
+    errors: string[];
+  } | null>(null);
 
   const handleCredentialChange = (key: string, value: string) => {
     setCredentials(prev => ({ ...prev, [key]: value }));
+    setValidationResult(null);
   };
+
+  const handleTestCredentials = () => {
+    setValidationResult(null);
+    validateCredentials.mutate(
+      { destination, credentials },
+      {
+        onSuccess: (data) => {
+          setValidationResult({ success: data.success, message: data.message, errors: data.errors });
+          if (data.success) {
+            toast.success('Credentials validated successfully');
+          } else {
+            toast.error('Credential validation failed');
+          }
+        },
+        onError: (err) => {
+          toast.error(err.message || 'Validation request failed');
+        },
+      }
+    );
+  };
+
+  const canSave = !!name && !!destination && validationResult?.success === true;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !destination) return;
+    if (!canSave) {
+      toast.error('Please test your credentials before saving');
+      return;
+    }
 
     createConnection.mutate(
       { name, destination, credentials },
@@ -73,6 +105,7 @@ export default function ConnectionsNew() {
               onChange={(e) => {
                 setDestination(e.target.value);
                 setCredentials({});
+                setValidationResult(null);
               }}
               required
             >
@@ -105,7 +138,6 @@ export default function ConnectionsNew() {
               />
             </div>
             
-            {/* Show extra fields based on destination type to make it feel real */}
             {['salesforce', 'hubspot', 'zendesk'].includes(destination) && (
               <div className="space-y-2">
                 <label className="text-sm font-medium">Instance URL / Subdomain</label>
@@ -118,11 +150,55 @@ export default function ConnectionsNew() {
                 />
               </div>
             )}
+
+            <div className="pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleTestCredentials}
+                isLoading={validateCredentials.isPending}
+                className="gap-2"
+              >
+                <Activity className="w-4 h-4" />
+                Test Connection
+              </Button>
+            </div>
+
+            {validationResult && (
+              <div className={`flex items-start gap-2 p-3 rounded-md text-sm ${
+                validationResult.success
+                  ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                  : 'bg-red-500/10 border border-red-500/30 text-red-400'
+              }`}>
+                {validationResult.success ? (
+                  <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
+                ) : (
+                  <XCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                )}
+                <div className="space-y-1">
+                  <p className="font-medium">{validationResult.success ? 'Validation passed' : 'Validation failed'}</p>
+                  {validationResult.errors.length > 0 && (
+                    <ul className="list-disc list-inside space-y-0.5 text-xs opacity-90">
+                      {validationResult.errors.map((err, i) => (
+                        <li key={i}>{err}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="flex justify-end pt-4 border-t border-border">
-          <Button type="submit" isLoading={createConnection.isPending} className="gap-2">
+        <div className="flex items-center justify-between pt-4 border-t border-border">
+          {!validationResult?.success && (
+            <p className="text-xs text-muted-foreground">Test your credentials before saving.</p>
+          )}
+          {validationResult?.success && (
+            <p className="text-xs text-emerald-400">Credentials validated — ready to save.</p>
+          )}
+          <Button type="submit" isLoading={createConnection.isPending} disabled={!canSave} className="gap-2">
             <Save className="w-4 h-4" />
             Save Connection
           </Button>

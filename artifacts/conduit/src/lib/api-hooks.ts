@@ -29,7 +29,14 @@ export const useDeleteConnection = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['connections'] }),
   });
 };
-export const useTestConnection = () => useMutation({ mutationFn: api.testConnection });
+export const useTestConnection = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: api.testConnection,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['connections'] }),
+  });
+};
+export const useValidateCredentials = () => useMutation({ mutationFn: api.validateCredentials });
 
 export const useSyncs = () => useQuery({ queryKey: ['syncs'], queryFn: api.listSyncs });
 export const useSync = (id: string) => useQuery({ queryKey: ['syncs', id], queryFn: () => api.getSync(id), enabled: !!id });

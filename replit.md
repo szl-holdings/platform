@@ -1,7 +1,7 @@
 # SZL Holdings Platform
 
 ## Overview
-SZL Holdings offers FORGE, a governed operational intelligence platform for regulated enterprises. The platform provides a governed execution fabric where enterprise signals, agents, tools, people, policies, and proof operate as one controlled system. It's a comprehensive solution for decision intelligence and operational oversight, targeting highly regulated sectors requiring stringent compliance and auditable AI applications. The platform supports web and mobile applications, an API, and a design system, focusing on Governed Workflow Orchestration and Maritime Intelligence. Key capabilities include the Sovereign Execution Lab, the A11oy Agentic Layer, the A11oy Mythos Doctrine for governance, the A11oy Compliance Fabric, the A11oy DARPA Resilience Layer, and OMNIA, a Unified Portfolio Intelligence Layer.
+SZL Holdings offers FORGE, a governed operational intelligence platform designed for regulated enterprises. Its purpose is to provide a governed execution fabric where enterprise signals, agents, tools, people, policies, and proof operate as one controlled system. The platform aims to be a comprehensive solution for decision intelligence and operational oversight, particularly for sectors requiring stringent compliance and auditable AI applications. It supports web and mobile applications, an API, and a design system, with a focus on Governed Workflow Orchestration and Maritime Intelligence. Key capabilities include the Sovereign Execution Lab, the A11oy Agentic Layer, the A11oy Mythos Doctrine for governance, the A11oy Compliance Fabric, the A11oy DARPA Resilience Layer, and OMNIA, a Unified Portfolio Intelligence Layer.
 
 ## User Preferences
 I prefer detailed explanations.
@@ -9,7 +9,7 @@ I want iterative development.
 Ask before making major changes.
 
 ## System Architecture
-The platform is a pnpm monorepo, known as the FORGE Execution and Evidence Platform (AEEP), built with TypeScript 5.9, React 19, Vite, and Node.js, employing a micro-frontend architecture.
+The platform is a pnpm monorepo, known as the FORGE Execution and Evidence Platform (AEEP), built with TypeScript, React, Vite, and Node.js, employing a micro-frontend architecture.
 
 **Core Architectural Primitives:**
 - **FORGE Execution Fabric:** Incorporates Human-in-the-loop governance, Outcome Graph, Proof Chain, and Covenant Policy.
@@ -25,30 +25,29 @@ The platform is a pnpm monorepo, known as the FORGE Execution and Evidence Platf
 
 **UI/UX and Design System:** The Governed-Intelligence Design Language v2 (`@szl-holdings/design-system`) is the single visual source of truth, defining the enterprise accent palette, typography, spacing, and UI components. All authenticated product surfaces are evidence-first, utilizing a pure dark theme with a single warm accent. The platform uses a One-of-One Platform Shell to unify user interfaces across applications.
 
-**API Layers:** Includes REST API, GraphQL API (Apollo Server), and an MCP Gateway. Zero-Trust Auth Hardening features passwordless magic-link authentication, device fingerprinting, adaptive risk scoring, progressive brute-force protection, session management, and security event audit logging.
+**API Layers:** Includes REST API, GraphQL API (Apollo Server), and an MCP Gateway.
+
+**Zero-Trust Auth Hardening:** Implemented on the API server with passwordless magic-link authentication, device fingerprinting, adaptive risk scoring, progressive brute-force protection, session management API, and security event audit logging.
 
 **AI Infrastructure:** Features a multi-provider AI backend, AI evaluation infrastructure, AI Ops Dashboard, NVIDIA-Ready Packages, and Substrate Edge Inference (oLLM).
 - **Forge – AI Runtime, Agent Factory & Promotion Pipeline:** Manages the governed lifecycle of AI agents.
 - **Precision Evolution Runtime (PER):** A governed, evidence-gated system for continuously evolving agent policies.
 - **PRAXIS – Unified Agentic AI Layer:** An internal tooling sandbox for AI agent research, memory management, skill registry, and AI Control Plane features.
 - **A11oy Agent Runtime:** A governed, agentic execution fabric ensuring controlled execution through governance invariants, evolved into a Proof-Carrying Agentic Execution Platform with capabilities such as Agent Gateway, A2A Interop, Reasoning Proof Engine, Governed Memory Vault, Agent Identity Registry, MirrorEval + Reasoning Verification, Self-Optimization Engine, Signal Mesh + Knowledge Graph, and Governed Security Agents.
-- **a1.1oy — Conversational AI Interface (inside A11oy):** Claude-style governed AI chat at `/nexus`, MCP Hub at `/mcp-hub`, and Agentic RAG at `/agentic-rag`.
+- **a1.1oy — Conversational AI Interface:** Claude-style governed AI chat at `/nexus`, MCP Hub at `/mcp-hub`, and Agentic RAG at `/agentic-rag` with multi-step retrieval pipeline and knowledge collections.
 - **AI Provenance & Explainability Contract:** Every AI-generated output carries a `ProvenanceEnvelope` with essential metadata.
-- **Karpathy-Distilled Agent Evolution:** Implements six Karpathy-inspired engine primitives for advanced agent intelligence.
 
 **Other Technical Implementations:**
 - **Red-Team Game Day Engine:** Live competitive crisis simulation for resilience scoring.
 - **Cross-Domain Signal Bus (Alert Bus):** "When/then" automation engine routing signals across product domains.
 - **Outbound Gateway:** Unified omni-channel notification layer with pluggable adapters.
 - **Conduit — Reverse ETL:** Visual no-code tool for operators to map SZL internal data to third-party SaaS destinations.
-- **AEEP Core Packages:** Includes contracts, agent core, workflow runtime, retrieval core, memory core, memory fabric, evidence ledger, policy guard, domain profiles, and platform metrics registry, featuring a two-stage retrieval pipeline, multimodal retrieval, and scoped memory management.
+- **AEEP Core Packages:** Includes contracts, agent core, workflow runtime, retrieval core, memory core, memory fabric, evidence ledger, policy guard, domain profiles, and platform metrics registry.
 - **Multi-Agent Crew System:** Specialized agent roles with plan decomposition and trust-aware execution.
 - **Trust Score Engine:** Graduated autonomy system with rolling accuracy tracking and approval routing.
 - **Fine-Tuned Model Router:** Domain-aware model routing with fine-tuned model resolution and cascading fallback chains.
 - **Multi-Language Voice Pipeline:** 5-language support for auto-detection, transcription, TTS, and voice chat.
 - **Offline-First Sync (Mobile):** Mobile offline sync with local cache, background sync queue, and conflict resolution.
-- **Wake-Word Detection (Mobile):** On-device "Hey Command" wake-word detection supporting 5 languages.
-- **Mobile Web Parity:** Global search, agent trust dashboard, and offline sync status screens in mobile app.
 - **Mobile Biometric Sign-In:** Real server-side authentication factor with cryptographic proof-of-possession.
 - **Unified Auth Mesh:** Backend-only authentication unification layer using custom HS256 JWT.
 - **Forecast & Anomaly Fabric:** Unified forecasting service and streaming/batch anomaly detection service.
@@ -59,7 +58,7 @@ The platform is a pnpm monorepo, known as the FORGE Execution and Evidence Platf
 - **Monte Carlo Simulation Fabric:** Configurable stochastic simulation engine.
 - **OpenAI Agents SDK Bridge:** Wires `@openai/agents@0.0.15` into the SZL observability stack.
 - **DARPA MTO Innovation Hub, Post-Quantum Cryptography Readiness, Hardware Root of Trust, Adversarial ML Defense Console, Cyber Innovation Roadmap, Photonic Inference Tier:** Integrated modules for advanced cybersecurity and resilience.
-- **A11oy ARGO — Field Intelligence Forge (`/a11oy/argo`, v0.2.0-seed):** Distillation surface that fuses external signals with defensive doctrines and public research for cybersecurity insights.
+- **A11oy ARGO — Field Intelligence Forge:** Distillation surface that fuses external signals with defensive doctrines and public research for cybersecurity insights.
 - **A11oy Aerial Twin (Site-Specific Wireless Digital-Twin Doctrine):** Doctrine hub distilling public NVIDIA Aerial Digital Twin overview into the SZL ecosystem with operational milestone surfaces.
 - **A11oy Mythos Layer (Defensive Architecture Doctrine):** Static doctrine surface codifying the A11oy×Sentra orchestration architecture.
 - **A11oy × Sentra Glasswing Command Layer (Risk-as-Reward):** Premium executive command surface synthesizing agent constellations and a "Risk-as-Reward" novelty thesis.
@@ -74,10 +73,10 @@ The platform is a pnpm monorepo, known as the FORGE Execution and Evidence Platf
   - **Observability as Code** (`/observability-as-code`): Declarative monitors, dashboards, SLOs, healing workflows via Terraform/YAML/API. Version control, drift detection, CI/CD integration, audit trails.
 - **A11oy Trust & Policies:** Three new operational policy pages covering Constitution, Security & Compliance, and Right to Audit.
 - **Shared Reverse Proxy:** `packages/shared-proxy` — all artifacts share a single reverse-proxy Vite plugin on port 9090 with `SO_REUSEPORT`.
-- **Shared Security Headers:** `packages/security-headers` (`@szl-holdings/security-headers`) enforces HSTS, CSP, X-Content-Type-Options, Referrer-Policy, X-Frame-Options, and Permissions-Policy consistently across the platform.
+- **Shared Security Headers:** `packages/security-headers` (`@szl-holdings/security-headers`) exports `securityHeadersVitePlugin()` (wired into every web artifact's vite.config.ts) and `buildHelmetOptions()` (used by the API server). Enforces HSTS, CSP, X-Content-Type-Options, Referrer-Policy, X-Frame-Options, and Permissions-Policy consistently across the platform.
 
 ## External Dependencies
-- **Database:** PostgreSQL 16
+- **Database:** PostgreSQL
 - **Authentication:** Replit Auth
 - **Payment Processing:** Stripe
 - **AI Providers:** OpenAI, Anthropic, Gemini, HuggingFace Inference API, HuggingFace MCP, Elevenlabs, Substrate/oLLM
